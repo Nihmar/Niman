@@ -1719,9 +1719,6 @@ final class AlbanianStrings extends Strings {
   @override
   String get commandNeedWideWindow => 'Vetëm në dritare të gjerë';
   @override
-  String get commandNeedDockRoom =>
-      'Kërkon një dritare mjaft të gjerë për panelin anësor';
-  @override
   String get commandNeedDesktop => 'Vetëm në desktop';
   @override
   String get commandNeedNotInZen => 'Jo në modalitetin Zen';

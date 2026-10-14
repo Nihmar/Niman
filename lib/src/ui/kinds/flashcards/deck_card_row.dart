@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:niman/src/flashcards/flash_card.dart';
 import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/ui/kinds/flashcards/card_text.dart';
+import 'package:niman/src/ui/pointer_menu.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// How wide the **Next** column is.
@@ -109,11 +110,16 @@ final class _DeckCardRowState extends State<DeckCardRow> {
         position.dy,
       ),
       items: [
-        PopupMenuItem(
+        menuItem(
+          context,
           value: 'edit',
           child: Text(AppStrings.flashcardsEditCard),
         ),
-        PopupMenuItem(value: 'delete', child: Text(AppStrings.actionDelete)),
+        menuItem(
+          context,
+          value: 'delete',
+          child: Text(AppStrings.actionDelete),
+        ),
       ],
     );
     if (choice == 'edit') _edit();

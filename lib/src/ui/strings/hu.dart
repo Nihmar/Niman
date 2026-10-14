@@ -1715,9 +1715,6 @@ final class HungarianStrings extends Strings {
   @override
   String get commandNeedWideWindow => 'Csak széles ablakban';
   @override
-  String get commandNeedDockRoom =>
-      'Az oldalsó panelhez elég széles ablak kell';
-  @override
   String get commandNeedDesktop => 'Csak asztali gépen';
   @override
   String get commandNeedNotInZen => 'Nem Zen módban';

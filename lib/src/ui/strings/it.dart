@@ -1727,9 +1727,6 @@ final class ItalianStrings extends Strings {
   @override
   String get commandNeedWideWindow => 'Solo con finestra larga';
   @override
-  String get commandNeedDockRoom =>
-      'Serve una finestra larga abbastanza per il pannello laterale';
-  @override
   String get commandNeedDesktop => 'Solo desktop';
   @override
   String get commandNeedNotInZen => 'Non in modalità Zen';

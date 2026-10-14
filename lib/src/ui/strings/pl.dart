@@ -1726,9 +1726,6 @@ final class PolishStrings extends Strings {
   @override
   String get commandNeedWideWindow => 'Tylko w szerokim oknie';
   @override
-  String get commandNeedDockRoom =>
-      'Wymaga okna wystarczająco szerokiego na panel boczny';
-  @override
   String get commandNeedDesktop => 'Tylko na komputerze';
   @override
   String get commandNeedNotInZen => 'Nie w trybie Zen';

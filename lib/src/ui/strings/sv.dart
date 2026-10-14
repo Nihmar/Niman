@@ -1710,9 +1710,6 @@ final class SwedishStrings extends Strings {
   @override
   String get commandNeedWideWindow => 'Bara i brett fönster';
   @override
-  String get commandNeedDockRoom =>
-      'Kräver ett fönster som är tillräckligt brett för sidopanelen';
-  @override
   String get commandNeedDesktop => 'Bara på datorn';
   @override
   String get commandNeedNotInZen => 'Inte i Zen-läge';

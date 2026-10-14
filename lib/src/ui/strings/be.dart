@@ -1706,9 +1706,6 @@ final class BelarusianStrings extends Strings {
   @override
   String get commandNeedWideWindow => 'Толькі ў шырокім акне';
   @override
-  String get commandNeedDockRoom =>
-      'Патрэбна акно, дастаткова шырокае для бакавой панэлі';
-  @override
   String get commandNeedDesktop => "Толькі на камп'ютары";
   @override
   String get commandNeedNotInZen => 'Не ў рэжыме Дзэн';

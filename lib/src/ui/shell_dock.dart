@@ -1,7 +1,8 @@
 /// The right dock and the phone's panel sheets, split out of `shell.dart`
 /// for #710: whether the window has room for the dock (#175), which pane
-/// it shows, the button that opens it, and the sheet a phone gets
-/// instead of it.
+/// it shows, the button that opens it, the overlay a window without room
+/// gets instead of the docked panel, and the sheet a phone gets instead
+/// of it.
 ///
 /// The shell keeps the width it takes on screen (`_dockWidth` and the
 /// divider that drags it): that is the library's `dockWidth` setting,
@@ -11,6 +12,8 @@ library;
 import 'package:flutter/material.dart';
 import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/library/session.dart';
+import 'package:niman/src/ui/dock/dock_toggle.dart';
+import 'package:niman/src/ui/dock/dock_toggles.dart';
 import 'package:niman/src/ui/dock/history_dock_pane.dart';
 import 'package:niman/src/ui/dock/links_dock_pane.dart';
 import 'package:niman/src/ui/dock/outline_dock_pane.dart';
@@ -20,7 +23,6 @@ import 'package:niman/src/ui/dock/tags_dock_pane.dart';
 import 'package:niman/src/ui/note_view_handle.dart';
 import 'package:niman/src/ui/outline_panel.dart';
 import 'package:niman/src/ui/shell_workspace.dart';
-import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/workspace/workspace.dart';
 
 /// The dock's room, state and widgets, as the shell drives them.
@@ -39,6 +41,7 @@ final class ShellDock {
     required this.journalBrowser,
     required this.onOpenHistory,
     required this.onOpenNoteFromLink,
+    required this.onChanged,
     this.onOpenVersion,
   });
 
@@ -69,35 +72,79 @@ final class ShellDock {
   /// Opens the note at a path, from a link in the tags pane.
   final void Function(String path) onOpenNoteFromLink;
 
+  /// Called when what the dock shows changed without the workspace
+  /// saying so: the overlay opened or closed.
+  final VoidCallback onChanged;
+
+  /// Whether the panel was asked for over the note, on a window without
+  /// room for it beside the note. Not remembered: it is never part of
+  /// the saved workspace, so a narrow window at startup (or after a
+  /// resize) does not open the panel by itself.
+  bool _overlay = false;
+
+  /// The buttons on screen, which the overlay keeps clear.
+  final DockToggles toggles = DockToggles();
+
   /// Whether the window has room for the right dock beside a note (#175):
   /// a desktop, a tablet, a phone in landscape — on the same rule.
   bool get room => windowWidth() >= RightDock.minWindowWidth;
 
-  /// Whether the dock shows: there is room, and it was not closed.
+  /// Whether the dock shows beside the note: there is room, and it was
+  /// not closed.
   bool get shown => room && workspace.value.dockOpen;
 
+  /// Whether the panel shows over the note instead: a wide layout
+  /// without room for the dock, and the panel asked for.
+  bool get overlayShown => wide() && !room && _overlay;
+
+  /// Whether the toggle reads as on: the dock open where it docks, the
+  /// overlay where it does not.
+  bool get on => room ? workspace.value.dockOpen : _overlay;
+
+  /// Drops an overlay request once the window has room again, so that
+  /// narrowing it later does not bring the panel back by itself: the
+  /// remembered state is the docked one.
+  void settle() {
+    if (room) _overlay = false;
+  }
+
+  /// Closes the overlay, if it is open.
+  void closeOverlay() {
+    if (!_overlay) return;
+    _overlay = false;
+    onChanged();
+  }
+
   /// The right dock: the focused pane's note's outline, tags or history.
-  Widget build(BuildContext context) {
+  /// As the [overlay] its close shuts the overlay and leaves the docked
+  /// state as it was, and a note opened from a pane uncovers itself.
+  Widget build(BuildContext context, {bool overlay = false}) {
     final w = workspace.value;
     final path = w.activePath;
+    void open(String path) {
+      if (overlay) closeOverlay();
+      workspace.show(path);
+    }
+
     return RightDock(
       pane: w.dockPane,
       onPane: (pane) =>
           workspace.controller.update((w) => w.withDock(pane: pane)),
-      onClose: () =>
-          workspace.controller.update((w) => w.withDock(open: false)),
+      onClose: overlay
+          ? closeOverlay
+          : () => workspace.controller.update((w) => w.withDock(open: false)),
       paneBuilder: (pane) => switch (pane) {
         DockPane.outline => OutlineDockPane(note: panelNote()),
         DockPane.tags => TagsDockPane(
           note: panelNote(),
           tags: controller.tagSource,
-          onOpenNote: workspace.show,
+          onOpenNote: open,
         ),
         DockPane.links => LinksDockPane(
           note: panelNote(),
           links: controller.linkSource,
           libraryRoot: controller.root,
-          onOpenNote: workspace.show,
+          onOpenNote: open,
         ),
         DockPane.spelling => SpellingDockPane(note: panelNote()),
         DockPane.history => HistoryDockPane(
@@ -116,19 +163,22 @@ final class ShellDock {
     );
   }
 
-  /// Shows or hides the dock (the note row's button, Ctrl+Shift+B).
-  void toggleOpen() =>
+  /// Shows or hides the dock (the note row's button, Ctrl+Shift+B): the
+  /// docked panel where there is room, the overlay where there is not.
+  void toggleOpen() {
+    if (room) {
       workspace.controller.update((w) => w.withDock(open: !w.dockOpen));
+      return;
+    }
+    _overlay = !_overlay;
+    onChanged();
+  }
 
-  /// The note row's dock button, where the window has room for a dock.
-  Widget toggle() => IconButton(
-    key: const Key('dock-toggle'),
-    tooltip: AppStrings.sidePanelTooltip,
-    isSelected: workspace.value.dockOpen,
-    icon: const Icon(Icons.view_sidebar_outlined),
-    selectedIcon: const Icon(Icons.view_sidebar),
-    onPressed: toggleOpen,
-  );
+  /// The note row's dock button. It is always there on the wide layout,
+  /// whatever the window's width: a control that shows in only some
+  /// states would move the row under a thumb crossing the threshold.
+  Widget toggle() =>
+      DockToggle(toggles: toggles, on: on, onPressed: toggleOpen);
 
   /// Opens [pane] for the note: in the dock where it fits, else as a
   /// sheet (the phone's way to the same panes, #175). The outline, as a

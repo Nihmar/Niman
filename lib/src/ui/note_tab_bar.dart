@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/ui/marquee_text.dart';
 import 'package:niman/src/ui/pointer_density.dart';
+import 'package:niman/src/ui/pointer_menu.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/tab_drag.dart';
 import 'package:niman/src/workspace/workspace.dart';
@@ -243,7 +244,8 @@ final class _NoteTabBarState extends State<NoteTabBar> {
       position: RelativeRect.fromLTRB(at.dx, at.dy, at.dx + 1, at.dy + 1),
       items: [
         for (final (i, tab) in widget.tabs.indexed)
-          PopupMenuItem<int>(
+          menuItem<int>(
+            context,
             key: Key('tab-list-$i'),
             value: i,
             child: _TabListRow(
@@ -277,48 +279,55 @@ final class _NoteTabBarState extends State<NoteTabBar> {
       ),
       items: [
         if (split != null) ...[
-          PopupMenuItem(
+          menuItem(
+            context,
             key: const Key('tab-menu-split-right'),
             value: 'right',
             child: Text(AppStrings.splitRight),
           ),
-          PopupMenuItem(
+          menuItem(
+            context,
             key: const Key('tab-menu-split-down'),
             value: 'down',
             child: Text(AppStrings.splitDown),
           ),
         ],
         if (move != null)
-          PopupMenuItem(
+          menuItem(
+            context,
             key: const Key('tab-menu-move'),
             value: 'move',
             child: Text(AppStrings.moveToOtherPane),
           ),
-        const PopupMenuDivider(),
-        PopupMenuItem(
+        menuDivider(context),
+        menuItem(
+          context,
           key: const Key('tab-menu-close'),
           value: 'close',
           child: Text(AppStrings.closeTabTooltip),
         ),
-        PopupMenuItem(
+        menuItem(
+          context,
           key: const Key('tab-menu-close-others'),
           value: 'others',
           enabled: widget.tabs.length > 1,
           child: Text(AppStrings.tabCloseOthers),
         ),
-        PopupMenuItem(
+        menuItem(
+          context,
           key: const Key('tab-menu-close-right'),
           value: 'toright',
           enabled: index < widget.tabs.length - 1,
           child: Text(AppStrings.tabCloseToRight),
         ),
-        PopupMenuItem(
+        menuItem(
+          context,
           key: const Key('tab-menu-close-all'),
           value: 'all',
           child: Text(AppStrings.closeAllNotes),
         ),
         if (widget.onTabAction != null) ...[
-          const PopupMenuDivider(),
+          menuDivider(context),
           for (final (action, label) in [
             (NoteTabAction.reveal, AppStrings.revealInTree),
             (NoteTabAction.copyPath, AppStrings.copyPathAction),
@@ -326,7 +335,8 @@ final class _NoteTabBarState extends State<NoteTabBar> {
             (NoteTabAction.history, AppStrings.noteHistoryTitle),
             (NoteTabAction.export, '${AppStrings.exportTitle}…'),
           ])
-            PopupMenuItem(
+            menuItem(
+              context,
               key: Key('tab-menu-${action.name}'),
               value: action.name,
               child: Text(label),
@@ -681,10 +691,10 @@ final class _TabListRow extends StatelessWidget {
       children: [
         Icon(
           active ? Icons.description : Icons.description_outlined,
-          size: 18,
+          size: theme.menuIconSize,
           color: active ? theme.colorScheme.primary : null,
         ),
-        const SizedBox(width: 12),
+        SizedBox(width: theme.menuIconGap),
         Expanded(
           child: Column(
             mainAxisSize: MainAxisSize.min,

@@ -1696,9 +1696,6 @@ final class NorwegianStrings extends Strings {
   @override
   String get commandNeedWideWindow => 'Bare i bredt vindu';
   @override
-  String get commandNeedDockRoom =>
-      'Krever et vindu som er bredt nok for sidepanelet';
-  @override
   String get commandNeedDesktop => 'Bare på datamaskin';
   @override
   String get commandNeedNotInZen => 'Ikke i Zen-modus';

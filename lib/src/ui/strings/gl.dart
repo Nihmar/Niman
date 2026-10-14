@@ -1717,9 +1717,6 @@ final class GalicianStrings extends Strings {
   @override
   String get commandNeedWideWindow => 'Só con xanela ancha';
   @override
-  String get commandNeedDockRoom =>
-      'Precisa unha xanela o bastante ancha para o panel lateral';
-  @override
   String get commandNeedDesktop => 'Só no escritorio';
   @override
   String get commandNeedNotInZen => 'Fóra do modo Zen';

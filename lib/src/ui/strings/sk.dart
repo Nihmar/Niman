@@ -1704,8 +1704,6 @@ final class SlovakStrings extends Strings {
   @override
   String get commandNeedWideWindow => 'Len v širokom okne';
   @override
-  String get commandNeedDockRoom => 'Vyžaduje okno dosť široké pre bočný panel';
-  @override
   String get commandNeedDesktop => 'Len na počítači';
   @override
   String get commandNeedNotInZen => 'Nie v režime Zen';

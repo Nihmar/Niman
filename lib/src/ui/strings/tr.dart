@@ -1692,9 +1692,6 @@ final class TurkishStrings extends Strings {
   @override
   String get commandNeedWideWindow => 'Yalnızca geniş pencerede';
   @override
-  String get commandNeedDockRoom =>
-      'Yan panel için yeterince geniş bir pencere gerekir';
-  @override
   String get commandNeedDesktop => 'Yalnızca masaüstünde';
   @override
   String get commandNeedNotInZen => 'Zen modunda değil';

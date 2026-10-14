@@ -1699,9 +1699,6 @@ final class DanishStrings extends Strings {
   @override
   String get commandNeedWideWindow => 'Kun i bredt vindue';
   @override
-  String get commandNeedDockRoom =>
-      'Kræver et vindue, der er bredt nok til sidepanelet';
-  @override
   String get commandNeedDesktop => 'Kun på computer';
   @override
   String get commandNeedNotInZen => 'Ikke i Zen-tilstand';

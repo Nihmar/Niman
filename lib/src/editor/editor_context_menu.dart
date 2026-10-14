@@ -19,6 +19,7 @@ import 'package:niman/src/editor/context_menu_items.dart';
 import 'package:niman/src/editor/context_menu_row.dart';
 import 'package:niman/src/editor/menu_group_sheet.dart';
 import 'package:niman/src/editor/toolbar_item.dart';
+import 'package:niman/src/ui/pointer_menu.dart';
 
 /// One formatting action for the menu: the toolbar's [item], what it
 /// does, and whether its format is on at the caret.
@@ -114,7 +115,11 @@ final class EditorContextMenu extends StatelessWidget {
     );
   }
 
-  static const Divider _divider = Divider(height: 9, indent: 8, endIndent: 8);
+  static const Divider _divider = Divider(
+    height: pointerDenseDividerHeight,
+    indent: 8,
+    endIndent: 8,
+  );
 
   /// A submenu's rows: its sections, set apart.
   List<Widget> _groupChildren(ContextMenuGroup group) => [
@@ -209,13 +214,8 @@ final class EditorContextMenu extends StatelessWidget {
 
   /// The clipboard's icons; anything else (Add to dictionary) is a word
   /// to keep.
-  static IconData _iconOf(ContextMenuButtonItem item) => switch (item.type) {
-    ContextMenuButtonType.cut => Icons.content_cut,
-    ContextMenuButtonType.copy => Icons.content_copy,
-    ContextMenuButtonType.paste => Icons.content_paste,
-    ContextMenuButtonType.selectAll => Icons.select_all,
-    _ => Icons.spellcheck,
-  };
+  static IconData _iconOf(ContextMenuButtonItem item) =>
+      clipboardIconOf(item.type) ?? Icons.spellcheck;
 
   List<Widget> _mobileChildren(BuildContext context) {
     final theme = Theme.of(context);

@@ -87,17 +87,24 @@ void main() {
   });
 
   test('rename batches carry the parent directory for resync', () async {
-    final batches = await runWith(
-      FileWatcher(root.path, debounce: const Duration(milliseconds: 50)),
-      (b) async {
-        final bPath = p.join(root.path, 'b.md');
-        File(bPath).writeAsStringSync('x');
-        await Future<void>.delayed(const Duration(milliseconds: 150));
-        await File(bPath).rename(p.join(root.path, 'c.md'));
-        await Future<void>.delayed(const Duration(milliseconds: 400));
-      },
-    );
     final parent = p.dirname(p.join(root.path, 'b.md'));
+    final watcher = FileWatcher(
+      root.path,
+      debounce: const Duration(milliseconds: 50),
+    );
+    final batches = await runWith(watcher, (b) async {
+      // Waits for the batch itself rather than a fixed time: the OS
+      // delivers the rename when it does, and under full-suite load on a
+      // shared runner that was past a 400 ms sleep. The timeout only
+      // bounds a watcher that never reports it.
+      final resync = watcher.events
+          .firstWhere((batch) => batch.resyncDirs.contains(parent))
+          .timeout(const Duration(seconds: 10));
+      final bPath = p.join(root.path, 'b.md');
+      File(bPath).writeAsStringSync('x');
+      await File(bPath).rename(p.join(root.path, 'c.md'));
+      await resync;
+    });
     expect(batches.any((b) => b.resyncDirs.contains(parent)), isTrue);
   });
 

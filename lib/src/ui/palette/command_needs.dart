@@ -22,9 +22,6 @@ enum CommandNeed {
   /// The window is wide enough for tabs and panes.
   wideWindow,
 
-  /// The window is wide enough for the right dock.
-  dockRoom,
-
   /// Linux or Windows: a picker for any file, a window to make Zen of.
   desktop,
 
@@ -94,7 +91,7 @@ Set<CommandNeed> commandNeeds(AppCommand command) => switch (command) {
   },
   AppCommand.splitRight ||
   AppCommand.splitDown => const {CommandNeed.wideWindow, CommandNeed.notInZen},
-  AppCommand.toggleDock => const {CommandNeed.dockRoom, CommandNeed.notInZen},
+  AppCommand.toggleDock => const {CommandNeed.wideWindow, CommandNeed.notInZen},
   AppCommand.toggleSidebar => const {CommandNeed.notInZen},
   AppCommand.journalPrevious ||
   AppCommand.journalNext => const {CommandNeed.journalEntry},
@@ -156,7 +153,6 @@ String commandNeedLabel(CommandNeed need) => switch (need) {
   CommandNeed.openNote => AppStrings.commandNeedOpenNote,
   CommandNeed.textNote => AppStrings.commandNeedTextNote,
   CommandNeed.wideWindow => AppStrings.commandNeedWideWindow,
-  CommandNeed.dockRoom => AppStrings.commandNeedDockRoom,
   CommandNeed.desktop => AppStrings.commandNeedDesktop,
   CommandNeed.notInZen => AppStrings.commandNeedNotInZen,
   CommandNeed.zenRoom => AppStrings.commandNeedZenRoom,

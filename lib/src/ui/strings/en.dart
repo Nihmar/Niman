@@ -1692,8 +1692,6 @@ final class EnglishStrings extends Strings {
   @override
   String get commandNeedWideWindow => 'Wide window only';
   @override
-  String get commandNeedDockRoom => 'Needs a window wide enough for the dock';
-  @override
   String get commandNeedDesktop => 'Desktop only';
   @override
   String get commandNeedNotInZen => 'Not in Zen mode';

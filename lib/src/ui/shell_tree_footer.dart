@@ -12,7 +12,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/library/session.dart';
+import 'package:niman/src/ui/menu_row.dart';
 import 'package:niman/src/ui/pointer_density.dart';
+import 'package:niman/src/ui/pointer_menu.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/trash.dart';
 
@@ -81,9 +83,6 @@ final class TreeFooterBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    // A pointer's menu is the tree's own (#296, #747): the footer's menus
-    // run the dense rows where the tree's do.
-    final dense = pointerDense(theme);
     // On a touch device (an Android tablet's wide shell, #849) the footer
     // is a thumb's: 56 px tall, every button its 48.
     final touch = thumbDense(theme);
@@ -128,7 +127,6 @@ final class TreeFooterBar extends StatelessWidget {
                   tooltip: AppStrings.actionNew,
                   onSelected: onNewItem,
                   position: PopupMenuPosition.over,
-                  menuPadding: dense ? pointerDenseMenuPadding : null,
                   // A desktop menu should appear, not perform (T-PP-22): the
                   // default 300 ms scale reads as skipped frames on this
                   // compositor, and 120 ms is a menu that is simply there.
@@ -140,73 +138,69 @@ final class TreeFooterBar extends StatelessWidget {
                     // The one thing done every day (#7), set apart like the
                     // FAB's.
                     _item(
+                      context,
                       NewShellItem.journal,
                       Icons.today_outlined,
                       AppStrings.journalFabToday,
                       key: const Key('journal-today-action'),
-                      dense: dense,
                     ),
-                    PopupMenuDivider(
-                      height: dense ? pointerDenseDividerHeight : 16,
-                    ),
+                    menuDivider(context),
                     _item(
+                      context,
                       NewShellItem.note,
                       Icons.note_add_outlined,
                       AppStrings.newNoteTitle,
                       key: const Key('new-note-action'),
-                      dense: dense,
                     ),
                     _item(
+                      context,
                       NewShellItem.listNote,
                       Icons.checklist_outlined,
                       AppStrings.newListNoteTitle,
                       key: const Key('new-list-note-action'),
-                      dense: dense,
                     ),
                     _item(
+                      context,
                       NewShellItem.audioNote,
                       Icons.mic_outlined,
                       AppStrings.newAudioNoteTitle,
                       key: const Key('new-audio-note-action'),
-                      dense: dense,
                     ),
                     _item(
+                      context,
                       NewShellItem.slides,
                       Icons.slideshow_outlined,
                       AppStrings.newSlidesTitle,
                       key: const Key('new-slides-action'),
-                      dense: dense,
                     ),
                     _item(
+                      context,
                       NewShellItem.flashcards,
                       Icons.style_outlined,
                       AppStrings.newFlashcardsTitle,
                       key: const Key('new-flashcards-action'),
-                      dense: dense,
                     ),
                     _item(
+                      context,
                       NewShellItem.template,
                       Icons.file_copy_outlined,
                       AppStrings.newFromTemplateTitle,
                       key: const Key('new-from-template-action'),
-                      dense: dense,
                     ),
                     _item(
+                      context,
                       NewShellItem.captureWebPage,
                       Icons.language_outlined,
                       AppStrings.captureWebPage,
                       key: const Key('capture-web-page-action'),
-                      dense: dense,
                     ),
-                    PopupMenuDivider(
-                      height: dense ? pointerDenseDividerHeight : 16,
-                    ),
+                    menuDivider(context),
                     _item(
+                      context,
                       NewShellItem.folder,
                       Icons.create_new_folder_outlined,
                       AppStrings.newFolderTitle,
                       key: const Key('new-folder-action'),
-                      dense: dense,
                     ),
                   ],
                   child: Padding(
@@ -259,24 +253,17 @@ final class TreeFooterBar extends StatelessWidget {
 
   /// One entry of the create menu.
   PopupMenuItem<NewShellItem> _item(
+    BuildContext context,
     NewShellItem item,
     IconData icon,
     String label, {
-    required bool dense,
     Key? key,
   }) {
-    return PopupMenuItem<NewShellItem>(
+    return menuItem<NewShellItem>(
+      context,
       key: key,
       value: item,
-      height: dense ? pointerDenseItemHeight : kMinInteractiveDimension,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 18),
-          const SizedBox(width: 12),
-          Flexible(child: Text(label, overflow: TextOverflow.ellipsis)),
-        ],
-      ),
+      child: MenuRow(icon: icon, label: label),
     );
   }
 }
@@ -316,7 +303,6 @@ final class TreeSortToggle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dense = pointerDense(Theme.of(context));
     final view = this.view;
     final onView = this.onView;
     return PopupMenuButton<Object>(
@@ -330,7 +316,6 @@ final class TreeSortToggle extends StatelessWidget {
       tooltip: view == null
           ? AppStrings.todoSortTooltip
           : '${AppStrings.todoSortTooltip} · ${AppStrings.viewGroup}',
-      menuPadding: dense ? pointerDenseMenuPadding : null,
       icon: AnimatedRotation(
         turns: sort.descending ? 0.5 : 0,
         duration: const Duration(milliseconds: 180),
@@ -345,59 +330,56 @@ final class TreeSortToggle extends StatelessWidget {
       },
       itemBuilder: (context) => [
         if (view != null && onView != null) ...[
-          _menuHeading(context, AppStrings.viewGroup, dense: dense),
-          _viewItem(
+          _menuHeading(context, AppStrings.viewGroup),
+          _choiceItem(
+            context,
             key: const Key('view-list'),
             value: TreeView.list,
             checked: view == TreeView.list,
             label: AppStrings.viewList,
-            dense: dense,
           ),
-          _viewItem(
+          _choiceItem(
+            context,
             key: const Key('view-grid'),
             value: TreeView.grid,
             checked: view == TreeView.grid,
             label: AppStrings.viewGrid,
-            dense: dense,
           ),
-          PopupMenuDivider(height: dense ? pointerDenseDividerHeight : 16),
+          menuDivider(context),
         ],
         for (final order in TreeOrder.values)
-          _sortItem(
+          _choiceItem(
+            context,
             key: Key('sort-${order.name}'),
             value: TreeSort.of(order, descending: sort.descending),
             checked: order == sort.order,
             label: sortOrderLabel(order),
-            dense: dense,
           ),
-        PopupMenuDivider(height: dense ? pointerDenseDividerHeight : 16),
-        _sortItem(
+        menuDivider(context),
+        _choiceItem(
+          context,
           key: const Key('sort-ascending'),
           value: TreeSort.of(sort.order, descending: false),
           checked: !sort.descending,
           label: AppStrings.sortAscending,
-          dense: dense,
         ),
-        _sortItem(
+        _choiceItem(
+          context,
           key: const Key('sort-descending'),
           value: TreeSort.of(sort.order, descending: true),
           checked: sort.descending,
           label: AppStrings.sortDescending,
-          dense: dense,
         ),
       ],
     );
   }
 
   /// The small heading over a group, as the mockup's **View** (#727).
-  PopupMenuItem<Object> _menuHeading(
-    BuildContext context,
-    String label, {
-    required bool dense,
-  }) {
-    return PopupMenuItem<Object>(
+  PopupMenuItem<Object> _menuHeading(BuildContext context, String label) {
+    return menuItem<Object>(
+      context,
       enabled: false,
-      height: dense ? 24 : 28,
+      height: pointerDense(Theme.of(context)) ? 24 : 28,
       child: Text(
         label.toUpperCase(),
         style: TextStyle(
@@ -409,59 +391,26 @@ final class TreeSortToggle extends StatelessWidget {
     );
   }
 
-  /// One entry of the sort menu.
-  ///
-  /// A plain item with the check leading, not a `CheckedPopupMenuItem`: that
-  /// one draws a [ListTile], and a tile keeps its own 48 px whatever height
-  /// the item was given — the sort menu stood twice as tall as the create
-  /// menu beside it because of it (#747). The check is said to a screen
-  /// reader as the checked state the old item carried (#785).
-  PopupMenuItem<Object> _sortItem({
-    required Key key,
-    required TreeSort value,
-    required bool checked,
-    required String label,
-    required bool dense,
-  }) {
-    return _choiceItem(
-      key: key,
-      value: value,
-      checked: checked,
-      label: label,
-      dense: dense,
-    );
-  }
-
-  /// One entry of the view group at the top of the menu (#727).
-  PopupMenuItem<Object> _viewItem({
-    required Key key,
-    required TreeView value,
-    required bool checked,
-    required String label,
-    required bool dense,
-  }) {
-    return _choiceItem(
-      key: key,
-      value: value,
-      checked: checked,
-      label: label,
-      dense: dense,
-    );
-  }
-
   /// A menu entry with the check leading; [value] is either a [TreeSort]
   /// or a [TreeView], and the two are told apart by the selection.
-  PopupMenuItem<Object> _choiceItem({
+  ///
+  /// A plain item, not a `CheckedPopupMenuItem`: that one draws a
+  /// [ListTile], and a tile keeps its own 48 px whatever height the item
+  /// was given — the sort menu stood twice as tall as the create menu
+  /// beside it because of it (#747). The check is said to a screen reader
+  /// as the checked state the old item carried (#785).
+  PopupMenuItem<Object> _choiceItem(
+    BuildContext context, {
     required Key key,
     required Object value,
     required bool checked,
     required String label,
-    required bool dense,
   }) {
-    return PopupMenuItem<Object>(
+    final theme = Theme.of(context);
+    return menuItem<Object>(
+      context,
       key: key,
       value: value,
-      height: dense ? pointerDenseItemHeight : kMinInteractiveDimension,
       child: Semantics(
         checked: checked,
         child: Row(
@@ -470,12 +419,12 @@ final class TreeSortToggle extends StatelessWidget {
             // The room of the check a chosen entry wears, taken either way
             // so the labels line up.
             SizedBox(
-              width: 18,
+              width: theme.menuIconSize,
               child: checked
-                  ? const Icon(Icons.check, size: 18)
+                  ? Icon(Icons.check, size: theme.menuIconSize)
                   : const SizedBox.shrink(),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: theme.menuIconGap),
             Text(label, overflow: TextOverflow.ellipsis),
           ],
         ),

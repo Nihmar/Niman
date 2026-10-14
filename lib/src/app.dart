@@ -16,6 +16,7 @@ import 'package:niman/src/ui/changelog.dart';
 import 'package:niman/src/ui/close_guard.dart';
 import 'package:niman/src/ui/device_shape.dart';
 import 'package:niman/src/ui/drop_target.dart';
+import 'package:niman/src/ui/pointer_menu_scope.dart';
 import 'package:niman/src/ui/shell.dart';
 import 'package:niman/src/ui/theme/device_colors.dart';
 import 'package:niman/src/ui/theme/palettes.dart';
@@ -89,23 +90,26 @@ class _NimanAppState extends State<NimanApp> with WidgetsBindingObserver {
         // It multiplies the platform scaler rather than replacing it, so
         // the OS accessibility setting still counts; the note text does
         // not come through here — the note pane carries the note scale in
-        // a MediaQuery of its own.
-        builder: (context, child) => DeviceShapeScope(
-          child: AppTextScaleScope(
-            child: MediaQuery(
-              data: MediaQuery.of(context).copyWith(
-                textScaler: ComposedTextScaler(
-                  MediaQuery.textScalerOf(context),
-                  AppTextScales.ui,
+        // a MediaQuery of its own. Every menu is the pointer's compact one
+        // on a desktop, from the theme as the app is drawn with it.
+        builder: (context, child) => PointerMenuScope(
+          child: DeviceShapeScope(
+            child: AppTextScaleScope(
+              child: MediaQuery(
+                data: MediaQuery.of(context).copyWith(
+                  textScaler: ComposedTextScaler(
+                    MediaQuery.textScalerOf(context),
+                    AppTextScales.ui,
+                  ),
                 ),
-              ),
-              // Files and folders dropped anywhere on the window (#75), over
-              // whichever screen is up.
-              child: Consumer(
-                builder: (context, ref, _) => AppDropTarget(
-                  requests: ref.watch(launchRequestsProvider),
-                  drops: ref.watch(dropTargetServiceProvider),
-                  child: child ?? const SizedBox.shrink(),
+                // Files and folders dropped anywhere on the window (#75), over
+                // whichever screen is up.
+                child: Consumer(
+                  builder: (context, ref, _) => AppDropTarget(
+                    requests: ref.watch(launchRequestsProvider),
+                    drops: ref.watch(dropTargetServiceProvider),
+                    child: child ?? const SizedBox.shrink(),
+                  ),
                 ),
               ),
             ),

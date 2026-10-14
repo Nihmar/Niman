@@ -1677,9 +1677,6 @@ final class HindiStrings extends Strings {
   @override
   String get commandNeedWideWindow => 'केवल चौड़ी विंडो में';
   @override
-  String get commandNeedDockRoom =>
-      'साइड पैनल के लिए पर्याप्त चौड़ी विंडो चाहिए';
-  @override
   String get commandNeedDesktop => 'केवल डेस्कटॉप पर';
   @override
   String get commandNeedNotInZen => 'ज़ेन मोड में नहीं';

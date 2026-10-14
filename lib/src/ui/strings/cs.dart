@@ -1698,8 +1698,6 @@ final class CzechStrings extends Strings {
   @override
   String get commandNeedWideWindow => 'Jen v širokém okně';
   @override
-  String get commandNeedDockRoom => 'Vyžaduje okno dost široké pro boční panel';
-  @override
   String get commandNeedDesktop => 'Jen na počítači';
   @override
   String get commandNeedNotInZen => 'Ne v režimu Zen';

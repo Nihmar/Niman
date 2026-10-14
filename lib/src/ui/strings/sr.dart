@@ -1709,9 +1709,6 @@ final class SerbianStrings extends Strings {
   @override
   String get commandNeedWideWindow => 'Само у широком прозору';
   @override
-  String get commandNeedDockRoom =>
-      'Потребан је прозор довољно широк за бочни панел';
-  @override
   String get commandNeedDesktop => 'Само на рачунару';
   @override
   String get commandNeedNotInZen => 'Не у Зен режиму';

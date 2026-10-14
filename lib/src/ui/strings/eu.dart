@@ -1715,9 +1715,6 @@ final class BasqueStrings extends Strings {
   @override
   String get commandNeedWideWindow => 'Leiho zabalean soilik';
   @override
-  String get commandNeedDockRoom =>
-      'Alboko panelerako adina zabala den leihoa behar du';
-  @override
   String get commandNeedDesktop => 'Mahaigainean soilik';
   @override
   String get commandNeedNotInZen => 'Ez Zen moduan';

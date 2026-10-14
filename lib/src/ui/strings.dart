@@ -1104,7 +1104,6 @@ final class AppStrings {
   static String get commandNeedTextNote => _s.commandNeedTextNote;
   static String get commandNeedProseNote => _s.commandNeedProseNote;
   static String get commandNeedWideWindow => _s.commandNeedWideWindow;
-  static String get commandNeedDockRoom => _s.commandNeedDockRoom;
   static String get commandNeedDesktop => _s.commandNeedDesktop;
   static String get commandNeedNotInZen => _s.commandNeedNotInZen;
   static String get commandNeedZenRoom => _s.commandNeedZenRoom;

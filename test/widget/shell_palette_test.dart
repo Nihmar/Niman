@@ -137,7 +137,6 @@ void main() {
       offered(tester),
       expected({
         CommandNeed.wideWindow,
-        CommandNeed.dockRoom,
         CommandNeed.notInZen,
         CommandNeed.desktop,
         CommandNeed.proseNote,
@@ -155,7 +154,6 @@ void main() {
         CommandNeed.openNote,
         CommandNeed.textNote,
         CommandNeed.wideWindow,
-        CommandNeed.dockRoom,
         CommandNeed.notInZen,
         CommandNeed.desktop,
         CommandNeed.zenRoom,
@@ -184,7 +182,6 @@ void main() {
       expected({
         CommandNeed.openNote,
         CommandNeed.wideWindow,
-        CommandNeed.dockRoom,
         CommandNeed.notInZen,
         CommandNeed.desktop,
         CommandNeed.zenRoom,

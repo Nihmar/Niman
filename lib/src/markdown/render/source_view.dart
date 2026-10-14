@@ -2976,13 +2976,18 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
 
   /// Scrolls the caret's line into view when an edit or a jump left it out.
   ///
-  /// The jump is planned on the height map, and far from the viewport that
-  /// is estimates: the frame that lands measures the rows it draws, and the
-  /// line — and the note's extent — can end up elsewhere than planned.
-  /// Ctrl+End left the last line half under the pane's edge until the
-  /// wheel, scrolling against the measured extent, went the rest of the
-  /// way. So a jump is checked again after the frames that follow it, for
-  /// as long as each one still has to move — [settle] of them at most.
+  /// The plan is made on the height map, and the map is only as good as the
+  /// last layout: a row an edit just changed — a line that wrapped onto new
+  /// rows, one that became a heading, one added at the bottom — is as the
+  /// frame before measured it (or estimated), and the note's extent, which
+  /// the plan clamps to, is the one it had. Far from the viewport it is
+  /// estimates throughout. So the plan is checked again against the layout
+  /// that follows it, whether or not it moved anything: a line that fit the
+  /// old measure and does not fit the new one is brought in with the rest of
+  /// its box (Ctrl+End left the last line half under the pane's edge until
+  /// the wheel went the rest of the way; typing into the last row left its
+  /// new rows below the pane). A check that still has to move is followed by
+  /// another — [settle] of them at most.
   ///
   /// [wholeSelection] keeps the whole selection in view when it fits, not
   /// only the caret: what the keyboard opening asks for (#728). A caret move
@@ -2990,8 +2995,33 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// the view back to it (#764).
   void _ensureCaretVisible({int settle = 3, bool wholeSelection = false}) {
     if (!_scroll.hasClients) return;
+    _revealPlanned(wholeSelection: wholeSelection);
+    _checkRevealAfterLayout(settle, wholeSelection);
+  }
+
+  /// Plans the reveal again after the next frame, which lays out what the
+  /// edit or the jump changed. That frame is asked for here, so the check
+  /// never waits for one the writer's next scroll brings (and takes the view
+  /// back from them).
+  void _checkRevealAfterLayout(int settle, bool wholeSelection) {
+    if (settle <= 0) return;
+    final epoch = _revealEpoch;
+    WidgetsBinding.instance
+      ..addPostFrameCallback((_) {
+        if (!mounted || epoch != _revealEpoch || !_scroll.hasClients) return;
+        // Only a check that moved the view has a frame coming to follow it.
+        if (_revealPlanned(wholeSelection: wholeSelection)) {
+          _checkRevealAfterLayout(settle - 1, wholeSelection);
+        }
+      })
+      ..scheduleFrame();
+  }
+
+  /// Plans the reveal on the height map as it stands and scrolls to it;
+  /// whether the view moved.
+  bool _revealPlanned({required bool wholeSelection}) {
     final line = _caretLineIndex;
-    if (line < 0) return;
+    if (line < 0) return false;
     // In the scroll view's coordinates: the map starts below the top padding,
     // and the last line takes the bottom padding with it. Without them every
     // jump down stopped the padding short, the caret's row cut by it.
@@ -3029,17 +3059,11 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
         _scroll.position.maxScrollExtent,
       );
     } else {
-      return;
+      return false;
     }
-    if (target == _scroll.offset) return;
+    if (target == _scroll.offset) return false;
     _scroll.jumpTo(target);
-    if (settle <= 0) return;
-    final epoch = _revealEpoch;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted && epoch == _revealEpoch) {
-        _ensureCaretVisible(settle: settle - 1, wholeSelection: wholeSelection);
-      }
-    });
+    return true;
   }
 
   /// Line [line] as the scroll view sees it: its top and its bottom, in the

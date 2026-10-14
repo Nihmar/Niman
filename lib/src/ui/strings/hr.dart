@@ -1700,9 +1700,6 @@ final class CroatianStrings extends Strings {
   @override
   String get commandNeedWideWindow => 'Samo u širokom prozoru';
   @override
-  String get commandNeedDockRoom =>
-      'Potreban je prozor dovoljno širok za bočnu ploču';
-  @override
   String get commandNeedDesktop => 'Samo na računalu';
   @override
   String get commandNeedNotInZen => 'Ne u Zen načinu';

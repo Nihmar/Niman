@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:niman/src/ui/menu_row.dart';
+import 'package:niman/src/ui/pointer_menu.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// What the open note's ⋮ menu can do.
@@ -169,7 +171,7 @@ final class NoteMenuButton extends StatelessWidget {
         tooltip: AppStrings.noteMenuTooltip,
         icon: const Icon(Icons.more_vert),
         onSelected: onSelected,
-        itemBuilder: (context) => _deckItems(),
+        itemBuilder: _deckItems,
       );
     }
     return PopupMenuButton<NoteMenuAction>(
@@ -180,37 +182,53 @@ final class NoteMenuButton extends StatelessWidget {
       itemBuilder: (context) => [
         if (slides) ...[
           _item(
+            context,
             NoteMenuAction.present,
             Icons.present_to_all_outlined,
             AppStrings.slidesPresent,
           ),
           if (presenterView)
             _item(
+              context,
               NoteMenuAction.presenterView,
               Icons.speaker_notes_outlined,
               AppStrings.slidesPresenterView,
             ),
           _item(
+            context,
             NoteMenuAction.markdownPreview,
             Icons.visibility_outlined,
             AppStrings.slidesMarkdownPreview,
           ),
           _item(
+            context,
             NoteMenuAction.exportSlides,
             Icons.picture_as_pdf_outlined,
             AppStrings.slidesExportPdf,
           ),
         ],
         if (textNote) ...[
-          _item(NoteMenuAction.outline, Icons.toc, AppStrings.outlineTooltip),
-          _item(NoteMenuAction.tags, Icons.sell_outlined, AppStrings.tagsTitle),
           _item(
+            context,
+            NoteMenuAction.outline,
+            Icons.toc,
+            AppStrings.outlineTooltip,
+          ),
+          _item(
+            context,
+            NoteMenuAction.tags,
+            Icons.sell_outlined,
+            AppStrings.tagsTitle,
+          ),
+          _item(
+            context,
             NoteMenuAction.links,
             Icons.link_outlined,
             AppStrings.linksToNoteTitle,
           ),
           if (kindSwitch case final kind?)
             _item(
+              context,
               NoteMenuAction.kindSwitch,
               kind == NoteKindSwitch.toShoppingList
                   ? Icons.shopping_cart_outlined
@@ -221,12 +239,14 @@ final class NoteMenuButton extends StatelessWidget {
             ),
           if (makeFlashcards)
             _item(
+              context,
               NoteMenuAction.makeFlashcards,
               Icons.style_outlined,
               '${AppStrings.makeFlashcardsTitle}…',
             ),
           if (!slides)
             _item(
+              context,
               NoteMenuAction.typewriter,
               Icons.vertical_align_center,
               typewriter ? AppStrings.typewriterOff : AppStrings.typewriterOn,
@@ -234,6 +254,7 @@ final class NoteMenuButton extends StatelessWidget {
         ],
         if (palette)
           _item(
+            context,
             NoteMenuAction.palette,
             Icons.bolt_outlined,
             AppStrings.commandPaletteTitle,
@@ -241,22 +262,26 @@ final class NoteMenuButton extends StatelessWidget {
         if (textNote) ...[
           if (!slides && tidy)
             _item(
+              context,
               NoteMenuAction.format,
               Icons.cleaning_services_outlined,
               AppStrings.formatNoteTitle,
             ),
           _item(
+            context,
             NoteMenuAction.export,
             Icons.save_alt_outlined,
             AppStrings.exportTitle,
           ),
           if (!slides)
             _item(
+              context,
               NoteMenuAction.cheatsheet,
               Icons.menu_book_outlined,
               AppStrings.cheatsheetTitle,
             ),
           _item(
+            context,
             NoteMenuAction.history,
             Icons.history,
             AppStrings.noteHistoryTitle,
@@ -264,21 +289,25 @@ final class NoteMenuButton extends StatelessWidget {
         ],
         if (recognize)
           _item(
+            context,
             NoteMenuAction.recognizeText,
             Icons.document_scanner_outlined,
             AppStrings.ocrRecognizeAction,
           ),
         _item(
+          context,
           NoteMenuAction.rename,
           Icons.edit_outlined,
           AppStrings.actionRename,
         ),
         _item(
+          context,
           NoteMenuAction.move,
           Icons.drive_folder_upload_outlined,
           AppStrings.actionMove,
         ),
         _item(
+          context,
           NoteMenuAction.delete,
           Icons.delete_outline,
           AppStrings.actionDelete,
@@ -288,68 +317,86 @@ final class NoteMenuButton extends StatelessWidget {
   }
 
   /// The deck's menu (mockup D5): its own entries, then the note's.
-  List<PopupMenuEntry<NoteMenuAction>> _deckItems() => [
+  List<PopupMenuEntry<NoteMenuAction>> _deckItems(BuildContext context) => [
     _item(
+      context,
       NoteMenuAction.studyDeck,
       Icons.style_outlined,
       AppStrings.flashcardsStudyDeck,
       enabled: studyEnabled,
     ),
     _item(
+      context,
       NoteMenuAction.editMarkdown,
       Icons.edit_outlined,
       AppStrings.flashcardsEditMarkdown,
     ),
     _item(
+      context,
       NoteMenuAction.deckColumns,
       Icons.view_column_outlined,
       '${AppStrings.flashcardsColumnsTitle}…',
     ),
     _item(
+      context,
       NoteMenuAction.deckReset,
       Icons.restart_alt,
       '${AppStrings.flashcardsResetAction}…',
     ),
     if (palette)
       _item(
+        context,
         NoteMenuAction.palette,
         Icons.bolt_outlined,
         AppStrings.commandPaletteTitle,
       ),
-    const PopupMenuDivider(),
-    _item(NoteMenuAction.rename, Icons.edit_outlined, AppStrings.actionRename),
+    menuDivider(context),
     _item(
+      context,
+      NoteMenuAction.rename,
+      Icons.edit_outlined,
+      AppStrings.actionRename,
+    ),
+    _item(
+      context,
       NoteMenuAction.move,
       Icons.drive_folder_upload_outlined,
       AppStrings.actionMove,
     ),
-    _item(NoteMenuAction.history, Icons.history, AppStrings.noteHistoryTitle),
     _item(
+      context,
+      NoteMenuAction.history,
+      Icons.history,
+      AppStrings.noteHistoryTitle,
+    ),
+    _item(
+      context,
       NoteMenuAction.export,
       Icons.save_alt_outlined,
       AppStrings.exportTitle,
     ),
-    const PopupMenuDivider(),
-    _item(NoteMenuAction.delete, Icons.delete_outline, AppStrings.actionDelete),
+    menuDivider(context),
+    _item(
+      context,
+      NoteMenuAction.delete,
+      Icons.delete_outline,
+      AppStrings.actionDelete,
+    ),
   ];
 
   PopupMenuItem<NoteMenuAction> _item(
+    BuildContext context,
     NoteMenuAction action,
     IconData icon,
     String label, {
     bool enabled = true,
   }) {
-    return PopupMenuItem(
+    return menuItem(
+      context,
       key: Key('note-menu-${action.name}'),
       value: action,
       enabled: enabled,
-      child: Row(
-        children: [
-          Icon(icon, size: 20),
-          const SizedBox(width: 12),
-          Flexible(child: Text(label, overflow: TextOverflow.ellipsis)),
-        ],
-      ),
+      child: MenuRow(icon: icon, label: label),
     );
   }
 }

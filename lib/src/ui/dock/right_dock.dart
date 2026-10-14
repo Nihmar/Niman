@@ -41,7 +41,9 @@ final class RightDock extends StatelessWidget {
   static const double minPanesWidth = 360;
 
   /// A window at least this wide has room for the dock beside a note
-  /// column; below it the dock stays shut whatever was chosen.
+  /// column; below it the dock does not dock — it opens over the note
+  /// instead (see `DockOverlay`), and the docked state stays as it was
+  /// chosen.
   static const double minWindowWidth = 1000;
 
   static String _label(DockPane pane) => switch (pane) {
