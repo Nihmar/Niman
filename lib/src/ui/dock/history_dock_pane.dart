@@ -7,14 +7,16 @@ import 'package:niman/src/ui/history/history_labels.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// The dock's history (#175): the note's kept versions, newest first,
-/// when and why each was kept. Comparing and restoring stay where they
-/// are, in the history screen: a version, or All versions, opens it.
+/// when and why each was kept. A version opens beside the note, compared
+/// with it, as a tab of the pane (#712); All versions opens the history
+/// screen.
 final class HistoryDockPane extends StatefulWidget {
   /// The history of the note at library-relative [path].
   const new({
     required this.ops,
     required this.path,
     required this.onOpenHistory,
+    this.onOpenVersion,
     this.now = DateTime.now,
     super.key,
   });
@@ -27,6 +29,10 @@ final class HistoryDockPane extends StatefulWidget {
 
   /// Opens the history screen for the note.
   final VoidCallback onOpenHistory;
+
+  /// Opens one version compared with the note (#712); null opens the
+  /// history screen instead.
+  final ValueChanged<HistoryVersion>? onOpenVersion;
 
   /// The clock the labels are read against (a test seam).
   final DateTime Function() now;
@@ -86,7 +92,10 @@ final class _HistoryDockPaneState extends State<HistoryDockPane> {
             leading: const Icon(Icons.history, size: 18),
             title: Text(historyWhen(version.savedAt, now)),
             subtitle: Text(historyReasonLabel(version.reason)),
-            onTap: widget.onOpenHistory,
+            onTap: switch (widget.onOpenVersion) {
+              final open? => () => open(version),
+              null => widget.onOpenHistory,
+            },
           ),
         Align(
           alignment: AlignmentDirectional.centerStart,

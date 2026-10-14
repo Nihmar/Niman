@@ -2,7 +2,6 @@
 // field and a scale is a slider in its row; a phone keeps the dialogs.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:niman/src/ui/settings_dialogs.dart';
 import 'package:niman/src/ui/settings_rows.dart';
 import 'package:niman/src/ui/settings_slider_row.dart';
 

@@ -9,6 +9,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/dock/history_dock_pane.dart';
 import 'package:niman/src/ui/dock/links_dock_pane.dart';
@@ -38,6 +39,7 @@ final class ShellDock {
     required this.journalBrowser,
     required this.onOpenHistory,
     required this.onOpenNoteFromLink,
+    this.onOpenVersion,
   });
 
   /// The notes that are open, whose active one the dock follows.
@@ -60,6 +62,9 @@ final class ShellDock {
 
   /// Opens the history of a path (the history pane's list).
   final void Function(String path) onOpenHistory;
+
+  /// Opens a version of a note compared with it, as a pane's tab (#712).
+  final void Function(String path, HistoryVersion version)? onOpenVersion;
 
   /// Opens the note at a path, from a link in the tags pane.
   final void Function(String path) onOpenNoteFromLink;
@@ -100,6 +105,10 @@ final class ShellDock {
           path: path,
           onOpenHistory: () {
             if (path != null) onOpenHistory(path);
+          },
+          onOpenVersion: switch ((onOpenVersion, path)) {
+            (final open?, final path?) => (version) => open(path, version),
+            _ => null,
           },
         ),
         DockPane.journal => journalBrowser(context),

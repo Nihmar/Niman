@@ -79,6 +79,15 @@ row to show the unchanged lines) or to read its whole text. **Restore
 this version** keeps the current text as a version first, then puts the
 old one back — the snackbar's **Undo** swaps them again.
 
+On a desktop with room for the dock, **History** on the note on screen
+opens the dock's **History** pane instead, and a version there opens
+beside it as a tab of the pane, `note.md — 3 Oct 14:02`, with the same
+Changes / Version switch and **Restore** (#712): the note's own tabs and
+the dock stay where they are, a note tab shows the note again and the
+version's tab brings it back. A restore closes that tab and offers
+**Undo**. **All versions**, at the foot of the pane, and **History** on
+any other note open the history page.
+
 **Following the note.** Renaming or moving a note (or its folder) moves
 its history too, and rewrites the links other notes hold to it: a wikilink
 written by path and a Markdown link follow the new path, and a wikilink
