@@ -404,8 +404,10 @@ that the share is refused rather than copied — the sender's text arrives
 instead, if it attached any.
 
 The **side panel** (outline, tags, the notes that link here, history beside
-the note, and the [journal](journal.md)'s calendar) shows on
-any wide window at least 1000 px wide: desktops and tablets. A phone,
+the note, and the [journal](journal.md)'s calendar) docks
+beside the note on any wide window at least 1000 px wide: desktops and
+tablets. A narrower wide window keeps the panel's button and opens the
+panel over the note instead (see [editing](editing.md#the-side-panel)). A phone,
 upright or turned, has no room for a note and a panel side by side, so
 this is a decision rather than an omission: the note's ⋮ menu opens the
 same ones there, the outline, the tags and *Links to this note* as sheets

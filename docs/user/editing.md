@@ -143,8 +143,7 @@ tabs.
 - **One place per note.** A note is open in one place only: opening it
   again takes you to the pane and tab it is in.
 
-**The side panel.** On a window wide enough (1000 px and up) a panel on
-the right shows the note's **Outline**, its **Tags**, its **Links** or its
+**The side panel.** On a wide window a panel on the right shows the note's **Outline**, its **Tags**, its **Links** or its
 **History**, one at a time, switched by the icons at its top.
 
 - **Outline** lists the headings, and a click takes the caret to one.
@@ -161,9 +160,20 @@ edited. The panel's button in the note's row, its **×**, or
 `Ctrl+Shift+B` shows and hides it. Whether it is open, and which of the
 panes it shows, is remembered with the tabs. The note's **⋮** menu has
 Outline, Tags and Links to this note too: they open the panel where it
-fits, and a sheet on a phone. Where the panel fits, the outline button leaves the row under
-the note — the panel is where the outline is; on a narrower window and a
-phone that button opens the outline as a sheet.
+docks, and a sheet on a phone. Where the panel docks, the outline button
+leaves the row under the note — the panel is where the outline is; on a
+narrower window and a phone that button opens the outline as a sheet.
+
+With 1000 px or more the panel docks beside the note. On a narrower wide
+window — half of a 1080p screen, say — the button stays in its place in
+the note's row and the panel opens **over the note** instead, on the
+right edge, the note under a scrim and not moving or resizing. The button
+(which the panel then covers), `Ctrl+Shift+B`, the **Side panel** command
+of the palette, the panel's **×**, `Esc` or a click outside it shut it,
+and so does opening a note from its Tags or Links pane. It is not
+remembered: the window starts, and is resized, with the panel shut over
+the note, while the docked state you left (open or shut) comes back as
+soon as the window has room again.
 
 Each tab keeps its own way of showing its note: the source editor or the
 WYSIWYG one, the preview or not. The **Default editor** setting is the
