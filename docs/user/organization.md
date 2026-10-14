@@ -336,6 +336,14 @@ extension: a PDF renamed is still a PDF. With the tree hidden, and on a
 phone, the rename asks for the name in a dialog. `F2` can be changed under
 Settings → Keyboard shortcuts.
 
+A new note or folder is named the same way (#712): **New note** and **New
+folder** — from the tree's menus, the **New** button, `Ctrl+N` or the
+palette — add a row where it will be, under its folder or at the top of
+the tree, with *New note* or *New folder* selected in a field. `Enter` or
+a click elsewhere makes it with that name (and opens a note), `Esc` gives
+it up and nothing is made. With the tree hidden or showing the grid, and
+on a phone, the name is asked in a dialog.
+
 ## Moving a note or a folder
 
 Long-press a row in the tree (right-click on desktop) and pick **Move**.

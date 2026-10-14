@@ -93,6 +93,7 @@ final class NoteTree extends StatefulWidget {
     this.onMarkedMenu,
     this.onDeleteMarked,
     this.focusNode,
+    this.creating,
     this.onMove,
     this.sort = TreeSort.nameAsc,
     this.ocrQueue,
@@ -173,6 +174,10 @@ final class NoteTree extends StatefulWidget {
 
   /// Deletes the rows marked together, on `Delete` (#712).
   final ValueChanged<List<String>>? onDeleteMarked;
+
+  /// The row being made, its name a field under its folder's row or at
+  /// the top of the tree (#712); null while none is.
+  final TreeCreate? creating;
 
   /// The keyboard's focus, when the shell asks for it (`Ctrl+Shift+E`,
   /// #712); null keeps one of the tree's own.
@@ -892,7 +897,7 @@ final class _NoteTreeState extends State<NoteTree> {
                   return _pinnedItem(rows.pinned, index, walked);
                 }
                 final row = rows.tree[index - header];
-                return _RowTile(
+                final tile = _RowTile(
                   note: row.note,
                   depth: row.depth,
                   sidecar: row.sidecar,
@@ -914,12 +919,36 @@ final class _NoteTreeState extends State<NoteTree> {
                       ? widget.renaming
                       : null,
                 );
+                // A row being made sits under its folder's (#712).
+                final creating = widget.creating;
+                if (creating == null ||
+                    !row.note.isDir ||
+                    creating.folder != row.note.path) {
+                  return tile;
+                }
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    tile,
+                    _CreateRow(creating: creating, depth: row.depth + 1),
+                  ],
+                );
               },
             );
             final move = widget.onMove;
+            final creating = widget.creating;
+            // At the root, the row being made tops the tree (#712).
+            final listed = creating != null && creating.folder.isEmpty
+                ? Column(
+                    children: [
+                      _CreateRow(creating: creating, depth: 0),
+                      Expanded(child: list),
+                    ],
+                  )
+                : list;
             final tree = move == null
-                ? list
-                : TreeRootDrop(onMove: move, child: list);
+                ? listed
+                : TreeRootDrop(onMove: move, child: listed);
             return Focus(focusNode: _focus, onKeyEvent: _onKey, child: tree);
           },
         );
@@ -1020,6 +1049,17 @@ bool _setEquals(Set<String> a, Set<String> b) {
   return true;
 }
 
+/// A row being made in the tree (#712): a note or a folder in `folder`
+/// ('' the root), its name typed where it will be, `initial` proposed;
+/// `submit` and `cancel` as a rename's.
+typedef TreeCreate = ({
+  String folder,
+  bool isDir,
+  String initial,
+  Future<String?> Function(String name) submit,
+  VoidCallback cancel,
+});
+
 /// One row tile: chevron (folders) or doc icon (files), then the name —
 /// the name column is shared, per the mockup.
 /// A rename in place (#707): the row at `path` shows a field, which
@@ -1030,6 +1070,49 @@ typedef TreeRename = ({
   Future<String?> Function(String name) submit,
   VoidCallback cancel,
 });
+
+/// The row of a note or a folder being made (#712): its icon, and its
+/// name in a field, at the [depth] it will sit.
+final class _CreateRow extends StatelessWidget {
+  const new({required this.creating, required this.depth});
+
+  final TreeCreate creating;
+  final int depth;
+
+  @override
+  Widget build(BuildContext context) {
+    final metrics = TreeRowMetrics.of(context);
+    final theme = Theme.of(context);
+    return Container(
+      key: const Key('tree-create-row'),
+      constraints: BoxConstraints(minHeight: metrics.height),
+      padding: EdgeInsets.only(left: depth * metrics.indent + 8),
+      child: Row(
+        children: [
+          SizedBox(
+            width: metrics.leading,
+            child: Icon(
+              creating.isDir
+                  ? Icons.create_new_folder_outlined
+                  : Icons.note_add_outlined,
+              size: 16,
+            ),
+          ),
+          Expanded(
+            child: TreeRenameField(
+              name: creating.initial,
+              isDir: creating.isDir,
+              keepsUnchanged: true,
+              style: theme.textTheme.bodyMedium,
+              onSubmit: creating.submit,
+              onCancel: creating.cancel,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
 
 final class _RowTile extends StatelessWidget {
   const new({

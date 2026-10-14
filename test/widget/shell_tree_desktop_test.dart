@@ -1,5 +1,6 @@
-// #712: rows marked together in the desktop's tree — their menu deletes
-// them all into the trash with one Undo, and moves them all at once.
+// #712: the desktop's tree — rows marked together, whose menu deletes
+// them all into the trash with one Undo and moves them all at once, and a
+// new note named in a row of its own.
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -85,5 +86,35 @@ void main() {
     expect(await controller.find('Box/alpha.md'), isNotNull);
     expect(await controller.find('Box/bravo.md'), isNotNull);
     expect(await controller.find('charlie.md'), isNotNull);
+  }, variant: _linux);
+
+  testWidgets('a new note is named in a row of the tree; Esc gives it up', (
+    tester,
+  ) async {
+    await pump(tester);
+    Future<void> newNote() async {
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await tester.sendKeyEvent(LogicalKeyboardKey.keyN);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      await settle(tester);
+    }
+
+    await newNote();
+    expect(find.byType(AlertDialog), findsNothing);
+    final field = find.descendant(
+      of: find.byKey(const Key('tree-create-row')),
+      matching: find.byType(TextField),
+    );
+    expect(field, findsOne);
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await settle(tester);
+    expect(find.byKey(const Key('tree-create-row')), findsNothing);
+
+    await newNote();
+    await tester.enterText(field, 'gamma');
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await settle(tester);
+    expect(find.byKey(const Key('tree-create-row')), findsNothing);
+    expect(await controller.find('gamma.md'), isNotNull);
   }, variant: _linux);
 }

@@ -937,7 +937,61 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     newItemRule: _newItemRule,
     guard: _guard,
     onCreated: _onItemCreated,
+    nameInPlace: _nameInPlace,
   );
+
+  /// The row being made in the tree, and the name it waits for (#712).
+  ({String folder, bool isDir, String initial, Completer<String?> name})?
+  _creating;
+
+  /// Asks for a new item's name in a row of the tree, under [folder], as
+  /// a rename in place does: on Linux and Windows, with the tree on screen
+  /// (#712). Null leaves it to the dialog.
+  Future<String?>? _nameInPlace({
+    required String folder,
+    required bool isDir,
+    required String initial,
+  }) {
+    if (!_desktop ||
+        !_wide ||
+        !_sidebarVisible ||
+        !_filesSlotVisible ||
+        _sidebarShowsSearch ||
+        _gridOn) {
+      return null;
+    }
+    _creating?.name.complete(null);
+    final name = Completer<String?>();
+    setState(() {
+      for (var at = folder; at.isNotEmpty; at = parentOf(at)) {
+        _expanded.add(at);
+      }
+      _creating = (folder: folder, isDir: isDir, initial: initial, name: name);
+    });
+    return name.future;
+  }
+
+  /// What the made row's field does: the name typed, or none.
+  TreeCreate? get _treeCreate => switch (_creating) {
+    final creating? => (
+      folder: creating.folder,
+      isDir: creating.isDir,
+      initial: creating.initial,
+      submit: (typed) async {
+        _endCreating(typed);
+        return null;
+      },
+      cancel: () => _endCreating(null),
+    ),
+    null => null,
+  };
+
+  void _endCreating(String? name) {
+    final creating = _creating;
+    if (creating == null) return;
+    if (mounted) setState(() => _creating = null);
+    if (!creating.name.isCompleted) creating.name.complete(name);
+  }
 
   /// Web pages captured as notes (#531).
   late final CaptureFlow _captureFlow = CaptureFlow(
@@ -5112,6 +5166,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
                   unawaited(_markedActions.delete(context, paths)),
               focusNode: _treeFocus,
               renaming: _treeRename,
+              creating: _treeCreate,
             ),
           ),
           if (showGrid)
