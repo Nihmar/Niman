@@ -1,9 +1,12 @@
 // Tab on a list item nests it under the item above, the way CommonMark reads
 // it: an item is inside another only when it is indented to that item's
 // content column, which a fixed number of spaces does not reach for `6. `.
+import 'dart:math';
+
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/editor/list_indent.dart';
+import 'package:niman/src/editor/list_window.dart';
 import 'package:niman/src/markdown/block_scanner.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 
@@ -239,6 +242,112 @@ void main() {
 
     test('a mis-indented item (the old two spaces) is brought back', () {
       expect(_run('6. a\n  7. t|\n8. v', outdent: true), '6. a\n7. t|\n8. v');
+    });
+  });
+
+  group('the window', () {
+    /// The indent of the lines `first..last` of [lines] over the whole note,
+    /// and over the window only, put back into the note.
+    (List<String>, List<String>, ({int first, int last})) both(
+      List<String> lines,
+      int first,
+      int last, {
+      required bool outdent,
+    }) {
+      final whole = indentListLines(
+        lines,
+        first: first,
+        last: last,
+        width: 2,
+        outdent: outdent,
+      );
+      final window = listIndentWindow(
+        (at) => lines[at],
+        lines.length,
+        first,
+        last,
+      );
+      final part = indentListLines(
+        lines.sublist(window.first, window.last + 1),
+        first: first - window.first,
+        last: last - window.first,
+        width: 2,
+        outdent: outdent,
+      );
+      return (
+        whole,
+        [
+          ...lines.sublist(0, window.first),
+          ...part,
+          ...lines.sublist(window.last + 1),
+        ],
+        window,
+      );
+    }
+
+    test('a long list is read up to the item on the margin above only', () {
+      // 5 000 items, each with a child: Tab on a child near the end.
+      final lines = [
+        for (var at = 0; at < 5000; at++) ...['- item $at', '  - child $at'],
+      ];
+      const child = 2 * 4990 + 1;
+      final (whole, windowed, window) = both(
+        lines,
+        child,
+        child,
+        outdent: false,
+      );
+      expect(window.first, 2 * 4990, reason: 'the item above, not line 0');
+      expect(windowed, whole);
+      expect(whole[child], '    - child 4990', reason: 'no sibling: by width');
+      final flat = [for (var at = 0; at < 5000; at++) '${at + 1}. item'];
+      final (flatWhole, flatWindowed, flatWindow) = both(
+        flat,
+        4990,
+        4990,
+        outdent: false,
+      );
+      expect(flatWindow.first, 4989);
+      expect(flatWindowed, flatWhole);
+      expect(flatWhole[4990], '      1. item', reason: 'under 4990.');
+    });
+
+    test('over the window is over the whole note, at random', () {
+      final random = Random(20261014);
+      String line() => switch (random.nextInt(12)) {
+        0 => '',
+        1 => 'text',
+        2 => '  continued',
+        3 => '- a',
+        4 => '  - b',
+        5 => '    - c',
+        6 => '1. one',
+        7 => '   2. two',
+        8 => '10. ten',
+        9 => '> - quoted',
+        10 => '> 3. quoted',
+        _ => '- [ ] task',
+      };
+      for (var round = 0; round < 500; round++) {
+        final lines = [
+          for (var at = 0; at < 2 + random.nextInt(20); at++) line(),
+        ];
+        final first = random.nextInt(lines.length);
+        final last = first + random.nextInt(lines.length - first);
+        for (final outdent in [false, true]) {
+          final (whole, windowed, _) = both(
+            lines,
+            first,
+            last,
+            outdent: outdent,
+          );
+          expect(
+            windowed,
+            whole,
+            reason: '$round outdent=$outdent $first..$last of $lines',
+          );
+        }
+      }
     });
   });
 }
