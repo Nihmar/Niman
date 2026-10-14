@@ -3563,4 +3563,18 @@ final class ChineseStrings extends Strings {
   String get resetAllReviewsTitle => '重置所有复习？';
   @override
   String get resetAllReviewsBody => '每个牌组的每张卡片都会重新变为新卡。不会更改任何笔记。';
+  @override
+  String get makeFlashcardsTitle => '制作闪卡';
+  @override
+  String get makeFlashcardsDeck => '牌组';
+  @override
+  String get makeFlashcardsDeckHint => '分类用 / 分隔。留空：无分类。';
+  @override
+  String get makeFlashcardsWrites => '写入 frontmatter';
+  @override
+  String makeFlashcardsAction(int count) => '制作 $count 张卡片';
+  @override
+  String get makeFlashcardsNone => '此笔记没有可制作卡片的表格、:: 行或高亮。';
+  @override
+  String get commandNeedPlainNote => '需要打开一个没有类型的笔记';
 }

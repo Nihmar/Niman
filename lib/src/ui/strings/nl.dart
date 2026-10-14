@@ -4023,4 +4023,22 @@ final class DutchStrings extends Strings {
   String get resetAllReviewsBody =>
       'Elke kaart van elke stapel wordt weer nieuw. Er wordt geen notitie '
       'gewijzigd.';
+  @override
+  String get makeFlashcardsTitle => 'Flashcards maken';
+  @override
+  String get makeFlashcardsDeck => 'Stapel';
+  @override
+  String get makeFlashcardsDeckHint =>
+      'Categorieën gescheiden door /. Leeg: Zonder categorie.';
+  @override
+  String get makeFlashcardsWrites => 'Wordt in de frontmatter geschreven';
+  @override
+  String makeFlashcardsAction(int count) =>
+      count == 1 ? '1 kaart maken' : '$count kaarten maken';
+  @override
+  String get makeFlashcardsNone =>
+      'Deze notitie heeft geen tabel, ::-regel of markering om kaarten van te '
+      'maken.';
+  @override
+  String get commandNeedPlainNote => 'Vereist een geopende notitie zonder type';
 }

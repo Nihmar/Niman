@@ -4001,4 +4001,21 @@ final class PortugueseStrings extends Strings {
   @override
   String get resetAllReviewsBody =>
       'Cada carta de cada baralho volta a ser nova. Nenhuma nota é alterada.';
+  @override
+  String get makeFlashcardsTitle => 'Criar cartões';
+  @override
+  String get makeFlashcardsDeck => 'Baralho';
+  @override
+  String get makeFlashcardsDeckHint =>
+      'Categorias separadas por /. Vazio: Sem categoria.';
+  @override
+  String get makeFlashcardsWrites => 'Escrito no frontmatter';
+  @override
+  String makeFlashcardsAction(int count) =>
+      count == 1 ? 'Criar 1 cartão' : 'Criar $count cartões';
+  @override
+  String get makeFlashcardsNone =>
+      'Esta nota não tem tabela, linha :: nem destaque com que criar cartões.';
+  @override
+  String get commandNeedPlainNote => 'Requer uma nota aberta sem tipo';
 }

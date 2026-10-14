@@ -2133,4 +2133,11 @@ abstract base class Strings {
   String get settingsResetAllReviews;
   String get resetAllReviewsTitle;
   String get resetAllReviewsBody;
+  String get makeFlashcardsTitle;
+  String get makeFlashcardsDeck;
+  String get makeFlashcardsDeckHint;
+  String get makeFlashcardsWrites;
+  String makeFlashcardsAction(int count);
+  String get makeFlashcardsNone;
+  String get commandNeedPlainNote;
 }

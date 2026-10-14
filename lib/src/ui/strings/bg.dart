@@ -3996,4 +3996,21 @@ final class BulgarianStrings extends Strings {
   @override
   String get resetAllReviewsBody =>
       'Всяка карта от всяко тесте отново става нова. Бележките не се променят.';
+  @override
+  String get makeFlashcardsTitle => 'Създай карти за учене';
+  @override
+  String get makeFlashcardsDeck => 'Тесте';
+  @override
+  String get makeFlashcardsDeckHint =>
+      'Категории, разделени с /. Празно: Без категория.';
+  @override
+  String get makeFlashcardsWrites => 'Записва се във frontmatter';
+  @override
+  String makeFlashcardsAction(int count) => 'Създай карти: $count';
+  @override
+  String get makeFlashcardsNone =>
+      'Тази бележка няма таблица, ред :: или открояване, от които да станат '
+      'карти.';
+  @override
+  String get commandNeedPlainNote => 'Изисква отворена бележка без тип';
 }

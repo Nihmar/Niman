@@ -4015,4 +4015,20 @@ final class BelarusianStrings extends Strings {
   @override
   String get resetAllReviewsBody =>
       'Кожная картка кожнай калоды зноў стане новай. Нататкі не змяняюцца.';
+  @override
+  String get makeFlashcardsTitle => 'Зрабіць картачкі';
+  @override
+  String get makeFlashcardsDeck => 'Калода';
+  @override
+  String get makeFlashcardsDeckHint =>
+      'Катэгорыі праз /. Пуста: Без катэгорыі.';
+  @override
+  String get makeFlashcardsWrites => 'Запісваецца ў frontmatter';
+  @override
+  String makeFlashcardsAction(int count) => 'Зрабіць картачак: $count';
+  @override
+  String get makeFlashcardsNone =>
+      'У гэтай нататцы няма табліцы, радка :: або вылучэння для картачак.';
+  @override
+  String get commandNeedPlainNote => 'Патрэбна адкрытая нататка без тыпу';
 }

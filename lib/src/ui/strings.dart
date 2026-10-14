@@ -2025,4 +2025,12 @@ final class AppStrings {
   static String get settingsResetAllReviews => _s.settingsResetAllReviews;
   static String get resetAllReviewsTitle => _s.resetAllReviewsTitle;
   static String get resetAllReviewsBody => _s.resetAllReviewsBody;
+  static String get makeFlashcardsTitle => _s.makeFlashcardsTitle;
+  static String get makeFlashcardsDeck => _s.makeFlashcardsDeck;
+  static String get makeFlashcardsDeckHint => _s.makeFlashcardsDeckHint;
+  static String get makeFlashcardsWrites => _s.makeFlashcardsWrites;
+  static String makeFlashcardsAction(int count) =>
+      _s.makeFlashcardsAction(count);
+  static String get makeFlashcardsNone => _s.makeFlashcardsNone;
+  static String get commandNeedPlainNote => _s.commandNeedPlainNote;
 }

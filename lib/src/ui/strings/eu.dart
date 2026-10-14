@@ -4018,4 +4018,21 @@ final class BasqueStrings extends Strings {
   String get resetAllReviewsBody =>
       'Mazo guztietako txartel guztiak berriak izango dira berriro. Ez da '
       'oharrik aldatzen.';
+  @override
+  String get makeFlashcardsTitle => 'Sortu fitxak';
+  @override
+  String get makeFlashcardsDeck => 'Mazoa';
+  @override
+  String get makeFlashcardsDeckHint =>
+      'Kategoriak / bidez bereizita. Hutsik: Kategoriarik gabe.';
+  @override
+  String get makeFlashcardsWrites => 'Frontmatter-ean idazten da';
+  @override
+  String makeFlashcardsAction(int count) => 'Sortu fitxak: $count';
+  @override
+  String get makeFlashcardsNone =>
+      'Ohar honek ez du taularik, :: lerrorik edo nabarmentzerik fitxak '
+      'sortzeko.';
+  @override
+  String get commandNeedPlainNote => 'Motarik gabeko ohar ireki bat behar du';
 }

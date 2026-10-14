@@ -3971,4 +3971,21 @@ final class CzechStrings extends Strings {
   @override
   String get resetAllReviewsBody =>
       'Každá karta každého balíčku bude znovu nová. Žádná poznámka se nezmění.';
+  @override
+  String get makeFlashcardsTitle => 'Vytvořit kartičky';
+  @override
+  String get makeFlashcardsDeck => 'Balíček';
+  @override
+  String get makeFlashcardsDeckHint =>
+      'Kategorie oddělené /. Prázdné: Bez kategorie.';
+  @override
+  String get makeFlashcardsWrites => 'Zapíše se do frontmatteru';
+  @override
+  String makeFlashcardsAction(int count) => 'Vytvořit kartiček: $count';
+  @override
+  String get makeFlashcardsNone =>
+      'Tato poznámka nemá tabulku, řádek :: ani zvýraznění, z nichž by '
+      'vznikly kartičky.';
+  @override
+  String get commandNeedPlainNote => 'Vyžaduje otevřenou poznámku bez typu';
 }

@@ -3999,4 +3999,21 @@ final class CroatianStrings extends Strings {
   String get resetAllReviewsBody =>
       'Svaka kartica svakog špila ponovno postaje nova. Nijedna bilješka se '
       'ne mijenja.';
+  @override
+  String get makeFlashcardsTitle => 'Izradi kartice';
+  @override
+  String get makeFlashcardsDeck => 'Špil';
+  @override
+  String get makeFlashcardsDeckHint =>
+      'Kategorije odvojene s /. Prazno: Bez kategorije.';
+  @override
+  String get makeFlashcardsWrites => 'Upisuje se u frontmatter';
+  @override
+  String makeFlashcardsAction(int count) => 'Izradi kartica: $count';
+  @override
+  String get makeFlashcardsNone =>
+      'Ova bilješka nema tablicu, redak :: ni isticanje od kojih bi nastale '
+      'kartice.';
+  @override
+  String get commandNeedPlainNote => 'Traži otvorenu bilješku bez vrste';
 }

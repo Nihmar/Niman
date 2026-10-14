@@ -3926,4 +3926,20 @@ final class HindiStrings extends Strings {
   @override
   String get resetAllReviewsBody =>
       'हर डेक का हर कार्ड फिर से नया हो जाएगा। कोई नोट नहीं बदलता।';
+  @override
+  String get makeFlashcardsTitle => 'फ़्लैशकार्ड बनाएँ';
+  @override
+  String get makeFlashcardsDeck => 'डेक';
+  @override
+  String get makeFlashcardsDeckHint =>
+      'श्रेणियाँ / से अलग करें। खाली: कोई श्रेणी नहीं।';
+  @override
+  String get makeFlashcardsWrites => 'frontmatter में लिखा जाता है';
+  @override
+  String makeFlashcardsAction(int count) => 'कार्ड बनाएँ: $count';
+  @override
+  String get makeFlashcardsNone =>
+      'इस नोट में कार्ड बनाने के लिए कोई तालिका, :: पंक्ति या हाइलाइट नहीं है।';
+  @override
+  String get commandNeedPlainNote => 'बिना प्रकार का एक खुला नोट चाहिए';
 }

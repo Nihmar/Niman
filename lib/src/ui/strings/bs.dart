@@ -4002,4 +4002,21 @@ final class BosnianStrings extends Strings {
   String get resetAllReviewsBody =>
       'Svaka kartica svakog špila ponovo postaje nova. Nijedna bilješka se ne '
       'mijenja.';
+  @override
+  String get makeFlashcardsTitle => 'Napravi kartice';
+  @override
+  String get makeFlashcardsDeck => 'Špil';
+  @override
+  String get makeFlashcardsDeckHint =>
+      'Kategorije odvojene sa /. Prazno: Bez kategorije.';
+  @override
+  String get makeFlashcardsWrites => 'Upisuje se u frontmatter';
+  @override
+  String makeFlashcardsAction(int count) => 'Napravi kartica: $count';
+  @override
+  String get makeFlashcardsNone =>
+      'Ova bilješka nema tabelu, red :: ili isticanje od kojih bi nastale '
+      'kartice.';
+  @override
+  String get commandNeedPlainNote => 'Zahtijeva otvorenu bilješku bez tipa';
 }

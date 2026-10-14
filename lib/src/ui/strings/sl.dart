@@ -3997,4 +3997,21 @@ final class SlovenianStrings extends Strings {
   String get resetAllReviewsBody =>
       'Vsaka kartica vsakega kupčka spet postane nova. Noben zapisek se ne '
       'spremeni.';
+  @override
+  String get makeFlashcardsTitle => 'Ustvari kartice';
+  @override
+  String get makeFlashcardsDeck => 'Kupček';
+  @override
+  String get makeFlashcardsDeckHint =>
+      'Kategorije, ločene z /. Prazno: Brez kategorije.';
+  @override
+  String get makeFlashcardsWrites => 'Zapiše se v frontmatter';
+  @override
+  String makeFlashcardsAction(int count) => 'Ustvari kartic: $count';
+  @override
+  String get makeFlashcardsNone =>
+      'Ta zapisek nima tabele, vrstice :: ali poudarka, iz katerih bi nastale '
+      'kartice.';
+  @override
+  String get commandNeedPlainNote => 'Zahteva odprt zapisek brez vrste';
 }

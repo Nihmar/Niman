@@ -4008,4 +4008,22 @@ final class ItalianStrings extends Strings {
   @override
   String get resetAllReviewsBody =>
       'Ogni carta di ogni mazzo torna nuova. Nessuna nota viene modificata.';
+  @override
+  String get makeFlashcardsTitle => 'Crea flashcard';
+  @override
+  String get makeFlashcardsDeck => 'Mazzo';
+  @override
+  String get makeFlashcardsDeckHint =>
+      'Categorie separate da /. Vuoto: Senza categoria.';
+  @override
+  String get makeFlashcardsWrites => 'Scritto nel frontmatter';
+  @override
+  String makeFlashcardsAction(int count) =>
+      count == 1 ? 'Crea 1 carta' : 'Crea $count carte';
+  @override
+  String get makeFlashcardsNone =>
+      'Questa nota non ha tabelle, righe :: o evidenziazioni da cui creare '
+      'carte.';
+  @override
+  String get commandNeedPlainNote => 'Richiede una nota aperta senza un tipo';
 }

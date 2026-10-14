@@ -4033,4 +4033,22 @@ final class SpanishStrings extends Strings {
   String get resetAllReviewsBody =>
       'Cada tarjeta de cada mazo vuelve a ser nueva. No se cambia ninguna '
       'nota.';
+  @override
+  String get makeFlashcardsTitle => 'Crear tarjetas';
+  @override
+  String get makeFlashcardsDeck => 'Mazo';
+  @override
+  String get makeFlashcardsDeckHint =>
+      'Categorías separadas por /. Vacío: Sin categoría.';
+  @override
+  String get makeFlashcardsWrites => 'Se escribe en el frontmatter';
+  @override
+  String makeFlashcardsAction(int count) =>
+      count == 1 ? 'Crear 1 tarjeta' : 'Crear $count tarjetas';
+  @override
+  String get makeFlashcardsNone =>
+      'Esta nota no tiene ninguna tabla, línea :: ni resaltado con que crear '
+      'tarjetas.';
+  @override
+  String get commandNeedPlainNote => 'Requiere una nota abierta sin tipo';
 }

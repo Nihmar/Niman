@@ -4004,4 +4004,20 @@ final class AlbanianStrings extends Strings {
   @override
   String get resetAllReviewsBody =>
       'Çdo kartë e çdo pakoje bëhet sërish e re. Asnjë shënim nuk ndryshon.';
+  @override
+  String get makeFlashcardsTitle => 'Krijo kartela';
+  @override
+  String get makeFlashcardsDeck => 'Pako';
+  @override
+  String get makeFlashcardsDeckHint =>
+      'Kategori të ndara me /. Bosh: Pa kategori.';
+  @override
+  String get makeFlashcardsWrites => 'Shkruhet në frontmatter';
+  @override
+  String makeFlashcardsAction(int count) => 'Krijo kartela: $count';
+  @override
+  String get makeFlashcardsNone =>
+      'Ky shënim nuk ka tabelë, rresht :: ose theksim nga të krijohen kartela.';
+  @override
+  String get commandNeedPlainNote => 'Kërkon një shënim të hapur pa lloj';
 }

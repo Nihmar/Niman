@@ -4004,4 +4004,22 @@ final class GalicianStrings extends Strings {
   @override
   String get resetAllReviewsBody =>
       'Cada tarxeta de cada mazo volve ser nova. Non se cambia ningunha nota.';
+  @override
+  String get makeFlashcardsTitle => 'Crear tarxetas';
+  @override
+  String get makeFlashcardsDeck => 'Mazo';
+  @override
+  String get makeFlashcardsDeckHint =>
+      'Categorías separadas por /. Baleiro: Sen categoría.';
+  @override
+  String get makeFlashcardsWrites => 'Escríbese no frontmatter';
+  @override
+  String makeFlashcardsAction(int count) =>
+      count == 1 ? 'Crear 1 tarxeta' : 'Crear $count tarxetas';
+  @override
+  String get makeFlashcardsNone =>
+      'Esta nota non ten ningunha táboa, liña :: nin resaltado co que crear '
+      'tarxetas.';
+  @override
+  String get commandNeedPlainNote => 'Require unha nota aberta sen tipo';
 }

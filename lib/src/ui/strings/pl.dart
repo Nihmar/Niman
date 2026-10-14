@@ -4030,4 +4030,21 @@ final class PolishStrings extends Strings {
   String get resetAllReviewsBody =>
       'Każda fiszka każdej talii znów stanie się nowa. Żadna notatka się nie '
       'zmienia.';
+  @override
+  String get makeFlashcardsTitle => 'Utwórz fiszki';
+  @override
+  String get makeFlashcardsDeck => 'Talia';
+  @override
+  String get makeFlashcardsDeckHint =>
+      'Kategorie oddzielone /. Puste: Bez kategorii.';
+  @override
+  String get makeFlashcardsWrites => 'Zapisywane we frontmatterze';
+  @override
+  String makeFlashcardsAction(int count) => 'Utwórz fiszki: $count';
+  @override
+  String get makeFlashcardsNone =>
+      'Ta notatka nie ma tabeli, wiersza :: ani wyróżnienia, z których '
+      'powstałyby fiszki.';
+  @override
+  String get commandNeedPlainNote => 'Wymaga otwartej notatki bez typu';
 }

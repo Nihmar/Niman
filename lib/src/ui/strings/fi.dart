@@ -4000,4 +4000,21 @@ final class FinnishStrings extends Strings {
   @override
   String get resetAllReviewsBody =>
       'Jokaisen pakan jokainen kortti on taas uusi. Muistiinpanoja ei muuteta.';
+  @override
+  String get makeFlashcardsTitle => 'Tee muistikortit';
+  @override
+  String get makeFlashcardsDeck => 'Pakka';
+  @override
+  String get makeFlashcardsDeckHint =>
+      'Luokat erotettuna merkillä /. Tyhjä: Ei luokkaa.';
+  @override
+  String get makeFlashcardsWrites => 'Kirjoitetaan frontmatteriin';
+  @override
+  String makeFlashcardsAction(int count) => 'Tee kortteja: $count';
+  @override
+  String get makeFlashcardsNone =>
+      'Tässä muistiinpanossa ei ole taulukkoa, :: riviä eikä korostusta '
+      'korteiksi.';
+  @override
+  String get commandNeedPlainNote => 'Vaatii avoimen tyypittömän muistiinpanon';
 }

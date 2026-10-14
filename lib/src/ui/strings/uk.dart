@@ -4014,4 +4014,21 @@ final class UkrainianStrings extends Strings {
   @override
   String get resetAllReviewsBody =>
       'Кожна картка кожної колоди знову стане новою. Нотатки не змінюються.';
+  @override
+  String get makeFlashcardsTitle => 'Створити картки';
+  @override
+  String get makeFlashcardsDeck => 'Колода';
+  @override
+  String get makeFlashcardsDeckHint =>
+      'Категорії через /. Порожньо: Без категорії.';
+  @override
+  String get makeFlashcardsWrites => 'Записується у frontmatter';
+  @override
+  String makeFlashcardsAction(int count) => 'Створити карток: $count';
+  @override
+  String get makeFlashcardsNone =>
+      'У цій нотатці немає таблиці, рядка :: чи виділення, з яких можна '
+      'зробити картки.';
+  @override
+  String get commandNeedPlainNote => 'Потрібна відкрита нотатка без типу';
 }

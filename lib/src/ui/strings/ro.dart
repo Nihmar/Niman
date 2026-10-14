@@ -4036,4 +4036,21 @@ final class RomanianStrings extends Strings {
   String get resetAllReviewsBody =>
       'Fiecare carte din fiecare pachet redevine nouă. Nicio notă nu se '
       'schimbă.';
+  @override
+  String get makeFlashcardsTitle => 'Creează carduri';
+  @override
+  String get makeFlashcardsDeck => 'Pachet';
+  @override
+  String get makeFlashcardsDeckHint =>
+      'Categorii separate prin /. Gol: Fără categorie.';
+  @override
+  String get makeFlashcardsWrites => 'Se scrie în frontmatter';
+  @override
+  String makeFlashcardsAction(int count) => 'Creează carduri: $count';
+  @override
+  String get makeFlashcardsNone =>
+      'Această notă nu are tabel, rând :: sau evidențiere din care să facă '
+      'carduri.';
+  @override
+  String get commandNeedPlainNote => 'Necesită o notă deschisă fără tip';
 }

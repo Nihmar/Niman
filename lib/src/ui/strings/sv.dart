@@ -3991,4 +3991,22 @@ final class SwedishStrings extends Strings {
   @override
   String get resetAllReviewsBody =>
       'Varje kort i varje kortlek blir nytt igen. Ingen anteckning ändras.';
+  @override
+  String get makeFlashcardsTitle => 'Gör flashcards';
+  @override
+  String get makeFlashcardsDeck => 'Kortlek';
+  @override
+  String get makeFlashcardsDeckHint =>
+      'Kategorier åtskilda med /. Tomt: Ingen kategori.';
+  @override
+  String get makeFlashcardsWrites => 'Skrivs i frontmatter';
+  @override
+  String makeFlashcardsAction(int count) =>
+      count == 1 ? 'Gör 1 kort' : 'Gör $count kort';
+  @override
+  String get makeFlashcardsNone =>
+      'Den här anteckningen har ingen tabell, ::-rad eller markering att göra '
+      'kort av.';
+  @override
+  String get commandNeedPlainNote => 'Kräver en öppen anteckning utan typ';
 }

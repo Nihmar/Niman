@@ -3934,4 +3934,21 @@ final class EnglishStrings extends Strings {
   @override
   String get resetAllReviewsBody =>
       'Every card of every deck becomes new again. No note is changed.';
+  @override
+  String get makeFlashcardsTitle => 'Make flashcards';
+  @override
+  String get makeFlashcardsDeck => 'Deck';
+  @override
+  String get makeFlashcardsDeckHint =>
+      'Categories separated by /. Empty: No category.';
+  @override
+  String get makeFlashcardsWrites => 'Written in the frontmatter';
+  @override
+  String makeFlashcardsAction(int count) =>
+      count == 1 ? 'Make 1 card' : 'Make $count cards';
+  @override
+  String get makeFlashcardsNone =>
+      'This note has no table, :: line or highlight to make cards from.';
+  @override
+  String get commandNeedPlainNote => 'Needs an open note of no particular type';
 }

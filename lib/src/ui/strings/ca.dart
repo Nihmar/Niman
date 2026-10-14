@@ -4042,4 +4042,22 @@ final class CatalanStrings extends Strings {
   String get resetAllReviewsBody =>
       'Totes les targetes de totes les baralles tornen a ser noves. No es '
       'canvia cap nota.';
+  @override
+  String get makeFlashcardsTitle => 'Fes targetes';
+  @override
+  String get makeFlashcardsDeck => 'Baralla';
+  @override
+  String get makeFlashcardsDeckHint =>
+      'Categories separades per /. Buit: Sense categoria.';
+  @override
+  String get makeFlashcardsWrites => 'S’escriu al frontmatter';
+  @override
+  String makeFlashcardsAction(int count) =>
+      count == 1 ? 'Fes 1 targeta' : 'Fes $count targetes';
+  @override
+  String get makeFlashcardsNone =>
+      'Aquesta nota no té cap taula, línia :: ni ressaltat per fer-ne '
+      'targetes.';
+  @override
+  String get commandNeedPlainNote => 'Cal una nota oberta sense tipus';
 }

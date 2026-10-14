@@ -4090,4 +4090,22 @@ final class FrenchStrings extends Strings {
   String get resetAllReviewsBody =>
       'Chaque carte de chaque paquet redevient nouvelle. Aucune note n’est '
       'modifiée.';
+  @override
+  String get makeFlashcardsTitle => 'Créer des cartes mémoire';
+  @override
+  String get makeFlashcardsDeck => 'Paquet';
+  @override
+  String get makeFlashcardsDeckHint =>
+      'Catégories séparées par /. Vide : Sans catégorie.';
+  @override
+  String get makeFlashcardsWrites => 'Écrit dans le frontmatter';
+  @override
+  String makeFlashcardsAction(int count) =>
+      count == 1 ? 'Créer 1 carte' : 'Créer $count cartes';
+  @override
+  String get makeFlashcardsNone =>
+      'Cette note n’a ni tableau, ni ligne ::, ni surlignage dont faire des '
+      'cartes.';
+  @override
+  String get commandNeedPlainNote => 'Nécessite une note ouverte sans type';
 }

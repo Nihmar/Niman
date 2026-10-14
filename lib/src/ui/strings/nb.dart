@@ -3966,4 +3966,21 @@ final class NorwegianStrings extends Strings {
   @override
   String get resetAllReviewsBody =>
       'Hvert kort i hver kortstokk blir nytt igjen. Ingen notater endres.';
+  @override
+  String get makeFlashcardsTitle => 'Lag flashcards';
+  @override
+  String get makeFlashcardsDeck => 'Kortstokk';
+  @override
+  String get makeFlashcardsDeckHint =>
+      'Kategorier skilt med /. Tomt: Ingen kategori.';
+  @override
+  String get makeFlashcardsWrites => 'Skrives i frontmatter';
+  @override
+  String makeFlashcardsAction(int count) =>
+      count == 1 ? 'Lag 1 kort' : 'Lag $count kort';
+  @override
+  String get makeFlashcardsNone =>
+      'Dette notatet har ingen tabell, :: linje eller utheving å lage kort av.';
+  @override
+  String get commandNeedPlainNote => 'Krever et åpent notat uten type';
 }

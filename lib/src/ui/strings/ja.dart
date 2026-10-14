@@ -3659,4 +3659,18 @@ final class JapaneseStrings extends Strings {
   String get resetAllReviewsTitle => 'すべての学習をリセットしますか？';
   @override
   String get resetAllReviewsBody => 'すべてのデッキのすべてのカードが新規に戻ります。ノートは変更されません。';
+  @override
+  String get makeFlashcardsTitle => 'フラッシュカードにする';
+  @override
+  String get makeFlashcardsDeck => 'デッキ';
+  @override
+  String get makeFlashcardsDeckHint => 'カテゴリは / で区切ります。空欄: カテゴリなし。';
+  @override
+  String get makeFlashcardsWrites => 'frontmatter に書き込まれます';
+  @override
+  String makeFlashcardsAction(int count) => '$count 枚のカードを作成';
+  @override
+  String get makeFlashcardsNone => 'このノートには、カードにできる表、:: の行、ハイライトがありません。';
+  @override
+  String get commandNeedPlainNote => '種類のない開いているノートが必要です';
 }

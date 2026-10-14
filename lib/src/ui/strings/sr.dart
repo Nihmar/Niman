@@ -3996,4 +3996,21 @@ final class SerbianStrings extends Strings {
   String get resetAllReviewsBody =>
       'Свака картица сваког шпила поново постаје нова. Ниједна белешка се не '
       'мења.';
+  @override
+  String get makeFlashcardsTitle => 'Направи картице';
+  @override
+  String get makeFlashcardsDeck => 'Шпил';
+  @override
+  String get makeFlashcardsDeckHint =>
+      'Категорије одвојене са /. Празно: Без категорије.';
+  @override
+  String get makeFlashcardsWrites => 'Уписује се у frontmatter';
+  @override
+  String makeFlashcardsAction(int count) => 'Направи картица: $count';
+  @override
+  String get makeFlashcardsNone =>
+      'Ова белешка нема табелу, ред :: ни истицање од којих би настале '
+      'картице.';
+  @override
+  String get commandNeedPlainNote => 'Захтева отворену белешку без врсте';
 }

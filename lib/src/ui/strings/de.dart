@@ -4061,4 +4061,22 @@ final class GermanStrings extends Strings {
   @override
   String get resetAllReviewsBody =>
       'Jede Karte jedes Stapels wird wieder neu. Keine Notiz wird geändert.';
+  @override
+  String get makeFlashcardsTitle => 'Karteikarten erstellen';
+  @override
+  String get makeFlashcardsDeck => 'Stapel';
+  @override
+  String get makeFlashcardsDeckHint =>
+      'Kategorien durch / getrennt. Leer: Ohne Kategorie.';
+  @override
+  String get makeFlashcardsWrites => 'Wird in das Frontmatter geschrieben';
+  @override
+  String makeFlashcardsAction(int count) =>
+      count == 1 ? '1 Karte erstellen' : '$count Karten erstellen';
+  @override
+  String get makeFlashcardsNone =>
+      'Diese Notiz hat keine Tabelle, keine ::-Zeile und keine Hervorhebung, '
+      'aus der Karten werden könnten.';
+  @override
+  String get commandNeedPlainNote => 'Benötigt eine geöffnete Notiz ohne Typ';
 }

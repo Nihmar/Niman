@@ -4096,4 +4096,21 @@ final class GreekStrings extends Strings {
   @override
   String get resetAllReviewsBody =>
       'Κάθε κάρτα κάθε τράπουλας γίνεται ξανά νέα. Καμία σημείωση δεν αλλάζει.';
+  @override
+  String get makeFlashcardsTitle => 'Δημιουργία καρτών';
+  @override
+  String get makeFlashcardsDeck => 'Τράπουλα';
+  @override
+  String get makeFlashcardsDeckHint =>
+      'Κατηγορίες χωρισμένες με /. Κενό: Χωρίς κατηγορία.';
+  @override
+  String get makeFlashcardsWrites => 'Γράφεται στο frontmatter';
+  @override
+  String makeFlashcardsAction(int count) =>
+      count == 1 ? 'Δημιουργία 1 κάρτας' : 'Δημιουργία $count καρτών';
+  @override
+  String get makeFlashcardsNone =>
+      'Αυτή η σημείωση δεν έχει πίνακα, γραμμή :: ή επισήμανση για κάρτες.';
+  @override
+  String get commandNeedPlainNote => 'Απαιτεί ανοιχτή σημείωση χωρίς τύπο';
 }

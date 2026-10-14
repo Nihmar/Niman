@@ -3961,4 +3961,21 @@ final class DanishStrings extends Strings {
   @override
   String get resetAllReviewsBody =>
       'Hvert kort i hvert kortspil bliver nyt igen. Ingen note ændres.';
+  @override
+  String get makeFlashcardsTitle => 'Lav flashcards';
+  @override
+  String get makeFlashcardsDeck => 'Kortspil';
+  @override
+  String get makeFlashcardsDeckHint =>
+      'Kategorier adskilt af /. Tom: Ingen kategori.';
+  @override
+  String get makeFlashcardsWrites => 'Skrives i frontmatter';
+  @override
+  String makeFlashcardsAction(int count) =>
+      count == 1 ? 'Lav 1 kort' : 'Lav $count kort';
+  @override
+  String get makeFlashcardsNone =>
+      'Denne note har ingen tabel, :: linje eller fremhævning at lave kort af.';
+  @override
+  String get commandNeedPlainNote => 'Kræver en åben note uden type';
 }

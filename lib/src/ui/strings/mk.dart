@@ -4003,4 +4003,21 @@ final class MacedonianStrings extends Strings {
   String get resetAllReviewsBody =>
       'Секоја картичка од секој шпил повторно станува нова. Ниту една белешка '
       'не се менува.';
+  @override
+  String get makeFlashcardsTitle => 'Направи картички';
+  @override
+  String get makeFlashcardsDeck => 'Шпил';
+  @override
+  String get makeFlashcardsDeckHint =>
+      'Категории одделени со /. Празно: Без категорија.';
+  @override
+  String get makeFlashcardsWrites => 'Се запишува во frontmatter';
+  @override
+  String makeFlashcardsAction(int count) => 'Направи картички: $count';
+  @override
+  String get makeFlashcardsNone =>
+      'Оваа белешка нема табела, ред :: или истакнување од кои би се '
+      'направиле картички.';
+  @override
+  String get commandNeedPlainNote => 'Бара отворена белешка без тип';
 }

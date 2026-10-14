@@ -3976,4 +3976,21 @@ final class IcelandicStrings extends Strings {
   String get resetAllReviewsBody =>
       'Hvert spjald í hverjum stokki verður nýtt aftur. Engum minnismiða er '
       'breytt.';
+  @override
+  String get makeFlashcardsTitle => 'Búa til minniskort';
+  @override
+  String get makeFlashcardsDeck => 'Stokkur';
+  @override
+  String get makeFlashcardsDeckHint =>
+      'Flokkar aðgreindir með /. Tómt: Enginn flokkur.';
+  @override
+  String get makeFlashcardsWrites => 'Skrifað í frontmatter';
+  @override
+  String makeFlashcardsAction(int count) => 'Búa til spjöld: $count';
+  @override
+  String get makeFlashcardsNone =>
+      'Þessi glósa hefur enga töflu, :: línu eða áherslu til að búa til '
+      'spjöld úr.';
+  @override
+  String get commandNeedPlainNote => 'Krefst opinnar glósu án tegundar';
 }

@@ -4015,4 +4015,21 @@ final class LithuanianStrings extends Strings {
   String get resetAllReviewsBody =>
       'Kiekviena kiekvienos kaladės kortelė vėl taps nauja. Užrašai '
       'nekeičiami.';
+  @override
+  String get makeFlashcardsTitle => 'Sukurti korteles';
+  @override
+  String get makeFlashcardsDeck => 'Kaladė';
+  @override
+  String get makeFlashcardsDeckHint =>
+      'Kategorijos atskirtos /. Tuščia: Be kategorijos.';
+  @override
+  String get makeFlashcardsWrites => 'Įrašoma į frontmatter';
+  @override
+  String makeFlashcardsAction(int count) => 'Sukurti kortelių: $count';
+  @override
+  String get makeFlashcardsNone =>
+      'Šiame užraše nėra lentelės, :: eilutės ar paryškinimo kortelėms '
+      'sukurti.';
+  @override
+  String get commandNeedPlainNote => 'Reikia atidaryto užrašo be tipo';
 }

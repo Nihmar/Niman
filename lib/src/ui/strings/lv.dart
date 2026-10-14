@@ -3968,4 +3968,21 @@ final class LatvianStrings extends Strings {
   String get resetAllReviewsBody =>
       'Katra komplekta katra kartīte atkal kļūst jauna. Neviena piezīme '
       'netiek mainīta.';
+  @override
+  String get makeFlashcardsTitle => 'Izveidot kartītes';
+  @override
+  String get makeFlashcardsDeck => 'Komplekts';
+  @override
+  String get makeFlashcardsDeckHint =>
+      'Kategorijas atdalītas ar /. Tukšs: Bez kategorijas.';
+  @override
+  String get makeFlashcardsWrites => 'Tiek ierakstīts frontmatter';
+  @override
+  String makeFlashcardsAction(int count) => 'Izveidot kartītes: $count';
+  @override
+  String get makeFlashcardsNone =>
+      'Šajā piezīmē nav tabulas, :: rindas vai izcēluma, no kā veidot '
+      'kartītes.';
+  @override
+  String get commandNeedPlainNote => 'Nepieciešama atvērta piezīme bez veida';
 }

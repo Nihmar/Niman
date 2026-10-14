@@ -3926,4 +3926,21 @@ final class EstonianStrings extends Strings {
   @override
   String get resetAllReviewsBody =>
       'Iga paki iga kaart muutub taas uueks. Ühtegi märget ei muudeta.';
+  @override
+  String get makeFlashcardsTitle => 'Loo kaardid';
+  @override
+  String get makeFlashcardsDeck => 'Pakk';
+  @override
+  String get makeFlashcardsDeckHint =>
+      'Kategooriad eraldatud märgiga /. Tühi: Kategooriata.';
+  @override
+  String get makeFlashcardsWrites => 'Kirjutatakse frontmatterisse';
+  @override
+  String makeFlashcardsAction(int count) => 'Loo kaarte: $count';
+  @override
+  String get makeFlashcardsNone =>
+      'Selles märkmes pole tabelit, :: rida ega esiletõstu, millest kaarte '
+      'teha.';
+  @override
+  String get commandNeedPlainNote => 'Vajab avatud tüübita märget';
 }

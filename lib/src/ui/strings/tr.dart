@@ -3941,4 +3941,20 @@ final class TurkishStrings extends Strings {
   @override
   String get resetAllReviewsBody =>
       'Her destenin her kartı yeniden yeni olur. Hiçbir not değişmez.';
+  @override
+  String get makeFlashcardsTitle => 'Bilgi kartı yap';
+  @override
+  String get makeFlashcardsDeck => 'Deste';
+  @override
+  String get makeFlashcardsDeckHint =>
+      'Kategoriler / ile ayrılır. Boş: Kategorisiz.';
+  @override
+  String get makeFlashcardsWrites => 'Frontmatter’a yazılır';
+  @override
+  String makeFlashcardsAction(int count) => 'Kart yap: $count';
+  @override
+  String get makeFlashcardsNone =>
+      'Bu notta kart yapılacak bir tablo, :: satırı veya vurgu yok.';
+  @override
+  String get commandNeedPlainNote => 'Türü olmayan açık bir not gerektirir';
 }

@@ -3991,4 +3991,22 @@ final class HungarianStrings extends Strings {
   @override
   String get resetAllReviewsBody =>
       'Minden pakli minden kártyája újra új lesz. Egyik jegyzet sem változik.';
+  @override
+  String get makeFlashcardsTitle => 'Kártyák készítése';
+  @override
+  String get makeFlashcardsDeck => 'Pakli';
+  @override
+  String get makeFlashcardsDeckHint =>
+      'Kategóriák / jellel elválasztva. Üres: Kategória nélkül.';
+  @override
+  String get makeFlashcardsWrites => 'A frontmatterbe kerül';
+  @override
+  String makeFlashcardsAction(int count) => 'Kártyák készítése: $count';
+  @override
+  String get makeFlashcardsNone =>
+      'Ebben a jegyzetben nincs táblázat, :: sor vagy kiemelés, amiből kártya '
+      'lehetne.';
+  @override
+  String get commandNeedPlainNote =>
+      'Típus nélküli megnyitott jegyzetet igényel';
 }

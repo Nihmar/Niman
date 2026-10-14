@@ -3982,4 +3982,21 @@ final class SlovakStrings extends Strings {
   String get resetAllReviewsBody =>
       'Každá karta každého balíčka bude znova nová. Žiadna poznámka sa '
       'nezmení.';
+  @override
+  String get makeFlashcardsTitle => 'Vytvoriť kartičky';
+  @override
+  String get makeFlashcardsDeck => 'Balíček';
+  @override
+  String get makeFlashcardsDeckHint =>
+      'Kategórie oddelené /. Prázdne: Bez kategórie.';
+  @override
+  String get makeFlashcardsWrites => 'Zapíše sa do frontmatteru';
+  @override
+  String makeFlashcardsAction(int count) => 'Vytvoriť kartičiek: $count';
+  @override
+  String get makeFlashcardsNone =>
+      'Táto poznámka nemá tabuľku, riadok :: ani zvýraznenie, z ktorých by '
+      'vznikli kartičky.';
+  @override
+  String get commandNeedPlainNote => 'Vyžaduje otvorenú poznámku bez typu';
 }
