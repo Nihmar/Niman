@@ -526,9 +526,6 @@ final class _NoteViewState extends State<NoteView>
         : setFrontmatterKey(_unifiedText, 'type', type);
     if (text == _unifiedText) return;
     _applyKindEdit(text);
-    if (!mounted) return;
-    setState(() => _noteKind = type);
-    widget.onNoteKindChanged?.call(type);
   }
 
   @override
@@ -2059,8 +2056,13 @@ final class _NoteViewState extends State<NoteView>
         ),
       );
     }
-    setState(() {});
+    // An edit that changes the note's `type` (Make flashcards, #533) turns
+    // the view to the kind it names, as a note opened with it would be.
+    final kind = frontmatterTypeOf(newText);
+    final kindChanged = kind != _noteKind;
+    setState(() => _noteKind = kind);
     unawaited(_saves.save());
+    if (kindChanged) widget.onNoteKindChanged?.call(kind);
   }
 
   /// The formatting keys (#205), applied through the toolbar's own
