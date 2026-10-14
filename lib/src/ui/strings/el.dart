@@ -186,6 +186,28 @@ final class GreekStrings extends Strings {
   @override
   String get updateInstallerStarted => 'Το πρόγραμμα εγκατάστασης ξεκίνησε';
   @override
+  String updateDownloading(Object percent) => 'Λήψη… $percent%';
+  @override
+  String get updateLater => 'Αργότερα';
+  @override
+  String get updateInstallPermissionTitle =>
+      'Επιτρέψτε την εγκατάσταση της ενημέρωσης';
+  @override
+  String get updateInstallPermissionBody =>
+      'Το Android ρωτά μία φορά πριν το Niman μπορέσει να εγκαταστήσει τις '
+      'ενημερώσεις του. Ενεργοποιήστε το «Να επιτρέπεται από αυτή την πηγή» '
+      'για το Niman και επιστρέψτε: η εγκατάσταση συνεχίζεται.';
+  @override
+  String get updateOpenSettings => 'Άνοιγμα ρυθμίσεων';
+  @override
+  String get updateInstallerFailed => 'Το πρόγραμμα εγκατάστασης δεν άνοιξε';
+  @override
+  String get updateReleasePage => 'Σελίδα έκδοσης';
+  @override
+  String get updateTestingBuild =>
+      'Οι δοκιμαστικές εκδόσεις δεν ενημερώνονται μόνες τους: εγκαταστήστε '
+      'την επόμενη χειροκίνητα.';
+  @override
   String get settingsSpellCheckTitle => 'Έλεγχος ορθογραφίας';
   @override
   String get settingsSpellCheckSubtitle =>

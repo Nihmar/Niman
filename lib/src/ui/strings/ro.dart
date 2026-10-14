@@ -187,6 +187,28 @@ final class RomanianStrings extends Strings {
   @override
   String get updateInstallerStarted => 'Programul de instalare a pornit';
   @override
+  String updateDownloading(Object percent) => 'Se descarcă… $percent%';
+  @override
+  String get updateLater => 'Mai târziu';
+  @override
+  String get updateInstallPermissionTitle =>
+      'Permiteți instalarea actualizării';
+  @override
+  String get updateInstallPermissionBody =>
+      'Android întreabă o dată înainte ca Niman să-și poată instala '
+      'actualizările. Activați „Permiteți din această sursă” pentru Niman, '
+      'apoi reveniți: instalarea continuă.';
+  @override
+  String get updateOpenSettings => 'Deschide setările';
+  @override
+  String get updateInstallerFailed => 'Programul de instalare nu s-a deschis';
+  @override
+  String get updateReleasePage => 'Pagina versiunii';
+  @override
+  String get updateTestingBuild =>
+      'Versiunile de test nu se actualizează singure: instalați-o manual pe '
+      'următoarea.';
+  @override
   String get settingsSpellCheckTitle => 'Verificarea ortografiei';
   @override
   String get settingsSpellCheckSubtitle =>

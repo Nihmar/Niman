@@ -181,6 +181,26 @@ final class EnglishStrings extends Strings {
   @override
   String get updateInstallerStarted => 'Installer started';
   @override
+  String updateDownloading(Object percent) => 'Downloading… $percent%';
+  @override
+  String get updateLater => 'Later';
+  @override
+  String get updateInstallPermissionTitle => 'Allow installing the update';
+  @override
+  String get updateInstallPermissionBody =>
+      'Android asks once before Niman can install its own updates. Turn on '
+      '"Allow from this source" for Niman, then come back: the install goes '
+      'on.';
+  @override
+  String get updateOpenSettings => 'Open settings';
+  @override
+  String get updateInstallerFailed => 'The installer did not open';
+  @override
+  String get updateReleasePage => 'Release page';
+  @override
+  String get updateTestingBuild =>
+      'Test builds do not update themselves: install the next one by hand.';
+  @override
   String get settingsSpellCheckTitle => 'Check spelling';
   @override
   String get settingsSpellCheckSubtitle =>

@@ -184,6 +184,27 @@ final class SwedishStrings extends Strings {
   @override
   String get updateInstallerStarted => 'Installationsprogrammet har startats';
   @override
+  String updateDownloading(Object percent) => 'Hämtar … $percent %';
+  @override
+  String get updateLater => 'Senare';
+  @override
+  String get updateInstallPermissionTitle =>
+      'Tillåt installation av uppdateringen';
+  @override
+  String get updateInstallPermissionBody =>
+      'Android frågar en gång innan Niman kan installera sina egna '
+      'uppdateringar. Slå på ”Tillåt från den här källan” för Niman och kom '
+      'tillbaka: installationen fortsätter.';
+  @override
+  String get updateOpenSettings => 'Öppna inställningar';
+  @override
+  String get updateInstallerFailed => 'Installationsprogrammet öppnades inte';
+  @override
+  String get updateReleasePage => 'Versionssida';
+  @override
+  String get updateTestingBuild =>
+      'Testversioner uppdaterar inte sig själva: installera nästa för hand.';
+  @override
   String get settingsSpellCheckTitle => 'Stavkontroll';
   @override
   String get settingsSpellCheckSubtitle =>

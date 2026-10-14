@@ -187,6 +187,26 @@ final class LithuanianStrings extends Strings {
   @override
   String get updateInstallerStarted => 'Diegimo programa paleista';
   @override
+  String updateDownloading(Object percent) => 'Atsisiunčiama… $percent %';
+  @override
+  String get updateLater => 'Vėliau';
+  @override
+  String get updateInstallPermissionTitle => 'Leiskite įdiegti naujinį';
+  @override
+  String get updateInstallPermissionBody =>
+      'Android vieną kartą paklausia, prieš leisdama Niman diegti savo '
+      'naujinius. Įjunkite „Leisti iš šio šaltinio“ Niman programai ir '
+      'grįžkite: diegimas tęsis.';
+  @override
+  String get updateOpenSettings => 'Atverti nustatymus';
+  @override
+  String get updateInstallerFailed => 'Diegimo programa neatsidarė';
+  @override
+  String get updateReleasePage => 'Leidimo puslapis';
+  @override
+  String get updateTestingBuild =>
+      'Bandomosios versijos neatsinaujina pačios: kitą įdiekite rankiniu būdu.';
+  @override
   String get settingsSpellCheckTitle => 'Rašybos patikra';
   @override
   String get settingsSpellCheckSubtitle => 'Paryškina rašybos klaidas rašant.';

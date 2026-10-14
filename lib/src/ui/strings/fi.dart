@@ -183,6 +183,26 @@ final class FinnishStrings extends Strings {
   @override
   String get updateInstallerStarted => 'Asennusohjelma käynnistetty';
   @override
+  String updateDownloading(Object percent) => 'Ladataan… $percent %';
+  @override
+  String get updateLater => 'Myöhemmin';
+  @override
+  String get updateInstallPermissionTitle => 'Salli päivityksen asennus';
+  @override
+  String get updateInstallPermissionBody =>
+      'Android kysyy kerran, ennen kuin Niman voi asentaa omia päivityksiään. '
+      'Ota Nimanille käyttöön ”Salli tästä lähteestä” ja palaa: asennus '
+      'jatkuu.';
+  @override
+  String get updateOpenSettings => 'Avaa asetukset';
+  @override
+  String get updateInstallerFailed => 'Asennusohjelma ei auennut';
+  @override
+  String get updateReleasePage => 'Julkaisusivu';
+  @override
+  String get updateTestingBuild =>
+      'Testiversiot eivät päivitä itseään: asenna seuraava käsin.';
+  @override
   String get settingsSpellCheckTitle => 'Oikoluku';
   @override
   String get settingsSpellCheckSubtitle =>

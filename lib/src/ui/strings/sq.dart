@@ -181,6 +181,26 @@ final class AlbanianStrings extends Strings {
   @override
   String get updateInstallerStarted => 'Instaluesi u nis';
   @override
+  String updateDownloading(Object percent) => 'Po shkarkohet… $percent%';
+  @override
+  String get updateLater => 'Më vonë';
+  @override
+  String get updateInstallPermissionTitle => 'Lejo instalimin e përditësimit';
+  @override
+  String get updateInstallPermissionBody =>
+      'Android pyet një herë përpara se Niman të mund të instalojë '
+      'përditësimet e veta. Aktivizoni «Lejo nga ky burim» për Niman dhe '
+      'kthehuni: instalimi vazhdon.';
+  @override
+  String get updateOpenSettings => 'Hap cilësimet';
+  @override
+  String get updateInstallerFailed => 'Instaluesi nuk u hap';
+  @override
+  String get updateReleasePage => 'Faqja e versionit';
+  @override
+  String get updateTestingBuild =>
+      'Versionet provë nuk përditësohen vetë: instaloni tjetrin me dorë.';
+  @override
   String get settingsSpellCheckTitle => 'Kontrolli i shkrimit';
   @override
   String get settingsSpellCheckSubtitle =>

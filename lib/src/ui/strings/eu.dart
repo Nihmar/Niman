@@ -181,6 +181,26 @@ final class BasqueStrings extends Strings {
   @override
   String get updateInstallerStarted => 'Instalatzailea abiarazi da';
   @override
+  String updateDownloading(Object percent) => 'Deskargatzen… % $percent';
+  @override
+  String get updateLater => 'Geroago';
+  @override
+  String get updateInstallPermissionTitle => 'Baimendu eguneratzea instalatzea';
+  @override
+  String get updateInstallPermissionBody =>
+      'Android-ek behin galdetzen du Niman-ek bere eguneratzeak instalatu '
+      'aurretik. Aktibatu «Baimendu iturburu honetatik» Niman-entzat eta '
+      'itzuli: instalazioak aurrera jarraitzen du.';
+  @override
+  String get updateOpenSettings => 'Ireki ezarpenak';
+  @override
+  String get updateInstallerFailed => 'Instalatzailea ezin izan da ireki';
+  @override
+  String get updateReleasePage => 'Bertsioaren orria';
+  @override
+  String get updateTestingBuild =>
+      'Proba-bertsioak ez dira berez eguneratzen: instalatu hurrengoa eskuz.';
+  @override
   String get settingsSpellCheckTitle => 'Ortografia-egiaztapena';
   @override
   String get settingsSpellCheckSubtitle =>

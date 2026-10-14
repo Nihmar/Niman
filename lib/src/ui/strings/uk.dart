@@ -187,6 +187,26 @@ final class UkrainianStrings extends Strings {
   @override
   String get updateInstallerStarted => 'Інсталятор запущено';
   @override
+  String updateDownloading(Object percent) => 'Завантаження… $percent%';
+  @override
+  String get updateLater => 'Пізніше';
+  @override
+  String get updateInstallPermissionTitle => 'Дозвольте встановити оновлення';
+  @override
+  String get updateInstallPermissionBody =>
+      'Android один раз питає, перш ніж Niman зможе встановлювати власні '
+      'оновлення. Увімкніть «Дозволити з цього джерела» для Niman і '
+      'поверніться: встановлення продовжиться.';
+  @override
+  String get updateOpenSettings => 'Відкрити налаштування';
+  @override
+  String get updateInstallerFailed => 'Не вдалося відкрити інсталятор';
+  @override
+  String get updateReleasePage => 'Сторінка випуску';
+  @override
+  String get updateTestingBuild =>
+      'Тестові збірки не оновлюються самі: наступну встановіть вручну.';
+  @override
   String get settingsSpellCheckTitle => 'Перевірка орфографії';
   @override
   String get settingsSpellCheckSubtitle =>

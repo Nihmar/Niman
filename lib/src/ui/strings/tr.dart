@@ -179,6 +179,27 @@ final class TurkishStrings extends Strings {
   @override
   String get updateInstallerStarted => 'Yükleyici başlatıldı';
   @override
+  String updateDownloading(Object percent) => 'İndiriliyor… %$percent';
+  @override
+  String get updateLater => 'Daha sonra';
+  @override
+  String get updateInstallPermissionTitle =>
+      'Güncellemenin yüklenmesine izin verin';
+  @override
+  String get updateInstallPermissionBody =>
+      'Niman kendi güncellemelerini yükleyebilmeden önce Android bir kez '
+      'sorar. Niman için "Bu kaynaktan izin ver" seçeneğini açın ve geri '
+      'dönün: yükleme devam eder.';
+  @override
+  String get updateOpenSettings => 'Ayarları aç';
+  @override
+  String get updateInstallerFailed => 'Yükleyici açılamadı';
+  @override
+  String get updateReleasePage => 'Sürüm sayfası';
+  @override
+  String get updateTestingBuild =>
+      'Test sürümleri kendini güncellemez: bir sonrakini elle yükleyin.';
+  @override
   String get settingsSpellCheckTitle => 'Yazım denetimi';
   @override
   String get settingsSpellCheckSubtitle =>

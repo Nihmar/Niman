@@ -7,7 +7,6 @@
 library;
 
 import 'package:flutter/material.dart';
-import 'package:niman/src/core/app_channel.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ocr/ocr_installation.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
@@ -250,17 +249,17 @@ List<SettingsArea> settingsAreas({
           highlight: highlight,
         ),
       ),
-    if (!isTestingBuild)
-      SettingsArea(
-        id: SettingsAreaId.updates,
-        group: SettingsGroup.app,
-        rowKey: const Key('settings-area-updates'),
-        icon: () => Icons.system_update,
-        title: AppStrings.settingsSectionUpdates,
-        subtitle: () => version,
-        build: (highlight) =>
-            SettingsUpdatesScreen(controller: controller, highlight: highlight),
-      ),
+    // A test build lists it too, to say why it has nothing to check (#900).
+    SettingsArea(
+      id: SettingsAreaId.updates,
+      group: SettingsGroup.app,
+      rowKey: const Key('settings-area-updates'),
+      icon: () => Icons.system_update,
+      title: AppStrings.settingsSectionUpdates,
+      subtitle: () => version,
+      build: (highlight) =>
+          SettingsUpdatesScreen(controller: controller, highlight: highlight),
+    ),
     SettingsArea(
       id: SettingsAreaId.diagnostics,
       group: SettingsGroup.app,

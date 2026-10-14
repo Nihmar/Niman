@@ -187,6 +187,17 @@ final class AppStrings {
   static String get updateCheckFailed => _s.updateCheckFailed;
   static String updateSavedTo(Object path) => _s.updateSavedTo(path);
   static String get updateInstallerStarted => _s.updateInstallerStarted;
+  static String updateDownloading(Object percent) =>
+      _s.updateDownloading(percent);
+  static String get updateLater => _s.updateLater;
+  static String get updateInstallPermissionTitle =>
+      _s.updateInstallPermissionTitle;
+  static String get updateInstallPermissionBody =>
+      _s.updateInstallPermissionBody;
+  static String get updateOpenSettings => _s.updateOpenSettings;
+  static String get updateInstallerFailed => _s.updateInstallerFailed;
+  static String get updateReleasePage => _s.updateReleasePage;
+  static String get updateTestingBuild => _s.updateTestingBuild;
   static String get settingsSpellCheckTitle => _s.settingsSpellCheckTitle;
   static String get settingsSpellCheckSubtitle => _s.settingsSpellCheckSubtitle;
   static String get spellCheckDictionaryTitle => _s.spellCheckDictionaryTitle;

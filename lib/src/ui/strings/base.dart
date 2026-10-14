@@ -83,6 +83,14 @@ abstract base class Strings {
   String get updateCheckFailed;
   String updateSavedTo(Object path);
   String get updateInstallerStarted;
+  String updateDownloading(Object percent);
+  String get updateLater;
+  String get updateInstallPermissionTitle;
+  String get updateInstallPermissionBody;
+  String get updateOpenSettings;
+  String get updateInstallerFailed;
+  String get updateReleasePage;
+  String get updateTestingBuild;
   String get settingsSpellCheckTitle;
   String get settingsSpellCheckSubtitle;
   String get spellCheckDictionaryTitle;

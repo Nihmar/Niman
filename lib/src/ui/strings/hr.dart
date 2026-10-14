@@ -186,6 +186,26 @@ final class CroatianStrings extends Strings {
   @override
   String get updateInstallerStarted => 'Instalacijski program pokrenut';
   @override
+  String updateDownloading(Object percent) => 'Preuzimanje… $percent %';
+  @override
+  String get updateLater => 'Kasnije';
+  @override
+  String get updateInstallPermissionTitle => 'Dopustite instalaciju ažuriranja';
+  @override
+  String get updateInstallPermissionBody =>
+      'Android pita jednom prije nego što Niman smije instalirati svoja '
+      'ažuriranja. Uključite „Dopusti iz ovog izvora” za Niman i vratite se: '
+      'instalacija se nastavlja.';
+  @override
+  String get updateOpenSettings => 'Otvori postavke';
+  @override
+  String get updateInstallerFailed => 'Instalacijski program se nije otvorio';
+  @override
+  String get updateReleasePage => 'Stranica izdanja';
+  @override
+  String get updateTestingBuild =>
+      'Testne verzije se ne ažuriraju same: sljedeću instalirajte ručno.';
+  @override
   String get settingsSpellCheckTitle => 'Kontrola pravopisa';
   @override
   String get settingsSpellCheckSubtitle =>

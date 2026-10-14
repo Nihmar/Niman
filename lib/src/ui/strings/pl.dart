@@ -186,6 +186,27 @@ final class PolishStrings extends Strings {
   @override
   String get updateInstallerStarted => 'Uruchomiono instalator';
   @override
+  String updateDownloading(Object percent) => 'Pobieranie… $percent%';
+  @override
+  String get updateLater => 'Później';
+  @override
+  String get updateInstallPermissionTitle =>
+      'Zezwól na instalację aktualizacji';
+  @override
+  String get updateInstallPermissionBody =>
+      'Android pyta raz, zanim Niman będzie mógł instalować swoje '
+      'aktualizacje. Włącz „Zezwalaj z tego źródła” dla Niman i wróć: '
+      'instalacja będzie kontynuowana.';
+  @override
+  String get updateOpenSettings => 'Otwórz ustawienia';
+  @override
+  String get updateInstallerFailed => 'Nie udało się otworzyć instalatora';
+  @override
+  String get updateReleasePage => 'Strona wydania';
+  @override
+  String get updateTestingBuild =>
+      'Wersje testowe nie aktualizują się same: następną zainstaluj ręcznie.';
+  @override
   String get settingsSpellCheckTitle => 'Sprawdzanie pisowni';
   @override
   String get settingsSpellCheckSubtitle =>

@@ -186,6 +186,26 @@ final class BelarusianStrings extends Strings {
   @override
   String get updateInstallerStarted => 'Усталёўшчык запушчаны';
   @override
+  String updateDownloading(Object percent) => 'Спампоўка… $percent%';
+  @override
+  String get updateLater => 'Пазней';
+  @override
+  String get updateInstallPermissionTitle => 'Дазвольце ўсталяваць абнаўленне';
+  @override
+  String get updateInstallPermissionBody =>
+      'Android пытаецца адзін раз, перш чым Niman зможа ўсталёўваць свае '
+      'абнаўленні. Уключыце «Дазволіць з гэтай крыніцы» для Niman і '
+      'вярніцеся: усталяванне пойдзе далей.';
+  @override
+  String get updateOpenSettings => 'Адкрыць налады';
+  @override
+  String get updateInstallerFailed => 'Не ўдалося адкрыць усталёўшчык';
+  @override
+  String get updateReleasePage => 'Старонка выпуску';
+  @override
+  String get updateTestingBuild =>
+      'Тэставыя зборкі не абнаўляюцца самі: наступную ўсталюйце ўручную.';
+  @override
   String get settingsSpellCheckTitle => 'Праверка арфаграфіі';
   @override
   String get settingsSpellCheckSubtitle =>

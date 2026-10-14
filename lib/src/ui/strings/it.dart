@@ -186,6 +186,29 @@ final class ItalianStrings extends Strings {
   @override
   String get updateInstallerStarted => 'Programma di installazione avviato';
   @override
+  String updateDownloading(Object percent) => 'Download in corso… $percent%';
+  @override
+  String get updateLater => 'Più tardi';
+  @override
+  String get updateInstallPermissionTitle =>
+      'Consenti l’installazione dell’aggiornamento';
+  @override
+  String get updateInstallPermissionBody =>
+      'Android lo chiede una volta prima che Niman possa installare i propri '
+      'aggiornamenti. Attiva «Consenti da questa fonte» per Niman e torna '
+      'qui: l’installazione prosegue.';
+  @override
+  String get updateOpenSettings => 'Apri impostazioni';
+  @override
+  String get updateInstallerFailed =>
+      'Il programma di installazione non si è aperto';
+  @override
+  String get updateReleasePage => 'Pagina della versione';
+  @override
+  String get updateTestingBuild =>
+      'Le build di prova non si aggiornano da sole: installa la prossima a '
+      'mano.';
+  @override
   String get settingsSpellCheckTitle => 'Controlla ortografia';
   @override
   String get settingsSpellCheckSubtitle =>

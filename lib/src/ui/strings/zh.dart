@@ -169,6 +169,23 @@ final class ChineseStrings extends Strings {
   @override
   String get updateInstallerStarted => '安装程序已启动';
   @override
+  String updateDownloading(Object percent) => '正在下载… $percent%';
+  @override
+  String get updateLater => '稍后';
+  @override
+  String get updateInstallPermissionTitle => '允许安装更新';
+  @override
+  String get updateInstallPermissionBody =>
+      '在 Niman 安装自身更新之前，Android 会询问一次。为 Niman 打开“允许来自此来源”，然后返回：安装会继续进行。';
+  @override
+  String get updateOpenSettings => '打开设置';
+  @override
+  String get updateInstallerFailed => '安装程序未能打开';
+  @override
+  String get updateReleasePage => '发布页面';
+  @override
+  String get updateTestingBuild => '测试版不会自动更新：请手动安装下一个版本。';
+  @override
   String get settingsSpellCheckTitle => '拼写检查';
   @override
   String get settingsSpellCheckSubtitle => '输入时把拼错的词加下划线。';

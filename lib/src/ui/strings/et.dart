@@ -181,6 +181,26 @@ final class EstonianStrings extends Strings {
   @override
   String get updateInstallerStarted => 'Paigaldusprogramm käivitati';
   @override
+  String updateDownloading(Object percent) => 'Allalaadimine… $percent%';
+  @override
+  String get updateLater => 'Hiljem';
+  @override
+  String get updateInstallPermissionTitle => 'Luba värskenduse paigaldamine';
+  @override
+  String get updateInstallPermissionBody =>
+      'Android küsib ühe korra, enne kui Niman saab oma värskendusi '
+      'paigaldada. Lülita Nimani jaoks sisse „Luba sellest allikast“ ja tule '
+      'tagasi: paigaldus jätkub.';
+  @override
+  String get updateOpenSettings => 'Ava seaded';
+  @override
+  String get updateInstallerFailed => 'Paigaldajat ei õnnestunud avada';
+  @override
+  String get updateReleasePage => 'Väljalaske leht';
+  @override
+  String get updateTestingBuild =>
+      'Testversioonid ei uuenda end ise: paigalda järgmine käsitsi.';
+  @override
   String get settingsSpellCheckTitle => 'Õigekirjapide';
   @override
   String get settingsSpellCheckSubtitle =>

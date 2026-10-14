@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/ui/settings_rows.dart';
 import 'package:niman/src/ui/settings_updates.dart';
 import 'package:niman/src/ui/strings.dart';
+import 'package:niman/src/ui/update_actions.dart';
 import 'package:niman/src/ui/update_banner.dart';
 import 'package:niman/src/update/app_version.dart';
 import 'package:niman/src/update/release_asset.dart';
@@ -64,7 +65,10 @@ void main() {
         home: SettingsUpdatesScreen(
           controller: session,
           checkUpdate: () async => _update,
-          downloadUpdate: (_, _) async => downloads++,
+          downloadUpdate: (_, _) async {
+            downloads++;
+            return false;
+          },
         ),
       ),
     );
@@ -92,7 +96,7 @@ void main() {
         home: SettingsUpdatesScreen(
           controller: FakeLibrarySession(),
           checkUpdate: () async => null,
-          downloadUpdate: (_, _) async {},
+          downloadUpdate: (_, _) async => false,
         ),
       ),
     );
@@ -111,12 +115,34 @@ void main() {
         home: SettingsUpdatesScreen(
           controller: FakeLibrarySession()..pendingUpdate = _update,
           checkUpdate: () async => null,
-          downloadUpdate: (_, _) async {},
+          downloadUpdate: (_, _) async => false,
         ),
       ),
     );
     await tester.pumpAndSettle();
     expect(find.text(AppStrings.updateAvailableMessage('9.9.9')), findsOne);
     expect(_enabled(tester), isTrue);
+  });
+
+  testWidgets('a download in the banner shows how far it got, and its '
+      'Cancel stops it (#900)', (tester) async {
+    final session = FakeLibrarySession()..pendingUpdate = _update;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Column(children: [UpdateAvailableBanner(session: session)]),
+        ),
+      ),
+    );
+    expect(updateDownload.start(), isTrue);
+    addTearDown(updateDownload.finish);
+    expect(updateDownload.start(), isFalse, reason: 'one at a time');
+    updateDownload.report(42, 100);
+    await tester.pump();
+    expect(find.text(AppStrings.updateDownloading(42)), findsOne);
+    expect(find.byKey(const Key('update-available-download')), findsNothing);
+    await tester.tap(find.byKey(const Key('update-download-cancel')));
+    await tester.pump();
+    expect(updateDownload.cancelled, isTrue);
   });
 }

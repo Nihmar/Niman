@@ -182,6 +182,26 @@ final class IcelandicStrings extends Strings {
   @override
   String get updateInstallerStarted => 'Uppsetningarforrit ræst';
   @override
+  String updateDownloading(Object percent) => 'Sæki… $percent%';
+  @override
+  String get updateLater => 'Seinna';
+  @override
+  String get updateInstallPermissionTitle => 'Leyfa uppsetningu uppfærslunnar';
+  @override
+  String get updateInstallPermissionBody =>
+      'Android spyr einu sinni áður en Niman má setja upp eigin uppfærslur. '
+      'Kveiktu á „Leyfa frá þessum uppruna“ fyrir Niman og komdu svo aftur: '
+      'uppsetningin heldur áfram.';
+  @override
+  String get updateOpenSettings => 'Opna stillingar';
+  @override
+  String get updateInstallerFailed => 'Uppsetningarforritið opnaðist ekki';
+  @override
+  String get updateReleasePage => 'Útgáfusíða';
+  @override
+  String get updateTestingBuild =>
+      'Prófunarútgáfur uppfæra sig ekki sjálfar: settu þá næstu upp handvirkt.';
+  @override
   String get settingsSpellCheckTitle => 'Stafsetningarprófun';
   @override
   String get settingsSpellCheckSubtitle =>

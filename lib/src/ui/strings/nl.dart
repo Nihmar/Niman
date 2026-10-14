@@ -183,6 +183,28 @@ final class DutchStrings extends Strings {
   @override
   String get updateInstallerStarted => 'Installatieprogramma gestart';
   @override
+  String updateDownloading(Object percent) => 'Downloaden… $percent%';
+  @override
+  String get updateLater => 'Later';
+  @override
+  String get updateInstallPermissionTitle =>
+      'Installatie van de update toestaan';
+  @override
+  String get updateInstallPermissionBody =>
+      'Android vraagt het één keer voordat Niman zijn eigen updates kan '
+      'installeren. Zet "Toestaan van deze bron" aan voor Niman en kom terug: '
+      'de installatie gaat verder.';
+  @override
+  String get updateOpenSettings => 'Instellingen openen';
+  @override
+  String get updateInstallerFailed => 'Het installatieprogramma ging niet open';
+  @override
+  String get updateReleasePage => 'Releasepagina';
+  @override
+  String get updateTestingBuild =>
+      'Testversies werken zichzelf niet bij: installeer de volgende met de '
+      'hand.';
+  @override
   String get settingsSpellCheckTitle => 'Spellingscontrole';
   @override
   String get settingsSpellCheckSubtitle =>

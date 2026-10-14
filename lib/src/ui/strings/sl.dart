@@ -188,6 +188,27 @@ final class SlovenianStrings extends Strings {
   @override
   String get updateInstallerStarted => 'Namestitveni program zagnan';
   @override
+  String updateDownloading(Object percent) => 'Prenašanje … $percent %';
+  @override
+  String get updateLater => 'Pozneje';
+  @override
+  String get updateInstallPermissionTitle => 'Dovolite namestitev posodobitve';
+  @override
+  String get updateInstallPermissionBody =>
+      'Android enkrat vpraša, preden lahko Niman namešča svoje posodobitve. '
+      'Za Niman vklopite »Dovoli iz tega vira« in se vrnite: namestitev se '
+      'nadaljuje.';
+  @override
+  String get updateOpenSettings => 'Odpri nastavitve';
+  @override
+  String get updateInstallerFailed => 'Namestitveni program se ni odprl';
+  @override
+  String get updateReleasePage => 'Stran izdaje';
+  @override
+  String get updateTestingBuild =>
+      'Preizkusne različice se ne posodabljajo same: naslednjo namestite '
+      'ročno.';
+  @override
   String get settingsSpellCheckTitle => 'Preverjanje pravopisa';
   @override
   String get settingsSpellCheckSubtitle =>

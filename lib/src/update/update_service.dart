@@ -166,8 +166,24 @@ final class UpdateIntegrityException implements Exception {
   String toString() => 'UpdateIntegrityException: $message';
 }
 
+/// A download stopped by its own Cancel (#900): nothing was left on disk.
+final class UpdateCancelled implements Exception {
+  /// Creates the stop.
+  const new();
+
+  @override
+  String toString() => 'UpdateCancelled';
+}
+
 /// Streams [asset] into [into] (default [updateDownloadDirectory]) and
 /// verifies the bytes against the digest the release published.
+///
+/// [onProgress] hears the bytes received and the size the server gave, if
+/// any, as they come (#900); [isCancelled] is asked at each chunk, and a
+/// yes stops the transfer as [UpdateCancelled], the partial file removed.
+/// A file already there under the asset's name that passes the digest is
+/// the download: an install refused, or left for a permission, does not
+/// fetch the same bytes again.
 ///
 /// The body lands in `<name>.part` and is renamed to the asset's base name
 /// only once its digest matches, so a file under the installer's name is
@@ -187,9 +203,19 @@ Future<File> downloadAsset(
   ReleaseAsset asset, {
   Directory? into,
   Duration stallTimeout = const Duration(seconds: 30),
+  void Function(int received, int? total)? onProgress,
+  bool Function()? isCancelled,
 }) async {
   final dir = into ?? await updateDownloadDirectory();
   final file = File(p.join(dir.path, p.basename(asset.name)));
+  // Hashed off the UI isolate, as a download is; a file that is not there
+  // fails the read and is fetched.
+  try {
+    await _verifyDownload(asset, file);
+    return file;
+  } on Object {
+    await _deleteQuietly(file);
+  }
   final part = File('${file.path}.part');
   final client = HttpClient();
   try {
@@ -203,15 +229,26 @@ Future<File> downloadAsset(
         uri: Uri.parse(asset.downloadUrl),
       );
     }
+    final total = response.contentLength < 0 ? null : response.contentLength;
+    var received = 0;
     final sink = part.openWrite();
     try {
       await sink.addStream(
-        response.timeout(
-          stallTimeout,
-          onTimeout: (events) => events.addError(
-            TimeoutException('no data for ${stallTimeout.inMilliseconds} ms'),
-          ),
-        ),
+        response
+            .timeout(
+              stallTimeout,
+              onTimeout: (events) => events.addError(
+                TimeoutException(
+                  'no data for ${stallTimeout.inMilliseconds} ms',
+                ),
+              ),
+            )
+            .map((chunk) {
+              if (isCancelled?.call() ?? false) throw const UpdateCancelled();
+              received += chunk.length;
+              onProgress?.call(received, total);
+              return chunk;
+            }),
       );
     } finally {
       await _closeQuietly(sink);
@@ -305,6 +342,48 @@ Future<bool> _applyDesktop(File file) async {
     }
   }
   return false;
+}
+
+/// Whether Android lets the app install a package now: "Install unknown
+/// apps" for Niman (#900). True off Android, and where the bridge is not
+/// there (tests): the installer is then the one to say so.
+Future<bool> canInstallPackages() async {
+  if (!Platform.isAndroid) return true;
+  try {
+    return await const MethodChannel('niman/update')
+            .invokeMethod<bool>('canInstallPackages') ??
+        true;
+  } on Object {
+    return true;
+  }
+}
+
+/// Opens Android's "Install unknown apps" page for Niman (#900); false
+/// when it could not be opened.
+Future<bool> openInstallPermission() async {
+  try {
+    return await const MethodChannel('niman/update')
+            .invokeMethod<bool>('openInstallPermission') ??
+        false;
+  } on Object {
+    return false;
+  }
+}
+
+/// Removes what earlier downloads left in Android's updates folder (#900):
+/// run at launch, when an installed update has done its work and a refused
+/// one is fetched again only if it is still wanted. Off Android the files
+/// are the user's, in Downloads, and stay.
+Future<void> clearUpdateDownloads() async {
+  if (!Platform.isAndroid) return;
+  try {
+    final dir = await updateDownloadDirectory();
+    await for (final entry in dir.list()) {
+      if (entry is File) await _deleteQuietly(entry);
+    }
+  } on FileSystemException {
+    // Nothing to clear, or not now: the next launch tries again.
+  }
 }
 
 /// Opens the system package installer for the downloaded [apk].

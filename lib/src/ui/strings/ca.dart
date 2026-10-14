@@ -185,6 +185,28 @@ final class CatalanStrings extends Strings {
   @override
   String get updateInstallerStarted => 'Instal·lador iniciat';
   @override
+  String updateDownloading(Object percent) => 'Baixant… $percent%';
+  @override
+  String get updateLater => 'Més tard';
+  @override
+  String get updateInstallPermissionTitle =>
+      'Permeteu instal·lar l’actualització';
+  @override
+  String get updateInstallPermissionBody =>
+      'Android ho demana una vegada abans que Niman pugui instal·lar les '
+      'seves actualitzacions. Activeu «Permet d’aquesta font» per a Niman i '
+      'torneu: la instal·lació continua.';
+  @override
+  String get updateOpenSettings => 'Obre la configuració';
+  @override
+  String get updateInstallerFailed => 'No s’ha pogut obrir l’instal·lador';
+  @override
+  String get updateReleasePage => 'Pàgina de la versió';
+  @override
+  String get updateTestingBuild =>
+      'Les versions de prova no s’actualitzen soles: instal·leu la següent a '
+      'mà.';
+  @override
   String get settingsSpellCheckTitle => 'Comprovació d’ortografia';
   @override
   String get settingsSpellCheckSubtitle =>

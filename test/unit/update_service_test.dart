@@ -93,6 +93,51 @@ void main() {
       expect(await file.readAsBytes(), bytes);
     });
 
+    test('reports its progress, and a verified file is not fetched again '
+        '(#900)', () async {
+      final bytes = List<int>.generate(200000, (i) => i % 251);
+      final digest = 'sha256:${sha256.convert(bytes)}';
+      var requests = 0;
+      server.listen((request) async {
+        requests++;
+        request.response
+          ..statusCode = HttpStatus.ok
+          ..contentLength = bytes.length
+          ..add(bytes);
+        await request.response.close();
+      });
+      final served = ReleaseAsset(
+        name: 'niman-1.0.0-windows-x64-setup.exe',
+        downloadUrl: 'http://${server.address.host}:${server.port}/setup.exe',
+        digest: digest,
+      );
+      final seen = <(int, int?)>[];
+      await downloadAsset(
+        served,
+        into: dir,
+        onProgress: (received, total) => seen.add((received, total)),
+      );
+      expect(seen.last, (bytes.length, bytes.length));
+      expect(requests, 1);
+
+      final again = await downloadAsset(served, into: dir);
+      expect(requests, 1, reason: 'the file there passed the digest');
+      expect(await again.readAsBytes(), bytes);
+    });
+
+    test('a cancel stops the transfer and leaves nothing (#900)', () async {
+      final bytes = List<int>.generate(200000, (i) => i % 251);
+      await expectLater(
+        downloadAsset(
+          asset(served: bytes, digest: 'sha256:${sha256.convert(bytes)}'),
+          into: dir,
+          isCancelled: () => true,
+        ),
+        throwsA(isA<UpdateCancelled>()),
+      );
+      expect(dir.listSync(), isEmpty);
+    });
+
     test('refuses and removes bytes that do not match', () async {
       await expectLater(
         downloadAsset(
