@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:niman/src/ui/menu_row.dart';
+import 'package:niman/src/ui/pointer_menu.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// What the menu of a written-note bubble can do.
@@ -51,41 +53,23 @@ class _AudioTextBubbleState extends State<AudioTextBubble> {
         Offset.zero & overlay.size,
       ),
       items: [
-        PopupMenuItem(
+        menuItem(
+          context,
           key: ValueKey('audio-note-edit-${widget.suffix}'),
           value: _NoteAction.edit,
-          child: Row(
-            children: [
-              const Icon(Icons.edit_outlined, size: 20),
-              const SizedBox(width: 12),
-              Flexible(
-                child: Text(
-                  AppStrings.audioEditNote,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
+          child: MenuRow(
+            icon: Icons.edit_outlined,
+            label: AppStrings.audioEditNote,
           ),
         ),
-        PopupMenuItem(
+        menuItem(
+          context,
           key: ValueKey('audio-note-delete-${widget.suffix}'),
           value: _NoteAction.delete,
-          child: Row(
-            children: [
-              Icon(
-                Icons.delete_outline,
-                size: 20,
-                color: theme.colorScheme.error,
-              ),
-              const SizedBox(width: 12),
-              Flexible(
-                child: Text(
-                  AppStrings.audioDeleteNote,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(color: theme.colorScheme.error),
-                ),
-              ),
-            ],
+          child: MenuRow(
+            icon: Icons.delete_outline,
+            label: AppStrings.audioDeleteNote,
+            color: theme.colorScheme.error,
           ),
         ),
       ],

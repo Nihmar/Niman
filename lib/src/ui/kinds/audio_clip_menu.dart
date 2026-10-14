@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:niman/src/ui/menu_row.dart';
+import 'package:niman/src/ui/pointer_menu.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// What the menu of a clip bubble can do.
@@ -84,6 +86,7 @@ final class AudioClipMenuState extends State<AudioClipMenu> {
   }
 
   PopupMenuItem<_ClipAction> _item(
+    BuildContext context,
     _ClipAction action,
     String key,
     IconData icon,
@@ -92,37 +95,16 @@ final class AudioClipMenuState extends State<AudioClipMenu> {
     String? subtitle,
     bool enabled = true,
   }) {
-    final theme = Theme.of(context);
-    return PopupMenuItem<_ClipAction>(
+    return menuItem<_ClipAction>(
+      context,
       key: ValueKey('audio-$key-${widget.suffix}'),
       value: action,
       enabled: enabled,
-      child: Row(
-        children: [
-          Icon(icon, size: 20, color: color),
-          const SizedBox(width: 12),
-          Flexible(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  label,
-                  overflow: TextOverflow.ellipsis,
-                  style: color == null ? null : TextStyle(color: color),
-                ),
-                if (subtitle != null)
-                  Text(
-                    subtitle,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        ],
+      child: MenuRow(
+        icon: icon,
+        label: label,
+        subtitle: subtitle,
+        color: color,
       ),
     );
   }
@@ -131,7 +113,8 @@ final class AudioClipMenuState extends State<AudioClipMenu> {
     final theme = Theme.of(context);
     final hint = widget.transcribeHint;
     return [
-      PopupMenuItem<_ClipAction>(
+      menuItem<_ClipAction>(
+        context,
         enabled: false,
         height: 32,
         child: Text(
@@ -142,9 +125,10 @@ final class AudioClipMenuState extends State<AudioClipMenu> {
           ),
         ),
       ),
-      const PopupMenuDivider(),
+      menuDivider(context),
       if (hint != null)
         _item(
+          context,
           _ClipAction.transcribe,
           'transcribe',
           Icons.subtitles_outlined,
@@ -152,8 +136,15 @@ final class AudioClipMenuState extends State<AudioClipMenu> {
           subtitle: hint,
           enabled: widget.onTranscribe != null,
         ),
-      _item(_ClipAction.title, 'title', Icons.title, AppStrings.audioEditTitle),
       _item(
+        context,
+        _ClipAction.title,
+        'title',
+        Icons.title,
+        AppStrings.audioEditTitle,
+      ),
+      _item(
+        context,
         _ClipAction.description,
         'description',
         Icons.notes,
@@ -161,6 +152,7 @@ final class AudioClipMenuState extends State<AudioClipMenu> {
       ),
       if (widget.onCopy != null)
         _item(
+          context,
           _ClipAction.copy,
           'copy',
           Icons.copy_outlined,
@@ -168,12 +160,14 @@ final class AudioClipMenuState extends State<AudioClipMenu> {
         ),
       if (widget.onRename != null)
         _item(
+          context,
           _ClipAction.rename,
           'rename',
           Icons.drive_file_rename_outline,
           AppStrings.audioRename,
         ),
       _item(
+        context,
         _ClipAction.delete,
         'delete',
         Icons.delete_outline,

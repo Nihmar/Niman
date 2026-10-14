@@ -22,6 +22,7 @@ import 'package:niman/src/ui/pdf_document_view.dart';
 import 'package:niman/src/ui/pdf_held_document.dart';
 import 'package:niman/src/ui/pdf_mark_layer.dart';
 import 'package:niman/src/ui/place_link_button.dart';
+import 'package:niman/src/ui/pointer_menu.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:path/path.dart' as p;
 import 'package:pdfrx/pdfrx.dart';
@@ -237,18 +238,21 @@ final class PdfDocumentViewState extends State<PdfDocumentView> {
       position: RelativeRect.fromLTRB(at.dx, at.dy, at.dx, at.dy),
       items: [
         if (_annotates)
-          PopupMenuItem(
+          menuItem(
+            context,
             key: const Key('ocr-line-annotate'),
             value: 'annotate',
             child: Text(AppStrings.annotateAction),
           ),
-        PopupMenuItem(
+        menuItem(
+          context,
           key: const Key('ocr-line-copy'),
           value: 'copy',
           child: Text(AppStrings.ocrCopyText),
         ),
         if (key != null)
-          PopupMenuItem(
+          menuItem(
+            context,
             key: const Key('ocr-line-link'),
             value: 'link',
             child: Text(AppStrings.copyPlaceLink),
