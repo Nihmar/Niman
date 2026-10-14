@@ -3867,4 +3867,98 @@ final class DutchStrings extends Strings {
   @override
   String homeActionMissing(String path) =>
       '$path staat niet meer in de bibliotheek';
+
+  @override
+  String get flashcardsName => 'Flashcards';
+  @override
+  String get newFlashcardsTitle => 'Nieuwe flashcards';
+  @override
+  String get newFlashcardsDefault => 'Mijn flashcards';
+  @override
+  String get showFlashcardsTooltip => 'Flashcards tonen';
+  @override
+  String get flashcardsNoCategory => 'Zonder categorie';
+  @override
+  String flashcardsDueCount(int count) => '$count te herhalen';
+  @override
+  String flashcardsNewCount(int count) => '$count nieuw';
+  @override
+  String flashcardsCardCount(int count) =>
+      count == 1 ? '1 kaart' : '$count kaarten';
+  @override
+  String flashcardsStudyCount(int count) => '$count studeren';
+  @override
+  String flashcardsStudyCards(int count) =>
+      count == 1 ? '1 kaart studeren' : '$count kaarten studeren';
+  @override
+  String get flashcardsStudyDeck => 'Deze stapel studeren';
+  @override
+  String get flashcardsAddCard => 'Kaart toevoegen';
+  @override
+  String get flashcardsQuestion => 'Vraag';
+  @override
+  String get flashcardsAnswer => 'Antwoord';
+  @override
+  String get flashcardsNextColumn => 'Volgende';
+  @override
+  String get flashcardsDue => 'Te herhalen';
+  @override
+  String get flashcardsNew => 'Nieuw';
+  @override
+  String flashcardsInDays(int count) =>
+      count == 1 ? 'over 1 dag' : 'over $count dagen';
+  @override
+  String flashcardsInMonths(int count) =>
+      count == 1 ? 'over 1 maand' : 'over $count maanden';
+  @override
+  String flashcardsInYears(int count) =>
+      count == 1 ? 'over 1 jaar' : 'over $count jaar';
+  @override
+  String get flashcardsRepeated => 'Herhaald';
+  @override
+  String get flashcardsRepeatedTip =>
+      'Deze vraag komt meer dan eens voor in de stapel';
+  @override
+  String get flashcardsEmpty => 'Nog geen kaarten';
+  @override
+  String get flashcardsEditCard => 'Kaart bewerken';
+  @override
+  String get flashcardsSentence => 'Zin';
+  @override
+  String get flashcardsEditNote =>
+      'De voortgang blijft behouden zolang de vraag gelijk blijft. '
+      'Niman herschrijft deze kaart in de notitie.';
+  @override
+  String flashcardsKindRows(int count) =>
+      count == 1 ? '1 tabelrij' : '$count tabelrijen';
+  @override
+  String flashcardsKindLines(int count) =>
+      count == 1 ? '1 ::-regel' : '$count ::-regels';
+  @override
+  String flashcardsKindClozes(int count) =>
+      count == 1 ? '1 invulzin' : '$count invulzinnen';
+  @override
+  String get flashcardsEditMarkdown => 'Bewerken als Markdown';
+  @override
+  String get flashcardsColumnsTitle => 'Vraag- en antwoordkolommen';
+  @override
+  String get flashcardsQuestionColumn => 'Vraagkolom';
+  @override
+  String get flashcardsAnswerColumn => 'Antwoordkolom';
+  @override
+  String get flashcardsColumnsNone =>
+      'Geen tabel in deze notitie heeft meer dan twee kolommen.';
+  @override
+  String get flashcardsResetAction => 'De herhaling van deze stapel resetten';
+  @override
+  String get flashcardsResetTitle => 'De herhaling resetten?';
+  @override
+  String get flashcardsResetBody =>
+      'Elke kaart van deze stapel wordt weer nieuw. De notitie blijft '
+      'ongewijzigd.';
+  @override
+  String get flashcardsResetConfirm => 'Resetten';
+  @override
+  String get commandNeedFlashcardNote =>
+      'Vereist een geopende flashcardnotitie';
 }

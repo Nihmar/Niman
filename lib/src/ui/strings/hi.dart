@@ -3775,4 +3775,95 @@ final class HindiStrings extends Strings {
 
   @override
   String homeActionMissing(String path) => '$path अब लाइब्रेरी में नहीं है';
+
+  @override
+  String get flashcardsName => 'फ़्लैशकार्ड';
+  @override
+  String get newFlashcardsTitle => 'नए फ़्लैशकार्ड';
+  @override
+  String get newFlashcardsDefault => 'मेरे फ़्लैशकार्ड';
+  @override
+  String get showFlashcardsTooltip => 'फ़्लैशकार्ड दिखाएँ';
+  @override
+  String get flashcardsNoCategory => 'कोई श्रेणी नहीं';
+  @override
+  String flashcardsDueCount(int count) => '$count दोहराने हैं';
+  @override
+  String flashcardsNewCount(int count) => '$count नए';
+  @override
+  String flashcardsCardCount(int count) =>
+      count == 1 ? '1 कार्ड' : '$count कार्ड';
+  @override
+  String flashcardsStudyCount(int count) => '$count पढ़ें';
+  @override
+  String flashcardsStudyCards(int count) =>
+      count == 1 ? '1 कार्ड पढ़ें' : '$count कार्ड पढ़ें';
+  @override
+  String get flashcardsStudyDeck => 'यह डेक पढ़ें';
+  @override
+  String get flashcardsAddCard => 'कार्ड जोड़ें';
+  @override
+  String get flashcardsQuestion => 'प्रश्न';
+  @override
+  String get flashcardsAnswer => 'उत्तर';
+  @override
+  String get flashcardsNextColumn => 'अगला';
+  @override
+  String get flashcardsDue => 'देय';
+  @override
+  String get flashcardsNew => 'नया';
+  @override
+  String flashcardsInDays(int count) =>
+      count == 1 ? '1 दिन में' : '$count दिन में';
+  @override
+  String flashcardsInMonths(int count) =>
+      count == 1 ? '1 महीने में' : '$count महीने में';
+  @override
+  String flashcardsInYears(int count) =>
+      count == 1 ? '1 साल में' : '$count साल में';
+  @override
+  String get flashcardsRepeated => 'दोहराया हुआ';
+  @override
+  String get flashcardsRepeatedTip => 'यह प्रश्न डेक में एक से अधिक बार आता है';
+  @override
+  String get flashcardsEmpty => 'अभी कोई कार्ड नहीं';
+  @override
+  String get flashcardsEditCard => 'कार्ड संपादित करें';
+  @override
+  String get flashcardsSentence => 'वाक्य';
+  @override
+  String get flashcardsEditNote =>
+      'जब तक प्रश्न वही रहता है, दोहराव की प्रगति बनी रहती है। Niman '
+      'नोट में यह कार्ड फिर से लिखता है।';
+  @override
+  String flashcardsKindRows(int count) =>
+      count == 1 ? 'तालिका की 1 पंक्ति' : 'तालिका की $count पंक्तियाँ';
+  @override
+  String flashcardsKindLines(int count) =>
+      count == 1 ? '1 :: पंक्ति' : '$count :: पंक्तियाँ';
+  @override
+  String flashcardsKindClozes(int count) =>
+      count == 1 ? '1 रिक्त स्थान' : '$count रिक्त स्थान';
+  @override
+  String get flashcardsEditMarkdown => 'Markdown के रूप में संपादित करें';
+  @override
+  String get flashcardsColumnsTitle => 'प्रश्न और उत्तर के स्तंभ';
+  @override
+  String get flashcardsQuestionColumn => 'प्रश्न का स्तंभ';
+  @override
+  String get flashcardsAnswerColumn => 'उत्तर का स्तंभ';
+  @override
+  String get flashcardsColumnsNone =>
+      'इस नोट की किसी भी तालिका में दो से अधिक स्तंभ नहीं हैं।';
+  @override
+  String get flashcardsResetAction => 'इस डेक का दोहराव रीसेट करें';
+  @override
+  String get flashcardsResetTitle => 'दोहराव रीसेट करें?';
+  @override
+  String get flashcardsResetBody =>
+      'डेक का हर कार्ड फिर से नया हो जाएगा। नोट नहीं बदलेगा।';
+  @override
+  String get flashcardsResetConfirm => 'रीसेट करें';
+  @override
+  String get commandNeedFlashcardNote => 'एक खुला फ़्लैशकार्ड नोट चाहिए';
 }

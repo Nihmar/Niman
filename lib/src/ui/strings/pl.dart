@@ -3879,4 +3879,94 @@ final class PolishStrings extends Strings {
 
   @override
   String homeActionMissing(String path) => '$path nie ma już w bibliotece';
+
+  @override
+  String get flashcardsName => 'Fiszki';
+  @override
+  String get newFlashcardsTitle => 'Nowe fiszki';
+  @override
+  String get newFlashcardsDefault => 'Moje fiszki';
+  @override
+  String get showFlashcardsTooltip => 'Pokaż fiszki';
+  @override
+  String get flashcardsNoCategory => 'Bez kategorii';
+  @override
+  String flashcardsDueCount(int count) => 'Do powtórki: $count';
+  @override
+  String flashcardsNewCount(int count) => 'Nowe: $count';
+  @override
+  String flashcardsCardCount(int count) =>
+      count == 1 ? '1 fiszka' : 'Fiszek: $count';
+  @override
+  String flashcardsStudyCount(int count) => 'Ucz się: $count';
+  @override
+  String flashcardsStudyCards(int count) =>
+      count == 1 ? 'Ucz się: 1 fiszka' : 'Ucz się: $count fiszek';
+  @override
+  String get flashcardsStudyDeck => 'Ucz się tej talii';
+  @override
+  String get flashcardsAddCard => 'Dodaj fiszkę';
+  @override
+  String get flashcardsQuestion => 'Pytanie';
+  @override
+  String get flashcardsAnswer => 'Odpowiedź';
+  @override
+  String get flashcardsNextColumn => 'Następna';
+  @override
+  String get flashcardsDue => 'Do powtórki';
+  @override
+  String get flashcardsNew => 'Nowa';
+  @override
+  String flashcardsInDays(int count) =>
+      count == 1 ? 'za 1 dzień' : 'za $count dni';
+  @override
+  String flashcardsInMonths(int count) =>
+      count == 1 ? 'za 1 miesiąc' : 'za $count mies.';
+  @override
+  String flashcardsInYears(int count) =>
+      count == 1 ? 'za 1 rok' : 'za $count l.';
+  @override
+  String get flashcardsRepeated => 'Powtórzone';
+  @override
+  String get flashcardsRepeatedTip =>
+      'To pytanie występuje w talii więcej niż raz';
+  @override
+  String get flashcardsEmpty => 'Brak fiszek';
+  @override
+  String get flashcardsEditCard => 'Edytuj fiszkę';
+  @override
+  String get flashcardsSentence => 'Zdanie';
+  @override
+  String get flashcardsEditNote =>
+      'Postęp nauki zostaje, dopóki pytanie się nie zmieni. Niman '
+      'przepisuje tę fiszkę w notatce.';
+  @override
+  String flashcardsKindRows(int count) => 'Wierszy tabeli: $count';
+  @override
+  String flashcardsKindLines(int count) => 'Linii „::”: $count';
+  @override
+  String flashcardsKindClozes(int count) => 'Luk: $count';
+  @override
+  String get flashcardsEditMarkdown => 'Edytuj jako Markdown';
+  @override
+  String get flashcardsColumnsTitle => 'Kolumny pytania i odpowiedzi';
+  @override
+  String get flashcardsQuestionColumn => 'Kolumna pytania';
+  @override
+  String get flashcardsAnswerColumn => 'Kolumna odpowiedzi';
+  @override
+  String get flashcardsColumnsNone =>
+      'Żadna tabela w tej notatce nie ma więcej niż dwóch kolumn.';
+  @override
+  String get flashcardsResetAction => 'Zresetuj naukę tej talii';
+  @override
+  String get flashcardsResetTitle => 'Zresetować naukę?';
+  @override
+  String get flashcardsResetBody =>
+      'Każda fiszka w tej talii znów będzie nowa. Notatka się nie '
+      'zmieni.';
+  @override
+  String get flashcardsResetConfirm => 'Zresetuj';
+  @override
+  String get commandNeedFlashcardNote => 'Wymaga otwartej notatki z fiszkami';
 }

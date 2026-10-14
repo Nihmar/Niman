@@ -3427,4 +3427,83 @@ final class ChineseStrings extends Strings {
 
   @override
   String homeActionMissing(String path) => '$path 已不在资料库中';
+
+  @override
+  String get flashcardsName => '闪卡';
+  @override
+  String get newFlashcardsTitle => '新建闪卡';
+  @override
+  String get newFlashcardsDefault => '我的闪卡';
+  @override
+  String get showFlashcardsTooltip => '显示闪卡';
+  @override
+  String get flashcardsNoCategory => '无分类';
+  @override
+  String flashcardsDueCount(int count) => '$count 张待复习';
+  @override
+  String flashcardsNewCount(int count) => '$count 张新卡';
+  @override
+  String flashcardsCardCount(int count) => '$count 张卡片';
+  @override
+  String flashcardsStudyCount(int count) => '学习 $count';
+  @override
+  String flashcardsStudyCards(int count) => '学习 $count 张卡片';
+  @override
+  String get flashcardsStudyDeck => '学习此牌组';
+  @override
+  String get flashcardsAddCard => '添加卡片';
+  @override
+  String get flashcardsQuestion => '问题';
+  @override
+  String get flashcardsAnswer => '答案';
+  @override
+  String get flashcardsNextColumn => '下次';
+  @override
+  String get flashcardsDue => '待复习';
+  @override
+  String get flashcardsNew => '新卡';
+  @override
+  String flashcardsInDays(int count) => '$count 天后';
+  @override
+  String flashcardsInMonths(int count) => '$count 个月后';
+  @override
+  String flashcardsInYears(int count) => '$count 年后';
+  @override
+  String get flashcardsRepeated => '重复';
+  @override
+  String get flashcardsRepeatedTip => '此问题在牌组中出现多次';
+  @override
+  String get flashcardsEmpty => '还没有卡片';
+  @override
+  String get flashcardsEditCard => '编辑卡片';
+  @override
+  String get flashcardsSentence => '句子';
+  @override
+  String get flashcardsEditNote => '只要问题不变，复习进度就会保留。Niman 会在笔记中改写这张卡片。';
+  @override
+  String flashcardsKindRows(int count) => '表格行 $count';
+  @override
+  String flashcardsKindLines(int count) => '“::”行 $count';
+  @override
+  String flashcardsKindClozes(int count) => '填空 $count';
+  @override
+  String get flashcardsEditMarkdown => '以 Markdown 编辑';
+  @override
+  String get flashcardsColumnsTitle => '问题和答案列';
+  @override
+  String get flashcardsQuestionColumn => '问题列';
+  @override
+  String get flashcardsAnswerColumn => '答案列';
+  @override
+  String get flashcardsColumnsNone => '此笔记中没有超过两列的表格。';
+  @override
+  String get flashcardsResetAction => '重置此牌组的复习';
+  @override
+  String get flashcardsResetTitle => '重置复习？';
+  @override
+  String get flashcardsResetBody => '此牌组的每张卡片都会重新变为新卡。笔记不会改变。';
+  @override
+  String get flashcardsResetConfirm => '重置';
+  @override
+  String get commandNeedFlashcardNote => '需要打开一个闪卡笔记';
 }

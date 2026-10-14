@@ -3906,4 +3906,98 @@ final class GermanStrings extends Strings {
   @override
   String homeActionMissing(String path) =>
       '$path ist nicht mehr in der Bibliothek';
+
+  @override
+  String get flashcardsName => 'Karteikarten';
+  @override
+  String get newFlashcardsTitle => 'Neue Karteikarten';
+  @override
+  String get newFlashcardsDefault => 'Meine Karteikarten';
+  @override
+  String get showFlashcardsTooltip => 'Karteikarten anzeigen';
+  @override
+  String get flashcardsNoCategory => 'Ohne Kategorie';
+  @override
+  String flashcardsDueCount(int count) => '$count fällig';
+  @override
+  String flashcardsNewCount(int count) => '$count neu';
+  @override
+  String flashcardsCardCount(int count) =>
+      count == 1 ? '1 Karte' : '$count Karten';
+  @override
+  String flashcardsStudyCount(int count) => '$count lernen';
+  @override
+  String flashcardsStudyCards(int count) =>
+      count == 1 ? '1 Karte lernen' : '$count Karten lernen';
+  @override
+  String get flashcardsStudyDeck => 'Diesen Stapel lernen';
+  @override
+  String get flashcardsAddCard => 'Karte hinzufügen';
+  @override
+  String get flashcardsQuestion => 'Frage';
+  @override
+  String get flashcardsAnswer => 'Antwort';
+  @override
+  String get flashcardsNextColumn => 'Nächste';
+  @override
+  String get flashcardsDue => 'Fällig';
+  @override
+  String get flashcardsNew => 'Neu';
+  @override
+  String flashcardsInDays(int count) =>
+      count == 1 ? 'in 1 Tag' : 'in $count Tagen';
+  @override
+  String flashcardsInMonths(int count) =>
+      count == 1 ? 'in 1 Monat' : 'in $count Monaten';
+  @override
+  String flashcardsInYears(int count) =>
+      count == 1 ? 'in 1 Jahr' : 'in $count Jahren';
+  @override
+  String get flashcardsRepeated => 'Wiederholt';
+  @override
+  String get flashcardsRepeatedTip =>
+      'Diese Frage kommt im Stapel mehrfach vor';
+  @override
+  String get flashcardsEmpty => 'Noch keine Karten';
+  @override
+  String get flashcardsEditCard => 'Karte bearbeiten';
+  @override
+  String get flashcardsSentence => 'Satz';
+  @override
+  String get flashcardsEditNote =>
+      'Der Lernfortschritt bleibt erhalten, solange die Frage gleich '
+      'bleibt. Niman schreibt diese Karte in der Notiz neu.';
+  @override
+  String flashcardsKindRows(int count) =>
+      count == 1 ? '1 Tabellenzeile' : '$count Tabellenzeilen';
+  @override
+  String flashcardsKindLines(int count) =>
+      count == 1 ? '1 ::-Zeile' : '$count ::-Zeilen';
+  @override
+  String flashcardsKindClozes(int count) =>
+      count == 1 ? '1 Lückentext' : '$count Lückentexte';
+  @override
+  String get flashcardsEditMarkdown => 'Als Markdown bearbeiten';
+  @override
+  String get flashcardsColumnsTitle => 'Frage- und Antwortspalten';
+  @override
+  String get flashcardsQuestionColumn => 'Fragespalte';
+  @override
+  String get flashcardsAnswerColumn => 'Antwortspalte';
+  @override
+  String get flashcardsColumnsNone =>
+      'Keine Tabelle dieser Notiz hat mehr als zwei Spalten.';
+  @override
+  String get flashcardsResetAction => 'Lernstand dieses Stapels zurücksetzen';
+  @override
+  String get flashcardsResetTitle => 'Lernstand zurücksetzen?';
+  @override
+  String get flashcardsResetBody =>
+      'Jede Karte dieses Stapels wird wieder neu. Die Notiz bleibt '
+      'unverändert.';
+  @override
+  String get flashcardsResetConfirm => 'Zurücksetzen';
+  @override
+  String get commandNeedFlashcardNote =>
+      'Benötigt eine geöffnete Karteikarten-Notiz';
 }

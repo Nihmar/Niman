@@ -3522,4 +3522,84 @@ final class JapaneseStrings extends Strings {
 
   @override
   String homeActionMissing(String path) => '$path はもうライブラリにありません';
+
+  @override
+  String get flashcardsName => 'フラッシュカード';
+  @override
+  String get newFlashcardsTitle => '新しいフラッシュカード';
+  @override
+  String get newFlashcardsDefault => 'マイフラッシュカード';
+  @override
+  String get showFlashcardsTooltip => 'フラッシュカードを表示';
+  @override
+  String get flashcardsNoCategory => 'カテゴリなし';
+  @override
+  String flashcardsDueCount(int count) => '復習 $count';
+  @override
+  String flashcardsNewCount(int count) => '新規 $count';
+  @override
+  String flashcardsCardCount(int count) => '$count 枚';
+  @override
+  String flashcardsStudyCount(int count) => '学習 $count';
+  @override
+  String flashcardsStudyCards(int count) => '$count 枚を学習';
+  @override
+  String get flashcardsStudyDeck => 'このデッキを学習';
+  @override
+  String get flashcardsAddCard => 'カードを追加';
+  @override
+  String get flashcardsQuestion => '問題';
+  @override
+  String get flashcardsAnswer => '答え';
+  @override
+  String get flashcardsNextColumn => '次回';
+  @override
+  String get flashcardsDue => '期限';
+  @override
+  String get flashcardsNew => '新規';
+  @override
+  String flashcardsInDays(int count) => '$count 日後';
+  @override
+  String flashcardsInMonths(int count) => '$count か月後';
+  @override
+  String flashcardsInYears(int count) => '$count 年後';
+  @override
+  String get flashcardsRepeated => '重複';
+  @override
+  String get flashcardsRepeatedTip => 'このデッキには同じ問題が複数あります';
+  @override
+  String get flashcardsEmpty => 'まだカードがありません';
+  @override
+  String get flashcardsEditCard => 'カードを編集';
+  @override
+  String get flashcardsSentence => '文';
+  @override
+  String get flashcardsEditNote =>
+      '問題が同じである限り、学習の進捗は保たれます。Niman はノート内でこのカードを書き換えます。';
+  @override
+  String flashcardsKindRows(int count) => '表の行 $count';
+  @override
+  String flashcardsKindLines(int count) => '「::」行 $count';
+  @override
+  String flashcardsKindClozes(int count) => '穴埋め $count';
+  @override
+  String get flashcardsEditMarkdown => 'Markdown として編集';
+  @override
+  String get flashcardsColumnsTitle => '問題と答えの列';
+  @override
+  String get flashcardsQuestionColumn => '問題の列';
+  @override
+  String get flashcardsAnswerColumn => '答えの列';
+  @override
+  String get flashcardsColumnsNone => 'このノートには3列以上の表がありません。';
+  @override
+  String get flashcardsResetAction => 'このデッキの学習をリセット';
+  @override
+  String get flashcardsResetTitle => '学習をリセットしますか？';
+  @override
+  String get flashcardsResetBody => 'デッキのすべてのカードが再び新規になります。ノートは変更されません。';
+  @override
+  String get flashcardsResetConfirm => 'リセット';
+  @override
+  String get commandNeedFlashcardNote => '開いているフラッシュカードのノートが必要です';
 }

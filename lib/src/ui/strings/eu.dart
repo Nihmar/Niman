@@ -3863,4 +3863,97 @@ final class BasqueStrings extends Strings {
 
   @override
   String homeActionMissing(String path) => '$path ez dago jada liburutegian';
+
+  @override
+  String get flashcardsName => 'Fitxak';
+  @override
+  String get newFlashcardsTitle => 'Fitxa berriak';
+  @override
+  String get newFlashcardsDefault => 'Nire fitxak';
+  @override
+  String get showFlashcardsTooltip => 'Erakutsi fitxak';
+  @override
+  String get flashcardsNoCategory => 'Kategoriarik gabe';
+  @override
+  String flashcardsDueCount(int count) => '$count errepasatzeko';
+  @override
+  String flashcardsNewCount(int count) => '$count berri';
+  @override
+  String flashcardsCardCount(int count) =>
+      count == 1 ? 'fitxa 1' : '$count fitxa';
+  @override
+  String flashcardsStudyCount(int count) => 'Ikasi $count';
+  @override
+  String flashcardsStudyCards(int count) =>
+      count == 1 ? 'Ikasi fitxa 1' : 'Ikasi $count fitxa';
+  @override
+  String get flashcardsStudyDeck => 'Ikasi mazo hau';
+  @override
+  String get flashcardsAddCard => 'Gehitu fitxa';
+  @override
+  String get flashcardsQuestion => 'Galdera';
+  @override
+  String get flashcardsAnswer => 'Erantzuna';
+  @override
+  String get flashcardsNextColumn => 'Hurrengoa';
+  @override
+  String get flashcardsDue => 'Errepasatzeko';
+  @override
+  String get flashcardsNew => 'Berria';
+  @override
+  String flashcardsInDays(int count) =>
+      count == 1 ? 'egun 1ean' : '$count egunetan';
+  @override
+  String flashcardsInMonths(int count) =>
+      count == 1 ? 'hilabete 1ean' : '$count hilabetetan';
+  @override
+  String flashcardsInYears(int count) =>
+      count == 1 ? 'urte 1ean' : '$count urtetan';
+  @override
+  String get flashcardsRepeated => 'Errepikatua';
+  @override
+  String get flashcardsRepeatedTip =>
+      'Galdera hau mazoan behin baino gehiagotan agertzen da';
+  @override
+  String get flashcardsEmpty => 'Oraindik ez dago fitxarik';
+  @override
+  String get flashcardsEditCard => 'Editatu fitxa';
+  @override
+  String get flashcardsSentence => 'Esaldia';
+  @override
+  String get flashcardsEditNote =>
+      'Galdera berbera den bitartean, aurrerapena gordetzen da. '
+      'Niman-ek fitxa hau berridazten du oharrean.';
+  @override
+  String flashcardsKindRows(int count) =>
+      count == 1 ? 'taulako errenkada 1' : 'taulako $count errenkada';
+  @override
+  String flashcardsKindLines(int count) =>
+      count == 1 ? ':: lerro 1' : '$count :: lerro';
+  @override
+  String flashcardsKindClozes(int count) =>
+      count == 1 ? 'hutsune 1' : '$count hutsune';
+  @override
+  String get flashcardsEditMarkdown => 'Editatu Markdown gisa';
+  @override
+  String get flashcardsColumnsTitle => 'Galdera eta erantzun zutabeak';
+  @override
+  String get flashcardsQuestionColumn => 'Galderaren zutabea';
+  @override
+  String get flashcardsAnswerColumn => 'Erantzunaren zutabea';
+  @override
+  String get flashcardsColumnsNone =>
+      'Ohar honetako taulek ez dute bi zutabe baino gehiago.';
+  @override
+  String get flashcardsResetAction => 'Berrezarri mazo honen errepasoa';
+  @override
+  String get flashcardsResetTitle => 'Errepasoa berrezarri?';
+  @override
+  String get flashcardsResetBody =>
+      'Mazoko fitxa bakoitza berri bihurtuko da berriro. Oharra ez da '
+      'aldatzen.';
+  @override
+  String get flashcardsResetConfirm => 'Berrezarri';
+  @override
+  String get commandNeedFlashcardNote => 'Fitxa-ohar ireki bat behar du';
 }

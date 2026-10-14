@@ -3854,4 +3854,92 @@ final class MacedonianStrings extends Strings {
 
   @override
   String homeActionMissing(String path) => '$path веќе не е во библиотеката';
+
+  @override
+  String get flashcardsName => 'Картички';
+  @override
+  String get newFlashcardsTitle => 'Нови картички';
+  @override
+  String get newFlashcardsDefault => 'Мои картички';
+  @override
+  String get showFlashcardsTooltip => 'Прикажи картички';
+  @override
+  String get flashcardsNoCategory => 'Без категорија';
+  @override
+  String flashcardsDueCount(int count) => 'За повторување: $count';
+  @override
+  String flashcardsNewCount(int count) => 'Нови: $count';
+  @override
+  String flashcardsCardCount(int count) => 'Картички: $count';
+  @override
+  String flashcardsStudyCount(int count) => 'Учи: $count';
+  @override
+  String flashcardsStudyCards(int count) => 'Учи картички: $count';
+  @override
+  String get flashcardsStudyDeck => 'Учи го овој шпил';
+  @override
+  String get flashcardsAddCard => 'Додај картичка';
+  @override
+  String get flashcardsQuestion => 'Прашање';
+  @override
+  String get flashcardsAnswer => 'Одговор';
+  @override
+  String get flashcardsNextColumn => 'Следна';
+  @override
+  String get flashcardsDue => 'За повторување';
+  @override
+  String get flashcardsNew => 'Нова';
+  @override
+  String flashcardsInDays(int count) =>
+      count == 1 ? 'за 1 ден' : 'за $count д.';
+  @override
+  String flashcardsInMonths(int count) =>
+      count == 1 ? 'за 1 месец' : 'за $count мес.';
+  @override
+  String flashcardsInYears(int count) =>
+      count == 1 ? 'за 1 година' : 'за $count год.';
+  @override
+  String get flashcardsRepeated => 'Повторена';
+  @override
+  String get flashcardsRepeatedTip =>
+      'Ова прашање се појавува повеќе пати во шпилот';
+  @override
+  String get flashcardsEmpty => 'Сè уште нема картички';
+  @override
+  String get flashcardsEditCard => 'Уреди картичка';
+  @override
+  String get flashcardsSentence => 'Реченица';
+  @override
+  String get flashcardsEditNote =>
+      'Напредокот се задржува додека прашањето не се промени. Niman ја '
+      'препишува оваа картичка во белешката.';
+  @override
+  String flashcardsKindRows(int count) => 'Редови во табела: $count';
+  @override
+  String flashcardsKindLines(int count) => 'Редови „::“: $count';
+  @override
+  String flashcardsKindClozes(int count) => 'Празнини: $count';
+  @override
+  String get flashcardsEditMarkdown => 'Уреди како Markdown';
+  @override
+  String get flashcardsColumnsTitle => 'Колони за прашање и одговор';
+  @override
+  String get flashcardsQuestionColumn => 'Колона за прашање';
+  @override
+  String get flashcardsAnswerColumn => 'Колона за одговор';
+  @override
+  String get flashcardsColumnsNone =>
+      'Ниедна табела во оваа белешка нема повеќе од две колони.';
+  @override
+  String get flashcardsResetAction => 'Ресетирај го повторувањето на овој шпил';
+  @override
+  String get flashcardsResetTitle => 'Да се ресетира ли повторувањето?';
+  @override
+  String get flashcardsResetBody =>
+      'Секоја картичка во шпилот повторно станува нова. Белешката не се '
+      'менува.';
+  @override
+  String get flashcardsResetConfirm => 'Ресетирај';
+  @override
+  String get commandNeedFlashcardNote => 'Бара отворена белешка со картички';
 }

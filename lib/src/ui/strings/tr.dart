@@ -3788,4 +3788,96 @@ final class TurkishStrings extends Strings {
 
   @override
   String homeActionMissing(String path) => '$path artık kitaplıkta değil';
+
+  @override
+  String get flashcardsName => 'Bilgi kartları';
+  @override
+  String get newFlashcardsTitle => 'Yeni bilgi kartları';
+  @override
+  String get newFlashcardsDefault => 'Bilgi kartlarım';
+  @override
+  String get showFlashcardsTooltip => 'Bilgi kartlarını göster';
+  @override
+  String get flashcardsNoCategory => 'Kategorisiz';
+  @override
+  String flashcardsDueCount(int count) => '$count tekrar bekliyor';
+  @override
+  String flashcardsNewCount(int count) => '$count yeni';
+  @override
+  String flashcardsCardCount(int count) =>
+      count == 1 ? '1 kart' : '$count kart';
+  @override
+  String flashcardsStudyCount(int count) => 'Çalış: $count';
+  @override
+  String flashcardsStudyCards(int count) =>
+      count == 1 ? 'Çalış: 1 kart' : 'Çalış: $count kart';
+  @override
+  String get flashcardsStudyDeck => 'Bu desteyi çalış';
+  @override
+  String get flashcardsAddCard => 'Kart ekle';
+  @override
+  String get flashcardsQuestion => 'Soru';
+  @override
+  String get flashcardsAnswer => 'Cevap';
+  @override
+  String get flashcardsNextColumn => 'Sonraki';
+  @override
+  String get flashcardsDue => 'Zamanı geldi';
+  @override
+  String get flashcardsNew => 'Yeni';
+  @override
+  String flashcardsInDays(int count) =>
+      count == 1 ? '1 gün sonra' : '$count gün sonra';
+  @override
+  String flashcardsInMonths(int count) =>
+      count == 1 ? '1 ay sonra' : '$count ay sonra';
+  @override
+  String flashcardsInYears(int count) =>
+      count == 1 ? '1 yıl sonra' : '$count yıl sonra';
+  @override
+  String get flashcardsRepeated => 'Tekrarlanan';
+  @override
+  String get flashcardsRepeatedTip =>
+      'Bu soru destede birden fazla kez geçiyor';
+  @override
+  String get flashcardsEmpty => 'Henüz kart yok';
+  @override
+  String get flashcardsEditCard => 'Kartı düzenle';
+  @override
+  String get flashcardsSentence => 'Cümle';
+  @override
+  String get flashcardsEditNote =>
+      'Soru aynı kaldıkça ilerleme korunur. Niman bu kartı notta '
+      'yeniden yazar.';
+  @override
+  String flashcardsKindRows(int count) =>
+      count == 1 ? '1 tablo satırı' : '$count tablo satırı';
+  @override
+  String flashcardsKindLines(int count) =>
+      count == 1 ? '1 :: satırı' : '$count :: satırı';
+  @override
+  String flashcardsKindClozes(int count) =>
+      count == 1 ? '1 boşluk doldurma' : '$count boşluk doldurma';
+  @override
+  String get flashcardsEditMarkdown => 'Markdown olarak düzenle';
+  @override
+  String get flashcardsColumnsTitle => 'Soru ve cevap sütunları';
+  @override
+  String get flashcardsQuestionColumn => 'Soru sütunu';
+  @override
+  String get flashcardsAnswerColumn => 'Cevap sütunu';
+  @override
+  String get flashcardsColumnsNone =>
+      'Bu notun hiçbir tablosunda ikiden fazla sütun yok.';
+  @override
+  String get flashcardsResetAction => 'Bu destenin tekrarını sıfırla';
+  @override
+  String get flashcardsResetTitle => 'Tekrar sıfırlansın mı?';
+  @override
+  String get flashcardsResetBody =>
+      'Destedeki her kart yeniden yeni olur. Not değişmez.';
+  @override
+  String get flashcardsResetConfirm => 'Sıfırla';
+  @override
+  String get commandNeedFlashcardNote => 'Açık bir bilgi kartı notu gerektirir';
 }

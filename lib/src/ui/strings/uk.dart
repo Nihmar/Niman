@@ -3869,4 +3869,90 @@ final class UkrainianStrings extends Strings {
 
   @override
   String homeActionMissing(String path) => '$path більше немає в бібліотеці';
+
+  @override
+  String get flashcardsName => 'Картки';
+  @override
+  String get newFlashcardsTitle => 'Нові картки';
+  @override
+  String get newFlashcardsDefault => 'Мої картки';
+  @override
+  String get showFlashcardsTooltip => 'Показати картки';
+  @override
+  String get flashcardsNoCategory => 'Без категорії';
+  @override
+  String flashcardsDueCount(int count) => 'До повторення: $count';
+  @override
+  String flashcardsNewCount(int count) => 'Нових: $count';
+  @override
+  String flashcardsCardCount(int count) => 'Карток: $count';
+  @override
+  String flashcardsStudyCount(int count) => 'Вчити: $count';
+  @override
+  String flashcardsStudyCards(int count) => 'Вчити карток: $count';
+  @override
+  String get flashcardsStudyDeck => 'Вчити цю колоду';
+  @override
+  String get flashcardsAddCard => 'Додати картку';
+  @override
+  String get flashcardsQuestion => 'Питання';
+  @override
+  String get flashcardsAnswer => 'Відповідь';
+  @override
+  String get flashcardsNextColumn => 'Наступна';
+  @override
+  String get flashcardsDue => 'До повторення';
+  @override
+  String get flashcardsNew => 'Нова';
+  @override
+  String flashcardsInDays(int count) =>
+      count == 1 ? 'через 1 день' : 'через $count дн.';
+  @override
+  String flashcardsInMonths(int count) =>
+      count == 1 ? 'через 1 місяць' : 'через $count міс.';
+  @override
+  String flashcardsInYears(int count) =>
+      count == 1 ? 'через 1 рік' : 'через $count р.';
+  @override
+  String get flashcardsRepeated => 'Повторюється';
+  @override
+  String get flashcardsRepeatedTip => 'Це питання трапляється в колоді не раз';
+  @override
+  String get flashcardsEmpty => 'Карток ще немає';
+  @override
+  String get flashcardsEditCard => 'Редагувати картку';
+  @override
+  String get flashcardsSentence => 'Речення';
+  @override
+  String get flashcardsEditNote =>
+      'Прогрес зберігається, доки питання не зміниться. Niman '
+      'перезаписує цю картку в нотатці.';
+  @override
+  String flashcardsKindRows(int count) => 'Рядків таблиці: $count';
+  @override
+  String flashcardsKindLines(int count) => 'Рядків «::»: $count';
+  @override
+  String flashcardsKindClozes(int count) => 'Пропусків: $count';
+  @override
+  String get flashcardsEditMarkdown => 'Редагувати як Markdown';
+  @override
+  String get flashcardsColumnsTitle => 'Стовпці питання й відповіді';
+  @override
+  String get flashcardsQuestionColumn => 'Стовпець питання';
+  @override
+  String get flashcardsAnswerColumn => 'Стовпець відповіді';
+  @override
+  String get flashcardsColumnsNone =>
+      'Жодна таблиця в цій нотатці не має більше двох стовпців.';
+  @override
+  String get flashcardsResetAction => 'Скинути повторення цієї колоди';
+  @override
+  String get flashcardsResetTitle => 'Скинути повторення?';
+  @override
+  String get flashcardsResetBody =>
+      'Кожна картка колоди знову стане новою. Нотатка не зміниться.';
+  @override
+  String get flashcardsResetConfirm => 'Скинути';
+  @override
+  String get commandNeedFlashcardNote => 'Потрібна відкрита нотатка з картками';
 }

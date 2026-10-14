@@ -3940,4 +3940,99 @@ final class GreekStrings extends Strings {
   @override
   String homeActionMissing(String path) =>
       'Το $path δεν υπάρχει πια στη βιβλιοθήκη';
+
+  @override
+  String get flashcardsName => 'Κάρτες';
+  @override
+  String get newFlashcardsTitle => 'Νέες κάρτες';
+  @override
+  String get newFlashcardsDefault => 'Οι κάρτες μου';
+  @override
+  String get showFlashcardsTooltip => 'Εμφάνιση καρτών';
+  @override
+  String get flashcardsNoCategory => 'Χωρίς κατηγορία';
+  @override
+  String flashcardsDueCount(int count) => '$count προς επανάληψη';
+  @override
+  String flashcardsNewCount(int count) => '$count νέες';
+  @override
+  String flashcardsCardCount(int count) =>
+      count == 1 ? '1 κάρτα' : '$count κάρτες';
+  @override
+  String flashcardsStudyCount(int count) => 'Μελέτη $count';
+  @override
+  String flashcardsStudyCards(int count) =>
+      count == 1 ? 'Μελέτη 1 κάρτας' : 'Μελέτη $count καρτών';
+  @override
+  String get flashcardsStudyDeck => 'Μελέτη αυτής της τράπουλας';
+  @override
+  String get flashcardsAddCard => 'Προσθήκη κάρτας';
+  @override
+  String get flashcardsQuestion => 'Ερώτηση';
+  @override
+  String get flashcardsAnswer => 'Απάντηση';
+  @override
+  String get flashcardsNextColumn => 'Επόμενη';
+  @override
+  String get flashcardsDue => 'Προς επανάληψη';
+  @override
+  String get flashcardsNew => 'Νέα';
+  @override
+  String flashcardsInDays(int count) =>
+      count == 1 ? 'σε 1 ημέρα' : 'σε $count ημέρες';
+  @override
+  String flashcardsInMonths(int count) =>
+      count == 1 ? 'σε 1 μήνα' : 'σε $count μήνες';
+  @override
+  String flashcardsInYears(int count) =>
+      count == 1 ? 'σε 1 έτος' : 'σε $count έτη';
+  @override
+  String get flashcardsRepeated => 'Επαναλαμβανόμενη';
+  @override
+  String get flashcardsRepeatedTip =>
+      'Αυτή η ερώτηση υπάρχει περισσότερες από μία φορές στην τράπουλα';
+  @override
+  String get flashcardsEmpty => 'Δεν υπάρχουν κάρτες ακόμη';
+  @override
+  String get flashcardsEditCard => 'Επεξεργασία κάρτας';
+  @override
+  String get flashcardsSentence => 'Πρόταση';
+  @override
+  String get flashcardsEditNote =>
+      'Η πρόοδος διατηρείται όσο η ερώτηση μένει ίδια. Το Niman '
+      'ξαναγράφει αυτή την κάρτα στη σημείωση.';
+  @override
+  String flashcardsKindRows(int count) =>
+      count == 1 ? '1 γραμμή πίνακα' : '$count γραμμές πίνακα';
+  @override
+  String flashcardsKindLines(int count) =>
+      count == 1 ? '1 γραμμή ::' : '$count γραμμές ::';
+  @override
+  String flashcardsKindClozes(int count) =>
+      count == 1 ? '1 κενό' : '$count κενά';
+  @override
+  String get flashcardsEditMarkdown => 'Επεξεργασία ως Markdown';
+  @override
+  String get flashcardsColumnsTitle => 'Στήλες ερώτησης και απάντησης';
+  @override
+  String get flashcardsQuestionColumn => 'Στήλη ερώτησης';
+  @override
+  String get flashcardsAnswerColumn => 'Στήλη απάντησης';
+  @override
+  String get flashcardsColumnsNone =>
+      'Κανένας πίνακας σε αυτή τη σημείωση δεν έχει πάνω από δύο '
+      'στήλες.';
+  @override
+  String get flashcardsResetAction =>
+      'Επαναφορά της επανάληψης αυτής της τράπουλας';
+  @override
+  String get flashcardsResetTitle => 'Επαναφορά της επανάληψης;';
+  @override
+  String get flashcardsResetBody =>
+      'Κάθε κάρτα της τράπουλας γίνεται ξανά νέα. Η σημείωση δεν '
+      'αλλάζει.';
+  @override
+  String get flashcardsResetConfirm => 'Επαναφορά';
+  @override
+  String get commandNeedFlashcardNote => 'Απαιτεί ανοιχτή σημείωση καρτών';
 }

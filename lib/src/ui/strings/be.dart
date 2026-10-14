@@ -3867,4 +3867,92 @@ final class BelarusianStrings extends Strings {
 
   @override
   String homeActionMissing(String path) => '$path больш няма ў бібліятэцы';
+
+  @override
+  String get flashcardsName => 'Картачкі';
+  @override
+  String get newFlashcardsTitle => 'Новыя картачкі';
+  @override
+  String get newFlashcardsDefault => 'Мае картачкі';
+  @override
+  String get showFlashcardsTooltip => 'Паказаць картачкі';
+  @override
+  String get flashcardsNoCategory => 'Без катэгорыі';
+  @override
+  String flashcardsDueCount(int count) => 'Да паўтарэння: $count';
+  @override
+  String flashcardsNewCount(int count) => 'Новых: $count';
+  @override
+  String flashcardsCardCount(int count) => 'Картачак: $count';
+  @override
+  String flashcardsStudyCount(int count) => 'Вучыць: $count';
+  @override
+  String flashcardsStudyCards(int count) => 'Вучыць картачак: $count';
+  @override
+  String get flashcardsStudyDeck => 'Вучыць гэтую калоду';
+  @override
+  String get flashcardsAddCard => 'Дадаць картачку';
+  @override
+  String get flashcardsQuestion => 'Пытанне';
+  @override
+  String get flashcardsAnswer => 'Адказ';
+  @override
+  String get flashcardsNextColumn => 'Наступная';
+  @override
+  String get flashcardsDue => 'Да паўтарэння';
+  @override
+  String get flashcardsNew => 'Новая';
+  @override
+  String flashcardsInDays(int count) =>
+      count == 1 ? 'праз 1 дзень' : 'праз $count дз.';
+  @override
+  String flashcardsInMonths(int count) =>
+      count == 1 ? 'праз 1 месяц' : 'праз $count мес.';
+  @override
+  String flashcardsInYears(int count) =>
+      count == 1 ? 'праз 1 год' : 'праз $count г.';
+  @override
+  String get flashcardsRepeated => 'Паўтараецца';
+  @override
+  String get flashcardsRepeatedTip =>
+      'Гэтае пытанне ў калодзе сустракаецца не раз';
+  @override
+  String get flashcardsEmpty => 'Картачак пакуль няма';
+  @override
+  String get flashcardsEditCard => 'Рэдагаваць картачку';
+  @override
+  String get flashcardsSentence => 'Сказ';
+  @override
+  String get flashcardsEditNote =>
+      'Прагрэс захоўваецца, пакуль пытанне не зменіцца. Niman '
+      'перапісвае гэтую картачку ў нататцы.';
+  @override
+  String flashcardsKindRows(int count) => 'Радкоў табліцы: $count';
+  @override
+  String flashcardsKindLines(int count) => 'Радкоў «::»: $count';
+  @override
+  String flashcardsKindClozes(int count) => 'Прапускаў: $count';
+  @override
+  String get flashcardsEditMarkdown => 'Рэдагаваць як Markdown';
+  @override
+  String get flashcardsColumnsTitle => 'Слупкі пытання і адказу';
+  @override
+  String get flashcardsQuestionColumn => 'Слупок пытання';
+  @override
+  String get flashcardsAnswerColumn => 'Слупок адказу';
+  @override
+  String get flashcardsColumnsNone =>
+      'Ніводная табліца ў гэтай нататцы не мае больш за два слупкі.';
+  @override
+  String get flashcardsResetAction => 'Скінуць паўтарэнне гэтай калоды';
+  @override
+  String get flashcardsResetTitle => 'Скінуць паўтарэнне?';
+  @override
+  String get flashcardsResetBody =>
+      'Кожная картачка калоды зноў стане новай. Нататка не зменіцца.';
+  @override
+  String get flashcardsResetConfirm => 'Скінуць';
+  @override
+  String get commandNeedFlashcardNote =>
+      'Патрэбна адкрытая нататка з картачкамі';
 }

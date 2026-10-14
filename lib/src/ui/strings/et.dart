@@ -3773,4 +3773,96 @@ final class EstonianStrings extends Strings {
 
   @override
   String homeActionMissing(String path) => '$path pole enam kogus';
+
+  @override
+  String get flashcardsName => 'Kaardid';
+  @override
+  String get newFlashcardsTitle => 'Uued kaardid';
+  @override
+  String get newFlashcardsDefault => 'Minu kaardid';
+  @override
+  String get showFlashcardsTooltip => 'Näita kaarte';
+  @override
+  String get flashcardsNoCategory => 'Kategooriata';
+  @override
+  String flashcardsDueCount(int count) => '$count kordamiseks';
+  @override
+  String flashcardsNewCount(int count) => '$count uut';
+  @override
+  String flashcardsCardCount(int count) =>
+      count == 1 ? '1 kaart' : '$count kaarti';
+  @override
+  String flashcardsStudyCount(int count) => 'Õpi $count';
+  @override
+  String flashcardsStudyCards(int count) =>
+      count == 1 ? 'Õpi 1 kaarti' : 'Õpi $count kaarti';
+  @override
+  String get flashcardsStudyDeck => 'Õpi seda pakki';
+  @override
+  String get flashcardsAddCard => 'Lisa kaart';
+  @override
+  String get flashcardsQuestion => 'Küsimus';
+  @override
+  String get flashcardsAnswer => 'Vastus';
+  @override
+  String get flashcardsNextColumn => 'Järgmine';
+  @override
+  String get flashcardsDue => 'Tähtaeg käes';
+  @override
+  String get flashcardsNew => 'Uus';
+  @override
+  String flashcardsInDays(int count) =>
+      count == 1 ? '1 päeva pärast' : '$count päeva pärast';
+  @override
+  String flashcardsInMonths(int count) =>
+      count == 1 ? '1 kuu pärast' : '$count kuu pärast';
+  @override
+  String flashcardsInYears(int count) =>
+      count == 1 ? '1 aasta pärast' : '$count aasta pärast';
+  @override
+  String get flashcardsRepeated => 'Korduv';
+  @override
+  String get flashcardsRepeatedTip =>
+      'See küsimus esineb pakis rohkem kui üks kord';
+  @override
+  String get flashcardsEmpty => 'Kaarte veel pole';
+  @override
+  String get flashcardsEditCard => 'Muuda kaarti';
+  @override
+  String get flashcardsSentence => 'Lause';
+  @override
+  String get flashcardsEditNote =>
+      'Edenemine säilib, kuni küsimus samaks jääb. Niman kirjutab selle '
+      'kaardi märkuses ümber.';
+  @override
+  String flashcardsKindRows(int count) =>
+      count == 1 ? '1 tabelirida' : '$count tabelirida';
+  @override
+  String flashcardsKindLines(int count) =>
+      count == 1 ? '1 ::-rida' : '$count ::-rida';
+  @override
+  String flashcardsKindClozes(int count) =>
+      count == 1 ? '1 lünk' : '$count lünka';
+  @override
+  String get flashcardsEditMarkdown => 'Muuda Markdownina';
+  @override
+  String get flashcardsColumnsTitle => 'Küsimuse ja vastuse veerud';
+  @override
+  String get flashcardsQuestionColumn => 'Küsimuse veerg';
+  @override
+  String get flashcardsAnswerColumn => 'Vastuse veerg';
+  @override
+  String get flashcardsColumnsNone =>
+      'Üheski selle märkuse tabelis pole üle kahe veeru.';
+  @override
+  String get flashcardsResetAction => 'Lähtesta selle paki kordamine';
+  @override
+  String get flashcardsResetTitle => 'Kas lähtestada kordamine?';
+  @override
+  String get flashcardsResetBody =>
+      'Iga paki kaart muutub uuesti uueks. Märkust ei muudeta.';
+  @override
+  String get flashcardsResetConfirm => 'Lähtesta';
+  @override
+  String get commandNeedFlashcardNote => 'Vajab avatud kaartide märkust';
 }

@@ -3819,4 +3819,91 @@ final class LatvianStrings extends Strings {
 
   @override
   String homeActionMissing(String path) => '$path vairs nav bibliotēkā';
+
+  @override
+  String get flashcardsName => 'Kartītes';
+  @override
+  String get newFlashcardsTitle => 'Jaunas kartītes';
+  @override
+  String get newFlashcardsDefault => 'Manas kartītes';
+  @override
+  String get showFlashcardsTooltip => 'Rādīt kartītes';
+  @override
+  String get flashcardsNoCategory => 'Bez kategorijas';
+  @override
+  String flashcardsDueCount(int count) => 'Jāatkārto: $count';
+  @override
+  String flashcardsNewCount(int count) => 'Jaunas: $count';
+  @override
+  String flashcardsCardCount(int count) => 'Kartīšu: $count';
+  @override
+  String flashcardsStudyCount(int count) => 'Mācīties: $count';
+  @override
+  String flashcardsStudyCards(int count) => 'Mācīties kartīšu: $count';
+  @override
+  String get flashcardsStudyDeck => 'Mācīties šo komplektu';
+  @override
+  String get flashcardsAddCard => 'Pievienot kartīti';
+  @override
+  String get flashcardsQuestion => 'Jautājums';
+  @override
+  String get flashcardsAnswer => 'Atbilde';
+  @override
+  String get flashcardsNextColumn => 'Nākamā';
+  @override
+  String get flashcardsDue => 'Jāatkārto';
+  @override
+  String get flashcardsNew => 'Jauna';
+  @override
+  String flashcardsInDays(int count) =>
+      count == 1 ? 'pēc 1 dienas' : 'pēc $count d.';
+  @override
+  String flashcardsInMonths(int count) =>
+      count == 1 ? 'pēc 1 mēneša' : 'pēc $count mēn.';
+  @override
+  String flashcardsInYears(int count) =>
+      count == 1 ? 'pēc 1 gada' : 'pēc $count g.';
+  @override
+  String get flashcardsRepeated => 'Atkārtojas';
+  @override
+  String get flashcardsRepeatedTip =>
+      'Šis jautājums komplektā ir vairāk nekā vienu reizi';
+  @override
+  String get flashcardsEmpty => 'Kartīšu vēl nav';
+  @override
+  String get flashcardsEditCard => 'Rediģēt kartīti';
+  @override
+  String get flashcardsSentence => 'Teikums';
+  @override
+  String get flashcardsEditNote =>
+      'Progress saglabājas, kamēr jautājums nemainās. Niman pārraksta '
+      'šo kartīti piezīmē.';
+  @override
+  String flashcardsKindRows(int count) => 'Tabulas rindu: $count';
+  @override
+  String flashcardsKindLines(int count) => 'Rindu „::“: $count';
+  @override
+  String flashcardsKindClozes(int count) => 'Izlaidumu: $count';
+  @override
+  String get flashcardsEditMarkdown => 'Rediģēt kā Markdown';
+  @override
+  String get flashcardsColumnsTitle => 'Jautājuma un atbildes kolonnas';
+  @override
+  String get flashcardsQuestionColumn => 'Jautājuma kolonna';
+  @override
+  String get flashcardsAnswerColumn => 'Atbildes kolonna';
+  @override
+  String get flashcardsColumnsNone =>
+      'Nevienā šīs piezīmes tabulā nav vairāk par divām kolonnām.';
+  @override
+  String get flashcardsResetAction => 'Atiestatīt šī komplekta atkārtošanu';
+  @override
+  String get flashcardsResetTitle => 'Atiestatīt atkārtošanu?';
+  @override
+  String get flashcardsResetBody =>
+      'Katra komplekta kartīte atkal kļūs jauna. Piezīme nemainās.';
+  @override
+  String get flashcardsResetConfirm => 'Atiestatīt';
+  @override
+  String get commandNeedFlashcardNote => 'Nepieciešama atvērta kartīšu piezīme';
 }

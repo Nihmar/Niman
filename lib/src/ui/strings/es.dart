@@ -3878,4 +3878,97 @@ final class SpanishStrings extends Strings {
 
   @override
   String homeActionMissing(String path) => '$path ya no está en la biblioteca';
+
+  @override
+  String get flashcardsName => 'Tarjetas';
+  @override
+  String get newFlashcardsTitle => 'Tarjetas nuevas';
+  @override
+  String get newFlashcardsDefault => 'Mis tarjetas';
+  @override
+  String get showFlashcardsTooltip => 'Mostrar las tarjetas';
+  @override
+  String get flashcardsNoCategory => 'Sin categoría';
+  @override
+  String flashcardsDueCount(int count) => '$count pendientes';
+  @override
+  String flashcardsNewCount(int count) => '$count nuevas';
+  @override
+  String flashcardsCardCount(int count) =>
+      count == 1 ? '1 tarjeta' : '$count tarjetas';
+  @override
+  String flashcardsStudyCount(int count) => 'Estudiar $count';
+  @override
+  String flashcardsStudyCards(int count) =>
+      count == 1 ? 'Estudiar 1 tarjeta' : 'Estudiar $count tarjetas';
+  @override
+  String get flashcardsStudyDeck => 'Estudiar este mazo';
+  @override
+  String get flashcardsAddCard => 'Añadir tarjeta';
+  @override
+  String get flashcardsQuestion => 'Pregunta';
+  @override
+  String get flashcardsAnswer => 'Respuesta';
+  @override
+  String get flashcardsNextColumn => 'Próxima';
+  @override
+  String get flashcardsDue => 'Pendiente';
+  @override
+  String get flashcardsNew => 'Nueva';
+  @override
+  String flashcardsInDays(int count) =>
+      count == 1 ? 'en 1 día' : 'en $count días';
+  @override
+  String flashcardsInMonths(int count) =>
+      count == 1 ? 'en 1 mes' : 'en $count meses';
+  @override
+  String flashcardsInYears(int count) =>
+      count == 1 ? 'en 1 año' : 'en $count años';
+  @override
+  String get flashcardsRepeated => 'Repetida';
+  @override
+  String get flashcardsRepeatedTip =>
+      'Esta pregunta aparece más de una vez en el mazo';
+  @override
+  String get flashcardsEmpty => 'Aún no hay tarjetas';
+  @override
+  String get flashcardsEditCard => 'Editar tarjeta';
+  @override
+  String get flashcardsSentence => 'Frase';
+  @override
+  String get flashcardsEditNote =>
+      'El progreso del repaso se conserva mientras la pregunta no '
+      'cambie. Niman reescribe esta tarjeta en la nota.';
+  @override
+  String flashcardsKindRows(int count) =>
+      count == 1 ? '1 fila de tabla' : '$count filas de tabla';
+  @override
+  String flashcardsKindLines(int count) =>
+      count == 1 ? '1 línea ::' : '$count líneas ::';
+  @override
+  String flashcardsKindClozes(int count) =>
+      count == 1 ? '1 hueco' : '$count huecos';
+  @override
+  String get flashcardsEditMarkdown => 'Editar como Markdown';
+  @override
+  String get flashcardsColumnsTitle => 'Columnas de pregunta y respuesta';
+  @override
+  String get flashcardsQuestionColumn => 'Columna de la pregunta';
+  @override
+  String get flashcardsAnswerColumn => 'Columna de la respuesta';
+  @override
+  String get flashcardsColumnsNone =>
+      'Ninguna tabla de esta nota tiene más de dos columnas.';
+  @override
+  String get flashcardsResetAction => 'Reiniciar el repaso de este mazo';
+  @override
+  String get flashcardsResetTitle => '¿Reiniciar el repaso?';
+  @override
+  String get flashcardsResetBody =>
+      'Cada tarjeta de este mazo vuelve a ser nueva. La nota no cambia.';
+  @override
+  String get flashcardsResetConfirm => 'Reiniciar';
+  @override
+  String get commandNeedFlashcardNote =>
+      'Requiere una nota de tarjetas abierta';
 }

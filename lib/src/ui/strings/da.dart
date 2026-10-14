@@ -3809,4 +3809,96 @@ final class DanishStrings extends Strings {
   @override
   String homeActionMissing(String path) =>
       '$path er ikke længere i biblioteket';
+
+  @override
+  String get flashcardsName => 'Flashcards';
+  @override
+  String get newFlashcardsTitle => 'Nye flashcards';
+  @override
+  String get newFlashcardsDefault => 'Mine flashcards';
+  @override
+  String get showFlashcardsTooltip => 'Vis flashcards';
+  @override
+  String get flashcardsNoCategory => 'Ingen kategori';
+  @override
+  String flashcardsDueCount(int count) => '$count til repetition';
+  @override
+  String flashcardsNewCount(int count) => '$count nye';
+  @override
+  String flashcardsCardCount(int count) =>
+      count == 1 ? '1 kort' : '$count kort';
+  @override
+  String flashcardsStudyCount(int count) => 'Studér $count';
+  @override
+  String flashcardsStudyCards(int count) =>
+      count == 1 ? 'Studér 1 kort' : 'Studér $count kort';
+  @override
+  String get flashcardsStudyDeck => 'Studér dette kortspil';
+  @override
+  String get flashcardsAddCard => 'Tilføj kort';
+  @override
+  String get flashcardsQuestion => 'Spørgsmål';
+  @override
+  String get flashcardsAnswer => 'Svar';
+  @override
+  String get flashcardsNextColumn => 'Næste';
+  @override
+  String get flashcardsDue => 'Til repetition';
+  @override
+  String get flashcardsNew => 'Nyt';
+  @override
+  String flashcardsInDays(int count) =>
+      count == 1 ? 'om 1 dag' : 'om $count dage';
+  @override
+  String flashcardsInMonths(int count) =>
+      count == 1 ? 'om 1 måned' : 'om $count måneder';
+  @override
+  String flashcardsInYears(int count) =>
+      count == 1 ? 'om 1 år' : 'om $count år';
+  @override
+  String get flashcardsRepeated => 'Gentaget';
+  @override
+  String get flashcardsRepeatedTip =>
+      'Dette spørgsmål forekommer mere end én gang i kortspillet';
+  @override
+  String get flashcardsEmpty => 'Ingen kort endnu';
+  @override
+  String get flashcardsEditCard => 'Rediger kort';
+  @override
+  String get flashcardsSentence => 'Sætning';
+  @override
+  String get flashcardsEditNote =>
+      'Fremskridtet bevares, så længe spørgsmålet er det samme. Niman '
+      'omskriver dette kort i noten.';
+  @override
+  String flashcardsKindRows(int count) =>
+      count == 1 ? '1 tabelrække' : '$count tabelrækker';
+  @override
+  String flashcardsKindLines(int count) =>
+      count == 1 ? '1 ::-linje' : '$count ::-linjer';
+  @override
+  String flashcardsKindClozes(int count) =>
+      count == 1 ? '1 hulsætning' : '$count hulsætninger';
+  @override
+  String get flashcardsEditMarkdown => 'Rediger som Markdown';
+  @override
+  String get flashcardsColumnsTitle => 'Spørgsmåls- og svarkolonner';
+  @override
+  String get flashcardsQuestionColumn => 'Spørgsmålskolonne';
+  @override
+  String get flashcardsAnswerColumn => 'Svarkolonne';
+  @override
+  String get flashcardsColumnsNone =>
+      'Ingen tabel i denne note har mere end to kolonner.';
+  @override
+  String get flashcardsResetAction => 'Nulstil repetitionen af dette kortspil';
+  @override
+  String get flashcardsResetTitle => 'Nulstil repetitionen?';
+  @override
+  String get flashcardsResetBody =>
+      'Hvert kort i kortspillet bliver nyt igen. Noten ændres ikke.';
+  @override
+  String get flashcardsResetConfirm => 'Nulstil';
+  @override
+  String get commandNeedFlashcardNote => 'Kræver en åben flashcard-note';
 }

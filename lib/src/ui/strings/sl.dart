@@ -3850,4 +3850,90 @@ final class SlovenianStrings extends Strings {
 
   @override
   String homeActionMissing(String path) => '$path ni več v knjižnici';
+
+  @override
+  String get flashcardsName => 'Kartice';
+  @override
+  String get newFlashcardsTitle => 'Nove kartice';
+  @override
+  String get newFlashcardsDefault => 'Moje kartice';
+  @override
+  String get showFlashcardsTooltip => 'Pokaži kartice';
+  @override
+  String get flashcardsNoCategory => 'Brez kategorije';
+  @override
+  String flashcardsDueCount(int count) => 'Za ponovitev: $count';
+  @override
+  String flashcardsNewCount(int count) => 'Nove: $count';
+  @override
+  String flashcardsCardCount(int count) => 'Kartic: $count';
+  @override
+  String flashcardsStudyCount(int count) => 'Učenje: $count';
+  @override
+  String flashcardsStudyCards(int count) => 'Učenje kartic: $count';
+  @override
+  String get flashcardsStudyDeck => 'Učenje tega kupčka';
+  @override
+  String get flashcardsAddCard => 'Dodaj kartico';
+  @override
+  String get flashcardsQuestion => 'Vprašanje';
+  @override
+  String get flashcardsAnswer => 'Odgovor';
+  @override
+  String get flashcardsNextColumn => 'Naslednja';
+  @override
+  String get flashcardsDue => 'Za ponovitev';
+  @override
+  String get flashcardsNew => 'Nova';
+  @override
+  String flashcardsInDays(int count) =>
+      count == 1 ? 'čez 1 dan' : 'čez $count d';
+  @override
+  String flashcardsInMonths(int count) =>
+      count == 1 ? 'čez 1 mesec' : 'čez $count mes.';
+  @override
+  String flashcardsInYears(int count) =>
+      count == 1 ? 'čez 1 leto' : 'čez $count l.';
+  @override
+  String get flashcardsRepeated => 'Ponovljeno';
+  @override
+  String get flashcardsRepeatedTip => 'To vprašanje se v kupčku pojavi večkrat';
+  @override
+  String get flashcardsEmpty => 'Še ni kartic';
+  @override
+  String get flashcardsEditCard => 'Uredi kartico';
+  @override
+  String get flashcardsSentence => 'Poved';
+  @override
+  String get flashcardsEditNote =>
+      'Napredek se ohrani, dokler se vprašanje ne spremeni. Niman to '
+      'kartico prepiše v zapisku.';
+  @override
+  String flashcardsKindRows(int count) => 'Vrstic tabele: $count';
+  @override
+  String flashcardsKindLines(int count) => 'Vrstic „::“: $count';
+  @override
+  String flashcardsKindClozes(int count) => 'Vrzeli: $count';
+  @override
+  String get flashcardsEditMarkdown => 'Uredi kot Markdown';
+  @override
+  String get flashcardsColumnsTitle => 'Stolpca vprašanja in odgovora';
+  @override
+  String get flashcardsQuestionColumn => 'Stolpec vprašanja';
+  @override
+  String get flashcardsAnswerColumn => 'Stolpec odgovora';
+  @override
+  String get flashcardsColumnsNone =>
+      'Nobena tabela v tem zapisku nima več kot dveh stolpcev.';
+  @override
+  String get flashcardsResetAction => 'Ponastavi ponavljanje tega kupčka';
+  @override
+  String get flashcardsResetTitle => 'Ponastavim ponavljanje?';
+  @override
+  String get flashcardsResetBody =>
+      'Vsaka kartica v kupčku bo spet nova. Zapisek se ne spremeni.';
+  @override
+  String get flashcardsResetConfirm => 'Ponastavi';
+  @override
+  String get commandNeedFlashcardNote => 'Zahteva odprt zapisek s karticami';
 }

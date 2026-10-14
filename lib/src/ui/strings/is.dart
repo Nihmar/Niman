@@ -3822,4 +3822,97 @@ final class IcelandicStrings extends Strings {
 
   @override
   String homeActionMissing(String path) => '$path er ekki lengur í safninu';
+
+  @override
+  String get flashcardsName => 'Minniskort';
+  @override
+  String get newFlashcardsTitle => 'Ný minniskort';
+  @override
+  String get newFlashcardsDefault => 'Mín minniskort';
+  @override
+  String get showFlashcardsTooltip => 'Sýna minniskort';
+  @override
+  String get flashcardsNoCategory => 'Enginn flokkur';
+  @override
+  String flashcardsDueCount(int count) => '$count til upprifjunar';
+  @override
+  String flashcardsNewCount(int count) => '$count ný';
+  @override
+  String flashcardsCardCount(int count) =>
+      count == 1 ? '1 kort' : '$count kort';
+  @override
+  String flashcardsStudyCount(int count) => 'Læra $count';
+  @override
+  String flashcardsStudyCards(int count) =>
+      count == 1 ? 'Læra 1 kort' : 'Læra $count kort';
+  @override
+  String get flashcardsStudyDeck => 'Læra þennan stokk';
+  @override
+  String get flashcardsAddCard => 'Bæta við korti';
+  @override
+  String get flashcardsQuestion => 'Spurning';
+  @override
+  String get flashcardsAnswer => 'Svar';
+  @override
+  String get flashcardsNextColumn => 'Næsta';
+  @override
+  String get flashcardsDue => 'Á að rifja upp';
+  @override
+  String get flashcardsNew => 'Nýtt';
+  @override
+  String flashcardsInDays(int count) =>
+      count == 1 ? 'eftir 1 dag' : 'eftir $count daga';
+  @override
+  String flashcardsInMonths(int count) =>
+      count == 1 ? 'eftir 1 mánuð' : 'eftir $count mánuði';
+  @override
+  String flashcardsInYears(int count) =>
+      count == 1 ? 'eftir 1 ár' : 'eftir $count ár';
+  @override
+  String get flashcardsRepeated => 'Endurtekið';
+  @override
+  String get flashcardsRepeatedTip =>
+      'Þessi spurning kemur oftar en einu sinni fyrir í stokknum';
+  @override
+  String get flashcardsEmpty => 'Engin kort enn';
+  @override
+  String get flashcardsEditCard => 'Breyta korti';
+  @override
+  String get flashcardsSentence => 'Setning';
+  @override
+  String get flashcardsEditNote =>
+      'Framvindan helst á meðan spurningin er sú sama. Niman '
+      'endurskrifar þetta kort í glósunni.';
+  @override
+  String flashcardsKindRows(int count) =>
+      count == 1 ? '1 töflulína' : '$count töflulínur';
+  @override
+  String flashcardsKindLines(int count) =>
+      count == 1 ? '1 ::-lína' : '$count ::-línur';
+  @override
+  String flashcardsKindClozes(int count) =>
+      count == 1 ? '1 eyða' : '$count eyður';
+  @override
+  String get flashcardsEditMarkdown => 'Breyta sem Markdown';
+  @override
+  String get flashcardsColumnsTitle => 'Dálkar spurningar og svars';
+  @override
+  String get flashcardsQuestionColumn => 'Dálkur spurningar';
+  @override
+  String get flashcardsAnswerColumn => 'Dálkur svars';
+  @override
+  String get flashcardsColumnsNone =>
+      'Engin tafla í þessari glósu hefur fleiri en tvo dálka.';
+  @override
+  String get flashcardsResetAction => 'Endurstilla upprifjun þessa stokks';
+  @override
+  String get flashcardsResetTitle => 'Endurstilla upprifjun?';
+  @override
+  String get flashcardsResetBody =>
+      'Hvert kort í stokknum verður aftur nýtt. Glósunni er ekki '
+      'breytt.';
+  @override
+  String get flashcardsResetConfirm => 'Endurstilla';
+  @override
+  String get commandNeedFlashcardNote => 'Krefst opinnar minniskortaglósu';
 }
