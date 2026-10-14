@@ -207,7 +207,7 @@ one typed), shows the exact frontmatter it will write, and writes it as one
 undoable edit (**Make 15 cards**). On a deck the same dialog is **Question
 and answer columns…**.
 
-## Decisions to confirm
+## Decided (2026-10-14)
 
 1. **Study is hidden by default** in the navigation (`defaultHidden`,
    #536's mechanism): a library with no deck does not grow a seventh
