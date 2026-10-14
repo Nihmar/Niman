@@ -15,7 +15,12 @@ import 'package:niman/src/ui/strings.dart';
 /// The progress of one running [TreeExport].
 final class ExportProgressDialog extends StatefulWidget {
   /// Watches [export].
-  const new({required this.export, super.key});
+  const new({required this.export, this.closeOnDone = true, super.key});
+
+  /// Whether it pops its own route once the export is over; false where
+  /// it is not a route but a card over the window, which its host takes
+  /// down (#712).
+  final bool closeOnDone;
 
   /// The export running.
   final TreeExport export;
@@ -40,7 +45,7 @@ final class _ExportProgressDialogState extends State<ExportProgressDialog> {
       // The shell shows what went wrong, or says nothing when it was
       // cancelled.
     }
-    if (mounted) Navigator.of(context).pop();
+    if (mounted && widget.closeOnDone) Navigator.of(context).pop();
   }
 
   @override

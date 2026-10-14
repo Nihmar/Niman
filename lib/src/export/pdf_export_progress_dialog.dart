@@ -22,8 +22,14 @@ final class PdfExportProgressDialog extends StatefulWidget {
     required this.progress,
     required this.done,
     required this.onCancel,
+    this.closeOnDone = true,
     super.key,
   });
+
+  /// Whether it pops its own route once the export is over; false where
+  /// it is not a route but a card over the window, which its host takes
+  /// down (#712).
+  final bool closeOnDone;
 
   /// The note's own name, so the dialog says what is being exported.
   final String title;
@@ -61,7 +67,7 @@ final class _PdfExportProgressDialogState
       // The shell shows what went wrong, or says nothing when it was
       // cancelled.
     }
-    if (mounted) Navigator.of(context).pop();
+    if (mounted && widget.closeOnDone) Navigator.of(context).pop();
   }
 
   @override

@@ -19,6 +19,7 @@ import 'package:niman/src/export/export_files.dart';
 import 'package:niman/src/export/export_note.dart';
 import 'package:niman/src/export/export_pdf.dart';
 import 'package:niman/src/export/export_progress_dialog.dart';
+import 'package:niman/src/export/export_progress_host.dart';
 import 'package:niman/src/export/export_tree.dart';
 import 'package:niman/src/export/export_tree_book.dart';
 import 'package:niman/src/export/export_working_dialog.dart';
@@ -159,25 +160,24 @@ final class ShellExportFlow {
         final done = Completer<void>();
         var cancelled = false;
         if (context.mounted) {
-          unawaited(
-            showDialog<void>(
-              context: context,
-              barrierDismissible: false,
-              builder: (context) => PdfExportProgressDialog(
-                title: title,
-                progress: progress,
-                done: done.future,
-                onCancel: () {
-                  cancelled = true;
-                  // Android's WebView print is the one engine that can be
-                  // stopped mid-flight; a desktop process is left to its
-                  // own timeout, and the flag aborts before anything is
-                  // written or drawn.
-                  if (Platform.isAndroid) {
-                    unawaited(WebViewPdfPrinter.cancel());
-                  }
-                },
-              ),
+          showExportProgress(
+            context,
+            done: done.future,
+            build: (context, {required modal}) => PdfExportProgressDialog(
+              title: title,
+              progress: progress,
+              done: done.future,
+              closeOnDone: modal,
+              onCancel: () {
+                cancelled = true;
+                // Android's WebView print is the one engine that can be
+                // stopped mid-flight; a desktop process is left to its
+                // own timeout, and the flag aborts before anything is
+                // written or drawn.
+                if (Platform.isAndroid) {
+                  unawaited(WebViewPdfPrinter.cancel());
+                }
+              },
             ),
           );
         }
@@ -222,15 +222,14 @@ final class ShellExportFlow {
         final done = Completer<void>();
         var cancelled = false;
         if (context.mounted) {
-          unawaited(
-            showDialog<void>(
-              context: context,
-              barrierDismissible: false,
-              builder: (context) => ExportWorkingDialog(
-                title: title,
-                done: done.future,
-                onCancel: () => cancelled = true,
-              ),
+          showExportProgress(
+            context,
+            done: done.future,
+            build: (context, {required modal}) => ExportWorkingDialog(
+              title: title,
+              done: done.future,
+              closeOnDone: modal,
+              onCancel: () => cancelled = true,
             ),
           );
         }
@@ -402,12 +401,12 @@ final class ShellExportFlow {
       return;
     }
     if (!context.mounted) return;
-    unawaited(
-      showDialog<void>(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => ExportProgressDialog(export: export),
-      ),
+    showExportProgress(
+      context,
+      // Over however it ends: the export's own errors are reported below.
+      done: export.done.then<void>((_) {}, onError: (Object _) {}),
+      build: (context, {required modal}) =>
+          ExportProgressDialog(export: export, closeOnDone: modal),
     );
     try {
       await export.done;

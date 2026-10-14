@@ -130,6 +130,11 @@ let go of the file yet, and then the app says so. An export never
 overwrites the last one: a second zip of the same folder is written as
 `name (2).zip` beside it.
 
+On a desktop the progress of every export — a folder's zip or book, a
+note's PDF or EPUB — is a card in the window's bottom-right corner rather
+than a dialog (#712): you can keep writing while a long PDF is drawn, and
+**Cancel** on the card stops it. A phone keeps the dialog.
+
 ## Where it lands
 
 The save dialog on the desktop, or the system picker on Android, decides.

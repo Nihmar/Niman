@@ -21,8 +21,14 @@ final class ExportWorkingDialog extends StatefulWidget {
     required this.title,
     required this.done,
     this.onCancel,
+    this.closeOnDone = true,
     super.key,
   });
+
+  /// Whether it pops its own route once the export is over; false where
+  /// it is not a route but a card over the window, which its host takes
+  /// down (#712).
+  final bool closeOnDone;
 
   /// The note's own name, so the dialog says what is being exported.
   final String title;
@@ -54,7 +60,7 @@ final class _ExportWorkingDialogState extends State<ExportWorkingDialog> {
     } on Object {
       // The shell shows what went wrong.
     }
-    if (mounted) Navigator.of(context).pop();
+    if (mounted && widget.closeOnDone) Navigator.of(context).pop();
   }
 
   @override
