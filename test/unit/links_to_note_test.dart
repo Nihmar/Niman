@@ -64,7 +64,7 @@ void main() {
   });
 
   group('the reverse lookup', () {
-    test('lists who links here, in path order, with the link forms', () async {
+    test('lists who links here, in path order', () async {
       final b = (await indexer.dao.find('B.md'))!;
 
       final found = await indexer.dao.referrers.page(b.id, limit: 50);
@@ -76,8 +76,6 @@ void main() {
         'Long.md',
         'Sub/G.md',
       ]);
-      expect(found.items.first.kinds, ['md', 'wiki'], reason: 'both forms');
-      expect(found.items[1].kinds, ['wiki']);
       expect(found.next, isNull);
     });
 
@@ -180,8 +178,6 @@ void main() {
       final mention = await resolver.mentionIn('A.md', 'B.md');
 
       expect(mention.context, 'See [[B]] for the story, and [the same](B.md).');
-      expect(mention.line, 2);
-      expect(mention.count, 2);
       expect(mention.embed, isFalse);
     });
 
@@ -192,7 +188,6 @@ void main() {
 
       final both = await resolver.mentionIn('D.md', 'B.md');
       expect(both.embed, isFalse, reason: 'the referrer links it, too');
-      expect(both.count, 2);
       expect(both.context, 'both: ![[B]] then [[B]]', reason: 'marker off');
     });
 
@@ -235,8 +230,6 @@ void main() {
         final mention = await resolver.mentionIn('A.md', 'B.md');
 
         expect(mention.context, isEmpty);
-        expect(mention.count, 0);
-        expect(mention.line, -1);
       },
     );
 
@@ -244,9 +237,9 @@ void main() {
       'without a way to read notes, or for a note not in the index',
       () async {
         final blind = MentionReader(db, LinkResolver(db));
-        expect((await blind.mentionIn('A.md', 'B.md')).count, 0);
-        expect((await resolver.mentionIn('Nope.md', 'B.md')).count, 0);
-        expect((await resolver.mentionIn('A.md', 'Nope.md')).count, 0);
+        expect((await blind.mentionIn('A.md', 'B.md')).context, isEmpty);
+        expect((await resolver.mentionIn('Nope.md', 'B.md')).context, isEmpty);
+        expect((await resolver.mentionIn('A.md', 'Nope.md')).context, isEmpty);
       },
     );
 

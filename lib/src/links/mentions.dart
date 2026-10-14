@@ -24,21 +24,12 @@ import 'package:niman/src/markdown/note_references.dart';
 
 /// A note that links to another, as the index knows it.
 final class Referrer {
-  /// Creates the referrer at library-relative [path], whose links to the note
-  /// are of these [kinds] (`wiki`, `md`), at the revision [modified] and
-  /// [size] the index read it at.
-  const new({
-    required this.path,
-    required this.kinds,
-    required this.modified,
-    required this.size,
-  });
+  /// Creates the referrer at library-relative [path], at the revision
+  /// [modified] and [size] the index read it at.
+  const new({required this.path, required this.modified, required this.size});
 
   /// The referrer's library-relative path.
   final String path;
-
-  /// The link forms it uses to name the note, sorted: `md`, `wiki`.
-  final List<String> kinds;
 
   /// The referrer's mtime, as the index recorded it.
   final DateTime modified;
@@ -74,36 +65,20 @@ final class Referrers {
 /// What one referrer says about the note it links to.
 final class Mention {
   /// Creates a mention.
-  const new({
-    required this.context,
-    required this.line,
-    required this.embed,
-    required this.count,
-  });
+  const new({required this.context, required this.embed});
 
   /// The referrer says nothing readable about the note: its text changed
   /// since the index read it, or it cannot be read now.
-  static const Mention unread = Mention(
-    context: '',
-    line: -1,
-    embed: false,
-    count: 0,
-  );
+  static const Mention unread = Mention(context: '', embed: false);
 
   /// The line the first mention is on, trimmed and cut to a row's width,
   /// with the link in it; empty when [unread].
   final String context;
 
-  /// The 0-based line of that mention, or -1.
-  final int line;
-
   /// Whether the mention is an embed (`![[note]]`, `![](note.md)`): the note
   /// is shown there rather than linked. A referrer that links *and* embeds
   /// is shown by its link.
   final bool embed;
-
-  /// How many times the referrer names the note (links and embeds).
-  final int count;
 }
 
 /// One link of a note, as the list of mentions reads it: what it targets (as

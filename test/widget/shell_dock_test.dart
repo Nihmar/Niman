@@ -176,9 +176,7 @@ void main() {
     links.referrers['alpha.md'] = ['beta.md'];
     links.mentions['beta.md -> alpha.md'] = const Mention(
       context: 'Beta leans on [[alpha]] here',
-      line: 0,
       embed: false,
-      count: 1,
     );
     return links;
   }

@@ -80,7 +80,6 @@ final class FakeLinkSource implements LibraryLinks {
       for (final referrer in found.sublist(start < end ? start : end, end))
         Referrer(
           path: referrer,
-          kinds: const <String>['wiki'],
           modified: DateTime.utc(2026),
           size: revisions[referrer] ?? 0,
         ),
