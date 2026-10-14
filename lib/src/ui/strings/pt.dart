@@ -1715,9 +1715,6 @@ final class PortugueseStrings extends Strings {
   @override
   String get commandNeedWideWindow => 'Apenas com janela larga';
   @override
-  String get commandNeedDockRoom =>
-      'Precisa de uma janela larga o suficiente para o painel lateral';
-  @override
   String get commandNeedDesktop => 'Apenas no computador';
   @override
   String get commandNeedNotInZen => 'Fora do modo Zen';

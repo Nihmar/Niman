@@ -1703,9 +1703,6 @@ final class IcelandicStrings extends Strings {
   @override
   String get commandNeedWideWindow => 'Aðeins í breiðum glugga';
   @override
-  String get commandNeedDockRoom =>
-      'Krefst glugga sem er nógu breiður fyrir hliðarspjaldið';
-  @override
   String get commandNeedDesktop => 'Aðeins á tölvu';
   @override
   String get commandNeedNotInZen => 'Ekki í Zen-ham';

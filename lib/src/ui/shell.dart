@@ -3784,7 +3784,6 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     CommandNeed.openNote => _shownNote != null,
     CommandNeed.textNote => _shownNote != null && !_shownIsAttachment,
     CommandNeed.wideWindow => _wide,
-    CommandNeed.dockRoom => _dockRoom,
     CommandNeed.desktop => Platform.isLinux || Platform.isWindows,
     CommandNeed.notInZen => !_inZen,
     CommandNeed.zenRoom => _immersive.zen.on || _zenPossible,

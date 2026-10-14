@@ -1709,9 +1709,6 @@ final class UkrainianStrings extends Strings {
   @override
   String get commandNeedWideWindow => 'Лише в широкому вікні';
   @override
-  String get commandNeedDockRoom =>
-      'Потрібне вікно, достатньо широке для бічної панелі';
-  @override
   String get commandNeedDesktop => "Лише на комп'ютері";
   @override
   String get commandNeedNotInZen => 'Не в режимі Дзен';

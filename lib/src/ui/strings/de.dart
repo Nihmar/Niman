@@ -1731,9 +1731,6 @@ final class GermanStrings extends Strings {
   @override
   String get commandNeedWideWindow => 'Nur in breiten Fenstern';
   @override
-  String get commandNeedDockRoom =>
-      'Braucht ein Fenster, das breit genug für die Seitenleiste ist';
-  @override
   String get commandNeedDesktop => 'Nur auf dem Desktop';
   @override
   String get commandNeedNotInZen => 'Nicht im Zen-Modus';

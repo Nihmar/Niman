@@ -1604,8 +1604,6 @@ final class JapaneseStrings extends Strings {
   @override
   String get commandNeedWideWindow => '広いウィンドウのみ';
   @override
-  String get commandNeedDockRoom => 'サイドパネルが入る幅のウィンドウが必要です';
-  @override
   String get commandNeedDesktop => 'デスクトップのみ';
   @override
   String get commandNeedNotInZen => '禅モード以外';

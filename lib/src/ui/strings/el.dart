@@ -1757,9 +1757,6 @@ final class GreekStrings extends Strings {
   @override
   String get commandNeedWideWindow => 'Μόνο σε φαρδύ παράθυρο';
   @override
-  String get commandNeedDockRoom =>
-      'Χρειάζεται παράθυρο αρκετά φαρδύ για το πλαϊνό πάνελ';
-  @override
   String get commandNeedDesktop => 'Μόνο σε υπολογιστή';
   @override
   String get commandNeedNotInZen => 'Όχι σε λειτουργία Zen';

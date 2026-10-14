@@ -1717,9 +1717,6 @@ final class FinnishStrings extends Strings {
   @override
   String get commandNeedWideWindow => 'Vain leveässä ikkunassa';
   @override
-  String get commandNeedDockRoom =>
-      'Vaatii tarpeeksi leveän ikkunan sivupaneelille';
-  @override
   String get commandNeedDesktop => 'Vain työpöydällä';
   @override
   String get commandNeedNotInZen => 'Ei Zen-tilassa';

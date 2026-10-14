@@ -1721,9 +1721,6 @@ final class DutchStrings extends Strings {
   @override
   String get commandNeedWideWindow => 'Alleen in een breed venster';
   @override
-  String get commandNeedDockRoom =>
-      'Vereist een venster dat breed genoeg is voor het zijpaneel';
-  @override
   String get commandNeedDesktop => 'Alleen op de desktop';
   @override
   String get commandNeedNotInZen => 'Niet in zenmodus';

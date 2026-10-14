@@ -893,7 +893,6 @@ abstract base class Strings {
   String get commandNeedTextNote;
   String get commandNeedProseNote;
   String get commandNeedWideWindow;
-  String get commandNeedDockRoom;
   String get commandNeedDesktop;
   String get commandNeedNotInZen;
   String get commandNeedZenRoom;

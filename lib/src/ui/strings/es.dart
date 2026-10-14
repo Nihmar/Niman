@@ -1733,9 +1733,6 @@ final class SpanishStrings extends Strings {
   @override
   String get commandNeedWideWindow => 'Solo con ventana ancha';
   @override
-  String get commandNeedDockRoom =>
-      'Necesita una ventana lo bastante ancha para el panel lateral';
-  @override
   String get commandNeedDesktop => 'Solo en escritorio';
   @override
   String get commandNeedNotInZen => 'Fuera del modo Zen';

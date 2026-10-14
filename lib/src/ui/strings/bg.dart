@@ -1720,9 +1720,6 @@ final class BulgarianStrings extends Strings {
   @override
   String get commandNeedWideWindow => 'Само в широк прозорец';
   @override
-  String get commandNeedDockRoom =>
-      'Изисква прозорец, достатъчно широк за страничния панел';
-  @override
   String get commandNeedDesktop => 'Само на компютър';
   @override
   String get commandNeedNotInZen => 'Не в режим Дзен';

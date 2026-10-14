@@ -1701,9 +1701,6 @@ final class SlovenianStrings extends Strings {
   @override
   String get commandNeedWideWindow => 'Samo v širokem oknu';
   @override
-  String get commandNeedDockRoom =>
-      'Potrebuje okno, dovolj široko za stransko ploščo';
-  @override
   String get commandNeedDesktop => 'Samo na namizju';
   @override
   String get commandNeedNotInZen => 'Ne v načinu Zen';

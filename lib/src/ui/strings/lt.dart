@@ -1705,9 +1705,6 @@ final class LithuanianStrings extends Strings {
   @override
   String get commandNeedWideWindow => 'Tik plačiame lange';
   @override
-  String get commandNeedDockRoom =>
-      'Reikia pakankamai plataus lango šoniniam skydeliui';
-  @override
   String get commandNeedDesktop => 'Tik kompiuteryje';
   @override
   String get commandNeedNotInZen => 'Ne Zen režimu';

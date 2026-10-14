@@ -1702,9 +1702,6 @@ final class LatvianStrings extends Strings {
   @override
   String get commandNeedWideWindow => 'Tikai platā logā';
   @override
-  String get commandNeedDockRoom =>
-      'Nepieciešams pietiekami plats logs sānu panelim';
-  @override
   String get commandNeedDesktop => 'Tikai datorā';
   @override
   String get commandNeedNotInZen => 'Ne Zen režīmā';

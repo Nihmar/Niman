@@ -1567,8 +1567,6 @@ final class ChineseStrings extends Strings {
   @override
   String get commandNeedWideWindow => '仅限宽窗口';
   @override
-  String get commandNeedDockRoom => '需要足够容纳侧边面板的宽窗口';
-  @override
   String get commandNeedDesktop => '仅限桌面端';
   @override
   String get commandNeedNotInZen => '不在禅模式下';

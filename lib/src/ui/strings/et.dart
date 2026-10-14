@@ -1685,9 +1685,6 @@ final class EstonianStrings extends Strings {
   @override
   String get commandNeedWideWindow => 'Ainult laias aknas';
   @override
-  String get commandNeedDockRoom =>
-      'Vajab külgpaneeli jaoks piisavalt laia akent';
-  @override
   String get commandNeedDesktop => 'Ainult arvutis';
   @override
   String get commandNeedNotInZen => 'Mitte Zen-režiimis';
