@@ -497,13 +497,18 @@ final class NoteOps implements NoteOperations {
     String newName, {
     LinkUpdateConfirm? confirmLinks,
     void Function()? onLinksRewritten,
+    FlushOpenNotes? flushOpen,
   }) async {
-    final done = await _released(path, () => _rename(path, newName));
+    final done = await _released(path, () => _rename(path, newName, flushOpen));
     _askLinks(done, confirmLinks, onLinksRewritten);
     return done.row;
   }
 
-  Future<Relocated> _rename(String path, String newName) {
+  Future<Relocated> _rename(
+    String path,
+    String newName,
+    FlushOpenNotes? flushOpen,
+  ) {
     return _synchronized(() async {
       final row = await _mustFind(path);
       final parent = parentOf(path);
@@ -535,7 +540,7 @@ final class NoteOps implements NoteOperations {
       }
       final newRel = resolvePath(parent, target);
       if (newRel == path) return (row: row, pending: null);
-      return await _relocator.relocate(row, path, newRel);
+      return await _relocator.relocate(row, path, newRel, flushOpen: flushOpen);
     });
   }
 
@@ -550,13 +555,21 @@ final class NoteOps implements NoteOperations {
     String targetParent, {
     LinkUpdateConfirm? confirmLinks,
     void Function()? onLinksRewritten,
+    FlushOpenNotes? flushOpen,
   }) async {
-    final done = await _released(path, () => _move(path, targetParent));
+    final done = await _released(
+      path,
+      () => _move(path, targetParent, flushOpen),
+    );
     _askLinks(done, confirmLinks, onLinksRewritten);
     return done.row;
   }
 
-  Future<Relocated> _move(String path, String targetParent) {
+  Future<Relocated> _move(
+    String path,
+    String targetParent,
+    FlushOpenNotes? flushOpen,
+  ) {
     return _synchronized(() async {
       final row = await _mustFind(path);
       if (resolvePath(targetParent, p.basename(path)) == path) {
@@ -577,7 +590,7 @@ final class NoteOps implements NoteOperations {
         target = await uniqueFileName(targetDir, parts.base, parts.ext);
       }
       final newRel = resolvePath(targetParent, target);
-      return await _relocator.relocate(row, path, newRel);
+      return await _relocator.relocate(row, path, newRel, flushOpen: flushOpen);
     });
   }
 
@@ -616,6 +629,8 @@ final class NoteOps implements NoteOperations {
         // referrers are read without holding up any other op or sync write.
         final notes = await pending.count();
         if (notes == 0 || !await confirm(notes)) return;
+        // The rewrite flushes the open notes itself, right before reading
+        // each referrer (#913).
         await _synchronized(pending.apply);
         onRewritten?.call();
       } on Object catch (error) {
