@@ -6,16 +6,9 @@ import 'package:niman/src/db/index_database.dart';
 const _idChunk = 500;
 
 /// One note that links to another, as the index has it: its row id (the
-/// cursor a page resumes after), its path, the link forms it names the note
-/// by, and its revision (mtime and size), which says when what it says has
-/// to be read again.
-typedef ReferrerRow = ({
-  int id,
-  String path,
-  List<String> kinds,
-  DateTime modified,
-  int size,
-});
+/// cursor a page resumes after), its path, and its revision (mtime and size),
+/// which says when what it says has to be read again.
+typedef ReferrerRow = ({int id, String path, DateTime modified, int size});
 
 /// A page of [ReferrerRow]s, by path, and the cursor of the next page —
 /// null when this one is the last.
@@ -36,14 +29,14 @@ final class ReferrerDao {
   /// index walk: `?1` the target, `?2` the cursor, `?3` the page size.
   static const String pageQuery =
       'SELECT l.from_note AS id, n.path AS path, n.modified AS modified, '
-      'n.size AS size, group_concat(l.kind) AS kinds '
+      'n.size AS size '
       'FROM note_links l JOIN notes n ON n.id = l.from_note '
       'WHERE l.to_note = ?1 AND l.from_note > ?2 AND l.from_note <> ?1 '
       'GROUP BY l.from_note ORDER BY l.from_note LIMIT ?3';
 
   /// The paths of the notes holding a link to any note in [toIds], distinct:
-  /// the backlinks of a moved note, in one lookup per [_idChunk] target ids
-  /// (#507).
+  /// the notes that link to a moved note, in one lookup per [_idChunk]
+  /// target ids (#507).
   Future<List<String>> pathsOf(Iterable<int> toIds) async {
     final wanted = toIds.toSet().toList(growable: false);
     if (wanted.isEmpty) return const <String>[];
@@ -99,7 +92,6 @@ final class ReferrerDao {
         (
           id: row.read<int>('id'),
           path: row.read<String>('path'),
-          kinds: row.read<String>('kinds').split(',').toSet().toList()..sort(),
           modified: row.read<DateTime>('modified'),
           size: row.read<int>('size'),
         ),

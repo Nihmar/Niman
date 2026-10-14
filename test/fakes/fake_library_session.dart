@@ -1399,6 +1399,7 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     String path,
     String newName, {
     LinkUpdateConfirm? confirmLinks,
+    void Function()? onLinksRewritten,
   }) async {
     final row = _requireRow(path);
     final parent = parentOf(path);
@@ -1428,6 +1429,7 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     String path,
     String targetParent, {
     LinkUpdateConfirm? confirmLinks,
+    void Function()? onLinksRewritten,
   }) async {
     final row = _requireRow(path);
     final same = resolvePath(targetParent, p.basename(path)) == path;
@@ -1614,6 +1616,8 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   /// folder [ensureFolder] reuses rather than making a second one under a
   /// different spelling (#847).
   _Row? _findDirIgnoringCase(String path) {
+    final exact = _findRow(path);
+    if (exact != null && exact.isDir) return exact;
     final lower = path.toLowerCase();
     for (final row in _rows) {
       if (!row.trashed && row.isDir && row.path.toLowerCase() == lower) {

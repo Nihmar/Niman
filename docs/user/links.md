@@ -353,13 +353,15 @@ the note inside it, as Obsidian does — a folder the library already has
 under another spelling is that folder. The confirmation dialog names the
 whole proposed path, so you see what is about to be made, and Cancel makes
 neither the note nor its folders. Each name is cleaned the way a note's
-name is, and a segment that names nothing (`.`, `..`, empty) is dropped, so
-a link never creates anything outside the library; a segment that starts
-with a dot names a hidden folder, and the link is refused rather than made
-there. If a name on the way is already a file, or the disk refuses, nothing
-is made and the link stays dead. Targets with an extension (`[[photo.png]]`)
-are attachments, not notes: they are never created. External URLs keep their
-behavior.
+name is, and an empty segment is dropped. A leading `/` or a `.`/`..`
+segment is walked as a link is read (see *Paths* above): `[[../X/Y]]` in
+`A/B/n.md` creates `A/X/Y.md`, `[[/X/Y]]` creates `X/Y.md`, and one that
+climbs out of the library makes nothing, so a link never creates anything
+outside the library. A segment that starts with a dot names a hidden folder,
+and the link is refused rather than made there. If a name on the way is
+already a file, or the disk refuses, nothing is made and the link stays dead.
+Targets with an extension (`[[photo.png]]`) are attachments, not notes: they
+are never created. External URLs keep their behavior.
 
 Notes opened without a library (editor-only mode) keep the old
 "link not found" outcome.

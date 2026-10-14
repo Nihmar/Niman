@@ -28,6 +28,22 @@ final class _FakeNote implements UnsavedNote {
   }
 }
 
+/// A note that gives the front of its buffer, and counts the whole reads.
+final class _HeadNote extends _FakeNote implements UnsavedNoteHead {
+  new(super.path) : super(unsaved: true);
+
+  int wholeReads = 0;
+
+  @override
+  String get text {
+    wholeReads++;
+    return 'abcdef';
+  }
+
+  @override
+  String textHead(int maxChars) => 'abcdef'.substring(0, maxChars);
+}
+
 void main() {
   test('hasUnsaved and unsavedPaths follow the tracked notes', () {
     final tracker = UnsavedTracker();
@@ -106,6 +122,27 @@ void main() {
       reason: 'the disk holds it now',
     );
   });
+
+  test(
+    'unsavedTextOf with maxChars asks a note for its head, not its text',
+    () {
+      final tracker = UnsavedTracker();
+      final head = _HeadNote('/lib/a.md');
+      final plain = _FakeNote('/lib/b.md', unsaved: true)..text = 'abcdef';
+      tracker
+        ..register(head)
+        ..register(plain);
+
+      expect(tracker.unsavedTextOf('/lib/a.md', maxChars: 3), 'abc');
+      expect(head.wholeReads, 0, reason: 'the note was not joined whole');
+      expect(tracker.unsavedTextOf('/lib/a.md'), 'abcdef');
+      expect(
+        tracker.unsavedTextOf('/lib/b.md', maxChars: 3),
+        'abcdef',
+        reason: 'a note with no head to give is read whole',
+      );
+    },
+  );
 
   test('saveAll surfaces the first write error', () async {
     final tracker = UnsavedTracker();

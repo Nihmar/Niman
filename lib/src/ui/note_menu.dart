@@ -161,7 +161,11 @@ final class NoteMenuButton extends StatelessWidget {
         if (textNote) ...[
           _item(NoteMenuAction.outline, Icons.toc, AppStrings.outlineTooltip),
           _item(NoteMenuAction.tags, Icons.sell_outlined, AppStrings.tagsTitle),
-          _item(NoteMenuAction.links, Icons.link, AppStrings.linksToNoteTitle),
+          _item(
+            NoteMenuAction.links,
+            Icons.link_outlined,
+            AppStrings.linksToNoteTitle,
+          ),
           if (kindSwitch case final kind?)
             _item(
               NoteMenuAction.kindSwitch,

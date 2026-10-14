@@ -261,7 +261,7 @@ void main() {
       expect(text.startsWith(preview.text), isTrue);
     });
 
-    test('a multi-byte character cut at the limit does not fail the read', () {
+    test('a multi-byte character cut at the limit is dropped, not mangled', () {
       final bytes = <int>[
         ...List.filled(PreviewLimits.bytes - 1, 0x61),
         ...[0xC3, 0xA9], // é, whose first byte is the last the read keeps
@@ -270,7 +270,22 @@ void main() {
       final preview = previewTextOfNoteFile(write('cut.md', bytes));
 
       expect(preview.truncated, isTrue);
-      expect(preview.text.startsWith('a' * 100), isTrue);
+      expect(preview.text, 'a' * (PreviewLimits.bytes - 1));
+    });
+
+    test('a head cut inside a 2-byte character keeps the rest decoded', () {
+      final bytes = <int>[
+        ...utf8.encode('é'),
+        ...List.filled(PreviewLimits.bytes - 3, 0x61),
+        ...utf8.encode('é'), // its first byte is the last the read keeps
+        ...List.filled(10, 0x62),
+      ];
+      final preview = previewTextOfNoteFile(write('mixed.md', bytes));
+
+      expect(preview.truncated, isTrue);
+      expect(preview.text, startsWith('éaaa'));
+      expect(preview.text, isNot(contains('\uFFFD')));
+      expect(preview.text, isNot(contains('Ã')));
     });
   });
 

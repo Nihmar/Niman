@@ -71,21 +71,15 @@ FakeLinkSource _library() {
   links.referrers['Newton.md'] = ['Laws/Three laws.md', 'Optics.md', 'Pic.md'];
   links.mentions['Laws/Three laws.md -> Newton.md'] = const Mention(
     context: 'Proposed by [[Newton]] in 1687',
-    line: 4,
     embed: false,
-    count: 2,
   );
   links.mentions['Optics.md -> Newton.md'] = const Mention(
     context: 'See also [[Newton]].',
-    line: 1,
     embed: false,
-    count: 1,
   );
   links.mentions['Pic.md -> Newton.md'] = const Mention(
     context: '![[Newton]]',
-    line: 0,
     embed: true,
-    count: 1,
   );
   return links;
 }
@@ -228,9 +222,7 @@ void main() {
 
       links.mentions['Optics.md -> Newton.md'] = const Mention(
         context: 'Now: [[Newton]] and more.',
-        line: 3,
         embed: false,
-        count: 1,
       );
       links.revisions['Optics.md'] = 1;
       links.announceChange();
@@ -345,9 +337,7 @@ void main() {
       links.referrers['Newton.md'] = ['Long.md'];
       links.mentions['Long.md -> Newton.md'] = Mention(
         context: List.filled(40, 'a very long context word').join(' '),
-        line: 0,
         embed: false,
-        count: 1,
       );
       await tester.binding.setSurfaceSize(const Size(360, 640));
       addTearDown(() => tester.binding.setSurfaceSize(null));

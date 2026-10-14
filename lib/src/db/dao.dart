@@ -93,14 +93,25 @@ final class NoteDao {
     return rows.isEmpty ? null : rows.first;
   }
 
-  /// The directory row whose path spells [path] in any case, or null: the
-  /// folder `NoteOps.ensureFolder` reuses rather than making a second one
-  /// under a different spelling (#847).
+  /// The directory row whose path spells [path], or null: the folder
+  /// `NoteOps.ensureFolder` reuses rather than making a second one under a
+  /// different spelling (#847).
+  ///
+  /// The exact spelling wins (#857: a library holding `Journal/` and
+  /// `journal/` must not have one redirected into the other), and it is the
+  /// only lookup the `notes_dir_path` index can serve (#858). Only a miss
+  /// falls back to a case-insensitive scan, which walks every folder row;
+  /// of several that differ only by case, the first by path is taken.
   Future<Note?> folderIgnoringCase(String path) async {
+    final exact =
+        await (_db.select(_db.notes)
+              ..where((t) => t.path.equals(path) & t.isDir.equals(true)))
+            .getSingleOrNull();
+    if (exact != null) return exact;
     final rows = await _db
         .customSelect(
           'SELECT * FROM notes WHERE is_dir = 1 AND path = ? COLLATE NOCASE '
-          'LIMIT 1',
+          'ORDER BY path LIMIT 1',
           variables: [Variable.withString(path)],
           readsFrom: {_db.notes},
         )

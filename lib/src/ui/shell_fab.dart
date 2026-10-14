@@ -9,6 +9,7 @@
 library;
 
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/ui/new_item_fab.dart';
@@ -41,10 +42,11 @@ final class ShellFab extends ChangeNotifier {
   double? _room;
 
   /// The room the button's menu may take, margins above and below it
-  /// kept; null before the body has been laid out.
+  /// kept — none, not less than none, on a body shorter than the margins;
+  /// null before the body has been laid out.
   double? get _menuRoom {
     final room = _room;
-    return room == null ? null : room - 2 * _margin;
+    return room == null ? null : math.max(0, room - 2 * _margin);
   }
 
   /// The gap the Scaffold keeps between its FAB and the edges of its body.

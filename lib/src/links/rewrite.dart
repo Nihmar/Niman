@@ -137,7 +137,7 @@ String? _wikiTarget(
 /// The new target of a bare wikilink that named a renamed file, or null.
 String? _renamedBareName(String target, String? from, String? to) {
   if (from == null || to == null) return null;
-  final written = _clean(target);
+  final written = LinkPaths.clean(target);
   if (!_nameVariants(from).contains(written.toLowerCase())) return null;
   return written.toLowerCase().endsWith('.md') ? to : _withoutMd(to);
 }
@@ -195,7 +195,7 @@ String? _movedPath(
   required LinkMoves moves,
   bool beside = false,
 }) {
-  final cleaned = _clean(target);
+  final cleaned = LinkPaths.clean(target);
   if (cleaned.isEmpty) return null;
   final dotted = _asWritten(target).startsWith('./');
   final candidates = <(String, _Form)>[];
@@ -288,15 +288,6 @@ String _withoutMd(String path) => path.toLowerCase().endsWith('.md')
 /// slashes.
 String _asWritten(String target) => target.trim().replaceAll(r'\', '/');
 
-/// [target] trimmed, its backslashes slashes, its leading `./` gone.
-String _clean(String target) {
-  var t = target.trim().replaceAll(r'\', '/');
-  while (t.startsWith('./')) {
-    t = t.substring(2);
-  }
-  return t;
-}
-
 /// The folder of [from], or an empty string when it is at the root.
 String _folderOf(String from) {
   final idx = from.lastIndexOf('/');
@@ -306,22 +297,21 @@ String _folderOf(String from) {
 /// [segments] walked from the folder of [from] (`.` stays, `..` up), or null
 /// when it climbs out of the library. A leading `/` is handled by the
 /// caller, which is the only place a rooted path exists here.
-String? _walk(List<String> segments, String? from) {
-  final path = <String>[
+///
+/// The resolver's own walk ([LinkPaths.walk]), so the two cannot part ways,
+/// fed the folder in its written case as a rooted path: [LinkPaths.folderOf]
+/// lowercases (a target is), and a path written back keeps its case. Rooted
+/// also keeps `..` past the root null with no [from], where a relative walk
+/// would drop it.
+String? _walk(List<String> segments, String? from) => LinkPaths.walk(
+  [
     for (final s in _folderOf(from ?? '').split('/'))
       if (s.isNotEmpty) s,
-  ];
-  for (final segment in segments) {
-    if (segment.isEmpty || segment == '.') continue;
-    if (segment != '..') {
-      path.add(segment);
-      continue;
-    }
-    if (path.isEmpty) return null;
-    path.removeLast();
-  }
-  return path.isEmpty ? null : path.join('/');
-}
+    ...segments,
+  ],
+  null,
+  rooted: true,
+);
 
 /// Whether [rune] can sit in a Markdown href as written.
 ///
