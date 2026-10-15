@@ -26,6 +26,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:niman/src/frontmatter/edit.dart';
 import 'package:niman/src/frontmatter/parser.dart';
 import 'package:niman/src/frontmatter/typed_fields.dart';
 import 'package:niman/src/ui/frontmatter_field_dialog.dart';
@@ -545,6 +546,33 @@ final class _FrontmatterFieldsState extends State<FrontmatterFields> {
     widget.onSet(field.key, _yamlOf(type, values));
   }
 
+  /// Opens the row of [key] for editing when the block already has it, and
+  /// says so: a key typed into the add row that is there is not a new field,
+  /// and writing its empty value would empty what it holds. A key no row can
+  /// show (a nested mapping) is left alone, written or opened by nothing.
+  bool _openExisting(String key) {
+    if (!hasFrontmatterKey(widget.note, key)) return false;
+    final block = frontmatterBlock(widget.note);
+    final fields = block == null
+        ? const <FrontmatterField>[]
+        : frontmatterFieldsIn(block.text).fields;
+    final type = fields.where((field) => field.key == key).firstOrNull?.type;
+    setState(() {
+      switch (type) {
+        case FrontmatterFieldType.text:
+        case FrontmatterFieldType.number:
+        case FrontmatterFieldType.date:
+          _justAdded = key;
+        case FrontmatterFieldType.list:
+          _addingItem = key;
+        case FrontmatterFieldType.boolean:
+        case null:
+          break;
+      }
+    });
+    return true;
+  }
+
   /// The panel's action row: a small box with a plus and the words that add a
   /// key — or, while one is being added where a pointer aims, its field.
   Widget _addRow(BuildContext context) {
@@ -562,6 +590,7 @@ final class _FrontmatterFieldsState extends State<FrontmatterFields> {
             onDone: (key) {
               setState(() => _addingKey = false);
               if (key == null || key.isEmpty) return;
+              if (_openExisting(key)) return;
               setState(() => _justAdded = key);
               widget.onSet(
                 key,

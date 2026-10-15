@@ -43,6 +43,16 @@ final class FrontmatterInlineValue extends StatefulWidget {
 final class _FrontmatterInlineValueState extends State<FrontmatterInlineValue> {
   late bool _editing = widget.startEditing && !widget.date;
 
+  @override
+  void didUpdateWidget(FrontmatterInlineValue old) {
+    super.didUpdateWidget(old);
+    // A row that is already there is asked to open too: a key typed into
+    // the add row that the block has.
+    if (widget.startEditing && !old.startEditing && !widget.date) {
+      _editing = true;
+    }
+  }
+
   Future<void> _pickDate() async {
     final anchor = menuAnchorOf(context);
     if (anchor == null) return;

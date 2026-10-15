@@ -370,4 +370,20 @@ void main() {
       expect(removeFrontmatterKey(pinned, 'pinned'), source);
     });
   });
+
+  group('hasFrontmatterKey', () {
+    test('finds a top-level key whatever its value is', () {
+      const note = '---\ntitle: A\nmeta:\n  inner: 1\nempty:\n---\nBody\n';
+      expect(hasFrontmatterKey(note, 'title'), isTrue);
+      expect(hasFrontmatterKey(note, 'meta'), isTrue);
+      expect(hasFrontmatterKey(note, 'empty'), isTrue);
+    });
+
+    test('not a nested key, an absent key or a note with no block', () {
+      const note = '---\ntitle: A\nmeta:\n  inner: 1\n---\nBody\n';
+      expect(hasFrontmatterKey(note, 'inner'), isFalse);
+      expect(hasFrontmatterKey(note, 'tags'), isFalse);
+      expect(hasFrontmatterKey('title: A\n', 'title'), isFalse);
+    });
+  });
 }

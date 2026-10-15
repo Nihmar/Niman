@@ -137,4 +137,54 @@ void main() {
     expect(find.byKey(const Key('calendar-popover')), findsNothing);
     expect(set.single, ('date', '2019-10-15'));
   });
+
+  // #962: a key that is already there is opened, not written over.
+  testWidgets('adding an existing key opens its row and writes nothing', (
+    tester,
+  ) async {
+    await pump(tester);
+    await tester.tap(find.byKey(const Key('frontmatter-add')));
+    await tester.pump();
+    await tester.enterText(field, 'title');
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pump();
+    expect(set, isEmpty);
+    expect(
+      tester
+          .widget<EditableText>(
+            find.descendant(of: field, matching: find.byType(EditableText)),
+          )
+          .controller
+          .text,
+      'Hello',
+    );
+  });
+
+  testWidgets('adding the key of a list opens a new item, and writes '
+      'nothing', (tester) async {
+    await pump(tester);
+    await tester.tap(find.byKey(const Key('frontmatter-add')));
+    await tester.pump();
+    await tester.enterText(field, 'tags');
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pump();
+    expect(set, isEmpty);
+    expect(field, findsOne);
+    await tester.enterText(field, 'b');
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pump();
+    expect(set.single, ('tags', '[a, b]'));
+  });
+
+  testWidgets('a key the panel has no row for is not written over', (
+    tester,
+  ) async {
+    await pump(tester, note: '---\ntitle: Hello\nmeta:\n  a: 1\n---\n');
+    await tester.tap(find.byKey(const Key('frontmatter-add')));
+    await tester.pump();
+    await tester.enterText(field, 'meta');
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pump();
+    expect(set, isEmpty);
+  });
 }

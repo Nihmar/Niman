@@ -114,6 +114,15 @@ String removeFrontmatterKey(String text, String key) {
   return lines.join('\n');
 }
 
+/// Whether the frontmatter block of [text] already declares the top-level
+/// [key] — whatever its value is, a mapping or an empty one included, which
+/// the typed fields leave out. [setFrontmatterKey] would replace it.
+bool hasFrontmatterKey(String text, String key) {
+  final block = _blockRange(text);
+  if (block == null) return false;
+  return _entryFor(_entriesOf(text.split('\n'), block), key) != null;
+}
+
 /// The line range of the frontmatter block: `start` is the opening `---`
 /// and `end` the closing fence, both indices into the split lines. Null
 /// when [text] has no block.
