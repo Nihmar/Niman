@@ -44,8 +44,14 @@ final class _DeckNoteViewState extends ConsumerState<DeckNoteView> {
   final MathCache _math = MathCache();
   StreamSubscription<String>? _changes;
 
-  /// Bumped by every read: one that lands after a later one is dropped.
+  /// Bumped by every read of the deck: one that lands after a later one is
+  /// dropped.
   int _reads = 0;
+
+  /// The same for the review states, whose reads overlap when a study
+  /// beside the deck grades quickly: each is an independent isolate, and the
+  /// last to land is not always the last asked.
+  int _stateReads = 0;
 
   @override
   void initState() {
@@ -99,8 +105,9 @@ final class _DeckNoteViewState extends ConsumerState<DeckNoteView> {
     final root = widget.host.libraryRoot;
     final path = _path;
     if (root == null || path == null) return;
+    final at = ++_stateReads;
     final states = await ref.read(deckReviewSourceProvider).read(root, path);
-    if (!mounted) return;
+    if (!mounted || at != _stateReads) return;
     setState(() => _states = states);
   }
 
