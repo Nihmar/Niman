@@ -333,6 +333,30 @@ void main() {
       expect(find.byKey(const Key('row-question-field')), findsOneWidget);
     });
 
+    testWidgets('an emptied answer of a :: line does not save', (tester) async {
+      const note = 'Capital of Peru :: Lima\n';
+      final host = await _show(tester, note);
+      await _doubleTap(
+        tester,
+        find.byKey(const Key('deck-row-Capital of Peru')),
+      );
+      await tester.enterText(find.byKey(const Key('row-answer-field')), '');
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pumpAndSettle();
+      expect(host.text, note);
+      expect(find.byKey(const Key('row-question-field')), findsOneWidget);
+    });
+
+    testWidgets('an emptied answer of a table row still saves', (tester) async {
+      final host = await _show(tester, _table);
+      await _doubleTap(tester, find.byKey(const Key('deck-row-begin')));
+      await tester.enterText(find.byKey(const Key('row-answer-field')), '');
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pumpAndSettle();
+      expect(host.text, isNot(_table));
+      expect(find.byKey(const Key('row-question-field')), findsNothing);
+    });
+
     testWidgets('a changed question leaves the old key in the review file', (
       tester,
     ) async {
@@ -548,6 +572,41 @@ void main() {
             .onPressed,
         isNull,
       );
+    });
+
+    testWidgets('Save is off while a :: line has no answer', (tester) async {
+      await _show(tester, 'Capital of Peru :: Lima\n', size: _phone);
+      await tester.longPress(find.byKey(const Key('deck-row-Capital of Peru')));
+      await tester.pumpAndSettle();
+      bool canSave() =>
+          tester
+              .widget<FilledButton>(find.byKey(const Key('card-sheet-save')))
+              .onPressed !=
+          null;
+      expect(canSave(), isTrue);
+      await tester.enterText(find.byKey(const Key('card-sheet-answer')), ' ');
+      await tester.pump();
+      expect(canSave(), isFalse);
+      await tester.enterText(
+        find.byKey(const Key('card-sheet-answer')),
+        'Lima',
+      );
+      await tester.pump();
+      expect(canSave(), isTrue);
+    });
+
+    testWidgets('a table row can be saved with an empty answer', (
+      tester,
+    ) async {
+      final host = await _show(tester, _table, size: _phone);
+      await tester.longPress(find.byKey(const Key('deck-row-begin')));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byKey(const Key('card-sheet-answer')), '');
+      await tester.pump();
+      await tester.tap(find.byKey(const Key('card-sheet-save')));
+      await tester.pumpAndSettle();
+      expect(host.text, contains('| begin |'));
+      expect(host.text, isNot(contains('began')));
     });
 
     testWidgets('Add card opens the sheet empty and Save appends', (

@@ -248,6 +248,43 @@ void main() {
       expect(catalog.snapshot, same(snapshot));
     });
 
+    test('decodes review.json again only when the file changed', () async {
+      write('a.md', deck(['1', '2']));
+      await scan();
+      await store.write('a.md', '1', state(due: today));
+      final file = File(p.join(root.path, ReviewStore.filePath));
+      final before = file.statSync().modified;
+      await catalog.load();
+
+      // The same size and the same time: the file is the version the
+      // catalog decoded, so the kept states are what a refresh counts.
+      final text = file.readAsStringSync();
+      file
+        ..writeAsStringSync(text.replaceFirst('"1"', '"2"'))
+        ..setLastModifiedSync(before);
+      expect(file.lengthSync(), text.length);
+      var snapshot = await catalog.reloadStates();
+      expect(snapshot.states['a.md']!.keys, ['1']);
+      snapshot = await catalog.load();
+      expect(snapshot.states['a.md']!.keys, ['1']);
+
+      // A version with another time is decoded.
+      file.setLastModifiedSync(before.add(const Duration(seconds: 5)));
+      snapshot = await catalog.reloadStates();
+      expect(snapshot.states['a.md']!.keys, ['2']);
+    });
+
+    test('forgets the states of a review.json that is gone', () async {
+      write('a.md', deck(['1']));
+      await scan();
+      await store.write('a.md', '1', state(due: today));
+      expect((await catalog.load()).states, isNotEmpty);
+
+      File(p.join(root.path, ReviewStore.filePath)).deleteSync();
+      expect((await catalog.load()).states, isEmpty);
+      expect((await catalog.reloadStates()).states, isEmpty);
+    });
+
     test('drops a deck gone from the index', () async {
       write('a.md', deck(['1']));
       await scan();

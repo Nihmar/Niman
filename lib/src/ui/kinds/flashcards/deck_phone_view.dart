@@ -45,6 +45,7 @@ final class DeckPhoneView extends StatelessWidget {
       question: draft.question,
       answer: draft.answer,
       cloze: cloze,
+      answerRequired: card.kind == CardKind.line,
     );
     switch (result) {
       case CardSaved(:final question, :final answer):

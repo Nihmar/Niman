@@ -30,13 +30,15 @@ final class CardDeleted extends CardSheetResult {
 /// **Delete** and **Save**.
 ///
 /// A cloze has one field, its sentence: the paragraph around the
-/// highlight, as the note writes it.
+/// highlight, as the note writes it. A `::` line is only a card with an
+/// answer, so with [answerRequired] Save waits for one.
 Future<CardSheetResult?> showCardSheet(
   BuildContext context, {
   String question = '',
   String answer = '',
   bool isNew = false,
   bool cloze = false,
+  bool answerRequired = false,
 }) => showModalBottomSheet<CardSheetResult>(
   context: context,
   isScrollControlled: true,
@@ -46,6 +48,7 @@ Future<CardSheetResult?> showCardSheet(
     answer: answer,
     isNew: isNew,
     cloze: cloze,
+    answerRequired: answerRequired,
   ),
 );
 
@@ -55,12 +58,14 @@ final class _CardSheet extends StatefulWidget {
     required this.answer,
     required this.isNew,
     required this.cloze,
+    required this.answerRequired,
   });
 
   final String question;
   final String answer;
   final bool isNew;
   final bool cloze;
+  final bool answerRequired;
 
   @override
   State<_CardSheet> createState() => _CardSheetState();
@@ -72,7 +77,7 @@ final class _CardSheetState extends State<_CardSheet> {
   )..addListener(_changed);
   late final TextEditingController _answer = TextEditingController(
     text: widget.answer,
-  );
+  )..addListener(_changed);
 
   void _changed() => setState(() {});
 
@@ -83,7 +88,9 @@ final class _CardSheetState extends State<_CardSheet> {
     super.dispose();
   }
 
-  bool get _canSave => _question.text.trim().isNotEmpty;
+  bool get _canSave =>
+      _question.text.trim().isNotEmpty &&
+      (!widget.answerRequired || _answer.text.trim().isNotEmpty);
 
   void _save() {
     if (!_canSave) return;

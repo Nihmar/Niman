@@ -34,6 +34,42 @@ void main() {
     expect(ReviewStore.filePath, '.niman/review.json');
   });
 
+  group('reading the whole file only when it changed (#967)', () {
+    test('a file still the version known is not decoded again', () async {
+      await store.write('a.md', '1', state());
+      final first = await store.readAllIfChanged(null);
+      expect(first.stamp, isNotNull);
+      expect(first.states, hasLength(1));
+
+      final again = await store.readAllIfChanged(first.stamp);
+      expect(again.stamp, first.stamp);
+      expect(again.states, isNull);
+    });
+
+    test('a write makes the file a version to read', () async {
+      await store.write('a.md', '1', state());
+      final known = (await store.readAllIfChanged(null)).stamp;
+
+      await store.write('a.md', '2', state(interval: 7));
+      final read = await store.readAllIfChanged(known);
+      expect(read.stamp, isNot(known));
+      expect(read.states!['a.md'], hasLength(2));
+    });
+
+    test('a file that is missing is read as empty, and has no stamp', () async {
+      final read = await store.readAllIfChanged(null);
+      expect(read.stamp, isNull);
+      expect(read.states, isEmpty);
+
+      await store.write('a.md', '1', state());
+      final known = (await store.readAllIfChanged(null)).stamp;
+      kept().deleteSync();
+      final gone = await store.readAllIfChanged(known);
+      expect(gone.stamp, isNull);
+      expect(gone.states, isEmpty);
+    });
+  });
+
   test('reads nothing from a library never studied', () async {
     expect(await store.read('a.md'), isEmpty);
     expect(await store.readAll(), isEmpty);
@@ -137,6 +173,65 @@ void main() {
       await store.moved('Studio/Ver', 'Studio/Other');
       expect(kept().readAsStringSync(), before);
     });
+
+    test('follows the file when it changes between moves', () async {
+      await store.moved('Studio/Verbs.md', 'Archive/Verbs.md');
+      await store.write('Studio/New.md', 'k', state(interval: 4));
+      await store.moved('Studio/New.md', 'Archive/New.md');
+      expect(await store.read('Archive/New.md'), {'k': state(interval: 4)});
+      expect(await store.read('Archive/Verbs.md'), {'k': state()});
+    });
+
+    test(
+      'does not go through the file for a note it has no entry for',
+      () async {
+        // The paths of this version of the file are known now...
+        await store.moved('Elsewhere.md', 'Somewhere.md');
+        // ...so a copy with an entry of its own, same size and same time,
+        // is the version they came from, and a move that no entry asks for
+        // never opens it.
+        final before = kept().statSync().modified;
+        final text = kept().readAsStringSync();
+        kept()
+          ..writeAsStringSync(text.replaceFirst('Studio 2/', 'Studio 3/'))
+          ..setLastModifiedSync(before);
+        await store.moved('Studio 3/Verbs.md', 'Archive/Verbs.md');
+        expect(await store.read('Archive/Verbs.md'), isEmpty);
+        expect(await store.read('Studio 3/Verbs.md'), isNotEmpty);
+
+        // A version with another time is looked at again.
+        kept().setLastModifiedSync(before.add(const Duration(seconds: 5)));
+        await store.moved('Studio 3/Verbs.md', 'Archive/Verbs.md');
+        expect(await store.read('Archive/Verbs.md'), isNotEmpty);
+      },
+    );
+  });
+
+  group('a move right after a grade not yet on disk', () {
+    Future<void> gradeThenMove() async {
+      // Started together: the grade is queued, the file has no entry yet.
+      final grade = store.write('Studio/New.md', 'k', state(interval: 4));
+      final move = store.moved('Studio/New.md', 'Archive/New.md');
+      await Future.wait([grade, move]);
+      expect(await store.read('Archive/New.md'), {'k': state(interval: 4)});
+      expect(await store.read('Studio/New.md'), isEmpty);
+    }
+
+    test('carries the entry in a library with no review file', gradeThenMove);
+
+    test('carries the entry when the file and its paths are known', () async {
+      await store.write('Studio/Verbs.md', 'k', state());
+      await store.moved('Elsewhere.md', 'Somewhere.md');
+      await gradeThenMove();
+      expect(await store.read('Studio/Verbs.md'), isNotEmpty);
+    });
+  });
+
+  test('a move in a library with no review file makes none', () async {
+    await store.moved('Studio/Verbs.md', 'Archive/Verbs.md');
+    await store.moved('Studio', 'Lessons');
+    expect(kept().existsSync(), isFalse);
+    expect(kept().parent.existsSync(), isFalse);
   });
 
   group('removed', () {
