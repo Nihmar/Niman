@@ -2217,7 +2217,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// window (#769): the panes are on screen beside it, and its hits stay
   /// there to step through.
   void _activateTab(int pane, int index) {
-    if (_compareShows) setState(() => _compareShows = false);
+    // Only the pane that shows the compare page gives it up: a version
+    // stays open beside the note being edited in the other one (#975).
+    if (_compareIn(pane)) setState(() => _compareShows = false);
     if (pane == _reviewPaneShown) _reviewTab.show(on: false);
     if (_tab != ShellTab.files && !_sidebarShowsView) {
       _onDestinationSelected(ShellTab.files);

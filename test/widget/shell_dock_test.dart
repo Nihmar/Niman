@@ -169,6 +169,53 @@ void main() {
     expect(find.byKey(const Key('compare-tab')), findsOne);
   });
 
+  testWidgets('a tab clicked in the other pane leaves the compare page where '
+      'it is (#975)', (tester) async {
+    controller.seedVersion(
+      'alpha.md',
+      number: 1,
+      savedAt: DateTime(2026, 10, 3, 14, 2),
+      text: 'the old alpha',
+    );
+    await pumpAt(tester, const Size(2400, 900));
+    // beta beside alpha, then the focus back in alpha's pane.
+    await tester.tapAt(
+      tester.getCenter(noteRow('beta.md')),
+      buttons: kSecondaryButton,
+    );
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('menu-open-beside')));
+    await settle(tester);
+    final divider = tester.getRect(find.byKey(const Key('pane-divider')));
+    await tester.tapAt(Offset(divider.left - 80, 400));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('dock-pane-history')));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('dock-history-1')));
+    await settle(tester);
+    expect(find.byType(NoteVersionScreen), findsOne);
+
+    // A note tab of the pane beside: the version stays open next to it.
+    await tester.tap(
+      find.descendant(
+        of: find.byKey(const Key('pane-tabs-1')),
+        matching: find.byKey(const Key('note-tab-0')),
+      ),
+    );
+    await settle(tester);
+    expect(find.byType(NoteVersionScreen), findsOne);
+
+    // One of its own pane's takes the page back.
+    await tester.tap(
+      find.descendant(
+        of: find.byKey(const Key('pane-tabs-0')),
+        matching: find.byKey(const Key('note-tab-0')),
+      ),
+    );
+    await settle(tester);
+    expect(find.byType(NoteVersionScreen), findsNothing);
+  });
+
   testWidgets('the title bar menu runs a command, its key beside it (#712)', (
     tester,
   ) async {
