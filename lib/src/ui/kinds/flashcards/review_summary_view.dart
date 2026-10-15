@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:niman/src/flashcards/grade.dart';
-import 'package:niman/src/flashcards/study_session.dart';
+import 'package:niman/src/flashcards/session_summary.dart';
 import 'package:niman/src/ui/kinds/flashcards/next_label.dart';
 import 'package:niman/src/ui/kinds/flashcards/review_run.dart';
 import 'package:niman/src/ui/strings.dart';

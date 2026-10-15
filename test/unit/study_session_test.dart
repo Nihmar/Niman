@@ -5,7 +5,9 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/flashcards/flash_card.dart';
 import 'package:niman/src/flashcards/grade.dart';
+import 'package:niman/src/flashcards/queue_kind.dart';
 import 'package:niman/src/flashcards/review_state.dart';
+import 'package:niman/src/flashcards/session_deck.dart';
 import 'package:niman/src/flashcards/sm2.dart';
 import 'package:niman/src/flashcards/study_session.dart';
 

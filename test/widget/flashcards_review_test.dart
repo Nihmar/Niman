@@ -8,6 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/flashcards/deck.dart';
 import 'package:niman/src/flashcards/grade.dart';
 import 'package:niman/src/flashcards/review_state.dart';
+import 'package:niman/src/flashcards/session_deck.dart';
 import 'package:niman/src/flashcards/study_session.dart';
 import 'package:niman/src/ui/kinds/flashcards/deck_review_source.dart';
 import 'package:niman/src/ui/kinds/flashcards/review_run.dart';

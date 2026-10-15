@@ -5,6 +5,7 @@ import 'package:niman/src/flashcards/grade.dart';
 import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/ui/device_shape.dart';
 import 'package:niman/src/ui/kinds/flashcards/card_text.dart';
+import 'package:niman/src/ui/kinds/flashcards/grade_button.dart';
 import 'package:niman/src/ui/kinds/flashcards/next_label.dart';
 import 'package:niman/src/ui/kinds/flashcards/review_run.dart';
 import 'package:niman/src/ui/kinds/flashcards/review_summary_view.dart';
@@ -254,7 +255,7 @@ final class _ReviewViewState extends State<ReviewView> {
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: _GradeButton(
+                child: GradeButton(
                   grade: grade,
                   when: comesBackLabel(previews[grade] ?? 0),
                   shortcut: keys ? '${index + 1}' : null,
@@ -262,47 +263,6 @@ final class _ReviewViewState extends State<ReviewView> {
                 ),
               ),
             ),
-        ],
-      ),
-    );
-  }
-}
-
-/// One of the four grades: its name, when it brings the card back, and
-/// its key where there is a keyboard.
-final class _GradeButton extends StatelessWidget {
-  const new({
-    required this.grade,
-    required this.when,
-    required this.shortcut,
-    required this.onPressed,
-  });
-
-  final Grade grade;
-  final String when;
-  final String? shortcut;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    final small = theme.textTheme.bodySmall?.copyWith(
-      color: scheme.onSurfaceVariant,
-    );
-    return OutlinedButton(
-      key: Key('review-grade-${grade.name}'),
-      style: OutlinedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
-        foregroundColor: grade == Grade.again ? scheme.error : null,
-      ),
-      onPressed: onPressed,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(gradeName(grade), overflow: TextOverflow.ellipsis),
-          Text(when, style: small, overflow: TextOverflow.ellipsis),
-          if (shortcut case final key?) Text(key, style: small),
         ],
       ),
     );

@@ -7,112 +7,14 @@
 /// every card's state, so it needs no read in between.
 library;
 
-import 'package:meta/meta.dart';
-import 'package:niman/src/flashcards/flash_card.dart';
 import 'package:niman/src/flashcards/grade.dart';
+import 'package:niman/src/flashcards/queue_kind.dart';
 import 'package:niman/src/flashcards/review_state.dart';
+import 'package:niman/src/flashcards/session_card.dart';
+import 'package:niman/src/flashcards/session_deck.dart';
+import 'package:niman/src/flashcards/session_summary.dart';
 import 'package:niman/src/flashcards/sm2.dart';
-
-/// A deck as a session takes it: its cards, read, and their states.
-@immutable
-final class SessionDeck {
-  /// The deck at [path] with [cards] in note order, and [states] by key.
-  const new({
-    required this.path,
-    required this.cards,
-    this.states = const <String, ReviewState>{},
-  });
-
-  /// The note's library-relative path.
-  final String path;
-
-  /// Its cards, in note order.
-  final List<FlashCard> cards;
-
-  /// Their review states, by key; a card with none is new.
-  final Map<String, ReviewState> states;
-}
-
-/// One card of a session: where it is from, and the card.
-@immutable
-final class SessionCard {
-  /// [card] of the deck at [deckPath].
-  const new(this.deckPath, this.card);
-
-  /// The deck note's library-relative path.
-  final String deckPath;
-
-  /// The card.
-  final FlashCard card;
-
-  /// The card's identity in a library: its deck and its key.
-  ({String deck, String key}) get id => (deck: deckPath, key: card.key);
-}
-
-/// Why a card is in the queue.
-enum QueueKind {
-  /// Reviewed before, its day has come.
-  due,
-
-  /// Never reviewed.
-  fresh,
-
-  /// Graded Again in this session, asked once more.
-  again,
-}
-
-/// A change of a card's state for the caller to write: [state] null takes
-/// the card back to never reviewed (`ReviewStore.write`).
-@immutable
-final class StateWrite {
-  /// Sets [key] of the deck at [path] to [state].
-  const new(this.path, this.key, this.state);
-
-  /// The deck note's library-relative path.
-  final String path;
-
-  /// The card's key.
-  final String key;
-
-  /// The state to write; null for none.
-  final ReviewState? state;
-}
-
-/// What a session came to.
-@immutable
-final class SessionSummary {
-  /// A summary of a session.
-  const new({
-    required this.reviewed,
-    required this.grades,
-    required this.elapsed,
-    required this.nextDue,
-    required this.nextCount,
-  });
-
-  /// The cards graded, each once however many times it came back.
-  final int reviewed;
-
-  /// How many times each grade was given; [Grade.again] is the number of
-  /// times a card was asked again.
-  final Map<Grade, int> grades;
-
-  /// From the start to the last grade, or to now while the session runs.
-  final Duration elapsed;
-
-  /// The next day, after today, on which the session's decks have a card
-  /// due; null when none has.
-  final DateTime? nextDue;
-
-  /// How many cards of the session's decks are due on [nextDue].
-  final int nextCount;
-
-  /// The number of Again grades.
-  int get again => grades[Grade.again] ?? 0;
-
-  /// All the grades given.
-  int get graded => grades.values.fold(0, (sum, count) => sum + count);
-}
+import 'package:niman/src/flashcards/state_write.dart';
 
 /// One grade given, kept to take it back.
 final class _Entry {
