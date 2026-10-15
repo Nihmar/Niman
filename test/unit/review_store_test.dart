@@ -207,6 +207,26 @@ void main() {
     );
   });
 
+  group('a move right after a grade not yet on disk', () {
+    Future<void> gradeThenMove() async {
+      // Started together: the grade is queued, the file has no entry yet.
+      final grade = store.write('Studio/New.md', 'k', state(interval: 4));
+      final move = store.moved('Studio/New.md', 'Archive/New.md');
+      await Future.wait([grade, move]);
+      expect(await store.read('Archive/New.md'), {'k': state(interval: 4)});
+      expect(await store.read('Studio/New.md'), isEmpty);
+    }
+
+    test('carries the entry in a library with no review file', gradeThenMove);
+
+    test('carries the entry when the file and its paths are known', () async {
+      await store.write('Studio/Verbs.md', 'k', state());
+      await store.moved('Elsewhere.md', 'Somewhere.md');
+      await gradeThenMove();
+      expect(await store.read('Studio/Verbs.md'), isNotEmpty);
+    });
+  });
+
   test('a move in a library with no review file makes none', () async {
     await store.moved('Studio/Verbs.md', 'Archive/Verbs.md');
     await store.moved('Studio', 'Lessons');

@@ -152,7 +152,11 @@ final class ReviewStore {
   /// the paths it holds, which are read once per version of the file and
   /// kept ([ReviewFileStamp]) for the next move.
   Future<void> moved(String from, String to) async {
-    if (!await _mayHold(from)) return;
+    // A write of this app still in the file's queue is not on disk yet, so
+    // neither the stat nor the kept paths can see it: a first grade of a
+    // deck, then the deck renamed, must carry the entry the grade is about
+    // to make. With one in flight the move takes its place in the queue.
+    if (!_writing && !await _mayHold(from) && !_writing) return;
     await _told(_state.moved(from, to));
   }
 
@@ -219,9 +223,27 @@ final class ReviewStore {
       : null;
 
   /// Tells [changes] that the file was written, once [wrote] says it was.
+  ///
+  /// Every write of the file comes through here, called as the write is
+  /// started, so the count of those in flight is exact.
   Future<void> _told(Future<bool> wrote) async {
-    if (await wrote && _changes.hasListener) _changes.add(root);
+    _inFlight[root] = (_inFlight[root] ?? 0) + 1;
+    try {
+      if (await wrote && _changes.hasListener) _changes.add(root);
+    } finally {
+      final left = _inFlight[root]! - 1;
+      if (left == 0) {
+        _inFlight.remove(root);
+      } else {
+        _inFlight[root] = left;
+      }
+    }
   }
+
+  /// How many writes of this app are started and not finished, by library.
+  static final Map<String, int> _inFlight = {};
+
+  bool get _writing => _inFlight.containsKey(root);
 
   /// A note's raw cards, copied so an update can change them: none for an
   /// entry that is not an object.
