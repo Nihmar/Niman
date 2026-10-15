@@ -113,7 +113,7 @@ final class EditorFormatKeys {
     // test round). The command's own early handler takes it from here.
     for (final MapEntry(key: command, value: chosen) in map.overrides.entries) {
       if (chosen == null || !chosen.accepts(event, keyboard)) continue;
-      if (map.commandOn(chosen) == command) return false;
+      if (map.commandsOn(chosen).contains(command)) return false;
     }
     for (final item in ToolbarItem.values) {
       final keys = map.editorBindingOf(item);

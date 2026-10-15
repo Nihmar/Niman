@@ -121,12 +121,47 @@ void main() {
     await tester.pumpAndSettle();
     final map = AppKeyMap.current.value;
     expect(
-      map.commandOn(
+      map.commandsOn(
         const SingleActivator(LogicalKeyboardKey.keyB, control: true),
       ),
-      AppCommand.newNote,
+      [AppCommand.newNote],
     );
     expect(map.bindingOf(AppCommand.toggleSidebar), isNull);
+  });
+
+  testWidgets('a key two commands ship on names both, and moving frees both', (
+    tester,
+  ) async {
+    // F5 presents slides and studies a deck, by design (#963).
+    const f5 = SingleActivator(LogicalKeyboardKey.f5);
+    expect(KeyMap.defaults.commandsOn(f5), [
+      AppCommand.presentSlides,
+      AppCommand.studyDeck,
+    ]);
+    await pump(tester);
+    await record(
+      tester,
+      AppCommand.newNote,
+      LogicalKeyboardKey.f5,
+      control: false,
+    );
+    final dialog = find.byKey(const Key('shortcut-conflict'));
+    expect(dialog, findsOne);
+    for (final command in [AppCommand.presentSlides, AppCommand.studyDeck]) {
+      expect(
+        find.descendant(
+          of: dialog,
+          matching: find.textContaining(appCommandLabel(command)),
+        ),
+        findsOne,
+      );
+    }
+    await tester.tap(find.byKey(const Key('shortcut-conflict-yes')));
+    await tester.pumpAndSettle();
+    final map = AppKeyMap.current.value;
+    expect(map.commandsOn(f5), [AppCommand.newNote]);
+    expect(map.bindingOf(AppCommand.presentSlides), isNull);
+    expect(map.bindingOf(AppCommand.studyDeck), isNull);
   });
 
   testWidgets('declining a conflict changes nothing', (tester) async {
