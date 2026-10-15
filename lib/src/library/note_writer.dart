@@ -549,9 +549,11 @@ Future<void> _renameOrCopy(String abs, String tempAbs) async {
 /// stands in for hangs on Windows (issue #103), and the staged one is a
 /// rename too (#492). [renameStaged] and [grace] are seams for a test that
 /// hangs the staged rename without waiting the real grace out. Every delete
-/// the copy makes gets that grace too — the abandoned rename may hold the
-/// staged file, and a delete that waits on it would stall the run the same
-/// way; [deleteStaged] is the seam for a delete that hangs.
+/// of the staged file gets that grace too — the abandoned rename may hold
+/// it, and a delete that waits on it would stall the run the same way;
+/// [deleteStaged] is the seam for a delete that hangs. The temp [tempAbs]
+/// is no file of that rename's: its delete keeps the real [_renameGrace]
+/// whatever [grace] a test passes (#992), and [deleteTemp] is its seam.
 ///
 /// A temp that will not delete is left where it is. The abandoned rename
 /// may still hold it; it is hidden, the indexer skips it, and the bytes
@@ -563,6 +565,7 @@ Future<void> copyFileOver(
   Duration grace = _renameGrace,
   Future<void> Function(File staged, String abs)? renameStaged,
   Future<void> Function(File staged)? deleteStaged,
+  Future<void> Function(File temp)? deleteTemp,
 }) async {
   const log = AppLogger(name: 'swap');
   final name = p.basename(abs);
@@ -570,6 +573,7 @@ Future<void> copyFileOver(
   final rename =
       renameStaged ?? (File staged, String target) => staged.rename(target);
   final delete = deleteStaged ?? (File staged) => staged.delete();
+  final dropTemp = deleteTemp ?? (File temp) => temp.delete();
   final staged = atomicTempPath(
     File(abs),
     DateTime.now().microsecondsSinceEpoch,
@@ -610,7 +614,7 @@ Future<void> copyFileOver(
   }
   log.warning('"$name": copied $expected bytes in place');
   try {
-    await File(tempAbs).delete().timeout(grace);
+    await dropTemp(File(tempAbs)).timeout(_renameGrace);
   } on Object catch (error) {
     log.warning('"$name": the temp could not be removed: $error');
   }

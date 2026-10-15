@@ -204,6 +204,30 @@ void main() {
       expect(File(source).existsSync(), isFalse);
     });
 
+    test('a slow delete of the temp is not cut short by the staged grace '
+        '(#992)', () async {
+      // The grace a test shortens is the staged rename's: the abandoned
+      // rename may hold the staged file, never the temp. A temp delete that
+      // takes longer than that grace — a loaded disk, a busy runner — still
+      // finishes before the copy returns.
+      final target = p.join(root.path, 'clip.wav');
+      final source = await temp('.clip.wav.niman-tmp-copy-9', 'audio bytes');
+
+      await copyFileOver(
+        target,
+        source,
+        grace: const Duration(milliseconds: 50),
+        renameStaged: (staged, abs) => Completer<void>().future,
+        deleteTemp: (temp) async {
+          await Future<void>.delayed(const Duration(milliseconds: 200));
+          await temp.delete();
+        },
+      ).timeout(const Duration(seconds: 5));
+
+      expect(File(target).readAsStringSync(), 'audio bytes');
+      expect(File(source).existsSync(), isFalse);
+    });
+
     test('a copy that fails leaves the live file exactly as it was', () async {
       final target = p.join(root.path, 'clip.wav');
       final before = Uint8List(1 << 16)..fillRange(0, 1 << 16, 0x61);
