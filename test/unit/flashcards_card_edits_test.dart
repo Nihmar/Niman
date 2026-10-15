@@ -168,6 +168,13 @@ void main() {
       expect(read(out).cards, hasLength(1));
     });
 
+    test('an emptied answer leaves the note as it was', () {
+      const note = 'Capital of Peru :: Lima\n';
+      expect(rewrite(note, 0, answer: ''), note);
+      expect(rewrite(note, 0, question: 'Capital', answer: '  '), note);
+      expect(keys(rewrite(note, 0, answer: '')), ['Capital of Peru']);
+    });
+
     test('markup stays as typed', () {
       const note = '- *to tread* :: `trod`\n';
       final out = rewrite(note, 0, answer: '`trod` or `treaded`');

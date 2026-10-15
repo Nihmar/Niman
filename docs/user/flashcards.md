@@ -93,7 +93,8 @@ the second marked **Repeated** in the deck.
   question opens a sheet to change or delete it.
 
 Every edit is an edit of the note — only that card's characters change —
-and Undo takes it back.
+and Undo takes it back. A card written as a `::` line needs an answer: the
+editors do not save it without one (a table row may keep an empty cell).
 
 The deck's ⋮: **Study this deck** (`F5`), **Edit as Markdown**,
 **Question and answer columns…**, **Reset the review of this deck…** (the

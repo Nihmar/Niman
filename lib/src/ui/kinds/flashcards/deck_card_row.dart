@@ -95,8 +95,13 @@ final class _DeckCardRowState extends State<DeckCardRow> {
 
   void _cancel() => setState(() => _editing = false);
 
+  /// A `::` line without an answer is not a card, so it is not saved.
+  bool get _canSave =>
+      _question.text.trim().isNotEmpty &&
+      (widget.card.kind != CardKind.line || _answer.text.trim().isNotEmpty);
+
   void _save() {
-    if (_question.text.trim().isEmpty) return;
+    if (!_canSave) return;
     setState(() => _editing = false);
     if (_cloze) {
       widget.onSaveSentence(_question.text);

@@ -30,6 +30,10 @@ String flashcardNoteContent() =>
 /// [question] and answer [answer], as Markdown. A piece equal to what the
 /// card has is left as written.
 ///
+/// A `::` line cannot be rewritten to an empty answer: `Q ::` has no divider
+/// and would stop being a card, so the text comes back as it was. (A table
+/// row keeps its place with an empty cell.)
+///
 /// A cloze is rewritten whole by [rewriteCloze]; this throws for one.
 String rewriteCard(
   String text,
@@ -196,6 +200,8 @@ String _rewriteRow(String text, FlashCard card, String asked, String replied) {
 }
 
 String _rewriteLine(String text, FlashCard card, String asked, String replied) {
+  // An emptied answer would take the divider with it (see [rewriteCard]).
+  if (replied.isEmpty) return text;
   final source = card.source;
   final question = _lineText(asked).replaceAll(_divider, ' : ');
   final answer = _lineText(replied);
