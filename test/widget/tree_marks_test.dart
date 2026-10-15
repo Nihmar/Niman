@@ -58,11 +58,6 @@ void main() {
     await shiftTap(tester, 'charlie.md');
     expect(calls.opened, ['Zulu', 'alpha.md'], reason: 'a mark opens none');
 
-    await tester.tap(noteRow('bravo.md'), buttons: kSecondaryButton);
-    await tester.pumpAndSettle();
-    expect(calls.menus.single, {'alpha.md', 'bravo.md', 'charlie.md'});
-    expect(calls.rowMenus, isEmpty);
-
     await tester.sendKeyEvent(LogicalKeyboardKey.delete);
     await tester.pumpAndSettle();
     expect(calls.deleted.single, {'alpha.md', 'bravo.md', 'charlie.md'});
@@ -70,6 +65,15 @@ void main() {
     // The marks went with the delete: a right click is a row's again.
     await tester.tap(noteRow('bravo.md'), buttons: kSecondaryButton);
     await tester.pumpAndSettle();
+    expect(calls.rowMenus, ['bravo.md']);
+
+    // Marked again, a right click on them opens their menu.
+    await tester.tap(noteRow('alpha.md'));
+    await tester.pumpAndSettle();
+    await shiftTap(tester, 'charlie.md');
+    await tester.tap(noteRow('bravo.md'), buttons: kSecondaryButton);
+    await tester.pumpAndSettle();
+    expect(calls.menus.single, {'alpha.md', 'bravo.md', 'charlie.md'});
     expect(calls.rowMenus, ['bravo.md']);
   });
 
@@ -81,18 +85,78 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
-    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    // Space marks or unmarks the cursor's row: bravo goes.
     await tester.sendKeyEvent(LogicalKeyboardKey.space);
+    await tester.pump();
+    await tester.tap(noteRow('alpha.md'), buttons: kSecondaryButton);
+    await tester.pumpAndSettle();
+    expect(calls.menus.single, {'Zulu', 'alpha.md'});
+
+    // The menu acted: the marks went with it (#979), so a right click on
+    // a row that was marked is that row's again.
+    await tester.tap(noteRow('alpha.md'), buttons: kSecondaryButton);
+    await tester.pumpAndSettle();
+    expect(calls.rowMenus, ['alpha.md']);
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
     await tester.pump();
     await tester.tap(noteRow('charlie.md'), buttons: kSecondaryButton);
     await tester.pumpAndSettle();
-    expect(calls.menus.single, {'Zulu', 'alpha.md', 'bravo.md', 'charlie.md'});
+    expect(calls.menus.last.length, greaterThan(1));
 
     await tester.sendKeyEvent(LogicalKeyboardKey.escape);
     await tester.pump();
     await tester.tap(noteRow('charlie.md'), buttons: kSecondaryButton);
     await tester.pumpAndSettle();
-    expect(calls.rowMenus, ['charlie.md']);
+    expect(calls.rowMenus, ['alpha.md', 'charlie.md']);
+  });
+
+  testWidgets('marks outlive neither the marked menu nor a plain move of the '
+      'cursor: Delete then goes to the cursor row (#979)', (tester) async {
+    await pump(tester);
+    await tester.tap(noteRow('alpha.md'));
+    await tester.pumpAndSettle();
+    await shiftTap(tester, 'charlie.md');
+    await tester.tap(noteRow('bravo.md'), buttons: kSecondaryButton);
+    await tester.pumpAndSettle();
+    expect(calls.menus, hasLength(1));
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.sendKeyEvent(LogicalKeyboardKey.delete);
+    await tester.pumpAndSettle();
+    expect(calls.deleted, isEmpty, reason: 'the menu let the marks go');
+    expect(calls.deletedOne, ['delta.md']);
+
+    // Shift+arrows mark; a plain arrow elsewhere lets them go.
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.sendKeyEvent(LogicalKeyboardKey.delete);
+    await tester.pumpAndSettle();
+    expect(calls.deleted, isEmpty);
+    expect(calls.deletedOne.last, 'alpha.md');
+  });
+
+  testWidgets('marks of rows that left the tree are dropped, so Delete does '
+      'not go to paths that are gone (#979)', (tester) async {
+    await pump(tester);
+    await tester.tap(noteRow('alpha.md'));
+    await tester.pumpAndSettle();
+    await shiftTap(tester, 'charlie.md');
+    await session.delete('alpha.md');
+    await session.delete('bravo.md');
+    await tester.pumpAndSettle();
+    expect(noteRow('alpha.md'), findsNothing);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.delete);
+    await tester.pumpAndSettle();
+    expect(calls.deleted, isEmpty);
+    expect(calls.deletedOne, ['charlie.md']);
   });
 
   testWidgets('Ctrl+Enter opens in a new tab; letters jump by name', (
@@ -120,6 +184,7 @@ final class _Calls {
   final rowMenus = <String>[];
   final menus = <Set<String>>[];
   final deleted = <Set<String>>[];
+  final deletedOne = <String>[];
 }
 
 final class _Host extends StatefulWidget {
@@ -154,6 +219,7 @@ final class _HostState extends State<_Host> {
       onSecondaryTapDown: (note, _) => calls.rowMenus.add(note.path),
       onMarkedMenu: (paths, _) => calls.menus.add(paths.toSet()),
       onDeleteMarked: (paths) => calls.deleted.add(paths.toSet()),
+      onDelete: calls.deletedOne.add,
     );
   }
 }
