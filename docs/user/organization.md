@@ -242,11 +242,12 @@ On a desktop the tree also takes (#712): `Ctrl`+`Enter` opens the note
 under the cursor in a new tab, and typing a name jumps to the next row that
 starts with it. **Several rows at once:** `Shift`+click marks the rows from
 the cursor's to the one clicked, `Shift`+`↑`/`↓` marks on from the
-keyboard, `Space` marks or unmarks the cursor's row, and `Esc`, a plain
-click, a plain arrow (or a typed name) moving the cursor, or the menu or
-`Delete` acting on them lets them go — as does a row leaving the tree. A right click on a marked row opens their menu —
-*Selected: N*, **Move…** into one folder, **Delete** — and `Delete` deletes
-them all; into the trash, one **Undo** brings them all back. (A file's own
+keyboard, `Space` marks or unmarks the cursor's row, and `Esc` or a plain
+click lets them go — as does a row leaving the tree. A right click on a
+marked row opens their menu — *Selected: N*, **Move…** into one folder,
+**Delete** — and `Delete` with the cursor on a marked row deletes them all;
+on any other row it deletes that row alone, and the marks let go. Into the
+trash, one **Undo** brings them all back. (A file's own
 notes stay where they are in that case: the question about them is asked
 for one file at a time.) **Reveal in tree**, in the palette and the View
 menu, shows the note on screen as the tree's row and gives the tree the

@@ -231,9 +231,8 @@ final class _NoteTreeState extends State<NoteTree> {
       widget.focusNode ?? FocusNode(debugLabel: 'note-tree');
 
   /// The rows marked together (#712), by path: `Shift`+click, `Shift`+the
-  /// arrows and `Space` mark; a plain click, `Esc`, a plain move of the
-  /// cursor and the marked menu or `Delete` acting let go (#979), and so
-  /// does a row leaving the tree. The tree's own rows only, not the pinned
+  /// arrows and `Space` mark, a plain click or `Esc` lets go; so does a row
+  /// leaving the tree (#979). The tree's own rows only, not the pinned
   /// block's copies.
   final Set<String> _marked = {};
 
@@ -540,7 +539,7 @@ final class _NoteTreeState extends State<NoteTree> {
         _walkLength - 1,
       );
       _markRange(at, to);
-      return _move(to, keepMarks: true);
+      return _move(to);
     }
     if (keys.isShiftPressed) return null;
     if (marks && key == LogicalKeyboardKey.space && !row.pinned) {
@@ -553,12 +552,18 @@ final class _NoteTreeState extends State<NoteTree> {
       setState(_marked.clear);
       return KeyEventResult.handled;
     }
-    if (key == LogicalKeyboardKey.delete && _marked.length > 1) {
-      final delete = widget.onDeleteMarked;
-      if (delete == null) return KeyEventResult.ignored;
-      delete(_marked.toList());
+    if (key == LogicalKeyboardKey.delete && _marked.isNotEmpty) {
+      // As a right click does (#979): on a marked row, `Delete` is the
+      // marks'; on any other it is that row's alone, and the marks let go
+      // rather than wait to be deleted by a later key.
+      if (_marked.length > 1 && !row.pinned && _marked.contains(row.path)) {
+        final delete = widget.onDeleteMarked;
+        if (delete == null) return KeyEventResult.ignored;
+        delete(_marked.toList());
+        setState(_marked.clear);
+        return KeyEventResult.handled;
+      }
       setState(_marked.clear);
-      return KeyEventResult.handled;
     }
     final typed = event.character;
     if (typed != null &&
@@ -624,9 +629,6 @@ final class _NoteTreeState extends State<NoteTree> {
     final marked = widget.onMarkedMenu;
     if (marked != null && _marked.length > 1 && _marked.contains(note.path)) {
       marked(_marked.toList(), menuAnchorAt(details.globalPosition));
-      // The menu acts on the rows it was given: marks left standing would
-      // name rows that are gone by the next Delete (#979).
-      setState(_marked.clear);
       return;
     }
     if (_marked.isNotEmpty) setState(_marked.clear);
@@ -634,12 +636,10 @@ final class _NoteTreeState extends State<NoteTree> {
   }
 
   /// Puts the cursor on the row at [index], clamped to the rows there are,
-  /// and brings it into view. A move lets the marks go (#979) unless it is
-  /// the one that extends them, `Shift`+the arrows ([keepMarks]).
-  KeyEventResult _move(int index, {bool keepMarks = false}) {
+  /// and brings it into view.
+  KeyEventResult _move(int index) {
     final row = _walkRow(index.clamp(0, _walkLength - 1));
     setState(() {
-      if (!keepMarks) _marked.clear();
       _cursorPath = row.path;
       _cursorPinned = row.pinned;
       _keyboardFocus = true;
