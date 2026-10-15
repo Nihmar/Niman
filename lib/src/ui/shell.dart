@@ -5422,7 +5422,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// what the phone's Back does in its layout, in the wide one's terms.
   bool get _wideBackAvailable =>
       _wide &&
-      (_contentTabShows ||
+      (_dock.overlayShown ||
+          _contentTabShows ||
           _sidebarShowsView ||
           _compareShows && _compare != null ||
           _reviewTab.shows ||
@@ -5430,11 +5431,14 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           _gridCanStepUp);
 
   /// The wide shell's Back (#849): the topmost thing on screen goes
-  /// first — a book out of full screen, a pinned Home or Todo, the search
-  /// sidebar, the open note — and the grid steps up a folder last. With
-  /// none of them left Back leaves the app.
+  /// first — the side panel lying over the note (#977), a book out of full
+  /// screen, a pinned Home or Todo, the search sidebar, the open note —
+  /// and the grid steps up a folder last. With none of them left Back
+  /// leaves the app.
   void _wideBack() {
-    if (_immersive.fullScreen.value != null) {
+    if (_dock.overlayShown) {
+      _dock.closeOverlay();
+    } else if (_immersive.fullScreen.value != null) {
       _immersive.fullScreen.value = null;
     } else if (_reviewTab.shows) {
       _reviewTab.close();
