@@ -8,16 +8,14 @@ library;
 
 import 'dart:convert';
 
-import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/flashcards/deck_summary.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/widget/widget_configs.dart';
 import 'package:niman/src/widget/widget_host.dart';
 import 'package:niman/src/widget/widget_placement.dart';
+import 'package:niman/src/widget/widget_reconcile.dart';
 import 'package:niman/src/widget/widget_theme.dart';
 import 'package:niman/src/widget/widget_updater.dart';
-
-const AppLogger _log = AppLogger(name: 'widgets');
 
 /// The Study rows as JSON: `{"library": path, "total": cards today,
 /// "rows": [...]}`, a row being a group — `{"kind": "group", "text":
@@ -83,33 +81,15 @@ Future<void> refreshStudyWidgets({
 }) async {
   final root = session.root;
   if (root == null) return;
-  if (host != null) {
-    final placed = await host.studyWidgetIds();
-    _log.debug('study refresh: placed=$placed');
-    if (placed.isNotEmpty) {
-      final known = {
-        for (final config in await session.widgetConfigsFor(root))
-          config.androidWidgetId,
-      };
-      for (final id in placed) {
-        if (known.contains(id)) continue;
-        final choice = await placement?.consumeStudyConfig(id);
-        final library = choice?.library;
-        final adopted = library == null || library.isEmpty ? root : library;
-        await session.adoptStudyWidget(id, adopted);
-        _log.debug('study refresh: adopted $id -> $adopted');
-      }
-      await session.pruneWidgetConfigs(
-        libraryPath: root,
-        provider: WidgetProvider.study,
-        placedIds: placed.toSet(),
-      );
-    }
-  }
-  final ids = <int>[
-    for (final config in await session.widgetConfigsFor(root))
-      if (config.provider == WidgetProvider.study.name) config.androidWidgetId,
-  ];
+  final ids = await reconcilePlacedWidgets(
+    session: session,
+    root: root,
+    provider: WidgetProvider.study,
+    placed: host?.studyWidgetIds,
+    chosenLibrary: (id) async =>
+        (await placement?.consumeStudyConfig(id))?.library,
+    adopt: session.adoptStudyWidget,
+  );
   if (ids.isEmpty) return;
   final counted = await decks();
   if (counted == null) return;
@@ -118,13 +98,10 @@ Future<void> refreshStudyWidgets({
     libraryPath: root,
     theme: resolveWidgetTheme(),
   );
-  final push = updater ?? WidgetUpdater();
-  for (final id in ids) {
-    await push.push(
-      provider: WidgetProvider.study,
-      androidWidgetId: id,
-      payload: payload,
-    );
-    _log.debug('study refresh: pushed $id (${payload.length} chars)');
-  }
+  await pushToWidgets(
+    provider: WidgetProvider.study,
+    ids: ids,
+    payload: payload,
+    updater: updater,
+  );
 }
