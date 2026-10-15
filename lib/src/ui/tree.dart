@@ -231,8 +231,9 @@ final class _NoteTreeState extends State<NoteTree> {
       widget.focusNode ?? FocusNode(debugLabel: 'note-tree');
 
   /// The rows marked together (#712), by path: `Shift`+click, `Shift`+the
-  /// arrows and `Space` mark, a plain click or `Esc` lets go. The tree's
-  /// own rows only, not the pinned block's copies.
+  /// arrows and `Space` mark, a plain click or `Esc` lets go; so does a row
+  /// leaving the tree (#979). The tree's own rows only, not the pinned
+  /// block's copies.
   final Set<String> _marked = {};
 
   /// What has been typed to jump to a row by its name, and when the last
@@ -551,12 +552,18 @@ final class _NoteTreeState extends State<NoteTree> {
       setState(_marked.clear);
       return KeyEventResult.handled;
     }
-    if (key == LogicalKeyboardKey.delete && _marked.length > 1) {
-      final delete = widget.onDeleteMarked;
-      if (delete == null) return KeyEventResult.ignored;
-      delete(_marked.toList());
+    if (key == LogicalKeyboardKey.delete && _marked.isNotEmpty) {
+      // As a right click does (#979): on a marked row, `Delete` is the
+      // marks'; on any other it is that row's alone, and the marks let go
+      // rather than wait to be deleted by a later key.
+      if (_marked.length > 1 && !row.pinned && _marked.contains(row.path)) {
+        final delete = widget.onDeleteMarked;
+        if (delete == null) return KeyEventResult.ignored;
+        delete(_marked.toList());
+        setState(_marked.clear);
+        return KeyEventResult.handled;
+      }
       setState(_marked.clear);
-      return KeyEventResult.handled;
     }
     final typed = event.character;
     if (typed != null &&
@@ -801,6 +808,7 @@ final class _NoteTreeState extends State<NoteTree> {
 
     final out = <_Row>[];
     _walkSync(0, 0, nodesByParent, out);
+    _dropMarksOutside(out);
 
     const AppLogger(name: 'tree.ui').debug(
       'flatten: ${DateTime.now().difference(started).inMilliseconds}ms '
@@ -808,6 +816,15 @@ final class _NoteTreeState extends State<NoteTree> {
       '[tree $treeMs, pinned $pinnedMs, settings $settingsMs]',
     );
     return _Rows(pinned: pinned, tree: out);
+  }
+
+  /// Lets go of the marks on rows that are no longer in [rows] — deleted,
+  /// moved, renamed or folded away — so a `Delete` never goes to paths that
+  /// are not on screen (#979). Once per flatten, not per frame.
+  void _dropMarksOutside(List<_Row> rows) {
+    if (_marked.isEmpty) return;
+    final present = {for (final row in rows) row.note.path};
+    _marked.removeWhere((path) => !present.contains(path));
   }
 
   void _walkSync(

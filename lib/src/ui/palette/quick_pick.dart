@@ -6,6 +6,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:niman/src/ui/palette/command_palette.dart';
+import 'package:niman/src/ui/palette/palette_reveal.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// Asks for one of [items], each shown as its label; null when given up.
@@ -40,10 +41,15 @@ final class _QuickPickState<T> extends State<_QuickPick<T>> {
   final TextEditingController _query = TextEditingController();
   late List<(String, T)> _shown = widget.items;
   int _selected = 0;
+  final ScrollController _scroll = ScrollController();
+
+  /// The selected row's, to bring it into view when the arrows move it.
+  final GlobalKey _selectedRow = GlobalKey();
 
   @override
   void dispose() {
     _query.dispose();
+    _scroll.dispose();
     super.dispose();
   }
 
@@ -58,6 +64,8 @@ final class _QuickPickState<T> extends State<_QuickPick<T>> {
       ];
       _selected = 0;
     });
+    // The list is shorter, or another: back to its top, where row 0 is.
+    if (_scroll.hasClients) _scroll.jumpTo(_scroll.position.minScrollExtent);
   }
 
   void _choose([int? at]) {
@@ -78,6 +86,12 @@ final class _QuickPickState<T> extends State<_QuickPick<T>> {
     } else {
       return KeyEventResult.ignored;
     }
+    revealPaletteRow(
+      _scroll,
+      _selectedRow,
+      first: _selected == 0,
+      last: _selected == _shown.length - 1,
+    );
     return KeyEventResult.handled;
   }
 
@@ -138,18 +152,22 @@ final class _QuickPickState<T> extends State<_QuickPick<T>> {
                             ),
                           )
                         : ListView.builder(
+                            controller: _scroll,
                             shrinkWrap: true,
                             padding: const EdgeInsets.symmetric(vertical: 6),
                             itemCount: _shown.length,
-                            itemBuilder: (context, at) => ListTile(
-                              key:
-                                  widget.itemKey?.call(_shown[at].$2) ??
-                                  Key('quick-pick-$at'),
-                              dense: true,
-                              selected: at == _selected,
-                              selectedTileColor: scheme.secondaryContainer,
-                              title: Text(_shown[at].$1),
-                              onTap: () => _choose(at),
+                            itemBuilder: (context, at) => KeyedSubtree(
+                              key: at == _selected ? _selectedRow : null,
+                              child: ListTile(
+                                key:
+                                    widget.itemKey?.call(_shown[at].$2) ??
+                                    Key('quick-pick-$at'),
+                                dense: true,
+                                selected: at == _selected,
+                                selectedTileColor: scheme.secondaryContainer,
+                                title: Text(_shown[at].$1),
+                                onTap: () => _choose(at),
+                              ),
                             ),
                           ),
                   ),
