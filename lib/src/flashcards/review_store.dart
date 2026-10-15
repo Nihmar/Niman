@@ -20,10 +20,16 @@
 library;
 
 import 'dart:async';
+import 'dart:io';
 import 'dart:isolate';
 
 import 'package:niman/src/core/library_state_file.dart';
 import 'package:niman/src/flashcards/review_state.dart';
+import 'package:path/path.dart' as p;
+
+/// What tells one version of `review.json` from another: its modification
+/// time, in microseconds, and its size.
+typedef ReviewFileStamp = ({int modified, int size});
 
 /// The review states of the library at [root].
 final class ReviewStore {
@@ -76,6 +82,36 @@ final class ReviewStore {
         if (_statesOf(value) case final states when states.isNotEmpty)
           key: states,
     };
+  }
+
+  /// The states of [readAllBlocking], decoded only if the file is no longer
+  /// the version [known] (#967): `states` is null when it still is, and the
+  /// caller keeps what it decoded then. The stamp is taken before the file
+  /// is read, so a write that lands in between shows as a different stamp
+  /// at the next call and is read again, never missed.
+  ///
+  /// For code already on a background isolate. A file that is missing has no
+  /// stamp and is always read, which costs a failed open.
+  static ({
+    ReviewFileStamp? stamp,
+    Map<String, Map<String, ReviewState>>? states,
+  })
+  readAllUnless(String root, ReviewFileStamp? known) {
+    final stat = FileStat.statSync(p.join(root, filePath));
+    final stamp = stat.type == FileSystemEntityType.file
+        ? (modified: stat.modified.microsecondsSinceEpoch, size: stat.size)
+        : null;
+    if (stamp != null && stamp == known) return (stamp: stamp, states: null);
+    return (stamp: stamp, states: readAllBlocking(root));
+  }
+
+  /// [readAllUnless] on a background isolate.
+  Future<
+    ({ReviewFileStamp? stamp, Map<String, Map<String, ReviewState>>? states})
+  >
+  readAllIfChanged(ReviewFileStamp? known) {
+    final library = root;
+    return Isolate.run(() => readAllUnless(library, known));
   }
 
   /// Fires with the library root after this app wrote the file: the Study

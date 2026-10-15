@@ -34,6 +34,42 @@ void main() {
     expect(ReviewStore.filePath, '.niman/review.json');
   });
 
+  group('reading the whole file only when it changed (#967)', () {
+    test('a file still the version known is not decoded again', () async {
+      await store.write('a.md', '1', state());
+      final first = await store.readAllIfChanged(null);
+      expect(first.stamp, isNotNull);
+      expect(first.states, hasLength(1));
+
+      final again = await store.readAllIfChanged(first.stamp);
+      expect(again.stamp, first.stamp);
+      expect(again.states, isNull);
+    });
+
+    test('a write makes the file a version to read', () async {
+      await store.write('a.md', '1', state());
+      final known = (await store.readAllIfChanged(null)).stamp;
+
+      await store.write('a.md', '2', state(interval: 7));
+      final read = await store.readAllIfChanged(known);
+      expect(read.stamp, isNot(known));
+      expect(read.states!['a.md'], hasLength(2));
+    });
+
+    test('a file that is missing is read as empty, and has no stamp', () async {
+      final read = await store.readAllIfChanged(null);
+      expect(read.stamp, isNull);
+      expect(read.states, isEmpty);
+
+      await store.write('a.md', '1', state());
+      final known = (await store.readAllIfChanged(null)).stamp;
+      kept().deleteSync();
+      final gone = await store.readAllIfChanged(known);
+      expect(gone.stamp, isNull);
+      expect(gone.states, isEmpty);
+    });
+  });
+
   test('reads nothing from a library never studied', () async {
     expect(await store.read('a.md'), isEmpty);
     expect(await store.readAll(), isEmpty);
