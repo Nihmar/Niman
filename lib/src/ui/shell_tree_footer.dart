@@ -35,6 +35,9 @@ enum NewShellItem {
   /// A slides note (frontmatter type: slides) in the current folder.
   slides,
 
+  /// A flashcard deck (frontmatter type: flashcard) in the current folder.
+  flashcards,
+
   /// A note copied from a template.
   template,
 
@@ -169,6 +172,13 @@ final class TreeFooterBar extends StatelessWidget {
                       Icons.slideshow_outlined,
                       AppStrings.newSlidesTitle,
                       key: const Key('new-slides-action'),
+                    ),
+                    _item(
+                      context,
+                      NewShellItem.flashcards,
+                      Icons.style_outlined,
+                      AppStrings.newFlashcardsTitle,
+                      key: const Key('new-flashcards-action'),
                     ),
                     _item(
                       context,

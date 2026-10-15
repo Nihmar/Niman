@@ -3848,4 +3848,175 @@ final class AlbanianStrings extends Strings {
 
   @override
   String homeActionMissing(String path) => '$path nuk është më në bibliotekë';
+
+  @override
+  String get flashcardsName => 'Kartela';
+  @override
+  String get newFlashcardsTitle => 'Kartela të reja';
+  @override
+  String get newFlashcardsDefault => 'Kartelat e mia';
+  @override
+  String get showFlashcardsTooltip => 'Shfaq kartelat';
+  @override
+  String get flashcardsNoCategory => 'Pa kategori';
+  @override
+  String flashcardsDueCount(int count) => '$count për përsëritje';
+  @override
+  String flashcardsNewCount(int count) => '$count të reja';
+  @override
+  String flashcardsCardCount(int count) =>
+      count == 1 ? '1 kartelë' : '$count kartela';
+  @override
+  String flashcardsStudyCount(int count) => 'Mëso $count';
+  @override
+  String flashcardsStudyCards(int count) =>
+      count == 1 ? 'Mëso 1 kartelë' : 'Mëso $count kartela';
+  @override
+  String get flashcardsStudyDeck => 'Mëso këtë pako';
+  @override
+  String get flashcardsAddCard => 'Shto kartelë';
+  @override
+  String get flashcardsQuestion => 'Pyetje';
+  @override
+  String get flashcardsAnswer => 'Përgjigje';
+  @override
+  String get flashcardsNextColumn => 'Tjetra';
+  @override
+  String get flashcardsDue => 'Për përsëritje';
+  @override
+  String get flashcardsNew => 'E re';
+  @override
+  String flashcardsInDays(int count) =>
+      count == 1 ? 'pas 1 dite' : 'pas $count ditësh';
+  @override
+  String flashcardsInMonths(int count) =>
+      count == 1 ? 'pas 1 muaji' : 'pas $count muajsh';
+  @override
+  String flashcardsInYears(int count) =>
+      count == 1 ? 'pas 1 viti' : 'pas $count vitesh';
+  @override
+  String get flashcardsRepeated => 'E përsëritur';
+  @override
+  String get flashcardsRepeatedTip =>
+      'Kjo pyetje shfaqet më shumë se një herë në pako';
+  @override
+  String get flashcardsEmpty => 'Ende pa kartela';
+  @override
+  String get flashcardsEditCard => 'Ndrysho kartelën';
+  @override
+  String get flashcardsSentence => 'Fjali';
+  @override
+  String get flashcardsEditNote =>
+      'Ecuria ruhet për sa kohë pyetja mbetet e njëjtë. Niman e '
+      'rishkruan këtë kartelë në shënim.';
+  @override
+  String flashcardsKindRows(int count) =>
+      count == 1 ? '1 rresht tabele' : '$count rreshta tabele';
+  @override
+  String flashcardsKindLines(int count) =>
+      count == 1 ? '1 rresht ::' : '$count rreshta ::';
+  @override
+  String flashcardsKindClozes(int count) =>
+      count == 1 ? '1 boshllëk' : '$count boshllëqe';
+  @override
+  String get flashcardsEditMarkdown => 'Ndrysho si Markdown';
+  @override
+  String get flashcardsColumnsTitle => 'Kolonat e pyetjes dhe përgjigjes';
+  @override
+  String get flashcardsQuestionColumn => 'Kolona e pyetjes';
+  @override
+  String get flashcardsAnswerColumn => 'Kolona e përgjigjes';
+  @override
+  String get flashcardsColumnsNone =>
+      'Asnjë tabelë e këtij shënimi nuk ka më shumë se dy kolona.';
+  @override
+  String get flashcardsResetAction => 'Rivendos përsëritjen e kësaj pako';
+  @override
+  String get flashcardsResetTitle => 'Të rivendoset përsëritja?';
+  @override
+  String get flashcardsResetBody =>
+      'Çdo kartelë e pakos bëhet sërish e re. Shënimi nuk ndryshon.';
+  @override
+  String get flashcardsResetConfirm => 'Rivendos';
+  @override
+  String get commandNeedFlashcardNote => 'Kërkon një shënim kartelash të hapur';
+
+  @override
+  String get flashcardsCardsLabel => 'Kartela';
+  @override
+  String get flashcardsShowAnswer => 'Shfaq përgjigjen';
+  @override
+  String get flashcardsGradeAgain => 'Përsëri';
+  @override
+  String get flashcardsGradeHard => 'Vështirë';
+  @override
+  String get flashcardsGradeGood => 'Mirë';
+  @override
+  String get flashcardsGradeEasy => 'Lehtë';
+  @override
+  String get flashcardsToday => 'sot';
+  @override
+  String get flashcardsTomorrow => 'nesër';
+  @override
+  String flashcardsReviewTitle(String deck) => 'Studim · $deck';
+  @override
+  String flashcardsAgainCount(int count) => 'Përsëri: $count';
+  @override
+  String get flashcardsDoneToday => 'Mbaruat për sot';
+  @override
+  String flashcardsReviewedCount(int count) => 'Të përsëritura: $count';
+  @override
+  String flashcardsMinutes(int count) => '$count min';
+  @override
+  String flashcardsNextOn(String when) => 'Të tjerat: $when';
+  @override
+  String get flashcardsNothingScheduled => 'Asnjë kartë e planifikuar';
+  @override
+  String get flashcardsNextDeck => 'Pakoja tjetër';
+  @override
+  String get flashcardsBackToDeck => 'Kthehu te pakoja';
+  @override
+  String get flashcardsEndReview => 'Përfundo përsëritjen';
+  @override
+  String get tabStudy => 'Studim';
+  @override
+  String get studyEmpty => 'Ende nuk ka pako';
+  @override
+  String get studyEmptyHint =>
+      'Një shënim me type: flashcard është një pako kartash.';
+  @override
+  String get studyOfferBody =>
+      'Studimi tregon pakot e tua. Ta shfaq në navigim?';
+  @override
+  String get studyOfferAction => 'Shfaq';
+  @override
+  String get settingsNewCardsPerDay => 'Karta të reja në ditë';
+  @override
+  String get settingsNewCardsPerDayHint =>
+      'Për pako. 0 nuk shfaq karta të reja.';
+  @override
+  String get settingsResetAllReviews => 'Rivendos të gjitha përsëritjet';
+  @override
+  String get resetAllReviewsTitle => 'Të rivendosen të gjitha përsëritjet?';
+  @override
+  String get resetAllReviewsBody =>
+      'Çdo kartë e çdo pakoje bëhet sërish e re. Asnjë shënim nuk ndryshon.';
+  @override
+  String get makeFlashcardsTitle => 'Krijo kartela';
+  @override
+  String get makeFlashcardsDeck => 'Pako';
+  @override
+  String get makeFlashcardsDeckHint =>
+      'Kategori të ndara me /. Bosh: Pa kategori.';
+  @override
+  String get makeFlashcardsWrites => 'Shkruhet në frontmatter';
+  @override
+  String makeFlashcardsAction(int count) => 'Krijo kartela: $count';
+  @override
+  String get makeFlashcardsNone =>
+      'Ky shënim nuk ka tabelë, rresht :: ose theksim nga të krijohen kartela.';
+  @override
+  String get commandNeedPlainNote => 'Kërkon një shënim të hapur pa lloj';
+  @override
+  String get studyNothingToday => 'Asgjë për të studiuar sot';
 }

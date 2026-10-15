@@ -46,6 +46,9 @@ the tiles use the width.
   another.
 - **Saved search** — a query of its own and its first results: words, or
   `key = value` as in [search](search.md).
+- **Study** — the flashcard decks with cards to study today, the most
+  cards first, and the day's due and new cards over them; a row opens its
+  deck, **Study** reviews the first. With nothing due it says so.
 
 The tiles read the library's index and the task list: they store
 nothing. While the Home is on screen, a change in the library shows in

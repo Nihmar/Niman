@@ -50,7 +50,8 @@ void main() {
     await tester.pumpAndSettle();
 
     final saved = await session.navigation;
-    expect(saved.library?.hidden, {'todo'});
+    // Study starts hidden (#533), and the saved layout says so.
+    expect(saved.library?.hidden, {'todo', 'study'});
     expect(saved.device, isNull);
     expect(previewed(tester), [
       'files',
@@ -76,7 +77,9 @@ void main() {
   testWidgets('the last destination shown besides Settings keeps its switch '
       'on (#667)', (tester) async {
     await pump(tester);
+    // A destination hidden from the start (Study, #533) is off already.
     for (final name in hideable.skip(1)) {
+      if (defaultHiddenDestinations.contains(name)) continue;
       await tester.tap(find.byKey(Key('navigation-switch-$name')));
       await tester.pumpAndSettle();
     }
@@ -131,7 +134,7 @@ void main() {
 
     var saved = await session.navigation;
     expect(saved.library?.hidden, {'todo'}, reason: 'the library untouched');
-    expect(saved.device?.hidden, {'todo', 'search'});
+    expect(saved.device?.hidden, {'todo', 'search', 'study'});
 
     await tester.tap(find.text('This library'));
     await tester.pumpAndSettle();
@@ -170,7 +173,7 @@ void main() {
     await tester.pumpAndSettle();
     final saved = (await session.navigation).library!;
     expect(saved.start, 'home', reason: 'kept, to come back with Home');
-    expect(saved.hidden, {'home'});
+    expect(saved.hidden, {'home', 'study'});
     expect(
       find.text(
         AppStrings.navigationStartHidden(

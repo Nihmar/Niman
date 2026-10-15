@@ -19,6 +19,9 @@ abstract interface class WidgetHostService {
   /// The placed note widget ids (empty off-Android, or when none).
   Future<List<int>> noteWidgetIds();
 
+  /// The placed Study widget ids (empty off-Android, or when none).
+  Future<List<int>> studyWidgetIds();
+
   /// Releases resources.
   Future<void> dispose();
 }
@@ -57,6 +60,11 @@ final class PlatformWidgetHostService implements WidgetHostService {
     return _widgetIds(noteWidgetAndroidName);
   }
 
+  @override
+  Future<List<int>> studyWidgetIds() {
+    return _widgetIds(studyWidgetAndroidName);
+  }
+
   /// The placed instances of the provider class [androidName].
   Future<List<int>> _widgetIds(String androidName) async {
     try {
@@ -89,6 +97,9 @@ final class NoopWidgetHostService implements WidgetHostService {
 
   @override
   Future<List<int>> noteWidgetIds() async => [];
+
+  @override
+  Future<List<int>> studyWidgetIds() async => [];
 
   @override
   Future<void> dispose() async {}

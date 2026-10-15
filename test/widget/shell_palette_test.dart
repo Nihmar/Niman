@@ -160,6 +160,8 @@ void main() {
         CommandNeed.previewToggle,
         CommandNeed.twoEditors,
         CommandNeed.proseNote,
+        // Of no type: it can be made a deck (#533).
+        CommandNeed.plainNote,
       }),
     );
   });

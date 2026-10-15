@@ -3834,4 +3834,169 @@ final class SlovakStrings extends Strings {
 
   @override
   String homeActionMissing(String path) => '$path už v knižnici nie je';
+
+  @override
+  String get flashcardsName => 'Kartičky';
+  @override
+  String get newFlashcardsTitle => 'Nové kartičky';
+  @override
+  String get newFlashcardsDefault => 'Moje kartičky';
+  @override
+  String get showFlashcardsTooltip => 'Zobraziť kartičky';
+  @override
+  String get flashcardsNoCategory => 'Bez kategórie';
+  @override
+  String flashcardsDueCount(int count) => 'Na opakovanie: $count';
+  @override
+  String flashcardsNewCount(int count) => 'Nové: $count';
+  @override
+  String flashcardsCardCount(int count) => 'Kartičiek: $count';
+  @override
+  String flashcardsStudyCount(int count) => 'Študovať: $count';
+  @override
+  String flashcardsStudyCards(int count) => 'Študovať kartičiek: $count';
+  @override
+  String get flashcardsStudyDeck => 'Študovať tento balíček';
+  @override
+  String get flashcardsAddCard => 'Pridať kartičku';
+  @override
+  String get flashcardsQuestion => 'Otázka';
+  @override
+  String get flashcardsAnswer => 'Odpoveď';
+  @override
+  String get flashcardsNextColumn => 'Ďalšia';
+  @override
+  String get flashcardsDue => 'Na opakovanie';
+  @override
+  String get flashcardsNew => 'Nová';
+  @override
+  String flashcardsInDays(int count) => count == 1 ? 'o 1 deň' : 'o $count d';
+  @override
+  String flashcardsInMonths(int count) =>
+      count == 1 ? 'o 1 mesiac' : 'o $count mes.';
+  @override
+  String flashcardsInYears(int count) => count == 1 ? 'o 1 rok' : 'o $count r.';
+  @override
+  String get flashcardsRepeated => 'Opakovaná';
+  @override
+  String get flashcardsRepeatedTip => 'Táto otázka je v balíčku viackrát';
+  @override
+  String get flashcardsEmpty => 'Zatiaľ žiadne kartičky';
+  @override
+  String get flashcardsEditCard => 'Upraviť kartičku';
+  @override
+  String get flashcardsSentence => 'Veta';
+  @override
+  String get flashcardsEditNote =>
+      'Pokrok sa zachová, kým sa otázka nezmení. Niman túto kartičku v '
+      'poznámke prepíše.';
+  @override
+  String flashcardsKindRows(int count) => 'Riadkov tabuľky: $count';
+  @override
+  String flashcardsKindLines(int count) => 'Riadkov „::“: $count';
+  @override
+  String flashcardsKindClozes(int count) => 'Doplňovačiek: $count';
+  @override
+  String get flashcardsEditMarkdown => 'Upraviť ako Markdown';
+  @override
+  String get flashcardsColumnsTitle => 'Stĺpce otázky a odpovede';
+  @override
+  String get flashcardsQuestionColumn => 'Stĺpec otázky';
+  @override
+  String get flashcardsAnswerColumn => 'Stĺpec odpovede';
+  @override
+  String get flashcardsColumnsNone =>
+      'Žiadna tabuľka v tejto poznámke nemá viac ako dva stĺpce.';
+  @override
+  String get flashcardsResetAction => 'Vynulovať opakovanie tohto balíčka';
+  @override
+  String get flashcardsResetTitle => 'Vynulovať opakovanie?';
+  @override
+  String get flashcardsResetBody =>
+      'Každá kartička v balíčku bude opäť nová. Poznámka sa nezmení.';
+  @override
+  String get flashcardsResetConfirm => 'Vynulovať';
+  @override
+  String get commandNeedFlashcardNote =>
+      'Vyžaduje otvorenú poznámku s kartičkami';
+
+  @override
+  String get flashcardsCardsLabel => 'Kartičky';
+  @override
+  String get flashcardsShowAnswer => 'Zobraziť odpoveď';
+  @override
+  String get flashcardsGradeAgain => 'Znova';
+  @override
+  String get flashcardsGradeHard => 'Ťažké';
+  @override
+  String get flashcardsGradeGood => 'Dobré';
+  @override
+  String get flashcardsGradeEasy => 'Ľahké';
+  @override
+  String get flashcardsToday => 'dnes';
+  @override
+  String get flashcardsTomorrow => 'zajtra';
+  @override
+  String flashcardsReviewTitle(String deck) => 'Štúdium · $deck';
+  @override
+  String flashcardsAgainCount(int count) => 'Znova: $count';
+  @override
+  String get flashcardsDoneToday => 'Na dnes hotovo';
+  @override
+  String flashcardsReviewedCount(int count) => 'Zopakované: $count';
+  @override
+  String flashcardsMinutes(int count) => '$count min';
+  @override
+  String flashcardsNextOn(String when) => 'Ďalšie: $when';
+  @override
+  String get flashcardsNothingScheduled => 'Žiadne naplánované karty';
+  @override
+  String get flashcardsNextDeck => 'Ďalší balíček';
+  @override
+  String get flashcardsBackToDeck => 'Späť na balíček';
+  @override
+  String get flashcardsEndReview => 'Ukončiť opakovanie';
+  @override
+  String get tabStudy => 'Štúdium';
+  @override
+  String get studyEmpty => 'Zatiaľ žiadne balíčky';
+  @override
+  String get studyEmptyHint => 'Poznámka s type: flashcard je balíček kariet.';
+  @override
+  String get studyOfferBody =>
+      'Štúdium zobrazuje vaše balíčky. Zobraziť ho v navigácii?';
+  @override
+  String get studyOfferAction => 'Zobraziť';
+  @override
+  String get settingsNewCardsPerDay => 'Nových kariet denne';
+  @override
+  String get settingsNewCardsPerDayHint =>
+      'Na balíček. 0 nezobrazí žiadne nové karty.';
+  @override
+  String get settingsResetAllReviews => 'Vynulovať všetky opakovania';
+  @override
+  String get resetAllReviewsTitle => 'Vynulovať všetky opakovania?';
+  @override
+  String get resetAllReviewsBody =>
+      'Každá karta každého balíčka bude znova nová. Žiadna poznámka sa '
+      'nezmení.';
+  @override
+  String get makeFlashcardsTitle => 'Vytvoriť kartičky';
+  @override
+  String get makeFlashcardsDeck => 'Balíček';
+  @override
+  String get makeFlashcardsDeckHint =>
+      'Kategórie oddelené /. Prázdne: Bez kategórie.';
+  @override
+  String get makeFlashcardsWrites => 'Zapíše sa do frontmatteru';
+  @override
+  String makeFlashcardsAction(int count) => 'Vytvoriť kartičiek: $count';
+  @override
+  String get makeFlashcardsNone =>
+      'Táto poznámka nemá tabuľku, riadok :: ani zvýraznenie, z ktorých by '
+      'vznikli kartičky.';
+  @override
+  String get commandNeedPlainNote => 'Vyžaduje otvorenú poznámku bez typu';
+  @override
+  String get studyNothingToday => 'Dnes nie je čo študovať';
 }

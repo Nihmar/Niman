@@ -52,6 +52,11 @@ abstract interface class NoteViewHandle {
   /// into a shopping list and back (#309).
   void setNoteKind(String? type);
 
+  /// Replaces the note's whole text with [newText] as one undoable edit,
+  /// saved at once: what a kind's own view does to its note, and the ⋮
+  /// menu does for it (a deck's question and answer columns, #533).
+  void applyKindEdit(String newText);
+
   /// Puts [markdown] at the caret, one undo step: on the caret's line when
   /// it is one line, on lines of its own when it is more (#265).
   void insertAtCaret(String markdown);

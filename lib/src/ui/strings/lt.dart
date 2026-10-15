@@ -3864,4 +3864,171 @@ final class LithuanianStrings extends Strings {
 
   @override
   String homeActionMissing(String path) => '$path nebėra bibliotekoje';
+
+  @override
+  String get flashcardsName => 'Kortelės';
+  @override
+  String get newFlashcardsTitle => 'Naujos kortelės';
+  @override
+  String get newFlashcardsDefault => 'Mano kortelės';
+  @override
+  String get showFlashcardsTooltip => 'Rodyti korteles';
+  @override
+  String get flashcardsNoCategory => 'Be kategorijos';
+  @override
+  String flashcardsDueCount(int count) => 'Kartoti: $count';
+  @override
+  String flashcardsNewCount(int count) => 'Naujos: $count';
+  @override
+  String flashcardsCardCount(int count) => 'Kortelių: $count';
+  @override
+  String flashcardsStudyCount(int count) => 'Mokytis: $count';
+  @override
+  String flashcardsStudyCards(int count) => 'Mokytis kortelių: $count';
+  @override
+  String get flashcardsStudyDeck => 'Mokytis šią kaladę';
+  @override
+  String get flashcardsAddCard => 'Pridėti kortelę';
+  @override
+  String get flashcardsQuestion => 'Klausimas';
+  @override
+  String get flashcardsAnswer => 'Atsakymas';
+  @override
+  String get flashcardsNextColumn => 'Kita';
+  @override
+  String get flashcardsDue => 'Kartoti';
+  @override
+  String get flashcardsNew => 'Nauja';
+  @override
+  String flashcardsInDays(int count) =>
+      count == 1 ? 'po 1 dienos' : 'po $count d.';
+  @override
+  String flashcardsInMonths(int count) =>
+      count == 1 ? 'po 1 mėnesio' : 'po $count mėn.';
+  @override
+  String flashcardsInYears(int count) =>
+      count == 1 ? 'po 1 metų' : 'po $count m.';
+  @override
+  String get flashcardsRepeated => 'Pasikartoja';
+  @override
+  String get flashcardsRepeatedTip =>
+      'Šis klausimas kaladėje pasitaiko ne vieną kartą';
+  @override
+  String get flashcardsEmpty => 'Kortelių dar nėra';
+  @override
+  String get flashcardsEditCard => 'Redaguoti kortelę';
+  @override
+  String get flashcardsSentence => 'Sakinys';
+  @override
+  String get flashcardsEditNote =>
+      'Pažanga išlieka, kol klausimas nesikeičia. Niman perrašo šią '
+      'kortelę užrašuose.';
+  @override
+  String flashcardsKindRows(int count) => 'Lentelės eilučių: $count';
+  @override
+  String flashcardsKindLines(int count) => 'Eilučių „::“: $count';
+  @override
+  String flashcardsKindClozes(int count) => 'Tarpų: $count';
+  @override
+  String get flashcardsEditMarkdown => 'Redaguoti kaip Markdown';
+  @override
+  String get flashcardsColumnsTitle => 'Klausimo ir atsakymo stulpeliai';
+  @override
+  String get flashcardsQuestionColumn => 'Klausimo stulpelis';
+  @override
+  String get flashcardsAnswerColumn => 'Atsakymo stulpelis';
+  @override
+  String get flashcardsColumnsNone =>
+      'Nė viena šio užrašo lentelė neturi daugiau nei dviejų stulpelių.';
+  @override
+  String get flashcardsResetAction => 'Atstatyti šios kaladės kartojimą';
+  @override
+  String get flashcardsResetTitle => 'Atstatyti kartojimą?';
+  @override
+  String get flashcardsResetBody =>
+      'Kiekviena kaladės kortelė vėl taps nauja. Užrašas nesikeičia.';
+  @override
+  String get flashcardsResetConfirm => 'Atstatyti';
+  @override
+  String get commandNeedFlashcardNote => 'Reikia atidaryto kortelių užrašo';
+
+  @override
+  String get flashcardsCardsLabel => 'Kortelės';
+  @override
+  String get flashcardsShowAnswer => 'Rodyti atsakymą';
+  @override
+  String get flashcardsGradeAgain => 'Dar kartą';
+  @override
+  String get flashcardsGradeHard => 'Sunku';
+  @override
+  String get flashcardsGradeGood => 'Gerai';
+  @override
+  String get flashcardsGradeEasy => 'Lengva';
+  @override
+  String get flashcardsToday => 'šiandien';
+  @override
+  String get flashcardsTomorrow => 'rytoj';
+  @override
+  String flashcardsReviewTitle(String deck) => 'Mokymasis · $deck';
+  @override
+  String flashcardsAgainCount(int count) => 'Dar kartą: $count';
+  @override
+  String get flashcardsDoneToday => 'Šiandienai baigta';
+  @override
+  String flashcardsReviewedCount(int count) => 'Pakartota: $count';
+  @override
+  String flashcardsMinutes(int count) => '$count min.';
+  @override
+  String flashcardsNextOn(String when) => 'Kitos: $when';
+  @override
+  String get flashcardsNothingScheduled => 'Nėra suplanuotų kortelių';
+  @override
+  String get flashcardsNextDeck => 'Kita kaladė';
+  @override
+  String get flashcardsBackToDeck => 'Atgal į kaladę';
+  @override
+  String get flashcardsEndReview => 'Baigti kartojimą';
+  @override
+  String get tabStudy => 'Mokymasis';
+  @override
+  String get studyEmpty => 'Kaladžių dar nėra';
+  @override
+  String get studyEmptyHint =>
+      'Užrašas su type: flashcard yra kortelių kaladė.';
+  @override
+  String get studyOfferBody =>
+      'Mokymasis rodo jūsų kaladės. Rodyti jį naršymo juostoje?';
+  @override
+  String get studyOfferAction => 'Rodyti';
+  @override
+  String get settingsNewCardsPerDay => 'Naujų kortelių per dieną';
+  @override
+  String get settingsNewCardsPerDayHint => 'Kaladei. 0 nerodo naujų kortelių.';
+  @override
+  String get settingsResetAllReviews => 'Atstatyti visus kartojimus';
+  @override
+  String get resetAllReviewsTitle => 'Atstatyti visus kartojimus?';
+  @override
+  String get resetAllReviewsBody =>
+      'Kiekviena kiekvienos kaladės kortelė vėl taps nauja. Užrašai '
+      'nekeičiami.';
+  @override
+  String get makeFlashcardsTitle => 'Sukurti korteles';
+  @override
+  String get makeFlashcardsDeck => 'Kaladė';
+  @override
+  String get makeFlashcardsDeckHint =>
+      'Kategorijos atskirtos /. Tuščia: Be kategorijos.';
+  @override
+  String get makeFlashcardsWrites => 'Įrašoma į frontmatter';
+  @override
+  String makeFlashcardsAction(int count) => 'Sukurti kortelių: $count';
+  @override
+  String get makeFlashcardsNone =>
+      'Šiame užraše nėra lentelės, :: eilutės ar paryškinimo kortelėms '
+      'sukurti.';
+  @override
+  String get commandNeedPlainNote => 'Reikia atidaryto užrašo be tipo';
+  @override
+  String get studyNothingToday => 'Šiandien nėra ką mokytis';
 }

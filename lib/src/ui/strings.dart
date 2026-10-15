@@ -1951,4 +1951,86 @@ final class AppStrings {
   static String get homeActionProject => _s.homeActionProject;
   static String get homeActionTemplate => _s.homeActionTemplate;
   static String homeActionMissing(String path) => _s.homeActionMissing(path);
+  static String get flashcardsCardsLabel => _s.flashcardsCardsLabel;
+  static String get flashcardsName => _s.flashcardsName;
+  static String get newFlashcardsTitle => _s.newFlashcardsTitle;
+  static String get newFlashcardsDefault => _s.newFlashcardsDefault;
+  static String get showFlashcardsTooltip => _s.showFlashcardsTooltip;
+  static String get flashcardsNoCategory => _s.flashcardsNoCategory;
+  static String flashcardsDueCount(int count) => _s.flashcardsDueCount(count);
+  static String flashcardsNewCount(int count) => _s.flashcardsNewCount(count);
+  static String flashcardsCardCount(int count) => _s.flashcardsCardCount(count);
+  static String flashcardsStudyCount(int count) =>
+      _s.flashcardsStudyCount(count);
+  static String flashcardsStudyCards(int count) =>
+      _s.flashcardsStudyCards(count);
+  static String get flashcardsStudyDeck => _s.flashcardsStudyDeck;
+  static String get flashcardsAddCard => _s.flashcardsAddCard;
+  static String get flashcardsQuestion => _s.flashcardsQuestion;
+  static String get flashcardsAnswer => _s.flashcardsAnswer;
+  static String get flashcardsNextColumn => _s.flashcardsNextColumn;
+  static String get flashcardsDue => _s.flashcardsDue;
+  static String get flashcardsNew => _s.flashcardsNew;
+  static String flashcardsInDays(int count) => _s.flashcardsInDays(count);
+  static String flashcardsInMonths(int count) => _s.flashcardsInMonths(count);
+  static String flashcardsInYears(int count) => _s.flashcardsInYears(count);
+  static String get flashcardsRepeated => _s.flashcardsRepeated;
+  static String get flashcardsRepeatedTip => _s.flashcardsRepeatedTip;
+  static String get flashcardsEmpty => _s.flashcardsEmpty;
+  static String get flashcardsEditCard => _s.flashcardsEditCard;
+  static String get flashcardsSentence => _s.flashcardsSentence;
+  static String get flashcardsEditNote => _s.flashcardsEditNote;
+  static String flashcardsKindRows(int count) => _s.flashcardsKindRows(count);
+  static String flashcardsKindLines(int count) => _s.flashcardsKindLines(count);
+  static String flashcardsKindClozes(int count) =>
+      _s.flashcardsKindClozes(count);
+  static String get flashcardsEditMarkdown => _s.flashcardsEditMarkdown;
+  static String get flashcardsColumnsTitle => _s.flashcardsColumnsTitle;
+  static String get flashcardsQuestionColumn => _s.flashcardsQuestionColumn;
+  static String get flashcardsAnswerColumn => _s.flashcardsAnswerColumn;
+  static String get flashcardsColumnsNone => _s.flashcardsColumnsNone;
+  static String get flashcardsResetAction => _s.flashcardsResetAction;
+  static String get flashcardsResetTitle => _s.flashcardsResetTitle;
+  static String get flashcardsResetBody => _s.flashcardsResetBody;
+  static String get flashcardsResetConfirm => _s.flashcardsResetConfirm;
+  static String get commandNeedFlashcardNote => _s.commandNeedFlashcardNote;
+  static String get flashcardsShowAnswer => _s.flashcardsShowAnswer;
+  static String get flashcardsGradeAgain => _s.flashcardsGradeAgain;
+  static String get flashcardsGradeHard => _s.flashcardsGradeHard;
+  static String get flashcardsGradeGood => _s.flashcardsGradeGood;
+  static String get flashcardsGradeEasy => _s.flashcardsGradeEasy;
+  static String get flashcardsToday => _s.flashcardsToday;
+  static String get flashcardsTomorrow => _s.flashcardsTomorrow;
+  static String flashcardsReviewTitle(String deck) =>
+      _s.flashcardsReviewTitle(deck);
+  static String flashcardsAgainCount(int count) =>
+      _s.flashcardsAgainCount(count);
+  static String get flashcardsDoneToday => _s.flashcardsDoneToday;
+  static String flashcardsReviewedCount(int count) =>
+      _s.flashcardsReviewedCount(count);
+  static String flashcardsMinutes(int count) => _s.flashcardsMinutes(count);
+  static String flashcardsNextOn(String when) => _s.flashcardsNextOn(when);
+  static String get flashcardsNothingScheduled => _s.flashcardsNothingScheduled;
+  static String get flashcardsNextDeck => _s.flashcardsNextDeck;
+  static String get flashcardsBackToDeck => _s.flashcardsBackToDeck;
+  static String get flashcardsEndReview => _s.flashcardsEndReview;
+  static String get tabStudy => _s.tabStudy;
+  static String get studyEmpty => _s.studyEmpty;
+  static String get studyEmptyHint => _s.studyEmptyHint;
+  static String get studyOfferBody => _s.studyOfferBody;
+  static String get studyOfferAction => _s.studyOfferAction;
+  static String get settingsNewCardsPerDay => _s.settingsNewCardsPerDay;
+  static String get settingsNewCardsPerDayHint => _s.settingsNewCardsPerDayHint;
+  static String get settingsResetAllReviews => _s.settingsResetAllReviews;
+  static String get resetAllReviewsTitle => _s.resetAllReviewsTitle;
+  static String get resetAllReviewsBody => _s.resetAllReviewsBody;
+  static String get makeFlashcardsTitle => _s.makeFlashcardsTitle;
+  static String get makeFlashcardsDeck => _s.makeFlashcardsDeck;
+  static String get makeFlashcardsDeckHint => _s.makeFlashcardsDeckHint;
+  static String get makeFlashcardsWrites => _s.makeFlashcardsWrites;
+  static String makeFlashcardsAction(int count) =>
+      _s.makeFlashcardsAction(count);
+  static String get makeFlashcardsNone => _s.makeFlashcardsNone;
+  static String get commandNeedPlainNote => _s.commandNeedPlainNote;
+  static String get studyNothingToday => _s.studyNothingToday;
 }

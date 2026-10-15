@@ -16,6 +16,7 @@ import 'package:niman/src/widget/widget_note_ops.dart';
 import 'package:niman/src/widget/widget_payload.dart';
 import 'package:niman/src/widget/widget_pin.dart';
 import 'package:niman/src/widget/widget_placement.dart';
+import 'package:niman/src/widget/widget_reconcile.dart';
 import 'package:niman/src/widget/widget_theme.dart';
 import 'package:niman/src/widget/widget_updater.dart';
 
@@ -37,40 +38,15 @@ Future<void> refreshTodoWidgets({
 }) async {
   final root = session.root;
   if (root == null || snapshot == null) return;
-  if (host != null) {
-    final placed = await host.todoWidgetIds();
-    const AppLogger(name: 'widgets').debug('todo refresh: placed=$placed');
-    if (placed.isNotEmpty) {
-      final known = {
-        for (final config in await session.widgetConfigsFor(root))
-          config.androidWidgetId,
-      };
-      for (final id in placed) {
-        if (known.contains(id)) continue;
-        final choice = await placement?.consumeTodoConfig(id);
-        final library = choice?.library;
-        final adopted = library == null || library.isEmpty ? root : library;
-        await session.adoptTodoWidget(id, adopted);
-        const AppLogger(name: 'widgets').debug(
-          'todo refresh: adopted $id -> $adopted '
-          '(${choice == null ? 'open library' : 'choice'})',
-        );
-      }
-      // The removed instances' rows are reaped here: the native
-      // onDeleted cannot reach the database (the engine may be dead),
-      // and a stale row pushes on every refresh — and every push
-      // re-broadcasts the update to the instances still placed.
-      await session.pruneWidgetConfigs(
-        libraryPath: root,
-        provider: WidgetProvider.todo,
-        placedIds: placed.toSet(),
-      );
-    }
-  }
-  final ids = <int>[
-    for (final config in await session.widgetConfigsFor(root))
-      if (config.provider == WidgetProvider.todo.name) config.androidWidgetId,
-  ];
+  final ids = await reconcilePlacedWidgets(
+    session: session,
+    root: root,
+    provider: WidgetProvider.todo,
+    placed: host?.todoWidgetIds,
+    chosenLibrary: (id) async =>
+        (await placement?.consumeTodoConfig(id))?.library,
+    adopt: session.adoptTodoWidget,
+  );
   if (ids.isEmpty) return;
   final payload = todoWidgetPayload(
     sortTodosForWidget(snapshot),
@@ -78,16 +54,12 @@ Future<void> refreshTodoWidgets({
     total: widgetTodoTotal(snapshot),
     theme: resolveWidgetTheme(),
   );
-  final push = updater ?? WidgetUpdater();
-  for (final id in ids) {
-    await push.push(
-      provider: WidgetProvider.todo,
-      androidWidgetId: id,
-      payload: payload,
-    );
-    const AppLogger(name: 'widgets')
-        .debug('todo refresh: pushed $id (${payload.length} chars)');
-  }
+  await pushToWidgets(
+    provider: WidgetProvider.todo,
+    ids: ids,
+    payload: payload,
+    updater: updater,
+  );
 }
 
 /// Reads the text of the note file at [notePath] in [root] (null when

@@ -30,6 +30,9 @@ enum AppCommand {
   /// A new `type: slides` note (#534).
   newSlides,
 
+  /// A new `type: flashcard` note (#533).
+  newFlashcards,
+
   /// A new todo task.
   newTodo,
 
@@ -147,6 +150,18 @@ enum AppCommand {
   /// The slides note's presenter view (#534).
   presenterView,
 
+  /// Study the deck on screen (#533): the review of its due and new cards.
+  studyDeck,
+
+  /// Pick the question and answer columns of the deck on screen (#533).
+  deckColumns,
+
+  /// Forget the review of every card of the deck on screen (#533).
+  deckReset,
+
+  /// Make the plain note on screen a flashcard deck (#533).
+  makeFlashcards,
+
   /// Switch the note between the source editor and the WYSIWYG.
   switchEditor,
 
@@ -185,6 +200,9 @@ enum AppCommand {
 
   /// Select the Home tab (#535).
   tabHome,
+
+  /// Select the Study tab (#533).
+  tabStudy,
 
   /// Open the next search sidebar hit (#712).
   searchNextHit,
@@ -310,6 +328,9 @@ nimanAppShortcuts = List<AppShortcut>.unmodifiable(const <AppShortcut>[
     AppCommand.presenterView,
     SingleActivator(LogicalKeyboardKey.f5, alt: true),
   ),
+  // The same F5 studies a deck (#533): the two commands wait on different
+  // notes on screen (`commandNeeds`), so at most one answers.
+  AppShortcut(AppCommand.studyDeck, SingleActivator(LogicalKeyboardKey.f5)),
   AppShortcut(
     AppCommand.typewriterMode,
     SingleActivator(LogicalKeyboardKey.keyT, control: true, shift: true),
@@ -363,6 +384,10 @@ nimanAppShortcuts = List<AppShortcut>.unmodifiable(const <AppShortcut>[
     AppCommand.tabHome,
     SingleActivator(LogicalKeyboardKey.digit6, control: true),
   ),
+  AppShortcut(
+    AppCommand.tabStudy,
+    SingleActivator(LogicalKeyboardKey.digit7, control: true),
+  ),
   // F4/Shift+F4, the key every editor's "find next" sits on (#712).
   AppShortcut(AppCommand.searchNextHit, SingleActivator(LogicalKeyboardKey.f4)),
   AppShortcut(
@@ -382,6 +407,11 @@ String appCommandLabel(AppCommand command) => switch (command) {
   AppCommand.newListNote => AppStrings.shortcutNewList,
   AppCommand.newAudioNote => AppStrings.shortcutNewAudio,
   AppCommand.newSlides => AppStrings.newSlidesTitle,
+  AppCommand.newFlashcards => AppStrings.newFlashcardsTitle,
+  AppCommand.studyDeck => AppStrings.flashcardsStudyDeck,
+  AppCommand.deckColumns => AppStrings.flashcardsColumnsTitle,
+  AppCommand.deckReset => AppStrings.flashcardsResetAction,
+  AppCommand.makeFlashcards => AppStrings.makeFlashcardsTitle,
   AppCommand.presentSlides => AppStrings.slidesPresent,
   AppCommand.presenterView => AppStrings.slidesPresenterView,
   AppCommand.newTodo => AppStrings.shortcutNewTodo,
@@ -434,6 +464,7 @@ String appCommandLabel(AppCommand command) => switch (command) {
   AppCommand.tabQuickNote => AppStrings.quickNoteTitle,
   AppCommand.tabSettings => AppStrings.tabSettings,
   AppCommand.tabHome => AppStrings.tabHome,
+  AppCommand.tabStudy => AppStrings.tabStudy,
   // The find bar's own words: the same step, through the hits.
   AppCommand.searchNextHit => AppStrings.editorFindNextTooltip,
   AppCommand.searchPreviousHit => AppStrings.editorFindPreviousTooltip,

@@ -23,6 +23,9 @@ enum WidgetTargetKind {
 
   /// One note of the target library, in the editor.
   note,
+
+  /// The Study destination of the target library (#533).
+  study,
 }
 
 /// A widget tap: the library to show, and what to open inside it.

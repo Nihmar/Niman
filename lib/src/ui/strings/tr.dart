@@ -3785,4 +3785,175 @@ final class TurkishStrings extends Strings {
 
   @override
   String homeActionMissing(String path) => '$path artık kitaplıkta değil';
+
+  @override
+  String get flashcardsName => 'Bilgi kartları';
+  @override
+  String get newFlashcardsTitle => 'Yeni bilgi kartları';
+  @override
+  String get newFlashcardsDefault => 'Bilgi kartlarım';
+  @override
+  String get showFlashcardsTooltip => 'Bilgi kartlarını göster';
+  @override
+  String get flashcardsNoCategory => 'Kategorisiz';
+  @override
+  String flashcardsDueCount(int count) => '$count tekrar bekliyor';
+  @override
+  String flashcardsNewCount(int count) => '$count yeni';
+  @override
+  String flashcardsCardCount(int count) =>
+      count == 1 ? '1 kart' : '$count kart';
+  @override
+  String flashcardsStudyCount(int count) => 'Çalış: $count';
+  @override
+  String flashcardsStudyCards(int count) =>
+      count == 1 ? 'Çalış: 1 kart' : 'Çalış: $count kart';
+  @override
+  String get flashcardsStudyDeck => 'Bu desteyi çalış';
+  @override
+  String get flashcardsAddCard => 'Kart ekle';
+  @override
+  String get flashcardsQuestion => 'Soru';
+  @override
+  String get flashcardsAnswer => 'Cevap';
+  @override
+  String get flashcardsNextColumn => 'Sonraki';
+  @override
+  String get flashcardsDue => 'Zamanı geldi';
+  @override
+  String get flashcardsNew => 'Yeni';
+  @override
+  String flashcardsInDays(int count) =>
+      count == 1 ? '1 gün sonra' : '$count gün sonra';
+  @override
+  String flashcardsInMonths(int count) =>
+      count == 1 ? '1 ay sonra' : '$count ay sonra';
+  @override
+  String flashcardsInYears(int count) =>
+      count == 1 ? '1 yıl sonra' : '$count yıl sonra';
+  @override
+  String get flashcardsRepeated => 'Tekrarlanan';
+  @override
+  String get flashcardsRepeatedTip =>
+      'Bu soru destede birden fazla kez geçiyor';
+  @override
+  String get flashcardsEmpty => 'Henüz kart yok';
+  @override
+  String get flashcardsEditCard => 'Kartı düzenle';
+  @override
+  String get flashcardsSentence => 'Cümle';
+  @override
+  String get flashcardsEditNote =>
+      'Soru aynı kaldıkça ilerleme korunur. Niman bu kartı notta '
+      'yeniden yazar.';
+  @override
+  String flashcardsKindRows(int count) =>
+      count == 1 ? '1 tablo satırı' : '$count tablo satırı';
+  @override
+  String flashcardsKindLines(int count) =>
+      count == 1 ? '1 :: satırı' : '$count :: satırı';
+  @override
+  String flashcardsKindClozes(int count) =>
+      count == 1 ? '1 boşluk doldurma' : '$count boşluk doldurma';
+  @override
+  String get flashcardsEditMarkdown => 'Markdown olarak düzenle';
+  @override
+  String get flashcardsColumnsTitle => 'Soru ve cevap sütunları';
+  @override
+  String get flashcardsQuestionColumn => 'Soru sütunu';
+  @override
+  String get flashcardsAnswerColumn => 'Cevap sütunu';
+  @override
+  String get flashcardsColumnsNone =>
+      'Bu notun hiçbir tablosunda ikiden fazla sütun yok.';
+  @override
+  String get flashcardsResetAction => 'Bu destenin tekrarını sıfırla';
+  @override
+  String get flashcardsResetTitle => 'Tekrar sıfırlansın mı?';
+  @override
+  String get flashcardsResetBody =>
+      'Destedeki her kart yeniden yeni olur. Not değişmez.';
+  @override
+  String get flashcardsResetConfirm => 'Sıfırla';
+  @override
+  String get commandNeedFlashcardNote => 'Açık bir bilgi kartı notu gerektirir';
+
+  @override
+  String get flashcardsCardsLabel => 'Kartlar';
+  @override
+  String get flashcardsShowAnswer => 'Cevabı göster';
+  @override
+  String get flashcardsGradeAgain => 'Tekrar';
+  @override
+  String get flashcardsGradeHard => 'Zor';
+  @override
+  String get flashcardsGradeGood => 'İyi';
+  @override
+  String get flashcardsGradeEasy => 'Kolay';
+  @override
+  String get flashcardsToday => 'bugün';
+  @override
+  String get flashcardsTomorrow => 'yarın';
+  @override
+  String flashcardsReviewTitle(String deck) => 'Çalışma · $deck';
+  @override
+  String flashcardsAgainCount(int count) => 'Tekrar: $count';
+  @override
+  String get flashcardsDoneToday => 'Bugünlük bitti';
+  @override
+  String flashcardsReviewedCount(int count) => 'Tekrarlanan: $count';
+  @override
+  String flashcardsMinutes(int count) => '$count dk';
+  @override
+  String flashcardsNextOn(String when) => 'Sonraki: $when';
+  @override
+  String get flashcardsNothingScheduled => 'Planlanmış kart yok';
+  @override
+  String get flashcardsNextDeck => 'Sonraki deste';
+  @override
+  String get flashcardsBackToDeck => 'Desteye dön';
+  @override
+  String get flashcardsEndReview => 'Tekrarı bitir';
+  @override
+  String get tabStudy => 'Çalışma';
+  @override
+  String get studyEmpty => 'Henüz deste yok';
+  @override
+  String get studyEmptyHint =>
+      'type: flashcard içeren bir not bir kart destesidir.';
+  @override
+  String get studyOfferBody =>
+      'Çalışma destelerini gösterir. Gezinmede gösterilsin mi?';
+  @override
+  String get studyOfferAction => 'Göster';
+  @override
+  String get settingsNewCardsPerDay => 'Günlük yeni kart';
+  @override
+  String get settingsNewCardsPerDayHint =>
+      'Deste başına. 0 yeni kart göstermez.';
+  @override
+  String get settingsResetAllReviews => 'Tüm tekrarları sıfırla';
+  @override
+  String get resetAllReviewsTitle => 'Tüm tekrarlar sıfırlansın mı?';
+  @override
+  String get resetAllReviewsBody =>
+      'Her destenin her kartı yeniden yeni olur. Hiçbir not değişmez.';
+  @override
+  String get makeFlashcardsTitle => 'Bilgi kartı yap';
+  @override
+  String get makeFlashcardsDeck => 'Deste';
+  @override
+  String get makeFlashcardsDeckHint =>
+      'Kategoriler / ile ayrılır. Boş: Kategorisiz.';
+  @override
+  String get makeFlashcardsWrites => 'Frontmatter’a yazılır';
+  @override
+  String makeFlashcardsAction(int count) => 'Kart yap: $count';
+  @override
+  String get makeFlashcardsNone =>
+      'Bu notta kart yapılacak bir tablo, :: satırı veya vurgu yok.';
+  @override
+  String get commandNeedPlainNote => 'Türü olmayan açık bir not gerektirir';
+  @override
+  String get studyNothingToday => 'Bugün çalışılacak bir şey yok';
 }

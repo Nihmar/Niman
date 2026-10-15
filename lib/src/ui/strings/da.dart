@@ -3806,4 +3806,175 @@ final class DanishStrings extends Strings {
   @override
   String homeActionMissing(String path) =>
       '$path er ikke længere i biblioteket';
+
+  @override
+  String get flashcardsName => 'Flashcards';
+  @override
+  String get newFlashcardsTitle => 'Nye flashcards';
+  @override
+  String get newFlashcardsDefault => 'Mine flashcards';
+  @override
+  String get showFlashcardsTooltip => 'Vis flashcards';
+  @override
+  String get flashcardsNoCategory => 'Ingen kategori';
+  @override
+  String flashcardsDueCount(int count) => '$count til repetition';
+  @override
+  String flashcardsNewCount(int count) => '$count nye';
+  @override
+  String flashcardsCardCount(int count) =>
+      count == 1 ? '1 kort' : '$count kort';
+  @override
+  String flashcardsStudyCount(int count) => 'Studér $count';
+  @override
+  String flashcardsStudyCards(int count) =>
+      count == 1 ? 'Studér 1 kort' : 'Studér $count kort';
+  @override
+  String get flashcardsStudyDeck => 'Studér dette kortspil';
+  @override
+  String get flashcardsAddCard => 'Tilføj kort';
+  @override
+  String get flashcardsQuestion => 'Spørgsmål';
+  @override
+  String get flashcardsAnswer => 'Svar';
+  @override
+  String get flashcardsNextColumn => 'Næste';
+  @override
+  String get flashcardsDue => 'Til repetition';
+  @override
+  String get flashcardsNew => 'Nyt';
+  @override
+  String flashcardsInDays(int count) =>
+      count == 1 ? 'om 1 dag' : 'om $count dage';
+  @override
+  String flashcardsInMonths(int count) =>
+      count == 1 ? 'om 1 måned' : 'om $count måneder';
+  @override
+  String flashcardsInYears(int count) =>
+      count == 1 ? 'om 1 år' : 'om $count år';
+  @override
+  String get flashcardsRepeated => 'Gentaget';
+  @override
+  String get flashcardsRepeatedTip =>
+      'Dette spørgsmål forekommer mere end én gang i kortspillet';
+  @override
+  String get flashcardsEmpty => 'Ingen kort endnu';
+  @override
+  String get flashcardsEditCard => 'Rediger kort';
+  @override
+  String get flashcardsSentence => 'Sætning';
+  @override
+  String get flashcardsEditNote =>
+      'Fremskridtet bevares, så længe spørgsmålet er det samme. Niman '
+      'omskriver dette kort i noten.';
+  @override
+  String flashcardsKindRows(int count) =>
+      count == 1 ? '1 tabelrække' : '$count tabelrækker';
+  @override
+  String flashcardsKindLines(int count) =>
+      count == 1 ? '1 ::-linje' : '$count ::-linjer';
+  @override
+  String flashcardsKindClozes(int count) =>
+      count == 1 ? '1 hulsætning' : '$count hulsætninger';
+  @override
+  String get flashcardsEditMarkdown => 'Rediger som Markdown';
+  @override
+  String get flashcardsColumnsTitle => 'Spørgsmåls- og svarkolonner';
+  @override
+  String get flashcardsQuestionColumn => 'Spørgsmålskolonne';
+  @override
+  String get flashcardsAnswerColumn => 'Svarkolonne';
+  @override
+  String get flashcardsColumnsNone =>
+      'Ingen tabel i denne note har mere end to kolonner.';
+  @override
+  String get flashcardsResetAction => 'Nulstil repetitionen af dette kortspil';
+  @override
+  String get flashcardsResetTitle => 'Nulstil repetitionen?';
+  @override
+  String get flashcardsResetBody =>
+      'Hvert kort i kortspillet bliver nyt igen. Noten ændres ikke.';
+  @override
+  String get flashcardsResetConfirm => 'Nulstil';
+  @override
+  String get commandNeedFlashcardNote => 'Kræver en åben flashcard-note';
+
+  @override
+  String get flashcardsCardsLabel => 'Kort';
+  @override
+  String get flashcardsShowAnswer => 'Vis svar';
+  @override
+  String get flashcardsGradeAgain => 'Igen';
+  @override
+  String get flashcardsGradeHard => 'Svært';
+  @override
+  String get flashcardsGradeGood => 'Godt';
+  @override
+  String get flashcardsGradeEasy => 'Let';
+  @override
+  String get flashcardsToday => 'i dag';
+  @override
+  String get flashcardsTomorrow => 'i morgen';
+  @override
+  String flashcardsReviewTitle(String deck) => 'Studér · $deck';
+  @override
+  String flashcardsAgainCount(int count) => '$count igen';
+  @override
+  String get flashcardsDoneToday => 'Færdig for i dag';
+  @override
+  String flashcardsReviewedCount(int count) => '$count repeteret';
+  @override
+  String flashcardsMinutes(int count) => '$count min';
+  @override
+  String flashcardsNextOn(String when) => 'Næste: $when';
+  @override
+  String get flashcardsNothingScheduled => 'Ingen kort planlagt';
+  @override
+  String get flashcardsNextDeck => 'Næste kortspil';
+  @override
+  String get flashcardsBackToDeck => 'Tilbage til kortspillet';
+  @override
+  String get flashcardsEndReview => 'Afslut repetition';
+  @override
+  String get tabStudy => 'Studér';
+  @override
+  String get studyEmpty => 'Ingen kortspil endnu';
+  @override
+  String get studyEmptyHint => 'En note med type: flashcard er et kortspil.';
+  @override
+  String get studyOfferBody =>
+      'Studér viser dine kortspil. Vis det i navigationen?';
+  @override
+  String get studyOfferAction => 'Vis';
+  @override
+  String get settingsNewCardsPerDay => 'Nye kort pr. dag';
+  @override
+  String get settingsNewCardsPerDayHint =>
+      'Pr. kortspil. 0 viser ingen nye kort.';
+  @override
+  String get settingsResetAllReviews => 'Nulstil alle repetitioner';
+  @override
+  String get resetAllReviewsTitle => 'Nulstil alle repetitioner?';
+  @override
+  String get resetAllReviewsBody =>
+      'Hvert kort i hvert kortspil bliver nyt igen. Ingen note ændres.';
+  @override
+  String get makeFlashcardsTitle => 'Lav flashcards';
+  @override
+  String get makeFlashcardsDeck => 'Kortspil';
+  @override
+  String get makeFlashcardsDeckHint =>
+      'Kategorier adskilt af /. Tom: Ingen kategori.';
+  @override
+  String get makeFlashcardsWrites => 'Skrives i frontmatter';
+  @override
+  String makeFlashcardsAction(int count) =>
+      count == 1 ? 'Lav 1 kort' : 'Lav $count kort';
+  @override
+  String get makeFlashcardsNone =>
+      'Denne note har ingen tabel, :: linje eller fremhævning at lave kort af.';
+  @override
+  String get commandNeedPlainNote => 'Kræver en åben note uden type';
+  @override
+  String get studyNothingToday => 'Intet at studere i dag';
 }

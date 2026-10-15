@@ -79,6 +79,7 @@ IconData homeTileIcon(HomeTileKind kind) => switch (kind) {
   HomeTileKind.topTags => Icons.sell_outlined,
   HomeTileKind.randomNote => Icons.casino_outlined,
   HomeTileKind.search => Icons.saved_search,
+  HomeTileKind.study => Icons.style_outlined,
 };
 
 /// The name of a tile of [kind].
@@ -93,6 +94,7 @@ String homeTileName(HomeTileKind kind) => switch (kind) {
   HomeTileKind.topTags => AppStrings.homeTileTopTags,
   HomeTileKind.randomNote => AppStrings.homeTileRandomNote,
   HomeTileKind.search => AppStrings.homeTileSearch,
+  HomeTileKind.study => AppStrings.tabStudy,
 };
 
 /// [tile]'s title: a search tile's own name, else its kind's.

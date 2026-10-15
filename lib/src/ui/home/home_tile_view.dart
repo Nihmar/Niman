@@ -14,6 +14,7 @@ import 'package:niman/src/ui/home/tiles/pinned_tile.dart';
 import 'package:niman/src/ui/home/tiles/random_note_tile.dart';
 import 'package:niman/src/ui/home/tiles/recent_tile.dart';
 import 'package:niman/src/ui/home/tiles/search_tile.dart';
+import 'package:niman/src/ui/home/tiles/study_tile.dart';
 import 'package:niman/src/ui/home/tiles/tasks_due_tile.dart';
 import 'package:niman/src/ui/home/tiles/top_tags_tile.dart';
 
@@ -78,6 +79,7 @@ final class HomeTileView extends StatelessWidget {
           revision: revision,
           query: tile.query,
         ),
+        HomeTileKind.study => StudyTile(host: host),
       },
     );
   }

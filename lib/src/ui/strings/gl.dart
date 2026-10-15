@@ -3848,4 +3848,177 @@ final class GalicianStrings extends Strings {
 
   @override
   String homeActionMissing(String path) => '$path xa non está na biblioteca';
+
+  @override
+  String get flashcardsName => 'Tarxetas';
+  @override
+  String get newFlashcardsTitle => 'Tarxetas novas';
+  @override
+  String get newFlashcardsDefault => 'As miñas tarxetas';
+  @override
+  String get showFlashcardsTooltip => 'Mostrar as tarxetas';
+  @override
+  String get flashcardsNoCategory => 'Sen categoría';
+  @override
+  String flashcardsDueCount(int count) => '$count pendentes';
+  @override
+  String flashcardsNewCount(int count) => '$count novas';
+  @override
+  String flashcardsCardCount(int count) =>
+      count == 1 ? '1 tarxeta' : '$count tarxetas';
+  @override
+  String flashcardsStudyCount(int count) => 'Estudar $count';
+  @override
+  String flashcardsStudyCards(int count) =>
+      count == 1 ? 'Estudar 1 tarxeta' : 'Estudar $count tarxetas';
+  @override
+  String get flashcardsStudyDeck => 'Estudar este mazo';
+  @override
+  String get flashcardsAddCard => 'Engadir tarxeta';
+  @override
+  String get flashcardsQuestion => 'Pregunta';
+  @override
+  String get flashcardsAnswer => 'Resposta';
+  @override
+  String get flashcardsNextColumn => 'Seguinte';
+  @override
+  String get flashcardsDue => 'Pendente';
+  @override
+  String get flashcardsNew => 'Nova';
+  @override
+  String flashcardsInDays(int count) =>
+      count == 1 ? 'en 1 día' : 'en $count días';
+  @override
+  String flashcardsInMonths(int count) =>
+      count == 1 ? 'en 1 mes' : 'en $count meses';
+  @override
+  String flashcardsInYears(int count) =>
+      count == 1 ? 'en 1 ano' : 'en $count anos';
+  @override
+  String get flashcardsRepeated => 'Repetida';
+  @override
+  String get flashcardsRepeatedTip =>
+      'Esta pregunta aparece máis dunha vez no mazo';
+  @override
+  String get flashcardsEmpty => 'Aínda non hai tarxetas';
+  @override
+  String get flashcardsEditCard => 'Editar tarxeta';
+  @override
+  String get flashcardsSentence => 'Frase';
+  @override
+  String get flashcardsEditNote =>
+      'O progreso consérvase mentres a pregunta non cambie. Niman '
+      'reescribe esta tarxeta na nota.';
+  @override
+  String flashcardsKindRows(int count) =>
+      count == 1 ? '1 fila de táboa' : '$count filas de táboa';
+  @override
+  String flashcardsKindLines(int count) =>
+      count == 1 ? '1 liña ::' : '$count liñas ::';
+  @override
+  String flashcardsKindClozes(int count) =>
+      count == 1 ? '1 oco' : '$count ocos';
+  @override
+  String get flashcardsEditMarkdown => 'Editar como Markdown';
+  @override
+  String get flashcardsColumnsTitle => 'Columnas de pregunta e resposta';
+  @override
+  String get flashcardsQuestionColumn => 'Columna da pregunta';
+  @override
+  String get flashcardsAnswerColumn => 'Columna da resposta';
+  @override
+  String get flashcardsColumnsNone =>
+      'Ningunha táboa desta nota ten máis de dúas columnas.';
+  @override
+  String get flashcardsResetAction => 'Reiniciar a revisión deste mazo';
+  @override
+  String get flashcardsResetTitle => 'Reiniciar a revisión?';
+  @override
+  String get flashcardsResetBody =>
+      'Cada tarxeta do mazo volve ser nova. A nota non cambia.';
+  @override
+  String get flashcardsResetConfirm => 'Reiniciar';
+  @override
+  String get commandNeedFlashcardNote => 'Require unha nota de tarxetas aberta';
+
+  @override
+  String get flashcardsCardsLabel => 'Tarxetas';
+  @override
+  String get flashcardsShowAnswer => 'Amosar a resposta';
+  @override
+  String get flashcardsGradeAgain => 'Outra vez';
+  @override
+  String get flashcardsGradeHard => 'Difícil';
+  @override
+  String get flashcardsGradeGood => 'Ben';
+  @override
+  String get flashcardsGradeEasy => 'Doado';
+  @override
+  String get flashcardsToday => 'hoxe';
+  @override
+  String get flashcardsTomorrow => 'mañá';
+  @override
+  String flashcardsReviewTitle(String deck) => 'Estudo · $deck';
+  @override
+  String flashcardsAgainCount(int count) => '$count outra vez';
+  @override
+  String get flashcardsDoneToday => 'Feito por hoxe';
+  @override
+  String flashcardsReviewedCount(int count) => '$count repasadas';
+  @override
+  String flashcardsMinutes(int count) => '$count min';
+  @override
+  String flashcardsNextOn(String when) => 'Seguintes: $when';
+  @override
+  String get flashcardsNothingScheduled => 'Ningunha tarxeta programada';
+  @override
+  String get flashcardsNextDeck => 'Seguinte mazo';
+  @override
+  String get flashcardsBackToDeck => 'Volver ao mazo';
+  @override
+  String get flashcardsEndReview => 'Rematar o repaso';
+  @override
+  String get tabStudy => 'Estudo';
+  @override
+  String get studyEmpty => 'Aínda non hai mazos';
+  @override
+  String get studyEmptyHint =>
+      'Unha nota con type: flashcard é un mazo de tarxetas.';
+  @override
+  String get studyOfferBody =>
+      'Estudo mostra os teus mazos. Amosalo na navegación?';
+  @override
+  String get studyOfferAction => 'Amosar';
+  @override
+  String get settingsNewCardsPerDay => 'Tarxetas novas ao día';
+  @override
+  String get settingsNewCardsPerDayHint =>
+      'Por mazo. 0 non amosa tarxetas novas.';
+  @override
+  String get settingsResetAllReviews => 'Reiniciar todos os repasos';
+  @override
+  String get resetAllReviewsTitle => 'Reiniciar todos os repasos?';
+  @override
+  String get resetAllReviewsBody =>
+      'Cada tarxeta de cada mazo volve ser nova. Non se cambia ningunha nota.';
+  @override
+  String get makeFlashcardsTitle => 'Crear tarxetas';
+  @override
+  String get makeFlashcardsDeck => 'Mazo';
+  @override
+  String get makeFlashcardsDeckHint =>
+      'Categorías separadas por /. Baleiro: Sen categoría.';
+  @override
+  String get makeFlashcardsWrites => 'Escríbese no frontmatter';
+  @override
+  String makeFlashcardsAction(int count) =>
+      count == 1 ? 'Crear 1 tarxeta' : 'Crear $count tarxetas';
+  @override
+  String get makeFlashcardsNone =>
+      'Esta nota non ten ningunha táboa, liña :: nin resaltado co que crear '
+      'tarxetas.';
+  @override
+  String get commandNeedPlainNote => 'Require unha nota aberta sen tipo';
+  @override
+  String get studyNothingToday => 'Hoxe non hai nada que estudar';
 }

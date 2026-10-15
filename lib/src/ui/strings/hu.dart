@@ -3835,4 +3835,177 @@ final class HungarianStrings extends Strings {
 
   @override
   String homeActionMissing(String path) => '$path már nincs a könyvtárban';
+
+  @override
+  String get flashcardsName => 'Kártyák';
+  @override
+  String get newFlashcardsTitle => 'Új kártyák';
+  @override
+  String get newFlashcardsDefault => 'Saját kártyáim';
+  @override
+  String get showFlashcardsTooltip => 'Kártyák megjelenítése';
+  @override
+  String get flashcardsNoCategory => 'Kategória nélkül';
+  @override
+  String flashcardsDueCount(int count) => '$count esedékes';
+  @override
+  String flashcardsNewCount(int count) => '$count új';
+  @override
+  String flashcardsCardCount(int count) =>
+      count == 1 ? '1 kártya' : '$count kártya';
+  @override
+  String flashcardsStudyCount(int count) => '$count tanulása';
+  @override
+  String flashcardsStudyCards(int count) =>
+      count == 1 ? '1 kártya tanulása' : '$count kártya tanulása';
+  @override
+  String get flashcardsStudyDeck => 'Pakli tanulása';
+  @override
+  String get flashcardsAddCard => 'Kártya hozzáadása';
+  @override
+  String get flashcardsQuestion => 'Kérdés';
+  @override
+  String get flashcardsAnswer => 'Válasz';
+  @override
+  String get flashcardsNextColumn => 'Következő';
+  @override
+  String get flashcardsDue => 'Esedékes';
+  @override
+  String get flashcardsNew => 'Új';
+  @override
+  String flashcardsInDays(int count) =>
+      count == 1 ? '1 nap múlva' : '$count nap múlva';
+  @override
+  String flashcardsInMonths(int count) =>
+      count == 1 ? '1 hónap múlva' : '$count hónap múlva';
+  @override
+  String flashcardsInYears(int count) =>
+      count == 1 ? '1 év múlva' : '$count év múlva';
+  @override
+  String get flashcardsRepeated => 'Ismétlődő';
+  @override
+  String get flashcardsRepeatedTip =>
+      'Ez a kérdés többször szerepel a pakliban';
+  @override
+  String get flashcardsEmpty => 'Még nincs kártya';
+  @override
+  String get flashcardsEditCard => 'Kártya szerkesztése';
+  @override
+  String get flashcardsSentence => 'Mondat';
+  @override
+  String get flashcardsEditNote =>
+      'A haladás megmarad, amíg a kérdés ugyanaz. A Niman átírja ezt a '
+      'kártyát a jegyzetben.';
+  @override
+  String flashcardsKindRows(int count) =>
+      count == 1 ? '1 táblázatsor' : '$count táblázatsor';
+  @override
+  String flashcardsKindLines(int count) =>
+      count == 1 ? '1 ::-sor' : '$count ::-sor';
+  @override
+  String flashcardsKindClozes(int count) =>
+      count == 1 ? '1 hiányos szöveg' : '$count hiányos szöveg';
+  @override
+  String get flashcardsEditMarkdown => 'Szerkesztés Markdownként';
+  @override
+  String get flashcardsColumnsTitle => 'Kérdés- és válaszoszlopok';
+  @override
+  String get flashcardsQuestionColumn => 'Kérdés oszlopa';
+  @override
+  String get flashcardsAnswerColumn => 'Válasz oszlopa';
+  @override
+  String get flashcardsColumnsNone =>
+      'A jegyzet egyik táblázata sem szélesebb két oszlopnál.';
+  @override
+  String get flashcardsResetAction => 'A pakli ismétlésének visszaállítása';
+  @override
+  String get flashcardsResetTitle => 'Visszaállítod az ismétlést?';
+  @override
+  String get flashcardsResetBody =>
+      'A pakli minden kártyája újra új lesz. A jegyzet nem változik.';
+  @override
+  String get flashcardsResetConfirm => 'Visszaállítás';
+  @override
+  String get commandNeedFlashcardNote => 'Megnyitott kártyajegyzetet igényel';
+
+  @override
+  String get flashcardsCardsLabel => 'Kártyák';
+  @override
+  String get flashcardsShowAnswer => 'Válasz mutatása';
+  @override
+  String get flashcardsGradeAgain => 'Újra';
+  @override
+  String get flashcardsGradeHard => 'Nehéz';
+  @override
+  String get flashcardsGradeGood => 'Jó';
+  @override
+  String get flashcardsGradeEasy => 'Könnyű';
+  @override
+  String get flashcardsToday => 'ma';
+  @override
+  String get flashcardsTomorrow => 'holnap';
+  @override
+  String flashcardsReviewTitle(String deck) => 'Tanulás · $deck';
+  @override
+  String flashcardsAgainCount(int count) => 'Újra: $count';
+  @override
+  String get flashcardsDoneToday => 'Mára kész';
+  @override
+  String flashcardsReviewedCount(int count) => 'Ismételve: $count';
+  @override
+  String flashcardsMinutes(int count) => '$count perc';
+  @override
+  String flashcardsNextOn(String when) => 'Következő: $when';
+  @override
+  String get flashcardsNothingScheduled => 'Nincs ütemezett kártya';
+  @override
+  String get flashcardsNextDeck => 'Következő pakli';
+  @override
+  String get flashcardsBackToDeck => 'Vissza a paklihoz';
+  @override
+  String get flashcardsEndReview => 'Ismétlés befejezése';
+  @override
+  String get tabStudy => 'Tanulás';
+  @override
+  String get studyEmpty => 'Még nincs pakli';
+  @override
+  String get studyEmptyHint =>
+      'A type: flashcard jelölésű jegyzet egy kártyapakli.';
+  @override
+  String get studyOfferBody =>
+      'A Tanulás a paklijaidat mutatja. Megjelenjen a navigációban?';
+  @override
+  String get studyOfferAction => 'Megjelenítés';
+  @override
+  String get settingsNewCardsPerDay => 'Új kártya naponta';
+  @override
+  String get settingsNewCardsPerDayHint =>
+      'Paklinként. 0 esetén nincs új kártya.';
+  @override
+  String get settingsResetAllReviews => 'Minden ismétlés visszaállítása';
+  @override
+  String get resetAllReviewsTitle => 'Visszaállítod az összes ismétlést?';
+  @override
+  String get resetAllReviewsBody =>
+      'Minden pakli minden kártyája újra új lesz. Egyik jegyzet sem változik.';
+  @override
+  String get makeFlashcardsTitle => 'Kártyák készítése';
+  @override
+  String get makeFlashcardsDeck => 'Pakli';
+  @override
+  String get makeFlashcardsDeckHint =>
+      'Kategóriák / jellel elválasztva. Üres: Kategória nélkül.';
+  @override
+  String get makeFlashcardsWrites => 'A frontmatterbe kerül';
+  @override
+  String makeFlashcardsAction(int count) => 'Kártyák készítése: $count';
+  @override
+  String get makeFlashcardsNone =>
+      'Ebben a jegyzetben nincs táblázat, :: sor vagy kiemelés, amiből kártya '
+      'lehetne.';
+  @override
+  String get commandNeedPlainNote =>
+      'Típus nélküli megnyitott jegyzetet igényel';
+  @override
+  String get studyNothingToday => 'Ma nincs mit tanulni';
 }

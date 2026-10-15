@@ -79,6 +79,99 @@ DateTime _readAt(Object? entry) =>
     (entry is Map ? DateTime.tryParse('${entry['at']}') : null) ??
     DateTime.utc(1970);
 
+/// `.niman/review.json` (#533) merged card by card over [base], the
+/// content both sides last agreed on (null when there is none), as
+/// [mergeReadingJson] merges book by book: a card only one side changed
+/// (graded, added or dropped) takes that side, and where both graded it
+/// the later review wins, by the entries' own `at`, not the file's. So
+/// two devices studying two decks, or one deck on two days, never
+/// conflict.
+///
+/// A card both sides graded since the base keeps the earlier of their
+/// `first` dates (the day it was first shown, which counts toward the day's
+/// limit of new cards). A card only one side changed is that side's whole,
+/// `first` included: a deck reset and studied again is new on that day.
+///
+/// A note is the map of its cards: a note one side lacks is a side with no
+/// cards, so a card present on one side only is kept when the other never
+/// had it (the base lacks it, or there is no base), and dropped when the
+/// other side dropped it (the note was deleted or reset) and this side
+/// did not review it since. A note left with no card is left out.
+///
+/// Returns null when a side does not parse as a JSON object.
+String? mergeReviewJson({
+  required String? base,
+  required String local,
+  required String remote,
+}) {
+  final l = _object(local);
+  final r = _object(remote);
+  if (l == null || r == null) return null;
+  final b = base == null ? null : _object(base);
+  final merged = <String, Object?>{};
+  for (final note in {...l.keys, ...r.keys}) {
+    final mine = _cards(l[note]);
+    final theirs = _cards(r[note]);
+    final agreed = b == null ? null : _cards(b[note]);
+    final cards = <String, Object?>{};
+    for (final key in {...mine.keys, ...theirs.keys}) {
+      final pick = _pick(
+        key,
+        local: mine,
+        remote: theirs,
+        base: agreed,
+        localNewer: !_readAt(theirs[key]).isAfter(_readAt(mine[key])),
+      );
+      if (!pick.present) continue;
+      // The earlier `first` is for a card both sides changed since the base.
+      // A side that left it as it was has nothing to say on it: the other
+      // side's card wins whole, or a reset deck re-graded here would take its
+      // old `first` back from a device that never saw the reset.
+      final both =
+          mine.containsKey(key) &&
+          theirs.containsKey(key) &&
+          _changedSince(agreed, key, mine) &&
+          _changedSince(agreed, key, theirs);
+      cards[key] = both
+          ? _withEarliestFirst(pick.value, mine[key], theirs[key])
+          : pick.value;
+    }
+    if (cards.isNotEmpty) merged[note] = cards;
+  }
+  return _encode(merged);
+}
+
+/// Whether [side] has the card [key] other than the base [agreed] had it;
+/// without a base nothing says it did not.
+bool _changedSince(
+  Map<String, Object?>? agreed,
+  String key,
+  Map<String, Object?> side,
+) =>
+    agreed == null ||
+    !_same(
+      (present: true, value: side[key]),
+      (present: agreed.containsKey(key), value: agreed[key]),
+    );
+
+/// The card [picked] with the earlier of the two sides' `first` dates: a
+/// card first graded on two devices was first graded on the earlier day,
+/// whichever review is the later. ISO dates compare as text.
+Object? _withEarliestFirst(Object? picked, Object? mine, Object? theirs) {
+  if (picked is! Map) return picked;
+  final firsts = [
+    for (final card in [mine, theirs])
+      if (card is Map && card['first'] is String) card['first']! as String,
+  ]..sort();
+  if (firsts.isEmpty || picked['first'] == firsts.first) return picked;
+  return {...picked, 'first': firsts.first};
+}
+
+/// A note's cards of a review file; none for an entry that is no object.
+Map<String, Object?> _cards(Object? note) => note is Map
+    ? {for (final card in note.entries) card.key.toString(): card.value}
+    : <String, Object?>{};
+
 /// `.niman/counters.json` merged: every counter is the highest either
 /// side reached, so a number a template already handed out on one device
 /// is never handed out again on the other.

@@ -3885,4 +3885,178 @@ final class CatalanStrings extends Strings {
 
   @override
   String homeActionMissing(String path) => '$path ja no és a la biblioteca';
+
+  @override
+  String get flashcardsName => 'Targetes';
+  @override
+  String get newFlashcardsTitle => 'Targetes noves';
+  @override
+  String get newFlashcardsDefault => 'Les meves targetes';
+  @override
+  String get showFlashcardsTooltip => 'Mostra les targetes';
+  @override
+  String get flashcardsNoCategory => 'Sense categoria';
+  @override
+  String flashcardsDueCount(int count) => '$count pendents';
+  @override
+  String flashcardsNewCount(int count) => '$count noves';
+  @override
+  String flashcardsCardCount(int count) =>
+      count == 1 ? '1 targeta' : '$count targetes';
+  @override
+  String flashcardsStudyCount(int count) => 'Estudia $count';
+  @override
+  String flashcardsStudyCards(int count) =>
+      count == 1 ? 'Estudia 1 targeta' : 'Estudia $count targetes';
+  @override
+  String get flashcardsStudyDeck => 'Estudia aquesta baralla';
+  @override
+  String get flashcardsAddCard => 'Afegeix una targeta';
+  @override
+  String get flashcardsQuestion => 'Pregunta';
+  @override
+  String get flashcardsAnswer => 'Resposta';
+  @override
+  String get flashcardsNextColumn => 'Propera';
+  @override
+  String get flashcardsDue => 'Pendent';
+  @override
+  String get flashcardsNew => 'Nova';
+  @override
+  String flashcardsInDays(int count) =>
+      count == 1 ? 'd’aquí a 1 dia' : 'd’aquí a $count dies';
+  @override
+  String flashcardsInMonths(int count) =>
+      count == 1 ? 'd’aquí a 1 mes' : 'd’aquí a $count mesos';
+  @override
+  String flashcardsInYears(int count) =>
+      count == 1 ? 'd’aquí a 1 any' : 'd’aquí a $count anys';
+  @override
+  String get flashcardsRepeated => 'Repetida';
+  @override
+  String get flashcardsRepeatedTip =>
+      'Aquesta pregunta apareix més d’una vegada a la baralla';
+  @override
+  String get flashcardsEmpty => 'Encara no hi ha targetes';
+  @override
+  String get flashcardsEditCard => 'Edita la targeta';
+  @override
+  String get flashcardsSentence => 'Frase';
+  @override
+  String get flashcardsEditNote =>
+      'El progrés es conserva mentre la pregunta no canviï. Niman '
+      'reescriu aquesta targeta a la nota.';
+  @override
+  String flashcardsKindRows(int count) =>
+      count == 1 ? '1 fila de taula' : '$count files de taula';
+  @override
+  String flashcardsKindLines(int count) =>
+      count == 1 ? '1 línia ::' : '$count línies ::';
+  @override
+  String flashcardsKindClozes(int count) =>
+      count == 1 ? '1 buit' : '$count buits';
+  @override
+  String get flashcardsEditMarkdown => 'Edita com a Markdown';
+  @override
+  String get flashcardsColumnsTitle => 'Columnes de pregunta i resposta';
+  @override
+  String get flashcardsQuestionColumn => 'Columna de la pregunta';
+  @override
+  String get flashcardsAnswerColumn => 'Columna de la resposta';
+  @override
+  String get flashcardsColumnsNone =>
+      'Cap taula d’aquesta nota té més de dues columnes.';
+  @override
+  String get flashcardsResetAction => 'Reinicia la revisió d’aquesta baralla';
+  @override
+  String get flashcardsResetTitle => 'Vols reiniciar la revisió?';
+  @override
+  String get flashcardsResetBody =>
+      'Cada targeta de la baralla torna a ser nova. La nota no canvia.';
+  @override
+  String get flashcardsResetConfirm => 'Reinicia';
+  @override
+  String get commandNeedFlashcardNote => 'Cal una nota de targetes oberta';
+
+  @override
+  String get flashcardsCardsLabel => 'Targetes';
+  @override
+  String get flashcardsShowAnswer => 'Mostra la resposta';
+  @override
+  String get flashcardsGradeAgain => 'Una altra vegada';
+  @override
+  String get flashcardsGradeHard => 'Difícil';
+  @override
+  String get flashcardsGradeGood => 'Bé';
+  @override
+  String get flashcardsGradeEasy => 'Fàcil';
+  @override
+  String get flashcardsToday => 'avui';
+  @override
+  String get flashcardsTomorrow => 'demà';
+  @override
+  String flashcardsReviewTitle(String deck) => 'Estudi · $deck';
+  @override
+  String flashcardsAgainCount(int count) => '$count una altra vegada';
+  @override
+  String get flashcardsDoneToday => 'Fet per avui';
+  @override
+  String flashcardsReviewedCount(int count) => '$count revisades';
+  @override
+  String flashcardsMinutes(int count) => '$count min';
+  @override
+  String flashcardsNextOn(String when) => 'Següents: $when';
+  @override
+  String get flashcardsNothingScheduled => 'Cap targeta programada';
+  @override
+  String get flashcardsNextDeck => 'Baralla següent';
+  @override
+  String get flashcardsBackToDeck => 'Torna a la baralla';
+  @override
+  String get flashcardsEndReview => 'Acaba la revisió';
+  @override
+  String get tabStudy => 'Estudi';
+  @override
+  String get studyEmpty => 'Encara no hi ha cap baralla';
+  @override
+  String get studyEmptyHint =>
+      'Una nota amb type: flashcard és una baralla de targetes.';
+  @override
+  String get studyOfferBody =>
+      'Estudi mostra les teves baralles. Vols mostrar-lo a la navegació?';
+  @override
+  String get studyOfferAction => 'Mostra';
+  @override
+  String get settingsNewCardsPerDay => 'Targetes noves al dia';
+  @override
+  String get settingsNewCardsPerDayHint =>
+      'Per baralla. 0 no mostra cap targeta nova.';
+  @override
+  String get settingsResetAllReviews => 'Reinicia totes les revisions';
+  @override
+  String get resetAllReviewsTitle => 'Vols reiniciar totes les revisions?';
+  @override
+  String get resetAllReviewsBody =>
+      'Totes les targetes de totes les baralles tornen a ser noves. No es '
+      'canvia cap nota.';
+  @override
+  String get makeFlashcardsTitle => 'Fes targetes';
+  @override
+  String get makeFlashcardsDeck => 'Baralla';
+  @override
+  String get makeFlashcardsDeckHint =>
+      'Categories separades per /. Buit: Sense categoria.';
+  @override
+  String get makeFlashcardsWrites => 'S’escriu al frontmatter';
+  @override
+  String makeFlashcardsAction(int count) =>
+      count == 1 ? 'Fes 1 targeta' : 'Fes $count targetes';
+  @override
+  String get makeFlashcardsNone =>
+      'Aquesta nota no té cap taula, línia :: ni ressaltat per fer-ne '
+      'targetes.';
+  @override
+  String get commandNeedPlainNote => 'Cal una nota oberta sense tipus';
+  @override
+  String get studyNothingToday => 'Avui no hi ha res per estudiar';
 }

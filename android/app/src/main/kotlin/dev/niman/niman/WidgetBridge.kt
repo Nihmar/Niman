@@ -3,6 +3,7 @@ package dev.niman.niman
 import android.app.Activity
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
 import android.util.Log
 import io.flutter.plugin.common.BinaryMessenger
@@ -38,6 +39,17 @@ class WidgetBridge(private val activity: Activity) :
 
         /** The intent extra holding the optional heading anchor. */
         const val EXTRA_ANCHOR = "anchor"
+
+        /** Opens Study, the decks, of the carrying library (#533). */
+        const val ACTION_OPEN_STUDY = "dev.niman.niman.OPEN_STUDY"
+
+        /** The intent the Study widget's header taps (#533). */
+        fun studyIntent(context: Context, libraryPath: String): Intent =
+            Intent(context, MainActivity::class.java)
+                .setAction(ACTION_OPEN_STUDY)
+                .putExtra(EXTRA_LIBRARY, libraryPath)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
     }
 
     private var channel: MethodChannel? = null
@@ -70,7 +82,9 @@ class WidgetBridge(private val activity: Activity) :
      */
     fun handleIntent(intent: Intent?, running: Boolean): Boolean {
         if (intent == null) return false
-        if (intent.action != ACTION_OPEN_TODO && intent.action != ACTION_OPEN_NOTE) return false
+        if (intent.action !in setOf(ACTION_OPEN_TODO, ACTION_OPEN_NOTE, ACTION_OPEN_STUDY)) {
+            return false
+        }
         val target = targetOf(intent) ?: return true
         clearExtras(intent)
         if (running) {
@@ -168,6 +182,8 @@ class WidgetBridge(private val activity: Activity) :
                 ComponentName(activity, TodoWidgetProvider::class.java)
             "NoteWidgetProvider" ->
                 ComponentName(activity, NoteWidgetProvider::class.java)
+            "StudyWidgetProvider" ->
+                ComponentName(activity, StudyWidgetProvider::class.java)
             else -> return emptyList()
         }
         val ids = manager.getAppWidgetIds(component).toList()
@@ -184,6 +200,10 @@ class WidgetBridge(private val activity: Activity) :
         return when (intent.action) {
             ACTION_OPEN_TODO -> mapOf(
                 "kind" to "todo",
+                "libraryPath" to library,
+            )
+            ACTION_OPEN_STUDY -> mapOf(
+                "kind" to "study",
                 "libraryPath" to library,
             )
             ACTION_OPEN_NOTE -> {

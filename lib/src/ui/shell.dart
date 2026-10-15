@@ -34,6 +34,8 @@ import 'package:niman/src/editor/markdown_format.dart';
 import 'package:niman/src/editor/plain_text.dart';
 import 'package:niman/src/export/export_files.dart';
 import 'package:niman/src/export/pdf_printer.dart';
+import 'package:niman/src/flashcards/deck_catalog_controller.dart';
+import 'package:niman/src/flashcards/library_decks.dart';
 import 'package:niman/src/frontmatter/note_kind.dart';
 import 'package:niman/src/frontmatter/parser.dart';
 import 'package:niman/src/history/history_manifest.dart';
@@ -93,6 +95,13 @@ import 'package:niman/src/ui/island.dart';
 import 'package:niman/src/ui/journal/journal_flow.dart';
 import 'package:niman/src/ui/key_map.dart';
 import 'package:niman/src/ui/kinds/audio_transcript_writer.dart';
+import 'package:niman/src/ui/kinds/flashcards/deck_menu_flow.dart';
+import 'package:niman/src/ui/kinds/flashcards/deck_review_source.dart';
+import 'package:niman/src/ui/kinds/flashcards/deck_study.dart';
+import 'package:niman/src/ui/kinds/flashcards/make_flashcards.dart';
+import 'package:niman/src/ui/kinds/flashcards/review_run.dart';
+import 'package:niman/src/ui/kinds/flashcards/review_tab.dart';
+import 'package:niman/src/ui/kinds/flashcards/review_view.dart';
 import 'package:niman/src/ui/kinds/slides/slides_present.dart';
 import 'package:niman/src/ui/link_update_dialog.dart';
 import 'package:niman/src/ui/note_menu.dart';
@@ -144,6 +153,7 @@ import 'package:niman/src/ui/shell_windows.dart';
 import 'package:niman/src/ui/shell_workspace.dart';
 import 'package:niman/src/ui/shell_zen.dart';
 import 'package:niman/src/ui/strings.dart';
+import 'package:niman/src/ui/study/study_view.dart';
 import 'package:niman/src/ui/sync/sync_status.dart';
 import 'package:niman/src/ui/tab_body_stack.dart';
 import 'package:niman/src/ui/tab_drag.dart';
@@ -722,6 +732,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     // does.
     FocusManager.instance.primaryFocus?.unfocus();
     _shellFocus.requestFocus();
+    _reviewTab.show(on: false);
     setState(() {
       _compareShows = false;
       _tab = tab;
@@ -780,7 +791,12 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     updater: widget.widgetUpdater,
     host: widget.widgetHost,
     todoSnapshot: () => _todoController.snapshot,
+    decks: () async => switch (_decks) {
+      final catalog? when catalog.loaded => catalog.summaries,
+      _ => null,
+    },
     openTodo: _openTodo,
+    openStudy: () => _onDestinationSelected(ShellTab.study),
     openNote: _openNoteFromLink,
     mounted: () => mounted,
     onTargetBlocked: () =>
@@ -819,6 +835,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     // they open as a pinned tab in the focused pane and the tree, the
     // panes and the dock stay, instead of taking a whole slot.
     if (!narrow && (tab == ShellTab.home || tab == ShellTab.todo)) {
+      _reviewTab.show(on: false);
       setState(() {
         // The page it shows covers the compare tab's: that tab stays on
         // its chip (#906).
@@ -845,7 +862,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         _fab.collapse();
         // A sidebar view has no island of its own: picking Search shows
         // the sidebar island it lives in (#712).
-        if (!narrow && tab == ShellTab.search) _sidebarVisible = true;
+        if (!narrow && (tab == ShellTab.search || tab == ShellTab.study)) {
+          _sidebarVisible = true;
+        }
         // Leaving any open note: the tabs show at once (issue #4).
         _noteClosed();
       });
@@ -963,7 +982,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         !_wide ||
         !_sidebarVisible ||
         !_filesSlotVisible ||
-        _sidebarShowsSearch ||
+        _sidebarShowsView ||
         _gridOn) {
       return null;
     }
@@ -1185,6 +1204,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     final icon = switch (_noteKind) {
       'audio' => Icons.mic_outlined,
       'slides' => Icons.slideshow_outlined,
+      'flashcard' => Icons.style_outlined,
       'shopping-list' => Icons.shopping_cart_outlined,
       _ => Icons.checklist,
     };
@@ -1210,6 +1230,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           tooltip: switch (_noteKind) {
             'audio' => AppStrings.showAudioTooltip,
             'slides' => AppStrings.showSlidesTooltip,
+            'flashcard' => AppStrings.showFlashcardsTooltip,
             _ => AppStrings.showListTooltip,
           },
           icon: Icon(icon),
@@ -1637,6 +1658,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     }
     if (!mounted) return;
     FocusManager.instance.primaryFocus?.unfocus();
+    _reviewTab.show(on: false);
     setState(() {
       _compare = (path: path, version: version, pane: _workspace.value.focused);
       _compareShows = true;
@@ -1725,6 +1747,139 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     );
   }
 
+  /// The study beside the deck (#533, decision 9): a tab of the pane
+  /// [_placeReview] picks, its chip at the end of that pane's row.
+  late final ReviewTab _reviewTab = ref.read(reviewTabProvider);
+
+  /// Which pane draws the study: the one it opened in, or pane 0 when the
+  /// window is not split any more.
+  int get _reviewPaneShown =>
+      _workspace.value.isSplit ? _reviewTab.pane ?? 0 : 0;
+
+  /// Whether [pane] shows the study now.
+  bool _reviewIn(int pane) =>
+      _wide && _reviewTab.shows && pane == _reviewPaneShown;
+
+  void _onReviewTab() {
+    if (!mounted) return;
+    if (_reviewTab.run != null && _reviewTab.pane == null) _placeReview();
+    if (_reviewTab.shows) {
+      FocusManager.instance.primaryFocus?.unfocus();
+      // A study opened over the compare tab's pane covers it.
+      if (_comparePaneShown == _reviewPaneShown) _compareShows = false;
+    }
+    setState(() {});
+  }
+
+  /// Puts a new study beside its deck: in the other pane of a split; in a
+  /// pane split off to the right where the window has room for two; over
+  /// the deck where it has not, as the compare tab opens.
+  void _placeReview() {
+    final w = _workspace.value;
+    final dock = _dockShown ? _dockWidth + ResizeDivider.width : 0;
+    final panes =
+        MediaQuery.sizeOf(context).width - _tabsStart - dock - Island.gap;
+    if (w.isSplit) {
+      _reviewTab.pane = 1 - w.focused;
+    } else if (panes >= 2 * RightDock.minPanesWidth) {
+      // Placed first: the split that follows is no note shown over it.
+      _reviewTab.pane = 1;
+      _workspace.controller.update(
+        (w) => w.split(SplitAxis.right).focus(w.focused),
+      );
+    } else {
+      _reviewTab.pane = w.focused;
+    }
+  }
+
+  Widget _reviewChip(int pane) {
+    final w = _workspace.value;
+    return ReviewTabChip(
+      title: _reviewTab.run!.title,
+      selected: _reviewIn(pane),
+      focused: !w.isSplit || w.focused == pane,
+      onTap: () {
+        FocusManager.instance.primaryFocus?.unfocus();
+        _reviewTab.show();
+      },
+      onClose: _reviewTab.close,
+    );
+  }
+
+  Widget _reviewPage() {
+    final run = _reviewTab.run!;
+    return ReviewView(
+      key: ObjectKey(run),
+      run: run,
+      onClose: _reviewTab.close,
+      onNextDeck: (path) => unawaited(_studyNextDeck(path)),
+    );
+  }
+
+  /// **Next deck** (#533): the deck at library-relative [path] opens where
+  /// the last one was, and its study takes the last one's place.
+  Future<void> _studyNextDeck(String path) async {
+    final root = widget.controller.root;
+    if (root == null) return;
+    final run = await loadReviewRun(
+      session: widget.controller,
+      reviews: ref.read(deckReviewSourceProvider),
+      paths: [p.join(root, path)],
+    );
+    if (!mounted || run == null) return;
+    final pane = _reviewTab.pane;
+    final w = _workspace.value;
+    // Beside the study, the deck shows; over it, it would cover the study.
+    if (w.isSplit && pane != null) {
+      _workspace.focus(1 - pane);
+      _showNote(path);
+    }
+    _reviewTab.open(run, pane: pane);
+  }
+
+  /// The decks of the library, counted (#533): read on Study's first
+  /// visit, kept while the shell lives.
+  DeckCatalogController? _deckCatalog;
+
+  DeckCatalogController? get _decks {
+    if (_deckCatalog case final catalog?) return catalog;
+    final catalog = deckCatalogOf(widget.controller);
+    if (catalog != null) {
+      // Every count reaches the Study widgets, the first one included.
+      catalog.addListener(_homeWidgets.pushStudy);
+      unawaited(catalog.refresh());
+    }
+    return _deckCatalog = catalog;
+  }
+
+  /// Studies the decks at [paths], library-relative, under [title] (#533).
+  void _studyPaths(List<String> paths, String title) {
+    final root = widget.controller.root;
+    if (root == null) return;
+    unawaited(
+      studyDecks(context, ref.read, [
+        for (final path in paths) p.join(root, path),
+      ], title: title),
+    );
+  }
+
+  /// The Study tree (#533): the left island's on a wide window, the
+  /// destination's body on a phone. One view, built where it shows.
+  Widget _studyView() {
+    final catalog = _decks;
+    if (catalog == null) return const SizedBox.shrink();
+    return StudyView(
+      key: const Key('study-view'),
+      controller: catalog,
+      // A deck opens as a note of the tree does: in place of the tab's,
+      // in a tab of its own on a double click.
+      onOpenDeck: (path) =>
+          _wide ? _showFromTree(path, newTab: false) : _showNote(path),
+      onStudy: _studyPaths,
+      onNewDeck: () => unawaited(_createFlow.createFlashcards(context)),
+    );
+  }
+
   /// Back and forward through the notes shown (#700).
   late final NoteHistoryNavigator _noteHistory = NoteHistoryNavigator(
     workspace: _workspace,
@@ -1795,7 +1950,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       // A note tab does not read as selected while the content tab shows:
       // the chip is what the pane is showing.
       active:
-          (_contentTabShows && pane == _contentPaneShown) || _compareIn(pane)
+          (_contentTabShows && pane == _contentPaneShown) ||
+              _compareIn(pane) ||
+              _reviewIn(pane)
           ? -1
           : tabs.active,
       focused: !w.isSplit || w.focused == pane,
@@ -1823,7 +1980,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     final content = _contentTab;
     final hasContent = content != null && pane == _contentPaneShown;
     final hasCompare = _compare != null && pane == _comparePaneShown;
-    if (!hasContent && !hasCompare) return bar;
+    final hasReview = _reviewTab.run != null && pane == _reviewPaneShown;
+    if (!hasContent && !hasCompare && !hasReview) return bar;
     // At the row's far end, where it comes and goes without moving a note
     // tab under the pointer (#770). The chips take what the tab bar's own
     // buttons leave, no more: a narrow pane (a tablet's, beside the tree
@@ -1844,6 +2002,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  if (hasReview) Flexible(child: _reviewChip(pane)),
                   if (hasCompare) Flexible(child: _compareChip(pane)),
                   if (hasContent)
                     Flexible(child: _contentTabChip(content, pane)),
@@ -1991,6 +2150,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// [_onWorkspaceChanged] last looked (#906).
   ({int pane, String? path})? _lastComparePane;
 
+  /// The same for the study beside the deck (#533).
+  ({int pane, String? path})? _lastReviewPane;
+
   /// The workspace moved (#23): a tab shown, closed, renamed. On a wide
   /// window the tree follows the showing tab, and a newly shown note is
   /// asked its kind afresh.
@@ -2015,6 +2177,20 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         _lastComparePane?.pane == comparePane &&
         _lastComparePane?.path != comparePanePath;
     _lastComparePane = comparePaneNow;
+    // The same for the study beside the deck (#533).
+    final reviewPane = _reviewPaneShown;
+    final reviewPaneNow = (
+      pane: reviewPane,
+      path: reviewPane < panes.length
+          ? panes[reviewPane].activeTab?.path
+          : null,
+    );
+    if (_reviewTab.shows &&
+        _lastReviewPane?.pane == reviewPane &&
+        _lastReviewPane?.path != reviewPaneNow.path) {
+      _reviewTab.show(on: false);
+    }
+    _lastReviewPane = reviewPaneNow;
     // A caret or a scroll handed in changes nothing drawn here: only the
     // tabs, which listen for themselves. The shell rebuilds for what it
     // draws — tabs, panes, and how each tab shows its note.
@@ -2042,7 +2218,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// there to step through.
   void _activateTab(int pane, int index) {
     if (_compareShows) setState(() => _compareShows = false);
-    if (_tab != ShellTab.files && !_sidebarShowsSearch) {
+    if (pane == _reviewPaneShown) _reviewTab.show(on: false);
+    if (_tab != ShellTab.files && !_sidebarShowsView) {
       _onDestinationSelected(ShellTab.files);
     }
     _workspace.activate(pane, index);
@@ -2109,6 +2286,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _reviewTab
+      ..hosted = true
+      ..addListener(_onReviewTab);
     _todoController = TodoController(
       session: widget.controller,
       reminders: widget.reminders,
@@ -2176,7 +2356,11 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
             WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed,
       );
     });
-    _homeWidgets.start();
+    // The Study widgets have no other first push: the decks are counted
+    // for them only when one is placed (#533).
+    _homeWidgets
+      ..start()
+      ..pushStudy();
     _workspace.controller.addListener(_onWorkspaceChanged);
     AppKeyMap.current.addListener(_onKeyMapChanged);
     _chosenKeys.attach();
@@ -2264,6 +2448,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
 
   @override
   void dispose() {
+    _deckCatalog?.dispose();
     // A library closed or switched from a floating window: the window
     // goes with the shell it was over (#202, #203). Off the teardown, which
     // must not change the navigator it runs under.
@@ -2273,6 +2458,13 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     _searchCommands.dispose();
     _treeFocus.dispose();
     _workspace.controller.removeListener(_onWorkspaceChanged);
+    // The study is the library's: the tab is app-wide, and a run left in it
+    // would show in the next library's panes and grade into this one's
+    // review.json (#944).
+    _reviewTab
+      ..removeListener(_onReviewTab)
+      ..close()
+      ..hosted = false;
     AppKeyMap.current.removeListener(_onKeyMapChanged);
     _chosenKeys.detach();
     FocusManager.instance.removeListener(_reclaimFocus);
@@ -2327,6 +2519,10 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     // when clean instead of showing the pre-toggle state.
     unawaited(_todoController.open());
     unawaited(_calendarController.open());
+    // The day may have turned while the app was away: the decks are
+    // counted for the study day it is now, and Study and its widgets
+    // follow (#533).
+    unawaited(_deckCatalog?.refreshStates());
     if (_selected != null && !_selectedIsDir) {
       setState(() => _noteReloadToken++);
     }
@@ -3098,6 +3294,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     palette: _paletteByTouch,
     slides: _showsSlides,
     presenterView: _wide,
+    deck: _showsDeck,
+    studyEnabled: ref.read(deckStudyStarterProvider) != null,
+    makeFlashcards: _plainNote,
     kindSwitch: switch (_noteKind) {
       'list' => NoteKindSwitch.toShoppingList,
       'shopping-list' => NoteKindSwitch.toChecklist,
@@ -3125,6 +3324,11 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           () => _recognize(path),
         ),
         NoteMenuAction.kindSwitch => Future<void>.sync(_switchNoteKind),
+        NoteMenuAction.studyDeck => _studyDeck(),
+        NoteMenuAction.makeFlashcards => _makeFlashcards(),
+        NoteMenuAction.editMarkdown => Future<void>.sync(_editKindRaw),
+        NoteMenuAction.deckColumns => _chooseDeckColumns(),
+        NoteMenuAction.deckReset => _resetDeckReview(),
         NoteMenuAction.present => _presentSlides(),
         NoteMenuAction.presenterView => _presentSlides(presenter: true),
         NoteMenuAction.markdownPreview => Future<void>.sync(_showKindMarkdown),
@@ -3142,6 +3346,52 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
 
   /// Whether the note on screen is a deck shown as its slides (#534).
   bool get _showsSlides => _noteKind == 'slides' && !_kindRawMode;
+
+  /// Whether the note on screen is a flashcard deck shown as its cards
+  /// (#533).
+  bool get _showsDeck => _noteKind == 'flashcard' && !_kindRawMode;
+
+  /// What the deck's ⋮ entries do beyond its view (#533).
+  late final DeckMenuFlow _deckFlow = DeckMenuFlow(
+    ref.read(deckReviewSourceProvider),
+  );
+
+  /// Starts a study session of the deck on screen, through the seam the
+  /// review fills (`deckStudyStarterProvider`); nothing while there is none.
+  Future<void> _studyDeck() async {
+    final note = _panelNote;
+    final starter = ref.read(deckStudyStarterProvider);
+    if (note == null || starter == null || !_showsDeck) return;
+    await starter(context, note.notePath);
+  }
+
+  /// Whether the note on screen is a plain one, text of no `type`: what
+  /// **Make flashcards** turns into a deck (#533).
+  bool get _plainNote =>
+      _shownNote != null && !_shownIsAttachment && _noteKind == null;
+
+  /// **Make flashcards** of the note on screen (#533).
+  Future<void> _makeFlashcards() async {
+    final note = _panelNote;
+    if (note == null || !_plainNote) return;
+    await makeFlashcards(context, note: note, session: widget.controller);
+  }
+
+  Future<void> _chooseDeckColumns() async {
+    final note = _panelNote;
+    if (note == null || !_showsDeck) return;
+    await _deckFlow.chooseColumns(context, note);
+  }
+
+  Future<void> _resetDeckReview() async {
+    final note = _panelNote;
+    if (note == null || !_showsDeck) return;
+    await _deckFlow.resetReview(
+      context,
+      root: widget.controller.root,
+      notePath: note.notePath,
+    );
+  }
 
   /// Presents the slides note on screen (#534), from the slide its view
   /// shows; [presenter] opens on the presenter view.
@@ -3386,6 +3636,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         if (tab != ShellTab.files &&
             tab != ShellTab.quickNote &&
             !(tab == ShellTab.search && _wide) &&
+            // So has Study (#533).
+            !(tab == ShellTab.study && _wide) &&
             // Home and Todo are content destinations on a wide window
             // (#712): they live in a pane, not in a slot of their own.
             !(_wide && (tab == ShellTab.home || tab == ShellTab.todo)))
@@ -3410,6 +3662,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   bool get _filesSlotVisible =>
       _tab == ShellTab.files ||
       (_wide && _tab == ShellTab.search) ||
+      _sidebarShowsStudy ||
       _contentTabShows ||
       (_tab == ShellTab.quickNote && !_showQuickNoteChooser);
 
@@ -3417,6 +3670,13 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// (#712): Search is a sidebar view on a wide window, so the panes and
   /// the dock stay beside it. A phone keeps Search as a destination.
   bool get _sidebarShowsSearch => _wide && _tab == ShellTab.search;
+
+  /// Whether the left island shows the Study tree in place of the tree
+  /// (#533), as it shows the search.
+  bool get _sidebarShowsStudy => _wide && _tab == ShellTab.study;
+
+  /// Whether a sidebar view holds the left island instead of the tree.
+  bool get _sidebarShowsView => _sidebarShowsSearch || _sidebarShowsStudy;
 
   /// A tab's screen on the wide layout: one island on the base, as the
   /// tree, the panes and the dock are on Files. No band above it: the
@@ -3467,7 +3727,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       ShellTab.search ||
       ShellTab.quickNote ||
       ShellTab.settings ||
-      ShellTab.home => null,
+      ShellTab.home ||
+      ShellTab.study => null,
     };
     if (fab == null) return null;
     return KeyedSubtree(key: const Key('shell-tab-fab'), child: fab);
@@ -3496,6 +3757,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       onNewListNote: () => unawaited(_createFlow.createListNote(context)),
       onNewAudioNote: () => unawaited(_createFlow.createAudioNote(context)),
       onNewSlides: () => unawaited(_createFlow.createSlidesNote(context)),
+      onNewFlashcards: () => unawaited(_createFlow.createFlashcards(context)),
       onNewFromTemplate: () =>
           unawaited(_templateFlow.createFromTemplate(context)),
       onNewFolder: () => unawaited(_createFlow.createFolder(context)),
@@ -3573,6 +3835,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     ShellTab.quickNote => AppStrings.quickNoteTitle,
     ShellTab.settings => AppStrings.tabSettings,
     ShellTab.home => AppStrings.tabHome,
+    ShellTab.study => AppStrings.tabStudy,
   };
 
   /// The narrow shell: app bar for the tab + the bottom navigation bar.
@@ -3792,6 +4055,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     CommandNeed.twoEditors => _editorSettings.editorsEnabled.length > 1,
     CommandNeed.journalEntry => _shownJournalDay != null,
     CommandNeed.slidesNote => _noteKind == 'slides',
+    CommandNeed.flashcardNote => _showsDeck,
+    CommandNeed.plainNote => _plainNote,
     CommandNeed.ocrFile =>
       _ocrFlow != null &&
           _shownIsAttachment &&
@@ -3827,6 +4092,12 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           unawaited(_createFlow.createAudioNote(context)),
       AppCommand.newSlides: () =>
           unawaited(_createFlow.createSlidesNote(context)),
+      AppCommand.newFlashcards: () =>
+          unawaited(_createFlow.createFlashcards(context)),
+      AppCommand.studyDeck: () => unawaited(_studyDeck()),
+      AppCommand.deckColumns: () => unawaited(_chooseDeckColumns()),
+      AppCommand.deckReset: () => unawaited(_resetDeckReview()),
+      AppCommand.makeFlashcards: () => unawaited(_makeFlashcards()),
       AppCommand.presentSlides: () => unawaited(_presentSlides()),
       AppCommand.presenterView: () =>
           unawaited(_presentSlides(presenter: true)),
@@ -3884,6 +4155,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       AppCommand.tabQuickNote: () => _onDestinationSelected(ShellTab.quickNote),
       AppCommand.tabSettings: () => _onDestinationSelected(ShellTab.settings),
       AppCommand.tabHome: () => _onDestinationSelected(ShellTab.home),
+      AppCommand.tabStudy: () => _onDestinationSelected(ShellTab.study),
       AppCommand.togglePreview: _togglePreview,
       AppCommand.switchEditor: () => unawaited(
         _setEditorKind(
@@ -4373,7 +4645,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
                 fit: StackFit.expand,
                 children: [
                   Offstage(
-                    offstage: _sidebarShowsSearch,
+                    offstage: _sidebarShowsView,
                     child: Column(
                       children: [
                         Expanded(child: _treePane(controller)),
@@ -4393,6 +4665,12 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
                       maintainAnimation: true,
                       maintainSize: true,
                       child: _searchSlot(controller, tree: true),
+                    ),
+                  // The decks (#533): built on the first visit too.
+                  if (_visitedTabs.contains(ShellTab.study))
+                    Offstage(
+                      offstage: !_sidebarShowsStudy,
+                      child: _studyView(),
                     ),
                 ],
               ),
@@ -4547,8 +4825,10 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// claims nothing, so the step is skipped rather than pointing at a
   /// blank.
   Widget _detailPane(LibrarySession controller, int pane) {
-    final compare = _compareIn(pane);
-    final content = _contentTabShows && pane == _contentPaneShown && !compare
+    final review = _reviewIn(pane);
+    final compare = _compareIn(pane) && !review;
+    final content =
+        _contentTabShows && pane == _contentPaneShown && !compare && !review
         ? _contentTab
         : null;
     final listener = Listener(
@@ -4567,9 +4847,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
             fit: StackFit.expand,
             children: [
               Offstage(
-                offstage: content != null || compare,
+                offstage: content != null || compare || review,
                 child: TickerMode(
-                  enabled: content == null && !compare,
+                  enabled: content == null && !compare && !review,
                   child: ShellDetailPane(
                     root: controller.root,
                     tabs: _deck(pane),
@@ -4644,7 +4924,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
               if (_contentTab case final tab? when pane == _contentPaneShown)
                 Offstage(
                   key: Key('content-pane-${tab.name}'),
-                  offstage: content == null,
+                  offstage: content == null || review,
                   child: TickerMode(
                     enabled: content != null,
                     child: _tabBodyFor(tab, controller),
@@ -4653,6 +4933,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
               // A version beside the note (#712): over the deck, which
               // keeps its notes as they were.
               if (compare) _comparePage(controller),
+              // A study beside the deck (#533): over the pane's notes too.
+              if (review) _reviewPage(),
             ],
           ),
         ),
@@ -4832,6 +5114,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         host: _homeHost(controller),
         tab: _tabListenable,
       ),
+      ShellTab.study => _studyView(),
       ShellTab.settings => SettingsTab(
         // A palette pick opens the tab where it points, once (#229).
         key: ValueKey(_settingsTarget),
@@ -4944,6 +5227,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     openTag: (tag) => _showSearch(SearchRequest.forTag(tag)),
     openTodo: _openTodo,
     runAction: (action) => unawaited(_homeActions.run(context, action)),
+    decks: () => _decks,
+    study: _studyPaths,
   );
 
   /// Runs the Home's actions through the shell's own flows (#535).
@@ -5131,8 +5416,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   bool get _wideBackAvailable =>
       _wide &&
       (_contentTabShows ||
-          _sidebarShowsSearch ||
+          _sidebarShowsView ||
           _compareShows && _compare != null ||
+          _reviewTab.shows ||
           _workspace.value.activePath != null ||
           _gridCanStepUp);
 
@@ -5143,12 +5429,14 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   void _wideBack() {
     if (_immersive.fullScreen.value != null) {
       _immersive.fullScreen.value = null;
+    } else if (_reviewTab.shows) {
+      _reviewTab.close();
     } else if (_compareShows && _compare != null) {
       // The compare page covers the note: it goes before the note (#906).
       _closeCompare();
     } else if (_contentTabShows) {
       _closeContentTab();
-    } else if (_sidebarShowsSearch) {
+    } else if (_sidebarShowsView) {
       _onDestinationSelected(ShellTab.files);
     } else if (_workspace.value.activePath != null) {
       _workspace.closeActive();
@@ -5205,6 +5493,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         unawaited(_createFlow.createAudioNote(context));
       case NewShellItem.slides:
         unawaited(_createFlow.createSlidesNote(context));
+      case NewShellItem.flashcards:
+        unawaited(_createFlow.createFlashcards(context));
       case NewShellItem.template:
         unawaited(_templateFlow.createFromTemplate(context));
       case NewShellItem.captureWebPage:
@@ -5246,7 +5536,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
               expanded: _expanded,
               // The keyboard's walk (#727) lets go while the grid holds the
               // pane, and while the search holds the sidebar's slot.
-              active: !_gridOn && !_sidebarShowsSearch,
+              active: !_gridOn && !_sidebarShowsView,
               onToggle: _toggle,
               onSelect: _selectFromPane,
               onOpenInNewTab: (note) => _select(note, newTab: true),
@@ -5325,7 +5615,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         !_wide ||
         !_sidebarVisible ||
         !_filesSlotVisible ||
-        _sidebarShowsSearch) {
+        _sidebarShowsView) {
       return false;
     }
     if (_gridOn) {

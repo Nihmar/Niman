@@ -3425,4 +3425,156 @@ final class ChineseStrings extends Strings {
 
   @override
   String homeActionMissing(String path) => '$path 已不在资料库中';
+
+  @override
+  String get flashcardsName => '闪卡';
+  @override
+  String get newFlashcardsTitle => '新建闪卡';
+  @override
+  String get newFlashcardsDefault => '我的闪卡';
+  @override
+  String get showFlashcardsTooltip => '显示闪卡';
+  @override
+  String get flashcardsNoCategory => '无分类';
+  @override
+  String flashcardsDueCount(int count) => '$count 张待复习';
+  @override
+  String flashcardsNewCount(int count) => '$count 张新卡';
+  @override
+  String flashcardsCardCount(int count) => '$count 张卡片';
+  @override
+  String flashcardsStudyCount(int count) => '学习 $count';
+  @override
+  String flashcardsStudyCards(int count) => '学习 $count 张卡片';
+  @override
+  String get flashcardsStudyDeck => '学习此牌组';
+  @override
+  String get flashcardsAddCard => '添加卡片';
+  @override
+  String get flashcardsQuestion => '问题';
+  @override
+  String get flashcardsAnswer => '答案';
+  @override
+  String get flashcardsNextColumn => '下次';
+  @override
+  String get flashcardsDue => '待复习';
+  @override
+  String get flashcardsNew => '新卡';
+  @override
+  String flashcardsInDays(int count) => '$count 天后';
+  @override
+  String flashcardsInMonths(int count) => '$count 个月后';
+  @override
+  String flashcardsInYears(int count) => '$count 年后';
+  @override
+  String get flashcardsRepeated => '重复';
+  @override
+  String get flashcardsRepeatedTip => '此问题在牌组中出现多次';
+  @override
+  String get flashcardsEmpty => '还没有卡片';
+  @override
+  String get flashcardsEditCard => '编辑卡片';
+  @override
+  String get flashcardsSentence => '句子';
+  @override
+  String get flashcardsEditNote => '只要问题不变，复习进度就会保留。Niman 会在笔记中改写这张卡片。';
+  @override
+  String flashcardsKindRows(int count) => '表格行 $count';
+  @override
+  String flashcardsKindLines(int count) => '“::”行 $count';
+  @override
+  String flashcardsKindClozes(int count) => '填空 $count';
+  @override
+  String get flashcardsEditMarkdown => '以 Markdown 编辑';
+  @override
+  String get flashcardsColumnsTitle => '问题和答案列';
+  @override
+  String get flashcardsQuestionColumn => '问题列';
+  @override
+  String get flashcardsAnswerColumn => '答案列';
+  @override
+  String get flashcardsColumnsNone => '此笔记中没有超过两列的表格。';
+  @override
+  String get flashcardsResetAction => '重置此牌组的复习';
+  @override
+  String get flashcardsResetTitle => '重置复习？';
+  @override
+  String get flashcardsResetBody => '此牌组的每张卡片都会重新变为新卡。笔记不会改变。';
+  @override
+  String get flashcardsResetConfirm => '重置';
+  @override
+  String get commandNeedFlashcardNote => '需要打开一个闪卡笔记';
+
+  @override
+  String get flashcardsCardsLabel => '卡片';
+  @override
+  String get flashcardsShowAnswer => '显示答案';
+  @override
+  String get flashcardsGradeAgain => '重来';
+  @override
+  String get flashcardsGradeHard => '困难';
+  @override
+  String get flashcardsGradeGood => '良好';
+  @override
+  String get flashcardsGradeEasy => '简单';
+  @override
+  String get flashcardsToday => '今天';
+  @override
+  String get flashcardsTomorrow => '明天';
+  @override
+  String flashcardsReviewTitle(String deck) => '学习 · $deck';
+  @override
+  String flashcardsAgainCount(int count) => '重来 $count';
+  @override
+  String get flashcardsDoneToday => '今天完成了';
+  @override
+  String flashcardsReviewedCount(int count) => '已复习 $count';
+  @override
+  String flashcardsMinutes(int count) => '$count 分钟';
+  @override
+  String flashcardsNextOn(String when) => '下次：$when';
+  @override
+  String get flashcardsNothingScheduled => '没有已安排的卡片';
+  @override
+  String get flashcardsNextDeck => '下一个牌组';
+  @override
+  String get flashcardsBackToDeck => '返回牌组';
+  @override
+  String get flashcardsEndReview => '结束复习';
+  @override
+  String get tabStudy => '学习';
+  @override
+  String get studyEmpty => '还没有牌组';
+  @override
+  String get studyEmptyHint => '带有 type: flashcard 的笔记就是一个卡片牌组。';
+  @override
+  String get studyOfferBody => '学习会列出你的牌组。要在导航中显示吗？';
+  @override
+  String get studyOfferAction => '显示';
+  @override
+  String get settingsNewCardsPerDay => '每日新卡片';
+  @override
+  String get settingsNewCardsPerDayHint => '每个牌组。0 表示不显示新卡片。';
+  @override
+  String get settingsResetAllReviews => '重置所有复习';
+  @override
+  String get resetAllReviewsTitle => '重置所有复习？';
+  @override
+  String get resetAllReviewsBody => '每个牌组的每张卡片都会重新变为新卡。不会更改任何笔记。';
+  @override
+  String get makeFlashcardsTitle => '制作闪卡';
+  @override
+  String get makeFlashcardsDeck => '牌组';
+  @override
+  String get makeFlashcardsDeckHint => '分类用 / 分隔。留空：无分类。';
+  @override
+  String get makeFlashcardsWrites => '写入 frontmatter';
+  @override
+  String makeFlashcardsAction(int count) => '制作 $count 张卡片';
+  @override
+  String get makeFlashcardsNone => '此笔记没有可制作卡片的表格、:: 行或高亮。';
+  @override
+  String get commandNeedPlainNote => '需要打开一个没有类型的笔记';
+  @override
+  String get studyNothingToday => '今天没有要学习的内容';
 }

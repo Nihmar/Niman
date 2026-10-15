@@ -72,6 +72,8 @@ any step; nothing of it is left in your library.
   the ⋮ switch between the two.
 - [Slide notes](slides.md) — a note as a deck: presented full screen, with
   speaker notes, and exported as a PDF of slides.
+- [Flashcards](flashcards.md) — a note as a deck of cards: its tables,
+  `::` lines and highlights, studied with spaced repetition.
 - [Organization](organization.md) — trash, history, templates, tags — and
   reading pictures, PDFs and books.
 - [Export](export.md) — a note, a folder or the library out as Markdown,

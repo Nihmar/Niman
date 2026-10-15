@@ -92,6 +92,7 @@ List<SettingsSearchEntry> settingsSearchEntries({
   void pushFolders(Key row) => openArea(SettingsAreaId.folders, row);
   void pushJournal(Key row) => openArea(SettingsAreaId.journal, row);
   void pushTrash(Key row) => openArea(SettingsAreaId.trashHistory, row);
+  void pushStudy(Key row) => openArea(SettingsAreaId.study, row);
   void pushNavigation(Key row) => openArea(SettingsAreaId.navigation, row);
   void pushUpdates(Key row) => openArea(SettingsAreaId.updates, row);
   void pushDiagnostics(Key row) => openArea(SettingsAreaId.diagnostics, row);
@@ -109,6 +110,7 @@ List<SettingsSearchEntry> settingsSearchEntries({
   final folders = libraryArea(AppStrings.settingsAreaFolders);
   final journal = libraryArea(AppStrings.paletteGroupJournal);
   final trashHistory = libraryArea(AppStrings.settingsAreaTrashHistory);
+  final study = libraryArea(AppStrings.tabStudy);
   final navigation = libraryArea(AppStrings.settingsAreaNavigation);
   final maintenance = AppStrings.settingsGroupMaintenance;
   final entries = <SettingsSearchEntry>[
@@ -478,6 +480,22 @@ List<SettingsSearchEntry> settingsSearchEntries({
           AppStrings.trashAutoEmptyValue(await controller.trashAutoEmptyDays),
       areaId: SettingsAreaId.trashHistory,
       open: () => pushTrash(SettingsKeys.trashAutoEmpty),
+    ),
+    SettingsSearchEntry(
+      title: AppStrings.settingsNewCardsPerDay,
+      area: study,
+      rowKey: SettingsKeys.newCardsPerDay,
+      value: () async => '${await controller.newCardsPerDay}',
+      areaId: SettingsAreaId.study,
+      open: () => pushStudy(SettingsKeys.newCardsPerDay),
+    ),
+    SettingsSearchEntry(
+      title: AppStrings.settingsResetAllReviews,
+      area: study,
+      rowKey: SettingsKeys.resetAllReviews,
+      value: noValue,
+      areaId: SettingsAreaId.study,
+      open: () => pushStudy(SettingsKeys.resetAllReviews),
     ),
     SettingsSearchEntry(
       title: AppStrings.historyVersionsTitle,

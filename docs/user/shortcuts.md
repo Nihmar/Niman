@@ -39,7 +39,11 @@ shortcuts lists them and lets you change them:
 - `F11` — Zen mode: the note and nothing else; `Esc` or `F11` again
   leaves it (see [editing](editing.md#zen-mode))
 - `F5` — present the slides note on screen, `Alt+F5` its presenter view
-  (see [slide notes](slides.md#presenting))
+  (see [slide notes](slides.md#presenting)); on a flashcard deck, study it
+  (see [flashcards](flashcards.md#studying))
+- While studying: `Space` shows the answer, then grades Good; `1`–`4`
+  grade Again, Hard, Good, Easy; `Ctrl/⌘+Z` takes the last grade back;
+  `Esc` ends the session (see [flashcards](flashcards.md#studying))
 - `Ctrl/⌘+Shift+T` — typewriter mode on or off: the line being written
   stays in the middle (see [editing](editing.md#typewriter-mode))
 - `Ctrl/⌘+=` / `Ctrl/⌘+-` — zoom the note's text in and out, `Ctrl/⌘+0`
@@ -55,9 +59,10 @@ shortcuts lists them and lets you change them:
   the same keys, pinch, wheel and commands zoom the book's text instead, the
   books' own text size (see
   [organization](organization.md#files-that-are-not-notes))
-- `Ctrl/⌘+1…6` — Files, Todo, Search, Quick note, Settings and
-  [Home](home.md) tabs (on a wide window Settings opens as a floating
-  window)
+- `Ctrl/⌘+1…7` — Files, Todo, Search, Quick note, Settings,
+  [Home](home.md) and [Study](flashcards.md#study-the-decks) tabs (on a
+  wide window Settings opens as a floating window; Study opens even while
+  it is hidden from the navigation)
 
 Formatting, in both editors, on the note's selection:
 

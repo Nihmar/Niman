@@ -14,6 +14,12 @@ final class FakeWidgetHostService implements WidgetHostService {
   @override
   Future<List<int>> noteWidgetIds() async => List.of(noteIds);
 
+  /// The placed Study widget ids the host reports.
+  List<int> studyIds = [];
+
+  @override
+  Future<List<int>> studyWidgetIds() async => List.of(studyIds);
+
   @override
   Future<void> dispose() async {}
 }

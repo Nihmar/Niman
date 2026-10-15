@@ -3841,4 +3841,179 @@ final class FinnishStrings extends Strings {
 
   @override
   String homeActionMissing(String path) => '$path ei ole enää kirjastossa';
+
+  @override
+  String get flashcardsName => 'Muistikortit';
+  @override
+  String get newFlashcardsTitle => 'Uudet muistikortit';
+  @override
+  String get newFlashcardsDefault => 'Omat muistikorttini';
+  @override
+  String get showFlashcardsTooltip => 'Näytä muistikortit';
+  @override
+  String get flashcardsNoCategory => 'Ei luokkaa';
+  @override
+  String flashcardsDueCount(int count) => '$count kertaamatta';
+  @override
+  String flashcardsNewCount(int count) => '$count uutta';
+  @override
+  String flashcardsCardCount(int count) =>
+      count == 1 ? '1 kortti' : '$count korttia';
+  @override
+  String flashcardsStudyCount(int count) => 'Opiskele $count';
+  @override
+  String flashcardsStudyCards(int count) =>
+      count == 1 ? 'Opiskele 1 kortti' : 'Opiskele $count korttia';
+  @override
+  String get flashcardsStudyDeck => 'Opiskele tämä pakka';
+  @override
+  String get flashcardsAddCard => 'Lisää kortti';
+  @override
+  String get flashcardsQuestion => 'Kysymys';
+  @override
+  String get flashcardsAnswer => 'Vastaus';
+  @override
+  String get flashcardsNextColumn => 'Seuraava';
+  @override
+  String get flashcardsDue => 'Erääntynyt';
+  @override
+  String get flashcardsNew => 'Uusi';
+  @override
+  String flashcardsInDays(int count) =>
+      count == 1 ? '1 päivän päästä' : '$count päivän päästä';
+  @override
+  String flashcardsInMonths(int count) =>
+      count == 1 ? '1 kuukauden päästä' : '$count kuukauden päästä';
+  @override
+  String flashcardsInYears(int count) =>
+      count == 1 ? '1 vuoden päästä' : '$count vuoden päästä';
+  @override
+  String get flashcardsRepeated => 'Toistuu';
+  @override
+  String get flashcardsRepeatedTip =>
+      'Tämä kysymys esiintyy pakassa useammin kuin kerran';
+  @override
+  String get flashcardsEmpty => 'Ei vielä kortteja';
+  @override
+  String get flashcardsEditCard => 'Muokkaa korttia';
+  @override
+  String get flashcardsSentence => 'Lause';
+  @override
+  String get flashcardsEditNote =>
+      'Kertauksen eteneminen säilyy, kunhan kysymys pysyy samana. Niman '
+      'kirjoittaa tämän kortin uudelleen muistiinpanoon.';
+  @override
+  String flashcardsKindRows(int count) =>
+      count == 1 ? '1 taulukkorivi' : '$count taulukkoriviä';
+  @override
+  String flashcardsKindLines(int count) =>
+      count == 1 ? '1 ::-rivi' : '$count ::-riviä';
+  @override
+  String flashcardsKindClozes(int count) =>
+      count == 1 ? '1 aukkoteksti' : '$count aukkotekstiä';
+  @override
+  String get flashcardsEditMarkdown => 'Muokkaa Markdownina';
+  @override
+  String get flashcardsColumnsTitle => 'Kysymys- ja vastaussarakkeet';
+  @override
+  String get flashcardsQuestionColumn => 'Kysymyssarake';
+  @override
+  String get flashcardsAnswerColumn => 'Vastaussarake';
+  @override
+  String get flashcardsColumnsNone =>
+      'Missään tämän muistiinpanon taulukossa ei ole yli kahta '
+      'saraketta.';
+  @override
+  String get flashcardsResetAction => 'Nollaa tämän pakan kertaus';
+  @override
+  String get flashcardsResetTitle => 'Nollataanko kertaus?';
+  @override
+  String get flashcardsResetBody =>
+      'Jokainen pakan kortti muuttuu taas uudeksi. Muistiinpanoa ei '
+      'muuteta.';
+  @override
+  String get flashcardsResetConfirm => 'Nollaa';
+  @override
+  String get commandNeedFlashcardNote =>
+      'Vaatii avoimen muistikorttimuistiinpanon';
+
+  @override
+  String get flashcardsCardsLabel => 'Kortit';
+  @override
+  String get flashcardsShowAnswer => 'Näytä vastaus';
+  @override
+  String get flashcardsGradeAgain => 'Uudelleen';
+  @override
+  String get flashcardsGradeHard => 'Vaikea';
+  @override
+  String get flashcardsGradeGood => 'Hyvä';
+  @override
+  String get flashcardsGradeEasy => 'Helppo';
+  @override
+  String get flashcardsToday => 'tänään';
+  @override
+  String get flashcardsTomorrow => 'huomenna';
+  @override
+  String flashcardsReviewTitle(String deck) => 'Opiskelu · $deck';
+  @override
+  String flashcardsAgainCount(int count) => 'Uudelleen: $count';
+  @override
+  String get flashcardsDoneToday => 'Valmista tältä päivältä';
+  @override
+  String flashcardsReviewedCount(int count) => 'Kerrattu: $count';
+  @override
+  String flashcardsMinutes(int count) => '$count min';
+  @override
+  String flashcardsNextOn(String when) => 'Seuraavat: $when';
+  @override
+  String get flashcardsNothingScheduled => 'Ei ajoitettuja kortteja';
+  @override
+  String get flashcardsNextDeck => 'Seuraava pakka';
+  @override
+  String get flashcardsBackToDeck => 'Takaisin pakkaan';
+  @override
+  String get flashcardsEndReview => 'Lopeta kertaus';
+  @override
+  String get tabStudy => 'Opiskelu';
+  @override
+  String get studyEmpty => 'Ei vielä pakkoja';
+  @override
+  String get studyEmptyHint =>
+      'Muistiinpano, jossa on type: flashcard, on korttipakka.';
+  @override
+  String get studyOfferBody =>
+      'Opiskelu näyttää pakkasi. Näytetäänkö se navigoinnissa?';
+  @override
+  String get studyOfferAction => 'Näytä';
+  @override
+  String get settingsNewCardsPerDay => 'Uusia kortteja päivässä';
+  @override
+  String get settingsNewCardsPerDayHint =>
+      'Pakkaa kohden. 0 ei näytä uusia kortteja.';
+  @override
+  String get settingsResetAllReviews => 'Nollaa kaikki kertaukset';
+  @override
+  String get resetAllReviewsTitle => 'Nollataanko kaikki kertaukset?';
+  @override
+  String get resetAllReviewsBody =>
+      'Jokaisen pakan jokainen kortti on taas uusi. Muistiinpanoja ei muuteta.';
+  @override
+  String get makeFlashcardsTitle => 'Tee muistikortit';
+  @override
+  String get makeFlashcardsDeck => 'Pakka';
+  @override
+  String get makeFlashcardsDeckHint =>
+      'Luokat erotettuna merkillä /. Tyhjä: Ei luokkaa.';
+  @override
+  String get makeFlashcardsWrites => 'Kirjoitetaan frontmatteriin';
+  @override
+  String makeFlashcardsAction(int count) => 'Tee kortteja: $count';
+  @override
+  String get makeFlashcardsNone =>
+      'Tässä muistiinpanossa ei ole taulukkoa, :: riviä eikä korostusta '
+      'korteiksi.';
+  @override
+  String get commandNeedPlainNote => 'Vaatii avoimen tyypittömän muistiinpanon';
+  @override
+  String get studyNothingToday => 'Tänään ei ole opiskeltavaa';
 }

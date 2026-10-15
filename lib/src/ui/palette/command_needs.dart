@@ -52,6 +52,13 @@ enum CommandNeed {
 
   /// A slides note is on screen (#534).
   slidesNote,
+
+  /// A flashcard deck is on screen, shown as its cards (#533).
+  flashcardNote,
+
+  /// The note on screen is plain text of no `type`: it can become a deck
+  /// (#533).
+  plainNote,
 }
 
 /// What [command] waits on; empty for one that can always run.
@@ -95,6 +102,13 @@ Set<CommandNeed> commandNeeds(AppCommand command) => switch (command) {
     CommandNeed.slidesNote,
     CommandNeed.desktop,
   },
+  AppCommand.studyDeck ||
+  AppCommand.deckColumns ||
+  AppCommand.deckReset => const {CommandNeed.flashcardNote},
+  AppCommand.makeFlashcards => const {
+    CommandNeed.textNote,
+    CommandNeed.plainNote,
+  },
   AppCommand.openFile => const {CommandNeed.desktop},
   AppCommand.openPalette ||
   AppCommand.goToNote ||
@@ -102,6 +116,7 @@ Set<CommandNeed> commandNeeds(AppCommand command) => switch (command) {
   AppCommand.newListNote ||
   AppCommand.newAudioNote ||
   AppCommand.newSlides ||
+  AppCommand.newFlashcards ||
   AppCommand.newTodo ||
   AppCommand.captureWebPage ||
   AppCommand.quickNote ||
@@ -123,6 +138,7 @@ Set<CommandNeed> commandNeeds(AppCommand command) => switch (command) {
   AppCommand.tabQuickNote ||
   AppCommand.tabSettings ||
   AppCommand.tabHome ||
+  AppCommand.tabStudy ||
   AppCommand.noteBack ||
   AppCommand.noteForward ||
   // The step and the focus no-op when there is no search on screen; the
@@ -146,4 +162,6 @@ String commandNeedLabel(CommandNeed need) => switch (need) {
   CommandNeed.journalEntry => AppStrings.commandNeedJournalEntry,
   CommandNeed.ocrFile => AppStrings.commandNeedOcrFile,
   CommandNeed.slidesNote => AppStrings.commandNeedSlidesNote,
+  CommandNeed.flashcardNote => AppStrings.commandNeedFlashcardNote,
+  CommandNeed.plainNote => AppStrings.commandNeedPlainNote,
 };

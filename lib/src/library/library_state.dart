@@ -37,6 +37,7 @@ import 'package:niman/src/db/index_scan.dart';
 import 'package:niman/src/db/indexer.dart';
 import 'package:niman/src/epub/epub_look.dart';
 import 'package:niman/src/epub/epub_looks.dart';
+import 'package:niman/src/flashcards/review_store.dart';
 import 'package:niman/src/frontmatter/fields.dart';
 import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/library/file_watcher.dart';
@@ -765,12 +766,23 @@ final class LibraryController implements LibrarySession {
 
   /// Records a placed todo widget for [libraryPath] (issue 6).
   @override
-  Future<void> adoptTodoWidget(int androidWidgetId, String libraryPath) async {
+  Future<void> adoptTodoWidget(int androidWidgetId, String libraryPath) =>
+      _adoptLibraryWidget(androidWidgetId, libraryPath, WidgetProvider.todo);
+
+  @override
+  Future<void> adoptStudyWidget(int androidWidgetId, String libraryPath) =>
+      _adoptLibraryWidget(androidWidgetId, libraryPath, WidgetProvider.study);
+
+  Future<void> _adoptLibraryWidget(
+    int androidWidgetId,
+    String libraryPath,
+    WidgetProvider provider,
+  ) async {
     final store = WidgetConfigStore(await appDatabase);
     if (await store.find(androidWidgetId) != null) return;
     await store.upsert(
       androidWidgetId: androidWidgetId,
-      provider: WidgetProvider.todo,
+      provider: provider,
       libraryPath: libraryPath,
     );
   }
@@ -1342,6 +1354,19 @@ final class LibraryController implements LibrarySession {
     );
   }
 
+  /// The new flashcards each deck shows per day (#533).
+  @override
+  Future<int> get newCardsPerDay async => (await _library).newCardsPerDay;
+
+  /// Sets (and persists) the new flashcards per deck per day, into range.
+  @override
+  Future<void> setNewCardsPerDay(int count) async {
+    _log.info('new cards per day set to $count');
+    await _editLibrary(
+      (c) => c.copyWith(newCardsPerDay: normalizeNewCardsPerDay(count)),
+    );
+  }
+
   @override
   Future<int> get trashAutoEmptyDays async =>
       (await _library).trashAutoEmptyDays;
@@ -1651,11 +1676,13 @@ final class LibraryController implements LibrarySession {
   }
 
   /// Fires with the paths a re-index pruned, and drops their reading
-  /// positions: those files are ones the library saw leave (#492).
+  /// positions and review states: those files are ones the library saw
+  /// leave (#492, #533).
   void _onRemoved(String root, Set<String> removed) {
     if (removed.isEmpty || _removals.isClosed) return;
     _removals.add(removed);
     unawaited(ReadingPositions(root).removed(removed));
+    unawaited(ReviewStore(root).removed(removed));
   }
 
   /// Drops everything that belongs to the open library, the index file

@@ -3770,4 +3770,176 @@ final class EstonianStrings extends Strings {
 
   @override
   String homeActionMissing(String path) => '$path pole enam kogus';
+
+  @override
+  String get flashcardsName => 'Kaardid';
+  @override
+  String get newFlashcardsTitle => 'Uued kaardid';
+  @override
+  String get newFlashcardsDefault => 'Minu kaardid';
+  @override
+  String get showFlashcardsTooltip => 'Näita kaarte';
+  @override
+  String get flashcardsNoCategory => 'Kategooriata';
+  @override
+  String flashcardsDueCount(int count) => '$count kordamiseks';
+  @override
+  String flashcardsNewCount(int count) => '$count uut';
+  @override
+  String flashcardsCardCount(int count) =>
+      count == 1 ? '1 kaart' : '$count kaarti';
+  @override
+  String flashcardsStudyCount(int count) => 'Õpi $count';
+  @override
+  String flashcardsStudyCards(int count) =>
+      count == 1 ? 'Õpi 1 kaarti' : 'Õpi $count kaarti';
+  @override
+  String get flashcardsStudyDeck => 'Õpi seda pakki';
+  @override
+  String get flashcardsAddCard => 'Lisa kaart';
+  @override
+  String get flashcardsQuestion => 'Küsimus';
+  @override
+  String get flashcardsAnswer => 'Vastus';
+  @override
+  String get flashcardsNextColumn => 'Järgmine';
+  @override
+  String get flashcardsDue => 'Tähtaeg käes';
+  @override
+  String get flashcardsNew => 'Uus';
+  @override
+  String flashcardsInDays(int count) =>
+      count == 1 ? '1 päeva pärast' : '$count päeva pärast';
+  @override
+  String flashcardsInMonths(int count) =>
+      count == 1 ? '1 kuu pärast' : '$count kuu pärast';
+  @override
+  String flashcardsInYears(int count) =>
+      count == 1 ? '1 aasta pärast' : '$count aasta pärast';
+  @override
+  String get flashcardsRepeated => 'Korduv';
+  @override
+  String get flashcardsRepeatedTip =>
+      'See küsimus esineb pakis rohkem kui üks kord';
+  @override
+  String get flashcardsEmpty => 'Kaarte veel pole';
+  @override
+  String get flashcardsEditCard => 'Muuda kaarti';
+  @override
+  String get flashcardsSentence => 'Lause';
+  @override
+  String get flashcardsEditNote =>
+      'Edenemine säilib, kuni küsimus samaks jääb. Niman kirjutab selle '
+      'kaardi märkuses ümber.';
+  @override
+  String flashcardsKindRows(int count) =>
+      count == 1 ? '1 tabelirida' : '$count tabelirida';
+  @override
+  String flashcardsKindLines(int count) =>
+      count == 1 ? '1 ::-rida' : '$count ::-rida';
+  @override
+  String flashcardsKindClozes(int count) =>
+      count == 1 ? '1 lünk' : '$count lünka';
+  @override
+  String get flashcardsEditMarkdown => 'Muuda Markdownina';
+  @override
+  String get flashcardsColumnsTitle => 'Küsimuse ja vastuse veerud';
+  @override
+  String get flashcardsQuestionColumn => 'Küsimuse veerg';
+  @override
+  String get flashcardsAnswerColumn => 'Vastuse veerg';
+  @override
+  String get flashcardsColumnsNone =>
+      'Üheski selle märkuse tabelis pole üle kahe veeru.';
+  @override
+  String get flashcardsResetAction => 'Lähtesta selle paki kordamine';
+  @override
+  String get flashcardsResetTitle => 'Kas lähtestada kordamine?';
+  @override
+  String get flashcardsResetBody =>
+      'Iga paki kaart muutub uuesti uueks. Märkust ei muudeta.';
+  @override
+  String get flashcardsResetConfirm => 'Lähtesta';
+  @override
+  String get commandNeedFlashcardNote => 'Vajab avatud kaartide märkust';
+
+  @override
+  String get flashcardsCardsLabel => 'Kaardid';
+  @override
+  String get flashcardsShowAnswer => 'Näita vastust';
+  @override
+  String get flashcardsGradeAgain => 'Uuesti';
+  @override
+  String get flashcardsGradeHard => 'Raske';
+  @override
+  String get flashcardsGradeGood => 'Hea';
+  @override
+  String get flashcardsGradeEasy => 'Lihtne';
+  @override
+  String get flashcardsToday => 'täna';
+  @override
+  String get flashcardsTomorrow => 'homme';
+  @override
+  String flashcardsReviewTitle(String deck) => 'Õppimine · $deck';
+  @override
+  String flashcardsAgainCount(int count) => 'Uuesti: $count';
+  @override
+  String get flashcardsDoneToday => 'Tänaseks valmis';
+  @override
+  String flashcardsReviewedCount(int count) => 'Korratud: $count';
+  @override
+  String flashcardsMinutes(int count) => '$count min';
+  @override
+  String flashcardsNextOn(String when) => 'Järgmised: $when';
+  @override
+  String get flashcardsNothingScheduled => 'Ühtegi kaarti pole ajastatud';
+  @override
+  String get flashcardsNextDeck => 'Järgmine pakk';
+  @override
+  String get flashcardsBackToDeck => 'Tagasi pakki';
+  @override
+  String get flashcardsEndReview => 'Lõpeta kordamine';
+  @override
+  String get tabStudy => 'Õppimine';
+  @override
+  String get studyEmpty => 'Pakke veel pole';
+  @override
+  String get studyEmptyHint =>
+      'Märge, millel on type: flashcard, on kaardipakk.';
+  @override
+  String get studyOfferBody =>
+      'Õppimine näitab su pakke. Kas näidata seda navigeerimises?';
+  @override
+  String get studyOfferAction => 'Näita';
+  @override
+  String get settingsNewCardsPerDay => 'Uusi kaarte päevas';
+  @override
+  String get settingsNewCardsPerDayHint =>
+      'Paki kohta. 0 ei näita uusi kaarte.';
+  @override
+  String get settingsResetAllReviews => 'Lähtesta kõik kordamised';
+  @override
+  String get resetAllReviewsTitle => 'Kas lähtestada kõik kordamised?';
+  @override
+  String get resetAllReviewsBody =>
+      'Iga paki iga kaart muutub taas uueks. Ühtegi märget ei muudeta.';
+  @override
+  String get makeFlashcardsTitle => 'Loo kaardid';
+  @override
+  String get makeFlashcardsDeck => 'Pakk';
+  @override
+  String get makeFlashcardsDeckHint =>
+      'Kategooriad eraldatud märgiga /. Tühi: Kategooriata.';
+  @override
+  String get makeFlashcardsWrites => 'Kirjutatakse frontmatterisse';
+  @override
+  String makeFlashcardsAction(int count) => 'Loo kaarte: $count';
+  @override
+  String get makeFlashcardsNone =>
+      'Selles märkmes pole tabelit, :: rida ega esiletõstu, millest kaarte '
+      'teha.';
+  @override
+  String get commandNeedPlainNote => 'Vajab avatud tüübita märget';
+  @override
+  String get studyNothingToday => 'Täna pole midagi õppida';
 }

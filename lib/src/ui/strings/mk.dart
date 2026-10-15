@@ -3851,4 +3851,172 @@ final class MacedonianStrings extends Strings {
 
   @override
   String homeActionMissing(String path) => '$path веќе не е во библиотеката';
+
+  @override
+  String get flashcardsName => 'Картички';
+  @override
+  String get newFlashcardsTitle => 'Нови картички';
+  @override
+  String get newFlashcardsDefault => 'Мои картички';
+  @override
+  String get showFlashcardsTooltip => 'Прикажи картички';
+  @override
+  String get flashcardsNoCategory => 'Без категорија';
+  @override
+  String flashcardsDueCount(int count) => 'За повторување: $count';
+  @override
+  String flashcardsNewCount(int count) => 'Нови: $count';
+  @override
+  String flashcardsCardCount(int count) => 'Картички: $count';
+  @override
+  String flashcardsStudyCount(int count) => 'Учи: $count';
+  @override
+  String flashcardsStudyCards(int count) => 'Учи картички: $count';
+  @override
+  String get flashcardsStudyDeck => 'Учи го овој шпил';
+  @override
+  String get flashcardsAddCard => 'Додај картичка';
+  @override
+  String get flashcardsQuestion => 'Прашање';
+  @override
+  String get flashcardsAnswer => 'Одговор';
+  @override
+  String get flashcardsNextColumn => 'Следна';
+  @override
+  String get flashcardsDue => 'За повторување';
+  @override
+  String get flashcardsNew => 'Нова';
+  @override
+  String flashcardsInDays(int count) =>
+      count == 1 ? 'за 1 ден' : 'за $count д.';
+  @override
+  String flashcardsInMonths(int count) =>
+      count == 1 ? 'за 1 месец' : 'за $count мес.';
+  @override
+  String flashcardsInYears(int count) =>
+      count == 1 ? 'за 1 година' : 'за $count год.';
+  @override
+  String get flashcardsRepeated => 'Повторена';
+  @override
+  String get flashcardsRepeatedTip =>
+      'Ова прашање се појавува повеќе пати во шпилот';
+  @override
+  String get flashcardsEmpty => 'Сè уште нема картички';
+  @override
+  String get flashcardsEditCard => 'Уреди картичка';
+  @override
+  String get flashcardsSentence => 'Реченица';
+  @override
+  String get flashcardsEditNote =>
+      'Напредокот се задржува додека прашањето не се промени. Niman ја '
+      'препишува оваа картичка во белешката.';
+  @override
+  String flashcardsKindRows(int count) => 'Редови во табела: $count';
+  @override
+  String flashcardsKindLines(int count) => 'Редови „::“: $count';
+  @override
+  String flashcardsKindClozes(int count) => 'Празнини: $count';
+  @override
+  String get flashcardsEditMarkdown => 'Уреди како Markdown';
+  @override
+  String get flashcardsColumnsTitle => 'Колони за прашање и одговор';
+  @override
+  String get flashcardsQuestionColumn => 'Колона за прашање';
+  @override
+  String get flashcardsAnswerColumn => 'Колона за одговор';
+  @override
+  String get flashcardsColumnsNone =>
+      'Ниедна табела во оваа белешка нема повеќе од две колони.';
+  @override
+  String get flashcardsResetAction => 'Ресетирај го повторувањето на овој шпил';
+  @override
+  String get flashcardsResetTitle => 'Да се ресетира ли повторувањето?';
+  @override
+  String get flashcardsResetBody =>
+      'Секоја картичка во шпилот повторно станува нова. Белешката не се '
+      'менува.';
+  @override
+  String get flashcardsResetConfirm => 'Ресетирај';
+  @override
+  String get commandNeedFlashcardNote => 'Бара отворена белешка со картички';
+
+  @override
+  String get flashcardsCardsLabel => 'Картички';
+  @override
+  String get flashcardsShowAnswer => 'Прикажи одговор';
+  @override
+  String get flashcardsGradeAgain => 'Повторно';
+  @override
+  String get flashcardsGradeHard => 'Тешко';
+  @override
+  String get flashcardsGradeGood => 'Добро';
+  @override
+  String get flashcardsGradeEasy => 'Лесно';
+  @override
+  String get flashcardsToday => 'денес';
+  @override
+  String get flashcardsTomorrow => 'утре';
+  @override
+  String flashcardsReviewTitle(String deck) => 'Учење · $deck';
+  @override
+  String flashcardsAgainCount(int count) => 'Повторно: $count';
+  @override
+  String get flashcardsDoneToday => 'Готово за денес';
+  @override
+  String flashcardsReviewedCount(int count) => 'Повторени: $count';
+  @override
+  String flashcardsMinutes(int count) => '$count мин';
+  @override
+  String flashcardsNextOn(String when) => 'Следни: $when';
+  @override
+  String get flashcardsNothingScheduled => 'Нема закажани картички';
+  @override
+  String get flashcardsNextDeck => 'Следен шпил';
+  @override
+  String get flashcardsBackToDeck => 'Назад кон шпилот';
+  @override
+  String get flashcardsEndReview => 'Заврши со повторувањето';
+  @override
+  String get tabStudy => 'Учење';
+  @override
+  String get studyEmpty => 'Сè уште нема шпилови';
+  @override
+  String get studyEmptyHint => 'Белешка со type: flashcard е шпил картички.';
+  @override
+  String get studyOfferBody =>
+      'Учење ги прикажува вашите шпилови. Да се прикаже во навигацијата?';
+  @override
+  String get studyOfferAction => 'Прикажи';
+  @override
+  String get settingsNewCardsPerDay => 'Нови картички дневно';
+  @override
+  String get settingsNewCardsPerDayHint =>
+      'По шпил. 0 не прикажува нови картички.';
+  @override
+  String get settingsResetAllReviews => 'Ресетирај ги сите повторувања';
+  @override
+  String get resetAllReviewsTitle => 'Да се ресетираат сите повторувања?';
+  @override
+  String get resetAllReviewsBody =>
+      'Секоја картичка од секој шпил повторно станува нова. Ниту една белешка '
+      'не се менува.';
+  @override
+  String get makeFlashcardsTitle => 'Направи картички';
+  @override
+  String get makeFlashcardsDeck => 'Шпил';
+  @override
+  String get makeFlashcardsDeckHint =>
+      'Категории одделени со /. Празно: Без категорија.';
+  @override
+  String get makeFlashcardsWrites => 'Се запишува во frontmatter';
+  @override
+  String makeFlashcardsAction(int count) => 'Направи картички: $count';
+  @override
+  String get makeFlashcardsNone =>
+      'Оваа белешка нема табела, ред :: или истакнување од кои би се '
+      'направиле картички.';
+  @override
+  String get commandNeedPlainNote => 'Бара отворена белешка без тип';
+  @override
+  String get studyNothingToday => 'Денес нема ништо за учење';
 }

@@ -3864,4 +3864,180 @@ final class DutchStrings extends Strings {
   @override
   String homeActionMissing(String path) =>
       '$path staat niet meer in de bibliotheek';
+
+  @override
+  String get flashcardsName => 'Flashcards';
+  @override
+  String get newFlashcardsTitle => 'Nieuwe flashcards';
+  @override
+  String get newFlashcardsDefault => 'Mijn flashcards';
+  @override
+  String get showFlashcardsTooltip => 'Flashcards tonen';
+  @override
+  String get flashcardsNoCategory => 'Zonder categorie';
+  @override
+  String flashcardsDueCount(int count) => '$count te herhalen';
+  @override
+  String flashcardsNewCount(int count) => '$count nieuw';
+  @override
+  String flashcardsCardCount(int count) =>
+      count == 1 ? '1 kaart' : '$count kaarten';
+  @override
+  String flashcardsStudyCount(int count) => '$count studeren';
+  @override
+  String flashcardsStudyCards(int count) =>
+      count == 1 ? '1 kaart studeren' : '$count kaarten studeren';
+  @override
+  String get flashcardsStudyDeck => 'Deze stapel studeren';
+  @override
+  String get flashcardsAddCard => 'Kaart toevoegen';
+  @override
+  String get flashcardsQuestion => 'Vraag';
+  @override
+  String get flashcardsAnswer => 'Antwoord';
+  @override
+  String get flashcardsNextColumn => 'Volgende';
+  @override
+  String get flashcardsDue => 'Te herhalen';
+  @override
+  String get flashcardsNew => 'Nieuw';
+  @override
+  String flashcardsInDays(int count) =>
+      count == 1 ? 'over 1 dag' : 'over $count dagen';
+  @override
+  String flashcardsInMonths(int count) =>
+      count == 1 ? 'over 1 maand' : 'over $count maanden';
+  @override
+  String flashcardsInYears(int count) =>
+      count == 1 ? 'over 1 jaar' : 'over $count jaar';
+  @override
+  String get flashcardsRepeated => 'Herhaald';
+  @override
+  String get flashcardsRepeatedTip =>
+      'Deze vraag komt meer dan eens voor in de stapel';
+  @override
+  String get flashcardsEmpty => 'Nog geen kaarten';
+  @override
+  String get flashcardsEditCard => 'Kaart bewerken';
+  @override
+  String get flashcardsSentence => 'Zin';
+  @override
+  String get flashcardsEditNote =>
+      'De voortgang blijft behouden zolang de vraag gelijk blijft. '
+      'Niman herschrijft deze kaart in de notitie.';
+  @override
+  String flashcardsKindRows(int count) =>
+      count == 1 ? '1 tabelrij' : '$count tabelrijen';
+  @override
+  String flashcardsKindLines(int count) =>
+      count == 1 ? '1 ::-regel' : '$count ::-regels';
+  @override
+  String flashcardsKindClozes(int count) =>
+      count == 1 ? '1 invulzin' : '$count invulzinnen';
+  @override
+  String get flashcardsEditMarkdown => 'Bewerken als Markdown';
+  @override
+  String get flashcardsColumnsTitle => 'Vraag- en antwoordkolommen';
+  @override
+  String get flashcardsQuestionColumn => 'Vraagkolom';
+  @override
+  String get flashcardsAnswerColumn => 'Antwoordkolom';
+  @override
+  String get flashcardsColumnsNone =>
+      'Geen tabel in deze notitie heeft meer dan twee kolommen.';
+  @override
+  String get flashcardsResetAction => 'De herhaling van deze stapel resetten';
+  @override
+  String get flashcardsResetTitle => 'De herhaling resetten?';
+  @override
+  String get flashcardsResetBody =>
+      'Elke kaart van deze stapel wordt weer nieuw. De notitie blijft '
+      'ongewijzigd.';
+  @override
+  String get flashcardsResetConfirm => 'Resetten';
+  @override
+  String get commandNeedFlashcardNote =>
+      'Vereist een geopende flashcardnotitie';
+
+  @override
+  String get flashcardsCardsLabel => 'Kaarten';
+  @override
+  String get flashcardsShowAnswer => 'Antwoord tonen';
+  @override
+  String get flashcardsGradeAgain => 'Opnieuw';
+  @override
+  String get flashcardsGradeHard => 'Moeilijk';
+  @override
+  String get flashcardsGradeGood => 'Goed';
+  @override
+  String get flashcardsGradeEasy => 'Makkelijk';
+  @override
+  String get flashcardsToday => 'vandaag';
+  @override
+  String get flashcardsTomorrow => 'morgen';
+  @override
+  String flashcardsReviewTitle(String deck) => 'Studeren · $deck';
+  @override
+  String flashcardsAgainCount(int count) => '$count opnieuw';
+  @override
+  String get flashcardsDoneToday => 'Klaar voor vandaag';
+  @override
+  String flashcardsReviewedCount(int count) => '$count herhaald';
+  @override
+  String flashcardsMinutes(int count) => '$count min';
+  @override
+  String flashcardsNextOn(String when) => 'Volgende: $when';
+  @override
+  String get flashcardsNothingScheduled => 'Geen kaarten gepland';
+  @override
+  String get flashcardsNextDeck => 'Volgende stapel';
+  @override
+  String get flashcardsBackToDeck => 'Terug naar de stapel';
+  @override
+  String get flashcardsEndReview => 'Herhaling beëindigen';
+  @override
+  String get tabStudy => 'Studeren';
+  @override
+  String get studyEmpty => 'Nog geen stapels';
+  @override
+  String get studyEmptyHint =>
+      'Een notitie met type: flashcard is een stapel kaarten.';
+  @override
+  String get studyOfferBody =>
+      'Studeren toont je stapels. Tonen in de navigatie?';
+  @override
+  String get studyOfferAction => 'Tonen';
+  @override
+  String get settingsNewCardsPerDay => 'Nieuwe kaarten per dag';
+  @override
+  String get settingsNewCardsPerDayHint =>
+      'Per stapel. 0 toont geen nieuwe kaarten.';
+  @override
+  String get settingsResetAllReviews => 'Alle herhalingen resetten';
+  @override
+  String get resetAllReviewsTitle => 'Alle herhalingen resetten?';
+  @override
+  String get resetAllReviewsBody =>
+      'Elke kaart van elke stapel wordt weer nieuw. Er wordt geen notitie '
+      'gewijzigd.';
+  @override
+  String get makeFlashcardsTitle => 'Flashcards maken';
+  @override
+  String get makeFlashcardsDeck => 'Stapel';
+  @override
+  String get makeFlashcardsDeckHint =>
+      'Categorieën gescheiden door /. Leeg: Zonder categorie.';
+  @override
+  String get makeFlashcardsWrites => 'Wordt in de frontmatter geschreven';
+  @override
+  String makeFlashcardsAction(int count) =>
+      count == 1 ? '1 kaart maken' : '$count kaarten maken';
+  @override
+  String get makeFlashcardsNone =>
+      'Deze notitie heeft geen tabel, ::-regel of markering om kaarten van te '
+      'maken.';
+  @override
+  String get commandNeedPlainNote => 'Vereist een geopende notitie zonder type';
+  @override
+  String get studyNothingToday => 'Vandaag niets te studeren';
 }

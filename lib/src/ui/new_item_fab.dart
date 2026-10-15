@@ -21,6 +21,7 @@ final class NewItemFab extends StatelessWidget {
     required this.onNewListNote,
     required this.onNewAudioNote,
     required this.onNewSlides,
+    required this.onNewFlashcards,
     required this.onNewFromTemplate,
     required this.onNewFolder,
     required this.onJournalToday,
@@ -69,6 +70,9 @@ final class NewItemFab extends StatelessWidget {
 
   /// Creates a slides note in the FAB target folder (#534).
   final VoidCallback onNewSlides;
+
+  /// Creates a flashcard deck in the FAB target folder (#533).
+  final VoidCallback onNewFlashcards;
 
   /// Creates a new folder in the FAB target folder.
   final VoidCallback onNewFolder;
@@ -197,6 +201,14 @@ final class NewItemFab extends StatelessWidget {
           label: AppStrings.newSlidesTitle,
           open: expanded,
           onTap: onNewSlides,
+        ),
+        const SizedBox(height: 12),
+        _MiniFab(
+          key: const Key('new-flashcards-action'),
+          icon: Icons.style_outlined,
+          label: AppStrings.newFlashcardsTitle,
+          open: expanded,
+          onTap: onNewFlashcards,
         ),
         const SizedBox(height: 12),
         _MiniFab(

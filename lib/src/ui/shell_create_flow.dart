@@ -11,6 +11,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/files.dart';
+import 'package:niman/src/flashcards/card_edits.dart';
 import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/kinds/audio_note.dart';
@@ -18,6 +19,7 @@ import 'package:niman/src/ui/kinds/list_note.dart';
 import 'package:niman/src/ui/kinds/slides/slides_kind.dart';
 import 'package:niman/src/ui/name_dialog.dart';
 import 'package:niman/src/ui/strings.dart';
+import 'package:niman/src/ui/study/study_offer.dart';
 
 /// What a finished create hands back: the row's path, whether it is a
 /// folder, and whether the note carries a kind the editor has a GUI for
@@ -152,6 +154,29 @@ final class ShellCreateFlow {
       );
       onCreated((path: row.path, isDir: false, hasKind: true));
     });
+  }
+
+  /// A flashcard deck (#533): a note with `type: flashcard` frontmatter
+  /// where the library's rule puts new notes, with the head of the table its
+  /// cards go in.
+  Future<void> createFlashcards(BuildContext context) async {
+    final name = await showNameDialog(
+      context,
+      title: AppStrings.newFlashcardsTitle,
+      initial: AppStrings.newFlashcardsDefault,
+    );
+    if (name == null) return;
+    var made = false;
+    await guard(() async {
+      final row = await controller.ops!.createNote(
+        parentPath: newItemRule.folder,
+        name: name,
+        content: flashcardNoteContent(),
+      );
+      onCreated((path: row.path, isDir: false, hasKind: true));
+      made = true;
+    });
+    if (made && context.mounted) await offerStudy(context, controller);
   }
 
   /// A folder in [parent] (default: where the library's rule puts new

@@ -3931,4 +3931,180 @@ final class FrenchStrings extends Strings {
   @override
   String homeActionMissing(String path) =>
       "$path n'est plus dans la bibliothèque";
+
+  @override
+  String get flashcardsName => 'Cartes mémoire';
+  @override
+  String get newFlashcardsTitle => 'Nouvelles cartes mémoire';
+  @override
+  String get newFlashcardsDefault => 'Mes cartes mémoire';
+  @override
+  String get showFlashcardsTooltip => 'Afficher les cartes mémoire';
+  @override
+  String get flashcardsNoCategory => 'Sans catégorie';
+  @override
+  String flashcardsDueCount(int count) => '$count à revoir';
+  @override
+  String flashcardsNewCount(int count) => '$count nouvelles';
+  @override
+  String flashcardsCardCount(int count) =>
+      count == 1 ? '1 carte' : '$count cartes';
+  @override
+  String flashcardsStudyCount(int count) => 'Réviser $count';
+  @override
+  String flashcardsStudyCards(int count) =>
+      count == 1 ? 'Réviser 1 carte' : 'Réviser $count cartes';
+  @override
+  String get flashcardsStudyDeck => 'Réviser ce paquet';
+  @override
+  String get flashcardsAddCard => 'Ajouter une carte';
+  @override
+  String get flashcardsQuestion => 'Question';
+  @override
+  String get flashcardsAnswer => 'Réponse';
+  @override
+  String get flashcardsNextColumn => 'Prochaine';
+  @override
+  String get flashcardsDue => 'À revoir';
+  @override
+  String get flashcardsNew => 'Nouvelle';
+  @override
+  String flashcardsInDays(int count) =>
+      count == 1 ? 'dans 1 jour' : 'dans $count jours';
+  @override
+  String flashcardsInMonths(int count) =>
+      count == 1 ? 'dans 1 mois' : 'dans $count mois';
+  @override
+  String flashcardsInYears(int count) =>
+      count == 1 ? 'dans 1 an' : 'dans $count ans';
+  @override
+  String get flashcardsRepeated => 'Répétée';
+  @override
+  String get flashcardsRepeatedTip =>
+      'Cette question apparaît plusieurs fois dans le paquet';
+  @override
+  String get flashcardsEmpty => 'Aucune carte pour l’instant';
+  @override
+  String get flashcardsEditCard => 'Modifier la carte';
+  @override
+  String get flashcardsSentence => 'Phrase';
+  @override
+  String get flashcardsEditNote =>
+      'La progression est conservée tant que la question ne change pas. '
+      'Niman réécrit cette carte dans la note.';
+  @override
+  String flashcardsKindRows(int count) =>
+      count == 1 ? '1 ligne de tableau' : '$count lignes de tableau';
+  @override
+  String flashcardsKindLines(int count) =>
+      count == 1 ? '1 ligne ::' : '$count lignes ::';
+  @override
+  String flashcardsKindClozes(int count) =>
+      count == 1 ? '1 texte à trous' : '$count textes à trous';
+  @override
+  String get flashcardsEditMarkdown => 'Modifier en Markdown';
+  @override
+  String get flashcardsColumnsTitle => 'Colonnes de question et de réponse';
+  @override
+  String get flashcardsQuestionColumn => 'Colonne de la question';
+  @override
+  String get flashcardsAnswerColumn => 'Colonne de la réponse';
+  @override
+  String get flashcardsColumnsNone =>
+      'Aucun tableau de cette note n’a plus de deux colonnes.';
+  @override
+  String get flashcardsResetAction => 'Réinitialiser la révision de ce paquet';
+  @override
+  String get flashcardsResetTitle => 'Réinitialiser la révision ?';
+  @override
+  String get flashcardsResetBody =>
+      'Chaque carte de ce paquet redevient nouvelle. La note n’est pas '
+      'modifiée.';
+  @override
+  String get flashcardsResetConfirm => 'Réinitialiser';
+  @override
+  String get commandNeedFlashcardNote =>
+      'Nécessite une note de cartes mémoire ouverte';
+
+  @override
+  String get flashcardsCardsLabel => 'Cartes';
+  @override
+  String get flashcardsShowAnswer => 'Afficher la réponse';
+  @override
+  String get flashcardsGradeAgain => 'Encore';
+  @override
+  String get flashcardsGradeHard => 'Difficile';
+  @override
+  String get flashcardsGradeGood => 'Correct';
+  @override
+  String get flashcardsGradeEasy => 'Facile';
+  @override
+  String get flashcardsToday => 'aujourd’hui';
+  @override
+  String get flashcardsTomorrow => 'demain';
+  @override
+  String flashcardsReviewTitle(String deck) => 'Révision · $deck';
+  @override
+  String flashcardsAgainCount(int count) => 'Encore : $count';
+  @override
+  String get flashcardsDoneToday => 'Terminé pour aujourd’hui';
+  @override
+  String flashcardsReviewedCount(int count) => '$count révisées';
+  @override
+  String flashcardsMinutes(int count) => '$count min';
+  @override
+  String flashcardsNextOn(String when) => 'Prochaines : $when';
+  @override
+  String get flashcardsNothingScheduled => 'Aucune carte prévue';
+  @override
+  String get flashcardsNextDeck => 'Paquet suivant';
+  @override
+  String get flashcardsBackToDeck => 'Retour au paquet';
+  @override
+  String get flashcardsEndReview => 'Terminer la révision';
+  @override
+  String get tabStudy => 'Révision';
+  @override
+  String get studyEmpty => 'Aucun paquet pour l’instant';
+  @override
+  String get studyEmptyHint =>
+      'Une note avec type: flashcard est un paquet de cartes.';
+  @override
+  String get studyOfferBody =>
+      'Révision liste vos paquets. L’afficher dans la navigation ?';
+  @override
+  String get studyOfferAction => 'Afficher';
+  @override
+  String get settingsNewCardsPerDay => 'Nouvelles cartes par jour';
+  @override
+  String get settingsNewCardsPerDayHint =>
+      'Par paquet. 0 n’affiche aucune nouvelle carte.';
+  @override
+  String get settingsResetAllReviews => 'Réinitialiser toutes les révisions';
+  @override
+  String get resetAllReviewsTitle => 'Réinitialiser toutes les révisions ?';
+  @override
+  String get resetAllReviewsBody =>
+      'Chaque carte de chaque paquet redevient nouvelle. Aucune note n’est '
+      'modifiée.';
+  @override
+  String get makeFlashcardsTitle => 'Créer des cartes mémoire';
+  @override
+  String get makeFlashcardsDeck => 'Paquet';
+  @override
+  String get makeFlashcardsDeckHint =>
+      'Catégories séparées par /. Vide : Sans catégorie.';
+  @override
+  String get makeFlashcardsWrites => 'Écrit dans le frontmatter';
+  @override
+  String makeFlashcardsAction(int count) =>
+      count == 1 ? 'Créer 1 carte' : 'Créer $count cartes';
+  @override
+  String get makeFlashcardsNone =>
+      'Cette note n’a ni tableau, ni ligne ::, ni surlignage dont faire des '
+      'cartes.';
+  @override
+  String get commandNeedPlainNote => 'Nécessite une note ouverte sans type';
+  @override
+  String get studyNothingToday => 'Rien à réviser aujourd’hui';
 }

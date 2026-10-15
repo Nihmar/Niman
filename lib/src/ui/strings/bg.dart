@@ -3841,4 +3841,175 @@ final class BulgarianStrings extends Strings {
 
   @override
   String homeActionMissing(String path) => '$path вече не е в библиотеката';
+
+  @override
+  String get flashcardsName => 'Карти за учене';
+  @override
+  String get newFlashcardsTitle => 'Нови карти';
+  @override
+  String get newFlashcardsDefault => 'Моите карти';
+  @override
+  String get showFlashcardsTooltip => 'Показване на картите';
+  @override
+  String get flashcardsNoCategory => 'Без категория';
+  @override
+  String flashcardsDueCount(int count) => '$count за преговор';
+  @override
+  String flashcardsNewCount(int count) => '$count нови';
+  @override
+  String flashcardsCardCount(int count) =>
+      count == 1 ? '1 карта' : '$count карти';
+  @override
+  String flashcardsStudyCount(int count) => 'Учене: $count';
+  @override
+  String flashcardsStudyCards(int count) =>
+      count == 1 ? 'Учене: 1 карта' : 'Учене: $count карти';
+  @override
+  String get flashcardsStudyDeck => 'Учене на това тесте';
+  @override
+  String get flashcardsAddCard => 'Добавяне на карта';
+  @override
+  String get flashcardsQuestion => 'Въпрос';
+  @override
+  String get flashcardsAnswer => 'Отговор';
+  @override
+  String get flashcardsNextColumn => 'Следваща';
+  @override
+  String get flashcardsDue => 'За преговор';
+  @override
+  String get flashcardsNew => 'Нова';
+  @override
+  String flashcardsInDays(int count) =>
+      count == 1 ? 'след 1 ден' : 'след $count дни';
+  @override
+  String flashcardsInMonths(int count) =>
+      count == 1 ? 'след 1 месец' : 'след $count месеца';
+  @override
+  String flashcardsInYears(int count) =>
+      count == 1 ? 'след 1 година' : 'след $count години';
+  @override
+  String get flashcardsRepeated => 'Повторена';
+  @override
+  String get flashcardsRepeatedTip =>
+      'Този въпрос се среща в тестето повече от веднъж';
+  @override
+  String get flashcardsEmpty => 'Още няма карти';
+  @override
+  String get flashcardsEditCard => 'Редактиране на карта';
+  @override
+  String get flashcardsSentence => 'Изречение';
+  @override
+  String get flashcardsEditNote =>
+      'Напредъкът се запазва, докато въпросът не се промени. Niman '
+      'пренаписва тази карта в бележката.';
+  @override
+  String flashcardsKindRows(int count) =>
+      count == 1 ? '1 ред от таблица' : '$count реда от таблица';
+  @override
+  String flashcardsKindLines(int count) =>
+      count == 1 ? '1 ред „::“' : '$count реда „::“';
+  @override
+  String flashcardsKindClozes(int count) =>
+      count == 1 ? '1 пропуск' : '$count пропуска';
+  @override
+  String get flashcardsEditMarkdown => 'Редактиране като Markdown';
+  @override
+  String get flashcardsColumnsTitle => 'Колони за въпрос и отговор';
+  @override
+  String get flashcardsQuestionColumn => 'Колона за въпрос';
+  @override
+  String get flashcardsAnswerColumn => 'Колона за отговор';
+  @override
+  String get flashcardsColumnsNone =>
+      'Нито една таблица в тази бележка няма повече от две колони.';
+  @override
+  String get flashcardsResetAction => 'Нулиране на преговора на това тесте';
+  @override
+  String get flashcardsResetTitle => 'Да се нулира ли преговорът?';
+  @override
+  String get flashcardsResetBody =>
+      'Всяка карта в тестето отново става нова. Бележката не се '
+      'променя.';
+  @override
+  String get flashcardsResetConfirm => 'Нулиране';
+  @override
+  String get commandNeedFlashcardNote => 'Изисква отворена бележка с карти';
+
+  @override
+  String get flashcardsCardsLabel => 'Карти';
+  @override
+  String get flashcardsShowAnswer => 'Покажи отговора';
+  @override
+  String get flashcardsGradeAgain => 'Отново';
+  @override
+  String get flashcardsGradeHard => 'Трудно';
+  @override
+  String get flashcardsGradeGood => 'Добре';
+  @override
+  String get flashcardsGradeEasy => 'Лесно';
+  @override
+  String get flashcardsToday => 'днес';
+  @override
+  String get flashcardsTomorrow => 'утре';
+  @override
+  String flashcardsReviewTitle(String deck) => 'Учене · $deck';
+  @override
+  String flashcardsAgainCount(int count) => 'Отново: $count';
+  @override
+  String get flashcardsDoneToday => 'Готово за днес';
+  @override
+  String flashcardsReviewedCount(int count) => 'Преговорени: $count';
+  @override
+  String flashcardsMinutes(int count) => '$count мин';
+  @override
+  String flashcardsNextOn(String when) => 'Следващи: $when';
+  @override
+  String get flashcardsNothingScheduled => 'Няма планирани карти';
+  @override
+  String get flashcardsNextDeck => 'Следващо тесте';
+  @override
+  String get flashcardsBackToDeck => 'Обратно към тестето';
+  @override
+  String get flashcardsEndReview => 'Край на преговора';
+  @override
+  String get tabStudy => 'Учене';
+  @override
+  String get studyEmpty => 'Още няма тестета';
+  @override
+  String get studyEmptyHint => 'Бележка с type: flashcard е тесте с карти.';
+  @override
+  String get studyOfferBody =>
+      'Учене показва тестетата ви. Да се покаже ли в навигацията?';
+  @override
+  String get studyOfferAction => 'Покажи';
+  @override
+  String get settingsNewCardsPerDay => 'Нови карти на ден';
+  @override
+  String get settingsNewCardsPerDayHint => 'За тесте. 0 не показва нови карти.';
+  @override
+  String get settingsResetAllReviews => 'Нулиране на всички прегледи';
+  @override
+  String get resetAllReviewsTitle => 'Нулиране на всички прегледи?';
+  @override
+  String get resetAllReviewsBody =>
+      'Всяка карта от всяко тесте отново става нова. Бележките не се променят.';
+  @override
+  String get makeFlashcardsTitle => 'Създай карти за учене';
+  @override
+  String get makeFlashcardsDeck => 'Тесте';
+  @override
+  String get makeFlashcardsDeckHint =>
+      'Категории, разделени с /. Празно: Без категория.';
+  @override
+  String get makeFlashcardsWrites => 'Записва се във frontmatter';
+  @override
+  String makeFlashcardsAction(int count) => 'Създай карти: $count';
+  @override
+  String get makeFlashcardsNone =>
+      'Тази бележка няма таблица, ред :: или открояване, от които да станат '
+      'карти.';
+  @override
+  String get commandNeedPlainNote => 'Изисква отворена бележка без тип';
+  @override
+  String get studyNothingToday => 'Днес няма нищо за учене';
 }

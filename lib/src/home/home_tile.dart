@@ -36,7 +36,10 @@ enum HomeTileKind {
   randomNote,
 
   /// A search query and its first results.
-  search;
+  search,
+
+  /// The flashcard decks with cards to study today (#533).
+  study;
 
   /// Whether a Home may hold several: each actions tile is its own group
   /// of buttons, each search tile its own query. The others show the
@@ -46,7 +49,7 @@ enum HomeTileKind {
   /// The cells a new tile of this kind takes on the grid.
   ({int w, int h}) get defaultSize => switch (this) {
     journalToday => (w: 2, h: 2),
-    tasksDue || recent || journalCalendar => (w: 1, h: 2),
+    tasksDue || recent || journalCalendar || study => (w: 1, h: 2),
     eventsToday => (w: 2, h: 1),
     actions || search => (w: 2, h: 1),
     pinned || topTags || randomNote => (w: 1, h: 1),

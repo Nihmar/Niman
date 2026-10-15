@@ -6,6 +6,7 @@
 <resources>
     <string name="todo_widget_label">Niman Todos</string>
     <string name="note_widget_label">Niman Note</string>
+    <string name="study_widget_label">Niman Study</string>
     <string name="widget_note_add_hint">New item</string>
     <string name="widget_note_add_add">Add</string>
     <string name="widget_note_add_cancel">Cancel</string>
@@ -15,6 +16,14 @@
     <string name="widget_todo_count_open">%1$d open</string>
     <string name="widget_todo_empty_loading">Open Niman to load todos</string>
     <string name="widget_todo_empty_none">No open tasks</string>
+
+    <!-- The Study widget (#533). -->
+    <string name="widget_study_title_fallback">Study</string>
+    <string name="widget_study_count">%1$d today</string>
+    <string name="widget_study_row_counts">%1$d due · %2$d new</string>
+    <string name="widget_study_no_category">No category</string>
+    <string name="widget_study_empty_loading">Open Niman to count the decks</string>
+    <string name="widget_study_empty_none">Nothing to study today</string>
 
     <!-- The note widget. -->
     <string name="widget_note_title_fallback">Note</string>

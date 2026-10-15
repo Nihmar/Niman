@@ -3819,4 +3819,177 @@ final class IcelandicStrings extends Strings {
 
   @override
   String homeActionMissing(String path) => '$path er ekki lengur í safninu';
+
+  @override
+  String get flashcardsName => 'Minniskort';
+  @override
+  String get newFlashcardsTitle => 'Ný minniskort';
+  @override
+  String get newFlashcardsDefault => 'Mín minniskort';
+  @override
+  String get showFlashcardsTooltip => 'Sýna minniskort';
+  @override
+  String get flashcardsNoCategory => 'Enginn flokkur';
+  @override
+  String flashcardsDueCount(int count) => '$count til upprifjunar';
+  @override
+  String flashcardsNewCount(int count) => '$count ný';
+  @override
+  String flashcardsCardCount(int count) =>
+      count == 1 ? '1 kort' : '$count kort';
+  @override
+  String flashcardsStudyCount(int count) => 'Læra $count';
+  @override
+  String flashcardsStudyCards(int count) =>
+      count == 1 ? 'Læra 1 kort' : 'Læra $count kort';
+  @override
+  String get flashcardsStudyDeck => 'Læra þennan stokk';
+  @override
+  String get flashcardsAddCard => 'Bæta við korti';
+  @override
+  String get flashcardsQuestion => 'Spurning';
+  @override
+  String get flashcardsAnswer => 'Svar';
+  @override
+  String get flashcardsNextColumn => 'Næsta';
+  @override
+  String get flashcardsDue => 'Á að rifja upp';
+  @override
+  String get flashcardsNew => 'Nýtt';
+  @override
+  String flashcardsInDays(int count) =>
+      count == 1 ? 'eftir 1 dag' : 'eftir $count daga';
+  @override
+  String flashcardsInMonths(int count) =>
+      count == 1 ? 'eftir 1 mánuð' : 'eftir $count mánuði';
+  @override
+  String flashcardsInYears(int count) =>
+      count == 1 ? 'eftir 1 ár' : 'eftir $count ár';
+  @override
+  String get flashcardsRepeated => 'Endurtekið';
+  @override
+  String get flashcardsRepeatedTip =>
+      'Þessi spurning kemur oftar en einu sinni fyrir í stokknum';
+  @override
+  String get flashcardsEmpty => 'Engin kort enn';
+  @override
+  String get flashcardsEditCard => 'Breyta korti';
+  @override
+  String get flashcardsSentence => 'Setning';
+  @override
+  String get flashcardsEditNote =>
+      'Framvindan helst á meðan spurningin er sú sama. Niman '
+      'endurskrifar þetta kort í glósunni.';
+  @override
+  String flashcardsKindRows(int count) =>
+      count == 1 ? '1 töflulína' : '$count töflulínur';
+  @override
+  String flashcardsKindLines(int count) =>
+      count == 1 ? '1 ::-lína' : '$count ::-línur';
+  @override
+  String flashcardsKindClozes(int count) =>
+      count == 1 ? '1 eyða' : '$count eyður';
+  @override
+  String get flashcardsEditMarkdown => 'Breyta sem Markdown';
+  @override
+  String get flashcardsColumnsTitle => 'Dálkar spurningar og svars';
+  @override
+  String get flashcardsQuestionColumn => 'Dálkur spurningar';
+  @override
+  String get flashcardsAnswerColumn => 'Dálkur svars';
+  @override
+  String get flashcardsColumnsNone =>
+      'Engin tafla í þessari glósu hefur fleiri en tvo dálka.';
+  @override
+  String get flashcardsResetAction => 'Endurstilla upprifjun þessa stokks';
+  @override
+  String get flashcardsResetTitle => 'Endurstilla upprifjun?';
+  @override
+  String get flashcardsResetBody =>
+      'Hvert kort í stokknum verður aftur nýtt. Glósunni er ekki '
+      'breytt.';
+  @override
+  String get flashcardsResetConfirm => 'Endurstilla';
+  @override
+  String get commandNeedFlashcardNote => 'Krefst opinnar minniskortaglósu';
+
+  @override
+  String get flashcardsCardsLabel => 'Kort';
+  @override
+  String get flashcardsShowAnswer => 'Sýna svar';
+  @override
+  String get flashcardsGradeAgain => 'Aftur';
+  @override
+  String get flashcardsGradeHard => 'Erfitt';
+  @override
+  String get flashcardsGradeGood => 'Gott';
+  @override
+  String get flashcardsGradeEasy => 'Auðvelt';
+  @override
+  String get flashcardsToday => 'í dag';
+  @override
+  String get flashcardsTomorrow => 'á morgun';
+  @override
+  String flashcardsReviewTitle(String deck) => 'Nám · $deck';
+  @override
+  String flashcardsAgainCount(int count) => 'Aftur: $count';
+  @override
+  String get flashcardsDoneToday => 'Búið í dag';
+  @override
+  String flashcardsReviewedCount(int count) => 'Rifjað upp: $count';
+  @override
+  String flashcardsMinutes(int count) => '$count mín.';
+  @override
+  String flashcardsNextOn(String when) => 'Næst: $when';
+  @override
+  String get flashcardsNothingScheduled => 'Engin spjöld á dagskrá';
+  @override
+  String get flashcardsNextDeck => 'Næsti stokkur';
+  @override
+  String get flashcardsBackToDeck => 'Aftur í stokkinn';
+  @override
+  String get flashcardsEndReview => 'Ljúka upprifjun';
+  @override
+  String get tabStudy => 'Nám';
+  @override
+  String get studyEmpty => 'Engir stokkar enn';
+  @override
+  String get studyEmptyHint =>
+      'Minnismiði með type: flashcard er spjaldastokkur.';
+  @override
+  String get studyOfferBody =>
+      'Nám sýnir stokkana þína. Sýna það í leiðsögninni?';
+  @override
+  String get studyOfferAction => 'Sýna';
+  @override
+  String get settingsNewCardsPerDay => 'Ný spjöld á dag';
+  @override
+  String get settingsNewCardsPerDayHint => 'Á stokk. 0 sýnir engin ný spjöld.';
+  @override
+  String get settingsResetAllReviews => 'Endurstilla alla upprifjun';
+  @override
+  String get resetAllReviewsTitle => 'Endurstilla alla upprifjun?';
+  @override
+  String get resetAllReviewsBody =>
+      'Hvert spjald í hverjum stokki verður nýtt aftur. Engum minnismiða er '
+      'breytt.';
+  @override
+  String get makeFlashcardsTitle => 'Búa til minniskort';
+  @override
+  String get makeFlashcardsDeck => 'Stokkur';
+  @override
+  String get makeFlashcardsDeckHint =>
+      'Flokkar aðgreindir með /. Tómt: Enginn flokkur.';
+  @override
+  String get makeFlashcardsWrites => 'Skrifað í frontmatter';
+  @override
+  String makeFlashcardsAction(int count) => 'Búa til spjöld: $count';
+  @override
+  String get makeFlashcardsNone =>
+      'Þessi glósa hefur enga töflu, :: línu eða áherslu til að búa til '
+      'spjöld úr.';
+  @override
+  String get commandNeedPlainNote => 'Krefst opinnar glósu án tegundar';
+  @override
+  String get studyNothingToday => 'Ekkert að læra í dag';
 }

@@ -3816,4 +3816,172 @@ final class LatvianStrings extends Strings {
 
   @override
   String homeActionMissing(String path) => '$path vairs nav bibliotēkā';
+
+  @override
+  String get flashcardsName => 'Kartītes';
+  @override
+  String get newFlashcardsTitle => 'Jaunas kartītes';
+  @override
+  String get newFlashcardsDefault => 'Manas kartītes';
+  @override
+  String get showFlashcardsTooltip => 'Rādīt kartītes';
+  @override
+  String get flashcardsNoCategory => 'Bez kategorijas';
+  @override
+  String flashcardsDueCount(int count) => 'Jāatkārto: $count';
+  @override
+  String flashcardsNewCount(int count) => 'Jaunas: $count';
+  @override
+  String flashcardsCardCount(int count) => 'Kartīšu: $count';
+  @override
+  String flashcardsStudyCount(int count) => 'Mācīties: $count';
+  @override
+  String flashcardsStudyCards(int count) => 'Mācīties kartīšu: $count';
+  @override
+  String get flashcardsStudyDeck => 'Mācīties šo komplektu';
+  @override
+  String get flashcardsAddCard => 'Pievienot kartīti';
+  @override
+  String get flashcardsQuestion => 'Jautājums';
+  @override
+  String get flashcardsAnswer => 'Atbilde';
+  @override
+  String get flashcardsNextColumn => 'Nākamā';
+  @override
+  String get flashcardsDue => 'Jāatkārto';
+  @override
+  String get flashcardsNew => 'Jauna';
+  @override
+  String flashcardsInDays(int count) =>
+      count == 1 ? 'pēc 1 dienas' : 'pēc $count d.';
+  @override
+  String flashcardsInMonths(int count) =>
+      count == 1 ? 'pēc 1 mēneša' : 'pēc $count mēn.';
+  @override
+  String flashcardsInYears(int count) =>
+      count == 1 ? 'pēc 1 gada' : 'pēc $count g.';
+  @override
+  String get flashcardsRepeated => 'Atkārtojas';
+  @override
+  String get flashcardsRepeatedTip =>
+      'Šis jautājums komplektā ir vairāk nekā vienu reizi';
+  @override
+  String get flashcardsEmpty => 'Kartīšu vēl nav';
+  @override
+  String get flashcardsEditCard => 'Rediģēt kartīti';
+  @override
+  String get flashcardsSentence => 'Teikums';
+  @override
+  String get flashcardsEditNote =>
+      'Progress saglabājas, kamēr jautājums nemainās. Niman pārraksta '
+      'šo kartīti piezīmē.';
+  @override
+  String flashcardsKindRows(int count) => 'Tabulas rindu: $count';
+  @override
+  String flashcardsKindLines(int count) => 'Rindu „::“: $count';
+  @override
+  String flashcardsKindClozes(int count) => 'Izlaidumu: $count';
+  @override
+  String get flashcardsEditMarkdown => 'Rediģēt kā Markdown';
+  @override
+  String get flashcardsColumnsTitle => 'Jautājuma un atbildes kolonnas';
+  @override
+  String get flashcardsQuestionColumn => 'Jautājuma kolonna';
+  @override
+  String get flashcardsAnswerColumn => 'Atbildes kolonna';
+  @override
+  String get flashcardsColumnsNone =>
+      'Nevienā šīs piezīmes tabulā nav vairāk par divām kolonnām.';
+  @override
+  String get flashcardsResetAction => 'Atiestatīt šī komplekta atkārtošanu';
+  @override
+  String get flashcardsResetTitle => 'Atiestatīt atkārtošanu?';
+  @override
+  String get flashcardsResetBody =>
+      'Katra komplekta kartīte atkal kļūs jauna. Piezīme nemainās.';
+  @override
+  String get flashcardsResetConfirm => 'Atiestatīt';
+  @override
+  String get commandNeedFlashcardNote => 'Nepieciešama atvērta kartīšu piezīme';
+
+  @override
+  String get flashcardsCardsLabel => 'Kartītes';
+  @override
+  String get flashcardsShowAnswer => 'Rādīt atbildi';
+  @override
+  String get flashcardsGradeAgain => 'Vēlreiz';
+  @override
+  String get flashcardsGradeHard => 'Grūti';
+  @override
+  String get flashcardsGradeGood => 'Labi';
+  @override
+  String get flashcardsGradeEasy => 'Viegli';
+  @override
+  String get flashcardsToday => 'šodien';
+  @override
+  String get flashcardsTomorrow => 'rīt';
+  @override
+  String flashcardsReviewTitle(String deck) => 'Mācības · $deck';
+  @override
+  String flashcardsAgainCount(int count) => 'Vēlreiz: $count';
+  @override
+  String get flashcardsDoneToday => 'Šodienai pabeigts';
+  @override
+  String flashcardsReviewedCount(int count) => 'Atkārtotas: $count';
+  @override
+  String flashcardsMinutes(int count) => '$count min';
+  @override
+  String flashcardsNextOn(String when) => 'Nākamās: $when';
+  @override
+  String get flashcardsNothingScheduled => 'Nav ieplānotu kartīšu';
+  @override
+  String get flashcardsNextDeck => 'Nākamais komplekts';
+  @override
+  String get flashcardsBackToDeck => 'Atpakaļ uz komplektu';
+  @override
+  String get flashcardsEndReview => 'Beigt atkārtošanu';
+  @override
+  String get tabStudy => 'Mācības';
+  @override
+  String get studyEmpty => 'Vēl nav neviena komplekta';
+  @override
+  String get studyEmptyHint =>
+      'Piezīme ar type: flashcard ir kartīšu komplekts.';
+  @override
+  String get studyOfferBody =>
+      'Mācības rāda jūsu komplektus. Vai rādīt tās navigācijā?';
+  @override
+  String get studyOfferAction => 'Rādīt';
+  @override
+  String get settingsNewCardsPerDay => 'Jaunas kartītes dienā';
+  @override
+  String get settingsNewCardsPerDayHint =>
+      'Katram komplektam. 0 nerāda jaunas kartītes.';
+  @override
+  String get settingsResetAllReviews => 'Atiestatīt visu atkārtošanu';
+  @override
+  String get resetAllReviewsTitle => 'Vai atiestatīt visu atkārtošanu?';
+  @override
+  String get resetAllReviewsBody =>
+      'Katra komplekta katra kartīte atkal kļūst jauna. Neviena piezīme '
+      'netiek mainīta.';
+  @override
+  String get makeFlashcardsTitle => 'Izveidot kartītes';
+  @override
+  String get makeFlashcardsDeck => 'Komplekts';
+  @override
+  String get makeFlashcardsDeckHint =>
+      'Kategorijas atdalītas ar /. Tukšs: Bez kategorijas.';
+  @override
+  String get makeFlashcardsWrites => 'Tiek ierakstīts frontmatter';
+  @override
+  String makeFlashcardsAction(int count) => 'Izveidot kartītes: $count';
+  @override
+  String get makeFlashcardsNone =>
+      'Šajā piezīmē nav tabulas, :: rindas vai izcēluma, no kā veidot '
+      'kartītes.';
+  @override
+  String get commandNeedPlainNote => 'Nepieciešama atvērta piezīme bez veida';
+  @override
+  String get studyNothingToday => 'Šodien nav ko mācīties';
 }

@@ -3903,4 +3903,179 @@ final class GermanStrings extends Strings {
   @override
   String homeActionMissing(String path) =>
       '$path ist nicht mehr in der Bibliothek';
+
+  @override
+  String get flashcardsName => 'Karteikarten';
+  @override
+  String get newFlashcardsTitle => 'Neue Karteikarten';
+  @override
+  String get newFlashcardsDefault => 'Meine Karteikarten';
+  @override
+  String get showFlashcardsTooltip => 'Karteikarten anzeigen';
+  @override
+  String get flashcardsNoCategory => 'Ohne Kategorie';
+  @override
+  String flashcardsDueCount(int count) => '$count fällig';
+  @override
+  String flashcardsNewCount(int count) => '$count neu';
+  @override
+  String flashcardsCardCount(int count) =>
+      count == 1 ? '1 Karte' : '$count Karten';
+  @override
+  String flashcardsStudyCount(int count) => '$count lernen';
+  @override
+  String flashcardsStudyCards(int count) =>
+      count == 1 ? '1 Karte lernen' : '$count Karten lernen';
+  @override
+  String get flashcardsStudyDeck => 'Diesen Stapel lernen';
+  @override
+  String get flashcardsAddCard => 'Karte hinzufügen';
+  @override
+  String get flashcardsQuestion => 'Frage';
+  @override
+  String get flashcardsAnswer => 'Antwort';
+  @override
+  String get flashcardsNextColumn => 'Nächste';
+  @override
+  String get flashcardsDue => 'Fällig';
+  @override
+  String get flashcardsNew => 'Neu';
+  @override
+  String flashcardsInDays(int count) =>
+      count == 1 ? 'in 1 Tag' : 'in $count Tagen';
+  @override
+  String flashcardsInMonths(int count) =>
+      count == 1 ? 'in 1 Monat' : 'in $count Monaten';
+  @override
+  String flashcardsInYears(int count) =>
+      count == 1 ? 'in 1 Jahr' : 'in $count Jahren';
+  @override
+  String get flashcardsRepeated => 'Wiederholt';
+  @override
+  String get flashcardsRepeatedTip =>
+      'Diese Frage kommt im Stapel mehrfach vor';
+  @override
+  String get flashcardsEmpty => 'Noch keine Karten';
+  @override
+  String get flashcardsEditCard => 'Karte bearbeiten';
+  @override
+  String get flashcardsSentence => 'Satz';
+  @override
+  String get flashcardsEditNote =>
+      'Der Lernfortschritt bleibt erhalten, solange die Frage gleich '
+      'bleibt. Niman schreibt diese Karte in der Notiz neu.';
+  @override
+  String flashcardsKindRows(int count) =>
+      count == 1 ? '1 Tabellenzeile' : '$count Tabellenzeilen';
+  @override
+  String flashcardsKindLines(int count) =>
+      count == 1 ? '1 ::-Zeile' : '$count ::-Zeilen';
+  @override
+  String flashcardsKindClozes(int count) =>
+      count == 1 ? '1 Lückentext' : '$count Lückentexte';
+  @override
+  String get flashcardsEditMarkdown => 'Als Markdown bearbeiten';
+  @override
+  String get flashcardsColumnsTitle => 'Frage- und Antwortspalten';
+  @override
+  String get flashcardsQuestionColumn => 'Fragespalte';
+  @override
+  String get flashcardsAnswerColumn => 'Antwortspalte';
+  @override
+  String get flashcardsColumnsNone =>
+      'Keine Tabelle dieser Notiz hat mehr als zwei Spalten.';
+  @override
+  String get flashcardsResetAction => 'Lernstand dieses Stapels zurücksetzen';
+  @override
+  String get flashcardsResetTitle => 'Lernstand zurücksetzen?';
+  @override
+  String get flashcardsResetBody =>
+      'Jede Karte dieses Stapels wird wieder neu. Die Notiz bleibt '
+      'unverändert.';
+  @override
+  String get flashcardsResetConfirm => 'Zurücksetzen';
+  @override
+  String get commandNeedFlashcardNote =>
+      'Benötigt eine geöffnete Karteikarten-Notiz';
+
+  @override
+  String get flashcardsCardsLabel => 'Karten';
+  @override
+  String get flashcardsShowAnswer => 'Antwort zeigen';
+  @override
+  String get flashcardsGradeAgain => 'Nochmal';
+  @override
+  String get flashcardsGradeHard => 'Schwer';
+  @override
+  String get flashcardsGradeGood => 'Gut';
+  @override
+  String get flashcardsGradeEasy => 'Einfach';
+  @override
+  String get flashcardsToday => 'heute';
+  @override
+  String get flashcardsTomorrow => 'morgen';
+  @override
+  String flashcardsReviewTitle(String deck) => 'Lernen · $deck';
+  @override
+  String flashcardsAgainCount(int count) => '$count nochmal';
+  @override
+  String get flashcardsDoneToday => 'Für heute fertig';
+  @override
+  String flashcardsReviewedCount(int count) => '$count wiederholt';
+  @override
+  String flashcardsMinutes(int count) => '$count Min.';
+  @override
+  String flashcardsNextOn(String when) => 'Nächste: $when';
+  @override
+  String get flashcardsNothingScheduled => 'Keine Karten geplant';
+  @override
+  String get flashcardsNextDeck => 'Nächster Stapel';
+  @override
+  String get flashcardsBackToDeck => 'Zurück zum Stapel';
+  @override
+  String get flashcardsEndReview => 'Lernen beenden';
+  @override
+  String get tabStudy => 'Lernen';
+  @override
+  String get studyEmpty => 'Noch keine Stapel';
+  @override
+  String get studyEmptyHint =>
+      'Eine Notiz mit type: flashcard ist ein Kartenstapel.';
+  @override
+  String get studyOfferBody =>
+      'Lernen zeigt deine Stapel. In der Navigation anzeigen?';
+  @override
+  String get studyOfferAction => 'Anzeigen';
+  @override
+  String get settingsNewCardsPerDay => 'Neue Karten pro Tag';
+  @override
+  String get settingsNewCardsPerDayHint =>
+      'Pro Stapel. 0 zeigt keine neuen Karten.';
+  @override
+  String get settingsResetAllReviews => 'Alle Lernstände zurücksetzen';
+  @override
+  String get resetAllReviewsTitle => 'Alle Lernstände zurücksetzen?';
+  @override
+  String get resetAllReviewsBody =>
+      'Jede Karte jedes Stapels wird wieder neu. Keine Notiz wird geändert.';
+  @override
+  String get makeFlashcardsTitle => 'Karteikarten erstellen';
+  @override
+  String get makeFlashcardsDeck => 'Stapel';
+  @override
+  String get makeFlashcardsDeckHint =>
+      'Kategorien durch / getrennt. Leer: Ohne Kategorie.';
+  @override
+  String get makeFlashcardsWrites => 'Wird in das Frontmatter geschrieben';
+  @override
+  String makeFlashcardsAction(int count) =>
+      count == 1 ? '1 Karte erstellen' : '$count Karten erstellen';
+  @override
+  String get makeFlashcardsNone =>
+      'Diese Notiz hat keine Tabelle, keine ::-Zeile und keine Hervorhebung, '
+      'aus der Karten werden könnten.';
+  @override
+  String get commandNeedPlainNote => 'Benötigt eine geöffnete Notiz ohne Typ';
+  @override
+  String get studyNothingToday => 'Heute nichts zu lernen';
 }

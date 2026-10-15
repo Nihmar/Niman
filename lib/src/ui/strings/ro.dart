@@ -3880,4 +3880,176 @@ final class RomanianStrings extends Strings {
 
   @override
   String homeActionMissing(String path) => '$path nu mai este în bibliotecă';
+
+  @override
+  String get flashcardsName => 'Carduri';
+  @override
+  String get newFlashcardsTitle => 'Carduri noi';
+  @override
+  String get newFlashcardsDefault => 'Cardurile mele';
+  @override
+  String get showFlashcardsTooltip => 'Arată cardurile';
+  @override
+  String get flashcardsNoCategory => 'Fără categorie';
+  @override
+  String flashcardsDueCount(int count) => '$count de repetat';
+  @override
+  String flashcardsNewCount(int count) => '$count noi';
+  @override
+  String flashcardsCardCount(int count) =>
+      count == 1 ? '1 card' : '$count carduri';
+  @override
+  String flashcardsStudyCount(int count) => 'Studiază $count';
+  @override
+  String flashcardsStudyCards(int count) =>
+      count == 1 ? 'Studiază 1 card' : 'Studiază $count carduri';
+  @override
+  String get flashcardsStudyDeck => 'Studiază acest pachet';
+  @override
+  String get flashcardsAddCard => 'Adaugă card';
+  @override
+  String get flashcardsQuestion => 'Întrebare';
+  @override
+  String get flashcardsAnswer => 'Răspuns';
+  @override
+  String get flashcardsNextColumn => 'Următorul';
+  @override
+  String get flashcardsDue => 'De repetat';
+  @override
+  String get flashcardsNew => 'Nou';
+  @override
+  String flashcardsInDays(int count) =>
+      count == 1 ? 'peste 1 zi' : 'peste $count zile';
+  @override
+  String flashcardsInMonths(int count) =>
+      count == 1 ? 'peste 1 lună' : 'peste $count luni';
+  @override
+  String flashcardsInYears(int count) =>
+      count == 1 ? 'peste 1 an' : 'peste $count ani';
+  @override
+  String get flashcardsRepeated => 'Repetat';
+  @override
+  String get flashcardsRepeatedTip =>
+      'Această întrebare apare de mai multe ori în pachet';
+  @override
+  String get flashcardsEmpty => 'Niciun card încă';
+  @override
+  String get flashcardsEditCard => 'Editează cardul';
+  @override
+  String get flashcardsSentence => 'Propoziție';
+  @override
+  String get flashcardsEditNote =>
+      'Progresul se păstrează cât timp întrebarea rămâne aceeași. Niman '
+      'rescrie acest card în notă.';
+  @override
+  String flashcardsKindRows(int count) =>
+      count == 1 ? '1 rând de tabel' : '$count rânduri de tabel';
+  @override
+  String flashcardsKindLines(int count) =>
+      count == 1 ? '1 linie ::' : '$count linii ::';
+  @override
+  String flashcardsKindClozes(int count) =>
+      count == 1 ? '1 spațiu de completat' : '$count spații de completat';
+  @override
+  String get flashcardsEditMarkdown => 'Editează ca Markdown';
+  @override
+  String get flashcardsColumnsTitle => 'Coloanele întrebării și răspunsului';
+  @override
+  String get flashcardsQuestionColumn => 'Coloana întrebării';
+  @override
+  String get flashcardsAnswerColumn => 'Coloana răspunsului';
+  @override
+  String get flashcardsColumnsNone =>
+      'Niciun tabel din această notă nu are mai mult de două coloane.';
+  @override
+  String get flashcardsResetAction => 'Resetează repetarea acestui pachet';
+  @override
+  String get flashcardsResetTitle => 'Resetezi repetarea?';
+  @override
+  String get flashcardsResetBody =>
+      'Fiecare card din pachet redevine nou. Nota nu se modifică.';
+  @override
+  String get flashcardsResetConfirm => 'Resetează';
+  @override
+  String get commandNeedFlashcardNote => 'Necesită o notă de carduri deschisă';
+
+  @override
+  String get flashcardsCardsLabel => 'Carduri';
+  @override
+  String get flashcardsShowAnswer => 'Arată răspunsul';
+  @override
+  String get flashcardsGradeAgain => 'Din nou';
+  @override
+  String get flashcardsGradeHard => 'Greu';
+  @override
+  String get flashcardsGradeGood => 'Bine';
+  @override
+  String get flashcardsGradeEasy => 'Ușor';
+  @override
+  String get flashcardsToday => 'azi';
+  @override
+  String get flashcardsTomorrow => 'mâine';
+  @override
+  String flashcardsReviewTitle(String deck) => 'Studiu · $deck';
+  @override
+  String flashcardsAgainCount(int count) => 'Din nou: $count';
+  @override
+  String get flashcardsDoneToday => 'Gata pentru azi';
+  @override
+  String flashcardsReviewedCount(int count) => 'Repetate: $count';
+  @override
+  String flashcardsMinutes(int count) => '$count min';
+  @override
+  String flashcardsNextOn(String when) => 'Următoarele: $when';
+  @override
+  String get flashcardsNothingScheduled => 'Nicio carte programată';
+  @override
+  String get flashcardsNextDeck => 'Pachetul următor';
+  @override
+  String get flashcardsBackToDeck => 'Înapoi la pachet';
+  @override
+  String get flashcardsEndReview => 'Încheie repetarea';
+  @override
+  String get tabStudy => 'Studiu';
+  @override
+  String get studyEmpty => 'Încă nu există pachete';
+  @override
+  String get studyEmptyHint =>
+      'O notă cu type: flashcard este un pachet de cărți.';
+  @override
+  String get studyOfferBody =>
+      'Studiu îți arată pachetele. Îl afișezi în navigare?';
+  @override
+  String get studyOfferAction => 'Afișează';
+  @override
+  String get settingsNewCardsPerDay => 'Cărți noi pe zi';
+  @override
+  String get settingsNewCardsPerDayHint => 'Pe pachet. 0 nu arată cărți noi.';
+  @override
+  String get settingsResetAllReviews => 'Resetează toate repetările';
+  @override
+  String get resetAllReviewsTitle => 'Resetezi toate repetările?';
+  @override
+  String get resetAllReviewsBody =>
+      'Fiecare carte din fiecare pachet redevine nouă. Nicio notă nu se '
+      'schimbă.';
+  @override
+  String get makeFlashcardsTitle => 'Creează carduri';
+  @override
+  String get makeFlashcardsDeck => 'Pachet';
+  @override
+  String get makeFlashcardsDeckHint =>
+      'Categorii separate prin /. Gol: Fără categorie.';
+  @override
+  String get makeFlashcardsWrites => 'Se scrie în frontmatter';
+  @override
+  String makeFlashcardsAction(int count) => 'Creează carduri: $count';
+  @override
+  String get makeFlashcardsNone =>
+      'Această notă nu are tabel, rând :: sau evidențiere din care să facă '
+      'carduri.';
+  @override
+  String get commandNeedPlainNote => 'Necesită o notă deschisă fără tip';
+  @override
+  String get studyNothingToday => 'Nimic de studiat azi';
 }

@@ -7,6 +7,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/db/app_database.dart';
 import 'package:niman/src/db/index_database.dart';
+import 'package:niman/src/flashcards/review_state.dart';
+import 'package:niman/src/flashcards/review_store.dart';
 import 'package:niman/src/library/file_watcher.dart';
 import 'package:niman/src/library/library_registry.dart';
 import 'package:niman/src/library/library_state.dart';
@@ -533,6 +535,39 @@ void main() {
     while (await positions.read('book.epub') != null) {
       if (DateTime.now().isAfter(deadline)) {
         fail('the deleted book kept its reading position');
+      }
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+    }
+    await controller.close();
+    await controller.dispose();
+  });
+
+  test('deleting a deck drops its review states', () async {
+    // #533: the same rule as for a book — the indexer's prune of the
+    // deleted path is what the library saw leave.
+    File(p.join(root.path, 'deck.md')).writeAsStringSync('a :: b\n');
+    final controller = makeController();
+    await controller.open(root.path, create: false);
+    final store = ReviewStore(root.path);
+    await store.write(
+      'deck.md',
+      'a',
+      ReviewState(
+        ef: 2.5,
+        interval: 1,
+        reps: 1,
+        due: DateTime(2026, 10, 15),
+        at: DateTime.utc(2026, 10, 14),
+      ),
+    );
+    expect(await store.read('deck.md'), isNotEmpty);
+
+    await controller.ops!.delete('deck.md');
+
+    final deadline = DateTime.now().add(const Duration(seconds: 5));
+    while ((await store.read('deck.md')).isNotEmpty) {
+      if (DateTime.now().isAfter(deadline)) {
+        fail('the deleted deck kept its review states');
       }
       await Future<void>.delayed(const Duration(milliseconds: 50));
     }

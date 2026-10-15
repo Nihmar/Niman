@@ -4,6 +4,7 @@
 <resources>
     <string name="todo_widget_label">Niman Attività</string>
     <string name="note_widget_label">Niman Nota</string>
+    <string name="study_widget_label">Niman Studio</string>
     <string name="widget_note_add_hint">Nuovo elemento</string>
     <string name="widget_note_add_add">Aggiungi</string>
     <string name="widget_note_add_cancel">Annulla</string>
@@ -13,6 +14,14 @@
     <string name="widget_todo_count_open">%1$d aperte</string>
     <string name="widget_todo_empty_loading">Apri Niman per caricare le attività</string>
     <string name="widget_todo_empty_none">Nessuna attività aperta</string>
+
+    <!-- Il widget dello studio (#533). -->
+    <string name="widget_study_title_fallback">Studio</string>
+    <string name="widget_study_count">%1$d oggi</string>
+    <string name="widget_study_row_counts">%1$d da ripassare · %2$d nuove</string>
+    <string name="widget_study_no_category">Senza categoria</string>
+    <string name="widget_study_empty_loading">Apri Niman per contare i mazzi</string>
+    <string name="widget_study_empty_none">Niente da studiare oggi</string>
 
     <!-- Il widget della nota. -->
     <string name="widget_note_title_fallback">Nota</string>

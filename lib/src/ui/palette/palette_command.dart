@@ -40,6 +40,7 @@ PaletteGroup? paletteGroup(AppCommand command) => switch (command) {
   AppCommand.newListNote ||
   AppCommand.newAudioNote ||
   AppCommand.newSlides ||
+  AppCommand.newFlashcards ||
   AppCommand.newTodo ||
   AppCommand.captureWebPage ||
   AppCommand.quickNote ||
@@ -54,6 +55,10 @@ PaletteGroup? paletteGroup(AppCommand command) => switch (command) {
   AppCommand.togglePreview ||
   AppCommand.presentSlides ||
   AppCommand.presenterView ||
+  AppCommand.studyDeck ||
+  AppCommand.deckColumns ||
+  AppCommand.deckReset ||
+  AppCommand.makeFlashcards ||
   AppCommand.switchEditor ||
   AppCommand.typewriterMode ||
   AppCommand.formatNote ||
@@ -91,7 +96,8 @@ PaletteGroup? paletteGroup(AppCommand command) => switch (command) {
   AppCommand.tabSearch ||
   AppCommand.tabQuickNote ||
   AppCommand.tabSettings ||
-  AppCommand.tabHome => PaletteGroup.goTo,
+  AppCommand.tabHome ||
+  AppCommand.tabStudy => PaletteGroup.goTo,
   AppCommand.openPalette ||
   AppCommand.goToNote ||
   AppCommand.welcomeTour ||
@@ -110,6 +116,8 @@ bool paletteAsks(AppCommand command) => switch (command) {
   AppCommand.deleteNote ||
   AppCommand.exportNote ||
   AppCommand.recognizeText ||
+  AppCommand.deckColumns ||
+  AppCommand.deckReset ||
   AppCommand.exportLibrary ||
   AppCommand.openFile ||
   AppCommand.switchLibrary => true,

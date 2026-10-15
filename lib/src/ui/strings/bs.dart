@@ -3850,4 +3850,172 @@ final class BosnianStrings extends Strings {
 
   @override
   String homeActionMissing(String path) => '$path više nije u biblioteci';
+
+  @override
+  String get flashcardsName => 'Kartice';
+  @override
+  String get newFlashcardsTitle => 'Nove kartice';
+  @override
+  String get newFlashcardsDefault => 'Moje kartice';
+  @override
+  String get showFlashcardsTooltip => 'Prikaži kartice';
+  @override
+  String get flashcardsNoCategory => 'Bez kategorije';
+  @override
+  String flashcardsDueCount(int count) => 'Za ponavljanje: $count';
+  @override
+  String flashcardsNewCount(int count) => 'Nove: $count';
+  @override
+  String flashcardsCardCount(int count) => 'Kartica: $count';
+  @override
+  String flashcardsStudyCount(int count) => 'Uči: $count';
+  @override
+  String flashcardsStudyCards(int count) => 'Uči kartica: $count';
+  @override
+  String get flashcardsStudyDeck => 'Uči ovaj špil';
+  @override
+  String get flashcardsAddCard => 'Dodaj karticu';
+  @override
+  String get flashcardsQuestion => 'Pitanje';
+  @override
+  String get flashcardsAnswer => 'Odgovor';
+  @override
+  String get flashcardsNextColumn => 'Sljedeća';
+  @override
+  String get flashcardsDue => 'Za ponavljanje';
+  @override
+  String get flashcardsNew => 'Nova';
+  @override
+  String flashcardsInDays(int count) => count == 1 ? 'za 1 dan' : 'za $count d';
+  @override
+  String flashcardsInMonths(int count) =>
+      count == 1 ? 'za 1 mjesec' : 'za $count mj.';
+  @override
+  String flashcardsInYears(int count) =>
+      count == 1 ? 'za 1 godinu' : 'za $count god.';
+  @override
+  String get flashcardsRepeated => 'Ponovljeno';
+  @override
+  String get flashcardsRepeatedTip =>
+      'Ovo se pitanje u špilu pojavljuje više puta';
+  @override
+  String get flashcardsEmpty => 'Još nema kartica';
+  @override
+  String get flashcardsEditCard => 'Uredi karticu';
+  @override
+  String get flashcardsSentence => 'Rečenica';
+  @override
+  String get flashcardsEditNote =>
+      'Napredak ostaje dok se pitanje ne promijeni. Niman ovu karticu '
+      'prepisuje u bilješci.';
+  @override
+  String flashcardsKindRows(int count) => 'Redova tabele: $count';
+  @override
+  String flashcardsKindLines(int count) => 'Redova „::“: $count';
+  @override
+  String flashcardsKindClozes(int count) => 'Praznina: $count';
+  @override
+  String get flashcardsEditMarkdown => 'Uredi kao Markdown';
+  @override
+  String get flashcardsColumnsTitle => 'Kolone pitanja i odgovora';
+  @override
+  String get flashcardsQuestionColumn => 'Kolona pitanja';
+  @override
+  String get flashcardsAnswerColumn => 'Kolona odgovora';
+  @override
+  String get flashcardsColumnsNone =>
+      'Nijedna tabela u ovoj bilješci nema više od dvije kolone.';
+  @override
+  String get flashcardsResetAction => 'Poništi ponavljanje ovog špila';
+  @override
+  String get flashcardsResetTitle => 'Poništiti ponavljanje?';
+  @override
+  String get flashcardsResetBody =>
+      'Svaka kartica u špilu ponovo postaje nova. Bilješka se ne '
+      'mijenja.';
+  @override
+  String get flashcardsResetConfirm => 'Poništi';
+  @override
+  String get commandNeedFlashcardNote =>
+      'Zahtijeva otvorenu bilješku s karticama';
+
+  @override
+  String get flashcardsCardsLabel => 'Kartice';
+  @override
+  String get flashcardsShowAnswer => 'Prikaži odgovor';
+  @override
+  String get flashcardsGradeAgain => 'Ponovo';
+  @override
+  String get flashcardsGradeHard => 'Teško';
+  @override
+  String get flashcardsGradeGood => 'Dobro';
+  @override
+  String get flashcardsGradeEasy => 'Lako';
+  @override
+  String get flashcardsToday => 'danas';
+  @override
+  String get flashcardsTomorrow => 'sutra';
+  @override
+  String flashcardsReviewTitle(String deck) => 'Učenje · $deck';
+  @override
+  String flashcardsAgainCount(int count) => 'Ponovo: $count';
+  @override
+  String get flashcardsDoneToday => 'Gotovo za danas';
+  @override
+  String flashcardsReviewedCount(int count) => 'Ponovljeno: $count';
+  @override
+  String flashcardsMinutes(int count) => '$count min';
+  @override
+  String flashcardsNextOn(String when) => 'Sljedeće: $when';
+  @override
+  String get flashcardsNothingScheduled => 'Nema zakazanih kartica';
+  @override
+  String get flashcardsNextDeck => 'Sljedeći špil';
+  @override
+  String get flashcardsBackToDeck => 'Nazad na špil';
+  @override
+  String get flashcardsEndReview => 'Završi ponavljanje';
+  @override
+  String get tabStudy => 'Učenje';
+  @override
+  String get studyEmpty => 'Još nema špilova';
+  @override
+  String get studyEmptyHint => 'Bilješka s type: flashcard je špil kartica.';
+  @override
+  String get studyOfferBody =>
+      'Učenje prikazuje vaše špilove. Prikazati ga u navigaciji?';
+  @override
+  String get studyOfferAction => 'Prikaži';
+  @override
+  String get settingsNewCardsPerDay => 'Novih kartica dnevno';
+  @override
+  String get settingsNewCardsPerDayHint =>
+      'Po špilu. 0 ne prikazuje nove kartice.';
+  @override
+  String get settingsResetAllReviews => 'Poništi sva ponavljanja';
+  @override
+  String get resetAllReviewsTitle => 'Poništiti sva ponavljanja?';
+  @override
+  String get resetAllReviewsBody =>
+      'Svaka kartica svakog špila ponovo postaje nova. Nijedna bilješka se ne '
+      'mijenja.';
+  @override
+  String get makeFlashcardsTitle => 'Napravi kartice';
+  @override
+  String get makeFlashcardsDeck => 'Špil';
+  @override
+  String get makeFlashcardsDeckHint =>
+      'Kategorije odvojene sa /. Prazno: Bez kategorije.';
+  @override
+  String get makeFlashcardsWrites => 'Upisuje se u frontmatter';
+  @override
+  String makeFlashcardsAction(int count) => 'Napravi kartica: $count';
+  @override
+  String get makeFlashcardsNone =>
+      'Ova bilješka nema tabelu, red :: ili isticanje od kojih bi nastale '
+      'kartice.';
+  @override
+  String get commandNeedPlainNote => 'Zahtijeva otvorenu bilješku bez tipa';
+  @override
+  String get studyNothingToday => 'Danas nema ništa za učenje';
 }

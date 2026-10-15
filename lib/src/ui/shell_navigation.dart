@@ -27,6 +27,7 @@ AppCommand? _tabCommand(ShellTab tab) => switch (tab) {
   ShellTab.quickNote => AppCommand.tabQuickNote,
   ShellTab.settings => AppCommand.tabSettings,
   ShellTab.home => AppCommand.tabHome,
+  ShellTab.study => AppCommand.tabStudy,
 };
 
 /// [destination]'s label, with the key that selects it when a keyboard is
@@ -60,9 +61,13 @@ enum ShellTab {
   /// The library settings (the pushed SettingsScreen on wide screens).
   settings,
 
-  /// The library's Home (#535): its tiles and action buttons. Last in the
-  /// enum, which is the bodies' slots; the bar puts it after Search.
+  /// The library's Home (#535): its tiles and action buttons. The bar
+  /// puts it after Search.
   home,
+
+  /// The decks to study (#533). Last in the enum, which is the bodies'
+  /// slots; hidden until asked for ([defaultHiddenDestinations]).
+  study,
 }
 
 /// One destination, as both shapes draw it.
@@ -113,6 +118,13 @@ List<ShellDestination> shellDestinations() => <ShellDestination>[
     label: AppStrings.tabHome,
   ),
   (
+    tab: ShellTab.study,
+    name: 'study',
+    icon: Icons.style_outlined,
+    selectedIcon: Icons.style,
+    label: AppStrings.tabStudy,
+  ),
+  (
     tab: ShellTab.quickNote,
     name: 'quicknote',
     icon: Icons.edit_outlined,
@@ -132,13 +144,22 @@ List<ShellDestination> shellDestinations() => <ShellDestination>[
 /// hid the rest.
 const Set<String> lockedDestinations = {'settings'};
 
+/// The destinations a library starts without (#533): a library with no
+/// deck does not grow a Study it has no use for; the first deck made
+/// offers it.
+const Set<String> defaultHiddenDestinations = {'study'};
+
 /// The destinations as [layout] places them, the hidden ones included,
 /// for the settings that edit it.
 List<({ShellDestination destination, bool hidden})> placedDestinations(
   NavigationLayout layout,
 ) {
   final all = {for (final d in shellDestinations()) d.name: d};
-  final placed = layout.place(all.keys.toList(), locked: lockedDestinations);
+  final placed = layout.place(
+    all.keys.toList(),
+    defaultHidden: defaultHiddenDestinations,
+    locked: lockedDestinations,
+  );
   // A bar needs two destinations (`NavigationBar` asserts it, #667): a
   // layout that hides all but Settings — a file edited by hand, a build
   // that dropped one — shows the first hidden ones back.
