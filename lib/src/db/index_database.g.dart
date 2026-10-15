@@ -2204,6 +2204,321 @@ class PendingLinksCompanion extends UpdateCompanion<PendingLink> {
   }
 }
 
+class $DanglingLinksTable extends DanglingLinks
+    with TableInfo<$DanglingLinksTable, DanglingLink> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $DanglingLinksTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _noteIdMeta = const VerificationMeta('noteId');
+  @override
+  late final GeneratedColumn<int> noteId = GeneratedColumn<int>(
+    'note_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _stemMeta = const VerificationMeta('stem');
+  @override
+  late final GeneratedColumn<String> stem = GeneratedColumn<String>(
+    'stem',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'COLLATE NOCASE',
+  );
+  static const VerificationMeta _targetMeta = const VerificationMeta('target');
+  @override
+  late final GeneratedColumn<String> target = GeneratedColumn<String>(
+    'target',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _kindMeta = const VerificationMeta('kind');
+  @override
+  late final GeneratedColumn<String> kind = GeneratedColumn<String>(
+    'kind',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [noteId, stem, target, kind];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'dangling_links';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<DanglingLink> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('note_id')) {
+      context.handle(
+        _noteIdMeta,
+        noteId.isAcceptableOrUnknown(data['note_id']!, _noteIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_noteIdMeta);
+    }
+    if (data.containsKey('stem')) {
+      context.handle(
+        _stemMeta,
+        stem.isAcceptableOrUnknown(data['stem']!, _stemMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_stemMeta);
+    }
+    if (data.containsKey('target')) {
+      context.handle(
+        _targetMeta,
+        target.isAcceptableOrUnknown(data['target']!, _targetMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_targetMeta);
+    }
+    if (data.containsKey('kind')) {
+      context.handle(
+        _kindMeta,
+        kind.isAcceptableOrUnknown(data['kind']!, _kindMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_kindMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {noteId, target, kind, stem};
+  @override
+  DanglingLink map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return DanglingLink(
+      noteId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}note_id'],
+      )!,
+      stem: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}stem'],
+      )!,
+      target: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}target'],
+      )!,
+      kind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}kind'],
+      )!,
+    );
+  }
+
+  @override
+  $DanglingLinksTable createAlias(String alias) {
+    return $DanglingLinksTable(attachedDatabase, alias);
+  }
+}
+
+class DanglingLink extends DataClass implements Insertable<DanglingLink> {
+  /// The id of the note the link is written in.
+  final int noteId;
+
+  /// The stem a note answers the link by, lowercased.
+  final String stem;
+
+  /// The target text as written.
+  final String target;
+
+  /// The link form: `wiki` (`[[…]]`) or `md` (`[t](p)`).
+  final String kind;
+  const DanglingLink({
+    required this.noteId,
+    required this.stem,
+    required this.target,
+    required this.kind,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['note_id'] = Variable<int>(noteId);
+    map['stem'] = Variable<String>(stem);
+    map['target'] = Variable<String>(target);
+    map['kind'] = Variable<String>(kind);
+    return map;
+  }
+
+  DanglingLinksCompanion toCompanion(bool nullToAbsent) {
+    return DanglingLinksCompanion(
+      noteId: Value(noteId),
+      stem: Value(stem),
+      target: Value(target),
+      kind: Value(kind),
+    );
+  }
+
+  factory DanglingLink.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return DanglingLink(
+      noteId: serializer.fromJson<int>(json['noteId']),
+      stem: serializer.fromJson<String>(json['stem']),
+      target: serializer.fromJson<String>(json['target']),
+      kind: serializer.fromJson<String>(json['kind']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'noteId': serializer.toJson<int>(noteId),
+      'stem': serializer.toJson<String>(stem),
+      'target': serializer.toJson<String>(target),
+      'kind': serializer.toJson<String>(kind),
+    };
+  }
+
+  DanglingLink copyWith({
+    int? noteId,
+    String? stem,
+    String? target,
+    String? kind,
+  }) => DanglingLink(
+    noteId: noteId ?? this.noteId,
+    stem: stem ?? this.stem,
+    target: target ?? this.target,
+    kind: kind ?? this.kind,
+  );
+  DanglingLink copyWithCompanion(DanglingLinksCompanion data) {
+    return DanglingLink(
+      noteId: data.noteId.present ? data.noteId.value : this.noteId,
+      stem: data.stem.present ? data.stem.value : this.stem,
+      target: data.target.present ? data.target.value : this.target,
+      kind: data.kind.present ? data.kind.value : this.kind,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DanglingLink(')
+          ..write('noteId: $noteId, ')
+          ..write('stem: $stem, ')
+          ..write('target: $target, ')
+          ..write('kind: $kind')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(noteId, stem, target, kind);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is DanglingLink &&
+          other.noteId == this.noteId &&
+          other.stem == this.stem &&
+          other.target == this.target &&
+          other.kind == this.kind);
+}
+
+class DanglingLinksCompanion extends UpdateCompanion<DanglingLink> {
+  final Value<int> noteId;
+  final Value<String> stem;
+  final Value<String> target;
+  final Value<String> kind;
+  final Value<int> rowid;
+  const DanglingLinksCompanion({
+    this.noteId = const Value.absent(),
+    this.stem = const Value.absent(),
+    this.target = const Value.absent(),
+    this.kind = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  DanglingLinksCompanion.insert({
+    required int noteId,
+    required String stem,
+    required String target,
+    required String kind,
+    this.rowid = const Value.absent(),
+  }) : noteId = Value(noteId),
+       stem = Value(stem),
+       target = Value(target),
+       kind = Value(kind);
+  static Insertable<DanglingLink> custom({
+    Expression<int>? noteId,
+    Expression<String>? stem,
+    Expression<String>? target,
+    Expression<String>? kind,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (noteId != null) 'note_id': noteId,
+      if (stem != null) 'stem': stem,
+      if (target != null) 'target': target,
+      if (kind != null) 'kind': kind,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  DanglingLinksCompanion copyWith({
+    Value<int>? noteId,
+    Value<String>? stem,
+    Value<String>? target,
+    Value<String>? kind,
+    Value<int>? rowid,
+  }) {
+    return DanglingLinksCompanion(
+      noteId: noteId ?? this.noteId,
+      stem: stem ?? this.stem,
+      target: target ?? this.target,
+      kind: kind ?? this.kind,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (noteId.present) {
+      map['note_id'] = Variable<int>(noteId.value);
+    }
+    if (stem.present) {
+      map['stem'] = Variable<String>(stem.value);
+    }
+    if (target.present) {
+      map['target'] = Variable<String>(target.value);
+    }
+    if (kind.present) {
+      map['kind'] = Variable<String>(kind.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DanglingLinksCompanion(')
+          ..write('noteId: $noteId, ')
+          ..write('stem: $stem, ')
+          ..write('target: $target, ')
+          ..write('kind: $kind, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $NoteHeadingsTable extends NoteHeadings
     with TableInfo<$NoteHeadingsTable, NoteHeading> {
   @override
@@ -2845,6 +3160,7 @@ abstract class _$IndexDatabase extends GeneratedDatabase {
   late final $FrontmatterFieldsTable frontmatterFields =
       $FrontmatterFieldsTable(this);
   late final $PendingLinksTable pendingLinks = $PendingLinksTable(this);
+  late final $DanglingLinksTable danglingLinks = $DanglingLinksTable(this);
   late final $NoteHeadingsTable noteHeadings = $NoteHeadingsTable(this);
   late final $NoteBlocksTable noteBlocks = $NoteBlocksTable(this);
   late final Index notesParent = Index(
@@ -2871,6 +3187,10 @@ abstract class _$IndexDatabase extends GeneratedDatabase {
     'fields_key_value',
     'CREATE INDEX fields_key_value ON frontmatter_fields ("key", value)',
   );
+  late final Index danglingStem = Index(
+    'dangling_stem',
+    'CREATE INDEX dangling_stem ON dangling_links (stem)',
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -2883,6 +3203,7 @@ abstract class _$IndexDatabase extends GeneratedDatabase {
     noteLinks,
     frontmatterFields,
     pendingLinks,
+    danglingLinks,
     noteHeadings,
     noteBlocks,
     notesParent,
@@ -2891,6 +3212,7 @@ abstract class _$IndexDatabase extends GeneratedDatabase {
     noteTagsNote,
     linksTo,
     fieldsKeyValue,
+    danglingStem,
   ];
 }
 
@@ -4190,6 +4512,198 @@ typedef $$PendingLinksTableProcessedTableManager =
       PendingLink,
       PrefetchHooks Function()
     >;
+typedef $$DanglingLinksTableCreateCompanionBuilder =
+    DanglingLinksCompanion Function({
+      required int noteId,
+      required String stem,
+      required String target,
+      required String kind,
+      Value<int> rowid,
+    });
+typedef $$DanglingLinksTableUpdateCompanionBuilder =
+    DanglingLinksCompanion Function({
+      Value<int> noteId,
+      Value<String> stem,
+      Value<String> target,
+      Value<String> kind,
+      Value<int> rowid,
+    });
+
+class $$DanglingLinksTableFilterComposer
+    extends Composer<_$IndexDatabase, $DanglingLinksTable> {
+  $$DanglingLinksTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get noteId => $composableBuilder(
+    column: $table.noteId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get stem => $composableBuilder(
+    column: $table.stem,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get target => $composableBuilder(
+    column: $table.target,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$DanglingLinksTableOrderingComposer
+    extends Composer<_$IndexDatabase, $DanglingLinksTable> {
+  $$DanglingLinksTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get noteId => $composableBuilder(
+    column: $table.noteId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get stem => $composableBuilder(
+    column: $table.stem,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get target => $composableBuilder(
+    column: $table.target,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$DanglingLinksTableAnnotationComposer
+    extends Composer<_$IndexDatabase, $DanglingLinksTable> {
+  $$DanglingLinksTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get noteId =>
+      $composableBuilder(column: $table.noteId, builder: (column) => column);
+
+  GeneratedColumn<String> get stem =>
+      $composableBuilder(column: $table.stem, builder: (column) => column);
+
+  GeneratedColumn<String> get target =>
+      $composableBuilder(column: $table.target, builder: (column) => column);
+
+  GeneratedColumn<String> get kind =>
+      $composableBuilder(column: $table.kind, builder: (column) => column);
+}
+
+class $$DanglingLinksTableTableManager
+    extends
+        RootTableManager<
+          _$IndexDatabase,
+          $DanglingLinksTable,
+          DanglingLink,
+          $$DanglingLinksTableFilterComposer,
+          $$DanglingLinksTableOrderingComposer,
+          $$DanglingLinksTableAnnotationComposer,
+          $$DanglingLinksTableCreateCompanionBuilder,
+          $$DanglingLinksTableUpdateCompanionBuilder,
+          (
+            DanglingLink,
+            BaseReferences<_$IndexDatabase, $DanglingLinksTable, DanglingLink>,
+          ),
+          DanglingLink,
+          PrefetchHooks Function()
+        > {
+  $$DanglingLinksTableTableManager(
+    _$IndexDatabase db,
+    $DanglingLinksTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$DanglingLinksTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$DanglingLinksTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$DanglingLinksTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> noteId = const Value.absent(),
+                Value<String> stem = const Value.absent(),
+                Value<String> target = const Value.absent(),
+                Value<String> kind = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => DanglingLinksCompanion(
+                noteId: noteId,
+                stem: stem,
+                target: target,
+                kind: kind,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required int noteId,
+                required String stem,
+                required String target,
+                required String kind,
+                Value<int> rowid = const Value.absent(),
+              }) => DanglingLinksCompanion.insert(
+                noteId: noteId,
+                stem: stem,
+                target: target,
+                kind: kind,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$DanglingLinksTable, DanglingLink>(table),
+                  BaseReferences<
+                    _$IndexDatabase,
+                    $DanglingLinksTable,
+                    DanglingLink
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$DanglingLinksTableProcessedTableManager =
+    ProcessedTableManager<
+      _$IndexDatabase,
+      $DanglingLinksTable,
+      DanglingLink,
+      $$DanglingLinksTableFilterComposer,
+      $$DanglingLinksTableOrderingComposer,
+      $$DanglingLinksTableAnnotationComposer,
+      $$DanglingLinksTableCreateCompanionBuilder,
+      $$DanglingLinksTableUpdateCompanionBuilder,
+      (
+        DanglingLink,
+        BaseReferences<_$IndexDatabase, $DanglingLinksTable, DanglingLink>,
+      ),
+      DanglingLink,
+      PrefetchHooks Function()
+    >;
 typedef $$NoteHeadingsTableCreateCompanionBuilder =
     NoteHeadingsCompanion Function({
       required int noteId,
@@ -4582,6 +5096,8 @@ class $IndexDatabaseManager {
       $$FrontmatterFieldsTableTableManager(_db, _db.frontmatterFields);
   $$PendingLinksTableTableManager get pendingLinks =>
       $$PendingLinksTableTableManager(_db, _db.pendingLinks);
+  $$DanglingLinksTableTableManager get danglingLinks =>
+      $$DanglingLinksTableTableManager(_db, _db.danglingLinks);
   $$NoteHeadingsTableTableManager get noteHeadings =>
       $$NoteHeadingsTableTableManager(_db, _db.noteHeadings);
   $$NoteBlocksTableTableManager get noteBlocks =>

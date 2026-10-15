@@ -28,6 +28,7 @@ library;
 import 'package:drift/drift.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/db/dangling_link_store.dart';
 import 'package:niman/src/db/dao.dart';
 import 'package:niman/src/db/index_change.dart';
 import 'package:niman/src/db/index_content_store.dart';
@@ -194,6 +195,8 @@ final class IndexReconciler {
         wrote |= pruned.wrote;
         removed.addAll(pruned.removed);
         await _writePendingLinks();
+        // The notes this walk made answer links that were waiting.
+        await _store.dangling.flush();
         if (contentOwed && await _store.repairDerivedRows()) wrote = true;
       });
     } finally {
@@ -686,6 +689,7 @@ final class IndexReconciler {
     await _db.customStatement('DELETE FROM pending_links WHERE note_id = ?', [
       orphan.id,
     ]);
+    await _store.dangling.forget(orphan.id);
     await _db.customStatement(
       'UPDATE OR IGNORE pending_links SET note_id = ? WHERE note_id = ?',
       [orphan.id, fresh.id],
@@ -722,10 +726,20 @@ final class IndexReconciler {
       final resolved = await LinkResolver(_db)
           .resolveQueries({for (final row in rows) queryOf(row)});
       final last = rows.last.read<int>('rowid');
+      final waiting = <WaitingLink>[];
       await _db.transaction(() async {
         for (final row in rows) {
           final fromNote = row.read<int>('note_id');
           final outcome = resolved[queryOf(row)];
+          // A note deleted since it queued the link has no row to wait for.
+          if (outcome is UnresolvedNote &&
+              row.readNullable<String>('path') != null) {
+            waiting.add((
+              noteId: fromNote,
+              query: queryOf(row),
+              kind: row.read<String>('kind'),
+            ));
+          }
           if (outcome is! ResolvedNote || outcome.note.id == fromNote) {
             continue;
           }
@@ -743,6 +757,8 @@ final class IndexReconciler {
           'DELETE FROM pending_links WHERE rowid <= ?',
           [last],
         );
+        // Dead links are kept for the note that answers them later (#974).
+        await _store.dangling.keep(waiting);
       });
     }
   }

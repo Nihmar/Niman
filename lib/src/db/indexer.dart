@@ -149,7 +149,11 @@ final class Indexer {
   /// the digest the rename pairing keys on — so this is the empty index's
   /// alone.
   Future<bool> indexTreeFirst(String root) {
-    return _synchronized(() => _scan.treeFirst(root, onChanged: onChanged));
+    return _synchronized(() async {
+      final wrote = await _scan.treeFirst(root, onChanged: onChanged);
+      await _store.dangling.flush();
+      return wrote;
+    });
   }
 
   /// Applies a batch of changed absolute paths incrementally.
@@ -312,6 +316,9 @@ final class Indexer {
       if (movedKept.isNotEmpty) {
         await _store.applyContent(movedKept, paired: pairedKeep);
       }
+      // The notes this batch made answer the links that were waiting for
+      // them (#974).
+      await _store.dangling.flush();
       if (wrote) {
         final cb = onChanged;
         if (cb != null) cb(tree ? IndexChange.tree : IndexChange.contents);
@@ -394,6 +401,8 @@ final class Indexer {
       final drawn = await _store.applyContent({
         for (final c in changed) c.rel: c,
       }, paired: const {});
+      // A new alias answers the links waiting for it (#974).
+      await _store.dangling.flush();
       if (wrote || drawn) {
         final cb = onChanged;
         if (cb != null) cb(drawn ? IndexChange.tree : IndexChange.contents);
@@ -446,6 +455,7 @@ final class Indexer {
       }
       _scan.touches.add([rel]);
       final result = await _reconcile(root, abs, rel, 'resync');
+      await _store.dangling.flush();
       if (result.wrote) {
         final cb = onChanged;
         if (cb != null) cb(IndexChange.tree);

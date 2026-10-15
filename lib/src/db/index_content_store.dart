@@ -7,6 +7,7 @@ import 'dart:async';
 
 import 'package:drift/drift.dart';
 import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/db/dangling_link_store.dart';
 import 'package:niman/src/db/dao.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/db/index_note_content.dart';
@@ -32,13 +33,20 @@ typedef QueuedLink = ({int fromNote, String target, String kind});
 /// notes rows of a batch are written.
 final class IndexContentStore {
   /// Creates the store over the given [IndexDatabase].
-  new(this._db, this._dao) : _log = const AppLogger(name: 'indexer');
+  new(this._db, this._dao)
+    : _log = const AppLogger(name: 'indexer'),
+      dangling = DanglingLinkStore(_db);
 
   final IndexDatabase _db;
 
   final NoteDao _dao;
 
   final AppLogger _log;
+
+  /// The links waiting for a note not made yet (#974). The stems this store
+  /// writes are reported to it; whoever finishes a write settles them with
+  /// [DanglingLinkStore.flush].
+  final DanglingLinkStore dangling;
 
   /// How many notes' content rows are written per chunk transaction
   /// (T-M3-09: a big backfill must not hold frames for its whole run).
@@ -75,6 +83,7 @@ final class IndexContentStore {
           NoteStemsCompanion.insert(stem: stem, noteId: noteId, source: 'file'),
           mode: InsertMode.insertOrIgnore,
         );
+    dangling.appeared(stem);
   }
 
   /// Whether every md note has a content row (`notes_fts.rowid`
@@ -484,6 +493,7 @@ final class IndexContentStore {
             ),
             mode: InsertMode.insertOrIgnore,
           );
+      dangling.appeared(alias.toLowerCase());
     }
   }
 
@@ -533,8 +543,9 @@ final class IndexContentStore {
 
   /// Rewrites the resolved `note_links` edges of note [note] to match
   /// [c]'s links: wiki and `.md` targets that resolve to another indexed
-  /// note become edges; dead links, external URLs, anchors and self-links
-  /// are skipped. [resolved] carries the batched resolution results
+  /// note become edges; external URLs, anchors and self-links are skipped,
+  /// and a dead link is kept in `dangling_links` for the note that answers
+  /// it later (#974). [resolved] carries the batched resolution results
   /// (target text → outcome, same rules as the single-target path).
   ///
   /// With [pendingLink] the edges are handed over unresolved, after the
@@ -555,7 +566,9 @@ final class IndexContentStore {
     await (_db.delete(
       _db.pendingLinks,
     )..where((l) => l.noteId.equals(noteId))).go();
+    await dangling.forget(noteId);
     final pending = <QueuedLink>[];
+    final waiting = <WaitingLink>[];
     await _db.batch((batch) {
       // Embeds and images are references too: they get an edge so a rename
       // or move finds the note and carries the reference with it (#507).
@@ -568,6 +581,9 @@ final class IndexContentStore {
           continue;
         }
         final outcome = resolved[query];
+        if (outcome is UnresolvedNote) {
+          waiting.add((noteId: noteId, query: query, kind: kind));
+        }
         if (outcome is! ResolvedNote || outcome.note.id == noteId) continue;
         batch.insert(
           _db.noteLinks,
@@ -580,6 +596,8 @@ final class IndexContentStore {
         );
       }
     });
+    // A dead link is an edge once its target is made (#974).
+    await dangling.keep(waiting);
     if (pendingLink == null) return;
     pending.forEach(pendingLink);
   }

@@ -198,7 +198,10 @@ What is listed is what the index records as a link: a wikilink or a Markdown
 link that resolves to this note, wherever the writer is in the library, and
 embeds. A note's own link to itself is not a mention, and a link to a note that
 does not exist yet (a [dead link](#dead-links)) is no one's mention — it
-names no note. The list is one indexed lookup however large the library is;
+names no note — until the note is made: created from the dead link or by hand,
+restored from the trash, or arrived by sync, it lists the notes that were
+waiting to link to it, without any of them being saved again, and renaming it
+then rewrites those links like any other. The list is one indexed lookup however large the library is;
 the line of each row is read from the note that holds it only as the row is
 drawn (so only the rows you scroll to), off the app's main thread, and kept
 until that note changes. The list is read again a moment after the library's

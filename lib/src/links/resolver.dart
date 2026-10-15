@@ -164,7 +164,7 @@ final class LinkResolver implements LinkSource {
     if (t.isEmpty) {
       return LocalAnchor(heading: spec.heading ?? '');
     }
-    final stem = t.contains('/') ? t.substring(t.lastIndexOf('/') + 1) : t;
+    final stem = _lastSegment(t);
     final stems = await (_db.select(
       _db.noteStems,
     )..where((s) => s.stem.isIn(LinkPaths.stemVariants(stem)))).get();
@@ -197,6 +197,42 @@ final class LinkResolver implements LinkSource {
     return {for (final q in queries) q.target: resolved[q]!};
   }
 
+  /// [query] read into what it names, null when it names nothing.
+  ///
+  /// A Markdown href is read as opening it reads it: percent-decoded, its
+  /// path and its fragment kept apart.
+  static LinkSpec? _specOf(LinkQuery query) {
+    final written = query.target;
+    if (query.markdown) {
+      final read = LinkPaths.markdownTarget(written.trim());
+      return read == null || LinkPaths.clean(read.path).isEmpty
+          ? null
+          : LinkPaths.readPath(
+              read.path,
+              fragment: read.fragment,
+              from: query.from,
+              beside: true,
+            );
+    }
+    return LinkPaths.clean(written).isEmpty
+        ? null
+        : LinkPaths.read(written, from: query.from, beside: false);
+  }
+
+  /// The last segment of the read path [t]: the stem a note answers to.
+  static String _lastSegment(String t) =>
+      t.contains('/') ? t.substring(t.lastIndexOf('/') + 1) : t;
+
+  /// The stems in `note_stems` a note has to carry for [query] to resolve to
+  /// it — what [resolveQueries] looks the link up by — or none for a link
+  /// that no note can ever answer (an anchor, a path that climbs out of the
+  /// library). The index of dangling links keys on them (#974).
+  static Set<String> stemsOf(LinkQuery query) {
+    final spec = _specOf(query);
+    if (spec == null || spec.t.isEmpty) return const <String>{};
+    return LinkPaths.stemVariants(_lastSegment(spec.t));
+  }
+
   /// Resolves many links, each with the note it is written in, in as few
   /// queries as [resolveBatch]: one stems lookup per distinct last segment,
   /// one notes lookup, then the per-link rules in Dart (#491).
@@ -207,36 +243,19 @@ final class LinkResolver implements LinkSource {
     final byStem = <String, List<(LinkQuery, LinkSpec)>>{};
     for (final query in queries) {
       if (out.containsKey(query)) continue;
-      final written = query.target;
-      // A Markdown href is read as opening it reads it: percent-decoded,
-      // its path and its fragment kept apart.
-      final LinkSpec? spec;
-      if (query.markdown) {
-        final read = LinkPaths.markdownTarget(written.trim());
-        spec = read == null || LinkPaths.clean(read.path).isEmpty
-            ? null
-            : LinkPaths.readPath(
-                read.path,
-                fragment: read.fragment,
-                from: query.from,
-                beside: true,
-              );
-      } else {
-        spec = LinkPaths.clean(written).isEmpty
-            ? null
-            : LinkPaths.read(written, from: query.from, beside: false);
-      }
+      final spec = _specOf(query);
       if (spec == null) {
-        out[query] = UnresolvedNote(target: written);
+        out[query] = UnresolvedNote(target: query.target);
         continue;
       }
       if (spec.t.isEmpty) {
         out[query] = LocalAnchor(heading: spec.heading ?? '');
         continue;
       }
-      final t = spec.t;
-      final stem = t.contains('/') ? t.substring(t.lastIndexOf('/') + 1) : t;
-      (byStem[stem] ??= <(LinkQuery, LinkSpec)>[]).add((query, spec));
+      (byStem[_lastSegment(spec.t)] ??= <(LinkQuery, LinkSpec)>[]).add((
+        query,
+        spec,
+      ));
     }
     for (final MapEntry(key: stem, value: group) in byStem.entries) {
       final stems = await (_db.select(
