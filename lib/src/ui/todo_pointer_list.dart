@@ -10,6 +10,7 @@ import 'dart:async';
 import 'package:flutter/gestures.dart' show kDoubleTapTimeout;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:niman/src/core/calendar_days.dart';
 import 'package:niman/src/todo/line_edits.dart';
 import 'package:niman/src/todo/todo_store.dart';
 import 'package:niman/src/ui/os_pickers.dart';
@@ -342,12 +343,12 @@ final class _TodoPointerListState extends State<TodoPointerList> {
       case TodoMenuPick.dueTomorrow:
         await widget.onRewrite(
           entry,
-          todoLineWithDue(task, today.add(const Duration(days: 1))),
+          todoLineWithDue(task, addCalendarDays(today, 1)),
         );
       case TodoMenuPick.dueNextWeek:
         await widget.onRewrite(
           entry,
-          todoLineWithDue(task, today.add(const Duration(days: 7))),
+          todoLineWithDue(task, addCalendarDays(today, 7)),
         );
       case TodoMenuPick.dueNone:
         await widget.onRewrite(entry, todoLineWithDue(task, null));

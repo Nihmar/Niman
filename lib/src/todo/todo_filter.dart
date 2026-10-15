@@ -8,6 +8,7 @@
 library;
 
 import 'package:meta/meta.dart';
+import 'package:niman/src/core/calendar_days.dart';
 import 'package:niman/src/todo/parser.dart';
 import 'package:niman/src/todo/todo_store.dart';
 
@@ -211,7 +212,7 @@ bool _dueInRange(DateTime? due, DateTime today, TodoDueRange range) {
       // fall-back is an hour short of the seventh day, which would drop
       // it from the window (#380). The day arithmetic below matches how
       // the task dates themselves are written.
-      final end = DateTime(start.year, start.month, start.day + 7);
+      final end = addCalendarDays(start, 7);
       return !day.isBefore(start) && !day.isAfter(end);
   }
 }
