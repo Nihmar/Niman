@@ -194,6 +194,16 @@ thrive :: throve · thriven
       expect(deck.cards.single.source.lastLine, 2);
     });
 
+    test('a literal […] in the sentence is escaped, only the gap is one', () {
+      final deck = read('I came […] and ==conquered== and ==saw […]==.');
+      expect(deck.cards, hasLength(2));
+      expect(deck.cards[0].question, r'I came […\] and […] and saw […\].');
+      expect(deck.cards[1].question, r'I came […\] and conquered and […].');
+      for (final card in deck.cards) {
+        expect(card.question.split(FlashCard.clozeGap), hasLength(2));
+      }
+    });
+
     test('a line with a divider is a line card, its highlights marks', () {
       final deck = read('a ==b== :: c');
       expect(deck.cards.single.kind, CardKind.line);

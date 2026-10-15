@@ -121,4 +121,9 @@ final class FlashCard {
 
   /// What stands where a cloze hides its answer.
   static const String clozeGap = '[…]';
+
+  /// How a literal [clozeGap] in a cloze's text is written in its question:
+  /// the Markdown escape draws the same three characters, and is not read
+  /// as the gap.
+  static const String clozeElision = r'[…\]';
 }

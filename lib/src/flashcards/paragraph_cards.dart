@@ -95,12 +95,21 @@ String _questionWith(
   var from = 0;
   for (final mark in highlights) {
     out
-      ..write(text.substring(from, mark.start))
-      ..write(identical(mark, gap) ? FlashCard.clozeGap : _hidden(text, mark));
+      ..write(_literal(text.substring(from, mark.start)))
+      ..write(
+        identical(mark, gap)
+            ? FlashCard.clozeGap
+            : _literal(_hidden(text, mark)),
+      );
     from = mark.end;
   }
-  return (out..write(text.substring(from))).toString();
+  return (out..write(_literal(text.substring(from)))).toString();
 }
+
+/// [text] with each literal `[…]` (an elision in a quotation) written
+/// [FlashCard.clozeElision], so the question's only `[…]` is the gap.
+String _literal(String text) =>
+    text.replaceAll(FlashCard.clozeGap, FlashCard.clozeElision);
 
 /// The nodes of [nodes] and below that [test] picks, in order; [into] false
 /// leaves a picked node's own children alone.
