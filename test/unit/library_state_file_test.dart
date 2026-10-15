@@ -203,6 +203,18 @@ void main() {
       expect((await file.readAll()).keys, ['Studio 2/Verbs.md']);
     });
 
+    test('drops by whole folders, at any depth, and by file', () async {
+      await put('Studio/Sub/Deep/More.md', 4);
+      await put('Studio/', 5);
+      expect(await file.removed(['Studio/Sub', 'Studio 2/Verbs.md']), isTrue);
+      expect((await file.readAll()).keys, ['Studio/Verbs.md', 'Studio/']);
+    });
+
+    test('a removed library root drops everything', () async {
+      expect(await file.removed(['']), isTrue);
+      expect(await file.readAll(), isEmpty);
+    });
+
     test('does nothing for nothing', () async {
       expect(await file.removed(const []), isFalse);
       expect(await file.removed(['Missing.md']), isFalse);

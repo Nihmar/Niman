@@ -155,11 +155,23 @@ bool _carry(Map<String, Object?> entries, String from, String to) {
 }
 
 bool _drop(Map<String, Object?> entries, List<String> gone) {
-  final leaving =
-      entries.keys
-          .where((key) => gone.any((path) => key == path || isUnder(path, key)))
-          .toList(growable: false)
-        ..forEach(entries.remove);
+  // A key leaves when it is a gone path or lies under one: its own path and
+  // each folder above it are looked up in a set, so the cost is the depth of
+  // the key, not the number of paths removed (#956).
+  final paths = gone.toSet();
+  final everything = paths.contains('');
+  bool leaves(String key) {
+    if (everything || paths.contains(key)) return true;
+    for (var i = key.indexOf('/'); i >= 0; i = key.indexOf('/', i + 1)) {
+      if (i + 1 < key.length && paths.contains(key.substring(0, i))) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  final leaving = entries.keys.where(leaves).toList(growable: false)
+    ..forEach(entries.remove);
   return leaving.isNotEmpty;
 }
 
