@@ -134,8 +134,7 @@ class TodoWidgetProvider : HomeWidgetProvider() {
         @Suppress("DEPRECATION") // RemoteCollectionItems is static-only
         views.setRemoteAdapter(
             R.id.widget_todo_rows,
-            Intent(context, TodoWidgetService::class.java)
-                .putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, id),
+            WidgetAdapter.intent(context, TodoWidgetService::class.java, WidgetAdapter.TODO, id),
         )
         // Row taps: the framework drops a setOnClickPendingIntent set on
         // a collection child (a row of the bound ListView), so the rows

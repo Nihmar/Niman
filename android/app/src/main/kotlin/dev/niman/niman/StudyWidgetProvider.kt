@@ -88,8 +88,7 @@ class StudyWidgetProvider : HomeWidgetProvider() {
         @Suppress("DEPRECATION") // RemoteCollectionItems is static-only
         views.setRemoteAdapter(
             R.id.widget_study_rows,
-            Intent(context, StudyWidgetService::class.java)
-                .putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, id),
+            WidgetAdapter.intent(context, StudyWidgetService::class.java, WidgetAdapter.STUDY, id),
         )
         // A row hands its deck to this template: the framework drops a
         // click set on a collection child. Mutable, so the fill-in's
