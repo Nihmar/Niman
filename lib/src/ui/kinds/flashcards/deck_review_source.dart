@@ -12,6 +12,14 @@ abstract interface class DeckReviewSource {
   /// The states of the note's cards, by key.
   Future<Map<String, ReviewState>> read(String root, String path);
 
+  /// The states of the cards of each note of [paths], by path then key: one
+  /// read of the file for all of them, as a study of a category of decks
+  /// needs. Every path is a key, empty for a note never studied.
+  Future<Map<String, Map<String, ReviewState>>> readMany(
+    String root,
+    Iterable<String> paths,
+  );
+
   /// Forgets every card of the note: **Reset the review of this deck**.
   Future<void> reset(String root, String path);
 
@@ -31,6 +39,12 @@ final class FileDeckReviewSource implements DeckReviewSource {
   @override
   Future<Map<String, ReviewState>> read(String root, String path) =>
       ReviewStore(root).read(path);
+
+  @override
+  Future<Map<String, Map<String, ReviewState>>> readMany(
+    String root,
+    Iterable<String> paths,
+  ) => ReviewStore(root).readMany(paths);
 
   @override
   Future<void> reset(String root, String path) =>

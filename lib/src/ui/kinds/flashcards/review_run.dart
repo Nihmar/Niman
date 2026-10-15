@@ -97,6 +97,7 @@ Future<ReviewRun?> loadReviewRun({
   final dayStart = (await session.ops?.journal)?.dayStartHour ?? 0;
   final first = read.first;
   final studied = {for (final deck in read) deck.path};
+  final states = await reviews.readMany(root, studied);
   return ReviewRun(
     session: StudySession.start(
       decks: [
@@ -104,7 +105,7 @@ Future<ReviewRun?> loadReviewRun({
           SessionDeck(
             path: path,
             cards: deck.cards,
-            states: await reviews.read(root, path),
+            states: states[path] ?? const {},
           ),
       ],
       today: studyToday(DateTime.now(), dayStart),

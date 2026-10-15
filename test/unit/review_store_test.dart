@@ -70,6 +70,18 @@ void main() {
     expect((await store.readAll()).keys, unorderedEquals(['a.md', 'b.md']));
   });
 
+  test('reads the states of several notes at once', () async {
+    await store.write('a.md', 'one', state());
+    await store.write('b.md', 'one', state(interval: 3));
+    await store.write('c.md', 'one', state(interval: 9));
+    expect(await store.readMany(['a.md', 'c.md', 'never.md']), {
+      'a.md': {'one': state()},
+      'c.md': {'one': state(interval: 9)},
+      'never.md': isEmpty,
+    });
+    expect(await store.readMany(const []), isEmpty);
+  });
+
   test('queues writes issued together, none lost', () async {
     await Future.wait([
       for (var i = 0; i < 12; i++) store.write('a.md', 'card $i', state()),

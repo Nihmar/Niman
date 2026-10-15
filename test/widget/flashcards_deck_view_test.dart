@@ -88,6 +88,12 @@ final class _Reviews implements DeckReviewSource {
       Map.of(states);
 
   @override
+  Future<Map<String, Map<String, ReviewState>>> readMany(
+    String root,
+    Iterable<String> paths,
+  ) async => {for (final path in paths) path: await read(root, path)};
+
+  @override
   Future<void> reset(String root, String path) async => states.clear();
 
   @override

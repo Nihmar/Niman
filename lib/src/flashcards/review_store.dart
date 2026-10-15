@@ -44,6 +44,18 @@ final class ReviewStore {
   Future<Map<String, ReviewState>> read(String path) async =>
       _statesOf((await _state.read([path]))[path]);
 
+  /// The states of the cards of each note of [paths], library-relative: one
+  /// read of the file for all of them, where a study of a category of decks
+  /// would otherwise decode it once per deck. Every path is a key, with no
+  /// states for a note never studied.
+  Future<Map<String, Map<String, ReviewState>>> readMany(
+    Iterable<String> paths,
+  ) async {
+    final wanted = paths.toList(growable: false);
+    final entries = await _state.read(wanted);
+    return {for (final path in wanted) path: _statesOf(entries[path])};
+  }
+
   /// Every note's states, by path: what the Study view counts from. The
   /// file is read and decoded on a background isolate, being the whole
   /// library's.

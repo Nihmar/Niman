@@ -19,10 +19,22 @@ import '../fakes/fake_library_session.dart';
 /// The writes, in order; the reads are not used.
 final class _Reviews implements DeckReviewSource {
   final List<(String, ReviewState?)> writes = [];
+  final List<List<String>> reads = [];
 
   @override
-  Future<Map<String, ReviewState>> read(String root, String path) async =>
-      const {};
+  Future<Map<String, ReviewState>> read(String root, String path) async {
+    reads.add([path]);
+    return const {};
+  }
+
+  @override
+  Future<Map<String, Map<String, ReviewState>>> readMany(
+    String root,
+    Iterable<String> paths,
+  ) async {
+    reads.add(paths.toList());
+    return {for (final path in paths) path: const {}};
+  }
 
   @override
   Future<void> reset(String root, String path) async {}
@@ -233,4 +245,34 @@ void main() {
       expect(run.session.current!.card.question, 'begin');
     },
   );
+
+  test('a run of several decks reads the states in one go (#946)', () async {
+    final dir = await Directory.systemTemp.createTemp('niman_review_many_');
+    final session = FakeLibrarySession();
+    addTearDown(() async {
+      await session.close();
+      await session.dispose();
+      await dir.delete(recursive: true);
+    });
+    await session.open(dir.path, create: true);
+    for (final name in ['A.md', 'B.md', 'C.md']) {
+      File(p.join(dir.path, name)).writeAsStringSync(_deck);
+    }
+    final reviews = _Reviews();
+    final run = await loadReviewRun(
+      session: session,
+      reviews: reviews,
+      paths: [
+        for (final name in ['A.md', 'B.md', 'C.md']) p.join(dir.path, name),
+      ],
+    );
+    expect(run!.session.decks.map((deck) => deck.path), [
+      'A.md',
+      'B.md',
+      'C.md',
+    ]);
+    expect(reviews.reads, [
+      ['A.md', 'B.md', 'C.md'],
+    ]);
+  });
 }
