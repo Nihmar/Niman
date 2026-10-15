@@ -1680,7 +1680,12 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         key: const Key('compare-tab'),
         selected: selected,
         focused: !w.isSplit || w.focused == pane,
-        onTap: () => setState(() => _compareShows = true),
+        onTap: () {
+          // A study in this pane lets go of it, as it does for a note tab
+          // (#976): the page would be drawn under the study otherwise.
+          if (pane == _reviewPaneShown) _reviewTab.show(on: false);
+          setState(() => _compareShows = true);
+        },
         builder: (context, {required hover}) => Row(
           mainAxisSize: MainAxisSize.min,
           children: [

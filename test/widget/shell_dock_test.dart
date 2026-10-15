@@ -9,12 +9,19 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/app.dart';
 import 'package:niman/src/core/settings/library_config.dart';
+import 'package:niman/src/flashcards/deck.dart';
+import 'package:niman/src/flashcards/review_state.dart';
+import 'package:niman/src/flashcards/session_deck.dart';
+import 'package:niman/src/flashcards/study_session.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/links/mentions.dart';
 import 'package:niman/src/todo/todo_source.dart';
 import 'package:niman/src/ui/dock/history_dock_pane.dart';
 import 'package:niman/src/ui/dock/right_dock.dart';
 import 'package:niman/src/ui/history/note_version_screen.dart';
+import 'package:niman/src/ui/kinds/flashcards/deck_review_source.dart';
+import 'package:niman/src/ui/kinds/flashcards/review_run.dart';
+import 'package:niman/src/ui/kinds/flashcards/review_tab.dart';
 import 'package:niman/src/ui/window_controller.dart';
 import 'package:niman/src/workspace/workspace.dart';
 
@@ -23,6 +30,43 @@ import '../fakes/fake_link_source.dart';
 import '../fakes/fake_todo_source.dart';
 import '../fakes/fake_window_controller.dart';
 import '../fakes/shell_harness.dart';
+
+/// A review source that holds nothing: the study is only to be on screen.
+final class _NoReviews implements DeckReviewSource {
+  @override
+  Future<Map<String, ReviewState>> read(String root, String path) async =>
+      const {};
+
+  @override
+  Future<Map<String, Map<String, ReviewState>>> readMany(
+    String root,
+    Iterable<String> paths,
+  ) async => {for (final path in paths) path: const {}};
+
+  @override
+  Future<void> reset(String root, String path) async {}
+
+  @override
+  Future<void> write(
+    String root,
+    String path,
+    String key,
+    ReviewState? state,
+  ) async {}
+
+  @override
+  Stream<String> get changes => const Stream.empty();
+}
+
+const String _deck = '''
+---
+type: flashcard
+---
+
+| Verb | Past |
+|---|---|
+| begin | began |
+''';
 
 void main() {
   late FakeLibrarySession controller;
@@ -214,6 +258,43 @@ void main() {
     );
     await settle(tester);
     expect(find.byType(NoteVersionScreen), findsNothing);
+  });
+
+  testWidgets('the compare chip shows its page over a study in the same pane '
+      '(#976)', (tester) async {
+    await openCompare(tester);
+    // A study in the compare tab's pane, as a window too narrow for a pane
+    // of its own opens it: it covers the page, which keeps its chip.
+    ProviderScope.containerOf(tester.element(find.byType(NimanApp)))
+        .read(reviewTabProvider)
+        .open(
+          ReviewRun(
+            session: StudySession.start(
+              decks: [
+                SessionDeck(path: 'Verbs.md', cards: Deck.read(_deck).cards),
+              ],
+              today: DateTime(2026, 10, 14),
+              newPerDay: 20,
+            ),
+            title: 'Verbs',
+            root: 'library',
+            reviews: _NoReviews(),
+          ),
+          pane: 0,
+        );
+    await settle(tester);
+    expect(find.byKey(const Key('review-question')), findsOne);
+    expect(find.byType(NoteVersionScreen), findsNothing);
+
+    await tester.tap(find.byKey(const Key('compare-tab')));
+    await settle(tester);
+    expect(find.byType(NoteVersionScreen), findsOne);
+    expect(find.byKey(const Key('review-question')), findsNothing);
+    expect(
+      find.byKey(const Key('review-tab')),
+      findsOne,
+      reason: 'the study goes on, behind its chip',
+    );
   });
 
   testWidgets('the title bar menu runs a command, its key beside it (#712)', (
