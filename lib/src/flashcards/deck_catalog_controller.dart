@@ -172,11 +172,23 @@ final class DeckCatalogController extends ChangeNotifier {
           ? await catalog.load()
           : await catalog.reloadStates();
       if (_disposed) return;
-      _settings = settings;
+      // The snapshot is always the latest, for a session to start from, but
+      // what the screens show is told only when it moved: a note saved
+      // elsewhere in the library reloads the decks and, the counts being
+      // the same, notifies nobody (#947).
       _snapshot = snapshot;
-      _today = studyToday(_now(), settings.dayStartHour);
-      _summaries = snapshot.summaries(_today, settings.newPerDay);
+      final today = studyToday(_now(), settings.dayStartHour);
+      final summaries = snapshot.summaries(today, settings.newPerDay);
+      final moved =
+          !_loaded ||
+          today != _today ||
+          settings != _settings ||
+          !listEquals(summaries, _summaries);
       _loaded = true;
+      if (!moved) return;
+      _settings = settings;
+      _today = today;
+      _summaries = summaries;
       _selected = _selected.intersection(tags.toSet());
       _rebuildTree();
       notifyListeners();

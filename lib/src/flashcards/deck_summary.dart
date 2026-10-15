@@ -3,7 +3,7 @@
 /// no read of the note.
 library;
 
-import 'package:meta/meta.dart';
+import 'package:flutter/foundation.dart';
 import 'package:niman/src/flashcards/deck_meta.dart';
 import 'package:niman/src/flashcards/review_state.dart';
 import 'package:path/path.dart' as p;
@@ -113,4 +113,29 @@ final class DeckSummary {
 
   /// What a study of the deck shows today.
   int get toStudy => due + newAvailable;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is DeckSummary &&
+          other.path == path &&
+          other.name == name &&
+          listEquals(other.category, category) &&
+          listEquals(other.tags, tags) &&
+          other.total == total &&
+          other.due == due &&
+          other.fresh == fresh &&
+          other.newAvailable == newAvailable;
+
+  @override
+  int get hashCode => Object.hash(
+    path,
+    name,
+    Object.hashAll(category),
+    Object.hashAll(tags),
+    total,
+    due,
+    fresh,
+    newAvailable,
+  );
 }

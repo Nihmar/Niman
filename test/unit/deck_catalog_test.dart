@@ -405,6 +405,54 @@ void main() {
       expect(controller.summaries.single.newAvailable, 1);
     });
 
+    test('tells only when what it shows moved (#947)', () async {
+      write('a.md', deck(['1', '2']));
+      await scan();
+      var told = 0;
+      controller.addListener(() => told++);
+      await controller.refresh();
+      expect(told, 1, reason: 'the first load shows the decks');
+
+      // A note saved elsewhere in the library, or this deck saved with the
+      // same cards: the decks are read again, the counts are the same.
+      File(p.join(root.path, 'a.md'))
+          .setLastModifiedSync(DateTime(2026, 10, 14, 14));
+      await controller.refresh();
+      expect(catalog.notesRead, 1, reason: 'it did reload the deck');
+      expect(told, 1, reason: 'but nothing shown moved');
+
+      // A count moves.
+      await store.write('a.md', '1', state(due: today));
+      await controller.refreshStates();
+      expect(told, 2);
+      expect(controller.summaries.single.due, 1);
+
+      // The limit of new cards, then the study day.
+      perDay = 1;
+      await controller.refresh();
+      expect(told, 3);
+      clock = DateTime(2026, 10, 15, 12);
+      await controller.refresh();
+      expect(told, 4);
+      expect(controller.today, DateTime(2026, 10, 15));
+    });
+
+    test('keeps the snapshot current when it does not tell', () async {
+      write('a.md', deck(['1', '2']));
+      await scan();
+      await controller.refresh();
+      await store.write('a.md', '1', state(due: DateTime(2026, 11)));
+      await controller.refreshStates();
+      var told = 0;
+      controller.addListener(() => told++);
+      // The same card graded again, still not due: no count moves, the
+      // state does, and a session started now starts from it.
+      await store.write('a.md', '1', state(due: DateTime(2026, 12)));
+      await controller.refreshStates();
+      expect(told, 0);
+      expect(controller.snapshot.states['a.md']!['1']!.due, DateTime(2026, 12));
+    });
+
     test('overlapping refreshes end with the full one done', () async {
       write('a.md', deck(['1']));
       await scan();
