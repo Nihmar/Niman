@@ -10,14 +10,17 @@ import 'package:niman/src/ui/frontmatter_fields.dart';
 void main() {
   late List<(String, String)> set;
 
-  Future<void> pump(WidgetTester tester) async {
+  Future<void> pump(
+    WidgetTester tester, {
+    String note = '---\ntitle: Hello\ntags: [a]\ndate: 2026-10-01\n---\n',
+  }) async {
     set = [];
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(visualDensity: VisualDensity.compact),
         home: Scaffold(
           body: FrontmatterFields(
-            note: '---\ntitle: Hello\ntags: [a]\ndate: 2026-10-01\n---\n',
+            note: note,
             panel: FrontmatterPanel.open,
             onToggle: () {},
             onSet: (key, yaml) => set.add((key, yaml)),
@@ -82,5 +85,36 @@ void main() {
     await tester.tap(find.byKey(const Key('frontmatter-retype-list')));
     await tester.pumpAndSettle();
     expect(set.last, ('title', '[Hello]'));
+  });
+
+  // #959: an item typed into a flow list is quoted for a flow list.
+  testWidgets('an item with a comma or a bracket stays one item', (
+    tester,
+  ) async {
+    await pump(tester);
+    await tester.tap(find.byKey(const Key('frontmatter-add-item-tags')));
+    await tester.pump();
+    await tester.enterText(field, 'Doe, J');
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pump();
+    expect(set.last, ('tags', '[a, "Doe, J"]'));
+
+    await tester.tap(find.byKey(const Key('frontmatter-add-item-tags')));
+    await tester.pump();
+    await tester.enterText(field, 'x]');
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pump();
+    expect(set.last, ('tags', '[a, "x]"]'));
+  });
+
+  testWidgets('retyping text with a comma to a list makes one item', (
+    tester,
+  ) async {
+    await pump(tester, note: "---\ntitle: 'Doe, J'\n---\n");
+    await tester.tap(find.byKey(const Key('frontmatter-type-menu-title')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('frontmatter-retype-list')));
+    await tester.pumpAndSettle();
+    expect(set.last, ('title', '["Doe, J"]'));
   });
 }

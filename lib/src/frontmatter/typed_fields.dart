@@ -213,10 +213,14 @@ bool _isTruthy(String value) =>
 
 /// [values] as a flow list, `[a, b]`, each item quoted as it needs to be to
 /// stay one item.
-String _yamlList(List<String> values) {
-  final items = [for (final value in values) _yamlText(value, inFlow: true)];
-  return '[${items.join(', ')}]';
-}
+String _yamlList(List<String> values) => frontmatterListYaml([
+  for (final value in values) frontmatterFlowItem(value),
+]);
+
+/// [text], trimmed, as one item of a flow list `[a, b]`: quoted when a comma,
+/// a `]` or the like would split it or end the list ([frontmatterFieldYaml]
+/// quotes for a block, where `Doe, J` is plain and `x]` too).
+String frontmatterFlowItem(String text) => _yamlText(text, inFlow: true);
 
 /// [value], trimmed, as a YAML scalar that reads back as that same text:
 /// plain when YAML reads the plain form so, quoted otherwise
@@ -257,6 +261,6 @@ List<String> frontmatterListItems(String text) {
   }
   return [
     for (final part in trimmed.split(','))
-      if (part.trim().isNotEmpty) _yamlText(part, inFlow: true),
+      if (part.trim().isNotEmpty) frontmatterFlowItem(part),
   ];
 }

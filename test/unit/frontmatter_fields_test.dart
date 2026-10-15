@@ -192,6 +192,18 @@ void main() {
     });
   });
 
+  group('frontmatterFlowItem', () {
+    test('quotes what would split or end a flow list, and only that', () {
+      expect(frontmatterFlowItem('Doe, J'), '"Doe, J"');
+      expect(frontmatterFlowItem('x]'), '"x]"');
+      expect(frontmatterFlowItem(' plain '), 'plain');
+      for (final text in ['Doe, J', 'x]', '[a', 'a: b', '#t', 'true', '12']) {
+        final list = frontmatterListYaml([frontmatterFlowItem(text)]);
+        expect((loadYaml(list) as List).single, text, reason: list);
+      }
+    });
+  });
+
   group('frontmatterListItems', () {
     test('reads the list editor as the inside of a flow list', () {
       expect(frontmatterListItems('"Doe, J", "Roe, K", x'), [

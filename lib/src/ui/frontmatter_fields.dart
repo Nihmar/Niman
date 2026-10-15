@@ -473,7 +473,7 @@ final class _FrontmatterFieldsState extends State<FrontmatterFields> {
                       field.key,
                       frontmatterListYaml([
                         ...field.items,
-                        frontmatterFieldYaml(FrontmatterFieldType.text, [text]),
+                        frontmatterFlowItem(text),
                       ]),
                     );
                   },
@@ -540,10 +540,7 @@ final class _FrontmatterFieldsState extends State<FrontmatterFields> {
         ? field.values.join(', ')
         : field.value ?? '';
     final values = type == FrontmatterFieldType.list
-        ? [
-            if (scalar.isNotEmpty)
-              frontmatterFieldYaml(FrontmatterFieldType.text, [scalar]),
-          ]
+        ? [if (scalar.isNotEmpty) frontmatterFlowItem(scalar)]
         : [scalar];
     widget.onSet(field.key, _yamlOf(type, values));
   }
