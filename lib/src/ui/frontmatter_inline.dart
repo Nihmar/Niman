@@ -200,17 +200,42 @@ Future<DateTime?> showCalendarPopover(
           child: SizedBox(
             width: 320,
             height: 340,
-            child: CalendarDatePicker(
-              initialDate: day,
-              firstDate: DateTime(day.year - 100),
-              lastDate: DateTime(day.year + 100),
-              onDateChanged: (picked) => Navigator.pop(context, picked),
+            // The picker reports a year chosen in its year grid through the
+            // same callback as a day, and the year is not the date: the
+            // day is still to pick. The grid replaces the days while it
+            // shows, so one under this subtree is the year being chosen.
+            child: Builder(
+              builder: (here) => CalendarDatePicker(
+                initialDate: day,
+                firstDate: DateTime(day.year - 100),
+                lastDate: DateTime(day.year + 100),
+                onDateChanged: (picked) {
+                  if (!_showsYearGrid(here)) Navigator.pop(context, picked);
+                },
+              ),
             ),
           ),
         ),
       );
     },
   );
+}
+
+/// Whether the year grid of a [CalendarDatePicker] is showing under
+/// [context].
+bool _showsYearGrid(BuildContext context) {
+  var found = false;
+  void visit(Element element) {
+    if (found) return;
+    if (element.widget is YearPicker) {
+      found = true;
+      return;
+    }
+    element.visitChildren(visit);
+  }
+
+  (context as Element).visitChildren(visit);
+  return found;
 }
 
 /// Under [anchor] where there is room, above it where there is not, and

@@ -117,4 +117,24 @@ void main() {
     await tester.pumpAndSettle();
     expect(set.last, ('title', '["Doe, J"]'));
   });
+
+  // #960: the year grid reports a change too, and it is not a day pick.
+  testWidgets('picking a year leaves the calendar open; a day closes it', (
+    tester,
+  ) async {
+    await pump(tester);
+    await tester.tap(find.byKey(const Key('frontmatter-value-date')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('October 2026'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('2019'));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('calendar-popover')), findsOne);
+    expect(set, isEmpty);
+
+    await tester.tap(find.text('15'));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('calendar-popover')), findsNothing);
+    expect(set.single, ('date', '2019-10-15'));
+  });
 }
