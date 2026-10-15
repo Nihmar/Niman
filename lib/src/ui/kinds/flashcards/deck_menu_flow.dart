@@ -1,5 +1,3 @@
-import 'dart:isolate';
-
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/flashcards/deck.dart';
@@ -20,17 +18,12 @@ final class DeckMenuFlow {
   /// Where the review states are kept.
   final DeckReviewSource reviews;
 
-  /// From this length on, the note is read on a background isolate.
-  static const int _isolateFrom = 64 * 1024;
-
   /// Asks which columns of the deck's first table of more than two are the
   /// question and the answer, and writes `front:` and `back:` into the
   /// frontmatter as one undoable edit of [note].
   Future<void> chooseColumns(BuildContext context, NoteViewHandle note) async {
     final text = note.currentText;
-    final deck = text.length < _isolateFrom
-        ? Deck.read(text)
-        : await Isolate.run(() => Deck.read(text));
+    final deck = await Deck.readOffUi(text);
     if (!context.mounted) return;
     final wide = deck.tables.where((table) => table.columns > 2);
     if (wide.isEmpty) {

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:isolate';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -32,12 +31,6 @@ final class DeckNoteView extends ConsumerStatefulWidget {
 
   /// The note's window: its text, its edits, its path.
   final NoteKindHost host;
-
-  /// From this length on, a note is read on a background isolate: a deck
-  /// can be a novel-length note, and a short one reads in less than the hop
-  /// costs.
-  @visibleForTesting
-  static const int isolateFrom = 64 * 1024;
 
   @override
   ConsumerState<DeckNoteView> createState() => _DeckNoteViewState();
@@ -83,12 +76,13 @@ final class _DeckNoteViewState extends ConsumerState<DeckNoteView> {
 
   void _read(String text) {
     final at = ++_reads;
-    if (text.length < DeckNoteView.isolateFrom) {
-      _deck = Deck.read(text);
+    final read = Deck.readOffUi(text);
+    if (read is Deck) {
+      _deck = read;
       return;
     }
     unawaited(
-      Isolate.run(() => Deck.read(text)).then((deck) {
+      read.then((deck) {
         if (!mounted || at != _reads) return;
         setState(() => _deck = deck);
       }),

@@ -349,4 +349,23 @@ The ==cat== sat.
       expect(cut(crlf, source.answer), 'wove');
     });
   });
+
+  group('readOffUi', () {
+    test('a short note is read at once', () {
+      final read = Deck.readOffUi('begin :: began\n');
+      expect(read, isA<Deck>());
+      expect((read as Deck).cards.single.question, 'begin');
+    });
+
+    test('a note from Deck.isolateFrom on is read on an isolate', () async {
+      final pad = 'filler words\n\n' * (Deck.isolateFrom ~/ 14);
+      final text = '$pad- begin :: began\n';
+      expect(text.length, greaterThanOrEqualTo(Deck.isolateFrom));
+      final read = Deck.readOffUi(text);
+      expect(read, isA<Future<Deck>>());
+      final deck = await read;
+      expect(keys(deck), keys(Deck.read(text)));
+      expect(deck.cards.single.question, 'begin');
+    });
+  });
 }

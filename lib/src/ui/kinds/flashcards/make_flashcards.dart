@@ -1,5 +1,3 @@
-import 'dart:isolate';
-
 import 'package:flutter/material.dart';
 import 'package:niman/src/flashcards/deck.dart';
 import 'package:niman/src/flashcards/deck_catalog.dart';
@@ -24,9 +22,7 @@ Future<void> makeFlashcards(
   required LibrarySession session,
 }) async {
   final text = note.currentText;
-  final deck = text.length < _isolateFrom
-      ? Deck.read(text)
-      : await Isolate.run(() => Deck.read(text));
+  final deck = await Deck.readOffUi(text);
   if (!context.mounted) return;
   if (deck.cards.isEmpty) {
     ScaffoldMessenger.of(context)
@@ -52,9 +48,6 @@ Future<void> makeFlashcards(
   );
   await offerStudy(context, session);
 }
-
-/// From this length on, the note is read on a background isolate.
-const int _isolateFrom = 64 * 1024;
 
 typedef _Made = ({String deck, String? front, String? back});
 

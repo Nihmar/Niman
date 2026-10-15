@@ -5,6 +5,9 @@
 /// an HTML block or the frontmatter is a card.
 library;
 
+import 'dart:async';
+import 'dart:isolate';
+
 import 'package:meta/meta.dart';
 import 'package:niman/src/flashcards/card_keys.dart';
 import 'package:niman/src/flashcards/deck_meta.dart';
@@ -52,6 +55,18 @@ final class Deck {
       tables: tables,
     );
   }
+
+  /// From this length on, a note is read on a background isolate: a deck can
+  /// be a novel-length note, and a short one reads in less than the hop
+  /// costs.
+  static const int isolateFrom = 64 * 1024;
+
+  /// Reads the deck [text] holds the way a caller on the UI isolate should:
+  /// at once for a short note (a [Deck], no frame lost), on a background
+  /// isolate from [isolateFrom] on (a [Future]).
+  static FutureOr<Deck> readOffUi(String text) => text.length < isolateFrom
+      ? Deck.read(text)
+      : Isolate.run(() => Deck.read(text));
 
   /// The frontmatter's say on the deck.
   final DeckMeta meta;

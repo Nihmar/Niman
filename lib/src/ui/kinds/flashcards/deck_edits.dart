@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:isolate';
 
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/flashcards/card_edits.dart';
@@ -61,17 +60,8 @@ final class DeckCardEdits {
     final root = host.libraryRoot;
     final path = root == null ? null : pathInLibrary(root, host.notePath);
     if (root == null || path == null) return;
-    final keys = text.length < _isolateFrom
-        ? _keysOf(text)
-        : await Isolate.run(() => _keysOf(text));
+    final deck = await Deck.readOffUi(text);
+    final keys = {for (final card in deck.cards) card.key};
     await reviews.prune(root, path, keys);
   }
-
-  /// From this length on, the keys are read on a background isolate: a deck
-  /// can be a novel-length note.
-  static const int _isolateFrom = 64 * 1024;
 }
-
-Set<String> _keysOf(String text) => {
-  for (final card in Deck.read(text).cards) card.key,
-};
