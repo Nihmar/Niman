@@ -591,10 +591,16 @@ final class NoteEditCommands {
     // The surface's own lines, and its own tokenizer's runs: code, maths,
     // links and markers are skipped as they are in the underline.
     final buffer = surface.buffer;
+    // The review in the dock leaves the note editable, and the pass hands
+    // the frame back between slices: it is bound to the revision it was
+    // started on, and stops at the first line after an edit (#958).
+    final revision = buffer.revision;
     return spell.startScan(
       lineCount: buffer.lineCount,
       lineAt: (i) =>
           (text: buffer.lineAt(i), skip: spellSkipRanges(surface.tokensOf(i))),
+      current: () =>
+          identical(surface.buffer, buffer) && buffer.revision == revision,
     );
   }
 

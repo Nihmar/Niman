@@ -364,10 +364,17 @@ final class EditorSpellCheck extends ChangeNotifier {
   /// word-verdict cache. Its issues carry no suggestions: those are
   /// hunspell's slow call, and [suggestionsFor] makes them one word at a
   /// time, for the words the panel shows.
+  ///
+  /// [current] tells whether the text is still the one the pass started
+  /// on (#958). The pass hands the frame back between slices, and the
+  /// docked review leaves the note editable: [lineCount] and [lineAt] are
+  /// only good for the text they were made from, so the pass asks before
+  /// every line and stops, [SpellScan.stale], at the first no.
   SpellScan startScan({
     required int lineCount,
     required SpellLine Function(int index) lineAt,
-  }) => SpellScan._(this, lineCount, lineAt);
+    bool Function()? current,
+  }) => SpellScan._(this, lineCount, lineAt, current);
 
   /// Hunspell's suggestions for [word], best first; cached per word.
   List<String> suggestionsFor(String word) {
@@ -494,10 +501,11 @@ ContextMenuButtonItem? addToDictionaryItem({
 /// One run of the panel's whole-note pass (#61): the issues found so far,
 /// how far it got, and whether it stopped at [EditorSpellCheck.maxIssues].
 final class SpellScan extends ChangeNotifier {
-  new _(this._spell, this.lineCount, this._lineAt);
+  new _(this._spell, this.lineCount, this._lineAt, this._current);
 
   final EditorSpellCheck _spell;
   final SpellLine Function(int index) _lineAt;
+  final bool Function()? _current;
 
   /// How long one slice may keep the frame before handing it back.
   static const Duration slice = Duration(milliseconds: 8);
@@ -510,6 +518,7 @@ final class SpellScan extends ChangeNotifier {
   bool _done = false;
   bool _capped = false;
   bool _cancelled = false;
+  bool _stale = false;
 
   /// The misspellings found so far, in reading order, without
   /// suggestions (see [EditorSpellCheck.suggestionsFor]).
@@ -520,6 +529,11 @@ final class SpellScan extends ChangeNotifier {
 
   /// Whether the pass is over: every line checked, or the list full.
   bool get done => _done;
+
+  /// Whether the pass stopped because the text changed under it (#958):
+  /// it is not [done], and what it found belongs to a text that is gone.
+  /// The edit's own signal starts the pass that replaces it.
+  bool get stale => _stale;
 
   /// Whether the pass stopped at [EditorSpellCheck.maxIssues] with lines
   /// left: the panel says it shows the first ones only.
@@ -552,6 +566,13 @@ final class SpellScan extends ChangeNotifier {
     var checker = first;
     final clock = Stopwatch()..start();
     while (_linesDone < lineCount && !_cancelled) {
+      // Before anything reads the text: a line of another text is not
+      // this pass's to read, and the engine's wait above or the slice's
+      // hand-back below is where the note can have changed.
+      if (!(_current?.call() ?? true)) {
+        _stale = true;
+        return;
+      }
       if (!identical(checker, spell._checker)) {
         _issues.clear();
         _linesDone = 0;
