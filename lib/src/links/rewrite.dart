@@ -170,7 +170,9 @@ String? _wikiTarget(
   required String? only,
 }) {
   if (target.isEmpty) return null;
-  if (_isBareName(target)) {
+  // A name or a path as the resolver reads it: `Docs\Note` is `Docs/Note`,
+  // not a bare name (#973).
+  if (_isBareName(LinkPaths.clean(target))) {
     return _renamedBareName(target, renamedFrom, renamedTo);
   }
   final keepMd = target.toLowerCase().endsWith('.md');

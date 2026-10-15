@@ -332,4 +332,13 @@ void main() {
       expect(identical(rewrite(source), source), isTrue);
     });
   });
+
+  test('a wikilink path written with backslashes follows its note (#973)', () {
+    final out = rewriteMovedLinks(
+      r'[[Docs\Note]] [[Docs\Note#H|x]] [[Note]]',
+      from: 'root.md',
+      moves: LinkMoves({'Docs/Note.md': 'Archive/Note.md'}),
+    );
+    expect(out, '[[Archive/Note]] [[Archive/Note#H|x]] [[Note]]');
+  });
 }
