@@ -129,6 +129,20 @@ void main() {
       },
     );
 
+    test(
+      'a scheme without // is never dead, a drive path still is (#970)',
+      () async {
+        expect(
+          await resolver.deadAmong([
+            md('mailto:john@example.com'),
+            md('tel:+39123456789'),
+            md('C:/Users/a/gone.md'),
+          ]),
+          {md('C:/Users/a/gone.md')},
+        );
+      },
+    );
+
     test('a fragment is not asked: the note decides', () async {
       await addNote('Live.md');
       expect(

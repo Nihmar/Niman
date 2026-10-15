@@ -484,11 +484,26 @@ void main() {
 
     test('non-md hrefs are unresolved', () async {
       expect(await resolver.resolveMarkdown('img.png'), isA<UnresolvedNote>());
+      expect(await resolver.resolveMarkdown(''), isA<UnresolvedNote>());
+    });
+
+    test('a scheme without // leaves the library (#970)', () async {
+      for (final url in ['mailto:john@example.com', 'tel:+39123456789']) {
+        final result = await resolver.resolveMarkdown(url);
+        expect(result, isA<ExternalLink>(), reason: url);
+        expect((result as ExternalLink).url, url);
+      }
+    });
+
+    test('a Windows drive path is a path, not a scheme (#970)', () async {
       expect(
-        await resolver.resolveMarkdown('mailto:a@b.c'),
+        await resolver.resolveMarkdown(r'C:\Users\a\x.md'),
         isA<UnresolvedNote>(),
       );
-      expect(await resolver.resolveMarkdown(''), isA<UnresolvedNote>());
+      expect(
+        await resolver.resolveMarkdown('C:/Users/a/x.md'),
+        isA<UnresolvedNote>(),
+      );
     });
   });
 }
