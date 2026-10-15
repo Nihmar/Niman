@@ -1868,18 +1868,21 @@ final class _NoteViewState extends State<NoteView>
     return resolveEmbedPath(target, widget.path, root, widget.linkSource);
   }
 
-  /// Opens a link token's target: [raw] is the token as written, `[[…]]` for
-  /// a wikilink and `[…](…)` for a Markdown link; [href] is the target its
-  /// parse resolved, when the tap carried one — a reference link has no
-  /// `](href)` in [raw] to read it from.
+  /// Opens a link token's target: [raw] is the token as written — `[[…]]` for
+  /// a wikilink, `![[…]]` for an embed, `[…](…)` for a Markdown link; [href]
+  /// is the target its parse resolved, when the tap carried one — a reference
+  /// link has no `](href)` in [raw] to read it from.
   ///
   /// The editor surface only follows a link on a Ctrl/Cmd+click, so the
   /// targets carry the modifier: a dead link is created on the spot (#477).
   Future<void> _openLinkToken(TokenKind kind, String raw, String? href) async {
     if (kind == TokenKind.wikilink) {
+      // An embed's run carries its own `!` (#994): the wikilink inside it
+      // starts one character later.
+      final wiki = raw.startsWith('!') ? raw.substring(1) : raw;
       await openWiki(
         context,
-        parseWikiRef(raw.substring(2, raw.length - 2)),
+        parseWikiRef(wiki.substring(2, wiki.length - 2)),
         _linkTargets(modifier: true),
       );
     } else {

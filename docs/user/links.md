@@ -25,6 +25,11 @@ the editor highlights, the preview links, and the indexer records are
 the same set: links inside code fences, math blocks, inline code, and
 frontmatter are never links, everywhere.
 
+An embed follows the same way, modifier held: `![[photo.png]]` opens the
+file it names — the picture, the PDF or the book in the note pane, a
+`#page=` or `#chapter=` landing where it says — and `![[A note]]` opens
+the note, as its link would.
+
 While a link is typed, a small panel lists what can go there, in both
 editors, under the caret. Only typing opens it: a caret moved into a link
 already written — an arrow key, a click — opens nothing, and the keys stay
