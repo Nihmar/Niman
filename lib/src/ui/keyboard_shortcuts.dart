@@ -96,16 +96,27 @@ Future<KeyMap?> _cleared(
 }) async {
   var map = AppKeyMap.current.value;
   final described = describeActivator(keys);
-  final other = command == null ? null : map.commandOn(keys);
-  if (other != null && other != command) {
+  // Every command on the keys, not the first: F5 ships on two (#963).
+  final others = command == null
+      ? const <AppCommand>[]
+      : [
+          for (final holder in map.commandsOn(keys))
+            if (holder != command) holder,
+        ];
+  if (others.isNotEmpty) {
     final move = await _ask(
       context,
-      AppStrings.shortcutConflict(described, appCommandLabel(other)),
+      AppStrings.shortcutConflict(
+        described,
+        others.map(appCommandLabel).join(', '),
+      ),
       AppStrings.shortcutMove,
       key: const Key('shortcut-conflict'),
     );
     if (!move || !context.mounted) return null;
-    map = map.withBinding(other, null);
+    for (final holder in others) {
+      map = map.withBinding(holder, null);
+    }
   }
   final otherItem = item == null ? null : map.editorItemOn(keys);
   if (otherItem != null && otherItem != item) {

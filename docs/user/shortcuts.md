@@ -173,7 +173,9 @@ there.
   alone.
 - **Conflicts.** A combination another command already has is never
   taken silently. The screen names that command and asks whether to
-  move the keys; if you do, that command is left with no shortcut.
+  move the keys; if you do, that command is left with no shortcut. A
+  combination shipped on two commands (`F5` presents slides and studies a
+  deck) names both, and moving it leaves both without.
 - **Keys the text fields and the editors use.** Copy, paste, cut, select
   all, undo, redo, find, replace and the formatting keys may be taken,
   after a plain warning: your command takes them there too, outside an

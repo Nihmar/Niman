@@ -132,14 +132,17 @@ final class KeyMap {
   KeyMap editorReverted(ToolbarItem item) =>
       KeyMap(overrides, Map.unmodifiable({...editorOverrides}..remove(item)));
 
-  /// The command [keys] runs now, or null.
-  AppCommand? commandOn(SingleActivator keys) {
-    for (final command in AppCommand.values) {
-      final binding = bindingOf(command);
-      if (binding != null && sameKeys(binding, keys)) return command;
-    }
-    return null;
-  }
+  /// Every command [keys] run now, in the registry's order.
+  ///
+  /// More than one only where the app ships it so: F5 presents slides
+  /// and studies a deck, and `commandNeeds` keeps the two from ever
+  /// answering together. A conflict check that looked at the first of
+  /// them would leave the other on the key it was asked to free (#963).
+  List<AppCommand> commandsOn(SingleActivator keys) => [
+    for (final command in AppCommand.values)
+      if (bindingOf(command) case final binding?)
+        if (sameKeys(binding, keys)) command,
+  ];
 
   /// Every command with a key, in the registry's order.
   List<AppShortcut> get shortcuts => [

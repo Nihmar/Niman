@@ -27,7 +27,7 @@ void main() {
     expect(map.bindingOf(AppCommand.newNote), _ctrlAltN);
     expect(map.isChanged(AppCommand.newNote), isTrue);
     expect(map.bindingOf(AppCommand.toggleSidebar), isNull);
-    expect(map.commandOn(_ctrlAltN), AppCommand.newNote);
+    expect(map.commandsOn(_ctrlAltN), [AppCommand.newNote]);
     // Reverting, or choosing the shipped key again, is no change.
     expect(
       map.reverted(AppCommand.newNote).isChanged(AppCommand.newNote),
