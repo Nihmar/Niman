@@ -82,17 +82,10 @@ final class _Reviews implements DeckReviewSource {
   new(this.states);
 
   final Map<String, ReviewState> states;
-  final List<Set<String>> pruned = [];
 
   @override
   Future<Map<String, ReviewState>> read(String root, String path) async =>
       Map.of(states);
-
-  @override
-  Future<void> prune(String root, String path, Set<String> keep) async {
-    pruned.add(keep);
-    states.removeWhere((key, _) => !keep.contains(key));
-  }
 
   @override
   Future<void> reset(String root, String path) async => states.clear();
@@ -330,7 +323,7 @@ void main() {
       expect(find.byKey(const Key('row-question-field')), findsOneWidget);
     });
 
-    testWidgets('a changed question drops the old key from the review file', (
+    testWidgets('a changed question leaves the old key in the review file', (
       tester,
     ) async {
       final states = {'begin': _state(2), 'choose': _state(3)};
@@ -343,9 +336,12 @@ void main() {
       await tester.testTextInput.receiveAction(TextInputAction.done);
       await tester.pumpAndSettle();
       expect(host.text, contains('| start | began |'));
-      // The old key is an orphan now: the store drops it, and no other.
-      expect(_reviews.pruned.single, {'start', 'choose', 'tread'});
-      expect(_reviews.states.keys, ['choose']);
+      // The old key is an orphan now, and stays: the text change is an
+      // undoable edit, and Undo brings the card back with its state.
+      expect(_reviews.states.keys, ['begin', 'choose']);
+      host.note.value = _table;
+      await tester.pumpAndSettle();
+      expect(find.text('in 2 days'), findsOneWidget);
     });
 
     testWidgets("an edited answer keeps the card's review state", (

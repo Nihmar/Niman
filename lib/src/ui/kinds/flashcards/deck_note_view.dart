@@ -134,10 +134,7 @@ final class _DeckNoteViewState extends ConsumerState<DeckNoteView> {
       today: _today,
       newPerDay: _newPerDay,
     );
-    final edits = DeckCardEdits(
-      widget.host,
-      ref.read(deckReviewSourceProvider),
-    );
+    final edits = DeckCardEdits(widget.host);
     final onStudy = _study(context);
     if (!isWideShell(context)) {
       return DeckPhoneView(

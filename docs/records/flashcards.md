@@ -143,10 +143,11 @@ written before it existed) is never counted as a new card of today.
   days — never conflict (`lib/src/sync/state_merge.dart`, beside
   `mergeReadingJson`). It joins the sync's library state files.
 - **Losing the file loses the dates only**: the cards are in the notes.
-- **Orphans** (a key no card has any more) are dropped when Niman itself
-  changes a question (the edit sheet, the inline edit) and by **Reset the
-  review of this deck**. A key the sync brought for a card whose note has
-  not arrived yet is not mistaken for one, since nothing prunes on a read.
+- **Orphans** (a key no card has any more) are dropped only by **Reset the
+  review of this deck**. A card edit does not prune: the text change is an
+  undoable edit of the note, and Undo brings the old key back with its
+  state; and a key the sync brought for a card whose note has not arrived
+  yet is not mistaken for an orphan. An orphan costs a few bytes.
 
 ## Where the decks come from
 

@@ -4,10 +4,8 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/settings/library_settings.dart' show LinkType;
 import 'package:niman/src/flashcards/deck.dart';
-import 'package:niman/src/flashcards/review_state.dart';
 import 'package:niman/src/frontmatter/note_kind.dart';
 import 'package:niman/src/ui/kinds/flashcards/deck_edits.dart';
-import 'package:niman/src/ui/kinds/flashcards/deck_review_source.dart';
 
 final class _Host implements NoteKindHost {
   new(this.text);
@@ -43,30 +41,6 @@ final class _Host implements NoteKindHost {
   VoidCallback? get showMarkdown => null;
 }
 
-final class _NoReviews implements DeckReviewSource {
-  const new();
-
-  @override
-  Future<Map<String, ReviewState>> read(String root, String path) async => {};
-
-  @override
-  Future<void> prune(String root, String path, Set<String> keep) async {}
-
-  @override
-  Future<void> reset(String root, String path) async {}
-
-  @override
-  Future<void> write(
-    String root,
-    String path,
-    String key,
-    ReviewState? state,
-  ) async {}
-
-  @override
-  Stream<String> get changes => const Stream.empty();
-}
-
 const String _table =
     '| Verb | Past |\n'
     '|---|---|\n'
@@ -74,7 +48,7 @@ const String _table =
     '| choose | chose |\n'
     '| tread | trod |\n';
 
-DeckCardEdits _edits(_Host host) => DeckCardEdits(host, const _NoReviews());
+DeckCardEdits _edits(_Host host) => DeckCardEdits(host);
 
 void main() {
   group('a card read from an older text', () {

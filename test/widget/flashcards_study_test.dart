@@ -29,9 +29,6 @@ final class _Reviews implements DeckReviewSource {
       const {};
 
   @override
-  Future<void> prune(String root, String path, Set<String> keep) async {}
-
-  @override
   Future<void> reset(String root, String path) async {}
 
   @override

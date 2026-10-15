@@ -12,10 +12,6 @@ abstract interface class DeckReviewSource {
   /// The states of the note's cards, by key.
   Future<Map<String, ReviewState>> read(String root, String path);
 
-  /// Drops the states of the cards whose key is not in [keep]: the orphans
-  /// a changed question leaves.
-  Future<void> prune(String root, String path, Set<String> keep);
-
   /// Forgets every card of the note: **Reset the review of this deck**.
   Future<void> reset(String root, String path);
 
@@ -35,10 +31,6 @@ final class FileDeckReviewSource implements DeckReviewSource {
   @override
   Future<Map<String, ReviewState>> read(String root, String path) =>
       ReviewStore(root).read(path);
-
-  @override
-  Future<void> prune(String root, String path, Set<String> keep) =>
-      ReviewStore(root).pruneNote(path, keep);
 
   @override
   Future<void> reset(String root, String path) =>
