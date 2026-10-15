@@ -2,6 +2,7 @@
 // block with its blank line, the rows it takes, the caret in it, one field
 // edited, and the parse error from the first lines.
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/ui/note_frontmatter_head.dart';
 
@@ -54,5 +55,24 @@ void main() {
     expect(frontmatterErrorOf(note('---\na: 1\n---\nBody')), isNull);
     expect(frontmatterErrorOf(note('---\na: [1\n---\nBody')), isNotNull);
     expect(frontmatterErrorOf(note('')), isNull);
+  });
+
+  test('a caret in the body moves with the head, one in it stays', () {
+    const grown = (end: 10, text: '0123456789abcd');
+    const shrunk = (end: 10, text: '012');
+    SelectionModel after(int caret, FrontmatterFieldEdit edit) =>
+        selectionAfterFieldEdit(SelectionModel.at(caret), edit);
+    expect(after(10, grown).extent, 14);
+    expect(after(25, grown).extent, 29);
+    expect(after(25, shrunk).extent, 18);
+    expect(after(10, shrunk).extent, 3);
+    expect(after(4, grown).extent, 4);
+    expect(after(8, shrunk).extent, 3, reason: 'clamped into the new head');
+    expect(after(0, shrunk).extent, 0);
+    final range = selectionAfterFieldEdit(
+      const SelectionModel(anchor: 12, extent: 30),
+      grown,
+    );
+    expect((range.anchor, range.extent), (16, 34));
   });
 }

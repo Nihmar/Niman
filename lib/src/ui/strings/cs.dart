@@ -1513,6 +1513,9 @@ final class CzechStrings extends Strings {
   @override
   String get frontmatterNoFields => 'Žádné vlastnosti';
   @override
+  String get frontmatterKeyUnavailable =>
+      'Tato vlastnost již existuje a nelze ji zde upravit.';
+  @override
   String get frontmatterTypeText => 'text';
   @override
   String get frontmatterTypeNumber => 'číslo';

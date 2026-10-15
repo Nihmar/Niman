@@ -1524,6 +1524,9 @@ final class SwedishStrings extends Strings {
   @override
   String get frontmatterNoFields => 'Inga egenskaper';
   @override
+  String get frontmatterKeyUnavailable =>
+      'Den här egenskapen finns redan och kan inte redigeras här.';
+  @override
   String get frontmatterTypeText => 'text';
   @override
   String get frontmatterTypeNumber => 'tal';

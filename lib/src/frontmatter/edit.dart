@@ -114,6 +114,33 @@ String removeFrontmatterKey(String text, String key) {
   return lines.join('\n');
 }
 
+/// Whether the frontmatter block of [text] declares the top-level [key] with
+/// something in it — a value, a list, a nested block, which the typed fields
+/// leave out — so that [setFrontmatterKey] would write over it.
+///
+/// A key with nothing after it (`title:`, `title: ""`) holds nothing to lose:
+/// it is as good as absent, and giving it a value is how it gets filled in.
+bool frontmatterKeyHolds(String text, String key) {
+  final block = _blockRange(text);
+  if (block == null) return false;
+  final lines = text.split('\n');
+  if (_entryFor(_entriesOf(lines, block), key) == null) return false;
+  final YamlNode doc;
+  try {
+    doc = loadYamlNode(lines.sublist(block.start + 1, block.end).join('\n'));
+  } on Object {
+    // A block YAML cannot read: the entry is there, and is kept.
+    return true;
+  }
+  if (doc is! YamlMap) return true;
+  for (final MapEntry(key: name, value: node) in doc.nodes.entries) {
+    if ('${name is YamlNode ? name.value : name}' != key) continue;
+    final value = node is YamlScalar ? node.value : node;
+    return !(value == null || (value is String && value.trim().isEmpty));
+  }
+  return true;
+}
+
 /// The line range of the frontmatter block: `start` is the opening `---`
 /// and `end` the closing fence, both indices into the split lines. Null
 /// when [text] has no block.

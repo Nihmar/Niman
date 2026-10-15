@@ -1541,6 +1541,9 @@ final class ItalianStrings extends Strings {
   @override
   String get frontmatterNoFields => 'Nessuna proprietà';
   @override
+  String get frontmatterKeyUnavailable =>
+      'Questa proprietà esiste già e non si può modificare qui.';
+  @override
   String get frontmatterTypeText => 'testo';
   @override
   String get frontmatterTypeNumber => 'numero';

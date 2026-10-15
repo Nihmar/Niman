@@ -1533,6 +1533,9 @@ final class DutchStrings extends Strings {
   @override
   String get frontmatterNoFields => 'Geen eigenschappen';
   @override
+  String get frontmatterKeyUnavailable =>
+      'Deze eigenschap bestaat al en kan hier niet worden bewerkt.';
+  @override
   String get frontmatterTypeText => 'tekst';
   @override
   String get frontmatterTypeNumber => 'getal';

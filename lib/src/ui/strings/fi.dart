@@ -1528,6 +1528,9 @@ final class FinnishStrings extends Strings {
   @override
   String get frontmatterNoFields => 'Ei ominaisuuksia';
   @override
+  String get frontmatterKeyUnavailable =>
+      'Tämä ominaisuus on jo olemassa, eikä sitä voi muokata tässä.';
+  @override
   String get frontmatterTypeText => 'teksti';
   @override
   String get frontmatterTypeNumber => 'luku';

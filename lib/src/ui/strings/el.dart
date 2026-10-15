@@ -1566,6 +1566,9 @@ final class GreekStrings extends Strings {
   @override
   String get frontmatterNoFields => 'Καμία ιδιότητα';
   @override
+  String get frontmatterKeyUnavailable =>
+      'Αυτή η ιδιότητα υπάρχει ήδη και δεν μπορεί να επεξεργαστεί εδώ.';
+  @override
   String get frontmatterTypeText => 'κείμενο';
   @override
   String get frontmatterTypeNumber => 'αριθμός';

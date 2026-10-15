@@ -1513,6 +1513,9 @@ final class CroatianStrings extends Strings {
   @override
   String get frontmatterNoFields => 'Nema svojstava';
   @override
+  String get frontmatterKeyUnavailable =>
+      'Ovo svojstvo već postoji i ne može se ovdje uređivati.';
+  @override
   String get frontmatterTypeText => 'tekst';
   @override
   String get frontmatterTypeNumber => 'broj';

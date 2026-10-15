@@ -1233,8 +1233,15 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
 
   /// Replaces `[start, end)` with [text] for the shell — a command, an image,
   /// a spelling fixed — as one undoable edit, caret at [caret] or after it.
-  void replaceText(int start, int end, String text, {SelectionModel? caret}) =>
-      _replaceRange(start, end, text, caret: caret);
+  /// Without [follow] the note stays where it is scrolled, for an edit made
+  /// somewhere the caret is not.
+  void replaceText(
+    int start,
+    int end,
+    String text, {
+    SelectionModel? caret,
+    bool follow = true,
+  }) => _replaceRange(start, end, text, caret: caret, follow: follow);
 
   /// Makes the note say [text] because it changed elsewhere (the disk, the
   /// WYSIWYG): the history goes, since undoing past it would write the old

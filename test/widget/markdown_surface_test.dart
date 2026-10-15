@@ -1563,4 +1563,34 @@ void main() {
     // caret's offset is still inside the character that offset sits on.
     expect(live.offsetAt(Offset(liveRect.left + 1, liveRect.top + 2)), 10);
   });
+
+  // #961: a field edited in the panel is made where the panel is, and the
+  // view stays there instead of going to the caret in the body.
+  for (final follow in [true, false]) {
+    testWidgets('an edit made with follow: $follow '
+        '${follow ? 'scrolls to' : 'leaves the view off'} the caret', (
+      tester,
+    ) async {
+      final text = [for (var i = 0; i < 200; i++) 'line $i\n'].join();
+      final state = await pumpMode(
+        tester,
+        MarkdownSurfaceMode.source,
+        caret: text.length - 1,
+        text: text,
+      );
+      state.jumpToOffset(0);
+      await tester.pump();
+      await tester.pump();
+      expect(state.scrollOffset, 0);
+      state.replaceText(
+        0,
+        0,
+        '--',
+        caret: SelectionModel.at(text.length + 1),
+        follow: follow,
+      );
+      await tester.pumpAndSettle();
+      expect(state.scrollOffset, follow ? greaterThan(0) : 0);
+    });
+  }
 }

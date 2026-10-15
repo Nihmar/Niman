@@ -1532,6 +1532,9 @@ final class BulgarianStrings extends Strings {
   @override
   String get frontmatterNoFields => 'Няма свойства';
   @override
+  String get frontmatterKeyUnavailable =>
+      'Това свойство вече съществува и не може да се редактира тук.';
+  @override
   String get frontmatterTypeText => 'текст';
   @override
   String get frontmatterTypeNumber => 'число';

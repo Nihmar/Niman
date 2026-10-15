@@ -1531,6 +1531,9 @@ final class MacedonianStrings extends Strings {
   @override
   String get frontmatterNoFields => 'Нема својства';
   @override
+  String get frontmatterKeyUnavailable =>
+      'Ова својство веќе постои и не може да се уредува овде.';
+  @override
   String get frontmatterTypeText => 'текст';
   @override
   String get frontmatterTypeNumber => 'број';

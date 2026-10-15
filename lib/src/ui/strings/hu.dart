@@ -1526,6 +1526,9 @@ final class HungarianStrings extends Strings {
   @override
   String get frontmatterNoFields => 'Nincs tulajdonság';
   @override
+  String get frontmatterKeyUnavailable =>
+      'Ez a tulajdonság már létezik, és itt nem szerkeszthető.';
+  @override
   String get frontmatterTypeText => 'szöveg';
   @override
   String get frontmatterTypeNumber => 'szám';

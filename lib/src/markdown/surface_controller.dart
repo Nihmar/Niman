@@ -310,11 +310,18 @@ final class MarkdownSurfaceController {
   }
 
   /// Replaces `[start, end)` with [text], as one undoable edit, leaving the
-  /// caret at [caret] or after the text.
-  void replaceRange(int start, int end, String text, {SelectionModel? caret}) {
+  /// caret at [caret] or after the text. Without [follow] a source pane
+  /// keeps its scroll rather than going to the caret.
+  void replaceRange(
+    int start,
+    int end,
+    String text, {
+    SelectionModel? caret,
+    bool follow = true,
+  }) {
     final view = _view;
     if (view != null) {
-      view.replaceText(start, end, text, caret: caret);
+      view.replaceText(start, end, text, caret: caret, follow: follow);
       return;
     }
     if (start < 0 || end < start || end > buffer.length) return;

@@ -26,6 +26,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:niman/src/frontmatter/edit.dart';
 import 'package:niman/src/frontmatter/parser.dart';
 import 'package:niman/src/frontmatter/typed_fields.dart';
 import 'package:niman/src/ui/frontmatter_field_dialog.dart';
@@ -473,7 +474,7 @@ final class _FrontmatterFieldsState extends State<FrontmatterFields> {
                       field.key,
                       frontmatterListYaml([
                         ...field.items,
-                        frontmatterFieldYaml(FrontmatterFieldType.text, [text]),
+                        frontmatterFlowItem(text),
                       ]),
                     );
                   },
@@ -540,12 +541,40 @@ final class _FrontmatterFieldsState extends State<FrontmatterFields> {
         ? field.values.join(', ')
         : field.value ?? '';
     final values = type == FrontmatterFieldType.list
-        ? [
-            if (scalar.isNotEmpty)
-              frontmatterFieldYaml(FrontmatterFieldType.text, [scalar]),
-          ]
+        ? [if (scalar.isNotEmpty) frontmatterFlowItem(scalar)]
         : [scalar];
     widget.onSet(field.key, _yamlOf(type, values));
+  }
+
+  /// Opens the row of [key] for editing when the block already has it, and
+  /// says so: a key typed into the add row that is there is not a new field,
+  /// and writing its empty value would empty what it holds. A key no row can
+  /// show (a nested mapping) is left alone, written or opened by nothing.
+  bool _openExisting(String key) {
+    if (!frontmatterKeyHolds(widget.note, key)) return false;
+    setState(() {
+      switch (_fieldNamed(key)?.type) {
+        case FrontmatterFieldType.text:
+        case FrontmatterFieldType.number:
+        case FrontmatterFieldType.date:
+          _justAdded = key;
+        case FrontmatterFieldType.list:
+          _addingItem = key;
+        case FrontmatterFieldType.boolean:
+        case null:
+          break;
+      }
+    });
+    return true;
+  }
+
+  /// The field of the note's block named [key], or null when there is none
+  /// or no row can show it.
+  FrontmatterField? _fieldNamed(String key) {
+    final block = frontmatterBlock(widget.note);
+    if (block == null) return null;
+    final fields = frontmatterFieldsIn(block.text).fields;
+    return fields.where((field) => field.key == key).firstOrNull;
   }
 
   /// The panel's action row: a small box with a plus and the words that add a
@@ -565,6 +594,7 @@ final class _FrontmatterFieldsState extends State<FrontmatterFields> {
             onDone: (key) {
               setState(() => _addingKey = false);
               if (key == null || key.isEmpty) return;
+              if (_openExisting(key)) return;
               setState(() => _justAdded = key);
               widget.onSet(
                 key,
@@ -644,8 +674,20 @@ final class _FrontmatterFieldsState extends State<FrontmatterFields> {
       setState(() => _addingKey = true);
       return;
     }
-    final result = await showFrontmatterFieldDialog(context);
-    if (result == null) return;
+    final result = await showFrontmatterFieldDialog(
+      context,
+      // A key the note has and no field shows is refused in the dialog.
+      unavailable: (key) =>
+          frontmatterKeyHolds(widget.note, key) && _fieldNamed(key) == null,
+    );
+    if (result == null || !context.mounted) return;
+    // A key the note has is not a new field: its own editor opens, on what
+    // it holds, and what the dialog was filled with is not written over it.
+    final existing = _fieldNamed(result.key);
+    if (existing != null) {
+      await _edit(context, existing);
+      return;
+    }
     widget.onSet(result.key, _yamlOf(result.type, result.values));
   }
 

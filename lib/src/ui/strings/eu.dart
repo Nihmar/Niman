@@ -1525,6 +1525,9 @@ final class BasqueStrings extends Strings {
   @override
   String get frontmatterNoFields => 'Propietaterik ez';
   @override
+  String get frontmatterKeyUnavailable =>
+      'Propietate hau badago dagoeneko, eta ezin da hemen editatu.';
+  @override
   String get frontmatterTypeText => 'testua';
   @override
   String get frontmatterTypeNumber => 'zenbakia';

@@ -1528,6 +1528,9 @@ final class PortugueseStrings extends Strings {
   @override
   String get frontmatterNoFields => 'Sem propriedades';
   @override
+  String get frontmatterKeyUnavailable =>
+      'Esta propriedade já existe e não pode ser editada aqui.';
+  @override
   String get frontmatterTypeText => 'texto';
   @override
   String get frontmatterTypeNumber => 'número';

@@ -1517,6 +1517,9 @@ final class SlovakStrings extends Strings {
   @override
   String get frontmatterNoFields => 'Žiadne vlastnosti';
   @override
+  String get frontmatterKeyUnavailable =>
+      'Táto vlastnosť už existuje a nedá sa tu upraviť.';
+  @override
   String get frontmatterTypeText => 'text';
   @override
   String get frontmatterTypeNumber => 'číslo';

@@ -370,4 +370,32 @@ void main() {
       expect(removeFrontmatterKey(pinned, 'pinned'), source);
     });
   });
+
+  group('frontmatterKeyHolds', () {
+    test('finds a top-level key with a value, a list or a block in it', () {
+      const note =
+          '---\ntitle: A\nmeta:\n  inner: 1\ntags: [a]\nnone: []\nflag: false'
+          '\n---\nBody\n';
+      expect(frontmatterKeyHolds(note, 'title'), isTrue);
+      expect(frontmatterKeyHolds(note, 'meta'), isTrue);
+      expect(frontmatterKeyHolds(note, 'tags'), isTrue);
+      expect(frontmatterKeyHolds(note, 'none'), isTrue);
+      expect(frontmatterKeyHolds(note, 'flag'), isTrue);
+    });
+
+    test('a key with nothing after it holds nothing', () {
+      const note = '---\ntitle:\nsub: ""\nblank: "  "\ntilde: ~\n---\nBody\n';
+      expect(frontmatterKeyHolds(note, 'title'), isFalse);
+      expect(frontmatterKeyHolds(note, 'sub'), isFalse);
+      expect(frontmatterKeyHolds(note, 'blank'), isFalse);
+      expect(frontmatterKeyHolds(note, 'tilde'), isFalse);
+    });
+
+    test('not a nested key, an absent key or a note with no block', () {
+      const note = '---\ntitle: A\nmeta:\n  inner: 1\n---\nBody\n';
+      expect(frontmatterKeyHolds(note, 'inner'), isFalse);
+      expect(frontmatterKeyHolds(note, 'tags'), isFalse);
+      expect(frontmatterKeyHolds('title: A\n', 'title'), isFalse);
+    });
+  });
 }

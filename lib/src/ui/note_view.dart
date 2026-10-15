@@ -1758,7 +1758,18 @@ final class _NoteViewState extends State<NoteView>
     if (surface == null) return;
     final edit = frontmatterFieldEdit(surface.buffer, key, value);
     if (edit == null) return;
-    surface.replaceRange(0, edit.end, edit.text, caret: surface.selection);
+    // The caret is an offset into the old text: it moves by what the head
+    // grew or shrank by, or stays where it is when it sits in the head
+    // (clamped into the new one). And it is not followed — the edit is made
+    // where the panel is, and the view jumping to a caret in the body would
+    // take the panel off the screen.
+    surface.replaceRange(
+      0,
+      edit.end,
+      edit.text,
+      caret: selectionAfterFieldEdit(surface.selection, edit),
+      follow: false,
+    );
     _refreshPreview();
     _stats.refresh();
   }

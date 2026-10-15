@@ -1531,6 +1531,9 @@ final class GalicianStrings extends Strings {
   @override
   String get frontmatterNoFields => 'Non hai propiedades';
   @override
+  String get frontmatterKeyUnavailable =>
+      'Esta propiedade xa existe e non se pode editar aquí.';
+  @override
   String get frontmatterTypeText => 'texto';
   @override
   String get frontmatterTypeNumber => 'número';

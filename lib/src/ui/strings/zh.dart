@@ -1396,6 +1396,8 @@ final class ChineseStrings extends Strings {
   @override
   String get frontmatterNoFields => '没有属性';
   @override
+  String get frontmatterKeyUnavailable => '此属性已存在，无法在此处编辑。';
+  @override
   String get frontmatterTypeText => '文本';
   @override
   String get frontmatterTypeNumber => '数字';

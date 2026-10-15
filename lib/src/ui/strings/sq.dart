@@ -1532,6 +1532,9 @@ final class AlbanianStrings extends Strings {
   @override
   String get frontmatterNoFields => 'Pa veti';
   @override
+  String get frontmatterKeyUnavailable =>
+      'Kjo veti ekziston tashmë dhe nuk mund të përpunohet këtu.';
+  @override
   String get frontmatterTypeText => 'tekst';
   @override
   String get frontmatterTypeNumber => 'numër';

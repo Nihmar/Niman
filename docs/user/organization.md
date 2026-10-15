@@ -160,11 +160,17 @@ and the file gets back the `YYYY-MM-DD` the parser reads as a date.
 
 On a desktop the panel edits in place, with no dialog (#712): a click on a
 value turns it into a field — `Enter` or a click elsewhere keeps it, `Esc`
-leaves it — a date opens a calendar under itself, a list's **+** takes one
+leaves it — a date opens a calendar under itself (a year picked in it leaves the
+calendar open for the day), a list's **+** takes one
 item in a field of its own, **Add field** asks for the key in a row and then
-opens its value, and the type chip at the row's end is a menu that turns the
+opens its value — or, for a key the note already has, opens that field and
+changes nothing — and the type chip at the row's end is a menu that turns the
 field into another type (a list's items joined into one value, a value made
-the one item of a list). A phone keeps the dialog.
+the one item of a list). A phone keeps the dialog; there too, a key the note
+already has opens that field's own editor instead of being written over, and a
+key the panel cannot show (a nested block) is refused in the dialog. A key
+that is in the note with nothing after it (`title:`) counts as not there: adding
+it fills it in.
 
 In every surface the file is the only copy: an edit rewrites that key's line
 and leaves the rest of the block — comments, quoting, the other keys — exactly

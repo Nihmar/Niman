@@ -1539,6 +1539,9 @@ final class PolishStrings extends Strings {
   @override
   String get frontmatterNoFields => 'Brak właściwości';
   @override
+  String get frontmatterKeyUnavailable =>
+      'Ta właściwość już istnieje i nie można jej tutaj edytować.';
+  @override
   String get frontmatterTypeText => 'tekst';
   @override
   String get frontmatterTypeNumber => 'liczba';

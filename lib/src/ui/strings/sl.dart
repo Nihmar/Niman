@@ -1516,6 +1516,9 @@ final class SlovenianStrings extends Strings {
   @override
   String get frontmatterNoFields => 'Ni lastnosti';
   @override
+  String get frontmatterKeyUnavailable =>
+      'Ta lastnost že obstaja in je tu ni mogoče urejati.';
+  @override
   String get frontmatterTypeText => 'besedilo';
   @override
   String get frontmatterTypeNumber => 'število';

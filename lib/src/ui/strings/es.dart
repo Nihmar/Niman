@@ -1545,6 +1545,9 @@ final class SpanishStrings extends Strings {
   @override
   String get frontmatterNoFields => 'No hay propiedades';
   @override
+  String get frontmatterKeyUnavailable =>
+      'Esta propiedad ya existe y no se puede editar aquí.';
+  @override
   String get frontmatterTypeText => 'texto';
   @override
   String get frontmatterTypeNumber => 'número';
