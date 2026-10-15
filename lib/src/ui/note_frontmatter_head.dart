@@ -1,5 +1,8 @@
+import 'dart:math' as math;
+
 import 'package:niman/src/frontmatter/edit.dart';
 import 'package:niman/src/frontmatter/parser.dart';
+import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 
 /// How much of a note's head the frontmatter is looked for in: a note that
@@ -78,6 +81,25 @@ FrontmatterFieldEdit? frontmatterFieldEdit(
       : setFrontmatterKey(head, key, value);
   if (edited == head) return null;
   return (end: head.length, text: edited);
+}
+
+/// [selection], as it stands once [edit] is made: the offsets are into the
+/// note as it was, and the head's change in length moves everything after it.
+///
+/// An end at or past `edit.end` is in the body and moves by the difference;
+/// one inside the head, which the edit rewrote, stays at its offset, kept
+/// inside the new head.
+SelectionModel selectionAfterFieldEdit(
+  SelectionModel selection,
+  FrontmatterFieldEdit edit,
+) {
+  int moved(int offset) => offset >= edit.end
+      ? offset + edit.text.length - edit.end
+      : math.min(offset, edit.text.length);
+  return SelectionModel(
+    anchor: moved(selection.anchor),
+    extent: moved(selection.extent),
+  );
 }
 
 /// The replacement [frontmatterFieldEdit] makes: `text` in place of the

@@ -8,6 +8,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/frontmatter/parser.dart';
+import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/markdown/surface.dart';
 import 'package:niman/src/ui/note_view.dart';
@@ -120,6 +121,29 @@ void main() {
     expect(_text(tester), _note);
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('a field edit keeps the caret on the body character it was on', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_app(_note));
+    await tester.pumpAndSettle();
+    final editor = tester.state<MarkdownSourceViewState>(
+      find.byType(MarkdownSourceView, skipOffstage: false),
+    );
+    final caret = _note.indexOf('text.');
+    editor.select(SelectionModel.at(caret));
+    await tester.pumpAndSettle();
+
+    await _openPanel(tester);
+    await tester.tap(find.byKey(const Key('frontmatter-value-title')));
+    await tester.pumpAndSettle();
+    await _fillField(tester, value: 'A much longer title');
+
+    final grew = _text(tester).length - _note.length;
+    expect(grew, greaterThan(0));
+    expect(editor.selection.extent, caret + grew);
+    expect(_text(tester).substring(editor.selection.extent), 'text.\n');
   });
 
   testWidgets('adding and removing a field in the editor', (tester) async {
