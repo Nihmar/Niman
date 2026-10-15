@@ -306,6 +306,46 @@ void main() {
       expect(ranges.single.start, 0);
     });
 
+    test('links with nothing between them are judged one by one (#971)', () {
+      const text = '[[Gone]][[Live]][[Gone2]] [a](gone.md)[b](live.md)';
+      final ranges = deadLinkRanges(
+        line(text),
+        const DeadLinks(wiki: {'Gone', 'Gone2'}, href: {'gone.md'}),
+      );
+      expect(
+        [for (final r in ranges) text.substring(r.start, r.end)],
+        ['[[Gone]]', '[[Gone2]]', '[a](gone.md)'],
+      );
+    });
+
+    test('a run of styler tokens ends at the marker that closes its link '
+        '(#971)', () {
+      // As the styler cuts `[[Gone]][[Live]]` and `[a](gone.md)[b](live.md)`:
+      // each link its opening marker, its text and its closing marker, and
+      // the markers that touch one token (`]][[`).
+      const text = '[[Gone]][[Live]] [a](gone.md)[b](live.md)';
+      const styled = StyledLine(text, [
+        Token(TokenKind.wikilink, 0, 2, marker: true),
+        Token(TokenKind.wikilink, 2, 6),
+        Token(TokenKind.wikilink, 6, 10, marker: true),
+        Token(TokenKind.wikilink, 10, 14),
+        Token(TokenKind.wikilink, 14, 16, marker: true),
+        Token(TokenKind.link, 17, 18, marker: true),
+        Token(TokenKind.link, 18, 19),
+        Token(TokenKind.link, 19, 30, marker: true),
+        Token(TokenKind.link, 30, 31),
+        Token(TokenKind.link, 31, 41, marker: true),
+      ]);
+      final ranges = deadLinkRanges(
+        styled,
+        const DeadLinks(wiki: {'Gone'}, href: {'gone.md'}),
+      );
+      expect(
+        [for (final r in ranges) text.substring(r.start, r.end)],
+        ['[[Gone]]', '[a](gone.md)'],
+      );
+    });
+
     test('nothing dead, nothing to range', () {
       expect(deadLinkRanges(line('[[Gone]]'), DeadLinks.none), isEmpty);
       expect(

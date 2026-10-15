@@ -10,6 +10,7 @@ import 'package:flutter/painting.dart' show TextRange;
 import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/links/dead_links.dart';
 import 'package:niman/src/links/parser.dart' show parseWikiRef;
+import 'package:niman/src/markdown/render/link_run.dart';
 
 /// The ranges of [styled] (local to the line) holding a link that [dead]
 /// says names nothing.
@@ -23,29 +24,14 @@ List<TextRange> deadLinkRanges(
   String? Function(int tokenStart)? hrefOf,
 }) {
   if (dead.isEmpty) return const <TextRange>[];
-  final tokens = styled.tokens;
   final text = styled.text;
   List<TextRange>? out;
-  for (var at = 0; at < tokens.length; at++) {
-    final token = tokens[at];
-    if (token.kind != TokenKind.wikilink && token.kind != TokenKind.link) {
-      continue;
+  // A link comes as its markers and its text, one token each: the link is
+  // the run of them, up to the marker that closes it (#971).
+  for (final (:kind, :start, :end) in linkRuns(styled.tokens, text)) {
+    if (_isDead(kind, text.substring(start, end), start, dead, hrefOf)) {
+      (out ??= <TextRange>[]).add(TextRange(start: start, end: end));
     }
-    // A link comes as its markers and its text, one token each: the link is
-    // the run of them.
-    var end = at;
-    while (end + 1 < tokens.length &&
-        tokens[end + 1].kind == token.kind &&
-        tokens[end + 1].start == tokens[end].end) {
-      end++;
-    }
-    final raw = text.substring(token.start, tokens[end].end);
-    if (_isDead(token.kind, raw, token.start, dead, hrefOf)) {
-      (out ??= <TextRange>[]).add(
-        TextRange(start: token.start, end: tokens[end].end),
-      );
-    }
-    at = end;
   }
   return out ?? const <TextRange>[];
 }

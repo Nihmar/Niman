@@ -233,4 +233,17 @@ void main() {
     await tester.pump();
     expect(_opened, isEmpty, reason: 'no click was made with the modifier');
   });
+
+  // #971: two links with nothing between them are two links; the offset says
+  // which one it is on, not both read as one.
+  both('links with nothing between them are found one by one', (
+    tester,
+    mode,
+  ) async {
+    final state = await _pump(tester, '[[Uno]][[Due]][a](x.md)[b](y.md)', mode);
+    expect(state.linkAt(3), (TokenKind.wikilink, '[[Uno]]', null));
+    expect(state.linkAt(10), (TokenKind.wikilink, '[[Due]]', null));
+    expect(state.linkAt(17), (TokenKind.link, '[a](x.md)', null));
+    expect(state.linkAt(27), (TokenKind.link, '[b](y.md)', null));
+  });
 }

@@ -81,6 +81,7 @@ import 'package:niman/src/markdown/render/dead_link_ranges.dart';
 import 'package:niman/src/markdown/render/fence_band_painter.dart';
 import 'package:niman/src/markdown/render/focus_return.dart';
 import 'package:niman/src/markdown/render/footnote_list.dart';
+import 'package:niman/src/markdown/render/link_run.dart';
 import 'package:niman/src/markdown/render/live_blocks.dart';
 import 'package:niman/src/markdown/render/live_code_colors.dart';
 import 'package:niman/src/markdown/render/live_decorations.dart';
@@ -2824,31 +2825,19 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     final line = buffer.lineOf(offset.clamp(0, buffer.length));
     final local = offset - buffer.offsetOfLine(line);
     final styled = _lineAt(line);
-    final tokens = styled.tokens;
-    for (var at = 0; at < tokens.length; at++) {
-      final token = tokens[at];
-      if (token.kind != TokenKind.wikilink && token.kind != TokenKind.link) {
-        continue;
-      }
-      // A link comes as its markers and its text, one token each: the link
-      // is the run of them.
-      var end = at;
-      while (end + 1 < tokens.length &&
-          tokens[end + 1].kind == token.kind &&
-          tokens[end + 1].start == tokens[end].end) {
-        end++;
-      }
-      if (local >= token.start && local <= tokens[end].end) {
-        final raw = styled.text.substring(token.start, tokens[end].end);
+    // A link comes as its markers and its text, one token each: the link
+    // is the run of them, up to the marker that closes it (#971).
+    for (final (:kind, :start, :end) in linkRuns(styled.tokens, styled.text)) {
+      if (local >= start && local <= end) {
+        final raw = styled.text.substring(start, end);
         // A reference link spells no `](href)`: its target has to come from
         // the parse the line was drawn from. An inline link keeps reading it
         // out of its own source, as it always has.
-        final href = token.kind == TokenKind.link && !raw.contains('](')
-            ? _styler?.linkHrefAt(line, token.start)
+        final href = kind == TokenKind.link && !raw.contains('](')
+            ? _styler?.linkHrefAt(line, start)
             : null;
-        return (token.kind, raw, href);
+        return (kind, raw, href);
       }
-      at = end;
     }
     return null;
   }
