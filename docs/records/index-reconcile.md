@@ -56,6 +56,19 @@ kill that recurs on every rescan.
   FTS row is written but whose edges are not — and the content-row check
   cannot see the difference. The event paths (`applyEvents`, `rescanFiles`)
   still resolve inline, as before.
+- **A dead link waits in the index for its note (#974).** An edge is written
+  only for a link that resolves, and only when its own note is indexed, so a
+  note made later had no referrers until the notes that named it were saved
+  again. The targets no note answers are kept in `dangling_links`, keyed by
+  the stem a note must carry to answer them (`schemaVersion` 11). Every stem
+  the content store writes — a file stem or an alias — is noted, and the
+  entry point that finished the write (`applyEvents`, `rescanFiles`,
+  `resync`, the end of a scan) resolves the links waiting on those stems by
+  the `dangling_stem` index; past 256 stems it resolves all the waiting links
+  in pages instead, so a first index keeps no set of them. A row stays after
+  its edge is made — deleting the note drops the edge, and the note restored
+  must find the link still waiting — and goes when its own note is indexed
+  again or deleted.
 - **The one-time repairs are paged.** Missing file stems and frontmatter
   recorded against a non-note are written a page at a time
   (`repairDerivedRows`), and the "notes without a content row" check is

@@ -195,6 +195,44 @@ class PendingLinks extends Table {
   Set<Column> get primaryKey => {noteId, target, kind};
 }
 
+/// A link target a note holds that no note answered when the note was
+/// indexed (#974): the way back from a note that appears to the links that
+/// were waiting for it.
+///
+/// A dead link has no edge in [NoteLinks], and the note it names may be made
+/// later — from the dead link itself, by hand, restored from the trash,
+/// synced in. Without a record of the target nothing could tell which notes
+/// to look at then, short of reading every note. The record is keyed by
+/// [stem], the name a note has to carry to answer the link (`note_stems`),
+/// so a note that appears finds its waiting links by an index lookup,
+/// whatever the library's size.
+///
+/// A row is not removed when an edge is made from it: a note that is
+/// deleted takes the edges to it along, and made again — restored — it has
+/// to find the link still waiting. It goes when the note it belongs to is
+/// indexed again, which writes its links anew, or deleted.
+///
+/// The primary key deletes a note's rows; the index finds the rows a stem
+/// is waited on by. A reserved device name has a row for each stem a note
+/// can be indexed under (`LinkPaths.stemVariants`).
+@TableIndex(name: 'dangling_stem', columns: {#stem})
+class DanglingLinks extends Table {
+  /// The id of the note the link is written in.
+  IntColumn get noteId => integer()();
+
+  /// The stem a note answers the link by, lowercased.
+  TextColumn get stem => text().customConstraint('COLLATE NOCASE')();
+
+  /// The target text as written.
+  TextColumn get target => text()();
+
+  /// The link form: `wiki` (`[[…]]`) or `md` (`[t](p)`).
+  TextColumn get kind => text()();
+
+  @override
+  Set<Column> get primaryKey => {noteId, target, kind, stem};
+}
+
 /// The headings of a note, one row each: the text a `[[Note#Heading]]` link
 /// completes and a `[[##` search lists across the library (#845).
 ///
@@ -275,6 +313,7 @@ void indexDatabaseSetup(sqlite3.Database db) {
     NoteLinks,
     FrontmatterFields,
     PendingLinks,
+    DanglingLinks,
     NoteHeadings,
     NoteBlocks,
   ],
@@ -302,8 +341,11 @@ class IndexDatabase extends _$IndexDatabase {
   /// own-line id below another names no block (#915), so the stored
   /// headings, block ids and their word index of an index written before
   /// are stale — the same wipe and rescan.
+  /// v11: `dangling_links` keeps the targets no note answered, keyed by the
+  /// stem that would, so a note made later finds the links waiting for it
+  /// (#974) — an index written before holds none, and is wiped and rescanned.
   @override
-  int get schemaVersion => 10;
+  int get schemaVersion => 11;
 
   /// The FTS5 index (design.md: no drift class — raw SQL, `rowid` =
   /// `notes.id`, one row per note, `title` weighted above `body` by the
@@ -362,6 +404,7 @@ class IndexDatabase extends _$IndexDatabase {
     'note_blocks',
     tag_counts.tagCountsTable,
     'pending_links',
+    'dangling_links',
     'frontmatter_fields',
     'note_links',
     'note_tags',
