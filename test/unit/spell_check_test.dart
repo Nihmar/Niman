@@ -7,6 +7,7 @@ import 'dart:io';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/editor/highlighting.dart';
+import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/spellcheck/hunspell_spell_checker.dart';
 import 'package:niman/src/spellcheck/personal_dictionary.dart';
@@ -303,6 +304,34 @@ void main() {
       await going;
       expect(stopped.linesDone, lessThan(40));
       expect(stopped.done, isFalse);
+    });
+
+    test('a pass stops when the text it started on is edited (#958)', () async {
+      final check = EditorSpellCheck(
+        createChecker: (_) => _FakeChecker({'wrold'}, cost: 2),
+      );
+      // The docked review leaves the note editable: the lines are read
+      // from the live buffer, as the note's commands read them.
+      final buffer = SourceBuffer.fromText(
+        [for (var i = 0; i < 40; i++) '${_letters(i)} wrold'].join('\n'),
+      );
+      final revision = buffer.revision;
+      final scan = check.startScan(
+        lineCount: buffer.lineCount,
+        lineAt: (i) => (text: buffer.lineAt(i), skip: const <TextRange>[]),
+        current: () => buffer.revision == revision,
+      );
+      final running = scan.run();
+      // The first slice ran in this turn and stopped well before line 40.
+      expect(scan.done, isFalse);
+      expect(scan.linesDone, lessThan(10));
+      // Most of the note is deleted while the pass waits for its next turn.
+      buffer.delete(buffer.offsetOfLine(5), buffer.length);
+      expect(buffer.lineCount, lessThan(scan.lineCount));
+      // No line past the end is read, and the pass says it is out of date.
+      await running;
+      expect(scan.stale, isTrue);
+      expect(scan.done, isFalse);
     });
 
     test('a pass across a dictionary change caches no verdict of the old '
