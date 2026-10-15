@@ -32,8 +32,12 @@ final class _Host implements NoteKindHost {
 
   final String? root;
 
+  /// A text the note holds that the view has not been given yet: the sync
+  /// or another pane changed it, and the view's re-read has not landed.
+  String? ahead;
+
   @override
-  String get text => note.value;
+  String get text => ahead ?? note.value;
 
   @override
   void applyEdit(String newText) => note.value = newText;
@@ -390,6 +394,31 @@ void main() {
       expect(host.text, _table.replaceFirst('| choose | chose |\n', ''));
     });
 
+    testWidgets('an edit opens on the card as the note holds it now', (
+      tester,
+    ) async {
+      const note = 'The ==cat== sat.\n';
+      final host = await _show(tester, 'A long line above the cloze.\n\n$note');
+      // The note shrank under the view, which still holds the old card.
+      host.ahead = note;
+      await _doubleTap(tester, find.byKey(const Key('deck-row-The […] sat.')));
+      expect(tester.takeException(), isNull);
+      final field = tester.widget<TextField>(
+        find.byKey(const Key('row-question-field')),
+      );
+      expect(field.controller!.text, 'The ==cat== sat.');
+    });
+
+    testWidgets('an edit of a card the note lost does not open', (
+      tester,
+    ) async {
+      final host = await _show(tester, _table);
+      host.ahead = _table.replaceFirst('| choose | chose |\n', '');
+      await _doubleTap(tester, find.byKey(const Key('deck-row-choose')));
+      expect(tester.takeException(), isNull);
+      expect(find.byKey(const Key('row-question-field')), findsNothing);
+    });
+
     testWidgets('a cloze is edited as its sentence', (tester) async {
       final host = await _show(tester, 'The ==cat== sat.\n');
       await _doubleTap(tester, find.byKey(const Key('deck-row-The […] sat.')));
@@ -543,6 +572,36 @@ void main() {
       await tester.tap(find.byKey(const Key('card-sheet-save')));
       await tester.pumpAndSettle();
       expect(host.text, '$_table| do | did |\n');
+    });
+
+    testWidgets('the sheet opens on the card as the note holds it now', (
+      tester,
+    ) async {
+      const note = 'The ==cat== sat.\n';
+      final host = await _show(
+        tester,
+        'A long line above the cloze.\n\n$note',
+        size: _phone,
+      );
+      host.ahead = note;
+      await tester.longPress(find.byKey(const Key('deck-row-The […] sat.')));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      final field = tester.widget<TextField>(
+        find.byKey(const Key('card-sheet-question')),
+      );
+      expect(field.controller!.text, 'The ==cat== sat.');
+    });
+
+    testWidgets('the sheet of a card the note lost does not open', (
+      tester,
+    ) async {
+      final host = await _show(tester, _table, size: _phone);
+      host.ahead = _table.replaceFirst('| choose | chose |\n', '');
+      await tester.longPress(find.byKey(const Key('deck-row-choose')));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(find.byKey(const Key('card-sheet-question')), findsNothing);
     });
 
     testWidgets('a cloze has one field, its sentence', (tester) async {

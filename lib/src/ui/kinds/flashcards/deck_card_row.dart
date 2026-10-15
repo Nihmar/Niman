@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:niman/src/flashcards/flash_card.dart';
 import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/ui/kinds/flashcards/card_text.dart';
+import 'package:niman/src/ui/kinds/flashcards/deck_edits.dart';
 import 'package:niman/src/ui/pointer_menu.dart';
 import 'package:niman/src/ui/strings.dart';
 
@@ -22,7 +25,7 @@ final class DeckCardRow extends StatefulWidget {
     required this.next,
     required this.repeated,
     required this.mathCache,
-    required this.sentence,
+    required this.open,
     required this.onSave,
     required this.onSaveSentence,
     required this.onDelete,
@@ -51,8 +54,9 @@ final class DeckCardRow extends StatefulWidget {
   /// The formulas typeset so far, shared by the deck's rows.
   final MathCache mathCache;
 
-  /// A cloze's sentence as the note writes it, read when the row is edited.
-  final String Function() sentence;
+  /// What the editor opens with, read when the row is edited: the card as
+  /// the note holds it now, or null when the note no longer has it.
+  final Future<CardDraft?> Function() open;
 
   /// Saves a table row's or a `::` line's new question and answer.
   final void Function(String question, String answer) onSave;
@@ -81,9 +85,11 @@ final class _DeckCardRowState extends State<DeckCardRow> {
     super.dispose();
   }
 
-  void _edit() {
-    _question.text = _cloze ? widget.sentence() : widget.card.question;
-    _answer.text = widget.card.answer;
+  Future<void> _edit() async {
+    final draft = await widget.open();
+    if (draft == null || !mounted) return;
+    _question.text = draft.question;
+    _answer.text = draft.answer;
     setState(() => _editing = true);
   }
 
@@ -122,7 +128,7 @@ final class _DeckCardRowState extends State<DeckCardRow> {
         ),
       ],
     );
-    if (choice == 'edit') _edit();
+    if (choice == 'edit') unawaited(_edit());
     if (choice == 'delete') widget.onDelete();
   }
 
@@ -143,7 +149,7 @@ final class _DeckCardRowState extends State<DeckCardRow> {
     return GestureDetector(
       key: Key('deck-row-${card.key}'),
       behavior: HitTestBehavior.opaque,
-      onDoubleTap: _edit,
+      onDoubleTap: () => unawaited(_edit()),
       onSecondaryTapUp: _menu,
       child: Container(
         key: widget.studying ? const Key('deck-row-studying') : null,

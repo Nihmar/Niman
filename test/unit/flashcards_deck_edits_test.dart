@@ -124,6 +124,54 @@ void main() {
     });
   });
 
+  group('what the editor opens with', () {
+    test('is the card as the note holds it now', () async {
+      final host = _Host(_table);
+      final stale = Deck.read(host.text).cards[1];
+      host.text = _table.replaceFirst('| chose |', '| picked |');
+      final draft = await _edits(host).open(stale);
+      expect(draft, (question: 'choose', answer: 'picked'));
+    });
+
+    test('is a cloze sentence from where the note has it now', () async {
+      const note = 'Rome was ==built== in a day.\n';
+      final host = _Host('A line above that pushes the cloze down.\n\n$note');
+      final stale = Deck.read(host.text).cards.single;
+      // The paragraph above went: the stale offsets now point past the end
+      // of the text, where reading them would throw.
+      host.text = note;
+      expect(stale.source.content.end, greaterThan(host.text.length));
+      final draft = await _edits(host).open(stale);
+      expect(draft, (question: 'Rome was ==built== in a day.', answer: ''));
+    });
+
+    test('is a cloze sentence where its offsets pointed elsewhere', () async {
+      const note = 'Rome was ==built== in a day.\n';
+      final host = _Host(note);
+      final stale = Deck.read(host.text).cards.single;
+      host.text = 'Other words here.\n\n$note';
+      final draft = await _edits(host).open(stale);
+      expect(draft?.question, 'Rome was ==built== in a day.');
+    });
+
+    test('is nothing once the note no longer has the card', () async {
+      final host = _Host(_table);
+      final stale = Deck.read(host.text).cards[1];
+      host.text = _table.replaceFirst('| choose | chose |\n', '');
+      expect(await _edits(host).open(stale), isNull);
+    });
+
+    test('waits for a long deck and follows the note that moved', () async {
+      final pad = 'filler words\n\n' * (Deck.isolateFrom ~/ 14 + 1);
+      final host = _Host('$pad$_table');
+      final stale = Deck.read(host.text).cards[1];
+      final pending = _edits(host).open(stale);
+      // The note changes while the isolate reads the first text.
+      host.text = '$pad${_table.replaceFirst('| chose |', '| picked |')}';
+      expect(await pending, (question: 'choose', answer: 'picked'));
+    });
+  });
+
   test('two deletes before a long deck is re-read both land', () async {
     // From Deck.isolateFrom the read is a hop to an isolate: both deletes
     // start from the same text, as two clicks before the re-read lands.

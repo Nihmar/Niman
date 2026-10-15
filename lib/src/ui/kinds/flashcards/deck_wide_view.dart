@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:niman/src/flashcards/card_edits.dart';
 import 'package:niman/src/flashcards/deck_reading.dart';
 import 'package:niman/src/flashcards/flash_card.dart';
 import 'package:niman/src/preview/math_cache.dart';
@@ -107,7 +106,7 @@ final class DeckWideView extends StatelessWidget {
                 studying: card.key == studying,
                 hideAnswer: studied,
                 mathCache: mathCache,
-                sentence: () => clozeSentence(edits.host.text, card),
+                open: () => edits.open(card),
                 onSave: (question, answer) =>
                     edits.rewrite(card, question: question, answer: answer),
                 onSaveSentence: (sentence) =>

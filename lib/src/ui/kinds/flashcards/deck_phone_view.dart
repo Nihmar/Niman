@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:niman/src/flashcards/card_edits.dart';
 import 'package:niman/src/flashcards/deck_reading.dart';
 import 'package:niman/src/flashcards/flash_card.dart';
 import 'package:niman/src/preview/math_cache.dart';
@@ -38,10 +37,13 @@ final class DeckPhoneView extends StatelessWidget {
 
   Future<void> _edit(BuildContext context, FlashCard card) async {
     final cloze = card.kind == CardKind.cloze;
+    // The card as the note holds it now, not as this view read it.
+    final draft = await edits.open(card);
+    if (draft == null || !context.mounted) return;
     final result = await showCardSheet(
       context,
-      question: cloze ? clozeSentence(edits.host.text, card) : card.question,
-      answer: cloze ? '' : card.answer,
+      question: draft.question,
+      answer: draft.answer,
       cloze: cloze,
     );
     switch (result) {
