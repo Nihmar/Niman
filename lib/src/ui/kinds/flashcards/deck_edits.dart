@@ -11,6 +11,13 @@ import 'package:niman/src/ui/kinds/flashcards/deck_review_source.dart';
 /// text rewritten by `card_edits.dart` and handed to the host as one
 /// undoable edit.
 ///
+/// A card the view holds says where it stood in the text it was read from,
+/// and the note may have moved since (a sync pull, another pane, a sheet
+/// held open, a long deck whose re-read has not landed). So an edit never
+/// splices at the card's own offsets: it reads the deck of the note's
+/// current text, finds the card again by its key, and drops the edit when
+/// the card is gone.
+///
 /// A question that changed is a new card (`docs/records/flashcards.md`),
 /// and the state its old key had is an orphan: the review store drops it
 /// once the note is written.
@@ -25,35 +32,66 @@ final class DeckCardEdits {
   final DeckReviewSource reviews;
 
   /// [card] asking [question] and answering [answer].
-  void rewrite(
+  Future<void> rewrite(
     FlashCard card, {
     required String question,
     required String answer,
-  }) {
-    final next = rewriteCard(
-      host.text,
-      card,
-      question: question,
-      answer: answer,
-    );
-    _apply(next, prune: question.trim() != card.question);
-  }
+  }) => _edit(
+    card,
+    (text, deck, found) =>
+        rewriteCard(text, found!, question: question, answer: answer),
+    prune: (found) => question.trim() != found.question,
+  );
 
   /// The cloze [card]'s paragraph, as [sentence].
-  void rewriteSentence(FlashCard card, String sentence) =>
-      _apply(rewriteCloze(host.text, card, sentence), prune: true);
+  Future<void> rewriteSentence(FlashCard card, String sentence) => _edit(
+    card,
+    (text, deck, found) => rewriteCloze(text, found!, sentence),
+    prune: (_) => true,
+  );
 
   /// The note without [card]; a cloze keeps its words.
-  void delete(FlashCard card) => _apply(deleteCard(host.text, card));
+  Future<void> delete(FlashCard card) =>
+      _edit(card, (text, deck, found) => deleteCard(text, found!));
 
-  /// A card asking [question] and answering [answer], added to [deck].
-  void add(Deck deck, {required String question, required String answer}) =>
-      _apply(addCard(host.text, deck, question: question, answer: answer));
+  /// A card asking [question] and answering [answer], added to the deck.
+  Future<void> add({required String question, required String answer}) => _edit(
+    null,
+    (text, deck, _) => addCard(text, deck, question: question, answer: answer),
+  );
 
-  void _apply(String next, {bool prune = false}) {
-    if (next == host.text) return;
-    host.applyEdit(next);
-    if (prune) unawaited(_prune(next));
+  /// Builds the new text from the deck of the note as it is now, with
+  /// [card] as that deck holds it, and applies it; nothing happens when
+  /// [card] is no longer there.
+  Future<void> _edit(
+    FlashCard? card,
+    String Function(String text, Deck deck, FlashCard? found) build, {
+    bool Function(FlashCard found)? prune,
+  }) async {
+    while (true) {
+      final text = host.text;
+      final read = Deck.readOffUi(text);
+      final deck = read is Deck ? read : await read;
+      // The note moved while a long deck was being read: read it again.
+      if (host.text != text) continue;
+      FlashCard? found;
+      if (card != null) {
+        found = _find(deck, card);
+        if (found == null) return;
+      }
+      final next = build(text, deck, found);
+      if (next == text) return;
+      host.applyEdit(next);
+      if (prune != null && prune(found!)) unawaited(_prune(next));
+      return;
+    }
+  }
+
+  static FlashCard? _find(Deck deck, FlashCard card) {
+    for (final candidate in deck.cards) {
+      if (candidate.key == card.key) return candidate;
+    }
+    return null;
   }
 
   Future<void> _prune(String text) async {

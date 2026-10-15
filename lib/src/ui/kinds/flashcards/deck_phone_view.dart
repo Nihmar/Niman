@@ -47,12 +47,12 @@ final class DeckPhoneView extends StatelessWidget {
     switch (result) {
       case CardSaved(:final question, :final answer):
         if (cloze) {
-          edits.rewriteSentence(card, question);
+          await edits.rewriteSentence(card, question);
         } else {
-          edits.rewrite(card, question: question, answer: answer);
+          await edits.rewrite(card, question: question, answer: answer);
         }
       case CardDeleted():
-        edits.delete(card);
+        await edits.delete(card);
       case null:
         break;
     }
@@ -61,7 +61,7 @@ final class DeckPhoneView extends StatelessWidget {
   Future<void> _add(BuildContext context) async {
     final result = await showCardSheet(context, isNew: true);
     if (result case CardSaved(:final question, :final answer)) {
-      edits.add(reading.deck, question: question, answer: answer);
+      await edits.add(question: question, answer: answer);
     }
   }
 

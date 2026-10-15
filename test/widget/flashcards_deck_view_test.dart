@@ -468,6 +468,43 @@ void main() {
       expect(find.byKey(const Key('deck-row-begin')), findsNothing);
     });
 
+    testWidgets('Save lands on the card even if the note moved under it', (
+      tester,
+    ) async {
+      final host = await _show(tester, _table, size: _phone);
+      await tester.longPress(find.byKey(const Key('deck-row-choose')));
+      await tester.pumpAndSettle();
+      // A sync pull adds a row above the card while the sheet is open.
+      final pulled = _table.replaceFirst(
+        '| begin | began |\n',
+        '| be | was |\n| begin | began |\n',
+      );
+      host.note.value = pulled;
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.byKey(const Key('card-sheet-answer')),
+        'chosen',
+      );
+      await tester.pump();
+      await tester.tap(find.byKey(const Key('card-sheet-save')));
+      await tester.pumpAndSettle();
+      expect(host.text, pulled.replaceFirst('| chose |', '| chosen |'));
+    });
+
+    testWidgets('Delete does nothing if the note lost the card meanwhile', (
+      tester,
+    ) async {
+      final host = await _show(tester, _table, size: _phone);
+      await tester.longPress(find.byKey(const Key('deck-row-choose')));
+      await tester.pumpAndSettle();
+      final pulled = _table.replaceFirst('| choose | chose |\n', '');
+      host.note.value = pulled;
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('card-sheet-delete')));
+      await tester.pumpAndSettle();
+      expect(host.text, pulled);
+    });
+
     testWidgets('Save is off while the question is empty', (tester) async {
       await _show(tester, _table, size: _phone);
       await tester.longPress(find.byKey(const Key('deck-row-begin')));

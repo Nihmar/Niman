@@ -94,11 +94,8 @@ final class DeckWideView extends StatelessWidget {
             itemBuilder: (context, index) {
               if (index == cards.length) {
                 return DeckAddCard(
-                  onAdd: (question, answer) => edits.add(
-                    reading.deck,
-                    question: question,
-                    answer: answer,
-                  ),
+                  onAdd: (question, answer) =>
+                      edits.add(question: question, answer: answer),
                 );
               }
               final card = cards[index];
