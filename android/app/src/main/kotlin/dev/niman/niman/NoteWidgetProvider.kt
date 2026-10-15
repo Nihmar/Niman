@@ -158,8 +158,7 @@ class NoteWidgetProvider : HomeWidgetProvider() {
         @Suppress("DEPRECATION") // RemoteCollectionItems is static-only
         views.setRemoteAdapter(
             R.id.widget_note_rows,
-            Intent(context, NoteWidgetService::class.java)
-                .putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, id),
+            WidgetAdapter.intent(context, NoteWidgetService::class.java, WidgetAdapter.NOTE, id),
         )
         // Row taps: the framework drops a setOnClickPendingIntent set on
         // a collection child (a row of the bound ListView), so the rows
