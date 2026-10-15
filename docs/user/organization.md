@@ -166,7 +166,9 @@ item in a field of its own, **Add field** asks for the key in a row and then
 opens its value — or, for a key the note already has, opens that field and
 changes nothing — and the type chip at the row's end is a menu that turns the
 field into another type (a list's items joined into one value, a value made
-the one item of a list). A phone keeps the dialog.
+the one item of a list). A phone keeps the dialog; there too, a key the note
+already has opens that field's own editor instead of being written over, and a
+key the panel cannot show (a nested block) is refused in the dialog.
 
 In every surface the file is the only copy: an edit rewrites that key's line
 and leaves the rest of the block — comments, quoting, the other keys — exactly

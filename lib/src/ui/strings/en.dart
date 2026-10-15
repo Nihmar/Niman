@@ -1508,6 +1508,9 @@ final class EnglishStrings extends Strings {
   @override
   String get frontmatterNoFields => 'No properties';
   @override
+  String get frontmatterKeyUnavailable =>
+      'This property already exists and cannot be edited here.';
+  @override
   String get frontmatterTypeText => 'text';
   @override
   String get frontmatterTypeNumber => 'number';

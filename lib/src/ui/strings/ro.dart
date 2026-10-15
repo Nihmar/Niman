@@ -1531,6 +1531,9 @@ final class RomanianStrings extends Strings {
   @override
   String get frontmatterNoFields => 'Nicio proprietate';
   @override
+  String get frontmatterKeyUnavailable =>
+      'Această proprietate există deja și nu poate fi editată aici.';
+  @override
   String get frontmatterTypeText => 'text';
   @override
   String get frontmatterTypeNumber => 'număr';

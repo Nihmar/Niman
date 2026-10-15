@@ -1513,6 +1513,9 @@ final class NorwegianStrings extends Strings {
   @override
   String get frontmatterNoFields => 'Ingen egenskaper';
   @override
+  String get frontmatterKeyUnavailable =>
+      'Denne egenskapen finnes allerede og kan ikke redigeres her.';
+  @override
   String get frontmatterTypeText => 'tekst';
   @override
   String get frontmatterTypeNumber => 'tall';

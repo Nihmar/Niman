@@ -1506,6 +1506,9 @@ final class TurkishStrings extends Strings {
   @override
   String get frontmatterNoFields => 'Özellik yok';
   @override
+  String get frontmatterKeyUnavailable =>
+      'Bu özellik zaten var ve burada düzenlenemez.';
+  @override
   String get frontmatterTypeText => 'metin';
   @override
   String get frontmatterTypeNumber => 'sayı';

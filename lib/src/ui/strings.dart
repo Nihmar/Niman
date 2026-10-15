@@ -1016,6 +1016,7 @@ final class AppStrings {
   static String get frontmatterListHint => _s.frontmatterListHint;
   static String get frontmatterRemoveField => _s.frontmatterRemoveField;
   static String get frontmatterNoFields => _s.frontmatterNoFields;
+  static String get frontmatterKeyUnavailable => _s.frontmatterKeyUnavailable;
   static String get frontmatterTypeText => _s.frontmatterTypeText;
   static String get frontmatterTypeNumber => _s.frontmatterTypeNumber;
   static String get frontmatterTypeDate => _s.frontmatterTypeDate;

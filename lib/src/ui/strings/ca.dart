@@ -1549,6 +1549,9 @@ final class CatalanStrings extends Strings {
   @override
   String get frontmatterNoFields => 'Cap propietat';
   @override
+  String get frontmatterKeyUnavailable =>
+      'Aquesta propietat ja existeix i no es pot editar aquí.';
+  @override
   String get frontmatterTypeText => 'text';
   @override
   String get frontmatterTypeNumber => 'nombre';

@@ -1514,6 +1514,9 @@ final class DanishStrings extends Strings {
   @override
   String get frontmatterNoFields => 'Ingen egenskaber';
   @override
+  String get frontmatterKeyUnavailable =>
+      'Denne egenskab findes allerede og kan ikke redigeres her.';
+  @override
   String get frontmatterTypeText => 'tekst';
   @override
   String get frontmatterTypeNumber => 'tal';

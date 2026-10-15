@@ -1493,6 +1493,9 @@ final class HindiStrings extends Strings {
   @override
   String get frontmatterNoFields => 'कोई प्रॉपर्टी नहीं';
   @override
+  String get frontmatterKeyUnavailable =>
+      'यह प्रॉपर्टी पहले से मौजूद है और यहाँ संपादित नहीं की जा सकती।';
+  @override
   String get frontmatterTypeText => 'पाठ';
   @override
   String get frontmatterTypeNumber => 'संख्या';

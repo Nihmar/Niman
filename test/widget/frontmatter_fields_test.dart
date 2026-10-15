@@ -9,6 +9,7 @@ import 'package:niman/src/frontmatter/parser.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/ui/note_view.dart';
+import 'package:niman/src/ui/strings.dart';
 
 /// The note the pane is handed.
 const String _note =
@@ -518,5 +519,75 @@ void main() {
       reason: 'the closing fence is the last line of the head',
     );
     expect(tester.takeException(), isNull);
+  });
+
+  // #962: the dialog is how a phone adds a field, and a key the note has is
+  // not a new one.
+  testWidgets('adding a key the note has opens that field and writes nothing', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_app(_note));
+    await tester.pumpAndSettle();
+    await _openPanel(tester);
+
+    await tester.tap(find.byKey(const Key('frontmatter-add')));
+    await tester.pumpAndSettle();
+    await _fillField(tester, key: 'title', value: 'Other');
+
+    expect(_text(tester), _note, reason: 'nothing was written over the title');
+    final key = tester.widget<TextField>(
+      find.byKey(const Key('frontmatter-key-field')),
+    );
+    expect(key.controller!.text, 'title', reason: 'the title opened');
+    expect(key.enabled, isFalse, reason: 'as the field being edited');
+    expect(
+      tester
+          .widget<TextField>(find.byKey(const Key('frontmatter-value-field')))
+          .controller!
+          .text,
+      'Enciclopedia',
+    );
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+    expect(_text(tester), _note);
+  });
+
+  testWidgets('a key the panel has no field for is refused in the dialog', (
+    tester,
+  ) async {
+    const note =
+        '---\n'
+        'title: Enciclopedia\n'
+        'meta:\n'
+        '  inner: 1\n'
+        '---\n'
+        '\n'
+        'Body text.\n';
+    await tester.pumpWidget(_app(note));
+    await tester.pumpAndSettle();
+    await _openPanel(tester);
+
+    await tester.tap(find.byKey(const Key('frontmatter-add')));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const Key('frontmatter-key-field')),
+      'meta',
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text(AppStrings.frontmatterKeyUnavailable), findsOneWidget);
+    expect(
+      tester
+          .widget<FilledButton>(find.byKey(const Key('frontmatter-save')))
+          .onPressed,
+      isNull,
+    );
+    await tester.enterText(
+      find.byKey(const Key('frontmatter-key-field')),
+      'other',
+    );
+    await tester.pumpAndSettle();
+    expect(find.text(AppStrings.frontmatterKeyUnavailable), findsNothing);
+    expect(_text(tester), note);
   });
 }

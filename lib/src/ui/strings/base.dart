@@ -802,6 +802,7 @@ abstract base class Strings {
   String get frontmatterListHint;
   String get frontmatterRemoveField;
   String get frontmatterNoFields;
+  String get frontmatterKeyUnavailable;
   String get frontmatterTypeText;
   String get frontmatterTypeNumber;
   String get frontmatterTypeDate;

@@ -21,23 +21,37 @@ import 'package:niman/src/ui/strings.dart';
 
 /// Shows the field dialog, and answers what was entered or null when it was
 /// dismissed.
+///
+/// [unavailable] says of a key typed for a new field that the note already
+/// has it as something no field can show, so the dialog refuses it rather
+/// than let a save write over it.
 Future<({String key, FrontmatterFieldType type, List<String> values})?>
 showFrontmatterFieldDialog(
   BuildContext context, {
   String? fieldKey,
   FrontmatterFieldType type = FrontmatterFieldType.text,
   List<String> values = const <String>[],
+  bool Function(String key)? unavailable,
 }) {
   return showDialog(
     context: context,
-    builder: (context) =>
-        _FrontmatterFieldDialog(fieldKey: fieldKey, type: type, values: values),
+    builder: (context) => _FrontmatterFieldDialog(
+      fieldKey: fieldKey,
+      type: type,
+      values: values,
+      unavailable: unavailable,
+    ),
   );
 }
 
 /// The dialog body. Owns its controllers so they live as long as the dialog.
 final class _FrontmatterFieldDialog extends StatefulWidget {
-  const new({required this.fieldKey, required this.type, required this.values});
+  const new({
+    required this.fieldKey,
+    required this.type,
+    required this.values,
+    required this.unavailable,
+  });
 
   /// The key being edited, or null when a field is being added.
   final String? fieldKey;
@@ -47,6 +61,10 @@ final class _FrontmatterFieldDialog extends StatefulWidget {
 
   /// The values the field starts with.
   final List<String> values;
+
+  /// Whether a key typed for a new field is one the note has and no field
+  /// can show.
+  final bool Function(String key)? unavailable;
 
   @override
   State<_FrontmatterFieldDialog> createState() =>
@@ -85,8 +103,14 @@ final class _FrontmatterFieldDialogState
 
   bool get _adding => widget.fieldKey == null;
 
+  /// Whether the key typed for the new field is one it must not be written
+  /// over.
+  bool get _keyUnavailable =>
+      _adding && (widget.unavailable?.call(_key.text.trim()) ?? false);
+
   bool get _canSave =>
       (!_adding || _key.text.trim().isNotEmpty) &&
+      !_keyUnavailable &&
       // A date field with no date is no field: the picker is what fills it.
       (_type != FrontmatterFieldType.date || _date != null);
 
@@ -132,6 +156,10 @@ final class _FrontmatterFieldDialogState
               enabled: _adding,
               decoration: InputDecoration(
                 labelText: AppStrings.frontmatterKeyLabel,
+                errorText: _keyUnavailable
+                    ? AppStrings.frontmatterKeyUnavailable
+                    : null,
+                errorMaxLines: 3,
               ),
               onChanged: (_) => setState(() {}),
               onSubmitted: (_) => _canSave ? _save() : null,

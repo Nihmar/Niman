@@ -1558,6 +1558,9 @@ final class FrenchStrings extends Strings {
   @override
   String get frontmatterNoFields => 'Aucune propriété';
   @override
+  String get frontmatterKeyUnavailable =>
+      'Cette propriété existe déjà et ne peut pas être modifiée ici.';
+  @override
   String get frontmatterTypeText => 'texte';
   @override
   String get frontmatterTypeNumber => 'nombre';

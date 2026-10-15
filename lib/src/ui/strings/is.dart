@@ -1518,6 +1518,9 @@ final class IcelandicStrings extends Strings {
   @override
   String get frontmatterNoFields => 'Engir eiginleikar';
   @override
+  String get frontmatterKeyUnavailable =>
+      'Þetta eigindi er þegar til og ekki er hægt að breyta því hér.';
+  @override
   String get frontmatterTypeText => 'texti';
   @override
   String get frontmatterTypeNumber => 'tala';

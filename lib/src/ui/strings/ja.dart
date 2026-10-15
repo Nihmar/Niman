@@ -1429,6 +1429,8 @@ final class JapaneseStrings extends Strings {
   @override
   String get frontmatterNoFields => 'プロパティはありません';
   @override
+  String get frontmatterKeyUnavailable => 'このプロパティはすでに存在し、ここでは編集できません。';
+  @override
   String get frontmatterTypeText => 'テキスト';
   @override
   String get frontmatterTypeNumber => '数値';

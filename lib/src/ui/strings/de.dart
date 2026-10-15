@@ -1543,6 +1543,10 @@ final class GermanStrings extends Strings {
   @override
   String get frontmatterNoFields => 'Keine Eigenschaften';
   @override
+  String get frontmatterKeyUnavailable =>
+      'Diese Eigenschaft existiert bereits und lässt sich hier '
+      'nicht bearbeiten.';
+  @override
   String get frontmatterTypeText => 'Text';
   @override
   String get frontmatterTypeNumber => 'Zahl';

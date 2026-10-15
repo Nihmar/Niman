@@ -1521,6 +1521,9 @@ final class SerbianStrings extends Strings {
   @override
   String get frontmatterNoFields => 'Нема својстава';
   @override
+  String get frontmatterKeyUnavailable =>
+      'Ово својство већ постоји и не може се овде уређивати.';
+  @override
   String get frontmatterTypeText => 'текст';
   @override
   String get frontmatterTypeNumber => 'број';

@@ -552,13 +552,8 @@ final class _FrontmatterFieldsState extends State<FrontmatterFields> {
   /// show (a nested mapping) is left alone, written or opened by nothing.
   bool _openExisting(String key) {
     if (!hasFrontmatterKey(widget.note, key)) return false;
-    final block = frontmatterBlock(widget.note);
-    final fields = block == null
-        ? const <FrontmatterField>[]
-        : frontmatterFieldsIn(block.text).fields;
-    final type = fields.where((field) => field.key == key).firstOrNull?.type;
     setState(() {
-      switch (type) {
+      switch (_fieldNamed(key)?.type) {
         case FrontmatterFieldType.text:
         case FrontmatterFieldType.number:
         case FrontmatterFieldType.date:
@@ -571,6 +566,15 @@ final class _FrontmatterFieldsState extends State<FrontmatterFields> {
       }
     });
     return true;
+  }
+
+  /// The field of the note's block named [key], or null when there is none
+  /// or no row can show it.
+  FrontmatterField? _fieldNamed(String key) {
+    final block = frontmatterBlock(widget.note);
+    if (block == null) return null;
+    final fields = frontmatterFieldsIn(block.text).fields;
+    return fields.where((field) => field.key == key).firstOrNull;
   }
 
   /// The panel's action row: a small box with a plus and the words that add a
@@ -670,8 +674,20 @@ final class _FrontmatterFieldsState extends State<FrontmatterFields> {
       setState(() => _addingKey = true);
       return;
     }
-    final result = await showFrontmatterFieldDialog(context);
-    if (result == null) return;
+    final result = await showFrontmatterFieldDialog(
+      context,
+      // A key the note has and no field shows is refused in the dialog.
+      unavailable: (key) =>
+          hasFrontmatterKey(widget.note, key) && _fieldNamed(key) == null,
+    );
+    if (result == null || !context.mounted) return;
+    // A key the note has is not a new field: its own editor opens, on what
+    // it holds, and what the dialog was filled with is not written over it.
+    final existing = _fieldNamed(result.key);
+    if (existing != null) {
+      await _edit(context, existing);
+      return;
+    }
     widget.onSet(result.key, _yamlOf(result.type, result.values));
   }
 

@@ -1499,6 +1499,9 @@ final class EstonianStrings extends Strings {
   @override
   String get frontmatterNoFields => 'Atribuute pole';
   @override
+  String get frontmatterKeyUnavailable =>
+      'See atribuut on juba olemas ja seda ei saa siin muuta.';
+  @override
   String get frontmatterTypeText => 'tekst';
   @override
   String get frontmatterTypeNumber => 'arv';

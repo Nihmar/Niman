@@ -1519,6 +1519,9 @@ final class LithuanianStrings extends Strings {
   @override
   String get frontmatterNoFields => 'Savybių nėra';
   @override
+  String get frontmatterKeyUnavailable =>
+      'Ši savybė jau egzistuoja ir čia jos redaguoti negalima.';
+  @override
   String get frontmatterTypeText => 'tekstas';
   @override
   String get frontmatterTypeNumber => 'skaičius';

@@ -1514,6 +1514,9 @@ final class LatvianStrings extends Strings {
   @override
   String get frontmatterNoFields => 'Nav īpašību';
   @override
+  String get frontmatterKeyUnavailable =>
+      'Šāds rekvizīts jau pastāv, un to šeit nevar rediģēt.';
+  @override
   String get frontmatterTypeText => 'teksts';
   @override
   String get frontmatterTypeNumber => 'skaitlis';

@@ -1522,6 +1522,9 @@ final class UkrainianStrings extends Strings {
   @override
   String get frontmatterNoFields => 'Немає властивостей';
   @override
+  String get frontmatterKeyUnavailable =>
+      'Ця властивість уже існує, і її не можна редагувати тут.';
+  @override
   String get frontmatterTypeText => 'текст';
   @override
   String get frontmatterTypeNumber => 'число';

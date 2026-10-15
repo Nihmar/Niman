@@ -1519,6 +1519,9 @@ final class BelarusianStrings extends Strings {
   @override
   String get frontmatterNoFields => 'Няма ўласцівасцей';
   @override
+  String get frontmatterKeyUnavailable =>
+      'Такая ўласцівасць ужо існуе, і яе нельга рэдагаваць тут.';
+  @override
   String get frontmatterTypeText => 'тэкст';
   @override
   String get frontmatterTypeNumber => 'лік';
