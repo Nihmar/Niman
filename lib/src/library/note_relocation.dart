@@ -451,7 +451,9 @@ final class NoteRelocator {
 
   /// Carries the review states of what moved from [from] to [to] (#533):
   /// a deck note, or a folder that may hold some. Any other file
-  /// holds none, and costs no read of the review file.
+  /// holds none, and costs no read of the review file. Nor does a note the
+  /// review file has no entry for, whose moves a library makes by the
+  /// thousand: the store answers that from the paths it kept (#968).
   Future<void> _carryReview(String from, String to, {required bool isDir}) {
     if (!isDir && !isMarkdownNote(from)) return Future<void>.value();
     return ReviewStore(root).moved(from, to);

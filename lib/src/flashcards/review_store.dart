@@ -23,6 +23,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:isolate';
 
+import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/library_state_file.dart';
 import 'package:niman/src/flashcards/review_state.dart';
 import 'package:path/path.dart' as p;
@@ -97,10 +98,7 @@ final class ReviewStore {
     Map<String, Map<String, ReviewState>>? states,
   })
   readAllUnless(String root, ReviewFileStamp? known) {
-    final stat = FileStat.statSync(p.join(root, filePath));
-    final stamp = stat.type == FileSystemEntityType.file
-        ? (modified: stat.modified.microsecondsSinceEpoch, size: stat.size)
-        : null;
+    final stamp = _stampOf(FileStat.statSync(p.join(root, filePath)));
     if (stamp != null && stamp == known) return (stamp: stamp, states: null);
     return (stamp: stamp, states: readAllBlocking(root));
   }
@@ -146,7 +144,17 @@ final class ReviewStore {
 
   /// Carries the entries of [from] to [to], both library-relative: a note
   /// renamed or moved, or a folder and every note under it.
-  Future<void> moved(String from, String to) => _told(_state.moved(from, to));
+  ///
+  /// Most moves have nothing to carry, and a library moves a thousand notes
+  /// as readily as one: the file is read and rewritten on a background
+  /// isolate, so a move that has no entry to carry must not go there (#968).
+  /// A library with no review file is told by a stat; one with a file, by
+  /// the paths it holds, which are read once per version of the file and
+  /// kept ([ReviewFileStamp]) for the next move.
+  Future<void> moved(String from, String to) async {
+    if (!await _mayHold(from)) return;
+    await _told(_state.moved(from, to));
+  }
 
   /// Drops the entries of [paths], library-relative, and of the notes under
   /// them: the files the library saw leave.
@@ -169,6 +177,46 @@ final class ReviewStore {
       return true;
     }),
   );
+
+  /// Whether the file holds an entry for [path] or for a note under it.
+  Future<bool> _mayHold(String path) async {
+    final stamp = _stampOf(await FileStat.stat(p.join(root, filePath)));
+    if (stamp == null) {
+      _heldPaths.remove(root);
+      return false;
+    }
+    final kept = _heldPaths[root];
+    final library = root;
+    final held = kept != null && kept.stamp == stamp
+        ? kept
+        : await Isolate.run(() => _pathsOf(library));
+    _heldPaths[root] = held;
+    return held.paths.contains(path) ||
+        held.paths.any((other) => isUnder(path, other));
+  }
+
+  /// The paths each library's file held when it was last looked at, by the
+  /// version of the file they came from.
+  static final Map<String, ({ReviewFileStamp? stamp, Set<String> paths})>
+  _heldPaths = {};
+
+  /// The stamp and the note paths of the library [root]'s file, read here
+  /// and now: for a background isolate. The stamp comes before the read,
+  /// as in [readAllUnless].
+  static ({ReviewFileStamp? stamp, Set<String> paths}) _pathsOf(String root) {
+    final stamp = _stampOf(FileStat.statSync(p.join(root, filePath)));
+    final (:entries, problem: _) = LibraryStateFile.readBlocking(
+      root,
+      filePath,
+    );
+    return (stamp: stamp, paths: entries.keys.toSet());
+  }
+
+  /// The version of a file whose stat is [stat]; null if there is no file.
+  static ReviewFileStamp? _stampOf(FileStat stat) =>
+      stat.type == FileSystemEntityType.file
+      ? (modified: stat.modified.microsecondsSinceEpoch, size: stat.size)
+      : null;
 
   /// Tells [changes] that the file was written, once [wrote] says it was.
   Future<void> _told(Future<bool> wrote) async {

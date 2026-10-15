@@ -173,6 +173,45 @@ void main() {
       await store.moved('Studio/Ver', 'Studio/Other');
       expect(kept().readAsStringSync(), before);
     });
+
+    test('follows the file when it changes between moves', () async {
+      await store.moved('Studio/Verbs.md', 'Archive/Verbs.md');
+      await store.write('Studio/New.md', 'k', state(interval: 4));
+      await store.moved('Studio/New.md', 'Archive/New.md');
+      expect(await store.read('Archive/New.md'), {'k': state(interval: 4)});
+      expect(await store.read('Archive/Verbs.md'), {'k': state()});
+    });
+
+    test(
+      'does not go through the file for a note it has no entry for',
+      () async {
+        // The paths of this version of the file are known now...
+        await store.moved('Elsewhere.md', 'Somewhere.md');
+        // ...so a copy with an entry of its own, same size and same time,
+        // is the version they came from, and a move that no entry asks for
+        // never opens it.
+        final before = kept().statSync().modified;
+        final text = kept().readAsStringSync();
+        kept()
+          ..writeAsStringSync(text.replaceFirst('Studio 2/', 'Studio 3/'))
+          ..setLastModifiedSync(before);
+        await store.moved('Studio 3/Verbs.md', 'Archive/Verbs.md');
+        expect(await store.read('Archive/Verbs.md'), isEmpty);
+        expect(await store.read('Studio 3/Verbs.md'), isNotEmpty);
+
+        // A version with another time is looked at again.
+        kept().setLastModifiedSync(before.add(const Duration(seconds: 5)));
+        await store.moved('Studio 3/Verbs.md', 'Archive/Verbs.md');
+        expect(await store.read('Archive/Verbs.md'), isNotEmpty);
+      },
+    );
+  });
+
+  test('a move in a library with no review file makes none', () async {
+    await store.moved('Studio/Verbs.md', 'Archive/Verbs.md');
+    await store.moved('Studio', 'Lessons');
+    expect(kept().existsSync(), isFalse);
+    expect(kept().parent.existsSync(), isFalse);
   });
 
   group('removed', () {
