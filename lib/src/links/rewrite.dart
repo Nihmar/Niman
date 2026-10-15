@@ -28,6 +28,9 @@
 ///   the index, before the move, which links of the note resolved to one
 ///   ([MovedLinks]), because a name or the tail of a path also fits another
 ///   note that shares it. Each follows the file it resolved to.
+/// * **A link reference definition** (`[label]: path.md`, #972) is the href of
+///   every `[text][label]` that uses it: its destination follows as an inline
+///   link's does, its label and title untouched.
 /// * A `#fragment` and a `|alias` are carried through untouched; only the
 ///   target is rewritten.
 library;
@@ -35,6 +38,7 @@ library;
 import 'dart:convert';
 
 import 'package:niman/src/core/percent.dart';
+import 'package:niman/src/links/link_definitions.dart';
 import 'package:niman/src/links/link_moves.dart';
 import 'package:niman/src/links/link_path.dart';
 import 'package:niman/src/links/moved_links.dart';
@@ -108,7 +112,28 @@ String rewriteMovedLinks(
         }
     }
   }
+  for (final definition in linkDefinitionsOf(source)) {
+    final only = resolved?.oldPathOf(definition.href, markdown: true);
+    if (resolved != null && only == null) continue;
+    final rewritten = _markdownHref(
+      definition.href,
+      from,
+      here,
+      moves,
+      only: only,
+    );
+    if (rewritten != null) {
+      // Only the destination: the label and the title stay as written.
+      replacements.add((
+        definition.start,
+        definition.end,
+        definition.angled ? '<$rewritten>' : rewritten,
+      ));
+    }
+  }
   if (replacements.isEmpty) return source;
+  // The definitions come after the links; the text is cut in order.
+  replacements.sort((a, b) => a.$1.compareTo(b.$1));
   final buffer = StringBuffer();
   var cursor = 0;
   for (final (start, end, text) in replacements) {

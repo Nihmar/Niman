@@ -87,6 +87,28 @@ void main() {
       expect(asked, 0);
     });
 
+    test(
+      'a move carries a reference-style link, its edge with it (#972)',
+      () async {
+        await ops.createFolder(parentPath: '', name: 'Docs');
+        await ops.createFolder(parentPath: '', name: 'Archive');
+        await ops.createNote(parentPath: 'Docs', name: 'a');
+        await ops.createNote(
+          parentPath: '',
+          name: 'B',
+          content: 'see [x][r]\n\n[r]: Docs/a.md "Title"\n',
+        );
+        expect(await referrersOf('Docs/a.md'), ['B.md']);
+        await ops.move('Docs/a.md', 'Archive');
+        await ops.writer.indexed;
+        expect(
+          await ops.readNote('B.md'),
+          'see [x][r]\n\n[r]: Archive/a.md "Title"\n',
+        );
+        expect(await referrersOf('Archive/a.md'), ['B.md']);
+      },
+    );
+
     test('saves the open notes before it rewrites them (#913)', () async {
       await seed();
       final editor = openBuffer('Ref.md', 'Typed just now: [[Old]].\n');

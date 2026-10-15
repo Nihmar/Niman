@@ -251,7 +251,8 @@ note is next indexed.
 
 Renaming or moving a note, or a folder of them, also rewrites the links
 *other* notes hold to it, so they keep finding it: a path link and a
-Markdown link follow the new path, and a link by name follows a rename (see
+Markdown link follow the new path (a reference link's `[label]: path` line
+included), and a link by name follows a rename (see
 [organization](organization.md) for what else follows the note). Only the
 links that pointed at what moved are rewritten: with two notes of the same
 name in different folders, a link to the other one is left as it is.
