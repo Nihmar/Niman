@@ -13,6 +13,7 @@ import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/todo/todo_source.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
+import 'package:niman/src/ui/history/note_version_screen.dart';
 import 'package:niman/src/ui/island.dart';
 import 'package:niman/src/ui/palette/command_palette.dart';
 import 'package:niman/src/ui/window_controller.dart';
@@ -202,6 +203,25 @@ void main() {
     await settle(tester);
     expect(overlay, findsOne);
     expect(controller.workspace.dockPane, DockPane.history);
+  }, variant: desktopDensity);
+
+  testWidgets('a version picked in the overlay opens with the overlay shut '
+      '(#978)', (tester) async {
+    controller.seedVersion(
+      'alpha.md',
+      number: 1,
+      savedAt: DateTime(2026, 10, 3, 14, 2),
+      text: 'the old alpha',
+    );
+    await pumpAt(tester, narrow);
+    await tester.tap(toggle);
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('dock-pane-history')));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('dock-history-1')));
+    await settle(tester);
+    expect(find.byType(NoteVersionScreen), findsOne);
+    expect(overlay, findsNothing, reason: 'the page is not left under a scrim');
   }, variant: desktopDensity);
 
   testWidgets('the palette lists the toggle, and runs it', (tester) async {

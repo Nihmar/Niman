@@ -203,6 +203,30 @@ void main() {
       );
     }, variant: _android);
 
+    testWidgets('closes the side panel lying over the note first (#977)', (
+      tester,
+    ) async {
+      // Under 1000 dp the panel has no room to dock: it is an overlay.
+      await pumpApp(tester, const Size(900, 700));
+      await openAlpha(tester);
+      await tester.tap(find.byKey(const Key('dock-toggle')));
+      await settle(tester);
+      expect(find.byKey(const Key('dock-overlay')), findsOne);
+
+      expect(await tester.binding.handlePopRoute(), isTrue);
+      await settle(tester);
+      expect(find.byKey(const Key('dock-overlay')), findsNothing);
+      expect(
+        find.byKey(const Key('note-tab-0')),
+        findsOne,
+        reason: 'the note under it stays',
+      );
+
+      expect(await tester.binding.handlePopRoute(), isTrue);
+      await settle(tester);
+      expect(find.byKey(const Key('note-tab-0')), findsNothing);
+    }, variant: _android);
+
     testWidgets('closes a pinned Home before the note under it', (
       tester,
     ) async {

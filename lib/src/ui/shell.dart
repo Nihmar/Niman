@@ -1680,7 +1680,12 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         key: const Key('compare-tab'),
         selected: selected,
         focused: !w.isSplit || w.focused == pane,
-        onTap: () => setState(() => _compareShows = true),
+        onTap: () {
+          // A study in this pane lets go of it, as it does for a note tab
+          // (#976): the page would be drawn under the study otherwise.
+          if (pane == _reviewPaneShown) _reviewTab.show(on: false);
+          setState(() => _compareShows = true);
+        },
         builder: (context, {required hover}) => Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -2217,7 +2222,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// window (#769): the panes are on screen beside it, and its hits stay
   /// there to step through.
   void _activateTab(int pane, int index) {
-    if (_compareShows) setState(() => _compareShows = false);
+    // Only the pane that shows the compare page gives it up: a version
+    // stays open beside the note being edited in the other one (#975).
+    if (_compareIn(pane)) setState(() => _compareShows = false);
     if (pane == _reviewPaneShown) _reviewTab.show(on: false);
     if (_tab != ShellTab.files && !_sidebarShowsView) {
       _onDestinationSelected(ShellTab.files);
@@ -5415,7 +5422,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// what the phone's Back does in its layout, in the wide one's terms.
   bool get _wideBackAvailable =>
       _wide &&
-      (_contentTabShows ||
+      (_dock.overlayShown ||
+          _contentTabShows ||
           _sidebarShowsView ||
           _compareShows && _compare != null ||
           _reviewTab.shows ||
@@ -5423,11 +5431,14 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           _gridCanStepUp);
 
   /// The wide shell's Back (#849): the topmost thing on screen goes
-  /// first — a book out of full screen, a pinned Home or Todo, the search
-  /// sidebar, the open note — and the grid steps up a folder last. With
-  /// none of them left Back leaves the app.
+  /// first — the side panel lying over the note (#977), a book out of full
+  /// screen, a pinned Home or Todo, the search sidebar, the open note —
+  /// and the grid steps up a folder last. With none of them left Back
+  /// leaves the app.
   void _wideBack() {
-    if (_immersive.fullScreen.value != null) {
+    if (_dock.overlayShown) {
+      _dock.closeOverlay();
+    } else if (_immersive.fullScreen.value != null) {
       _immersive.fullScreen.value = null;
     } else if (_reviewTab.shows) {
       _reviewTab.close();
