@@ -128,6 +128,63 @@ void main() {
     );
   });
 
+  test('a card re-graded after a reset keeps its new first day (#950)', () {
+    Map<String, Object?> graded(int interval, String at, String first) => {
+      ...card(interval, at),
+      'first': first,
+    };
+    // The base is the pre-reset entry; this side reset the deck and studied
+    // it again today, the other still has the entry as it was.
+    final merged = mergeReviewJson(
+      base: json({
+        'a.md': {'x': graded(6, early, '2026-10-01')},
+      }),
+      local: json({
+        'a.md': {'x': graded(1, late, '2026-10-14')},
+      }),
+      remote: json({
+        'a.md': {'x': graded(6, early, '2026-10-01')},
+      }),
+    );
+    expect(parsed(merged), {
+      'a.md': {'x': graded(1, late, '2026-10-14')},
+    });
+    // The same from the other side.
+    final other = mergeReviewJson(
+      base: json({
+        'a.md': {'x': graded(6, early, '2026-10-01')},
+      }),
+      local: json({
+        'a.md': {'x': graded(6, early, '2026-10-01')},
+      }),
+      remote: json({
+        'a.md': {'x': graded(1, late, '2026-10-14')},
+      }),
+    );
+    expect(parsed(other), parsed(merged));
+  });
+
+  test('a card both sides graded since the base keeps the earlier first', () {
+    Map<String, Object?> graded(int interval, String at, String first) => {
+      ...card(interval, at),
+      'first': first,
+    };
+    final merged = mergeReviewJson(
+      base: json({
+        'a.md': {'x': card(1, earlier)},
+      }),
+      local: json({
+        'a.md': {'x': graded(1, early, '2026-10-14')},
+      }),
+      remote: json({
+        'a.md': {'x': graded(6, late, '2026-10-13')},
+      }),
+    );
+    expect(parsed(merged), {
+      'a.md': {'x': graded(6, late, '2026-10-13')},
+    });
+  });
+
   test('a card present on one side only is kept without a base', () {
     final merged = mergeReviewJson(
       base: null,

@@ -87,6 +87,11 @@ DateTime _readAt(Object? entry) =>
 /// two devices studying two decks, or one deck on two days, never
 /// conflict.
 ///
+/// A card both sides graded since the base keeps the earlier of their
+/// `first` dates (the day it was first shown, which counts toward the day's
+/// limit of new cards). A card only one side changed is that side's whole,
+/// `first` included: a deck reset and studied again is new on that day.
+///
 /// A note is the map of its cards: a note one side lacks is a side with no
 /// cards, so a card present on one side only is kept when the other never
 /// had it (the base lacks it, or there is no base), and dropped when the
@@ -117,14 +122,37 @@ String? mergeReviewJson({
         base: agreed,
         localNewer: !_readAt(theirs[key]).isAfter(_readAt(mine[key])),
       );
-      if (pick.present) {
-        cards[key] = _withEarliestFirst(pick.value, mine[key], theirs[key]);
-      }
+      if (!pick.present) continue;
+      // The earlier `first` is for a card both sides changed since the base.
+      // A side that left it as it was has nothing to say on it: the other
+      // side's card wins whole, or a reset deck re-graded here would take its
+      // old `first` back from a device that never saw the reset.
+      final both =
+          mine.containsKey(key) &&
+          theirs.containsKey(key) &&
+          _changedSince(agreed, key, mine) &&
+          _changedSince(agreed, key, theirs);
+      cards[key] = both
+          ? _withEarliestFirst(pick.value, mine[key], theirs[key])
+          : pick.value;
     }
     if (cards.isNotEmpty) merged[note] = cards;
   }
   return _encode(merged);
 }
+
+/// Whether [side] has the card [key] other than the base [agreed] had it;
+/// without a base nothing says it did not.
+bool _changedSince(
+  Map<String, Object?>? agreed,
+  String key,
+  Map<String, Object?> side,
+) =>
+    agreed == null ||
+    !_same(
+      (present: true, value: side[key]),
+      (present: agreed.containsKey(key), value: agreed[key]),
+    );
 
 /// The card [picked] with the earlier of the two sides' `first` dates: a
 /// card first graded on two devices was first graded on the earlier day,

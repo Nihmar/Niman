@@ -127,7 +127,9 @@ Each grade button shows when the card would come back.
 its first grade on, so it is what tells how many **new** cards a deck has
 already shown today (the states whose `first` is today): the daily limit
 needs no other counter. It is written once and kept by every later grade;
-the sync keeps the earlier of two devices' `first`. A state without it (none
+when both devices graded the card the sync keeps the earlier of their `first`,
+and a card only one device changed (a deck reset and studied again) is that
+device's whole, `first` included. A state without it (none
 written before it existed) is never counted as a new card of today.
 
 - **Out of the note**, because every grade changes it: inside the note it
