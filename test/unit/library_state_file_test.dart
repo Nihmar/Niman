@@ -98,6 +98,44 @@ void main() {
   });
 
   test(
+    'a file that is there but cannot be opened is left alone (#955)',
+    () async {
+      // A directory where the file belongs opens for nobody: the same fault as
+      // a lock held while the sync swaps the file, on every platform without a
+      // permission call. It is not "no file yet", so nothing may be written.
+      Directory(p.join(root.path, _path)).createSync(recursive: true);
+      final marker = File(p.join(root.path, 'change-ran'));
+      final markerPath = marker.path;
+
+      expect(
+        LibraryStateFile.readBlocking(root.path, _path).problem,
+        isNotNull,
+      );
+      expect(await file.readAll(), isEmpty);
+      final wrote = await file.update((entries) {
+        File(markerPath).writeAsStringSync('ran');
+        entries['a.md'] = 1;
+        return true;
+      });
+      expect(wrote, isFalse);
+      expect(marker.existsSync(), isFalse, reason: 'the change never ran');
+      expect(await file.moved('a.md', 'b.md'), isFalse);
+      expect(await file.removed(['a.md']), isFalse);
+      expect(FileSystemEntity.isDirectorySync(kept().path), isTrue);
+    },
+  );
+
+  test(
+    'a missing file is no problem, and the first update creates it',
+    () async {
+      expect(LibraryStateFile.readBlocking(root.path, _path).problem, isNull);
+      // The folder of the file is missing too.
+      expect(await put('a.md', 1), isTrue);
+      expect(onDisk(), {'a.md': 1});
+    },
+  );
+
+  test(
     'keeps the entries an update did not touch, whatever they hold',
     () async {
       Directory(p.join(root.path, '.niman')).createSync();

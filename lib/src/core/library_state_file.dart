@@ -83,25 +83,8 @@ final class LibraryStateFile {
     String root,
     String filePath,
   ) {
-    try {
-      final decoded = jsonDecode(
-        File(p.join(root, filePath)).readAsStringSync(),
-      );
-      if (decoded is Map) {
-        return (
-          entries: {
-            for (final entry in decoded.entries)
-              entry.key.toString(): entry.value,
-          },
-          problem: null,
-        );
-      }
-    } on FileSystemException {
-      // No file yet: nothing was recorded in this library.
-    } on FormatException catch (error) {
-      return (entries: <String, Object?>{}, problem: error.toString());
-    }
-    return (entries: <String, Object?>{}, problem: null);
+    final (:entries, :problem, unreadable: _) = _load(root, filePath);
+    return (entries: entries, problem: problem);
   }
 
   /// Runs [change] over the entries, after every earlier update of this
@@ -109,8 +92,12 @@ final class LibraryStateFile {
   /// it wrote.
   ///
   /// The read, [change] and the write are one job on a background isolate,
-  /// so [change] captures plain values only. A file that does not read is
-  /// written over; a write that fails is logged, not thrown, and says false.
+  /// so [change] captures plain values only. A file that is there but cannot
+  /// be opened (a lock held while the sync swaps it, an I/O error) is left as
+  /// it is, [change] never runs and the answer is false: the file is the whole
+  /// library's, and writing over it would lose every entry but this one
+  /// (#955). A file that opens but is not a JSON object is written over. A
+  /// write that fails is logged, not thrown, and says false.
   Future<bool> update(StateChange change) async {
     final library = root;
     final path = filePath;
@@ -176,6 +163,55 @@ bool _drop(Map<String, Object?> entries, List<String> gone) {
   return leaving.isNotEmpty;
 }
 
+/// The file [filePath] of the library at [root], read and decoded. Only a
+/// missing file means nothing was recorded; one that is there and does not
+/// open is `unreadable`, and the caller must not take its empty entries for
+/// the file's content.
+({Map<String, Object?> entries, String? problem, bool unreadable}) _load(
+  String root,
+  String filePath,
+) {
+  final String text;
+  try {
+    text = utf8.decode(File(p.join(root, filePath)).readAsBytesSync());
+  } on PathNotFoundException {
+    // No file yet: nothing was recorded in this library.
+    return (entries: <String, Object?>{}, problem: null, unreadable: false);
+  } on FileSystemException catch (error) {
+    return (
+      entries: <String, Object?>{},
+      problem: error.toString(),
+      unreadable: true,
+    );
+  } on FormatException catch (error) {
+    return (
+      entries: <String, Object?>{},
+      problem: error.toString(),
+      unreadable: false,
+    );
+  }
+  try {
+    final decoded = jsonDecode(text);
+    if (decoded is Map) {
+      return (
+        entries: {
+          for (final entry in decoded.entries)
+            entry.key.toString(): entry.value,
+        },
+        problem: null,
+        unreadable: false,
+      );
+    }
+  } on FormatException catch (error) {
+    return (
+      entries: <String, Object?>{},
+      problem: error.toString(),
+      unreadable: false,
+    );
+  }
+  return (entries: <String, Object?>{}, problem: null, unreadable: false);
+}
+
 /// The job of [LibraryStateFile.update], top level so the closure of
 /// `Isolate.run` carries only the paths and the change.
 Future<({bool wrote, String? problem})> _updateBlocking(
@@ -183,8 +219,8 @@ Future<({bool wrote, String? problem})> _updateBlocking(
   String filePath,
   StateChange change,
 ) async {
-  final (:entries, :problem) = LibraryStateFile.readBlocking(root, filePath);
-  if (!change(entries)) return (wrote: false, problem: problem);
+  final (:entries, :problem, :unreadable) = _load(root, filePath);
+  if (unreadable || !change(entries)) return (wrote: false, problem: problem);
   final file = File(p.join(root, filePath));
   await file.parent.create(recursive: true);
   final text = const JsonEncoder.withIndent('  ').convert(entries);
