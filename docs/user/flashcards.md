@@ -95,6 +95,8 @@ the second marked **Repeated** in the deck.
 Every edit is an edit of the note — only that card's characters change —
 and Undo takes it back. A card written as a `::` line needs an answer: the
 editors do not save it without one (a table row may keep an empty cell).
+The counts of an open deck follow the reviews you grade on another device
+once they sync, and the turn of the study day, with no need to reopen the note.
 
 The deck's ⋮: **Study this deck** (`F5`), **Edit as Markdown**,
 **Question and answer columns…**, **Reset the review of this deck…** (the

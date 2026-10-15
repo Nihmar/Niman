@@ -7,9 +7,11 @@ import 'package:niman/src/flashcards/deck.dart';
 import 'package:niman/src/flashcards/deck_meta.dart';
 import 'package:niman/src/flashcards/deck_reading.dart';
 import 'package:niman/src/flashcards/review_state.dart';
+import 'package:niman/src/flashcards/review_store.dart';
 import 'package:niman/src/flashcards/study_day.dart';
 import 'package:niman/src/frontmatter/note_kind.dart';
 import 'package:niman/src/library/library_state.dart';
+import 'package:niman/src/library/session.dart';
 import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/ui/device_shape.dart';
 import 'package:niman/src/ui/kinds/flashcards/deck_edits.dart';
@@ -18,10 +20,16 @@ import 'package:niman/src/ui/kinds/flashcards/deck_review_source.dart';
 import 'package:niman/src/ui/kinds/flashcards/deck_study.dart';
 import 'package:niman/src/ui/kinds/flashcards/deck_wide_view.dart';
 import 'package:niman/src/ui/kinds/flashcards/review_tab.dart';
+import 'package:niman/src/ui/kinds/flashcards/study_day_watch.dart';
 
 /// The flashcard kind's body (#533): the deck the note is — its counts, its
 /// cards with when each comes back — in the shape of the surface, and the
 /// card edits that rewrite the note.
+///
+/// The counts and the Next labels are the review states seen from a study
+/// day, and both move without the note being touched: this app's own grades
+/// (`ReviewStore.changes`), a `review.json` the sync brought from another
+/// device, and the day turning (#966). The view follows all three.
 final class DeckNoteView extends ConsumerStatefulWidget {
   /// Shows the deck of [text], the note [host] holds.
   const new({required this.text, required this.host, super.key});
@@ -39,10 +47,12 @@ final class DeckNoteView extends ConsumerStatefulWidget {
 final class _DeckNoteViewState extends ConsumerState<DeckNoteView> {
   Deck _deck = const Deck(meta: DeckMeta(), cards: []);
   Map<String, ReviewState> _states = const {};
-  DateTime _today = studyToday(DateTime.now(), 0);
+  late DateTime _today;
   int _newPerDay = 20;
   final MathCache _math = MathCache();
   StreamSubscription<String>? _changes;
+  StreamSubscription<Set<String>>? _synced;
+  late final StudyDayWatch _day;
 
   /// Bumped by every read of the deck: one that lands after a later one is
   /// dropped.
@@ -56,11 +66,19 @@ final class _DeckNoteViewState extends ConsumerState<DeckNoteView> {
   @override
   void initState() {
     super.initState();
+    final now = ref.read(studyClockProvider);
+    _today = studyToday(now(), 0);
+    _day = StudyDayWatch(now: now, onTurn: () => unawaited(_readSettings()));
     _read(widget.text);
     unawaited(_readStates());
     unawaited(_readSettings());
     _changes = ref.read(deckReviewSourceProvider).changes.listen((root) {
       if (root == widget.host.libraryRoot) unawaited(_readStates());
+    });
+    // A sync that brings only the review file moves no note and fires no
+    // grade of this app: the file is heard here, as the deck catalog does.
+    _synced = _session?.sync?.localChanges.listen((paths) {
+      if (paths.contains(ReviewStore.filePath)) unawaited(_readStates());
     });
   }
 
@@ -76,6 +94,8 @@ final class _DeckNoteViewState extends ConsumerState<DeckNoteView> {
   @override
   void dispose() {
     unawaited(_changes?.cancel());
+    unawaited(_synced?.cancel());
+    _day.dispose();
     _math.dispose();
     super.dispose();
   }
@@ -111,16 +131,27 @@ final class _DeckNoteViewState extends ConsumerState<DeckNoteView> {
     setState(() => _states = states);
   }
 
+  /// The open library's session, or null for a view with none.
+  LibrarySession? get _session {
+    try {
+      return ref.read(librarySessionProvider);
+    } on Object {
+      return null;
+    }
+  }
+
   Future<void> _readSettings() async {
     try {
       final session = ref.read(librarySessionProvider);
       final perDay = await session.newCardsPerDay;
       final dayStart = (await session.ops?.journal)?.dayStartHour ?? 0;
       if (!mounted) return;
+      final today = studyToday(ref.read(studyClockProvider)(), dayStart);
       setState(() {
         _newPerDay = perDay;
-        _today = studyToday(DateTime.now(), dayStart);
+        _today = today;
       });
+      _day.track(dayStart, today);
     } on Object {
       // No library session (an isolated view): the defaults stand.
     }
