@@ -17,6 +17,7 @@ import 'package:niman/src/ui/home/home_icons.dart';
 import 'package:niman/src/ui/keyboard_presence.dart';
 import 'package:niman/src/ui/palette/palette_command.dart';
 import 'package:niman/src/ui/palette/palette_match.dart';
+import 'package:niman/src/ui/palette/palette_reveal.dart';
 import 'package:niman/src/ui/palette/pinned_commands.dart';
 import 'package:niman/src/ui/settings_areas.dart';
 import 'package:niman/src/ui/strings.dart';
@@ -163,6 +164,9 @@ final class CommandPalette extends StatefulWidget {
 final class _CommandPaletteState extends State<CommandPalette> {
   final TextEditingController _query = TextEditingController();
   final ScrollController _scroll = ScrollController();
+
+  /// The selected row's, to bring it into view when the arrows move it.
+  final GlobalKey _selectedRow = GlobalKey();
   List<PaletteCommand> _commands = const [];
   List<String> _notes = const [];
   List<PaletteSetting> _settings = const [];
@@ -303,6 +307,8 @@ final class _CommandPaletteState extends State<CommandPalette> {
       if (query.trim().isEmpty) _notes = widget.recentNotes.take(8).toList();
       _selected = 0;
     });
+    // Another list, or a shorter one: back to its top, where row 0 is.
+    if (_scroll.hasClients) _scroll.jumpTo(_scroll.position.minScrollExtent);
     _debounce?.cancel();
     if (query.trim().isEmpty) return;
     final token = ++_token;
@@ -326,6 +332,12 @@ final class _CommandPaletteState extends State<CommandPalette> {
     final count = _items.length;
     if (count == 0) return;
     setState(() => _selected = (_selected + step) % count);
+    revealPaletteRow(
+      _scroll,
+      _selectedRow,
+      first: _selected == 0,
+      last: _selected == count - 1,
+    );
   }
 
   void _choose([int? index]) {
@@ -386,6 +398,7 @@ final class _CommandPaletteState extends State<CommandPalette> {
       return _PaletteRow(
         key: Key('palette-item-$at'),
         selected: at == _selected,
+        anchor: at == _selected ? _selectedRow : null,
         // The pointer moves the selection with it, as every palette
         // does: the row under the hand is the row ↵ runs and Alt+P pins
         // (0.0.8 test round — pinning acted on a row elsewhere).
@@ -550,10 +563,14 @@ final class _PaletteRow extends StatelessWidget {
     required this.onTap,
     required this.onHover,
     required this.child,
+    this.anchor,
     super.key,
   });
 
   final bool selected;
+
+  /// The key the selected row carries, for the list to scroll to it.
+  final GlobalKey? anchor;
   final VoidCallback onTap;
 
   /// The pointer came onto this row.
@@ -565,6 +582,7 @@ final class _PaletteRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Padding(
+      key: anchor,
       padding: const EdgeInsets.symmetric(horizontal: 6),
       child: Material(
         color: selected ? scheme.surfaceContainerHighest : Colors.transparent,
