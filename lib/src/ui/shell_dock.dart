@@ -121,8 +121,14 @@ final class ShellDock {
   Widget build(BuildContext context, {bool overlay = false}) {
     final w = workspace.value;
     final path = w.activePath;
-    void open(String path) {
+    // A page opened from a pane lands under the scrim unless the overlay
+    // is shut first (#978).
+    void shut() {
       if (overlay) closeOverlay();
+    }
+
+    void open(String path) {
+      shut();
       workspace.show(path);
     }
 
@@ -154,7 +160,10 @@ final class ShellDock {
             if (path != null) onOpenHistory(path);
           },
           onOpenVersion: switch ((onOpenVersion, path)) {
-            (final open?, final path?) => (version) => open(path, version),
+            (final openVersion?, final path?) => (version) {
+              shut();
+              openVersion(path, version);
+            },
             _ => null,
           },
         ),
