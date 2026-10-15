@@ -2458,9 +2458,13 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     _searchCommands.dispose();
     _treeFocus.dispose();
     _workspace.controller.removeListener(_onWorkspaceChanged);
+    // The study is the library's: the tab is app-wide, and a run left in it
+    // would show in the next library's panes and grade into this one's
+    // review.json (#944).
     _reviewTab
-      ..hosted = false
-      ..removeListener(_onReviewTab);
+      ..removeListener(_onReviewTab)
+      ..close()
+      ..hosted = false;
     AppKeyMap.current.removeListener(_onKeyMapChanged);
     _chosenKeys.detach();
     FocusManager.instance.removeListener(_reclaimFocus);

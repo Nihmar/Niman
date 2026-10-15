@@ -15,6 +15,7 @@ import 'package:niman/src/todo/todo_source.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/kinds/flashcards/deck_review_source.dart';
 import 'package:niman/src/ui/kinds/flashcards/deck_study.dart';
+import 'package:niman/src/ui/kinds/flashcards/review_tab.dart';
 import 'package:niman/src/ui/palette/command_palette.dart';
 import 'package:niman/src/ui/window_controller.dart';
 import 'package:path/path.dart' as p;
@@ -205,6 +206,33 @@ void main() {
     expect(find.byKey(const Key('deck-row-studying')), findsNothing);
     expect(find.byKey(const Key('deck-name')), findsOneWidget);
     expect(find.text('began', findRichText: true), findsOneWidget);
+  });
+
+  testWidgets('a study open beside a deck ends with the library (#944)', (
+    tester,
+  ) async {
+    await openDeck(tester, realStudy: true, size: const Size(1800, 900));
+    await tester.tap(find.byKey(const Key('deck-study')));
+    for (var i = 0; i < 20; i++) {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 50)),
+      );
+      await tester.pump();
+      if (find.byKey(const Key('review-tab')).evaluate().isNotEmpty) break;
+    }
+    await settle(tester);
+    final tab = ProviderScope.containerOf(tester.element(find.byType(NimanApp)))
+        .read(reviewTabProvider);
+    expect(tab.run, isNotNull);
+
+    // The library goes: its shell is torn down, and the study with it, so
+    // the next library's shell does not build with another library's run.
+    await controller.close();
+    await settle(tester);
+    expect(tab.run, isNull);
+    expect(tab.pane, isNull);
+    expect(tab.hosted, isFalse);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('a window too narrow for two panes studies over the deck', (
