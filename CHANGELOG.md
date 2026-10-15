@@ -6,6 +6,52 @@ This file ships inside the build and feeds the in-app changelog (the
 launch dialog after an update and the screen under Settings → Diagnostics
 and info). Update it in the release commit, before the tag.
 
+## [0.2.1] - 2026-10-15
+
+Flashcards, links, and the rest of the desktop.
+
+A note can be a **deck of flashcards**: its tables, `::` lines and
+highlights are cards, studied with spaced repetition, while the note
+stays plain Markdown. Links gain **heading paths and block ids**, a muted
+style for a link to nothing, **Links to this note** and a **preview** on
+hover. The desktop audit is finished — marking several tree rows, naming
+in the tree, the Todo for mouse and keyboard, spelling and properties in
+the dock — and a phone turned to landscape stays a phone.
+
+### Added
+- **Flashcards** (#533): a note with `type: flashcard` is a deck — every table row, every `question :: answer` line and every `==highlight==` cloze is a card, studied with spaced repetition (Again, Hard, Good, Easy). **New flashcards** and **Make flashcards…** make one; **Study** lists the decks by their `deck:` place and filters them by tag; the review opens as a tab on a desktop and takes the screen on a phone. When each card comes back is kept in `.niman/review.json`, merged card by card on sync. **Settings → Study** sets the new cards per day, the Home gains a **Study** tile and Android a **Niman Study** widget
+- **Heading paths and block links** (#844, #845): `[[Note#Part#Details]]` tells a repeated heading apart by its parent, and `[[Note#^id]]` points at the block that ends with ` ^id`. The suggester offers both, and searches every note's headings after `[[##` and its ids after `[[^^`; a move or rename keeps the whole fragment
+- **Dead links drawn muted** (#847) in live, source and the read view, in every palette; creating a dead link's note makes the folders its path names
+- **Links to this note** (#842): the notes that link here, each with the line that does — under the note, in the dock's Links pane, or a sheet from the note's menu on a phone
+- **Link preview** (#846): the pointer resting on a link in the read view, or Ctrl/⌘ held over one in the editor, shows the target in a card, scrolled to its heading or block; a long press does it on a phone's read view. **Settings → Editor → Preview links** turns it off
+- **Update links after rename or move** (#848): **automatic**, **ask** or **never**, a library setting
+- **New notes and folders go to** (#850): one setting — the library's root or the open note's folder — for every way of making one
+- **The tree, for the mouse and the keyboard** (#712): `Shift`+click and `Shift`+arrows mark several rows, to move or delete together with one Undo; typing a name jumps to it; `Ctrl+Enter` opens in a new tab; a new note or folder is named in place in the tree; **Reveal in tree** is a command
+- **A ☰ menu in the title bar** (#712) lists every command by group, with its keys, and a tab's right click offers Close others, Close to the right, Close all, Reveal in tree, Copy path, Rename…, History and Export…
+- **A version from History opens as a tab** beside the note (#712), and a restore closes it with Undo
+- **Spelling and properties in the dock** (#712): the spelling review is a dock pane that rechecks after each edit, and the properties panel edits values, dates, list items, new keys and the type in place
+- **The Todo, for the mouse and the keyboard** (#712): click to select, double click, `Enter` or `F2` to edit, `Space` to check, `Delete` to delete, a right-click menu for due date and priority, and a quick-add field with token completion
+- **On a desktop** (#712): `Ctrl`+wheel zooms a note or a book; templates are picked by typing; an export's progress is a card in the corner with Cancel; a search hit has a right-click menu and the arrows walk the hits; the sync status is a pop-up at its icon; a Home tile's ⚙ opens an inspector beside the grid; a settings drop-down opens under its field
+- **The Android update shows its progress** (#900), with a Cancel that stops it, and asks for *Install unknown apps* before the installer
+
+### Changed
+- **A phone is a phone in landscape too** (#849): the shape follows the device, not the window's width, so a turned phone keeps the phone's layout with more room for the note
+- **Every desktop popup menu uses compact rows** (#938)
+
+### Fixed
+- **Links**: a link to the open note's own heading jumps in place on Windows (#865); a dead relative link proposes the right path (#860); a rename that leaves links alone drops their stale edges (#856); a move rewrites only the links that named what moved, and titles, `%23` and escaped pipes survive it (#917–#920); the open notes are saved before a rewrite writes them (#913); block ids — a heading's id is not its text, an id line is not a block (#912–#915); schemes without `//`, touching links, reference definitions and backslash wiki paths read right (#970–#973); a dead link gets its edge when its note is made (#974); a long name no longer overflows a library-wide row (#874); the preview never cuts a character in half (#863)
+- **Editor**: the caret stays fully visible at the bottom of a note; a list item nests under the one above it; the docked spelling pass stops when the note is edited under it, keeps Ignore and never fixes text it did not see (#907, #908, #958)
+- **Flashcards**: line cards' answers, the deck's refresh, and the progress's cost on index writes and moves (#964–#968)
+- **Properties**: a flow list's quoting, the year picker, the caret's place and an existing key (#959–#962)
+- **Update**: an installer that fails to start says so, a late Cancel still stops, a missing permission is told (#905, #911, #914)
+- **Shell**: the compare tab gives its pane back to what opens over it (#906, #975–#978); the side panel is reachable on a window too narrow to dock it; the note tab bar keeps its buttons beside the compare chip (#927); the list/grid switch clips to its outline
+- **Tasks**: Tomorrow and Next week step calendar days across a DST change (#957); the keyboard selection stays in view (#909, #910)
+- **Tree and files**: stale marks are dropped and the selected row stays in view in the quick pick (#979, #980); a note is filed in the folder actually made (#904); a direct copy's temp file is deleted reliably (#992); an unreadable state file is left alone (#955, #956)
+- **Lists**: the add field keeps the focus, and takes it when a list opens on a desktop
+- **Shortcuts**: a key shared by two commands names both and frees both (#963)
+- **Export**: a trailing block id is hidden and the block gets an id (#928); an embed's escaped pipe reads right (#932)
+- **Android widgets**: each widget instance has its own rows (#969)
+
 ## [0.2.0] - 2026-10-12
 
 Polish, Calendar, Grid and Columns.
