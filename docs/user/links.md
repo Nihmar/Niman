@@ -217,7 +217,8 @@ separate feature. Only linked mentions are here.
 Standard `[text](href)` links, and reference links — `[text][label]` with a
 `[label]: href` line anywhere in the note. `href` may be a relative path
 to a note or any other file of the library (`Books/Dune.epub`), a
-`#anchor`, or an external URL. The path may be percent-encoded, as
+`#anchor`, or an external URL — `https://…`, but `mailto:` and `tel:` too,
+which the system opens and which are never drawn as dead links. The path may be percent-encoded, as
 Obsidian writes it: `[x](My%20Note.md)` is `My Note.md`. A path with no
 extension is not followed. `![alt](src)` images are not links,
 and neither is a footnote reference (`[^1]`); a link written inside a
@@ -254,7 +255,8 @@ note is next indexed.
 
 Renaming or moving a note, or a folder of them, also rewrites the links
 *other* notes hold to it, so they keep finding it: a path link and a
-Markdown link follow the new path, and a link by name follows a rename (see
+Markdown link follow the new path (a reference link's `[label]: path` line
+included), and a link by name follows a rename (see
 [organization](organization.md) for what else follows the note). Only the
 links that pointed at what moved are rewritten: with two notes of the same
 name in different folders, a link to the other one is left as it is.

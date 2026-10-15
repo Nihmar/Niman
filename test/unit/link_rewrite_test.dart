@@ -279,4 +279,66 @@ void main() {
     );
     expect(identical(out, source), isTrue);
   });
+
+  group('link reference definitions (#972)', () {
+    final moves = LinkMoves({'Docs/a.md': 'Archive/a.md'});
+
+    String rewrite(String source) =>
+        rewriteMovedLinks(source, from: 'root.md', moves: moves);
+
+    test('the destination follows, the label and the title stay', () {
+      expect(
+        rewrite('see [x][r]\n\n[r]: Docs/a.md "The title"\n'),
+        'see [x][r]\n\n[r]: Archive/a.md "The title"\n',
+      );
+    });
+
+    test('an angled destination keeps its brackets, a fragment rides', () {
+      expect(
+        rewrite(
+          '[x][r] [y][s]\n\n[r]: <Docs/a.md#Part>\n[s]: Docs/a.md#Other\n',
+        ),
+        '[x][r] [y][s]\n\n[r]: <Archive/a.md#Part>\n[s]: Archive/a.md#Other\n',
+      );
+    });
+
+    test('a destination on the line after its label follows', () {
+      expect(
+        rewrite('[x][r]\n\n[r]:\n    Docs/a.md\n'),
+        '[x][r]\n\n[r]:\n    Archive/a.md\n',
+      );
+    });
+
+    test('it follows with the inline links of the note, in order', () {
+      expect(
+        rewrite('[i](Docs/a.md) [x][r]\n\n[r]: Docs/a.md\n\n[j](Docs/a.md)\n'),
+        '[i](Archive/a.md) [x][r]\n\n[r]: Archive/a.md\n\n[j](Archive/a.md)\n',
+      );
+    });
+
+    test('a path beside the linking note stays relative to it', () {
+      final out = rewriteMovedLinks(
+        '[x][r]\n\n[r]: a.md\n',
+        from: 'Docs/note.md',
+        moves: moves,
+      );
+      expect(out, '[x][r]\n\n[r]: ../Archive/a.md\n');
+    });
+
+    test('another file, a URL, a fence and a quote are left as written', () {
+      const source =
+          '[a][r] [b][s]\n\n[r]: Elsewhere/a.md\n[s]: https://x.y/Docs/a.md\n\n'
+          '```\n[t]: Docs/a.md\n```\n\n> [q]: Docs/a.md\n';
+      expect(identical(rewrite(source), source), isTrue);
+    });
+  });
+
+  test('a wikilink path written with backslashes follows its note (#973)', () {
+    final out = rewriteMovedLinks(
+      r'[[Docs\Note]] [[Docs\Note#H|x]] [[Note]]',
+      from: 'root.md',
+      moves: LinkMoves({'Docs/Note.md': 'Archive/Note.md'}),
+    );
+    expect(out, '[[Archive/Note]] [[Archive/Note#H|x]] [[Note]]');
+  });
 }

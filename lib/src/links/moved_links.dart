@@ -14,6 +14,7 @@
 /// walk of the library.
 library;
 
+import 'package:niman/src/links/link_definitions.dart';
 import 'package:niman/src/links/link_moves.dart';
 import 'package:niman/src/links/link_query.dart';
 import 'package:niman/src/links/parser.dart';
@@ -41,7 +42,12 @@ final class MovedLinks {
     required LinkResolver resolver,
   }) async {
     final asked = <LinkQuery>{};
-    for (final link in parseLinks(text, includeEmbeds: true)) {
+    // A definition's destination is a link's href: what `[text][label]`
+    // names (#972).
+    for (final link in [
+      ...parseLinks(text, includeEmbeds: true),
+      ...linkDefinitionsOf(text),
+    ]) {
       final query = linkQueryOf(link, from);
       if (query != null &&
           moves.mayName(query.target, markdown: query.markdown)) {

@@ -83,10 +83,17 @@ abstract final class LinkPaths {
     }
   }
 
-  /// Whether [s] starts with a URI scheme (`http://`, `https://`, …).
+  /// Whether [s] starts with a URI scheme: `https://`, but `mailto:` and
+  /// `tel:` too, which carry no `//` (#970). Such a link leaves the library:
+  /// it is never looked up as a file, never drawn dead, and is opened by the
+  /// system.
+  ///
+  /// A scheme is two letters or more before the colon, which keeps a Windows
+  /// drive (`C:\`, `C:/`) a path: RFC 3986 allows one letter, but no scheme
+  /// is written with one, and a drive is.
   static bool hasScheme(String s) => _scheme.hasMatch(s);
 
-  static final RegExp _scheme = RegExp('^[a-zA-Z][a-zA-Z0-9+.-]*://');
+  static final RegExp _scheme = RegExp('^[a-zA-Z][a-zA-Z0-9+.-]+:');
 
   /// Normalizes a target for matching: backslashes to slashes, `./` and
   /// whitespace trimmed, lowercased. The `.md` extension and any
