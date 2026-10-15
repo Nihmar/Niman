@@ -552,6 +552,27 @@ void main() {
     expect(_text(tester), _note);
   });
 
+  testWidgets('a key that is there with nothing in it is filled in', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_app('---\ntitle: Enciclopedia\nsubtitle:\n---\n'));
+    await tester.pumpAndSettle();
+    await _openPanel(tester);
+
+    await tester.tap(find.byKey(const Key('frontmatter-add')));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const Key('frontmatter-key-field')),
+      'subtitle',
+    );
+    await tester.pumpAndSettle();
+    expect(find.text(AppStrings.frontmatterKeyUnavailable), findsNothing);
+    await _fillField(tester, value: 'Una enciclopedia');
+
+    expect(_text(tester), contains('subtitle: Una enciclopedia\n'));
+    expect(_text(tester), contains('title: Enciclopedia\n'));
+  });
+
   testWidgets('a key the panel has no field for is refused in the dialog', (
     tester,
   ) async {

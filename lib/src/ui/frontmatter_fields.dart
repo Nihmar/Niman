@@ -551,7 +551,7 @@ final class _FrontmatterFieldsState extends State<FrontmatterFields> {
   /// and writing its empty value would empty what it holds. A key no row can
   /// show (a nested mapping) is left alone, written or opened by nothing.
   bool _openExisting(String key) {
-    if (!hasFrontmatterKey(widget.note, key)) return false;
+    if (!frontmatterKeyHolds(widget.note, key)) return false;
     setState(() {
       switch (_fieldNamed(key)?.type) {
         case FrontmatterFieldType.text:
@@ -678,7 +678,7 @@ final class _FrontmatterFieldsState extends State<FrontmatterFields> {
       context,
       // A key the note has and no field shows is refused in the dialog.
       unavailable: (key) =>
-          hasFrontmatterKey(widget.note, key) && _fieldNamed(key) == null,
+          frontmatterKeyHolds(widget.note, key) && _fieldNamed(key) == null,
     );
     if (result == null || !context.mounted) return;
     // A key the note has is not a new field: its own editor opens, on what

@@ -168,7 +168,9 @@ changes nothing — and the type chip at the row's end is a menu that turns the
 field into another type (a list's items joined into one value, a value made
 the one item of a list). A phone keeps the dialog; there too, a key the note
 already has opens that field's own editor instead of being written over, and a
-key the panel cannot show (a nested block) is refused in the dialog.
+key the panel cannot show (a nested block) is refused in the dialog. A key
+that is in the note with nothing after it (`title:`) counts as not there: adding
+it fills it in.
 
 In every surface the file is the only copy: an edit rewrites that key's line
 and leaves the rest of the block — comments, quoting, the other keys — exactly

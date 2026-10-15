@@ -176,6 +176,18 @@ void main() {
     expect(set.single, ('tags', '[a, b]'));
   });
 
+  testWidgets('adding a key that is there with nothing in it fills it in', (
+    tester,
+  ) async {
+    await pump(tester, note: '---\ntitle: Hello\nsubtitle:\n---\n');
+    await tester.tap(find.byKey(const Key('frontmatter-add')));
+    await tester.pump();
+    await tester.enterText(field, 'subtitle');
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pump();
+    expect(set.single.$1, 'subtitle');
+  });
+
   testWidgets('a key the panel has no row for is not written over', (
     tester,
   ) async {
