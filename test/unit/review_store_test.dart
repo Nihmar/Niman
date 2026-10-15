@@ -181,34 +181,6 @@ void main() {
     await store.resetAll();
   });
 
-  group('pruneNote', () {
-    test('keeps the keys given and drops the others', () async {
-      await store.write('a.md', 'one', state());
-      await store.write('a.md', 'two', state());
-      await store.write('a.md', 'three', state());
-      await store.write('b.md', 'orphan', state());
-      await store.pruneNote('a.md', {'one', 'three', 'never reviewed'});
-      expect((await store.read('a.md')).keys, ['one', 'three']);
-      expect(await store.read('b.md'), isNotEmpty);
-    });
-
-    test('drops the entry of a note with no card left', () async {
-      await store.write('a.md', 'one', state());
-      await store.pruneNote('a.md', const {});
-      expect(onDisk(), isEmpty);
-    });
-
-    test('writes nothing when every key stays', () async {
-      await store.write('a.md', 'one', state());
-      final before = kept().lastModifiedSync();
-      final text = kept().readAsStringSync();
-      await store.pruneNote('a.md', {'one'});
-      await store.pruneNote('missing.md', const {});
-      expect(kept().readAsStringSync(), text);
-      expect(kept().lastModifiedSync(), before);
-    });
-  });
-
   group('a file that does not read', () {
     test('reads as empty and is written over', () async {
       Directory(p.join(root.path, '.niman')).createSync();

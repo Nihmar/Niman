@@ -14,9 +14,9 @@
 /// reading the file again, so two panes never lose each other's grade, and
 /// the read, the change and the write run on a background isolate. Nothing
 /// prunes on a read or a write: a key the sync brought for a card whose note
-/// has not arrived yet is not an orphan. Orphans go when Niman itself changes
-/// a question (`pruneNote`) or the deck is reset (`resetNote`), and a note
-/// the library saw leave takes its entry along (`removed`).
+/// has not arrived yet is not an orphan, and a card edit does not prune
+/// either. Orphans go when the deck is reset (`resetNote`), and a note the
+/// library saw leave takes its entry along (`removed`).
 library;
 
 import 'dart:async';
@@ -133,27 +133,6 @@ final class ReviewStore {
       return true;
     }),
   );
-
-  /// Drops the cards of the note at [path] whose key is not in [keepKeys]:
-  /// the orphans a question changed in Niman leaves behind.
-  Future<void> pruneNote(String path, Set<String> keepKeys) {
-    final keep = Set<String>.of(keepKeys);
-    return _told(
-      _state.update((entries) {
-        if (!entries.containsKey(path)) return false;
-        final cards = _cardsOf(entries[path]);
-        final before = cards.length;
-        cards.removeWhere((key, _) => !keep.contains(key));
-        if (cards.isEmpty) {
-          entries.remove(path);
-          return true;
-        }
-        if (cards.length == before) return false;
-        entries[path] = cards;
-        return true;
-      }),
-    );
-  }
 
   /// Tells [changes] that the file was written, once [wrote] says it was.
   Future<void> _told(Future<bool> wrote) async {
