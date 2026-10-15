@@ -204,6 +204,50 @@ void main() {
     });
   });
 
+  group('a cloze in a container of several lines (#948)', () {
+    test('a quote: the editor shows no prefix, the rewrite adds it back', () {
+      const note = '> The past of ==tread== is\n> trod.\n\nAfter.\n';
+      final card = read(note).cards.single;
+      expect(clozeSentence(note, card), 'The past of ==tread== is\ntrod.');
+      // Retyping the sentence as it was changes nothing.
+      expect(rewriteCloze(note, card, clozeSentence(note, card)), note);
+      final out = rewriteCloze(note, card, 'The past of ==tread== is\ntrod!');
+      expect(out, '> The past of ==tread== is\n> trod!\n\nAfter.\n');
+      // Still one quote with one card in it.
+      expect(read(out).cards, hasLength(1));
+    });
+
+    test('lines added to the sentence get the prefix too', () {
+      const note = '> a ==b==\n> c\n';
+      final card = read(note).cards.single;
+      final out = rewriteCloze(note, card, 'a ==b==\nc\nd\n\ne');
+      expect(out, '> a ==b==\n> c\n> d\n>\n> e\n');
+    });
+
+    test('a list item: the indent comes back', () {
+      const note = '- one ==two==\n  three\n- next\n';
+      final card = read(note).cards.single;
+      expect(clozeSentence(note, card), 'one ==two==\nthree');
+      final out = rewriteCloze(note, card, 'one ==two==\nthree four');
+      expect(out, '- one ==two==\n  three four\n- next\n');
+    });
+
+    test('a list item in a quote, with CRLF line endings', () {
+      const note = '> - one ==two==\r\n>   three\r\n';
+      final card = read(note).cards.single;
+      expect(clozeSentence(note, card), 'one ==two==\nthree');
+      final out = rewriteCloze(note, card, 'one ==two==\nthree four');
+      expect(out, '> - one ==two==\r\n>   three four\r\n');
+    });
+
+    test('a lazy continuation line stays unprefixed', () {
+      const note = '> a ==b==\nc\n';
+      final card = read(note).cards.single;
+      expect(clozeSentence(note, card), 'a ==b==\nc');
+      expect(rewriteCloze(note, card, 'a ==b==\nc d'), '> a ==b==\nc d\n');
+    });
+  });
+
   group('deleting a card', () {
     const note =
         '| Q | A |\n'

@@ -35,6 +35,7 @@ final class CardSource {
     this.answer,
     this.questionColumn,
     this.answerColumn,
+    this.lineContents = const <NoteRange>[],
   });
 
   /// The first line of the card's source, counting from 0.
@@ -71,6 +72,11 @@ final class CardSource {
 
   /// For a table row, the column of the answer; null for any other card.
   final int? answerColumn;
+
+  /// For a source of several lines, each line's content: [content] cut at
+  /// the lines, a container's prefix (`> `, a list item's indent) left out
+  /// of every one. Empty for a source of one line.
+  final List<NoteRange> lineContents;
 }
 
 /// One card of a deck.

@@ -62,6 +62,15 @@ CardSource sourceOf(
     answer: answer,
     questionColumn: questionColumn,
     answerColumn: answerColumn,
+    lineContents: spans.length == 1
+        ? const <NoteRange>[]
+        : [
+            for (final span in spans)
+              (
+                start: buffer.offsetAt(span.line, span.start),
+                end: buffer.offsetAt(span.line, span.end),
+              ),
+          ],
   );
 }
 

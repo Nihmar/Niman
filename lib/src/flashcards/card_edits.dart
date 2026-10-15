@@ -51,22 +51,52 @@ String rewriteCard(
 }
 
 /// What a cloze card's editor shows: the paragraph or list item around the
-/// highlight, as written, line endings as `\n`.
-String clozeSentence(String text, FlashCard card) => text
-    .substring(card.source.content.start, card.source.content.end)
-    .replaceAll('\r\n', '\n');
+/// highlight, as written, line endings as `\n`. The lines after the first
+/// are shown without what their container writes before them (a quote's
+/// `> `, a list item's indent): [rewriteCloze] puts it back.
+String clozeSentence(String text, FlashCard card) {
+  final lines = card.source.lineContents;
+  if (lines.isEmpty) {
+    return text.substring(card.source.content.start, card.source.content.end);
+  }
+  return [
+    for (final line in lines)
+      text.substring(line.start, line.end).replaceAll('\r', ''),
+  ].join('\n');
+}
 
 /// [text] with the paragraph of the cloze [card] replaced by [sentence]:
-/// one line when the paragraph was one, its line endings the note's.
+/// one line when the paragraph was one, its line endings the note's, and
+/// every line after the first behind the prefix the paragraph's second line
+/// had (`> `, an item's indent).
 String rewriteCloze(String text, FlashCard card, String sentence) {
-  final multiple = card.source.firstLine != card.source.lastLine;
+  final lines = card.source.lineContents;
   var next = sentence.replaceAll('\r\n', '\n').trim();
-  if (!multiple) {
+  if (lines.isEmpty) {
     next = next.replaceAll('\n', ' ');
-  } else if (text.contains('\r\n')) {
-    next = next.replaceAll('\n', '\r\n');
+  } else {
+    final prefix = _prefixBefore(text, lines[1].start);
+    next = next
+        .split('\n')
+        .indexed
+        .map(
+          (line) => line.$1 == 0
+              ? line.$2
+              : '${line.$2.trim().isEmpty ? prefix.trimRight() : prefix}'
+                    '${line.$2}',
+        )
+        .join(text.contains('\r\n') ? '\r\n' : '\n');
   }
   return _replace(text, card.source.content, next);
+}
+
+/// What the line holding [at] has before [at]: its container's prefix.
+String _prefixBefore(String text, int at) {
+  var from = at;
+  while (from > 0 && text.codeUnitAt(from - 1) != 0x0A) {
+    from--;
+  }
+  return text.substring(from, at);
 }
 
 /// [text] without [card]: its line for a table row or a `::` line, its
