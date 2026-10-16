@@ -1917,13 +1917,15 @@ final class LibraryController implements LibrarySession {
     _log.debug('index warm-up: ${clock.elapsedMilliseconds} ms');
   }
 
-  /// [IndexDatabase.ensureRecentIndex] and [IndexDatabase.ensureTagCounts],
+  /// [IndexDatabase.ensureRecentIndex], [IndexDatabase.ensurePinnedIndex]
+  /// and [IndexDatabase.ensureTagCounts],
   /// logged rather than thrown: their readers answer without them, only
   /// slower.
   Future<void> _ensureRecentIndex(IndexDatabase db) async {
     final clock = Stopwatch()..start();
     try {
       await db.ensureRecentIndex();
+      await db.ensurePinnedIndex();
       await db.ensureTagCounts();
       _log.debug(
         'notes_recent and tag counts ready in ${clock.elapsedMilliseconds} ms',

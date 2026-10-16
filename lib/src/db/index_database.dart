@@ -380,6 +380,14 @@ class IndexDatabase extends _$IndexDatabase {
   static const String _createRecentIndex =
       'CREATE INDEX IF NOT EXISTS notes_recent ON notes (is_dir, modified)';
 
+  /// The pinned notes by path: a partial index, one entry per pinned note,
+  /// so `FieldRepo.pinnedNotes` reads the few rows it names, not the table
+  /// (#1065). The query has to say `pinned = 1` as a literal for the planner
+  /// to prove the index covers it.
+  static const String _createPinnedIndex =
+      'CREATE INDEX IF NOT EXISTS notes_pinned ON notes (path) '
+      'WHERE pinned = 1';
+
   /// Builds the `notes_recent` index the Home's recently modified tile
   /// (#535) walks, when this file lacks it; nothing when it has it.
   ///
@@ -391,6 +399,12 @@ class IndexDatabase extends _$IndexDatabase {
   /// this file is a wipe and a full rescan. Until it exists, the tile's
   /// query reads the table, which still answers.
   Future<void> ensureRecentIndex() => customStatement(_createRecentIndex);
+
+  /// Builds the `notes_pinned` index (#1065) on a file from before it, the
+  /// way [ensureRecentIndex] does and for the same reason: not a schema
+  /// bump. Until it exists the pinned query reads the table, which still
+  /// answers.
+  Future<void> ensurePinnedIndex() => customStatement(_createPinnedIndex);
 
   /// Builds the tag counts (#692) on a file from before them, the way
   /// [ensureRecentIndex] builds its index, and for the same reason.
@@ -420,6 +434,7 @@ class IndexDatabase extends _$IndexDatabase {
       await m.database.customStatement(_createFts);
       await m.database.customStatement(_createAnchorsFts);
       await m.database.customStatement(_createRecentIndex);
+      await m.database.customStatement(_createPinnedIndex);
       await tag_counts.createTagCounts(m.database);
     },
     // Every row here is derived from the notes on disk, so an upgrade is a
@@ -436,6 +451,7 @@ class IndexDatabase extends _$IndexDatabase {
       await m.database.customStatement(_createFts);
       await m.database.customStatement(_createAnchorsFts);
       await m.database.customStatement(_createRecentIndex);
+      await m.database.customStatement(_createPinnedIndex);
       await tag_counts.createTagCounts(m.database);
     },
     beforeOpen: (details) async {

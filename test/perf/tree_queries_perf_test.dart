@@ -1,0 +1,58 @@
+// What the tree's index queries cost on a big table (#1065, #1064, #1063).
+//
+// The rows are written straight into the index with one recursive INSERT, so
+// the table is 200 000 rows in a second and the numbers are SQLite's, not the
+// filesystem's. Every run prints its numbers and asserts a backstop three
+// times as wide as the design's ceiling; `NIMAN_PERF=1` holds the ceiling
+// itself (AGENTS.md).
+
+import 'dart:io';
+
+import 'package:drift/drift.dart' show driftRuntimeOptions;
+import 'package:drift/native.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/db/index_database.dart';
+import 'package:niman/src/frontmatter/fields.dart';
+
+final bool _referenceHost = Platform.environment['NIMAN_PERF'] == '1';
+
+/// The bar [ceiling] is held to, per [_referenceHost].
+double _bar(double ceiling) => _referenceHost ? ceiling : ceiling * 3;
+
+const int _rows = 200000;
+
+void main() {
+  driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
+
+  late IndexDatabase db;
+
+  setUp(() async {
+    db = IndexDatabase(NativeDatabase.memory());
+    addTearDown(db.close);
+    await db.customStatement(
+      'WITH RECURSIVE s(i) AS (SELECT 1 UNION ALL SELECT i + 1 FROM s '
+      'WHERE i < $_rows) '
+      'INSERT INTO notes (path, parent, name, is_dir, size, modified, '
+      'created, pinned) '
+      "SELECT 'Inbox/n' || i || '.md', 1, 'n' || i || '.md', 0, 0, 0, 0, "
+      'i IN (5, 90000, 199999) FROM s',
+    );
+  });
+
+  test('the pinned notes come from the partial index, not a scan', () async {
+    final repo = FieldRepo(db);
+    await repo.pinnedNotes(); // opens the connection and prepares the statement
+    final clock = Stopwatch()..start();
+    final pinned = await repo.pinnedNotes();
+    final ms = clock.elapsedMicroseconds / 1000;
+    _say('pinnedNotes over $_rows rows: ${ms.toStringAsFixed(2)} ms');
+
+    expect(pinned, hasLength(3));
+    expect(ms, lessThan(_bar(20)));
+  });
+}
+
+/// Prints a measurement. The numbers are the point of this file, so they
+/// go to the console rather than into an assertion message nobody sees.
+// ignore: avoid_print
+void _say(String line) => print(line);
