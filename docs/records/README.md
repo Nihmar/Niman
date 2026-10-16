@@ -31,4 +31,5 @@ comments (`docs/records/<name>.md`).
 | [flashcards.md](flashcards.md) | Decks of flashcards in notes, reviewed with SM-2, the review state in `.niman/review.json` (#533) |
 | [calendar-txt.md](calendar-txt.md) | Reading and writing `calendar.txt` beside `todo.txt`: the journal's events, the line-wise sync merge, reminders on an event (#730) |
 | [note-columns.md](note-columns.md) | Columns of blocks side by side with Pandoc's fenced divs, editable in `live` (#729) |
+| [apple-platforms.md](apple-platforms.md) | The plan for macOS and iOS: storage grants, the Mac desktop, widgets, signing, CI, phases and the owner's decisions — not built |
 | [review-v0.1.3.md](review-v0.1.3.md) | Code review of everything merged after v0.1.3: what was fixed, what is open |
