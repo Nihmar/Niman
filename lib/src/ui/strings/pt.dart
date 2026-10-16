@@ -956,6 +956,9 @@ final class PortugueseStrings extends Strings {
   @override
   String get linksToNoteFurther => 'Mencionada mais abaixo';
   @override
+  String linksUpdating(int done, int total) =>
+      'A atualizar ligações: $done de $total';
+  @override
   String get openLinkFailed => 'Não foi possível abrir o link';
 
   // Dead-link note creation (issue #78).

@@ -375,6 +375,7 @@ void main() {
         content: 'See [[Old]].\n',
       );
       await ops.rename('Old.md', 'New');
+      await ops.linkQuestion;
       expect(await ops.readNote('Ref.md'), 'See [[New]].\n');
     });
 
@@ -390,6 +391,7 @@ void main() {
           content: '[[A/Note]] and [[Note]]\n',
         );
         await ops.move('A/Note.md', 'B');
+        await ops.linkQuestion;
         expect(
           await ops.readNote('Ref.md'),
           '[[B/Note]] and [[Note]]\n',
@@ -414,6 +416,7 @@ void main() {
       );
 
       await ops.rename('z/b.md', 'c');
+      await ops.linkQuestion;
 
       expect(
         await ops.readNote('a/N.md'),
@@ -435,6 +438,7 @@ void main() {
       );
 
       await ops.rename('a/b.md', 'c');
+      await ops.linkQuestion;
 
       expect(
         await ops.readNote('N.md'),
@@ -454,6 +458,7 @@ void main() {
       );
 
       await ops.rename('Docs', 'Books');
+      await ops.linkQuestion;
 
       expect(await ops.readNote('Books/N.md'), '[x](b.md) and [[Books/b]]\n');
     });
@@ -467,6 +472,7 @@ void main() {
         content: '[[Docs/Note]] and [x](Docs/Note.md) and [[Note]]\n',
       );
       await ops.rename('Docs', 'Books');
+      await ops.linkQuestion;
       expect(
         await ops.readNote('Ref.md'),
         '[[Books/Note]] and [x](Books/Note.md) and [[Note]]\n',
@@ -483,6 +489,7 @@ void main() {
       await indexer.fullScan(root.path);
 
       await ops.rename('assets', 'media');
+      await ops.linkQuestion;
 
       expect(
         await ops.readNote('Ref.md'),
@@ -505,6 +512,7 @@ void main() {
         );
 
         await ops.rename('Old.md', 'New');
+        await ops.linkQuestion;
 
         expect(await ops.readNote('Ref.md'), '![[New]]\n');
       },

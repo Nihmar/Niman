@@ -960,6 +960,9 @@ final class BulgarianStrings extends Strings {
   @override
   String get linksToNoteFurther => 'Спомената по-надолу';
   @override
+  String linksUpdating(int done, int total) =>
+      'Обновяване на връзките: $done от $total';
+  @override
   String get openLinkFailed => 'Не може да се отвори връзката';
 
   // Dead-link note creation (issue #78).

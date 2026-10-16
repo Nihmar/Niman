@@ -952,6 +952,9 @@ final class CroatianStrings extends Strings {
   @override
   String get linksToNoteFurther => 'Spomenuto dalje dolje';
   @override
+  String linksUpdating(int done, int total) =>
+      'Ažuriranje veza: $done od $total';
+  @override
   String get openLinkFailed => 'Veza se nije mogla otvoriti';
 
   // Dead-link note creation (issue #78).

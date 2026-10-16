@@ -48,6 +48,7 @@ final class ShellRowActions {
     this.renameInPlace,
     this.confirmLinks,
     this.onLinksRewritten,
+    this.onLinksProgress,
   });
 
   /// Asks whether the links to what a rename or a move took are to follow,
@@ -58,6 +59,10 @@ final class ShellRowActions {
   /// The answer was yes and the links were rewritten on disk (#859), some
   /// time after [onMoved]: the open note re-reads its file.
   final VoidCallback? onLinksRewritten;
+
+  /// How far the rewrite of the links to what moved has come (#1041): it runs
+  /// after [onMoved], one batch of notes at a time.
+  final LinkRewriteProgress? onLinksProgress;
 
   /// Starts a rename in place in the tree (#707): true when it did — a
   /// desktop with the tree on screen — false to ask in a dialog.
@@ -206,6 +211,7 @@ final class ShellRowActions {
         name,
         confirmLinks: confirmLinks,
         onLinksRewritten: onLinksRewritten,
+        onLinksProgress: onLinksProgress,
         flushOpen: saveOpen,
       );
       onMoved(sel, row.path);
@@ -228,6 +234,7 @@ final class ShellRowActions {
         name,
         confirmLinks: confirmLinks,
         onLinksRewritten: onLinksRewritten,
+        onLinksProgress: onLinksProgress,
         flushOpen: saveOpen,
       );
       onMoved(path, renamed.path);
@@ -277,6 +284,7 @@ final class ShellRowActions {
       target,
       confirmLinks: confirmLinks,
       onLinksRewritten: onLinksRewritten,
+      onLinksProgress: onLinksProgress,
       flushOpen: saveOpen,
     );
     onMoved(path, row.path);

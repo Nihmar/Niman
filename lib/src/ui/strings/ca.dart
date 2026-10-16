@@ -963,6 +963,9 @@ final class CatalanStrings extends Strings {
   @override
   String get linksToNoteFurther => 'Esmentada més avall';
   @override
+  String linksUpdating(int done, int total) =>
+      'Actualitzant enllaços: $done de $total';
+  @override
   String get openLinkFailed => 'No s’ha pogut obrir l’enllaç';
 
   // Dead-link note creation (issue #78).

@@ -958,6 +958,9 @@ final class SlovenianStrings extends Strings {
   @override
   String get linksToNoteFurther => 'Omenjeno nižje';
   @override
+  String linksUpdating(int done, int total) =>
+      'Posodabljanje povezav: $done od $total';
+  @override
   String get openLinkFailed => 'Povezave ni bilo mogoče odpreti';
 
   // Dead-link note creation (issue #78).

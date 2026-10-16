@@ -953,6 +953,9 @@ final class IcelandicStrings extends Strings {
   @override
   String get linksToNoteFurther => 'Nefnt neðar';
   @override
+  String linksUpdating(int done, int total) =>
+      'Uppfæri tengla: $done af $total';
+  @override
   String get openLinkFailed => 'Það gekk ekki að opna tengilinn';
 
   // Dead-link note creation (issue #78).

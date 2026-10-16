@@ -505,10 +505,11 @@ final class NoteOps implements NoteOperations {
     String newName, {
     LinkUpdateConfirm? confirmLinks,
     void Function()? onLinksRewritten,
+    LinkRewriteProgress? onLinksProgress,
     FlushOpenNotes? flushOpen,
   }) async {
     final done = await _released(path, () => _rename(path, newName, flushOpen));
-    _askLinks(done, confirmLinks, onLinksRewritten);
+    _askLinks(done, confirmLinks, onLinksRewritten, onLinksProgress);
     return done.row;
   }
 
@@ -563,13 +564,14 @@ final class NoteOps implements NoteOperations {
     String targetParent, {
     LinkUpdateConfirm? confirmLinks,
     void Function()? onLinksRewritten,
+    LinkRewriteProgress? onLinksProgress,
     FlushOpenNotes? flushOpen,
   }) async {
     final done = await _released(
       path,
       () => _move(path, targetParent, flushOpen),
     );
-    _askLinks(done, confirmLinks, onLinksRewritten);
+    _askLinks(done, confirmLinks, onLinksRewritten, onLinksProgress);
     return done.row;
   }
 
@@ -605,8 +607,12 @@ final class NoteOps implements NoteOperations {
   /// The question about the links [rename] and [move] left, still open or
   /// answered and carried out (#859); completes without error whatever
   /// became of it. What a test awaits to see the links rewritten.
-  Future<void> get linkQuestion => _linkQuestion;
+  Future<void> get linkQuestion =>
+      Future.wait<void>([_linkQuestion, _linkRewrites]);
   Future<void> _linkQuestion = Future<void>.value();
+
+  /// The automatic rewrites of links, one after the other (#1041).
+  Future<void> _linkRewrites = Future<void>.value();
 
   /// Asks [confirm] about the link rewrite [done] left pending (#848), once
   /// the move is over and returned to its caller: the caller follows the
@@ -619,14 +625,30 @@ final class NoteOps implements NoteOperations {
   /// thrown: the move is done, and nobody awaits this.
   /// Without a [confirm] to ask, the links stay as written: a note is never
   /// written unasked.
+  ///
+  /// Under the automatic setting there is nothing to ask: the rewrite runs
+  /// at once, in the same turn of its own, a batch of referrers to a turn of
+  /// the op chain (#1041), telling [onProgress] as it goes.
   void _askLinks(
     Relocated done,
     LinkUpdateConfirm? confirm,
     void Function()? onRewritten,
+    LinkRewriteProgress? onProgress,
   ) {
     final pending = done.pending;
     if (pending == null) return;
     const log = AppLogger(name: 'links');
+    if (pending.automatic) {
+      _linkRewrites = _linkRewrites.then((_) async {
+        try {
+          await pending.apply(_synchronized, progress: onProgress);
+          onRewritten?.call();
+        } on Object catch (error) {
+          log.warning('could not update links to "${done.row.path}": $error');
+        }
+      });
+      return;
+    }
     if (confirm == null) {
       log.info('links to "${done.row.path}" left as written: no prompt');
       return;
@@ -639,7 +661,7 @@ final class NoteOps implements NoteOperations {
         if (notes == 0 || !await confirm(notes)) return;
         // The rewrite flushes the open notes itself, right before reading
         // each referrer (#913).
-        await _synchronized(pending.apply);
+        await pending.apply(_synchronized, progress: onProgress);
         onRewritten?.call();
       } on Object catch (error) {
         log.warning('could not update links to "${done.row.path}": $error');

@@ -954,6 +954,9 @@ final class HungarianStrings extends Strings {
   @override
   String get linksToNoteFurther => 'Lejjebb említve';
   @override
+  String linksUpdating(int done, int total) =>
+      'Hivatkozások frissítése: $done / $total';
+  @override
   String get openLinkFailed => 'A hivatkozás nem nyitható meg';
 
   // Dead-link note creation (issue #78).

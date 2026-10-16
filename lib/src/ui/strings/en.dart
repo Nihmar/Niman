@@ -945,6 +945,9 @@ final class EnglishStrings extends Strings {
   @override
   String get linksToNoteFurther => 'Mentioned further down';
   @override
+  String linksUpdating(int done, int total) =>
+      'Updating links: $done of $total';
+  @override
   String get openLinkFailed => 'Could not open link';
 
   // Dead-link note creation (issue #78).

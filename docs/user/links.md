@@ -274,7 +274,9 @@ name in different folders, a link to the other one is left as it is.
 Editor → Update links after rename or move** chooses what happens:
 
 - **Automatically** (the default) rewrites every note that links to what
-  moved.
+  moved. The rename or move is done at once and the rewrite follows in the
+  background, a few notes at a time, so the rest of the app keeps working;
+  when more than a few notes are rewritten a message counts them as it goes.
 - **Ask each time** moves first, then asks one question for the whole move
   — a folder rename included, not one per note — naming how many notes
   would change: *Update* rewrites their links, *Leave as is* (or closing the

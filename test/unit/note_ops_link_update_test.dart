@@ -82,6 +82,7 @@ void main() {
           return false;
         },
       );
+      await ops.linkQuestion;
       expect(await ops.readNote('Ref.md'), 'See [[New]] and [[Other]].\n');
       expect(await ops.readNote('Second.md'), '[x](New.md)\n');
       expect(asked, 0);
@@ -100,6 +101,7 @@ void main() {
         );
         expect(await referrersOf('Docs/a.md'), ['B.md']);
         await ops.move('Docs/a.md', 'Archive');
+        await ops.linkQuestion;
         await ops.writer.indexed;
         expect(
           await ops.readNote('B.md'),
@@ -113,9 +115,67 @@ void main() {
       await seed();
       final editor = openBuffer('Ref.md', 'Typed just now: [[Old]].\n');
       await ops.rename('Old.md', 'New', flushOpen: editor.save);
+      await ops.linkQuestion;
       // The autosave that would have been next finds nothing left to write.
       await editor.save();
       expect(await ops.readNote('Ref.md'), 'Typed just now: [[New]].\n');
+    });
+  });
+
+  group('automatic rewrite runs off the op chain (#1041)', () {
+    const referrers = 40;
+    const flushTime = Duration(milliseconds: 25);
+
+    /// `Hub` cited by [referrers] notes.
+    Future<void> seedHub() async {
+      await ops.createNote(parentPath: '', name: 'Hub');
+      for (var i = 0; i < referrers; i++) {
+        await ops.createNote(
+          parentPath: '',
+          name: 'Ref$i',
+          content: 'See [[Hub]].\n',
+        );
+      }
+    }
+
+    test('rename returns before the rewrite, which does not hold the chain '
+        'and reports its progress', () async {
+      await seedHub();
+      var flushes = 0;
+      final progress = <(int, int)>[];
+      var rewritten = 0;
+
+      final row = await ops.rename(
+        'Hub.md',
+        'Centre',
+        flushOpen: () async {
+          flushes++;
+          await Future<void>.delayed(flushTime);
+        },
+        onLinksProgress: (done, total) => progress.add((done, total)),
+        onLinksRewritten: () => rewritten++,
+      );
+
+      expect(row.path, 'Centre.md');
+      expect(flushes, lessThan(referrers), reason: 'the rewrite is not done');
+      expect(rewritten, 0);
+
+      // Another op issued meanwhile waits for a batch of notes, not all.
+      await ops.createNote(parentPath: '', name: 'During');
+      expect(
+        flushes,
+        lessThan(referrers),
+        reason: 'createNote did not wait for the whole rewrite',
+      );
+
+      await ops.linkQuestion;
+      expect(flushes, referrers);
+      expect(rewritten, 1);
+      expect(progress.last, (referrers, referrers));
+      expect(progress.length, greaterThan(1), reason: 'progress is stepwise');
+      for (var i = 0; i < referrers; i++) {
+        expect(await ops.readNote('Ref$i.md'), 'See [[Centre]].\n');
+      }
     });
   });
 

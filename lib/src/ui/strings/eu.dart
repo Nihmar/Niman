@@ -953,6 +953,9 @@ final class BasqueStrings extends Strings {
   @override
   String get linksToNoteFurther => 'Beherago aipatua';
   @override
+  String linksUpdating(int done, int total) =>
+      'Estekak eguneratzen: $done / $total';
+  @override
   String get openLinkFailed => 'Ezin izan da esteka ireki';
 
   // Dead-link note creation (issue #78).
