@@ -890,12 +890,28 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   /// test holds a change that moved nothing the tree draws to no read.
   int treeCalls = 0;
 
+  /// While set, [tree] waits for it before answering: a read that outlasts
+  /// the changes arriving behind it (#1064).
+  Completer<void>? treeGate;
+
+  /// The most [tree] reads that were outstanding at once.
+  int treePeak = 0;
+  int _treeOutstanding = 0;
+
   @override
   Future<List<Note>> tree(
     Iterable<String> expandedPaths, {
     TreeSort sort = TreeSort.nameAsc,
   }) async {
     treeCalls++;
+    _treeOutstanding++;
+    if (_treeOutstanding > treePeak) treePeak = _treeOutstanding;
+    try {
+      final gate = treeGate;
+      if (gate != null) await gate.future;
+    } finally {
+      _treeOutstanding--;
+    }
     final expanded = Set<String>.from(expandedPaths);
     final results = <_Row>[
       for (final row in _rows)

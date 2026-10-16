@@ -782,7 +782,40 @@ final class _NoteTreeState extends State<NoteTree> {
     _rowsFollowContents = followsContents;
     _rowsExpanded = Set<String>.of(widget.expanded);
     _rowsSort = widget.sort;
-    return _rows = _flatten();
+    return _rows = _flattenOnce();
+  }
+
+  /// The flatten running now, if any.
+  Future<_Rows>? _flattening;
+
+  /// The one flatten waiting behind it (#1064).
+  Completer<_Rows>? _flattenNext;
+
+  /// [_flatten], with at most one in flight and one waiting: the changes that
+  /// arrive while the rows are being read share one more read, which starts
+  /// when the first ends and takes the expanded folders and the order as they
+  /// are then. Each caller gets the rows of the read that answers it, so a
+  /// burst of tree changes is two reads, not one per change.
+  Future<_Rows> _flattenOnce() {
+    if (_flattening != null) {
+      return (_flattenNext ??= Completer<_Rows>()).future;
+    }
+    return _flattenNow();
+  }
+
+  Future<_Rows> _flattenNow() {
+    final running = _flatten();
+    _flattening = running;
+    return running.whenComplete(() {
+      _flattening = null;
+      final next = _flattenNext;
+      _flattenNext = null;
+      if (next != null) {
+        unawaited(
+          _flattenNow().then(next.complete, onError: next.completeError),
+        );
+      }
+    });
   }
 
   /// Flattens the visible tree from the index, and reads the pinned notes

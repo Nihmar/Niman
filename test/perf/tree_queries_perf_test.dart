@@ -11,6 +11,7 @@ import 'dart:io';
 import 'package:drift/drift.dart' show driftRuntimeOptions;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/db/dao.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/frontmatter/fields.dart';
 
@@ -34,9 +35,9 @@ void main() {
       'WHERE i < $_rows) '
       'INSERT INTO notes (path, parent, name, is_dir, size, modified, '
       'created, pinned, name_key) '
-      "SELECT 'Inbox/n' || i || '.md', 1, 'n' || i || '.md', 0, 0, 0, 0, "
+      "SELECT 'Inbox/n' || i || '.md', 0, 'n' || i || '.md', 0, 0, 0, 0, "
       'i IN (5, 90000, 199999), '
-      "'n' || i || '.md' FROM s",
+      "'n' || printf('%07d', i) || '.md' FROM s",
     );
   });
 
@@ -51,6 +52,32 @@ void main() {
     expect(pinned, hasLength(3));
     expect(ms, lessThan(_bar(20)));
   });
+
+  test(
+    'the tree of a 200k-note root reads its index in order (#1064)',
+    () async {
+      final dao = NoteDao(db);
+      await dao.tree(
+        const [],
+      ); // opens the connection and prepares the statement
+      final clock = Stopwatch()..start();
+      final rows = await dao.tree(const []);
+      final ms = clock.elapsedMicroseconds / 1000;
+      _say('tree of $_rows rows in the root: ${ms.toStringAsFixed(1)} ms');
+      expect(rows, hasLength(_rows));
+
+      final generated = dao.treeQuery(const []).constructQuery();
+      final plan = await db
+          .customSelect(
+            'EXPLAIN QUERY PLAN ${generated.sql}',
+            variables: generated.introducedVariables,
+          )
+          .get();
+      final detail = plan.map((r) => r.read<String>('detail')).join('\n');
+      expect(detail, contains('notes_tree'));
+      expect(detail, isNot(contains('TEMP B-TREE')));
+    },
+  );
 }
 
 /// Prints a measurement. The numbers are the point of this file, so they

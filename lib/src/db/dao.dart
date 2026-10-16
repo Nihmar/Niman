@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import 'package:meta/meta.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/db/referrer_dao.dart';
@@ -51,19 +52,37 @@ final class NoteDao {
   Future<List<Note>> tree(
     Iterable<String> expandedPaths, {
     TreeSort sort = TreeSort.nameAsc,
+  }) async {
+    final ids = await _expandedIds(expandedPaths);
+    return await treeQuery(ids, sort: sort).get();
+  }
+
+  /// The ids of the folders at [paths]: a seek on the unique path each.
+  Future<List<int>> _expandedIds(Iterable<String> paths) async {
+    if (paths.isEmpty) return const [];
+    final query = _db.selectOnly(_db.notes)
+      ..addColumns([_db.notes.id])
+      ..where(_db.notes.path.isIn(paths));
+    return [for (final row in await query.get()) row.read(_db.notes.id)!];
+  }
+
+  /// The statement behind [tree]: the children of the root and of the folders
+  /// with the ids [expandedIds], parent by parent.
+  ///
+  /// Ordered by `parent` first, then by the tree's terms, so a name order
+  /// walks the `notes_tree` index one parent after the other and sorts
+  /// nothing (#1064, #1070); the previous `parent = 0 OR parent IN (…)`
+  /// could not use it and sorted every row of every open folder in a
+  /// temporary b-tree. The rows of one parent come out in the same order as
+  /// before, which is all the caller groups them by.
+  @visibleForTesting
+  SimpleSelectStatement<$NotesTable, Note> treeQuery(
+    Iterable<int> expandedIds, {
+    TreeSort sort = TreeSort.nameAsc,
   }) {
-    return (_db.select(_db.notes)
-          ..where(
-            (t) =>
-                t.parent.equals(0) |
-                t.parent.isInQuery(
-                  _db.selectOnly(_db.notes)
-                    ..addColumns([_db.notes.id])
-                    ..where(_db.notes.path.isIn(expandedPaths)),
-                ),
-          )
-          ..orderBy(_treeOrder(sort)))
-        .get();
+    return _db.select(_db.notes)
+      ..where((t) => t.parent.isIn([0, ...expandedIds]))
+      ..orderBy([(t) => OrderingTerm.asc(t.parent), ..._treeOrder(sort)]);
   }
 
   /// The tree's own order terms for [sort] (#726): folders first, then the
