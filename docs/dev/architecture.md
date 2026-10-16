@@ -64,7 +64,12 @@ lines or when responsibilities mix.
   one scheduled after the last ended — ten times its duration at least,
   five minutes at least, three times that while the watch is healthy — and
   none while the app is in the background or hidden. A watch that restarts
-  (`missedChanges`) and the manual rescan ask for a walk at once.
+  (`missedChanges`) and the manual rescan ask for a walk at once. The
+  watcher's batches run through `WatchBatchQueue` — one in flight, the ones
+  that arrive meanwhile merged into one (#1062). A move the OS paired with
+  its destination is those two paths; only a move with no known destination
+  reconciles its parent folder, against a listing of that folder's own
+  entries (`IndexTree.syncDirLevel`), never its subtree.
 - **Edit:** `NoteOps.saveNote` → history snapshot and atomic write
   (temp + rename) in one isolate pass → the note is rescanned into the
   index. Every mode of the surface shares one tokenizer for links.

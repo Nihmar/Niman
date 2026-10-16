@@ -571,6 +571,73 @@ final class IndexTree {
           in rel.isEmpty ? await _dao.allRows() : await _dao.subtreeRows(rel))
         row.path: row,
     };
+    return await _applyScope(root, rel, entries, old);
+  }
+
+  /// Reconciles the one directory at [abs] with its rows, without
+  /// descending (#1062): its entries are listed on a background isolate and
+  /// compared with the rows whose parent it is. What is new is inserted,
+  /// what changed is updated, what is gone is pruned (a folder with
+  /// everything under it).
+  ///
+  /// The cost is the directory's own entries — not the library's, not the
+  /// subtree's. A subfolder the index has no row for is new to it, nothing
+  /// is indexed under it, and it is synced whole ([syncDirSubtree]); one it
+  /// holds is left to its own events and to the full scan. A directory the
+  /// index does not hold at all is synced whole too.
+  Future<({bool wrote, Set<String> removed})> syncDirLevel(
+    String root,
+    String abs,
+  ) async {
+    final rel = relPath(abs, root);
+    final dirRow = rel.isEmpty ? null : await _dao.find(rel);
+    if (rel.isNotEmpty && dirRow == null) {
+      return await syncDirSubtree(root, abs);
+    }
+    final listing = await IsolateGauge.run(
+      () => listDirectory(root, abs),
+      'list "$rel"',
+    );
+    listing.logs.forEach(_log.debug);
+    if (listing.failed) return (wrote: false, removed: const <String>{});
+    final entries = <DiskEntry>[
+      if (dirRow != null)
+        DiskEntry(
+          rel: rel,
+          name: listing.name,
+          isDir: true,
+          size: 0,
+          modified: listing.modified,
+          created: listing.created,
+        ),
+      ...listing.entries,
+    ];
+    _log.debug('syncDirLevel "$rel": ${listing.entries.length} entr(ies)');
+    final old = <String, Note>{
+      rel: ?dirRow,
+      for (final row in await _dao.children(dirRow?.id ?? 0)) row.path: row,
+    };
+    var result = await _applyScope(root, rel, entries, old);
+    for (final entry in listing.entries) {
+      if (!entry.isDir || old.containsKey(entry.rel)) continue;
+      final inside = await syncDirSubtree(root, p.join(root, entry.rel));
+      result = (
+        wrote: result.wrote || inside.wrote,
+        removed: {...result.removed, ...inside.removed},
+      );
+    }
+    return result;
+  }
+
+  /// Reads what changed among [entries], applies the diff against [old] in
+  /// one transaction and writes the content rows of what was read: the part
+  /// [syncDirSubtree] and [syncDirLevel] share, over [rel]'s scope.
+  Future<({bool wrote, Set<String> removed})> _applyScope(
+    String root,
+    String rel,
+    List<DiskEntry> entries,
+    Map<String, Note> old,
+  ) async {
     final read = await readContents(root, entries, old);
     var wrote = false;
     var pairedRels = const <String>{};

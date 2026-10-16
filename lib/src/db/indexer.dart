@@ -438,12 +438,14 @@ final class Indexer {
     });
   }
 
-  /// Reconciles [abs] with disk: if it exists as a directory the whole
-  /// subtree is re-synced (covering renames/moves whose new path was not in
-  /// the event batch), if it is a file it is upserted, and if it is gone its
-  /// index rows are pruned. Dot components are ignored. [onChanged] fires
-  /// after the writes, and only when the index actually changed; [onRemoved]
-  /// fires with the paths the reconcile pruned.
+  /// Reconciles [abs] with disk: if it exists as a directory its own
+  /// entries are compared with the index, one level and not the subtree
+  /// (the watcher asks for this after a move whose destination it was not
+  /// told, #1062); if it is a file it is upserted, and if it is gone its
+  /// index rows are pruned. A directory the index has no row for is synced
+  /// whole, as is a subfolder it has none for. Dot components are ignored.
+  /// [onChanged] fires after the writes, and only when the index actually
+  /// changed; [onRemoved] fires with the paths the reconcile pruned.
   Future<void> resync(String root, String abs) {
     return _synchronized(() async {
       final rel = _tree.safeRel(abs, root);
@@ -484,7 +486,7 @@ final class Indexer {
     );
     if (probe.isDir) {
       _log.debug('$tag: "$abs" -> resync dir "$rel"');
-      return await _tree.syncDirSubtree(root, abs);
+      return await _tree.syncDirLevel(root, abs);
     }
     if (probe.exists && _tree.awaited(rel)) {
       _log.debug('$tag: "$rel" -> its writer reads it');

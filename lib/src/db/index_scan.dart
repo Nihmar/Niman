@@ -196,6 +196,12 @@ Future<void> walkDirectories((String, SendPort) args) async {
   requests.close();
 }
 
+/// [abs]'s own state and its direct children, without descending: what a
+/// single-level reconcile of one directory compares with its rows (#1062).
+/// Runs on a background isolate in the caller.
+DirListing listDirectory(String root, String abs) =>
+    _listOne(root, abs, <String>[]);
+
 /// Lists one directory: its own state plus its direct children, and queues
 /// its subfolders for the walk to visit next.
 DirListing _listOne(String root, String abs, List<String> pending) {

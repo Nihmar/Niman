@@ -47,6 +47,7 @@ import 'package:niman/src/library/note_ops.dart';
 import 'package:niman/src/library/rescan_scheduler.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/library/trash_cleaner.dart';
+import 'package:niman/src/library/watch_batch_queue.dart';
 import 'package:niman/src/links/library_links.dart';
 import 'package:niman/src/links/suggester.dart';
 import 'package:niman/src/reading/reading_positions.dart';
@@ -209,6 +210,9 @@ final class LibraryController implements LibrarySession {
   NoteOps? _ops;
   LibrarySyncService? _sync;
   FileWatcher? _watcher;
+
+  /// The watcher's batches of the open library, run one at a time.
+  WatchBatchQueue? _batches;
 
   /// The full walks of the open library: one at a time, paced by how long
   /// the last took (#1067). Null while no library is open.
@@ -636,7 +640,10 @@ final class LibraryController implements LibrarySession {
       debounce: watcherDebounce,
       source: watchSource,
     );
-    watcher.events.listen(_onWatchBatch);
+    // One batch in flight, the ones that arrive meanwhile merged (#1062).
+    final batches = WatchBatchQueue(_onWatchBatch);
+    _batches = batches;
+    watcher.events.listen((batch) => unawaited(batches.add(batch)));
     await watcher.start();
     // Held so [_teardown] can stop it: an unheld watcher keeps its
     // recursive watch (and its event handling) alive for the whole
@@ -1701,6 +1708,8 @@ final class LibraryController implements LibrarySession {
   Future<void> _teardown() async {
     _rescans?.stop();
     _rescans = null;
+    _batches?.close();
+    _batches = null;
     _reconcileTimer?.cancel();
     _reconcileTimer = null;
     final watcher = _watcher;
