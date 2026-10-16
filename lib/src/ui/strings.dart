@@ -475,6 +475,7 @@ final class AppStrings {
   static String get noteStatusError => _s.noteStatusError;
   static String get noteStatusSaveFailed => _s.noteStatusSaveFailed;
   static String get noteSaveFailedSnack => _s.noteSaveFailedSnack;
+  static String get noteChangedOnDisk => _s.noteChangedOnDisk;
   static String get noteNotText => _s.noteNotText;
   static String get noteLoadFailed => _s.noteLoadFailed;
   static String get noteLoadMissing => _s.noteLoadMissing;
@@ -619,6 +620,11 @@ final class AppStrings {
   static String get searchTooShortHint => _s.searchTooShortHint;
   static String get searchNoMatches => _s.searchNoMatches;
   static String get searchLoadMore => _s.searchLoadMore;
+  static String searchShowingFirst(int shown, int total) =>
+      _s.searchShowingFirst(shown, total);
+  static String get searchStop => _s.searchStop;
+  static String searchScanning(int scanned, int total) =>
+      _s.searchScanning(scanned, total);
 
   /// The Tasks and events group of a lone `+project`/`@context` (#730).
   static String searchTasksAndEvents(int count) =>
@@ -1370,6 +1376,7 @@ final class AppStrings {
   static String get historyReasonRestore => _s.historyReasonRestore;
   static String get historyReasonSync => _s.historyReasonSync;
   static String get historyReasonReplace => _s.historyReasonReplace;
+  static String get historyReasonExternal => _s.historyReasonExternal;
   static String get historyReasonUnknown => _s.historyReasonUnknown;
   static String get historySyncBase => _s.historySyncBase;
   static String get historyEmpty => _s.historyEmpty;

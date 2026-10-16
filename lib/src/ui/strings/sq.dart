@@ -609,6 +609,10 @@ final class AlbanianStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Shënimi nuk u ruajt. Niman do të provojë sërish.';
   @override
+  String get noteChangedOnDisk =>
+      'Një program tjetër e ndryshoi këtë shënim. Ajo version ruhet në '
+      'histori.';
+  @override
   String get noteNotText =>
       'Ky skedar nuk është shënim teksti, ndaj Niman nuk mund ta shfaqë këtu.';
   @override
@@ -879,6 +883,14 @@ final class AlbanianStrings extends Strings {
   String get searchNoMatches => 'Nuk ka përputhje';
   @override
   String get searchLoadMore => 'Shfaq më shumë';
+  @override
+  String get searchStop => 'Ndalo';
+  @override
+  String searchScanning(int scanned, int total) =>
+      'Po kërkohet… $scanned nga $total shënime';
+  @override
+  String searchShowingFirst(int shown, int total) =>
+      'Të parat $shown nga $total';
   @override
   String searchTasksAndEvents(int count) => 'Detyrat dhe ngjarjet · $count';
   @override
@@ -2276,6 +2288,8 @@ final class AlbanianStrings extends Strings {
   String get historyReasonSync => 'para sinkronizimit';
   @override
   String get historyReasonReplace => 'para zëvendësimit';
+  @override
+  String get historyReasonExternal => 'ndryshuar jashtë Niman';
   @override
   String get historyReasonUnknown => 'i rikuperuar';
   @override

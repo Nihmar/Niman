@@ -610,6 +610,10 @@ final class HungarianStrings extends Strings {
   String get noteSaveFailedSnack =>
       'A jegyzetet nem sikerült menteni. A Niman újra megpróbálja.';
   @override
+  String get noteChangedOnDisk =>
+      'Egy másik program módosította ezt a jegyzetet. Az a változat megmaradt '
+      'az előzményekben.';
+  @override
   String get noteNotText =>
       'Ez a fájl nem szöveges jegyzet, ezért a '
       'Niman itt nem tudja megjeleníteni.';
@@ -884,6 +888,14 @@ final class HungarianStrings extends Strings {
   String get searchNoMatches => 'Nincs találat';
   @override
   String get searchLoadMore => 'Több megjelenítése';
+  @override
+  String get searchStop => 'Leállítás';
+  @override
+  String searchScanning(int scanned, int total) =>
+      'Keresés… $scanned / $total jegyzet';
+  @override
+  String searchShowingFirst(int shown, int total) =>
+      'Az első $shown a(z) $total közül';
   @override
   String searchTasksAndEvents(int count) => 'Feladatok és események · $count';
   @override
@@ -2277,6 +2289,8 @@ final class HungarianStrings extends Strings {
   String get historyReasonSync => 'szinkronizálás előtt';
   @override
   String get historyReasonReplace => 'csere előtt';
+  @override
+  String get historyReasonExternal => 'a Nimanen kívül módosítva';
   @override
   String get historyReasonUnknown => 'helyreállított';
   @override

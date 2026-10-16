@@ -57,7 +57,10 @@ replace — never a copy of what is already on screen:
 - while you write, at most once every few minutes
   (`historyIntervalMinutes`, default 5);
 - right before a restore, before a library-wide replace, and (with sync)
-  before a download overwrites the note.
+  before a download overwrites the note;
+- when a save is about to overwrite a version of the note that another
+  program wrote since the editor last read or wrote it (*changed outside
+  Niman*), whatever the interval.
 
 A version identical to the newest one is not kept twice, and an empty
 note (one just created) has nothing to keep. Autosave runs

@@ -598,6 +598,9 @@ final class HindiStrings extends Strings {
   String get noteSaveFailedSnack =>
       'यह नोट सहेजा नहीं जा सका। Niman फिर कोशिश करेगा।';
   @override
+  String get noteChangedOnDisk =>
+      'किसी दूसरे प्रोग्राम ने यह नोट बदला। वह संस्करण इतिहास में रखा गया है।';
+  @override
   String get noteNotText =>
       'यह फ़ाइल टेक्स्ट नोट नहीं है, इसलिए Niman इसे यहाँ नहीं दिखा सकता।';
   @override
@@ -869,6 +872,14 @@ final class HindiStrings extends Strings {
   String get searchNoMatches => 'कोई मेल नहीं';
   @override
   String get searchLoadMore => 'और दिखाएँ';
+  @override
+  String get searchStop => 'रोकें';
+  @override
+  String searchScanning(int scanned, int total) =>
+      'खोज रहे हैं… $scanned / $total नोट';
+  @override
+  String searchShowingFirst(int shown, int total) =>
+      '$total में से पहले $shown दिखाए जा रहे हैं';
   @override
   String searchTasksAndEvents(int count) => 'कार्य और ईवेंट · $count';
   @override
@@ -2228,6 +2239,8 @@ final class HindiStrings extends Strings {
   String get historyReasonSync => 'सिंक से पहले';
   @override
   String get historyReasonReplace => 'बदलने से पहले';
+  @override
+  String get historyReasonExternal => 'Niman के बाहर बदला गया';
   @override
   String get historyReasonUnknown => 'पुनर्प्राप्त';
   @override

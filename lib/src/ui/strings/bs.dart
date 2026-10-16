@@ -612,6 +612,10 @@ final class BosnianStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Bilješka se nije mogla spremiti. Niman će pokušati ponovo.';
   @override
+  String get noteChangedOnDisk =>
+      'Drugi program je promijenio ovu bilješku. Ta verzija je sačuvana u '
+      'historiji.';
+  @override
   String get noteNotText =>
       'Ova datoteka nije tekstualna bilješka, pa je '
       'Niman ne može prikazati ovdje.';
@@ -884,6 +888,13 @@ final class BosnianStrings extends Strings {
   String get searchNoMatches => 'Nema podudaranja';
   @override
   String get searchLoadMore => 'Prikaži više';
+  @override
+  String get searchStop => 'Zaustavi';
+  @override
+  String searchScanning(int scanned, int total) =>
+      'Pretraga… $scanned od $total bilješki';
+  @override
+  String searchShowingFirst(int shown, int total) => 'Prvih $shown od $total';
   @override
   String searchTasksAndEvents(int count) => 'Zadaci i događaji · $count';
   @override
@@ -2271,6 +2282,8 @@ final class BosnianStrings extends Strings {
   String get historyReasonSync => 'prije sinhronizacije';
   @override
   String get historyReasonReplace => 'prije zamjene';
+  @override
+  String get historyReasonExternal => 'promijenjeno izvan Nimana';
   @override
   String get historyReasonUnknown => 'pronađena';
   @override

@@ -296,7 +296,7 @@ void main() {
   ) async {
     // A tall surface so every page's items (and the Show more slot) are
     // actually built by the lazy ListView.
-    tester.view.physicalSize = const Size(1000, 4000);
+    tester.view.physicalSize = const Size(1000, 8000);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
@@ -768,6 +768,214 @@ void main() {
     expect(opened.last, 'n1.md');
     expect(row('n1.md').hitTestable(), findsOne);
   });
+
+  // #1044
+  testWidgets('a new result set starts at the top of the list', (tester) async {
+    source.hits = [
+      for (var i = 0; i < 40; i++) _hit('n$i.md', snippet: 'xy $i'),
+    ];
+    await tester.pumpWidget(buildApp(source));
+    await tester.pump();
+    await tester.enterText(find.byKey(const Key('search-query')), 'xy');
+    await settle(tester);
+
+    double offset() => tester
+        .state<ScrollableState>(
+          find.descendant(
+            of: find.byKey(const Key('search-results')),
+            matching: find.byType(Scrollable),
+          ),
+        )
+        .position
+        .pixels;
+
+    await tester.drag(
+      find.byKey(const Key('search-results')),
+      const Offset(0, -1500),
+    );
+    await tester.pumpAndSettle();
+    expect(offset(), greaterThan(500));
+
+    source.hits = [
+      for (var i = 0; i < 40; i++) _hit('m$i.md', snippet: 'xyz $i'),
+    ];
+    await tester.enterText(find.byKey(const Key('search-query')), 'xyz');
+    await settle(tester);
+    expect(offset(), 0);
+    expect(find.byKey(const Key('search-hit-m0.md')), findsOne);
+  });
+
+  // #1044
+  testWidgets('Enter in the field opens the first hit when none is marked', (
+    tester,
+  ) async {
+    source.hits = [_hit('a.md'), _hit('b.md')];
+    await tester.pumpWidget(buildApp(source));
+    await tester.enterText(find.byKey(const Key('search-query')), 'note');
+    await settle(tester);
+    expect(opened, isEmpty);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pump();
+    expect(opened, ['a.md']);
+
+    // The search action of a touch keyboard does the same.
+    opened.clear();
+    await tester.testTextInput.receiveAction(TextInputAction.search);
+    await tester.pump();
+    expect(opened, ['a.md']);
+  });
+
+  // #1038: a contains scan shows its progress and its first hits as they
+  // come, says "no matches" only once it is over, and can be stopped.
+  testWidgets('a contains scan streams progress and hits; Stop ends it', (
+    tester,
+  ) async {
+    final events = source.containsEvents = StreamController<ContainsProgress>();
+    addTearDown(events.close);
+    await tester.pumpWidget(buildApp(source));
+    await tester.tap(find.text('Contains'));
+    await tester.pump();
+    await tester.enterText(find.byKey(const Key('search-query')), 'quokka');
+    await tester.pump(const Duration(milliseconds: 200));
+
+    // Started, nothing read yet: a bar, no verdict.
+    events.add(const ContainsProgress(hits: [], scanned: 0, total: 1000));
+    await tester.pump();
+    await tester.pump();
+    expect(find.byKey(const Key('search-scan')), findsOne);
+    expect(find.text('Searching… 0 of 1000 notes'), findsOne);
+    expect(find.text('No matches'), findsNothing);
+
+    // A step read, one hit found: it is on screen with the scan going on.
+    events.add(
+      ContainsProgress(
+        hits: [_hit('q.md', snippet: 'a <mark>quokka</mark>')],
+        scanned: 800,
+        total: 1000,
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+    expect(find.byKey(const Key('search-hit-q.md')), findsOne);
+    expect(find.text('Searching… 800 of 1000 notes'), findsOne);
+
+    // Stop keeps what was found and ends the scan.
+    await tester.tap(find.byKey(const Key('search-stop')));
+    await tester.pump();
+    expect(find.byKey(const Key('search-scan')), findsNothing);
+    expect(find.byKey(const Key('search-hit-q.md')), findsOne);
+    expect(source.isCurrent(1), isFalse, reason: 'the scan was told to end');
+  });
+
+  testWidgets('a scan that finds nothing says so only when it is done', (
+    tester,
+  ) async {
+    final events = source.containsEvents = StreamController<ContainsProgress>();
+    addTearDown(events.close);
+    await tester.pumpWidget(buildApp(source));
+    await tester.tap(find.text('Contains'));
+    await tester.pump();
+    await tester.enterText(find.byKey(const Key('search-query')), 'quokka');
+    await tester.pump(const Duration(milliseconds: 200));
+    events.add(const ContainsProgress(hits: [], scanned: 500, total: 1000));
+    await tester.pump();
+    await tester.pump();
+    expect(find.text('No matches'), findsNothing);
+
+    events.add(
+      const ContainsProgress(hits: [], scanned: 1000, total: 1000, done: true),
+    );
+    await tester.pump();
+    await tester.pump();
+    expect(find.text('No matches'), findsOne);
+    expect(find.byKey(const Key('search-scan')), findsNothing);
+  });
+
+  // #1045: a hit opens at the words it matched.
+  testWidgets('a hit opens with the words the query searched for', (
+    tester,
+  ) async {
+    source.hits = [_hit('a.md', snippet: 're-read x1')];
+    final at = <String>[];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SearchScreen(
+            controller: session,
+            onOpenNote: opened.add,
+            onOpenHit: (path, terms) => at.add('$path|${terms.join(',')}'),
+            source: source,
+          ),
+        ),
+      ),
+    );
+    await tester.enterText(find.byKey(const Key('search-query')), 're-read x1');
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('search-hit-a.md')));
+    await tester.pump();
+    expect(at, ['a.md|re,read,x1']);
+    expect(opened, isEmpty);
+
+    // Contains mode: the string as typed.
+    await tester.tap(find.text('Contains'));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('search-hit-a.md')));
+    await tester.pump();
+    expect(at.last, 'a.md|re-read x1');
+  });
+
+  // #1038: the list on screen while a new query is out is the old one's:
+  // it says so, and Enter and the arrows do not act on its rows.
+  testWidgets('a pending query marks the old list stale; Enter waits', (
+    tester,
+  ) async {
+    source.hits = [_hit('old.md')];
+    await tester.pumpWidget(buildApp(source));
+    await tester.enterText(find.byKey(const Key('search-query')), 'xy');
+    await settle(tester);
+    expect(find.byKey(const Key('search-busy')), findsNothing);
+
+    source.hits = [_hit('new.md')];
+    final gate = source.searchGate = Completer<void>();
+    await tester.enterText(find.byKey(const Key('search-query')), 'xyz');
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.byKey(const Key('search-busy')), findsOne);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pump();
+    expect(opened, isEmpty, reason: 'the old rows are not acted on');
+
+    gate.complete();
+    await tester.pump();
+    await tester.pump();
+    expect(find.byKey(const Key('search-busy')), findsNothing);
+    expect(opened, ['new.md'], reason: 'Enter opened the fresh first hit');
+  });
+
+  // #1044
+  testWidgets('a word hit keeps its height while its excerpt loads', (
+    tester,
+  ) async {
+    source.hits = [_hit('a.md')];
+    source.excerpts['a.md'] = 'one <mark>xy</mark> two';
+    final gate = source.excerptGates['a.md'] = Completer<void>();
+    await tester.pumpWidget(buildApp(source));
+    await tester.enterText(find.byKey(const Key('search-query')), 'xy');
+    await settle(tester);
+
+    final row = find.byKey(const Key('search-hit-a.md'));
+    final before = tester.getSize(row).height;
+    expect(find.byKey(const Key('search-excerpt-skeleton')), findsOne);
+
+    gate.complete();
+    await tester.pump();
+    await tester.pump();
+    expect(find.byKey(const Key('search-excerpt-skeleton')), findsNothing);
+    expect(find.textContaining('one xy two', findRichText: true), findsOne);
+    expect(tester.getSize(row).height, before);
+  });
 }
 
 /// A source whose searches complete only after a microtask — for the
@@ -814,6 +1022,21 @@ final class _SlowSource implements SearchSource {
   }
 
   @override
+  Stream<ContainsProgress> searchContainsStream(
+    String pattern, {
+    required int id,
+    int limit = 200,
+  }) async* {
+    final hits = await searchContains(pattern, id: id, limit: limit);
+    yield ContainsProgress(
+      hits: hits,
+      scanned: hits.length,
+      total: hits.length,
+      done: true,
+    );
+  }
+
+  @override
   Future<String> excerpt(SearchHit hit, String userText) async => '';
 }
 
@@ -854,6 +1077,21 @@ final class _HangingSource implements SearchSource {
     int limit = 200,
   }) {
     return search(pattern, id: id, limit: limit);
+  }
+
+  @override
+  Stream<ContainsProgress> searchContainsStream(
+    String pattern, {
+    required int id,
+    int limit = 200,
+  }) async* {
+    final hits = await searchContains(pattern, id: id, limit: limit);
+    yield ContainsProgress(
+      hits: hits,
+      scanned: hits.length,
+      total: hits.length,
+      done: true,
+    );
   }
 
   @override

@@ -48,7 +48,7 @@ the DevTools Memory view over the same VM service is enough.
 | Owner | What it holds | Bound / lifetime | Code |
 |---|---|---|---|
 | Open note text | One `SourceBuffer` per open note (the whole file, in memory) | One per open tab; dropped when the tab closes; the library's workspace is disposed on `close()` | `lib/src/markdown/source_buffer.dart`, `lib/src/workspace/workspace_controller.dart` |
-| Undo history | Up to 200 `EditRecord`s per note, each holding the removed and inserted text | `EditHistory.limit = 200`; one per open note, owner's history survives a tab move but not library close | `lib/src/markdown/edit/edit_history.dart` |
+| Undo history | Up to 200 `EditStep`s per note, each holding the removed and inserted text; an edit over a long span keeps only the lines that changed (`line_hunks.dart`) | `EditHistory.limit = 200` steps **and** `EditHistory.defaultBudget` = 16 M code units (32 MB of UTF-16) of text, the oldest dropped first and the newest never (#1050); one per open note, owner's history survives a tab move but not library close | `lib/src/markdown/edit/edit_history.dart`, `edit_step.dart`, `line_hunks.dart` |
 | Parsed / highlighted spans | `SourceStyler`'s line store, block list and per-line tokens for every open note; the read view's block heights | Per open note; rebuilt on edit; released with the note | `lib/src/markdown/source_styler.dart`, `lib/src/markdown/render/block_height_map.dart` |
 | KaTeX boxes and rasters | Typeset formulas, as boxes (512) and rasterized images (128) | Bounded per `MathCache`/`MathRaster`; one cache per `NoteView` (`_mathCache`), disposed in `NoteView.dispose` | `lib/src/preview/math_cache.dart`, `lib/src/preview/math_raster.dart` |
 | Flutter's image cache | Decoded images in the read view and attachments — default **1000 images / 100 MB** | Global to the engine, not per library; released only by age/size eviction | engine (`PaintingBinding.imageCache`) |
@@ -57,8 +57,9 @@ The open-note buffers are the largest scaling term: **memory is
 proportional to what is open, not to the library**, which is the intended
 shape. The thing to confirm by measurement is that closing a tab really
 drops its buffer (no `ChangeNotifier` or closure keeps it), and that
-`EditHistory`'s 200 records do not hold a whole novel after a few large
-deletions.
+`EditHistory`'s steps do not hold a whole novel after a few large
+deletions (bounded by text since #1050; the newest step is kept whole, so
+one select-all-and-delete of a novel still holds it once).
 
 ### The two drift databases and SQLite caches
 
@@ -107,6 +108,14 @@ hunspell (desktop) loads `.dic`/`.aff` per selected dictionary
 dictionary is a few MB each and several can be selected
 (`LibraryConfig.spellDictionaries`). The loader is per library; confirm the
 maps are dropped on library close and not re-read per keystroke.
+
+The editor keeps the answer for each line it has underlined
+(`spellcheck/checked_lines.dart`): a bounded least-recently-used memory of
+4096 lines and 2 M characters, keyed by the line's text and the ranges it
+skips rather than by its index (#1052), so scrolling a large note does not
+keep a second copy of it and an Enter above a line does not make it be
+checked again. The per-word verdicts (`EditorSpellCheck._words`) are bounded
+by the note's vocabulary.
 
 ### Whisper models
 
@@ -158,8 +167,8 @@ absolute bar goes behind `NIMAN_PERF`):
 3. **Verify closed tabs release their note** — a perf-style integration test
    that opens N notes, closes them, and prints the Dart heap from the VM
    service before and after.
-4. **Bound `EditHistory` by bytes, not only by record count**, so 200 large
-   deletions of a novel cannot hold it whole.
+4. ~~**Bound `EditHistory` by bytes, not only by record count**, so 200 large
+   deletions of a novel cannot hold it whole.~~ Done (#1050).
 5. **Release the search connection when no search screen is open** if the
    measurement shows its isolate/FTS cache is non-trivial at idle.
 6. **A resident-memory regression guard**: an integration test (or a

@@ -21,6 +21,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/editor/highlighting.dart';
+import 'package:niman/src/spellcheck/checked_lines.dart';
 import 'package:niman/src/spellcheck/hunspell_spell_checker.dart';
 import 'package:niman/src/spellcheck/personal_dictionary.dart';
 import 'package:niman/src/spellcheck/personal_dictionary_spell_checker.dart';
@@ -60,26 +61,6 @@ const Set<TokenKind> _skipKinds = <TokenKind>{
 /// One line handed to [EditorSpellCheck.startScan]: its text and the
 /// ranges the checker must ignore.
 typedef SpellLine = ({String text, List<TextRange> skip});
-
-/// One checked line: the text it was checked for, the ranges the checker was
-/// told to skip, and the ranges found.
-///
-/// The skip is part of the answer rather than a detail of the question: a
-/// line asked about with nothing to skip — its tokens not known yet — is a
-/// different question from the same line asked about with its code, maths
-/// and links skipped, and the first answer must not stand for the second
-/// (#373).
-final class _CheckedLine {
-  const new(this.text, this.skip, this.ranges);
-
-  final String text;
-  final List<TextRange> skip;
-  final List<TextRange> ranges;
-
-  /// Whether this answer is [line]'s, checked with [skip] — the cache hit.
-  bool answers(String line, List<TextRange> skip) =>
-      text == line && listEquals(this.skip, skip);
-}
 
 /// The document-level spelling state the editor's span builder consults.
 final class EditorSpellCheck extends ChangeNotifier {
@@ -231,7 +212,20 @@ final class EditorSpellCheck extends ChangeNotifier {
   static final RegExp _word = RegExp(r"[\p{L}][\p{L}'’-]*", unicode: true);
 
   bool _enabled = true;
-  final Map<int, _CheckedLine> _lines = <int, _CheckedLine>{};
+
+  /// The lines answered for, by their text and skip and not by index, within
+  /// bounds (#1052).
+  final CheckedLines _lines = CheckedLines();
+
+  /// How many lines [rangesFor] has checked rather than answered from memory,
+  /// for a test to see that a line pushed down by an edit was not checked
+  /// again.
+  @visibleForTesting
+  int linesChecked = 0;
+
+  /// How many lines are held in memory.
+  @visibleForTesting
+  int get linesHeld => _lines.length;
   final Map<String, bool> _words = <String, bool>{};
 
   /// Whether underlining is on.
@@ -336,7 +330,9 @@ final class EditorSpellCheck extends ChangeNotifier {
   /// enough to be styled in the background is asked about its lines before
   /// their tokens are read, and the answer of that ask — with nothing to
   /// skip — must not stand once the tokens arrive (#373). Later calls for
-  /// the same text *and* the same skip are a compare. Nothing is computed
+  /// the same text *and* the same skip are a lookup — by the text, not by
+  /// [index], so a line an edit pushed down is still answered from memory,
+  /// and the memory is bounded ([CheckedLines], #1052). Nothing is computed
   /// while [enabled] is false or the engine is unavailable — the latter
   /// includes the background load still being in flight (#453), which is
   /// why an ask is never what waits for a dictionary.
@@ -346,12 +342,13 @@ final class EditorSpellCheck extends ChangeNotifier {
     required List<TextRange> skip,
   }) {
     if (!_enabled) return const <TextRange>[];
-    final cached = _lines[index];
-    if (cached != null && cached.answers(line, skip)) return cached.ranges;
+    final cached = _lines.lookup(line, skip);
+    if (cached != null) return cached;
     final checker = _checker;
     if (checker == null || !checker.available) return const <TextRange>[];
+    linesChecked++;
     final ranges = _checkLine(checker, line, skip);
-    _lines[index] = _CheckedLine(line, skip, ranges);
+    _lines.store(line, skip, ranges);
     return ranges;
   }
 

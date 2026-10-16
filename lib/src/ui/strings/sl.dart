@@ -612,6 +612,10 @@ final class SlovenianStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Zapiska ni bilo mogoče shraniti. Niman bo poskusil znova.';
   @override
+  String get noteChangedOnDisk =>
+      'Drug program je spremenil ta zapisek. Ta različica je shranjena v '
+      'zgodovini.';
+  @override
   String get noteNotText =>
       'Ta datoteka ni besedilni zapisek, zato je Niman tu ne more prikazati.';
   @override
@@ -886,6 +890,13 @@ final class SlovenianStrings extends Strings {
   String get searchNoMatches => 'Ni zadetkov';
   @override
   String get searchLoadMore => 'Prikaži več';
+  @override
+  String get searchStop => 'Ustavi';
+  @override
+  String searchScanning(int scanned, int total) =>
+      'Iskanje… $scanned od $total zapiskov';
+  @override
+  String searchShowingFirst(int shown, int total) => 'Prvih $shown od $total';
   @override
   String searchTasksAndEvents(int count) => 'Opravila in dogodki · $count';
   @override
@@ -2252,6 +2263,8 @@ final class SlovenianStrings extends Strings {
   String get historyReasonSync => 'pred sinhronizacijo';
   @override
   String get historyReasonReplace => 'pred zamenjavo';
+  @override
+  String get historyReasonExternal => 'spremenjeno zunaj Nimana';
   @override
   String get historyReasonUnknown => 'najdena';
   @override

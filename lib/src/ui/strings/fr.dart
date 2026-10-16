@@ -624,6 +624,10 @@ final class FrenchStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Cette note n’a pas pu être enregistrée. Niman va réessayer.';
   @override
+  String get noteChangedOnDisk =>
+      'Un autre programme a modifié cette note. Cette version est conservée '
+      'dans l’historique.';
+  @override
   String get noteNotText =>
       'Ce fichier n’est pas une note texte, Niman '
       'ne peut donc pas l’afficher ici.';
@@ -896,6 +900,14 @@ final class FrenchStrings extends Strings {
   String get searchNoMatches => 'Aucun résultat';
   @override
   String get searchLoadMore => 'Afficher plus';
+  @override
+  String get searchStop => 'Arrêter';
+  @override
+  String searchScanning(int scanned, int total) =>
+      'Recherche… $scanned sur $total notes';
+  @override
+  String searchShowingFirst(int shown, int total) =>
+      'Les $shown premiers sur $total';
   @override
   String searchTasksAndEvents(int count) => 'Tâches et événements · $count';
   @override
@@ -2323,6 +2335,8 @@ final class FrenchStrings extends Strings {
   String get historyReasonSync => 'avant synchronisation';
   @override
   String get historyReasonReplace => 'avant remplacement';
+  @override
+  String get historyReasonExternal => 'modifiée hors de Niman';
   @override
   String get historyReasonUnknown => 'récupérée';
   @override

@@ -603,6 +603,9 @@ final class EstonianStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Märget ei õnnestunud salvestada. Niman proovib uuesti.';
   @override
+  String get noteChangedOnDisk =>
+      'Teine programm muutis seda märget. See versioon on ajaloos alles.';
+  @override
   String get noteNotText =>
       'See fail ei ole tekstimärge, seega ei saa Niman seda siin näidata.';
   @override
@@ -873,6 +876,14 @@ final class EstonianStrings extends Strings {
   String get searchNoMatches => 'Tulemusi pole';
   @override
   String get searchLoadMore => 'Kuva rohkem';
+  @override
+  String get searchStop => 'Peata';
+  @override
+  String searchScanning(int scanned, int total) =>
+      'Otsin… $scanned / $total märget';
+  @override
+  String searchShowingFirst(int shown, int total) =>
+      'Esimesed $shown $total-st';
   @override
   String searchTasksAndEvents(int count) => 'Ülesanded ja sündmused · $count';
   @override
@@ -2233,6 +2244,8 @@ final class EstonianStrings extends Strings {
   String get historyReasonSync => 'enne sünkroonimist';
   @override
   String get historyReasonReplace => 'enne asendamist';
+  @override
+  String get historyReasonExternal => 'muudetud väljaspool Nimani';
   @override
   String get historyReasonUnknown => 'taasleitud';
   @override

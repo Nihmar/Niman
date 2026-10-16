@@ -607,6 +607,9 @@ final class LithuanianStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Užrašo išsaugoti nepavyko. Niman bandys dar kartą.';
   @override
+  String get noteChangedOnDisk =>
+      'Kita programa pakeitė šį užrašą. Ta versija išsaugota istorijoje.';
+  @override
   String get noteNotText =>
       'Šis failas nėra tekstinis užrašas, todėl Niman negali jo čia parodyti.';
   @override
@@ -883,6 +886,14 @@ final class LithuanianStrings extends Strings {
   String get searchNoMatches => 'Rezultatų nėra';
   @override
   String get searchLoadMore => 'Rodyti daugiau';
+  @override
+  String get searchStop => 'Stabdyti';
+  @override
+  String searchScanning(int scanned, int total) =>
+      'Ieškoma… $scanned iš $total užrašų';
+  @override
+  String searchShowingFirst(int shown, int total) =>
+      'Pirmieji $shown iš $total';
   @override
   String searchTasksAndEvents(int count) => 'Užduotys ir įvykiai · $count';
   @override
@@ -2266,6 +2277,8 @@ final class LithuanianStrings extends Strings {
   String get historyReasonSync => 'prieš sinchronizavimą';
   @override
   String get historyReasonReplace => 'prieš pakeitimą';
+  @override
+  String get historyReasonExternal => 'pakeista ne Niman programoje';
   @override
   String get historyReasonUnknown => 'atgauta';
   @override

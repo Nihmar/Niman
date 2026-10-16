@@ -563,6 +563,8 @@ final class ChineseStrings extends Strings {
   @override
   String get noteSaveFailedSnack => '无法保存此笔记。Niman 将会重试。';
   @override
+  String get noteChangedOnDisk => '另一个程序修改了此笔记。该版本已保存在历史记录中。';
+  @override
   String get noteNotText => '此文件不是文本笔记，因此 Niman 无法在此显示。';
   @override
   String get noteLoadFailed => '无法打开此笔记。';
@@ -826,6 +828,13 @@ final class ChineseStrings extends Strings {
   String get searchNoMatches => '没有匹配结果';
   @override
   String get searchLoadMore => '显示更多';
+  @override
+  String get searchStop => '停止';
+  @override
+  String searchScanning(int scanned, int total) =>
+      '正在搜索… $scanned / $total 条笔记';
+  @override
+  String searchShowingFirst(int shown, int total) => '显示前 $shown 项，共 $total 项';
   @override
   String searchTasksAndEvents(int count) => '任务和事件 · $count';
   @override
@@ -2063,6 +2072,8 @@ final class ChineseStrings extends Strings {
   String get historyReasonSync => '同步前';
   @override
   String get historyReasonReplace => '替换前';
+  @override
+  String get historyReasonExternal => '在 Niman 之外被修改';
   @override
   String get historyReasonUnknown => '已找回';
   @override

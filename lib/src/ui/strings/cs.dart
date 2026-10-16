@@ -608,6 +608,9 @@ final class CzechStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Poznámku se nepodařilo uložit. Niman to zkusí znovu.';
   @override
+  String get noteChangedOnDisk =>
+      'Jiný program tuto poznámku změnil. Ta verze je uložena v historii.';
+  @override
   String get noteNotText =>
       'Tento soubor není textová poznámka, proto ho Niman nemůže zobrazit zde.';
   @override
@@ -881,6 +884,13 @@ final class CzechStrings extends Strings {
   String get searchNoMatches => 'Žádná shoda';
   @override
   String get searchLoadMore => 'Zobrazit další';
+  @override
+  String get searchStop => 'Zastavit';
+  @override
+  String searchScanning(int scanned, int total) =>
+      'Hledání… $scanned z $total poznámek';
+  @override
+  String searchShowingFirst(int shown, int total) => 'Prvních $shown z $total';
   @override
   String searchTasksAndEvents(int count) => 'Úkoly a události · $count';
   @override
@@ -2253,6 +2263,8 @@ final class CzechStrings extends Strings {
   String get historyReasonSync => 'před synchronizací';
   @override
   String get historyReasonReplace => 'před nahrazením';
+  @override
+  String get historyReasonExternal => 'změněno mimo Niman';
   @override
   String get historyReasonUnknown => 'nalezená';
   @override

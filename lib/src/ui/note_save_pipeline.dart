@@ -15,10 +15,14 @@ import 'package:niman/src/markdown/source_buffer.dart';
 /// Saves [content] as the note at absolute [path]; [editSession] is the
 /// editor session the save belongs to (one opening of the note). Answers what
 /// the write left on the disk, when the writer can say ([NoteSaveResult]).
+///
+/// [expected] is the file as the editor last saw it (#1055): the writer keeps
+/// another version found there in the history before it overwrites it.
 typedef NoteSaver = Future<NoteSaveResult?> Function(
   String path,
   String content, {
   required int editSession,
+  DiskStamp? expected,
 });
 
 /// Saves a note whose text the editor never joins: [content] makes the
@@ -33,6 +37,7 @@ typedef NoteStreamSaver = Future<NoteSaveResult?> Function(
   NoteContentProducer content, {
   required int editSession,
   NoteReferences? references,
+  DiskStamp? expected,
 });
 
 /// How an open note reaches the disk: the revision the editor is at and the
@@ -66,6 +71,8 @@ final class NoteSavePipeline {
     required this.saveNoteStream,
     required this.onSaved,
     required this.onSettled,
+    this.diskStamp,
+    this.onExternalKept,
     this.hold,
     this.retryDelays = const [
       Duration(seconds: 2),
@@ -114,6 +121,15 @@ final class NoteSavePipeline {
 
   /// A save ended, written or failed.
   final VoidCallback onSettled;
+
+  /// The file as the editor last read or wrote it (#1055), which every save
+  /// hands its writer as what it expects to find: another file there was
+  /// written by somebody else, and the writer keeps that version first.
+  final DiskStamp? Function()? diskStamp;
+
+  /// A save of the note on screen found another program's version of the file
+  /// and kept it in the note's history before overwriting it (#1055).
+  final void Function(String path)? onExternalKept;
 
   /// Holds a write for a note that is leaving the editor, with the text it
   /// writes, in the app-wide registry of unsaved notes
@@ -365,6 +381,9 @@ final class NoteSavePipeline {
     // Nothing was typed since the save in flight took its text: when it lands
     // there is nothing to write again.
     final covered = _saving && _inFlightRevision == _revision;
+    // The file as the editor last saw it; unknown when a save of this very
+    // note is still running, which is about to change it.
+    final expected = running == null ? diskStamp?.call() : null;
     final stream = _takeStreamSave();
     final plain = stream == null ? text() : null;
     final joined = plain == null ? null : framing().apply(plain);
@@ -394,9 +413,10 @@ final class NoteSavePipeline {
             (index) => _nextSlice(stream, index),
             editSession: session,
             references: stream.references,
+            expected: expected,
           );
         } else {
-          await _write(target, joined!, session);
+          await _write(target, joined!, session, expected);
         }
         _landed(target, revision);
         _log.info(
@@ -435,6 +455,7 @@ final class NoteSavePipeline {
     // the keystroke path.
     final joinClock = Stopwatch()..start();
     final joined = framing().apply(text());
+    final expected = diskStamp?.call();
     final joinMs = joinClock.elapsedMilliseconds;
     // Read with the text, before the first await: a note switch that
     // saves the outgoing note is followed by a load that starts the next
@@ -445,8 +466,8 @@ final class NoteSavePipeline {
       'session $session)',
     );
     try {
-      final saved = await _write(target, joined, session);
-      _saved(target, revision, saved?.stamp);
+      final saved = await _write(target, joined, session, expected);
+      _saved(target, revision, saved);
       _log.info(
         'note saved: $target (${joined.length} chars, '
         '${clock.elapsedMilliseconds} ms)',
@@ -477,6 +498,7 @@ final class NoteSavePipeline {
     // saves the outgoing note is followed by a load that starts the next
     // session, and this save belongs to the one it came from.
     final session = _editSession;
+    final expected = diskStamp?.call();
     _log.info(
       'save start: $target (${lines.length} chars in '
       '${stream.slices} slices, session $session)',
@@ -487,8 +509,9 @@ final class NoteSavePipeline {
         (index) => _nextSlice(stream, index),
         editSession: session,
         references: stream.references,
+        expected: expected,
       );
-      _saved(target, revision, saved?.stamp);
+      _saved(target, revision, saved);
       _log.info(
         'note saved: $target (${lines.length} chars, '
         '${clock.elapsedMilliseconds} ms)',
@@ -512,11 +535,12 @@ final class NoteSavePipeline {
 
   /// [target] holds [revision] now: when it is the note on screen, that is
   /// the revision the disk has.
-  void _saved(String target, int revision, DiskStamp? stamp) {
+  void _saved(String target, int revision, NoteSaveResult? saved) {
     if (target != notePath()) return;
     _lastSavedRevision = revision;
     _forgetFailure();
-    onSaved(target, stamp);
+    onSaved(target, saved?.stamp);
+    if (saved?.keptExternal ?? false) onExternalKept?.call(target);
   }
 
   /// The save is over, however it ended: the flag goes, the owner is told,
@@ -594,10 +618,16 @@ final class NoteSavePipeline {
     String path,
     String content,
     int editSession,
+    DiskStamp? expected,
   ) async {
     final saver = saveNote();
     if (saver != null) {
-      return await saver(path, content, editSession: editSession);
+      return await saver(
+        path,
+        content,
+        editSession: editSession,
+        expected: expected,
+      );
     }
     final seam = writeNote();
     if (seam != null) {

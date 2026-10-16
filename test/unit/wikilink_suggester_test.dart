@@ -7,7 +7,13 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:drift/drift.dart'
-    show ApplyInterceptor, InsertMode, QueryExecutor, QueryInterceptor, Value;
+    show
+        ApplyInterceptor,
+        InsertMode,
+        QueryExecutor,
+        QueryInterceptor,
+        Value,
+        Variable;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/name_sort_key.dart';
@@ -129,6 +135,57 @@ void main() {
       ('Notes', 'Archive'),
       ('Meeting notes', 'Work'),
     ], reason: 'the two prefix matches by path, the contains match after them');
+  });
+
+  // #1035: the name typed in full is the row Enter writes, whatever the
+  // folder sorts like.
+  test('the name typed in full ranks first, not the first folder', () async {
+    await addNote('Archive/Meeting notes old.md', stems: ['meeting notes old']);
+    await addNote('Work/Meeting notes.md', stems: ['meeting notes']);
+    final suggester = suggesterOver();
+
+    final rows = await suggester.notes('Meeting notes');
+
+    expect(rows.map((r) => r.name), ['Meeting notes', 'Meeting notes old']);
+    expect(rows.first.target, 'Meeting notes');
+  });
+
+  test(
+    'the name typed in full is found past 200 longer prefix matches',
+    () async {
+      for (var i = 0; i < 250; i++) {
+        await addNote('a/proj-$i.md', stems: ['proj-$i']);
+      }
+      await addNote('z/proj.md', stems: ['proj']);
+
+      final rows = await suggesterOver().notes('proj');
+
+      expect(rows.first.name, 'proj');
+      expect(rows.first.folder, 'z');
+    },
+  );
+
+  test('the prefix seek runs on the stem index, in stem order', () async {
+    await addNote('a.md', stems: ['alpha']);
+    counter.reset();
+    await suggesterOver().notes('al');
+    // The statement the app ran, planned with the arguments it ran with.
+    final ran = counter.statements.firstWhere(
+      (s) => s.sql.contains('s.stem >='),
+    );
+    final plan = await db
+        .customSelect(
+          'EXPLAIN QUERY PLAN ${ran.sql}',
+          variables: [
+            for (final arg in ran.args)
+              if (arg is int) Variable<int>(arg) else Variable<String>('$arg'),
+          ],
+        )
+        .get();
+    final detail = plan.map((r) => r.read<String>('detail')).join(' | ');
+    expect(detail, contains('INDEX sqlite_autoindex_note_stems_1'));
+    expect(detail, contains('stem>? AND stem<?'));
+    expect(detail, isNot(contains('TEMP B-TREE')));
   });
 
   // A bare name two notes share resolves to neither for sure: the row the
@@ -360,49 +417,49 @@ void main() {
     await addNote('Notes.md', stems: ['notes']);
     final suggester = suggesterOver();
 
-    expect((await suggester.notes('%')).map((r) => r.name), [
+    expect((await suggester.notes('% n')).map((r) => r.name), [
       '100% notes',
     ], reason: 'a `%` in the query is a character, not a wildcard');
   });
-
-  // #491: a `%q%` match has no stem index to use (`q%` does), so SQLite
-  // evaluates the LIKE against every stem and sorts the matches before the
-  // LIMIT — a scan and a sort per keystroke on a large library. The indexed
-  // prefix query is read first; the contains query is paid only when the
-  // prefix rows leave room under the fetch cap.
+  // #491, #1036: a contains match has no stem index to use (`q%` does), so
+  // it reads the trigram index of the names instead of evaluating a LIKE
+  // against every stem. The indexed prefix query is read first; the
+  // trigrams are read only when the prefix rows leave room under the fetch
+  // cap.
   test('a full cap of prefix rows leaves the contains query unrun', () async {
     // The fetch cap is 200 stems: the query as a prefix of this many fills it.
     for (var i = 0; i < 200; i++) {
-      await addNote('aa$i.md', stems: ['aa$i']);
+      await addNote('aaa$i.md', stems: ['aaa$i']);
     }
     // One note the query reaches only in the middle (`%q%`, not `q%`).
-    await addNote('zz.md', stems: ['zzaa']);
+    await addNote('zz.md', stems: ['zzaaa']);
     counter.reset();
 
-    final rows = await suggesterOver().notes('aa');
+    final rows = await suggesterOver().notes('aaa');
 
     expect(
       counter.ranContains,
       isFalse,
-      reason: 'the prefix rows fill the cap, so `%q%` was never queried',
+      reason: 'the prefix rows fill the cap, so the trigrams were not read',
     );
     expect(rows, isNotEmpty);
   });
 
   test('the contains query runs when the prefix rows leave room', () async {
-    await addNote('aa1.md', stems: ['aa1']);
-    await addNote('zz.md', stems: ['zzaa']);
+    await addNote('aaa1.md', stems: ['aaa1']);
+    await addNote('zz.md', stems: ['zzaaa']);
     counter.reset();
 
-    final rows = await suggesterOver().notes('aa');
+    final rows = await suggesterOver().notes('aaa');
 
     expect(
       counter.ranContains,
       isTrue,
-      reason: 'the prefix rows did not fill the cap, so `%q%` answered too',
+      reason:
+          'the prefix rows did not fill the cap, so the trigrams answered too',
     );
     expect(rows.map((r) => r.name), [
-      'aa1',
+      'aaa1',
       'zz',
     ], reason: 'the prefix match first, the contains match after');
   });
@@ -691,11 +748,10 @@ final class _QueryLog extends QueryInterceptor {
 
   void reset() => statements.clear();
 
-  /// Whether any issued SELECT bound a leading-wildcard LIKE — the `%q%`
-  /// (contains) query, which cannot use the stem index.
-  bool get ranContains => statements.any(
-    (s) => s.args.any((a) => a is String && a.startsWith('%')),
-  );
+  /// Whether any issued SELECT read the trigram index — the contains
+  /// lookup, which the prefix rows spare when they fill the cap.
+  bool get ranContains =>
+      statements.any((s) => s.sql.contains('stem_trigrams'));
 
   @override
   Future<List<Map<String, Object?>>> runSelect(

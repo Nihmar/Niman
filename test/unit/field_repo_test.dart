@@ -2,7 +2,14 @@
 // the `key = value` filter read — and the index file's upgrade rule.
 import 'dart:io';
 
-import 'package:drift/drift.dart' show driftRuntimeOptions;
+import 'package:drift/drift.dart'
+    show
+        ApplyInterceptor,
+        QueryExecutor,
+        QueryInterceptor,
+        Value,
+        Variable,
+        driftRuntimeOptions;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/db/index_database.dart';
@@ -141,6 +148,108 @@ void main() {
     });
   });
 
+  // #1037: a filter on a key most notes carry is a list nobody scrolls and
+  // a million rows in memory. It reads a page at a time, past a path, and
+  // the real count is a read of the index.
+  group('a long list', () {
+    setUp(() async {
+      String path(int i) => 'n${i.toString().padLeft(4, '0')}.md';
+      await db.batch((batch) {
+        batch
+          ..insertAll(db.notes, [
+            for (var i = 0; i < 1200; i++)
+              NotesCompanion.insert(
+                id: Value(i + 1),
+                path: path(i),
+                parent: 0,
+                name: path(i),
+                isDir: false,
+                size: 1,
+                modified: DateTime(2026),
+                created: DateTime(2026),
+              ),
+          ])
+          ..insertAll(db.frontmatterFields, [
+            for (var i = 0; i < 1200; i++) ...[
+              // Written in two cases: one value to the filter.
+              FrontmatterFieldsCompanion.insert(
+                noteId: i + 1,
+                key: 'status',
+                value: i.isEven ? 'Draft' : 'draft',
+              ),
+              FrontmatterFieldsCompanion.insert(
+                noteId: i + 1,
+                key: 'tags',
+                value: 'x',
+              ),
+              FrontmatterFieldsCompanion.insert(
+                noteId: i + 1,
+                key: 'tags',
+                value: 'y',
+              ),
+            ],
+          ]);
+      });
+    });
+
+    test('pages by path with a cursor, and counts them all', () async {
+      final first = await repo.notesWithField('status', 'DRAFT', limit: 500);
+      expect(first, hasLength(500));
+      expect(first.first.path, 'n0000.md');
+      final second = await repo.notesWithField(
+        'status',
+        'draft',
+        limit: 500,
+        after: first.last.path,
+      );
+      expect(second.first.path, 'n0500.md');
+      final third = await repo.notesWithField(
+        'status',
+        'draft',
+        limit: 500,
+        after: second.last.path,
+      );
+      expect(third, hasLength(200));
+      expect(third.last.path, 'n1199.md');
+
+      expect(await repo.countWithField('status', 'draft'), 1200);
+      expect(await repo.countWithField('status', ''), 1200);
+      // A key with two values per note still counts its notes once.
+      expect(await repo.countWithField('tags', ''), 1200);
+      expect(await repo.countWithField('tags', 'y'), 1200);
+      expect(await repo.countWithField('status', 'nope'), 0);
+    });
+
+    test('the filter is a seek on the key and the value', () async {
+      final log = _SelectLog();
+      final logged = IndexDatabase(NativeDatabase.memory().interceptWith(log));
+      addTearDown(logged.close);
+      final fields = FieldRepo(logged);
+      await fields.notesWithField('status', 'draft', limit: 10);
+      await fields.countWithField('status', 'draft');
+
+      final lookups = [
+        for (final s in log.statements)
+          if (s.sql.contains('frontmatter_fields')) s,
+      ];
+      expect(lookups, hasLength(2));
+      for (final lookup in lookups) {
+        final plan = await logged
+            .customSelect(
+              'EXPLAIN QUERY PLAN ${lookup.sql}',
+              variables: [
+                for (final a in lookup.args)
+                  if (a is int) Variable<int>(a) else Variable<String>('$a'),
+              ],
+            )
+            .get();
+        final detail = plan.map((r) => r.read<String>('detail')).join(' | ');
+        expect(detail, contains('fields_key_value (key=? AND value=?)'));
+        expect(detail, isNot(contains('SCAN frontmatter_fields')));
+      }
+    });
+  });
+
   group('fieldKeys', () {
     test('counts the notes per key, most used first', () async {
       write('a.md', '---\nstatus: draft\nweight: 1\n---\nx');
@@ -183,4 +292,19 @@ void main() {
       );
     });
   });
+}
+
+/// The SELECTs a database ran, with their arguments.
+final class _SelectLog extends QueryInterceptor {
+  final statements = <({String sql, List<Object?> args})>[];
+
+  @override
+  Future<List<Map<String, Object?>>> runSelect(
+    QueryExecutor executor,
+    String statement,
+    List<Object?> args,
+  ) {
+    statements.add((sql: statement, args: args));
+    return executor.runSelect(statement, args);
+  }
 }

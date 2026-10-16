@@ -616,6 +616,10 @@ final class BulgarianStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Бележката не можа да бъде запазена. Niman ще опита отново.';
   @override
+  String get noteChangedOnDisk =>
+      'Друга програма е променила тази бележка. Онази версия е запазена в '
+      'историята.';
+  @override
   String get noteNotText =>
       'Този файл не е текстова бележка, затова Niman не може да го покаже тук.';
   @override
@@ -886,6 +890,13 @@ final class BulgarianStrings extends Strings {
   String get searchNoMatches => 'Няма резултати';
   @override
   String get searchLoadMore => 'Покажи още';
+  @override
+  String get searchStop => 'Спри';
+  @override
+  String searchScanning(int scanned, int total) =>
+      'Търсене… $scanned от $total бележки';
+  @override
+  String searchShowingFirst(int shown, int total) => 'Първите $shown от $total';
   @override
   String searchTasksAndEvents(int count) => 'Задачи и събития · $count';
   @override
@@ -2279,6 +2290,8 @@ final class BulgarianStrings extends Strings {
   String get historyReasonSync => 'преди синхронизация';
   @override
   String get historyReasonReplace => 'преди замяна';
+  @override
+  String get historyReasonExternal => 'променена извън Niman';
   @override
   String get historyReasonUnknown => 'открита';
   @override

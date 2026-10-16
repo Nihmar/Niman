@@ -804,8 +804,10 @@ the code parted from it, here is where and why.
   margin, of at most 2 000 lines, sets its columns side by side; a
   nested quote, one in a list item, and a longer one keep them stacked.
   The block's sliver paints the quote's bars and the callout's box down
-  its height. The quote blocks are counted per chunk of the block list,
-  as the fence lines are, so a note without them pays nothing.
+  its height. The quote blocks that have a `:::` line behind their `>`
+  (`Block.holdsFence`, set by the scan, #1048) are counted per chunk of
+  the block list, as the fence lines are, so a note without them pays
+  nothing however many plain quotes it has.
 - **Folds in a side-by-side block.** A block with a folded section in it
   is stacked: a fold hides rows, and a column has none. A heading in a
   side-by-side column has no fold arrow — the gutter has one row for

@@ -11,6 +11,7 @@
 /// (`search_excerpt.dart`).
 library;
 
+import 'dart:async';
 import 'dart:isolate';
 
 import 'package:drift/drift.dart' show QueryRow, Variable;
@@ -42,6 +43,30 @@ final class SearchHit {
   /// empty when there is none to show, or none yet — a word result's is
   /// read on demand ([SearchSource.excerpt]).
   final String snippet;
+}
+
+/// How far a contains scan has got (#1038): the hits so far, in path
+/// order, and how many of the library's notes it has read.
+final class ContainsProgress {
+  /// A scan that has read [scanned] of [total] notes and found [hits].
+  const new({
+    required this.hits,
+    required this.scanned,
+    required this.total,
+    this.done = false,
+  });
+
+  /// Every hit found so far, in path order.
+  final List<SearchHit> hits;
+
+  /// How many notes have been read.
+  final int scanned;
+
+  /// How many notes the scan reads in all.
+  final int total;
+
+  /// Whether the scan is over: it found enough hits, or read every note.
+  final bool done;
 }
 
 /// The search data source the UI talks to: FTS word search and the
@@ -77,6 +102,16 @@ abstract interface class SearchSource {
     int limit = 200,
   });
 
+  /// The contains scan as it goes (#1038): an event after each step with the
+  /// hits found so far and how far the scan has read, the last one with
+  /// [ContainsProgress.done]. Ends without one when [id] is superseded —
+  /// by a new query, or by `begin()` as Stop — within a step of it.
+  Stream<ContainsProgress> searchContainsStream(
+    String pattern, {
+    required int id,
+    int limit = 200,
+  });
+
   /// The excerpt of word result [hit] for the words typed as [userText]:
   /// read from the note when a row asks for it, so a search answers with
   /// its list and reads only the notes whose rows are shown. Empty when the
@@ -93,7 +128,7 @@ abstract interface class SearchSource {
 final class SearchRepo implements SearchSource {
   /// Creates the repo over [IndexDatabase], for the library at [root] — the
   /// notes the excerpts and the contains scan are read from.
-  new(this._db, {required this.root});
+  new(this._db, {required this.root, this.rankedMatches = 20000});
 
   final IndexDatabase _db;
 
@@ -104,10 +139,50 @@ final class SearchRepo implements SearchSource {
   /// whether its query is still the current one.
   static const int _scanBatch = 200;
 
+  /// How many matches a word search ranks at most when its last term is a
+  /// short prefix (#1039). `co*` over a large library has hundreds of
+  /// thousands of matches, and bm25 is computed for each before the limit
+  /// applies: such a query is ranked over the first [rankedMatches] of
+  /// them, in the index's own order. A full word, or a longer prefix, is
+  /// ranked over all its matches: the best title hit must not be dropped
+  /// for sitting past the cap.
+  final int rankedMatches;
+
+  /// Whether the last term of the FTS [query] is a prefix of at most four
+  /// characters: the case the prefix index exists for, and the one whose
+  /// matches are most of the library.
+  static bool _endsInShortPrefix(String query) {
+    final last = RegExp(r'"((?:[^"]|"")*)"\*\s*$').firstMatch(query);
+    return last != null && last.group(1)!.replaceAll('""', '"').length <= 4;
+  }
+
   int _invocation = 0;
+
+  /// The end of the line of queries waiting for the connection (see
+  /// [_turn]).
+  Future<void> _line = Future<void>.value();
 
   @override
   int begin() => ++_invocation;
+
+  /// Runs [run] in its turn: after every query before it has finished, and
+  /// only if [id] is still the one wanted by then (#1039). The connection
+  /// takes one statement at a time, so a statement sent while another runs
+  /// only waits — and ran to the end even when the typist had moved on
+  /// long before it started. A query that was superseded in the line never
+  /// reaches SQLite; [skipped] is what it answers.
+  Future<T> _turn<T>(int? id, T skipped, Future<T> Function() run) async {
+    final before = _line;
+    final done = Completer<void>();
+    _line = done.future;
+    try {
+      await before;
+      if (id != null && !isCurrent(id)) return skipped;
+      return await run();
+    } finally {
+      done.complete();
+    }
+  }
 
   @override
   bool isCurrent(int id) => id == _invocation;
@@ -121,20 +196,19 @@ final class SearchRepo implements SearchSource {
     if (query == null || query.trim().isEmpty) return const [];
     const log = AppLogger(name: 'search');
     final clock = Stopwatch()..start();
-    List<QueryRow> rows;
+    List<QueryRow>? rows;
     try {
-      rows = await _db
-          .customSelect(
-            'SELECT notes.id, notes.path, notes.name, notes.title '
-            'FROM notes_fts JOIN notes ON notes.id = notes_fts.rowid '
-            'WHERE notes_fts MATCH ?1 '
-            'ORDER BY bm25(notes_fts, 10.0, 1.0) '
-            'LIMIT ?2',
-            variables: [Variable<String>(query), Variable<int>(limit)],
-          )
-          .get();
+      rows = await _turn<List<QueryRow>?>(
+        id,
+        null,
+        () => _ranked(query, limit),
+      );
     } on Object catch (e) {
       log.warning('word search failed for "$query": $e');
+      return const [];
+    }
+    if (rows == null) {
+      log.debug('word "$query" (id $id): superseded in line — never run');
       return const [];
     }
     if (id != null && !isCurrent(id)) {
@@ -148,6 +222,44 @@ final class SearchRepo implements SearchSource {
       'in ${clock.elapsedMilliseconds} ms',
     );
     return [for (final row in rows) _hitOf(row, snippet: '')];
+  }
+
+  /// The best [limit] matches of the FTS [query] by bm25 (title ten times
+  /// the body); ranked over at most [rankedMatches] of them when the query
+  /// ends in a short prefix, over all of them otherwise.
+  Future<List<QueryRow>> _ranked(String query, int limit) async {
+    // The matches come off the index in rowid order and the first query
+    // stops after the cap, so it is cheap however broad the query is. Short
+    // of the cap, nothing is left out; at it, the ranking sees the matches
+    // up to the cap-th one.
+    final edge = !_endsInShortPrefix(query)
+        ? const <QueryRow>[]
+        : await _db
+              .customSelect(
+                'SELECT rowid FROM notes_fts WHERE notes_fts MATCH ?1 '
+                'ORDER BY rowid LIMIT 1 OFFSET ?2',
+                variables: [
+                  Variable<String>(query),
+                  Variable<int>(rankedMatches - 1),
+                ],
+              )
+              .get();
+    final bound = edge.isEmpty ? null : edge.single.read<int>('rowid');
+    return await _db
+        .customSelect(
+          'SELECT notes.id, notes.path, notes.name, notes.title '
+          'FROM notes_fts JOIN notes ON notes.id = notes_fts.rowid '
+          'WHERE notes_fts MATCH ?1 '
+          '${bound == null ? '' : 'AND notes_fts.rowid <= ?3 '}'
+          'ORDER BY bm25(notes_fts, 10.0, 1.0) '
+          'LIMIT ?2',
+          variables: [
+            Variable<String>(query),
+            Variable<int>(limit),
+            if (bound != null) Variable<int>(bound),
+          ],
+        )
+        .get();
   }
 
   @override
@@ -168,58 +280,129 @@ final class SearchRepo implements SearchSource {
     required int id,
     int limit = 200,
   }) async {
+    var hits = const <SearchHit>[];
+    await for (final progress in searchContainsStream(
+      pattern,
+      id: id,
+      limit: limit,
+    )) {
+      hits = progress.hits;
+    }
+    return isCurrent(id) ? hits : const [];
+  }
+
+  /// How many notes a scan reads at once: each batch on an isolate of its
+  /// own, the batches of a step side by side (#1038).
+  static const int _scanWorkers = 4;
+
+  @override
+  Stream<ContainsProgress> searchContainsStream(
+    String pattern, {
+    required int id,
+    int limit = 200,
+  }) async* {
     // A scan of the notes themselves, in path order: the index keeps no
     // copy of their text to scan instead. The notes are listed a batch at
     // a time and each batch read on an isolate — every note only up to its
     // first match — with the query asked after each batch whether it is
     // still the one wanted, so a keystroke stops the scan it replaces.
-    if (foldForSearch(pattern).isEmpty) return const [];
+    if (foldForSearch(pattern).isEmpty) {
+      yield const ContainsProgress(hits: [], scanned: 0, total: 0, done: true);
+      return;
+    }
     const log = AppLogger(name: 'search');
     final clock = Stopwatch()..start();
     final hits = <SearchHit>[];
     var after = '';
     var read = 0;
+    var total = 0;
     try {
-      while (hits.length < limit) {
-        final rows = await _db
-            .customSelect(
-              'SELECT id, path, name, title FROM notes '
-              "WHERE is_dir = 0 AND lower(substr(name, -3)) = '.md' "
-              'AND path > ?1 ORDER BY path LIMIT ?2',
-              variables: [
-                Variable<String>(after),
-                const Variable<int>(_scanBatch),
-              ],
-            )
-            .get();
-        if (rows.isEmpty) break;
-        after = rows.last.read<String>('path');
-        final paths = [
-          for (final row in rows) p.join(root, row.read<String>('path')),
-        ];
-        final excerpts = await _containsExcerpts(paths, pattern);
-        read += rows.length;
+      total =
+          (await _db
+                  .customSelect(
+                    'SELECT count(*) AS c FROM notes '
+                    "WHERE is_dir = 0 AND lower(substr(name, -3)) = '.md'",
+                  )
+                  .getSingle())
+              .read<int>('c');
+      // The first sign of the scan, before any note is read.
+      yield ContainsProgress(hits: const [], scanned: 0, total: total);
+      var exhausted = false;
+      while (hits.length < limit && !exhausted) {
+        if (!isCurrent(id)) break;
+        // One step: up to [_scanWorkers] batches listed in path order, each
+        // read on an isolate of its own, side by side.
+        final batches = <List<QueryRow>>[];
+        while (batches.length < _scanWorkers) {
+          final rows = await _db
+              .customSelect(
+                'SELECT id, path, name, title FROM notes '
+                "WHERE is_dir = 0 AND lower(substr(name, -3)) = '.md' "
+                'AND path > ?1 ORDER BY path LIMIT ?2',
+                variables: [
+                  Variable<String>(after),
+                  const Variable<int>(_scanBatch),
+                ],
+              )
+              .get();
+          if (rows.isEmpty) {
+            exhausted = true;
+            break;
+          }
+          after = rows.last.read<String>('path');
+          batches.add(rows);
+          if (rows.length < _scanBatch) {
+            exhausted = true;
+            break;
+          }
+        }
+        if (batches.isEmpty) break;
+        final excerpts = await Future.wait([
+          for (final rows in batches)
+            _containsExcerpts([
+              for (final row in rows) p.join(root, row.read<String>('path')),
+            ], pattern),
+        ]);
+        for (final rows in batches) {
+          read += rows.length;
+        }
         if (!isCurrent(id)) {
           log.debug(
             'contains "$pattern" (id $id): superseded by id $_invocation '
             'after $read note(s) — dropped',
           );
-          return const [];
+          return;
         }
-        for (var i = 0; i < rows.length && hits.length < limit; i++) {
-          final excerpt = excerpts[i];
-          if (excerpt != null) hits.add(_hitOf(rows[i], snippet: excerpt));
+        for (var b = 0; b < batches.length; b++) {
+          final rows = batches[b];
+          for (var i = 0; i < rows.length && hits.length < limit; i++) {
+            final excerpt = excerpts[b][i];
+            if (excerpt != null) hits.add(_hitOf(rows[i], snippet: excerpt));
+          }
+        }
+        if (hits.length < limit && !exhausted) {
+          yield ContainsProgress(
+            hits: List.unmodifiable(hits),
+            scanned: read,
+            total: total,
+          );
         }
       }
     } on Object catch (e) {
       log.warning('contains search failed for "$pattern": $e');
-      return const [];
+      if (!isCurrent(id)) return;
     }
+    if (!isCurrent(id)) return;
     log.debug(
       'contains "$pattern" -> ${hits.length} hit(s) from $read note(s) '
       'in ${clock.elapsedMilliseconds} ms',
     );
-    return hits;
+    yield ContainsProgress(
+      hits: List.unmodifiable(hits),
+      scanned: read,
+      total: total,
+      done: true,
+    );
   }
 
   static SearchHit _hitOf(QueryRow row, {required String snippet}) {

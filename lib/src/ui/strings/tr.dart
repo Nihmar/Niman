@@ -603,6 +603,9 @@ final class TurkishStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Bu not kaydedilemedi. Niman yeniden deneyecek.';
   @override
+  String get noteChangedOnDisk =>
+      'Başka bir program bu notu değiştirdi. O sürüm geçmişte saklandı.';
+  @override
   String get noteNotText =>
       'Bu dosya bir metin notu değil, bu yüzden Niman onu burada gösteremiyor.';
   @override
@@ -874,6 +877,13 @@ final class TurkishStrings extends Strings {
   String get searchNoMatches => 'Eşleşme yok';
   @override
   String get searchLoadMore => 'Daha fazla göster';
+  @override
+  String get searchStop => 'Durdur';
+  @override
+  String searchScanning(int scanned, int total) =>
+      'Aranıyor… $scanned / $total not';
+  @override
+  String searchShowingFirst(int shown, int total) => 'İlk $shown / $total';
   @override
   String searchTasksAndEvents(int count) => 'Görevler ve etkinlikler · $count';
   @override
@@ -2241,6 +2251,8 @@ final class TurkishStrings extends Strings {
   String get historyReasonSync => 'eşitleme öncesi';
   @override
   String get historyReasonReplace => 'değiştirme öncesi';
+  @override
+  String get historyReasonExternal => 'Niman dışında değiştirildi';
   @override
   String get historyReasonUnknown => 'kurtarılan';
   @override

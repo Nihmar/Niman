@@ -43,7 +43,6 @@ import 'package:niman/src/editor/editor_context_menu.dart';
 import 'package:niman/src/editor/highlight_style.dart';
 import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/editor/list_row.dart';
-import 'package:niman/src/editor/md_editing.dart';
 import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/editor/outline.dart';
 import 'package:niman/src/editor/toolbar_item.dart';
@@ -62,6 +61,7 @@ import 'package:niman/src/markdown/edit/bracket_pairs.dart';
 import 'package:niman/src/markdown/edit/caret_motion.dart';
 import 'package:niman/src/markdown/edit/caret_spot.dart';
 import 'package:niman/src/markdown/edit/edit_history.dart';
+import 'package:niman/src/markdown/edit/enter_edit.dart';
 import 'package:niman/src/markdown/edit/line_prefix.dart';
 import 'package:niman/src/markdown/edit/list_indent_edit.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
@@ -1267,15 +1267,16 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       _applySelection(next, rebuild: true, reveal: true);
 
   /// Undoes the last edit, and says whether there was one.
-  bool undo() => _applyHistory(_history.undo(widget.buffer), forwards: false);
+  bool undo() => _applyHistory(_history.undo(widget.buffer));
 
   /// Redoes the last undone edit, and says whether there was one.
-  bool redo() => _applyHistory(_history.redo(widget.buffer), forwards: true);
+  bool redo() => _applyHistory(_history.redo(widget.buffer));
 
   /// Rebuilds what an undo or a redo changed, the same way a platform edit
-  /// does.
-  bool _applyHistory(EditRecord? record, {required bool forwards}) {
-    if (record == null) return false;
+  /// does; [caret] is where the history put the caret, null when it had
+  /// nothing to do.
+  bool _applyHistory(int? caret) {
+    if (caret == null) return false;
     // An undo is an edit like any other: the buffer says which lines it
     // touched, and the tokenizer and the map follow those lines.
     final edit = _history.lastEdit;
@@ -1289,7 +1290,6 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     // has, or a rebuild when there is none (a restyle after a reload).
     // Undo puts the caret after what it restored (where it was before a
     // deletion, at the start of typing it took back); redo after what it did.
-    final caret = forwards ? record.end : record.start + record.removed.length;
     setState(() {
       _ownSelection = _selection
           .collapsedTo(caret)
@@ -1680,6 +1680,10 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// `SourceBuffer.replaceRange`). Without [follow] the note stays where it
   /// is on screen rather than going to the caret: an edit made somewhere the
   /// writer is looking, not where they are typing — a checkbox ticked.
+  ///
+  /// The last [closing] characters of [text] are closers written ahead of the
+  /// caret — the `)` of a `(` — which the history keeps in the step of the
+  /// typing inside the pair.
   void _replaceRange(
     int start,
     int end,
@@ -1687,6 +1691,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     SelectionModel? caret,
     bool verbatim = false,
     bool follow = true,
+    int closing = 0,
   }) {
     if (start < 0 || end < start || end > widget.buffer.length) return;
     _touch.hide();
@@ -1701,6 +1706,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
         removed: removed,
         inserted: buffer.substring(start, start + stored),
       ),
+      closing: closing,
     );
     _styleEdited(edit);
     final next = (caret ?? SelectionModel.at(start + stored)).clampTo(
@@ -1847,17 +1853,40 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     if (edit == null) return false;
     final caret = SelectionModel(anchor: edit.anchor, extent: edit.extent);
     if (edit.text.isEmpty && edit.start == edit.end) {
-      placeCaret(edit.extent);
+      _stepOverCloser(edit.extent);
     } else {
-      _replaceRange(edit.start, edit.end, edit.text, caret: caret);
+      // A pair written at the caret: the characters after the caret are
+      // closers, which the typing inside the pair is one undo step with.
+      final closing = edit.start == edit.end
+          ? edit.start + edit.text.length - edit.extent
+          : 0;
+      _replaceRange(
+        edit.start,
+        edit.end,
+        edit.text,
+        caret: caret,
+        closing: closing,
+      );
     }
     return true;
   }
 
+  /// Puts the caret at [offset], past a closing character the writer typed
+  /// over: the typing goes on in the undo step that wrote the pair (#1053).
+  void _stepOverCloser(int offset) {
+    _applySelection(
+      _selection.collapsedTo(offset),
+      reveal: true,
+      endStep: false,
+    );
+    _history.stepOver(offset);
+  }
+
   /// A line break typed over `[start, end)`, when it means more than a line
   /// break: inside a list item it carries the list on, and on an empty item it
-  /// ends the list (#142, the legacy editor's `applyNewLine`). Answers whether
-  /// it did either; otherwise the platform's line break is applied as typed.
+  /// ends the list (#142, the legacy editor's `applyNewLine`); inside a quote
+  /// or a callout it carries the quote on (#1049). Answers whether it did any
+  /// of them; otherwise the platform's line break is applied as typed.
   ///
   /// It hangs off the *line break arriving*, not off the Enter key, because
   /// that is the one place every embedder meets: an IME commits the break as
@@ -1872,24 +1901,19 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     if (_tableEnter()) return true;
     if (start != end) return false;
     final buffer = widget.buffer;
-    final line = buffer.lineOf(start);
-    if (!_isPlainLine(line)) return false;
-    final text = buffer.lineAt(line);
-    final head = listItemHead(text);
-    if (head == null) return false;
-    final lineStart = buffer.offsetOfLine(line);
-    if (head.isEmpty) {
-      // Enter on an item with nothing in it takes the marker away instead of
-      // adding another empty item — the second Enter everybody presses to get
-      // out of a list.
-      _replaceRange(lineStart, lineStart + text.length, '');
-      return true;
-    }
-    // A caret inside the marker is not "in the item": leave it to the platform.
-    if (start - lineStart < text.length - head.content.length) return false;
-    // One edit, not a line break and then a marker: one undo step, and no
-    // frame where the marker is missing.
-    _replaceRange(start, end, '\n${head.continuation}');
+    if (!_isPlainLine(buffer.lineOf(start))) return false;
+    // The rule is `enterEdit`'s: a list item behind its quote marks is
+    // carried on, a quote line starts the next with its marks, an empty
+    // nested item goes back a level (#1049).
+    final edit = enterEdit(buffer, start, indentWidth: widget.indentWidth);
+    if (edit == null) return false;
+    _replaceRange(
+      edit.start,
+      edit.end,
+      edit.text,
+      caret: edit.caret,
+      verbatim: edit.verbatim,
+    );
     return true;
   }
 
@@ -2086,7 +2110,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     if (revision == _runsRevision) return _runs;
     final styler = _styler;
     final fences = styler?.divBlocks;
-    final quotes = styler?.quoteBlocks;
+    final quotes = styler?.fenceQuoteBlocks;
     if (styler == null || fences == null || quotes == null) {
       _runsOwed = styler != null;
       return const <LiveRun>[];
@@ -2910,11 +2934,13 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     bool rebuild = false,
     bool reveal = false,
     bool suggest = true,
+    bool endStep = true,
   }) {
     final clamped = next.clampTo(widget.buffer.length);
     // A caret the writer moved ends the typing step: what is typed next is
-    // undone on its own.
-    _history.seal();
+    // undone on its own. Not so a caret that steps over a closer the step
+    // wrote ([_stepOverCloser]).
+    if (endStep) _history.seal();
     final wasRange = !_selection.isCollapsed;
     _ownSelection = clamped;
     if (rebuild || !clamped.isCollapsed || wasRange) setState(() {});

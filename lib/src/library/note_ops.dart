@@ -33,6 +33,7 @@ import 'package:niman/src/library/session.dart';
 import 'package:niman/src/links/block_anchors.dart';
 import 'package:niman/src/links/link_preview.dart';
 import 'package:niman/src/links/link_spot_slices.dart';
+import 'package:niman/src/links/note_finder.dart';
 import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/lint/lint_rule.dart';
 import 'package:niman/src/markdown/note_bytes.dart';
@@ -64,6 +65,7 @@ final class NoteOps implements NoteOperations {
     FileHolds? holds,
   }) : holds = holds ?? FileHolds.instance,
        _dao = NoteDao(db),
+       _finder = NoteFinder(db),
        _resolver = LinkResolver(db),
        history = NoteHistory(root: root, config: config) {
     writer = NoteWriter(root: root, indexer: indexer, history: history);
@@ -95,6 +97,9 @@ final class NoteOps implements NoteOperations {
   final NoteHistory history;
 
   final NoteDao _dao;
+
+  /// Finds notes by name, alias and title, for Go to note (#1043).
+  final NoteFinder _finder;
 
   /// Resolves links against the index, for the links a move has to follow.
   final LinkResolver _resolver;
@@ -193,8 +198,8 @@ final class NoteOps implements NoteOperations {
   Future<Note?> find(String path) => _dao.find(path);
 
   @override
-  Future<List<Note>> notesNamed(String query, {int limit = 50}) =>
-      _dao.named(query, limit: limit);
+  Future<List<String>> notesNamed(String query, {int limit = 50}) =>
+      _finder.paths(query, limit: limit);
 
   @override
   Future<List<Note>> recentlyModified({
@@ -792,8 +797,14 @@ final class NoteOps implements NoteOperations {
     String path,
     String content, {
     int? editSession,
+    DiskStamp? expected,
   }) async {
-    final saved = await writer.save(path, content, editSession: editSession);
+    final saved = await writer.save(
+      path,
+      content,
+      editSession: editSession,
+      expected: expected,
+    );
     // After the write: a sync that read the hint before the text landed
     // could otherwise upload the old text and drop the hint.
     _hint(path, SyncOpKind.changed);
@@ -813,12 +824,14 @@ final class NoteOps implements NoteOperations {
     NoteContentProducer content, {
     int? editSession,
     NoteReferences? references,
+    DiskStamp? expected,
   }) async {
     final saved = await writer.save(
       path,
       content,
       editSession: editSession,
       references: references,
+      expected: expected,
     );
     _hint(path, SyncOpKind.changed);
     return saved;

@@ -52,8 +52,18 @@ abstract interface class FieldSource {
   /// Both are matched case-insensitively: the key is stored lowercased,
   /// and a person filtering by `status = Draft` means the note that says
   /// `status: draft`. An empty [value] matches every note that declares
-  /// the key at all. [limit] keeps the first ones only.
-  Future<List<Note>> notesWithField(String key, String value, {int? limit});
+  /// the key at all. [limit] keeps the first ones only, and [after] starts
+  /// past that path: the cursor of a long list read a page at a time
+  /// (#1037).
+  Future<List<Note>> notesWithField(
+    String key,
+    String value, {
+    int? limit,
+    String? after,
+  });
+
+  /// How many notes [notesWithField] lists for [key] and [value] in all.
+  Future<int> countWithField(String key, String value);
 
   /// Every key in use, most declared first (ties alphabetical).
   Future<List<FieldKeyCount>> fieldKeys();
@@ -94,25 +104,56 @@ final class FieldRepo implements FieldSource {
   }
 
   @override
-  Future<List<Note>> notesWithField(String key, String value, {int? limit}) {
-    final wanted = value.trim().toLowerCase();
+  Future<List<Note>> notesWithField(
+    String key,
+    String value, {
+    int? limit,
+    String? after,
+  }) {
     final fields = _db.frontmatterFields;
     final query = _db.select(_db.notes)
       ..where(
-        (n) => n.id.isInQuery(
-          _db.selectOnly(fields)
-            ..addColumns([fields.noteId])
-            ..where(
-              wanted.isEmpty
-                  ? fields.key.equals(key.trim().toLowerCase())
-                  : fields.key.equals(key.trim().toLowerCase()) &
-                        fields.value.lower().equals(wanted),
-            ),
-        ),
+        (n) =>
+            n.id.isInQuery(
+              _db.selectOnly(fields)
+                ..addColumns([fields.noteId])
+                ..where(_matches(fields, key, value)),
+            ) &
+            (after == null
+                ? const Constant(true)
+                : n.path.isBiggerThanValue(after)),
       )
       ..orderBy([(n) => OrderingTerm.asc(n.path)]);
     if (limit != null) query.limit(limit);
     return query.get();
+  }
+
+  @override
+  Future<int> countWithField(String key, String value) async {
+    final fields = _db.frontmatterFields;
+    final count = value.trim().isEmpty
+        ? fields.noteId.count(distinct: true)
+        : fields.noteId.count();
+    final query = _db.selectOnly(fields)
+      ..addColumns([count])
+      ..where(_matches(fields, key, value));
+    final row = await query.getSingle();
+    final total = row.read<int>(count);
+    return total ?? 0;
+  }
+
+  /// The rows of [key] holding [value] (any value when it is empty): an
+  /// equality on the `(key, value, note_id)` index. `value` is a
+  /// `COLLATE NOCASE` column, so the seek is the index's and needs no
+  /// `lower()` over every row of the key (#1037).
+  Expression<bool> _matches(
+    $FrontmatterFieldsTable fields,
+    String key,
+    String value,
+  ) {
+    final wanted = value.trim().toLowerCase();
+    final named = fields.key.equals(key.trim().toLowerCase());
+    return wanted.isEmpty ? named : named & fields.value.equals(wanted);
   }
 
   @override

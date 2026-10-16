@@ -1972,8 +1972,9 @@ final class LibraryController implements LibrarySession {
     _log.debug('index warm-up: ${clock.elapsedMilliseconds} ms');
   }
 
-  /// [IndexDatabase.ensureRecentIndex], [IndexDatabase.ensurePinnedIndex]
-  /// and [IndexDatabase.ensureTagCounts],
+  /// [IndexDatabase.ensureRecentIndex], [IndexDatabase.ensurePinnedIndex],
+  /// [IndexDatabase.ensureTagCounts] and
+  /// [IndexDatabase.ensureStemTrigrams],
   /// logged rather than thrown: their readers answer without them, only
   /// slower.
   Future<void> _ensureRecentIndex(IndexDatabase db) async {
@@ -1982,11 +1983,15 @@ final class LibraryController implements LibrarySession {
       await db.ensureRecentIndex();
       await db.ensurePinnedIndex();
       await db.ensureTagCounts();
+      await db.ensureStemTrigrams();
       _log.debug(
-        'notes_recent and tag counts ready in ${clock.elapsedMilliseconds} ms',
+        'notes_recent, tag counts and name trigrams ready in '
+        '${clock.elapsedMilliseconds} ms',
       );
     } on Object catch (error) {
-      _log.warning('notes_recent or tag counts not built: $error');
+      _log.warning(
+        'notes_recent, tag counts or name trigrams not built: $error',
+      );
     }
   }
 

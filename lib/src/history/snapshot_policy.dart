@@ -1,4 +1,5 @@
 import 'package:meta/meta.dart';
+import 'package:niman/src/core/files.dart';
 import 'package:niman/src/history/history_manifest.dart';
 
 /// What a save asks of history before it overwrites a note.
@@ -13,6 +14,7 @@ final class SnapshotRequest {
     required this.now,
     this.sessionStart = false,
     this.forced,
+    this.expected,
   });
 
   /// `historyVersions`: how many unpinned versions to keep (0 = none).
@@ -32,6 +34,12 @@ final class SnapshotRequest {
   /// ([HistoryReason.restore], [HistoryReason.sync],
   /// [HistoryReason.replace]); null for an ordinary save.
   final HistoryReason? forced;
+
+  /// What the saving editor last saw of the file (#1055): if the file is not
+  /// that any more, somebody else wrote it since, and the save is about to
+  /// overwrite their version — which is then kept whatever the interval
+  /// ([HistoryReason.external]). Null for a save that holds no such belief.
+  final DiskStamp? expected;
 }
 
 /// Whether to keep the content about to be overwritten, and why.

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:niman/src/search/search_repo.dart';
 
 /// In-memory [SearchSource] for widget tests.
@@ -12,6 +14,10 @@ final class FakeSearchSource implements SearchSource {
 
   /// The hits every word query returns (writable, so tests can reshuffle).
   List<SearchHit> hits;
+
+  /// While set, a word search waits for it to complete: a query that takes
+  /// its time.
+  Completer<void>? searchGate;
 
   /// Which queries have been started, in order (for debounce assertions).
   final List<String> queries = [];
@@ -31,6 +37,7 @@ final class FakeSearchSource implements SearchSource {
     int limit = 200,
   }) async {
     queries.add(query ?? '');
+    await searchGate?.future;
     if (id != null && !isCurrent(id)) return const [];
     if (query == null || query.trim().isEmpty) return const [];
     return hits;
@@ -55,10 +62,41 @@ final class FakeSearchSource implements SearchSource {
     ];
   }
 
+  /// While set, the contains scan's events come from it: a scan that takes
+  /// its time, which a test steps by hand.
+  StreamController<ContainsProgress>? containsEvents;
+
+  @override
+  Stream<ContainsProgress> searchContainsStream(
+    String pattern, {
+    required int id,
+    int limit = 200,
+  }) async* {
+    final events = containsEvents;
+    if (events != null) {
+      queries.add(pattern);
+      yield* events.stream;
+      return;
+    }
+    final hits = await searchContains(pattern, id: id, limit: limit);
+    yield ContainsProgress(
+      hits: hits,
+      scanned: hits.length,
+      total: hits.length,
+      done: true,
+    );
+  }
+
   /// The excerpts a word result's row reads, by path; none by default.
   final Map<String, String> excerpts = {};
 
+  /// Holds a path's excerpt until its completer completes (the excerpt of
+  /// a big note takes its time); a path without a gate answers at once.
+  final Map<String, Completer<void>> excerptGates = {};
+
   @override
-  Future<String> excerpt(SearchHit hit, String userText) async =>
-      excerpts[hit.path] ?? '';
+  Future<String> excerpt(SearchHit hit, String userText) async {
+    await excerptGates[hit.path]?.future;
+    return excerpts[hit.path] ?? '';
+  }
 }

@@ -320,6 +320,7 @@ abstract base class Strings {
   String get noteStatusError;
   String get noteStatusSaveFailed;
   String get noteSaveFailedSnack;
+  String get noteChangedOnDisk;
   String get noteNotText;
   String get noteLoadFailed;
   String get noteLoadMissing;
@@ -475,6 +476,9 @@ abstract base class Strings {
   String get searchTooShortHint;
   String get searchNoMatches;
   String get searchLoadMore;
+  String get searchStop;
+  String searchScanning(int scanned, int total);
+  String searchShowingFirst(int shown, int total);
 
   // The Tasks and events group of a lone `+project`/`@context` (#730).
 
@@ -1207,6 +1211,7 @@ abstract base class Strings {
   String get historyReasonRestore;
   String get historyReasonSync;
   String get historyReasonReplace;
+  String get historyReasonExternal;
   String get historyReasonUnknown;
   String get historySyncBase;
   String get historyEmpty;

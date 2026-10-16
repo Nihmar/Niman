@@ -608,6 +608,9 @@ final class NorwegianStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Notatet kunne ikke lagres. Niman prøver igjen.';
   @override
+  String get noteChangedOnDisk =>
+      'Et annet program endret notatet. Den versjonen er bevart i historikken.';
+  @override
   String get noteNotText =>
       'Denne filen er ikke et tekstnotat, så Niman kan ikke vise den her.';
   @override
@@ -878,6 +881,14 @@ final class NorwegianStrings extends Strings {
   String get searchNoMatches => 'Ingen treff';
   @override
   String get searchLoadMore => 'Vis mer';
+  @override
+  String get searchStop => 'Stopp';
+  @override
+  String searchScanning(int scanned, int total) =>
+      'Søker… $scanned av $total notater';
+  @override
+  String searchShowingFirst(int shown, int total) =>
+      'De første $shown av $total';
   @override
   String searchTasksAndEvents(int count) => 'Oppgaver og hendelser · $count';
   @override
@@ -2250,6 +2261,8 @@ final class NorwegianStrings extends Strings {
   String get historyReasonSync => 'før synk';
   @override
   String get historyReasonReplace => 'før erstatning';
+  @override
+  String get historyReasonExternal => 'endret utenfor Niman';
   @override
   String get historyReasonUnknown => 'gjenfunnet';
   @override

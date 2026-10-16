@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:meta/meta.dart';
 import 'package:niman/src/core/app_theme.dart';
 import 'package:niman/src/core/custom_theme.dart';
+import 'package:niman/src/core/files.dart' show DiskStamp;
 import 'package:niman/src/core/language.dart';
 import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
@@ -111,8 +112,9 @@ abstract interface class NoteOperations {
   /// The indexed note/folder at library-relative [path], or null.
   Future<Note?> find(String path);
 
-  /// Notes whose name holds [query], best matches first (#155).
-  Future<List<Note>> notesNamed(String query, {int limit = 50});
+  /// The paths of the notes [query] finds by name, alias or title, best
+  /// matches first (#155, #1043); none for a text under two characters.
+  Future<List<String>> notesNamed(String query, {int limit = 50});
 
   /// The [limit] notes modified last, newest first, outside
   /// [excludeFolder] (#535).
@@ -147,11 +149,15 @@ abstract interface class NoteOperations {
   /// session the save belongs to — one opening of the note, however many
   /// autosaves it makes.
   ///
+  /// [expected] is the file as the editor last saw it (#1055): if the disk
+  /// holds another, that version is kept in the history first.
+  ///
   /// Answers what the write left on the disk, or null when it cannot say.
   Future<NoteSaveResult?> saveNote(
     String path,
     String content, {
     int? editSession,
+    DiskStamp? expected,
   });
 
   /// Saves a note whose text is never joined: [content] makes the bytes one
@@ -168,6 +174,7 @@ abstract interface class NoteOperations {
     NoteContentProducer content, {
     int? editSession,
     NoteReferences? references,
+    DiskStamp? expected,
   });
 
   /// Tidies the note at [path]'s Markdown, in its turn among the note's

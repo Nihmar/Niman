@@ -230,6 +230,37 @@ void main() {
     expect(suggester.noteQueries, ['', 'No']);
   });
 
+  // #1036: the index is one connection and its reads queue, so a fast
+  // typist's keystrokes do not each reach it: one read is in flight and the
+  // newest ask waits behind it; the ones in between are never made.
+  testWidgets('keystrokes during a read ask the library once, for the last', (
+    tester,
+  ) async {
+    final buffer = SourceBuffer.fromText('');
+    final suggester = _library();
+    await pump(tester, buffer, suggester);
+    await type(tester, '[[');
+    suggester.noteQueries.clear();
+
+    suggester.holding = true;
+    await type(tester, '[[N');
+    await type(tester, '[[No');
+    await type(tester, '[[Not');
+    await type(tester, '[[Note');
+    expect(suggester.noteQueries, ['N'], reason: 'one read in flight');
+
+    suggester.release();
+    await tester.pump();
+    await tester.pump();
+
+    expect(suggester.noteQueries, ['N', 'Note']);
+    expect(
+      panel(tester).entries.whereType<NoteSuggestion>().map((n) => n.name),
+      ['Notes', 'Notes', 'Meeting notes', 'Meeting notes'],
+      reason: "the rows are the last text's",
+    );
+  });
+
   testWidgets('Enter completes the link and the caret lands after it', (
     tester,
   ) async {

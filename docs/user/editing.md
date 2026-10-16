@@ -309,6 +309,16 @@ the other, and entering or leaving Zen leaves typewriter mode as it
 was. In Zen the status row is hidden, so the key and the palette are
 the way to it.
 
+### Find and replace
+
+The find bar searches the note a line at a time, without making a copy of
+it, so a very long note can have it open: the matches arrive in a moment
+after you stop typing the query. **Replace** swaps the current match and
+moves on, keeping the matches it already found; **Replace all** is one undo
+step and leaves the caret where it was in the text (moved by the
+replacements before it) instead of taking it to the first match. A query
+that contains a line break is searched over the whole note.
+
 ### Copy and paste
 
 The clipboard carries Markdown on both editors, so copying the same text
@@ -321,6 +331,30 @@ the HTML is used when the clipboard carries it. In the source editor,
 **Paste as Markdown** (`Ctrl/⌘+Shift+V`, or the editor's menu) turns a
 browser's copy into Markdown, linked to the page it came from (see
 [web capture](web-capture.md#paste-as-markdown)).
+
+### Undo and redo
+
+Undo goes back one step at a time, and a step is what a writer would call
+one thing done rather than one key pressed. Typing is a step, and so is a
+run of Backspace or Delete in one direction: a held Backspace is undone with
+one `Ctrl/⌘+Z`, not one character per press.
+
+A step ends when you:
+
+- stop for about a second;
+- start a new word — the word you type after a space is a step of its own,
+  so undo takes words back one at a time;
+- press Enter, or move the caret;
+- change from typing to deleting, or from Backspace to Delete.
+
+A bracket or quote that closes itself belongs to the step of what you type
+inside it: `(like this)` is undone whole, and typing the closing `)` over the
+one the editor wrote does not end the step.
+
+Each open note keeps its last 200 steps, as long as the text they hold fits
+in about 32 MB; past that the oldest go first, and the latest step always
+stays. A change over a long stretch of the note — Replace All, Tidy — keeps
+only the lines it changed, so a big note does not weigh down its own undo.
 
 ### Opening and saving a note
 
@@ -348,13 +382,19 @@ Nothing is thrown away meanwhile. If the note is switched away from or its tab
 is closed while the write is still running or has failed, its text is kept by
 the app: the note stays marked as unsaved, the write is retried, and quitting
 waits for it (or asks, if it still cannot be written) instead of leaving with
-the last edits lost.
+the last edits lost. If you open that note again meanwhile, it opens with
+those edits in it, as unsaved changes of its own — not with the older text the
+disk still has — and the held write is dropped, so nothing old is ever written
+over what you type next.
 
 **A note changed by another program.** When a sync client, Niman's own sync or
 another program rewrites a note that is open, every open note whose text you
 have not changed — the tabs behind the one on screen too — shows the new file
-at once. A note with edits of yours keeps them (your text wins and is saved
-over the file, as before).
+at once. A note with edits of yours keeps them: your text wins and is saved
+over the file — but before it is, the version the other program wrote is kept
+in the note's [history](organization.md) (*changed outside Niman*), and a
+message says so. The comparison is of the file with the one the editor last
+read or wrote, so nothing is kept when nobody else touched it.
 
 **Line endings and the byte order mark.** The editor works with plain lines,
 but the file keeps what it had: a note with Windows (`CRLF`) line endings is
@@ -563,9 +603,19 @@ note.
 Enter inside a list carries the list on, in both editors: the next line
 starts with the same marker, a numbered list counts on, and a task item
 gives you a fresh empty box. Enter on an item you have not typed
-anything into ends the list instead — the usual second Enter. Inside a
-fenced code block, a math block or the frontmatter it does nothing: a
-dash there is a dash.
+anything into ends the list instead — the usual second Enter. On an empty
+item that is nested, Enter first takes it back one level, as Shift+Tab
+does, and only at the margin removes the marker. Inside a fenced code
+block, a math block or the frontmatter it does nothing: a dash there is a
+dash.
+
+Enter in a quote or a callout starts the next line with the same `>`
+marks, and a list inside the quote goes on behind them: `> - milk` and
+Enter gives `> - `, `> > x` gives `> > `, and the first line of a callout,
+`> [!note]`, gives `> ` for its body. Enter on a line with nothing after
+its marks, `> `, takes them off and leaves the quote; on an empty list
+item in a quote it takes the marker, and the next Enter the quote. Enter
+and Tab read the line the same way, behind the `>`.
 
 Brackets come in pairs, in both editors and on every platform: `(`
 writes `()`, `[` writes `[]` and `{` writes `{}`, with the caret between
@@ -945,6 +995,15 @@ The rendered note shows Markdown, math, diagrams, and fenced code
 coloured by the language its fence names.
 
 Extras: word count, heading outline, heading folding.
+
+The word count is of your words, not of the Markdown around them. The
+marks at the head of a line — a heading's `#`, a list's `-` or `1.` and
+its task box, a quote's `>` — are not counted, so `## Title` is one word
+and `- [ ] buy milk` is two. A line that is only syntax counts for
+nothing: a rule (`---`, `***`), a table's `|---|---|` row, the pipes
+between a table row's cells and the lines that open and close a code
+fence. The frontmatter at the top of the note, between its two `---`
+lines, is not counted either. The words inside a code block are.
 
 ## Images
 

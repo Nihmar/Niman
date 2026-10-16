@@ -180,6 +180,15 @@ final class _CommandPaletteState extends State<CommandPalette> {
   /// as the field's submit, and the second must not pop the screen below.
   bool _chosen = false;
 
+  /// True from a keystroke until the note search for the text then in the
+  /// field has landed (#1034): until then the note rows are the recent
+  /// notes or the previous keystroke's hits, not what was typed for.
+  bool _pending = false;
+
+  /// Enter arrived on a note row while [_pending]: the choice waits for
+  /// the fresh list and is made from it, instead of opening a stale row.
+  bool _chooseWhenFresh = false;
+
   @override
   void initState() {
     super.initState();
@@ -300,6 +309,8 @@ final class _CommandPaletteState extends State<CommandPalette> {
   }
 
   void _refresh(String query) {
+    // A new text voids the search in flight and the Enter queued on it.
+    _chooseWhenFresh = false;
     setState(() {
       _settings = _rankSettings(query);
       _commands = _rankCommands(query);
@@ -310,17 +321,36 @@ final class _CommandPaletteState extends State<CommandPalette> {
     // Another list, or a shorter one: back to its top, where row 0 is.
     if (_scroll.hasClients) _scroll.jumpTo(_scroll.position.minScrollExtent);
     _debounce?.cancel();
-    if (query.trim().isEmpty) return;
     final token = ++_token;
+    if (query.trim().isEmpty) {
+      _pending = false;
+      return;
+    }
+    _pending = true;
     _debounce = Timer(const Duration(milliseconds: 120), () async {
-      final notes = await widget.searchNotes(query);
+      List<String> notes;
+      try {
+        notes = await widget.searchNotes(query);
+      } on Object {
+        notes = const [];
+      }
       if (!mounted || token != _token) return;
+      final choose = _chooseWhenFresh;
       setState(() {
+        _pending = false;
+        _chooseWhenFresh = false;
         _notes = notes.take(20).toList();
         if (_selected >= _items.length) _selected = 0;
       });
+      if (choose) _choose();
     });
   }
+
+  /// Whether the row at [index] is a note row still showing the notes of
+  /// an earlier text (#1034). Commands, actions and settings are ranked
+  /// on the spot, so they are never stale.
+  bool _isStale(int index) =>
+      _pending && index >= 0 && _items[index] is PaletteNoteChoice;
 
   /// Selects the row at [index] (the pointer moved onto it).
   void _select(int index) {
@@ -344,6 +374,12 @@ final class _CommandPaletteState extends State<CommandPalette> {
     final items = _items;
     final at = index ?? _selected;
     if (_chosen || at < 0 || at >= items.length) return;
+    // Enter on a stale note row waits for the search for the typed text
+    // and chooses from its list (#1034); a tap names the row it hit.
+    if (index == null && _isStale(at)) {
+      _chooseWhenFresh = true;
+      return;
+    }
     _chosen = true;
     Navigator.of(context).pop(items[at]);
   }
@@ -499,7 +535,14 @@ final class _CommandPaletteState extends State<CommandPalette> {
                                   _notes.isNotEmpty)
                                 _Heading(AppStrings.paletteNotes),
                               for (final path in _notes)
-                                row(_NoteLine(path: path)),
+                                row(
+                                  // Dimmed while the search for the typed
+                                  // text is out: they are not its hits yet.
+                                  Opacity(
+                                    opacity: _pending ? 0.5 : 1,
+                                    child: _NoteLine(path: path),
+                                  ),
+                                ),
                               if (_settings.isNotEmpty)
                                 _Heading(AppStrings.tabSettings),
                               for (final setting in _settings)

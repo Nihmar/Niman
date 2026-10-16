@@ -608,6 +608,9 @@ final class DanishStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Noten kunne ikke gemmes. Niman prøver igen.';
   @override
+  String get noteChangedOnDisk =>
+      'Et andet program har ændret noten. Den version er gemt i historikken.';
+  @override
   String get noteNotText =>
       'Denne fil er ikke en tekstnote, så Niman kan ikke vise den her.';
   @override
@@ -877,6 +880,14 @@ final class DanishStrings extends Strings {
   String get searchNoMatches => 'Ingen resultater';
   @override
   String get searchLoadMore => 'Vis mere';
+  @override
+  String get searchStop => 'Stop';
+  @override
+  String searchScanning(int scanned, int total) =>
+      'Søger… $scanned af $total noter';
+  @override
+  String searchShowingFirst(int shown, int total) =>
+      'De første $shown af $total';
   @override
   String searchTasksAndEvents(int count) => 'Opgaver og begivenheder · $count';
   @override
@@ -2251,6 +2262,8 @@ final class DanishStrings extends Strings {
   String get historyReasonSync => 'før synk';
   @override
   String get historyReasonReplace => 'før erstatning';
+  @override
+  String get historyReasonExternal => 'ændret uden for Niman';
   @override
   String get historyReasonUnknown => 'genfundet';
   @override

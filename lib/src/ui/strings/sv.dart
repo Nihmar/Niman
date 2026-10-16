@@ -612,6 +612,10 @@ final class SwedishStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Anteckningen kunde inte sparas. Niman försöker igen.';
   @override
+  String get noteChangedOnDisk =>
+      'Ett annat program ändrade anteckningen. Den versionen finns kvar i '
+      'historiken.';
+  @override
   String get noteNotText =>
       'Den här filen är inte en textanteckning, så '
       'Niman kan inte visa den här.';
@@ -885,6 +889,14 @@ final class SwedishStrings extends Strings {
   String get searchNoMatches => 'Inga träffar';
   @override
   String get searchLoadMore => 'Visa mer';
+  @override
+  String get searchStop => 'Stoppa';
+  @override
+  String searchScanning(int scanned, int total) =>
+      'Söker… $scanned av $total anteckningar';
+  @override
+  String searchShowingFirst(int shown, int total) =>
+      'De första $shown av $total';
   @override
   String searchTasksAndEvents(int count) => 'Uppgifter och händelser · $count';
   @override
@@ -2271,6 +2283,8 @@ final class SwedishStrings extends Strings {
   String get historyReasonSync => 'före synk';
   @override
   String get historyReasonReplace => 'före ersättning';
+  @override
+  String get historyReasonExternal => 'ändrad utanför Niman';
   @override
   String get historyReasonUnknown => 'återfunnen';
   @override

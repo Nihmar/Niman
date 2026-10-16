@@ -70,6 +70,27 @@ final class BlockRules {
     );
   }
 
+  /// Whether [line], a line of a quote block, opens a fenced div behind its
+  /// `>`: three colons, after the one quote mark and the spaces round it
+  /// (#1048). The quote's content is read again only for the quotes that
+  /// have such a line. No allocation: a quote line is read once per scan.
+  bool quoteLineHoldsFence(int line) {
+    final text = _lines.lineText(line);
+    var at = 0;
+    while (at < text.length && _isBlank(text.codeUnitAt(at))) {
+      at++;
+    }
+    if (at < text.length && text.codeUnitAt(at) == 0x3E) {
+      at++;
+      while (at < text.length && _isBlank(text.codeUnitAt(at))) {
+        at++;
+      }
+    }
+    return text.startsWith(':::', at);
+  }
+
+  static bool _isBlank(int unit) => unit == 0x20 || unit == 0x09;
+
   /// Whether line [end] belongs to [open], the block the scan has open.
   ///
   /// A block goes on only in the container it is in: a line read with what

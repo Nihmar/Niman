@@ -603,6 +603,9 @@ final class LatvianStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Piezīmi neizdevās saglabāt. Niman mēģinās vēlreiz.';
   @override
+  String get noteChangedOnDisk =>
+      'Cita programma mainīja šo piezīmi. Šī versija ir saglabāta vēsturē.';
+  @override
   String get noteNotText =>
       'Šis fails nav teksta piezīme, tāpēc Niman to šeit nevar parādīt.';
   @override
@@ -878,6 +881,13 @@ final class LatvianStrings extends Strings {
   String get searchNoMatches => 'Nav rezultātu';
   @override
   String get searchLoadMore => 'Rādīt vairāk';
+  @override
+  String get searchStop => 'Apturēt';
+  @override
+  String searchScanning(int scanned, int total) =>
+      'Meklēšana… $scanned no $total piezīmēm';
+  @override
+  String searchShowingFirst(int shown, int total) => 'Pirmie $shown no $total';
   @override
   String searchTasksAndEvents(int count) => 'Uzdevumi un notikumi · $count';
   @override
@@ -2258,6 +2268,8 @@ final class LatvianStrings extends Strings {
   String get historyReasonSync => 'pirms sinhronizācijas';
   @override
   String get historyReasonReplace => 'pirms aizstāšanas';
+  @override
+  String get historyReasonExternal => 'mainīts ārpus Niman';
   @override
   String get historyReasonUnknown => 'atgūta';
   @override

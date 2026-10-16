@@ -12,10 +12,10 @@ import 'package:drift/drift.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/links/link_path.dart';
 import 'package:niman/src/links/resolver.dart';
+import 'package:niman/src/links/stem_rank.dart';
 import 'package:niman/src/links/stem_row.dart';
 import 'package:niman/src/links/stem_rows.dart';
 import 'package:niman/src/links/suggestion.dart';
-import 'package:path/path.dart' as p;
 
 /// Notes and files by name, from the library's `note_stems`.
 final class NoteNames {
@@ -112,7 +112,7 @@ final class NoteNames {
 
   /// The normalized stem a file named [path] is indexed under.
   static String _stemOf(String path) =>
-      LinkPaths.normalizeTarget(_displayName(path));
+      LinkPaths.normalizeTarget(displayName(path));
 
   /// For each of the normalized [stems], the paths of the files that answer
   /// to it, aliases included: one query for the lot.
@@ -207,62 +207,16 @@ final class NoteNames {
     return bare;
   }
 
-  /// [rows] grouped by note and ranked: a note whose name or an alias starts
-  /// with [q] first, then by path. A note found only through an alias carries
-  /// it.
-  List<_Ranked> _rank(List<StemRow> rows, String q) {
-    final byNote = <int, List<StemRow>>{};
-    for (final row in rows) {
-      (byNote[row.id] ??= <StemRow>[]).add(row);
-    }
-    final ranked = <({NoteSuggestion note, String path, bool prefix})>[];
-    for (final group in byNote.values) {
-      final first = group.first;
-      final named = group.where((r) => r.source == 'file').firstOrNull;
-      final name = _displayName(first.path);
-      final prefix = q.isNotEmpty && group.any((r) => r.stem.startsWith(q));
-      final nameMatched =
-          q.isEmpty || (named != null && named.stem.contains(q));
-      ranked.add((
-        note: NoteSuggestion(
-          name: name,
-          folder: _folderOf(first.path),
-          target: name,
-          alias: q.isNotEmpty && !nameMatched ? first.stem : null,
-        ),
-        path: first.path,
-        prefix: prefix,
-      ));
-    }
-    ranked.sort((a, b) {
-      if (a.prefix != b.prefix) return a.prefix ? -1 : 1;
-      final byFolder = a.note.folder.compareTo(b.note.folder);
-      return byFolder != 0 ? byFolder : a.note.name.compareTo(b.note.name);
-    });
-    return [
-      for (final r in ranked)
-        if (readsBack(r.note.target)) (note: r.note, path: r.path),
-    ];
-  }
-
-  /// The name shown for [path]: the file's base name, `.md` dropped.
-  static String _displayName(String path) {
-    final name = p.basename(path);
-    return name.toLowerCase().endsWith('.md')
-        ? name.substring(0, name.length - 3)
-        : name;
-  }
-
-  /// The folder of [path] relative to the library; empty at the root.
-  static String _folderOf(String path) {
-    final dir = p.dirname(path);
-    return dir == '.' ? '' : dir;
-  }
+  /// [rows] ranked ([rankStems]), those whose name a `[[…]]` target can carry.
+  List<_Ranked> _rank(List<StemRow> rows, String q) => [
+    for (final r in rankStems(rows, q))
+      if (readsBack(r.note.target)) r,
+  ];
 }
 
 /// A ranked row: the suggestion with its bare target, and the note's path,
 /// which qualifies the target when the name is shared.
-typedef _Ranked = ({NoteSuggestion note, String path});
+typedef _Ranked = RankedStem;
 
 /// The one note the wiki [target] names — the shortest path first when
 /// several do — or null when it names no indexed note.

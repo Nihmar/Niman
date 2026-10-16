@@ -569,6 +569,8 @@ final class JapaneseStrings extends Strings {
   @override
   String get noteSaveFailedSnack => 'このノートを保存できませんでした。Niman は再試行します。';
   @override
+  String get noteChangedOnDisk => '別のプログラムがこのノートを変更しました。その版は履歴に残してあります。';
+  @override
   String get noteNotText => 'このファイルはテキストのノートではないため、Niman ではここに表示できません。';
   @override
   String get noteLoadFailed => 'このノートを開けませんでした。';
@@ -832,6 +834,13 @@ final class JapaneseStrings extends Strings {
   String get searchNoMatches => '一致はありません';
   @override
   String get searchLoadMore => 'もっと表示';
+  @override
+  String get searchStop => '停止';
+  @override
+  String searchScanning(int scanned, int total) =>
+      '検索中… $scanned / $total 件のノート';
+  @override
+  String searchShowingFirst(int shown, int total) => '先頭の$shown件を表示（全$total件）';
   @override
   String searchTasksAndEvents(int count) => 'タスクと予定 · $count';
   @override
@@ -2116,6 +2125,8 @@ final class JapaneseStrings extends Strings {
   String get historyReasonSync => '同期前';
   @override
   String get historyReasonReplace => '置換前';
+  @override
+  String get historyReasonExternal => 'Niman の外で変更';
   @override
   String get historyReasonUnknown => '回復';
   @override

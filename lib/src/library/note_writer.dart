@@ -111,6 +111,11 @@ final class NoteWriter {
   /// editor keeps them: handed to the note's reindex with the digest the
   /// write makes ([KnownContent]).
   ///
+  /// [expected] is the file as the saving editor last saw it (#1055): when the
+  /// file on disk is another, somebody else wrote it since, and their version
+  /// is kept in the history before this save replaces it
+  /// ([HistoryReason.external]; [NoteSaveResult.keptExternal]).
+  ///
   /// Answers what the write left on the disk ([NoteSaveResult]), or null when
   /// the producer abandoned the save and the disk was not touched.
   Future<NoteSaveResult?> save(
@@ -120,6 +125,7 @@ final class NoteWriter {
     HistoryReason? forced,
     int? contentLength,
     NoteReferences? references,
+    DiskStamp? expected,
   }) {
     final queuedAt = Stopwatch()..start();
     return _inTurn(
@@ -132,6 +138,7 @@ final class NoteWriter {
         queuedAt,
         contentLength,
         references: references,
+        expected: expected,
       ),
     );
   }
@@ -262,6 +269,7 @@ final class NoteWriter {
     Stopwatch queuedAt,
     int? contentLength, {
     NoteReferences? references,
+    DiskStamp? expected,
   }) async {
     final waitMs = queuedAt.elapsedMilliseconds;
     final abs = p.join(root, path);
@@ -276,6 +284,7 @@ final class NoteWriter {
       path,
       editSession: editSession,
       forced: forced,
+      expected: expected,
     );
     final NoteWriteResult? result;
     try {
@@ -309,8 +318,13 @@ final class NoteWriter {
       'total ${queuedAt.elapsedMilliseconds} ms)',
     );
     _reindexWhenQuiet(path, abs, created: result.created, bytes: result.bytes);
+    final kept = result.snapshot?.version?.reason == HistoryReason.external;
+    if (kept) {
+      _log.info('kept the version of "$path" that was written outside');
+    }
     return NoteSaveResult(
       stamp: DiskStamp(size: result.bytes, modified: result.modified),
+      keptExternal: kept,
     );
   }
 

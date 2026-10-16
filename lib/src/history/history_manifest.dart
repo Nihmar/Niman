@@ -19,6 +19,10 @@ enum HistoryReason {
   /// Right before a library-wide replace rewrote the note.
   replace,
 
+  /// Right before a save overwrote a version of the note that another
+  /// program had written since the editor last read or wrote it (#1055).
+  external,
+
   /// Read back from a `.v<n>` file the manifest did not describe.
   unknown;
 

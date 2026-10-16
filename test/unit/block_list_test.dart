@@ -12,6 +12,7 @@ Block _block(int start, int length, int tag) => Block(
   startLine: start,
   endLine: start + length,
   listOrdinal: tag,
+  holdsFence: tag.isEven,
 );
 
 String _describe(Block block) =>
@@ -66,9 +67,9 @@ final class _Pair {
     ];
     expect(list.divCount, divs.length, reason: reason);
     expect(list.divBlocks.map(_describe).toList(), divs, reason: reason);
-    expect(list.quoteBlocks.map(_describe).toList(), [
+    expect(list.fenceQuoteBlocks.map(_describe).toList(), [
       for (final block in plain)
-        if (block.kind == BlockKind.quote) _describe(block),
+        if (block.kind == BlockKind.quote && block.holdsFence) _describe(block),
     ], reason: reason);
     // Out of order, as a binary search reads.
     final random = Random(plain.length);

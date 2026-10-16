@@ -615,6 +615,10 @@ final class DutchStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Deze notitie kon niet worden opgeslagen. Niman probeert het opnieuw.';
   @override
+  String get noteChangedOnDisk =>
+      'Een ander programma heeft deze notitie gewijzigd. Die versie staat in '
+      'de geschiedenis.';
+  @override
   String get noteNotText =>
       'Dit bestand is geen tekstnotitie, dus Niman kan het hier niet tonen.';
   @override
@@ -887,6 +891,14 @@ final class DutchStrings extends Strings {
   String get searchNoMatches => 'Geen overeenkomsten';
   @override
   String get searchLoadMore => 'Meer tonen';
+  @override
+  String get searchStop => 'Stop';
+  @override
+  String searchScanning(int scanned, int total) =>
+      'Zoeken… $scanned van $total notities';
+  @override
+  String searchShowingFirst(int shown, int total) =>
+      'De eerste $shown van $total';
   @override
   String searchTasksAndEvents(int count) => 'Taken en gebeurtenissen · $count';
   @override
@@ -2287,6 +2299,8 @@ final class DutchStrings extends Strings {
   String get historyReasonSync => 'vóór sync';
   @override
   String get historyReasonReplace => 'vóór vervangen';
+  @override
+  String get historyReasonExternal => 'buiten Niman gewijzigd';
   @override
   String get historyReasonUnknown => 'teruggevonden';
   @override

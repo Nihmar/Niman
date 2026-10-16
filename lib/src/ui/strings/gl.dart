@@ -613,6 +613,9 @@ final class GalicianStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Non se puido gardar a nota. Niman tentarao de novo.';
   @override
+  String get noteChangedOnDisk =>
+      'Outro programa cambiou esta nota. Esa versión gardouse no historial.';
+  @override
   String get noteNotText =>
       'Este ficheiro non é unha nota de texto, así '
       'que Niman non pode amosalo aquí.';
@@ -884,6 +887,14 @@ final class GalicianStrings extends Strings {
   String get searchNoMatches => 'Sen coincidencias';
   @override
   String get searchLoadMore => 'Mostrar máis';
+  @override
+  String get searchStop => 'Parar';
+  @override
+  String searchScanning(int scanned, int total) =>
+      'Buscando… $scanned de $total notas';
+  @override
+  String searchShowingFirst(int shown, int total) =>
+      'Mostrando os primeiros $shown de $total';
   @override
   String searchTasksAndEvents(int count) => 'Tarefas e eventos · $count';
   @override
@@ -2277,6 +2288,8 @@ final class GalicianStrings extends Strings {
   String get historyReasonSync => 'antes de sincronizar';
   @override
   String get historyReasonReplace => 'antes de substituír';
+  @override
+  String get historyReasonExternal => 'cambiada fóra de Niman';
   @override
   String get historyReasonUnknown => 'recuperada';
   @override

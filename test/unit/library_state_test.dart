@@ -560,6 +560,34 @@ void main() {
     await controller.dispose();
   });
 
+  test('the paths the watcher reports reach the open editors, absolute '
+      "like the note's own (#1055)", () async {
+    final watched = StreamController<WatchChange>();
+    addTearDown(watched.close);
+    final controller = LibraryController(
+      appDb,
+      indexDbFactory: indexDb,
+      rescanInterval: const Duration(hours: 1),
+      watchSource: (_) => watched.stream,
+    );
+    await controller.open(root.path, create: false);
+
+    final note = p.join(root.path, 'a.md');
+    final heard = controller.externalChanges.first.timeout(
+      const Duration(seconds: 5),
+    );
+    File(note).writeAsStringSync('rewritten by another program');
+    watched.add(WatchChange(note));
+
+    final paths = await heard;
+    expect(paths, {note});
+    // What a note view compares its own path with.
+    expect(p.isAbsolute(paths.single), isTrue);
+    expect(p.equals(paths.single, p.join(root.path, 'a.md')), isTrue);
+    await controller.close();
+    await controller.dispose();
+  });
+
   test('a disposed controller never reopens the settings file', () async {
     // A rescan still running when the controller was let go closed the
     // library after it — and reopened the settings file to do it, which

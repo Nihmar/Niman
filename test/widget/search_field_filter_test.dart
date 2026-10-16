@@ -19,6 +19,9 @@ final class _FakeFieldSource implements FieldSource {
   /// Every (key, value) pair the screen asked for, in order.
   final List<String> queries = [];
 
+  /// How many pages of the long lists were read.
+  int pagesRead = 0;
+
   Note _note(String path) => Note(
     id: path.hashCode & 0x7fffffff,
     path: path,
@@ -51,8 +54,12 @@ final class _FakeFieldSource implements FieldSource {
     String key,
     String value, {
     int? limit,
+    String? after,
   }) async {
-    queries.add('$key=$value');
+    if (queries.isEmpty || queries.last != '$key=$value') {
+      queries.add('$key=$value');
+    }
+    if (limit != null) pagesRead++;
     final out = <Note>[];
     for (final entry in notes.entries) {
       final values = entry.value[key];
@@ -61,8 +68,19 @@ final class _FakeFieldSource implements FieldSource {
         out.add(_note(entry.key));
       }
     }
-    return out..sort((a, b) => a.path.compareTo(b.path));
+    out.sort((a, b) => a.path.compareTo(b.path));
+    final past = after == null
+        ? out
+        : [
+            for (final note in out)
+              if (note.path.compareTo(after) > 0) note,
+          ];
+    return limit == null ? past : past.take(limit).toList();
   }
+
+  @override
+  Future<int> countWithField(String key, String value) async =>
+      (await notesWithField(key, value)).length;
 }
 
 void main() {
@@ -199,5 +217,56 @@ void main() {
     await type(tester, 'status = archived');
 
     expect(find.text('No matches'), findsOne);
+  });
+
+  // #1037: a key most notes carry lists a page of its notes, says how many
+  // there are, and reads the next page when it is asked for.
+  testWidgets('a long filter lists a page, says the count, reads on', (
+    tester,
+  ) async {
+    fields.notes = {
+      for (var i = 0; i < 1200; i++)
+        'n${i.toString().padLeft(4, '0')}.md': {
+          'status': ['draft'],
+        },
+    };
+    await tester.pumpWidget(buildApp());
+    await tester.pump();
+    await type(tester, 'status =');
+
+    final more = find.byKey(const Key('search-load-more'));
+    Future<void> reveal() => tester.scrollUntilVisible(
+      more,
+      800,
+      scrollable: find.descendant(
+        of: find.byKey(const Key('search-results')),
+        matching: find.byType(Scrollable),
+      ),
+    );
+    Future<void> showMore() async {
+      await reveal();
+      await tester.ensureVisible(more);
+      await tester.pump();
+      await tester.tap(more);
+      await tester.pump();
+      await tester.pump();
+    }
+
+    // 500 notes are read, 50 are shown; the rest of the count is known.
+    expect(fields.queries, ['status=']);
+    await showMore();
+    // Show what is held (ten pages of fifty): the next page is read only
+    // once the held ones are all shown.
+    await reveal();
+    expect(find.text('Showing the first 500 of 1200'), findsOne);
+    for (var i = 0; i < 7; i++) {
+      await showMore();
+    }
+    expect(fields.pagesRead, 1);
+    await showMore();
+    await showMore();
+    expect(fields.pagesRead, 2);
+    await reveal();
+    expect(find.text('Showing the first 1000 of 1200'), findsOne);
   });
 }

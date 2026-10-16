@@ -24,7 +24,13 @@ void main() {
             readNote: (_) async => 'One #first line.\n\nA [[Link]] here.\n',
             writeNote: (_, _) async {},
             saveNoteStream:
-                (path, content, {required editSession, references}) async {
+                (
+                  path,
+                  content, {
+                  required editSession,
+                  references,
+                  expected,
+                }) async {
                   final text = StringBuffer();
                   for (var index = 0; ; index++) {
                     final slice = await content(index);

@@ -96,6 +96,117 @@ void main() {
     expect(surface.history.canUndo, isFalse);
   });
 
+  group('a long note is not joined, nor searched again whole (#1047)', () {
+    String note(int lines) =>
+        [for (var i = 0; i < lines; i++) 'line $i has a cat and more words']
+            .join('\n');
+
+    test('Replace all keeps the caret where the writer had it', () {
+      final text = note(3000);
+      final caret = text.indexOf('line 1500');
+      // The match the search selects at the caret: where the writer is.
+      final here = text.indexOf('cat', caret) + 3;
+      final (find, surface) = _find(text, caret: caret);
+      find
+        ..open()
+        ..replaceInput.text = 'dog'
+        ..findInput.text = 'cat'
+        ..search()
+        ..replaceAllMatches();
+      expect(surface.buffer.text, text.replaceAll('cat', 'dog'));
+      expect(surface.selection.start, here, reason: 'dog is as long as cat');
+      final (second, other) = _find(text, caret: caret);
+      second
+        ..open()
+        ..replaceInput.text = 'a longer word'
+        ..findInput.text = 'cat'
+        ..search()
+        ..replaceAllMatches();
+      expect(
+        other.selection.start,
+        here + 1501 * ('a longer word'.length - 3),
+        reason: 'moved by the matches before it, not sent to the first one',
+      );
+    });
+
+    test('Replace all keeps only the lines that changed in the history', () {
+      final text = [
+        for (var i = 0; i < 4000; i++)
+          'line $i has a ${i % 100 == 0 ? 'cat' : 'dog'} and more words',
+      ].join('\n');
+      final (find, surface) = _find(text);
+      find
+        ..open()
+        ..replaceInput.text = 'owl'
+        ..findInput.text = 'cat'
+        ..search()
+        ..replaceAllMatches();
+      expect(surface.history.length, 1);
+      // 40 changed lines, both sides: not the span, twice.
+      expect(surface.history.units, lessThan(40 * 2 * 45));
+      surface.history.undo(surface.buffer);
+      expect(surface.buffer.text, text);
+      surface.history.redo(surface.buffer);
+      expect(surface.buffer.text, text.replaceAll('cat', 'owl'));
+    });
+
+    test('Replace reads its own line again, not the note', () {
+      final text = note(20000);
+      final (find, surface) = _find(text);
+      find
+        ..open()
+        ..replaceInput.text = 'dog'
+        ..findInput.text = 'cat'
+        ..search();
+      expect(find.matchCount, 20000);
+      final read = find.linesRead;
+      find.replaceMatch();
+      expect(
+        find.linesRead - read,
+        lessThan(5),
+        reason: 'the matches after it were moved, not found again',
+      );
+      expect(find.matchCount, 19999);
+      expect(find.matchIndex, 0);
+      expect(surface.selection.start, text.indexOf('cat', 14));
+      // What it kept is what a search from scratch finds.
+      final kept = [for (var i = 0; i < find.matchCount; i++) i].length;
+      final (fresh, _) = _find(surface.buffer.text);
+      fresh.findInput.text = 'cat';
+      fresh.search();
+      expect(find.matchCount, fresh.matchCount);
+      expect(kept, fresh.matchCount);
+    });
+
+    test('a replacement that makes a match with its neighbours is found', () {
+      final (find, surface) = _find('ca cat\nca');
+      find
+        ..open()
+        ..replaceInput.text = ''
+        ..findInput.text = 'cat'
+        ..search()
+        ..replaceMatch();
+      // `ca ` + `` leaves `ca ` : no new match, but 'cat' typed around one:
+      expect(surface.buffer.text, 'ca \nca');
+      expect(find.matchCount, 0);
+    });
+
+    test('a long note is searched in slices, and its edit stales a scan', () {
+      final text = note(60000);
+      expect(text.length, greaterThan(1 << 20));
+      final (find, _) = _find(text);
+      find.findInput.text = 'cat';
+      find.open();
+      expect(find.matchCount, 0, reason: 'nothing yet: the slices come after');
+      fakeAsync((async) {
+        find.search();
+        async.elapse(const Duration(milliseconds: 250));
+      });
+      expect(find.slices, greaterThan(1));
+      expect(find.matchCount, 60000);
+    });
+  });
+
   test('an edit is followed a moment later, without moving the caret', () {
     fakeAsync((async) {
       final surface = MarkdownSurfaceController(SourceBuffer.fromText('ab ab'));
