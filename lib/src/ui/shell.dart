@@ -747,6 +747,43 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     });
   }
 
+  /// Whether something pinned — Home or Todo, a version, a study — covers
+  /// the notes of [pane]: the chip, not a note tab, is what it shows.
+  bool _chipCovers(int pane) =>
+      (_contentTabShows && pane == _contentPaneShown) ||
+      _compareIn(pane) ||
+      _reviewIn(pane);
+
+  /// Ctrl+W: closes the tab the focused pane shows (#1078) — the pinned chip
+  /// when it covers the notes, else the note's tab.
+  void _closeShownTab() {
+    final pane = _workspace.value.focused;
+    if (_reviewIn(pane)) {
+      _reviewTab.close();
+    } else if (_compareIn(pane)) {
+      _closeCompare();
+    } else if (_contentTabShows && pane == _contentPaneShown) {
+      _closeContentTab();
+    } else {
+      _workspace.closeActive();
+    }
+  }
+
+  /// Ctrl+Tab and Ctrl+Shift+Tab (#1078): the next or the previous note tab.
+  /// From a chip over the pane, the row goes on from its far end: the first
+  /// note tab forward, the last backward, shown as a click on it shows it.
+  void _cycleTab(int step) {
+    final w = _workspace.value;
+    final pane = w.focused;
+    if (!_chipCovers(pane)) {
+      _workspace.cycle(step);
+      return;
+    }
+    final tabs = w.panes[pane].tabs;
+    if (tabs.isEmpty) return;
+    _activateTab(pane, step > 0 ? 0 : tabs.length - 1);
+  }
+
   /// Closes the pinned content tab (#712): the tree keeps the rail.
   void _closeContentTab() {
     setState(() {
@@ -1985,12 +2022,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       tabs: tabs.tabs,
       // A note tab does not read as selected while the content tab shows:
       // the chip is what the pane is showing.
-      active:
-          (_contentTabShows && pane == _contentPaneShown) ||
-              _compareIn(pane) ||
-              _reviewIn(pane)
-          ? -1
-          : tabs.active,
+      active: _chipCovers(pane) ? -1 : tabs.active,
       focused: !w.isSplit || w.focused == pane,
       unsaved: _unsavedRelPaths(),
       onActivate: (index) => _activateTab(pane, index),
@@ -4194,9 +4226,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       AppCommand.welcomeDeck: () => unawaited(showWelcomeDeck(context)),
       AppCommand.toggleSidebar: _toggleSidebar,
       // The tabs are the wide layout's (#23); a phone has one note.
-      AppCommand.closeTab: _workspace.closeActive,
-      AppCommand.nextTab: () => _workspace.cycle(1),
-      AppCommand.previousTab: () => _workspace.cycle(-1),
+      AppCommand.closeTab: _closeShownTab,
+      AppCommand.nextTab: () => _cycleTab(1),
+      AppCommand.previousTab: () => _cycleTab(-1),
       AppCommand.noteBack: () => unawaited(_noteHistory.back()),
       AppCommand.noteForward: () => unawaited(_noteHistory.forward()),
       AppCommand.splitRight: () => _workspace.splitActive(SplitAxis.right),

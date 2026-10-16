@@ -111,7 +111,9 @@ motion keeps the ellipsis instead.
   **+** after the tabs (a new note) opens one alongside.
 - **Switching** is by the tab, by `Ctrl+Tab` / `Ctrl+Shift+Tab`, or by
   the **▾** list, which shows every tab with its folder when the row is
-  too full.
+  too full. With Home or Todo pinned over the notes, `Ctrl+Tab` goes on
+  to the first note tab (`Ctrl+Shift+Tab` to the last), and `Ctrl+W`
+  closes the pinned page, not a note under it.
 - **Back and forward** go through the notes you looked at, in the order
   you looked at them, as a browser goes through pages: the mouse's side
   buttons, or `Alt+←` / `Alt+→` (remappable, and in the palette). One
