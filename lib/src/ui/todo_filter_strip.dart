@@ -30,6 +30,9 @@ final class TodoFilterStrip extends StatelessWidget {
   /// How many open tasks there are.
   final int total;
 
+  /// The largest share of the strip's width the count and Clear take.
+  static const double _tailShare = 0.6;
+
   @override
   Widget build(BuildContext context) {
     if (!view.hasActiveFilters) {
@@ -40,42 +43,62 @@ final class TodoFilterStrip extends StatelessWidget {
     return Padding(
       key: const Key('todo-filter-strip'),
       padding: const EdgeInsetsDirectional.fromSTEB(16, 4, 8, 0),
-      child: Row(
-        children: [
-          Expanded(
-            child: Wrap(
-              spacing: 8,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [
-                if (filter.dueRange != TodoDueRange.all)
-                  InputChip(
-                    key: const Key('todo-strip-due'),
-                    label: Text(todoDueRangeLabel(filter.dueRange)),
-                    onDeleted: () => view.setDueRange(TodoDueRange.all),
-                  ),
-                for (final token in filter.tokens)
-                  InputChip(
-                    key: Key('todo-strip-token-$token'),
-                    label: Text(token),
-                    onDeleted: () => view.toggleToken(token),
-                  ),
-              ],
+      // The tail is capped at a share of the strip: the chips wrap in what
+      // is left, and a count too long for its share scales down instead of
+      // pushing past the strip's edge.
+      child: LayoutBuilder(
+        builder: (context, constraints) => Row(
+          children: [
+            Expanded(
+              child: Wrap(
+                spacing: 8,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  if (filter.dueRange != TodoDueRange.all)
+                    InputChip(
+                      key: const Key('todo-strip-due'),
+                      label: Text(todoDueRangeLabel(filter.dueRange)),
+                      onDeleted: () => view.setDueRange(TodoDueRange.all),
+                    ),
+                  for (final token in filter.tokens)
+                    InputChip(
+                      key: Key('todo-strip-token-$token'),
+                      label: Text(token),
+                      onDeleted: () => view.toggleToken(token),
+                    ),
+                ],
+              ),
             ),
-          ),
-          const SizedBox(width: 8),
-          Text(
-            AppStrings.todoFilteredCount(shown, total),
-            key: const Key('todo-filtered-count'),
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+            const SizedBox(width: 8),
+            ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: constraints.maxWidth * _tailShare,
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Flexible(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        AppStrings.todoFilteredCount(shown, total),
+                        key: const Key('todo-filtered-count'),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                  ),
+                  TextButton(
+                    key: const Key('todo-clear-filters'),
+                    onPressed: view.clearFilters,
+                    child: Text(AppStrings.todoClearFilters),
+                  ),
+                ],
+              ),
             ),
-          ),
-          TextButton(
-            key: const Key('todo-clear-filters'),
-            onPressed: view.clearFilters,
-            child: Text(AppStrings.todoClearFilters),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
