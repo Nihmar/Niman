@@ -1086,6 +1086,7 @@ abstract base class Strings {
   // Folder picker (T-TK-07).
   String get folderPickerNewFolder;
   String get folderPickerEmpty;
+  String get folderPickerFilter;
   String get listFolderTitle;
   String get attachmentsFolderTitle;
 

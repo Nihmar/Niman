@@ -2070,6 +2070,8 @@ final class MacedonianStrings extends Strings {
   @override
   String get folderPickerEmpty => 'Сè уште нема папки';
   @override
+  String get folderPickerFilter => 'Филтрирај папки';
+  @override
   String get listFolderTitle => 'Папка на листа';
   @override
   String get attachmentsFolderTitle => 'Папка со прилози';

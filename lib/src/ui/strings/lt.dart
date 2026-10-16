@@ -2055,6 +2055,8 @@ final class LithuanianStrings extends Strings {
   @override
   String get folderPickerEmpty => 'Katalogų dar nėra';
   @override
+  String get folderPickerFilter => 'Filtruoti katalogus';
+  @override
   String get listFolderTitle => 'Sąrašų katalogas';
   @override
   String get attachmentsFolderTitle => 'Priedų katalogas';

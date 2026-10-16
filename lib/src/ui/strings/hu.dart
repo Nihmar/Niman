@@ -2068,6 +2068,8 @@ final class HungarianStrings extends Strings {
   @override
   String get folderPickerEmpty => 'Még nincs mappa';
   @override
+  String get folderPickerFilter => 'Mappák szűrése';
+  @override
   String get listFolderTitle => 'Listamappa';
   @override
   String get attachmentsFolderTitle => 'Mellékletmappa';

@@ -2072,6 +2072,8 @@ final class BulgarianStrings extends Strings {
   @override
   String get folderPickerEmpty => 'Все още няма папки';
   @override
+  String get folderPickerFilter => 'Филтър на папките';
+  @override
   String get listFolderTitle => 'Папка за списъци';
   @override
   String get attachmentsFolderTitle => 'Папка за прикачени файлове';

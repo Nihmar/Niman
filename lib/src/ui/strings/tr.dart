@@ -2038,6 +2038,8 @@ final class TurkishStrings extends Strings {
   @override
   String get folderPickerEmpty => 'Henüz klasör yok';
   @override
+  String get folderPickerFilter => 'Klasörleri filtrele';
+  @override
   String get listFolderTitle => 'Liste klasörü';
   @override
   String get attachmentsFolderTitle => 'Ekler klasörü';

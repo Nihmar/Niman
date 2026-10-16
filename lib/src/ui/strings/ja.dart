@@ -1928,6 +1928,8 @@ final class JapaneseStrings extends Strings {
   @override
   String get folderPickerEmpty => 'まだフォルダがありません';
   @override
+  String get folderPickerFilter => 'フォルダを絞り込む';
+  @override
   String get listFolderTitle => 'リストフォルダ';
   @override
   String get attachmentsFolderTitle => '添付ファイルフォルダ';

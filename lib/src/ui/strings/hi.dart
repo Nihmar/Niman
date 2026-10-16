@@ -2024,6 +2024,8 @@ final class HindiStrings extends Strings {
   @override
   String get folderPickerEmpty => 'अभी कोई फ़ोल्डर नहीं';
   @override
+  String get folderPickerFilter => 'फ़ोल्डर फ़िल्टर करें';
+  @override
   String get listFolderTitle => 'सूची-फ़ोल्डर';
   @override
   String get attachmentsFolderTitle => 'अनुलग्नक फ़ोल्डर';

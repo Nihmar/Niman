@@ -2036,6 +2036,8 @@ final class EnglishStrings extends Strings {
   @override
   String get folderPickerEmpty => 'No folders yet';
   @override
+  String get folderPickerFilter => 'Filter folders';
+  @override
   String get listFolderTitle => 'List folder';
   @override
   String get attachmentsFolderTitle => 'Attachments folder';

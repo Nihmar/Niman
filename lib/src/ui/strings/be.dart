@@ -2058,6 +2058,8 @@ final class BelarusianStrings extends Strings {
   @override
   String get folderPickerEmpty => 'Папак яшчэ няма';
   @override
+  String get folderPickerFilter => 'Фільтр папак';
+  @override
   String get listFolderTitle => 'Папка спісаў';
   @override
   String get attachmentsFolderTitle => 'Папка ўкладанняў';

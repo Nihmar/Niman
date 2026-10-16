@@ -2050,6 +2050,8 @@ final class CroatianStrings extends Strings {
   @override
   String get folderPickerEmpty => 'Još nema direktorija';
   @override
+  String get folderPickerFilter => 'Filtriraj direktorije';
+  @override
   String get listFolderTitle => 'Direktorij popisa';
   @override
   String get attachmentsFolderTitle => 'Direktorij privitaka';

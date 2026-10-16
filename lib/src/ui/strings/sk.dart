@@ -2051,6 +2051,8 @@ final class SlovakStrings extends Strings {
   @override
   String get folderPickerEmpty => 'Zatiaľ žiadny priečinok';
   @override
+  String get folderPickerFilter => 'Filtrovať priečinky';
+  @override
   String get listFolderTitle => 'Priečinok zoznamov';
   @override
   String get attachmentsFolderTitle => 'Priečinok príloh';

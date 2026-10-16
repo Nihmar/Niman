@@ -2069,6 +2069,8 @@ final class RomanianStrings extends Strings {
   @override
   String get folderPickerEmpty => 'Niciun dosar încă';
   @override
+  String get folderPickerFilter => 'Filtrează dosarele';
+  @override
   String get listFolderTitle => 'Dosar de liste';
   @override
   String get attachmentsFolderTitle => 'Dosar de atașamente';

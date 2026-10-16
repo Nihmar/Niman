@@ -2057,6 +2057,8 @@ final class BosnianStrings extends Strings {
   @override
   String get folderPickerEmpty => 'Još nema mapa';
   @override
+  String get folderPickerFilter => 'Filtriraj mape';
+  @override
   String get listFolderTitle => 'Mapa popisa';
   @override
   String get attachmentsFolderTitle => 'Mapa priloga';

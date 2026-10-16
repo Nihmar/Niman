@@ -2044,6 +2044,8 @@ final class CzechStrings extends Strings {
   @override
   String get folderPickerEmpty => 'Zatím žádné složky';
   @override
+  String get folderPickerFilter => 'Filtrovat složky';
+  @override
   String get listFolderTitle => 'Složka seznamů';
   @override
   String get attachmentsFolderTitle => 'Složka příloh';

@@ -2078,6 +2078,8 @@ final class PolishStrings extends Strings {
   @override
   String get folderPickerEmpty => 'Nie ma jeszcze katalogów';
   @override
+  String get folderPickerFilter => 'Filtruj katalogi';
+  @override
   String get listFolderTitle => 'Katalog list';
   @override
   String get attachmentsFolderTitle => 'Katalog załączników';

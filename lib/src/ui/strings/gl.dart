@@ -2068,6 +2068,8 @@ final class GalicianStrings extends Strings {
   @override
   String get folderPickerEmpty => 'Aínda non hai cartafóis';
   @override
+  String get folderPickerFilter => 'Filtrar cartafóis';
+  @override
   String get listFolderTitle => 'Cartafol de lista';
   @override
   String get attachmentsFolderTitle => 'Cartafol de anexos';

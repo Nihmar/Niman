@@ -1881,6 +1881,8 @@ final class ChineseStrings extends Strings {
   @override
   String get folderPickerEmpty => '还没有文件夹';
   @override
+  String get folderPickerFilter => '筛选文件夹';
+  @override
   String get listFolderTitle => '列表文件夹';
   @override
   String get attachmentsFolderTitle => '附件文件夹';

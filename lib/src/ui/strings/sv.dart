@@ -2062,6 +2062,8 @@ final class SwedishStrings extends Strings {
   @override
   String get folderPickerEmpty => 'Inga mappar ännu';
   @override
+  String get folderPickerFilter => 'Filtrera mappar';
+  @override
   String get listFolderTitle => 'Listmapp';
   @override
   String get attachmentsFolderTitle => 'Mapp för bilagor';

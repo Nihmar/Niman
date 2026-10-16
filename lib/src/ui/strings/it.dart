@@ -2081,6 +2081,8 @@ final class ItalianStrings extends Strings {
   @override
   String get folderPickerEmpty => 'Nessuna cartella';
   @override
+  String get folderPickerFilter => 'Filtra cartelle';
+  @override
   String get listFolderTitle => 'Cartella delle liste';
   @override
   String get attachmentsFolderTitle => 'Cartella degli allegati';

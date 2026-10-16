@@ -1268,6 +1268,7 @@ final class AppStrings {
   // Folder picker (T-TK-07).
   static String get folderPickerNewFolder => _s.folderPickerNewFolder;
   static String get folderPickerEmpty => _s.folderPickerEmpty;
+  static String get folderPickerFilter => _s.folderPickerFilter;
   static String get listFolderTitle => _s.listFolderTitle;
   static String get attachmentsFolderTitle => _s.attachmentsFolderTitle;
 
