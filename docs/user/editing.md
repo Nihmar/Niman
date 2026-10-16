@@ -312,6 +312,16 @@ the HTML is used when the clipboard carries it. In the source editor,
 browser's copy into Markdown, linked to the page it came from (see
 [web capture](web-capture.md#paste-as-markdown)).
 
+### Undo and redo
+
+Undo goes back one step at a time, and a step is what a writer would call
+one thing done rather than one key pressed. Typing is a step until you move
+the caret or press Enter, and a run of Backspace or Delete in one direction
+is a step too — a held Backspace is undone with one `Ctrl/⌘+Z`, not one
+character per press. A line break, a change of direction between Backspace
+and Delete, and a caret move each end the step. The last 200 steps are kept
+for each open note.
+
 ## Markdown support
 
 Tables, task lists, footnotes, strikethrough, `==highlight==` (a marker's

@@ -64,7 +64,9 @@ void main() {
     );
   });
 
-  test('a deletion is its own step, and redo puts the text back', () {
+  test('a lone deletion is a step, and redo puts the text back', () {
+    // Pinned as "a deletion is its own step" before #1046: a deletion is
+    // still one step when nothing contiguous follows it.
     final buffer = SourceBuffer.fromText('una riga\n');
     final history = EditHistory();
     buffer.delete(3, 8);
@@ -74,6 +76,126 @@ void main() {
     expect(buffer.text, 'una riga\n');
     history.redo(buffer);
     expect(buffer.text, 'una\n');
+  });
+
+  group('deletions coalesce (#1046)', () {
+    final text = List<String>.generate(50, (i) => 'abcdefghij'[i % 10]).join();
+
+    /// Deletes the character before [caret] and records it, as Backspace.
+    void backspace(EditHistory history, SourceBuffer buffer, int caret) {
+      final removed = buffer.substring(caret - 1, caret);
+      buffer.delete(caret - 1, caret);
+      history.record(
+        EditRecord(start: caret - 1, removed: removed, inserted: ''),
+      );
+    }
+
+    /// Deletes the character at [caret] and records it, as Delete.
+    void forwardDelete(EditHistory history, SourceBuffer buffer, int caret) {
+      final removed = buffer.substring(caret, caret + 1);
+      buffer.delete(caret, caret + 1);
+      history.record(EditRecord(start: caret, removed: removed, inserted: ''));
+    }
+
+    test('50 backspaces are one step, undone and redone whole', () {
+      final buffer = SourceBuffer.fromText(text);
+      final history = EditHistory();
+      for (var caret = 50; caret > 0; caret--) {
+        backspace(history, buffer, caret);
+      }
+      expect(buffer.text, '');
+      expect(history.length, 1);
+      history.undo(buffer);
+      expect(buffer.text, text, reason: 'the removed text, in order');
+      history.redo(buffer);
+      expect(buffer.text, '');
+    });
+
+    test('50 forward deletes are one step too', () {
+      final buffer = SourceBuffer.fromText(text);
+      final history = EditHistory();
+      for (var i = 0; i < 50; i++) {
+        forwardDelete(history, buffer, 0);
+      }
+      expect(history.length, 1);
+      history.undo(buffer);
+      expect(buffer.text, text);
+      history.redo(buffer);
+      expect(buffer.text, '');
+    });
+
+    test('a seal splits the run', () {
+      final buffer = SourceBuffer.fromText(text);
+      final history = EditHistory();
+      backspace(history, buffer, 50);
+      backspace(history, buffer, 49);
+      history.seal();
+      backspace(history, buffer, 48);
+      expect(history.length, 2);
+    });
+
+    test('a direction change splits the run', () {
+      final buffer = SourceBuffer.fromText(text);
+      final history = EditHistory();
+      backspace(history, buffer, 20);
+      backspace(history, buffer, 19);
+      forwardDelete(history, buffer, 18);
+      expect(history.length, 2);
+      history.undo(buffer);
+      expect(buffer.length, 48, reason: 'the backspaces stay done');
+    });
+
+    test('a deletion elsewhere is a step of its own', () {
+      final buffer = SourceBuffer.fromText(text);
+      final history = EditHistory();
+      backspace(history, buffer, 20);
+      backspace(history, buffer, 10);
+      expect(history.length, 2);
+    });
+
+    test('a line break ends the run on both sides', () {
+      final buffer = SourceBuffer.fromText('abc\ndef');
+      final history = EditHistory();
+      backspace(history, buffer, 7);
+      backspace(history, buffer, 6);
+      // Across the break: its own step, and nothing joins it.
+      final removed = buffer.substring(3, 4);
+      buffer.delete(3, 4);
+      history.record(EditRecord(start: 3, removed: removed, inserted: ''));
+      backspace(history, buffer, 3);
+      expect(buffer.text, 'abd');
+      expect(history.length, 3);
+    });
+
+    test('typing, deleting and typing again are three steps', () {
+      final buffer = SourceBuffer.fromText('');
+      final history = EditHistory();
+      _typed(history, buffer, 0, 'hello');
+      backspace(history, buffer, 5);
+      backspace(history, buffer, 4);
+      _typed(history, buffer, 3, 'p');
+      expect(history.length, 3);
+    });
+
+    test('250 backspaces leave the earlier steps reachable', () {
+      final buffer = SourceBuffer.fromText('');
+      final history = EditHistory();
+      for (var i = 0; i < 3; i++) {
+        // Three steps of typing, told apart by their line break.
+        _typed(history, buffer, buffer.length, 'step $i\n');
+      }
+      final typed = buffer.length;
+      _typed(history, buffer, typed, 'x' * 250);
+      history.seal();
+      for (var caret = typed + 250; caret > typed; caret--) {
+        backspace(history, buffer, caret);
+      }
+      expect(history.length, 5, reason: '3 steps + the typing + the deletion');
+      for (var i = 0; i < 5; i++) {
+        history.undo(buffer);
+      }
+      expect(buffer.text, '');
+    });
   });
 
   test('a new edit drops what was undone', () {

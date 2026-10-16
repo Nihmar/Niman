@@ -1,72 +1,32 @@
 // Undo and redo for the note the surface is editing (#245, phase 3).
 //
 // A history of *edits*, not of texts: each entry is a range, what was there,
-// and
-// what replaced it, which is exactly what an undo needs and what a redo needs
-// turned around. Storing whole notes instead would be O(n) per keystroke and
-// would
-// make the 1M-note rule a lie in the one place a writer notices it.
+// and what replaced it, which is exactly what an undo needs and what a redo
+// needs turned around. Storing whole notes instead would be O(n) per keystroke
+// and would make the 1M-note rule a lie in the one place a writer notices it.
 //
-// Two rules the writer feels rather than reads:
+// Rules the writer feels rather than reads:
 //
 // * **typing coalesces.** A keystroke per undo entry makes Ctrl+Z useless — no
-// one
-// wants to un-type a sentence one letter at a time. Consecutive insertions that
-// are not separated by a caret move, a deletion or a newline merge into the
-// entry
-//   they continue.
+//   one wants to un-type a sentence one letter at a time. Consecutive
+//   insertions that are not separated by a caret move or a newline merge into
+//   the step they continue.
+// * **deleting coalesces** (#1046), in one direction: a held Backspace or
+//   Delete is one step, not one per key repeat, which would also push the
+//   writer's earlier work out of the bounded stack.
 // * **the stack is bounded.** A note is a file, and a session is long: the
-// oldest
-//   entries go before the memory does. What is dropped is the *oldest*, so undo
-//   reaches far enough back to matter and then stops, as every editor's does.
+//   oldest entries go before the memory does. What is dropped is the *oldest*,
+//   so undo reaches far enough back to matter and then stops, as every
+//   editor's does.
+//
+// The step still being written lives in an [EditRun], built in O(size); it
+// becomes a plain [EditRecord] once nothing can join it any more.
+import 'package:niman/src/markdown/edit/edit_record.dart';
+import 'package:niman/src/markdown/edit/edit_run.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/markdown/source_edit.dart';
 
-/// One edit, as an undo needs to see it.
-final class EditRecord {
-  /// Creates a record of replacing `[start, start + removed.length)` with
-  /// [inserted].
-  const new({
-    required this.start,
-    required this.removed,
-    required this.inserted,
-  });
-
-  /// Where the edit began.
-  final int start;
-
-  /// What was there before.
-  final String removed;
-
-  /// What is there now.
-  final String inserted;
-
-  /// Where the edit ends in the text as it stands.
-  int get end => start + inserted.length;
-
-  /// Whether this edit and [next] can be one undo step.
-  ///
-  /// True when [next] simply continues the typing this record began: it is an
-  /// insertion with nothing removed, it starts where this one ended, and
-  /// neither
-  /// side is a line break (a newline is a decision, and undoing it separately
-  /// is
-  /// what a writer expects).
-  bool continuesWith(EditRecord next) {
-    if (removed.isNotEmpty || next.removed.isNotEmpty) return false;
-    if (next.start != end) return false;
-    if (inserted.contains('\n') || next.inserted.contains('\n')) return false;
-    return true;
-  }
-
-  /// The record that undoes this one, given the text it produced.
-  EditRecord get inverse =>
-      EditRecord(start: start, removed: inserted, inserted: removed);
-
-  @override
-  String toString() =>
-      'EditRecord($start, -${removed.length}, +${inserted.length})';
-}
+export 'package:niman/src/markdown/edit/edit_record.dart';
 
 /// The edits that made the note what it is, and the way back.
 final class EditHistory {
@@ -79,27 +39,27 @@ final class EditHistory {
   final List<EditRecord> _done = <EditRecord>[];
   final List<EditRecord> _undone = <EditRecord>[];
 
+  /// The last step, while the next edit may still join it.
+  EditRun? _open;
+
   /// Whether there is anything to undo.
-  bool get canUndo => _done.isNotEmpty;
+  bool get canUndo => _done.isNotEmpty || _open != null;
 
   /// Whether there is anything to redo.
   bool get canRedo => _undone.isNotEmpty;
 
   /// How many undo steps are held.
-  int get length => _done.length;
+  int get length => _done.length + (_open == null ? 0 : 1);
 
   /// The buffer's own account of the last undo or redo, so the caller can
   /// follow it line by line instead of rebuilding what depends on the lines.
   SourceEdit? get lastEdit => _lastEdit;
   SourceEdit? _lastEdit;
 
-  /// Whether the next edit starts a step of its own whatever it continues.
-  bool _sealed = false;
-
   /// Ends the current step: the next edit is undone on its own even when it
   /// continues the last one (the caret moved away and came back — typing
   /// there again is a new thought).
-  void seal() => _sealed = true;
+  void seal() => _close();
 
   /// Records an edit that has already been applied to the buffer.
   ///
@@ -111,29 +71,35 @@ final class EditHistory {
     if (record.removed.isEmpty && record.inserted.isEmpty) return;
     // A new edit is a new branch: whatever was undone is no longer reachable.
     _undone.clear();
-    final sealed = _sealed;
-    _sealed = false;
-    if (!sealed && _done.isNotEmpty && _done.last.continuesWith(record)) {
-      final last = _done.removeLast();
-      _done.add(
-        EditRecord(
-          start: last.start,
-          removed: last.removed,
-          inserted: '${last.inserted}${record.inserted}',
-        ),
-      );
-    } else {
-      _done.add(record);
-      while (_done.length > limit) {
-        _done.removeAt(0);
-      }
+    final open = _open;
+    if (open != null && open.accepts(record)) {
+      open.add(record);
+      return;
+    }
+    _close();
+    _open = EditRun(record);
+    _trim();
+  }
+
+  /// Moves the open step to the stack of closed ones.
+  void _close() {
+    final open = _open;
+    if (open == null) return;
+    _open = null;
+    _done.add(open.finish());
+  }
+
+  /// Drops the oldest steps beyond [limit].
+  void _trim() {
+    while (length > limit && _done.isNotEmpty) {
+      _done.removeAt(0);
     }
   }
 
   /// Undoes the last edit on [buffer], returning what it did, or null when
-  /// there
-  /// is nothing to undo.
+  /// there is nothing to undo.
   EditRecord? undo(SourceBuffer buffer) {
+    _close();
     if (_done.isEmpty) return null;
     final last = _done.removeLast();
     _lastEdit = buffer.replaceRange(
@@ -143,13 +109,13 @@ final class EditHistory {
       verbatim: true,
     );
     _undone.add(last);
-    _sealed = true;
     return last;
   }
 
   /// Redoes the last undone edit on [buffer], or null when there is nothing.
   EditRecord? redo(SourceBuffer buffer) {
     if (_undone.isEmpty) return null;
+    _close();
     final next = _undone.removeLast();
     _lastEdit = buffer.replaceRange(
       next.start,
@@ -158,7 +124,6 @@ final class EditHistory {
       verbatim: true,
     );
     _done.add(next);
-    _sealed = true;
     return next;
   }
 
@@ -167,6 +132,6 @@ final class EditHistory {
   void clear() {
     _done.clear();
     _undone.clear();
-    _sealed = false;
+    _open = null;
   }
 }
