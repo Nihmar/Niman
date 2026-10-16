@@ -22,7 +22,18 @@ data class WidgetTheme(
     val secondary: Int,
     val accent: Int,
 ) {
+    /**
+     * The error tone (Overdue, #1003): the Material error pair for the
+     * app's brightness. The payload's theme carries no error color, and
+     * the same red reads on every palette.
+     */
+    val error: Int
+        get() = if (dark) ERROR_DARK else ERROR_LIGHT
+
     companion object {
+        private const val ERROR_LIGHT = 0xFFB3261E.toInt()
+        private const val ERROR_DARK = 0xFFF2B8B5.toInt()
+
         /** The payload's theme, or null when it carries none (or a broken one). */
         fun fromPayload(payload: String?): WidgetTheme? {
             val parsed = payload?.let { runCatching { JSONObject(it) }.getOrNull() }

@@ -82,9 +82,10 @@ tapping a task's opens the task list.
 
 ## Home-screen widget
 
-Android: the **Niman Todos** widget mirrors the tab's open view —
-due-soonest first — and toggles a task on a row tap, with the app
-closed or not. See [widgets](widgets.md).
+Android: the **Niman Todos** widget shows the tab's open tasks in the
+same due-date sections (Overdue, Today, Next 7 days, Later, No date)
+and toggles a task on a row tap, with the app closed or not. See
+[widgets](widgets.md).
 
 ## The task dialog
 

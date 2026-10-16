@@ -6,4 +6,5 @@
     <color name="widget_background">#E6FFFFFF</color>
     <color name="widget_text_primary">#1A1C1E</color>
     <color name="widget_text_secondary">#44474E</color>
+    <color name="widget_error">#B3261E</color>
 </resources>

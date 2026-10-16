@@ -10,12 +10,21 @@ short setup dialog: pick the library from the ones you have open
 
 ## Niman Todos
 
-- **Rows:** the same open tasks the Todo tab shows with its default
-  filter — due date first (overdue on top), ties broken by priority
-  (`(A)` first) — up to 100 rows in a scrollable list. The header names the true total even when capped.
+- **Sections:** the open tasks are grouped as the Todo tab does when
+  sorted by due date — **Overdue**, **Today**, **Next 7 days**,
+  **Later**, **No date** — each heading with its count. A section with no
+  task is not shown. Within a section the order is the tab's: due date,
+  ties broken by priority (`(A)` first). The widget has no Done section
+  (open tasks only), no sort and no filter of its own, and it always
+  shows every section open: a heading is not a button, so folding a
+  section in the app does not fold it here. The list scrolls and holds up
+  to 100 tasks; a section's count and the header's `N open` stay true
+  even when the list is capped.
 - **Meta line:** each row names its priority, due date and
   `+project` / `@context` / `#tag` markers; rows without any of them
-  hide the line so the text stays aligned.
+  hide the line so the text stays aligned. The section already says what
+  it says, so a row under *Today* does not repeat its date; an *Overdue*
+  row keeps it.
 - **Tap a row:** toggles the task; works with the app closed.
 - **Tap the header:** opens the app on that library.
 - **"+":** opens the app with the task add field focused.
