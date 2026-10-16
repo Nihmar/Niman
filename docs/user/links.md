@@ -28,7 +28,9 @@ frontmatter are never links, everywhere.
 An embed follows the same way, modifier held: `![[photo.png]]` opens the
 file it names — the picture, the PDF or the book in the note pane, a
 `#page=` or `#chapter=` landing where it says — and `![[A note]]` opens
-the note, as its link would.
+the note, as its link would. This is the `![[…]]` embed's rule alone: a
+Markdown image, `![alt](img.png)`, is not a link, so a Ctrl+click on it
+follows nothing — by design, as *Markdown links* below says.
 
 While a link is typed, a small panel lists what can go there, in both
 editors, under the caret. Only typing opens it: a caret moved into a link
