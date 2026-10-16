@@ -170,27 +170,31 @@ void main() {
     expect(menu, findsOne);
   });
 
-  testWidgets('the notes leave the outline to the dock where it has room', (
+  testWidgets('the notes leave the outline and spelling to the panel', (
     tester,
   ) async {
-    Future<bool> inDock(Size size) async {
+    // Wherever the wide layout can show the panel — docked beside the
+    // note, or over it on a window without room for both — the note's
+    // outline and its spelling review live there, not in the status row
+    // (#1002).
+    Future<(bool, bool)> inPanel(Size size) async {
       await pumpShell(tester, size);
       await controller.createNote(parentPath: '', name: 'beta');
       await settle(tester);
       await tester.tap(noteRow('beta.md'));
       await settle(tester);
-      return tester
-          .widget<ShellDetailPane>(find.byType(ShellDetailPane).first)
-          .outlineInDock;
+      final pane = tester.widget<ShellDetailPane>(
+        find.byType(ShellDetailPane).first,
+      );
+      return (pane.outlineInDock, pane.spellCheckInDock);
     }
 
-    expect(await inDock(const Size(1200, 900)), isTrue);
+    expect(await inPanel(const Size(1200, 900)), (true, true));
     controller = FakeLibrarySession();
-    expect(
-      await inDock(const Size(900, 900)),
-      isFalse,
-      reason: 'wide, but no room for the dock',
-    );
+    expect(await inPanel(const Size(900, 900)), (
+      true,
+      true,
+    ), reason: 'wide: the panel opens over the note');
   });
 
   testWidgets('wide: the todo panel holds switch, add and help; no FAB', (

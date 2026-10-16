@@ -232,7 +232,7 @@ void main() {
           loading: false,
           showPreview: false,
           showWysiwyg: false,
-          spellCheckAvailable: false,
+          showSpellCheck: false,
           canSwitchEditorKind: false,
           wordCount: 12,
           statusText: 'Saved',

@@ -66,7 +66,6 @@ void main() {
       onInserted: () {},
       spellCheck: () => spell,
       onSpellChecked: () {},
-      inDock: () => null,
     );
     review = commands.spellReview(edited: edited)!;
   });

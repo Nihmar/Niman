@@ -4862,12 +4862,14 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
                     tabs: _deck(pane),
                     onMemento: _workspace.remember,
                     zen: _inZen,
-                    // The dock's outline pane, where the window has room.
-                    outlineInDock: _dockRoom && !_inZen,
-                    // The spelling pane too: beside the note, not over it.
-                    onSpellingInDock: _wide && _dockRoom && !_inZen
-                        ? () => unawaited(_showPanel(DockPane.spelling))
-                        : null,
+                    // The panel holds the note's outline and spelling
+                    // wherever the wide layout can show it — docked beside
+                    // the note, or over it on a window without room for
+                    // both — so the status row leaves both its buttons
+                    // out (#1002). A phone keeps them: there they open
+                    // their sheets.
+                    outlineInDock: _wide && !_inZen,
+                    spellCheckInDock: _wide && !_inZen,
                     typewriter: _editorSettings.typewriter,
                     cascadeChecklist: _editorSettings.cascadeChecklist,
                     frontmatterPanel: _editorSettings.frontmatterPanel,
