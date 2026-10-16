@@ -953,6 +953,11 @@ final class SerbianStrings extends Strings {
   @override
   String get linksToNoteEmbed => 'уграђена';
   @override
+  String get linksToNoteFurther => 'Поменуто даље доле';
+  @override
+  String linksUpdating(int done, int total) =>
+      'Ажурирање веза: $done од $total';
+  @override
   String get openLinkFailed => 'Веза се не може отворити';
 
   // Dead-link note creation (issue #78).

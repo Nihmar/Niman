@@ -952,6 +952,11 @@ final class FinnishStrings extends Strings {
   @override
   String get linksToNoteEmbed => 'upotettu';
   @override
+  String get linksToNoteFurther => 'Mainittu alempana';
+  @override
+  String linksUpdating(int done, int total) =>
+      'Päivitetään linkkejä: $done / $total';
+  @override
   String get openLinkFailed => 'Linkkiä ei voitu avata';
 
   // Dead-link note creation (issue #78).

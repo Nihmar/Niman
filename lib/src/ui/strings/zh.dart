@@ -895,6 +895,10 @@ final class ChineseStrings extends Strings {
   @override
   String get linksToNoteEmbed => '嵌入';
   @override
+  String get linksToNoteFurther => '在下文提及';
+  @override
+  String linksUpdating(int done, int total) => '正在更新链接：$done / $total';
+  @override
   String get openLinkFailed => '无法打开链接';
 
   // Dead-link note creation (issue #78).

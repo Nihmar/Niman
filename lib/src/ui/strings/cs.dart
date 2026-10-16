@@ -951,6 +951,11 @@ final class CzechStrings extends Strings {
   @override
   String get linksToNoteEmbed => 'vložená';
   @override
+  String get linksToNoteFurther => 'Zmíněno dále';
+  @override
+  String linksUpdating(int done, int total) =>
+      'Aktualizace odkazů: $done z $total';
+  @override
   String get openLinkFailed => 'Odkaz se nepodařilo otevřít';
 
   // Dead-link note creation (issue #78).

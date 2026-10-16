@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/logging.dart';
@@ -35,14 +36,32 @@ typedef LinkUpdateConfirm = Future<bool> Function(int notes);
 /// text the buffer holds.
 typedef FlushOpenNotes = Future<void> Function();
 
+/// Runs [fn] as one turn of the library's op chain: serially with every
+/// other op.
+typedef OpTurn = Future<T> Function<T>(Future<T> Function() fn);
+
+/// Tells how many referrers of [total] a link rewrite has gone through.
+typedef LinkRewriteProgress = void Function(int done, int total);
+
+/// How many referrers a rewrite of links takes one turn of the op chain for
+/// (#1041): few enough that a `createNote` waiting behind the rewrite waits
+/// for a handful of notes, not for a thousand.
+const int linkRewriteBatch = 4;
+
 /// The rewrite of links a relocation leaves for after its turn of the op
-/// chain, under [LinkUpdate.ask] (#848): the question is a dialog a person
-/// may leave open, and a dialog must not hold the chain every other op and
-/// every sync write waits in.
+/// chain: under [LinkUpdate.ask] (#848) the question is a dialog a person may
+/// leave open, and under [LinkUpdate.automatic] (#1041) a hub note's
+/// thousand referrers are read, rewritten and saved one after the other; a
+/// dialog or a long job must not hold the chain every other op and every sync
+/// write waits in.
 final class PendingLinkRewrite {
   /// A rewrite of the links in the notes [count] finds changing, done by
-  /// [apply].
-  const new({required this.count, required this.apply});
+  /// [apply]; [automatic] when it needs no answer first.
+  const new({required this.count, required this.apply, this.automatic = false});
+
+  /// Whether the rewrite runs without asking, in the background of the move
+  /// that left it ([LinkUpdate.automatic]).
+  final bool automatic;
 
   /// How many notes the rewrite would change, found by reading each
   /// referrer and rewriting it in memory (#866). Takes no turn of the op
@@ -51,9 +70,11 @@ final class PendingLinkRewrite {
   final Future<int> Function() count;
 
   /// Rewrites the links. It reads each note again, so an edit made since
-  /// the count (or while the question was open) is kept; it must run in a
-  /// turn of the op chain of its own.
-  final Future<void> Function() apply;
+  /// the count (or while the question was open) is kept. It takes a turn of
+  /// the op chain, through `turn`, for each batch of referrers rather than one
+  /// for all, and tells `progress` after each.
+  final Future<void> Function(OpTurn turn, {LinkRewriteProgress? progress})
+  apply;
 }
 
 /// What a relocation did: the moved row, and the link rewrite still to ask
@@ -364,25 +385,32 @@ final class NoteRelocator {
       return next == text ? null : next;
     }
 
-    Future<void> write() async {
+    Future<void> write(OpTurn turn, {LinkRewriteProgress? progress}) async {
       var updated = 0;
-      for (final (oldReferrer, path) in targets) {
-        // One referrer that cannot be read or written must not stop the
-        // rest: the move is already done, and the others still need their
-        // links fixed.
-        try {
-          // Before each referrer, not once for all: a thousand notes take
-          // seconds, and the open one may be typed into meanwhile (#913).
-          await _flush(flushOpen);
-          final next = await rewritten(oldReferrer, path);
-          if (next == null) continue;
-          await writer.save(path, next);
-          hint(path, SyncOpKind.changed);
-          updated++;
-        } on Object catch (error) {
-          const AppLogger(name: 'links')
-              .warning('could not rewrite links in "$path": $error');
-        }
+      for (var at = 0; at < targets.length; at += linkRewriteBatch) {
+        final end = math.min(at + linkRewriteBatch, targets.length);
+        await turn<void>(() async {
+          for (final (oldReferrer, path) in targets.sublist(at, end)) {
+            // One referrer that cannot be read or written must not stop the
+            // rest: the move is already done, and the others still need
+            // their links fixed.
+            try {
+              // Before each referrer, not once for all: a thousand notes
+              // take seconds, and the open one may be typed into meanwhile
+              // (#913).
+              await _flush(flushOpen);
+              final next = await rewritten(oldReferrer, path);
+              if (next == null) continue;
+              await writer.save(path, next);
+              hint(path, SyncOpKind.changed);
+              updated++;
+            } on Object catch (error) {
+              const AppLogger(name: 'links')
+                  .warning('could not rewrite links in "$path": $error');
+            }
+          }
+        });
+        progress?.call(end, targets.length);
       }
       if (updated > 0) {
         const AppLogger(name: 'links')
@@ -390,9 +418,15 @@ final class NoteRelocator {
       }
     }
 
+    // Not here, in the move's own turn of the op chain: renaming a note a
+    // thousand others link to would hold the tree, every create and every
+    // sync write behind a thousand reads and saves (#1041).
     if (mode == LinkUpdate.automatic) {
-      await write();
-      return null;
+      return PendingLinkRewrite(
+        count: () async => targets.length,
+        apply: write,
+        automatic: true,
+      );
     }
     Future<int> count() async {
       var changing = 0;

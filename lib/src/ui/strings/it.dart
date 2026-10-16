@@ -961,6 +961,11 @@ final class ItalianStrings extends Strings {
   @override
   String get linksToNoteEmbed => 'incorporata';
   @override
+  String get linksToNoteFurther => 'Citata più in basso';
+  @override
+  String linksUpdating(int done, int total) =>
+      'Aggiornamento dei link: $done di $total';
+  @override
   String get openLinkFailed => 'Impossibile aprire il link';
 
   // Dead-link note creation (issue #78).

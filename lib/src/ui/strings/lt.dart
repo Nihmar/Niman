@@ -953,6 +953,11 @@ final class LithuanianStrings extends Strings {
   @override
   String get linksToNoteEmbed => 'įterpta';
   @override
+  String get linksToNoteFurther => 'Paminėta toliau';
+  @override
+  String linksUpdating(int done, int total) =>
+      'Atnaujinamos nuorodos: $done iš $total';
+  @override
   String get openLinkFailed => 'Nepavyko atidaryti nuorodos';
 
   // Dead-link note creation (issue #78).

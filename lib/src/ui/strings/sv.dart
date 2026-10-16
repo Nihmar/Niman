@@ -952,6 +952,11 @@ final class SwedishStrings extends Strings {
   @override
   String get linksToNoteEmbed => 'inbäddad';
   @override
+  String get linksToNoteFurther => 'Nämnd längre ner';
+  @override
+  String linksUpdating(int done, int total) =>
+      'Uppdaterar länkar: $done av $total';
+  @override
   String get openLinkFailed => 'Kunde inte öppna länken';
 
   // Dead-link note creation (issue #78).

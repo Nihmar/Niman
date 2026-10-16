@@ -958,6 +958,11 @@ final class GermanStrings extends Strings {
   @override
   String get linksToNoteEmbed => 'eingebettet';
   @override
+  String get linksToNoteFurther => 'Weiter unten erwähnt';
+  @override
+  String linksUpdating(int done, int total) =>
+      'Links werden aktualisiert: $done von $total';
+  @override
   String get openLinkFailed => 'Link konnte nicht geöffnet werden';
 
   // Dead-link note creation (issue #78).

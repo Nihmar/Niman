@@ -60,7 +60,13 @@ void main() {
         return ops.readNote(rel);
       },
     );
-    await relocator.relocate((await ops.find(path))!, path, newRel);
+    final done = await relocator.relocate(
+      (await ops.find(path))!,
+      path,
+      newRel,
+    );
+    // The automatic rewrite is a job of its own after the move (#1041).
+    await done.pending?.apply(<T>(fn) => fn());
     await ops.writer.indexed;
     return before;
   }
