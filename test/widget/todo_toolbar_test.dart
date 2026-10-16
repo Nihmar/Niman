@@ -310,6 +310,52 @@ void main() {
       expect(find.byIcon(Icons.filter_alt_outlined), findsOneWidget);
     });
 
+    testWidgets('no count moves the Sort pill: the Filter pill holds its width '
+        '(#1015)', (tester) async {
+      windowSized(tester, const Size(1200, 900));
+      await prepare(['a']);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Align(
+              alignment: Alignment.topLeft,
+              child: SizedBox(
+                width: 700,
+                child: TodoToolbar(
+                  controller: controller,
+                  view: view,
+                  labelled: true,
+                  onAddTask: () {},
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      final sort = tester.getRect(key('todo-sort-button'));
+      final filter = tester.getRect(key('todo-filter-button'));
+      for (final count in [9, 99, 1234]) {
+        view.setFilter(
+          TodoFilter(tokens: {for (var i = 0; i < count; i++) '+t$i'}),
+        );
+        await tester.pump();
+        expect(find.text('Filter · $count'), findsOneWidget);
+        expect(
+          tester.getRect(key('todo-filter-button')),
+          filter,
+          reason: 'the Filter pill at $count',
+        );
+        expect(
+          tester.getRect(key('todo-sort-button')),
+          sort,
+          reason: 'the Sort pill at $count',
+        );
+      }
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets('the Filter pill opens the sheet, with the due range', (
       tester,
     ) async {

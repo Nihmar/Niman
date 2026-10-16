@@ -210,19 +210,45 @@ final class _Pill extends StatelessWidget {
             Flexible(
               child: widest == null
                   ? Text(label, overflow: TextOverflow.ellipsis)
-                  : IndexedStack(
-                      alignment: AlignmentDirectional.centerStart,
-                      children: [
-                        Text(label, overflow: TextOverflow.ellipsis),
-                        Text(widest!, overflow: TextOverflow.ellipsis),
-                      ],
-                    ),
+                  : _Reserved(widest: widest!, label: label),
             ),
             const SizedBox(width: 4),
             Icon(Icons.expand_more, size: 16, color: muted),
           ],
         ),
       ),
+    );
+  }
+}
+
+/// [label] in the room of [widest]: the pill keeps one width whatever the
+/// label says. A label longer than [widest] (a count past the one the room
+/// was made for) shrinks to fit instead of growing the pill and moving its
+/// neighbours.
+final class _Reserved extends StatelessWidget {
+  const new({required this.widest, required this.label});
+
+  final String widest;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        // Sizes the stack, shows nothing (no child of an IndexedStack
+        // without an index is on stage).
+        IndexedStack(
+          index: null,
+          children: [Text(widest, overflow: TextOverflow.ellipsis)],
+        ),
+        Positioned.fill(
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: AlignmentDirectional.centerStart,
+            child: Text(label, maxLines: 1, softWrap: false),
+          ),
+        ),
+      ],
     );
   }
 }
