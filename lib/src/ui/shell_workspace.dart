@@ -41,6 +41,17 @@ final class ShellWorkspace {
   /// and with it undo, find and folds (decision 4 of the plan on #23).
   static const int keptAlive = 4;
 
+  /// How many notes stay open on a phone (#1082): one joins the others each
+  /// time a note is opened, and nothing else closes them. Past it the least
+  /// recently shown one without unsaved edits closes, and keeps its place.
+  static const int phoneCap = 30;
+
+  /// The open notes holding unsaved edits, library-relative: never the one
+  /// the cap closes. The shell wires the tracker in.
+  Set<String> Function() unsavedPaths = _noPaths;
+
+  static Set<String> _noPaths() => const <String>{};
+
   /// Past this many characters a note keeps its editor only while it
   /// shows: novel-length notes are what the app is built to open, and
   /// five of them mounted at once is not.
@@ -69,7 +80,38 @@ final class ShellWorkspace {
   final NoteHistory history = NoteHistory();
 
   void _track() {
-    if (value.activePath case final shown?) history.shown(shown);
+    if (value.activePath case final shown?) {
+      history.shown(shown);
+      if (_recent.isEmpty || _recent.first != shown) {
+        _recent
+          ..remove(shown)
+          ..insert(0, shown);
+      }
+    }
+  }
+
+  /// [w] with the open notes held to [phoneCap]: the least recently shown
+  /// ones without unsaved edits close — never [keep], the note just
+  /// opened — and their places are kept for when they open again.
+  Workspace _capped(Workspace w, String keep) {
+    var next = w;
+    if (next.tabs.length <= phoneCap) return next;
+    final dirty = unsavedPaths();
+    final open = [for (final tab in next.tabs) tab.path];
+    // Oldest first: the ones never shown this session, in tab order, then
+    // the ones shown, longest ago first.
+    final order = [
+      for (final path in open)
+        if (!_recent.contains(path)) path,
+      for (final path in _recent.reversed)
+        if (open.contains(path)) path,
+    ];
+    for (final path in order) {
+      if (next.tabs.length <= phoneCap) break;
+      if (path == keep || dirty.contains(path)) continue;
+      next = next.closePath(path);
+    }
+    return next;
   }
 
   /// Reads back what was left open in the library on this device.
@@ -134,7 +176,11 @@ final class ShellWorkspace {
         final fresh = alongside || _nextInNewTab;
         _nextInNewTab = false;
         controller.update(
-          (w) => fresh ? w.open(notePath) : w.replaceActive(notePath),
+          (w) => fresh
+              ? alongside
+                    ? _capped(w.open(notePath), notePath)
+                    : w.open(notePath)
+              : w.replaceActive(notePath),
         );
       } else if (previous != null && !keepOnNone) {
         controller.update((w) => w.closePath(previous));

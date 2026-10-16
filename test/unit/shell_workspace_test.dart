@@ -34,6 +34,81 @@ void main() {
     },
   );
 
+  // #1082: a phone keeps every note it opened, and nothing closed them.
+  group('the phone’s open notes are capped', () {
+    Future<ShellWorkspace> opened(
+      int count, {
+      Set<String> dirty = const {},
+      void Function(ShellWorkspace)? between,
+    }) async {
+      final workspace = ShellWorkspace(FakeLibrarySession());
+      addTearDown(workspace.dispose);
+      workspace.unsavedPaths = () => dirty;
+      for (var i = 0; i < count; i++) {
+        workspace.follow('n$i.md', alongside: true);
+        await pumpEventQueue();
+        between?.call(workspace);
+      }
+      return workspace;
+    }
+
+    test('a hundred opened leave thirty, the latest', () async {
+      final workspace = await opened(100);
+      final paths = workspace.value.tabs.map((t) => t.path).toList();
+      expect(paths.length, ShellWorkspace.phoneCap);
+      expect(paths, contains('n99.md'));
+      expect(paths, isNot(contains('n0.md')));
+      expect(workspace.value.activePath, 'n99.md');
+    });
+
+    test('a note with unsaved edits is never the one closed', () async {
+      final workspace = await opened(100, dirty: {'n0.md', 'n1.md'});
+      final paths = workspace.value.tabs.map((t) => t.path).toList();
+      expect(paths, containsAll(['n0.md', 'n1.md']));
+      expect(paths.length, ShellWorkspace.phoneCap);
+    });
+
+    test('the one closed keeps its place, and the least recent goes', () async {
+      final workspace = ShellWorkspace(FakeLibrarySession());
+      addTearDown(workspace.dispose);
+      for (var i = 0; i < ShellWorkspace.phoneCap; i++) {
+        workspace.follow('n$i.md', alongside: true);
+        await pumpEventQueue();
+      }
+      workspace.remember('n0.md', const NoteMemento(selectionExtent: 9));
+      await pumpEventQueue();
+      // n0 is shown again: it is the most recent, so n1 is the one to go.
+      workspace.follow('n0.md', alongside: true);
+      await pumpEventQueue();
+      workspace.follow('extra.md', alongside: true);
+      await pumpEventQueue();
+      final paths = workspace.value.tabs.map((t) => t.path).toList();
+      expect(paths, contains('n0.md'));
+      expect(paths, isNot(contains('n1.md')));
+
+      workspace.remember('n1.md', const NoteMemento(selectionExtent: 4));
+      await pumpEventQueue();
+      workspace.follow('n1.md', alongside: true);
+      await pumpEventQueue();
+      expect(
+        workspace.value.tabs
+            .firstWhere((t) => t.path == 'n1.md')
+            .memento
+            .selectionExtent,
+        4,
+      );
+    });
+
+    test('a desktop’s tabs are not capped', () async {
+      final workspace = ShellWorkspace(FakeLibrarySession());
+      addTearDown(workspace.dispose);
+      for (var i = 0; i < 40; i++) {
+        workspace.show('n$i.md', newTab: true);
+      }
+      expect(workspace.value.tabs.length, 40);
+    });
+  });
+
   test('a preview asked for before the tab exists lands on it', () async {
     final workspace = ShellWorkspace(FakeLibrarySession());
     addTearDown(workspace.dispose);

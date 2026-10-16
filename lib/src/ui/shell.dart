@@ -2401,6 +2401,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       ..start()
       ..pushStudy();
     _workspace.controller.addListener(_onWorkspaceChanged);
+    _workspace.unsavedPaths = _unsavedRelPaths;
     AppKeyMap.current.addListener(_onKeyMapChanged);
     _chosenKeys.attach();
     FocusManager.instance.addListener(_reclaimFocus);
