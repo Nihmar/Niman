@@ -5579,7 +5579,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
               onBackgroundSecondaryTapUp: (details) =>
                   unawaited(_showTreeBackgroundMenuAt(details.globalPosition)),
               onMove: (paths, folder) =>
-                  unawaited(_markedActions.moveTo(paths, folder)),
+                  unawaited(_markedActions.moveTo(context, paths, folder)),
               onRename: (path) => unawaited(_rowActions.rename(context, path)),
               onDelete: (path) => unawaited(_rowActions.delete(context, path)),
               // Several rows at once (#712): a pointer's, with keys.
@@ -5615,7 +5615,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
                 onBackgroundSecondaryTapUp: (folder, details) =>
                     _showGridBackgroundMenuAt(folder, details.globalPosition),
                 onMove: (paths, folder) =>
-                    unawaited(_markedActions.moveTo(paths, folder)),
+                    unawaited(_markedActions.moveTo(context, paths, folder)),
                 onRename: (path) =>
                     unawaited(_rowActions.rename(context, path)),
                 onDelete: (path) =>

@@ -267,6 +267,13 @@ final class ShellRowActions {
   /// (#567).
   Future<void> moveTo(String path, String target) => guard(() async {
     await saveOpen();
+    await moveSaved(path, target);
+  });
+
+  /// [moveTo] for a caller that holds the [guard] and has written the open
+  /// notes itself (#1012): several rows moved one after the other save them
+  /// once, not once per row, and answer to one guard, not one each.
+  Future<void> moveSaved(String path, String target) async {
     final row = await controller.ops!.move(
       path,
       target,
@@ -275,7 +282,7 @@ final class ShellRowActions {
       flushOpen: saveOpen,
     );
     onMoved(path, row.path);
-  });
+  }
 
   /// Deletes [path], into the trash or for good depending on the
   /// library's trash setting. A move to the trash needs no question —
