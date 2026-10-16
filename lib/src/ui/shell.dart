@@ -107,6 +107,7 @@ import 'package:niman/src/ui/kinds/flashcards/review_tab.dart';
 import 'package:niman/src/ui/kinds/flashcards/review_view.dart';
 import 'package:niman/src/ui/kinds/slides/slides_present.dart';
 import 'package:niman/src/ui/link_update_dialog.dart';
+import 'package:niman/src/ui/note_editor_keys.dart';
 import 'package:niman/src/ui/note_menu.dart';
 import 'package:niman/src/ui/note_tab_bar.dart';
 import 'package:niman/src/ui/note_view.dart';
@@ -1092,6 +1093,10 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     templates: _templateFlow,
     selectedPath: () => _selected,
     onMoved: (from, to) {
+      // The open notes' editors follow the rename, and are told where they
+      // came from for the frame that shows them under the new name (#1076).
+      _noteKeys.moved(from, to);
+      WidgetsBinding.instance.addPostFrameCallback((_) => _noteKeys.settle());
       _workspace.moved(from, to);
       // The move rewrote the links other notes hold to it, on disk (#507):
       // an open one re-reads its file, which a clean buffer adopts — and
@@ -2946,7 +2951,12 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     if (last != null &&
         last.path == path &&
         now.difference(last.at) <= kDoubleTapTimeout) {
-      if (last.replaced case final replaced?) _workspace.show(replaced);
+      // The first click already showed the note, in a tab of its own; the
+      // tab it replaced comes back beside it, and nothing else is shown or
+      // recreated (#1076).
+      if (last.replaced case final replaced?) {
+        _workspace.reopenBeforeShowing(replaced);
+      }
       _workspace.show(path, newTab: true);
       return;
     }
@@ -5018,15 +5028,16 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     final mounted = _workspace.mounted();
     final showing = w.panes[pane].activeTab?.path;
     final focused = pane == w.focused;
-    _noteKeys.removeWhere((path, _) => !mounted.contains(path));
+    _noteKeys.keepOnly(mounted);
     return [
       for (final tab in w.panes[pane].tabs)
         if (mounted.contains(tab.path))
           () {
             final editor = _editorOf(tab.memento);
             return DetailTab(
-              key: _noteKeys.putIfAbsent(tab.path, GlobalKey.new),
+              key: _noteKeys.keyOf(tab.path),
               path: tab.path,
+              movedFrom: _noteKeys.movedFrom(tab.path),
               active: tab.path == showing,
               focused: focused,
               memento: tab.memento,
@@ -5044,9 +5055,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     ];
   }
 
-  /// One key per mounted note, so a tab moved to the other pane takes
-  /// its editor along — undo and all — instead of starting a new one.
-  final Map<String, GlobalKey> _noteKeys = {};
+  /// One key per mounted note: a tab moved to the other pane, or a note
+  /// renamed, takes its editor along — undo and all (#1076).
+  final NoteEditorKeys _noteKeys = NoteEditorKeys();
 
   /// The draggable tree/detail divider (T-PP-21). Moves apply live; the
   /// lift persists the width to the library.

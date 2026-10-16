@@ -4,6 +4,7 @@ import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/workspace/note_memento.dart';
+import 'package:niman/src/workspace/note_places.dart';
 import 'package:niman/src/workspace/workspace.dart';
 
 /// The paths of [pane]'s tabs, the showing one in brackets.
@@ -210,6 +211,111 @@ void main() {
           .withMemento('a.md', const NoteMemento(scrollOffset: 640))
           .withMemento('a.md', const NoteMemento(scrollOffset: 0));
       expect(w.tabs.single.memento.scrollOffset, 0);
+    });
+  });
+
+  // #1076: the position is the note's, not the tab's.
+  group('the places of notes that are not open', () {
+    const placeA = NoteMemento(selectionExtent: 12, scrollOffset: 300);
+
+    test('a note replaced and opened again comes back where it was', () {
+      final w = _opened(['a.md'])
+          .withMemento('a.md', placeA)
+          .replaceActive('b.md')
+          .replaceActive('a.md');
+      expect(_row(w), '[a.md]');
+      expect(w.tabs.single.memento, placeA);
+    });
+
+    test('a note closed and opened again comes back where it was', () {
+      final w = _opened(['a.md', 'b.md'])
+          .withMemento('a.md', placeA)
+          .closePath('a.md')
+          .open('a.md');
+      expect(w.tabs.firstWhere((t) => t.path == 'a.md').memento, placeA);
+    });
+
+    test('the closing editor’s late word, with no tab left, is its place', () {
+      final w = _opened(['a.md'])
+          .replaceActive('b.md')
+          .withMemento('a.md', placeA)
+          .replaceActive('a.md');
+      expect(w.tabs.single.memento, placeA);
+    });
+
+    test('a late word that knows no scroll keeps the place’s scroll', () {
+      final w = _opened(['a.md'])
+          .withMemento('a.md', placeA)
+          .replaceActive('b.md')
+          .withMemento('a.md', const NoteMemento(selectionExtent: 40))
+          .replaceActive('a.md');
+      expect(w.tabs.single.memento.selectionExtent, 40);
+      expect(w.tabs.single.memento.scrollOffset, 300);
+    });
+
+    test('a rename takes the place along, a folder’s notes too', () {
+      final w = _opened(['Notes/a.md'])
+          .withMemento('Notes/a.md', placeA)
+          .replaceActive('c.md')
+          .renamed('Notes', 'Archive')
+          .replaceActive('Archive/a.md');
+      expect(w.tabs.single.memento, placeA);
+      expect(w.places['Notes/a.md'], isNull);
+    });
+
+    test('a deleted note keeps no place', () {
+      final w = _opened(['a.md'])
+          .withMemento('a.md', placeA)
+          .replaceActive('b.md')
+          .deleted('a.md');
+      expect(w.places['a.md'], isNull);
+    });
+
+    test('moving a tab to the other pane is not closing it', () {
+      final w = _opened(['a.md', 'b.md']).split(SplitAxis.right);
+      final moved = w.moveTab(0, 0, 1);
+      expect(moved.places.length, 0);
+    });
+
+    test('the store is bounded: the least recently left goes first', () {
+      var w = Workspace.empty;
+      for (var i = 0; i < NotePlaces.capacity + 20; i++) {
+        w = w.withMemento('n$i.md', NoteMemento(selectionExtent: i));
+      }
+      expect(w.places.length, NotePlaces.capacity);
+      expect(w.places['n0.md'], isNull);
+      expect(w.places['n${NotePlaces.capacity + 19}.md'], isNotNull);
+    });
+
+    test('they survive the stored form, and an old one has none', () {
+      final w = _opened(['a.md'])
+          .withMemento('a.md', placeA)
+          .replaceActive('b.md');
+      final back = Workspace.fromJson(jsonDecode(jsonEncode(w.toJson())));
+      expect(back.places['a.md'], placeA);
+      expect(back, w);
+
+      final old = Workspace.fromJson(const {
+        'version': 1,
+        'panes': [
+          {
+            'active': 0,
+            'tabs': [
+              {'path': 'a.md'},
+            ],
+          },
+        ],
+      });
+      expect(old.places.length, 0);
+      expect(old.tabs.single.path, 'a.md');
+    });
+
+    test('opening before the showing tab leaves the showing tab showing', () {
+      final w = _opened(['b.md', 'c.md']).activate(0, 1);
+      final back = w.withMemento('a.md', placeA).openBeforeActive('a.md');
+      expect(_row(back), 'b.md a.md [c.md]');
+      expect(back.tabs.firstWhere((t) => t.path == 'a.md').memento, placeA);
+      expect(back.openBeforeActive('b.md'), back);
     });
   });
 

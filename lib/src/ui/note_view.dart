@@ -129,6 +129,7 @@ final class NoteView extends StatefulWidget {
     this.initialCaretOffset,
     this.active = true,
     this.initialMemento,
+    this.movedFrom,
     this.onMemento,
     this.onEditedNoteClosed,
     this.onLoaded,
@@ -311,6 +312,12 @@ final class NoteView extends StatefulWidget {
   /// selection when it was left in the editor that shows now, and its
   /// scroll. A caret landing or an anchor wins over it.
   final NoteMemento? initialMemento;
+
+  /// The path this note was at a moment ago, when its file was renamed or
+  /// moved (#1076): [path] changing from this one is the same note under
+  /// another name, so the view keeps its text, undo and place instead of
+  /// loading another note.
+  final String? movedFrom;
 
   /// Receives where the note is left: when its tab goes behind another,
   /// and when the view goes away.
@@ -978,6 +985,7 @@ final class _NoteViewState extends State<NoteView>
   @override
   void didUpdateWidget(covariant NoteView oldWidget) {
     super.didUpdateWidget(oldWidget);
+    final moved = _followsMove(oldWidget);
     _keepPlaceAcrossModes(oldWidget);
     if (!identical(oldWidget.linkSource, widget.linkSource)) {
       // The library opened under a note that was already on screen: its
@@ -986,7 +994,7 @@ final class _NoteViewState extends State<NoteView>
         ..sourceChanged()
         ..refresh();
     }
-    if (oldWidget.path != widget.path) {
+    if (oldWidget.path != widget.path && !moved) {
       // Another note's head is not this one's (#157): the panel opens closed
       // again, and the note on screen is taken at its head until it scrolls.
       _frontmatterOpen = false;
@@ -1017,7 +1025,9 @@ final class _NoteViewState extends State<NoteView>
       widget.onNoteKindChanged?.call(_noteKind);
       _dismissKeyboardForPreview();
     }
-    if (oldWidget.path != widget.path) {
+    if (moved) {
+      _followMove();
+    } else if (oldWidget.path != widget.path) {
       _handMemento(oldWidget.path);
       // Persist the outgoing note under its own path before the buffer is
       // replaced by the incoming one: the _load below resets it.
@@ -1057,6 +1067,30 @@ final class _NoteViewState extends State<NoteView>
       _caretPending = true;
       _refocus();
     }
+  }
+
+  /// Whether [oldWidget] to this one is the same loaded note renamed or
+  /// moved (#1076), not another note: its buffer is still the note.
+  bool _followsMove(NoteView oldWidget) =>
+      oldWidget.path != widget.path &&
+      widget.movedFrom == oldWidget.path &&
+      _ready &&
+      !_loading &&
+      _surface != null;
+
+  /// The note's file is at a new path and its editor stays as it is: the
+  /// text, the undo, the place. What was keyed on the old path starts over.
+  void _followMove() {
+    _log.debug('moved: ${widget.movedFrom} -> ${widget.path}');
+    // The edits from here on are saved under the new name, as a new
+    // session. The disk stamp is the old file's, which the move kept, so a
+    // rewrite of this note's links by the move still reads as a change.
+    _saves.newSession();
+    _unsaved?.noteChanged();
+    // Its links resolve from where it is now.
+    _deadLinks
+      ..sourceChanged()
+      ..refresh();
   }
 
   @override

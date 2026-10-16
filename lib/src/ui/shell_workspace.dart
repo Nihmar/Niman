@@ -97,6 +97,12 @@ final class ShellWorkspace {
     );
   }
 
+  /// Brings back the tab [path] had before a click replaced it with the
+  /// showing note, which keeps its own tab: a double-click is "open it
+  /// alongside", and the note already there stays put (#1076).
+  void reopenBeforeShowing(String path) =>
+      controller.update((w) => w.openBeforeActive(path));
+
   /// The next note the shell opens, however it opens it, goes into a new
   /// tab: for the flows that pick their note later (a new note's name).
   void openNextInNewTab() => _nextInNewTab = true;

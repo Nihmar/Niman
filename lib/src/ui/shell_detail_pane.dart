@@ -325,6 +325,7 @@ final class ShellDetailPane extends StatelessWidget {
     path: p.join(root, tab.path),
     active: tab.active,
     initialMemento: tab.memento,
+    movedFrom: tab.movedFrom == null ? null : p.join(root, tab.movedFrom),
     onMemento: onMemento == null
         ? null
         : (_, memento) => onMemento!(tab.path, memento),
@@ -396,6 +397,7 @@ final class DetailTab {
     this.focused = true,
     this.anchor,
     this.caret,
+    this.movedFrom,
   });
 
   /// The note's library-relative path.
@@ -418,6 +420,10 @@ final class DetailTab {
 
   /// Whether the tab shows its preview.
   final bool showPreview;
+
+  /// Where the note was a moment ago, when its file was renamed or moved:
+  /// the tab's editor stays, with its undo (#1076).
+  final String? movedFrom;
 
   /// A heading to land on as it loads (a link's anchor).
   final String? anchor;

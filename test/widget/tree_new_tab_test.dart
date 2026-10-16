@@ -2,7 +2,7 @@
 // tree opens it in a tab of its own; a single click still shows it in
 // place of the tab's note.
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/app.dart';
@@ -107,5 +107,36 @@ void main() {
     await settle(tester);
     expect(tabs(), ['beta.md', 'delta.md']);
     expect(controller.workspace.activePath, 'delta.md');
+  });
+
+  testWidgets('a double click adds no step to the history (#1076)', (
+    tester,
+  ) async {
+    // The pair used to show beta again and then gamma again, so back walked
+    // beta, gamma, beta before leaving: three steps for two notes.
+    var now = DateTime(2026, 9, 28, 12);
+    await pumpShell(tester, now: () => now);
+    await tester.tap(noteRow('beta.md'));
+    await settle(tester);
+    await tester.tap(noteRow('gamma.md'));
+    now = now.add(const Duration(milliseconds: 50));
+    await tester.pump();
+    await tester.tap(noteRow('gamma.md'));
+    await settle(tester);
+    expect(tabs(), ['beta.md', 'gamma.md']);
+
+    Future<void> back() async {
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.altLeft);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.altLeft);
+      await settle(tester);
+    }
+
+    await back();
+    expect(controller.workspace.activePath, 'beta.md');
+    await back();
+    // Nothing is behind beta: it is still the note shown.
+    expect(controller.workspace.activePath, 'beta.md');
+    expect(tabs(), ['beta.md', 'gamma.md']);
   });
 }
