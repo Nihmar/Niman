@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Todo home widget with sections</title>
+</head>
+<body>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+.home{width:420px;height:844px;background:#3a4150;font-family:Roboto,system-ui,sans-serif;color:#e2e2e6;display:flex;flex-direction:column;gap:28px;padding:40px 30px;box-sizing:border-box}
+.cap{font-size:13px;color:#d5d9e2;margin:0 0 -18px 4px}
+.wg{background:#1f2228;border-radius:24px;overflow:hidden;display:flex;flex-direction:column}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+svg.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
+svg.sm{width:13px;height:13px}
+.hd{display:flex;align-items:center;gap:8px;padding:4px 4px 0 18px;height:52px;flex:none}
+.ttl{font-size:14px;font-weight:500;flex:1}
+.cnt{font-size:12px;color:#a3a7ae}
+.add{width:48px;height:48px;display:flex;align-items:center;justify-content:center;color:#e2e2e6}
+.sec{display:flex;justify-content:space-between;font-size:11px;font-weight:500;color:#a3a7ae;padding:8px 18px 2px}
+.row{display:flex;align-items:center;gap:10px;min-height:48px;padding:2px 16px 2px 8px;box-sizing:border-box;width:100%;text-align:left}
+.box{width:44px;height:44px;display:flex;align-items:center;justify-content:center;flex:none}
+.box span{width:16px;height:16px;border:2px solid #9aa0a8;border-radius:3px;display:block}
+.m{font-size:11px;color:#a3a7ae;display:flex;gap:6px;align-items:center}
+.x{font-size:13px;line-height:18px}
+.od{color:#f08a92}.p{color:#8fb8ff}.c{color:#7fd1b0}
+</style>
+<div class="home">
+  <p class="cap">4 × 4</p>
+  <div class="wg" style="height:430px">
+    <div class="hd"><span class="ttl">Todo</span><span class="cnt">6 open</span><button class="add" aria-label="Add task"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button></div>
+    <div class="sec" style="color:#f08a92"><span>Overdue</span><span>1</span></div>
+    <button class="row"><span class="box"><span></span></span><span><span class="m"><span class="od">5 Oct</span><svg class="i sm" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg>08:10</span><span class="x">chiamare/andate meccanici sensore</span></span></button>
+    <div class="sec"><span>Today</span><span>1</span></div>
+    <button class="row"><span class="box"><span></span></span><span><span class="m"><span class="p">+casa</span></span><span class="x">Pagare bollo auto</span></span></button>
+    <div class="sec"><span>Next 7 days</span><span>2</span></div>
+    <button class="row"><span class="box"><span></span></span><span><span class="m">Tue 20 Oct<span class="p">+casa</span></span><span class="x">Sistemare tapparella</span></span></button>
+    <button class="row"><span class="box"><span></span></span><span><span class="m">Thu 22 Oct<span class="c">@ufficio</span></span><span class="x">Rinnovare passaporto</span></span></button>
+    <div class="sec"><span>Later</span><span>1</span></div>
+    <button class="row"><span class="box"><span></span></span><span><span class="m">Tue 3 Nov</span><span class="x">Comprare regalo Giulia</span></span></button>
+  </div>
+
+  <p class="cap">4 × 2</p>
+  <div class="wg" style="height:210px">
+    <div class="hd"><span class="ttl">Todo</span><span class="cnt">6 open</span><button class="add" aria-label="Add task"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button></div>
+    <div class="sec" style="color:#f08a92"><span>Overdue</span><span>1</span></div>
+    <button class="row"><span class="box"><span></span></span><span><span class="m"><span class="od">5 Oct</span><svg class="i sm" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg>08:10</span><span class="x">chiamare/andate meccanici sensore</span></span></button>
+    <div class="sec"><span>Today</span><span>1</span></div>
+    <button class="row"><span class="box"><span></span></span><span><span class="m"><span class="p">+casa</span></span><span class="x">Pagare bollo auto</span></span></button>
+  </div>
+</div>
+</body>
+</html>

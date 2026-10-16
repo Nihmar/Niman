@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Todo, current layout</title>
+</head>
+<body>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+.scr{width:390px;height:844px;background:#1f2228;color:#e2e2e6;font-family:Roboto,system-ui,sans-serif;display:flex;flex-direction:column;position:relative;overflow:hidden;box-sizing:border-box}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+svg.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
+svg.sm{width:15px;height:15px}
+.ib{width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:22px;color:#c4c7cf}
+.row{display:flex;gap:10px;padding:8px 16px 8px 6px;align-items:flex-start;box-sizing:border-box}
+.cb{width:44px;height:44px;display:flex;align-items:center;justify-content:center;flex:none;margin-top:-10px}
+.cb span{width:18px;height:18px;border:2px solid #9aa0a8;border-radius:3px;display:block}
+.t{font-size:16px;line-height:22px}
+.s{font-size:13px;line-height:18px;color:#a3a7ae;display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:2px}
+.s span{display:inline-flex;gap:4px;align-items:center}
+.od{color:#f08a92}.today{color:#8fb8ff}.p{color:#8fb8ff}.c{color:#7fd1b0}
+.nav{margin-top:auto;height:80px;background:#272a31;display:flex;justify-content:space-around;align-items:center;font-size:12px;color:#c4c7cf;flex:none}
+.nv{display:flex;flex-direction:column;align-items:center;gap:4px;width:68px}
+.pill{width:56px;height:32px;border-radius:16px;display:flex;align-items:center;justify-content:center}
+.nv.on .pill{background:#3b3f47}.nv.on{color:#f1f1f4;font-weight:500}
+.fab{position:absolute;right:16px;bottom:96px;width:56px;height:56px;border-radius:16px;background:#3a3e47;display:flex;align-items:center;justify-content:center;color:#e8e8ec}
+.chip{height:36px;border:1px solid #4a4e57;border-radius:18px;padding:0 12px;display:inline-flex;align-items:center;gap:6px;font-size:13px;color:#d6d8de;white-space:nowrap;box-sizing:border-box}
+</style>
+<div class="scr">
+  <div style="height:64px;display:flex;align-items:center;padding:0 20px;font-size:22px;flex:none">Todo</div>
+  <div style="display:flex;justify-content:center;align-items:center;gap:16px;padding:8px 0 16px">
+    <div style="display:flex;height:44px;border:1px solid #5a5e66;border-radius:22px;overflow:hidden;font-size:14px;font-weight:500">
+      <button style="display:flex;align-items:center;gap:8px;padding:0 18px;background:#3b3f47"><svg class="i sm" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg>Open</button>
+      <button style="padding:0 26px;border-left:1px solid #5a5e66">Done</button>
+    </div>
+    <button class="ib" aria-label="Format help"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .9-1 1.7"/><path d="M12 17h.01"/></svg></button>
+  </div>
+  <div style="display:flex;gap:8px;padding:0 16px">
+    <button class="chip"><svg class="i sm" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M8 3v4M16 3v4"/></svg>All dates<svg class="i sm" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+    <button class="chip"><svg class="i sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16l-6 7.5V19l-4-2v-4.5z"/></svg>Filter<svg class="i sm" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+  </div>
+  <div style="text-align:right;padding:14px 20px 10px;font-size:13px;color:#a3a7ae">6 open</div>
+
+  <div class="row"><button class="cb" aria-label="Mark done"><span></span></button><div><div class="t">chiamare/andate meccanici sensore</div><div class="s"><span class="od">Overdue · 5 Oct</span><span><svg class="i sm" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg>5 Oct 08:10</span></div></div></div>
+  <div class="row"><button class="cb" aria-label="Mark done"><span></span></button><div><div class="t">Pagare bollo auto</div><div class="s"><span class="today">Today</span><span class="p">+casa</span></div></div></div>
+  <div class="row"><button class="cb" aria-label="Mark done"><span></span></button><div><div class="t">Sistemare tapparella</div><div class="s"><span>Tue 20 Oct</span><span class="p">+casa</span></div></div></div>
+  <div class="row"><button class="cb" aria-label="Mark done"><span></span></button><div><div class="t">Rinnovare passaporto</div><div class="s"><span>Thu 22 Oct</span><span class="c">@ufficio</span></div></div></div>
+  <div class="row"><button class="cb" aria-label="Mark done"><span></span></button><div><div class="t">Comprare regalo Giulia</div><div class="s"><span>3 Nov</span></div></div></div>
+  <div class="row"><button class="cb" aria-label="Mark done"><span></span></button><div><div class="t">Leggere capitolo 3</div><div class="s"><span class="p">+studio</span></div></div></div>
+
+  <button class="fab" aria-label="Add task"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+  <nav class="nav" aria-label="Main">
+    <button class="nv"><span class="pill"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6.5A1.5 1.5 0 0 1 4.5 5H9l2 2h8.5A1.5 1.5 0 0 1 21 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5z"/></svg></span>Files</button>
+    <button class="nv on" aria-current="page"><span class="pill"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2" fill="#f1f1f4"/><path d="m8 12 3 3 5-6" stroke="#3b3f47"/></svg></span>Todo</button>
+    <button class="nv"><span class="pill"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10.5 12 4l8 6.5V20h-5v-6h-6v6H4z"/></svg></span>Home</button>
+    <button class="nv"><span class="pill"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg></span>Quick note</button>
+    <button class="nv"><span class="pill"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="6.5"/><path d="M12 3v2.5M12 18.5V21M3 12h2.5M18.5 12H21M5.6 5.6l1.8 1.8M16.6 16.6l1.8 1.8M5.6 18.4l1.8-1.8M16.6 7.4l1.8-1.8"/></svg></span>Settings</button>
+  </nav>
+</div>
+</body>
+</html>
