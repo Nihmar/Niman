@@ -34,23 +34,25 @@ const int widgetTodoLimit = 100;
 List<TodoEntry> sortTodosForWidget(
   TodoSnapshot snapshot, {
   int limit = widgetTodoLimit,
+  DateTime? today,
 }) {
-  final sorted = _sortedOpen(snapshot);
+  final sorted = _sortedOpen(snapshot, today ?? DateTime.now());
   if (sorted.length <= limit) {
     return sorted;
   }
   return sorted.sublist(0, limit);
 }
 
-/// The open todos of [snapshot] in widget order, uncapped.
-List<TodoEntry> _sortedOpen(TodoSnapshot snapshot) {
+/// The open todos of [snapshot] in widget order, uncapped, against the
+/// one [today] its caller also buckets with.
+List<TodoEntry> _sortedOpen(TodoSnapshot snapshot, DateTime today) {
   final open = <TodoEntry>[
     for (final entry in snapshot.todo)
       if (entry.task.raw.trim().isNotEmpty) entry,
   ];
   // The range is always `all`, so the `today` argument never narrows: it
   // only feeds due-range comparisons the default filter does not use.
-  return applyTodoFilter(open, const TodoFilter(), DateTime.now());
+  return applyTodoFilter(open, const TodoFilter(), today);
 }
 
 /// One section of the widget: the Todo tab's due-date section `id`, its
@@ -78,11 +80,8 @@ List<WidgetTodoSection> widgetTodoSections(
   DateTime? today,
   int limit = widgetTodoLimit,
 }) {
-  final sections = todoSections(
-    _sortedOpen(snapshot),
-    TodoSort.due,
-    today ?? DateTime.now(),
-  );
+  final now = today ?? DateTime.now();
+  final sections = todoSections(_sortedOpen(snapshot, now), TodoSort.due, now);
   final result = <WidgetTodoSection>[];
   var room = limit;
   for (final section in sections) {
