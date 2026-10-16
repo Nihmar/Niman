@@ -59,6 +59,19 @@ void main() {
       );
     });
 
+    test('the resolved theme carries the scheme error color (#1008)', () {
+      AppThemes.apply(
+        brightness: AppBrightness.night,
+        theme: const BuiltinAppTheme(AppPalette.niman),
+      );
+      final theme = resolveWidgetTheme(platform: Brightness.dark);
+      expect(theme.error, matches(RegExp(r'^#[0-9A-F]{8}$')));
+      AppThemes.apply(
+        brightness: AppBrightness.system,
+        theme: const BuiltinAppTheme(AppPalette.niman),
+      );
+    });
+
     test('the palette moves the accent', () {
       AppThemes.apply(
         brightness: AppBrightness.night,
@@ -101,6 +114,7 @@ void main() {
       primary: '#FFE2E2E5',
       secondary: '#FFC3C6CF',
       accent: '#FFD0BCFF',
+      error: null,
     );
 
     test('toMap/fromMap round-trip', () {
@@ -145,6 +159,45 @@ void main() {
         isNull,
       );
     });
+
+    test(
+      'the error color rides the map and the URI when the theme has one',
+      () {
+        const withError = (
+          dark: true,
+          background: '#E61A1C1E',
+          primary: '#FFE2E2E5',
+          secondary: '#FFC3C6CF',
+          accent: '#FFD0BCFF',
+          error: '#FFFFB4AB',
+        );
+        final map = widgetThemeToMap(withError);
+        expect(map['error'], '#FFFFB4AB');
+        expect(widgetThemeFromMap(map), withError);
+        final params = <String, String>{};
+        appendWidgetThemeParams(params, withError);
+        expect(params[widgetThemeErrorKey], '#FFFFB4AB');
+        final uri = Uri(
+          scheme: 'niman',
+          host: 'todo-toggle',
+          queryParameters: params,
+        );
+        expect(widgetThemeFromUri(uri), withError);
+      },
+    );
+
+    test(
+      'absent, the error key is omitted and a broken one reads as absent',
+      () {
+        expect(widgetThemeToMap(theme).containsKey('error'), isFalse);
+        final params = <String, String>{};
+        appendWidgetThemeParams(params, theme);
+        expect(params.containsKey(widgetThemeErrorKey), isFalse);
+        // A broken error does not drop the rest of the theme.
+        final broken = {...widgetThemeToMap(theme), 'error': 'red'};
+        expect(widgetThemeFromMap(broken), theme);
+      },
+    );
 
     test('appending a null theme appends nothing', () {
       final params = <String, String>{'id': '7'};

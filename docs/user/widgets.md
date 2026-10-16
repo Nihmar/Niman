@@ -18,8 +18,16 @@ short setup dialog: pick the library from the ones you have open
   (open tasks only), no sort and no filter of its own, and it always
   shows every section open: a heading is not a button, so folding a
   section in the app does not fold it here. The list scrolls and holds up
-  to 100 tasks; a section's count and the header's `N open` stay true
-  even when the list is capped.
+  to 100 tasks; a section's count is the number of tasks listed under it,
+  so a heading never promises more than the widget shows, while the
+  header's `N open` stays true even when the list is capped.
+- **At midnight:** the sections depend on the day, so the widget
+  re-reads your `todo.txt` when the day turns over — with the app closed —
+  and moves a task due yesterday from *Today* to *Overdue* (and the rest
+  of the buckets with it). The same refresh runs when the clock or the
+  time zone changes and after a restart. It is an inexact system alarm,
+  so it can land a few minutes after midnight, and it only runs while a
+  Todos widget is placed.
 - **Meta line:** each row names its priority, due date and
   `+project` / `@context` / `#tag` markers; rows without any of them
   hide the line so the text stays aligned. The section already says what
@@ -59,7 +67,8 @@ A widget that points at another library than the open one switches to it,
 saving the open notes first; a note that cannot be saved keeps the current
 library open and says so, and the tap opens nothing.
 
-All three wear the app theme (brightness and palette) and refresh when
+All three wear the app theme (brightness, palette and, for the Overdue
+heading, the palette's error color) and refresh when
 the app resumes or the files they show change. To point an instance
 at another library or note, remove the widget and place it again —
 there is no in-place reconfiguration yet.

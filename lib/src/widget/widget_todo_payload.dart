@@ -13,6 +13,10 @@ import 'package:niman/src/ui/todo_section_label.dart';
 import 'package:niman/src/widget/widget_payload.dart';
 import 'package:niman/src/widget/widget_theme.dart';
 
+/// The tap-URI query key carrying the language id the payload's labels
+/// were written in (`lg`), so the background re-push words them the same.
+const String widgetLanguageParam = 'lg';
+
 /// The payload of [snapshot] for the widget of the library at
 /// [libraryPath].
 ///

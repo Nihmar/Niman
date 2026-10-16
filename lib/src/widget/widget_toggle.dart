@@ -4,7 +4,8 @@
 /// `niman://` URI; this callback routes each to its op — todo toggle,
 /// note-row flip, note-row add — which edit the file and re-push the
 /// payload. No activity comes to the foreground, and it works with the
-/// app closed.
+/// app closed. The native day-change receiver fires the same callback with
+/// a `todo-refresh` URI (`widget_day_refresh.dart`).
 /// No Drift, no UI: the background isolate owns plain file I/O through
 /// [TodoStore] and the note file.
 ///
@@ -17,6 +18,7 @@ import 'package:home_widget/home_widget.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/todo/todo_store.dart';
 import 'package:niman/src/widget/widget_configs.dart';
+import 'package:niman/src/widget/widget_day_refresh.dart';
 import 'package:niman/src/widget/widget_note_ops.dart';
 import 'package:niman/src/widget/widget_theme.dart';
 import 'package:niman/src/widget/widget_todo_payload.dart';
@@ -35,19 +37,18 @@ Future<void> widgetToggleCallback(Uri? uri) async {
       await toggleWidgetNoteRow(uri);
     case 'note-row-add':
       await addWidgetNoteRow(uri);
+    case widgetTodoRefreshHost:
+      await refreshWidgetTodoForNewDay(uri);
   }
 }
-
-/// The tap-URI query key carrying the language id the payload's labels
-/// were written in (`lg`), so the background re-push words them the same.
-const String widgetLanguageParam = 'lg';
 
 /// Parses a `niman://todo-toggle?id=&library=&line=` URI, or null when
 /// it carries nothing toggleable.
 ///
-/// The native rows append the payload's theme (`td/bg/fg/fs/ac`), so
-/// the re-push wears the same theme instead of flashing the defaults;
-/// taps without it (old widgets) resolve live in the pushing isolate.
+/// The native rows append the payload's theme (`td/bg/fg/fs/ac`, `er` when
+/// it has an error color), so the re-push wears the same theme instead of
+/// flashing the defaults; taps without it (old widgets) resolve live in the
+/// pushing isolate.
 /// The payload's language rides the same way (`lg`), for the section
 /// headings.
 ({int id, String library, int line, WidgetTheme? theme, String? language})?

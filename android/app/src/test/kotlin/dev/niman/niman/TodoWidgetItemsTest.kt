@@ -58,6 +58,24 @@ class TodoWidgetItemsTest {
     }
 
     @Test
+    fun `an entry of an unknown kind is skipped, not drawn as an empty row`() {
+        // A payload from a newer app: kinds this reader has never heard of.
+        val items = TodoWidgetItems.parse(
+            JSONArray()
+                .put(header("due.today", "Today", 1))
+                .put(JSONObject().put("kind", "future-thing").put("label", "from tomorrow"))
+                .put(row("task", "due.today"))
+                .put(JSONObject().put("kind", "banner").put("text", "also unknown"))
+                .put(row("explicit", "due.today").put("kind", "row")),
+        )
+        assertEquals(3, items.size)
+        assertEquals(2, TodoWidgetItems.rowCount(items))
+        assertEquals(listOf("task", "explicit"), items.filterNot { TodoWidgetItems.isSection(it) }.map { it.getString("text") })
+        // The header counts the rows it understands, the skipped ones excluded.
+        assertEquals("2", TodoWidgetItems.sectionCount(items.first()))
+    }
+
+    @Test
     fun `a header and a row inflate different layouts`() {
         assertEquals(TodoWidgetItems.VIEW_SECTION, TodoWidgetItems.viewType(header("due.today", "Today", 1)))
         assertEquals(TodoWidgetItems.VIEW_ROW, TodoWidgetItems.viewType(row("task", "due.today")))
@@ -96,6 +114,21 @@ class TodoWidgetItemsTest {
         val item = header("due.later", "Later", 250)
         assertEquals("Later", TodoWidgetItems.sectionLabel(item))
         assertEquals("250", TodoWidgetItems.sectionCount(item))
+    }
+
+    @Test
+    fun `a header counts the rows that follow it, not the count it was written with`() {
+        // A capped payload: "Later" was written with 250 but 2 rows survived.
+        val items = TodoWidgetItems.parse(
+            JSONArray()
+                .put(header("due.today", "Today", 1))
+                .put(row("now", "due.today"))
+                .put(header("due.later", "Later", 250))
+                .put(row("far", "due.later"))
+                .put(row("farther", "due.later")),
+        )
+        val counts = items.filter { TodoWidgetItems.isSection(it) }.map { TodoWidgetItems.sectionCount(it) }
+        assertEquals(listOf("1", "2"), counts)
     }
 
     @Test
@@ -141,6 +174,39 @@ class TodoWidgetItemsTest {
         val dark = WidgetTheme(true, 0, 0, 0, 0)
         assertEquals(0xFFB3261E.toInt(), light.error)
         assertEquals(0xFFF2B8B5.toInt(), dark.error)
+    }
+
+    // The platform's Color.parseColor is a stub on the host: #AARRGGBB by hand.
+    private fun parseColor(hex: String): Int = java.lang.Long.parseLong(hex.removePrefix("#"), 16).toInt()
+
+    private fun payloadWithTheme(error: String?): String {
+        val theme = JSONObject()
+            .put("dark", false)
+            .put("background", "#E6FFFBFF")
+            .put("primary", "#FF1C1B1F")
+            .put("secondary", "#FF49454F")
+            .put("accent", "#FF6750A4")
+            .also { if (error != null) it.put("error", error) }
+        return JSONObject().put("theme", theme).toString()
+    }
+
+    @Test
+    fun `the payload's error color overrides the fallback pair`() {
+        val theme = WidgetTheme.fromPayload(payloadWithTheme("#FF8C1D18"), ::parseColor)!!
+        assertEquals(0xFF8C1D18.toInt(), theme.error)
+    }
+
+    @Test
+    fun `a payload without an error color keeps the fallback pair`() {
+        val theme = WidgetTheme.fromPayload(payloadWithTheme(null), ::parseColor)!!
+        assertEquals(0xFFB3261E.toInt(), theme.error)
+    }
+
+    @Test
+    fun `a broken error color leaves the fallback and keeps the theme`() {
+        val theme = WidgetTheme.fromPayload(payloadWithTheme("not a color"), ::parseColor)!!
+        assertEquals(0xFFB3261E.toInt(), theme.error)
+        assertEquals(0xFF6750A4.toInt(), theme.accent)
     }
 
     @Test
