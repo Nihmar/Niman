@@ -85,6 +85,18 @@ NoteView _note({
   linkPreview: linkPreview,
 );
 
+/// Lets a chain of real `dart:io` probes finish: each one completes outside
+/// the test's fake clock, and the code after it resumes on a pump.
+Future<void> _settleDisk(WidgetTester tester) async {
+  for (var i = 0; i < 6; i++) {
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 30)),
+    );
+    await tester.pump();
+  }
+  await tester.pumpAndSettle();
+}
+
 Widget _app(Widget child) => MaterialApp(home: Scaffold(body: child));
 
 MarkdownSourceViewState _surface(WidgetTester tester) =>
@@ -415,9 +427,64 @@ void main() {
     await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
     await tester.tapAt(at, kind: PointerDeviceKind.mouse);
     await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
-    await tester.pumpAndSettle();
+    // The disk is tried first (#1010): its real probes finish outside the
+    // test's fake clock.
+    await _settleDisk(tester);
     expect(links.queries, contains('wiki:Attachments/photo.png'));
     expect(opened, <String>['Attachments/photo.png|null']);
+  }, variant: _desktop);
+
+  testWidgets('Ctrl+click on an embed whose file is on the disk only follows '
+      'the file, never the create-note offer (#1010)', (tester) async {
+    // A file just synced in: the read view finds it on the disk, the index has
+    // not caught up. The click goes by the same rule, so the dead-link flow
+    // (which would offer a note named `photo.png`) is never reached.
+    final dir = (await tester.runAsync(
+      () => Directory.systemTemp.createTemp('niman_embed_'),
+    ))!;
+    addTearDown(() => dir.deleteSync(recursive: true));
+    await tester.runAsync(() async {
+      await Directory(p.join(dir.path, 'Attachments')).create();
+      await File(p.join(dir.path, 'Attachments', 'photo.png'))
+          .writeAsBytes(<int>[1, 2, 3]);
+    });
+    final links = FakeLinkSource(notes: <String>['current.md']);
+    final opened = <String>[];
+    final created = <String>[];
+    await tester.pumpWidget(
+      _app(
+        _note(
+          text: 'text ![[Attachments/photo.png]] more\n',
+          path: p.join(dir.path, 'current.md'),
+          libraryRoot: dir.path,
+          links: links,
+          opened: opened,
+          createMissingNote: (rel) async {
+            created.add(rel);
+            return rel;
+          },
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final paragraph = tester.renderObject<RenderParagraph>(
+      find.text('text ![[Attachments/photo.png]] more', findRichText: true),
+    );
+    final at = paragraph.localToGlobal(
+      paragraph.getOffsetForCaret(const TextPosition(offset: 8), Rect.zero) +
+          const Offset(2, 8),
+    );
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.tapAt(at, kind: PointerDeviceKind.mouse);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    await _settleDisk(tester);
+    expect(opened, <String>['Attachments/photo.png|null']);
+    expect(created, isEmpty);
+    expect(
+      links.queries,
+      isNot(contains('wiki:Attachments/photo.png')),
+      reason: 'the disk answered; the index was not asked',
+    );
   }, variant: _desktop);
 
   testWidgets(

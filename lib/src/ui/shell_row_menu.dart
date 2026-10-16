@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/ui/action_sheet.dart';
+import 'package:niman/src/ui/create_kinds.dart';
 import 'package:niman/src/ui/file_icon.dart';
 import 'package:niman/src/ui/file_tree_context.dart';
 import 'package:niman/src/ui/menu_row.dart';
@@ -26,6 +27,16 @@ typedef RowMenuEntry = ({
   String value,
   bool destructive,
 });
+
+/// [kind]'s entry, its key [prefix]ed by the menu it sits in: the one
+/// builder both menus read (#1013).
+RowMenuEntry _kindEntry(CreateKind kind, String prefix) => (
+  key: Key('$prefix-${kind.keySuffix}'),
+  icon: kind.icon,
+  label: kind.label(),
+  value: kind.value,
+  destructive: false,
+);
 
 /// The phone's long-press sheet (T-UI-05): the note actions, scoped to
 /// the pressed row. Resolves to the chosen action, or null. A pointer's
@@ -122,27 +133,7 @@ Future<String?> showTreeBackgroundMenuAt(
         value: 'template',
         destructive: false,
       ),
-      (
-        key: const Key('tree-menu-new-audio-note'),
-        icon: Icons.mic_outlined,
-        label: AppStrings.newAudioNoteHere,
-        value: 'audio',
-        destructive: false,
-      ),
-      (
-        key: const Key('tree-menu-new-slides'),
-        icon: Icons.slideshow_outlined,
-        label: AppStrings.newSlidesHere,
-        value: 'slides',
-        destructive: false,
-      ),
-      (
-        key: const Key('tree-menu-new-flashcards'),
-        icon: Icons.style_outlined,
-        label: AppStrings.newFlashcardsHere,
-        value: 'flashcards',
-        destructive: false,
-      ),
+      for (final kind in createKinds) _kindEntry(kind, 'tree-menu'),
       (
         key: const Key('tree-menu-new-folder'),
         icon: Icons.create_new_folder_outlined,
@@ -298,29 +289,8 @@ List<List<RowMenuEntry>> rowMenuGroups(
     // note, slides, a deck. A list note is left out — it is bound to the
     // list folder — and so are the journal and the capture, each bound to
     // a folder of its own.
-    if (note.isDir) ...[
-      (
-        key: const Key('menu-new-audio-note'),
-        icon: Icons.mic_outlined,
-        label: AppStrings.newAudioNoteHere,
-        value: 'audio',
-        destructive: false,
-      ),
-      (
-        key: const Key('menu-new-slides'),
-        icon: Icons.slideshow_outlined,
-        label: AppStrings.newSlidesHere,
-        value: 'slides',
-        destructive: false,
-      ),
-      (
-        key: const Key('menu-new-flashcards'),
-        icon: Icons.style_outlined,
-        label: AppStrings.newFlashcardsHere,
-        value: 'flashcards',
-        destructive: false,
-      ),
-    ],
+    if (note.isDir)
+      for (final kind in createKinds) _kindEntry(kind, 'menu'),
     if (note.isDir)
       (
         key: const Key('menu-new-folder'),

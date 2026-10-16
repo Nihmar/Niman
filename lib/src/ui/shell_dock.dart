@@ -139,38 +139,53 @@ final class ShellDock {
       onClose: overlay
           ? closeOverlay
           : () => workspace.controller.update((w) => w.withDock(open: false)),
-      paneBuilder: (pane) => switch (pane) {
-        DockPane.outline => OutlineDockPane(note: panelNote()),
-        DockPane.tags => TagsDockPane(
-          note: panelNote(),
-          tags: controller.tagSource,
-          onOpenNote: open,
-        ),
-        DockPane.links => LinksDockPane(
-          note: panelNote(),
-          links: controller.linkSource,
-          libraryRoot: controller.root,
-          onOpenNote: open,
-        ),
-        DockPane.spelling => SpellingDockPane(note: panelNote()),
-        DockPane.history => HistoryDockPane(
-          ops: controller.ops,
-          path: path,
-          onOpenHistory: () {
-            if (path != null) onOpenHistory(path);
-          },
-          onOpenVersion: switch ((onOpenVersion, path)) {
-            (final openVersion?, final path?) => (version) {
-              shut();
-              openVersion(path, version);
-            },
-            _ => null,
-          },
-        ),
-        DockPane.journal => journalBrowser(context),
-      },
+      paneBuilder: (pane) =>
+          _paneBody(context, pane, open: open, shut: shut, path: path),
     );
   }
+
+  /// What [pane] holds, in the dock or in the sheet that stands for it: one
+  /// switch for both, so no pane reaches a surface that shows another.
+  /// [open] opens a note from the pane, [shut] clears the pane's own cover
+  /// (the overlay, the sheet) before a page opens from it.
+  Widget _paneBody(
+    BuildContext context,
+    DockPane pane, {
+    required void Function(String path) open,
+    required VoidCallback shut,
+    required String? path,
+  }) => switch (pane) {
+    DockPane.outline => OutlineDockPane(note: panelNote()),
+    DockPane.tags => TagsDockPane(
+      note: panelNote(),
+      tags: controller.tagSource,
+      onOpenNote: open,
+    ),
+    DockPane.links => LinksDockPane(
+      note: panelNote(),
+      links: controller.linkSource,
+      libraryRoot: controller.root,
+      onOpenNote: open,
+    ),
+    DockPane.spelling => SpellingDockPane(note: panelNote()),
+    DockPane.history => HistoryDockPane(
+      ops: controller.ops,
+      path: path,
+      onOpenHistory: () {
+        if (path == null) return;
+        shut();
+        onOpenHistory(path);
+      },
+      onOpenVersion: switch ((onOpenVersion, path)) {
+        (final openVersion?, final path?) => (version) {
+          shut();
+          openVersion(path, version);
+        },
+        _ => null,
+      },
+    ),
+    DockPane.journal => journalBrowser(context),
+  };
 
   /// Shows or hides the dock (the note row's button, Ctrl+Shift+B): the
   /// docked panel where there is room, the overlay where there is not.
@@ -202,8 +217,9 @@ final class ShellDock {
       return;
     }
     final note = panelNote();
-    if (note == null) return;
-    if (pane == DockPane.outline) {
+    // The journal is the library's, not the note's: it needs no note.
+    if (note == null && pane != DockPane.journal) return;
+    if (pane == DockPane.outline && note != null) {
       final line = await showOutlineSheet(
         context,
         entries: note.outline.value,
@@ -212,37 +228,22 @@ final class ShellDock {
       if (line != null) note.jumpToHeading(line);
       return;
     }
-    if (pane == DockPane.links) {
-      await showModalBottomSheet<void>(
-        context: context,
-        showDragHandle: true,
-        builder: (sheet) => SizedBox(
-          height: MediaQuery.sizeOf(sheet).height * 0.5,
-          child: LinksDockPane(
-            note: note,
-            links: controller.linkSource,
-            libraryRoot: controller.root,
-            onOpenNote: (path) {
-              Navigator.pop(sheet);
-              onOpenNoteFromLink(path);
-            },
-          ),
-        ),
-      );
-      return;
-    }
+    // Every other pane is the same body the dock draws, in a sheet of its
+    // own: a pane never lands in a sheet made for another one (#1011).
     await showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
       builder: (sheet) => SizedBox(
         height: MediaQuery.sizeOf(sheet).height * 0.5,
-        child: TagsDockPane(
-          note: note,
-          tags: controller.tagSource,
-          onOpenNote: (path) {
+        child: _paneBody(
+          sheet,
+          pane,
+          open: (path) {
             Navigator.pop(sheet);
             onOpenNoteFromLink(path);
           },
+          shut: () => Navigator.pop(sheet),
+          path: note?.notePath,
         ),
       ),
     );

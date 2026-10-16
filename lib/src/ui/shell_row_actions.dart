@@ -15,6 +15,7 @@ import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/library/note_relocation.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/carried_notes.dart';
+import 'package:niman/src/ui/create_kinds.dart';
 import 'package:niman/src/ui/file_tree_context.dart';
 import 'package:niman/src/ui/folder_picker.dart';
 import 'package:niman/src/ui/name_dialog.dart';
@@ -128,12 +129,6 @@ final class ShellRowActions {
         await creates.createNote(context, parent: here);
       case 'template':
         await templates.createFromTemplate(context, parent: here);
-      case 'audio':
-        await creates.createAudioNote(context, parent: here);
-      case 'slides':
-        await creates.createSlidesNote(context, parent: here);
-      case 'flashcards':
-        await creates.createFlashcards(context, parent: here);
       case 'folder':
         await creates.createFolder(context, parent: here);
       case 'quicknote':
@@ -169,6 +164,9 @@ final class ShellRowActions {
         await move(context, note.path);
       case 'delete':
         await delete(context, note.path);
+      default:
+        // The kinds a folder creates in place: one table (#1013).
+        await createKindFromMenu(action, creates, context, parent: here);
     }
   }
 

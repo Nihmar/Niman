@@ -179,7 +179,11 @@ final class _PaneTabsState extends State<_PaneTabs> {
     if (target == position.pixels) return;
     GestureBinding.instance.pointerSignalResolver.register(
       event,
-      (_) => position.pointerScroll(delta),
+      // The resolver runs after the event is dispatched: the strip may have
+      // lost its position by then (#1025), so it is read again.
+      (_) {
+        if (_scroll.hasClients) _scroll.position.pointerScroll(delta);
+      },
     );
   }
 

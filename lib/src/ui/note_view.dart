@@ -1871,6 +1871,24 @@ final class _NoteViewState extends State<NoteView>
     return resolveEmbedPath(target, widget.path, root, widget.linkSource);
   }
 
+  /// Opens the file the embed [ref] names, found by the shared embed rule
+  /// ([_resolveEmbed]); false when the disk has no such file, and the caller
+  /// goes on to the index and the dead-link flow.
+  Future<bool> _openEmbedOnDisk(WikiRef ref) async {
+    final root = widget.libraryRoot;
+    final open = widget.onOpenNote;
+    if (root == null || open == null || ref.target.isEmpty) return false;
+    final found = await _resolveEmbed(ref.target);
+    if (found == null || !mounted) return false;
+    final rel = pathInLibrary(root, found);
+    if (rel == null) return false;
+    // The note itself is the one target that stays here: the index flow
+    // jumps locally for it.
+    if (rel == _pathInLibrary) return false;
+    open(rel, ref.fragment);
+    return true;
+  }
+
   /// Opens a link token's target: [raw] is the token as written — `[[…]]` for
   /// a wikilink, `![[…]]` for an embed, `[…](…)` for a Markdown link; [href]
   /// is the target its parse resolved, when the tap carried one — a reference
@@ -1882,12 +1900,15 @@ final class _NoteViewState extends State<NoteView>
     if (kind == TokenKind.wikilink) {
       // An embed's run carries its own `!` (#994): the wikilink inside it
       // starts one character later.
-      final wiki = raw.startsWith('!') ? raw.substring(1) : raw;
-      await openWiki(
-        context,
-        parseWikiRef(wiki.substring(2, wiki.length - 2)),
-        _linkTargets(modifier: true),
-      );
+      final embed = raw.startsWith('!');
+      final wiki = embed ? raw.substring(1) : raw;
+      final ref = parseWikiRef(wiki.substring(2, wiki.length - 2));
+      // The read view draws an embed from the disk first (#24); the click
+      // follows the file by that same rule, so a target the index has not
+      // caught up with yet is opened, not offered for creation (#1010).
+      if (embed && await _openEmbedOnDisk(ref)) return;
+      if (!mounted) return;
+      await openWiki(context, ref, _linkTargets(modifier: true));
     } else {
       final close = raw.indexOf(']');
       final inline = close < 0 ? '' : raw.substring(close + 2, raw.length - 1);

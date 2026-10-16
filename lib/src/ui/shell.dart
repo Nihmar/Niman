@@ -77,6 +77,7 @@ import 'package:niman/src/ui/capture/capture_services.dart';
 import 'package:niman/src/ui/capture/paste_markdown_flow.dart';
 import 'package:niman/src/ui/cheatsheet/cheatsheet_screen.dart';
 import 'package:niman/src/ui/close_to_tray.dart';
+import 'package:niman/src/ui/create_kinds.dart';
 import 'package:niman/src/ui/deferred_listenable.dart';
 import 'package:niman/src/ui/device_shape.dart';
 import 'package:niman/src/ui/dismiss_chain.dart';
@@ -5488,12 +5489,6 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         await _createFlow.createNote(context, parent: folder);
       case 'template':
         await _templateFlow.createFromTemplate(context, parent: folder);
-      case 'audio':
-        await _createFlow.createAudioNote(context, parent: folder);
-      case 'slides':
-        await _createFlow.createSlidesNote(context, parent: folder);
-      case 'flashcards':
-        await _createFlow.createFlashcards(context, parent: folder);
       case 'folder':
         await _createFlow.createFolder(context, parent: folder);
       case 'exportfolder':
@@ -5510,6 +5505,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           library: true,
           anchor: menuAnchorAt(position),
         );
+      default:
+        // The kinds a folder creates in place: one table (#1013).
+        await createKindFromMenu(action, _createFlow, context, parent: folder);
     }
   }
 
@@ -5695,12 +5693,6 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         await _createFlow.createNote(context, parent: '');
       case 'template':
         await _templateFlow.createFromTemplate(context, parent: '');
-      case 'audio':
-        await _createFlow.createAudioNote(context, parent: '');
-      case 'slides':
-        await _createFlow.createSlidesNote(context, parent: '');
-      case 'flashcards':
-        await _createFlow.createFlashcards(context, parent: '');
       case 'folder':
         await _createFlow.createFolder(context, parent: '');
       case 'exportlibrary':
@@ -5710,6 +5702,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           library: true,
           anchor: menuAnchorAt(position),
         );
+      default:
+        // The kinds a folder creates in place: one table (#1013).
+        await createKindFromMenu(action, _createFlow, context, parent: '');
     }
   }
 }
