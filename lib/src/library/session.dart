@@ -81,7 +81,9 @@ abstract interface class NoteOperations {
   /// Renames the note or folder at [path] to [newName]. [confirmLinks]
   /// answers the library's [LinkUpdate.ask] (#848) once the rename is done
   /// and returned, not before it (#859); [onLinksRewritten] runs when a yes
-  /// has rewritten the links; [flushOpen] saves the open notes' unsaved
+  /// has rewritten the links, and under the automatic setting [onLinksProgress]
+  /// tells how far the rewrite, which runs after the rename has returned,
+  /// has come (#1041); [flushOpen] saves the open notes' unsaved
   /// edits right before each is rewritten, so an autosave cannot write the
   /// old links back over the rewrite (#913).
   Future<Note> rename(
@@ -89,16 +91,19 @@ abstract interface class NoteOperations {
     String newName, {
     LinkUpdateConfirm? confirmLinks,
     void Function()? onLinksRewritten,
+    LinkRewriteProgress? onLinksProgress,
     FlushOpenNotes? flushOpen,
   });
 
   /// Moves the note or folder at [path] into [targetParent].
-  /// [confirmLinks], [onLinksRewritten] and [flushOpen] are [rename]'s.
+  /// [confirmLinks], [onLinksRewritten], [onLinksProgress] and [flushOpen] are
+  /// [rename]'s.
   Future<Note> move(
     String path,
     String targetParent, {
     LinkUpdateConfirm? confirmLinks,
     void Function()? onLinksRewritten,
+    LinkRewriteProgress? onLinksProgress,
     FlushOpenNotes? flushOpen,
   });
 

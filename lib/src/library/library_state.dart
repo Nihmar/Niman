@@ -452,9 +452,9 @@ final class LibraryController implements LibrarySession {
             },
       readSpots: reader == null
           ? null
-          : (path) async {
+          : (path, from) async {
               try {
-                return await reader.noteLinkSpots(path);
+                return await reader.noteLinkSpotSlice(path, from);
               } on Object {
                 return null;
               }

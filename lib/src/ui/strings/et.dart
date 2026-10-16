@@ -951,6 +951,11 @@ final class EstonianStrings extends Strings {
   @override
   String get linksToNoteEmbed => 'manustatud';
   @override
+  String get linksToNoteFurther => 'Mainitud allpool';
+  @override
+  String linksUpdating(int done, int total) =>
+      'Linkide uuendamine: $done / $total';
+  @override
   String get openLinkFailed => 'Viidet ei õnnestunud avada';
 
   // Dead-link note creation (issue #78).

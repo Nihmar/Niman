@@ -13,6 +13,7 @@ import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/db/indexer.dart';
 import 'package:niman/src/db/referrer_dao.dart';
 import 'package:niman/src/library/note_ops.dart';
+import 'package:niman/src/links/link_spot_slices.dart';
 import 'package:niman/src/links/mention_reader.dart';
 import 'package:niman/src/links/mentions.dart';
 import 'package:niman/src/links/resolver.dart';
@@ -50,9 +51,9 @@ void main() {
     resolver = MentionReader(
       db,
       LinkResolver(db),
-      readSpots: (path) async {
+      readSpots: (path, from) async {
         reads.add(path);
-        return linkSpotsOfNoteFile(p.join(root.path, path));
+        return linkSpotSliceOfFile(p.join(root.path, path), from);
       },
     );
   });
@@ -264,7 +265,7 @@ void main() {
       final bulk = MentionReader(
         db,
         LinkResolver(db),
-        readSpots: (_) async => spots,
+        readSpots: (_, _) async => (spots: spots, next: null),
       );
       for (var i = 0; i < MentionReader.kept + 40; i++) {
         write('bulk/n$i.md', '[[B]]\n');
@@ -361,7 +362,8 @@ void main() {
       indexer: indexer,
       config: LibraryConfigRepo(root.path),
     );
-    final spots = await ops.noteLinkSpots('A.md');
-    expect(spots.map((s) => s.target), ['B', 'B.md']);
+    final slice = await ops.noteLinkSpotSlice('A.md', spotCursorStart);
+    expect(slice.spots.map((s) => s.target), ['B', 'B.md']);
+    expect(slice.next, isNull);
   });
 }

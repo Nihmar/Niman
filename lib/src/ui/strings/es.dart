@@ -968,6 +968,11 @@ final class SpanishStrings extends Strings {
   @override
   String get linksToNoteEmbed => 'incrustada';
   @override
+  String get linksToNoteFurther => 'Mencionada más abajo';
+  @override
+  String linksUpdating(int done, int total) =>
+      'Actualizando enlaces: $done de $total';
+  @override
   String get openLinkFailed => 'No se pudo abrir el enlace';
 
   // Dead-link note creation (issue #78).

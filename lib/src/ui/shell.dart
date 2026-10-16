@@ -45,6 +45,7 @@ import 'package:niman/src/journal/journal_settings.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/library/markdown_import.dart';
 import 'package:niman/src/library/new_item_folder.dart';
+import 'package:niman/src/library/note_relocation.dart' show linkRewriteBatch;
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/links/library_links.dart';
 import 'package:niman/src/links/suggester.dart';
@@ -1088,6 +1089,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     onLinksRewritten: () {
       if (mounted) setState(() => _noteReloadToken++);
     },
+    onLinksProgress: _showLinksProgress,
     controller: widget.controller,
     guard: _guard,
     saveOpen: () => widget.unsavedTracker.saveAll(),
@@ -2743,6 +2745,23 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       if (!mounted) return;
       _showImported(imported?.folder, name);
     });
+  }
+
+  /// Says how far the rewrite of the links to a note that moved has come
+  /// (#1041), in one snack bar that is replaced as it goes and leaves when it
+  /// is done: a rewrite of a thousand notes runs after the move has returned,
+  /// and would otherwise be unseen. A rewrite of a few notes is over before
+  /// it would be read, and says nothing.
+  void _showLinksProgress(int done, int total) {
+    if (!mounted || total <= linkRewriteBatch) return;
+    final messenger = ScaffoldMessenger.of(context)..clearSnackBars();
+    if (done >= total) return;
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(AppStrings.linksUpdating(done, total)),
+        duration: const Duration(seconds: 30),
+      ),
+    );
   }
 
   /// Says how an import of [name] went: nothing to bring in when

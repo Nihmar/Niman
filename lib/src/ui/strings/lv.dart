@@ -955,6 +955,11 @@ final class LatvianStrings extends Strings {
   @override
   String get linksToNoteEmbed => 'iegulta';
   @override
+  String get linksToNoteFurther => 'Minēts tālāk';
+  @override
+  String linksUpdating(int done, int total) =>
+      'Atjaunina saites: $done no $total';
+  @override
   String get openLinkFailed => 'Nevarēja atvērt saiti';
 
   // Dead-link note creation (issue #78).

@@ -964,6 +964,11 @@ final class DutchStrings extends Strings {
   @override
   String get linksToNoteEmbed => 'ingesloten';
   @override
+  String get linksToNoteFurther => 'Verderop genoemd';
+  @override
+  String linksUpdating(int done, int total) =>
+      'Links bijwerken: $done van $total';
+  @override
   String get openLinkFailed => 'Kon de link niet openen';
 
   // Dead-link note creation (issue #78).

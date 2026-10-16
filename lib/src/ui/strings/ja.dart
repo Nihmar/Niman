@@ -908,6 +908,10 @@ final class JapaneseStrings extends Strings {
   @override
   String get linksToNoteEmbed => '埋め込み';
   @override
+  String get linksToNoteFurther => '下の方で言及';
+  @override
+  String linksUpdating(int done, int total) => 'リンクを更新中: $done / $total';
+  @override
   String get openLinkFailed => 'リンクを開けませんでした';
 
   // Dead-link note creation (issue #78).

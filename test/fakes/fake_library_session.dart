@@ -1435,6 +1435,7 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     String newName, {
     LinkUpdateConfirm? confirmLinks,
     void Function()? onLinksRewritten,
+    LinkRewriteProgress? onLinksProgress,
     FlushOpenNotes? flushOpen,
   }) async {
     final row = _requireRow(path);
@@ -1476,6 +1477,7 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     String targetParent, {
     LinkUpdateConfirm? confirmLinks,
     void Function()? onLinksRewritten,
+    LinkRewriteProgress? onLinksProgress,
     FlushOpenNotes? flushOpen,
   }) async {
     moveCalls.add(path);

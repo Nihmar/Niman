@@ -954,6 +954,11 @@ final class NorwegianStrings extends Strings {
   @override
   String get linksToNoteEmbed => 'innebygd';
   @override
+  String get linksToNoteFurther => 'Nevnt lenger ned';
+  @override
+  String linksUpdating(int done, int total) =>
+      'Oppdaterer lenker: $done av $total';
+  @override
   String get openLinkFailed => 'Kunne ikke åpne lenken';
 
   // Dead-link note creation (issue #78).

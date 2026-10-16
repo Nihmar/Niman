@@ -951,6 +951,11 @@ final class TurkishStrings extends Strings {
   @override
   String get linksToNoteEmbed => 'gömülü';
   @override
+  String get linksToNoteFurther => 'Daha aşağıda anılıyor';
+  @override
+  String linksUpdating(int done, int total) =>
+      'Bağlantılar güncelleniyor: $done / $total';
+  @override
   String get openLinkFailed => 'Bağlantı açılamadı';
 
   // Dead-link note creation (issue #78).
