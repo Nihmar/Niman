@@ -97,6 +97,9 @@ final class EditRun {
       (unit >= 0x2000 && unit <= 0x200A) ||
       unit == 0x3000;
 
+  /// Whether nothing can join this run: it is a step already.
+  bool get isComplete => _kind == _Kind.solo;
+
   /// How many code units the step holds.
   int get units => _kind == _Kind.solo
       ? _solo!.removed.length + _solo.inserted.length

@@ -1267,15 +1267,16 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       _applySelection(next, rebuild: true, reveal: true);
 
   /// Undoes the last edit, and says whether there was one.
-  bool undo() => _applyHistory(_history.undo(widget.buffer), forwards: false);
+  bool undo() => _applyHistory(_history.undo(widget.buffer));
 
   /// Redoes the last undone edit, and says whether there was one.
-  bool redo() => _applyHistory(_history.redo(widget.buffer), forwards: true);
+  bool redo() => _applyHistory(_history.redo(widget.buffer));
 
   /// Rebuilds what an undo or a redo changed, the same way a platform edit
-  /// does.
-  bool _applyHistory(EditRecord? record, {required bool forwards}) {
-    if (record == null) return false;
+  /// does; [caret] is where the history put the caret, null when it had
+  /// nothing to do.
+  bool _applyHistory(int? caret) {
+    if (caret == null) return false;
     // An undo is an edit like any other: the buffer says which lines it
     // touched, and the tokenizer and the map follow those lines.
     final edit = _history.lastEdit;
@@ -1289,7 +1290,6 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     // has, or a rebuild when there is none (a restyle after a reload).
     // Undo puts the caret after what it restored (where it was before a
     // deletion, at the start of typing it took back); redo after what it did.
-    final caret = forwards ? record.end : record.start + record.removed.length;
     setState(() {
       _ownSelection = _selection
           .collapsedTo(caret)

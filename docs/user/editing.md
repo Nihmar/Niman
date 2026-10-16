@@ -329,8 +329,12 @@ A step ends when you:
 
 A bracket or quote that closes itself belongs to the step of what you type
 inside it: `(like this)` is undone whole, and typing the closing `)` over the
-one the editor wrote does not end the step. The last 200 steps are kept for
-each open note.
+one the editor wrote does not end the step.
+
+Each open note keeps its last 200 steps, as long as the text they hold fits
+in about 32 MB; past that the oldest go first, and the latest step always
+stays. A change over a long stretch of the note — Replace All, Tidy — keeps
+only the lines it changed, so a big note does not weigh down its own undo.
 
 ## Markdown support
 

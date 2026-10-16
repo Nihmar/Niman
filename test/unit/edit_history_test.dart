@@ -274,6 +274,115 @@ void main() {
     expect(history.canRedo, isFalse);
   });
 
+  group('the history is bounded by text as well as steps (#1050)', () {
+    /// Replaces the whole [buffer] with [text] and records it.
+    void replaceAll(EditHistory history, SourceBuffer buffer, String text) {
+      final before = buffer.text;
+      buffer.replaceRange(0, buffer.length, text);
+      history.record(EditRecord(start: 0, removed: before, inserted: text));
+    }
+
+    test('the default budget is 16 M code units, 32 MB of UTF-16', () {
+      expect(EditHistory().budget, 16 * 1024 * 1024);
+    });
+
+    test('the oldest steps go first when the text outgrows the budget', () {
+      // Ten replacements of 5 000 characters by 5 000 others against a budget
+      // of 16 000: the scale of "ten 5 MB pastes against 16 MB", small enough
+      // to run anywhere. A step holds 10 000, so one fits and two do not.
+      final buffer = SourceBuffer.fromText('s' * 5000);
+      final history = EditHistory(budget: 16000);
+      for (var i = 0; i < 10; i++) {
+        replaceAll(history, buffer, '${i}x' * 2500);
+      }
+      expect(history.length, 1, reason: 'the others were evicted');
+      expect(history.units, lessThanOrEqualTo(16000));
+      history.undo(buffer);
+      expect(buffer.text, '8x' * 2500, reason: 'the newest is undoable');
+    });
+
+    test('several small steps fit and the count cap still applies', () {
+      final buffer = SourceBuffer.fromText('');
+      final history = EditHistory(limit: 4, budget: 1000);
+      for (var i = 0; i < 10; i++) {
+        _typed(history, buffer, buffer.length, 'line $i\n');
+      }
+      expect(history.length, 4);
+      expect(history.units, lessThan(1000));
+    });
+
+    test('a step bigger than the budget is kept: it is the newest', () {
+      final buffer = SourceBuffer.fromText('a' * 100);
+      final history = EditHistory(budget: 10);
+      replaceAll(history, buffer, 'b' * 100);
+      expect(history.length, 1);
+      history.undo(buffer);
+      expect(buffer.text, 'a' * 100);
+    });
+
+    test('what a step holds is given back when it is undone', () {
+      final buffer = SourceBuffer.fromText('a' * 100);
+      final history = EditHistory();
+      replaceAll(history, buffer, 'b' * 100);
+      expect(history.units, 200);
+      history.undo(buffer);
+      expect(history.units, 0);
+      history.redo(buffer);
+      expect(history.units, 200);
+    });
+
+    test('an edit over a long span keeps only the lines that changed', () {
+      final lines = List<String>.generate(20000, (i) => 'line number $i');
+      final before = '${lines.join('\n')}\n';
+      final changed = List<String>.of(lines)
+        ..[10] = 'ten'
+        ..[10000] = 'ten thousand'
+        ..[19990] = 'nineteen nine ninety';
+      final after = '${changed.join('\n')}\n';
+      // A Replace All from the first match to the last: it spans the note.
+      final buffer = SourceBuffer.fromText('head\n$before');
+      final history = EditHistory();
+      buffer.replaceRange(5, buffer.length, after);
+      history.record(EditRecord(start: 5, removed: before, inserted: after));
+      expect(history.units, lessThan(200), reason: 'three lines, both sides');
+      history.undo(buffer);
+      expect(buffer.text, 'head\n$before');
+      history.redo(buffer);
+      expect(buffer.text, 'head\n$after');
+      expect(buffer.lineCount, 20002);
+    });
+
+    test('a CRLF note is put back exactly through its hunks', () {
+      final lines = List<String>.generate(2000, (i) => 'line number $i');
+      final before = '${lines.join('\r\n')}\r\n';
+      final changed = List<String>.of(lines)
+        ..[3] = 'three'
+        ..[1500] = 'fifteen hundred';
+      final after = '${changed.join('\r\n')}\r\n';
+      final buffer = SourceBuffer.fromText(before);
+      final history = EditHistory();
+      buffer.replaceRange(0, buffer.length, after);
+      history
+        ..record(EditRecord(start: 0, removed: before, inserted: buffer.text))
+        ..undo(buffer);
+      expect(buffer.text, before);
+      history.redo(buffer);
+      expect(buffer.text, after);
+    });
+
+    test('undo and redo say where the caret goes', () {
+      final buffer = SourceBuffer.fromText('ciao mondo\n');
+      final history = EditHistory();
+      buffer.replaceRange(4, 10, '');
+      history.record(
+        const EditRecord(start: 4, removed: ' mondo', inserted: ''),
+      );
+      expect(history.undo(buffer), 10, reason: 'after what came back');
+      expect(history.redo(buffer), 4, reason: 'after what redo did');
+      expect(history.redo(buffer), isNull);
+    });
+  });
+
   group('where a typing step ends (#1053)', () {
     var now = Duration.zero;
     EditHistory make() {
