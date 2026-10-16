@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import 'package:niman/src/db/stem_trigrams.dart' as stem_trigrams;
 import 'package:niman/src/db/tag_counts.dart' as tag_counts;
 import 'package:sqlite3/sqlite3.dart' as sqlite3;
 
@@ -396,9 +397,15 @@ class IndexDatabase extends _$IndexDatabase {
   /// [ensureRecentIndex] builds its index, and for the same reason.
   Future<void> ensureTagCounts() => tag_counts.ensureTagCounts(this);
 
+  /// Builds the trigram index of the names (#1043) on a file from before
+  /// it, filled from the stems on hand; nothing when it has it. Until it
+  /// exists, a contains lookup of a name answers without it.
+  Future<void> ensureStemTrigrams() => stem_trigrams.ensureStemTrigrams(this);
+
   /// The tables an upgrade drops, dependents before the rows they key on.
   static const List<String> _allTables = [
     'notes_fts',
+    stem_trigrams.stemTrigramsTable,
     'note_anchors_fts',
     'note_headings',
     'note_blocks',
@@ -421,6 +428,7 @@ class IndexDatabase extends _$IndexDatabase {
       await m.database.customStatement(_createAnchorsFts);
       await m.database.customStatement(_createRecentIndex);
       await tag_counts.createTagCounts(m.database);
+      await stem_trigrams.createStemTrigrams(m.database);
     },
     // Every row here is derived from the notes on disk, so an upgrade is a
     // wipe and a rescan: the file is emptied and recreated at the new
@@ -437,6 +445,7 @@ class IndexDatabase extends _$IndexDatabase {
       await m.database.customStatement(_createAnchorsFts);
       await m.database.customStatement(_createRecentIndex);
       await tag_counts.createTagCounts(m.database);
+      await stem_trigrams.createStemTrigrams(m.database);
     },
     beforeOpen: (details) async {
       // Belt and braces: an index file that predates the FTS table (or

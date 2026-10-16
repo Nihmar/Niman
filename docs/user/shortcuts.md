@@ -7,7 +7,9 @@ shortcuts lists them and lets you change them:
 
 - `Ctrl/⌘+Shift+P` — the command palette: commands and notes in one
   search
-- `Ctrl/⌘+O` — go to a note by name (the palette, on notes alone)
+- `Ctrl/⌘+O` — go to a note (the palette, on notes alone): by its name,
+  an alias or a word of its title, from two characters; the name you
+  typed in full comes first
 - `Ctrl/⌘+Shift+O` — open a Markdown file outside any library (see
   [organization](organization.md#opening-a-file-outside-any-library))
 - `Ctrl/⌘+N` — new note

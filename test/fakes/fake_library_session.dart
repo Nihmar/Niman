@@ -911,9 +911,9 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   }
 
   @override
-  Future<List<Note>> notesNamed(String query, {int limit = 50}) async {
+  Future<List<String>> notesNamed(String query, {int limit = 50}) async {
     final q = query.trim().toLowerCase();
-    if (q.isEmpty) return const [];
+    if (q.length < 2) return const [];
     final hits =
         [
           for (final row in _rows)
@@ -925,7 +925,7 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
           final byLength = a.name.length - b.name.length;
           return byLength != 0 ? byLength : a.path.compareTo(b.path);
         });
-    return [for (final row in hits.take(limit)) _toNote(row)];
+    return [for (final row in hits.take(limit)) row.path];
   }
 
   /// Newest created first: the fake keeps no modification time, and a

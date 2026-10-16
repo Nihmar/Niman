@@ -6,6 +6,7 @@ library;
 
 import 'package:drift/drift.dart';
 import 'package:niman/src/db/index_database.dart';
+import 'package:niman/src/db/stem_trigrams.dart';
 import 'package:niman/src/links/stem_row.dart';
 
 /// The matching `note_stems` rows of a library.
@@ -33,6 +34,9 @@ final class StemRows {
       "(lower(substr(n.name, -3)) = '.md' "
       "OR lower(substr(n.name, -4)) = '.pdf' "
       "OR lower(substr(n.name, -5)) = '.epub')";
+
+  /// Every file, whatever its kind: what Go to note finds (#1043).
+  static const String anyFile = '1 = 1';
 
   /// Every file but a note: what an `![[` embed names first (#705).
   static const String attachment = "lower(substr(n.name, -3)) <> '.md'";
@@ -74,18 +78,17 @@ final class StemRows {
           .get();
     } else {
       // A prefix match (`q%`) is answered by the stem index, so it is read
-      // first and cut by the cap. A contains match (`%q%`) has no index to
-      // use — SQLite would evaluate the LIKE against every stem and sort the
-      // matches before the LIMIT — so it is read, bounded by what the prefix
-      // left, only when the prefix rows do not fill the cap (#491).
+      // first and cut by the cap. A contains match is answered by the
+      // trigram index of the names, bounded by what the prefix left, and
+      // only when the prefix rows do not fill the cap (#491, #1036): the
+      // `%q%` it replaces had no index to use, and SQLite evaluated the
+      // LIKE against every stem.
       //
       // The prefix is a range on the stem column, so the seek is the index's
       // whatever the LIKE optimizer would make of the pattern, and the rows
       // come out in stem order: the name typed in full, if there is one,
       // sorts first, and the cut keeps the closest names rather than the
       // first folders (#1035). `NoteNames` ranks what is fetched.
-      final escaped = _escapeLike(q);
-      final prefix = '$escaped%';
       var rows = await _db
           .customSelect(
             // CROSS JOIN fixes the order: the stems by their index, each
@@ -104,19 +107,13 @@ final class StemRows {
       if (rows.length < _fetch) {
         rows = [
           ...rows,
-          ...await _db
-              .customSelect(
-                "$select AND s.stem LIKE ? ESCAPE '\\' "
-                r"AND s.stem NOT LIKE ? ESCAPE '\' "
-                'ORDER BY n.path ASC LIMIT ?',
-                variables: [
-                  ...scoped,
-                  Variable<String>('%$escaped%'),
-                  Variable<String>(prefix),
-                  Variable<int>(_fetch - rows.length),
-                ],
-              )
-              .get(),
+          ...await _containing(
+            q,
+            files,
+            scope,
+            scoped,
+            limit: _fetch - rows.length,
+          ),
         ];
       }
       result = rows;
@@ -130,6 +127,49 @@ final class StemRows {
           source: row.read<String>('source'),
         ),
     ];
+  }
+
+  /// The rows whose stem holds [q] but does not start with it, at most
+  /// [limit] (#1043, #1036): the notes the trigram index names for [q], then
+  /// the rows of theirs that really hold it, which trims what the
+  /// tokenizer's folding lets through. Nothing for a [q] shorter than a
+  /// trigram, nor on a file that has no trigram index yet.
+  Future<List<QueryRow>> _containing(
+    String q,
+    String files,
+    String scope,
+    List<Variable<Object>> scoped, {
+    required int limit,
+  }) async {
+    final match = stemTrigramQuery(q);
+    if (match == null) return const [];
+    try {
+      return await _db
+          .customSelect(
+            'SELECT s.stem AS stem, s.source AS source, n.id AS id, '
+            'n.path AS path FROM $stemTrigramsTable AS t '
+            'CROSS JOIN note_stems AS s ON s.note_id = t.rowid '
+            'CROSS JOIN notes AS n ON n.id = s.note_id '
+            'WHERE t.stem MATCH ? AND n.is_dir = 0 AND $files$scope '
+            r"AND s.stem LIKE ? ESCAPE '\' "
+            'AND NOT (s.stem >= ? AND s.stem < ?) LIMIT ?',
+            variables: [
+              Variable<String>(match),
+              ...scoped,
+              Variable<String>('%${_escapeLike(q)}%'),
+              Variable<String>(q),
+              Variable<String>('$q$_afterPrefix'),
+              Variable<int>(limit),
+            ],
+          )
+          .get();
+    } on Object catch (error) {
+      // A file from before the index: it is built behind the tree once
+      // the library is open, and the names it holds start with the query
+      // until then.
+      if ('$error'.contains('no such table')) return const [];
+      rethrow;
+    }
   }
 
   /// Escapes the LIKE wildcards in [s] so a query is matched literally.

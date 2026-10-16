@@ -94,9 +94,8 @@ final class ShellPalette {
       homeActions: _homeActionsOffered,
       onTogglePin: (command) =>
           unawaited(PinnedCommands.toggle(controller, command)),
-      searchNotes: (query) async => ops == null
-          ? const []
-          : [for (final note in await ops.notesNamed(query)) note.path],
+      searchNotes: (query) async =>
+          ops == null ? const [] : await ops.notesNamed(query),
     );
     if (!context.mounted || choice == null) return;
     switch (choice) {
