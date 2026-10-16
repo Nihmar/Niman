@@ -340,6 +340,12 @@ the app: the note stays marked as unsaved, the write is retried, and quitting
 waits for it (or asks, if it still cannot be written) instead of leaving with
 the last edits lost.
 
+**A note changed by another program.** When a sync client, Niman's own sync or
+another program rewrites a note that is open, every open note whose text you
+have not changed — the tabs behind the one on screen too — shows the new file
+at once. A note with edits of yours keeps them (your text wins and is saved
+over the file, as before).
+
 **Line endings and the byte order mark.** The editor works with plain lines,
 but the file keeps what it had: a note with Windows (`CRLF`) line endings is
 saved with them, and a note that began with a UTF-8 byte order mark is saved

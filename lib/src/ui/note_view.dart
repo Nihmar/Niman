@@ -992,7 +992,7 @@ final class _NoteViewState extends State<NoteView>
     _stats.addListener(_onStatsChanged);
     _saves.failure.addListener(_onSaveFailureChanged);
     _diskChanges = _unsaved?.diskChanges.listen((paths) {
-      if (paths.isEmpty || paths.contains(widget.path)) {
+      if (paths.isEmpty || paths.any((it) => p.equals(it, widget.path))) {
         unawaited(_reloadIfChanged());
       }
     });

@@ -360,6 +360,13 @@ abstract interface class LibrarySession {
   /// paired, not pruned). What holds a path open — a tab — closes it here.
   Stream<Set<String>> get removals;
 
+  /// Fires with the absolute paths the file watcher reported changed (#1055):
+  /// another program, a sync client or Niman's own sync rewrote them — and,
+  /// as the watcher cannot tell, the app's own saves too. What holds a note
+  /// open compares the file with what it last read or wrote before it
+  /// believes a change.
+  Stream<Set<String>> get externalChanges;
+
   /// Which of [paths] the index does not hold — a note pruned before this
   /// session read the tree, so no [removals] event carries it. What a tab
   /// holds open on one closes when the workspace loads (#289).

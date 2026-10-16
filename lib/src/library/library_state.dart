@@ -188,6 +188,10 @@ final class LibraryController implements LibrarySession {
   /// the shell holds open on them closes.
   final StreamController<Set<String>> _removals =
       StreamController<Set<String>>.broadcast();
+
+  /// The paths the watcher reported ([externalChanges]).
+  final StreamController<Set<String>> _externalChanges =
+      StreamController<Set<String>>.broadcast();
   final AppLogger _log = const AppLogger(name: 'session');
   int _revision = 0;
   int _treeRevision = 0;
@@ -273,6 +277,9 @@ final class LibraryController implements LibrarySession {
   /// Fires with the library-relative paths a re-index pruned from the tree.
   @override
   Stream<Set<String>> get removals => _removals.stream;
+
+  @override
+  Stream<Set<String>> get externalChanges => _externalChanges.stream;
 
   /// The app's settings database, opened once per session.
   ///
@@ -1655,6 +1662,9 @@ final class LibraryController implements LibrarySession {
     if (!_removals.isClosed) {
       await _removals.close();
     }
+    if (!_externalChanges.isClosed) {
+      await _externalChanges.close();
+    }
     final appDb = _appDatabase;
     _appDatabase = null;
     if (appDb != null) {
@@ -1764,6 +1774,10 @@ final class LibraryController implements LibrarySession {
       // What changed behind the ops' back (another app, a background
       // isolate, a hand edit) reaches the sync queue this way.
       _sync?.watched(batch.paths, batch.resyncDirs);
+      // And the editors that hold those notes open (#1055).
+      if (batch.paths.isNotEmpty && !_externalChanges.isClosed) {
+        _externalChanges.add(batch.paths.toSet());
+      }
     } on Object catch (error) {
       // Transient watcher errors are covered by the periodic rescan.
       _log.warning('watch batch failed: $error');

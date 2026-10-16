@@ -133,6 +133,12 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   @override
   Stream<Set<String>> get removals => _removals.stream;
 
+  final StreamController<Set<String>> externalChangesController =
+      StreamController<Set<String>>.broadcast();
+
+  @override
+  Stream<Set<String>> get externalChanges => externalChangesController.stream;
+
   @override
   NoteOperations? get ops => _phase == LibraryPhase.ready ? this : null;
 
@@ -825,6 +831,9 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     }
     if (!_removals.isClosed) {
       await _removals.close();
+    }
+    if (!externalChangesController.isClosed) {
+      await externalChangesController.close();
     }
   }
 
