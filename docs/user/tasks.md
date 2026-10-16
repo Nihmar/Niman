@@ -17,6 +17,12 @@ the section or open it again. A section with nothing in it is not shown.
 Which sections are folded is remembered on each device, for each
 library.
 
+There is no standing total of open or done tasks, on purpose: the
+numbers are in the section headers, and while a filter is on the strip
+says how many open tasks are shown out of how many. The plain list
+sorted by creation date has no header, so it shows no count until a
+filter is on.
+
 **Done** is the last section: the tasks of `done.txt`, newest first,
 folded until you open it. A done task is checked and shows the day it was
 finished; unchecking it puts it back among the open ones.
