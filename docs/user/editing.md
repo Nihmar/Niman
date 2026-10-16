@@ -113,7 +113,9 @@ motion keeps the ellipsis instead.
   the **▾** list, which shows every tab with its folder when the row is
   too full. With Home or Todo pinned over the notes, `Ctrl+Tab` goes on
   to the first note tab (`Ctrl+Shift+Tab` to the last), and `Ctrl+W`
-  closes the pinned page, not a note under it.
+  closes the pinned page, not a note under it. A row too full to fit
+  scrolls: with the mouse wheel over it, or by swiping along it with a
+  finger; a thin bar under it shows where you are.
 - **Back and forward** go through the notes you looked at, in the order
   you looked at them, as a browser goes through pages: the mouse's side
   buttons, or `Alt+←` / `Alt+→` (remappable, and in the palette). One
@@ -121,7 +123,8 @@ motion keeps the ellipsis instead.
   closed since opens again in the place of the tab you are on, at the line
   where you left it, and adds no tab; one deleted since is skipped.
 - **Dragging a tab** along its row reorders it; a line shows where it
-  will land. Dropped on the other pane's row or body it moves there,
+  will land. A finger holds the tab a moment first, so a swipe along the
+  row scrolls it instead. Dropped on the other pane's row or body it moves there,
   keeping everything, undo included. With the window not split, dropping
   it on a pane's right or bottom quarter splits the window with that tab
   — the shaded half shows what you are about to get.
