@@ -3,7 +3,8 @@
 // superseded queries are dropped by invocation id; MATCH vs contains.
 import 'dart:io';
 
-import 'package:drift/drift.dart' show Variable;
+import 'package:drift/drift.dart'
+    show ApplyInterceptor, QueryExecutor, QueryInterceptor, Variable;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/db/index_database.dart';
@@ -136,6 +137,60 @@ void main() {
     expect(current, isNotEmpty);
   });
 
+  // #1039: the connection takes one statement at a time, so a query sent
+  // while another runs only waits. One superseded while it waits must not
+  // reach SQLite when its turn comes.
+  test('five queries in a row run only the last', () async {
+    final log = _MatchLog();
+    final counted = IndexDatabase(NativeDatabase.memory().interceptWith(log));
+    addTearDown(counted.close);
+    final repo = SearchRepo(counted, root: root.path);
+    await counted.customStatement(
+      'INSERT INTO notes (path, parent, name, is_dir, size, modified, created) '
+      "VALUES ('a.md', 0, 'a.md', 0, 1, 0, 0)",
+    );
+    await counted.customStatement(
+      'INSERT INTO notes_fts (rowid, title, body) '
+      "VALUES (1, 'a', 'configuration')",
+    );
+    log.matches.clear();
+
+    final answers = <Future<List<SearchHit>>>[];
+    for (final text in ['co', 'con', 'conf', 'confi', 'configuration']) {
+      answers.add(repo.search(buildFtsQuery(text), id: repo.begin()));
+    }
+    final hits = await Future.wait(answers);
+
+    expect(hits.take(4).expand((h) => h), isEmpty, reason: 'superseded');
+    expect(hits.last.single.path, 'a.md');
+    expect(log.matches, ['"configuration"*'], reason: 'only the last ran');
+  });
+
+  test('the word index keeps the short prefixes', () async {
+    final row = await db
+        .customSelect("SELECT sql FROM sqlite_master WHERE name = 'notes_fts'")
+        .getSingle();
+    expect(row.read<String>('sql'), contains("prefix = '2 3 4'"));
+    // And a two-letter prefix finds the word.
+    final id = search.begin();
+    expect(await search.search(buildFtsQuery('ze'), id: id), hasLength(2));
+  });
+
+  test('a broad query is ranked over a bounded set of matches', () async {
+    final bounded = SearchRepo(db, root: root.path, rankedMatches: 2);
+    // `zebra` is in two notes, the cap is two: both are ranked, as ever.
+    var id = bounded.begin();
+    expect(await bounded.search(buildFtsQuery('zebra'), id: id), hasLength(2));
+    // `the` is in four: the cap leaves the rest unranked.
+    await indexNote('the-third.md', 'The third', 'the third note');
+    id = bounded.begin();
+    final broad = await bounded.search(buildFtsQuery('the'), id: id);
+    expect(broad, hasLength(2));
+    // The unbounded repo keeps all of them.
+    id = search.begin();
+    expect(await search.search(buildFtsQuery('the'), id: id), hasLength(4));
+  });
+
   test('a query token that never appears returns nothing', () async {
     final id = search.begin();
     final hits = await search.search(buildFtsQuery('missingword'), id: id);
@@ -232,4 +287,22 @@ void main() {
       expect(await search.searchContains('zebra', id: late), isNotEmpty);
     });
   });
+}
+
+/// The FTS MATCH expressions the database was asked for, in order.
+final class _MatchLog extends QueryInterceptor {
+  final matches = <String>[];
+
+  @override
+  Future<List<Map<String, Object?>>> runSelect(
+    QueryExecutor executor,
+    String statement,
+    List<Object?> args,
+  ) {
+    if (statement.contains('notes_fts MATCH')) {
+      final first = args.first;
+      if (first is String && !matches.contains(first)) matches.add(first);
+    }
+    return executor.runSelect(statement, args);
+  }
 }

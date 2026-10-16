@@ -345,8 +345,11 @@ class IndexDatabase extends _$IndexDatabase {
   /// v11: `dangling_links` keeps the targets no note answered, keyed by the
   /// stem that would, so a note made later finds the links waiting for it
   /// (#974) — an index written before holds none, and is wiped and rescanned.
+  /// v12: the full-text table keeps a prefix index for two, three and four
+  /// letters (#1039), so the first keystrokes of a word are a lookup, not an
+  /// expansion of the vocabulary — the same wipe and rescan.
   @override
-  int get schemaVersion => 11;
+  int get schemaVersion => 12;
 
   /// The FTS5 index (design.md: no drift class — raw SQL, `rowid` =
   /// `notes.id`, one row per note, `title` weighted above `body` by the
@@ -359,10 +362,16 @@ class IndexDatabase extends _$IndexDatabase {
   /// excerpt and the contains scan read the note instead
   /// (`search/search_excerpt.dart`). `contentless_delete=1` lets a note's row
   /// be deleted by its rowid alone, which a rewrite of the note does.
+  ///
+  /// `prefix='2 3 4'` keeps the documents of every two-, three- and
+  /// four-letter prefix in the index itself (#1039): `co*` is read off one
+  /// list instead of merged from the lists of every term that starts with
+  /// it, which is what the first keystrokes of a word cost on a library
+  /// with a large vocabulary. The file grows by those lists.
   static const String _createFts =
       'CREATE VIRTUAL TABLE IF NOT EXISTS notes_fts USING '
       "fts5(title, body, content = '', contentless_delete = 1, "
-      "tokenize = 'unicode61 remove_diacritics 2')";
+      "tokenize = 'unicode61 remove_diacritics 2', prefix = '2 3 4')";
 
   /// The word index of every note's headings and block ids (#844, #845):
   /// raw SQL like [_createFts], one row per note (`rowid` = `notes.id`) whose

@@ -11,6 +11,7 @@
 /// (`search_excerpt.dart`).
 library;
 
+import 'dart:async';
 import 'dart:isolate';
 
 import 'package:drift/drift.dart' show QueryRow, Variable;
@@ -93,7 +94,7 @@ abstract interface class SearchSource {
 final class SearchRepo implements SearchSource {
   /// Creates the repo over [IndexDatabase], for the library at [root] — the
   /// notes the excerpts and the contains scan are read from.
-  new(this._db, {required this.root});
+  new(this._db, {required this.root, this.rankedMatches = 20000});
 
   final IndexDatabase _db;
 
@@ -104,10 +105,40 @@ final class SearchRepo implements SearchSource {
   /// whether its query is still the current one.
   static const int _scanBatch = 200;
 
+  /// How many matches a word search ranks at most (#1039). A broad query
+  /// (`co*` over a large library) has hundreds of thousands, and bm25 is
+  /// computed for each before the limit applies: the query is ranked over
+  /// the first [rankedMatches] of them, in the index's own order, which
+  /// leaves every query that selective enough to matter exactly as it was.
+  final int rankedMatches;
+
   int _invocation = 0;
+
+  /// The end of the line of queries waiting for the connection (see
+  /// [_turn]).
+  Future<void> _line = Future<void>.value();
 
   @override
   int begin() => ++_invocation;
+
+  /// Runs [run] in its turn: after every query before it has finished, and
+  /// only if [id] is still the one wanted by then (#1039). The connection
+  /// takes one statement at a time, so a statement sent while another runs
+  /// only waits — and ran to the end even when the typist had moved on
+  /// long before it started. A query that was superseded in the line never
+  /// reaches SQLite; [skipped] is what it answers.
+  Future<T> _turn<T>(int? id, T skipped, Future<T> Function() run) async {
+    final before = _line;
+    final done = Completer<void>();
+    _line = done.future;
+    try {
+      await before;
+      if (id != null && !isCurrent(id)) return skipped;
+      return await run();
+    } finally {
+      done.complete();
+    }
+  }
 
   @override
   bool isCurrent(int id) => id == _invocation;
@@ -121,20 +152,19 @@ final class SearchRepo implements SearchSource {
     if (query == null || query.trim().isEmpty) return const [];
     const log = AppLogger(name: 'search');
     final clock = Stopwatch()..start();
-    List<QueryRow> rows;
+    List<QueryRow>? rows;
     try {
-      rows = await _db
-          .customSelect(
-            'SELECT notes.id, notes.path, notes.name, notes.title '
-            'FROM notes_fts JOIN notes ON notes.id = notes_fts.rowid '
-            'WHERE notes_fts MATCH ?1 '
-            'ORDER BY bm25(notes_fts, 10.0, 1.0) '
-            'LIMIT ?2',
-            variables: [Variable<String>(query), Variable<int>(limit)],
-          )
-          .get();
+      rows = await _turn<List<QueryRow>?>(
+        id,
+        null,
+        () => _ranked(query, limit),
+      );
     } on Object catch (e) {
       log.warning('word search failed for "$query": $e');
+      return const [];
+    }
+    if (rows == null) {
+      log.debug('word "$query" (id $id): superseded in line — never run');
       return const [];
     }
     if (id != null && !isCurrent(id)) {
@@ -148,6 +178,41 @@ final class SearchRepo implements SearchSource {
       'in ${clock.elapsedMilliseconds} ms',
     );
     return [for (final row in rows) _hitOf(row, snippet: '')];
+  }
+
+  /// The best [limit] matches of the FTS [query] by bm25 (title ten times
+  /// the body), ranked over at most [rankedMatches] of them.
+  Future<List<QueryRow>> _ranked(String query, int limit) async {
+    // The matches come off the index in rowid order and the first query
+    // stops after the cap, so it is cheap however broad the query is. Short
+    // of the cap, nothing is left out; at it, the ranking sees the matches
+    // up to the cap-th one.
+    final edge = await _db
+        .customSelect(
+          'SELECT rowid FROM notes_fts WHERE notes_fts MATCH ?1 '
+          'ORDER BY rowid LIMIT 1 OFFSET ?2',
+          variables: [
+            Variable<String>(query),
+            Variable<int>(rankedMatches - 1),
+          ],
+        )
+        .get();
+    final bound = edge.isEmpty ? null : edge.single.read<int>('rowid');
+    return await _db
+        .customSelect(
+          'SELECT notes.id, notes.path, notes.name, notes.title '
+          'FROM notes_fts JOIN notes ON notes.id = notes_fts.rowid '
+          'WHERE notes_fts MATCH ?1 '
+          '${bound == null ? '' : 'AND notes_fts.rowid <= ?3 '}'
+          'ORDER BY bm25(notes_fts, 10.0, 1.0) '
+          'LIMIT ?2',
+          variables: [
+            Variable<String>(query),
+            Variable<int>(limit),
+            if (bound != null) Variable<int>(bound),
+          ],
+        )
+        .get();
   }
 
   @override
