@@ -53,7 +53,7 @@ void main() {
     expect(ms, lessThan(_bar(20)));
   });
 
-  test('a page of a 200k-note root costs the page, not the folder (#1064)', () async {
+  test('a page of a big root costs the page, not the folder (#1064)', () async {
     final dao = NoteDao(db);
     await dao.childrenPage(0, limit: 2001); // opens the connection
     final clock = Stopwatch()..start();
