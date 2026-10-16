@@ -1305,6 +1305,12 @@ final class IcelandicStrings extends Strings {
   @override
   String get newNoteHere => 'Nýtt minnisblað hér';
   @override
+  String get newAudioNoteHere => 'Nýtt raddminnisblað hér';
+  @override
+  String get newSlidesHere => 'Ný kynning hér';
+  @override
+  String get newFlashcardsHere => 'Ný minniskort hér';
+  @override
   String get newFolderHere => 'Ný mappa hér';
   @override
   String get newListNoteTitle => 'Nýtt listaminnisblað';

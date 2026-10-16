@@ -92,7 +92,8 @@ Future<String?> showRowMenuAt(
 }
 
 /// The right-click menu on the tree's empty space: what can be made at the
-/// library's root. Resolves to `note`, `template` or `folder`, or null.
+/// library's root. Resolves to `note`, `template`, `audio`, `slides`,
+/// `flashcards` or `folder`, or null.
 ///
 /// With [here] given — the folder the grid shows (#727) — "here" means
 /// that folder, and the caller creates inside it: the export entry is the
@@ -119,6 +120,27 @@ Future<String?> showTreeBackgroundMenuAt(
         icon: Icons.file_copy_outlined,
         label: AppStrings.newFromTemplateHere,
         value: 'template',
+        destructive: false,
+      ),
+      (
+        key: const Key('tree-menu-new-audio-note'),
+        icon: Icons.mic_outlined,
+        label: AppStrings.newAudioNoteHere,
+        value: 'audio',
+        destructive: false,
+      ),
+      (
+        key: const Key('tree-menu-new-slides'),
+        icon: Icons.slideshow_outlined,
+        label: AppStrings.newSlidesHere,
+        value: 'slides',
+        destructive: false,
+      ),
+      (
+        key: const Key('tree-menu-new-flashcards'),
+        icon: Icons.style_outlined,
+        label: AppStrings.newFlashcardsHere,
+        value: 'flashcards',
         destructive: false,
       ),
       (
@@ -272,6 +294,33 @@ List<List<RowMenuEntry>> rowMenuGroups(
       value: 'template',
       destructive: false,
     ),
+    // The kinds whose folder is the choice, created here (#997): a voice
+    // note, slides, a deck. A list note is left out — it is bound to the
+    // list folder — and so are the journal and the capture, each bound to
+    // a folder of its own.
+    if (note.isDir) ...[
+      (
+        key: const Key('menu-new-audio-note'),
+        icon: Icons.mic_outlined,
+        label: AppStrings.newAudioNoteHere,
+        value: 'audio',
+        destructive: false,
+      ),
+      (
+        key: const Key('menu-new-slides'),
+        icon: Icons.slideshow_outlined,
+        label: AppStrings.newSlidesHere,
+        value: 'slides',
+        destructive: false,
+      ),
+      (
+        key: const Key('menu-new-flashcards'),
+        icon: Icons.style_outlined,
+        label: AppStrings.newFlashcardsHere,
+        value: 'flashcards',
+        destructive: false,
+      ),
+    ],
     if (note.isDir)
       (
         key: const Key('menu-new-folder'),

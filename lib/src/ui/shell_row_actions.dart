@@ -128,6 +128,12 @@ final class ShellRowActions {
         await creates.createNote(context, parent: here);
       case 'template':
         await templates.createFromTemplate(context, parent: here);
+      case 'audio':
+        await creates.createAudioNote(context, parent: here);
+      case 'slides':
+        await creates.createSlidesNote(context, parent: here);
+      case 'flashcards':
+        await creates.createFlashcards(context, parent: here);
       case 'folder':
         await creates.createFolder(context, parent: here);
       case 'quicknote':

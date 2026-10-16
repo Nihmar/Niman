@@ -1306,6 +1306,12 @@ final class BelarusianStrings extends Strings {
   @override
   String get newNoteHere => 'Новая заўвага тут';
   @override
+  String get newAudioNoteHere => 'Новая галасавая заўвага тут';
+  @override
+  String get newSlidesHere => 'Новая прэзентацыя тут';
+  @override
+  String get newFlashcardsHere => 'Новыя картачкі тут';
+  @override
   String get newFolderHere => 'Новая папка тут';
   @override
   String get newListNoteTitle => 'Новая заўвага са спісам';

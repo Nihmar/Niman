@@ -5472,6 +5472,12 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         await _createFlow.createNote(context, parent: folder);
       case 'template':
         await _templateFlow.createFromTemplate(context, parent: folder);
+      case 'audio':
+        await _createFlow.createAudioNote(context, parent: folder);
+      case 'slides':
+        await _createFlow.createSlidesNote(context, parent: folder);
+      case 'flashcards':
+        await _createFlow.createFlashcards(context, parent: folder);
       case 'folder':
         await _createFlow.createFolder(context, parent: folder);
       case 'exportfolder':
@@ -5673,6 +5679,12 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         await _createFlow.createNote(context, parent: '');
       case 'template':
         await _templateFlow.createFromTemplate(context, parent: '');
+      case 'audio':
+        await _createFlow.createAudioNote(context, parent: '');
+      case 'slides':
+        await _createFlow.createSlidesNote(context, parent: '');
+      case 'flashcards':
+        await _createFlow.createFlashcards(context, parent: '');
       case 'folder':
         await _createFlow.createFolder(context, parent: '');
       case 'exportlibrary':

@@ -94,6 +94,7 @@ void main() {
     await settle(tester);
     await tester.longPress(noteRow('Docs', offstage: true));
     await settle(tester);
+    await tester.ensureVisible(find.byKey(const Key('menu-rename')));
     await tester.tap(find.byKey(const Key('menu-rename')));
     await settle(tester);
     await tester.enterText(dialogField(), 'Books');
@@ -473,6 +474,7 @@ void main() {
     await settle(tester);
     await tester.longPress(noteRow('Outer', offstage: true));
     await settle(tester);
+    await tester.ensureVisible(find.byKey(const Key('menu-new-folder')));
     await tester.tap(find.byKey(const Key('menu-new-folder')));
     await settle(tester);
     await tester.enterText(dialogField(), 'Inner');
@@ -485,6 +487,7 @@ void main() {
     await settle(tester);
     await tester.longPress(noteRow('Outer', offstage: true));
     await settle(tester);
+    await tester.ensureVisible(find.byKey(const Key('menu-move')));
     await tester.tap(find.byKey(const Key('menu-move')));
     await tester.pump();
     // Scoped to the dialog: the tree behind it still names the folder.

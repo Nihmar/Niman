@@ -1321,6 +1321,12 @@ final class PolishStrings extends Strings {
   @override
   String get newNoteHere => 'Nowa notatka tutaj';
   @override
+  String get newAudioNoteHere => 'Nowa notatka głosowa tutaj';
+  @override
+  String get newSlidesHere => 'Nowa prezentacja tutaj';
+  @override
+  String get newFlashcardsHere => 'Nowe fiszki tutaj';
+  @override
   String get newFolderHere => 'Nowy katalog tutaj';
   @override
   String get newListNoteTitle => 'Nowa notatka-lista';

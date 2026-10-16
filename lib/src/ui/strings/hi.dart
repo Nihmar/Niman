@@ -1286,6 +1286,12 @@ final class HindiStrings extends Strings {
   @override
   String get newNoteHere => 'यहाँ नया नोट';
   @override
+  String get newAudioNoteHere => 'यहाँ नया वॉइस नोट';
+  @override
+  String get newSlidesHere => 'यहाँ नई प्रस्तुति';
+  @override
+  String get newFlashcardsHere => 'यहाँ नए फ़्लैशकार्ड';
+  @override
   String get newFolderHere => 'यहाँ नया फ़ोल्डर';
   @override
   String get newListNoteTitle => 'नया सूची-नोट';

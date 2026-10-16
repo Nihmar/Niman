@@ -117,9 +117,11 @@ final class ShellCreateFlow {
     });
   }
 
-  /// A voice note: a note with `type: audio` frontmatter where the
-  /// library's rule puts new notes, ready to record into.
-  Future<void> createAudioNote(BuildContext context) async {
+  /// A voice note: a note with `type: audio` frontmatter in [parent]
+  /// (default: where the library's rule puts new notes), ready to record
+  /// into.
+  Future<void> createAudioNote(BuildContext context, {String? parent}) async {
+    final folder = parent ?? newItemRule.folder;
     final name = await showNameDialog(
       context,
       title: AppStrings.newAudioNoteTitle,
@@ -128,7 +130,7 @@ final class ShellCreateFlow {
     if (name == null) return;
     await guard(() async {
       final row = await controller.ops!.createNote(
-        parentPath: newItemRule.folder,
+        parentPath: folder,
         name: name,
         content: audioNoteContent(),
       );
@@ -136,10 +138,12 @@ final class ShellCreateFlow {
     });
   }
 
-  /// A slides note (#534): a note with `type: slides` frontmatter where
-  /// the library's rule puts new notes (#850; it used to be the root,
-  /// whatever was selected, #703), two slides in it to start from.
-  Future<void> createSlidesNote(BuildContext context) async {
+  /// A slides note (#534): a note with `type: slides` frontmatter in
+  /// [parent] (default: where the library's rule puts new notes, #850; it
+  /// used to be the root, whatever was selected, #703), two slides in it
+  /// to start from.
+  Future<void> createSlidesNote(BuildContext context, {String? parent}) async {
+    final folder = parent ?? newItemRule.folder;
     final name = await showNameDialog(
       context,
       title: AppStrings.newSlidesTitle,
@@ -148,7 +152,7 @@ final class ShellCreateFlow {
     if (name == null) return;
     await guard(() async {
       final row = await controller.ops!.createNote(
-        parentPath: newItemRule.folder,
+        parentPath: folder,
         name: name,
         content: slidesNoteContent(name),
       );
@@ -156,10 +160,11 @@ final class ShellCreateFlow {
     });
   }
 
-  /// A flashcard deck (#533): a note with `type: flashcard` frontmatter
-  /// where the library's rule puts new notes, with the head of the table its
-  /// cards go in.
-  Future<void> createFlashcards(BuildContext context) async {
+  /// A flashcard deck (#533): a note with `type: flashcard` frontmatter in
+  /// [parent] (default: where the library's rule puts new notes), with the
+  /// head of the table its cards go in.
+  Future<void> createFlashcards(BuildContext context, {String? parent}) async {
+    final folder = parent ?? newItemRule.folder;
     final name = await showNameDialog(
       context,
       title: AppStrings.newFlashcardsTitle,
@@ -169,7 +174,7 @@ final class ShellCreateFlow {
     var made = false;
     await guard(() async {
       final row = await controller.ops!.createNote(
-        parentPath: newItemRule.folder,
+        parentPath: folder,
         name: name,
         content: flashcardNoteContent(),
       );

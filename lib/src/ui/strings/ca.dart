@@ -1326,6 +1326,12 @@ final class CatalanStrings extends Strings {
   @override
   String get newNoteHere => 'Nota nova aquí';
   @override
+  String get newAudioNoteHere => 'Nota de veu nova aquí';
+  @override
+  String get newSlidesHere => 'Nova presentació aquí';
+  @override
+  String get newFlashcardsHere => 'Targetes noves aquí';
+  @override
   String get newFolderHere => 'Carpeta nova aquí';
   @override
   String get newListNoteTitle => 'Nota de llista nova';

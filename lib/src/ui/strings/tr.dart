@@ -1298,6 +1298,12 @@ final class TurkishStrings extends Strings {
   @override
   String get newNoteHere => 'Buraya yeni not';
   @override
+  String get newAudioNoteHere => 'Buraya yeni sesli not';
+  @override
+  String get newSlidesHere => 'Buraya yeni sunum';
+  @override
+  String get newFlashcardsHere => 'Buraya yeni bilgi kartları';
+  @override
   String get newFolderHere => 'Buraya yeni klasör';
   @override
   String get newListNoteTitle => 'Yeni liste notu';

@@ -1295,6 +1295,12 @@ final class EnglishStrings extends Strings {
   @override
   String get newNoteHere => 'New note here';
   @override
+  String get newAudioNoteHere => 'New voice note here';
+  @override
+  String get newSlidesHere => 'New slides here';
+  @override
+  String get newFlashcardsHere => 'New flashcards here';
+  @override
   String get newFolderHere => 'New folder here';
   @override
   String get newListNoteTitle => 'New list note';

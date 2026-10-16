@@ -1301,6 +1301,12 @@ final class DanishStrings extends Strings {
   @override
   String get newNoteHere => 'Ny note her';
   @override
+  String get newAudioNoteHere => 'Ny stemmenote her';
+  @override
+  String get newSlidesHere => 'Ny præsentation her';
+  @override
+  String get newFlashcardsHere => 'Nye flashcards her';
+  @override
   String get newFolderHere => 'Ny mappe her';
   @override
   String get newListNoteTitle => 'Ny listenote';

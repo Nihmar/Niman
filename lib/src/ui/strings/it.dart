@@ -1319,6 +1319,12 @@ final class ItalianStrings extends Strings {
   @override
   String get newNoteHere => 'Nuova nota qui';
   @override
+  String get newAudioNoteHere => 'Nuova nota vocale qui';
+  @override
+  String get newSlidesHere => 'Nuova presentazione qui';
+  @override
+  String get newFlashcardsHere => 'Nuove flashcard qui';
+  @override
   String get newFolderHere => 'Nuova cartella qui';
   @override
   String get newListNoteTitle => 'Nuova lista';

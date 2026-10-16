@@ -1312,6 +1312,12 @@ final class AlbanianStrings extends Strings {
   @override
   String get newNoteHere => 'Shënim i ri këtu';
   @override
+  String get newAudioNoteHere => 'Shënim zanor i ri këtu';
+  @override
+  String get newSlidesHere => 'Prezantim i ri këtu';
+  @override
+  String get newFlashcardsHere => 'Kartela të reja këtu';
+  @override
   String get newFolderHere => 'Tresë e re këtu';
   @override
   String get newListNoteTitle => 'Shënim-listë i ri';

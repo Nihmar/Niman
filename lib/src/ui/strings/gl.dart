@@ -1314,6 +1314,12 @@ final class GalicianStrings extends Strings {
   @override
   String get newNoteHere => 'Nota nova aquí';
   @override
+  String get newAudioNoteHere => 'Nota de voz nova aquí';
+  @override
+  String get newSlidesHere => 'Nova presentación aquí';
+  @override
+  String get newFlashcardsHere => 'Tarxetas novas aquí';
+  @override
   String get newFolderHere => 'Cartafol novo aquí';
   @override
   String get newListNoteTitle => 'Nota de lista nova';

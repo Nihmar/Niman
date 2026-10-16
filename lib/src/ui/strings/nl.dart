@@ -1309,6 +1309,12 @@ final class DutchStrings extends Strings {
   @override
   String get newNoteHere => 'Nieuwe notitie hier';
   @override
+  String get newAudioNoteHere => 'Nieuwe spraaknotitie hier';
+  @override
+  String get newSlidesHere => 'Nieuwe presentatie hier';
+  @override
+  String get newFlashcardsHere => 'Nieuwe flashcards hier';
+  @override
   String get newFolderHere => 'Nieuwe map hier';
   @override
   String get newListNoteTitle => 'Nieuwe lijstnotitie';

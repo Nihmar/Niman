@@ -1308,6 +1308,12 @@ final class UkrainianStrings extends Strings {
   @override
   String get newNoteHere => 'Нова нотатка тут';
   @override
+  String get newAudioNoteHere => 'Нова голосова нотатка тут';
+  @override
+  String get newSlidesHere => 'Нова презентація тут';
+  @override
+  String get newFlashcardsHere => 'Нові картки тут';
+  @override
   String get newFolderHere => 'Нова папка тут';
   @override
   String get newListNoteTitle => 'Нова нотатка зі списком';

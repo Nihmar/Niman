@@ -1219,6 +1219,12 @@ final class ChineseStrings extends Strings {
   @override
   String get newNoteHere => '在此新建笔记';
   @override
+  String get newAudioNoteHere => '在此新建语音笔记';
+  @override
+  String get newSlidesHere => '在此新建幻灯片';
+  @override
+  String get newFlashcardsHere => '在此新建闪卡';
+  @override
   String get newFolderHere => '在此新建文件夹';
   @override
   String get newListNoteTitle => '新建列表笔记';

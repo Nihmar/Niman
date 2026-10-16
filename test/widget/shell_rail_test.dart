@@ -512,6 +512,9 @@ void main() {
       await settle(tester);
       expect(find.byKey(const Key('tree-menu-new-note')), findsOne);
       expect(find.byKey(const Key('tree-menu-new-folder')), findsOne);
+      expect(find.byKey(const Key('tree-menu-new-audio-note')), findsOne);
+      expect(find.byKey(const Key('tree-menu-new-slides')), findsOne);
+      expect(find.byKey(const Key('tree-menu-new-flashcards')), findsOne);
       expect(find.byKey(const Key('menu-new-note')), findsNothing);
 
       await tester.tap(find.byKey(const Key('tree-menu-new-folder')));
@@ -532,6 +535,31 @@ void main() {
       );
       await settle(tester);
       expect(noteRow('Radice'), findsOne, reason: 'at the root, beside Docs');
+
+      // A kind from the background menu lands at the root too (#997).
+      final below = tester.getRect(noteTree());
+      await tester.tapAt(
+        Offset(below.center.dx, below.top + below.height * 0.7),
+        buttons: kSecondaryMouseButton,
+      );
+      await settle(tester);
+      await tester.tap(find.byKey(const Key('tree-menu-new-slides')));
+      await settle(tester);
+      await tester.enterText(
+        find.descendant(
+          of: find.byType(AlertDialog),
+          matching: find.byType(TextField),
+        ),
+        'Talk',
+      );
+      await tester.tap(
+        find.descendant(
+          of: find.byType(AlertDialog),
+          matching: find.byType(FilledButton),
+        ),
+      );
+      await settle(tester);
+      expect(await controller.readNote('Talk.md'), contains('type: slides'));
     },
   );
 

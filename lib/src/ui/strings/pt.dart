@@ -1310,6 +1310,12 @@ final class PortugueseStrings extends Strings {
   @override
   String get newNoteHere => 'Nova nota aqui';
   @override
+  String get newAudioNoteHere => 'Nova nota de voz aqui';
+  @override
+  String get newSlidesHere => 'Nova apresentação aqui';
+  @override
+  String get newFlashcardsHere => 'Novos cartões aqui';
+  @override
   String get newFolderHere => 'Nova pasta aqui';
   @override
   String get newListNoteTitle => 'Nova nota-lista';

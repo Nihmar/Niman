@@ -1311,6 +1311,12 @@ final class BasqueStrings extends Strings {
   @override
   String get newNoteHere => 'Ohar berria hemen';
   @override
+  String get newAudioNoteHere => 'Ahots-ohar berria hemen';
+  @override
+  String get newSlidesHere => 'Aurkezpen berria hemen';
+  @override
+  String get newFlashcardsHere => 'Fitxa berriak hemen';
+  @override
   String get newFolderHere => 'Karpeta berria hemen';
   @override
   String get newListNoteTitle => 'Ohar zerrenda berria';
