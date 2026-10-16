@@ -127,7 +127,7 @@ final class TodoSortButton extends StatelessWidget {
       builder: (context) => IconButton(
         key: const Key('todo-sort-button'),
         tooltip: AppStrings.todoSortTooltip,
-        icon: const Icon(Icons.sort),
+        icon: const Icon(Icons.sort_outlined),
         onPressed: () => unawaited(
           showTodoSort(context, view: view, anchor: menuAnchorOf(context)),
         ),

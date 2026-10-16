@@ -125,7 +125,8 @@ void main() {
       expect(filter, lessThan(sort));
       expect(find.byIcon(Icons.help_outline), findsOneWidget);
       expect(find.byIcon(Icons.filter_alt_outlined), findsOneWidget);
-      expect(find.byIcon(Icons.sort), findsOneWidget);
+      expect(find.byIcon(Icons.sort_outlined), findsOneWidget);
+      expect(find.byIcon(Icons.sort), findsNothing, reason: 'no filled glyph');
       expect(find.byIcon(Icons.filter_alt), findsNothing, reason: 'no filled');
       // No Open/Done switch, no count: the sections replace them.
       expect(key('todo-view-switch'), findsNothing);
@@ -245,6 +246,9 @@ void main() {
       expect(find.text('Due date'), findsOneWidget, reason: 'the sort key');
       expect(find.text('Add task'), findsOneWidget);
       expect(key('todo-help'), findsOneWidget);
+      // The Sort pill's glyph follows the outline rule too (#1020).
+      expect(find.byIcon(Icons.sort_outlined), findsOneWidget);
+      expect(find.byIcon(Icons.sort), findsNothing);
       expect(key('todo-view-switch'), findsNothing);
       expect(key('todo-count'), findsNothing);
       expect(key('todo-due-menu'), findsNothing);

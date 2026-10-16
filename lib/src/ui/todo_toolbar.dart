@@ -155,7 +155,7 @@ final class _SortPill extends StatelessWidget {
       listenable: view,
       builder: (context, _) => _Pill(
         key: const Key('todo-sort-button'),
-        icon: Icons.sort,
+        icon: Icons.sort_outlined,
         label: todoSortLabel(view.filter.sort),
         onPressed: (anchor) =>
             unawaited(showTodoSort(context, view: view, anchor: anchor)),
