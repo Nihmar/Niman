@@ -468,6 +468,15 @@ final class SourceInput implements DeltaTextInputClient {
     );
     var known = true;
     var value = _platformValue;
+    // The app's selection when the batch arrived. A platform edit that covers
+    // the whole of its copy is read against this one: the platform moves its
+    // own selection onto that copy's edge as it prepares the edit (Android's
+    // `BaseInputConnection.replaceTextInternal` selects where the replacement
+    // lands *before* it replaces the selection), and each of the two spans it
+    // moves is reported as a delta ahead of the edit. Read per delta, a Select
+    // all is collapsed by those and the edit takes the window instead of the
+    // note (#1097).
+    final wide = selection().clampTo(buffer.length);
     for (final delta in deltas) {
       deltaCount++;
       // Which window the platform built this delta on: the one it holds, or
@@ -518,7 +527,6 @@ final class SourceInput implements DeltaTextInputClient {
       // of the platform's whole copy while the app's selection is smaller is
       // the two out of step: the platform's own range is applied, and it is
       // told the result.
-      final wide = selection().clampTo(buffer.length);
       final held = _toWindow(wide, origin, delta.oldText.length);
       if (!wide.isCollapsed &&
           delta is! TextEditingDeltaNonTextUpdate &&

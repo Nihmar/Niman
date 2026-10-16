@@ -138,6 +138,43 @@ void main() {
     }
   });
 
+  // #1097: the platform reports its own copy's selection before the edit that
+  // replaces it — Android's `BaseInputConnection.replaceTextInternal` moves
+  // the caret onto the copy's end *before* it replaces (`commitText("", 1)`,
+  // a Backspace over a selection) — and both arrive in one batch, ahead of
+  // the edit. The app's Select all is still the selection that batch acts on:
+  // reading the selection after the preparation deltas left it collapsed at
+  // the window's end, and the deletion took the window instead of the note.
+  test('an app Select all, then the platform replacing its copy', () {
+    final text = List.generate(400, (i) => 'line $i of the note').join('\n');
+    for (final typed in <String>['', 'tutto nuovo']) {
+      final surface = _wire(text, caret: text.length ~/ 2);
+      surface.setSelection(SelectionModel(anchor: 0, extent: text.length));
+      final value = surface.input.currentTextEditingValue!;
+      expect(value.text.length, lessThan(text.length));
+      surface.input.updateEditingValueWithDeltas(<TextEditingDelta>[
+        TextEditingDeltaNonTextUpdate(
+          oldText: value.text,
+          selection: TextSelection.collapsed(offset: value.text.length),
+          composing: TextRange.empty,
+        ),
+        TextEditingDeltaNonTextUpdate(
+          oldText: value.text,
+          selection: TextSelection.collapsed(offset: value.text.length),
+          composing: TextRange.empty,
+        ),
+        TextEditingDeltaReplacement(
+          oldText: value.text,
+          replacementText: typed,
+          replacedRange: TextRange(start: 0, end: value.text.length),
+          selection: TextSelection.collapsed(offset: typed.length),
+          composing: TextRange.empty,
+        ),
+      ]);
+      expect(surface.buffer.text, typed);
+    }
+  });
+
   // #758: a selection the app made that happens to be the whole window — the
   // caret near the note's end, selected from the window's first line down to
   // it — is that range, not the note. Checked against the plain model of an
