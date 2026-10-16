@@ -1,19 +1,23 @@
-/// The Todo tab: Open/Done lists over `todo.txt` / `done.txt`
-/// (T-TD-04).
+/// The Todo tab: one list over `todo.txt` and `done.txt`, grouped in
+/// sections (T-TD-04, #1003).
 ///
-/// The shell owns the [TodoController] (its add action shares it); the
-/// tab opens the controller on mount, renders the Open/Done switch over
-/// the same list shape, and routes row gestures: checkbox toggles
-/// check/uncheck, tap edits (the dialog can also delete), long-press or
-/// right-click opens the bottom sheet (the app's menu pattern) with
-/// edit/delete, and a swipe towards the start deletes after asking.
+/// The shell owns the [TodoController] (its add action shares it) and the
+/// [TodoListView] (the phone's app bar sets the filter and the sort the
+/// tab draws from); the tab opens the controller on mount, applies the
+/// filter to both files, cuts the open tasks into sections that follow the
+/// sort key and closes the list with the Done section. It routes row
+/// gestures to the file each row was read from: the checkbox checks or
+/// unchecks, a tap edits (the dialog can also delete), a long press or a
+/// right click opens the menu, and a swipe towards the start deletes after
+/// asking.
 ///
 /// Where a pointer aims (#712) the rows are a [TodoPointerList]: a click
 /// selects, a double click or `Enter`/`F2` edits the text in place, the
-/// arrows move, `Space` checks, `Delete` deletes, and the row's menu —
-/// Edit…, Set due ▸, Priority ▸, Delete — opens at a right click or under
-/// its ⋯. A quick-add field tops the list, and the filter opens under its
-/// pill.
+/// arrows move across rows and headers, `Space` checks, `Delete` deletes,
+/// and the row's menu -- Edit…, Set due ▸, Priority ▸, Delete -- opens at a
+/// right click or under its ⋯. A quick-add field tops the list. A wide
+/// shell has a toolbar over the list (Filter, Sort, Add task, help); the
+/// phone's controls are in the shell's app bar.
 library;
 
 import 'dart:async';
@@ -26,33 +30,33 @@ import 'package:niman/src/todo/reminder_health.dart';
 import 'package:niman/src/todo/reminders.dart';
 import 'package:niman/src/todo/todo_controller.dart';
 import 'package:niman/src/todo/todo_filter.dart';
+import 'package:niman/src/todo/todo_list_model.dart';
+import 'package:niman/src/todo/todo_list_view.dart';
 import 'package:niman/src/todo/todo_store.dart';
-import 'package:niman/src/ui/action_sheet.dart';
 import 'package:niman/src/ui/device_shape.dart';
-import 'package:niman/src/ui/menu_row.dart';
 import 'package:niman/src/ui/pointer_density.dart';
-import 'package:niman/src/ui/pointer_menu.dart';
 import 'package:niman/src/ui/reminder_health_banner.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/todo_edit_dialog.dart';
-import 'package:niman/src/ui/todo_filter_bar.dart';
-import 'package:niman/src/ui/todo_filter_sheet.dart';
-import 'package:niman/src/ui/todo_help.dart';
+import 'package:niman/src/ui/todo_filter_strip.dart';
+import 'package:niman/src/ui/todo_list_actions.dart';
+import 'package:niman/src/ui/todo_phone_list.dart';
 import 'package:niman/src/ui/todo_pointer_list.dart';
 import 'package:niman/src/ui/todo_quick_add.dart';
-import 'package:niman/src/ui/todo_row.dart';
+import 'package:niman/src/ui/todo_toolbar.dart';
 
 /// The Todo tab body.
 final class TodoTab extends StatefulWidget {
-  /// Creates the tab over [controller].
+  /// Creates the tab over [controller], drawing what [view] says.
   ///
   /// [clock] fixes the wall-clock day for due badges and the edit
   /// dialog (defaults to now; widget tests inject a fixed time).
   ///
-  /// [onAddTask] is the shell's add flow: the desktop panel's Add button
+  /// [onAddTask] is the shell's add flow: the desktop toolbar's Add button
   /// uses it (the phone's FAB owns creation there).
   const new({
     required this.controller,
+    required this.view,
     this.reminders,
     this.clock,
     this.onAddTask,
@@ -67,13 +71,16 @@ final class TodoTab extends StatefulWidget {
   /// The session-bound todo state (owned by the shell).
   final TodoController controller;
 
+  /// The filter, the sort and the folded sections (owned by the shell).
+  final TodoListView view;
+
   /// The reminder service, for the health banner (null hides it).
   final ReminderService? reminders;
 
   /// The wall-clock source for "today".
   final DateTime Function()? clock;
 
-  /// Creates a task; the desktop filter panel shows the button.
+  /// Creates a task; the desktop toolbar shows the button.
   final VoidCallback? onAddTask;
 
   @override
@@ -83,17 +90,23 @@ final class TodoTab extends StatefulWidget {
 final class _TodoTabState extends State<TodoTab> {
   static const AppLogger _log = AppLogger(name: 'todo');
 
-  /// Whether the Done list shows (false = the Open list).
-  bool _showDone = false;
-
-  /// The list filter (due range + token chips + sort key).
-  TodoFilter _filter = const TodoFilter();
-
   /// Rows swiped away whose delete has not published yet. A dismissed
   /// [Dismissible] must leave the tree at once, while the controller's
   /// snapshot arrives after the file write; the next publish (the delete,
   /// or its failure) clears this, and a failed delete brings the row back.
   final Set<TodoEntry> _swiped = {};
+  int _swipedVersion = 0;
+
+  /// The model of the last snapshot, filter and day, and the items of the
+  /// last model under the last folded sections: deriving is a pass over
+  /// every line and a sort, and a fold or a rebuild must not repeat it.
+  TodoSnapshot? _modelSnapshot;
+  TodoFilter? _modelFilter;
+  DateTime? _modelDay;
+  int _modelSwiped = -1;
+  TodoListModel? _model;
+  List<TodoListItem>? _items;
+  Set<String>? _itemsCollapsed;
 
   @override
   void initState() {
@@ -103,59 +116,54 @@ final class _TodoTabState extends State<TodoTab> {
   }
 
   @override
+  void didUpdateWidget(TodoTab oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.controller != widget.controller) {
+      oldWidget.controller.removeListener(_onPublished);
+      widget.controller.addListener(_onPublished);
+    }
+  }
+
+  @override
   void dispose() {
     widget.controller.removeListener(_onPublished);
     super.dispose();
   }
 
-  void _onPublished() => _swiped.clear();
-
-  DateTime get _today {
-    final now = widget.clock?.call() ?? DateTime.now();
-    return DateTime(now.year, now.month, now.day);
+  /// A new snapshot: swiped rows are settled, and a token chip neither file
+  /// carries any more is dropped so it never dead-ends the list. Both files
+  /// count: the filter narrows the Done section too.
+  void _onPublished() {
+    _swiped.clear();
+    final snapshot = widget.controller.snapshot;
+    if (snapshot != null && widget.view.filter.tokens.isNotEmpty) {
+      widget.view.pruneTokens(snapshotTokens(snapshot));
+    }
   }
+
+  DateTime get _today => todoDayOf(widget.clock);
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
         // The pane the tab lives in decides the shape, and the shell
-        // too: a phone keeps its own switch row and the FAB adds, while a
-        // wide shell's pane (#712) folds the switch into the filter panel
-        // as long as the pane holds the panel's pills — under that it
-        // takes the phone's row, with Add in it, because the wide shell
-        // has no FAB at all.
+        // too: the phone's controls are in the app bar, while a wide
+        // shell has no app bar and the tab carries a toolbar -- labelled
+        // pills where the pane holds them, icons under that.
         final shellWide = isWideShell(context);
-        final wide = shellWide && constraints.maxWidth >= _minFoldWidth;
+        final labelled =
+            shellWide && constraints.maxWidth >= TodoToolbar.labelledMinWidth;
         return ListenableBuilder(
-          listenable: widget.controller,
+          listenable: Listenable.merge([widget.controller, widget.view]),
           builder: (context, _) {
             final controller = widget.controller;
             final snapshot = controller.snapshot;
             final reminders = widget.reminders;
+            final model = snapshot == null ? null : _modelOf(snapshot);
             return Column(
               children: [
                 if (reminders != null) ReminderHealthBanner(service: reminders),
-                // The phone keeps the switch on its own row; the desktop folds
-                // it — and the help — into the filter panel below (T-PP-22).
-                if (!wide)
-                  Padding(
-                    padding: const EdgeInsets.all(8),
-                    // A Wrap, not a Row: a wide shell's pane can be
-                    // narrower than the switch, Add and help together,
-                    // and they drop to a second line rather than clip.
-                    child: Wrap(
-                      spacing: 8,
-                      runSpacing: 4,
-                      alignment: WrapAlignment.spaceBetween,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      children: [
-                        _viewSwitch(),
-                        if (shellWide && widget.onAddTask != null) _addButton(),
-                        _helpButton(),
-                      ],
-                    ),
-                  ),
                 if (controller.error != null)
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -170,7 +178,25 @@ final class _TodoTabState extends State<TodoTab> {
                 Expanded(
                   child: NoteColumnPadding(
                     column: _column,
-                    child: _body(snapshot, wide: wide),
+                    child: Column(
+                      children: [
+                        if (shellWide)
+                          TodoToolbar(
+                            controller: controller,
+                            view: widget.view,
+                            labelled: labelled,
+                            onAddTask: widget.onAddTask,
+                            clock: widget.clock,
+                          ),
+                        if (model != null)
+                          TodoFilterStrip(
+                            view: widget.view,
+                            shown: model.openShown,
+                            total: model.openTotal,
+                          ),
+                        Expanded(child: _body(model)),
+                      ],
+                    ),
                   ),
                 ),
               ],
@@ -181,8 +207,8 @@ final class _TodoTabState extends State<TodoTab> {
     );
   }
 
-  /// The note column, never narrower than the filter bar needs: the
-  /// Open/Done switch, both pills, the count, Add and help on one line.
+  /// The note column, never narrower than the toolbar needs: the pills, Add
+  /// and help on one line.
   NoteColumn get _column {
     final column = widget.column;
     if (!column.enabled || column.width >= _minColumnWidth) return column;
@@ -191,158 +217,59 @@ final class _TodoTabState extends State<TodoTab> {
 
   static const double _minColumnWidth = 800;
 
-  /// The narrowest pane that holds the folded filter panel's own row: the
-  /// switch and the two pills. Under it the tab takes the phone's rows.
-  static const double _minFoldWidth = 420;
-
-  /// The Open/Done switch: its own row on the phone, the leading control
-  /// of the desktop filter panel.
-  Widget _viewSwitch() {
-    return SegmentedButton<bool>(
-      key: const Key('todo-view-switch'),
-      segments: [
-        ButtonSegment(value: false, label: Text(AppStrings.todoOpen)),
-        ButtonSegment(value: true, label: Text(AppStrings.todoDone)),
-      ],
-      selected: {_showDone},
-      onSelectionChanged: (selected) => _selectView(selected.single),
-    );
-  }
-
-  /// Adds a task: the filter panel's Add on the desktop, and the row's
-  /// where a wide shell's pane is too narrow to fold it and has no FAB.
-  Widget _addButton() {
-    return TextButton.icon(
-      key: const Key('todo-add-button'),
-      onPressed: widget.onAddTask,
-      icon: const Icon(Icons.add, size: 18),
-      label: Text(AppStrings.todoAddTooltip),
-    );
-  }
-
-  /// The format reference stays one tap from the list on every layout
-  /// (T-TD-08): the wide layout has no app bar to hold it any more.
-  Widget _helpButton() {
-    return IconButton(
-      key: const Key('todo-help'),
-      tooltip: AppStrings.todoHelpTooltip,
-      icon: const Icon(Icons.help_outline),
-      onPressed: _openHelp,
-    );
-  }
-
-  /// Opens the todo.txt format reference (T-TD-08).
-  ///
-  /// The dialog writes the syntax, so a user can go a long way without
-  /// seeing it — until they open todo.txt in another editor, or wonder
-  /// what the chips are. On the desktop it opens as a dialog over the
-  /// tab: a pushed screen would hide the rail and the list (T-PP-22).
-  Future<void> _openHelp() async {
-    if (!isWideShell(context)) {
-      await Navigator.push(
-        context,
-        MaterialPageRoute<void>(builder: (context) => const TodoHelpScreen()),
-      );
-      return;
+  /// The model of [snapshot] under the view's filter, derived once for as
+  /// long as the snapshot, the filter, the day and the swiped rows stay.
+  TodoListModel _modelOf(TodoSnapshot snapshot) {
+    final filter = widget.view.filter;
+    final day = _today;
+    final cached = _model;
+    if (cached != null &&
+        identical(_modelSnapshot, snapshot) &&
+        _modelFilter == filter &&
+        _modelDay == day &&
+        _modelSwiped == _swipedVersion) {
+      return cached;
     }
-    await showDialog<void>(
-      context: context,
-      builder: (context) => Dialog(
-        key: const Key('todo-help-dialog'),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 620, maxHeight: 640),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(24, 12, 8, 4),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        AppStrings.todoHelpTitle,
-                        style: Theme.of(context).textTheme.titleLarge,
-                      ),
-                    ),
-                    IconButton(
-                      key: const Key('todo-help-close'),
-                      tooltip: MaterialLocalizations.of(context)
-                          .closeButtonTooltip,
-                      icon: const Icon(Icons.close),
-                      onPressed: () => Navigator.of(context).pop(),
-                    ),
-                  ],
-                ),
-              ),
-              const Flexible(child: TodoHelpBody()),
-            ],
-          ),
-        ),
-      ),
+    _modelSnapshot = snapshot;
+    _modelFilter = filter;
+    _modelDay = day;
+    _modelSwiped = _swipedVersion;
+    _items = null;
+    return _model = TodoListModel.derive(
+      snapshot,
+      filter,
+      day,
+      hidden: _swiped,
     );
   }
 
-  /// Switches the visible file, pruning token chips absent from it so
-  /// a stale chip never dead-ends the list.
-  void _selectView(bool done) {
-    final snapshot = widget.controller.snapshot;
-    var filter = _filter;
-    if (snapshot != null) {
-      final entries = done ? snapshot.done : snapshot.todo;
-      final available = <String>{
-        for (final chip in tokenCountsFor(entries, TodoDueRange.all, _today))
-          chip.token,
-      };
-      filter = filter.pruneTokens(available);
+  /// The headers and rows of [model] under the sections folded now.
+  List<TodoListItem> _itemsOf(TodoListModel model) {
+    final collapsed = widget.view.collapsed;
+    final cached = _items;
+    final folded = _itemsCollapsed;
+    if (cached != null &&
+        folded != null &&
+        folded.length == collapsed.length &&
+        folded.containsAll(collapsed)) {
+      return cached;
     }
-    _log.debug('todo view: ${done ? 'done' : 'open'}');
-    setState(() {
-      _showDone = done;
-      _filter = filter;
-    });
+    _itemsCollapsed = collapsed;
+    return _items = model.items(collapsed);
   }
 
-  /// The list (or loading/empty state) for the visible file on [wide],
-  /// where the filter panel leads with the view switch and trails with
-  /// Add task and help (T-PP-22).
-  Widget _body(TodoSnapshot? snapshot, {required bool wide}) {
-    if (snapshot == null) {
+  /// The list (or loading/empty state) of [model].
+  Widget _body(TodoListModel? model) {
+    if (model == null) {
       return const Center(
         key: Key('todo-loading'),
         child: CircularProgressIndicator(),
       );
     }
-    final fileEntries = [
-      for (final entry in (_showDone ? snapshot.done : snapshot.todo))
-        if (entry.task.raw.trim().isNotEmpty) entry,
-    ];
-    final visible = [
-      for (final entry in applyTodoFilter(fileEntries, _filter, _today))
-        if (!_swiped.contains(entry)) entry,
-    ];
     final pointer = pointerDense(Theme.of(context));
+    final showPriority = widget.view.filter.sort != TodoSort.priority;
     return Column(
       children: [
-        TodoFilterBar(
-          filter: _filter,
-          showDone: _showDone,
-          count: fileEntries.length,
-          leading: wide ? _viewSwitch() : null,
-          trailing: wide
-              ? Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (widget.onAddTask != null) _addButton(),
-                    _helpButton(),
-                  ],
-                )
-              : null,
-          onDueRange: (range) {
-            _log.debug('todo filter due: ${range.name}');
-            setState(() => _filter = _filter.copyWith(dueRange: range));
-          },
-          onOpenFilter: (anchor) => _openFilterSheet(fileEntries, anchor),
-        ),
         if (pointer)
           TodoQuickAdd(
             key: const Key('todo-quick-add-row'),
@@ -350,139 +277,59 @@ final class _TodoTabState extends State<TodoTab> {
             knownTokens: _knownTokens,
           ),
         Expanded(
-          child: visible.isEmpty
-              ? _emptyList(fileEntries.isEmpty)
+          child: model.isEmpty
+              ? _emptyList(noTasks: model.hasNoTasks)
               : pointer
               ? TodoPointerList(
-                  entries: visible,
-                  view: _showDone ? 'done' : 'open',
+                  items: _itemsOf(model),
                   today: _today,
-                  onToggle: (entry, {required checked}) =>
-                      _toggle(entry, checked),
+                  showPriority: showPriority,
+                  onToggle: _toggle,
                   onEdit: _edit,
                   onDelete: _delete,
                   onRewrite: _rewrite,
+                  onToggleSection: _toggleSection,
                 )
-              : ListView.builder(
-                  key: const Key('todo-list'),
-                  itemCount: visible.length,
-                  itemBuilder: (context, index) {
-                    final entry = visible[index];
-                    final view = _showDone ? 'done' : 'open';
-                    return _swipeToDelete(
-                      entry,
-                      TodoRow(
-                        key: Key('todo-row-$view-${entry.lineIndex}'),
-                        entry: entry,
-                        today: _today,
-                        onToggle: (checked) => _toggle(entry, checked),
-                        onEdit: () => _edit(entry),
-                        onShowMenu: () => _showRowMenu(entry),
-                        onShowMenuAt: (at) => _showRowMenuAt(entry, at),
-                      ),
-                    );
-                  },
+              : TodoPhoneList(
+                  items: _itemsOf(model),
+                  today: _today,
+                  showPriority: showPriority,
+                  onToggle: _toggle,
+                  onEdit: _edit,
+                  onDelete: _delete,
+                  onSwipeDelete: _swipeDelete,
+                  onToggleSection: _toggleSection,
                 ),
         ),
       ],
     );
   }
 
-  /// [row] made swipeable towards the start, which deletes [entry] once
-  /// the user confirms: a stray swipe on a phone must not lose a task,
-  /// since a deleted line has no trash.
-  Widget _swipeToDelete(TodoEntry entry, Widget row) {
-    final scheme = Theme.of(context).colorScheme;
-    return Dismissible(
-      // Per entry object, never per line index: once a line goes, the
-      // next one takes its index, and must not inherit a dismissed state.
-      key: ObjectKey(entry),
-      direction: DismissDirection.endToStart,
-      background: ColoredBox(
-        color: scheme.errorContainer,
-        child: Align(
-          alignment: AlignmentDirectional.centerEnd,
-          child: Padding(
-            padding: const EdgeInsetsDirectional.only(end: 24),
-            child: Icon(Icons.delete_outline, color: scheme.onErrorContainer),
-          ),
-        ),
-      ),
-      confirmDismiss: (_) => _confirmDelete(entry),
-      onDismissed: (_) {
-        setState(() => _swiped.add(entry));
-        unawaited(_delete(entry));
-      },
-      child: row,
-    );
-  }
-
-  /// Asks before a swipe deletes [entry]; true deletes.
-  Future<bool> _confirmDelete(TodoEntry entry) async {
-    _log.debug('todo swipe: line ${entry.lineIndex}, asking');
-    final display = taskDisplayText(entry.task.description);
-    final name = '“${display.isEmpty ? entry.task.raw : display}”';
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(AppStrings.todoDeleteAction),
-        content: Text(AppStrings.deleteForeverConfirm(name)),
-        actions: [
-          TextButton(
-            key: const Key('todo-swipe-cancel'),
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(AppStrings.actionCancel),
-          ),
-          TextButton(
-            key: const Key('todo-swipe-confirm'),
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(AppStrings.actionDelete),
-          ),
-        ],
-      ),
-    );
-    return confirmed ?? false;
-  }
-
-  /// Opens the token + sort sheet (T-TDM-03) over the visible file; where
-  /// a pointer aims, a pop-up under the pill at [anchor] (#712).
-  void _openFilterSheet(List<TodoEntry> fileEntries, Rect? anchor) {
-    final counts = tokenCountsFor(fileEntries, _filter.dueRange, _today);
-    if (pointerDense(Theme.of(context))) {
-      unawaited(
-        showActionSheet<void>(
-          context,
-          anchor: anchor,
-          items: (context) => [_filterSheet(counts)],
-        ),
-      );
-      return;
-    }
-    unawaited(
-      showModalBottomSheet<void>(
-        context: context,
-        builder: (context) => _filterSheet(counts),
+  /// The empty state: the lists' own when there is no task at all, the
+  /// filtered one when the filter hides every row.
+  Widget _emptyList({required bool noTasks}) {
+    return Center(
+      child: Text(
+        noTasks ? AppStrings.todoEmptyOpen : AppStrings.todoEmptyFiltered,
       ),
     );
   }
 
-  /// The tokens and the sort, as the sheet or the pop-up shows them.
-  Widget _filterSheet(List<({String token, int count})> counts) =>
-      TodoFilterSheet(
-        filter: _filter,
-        counts: counts,
-        onToggleToken: (token) {
-          final tokens = {..._filter.tokens};
-          if (!tokens.remove(token)) {
-            tokens.add(token);
-          }
-          _log.debug('todo filter tokens: $tokens');
-          setState(() => _filter = _filter.copyWith(tokens: tokens));
-        },
-        onSort: (sort) {
-          setState(() => _filter = _filter.copyWith(sort: sort));
-        },
-      );
+  /// Folds the section [id], or opens it.
+  void _toggleSection(String id) {
+    _log.debug('todo section: $id');
+    widget.view.toggleSection(id);
+  }
+
+  /// A row swiped away and confirmed: it leaves the screen now, and the
+  /// delete follows into the file it was read from.
+  void _swipeDelete(TodoRowItem row) {
+    setState(() {
+      _swiped.add(row.entry);
+      _swipedVersion++;
+    });
+    unawaited(_delete(row));
+  }
 
   /// Adds the task typed in the quick-add field (#712), created today.
   void _quickAdd(String text) {
@@ -498,54 +345,41 @@ final class _TodoTabState extends State<TodoTab> {
     );
   }
 
-  /// Writes [line] in place of [entry]'s, in the file it is in.
-  Future<void> _rewrite(TodoEntry entry, String line) {
-    _log.debug('todo row rewritten: line ${entry.lineIndex}');
-    return _showDone
-        ? widget.controller.updateDone(entry, line)
-        : widget.controller.updateTodo(entry, line);
+  /// Writes [line] in place of [row]'s, in the file it was read from.
+  Future<void> _rewrite(TodoRowItem row, String line) {
+    _log.debug('todo row rewritten: ${row.view} line ${row.entry.lineIndex}');
+    return row.done
+        ? widget.controller.updateDone(row.entry, line)
+        : widget.controller.updateTodo(row.entry, line);
   }
 
-  /// The empty state: the file's own when it holds nothing, the filtered
-  /// one when chips hide every row.
-  Widget _emptyList(bool fileEmpty) {
-    final text = fileEmpty
-        ? (_showDone ? AppStrings.todoEmptyDone : AppStrings.todoEmptyOpen)
-        : AppStrings.todoEmptyFiltered;
-    return Center(child: Text(text));
+  /// Flips a task: an open one is checked, a done one reopened -- by the
+  /// file it is in, whatever the checkbox says.
+  Future<void> _toggle(TodoRowItem row, {required bool checked}) {
+    _log.debug(
+      'todo toggle: ${row.view} line ${row.entry.lineIndex} -> $checked',
+    );
+    return row.done
+        ? widget.controller.uncheck(row.entry)
+        : widget.controller.check(row.entry);
   }
 
-  /// Flips a task: check from Open, uncheck from Done. A checkbox that
-  /// disagrees with its view (a stray `x` line awaiting migration)
-  /// still does the useful thing.
-  Future<void> _toggle(TodoEntry entry, bool checked) {
-    _log.debug('todo toggle: line ${entry.lineIndex} -> $checked');
-    return checked
-        ? widget.controller.check(entry)
-        : widget.controller.uncheck(entry);
-  }
-
-  /// Opens the edit dialog and applies the result to the visible file.
-  Future<void> _edit(TodoEntry entry) async {
+  /// Opens the edit dialog and applies the result to [row]'s file.
+  Future<void> _edit(TodoRowItem row) async {
     final reminders = widget.reminders;
     final line = await showTodoTaskDialog(
       context,
-      initial: entry.task,
+      initial: row.entry.task,
       today: _today,
       knownTokens: _knownTokens(),
-      onDelete: () => unawaited(_delete(entry)),
+      onDelete: () => unawaited(_delete(row)),
       health: reminders?.health.value ?? ReminderHealth.ok,
       onOpenReminderSettings: reminders?.openHealthSettings,
     );
     if (line == null || !mounted) {
       return;
     }
-    _log.debug('todo edit applied: line ${entry.lineIndex}');
-    if (_showDone) {
-      await widget.controller.updateDone(entry, line);
-    } else {
-      await widget.controller.updateTodo(entry, line);
-    }
+    await _rewrite(row, line);
   }
 
   /// The completion pool for the edit dialog: every token in both
@@ -555,98 +389,11 @@ final class _TodoTabState extends State<TodoTab> {
     return snapshot == null ? const <String>{} : snapshotTokens(snapshot);
   }
 
-  /// Long-press bottom sheet (the app's menu pattern): edit or delete.
-  Future<void> _showRowMenu(TodoEntry entry) async {
-    final action = await showModalBottomSheet<String>(
-      context: context,
-      builder: (context) => SafeArea(
-        child: Wrap(
-          children: [
-            ListTile(
-              key: const Key('todo-menu-edit'),
-              leading: const Icon(Icons.edit_outlined),
-              title: Text(AppStrings.todoEditAction),
-              onTap: () => Navigator.pop(context, 'edit'),
-            ),
-            ListTile(
-              key: const Key('todo-menu-delete'),
-              leading: const Icon(Icons.delete_outline),
-              title: Text(AppStrings.todoDeleteAction),
-              onTap: () => Navigator.pop(context, 'delete'),
-            ),
-          ],
-        ),
-      ),
-    );
-    await _runRowMenu(entry, action);
-  }
-
-  /// Right-click menu (T-PP-20): the same two actions at the cursor, the
-  /// shape a pointer gets (#712).
-  Future<void> _showRowMenuAt(TodoEntry entry, Offset at) async {
-    final overlay =
-        Overlay.of(context).context.findRenderObject()! as RenderBox;
-    final action = await showMenu<String>(
-      context: context,
-      position: RelativeRect.fromRect(
-        at & const Size(1, 1),
-        Offset.zero & overlay.size,
-      ),
-      items: [
-        _menuItem(
-          key: const Key('todo-menu-edit'),
-          icon: Icons.edit_outlined,
-          label: AppStrings.todoEditAction,
-          value: 'edit',
-        ),
-        _menuItem(
-          key: const Key('todo-menu-delete'),
-          icon: Icons.delete_outline,
-          label: AppStrings.todoDeleteAction,
-          value: 'delete',
-          destructive: true,
-        ),
-      ],
-    );
-    await _runRowMenu(entry, action);
-  }
-
-  /// One entry of the cursor menu, its icon left of its label.
-  PopupMenuItem<String> _menuItem({
-    required Key key,
-    required IconData icon,
-    required String label,
-    required String value,
-    bool destructive = false,
-  }) {
-    return menuItem<String>(
-      context,
-      key: key,
-      value: value,
-      child: MenuRow(
-        icon: icon,
-        label: label,
-        color: destructive ? Theme.of(context).colorScheme.error : null,
-      ),
-    );
-  }
-
-  /// Runs what either row menu answered.
-  Future<void> _runRowMenu(TodoEntry entry, String? action) async {
-    if (action == null || !mounted) return;
-    switch (action) {
-      case 'edit':
-        await _edit(entry);
-      case 'delete':
-        await _delete(entry);
-    }
-  }
-
-  /// Removes [entry]'s line from the visible file.
-  Future<void> _delete(TodoEntry entry) {
-    _log.debug('todo delete: line ${entry.lineIndex}');
-    return _showDone
-        ? widget.controller.deleteDone(entry)
-        : widget.controller.deleteTodo(entry);
+  /// Removes [row]'s line from the file it was read from.
+  Future<void> _delete(TodoRowItem row) {
+    _log.debug('todo delete: ${row.view} line ${row.entry.lineIndex}');
+    return row.done
+        ? widget.controller.deleteDone(row.entry)
+        : widget.controller.deleteTodo(row.entry);
   }
 }

@@ -100,11 +100,18 @@ void main() {
     expect(saves.single.$1, 'todo_7');
     final payload = jsonDecode(saves.single.$2!) as Map<String, Object?>;
     expect(payload['library'], root);
-    final texts = [
-      for (final row in payload['rows']! as List<Object?>)
-        (row! as Map)['text'],
-    ];
-    expect(texts, ['soon', 'undated']);
+    final items = payload['rows']! as List<Object?>;
+    // Sections by due date, a header before its rows; the fixed date is
+    // long past, so it stays overdue however late the test runs.
+    expect(
+      [
+        for (final item in items.cast<Map<String, Object?>>())
+          if (item['kind'] == 'section') item['section'] else item['text'],
+      ],
+      ['due.overdue', 'soon', 'due.none', 'undated'],
+    );
+    expect(payload['total'], 2);
+    expect(payload['language'], isA<String>());
   });
 
   test('note widgets and other libraries are left alone', () async {

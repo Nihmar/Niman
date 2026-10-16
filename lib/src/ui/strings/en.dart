@@ -953,8 +953,6 @@ final class EnglishStrings extends Strings {
 
   // Task lists (T-TD-04).
   @override
-  String get todoOpen => 'Open';
-  @override
   String get todoDone => 'Done';
 
   // Filter row + sheet (T-TDM-03).
@@ -965,13 +963,7 @@ final class EnglishStrings extends Strings {
   @override
   String get todoNoTokens => 'No tokens in this list';
   @override
-  String get todoCountOpen => 'open';
-  @override
-  String get todoCountDone => 'done';
-  @override
   String get todoEmptyOpen => 'No open tasks yet';
-  @override
-  String get todoEmptyDone => 'Nothing completed yet';
   @override
   String get todoEmptyFiltered => 'No tasks match';
   @override
@@ -1096,6 +1088,20 @@ final class EnglishStrings extends Strings {
   String get todoDueNext7 => 'Next 7 days';
   @override
   String get todoDueNoDate => 'No date';
+  @override
+  String get todoSectionLater => 'Later';
+  @override
+  String todoSectionPriority(String letter) => 'Priority $letter';
+  @override
+  String get todoSectionNoPriority => 'No priority';
+  @override
+  String get todoClearFilters => 'Clear';
+  @override
+  String todoFilteredCount(int shown, int total) => '$shown of $total';
+  @override
+  String todoFilterActive(int count) => 'Filter · $count';
+  @override
+  String todoDoneOn(String date) => 'Done $date';
   @override
   String get todoRowDue => 'Due';
   @override

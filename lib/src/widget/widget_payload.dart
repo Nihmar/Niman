@@ -12,7 +12,9 @@ library;
 import 'dart:convert';
 
 import 'package:niman/src/todo/parser.dart';
+import 'package:niman/src/todo/todo_sections.dart';
 import 'package:niman/src/todo/todo_store.dart';
+import 'package:niman/src/todo/widget_todos.dart';
 import 'package:niman/src/widget/note_excerpt.dart';
 import 'package:niman/src/widget/widget_configs.dart';
 import 'package:niman/src/widget/widget_theme.dart';
@@ -55,56 +57,98 @@ String widgetPayloadKey(WidgetProvider provider, int androidWidgetId) {
   return '${provider.name}_$androidWidgetId';
 }
 
-/// The todo rows as JSON: `{"library": path, "rows": [{text, due,
-/// priority, projects, contexts, tags, line}], "truncated": bool,
-/// "total": int}`.
+/// The `kind` of a section header item in the todo payload's `rows`.
 ///
-/// [entries] arrive in widget order (the todo widget sort: due date
-/// first, then priority); `library` is
-/// the absolute library root the native provider taps back into; `text`
-/// is the prose ([taskDisplayText], so `due:`/`rem:` slots and
-/// `+`/`@`/`#` markers do not eat widget width), `due` a `YYYY-MM-DD`
-/// date or null, `projects`/`contexts`/`tags` the `+project`/`@context`/
-/// `#tag` markers for the meta line (empty when the task carries none,
-/// so the row aligns its text), `line` the file line (for future
-/// tap-to-toggle). Rows
-/// drop from the end while the payload exceeds [maxChars], setting
-/// `truncated`. [total] is the open-task count before capping, so the
-/// header count stays true when the rows are truncated. [theme] wears
-/// the app theme (absent in old callers: the widget renders its
-/// defaults).
+/// A row item carries no `kind`: a payload from before the sections
+/// (#1003) is all rows and renders as one flat list.
+const String todoWidgetSectionKind = 'section';
+
+/// The header `tone` that draws the section in the error color (Overdue).
+const String todoWidgetErrorTone = 'error';
+
+/// The todo list as JSON: `{"library": path, "rows": [item, ...],
+/// "truncated": bool, "total": int, "language": id, "theme": {...}}`.
+///
+/// `rows` is one flat list in display order (the widget list is a
+/// `RemoteViews` collection, one item per position): each non-empty
+/// section contributes a header item `{kind: "section", section: id,
+/// label, count, tone?}` followed by its rows. `count` is the section's
+/// true count, `tone` is `error` for the overdue header. A row is
+/// `{text, due, priority, projects, contexts, tags, line, section,
+/// showDue}`:
+///
+/// - `text` is the prose ([taskDisplayText], so `due:`/`rem:` slots and
+///   `+`/`@`/`#` markers do not eat widget width);
+/// - `due` a `YYYY-MM-DD` date or null, and `showDue` whether the meta
+///   line repeats it (false under Today, which already says it);
+/// - `projects`/`contexts`/`tags` the `+project`/`@context`/`#tag`
+///   markers for the meta line;
+/// - `line` the file line the tap toggles;
+/// - `section` the id of the section the row sits under.
+///
+/// [sections] arrive in display order (see `widgetTodoSections`);
+/// `library` is the absolute library root the native provider taps back
+/// into. Items drop from the end while the payload exceeds [maxChars],
+/// setting `truncated` (a header left with no row goes with them).
+/// [total] is the open-task count before capping, so the header count
+/// stays true when the rows are truncated. [theme] wears the app theme
+/// and [language] is the app language id the labels were written in (the
+/// background toggle re-pushes in it; absent in old callers: the widget
+/// renders its defaults).
 String todoWidgetPayload(
-  List<TodoEntry> entries, {
+  List<WidgetTodoSection> sections, {
   required String libraryPath,
   int? total,
   WidgetTheme? theme,
+  String? language,
   int maxChars = widgetPayloadMaxChars,
 }) {
-  var rows = <Map<String, Object?>>[for (final entry in entries) _row(entry)];
+  var items = <Map<String, Object?>>[
+    for (final section in sections) ..._items(section),
+  ];
   var truncated = false;
-  var encoded = _encode(
+  String encode() => _encode(
     libraryPath,
-    rows,
+    items,
     truncated,
-    total ?? rows.length,
+    total ?? items.where(_isRow).length,
     theme,
+    language,
   );
-  while (rows.isNotEmpty && encoded.length > maxChars) {
-    rows = rows.sublist(0, rows.length - 1);
+  var encoded = encode();
+  while (items.isNotEmpty && encoded.length > maxChars) {
+    items = items.sublist(0, items.length - 1);
+    // A header whose rows were all dropped would head nothing.
+    while (items.isNotEmpty && !_isRow(items.last)) {
+      items = items.sublist(0, items.length - 1);
+    }
     truncated = true;
-    encoded = _encode(
-      libraryPath,
-      rows,
-      truncated,
-      total ?? rows.length,
-      theme,
-    );
+    encoded = encode();
   }
   return encoded;
 }
 
-/// One payload row for [entry].
-Map<String, Object?> _row(TodoEntry entry) {
+/// Whether [item] is a task row (not a section header).
+bool _isRow(Map<String, Object?> item) {
+  return item['kind'] != todoWidgetSectionKind;
+}
+
+/// The header item of [section] followed by its rows.
+List<Map<String, Object?>> _items(WidgetTodoSection section) {
+  return [
+    {
+      'kind': todoWidgetSectionKind,
+      'section': section.id,
+      'label': section.label,
+      'count': section.count,
+      if (section.id == todoDueOverdueSectionId) 'tone': todoWidgetErrorTone,
+    },
+    for (final entry in section.entries) _row(entry, section.id),
+  ];
+}
+
+/// One payload row for [entry] under the section [sectionId].
+Map<String, Object?> _row(TodoEntry entry, String sectionId) {
   final task = entry.task;
   return {
     'text': taskDisplayText(task.description),
@@ -114,22 +158,27 @@ Map<String, Object?> _row(TodoEntry entry) {
     'contexts': task.contexts,
     'tags': task.hashtags,
     'line': entry.lineIndex,
+    'section': sectionId,
+    // The Today section already says "today": its rows drop the date.
+    'showDue': sectionId != todoDueTodaySectionId,
   };
 }
 
-/// Encodes [rows] with the [libraryPath], [truncated] and [total] fields.
+/// Encodes [items] with the [libraryPath], [truncated] and [total] fields.
 String _encode(
   String libraryPath,
-  List<Map<String, Object?>> rows,
+  List<Map<String, Object?>> items,
   bool truncated,
   int total,
   WidgetTheme? theme,
+  String? language,
 ) {
   return jsonEncode({
     'library': libraryPath,
-    'rows': rows,
+    'rows': items,
     'truncated': truncated,
     'total': total,
+    'language': ?language,
     if (theme != null) 'theme': widgetThemeToMap(theme),
   });
 }

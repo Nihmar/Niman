@@ -954,8 +954,6 @@ final class TurkishStrings extends Strings {
 
   // Task lists (T-TD-04).
   @override
-  String get todoOpen => 'Açık';
-  @override
   String get todoDone => 'Biten';
 
   // Filter row + sheet (T-TDM-03).
@@ -966,13 +964,7 @@ final class TurkishStrings extends Strings {
   @override
   String get todoNoTokens => 'Bu listede token yok';
   @override
-  String get todoCountOpen => 'açık';
-  @override
-  String get todoCountDone => 'biten';
-  @override
   String get todoEmptyOpen => 'Henüz açık görev yok';
-  @override
-  String get todoEmptyDone => 'Henüz biten yok';
   @override
   String get todoEmptyFiltered => 'Eşleşen görev yok';
   @override
@@ -1098,6 +1090,20 @@ final class TurkishStrings extends Strings {
   String get todoDueNext7 => 'İlk 7 gün';
   @override
   String get todoDueNoDate => 'Tarih yok';
+  @override
+  String get todoSectionLater => 'Daha sonra';
+  @override
+  String todoSectionPriority(String letter) => 'Öncelik $letter';
+  @override
+  String get todoSectionNoPriority => 'Öncelik yok';
+  @override
+  String get todoClearFilters => 'Temizle';
+  @override
+  String todoFilteredCount(int shown, int total) => '$total içinden $shown';
+  @override
+  String todoFilterActive(int count) => 'Filtreler · $count';
+  @override
+  String todoDoneOn(String date) => 'Bitti: $date';
   @override
   String get todoRowDue => 'Bitişi';
   @override

@@ -971,8 +971,6 @@ final class ItalianStrings extends Strings {
 
   // Task lists (T-TD-04).
   @override
-  String get todoOpen => 'Da fare';
-  @override
   String get todoDone => 'Fatte';
 
   // Filter row + sheet (T-TDM-03).
@@ -983,13 +981,7 @@ final class ItalianStrings extends Strings {
   @override
   String get todoNoTokens => 'Nessun token in questa lista';
   @override
-  String get todoCountOpen => 'da fare';
-  @override
-  String get todoCountDone => 'fatte';
-  @override
   String get todoEmptyOpen => 'Nessuna attività da fare';
-  @override
-  String get todoEmptyDone => 'Niente di completato per ora';
   @override
   String get todoEmptyFiltered => 'Nessuna attività corrisponde';
   @override
@@ -1116,6 +1108,20 @@ final class ItalianStrings extends Strings {
   String get todoDueNext7 => 'Prossimi 7 giorni';
   @override
   String get todoDueNoDate => 'Senza data';
+  @override
+  String get todoSectionLater => 'Più avanti';
+  @override
+  String todoSectionPriority(String letter) => 'Priorità $letter';
+  @override
+  String get todoSectionNoPriority => 'Senza priorità';
+  @override
+  String get todoClearFilters => 'Azzera';
+  @override
+  String todoFilteredCount(int shown, int total) => '$shown di $total';
+  @override
+  String todoFilterActive(int count) => 'Filtra · $count';
+  @override
+  String todoDoneOn(String date) => 'Completato $date';
   @override
   String get todoRowDue => 'Scade';
   @override

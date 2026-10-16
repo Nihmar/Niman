@@ -956,8 +956,6 @@ final class NorwegianStrings extends Strings {
 
   // Task lists (T-TD-04).
   @override
-  String get todoOpen => 'Åpne';
-  @override
   String get todoDone => 'Ferdig';
 
   // Filter row + sheet (T-TDM-03).
@@ -968,13 +966,7 @@ final class NorwegianStrings extends Strings {
   @override
   String get todoNoTokens => 'Ingen token i denne listen';
   @override
-  String get todoCountOpen => 'åpne';
-  @override
-  String get todoCountDone => 'ferdige';
-  @override
   String get todoEmptyOpen => 'Ingen pågående oppgaver ennå';
-  @override
-  String get todoEmptyDone => 'Ingenting fullført ennå';
   @override
   String get todoEmptyFiltered => 'Ingen oppgaver samsvarer';
   @override
@@ -1101,6 +1093,20 @@ final class NorwegianStrings extends Strings {
   String get todoDueNext7 => 'Neste 7 dager';
   @override
   String get todoDueNoDate => 'Ingen dato';
+  @override
+  String get todoSectionLater => 'Senere';
+  @override
+  String todoSectionPriority(String letter) => 'Prioritet $letter';
+  @override
+  String get todoSectionNoPriority => 'Ingen prioritet';
+  @override
+  String get todoClearFilters => 'Fjern';
+  @override
+  String todoFilteredCount(int shown, int total) => '$shown av $total';
+  @override
+  String todoFilterActive(int count) => 'Filtrer · $count';
+  @override
+  String todoDoneOn(String date) => 'Ferdig $date';
   @override
   String get todoRowDue => 'Forfall';
   @override

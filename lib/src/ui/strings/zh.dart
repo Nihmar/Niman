@@ -905,8 +905,6 @@ final class ChineseStrings extends Strings {
 
   // Task lists (T-TD-04).
   @override
-  String get todoOpen => '待办';
-  @override
   String get todoDone => '已完成';
 
   // Filter row + sheet (T-TDM-03).
@@ -917,13 +915,7 @@ final class ChineseStrings extends Strings {
   @override
   String get todoNoTokens => '此列表中没有标记';
   @override
-  String get todoCountOpen => '待办';
-  @override
-  String get todoCountDone => '已完成';
-  @override
   String get todoEmptyOpen => '还没有待办任务';
-  @override
-  String get todoEmptyDone => '还没有完成的任务';
   @override
   String get todoEmptyFiltered => '没有符合筛选的任务';
   @override
@@ -1031,6 +1023,20 @@ final class ChineseStrings extends Strings {
   String get todoDueNext7 => '未来 7 天';
   @override
   String get todoDueNoDate => '无日期';
+  @override
+  String get todoSectionLater => '稍后';
+  @override
+  String todoSectionPriority(String letter) => '优先级 $letter';
+  @override
+  String get todoSectionNoPriority => '无优先级';
+  @override
+  String get todoClearFilters => '清除';
+  @override
+  String todoFilteredCount(int shown, int total) => '$total 项中的 $shown 项';
+  @override
+  String todoFilterActive(int count) => '筛选 · $count';
+  @override
+  String todoDoneOn(String date) => '已完成 $date';
   @override
   String get todoRowDue => '截止';
   @override

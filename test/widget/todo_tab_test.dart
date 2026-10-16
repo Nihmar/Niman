@@ -1,12 +1,13 @@
 // T-TD-04 AC: todo list UI — rows with badges/chips, checking moves a
-// row to Done with today's date, unchecking restores it, Open/Done
-// switch, tap-to-edit and delete (dialog, long-press, right-click), all
+// row to Done with today's date, unchecking restores it, the Done
+// section, tap-to-edit and delete (dialog, long-press, right-click), all
 // against FakeTodoSource
 // (no disk I/O in the fake-async test zone).
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/todo/todo_controller.dart';
+import 'package:niman/src/todo/todo_list_view.dart';
 import 'package:niman/src/ui/todo_edit_dialog.dart';
 import 'package:niman/src/ui/todo_tab.dart';
 
@@ -20,6 +21,7 @@ void main() {
   late FakeLibrarySession session;
   late FakeTodoSource source;
   TodoController? controller;
+  late TodoListView view;
 
   Future<void> pumpTab(
     WidgetTester tester, {
@@ -35,10 +37,12 @@ void main() {
       refreshDebounce: const Duration(milliseconds: 1),
       sourceFactory: (_) => source,
     );
+    view = TodoListView();
+    addTearDown(view.dispose);
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: TodoTab(controller: controller!, clock: clock),
+          body: TodoTab(controller: controller!, view: view, clock: clock),
         ),
       ),
     );
@@ -63,28 +67,16 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
   }
 
-  /// Opens the due-range dropdown and selects [keySuffix]
-  /// (a `TodoDueRange` name: `all`, `overdue`, `today`, …).
-  /// Opens the due-range dropdown, lets the menu entrance settle, then
-  /// selects [keySuffix] (a `TodoDueRange` name: `all`, `overdue`, …).
-  /// The extra settle is needed because the popup menu is scrollable and
-  /// lays out its items a frame after it opens.
+  /// Selects the due range [keySuffix] (a `TodoDueRange` name: `all`,
+  /// `overdue`, `today`, …) in the open Filter sheet, which stays open.
   Future<void> selectDue(WidgetTester tester, String keySuffix) async {
-    await tester.tap(find.byKey(const Key('todo-due-menu')));
-    await settle(tester);
     await tester.tap(find.byKey(Key('todo-due-$keySuffix')));
     await tester.pump();
   }
 
-  /// Opens the token/sort sheet, letting the slide-up entrance settle.
+  /// Opens the Filter sheet, letting the slide-up entrance settle.
   Future<void> openSheet(WidgetTester tester) async {
     await tester.tap(find.byKey(const Key('todo-filter-button')));
-    await settle(tester);
-  }
-
-  /// Dismisses the sheet: the modal barrier closes it on tap.
-  Future<void> closeSheet(WidgetTester tester) async {
-    await tester.tapAt(const Offset(400, 30));
     await settle(tester);
   }
 
@@ -155,23 +147,48 @@ void main() {
     await tester.pump();
     // Gone from Open...
     expect(find.text('file taxes'), findsNothing);
-    // ...present in Done, stamped today, checkbox checked.
-    await tester.tap(find.text('Done'));
+    // ...in the Done section, folded to its header...
+    expect(find.byKey(const Key('todo-section-done')), findsOneWidget);
+    // ...which opens in place: stamped today, checkbox checked.
+    await tester.tap(find.byKey(const Key('todo-section-done')));
     await tester.pump();
     expect(find.text('file taxes'), findsOneWidget);
+    expect(find.text('Done 7 Sep'), findsOneWidget);
     expect(tester.widget<Checkbox>(find.byType(Checkbox)).value, isTrue);
     expect(source.doneLines, ['x (A) 2026-09-07 2026-01-02 file taxes']);
   });
 
+  testWidgets('a token only Done carries survives a new snapshot', (
+    tester,
+  ) async {
+    // The filter narrows the Done section too, so a chip is stale only
+    // when neither file carries the token any more.
+    await pumpTab(
+      tester,
+      todo: ['2026-01-02 buy milk +shop'],
+      done: ['x 2026-09-01 2026-08-01 prune roses +garden'],
+    );
+    view.toggleToken('+garden');
+    await tester.pump();
+    // A write publishes a new snapshot, which prunes stale chips.
+    final added = controller!.add('2026-09-07 call the plumber');
+    await tester.pump();
+    await added;
+    await tester.pump();
+    expect(source.todoLines, hasLength(2));
+    expect(view.filter.tokens, {'+garden'});
+  });
+
   testWidgets('unchecking restores the row to Open', (tester) async {
     await pumpTab(tester, done: ['x (A) 2026-09-07 2026-01-02 file taxes']);
-    await tester.tap(find.text('Done'));
+    expect(find.text('file taxes'), findsNothing, reason: 'Done starts folded');
+    await tester.tap(find.byKey(const Key('todo-section-done')));
     await tester.pump();
     expect(find.text('file taxes'), findsOneWidget);
     await tester.tap(find.byType(Checkbox).first);
     await tester.pump();
-    await tester.tap(find.text('Open'));
-    await tester.pump();
+    // Open again, under its due section (here none: No date).
+    expect(find.byKey(const Key('todo-section-due.none')), findsOneWidget);
     expect(find.text('file taxes'), findsOneWidget);
     expect(source.todoLines, ['(A) 2026-01-02 file taxes']);
     expect(source.doneLines, isEmpty);
@@ -219,7 +236,7 @@ void main() {
     tester,
   ) async {
     await pumpTab(tester, done: ['x 2026-09-01 old', 'x 2026-09-02 kept']);
-    await tester.tap(find.text('Done'));
+    await tester.tap(find.byKey(const Key('todo-section-done')));
     await settle(tester);
     await tester.tap(find.text('old'));
     await settle(tester);
@@ -268,15 +285,16 @@ void main() {
     expect(source.todoLines, ['kept']);
   });
 
-  testWidgets('empty lists show the empty states', (tester) async {
+  testWidgets('no task at all shows the empty state and no Done section', (
+    tester,
+  ) async {
     await pumpTab(tester);
     expect(find.text('No open tasks yet'), findsOneWidget);
-    await tester.tap(find.text('Done'));
-    await tester.pump();
-    expect(find.text('Nothing completed yet'), findsOneWidget);
+    expect(find.byKey(const Key('todo-section-done')), findsNothing);
+    expect(find.byKey(const Key('todo-view-switch')), findsNothing);
   });
 
-  testWidgets('the due dropdown narrows the list', (tester) async {
+  testWidgets('the Filter sheet due range narrows the list', (tester) async {
     await pumpTab(
       tester,
       todo: [
@@ -293,6 +311,7 @@ void main() {
       order(tester, ['overdue', 'today', 'soon', 'later', 'undated']),
       isTrue,
     );
+    await openSheet(tester);
     await selectDue(tester, 'overdue');
     expect(find.text('overdue'), findsOneWidget);
     expect(find.text('today'), findsNothing);
@@ -341,12 +360,12 @@ void main() {
     await tester.tap(tokenChip);
     await tester.pump();
     expect(tester.widget<FilterChip>(tokenChip).selected, isTrue);
-    // ...and so does the sort chip.
-    final sortChip = find.byKey(const Key('todo-sort-priority'));
-    expect(tester.widget<ChoiceChip>(sortChip).selected, isFalse);
-    await tester.tap(sortChip);
+    // ...and so does the due range.
+    final range = find.byKey(const Key('todo-due-overdue'));
+    expect(tester.widget<ChoiceChip>(range).selected, isFalse);
+    await tester.tap(range);
     await tester.pump();
-    expect(tester.widget<ChoiceChip>(sortChip).selected, isTrue);
+    expect(tester.widget<ChoiceChip>(range).selected, isTrue);
   });
 
   testWidgets('a combo that matches nothing shows the filtered empty', (
@@ -356,21 +375,22 @@ void main() {
     await openSheet(tester);
     await tester.tap(find.byKey(const Key('todo-token-+q')));
     await tester.pump();
-    await closeSheet(tester);
     await selectDue(tester, 'overdue');
     expect(find.text('No tasks match'), findsOneWidget);
   });
 
-  testWidgets('the sheet sort chips reorder the list', (tester) async {
+  testWidgets('the Sort menu reorders the list', (tester) async {
     await pumpTab(
       tester,
       todo: ['(B) bee due:2026-09-01', '(A) aye due:2026-09-10', 'plain'],
     );
     // The display titles strip the priorities and due tokens.
     expect(order(tester, ['bee', 'aye', 'plain']), isTrue);
-    await openSheet(tester);
+    await tester.tap(find.byKey(const Key('todo-sort-button')));
+    await settle(tester);
+    expect(find.byIcon(Icons.check), findsOneWidget, reason: 'the current key');
     await tester.tap(find.byKey(const Key('todo-sort-priority')));
-    await tester.pump();
+    await settle(tester);
     expect(order(tester, ['aye', 'bee', 'plain']), isTrue);
     // Sorting is display-only: the file order never moves.
     expect(source.todoLines.first, '(B) bee due:2026-09-01');

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A section of the todo widget (#1003): Overdue, Today, Next 7 days,
+     Later or No date, with its count at the end. Not clickable: the
+     collection row hands the launcher no fill-in intent, and the widget
+     always shows every section expanded. The factory paints the Overdue
+     one in the error color. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_todo_section"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingTop="8dp"
+    android:paddingBottom="2dp">
+
+    <TextView
+        android:id="@+id/widget_todo_section_label"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:ellipsize="end"
+        android:fontFamily="sans-serif-medium"
+        android:maxLines="1"
+        android:textColor="@color/widget_text_secondary"
+        android:textSize="11sp" />
+
+    <TextView
+        android:id="@+id/widget_todo_section_count"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:fontFamily="sans-serif-medium"
+        android:maxLines="1"
+        android:textColor="@color/widget_text_secondary"
+        android:textSize="11sp" />
+</LinearLayout>

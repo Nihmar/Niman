@@ -961,8 +961,6 @@ final class BelarusianStrings extends Strings {
 
   // Task lists (T-TD-04).
   @override
-  String get todoOpen => 'Адкрытыя';
-  @override
   String get todoDone => 'Выкананыя';
 
   // Filter row + sheet (T-TDM-03).
@@ -973,13 +971,7 @@ final class BelarusianStrings extends Strings {
   @override
   String get todoNoTokens => 'У гэтым спісе няма токеноў';
   @override
-  String get todoCountOpen => 'адкрытыя';
-  @override
-  String get todoCountDone => 'выкананыя';
-  @override
   String get todoEmptyOpen => 'Адкрытых заданняў яшчэ няма';
-  @override
-  String get todoEmptyDone => 'Выкананых яшчэ няма';
   @override
   String get todoEmptyFiltered => 'Няма адпаведных заданняў';
   @override
@@ -1106,6 +1098,20 @@ final class BelarusianStrings extends Strings {
   String get todoDueNext7 => 'Наступныя 7 дзён';
   @override
   String get todoDueNoDate => 'Без даты';
+  @override
+  String get todoSectionLater => 'Пазней';
+  @override
+  String todoSectionPriority(String letter) => 'Прыярытэт $letter';
+  @override
+  String get todoSectionNoPriority => 'Без прыярытэту';
+  @override
+  String get todoClearFilters => 'Ачысціць';
+  @override
+  String todoFilteredCount(int shown, int total) => '$shown з $total';
+  @override
+  String todoFilterActive(int count) => 'Фільтраваць · $count';
+  @override
+  String todoDoneOn(String date) => 'Выканана $date';
   @override
   String get todoRowDue => 'Тэрмін';
   @override

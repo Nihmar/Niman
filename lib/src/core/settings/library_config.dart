@@ -282,6 +282,25 @@ Set<EditorKind> _enabledEditorsFrom(Object? raw) {
   return kinds.isEmpty ? const {EditorKind.source, EditorKind.wysiwyg} : kinds;
 }
 
+/// The todo sections collapsed in a library nobody has opened on this
+/// device yet: Done, the archive, starts folded (#1003). It is the id of
+/// the Done section (`todoDoneSectionId` in `todo/todo_sections.dart`).
+const Set<String> defaultTodoCollapsedSections = {'done'};
+
+/// Reads a `todoCollapsedSections` list out of the settings file.
+///
+/// An absent or malformed value is the default (Done folded); a list is
+/// taken as it stands, so an empty one means every section is open. Ids
+/// are kept as written, whatever they are: a section a newer build knows
+/// is not this build's to drop.
+Set<String> _todoCollapsedSectionsFrom(Object? raw) {
+  if (raw is! List) return defaultTodoCollapsedSections;
+  return <String>{
+    for (final id in raw)
+      if (id is String && id.isNotEmpty) id,
+  };
+}
+
 /// Reads a `lintRulesOff` list out of the settings file: the #72 rules
 /// this library has turned off, by [LintRule.id].
 ///
@@ -407,6 +426,7 @@ final class LibraryConfig {
     this.frontmatterPanel = true,
     this.lintRulesOff = const <String>{},
     this.treeSort = TreeSort.nameAsc,
+    this.todoCollapsedSections = defaultTodoCollapsedSections,
     this.treeView = TreeView.list,
     this.linkType = LinkType.wikilink,
     this.linkUpdate = LinkUpdate.automatic,
@@ -507,6 +527,9 @@ final class LibraryConfig {
         ),
         _ => TreeSort.nameAsc,
       },
+      todoCollapsedSections: _todoCollapsedSectionsFrom(
+        json['todoCollapsedSections'],
+      ),
       // The enum's name is the stored id, as the sort's is: an unknown
       // value reads back as the list view (#727).
       treeView: switch (json['treeView']) {
@@ -692,6 +715,14 @@ final class LibraryConfig {
   /// The tree's sort order (default [TreeSort.nameAsc]).
   final TreeSort treeSort;
 
+  /// The todo list's sections folded on this device, by section id (#1003).
+  ///
+  /// Kept on the device ([deviceKeys]) like the view the Files pane takes:
+  /// a phone folds what a wide window leaves open. Done starts folded
+  /// ([defaultTodoCollapsedSections]); an empty set means every section is
+  /// open.
+  final Set<String> todoCollapsedSections;
+
   /// How the Files pane shows a folder, the tree or the grid (default
   /// [TreeView.list], #727).
   ///
@@ -820,6 +851,7 @@ final class LibraryConfig {
     bool? frontmatterPanel,
     Set<String>? lintRulesOff,
     TreeSort? treeSort,
+    Set<String>? todoCollapsedSections,
     TreeView? treeView,
     LinkType? linkType,
     LinkUpdate? linkUpdate,
@@ -873,6 +905,8 @@ final class LibraryConfig {
       frontmatterPanel: frontmatterPanel ?? this.frontmatterPanel,
       lintRulesOff: lintRulesOff ?? this.lintRulesOff,
       treeSort: treeSort ?? this.treeSort,
+      todoCollapsedSections:
+          todoCollapsedSections ?? this.todoCollapsedSections,
       treeView: treeView ?? this.treeView,
       linkType: linkType ?? this.linkType,
       linkUpdate: linkUpdate ?? this.linkUpdate,
@@ -934,6 +968,7 @@ final class LibraryConfig {
     'noteColumnWidth',
     'editorAutofocus',
     'treeSort',
+    'todoCollapsedSections',
     'treeView',
     'editorToolbar',
     'uiTextScale',
@@ -1004,6 +1039,7 @@ final class LibraryConfig {
     'frontmatterPanel',
     'lintRulesOff',
     'treeSort',
+    'todoCollapsedSections',
     'treeView',
     'linkType',
     'linkUpdate',
@@ -1075,6 +1111,10 @@ final class LibraryConfig {
       'linkPreview': linkPreview,
       'frontmatterPanel': frontmatterPanel,
       'treeSort': treeSort.name,
+      // Sorted, so the file does not churn on a set rebuilt in another
+      // order; written even when empty, which is "all open" rather than
+      // the default.
+      'todoCollapsedSections': todoCollapsedSections.toList()..sort(),
       'treeView': treeView.name,
       'linkType': linkType.name,
       'linkUpdate': linkUpdate.name,
@@ -1192,6 +1232,8 @@ final class LibraryConfig {
         lintRulesOff.length == other.lintRulesOff.length &&
         lintRulesOff.containsAll(other.lintRulesOff) &&
         treeSort == other.treeSort &&
+        todoCollapsedSections.length == other.todoCollapsedSections.length &&
+        todoCollapsedSections.containsAll(other.todoCollapsedSections) &&
         treeView == other.treeView &&
         linkType == other.linkType &&
         linkUpdate == other.linkUpdate &&

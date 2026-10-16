@@ -539,17 +539,13 @@ abstract base class Strings {
   String missingNoteDialogBody(String path);
 
   // Task lists (T-TD-04).
-  String get todoOpen;
   String get todoDone;
 
   // Filter row + sheet (T-TDM-03).
   String get todoAllDates;
   String get todoFilter;
   String get todoNoTokens;
-  String get todoCountOpen;
-  String get todoCountDone;
   String get todoEmptyOpen;
-  String get todoEmptyDone;
   String get todoEmptyFiltered;
   String get todoTitle;
   String get todoAddTooltip;
@@ -599,6 +595,13 @@ abstract base class Strings {
   String get todoDueToday;
   String get todoDueNext7;
   String get todoDueNoDate;
+  String get todoSectionLater;
+  String todoSectionPriority(String letter);
+  String get todoSectionNoPriority;
+  String get todoClearFilters;
+  String todoFilteredCount(int shown, int total);
+  String todoFilterActive(int count);
+  String todoDoneOn(String date);
   String get todoRowDue;
   String get todoRowDueToday;
   String get todoSortTooltip;

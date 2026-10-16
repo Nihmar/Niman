@@ -968,8 +968,6 @@ final class GermanStrings extends Strings {
 
   // Task lists (T-TD-04).
   @override
-  String get todoOpen => 'Offen';
-  @override
   String get todoDone => 'Erledigt';
 
   // Filter row + sheet (T-TDM-03).
@@ -980,13 +978,7 @@ final class GermanStrings extends Strings {
   @override
   String get todoNoTokens => 'Keine Token in dieser Liste';
   @override
-  String get todoCountOpen => 'offen';
-  @override
-  String get todoCountDone => 'erledigt';
-  @override
   String get todoEmptyOpen => 'Noch keine offenen Aufgaben';
-  @override
-  String get todoEmptyDone => 'Bisher nichts erledigt';
   @override
   String get todoEmptyFiltered => 'Keine Aufgabe passt';
   @override
@@ -1121,6 +1113,20 @@ final class GermanStrings extends Strings {
   String get todoDueNext7 => 'Nächste 7 Tage';
   @override
   String get todoDueNoDate => 'Ohne Datum';
+  @override
+  String get todoSectionLater => 'Später';
+  @override
+  String todoSectionPriority(String letter) => 'Priorität $letter';
+  @override
+  String get todoSectionNoPriority => 'Keine Priorität';
+  @override
+  String get todoClearFilters => 'Zurücksetzen';
+  @override
+  String todoFilteredCount(int shown, int total) => '$shown von $total';
+  @override
+  String todoFilterActive(int count) => 'Filtern · $count';
+  @override
+  String todoDoneOn(String date) => 'Erledigt $date';
   @override
   String get todoRowDue => 'Fällig';
   @override

@@ -962,8 +962,6 @@ final class FinnishStrings extends Strings {
 
   // Task lists (T-TD-04).
   @override
-  String get todoOpen => 'Avoimet';
-  @override
   String get todoDone => 'Valmiit';
 
   // Filter row + sheet (T-TDM-03).
@@ -974,13 +972,7 @@ final class FinnishStrings extends Strings {
   @override
   String get todoNoTokens => 'Ei tokeneita tällä listalla';
   @override
-  String get todoCountOpen => 'avoinna';
-  @override
-  String get todoCountDone => 'valmiina';
-  @override
   String get todoEmptyOpen => 'Ei vielä avoimia tehtäviä';
-  @override
-  String get todoEmptyDone => 'Ei vielä valmiita';
   @override
   String get todoEmptyFiltered => 'Ei tehtäviä, jotka täsmäävät';
   @override
@@ -1109,6 +1101,20 @@ final class FinnishStrings extends Strings {
   String get todoDueNext7 => 'Seuraavat 7 päivää';
   @override
   String get todoDueNoDate => 'Ilman päivämäärää';
+  @override
+  String get todoSectionLater => 'Myöhemmin';
+  @override
+  String todoSectionPriority(String letter) => 'Prioriteetti $letter';
+  @override
+  String get todoSectionNoPriority => 'Ei prioriteettia';
+  @override
+  String get todoClearFilters => 'Tyhjennä';
+  @override
+  String todoFilteredCount(int shown, int total) => '$shown / $total';
+  @override
+  String todoFilterActive(int count) => 'Suodata · $count';
+  @override
+  String todoDoneOn(String date) => 'Valmis $date';
   @override
   String get todoRowDue => 'Eräpäivä';
   @override

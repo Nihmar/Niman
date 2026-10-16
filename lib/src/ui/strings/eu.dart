@@ -961,8 +961,6 @@ final class BasqueStrings extends Strings {
 
   // Task lists (T-TD-04).
   @override
-  String get todoOpen => 'Irekitakoak';
-  @override
   String get todoDone => 'Bukatuta';
 
   // Filter row + sheet (T-TDM-03).
@@ -973,13 +971,7 @@ final class BasqueStrings extends Strings {
   @override
   String get todoNoTokens => 'Ez dago tokenerik zerrenda honetan';
   @override
-  String get todoCountOpen => 'irekitakoak';
-  @override
-  String get todoCountDone => 'bukatutakoak';
-  @override
   String get todoEmptyOpen => 'Oraindik ez dago zeregin irekirik';
-  @override
-  String get todoEmptyDone => 'Oraindik ez da ezer bukatu';
   @override
   String get todoEmptyFiltered => 'Ez dago zeregirik bat etorritako';
   @override
@@ -1110,6 +1102,20 @@ final class BasqueStrings extends Strings {
   String get todoDueNext7 => 'Hurrengo 7 egunean';
   @override
   String get todoDueNoDate => 'Datarik gabe';
+  @override
+  String get todoSectionLater => 'Geroago';
+  @override
+  String todoSectionPriority(String letter) => 'Lehentasuna $letter';
+  @override
+  String get todoSectionNoPriority => 'Lehentasunik gabe';
+  @override
+  String get todoClearFilters => 'Garbitu';
+  @override
+  String todoFilteredCount(int shown, int total) => '${total}tik $shown';
+  @override
+  String todoFilterActive(int count) => 'Iragazi · $count';
+  @override
+  String todoDoneOn(String date) => 'Bukatuta $date';
   @override
   String get todoRowDue => 'Epe';
   @override

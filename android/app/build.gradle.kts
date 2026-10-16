@@ -123,4 +123,8 @@ dependencies {
     // Host-side unit tests (android/app/src/test): the share copy's size
     // cap is plain JVM code, so it is tested without a device (#386).
     testImplementation("junit:junit:4.13.2")
+    // The platform's org.json is a stub in the host-side android.jar (every
+    // method throws "not mocked"); the widget payload parsing (#1003) runs
+    // against the reference implementation instead.
+    testImplementation("org.json:json:20250517")
 }

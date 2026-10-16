@@ -972,8 +972,6 @@ final class RomanianStrings extends Strings {
 
   // Task lists (T-TD-04).
   @override
-  String get todoOpen => 'Deschise';
-  @override
   String get todoDone => 'Finalizate';
 
   // Filter row + sheet (T-TDM-03).
@@ -984,13 +982,7 @@ final class RomanianStrings extends Strings {
   @override
   String get todoNoTokens => 'Niciun token în această listă';
   @override
-  String get todoCountOpen => 'deschise';
-  @override
-  String get todoCountDone => 'finalizate';
-  @override
   String get todoEmptyOpen => 'Nicio sarcină deschisă încă';
-  @override
-  String get todoEmptyDone => 'Niciuna finalizată încă';
   @override
   String get todoEmptyFiltered => 'Nicio sarcină nu se potrivește';
   @override
@@ -1118,6 +1110,20 @@ final class RomanianStrings extends Strings {
   String get todoDueNext7 => 'Următoarele 7 zile';
   @override
   String get todoDueNoDate => 'Fără dată';
+  @override
+  String get todoSectionLater => 'Mai târziu';
+  @override
+  String todoSectionPriority(String letter) => 'Prioritate $letter';
+  @override
+  String get todoSectionNoPriority => 'Fără prioritate';
+  @override
+  String get todoClearFilters => 'Șterge';
+  @override
+  String todoFilteredCount(int shown, int total) => '$shown din $total';
+  @override
+  String todoFilterActive(int count) => 'Filtrează · $count';
+  @override
+  String todoDoneOn(String date) => 'Finalizat $date';
   @override
   String get todoRowDue => 'Termen';
   @override

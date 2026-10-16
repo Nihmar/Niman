@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/language.dart';
 import 'package:niman/src/widget/widget_toggle.dart';
 import 'package:niman/src/widget/widget_updater.dart';
 import 'package:path/path.dart' as p;
@@ -15,7 +16,7 @@ void main() {
         parseToggleUri(
           Uri.parse('niman://todo-toggle?id=7&library=%2Flib&line=3'),
         ),
-        (id: 7, library: '/lib', line: 3, theme: null),
+        (id: 7, library: '/lib', line: 3, theme: null, language: null),
       );
     });
 
@@ -33,6 +34,19 @@ void main() {
         secondary: '#FFC3C6CF',
         accent: '#FFD0BCFF',
       ));
+    });
+
+    test('parses the language param', () {
+      final target = parseToggleUri(
+        Uri.parse('niman://todo-toggle?id=7&library=%2Flib&line=3&lg=it'),
+      );
+      expect(target?.language, 'it');
+      expect(
+        parseToggleUri(
+          Uri.parse('niman://todo-toggle?id=7&library=%2Flib&line=3&lg='),
+        )?.language,
+        isNull,
+      );
     });
 
     test('rejects garbage', () {
@@ -102,8 +116,24 @@ void main() {
       expect(saves.map((s) => s.$1), ['todo_7']);
       final payload = jsonDecode(saves.single.$2!) as Map<String, Object?>;
       final rows = payload['rows']! as List<Object?>;
-      expect(rows, hasLength(1));
-      expect((rows.single! as Map)['text'], 'call');
+      // The header of the section the line sits in, then the line.
+      expect(rows, hasLength(2));
+      expect((rows.first! as Map)['kind'], 'section');
+      expect((rows.last! as Map)['text'], 'call');
+    });
+
+    test('words the headings in the language the tap carried', () async {
+      addTearDown(AppLanguages.reset);
+      File(p.join(root.path, 'todo.txt')).writeAsStringSync('call\nbuy milk\n');
+      final uri = toggleUri(
+        1,
+      ).replace(queryParameters: {...toggleUri(1).queryParameters, 'lg': 'it'});
+
+      expect(await toggleWidgetTodo(uri, updater: recorder()), isTrue);
+      final payload = jsonDecode(saves.single.$2!) as Map<String, Object?>;
+      expect(payload['language'], 'it');
+      final header = (payload['rows']! as List<Object?>).first! as Map;
+      expect(header['label'], 'Senza data');
     });
 
     test('a stale line fails quiet', () async {

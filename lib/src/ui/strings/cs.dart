@@ -961,8 +961,6 @@ final class CzechStrings extends Strings {
 
   // Task lists (T-TD-04).
   @override
-  String get todoOpen => 'Otevřené';
-  @override
   String get todoDone => 'Hotové';
 
   // Filter row + sheet (T-TDM-03).
@@ -973,13 +971,7 @@ final class CzechStrings extends Strings {
   @override
   String get todoNoTokens => 'Žádné tokeny v tomto seznamu';
   @override
-  String get todoCountOpen => 'otevřené';
-  @override
-  String get todoCountDone => 'hotové';
-  @override
   String get todoEmptyOpen => 'Zatím žádné otevřené úkoly';
-  @override
-  String get todoEmptyDone => 'Zatím nic hotového';
   @override
   String get todoEmptyFiltered => 'Žádný úkol neodpovídá';
   @override
@@ -1104,6 +1096,20 @@ final class CzechStrings extends Strings {
   String get todoDueNext7 => 'Příštích 7 dní';
   @override
   String get todoDueNoDate => 'Bez data';
+  @override
+  String get todoSectionLater => 'Později';
+  @override
+  String todoSectionPriority(String letter) => 'Priorita $letter';
+  @override
+  String get todoSectionNoPriority => 'Bez priority';
+  @override
+  String get todoClearFilters => 'Zrušit';
+  @override
+  String todoFilteredCount(int shown, int total) => '$shown z $total';
+  @override
+  String todoFilterActive(int count) => 'Filtrovat · $count';
+  @override
+  String todoDoneOn(String date) => 'Hotovo $date';
   @override
   String get todoRowDue => 'Termín';
   @override

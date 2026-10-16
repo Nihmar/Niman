@@ -73,4 +73,95 @@ void main() {
       expect(sortTodosForWidget(snapshot(lines), limit: 3), hasLength(3));
     });
   });
+
+  group('widgetTodoSections', () {
+    // Wednesday 2026-10-14: next 7 days run through 2026-10-21.
+    final today = DateTime(2026, 10, 14);
+
+    String label(String id) => 'L:$id';
+
+    test('groups like the tab sorted by due date, empty ones hidden', () {
+      final sections = widgetTodoSections(
+        snapshot([
+          'undated',
+          'far due:2027-01-01',
+          'week due:2026-10-20',
+          'now due:2026-10-14',
+          'late due:2026-10-01',
+        ]),
+        labelOf: label,
+        today: today,
+      );
+      expect(
+        [for (final s in sections) s.id],
+        ['due.overdue', 'due.today', 'due.next7', 'due.later', 'due.none'],
+      );
+      expect(
+        [for (final s in sections) s.label],
+        [
+          'L:due.overdue',
+          'L:due.today',
+          'L:due.next7',
+          'L:due.later',
+          'L:due.none',
+        ],
+      );
+      expect(sections.map((s) => s.count), everyElement(1));
+
+      final sparse = widgetTodoSections(
+        snapshot(['now due:2026-10-14', 'undated']),
+        labelOf: label,
+        today: today,
+      );
+      expect([for (final s in sparse) s.id], ['due.today', 'due.none']);
+      expect(widgetTodoSections(snapshot([]), labelOf: label), isEmpty);
+    });
+
+    test('blank lines and the done file never reach a section', () {
+      final sections = widgetTodoSections(
+        TodoSnapshot(
+          todo: <TodoEntry>[
+            TodoEntry(lineIndex: 0, task: parseTodoLine('   ')),
+            TodoEntry(lineIndex: 1, task: parseTodoLine('open')),
+          ],
+          done: <TodoEntry>[
+            TodoEntry(lineIndex: 0, task: parseTodoLine('x 2026-10-01 done')),
+          ],
+        ),
+        labelOf: label,
+        today: today,
+      );
+      expect(sections.single.id, 'due.none');
+      expect(descriptions(sections.single.entries), ['open']);
+    });
+
+    test('the cap trims entries but a count stays the true count', () {
+      final lines = <String>[
+        for (var i = 0; i < 7; i++) 'late $i due:2026-10-01',
+        for (var i = 0; i < 4; i++) 'now $i due:2026-10-14',
+        for (var i = 0; i < 5; i++) 'free $i',
+      ];
+      final sections = widgetTodoSections(
+        snapshot(lines),
+        labelOf: label,
+        today: today,
+        limit: 9,
+      );
+      // Seven overdue, two of the four today; the undated ones are cut,
+      // and a section left with no entry is dropped (no bare header).
+      expect([for (final s in sections) s.id], ['due.overdue', 'due.today']);
+      expect([for (final s in sections) s.count], [7, 4]);
+      expect([for (final s in sections) s.entries.length], [7, 2]);
+    });
+
+    test('a cap landing on a section edge leaves no empty section', () {
+      final sections = widgetTodoSections(
+        snapshot(['late due:2026-10-01', 'now due:2026-10-14']),
+        labelOf: label,
+        today: today,
+        limit: 1,
+      );
+      expect([for (final s in sections) s.id], ['due.overdue']);
+    });
+  });
 }

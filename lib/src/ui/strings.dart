@@ -676,7 +676,6 @@ final class AppStrings {
       _s.missingNoteDialogBody(path);
 
   // Task lists (T-TD-04).
-  static String get todoOpen => _s.todoOpen;
   static String get todoDone => _s.todoDone;
 
   // Filter row + sheet (T-TDM-03).
@@ -685,10 +684,7 @@ final class AppStrings {
   static String get todoNoTokens => _s.todoNoTokens;
 
   // The "N open" / "N done" count (T-TDM-03).
-  static String get todoCountOpen => _s.todoCountOpen;
-  static String get todoCountDone => _s.todoCountDone;
   static String get todoEmptyOpen => _s.todoEmptyOpen;
-  static String get todoEmptyDone => _s.todoEmptyDone;
   static String get todoEmptyFiltered => _s.todoEmptyFiltered;
   static String get todoTitle => _s.todoTitle;
   static String get todoAddTooltip => _s.todoAddTooltip;
@@ -746,6 +742,15 @@ final class AppStrings {
   static String get todoDueToday => _s.todoDueToday;
   static String get todoDueNext7 => _s.todoDueNext7;
   static String get todoDueNoDate => _s.todoDueNoDate;
+  static String get todoSectionLater => _s.todoSectionLater;
+  static String todoSectionPriority(String letter) =>
+      _s.todoSectionPriority(letter);
+  static String get todoSectionNoPriority => _s.todoSectionNoPriority;
+  static String get todoClearFilters => _s.todoClearFilters;
+  static String todoFilteredCount(int shown, int total) =>
+      _s.todoFilteredCount(shown, total);
+  static String todoFilterActive(int count) => _s.todoFilterActive(count);
+  static String todoDoneOn(String date) => _s.todoDoneOn(date);
   // The row's due labels (the range menu above names the ranges): the
   // prefix keeps the due date from being read as the reminder's date.
   static String get todoRowDue => _s.todoRowDue;

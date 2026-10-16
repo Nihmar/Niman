@@ -546,6 +546,15 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   }
 
   @override
+  Future<Set<String>> get todoCollapsedSections async =>
+      _config.todoCollapsedSections;
+
+  @override
+  Future<void> setTodoCollapsedSections(Set<String> ids) async {
+    _config = _config.copyWith(todoCollapsedSections: {...ids});
+  }
+
+  @override
   Future<TreeView> get treeView async => _config.treeView;
 
   @override

@@ -518,6 +518,34 @@ void main() {
     await second.dispose();
   });
 
+  test('the folded todo sections persist, Done folded by default', () async {
+    final first = makeController();
+    await first.open(root.path, create: false);
+    expect(await first.todoCollapsedSections, {'done'});
+
+    await first.setTodoCollapsedSections({'due.later', 'priority.A'});
+    expect(await first.todoCollapsedSections, {'due.later', 'priority.A'});
+    // Everything open is an answer of its own, not the default again.
+    await first.setTodoCollapsedSections(<String>{});
+    expect(await first.todoCollapsedSections, isEmpty);
+    await first.setTodoCollapsedSections({'done', 'due.none'});
+    await first.close();
+    await first.dispose();
+
+    final second = makeController();
+    await second.open(root.path, create: false);
+    expect(await second.todoCollapsedSections, {'done', 'due.none'});
+    await second.setTodoCollapsedSections(<String>{});
+    await second.close();
+    await second.dispose();
+
+    final third = makeController();
+    await third.open(root.path, create: false);
+    expect(await third.todoCollapsedSections, isEmpty);
+    await third.close();
+    await third.dispose();
+  });
+
   test('deleting a book drops where it was left', () async {
     // #492: the write no longer prunes an absent file on its own, so the
     // deletion has to. The indexer's prune of the deleted path is what the

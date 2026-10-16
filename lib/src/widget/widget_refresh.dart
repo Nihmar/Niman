@@ -9,15 +9,14 @@ library;
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/todo/todo_store.dart';
-import 'package:niman/src/todo/widget_todos.dart';
 import 'package:niman/src/widget/widget_configs.dart';
 import 'package:niman/src/widget/widget_host.dart';
 import 'package:niman/src/widget/widget_note_ops.dart';
-import 'package:niman/src/widget/widget_payload.dart';
 import 'package:niman/src/widget/widget_pin.dart';
 import 'package:niman/src/widget/widget_placement.dart';
 import 'package:niman/src/widget/widget_reconcile.dart';
 import 'package:niman/src/widget/widget_theme.dart';
+import 'package:niman/src/widget/widget_todo_payload.dart';
 import 'package:niman/src/widget/widget_updater.dart';
 
 /// Pushes [snapshot]'s open todos to every todo widget configured for the
@@ -48,10 +47,9 @@ Future<void> refreshTodoWidgets({
     adopt: session.adoptTodoWidget,
   );
   if (ids.isEmpty) return;
-  final payload = todoWidgetPayload(
-    sortTodosForWidget(snapshot),
+  final payload = buildTodoWidgetPayload(
+    snapshot,
     libraryPath: root,
-    total: widgetTodoTotal(snapshot),
     theme: resolveWidgetTheme(),
   );
   await pushToWidgets(

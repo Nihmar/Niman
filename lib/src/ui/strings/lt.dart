@@ -963,8 +963,6 @@ final class LithuanianStrings extends Strings {
 
   // Task lists (T-TD-04).
   @override
-  String get todoOpen => 'Atidarytos';
-  @override
   String get todoDone => 'Atliktos';
 
   // Filter row + sheet (T-TDM-03).
@@ -975,13 +973,7 @@ final class LithuanianStrings extends Strings {
   @override
   String get todoNoTokens => 'Šiame sąraše žetonų nėra';
   @override
-  String get todoCountOpen => 'atidarytos';
-  @override
-  String get todoCountDone => 'atliktos';
-  @override
   String get todoEmptyOpen => 'Atidarytų užduočių dar nėra';
-  @override
-  String get todoEmptyDone => 'Atliktų dar nėra';
   @override
   String get todoEmptyFiltered => 'Atitinkančių užduočių nėra';
   @override
@@ -1104,6 +1096,20 @@ final class LithuanianStrings extends Strings {
   String get todoDueNext7 => 'Kitos 7 dienos';
   @override
   String get todoDueNoDate => 'Bez datos';
+  @override
+  String get todoSectionLater => 'Vėliau';
+  @override
+  String todoSectionPriority(String letter) => 'Prioritetas $letter';
+  @override
+  String get todoSectionNoPriority => 'Be prioriteto';
+  @override
+  String get todoClearFilters => 'Išvalyti';
+  @override
+  String todoFilteredCount(int shown, int total) => '$shown iš $total';
+  @override
+  String todoFilterActive(int count) => 'Filtruoti · $count';
+  @override
+  String todoDoneOn(String date) => 'Atlikta $date';
   @override
   String get todoRowDue => 'Terminas';
   @override

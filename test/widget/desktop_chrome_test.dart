@@ -197,43 +197,50 @@ void main() {
     ), reason: 'wide: the panel opens over the note');
   });
 
-  testWidgets('wide: the todo panel holds switch, add and help; no FAB', (
-    tester,
-  ) async {
-    await pumpShell(tester, const Size(1200, 900));
-    await tester.tap(railDest('todo'));
-    await settle(tester);
+  testWidgets(
+    'wide: the todo toolbar holds filter, sort, add and help; no FAB',
+    (tester) async {
+      await pumpShell(tester, const Size(1200, 900));
+      await tester.tap(railDest('todo'));
+      await settle(tester);
 
-    // Open/Done leads the filter panel (same row), with Add task and the
-    // format help trailing it; the phone's add FAB is gone on desktop.
-    expect(find.byKey(const Key('todo-view-switch')), findsOne);
-    expect(find.byKey(const Key('todo-filter-button')), findsOne);
-    expect(find.byKey(const Key('todo-add-button')), findsOne);
-    expect(find.byKey(const Key('todo-help')), findsOne);
-    expect(find.byKey(const Key('todo-add')), findsNothing);
-    expect(
-      tester.getCenter(find.byKey(const Key('todo-view-switch'))).dy,
-      moreOrLessEquals(
-        tester.getCenter(find.byKey(const Key('todo-filter-button'))).dy,
-        epsilon: 1,
-      ),
-    );
+      // Filter and Sort lead the toolbar (one row), with Add task and the
+      // format help trailing it; the phone's add FAB is gone on desktop, and
+      // so are the Open/Done switch and the count.
+      expect(find.byKey(const Key('todo-filter-button')), findsOne);
+      expect(find.byKey(const Key('todo-sort-button')), findsOne);
+      expect(find.byKey(const Key('todo-add-button')), findsOne);
+      expect(find.byKey(const Key('todo-help')), findsOne);
+      expect(find.byKey(const Key('todo-add')), findsNothing);
+      expect(find.byKey(const Key('todo-view-switch')), findsNothing);
+      expect(find.byKey(const Key('todo-count')), findsNothing);
+      expect(
+        tester.getCenter(find.byKey(const Key('todo-sort-button'))).dy,
+        moreOrLessEquals(
+          tester.getCenter(find.byKey(const Key('todo-filter-button'))).dy,
+          epsilon: 1,
+        ),
+      );
+      // A pane this wide holds the labelled pills.
+      expect(find.text('Filter'), findsWidgets);
+      expect(find.text('Due date'), findsWidgets);
 
-    await tester.tap(find.byKey(const Key('todo-add-button')));
-    await settle(tester);
-    expect(find.byKey(const Key('todo-dialog-field')), findsOne);
-    await tester.tap(find.text(AppStrings.todoCancel));
-    await settle(tester);
+      await tester.tap(find.byKey(const Key('todo-add-button')));
+      await settle(tester);
+      expect(find.byKey(const Key('todo-dialog-field')), findsOne);
+      await tester.tap(find.text(AppStrings.todoCancel));
+      await settle(tester);
 
-    // The help opens over the tab: the rail stays on screen.
-    await tester.tap(find.byKey(const Key('todo-help')));
-    await settle(tester);
-    expect(find.byKey(const Key('todo-help-dialog')), findsOne);
-    expect(find.byKey(const Key('shell-rail')), findsOne);
-    await tester.tap(find.byKey(const Key('todo-help-close')));
-    await settle(tester);
-    expect(find.byKey(const Key('todo-help-dialog')), findsNothing);
-  });
+      // The help opens over the tab: the rail stays on screen.
+      await tester.tap(find.byKey(const Key('todo-help')));
+      await settle(tester);
+      expect(find.byKey(const Key('todo-help-dialog')), findsOne);
+      expect(find.byKey(const Key('shell-rail')), findsOne);
+      await tester.tap(find.byKey(const Key('todo-help-close')));
+      await settle(tester);
+      expect(find.byKey(const Key('todo-help-dialog')), findsNothing);
+    },
+  );
 
   testWidgets('wide: the title bar toggles the tree, the rail stays', (
     tester,

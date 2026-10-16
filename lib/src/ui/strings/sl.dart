@@ -966,8 +966,6 @@ final class SlovenianStrings extends Strings {
 
   // Task lists (T-TD-04).
   @override
-  String get todoOpen => 'Odprte';
-  @override
   String get todoDone => 'Končane';
 
   // Filter row + sheet (T-TDM-03).
@@ -978,13 +976,7 @@ final class SlovenianStrings extends Strings {
   @override
   String get todoNoTokens => 'Ni žetonov na tem seznamu';
   @override
-  String get todoCountOpen => 'odprte';
-  @override
-  String get todoCountDone => 'končane';
-  @override
   String get todoEmptyOpen => 'Ni še odprtih nalog';
-  @override
-  String get todoEmptyDone => 'Ni še končanih';
   @override
   String get todoEmptyFiltered => 'Naloga ne ustreza';
   @override
@@ -1109,6 +1101,20 @@ final class SlovenianStrings extends Strings {
   String get todoDueNext7 => 'Prihodnjih 7 dni';
   @override
   String get todoDueNoDate => 'Brez datuma';
+  @override
+  String get todoSectionLater => 'Pozneje';
+  @override
+  String todoSectionPriority(String letter) => 'Prioriteta $letter';
+  @override
+  String get todoSectionNoPriority => 'Brez prioritete';
+  @override
+  String get todoClearFilters => 'Počisti';
+  @override
+  String todoFilteredCount(int shown, int total) => '$shown od $total';
+  @override
+  String todoFilterActive(int count) => 'Filtri · $count';
+  @override
+  String todoDoneOn(String date) => 'Končano $date';
   @override
   String get todoRowDue => 'Rok';
   @override

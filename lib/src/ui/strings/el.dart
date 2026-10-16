@@ -981,8 +981,6 @@ final class GreekStrings extends Strings {
 
   // Task lists (T-TD-04).
   @override
-  String get todoOpen => 'Ανοιχτά';
-  @override
   String get todoDone => 'Ολοκληρωμένα';
 
   // Filter row + sheet (T-TDM-03).
@@ -993,13 +991,7 @@ final class GreekStrings extends Strings {
   @override
   String get todoNoTokens => 'Δεν υπάρχουν tokens σε αυτή τη λίστα';
   @override
-  String get todoCountOpen => 'ανοιχτά';
-  @override
-  String get todoCountDone => 'ολοκληρωμένα';
-  @override
   String get todoEmptyOpen => 'Δεν υπάρχουν ακόμα ανοιχτά καθήκοντα';
-  @override
-  String get todoEmptyDone => 'Δεν ολοκληρώθηκε τίποτα ακόμα';
   @override
   String get todoEmptyFiltered => 'Δεν υπάρχουν καθήκοντα που ταυτίζονται';
   @override
@@ -1134,6 +1126,20 @@ final class GreekStrings extends Strings {
   String get todoDueNext7 => 'Επόμενες 7 ημέρες';
   @override
   String get todoDueNoDate => 'Χωρίς ημερομηνία';
+  @override
+  String get todoSectionLater => 'Αργότερα';
+  @override
+  String todoSectionPriority(String letter) => 'Προτεραιότητα $letter';
+  @override
+  String get todoSectionNoPriority => 'Χωρίς προτεραιότητα';
+  @override
+  String get todoClearFilters => 'Καθαρισμός';
+  @override
+  String todoFilteredCount(int shown, int total) => '$shown από $total';
+  @override
+  String todoFilterActive(int count) => 'Φίλτρα · $count';
+  @override
+  String todoDoneOn(String date) => 'Ολοκληρώθηκε $date';
   @override
   String get todoRowDue => 'Λήξη';
   @override

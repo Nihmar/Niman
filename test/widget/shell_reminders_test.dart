@@ -87,7 +87,7 @@ void main() {
     // Icons only since #170: by key, the label is the tooltip.
     await tester.tap(find.byKey(const Key('rail-todo')));
     await settle(tester);
-    expect(find.byKey(const Key('todo-view-switch')), findsOne);
+    expect(find.byKey(const Key('todo-filter-button')), findsOne);
   });
 
   testWidgets('a reminder tap opens the todo list on a wide layout', (
@@ -98,7 +98,7 @@ void main() {
     await pumpShell(tester, const Size(1200, 900));
     reminders.tap(todoReminderPayload);
     await settle(tester);
-    expect(find.byKey(const Key('todo-view-switch')), findsOne);
+    expect(find.byKey(const Key('todo-filter-button')), findsOne);
   });
 
   testWidgets('an event reminder joins the tasks in one wanted set', (
@@ -132,7 +132,7 @@ void main() {
     reminders.tap(journalReminderPayload(DateTime(2099, 9, 8)));
     await settle(tester);
     expect(find.byKey(const Key('journal-browser')), findsOne);
-    expect(find.byKey(const Key('todo-view-switch')), findsNothing);
+    expect(find.byKey(const Key('todo-filter-button')), findsNothing);
   });
 
   testWidgets('the format help is one tap from the list', (tester) async {

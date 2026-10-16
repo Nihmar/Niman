@@ -98,7 +98,7 @@ class TodoWidgetProvider : HomeWidgetProvider() {
 
         // The header count names the TRUE open total (payload `total`),
         // so it stays right when the row cap truncates the payload.
-        val rowCount = rows?.length() ?: 0
+        val rowCount = TodoWidgetItems.rowCount(TodoWidgetItems.parse(rows))
         val total = parsed?.optInt("total", rowCount) ?: rowCount
         val views = RemoteViews(context.packageName, R.layout.widget_todo)
         views.setTextViewText(R.id.widget_todo_title, titleFor(context, library))

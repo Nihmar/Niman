@@ -962,8 +962,6 @@ final class SwedishStrings extends Strings {
 
   // Task lists (T-TD-04).
   @override
-  String get todoOpen => 'Öppna';
-  @override
   String get todoDone => 'Klart';
 
   // Filter row + sheet (T-TDM-03).
@@ -974,13 +972,7 @@ final class SwedishStrings extends Strings {
   @override
   String get todoNoTokens => 'Inga token i den här listan';
   @override
-  String get todoCountOpen => 'öppna';
-  @override
-  String get todoCountDone => 'klar';
-  @override
   String get todoEmptyOpen => 'Inga pågående uppgifter ännu';
-  @override
-  String get todoEmptyDone => 'Inget slutfört ännu';
   @override
   String get todoEmptyFiltered => 'Inga uppgifter matchar';
   @override
@@ -1109,6 +1101,20 @@ final class SwedishStrings extends Strings {
   String get todoDueNext7 => 'Nästa 7 dagar';
   @override
   String get todoDueNoDate => 'Inget datum';
+  @override
+  String get todoSectionLater => 'Senare';
+  @override
+  String todoSectionPriority(String letter) => 'Prioritet $letter';
+  @override
+  String get todoSectionNoPriority => 'Ingen prioritet';
+  @override
+  String get todoClearFilters => 'Rensa';
+  @override
+  String todoFilteredCount(int shown, int total) => '$shown av $total';
+  @override
+  String todoFilterActive(int count) => 'Filtrera · $count';
+  @override
+  String todoDoneOn(String date) => 'Klart $date';
   @override
   String get todoRowDue => 'Förfällig';
   @override

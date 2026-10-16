@@ -3,6 +3,39 @@
 The Todo tab reads `todo.txt` files (todo.txt grammar: `x (A)
 2016-05-20 2016-04-30 description +project @context #tag key:value`).
 
+## The list
+
+The open tasks come in sections that follow the sort:
+
+- **By due date** (the default): Overdue, Today, Next 7 days, Later and
+  No date.
+- **By priority**: one section per letter, A first, then No priority.
+- **By creation date**: one plain list, without headers.
+
+Each header shows how many tasks it holds; tap it (or click it) to fold
+the section or open it again. A section with nothing in it is not shown.
+Which sections are folded is remembered on each device, for each
+library.
+
+**Done** is the last section: the tasks of `done.txt`, newest first,
+folded until you open it. A done task is checked and shows the day it was
+finished; unchecking it puts it back among the open ones.
+
+**Filter** narrows both the open tasks and Done: a due range (All dates,
+Overdue, Today, Next 7 days, No date) and any number of `+project`,
+`@context` and `#tag` chips, which all have to match. **Sort** picks the
+order: due date, priority or creation date. A task's priority shows as a
+small badge, except when the list is sorted by priority, where its
+section already says it. While a filter is on, a strip under the bar
+lists it as chips you can remove one by one, with how many open tasks
+are shown out of how many, and **Clear** to drop them all.
+
+On a phone, help, **Filter** and **Sort** are in the app bar; the Filter
+icon takes the accent color and a dot while a filter is on. On a
+desktop they are a toolbar over the list — **Filter** (`Filter · 2` with
+two filters on) and **Sort** as pills, then **Add task** and help — or
+four icons in a pane too narrow for the pills.
+
 ## Line anatomy
 
 - `x ` marks completion; `(A)`…`(Z)` is priority; dates are
@@ -23,10 +56,11 @@ On a desktop the list is driven by the mouse and the keyboard (#712):
 
 - a click selects a row, a double click edits its text in place —
   `Enter` saves, `Esc` cancels;
-- `↑` / `↓` move the selection and scroll it into view, `Space` checks
-  the task, `Enter` or `F2` edits it in place and `Delete` deletes it —
-  the selection moves on to the row that takes the task's place, and
-  starts over when you switch between Open and Done;
+- `↑` / `↓` move the selection across the tasks and the section headers
+  and scroll it into view; on a task, `Space` checks it, `Enter` or `F2`
+  edits it in place and `Delete` deletes it — the selection moves on to
+  the row that takes the task's place; on a header, `Enter` or `Space`
+  folds the section or opens it;
 - a right click opens the row's menu at the pointer: **Edit…** (the
   dialog, for the dates, the reminder and the priority), **Set due** ▸
   (Today, Tomorrow, Next week, Pick a date…, No due date), **Priority** ▸
@@ -37,11 +71,11 @@ On a desktop the list is driven by the mouse and the keyboard (#712):
   `@context` and `due:` included, with the tokens already in the list
   completed as you type them (`Tab` takes the first) — and keeps the
   cursor for the next one;
-- **Filter** opens its tokens and sort under the pill.
+- **Filter** and **Sort** open under their pills.
 
-Deleting removes the line from `todo.txt` (or `done.txt`, in the
-Done view) outright: there is no trash for tasks. To keep a finished
-task, check it instead.
+Deleting removes the line from `todo.txt` (or `done.txt`, for a task in
+the Done section) outright: there is no trash for tasks. To keep a
+finished task, check it instead.
 
 ## The files themselves
 
@@ -82,9 +116,10 @@ tapping a task's opens the task list.
 
 ## Home-screen widget
 
-Android: the **Niman Todos** widget mirrors the tab's open view —
-due-soonest first — and toggles a task on a row tap, with the app
-closed or not. See [widgets](widgets.md).
+Android: the **Niman Todos** widget shows the tab's open tasks in the
+same due-date sections (Overdue, Today, Next 7 days, Later, No date)
+and toggles a task on a row tap, with the app closed or not. See
+[widgets](widgets.md).
 
 ## The task dialog
 

@@ -963,8 +963,6 @@ final class SerbianStrings extends Strings {
 
   // Task lists (T-TD-04).
   @override
-  String get todoOpen => 'Отворено';
-  @override
   String get todoDone => 'Завршено';
 
   // Filter row + sheet (T-TDM-03).
@@ -975,13 +973,7 @@ final class SerbianStrings extends Strings {
   @override
   String get todoNoTokens => 'Нема токена у овом списку';
   @override
-  String get todoCountOpen => 'отворено';
-  @override
-  String get todoCountDone => 'завршено';
-  @override
   String get todoEmptyOpen => 'Још нема отворених задатака';
-  @override
-  String get todoEmptyDone => 'Још ништа завршено';
   @override
   String get todoEmptyFiltered => 'Нема задатака који поклапају';
   @override
@@ -1108,6 +1100,20 @@ final class SerbianStrings extends Strings {
   String get todoDueNext7 => 'Следећих 7 дана';
   @override
   String get todoDueNoDate => 'Без датума';
+  @override
+  String get todoSectionLater => 'Касније';
+  @override
+  String todoSectionPriority(String letter) => 'Приоритет $letter';
+  @override
+  String get todoSectionNoPriority => 'Без приоритета';
+  @override
+  String get todoClearFilters => 'Очисти';
+  @override
+  String todoFilteredCount(int shown, int total) => '$shown од $total';
+  @override
+  String todoFilterActive(int count) => 'Филтер · $count';
+  @override
+  String todoDoneOn(String date) => 'Завршено $date';
   @override
   String get todoRowDue => 'Доспеће';
   @override
