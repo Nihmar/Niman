@@ -607,6 +607,13 @@ final class LithuanianStrings extends Strings {
   @override
   String get noteLoadFailed => 'Šio užrašo atidaryti nepavyko.';
   @override
+  String get noteLoadMissing => 'Šio užrašo failo diske nebėra.';
+  @override
+  String get noteLoadDenied => 'Niman neturi leidimo skaityti šio užrašo.';
+  @override
+  String get noteLoadLocked =>
+      'Kita programa naudoja šį užrašą. Pabandykite dar kartą po akimirkos.';
+  @override
   String wordCount(int count) => count % 100 >= 11 && count % 100 <= 19
       ? '$count žodžių'
       : switch (count % 10) {

@@ -616,6 +616,13 @@ final class BulgarianStrings extends Strings {
   @override
   String get noteLoadFailed => 'Тази бележка не можа да бъде отворена.';
   @override
+  String get noteLoadMissing => 'Файлът на тази бележка вече го няма на диска.';
+  @override
+  String get noteLoadDenied => 'Niman няма разрешение да чете тази бележка.';
+  @override
+  String get noteLoadLocked =>
+      'Друга програма използва тази бележка. Опитайте отново след малко.';
+  @override
   String wordCount(int count) => count == 1 ? '1 дума' : '$count думи';
   @override
   String get outlineTooltip => 'Структура';

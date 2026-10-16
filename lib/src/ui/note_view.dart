@@ -425,6 +425,12 @@ final class _NoteViewState extends State<NoteView>
   bool _loading = true;
   bool _ready = false;
 
+  /// Which load is the current one (#1059): counted up as each starts, and
+  /// compared after every await, so a load the reader has moved on from —
+  /// another note, the same note asked for again — changes nothing when it
+  /// ends, whether it ends well or not.
+  int _loadGeneration = 0;
+
   /// Why the note could not be opened, in the user's words; the raw error
   /// goes to the log only (issue #156).
   String? _error;
@@ -1139,6 +1145,7 @@ final class _NoteViewState extends State<NoteView>
 
   Future<void> _load() async {
     final path = widget.path;
+    final generation = ++_loadGeneration;
     // The buffer stops being any note's text here: the outgoing note's
     // save already left with its own path and text (didUpdateWidget), and
     // the incoming one is not read yet. Nothing in it is owed to the disk,
@@ -1169,7 +1176,7 @@ final class _NoteViewState extends State<NoteView>
         ready = loaded as LoadedNote;
         content = ready.text;
       }
-      if (!mounted || widget.path != path) return;
+      if (!mounted || generation != _loadGeneration) return;
       // The buffer uses LF: normalize line endings on load.
       final text = ready?.text ?? normalizedLineEndings(content);
       // The note kind (T-TK-02): the frontmatter `type` decides the body
@@ -1201,6 +1208,7 @@ final class _NoteViewState extends State<NoteView>
       setState(() {
         _loading = false;
         _ready = true;
+        _error = null;
       });
       // Opened straight into the preview: the IME has no target here.
       _dismissKeyboardForPreview();
@@ -1246,17 +1254,33 @@ final class _NoteViewState extends State<NoteView>
       // user waited for — load plus the frame that paints the loaded note.
       logNextFrame('editor', 'note open first frame (${text.length} chars)');
     } on Object catch (error) {
-      if (!mounted) return;
+      // A load the reader moved on from reports nothing: its failure is not
+      // this note's (#1059).
+      if (!mounted || generation != _loadGeneration) return;
       // A file that is not text is an attachment, not a broken note: it
       // says so, and nothing about it is ever reported saved (#156).
-      final notText = error is NoteReadFailure && error.notText;
+      final reason = NoteReadReason.of(error);
+      final notText = reason == NoteReadReason.notText;
       setState(() {
         _loading = false;
         _notText = notText;
-        _error = notText ? AppStrings.noteNotText : AppStrings.noteLoadFailed;
+        _error = switch (reason) {
+          NoteReadReason.notText => AppStrings.noteNotText,
+          NoteReadReason.missing => AppStrings.noteLoadMissing,
+          NoteReadReason.denied => AppStrings.noteLoadDenied,
+          NoteReadReason.locked => AppStrings.noteLoadLocked,
+          NoteReadReason.other => AppStrings.noteLoadFailed,
+        };
       });
       _log.error('note load failed: $path ($error)');
     }
+  }
+
+  /// Opens the note again after a load that failed: the error pane's Retry,
+  /// and the next reload trigger while the pane is up (#1059).
+  void _retryLoad() {
+    if (_loading) return;
+    unawaited(_load());
   }
 
   /// Adopts the disk text when it changed under the open note (a
@@ -1269,6 +1293,12 @@ final class _NoteViewState extends State<NoteView>
   /// external edit never disturbs the caret. The WYSIWYG surface owns a
   /// live document the buffer cannot replace, so it never auto-reloads.
   Future<void> _reloadIfChanged() async {
+    // A note that failed to open has nothing on screen to protect: the next
+    // trigger — a resume, a sync that touched it — is a new try (#1059).
+    if (_error != null && !_notText) {
+      _retryLoad();
+      return;
+    }
     if (_loading || _saves.busy) {
       _log.debug('reload skipped (busy): ${widget.path}');
       return;
@@ -1278,6 +1308,7 @@ final class _NoteViewState extends State<NoteView>
       return;
     }
     final path = widget.path;
+    final generation = _loadGeneration;
     // What the file looked like when it was last read or written, before the
     // read: O(1) against 250 ms of joining and comparing, and O(1) against
     // the read itself. The test seam reads nothing, so it has no stat to
@@ -1299,7 +1330,9 @@ final class _NoteViewState extends State<NoteView>
       _log.warning('reload read failed: $path ($error)');
       return;
     }
-    if (!mounted || widget.path != path) return;
+    if (!mounted || widget.path != path || generation != _loadGeneration) {
+      return;
+    }
     // The user may have typed during the read: re-check clean before
     // adopting anything.
     if (_loading || _saves.busy || _saves.dirty) {
@@ -2209,6 +2242,7 @@ final class _NoteViewState extends State<NoteView>
                       message: error,
                       path: widget.path,
                       offerDefaultApp: _notText,
+                      onRetry: _notText ? null : _retryLoad,
                     ),
             ),
           ),

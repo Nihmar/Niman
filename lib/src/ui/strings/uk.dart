@@ -608,6 +608,13 @@ final class UkrainianStrings extends Strings {
   @override
   String get noteLoadFailed => 'Не вдалося відкрити цю нотатку.';
   @override
+  String get noteLoadMissing => 'Файлу цієї нотатки більше немає на диску.';
+  @override
+  String get noteLoadDenied => 'Niman не має дозволу читати цю нотатку.';
+  @override
+  String get noteLoadLocked =>
+      'Інша програма використовує цю нотатку. Спробуйте ще раз за мить.';
+  @override
   String wordCount(int count) =>
       switch (count % 100 >= 11 && count % 100 <= 14 ? 0 : count % 10) {
         1 => '$count слово',

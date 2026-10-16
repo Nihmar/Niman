@@ -608,6 +608,14 @@ final class NorwegianStrings extends Strings {
   @override
   String get noteLoadFailed => 'Notatet kunne ikke åpnes.';
   @override
+  String get noteLoadMissing =>
+      'Filen til notatet finnes ikke lenger på disken.';
+  @override
+  String get noteLoadDenied => 'Niman har ikke tillatelse til å lese notatet.';
+  @override
+  String get noteLoadLocked =>
+      'Et annet program bruker notatet. Prøv igjen om et øyeblikk.';
+  @override
   String wordCount(int count) => '$count ord';
   @override
   String get outlineTooltip => 'Struktur';

@@ -141,6 +141,21 @@ void main() {
     expect(noteBytesNativeDecodes - decodes, 1, reason: 'the reload path');
   });
 
+  test('a file that cannot be read is a failure that says why (#1059)', () {
+    final gone = p.join(dir.path, 'gone.md');
+    for (final read in [loadNoteSync, readNoteTextSync]) {
+      final failure = read(gone);
+      expect(failure, isA<NoteReadFailure>());
+      expect((failure as NoteReadFailure).reason, NoteReadReason.missing);
+      expect(failure.notText, isFalse);
+    }
+    // A directory in the note's place: neither missing nor text.
+    final folder = Directory(p.join(dir.path, 'folder.md'))..createSync();
+    final failure = loadNoteSync(folder.path);
+    expect(failure, isA<NoteReadFailure>());
+    expect((failure as NoteReadFailure).notText, isFalse);
+  });
+
   test('line endings are made LF, and an LF note is left as it is', () {
     expect(normalizedLineEndings('a\r\nb\rc\n'), 'a\nb\nc\n');
     const lf = 'a\nb\n';

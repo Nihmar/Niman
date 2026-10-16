@@ -60,16 +60,32 @@ Future<Object> readNoteText(String path) =>
 /// callable on its own for the test that counts its decodes.
 @visibleForTesting
 Object readNoteTextSync(String path) {
-  final text = decodeNoteTextIfText(File(path).readAsBytesSync());
+  final String? text;
+  try {
+    text = decodeNoteTextIfText(File(path).readAsBytesSync());
+  } on FileSystemException catch (error) {
+    return _unreadable(path, error);
+  }
   if (text == null) return NoteReadFailure('$path: not text', notText: true);
   return text;
 }
+
+/// The failure a read that threw amounts to: a value the isolate can send
+/// whatever the platform's exception holds, and that the pane can word by
+/// its reason (#1059).
+NoteReadFailure _unreadable(String path, FileSystemException error) =>
+    NoteReadFailure('$path: $error', reason: NoteReadReason.of(error));
 
 /// [loadNote] on the calling isolate: what the isolate runs, kept callable
 /// on its own for the test that counts its decodes.
 @visibleForTesting
 Object loadNoteSync(String path) {
-  final read = decodeNoteTextIfText(File(path).readAsBytesSync());
+  final String? read;
+  try {
+    read = decodeNoteTextIfText(File(path).readAsBytesSync());
+  } on FileSystemException catch (error) {
+    return _unreadable(path, error);
+  }
   if (read == null) return NoteReadFailure('$path: not text', notText: true);
   final text = normalizedLineEndings(read);
   return LoadedNote(text: text, buffer: SourceBuffer.fromText(text));

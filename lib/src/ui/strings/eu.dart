@@ -607,6 +607,14 @@ final class BasqueStrings extends Strings {
   @override
   String get noteLoadFailed => 'Ezin izan da ohar hau ireki.';
   @override
+  String get noteLoadMissing => 'Ohar honen fitxategia ez dago jada diskoan.';
+  @override
+  String get noteLoadDenied => 'Nimanek ez du ohar hau irakurtzeko baimenik.';
+  @override
+  String get noteLoadLocked =>
+      'Beste programa batek ohar hau erabiltzen ari da. Saiatu berriro une '
+      'batean.';
+  @override
   String wordCount(int count) => '$count hitz';
   @override
   String get outlineTooltip => 'Egitura';

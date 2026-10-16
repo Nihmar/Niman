@@ -598,6 +598,14 @@ final class HindiStrings extends Strings {
   @override
   String get noteLoadFailed => 'यह नोट खोला नहीं जा सका।';
   @override
+  String get noteLoadMissing => 'इस नोट की फ़ाइल अब डिस्क पर नहीं है।';
+  @override
+  String get noteLoadDenied => 'Niman को यह नोट पढ़ने की अनुमति नहीं है।';
+  @override
+  String get noteLoadLocked =>
+      'कोई दूसरा प्रोग्राम इस नोट का उपयोग कर रहा है। थोड़ी देर बाद फिर कोशिश '
+      'करें।';
+  @override
   String wordCount(int count) => '$count शब्द';
   @override
   String get outlineTooltip => 'आउटलाइन';

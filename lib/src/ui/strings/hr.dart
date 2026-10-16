@@ -610,6 +610,13 @@ final class CroatianStrings extends Strings {
   @override
   String get noteLoadFailed => 'Ova se bilješka nije mogla otvoriti.';
   @override
+  String get noteLoadMissing => 'Datoteke ove bilješke više nema na disku.';
+  @override
+  String get noteLoadDenied => 'Niman nema dopuštenje za čitanje ove bilješke.';
+  @override
+  String get noteLoadLocked =>
+      'Drugi program koristi ovu bilješku. Pokušajte ponovno za trenutak.';
+  @override
   String wordCount(int count) =>
       count % 10 == 1 && count % 100 != 11 ? '$count riječ' : '$count riječi';
   @override

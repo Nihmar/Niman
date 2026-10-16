@@ -606,6 +606,13 @@ final class EnglishStrings extends Strings {
   @override
   String get noteLoadFailed => 'This note could not be opened.';
   @override
+  String get noteLoadMissing => 'This note’s file is no longer on the disk.';
+  @override
+  String get noteLoadDenied => 'Niman is not allowed to read this note.';
+  @override
+  String get noteLoadLocked =>
+      'Another program is using this note. Try again in a moment.';
+  @override
   String wordCount(int count) => count == 1 ? '1 word' : '$count words';
   @override
   String get outlineTooltip => 'Outline';

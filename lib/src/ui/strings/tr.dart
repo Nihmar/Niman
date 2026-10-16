@@ -603,6 +603,13 @@ final class TurkishStrings extends Strings {
   @override
   String get noteLoadFailed => 'Bu not açılamadı.';
   @override
+  String get noteLoadMissing => 'Bu notun dosyası artık diskte yok.';
+  @override
+  String get noteLoadDenied => 'Niman’ın bu notu okuma izni yok.';
+  @override
+  String get noteLoadLocked =>
+      'Başka bir program bu notu kullanıyor. Biraz sonra yeniden deneyin.';
+  @override
   String wordCount(int count) => '$count kelime';
   @override
   String get outlineTooltip => 'İçerik';

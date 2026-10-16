@@ -625,6 +625,16 @@ final class GreekStrings extends Strings {
   @override
   String get noteLoadFailed => 'Δεν ήταν δυνατό να ανοίξει αυτή η σημείωση.';
   @override
+  String get noteLoadMissing =>
+      'Το αρχείο αυτής της σημείωσης δεν υπάρχει πια στον δίσκο.';
+  @override
+  String get noteLoadDenied =>
+      'Το Niman δεν έχει άδεια να διαβάσει αυτή τη σημείωση.';
+  @override
+  String get noteLoadLocked =>
+      'Ένα άλλο πρόγραμμα χρησιμοποιεί αυτή τη σημείωση. Δοκιμάστε ξανά σε '
+      'λίγο.';
+  @override
   String wordCount(int count) => count == 1 ? '1 λέξη' : '$count λέξεις';
   @override
   String get outlineTooltip => 'Περιεχόμενο';

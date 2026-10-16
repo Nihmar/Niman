@@ -615,6 +615,13 @@ final class PolishStrings extends Strings {
   @override
   String get noteLoadFailed => 'Nie udało się otworzyć tej notatki.';
   @override
+  String get noteLoadMissing => 'Pliku tej notatki nie ma już na dysku.';
+  @override
+  String get noteLoadDenied => 'Niman nie ma uprawnień do odczytu tej notatki.';
+  @override
+  String get noteLoadLocked =>
+      'Inny program używa tej notatki. Spróbuj ponownie za chwilę.';
+  @override
   String wordCount(int count) => count == 1
       ? '1 słowo'
       : count % 10 >= 2 &&

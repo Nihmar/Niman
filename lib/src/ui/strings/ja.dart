@@ -569,6 +569,12 @@ final class JapaneseStrings extends Strings {
   @override
   String get noteLoadFailed => 'このノートを開けませんでした。';
   @override
+  String get noteLoadMissing => 'このノートのファイルはディスク上にありません。';
+  @override
+  String get noteLoadDenied => 'Niman にはこのノートを読み取る権限がありません。';
+  @override
+  String get noteLoadLocked => '別のプログラムがこのノートを使用しています。少し待ってからもう一度お試しください。';
+  @override
   String wordCount(int count) => '$count 語';
   @override
   String get outlineTooltip => 'アウトライン';

@@ -621,6 +621,14 @@ final class ItalianStrings extends Strings {
   @override
   String get noteLoadFailed => 'Impossibile aprire questa nota.';
   @override
+  String get noteLoadMissing => 'Il file di questa nota non è più sul disco.';
+  @override
+  String get noteLoadDenied =>
+      'Niman non ha il permesso di leggere questa nota.';
+  @override
+  String get noteLoadLocked =>
+      'Un altro programma sta usando questa nota. Riprova tra un momento.';
+  @override
   String wordCount(int count) => count == 1 ? '1 parola' : '$count parole';
   @override
   String get outlineTooltip => 'Struttura';

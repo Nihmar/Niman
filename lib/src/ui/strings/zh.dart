@@ -563,6 +563,12 @@ final class ChineseStrings extends Strings {
   @override
   String get noteLoadFailed => '无法打开此笔记。';
   @override
+  String get noteLoadMissing => '此笔记的文件已不在磁盘上。';
+  @override
+  String get noteLoadDenied => 'Niman 无权读取此笔记。';
+  @override
+  String get noteLoadLocked => '另一个程序正在使用此笔记。请稍后再试。';
+  @override
   String wordCount(int count) => '$count 词';
   @override
   String get outlineTooltip => '大纲';

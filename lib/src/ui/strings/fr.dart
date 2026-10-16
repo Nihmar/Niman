@@ -625,6 +625,15 @@ final class FrenchStrings extends Strings {
   @override
   String get noteLoadFailed => 'Impossible d’ouvrir cette note.';
   @override
+  String get noteLoadMissing =>
+      'Le fichier de cette note n’est plus sur le disque.';
+  @override
+  String get noteLoadDenied =>
+      'Niman n’a pas l’autorisation de lire cette note.';
+  @override
+  String get noteLoadLocked =>
+      'Un autre programme utilise cette note. Réessayez dans un instant.';
+  @override
   String wordCount(int count) => count == 1 ? '1 mot' : '$count mots';
   @override
   String get outlineTooltip => 'Plan';

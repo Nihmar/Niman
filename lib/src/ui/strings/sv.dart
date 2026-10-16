@@ -613,6 +613,15 @@ final class SwedishStrings extends Strings {
   @override
   String get noteLoadFailed => 'Anteckningen kunde inte öppnas.';
   @override
+  String get noteLoadMissing =>
+      'Anteckningens fil finns inte längre på disken.';
+  @override
+  String get noteLoadDenied =>
+      'Niman har inte behörighet att läsa anteckningen.';
+  @override
+  String get noteLoadLocked =>
+      'Ett annat program använder anteckningen. Försök igen om en stund.';
+  @override
   String wordCount(int count) => '$count ord';
   @override
   String get outlineTooltip => 'Struktur';

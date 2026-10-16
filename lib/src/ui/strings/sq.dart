@@ -609,6 +609,13 @@ final class AlbanianStrings extends Strings {
   @override
   String get noteLoadFailed => 'Ky shënim nuk mund të hapej.';
   @override
+  String get noteLoadMissing => 'Skedari i këtij shënimi nuk është më në disk.';
+  @override
+  String get noteLoadDenied => 'Niman nuk ka leje ta lexojë këtë shënim.';
+  @override
+  String get noteLoadLocked =>
+      'Një program tjetër po e përdor këtë shënim. Provo sërish pas pak.';
+  @override
   String wordCount(int count) => '$count fjalë';
   @override
   String get outlineTooltip => 'Përmbajtja';

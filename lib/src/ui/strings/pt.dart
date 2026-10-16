@@ -612,6 +612,13 @@ final class PortugueseStrings extends Strings {
   @override
   String get noteLoadFailed => 'Não foi possível abrir esta nota.';
   @override
+  String get noteLoadMissing => 'O arquivo desta nota não está mais no disco.';
+  @override
+  String get noteLoadDenied => 'O Niman não tem permissão para ler esta nota.';
+  @override
+  String get noteLoadLocked =>
+      'Outro programa está usando esta nota. Tente novamente em instantes.';
+  @override
   String wordCount(int count) => count == 1 ? '1 palavra' : '$count palavras';
   @override
   String get outlineTooltip => 'Estrutura';

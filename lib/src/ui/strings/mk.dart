@@ -616,6 +616,14 @@ final class MacedonianStrings extends Strings {
   @override
   String get noteLoadFailed => 'Оваа белешка не можеше да се отвори.';
   @override
+  String get noteLoadMissing =>
+      'Датотеката на оваа белешка веќе не е на дискот.';
+  @override
+  String get noteLoadDenied => 'Niman нема дозвола да ја чита оваа белешка.';
+  @override
+  String get noteLoadLocked =>
+      'Друга програма ја користи оваа белешка. Обидете се повторно за момент.';
+  @override
   String wordCount(int count) =>
       count % 10 == 1 && count % 100 != 11 ? '$count збор' : '$count зборови';
   @override

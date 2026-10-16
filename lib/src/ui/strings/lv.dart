@@ -603,6 +603,13 @@ final class LatvianStrings extends Strings {
   @override
   String get noteLoadFailed => 'Šo piezīmi neizdevās atvērt.';
   @override
+  String get noteLoadMissing => 'Šīs piezīmes faila diskā vairs nav.';
+  @override
+  String get noteLoadDenied => 'Niman nav atļaujas lasīt šo piezīmi.';
+  @override
+  String get noteLoadLocked =>
+      'Šo piezīmi izmanto cita programma. Mēģiniet vēlreiz pēc brīža.';
+  @override
   String wordCount(int count) =>
       count % 10 == 0 || (count % 100 >= 11 && count % 100 <= 19)
       ? '$count vārdu'

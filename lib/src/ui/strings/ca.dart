@@ -618,6 +618,14 @@ final class CatalanStrings extends Strings {
   @override
   String get noteLoadFailed => 'No s’ha pogut obrir aquesta nota.';
   @override
+  String get noteLoadMissing => 'El fitxer d’aquesta nota ja no és al disc.';
+  @override
+  String get noteLoadDenied => 'Niman no té permís per llegir aquesta nota.';
+  @override
+  String get noteLoadLocked =>
+      'Un altre programa està utilitzant aquesta nota. Torna-ho a provar '
+      'd’aquí a un moment.';
+  @override
   String wordCount(int count) => count == 1 ? '1 paraula' : '$count paraules';
   @override
   String get outlineTooltip => 'Estructura';

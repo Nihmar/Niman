@@ -320,6 +320,9 @@ abstract base class Strings {
   String get noteStatusError;
   String get noteNotText;
   String get noteLoadFailed;
+  String get noteLoadMissing;
+  String get noteLoadDenied;
+  String get noteLoadLocked;
   String wordCount(int count);
   String get outlineTooltip;
   String get outlineNoHeadings;

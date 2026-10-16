@@ -312,6 +312,16 @@ the HTML is used when the clipboard carries it. In the source editor,
 browser's copy into Markdown, linked to the page it came from (see
 [web capture](web-capture.md#paste-as-markdown)).
 
+### Opening and saving a note
+
+**A note that does not open.** The pane says why in one line — the file is no
+longer on the disk, Niman is not allowed to read it, or another program is
+using it at the moment — and offers **Retry**. The note is also tried again by
+itself the next time something asks the editor to look at the file again (the
+app coming back to the front, a sync that touched it), so a read that failed
+for a moment does not need a trip to another note and back. A file that is not
+text at all is an attachment, and says so instead.
+
 ## Markdown support
 
 Tables, task lists, footnotes, strikethrough, `==highlight==` (a marker's

@@ -617,6 +617,15 @@ final class GermanStrings extends Strings {
   @override
   String get noteLoadFailed => 'Diese Notiz konnte nicht geöffnet werden.';
   @override
+  String get noteLoadMissing =>
+      'Die Datei dieser Notiz ist nicht mehr auf dem Datenträger.';
+  @override
+  String get noteLoadDenied => 'Niman darf diese Notiz nicht lesen.';
+  @override
+  String get noteLoadLocked =>
+      'Ein anderes Programm verwendet diese Notiz. Versuche es gleich noch '
+      'einmal.';
+  @override
   String wordCount(int count) => count == 1 ? '1 Wort' : '$count Wörter';
   @override
   String get outlineTooltip => 'Übersicht';

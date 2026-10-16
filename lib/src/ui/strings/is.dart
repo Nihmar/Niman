@@ -608,6 +608,15 @@ final class IcelandicStrings extends Strings {
   @override
   String get noteLoadFailed => 'Ekki tókst að opna þennan minnispunkt.';
   @override
+  String get noteLoadMissing =>
+      'Skrá þessa minnispunkts er ekki lengur á disknum.';
+  @override
+  String get noteLoadDenied =>
+      'Niman hefur ekki leyfi til að lesa þennan minnispunkt.';
+  @override
+  String get noteLoadLocked =>
+      'Annað forrit notar þennan minnispunkt. Reyndu aftur að vörmu spori.';
+  @override
   String wordCount(int count) => '$count orð';
   @override
   String get outlineTooltip => 'Efni';

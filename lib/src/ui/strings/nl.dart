@@ -615,6 +615,15 @@ final class DutchStrings extends Strings {
   @override
   String get noteLoadFailed => 'Deze notitie kon niet worden geopend.';
   @override
+  String get noteLoadMissing =>
+      'Het bestand van deze notitie staat niet meer op de schijf.';
+  @override
+  String get noteLoadDenied => 'Niman mag deze notitie niet lezen.';
+  @override
+  String get noteLoadLocked =>
+      'Een ander programma gebruikt deze notitie. Probeer het zo meteen '
+      'opnieuw.';
+  @override
   String wordCount(int count) => count == 1 ? '1 woord' : '$count woorden';
   @override
   String get outlineTooltip => 'Structuur';

@@ -617,6 +617,15 @@ final class RomanianStrings extends Strings {
   @override
   String get noteLoadFailed => 'Această notă nu a putut fi deschisă.';
   @override
+  String get noteLoadMissing => 'Fișierul acestei note nu mai este pe disc.';
+  @override
+  String get noteLoadDenied =>
+      'Niman nu are permisiunea de a citi această notă.';
+  @override
+  String get noteLoadLocked =>
+      'Un alt program folosește această notă. Încearcă din nou peste un '
+      'moment.';
+  @override
   String wordCount(int count) => count == 1
       ? '1 cuvânt'
       : count % 100 >= 20 || count % 100 == 0

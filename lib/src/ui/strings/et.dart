@@ -603,6 +603,13 @@ final class EstonianStrings extends Strings {
   @override
   String get noteLoadFailed => 'Seda märget ei õnnestunud avada.';
   @override
+  String get noteLoadMissing => 'Selle märke faili pole enam kettal.';
+  @override
+  String get noteLoadDenied => 'Nimanil pole luba seda märget lugeda.';
+  @override
+  String get noteLoadLocked =>
+      'Teine programm kasutab seda märget. Proovi hetke pärast uuesti.';
+  @override
   String wordCount(int count) => '$count sõna';
   @override
   String get outlineTooltip => 'Struktuur';

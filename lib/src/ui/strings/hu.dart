@@ -611,6 +611,15 @@ final class HungarianStrings extends Strings {
   @override
   String get noteLoadFailed => 'Ezt a jegyzetet nem sikerült megnyitni.';
   @override
+  String get noteLoadMissing => 'A jegyzet fájlja már nincs a lemezen.';
+  @override
+  String get noteLoadDenied =>
+      'A Nimannek nincs engedélye a jegyzet olvasásához.';
+  @override
+  String get noteLoadLocked =>
+      'Egy másik program használja ezt a jegyzetet. Próbáld újra egy pillanat '
+      'múlva.';
+  @override
   String wordCount(int count) => '$count szó';
   @override
   String get outlineTooltip => 'Struktúra';
