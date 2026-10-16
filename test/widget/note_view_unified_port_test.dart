@@ -381,6 +381,45 @@ void main() {
     expect(opened, <String>['Target.md|null']);
   }, variant: _desktop);
 
+  testWidgets('Ctrl+click on an embed link opens its target (#994)', (
+    tester,
+  ) async {
+    // The run of an embed carries its own `!`: reading `[[…]]` from it without
+    // dropping that first character asked the resolver for
+    // `[Attachments/photo.png`, which matched nothing and ended in the
+    // "Link not found" snackbar for a file that is right there.
+    final links = FakeLinkSource(
+      notes: <String>['Attachments/photo.png', 'current.md'],
+    );
+    final opened = <String>[];
+    await tester.pumpWidget(
+      _app(
+        _note(
+          text: 'text ![[Attachments/photo.png]] more\n',
+          path: '/notes/current.md',
+          libraryRoot: '/notes',
+          links: links,
+          opened: opened,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final paragraph = tester.renderObject<RenderParagraph>(
+      find.text('text ![[Attachments/photo.png]] more', findRichText: true),
+    );
+    // Inside `![[Attachments/…]]`, where the line's own layout draws offset 8.
+    final at = paragraph.localToGlobal(
+      paragraph.getOffsetForCaret(const TextPosition(offset: 8), Rect.zero) +
+          const Offset(2, 8),
+    );
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.tapAt(at, kind: PointerDeviceKind.mouse);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    await tester.pumpAndSettle();
+    expect(links.queries, contains('wiki:Attachments/photo.png'));
+    expect(opened, <String>['Attachments/photo.png|null']);
+  }, variant: _desktop);
+
   testWidgets(
     'Ctrl+click on a reference link opens it (link_navigation_test)',
     (tester) async {
