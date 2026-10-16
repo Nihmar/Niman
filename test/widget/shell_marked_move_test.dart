@@ -1,6 +1,7 @@
-// #1012: several marked rows dragged into a folder move as one piece of
-// work — one report of what moved and what did not, one save of the open
-// notes, one drop at a time.
+// #1012 / #1026: several marked rows dragged into a folder move as one
+// piece of work — one report of what moved and what did not, one save of the
+// open notes, one drop at a time — and a row keeps its mark until its own
+// move has landed.
 import 'dart:async';
 
 import 'package:flutter/gestures.dart';
@@ -101,6 +102,28 @@ void main() {
     await tester.pump();
   }
 
+  /// How many rows the marked menu says are marked, read by a right click
+  /// on [row] (and closed again), or null when [row] opens its own menu.
+  Future<int?> markedCount(WidgetTester tester, String row) async {
+    await tester.tap(noteRow(row), buttons: kSecondaryButton);
+    await tester.pump(const Duration(milliseconds: 500));
+    final title = find.byWidgetPredicate(
+      (widget) =>
+          widget is Text && (widget.data ?? '').startsWith('Selected: '),
+    );
+    final count = title.evaluate().isEmpty
+        ? null
+        : int.parse(
+            tester
+                .widget<Text>(title.first)
+                .data!
+                .substring('Selected: '.length),
+          );
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pump(const Duration(milliseconds: 500));
+    return count;
+  }
+
   testWidgets('one row that fails: the rest move and the report says how '
       'many each way (#1012)', (tester) async {
     await pump(tester);
@@ -182,5 +205,26 @@ void main() {
     expect(controller.moveCalls, ['alpha.md', 'bravo.md', 'charlie.md']);
     expect(await controller.find('Box/bravo.md'), isNotNull);
     expect(await controller.find('Other/charlie.md'), isNotNull);
+  }, variant: _linux);
+
+  testWidgets('a row keeps its mark until its own move lands (#1026)', (
+    tester,
+  ) async {
+    await pump(tester);
+    final gate = controller.moveGates['bravo.md'] = Completer<void>();
+    await markAll(tester);
+
+    await dragMouse(tester, noteRow('alpha.md'), noteRow('Box'));
+    await tester.pump(const Duration(milliseconds: 100));
+    // alpha has landed and is gone from the root; bravo is held, charlie
+    // waits: both are still marked, none of the three rows demarked early.
+    expect(controller.moveCalls, ['alpha.md', 'bravo.md']);
+    expect(noteRow('alpha.md'), findsNothing);
+    expect(await markedCount(tester, 'charlie.md'), 2);
+
+    gate.complete();
+    await settle(tester);
+    expect(await controller.find('Box/charlie.md'), isNotNull);
+    expect(await markedCount(tester, 'Box'), isNull, reason: 'all let go');
   }, variant: _linux);
 }
