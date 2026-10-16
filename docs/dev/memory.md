@@ -109,6 +109,14 @@ dictionary is a few MB each and several can be selected
 (`LibraryConfig.spellDictionaries`). The loader is per library; confirm the
 maps are dropped on library close and not re-read per keystroke.
 
+The editor keeps the answer for each line it has underlined
+(`spellcheck/checked_lines.dart`): a bounded least-recently-used memory of
+4096 lines and 2 M characters, keyed by the line's text and the ranges it
+skips rather than by its index (#1052), so scrolling a large note does not
+keep a second copy of it and an Enter above a line does not make it be
+checked again. The per-word verdicts (`EditorSpellCheck._words`) are bounded
+by the note's vocabulary.
+
 ### Whisper models
 
 The transcription model is **kept loaded between clips**
