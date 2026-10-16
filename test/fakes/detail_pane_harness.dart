@@ -34,6 +34,7 @@ Widget detailPane(
   FocusNode? shellFocus,
   bool focused = true,
   Map<String, String> movedFrom = const {},
+  bool showPreview = false,
 }) => ShellDetailPane(
   root: paneRoot,
   shellFocus: shellFocus,
@@ -47,7 +48,7 @@ Widget detailPane(
         movedFrom: movedFrom[path],
         memento: mementos[path] ?? const NoteMemento(),
         showWysiwyg: false,
-        showPreview: false,
+        showPreview: showPreview,
       ),
   ],
   onMemento: onMemento,

@@ -194,6 +194,61 @@ void main() {
     });
   });
 
+  // #1077: the scroll is a place in the note, not a distance.
+  group('the scroll of a memento', () {
+    test('a place round-trips through the stored form', () {
+      const memento = NoteMemento(
+        selectionExtent: 4,
+        scrollLine: 120,
+        scrollFraction: 0.25,
+        preview: true,
+      );
+      final back = NoteMemento.fromJson(
+        jsonDecode(jsonEncode(memento.toJson())),
+      );
+      expect(back, memento);
+      expect(back.scrollLine, 120);
+      expect(back.scrollFraction, 0.25);
+    });
+
+    test('a memento written with pixels still decodes, and says so', () {
+      final old = NoteMemento.fromJson(const {
+        'base': 3,
+        'extent': 3,
+        'scroll': 640.5,
+        'editor': 'source',
+      });
+      expect(old.scrollOffset, 640.5);
+      expect(old.scrollLine, isNull);
+      expect(old.hasScroll, isTrue);
+      expect(old.selectionExtent, 3);
+    });
+
+    test('a fraction without its line, or out of range, is mended', () {
+      expect(NoteMemento.fromJson(const {'into': 0.4}).hasScroll, isFalse);
+      final over = NoteMemento.fromJson(const {'line': 9, 'into': 7});
+      expect(over.scrollFraction, 1.0);
+      expect(NoteMemento.fromJson(const {'line': -1}).hasScroll, isFalse);
+    });
+
+    test('a memento that knows no place keeps the tab’s', () {
+      const known = NoteMemento(scrollLine: 40, scrollFraction: 0.5);
+      final w = _opened(['a.md'])
+          .withMemento('a.md', known)
+          .withMemento('a.md', const NoteMemento(selectionExtent: 2));
+      expect(w.tabs.single.memento.scrollLine, 40);
+      expect(w.tabs.single.memento.scrollFraction, 0.5);
+      expect(w.tabs.single.memento.selectionExtent, 2);
+    });
+
+    test('line 0 is a place, not an absence', () {
+      final w = _opened(['a.md'])
+          .withMemento('a.md', const NoteMemento(scrollLine: 40))
+          .withMemento('a.md', const NoteMemento(scrollLine: 0));
+      expect(w.tabs.single.memento.scrollLine, 0);
+    });
+  });
+
   group('where a note was left', () {
     // #1075: an editor torn down before it was laid out hands in a memento
     // that cannot say where it was scrolled.

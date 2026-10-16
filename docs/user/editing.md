@@ -103,7 +103,9 @@ motion keeps the ellipsis instead.
   click replaced comes back in its tab. A note that leaves its tab is
   remembered where it was left: it opens again at the same place,
   whichever way it comes back (a click, back, the palette), and after a
-  restart. Renaming or moving an open note keeps its tab, its place and
+  restart. The place is the line at the top of the view you were in, the
+  editor or the preview, so another window width, text size or note
+  column lands on the same line. Renaming or moving an open note keeps its tab, its place and
   its undo.
 - **`Ctrl+click`**, the tree's right-click **Open in new tab**, or the
   **+** after the tabs (a new note) opens one alongside.

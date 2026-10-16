@@ -130,22 +130,6 @@ final class MarkdownSurfaceController {
   /// a view.
   List<Token> tokensOf(int line) => _view?.tokensOf(line) ?? const <Token>[];
 
-  /// How far the note is scrolled: the view's, or where the last one was
-  /// when it went (#1075), or the place a view is yet to be given; null when
-  /// nothing is known.
-  double? get scrollOffset =>
-      _view?.shownScroll ?? _lastScroll ?? _pendingScroll;
-
-  double? _lastScroll;
-
-  /// Takes what [view] knows of where the note is, while it still can: the
-  /// view's subtree is already gone by the time it detaches, and the note
-  /// view hands in its memento after that. Not for the shell.
-  void snapshotView(MarkdownSourceViewState view) {
-    if (!identical(_view, view)) return;
-    _lastScroll = view.shownScroll ?? _lastScroll;
-  }
-
   /// Called by the view as it mounts; not for the shell. A method, not a
   /// setter, because it pairs with [detachView].
   // ignore: use_setters_to_change_properties
