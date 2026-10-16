@@ -144,7 +144,10 @@ tabs.
   again takes you to the pane and tab it is in.
 
 **The side panel.** On a wide window a panel on the right shows the note's **Outline**, its **Tags**, its **Links** or its
-**History**, one at a time, switched by the icons at its top.
+**History**, one at a time, switched by the icons at its top. A panel too
+narrow for all of its icons shows them from the end, the first ones cut
+off at the left: the wheel over the row scrolls it, and the mouse drags
+it as a finger does on a tablet.
 
 - **Outline** lists the headings, and a click takes the caret to one.
 - **Tags** lists the note's tags; a click lists the other notes with
