@@ -2042,6 +2042,8 @@ final class DanishStrings extends Strings {
   @override
   String get folderPickerEmpty => 'Ingen mapper endnu';
   @override
+  String get folderPickerFilter => 'Filtrér mapper';
+  @override
   String get listFolderTitle => 'Listemappe';
   @override
   String get attachmentsFolderTitle => 'Mappe til vedhæftninger';

@@ -2044,6 +2044,8 @@ final class SlovenianStrings extends Strings {
   @override
   String get folderPickerEmpty => 'Ni še map';
   @override
+  String get folderPickerFilter => 'Filtriraj mape';
+  @override
   String get listFolderTitle => 'Mapa seznamov';
   @override
   String get attachmentsFolderTitle => 'Mapa prilog';

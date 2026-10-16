@@ -2084,6 +2084,8 @@ final class CatalanStrings extends Strings {
   @override
   String get folderPickerEmpty => 'Encara no hi ha carpetes';
   @override
+  String get folderPickerFilter => 'Filtra carpetes';
+  @override
   String get listFolderTitle => 'Carpeta de llista';
   @override
   String get attachmentsFolderTitle => "Carpeta d'adjunts";

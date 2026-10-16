@@ -2112,6 +2112,8 @@ final class GreekStrings extends Strings {
   @override
   String get folderPickerEmpty => 'Δεν υπάρχουν ακόμα φάκελοι';
   @override
+  String get folderPickerFilter => 'Φίλτρο φακέλων';
+  @override
   String get listFolderTitle => 'Φάκελος λίστας';
   @override
   String get attachmentsFolderTitle => 'Φάκελος συνημμένων';

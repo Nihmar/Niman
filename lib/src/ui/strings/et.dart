@@ -2028,6 +2028,8 @@ final class EstonianStrings extends Strings {
   @override
   String get folderPickerEmpty => 'Kaustu pole veel';
   @override
+  String get folderPickerFilter => 'Filtreeri kaustu';
+  @override
   String get listFolderTitle => 'Loetelute kaust';
   @override
   String get attachmentsFolderTitle => 'Manuste kaust';

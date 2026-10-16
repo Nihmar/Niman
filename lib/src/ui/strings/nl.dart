@@ -2073,6 +2073,8 @@ final class DutchStrings extends Strings {
   @override
   String get folderPickerEmpty => 'Nog geen mappen';
   @override
+  String get folderPickerFilter => 'Filter mappen';
+  @override
   String get listFolderTitle => 'Lijstmap';
   @override
   String get attachmentsFolderTitle => 'Bijlagenmap';

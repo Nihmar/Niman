@@ -2051,6 +2051,8 @@ final class SerbianStrings extends Strings {
   @override
   String get folderPickerEmpty => 'Још нема фасцикли';
   @override
+  String get folderPickerFilter => 'Филтрирај фасцикле';
+  @override
   String get listFolderTitle => 'Фасцикла списка';
   @override
   String get attachmentsFolderTitle => 'Фасцикла прилога';

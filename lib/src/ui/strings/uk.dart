@@ -2056,6 +2056,8 @@ final class UkrainianStrings extends Strings {
   @override
   String get folderPickerEmpty => 'Папок ще немає';
   @override
+  String get folderPickerFilter => 'Фільтр папок';
+  @override
   String get listFolderTitle => 'Папка списків';
   @override
   String get attachmentsFolderTitle => 'Папка вкладень';

@@ -2061,6 +2061,8 @@ final class PortugueseStrings extends Strings {
   @override
   String get folderPickerEmpty => 'Ainda não há pastas';
   @override
+  String get folderPickerFilter => 'Filtrar pastas';
+  @override
   String get listFolderTitle => 'Pasta de listas';
   @override
   String get attachmentsFolderTitle => 'Pasta de anexos';

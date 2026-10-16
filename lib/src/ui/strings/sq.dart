@@ -2063,6 +2063,8 @@ final class AlbanianStrings extends Strings {
   @override
   String get folderPickerEmpty => "Ende s'ka tresë";
   @override
+  String get folderPickerFilter => 'Filtro tresat';
+  @override
   String get listFolderTitle => 'Tresë e listës';
   @override
   String get attachmentsFolderTitle => 'Tresë e bashkëngjitjeve';

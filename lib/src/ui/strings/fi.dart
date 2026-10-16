@@ -2061,6 +2061,8 @@ final class FinnishStrings extends Strings {
   @override
   String get folderPickerEmpty => 'Ei vielä kansiota';
   @override
+  String get folderPickerFilter => 'Suodata kansioita';
+  @override
   String get listFolderTitle => 'Listojen kansio';
   @override
   String get attachmentsFolderTitle => 'Liitteiden kansio';

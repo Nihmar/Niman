@@ -2102,6 +2102,8 @@ final class FrenchStrings extends Strings {
   @override
   String get folderPickerEmpty => 'Aucun dossier pour l’instant';
   @override
+  String get folderPickerFilter => 'Filtrer les dossiers';
+  @override
   String get listFolderTitle => 'Dossier des listes';
   @override
   String get attachmentsFolderTitle => 'Dossier des pièces jointes';

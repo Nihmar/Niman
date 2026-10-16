@@ -2091,6 +2091,8 @@ final class GermanStrings extends Strings {
   @override
   String get folderPickerEmpty => 'Noch keine Ordner';
   @override
+  String get folderPickerFilter => 'Ordner filtern';
+  @override
   String get listFolderTitle => 'Listen-Ordner';
   @override
   String get attachmentsFolderTitle => 'Anhänge-Ordner';

@@ -2043,6 +2043,8 @@ final class LatvianStrings extends Strings {
   @override
   String get folderPickerEmpty => 'Vēl nav kataloga';
   @override
+  String get folderPickerFilter => 'Filtrēt katalogus';
+  @override
   String get listFolderTitle => 'Sarakstu katalogs';
   @override
   String get attachmentsFolderTitle => 'Pielikumu katalogs';

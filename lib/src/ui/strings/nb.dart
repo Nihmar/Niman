@@ -2038,6 +2038,8 @@ final class NorwegianStrings extends Strings {
   @override
   String get folderPickerEmpty => 'Ingen mapper ennå';
   @override
+  String get folderPickerFilter => 'Filtrer mapper';
+  @override
   String get listFolderTitle => 'Listemappe';
   @override
   String get attachmentsFolderTitle => 'Vedleggsmappe';

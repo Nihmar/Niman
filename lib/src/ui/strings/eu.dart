@@ -2060,6 +2060,8 @@ final class BasqueStrings extends Strings {
   @override
   String get folderPickerEmpty => 'Oraindik ez dago karpetarik';
   @override
+  String get folderPickerFilter => 'Iragazi karpetak';
+  @override
   String get listFolderTitle => 'Zerrenda-biltegia';
   @override
   String get attachmentsFolderTitle => 'Eranskinen biltegia';

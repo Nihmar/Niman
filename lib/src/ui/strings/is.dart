@@ -2048,6 +2048,8 @@ final class IcelandicStrings extends Strings {
   @override
   String get folderPickerEmpty => 'Engar mappar enn';
   @override
+  String get folderPickerFilter => 'Sía möppur';
+  @override
   String get listFolderTitle => 'Mappa lista';
   @override
   String get attachmentsFolderTitle => 'Mappa fyrir viðhengi';

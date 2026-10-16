@@ -2081,6 +2081,8 @@ final class SpanishStrings extends Strings {
   @override
   String get folderPickerEmpty => 'Aún no hay carpetas';
   @override
+  String get folderPickerFilter => 'Filtrar carpetas';
+  @override
   String get listFolderTitle => 'Carpeta de listas';
   @override
   String get attachmentsFolderTitle => 'Carpeta de adjuntos';
