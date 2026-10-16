@@ -87,6 +87,7 @@ import 'package:niman/src/ui/dock/dock_overlay.dart';
 import 'package:niman/src/ui/dock/right_dock.dart';
 import 'package:niman/src/ui/epub_look_sheet.dart';
 import 'package:niman/src/ui/epub_text_zoom.dart';
+import 'package:niman/src/ui/expanded_folders.dart';
 import 'package:niman/src/ui/folder_grid.dart';
 import 'package:niman/src/ui/history/history_flow.dart';
 import 'package:niman/src/ui/history/history_labels.dart';
@@ -108,6 +109,7 @@ import 'package:niman/src/ui/kinds/flashcards/review_tab.dart';
 import 'package:niman/src/ui/kinds/flashcards/review_view.dart';
 import 'package:niman/src/ui/kinds/slides/slides_present.dart';
 import 'package:niman/src/ui/link_update_dialog.dart';
+import 'package:niman/src/ui/note_editor_keys.dart';
 import 'package:niman/src/ui/note_menu.dart';
 import 'package:niman/src/ui/note_tab_bar.dart';
 import 'package:niman/src/ui/note_view.dart';
@@ -562,7 +564,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     with WidgetsBindingObserver {
   String? _selected;
   bool _selectedIsDir = false;
-  final Set<String> _expanded = <String>{};
+  final ExpandedFolders _expanded = ExpandedFolders();
   bool _busy = false;
 
   /// External-change reload requests for the open note (home-screen
@@ -732,11 +734,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// Shows [tab] in the focused pane (#712), where it is already open or
   /// not; the tree and dock stay put.
   void _showContentTab(ShellTab tab, int pane) {
-    // The note behind is only hidden, and a hidden editor keeps its focus
-    // and its keys (#770): the shell takes them back, as a rail switch
-    // does.
-    FocusManager.instance.primaryFocus?.unfocus();
-    _shellFocus.requestFocus();
+    // The deck behind is excluded from focus while the page covers it
+    // (#1074), which lets go of the editor's keys (#770).
     _reviewTab.show(on: false);
     setState(() {
       _compareShows = false;
@@ -747,6 +746,43 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       _workspace.focus(pane);
       _noteClosed();
     });
+  }
+
+  /// Whether something pinned — Home or Todo, a version, a study — covers
+  /// the notes of [pane]: the chip, not a note tab, is what it shows.
+  bool _chipCovers(int pane) =>
+      (_contentTabShows && pane == _contentPaneShown) ||
+      _compareIn(pane) ||
+      _reviewIn(pane);
+
+  /// Ctrl+W: closes the tab the focused pane shows (#1078) — the pinned chip
+  /// when it covers the notes, else the note's tab.
+  void _closeShownTab() {
+    final pane = _workspace.value.focused;
+    if (_reviewIn(pane)) {
+      _reviewTab.close();
+    } else if (_compareIn(pane)) {
+      _closeCompare();
+    } else if (_contentTabShows && pane == _contentPaneShown) {
+      _closeContentTab();
+    } else {
+      _workspace.closeActive();
+    }
+  }
+
+  /// Ctrl+Tab and Ctrl+Shift+Tab (#1078): the next or the previous note tab.
+  /// From a chip over the pane, the row goes on from its far end: the first
+  /// note tab forward, the last backward, shown as a click on it shows it.
+  void _cycleTab(int step) {
+    final w = _workspace.value;
+    final pane = w.focused;
+    if (!_chipCovers(pane)) {
+      _workspace.cycle(step);
+      return;
+    }
+    final tabs = w.panes[pane].tabs;
+    if (tabs.isEmpty) return;
+    _activateTab(pane, step > 0 ? 0 : tabs.length - 1);
   }
 
   /// Closes the pinned content tab (#712): the tree keeps the rail.
@@ -999,9 +1035,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     _creating?.name.complete(null);
     final name = Completer<String?>();
     setState(() {
-      for (var at = folder; at.isNotEmpty; at = parentOf(at)) {
-        _expanded.add(at);
-      }
+      _expanded.addWithAncestors(folder);
       _creating = (folder: folder, isDir: isDir, initial: initial, name: name);
     });
     return name.future;
@@ -1097,7 +1131,22 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     templates: _templateFlow,
     selectedPath: () => _selected,
     onMoved: (from, to) {
+      // The open notes' editors follow the rename, and are told where they
+      // came from for the frame that shows them under the new name (#1076).
+      _noteKeys.moved(from, to);
+      for (final entry in [..._tabKinds.entries]) {
+        final path = entry.key;
+        if (path == from || path.startsWith('$from/')) {
+          _tabKinds
+            ..remove(path)
+            ..[to + path.substring(from.length)] = entry.value;
+        }
+      }
+      WidgetsBinding.instance.addPostFrameCallback((_) => _noteKeys.settle());
       _workspace.moved(from, to);
+      // The folders open under a renamed or moved folder stay open under
+      // its new name (#1069).
+      setState(() => _expanded.moved(from, to));
       // The move rewrote the links other notes hold to it, on disk (#507):
       // an open one re-reads its file, which a clean buffer adopts — and
       // every buffer is clean, the move having saved them first.
@@ -1121,6 +1170,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     },
     onDeleted: (path) {
       _workspace.deleted(path);
+      setState(() => _expanded.deleted(path));
       if (_wide) {
         // The workspace moved the showing tab on already; the tree only
         // lets go of a selected folder that went with it.
@@ -1197,6 +1247,17 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   void _onNoteKindChanged(String? type) {
     if (!mounted) return;
     setState(() => _noteKind = type);
+  }
+
+  /// Each open note's kind as its view last reported it, by path (#1081): a
+  /// pane's own controls are decided by its own note, not by the focused
+  /// pane's.
+  final Map<String, String?> _tabKinds = {};
+
+  void _onTabKind(String path, String? kind) {
+    if (!mounted) return;
+    if (_tabKinds.containsKey(path) && _tabKinds[path] == kind) return;
+    setState(() => _tabKinds[path] = kind);
   }
 
   /// The GUI behind the open note's kind (T-TK-02): null for a plain
@@ -1345,6 +1406,23 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       if (sameNote) _noteReloadToken++;
       _noteOpened();
     });
+  }
+
+  /// Reads back what was left open in the library, and the tree as it was:
+  /// the folders that were expanded, and the ones above the note on screen
+  /// (#1069). From then on the tree's expansion is kept with the workspace.
+  Future<void> _restoreWorkspace() async {
+    final saved = await _workspace.load();
+    if (!mounted) return;
+    setState(() {
+      _expanded.addAll(saved.expanded);
+      if (_workspace.value.activePath case final shown?) {
+        _expanded.addWithAncestors(parentOf(shown));
+      }
+    });
+    _expanded.persistTo(
+      (folders) => _workspace.controller.update((w) => w.withExpanded(folders)),
+    );
   }
 
   /// Whether the shell is the wide one: the tabs' layout (#23). A phone
@@ -1972,12 +2050,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       tabs: tabs.tabs,
       // A note tab does not read as selected while the content tab shows:
       // the chip is what the pane is showing.
-      active:
-          (_contentTabShows && pane == _contentPaneShown) ||
-              _compareIn(pane) ||
-              _reviewIn(pane)
-          ? -1
-          : tabs.active,
+      active: _chipCovers(pane) ? -1 : tabs.active,
       focused: !w.isSplit || w.focused == pane,
       unsaved: _unsavedRelPaths(),
       onActivate: (index) => _activateTab(pane, index),
@@ -2388,12 +2461,13 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       ..start()
       ..pushStudy();
     _workspace.controller.addListener(_onWorkspaceChanged);
+    _workspace.unsavedPaths = _unsavedRelPaths;
     AppKeyMap.current.addListener(_onKeyMapChanged);
     _chosenKeys.attach();
     FocusManager.instance.addListener(_reclaimFocus);
     HardwareKeyboard.instance.addHandler(_historyKeyUnfocused);
     _immersive.addListener(_onImmersiveChanged);
-    unawaited(_workspace.load());
+    unawaited(_restoreWorkspace());
     // Library session events (every note op bumps the revision): the
     // pinned notes follow the files, so each one refreshes the note
     // widgets (issue 6).
@@ -2404,6 +2478,13 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     // Paths a re-index pruned from the tree: the tabs they hold stay, and
     // are flagged missing (issues #289, #372).
     _inbound.listen(widget.controller.removals, _workspace.missing);
+    // Notes rewritten on disk behind the editors' backs (a sync client,
+    // another program): every open note whose buffer is clean adopts the
+    // change, the tabs behind the one on screen included (#1055).
+    _inbound.listen(
+      widget.controller.externalChanges,
+      widget.unsavedTracker.notifyDiskChanged,
+    );
     // Paths a sync just changed on disk: the open note among them is
     // re-read (its buffer was saved before the sync started).
     _inbound.listen(widget.controller.sync?.localChanges, (paths) {
@@ -2500,6 +2581,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     _immersive.removeListener(_onImmersiveChanged);
     _immersive.dispose();
     _tabsListenable.dispose();
+    _expanded.dispose();
     _workspace.dispose();
     WidgetsBinding.instance.removeObserver(this);
     _noteHideTimer?.cancel();
@@ -2976,7 +3058,12 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     if (last != null &&
         last.path == path &&
         now.difference(last.at) <= kDoubleTapTimeout) {
-      if (last.replaced case final replaced?) _workspace.show(replaced);
+      // The first click already showed the note, in a tab of its own; the
+      // tab it replaced comes back beside it, and nothing else is shown or
+      // recreated (#1076).
+      if (last.replaced case final replaced?) {
+        _workspace.reopenBeforeShowing(replaced);
+      }
       _workspace.show(path, newTab: true);
       return;
     }
@@ -3748,7 +3835,10 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     required Widget child,
     bool retainLayout = false,
   }) {
-    final slot = TickerMode(enabled: visible, child: child);
+    final slot = TickerMode(
+      enabled: visible,
+      child: ExcludeFocus(excluding: !visible, child: child),
+    );
     if (retainLayout) {
       return Visibility(
         visible: visible,
@@ -4197,9 +4287,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       AppCommand.welcomeDeck: () => unawaited(showWelcomeDeck(context)),
       AppCommand.toggleSidebar: _toggleSidebar,
       // The tabs are the wide layout's (#23); a phone has one note.
-      AppCommand.closeTab: _workspace.closeActive,
-      AppCommand.nextTab: () => _workspace.cycle(1),
-      AppCommand.previousTab: () => _workspace.cycle(-1),
+      AppCommand.closeTab: _closeShownTab,
+      AppCommand.nextTab: () => _cycleTab(1),
+      AppCommand.previousTab: () => _cycleTab(-1),
       AppCommand.noteBack: () => unawaited(_noteHistory.back()),
       AppCommand.noteForward: () => unawaited(_noteHistory.forward()),
       AppCommand.splitRight: () => _workspace.splitActive(SplitAxis.right),
@@ -4339,9 +4429,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       _tab = ShellTab.files;
       _sidebarVisible = true;
       if (folder.isEmpty) return;
-      for (var at = folder; at.isNotEmpty && at != '.'; at = parentOf(at)) {
-        _expanded.add(at);
-      }
+      _expanded.addWithAncestors(folder);
       _selected = folder;
       _selectedIsDir = true;
       _treeVisible = true;
@@ -4868,7 +4956,10 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
             offstage: pane != w.focused,
             child: TickerMode(
               enabled: pane == w.focused,
-              child: _detailPane(controller, pane),
+              child: ExcludeFocus(
+                excluding: pane != w.focused,
+                child: _detailPane(controller, pane),
+              ),
             ),
           ),
       ],
@@ -4906,73 +4997,78 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
                 offstage: content != null || compare || review,
                 child: TickerMode(
                   enabled: content == null && !compare && !review,
-                  child: ShellDetailPane(
-                    root: controller.root,
-                    tabs: _deck(pane),
-                    onMemento: _workspace.remember,
-                    zen: _inZen,
-                    // The panel holds the note's outline and spelling
-                    // wherever the wide layout can show it — docked beside
-                    // the note, or over it on a window without room for
-                    // both — so the status row leaves both its buttons
-                    // out (#1002). A phone keeps them: there they open
-                    // their sheets.
-                    outlineInDock: _wide && !_inZen,
-                    spellCheckInDock: _wide && !_inZen,
-                    typewriter: _editorSettings.typewriter,
-                    cascadeChecklist: _editorSettings.cascadeChecklist,
-                    frontmatterPanel: _editorSettings.frontmatterPanel,
-                    linkPreview: _editorSettings.linkPreview,
-                    onToggleTypewriter: _toggleTypewriter,
-                    onLoaded: _workspace.noteLoaded,
-                    onEditedNoteClosed: _tidyClosedNote,
-                    showLineNumbers: _editorSettings.lineNumbers,
-                    noteColumn: _editorSettings.noteColumn,
-                    // The kind toggles and ⋮ sit at the end of the note's
-                    // one row of chrome (#173); there is no header above.
-                    barActions: [..._kindActions, _dockToggle(), _noteMenu()],
-                    autofocusEditor: _editorSettings.autofocusEditor,
-                    // The Files pane opened a note (#727): that tab's own
-                    // view is asked for the caret, and no other.
-                    caretPath: _caretPath,
-                    caretRequest: _caretRequest,
-                    linkType: _editorSettings.linkType,
-                    newItemLocation: _editorSettings.newItemLocation,
-                    attachmentsFolder: _editorSettings.attachmentsFolder,
-                    templateFolder: _editorSettings.templateFolder,
-                    indentWidth: _editorSettings.indentWidth,
-                    sourceFont: _editorSettings.sourceFont,
-                    toolbarLayout: _editorSettings.toolbarLayout,
-                    // A single enabled editor has nowhere to switch to:
-                    // the note hides its switch instead of offering a
-                    // dead toggle.
-                    onEditorKindChanged:
-                        _editorSettings.editorsEnabled.length > 1
-                        ? _setEditorKind
-                        : null,
-                    linkSource: _linkSource,
-                    wikilinkSuggester: _wikilinkSuggester,
-                    onOpenNote: _openNoteFromLink,
-                    kindMode: !_kindRawMode,
-                    onNoteKindChanged: _onNoteKindChanged,
-                    onPasteAsMarkdown: _pasteAsMarkdown,
-                    unsavedTracker: widget.unsavedTracker,
-                    spellCheck: widget.spellCheck,
-                    reloadToken: _noteReloadToken,
-                    linksFollowed: _linksFollowed,
-                    onAnnotate: _annotate,
-                    ocr: _ocrActions,
-                    marks: _annotations,
-                    saveNote: noteSaverFor(controller),
-                    saveNoteStream: noteStreamSaverFor(controller),
-                    createMissingNote: missingNoteCreatorFor(controller),
-                    statusActions: _statusActionsFor(pane),
-                    header: (path) => _journalUi.header(context, path),
-                    onEditEpubLook: (anchor) =>
-                        _editEpubLook(controller, anchor),
-                    onEpubTextScale: (scale) =>
-                        unawaited(keepEpubTextScale(controller, scale)),
-                    epubFullScreen: _immersive.fullScreen,
+                  child: ExcludeFocus(
+                    excluding: content != null || compare || review,
+                    child: ShellDetailPane(
+                      shellFocus: _shellFocus,
+                      root: controller.root,
+                      tabs: _deck(pane),
+                      onMemento: _workspace.remember,
+                      zen: _inZen,
+                      // The panel holds the note's outline and spelling
+                      // wherever the wide layout can show it — docked beside
+                      // the note, or over it on a window without room for
+                      // both — so the status row leaves both its buttons
+                      // out (#1002). A phone keeps them: there they open
+                      // their sheets.
+                      outlineInDock: _wide && !_inZen,
+                      spellCheckInDock: _wide && !_inZen,
+                      typewriter: _editorSettings.typewriter,
+                      cascadeChecklist: _editorSettings.cascadeChecklist,
+                      frontmatterPanel: _editorSettings.frontmatterPanel,
+                      linkPreview: _editorSettings.linkPreview,
+                      onToggleTypewriter: _toggleTypewriter,
+                      onLoaded: _workspace.noteLoaded,
+                      onEditedNoteClosed: _tidyClosedNote,
+                      showLineNumbers: _editorSettings.lineNumbers,
+                      noteColumn: _editorSettings.noteColumn,
+                      // The kind toggles and ⋮ sit at the end of the note's
+                      // one row of chrome (#173); there is no header above.
+                      barActions: [..._kindActions, _dockToggle(), _noteMenu()],
+                      autofocusEditor: _editorSettings.autofocusEditor,
+                      // The Files pane opened a note (#727): that tab's own
+                      // view is asked for the caret, and no other.
+                      caretPath: _caretPath,
+                      caretRequest: _caretRequest,
+                      linkType: _editorSettings.linkType,
+                      newItemLocation: _editorSettings.newItemLocation,
+                      attachmentsFolder: _editorSettings.attachmentsFolder,
+                      templateFolder: _editorSettings.templateFolder,
+                      indentWidth: _editorSettings.indentWidth,
+                      sourceFont: _editorSettings.sourceFont,
+                      toolbarLayout: _editorSettings.toolbarLayout,
+                      // A single enabled editor has nowhere to switch to:
+                      // the note hides its switch instead of offering a
+                      // dead toggle.
+                      onEditorKindChanged:
+                          _editorSettings.editorsEnabled.length > 1
+                          ? _setEditorKind
+                          : null,
+                      linkSource: _linkSource,
+                      wikilinkSuggester: _wikilinkSuggester,
+                      onOpenNote: _openNoteFromLink,
+                      kindMode: !_kindRawMode,
+                      onNoteKindChanged: _onNoteKindChanged,
+                      onTabKind: _onTabKind,
+                      onPasteAsMarkdown: _pasteAsMarkdown,
+                      unsavedTracker: widget.unsavedTracker,
+                      spellCheck: widget.spellCheck,
+                      reloadToken: _noteReloadToken,
+                      linksFollowed: _linksFollowed,
+                      onAnnotate: _annotate,
+                      ocr: _ocrActions,
+                      marks: _annotations,
+                      saveNote: noteSaverFor(controller),
+                      saveNoteStream: noteStreamSaverFor(controller),
+                      createMissingNote: missingNoteCreatorFor(controller),
+                      statusActions: _statusActionsFor(pane),
+                      header: (path) => _journalUi.header(context, path),
+                      onEditEpubLook: (anchor) =>
+                          _editEpubLook(controller, anchor),
+                      onEpubTextScale: (scale) =>
+                          unawaited(keepEpubTextScale(controller, scale)),
+                      epubFullScreen: _immersive.fullScreen,
+                    ),
                   ),
                 ),
               ),
@@ -4985,7 +5081,10 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
                   offstage: content == null || review,
                   child: TickerMode(
                     enabled: content != null,
-                    child: _tabBodyFor(tab, controller),
+                    child: ExcludeFocus(
+                      excluding: content == null,
+                      child: _tabBodyFor(tab, controller),
+                    ),
                   ),
                 ),
               // A version beside the note (#712): over the deck, which
@@ -5013,7 +5112,16 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// that pane shows, so each pane's eye says what its own tab does.
   List<Widget> _statusActionsFor(int pane) {
     final tab = _workspace.value.panes[pane].activeTab;
-    if (tab == null || !_previewToggleVisible) return const [];
+    if (tab == null) return const [];
+    // The focused pane's note is the one the shell's kind and raw mode
+    // speak of; another pane's is told by its own kind (#1081).
+    final offered = pane == _workspace.value.focused
+        ? _previewToggleVisible
+        : previewToggleOffered(
+            path: tab.path,
+            kindGui: NoteKinds.forType(_tabKinds[tab.path]),
+          );
+    if (!offered) return const [];
     final plain = isPlainTextFile(p.basename(tab.path));
     return [
       PreviewToggleAction(
@@ -5043,15 +5151,17 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     final mounted = _workspace.mounted();
     final showing = w.panes[pane].activeTab?.path;
     final focused = pane == w.focused;
-    _noteKeys.removeWhere((path, _) => !mounted.contains(path));
+    _noteKeys.keepOnly(mounted);
+    _tabKinds.removeWhere((path, _) => !mounted.contains(path));
     return [
       for (final tab in w.panes[pane].tabs)
         if (mounted.contains(tab.path))
           () {
             final editor = _editorOf(tab.memento);
             return DetailTab(
-              key: _noteKeys.putIfAbsent(tab.path, GlobalKey.new),
+              key: _noteKeys.keyOf(tab.path),
               path: tab.path,
+              movedFrom: _noteKeys.movedFrom(tab.path),
               active: tab.path == showing,
               focused: focused,
               memento: tab.memento,
@@ -5070,9 +5180,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     ];
   }
 
-  /// One key per mounted note, so a tab moved to the other pane takes
-  /// its editor along — undo and all — instead of starting a new one.
-  final Map<String, GlobalKey> _noteKeys = {};
+  /// One key per mounted note: a tab moved to the other pane, or a note
+  /// renamed, takes its editor along — undo and all (#1076).
+  final NoteEditorKeys _noteKeys = NoteEditorKeys();
 
   /// The draggable tree/detail divider (T-PP-21). Moves apply live; the
   /// lift persists the width to the library.
@@ -5195,6 +5305,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   Widget _searchSlot(LibrarySession controller, {bool tree = false}) {
     return SearchSlot(
       controller: controller,
+      unsavedTracker: widget.unsavedTracker,
       onOpenNote: _openSearchNote,
       onOpenHit: _openSearchHit,
       requests: _searchRequests,
@@ -5601,7 +5712,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
               controller: controller,
               sort: _editorSettings.treeSort,
               selectedPath: _selected,
-              expanded: _expanded,
+              expanded: _expanded.folders,
               // The keyboard's walk (#727) lets go while the grid holds the
               // pane, and while the search holds the sidebar's slot.
               active: !_gridOn && !_sidebarShowsView,
@@ -5694,9 +5805,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       return true;
     }
     setState(() {
-      for (var at = parentOf(path); at.isNotEmpty; at = parentOf(at)) {
-        _expanded.add(at);
-      }
+      _expanded.addWithAncestors(parentOf(path));
       _renaming = path;
     });
     return true;

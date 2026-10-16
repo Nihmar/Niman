@@ -318,8 +318,13 @@ abstract base class Strings {
   String get noteStatusUnsaved;
   String get noteStatusSaved;
   String get noteStatusError;
+  String get noteStatusSaveFailed;
+  String get noteSaveFailedSnack;
   String get noteNotText;
   String get noteLoadFailed;
+  String get noteLoadMissing;
+  String get noteLoadDenied;
+  String get noteLoadLocked;
   String wordCount(int count);
   String get outlineTooltip;
   String get outlineNoHeadings;
@@ -1089,6 +1094,7 @@ abstract base class Strings {
   // Folder picker (T-TK-07).
   String get folderPickerNewFolder;
   String get folderPickerEmpty;
+  String get folderPickerFilter;
   String get listFolderTitle;
   String get attachmentsFolderTitle;
 

@@ -598,10 +598,22 @@ final class LatvianStrings extends Strings {
   @override
   String get noteStatusError => 'Kļūda';
   @override
+  String get noteStatusSaveFailed => 'Nav saglabāts · mēģināt vēlreiz';
+  @override
+  String get noteSaveFailedSnack =>
+      'Piezīmi neizdevās saglabāt. Niman mēģinās vēlreiz.';
+  @override
   String get noteNotText =>
       'Šis fails nav teksta piezīme, tāpēc Niman to šeit nevar parādīt.';
   @override
   String get noteLoadFailed => 'Šo piezīmi neizdevās atvērt.';
+  @override
+  String get noteLoadMissing => 'Šīs piezīmes faila diskā vairs nav.';
+  @override
+  String get noteLoadDenied => 'Niman nav atļaujas lasīt šo piezīmi.';
+  @override
+  String get noteLoadLocked =>
+      'Šo piezīmi izmanto cita programma. Mēģiniet vēlreiz pēc brīža.';
   @override
   String wordCount(int count) =>
       count % 10 == 0 || (count % 100 >= 11 && count % 100 <= 19)
@@ -2054,6 +2066,8 @@ final class LatvianStrings extends Strings {
   String get folderPickerNewFolder => 'Jauns katalogs';
   @override
   String get folderPickerEmpty => 'Vēl nav kataloga';
+  @override
+  String get folderPickerFilter => 'Filtrēt katalogus';
   @override
   String get listFolderTitle => 'Sarakstu katalogs';
   @override

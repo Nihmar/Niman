@@ -18,8 +18,10 @@ import 'package:niman/src/ui/ocr/ocr_tree_order.dart';
 import 'package:niman/src/ui/ocr/ocr_tree_ring.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/tree_drag.dart';
+import 'package:niman/src/ui/tree_drag_scroll.dart';
 import 'package:niman/src/ui/tree_rename_field.dart';
 import 'package:niman/src/ui/tree_row_metrics.dart';
+import 'package:niman/src/ui/tree_spring_load.dart';
 
 /// One row of the flattened tree (note/folder + its depth).
 final class _Row {
@@ -222,6 +224,12 @@ final class _NoteTreeState extends State<NoteTree> {
 
   /// The tree's scroll, which a rename in place moves to its row (#707).
   final ScrollController _scroll = ScrollController();
+
+  /// The closed folders a drag has dwelt on and opened (#1071).
+  late final TreeSpringLoad _spring = TreeSpringLoad(
+    isOpen: (path) => widget.expanded.contains(path),
+    toggle: (path) => widget.onToggle(path),
+  );
 
   /// The row a rename has scrolled to, so it is scrolled to once.
   String? _revealed;
@@ -426,10 +434,21 @@ final class _NoteTreeState extends State<NoteTree> {
       final marking = _markKey(event);
       if (marking != null) return marking;
     }
+    final keys = HardwareKeyboard.instance;
+    // The menu key and `Shift`+`F10` open the cursor row's menu (#1072), as
+    // the editor's do: the only way to the row's actions without a pointer.
+    if (_walkLength > 0 &&
+        !keys.isControlPressed &&
+        !keys.isAltPressed &&
+        !keys.isMetaPressed &&
+        (event.logicalKey == LogicalKeyboardKey.contextMenu ||
+            (event.logicalKey == LogicalKeyboardKey.f10 &&
+                keys.isShiftPressed))) {
+      return _openRowMenu(_walkRow(_cursorAt()));
+    }
     // A modified key belongs to the app's accelerators (#23): Alt+Left and
     // Alt+Right walk the notes' history, Ctrl+Shift+PageUp/Down the
     // journal — the walk claims the plain key or none.
-    final keys = HardwareKeyboard.instance;
     if (keys.isControlPressed ||
         keys.isAltPressed ||
         keys.isMetaPressed ||
@@ -444,6 +463,31 @@ final class _NoteTreeState extends State<NoteTree> {
       setState(() => _keyboardFocus = true);
     }
     return handled;
+  }
+
+  /// The menu of [row] from the keyboard (#1072), anchored at the row
+  /// itself: the marked rows' menu when the row is one of several marked,
+  /// the row's own otherwise — a right click's two answers.
+  KeyEventResult _openRowMenu(_WalkRow row) {
+    final box = context.findRenderObject();
+    if (box is! RenderBox || !box.attached) return KeyEventResult.ignored;
+    final scrolled = _scroll.hasClients ? _scroll.position.pixels : 0.0;
+    final origin = box.localToGlobal(Offset(0, row.top - scrolled));
+    final anchor = origin & Size(box.size.width, row.height);
+    if (!_keyboardFocus) setState(() => _keyboardFocus = true);
+    final marked = widget.onMarkedMenu;
+    if (marked != null &&
+        _marked.length > 1 &&
+        !row.pinned &&
+        _marked.contains(row.path)) {
+      marked(_marked.toList(), anchor);
+      return KeyEventResult.handled;
+    }
+    final menu = widget.onLongPress;
+    if (menu == null) return KeyEventResult.ignored;
+    if (_marked.isNotEmpty) setState(_marked.clear);
+    menu(row.note, anchor);
+    return KeyEventResult.handled;
   }
 
   /// One key of the walk: [at] is the cursor's place in it, and what the
@@ -732,6 +776,7 @@ final class _NoteTreeState extends State<NoteTree> {
     _focus.removeListener(_onFocusChanged);
     if (widget.focusNode == null) _focus.dispose();
     _scroll.dispose();
+    _spring.dispose();
     const AppLogger(name: 'tree.ui').debug('dispose');
     super.dispose();
   }
@@ -938,6 +983,7 @@ final class _NoteTreeState extends State<NoteTree> {
                       : _secondaryTap,
                   onMiddleClick: widget.onOpenInNewTab,
                   onMove: widget.onMove,
+                  spring: _spring,
                   dragPaths: _dragPaths(row.note.path),
                   renaming: widget.renaming?.path == row.note.path
                       ? widget.renaming
@@ -972,7 +1018,11 @@ final class _NoteTreeState extends State<NoteTree> {
                 : list;
             final tree = move == null
                 ? listed
-                : TreeRootDrop(onMove: move, child: listed);
+                : TreeDragScroll(
+                    controller: _scroll,
+                    onEnd: _spring.finish,
+                    child: TreeRootDrop(onMove: move, child: listed),
+                  );
             return Focus(focusNode: _focus, onKeyEvent: _onKey, child: tree);
           },
         );
@@ -1151,6 +1201,7 @@ final class _RowTile extends StatelessWidget {
     this.onSecondaryTapDown,
     this.onMiddleClick,
     this.onMove,
+    this.spring,
     this.dragPaths,
     this.icon,
     this.sidecar = false,
@@ -1168,6 +1219,9 @@ final class _RowTile extends StatelessWidget {
 
   /// Moves this row by dragging it, and takes drops (#567).
   final TreeMove? onMove;
+
+  /// Opens this row, if a closed folder, when a drag dwells on it (#1071).
+  final TreeSpringLoad? spring;
 
   /// The paths this row's drag carries when it is dragged (#996): the
   /// marked rows' when this row is one of several, else null — the row's
@@ -1310,6 +1364,7 @@ final class _RowTile extends StatelessWidget {
         note: note,
         paths: dragPaths,
         onMove: move,
+        spring: spring,
         onLongPress: longPress,
         child: row,
       );

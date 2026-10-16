@@ -19,7 +19,9 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:meta/meta.dart';
+import 'package:niman/src/core/files.dart';
 import 'package:niman/src/markdown/note_bytes.dart';
+import 'package:niman/src/markdown/note_framing.dart';
 import 'package:niman/src/markdown/note_read_failure.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 
@@ -27,13 +29,49 @@ import 'package:niman/src/markdown/source_buffer.dart';
 /// the editor holds, and the buffer over that text.
 final class LoadedNote {
   /// Creates a loaded note.
-  const new({required this.text, required this.buffer});
+  const new({
+    required this.text,
+    required this.buffer,
+    this.framing = NoteFraming.plain,
+    this.stamp,
+  });
 
   /// The note's text, its line endings `\n`.
   final String text;
 
+  /// The line ending and byte order mark the file had, which a save writes
+  /// back (#1056).
+  final NoteFraming framing;
+
   /// The buffer over [text].
   final SourceBuffer buffer;
+
+  /// What the file looked like **before** it was read (#1060): a change that
+  /// lands after the stat leaves a stamp older than the file, so the next
+  /// look finds the file different and reads it again; a stamp taken after
+  /// the read would match the new file while [text] is the old one, and the
+  /// note would never be reloaded. Null when the file could not be stat'ed.
+  final DiskStamp? stamp;
+}
+
+/// A note's text as it is written, read for a reload: [text] with the
+/// [stamp] of the file as it was before the read (see [LoadedNote.stamp]).
+final class NoteTextRead {
+  /// Creates a read.
+  const new({
+    required this.text,
+    required this.stamp,
+    this.framing = NoteFraming.plain,
+  });
+
+  /// The text, line endings as on disk.
+  final String text;
+
+  /// What the file wraps [text] in (#1056).
+  final NoteFraming framing;
+
+  /// The file before the read, or null when it could not be stat'ed.
+  final DiskStamp? stamp;
 }
 
 /// [text] with its line endings made `\n`, as the editor holds a note —
@@ -50,27 +88,67 @@ String normalizedLineEndings(String text) => text.contains('\r')
 /// carries the state with it, and the isolate refuses it.
 Future<Object> loadNote(String path) => Isolate.run(() => loadNoteSync(path));
 
-/// Reads the text of the note at [path], in an isolate: the text as it is
-/// written, or a [NoteReadFailure] saying the file is not text. What a
-/// reload compares against the note on screen.
+/// Reads the text of the note at [path], in an isolate: a [NoteTextRead] —
+/// the text as it is written, with the file's stamp from before the read —
+/// or a [NoteReadFailure] saying the file is not text. What a reload compares
+/// against the note on screen.
 Future<Object> readNoteText(String path) =>
     Isolate.run(() => readNoteTextSync(path));
 
 /// [readNoteText] on the calling isolate: what the isolate runs, kept
 /// callable on its own for the test that counts its decodes.
 @visibleForTesting
-Object readNoteTextSync(String path) {
-  final text = decodeNoteTextIfText(File(path).readAsBytesSync());
+Object readNoteTextSync(
+  String path, {
+  List<int> Function(String path)? readBytes,
+}) {
+  // Before the read, not after it (see [LoadedNote.stamp]).
+  final stamp = DiskStamp.of(path);
+  final String? text;
+  final List<int> bytes;
+  try {
+    bytes = readBytes?.call(path) ?? File(path).readAsBytesSync();
+    text = decodeNoteTextIfText(bytes);
+  } on FileSystemException catch (error) {
+    return _unreadable(path, error);
+  }
   if (text == null) return NoteReadFailure('$path: not text', notText: true);
-  return text;
+  return NoteTextRead(
+    text: text,
+    stamp: stamp,
+    framing: NoteFraming.of(bytes: bytes, text: text),
+  );
 }
 
+/// The failure a read that threw amounts to: a value the isolate can send
+/// whatever the platform's exception holds, and that the pane can word by
+/// its reason (#1059).
+NoteReadFailure _unreadable(String path, FileSystemException error) =>
+    NoteReadFailure('$path: $error', reason: NoteReadReason.of(error));
+
 /// [loadNote] on the calling isolate: what the isolate runs, kept callable
-/// on its own for the test that counts its decodes.
+/// on its own for the test that counts its decodes. [readBytes] is the
+/// test's seam for the read itself.
 @visibleForTesting
-Object loadNoteSync(String path) {
-  final read = decodeNoteTextIfText(File(path).readAsBytesSync());
+Object loadNoteSync(String path, {List<int> Function(String path)? readBytes}) {
+  // Before the read, not after it (see [LoadedNote.stamp]).
+  final stamp = DiskStamp.of(path);
+  final String? read;
+  final List<int> bytes;
+  try {
+    bytes = readBytes?.call(path) ?? File(path).readAsBytesSync();
+    read = decodeNoteTextIfText(bytes);
+  } on FileSystemException catch (error) {
+    return _unreadable(path, error);
+  }
   if (read == null) return NoteReadFailure('$path: not text', notText: true);
+  // Counted before the endings are made `\n`, or there is nothing to count.
+  final framing = NoteFraming.of(bytes: bytes, text: read);
   final text = normalizedLineEndings(read);
-  return LoadedNote(text: text, buffer: SourceBuffer.fromText(text));
+  return LoadedNote(
+    text: text,
+    buffer: SourceBuffer.fromText(text),
+    framing: framing,
+    stamp: stamp,
+  );
 }

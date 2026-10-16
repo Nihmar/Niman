@@ -380,6 +380,12 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
     return (line: block.startLine + line, fraction: exact - line);
   }
 
+  /// Whether the view has the note drawn to show an anchor in
+  /// ([showAnchor]): it is laid out, and holds blocks or is still reading
+  /// them in.
+  bool get acceptsAnchor =>
+      _scroll.hasClients && (_blocks.isNotEmpty || _scanning);
+
   /// Scrolls the view so [anchor]'s line is at its top, as far into it as
   /// the anchor says — and again after each frame that measured the blocks
   /// it landed among, as [jumpToLine] does. Taken once the scan lands, for

@@ -611,10 +611,22 @@ final class BulgarianStrings extends Strings {
   @override
   String get noteStatusError => 'Грешка';
   @override
+  String get noteStatusSaveFailed => 'Не е запазено · опитай пак';
+  @override
+  String get noteSaveFailedSnack =>
+      'Бележката не можа да бъде запазена. Niman ще опита отново.';
+  @override
   String get noteNotText =>
       'Този файл не е текстова бележка, затова Niman не може да го покаже тук.';
   @override
   String get noteLoadFailed => 'Тази бележка не можа да бъде отворена.';
+  @override
+  String get noteLoadMissing => 'Файлът на тази бележка вече го няма на диска.';
+  @override
+  String get noteLoadDenied => 'Niman няма разрешение да чете тази бележка.';
+  @override
+  String get noteLoadLocked =>
+      'Друга програма използва тази бележка. Опитайте отново след малко.';
   @override
   String wordCount(int count) => count == 1 ? '1 дума' : '$count думи';
   @override
@@ -2078,6 +2090,8 @@ final class BulgarianStrings extends Strings {
   String get folderPickerNewFolder => 'Нова папка';
   @override
   String get folderPickerEmpty => 'Все още няма папки';
+  @override
+  String get folderPickerFilter => 'Филтър на папките';
   @override
   String get listFolderTitle => 'Папка за списъци';
   @override

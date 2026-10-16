@@ -25,6 +25,11 @@ A right click on a result opens its menu:
 *Replace in this note*; a middle click or `Ctrl`+click opens it in a new
 tab. On a phone a long press gives *Replace in this note*.
 
+**Replace all and the notes you have open.** A replace saves the notes open
+with unsaved edits first, so it rewrites what you see; if one of them cannot
+be saved the replace does not start. When it is done, the open notes show the
+rewritten text at once — the editor never saves the old words back over it.
+
 The index keeps the words of every note, not a copy of its text: it stays
 small, whatever the size of your notes. The text shown under a result is
 read from the note itself, when its row comes on screen.

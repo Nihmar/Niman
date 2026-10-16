@@ -619,11 +619,26 @@ final class GreekStrings extends Strings {
   @override
   String get noteStatusError => 'Σφάλμα';
   @override
+  String get noteStatusSaveFailed => 'Δεν αποθηκεύτηκε · δοκιμή ξανά';
+  @override
+  String get noteSaveFailedSnack =>
+      'Δεν ήταν δυνατή η αποθήκευση της σημείωσης. Το Niman θα δοκιμάσει ξανά.';
+  @override
   String get noteNotText =>
       'Αυτό το αρχείο δεν είναι σημείωση κειμένου, οπότε το '
       'Niman δεν μπορεί να το εμφανίσει εδώ.';
   @override
   String get noteLoadFailed => 'Δεν ήταν δυνατό να ανοίξει αυτή η σημείωση.';
+  @override
+  String get noteLoadMissing =>
+      'Το αρχείο αυτής της σημείωσης δεν υπάρχει πια στον δίσκο.';
+  @override
+  String get noteLoadDenied =>
+      'Το Niman δεν έχει άδεια να διαβάσει αυτή τη σημείωση.';
+  @override
+  String get noteLoadLocked =>
+      'Ένα άλλο πρόγραμμα χρησιμοποιεί αυτή τη σημείωση. Δοκιμάστε ξανά σε '
+      'λίγο.';
   @override
   String wordCount(int count) => count == 1 ? '1 λέξη' : '$count λέξεις';
   @override
@@ -2124,6 +2139,8 @@ final class GreekStrings extends Strings {
   String get folderPickerNewFolder => 'Νέος φάκελος';
   @override
   String get folderPickerEmpty => 'Δεν υπάρχουν ακόμα φάκελοι';
+  @override
+  String get folderPickerFilter => 'Φίλτρο φακέλων';
   @override
   String get listFolderTitle => 'Φάκελος λίστας';
   @override

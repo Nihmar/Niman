@@ -34,11 +34,14 @@ import 'package:niman/src/links/suggester.dart';
 import 'package:niman/src/markdown/background_scan.dart';
 import 'package:niman/src/markdown/buffer_block_anchors.dart';
 import 'package:niman/src/markdown/edit/source_find.dart';
+import 'package:niman/src/markdown/line_ending.dart';
+import 'package:niman/src/markdown/note_framing.dart';
 import 'package:niman/src/markdown/note_load.dart';
 import 'package:niman/src/markdown/note_read_failure.dart';
 import 'package:niman/src/markdown/read_parser.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
+import 'package:niman/src/markdown/render/scroll_anchor.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/markdown/source_edit.dart';
@@ -88,9 +91,9 @@ const double zenCaretWidth = 3;
 /// and saves are atomic. Edits persist ~500 ms after the last keystroke,
 /// on focus loss, and when the app is hidden.
 ///
-/// Line endings: the buffer uses LF; `\r` is stripped on load and the save
-/// writes LF. Restoring the file's original line ending on save is a
-/// deferred refinement (record it per note).
+/// Line endings: the buffer uses LF; `\r` is stripped on load, the file's
+/// dominant ending is remembered with the note, and every save writes the
+/// text back with it (#1056) — a CRLF note stays CRLF.
 ///
 /// [showLineNumbers] and [autofocusEditor] are the settings toggles,
 /// passed through to the editor. The note is one pane: [showPreview] says
@@ -130,6 +133,7 @@ final class NoteView extends StatefulWidget {
     this.initialFind,
     this.active = true,
     this.initialMemento,
+    this.movedFrom,
     this.onMemento,
     this.onEditedNoteClosed,
     this.onLoaded,
@@ -317,6 +321,12 @@ final class NoteView extends StatefulWidget {
   /// scroll. A caret landing or an anchor wins over it.
   final NoteMemento? initialMemento;
 
+  /// The path this note was at a moment ago, when its file was renamed or
+  /// moved (#1076): [path] changing from this one is the same note under
+  /// another name, so the view keeps its text, undo and place instead of
+  /// loading another note.
+  final String? movedFrom;
+
   /// Receives where the note is left: when its tab goes behind another,
   /// and when the view goes away.
   final void Function(String path, NoteMemento memento)? onMemento;
@@ -429,6 +439,12 @@ final class _NoteViewState extends State<NoteView>
 
   bool _loading = true;
   bool _ready = false;
+
+  /// Which load is the current one (#1059): counted up as each starts, and
+  /// compared after every await, so a load the reader has moved on from —
+  /// another note, the same note asked for again — changes nothing when it
+  /// ends, whether it ends well or not.
+  int _loadGeneration = 0;
 
   /// Why the note could not be opened, in the user's words; the raw error
   /// goes to the log only (issue #156).
@@ -602,6 +618,21 @@ final class _NoteViewState extends State<NoteView>
     _focus.requestFocus();
   }
 
+  @override
+  void takeFocus() {
+    if (!mounted) return;
+    if (!_ready) {
+      // The load puts the caret in once the editor is up.
+      _caretPending = true;
+      return;
+    }
+    if (_previewOnly) {
+      _readViewKey.currentState?.focus();
+      return;
+    }
+    _refocus();
+  }
+
   /// The note's editing commands: the toolbar's, the format keys', the
   /// context menu's, the Tools sheet's and the spelling review's.
   late final NoteEditCommands _commands = NoteEditCommands(
@@ -653,7 +684,16 @@ final class _NoteViewState extends State<NoteView>
   /// the comparison against the pane's text are what cost on a 246 MB note
   /// (208 ms to join the pane's text, 734 ms to normalize a fresh read, 44 ms
   /// to compare; measured 2026-09-22).
-  DiskStamp? _diskStat;
+  ///
+  /// Never stat'ed here (#1060): a read brings the stamp of the file from
+  /// before it was read, a save brings the one of the file it left, and a
+  /// look at the file asks the I/O threads ([DiskStamp.ofAsync]).
+  DiskStamp? _diskStamp;
+
+  /// The line ending and byte order mark the note's file has (#1056). The
+  /// buffer holds `\n` lines and no mark whatever the file had; a save writes
+  /// these back.
+  NoteFraming _framing = NoteFraming.plain;
 
   /// The read pane's refresh (T-M2-08), after a pause in the typing.
   Timer? _previewTimer;
@@ -886,6 +926,9 @@ final class _NoteViewState extends State<NoteView>
   /// or null when the owner does not track.
   late final UnsavedTracker? _unsaved;
 
+  /// Files changed on disk under the open notes (#1042): the tracker's word.
+  StreamSubscription<Set<String>>? _diskChanges;
+
   /// The [UnsavedNote] view handed to [_unsaved]; it reads this state's
   /// revision pair live, so it cannot hold stale text.
   late final UnsavedNoteAdapter _unsavedNote = UnsavedNoteAdapter(
@@ -906,17 +949,30 @@ final class _NoteViewState extends State<NoteView>
     text: () => _unifiedText,
     buffer: () => _unifiedSurfaceBuffer,
     references: () => _sourceViewKey.currentState?.references(),
+    framing: () => _framing,
     saveNote: () => widget.saveNote,
     writeNote: () => widget.writeNote,
     saveNoteStream: () => widget.saveNoteStream,
-    onSaved: (path) {
-      _recordDiskStat(path);
+    onSaved: (path, stamp) {
+      _diskStamp = stamp;
       _unsaved?.noteChanged();
     },
     onSettled: () {
       if (mounted) setState(() {});
     },
+    hold: widget.unsavedTracker?.hold,
   );
+
+  /// The first failure of a run of saves is said once, with a snack bar; the
+  /// status row keeps saying it, and offers the retry (#1054).
+  void _onSaveFailureChanged() {
+    if (!mounted) return;
+    final failure = _saves.failure.value;
+    setState(() {});
+    if (failure == null || failure.attempts != 1) return;
+    ScaffoldMessenger.maybeOf(context)
+        ?.showSnackBar(SnackBar(content: Text(AppStrings.noteSaveFailedSnack)));
+  }
 
   /// The loaded note's kind (the frontmatter `type` value, null = plain
   /// note); null again while a load is in flight.
@@ -961,13 +1017,24 @@ final class _NoteViewState extends State<NoteView>
     // The WYSIWYG publishes the formats at its caret on every selection
     // change: the same moment its memento moves.
     _activeFormats.addListener(_scheduleMemento);
+    // And the scroll of either pane: where the note is read is where it is
+    // left (#1077).
+    _previewScroll.addListener(_scheduleMemento);
+    _sourceScroll.addListener(_scheduleMemento);
     _stats.addListener(_onStatsChanged);
+    _saves.failure.addListener(_onSaveFailureChanged);
+    _diskChanges = _unsaved?.diskChanges.listen((paths) {
+      if (paths.isEmpty || paths.any((it) => p.equals(it, widget.path))) {
+        unawaited(_reloadIfChanged());
+      }
+    });
     unawaited(_load());
   }
 
   @override
   void didUpdateWidget(covariant NoteView oldWidget) {
     super.didUpdateWidget(oldWidget);
+    final moved = _followsMove(oldWidget);
     _keepPlaceAcrossModes(oldWidget);
     if (!identical(oldWidget.linkSource, widget.linkSource)) {
       // The library opened under a note that was already on screen: its
@@ -976,7 +1043,7 @@ final class _NoteViewState extends State<NoteView>
         ..sourceChanged()
         ..refresh();
     }
-    if (oldWidget.path != widget.path) {
+    if (oldWidget.path != widget.path && !moved) {
       // Another note's head is not this one's (#157): the panel opens closed
       // again, and the note on screen is taken at its head until it scrolls.
       _frontmatterOpen = false;
@@ -1002,12 +1069,17 @@ final class _NoteViewState extends State<NoteView>
       }
     }
     if (oldWidget.active && !widget.active) _handMemento(oldWidget.path);
+    if (!oldWidget.active && widget.active && _anchorToLand != null) {
+      _scheduleLanding();
+    }
     if (!oldWidget.active && widget.active && _ready) {
       // Back on screen: the shell asks the showing note what kind it is.
       widget.onNoteKindChanged?.call(_noteKind);
       _dismissKeyboardForPreview();
     }
-    if (oldWidget.path != widget.path) {
+    if (moved) {
+      _followMove();
+    } else if (oldWidget.path != widget.path) {
       _handMemento(oldWidget.path);
       // Persist the outgoing note under its own path before the buffer is
       // replaced by the incoming one: the _load below resets it.
@@ -1049,11 +1121,37 @@ final class _NoteViewState extends State<NoteView>
     }
   }
 
+  /// Whether [oldWidget] to this one is the same loaded note renamed or
+  /// moved (#1076), not another note: its buffer is still the note.
+  bool _followsMove(NoteView oldWidget) =>
+      oldWidget.path != widget.path &&
+      widget.movedFrom == oldWidget.path &&
+      _ready &&
+      !_loading &&
+      _surface != null;
+
+  /// The note's file is at a new path and its editor stays as it is: the
+  /// text, the undo, the place. What was keyed on the old path starts over.
+  void _followMove() {
+    _log.debug('moved: ${widget.movedFrom} -> ${widget.path}');
+    // The edits from here on are saved under the new name, as a new
+    // session. The disk stamp is the old file's, which the move kept, so a
+    // rewrite of this note's links by the move still reads as a change.
+    _saves.newSession();
+    _unsaved?.noteChanged();
+    // Its links resolve from where it is now.
+    _deadLinks
+      ..sourceChanged()
+      ..refresh();
+  }
+
   @override
   void dispose() {
     _handMemento(widget.path);
     _mementoTimer?.cancel();
     _activeFormats.removeListener(_scheduleMemento);
+    _previewScroll.removeListener(_scheduleMemento);
+    _sourceScroll.removeListener(_scheduleMemento);
     _templateCheck.dispose();
     _saves.cancel();
     _previewTimer?.cancel();
@@ -1062,6 +1160,8 @@ final class _NoteViewState extends State<NoteView>
     _unsaved?.unregister(_unsavedNote);
     widget.spellCheck?.removeListener(_onSpellCheckChanged);
     _sourceFind.dispose();
+    _saves.failure.removeListener(_onSaveFailureChanged);
+    unawaited(_diskChanges?.cancel());
     _stats
       ..removeListener(_onStatsChanged)
       ..dispose();
@@ -1109,12 +1209,16 @@ final class _NoteViewState extends State<NoteView>
       // panes keeps the caret. The *editor kind* is the pane's, so the switch
       // comes back to the mode the note was left in.
       final selection = surface.selection;
+      // The line at the top of the pane on stage, or, once the panes are
+      // gone with the tab, the one it had as it went (#1077).
+      final anchor = _stageAnchor() ?? _leavingAnchor;
       receive(
         path,
         NoteMemento(
           selectionBase: selection.anchor,
           selectionExtent: selection.extent,
-          scrollOffset: surface.scrollOffset,
+          scrollLine: anchor?.line,
+          scrollFraction: anchor?.fraction,
           editorKind: widget.showWysiwyg ? wysiwygEditorKind : sourceEditorKind,
           preview: widget.showPreview,
         ),
@@ -1135,15 +1239,91 @@ final class _NoteViewState extends State<NoteView>
     // One surface, two modes, the same text and the same offsets: the
     // selection is restored whenever the memento was taken in this pane, and
     // the scroll either way. The buffer is already built (the load made it).
+    final line = memento.scrollLine;
     _surface?.restore(
       base: sameEditor ? memento.selectionBase : null,
       extent: sameEditor ? memento.selectionExtent : null,
-      scroll: memento.scrollOffset,
+      // A memento written before the anchor held pixels: the editor still
+      // takes them.
+      scroll: line == null ? memento.scrollOffset : null,
     );
+    if (line != null) {
+      _landAnchor((line: line, fraction: memento.scrollFraction ?? 0.0));
+    }
   }
+
+  /// The source line at the top of the pane on stage, or null while none is
+  /// drawn.
+  ScrollAnchor? _stageAnchor() => _previewIn(widget)
+      ? _readViewKey.currentState?.topAnchor
+      : _sourceViewKey.currentState?.topAnchor;
+
+  /// The stage anchor taken as the view was leaving the tree: its panes are
+  /// gone by the time it is disposed, and the memento is handed in then.
+  ScrollAnchor? _leavingAnchor;
+
+  @override
+  void deactivate() {
+    _leavingAnchor = _stageAnchor();
+    super.deactivate();
+  }
+
+  @override
+  void activate() {
+    super.activate();
+    _leavingAnchor = null;
+  }
+
+  /// A place to show once the pane on stage has the note drawn, and how
+  /// many frames it has waited.
+  ScrollAnchor? _anchorToLand;
+  int _anchorFrames = 0;
+  bool _landingScheduled = false;
+
+  /// Shows [anchor] at the top of the pane on stage as soon as it can: the
+  /// note's panes are built a frame or more after its text arrives, the
+  /// preview later still, and a tab behind waits for its turn.
+  void _landAnchor(ScrollAnchor anchor) {
+    _anchorToLand = anchor;
+    _anchorFrames = 0;
+    _scheduleLanding();
+  }
+
+  void _scheduleLanding() {
+    if (_landingScheduled) return;
+    _landingScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _landingScheduled = false;
+      if (mounted) _tryLanding();
+    });
+  }
+
+  void _tryLanding() {
+    final anchor = _anchorToLand;
+    // A tab behind is not drawn: it lands when it comes back.
+    if (anchor == null || !widget.active) return;
+    final read = _previewIn(widget);
+    final landed = read
+        ? _readViewKey.currentState?.acceptsAnchor ?? false
+        : _sourceViewKey.currentState?.acceptsAnchor ?? false;
+    if (landed) {
+      _anchorToLand = null;
+      if (read) {
+        _readViewKey.currentState!.showAnchor(anchor);
+      } else {
+        _sourceViewKey.currentState!.showAnchor(anchor);
+      }
+      return;
+    }
+    if (++_anchorFrames < _maxLandingFrames) _scheduleLanding();
+  }
+
+  /// How many frames a place waits for its pane before it is given up.
+  static const int _maxLandingFrames = 240;
 
   Future<void> _load() async {
     final path = widget.path;
+    final generation = ++_loadGeneration;
     // The buffer stops being any note's text here: the outgoing note's
     // save already left with its own path and text (didUpdateWidget), and
     // the incoming one is not read yet. Nothing in it is owed to the disk,
@@ -1174,7 +1354,7 @@ final class _NoteViewState extends State<NoteView>
         ready = loaded as LoadedNote;
         content = ready.text;
       }
-      if (!mounted || widget.path != path) return;
+      if (!mounted || generation != _loadGeneration) return;
       // The buffer uses LF: normalize line endings on load.
       final text = ready?.text ?? normalizedLineEndings(content);
       // The note kind (T-TK-02): the frontmatter `type` decides the body
@@ -1188,6 +1368,12 @@ final class _NoteViewState extends State<NoteView>
         caret: (widget.initialCaretOffset ?? 0).clamp(0, text.length),
         ready: ready,
       );
+      // The test seam reads nothing, so it has no stamp to keep.
+      _diskStamp = ready?.stamp;
+      // The seam's content is text already: whatever mark it holds is in it.
+      _framing =
+          ready?.framing ??
+          NoteFraming(lineEnding: LineEnding.dominantOf(content));
       _surfaceCaretLine = null;
       _unifiedText = text;
       // A template `{{cursor}}` landing (#53): the surface was given the
@@ -1206,6 +1392,7 @@ final class _NoteViewState extends State<NoteView>
       setState(() {
         _loading = false;
         _ready = true;
+        _error = null;
       });
       // Opened straight into the preview: the IME has no target here.
       _dismissKeyboardForPreview();
@@ -1247,7 +1434,6 @@ final class _NoteViewState extends State<NoteView>
         unawaited(jumpToAnchor(context, anchor, _linkTargets()));
       }
       widget.onLoaded?.call(path, text.length);
-      _recordDiskStat(path);
       _log.info(
         'note loaded: $path (${text.length} chars, '
         '${clock.elapsedMilliseconds} ms)',
@@ -1256,17 +1442,33 @@ final class _NoteViewState extends State<NoteView>
       // user waited for — load plus the frame that paints the loaded note.
       logNextFrame('editor', 'note open first frame (${text.length} chars)');
     } on Object catch (error) {
-      if (!mounted) return;
+      // A load the reader moved on from reports nothing: its failure is not
+      // this note's (#1059).
+      if (!mounted || generation != _loadGeneration) return;
       // A file that is not text is an attachment, not a broken note: it
       // says so, and nothing about it is ever reported saved (#156).
-      final notText = error is NoteReadFailure && error.notText;
+      final reason = NoteReadReason.of(error);
+      final notText = reason == NoteReadReason.notText;
       setState(() {
         _loading = false;
         _notText = notText;
-        _error = notText ? AppStrings.noteNotText : AppStrings.noteLoadFailed;
+        _error = switch (reason) {
+          NoteReadReason.notText => AppStrings.noteNotText,
+          NoteReadReason.missing => AppStrings.noteLoadMissing,
+          NoteReadReason.denied => AppStrings.noteLoadDenied,
+          NoteReadReason.locked => AppStrings.noteLoadLocked,
+          NoteReadReason.other => AppStrings.noteLoadFailed,
+        };
       });
       _log.error('note load failed: $path ($error)');
     }
+  }
+
+  /// Opens the note again after a load that failed: the error pane's Retry,
+  /// and the next reload trigger while the pane is up (#1059).
+  void _retryLoad() {
+    if (_loading) return;
+    unawaited(_load());
   }
 
   /// Adopts the disk text when it changed under the open note (a
@@ -1279,6 +1481,12 @@ final class _NoteViewState extends State<NoteView>
   /// external edit never disturbs the caret. The WYSIWYG surface owns a
   /// live document the buffer cannot replace, so it never auto-reloads.
   Future<void> _reloadIfChanged() async {
+    // A note that failed to open has nothing on screen to protect: the next
+    // trigger — a resume, a sync that touched it — is a new try (#1059).
+    if (_error != null && !_notText) {
+      _retryLoad();
+      return;
+    }
     if (_loading || _saves.busy) {
       _log.debug('reload skipped (busy): ${widget.path}');
       return;
@@ -1288,34 +1496,50 @@ final class _NoteViewState extends State<NoteView>
       return;
     }
     final path = widget.path;
+    final generation = _loadGeneration;
     // What the file looked like when it was last read or written, before the
     // read: O(1) against 250 ms of joining and comparing, and O(1) against
-    // the read itself. The test seam reads nothing, so it has no stat to
+    // the read itself. The test seam reads nothing, so it has no stamp to
     // check and reads on.
-    if (widget.readNote == null && _unchangedOnDisk(path)) {
+    if (widget.readNote == null && await _unchangedOnDisk(path)) {
       _log.debug('reload skipped (the file did not change): $path');
       return;
     }
+    // The reader may have typed, or moved on, while the file was asked.
+    if (!mounted || generation != _loadGeneration) return;
+    if (_loading || _saves.busy || _saves.dirty) return;
     final String content;
+    DiskStamp? stamp;
+    NoteFraming? framing;
     try {
       if (widget.readNote != null) {
         content = await widget.readNote!(path);
       } else {
         final loaded = await readNoteText(path);
-        if (loaded is! String) return;
-        content = loaded;
+        if (loaded is! NoteTextRead) return;
+        content = loaded.text;
+        stamp = loaded.stamp;
+        framing = loaded.framing;
       }
     } on Object catch (error) {
       _log.warning('reload read failed: $path ($error)');
       return;
     }
-    if (!mounted || widget.path != path) return;
+    if (!mounted || widget.path != path || generation != _loadGeneration) {
+      return;
+    }
     // The user may have typed during the read: re-check clean before
     // adopting anything.
     if (_loading || _saves.busy || _saves.dirty) {
       return;
     }
     final text = normalizedLineEndings(content);
+    // The file is what the pane has, or is about to be: either way this is
+    // the file that was looked at, so the next look can stop at the stamp
+    // instead of reading it again (#1060).
+    _diskStamp = stamp;
+    _framing =
+        framing ?? NoteFraming(lineEnding: LineEnding.dominantOf(content));
     if (text == _unifiedText) return;
     // Mute the programmatic change like _load does: the listener returns
     // before the revision bump and the save schedule.
@@ -1946,18 +2170,12 @@ final class _NoteViewState extends State<NoteView>
     _refreshPreview();
   }
 
-  /// Records what the note's file looks like now, for [_unchangedOnDisk].
-  ///
-  /// Best effort: a file that cannot be stat'ed (gone, or on a filesystem
-  /// that will not answer) records nothing, and the next reload reads and
-  /// compares the way it always did.
-  void _recordDiskStat(String path) => _diskStat = DiskStamp.of(path);
-
-  /// Whether the file at [path] is the one [_diskStat] recorded.
+  /// Whether the file at [path] is the one [_diskStamp] recorded.
   ///
   /// A file that cannot be stat'ed, or one nothing recorded, is read: the
   /// fallback is the comparison this stands in front of.
-  bool _unchangedOnDisk(String path) => _diskStat?.matches(path) ?? false;
+  Future<bool> _unchangedOnDisk(String path) async =>
+      await _diskStamp?.matchesAsync(path) ?? false;
 
   /// Opens the outline sheet and jumps to whatever was picked; a pointer's
   /// menu grows from [anchor], the outline button.
@@ -2037,7 +2255,7 @@ final class _NoteViewState extends State<NoteView>
       _surface == null ? const <BlockAnchor>[] : await _blockAnchors.read();
 
   void _onFocusChanged() {
-    if (!_focus.hasFocus) unawaited(_saves.save());
+    if (!_focus.hasFocus) _saves.saveInBackground();
     _onToolbarFocusChanged();
   }
 
@@ -2051,7 +2269,12 @@ final class _NoteViewState extends State<NoteView>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     _log.info('lifecycle: ${state.name}');
-    if (state == AppLifecycleState.paused) unawaited(_saves.save());
+    // `paused` is a phone's; a desktop window that is minimised or covered
+    // goes `hidden` and never `paused` (#1057).
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.hidden) {
+      _saves.saveInBackground();
+    }
     // Leaving the foreground may be the last thing this process does.
     if (state != AppLifecycleState.resumed && widget.active) {
       _mementoTimer?.cancel();
@@ -2083,6 +2306,9 @@ final class _NoteViewState extends State<NoteView>
   String get _status {
     if (_error != null) return AppStrings.noteStatusError;
     if (_loading) return AppStrings.noteStatusLoading;
+    if (_saves.failure.value != null && !_saves.saving) {
+      return AppStrings.noteStatusSaveFailed;
+    }
     if (_saves.saving) return AppStrings.noteStatusSaving;
     if (_saves.dirty) return AppStrings.noteStatusUnsaved;
     return AppStrings.noteStatusSaved;
@@ -2109,7 +2335,7 @@ final class _NoteViewState extends State<NoteView>
     final kind = frontmatterTypeOf(newText);
     final kindChanged = kind != _noteKind;
     setState(() => _noteKind = kind);
-    unawaited(_saves.save());
+    _saves.saveInBackground();
     if (kindChanged) widget.onNoteKindChanged?.call(kind);
   }
 
@@ -2219,6 +2445,7 @@ final class _NoteViewState extends State<NoteView>
                       message: error,
                       path: widget.path,
                       offerDefaultApp: _notText,
+                      onRetry: _notText ? null : _retryLoad,
                     ),
             ),
           ),
@@ -2267,6 +2494,9 @@ final class _NoteViewState extends State<NoteView>
                           ? _templateCheck.problemCount
                           : 0,
                       statusText: _status,
+                      onStatusTap: _saves.failure.value == null
+                          ? null
+                          : _saves.saveInBackground,
                       statusActions: widget.statusActions,
                       onOutline: _openOutline,
                       onFind: () => _sourceFind.open(),

@@ -328,7 +328,9 @@ bar, the same tabs head the notes instead of sitting in the title bar.
 On an Android phone the same open notes are reached from a **switcher** instead
 of tabs: a count on the note bar opens the list. One note is on screen
 at a time, and the phone has no split: a phone's width holds one note,
-in landscape too.
+in landscape too. The phone keeps at most 30 notes open: opening one more
+closes the one shown longest ago that has no unsaved edits, and it opens
+again where you left it.
 
 **Back and forward** through the notes looked at work everywhere from a
 keyboard (`Alt+←` / `Alt+→`). The mouse's side buttons do it on Linux and

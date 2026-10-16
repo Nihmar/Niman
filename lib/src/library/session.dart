@@ -21,6 +21,7 @@ import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/library/note_ops.dart';
 import 'package:niman/src/library/note_relocation.dart';
+import 'package:niman/src/library/note_save_result.dart';
 import 'package:niman/src/library/note_write_stream.dart';
 import 'package:niman/src/links/library_links.dart';
 import 'package:niman/src/links/suggester.dart';
@@ -33,7 +34,7 @@ import 'package:niman/src/sync/sync_service.dart';
 import 'package:niman/src/templates/repo.dart';
 import 'package:niman/src/update/update_check.dart';
 import 'package:niman/src/widget/widget_configs.dart';
-import 'package:niman/src/workspace/workspace.dart';
+import 'package:niman/src/workspace/workspace_slot.dart';
 
 /// Operations the UI layer performs on an open library.
 ///
@@ -146,7 +147,13 @@ abstract interface class NoteOperations {
   /// of different notes independently. [editSession] names the editor
   /// session the save belongs to — one opening of the note, however many
   /// autosaves it makes.
-  Future<void> saveNote(String path, String content, {int? editSession});
+  ///
+  /// Answers what the write left on the disk, or null when it cannot say.
+  Future<NoteSaveResult?> saveNote(
+    String path,
+    String content, {
+    int? editSession,
+  });
 
   /// Saves a note whose text is never joined: [content] makes the bytes one
   /// slice at a time and the write takes them as they arrive.
@@ -157,7 +164,7 @@ abstract interface class NoteOperations {
   /// [references] are its tags and links as of the text, when the editor
   /// keeps them: the reindex behind the save takes them instead of reading
   /// the note for them.
-  Future<void> saveNoteStream(
+  Future<NoteSaveResult?> saveNoteStream(
     String path,
     NoteContentProducer content, {
     int? editSession,
@@ -359,6 +366,13 @@ abstract interface class LibrarySession {
   /// paired, not pruned). What holds a path open — a tab — closes it here.
   Stream<Set<String>> get removals;
 
+  /// Fires with the absolute paths the file watcher reported changed (#1055):
+  /// another program, a sync client or Niman's own sync rewrote them — and,
+  /// as the watcher cannot tell, the app's own saves too. What holds a note
+  /// open compares the file with what it last read or wrote before it
+  /// believes a change.
+  Stream<Set<String>> get externalChanges;
+
   /// Which of [paths] the index does not hold — a note pruned before this
   /// session read the tree, so no [removals] event carries it. What a tab
   /// holds open on one closes when the workspace loads (#289).
@@ -493,12 +507,11 @@ abstract interface class LibrarySession {
   /// Drops the pending update (the banner's dismiss action).
   void clearPendingUpdate();
 
-  /// The notes left open in this library on this device (issue #23);
-  /// nothing open when none were, or no library is.
-  Future<Workspace> get savedWorkspace;
-
-  /// Keeps [workspace] as what is open in this library on this device.
-  Future<void> saveWorkspace(Workspace workspace);
+  /// Where the open library's notes left open are kept on this device
+  /// (issue #23), bound to the library open now (#1083): the slot keeps
+  /// answering for it after the session has closed it or opened another.
+  /// Nothing is kept for no library.
+  WorkspaceSlot get workspaceSlot;
 
   /// Whether the note editor shows the row-number column (default true).
   Future<bool> get lineNumbersEnabled;

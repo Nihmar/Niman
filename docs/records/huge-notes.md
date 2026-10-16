@@ -256,6 +256,18 @@ written next to it.
    a fresh read and 44 ms to compare it (measured on the 246 MB note,
    2026-09-22). A file that changed is read, normalized and adopted exactly
    as before; a file that is gone, or that nothing has stamped, is read.
+
+   **Correction (2026-10-16, #1060):** the stamp was taken with a `statSync`
+   on the UI isolate, after the read and after the surface was built, and
+   was not refreshed when a change was adopted. It now comes from where the
+   truth is: the load and read isolates stat the file *before* reading it and
+   return `(text, stamp)` (a change landing during the read leaves a stamp
+   older than the file, so the note is read again rather than counted as
+   unchanged), a save hands back the size and time of the file it left
+   (`NoteSaveResult`), and the question "is the file still the one stamped?"
+   is an async stat on the I/O threads. A change adopted — or found identical
+   to the pane — stores the stamp it was read with, so one external touch of a
+   100 MB note no longer makes every refocus read it again.
 5. ~~**"Count list" scans the whole note.**~~ Done: the sheet lists every
    tool and greys the ones that cannot run, so the question "does this note
    hold a list?" is asked every time it opens — and it was answered by

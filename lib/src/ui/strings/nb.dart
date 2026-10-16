@@ -603,10 +603,23 @@ final class NorwegianStrings extends Strings {
   @override
   String get noteStatusError => 'Feil';
   @override
+  String get noteStatusSaveFailed => 'Ikke lagret · prøv igjen';
+  @override
+  String get noteSaveFailedSnack =>
+      'Notatet kunne ikke lagres. Niman prøver igjen.';
+  @override
   String get noteNotText =>
       'Denne filen er ikke et tekstnotat, så Niman kan ikke vise den her.';
   @override
   String get noteLoadFailed => 'Notatet kunne ikke åpnes.';
+  @override
+  String get noteLoadMissing =>
+      'Filen til notatet finnes ikke lenger på disken.';
+  @override
+  String get noteLoadDenied => 'Niman har ikke tillatelse til å lese notatet.';
+  @override
+  String get noteLoadLocked =>
+      'Et annet program bruker notatet. Prøv igjen om et øyeblikk.';
   @override
   String wordCount(int count) => '$count ord';
   @override
@@ -2050,6 +2063,8 @@ final class NorwegianStrings extends Strings {
   String get folderPickerNewFolder => 'Ny mappe';
   @override
   String get folderPickerEmpty => 'Ingen mapper ennå';
+  @override
+  String get folderPickerFilter => 'Filtrer mapper';
   @override
   String get listFolderTitle => 'Listemappe';
   @override

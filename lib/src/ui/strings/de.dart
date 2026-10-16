@@ -611,11 +611,25 @@ final class GermanStrings extends Strings {
   @override
   String get noteStatusError => 'Fehler';
   @override
+  String get noteStatusSaveFailed => 'Nicht gespeichert · erneut versuchen';
+  @override
+  String get noteSaveFailedSnack =>
+      'Die Notiz konnte nicht gespeichert werden. Niman versucht es erneut.';
+  @override
   String get noteNotText =>
       'Diese Datei ist keine Textnotiz, daher kann '
       'Niman sie hier nicht anzeigen.';
   @override
   String get noteLoadFailed => 'Diese Notiz konnte nicht geöffnet werden.';
+  @override
+  String get noteLoadMissing =>
+      'Die Datei dieser Notiz ist nicht mehr auf dem Datenträger.';
+  @override
+  String get noteLoadDenied => 'Niman darf diese Notiz nicht lesen.';
+  @override
+  String get noteLoadLocked =>
+      'Ein anderes Programm verwendet diese Notiz. Versuche es gleich noch '
+      'einmal.';
   @override
   String wordCount(int count) => count == 1 ? '1 Wort' : '$count Wörter';
   @override
@@ -2103,6 +2117,8 @@ final class GermanStrings extends Strings {
   String get folderPickerNewFolder => 'Neuer Ordner';
   @override
   String get folderPickerEmpty => 'Noch keine Ordner';
+  @override
+  String get folderPickerFilter => 'Ordner filtern';
   @override
   String get listFolderTitle => 'Listen-Ordner';
   @override

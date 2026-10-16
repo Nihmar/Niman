@@ -604,11 +604,23 @@ final class CroatianStrings extends Strings {
   @override
   String get noteStatusError => 'Greška';
   @override
+  String get noteStatusSaveFailed => 'Nije spremljeno · pokušaj ponovno';
+  @override
+  String get noteSaveFailedSnack =>
+      'Bilješka se nije mogla spremiti. Niman će pokušati ponovno.';
+  @override
   String get noteNotText =>
       'Ova datoteka nije tekstualna bilješka, pa je '
       'Niman ne može prikazati ovdje.';
   @override
   String get noteLoadFailed => 'Ova se bilješka nije mogla otvoriti.';
+  @override
+  String get noteLoadMissing => 'Datoteke ove bilješke više nema na disku.';
+  @override
+  String get noteLoadDenied => 'Niman nema dopuštenje za čitanje ove bilješke.';
+  @override
+  String get noteLoadLocked =>
+      'Drugi program koristi ovu bilješku. Pokušajte ponovno za trenutak.';
   @override
   String wordCount(int count) =>
       count % 10 == 1 && count % 100 != 11 ? '$count riječ' : '$count riječi';
@@ -2056,6 +2068,8 @@ final class CroatianStrings extends Strings {
   String get folderPickerNewFolder => 'Novi direktorij';
   @override
   String get folderPickerEmpty => 'Još nema direktorija';
+  @override
+  String get folderPickerFilter => 'Filtriraj direktorije';
   @override
   String get listFolderTitle => 'Direktorij popisa';
   @override

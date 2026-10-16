@@ -56,7 +56,11 @@ lines or when responsibilities mix.
   `staleTempMinimumAge` so a write in flight is never touched.
 - **Edit:** `NoteOps.saveNote` → history snapshot and atomic write
   (temp + rename) in one isolate pass → the note is rescanned into the
-  index. Every mode of the surface shares one tokenizer for links.
+  index. Every mode of the surface shares one tokenizer for links. Every
+  atomic write — the joined one and the streaming one alike — ends in
+  `publishTempFile` (`core/files.dart`): the temp file is flushed to storage
+  before the rename, so a power cut after it cannot bring the note back
+  empty (#1058).
 - **Sync download:** a note lands the same way (snapshot + rename on an
   isolate). An **attachment** has no snapshot, so it lands through
   `swapFileIn` on the calling isolate instead — a stat, a mkdir and a

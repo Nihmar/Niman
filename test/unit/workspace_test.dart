@@ -4,6 +4,7 @@ import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/workspace/note_memento.dart';
+import 'package:niman/src/workspace/note_places.dart';
 import 'package:niman/src/workspace/workspace.dart';
 
 /// The paths of [pane]'s tabs, the showing one in brackets.
@@ -190,6 +191,218 @@ void main() {
       final w = _opened(['a.md']).split(SplitAxis.right);
       expect(w.withFraction(0.05).fraction, 0.2);
       expect(w.withFraction(0.99).fraction, 0.8);
+    });
+  });
+
+  // #1077: the scroll is a place in the note, not a distance.
+  group('the scroll of a memento', () {
+    test('a place round-trips through the stored form', () {
+      const memento = NoteMemento(
+        selectionExtent: 4,
+        scrollLine: 120,
+        scrollFraction: 0.25,
+        preview: true,
+      );
+      final back = NoteMemento.fromJson(
+        jsonDecode(jsonEncode(memento.toJson())),
+      );
+      expect(back, memento);
+      expect(back.scrollLine, 120);
+      expect(back.scrollFraction, 0.25);
+    });
+
+    test('a memento written with pixels still decodes, and says so', () {
+      final old = NoteMemento.fromJson(const {
+        'base': 3,
+        'extent': 3,
+        'scroll': 640.5,
+        'editor': 'source',
+      });
+      expect(old.scrollOffset, 640.5);
+      expect(old.scrollLine, isNull);
+      expect(old.hasScroll, isTrue);
+      expect(old.selectionExtent, 3);
+    });
+
+    test('a fraction without its line, or out of range, is mended', () {
+      expect(NoteMemento.fromJson(const {'into': 0.4}).hasScroll, isFalse);
+      final over = NoteMemento.fromJson(const {'line': 9, 'into': 7});
+      expect(over.scrollFraction, 1.0);
+      expect(NoteMemento.fromJson(const {'line': -1}).hasScroll, isFalse);
+    });
+
+    test('a memento that knows no place keeps the tab’s', () {
+      const known = NoteMemento(scrollLine: 40, scrollFraction: 0.5);
+      final w = _opened(['a.md'])
+          .withMemento('a.md', known)
+          .withMemento('a.md', const NoteMemento(selectionExtent: 2));
+      expect(w.tabs.single.memento.scrollLine, 40);
+      expect(w.tabs.single.memento.scrollFraction, 0.5);
+      expect(w.tabs.single.memento.selectionExtent, 2);
+    });
+
+    test('line 0 is a place, not an absence', () {
+      final w = _opened(['a.md'])
+          .withMemento('a.md', const NoteMemento(scrollLine: 40))
+          .withMemento('a.md', const NoteMemento(scrollLine: 0));
+      expect(w.tabs.single.memento.scrollLine, 0);
+    });
+  });
+
+  // #1069: the tree's expanded folders ride with the workspace.
+  group('the expanded folders', () {
+    test('survive the stored form; an old one has none', () {
+      final w = _opened(['a.md']).withExpanded(['A', 'A/B']);
+      final back = Workspace.fromJson(jsonDecode(jsonEncode(w.toJson())));
+      expect(back.expanded, ['A', 'A/B']);
+      expect(back, w);
+      expect(Workspace.empty.toJson().containsKey('expanded'), isFalse);
+    });
+
+    test('are deduplicated, mended and bounded to the latest', () {
+      final w = Workspace.fromJson(const {
+        'version': 1,
+        'panes': [
+          {'active': 0, 'tabs': <Object>[]},
+        ],
+        'expanded': ['A', 'A', 3, '', 'B'],
+      });
+      expect(w.expanded, ['A', 'B']);
+      final many = Workspace.empty.withExpanded([
+        for (var i = 0; i < Workspace.maxExpanded + 5; i++) 'f$i',
+      ]);
+      expect(many.expanded.length, Workspace.maxExpanded);
+      expect(many.expanded.first, 'f5');
+    });
+
+    test('closing every tab leaves the tree as it was', () {
+      final w = _opened(['a.md']).withExpanded(['A']).closeAll();
+      expect(w.expanded, ['A']);
+    });
+  });
+
+  group('where a note was left', () {
+    // #1075: an editor torn down before it was laid out hands in a memento
+    // that cannot say where it was scrolled.
+    test('a memento without a scroll keeps the one the tab had', () {
+      const scrolled = NoteMemento(selectionExtent: 4, scrollOffset: 640);
+      final w = _opened(['a.md'])
+          .withMemento('a.md', scrolled)
+          .withMemento('a.md', const NoteMemento(selectionExtent: 9));
+      expect(w.tabs.single.memento.selectionExtent, 9);
+      expect(w.tabs.single.memento.scrollOffset, 640);
+    });
+
+    test('a scroll that is known replaces the old one, the top included', () {
+      final w = _opened(['a.md'])
+          .withMemento('a.md', const NoteMemento(scrollOffset: 640))
+          .withMemento('a.md', const NoteMemento(scrollOffset: 0));
+      expect(w.tabs.single.memento.scrollOffset, 0);
+    });
+  });
+
+  // #1076: the position is the note's, not the tab's.
+  group('the places of notes that are not open', () {
+    const placeA = NoteMemento(selectionExtent: 12, scrollOffset: 300);
+
+    test('a note replaced and opened again comes back where it was', () {
+      final w = _opened(['a.md'])
+          .withMemento('a.md', placeA)
+          .replaceActive('b.md')
+          .replaceActive('a.md');
+      expect(_row(w), '[a.md]');
+      expect(w.tabs.single.memento, placeA);
+    });
+
+    test('a note closed and opened again comes back where it was', () {
+      final w = _opened(['a.md', 'b.md'])
+          .withMemento('a.md', placeA)
+          .closePath('a.md')
+          .open('a.md');
+      expect(w.tabs.firstWhere((t) => t.path == 'a.md').memento, placeA);
+    });
+
+    test('the closing editor’s late word, with no tab left, is its place', () {
+      final w = _opened(['a.md'])
+          .replaceActive('b.md')
+          .withMemento('a.md', placeA)
+          .replaceActive('a.md');
+      expect(w.tabs.single.memento, placeA);
+    });
+
+    test('a late word that knows no scroll keeps the place’s scroll', () {
+      final w = _opened(['a.md'])
+          .withMemento('a.md', placeA)
+          .replaceActive('b.md')
+          .withMemento('a.md', const NoteMemento(selectionExtent: 40))
+          .replaceActive('a.md');
+      expect(w.tabs.single.memento.selectionExtent, 40);
+      expect(w.tabs.single.memento.scrollOffset, 300);
+    });
+
+    test('a rename takes the place along, a folder’s notes too', () {
+      final w = _opened(['Notes/a.md'])
+          .withMemento('Notes/a.md', placeA)
+          .replaceActive('c.md')
+          .renamed('Notes', 'Archive')
+          .replaceActive('Archive/a.md');
+      expect(w.tabs.single.memento, placeA);
+      expect(w.places['Notes/a.md'], isNull);
+    });
+
+    test('a deleted note keeps no place', () {
+      final w = _opened(['a.md'])
+          .withMemento('a.md', placeA)
+          .replaceActive('b.md')
+          .deleted('a.md');
+      expect(w.places['a.md'], isNull);
+    });
+
+    test('moving a tab to the other pane is not closing it', () {
+      final w = _opened(['a.md', 'b.md']).split(SplitAxis.right);
+      final moved = w.moveTab(0, 0, 1);
+      expect(moved.places.length, 0);
+    });
+
+    test('the store is bounded: the least recently left goes first', () {
+      var w = Workspace.empty;
+      for (var i = 0; i < NotePlaces.capacity + 20; i++) {
+        w = w.withMemento('n$i.md', NoteMemento(selectionExtent: i));
+      }
+      expect(w.places.length, NotePlaces.capacity);
+      expect(w.places['n0.md'], isNull);
+      expect(w.places['n${NotePlaces.capacity + 19}.md'], isNotNull);
+    });
+
+    test('they survive the stored form, and an old one has none', () {
+      final w = _opened(['a.md'])
+          .withMemento('a.md', placeA)
+          .replaceActive('b.md');
+      final back = Workspace.fromJson(jsonDecode(jsonEncode(w.toJson())));
+      expect(back.places['a.md'], placeA);
+      expect(back, w);
+
+      final old = Workspace.fromJson(const {
+        'version': 1,
+        'panes': [
+          {
+            'active': 0,
+            'tabs': [
+              {'path': 'a.md'},
+            ],
+          },
+        ],
+      });
+      expect(old.places.length, 0);
+      expect(old.tabs.single.path, 'a.md');
+    });
+
+    test('opening before the showing tab leaves the showing tab showing', () {
+      final w = _opened(['b.md', 'c.md']).activate(0, 1);
+      final back = w.withMemento('a.md', placeA).openBeforeActive('a.md');
+      expect(_row(back), 'b.md a.md [c.md]');
+      expect(back.tabs.firstWhere((t) => t.path == 'a.md').memento, placeA);
+      expect(back.openBeforeActive('b.md'), back);
     });
   });
 

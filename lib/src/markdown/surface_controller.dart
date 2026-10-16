@@ -130,9 +130,6 @@ final class MarkdownSurfaceController {
   /// a view.
   List<Token> tokensOf(int line) => _view?.tokensOf(line) ?? const <Token>[];
 
-  /// How far the view is scrolled, or null without one.
-  double? get scrollOffset => _view?.scrollOffset;
-
   /// Called by the view as it mounts; not for the shell. A method, not a
   /// setter, because it pairs with [detachView].
   // ignore: use_setters_to_change_properties

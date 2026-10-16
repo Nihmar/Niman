@@ -98,21 +98,41 @@ void main() {
     expect(shown(), 'beta.md');
   });
 
-  testWidgets('a note closed since opens again in a tab of its own', (
+  testWidgets('a note closed since opens again in the showing tab (#1076)', (
     tester,
   ) async {
     await pumpShell(tester);
     // A click shows a note in the tab on screen: alpha is closed by it.
     await show(tester, 'alpha.md');
     await show(tester, 'beta.md');
+    await show(tester, 'gamma.md');
+    expect(tabs(), ['gamma.md']);
+
+    // Back replaces the showing tab, as a page does in a browser: it adds
+    // no tabs, however far it goes.
+    await alt(tester, LogicalKeyboardKey.arrowLeft);
+    expect(shown(), 'beta.md');
     expect(tabs(), ['beta.md']);
+    await alt(tester, LogicalKeyboardKey.arrowLeft);
+    expect(shown(), 'alpha.md');
+    expect(tabs(), ['alpha.md']);
+
+    await alt(tester, LogicalKeyboardKey.arrowRight);
+    expect(shown(), 'beta.md');
+    expect(tabs(), ['beta.md']);
+  });
+
+  testWidgets('a note still open shows its tab', (tester) async {
+    await pumpShell(tester);
+    await show(tester, 'alpha.md');
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.tap(noteRow('beta.md'));
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    await settle(tester);
+    expect(tabs(), ['alpha.md', 'beta.md']);
 
     await alt(tester, LogicalKeyboardKey.arrowLeft);
     expect(shown(), 'alpha.md');
-    expect(tabs(), containsAll(['alpha.md', 'beta.md']));
-
-    await alt(tester, LogicalKeyboardKey.arrowRight);
-    expect(shown(), 'beta.md', reason: 'its tab, still open');
     expect(tabs(), hasLength(2));
   });
 

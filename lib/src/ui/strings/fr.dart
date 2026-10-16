@@ -619,11 +619,25 @@ final class FrenchStrings extends Strings {
   @override
   String get noteStatusError => 'Erreur';
   @override
+  String get noteStatusSaveFailed => 'Non enregistrée · réessayer';
+  @override
+  String get noteSaveFailedSnack =>
+      'Cette note n’a pas pu être enregistrée. Niman va réessayer.';
+  @override
   String get noteNotText =>
       'Ce fichier n’est pas une note texte, Niman '
       'ne peut donc pas l’afficher ici.';
   @override
   String get noteLoadFailed => 'Impossible d’ouvrir cette note.';
+  @override
+  String get noteLoadMissing =>
+      'Le fichier de cette note n’est plus sur le disque.';
+  @override
+  String get noteLoadDenied =>
+      'Niman n’a pas l’autorisation de lire cette note.';
+  @override
+  String get noteLoadLocked =>
+      'Un autre programme utilise cette note. Réessayez dans un instant.';
   @override
   String wordCount(int count) => count == 1 ? '1 mot' : '$count mots';
   @override
@@ -2114,6 +2128,8 @@ final class FrenchStrings extends Strings {
   String get folderPickerNewFolder => 'Nouveau dossier';
   @override
   String get folderPickerEmpty => 'Aucun dossier pour l’instant';
+  @override
+  String get folderPickerFilter => 'Filtrer les dossiers';
   @override
   String get listFolderTitle => 'Dossier des listes';
   @override

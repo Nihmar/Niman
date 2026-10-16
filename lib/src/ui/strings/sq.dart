@@ -604,10 +604,22 @@ final class AlbanianStrings extends Strings {
   @override
   String get noteStatusError => 'Gabim';
   @override
+  String get noteStatusSaveFailed => 'Pa ruajtur · provo sërish';
+  @override
+  String get noteSaveFailedSnack =>
+      'Shënimi nuk u ruajt. Niman do të provojë sërish.';
+  @override
   String get noteNotText =>
       'Ky skedar nuk është shënim teksti, ndaj Niman nuk mund ta shfaqë këtu.';
   @override
   String get noteLoadFailed => 'Ky shënim nuk mund të hapej.';
+  @override
+  String get noteLoadMissing => 'Skedari i këtij shënimi nuk është më në disk.';
+  @override
+  String get noteLoadDenied => 'Niman nuk ka leje ta lexojë këtë shënim.';
+  @override
+  String get noteLoadLocked =>
+      'Një program tjetër po e përdor këtë shënim. Provo sërish pas pak.';
   @override
   String wordCount(int count) => '$count fjalë';
   @override
@@ -2075,6 +2087,8 @@ final class AlbanianStrings extends Strings {
   String get folderPickerNewFolder => 'Tresë e re';
   @override
   String get folderPickerEmpty => "Ende s'ka tresë";
+  @override
+  String get folderPickerFilter => 'Filtro tresat';
   @override
   String get listFolderTitle => 'Tresë e listës';
   @override

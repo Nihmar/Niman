@@ -32,6 +32,7 @@ void main() {
                     text.write(utf8.decode(slice));
                   }
                   saves.add((text.toString(), references));
+                  return null;
                 },
           ),
         ),

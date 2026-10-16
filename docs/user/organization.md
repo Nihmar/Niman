@@ -226,6 +226,11 @@ folder's own size is 0, and the folders keep the lead whichever field is
 chosen. Ties fall back to the name. The order and the way are one setting
 of this device, kept like the tree's width (see [settings](settings.md#library-settings-kept-on-this-device)).
 
+The folders you have open stay open: they are kept with the library's open
+notes on this device, so a restart or a switch of library finds the tree as
+you left it, with the folders above the open note open. Renaming or moving
+a folder keeps what was open under it open; deleting it forgets them.
+
 Windows reports a file's creation time and the index records it, and a
 save keeps it: editing an old note does not make it new. Linux and Android
 do not offer one through the file API the app uses, so **Date created** is
@@ -237,7 +242,9 @@ goes on from — and the arrows then walk the rows: `Home`/`End` and
 `PgUp`/`PgDn` jump, `Enter` opens the note (or opens the folder) the
 cursor is on, `←` closes an open folder or steps out to the row that holds
 it, `→` opens a closed one or steps into the rows under it, `F2` renames
-and `Delete` deletes the row the cursor is on. A click on a note is a note
+and `Delete` deletes the row the cursor is on, and the menu key or
+`Shift`+`F10` opens its menu (the one a right click opens), anchored at the
+row. A click on a note is a note
 to write in: it opens and the caret goes into it, and the pane keeps no
 keys a note would need — on a desktop, where the keyboard is always there
 (a phone's is the **Keyboard on open** setting's). A modified key is left
@@ -367,12 +374,15 @@ on a phone, the name is asked in a dialog.
 
 ## Moving a note or a folder
 
-Long-press a row in the tree (right-click on desktop) and pick **Move**.
+Long-press a row in the tree (right-click on desktop, or the menu key or
+`Shift`+`F10` on the row the keyboard's cursor is on) and pick **Move**.
 The dialog lists the library root and every folder, one radio each, the
 same way the folder settings ask for a folder — and, like them, it has a
 **New folder** button, so a note can be moved somewhere that does not
-exist yet without leaving the dialog. A folder is never offered itself
-or anything inside it as a target.
+exist yet without leaving the dialog. A field at the top filters the list
+as you type (any part of the path, case ignored): `↑`/`↓` move the choice
+through what is left and `Enter` takes it. A folder is never offered
+itself or anything inside it as a target.
 
 Or drag the row: with the mouse on the desktop, or on a phone by holding
 the row and then moving the finger (held and let go without moving, the
@@ -383,6 +393,14 @@ block's heading takes no drop. The row under the pointer lights up where
 a drop would move something — a folder dropped on itself or inside itself,
 or anything dropped where it already is, stays put. It is the same move as
 the menu's: links follow, open notes are saved first.
+
+A drag reaches what is out of sight (#1071): held within a row or two of the
+top or bottom edge of the tree (or of the folder grid), the list scrolls,
+faster the closer to the edge, and stops when the pointer moves back; and
+a drag that rests for about half a second on a closed folder in the tree
+opens it, so a target inside is one drop away. A folder opened that way
+closes again if the drop lands anywhere but in it, and stays open if it
+lands in it or under it.
 
 Rows marked together (see below) are dragged together, too (#996): drag
 any one of them and every marked row moves, each on its own — a marked

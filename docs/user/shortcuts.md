@@ -126,6 +126,8 @@ open** setting:
   the grid, walk the tiles
 - `F2` — rename the row the cursor is on (in place on Linux and Windows,
   the dialog on a phone); `Delete` — delete it
+- Menu key / `Shift+F10` — open the menu of the row the cursor is on, as a
+  right click does
 - `Backspace` / `Alt+Up` — in the grid, up one folder
 
 A modified key is left to the app's own shortcuts: `Alt+←` / `Alt+→` walk

@@ -8,7 +8,15 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:niman/src/ui/attachment_view.dart';
 import 'package:niman/src/ui/strings.dart';
+
+/// Whether the eye is offered for the note at [path] whose kind has the GUI
+/// [kindGui] (null for a plain note): not on an attachment, which has no
+/// editor to flip from, nor on a note shown as its kind (a list), which is
+/// not a document (#1081).
+bool previewToggleOffered({required String path, required Object? kindGui}) =>
+    !isShownAttachment(path) && kindGui == null;
 
 /// The app-bar eye action: flips the editor and the preview in the note's
 /// one pane (the phone's app bar and the wide layout's status row).
@@ -38,7 +46,9 @@ final class PreviewToggleAction extends StatelessWidget {
       tooltip: previewVisible
           ? AppStrings.showEditorTooltip
           : AppStrings.showPreviewTooltip,
-      icon: Icon(previewVisible ? Icons.edit : Icons.visibility),
+      icon: Icon(
+        previewVisible ? Icons.edit_outlined : Icons.visibility_outlined,
+      ),
       iconSize: compact ? 18 : null,
       visualDensity: compact ? VisualDensity.compact : null,
       padding: compact ? EdgeInsets.zero : null,

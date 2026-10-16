@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/ui/detached_save.dart';
 import 'package:niman/src/ui/note_view.dart' show NoteView;
 import 'package:path/path.dart' as p;
 
@@ -44,6 +45,26 @@ abstract interface class UnsavedNoteHead {
 /// ([unsavedTrackerProvider]).
 final class UnsavedTracker extends ChangeNotifier {
   static const AppLogger _log = AppLogger(name: 'unsaved');
+
+  final StreamController<Set<String>> _diskChanges =
+      StreamController<Set<String>>.broadcast(sync: true);
+
+  /// The files that changed under the open notes (#1042, #1055): a flow that
+  /// rewrote notes behind the editors' backs says so here, and every open
+  /// note whose file is among them looks at it and adopts the change when its
+  /// buffer holds nothing the disk does not. An empty set means any of them
+  /// may have changed.
+  Stream<Set<String>> get diskChanges => _diskChanges.stream;
+
+  /// Tells the open notes that the files at the absolute [paths] changed on
+  /// disk — or, with none, that any open note's may have.
+  void notifyDiskChanged(Set<String> paths) => _diskChanges.add(paths);
+
+  @override
+  void dispose() {
+    unawaited(_diskChanges.close());
+    super.dispose();
+  }
 
   /// Insertion-ordered (a LinkedHashSet), so [unsavedPaths] reads in open
   /// order and a duplicate registration is a no-op.
@@ -94,6 +115,26 @@ final class UnsavedTracker extends ChangeNotifier {
   /// The dirty set the listeners were last told about, as [unsavedPaths]
   /// read then: what a call that publishes must differ from.
   List<String> _published = const <String>[];
+
+  /// Holds a write the app owes for the note at [path] after its view has
+  /// gone or moved on to another note (#1061, #1054): [write] is started now,
+  /// and until it lands the note is unsaved — [saveAll] waits for it, and a
+  /// failed one stays, with [text], to be retried. Completes when the write
+  /// lands, or with its error.
+  Future<void> hold(
+    String path,
+    String Function() text,
+    Future<void> Function() write,
+  ) {
+    final save = DetachedSave(
+      path: path,
+      textOf: text,
+      write: write,
+      onWritten: unregister,
+    );
+    register(save);
+    return save.start();
+  }
 
   /// Tracks [note]; it reads its dirty state live until [unregister].
   /// Registering the same note twice is a no-op.

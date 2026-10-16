@@ -2,7 +2,7 @@ import 'package:niman/src/search/replace.dart';
 
 /// In-memory [ReplaceSource] for widget tests: records every request and
 /// returns the configured preview/report.
-final class FakeReplaceSource implements ReplaceSource {
+base class FakeReplaceSource implements ReplaceSource {
   /// The match notes [previewMatches] returns.
   List<ReplaceMatchNote> preview = [];
 

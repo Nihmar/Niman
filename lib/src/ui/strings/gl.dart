@@ -608,11 +608,23 @@ final class GalicianStrings extends Strings {
   @override
   String get noteStatusError => 'Erro';
   @override
+  String get noteStatusSaveFailed => 'Sen gardar · tentar de novo';
+  @override
+  String get noteSaveFailedSnack =>
+      'Non se puido gardar a nota. Niman tentarao de novo.';
+  @override
   String get noteNotText =>
       'Este ficheiro non é unha nota de texto, así '
       'que Niman non pode amosalo aquí.';
   @override
   String get noteLoadFailed => 'Non se puido abrir esta nota.';
+  @override
+  String get noteLoadMissing => 'O ficheiro desta nota xa non está no disco.';
+  @override
+  String get noteLoadDenied => 'Niman non ten permiso para ler esta nota.';
+  @override
+  String get noteLoadLocked =>
+      'Outro programa está a usar esta nota. Téntao de novo nun momento.';
   @override
   String wordCount(int count) => count == 1 ? '1 palabra' : '$count palabras';
   @override
@@ -2075,6 +2087,8 @@ final class GalicianStrings extends Strings {
   String get folderPickerNewFolder => 'Cartafol novo';
   @override
   String get folderPickerEmpty => 'Aínda non hai cartafóis';
+  @override
+  String get folderPickerFilter => 'Filtrar cartafóis';
   @override
   String get listFolderTitle => 'Cartafol de lista';
   @override

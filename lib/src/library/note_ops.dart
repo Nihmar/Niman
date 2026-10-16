@@ -24,6 +24,7 @@ import 'package:niman/src/home/home_layout.dart';
 import 'package:niman/src/journal/journal_settings.dart';
 import 'package:niman/src/library/note_op_seams.dart';
 import 'package:niman/src/library/note_relocation.dart';
+import 'package:niman/src/library/note_save_result.dart';
 import 'package:niman/src/library/note_sync_writes.dart';
 import 'package:niman/src/library/note_trash.dart';
 import 'package:niman/src/library/note_write_stream.dart';
@@ -792,11 +793,16 @@ final class NoteOps implements NoteOperations {
   }
 
   @override
-  Future<void> saveNote(String path, String content, {int? editSession}) async {
-    await writer.save(path, content, editSession: editSession);
+  Future<NoteSaveResult?> saveNote(
+    String path,
+    String content, {
+    int? editSession,
+  }) async {
+    final saved = await writer.save(path, content, editSession: editSession);
     // After the write: a sync that read the hint before the text landed
     // could otherwise upload the old text and drop the hint.
     _hint(path, SyncOpKind.changed);
+    return saved;
   }
 
   @override
@@ -807,19 +813,20 @@ final class NoteOps implements NoteOperations {
   }
 
   @override
-  Future<void> saveNoteStream(
+  Future<NoteSaveResult?> saveNoteStream(
     String path,
     NoteContentProducer content, {
     int? editSession,
     NoteReferences? references,
   }) async {
-    await writer.save(
+    final saved = await writer.save(
       path,
       content,
       editSession: editSession,
       references: references,
     );
     _hint(path, SyncOpKind.changed);
+    return saved;
   }
 
   @override

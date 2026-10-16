@@ -610,10 +610,24 @@ final class DutchStrings extends Strings {
   @override
   String get noteStatusError => 'Fout';
   @override
+  String get noteStatusSaveFailed => 'Niet opgeslagen · opnieuw proberen';
+  @override
+  String get noteSaveFailedSnack =>
+      'Deze notitie kon niet worden opgeslagen. Niman probeert het opnieuw.';
+  @override
   String get noteNotText =>
       'Dit bestand is geen tekstnotitie, dus Niman kan het hier niet tonen.';
   @override
   String get noteLoadFailed => 'Deze notitie kon niet worden geopend.';
+  @override
+  String get noteLoadMissing =>
+      'Het bestand van deze notitie staat niet meer op de schijf.';
+  @override
+  String get noteLoadDenied => 'Niman mag deze notitie niet lezen.';
+  @override
+  String get noteLoadLocked =>
+      'Een ander programma gebruikt deze notitie. Probeer het zo meteen '
+      'opnieuw.';
   @override
   String wordCount(int count) => count == 1 ? '1 woord' : '$count woorden';
   @override
@@ -2085,6 +2099,8 @@ final class DutchStrings extends Strings {
   String get folderPickerNewFolder => 'Nieuwe map';
   @override
   String get folderPickerEmpty => 'Nog geen mappen';
+  @override
+  String get folderPickerFilter => 'Filter mappen';
   @override
   String get listFolderTitle => 'Lijstmap';
   @override

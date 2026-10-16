@@ -6,13 +6,16 @@ import 'dart:isolate';
 import 'package:flutter/foundation.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/library/note_save_result.dart';
 import 'package:niman/src/library/note_write_stream.dart';
+import 'package:niman/src/markdown/note_framing.dart';
 import 'package:niman/src/markdown/note_references.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 
 /// Saves [content] as the note at absolute [path]; [editSession] is the
-/// editor session the save belongs to (one opening of the note).
-typedef NoteSaver = Future<void> Function(
+/// editor session the save belongs to (one opening of the note). Answers what
+/// the write left on the disk, when the writer can say ([NoteSaveResult]).
+typedef NoteSaver = Future<NoteSaveResult?> Function(
   String path,
   String content, {
   required int editSession,
@@ -25,7 +28,7 @@ typedef NoteSaver = Future<void> Function(
 /// [references] are the note's tags and links as of the text saved, when
 /// the editor keeps them (a long note): the index takes them rather than
 /// reading the note for them.
-typedef NoteStreamSaver = Future<void> Function(
+typedef NoteStreamSaver = Future<NoteSaveResult?> Function(
   String path,
   NoteContentProducer content, {
   required int editSession,
@@ -46,7 +49,9 @@ final class NoteSavePipeline {
   /// [notePath] is the note on screen, [ready] whether its text is loaded,
   /// [text] the note joined, [buffer] the editor's buffer (null without
   /// one) and [references] the note's tags and links as the editor keeps
-  /// them. [saveNote], [writeNote] and [saveNoteStream] are the writers, read
+  /// them, and [framing] what the note's file wrapped its text in when it was
+  /// read, which every save writes back. [saveNote], [writeNote] and
+  /// [saveNoteStream] are the writers, read
   /// at each save. [onSaved] hears of a save of the note on screen that
   /// reached the disk; [onSettled] of every save that ended, however it did.
   new({
@@ -55,11 +60,18 @@ final class NoteSavePipeline {
     required this.text,
     required this.buffer,
     required this.references,
+    required this.framing,
     required this.saveNote,
     required this.writeNote,
     required this.saveNoteStream,
     required this.onSaved,
     required this.onSettled,
+    this.hold,
+    this.retryDelays = const [
+      Duration(seconds: 2),
+      Duration(seconds: 5),
+      Duration(seconds: 15),
+    ],
   });
 
   static const AppLogger _log = AppLogger(name: 'editor');
@@ -80,6 +92,11 @@ final class NoteSavePipeline {
   /// The note's tags and links as of [buffer], when the editor keeps them.
   final NoteReferences? Function() references;
 
+  /// The line ending and byte order mark the note's file had when it was
+  /// read (#1056). The buffer holds `\n` lines and no mark whatever the file
+  /// had; every save writes the file's own back, so a CRLF note stays CRLF.
+  final NoteFraming Function() framing;
+
   /// The library's write path (`NoteView.saveNote`).
   final NoteSaver? Function() saveNote;
 
@@ -91,11 +108,33 @@ final class NoteSavePipeline {
   final NoteStreamSaver? Function() saveNoteStream;
 
   /// The note at the path given reached the disk at the revision the
-  /// pipeline now calls saved.
-  final void Function(String path) onSaved;
+  /// pipeline now calls saved, leaving the file as `stamp` says (null when
+  /// the writer could not say).
+  final void Function(String path, DiskStamp? stamp) onSaved;
 
   /// A save ended, written or failed.
   final VoidCallback onSettled;
+
+  /// Holds a write for a note that is leaving the editor, with the text it
+  /// writes, in the app-wide registry of unsaved notes
+  /// (`UnsavedTracker.hold`): the close guard then waits for the write, and
+  /// a failed one keeps the text. Null where nothing tracks.
+  final Future<void> Function(
+    String path,
+    String Function() text,
+    Future<void> Function() write,
+  )?
+  hold;
+
+  /// The waits before the automatic retries of a save that failed (#1054).
+  final List<Duration> retryDelays;
+
+  /// Why the last save of the note on screen failed, or null while the last
+  /// one landed (or none was tried). The status row reads it.
+  final ValueNotifier<SaveFailure?> failure = ValueNotifier<SaveFailure?>(null);
+
+  Timer? _retryTimer;
+  int _failures = 0;
 
   /// Text-edit counter; the disk matches [lastSavedRevision]. A saved note
   /// is a revision, not a text copy.
@@ -112,6 +151,9 @@ final class NoteSavePipeline {
   /// Whether a save is in flight.
   bool get saving => _saving;
   bool _saving = false;
+
+  /// The revision the save in flight took.
+  int _inFlightRevision = -1;
 
   /// Whether a save is in flight or one is owed once it ends.
   bool get busy => _saving || _pending;
@@ -132,23 +174,71 @@ final class NoteSavePipeline {
   /// `saveAll` before a sync, #723) awaits the write, not the pending flag.
   Future<void>? _activeSave;
 
+  /// The debounce: restarted by every edit, so it fires once the writer
+  /// pauses.
   Timer? _timer;
 
-  /// The note was edited: a new revision, saved after [_saveDelay].
+  /// The ceiling on the debounce (#1057): started by the first edit after a
+  /// save, never restarted, so a writer who never pauses long enough for the
+  /// debounce still gets a save every [_maxWait]. Null while nothing is owed.
+  Timer? _ceiling;
+
+  /// The note was edited: a new revision, saved after [_saveDelay] of quiet
+  /// — or [_maxWait] after the first edit not yet saved, whichever is first.
   void edited() {
     _revision++;
     _timer?.cancel();
-    _timer = Timer(_saveDelay, save);
+    _timer = Timer(_saveDelay, saveInBackground);
+    _ceiling ??= Timer(_maxWait, saveInBackground);
   }
 
   /// The disk holds what the editor does: the note was just taken from it.
-  void markClean() => _lastSavedRevision = _revision;
+  void markClean() {
+    _lastSavedRevision = _revision;
+    _cancelTimers();
+    _forgetFailure();
+  }
+
+  /// Drops the debounce, the ceiling and the retry: no save is owed by the
+  /// clock.
+  void _cancelTimers() {
+    _timer?.cancel();
+    _ceiling?.cancel();
+    _ceiling = null;
+    _retryTimer?.cancel();
+  }
+
+  /// The last save landed, or its note is gone: nothing is failing.
+  void _forgetFailure() {
+    _failures = 0;
+    _retryTimer?.cancel();
+    if (failure.value != null) failure.value = null;
+  }
+
+  /// A save of the note on screen failed with [error]: the failure is kept
+  /// for the status row, and the save tried again after a growing wait while
+  /// the note is still unsaved (#1054).
+  void _failed(Object error) {
+    _failures++;
+    failure.value = SaveFailure(error, _failures);
+    _retryTimer?.cancel();
+    if (_failures <= retryDelays.length) {
+      _retryTimer = Timer(retryDelays[_failures - 1], saveInBackground);
+    }
+  }
+
+  /// [save] for a caller with nobody to tell: the timers, a blur, the app
+  /// leaving the foreground. A failure is recorded in [failure] and retried;
+  /// it does not escape as an uncaught async error.
+  void saveInBackground() {
+    unawaited(save().then<void>((_) {}, onError: (Object _) {}));
+  }
 
   /// Starts a new editor session, and returns its id.
   int newSession() => _editSession = ++_editSessions;
 
   /// Drops the save an edit scheduled.
-  void cancel() => _timer?.cancel();
+  void cancel() => _cancelTimers();
 
   /// How long after the last edit the note is saved.
   ///
@@ -165,6 +255,22 @@ final class NoteSavePipeline {
     return _saving
         ? const Duration(seconds: 1)
         : const Duration(milliseconds: 500);
+  }
+
+  /// The longest the first unsaved edit waits for a save, however the typing
+  /// goes after it (#1057).
+  ///
+  /// The debounce restarts on every edit, so a writer whose gaps are shorter
+  /// than it — typing, correcting, scrolling and fixing in a 20 MB novel,
+  /// where the debounce is 5 s — never triggered a save for the whole session,
+  /// and a crash or a dead battery took all of it. The streaming save keeps
+  /// the frames smooth, so a periodic one is affordable; a big note waits
+  /// longer between them, as it does for the debounce.
+  Duration get _maxWait {
+    final length = buffer()?.length ?? 0;
+    if (length > 16 << 20) return const Duration(seconds: 30);
+    if (length > 2 << 20) return const Duration(seconds: 20);
+    return const Duration(seconds: 5);
   }
 
   /// Saves the buffer at most once: a request that finds a save in flight
@@ -189,7 +295,12 @@ final class NoteSavePipeline {
       _pending = true;
       return _covering(revision);
     }
+    // Every edit up to this revision is on its way: the ceiling starts again
+    // with the next one.
+    _ceiling?.cancel();
+    _ceiling = null;
     _saving = true;
+    _inFlightRevision = revision;
     final future = _performSave(revision, path ?? notePath());
     _activeSave = future;
     return future;
@@ -221,59 +332,85 @@ final class NoteSavePipeline {
   /// behind that save — switching during a save dropped every edit made
   /// since it started (#334).
   Future<void> saveOutgoing(String path) {
-    _timer?.cancel();
+    _cancelTimers();
     _pending = false;
     if (!dirty) return _activeSave ?? Future<void>.value();
-    if (!_saving) return save(path: path);
-    return _saveOutgoingAfter(_activeSave, path);
+    return _detach(path);
   }
 
   /// The editor is going away: whatever it holds is saved, and the returned
   /// future completes when the disk has the note's last edit.
   Future<void> close() {
-    _timer?.cancel();
-    return dirty ? save() : _activeSave ?? Future<void>.value();
+    _cancelTimers();
+    return dirty ? _detach(notePath()) : _activeSave ?? Future<void>.value();
   }
 
-  /// Saves the outgoing note at [target] as it stands *now*, after
-  /// [waiting] — the save already running for it — so one note never has
-  /// two writes racing for the same path.
+  /// Saves the note at [target] as it stands *now* on its own, after the save
+  /// already running for it, so one note never has two writes racing for the
+  /// same path — and hands the write to the app-wide registry of unsaved
+  /// notes ([hold]), which is what keeps it from being forgotten (#1061):
+  /// the buffer is about to be the incoming note's, or gone, and the note
+  /// reads as saved from here on, while the write may be seconds from
+  /// landing, or may fail. Until it lands the registry holds the text, and
+  /// the close guard waits for it and retries it.
   ///
   /// The text, or the streaming save's buffer snapshot, is taken before the
   /// first await: the note switch that calls this replaces the buffer with
   /// the incoming note's, and an edit made during a save would otherwise be
   /// the one nobody writes (#334).
-  Future<void> _saveOutgoingAfter(Future<void>? waiting, String target) async {
+  Future<void> _detach(String target) {
     final session = _editSession;
+    final revision = _revision;
+    final running = _saving ? _activeSave : null;
+    // Nothing was typed since the save in flight took its text: when it lands
+    // there is nothing to write again.
+    final covered = _saving && _inFlightRevision == _revision;
     final stream = _takeStreamSave();
-    final joined = stream == null ? text() : null;
-    if (waiting != null) {
+    final plain = stream == null ? text() : null;
+    final joined = plain == null ? null : framing().apply(plain);
+    var first = true;
+
+    Future<void> write() async {
+      if (first) {
+        first = false;
+        if (running != null) {
+          try {
+            await running;
+            if (covered) {
+              _landed(target, revision);
+              return;
+            }
+          } on Object {
+            // The save that was already running reports its own failure;
+            // this one still has to try.
+          }
+        }
+      }
+      final clock = Stopwatch()..start();
       try {
-        await waiting;
-      } on Object {
-        // The save that was already running reports its own failure; this
-        // one still has to try.
-      }
-    }
-    final clock = Stopwatch()..start();
-    try {
-      if (stream != null) {
-        await saveNoteStream()!(
-          target,
-          (index) => _nextSlice(stream, index),
-          editSession: session,
-          references: stream.references,
+        if (stream != null) {
+          await saveNoteStream()!(
+            target,
+            (index) => _nextSlice(stream, index),
+            editSession: session,
+            references: stream.references,
+          );
+        } else {
+          await _write(target, joined!, session);
+        }
+        _landed(target, revision);
+        _log.info(
+          'note saved: $target (outgoing, ${clock.elapsedMilliseconds} ms)',
         );
-      } else {
-        await _write(target, joined!, session);
+      } on Object catch (error) {
+        _log.error('note save failed: $target ($error)');
+        rethrow;
       }
-      _log.info(
-        'note saved: $target (outgoing, ${clock.elapsedMilliseconds} ms)',
-      );
-    } on Object catch (error) {
-      _log.error('note save failed: $target ($error)');
-      rethrow;
     }
+
+    final holder = hold;
+    if (holder == null) return write();
+    return holder(target, () => stream?.buffer.text ?? plain!, write);
   }
 
   /// The actual write for [save]; a write error reaches every caller
@@ -297,7 +434,7 @@ final class NoteSavePipeline {
     // The full-text join (O(n)) happens here only — the save path, never
     // the keystroke path.
     final joinClock = Stopwatch()..start();
-    final joined = text();
+    final joined = framing().apply(text());
     final joinMs = joinClock.elapsedMilliseconds;
     // Read with the text, before the first await: a note switch that
     // saves the outgoing note is followed by a load that starts the next
@@ -308,12 +445,16 @@ final class NoteSavePipeline {
       'session $session)',
     );
     try {
-      await _write(target, joined, session);
-      _saved(target, revision);
+      final saved = await _write(target, joined, session);
+      _saved(target, revision, saved?.stamp);
       _log.info(
         'note saved: $target (${joined.length} chars, '
         '${clock.elapsedMilliseconds} ms)',
       );
+    } on Object catch (error) {
+      _log.error('note save failed: $target ($error)');
+      if (target == notePath()) _failed(error);
+      rethrow;
     } finally {
       _finishSave();
     }
@@ -341,31 +482,41 @@ final class NoteSavePipeline {
       '${stream.slices} slices, session $session)',
     );
     try {
-      await saveNoteStream()!(
+      final saved = await saveNoteStream()!(
         target,
         (index) => _nextSlice(stream, index),
         editSession: session,
         references: stream.references,
       );
-      _saved(target, revision);
+      _saved(target, revision, saved?.stamp);
       _log.info(
         'note saved: $target (${lines.length} chars, '
         '${clock.elapsedMilliseconds} ms)',
       );
     } on Object catch (error) {
       _log.error('note save failed: $target ($error)');
+      if (target == notePath()) _failed(error);
       rethrow;
     } finally {
       _finishSave();
     }
   }
 
+  /// A detached write of [target] landed: when the note is still the one on
+  /// screen (its editor is closing), the disk holds what the editor does.
+  void _landed(String target, int revision) {
+    if (target == notePath() && _lastSavedRevision < revision) {
+      _lastSavedRevision = revision;
+    }
+  }
+
   /// [target] holds [revision] now: when it is the note on screen, that is
   /// the revision the disk has.
-  void _saved(String target, int revision) {
+  void _saved(String target, int revision, DiskStamp? stamp) {
     if (target != notePath()) return;
     _lastSavedRevision = revision;
-    onSaved(target);
+    _forgetFailure();
+    onSaved(target, stamp);
   }
 
   /// The save is over, however it ended: the flag goes, the owner is told,
@@ -375,7 +526,7 @@ final class NoteSavePipeline {
     final trailing = _pending;
     _pending = false;
     onSettled();
-    if (trailing) unawaited(save());
+    if (trailing) saveInBackground();
   }
 
   /// The note as this save will write it, or null when there is nothing to
@@ -393,7 +544,11 @@ final class NoteSavePipeline {
     if (lines == null || lines.lineCount == 0) return null;
     // The references with the lines, of the same revision: the source
     // pane's scan follows this very buffer.
-    return _StreamSave(lines.snapshot(), references: references());
+    return _StreamSave(
+      lines.snapshot(),
+      references: references(),
+      framing: framing(),
+    );
   }
 
   /// The next slice of [stream]'s buffer, or null when the note is out.
@@ -406,10 +561,9 @@ final class NoteSavePipeline {
   Future<NoteBytes?> _nextSlice(_StreamSave stream, int index) async {
     final first = index * kSaveSliceLines;
     if (first >= stream.buffer.lineCount) return null;
-    final slice = stream.buffer.sliceText(
-      first,
-      first + kSaveSliceLines,
-      kSaveSliceChars,
+    final slice = stream.framing.applyToSlice(
+      stream.buffer.sliceText(first, first + kSaveSliceLines, kSaveSliceChars),
+      first: index == 0,
     );
     // Building the first slice is what starts the save; the gap the frames
     // need is the one after it, not before it.
@@ -436,33 +590,37 @@ final class NoteSavePipeline {
     }
   }
 
-  Future<void> _write(String path, String content, int editSession) async {
+  Future<NoteSaveResult?> _write(
+    String path,
+    String content,
+    int editSession,
+  ) async {
     final saver = saveNote();
     if (saver != null) {
-      await saver(path, content, editSession: editSession);
-      return;
+      return await saver(path, content, editSession: editSession);
     }
     final seam = writeNote();
     if (seam != null) {
       await seam(path, content);
-      return;
+      return null;
     }
     // Encode + atomic write off the UI isolate: the utf8 encode is an O(n)
     // string pass and the write the FUSE round trips — neither may touch
     // the UI frame.
-    final (bytes, encodeMs, writeMs) = await Isolate.run(() async {
+    final (bytes, encodeMs, writeMs, stamp) = await Isolate.run(() async {
       final encodeClock = Stopwatch()..start();
       final encoded = utf8.encode(content);
       final encodeMs = encodeClock.elapsedMilliseconds;
       final writeClock = Stopwatch()..start();
       await writeFileAtomically(File(path), encoded);
       final writeMs = writeClock.elapsedMilliseconds;
-      return (encoded.length, encodeMs, writeMs);
+      return (encoded.length, encodeMs, writeMs, DiskStamp.of(path));
     });
     _log.debug(
       'save write: $bytes bytes (encode $encodeMs ms, write $writeMs ms, '
       'off-isolate)',
     );
+    return NoteSaveResult(stamp: stamp);
   }
 }
 
@@ -470,10 +628,14 @@ final class NoteSavePipeline {
 /// were when the save started, which no later edit reaches.
 final class _StreamSave {
   /// Saves [buffer]'s lines, slice by slice.
-  const new(this.buffer, {this.references});
+  const new(this.buffer, {this.references, this.framing = NoteFraming.plain});
 
   /// The note's lines, at the moment the save began.
   final SourceBuffer buffer;
+
+  /// What the lines are written in, as of the moment the save began: a note
+  /// switch replaces the editor's with the incoming note's.
+  final NoteFraming framing;
 
   /// The note's tags and links as of [buffer], when the editor keeps them.
   final NoteReferences? references;
@@ -482,4 +644,17 @@ final class _StreamSave {
   int get slices =>
       (buffer.lineCount + NoteSavePipeline.kSaveSliceLines - 1) ~/
       NoteSavePipeline.kSaveSliceLines;
+}
+
+/// Why a save of the note on screen failed, and how many tries in a row have
+/// (#1054).
+final class SaveFailure {
+  /// A failure of [error], the [attempts]th since a save last landed.
+  const new(this.error, this.attempts);
+
+  /// What the writer threw.
+  final Object error;
+
+  /// How many saves in a row have failed.
+  final int attempts;
 }

@@ -607,11 +607,25 @@ final class SwedishStrings extends Strings {
   @override
   String get noteStatusError => 'Fel';
   @override
+  String get noteStatusSaveFailed => 'Inte sparad · försök igen';
+  @override
+  String get noteSaveFailedSnack =>
+      'Anteckningen kunde inte sparas. Niman försöker igen.';
+  @override
   String get noteNotText =>
       'Den här filen är inte en textanteckning, så '
       'Niman kan inte visa den här.';
   @override
   String get noteLoadFailed => 'Anteckningen kunde inte öppnas.';
+  @override
+  String get noteLoadMissing =>
+      'Anteckningens fil finns inte längre på disken.';
+  @override
+  String get noteLoadDenied =>
+      'Niman har inte behörighet att läsa anteckningen.';
+  @override
+  String get noteLoadLocked =>
+      'Ett annat program använder anteckningen. Försök igen om en stund.';
   @override
   String wordCount(int count) => '$count ord';
   @override
@@ -2069,6 +2083,8 @@ final class SwedishStrings extends Strings {
   String get folderPickerNewFolder => 'Ny mapp';
   @override
   String get folderPickerEmpty => 'Inga mappar ännu';
+  @override
+  String get folderPickerFilter => 'Filtrera mappar';
   @override
   String get listFolderTitle => 'Listmapp';
   @override
