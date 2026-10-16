@@ -11,8 +11,9 @@
 ///   offsets, and a note past a megabyte is searched in slices of lines a
 ///   moment after the query stops changing rather than on every character.
 ///   Replace shifts the matches after it and reads again only its own line;
-///   Replace all makes one edit per match as one undo step. A query that
-///   spans lines is the one case that reads the note whole.
+///   Replace all makes one edit over the span of the matches, built from the
+///   buffer's pieces, as one undo step. A query that spans lines is the one
+///   case that reads the note whole.
 /// * **The current match is the selection.** Going to a match selects it in
 ///   the note, so Escape leaves it selected and the next keystroke replaces it
 ///   — what every editor does — and the view has one thing to bring into view.
