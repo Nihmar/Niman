@@ -883,6 +883,13 @@ final class SerbianStrings extends Strings {
   @override
   String get searchLoadMore => 'Прикажи више';
   @override
+  String get searchStop => 'Заустави';
+  @override
+  String searchScanning(int scanned, int total) =>
+      'Претрага… $scanned од $total белешки';
+  @override
+  String searchShowingFirst(int shown, int total) => 'Првих $shown од $total';
+  @override
   String searchTasksAndEvents(int count) => 'Задаци и догађаји · $count';
   @override
   String searchNotes(int count) => 'Белешке · $count';

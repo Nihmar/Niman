@@ -882,6 +882,13 @@ final class IcelandicStrings extends Strings {
   @override
   String get searchLoadMore => 'Sýna fleiri';
   @override
+  String get searchStop => 'Stöðva';
+  @override
+  String searchScanning(int scanned, int total) =>
+      'Leita… $scanned af $total minnisblöðum';
+  @override
+  String searchShowingFirst(int shown, int total) => 'Fyrstu $shown af $total';
+  @override
   String searchTasksAndEvents(int count) => 'Verkefni og viðburðir · $count';
   @override
   String searchNotes(int count) => 'Nótur · $count';

@@ -3,7 +3,8 @@
 // superseded queries are dropped by invocation id; MATCH vs contains.
 import 'dart:io';
 
-import 'package:drift/drift.dart' show Variable;
+import 'package:drift/drift.dart'
+    show ApplyInterceptor, QueryExecutor, QueryInterceptor, Variable;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/db/index_database.dart';
@@ -136,6 +137,79 @@ void main() {
     expect(current, isNotEmpty);
   });
 
+  // #1039: the connection takes one statement at a time, so a query sent
+  // while another runs only waits. One superseded while it waits must not
+  // reach SQLite when its turn comes.
+  test('five queries in a row run only the last', () async {
+    final log = _MatchLog();
+    final counted = IndexDatabase(NativeDatabase.memory().interceptWith(log));
+    addTearDown(counted.close);
+    final repo = SearchRepo(counted, root: root.path);
+    await counted.customStatement(
+      'INSERT INTO notes (path, parent, name, is_dir, size, modified, created) '
+      "VALUES ('a.md', 0, 'a.md', 0, 1, 0, 0)",
+    );
+    await counted.customStatement(
+      'INSERT INTO notes_fts (rowid, title, body) '
+      "VALUES (1, 'a', 'configuration')",
+    );
+    log.matches.clear();
+
+    final answers = <Future<List<SearchHit>>>[];
+    for (final text in ['co', 'con', 'conf', 'confi', 'configuration']) {
+      answers.add(repo.search(buildFtsQuery(text), id: repo.begin()));
+    }
+    final hits = await Future.wait(answers);
+
+    expect(hits.take(4).expand((h) => h), isEmpty, reason: 'superseded');
+    expect(hits.last.single.path, 'a.md');
+    expect(log.matches, ['"configuration"*'], reason: 'only the last ran');
+  });
+
+  test('the word index keeps the short prefixes', () async {
+    final row = await db
+        .customSelect("SELECT sql FROM sqlite_master WHERE name = 'notes_fts'")
+        .getSingle();
+    expect(row.read<String>('sql'), contains("prefix = '2 3 4'"));
+    // And a two-letter prefix finds the word.
+    final id = search.begin();
+    expect(await search.search(buildFtsQuery('ze'), id: id), hasLength(2));
+  });
+
+  test('a full word is ranked over all its matches, past the cap', () async {
+    final bounded = SearchRepo(db, root: root.path, rankedMatches: 2);
+    await indexNote('p1.md', 'One', 'a project here');
+    await indexNote('p2.md', 'Two', 'another project there');
+    await indexNote('p3.md', 'Three', 'the project again');
+    // The best hit — the word in the title — has the highest rowid.
+    await indexNote('best.md', 'Project plan', 'about the project');
+
+    var id = bounded.begin();
+    final hits = await bounded.search(buildFtsQuery('project'), id: id);
+    expect(hits.first.path, 'best.md');
+    expect(hits, hasLength(4));
+
+    // A short prefix of the same word is the case that is bounded.
+    id = bounded.begin();
+    final short = await bounded.search(buildFtsQuery('pro'), id: id);
+    expect(short, hasLength(2));
+  });
+
+  test('a broad query is ranked over a bounded set of matches', () async {
+    final bounded = SearchRepo(db, root: root.path, rankedMatches: 2);
+    // `zebra` is in two notes, the cap is two: both are ranked, as ever.
+    var id = bounded.begin();
+    expect(await bounded.search(buildFtsQuery('zebra'), id: id), hasLength(2));
+    // `the` is in four: the cap leaves the rest unranked.
+    await indexNote('the-third.md', 'The third', 'the third note');
+    id = bounded.begin();
+    final broad = await bounded.search(buildFtsQuery('the'), id: id);
+    expect(broad, hasLength(2));
+    // The unbounded repo keeps all of them.
+    id = search.begin();
+    expect(await search.search(buildFtsQuery('the'), id: id), hasLength(4));
+  });
+
   test('a query token that never appears returns nothing', () async {
     final id = search.begin();
     final hits = await search.search(buildFtsQuery('missingword'), id: id);
@@ -176,6 +250,61 @@ void main() {
     expect(t, 'work');
     final notes = await tags.notesWithTag(t!);
     expect(notes.map((n) => n.path).toList(), ['apple.md', 'deep.md']);
+  });
+
+  // #1038: the scan reports as it goes and ends when told to.
+  group('the contains scan as a stream', () {
+    setUp(() async {
+      // Enough notes for several steps of four batches of 200 each.
+      for (var i = 0; i < 2000; i++) {
+        final name = 'n${i.toString().padLeft(4, '0')}.md';
+        final body = switch (i) {
+          10 || 450 || 850 || 1900 => 'a quokka here',
+          _ => 'nothing',
+        };
+        await indexNote(name, name, body);
+      }
+    });
+
+    test('progress comes first, then hits in path order, then done', () async {
+      final id = search.begin();
+      final events = await search
+          .searchContainsStream('quokka', id: id)
+          .toList();
+
+      expect(events.first.scanned, 0);
+      expect(events.first.hits, isEmpty);
+      expect(events.first.total, 2003, reason: 'every note counts');
+      expect(events.length, greaterThan(2), reason: 'more than one step');
+      expect(events.last.done, isTrue);
+      expect(events.last.scanned, 2003);
+      expect(events.last.hits.map((h) => h.path), [
+        'n0010.md',
+        'n0450.md',
+        'n0850.md',
+        'n1900.md',
+      ]);
+      // The hits only grow, and a step shows them before the scan ends.
+      for (var i = 1; i < events.length; i++) {
+        expect(
+          events[i].hits.length,
+          greaterThanOrEqualTo(events[i - 1].hits.length),
+        );
+      }
+      expect(events.any((e) => !e.done && e.hits.isNotEmpty), isTrue);
+    });
+
+    test('begin() stops the scan within one step', () async {
+      final id = search.begin();
+      final seen = <ContainsProgress>[];
+      await for (final event in search.searchContainsStream('quokka', id: id)) {
+        seen.add(event);
+        // Stop, as the button does, after the first step has landed.
+        if (seen.length == 2) search.begin();
+      }
+      expect(seen, hasLength(2), reason: 'nothing after the stop');
+      expect(seen.last.scanned, lessThan(2003));
+    });
   });
 
   group('contains mode (searchContains)', () {
@@ -232,4 +361,22 @@ void main() {
       expect(await search.searchContains('zebra', id: late), isNotEmpty);
     });
   });
+}
+
+/// The FTS MATCH expressions the database was asked for, in order.
+final class _MatchLog extends QueryInterceptor {
+  final matches = <String>[];
+
+  @override
+  Future<List<Map<String, Object?>>> runSelect(
+    QueryExecutor executor,
+    String statement,
+    List<Object?> args,
+  ) {
+    if (statement.contains('notes_fts MATCH')) {
+      final first = args.first;
+      if (first is String && !matches.contains(first)) matches.add(first);
+    }
+    return executor.runSelect(statement, args);
+  }
 }

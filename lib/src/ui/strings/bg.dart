@@ -887,6 +887,13 @@ final class BulgarianStrings extends Strings {
   @override
   String get searchLoadMore => 'Покажи още';
   @override
+  String get searchStop => 'Спри';
+  @override
+  String searchScanning(int scanned, int total) =>
+      'Търсене… $scanned от $total бележки';
+  @override
+  String searchShowingFirst(int shown, int total) => 'Първите $shown от $total';
+  @override
   String searchTasksAndEvents(int count) => 'Задачи и събития · $count';
   @override
   String searchNotes(int count) => 'Бележки · $count';

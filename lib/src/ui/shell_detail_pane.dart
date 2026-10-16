@@ -371,6 +371,7 @@ final class ShellDetailPane extends StatelessWidget {
     onOpenNote: onOpenNote,
     initialAnchor: tab.anchor,
     initialCaretOffset: tab.caret,
+    initialFind: tab.find,
     kindMode: kindMode,
     outlineInDock: outlineInDock,
     spellCheckInDock: spellCheckInDock,
@@ -407,6 +408,7 @@ final class DetailTab {
     this.focused = true,
     this.anchor,
     this.caret,
+    this.find,
     this.movedFrom,
   });
 
@@ -440,4 +442,8 @@ final class DetailTab {
 
   /// Where the caret lands as it loads: a template's `{{cursor}}` (#53).
   final int? caret;
+
+  /// The words a search result matched, for the note to show as it loads
+  /// (#1045).
+  final List<String>? find;
 }

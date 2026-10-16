@@ -879,6 +879,13 @@ final class LatvianStrings extends Strings {
   @override
   String get searchLoadMore => 'Rādīt vairāk';
   @override
+  String get searchStop => 'Apturēt';
+  @override
+  String searchScanning(int scanned, int total) =>
+      'Meklēšana… $scanned no $total piezīmēm';
+  @override
+  String searchShowingFirst(int shown, int total) => 'Pirmie $shown no $total';
+  @override
   String searchTasksAndEvents(int count) => 'Uzdevumi un notikumi · $count';
   @override
   String searchNotes(int count) => 'Piezīmes · $count';

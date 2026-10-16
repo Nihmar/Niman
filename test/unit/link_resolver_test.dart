@@ -1,7 +1,8 @@
 // T-M3-02 AC: the resolver resolves exact stem → shortest unique path prefix
 // → ambiguous candidate list, in O(log n) over the stems index; aliases go
 // through the same table (source `alias`).
-import 'package:drift/drift.dart' show InsertMode;
+import 'package:drift/drift.dart'
+    show ApplyInterceptor, InsertMode, QueryExecutor, QueryInterceptor;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/db/index_database.dart';
@@ -506,4 +507,74 @@ void main() {
       );
     });
   });
+
+  // #1036: a note with five hundred links was a thousand round trips on the
+  // index's one connection. The statements follow the chunks the lookups
+  // are bound in, not the number of distinct targets.
+  test(
+    'resolving many targets takes a few statements, not a pair each',
+    () async {
+      final log = _SelectCount();
+      final counted = IndexDatabase(NativeDatabase.memory().interceptWith(log));
+      addTearDown(counted.close);
+      final lookup = LinkResolver(counted);
+      for (var i = 0; i < 300; i++) {
+        final id = await counted
+            .into(counted.notes)
+            .insert(
+              NotesCompanion.insert(
+                path: 'n$i.md',
+                parent: 0,
+                name: 'n$i.md',
+                isDir: false,
+                size: 1,
+                modified: DateTime.fromMillisecondsSinceEpoch(0),
+                created: DateTime.fromMillisecondsSinceEpoch(0),
+              ),
+            );
+        await counted
+            .into(counted.noteStems)
+            .insert(
+              NoteStemsCompanion.insert(
+                stem: 'n$i',
+                noteId: id,
+                source: 'file',
+              ),
+            );
+      }
+      log.selects = 0;
+
+      final batch = await lookup.resolveBatch([
+        for (var i = 0; i < 300; i++) 'n$i',
+        'missing',
+      ]);
+
+      expect(batch, hasLength(301));
+      for (var i = 0; i < 300; i++) {
+        expect(batch['n$i'], isA<ResolvedNote>(), reason: 'n$i');
+        expect((batch['n$i']! as ResolvedNote).note.path, 'n$i.md');
+      }
+      expect(batch['missing'], isA<UnresolvedNote>());
+      expect(
+        log.selects,
+        lessThanOrEqualTo(2),
+        reason: 'one stems lookup and one notes lookup, whatever the count',
+      );
+    },
+  );
+}
+
+/// Counts the SELECTs a database runs.
+final class _SelectCount extends QueryInterceptor {
+  int selects = 0;
+
+  @override
+  Future<List<Map<String, Object?>>> runSelect(
+    QueryExecutor executor,
+    String statement,
+    List<Object?> args,
+  ) {
+    selects++;
+    return executor.runSelect(statement, args);
+  }
 }

@@ -885,6 +885,14 @@ final class HungarianStrings extends Strings {
   @override
   String get searchLoadMore => 'Több megjelenítése';
   @override
+  String get searchStop => 'Leállítás';
+  @override
+  String searchScanning(int scanned, int total) =>
+      'Keresés… $scanned / $total jegyzet';
+  @override
+  String searchShowingFirst(int shown, int total) =>
+      'Az első $shown a(z) $total közül';
+  @override
   String searchTasksAndEvents(int count) => 'Feladatok és események · $count';
   @override
   String searchNotes(int count) => 'Jegyzetek · $count';

@@ -884,6 +884,13 @@ final class UkrainianStrings extends Strings {
   @override
   String get searchLoadMore => 'Показати ще';
   @override
+  String get searchStop => 'Зупинити';
+  @override
+  String searchScanning(int scanned, int total) =>
+      'Пошук… $scanned із $total нотаток';
+  @override
+  String searchShowingFirst(int shown, int total) => 'Перші $shown із $total';
+  @override
   String searchTasksAndEvents(int count) => 'Завдання та події · $count';
   @override
   String searchNotes(int count) => 'Нотатки · $count';

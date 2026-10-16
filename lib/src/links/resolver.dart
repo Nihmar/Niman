@@ -257,15 +257,38 @@ final class LinkResolver implements LinkSource {
         spec,
       ));
     }
-    for (final MapEntry(key: stem, value: group) in byStem.entries) {
-      final stems = await (_db.select(
+    // One lookup of the stems of every group, and one of the notes they
+    // name, each in chunks the statement can bind (#1036): the statements
+    // do not grow with the number of distinct targets, as a pair per target
+    // did — a note with five hundred links was a thousand round trips on
+    // the index's one connection.
+    final variants = <String, Set<String>>{
+      for (final stem in byStem.keys)
+        stem: {for (final v in LinkPaths.stemVariants(stem)) v.toLowerCase()},
+    };
+    final idsByStem = <String, Set<int>>{};
+    for (final chunk in _chunks({for (final v in variants.values) ...v})) {
+      final rows = await (_db.select(
         _db.noteStems,
-      )..where((s) => s.stem.isIn(LinkPaths.stemVariants(stem)))).get();
-      final ids = <int>{for (final s in stems) s.noteId};
-      final notes = ids.isEmpty
-          ? <Note>[]
-          : await (_db.select(_db.notes)..where((n) => n.id.isIn(ids))).get();
+      )..where((s) => s.stem.isIn(chunk))).get();
+      for (final row in rows) {
+        (idsByStem[row.stem.toLowerCase()] ??= <int>{}).add(row.noteId);
+      }
+    }
+    final notesById = <int, Note>{};
+    for (final chunk in _chunks({for (final ids in idsByStem.values) ...ids})) {
+      final rows = await (_db.select(
+        _db.notes,
+      )..where((n) => n.id.isIn(chunk))).get();
+      for (final note in rows) {
+        notesById[note.id] = note;
+      }
+    }
+    for (final MapEntry(key: stem, value: group) in byStem.entries) {
+      final ids = <int>{for (final v in variants[stem]!) ...?idsByStem[v]};
       for (final (query, spec) in group) {
+        // The rules sort the candidates in place: each link its own list.
+        final notes = [for (final id in ids) ?notesById[id]];
         out[query] = notes.isEmpty
             ? UnresolvedNote(target: query.target)
             : _resolveFromCandidates(
@@ -276,6 +299,16 @@ final class LinkResolver implements LinkSource {
       }
     }
     return out;
+  }
+
+  /// [values] in lists a `WHERE … IN (…)` can bind: SQLite binds 999
+  /// variables by default.
+  static Iterable<List<T>> _chunks<T>(Set<T> values) sync* {
+    const size = 500;
+    final all = values.toList();
+    for (var i = 0; i < all.length; i += size) {
+      yield all.sublist(i, i + size > all.length ? all.length : i + size);
+    }
   }
 
   /// The pure resolution tail over gathered candidates: same rules for the

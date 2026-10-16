@@ -827,6 +827,13 @@ final class ChineseStrings extends Strings {
   @override
   String get searchLoadMore => '显示更多';
   @override
+  String get searchStop => '停止';
+  @override
+  String searchScanning(int scanned, int total) =>
+      '正在搜索… $scanned / $total 条笔记';
+  @override
+  String searchShowingFirst(int shown, int total) => '显示前 $shown 项，共 $total 项';
+  @override
   String searchTasksAndEvents(int count) => '任务和事件 · $count';
   @override
   String searchNotes(int count) => '笔记 · $count';

@@ -13,7 +13,14 @@ from any destination. Choosing *Files* brings the tree back. A phone
 keeps Search as a tab of its own.
 
 In the field, `↓` / `↑` move through the results without opening them and
-`Enter` opens the one marked. A right click on a result opens its menu:
+`Enter` opens the one marked, or the first when none is (the search key of
+a phone keyboard does the same). A new query shows its results from the
+top; until they arrive the old list is dimmed under a progress bar, and
+`Enter` waits for the new results instead of opening a row of the old ones.
+Opening a result of a word or contains search lands on the match: the note
+scrolls to the first occurrence of what you searched for, selects it, and the
+find bar marks every other one (`Esc` closes the bar).
+A right click on a result opens its menu:
 *Open*, *Open in new tab*, *Open to the side*, *Reveal in tree* and
 *Replace in this note*; a middle click or `Ctrl`+click opens it in a new
 tab. On a phone a long press gives *Replace in this note*.
@@ -71,8 +78,9 @@ never moves under the pointer.
 **Contains** finds any piece of text, inside words too (`ell` finds
 `hello`), ignoring case and accents. It reads the notes themselves, in
 path order, each only as far as its first match — so it is slower than a
-word search, and slower the larger the library. Typing again stops the
-search in progress.
+word search, and slower the larger the library. While it runs, a bar shows
+how many notes it has read, hits appear as they are found, and **Stop** ends
+it with what it has. Typing again stops the search in progress too.
 
 ## Tag search
 
@@ -89,3 +97,6 @@ A lone `#tag` token searches that tag (`#work`). Mixed input
 
 Matching is case-insensitive on key and value. Anything that is not
 `key = value` (e.g. `x = y + 1`, a second `=`) is a plain text search.
+
+A filter that matches many notes lists 500 of them, in path order, and says
+how many there are in all; *Show more* reads the next 500.

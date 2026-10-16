@@ -927,9 +927,9 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   }
 
   @override
-  Future<List<Note>> notesNamed(String query, {int limit = 50}) async {
+  Future<List<String>> notesNamed(String query, {int limit = 50}) async {
     final q = query.trim().toLowerCase();
-    if (q.isEmpty) return const [];
+    if (q.length < 2) return const [];
     final hits =
         [
           for (final row in _rows)
@@ -941,7 +941,7 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
           final byLength = a.name.length - b.name.length;
           return byLength != 0 ? byLength : a.path.compareTo(b.path);
         });
-    return [for (final row in hits.take(limit)) _toNote(row)];
+    return [for (final row in hits.take(limit)) row.path];
   }
 
   /// Newest created first: the fake keeps no modification time, and a
@@ -1878,6 +1878,7 @@ final class _FakeFieldSource implements FieldSource {
     String key,
     String value, {
     int? limit,
+    String? after,
   }) async {
     final wanted = value.trim().toLowerCase();
     final name = key.trim().toLowerCase();
@@ -1890,8 +1891,18 @@ final class _FakeFieldSource implements FieldSource {
       }
     }
     out.sort((a, b) => a.path.compareTo(b.path));
-    return limit == null ? out : out.take(limit).toList();
+    final past = after == null
+        ? out
+        : [
+            for (final note in out)
+              if (note.path.compareTo(after) > 0) note,
+          ];
+    return limit == null ? past : past.take(limit).toList();
   }
+
+  @override
+  Future<int> countWithField(String key, String value) async =>
+      (await notesWithField(key, value)).length;
 
   @override
   Future<List<({Note note, String value})>> fieldValues(String key) async {

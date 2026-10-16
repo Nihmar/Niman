@@ -883,6 +883,14 @@ final class PortugueseStrings extends Strings {
   @override
   String get searchLoadMore => 'Mostrar mais';
   @override
+  String get searchStop => 'Parar';
+  @override
+  String searchScanning(int scanned, int total) =>
+      'A pesquisar… $scanned de $total notas';
+  @override
+  String searchShowingFirst(int shown, int total) =>
+      'A mostrar os primeiros $shown de $total';
+  @override
   String searchTasksAndEvents(int count) => 'Tarefas e eventos · $count';
   @override
   String searchNotes(int count) => 'Notas · $count';

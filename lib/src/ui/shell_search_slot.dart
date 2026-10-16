@@ -24,6 +24,7 @@ final class SearchSlot extends StatefulWidget {
   const new({
     required this.controller,
     required this.onOpenNote,
+    this.onOpenHit,
     this.requests,
     this.commands,
     this.tree = false,
@@ -47,6 +48,9 @@ final class SearchSlot extends StatefulWidget {
 
   /// Opens a hit: the shell's own search-result open.
   final void Function(String path) onOpenNote;
+
+  /// See [SearchScreen.onOpenHit].
+  final void Function(String path, List<String> terms)? onOpenHit;
 
   /// The tasks and events already in memory (#730), and what opens one of
   /// their rows; both null in a host without the two files.
@@ -130,6 +134,7 @@ final class _SearchSlotState extends State<SearchSlot> {
             child: SearchScreen(
               controller: widget.controller,
               onOpenNote: widget.onOpenNote,
+              onOpenHit: widget.onOpenHit,
               requests: widget.requests,
               commands: widget.commands,
               taskEvents: widget.taskEvents,

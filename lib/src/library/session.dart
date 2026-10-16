@@ -111,8 +111,9 @@ abstract interface class NoteOperations {
   /// The indexed note/folder at library-relative [path], or null.
   Future<Note?> find(String path);
 
-  /// Notes whose name holds [query], best matches first (#155).
-  Future<List<Note>> notesNamed(String query, {int limit = 50});
+  /// The paths of the notes [query] finds by name, alias or title, best
+  /// matches first (#155, #1043); none for a text under two characters.
+  Future<List<String>> notesNamed(String query, {int limit = 50});
 
   /// The [limit] notes modified last, newest first, outside
   /// [excludeFolder] (#535).

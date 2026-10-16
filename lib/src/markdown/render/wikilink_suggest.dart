@@ -94,6 +94,18 @@ final class WikilinkSuggestController extends ChangeNotifier {
   /// dropped rather than shown.
   int _seq = 0;
 
+  /// Whether a read is on its way to the library now (#1036). The index is
+  /// one connection, shared with the indexer, and reads on it queue: a read
+  /// started for every keystroke of a fast typist is a line of them, each
+  /// for text already typed over. So one is in flight, and the keystrokes
+  /// that arrive meanwhile leave [_waiting] holding the newest.
+  bool _reading = false;
+
+  /// The newest ask made while a read was in flight: it starts when that
+  /// read ends. A newer ask replaces it, and the one replaced never
+  /// reaches the library.
+  ({int seq, _LinkQuery query, WikilinkSuggester suggester})? _waiting;
+
   /// A line break already taken as the panel's `Enter`: the desktop embedders
   /// send the break as text *after* the key, so the copy that follows is
   /// swallowed instead of inserting a newline behind the completed link.
@@ -252,7 +264,32 @@ final class WikilinkSuggestController extends ChangeNotifier {
     notifyListeners();
     overlay.show();
     final seq = ++_seq;
-    unawaited(_load(seq, query, suggester));
+    if (_reading) {
+      _waiting = (seq: seq, query: query, suggester: suggester);
+      return;
+    }
+    unawaited(_loadInTurn(seq, query, suggester));
+  }
+
+  /// Runs the read for [query], then the one that waited for it (#1036), if
+  /// that is still the text on the panel.
+  Future<void> _loadInTurn(
+    int seq,
+    _LinkQuery query,
+    WikilinkSuggester suggester,
+  ) async {
+    _reading = true;
+    try {
+      await _load(seq, query, suggester);
+    } finally {
+      _reading = false;
+    }
+    final next = _waiting;
+    _waiting = null;
+    if (next == null || _disposed || next.seq != _seq) return;
+    final panel = _panel;
+    if (panel == null || !panel.query.sameText(next.query)) return;
+    unawaited(_loadInTurn(next.seq, next.query, next.suggester));
   }
 
   Future<void> _load(
@@ -392,6 +429,7 @@ final class WikilinkSuggestController extends ChangeNotifier {
   void close() {
     if (_panel == null) return;
     _seq++;
+    _waiting = null;
     _panel = null;
     notifyListeners();
     overlay.hide();

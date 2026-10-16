@@ -9,14 +9,15 @@ import 'package:niman/src/frontmatter/fields.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/search/query.dart';
 import 'package:niman/src/search/replace.dart';
+import 'package:niman/src/search/search_excerpt.dart' show wordTermsOf;
 import 'package:niman/src/search/search_repo.dart';
 import 'package:niman/src/search/task_events.dart';
 import 'package:niman/src/ui/action_sheet.dart';
 import 'package:niman/src/ui/pointer_density.dart';
+import 'package:niman/src/ui/search_field_pager.dart';
 import 'package:niman/src/ui/search_request.dart';
 import 'package:niman/src/ui/search_task_events.dart';
 import 'package:niman/src/ui/strings.dart';
-import 'package:niman/src/ui/tree.dart' show displayNameOf;
 import 'package:niman/src/ui/unsaved_notes.dart';
 
 /// The other ways a hit opens, where the shell has them (#712): in a new
@@ -51,6 +52,7 @@ final class SearchScreen extends StatefulWidget {
   const new({
     required this.controller,
     required this.onOpenNote,
+    this.onOpenHit,
     this.onOpenTags,
     this.requests,
     this.commands,
@@ -70,6 +72,11 @@ final class SearchScreen extends StatefulWidget {
 
   /// Called with the note's library-relative path when a result is tapped.
   final void Function(String path) onOpenNote;
+
+  /// Called instead of [onOpenNote] when a hit is opened for words it
+  /// matched (#1045): the note opens with the first of them found and
+  /// shown. Null opens every hit as [onOpenNote] does.
+  final void Function(String path, List<String> terms)? onOpenHit;
 
   /// Opens the Tags screen (shell-provided; the tags button shows only
   /// when set).
@@ -143,6 +150,11 @@ final class _SearchScreenState extends State<SearchScreen> {
   /// range by its index (#768).
   final ScrollController _resultsScroll = ScrollController();
 
+  /// The text and mode the list now showing was searched for: a result
+  /// set for another one starts at the top (#1044), while a re-run of the
+  /// same query (after a replace) keeps its place.
+  String? _resultsFor;
+
   /// Replace mode (T-M3-10): the panel under the query box and the match
   /// preview replace the results list while active.
   final TextEditingController _replacement = TextEditingController();
@@ -160,6 +172,30 @@ final class _SearchScreenState extends State<SearchScreen> {
   bool _searched = false;
   List<SearchHit> _hits = const [];
   int _shown = 0;
+
+  /// The pages of the `key = value` filter [_hits] came from (#1037), or
+  /// null for a text search: the notes past the page read are in the index
+  /// and not in [_hits].
+  FieldPager? _fieldPager;
+
+  /// How far a contains scan has got, while it runs (#1038); null when no
+  /// scan is running.
+  ContainsProgress? _scan;
+
+  /// The words the hits on screen matched: what a hit opens at (#1045).
+  List<String> _hitTerms = const [];
+
+  /// Whether the next page of the filter is being read.
+  bool _readingMore = false;
+
+  /// True from the moment a runnable query is typed until its results land
+  /// (#1038): the list on screen is the previous query's, and is shown as
+  /// such; Enter waits for the new one instead of opening a row of the old.
+  bool _stale = false;
+
+  /// Enter was pressed while [_stale]: the first hit of the fresh results
+  /// opens when they land.
+  bool _openWhenFresh = false;
 
   /// The lone `+project`/`@context` the results were searched for, when
   /// the box held one (#730): the Tasks and events group answers it, and
@@ -299,12 +335,15 @@ final class _SearchScreenState extends State<SearchScreen> {
 
   void _onQueryChanged() {
     _debounceTimer?.cancel();
+    _openWhenFresh = false;
     final text = _query.text.trim();
     if (text.isEmpty || !_canSearch(text)) {
       // Nothing will be (re)searched: clear the results and supersede any
       // in-flight query, so its results cannot land on the hint state.
       _source?.begin();
       setState(() {
+        _stale = false;
+        _scan = null;
         _searched = false;
         _hits = const [];
         _shown = 0;
@@ -317,6 +356,7 @@ final class _SearchScreenState extends State<SearchScreen> {
     const AppLogger(name: 'search.ui')
         .debug('debouncing "$text" (${_debounce.inMilliseconds}ms)');
     _debounceTimer = Timer(_debounce, () => unawaited(_runSearch()));
+    if (!_stale) setState(() => _stale = true);
   }
 
   void _onReplacementChanged() {
@@ -356,10 +396,14 @@ final class _SearchScreenState extends State<SearchScreen> {
   Future<void> _runSearch() async {
     final text = _query.text.trim();
     if (text.isEmpty || !_canSearch(text)) return;
+    if (!_stale) setState(() => _stale = true);
     var source = _source;
     if (source == null) {
       source = await _acquireSource();
-      if (source == null || !mounted) return;
+      if (source == null || !mounted) {
+        if (mounted) setState(() => _stale = false);
+        return;
+      }
       setState(() => _source = source);
     }
     final id = source.begin();
@@ -375,13 +419,53 @@ final class _SearchScreenState extends State<SearchScreen> {
     // The field filter borrows the search source's invocation id: the two
     // are driven by the same box, so a text query typed over a filter (or
     // the other way round) still supersedes what came before it.
-    final results = field != null
-        ? await _runFieldFilter(field)
-        : contains
-        ? await source.searchContains(text, id: id)
+    if (field == null && contains) {
+      // A scan of the notes themselves: hits and progress are shown as the
+      // batches come in, and Stop ends it with what it has (#1038).
+      await for (final progress in source.searchContainsStream(text, id: id)) {
+        if (!source.isCurrent(id) || !mounted) return;
+        _land(
+          id: id,
+          mode: mode,
+          text: text,
+          results: progress.hits,
+          scan: progress.done ? null : progress,
+          clock: clock,
+        );
+      }
+      return;
+    }
+    final pager = field == null ? null : await _openFieldPager(field);
+    final results = pager != null
+        ? await pager.first()
+        : field != null
+        ? const <SearchHit>[]
         : await source.search(buildFtsQuery(text), id: id);
     if (!source.isCurrent(id)) return; // a newer query superseded this one
     if (!mounted) return;
+    _land(
+      id: id,
+      mode: mode,
+      text: text,
+      results: results,
+      pager: pager,
+      clock: clock,
+    );
+  }
+
+  /// Puts [results] on screen for the query [text] issued as [id]; with
+  /// [scan] set, more are still to come (#1038).
+  void _land({
+    required int id,
+    required String mode,
+    required String text,
+    required List<SearchHit> results,
+    required Stopwatch clock,
+    FieldPager? pager,
+    ContainsProgress? scan,
+  }) {
+    final contains = mode == 'contains';
+    final field = mode == 'field';
     // The repo already logs the SQL time; this is issue → results landed,
     // i.e. what a keystroke waits for on the UI side (debounce included
     // in the gap back to the 'debouncing' line).
@@ -389,15 +473,40 @@ final class _SearchScreenState extends State<SearchScreen> {
       'id $id landed in ${clock.elapsedMilliseconds}ms '
       '(${results.length} hits)',
     );
+    final resultsFor = '$mode:$text';
+    final fresh = resultsFor != _resultsFor;
+    _resultsFor = resultsFor;
+    // Enter pressed while the results were out opens the first of them, once
+    // there is one.
+    final open = _openWhenFresh && (scan == null || results.isNotEmpty);
+    if (open) _openWhenFresh = false;
     setState(() {
+      _stale = false;
+      _scan = scan;
+      // A new result set starts at its top, with nothing marked: the old
+      // offset and mark belong to rows that are gone (#1044).
+      if (fresh) {
+        _currentHit = null;
+        if (_resultsScroll.hasClients) _resultsScroll.jumpTo(0);
+      }
       _searched = true;
+      _hitTerms = field
+          ? const []
+          : contains
+          ? [text]
+          : wordTermsOf(text);
+      _fieldPager = pager;
       _hits = results;
-      _shown = _pageSize < results.length ? _pageSize : results.length;
-      _excerpts.clear();
-      _excerptWords = field == null && !contains ? text : null;
+      final page = _pageSize < results.length ? _pageSize : results.length;
+      // A scan adding hits keeps the pages the reader has opened.
+      final kept = _shown < results.length ? _shown : results.length;
+      _shown = fresh || kept < page ? page : kept;
+      if (fresh) _excerpts.clear();
+      _excerptWords = !field && !contains ? text : null;
       _taskEventToken = mode == 'words' ? taskEventQuery(text) : null;
     });
     logNextFrame('search.ui', 'results first frame (id $id)');
+    if (open) _openMarkedOrFirst();
   }
 
   /// The `key = value` filter [text] asks for, or null when it is a text
@@ -411,24 +520,13 @@ final class _SearchScreenState extends State<SearchScreen> {
   /// Whether the box currently holds a `key = value` filter.
   bool get _inFieldMode => _fieldFilter(_query.text.trim()) != null;
 
-  /// Runs a `key = value` filter and shapes its notes like search hits, so
-  /// the results list stays one list. There is no snippet: the match is
-  /// the field, not a place in the text.
-  Future<List<SearchHit>> _runFieldFilter(
-    ({String key, String value}) f,
-  ) async {
+  /// The pages of the `key = value` filter [f], or null where there is no
+  /// field source. Its notes are shaped like search hits, so the results
+  /// list stays one list; there is no snippet: the match is the field, not
+  /// a place in the text.
+  Future<FieldPager?> _openFieldPager(({String key, String value}) f) async {
     final fields = await _acquireFields();
-    if (fields == null) return const [];
-    final notes = await fields.notesWithField(f.key, f.value);
-    return [
-      for (final note in notes)
-        SearchHit(
-          noteId: note.id,
-          path: note.path,
-          title: displayNameOf(note),
-          snippet: '',
-        ),
-    ];
+    return fields == null ? null : FieldPager(fields, f.key, f.value);
   }
 
   /// The shell's `F4`/`Shift+F4` and `Ctrl+Shift+F` land here (#712): the
@@ -446,7 +544,18 @@ final class _SearchScreenState extends State<SearchScreen> {
   /// from it. A hit under the page's cut is listed first.
   void _openHit(int index) {
     _markHit(index);
-    widget.onOpenNote(_hits[index].path);
+    _open(_hits[index].path);
+  }
+
+  /// Opens the note at [path] — at the words the hits matched, where the
+  /// shell can show them (#1045).
+  void _open(String path) {
+    final open = widget.onOpenHit;
+    if (open != null && _hitTerms.isNotEmpty) {
+      open(path, _hitTerms);
+    } else {
+      widget.onOpenNote(path);
+    }
   }
 
   /// Makes the hit at [index] the current one, highlighted and in view,
@@ -475,7 +584,7 @@ final class _SearchScreenState extends State<SearchScreen> {
   /// `↓`/`↑` in the query field move through the hits and `Enter` opens
   /// the one marked (#712); the field keeps the cursor.
   KeyEventResult _queryKey(FocusNode node, KeyEvent event) {
-    if (event is KeyUpEvent || _replaceMode || _hits.isEmpty) {
+    if (event is KeyUpEvent || _replaceMode || (_hits.isEmpty && !_stale)) {
       return KeyEventResult.ignored;
     }
     final keys = HardwareKeyboard.instance;
@@ -483,19 +592,36 @@ final class _SearchScreenState extends State<SearchScreen> {
       return KeyEventResult.ignored;
     }
     switch (event.logicalKey) {
+      // The arrows do not walk the rows of a list about to be replaced.
+      case LogicalKeyboardKey.arrowDown || LogicalKeyboardKey.arrowUp
+          when _stale:
+        break;
       case LogicalKeyboardKey.arrowDown:
         _stepHit(1, open: false);
       case LogicalKeyboardKey.arrowUp:
         _stepHit(-1, open: false);
       case LogicalKeyboardKey.enter || LogicalKeyboardKey.numpadEnter
           when event is KeyDownEvent:
-        final at = _hits.indexWhere((hit) => hit.path == _currentHit);
-        if (at < 0) return KeyEventResult.ignored;
-        _openHit(at);
+        _openMarkedOrFirst();
       default:
         return KeyEventResult.ignored;
     }
     return KeyEventResult.handled;
+  }
+
+  /// Opens the hit marked, or the first when none is (#1044): Enter after
+  /// typing opens the top result, as the palette's does.
+  void _openMarkedOrFirst() {
+    if (_replaceMode) return;
+    // The results on screen are the last query's: the open waits for the
+    // ones being searched (#1038).
+    if (_stale) {
+      _openWhenFresh = true;
+      return;
+    }
+    if (_hits.isEmpty) return;
+    final at = _hits.indexWhere((hit) => hit.path == _currentHit);
+    _openHit(at < 0 ? 0 : at);
   }
 
   /// Brings the hit at [index] into view (#768). A row outside the
@@ -527,7 +653,7 @@ final class _SearchScreenState extends State<SearchScreen> {
       // The group's rows sit above the notes: the estimate counts them,
       // or a step would land short by exactly their number.
       final lead = _groupLead(_taskEventRows());
-      final rows = lead + _shown + (_shown < _hits.length ? 1 : 0);
+      final rows = lead + _shown + (_hasMoreRows ? 1 : 0);
       final length = position.maxScrollExtent + position.viewportDimension;
       final offset =
           length * (index + lead) / rows - position.viewportDimension / 2;
@@ -543,11 +669,34 @@ final class _SearchScreenState extends State<SearchScreen> {
   static const int _revealJumps = 8;
 
   void _loadMore() {
+    final next = _shown + _pageSize;
+    if (next >= _hits.length && (_fieldPager?.hasMore ?? false)) {
+      unawaited(_loadMoreFromFilter());
+    }
+    setState(() => _shown = next < _hits.length ? next : _hits.length);
+  }
+
+  /// Reads the filter's next page and lists it after the notes shown
+  /// (#1037); a page that lands for a filter since replaced is dropped.
+  Future<void> _loadMoreFromFilter() async {
+    final pager = _fieldPager;
+    if (pager == null || _readingMore) return;
+    setState(() => _readingMore = true);
+    final more = await pager.next();
+    if (!mounted || !identical(pager, _fieldPager)) return;
     setState(() {
-      final next = _shown + _pageSize;
-      _shown = next < _hits.length ? next : _hits.length;
+      _readingMore = false;
+      _hits = [..._hits, ...more];
+      _shown = _shown + _pageSize < _hits.length
+          ? _shown + _pageSize
+          : _hits.length;
     });
   }
+
+  /// Whether the list ends in its Show more row: notes held and not shown,
+  /// or a filter with pages left to read.
+  bool get _hasMoreRows =>
+      _shown < _hits.length || (_fieldPager?.hasMore ?? false);
 
   @override
   Widget build(BuildContext context) {
@@ -570,6 +719,9 @@ final class _SearchScreenState extends State<SearchScreen> {
                     controller: _query,
                     focusNode: _queryFocus,
                     textInputAction: TextInputAction.search,
+                    // The search action of a touch keyboard (a hardware
+                    // Enter is [_queryKey]'s).
+                    onSubmitted: (_) => _openMarkedOrFirst(),
                     decoration: InputDecoration(
                       hintText: AppStrings.searchHint,
                       // The icon says which of the two the box is doing, so a
@@ -661,10 +813,20 @@ final class _SearchScreenState extends State<SearchScreen> {
                 ],
               ),
             ),
+            if (_scan case final scan? when !_replaceMode)
+              _scanBar(Theme.of(context), scan),
+            if (_stale && !_replaceMode)
+              const LinearProgressIndicator(
+                key: Key('search-busy'),
+                minHeight: 2,
+              ),
             Expanded(
               child: _replaceMode
                   ? _replacePreviewList(theme)
-                  : _resultsWithEvents(theme),
+                  : Opacity(
+                      opacity: _stale && _hits.isNotEmpty ? 0.5 : 1,
+                      child: _resultsWithEvents(theme),
+                    ),
             ),
           ],
         );
@@ -702,9 +864,52 @@ final class _SearchScreenState extends State<SearchScreen> {
   int _groupLead(List<TaskEventHit> group) =>
       group.isEmpty ? 0 : 1 + group.length + (_hits.isEmpty ? 0 : 1);
 
+  /// The progress of a contains scan and the way to end it (#1038).
+  Widget _scanBar(ThemeData theme, ContainsProgress scan) => Column(
+    key: const Key('search-scan'),
+    children: [
+      LinearProgressIndicator(
+        value: scan.total > 0 ? scan.scanned / scan.total : null,
+        minHeight: 2,
+      ),
+      Padding(
+        padding: const EdgeInsets.fromLTRB(12, 0, 4, 0),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                AppStrings.searchScanning(scan.scanned, scan.total),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            TextButton(
+              key: const Key('search-stop'),
+              onPressed: _stopScan,
+              child: Text(AppStrings.searchStop),
+            ),
+          ],
+        ),
+      ),
+    ],
+  );
+
+  /// Ends the contains scan with the hits it has found so far (#1038): the
+  /// source is told the query is over, and its stream ends.
+  void _stopScan() {
+    _source?.begin();
+    setState(() => _scan = null);
+  }
+
   Widget _results(ThemeData theme) {
     if (!_searched) return _hint(theme);
     final group = _taskEventRows();
+    // No match is only known once the scan is done (#1038).
+    if (_hits.isEmpty && group.isEmpty && _scan != null) {
+      return const SizedBox.shrink();
+    }
     if (_hits.isEmpty && group.isEmpty) {
       return Center(
         child: Text(
@@ -719,7 +924,7 @@ final class _SearchScreenState extends State<SearchScreen> {
     return ListView.builder(
       key: const Key('search-results'),
       controller: _resultsScroll,
-      itemCount: lead + _shown + (_shown < _hits.length ? 1 : 0),
+      itemCount: lead + _shown + (_hasMoreRows ? 1 : 0),
       itemBuilder: (context, index) {
         if (index < lead) {
           if (index == 0) {
@@ -753,6 +958,13 @@ final class _SearchScreenState extends State<SearchScreen> {
             key: const Key('search-load-more'),
             leading: const Icon(Icons.expand_more),
             title: Text(AppStrings.searchLoadMore),
+            // A filter that holds more notes than it lists says how many.
+            subtitle: switch (_fieldPager) {
+              final pager? when pager.hasMore || _shown >= _hits.length => Text(
+                AppStrings.searchShowingFirst(_hits.length, pager.total),
+              ),
+              _ => null,
+            },
             onTap: _loadMore,
           );
         }
@@ -793,12 +1005,12 @@ final class _SearchScreenState extends State<SearchScreen> {
                         hit.path,
                         () => source.excerpt(hit, words),
                       ),
-                      builder: (context, excerpt) {
-                        final text = excerpt.data ?? '';
-                        return text.isEmpty
-                            ? const SizedBox.shrink()
-                            : _snippet(theme, text);
-                      },
+                      builder: (context, excerpt) => _excerptSlot(
+                        theme,
+                        excerpt.data ?? '',
+                        loading:
+                            excerpt.connectionState != ConnectionState.done,
+                      ),
                     ),
                 ],
               ),
@@ -835,6 +1047,37 @@ final class _SearchScreenState extends State<SearchScreen> {
     opens.newTab(_hits[at].path);
     return true;
   }
+
+  /// The room for a word hit's excerpt, two lines whether it has arrived
+  /// or not (#1044): the row is its final height from the first frame, so
+  /// nothing slides under the pointer while the excerpts load. While it is
+  /// on its way a faint bar holds the line.
+  Widget _excerptSlot(
+    ThemeData theme,
+    String excerpt, {
+    required bool loading,
+  }) => Stack(
+    children: [
+      // Two lines of the snippet's own style, drawn as nothing.
+      const Opacity(opacity: 0, child: Text('\n', maxLines: 2)),
+      if (excerpt.isNotEmpty)
+        _snippet(theme, excerpt)
+      else if (loading)
+        Positioned(
+          left: 0,
+          top: 5,
+          width: 140,
+          height: 8,
+          child: DecoratedBox(
+            key: const Key('search-excerpt-skeleton'),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
+        ),
+    ],
+  );
 
   Widget _snippet(ThemeData theme, String snippet) => Text.rich(
     _highlight(theme, snippet),
@@ -892,7 +1135,7 @@ final class _SearchScreenState extends State<SearchScreen> {
     if (now >= 0 && action != 'reveal' && action != 'replace') _markHit(now);
     switch (action) {
       case 'open':
-        widget.onOpenNote(hit.path);
+        _open(hit.path);
       case 'newtab':
         opens?.newTab(hit.path);
       case 'beside':

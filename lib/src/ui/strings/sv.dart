@@ -886,6 +886,14 @@ final class SwedishStrings extends Strings {
   @override
   String get searchLoadMore => 'Visa mer';
   @override
+  String get searchStop => 'Stoppa';
+  @override
+  String searchScanning(int scanned, int total) =>
+      'Söker… $scanned av $total anteckningar';
+  @override
+  String searchShowingFirst(int shown, int total) =>
+      'De första $shown av $total';
+  @override
   String searchTasksAndEvents(int count) => 'Uppgifter och händelser · $count';
   @override
   String searchNotes(int count) => 'Anteckningar · $count';

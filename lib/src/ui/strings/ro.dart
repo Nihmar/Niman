@@ -894,6 +894,14 @@ final class RomanianStrings extends Strings {
   @override
   String get searchLoadMore => 'Afișează mai multe';
   @override
+  String get searchStop => 'Oprește';
+  @override
+  String searchScanning(int scanned, int total) =>
+      'Căutare… $scanned din $total notițe';
+  @override
+  String searchShowingFirst(int shown, int total) =>
+      'Primele $shown din $total';
+  @override
   String searchTasksAndEvents(int count) => 'Sarcini și evenimente · $count';
   @override
   String searchNotes(int count) => 'Note · $count';

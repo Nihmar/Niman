@@ -880,6 +880,14 @@ final class BasqueStrings extends Strings {
   @override
   String get searchLoadMore => 'Ikusi gehiago';
   @override
+  String get searchStop => 'Gelditu';
+  @override
+  String searchScanning(int scanned, int total) =>
+      'Bilatzen… $scanned / $total ohar';
+  @override
+  String searchShowingFirst(int shown, int total) =>
+      'Lehen $shown, $total guztitik';
+  @override
   String searchTasksAndEvents(int count) => 'Zereginak eta gertaerak · $count';
   @override
   String searchNotes(int count) => 'Oharrak · $count';

@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import 'package:niman/src/db/stem_trigrams.dart' as stem_trigrams;
 import 'package:niman/src/db/tag_counts.dart' as tag_counts;
 import 'package:sqlite3/sqlite3.dart' as sqlite3;
 
@@ -77,7 +78,13 @@ class Notes extends Table {
 /// makes *any* key filterable (T-M4-03). The primary key answers "the
 /// fields of this note"; the index answers the other direction, "the
 /// notes whose `status` is `draft`", which is what filtering asks.
-@TableIndex(name: 'fields_key_value', columns: {#key, #value})
+///
+/// [value] compares without regard to case (`COLLATE NOCASE`, the way the
+/// stems do), so "the notes whose `status` is `Draft`" is an equality the
+/// index answers: a `lower(value)` over the column could not use it past
+/// the key (#1037). The index ends in the note, so counting the notes of a
+/// key or a value reads the index alone.
+@TableIndex(name: 'fields_key_value', columns: {#key, #value, #noteId})
 class FrontmatterFields extends Table {
   /// The id of the note the field belongs to.
   IntColumn get noteId => integer()();
@@ -85,8 +92,8 @@ class FrontmatterFields extends Table {
   /// The key, lowercased; dotted for a nested map's leaf.
   TextColumn get key => text()();
 
-  /// One of the key's values, as text.
-  TextColumn get value => text()();
+  /// One of the key's values, as text; compared without regard to case.
+  TextColumn get value => text().customConstraint('COLLATE NOCASE')();
 
   @override
   Set<Column> get primaryKey => {noteId, key, value};
@@ -344,8 +351,13 @@ class IndexDatabase extends _$IndexDatabase {
   /// v11: `dangling_links` keeps the targets no note answered, keyed by the
   /// stem that would, so a note made later finds the links waiting for it
   /// (#974) — an index written before holds none, and is wiped and rescanned.
+  /// v12: the full-text table keeps a prefix index for two, three and four
+  /// letters (#1039), so the first keystrokes of a word are a lookup, not an
+  /// expansion of the vocabulary; a frontmatter value compares without
+  /// regard to case, in an index that ends in the note (#1037) — the same
+  /// wipe and rescan.
   @override
-  int get schemaVersion => 11;
+  int get schemaVersion => 12;
 
   /// The FTS5 index (design.md: no drift class — raw SQL, `rowid` =
   /// `notes.id`, one row per note, `title` weighted above `body` by the
@@ -358,10 +370,16 @@ class IndexDatabase extends _$IndexDatabase {
   /// excerpt and the contains scan read the note instead
   /// (`search/search_excerpt.dart`). `contentless_delete=1` lets a note's row
   /// be deleted by its rowid alone, which a rewrite of the note does.
+  ///
+  /// `prefix='2 3 4'` keeps the documents of every two-, three- and
+  /// four-letter prefix in the index itself (#1039): `co*` is read off one
+  /// list instead of merged from the lists of every term that starts with
+  /// it, which is what the first keystrokes of a word cost on a library
+  /// with a large vocabulary. The file grows by those lists.
   static const String _createFts =
       'CREATE VIRTUAL TABLE IF NOT EXISTS notes_fts USING '
       "fts5(title, body, content = '', contentless_delete = 1, "
-      "tokenize = 'unicode61 remove_diacritics 2')";
+      "tokenize = 'unicode61 remove_diacritics 2', prefix = '2 3 4')";
 
   /// The word index of every note's headings and block ids (#844, #845):
   /// raw SQL like [_createFts], one row per note (`rowid` = `notes.id`) whose
@@ -396,9 +414,15 @@ class IndexDatabase extends _$IndexDatabase {
   /// [ensureRecentIndex] builds its index, and for the same reason.
   Future<void> ensureTagCounts() => tag_counts.ensureTagCounts(this);
 
+  /// Builds the trigram index of the names (#1043) on a file from before
+  /// it, filled from the stems on hand; nothing when it has it. Until it
+  /// exists, a contains lookup of a name answers without it.
+  Future<void> ensureStemTrigrams() => stem_trigrams.ensureStemTrigrams(this);
+
   /// The tables an upgrade drops, dependents before the rows they key on.
   static const List<String> _allTables = [
     'notes_fts',
+    stem_trigrams.stemTrigramsTable,
     'note_anchors_fts',
     'note_headings',
     'note_blocks',
@@ -421,6 +445,7 @@ class IndexDatabase extends _$IndexDatabase {
       await m.database.customStatement(_createAnchorsFts);
       await m.database.customStatement(_createRecentIndex);
       await tag_counts.createTagCounts(m.database);
+      await stem_trigrams.createStemTrigrams(m.database);
     },
     // Every row here is derived from the notes on disk, so an upgrade is a
     // wipe and a rescan: the file is emptied and recreated at the new
@@ -437,6 +462,7 @@ class IndexDatabase extends _$IndexDatabase {
       await m.database.customStatement(_createAnchorsFts);
       await m.database.customStatement(_createRecentIndex);
       await tag_counts.createTagCounts(m.database);
+      await stem_trigrams.createStemTrigrams(m.database);
     },
     beforeOpen: (details) async {
       // Belt and braces: an index file that predates the FTS table (or

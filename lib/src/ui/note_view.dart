@@ -130,6 +130,7 @@ final class NoteView extends StatefulWidget {
     this.createMissingNote,
     this.initialAnchor,
     this.initialCaretOffset,
+    this.initialFind,
     this.active = true,
     this.initialMemento,
     this.movedFrom,
@@ -306,6 +307,10 @@ final class NoteView extends StatefulWidget {
   /// A template `{{cursor}}` offset to land the caret on after the note
   /// loads (#53), measured in the created text. Clamped into the text.
   final int? initialCaretOffset;
+
+  /// The words a search result matched (#1045): the note shows the first
+  /// of them it holds, selected, with the find bar marking every one.
+  final List<String>? initialFind;
 
   /// Whether this is the tab on screen (#23). A tab kept alive behind it
   /// keeps its buffer, undo and view, and hands in a memento as it goes.
@@ -1419,6 +1424,11 @@ final class _NoteViewState extends State<NoteView>
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) _refreshPreview();
       });
+      if (widget.initialFind case final terms? when terms.isNotEmpty) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted && widget.path == path) _sourceFind.openFinding(terms);
+        });
+      }
       final anchor = widget.initialAnchor;
       if (anchor != null && mounted) {
         unawaited(jumpToAnchor(context, anchor, _linkTargets()));

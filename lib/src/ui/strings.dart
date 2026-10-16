@@ -619,6 +619,11 @@ final class AppStrings {
   static String get searchTooShortHint => _s.searchTooShortHint;
   static String get searchNoMatches => _s.searchNoMatches;
   static String get searchLoadMore => _s.searchLoadMore;
+  static String searchShowingFirst(int shown, int total) =>
+      _s.searchShowingFirst(shown, total);
+  static String get searchStop => _s.searchStop;
+  static String searchScanning(int scanned, int total) =>
+      _s.searchScanning(scanned, total);
 
   /// The Tasks and events group of a lone `+project`/`@context` (#730).
   static String searchTasksAndEvents(int count) =>

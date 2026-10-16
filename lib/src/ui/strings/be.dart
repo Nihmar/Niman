@@ -882,6 +882,13 @@ final class BelarusianStrings extends Strings {
   @override
   String get searchLoadMore => 'Паказаць яшчэ';
   @override
+  String get searchStop => 'Спыніць';
+  @override
+  String searchScanning(int scanned, int total) =>
+      'Пошук… $scanned з $total нататак';
+  @override
+  String searchShowingFirst(int shown, int total) => 'Першыя $shown з $total';
+  @override
   String searchTasksAndEvents(int count) => 'Задачы і падзеі · $count';
   @override
   String searchNotes(int count) => 'Нататкі · $count';

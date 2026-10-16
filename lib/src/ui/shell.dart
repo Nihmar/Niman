@@ -1230,6 +1230,10 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// file whose length the creation flow does not know.
   int? _pendingCaretOffset;
 
+  /// The words a search result matched, for the note being opened to show
+  /// (#1045).
+  List<String>? _pendingFind;
+
   /// The open note's kind (the frontmatter `type`, null = plain note or
   /// no note); reported by the open NoteView (T-TK-02).
   String? _noteKind;
@@ -1371,6 +1375,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     String path, {
     String? anchor,
     int? caret,
+    List<String>? find,
     bool preview = false,
     bool followsLink = false,
   }) {
@@ -1395,6 +1400,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       }
       _pendingAnchor = anchor;
       _pendingCaretOffset = caret;
+      _pendingFind = find;
       if (followsLink) _linksFollowed++;
       _resetNoteKind();
       if (sameNote) _noteReloadToken++;
@@ -1665,6 +1671,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           onOpenNote: _openNoteFromLink,
           initialAnchor: _pendingAnchor,
           initialCaretOffset: _pendingCaretOffset,
+          initialFind: _pendingFind,
           kindMode: !_kindRawMode,
           onNoteKindChanged: _onNoteKindChanged,
           onKindMarkdown: _showKindMarkdown,
@@ -3002,6 +3009,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       _noteFromTab = _tab;
       _pendingAnchor = null;
       _pendingCaretOffset = null;
+      _pendingFind = null;
       _resetNoteKind();
       if (note.isDir) {
         _noteClosed();
@@ -3074,6 +3082,14 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// (the search body would otherwise hide the selection).
   void _openSearchNote(String path) {
     _showNote(path);
+    logNextFrame('shell', 'search result open first frame');
+  }
+
+  /// Opens a search result at the words it matched (#1045): the note
+  /// shows the first of [terms] it holds, selected, with the find bar
+  /// marking the rest.
+  void _openSearchHit(String path, List<String> terms) {
+    _showNote(path, find: terms);
     logNextFrame('shell', 'search result open first frame');
   }
 
@@ -5158,6 +5174,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
               caret: focused && tab.path == showing
                   ? _pendingCaretOffset
                   : null,
+              find: focused && tab.path == showing ? _pendingFind : null,
             );
           }(),
     ];
@@ -5290,6 +5307,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       controller: controller,
       unsavedTracker: widget.unsavedTracker,
       onOpenNote: _openSearchNote,
+      onOpenHit: _openSearchHit,
       requests: _searchRequests,
       commands: _searchCommands,
       tree: tree,

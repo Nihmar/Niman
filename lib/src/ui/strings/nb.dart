@@ -879,6 +879,14 @@ final class NorwegianStrings extends Strings {
   @override
   String get searchLoadMore => 'Vis mer';
   @override
+  String get searchStop => 'Stopp';
+  @override
+  String searchScanning(int scanned, int total) =>
+      'Søker… $scanned av $total notater';
+  @override
+  String searchShowingFirst(int shown, int total) =>
+      'De første $shown av $total';
+  @override
   String searchTasksAndEvents(int count) => 'Oppgaver og hendelser · $count';
   @override
   String searchNotes(int count) => 'Notater · $count';
