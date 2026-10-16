@@ -50,7 +50,10 @@ lines or when responsibilities mix.
   (`library_device_settings`, `LibraryConfig.deviceKeys`) once into
   `LibraryConfigRepo` (cached per session) → scan files off the UI
   isolate (`Isolate.run` — every stat is a FUSE round trip on Android) →
-  upsert into `IndexDatabase` on main. Behind the ready bump, a sweep off
+  upsert into `IndexDatabase` on main. An index that has rows is ready at
+  once and reconciled with the disk behind the ready bump; an empty one
+  gets its tree first and its notes read behind it — no open waits for a
+  full walk, whichever screen it came from (#1073). Behind the ready bump, a sweep off
   the UI isolate removes the `.niman-tmp-*` files a killed write left
   (`core/files.dart`, #379), taking only files older than
   `staleTempMinimumAge` so a write in flight is never touched.

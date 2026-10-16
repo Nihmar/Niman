@@ -197,7 +197,7 @@ void main() {
       );
       addTearDown(controller.dispose);
 
-      await controller.open(library.path, create: true, blockingScan: false);
+      await controller.open(library.path, create: true);
 
       expect(await controller.editorKind, EditorKind.wysiwyg);
       expect(await controller.enabledEditors, {EditorKind.wysiwyg});
@@ -220,7 +220,7 @@ void main() {
       );
       addTearDown(controller.dispose);
 
-      await controller.open(library.path, create: true, blockingScan: false);
+      await controller.open(library.path, create: true);
 
       expect(await controller.editorKind, EditorKind.source);
       expect(await controller.enabledEditors, {

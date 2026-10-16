@@ -236,7 +236,7 @@ void main() {
     );
     final open = await timed(
       'open to ready',
-      () => controller.open(root.path, create: false, blockingScan: false),
+      () => controller.open(root.path, create: false),
     );
     expect(controller.phase, LibraryPhase.ready);
     // The shell's first frame asks for the top of the tree; that read is

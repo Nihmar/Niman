@@ -149,15 +149,11 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     if (path == null) return Future<void>.value();
     // Mirrors the real resume: non-blocking, and the in-memory index already
     // mirrors the tree, so there is nothing to reconcile.
-    return open(path, create: false, blockingScan: false);
+    return open(path, create: false);
   }
 
   @override
-  Future<void> open(
-    String path, {
-    required bool create,
-    bool blockingScan = true,
-  }) async {
+  Future<void> open(String path, {required bool create}) async {
     if (_phase != LibraryPhase.none) {
       throw StateError('A library is already open (phase: ${_phase.name})');
     }
@@ -194,7 +190,7 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   Future<void> switchTo(String libraryPath) async {
     if (libraryPath == _root) return;
     if (_phase != LibraryPhase.none) await close();
-    await open(libraryPath, create: false, blockingScan: false);
+    await open(libraryPath, create: false);
   }
 
   /// The known-library list, newest first (T-ML-04).

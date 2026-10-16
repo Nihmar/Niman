@@ -519,7 +519,7 @@ final class LibraryController implements LibrarySession {
         _log.warning('resume: root no longer exists: $last');
         return;
       }
-      await open(last, create: false, blockingScan: false);
+      await open(last, create: false);
     } on Object catch (error) {
       // Resume is best effort; the open screen is reached with lastError.
       _log.error('resume failed: $error');
@@ -529,19 +529,13 @@ final class LibraryController implements LibrarySession {
   /// Opens the library at [path]; with [create] true it is created first
   /// when missing.
   ///
-  /// With [blockingScan] true (the default) the full index scan completes
-  /// before the library becomes ready. With [blockingScan] false (used by
-  /// [resume] for a fast relaunch) the library becomes ready immediately
-  /// from the last index, and a reconciliation scan runs
-  /// [resumeReconcileDelay] later so external changes converge within
-  /// seconds (the scan is still a blocking disk walk, so it must not gate
-  /// the first frame).
+  /// An index that has rows is shown at once: the library becomes ready from
+  /// it and a reconciliation scan runs [resumeReconcileDelay] later, so
+  /// external changes converge within seconds (the scan is a disk walk, so it
+  /// must not gate the first frame) (#1073). One with no rows gets its tree
+  /// first, and its notes are read behind it.
   @override
-  Future<void> open(
-    String path, {
-    required bool create,
-    bool blockingScan = true,
-  }) async {
+  Future<void> open(String path, {required bool create}) async {
     if (_phase != LibraryPhase.none) {
       throw StateError('A library is already open (phase: ${_phase.name})');
     }
@@ -549,7 +543,7 @@ final class LibraryController implements LibrarySession {
     _lastError = null;
     _bump();
     try {
-      _log.info('open start: $path create=$create blockingScan=$blockingScan');
+      _log.info('open start: $path create=$create');
       final abs = p.normalize(path.trim());
       final rootDir = Directory(abs);
       if (create) {
@@ -559,7 +553,7 @@ final class LibraryController implements LibrarySession {
       } else if (!rootDir.existsSync()) {
         throw ArgumentError('Directory does not exist: $abs');
       }
-      await _startSession(abs, blockingScan: blockingScan);
+      await _startSession(abs);
       _log.info('open complete: ready root=$abs');
     } on Object catch (error) {
       _log.error('open failed: $error');
@@ -577,7 +571,7 @@ final class LibraryController implements LibrarySession {
   /// Shared by [open] and [rebuildIndex]: the first does the destination
   /// checks and sets the phase around it, the second runs it over an index
   /// file it has just deleted (#368).
-  Future<void> _startSession(String abs, {required bool blockingScan}) async {
+  Future<void> _startSession(String abs) async {
     // This library's own index file (T-ML-03). Opening a second library
     // no longer scans over the first one's rows, so coming back to it
     // costs a reconciliation rather than a full walk. [_openIndex] also
@@ -637,17 +631,6 @@ final class LibraryController implements LibrarySession {
     // reconciliation. On an index that has rows this is one query and
     // writes nothing.
     final contentOwed = await indexer.indexTreeFirst(abs);
-    if (blockingScan && !contentOwed) {
-      // Only here: the first index is the scan long enough to be worth
-      // watching, and reporting costs a message per note.
-      indexer.onProgress = _onIndexProgress;
-      try {
-        await indexer.fullScan(abs);
-      } finally {
-        indexer.onProgress = null;
-        _indexProgress = null;
-      }
-    }
     final watcher = FileWatcher(
       abs,
       debounce: watcherDebounce,
@@ -728,7 +711,7 @@ final class LibraryController implements LibrarySession {
     _reconcileTimer = Timer(resumeReconcileDelay, () async {
       await _ensureRecentIndex(indexDb);
       // A first index is a full walk already, running behind the tree.
-      if (!blockingScan && !contentOwed) await _safeRescan(abs);
+      if (!contentOwed) await _safeRescan(abs);
     });
     if (contentOwed) unawaited(_indexContents(abs));
   }
@@ -764,7 +747,7 @@ final class LibraryController implements LibrarySession {
     if (target == _root) return;
     _log.info('switch library: $_root -> $target');
     if (_phase != LibraryPhase.none) await close();
-    await open(target, create: false, blockingScan: false);
+    await open(target, create: false);
   }
 
   /// The libraries the app knows about, most recently opened first.
@@ -978,7 +961,7 @@ final class LibraryController implements LibrarySession {
     await _teardown();
     await _deleteIndexOf(root);
     try {
-      await _startSession(root, blockingScan: true);
+      await _startSession(root);
       _log.info('rebuild index complete: ready root=$root');
     } on Object catch (error) {
       _log.error('rebuild index failed: $error');
@@ -1838,7 +1821,16 @@ final class LibraryController implements LibrarySession {
     if (indexer == null || phase != LibraryPhase.ready) return;
     try {
       _log.info('first index: reading the notes of $abs');
-      await _rescans?.run();
+      // Reported while it runs: the walk is long enough to be worth
+      // watching, and reporting costs a message per note.
+      indexer.onProgress = _onIndexProgress;
+      try {
+        await _rescans?.run();
+      } finally {
+        indexer.onProgress = null;
+        _indexProgress = null;
+        _bump();
+      }
       _log.info('first index complete');
     } on Object catch (error) {
       // The periodic rescan finds what is still missing and reads it.

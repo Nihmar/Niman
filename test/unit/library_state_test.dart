@@ -1,7 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:drift/drift.dart' show driftRuntimeOptions;
+import 'package:drift/drift.dart'
+    show ApplyInterceptor, QueryExecutor, QueryInterceptor, driftRuntimeOptions;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
@@ -80,13 +81,52 @@ void main() {
     }
   }
 
-  test('a blocking open is ready only after the index mirrors disk', () async {
+  test('an open on an empty index is ready with its tree', () async {
     final controller = makeController();
     await controller.open(root.path, create: false);
     expect(controller.phase, LibraryPhase.ready);
     expect(await names(controller), ['a.md']);
     await controller.close();
     await controller.dispose();
+  });
+
+  test('opening a known library does not wait for its scan (#1073)', () async {
+    // Indexed once already, so the next open has an index to show.
+    final first = makeController();
+    await first.open(root.path, create: false);
+    await first.rescanNow();
+    await first.close();
+    await first.dispose();
+    File(p.join(root.path, 'b.md')).writeAsStringSync('b');
+
+    // Every full scan starts with a statement the test holds, as a walk
+    // that outlasts the wait does on a million notes.
+    final release = Completer<void>();
+    final held = Completer<void>();
+    final second = LibraryController(
+      appDb,
+      indexDbFactory: (libraryPath) async => IndexDatabase(
+        NativeDatabase(File(p.join(tmp.path, '${p.basename(libraryPath)}.db')))
+            .interceptWith(_HoldScan(release.future, held)),
+      ),
+      rescanInterval: const Duration(hours: 1),
+      resumeReconcileDelay: Duration.zero,
+    );
+    await second
+        .open(root.path, create: false)
+        .timeout(
+          const Duration(seconds: 10),
+          onTimeout: () => fail('open waited for the scan'),
+        );
+    expect(second.phase, LibraryPhase.ready);
+    expect(await names(second), ['a.md']);
+
+    // The reconciliation did start, behind the open.
+    await held.future.timeout(const Duration(seconds: 10));
+    release.complete();
+    await expectConverged(() async => (await names(second)).contains('b.md'));
+    await second.close();
+    await second.dispose();
   });
 
   test(
@@ -104,7 +144,7 @@ void main() {
       // A non-blocking open becomes ready from the (stale) index without
       // waiting for the scan.
       final second = makeController();
-      await second.open(root.path, create: false, blockingScan: false);
+      await second.open(root.path, create: false);
       expect(second.phase, LibraryPhase.ready);
       expect(await names(second), ['a.md']);
 
@@ -163,7 +203,7 @@ void main() {
     // Back to the first library, without waiting for a scan: what comes
     // up is its own index, not the one the second library left behind.
     final third = makeController();
-    await third.open(root.path, create: false, blockingScan: false);
+    await third.open(root.path, create: false);
     expect(await names(third), ['a.md']);
     await third.close();
     await third.dispose();
@@ -335,7 +375,7 @@ void main() {
       rescanInterval: const Duration(hours: 1),
       resumeReconcileDelay: const Duration(hours: 1),
     );
-    await resumed.open(root.path, create: false, blockingScan: false);
+    await resumed.open(root.path, create: false);
     expect(resumed.phase, LibraryPhase.ready);
     expect(await names(resumed), ['a.md']);
     await resumed.close();
@@ -614,4 +654,26 @@ final class _BrokenSecrets implements SyncSecretStore {
   @override
   Future<void> delete(String libraryPath) =>
       Future.error(Exception('no keychain'));
+}
+
+/// Holds the first statement of every full scan until [_release] completes,
+/// and says when it is held.
+final class _HoldScan extends QueryInterceptor {
+  new(this._release, this._held);
+
+  final Future<void> _release;
+  final Completer<void> _held;
+
+  @override
+  Future<void> runCustom(
+    QueryExecutor executor,
+    String statement,
+    List<Object?> args,
+  ) async {
+    if (statement.contains('incremental_vacuum')) {
+      if (!_held.isCompleted) _held.complete();
+      await _release;
+    }
+    await super.runCustom(executor, statement, args);
+  }
 }

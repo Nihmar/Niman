@@ -338,7 +338,8 @@ abstract interface class LibrarySession {
   int get treeRevision;
 
   /// The note the first index is reading, or null when no scan is
-  /// running. Reported only for the blocking scan of an opening library.
+  /// running. Reported while the notes of a newly indexed library are read
+  /// (#1068).
   IndexProgress? get indexProgress;
 
   /// Fires with the new [revision] after every index change.
@@ -376,14 +377,11 @@ abstract interface class LibrarySession {
   /// Opens the library at [path]; with [create] true it is created first
   /// when missing.
   ///
-  /// With [blockingScan] true (the default) the full index scan completes
-  /// before the library becomes ready. With [blockingScan] false (used by
-  /// [resume]) the scan is deferred to a background reconciliation.
-  Future<void> open(
-    String path, {
-    required bool create,
-    bool blockingScan = true,
-  });
+  /// The library is ready as soon as there is an index to show: one that
+  /// holds rows is ready at once and reconciled with the disk behind it, and
+  /// an empty one gets its tree first and its notes read behind the tree
+  /// (#1073). There is no mode that waits for a full walk.
+  Future<void> open(String path, {required bool create});
 
   /// Closes the current library (stops watching; keeps the index).
   Future<void> close();
