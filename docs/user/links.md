@@ -443,8 +443,10 @@ relative to the note. A picture or an audio file is embedded instead
 editor is; a PDF, a book or any other file is linked. A folder dragged
 onto the note writes nothing, and the read view, with no caret, takes no
 drop. So do several rows marked together (#996): that drag is a move, and
-the link is one file's gesture. The tree's own drops are unchanged: let
-go on a folder, the row moves into it.
+the link is one file's gesture. The note says so while they are over it
+(#1027): it is tinted and ringed in the error colour, with a "no" sign, and the pointer
+shows the "no" cursor — let go there and nothing is written. The tree's own
+drops are unchanged: let go on a folder, the row moves into it.
 
 ## Link button
 
