@@ -43,7 +43,6 @@ import 'package:niman/src/editor/editor_context_menu.dart';
 import 'package:niman/src/editor/highlight_style.dart';
 import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/editor/list_row.dart';
-import 'package:niman/src/editor/md_editing.dart';
 import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/editor/outline.dart';
 import 'package:niman/src/editor/toolbar_item.dart';
@@ -62,6 +61,7 @@ import 'package:niman/src/markdown/edit/bracket_pairs.dart';
 import 'package:niman/src/markdown/edit/caret_motion.dart';
 import 'package:niman/src/markdown/edit/caret_spot.dart';
 import 'package:niman/src/markdown/edit/edit_history.dart';
+import 'package:niman/src/markdown/edit/enter_edit.dart';
 import 'package:niman/src/markdown/edit/line_prefix.dart';
 import 'package:niman/src/markdown/edit/list_indent_edit.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
@@ -1880,8 +1880,9 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
 
   /// A line break typed over `[start, end)`, when it means more than a line
   /// break: inside a list item it carries the list on, and on an empty item it
-  /// ends the list (#142, the legacy editor's `applyNewLine`). Answers whether
-  /// it did either; otherwise the platform's line break is applied as typed.
+  /// ends the list (#142, the legacy editor's `applyNewLine`); inside a quote
+  /// or a callout it carries the quote on (#1049). Answers whether it did any
+  /// of them; otherwise the platform's line break is applied as typed.
   ///
   /// It hangs off the *line break arriving*, not off the Enter key, because
   /// that is the one place every embedder meets: an IME commits the break as
@@ -1896,24 +1897,19 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     if (_tableEnter()) return true;
     if (start != end) return false;
     final buffer = widget.buffer;
-    final line = buffer.lineOf(start);
-    if (!_isPlainLine(line)) return false;
-    final text = buffer.lineAt(line);
-    final head = listItemHead(text);
-    if (head == null) return false;
-    final lineStart = buffer.offsetOfLine(line);
-    if (head.isEmpty) {
-      // Enter on an item with nothing in it takes the marker away instead of
-      // adding another empty item — the second Enter everybody presses to get
-      // out of a list.
-      _replaceRange(lineStart, lineStart + text.length, '');
-      return true;
-    }
-    // A caret inside the marker is not "in the item": leave it to the platform.
-    if (start - lineStart < text.length - head.content.length) return false;
-    // One edit, not a line break and then a marker: one undo step, and no
-    // frame where the marker is missing.
-    _replaceRange(start, end, '\n${head.continuation}');
+    if (!_isPlainLine(buffer.lineOf(start))) return false;
+    // The rule is `enterEdit`'s: a list item behind its quote marks is
+    // carried on, a quote line starts the next with its marks, an empty
+    // nested item goes back a level (#1049).
+    final edit = enterEdit(buffer, start, indentWidth: widget.indentWidth);
+    if (edit == null) return false;
+    _replaceRange(
+      edit.start,
+      edit.end,
+      edit.text,
+      caret: edit.caret,
+      verbatim: edit.verbatim,
+    );
     return true;
   }
 

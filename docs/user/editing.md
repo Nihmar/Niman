@@ -534,9 +534,19 @@ note.
 Enter inside a list carries the list on, in both editors: the next line
 starts with the same marker, a numbered list counts on, and a task item
 gives you a fresh empty box. Enter on an item you have not typed
-anything into ends the list instead — the usual second Enter. Inside a
-fenced code block, a math block or the frontmatter it does nothing: a
-dash there is a dash.
+anything into ends the list instead — the usual second Enter. On an empty
+item that is nested, Enter first takes it back one level, as Shift+Tab
+does, and only at the margin removes the marker. Inside a fenced code
+block, a math block or the frontmatter it does nothing: a dash there is a
+dash.
+
+Enter in a quote or a callout starts the next line with the same `>`
+marks, and a list inside the quote goes on behind them: `> - milk` and
+Enter gives `> - `, `> > x` gives `> > `, and the first line of a callout,
+`> [!note]`, gives `> ` for its body. Enter on a line with nothing after
+its marks, `> `, takes them off and leaves the quote; on an empty list
+item in a quote it takes the marker, and the next Enter the quote. Enter
+and Tab read the line the same way, behind the `>`.
 
 Brackets come in pairs, in both editors and on every platform: `(`
 writes `()`, `[` writes `[]` and `{` writes `{}`, with the caret between
