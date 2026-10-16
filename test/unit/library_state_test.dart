@@ -90,6 +90,30 @@ void main() {
     await controller.dispose();
   });
 
+  test('the first index reports its progress once the library is ready '
+      '(#1068)', () async {
+    for (var i = 0; i < 300; i++) {
+      File(p.join(root.path, 'n$i.md')).writeAsStringSync('note $i');
+    }
+    final controller = makeController();
+    final seen = <int>[];
+    final sub = controller.events.listen((_) {
+      final progress = controller.indexProgress;
+      if (progress != null) seen.add(progress.done);
+    });
+
+    await controller.open(root.path, create: false);
+    expect(controller.phase, LibraryPhase.ready);
+    // The notes are read behind the tree: wait for the pass to end.
+    await expectConverged(() async => seen.isNotEmpty);
+    await expectConverged(() async => controller.indexProgress == null);
+
+    expect(seen, isNotEmpty, reason: 'progress was reported during the pass');
+    await sub.cancel();
+    await controller.close();
+    await controller.dispose();
+  });
+
   test('opening a known library does not wait for its scan (#1073)', () async {
     // Indexed once already, so the next open has an index to show.
     final first = makeController();

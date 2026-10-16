@@ -244,8 +244,21 @@ final class LibraryController implements LibrarySession {
     final last = _progressShown;
     if (last != null && now.difference(last) < _progressInterval) return;
     _progressShown = now;
-    _bump();
+    // The tree is asked to read its rows again only now and then: titles and
+    // pins reach it as the notes are read (#1068), but a flatten per report
+    // would spend the pass drawing a tree that has barely moved.
+    final treeAt = _progressTreeBump;
+    final tree =
+        treeAt == null || now.difference(treeAt) >= _progressTreeInterval;
+    if (tree) _progressTreeBump = now;
+    _bump(tree: tree);
   }
+
+  DateTime? _progressTreeBump;
+
+  /// How often a running content pass lets the tree read the rows it has
+  /// changed so far.
+  static const _progressTreeInterval = Duration(seconds: 2);
 
   /// How often a running scan redraws the name it is showing.
   static const _progressInterval = Duration(milliseconds: 50);
@@ -1838,6 +1851,7 @@ final class LibraryController implements LibrarySession {
       } finally {
         indexer.onProgress = null;
         _indexProgress = null;
+        _progressTreeBump = null;
         _bump();
       }
       _log.info('first index complete');
