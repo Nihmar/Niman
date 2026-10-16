@@ -429,6 +429,92 @@ void main() {
     expect(source.todoLines, hasLength(3));
   });
 
+  testWidgets('Enter and the keypad Enter fold the selected header, and open '
+      'it again (#1028)', (tester) async {
+    await pumpTab(tester, ['a due:2026-09-01', 'b']);
+    // Select the Overdue header with the arrows: from nothing, the first
+    // arrow down lands on the first item.
+    await tester.tap(find.byKey(const Key('todo-quick-add')));
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    final overdue = find.byKey(const Key('todo-section-due.overdue'));
+    expect(tester.widget<TodoSectionHeader>(overdue).selected, isTrue);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await settle(tester);
+    expect(view.isCollapsed('due.overdue'), isTrue);
+    expect(find.text('a'), findsNothing);
+    expect(tester.widget<TodoSectionHeader>(overdue).selected, isTrue);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.numpadEnter);
+    await settle(tester);
+    expect(view.isCollapsed('due.overdue'), isFalse);
+    expect(find.text('a'), findsOne);
+  });
+
+  testWidgets('the row edited in place is filtered away: the edit is dropped '
+      'and does not come back with the row (#1028)', (tester) async {
+    await pumpTab(tester, ['alpha +x', 'beta']);
+    await tester.tap(find.byKey(const Key('todo-row-open-1')));
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.sendKeyEvent(LogicalKeyboardKey.f2);
+    await tester.pump();
+    expect(find.byKey(const Key('tree-rename-field')), findsOne);
+
+    // The filter takes `beta` out of the list: its field goes with it.
+    view.toggleToken('+x');
+    await settle(tester);
+    expect(find.text('beta'), findsNothing);
+    expect(find.byKey(const Key('tree-rename-field')), findsNothing);
+
+    // Back in the list it is a row again, not a field nobody sees.
+    view.clearFilters();
+    await settle(tester);
+    expect(find.text('beta'), findsOne);
+    expect(find.byKey(const Key('tree-rename-field')), findsNothing);
+  });
+
+  testWidgets('a reveal brings the edge facing the selection into view '
+      '(#909, #1028)', (tester) async {
+    await pumpTab(tester, [for (var i = 0; i < 60; i++) 'task $i']);
+    final list = find.byKey(const Key('todo-list'));
+    Rect rowAt(int line) => tester.getRect(
+      find.byKey(Key('todo-row-open-$line'), skipOffstage: false),
+    );
+    final box = tester.getRect(list);
+
+    await tester.tap(row0);
+    await tester.pump(const Duration(milliseconds: 500));
+    for (var line = 1; line <= 30; line++) {
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pumpAndSettle();
+    }
+    // Moving down past the bottom edge, the row's bottom meets it.
+    expect(rowAt(30).bottom, closeTo(box.bottom, 0.5));
+
+    // The wheel took the list up, so the selected row's neighbour above is
+    // under the bottom edge: an arrow up brings the neighbour's bottom in
+    // -- the edge nearest the list -- though the move goes up.
+    await tester.drag(list, const Offset(0, 100));
+    await tester.pumpAndSettle();
+    expect(rowAt(29).top, greaterThan(box.bottom - 0.5), reason: 'below');
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.pumpAndSettle();
+    expect(rowAt(29).bottom, closeTo(box.bottom, 0.5));
+
+    // And the wheel took the list down, so the neighbour below is over the
+    // top edge: an arrow down brings its top in, though the move goes down.
+    await tester.drag(list, Offset(0, -(box.height + 100)));
+    await tester.pumpAndSettle();
+    expect(rowAt(30).bottom, lessThan(box.top + 0.5), reason: 'above');
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pumpAndSettle();
+    expect(rowAt(30).top, closeTo(box.top, 0.5));
+  });
+
   testWidgets('the quick-add field adds a task per Enter and keeps the '
       'cursor', (tester) async {
     await pumpTab(tester, ['old +work']);
