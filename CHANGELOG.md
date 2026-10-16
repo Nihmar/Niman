@@ -6,6 +6,46 @@ This file ships inside the build and feeds the in-app changelog (the
 launch dialog after an update and the screen under Settings → Diagnostics
 and info). Update it in the release commit, before the tag.
 
+## [0.2.2] - 2026-10-16
+
+A faster, steadier read.
+
+Search, the index and the tree bound their cost: a folder is read once a
+revision and a page at a time as the list scrolls, a query stops where it
+should, and the first index says where it is while it runs. Saves keep the
+file's own line endings, byte order mark and the version another program
+wrote — a failed write is held and retried, and a note changed on disk is
+adopted cleanly. The Todo gains sections and filters, a list item's links
+follow, and a link pasted into a field stays a paste.
+
+### Added
+- **The Todo, in sections** (#1003): the list groups by its sort key with a folded state per device, gains a Done section and the filters in its bar, and the Android widget draws the same sections and re-pushes them when the day turns (#1018)
+- **A folder's menu makes the kinds in that folder** (#997), beside the plain note and folder
+- **A search hit opens at its match** (#1045), selected and shown, with the find bar marking the rest
+- **Contains search streams** its hits and progress and can be stopped (#1038), with a pending query's list marked stale and a queued one superseded before it runs
+- **The index says where it is** (#1068): the tree footer, Search, Tags and Links show that the notes are still being read, and the first index reports its progress once the library is ready
+- **A link in a list item follows from the row** (#1094): a Markdown link, a bare address and a wikilink open as they do in the read view, while a tap elsewhere still edits the item
+
+### Changed
+- **The tree** (#1064, #1065, #1066, #1069, #1070, #1071, #1072): a folder is read once a revision and a page at a time as the list scrolls; names are ordered from an index, without case or accents and numbers by value; expanded folders follow a rename, a move and a delete; pinned notes come through a partial index; OCR sidecars nest in linear time; the row menu opens from the keyboard, the Move dialog filters, and a drag at the edge scrolls and opens folders
+- **Search and Go to note** (#1037, #1039, #1043, #1044): the field filter seeks the key and value indexes and reads 500 notes a page with the real count; short word prefixes use a prefix index; ranking is bounded and full words rank over all matches; a new result set starts at the top and Enter opens the first hit; Go to note finds names, aliases and titles through the stem and trigram indexes instead of a scan
+- **Saves and the note on disk** (#1054, #1055, #1056, #1057, #1058, #1059, #1060, #1061): a note is saved with the line ending and byte order mark its file had; the disk stamp comes from the read and the write, not a statSync on the UI isolate; the autosave debounce has a ceiling; a failed save is seen, held and retried; a save keeps the version another program wrote before it overwrites it; a note changed on disk is adopted by every open editor, and a failed load says why and can be retried
+- **Tabs and the workspace** (#1074, #1075, #1076, #1077, #1078, #1081, #1082, #1083): each pane's preview toggle follows its own note; a tab keeps its scroll when its editor is torn down; the memento stores the line at the top, not pixels; the workspace is bound to its library, so the last write at close or switch is kept; a phone keeps at most 30 notes open with a lazy open-notes sheet; Ctrl+Tab and Ctrl+W act on the pinned chip
+- **Links, on a rename or a read** (#1035, #1036, #1040, #1041): a rewrite runs off the op chain with progress; one `[[` read is in flight with the newest ask behind it, and resolution is batched by chunks; a referrer is read a slice at a time up to its first mention; suggestions rank the exact name first and cut the candidates in stem order
+- **Undo, the editor and the read** (#1046, #1048, #1050, #1052, #1053, #1079): history is bounded by text and keeps only the lines an edit changed; a pause, a new word and a bracket pair bound a typing step; consecutive deletes are one step; the spell check's memory is bounded; only the quotes that hold a fence line are followed, and hidden kept-alive slots are not laid out
+- **The index and the library** (#1062, #1063, #1067, #1073): a renamed or moved folder's rows are carried to its new path in place; a paired move asks for no resync; a known library opens from its index and reconciles behind it; the periodic rescan runs one at a time, paced by its own duration
+- **The Todo, its bar and its widget** (#1015, #1024, #1027): the filter pill holds its width at any count; the widget reader skips an entry of a kind it does not know; a multi-row drag over an open note is visibly refused
+
+### Fixed
+- **Capture** (#1093): a link pasted into a text field in the shell stays a paste — the field takes it, and only a paste nothing took opens the web capture dialog
+- **Tree**: marked rows move together, report in past tense what they moved, save once and take one drop at a time (#996, #1012)
+- **Dock**: a pane asked for outside the dock gets its own sheet, not the tags one (#1011); the pane tab strip scrolls by wheel and by drag (#1000); the status row leaves outline and spelling to the panel (#1002)
+- **Links**: Ctrl+click on an embed follows the file on disk before the index (#994, #1010)
+- **Menus**: the kind table reads its labels in the current language (#1013)
+- **Todo**: a failed swipe-delete brings the row back (#1006); a section header counts the rows under it after a cap (#1007); a row menu left open across a publish writes nothing by a stale line (#1009); the filter strip's tail shrinks instead of overflowing (#1022); the widget's error tone rides the payload's theme (#1008)
+- **Editor**: Enter carries a quote on and an empty nested item goes back a level (#1049); the word count counts the text's words, not the Markdown syntax (#1051)
+- **Palette**: Enter waits for the search of the typed text instead of opening a stale note row (#1034)
+
 ## [0.2.1] - 2026-10-15
 
 Flashcards, links, and the rest of the desktop.
