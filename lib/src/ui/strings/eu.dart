@@ -601,11 +601,24 @@ final class BasqueStrings extends Strings {
   @override
   String get noteStatusError => 'Errorea';
   @override
+  String get noteStatusSaveFailed => 'Gorde gabe · saiatu berriro';
+  @override
+  String get noteSaveFailedSnack =>
+      'Ezin izan da oharra gorde. Nimanek berriro saiatuko da.';
+  @override
   String get noteNotText =>
       'Fitxategi hau ez da testu-ohar bat, beraz '
       'Nimanek ezin du hemen erakutsi.';
   @override
   String get noteLoadFailed => 'Ezin izan da ohar hau ireki.';
+  @override
+  String get noteLoadMissing => 'Ohar honen fitxategia ez dago jada diskoan.';
+  @override
+  String get noteLoadDenied => 'Nimanek ez du ohar hau irakurtzeko baimenik.';
+  @override
+  String get noteLoadLocked =>
+      'Beste programa batek ohar hau erabiltzen ari da. Saiatu berriro une '
+      'batean.';
   @override
   String wordCount(int count) => '$count hitz';
   @override
@@ -950,6 +963,11 @@ final class BasqueStrings extends Strings {
       'Oraindik ez dago hona estekatzen duen oharrik';
   @override
   String get linksToNoteEmbed => 'txertatua';
+  @override
+  String get linksToNoteFurther => 'Beherago aipatua';
+  @override
+  String linksUpdating(int done, int total) =>
+      'Estekak eguneratzen: $done / $total';
   @override
   String get openLinkFailed => 'Ezin izan da esteka ireki';
 
@@ -2059,6 +2077,8 @@ final class BasqueStrings extends Strings {
   String get folderPickerNewFolder => 'Karpeta berria';
   @override
   String get folderPickerEmpty => 'Oraindik ez dago karpetarik';
+  @override
+  String get folderPickerFilter => 'Iragazi karpetak';
   @override
   String get listFolderTitle => 'Zerrenda-biltegia';
   @override

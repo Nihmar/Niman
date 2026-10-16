@@ -6,6 +6,7 @@ import 'package:niman/src/core/lru_cache.dart';
 import 'package:niman/src/db/dao.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/links/index_changes.dart';
+import 'package:niman/src/links/link_spot_slices.dart';
 import 'package:niman/src/links/mentions.dart';
 import 'package:niman/src/links/resolver.dart';
 
@@ -27,18 +28,23 @@ abstract interface class MentionSource implements IndexChanges {
 /// [MentionSource] over the `note_links` edges and the referrers' files.
 final class MentionReader implements MentionSource {
   /// Reads the edges of [_db], finds mentions with [_resolver] in the links
-  /// [_readSpots] gives for a note (off the UI isolate; null reads none), and
-  /// forwards the library's [_changes].
+  /// [_readSpots] gives for a slice of a note (off the UI isolate; null reads
+  /// none), and forwards the library's [_changes].
   new(this._db, this._resolver, {this._readSpots, this._changes});
 
   final IndexDatabase _db;
   final LinkResolver _resolver;
-  final Future<List<LinkSpot>?> Function(String path)? _readSpots;
+  final Future<SpotSlice?> Function(String path, SpotCursor from)? _readSpots;
   final Stream<void>? _changes;
 
   /// How many mentions are kept: a list scrolled through a long way, once
   /// each, and no more than this many.
   static const int kept = 256;
+
+  /// How much of a referrer is read looking for its first mention (#1040):
+  /// past it the row says the mention is further down rather than reading a
+  /// novel-length note to its end for one line.
+  static const int byteBudget = 8 * 1024 * 1024;
 
   /// How many referrers one page of the notes that link to a note holds.
   static const int referrersShown = 200;
@@ -95,8 +101,42 @@ final class MentionReader implements MentionSource {
     final key = (referrer.id, target.id, referrer.modified, referrer.size);
     final kept = _mentions[key];
     if (kept != null) return kept;
-    final spots = await read(referrerPath);
-    if (spots == null) return Mention.unread;
+    final mention = await _firstMention(read, referrerPath, target.id);
+    if (mention != null) _mentions[key] = mention;
+    return mention ?? Mention.unread;
+  }
+
+  /// The first mention of the note [targetId] in [referrerPath], read a
+  /// slice at a time and no further than [byteBudget] (#1040); null when a
+  /// slice could not be read.
+  Future<Mention?> _firstMention(
+    Future<SpotSlice?> Function(String path, SpotCursor from) read,
+    String referrerPath,
+    int targetId,
+  ) async {
+    var cursor = spotCursorStart;
+    while (true) {
+      final slice = await read(referrerPath, cursor);
+      if (slice == null) return null;
+      final found = await _firstNaming(slice.spots, referrerPath, targetId);
+      if (found != null) {
+        return Mention(context: found.context, embed: found.embed);
+      }
+      final next = slice.next;
+      if (next == null) return Mention.unread;
+      if (next.offset >= byteBudget) return Mention.furtherDown;
+      cursor = next;
+    }
+  }
+
+  /// The spot among [spots] to show for the note [targetId]: the first link
+  /// that resolves to it, else the first embed that does; null when none.
+  Future<LinkSpot?> _firstNaming(
+    List<LinkSpot> spots,
+    String referrerPath,
+    int targetId,
+  ) async {
+    if (spots.isEmpty) return null;
     final resolved = await _resolver.resolveQueries({
       for (final spot in spots)
         (target: spot.target, from: referrerPath, markdown: spot.markdown),
@@ -108,21 +148,11 @@ final class MentionReader implements MentionSource {
               from: referrerPath,
               markdown: spot.markdown,
             )]
-            case ResolvedNote(:final note) when note.id == target.id)
+            case ResolvedNote(:final note) when note.id == targetId)
           spot,
     ];
-    final Mention mention;
-    if (named.isEmpty) {
-      mention = Mention.unread;
-    } else {
-      // A link shows the referrer before an embed does.
-      final shown = named.firstWhere(
-        (s) => !s.embed,
-        orElse: () => named.first,
-      );
-      mention = Mention(context: shown.context, embed: shown.embed);
-    }
-    _mentions[key] = mention;
-    return mention;
+    if (named.isEmpty) return null;
+    // A link shows the referrer before an embed does.
+    return named.firstWhere((s) => !s.embed, orElse: () => named.first);
   }
 }

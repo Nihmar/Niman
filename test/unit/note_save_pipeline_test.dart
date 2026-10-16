@@ -6,10 +6,14 @@ import 'dart:convert';
 
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/files.dart';
+import 'package:niman/src/library/note_save_result.dart';
 import 'package:niman/src/library/note_write_stream.dart';
+import 'package:niman/src/markdown/note_framing.dart';
 import 'package:niman/src/markdown/note_references.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/ui/note_save_pipeline.dart';
+import 'package:niman/src/ui/unsaved_notes.dart';
 import 'package:path/path.dart' as p;
 
 /// One write the pipeline asked for.
@@ -18,31 +22,49 @@ typedef Write = ({String path, String text, int session});
 /// A pipeline over a buffer the test edits, with writes it holds open until
 /// the test lets them go.
 final class Harness {
-  new({this.streaming = false, this.loaded = true}) {
+  new({this.streaming = false, this.loaded = true, this.tracker}) {
     pipeline = NoteSavePipeline(
       notePath: () => path,
       ready: () => loaded,
       text: () => buffer.text,
       buffer: () => buffer,
       references: () => references,
+      framing: () => framing,
       saveNote: () => streaming ? null : _save,
       writeNote: () => null,
       saveNoteStream: () => streaming ? _saveStream : null,
-      onSaved: saved.add,
+      onSaved: (path, stamp) {
+        saved.add(path);
+        stamps.add(stamp);
+      },
       onSettled: () => settled++,
+      hold: tracker?.hold,
     );
   }
+
+  /// The app-wide registry of unsaved notes the pipeline holds its outgoing
+  /// writes in, when the test has one.
+  final UnsavedTracker? tracker;
 
   final bool streaming;
   bool loaded;
   String path = p.join('lib', 'a.md');
   SourceBuffer buffer = SourceBuffer.fromText('one\n');
   NoteReferences? references;
+
+  /// What the note's file wraps its text in.
+  NoteFraming framing = NoteFraming.plain;
   late final NoteSavePipeline pipeline;
 
   final List<Write> writes = [];
   final List<NoteReferences?> streamedReferences = [];
   final List<String> saved = [];
+
+  /// What each save reported of the file it left, in order.
+  final List<DiskStamp?> stamps = [];
+
+  /// What the writers answer with: the file the write left.
+  DiskStamp? leaves;
   int settled = 0;
 
   /// Writes wait on these, in order, while [hold] is set.
@@ -71,16 +93,17 @@ final class Harness {
     await gate.future;
   }
 
-  Future<void> _save(
+  Future<NoteSaveResult?> _save(
     String path,
     String content, {
     required int editSession,
   }) async {
     await _gate();
     writes.add((path: path, text: content, session: editSession));
+    return NoteSaveResult(stamp: leaves);
   }
 
-  Future<void> _saveStream(
+  Future<NoteSaveResult?> _saveStream(
     String path,
     NoteContentProducer content, {
     required int editSession,
@@ -96,6 +119,7 @@ final class Harness {
     }
     streamedReferences.add(references);
     writes.add((path: path, text: utf8.decode(bytes), session: editSession));
+    return NoteSaveResult(stamp: leaves);
   }
 
   void dispose() => pipeline.cancel();
@@ -121,6 +145,23 @@ void main() {
     expect(pipeline.lastSavedRevision, pipeline.revision);
     expect(harness.saved, [harness.path]);
     expect(harness.settled, 1);
+  });
+
+  test('a save reports the stamp of the file the write left (#1060)', () async {
+    final stamp = DiskStamp(size: 4, modified: DateTime(2026, 10, 16, 9));
+    harness = Harness()
+      ..leaves = stamp
+      ..edit('two\n');
+    await harness.pipeline.save();
+    expect(harness.stamps, [stamp]);
+
+    // A streamed save answers the same way.
+    harness.dispose();
+    harness = Harness(streaming: true)
+      ..leaves = stamp
+      ..edit('three\n');
+    await harness.pipeline.save();
+    expect(harness.stamps, [stamp]);
   });
 
   test('a clean note is not written', () async {
@@ -319,6 +360,225 @@ void main() {
       expect(harness.writes.map((w) => w.text), ['two\n', 'TWO\n']);
     },
   );
+
+  group('the debounce has a ceiling (#1057)', () {
+    /// Edits every [gap] for [total], and answers when each save landed.
+    List<Duration> editThrough(
+      FakeAsync async, {
+      required Duration gap,
+      required Duration total,
+      String filler = '',
+    }) {
+      final landed = <Duration>[];
+      var seen = 0;
+      var i = 0;
+      while (async.elapsed < total) {
+        harness.edit('$filler${i++}\n');
+        async
+          ..elapse(gap)
+          ..flushMicrotasks();
+        while (seen < harness.writes.length) {
+          landed.add(async.elapsed);
+          seen++;
+        }
+      }
+      return landed;
+    }
+
+    test('typing with gaps shorter than the debounce still saves', () {
+      fakeAsync((async) {
+        harness = Harness();
+        final landed = editThrough(
+          async,
+          gap: const Duration(milliseconds: 400),
+          total: const Duration(seconds: 12),
+        );
+        // The debounce (half a second) never ran out; the ceiling did, five
+        // seconds after the first unsaved edit, and again five after the next.
+        expect(landed.first, lessThanOrEqualTo(const Duration(seconds: 6)));
+        expect(landed.length, greaterThanOrEqualTo(2));
+        expect(
+          harness.writes.last.text,
+          isNot(harness.writes.first.text),
+          reason: 'each save took the text as it stood',
+        );
+      });
+    });
+
+    test('a big note waits longer between saves, but not for ever', () {
+      fakeAsync((async) {
+        harness = Harness();
+        final filler = 'x' * (3 << 20);
+        final landed = editThrough(
+          async,
+          gap: const Duration(milliseconds: 1500),
+          total: const Duration(seconds: 45),
+          filler: filler,
+        );
+        // Over 2 MiB the debounce is two seconds, which gaps of one and a
+        // half never reach; the ceiling is twenty.
+        expect(landed.first, greaterThan(const Duration(seconds: 15)));
+        expect(landed.first, lessThanOrEqualTo(const Duration(seconds: 22)));
+        expect(landed.length, 2);
+      });
+    });
+
+    test('a save restarts the ceiling for the edits after it', () {
+      fakeAsync((async) {
+        harness = Harness()..edit('one\n');
+        async
+          ..elapse(const Duration(milliseconds: 500))
+          ..flushMicrotasks();
+        expect(harness.writes, hasLength(1));
+        // Four seconds of quiet, then one edit: its own five seconds start
+        // here, not at the first edit.
+        async.elapse(const Duration(seconds: 4));
+        harness.edit('two\n');
+        for (var i = 0; i < 12; i++) {
+          async
+            ..elapse(const Duration(milliseconds: 400))
+            ..flushMicrotasks();
+          harness.edit('two $i\n');
+        }
+        // 4.8 s of edits since: not yet.
+        expect(harness.writes, hasLength(1));
+        async
+          ..elapse(const Duration(milliseconds: 400))
+          ..flushMicrotasks();
+        expect(harness.writes, hasLength(2));
+      });
+    });
+  });
+
+  group('a save that fails (#1054)', () {
+    test(
+      'is recorded, tried again after a wait, and forgotten once it lands',
+      () {
+        fakeAsync((async) {
+          harness = Harness()
+            ..failWith = StateError('disk full')
+            ..edit('two\n');
+          final failure = harness.pipeline.failure;
+          async
+            ..elapse(const Duration(milliseconds: 500))
+            ..flushMicrotasks();
+          expect(failure.value!.attempts, 1);
+          expect(harness.pipeline.dirty, isTrue);
+          // Nothing escaped as an uncaught async error: the zone would have
+          // failed this test.
+
+          async
+            ..elapse(const Duration(seconds: 2))
+            ..flushMicrotasks();
+          expect(failure.value!.attempts, 2, reason: 'retried after 2 s');
+          async
+            ..elapse(const Duration(seconds: 4))
+            ..flushMicrotasks();
+          expect(failure.value!.attempts, 2, reason: 'the next wait is 5 s');
+
+          harness.failWith = null;
+          async
+            ..elapse(const Duration(seconds: 1))
+            ..flushMicrotasks();
+          expect(failure.value, isNull);
+          expect(harness.pipeline.dirty, isFalse);
+          expect(harness.writes.single.text, 'two\n');
+        });
+      },
+    );
+
+    test('the retries stop after the schedule, and an edit tries at once', () {
+      fakeAsync((async) {
+        harness = Harness()
+          ..failWith = StateError('gone')
+          ..edit('two\n');
+        async
+          ..elapse(const Duration(minutes: 5))
+          ..flushMicrotasks();
+        expect(harness.pipeline.failure.value!.attempts, 4);
+
+        harness
+          ..failWith = null
+          ..edit('three\n');
+        async
+          ..elapse(const Duration(milliseconds: 500))
+          ..flushMicrotasks();
+        expect(harness.pipeline.failure.value, isNull);
+        expect(harness.writes.single.text, 'three\n');
+      });
+    });
+
+    test('an awaited save still reports its error', () async {
+      harness = Harness()
+        ..failWith = StateError('no space')
+        ..edit('two\n');
+      await expectLater(harness.pipeline.save(), throwsStateError);
+      expect(harness.pipeline.failure.value!.attempts, 1);
+    });
+  });
+
+  group('a note leaving the editor (#1061, #1054)', () {
+    test('its write in flight is visible to the close guard', () async {
+      final tracker = UnsavedTracker();
+      harness = Harness(tracker: tracker)
+        ..hold = true
+        ..edit('two\n');
+      final done = harness.pipeline.saveOutgoing(harness.path);
+      await pumpEventQueue();
+      // The editor now reads the note as saved: another one loads over it.
+      harness.pipeline.markClean();
+      expect(tracker.hasUnsaved, isTrue);
+      expect(tracker.unsavedPaths, [harness.path]);
+
+      var allSaved = false;
+      unawaited(tracker.saveAll().then((_) => allSaved = true));
+      await pumpEventQueue();
+      expect(allSaved, isFalse, reason: 'the write has not landed');
+
+      await harness.release();
+      await done;
+      await pumpEventQueue();
+      expect(allSaved, isTrue);
+      expect(tracker.hasUnsaved, isFalse);
+      expect(harness.writes.single.text, 'two\n');
+    });
+
+    test('a write that fails keeps its text until a retry lands', () async {
+      final tracker = UnsavedTracker();
+      harness = Harness(tracker: tracker)
+        ..failWith = StateError('card removed')
+        ..edit('two\n');
+      await expectLater(
+        harness.pipeline.saveOutgoing(harness.path),
+        throwsStateError,
+      );
+      harness.pipeline.markClean();
+
+      expect(tracker.hasUnsaved, isTrue);
+      expect(tracker.unsavedTextOf(harness.path), 'two\n');
+      await expectLater(tracker.saveAll(), throwsStateError);
+      expect(tracker.unsavedTextOf(harness.path), 'two\n');
+
+      harness.failWith = null;
+      await tracker.saveAll();
+      expect(tracker.hasUnsaved, isFalse);
+      expect(harness.writes.single.text, 'two\n');
+    });
+
+    test('a closed editor leaves its write to the registry', () async {
+      final tracker = UnsavedTracker();
+      harness = Harness(tracker: tracker, streaming: true)
+        ..hold = true
+        ..edit('two\n');
+      final done = harness.pipeline.close();
+      await pumpEventQueue();
+      expect(tracker.hasUnsaved, isTrue);
+      await harness.release();
+      await done;
+      expect(tracker.hasUnsaved, isFalse);
+      expect(harness.writes.single.text, 'two\n');
+    });
+  });
 
   test('an edit schedules its own save', () {
     fakeAsync((async) {

@@ -603,10 +603,22 @@ final class CzechStrings extends Strings {
   @override
   String get noteStatusError => 'Chyba';
   @override
+  String get noteStatusSaveFailed => 'Neuloženo · zkusit znovu';
+  @override
+  String get noteSaveFailedSnack =>
+      'Poznámku se nepodařilo uložit. Niman to zkusí znovu.';
+  @override
   String get noteNotText =>
       'Tento soubor není textová poznámka, proto ho Niman nemůže zobrazit zde.';
   @override
   String get noteLoadFailed => 'Tuto poznámku se nepodařilo otevřít.';
+  @override
+  String get noteLoadMissing => 'Soubor této poznámky už na disku není.';
+  @override
+  String get noteLoadDenied => 'Niman nemá oprávnění tuto poznámku číst.';
+  @override
+  String get noteLoadLocked =>
+      'Tuto poznámku právě používá jiný program. Zkuste to za chvíli znovu.';
   @override
   String wordCount(int count) => switch (count) {
     1 => '1 slovo',
@@ -950,6 +962,11 @@ final class CzechStrings extends Strings {
   String get linksToNoteEmpty => 'Zatím sem žádná poznámka neodkazuje';
   @override
   String get linksToNoteEmbed => 'vložená';
+  @override
+  String get linksToNoteFurther => 'Zmíněno dále';
+  @override
+  String linksUpdating(int done, int total) =>
+      'Aktualizace odkazů: $done z $total';
   @override
   String get openLinkFailed => 'Odkaz se nepodařilo otevřít';
 
@@ -2038,6 +2055,8 @@ final class CzechStrings extends Strings {
   String get folderPickerNewFolder => 'Nová složka';
   @override
   String get folderPickerEmpty => 'Zatím žádné složky';
+  @override
+  String get folderPickerFilter => 'Filtrovat složky';
   @override
   String get listFolderTitle => 'Složka seznamů';
   @override

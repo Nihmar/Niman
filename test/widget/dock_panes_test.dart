@@ -64,6 +64,9 @@ final class _Note implements NoteViewHandle {
   void openFind({bool replace = false}) {}
 
   @override
+  void takeFocus() {}
+
+  @override
   String get notePath => 'Celestia.md';
 
   @override

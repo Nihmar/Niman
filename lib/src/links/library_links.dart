@@ -11,6 +11,7 @@ library;
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/links/dead_link_checker.dart';
 import 'package:niman/src/links/link_preview.dart';
+import 'package:niman/src/links/link_spot_slices.dart';
 import 'package:niman/src/links/mention_reader.dart';
 import 'package:niman/src/links/mentions.dart';
 import 'package:niman/src/links/preview_reader.dart';
@@ -29,7 +30,7 @@ final class IndexLibraryLinks implements LibraryLinks {
   factory(
     IndexDatabase db, {
     Stream<void>? changes,
-    Future<List<LinkSpot>?> Function(String path)? readSpots,
+    Future<SpotSlice?> Function(String path, SpotCursor from)? readSpots,
     Future<NotePreviewText?> Function(String path)? readPreview,
   }) {
     final resolver = LinkResolver(db);

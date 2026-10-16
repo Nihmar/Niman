@@ -1415,6 +1415,10 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     return (line: line, fraction: into.clamp(0.0, 1.0));
   }
 
+  /// Whether the view has the note drawn to show an anchor in ([showAnchor]):
+  /// it is laid out and holds lines.
+  bool get acceptsAnchor => _scroll.hasClients && lineCount > 0;
+
   /// Scrolls the view so [anchor]'s line is at its top, as far into it as
   /// the anchor says; the caret stays where it is. The rows it lands among
   /// may be estimates — a switch of mode draws every row anew — so it looks

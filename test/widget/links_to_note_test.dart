@@ -60,6 +60,9 @@ final class _Note implements NoteViewHandle {
   void openFind({bool replace = false}) {}
 
   @override
+  void takeFocus() {}
+
+  @override
   Future<String?> resolveEmbed(String target) async => null;
 }
 

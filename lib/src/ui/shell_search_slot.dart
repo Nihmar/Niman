@@ -15,6 +15,7 @@ import 'package:niman/src/ui/search_request.dart';
 import 'package:niman/src/ui/search_screen.dart';
 import 'package:niman/src/ui/search_task_events.dart';
 import 'package:niman/src/ui/tags_screen.dart';
+import 'package:niman/src/ui/unsaved_notes.dart';
 
 /// Search, with Tags flipping in over it.
 final class SearchSlot extends StatefulWidget {
@@ -30,6 +31,7 @@ final class SearchSlot extends StatefulWidget {
     this.onOpenTaskEvent,
     this.eventTimesClock = false,
     this.hitOpens,
+    this.unsavedTracker,
     super.key,
   });
 
@@ -59,6 +61,9 @@ final class SearchSlot extends StatefulWidget {
 
   /// See [SearchScreen.hitOpens].
   final SearchHitOpens? hitOpens;
+
+  /// See [SearchScreen.unsavedTracker].
+  final UnsavedTracker? unsavedTracker;
 
   /// Whether Tags draws the wide sidebar's collapsible tree (#712);
   /// false keeps the phone's drill-down.
@@ -131,6 +136,7 @@ final class _SearchSlotState extends State<SearchSlot> {
               onOpenTaskEvent: widget.onOpenTaskEvent,
               eventTimesClock: widget.eventTimesClock,
               hitOpens: widget.hitOpens,
+              unsavedTracker: widget.unsavedTracker,
               onOpenTags: () => setState(() {
                 _showTags = true;
                 _tagsVisited = true;

@@ -4,6 +4,7 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/files.dart';
 import 'package:niman/src/editor/word_count.dart';
 import 'package:niman/src/editor/word_count_index.dart';
 import 'package:niman/src/markdown/note_bytes.dart';
@@ -68,7 +69,10 @@ void main() {
       // note ops, the index, the widget and export decode.
       expect(note.text, decodeNoteText(<int>[0x63, 0x61, 0x66, 0xE9, 0x0A]));
       // The reload path reads the same file the same way.
-      expect(await readNoteText(file.path), 'caf\u00E9\n');
+      expect(
+        (await readNoteText(file.path) as NoteTextRead).text,
+        'caf\u00E9\n',
+      );
     },
   );
 
@@ -104,7 +108,7 @@ void main() {
       final loaded = await loadNote(file.path);
       expect(loaded, isA<LoadedNote>());
       expect((loaded as LoadedNote).text, text);
-      expect(await readNoteText(file.path), text);
+      expect((await readNoteText(file.path) as NoteTextRead).text, text);
     },
   );
 
@@ -137,8 +141,54 @@ void main() {
     expect(noteBytesNativeDecodes - decodes, 1, reason: 'the loader');
 
     decodes = noteBytesNativeDecodes;
-    expect(readNoteTextSync(file.path), '# Title\n\nwords in città\n');
+    expect(
+      (readNoteTextSync(file.path) as NoteTextRead).text,
+      '# Title\n\nwords in città\n',
+    );
     expect(noteBytesNativeDecodes - decodes, 1, reason: 'the reload path');
+  });
+
+  test('the stamp is the file as it was before the read (#1060)', () {
+    // A change landing while the note is being read: the stamp must not be
+    // of the new file, or the note on screen — the old text — would count as
+    // unchanged and never be reloaded.
+    final file = File(p.join(dir.path, 'racing.md'))
+      ..writeAsStringSync('the text that was read');
+    final before = DiskStamp.of(file.path)!;
+    List<int> readWhileItChanges(String path) {
+      final bytes = File(path).readAsBytesSync();
+      File(path).writeAsStringSync('the text that was read, and then more');
+      return bytes;
+    }
+
+    final loaded =
+        loadNoteSync(file.path, readBytes: readWhileItChanges) as LoadedNote;
+    expect(loaded.text, 'the text that was read');
+    expect(loaded.stamp!.sameAs(before), isTrue);
+    expect(loaded.stamp!.matches(file.path), isFalse, reason: 'the file moved');
+
+    file.writeAsStringSync('the text that was read');
+    final reread = readNoteTextSync(
+      file.path,
+      readBytes: readWhileItChanges,
+    ) as NoteTextRead;
+    expect(reread.text, 'the text that was read');
+    expect(reread.stamp!.matches(file.path), isFalse);
+  });
+
+  test('a file that cannot be read is a failure that says why (#1059)', () {
+    final gone = p.join(dir.path, 'gone.md');
+    for (final read in [loadNoteSync, readNoteTextSync]) {
+      final failure = read(gone);
+      expect(failure, isA<NoteReadFailure>());
+      expect((failure as NoteReadFailure).reason, NoteReadReason.missing);
+      expect(failure.notText, isFalse);
+    }
+    // A directory in the note's place: neither missing nor text.
+    final folder = Directory(p.join(dir.path, 'folder.md'))..createSync();
+    final failure = loadNoteSync(folder.path);
+    expect(failure, isA<NoteReadFailure>());
+    expect((failure as NoteReadFailure).notText, isFalse);
   });
 
   test('line endings are made LF, and an LF note is left as it is', () {

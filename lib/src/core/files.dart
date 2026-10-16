@@ -123,22 +123,48 @@ void pinWorkingDirectory(Directory directory) {
 /// Writes [data] to [file] atomically.
 ///
 /// Bytes are first written to a temporary file in the same directory,
-/// which is then renamed over [file]. A rename within one filesystem is
-/// atomic on Android and Linux, so readers never observe a partial write.
-/// On Windows [file]'s creation time is carried onto the temp file first,
-/// or the rename would make it the temp's (#759).
+/// which is then published over [file] ([publishTempFile]): flushed to
+/// storage, then renamed. A rename within one filesystem is atomic on
+/// Android and Linux, so readers never observe a partial write.
 Future<void> writeFileAtomically(File file, List<int> data) async {
   final tmp = atomicTempPath(file, DateTime.now().microsecondsSinceEpoch);
   try {
-    await tmp.writeAsBytes(data, flush: true);
-    keepCreationTime(target: file.path, replacement: tmp.path);
-    await tmp.rename(file.path);
+    await tmp.writeAsBytes(data);
+    await publishTempFile(tmp, file.path);
   } catch (_) {
     if (tmp.existsSync()) {
       await tmp.delete();
     }
     rethrow;
   }
+}
+
+/// Makes the finished temp file [temp] the file at [target]: the last step
+/// of every atomic write, shared by [writeFileAtomically] and the streaming
+/// note writer (#1058) so the two cannot drift apart again.
+///
+/// The temp file is flushed to storage **before** the rename. A rename is
+/// atomic as to what a reader sees, not as to what survives a power cut: on a
+/// file system that does not order the data before the rename, a crash after
+/// it can bring [target] back empty or truncated, in place of the good copy
+/// it replaced. The flush is what makes the new bytes durable before they
+/// become the file.
+///
+/// On Windows [target]'s creation time is carried onto the temp file first,
+/// or the rename would make it the temp's (#759). The temp file stays where
+/// it is when this throws; the caller deletes it.
+Future<void> publishTempFile(File temp, String target) async {
+  // Opened for appending, which writes nothing: the flush covers the file's
+  // data whichever handle wrote it (fsync on Linux and Android,
+  // FlushFileBuffers on Windows).
+  final handle = await temp.open(mode: FileMode.append);
+  try {
+    await handle.flush();
+  } finally {
+    await handle.close();
+  }
+  keepCreationTime(target: target, replacement: temp.path);
+  await temp.rename(target);
 }
 
 /// Whether [name] (a base name) is the temp file of a write: the atomic
@@ -680,16 +706,33 @@ final class DiskStamp {
     }
   }
 
-  /// Whether the file at [path] is still the one this stamped.
+  /// [of], asked of the file system without blocking this isolate: the
+  /// stat runs on the I/O threads. What the UI isolate asks with — a
+  /// `statSync` there is a FUSE round trip per call on Android (#1060).
+  static Future<DiskStamp?> ofAsync(String path) async {
+    try {
+      final stat = await FileStat.stat(path);
+      if (stat.type == FileSystemEntityType.notFound) return null;
+      return DiskStamp(size: stat.size, modified: stat.modified);
+    } on Object {
+      return null;
+    }
+  }
+
+  /// Whether [other] is the same size and time as this stamp.
   ///
   /// Size and time together: a write that lands in the same second and
   /// changes the size is caught by the size, and one that keeps the size is
   /// caught by the time. A file whose bytes changed with both unchanged is
   /// the one case this cannot see, and no watcher reports it either.
-  bool matches(String path) {
-    final now = DiskStamp.of(path);
-    return now != null &&
-        now.size == size &&
-        now.modified.millisecondsSinceEpoch == modified.millisecondsSinceEpoch;
-  }
+  bool sameAs(DiskStamp? other) =>
+      other != null &&
+      other.size == size &&
+      other.modified.millisecondsSinceEpoch == modified.millisecondsSinceEpoch;
+
+  /// Whether the file at [path] is still the one this stamped.
+  bool matches(String path) => sameAs(DiskStamp.of(path));
+
+  /// [matches], without blocking this isolate (see [ofAsync]).
+  Future<bool> matchesAsync(String path) async => sameAs(await ofAsync(path));
 }

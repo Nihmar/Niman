@@ -87,6 +87,12 @@ abstract interface class NoteViewHandle {
   /// not on screen.
   void openFind({bool replace = false});
 
+  /// Puts the keyboard in the note: the editor's caret, or the read pane's
+  /// keys in the preview. A note still loading takes it as it appears. The
+  /// deck asks it of the note that comes on stage when the keyboard was in
+  /// the one that left (#1074).
+  void takeFocus();
+
   /// The path of the note on screen, as the shell gave it.
   String get notePath;
 

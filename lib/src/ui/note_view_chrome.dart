@@ -88,6 +88,7 @@ final class NoteStatusRow extends StatelessWidget {
     this.typewriter = false,
     this.templateProblems = 0,
     this.onToggleTypewriter,
+    this.onStatusTap,
     super.key,
   });
 
@@ -125,6 +126,10 @@ final class NoteStatusRow extends StatelessWidget {
 
   /// Extra actions after the status text.
   final List<Widget> statusActions;
+
+  /// What a tap on the status text does, or null for none: when a save has
+  /// failed (#1054) it tries again.
+  final VoidCallback? onStatusTap;
 
   /// Opens the outline sheet; a pointer's menu grows from the button's
   /// place, handed over.
@@ -348,7 +353,14 @@ final class NoteStatusRow extends StatelessWidget {
           ),
           const SizedBox(width: 10),
         ],
-        Text(statusText, style: labelStyle),
+        if (onStatusTap case final tap?)
+          InkWell(
+            key: const Key('note-status-retry'),
+            onTap: tap,
+            child: Text(statusText, style: labelStyle),
+          )
+        else
+          Text(statusText, style: labelStyle),
         for (final action in statusActions) ...[
           const SizedBox(width: 6),
           action,

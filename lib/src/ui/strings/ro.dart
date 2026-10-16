@@ -612,10 +612,24 @@ final class RomanianStrings extends Strings {
   @override
   String get noteStatusError => 'Eroare';
   @override
+  String get noteStatusSaveFailed => 'Nesalvată · încearcă din nou';
+  @override
+  String get noteSaveFailedSnack =>
+      'Nota nu a putut fi salvată. Niman va încerca din nou.';
+  @override
   String get noteNotText =>
       'Acest fișier nu este o notă text, așa că Niman nu îl poate afișa aici.';
   @override
   String get noteLoadFailed => 'Această notă nu a putut fi deschisă.';
+  @override
+  String get noteLoadMissing => 'Fișierul acestei note nu mai este pe disc.';
+  @override
+  String get noteLoadDenied =>
+      'Niman nu are permisiunea de a citi această notă.';
+  @override
+  String get noteLoadLocked =>
+      'Un alt program folosește această notă. Încearcă din nou peste un '
+      'moment.';
   @override
   String wordCount(int count) => count == 1
       ? '1 cuvânt'
@@ -961,6 +975,11 @@ final class RomanianStrings extends Strings {
   String get linksToNoteEmpty => 'Nicio notă nu trimite încă aici';
   @override
   String get linksToNoteEmbed => 'încorporată';
+  @override
+  String get linksToNoteFurther => 'Menționată mai jos';
+  @override
+  String linksUpdating(int done, int total) =>
+      'Se actualizează linkurile: $done din $total';
   @override
   String get openLinkFailed => 'Linkul nu a putut fi deschis';
 
@@ -2063,6 +2082,8 @@ final class RomanianStrings extends Strings {
   String get folderPickerNewFolder => 'Dosar nou';
   @override
   String get folderPickerEmpty => 'Niciun dosar încă';
+  @override
+  String get folderPickerFilter => 'Filtrează dosarele';
   @override
   String get listFolderTitle => 'Dosar de liste';
   @override

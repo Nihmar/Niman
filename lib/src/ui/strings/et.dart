@@ -598,10 +598,22 @@ final class EstonianStrings extends Strings {
   @override
   String get noteStatusError => 'Viga';
   @override
+  String get noteStatusSaveFailed => 'Pole salvestatud · proovi uuesti';
+  @override
+  String get noteSaveFailedSnack =>
+      'Märget ei õnnestunud salvestada. Niman proovib uuesti.';
+  @override
   String get noteNotText =>
       'See fail ei ole tekstimärge, seega ei saa Niman seda siin näidata.';
   @override
   String get noteLoadFailed => 'Seda märget ei õnnestunud avada.';
+  @override
+  String get noteLoadMissing => 'Selle märke faili pole enam kettal.';
+  @override
+  String get noteLoadDenied => 'Nimanil pole luba seda märget lugeda.';
+  @override
+  String get noteLoadLocked =>
+      'Teine programm kasutab seda märget. Proovi hetke pärast uuesti.';
   @override
   String wordCount(int count) => '$count sõna';
   @override
@@ -942,6 +954,11 @@ final class EstonianStrings extends Strings {
   String get linksToNoteEmpty => 'Ükski märge ei viita siia veel';
   @override
   String get linksToNoteEmbed => 'manustatud';
+  @override
+  String get linksToNoteFurther => 'Mainitud allpool';
+  @override
+  String linksUpdating(int done, int total) =>
+      'Linkide uuendamine: $done / $total';
   @override
   String get openLinkFailed => 'Viidet ei õnnestunud avada';
 
@@ -2027,6 +2044,8 @@ final class EstonianStrings extends Strings {
   String get folderPickerNewFolder => 'Uus kaust';
   @override
   String get folderPickerEmpty => 'Kaustu pole veel';
+  @override
+  String get folderPickerFilter => 'Filtreeri kaustu';
   @override
   String get listFolderTitle => 'Loetelute kaust';
   @override

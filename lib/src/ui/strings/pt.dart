@@ -606,11 +606,23 @@ final class PortugueseStrings extends Strings {
   @override
   String get noteStatusError => 'Erro';
   @override
+  String get noteStatusSaveFailed => 'Não salva · tentar novamente';
+  @override
+  String get noteSaveFailedSnack =>
+      'Não foi possível salvar a nota. O Niman tentará novamente.';
+  @override
   String get noteNotText =>
       'Este ficheiro não é uma nota de texto, por isso '
       'o Niman não o pode mostrar aqui.';
   @override
   String get noteLoadFailed => 'Não foi possível abrir esta nota.';
+  @override
+  String get noteLoadMissing => 'O arquivo desta nota não está mais no disco.';
+  @override
+  String get noteLoadDenied => 'O Niman não tem permissão para ler esta nota.';
+  @override
+  String get noteLoadLocked =>
+      'Outro programa está usando esta nota. Tente novamente em instantes.';
   @override
   String wordCount(int count) => count == 1 ? '1 palavra' : '$count palavras';
   @override
@@ -953,6 +965,11 @@ final class PortugueseStrings extends Strings {
   String get linksToNoteEmpty => 'Nenhuma nota aponta para cá ainda';
   @override
   String get linksToNoteEmbed => 'incorporada';
+  @override
+  String get linksToNoteFurther => 'Mencionada mais abaixo';
+  @override
+  String linksUpdating(int done, int total) =>
+      'A atualizar ligações: $done de $total';
   @override
   String get openLinkFailed => 'Não foi possível abrir o link';
 
@@ -2060,6 +2077,8 @@ final class PortugueseStrings extends Strings {
   String get folderPickerNewFolder => 'Nova pasta';
   @override
   String get folderPickerEmpty => 'Ainda não há pastas';
+  @override
+  String get folderPickerFilter => 'Filtrar pastas';
   @override
   String get listFolderTitle => 'Pasta de listas';
   @override

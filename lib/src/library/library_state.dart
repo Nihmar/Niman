@@ -63,7 +63,7 @@ import 'package:niman/src/update/update_scheduler.dart';
 import 'package:niman/src/update/update_service.dart';
 import 'package:niman/src/widget/widget_configs.dart';
 import 'package:niman/src/widget/widget_libraries.dart';
-import 'package:niman/src/workspace/workspace.dart';
+import 'package:niman/src/workspace/workspace_slot.dart';
 import 'package:niman/src/workspace/workspace_store.dart';
 import 'package:path/path.dart' as p;
 
@@ -188,6 +188,10 @@ final class LibraryController implements LibrarySession {
   /// the shell holds open on them closes.
   final StreamController<Set<String>> _removals =
       StreamController<Set<String>>.broadcast();
+
+  /// The paths the watcher reported ([externalChanges]).
+  final StreamController<Set<String>> _externalChanges =
+      StreamController<Set<String>>.broadcast();
   final AppLogger _log = const AppLogger(name: 'session');
   int _revision = 0;
   int _treeRevision = 0;
@@ -273,6 +277,9 @@ final class LibraryController implements LibrarySession {
   /// Fires with the library-relative paths a re-index pruned from the tree.
   @override
   Stream<Set<String>> get removals => _removals.stream;
+
+  @override
+  Stream<Set<String>> get externalChanges => _externalChanges.stream;
 
   /// The app's settings database, opened once per session.
   ///
@@ -452,9 +459,9 @@ final class LibraryController implements LibrarySession {
             },
       readSpots: reader == null
           ? null
-          : (path) async {
+          : (path, from) async {
               try {
-                return await reader.noteLinkSpots(path);
+                return await reader.noteLinkSpotSlice(path, from);
               } on Object {
                 return null;
               }
@@ -1088,17 +1095,11 @@ final class LibraryController implements LibrarySession {
   }
 
   @override
-  Future<Workspace> get savedWorkspace async {
+  WorkspaceSlot get workspaceSlot {
     final root = this.root;
-    if (root == null) return Workspace.empty;
-    return await WorkspaceStore(await appDatabase).load(root);
-  }
-
-  @override
-  Future<void> saveWorkspace(Workspace workspace) async {
-    final root = this.root;
-    if (root == null) return;
-    await WorkspaceStore(await appDatabase).save(root, workspace);
+    return root == null
+        ? const NoWorkspaceSlot()
+        : StoredWorkspaceSlot(appDatabase, root);
   }
 
   /// Whether the note editor shows the row-number column.
@@ -1655,6 +1656,9 @@ final class LibraryController implements LibrarySession {
     if (!_removals.isClosed) {
       await _removals.close();
     }
+    if (!_externalChanges.isClosed) {
+      await _externalChanges.close();
+    }
     final appDb = _appDatabase;
     _appDatabase = null;
     if (appDb != null) {
@@ -1764,6 +1768,10 @@ final class LibraryController implements LibrarySession {
       // What changed behind the ops' back (another app, a background
       // isolate, a hand edit) reaches the sync queue this way.
       _sync?.watched(batch.paths, batch.resyncDirs);
+      // And the editors that hold those notes open (#1055).
+      if (batch.paths.isNotEmpty && !_externalChanges.isClosed) {
+        _externalChanges.add(batch.paths.toSet());
+      }
     } on Object catch (error) {
       // Transient watcher errors are covered by the periodic rescan.
       _log.warning('watch batch failed: $error');

@@ -18,6 +18,7 @@
 library;
 
 import 'package:niman/src/links/link_path.dart';
+import 'package:niman/src/links/mention_reader.dart' show MentionReader;
 import 'package:niman/src/links/parser.dart';
 import 'package:niman/src/markdown/note_load.dart' show normalizedLineEndings;
 import 'package:niman/src/markdown/note_references.dart';
@@ -65,11 +66,19 @@ final class Referrers {
 /// What one referrer says about the note it links to.
 final class Mention {
   /// Creates a mention.
-  const new({required this.context, required this.embed});
+  const new({required this.context, required this.embed, this.further = false});
 
   /// The referrer says nothing readable about the note: its text changed
   /// since the index read it, or it cannot be read now.
   static const Mention unread = Mention(context: '', embed: false);
+
+  /// The referrer was read as far as the reader goes and no mention was
+  /// found in what was read: it is further down (#1040).
+  static const Mention furtherDown = Mention(
+    context: '',
+    embed: false,
+    further: true,
+  );
 
   /// The line the first mention is on, trimmed and cut to a row's width,
   /// with the link in it; empty when [unread].
@@ -79,6 +88,10 @@ final class Mention {
   /// is shown there rather than linked. A referrer that links *and* embeds
   /// is shown by its link.
   final bool embed;
+
+  /// Whether the mention lies past what the reader reads of a referrer
+  /// ([MentionReader.byteBudget]); [context] is empty then.
+  final bool further;
 }
 
 /// One link of a note, as the list of mentions reads it: what it targets (as
