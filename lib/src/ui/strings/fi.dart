@@ -604,11 +604,26 @@ final class FinnishStrings extends Strings {
   @override
   String get noteStatusError => 'Virhe';
   @override
+  String get noteStatusSaveFailed => 'Ei tallennettu · yritä uudelleen';
+  @override
+  String get noteSaveFailedSnack =>
+      'Muistiinpanoa ei voitu tallentaa. Niman yrittää uudelleen.';
+  @override
   String get noteNotText =>
       'Tämä tiedosto ei ole tekstimuistiinpano, joten '
       'Niman ei voi näyttää sitä tässä.';
   @override
   String get noteLoadFailed => 'Tätä muistiinpanoa ei voitu avata.';
+  @override
+  String get noteLoadMissing =>
+      'Tämän muistiinpanon tiedostoa ei ole enää levyllä.';
+  @override
+  String get noteLoadDenied =>
+      'Nimanilla ei ole lupaa lukea tätä muistiinpanoa.';
+  @override
+  String get noteLoadLocked =>
+      'Toinen ohjelma käyttää tätä muistiinpanoa. Yritä hetken kuluttua '
+      'uudelleen.';
   @override
   String wordCount(int count) => count == 1 ? '1 sana' : '$count sanaa';
   @override
@@ -951,6 +966,11 @@ final class FinnishStrings extends Strings {
   String get linksToNoteEmpty => 'Mikään muistiinpano ei vielä linkitä tänne';
   @override
   String get linksToNoteEmbed => 'upotettu';
+  @override
+  String get linksToNoteFurther => 'Mainittu alempana';
+  @override
+  String linksUpdating(int done, int total) =>
+      'Päivitetään linkkejä: $done / $total';
   @override
   String get openLinkFailed => 'Linkkiä ei voitu avata';
 
@@ -2060,6 +2080,8 @@ final class FinnishStrings extends Strings {
   String get folderPickerNewFolder => 'Uusi kansio';
   @override
   String get folderPickerEmpty => 'Ei vielä kansiota';
+  @override
+  String get folderPickerFilter => 'Suodata kansioita';
   @override
   String get listFolderTitle => 'Listojen kansio';
   @override

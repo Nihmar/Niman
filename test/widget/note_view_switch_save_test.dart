@@ -105,6 +105,7 @@ void main() {
             }
             disk[path] = saved;
             done.add('$path: $saved');
+            return null;
           },
     );
 

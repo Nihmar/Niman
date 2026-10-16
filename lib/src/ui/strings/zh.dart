@@ -559,9 +559,19 @@ final class ChineseStrings extends Strings {
   @override
   String get noteStatusError => '错误';
   @override
+  String get noteStatusSaveFailed => '未保存 · 重试';
+  @override
+  String get noteSaveFailedSnack => '无法保存此笔记。Niman 将会重试。';
+  @override
   String get noteNotText => '此文件不是文本笔记，因此 Niman 无法在此显示。';
   @override
   String get noteLoadFailed => '无法打开此笔记。';
+  @override
+  String get noteLoadMissing => '此笔记的文件已不在磁盘上。';
+  @override
+  String get noteLoadDenied => 'Niman 无权读取此笔记。';
+  @override
+  String get noteLoadLocked => '另一个程序正在使用此笔记。请稍后再试。';
   @override
   String wordCount(int count) => '$count 词';
   @override
@@ -894,6 +904,10 @@ final class ChineseStrings extends Strings {
   String get linksToNoteEmpty => '还没有笔记链接到这里';
   @override
   String get linksToNoteEmbed => '嵌入';
+  @override
+  String get linksToNoteFurther => '在下文提及';
+  @override
+  String linksUpdating(int done, int total) => '正在更新链接：$done / $total';
   @override
   String get openLinkFailed => '无法打开链接';
 
@@ -1876,6 +1890,8 @@ final class ChineseStrings extends Strings {
   String get folderPickerNewFolder => '新建文件夹';
   @override
   String get folderPickerEmpty => '还没有文件夹';
+  @override
+  String get folderPickerFilter => '筛选文件夹';
   @override
   String get listFolderTitle => '列表文件夹';
   @override

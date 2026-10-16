@@ -607,10 +607,22 @@ final class SlovenianStrings extends Strings {
   @override
   String get noteStatusError => 'Napaka';
   @override
+  String get noteStatusSaveFailed => 'Ni shranjeno · poskusi znova';
+  @override
+  String get noteSaveFailedSnack =>
+      'Zapiska ni bilo mogoče shraniti. Niman bo poskusil znova.';
+  @override
   String get noteNotText =>
       'Ta datoteka ni besedilni zapisek, zato je Niman tu ne more prikazati.';
   @override
   String get noteLoadFailed => 'Tega zapiska ni bilo mogoče odpreti.';
+  @override
+  String get noteLoadMissing => 'Datoteke tega zapiska ni več na disku.';
+  @override
+  String get noteLoadDenied => 'Niman nima dovoljenja za branje tega zapiska.';
+  @override
+  String get noteLoadLocked =>
+      'Ta zapisek uporablja drug program. Poskusite znova čez trenutek.';
   @override
   String wordCount(int count) => switch (count % 100) {
     1 => '$count beseda',
@@ -955,6 +967,11 @@ final class SlovenianStrings extends Strings {
   String get linksToNoteEmpty => 'Nobena opomba še ne povezuje sem';
   @override
   String get linksToNoteEmbed => 'vdelana';
+  @override
+  String get linksToNoteFurther => 'Omenjeno nižje';
+  @override
+  String linksUpdating(int done, int total) =>
+      'Posodabljanje povezav: $done od $total';
   @override
   String get openLinkFailed => 'Povezave ni bilo mogoče odpreti';
 
@@ -2043,6 +2060,8 @@ final class SlovenianStrings extends Strings {
   String get folderPickerNewFolder => 'Nova mapa';
   @override
   String get folderPickerEmpty => 'Ni še map';
+  @override
+  String get folderPickerFilter => 'Filtriraj mape';
   @override
   String get listFolderTitle => 'Mapa seznamov';
   @override

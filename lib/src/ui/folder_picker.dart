@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/name_dialog.dart';
@@ -17,7 +18,9 @@ import 'package:niman/src/ui/strings.dart';
 /// two faces and only one of them could answer "a folder I have not
 /// made yet".
 ///
-/// The list is the indexed folders, flat and sorted by path; a folder
+/// The list is the indexed folders, flat and sorted by path, narrowed by
+/// the field above it as it is typed (#1072) — the arrows move the choice
+/// through what is left and `Enter` takes it; a folder
 /// that does not exist yet is created from the dialog itself, so the
 /// caller never has to accept a typed path. [current] starts out
 /// selected only if the library holds it, so the new folder lands where
@@ -90,13 +93,32 @@ final class FolderPicker extends StatefulWidget {
 }
 
 final class _FolderPickerState extends State<FolderPicker> {
+  /// What a row is high: the list scrolls the choice into view by it.
+  static const double _rowHeight = 56;
+
   late List<String> _paths;
+
+  /// [_paths] as a set, for the questions "is this a folder?".
+  late Set<String> _known;
   String? _selected;
+  final TextEditingController _filter = TextEditingController();
+  final ScrollController _scroll = ScrollController();
+
+  /// The filter's words, lower-cased once rather than for each row.
+  String _query = '';
+
+  @override
+  void dispose() {
+    _filter.dispose();
+    _scroll.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
     super.initState();
     _paths = [for (final folder in widget.folders) folder.path]..sort();
+    _known = _paths.toSet();
     // Only a folder the library actually holds can start out selected.
     // A setting carries its default whether or not that folder was ever
     // created — `assets` for the attachments, `Lists` for the lists — and
@@ -104,11 +126,67 @@ final class _FolderPickerState extends State<FolderPicker> {
     // made *New folder* nest inside it: `assets/attachments` instead of
     // `attachments`, with `assets/` brought into being on the way
     // (issue #94).
-    _selected = _paths.contains(widget.current) ? widget.current : null;
+    _selected = _known.contains(widget.current) ? widget.current : null;
   }
 
-  /// The rows, the library root first where it is offered.
-  List<String> get _targets => [if (widget.allowRoot) '', ..._paths];
+  /// The rows, the library root first where it is offered: the folders
+  /// whose path holds the filter's text, or all of them while it is empty.
+  List<String> get _targets => _query.isEmpty
+      ? [if (widget.allowRoot) '', ..._paths]
+      : [
+          for (final path in _paths)
+            if (path.toLowerCase().contains(_query)) path,
+        ];
+
+  /// The filter changed: the choice stays where it was while that row is
+  /// still listed, and moves to the first one left when it is not — so
+  /// `Enter` always takes a folder that is on screen.
+  void _onFilter(String text) {
+    setState(() {
+      _query = text.trim().toLowerCase();
+      final targets = _targets;
+      if (!targets.contains(_selected)) {
+        _selected = targets.isEmpty ? null : targets.first;
+      }
+    });
+    if (_scroll.hasClients) _scroll.jumpTo(0);
+  }
+
+  /// Moves the choice [by] rows through what is listed, and keeps it in
+  /// view.
+  void _step(int by) {
+    final targets = _targets;
+    if (targets.isEmpty) return;
+    final from = _selected == null ? -1 : targets.indexOf(_selected!);
+    final to = (from + by).clamp(0, targets.length - 1);
+    setState(() => _selected = targets[to]);
+    if (!_scroll.hasClients) return;
+    final top = to * _rowHeight;
+    final position = _scroll.position;
+    if (top < position.pixels) {
+      _scroll.jumpTo(top);
+    } else if (top + _rowHeight >
+        position.pixels + position.viewportDimension) {
+      _scroll.jumpTo(top + _rowHeight - position.viewportDimension);
+    }
+  }
+
+  /// Up and Down move the choice from within the field, whose own caret
+  /// has no use for them on one line.
+  KeyEventResult _onFilterKey(FocusNode node, KeyEvent event) {
+    if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
+      return KeyEventResult.ignored;
+    }
+    if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
+      _step(1);
+      return KeyEventResult.handled;
+    }
+    if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
+      _step(-1);
+      return KeyEventResult.handled;
+    }
+    return KeyEventResult.ignored;
+  }
 
   /// The name *New folder* opens with: the folder the setting points at
   /// while the library has none, so the library that never created its
@@ -137,9 +215,13 @@ final class _FolderPickerState extends State<FolderPicker> {
     );
     if (!mounted) return;
     setState(() {
-      if (!_paths.contains(created.path)) {
+      if (_known.add(created.path)) {
         _paths = [..._paths, created.path]..sort();
       }
+      // The new folder may not match what was typed: it is shown, not
+      // hidden behind a filter.
+      _filter.clear();
+      _query = '';
       _selected = created.path;
     });
   }
@@ -194,10 +276,38 @@ final class _FolderPickerState extends State<FolderPicker> {
                   ),
                 ),
               ),
+            Focus(
+              onKeyEvent: _onFilterKey,
+              child: TextField(
+                key: const Key('folder-picker-filter'),
+                controller: _filter,
+                autofocus: true,
+                textInputAction: TextInputAction.done,
+                decoration: InputDecoration(
+                  hintText: AppStrings.folderPickerFilter,
+                  prefixIcon: const Icon(Icons.search),
+                  isDense: true,
+                ),
+                onChanged: _onFilter,
+                onSubmitted: (_) {
+                  final chosen = _selected;
+                  if (chosen != null) Navigator.pop(context, chosen);
+                },
+              ),
+            ),
+            const SizedBox(height: 8),
             Expanded(
               child: targets.isEmpty
-                  ? Center(child: Text(AppStrings.folderPickerEmpty))
+                  ? Center(
+                      child: Text(
+                        _query.isEmpty
+                            ? AppStrings.folderPickerEmpty
+                            : AppStrings.searchNoMatches,
+                      ),
+                    )
                   : ListView.builder(
+                      controller: _scroll,
+                      itemExtent: _rowHeight,
                       itemCount: targets.length,
                       itemBuilder: (context, index) => _row(targets[index]),
                     ),

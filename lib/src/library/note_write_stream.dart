@@ -34,7 +34,7 @@ import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
-import 'package:niman/src/core/creation_time.dart';
+import 'package:meta/meta.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/isolate_gauge.dart';
 import 'package:niman/src/history/history_store.dart';
@@ -98,12 +98,19 @@ typedef NoteStreamTalk = ({SendPort answers});
 /// Throws when the isolate cannot be started, the write fails, or the
 /// producer does; the temp file is gone either way, and the note still
 /// holds what it held.
+///
+/// [spawnWriter] starts the writer in place of a new isolate, and answers the
+/// isolate it made, if any: a test runs [runNoteStreamWriter] on its own
+/// isolate, under the I/O overrides of its own zone, which a spawned isolate
+/// never inherits.
 Future<NoteWriteResult?> saveNoteStream({
   required String root,
   required String rel,
   required NoteContentProducer produce,
   SnapshotRequest? snapshot,
   NoteSaveAbort? abort,
+  @visibleForTesting
+  Future<Isolate?> Function(NoteStreamSpawn spawn)? spawnWriter,
 }) async {
   final abs = p.join(root, rel);
   final start = (abs: abs, rel: rel, root: root, snapshot: snapshot);
@@ -121,10 +128,9 @@ Future<NoteWriteResult?> saveNoteStream({
   });
   answers.listen((message) => _settle(answer, message));
   final job = IsolateGauge.begin('stream "$rel"');
-  final isolate = await Isolate.spawn(_streamWriter, (
-    ready: ready.sendPort,
-    start: start,
-  ));
+  final spawn = (ready: ready.sendPort, start: start);
+  final isolate =
+      await (spawnWriter?.call(spawn) ?? Isolate.spawn(_streamWriter, spawn));
   SendPort? talk;
   try {
     // The first message of the conversation: where the save's result goes.
@@ -159,7 +165,7 @@ Future<NoteWriteResult?> saveNoteStream({
     await _abandon(talk: talk, answer: answer);
     rethrow;
   } finally {
-    isolate.kill(priority: Isolate.immediate);
+    isolate?.kill(priority: Isolate.immediate);
     IsolateGauge.finishJob(job);
     ready.close();
     answers.close();
@@ -258,6 +264,10 @@ void _streamWriter(NoteStreamSpawn spawn) {
   spawn.ready.send(talk.sendPort);
   unawaited(conversation.over);
 }
+
+/// [_streamWriter] on the calling isolate, for a test (see `spawnWriter`).
+@visibleForTesting
+void runNoteStreamWriter(NoteStreamSpawn spawn) => _streamWriter(spawn);
 
 /// One save's conversation with the main isolate: where the result goes,
 /// the slices, and the end of the note.
@@ -414,10 +424,9 @@ final class _Conversation {
         _answers?.send(null);
         return;
       }
-      // The note's creation time onto the temp, or on Windows the rename
-      // makes it the temp's (#759).
-      keepCreationTime(target: start.abs, replacement: temp.path);
-      await temp.rename(start.abs);
+      // Flushed to storage, then renamed over the note: the same last step
+      // as every other atomic write (#1058).
+      await publishTempFile(temp, start.abs);
       _temp = null;
       _digest.close();
       _answers!.send((

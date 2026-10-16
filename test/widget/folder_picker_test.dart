@@ -1,6 +1,7 @@
 // T-TK-07: the folder picker behind the list-folder setting — folders
 // are chosen from a dialog, never typed.
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/ui/folder_picker.dart';
@@ -53,6 +54,66 @@ Future<String?> _pick(
 }
 
 void main() {
+  testWidgets('typing narrows the list, and the keys choose from it (#1072)', (
+    tester,
+  ) async {
+    final session = FakeLibrarySession();
+    final chosen = await _pick(
+      tester,
+      session,
+      names: ['Archive', 'Inbox', 'Projects', 'Archived'],
+      allowRoot: true,
+      act: (tester) async {
+        // The field has the focus as the dialog opens.
+        await tester.enterText(
+          find.byKey(const Key('folder-picker-filter')),
+          'ARCH',
+        );
+        await tester.pumpAndSettle();
+        expect(find.text('Archive'), findsOneWidget);
+        expect(find.text('Archived'), findsOneWidget);
+        expect(find.text('Inbox'), findsNothing);
+        expect(find.text('Projects'), findsNothing);
+        // The first match is the choice; Down moves it to the next.
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+        await tester.pump();
+        await tester.testTextInput.receiveAction(TextInputAction.done);
+        await tester.pumpAndSettle();
+      },
+    );
+    expect(chosen, 'Archived');
+  });
+
+  testWidgets('a filter nothing matches says so and chooses nothing', (
+    tester,
+  ) async {
+    final session = FakeLibrarySession();
+    final chosen = await _pick(
+      tester,
+      session,
+      names: ['Inbox'],
+      act: (tester) async {
+        await tester.enterText(
+          find.byKey(const Key('folder-picker-filter')),
+          'zzz',
+        );
+        await tester.pumpAndSettle();
+        expect(find.text('Inbox'), findsNothing);
+        expect(find.text('No matches'), findsOneWidget);
+        final choose = tester.widget<FilledButton>(
+          find.byKey(const Key('folder-picker-choose')),
+        );
+        expect(choose.onPressed, isNull);
+        await tester.testTextInput.receiveAction(TextInputAction.done);
+        await tester.pumpAndSettle();
+        expect(find.byKey(const Key('folder-picker-filter')), findsOneWidget);
+        await tester.tap(find.text('Cancel'));
+        await tester.pumpAndSettle();
+      },
+    );
+    expect(chosen, isNull);
+  });
+
   testWidgets('lists the folders and resolves to the chosen one', (
     tester,
   ) async {
@@ -63,8 +124,8 @@ void main() {
       names: ['Lists', 'Notes'],
       current: 'Lists',
       act: (tester) async {
-        // Nothing is typed: the dialog has no text field.
-        expect(find.byType(TextField), findsNothing);
+        // No path is typed: the one field only narrows the list.
+        expect(find.byType(TextField), findsOneWidget);
         expect(find.text('Lists'), findsOneWidget);
         expect(find.text('Notes'), findsOneWidget);
         await tester.tap(find.text('Notes'));
@@ -87,13 +148,7 @@ void main() {
       act: (tester) async {
         await tester.tap(find.text('New folder'));
         await tester.pumpAndSettle();
-        await tester.enterText(
-          find.descendant(
-            of: find.byType(AlertDialog),
-            matching: find.byType(TextField),
-          ),
-          'Checklists',
-        );
+        await tester.enterText(find.byType(TextField).last, 'Checklists');
         await tester.tap(find.text('OK'));
         await tester.pumpAndSettle();
         await tester.tap(find.byKey(const Key('folder-picker-choose')));
@@ -128,10 +183,7 @@ void main() {
         // New folder opens on the missing folder's name...
         await tester.tap(find.text('New folder'));
         await tester.pumpAndSettle();
-        final field = find.descendant(
-          of: find.byType(AlertDialog),
-          matching: find.byType(TextField),
-        );
+        final field = find.byType(TextField).last;
         expect(tester.widget<TextField>(field).controller?.text, 'assets');
         // ...and whatever it is renamed to lands at the library root.
         await tester.enterText(field, 'attachments');
@@ -162,10 +214,7 @@ void main() {
         // Selected, so New folder has a parent and nothing to suggest.
         await tester.tap(find.text('New folder'));
         await tester.pumpAndSettle();
-        final field = find.descendant(
-          of: find.byType(AlertDialog),
-          matching: find.byType(TextField),
-        );
+        final field = find.byType(TextField).last;
         expect(tester.widget<TextField>(field).controller?.text, isEmpty);
         await tester.enterText(field, 'clips');
         await tester.tap(find.text('OK'));

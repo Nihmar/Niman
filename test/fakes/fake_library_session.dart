@@ -31,6 +31,7 @@ import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/library/note_ops.dart';
 import 'package:niman/src/library/note_relocation.dart';
+import 'package:niman/src/library/note_save_result.dart';
 import 'package:niman/src/library/note_write_stream.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/links/block_anchors.dart';
@@ -46,6 +47,7 @@ import 'package:niman/src/templates/repo.dart';
 import 'package:niman/src/update/update_check.dart';
 import 'package:niman/src/widget/widget_configs.dart';
 import 'package:niman/src/workspace/workspace.dart';
+import 'package:niman/src/workspace/workspace_slot.dart';
 import 'package:path/path.dart' as p;
 
 import 'fake_link_source.dart';
@@ -132,6 +134,12 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
 
   @override
   Stream<Set<String>> get removals => _removals.stream;
+
+  final StreamController<Set<String>> externalChangesController =
+      StreamController<Set<String>>.broadcast();
+
+  @override
+  Stream<Set<String>> get externalChanges => externalChangesController.stream;
 
   @override
   NoteOperations? get ops => _phase == LibraryPhase.ready ? this : null;
@@ -406,15 +414,20 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   Future<void> setPinnedCommands(String json) async =>
       pinnedCommandsJson = json;
 
-  /// What [saveWorkspace] last kept (#23).
+  /// What the workspace slot last kept (#23).
   Workspace workspace = Workspace.empty;
 
-  @override
-  Future<Workspace> get savedWorkspace async => workspace;
+  /// Every root a slot was made for, in order (#1083).
+  final List<String?> workspaceSlotRoots = [];
+
+  /// The root each slot was made for, and what each one kept, by root.
+  final Map<String?, Workspace> workspacesByRoot = {};
 
   @override
-  Future<void> saveWorkspace(Workspace workspace) async =>
-      this.workspace = workspace;
+  WorkspaceSlot get workspaceSlot {
+    workspaceSlotRoots.add(_root);
+    return _FakeWorkspaceSlot(this, _root);
+  }
 
   @override
   Future<bool> get lineNumbersEnabled async => _config.lineNumbers;
@@ -828,6 +841,9 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     if (!_removals.isClosed) {
       await _removals.close();
     }
+    if (!externalChangesController.isClosed) {
+      await externalChangesController.close();
+    }
   }
 
   /// Simulates a re-index that pruned [paths] from the tree (issue #289):
@@ -1234,7 +1250,11 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   Exception? saveError;
 
   @override
-  Future<void> saveNote(String path, String content, {int? editSession}) async {
+  Future<NoteSaveResult?> saveNote(
+    String path,
+    String content, {
+    int? editSession,
+  }) async {
     saves.add((path, content, editSession));
     final failure = saveError;
     if (failure != null) throw failure;
@@ -1242,13 +1262,14 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     if (gate != null) await gate.future;
     (_findRow(path) ?? _addRow(path, isDir: false)).content = content;
     _bump();
+    return null;
   }
 
   /// Every [saveNoteStream] call, in order: `(path, content, editSession)`.
   final List<(String, String, int?)> streamedSaves = [];
 
   @override
-  Future<void> saveNoteStream(
+  Future<NoteSaveResult?> saveNoteStream(
     String path,
     NoteContentProducer content, {
     int? editSession,
@@ -1264,6 +1285,7 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     streamedSaves.add((path, text, editSession));
     (_findRow(path) ?? _addRow(path, isDir: false)).content = text;
     _bump();
+    return null;
   }
 
   /// Every [tidyNote] call, in order.
@@ -1486,6 +1508,7 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     String newName, {
     LinkUpdateConfirm? confirmLinks,
     void Function()? onLinksRewritten,
+    LinkRewriteProgress? onLinksProgress,
     FlushOpenNotes? flushOpen,
   }) async {
     final row = _requireRow(path);
@@ -1527,6 +1550,7 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     String targetParent, {
     LinkUpdateConfirm? confirmLinks,
     void Function()? onLinksRewritten,
+    LinkRewriteProgress? onLinksProgress,
     FlushOpenNotes? flushOpen,
   }) async {
     moveCalls.add(path);
@@ -2216,5 +2240,24 @@ final class _FakeWikilinkSuggester implements WikilinkSuggester {
       default:
         return const <BookSuggestion>[];
     }
+  }
+}
+
+/// The fake's [WorkspaceSlot]: bound to the root the session had when it was
+/// made (#1083), as the real one is; what it keeps is the session's workspace.
+final class _FakeWorkspaceSlot implements WorkspaceSlot {
+  new(this._session, this._root);
+
+  final FakeLibrarySession _session;
+  final String? _root;
+
+  @override
+  Future<Workspace> load() async => _session.workspace;
+
+  @override
+  Future<void> save(Workspace workspace) async {
+    _session
+      ..workspace = workspace
+      ..workspacesByRoot[_root] = workspace;
   }
 }

@@ -615,11 +615,24 @@ final class ItalianStrings extends Strings {
   @override
   String get noteStatusError => 'Errore';
   @override
+  String get noteStatusSaveFailed => 'Non salvata · riprova';
+  @override
+  String get noteSaveFailedSnack =>
+      'Impossibile salvare la nota. Niman riproverà.';
+  @override
   String get noteNotText =>
       'Questo file non è una nota di testo, quindi '
       'Niman non può mostrarlo qui.';
   @override
   String get noteLoadFailed => 'Impossibile aprire questa nota.';
+  @override
+  String get noteLoadMissing => 'Il file di questa nota non è più sul disco.';
+  @override
+  String get noteLoadDenied =>
+      'Niman non ha il permesso di leggere questa nota.';
+  @override
+  String get noteLoadLocked =>
+      'Un altro programma sta usando questa nota. Riprova tra un momento.';
   @override
   String wordCount(int count) => count == 1 ? '1 parola' : '$count parole';
   @override
@@ -960,6 +973,11 @@ final class ItalianStrings extends Strings {
   String get linksToNoteEmpty => 'Nessuna nota rimanda qui';
   @override
   String get linksToNoteEmbed => 'incorporata';
+  @override
+  String get linksToNoteFurther => 'Citata più in basso';
+  @override
+  String linksUpdating(int done, int total) =>
+      'Aggiornamento dei link: $done di $total';
   @override
   String get openLinkFailed => 'Impossibile aprire il link';
 
@@ -2075,6 +2093,8 @@ final class ItalianStrings extends Strings {
   String get folderPickerNewFolder => 'Nuova cartella';
   @override
   String get folderPickerEmpty => 'Nessuna cartella';
+  @override
+  String get folderPickerFilter => 'Filtra cartelle';
   @override
   String get listFolderTitle => 'Cartella delle liste';
   @override

@@ -602,11 +602,25 @@ final class IcelandicStrings extends Strings {
   @override
   String get noteStatusError => 'Villa';
   @override
+  String get noteStatusSaveFailed => 'Ekki vistað · reyna aftur';
+  @override
+  String get noteSaveFailedSnack =>
+      'Ekki tókst að vista minnispunktinn. Niman reynir aftur.';
+  @override
   String get noteNotText =>
       'Þessi skrá er ekki textaminnispunktur, svo '
       'Niman getur ekki sýnt hana hér.';
   @override
   String get noteLoadFailed => 'Ekki tókst að opna þennan minnispunkt.';
+  @override
+  String get noteLoadMissing =>
+      'Skrá þessa minnispunkts er ekki lengur á disknum.';
+  @override
+  String get noteLoadDenied =>
+      'Niman hefur ekki leyfi til að lesa þennan minnispunkt.';
+  @override
+  String get noteLoadLocked =>
+      'Annað forrit notar þennan minnispunkt. Reyndu aftur að vörmu spori.';
   @override
   String wordCount(int count) => '$count orð';
   @override
@@ -950,6 +964,11 @@ final class IcelandicStrings extends Strings {
   String get linksToNoteEmpty => 'Enginn minnispunktur vísar hingað enn';
   @override
   String get linksToNoteEmbed => 'ívafið';
+  @override
+  String get linksToNoteFurther => 'Nefnt neðar';
+  @override
+  String linksUpdating(int done, int total) =>
+      'Uppfæri tengla: $done af $total';
   @override
   String get openLinkFailed => 'Það gekk ekki að opna tengilinn';
 
@@ -2047,6 +2066,8 @@ final class IcelandicStrings extends Strings {
   String get folderPickerNewFolder => 'Ný mappa';
   @override
   String get folderPickerEmpty => 'Engar mappar enn';
+  @override
+  String get folderPickerFilter => 'Sía möppur';
   @override
   String get listFolderTitle => 'Mappa lista';
   @override

@@ -4,7 +4,9 @@
 /// A message in the user's words, never the exception: the detail is in
 /// the log. When the file is not text — an attachment picked in the tree —
 /// the desktop offers it to the application the system opens it with,
-/// through the same path as the tree row's own entry (issue #76).
+/// through the same path as the tree row's own entry (issue #76). Any other
+/// failure offers to try again (#1059): a read that failed for a moment — a
+/// sharing violation, a half-written sync file — is not a verdict on the note.
 library;
 
 import 'dart:async';
@@ -21,6 +23,7 @@ class NoteLoadError extends StatelessWidget {
     required this.message,
     required this.path,
     this.offerDefaultApp = false,
+    this.onRetry,
     this.launcher = const OsLauncher(),
     super.key,
   });
@@ -33,6 +36,10 @@ class NoteLoadError extends StatelessWidget {
 
   /// Whether to offer the file to its default application.
   final bool offerDefaultApp;
+
+  /// Reads the note again; null leaves the button out (a file that is not text
+  /// reads the same the next time).
+  final VoidCallback? onRetry;
 
   /// The OS seam, replaced in tests.
   final OsLauncher launcher;
@@ -63,6 +70,15 @@ class NoteLoadError extends StatelessWidget {
               key: const Key('note-load-error'),
               textAlign: TextAlign.center,
             ),
+            if (onRetry != null) ...[
+              const SizedBox(height: 16),
+              OutlinedButton.icon(
+                key: const Key('note-load-error-retry'),
+                icon: const Icon(Icons.refresh),
+                label: Text(AppStrings.actionRetry),
+                onPressed: onRetry,
+              ),
+            ],
             if (offerDefaultApp && supportsTreeContextActions) ...[
               const SizedBox(height: 16),
               OutlinedButton.icon(

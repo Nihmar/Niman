@@ -30,6 +30,7 @@ void main() {
     List<String>? opened,
     List<String>? renamed,
     List<String>? deleted,
+    List<(String, Rect?)>? menus,
   }) => MaterialApp(
     home: Scaffold(
       body: _Host(
@@ -38,6 +39,7 @@ void main() {
         opened: opened,
         renamed: renamed,
         deleted: deleted,
+        menus: menus,
       ),
     ),
   );
@@ -135,6 +137,38 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
     await tester.pumpAndSettle();
     expect(ringOn(tester, 'Zulu'), isTrue, reason: 'up at the first row stays');
+  });
+
+  testWidgets('the menu key and Shift+F10 open the menu of the cursor row', (
+    tester,
+  ) async {
+    await openWith(tester);
+    final menus = <(String, Rect?)>[];
+    await tester.pumpWidget(treeFor(menus: menus));
+    await tester.pumpAndSettle();
+
+    await takeKeys(tester);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pumpAndSettle();
+    await tester.sendKeyEvent(LogicalKeyboardKey.contextMenu);
+    await tester.pumpAndSettle();
+    expect(menus, hasLength(1));
+    expect(menus.single.$1, 'alpha.md');
+    // Anchored at the row, not somewhere in the pane.
+    final row = tester.getRect(noteRow('alpha.md'));
+    expect(menus.single.$2!.center.dy, closeTo(row.center.dy, row.height));
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pumpAndSettle();
+    await sendWith(tester, LogicalKeyboardKey.f10, [
+      LogicalKeyboardKey.shiftLeft,
+    ]);
+    expect(menus.last.$1, 'bravo.md');
+
+    // A plain F10 is not the menu.
+    await tester.sendKeyEvent(LogicalKeyboardKey.f10);
+    await tester.pump();
+    expect(menus, hasLength(2));
   });
 
   testWidgets('a click on a note leaves the keyboard where it is', (
@@ -394,6 +428,7 @@ final class _Host extends StatefulWidget {
     this.opened,
     this.renamed,
     this.deleted,
+    this.menus,
   });
 
   final FakeLibrarySession session;
@@ -401,6 +436,7 @@ final class _Host extends StatefulWidget {
   final List<String>? opened;
   final List<String>? renamed;
   final List<String>? deleted;
+  final List<(String, Rect?)>? menus;
 
   @override
   State<_Host> createState() => _HostState();
@@ -428,5 +464,8 @@ final class _HostState extends State<_Host> {
     },
     onRename: widget.renamed?.add,
     onDelete: widget.deleted?.add,
+    onLongPress: widget.menus == null
+        ? null
+        : (note, anchor) => widget.menus!.add((note.path, anchor)),
   );
 }

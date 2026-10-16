@@ -603,10 +603,22 @@ final class UkrainianStrings extends Strings {
   @override
   String get noteStatusError => 'Помилка';
   @override
+  String get noteStatusSaveFailed => 'Не збережено · повторити';
+  @override
+  String get noteSaveFailedSnack =>
+      'Нотатку не вдалося зберегти. Niman спробує ще раз.';
+  @override
   String get noteNotText =>
       'Цей файл не є текстовою нотаткою, тож Niman не може показати його тут.';
   @override
   String get noteLoadFailed => 'Не вдалося відкрити цю нотатку.';
+  @override
+  String get noteLoadMissing => 'Файлу цієї нотатки більше немає на диску.';
+  @override
+  String get noteLoadDenied => 'Niman не має дозволу читати цю нотатку.';
+  @override
+  String get noteLoadLocked =>
+      'Інша програма використовує цю нотатку. Спробуйте ще раз за мить.';
   @override
   String wordCount(int count) =>
       switch (count % 100 >= 11 && count % 100 <= 14 ? 0 : count % 10) {
@@ -952,6 +964,11 @@ final class UkrainianStrings extends Strings {
   String get linksToNoteEmpty => 'Жодна нотатка ще не посилається сюди';
   @override
   String get linksToNoteEmbed => 'вбудована';
+  @override
+  String get linksToNoteFurther => 'Згадується нижче';
+  @override
+  String linksUpdating(int done, int total) =>
+      'Оновлення посилань: $done з $total';
   @override
   String get openLinkFailed => 'Не вдалося відкрити посилання';
 
@@ -2055,6 +2072,8 @@ final class UkrainianStrings extends Strings {
   String get folderPickerNewFolder => 'Нова папка';
   @override
   String get folderPickerEmpty => 'Папок ще немає';
+  @override
+  String get folderPickerFilter => 'Фільтр папок';
   @override
   String get listFolderTitle => 'Папка списків';
   @override

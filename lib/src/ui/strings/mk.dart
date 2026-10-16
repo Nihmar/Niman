@@ -610,11 +610,24 @@ final class MacedonianStrings extends Strings {
   @override
   String get noteStatusError => 'Грешка';
   @override
+  String get noteStatusSaveFailed => 'Не е зачувано · обиди се повторно';
+  @override
+  String get noteSaveFailedSnack =>
+      'Белешката не можеше да се зачува. Niman ќе се обиде повторно.';
+  @override
   String get noteNotText =>
       'Оваа датотека не е текстуална белешка, па '
       'Niman не може да ја прикаже тука.';
   @override
   String get noteLoadFailed => 'Оваа белешка не можеше да се отвори.';
+  @override
+  String get noteLoadMissing =>
+      'Датотеката на оваа белешка веќе не е на дискот.';
+  @override
+  String get noteLoadDenied => 'Niman нема дозвола да ја чита оваа белешка.';
+  @override
+  String get noteLoadLocked =>
+      'Друга програма ја користи оваа белешка. Обидете се повторно за момент.';
   @override
   String wordCount(int count) =>
       count % 10 == 1 && count % 100 != 11 ? '$count збор' : '$count зборови';
@@ -958,6 +971,11 @@ final class MacedonianStrings extends Strings {
   String get linksToNoteEmpty => 'Сè уште ниту една белешка не води овде';
   @override
   String get linksToNoteEmbed => 'вметната';
+  @override
+  String get linksToNoteFurther => 'Спомнато подолу';
+  @override
+  String linksUpdating(int done, int total) =>
+      'Ажурирање на врските: $done од $total';
   @override
   String get openLinkFailed => 'Не може да се отвори врската';
 
@@ -2064,6 +2082,8 @@ final class MacedonianStrings extends Strings {
   String get folderPickerNewFolder => 'Нова папка';
   @override
   String get folderPickerEmpty => 'Сè уште нема папки';
+  @override
+  String get folderPickerFilter => 'Филтрирај папки';
   @override
   String get listFolderTitle => 'Папка на листа';
   @override

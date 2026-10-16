@@ -18,6 +18,7 @@ import 'package:niman/src/ui/search_request.dart';
 import 'package:niman/src/ui/search_task_events.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/tree.dart' show displayNameOf;
+import 'package:niman/src/ui/unsaved_notes.dart';
 
 /// The other ways a hit opens, where the shell has them (#712): in a new
 /// tab, in the other pane, and as a row of the tree.
@@ -61,6 +62,7 @@ final class SearchScreen extends StatefulWidget {
     this.onOpenTaskEvent,
     this.eventTimesClock = false,
     this.hitOpens,
+    this.unsavedTracker,
     super.key,
   });
 
@@ -110,6 +112,11 @@ final class SearchScreen extends StatefulWidget {
   /// The other ways a hit opens, offered in its menu (#712); null — a
   /// phone, with one screen at a time — offers the hit's own open alone.
   final SearchHitOpens? hitOpens;
+
+  /// The open notes' unsaved edits (#1042): a Replace all saves them first,
+  /// so the run rewrites what is on screen, and tells the editors afterwards
+  /// to adopt the rewritten files. Null — a test — runs the replace alone.
+  final UnsavedTracker? unsavedTracker;
 
   @override
   State<SearchScreen> createState() => _SearchScreenState();
@@ -976,12 +983,32 @@ final class _SearchScreenState extends State<SearchScreen> {
     final term = _query.text.trim();
     final only = _replaceOnly;
     setState(() => _previewBusy = true);
+    // The notes open with edits the disk does not have are saved first: the
+    // run rewrites the files, and an editor that still held the old words
+    // would save them over the replacement (#1042). A save that fails stops
+    // the run before it touches anything.
+    final tracker = widget.unsavedTracker;
+    if (tracker != null) {
+      try {
+        await tracker.saveAll();
+      } on Object catch (error) {
+        const AppLogger(name: 'search.ui').warning('replace aborted: $error');
+        if (!mounted) return;
+        setState(() => _previewBusy = false);
+        _snack(AppStrings.noteSaveFailedSnack);
+        return;
+      }
+      if (!mounted) return;
+    }
     final report = await source.replaceAll(
       term: term,
       replacement: _replacement.text,
       caseSensitive: _replaceCase,
       only: only == null ? null : {only},
     );
+    // The open notes the run rewrote adopt their new text (they were saved
+    // before it ran, so none of them holds anything the file does not).
+    tracker?.notifyDiskChanged(const {});
     if (!mounted) return;
     // A run that wrote nothing because it could not is not a "no match":
     // the failed notes make the run report itself instead.

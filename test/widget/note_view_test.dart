@@ -238,8 +238,10 @@ void main() {
           path: path,
           readNote: (_) async => 'start',
           writeNote: (_, _) async => seamWrites++,
-          saveNote: (path, content, {required editSession}) async =>
-              saves.add((path, content, editSession)),
+          saveNote: (path, content, {required editSession}) async {
+            saves.add((path, content, editSession));
+            return null;
+          },
         ),
       );
       await tester.pumpWidget(view('/notes/a.md'));

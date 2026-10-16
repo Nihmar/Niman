@@ -17,6 +17,7 @@ library;
 
 import 'package:flutter/foundation.dart';
 import 'package:niman/src/workspace/note_memento.dart';
+import 'package:niman/src/workspace/note_places.dart';
 import 'package:niman/src/workspace/workspace_pane.dart';
 import 'package:niman/src/workspace/workspace_tab.dart';
 
@@ -64,6 +65,8 @@ final class Workspace {
     this.fraction = 0.5,
     this.dockOpen = true,
     this.dockPane = DockPane.outline,
+    this.places = const NotePlaces(),
+    this.expanded = const <String>[],
   }) : assert(focused >= 0, 'focused is a pane');
 
   /// Reads a stored form.
@@ -111,6 +114,8 @@ final class Workspace {
     final dockOpen = dock is Map ? dock['open'] : null;
     final dockPane = dock is Map ? dock['pane'] : null;
     return Workspace(
+      places: NotePlaces.fromJson(json['places']),
+      expanded: _expandedFrom(json['expanded']),
       dockOpen: dockOpen is! bool || dockOpen,
       dockPane: DockPane.values.firstWhere(
         (p) => p.name == dockPane,
@@ -152,6 +157,19 @@ final class Workspace {
   /// Which of its panes the dock shows.
   final DockPane dockPane;
 
+  /// Where the notes that are not open were last left (#1076): a note
+  /// opened again, in a tab of its own or in the place of another, starts
+  /// there.
+  final NotePlaces places;
+
+  /// The tree's expanded folders (#1069), library-relative, the one opened
+  /// longest ago first: they are the library's, kept with what is open so
+  /// that a restart or a switch of library finds the tree as it was left.
+  final List<String> expanded;
+
+  /// How many expanded folders are kept: the oldest go first.
+  static const int maxExpanded = 500;
+
   /// The pane with the focus.
   WorkspacePane get focusedPane => panes[focused];
 
@@ -180,7 +198,7 @@ final class Workspace {
     if (at != null) return activate(at.pane, at.index);
     final pane = focusedPane;
     final insert = pane.active + 1;
-    final tabs = [...pane.tabs]..insert(insert, WorkspaceTab(path));
+    final tabs = [...pane.tabs]..insert(insert, _tabFor(path));
     return _withPane(focused, WorkspacePane.clamped(tabs, insert));
   }
 
@@ -192,8 +210,24 @@ final class Workspace {
     if (at != null) return activate(at.pane, at.index);
     final pane = focusedPane;
     if (pane.isEmpty) return open(path);
-    final tabs = [...pane.tabs]..[pane.active] = WorkspaceTab(path);
-    return _withPane(focused, WorkspacePane.clamped(tabs, pane.active));
+    final replaced = pane.tabs[pane.active];
+    final tabs = [...pane.tabs]..[pane.active] = _tabFor(path);
+    return _copy(
+      panes: _replaced(focused, WorkspacePane.clamped(tabs, pane.active)),
+      places: places.remember(replaced.path, replaced.memento),
+    );
+  }
+
+  /// Opens [path] in a tab of its own just before the focused pane's
+  /// showing one, which stays showing: the tab a click replaced, brought
+  /// back by the double-click that was a second click on the note which
+  /// replaced it. Nothing changes when [path] is open already.
+  Workspace openBeforeActive(String path) {
+    if (locate(path) != null) return this;
+    final pane = focusedPane;
+    if (pane.isEmpty) return open(path);
+    final tabs = [...pane.tabs]..insert(pane.active, _tabFor(path));
+    return _withPane(focused, WorkspacePane.clamped(tabs, pane.active + 1));
   }
 
   /// Shows the tab at [index] of [pane], and focuses that pane.
@@ -255,7 +289,12 @@ final class Workspace {
   }
 
   /// Closes everything, and the split with it.
-  Workspace closeAll() => Workspace(dockOpen: dockOpen, dockPane: dockPane);
+  Workspace closeAll() => Workspace(
+    dockOpen: dockOpen,
+    dockPane: dockPane,
+    places: _placesWith(tabs),
+    expanded: expanded,
+  );
 
   /// Opens a second pane, empty and focused, [axis] of the first. A split
   /// window stays as it is.
@@ -281,7 +320,10 @@ final class Workspace {
     final moved = _copy(panes: _replaced(to, landing), focused: to);
     // Remove it from where it came from with the close rules, then put the
     // focus back on the pane it went to (the collapse may renumber it).
-    final closed = moved._filtered((p, i, _) => !(p == from && i == index));
+    final closed = moved._filtered(
+      (p, i, _) => !(p == from && i == index),
+      keepPlaces: false,
+    );
     final landed = closed.locate(tab.path)!;
     return closed.activate(landed.pane, landed.index);
   }
@@ -311,11 +353,13 @@ final class Workspace {
   Workspace renamed(String from, String to) {
     if (from == to) return this;
     final prefix = '$from/';
-    return _mapTabs((tab) {
+    final moved = _mapTabs((tab) {
       if (tab.path == from) return tab.copyWith(path: to);
       if (!tab.path.startsWith(prefix)) return tab;
       return tab.copyWith(path: '$to/${tab.path.substring(prefix.length)}');
     });
+    final places = this.places.moved(from, to);
+    return identical(places, this.places) ? moved : moved._copy(places: places);
   }
 
   /// Closes [path]'s tab and, for a folder, every tab under it: the note
@@ -328,16 +372,33 @@ final class Workspace {
   /// the note to go, and the tab goes with it.
   Workspace deletedAll(Set<String> paths) {
     if (paths.isEmpty) return this;
-    return _filtered(
+    // A deleted note keeps no place: there is nothing to come back to.
+    final forgotten = places.forgetting(paths);
+    final closed = _filtered(
       (_, _, tab) => !paths.any(
         (path) => tab.path == path || tab.path.startsWith('$path/'),
       ),
+      keepPlaces: false,
     );
+    return identical(forgotten, places)
+        ? closed
+        : closed._copy(places: forgotten);
   }
 
   /// Remembers where [path] was left.
-  Workspace withMemento(String path, NoteMemento memento) =>
-      _mapTab(path, (tab) => tab.copyWith(memento: memento));
+  ///
+  /// A memento that knows no scroll does not erase the one the tab had
+  /// (#1075). The editor of a tab that is already gone hands in its last
+  /// word late; it is the note's place all the same (#1076).
+  Workspace withMemento(String path, NoteMemento memento) {
+    if (locate(path) == null) {
+      return _copy(places: places.remember(path, memento));
+    }
+    return _mapTab(
+      path,
+      (tab) => tab.copyWith(memento: memento.keepingScrollOf(tab.memento)),
+    );
+  }
 
   /// Marks the tabs at [paths] — and, for a folder, every tab under it —
   /// as gone from disk: the file went away from outside the app, so the tab
@@ -372,6 +433,13 @@ final class Workspace {
     );
   }
 
+  /// The tree's expanded folders as [folders] say (#1069), the most recent
+  /// last; a pile beyond [maxExpanded] drops its oldest.
+  Workspace withExpanded(Iterable<String> folders) {
+    final next = _expandedFrom(folders.toList());
+    return listEquals(next, expanded) ? this : _copy(expanded: next);
+  }
+
   /// The dock opened or closed.
   Workspace withDock({bool? open, DockPane? pane}) =>
       _copy(dockOpen: open ?? dockOpen, dockPane: pane ?? dockPane);
@@ -394,6 +462,8 @@ final class Workspace {
     'axis': axis.name,
     'fraction': fraction,
     'dock': {'open': dockOpen, 'pane': dockPane.name},
+    if (places.length > 0) 'places': places.toJson(),
+    if (expanded.isNotEmpty) 'expanded': expanded,
     'panes': [
       for (final pane in panes)
         {
@@ -418,7 +488,11 @@ final class Workspace {
     double? fraction,
     bool? dockOpen,
     DockPane? dockPane,
+    NotePlaces? places,
+    List<String>? expanded,
   }) => Workspace(
+    places: places ?? this.places,
+    expanded: expanded ?? this.expanded,
     panes: List.unmodifiable(panes ?? this.panes),
     focused: focused ?? this.focused,
     axis: axis ?? this.axis,
@@ -426,6 +500,35 @@ final class Workspace {
     dockOpen: dockOpen ?? this.dockOpen,
     dockPane: dockPane ?? this.dockPane,
   );
+
+  /// The folders of a stored or given list: strings only, each once, at
+  /// most [maxExpanded] of the latest.
+  static List<String> _expandedFrom(Object? raw) {
+    if (raw is! List) return const <String>[];
+    final seen = <String>{};
+    final folders = <String>[
+      for (final folder in raw)
+        if (folder is String && folder.isNotEmpty && seen.add(folder)) folder,
+    ];
+    return List.unmodifiable(
+      folders.length > maxExpanded
+          ? folders.sublist(folders.length - maxExpanded)
+          : folders,
+    );
+  }
+
+  /// A tab for [path], where the note was last left if it is known.
+  WorkspaceTab _tabFor(String path) =>
+      WorkspaceTab(path, memento: places[path] ?? const NoteMemento());
+
+  /// [places] with where each of [closed] was left.
+  NotePlaces _placesWith(Iterable<WorkspaceTab> closed) {
+    var next = places;
+    for (final tab in closed) {
+      next = next.remember(tab.path, tab.memento);
+    }
+    return next;
+  }
 
   List<WorkspacePane> _replaced(int index, WorkspacePane pane) =>
       [...panes]..[index] = pane;
@@ -460,17 +563,26 @@ final class Workspace {
   /// Keeps the tabs [keep] says to, with the close rules: each pane's
   /// showing tab stays showing if it survives, otherwise the survivor
   /// that slid into its place does; a second pane left empty goes away.
+  ///
+  /// The places of the tabs that go are kept ([keepPlaces]): a note closed
+  /// opens again where it was left.
   Workspace _filtered(
-    bool Function(int pane, int index, WorkspaceTab tab) keep,
-  ) {
+    bool Function(int pane, int index, WorkspaceTab tab) keep, {
+    bool keepPlaces = true,
+  }) {
     final next = <WorkspacePane>[];
+    final closed = <WorkspaceTab>[];
     for (var p = 0; p < panes.length; p++) {
       final pane = panes[p];
       final kept = <WorkspaceTab>[];
       var active = -1;
       for (var i = 0; i < pane.tabs.length; i++) {
         final survives = keep(p, i, pane.tabs[i]);
-        if (survives) kept.add(pane.tabs[i]);
+        if (survives) {
+          kept.add(pane.tabs[i]);
+        } else {
+          closed.add(pane.tabs[i]);
+        }
         if (i == pane.active) {
           // The showing tab, or the first survivor at or after its place
           // (the one that slides under the pointer).
@@ -490,7 +602,11 @@ final class Workspace {
       next.removeAt(gone);
       focused = 0;
     }
-    return _copy(panes: next, focused: focused);
+    return _copy(
+      panes: next,
+      focused: focused,
+      places: keepPlaces ? _placesWith(closed) : null,
+    );
   }
 
   @override
@@ -501,6 +617,8 @@ final class Workspace {
       other.fraction == fraction &&
       other.dockOpen == dockOpen &&
       other.dockPane == dockPane &&
+      other.places == places &&
+      listEquals(other.expanded, expanded) &&
       listEquals(other.panes, panes);
 
   @override
@@ -510,6 +628,8 @@ final class Workspace {
     fraction,
     dockOpen,
     dockPane,
+    places,
+    Object.hashAll(expanded),
     Object.hashAll(panes),
   );
 

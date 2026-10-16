@@ -15,17 +15,24 @@ import 'package:niman/src/workspace/note_history.dart';
 import 'package:niman/src/workspace/note_memento.dart';
 import 'package:niman/src/workspace/workspace.dart';
 import 'package:niman/src/workspace/workspace_controller.dart';
+import 'package:niman/src/workspace/workspace_slot.dart';
 
 /// The open library's workspace, as the shell drives it.
 final class ShellWorkspace {
   /// The workspace of [session]'s library, kept through the session.
-  new(LibrarySession session)
-    : _session = session,
-      controller = WorkspaceController(save: session.saveWorkspace) {
+  new(LibrarySession session) : this._(session, session.workspaceSlot);
+
+  new _(this._session, this._slot)
+    : controller = WorkspaceController(save: _slot.save) {
     controller.addListener(_track);
   }
 
   final LibrarySession _session;
+
+  /// Where this library's workspace is kept: bound to the library the
+  /// shell was made for, so what the closing views hand in lands there
+  /// even once the session has moved on (#1083).
+  final WorkspaceSlot _slot;
 
   /// The workspace itself.
   final WorkspaceController controller;
@@ -33,6 +40,17 @@ final class ShellWorkspace {
   /// How many tabs besides the showing one keep their editor mounted —
   /// and with it undo, find and folds (decision 4 of the plan on #23).
   static const int keptAlive = 4;
+
+  /// How many notes stay open on a phone (#1082): one joins the others each
+  /// time a note is opened, and nothing else closes them. Past it the least
+  /// recently shown one without unsaved edits closes, and keeps its place.
+  static const int phoneCap = 30;
+
+  /// The open notes holding unsaved edits, library-relative: never the one
+  /// the cap closes. The shell wires the tracker in.
+  Set<String> Function() unsavedPaths = _noPaths;
+
+  static Set<String> _noPaths() => const <String>{};
 
   /// Past this many characters a note keeps its editor only while it
   /// shows: novel-length notes are what the app is built to open, and
@@ -62,7 +80,38 @@ final class ShellWorkspace {
   final NoteHistory history = NoteHistory();
 
   void _track() {
-    if (value.activePath case final shown?) history.shown(shown);
+    if (value.activePath case final shown?) {
+      history.shown(shown);
+      if (_recent.isEmpty || _recent.first != shown) {
+        _recent
+          ..remove(shown)
+          ..insert(0, shown);
+      }
+    }
+  }
+
+  /// [w] with the open notes held to [phoneCap]: the least recently shown
+  /// ones without unsaved edits close — never [keep], the note just
+  /// opened — and their places are kept for when they open again.
+  Workspace _capped(Workspace w, String keep) {
+    var next = w;
+    if (next.tabs.length <= phoneCap) return next;
+    final dirty = unsavedPaths();
+    final open = [for (final tab in next.tabs) tab.path];
+    // Oldest first: the ones never shown this session, in tab order, then
+    // the ones shown, longest ago first.
+    final order = [
+      for (final path in open)
+        if (!_recent.contains(path)) path,
+      for (final path in _recent.reversed)
+        if (open.contains(path)) path,
+    ];
+    for (final path in order) {
+      if (next.tabs.length <= phoneCap) break;
+      if (path == keep || dirty.contains(path)) continue;
+      next = next.closePath(path);
+    }
+    return next;
   }
 
   /// Reads back what was left open in the library on this device.
@@ -70,11 +119,15 @@ final class ShellWorkspace {
   /// A note deleted before this session read the tree has no `removals`
   /// event to arrive on: what the store still opens on one keeps its tab,
   /// flagged missing, here (#289, #372).
-  Future<void> load() async {
-    controller.adopt(await _session.savedWorkspace);
+  ///
+  /// Answers what was read, for what the shell keeps of its own with it
+  /// (the tree's expanded folders, #1069).
+  Future<Workspace> load() async {
+    final saved = await _slot.load();
+    controller.adopt(saved);
     final open = [for (final tab in value.tabs) tab.path];
-    if (open.isEmpty) return;
-    missing(await _session.missingPaths(open));
+    if (open.isNotEmpty) missing(await _session.missingPaths(open));
+    return saved;
   }
 
   /// Opens [notePath] now: in a new tab when [newTab] (or when one was
@@ -89,6 +142,12 @@ final class ShellWorkspace {
       (w) => fresh ? w.open(notePath) : w.replaceActive(notePath),
     );
   }
+
+  /// Brings back the tab [path] had before a click replaced it with the
+  /// showing note, which keeps its own tab: a double-click is "open it
+  /// alongside", and the note already there stays put (#1076).
+  void reopenBeforeShowing(String path) =>
+      controller.update((w) => w.openBeforeActive(path));
 
   /// The next note the shell opens, however it opens it, goes into a new
   /// tab: for the flows that pick their note later (a new note's name).
@@ -117,7 +176,11 @@ final class ShellWorkspace {
         final fresh = alongside || _nextInNewTab;
         _nextInNewTab = false;
         controller.update(
-          (w) => fresh ? w.open(notePath) : w.replaceActive(notePath),
+          (w) => fresh
+              ? alongside
+                    ? _capped(w.open(notePath), notePath)
+                    : w.open(notePath)
+              : w.replaceActive(notePath),
         );
       } else if (previous != null && !keepOnNone) {
         controller.update((w) => w.closePath(previous));
