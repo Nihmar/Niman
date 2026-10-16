@@ -47,7 +47,7 @@ void main() {
     // registry row and the workspace a forget would have taken stay.
     final controller = makeController();
     await controller.open(root.path, create: false);
-    await controller.saveWorkspace(Workspace.empty.open('a.md'));
+    await controller.workspaceSlot.save(Workspace.empty.open('a.md'));
 
     // A note that reached the disk while the library was open.
     File(p.join(root.path, 'b.md')).writeAsStringSync('b');
@@ -61,7 +61,7 @@ void main() {
     ]);
     final db = await controller.appDatabase;
     expect((await LibraryRegistry(db).all()).single.path, root.path);
-    expect((await controller.savedWorkspace).activePath, 'a.md');
+    expect((await controller.workspaceSlot.load()).activePath, 'a.md');
     await controller.close();
     await controller.dispose();
   });

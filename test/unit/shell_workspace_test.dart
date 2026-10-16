@@ -4,11 +4,36 @@
 // holds (#372).
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/ui/shell_workspace.dart';
+import 'package:niman/src/workspace/note_memento.dart';
 import 'package:niman/src/workspace/workspace.dart';
 
 import '../fakes/fake_library_session.dart';
 
 void main() {
+  // #1083: a library closed or switched under the shell. Its views hand in
+  // where each note was left as they go down, after the session has let go
+  // of the library; the last write belongs to that library all the same.
+  test(
+    'the last write after a close reaches the library it belongs to',
+    () async {
+      final session = FakeLibrarySession();
+      addTearDown(session.dispose);
+      await session.open('/lib/one', create: false);
+      final workspace = ShellWorkspace(session)..show('a.md');
+      await pumpEventQueue();
+
+      await session.close();
+      workspace.remember('a.md', const NoteMemento(selectionExtent: 7));
+      await pumpEventQueue();
+      workspace.dispose();
+      await pumpEventQueue();
+
+      final kept = session.workspacesByRoot['/lib/one'];
+      expect(kept?.tabs.single.memento.selectionExtent, 7);
+      expect(session.workspacesByRoot.containsKey(null), isFalse);
+    },
+  );
+
   test('a preview asked for before the tab exists lands on it', () async {
     final workspace = ShellWorkspace(FakeLibrarySession());
     addTearDown(workspace.dispose);

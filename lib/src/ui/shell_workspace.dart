@@ -15,17 +15,24 @@ import 'package:niman/src/workspace/note_history.dart';
 import 'package:niman/src/workspace/note_memento.dart';
 import 'package:niman/src/workspace/workspace.dart';
 import 'package:niman/src/workspace/workspace_controller.dart';
+import 'package:niman/src/workspace/workspace_slot.dart';
 
 /// The open library's workspace, as the shell drives it.
 final class ShellWorkspace {
   /// The workspace of [session]'s library, kept through the session.
-  new(LibrarySession session)
-    : _session = session,
-      controller = WorkspaceController(save: session.saveWorkspace) {
+  new(LibrarySession session) : this._(session, session.workspaceSlot);
+
+  new _(this._session, this._slot)
+    : controller = WorkspaceController(save: _slot.save) {
     controller.addListener(_track);
   }
 
   final LibrarySession _session;
+
+  /// Where this library's workspace is kept: bound to the library the
+  /// shell was made for, so what the closing views hand in lands there
+  /// even once the session has moved on (#1083).
+  final WorkspaceSlot _slot;
 
   /// The workspace itself.
   final WorkspaceController controller;
@@ -71,7 +78,7 @@ final class ShellWorkspace {
   /// event to arrive on: what the store still opens on one keeps its tab,
   /// flagged missing, here (#289, #372).
   Future<void> load() async {
-    controller.adopt(await _session.savedWorkspace);
+    controller.adopt(await _slot.load());
     final open = [for (final tab in value.tabs) tab.path];
     if (open.isEmpty) return;
     missing(await _session.missingPaths(open));
