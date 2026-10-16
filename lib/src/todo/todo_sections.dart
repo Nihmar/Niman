@@ -2,10 +2,12 @@
 /// (#1003).
 ///
 /// Pure logic, no widgets and no I/O: the tab narrows and sorts the open
-/// file with `applyTodoFilter`, then [todoSections] cuts the sorted list
-/// into runs. The sort already puts every section's entries side by side,
-/// so grouping is one pass that preserves the incoming order; an empty
-/// section is never produced.
+/// file with `applyTodoFilter`, then [todoSections] groups the sorted list.
+/// Grouping is one pass that collects each section's entries in the order
+/// they arrive, followed by a sort of the (few) sections by rank: it does
+/// not lean on the entries of a section lying side by side, so the section
+/// order is the rank's and never the sort's by accident. An empty section
+/// is never produced.
 library;
 
 import 'package:niman/src/core/calendar_days.dart';
