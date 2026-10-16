@@ -161,6 +161,13 @@ void main() {
       expect(notifications, 1, reason: 'the same set is not a change');
     });
 
+    test('a section toggled before the stored set arrives is kept', () {
+      view
+        ..toggleSection('priority.A')
+        ..restoreCollapsed({'due.later'});
+      expect(view.collapsed, {'done', 'priority.A'});
+    });
+
     test('without a callback toggling still works', () {
       final bare = TodoListView();
       addTearDown(bare.dispose);

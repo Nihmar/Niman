@@ -961,8 +961,6 @@ final class AlbanianStrings extends Strings {
 
   // Task lists (T-TD-04).
   @override
-  String get todoOpen => 'Hapur';
-  @override
   String get todoDone => 'Përfunduar';
 
   // Filter row + sheet (T-TDM-03).
@@ -973,13 +971,7 @@ final class AlbanianStrings extends Strings {
   @override
   String get todoNoTokens => "S'ka tokene në këtë listë";
   @override
-  String get todoCountOpen => 'hapur';
-  @override
-  String get todoCountDone => 'përfunduar';
-  @override
   String get todoEmptyOpen => "Ende s'ka detyra të hapura";
-  @override
-  String get todoEmptyDone => "Ende s'është përfunduar asgjë";
   @override
   String get todoEmptyFiltered => 'Nuk ka detyra që përputhen';
   @override
@@ -1116,6 +1108,14 @@ final class AlbanianStrings extends Strings {
   String todoSectionPriority(String letter) => 'Përparësi $letter';
   @override
   String get todoSectionNoPriority => 'Pa përparësi';
+  @override
+  String get todoClearFilters => 'Pastro';
+  @override
+  String todoFilteredCount(int shown, int total) => '$shown nga $total';
+  @override
+  String todoFilterActive(int count) => 'Filtrat · $count';
+  @override
+  String todoDoneOn(String date) => 'Përfunduar $date';
   @override
   String get todoRowDue => 'Skadhencë';
   @override

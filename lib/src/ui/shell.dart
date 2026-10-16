@@ -61,6 +61,8 @@ import 'package:niman/src/spellcheck/spell_check_provider.dart';
 import 'package:niman/src/todo/reminders.dart';
 import 'package:niman/src/todo/todo_controller.dart';
 import 'package:niman/src/todo/todo_filter.dart';
+import 'package:niman/src/todo/todo_list_view.dart';
+import 'package:niman/src/todo/todo_list_view_session.dart';
 import 'package:niman/src/todo/todo_source.dart';
 import 'package:niman/src/todo/todo_store.dart';
 import 'package:niman/src/transcription/open_audio_notes.dart';
@@ -159,6 +161,7 @@ import 'package:niman/src/ui/tab_body_stack.dart';
 import 'package:niman/src/ui/tab_drag.dart';
 import 'package:niman/src/ui/text_zoom_pinch.dart';
 import 'package:niman/src/ui/todo_edit_dialog.dart';
+import 'package:niman/src/ui/todo_list_buttons.dart';
 import 'package:niman/src/ui/todo_tab.dart';
 import 'package:niman/src/ui/tour/tour_host.dart';
 import 'package:niman/src/ui/tour/tour_steps.dart';
@@ -950,6 +953,11 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// The todo state (T-TD-04): owned here so the tab body and the tab's
   /// app-bar add action share one controller.
   late final TodoController _todoController;
+
+  /// What the Todo list shows (#1003): its filter, its sort and the folded
+  /// sections. Owned here, next to the controller, because the phone's app
+  /// bar (Filter and Sort) and the tab body read and set the same state.
+  late final TodoListView _todoView;
 
   /// The calendar file (#730): the journal's events, the Home tile and the
   /// editor's colours all read it.
@@ -2301,6 +2309,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       reminders: widget.reminders,
       sourceFactory: widget.todoSourceFactory,
     );
+    _todoView = todoListViewFor(widget.controller);
     // The todo widgets follow the snapshot: every mutation notifies, and
     // the initial open notifies too, so one listener covers both.
     _todoController.addListener(_homeWidgets.pushTodos);
@@ -2489,6 +2498,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     _todoController.removeListener(_homeWidgets.pushTodos);
     _calendarController.removeListener(_pushCalendarReminders);
     _todoController.dispose();
+    _todoView.dispose();
     _calendarController.dispose();
     _personalDictionary?.dispose();
     _fab.dispose();
@@ -3884,6 +3894,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
                 onPressed: () => unawaited(_palette.open(context)),
               ),
             ],
+            ShellTab.todo => [
+              TodoAppBarActions(controller: _todoController, view: _todoView),
+            ],
             _ => const [],
           },
         ),
@@ -5102,6 +5115,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       ShellTab.files => _fab.withScrim(_treePane(controller)),
       ShellTab.todo => TodoTab(
         controller: _todoController,
+        view: _todoView,
         reminders: widget.reminders,
         onAddTask: _addTodo,
         column: _editorSettings.noteColumn,

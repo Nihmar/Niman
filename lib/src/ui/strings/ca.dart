@@ -971,8 +971,6 @@ final class CatalanStrings extends Strings {
 
   // Task lists (T-TD-04).
   @override
-  String get todoOpen => 'Obertes';
-  @override
   String get todoDone => 'Fetes';
 
   // Filter row + sheet (T-TDM-03).
@@ -983,13 +981,7 @@ final class CatalanStrings extends Strings {
   @override
   String get todoNoTokens => 'Cap token en aquesta llista';
   @override
-  String get todoCountOpen => 'obertes';
-  @override
-  String get todoCountDone => 'fetes';
-  @override
   String get todoEmptyOpen => 'Encara no hi ha tasques obertes';
-  @override
-  String get todoEmptyDone => 'Encara res fet';
   @override
   String get todoEmptyFiltered => 'Cap tasca coincideix';
   @override
@@ -1128,6 +1120,14 @@ final class CatalanStrings extends Strings {
   String todoSectionPriority(String letter) => 'Prioritat $letter';
   @override
   String get todoSectionNoPriority => 'Sense prioritat';
+  @override
+  String get todoClearFilters => 'Esborra';
+  @override
+  String todoFilteredCount(int shown, int total) => '$shown de $total';
+  @override
+  String todoFilterActive(int count) => 'Filtra · $count';
+  @override
+  String todoDoneOn(String date) => 'Feta $date';
   @override
   String get todoRowDue => 'Caduca';
   @override

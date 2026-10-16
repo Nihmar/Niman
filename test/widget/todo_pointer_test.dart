@@ -1,12 +1,15 @@
-// #712: Todo for the mouse — the row menu with Set due and Priority, the
-// hover buttons, the keyboard on the list, the edit in place, the
-// quick-add field and the filter under its pill.
+// #712, #1003: Todo for the mouse — the row menu with Set due and Priority,
+// the one-line rows with the menu slot, the keyboard on the list across
+// rows and section headers, the edit in place, the quick-add field and the
+// filter under its pill.
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/todo/todo_controller.dart';
+import 'package:niman/src/todo/todo_list_view.dart';
 import 'package:niman/src/ui/todo_pointer_row.dart';
+import 'package:niman/src/ui/todo_section_header.dart';
 import 'package:niman/src/ui/todo_tab.dart';
 
 import '../fakes/fake_library_session.dart';
@@ -17,6 +20,7 @@ void main() {
 
   late FakeTodoSource source;
   TodoController? controller;
+  late TodoListView view;
 
   Future<void> pumpTab(
     WidgetTester tester,
@@ -32,11 +36,13 @@ void main() {
       refreshDebounce: const Duration(milliseconds: 1),
       sourceFactory: (_) => source,
     );
+    view = TodoListView();
+    addTearDown(view.dispose);
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(visualDensity: VisualDensity.compact),
         home: Scaffold(
-          body: TodoTab(controller: controller!, clock: clock),
+          body: TodoTab(controller: controller!, view: view, clock: clock),
         ),
       ),
     );
@@ -78,16 +84,43 @@ void main() {
     expect(source.todoLines, ['(A) 2026-09-01 call Ada due:2026-09-08']);
   });
 
-  testWidgets('the row calendar button offers the due days alone', (
+  testWidgets('a row is one line, with its menu slot reserved (#1003)', (
     tester,
   ) async {
-    await pumpTab(tester, ['call Ada due:2026-09-01']);
-    await tester.tap(find.byKey(const Key('todo-row-due')));
-    await settle(tester);
-    expect(find.byKey(const Key('todo-menu-edit')), findsNothing);
-    await tester.tap(find.byKey(const Key('todo-menu-dueNone')));
-    await settle(tester);
-    expect(source.todoLines, ['call Ada']);
+    await pumpTab(tester, ['(A) call Ada +work due:2026-09-10', 'plain']);
+    final first = tester.getRect(row0);
+    final second = tester.getRect(find.byKey(const Key('todo-row-open-1')));
+    expect(first.height, second.height, reason: 'same height with or without');
+    expect(first.height, lessThan(48), reason: 'one line');
+
+    // The priority, the token and the due day sit on the right, in order.
+    final badge = find.descendant(
+      of: row0,
+      matching: find.byKey(const Key('todo-row-priority')),
+    );
+    expect(badge, findsOne);
+    final text = tester.getRect(find.text('call Ada'));
+    final token = tester.getRect(find.text('+work'));
+    final due = tester.getRect(find.text('Due 10 Sep'));
+    expect(tester.getRect(badge).left, greaterThan(text.right));
+    expect(token.left, greaterThan(tester.getRect(badge).right));
+    expect(due.left, greaterThan(token.right));
+
+    // The menu button is hidden until the pointer or the selection comes,
+    // and keeps its place: the text does not move.
+    final more = find.descendant(
+      of: row0,
+      matching: find.byKey(const Key('todo-row-more')),
+    );
+    Finder shown() =>
+        find.descendant(of: row0, matching: find.byType(Visibility));
+    expect(tester.widget<Visibility>(shown().first).visible, isFalse);
+    final before = tester.getRect(find.text('call Ada'));
+    await tester.tap(row0);
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(tester.widget<Visibility>(shown().first).visible, isTrue);
+    expect(tester.getRect(more), isNotNull);
+    expect(tester.getRect(find.text('call Ada')), before);
   });
 
   testWidgets('the keyboard moves, checks and deletes; a double click edits '
@@ -168,7 +201,7 @@ void main() {
     expect(at.bottom, lessThanOrEqualTo(box.bottom + 0.5));
   });
 
-  testWidgets('the selection and the edit in place stay in their view '
+  testWidgets('the selection and the edit in place stay in their file '
       '(#910)', (tester) async {
     await pumpTab(
       tester,
@@ -182,25 +215,30 @@ void main() {
     await tester.tap(find.byKey(const Key('todo-row-open-2')));
     await tester.pump(const Duration(milliseconds: 500));
     expect(selected('todo-row-open-2'), isTrue);
-    await tester.tap(find.text('Done'));
+    // Down to the Done header, open it with Space, down into its rows.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.sendKeyEvent(LogicalKeyboardKey.space);
     await settle(tester);
+    expect(find.byKey(const Key('todo-row-done-2')), findsOne);
     for (var line = 0; line < 3; line++) {
       expect(selected('todo-row-done-$line'), isFalse, reason: 'done $line');
     }
+    expect(selected('todo-row-open-2'), isFalse);
 
-    // The keys of the list start over, and act on the Done file.
-    await tester.tap(find.byKey(const Key('todo-row-done-0')));
-    await tester.pump(const Duration(milliseconds: 500));
+    // The keys of the list act on the Done file: the newest line first.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.sendKeyEvent(LogicalKeyboardKey.f2);
     await tester.pump();
+    expect(selected('todo-row-done-2'), isTrue);
     expect(find.byKey(const Key('tree-rename-field')), findsOne);
-    await tester.tap(find.text('Open'));
+    await tester.enterText(
+      find.byKey(const Key('tree-rename-field')),
+      'd3, fixed',
+    );
+    await tester.testTextInput.receiveAction(TextInputAction.done);
     await settle(tester);
-    expect(find.byKey(const Key('tree-rename-field')), findsNothing);
-    for (var line = 0; line < 3; line++) {
-      expect(selected('todo-row-open-$line'), isFalse, reason: 'open $line');
-    }
     expect(source.todoLines, ['a', 'b', 'c']);
+    expect(source.doneLines.last, 'x 2026-09-01 d3, fixed');
     expect(source.doneLines, hasLength(3));
   });
 
@@ -285,24 +323,15 @@ void main() {
     expect(source.doneLines, hasLength(2));
   });
 
-  testWidgets('a delete above the selection keeps it on its task (#910)', (
-    tester,
-  ) async {
+  testWidgets('a row leaving above the selection keeps it on its task '
+      '(#910)', (tester) async {
     await pumpTab(tester, ['a', 'b', 'c']);
     await tester.tap(find.byKey(const Key('todo-row-open-2')));
     await tester.pump(const Duration(milliseconds: 500));
 
-    // The trash of a row under the pointer deletes it, selected or not.
-    final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
-    await mouse.addPointer(location: Offset.zero);
-    addTearDown(mouse.removePointer);
-    await mouse.moveTo(tester.getCenter(row0));
-    await tester.pump();
+    // The checkbox of another row checks it, selected or not.
     await tester.tap(
-      find.descendant(
-        of: row0,
-        matching: find.byKey(const Key('todo-row-delete')),
-      ),
+      find.descendant(of: row0, matching: find.byType(Checkbox)),
     );
     await settle(tester);
     expect(source.todoLines, ['b', 'c']);
@@ -311,6 +340,61 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.delete);
     await settle(tester);
     expect(source.todoLines, ['b']);
+  });
+
+  testWidgets('a section header folds on a click and keeps the selection '
+      '(#1003)', (tester) async {
+    await pumpTab(tester, ['a due:2026-09-01', 'b']);
+    final overdue = find.byKey(const Key('todo-section-due.overdue'));
+    expect(find.text('a'), findsOne);
+    await tester.tap(overdue);
+    await settle(tester);
+    expect(find.text('a'), findsNothing);
+    expect(view.isCollapsed('due.overdue'), isTrue);
+    expect(find.text('b'), findsOne, reason: 'the other section stays open');
+    // The header is the selected row: Enter opens it again.
+    expect(tester.widget<TodoSectionHeader>(overdue).selected, isTrue);
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await settle(tester);
+    expect(find.text('a'), findsOne);
+    expect(view.isCollapsed('due.overdue'), isFalse);
+  });
+
+  testWidgets('the arrows cross headers and Space folds one (#1003)', (
+    tester,
+  ) async {
+    await pumpTab(tester, ['a due:2026-09-01', 'b due:2026-09-07', 'c']);
+    // Items: Overdue, a, Today, b, No date, c, (no Done).
+    await tester.tap(find.byKey(const Key('todo-row-open-0')));
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    TodoSectionHeader header(String id) =>
+        tester.widget<TodoSectionHeader>(find.byKey(Key('todo-section-$id')));
+    expect(header('due.today').selected, isTrue);
+    await tester.sendKeyEvent(LogicalKeyboardKey.space);
+    await settle(tester);
+    expect(find.text('b'), findsNothing);
+    expect(header('due.today').selected, isTrue, reason: 'still on it');
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    expect(header('due.none').selected, isTrue);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.pump();
+    expect(
+      tester
+          .widget<TodoPointerRow>(find.byKey(const Key('todo-row-open-0')))
+          .selected,
+      isTrue,
+    );
+    // Delete on a header does nothing.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.delete);
+    await settle(tester);
+    expect(source.todoLines, hasLength(3));
   });
 
   testWidgets('the quick-add field adds a task per Enter and keeps the '

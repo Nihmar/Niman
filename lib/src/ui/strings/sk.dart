@@ -963,8 +963,6 @@ final class SlovakStrings extends Strings {
 
   // Task lists (T-TD-04).
   @override
-  String get todoOpen => 'Otvorené';
-  @override
   String get todoDone => 'Hotové';
 
   // Filter row + sheet (T-TDM-03).
@@ -975,13 +973,7 @@ final class SlovakStrings extends Strings {
   @override
   String get todoNoTokens => 'Žiadne tokeny v tomto zozname';
   @override
-  String get todoCountOpen => 'otvorené';
-  @override
-  String get todoCountDone => 'hotové';
-  @override
   String get todoEmptyOpen => 'Zatiaľ žiadne otvorené úlohy';
-  @override
-  String get todoEmptyDone => 'Zatiaľ žiadne hotové';
   @override
   String get todoEmptyFiltered => 'Žiadna úloha nezodpovedá';
   @override
@@ -1113,6 +1105,14 @@ final class SlovakStrings extends Strings {
   String todoSectionPriority(String letter) => 'Priorita $letter';
   @override
   String get todoSectionNoPriority => 'Bez priority';
+  @override
+  String get todoClearFilters => 'Zrušiť';
+  @override
+  String todoFilteredCount(int shown, int total) => '$shown z $total';
+  @override
+  String todoFilterActive(int count) => 'Filtrovať · $count';
+  @override
+  String todoDoneOn(String date) => 'Hotovo $date';
   @override
   String get todoRowDue => 'Termín';
   @override

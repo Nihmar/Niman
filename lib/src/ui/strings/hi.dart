@@ -947,8 +947,6 @@ final class HindiStrings extends Strings {
 
   // Task lists (T-TD-04).
   @override
-  String get todoOpen => 'बाकी';
-  @override
   String get todoDone => 'पूरे';
 
   // Filter row + sheet (T-TDM-03).
@@ -959,13 +957,7 @@ final class HindiStrings extends Strings {
   @override
   String get todoNoTokens => 'इस सूची में कोई टोकन नहीं';
   @override
-  String get todoCountOpen => 'बाकी';
-  @override
-  String get todoCountDone => 'पूरे';
-  @override
   String get todoEmptyOpen => 'अभी कोई बाकी कार्य नहीं';
-  @override
-  String get todoEmptyDone => 'अभी तक कुछ पूरा नहीं';
   @override
   String get todoEmptyFiltered => 'कोई कार्य मेल नहीं खाता';
   @override
@@ -1093,6 +1085,14 @@ final class HindiStrings extends Strings {
   String todoSectionPriority(String letter) => 'प्राथमिकता $letter';
   @override
   String get todoSectionNoPriority => 'कोई प्राथमिकता नहीं';
+  @override
+  String get todoClearFilters => 'साफ़ करें';
+  @override
+  String todoFilteredCount(int shown, int total) => '$total में से $shown';
+  @override
+  String todoFilterActive(int count) => 'छानें · $count';
+  @override
+  String todoDoneOn(String date) => 'पूरा हुआ $date';
   @override
   String get todoRowDue => 'समय-सीमा';
   @override

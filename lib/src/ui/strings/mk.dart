@@ -969,8 +969,6 @@ final class MacedonianStrings extends Strings {
 
   // Task lists (T-TD-04).
   @override
-  String get todoOpen => 'Отворено';
-  @override
   String get todoDone => 'Завршено';
 
   // Filter row + sheet (T-TDM-03).
@@ -981,13 +979,7 @@ final class MacedonianStrings extends Strings {
   @override
   String get todoNoTokens => 'Нема токени во оваа листа';
   @override
-  String get todoCountOpen => 'отворено';
-  @override
-  String get todoCountDone => 'завршено';
-  @override
   String get todoEmptyOpen => 'Сè уште нема отворени задачи';
-  @override
-  String get todoEmptyDone => 'Сè уште ништо не е завршено';
   @override
   String get todoEmptyFiltered => 'Нема задачи што совпаѓаат';
   @override
@@ -1122,6 +1114,14 @@ final class MacedonianStrings extends Strings {
   String todoSectionPriority(String letter) => 'Приоритет $letter';
   @override
   String get todoSectionNoPriority => 'Без приоритет';
+  @override
+  String get todoClearFilters => 'Исчисти';
+  @override
+  String todoFilteredCount(int shown, int total) => '$shown од $total';
+  @override
+  String todoFilterActive(int count) => 'Филтер · $count';
+  @override
+  String todoDoneOn(String date) => 'Завршено $date';
   @override
   String get todoRowDue => 'Доспевање';
   @override

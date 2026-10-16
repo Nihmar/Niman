@@ -958,8 +958,6 @@ final class LatvianStrings extends Strings {
 
   // Task lists (T-TD-04).
   @override
-  String get todoOpen => 'Atvērti';
-  @override
   String get todoDone => 'Pabeigti';
 
   // Filter row + sheet (T-TDM-03).
@@ -970,13 +968,7 @@ final class LatvianStrings extends Strings {
   @override
   String get todoNoTokens => 'Šajā sarakstā nav žetonu';
   @override
-  String get todoCountOpen => 'atvērti';
-  @override
-  String get todoCountDone => 'pabeigti';
-  @override
   String get todoEmptyOpen => 'Vēl nav atvērtu uzdevumu';
-  @override
-  String get todoEmptyDone => 'Vēl nav pabeigtu';
   @override
   String get todoEmptyFiltered => 'Neviens uzdevums neattiecas';
   @override
@@ -1109,6 +1101,14 @@ final class LatvianStrings extends Strings {
   String todoSectionPriority(String letter) => 'Prioritāte $letter';
   @override
   String get todoSectionNoPriority => 'Bez prioritātes';
+  @override
+  String get todoClearFilters => 'Notīrīt';
+  @override
+  String todoFilteredCount(int shown, int total) => '$shown no $total';
+  @override
+  String todoFilterActive(int count) => 'Filtrēt · $count';
+  @override
+  String todoDoneOn(String date) => 'Pabeigts $date';
   @override
   String get todoRowDue => 'Termiņš';
   @override

@@ -965,8 +965,6 @@ final class GalicianStrings extends Strings {
 
   // Task lists (T-TD-04).
   @override
-  String get todoOpen => 'Abertas';
-  @override
   String get todoDone => 'Feitas';
 
   // Filter row + sheet (T-TDM-03).
@@ -977,13 +975,7 @@ final class GalicianStrings extends Strings {
   @override
   String get todoNoTokens => 'Sen tokens nesta lista';
   @override
-  String get todoCountOpen => 'abertas';
-  @override
-  String get todoCountDone => 'feitas';
-  @override
   String get todoEmptyOpen => 'Aínda non hai tarefas abertas';
-  @override
-  String get todoEmptyDone => 'Aínda nada feito';
   @override
   String get todoEmptyFiltered => 'Ningunha tarefa coincide';
   @override
@@ -1118,6 +1110,14 @@ final class GalicianStrings extends Strings {
   String todoSectionPriority(String letter) => 'Prioridade $letter';
   @override
   String get todoSectionNoPriority => 'Sen prioridade';
+  @override
+  String get todoClearFilters => 'Limpar';
+  @override
+  String todoFilteredCount(int shown, int total) => '$shown de $total';
+  @override
+  String todoFilterActive(int count) => 'Filtrar · $count';
+  @override
+  String todoDoneOn(String date) => 'Feita $date';
   @override
   String get todoRowDue => 'Caduca';
   @override

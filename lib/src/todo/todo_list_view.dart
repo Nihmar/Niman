@@ -30,6 +30,11 @@ final class TodoListView extends ChangeNotifier {
   TodoFilter _filter;
   final Set<String> _collapsed;
 
+  /// Whether a section was folded or opened since the view was built: what
+  /// the user did is newer than what the device had stored.
+  bool _toggled = false;
+  bool _disposed = false;
+
   /// The current filter: due range, token chips and sort key.
   TodoFilter get filter => _filter;
 
@@ -93,6 +98,7 @@ final class TodoListView extends ChangeNotifier {
   /// Folds the section [id], or opens it when it is folded, and reports
   /// the new set to [onCollapsedChanged].
   void toggleSection(String id) {
+    _toggled = true;
     if (!_collapsed.remove(id)) {
       _collapsed.add(id);
     }
@@ -102,7 +108,14 @@ final class TodoListView extends ChangeNotifier {
 
   /// Takes the folded sections persisted on this device (read after the
   /// view was built with the default). Does not report them back.
+  ///
+  /// The read is asynchronous: if the user already folded or opened a
+  /// section meanwhile, that choice is newer than the stored set and is
+  /// kept.
   void restoreCollapsed(Set<String> ids) {
+    if (_toggled || _disposed) {
+      return;
+    }
     if (ids.length == _collapsed.length && _collapsed.containsAll(ids)) {
       return;
     }
@@ -110,5 +123,11 @@ final class TodoListView extends ChangeNotifier {
       ..clear()
       ..addAll(ids);
     notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
   }
 }

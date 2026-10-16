@@ -964,8 +964,6 @@ final class PortugueseStrings extends Strings {
 
   // Task lists (T-TD-04).
   @override
-  String get todoOpen => 'Abertas';
-  @override
   String get todoDone => 'Feitas';
 
   // Filter row + sheet (T-TDM-03).
@@ -976,13 +974,7 @@ final class PortugueseStrings extends Strings {
   @override
   String get todoNoTokens => 'Nenhum token nesta lista';
   @override
-  String get todoCountOpen => 'abertas';
-  @override
-  String get todoCountDone => 'feitas';
-  @override
   String get todoEmptyOpen => 'Nenhuma tarefa aberta ainda';
-  @override
-  String get todoEmptyDone => 'Nada concluído ainda';
   @override
   String get todoEmptyFiltered => 'Nenhuma tarefa corresponde';
   @override
@@ -1116,6 +1108,14 @@ final class PortugueseStrings extends Strings {
   String todoSectionPriority(String letter) => 'Prioridade $letter';
   @override
   String get todoSectionNoPriority => 'Sem prioridade';
+  @override
+  String get todoClearFilters => 'Limpar';
+  @override
+  String todoFilteredCount(int shown, int total) => '$shown de $total';
+  @override
+  String todoFilterActive(int count) => 'Filtrar · $count';
+  @override
+  String todoDoneOn(String date) => 'Feita $date';
   @override
   String get todoRowDue => 'Vence';
   @override

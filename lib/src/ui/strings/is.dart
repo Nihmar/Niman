@@ -961,8 +961,6 @@ final class IcelandicStrings extends Strings {
 
   // Task lists (T-TD-04).
   @override
-  String get todoOpen => 'Opið';
-  @override
   String get todoDone => 'Lokið';
 
   // Filter row + sheet (T-TDM-03).
@@ -973,13 +971,7 @@ final class IcelandicStrings extends Strings {
   @override
   String get todoNoTokens => 'Engir tokenar í þessari listanum';
   @override
-  String get todoCountOpen => 'opið';
-  @override
-  String get todoCountDone => 'lokið';
-  @override
   String get todoEmptyOpen => 'Engin opið verkefni enn';
-  @override
-  String get todoEmptyDone => 'Ekkert lokið enn';
   @override
   String get todoEmptyFiltered => 'Engin verkefni sem passa';
   @override
@@ -1112,6 +1104,14 @@ final class IcelandicStrings extends Strings {
   String todoSectionPriority(String letter) => 'Forrangur $letter';
   @override
   String get todoSectionNoPriority => 'Enginn forrangur';
+  @override
+  String get todoClearFilters => 'Hreinsa';
+  @override
+  String todoFilteredCount(int shown, int total) => '$shown af $total';
+  @override
+  String todoFilterActive(int count) => 'Sil · $count';
+  @override
+  String todoDoneOn(String date) => 'Lokið $date';
   @override
   String get todoRowDue => 'Lokið';
   @override

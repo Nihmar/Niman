@@ -960,8 +960,6 @@ final class CroatianStrings extends Strings {
 
   // Task lists (T-TD-04).
   @override
-  String get todoOpen => 'Otvorene';
-  @override
   String get todoDone => 'Završene';
 
   // Filter row + sheet (T-TDM-03).
@@ -972,13 +970,7 @@ final class CroatianStrings extends Strings {
   @override
   String get todoNoTokens => 'Nema tokena na ovom popisu';
   @override
-  String get todoCountOpen => 'otvoreno';
-  @override
-  String get todoCountDone => 'završeno';
-  @override
   String get todoEmptyOpen => 'Još nema otvorenih zadaća';
-  @override
-  String get todoEmptyDone => 'Još nema završenih';
   @override
   String get todoEmptyFiltered => 'Nema zadaća koje odgovaraju';
   @override
@@ -1109,6 +1101,14 @@ final class CroatianStrings extends Strings {
   String todoSectionPriority(String letter) => 'Prioritet $letter';
   @override
   String get todoSectionNoPriority => 'Bez prioriteta';
+  @override
+  String get todoClearFilters => 'Očisti';
+  @override
+  String todoFilteredCount(int shown, int total) => '$shown od $total';
+  @override
+  String todoFilterActive(int count) => 'Filtriraj · $count';
+  @override
+  String todoDoneOn(String date) => 'Završeno $date';
   @override
   String get todoRowDue => 'Rok';
   @override

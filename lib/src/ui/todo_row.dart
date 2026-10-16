@@ -16,6 +16,7 @@ import 'package:niman/src/core/theme_tokens.dart';
 import 'package:niman/src/todo/parser.dart';
 import 'package:niman/src/todo/todo_store.dart';
 import 'package:niman/src/ui/strings.dart';
+import 'package:niman/src/ui/todo_priority_badge.dart';
 
 /// The due-date state driving the subtitle styling (overdue and today
 /// stand out; upcoming is plain).
@@ -51,6 +52,11 @@ final class TodoRow extends StatelessWidget {
   /// (injected in widget tests; defaults to now). [onToggle] flips the
   /// checkbox, [onEdit] opens the edit dialog, [onShowMenu] opens the
   /// long-press bottom sheet.
+  ///
+  /// A [done] row (a line of `done.txt`) says when it was completed where an
+  /// open one says when it is due. The priority shows as a badge unless
+  /// [showPriority] is off: a list sorted by priority has it in its
+  /// section headings.
   const new({
     required this.entry,
     required this.onToggle,
@@ -58,11 +64,19 @@ final class TodoRow extends StatelessWidget {
     required this.onShowMenu,
     required this.onShowMenuAt,
     this.today,
+    this.done = false,
+    this.showPriority = true,
     super.key,
   });
 
   /// The task with its file line index.
   final TodoEntry entry;
+
+  /// Whether the entry is a line of `done.txt`.
+  final bool done;
+
+  /// Whether the priority shows as a badge.
+  final bool showPriority;
 
   /// Flips the checkbox.
   final ValueChanged<bool> onToggle;
@@ -113,7 +127,10 @@ final class TodoRow extends StatelessWidget {
             ? const TextStyle(decoration: TextDecoration.lineThrough)
             : null,
       ),
-      subtitle: TodoRowSubtitle(task: task, today: now),
+      subtitle: TodoRowSubtitle(task: task, today: now, done: done),
+      trailing: showPriority && task.priority != null
+          ? TodoPriorityBadge(priority: task.priority!)
+          : null,
       onTap: () {
         _log.debug('todo row tap (edit): line ${entry.lineIndex}');
         onEdit();
@@ -130,36 +147,62 @@ final class TodoRow extends StatelessWidget {
 /// carries `+project` / `@context` / `#tag` tokens — a chip per token,
 /// so the row shows what it is filed under (2026-09-07 user feedback).
 final class TodoRowSubtitle extends StatelessWidget {
-  /// Creates the subtitle of [task] as of [today].
-  const new({required this.task, required this.today, super.key});
+  /// Creates the subtitle of [task] as of [today]. A [done] task says when
+  /// it was completed in place of its due date and reminder.
+  const new({
+    required this.task,
+    required this.today,
+    this.done = false,
+    super.key,
+  });
 
   /// The task the row shows.
   final TodoTask task;
+
+  /// Whether the task is a line of `done.txt`.
+  final bool done;
 
   /// The wall-clock day for the due state.
   final DateTime today;
 
   @override
   Widget build(BuildContext context) {
-    final tokens = <String>[
-      for (final p in task.projects) '+$p',
-      for (final c in task.contexts) '@$c',
-      for (final h in task.hashtags) '#$h',
-    ];
-    if (task.due == null && task.reminder == null && tokens.isEmpty) {
+    final timing = todoRowTiming(task, today, done: done);
+    final tokens = todoRowTokenChips(task);
+    if (timing.isEmpty && tokens.isEmpty) {
       return const SizedBox.shrink();
     }
-    return Wrap(
-      spacing: 6,
-      runSpacing: 2,
-      children: [
-        if (task.due != null) TodoDueLabel(due: task.due!, today: today),
-        if (task.reminder != null)
-          _ReminderChip(stamp: task.reminder!, today: today),
-        for (final token in tokens) _TokenChip(token: token),
-      ],
-    );
+    return Wrap(spacing: 6, runSpacing: 2, children: [...timing, ...tokens]);
   }
+}
+
+/// What a row says about when: the due label and the reminder, or for a
+/// [done] row when it was completed. Empty when the task has none.
+List<Widget> todoRowTiming(
+  TodoTask task,
+  DateTime today, {
+  required bool done,
+}) {
+  if (done) {
+    final completed = task.completionDate;
+    return [
+      if (completed != null) TodoDoneLabel(date: completed, today: today),
+    ];
+  }
+  return [
+    if (task.due != null) TodoDueLabel(due: task.due!, today: today),
+    if (task.reminder != null)
+      _ReminderChip(stamp: task.reminder!, today: today),
+  ];
+}
+
+/// A chip per `+project` / `@context` / `#tag` the [task] carries.
+List<Widget> todoRowTokenChips(TodoTask task) {
+  return [
+    for (final p in task.projects) _TokenChip(token: '+$p'),
+    for (final c in task.contexts) _TokenChip(token: '@$c'),
+    for (final h in task.hashtags) _TokenChip(token: '#$h'),
+  ];
 }
 
 /// The due part of the row subtitle (T-TDM-02, split on 2026-09-07):
@@ -187,13 +230,38 @@ final class TodoDueLabel extends StatelessWidget {
     };
     final label = switch (dueState) {
       TodoDueState.overdue =>
-        '${AppStrings.todoDueOverdue} · ${_shortDate(due, today)}',
+        '${AppStrings.todoDueOverdue} · ${todoShortDate(due, today)}',
       TodoDueState.today => AppStrings.todoRowDueToday,
       TodoDueState.upcoming =>
-        '${AppStrings.todoRowDue} ${_shortDate(due, today)}',
+        '${AppStrings.todoRowDue} ${todoShortDate(due, today)}',
     };
     final style = Theme.of(context).textTheme.bodySmall?.copyWith(color: color);
     return Text(label, style: style);
+  }
+}
+
+/// The completion part of a done row: `Done 7 Sep`, where an open row has
+/// its due date.
+final class TodoDoneLabel extends StatelessWidget {
+  /// The label of a task completed on [date], read on [today].
+  const new({required this.date, required this.today, super.key});
+
+  /// The day the task was completed.
+  final DateTime date;
+
+  /// The day it is read on.
+  final DateTime today;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Text(
+      key: const Key('todo-row-done-on'),
+      AppStrings.todoDoneOn(todoShortDate(date, today)),
+      style: theme.textTheme.bodySmall?.copyWith(
+        color: theme.colorScheme.onSurfaceVariant,
+      ),
+    );
   }
 }
 
@@ -218,7 +286,7 @@ final class _ReminderChip extends StatelessWidget {
       children: [
         Icon(Icons.access_time, size: 14, color: scheme.onSurfaceVariant),
         const SizedBox(width: 2),
-        Text('${_shortDate(stamp, today)} ${_timeOf(stamp)}', style: style),
+        Text('${todoShortDate(stamp, today)} ${_timeOf(stamp)}', style: style),
       ],
     );
   }
@@ -264,7 +332,7 @@ Color tokenColor(BuildContext context, String token) {
 /// The display form of [date] (`7 Sep`), appending the year when it
 /// differs from [today]'s — the row's display formatting (the parser's
 /// `formatTodoDate` stays the machine form).
-String _shortDate(DateTime date, DateTime today) {
+String todoShortDate(DateTime date, DateTime today) {
   final base = '${date.day} ${AppStrings.monthNamesShort[date.month - 1]}';
   return date.year == today.year ? base : '$base ${date.year}';
 }

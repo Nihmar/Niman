@@ -953,8 +953,6 @@ final class EstonianStrings extends Strings {
 
   // Task lists (T-TD-04).
   @override
-  String get todoOpen => 'Avatud';
-  @override
   String get todoDone => 'Lõpetatud';
 
   // Filter row + sheet (T-TDM-03).
@@ -965,13 +963,7 @@ final class EstonianStrings extends Strings {
   @override
   String get todoNoTokens => 'Selles loetelus pole tokeneid';
   @override
-  String get todoCountOpen => 'avatud';
-  @override
-  String get todoCountDone => 'lõpetatud';
-  @override
   String get todoEmptyOpen => 'Avatud ülesandeid pole veel';
-  @override
-  String get todoEmptyDone => 'Lõpetatud ei ole veel';
   @override
   String get todoEmptyFiltered => 'Ülesanne ei vasta';
   @override
@@ -1102,6 +1094,14 @@ final class EstonianStrings extends Strings {
   String todoSectionPriority(String letter) => 'Prioriteet $letter';
   @override
   String get todoSectionNoPriority => 'Prioriteedita';
+  @override
+  String get todoClearFilters => 'Eemalda';
+  @override
+  String todoFilteredCount(int shown, int total) => '$shown / $total';
+  @override
+  String todoFilterActive(int count) => 'Filtreeri · $count';
+  @override
+  String todoDoneOn(String date) => 'Lõpetatud $date';
   @override
   String get todoRowDue => 'Lõpp';
   @override

@@ -962,8 +962,6 @@ final class HungarianStrings extends Strings {
 
   // Task lists (T-TD-04).
   @override
-  String get todoOpen => 'Nyitottak';
-  @override
   String get todoDone => 'Kész';
 
   // Filter row + sheet (T-TDM-03).
@@ -974,13 +972,7 @@ final class HungarianStrings extends Strings {
   @override
   String get todoNoTokens => 'Nincs token ezen a listán';
   @override
-  String get todoCountOpen => 'nyitott';
-  @override
-  String get todoCountDone => 'kész';
-  @override
   String get todoEmptyOpen => 'Még nincs nyitott feladat';
-  @override
-  String get todoEmptyDone => 'Még nincs kész';
   @override
   String get todoEmptyFiltered => 'Nincs illeszkedő feladat';
   @override
@@ -1115,6 +1107,14 @@ final class HungarianStrings extends Strings {
   String todoSectionPriority(String letter) => '$letter prioritás';
   @override
   String get todoSectionNoPriority => 'Nincs prioritás';
+  @override
+  String get todoClearFilters => 'Törlés';
+  @override
+  String todoFilteredCount(int shown, int total) => '$shown / $total';
+  @override
+  String todoFilterActive(int count) => 'Szűrés · $count';
+  @override
+  String todoDoneOn(String date) => 'Kész: $date';
   @override
   String get todoRowDue => 'Esedékesség';
   @override

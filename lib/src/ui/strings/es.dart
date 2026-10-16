@@ -970,8 +970,6 @@ final class SpanishStrings extends Strings {
 
   // Task lists (T-TD-04).
   @override
-  String get todoOpen => 'Pendientes';
-  @override
   String get todoDone => 'Hechas';
 
   // Filter row + sheet (T-TDM-03).
@@ -982,13 +980,7 @@ final class SpanishStrings extends Strings {
   @override
   String get todoNoTokens => 'Sin tokens en esta lista';
   @override
-  String get todoCountOpen => 'pendientes';
-  @override
-  String get todoCountDone => 'hechas';
-  @override
   String get todoEmptyOpen => 'Aún no hay tareas pendientes';
-  @override
-  String get todoEmptyDone => 'Nada completado aún';
   @override
   String get todoEmptyFiltered => 'Ninguna tarea coincide';
   @override
@@ -1125,6 +1117,14 @@ final class SpanishStrings extends Strings {
   String todoSectionPriority(String letter) => 'Prioridad $letter';
   @override
   String get todoSectionNoPriority => 'Sin prioridad';
+  @override
+  String get todoClearFilters => 'Borrar';
+  @override
+  String todoFilteredCount(int shown, int total) => '$shown de $total';
+  @override
+  String todoFilterActive(int count) => 'Filtrar · $count';
+  @override
+  String todoDoneOn(String date) => 'Hecha $date';
   @override
   String get todoRowDue => 'Vence';
   @override

@@ -1,6 +1,5 @@
 /// A desktop todo row's menu (#712): Edit…, Set due ▸, Priority ▸ and
-/// Delete, at the pointer or under the row's ⋯; the calendar button opens
-/// the due choices alone.
+/// Delete, at the pointer or under the row's ⋯.
 library;
 
 import 'package:flutter/material.dart';
@@ -43,11 +42,8 @@ enum TodoMenuPick {
   delete,
 }
 
-/// The menu's rows: the whole menu, or with [dueOnly] the due choices.
-List<Widget> todoRowMenuItems({
-  required ValueChanged<TodoMenuPick> onPick,
-  bool dueOnly = false,
-}) {
+/// The menu's rows.
+List<Widget> todoRowMenuItems({required ValueChanged<TodoMenuPick> onPick}) {
   Widget item(TodoMenuPick pick, String label, {IconData? icon}) =>
       MenuItemButton(
         key: Key('todo-menu-${pick.name}'),
@@ -62,7 +58,6 @@ List<Widget> todoRowMenuItems({
     item(TodoMenuPick.duePick, AppStrings.todoPickDate),
     item(TodoMenuPick.dueNone, AppStrings.todoNoDueDate),
   ];
-  if (dueOnly) return due;
   return [
     item(
       TodoMenuPick.edit,

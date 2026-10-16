@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/todo/reminder_health.dart';
 import 'package:niman/src/todo/todo_controller.dart';
+import 'package:niman/src/todo/todo_list_view.dart';
 import 'package:niman/src/ui/todo_tab.dart';
 
 import '../fakes/fake_library_session.dart';
@@ -35,10 +36,16 @@ void main() {
   });
 
   Future<void> pumpTab(WidgetTester tester) async {
+    final view = TodoListView();
+    addTearDown(view.dispose);
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: TodoTab(controller: controller, reminders: reminders),
+          body: TodoTab(
+            controller: controller,
+            view: view,
+            reminders: reminders,
+          ),
         ),
       ),
     );

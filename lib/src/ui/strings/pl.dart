@@ -971,8 +971,6 @@ final class PolishStrings extends Strings {
 
   // Task lists (T-TD-04).
   @override
-  String get todoOpen => 'Otwarte';
-  @override
   String get todoDone => 'Ukończone';
 
   // Filter row + sheet (T-TDM-03).
@@ -983,13 +981,7 @@ final class PolishStrings extends Strings {
   @override
   String get todoNoTokens => 'Brak tokenów na tej liście';
   @override
-  String get todoCountOpen => 'otwarte';
-  @override
-  String get todoCountDone => 'ukończone';
-  @override
   String get todoEmptyOpen => 'Nie ma jeszcze otwartych zadań';
-  @override
-  String get todoEmptyDone => 'Nic jeszcze nie jest ukończone';
   @override
   String get todoEmptyFiltered => 'Żadne zadanie nie pasuje';
   @override
@@ -1123,6 +1115,14 @@ final class PolishStrings extends Strings {
   String todoSectionPriority(String letter) => 'Priorytet $letter';
   @override
   String get todoSectionNoPriority => 'Bez priorytetu';
+  @override
+  String get todoClearFilters => 'Wyczyść';
+  @override
+  String todoFilteredCount(int shown, int total) => '$shown z $total';
+  @override
+  String todoFilterActive(int count) => 'Filtruj · $count';
+  @override
+  String todoDoneOn(String date) => 'Ukończono $date';
   @override
   String get todoRowDue => 'Termin';
   @override

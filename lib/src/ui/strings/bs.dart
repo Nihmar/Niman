@@ -965,8 +965,6 @@ final class BosnianStrings extends Strings {
 
   // Task lists (T-TD-04).
   @override
-  String get todoOpen => 'Otvoreno';
-  @override
   String get todoDone => 'Završeno';
 
   // Filter row + sheet (T-TDM-03).
@@ -977,13 +975,7 @@ final class BosnianStrings extends Strings {
   @override
   String get todoNoTokens => 'Nema tokena u ovom popisu';
   @override
-  String get todoCountOpen => 'otvoreno';
-  @override
-  String get todoCountDone => 'završeno';
-  @override
   String get todoEmptyOpen => 'Još nema otvorenih zadaća';
-  @override
-  String get todoEmptyDone => 'Još ništa završeno';
   @override
   String get todoEmptyFiltered => 'Nema zadaća koje se podudaraju';
   @override
@@ -1116,6 +1108,14 @@ final class BosnianStrings extends Strings {
   String todoSectionPriority(String letter) => 'Prioritet $letter';
   @override
   String get todoSectionNoPriority => 'Bez prioriteta';
+  @override
+  String get todoClearFilters => 'Očisti';
+  @override
+  String todoFilteredCount(int shown, int total) => '$shown od $total';
+  @override
+  String todoFilterActive(int count) => 'Filter · $count';
+  @override
+  String todoDoneOn(String date) => 'Završeno $date';
   @override
   String get todoRowDue => 'Dospijeće';
   @override

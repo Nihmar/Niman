@@ -968,8 +968,6 @@ final class BulgarianStrings extends Strings {
 
   // Task lists (T-TD-04).
   @override
-  String get todoOpen => 'Отворени';
-  @override
   String get todoDone => 'Завършени';
 
   // Filter row + sheet (T-TDM-03).
@@ -980,13 +978,7 @@ final class BulgarianStrings extends Strings {
   @override
   String get todoNoTokens => 'Няма токени в този списък';
   @override
-  String get todoCountOpen => 'отворени';
-  @override
-  String get todoCountDone => 'завършени';
-  @override
   String get todoEmptyOpen => 'Все още няма отворени задачи';
-  @override
-  String get todoEmptyDone => 'Все още няма завършени';
   @override
   String get todoEmptyFiltered => 'Няма съответстващи задачи';
   @override
@@ -1118,6 +1110,14 @@ final class BulgarianStrings extends Strings {
   String todoSectionPriority(String letter) => 'Приоритет $letter';
   @override
   String get todoSectionNoPriority => 'Без приоритет';
+  @override
+  String get todoClearFilters => 'Изчисти';
+  @override
+  String todoFilteredCount(int shown, int total) => '$shown от $total';
+  @override
+  String todoFilterActive(int count) => 'Филтрирай · $count';
+  @override
+  String todoDoneOn(String date) => 'Завършено $date';
   @override
   String get todoRowDue => 'Краен срок';
   @override

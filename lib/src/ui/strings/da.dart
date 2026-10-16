@@ -957,8 +957,6 @@ final class DanishStrings extends Strings {
 
   // Task lists (T-TD-04).
   @override
-  String get todoOpen => 'Åbne';
-  @override
   String get todoDone => 'Færdig';
 
   // Filter row + sheet (T-TDM-03).
@@ -969,13 +967,7 @@ final class DanishStrings extends Strings {
   @override
   String get todoNoTokens => 'Ingen token i denne liste';
   @override
-  String get todoCountOpen => 'åbne';
-  @override
-  String get todoCountDone => 'færdige';
-  @override
   String get todoEmptyOpen => 'Ingen åbne opgaver endnu';
-  @override
-  String get todoEmptyDone => 'Intet fuldført endnu';
   @override
   String get todoEmptyFiltered => 'Ingen opgaver matcher';
   @override
@@ -1108,6 +1100,14 @@ final class DanishStrings extends Strings {
   String todoSectionPriority(String letter) => 'Prioritet $letter';
   @override
   String get todoSectionNoPriority => 'Ingen prioritet';
+  @override
+  String get todoClearFilters => 'Ryd';
+  @override
+  String todoFilteredCount(int shown, int total) => '$shown af $total';
+  @override
+  String todoFilterActive(int count) => 'Filtrer · $count';
+  @override
+  String todoDoneOn(String date) => 'Færdig $date';
   @override
   String get todoRowDue => 'Frist';
   @override

@@ -966,8 +966,6 @@ final class DutchStrings extends Strings {
 
   // Task lists (T-TD-04).
   @override
-  String get todoOpen => 'Open';
-  @override
   String get todoDone => 'Klaar';
 
   // Filter row + sheet (T-TDM-03).
@@ -978,13 +976,7 @@ final class DutchStrings extends Strings {
   @override
   String get todoNoTokens => 'Geen tokens in deze lijst';
   @override
-  String get todoCountOpen => 'open';
-  @override
-  String get todoCountDone => 'klaar';
-  @override
   String get todoEmptyOpen => 'Nog geen openstaande taken';
-  @override
-  String get todoEmptyDone => 'Nog niets afgerond';
   @override
   String get todoEmptyFiltered => 'Geen taken komen overeen';
   @override
@@ -1118,6 +1110,14 @@ final class DutchStrings extends Strings {
   String todoSectionPriority(String letter) => 'Prioriteit $letter';
   @override
   String get todoSectionNoPriority => 'Geen prioriteit';
+  @override
+  String get todoClearFilters => 'Wissen';
+  @override
+  String todoFilteredCount(int shown, int total) => '$shown van $total';
+  @override
+  String todoFilterActive(int count) => 'Filteren · $count';
+  @override
+  String todoDoneOn(String date) => 'Klaar $date';
   @override
   String get todoRowDue => 'Vervalt';
   @override

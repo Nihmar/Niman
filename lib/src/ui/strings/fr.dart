@@ -977,8 +977,6 @@ final class FrenchStrings extends Strings {
 
   // Task lists (T-TD-04).
   @override
-  String get todoOpen => 'À faire';
-  @override
   String get todoDone => 'Faites';
 
   // Filter row + sheet (T-TDM-03).
@@ -989,13 +987,7 @@ final class FrenchStrings extends Strings {
   @override
   String get todoNoTokens => 'Aucun jeton dans cette liste';
   @override
-  String get todoCountOpen => 'à faire';
-  @override
-  String get todoCountDone => 'faites';
-  @override
   String get todoEmptyOpen => 'Aucune tâche à faire pour l’instant';
-  @override
-  String get todoEmptyDone => 'Rien de terminé pour l’instant';
   @override
   String get todoEmptyFiltered => 'Aucune tâche ne correspond';
   @override
@@ -1135,6 +1127,14 @@ final class FrenchStrings extends Strings {
   String todoSectionPriority(String letter) => 'Priorité $letter';
   @override
   String get todoSectionNoPriority => 'Sans priorité';
+  @override
+  String get todoClearFilters => 'Effacer';
+  @override
+  String todoFilteredCount(int shown, int total) => '$shown sur $total';
+  @override
+  String todoFilterActive(int count) => 'Filtrer · $count';
+  @override
+  String todoDoneOn(String date) => 'Fait le $date';
   @override
   String get todoRowDue => 'Échéance';
   @override

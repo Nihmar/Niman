@@ -963,8 +963,6 @@ final class UkrainianStrings extends Strings {
 
   // Task lists (T-TD-04).
   @override
-  String get todoOpen => 'Відкриті';
-  @override
   String get todoDone => 'Виконані';
 
   // Filter row + sheet (T-TDM-03).
@@ -975,13 +973,7 @@ final class UkrainianStrings extends Strings {
   @override
   String get todoNoTokens => 'У цьому списку немає токенів';
   @override
-  String get todoCountOpen => 'відкриті';
-  @override
-  String get todoCountDone => 'виконані';
-  @override
   String get todoEmptyOpen => 'Відкритих завдань ще немає';
-  @override
-  String get todoEmptyDone => 'Виконаних ще немає';
   @override
   String get todoEmptyFiltered => 'Немає відповідних завдань';
   @override
@@ -1113,6 +1105,14 @@ final class UkrainianStrings extends Strings {
   String todoSectionPriority(String letter) => 'Пріоритет $letter';
   @override
   String get todoSectionNoPriority => 'Без пріоритету';
+  @override
+  String get todoClearFilters => 'Скинути';
+  @override
+  String todoFilteredCount(int shown, int total) => '$shown з $total';
+  @override
+  String todoFilterActive(int count) => 'Фільтрувати · $count';
+  @override
+  String todoDoneOn(String date) => 'Виконано $date';
   @override
   String get todoRowDue => 'Строк';
   @override

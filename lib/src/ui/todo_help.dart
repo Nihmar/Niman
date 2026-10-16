@@ -13,8 +13,60 @@ library;
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:niman/src/ui/device_shape.dart';
 import 'package:niman/src/ui/help_layout.dart';
 import 'package:niman/src/ui/strings.dart';
+
+/// Opens the todo.txt format reference (T-TD-08).
+///
+/// The dialog writes the syntax, so a user can go a long way without
+/// seeing it -- until they open todo.txt in another editor, or wonder
+/// what the chips are. On the desktop it opens as a dialog over the
+/// tab: a pushed screen would hide the rail and the list (T-PP-22).
+Future<void> showTodoHelp(BuildContext context) async {
+  if (!isWideShell(context)) {
+    await Navigator.push(
+      context,
+      MaterialPageRoute<void>(builder: (context) => const TodoHelpScreen()),
+    );
+    return;
+  }
+  await showDialog<void>(
+    context: context,
+    builder: (context) => Dialog(
+      key: const Key('todo-help-dialog'),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 620, maxHeight: 640),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 12, 8, 4),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      AppStrings.todoHelpTitle,
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                  ),
+                  IconButton(
+                    key: const Key('todo-help-close'),
+                    tooltip: MaterialLocalizations.of(context)
+                        .closeButtonTooltip,
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                ],
+              ),
+            ),
+            const Flexible(child: TodoHelpBody()),
+          ],
+        ),
+      ),
+    ),
+  );
+}
 
 /// A read-only reference for the todo.txt syntax Niman understands.
 final class TodoHelpScreen extends StatelessWidget {

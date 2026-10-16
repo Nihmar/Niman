@@ -911,8 +911,6 @@ final class JapaneseStrings extends Strings {
 
   // Task lists (T-TD-04).
   @override
-  String get todoOpen => '未完了';
-  @override
   String get todoDone => '完了済み';
 
   // Filter row + sheet (T-TDM-03).
@@ -923,13 +921,7 @@ final class JapaneseStrings extends Strings {
   @override
   String get todoNoTokens => 'このリストにトークンはありません';
   @override
-  String get todoCountOpen => '未完了';
-  @override
-  String get todoCountDone => '完了済み';
-  @override
   String get todoEmptyOpen => 'まだ未完了タスクがありません';
-  @override
-  String get todoEmptyDone => 'まだ完了はありません';
   @override
   String get todoEmptyFiltered => '該当するタスクがありません';
   @override
@@ -1047,6 +1039,14 @@ final class JapaneseStrings extends Strings {
   String todoSectionPriority(String letter) => '優先度 $letter';
   @override
   String get todoSectionNoPriority => '優先度なし';
+  @override
+  String get todoClearFilters => 'クリア';
+  @override
+  String todoFilteredCount(int shown, int total) => '$total件中$shown件';
+  @override
+  String todoFilterActive(int count) => '絞り込み · $count';
+  @override
+  String todoDoneOn(String date) => '完了 $date';
   @override
   String get todoRowDue => '期限';
   @override
