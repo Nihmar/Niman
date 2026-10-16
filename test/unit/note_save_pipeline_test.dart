@@ -9,6 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/library/note_save_result.dart';
 import 'package:niman/src/library/note_write_stream.dart';
+import 'package:niman/src/markdown/note_framing.dart';
 import 'package:niman/src/markdown/note_references.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/ui/note_save_pipeline.dart';
@@ -27,6 +28,7 @@ final class Harness {
       text: () => buffer.text,
       buffer: () => buffer,
       references: () => references,
+      framing: () => framing,
       saveNote: () => streaming ? null : _save,
       writeNote: () => null,
       saveNoteStream: () => streaming ? _saveStream : null,
@@ -43,6 +45,9 @@ final class Harness {
   String path = p.join('lib', 'a.md');
   SourceBuffer buffer = SourceBuffer.fromText('one\n');
   NoteReferences? references;
+
+  /// What the note's file wraps its text in.
+  NoteFraming framing = NoteFraming.plain;
   late final NoteSavePipeline pipeline;
 
   final List<Write> writes = [];

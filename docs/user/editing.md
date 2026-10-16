@@ -322,6 +322,15 @@ app coming back to the front, a sync that touched it), so a read that failed
 for a moment does not need a trip to another note and back. A file that is not
 text at all is an attachment, and says so instead.
 
+**Line endings and the byte order mark.** The editor works with plain lines,
+but the file keeps what it had: a note with Windows (`CRLF`) line endings is
+saved with them, and a note that began with a UTF-8 byte order mark is saved
+with it, so changing one character of a note changes one character of the
+file — a version-control diff or a sync merge sees that character and not
+every line. A note that mixes endings is saved with the one most of its lines
+had (a tie goes to `LF`), so every line ends alike afterwards; a note of lone
+`CR` lines, as the oldest Mac programs wrote, stays that way.
+
 ## Markdown support
 
 Tables, task lists, footnotes, strikethrough, `==highlight==` (a marker's

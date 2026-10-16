@@ -8,6 +8,7 @@ import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/library/note_save_result.dart';
 import 'package:niman/src/library/note_write_stream.dart';
+import 'package:niman/src/markdown/note_framing.dart';
 import 'package:niman/src/markdown/note_references.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 
@@ -48,7 +49,9 @@ final class NoteSavePipeline {
   /// [notePath] is the note on screen, [ready] whether its text is loaded,
   /// [text] the note joined, [buffer] the editor's buffer (null without
   /// one) and [references] the note's tags and links as the editor keeps
-  /// them. [saveNote], [writeNote] and [saveNoteStream] are the writers, read
+  /// them, and [framing] what the note's file wrapped its text in when it was
+  /// read, which every save writes back. [saveNote], [writeNote] and
+  /// [saveNoteStream] are the writers, read
   /// at each save. [onSaved] hears of a save of the note on screen that
   /// reached the disk; [onSettled] of every save that ended, however it did.
   new({
@@ -57,6 +60,7 @@ final class NoteSavePipeline {
     required this.text,
     required this.buffer,
     required this.references,
+    required this.framing,
     required this.saveNote,
     required this.writeNote,
     required this.saveNoteStream,
@@ -81,6 +85,11 @@ final class NoteSavePipeline {
 
   /// The note's tags and links as of [buffer], when the editor keeps them.
   final NoteReferences? Function() references;
+
+  /// The line ending and byte order mark the note's file had when it was
+  /// read (#1056). The buffer holds `\n` lines and no mark whatever the file
+  /// had; every save writes the file's own back, so a CRLF note stays CRLF.
+  final NoteFraming Function() framing;
 
   /// The library's write path (`NoteView.saveNote`).
   final NoteSaver? Function() saveNote;
@@ -249,7 +258,7 @@ final class NoteSavePipeline {
   Future<void> _saveOutgoingAfter(Future<void>? waiting, String target) async {
     final session = _editSession;
     final stream = _takeStreamSave();
-    final joined = stream == null ? text() : null;
+    final joined = stream == null ? framing().apply(text()) : null;
     if (waiting != null) {
       try {
         await waiting;
@@ -300,7 +309,7 @@ final class NoteSavePipeline {
     // The full-text join (O(n)) happens here only — the save path, never
     // the keystroke path.
     final joinClock = Stopwatch()..start();
-    final joined = text();
+    final joined = framing().apply(text());
     final joinMs = joinClock.elapsedMilliseconds;
     // Read with the text, before the first await: a note switch that
     // saves the outgoing note is followed by a load that starts the next
@@ -396,7 +405,11 @@ final class NoteSavePipeline {
     if (lines == null || lines.lineCount == 0) return null;
     // The references with the lines, of the same revision: the source
     // pane's scan follows this very buffer.
-    return _StreamSave(lines.snapshot(), references: references());
+    return _StreamSave(
+      lines.snapshot(),
+      references: references(),
+      framing: framing(),
+    );
   }
 
   /// The next slice of [stream]'s buffer, or null when the note is out.
@@ -409,10 +422,9 @@ final class NoteSavePipeline {
   Future<NoteBytes?> _nextSlice(_StreamSave stream, int index) async {
     final first = index * kSaveSliceLines;
     if (first >= stream.buffer.lineCount) return null;
-    final slice = stream.buffer.sliceText(
-      first,
-      first + kSaveSliceLines,
-      kSaveSliceChars,
+    final slice = stream.framing.applyToSlice(
+      stream.buffer.sliceText(first, first + kSaveSliceLines, kSaveSliceChars),
+      first: index == 0,
     );
     // Building the first slice is what starts the save; the gap the frames
     // need is the one after it, not before it.
@@ -477,10 +489,14 @@ final class NoteSavePipeline {
 /// were when the save started, which no later edit reaches.
 final class _StreamSave {
   /// Saves [buffer]'s lines, slice by slice.
-  const new(this.buffer, {this.references});
+  const new(this.buffer, {this.references, this.framing = NoteFraming.plain});
 
   /// The note's lines, at the moment the save began.
   final SourceBuffer buffer;
+
+  /// What the lines are written in, as of the moment the save began: a note
+  /// switch replaces the editor's with the incoming note's.
+  final NoteFraming framing;
 
   /// The note's tags and links as of [buffer], when the editor keeps them.
   final NoteReferences? references;

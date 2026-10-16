@@ -21,6 +21,7 @@ import 'dart:isolate';
 import 'package:meta/meta.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/markdown/note_bytes.dart';
+import 'package:niman/src/markdown/note_framing.dart';
 import 'package:niman/src/markdown/note_read_failure.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 
@@ -28,10 +29,19 @@ import 'package:niman/src/markdown/source_buffer.dart';
 /// the editor holds, and the buffer over that text.
 final class LoadedNote {
   /// Creates a loaded note.
-  const new({required this.text, required this.buffer, this.stamp});
+  const new({
+    required this.text,
+    required this.buffer,
+    this.framing = NoteFraming.plain,
+    this.stamp,
+  });
 
   /// The note's text, its line endings `\n`.
   final String text;
+
+  /// The line ending and byte order mark the file had, which a save writes
+  /// back (#1056).
+  final NoteFraming framing;
 
   /// The buffer over [text].
   final SourceBuffer buffer;
@@ -48,10 +58,17 @@ final class LoadedNote {
 /// [stamp] of the file as it was before the read (see [LoadedNote.stamp]).
 final class NoteTextRead {
   /// Creates a read.
-  const new({required this.text, required this.stamp});
+  const new({
+    required this.text,
+    required this.stamp,
+    this.framing = NoteFraming.plain,
+  });
 
   /// The text, line endings as on disk.
   final String text;
+
+  /// What the file wraps [text] in (#1056).
+  final NoteFraming framing;
 
   /// The file before the read, or null when it could not be stat'ed.
   final DiskStamp? stamp;
@@ -88,15 +105,19 @@ Object readNoteTextSync(
   // Before the read, not after it (see [LoadedNote.stamp]).
   final stamp = DiskStamp.of(path);
   final String? text;
+  final List<int> bytes;
   try {
-    text = decodeNoteTextIfText(
-      readBytes?.call(path) ?? File(path).readAsBytesSync(),
-    );
+    bytes = readBytes?.call(path) ?? File(path).readAsBytesSync();
+    text = decodeNoteTextIfText(bytes);
   } on FileSystemException catch (error) {
     return _unreadable(path, error);
   }
   if (text == null) return NoteReadFailure('$path: not text', notText: true);
-  return NoteTextRead(text: text, stamp: stamp);
+  return NoteTextRead(
+    text: text,
+    stamp: stamp,
+    framing: NoteFraming.of(bytes: bytes, text: text),
+  );
 }
 
 /// The failure a read that threw amounts to: a value the isolate can send
@@ -113,18 +134,21 @@ Object loadNoteSync(String path, {List<int> Function(String path)? readBytes}) {
   // Before the read, not after it (see [LoadedNote.stamp]).
   final stamp = DiskStamp.of(path);
   final String? read;
+  final List<int> bytes;
   try {
-    read = decodeNoteTextIfText(
-      readBytes?.call(path) ?? File(path).readAsBytesSync(),
-    );
+    bytes = readBytes?.call(path) ?? File(path).readAsBytesSync();
+    read = decodeNoteTextIfText(bytes);
   } on FileSystemException catch (error) {
     return _unreadable(path, error);
   }
   if (read == null) return NoteReadFailure('$path: not text', notText: true);
+  // Counted before the endings are made `\n`, or there is nothing to count.
+  final framing = NoteFraming.of(bytes: bytes, text: read);
   final text = normalizedLineEndings(read);
   return LoadedNote(
     text: text,
     buffer: SourceBuffer.fromText(text),
+    framing: framing,
     stamp: stamp,
   );
 }

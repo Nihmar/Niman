@@ -34,6 +34,8 @@ import 'package:niman/src/links/suggester.dart';
 import 'package:niman/src/markdown/background_scan.dart';
 import 'package:niman/src/markdown/buffer_block_anchors.dart';
 import 'package:niman/src/markdown/edit/source_find.dart';
+import 'package:niman/src/markdown/line_ending.dart';
+import 'package:niman/src/markdown/note_framing.dart';
 import 'package:niman/src/markdown/note_load.dart';
 import 'package:niman/src/markdown/note_read_failure.dart';
 import 'package:niman/src/markdown/read_parser.dart';
@@ -88,9 +90,9 @@ const double zenCaretWidth = 3;
 /// and saves are atomic. Edits persist ~500 ms after the last keystroke,
 /// on focus loss, and when the app is hidden.
 ///
-/// Line endings: the buffer uses LF; `\r` is stripped on load and the save
-/// writes LF. Restoring the file's original line ending on save is a
-/// deferred refinement (record it per note).
+/// Line endings: the buffer uses LF; `\r` is stripped on load, the file's
+/// dominant ending is remembered with the note, and every save writes the
+/// text back with it (#1056) — a CRLF note stays CRLF.
 ///
 /// [showLineNumbers] and [autofocusEditor] are the settings toggles,
 /// passed through to the editor. The note is one pane: [showPreview] says
@@ -660,6 +662,11 @@ final class _NoteViewState extends State<NoteView>
   /// look at the file asks the I/O threads ([DiskStamp.ofAsync]).
   DiskStamp? _diskStamp;
 
+  /// The line ending and byte order mark the note's file has (#1056). The
+  /// buffer holds `\n` lines and no mark whatever the file had; a save writes
+  /// these back.
+  NoteFraming _framing = NoteFraming.plain;
+
   /// The read pane's refresh (T-M2-08), after a pause in the typing.
   Timer? _previewTimer;
 
@@ -911,6 +918,7 @@ final class _NoteViewState extends State<NoteView>
     text: () => _unifiedText,
     buffer: () => _unifiedSurfaceBuffer,
     references: () => _sourceViewKey.currentState?.references(),
+    framing: () => _framing,
     saveNote: () => widget.saveNote,
     writeNote: () => widget.writeNote,
     saveNoteStream: () => widget.saveNoteStream,
@@ -1196,6 +1204,10 @@ final class _NoteViewState extends State<NoteView>
       );
       // The test seam reads nothing, so it has no stamp to keep.
       _diskStamp = ready?.stamp;
+      // The seam's content is text already: whatever mark it holds is in it.
+      _framing =
+          ready?.framing ??
+          NoteFraming(lineEnding: LineEnding.dominantOf(content));
       _surfaceCaretLine = null;
       _unifiedText = text;
       // A template `{{cursor}}` landing (#53): the surface was given the
@@ -1327,6 +1339,7 @@ final class _NoteViewState extends State<NoteView>
     if (_loading || _saves.busy || _saves.dirty) return;
     final String content;
     DiskStamp? stamp;
+    NoteFraming? framing;
     try {
       if (widget.readNote != null) {
         content = await widget.readNote!(path);
@@ -1335,6 +1348,7 @@ final class _NoteViewState extends State<NoteView>
         if (loaded is! NoteTextRead) return;
         content = loaded.text;
         stamp = loaded.stamp;
+        framing = loaded.framing;
       }
     } on Object catch (error) {
       _log.warning('reload read failed: $path ($error)');
@@ -1353,6 +1367,8 @@ final class _NoteViewState extends State<NoteView>
     // the file that was looked at, so the next look can stop at the stamp
     // instead of reading it again (#1060).
     _diskStamp = stamp;
+    _framing =
+        framing ?? NoteFraming(lineEnding: LineEnding.dominantOf(content));
     if (text == _unifiedText) return;
     // Mute the programmatic change like _load does: the listener returns
     // before the revision bump and the save schedule.
