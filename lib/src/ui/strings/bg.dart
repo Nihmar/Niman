@@ -2113,6 +2113,11 @@ final class BulgarianStrings extends Strings {
       'Тази папка не се поддържа. Изберете папка от хранилището на '
       'устройството.';
   @override
+  String get indexingTitle => 'Индексиране…';
+  @override
+  String get indexingPartial =>
+      'Индексирането още върви: резултатите може да са непълни.';
+  @override
   String indexingCount(int done, int total) => '$done / $total бележки';
 
   // The known-library list on the home screen (T-ML-05, T-ML-07).

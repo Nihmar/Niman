@@ -2093,6 +2093,11 @@ final class IcelandicStrings extends Strings {
   String get openLibraryUnsupported =>
       'Þessi mappa er ekki stuðlað. Veldu mappu í vistun ritara.';
   @override
+  String get indexingTitle => 'Skráning…';
+  @override
+  String get indexingPartial =>
+      'Skráning stendur enn yfir: niðurstöður geta verið ófullkomnar.';
+  @override
   String indexingCount(int done, int total) => '$done af $total minnisblöðum';
 
   // The known-library list on the home screen (T-ML-05, T-ML-07).

@@ -11,6 +11,7 @@ import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/flashcards/review_state.dart';
 import 'package:niman/src/flashcards/review_store.dart';
 import 'package:niman/src/library/file_watcher.dart';
+import 'package:niman/src/library/indexing_status.dart';
 import 'package:niman/src/library/library_registry.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/library/session.dart';
@@ -97,9 +98,11 @@ void main() {
     }
     final controller = makeController();
     final seen = <int>[];
+    var owed = false;
     final sub = controller.events.listen((_) {
       final progress = controller.indexProgress;
       if (progress != null) seen.add(progress.done);
+      if (IndexingStatus.contentOwed.value) owed = true;
     });
 
     await controller.open(root.path, create: false);
@@ -109,6 +112,12 @@ void main() {
     await expectConverged(() async => controller.indexProgress == null);
 
     expect(seen, isNotEmpty, reason: 'progress was reported during the pass');
+    expect(owed, isTrue, reason: 'the screens were told the index is partial');
+    expect(
+      IndexingStatus.contentOwed.value,
+      isFalse,
+      reason: 'and told it is not',
+    );
     await sub.cancel();
     await controller.close();
     await controller.dispose();

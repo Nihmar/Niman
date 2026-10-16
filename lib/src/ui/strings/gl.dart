@@ -2108,6 +2108,11 @@ final class GalicianStrings extends Strings {
       'Este cartafol non é compatible. Escolle un cartafol no '
       'almacenamento do dispositivo.';
   @override
+  String get indexingTitle => 'Indexando…';
+  @override
+  String get indexingPartial =>
+      'Aínda se está a indexar: os resultados poden estar incompletos.';
+  @override
   String indexingCount(int done, int total) => '$done de $total notas';
 
   // The known-library list on the home screen (T-ML-05, T-ML-07).

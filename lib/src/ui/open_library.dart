@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/storage_access.dart';
 import 'package:niman/src/db/app_database.dart';
-import 'package:niman/src/db/index_scan.dart';
 import 'package:niman/src/editor/editor_only.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/library/session.dart';
@@ -186,11 +185,6 @@ final class _OpenLibraryScreenState extends State<OpenLibraryScreen> {
                       padding: EdgeInsets.only(top: 16),
                       child: LinearProgressIndicator(),
                     ),
-                    // The first index of a large library is a long silent
-                    // wait; naming what it is reading turns it into
-                    // something to watch, and says the app is not stuck.
-                    if (widget.controller.indexProgress case final progress?)
-                      _IndexingLine(progress: progress),
                   ],
                   if (error != null)
                     Padding(
@@ -309,51 +303,6 @@ final class _OpenLibraryScreenState extends State<OpenLibraryScreen> {
   void _setBusy(bool busy) {
     if (_busy == busy) return;
     setState(() => _busy = busy);
-  }
-}
-
-/// The note the first index is reading, under the progress bar.
-///
-/// One line, fixed height and no wrapping: the names change many times a
-/// second, and a line that grew or shrank with each one would make the
-/// whole screen jump.
-final class _IndexingLine extends StatelessWidget {
-  const new({required this.progress});
-
-  /// The scan's latest report.
-  final IndexProgress progress;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final style = theme.textTheme.bodySmall?.copyWith(
-      color: theme.colorScheme.onSurfaceVariant,
-    );
-    return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 420),
-      child: Column(
-        children: [
-          const SizedBox(height: 8),
-          Text(
-            AppStrings.indexingCount(progress.done, progress.of),
-            style: style,
-          ),
-          const SizedBox(height: 2),
-          SizedBox(
-            height: 18,
-            child: Text(
-              progress.file,
-              key: const Key('indexing-file'),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              softWrap: false,
-              textAlign: TextAlign.center,
-              style: style?.copyWith(fontFamily: 'monospace'),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }
 

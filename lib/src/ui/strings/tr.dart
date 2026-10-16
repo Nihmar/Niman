@@ -2077,6 +2077,11 @@ final class TurkishStrings extends Strings {
   String get openLibraryUnsupported =>
       'Bu klasör desteklenmiyor. Bir depolama klasörü seçin.';
   @override
+  String get indexingTitle => 'Dizine ekleniyor…';
+  @override
+  String get indexingPartial =>
+      'Dizine ekleme sürüyor: sonuçlar eksik olabilir.';
+  @override
   String indexingCount(int done, int total) => "$total notun $done'ı";
 
   // The known-library list on the home screen (T-ML-05, T-ML-07).

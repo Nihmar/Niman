@@ -22,6 +22,12 @@ The index keeps the words of every note, not a copy of its text: it stays
 small, whatever the size of your notes. The text shown under a result is
 read from the note itself, when its row comes on screen.
 
+A library opened for the first time shows its tree at once and reads its
+notes behind it. While it does, the tree's footer counts the notes read
+(*Indexing… 412 of 10000 notes*), and Search, Tags and a note's *Links to this
+note* say that what they list may be incomplete. The tree's titles and pins
+fill in as the notes are read.
+
 ## Word search
 
 Type words; every token is matched literally (quotes, hyphens, FTS

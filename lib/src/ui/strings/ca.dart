@@ -2129,6 +2129,11 @@ final class CatalanStrings extends Strings {
       'Aquesta carpeta no és compatible. Tria una carpeta a '
       'l’emmagatzematge del dispositiu.';
   @override
+  String get indexingTitle => 'Indexant…';
+  @override
+  String get indexingPartial =>
+      "Encara s'està indexant: els resultats poden ser incomplets.";
+  @override
   String indexingCount(int done, int total) => '$done de $total notes';
 
   // The known-library list on the home screen (T-ML-05, T-ML-07).

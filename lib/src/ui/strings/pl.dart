@@ -2118,6 +2118,10 @@ final class PolishStrings extends Strings {
       'Ten katalog nie jest obsługiwany. Wybierz katalog w pamięci '
       'urządzenia.';
   @override
+  String get indexingTitle => 'Indeksowanie…';
+  @override
+  String get indexingPartial => 'Indeksowanie trwa: wyniki mogą być niepełne.';
+  @override
   String indexingCount(int done, int total) => '$done z $total notatek';
 
   // The known-library list on the home screen (T-ML-05, T-ML-07).

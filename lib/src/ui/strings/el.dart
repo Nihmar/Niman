@@ -2160,6 +2160,11 @@ final class GreekStrings extends Strings {
       'Αυτός ο φάκελος δεν υποστηρίζεται. Επιλέξτε έναν φάκελο '
       'αποθήκευσης του επεξεργαστή.';
   @override
+  String get indexingTitle => 'Ευρετηρίαση…';
+  @override
+  String get indexingPartial =>
+      'Η ευρετηρίαση συνεχίζεται: τα αποτελέσματα μπορεί να είναι ελλιπή.';
+  @override
   String indexingCount(int done, int total) => '$done από $total σημειώσεις';
 
   // The known-library list on the home screen (T-ML-05, T-ML-07).

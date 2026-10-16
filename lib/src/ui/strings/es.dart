@@ -2126,6 +2126,11 @@ final class SpanishStrings extends Strings {
       'Esa carpeta no está soportada. Elige una carpeta del almacenamiento '
       'del dispositivo.';
   @override
+  String get indexingTitle => 'Indexando…';
+  @override
+  String get indexingPartial =>
+      'Aún se está indexando: los resultados pueden estar incompletos.';
+  @override
   String indexingCount(int done, int total) => '$done de $total notas';
 
   // The known-library list on the home screen (T-ML-05, T-ML-07).

@@ -1290,6 +1290,8 @@ final class AppStrings {
   /// The first index's counter, e.g. "412 of 10000 notes".
   static String indexingCount(int done, int total) =>
       _s.indexingCount(done, total);
+  static String get indexingTitle => _s.indexingTitle;
+  static String get indexingPartial => _s.indexingPartial;
 
   // The known-library list on the home screen (T-ML-05, T-ML-07).
   static String get knownLibrariesTitle => _s.knownLibrariesTitle;

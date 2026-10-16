@@ -2105,6 +2105,11 @@ final class BasqueStrings extends Strings {
       'Karpeta hau ez da onartzen. Hautatu gailuaren gordailuko '
       'biltegia.';
   @override
+  String get indexingTitle => 'Indexatzen…';
+  @override
+  String get indexingPartial =>
+      'Oraindik indexatzen ari da: emaitzak osatu gabe egon daitezke.';
+  @override
   String indexingCount(int done, int total) => '$total oharretako $done';
 
   // The known-library list on the home screen (T-ML-05, T-ML-07).

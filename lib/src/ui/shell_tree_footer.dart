@@ -12,6 +12,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/library/session.dart';
+import 'package:niman/src/ui/indexing_notice.dart';
 import 'package:niman/src/ui/menu_row.dart';
 import 'package:niman/src/ui/pointer_density.dart';
 import 'package:niman/src/ui/pointer_menu.dart';
@@ -111,7 +112,7 @@ final class TreeFooterBar extends StatelessWidget {
           ?viewToggle,
           sortToggle,
         ];
-        return Container(
+        final bar = Container(
           key: const Key('tree-footer'),
           height: touch ? 56 : 44,
           decoration: BoxDecoration(
@@ -246,6 +247,17 @@ final class TreeFooterBar extends StatelessWidget {
               ],
             ),
           ),
+        );
+        // The line that says the notes are still being read sits above the
+        // bar, so the bar's buttons stay where they are as it comes and goes
+        // (#1068).
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            IndexingFooterLine(controller: controller),
+            bar,
+          ],
         );
       },
     );

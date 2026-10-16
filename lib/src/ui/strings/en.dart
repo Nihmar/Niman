@@ -2075,6 +2075,10 @@ final class EnglishStrings extends Strings {
   String get openLibraryUnsupported =>
       'That folder is not supported. Pick a folder on the device storage.';
   @override
+  String get indexingTitle => 'Indexing…';
+  @override
+  String get indexingPartial => 'Still indexing: results may be incomplete.';
+  @override
   String indexingCount(int done, int total) => '$done of $total notes';
 
   // The known-library list on the home screen (T-ML-05, T-ML-07).

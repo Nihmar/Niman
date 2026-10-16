@@ -2088,6 +2088,11 @@ final class SlovenianStrings extends Strings {
   String get openLibraryUnsupported =>
       'Ta mapa ni podprta. Izberite mapo iz shrambe naprave.';
   @override
+  String get indexingTitle => 'Indeksiranje…';
+  @override
+  String get indexingPartial =>
+      'Indeksiranje še poteka: rezultati so lahko nepopolni.';
+  @override
   String indexingCount(int done, int total) => '$done / $total opomb';
 
   // The known-library list on the home screen (T-ML-05, T-ML-07).

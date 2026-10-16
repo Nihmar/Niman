@@ -41,6 +41,7 @@ import 'package:niman/src/flashcards/review_store.dart';
 import 'package:niman/src/frontmatter/fields.dart';
 import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/library/file_watcher.dart';
+import 'package:niman/src/library/indexing_status.dart';
 import 'package:niman/src/library/library_registry.dart';
 import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/library/note_ops.dart';
@@ -1719,6 +1720,7 @@ final class LibraryController implements LibrarySession {
   /// open would keep a connection — and, for the search connection, a
   /// worker isolate — per library ever opened this session.
   Future<void> _teardown() async {
+    IndexingStatus.contentOwed.value = false;
     _rescans?.stop();
     _rescans = null;
     _batches?.close();
@@ -1846,9 +1848,11 @@ final class LibraryController implements LibrarySession {
       // Reported while it runs: the walk is long enough to be worth
       // watching, and reporting costs a message per note.
       indexer.onProgress = _onIndexProgress;
+      IndexingStatus.contentOwed.value = true;
       try {
         await _rescans?.run();
       } finally {
+        IndexingStatus.contentOwed.value = false;
         indexer.onProgress = null;
         _indexProgress = null;
         _progressTreeBump = null;

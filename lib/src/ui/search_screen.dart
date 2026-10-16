@@ -12,6 +12,7 @@ import 'package:niman/src/search/replace.dart';
 import 'package:niman/src/search/search_repo.dart';
 import 'package:niman/src/search/task_events.dart';
 import 'package:niman/src/ui/action_sheet.dart';
+import 'package:niman/src/ui/indexing_notice.dart';
 import 'package:niman/src/ui/pointer_density.dart';
 import 'package:niman/src/ui/search_request.dart';
 import 'package:niman/src/ui/search_task_events.dart';
@@ -554,6 +555,7 @@ final class _SearchScreenState extends State<SearchScreen> {
         final dense = pointerDense(theme) || constraints.maxWidth < 360;
         final child = Column(
           children: [
+            const IndexingNotice(),
             Padding(
               padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
               child: Column(

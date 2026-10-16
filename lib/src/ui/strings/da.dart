@@ -2085,6 +2085,11 @@ final class DanishStrings extends Strings {
   String get openLibraryUnsupported =>
       'Den mappe understøttes ikke. Vælg en mappe på enhedens lagring.';
   @override
+  String get indexingTitle => 'Indekserer…';
+  @override
+  String get indexingPartial =>
+      'Indekseringen kører stadig: resultaterne kan være ufuldstændige.';
+  @override
   String indexingCount(int done, int total) => '$done af $total noter';
 
   // The known-library list on the home screen (T-ML-05, T-ML-07).
