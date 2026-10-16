@@ -31,6 +31,7 @@ import 'package:niman/src/ui/ocr/ocr_tree_order.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/tree.dart' show TreeRename;
 import 'package:niman/src/ui/tree_drag.dart';
+import 'package:niman/src/ui/tree_drag_scroll.dart';
 import 'package:niman/src/ui/tree_rename_field.dart';
 import 'package:path/path.dart' as p;
 
@@ -399,6 +400,10 @@ final class _FolderGridState extends State<FolderGrid> {
     // child already sits in, so nothing moves — and it must claim the
     // drop, or it would reach nothing at all.
     final move = widget.onMove;
+    // A tile dragged to the top or bottom edge scrolls the grid (#1071).
+    final scrolling = move == null
+        ? grid
+        : TreeDragScroll(controller: _scroll, child: grid);
     return GestureDetector(
       key: const Key('folder-grid-background'),
       behavior: HitTestBehavior.translucent,
@@ -410,7 +415,7 @@ final class _FolderGridState extends State<FolderGrid> {
           if (_keyboardFocus) setState(() => _keyboardFocus = false);
         },
         child: move == null
-            ? grid
+            ? scrolling
             : DragTarget<List<String>>(
                 onWillAcceptWithDetails: (details) =>
                     treeDropPaths(details.data, rows.folder).isNotEmpty,
@@ -418,7 +423,7 @@ final class _FolderGridState extends State<FolderGrid> {
                   final movable = treeDropPaths(details.data, rows.folder);
                   if (movable.isNotEmpty) move(movable, rows.folder);
                 },
-                builder: (context, _, _) => grid,
+                builder: (context, _, _) => scrolling,
               ),
       ),
     );

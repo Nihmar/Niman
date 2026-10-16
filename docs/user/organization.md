@@ -389,6 +389,14 @@ a drop would move something — a folder dropped on itself or inside itself,
 or anything dropped where it already is, stays put. It is the same move as
 the menu's: links follow, open notes are saved first.
 
+A drag reaches what is out of sight (#1071): held within a row or two of the
+top or bottom edge of the tree (or of the folder grid), the list scrolls,
+faster the closer to the edge, and stops when the pointer moves back; and
+a drag that rests for about half a second on a closed folder in the tree
+opens it, so a target inside is one drop away. A folder opened that way
+closes again if the drop lands anywhere but in it, and stays open if it
+lands in it or under it.
+
 Rows marked together (see below) are dragged together, too (#996): drag
 any one of them and every marked row moves, each on its own — a marked
 folder carries its contents, and a path inside another marked folder is
