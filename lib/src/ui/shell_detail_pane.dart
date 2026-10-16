@@ -75,11 +75,18 @@ final class ShellDetailPane extends StatelessWidget {
     this.createMissingNote,
     this.header,
     this.shellFocus,
+    this.onTabKind,
     this.onEditEpubLook,
     this.onEpubTextScale,
     this.epubFullScreen,
     super.key,
   });
+
+  /// Told each note's kind (the frontmatter `type`, null for a plain note)
+  /// as its view finds it, whichever tab it is in and whichever pane has the
+  /// focus: what a pane's own controls are decided by (#1081).
+  /// [onNoteKindChanged] is still the focused pane's showing note's alone.
+  final void Function(String path, String? kind)? onTabKind;
 
   /// The node the shell keeps its accelerators on, for the pane to tell the
   /// keyboard is in the shell and hand it to the note that shows (#1074).
@@ -369,7 +376,10 @@ final class ShellDetailPane extends StatelessWidget {
     spellCheckInDock: spellCheckInDock,
     // Only the note showing in the focused pane tells the shell what
     // kind it is.
-    onNoteKindChanged: tab.active && tab.focused ? onNoteKindChanged : null,
+    onNoteKindChanged: (kind) {
+      onTabKind?.call(tab.path, kind);
+      if (tab.active && tab.focused) onNoteKindChanged(kind);
+    },
     onPasteAsMarkdown: onPasteAsMarkdown,
     unsavedTracker: unsavedTracker,
     statusActions: statusActions,

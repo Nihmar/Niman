@@ -1132,6 +1132,14 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       // The open notes' editors follow the rename, and are told where they
       // came from for the frame that shows them under the new name (#1076).
       _noteKeys.moved(from, to);
+      for (final entry in [..._tabKinds.entries]) {
+        final path = entry.key;
+        if (path == from || path.startsWith('$from/')) {
+          _tabKinds
+            ..remove(path)
+            ..[to + path.substring(from.length)] = entry.value;
+        }
+      }
       WidgetsBinding.instance.addPostFrameCallback((_) => _noteKeys.settle());
       _workspace.moved(from, to);
       // The folders open under a renamed or moved folder stay open under
@@ -1233,6 +1241,17 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   void _onNoteKindChanged(String? type) {
     if (!mounted) return;
     setState(() => _noteKind = type);
+  }
+
+  /// Each open note's kind as its view last reported it, by path (#1081): a
+  /// pane's own controls are decided by its own note, not by the focused
+  /// pane's.
+  final Map<String, String?> _tabKinds = {};
+
+  void _onTabKind(String path, String? kind) {
+    if (!mounted) return;
+    if (_tabKinds.containsKey(path) && _tabKinds[path] == kind) return;
+    setState(() => _tabKinds[path] = kind);
   }
 
   /// The GUI behind the open note's kind (T-TK-02): null for a plain
@@ -4988,6 +5007,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
                       onOpenNote: _openNoteFromLink,
                       kindMode: !_kindRawMode,
                       onNoteKindChanged: _onNoteKindChanged,
+                      onTabKind: _onTabKind,
                       onPasteAsMarkdown: _pasteAsMarkdown,
                       unsavedTracker: widget.unsavedTracker,
                       spellCheck: widget.spellCheck,
@@ -5050,7 +5070,16 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// that pane shows, so each pane's eye says what its own tab does.
   List<Widget> _statusActionsFor(int pane) {
     final tab = _workspace.value.panes[pane].activeTab;
-    if (tab == null || !_previewToggleVisible) return const [];
+    if (tab == null) return const [];
+    // The focused pane's note is the one the shell's kind and raw mode
+    // speak of; another pane's is told by its own kind (#1081).
+    final offered = pane == _workspace.value.focused
+        ? _previewToggleVisible
+        : previewToggleOffered(
+            path: tab.path,
+            kindGui: NoteKinds.forType(_tabKinds[tab.path]),
+          );
+    if (!offered) return const [];
     final plain = isPlainTextFile(p.basename(tab.path));
     return [
       PreviewToggleAction(
@@ -5081,6 +5110,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     final showing = w.panes[pane].activeTab?.path;
     final focused = pane == w.focused;
     _noteKeys.keepOnly(mounted);
+    _tabKinds.removeWhere((path, _) => !mounted.contains(path));
     return [
       for (final tab in w.panes[pane].tabs)
         if (mounted.contains(tab.path))
