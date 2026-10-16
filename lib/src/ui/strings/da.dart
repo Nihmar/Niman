@@ -947,6 +947,8 @@ final class DanishStrings extends Strings {
   @override
   String get linksToNoteEmbed => 'indlejret';
   @override
+  String get linksToNoteFurther => 'Nævnt længere nede';
+  @override
   String get openLinkFailed => 'Kunne ikke åbne linket';
 
   // Dead-link note creation (issue #78).

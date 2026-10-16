@@ -958,6 +958,8 @@ final class BulgarianStrings extends Strings {
   @override
   String get linksToNoteEmbed => 'вградена';
   @override
+  String get linksToNoteFurther => 'Спомената по-надолу';
+  @override
   String get openLinkFailed => 'Не може да се отвори връзката';
 
   // Dead-link note creation (issue #78).

@@ -943,6 +943,8 @@ final class EnglishStrings extends Strings {
   @override
   String get linksToNoteEmbed => 'embed';
   @override
+  String get linksToNoteFurther => 'Mentioned further down';
+  @override
   String get openLinkFailed => 'Could not open link';
 
   // Dead-link note creation (issue #78).

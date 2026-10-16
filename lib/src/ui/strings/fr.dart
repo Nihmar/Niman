@@ -967,6 +967,8 @@ final class FrenchStrings extends Strings {
   @override
   String get linksToNoteEmbed => 'intégrée';
   @override
+  String get linksToNoteFurther => 'Mentionnée plus bas';
+  @override
   String get openLinkFailed => 'Impossible d’ouvrir le lien';
 
   // Dead-link note creation (issue #78).

@@ -959,6 +959,8 @@ final class MacedonianStrings extends Strings {
   @override
   String get linksToNoteEmbed => 'вметната';
   @override
+  String get linksToNoteFurther => 'Спомнато подолу';
+  @override
   String get openLinkFailed => 'Не може да се отвори врската';
 
   // Dead-link note creation (issue #78).

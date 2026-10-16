@@ -971,6 +971,8 @@ final class GreekStrings extends Strings {
   @override
   String get linksToNoteEmbed => 'ενσωματωμένη';
   @override
+  String get linksToNoteFurther => 'Αναφέρεται πιο κάτω';
+  @override
   String get openLinkFailed => 'Δεν ήταν δυνατό το άνοιγμα του συνδέσμου';
 
   // Dead-link note creation (issue #78).

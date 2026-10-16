@@ -211,7 +211,10 @@ waiting to link to it, without any of them being saved again, and renaming it
 then rewrites those links like any other. The list is one indexed lookup however large the library is;
 the line of each row is read from the note that holds it only as the row is
 drawn (so only the rows you scroll to), off the app's main thread, and kept
-until that note changes. The list is read again a moment after the library's
+until that note changes. A note is read a slice at a time and only as far as
+its first mention, up to 8 MB: a link on the third line of a novel-length note
+costs a slice, and a mention that lies further down than that is not read,
+the row says *Mentioned further down* instead. The list is read again a moment after the library's
 index changes.
 
 **Unlinked mentions** — a note's name written in another note's text without a

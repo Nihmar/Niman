@@ -951,6 +951,8 @@ final class IcelandicStrings extends Strings {
   @override
   String get linksToNoteEmbed => 'ívafið';
   @override
+  String get linksToNoteFurther => 'Nefnt neðar';
+  @override
   String get openLinkFailed => 'Það gekk ekki að opna tengilinn';
 
   // Dead-link note creation (issue #78).

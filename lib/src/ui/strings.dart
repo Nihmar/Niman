@@ -664,6 +664,7 @@ final class AppStrings {
   static String get linksToNoteTitle => _s.linksToNoteTitle;
   static String get linksToNoteEmpty => _s.linksToNoteEmpty;
   static String get linksToNoteEmbed => _s.linksToNoteEmbed;
+  static String get linksToNoteFurther => _s.linksToNoteFurther;
   static String get openLinkFailed => _s.openLinkFailed;
 
   // Where new notes and folders go (issue #850).

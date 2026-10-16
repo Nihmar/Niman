@@ -954,6 +954,8 @@ final class PortugueseStrings extends Strings {
   @override
   String get linksToNoteEmbed => 'incorporada';
   @override
+  String get linksToNoteFurther => 'Mencionada mais abaixo';
+  @override
   String get openLinkFailed => 'Não foi possível abrir o link';
 
   // Dead-link note creation (issue #78).

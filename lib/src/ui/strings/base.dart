@@ -527,6 +527,7 @@ abstract base class Strings {
   String get linksToNoteTitle;
   String get linksToNoteEmpty;
   String get linksToNoteEmbed;
+  String get linksToNoteFurther;
   String get openLinkFailed;
 
   // Where new notes and folders go (issue #850, which absorbed the

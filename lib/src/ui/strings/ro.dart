@@ -962,6 +962,8 @@ final class RomanianStrings extends Strings {
   @override
   String get linksToNoteEmbed => 'încorporată';
   @override
+  String get linksToNoteFurther => 'Menționată mai jos';
+  @override
   String get openLinkFailed => 'Linkul nu a putut fi deschis';
 
   // Dead-link note creation (issue #78).

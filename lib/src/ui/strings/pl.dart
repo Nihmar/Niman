@@ -961,6 +961,8 @@ final class PolishStrings extends Strings {
   @override
   String get linksToNoteEmbed => 'osadzona';
   @override
+  String get linksToNoteFurther => 'Wspomniana niżej';
+  @override
   String get openLinkFailed => 'Nie udało się otworzyć linku';
 
   // Dead-link note creation (issue #78).

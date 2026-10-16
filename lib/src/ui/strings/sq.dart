@@ -951,6 +951,8 @@ final class AlbanianStrings extends Strings {
   @override
   String get linksToNoteEmbed => 'e ngulitur';
   @override
+  String get linksToNoteFurther => 'Përmendur më poshtë';
+  @override
   String get openLinkFailed => "Lidhja s'u hap";
 
   // Dead-link note creation (issue #78).

@@ -31,7 +31,7 @@ import 'package:niman/src/library/note_writer.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/links/block_anchors.dart';
 import 'package:niman/src/links/link_preview.dart';
-import 'package:niman/src/links/mentions.dart';
+import 'package:niman/src/links/link_spot_slices.dart';
 import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/lint/lint_rule.dart';
 import 'package:niman/src/markdown/note_bytes.dart';
@@ -706,15 +706,16 @@ final class NoteOps implements NoteOperations {
     );
   }
 
-  /// The links and embeds of the note at [path] with the line around each —
-  /// what a list of the notes that link to another reads a mention from
-  /// (#842) — read, decoded and parsed where the note lies, off the UI
-  /// isolate.
-  Future<List<LinkSpot>> noteLinkSpots(String path) async {
+  /// The links and embeds of the slice of the note at [path] that starts at
+  /// [from] — what a list of the notes that link to another reads a mention
+  /// from (#842) — read, decoded and parsed where the note lies, off the UI
+  /// isolate. A slice at a time, so the first mention costs a slice and not
+  /// the note (#1040).
+  Future<SpotSlice> noteLinkSpotSlice(String path, SpotCursor from) async {
     await _mustFind(path);
     final abs = _abs(path);
     return await IsolateGauge.run(
-      () => linkSpotsOfNoteFile(abs),
+      () => linkSpotSliceOfFile(abs, from),
       'link spots "$path"',
     );
   }
@@ -881,6 +882,15 @@ final class NoteOps implements NoteOperations {
   Future<void> emptyTrash() => _trash.empty();
 }
 
+String _noteTextAt(String path) {
+  final bytes = File(path).readAsBytesSync();
+  var text = decodeNoteText(bytes);
+  if (text.isNotEmpty && text.codeUnitAt(0) == 0xFEFF) {
+    text = text.substring(1);
+  }
+  return text;
+}
+
 /// The heading texts of the note file at absolute [path], read as it lies.
 ///
 /// The whole file is read, decoded — leniently, without its BOM, as
@@ -919,18 +929,4 @@ NotePreviewText previewTextOfNoteFile(String path) {
     text: text.replaceAll('\r\n', '\n').replaceAll('\r', '\n'),
     truncated: truncated,
   );
-}
-
-/// The link spots of the note file at absolute [path] (#842): work for a
-/// background isolate.
-List<LinkSpot> linkSpotsOfNoteFile(String path) =>
-    linkSpotsOf(_noteTextAt(path));
-
-String _noteTextAt(String path) {
-  final bytes = File(path).readAsBytesSync();
-  var text = decodeNoteText(bytes);
-  if (text.isNotEmpty && text.codeUnitAt(0) == 0xFEFF) {
-    text = text.substring(1);
-  }
-  return text;
 }

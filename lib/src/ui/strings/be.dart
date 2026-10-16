@@ -951,6 +951,8 @@ final class BelarusianStrings extends Strings {
   @override
   String get linksToNoteEmbed => 'убудаваная';
   @override
+  String get linksToNoteFurther => 'Згадана далей';
+  @override
   String get openLinkFailed => 'Не ўдалося адкрыць спасылку';
 
   // Dead-link note creation (issue #78).

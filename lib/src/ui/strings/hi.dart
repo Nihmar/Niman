@@ -937,6 +937,8 @@ final class HindiStrings extends Strings {
   @override
   String get linksToNoteEmbed => 'एम्बेड';
   @override
+  String get linksToNoteFurther => 'आगे उल्लेख है';
+  @override
   String get openLinkFailed => 'लिंक नहीं खोला जा सका';
 
   // Dead-link note creation (issue #78).
