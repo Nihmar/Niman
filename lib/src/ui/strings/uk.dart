@@ -603,6 +603,11 @@ final class UkrainianStrings extends Strings {
   @override
   String get noteStatusError => 'Помилка';
   @override
+  String get noteStatusSaveFailed => 'Не збережено · повторити';
+  @override
+  String get noteSaveFailedSnack =>
+      'Нотатку не вдалося зберегти. Niman спробує ще раз.';
+  @override
   String get noteNotText =>
       'Цей файл не є текстовою нотаткою, тож Niman не може показати його тут.';
   @override

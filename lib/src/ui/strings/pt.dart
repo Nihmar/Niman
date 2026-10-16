@@ -606,6 +606,11 @@ final class PortugueseStrings extends Strings {
   @override
   String get noteStatusError => 'Erro';
   @override
+  String get noteStatusSaveFailed => 'Não salva · tentar novamente';
+  @override
+  String get noteSaveFailedSnack =>
+      'Não foi possível salvar a nota. O Niman tentará novamente.';
+  @override
   String get noteNotText =>
       'Este ficheiro não é uma nota de texto, por isso '
       'o Niman não o pode mostrar aqui.';

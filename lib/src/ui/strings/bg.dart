@@ -611,6 +611,11 @@ final class BulgarianStrings extends Strings {
   @override
   String get noteStatusError => 'Грешка';
   @override
+  String get noteStatusSaveFailed => 'Не е запазено · опитай пак';
+  @override
+  String get noteSaveFailedSnack =>
+      'Бележката не можа да бъде запазена. Niman ще опита отново.';
+  @override
   String get noteNotText =>
       'Този файл не е текстова бележка, затова Niman не може да го покаже тук.';
   @override

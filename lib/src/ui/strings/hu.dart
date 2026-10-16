@@ -605,6 +605,11 @@ final class HungarianStrings extends Strings {
   @override
   String get noteStatusError => 'Hiba';
   @override
+  String get noteStatusSaveFailed => 'Nincs mentve · újra';
+  @override
+  String get noteSaveFailedSnack =>
+      'A jegyzetet nem sikerült menteni. A Niman újra megpróbálja.';
+  @override
   String get noteNotText =>
       'Ez a fájl nem szöveges jegyzet, ezért a '
       'Niman itt nem tudja megjeleníteni.';

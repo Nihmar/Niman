@@ -615,6 +615,11 @@ final class ItalianStrings extends Strings {
   @override
   String get noteStatusError => 'Errore';
   @override
+  String get noteStatusSaveFailed => 'Non salvata · riprova';
+  @override
+  String get noteSaveFailedSnack =>
+      'Impossibile salvare la nota. Niman riproverà.';
+  @override
   String get noteNotText =>
       'Questo file non è una nota di testo, quindi '
       'Niman non può mostrarlo qui.';

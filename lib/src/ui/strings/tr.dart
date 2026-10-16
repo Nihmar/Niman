@@ -598,6 +598,11 @@ final class TurkishStrings extends Strings {
   @override
   String get noteStatusError => 'Hata';
   @override
+  String get noteStatusSaveFailed => 'Kaydedilemedi · yeniden dene';
+  @override
+  String get noteSaveFailedSnack =>
+      'Bu not kaydedilemedi. Niman yeniden deneyecek.';
+  @override
   String get noteNotText =>
       'Bu dosya bir metin notu değil, bu yüzden Niman onu burada gösteremiyor.';
   @override

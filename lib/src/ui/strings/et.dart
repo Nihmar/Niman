@@ -598,6 +598,11 @@ final class EstonianStrings extends Strings {
   @override
   String get noteStatusError => 'Viga';
   @override
+  String get noteStatusSaveFailed => 'Pole salvestatud · proovi uuesti';
+  @override
+  String get noteSaveFailedSnack =>
+      'Märget ei õnnestunud salvestada. Niman proovib uuesti.';
+  @override
   String get noteNotText =>
       'See fail ei ole tekstimärge, seega ei saa Niman seda siin näidata.';
   @override

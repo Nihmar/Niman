@@ -607,6 +607,11 @@ final class SlovenianStrings extends Strings {
   @override
   String get noteStatusError => 'Napaka';
   @override
+  String get noteStatusSaveFailed => 'Ni shranjeno · poskusi znova';
+  @override
+  String get noteSaveFailedSnack =>
+      'Zapiska ni bilo mogoče shraniti. Niman bo poskusil znova.';
+  @override
   String get noteNotText =>
       'Ta datoteka ni besedilni zapisek, zato je Niman tu ne more prikazati.';
   @override

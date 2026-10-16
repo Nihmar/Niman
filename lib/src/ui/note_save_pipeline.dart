@@ -66,6 +66,12 @@ final class NoteSavePipeline {
     required this.saveNoteStream,
     required this.onSaved,
     required this.onSettled,
+    this.hold,
+    this.retryDelays = const [
+      Duration(seconds: 2),
+      Duration(seconds: 5),
+      Duration(seconds: 15),
+    ],
   });
 
   static const AppLogger _log = AppLogger(name: 'editor');
@@ -109,6 +115,27 @@ final class NoteSavePipeline {
   /// A save ended, written or failed.
   final VoidCallback onSettled;
 
+  /// Holds a write for a note that is leaving the editor, with the text it
+  /// writes, in the app-wide registry of unsaved notes
+  /// (`UnsavedTracker.hold`): the close guard then waits for the write, and
+  /// a failed one keeps the text. Null where nothing tracks.
+  final Future<void> Function(
+    String path,
+    String Function() text,
+    Future<void> Function() write,
+  )?
+  hold;
+
+  /// The waits before the automatic retries of a save that failed (#1054).
+  final List<Duration> retryDelays;
+
+  /// Why the last save of the note on screen failed, or null while the last
+  /// one landed (or none was tried). The status row reads it.
+  final ValueNotifier<SaveFailure?> failure = ValueNotifier<SaveFailure?>(null);
+
+  Timer? _retryTimer;
+  int _failures = 0;
+
   /// Text-edit counter; the disk matches [lastSavedRevision]. A saved note
   /// is a revision, not a text copy.
   int get revision => _revision;
@@ -124,6 +151,9 @@ final class NoteSavePipeline {
   /// Whether a save is in flight.
   bool get saving => _saving;
   bool _saving = false;
+
+  /// The revision the save in flight took.
+  int _inFlightRevision = -1;
 
   /// Whether a save is in flight or one is owed once it ends.
   bool get busy => _saving || _pending;
@@ -158,21 +188,50 @@ final class NoteSavePipeline {
   void edited() {
     _revision++;
     _timer?.cancel();
-    _timer = Timer(_saveDelay, save);
-    _ceiling ??= Timer(_maxWait, save);
+    _timer = Timer(_saveDelay, saveInBackground);
+    _ceiling ??= Timer(_maxWait, saveInBackground);
   }
 
   /// The disk holds what the editor does: the note was just taken from it.
   void markClean() {
     _lastSavedRevision = _revision;
     _cancelTimers();
+    _forgetFailure();
   }
 
-  /// Drops the debounce and the ceiling: no save is owed by the clock.
+  /// Drops the debounce, the ceiling and the retry: no save is owed by the
+  /// clock.
   void _cancelTimers() {
     _timer?.cancel();
     _ceiling?.cancel();
     _ceiling = null;
+    _retryTimer?.cancel();
+  }
+
+  /// The last save landed, or its note is gone: nothing is failing.
+  void _forgetFailure() {
+    _failures = 0;
+    _retryTimer?.cancel();
+    if (failure.value != null) failure.value = null;
+  }
+
+  /// A save of the note on screen failed with [error]: the failure is kept
+  /// for the status row, and the save tried again after a growing wait while
+  /// the note is still unsaved (#1054).
+  void _failed(Object error) {
+    _failures++;
+    failure.value = SaveFailure(error, _failures);
+    _retryTimer?.cancel();
+    if (_failures <= retryDelays.length) {
+      _retryTimer = Timer(retryDelays[_failures - 1], saveInBackground);
+    }
+  }
+
+  /// [save] for a caller with nobody to tell: the timers, a blur, the app
+  /// leaving the foreground. A failure is recorded in [failure] and retried;
+  /// it does not escape as an uncaught async error.
+  void saveInBackground() {
+    unawaited(save().then<void>((_) {}, onError: (Object _) {}));
   }
 
   /// Starts a new editor session, and returns its id.
@@ -241,6 +300,7 @@ final class NoteSavePipeline {
     _ceiling?.cancel();
     _ceiling = null;
     _saving = true;
+    _inFlightRevision = revision;
     final future = _performSave(revision, path ?? notePath());
     _activeSave = future;
     return future;
@@ -275,56 +335,82 @@ final class NoteSavePipeline {
     _cancelTimers();
     _pending = false;
     if (!dirty) return _activeSave ?? Future<void>.value();
-    if (!_saving) return save(path: path);
-    return _saveOutgoingAfter(_activeSave, path);
+    return _detach(path);
   }
 
   /// The editor is going away: whatever it holds is saved, and the returned
   /// future completes when the disk has the note's last edit.
   Future<void> close() {
     _cancelTimers();
-    return dirty ? save() : _activeSave ?? Future<void>.value();
+    return dirty ? _detach(notePath()) : _activeSave ?? Future<void>.value();
   }
 
-  /// Saves the outgoing note at [target] as it stands *now*, after
-  /// [waiting] — the save already running for it — so one note never has
-  /// two writes racing for the same path.
+  /// Saves the note at [target] as it stands *now* on its own, after the save
+  /// already running for it, so one note never has two writes racing for the
+  /// same path — and hands the write to the app-wide registry of unsaved
+  /// notes ([hold]), which is what keeps it from being forgotten (#1061):
+  /// the buffer is about to be the incoming note's, or gone, and the note
+  /// reads as saved from here on, while the write may be seconds from
+  /// landing, or may fail. Until it lands the registry holds the text, and
+  /// the close guard waits for it and retries it.
   ///
   /// The text, or the streaming save's buffer snapshot, is taken before the
   /// first await: the note switch that calls this replaces the buffer with
   /// the incoming note's, and an edit made during a save would otherwise be
   /// the one nobody writes (#334).
-  Future<void> _saveOutgoingAfter(Future<void>? waiting, String target) async {
+  Future<void> _detach(String target) {
     final session = _editSession;
+    final revision = _revision;
+    final running = _saving ? _activeSave : null;
+    // Nothing was typed since the save in flight took its text: when it lands
+    // there is nothing to write again.
+    final covered = _saving && _inFlightRevision == _revision;
     final stream = _takeStreamSave();
-    final joined = stream == null ? framing().apply(text()) : null;
-    if (waiting != null) {
+    final plain = stream == null ? text() : null;
+    final joined = plain == null ? null : framing().apply(plain);
+    var first = true;
+
+    Future<void> write() async {
+      if (first) {
+        first = false;
+        if (running != null) {
+          try {
+            await running;
+            if (covered) {
+              _landed(target, revision);
+              return;
+            }
+          } on Object {
+            // The save that was already running reports its own failure;
+            // this one still has to try.
+          }
+        }
+      }
+      final clock = Stopwatch()..start();
       try {
-        await waiting;
-      } on Object {
-        // The save that was already running reports its own failure; this
-        // one still has to try.
-      }
-    }
-    final clock = Stopwatch()..start();
-    try {
-      if (stream != null) {
-        await saveNoteStream()!(
-          target,
-          (index) => _nextSlice(stream, index),
-          editSession: session,
-          references: stream.references,
+        if (stream != null) {
+          await saveNoteStream()!(
+            target,
+            (index) => _nextSlice(stream, index),
+            editSession: session,
+            references: stream.references,
+          );
+        } else {
+          await _write(target, joined!, session);
+        }
+        _landed(target, revision);
+        _log.info(
+          'note saved: $target (outgoing, ${clock.elapsedMilliseconds} ms)',
         );
-      } else {
-        await _write(target, joined!, session);
+      } on Object catch (error) {
+        _log.error('note save failed: $target ($error)');
+        rethrow;
       }
-      _log.info(
-        'note saved: $target (outgoing, ${clock.elapsedMilliseconds} ms)',
-      );
-    } on Object catch (error) {
-      _log.error('note save failed: $target ($error)');
-      rethrow;
     }
+
+    final holder = hold;
+    if (holder == null) return write();
+    return holder(target, () => stream?.buffer.text ?? plain!, write);
   }
 
   /// The actual write for [save]; a write error reaches every caller
@@ -365,6 +451,10 @@ final class NoteSavePipeline {
         'note saved: $target (${joined.length} chars, '
         '${clock.elapsedMilliseconds} ms)',
       );
+    } on Object catch (error) {
+      _log.error('note save failed: $target ($error)');
+      if (target == notePath()) _failed(error);
+      rethrow;
     } finally {
       _finishSave();
     }
@@ -405,9 +495,18 @@ final class NoteSavePipeline {
       );
     } on Object catch (error) {
       _log.error('note save failed: $target ($error)');
+      if (target == notePath()) _failed(error);
       rethrow;
     } finally {
       _finishSave();
+    }
+  }
+
+  /// A detached write of [target] landed: when the note is still the one on
+  /// screen (its editor is closing), the disk holds what the editor does.
+  void _landed(String target, int revision) {
+    if (target == notePath() && _lastSavedRevision < revision) {
+      _lastSavedRevision = revision;
     }
   }
 
@@ -416,6 +515,7 @@ final class NoteSavePipeline {
   void _saved(String target, int revision, DiskStamp? stamp) {
     if (target != notePath()) return;
     _lastSavedRevision = revision;
+    _forgetFailure();
     onSaved(target, stamp);
   }
 
@@ -426,7 +526,7 @@ final class NoteSavePipeline {
     final trailing = _pending;
     _pending = false;
     onSettled();
-    if (trailing) unawaited(save());
+    if (trailing) saveInBackground();
   }
 
   /// The note as this save will write it, or null when there is nothing to
@@ -544,4 +644,17 @@ final class _StreamSave {
   int get slices =>
       (buffer.lineCount + NoteSavePipeline.kSaveSliceLines - 1) ~/
       NoteSavePipeline.kSaveSliceLines;
+}
+
+/// Why a save of the note on screen failed, and how many tries in a row have
+/// (#1054).
+final class SaveFailure {
+  /// A failure of [error], the [attempts]th since a save last landed.
+  const new(this.error, this.attempts);
+
+  /// What the writer threw.
+  final Object error;
+
+  /// How many saves in a row have failed.
+  final int attempts;
 }

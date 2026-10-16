@@ -619,6 +619,11 @@ final class FrenchStrings extends Strings {
   @override
   String get noteStatusError => 'Erreur';
   @override
+  String get noteStatusSaveFailed => 'Non enregistrée · réessayer';
+  @override
+  String get noteSaveFailedSnack =>
+      'Cette note n’a pas pu être enregistrée. Niman va réessayer.';
+  @override
   String get noteNotText =>
       'Ce fichier n’est pas une note texte, Niman '
       'ne peut donc pas l’afficher ici.';

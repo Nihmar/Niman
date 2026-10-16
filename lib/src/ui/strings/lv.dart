@@ -598,6 +598,11 @@ final class LatvianStrings extends Strings {
   @override
   String get noteStatusError => 'Kļūda';
   @override
+  String get noteStatusSaveFailed => 'Nav saglabāts · mēģināt vēlreiz';
+  @override
+  String get noteSaveFailedSnack =>
+      'Piezīmi neizdevās saglabāt. Niman mēģinās vēlreiz.';
+  @override
   String get noteNotText =>
       'Šis fails nav teksta piezīme, tāpēc Niman to šeit nevar parādīt.';
   @override

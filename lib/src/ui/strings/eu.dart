@@ -601,6 +601,11 @@ final class BasqueStrings extends Strings {
   @override
   String get noteStatusError => 'Errorea';
   @override
+  String get noteStatusSaveFailed => 'Gorde gabe · saiatu berriro';
+  @override
+  String get noteSaveFailedSnack =>
+      'Ezin izan da oharra gorde. Nimanek berriro saiatuko da.';
+  @override
   String get noteNotText =>
       'Fitxategi hau ez da testu-ohar bat, beraz '
       'Nimanek ezin du hemen erakutsi.';

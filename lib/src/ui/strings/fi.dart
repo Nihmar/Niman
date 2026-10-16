@@ -604,6 +604,11 @@ final class FinnishStrings extends Strings {
   @override
   String get noteStatusError => 'Virhe';
   @override
+  String get noteStatusSaveFailed => 'Ei tallennettu · yritä uudelleen';
+  @override
+  String get noteSaveFailedSnack =>
+      'Muistiinpanoa ei voitu tallentaa. Niman yrittää uudelleen.';
+  @override
   String get noteNotText =>
       'Tämä tiedosto ei ole tekstimuistiinpano, joten '
       'Niman ei voi näyttää sitä tässä.';

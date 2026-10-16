@@ -601,6 +601,11 @@ final class EnglishStrings extends Strings {
   @override
   String get noteStatusError => 'Error';
   @override
+  String get noteStatusSaveFailed => 'Could not save · retry';
+  @override
+  String get noteSaveFailedSnack =>
+      'This note could not be saved. Niman will try again.';
+  @override
   String get noteNotText =>
       'This file is not a text note, so Niman cannot show it here.';
   @override

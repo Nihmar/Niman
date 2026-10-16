@@ -611,6 +611,11 @@ final class GermanStrings extends Strings {
   @override
   String get noteStatusError => 'Fehler';
   @override
+  String get noteStatusSaveFailed => 'Nicht gespeichert · erneut versuchen';
+  @override
+  String get noteSaveFailedSnack =>
+      'Die Notiz konnte nicht gespeichert werden. Niman versucht es erneut.';
+  @override
   String get noteNotText =>
       'Diese Datei ist keine Textnotiz, daher kann '
       'Niman sie hier nicht anzeigen.';

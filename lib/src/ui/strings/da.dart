@@ -603,6 +603,11 @@ final class DanishStrings extends Strings {
   @override
   String get noteStatusError => 'Fejl';
   @override
+  String get noteStatusSaveFailed => 'Ikke gemt · prøv igen';
+  @override
+  String get noteSaveFailedSnack =>
+      'Noten kunne ikke gemmes. Niman prøver igen.';
+  @override
   String get noteNotText =>
       'Denne fil er ikke en tekstnote, så Niman kan ikke vise den her.';
   @override

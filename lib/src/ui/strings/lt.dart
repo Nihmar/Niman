@@ -602,6 +602,11 @@ final class LithuanianStrings extends Strings {
   @override
   String get noteStatusError => 'Klaida';
   @override
+  String get noteStatusSaveFailed => 'Neišsaugota · bandyti dar kartą';
+  @override
+  String get noteSaveFailedSnack =>
+      'Užrašo išsaugoti nepavyko. Niman bandys dar kartą.';
+  @override
   String get noteNotText =>
       'Šis failas nėra tekstinis užrašas, todėl Niman negali jo čia parodyti.';
   @override

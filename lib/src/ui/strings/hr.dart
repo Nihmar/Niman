@@ -604,6 +604,11 @@ final class CroatianStrings extends Strings {
   @override
   String get noteStatusError => 'Greška';
   @override
+  String get noteStatusSaveFailed => 'Nije spremljeno · pokušaj ponovno';
+  @override
+  String get noteSaveFailedSnack =>
+      'Bilješka se nije mogla spremiti. Niman će pokušati ponovno.';
+  @override
   String get noteNotText =>
       'Ova datoteka nije tekstualna bilješka, pa je '
       'Niman ne može prikazati ovdje.';

@@ -608,6 +608,11 @@ final class GalicianStrings extends Strings {
   @override
   String get noteStatusError => 'Erro';
   @override
+  String get noteStatusSaveFailed => 'Sen gardar · tentar de novo';
+  @override
+  String get noteSaveFailedSnack =>
+      'Non se puido gardar a nota. Niman tentarao de novo.';
+  @override
   String get noteNotText =>
       'Este ficheiro non é unha nota de texto, así '
       'que Niman non pode amosalo aquí.';

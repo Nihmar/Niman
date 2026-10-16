@@ -604,6 +604,11 @@ final class AlbanianStrings extends Strings {
   @override
   String get noteStatusError => 'Gabim';
   @override
+  String get noteStatusSaveFailed => 'Pa ruajtur · provo sërish';
+  @override
+  String get noteSaveFailedSnack =>
+      'Shënimi nuk u ruajt. Niman do të provojë sërish.';
+  @override
   String get noteNotText =>
       'Ky skedar nuk është shënim teksti, ndaj Niman nuk mund ta shfaqë këtu.';
   @override

@@ -605,6 +605,11 @@ final class SerbianStrings extends Strings {
   @override
   String get noteStatusError => 'Грешка';
   @override
+  String get noteStatusSaveFailed => 'Није сачувано · покушај поново';
+  @override
+  String get noteSaveFailedSnack =>
+      'Белешка није могла да се сачува. Niman ће покушати поново.';
+  @override
   String get noteNotText =>
       'Ова датотека није текстуална белешка, па је '
       'Niman не може приказати овде.';

@@ -13,6 +13,7 @@ import 'package:niman/src/markdown/note_framing.dart';
 import 'package:niman/src/markdown/note_references.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/ui/note_save_pipeline.dart';
+import 'package:niman/src/ui/unsaved_notes.dart';
 import 'package:path/path.dart' as p;
 
 /// One write the pipeline asked for.
@@ -21,7 +22,7 @@ typedef Write = ({String path, String text, int session});
 /// A pipeline over a buffer the test edits, with writes it holds open until
 /// the test lets them go.
 final class Harness {
-  new({this.streaming = false, this.loaded = true}) {
+  new({this.streaming = false, this.loaded = true, this.tracker}) {
     pipeline = NoteSavePipeline(
       notePath: () => path,
       ready: () => loaded,
@@ -37,8 +38,13 @@ final class Harness {
         stamps.add(stamp);
       },
       onSettled: () => settled++,
+      hold: tracker?.hold,
     );
   }
+
+  /// The app-wide registry of unsaved notes the pipeline holds its outgoing
+  /// writes in, when the test has one.
+  final UnsavedTracker? tracker;
 
   final bool streaming;
   bool loaded;
@@ -441,6 +447,136 @@ void main() {
           ..flushMicrotasks();
         expect(harness.writes, hasLength(2));
       });
+    });
+  });
+
+  group('a save that fails (#1054)', () {
+    test(
+      'is recorded, tried again after a wait, and forgotten once it lands',
+      () {
+        fakeAsync((async) {
+          harness = Harness()
+            ..failWith = StateError('disk full')
+            ..edit('two\n');
+          final failure = harness.pipeline.failure;
+          async
+            ..elapse(const Duration(milliseconds: 500))
+            ..flushMicrotasks();
+          expect(failure.value!.attempts, 1);
+          expect(harness.pipeline.dirty, isTrue);
+          // Nothing escaped as an uncaught async error: the zone would have
+          // failed this test.
+
+          async
+            ..elapse(const Duration(seconds: 2))
+            ..flushMicrotasks();
+          expect(failure.value!.attempts, 2, reason: 'retried after 2 s');
+          async
+            ..elapse(const Duration(seconds: 4))
+            ..flushMicrotasks();
+          expect(failure.value!.attempts, 2, reason: 'the next wait is 5 s');
+
+          harness.failWith = null;
+          async
+            ..elapse(const Duration(seconds: 1))
+            ..flushMicrotasks();
+          expect(failure.value, isNull);
+          expect(harness.pipeline.dirty, isFalse);
+          expect(harness.writes.single.text, 'two\n');
+        });
+      },
+    );
+
+    test('the retries stop after the schedule, and an edit tries at once', () {
+      fakeAsync((async) {
+        harness = Harness()
+          ..failWith = StateError('gone')
+          ..edit('two\n');
+        async
+          ..elapse(const Duration(minutes: 5))
+          ..flushMicrotasks();
+        expect(harness.pipeline.failure.value!.attempts, 4);
+
+        harness
+          ..failWith = null
+          ..edit('three\n');
+        async
+          ..elapse(const Duration(milliseconds: 500))
+          ..flushMicrotasks();
+        expect(harness.pipeline.failure.value, isNull);
+        expect(harness.writes.single.text, 'three\n');
+      });
+    });
+
+    test('an awaited save still reports its error', () async {
+      harness = Harness()
+        ..failWith = StateError('no space')
+        ..edit('two\n');
+      await expectLater(harness.pipeline.save(), throwsStateError);
+      expect(harness.pipeline.failure.value!.attempts, 1);
+    });
+  });
+
+  group('a note leaving the editor (#1061, #1054)', () {
+    test('its write in flight is visible to the close guard', () async {
+      final tracker = UnsavedTracker();
+      harness = Harness(tracker: tracker)
+        ..hold = true
+        ..edit('two\n');
+      final done = harness.pipeline.saveOutgoing(harness.path);
+      await pumpEventQueue();
+      // The editor now reads the note as saved: another one loads over it.
+      harness.pipeline.markClean();
+      expect(tracker.hasUnsaved, isTrue);
+      expect(tracker.unsavedPaths, [harness.path]);
+
+      var allSaved = false;
+      unawaited(tracker.saveAll().then((_) => allSaved = true));
+      await pumpEventQueue();
+      expect(allSaved, isFalse, reason: 'the write has not landed');
+
+      await harness.release();
+      await done;
+      await pumpEventQueue();
+      expect(allSaved, isTrue);
+      expect(tracker.hasUnsaved, isFalse);
+      expect(harness.writes.single.text, 'two\n');
+    });
+
+    test('a write that fails keeps its text until a retry lands', () async {
+      final tracker = UnsavedTracker();
+      harness = Harness(tracker: tracker)
+        ..failWith = StateError('card removed')
+        ..edit('two\n');
+      await expectLater(
+        harness.pipeline.saveOutgoing(harness.path),
+        throwsStateError,
+      );
+      harness.pipeline.markClean();
+
+      expect(tracker.hasUnsaved, isTrue);
+      expect(tracker.unsavedTextOf(harness.path), 'two\n');
+      await expectLater(tracker.saveAll(), throwsStateError);
+      expect(tracker.unsavedTextOf(harness.path), 'two\n');
+
+      harness.failWith = null;
+      await tracker.saveAll();
+      expect(tracker.hasUnsaved, isFalse);
+      expect(harness.writes.single.text, 'two\n');
+    });
+
+    test('a closed editor leaves its write to the registry', () async {
+      final tracker = UnsavedTracker();
+      harness = Harness(tracker: tracker, streaming: true)
+        ..hold = true
+        ..edit('two\n');
+      final done = harness.pipeline.close();
+      await pumpEventQueue();
+      expect(tracker.hasUnsaved, isTrue);
+      await harness.release();
+      await done;
+      expect(tracker.hasUnsaved, isFalse);
+      expect(harness.writes.single.text, 'two\n');
     });
   });
 

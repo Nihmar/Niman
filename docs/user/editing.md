@@ -330,6 +330,16 @@ yet saved is written at most five seconds later (twenty over 2 MB, thirty over
 16 MB), however the typing goes after it, so a crash or a flat battery costs a
 few seconds of writing and not a session.
 
+**A save that fails.** A full disk, a card that was pulled out, a program
+holding the file: the status row reads **Could not save · retry** instead of
+*Unsaved*, a message says so once, and Niman tries again after 2, 5 and 15
+seconds — a tap on the status text tries at once, and so does the next change.
+Nothing is thrown away meanwhile. If the note is switched away from or its tab
+is closed while the write is still running or has failed, its text is kept by
+the app: the note stays marked as unsaved, the write is retried, and quitting
+waits for it (or asks, if it still cannot be written) instead of leaving with
+the last edits lost.
+
 **Line endings and the byte order mark.** The editor works with plain lines,
 but the file keeps what it had: a note with Windows (`CRLF`) line endings is
 saved with them, and a note that began with a UTF-8 byte order mark is saved

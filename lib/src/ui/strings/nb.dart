@@ -603,6 +603,11 @@ final class NorwegianStrings extends Strings {
   @override
   String get noteStatusError => 'Feil';
   @override
+  String get noteStatusSaveFailed => 'Ikke lagret · prøv igjen';
+  @override
+  String get noteSaveFailedSnack =>
+      'Notatet kunne ikke lagres. Niman prøver igjen.';
+  @override
   String get noteNotText =>
       'Denne filen er ikke et tekstnotat, så Niman kan ikke vise den her.';
   @override

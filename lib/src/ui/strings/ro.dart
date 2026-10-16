@@ -612,6 +612,11 @@ final class RomanianStrings extends Strings {
   @override
   String get noteStatusError => 'Eroare';
   @override
+  String get noteStatusSaveFailed => 'Nesalvată · încearcă din nou';
+  @override
+  String get noteSaveFailedSnack =>
+      'Nota nu a putut fi salvată. Niman va încerca din nou.';
+  @override
   String get noteNotText =>
       'Acest fișier nu este o notă text, așa că Niman nu îl poate afișa aici.';
   @override

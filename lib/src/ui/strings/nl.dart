@@ -610,6 +610,11 @@ final class DutchStrings extends Strings {
   @override
   String get noteStatusError => 'Fout';
   @override
+  String get noteStatusSaveFailed => 'Niet opgeslagen · opnieuw proberen';
+  @override
+  String get noteSaveFailedSnack =>
+      'Deze notitie kon niet worden opgeslagen. Niman probeert het opnieuw.';
+  @override
   String get noteNotText =>
       'Dit bestand is geen tekstnotitie, dus Niman kan het hier niet tonen.';
   @override

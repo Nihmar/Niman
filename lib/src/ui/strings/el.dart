@@ -619,6 +619,11 @@ final class GreekStrings extends Strings {
   @override
   String get noteStatusError => 'Σφάλμα';
   @override
+  String get noteStatusSaveFailed => 'Δεν αποθηκεύτηκε · δοκιμή ξανά';
+  @override
+  String get noteSaveFailedSnack =>
+      'Δεν ήταν δυνατή η αποθήκευση της σημείωσης. Το Niman θα δοκιμάσει ξανά.';
+  @override
   String get noteNotText =>
       'Αυτό το αρχείο δεν είναι σημείωση κειμένου, οπότε το '
       'Niman δεν μπορεί να το εμφανίσει εδώ.';

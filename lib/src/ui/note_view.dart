@@ -929,7 +929,19 @@ final class _NoteViewState extends State<NoteView>
     onSettled: () {
       if (mounted) setState(() {});
     },
+    hold: widget.unsavedTracker?.hold,
   );
+
+  /// The first failure of a run of saves is said once, with a snack bar; the
+  /// status row keeps saying it, and offers the retry (#1054).
+  void _onSaveFailureChanged() {
+    if (!mounted) return;
+    final failure = _saves.failure.value;
+    setState(() {});
+    if (failure == null || failure.attempts != 1) return;
+    ScaffoldMessenger.maybeOf(context)
+        ?.showSnackBar(SnackBar(content: Text(AppStrings.noteSaveFailedSnack)));
+  }
 
   /// The loaded note's kind (the frontmatter `type` value, null = plain
   /// note); null again while a load is in flight.
@@ -975,6 +987,7 @@ final class _NoteViewState extends State<NoteView>
     // change: the same moment its memento moves.
     _activeFormats.addListener(_scheduleMemento);
     _stats.addListener(_onStatsChanged);
+    _saves.failure.addListener(_onSaveFailureChanged);
     unawaited(_load());
   }
 
@@ -1075,6 +1088,7 @@ final class _NoteViewState extends State<NoteView>
     _unsaved?.unregister(_unsavedNote);
     widget.spellCheck?.removeListener(_onSpellCheckChanged);
     _sourceFind.dispose();
+    _saves.failure.removeListener(_onSaveFailureChanged);
     _stats
       ..removeListener(_onStatsChanged)
       ..dispose();
@@ -2084,7 +2098,7 @@ final class _NoteViewState extends State<NoteView>
       _surface == null ? const <BlockAnchor>[] : await _blockAnchors.read();
 
   void _onFocusChanged() {
-    if (!_focus.hasFocus) unawaited(_saves.save());
+    if (!_focus.hasFocus) _saves.saveInBackground();
     _onToolbarFocusChanged();
   }
 
@@ -2102,7 +2116,7 @@ final class _NoteViewState extends State<NoteView>
     // goes `hidden` and never `paused` (#1057).
     if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.hidden) {
-      unawaited(_saves.save());
+      _saves.saveInBackground();
     }
     // Leaving the foreground may be the last thing this process does.
     if (state != AppLifecycleState.resumed && widget.active) {
@@ -2135,6 +2149,9 @@ final class _NoteViewState extends State<NoteView>
   String get _status {
     if (_error != null) return AppStrings.noteStatusError;
     if (_loading) return AppStrings.noteStatusLoading;
+    if (_saves.failure.value != null && !_saves.saving) {
+      return AppStrings.noteStatusSaveFailed;
+    }
     if (_saves.saving) return AppStrings.noteStatusSaving;
     if (_saves.dirty) return AppStrings.noteStatusUnsaved;
     return AppStrings.noteStatusSaved;
@@ -2161,7 +2178,7 @@ final class _NoteViewState extends State<NoteView>
     final kind = frontmatterTypeOf(newText);
     final kindChanged = kind != _noteKind;
     setState(() => _noteKind = kind);
-    unawaited(_saves.save());
+    _saves.saveInBackground();
     if (kindChanged) widget.onNoteKindChanged?.call(kind);
   }
 
@@ -2320,6 +2337,9 @@ final class _NoteViewState extends State<NoteView>
                           ? _templateCheck.problemCount
                           : 0,
                       statusText: _status,
+                      onStatusTap: _saves.failure.value == null
+                          ? null
+                          : _saves.saveInBackground,
                       statusActions: widget.statusActions,
                       onOutline: _openOutline,
                       onFind: () => _sourceFind.open(),

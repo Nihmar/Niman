@@ -593,6 +593,11 @@ final class HindiStrings extends Strings {
   @override
   String get noteStatusError => 'त्रुटि';
   @override
+  String get noteStatusSaveFailed => 'सहेजा नहीं गया · फिर कोशिश करें';
+  @override
+  String get noteSaveFailedSnack =>
+      'यह नोट सहेजा नहीं जा सका। Niman फिर कोशिश करेगा।';
+  @override
   String get noteNotText =>
       'यह फ़ाइल टेक्स्ट नोट नहीं है, इसलिए Niman इसे यहाँ नहीं दिखा सकता।';
   @override

@@ -610,6 +610,11 @@ final class MacedonianStrings extends Strings {
   @override
   String get noteStatusError => 'Грешка';
   @override
+  String get noteStatusSaveFailed => 'Не е зачувано · обиди се повторно';
+  @override
+  String get noteSaveFailedSnack =>
+      'Белешката не можеше да се зачува. Niman ќе се обиде повторно.';
+  @override
   String get noteNotText =>
       'Оваа датотека не е текстуална белешка, па '
       'Niman не може да ја прикаже тука.';

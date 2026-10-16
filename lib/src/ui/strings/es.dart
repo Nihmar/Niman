@@ -611,6 +611,11 @@ final class SpanishStrings extends Strings {
   @override
   String get noteStatusError => 'Error';
   @override
+  String get noteStatusSaveFailed => 'No guardada · reintentar';
+  @override
+  String get noteSaveFailedSnack =>
+      'No se pudo guardar la nota. Niman lo intentará de nuevo.';
+  @override
   String get noteNotText =>
       'Este archivo no es una nota de texto, así que '
       'Niman no puede mostrarlo aquí.';

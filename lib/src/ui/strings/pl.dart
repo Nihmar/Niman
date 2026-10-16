@@ -610,6 +610,11 @@ final class PolishStrings extends Strings {
   @override
   String get noteStatusError => 'Błąd';
   @override
+  String get noteStatusSaveFailed => 'Nie zapisano · ponów';
+  @override
+  String get noteSaveFailedSnack =>
+      'Nie udało się zapisać notatki. Niman spróbuje ponownie.';
+  @override
   String get noteNotText =>
       'Ten plik nie jest notatką tekstową, więc Niman nie może go tu pokazać.';
   @override

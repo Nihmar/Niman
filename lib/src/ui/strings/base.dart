@@ -318,6 +318,8 @@ abstract base class Strings {
   String get noteStatusUnsaved;
   String get noteStatusSaved;
   String get noteStatusError;
+  String get noteStatusSaveFailed;
+  String get noteSaveFailedSnack;
   String get noteNotText;
   String get noteLoadFailed;
   String get noteLoadMissing;

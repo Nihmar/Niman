@@ -602,6 +602,11 @@ final class BelarusianStrings extends Strings {
   @override
   String get noteStatusError => 'Памылка';
   @override
+  String get noteStatusSaveFailed => 'Не захавана · паўтарыць';
+  @override
+  String get noteSaveFailedSnack =>
+      'Не ўдалося захаваць нататку. Niman паспрабуе яшчэ раз.';
+  @override
   String get noteNotText =>
       'Гэты файл не тэкставая нататка, таму Niman не можа паказаць яго тут.';
   @override

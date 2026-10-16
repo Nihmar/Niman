@@ -604,6 +604,11 @@ final class SlovakStrings extends Strings {
   @override
   String get noteStatusError => 'Chyba';
   @override
+  String get noteStatusSaveFailed => 'Neuložené · skúsiť znova';
+  @override
+  String get noteSaveFailedSnack =>
+      'Poznámku sa nepodarilo uložiť. Niman to skúsi znova.';
+  @override
   String get noteNotText =>
       'Tento súbor nie je textová poznámka, preto ho Niman nemôže zobraziť tu.';
   @override

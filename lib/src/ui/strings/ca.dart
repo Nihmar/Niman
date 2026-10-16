@@ -612,6 +612,11 @@ final class CatalanStrings extends Strings {
   @override
   String get noteStatusError => 'Error';
   @override
+  String get noteStatusSaveFailed => 'No desat · torna-ho a provar';
+  @override
+  String get noteSaveFailedSnack =>
+      'No s’ha pogut guardar la nota. Niman ho tornarà a provar.';
+  @override
   String get noteNotText =>
       'Aquest fitxer no és una nota de text, així '
       'que Niman no el pot mostrar aquí.';
