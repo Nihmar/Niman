@@ -15,17 +15,29 @@ List<(T, bool)> nestOcrSidecars<T>(
   String Function(T row) nameOf,
 ) {
   const suffix = '.ocr.md';
-  final byName = {for (final row in siblings) nameOf(row): row};
+  // Each row's name is read once and every lookup below is a map hit, so a
+  // folder costs a few passes, not a scan of the siblings per sidecar (#1066).
+  final names = [for (final row in siblings) nameOf(row)];
+  final byName = <String, T>{};
+  // Stem -> the first recognizable file of that stem, in sibling order.
+  final byStem = <String, T>{};
+  for (var i = 0; i < siblings.length; i++) {
+    final name = names[i];
+    byName[name] = siblings[i];
+    if (isRecognizableFile(name)) {
+      byStem.putIfAbsent(p.basenameWithoutExtension(name), () => siblings[i]);
+    }
+  }
   final under = <T, T>{};
-  for (final row in siblings) {
-    final name = nameOf(row);
+  for (var i = 0; i < siblings.length; i++) {
+    final name = names[i];
     if (!name.endsWith(suffix)) continue;
     final base = name.substring(0, name.length - suffix.length);
     final exact = byName[base];
     final owner = exact != null && isRecognizableFile(base)
         ? exact
-        : _stemOwner(siblings, nameOf, base);
-    if (owner != null) under[row] = owner;
+        : byStem[base];
+    if (owner != null) under[siblings[i]] = owner;
   }
   if (under.isEmpty) return [for (final row in siblings) (row, false)];
   final sidecarsOf = <T, List<T>>{};
@@ -39,14 +51,4 @@ List<(T, bool)> nestOcrSidecars<T>(
         for (final sidecar in sidecarsOf[row] ?? <T>[]) (sidecar, true),
       ],
   ];
-}
-
-T? _stemOwner<T>(List<T> siblings, String Function(T) nameOf, String stem) {
-  for (final row in siblings) {
-    final name = nameOf(row);
-    if (p.basenameWithoutExtension(name) == stem && isRecognizableFile(name)) {
-      return row;
-    }
-  }
-  return null;
 }
