@@ -350,11 +350,11 @@ final class SourceStyler {
       ? _scanner.divBlocks
       : null;
 
-  /// The note's quote blocks (#729), in order, or null while [divBlocks]
-  /// is.
-  Iterable<Block>? get quoteBlocks =>
+  /// The note's quote blocks that hold a `:::` line (#729, #1048), in order,
+  /// or null while [divBlocks] is.
+  Iterable<Block>? get fenceQuoteBlocks =>
       revision == buffer.revision && _scanner.settled
-      ? _scanner.quoteBlocks
+      ? _scanner.fenceQuoteBlocks
       : null;
 
   /// How many lines the scan behind the colours has read, for the test that

@@ -102,6 +102,7 @@ final class Block {
     this.reach = 0,
     this.divRole,
     this.divDepth = 0,
+    this.holdsFence = false,
   });
 
   /// [definition] for a link reference definition's block.
@@ -171,6 +172,34 @@ final class Block {
   /// around the div it opens or closes.
   final int divDepth;
 
+  /// Whether a line of this quote block opens a fenced div (`:::`) behind
+  /// its `>` (#1048): only such a quote can hold a `columns` block, so a
+  /// reader after those (`BlockList.fenceQuoteBlocks`) walks them alone.
+  ///
+  /// Never false for a quote that has such a line, and not part of
+  /// [sameShape]: a block cut or kept whole by a rescan keeps it though the
+  /// line that held it may have gone, and the reader looks at the text.
+  final bool holdsFence;
+
+  /// The same block, marked as holding a fenced div's opener.
+  Block withFence() => Block(
+    kind: kind,
+    startLine: startLine,
+    endLine: endLine,
+    quoteDepth: quoteDepth,
+    listDepth: listDepth,
+    listOrdinal: listOrdinal,
+    headingLevel: headingLevel,
+    fenceInfo: fenceInfo,
+    entering: entering,
+    footnote: footnote,
+    definition: definition,
+    reach: reach,
+    divRole: divRole,
+    divDepth: divDepth,
+    holdsFence: true,
+  );
+
   /// How many lines it covers.
   int get lineCount => endLine - startLine;
 
@@ -214,6 +243,7 @@ final class Block {
       reach: reach,
       divRole: divRole,
       divDepth: divDepth,
+      holdsFence: holdsFence,
     );
   }
 
@@ -234,6 +264,7 @@ final class Block {
     reach: reach,
     divRole: divRole,
     divDepth: divDepth,
+    holdsFence: holdsFence,
   );
 
   /// The block from [start] on, to [end]: what is left of a block a scan
@@ -253,6 +284,7 @@ final class Block {
         : footnote,
     divRole: divRole,
     divDepth: divDepth,
+    holdsFence: holdsFence,
   );
 
   /// The block, a paragraph or an item's first one, as the setext heading
@@ -272,6 +304,7 @@ final class Block {
           entering: entering,
           footnote: footnote,
           divDepth: divDepth,
+          holdsFence: holdsFence,
         )
       : Block(
           kind: BlockKind.heading,
@@ -283,6 +316,7 @@ final class Block {
           entering: entering,
           footnote: footnote,
           divDepth: divDepth,
+          holdsFence: holdsFence,
         );
 
   @override

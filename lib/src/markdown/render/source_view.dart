@@ -2106,7 +2106,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     if (revision == _runsRevision) return _runs;
     final styler = _styler;
     final fences = styler?.divBlocks;
-    final quotes = styler?.quoteBlocks;
+    final quotes = styler?.fenceQuoteBlocks;
     if (styler == null || fences == null || quotes == null) {
       _runsOwed = styler != null;
       return const <LiveRun>[];
