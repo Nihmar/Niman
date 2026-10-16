@@ -826,6 +826,35 @@ void main() {
     expect(opened, ['a.md']);
   });
 
+  // #1038: the list on screen while a new query is out is the old one's:
+  // it says so, and Enter and the arrows do not act on its rows.
+  testWidgets('a pending query marks the old list stale; Enter waits', (
+    tester,
+  ) async {
+    source.hits = [_hit('old.md')];
+    await tester.pumpWidget(buildApp(source));
+    await tester.enterText(find.byKey(const Key('search-query')), 'xy');
+    await settle(tester);
+    expect(find.byKey(const Key('search-busy')), findsNothing);
+
+    source.hits = [_hit('new.md')];
+    final gate = source.searchGate = Completer<void>();
+    await tester.enterText(find.byKey(const Key('search-query')), 'xyz');
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.byKey(const Key('search-busy')), findsOne);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pump();
+    expect(opened, isEmpty, reason: 'the old rows are not acted on');
+
+    gate.complete();
+    await tester.pump();
+    await tester.pump();
+    expect(find.byKey(const Key('search-busy')), findsNothing);
+    expect(opened, ['new.md'], reason: 'Enter opened the fresh first hit');
+  });
+
   // #1044
   testWidgets('a word hit keeps its height while its excerpt loads', (
     tester,

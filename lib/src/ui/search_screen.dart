@@ -167,6 +167,15 @@ final class _SearchScreenState extends State<SearchScreen> {
   /// Whether the next page of the filter is being read.
   bool _readingMore = false;
 
+  /// True from the moment a runnable query is typed until its results land
+  /// (#1038): the list on screen is the previous query's, and is shown as
+  /// such; Enter waits for the new one instead of opening a row of the old.
+  bool _stale = false;
+
+  /// Enter was pressed while [_stale]: the first hit of the fresh results
+  /// opens when they land.
+  bool _openWhenFresh = false;
+
   /// The lone `+project`/`@context` the results were searched for, when
   /// the box held one (#730): the Tasks and events group answers it, and
   /// null whenever the results are notes only.
@@ -305,12 +314,14 @@ final class _SearchScreenState extends State<SearchScreen> {
 
   void _onQueryChanged() {
     _debounceTimer?.cancel();
+    _openWhenFresh = false;
     final text = _query.text.trim();
     if (text.isEmpty || !_canSearch(text)) {
       // Nothing will be (re)searched: clear the results and supersede any
       // in-flight query, so its results cannot land on the hint state.
       _source?.begin();
       setState(() {
+        _stale = false;
         _searched = false;
         _hits = const [];
         _shown = 0;
@@ -323,6 +334,7 @@ final class _SearchScreenState extends State<SearchScreen> {
     const AppLogger(name: 'search.ui')
         .debug('debouncing "$text" (${_debounce.inMilliseconds}ms)');
     _debounceTimer = Timer(_debounce, () => unawaited(_runSearch()));
+    if (!_stale) setState(() => _stale = true);
   }
 
   void _onReplacementChanged() {
@@ -362,10 +374,14 @@ final class _SearchScreenState extends State<SearchScreen> {
   Future<void> _runSearch() async {
     final text = _query.text.trim();
     if (text.isEmpty || !_canSearch(text)) return;
+    if (!_stale) setState(() => _stale = true);
     var source = _source;
     if (source == null) {
       source = await _acquireSource();
-      if (source == null || !mounted) return;
+      if (source == null || !mounted) {
+        if (mounted) setState(() => _stale = false);
+        return;
+      }
       setState(() => _source = source);
     }
     final id = source.begin();
@@ -401,7 +417,10 @@ final class _SearchScreenState extends State<SearchScreen> {
     final resultsFor = '$mode:$text';
     final fresh = resultsFor != _resultsFor;
     _resultsFor = resultsFor;
+    final open = _openWhenFresh;
+    _openWhenFresh = false;
     setState(() {
+      _stale = false;
       // A new result set starts at its top, with nothing marked: the old
       // offset and mark belong to rows that are gone (#1044).
       if (fresh) {
@@ -417,6 +436,7 @@ final class _SearchScreenState extends State<SearchScreen> {
       _taskEventToken = mode == 'words' ? taskEventQuery(text) : null;
     });
     logNextFrame('search.ui', 'results first frame (id $id)');
+    if (open) _openMarkedOrFirst();
   }
 
   /// The `key = value` filter [text] asks for, or null when it is a text
@@ -483,7 +503,7 @@ final class _SearchScreenState extends State<SearchScreen> {
   /// `↓`/`↑` in the query field move through the hits and `Enter` opens
   /// the one marked (#712); the field keeps the cursor.
   KeyEventResult _queryKey(FocusNode node, KeyEvent event) {
-    if (event is KeyUpEvent || _replaceMode || _hits.isEmpty) {
+    if (event is KeyUpEvent || _replaceMode || (_hits.isEmpty && !_stale)) {
       return KeyEventResult.ignored;
     }
     final keys = HardwareKeyboard.instance;
@@ -491,6 +511,10 @@ final class _SearchScreenState extends State<SearchScreen> {
       return KeyEventResult.ignored;
     }
     switch (event.logicalKey) {
+      // The arrows do not walk the rows of a list about to be replaced.
+      case LogicalKeyboardKey.arrowDown || LogicalKeyboardKey.arrowUp
+          when _stale:
+        break;
       case LogicalKeyboardKey.arrowDown:
         _stepHit(1, open: false);
       case LogicalKeyboardKey.arrowUp:
@@ -507,7 +531,14 @@ final class _SearchScreenState extends State<SearchScreen> {
   /// Opens the hit marked, or the first when none is (#1044): Enter after
   /// typing opens the top result, as the palette's does.
   void _openMarkedOrFirst() {
-    if (_hits.isEmpty || _replaceMode) return;
+    if (_replaceMode) return;
+    // The results on screen are the last query's: the open waits for the
+    // ones being searched (#1038).
+    if (_stale) {
+      _openWhenFresh = true;
+      return;
+    }
+    if (_hits.isEmpty) return;
     final at = _hits.indexWhere((hit) => hit.path == _currentHit);
     _openHit(at < 0 ? 0 : at);
   }
@@ -701,10 +732,18 @@ final class _SearchScreenState extends State<SearchScreen> {
                 ],
               ),
             ),
+            if (_stale && !_replaceMode)
+              const LinearProgressIndicator(
+                key: Key('search-busy'),
+                minHeight: 2,
+              ),
             Expanded(
               child: _replaceMode
                   ? _replacePreviewList(theme)
-                  : _resultsWithEvents(theme),
+                  : Opacity(
+                      opacity: _stale && _hits.isNotEmpty ? 0.5 : 1,
+                      child: _resultsWithEvents(theme),
+                    ),
             ),
           ],
         );

@@ -15,6 +15,10 @@ final class FakeSearchSource implements SearchSource {
   /// The hits every word query returns (writable, so tests can reshuffle).
   List<SearchHit> hits;
 
+  /// While set, a word search waits for it to complete: a query that takes
+  /// its time.
+  Completer<void>? searchGate;
+
   /// Which queries have been started, in order (for debounce assertions).
   final List<String> queries = [];
 
@@ -33,6 +37,7 @@ final class FakeSearchSource implements SearchSource {
     int limit = 200,
   }) async {
     queries.add(query ?? '');
+    await searchGate?.future;
     if (id != null && !isCurrent(id)) return const [];
     if (query == null || query.trim().isEmpty) return const [];
     return hits;

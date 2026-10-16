@@ -15,7 +15,9 @@ keeps Search as a tab of its own.
 In the field, `↓` / `↑` move through the results without opening them and
 `Enter` opens the one marked, or the first when none is (the search key of
 a phone keyboard does the same). A new query shows its results from the
-top. A right click on a result opens its menu:
+top; until they arrive the old list is dimmed under a progress bar, and
+`Enter` waits for the new results instead of opening a row of the old ones.
+A right click on a result opens its menu:
 *Open*, *Open in new tab*, *Open to the side*, *Reveal in tree* and
 *Replace in this note*; a middle click or `Ctrl`+click opens it in a new
 tab. On a phone a long press gives *Replace in this note*.
