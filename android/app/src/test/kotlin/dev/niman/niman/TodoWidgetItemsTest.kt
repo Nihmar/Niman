@@ -99,6 +99,21 @@ class TodoWidgetItemsTest {
     }
 
     @Test
+    fun `a header counts the rows that follow it, not the count it was written with`() {
+        // A capped payload: "Later" was written with 250 but 2 rows survived.
+        val items = TodoWidgetItems.parse(
+            JSONArray()
+                .put(header("due.today", "Today", 1))
+                .put(row("now", "due.today"))
+                .put(header("due.later", "Later", 250))
+                .put(row("far", "due.later"))
+                .put(row("farther", "due.later")),
+        )
+        val counts = items.filter { TodoWidgetItems.isSection(it) }.map { TodoWidgetItems.sectionCount(it) }
+        assertEquals(listOf("1", "2"), counts)
+    }
+
+    @Test
     fun `only the error tone header is drawn in the error color`() {
         assertTrue(TodoWidgetItems.isErrorTone(header("due.overdue", "Overdue", 1, "error")))
         assertFalse(TodoWidgetItems.isErrorTone(header("due.today", "Today", 1)))

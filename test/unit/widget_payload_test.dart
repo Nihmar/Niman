@@ -220,14 +220,64 @@ void main() {
       expect(payload.length, lessThanOrEqualTo(cap));
     });
 
-    test('a section keeps its true count while its rows are capped', () {
-      final items = rowsOf(
-        todoWidgetPayload([
-          section(todoDueNoneSectionId, [entry(0, 'first')], count: 250),
-        ], libraryPath: '/lib'),
+    test(
+      'a header counts the rows under it, not the own count of a section',
+      () {
+        // The row cap of widgetTodoSections leaves 1 of 250 rows: the
+        // header says 1, the payload's `total` carries the true count.
+        final payload = todoWidgetPayload(
+          [
+            section(todoDueNoneSectionId, [entry(0, 'first')], count: 250),
+          ],
+          libraryPath: '/lib',
+          total: 250,
+        );
+        final items = rowsOf(payload);
+        expect(items.first['count'], 1);
+        expect(items, hasLength(2));
+        expect((jsonDecode(payload) as Map<String, Object?>)['total'], 250);
+      },
+    );
+
+    test('the character cap recounts a header it cut mid-section (#1007)', () {
+      final sections = [
+        section(todoDueTodaySectionId, [entry(0, 'first'), entry(1, 'second')]),
+        section(todoDueLaterSectionId, [
+          for (var i = 2; i < 12; i++) entry(i, 'later $i'),
+        ], count: 250),
+      ];
+      final full = todoWidgetPayload(sections, libraryPath: '/lib', total: 252);
+      // Room for most of the second section, not all of it.
+      final cap = full.length - 3 * (full.length ~/ 15);
+      final payload = todoWidgetPayload(
+        sections,
+        libraryPath: '/lib',
+        total: 252,
+        maxChars: cap,
       );
-      expect(items.first['count'], 250);
-      expect(items, hasLength(2));
+      expect(
+        (jsonDecode(payload) as Map<String, Object?>)['truncated'],
+        isTrue,
+      );
+      final items = rowsOf(payload);
+      final headers = items.where((item) => item['kind'] == 'section').toList();
+      expect(headers, hasLength(2), reason: 'the cut section keeps its header');
+      // Every header says exactly the rows that follow it.
+      var rows = 0;
+      for (var i = items.length - 1; i >= 0; i--) {
+        if (items[i]['kind'] == 'section') {
+          expect(
+            items[i]['count'],
+            rows,
+            reason: 'header ${items[i]['section']}',
+          );
+          rows = 0;
+        } else {
+          rows++;
+        }
+      }
+      expect(headers.last['count'], lessThan(10));
+      expect(headers.last['count'], greaterThan(0));
     });
 
     test('a theme and a language ride along when given, absent otherwise', () {

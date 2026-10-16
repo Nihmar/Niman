@@ -72,8 +72,11 @@ const String todoWidgetErrorTone = 'error';
 /// `rows` is one flat list in display order (the widget list is a
 /// `RemoteViews` collection, one item per position): each non-empty
 /// section contributes a header item `{kind: "section", section: id,
-/// label, count, tone?}` followed by its rows. `count` is the section's
-/// true count, `tone` is `error` for the overdue header. A row is
+/// label, count, tone?}` followed by its rows. `count` is the number of
+/// rows the payload carries under the header (recounted after any cap, so
+/// a header never promises more rows than the widget shows; the true
+/// open-task count rides in `total`), `tone` is `error` for the overdue
+/// header. A row is
 /// `{text, due, priority, projects, contexts, tags, line, section,
 /// showDue}`:
 ///
@@ -91,7 +94,8 @@ const String todoWidgetErrorTone = 'error';
 /// into. Items drop from the end while the payload exceeds [maxChars],
 /// setting `truncated` (a header left with no row goes with them).
 /// [total] is the open-task count before capping, so the header count
-/// stays true when the rows are truncated. [theme] wears the app theme
+/// stays true when the rows are truncated; a section's own `count` is
+/// not trusted past the cap (see above). [theme] wears the app theme
 /// and [language] is the app language id the labels were written in (the
 /// background toggle re-pushes in it; absent in old callers: the widget
 /// renders its defaults).
@@ -131,6 +135,32 @@ String todoWidgetPayload(
 /// Whether [item] is a task row (not a section header).
 bool _isRow(Map<String, Object?> item) {
   return item['kind'] != todoWidgetSectionKind;
+}
+
+/// [items] with every header's `count` set to the rows that follow it up
+/// to the next header: the cap trims the tail, so the section it cuts
+/// would otherwise promise more rows than the widget shows (#1007).
+List<Map<String, Object?>> _recounted(List<Map<String, Object?>> items) {
+  final result = <Map<String, Object?>>[];
+  int? header;
+  var rows = 0;
+  void close() {
+    final at = header;
+    if (at != null) result[at] = {...result[at], 'count': rows};
+  }
+
+  for (final item in items) {
+    if (_isRow(item)) {
+      rows++;
+    } else {
+      close();
+      header = result.length;
+      rows = 0;
+    }
+    result.add(item);
+  }
+  close();
+  return result;
 }
 
 /// The header item of [section] followed by its rows.
@@ -175,7 +205,7 @@ String _encode(
 ) {
   return jsonEncode({
     'library': libraryPath,
-    'rows': items,
+    'rows': _recounted(items),
     'truncated': truncated,
     'total': total,
     'language': ?language,

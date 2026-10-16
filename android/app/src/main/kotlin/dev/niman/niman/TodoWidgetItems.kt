@@ -33,10 +33,32 @@ object TodoWidgetItems {
     private const val TONE_ERROR = "error"
     private const val SEPARATOR = " · "
 
-    /** The items of [array] in order; entries that are not objects are skipped. */
+    /**
+     * The items of [array] in order; entries that are not objects are
+     * skipped. Each header's `count` is set to the rows that follow it,
+     * so a header never promises more rows than the list shows under it
+     * (#1007), whatever the writer put there.
+     */
     fun parse(array: JSONArray?): List<JSONObject> {
         if (array == null) return emptyList()
-        return (0 until array.length()).mapNotNull { array.optJSONObject(it) }
+        val items = (0 until array.length()).mapNotNull { array.optJSONObject(it) }
+        recount(items)
+        return items
+    }
+
+    private fun recount(items: List<JSONObject>) {
+        var header: JSONObject? = null
+        var rows = 0
+        for (item in items) {
+            if (isSection(item)) {
+                header?.put("count", rows)
+                header = item
+                rows = 0
+            } else {
+                rows++
+            }
+        }
+        header?.put("count", rows)
     }
 
     /** Whether [item] is a section header. */
