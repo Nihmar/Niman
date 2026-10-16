@@ -19,6 +19,8 @@ import 'package:niman/src/ui/pointer_density.dart';
 import 'package:niman/src/ui/pointer_menu.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/tab_drag.dart';
+import 'package:niman/src/ui/tab_draggable.dart';
+import 'package:niman/src/ui/wheel_scroll.dart';
 import 'package:niman/src/workspace/workspace.dart';
 import 'package:niman/src/workspace/workspace_tab.dart';
 import 'package:path/path.dart' as p;
@@ -182,7 +184,7 @@ final class _NoteTabBarState extends State<NoteTabBar> {
     final onDrop = widget.onDrop;
     if (onDrop == null) return child;
     final label = noteTabLabel(tab.path);
-    return Draggable<TabDrag>(
+    return TabDraggable(
       // The pointer, not the tab's own corner: the chip follows the hand.
       dragAnchorStrategy: pointerDragAnchorStrategy,
       data: TabDrag(pane: widget.pane, index: index, label: label),
@@ -400,40 +402,47 @@ final class _NoteTabBarState extends State<NoteTabBar> {
             // some of the filler: past that the row scrolls.
             ConstrainedBox(
               constraints: BoxConstraints(maxWidth: room),
-              child: SingleChildScrollView(
+              child: WheelScroll(
                 controller: _scroll,
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    for (final (i, tab) in tabs.indexed)
-                      _draggable(
-                        index: i,
-                        tab: tab,
-                        child: _NoteTab(
-                          key: i == widget.active
-                              ? _activeKey
-                              : ValueKey(tab.path),
-                          tab: tab,
-                          index: i,
-                          active: i == widget.active,
-                          focused: widget.focused,
-                          unsaved: widget.unsaved.contains(tab.path),
-                          onActivate: () => widget.onActivate(i),
-                          onClose: () => widget.onClose(i),
-                          onMenu: (position) =>
-                              unawaited(_showTabMenu(context, i, position)),
-                          maxWidth: tabWidth,
-                        ),
-                      ),
-                    // Past the last tab: a drop here puts the tab at the
-                    // end of the row, and an empty pane's row is all this.
-                    // With tabs in the row the place is narrow: the last
-                    // tab's own right half is the target a drop to the end
-                    // aims at, and the room between the last tab and `+`
-                    // reads as a hole otherwise (#712).
-                    _dropSlot(tabs.length, width: tabs.isEmpty ? 40 : 8),
-                  ],
+                child: Scrollbar(
+                  controller: _scroll,
+                  thickness: 3,
+                  child: SingleChildScrollView(
+                    controller: _scroll,
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        for (final (i, tab) in tabs.indexed)
+                          _draggable(
+                            index: i,
+                            tab: tab,
+                            child: _NoteTab(
+                              key: i == widget.active
+                                  ? _activeKey
+                                  : ValueKey(tab.path),
+                              tab: tab,
+                              index: i,
+                              active: i == widget.active,
+                              focused: widget.focused,
+                              unsaved: widget.unsaved.contains(tab.path),
+                              onActivate: () => widget.onActivate(i),
+                              onClose: () => widget.onClose(i),
+                              onMenu: (position) =>
+                                  unawaited(_showTabMenu(context, i, position)),
+                              maxWidth: tabWidth,
+                            ),
+                          ),
+                        // Past the last tab: a drop here puts the tab at the
+                        // end of the row, and an empty pane's row is all this.
+                        // With tabs in the row the place is narrow: the last
+                        // tab's own right half is the target a drop to the end
+                        // aims at, and the room between the last tab and `+`
+                        // reads as a hole otherwise (#712).
+                        _dropSlot(tabs.length, width: tabs.isEmpty ? 40 : 8),
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -593,6 +602,9 @@ final class _NoteTab extends StatelessWidget {
       child: Tooltip(
         message: tab.path,
         waitDuration: const Duration(milliseconds: 600),
+        // Hover only: a held finger lifts the tab (#1080), which the
+        // tooltip's own long press would take from it.
+        triggerMode: TooltipTriggerMode.manual,
         child: Listener(
           // A middle click closes, as everywhere else tabs exist.
           onPointerDown: (event) {

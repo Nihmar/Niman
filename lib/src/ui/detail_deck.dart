@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:niman/src/ui/hidden_slot.dart';
 
 /// One mounted note of a [DetailDeck]: what it draws, and how it takes
 /// the keyboard.
@@ -32,9 +33,9 @@ final class DeckSlot {
 /// A hidden note is out of the way of the keyboard as well as of the eye
 /// (#1074): [Offstage] children "can receive focus and have keyboard input
 /// directed to them", so a tab left with the caret in it went on taking the
-/// typing while another note showed. Every hidden slot is wrapped in
-/// [ExcludeFocus], which also lets go of the focus a slot holds when it is
-/// hidden.
+/// typing while another note showed. Every hidden slot is a [HiddenSlot],
+/// which excludes focus and lets go of the focus a slot holds when it is
+/// hidden, and does not lay the note out again on each resize (#1079).
 ///
 /// The keyboard then follows the stage: when the note on stage changes and
 /// the keyboard was in the note that left (or in the shell itself, on its
@@ -135,19 +136,16 @@ class _DetailDeckState extends State<DetailDeck> {
       fit: StackFit.expand,
       children: [
         for (final slot in widget.slots)
-          Offstage(
+          HiddenSlot(
             key: ValueKey('detail-note-${slot.id}'),
-            offstage: !slot.active,
+            hidden: !slot.active,
             child: TickerMode(
               enabled: slot.active,
-              child: ExcludeFocus(
-                excluding: !slot.active,
-                child: Focus(
-                  focusNode: _nodeOf(slot.id),
-                  canRequestFocus: false,
-                  skipTraversal: true,
-                  child: slot.child,
-                ),
+              child: Focus(
+                focusNode: _nodeOf(slot.id),
+                canRequestFocus: false,
+                skipTraversal: true,
+                child: slot.child,
               ),
             ),
           ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:niman/src/ui/hidden_slot.dart';
 
 /// The bottom-tab bodies, kept mounted so a switch never re-inflates them.
 ///
@@ -9,13 +10,15 @@ import 'package:flutter/material.dart';
 /// constructors logged 0 ms). The fade covers the entry without a
 /// cross-fade's second offscreen pass.
 ///
-/// Hidden slots hide with [Offstage] (layout, paint, and tickers skipped),
-/// except the ones in [retainLayout]: showing an [Offstage] child pays a
-/// full relayout, which for a `TextField`-heavy tab alone costs 10-16 ms
-/// of frame build (T-TS-09). Those stay laid out via [Visibility]
-/// `maintainSize` instead (paint, semantics, interactivity, and tickers
-/// still off), so showing them is paint-only. Retained sparingly and only
-/// where the show-layout is itself expensive: retaining everywhere would
+/// Hidden slots hide with [HiddenSlot] (layout, paint, hit tests and
+/// tickers skipped; a plain `Offstage` still lays its child out on every
+/// resize and keyboard frame, #1079), except the ones in [retainLayout]:
+/// showing a hidden slot pays a full layout, which for a `TextField`-heavy
+/// tab alone costs 10-16 ms of frame build (T-TS-09). Those stay laid out
+/// via [Visibility] `maintainSize` instead (paint, semantics, interactivity,
+/// and tickers still off), so showing them is paint-only. Retained sparingly
+/// and only where the show-layout is itself expensive: retaining everywhere
+/// would
 /// relayout every hidden tab on each window resize and keyboard frame.
 final class TabBodyStack extends StatelessWidget {
   /// Creates the stack over [children], showing [currentIndex].
@@ -69,7 +72,7 @@ final class TabBodyStack extends StatelessWidget {
               child: _slot(i),
             )
           else
-            Offstage(offstage: i != currentIndex, child: _slot(i)),
+            HiddenSlot(hidden: i != currentIndex, child: _slot(i)),
       ],
     );
   }

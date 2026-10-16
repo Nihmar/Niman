@@ -56,6 +56,7 @@ import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/dead_link_watcher.dart';
 import 'package:niman/src/ui/dropped_link.dart';
 import 'package:niman/src/ui/frontmatter_fields.dart';
+import 'package:niman/src/ui/hidden_slot.dart';
 import 'package:niman/src/ui/link_preview/note_link_preview.dart';
 import 'package:niman/src/ui/links_to_note_section.dart';
 import 'package:niman/src/ui/note_dead_links.dart';
@@ -2436,13 +2437,14 @@ final class _NoteViewState extends State<NoteView>
                         // coming back to the preview finds its parse, scroll
                         // offset, typeset math and images where they were
                         // (device report, 2026-09-11: every return re-parsed
-                        // the note and restarted from the top). Offstage
-                        // children skip hit testing, painting and the default
-                        // finders; the panes never show together.
+                        // the note and restarted from the top). Hidden
+                        // children skip layout, hit testing, painting and the
+                        // default finders (#1079); the panes never show
+                        // together.
                         : Stack(
                             children: [
-                              Offstage(
-                                offstage: showPreview,
+                              HiddenSlot(
+                                hidden: showPreview,
                                 child: KeyedSubtree(
                                   key: ValueKey(
                                     _wysiwygIn(widget)
@@ -2452,8 +2454,8 @@ final class _NoteViewState extends State<NoteView>
                                   child: _unifiedSurfacePane(),
                                 ),
                               ),
-                              Offstage(
-                                offstage: !showPreview,
+                              HiddenSlot(
+                                hidden: !showPreview,
                                 child: KeyedSubtree(
                                   key: const ValueKey('pane-preview'),
                                   child: _previewPane(context),

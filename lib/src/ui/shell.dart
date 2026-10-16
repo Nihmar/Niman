@@ -89,6 +89,7 @@ import 'package:niman/src/ui/epub_look_sheet.dart';
 import 'package:niman/src/ui/epub_text_zoom.dart';
 import 'package:niman/src/ui/expanded_folders.dart';
 import 'package:niman/src/ui/folder_grid.dart';
+import 'package:niman/src/ui/hidden_slot.dart';
 import 'package:niman/src/ui/history/history_flow.dart';
 import 'package:niman/src/ui/history/history_labels.dart';
 import 'package:niman/src/ui/history/note_version_screen.dart';
@@ -3828,27 +3829,24 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   );
 
   /// One kept-alive wide-layout slot. Hidden slots skip layout, paint and
-  /// tickers (see [TabBodyStack]); [retainLayout] keeps an expensive one
-  /// laid out, so showing it is paint-only.
+  /// tickers (see [TabBodyStack], [HiddenSlot]); [retainLayout] keeps an
+  /// expensive one laid out, so showing it is paint-only.
   Widget _wideSlot({
     required bool visible,
     required Widget child,
     bool retainLayout = false,
   }) {
-    final slot = TickerMode(
-      enabled: visible,
-      child: ExcludeFocus(excluding: !visible, child: child),
-    );
+    final slot = TickerMode(enabled: visible, child: child);
     if (retainLayout) {
       return Visibility(
         visible: visible,
         maintainState: true,
         maintainAnimation: true,
         maintainSize: true,
-        child: slot,
+        child: ExcludeFocus(excluding: !visible, child: slot),
       );
     }
-    return Offstage(offstage: !visible, child: slot);
+    return HiddenSlot(hidden: !visible, child: slot);
   }
 
   /// The current tab's FAB, or null for the tabs that have none.
@@ -4952,14 +4950,11 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       fit: StackFit.expand,
       children: [
         for (var pane = 0; pane < w.panes.length; pane++)
-          Offstage(
-            offstage: pane != w.focused,
+          HiddenSlot(
+            hidden: pane != w.focused,
             child: TickerMode(
               enabled: pane == w.focused,
-              child: ExcludeFocus(
-                excluding: pane != w.focused,
-                child: _detailPane(controller, pane),
-              ),
+              child: _detailPane(controller, pane),
             ),
           ),
       ],
@@ -4993,82 +4988,79 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           Stack(
             fit: StackFit.expand,
             children: [
-              Offstage(
-                offstage: content != null || compare || review,
+              HiddenSlot(
+                hidden: content != null || compare || review,
                 child: TickerMode(
                   enabled: content == null && !compare && !review,
-                  child: ExcludeFocus(
-                    excluding: content != null || compare || review,
-                    child: ShellDetailPane(
-                      shellFocus: _shellFocus,
-                      root: controller.root,
-                      tabs: _deck(pane),
-                      onMemento: _workspace.remember,
-                      zen: _inZen,
-                      // The panel holds the note's outline and spelling
-                      // wherever the wide layout can show it — docked beside
-                      // the note, or over it on a window without room for
-                      // both — so the status row leaves both its buttons
-                      // out (#1002). A phone keeps them: there they open
-                      // their sheets.
-                      outlineInDock: _wide && !_inZen,
-                      spellCheckInDock: _wide && !_inZen,
-                      typewriter: _editorSettings.typewriter,
-                      cascadeChecklist: _editorSettings.cascadeChecklist,
-                      frontmatterPanel: _editorSettings.frontmatterPanel,
-                      linkPreview: _editorSettings.linkPreview,
-                      onToggleTypewriter: _toggleTypewriter,
-                      onLoaded: _workspace.noteLoaded,
-                      onEditedNoteClosed: _tidyClosedNote,
-                      showLineNumbers: _editorSettings.lineNumbers,
-                      noteColumn: _editorSettings.noteColumn,
-                      // The kind toggles and ⋮ sit at the end of the note's
-                      // one row of chrome (#173); there is no header above.
-                      barActions: [..._kindActions, _dockToggle(), _noteMenu()],
-                      autofocusEditor: _editorSettings.autofocusEditor,
-                      // The Files pane opened a note (#727): that tab's own
-                      // view is asked for the caret, and no other.
-                      caretPath: _caretPath,
-                      caretRequest: _caretRequest,
-                      linkType: _editorSettings.linkType,
-                      newItemLocation: _editorSettings.newItemLocation,
-                      attachmentsFolder: _editorSettings.attachmentsFolder,
-                      templateFolder: _editorSettings.templateFolder,
-                      indentWidth: _editorSettings.indentWidth,
-                      sourceFont: _editorSettings.sourceFont,
-                      toolbarLayout: _editorSettings.toolbarLayout,
-                      // A single enabled editor has nowhere to switch to:
-                      // the note hides its switch instead of offering a
-                      // dead toggle.
-                      onEditorKindChanged:
-                          _editorSettings.editorsEnabled.length > 1
-                          ? _setEditorKind
-                          : null,
-                      linkSource: _linkSource,
-                      wikilinkSuggester: _wikilinkSuggester,
-                      onOpenNote: _openNoteFromLink,
-                      kindMode: !_kindRawMode,
-                      onNoteKindChanged: _onNoteKindChanged,
-                      onTabKind: _onTabKind,
-                      onPasteAsMarkdown: _pasteAsMarkdown,
-                      unsavedTracker: widget.unsavedTracker,
-                      spellCheck: widget.spellCheck,
-                      reloadToken: _noteReloadToken,
-                      linksFollowed: _linksFollowed,
-                      onAnnotate: _annotate,
-                      ocr: _ocrActions,
-                      marks: _annotations,
-                      saveNote: noteSaverFor(controller),
-                      saveNoteStream: noteStreamSaverFor(controller),
-                      createMissingNote: missingNoteCreatorFor(controller),
-                      statusActions: _statusActionsFor(pane),
-                      header: (path) => _journalUi.header(context, path),
-                      onEditEpubLook: (anchor) =>
-                          _editEpubLook(controller, anchor),
-                      onEpubTextScale: (scale) =>
-                          unawaited(keepEpubTextScale(controller, scale)),
-                      epubFullScreen: _immersive.fullScreen,
-                    ),
+                  child: ShellDetailPane(
+                    shellFocus: _shellFocus,
+                    root: controller.root,
+                    tabs: _deck(pane),
+                    onMemento: _workspace.remember,
+                    zen: _inZen,
+                    // The panel holds the note's outline and spelling
+                    // wherever the wide layout can show it — docked beside
+                    // the note, or over it on a window without room for
+                    // both — so the status row leaves both its buttons
+                    // out (#1002). A phone keeps them: there they open
+                    // their sheets.
+                    outlineInDock: _wide && !_inZen,
+                    spellCheckInDock: _wide && !_inZen,
+                    typewriter: _editorSettings.typewriter,
+                    cascadeChecklist: _editorSettings.cascadeChecklist,
+                    frontmatterPanel: _editorSettings.frontmatterPanel,
+                    linkPreview: _editorSettings.linkPreview,
+                    onToggleTypewriter: _toggleTypewriter,
+                    onLoaded: _workspace.noteLoaded,
+                    onEditedNoteClosed: _tidyClosedNote,
+                    showLineNumbers: _editorSettings.lineNumbers,
+                    noteColumn: _editorSettings.noteColumn,
+                    // The kind toggles and ⋮ sit at the end of the note's
+                    // one row of chrome (#173); there is no header above.
+                    barActions: [..._kindActions, _dockToggle(), _noteMenu()],
+                    autofocusEditor: _editorSettings.autofocusEditor,
+                    // The Files pane opened a note (#727): that tab's own
+                    // view is asked for the caret, and no other.
+                    caretPath: _caretPath,
+                    caretRequest: _caretRequest,
+                    linkType: _editorSettings.linkType,
+                    newItemLocation: _editorSettings.newItemLocation,
+                    attachmentsFolder: _editorSettings.attachmentsFolder,
+                    templateFolder: _editorSettings.templateFolder,
+                    indentWidth: _editorSettings.indentWidth,
+                    sourceFont: _editorSettings.sourceFont,
+                    toolbarLayout: _editorSettings.toolbarLayout,
+                    // A single enabled editor has nowhere to switch to:
+                    // the note hides its switch instead of offering a
+                    // dead toggle.
+                    onEditorKindChanged:
+                        _editorSettings.editorsEnabled.length > 1
+                        ? _setEditorKind
+                        : null,
+                    linkSource: _linkSource,
+                    wikilinkSuggester: _wikilinkSuggester,
+                    onOpenNote: _openNoteFromLink,
+                    kindMode: !_kindRawMode,
+                    onNoteKindChanged: _onNoteKindChanged,
+                    onTabKind: _onTabKind,
+                    onPasteAsMarkdown: _pasteAsMarkdown,
+                    unsavedTracker: widget.unsavedTracker,
+                    spellCheck: widget.spellCheck,
+                    reloadToken: _noteReloadToken,
+                    linksFollowed: _linksFollowed,
+                    onAnnotate: _annotate,
+                    ocr: _ocrActions,
+                    marks: _annotations,
+                    saveNote: noteSaverFor(controller),
+                    saveNoteStream: noteStreamSaverFor(controller),
+                    createMissingNote: missingNoteCreatorFor(controller),
+                    statusActions: _statusActionsFor(pane),
+                    header: (path) => _journalUi.header(context, path),
+                    onEditEpubLook: (anchor) =>
+                        _editEpubLook(controller, anchor),
+                    onEpubTextScale: (scale) =>
+                        unawaited(keepEpubTextScale(controller, scale)),
+                    epubFullScreen: _immersive.fullScreen,
                   ),
                 ),
               ),
@@ -5076,15 +5068,12 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
               // filter, its scroll and its place are kept, as a note
               // tab's are.
               if (_contentTab case final tab? when pane == _contentPaneShown)
-                Offstage(
+                HiddenSlot(
                   key: Key('content-pane-${tab.name}'),
-                  offstage: content == null || review,
+                  hidden: content == null || review,
                   child: TickerMode(
                     enabled: content != null,
-                    child: ExcludeFocus(
-                      excluding: content == null,
-                      child: _tabBodyFor(tab, controller),
-                    ),
+                    child: _tabBodyFor(tab, controller),
                   ),
                 ),
               // A version beside the note (#712): over the deck, which
