@@ -18,6 +18,7 @@ import 'package:niman/src/core/settings/library_settings.dart'
         defaultHighlightColour,
         defaultListFolder;
 import 'package:niman/src/library/new_item_folder.dart';
+import 'package:niman/src/todo/todo_sections.dart' show todoDoneSectionId;
 import 'package:path/path.dart' as p;
 
 void main() {
@@ -539,6 +540,7 @@ void main() {
         'editorAutofocus',
         'reminderShowTokens',
         'treeSort',
+        'todoCollapsedSections',
         'linkType',
         'indentWidth',
         'newCardsPerDay',
@@ -776,6 +778,74 @@ void main() {
         TreeView.list,
       );
       expect(LibraryConfig.fromJsonMap(const {}).treeView, TreeView.list);
+    });
+
+    test('the folded todo sections are a device key, Done folded (#1003)', () {
+      const config = LibraryConfig.defaults;
+      expect(config.todoCollapsedSections, {'done'});
+      expect(defaultTodoCollapsedSections, {todoDoneSectionId});
+      expect(LibraryConfig.deviceKeys, contains('todoCollapsedSections'));
+      final folded = config.copyWith(
+        todoCollapsedSections: {'priority.B', 'due.later'},
+      );
+      // Sorted in the file, so a rebuilt set does not churn it.
+      expect(folded.deviceJsonMap()['todoCollapsedSections'], [
+        'due.later',
+        'priority.B',
+      ]);
+      expect(
+        folded.libraryJsonMap().containsKey('todoCollapsedSections'),
+        isFalse,
+      );
+      expect(LibraryConfig.fromJsonMap(folded.toJsonMap()), folded);
+      expect(folded == config, isFalse);
+    });
+
+    test('an absent folded-sections key is the default, an empty list is '
+        'not', () {
+      expect(LibraryConfig.fromJsonMap(const {}).todoCollapsedSections, {
+        'done',
+      });
+      expect(
+        LibraryConfig.fromJsonMap(const {'todoCollapsedSections': <String>[]})
+            .todoCollapsedSections,
+        isEmpty,
+      );
+      // Written out even when empty, so "all open" survives a round trip.
+      final open = LibraryConfig.defaults.copyWith(
+        todoCollapsedSections: <String>{},
+      );
+      expect(open.toJsonMap()['todoCollapsedSections'], isEmpty);
+      expect(
+        LibraryConfig.fromJsonMap(open.toJsonMap()).todoCollapsedSections,
+        isEmpty,
+      );
+    });
+
+    test('malformed folded-sections values are read leniently', () {
+      expect(
+        LibraryConfig.fromJsonMap(const {'todoCollapsedSections': 'done'})
+            .todoCollapsedSections,
+        {'done'},
+        reason: 'not a list: the default',
+      );
+      expect(
+        LibraryConfig.fromJsonMap(const {
+          'todoCollapsedSections': ['due.none', 3, '', null, 'due.none'],
+        }).todoCollapsedSections,
+        {'due.none'},
+        reason: 'non-strings, blanks and repeats dropped',
+      );
+    });
+
+    test('the folded sections round trip through the files', () async {
+      final lib = await makeLibrary();
+      final store = LibraryConfigStore(lib.path);
+      final config = LibraryConfig.defaults.copyWith(
+        todoCollapsedSections: {'priority.none'},
+      );
+      await store.write(config);
+      expect((await store.read()).todoCollapsedSections, {'priority.none'});
     });
 
     test('an out-of-range indentWidth is brought into range', () {

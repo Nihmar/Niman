@@ -1267,6 +1267,17 @@ final class LibraryController implements LibrarySession {
     await _editLibrary((c) => c.copyWith(treeSort: sort));
   }
 
+  /// The todo sections folded on this device (#1003).
+  @override
+  Future<Set<String>> get todoCollapsedSections async =>
+      (await _library).todoCollapsedSections;
+
+  /// Sets (and persists) the folded todo sections on this device.
+  @override
+  Future<void> setTodoCollapsedSections(Set<String> ids) async {
+    await _editLibrary((c) => c.copyWith(todoCollapsedSections: {...ids}));
+  }
+
   /// How the Files pane shows a folder on this device (#727).
   @override
   Future<TreeView> get treeView async => (await _library).treeView;

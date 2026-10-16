@@ -595,6 +595,13 @@ abstract interface class LibrarySession {
   /// Sets (and persists) the library tree sort order.
   Future<void> setTreeSort(TreeSort sort);
 
+  /// The todo sections folded on this device, by section id (default
+  /// Done only, #1003).
+  Future<Set<String>> get todoCollapsedSections;
+
+  /// Sets (and persists) the folded todo sections on this device.
+  Future<void> setTodoCollapsedSections(Set<String> ids);
+
   /// How the Files pane shows a folder on this device (default
   /// [TreeView.list], #727).
   Future<TreeView> get treeView;
