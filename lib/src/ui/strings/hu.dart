@@ -1110,6 +1110,12 @@ final class HungarianStrings extends Strings {
   @override
   String get todoDueNoDate => 'Nincs dátum';
   @override
+  String get todoSectionLater => 'Később';
+  @override
+  String todoSectionPriority(String letter) => '$letter prioritás';
+  @override
+  String get todoSectionNoPriority => 'Nincs prioritás';
+  @override
   String get todoRowDue => 'Esedékesség';
   @override
   String get todoRowDueToday => 'Ma esedékes';

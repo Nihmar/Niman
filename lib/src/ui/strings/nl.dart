@@ -1113,6 +1113,12 @@ final class DutchStrings extends Strings {
   @override
   String get todoDueNoDate => 'Geen datum';
   @override
+  String get todoSectionLater => 'Later';
+  @override
+  String todoSectionPriority(String letter) => 'Prioriteit $letter';
+  @override
+  String get todoSectionNoPriority => 'Geen prioriteit';
+  @override
   String get todoRowDue => 'Vervalt';
   @override
   String get todoRowDueToday => 'Vervalt vandaag';

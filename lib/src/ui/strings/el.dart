@@ -1135,6 +1135,12 @@ final class GreekStrings extends Strings {
   @override
   String get todoDueNoDate => 'Χωρίς ημερομηνία';
   @override
+  String get todoSectionLater => 'Αργότερα';
+  @override
+  String todoSectionPriority(String letter) => 'Προτεραιότητα $letter';
+  @override
+  String get todoSectionNoPriority => 'Χωρίς προτεραιότητα';
+  @override
   String get todoRowDue => 'Λήξη';
   @override
   String get todoRowDueToday => 'Λήξη σήμερα';

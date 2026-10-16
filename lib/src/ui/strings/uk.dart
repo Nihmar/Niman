@@ -1108,6 +1108,12 @@ final class UkrainianStrings extends Strings {
   @override
   String get todoDueNoDate => 'Без дати';
   @override
+  String get todoSectionLater => 'Пізніше';
+  @override
+  String todoSectionPriority(String letter) => 'Пріоритет $letter';
+  @override
+  String get todoSectionNoPriority => 'Без пріоритету';
+  @override
   String get todoRowDue => 'Строк';
   @override
   String get todoRowDueToday => 'Строк сьогодні';

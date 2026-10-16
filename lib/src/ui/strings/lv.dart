@@ -1104,6 +1104,12 @@ final class LatvianStrings extends Strings {
   @override
   String get todoDueNoDate => 'Bez datuma';
   @override
+  String get todoSectionLater => 'Vēlāk';
+  @override
+  String todoSectionPriority(String letter) => 'Prioritāte $letter';
+  @override
+  String get todoSectionNoPriority => 'Bez prioritātes';
+  @override
   String get todoRowDue => 'Termiņš';
   @override
   String get todoRowDueToday => 'Termiņš šodien';

@@ -1120,6 +1120,12 @@ final class SpanishStrings extends Strings {
   @override
   String get todoDueNoDate => 'Sin fecha';
   @override
+  String get todoSectionLater => 'Más adelante';
+  @override
+  String todoSectionPriority(String letter) => 'Prioridad $letter';
+  @override
+  String get todoSectionNoPriority => 'Sin prioridad';
+  @override
   String get todoRowDue => 'Vence';
   @override
   String get todoRowDueToday => 'Vence hoy';

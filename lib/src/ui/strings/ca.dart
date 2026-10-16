@@ -1123,6 +1123,12 @@ final class CatalanStrings extends Strings {
   @override
   String get todoDueNoDate => 'Sense data';
   @override
+  String get todoSectionLater => 'Més endavant';
+  @override
+  String todoSectionPriority(String letter) => 'Prioritat $letter';
+  @override
+  String get todoSectionNoPriority => 'Sense prioritat';
+  @override
   String get todoRowDue => 'Caduca';
   @override
   String get todoRowDueToday => 'Caduca avui';

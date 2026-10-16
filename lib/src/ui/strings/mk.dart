@@ -1117,6 +1117,12 @@ final class MacedonianStrings extends Strings {
   @override
   String get todoDueNoDate => 'Без датум';
   @override
+  String get todoSectionLater => 'Подоцна';
+  @override
+  String todoSectionPriority(String letter) => 'Приоритет $letter';
+  @override
+  String get todoSectionNoPriority => 'Без приоритет';
+  @override
   String get todoRowDue => 'Доспевање';
   @override
   String get todoRowDueToday => 'Доспевање денес';

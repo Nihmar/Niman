@@ -1105,6 +1105,12 @@ final class CzechStrings extends Strings {
   @override
   String get todoDueNoDate => 'Bez data';
   @override
+  String get todoSectionLater => 'Později';
+  @override
+  String todoSectionPriority(String letter) => 'Priorita $letter';
+  @override
+  String get todoSectionNoPriority => 'Bez priority';
+  @override
   String get todoRowDue => 'Termín';
   @override
   String get todoRowDueToday => 'Termín dnes';

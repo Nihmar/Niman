@@ -1108,6 +1108,12 @@ final class SlovakStrings extends Strings {
   @override
   String get todoDueNoDate => 'Bez dátumu';
   @override
+  String get todoSectionLater => 'Neskôr';
+  @override
+  String todoSectionPriority(String letter) => 'Priorita $letter';
+  @override
+  String get todoSectionNoPriority => 'Bez priority';
+  @override
   String get todoRowDue => 'Termín';
   @override
   String get todoRowDueToday => 'Termín dnes';

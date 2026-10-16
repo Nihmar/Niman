@@ -599,6 +599,9 @@ abstract base class Strings {
   String get todoDueToday;
   String get todoDueNext7;
   String get todoDueNoDate;
+  String get todoSectionLater;
+  String todoSectionPriority(String letter);
+  String get todoSectionNoPriority;
   String get todoRowDue;
   String get todoRowDueToday;
   String get todoSortTooltip;

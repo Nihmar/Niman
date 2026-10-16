@@ -746,6 +746,10 @@ final class AppStrings {
   static String get todoDueToday => _s.todoDueToday;
   static String get todoDueNext7 => _s.todoDueNext7;
   static String get todoDueNoDate => _s.todoDueNoDate;
+  static String get todoSectionLater => _s.todoSectionLater;
+  static String todoSectionPriority(String letter) =>
+      _s.todoSectionPriority(letter);
+  static String get todoSectionNoPriority => _s.todoSectionNoPriority;
   // The row's due labels (the range menu above names the ranges): the
   // prefix keeps the due date from being read as the reminder's date.
   static String get todoRowDue => _s.todoRowDue;

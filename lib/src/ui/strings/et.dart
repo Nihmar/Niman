@@ -1097,6 +1097,12 @@ final class EstonianStrings extends Strings {
   @override
   String get todoDueNoDate => 'Kuupäevata';
   @override
+  String get todoSectionLater => 'Hiljem';
+  @override
+  String todoSectionPriority(String letter) => 'Prioriteet $letter';
+  @override
+  String get todoSectionNoPriority => 'Prioriteedita';
+  @override
   String get todoRowDue => 'Lõpp';
   @override
   String get todoRowDueToday => 'Lõpp täna';

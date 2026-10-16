@@ -1113,6 +1113,12 @@ final class BulgarianStrings extends Strings {
   @override
   String get todoDueNoDate => 'Без дата';
   @override
+  String get todoSectionLater => 'По-късно';
+  @override
+  String todoSectionPriority(String letter) => 'Приоритет $letter';
+  @override
+  String get todoSectionNoPriority => 'Без приоритет';
+  @override
   String get todoRowDue => 'Краен срок';
   @override
   String get todoRowDueToday => 'Краен срок днес';

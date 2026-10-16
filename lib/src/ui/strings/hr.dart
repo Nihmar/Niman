@@ -1104,6 +1104,12 @@ final class CroatianStrings extends Strings {
   @override
   String get todoDueNoDate => 'Bez datuma';
   @override
+  String get todoSectionLater => 'Kasnije';
+  @override
+  String todoSectionPriority(String letter) => 'Prioritet $letter';
+  @override
+  String get todoSectionNoPriority => 'Bez prioriteta';
+  @override
   String get todoRowDue => 'Rok';
   @override
   String get todoRowDueToday => 'Rok danas';

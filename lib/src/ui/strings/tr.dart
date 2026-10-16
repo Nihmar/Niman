@@ -1099,6 +1099,12 @@ final class TurkishStrings extends Strings {
   @override
   String get todoDueNoDate => 'Tarih yok';
   @override
+  String get todoSectionLater => 'Daha sonra';
+  @override
+  String todoSectionPriority(String letter) => 'Öncelik $letter';
+  @override
+  String get todoSectionNoPriority => 'Öncelik yok';
+  @override
   String get todoRowDue => 'Bitişi';
   @override
   String get todoRowDueToday => 'Bugün bitiyor';

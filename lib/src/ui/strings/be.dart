@@ -1107,6 +1107,12 @@ final class BelarusianStrings extends Strings {
   @override
   String get todoDueNoDate => 'Без даты';
   @override
+  String get todoSectionLater => 'Пазней';
+  @override
+  String todoSectionPriority(String letter) => 'Прыярытэт $letter';
+  @override
+  String get todoSectionNoPriority => 'Без прыярытэту';
+  @override
   String get todoRowDue => 'Тэрмін';
   @override
   String get todoRowDueToday => 'Тэрмін сёння';

@@ -1110,6 +1110,12 @@ final class SlovenianStrings extends Strings {
   @override
   String get todoDueNoDate => 'Brez datuma';
   @override
+  String get todoSectionLater => 'Pozneje';
+  @override
+  String todoSectionPriority(String letter) => 'Prioriteta $letter';
+  @override
+  String get todoSectionNoPriority => 'Brez prioritete';
+  @override
   String get todoRowDue => 'Rok';
   @override
   String get todoRowDueToday => 'Rok danes';

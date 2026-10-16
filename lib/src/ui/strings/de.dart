@@ -1122,6 +1122,12 @@ final class GermanStrings extends Strings {
   @override
   String get todoDueNoDate => 'Ohne Datum';
   @override
+  String get todoSectionLater => 'Später';
+  @override
+  String todoSectionPriority(String letter) => 'Priorität $letter';
+  @override
+  String get todoSectionNoPriority => 'Keine Priorität';
+  @override
   String get todoRowDue => 'Fällig';
   @override
   String get todoRowDueToday => 'Heute fällig';

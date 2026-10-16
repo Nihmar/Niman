@@ -1117,6 +1117,12 @@ final class ItalianStrings extends Strings {
   @override
   String get todoDueNoDate => 'Senza data';
   @override
+  String get todoSectionLater => 'Più avanti';
+  @override
+  String todoSectionPriority(String letter) => 'Priorità $letter';
+  @override
+  String get todoSectionNoPriority => 'Senza priorità';
+  @override
   String get todoRowDue => 'Scade';
   @override
   String get todoRowDueToday => 'Scade oggi';

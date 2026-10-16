@@ -1109,6 +1109,12 @@ final class SerbianStrings extends Strings {
   @override
   String get todoDueNoDate => 'Без датума';
   @override
+  String get todoSectionLater => 'Касније';
+  @override
+  String todoSectionPriority(String letter) => 'Приоритет $letter';
+  @override
+  String get todoSectionNoPriority => 'Без приоритета';
+  @override
   String get todoRowDue => 'Доспеће';
   @override
   String get todoRowDueToday => 'Доспеће данас';

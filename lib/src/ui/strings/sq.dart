@@ -1111,6 +1111,12 @@ final class AlbanianStrings extends Strings {
   @override
   String get todoDueNoDate => 'Pa datë';
   @override
+  String get todoSectionLater => 'Më vonë';
+  @override
+  String todoSectionPriority(String letter) => 'Përparësi $letter';
+  @override
+  String get todoSectionNoPriority => 'Pa përparësi';
+  @override
   String get todoRowDue => 'Skadhencë';
   @override
   String get todoRowDueToday => 'Skadhencë sot';

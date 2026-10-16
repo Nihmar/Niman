@@ -1118,6 +1118,12 @@ final class PolishStrings extends Strings {
   @override
   String get todoDueNoDate => 'Bez daty';
   @override
+  String get todoSectionLater => 'Później';
+  @override
+  String todoSectionPriority(String letter) => 'Priorytet $letter';
+  @override
+  String get todoSectionNoPriority => 'Bez priorytetu';
+  @override
   String get todoRowDue => 'Termin';
   @override
   String get todoRowDueToday => 'Termin dziś';

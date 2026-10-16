@@ -1119,6 +1119,12 @@ final class RomanianStrings extends Strings {
   @override
   String get todoDueNoDate => 'Fără dată';
   @override
+  String get todoSectionLater => 'Mai târziu';
+  @override
+  String todoSectionPriority(String letter) => 'Prioritate $letter';
+  @override
+  String get todoSectionNoPriority => 'Fără prioritate';
+  @override
   String get todoRowDue => 'Termen';
   @override
   String get todoRowDueToday => 'Termen astăzi';

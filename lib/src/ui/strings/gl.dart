@@ -1113,6 +1113,12 @@ final class GalicianStrings extends Strings {
   @override
   String get todoDueNoDate => 'Sen data';
   @override
+  String get todoSectionLater => 'Máis adiante';
+  @override
+  String todoSectionPriority(String letter) => 'Prioridade $letter';
+  @override
+  String get todoSectionNoPriority => 'Sen prioridade';
+  @override
   String get todoRowDue => 'Caduca';
   @override
   String get todoRowDueToday => 'Caduca hoxe';

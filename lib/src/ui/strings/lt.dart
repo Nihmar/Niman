@@ -1105,6 +1105,12 @@ final class LithuanianStrings extends Strings {
   @override
   String get todoDueNoDate => 'Bez datos';
   @override
+  String get todoSectionLater => 'Vėliau';
+  @override
+  String todoSectionPriority(String letter) => 'Prioritetas $letter';
+  @override
+  String get todoSectionNoPriority => 'Be prioriteto';
+  @override
   String get todoRowDue => 'Terminas';
   @override
   String get todoRowDueToday => 'Terminas šiandien';

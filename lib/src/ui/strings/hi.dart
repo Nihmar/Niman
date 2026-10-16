@@ -1088,6 +1088,12 @@ final class HindiStrings extends Strings {
   @override
   String get todoDueNoDate => 'बिना तारीख़';
   @override
+  String get todoSectionLater => 'बाद में';
+  @override
+  String todoSectionPriority(String letter) => 'प्राथमिकता $letter';
+  @override
+  String get todoSectionNoPriority => 'कोई प्राथमिकता नहीं';
+  @override
   String get todoRowDue => 'समय-सीमा';
   @override
   String get todoRowDueToday => 'आज की समय-सीमा';

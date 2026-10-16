@@ -1111,6 +1111,12 @@ final class BasqueStrings extends Strings {
   @override
   String get todoDueNoDate => 'Datarik gabe';
   @override
+  String get todoSectionLater => 'Geroago';
+  @override
+  String todoSectionPriority(String letter) => 'Lehentasuna $letter';
+  @override
+  String get todoSectionNoPriority => 'Lehentasunik gabe';
+  @override
   String get todoRowDue => 'Epe';
   @override
   String get todoRowDueToday => 'Epe gaur';

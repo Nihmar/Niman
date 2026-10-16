@@ -1042,6 +1042,12 @@ final class JapaneseStrings extends Strings {
   @override
   String get todoDueNoDate => '日付なし';
   @override
+  String get todoSectionLater => '後で';
+  @override
+  String todoSectionPriority(String letter) => '優先度 $letter';
+  @override
+  String get todoSectionNoPriority => '優先度なし';
+  @override
   String get todoRowDue => '期限';
   @override
   String get todoRowDueToday => '今日の期限';

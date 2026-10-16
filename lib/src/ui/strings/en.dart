@@ -1097,6 +1097,12 @@ final class EnglishStrings extends Strings {
   @override
   String get todoDueNoDate => 'No date';
   @override
+  String get todoSectionLater => 'Later';
+  @override
+  String todoSectionPriority(String letter) => 'Priority $letter';
+  @override
+  String get todoSectionNoPriority => 'No priority';
+  @override
   String get todoRowDue => 'Due';
   @override
   String get todoRowDueToday => 'Due today';

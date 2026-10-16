@@ -1110,6 +1110,12 @@ final class SwedishStrings extends Strings {
   @override
   String get todoDueNoDate => 'Inget datum';
   @override
+  String get todoSectionLater => 'Senare';
+  @override
+  String todoSectionPriority(String letter) => 'Prioritet $letter';
+  @override
+  String get todoSectionNoPriority => 'Ingen prioritet';
+  @override
   String get todoRowDue => 'Förfällig';
   @override
   String get todoRowDueToday => 'Förfällig idag';

@@ -1110,6 +1110,12 @@ final class FinnishStrings extends Strings {
   @override
   String get todoDueNoDate => 'Ilman päivämäärää';
   @override
+  String get todoSectionLater => 'Myöhemmin';
+  @override
+  String todoSectionPriority(String letter) => 'Prioriteetti $letter';
+  @override
+  String get todoSectionNoPriority => 'Ei prioriteettia';
+  @override
   String get todoRowDue => 'Eräpäivä';
   @override
   String get todoRowDueToday => 'Eräpäivä tänään';

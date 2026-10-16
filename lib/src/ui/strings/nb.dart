@@ -1102,6 +1102,12 @@ final class NorwegianStrings extends Strings {
   @override
   String get todoDueNoDate => 'Ingen dato';
   @override
+  String get todoSectionLater => 'Senere';
+  @override
+  String todoSectionPriority(String letter) => 'Prioritet $letter';
+  @override
+  String get todoSectionNoPriority => 'Ingen prioritet';
+  @override
   String get todoRowDue => 'Forfall';
   @override
   String get todoRowDueToday => 'Forfaller i dag';

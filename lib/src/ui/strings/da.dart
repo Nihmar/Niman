@@ -1103,6 +1103,12 @@ final class DanishStrings extends Strings {
   @override
   String get todoDueNoDate => 'Ingen dato';
   @override
+  String get todoSectionLater => 'Senere';
+  @override
+  String todoSectionPriority(String letter) => 'Prioritet $letter';
+  @override
+  String get todoSectionNoPriority => 'Ingen prioritet';
+  @override
   String get todoRowDue => 'Frist';
   @override
   String get todoRowDueToday => 'Frist i dag';

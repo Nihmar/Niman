@@ -1111,6 +1111,12 @@ final class PortugueseStrings extends Strings {
   @override
   String get todoDueNoDate => 'Sem data';
   @override
+  String get todoSectionLater => 'Mais tarde';
+  @override
+  String todoSectionPriority(String letter) => 'Prioridade $letter';
+  @override
+  String get todoSectionNoPriority => 'Sem prioridade';
+  @override
   String get todoRowDue => 'Vence';
   @override
   String get todoRowDueToday => 'Vence hoje';

@@ -1032,6 +1032,12 @@ final class ChineseStrings extends Strings {
   @override
   String get todoDueNoDate => '无日期';
   @override
+  String get todoSectionLater => '稍后';
+  @override
+  String todoSectionPriority(String letter) => '优先级 $letter';
+  @override
+  String get todoSectionNoPriority => '无优先级';
+  @override
   String get todoRowDue => '截止';
   @override
   String get todoRowDueToday => '今天截止';

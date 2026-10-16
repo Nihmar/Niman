@@ -1107,6 +1107,12 @@ final class IcelandicStrings extends Strings {
   @override
   String get todoDueNoDate => 'Án dagsetningar';
   @override
+  String get todoSectionLater => 'Síðar';
+  @override
+  String todoSectionPriority(String letter) => 'Forrangur $letter';
+  @override
+  String get todoSectionNoPriority => 'Enginn forrangur';
+  @override
   String get todoRowDue => 'Lokið';
   @override
   String get todoRowDueToday => 'Lokið í dag';

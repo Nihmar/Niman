@@ -1130,6 +1130,12 @@ final class FrenchStrings extends Strings {
   @override
   String get todoDueNoDate => 'Sans date';
   @override
+  String get todoSectionLater => 'Plus tard';
+  @override
+  String todoSectionPriority(String letter) => 'Priorité $letter';
+  @override
+  String get todoSectionNoPriority => 'Sans priorité';
+  @override
   String get todoRowDue => 'Échéance';
   @override
   String get todoRowDueToday => 'Échéance aujourd’hui';
