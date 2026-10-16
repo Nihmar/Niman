@@ -299,6 +299,16 @@ the other, and entering or leaving Zen leaves typewriter mode as it
 was. In Zen the status row is hidden, so the key and the palette are
 the way to it.
 
+### Find and replace
+
+The find bar searches the note a line at a time, without making a copy of
+it, so a very long note can have it open: the matches arrive in a moment
+after you stop typing the query. **Replace** swaps the current match and
+moves on, keeping the matches it already found; **Replace all** is one undo
+step and leaves the caret where it was in the text (moved by the
+replacements before it) instead of taking it to the first match. A query
+that contains a line break is searched over the whole note.
+
 ### Copy and paste
 
 The clipboard carries Markdown on both editors, so copying the same text
