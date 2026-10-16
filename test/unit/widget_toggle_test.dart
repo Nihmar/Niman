@@ -33,6 +33,7 @@ void main() {
         primary: '#FFE2E2E5',
         secondary: '#FFC3C6CF',
         accent: '#FFD0BCFF',
+        error: null,
       ));
     });
 

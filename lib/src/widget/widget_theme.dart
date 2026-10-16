@@ -23,14 +23,18 @@ import 'package:niman/src/core/app_theme.dart';
 import 'package:niman/src/core/theme.dart';
 import 'package:niman/src/ui/theme/palettes.dart';
 
-/// The widget theme: whether the app is dark, and the card, text and
-/// accent colors the native side applies.
+/// The widget theme: whether the app is dark, and the card, text, accent
+/// and error colors the native side applies.
+///
+/// `error` is optional: a theme that carries none (an old payload or tap)
+/// leaves the native side its own error pair (#1008).
 typedef WidgetTheme = ({
   bool dark,
   String background,
   String primary,
   String secondary,
   String accent,
+  String? error,
 });
 
 /// The short URI query keys carrying a theme on tap URIs.
@@ -48,6 +52,9 @@ const String widgetThemeSecondaryKey = 'fs';
 
 /// The accent (`#AARRGGBB`).
 const String widgetThemeAccentKey = 'ac';
+
+/// The error tone, the Overdue header (`#AARRGGBB`; optional, #1008).
+const String widgetThemeErrorKey = 'er';
 
 /// The theme the widgets wear right now: the app's brightness choice
 /// (the device brightness for `system`) in the app's theme.
@@ -69,6 +76,7 @@ WidgetTheme resolveWidgetTheme({Brightness? platform}) {
     primary: _hex(scheme.onSurface),
     secondary: _hex(scheme.onSurfaceVariant),
     accent: _hex(scheme.primary),
+    error: _hex(scheme.error),
   );
 }
 
@@ -80,6 +88,7 @@ Map<String, Object?> widgetThemeToMap(WidgetTheme theme) {
     'primary': theme.primary,
     'secondary': theme.secondary,
     'accent': theme.accent,
+    if (theme.error != null) 'error': theme.error,
   };
 }
 
@@ -92,6 +101,7 @@ WidgetTheme? widgetThemeFromMap(Map<String, Object?>? map) {
   final primary = map['primary'];
   final secondary = map['secondary'];
   final accent = map['accent'];
+  final error = map['error'];
   if (dark is! bool ||
       !_isHex(background) ||
       !_isHex(primary) ||
@@ -105,6 +115,7 @@ WidgetTheme? widgetThemeFromMap(Map<String, Object?>? map) {
     primary: primary! as String,
     secondary: secondary! as String,
     accent: accent! as String,
+    error: _isHex(error) ? error! as String : null,
   );
 }
 
@@ -118,6 +129,7 @@ WidgetTheme? widgetThemeFromUri(Uri? uri) {
   final primary = params[widgetThemePrimaryKey];
   final secondary = params[widgetThemeSecondaryKey];
   final accent = params[widgetThemeAccentKey];
+  final error = params[widgetThemeErrorKey];
   final bool dark;
   if (darkRaw == '1') {
     dark = true;
@@ -138,6 +150,7 @@ WidgetTheme? widgetThemeFromUri(Uri? uri) {
     primary: primary!,
     secondary: secondary!,
     accent: accent!,
+    error: _isHex(error) ? error : null,
   );
 }
 
@@ -150,6 +163,8 @@ void appendWidgetThemeParams(Map<String, String> params, WidgetTheme? theme) {
   params[widgetThemePrimaryKey] = theme.primary;
   params[widgetThemeSecondaryKey] = theme.secondary;
   params[widgetThemeAccentKey] = theme.accent;
+  final error = theme.error;
+  if (error != null) params[widgetThemeErrorKey] = error;
 }
 
 bool _isHex(Object? value) {

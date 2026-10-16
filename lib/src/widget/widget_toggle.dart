@@ -45,9 +45,10 @@ const String widgetLanguageParam = 'lg';
 /// Parses a `niman://todo-toggle?id=&library=&line=` URI, or null when
 /// it carries nothing toggleable.
 ///
-/// The native rows append the payload's theme (`td/bg/fg/fs/ac`), so
-/// the re-push wears the same theme instead of flashing the defaults;
-/// taps without it (old widgets) resolve live in the pushing isolate.
+/// The native rows append the payload's theme (`td/bg/fg/fs/ac`, `er` when
+/// it has an error color), so the re-push wears the same theme instead of
+/// flashing the defaults; taps without it (old widgets) resolve live in the
+/// pushing isolate.
 /// The payload's language rides the same way (`lg`), for the section
 /// headings.
 ({int id, String library, int line, WidgetTheme? theme, String? language})?

@@ -158,6 +158,39 @@ class TodoWidgetItemsTest {
         assertEquals(0xFFF2B8B5.toInt(), dark.error)
     }
 
+    // The platform's Color.parseColor is a stub on the host: #AARRGGBB by hand.
+    private fun parseColor(hex: String): Int = java.lang.Long.parseLong(hex.removePrefix("#"), 16).toInt()
+
+    private fun payloadWithTheme(error: String?): String {
+        val theme = JSONObject()
+            .put("dark", false)
+            .put("background", "#E6FFFBFF")
+            .put("primary", "#FF1C1B1F")
+            .put("secondary", "#FF49454F")
+            .put("accent", "#FF6750A4")
+            .also { if (error != null) it.put("error", error) }
+        return JSONObject().put("theme", theme).toString()
+    }
+
+    @Test
+    fun `the payload's error color overrides the fallback pair`() {
+        val theme = WidgetTheme.fromPayload(payloadWithTheme("#FF8C1D18"), ::parseColor)!!
+        assertEquals(0xFF8C1D18.toInt(), theme.error)
+    }
+
+    @Test
+    fun `a payload without an error color keeps the fallback pair`() {
+        val theme = WidgetTheme.fromPayload(payloadWithTheme(null), ::parseColor)!!
+        assertEquals(0xFFB3261E.toInt(), theme.error)
+    }
+
+    @Test
+    fun `a broken error color leaves the fallback and keeps the theme`() {
+        val theme = WidgetTheme.fromPayload(payloadWithTheme("not a color"), ::parseColor)!!
+        assertEquals(0xFFB3261E.toInt(), theme.error)
+        assertEquals(0xFF6750A4.toInt(), theme.accent)
+    }
+
     @Test
     fun `a JSON null reads as absent, not as the text null`() {
         assertEquals("", TodoWidgetItems.string(row("x"), "due"))

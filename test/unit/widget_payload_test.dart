@@ -287,6 +287,7 @@ void main() {
         primary: '#FFE2E2E5',
         secondary: '#FFC3C6CF',
         accent: '#FFD0BCFF',
+        error: null,
       );
       final sections = [
         section(todoDueNoneSectionId, [entry(0, 'first')]),
@@ -312,6 +313,27 @@ void main() {
       ) as Map<String, Object?>;
       expect(plain.containsKey('theme'), isFalse);
       expect(plain.containsKey('language'), isFalse);
+    });
+
+    test('the theme carries the error color when it has one (#1008)', () {
+      const theme = (
+        dark: false,
+        background: '#E6FFFBFF',
+        primary: '#FF1C1B1F',
+        secondary: '#FF49454F',
+        accent: '#FF6750A4',
+        error: '#FFB3261E',
+      );
+      final decoded = jsonDecode(
+        todoWidgetPayload(
+          [
+            section(todoDueNoneSectionId, [entry(0, 'first')]),
+          ],
+          libraryPath: '/lib',
+          theme: theme,
+        ),
+      ) as Map<String, Object?>;
+      expect((decoded['theme']! as Map<String, Object?>)['error'], '#FFB3261E');
     });
   });
 
