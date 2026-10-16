@@ -958,6 +958,11 @@ final class EstonianStrings extends Strings {
   @override
   String get linksToNoteEmbed => 'manustatud';
   @override
+  String get linksToNoteFurther => 'Mainitud allpool';
+  @override
+  String linksUpdating(int done, int total) =>
+      'Linkide uuendamine: $done / $total';
+  @override
   String get openLinkFailed => 'Viidet ei õnnestunud avada';
 
   // Dead-link note creation (issue #78).
@@ -2042,6 +2047,8 @@ final class EstonianStrings extends Strings {
   String get folderPickerNewFolder => 'Uus kaust';
   @override
   String get folderPickerEmpty => 'Kaustu pole veel';
+  @override
+  String get folderPickerFilter => 'Filtreeri kaustu';
   @override
   String get listFolderTitle => 'Loetelute kaust';
   @override

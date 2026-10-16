@@ -41,6 +41,7 @@ import 'package:niman/src/markdown/note_read_failure.dart';
 import 'package:niman/src/markdown/read_parser.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
+import 'package:niman/src/markdown/render/scroll_anchor.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/markdown/source_edit.dart';
@@ -131,6 +132,7 @@ final class NoteView extends StatefulWidget {
     this.initialCaretOffset,
     this.active = true,
     this.initialMemento,
+    this.movedFrom,
     this.onMemento,
     this.onEditedNoteClosed,
     this.onLoaded,
@@ -313,6 +315,12 @@ final class NoteView extends StatefulWidget {
   /// selection when it was left in the editor that shows now, and its
   /// scroll. A caret landing or an anchor wins over it.
   final NoteMemento? initialMemento;
+
+  /// The path this note was at a moment ago, when its file was renamed or
+  /// moved (#1076): [path] changing from this one is the same note under
+  /// another name, so the view keeps its text, undo and place instead of
+  /// loading another note.
+  final String? movedFrom;
 
   /// Receives where the note is left: when its tab goes behind another,
   /// and when the view goes away.
@@ -603,6 +611,21 @@ final class _NoteViewState extends State<NoteView>
     if (!mounted) return;
     if (!(ModalRoute.of(context)?.isCurrent ?? true)) return;
     _focus.requestFocus();
+  }
+
+  @override
+  void takeFocus() {
+    if (!mounted) return;
+    if (!_ready) {
+      // The load puts the caret in once the editor is up.
+      _caretPending = true;
+      return;
+    }
+    if (_previewOnly) {
+      _readViewKey.currentState?.focus();
+      return;
+    }
+    _refocus();
   }
 
   /// The note's editing commands: the toolbar's, the format keys', the
@@ -995,6 +1018,10 @@ final class _NoteViewState extends State<NoteView>
     // The WYSIWYG publishes the formats at its caret on every selection
     // change: the same moment its memento moves.
     _activeFormats.addListener(_scheduleMemento);
+    // And the scroll of either pane: where the note is read is where it is
+    // left (#1077).
+    _previewScroll.addListener(_scheduleMemento);
+    _sourceScroll.addListener(_scheduleMemento);
     _stats.addListener(_onStatsChanged);
     _saves.failure.addListener(_onSaveFailureChanged);
     _diskChanges = _unsaved?.diskChanges.listen((paths) {
@@ -1008,6 +1035,7 @@ final class _NoteViewState extends State<NoteView>
   @override
   void didUpdateWidget(covariant NoteView oldWidget) {
     super.didUpdateWidget(oldWidget);
+    final moved = _followsMove(oldWidget);
     _keepPlaceAcrossModes(oldWidget);
     if (!identical(oldWidget.linkSource, widget.linkSource)) {
       // The library opened under a note that was already on screen: its
@@ -1016,7 +1044,7 @@ final class _NoteViewState extends State<NoteView>
         ..sourceChanged()
         ..refresh();
     }
-    if (oldWidget.path != widget.path) {
+    if (oldWidget.path != widget.path && !moved) {
       // Another note's head is not this one's (#157): the panel opens closed
       // again, and the note on screen is taken at its head until it scrolls.
       _frontmatterOpen = false;
@@ -1042,12 +1070,17 @@ final class _NoteViewState extends State<NoteView>
       }
     }
     if (oldWidget.active && !widget.active) _handMemento(oldWidget.path);
+    if (!oldWidget.active && widget.active && _anchorToLand != null) {
+      _scheduleLanding();
+    }
     if (!oldWidget.active && widget.active && _ready) {
       // Back on screen: the shell asks the showing note what kind it is.
       widget.onNoteKindChanged?.call(_noteKind);
       _dismissKeyboardForPreview();
     }
-    if (oldWidget.path != widget.path) {
+    if (moved) {
+      _followMove();
+    } else if (oldWidget.path != widget.path) {
       _handMemento(oldWidget.path);
       // Persist the outgoing note under its own path before the buffer is
       // replaced by the incoming one: the _load below resets it.
@@ -1089,11 +1122,37 @@ final class _NoteViewState extends State<NoteView>
     }
   }
 
+  /// Whether [oldWidget] to this one is the same loaded note renamed or
+  /// moved (#1076), not another note: its buffer is still the note.
+  bool _followsMove(NoteView oldWidget) =>
+      oldWidget.path != widget.path &&
+      widget.movedFrom == oldWidget.path &&
+      _ready &&
+      !_loading &&
+      _surface != null;
+
+  /// The note's file is at a new path and its editor stays as it is: the
+  /// text, the undo, the place. What was keyed on the old path starts over.
+  void _followMove() {
+    _log.debug('moved: ${widget.movedFrom} -> ${widget.path}');
+    // The edits from here on are saved under the new name, as a new
+    // session. The disk stamp is the old file's, which the move kept, so a
+    // rewrite of this note's links by the move still reads as a change.
+    _saves.newSession();
+    _unsaved?.noteChanged();
+    // Its links resolve from where it is now.
+    _deadLinks
+      ..sourceChanged()
+      ..refresh();
+  }
+
   @override
   void dispose() {
     _handMemento(widget.path);
     _mementoTimer?.cancel();
     _activeFormats.removeListener(_scheduleMemento);
+    _previewScroll.removeListener(_scheduleMemento);
+    _sourceScroll.removeListener(_scheduleMemento);
     _templateCheck.dispose();
     _saves.cancel();
     _previewTimer?.cancel();
@@ -1151,12 +1210,16 @@ final class _NoteViewState extends State<NoteView>
       // panes keeps the caret. The *editor kind* is the pane's, so the switch
       // comes back to the mode the note was left in.
       final selection = surface.selection;
+      // The line at the top of the pane on stage, or, once the panes are
+      // gone with the tab, the one it had as it went (#1077).
+      final anchor = _stageAnchor() ?? _leavingAnchor;
       receive(
         path,
         NoteMemento(
           selectionBase: selection.anchor,
           selectionExtent: selection.extent,
-          scrollOffset: surface.scrollOffset,
+          scrollLine: anchor?.line,
+          scrollFraction: anchor?.fraction,
           editorKind: widget.showWysiwyg ? wysiwygEditorKind : sourceEditorKind,
           preview: widget.showPreview,
         ),
@@ -1177,12 +1240,87 @@ final class _NoteViewState extends State<NoteView>
     // One surface, two modes, the same text and the same offsets: the
     // selection is restored whenever the memento was taken in this pane, and
     // the scroll either way. The buffer is already built (the load made it).
+    final line = memento.scrollLine;
     _surface?.restore(
       base: sameEditor ? memento.selectionBase : null,
       extent: sameEditor ? memento.selectionExtent : null,
-      scroll: memento.scrollOffset,
+      // A memento written before the anchor held pixels: the editor still
+      // takes them.
+      scroll: line == null ? memento.scrollOffset : null,
     );
+    if (line != null) {
+      _landAnchor((line: line, fraction: memento.scrollFraction ?? 0.0));
+    }
   }
+
+  /// The source line at the top of the pane on stage, or null while none is
+  /// drawn.
+  ScrollAnchor? _stageAnchor() => _previewIn(widget)
+      ? _readViewKey.currentState?.topAnchor
+      : _sourceViewKey.currentState?.topAnchor;
+
+  /// The stage anchor taken as the view was leaving the tree: its panes are
+  /// gone by the time it is disposed, and the memento is handed in then.
+  ScrollAnchor? _leavingAnchor;
+
+  @override
+  void deactivate() {
+    _leavingAnchor = _stageAnchor();
+    super.deactivate();
+  }
+
+  @override
+  void activate() {
+    super.activate();
+    _leavingAnchor = null;
+  }
+
+  /// A place to show once the pane on stage has the note drawn, and how
+  /// many frames it has waited.
+  ScrollAnchor? _anchorToLand;
+  int _anchorFrames = 0;
+  bool _landingScheduled = false;
+
+  /// Shows [anchor] at the top of the pane on stage as soon as it can: the
+  /// note's panes are built a frame or more after its text arrives, the
+  /// preview later still, and a tab behind waits for its turn.
+  void _landAnchor(ScrollAnchor anchor) {
+    _anchorToLand = anchor;
+    _anchorFrames = 0;
+    _scheduleLanding();
+  }
+
+  void _scheduleLanding() {
+    if (_landingScheduled) return;
+    _landingScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _landingScheduled = false;
+      if (mounted) _tryLanding();
+    });
+  }
+
+  void _tryLanding() {
+    final anchor = _anchorToLand;
+    // A tab behind is not drawn: it lands when it comes back.
+    if (anchor == null || !widget.active) return;
+    final read = _previewIn(widget);
+    final landed = read
+        ? _readViewKey.currentState?.acceptsAnchor ?? false
+        : _sourceViewKey.currentState?.acceptsAnchor ?? false;
+    if (landed) {
+      _anchorToLand = null;
+      if (read) {
+        _readViewKey.currentState!.showAnchor(anchor);
+      } else {
+        _sourceViewKey.currentState!.showAnchor(anchor);
+      }
+      return;
+    }
+    if (++_anchorFrames < _maxLandingFrames) _scheduleLanding();
+  }
+
+  /// How many frames a place waits for its pane before it is given up.
+  static const int _maxLandingFrames = 240;
 
   Future<void> _load() async {
     final path = widget.path;

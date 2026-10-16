@@ -907,6 +907,10 @@ final class ChineseStrings extends Strings {
   @override
   String get linksToNoteEmbed => '嵌入';
   @override
+  String get linksToNoteFurther => '在下文提及';
+  @override
+  String linksUpdating(int done, int total) => '正在更新链接：$done / $total';
+  @override
   String get openLinkFailed => '无法打开链接';
 
   // Dead-link note creation (issue #78).
@@ -1888,6 +1892,8 @@ final class ChineseStrings extends Strings {
   String get folderPickerNewFolder => '新建文件夹';
   @override
   String get folderPickerEmpty => '还没有文件夹';
+  @override
+  String get folderPickerFilter => '筛选文件夹';
   @override
   String get listFolderTitle => '列表文件夹';
   @override

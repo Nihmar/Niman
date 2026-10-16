@@ -976,6 +976,11 @@ final class GermanStrings extends Strings {
   @override
   String get linksToNoteEmbed => 'eingebettet';
   @override
+  String get linksToNoteFurther => 'Weiter unten erwähnt';
+  @override
+  String linksUpdating(int done, int total) =>
+      'Links werden aktualisiert: $done von $total';
+  @override
   String get openLinkFailed => 'Link konnte nicht geöffnet werden';
 
   // Dead-link note creation (issue #78).
@@ -2108,6 +2113,8 @@ final class GermanStrings extends Strings {
   String get folderPickerNewFolder => 'Neuer Ordner';
   @override
   String get folderPickerEmpty => 'Noch keine Ordner';
+  @override
+  String get folderPickerFilter => 'Ordner filtern';
   @override
   String get listFolderTitle => 'Listen-Ordner';
   @override

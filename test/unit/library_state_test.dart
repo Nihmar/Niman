@@ -266,6 +266,32 @@ void main() {
     await controller.dispose();
   });
 
+  test(
+    'a workspace slot keeps writing to its library after the close',
+    () async {
+      // #1083: the shell's last writes (where each note was left) arrive as
+      // its views go down, after the session has closed the library: they
+      // used to read "the library open now" and be dropped.
+      final controller = LibraryController(
+        appDb,
+        indexDbFactory: indexDb,
+        rescanInterval: const Duration(hours: 1),
+      );
+      await controller.open(root.path, create: false);
+      final slot = controller.workspaceSlot;
+      await controller.close();
+      expect(controller.root, isNull);
+
+      await slot.save(Workspace.empty.open('a.md'));
+      await controller.open(root.path, create: false);
+
+      expect((await controller.workspaceSlot.load()).activePath, 'a.md');
+      expect((await slot.load()).activePath, 'a.md');
+      await controller.close();
+      await controller.dispose();
+    },
+  );
+
   test('opening a library whose index file is garbage rebuilds it', () async {
     // #368: the index is derived data and deleting it is the documented
     // repair, but only `forgetLibrary` did so — and it takes the registry
@@ -294,7 +320,7 @@ void main() {
     expect(await names(first), ['a.md']);
     // The workspace the rebuild must not cost: the note was open, on this
     // device, when the app last ran.
-    await first.saveWorkspace(Workspace.empty.open('a.md'));
+    await first.workspaceSlot.save(Workspace.empty.open('a.md'));
     await first.close();
     await first.dispose();
 
@@ -314,7 +340,7 @@ void main() {
     // workspace it had are still there.
     final db = await second.appDatabase;
     expect((await LibraryRegistry(db).all()).single.path, root.path);
-    expect((await second.savedWorkspace).activePath, 'a.md');
+    expect((await second.workspaceSlot.load()).activePath, 'a.md');
     await second.close();
     await second.dispose();
 

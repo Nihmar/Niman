@@ -963,6 +963,11 @@ final class LatvianStrings extends Strings {
   @override
   String get linksToNoteEmbed => 'iegulta';
   @override
+  String get linksToNoteFurther => 'Minēts tālāk';
+  @override
+  String linksUpdating(int done, int total) =>
+      'Atjaunina saites: $done no $total';
+  @override
   String get openLinkFailed => 'Nevarēja atvērt saiti';
 
   // Dead-link note creation (issue #78).
@@ -2057,6 +2062,8 @@ final class LatvianStrings extends Strings {
   String get folderPickerNewFolder => 'Jauns katalogs';
   @override
   String get folderPickerEmpty => 'Vēl nav kataloga';
+  @override
+  String get folderPickerFilter => 'Filtrēt katalogus';
   @override
   String get listFolderTitle => 'Sarakstu katalogs';
   @override

@@ -969,6 +969,11 @@ final class IcelandicStrings extends Strings {
   @override
   String get linksToNoteEmbed => 'ívafið';
   @override
+  String get linksToNoteFurther => 'Nefnt neðar';
+  @override
+  String linksUpdating(int done, int total) =>
+      'Uppfæri tengla: $done af $total';
+  @override
   String get openLinkFailed => 'Það gekk ekki að opna tengilinn';
 
   // Dead-link note creation (issue #78).
@@ -2065,6 +2070,8 @@ final class IcelandicStrings extends Strings {
   String get folderPickerNewFolder => 'Ný mappa';
   @override
   String get folderPickerEmpty => 'Engar mappar enn';
+  @override
+  String get folderPickerFilter => 'Sía möppur';
   @override
   String get listFolderTitle => 'Mappa lista';
   @override

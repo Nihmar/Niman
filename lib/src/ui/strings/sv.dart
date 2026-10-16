@@ -970,6 +970,11 @@ final class SwedishStrings extends Strings {
   @override
   String get linksToNoteEmbed => 'inbäddad';
   @override
+  String get linksToNoteFurther => 'Nämnd längre ner';
+  @override
+  String linksUpdating(int done, int total) =>
+      'Uppdaterar länkar: $done av $total';
+  @override
   String get openLinkFailed => 'Kunde inte öppna länken';
 
   // Dead-link note creation (issue #78).
@@ -2074,6 +2079,8 @@ final class SwedishStrings extends Strings {
   String get folderPickerNewFolder => 'Ny mapp';
   @override
   String get folderPickerEmpty => 'Inga mappar ännu';
+  @override
+  String get folderPickerFilter => 'Filtrera mappar';
   @override
   String get listFolderTitle => 'Listmapp';
   @override

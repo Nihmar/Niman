@@ -968,6 +968,11 @@ final class SlovakStrings extends Strings {
   @override
   String get linksToNoteEmbed => 'vložená';
   @override
+  String get linksToNoteFurther => 'Spomenuté nižšie';
+  @override
+  String linksUpdating(int done, int total) =>
+      'Aktualizácia odkazov: $done z $total';
+  @override
   String get openLinkFailed => 'Odkaz sa nedal otvoriť';
 
   // Dead-link note creation (issue #78).
@@ -2060,6 +2065,8 @@ final class SlovakStrings extends Strings {
   String get folderPickerNewFolder => 'Nový priečinok';
   @override
   String get folderPickerEmpty => 'Zatiaľ žiadny priečinok';
+  @override
+  String get folderPickerFilter => 'Filtrovať priečinky';
   @override
   String get listFolderTitle => 'Priečinok zoznamov';
   @override

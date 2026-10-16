@@ -976,6 +976,11 @@ final class MacedonianStrings extends Strings {
   @override
   String get linksToNoteEmbed => 'вметната';
   @override
+  String get linksToNoteFurther => 'Спомнато подолу';
+  @override
+  String linksUpdating(int done, int total) =>
+      'Ажурирање на врските: $done од $total';
+  @override
   String get openLinkFailed => 'Не може да се отвори врската';
 
   // Dead-link note creation (issue #78).
@@ -2081,6 +2086,8 @@ final class MacedonianStrings extends Strings {
   String get folderPickerNewFolder => 'Нова папка';
   @override
   String get folderPickerEmpty => 'Сè уште нема папки';
+  @override
+  String get folderPickerFilter => 'Филтрирај папки';
   @override
   String get listFolderTitle => 'Папка на листа';
   @override

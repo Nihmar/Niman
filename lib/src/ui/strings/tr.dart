@@ -959,6 +959,11 @@ final class TurkishStrings extends Strings {
   @override
   String get linksToNoteEmbed => 'gömülü';
   @override
+  String get linksToNoteFurther => 'Daha aşağıda anılıyor';
+  @override
+  String linksUpdating(int done, int total) =>
+      'Bağlantılar güncelleniyor: $done / $total';
+  @override
   String get openLinkFailed => 'Bağlantı açılamadı';
 
   // Dead-link note creation (issue #78).
@@ -2047,6 +2052,8 @@ final class TurkishStrings extends Strings {
   String get folderPickerNewFolder => 'Yeni klasör';
   @override
   String get folderPickerEmpty => 'Henüz klasör yok';
+  @override
+  String get folderPickerFilter => 'Klasörleri filtrele';
   @override
   String get listFolderTitle => 'Liste klasörü';
   @override

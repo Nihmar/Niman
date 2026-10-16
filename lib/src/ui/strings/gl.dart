@@ -970,6 +970,11 @@ final class GalicianStrings extends Strings {
   @override
   String get linksToNoteEmbed => 'incrustada';
   @override
+  String get linksToNoteFurther => 'Mencionada máis abaixo';
+  @override
+  String linksUpdating(int done, int total) =>
+      'Actualizando ligazóns: $done de $total';
+  @override
   String get openLinkFailed => 'Non se puido abrir o enlace';
 
   // Dead-link note creation (issue #78).
@@ -2077,6 +2082,8 @@ final class GalicianStrings extends Strings {
   String get folderPickerNewFolder => 'Cartafol novo';
   @override
   String get folderPickerEmpty => 'Aínda non hai cartafóis';
+  @override
+  String get folderPickerFilter => 'Filtrar cartafóis';
   @override
   String get listFolderTitle => 'Cartafol de lista';
   @override

@@ -966,6 +966,11 @@ final class CroatianStrings extends Strings {
   @override
   String get linksToNoteEmbed => 'ugrađena';
   @override
+  String get linksToNoteFurther => 'Spomenuto dalje dolje';
+  @override
+  String linksUpdating(int done, int total) =>
+      'Ažuriranje veza: $done od $total';
+  @override
   String get openLinkFailed => 'Veza se nije mogla otvoriti';
 
   // Dead-link note creation (issue #78).
@@ -2060,6 +2065,8 @@ final class CroatianStrings extends Strings {
   String get folderPickerNewFolder => 'Novi direktorij';
   @override
   String get folderPickerEmpty => 'Još nema direktorija';
+  @override
+  String get folderPickerFilter => 'Filtriraj direktorije';
   @override
   String get listFolderTitle => 'Direktorij popisa';
   @override

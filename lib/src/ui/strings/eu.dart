@@ -968,6 +968,11 @@ final class BasqueStrings extends Strings {
   @override
   String get linksToNoteEmbed => 'txertatua';
   @override
+  String get linksToNoteFurther => 'Beherago aipatua';
+  @override
+  String linksUpdating(int done, int total) =>
+      'Estekak eguneratzen: $done / $total';
+  @override
   String get openLinkFailed => 'Ezin izan da esteka ireki';
 
   // Dead-link note creation (issue #78).
@@ -2076,6 +2081,8 @@ final class BasqueStrings extends Strings {
   String get folderPickerNewFolder => 'Karpeta berria';
   @override
   String get folderPickerEmpty => 'Oraindik ez dago karpetarik';
+  @override
+  String get folderPickerFilter => 'Iragazi karpetak';
   @override
   String get listFolderTitle => 'Zerrenda-biltegia';
   @override

@@ -670,6 +670,9 @@ final class AppStrings {
   static String get linksToNoteTitle => _s.linksToNoteTitle;
   static String get linksToNoteEmpty => _s.linksToNoteEmpty;
   static String get linksToNoteEmbed => _s.linksToNoteEmbed;
+  static String get linksToNoteFurther => _s.linksToNoteFurther;
+  static String linksUpdating(int done, int total) =>
+      _s.linksUpdating(done, total);
   static String get openLinkFailed => _s.openLinkFailed;
 
   // Where new notes and folders go (issue #850).
@@ -1271,6 +1274,7 @@ final class AppStrings {
   // Folder picker (T-TK-07).
   static String get folderPickerNewFolder => _s.folderPickerNewFolder;
   static String get folderPickerEmpty => _s.folderPickerEmpty;
+  static String get folderPickerFilter => _s.folderPickerFilter;
   static String get listFolderTitle => _s.listFolderTitle;
   static String get attachmentsFolderTitle => _s.attachmentsFolderTitle;
 

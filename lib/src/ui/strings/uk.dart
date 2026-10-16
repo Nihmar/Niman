@@ -968,6 +968,11 @@ final class UkrainianStrings extends Strings {
   @override
   String get linksToNoteEmbed => 'вбудована';
   @override
+  String get linksToNoteFurther => 'Згадується нижче';
+  @override
+  String linksUpdating(int done, int total) =>
+      'Оновлення посилань: $done з $total';
+  @override
   String get openLinkFailed => 'Не вдалося відкрити посилання';
 
   // Dead-link note creation (issue #78).
@@ -2070,6 +2075,8 @@ final class UkrainianStrings extends Strings {
   String get folderPickerNewFolder => 'Нова папка';
   @override
   String get folderPickerEmpty => 'Папок ще немає';
+  @override
+  String get folderPickerFilter => 'Фільтр папок';
   @override
   String get listFolderTitle => 'Папка списків';
   @override

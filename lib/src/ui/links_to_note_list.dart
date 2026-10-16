@@ -192,6 +192,17 @@ final class _ReferrerRowState extends State<_ReferrerRow> {
                   ),
               ],
             ),
+            if (mention != null && mention.further)
+              Padding(
+                padding: const EdgeInsets.only(top: 2),
+                child: Text(
+                  AppStrings.linksToNoteFurther,
+                  key: Key('links-to-note-further-$path'),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: muted?.copyWith(fontStyle: FontStyle.italic),
+                ),
+              ),
             if (mention != null && mention.context.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.only(top: 2),

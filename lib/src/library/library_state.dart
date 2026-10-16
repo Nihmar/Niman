@@ -63,7 +63,7 @@ import 'package:niman/src/update/update_scheduler.dart';
 import 'package:niman/src/update/update_service.dart';
 import 'package:niman/src/widget/widget_configs.dart';
 import 'package:niman/src/widget/widget_libraries.dart';
-import 'package:niman/src/workspace/workspace.dart';
+import 'package:niman/src/workspace/workspace_slot.dart';
 import 'package:niman/src/workspace/workspace_store.dart';
 import 'package:path/path.dart' as p;
 
@@ -459,9 +459,9 @@ final class LibraryController implements LibrarySession {
             },
       readSpots: reader == null
           ? null
-          : (path) async {
+          : (path, from) async {
               try {
-                return await reader.noteLinkSpots(path);
+                return await reader.noteLinkSpotSlice(path, from);
               } on Object {
                 return null;
               }
@@ -1095,17 +1095,11 @@ final class LibraryController implements LibrarySession {
   }
 
   @override
-  Future<Workspace> get savedWorkspace async {
+  WorkspaceSlot get workspaceSlot {
     final root = this.root;
-    if (root == null) return Workspace.empty;
-    return await WorkspaceStore(await appDatabase).load(root);
-  }
-
-  @override
-  Future<void> saveWorkspace(Workspace workspace) async {
-    final root = this.root;
-    if (root == null) return;
-    await WorkspaceStore(await appDatabase).save(root, workspace);
+    return root == null
+        ? const NoWorkspaceSlot()
+        : StoredWorkspaceSlot(appDatabase, root);
   }
 
   /// Whether the note editor shows the row-number column.

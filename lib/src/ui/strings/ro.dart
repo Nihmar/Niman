@@ -980,6 +980,11 @@ final class RomanianStrings extends Strings {
   @override
   String get linksToNoteEmbed => 'încorporată';
   @override
+  String get linksToNoteFurther => 'Menționată mai jos';
+  @override
+  String linksUpdating(int done, int total) =>
+      'Se actualizează linkurile: $done din $total';
+  @override
   String get openLinkFailed => 'Linkul nu a putut fi deschis';
 
   // Dead-link note creation (issue #78).
@@ -2081,6 +2086,8 @@ final class RomanianStrings extends Strings {
   String get folderPickerNewFolder => 'Dosar nou';
   @override
   String get folderPickerEmpty => 'Niciun dosar încă';
+  @override
+  String get folderPickerFilter => 'Filtrează dosarele';
   @override
   String get listFolderTitle => 'Dosar de liste';
   @override

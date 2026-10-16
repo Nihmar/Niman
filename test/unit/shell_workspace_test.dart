@@ -4,11 +4,111 @@
 // holds (#372).
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/ui/shell_workspace.dart';
+import 'package:niman/src/workspace/note_memento.dart';
 import 'package:niman/src/workspace/workspace.dart';
 
 import '../fakes/fake_library_session.dart';
 
 void main() {
+  // #1083: a library closed or switched under the shell. Its views hand in
+  // where each note was left as they go down, after the session has let go
+  // of the library; the last write belongs to that library all the same.
+  test(
+    'the last write after a close reaches the library it belongs to',
+    () async {
+      final session = FakeLibrarySession();
+      addTearDown(session.dispose);
+      await session.open('/lib/one', create: false);
+      final workspace = ShellWorkspace(session)..show('a.md');
+      await pumpEventQueue();
+
+      await session.close();
+      workspace.remember('a.md', const NoteMemento(selectionExtent: 7));
+      await pumpEventQueue();
+      workspace.dispose();
+      await pumpEventQueue();
+
+      final kept = session.workspacesByRoot['/lib/one'];
+      expect(kept?.tabs.single.memento.selectionExtent, 7);
+      expect(session.workspacesByRoot.containsKey(null), isFalse);
+    },
+  );
+
+  // #1082: a phone keeps every note it opened, and nothing closed them.
+  group('the phone’s open notes are capped', () {
+    Future<ShellWorkspace> opened(
+      int count, {
+      Set<String> dirty = const {},
+      void Function(ShellWorkspace)? between,
+    }) async {
+      final workspace = ShellWorkspace(FakeLibrarySession());
+      addTearDown(workspace.dispose);
+      workspace.unsavedPaths = () => dirty;
+      for (var i = 0; i < count; i++) {
+        workspace.follow('n$i.md', alongside: true);
+        await pumpEventQueue();
+        between?.call(workspace);
+      }
+      return workspace;
+    }
+
+    test('a hundred opened leave thirty, the latest', () async {
+      final workspace = await opened(100);
+      final paths = workspace.value.tabs.map((t) => t.path).toList();
+      expect(paths.length, ShellWorkspace.phoneCap);
+      expect(paths, contains('n99.md'));
+      expect(paths, isNot(contains('n0.md')));
+      expect(workspace.value.activePath, 'n99.md');
+    });
+
+    test('a note with unsaved edits is never the one closed', () async {
+      final workspace = await opened(100, dirty: {'n0.md', 'n1.md'});
+      final paths = workspace.value.tabs.map((t) => t.path).toList();
+      expect(paths, containsAll(['n0.md', 'n1.md']));
+      expect(paths.length, ShellWorkspace.phoneCap);
+    });
+
+    test('the one closed keeps its place, and the least recent goes', () async {
+      final workspace = ShellWorkspace(FakeLibrarySession());
+      addTearDown(workspace.dispose);
+      for (var i = 0; i < ShellWorkspace.phoneCap; i++) {
+        workspace.follow('n$i.md', alongside: true);
+        await pumpEventQueue();
+      }
+      workspace.remember('n0.md', const NoteMemento(selectionExtent: 9));
+      await pumpEventQueue();
+      // n0 is shown again: it is the most recent, so n1 is the one to go.
+      workspace.follow('n0.md', alongside: true);
+      await pumpEventQueue();
+      workspace.follow('extra.md', alongside: true);
+      await pumpEventQueue();
+      final paths = workspace.value.tabs.map((t) => t.path).toList();
+      expect(paths, contains('n0.md'));
+      expect(paths, isNot(contains('n1.md')));
+
+      workspace.remember('n1.md', const NoteMemento(selectionExtent: 4));
+      await pumpEventQueue();
+      workspace.follow('n1.md', alongside: true);
+      await pumpEventQueue();
+      expect(
+        workspace.value.tabs
+            .firstWhere((t) => t.path == 'n1.md')
+            .memento
+            .selectionExtent,
+        4,
+      );
+    });
+
+    test('a desktop’s tabs are not capped', () async {
+      final workspace = ShellWorkspace(FakeLibrarySession());
+      addTearDown(workspace.dispose);
+      for (var i = 0; i < 40; i++) {
+        workspace.show('n$i.md', newTab: true);
+      }
+      expect(workspace.value.tabs.length, 40);
+    });
+  });
+
   test('a preview asked for before the tab exists lands on it', () async {
     final workspace = ShellWorkspace(FakeLibrarySession());
     addTearDown(workspace.dispose);

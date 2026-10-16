@@ -962,6 +962,11 @@ final class NorwegianStrings extends Strings {
   @override
   String get linksToNoteEmbed => 'innebygd';
   @override
+  String get linksToNoteFurther => 'Nevnt lenger ned';
+  @override
+  String linksUpdating(int done, int total) =>
+      'Oppdaterer lenker: $done av $total';
+  @override
   String get openLinkFailed => 'Kunne ikke åpne lenken';
 
   // Dead-link note creation (issue #78).
@@ -2053,6 +2058,8 @@ final class NorwegianStrings extends Strings {
   String get folderPickerNewFolder => 'Ny mappe';
   @override
   String get folderPickerEmpty => 'Ingen mapper ennå';
+  @override
+  String get folderPickerFilter => 'Filtrer mapper';
   @override
   String get listFolderTitle => 'Listemappe';
   @override

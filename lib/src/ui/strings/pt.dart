@@ -970,6 +970,11 @@ final class PortugueseStrings extends Strings {
   @override
   String get linksToNoteEmbed => 'incorporada';
   @override
+  String get linksToNoteFurther => 'Mencionada mais abaixo';
+  @override
+  String linksUpdating(int done, int total) =>
+      'A atualizar ligações: $done de $total';
+  @override
   String get openLinkFailed => 'Não foi possível abrir o link';
 
   // Dead-link note creation (issue #78).
@@ -2076,6 +2081,8 @@ final class PortugueseStrings extends Strings {
   String get folderPickerNewFolder => 'Nova pasta';
   @override
   String get folderPickerEmpty => 'Ainda não há pastas';
+  @override
+  String get folderPickerFilter => 'Filtrar pastas';
   @override
   String get listFolderTitle => 'Pasta de listas';
   @override

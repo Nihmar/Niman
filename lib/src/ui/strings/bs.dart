@@ -971,6 +971,11 @@ final class BosnianStrings extends Strings {
   @override
   String get linksToNoteEmbed => 'ugrađena';
   @override
+  String get linksToNoteFurther => 'Spomenuto dalje dolje';
+  @override
+  String linksUpdating(int done, int total) =>
+      'Ažuriranje veza: $done od $total';
+  @override
   String get openLinkFailed => 'Veza se ne može otvoriti';
 
   // Dead-link note creation (issue #78).
@@ -2067,6 +2072,8 @@ final class BosnianStrings extends Strings {
   String get folderPickerNewFolder => 'Nova mapa';
   @override
   String get folderPickerEmpty => 'Još nema mapa';
+  @override
+  String get folderPickerFilter => 'Filtriraj mape';
   @override
   String get listFolderTitle => 'Mapa popisa';
   @override

@@ -966,6 +966,11 @@ final class CzechStrings extends Strings {
   @override
   String get linksToNoteEmbed => 'vložená';
   @override
+  String get linksToNoteFurther => 'Zmíněno dále';
+  @override
+  String linksUpdating(int done, int total) =>
+      'Aktualizace odkazů: $done z $total';
+  @override
   String get openLinkFailed => 'Odkaz se nepodařilo otevřít';
 
   // Dead-link note creation (issue #78).
@@ -2053,6 +2058,8 @@ final class CzechStrings extends Strings {
   String get folderPickerNewFolder => 'Nová složka';
   @override
   String get folderPickerEmpty => 'Zatím žádné složky';
+  @override
+  String get folderPickerFilter => 'Filtrovat složky';
   @override
   String get listFolderTitle => 'Složka seznamů';
   @override

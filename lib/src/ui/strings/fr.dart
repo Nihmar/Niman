@@ -985,6 +985,11 @@ final class FrenchStrings extends Strings {
   @override
   String get linksToNoteEmbed => 'intégrée';
   @override
+  String get linksToNoteFurther => 'Mentionnée plus bas';
+  @override
+  String linksUpdating(int done, int total) =>
+      'Mise à jour des liens : $done sur $total';
+  @override
   String get openLinkFailed => 'Impossible d’ouvrir le lien';
 
   // Dead-link note creation (issue #78).
@@ -2119,6 +2124,8 @@ final class FrenchStrings extends Strings {
   String get folderPickerNewFolder => 'Nouveau dossier';
   @override
   String get folderPickerEmpty => 'Aucun dossier pour l’instant';
+  @override
+  String get folderPickerFilter => 'Filtrer les dossiers';
   @override
   String get listFolderTitle => 'Dossier des listes';
   @override

@@ -970,6 +970,11 @@ final class HungarianStrings extends Strings {
   @override
   String get linksToNoteEmbed => 'beágyazva';
   @override
+  String get linksToNoteFurther => 'Lejjebb említve';
+  @override
+  String linksUpdating(int done, int total) =>
+      'Hivatkozások frissítése: $done / $total';
+  @override
   String get openLinkFailed => 'A hivatkozás nem nyitható meg';
 
   // Dead-link note creation (issue #78).
@@ -2080,6 +2085,8 @@ final class HungarianStrings extends Strings {
   String get folderPickerNewFolder => 'Új mappa';
   @override
   String get folderPickerEmpty => 'Még nincs mappa';
+  @override
+  String get folderPickerFilter => 'Mappák szűrése';
   @override
   String get listFolderTitle => 'Listamappa';
   @override

@@ -102,24 +102,27 @@ Future<void> showOpenNotesSheet(
                   ),
                 ),
                 Flexible(
-                  child: ListView(
+                  // Built as scrolled to (#1082): the list is as long as the
+                  // notes opened.
+                  child: ListView.builder(
                     shrinkWrap: true,
-                    children: [
-                      for (final (i, tab) in tabs.indexed)
-                        _OpenNoteRow(
-                          key: Key('open-note-$i'),
-                          index: i,
-                          path: tab.path,
-                          current: tab.path == current,
-                          unsaved: dirty.contains(tab.path),
-                          onOpen: () => done(() => onOpen(tab.path)),
-                          onClose: () {
-                            onClose(tab.path);
-                            // Nothing left to switch between.
-                            if (tabs.length == 1) Navigator.pop(sheet);
-                          },
-                        ),
-                    ],
+                    itemCount: tabs.length,
+                    itemBuilder: (_, i) {
+                      final tab = tabs[i];
+                      return _OpenNoteRow(
+                        key: Key('open-note-$i'),
+                        index: i,
+                        path: tab.path,
+                        current: tab.path == current,
+                        unsaved: dirty.contains(tab.path),
+                        onOpen: () => done(() => onOpen(tab.path)),
+                        onClose: () {
+                          onClose(tab.path);
+                          // Nothing left to switch between.
+                          if (tabs.length == 1) Navigator.pop(sheet);
+                        },
+                      );
+                    },
                   ),
                 ),
                 const Divider(height: 1, indent: 16, endIndent: 16),

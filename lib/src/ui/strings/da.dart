@@ -962,6 +962,11 @@ final class DanishStrings extends Strings {
   @override
   String get linksToNoteEmbed => 'indlejret';
   @override
+  String get linksToNoteFurther => 'Nævnt længere nede';
+  @override
+  String linksUpdating(int done, int total) =>
+      'Opdaterer links: $done af $total';
+  @override
   String get openLinkFailed => 'Kunne ikke åbne linket';
 
   // Dead-link note creation (issue #78).
@@ -2056,6 +2061,8 @@ final class DanishStrings extends Strings {
   String get folderPickerNewFolder => 'Ny mappe';
   @override
   String get folderPickerEmpty => 'Ingen mapper endnu';
+  @override
+  String get folderPickerFilter => 'Filtrér mapper';
   @override
   String get listFolderTitle => 'Listemappe';
   @override

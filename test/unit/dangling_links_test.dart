@@ -68,6 +68,7 @@ void main() {
         expect(await referrersOf('New idea.md'), ['A.md']);
 
         await ops.rename('New idea.md', 'Better idea');
+        await ops.linkQuestion;
 
         expect(
           await ops.readNote('A.md'),

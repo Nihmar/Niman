@@ -533,6 +533,8 @@ abstract base class Strings {
   String get linksToNoteTitle;
   String get linksToNoteEmpty;
   String get linksToNoteEmbed;
+  String get linksToNoteFurther;
+  String linksUpdating(int done, int total);
   String get openLinkFailed;
 
   // Where new notes and folders go (issue #850, which absorbed the
@@ -1090,6 +1092,7 @@ abstract base class Strings {
   // Folder picker (T-TK-07).
   String get folderPickerNewFolder;
   String get folderPickerEmpty;
+  String get folderPickerFilter;
   String get listFolderTitle;
   String get attachmentsFolderTitle;
 

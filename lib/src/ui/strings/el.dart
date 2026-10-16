@@ -990,6 +990,11 @@ final class GreekStrings extends Strings {
   @override
   String get linksToNoteEmbed => 'ενσωματωμένη';
   @override
+  String get linksToNoteFurther => 'Αναφέρεται πιο κάτω';
+  @override
+  String linksUpdating(int done, int total) =>
+      'Ενημέρωση συνδέσμων: $done από $total';
+  @override
   String get openLinkFailed => 'Δεν ήταν δυνατό το άνοιγμα του συνδέσμου';
 
   // Dead-link note creation (issue #78).
@@ -2130,6 +2135,8 @@ final class GreekStrings extends Strings {
   String get folderPickerNewFolder => 'Νέος φάκελος';
   @override
   String get folderPickerEmpty => 'Δεν υπάρχουν ακόμα φάκελοι';
+  @override
+  String get folderPickerFilter => 'Φίλτρο φακέλων';
   @override
   String get listFolderTitle => 'Φάκελος λίστας';
   @override
