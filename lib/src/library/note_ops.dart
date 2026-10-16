@@ -769,8 +769,14 @@ final class NoteOps implements NoteOperations {
     String path,
     String content, {
     int? editSession,
+    DiskStamp? expected,
   }) async {
-    final saved = await writer.save(path, content, editSession: editSession);
+    final saved = await writer.save(
+      path,
+      content,
+      editSession: editSession,
+      expected: expected,
+    );
     // After the write: a sync that read the hint before the text landed
     // could otherwise upload the old text and drop the hint.
     _hint(path, SyncOpKind.changed);
@@ -790,12 +796,14 @@ final class NoteOps implements NoteOperations {
     NoteContentProducer content, {
     int? editSession,
     NoteReferences? references,
+    DiskStamp? expected,
   }) async {
     final saved = await writer.save(
       path,
       content,
       editSession: editSession,
       references: references,
+      expected: expected,
     );
     _hint(path, SyncOpKind.changed);
     return saved;

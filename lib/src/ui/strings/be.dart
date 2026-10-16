@@ -607,6 +607,9 @@ final class BelarusianStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Не ўдалося захаваць нататку. Niman паспрабуе яшчэ раз.';
   @override
+  String get noteChangedOnDisk =>
+      'Іншая праграма змяніла гэтую нататку. Тая версія захавана ў гісторыі.';
+  @override
   String get noteNotText =>
       'Гэты файл не тэкставая нататка, таму Niman не можа паказаць яго тут.';
   @override
@@ -2256,6 +2259,8 @@ final class BelarusianStrings extends Strings {
   String get historyReasonSync => 'перад сінхранізацыяй';
   @override
   String get historyReasonReplace => 'перад заменай';
+  @override
+  String get historyReasonExternal => 'змененая па-за Niman';
   @override
   String get historyReasonUnknown => 'знойдзеная';
   @override

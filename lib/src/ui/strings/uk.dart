@@ -608,6 +608,9 @@ final class UkrainianStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Нотатку не вдалося зберегти. Niman спробує ще раз.';
   @override
+  String get noteChangedOnDisk =>
+      'Інша програма змінила цю нотатку. Ту версію збережено в історії.';
+  @override
   String get noteNotText =>
       'Цей файл не є текстовою нотаткою, тож Niman не може показати його тут.';
   @override
@@ -2259,6 +2262,8 @@ final class UkrainianStrings extends Strings {
   String get historyReasonSync => 'до синхронізації';
   @override
   String get historyReasonReplace => 'до заміни';
+  @override
+  String get historyReasonExternal => 'змінено поза Niman';
   @override
   String get historyReasonUnknown => 'віднайдена';
   @override

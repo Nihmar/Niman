@@ -607,6 +607,10 @@ final class IcelandicStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Ekki tókst að vista minnispunktinn. Niman reynir aftur.';
   @override
+  String get noteChangedOnDisk =>
+      'Annað forrit breytti þessum minnispunkti. Sú útgáfa er geymd í '
+      'ferlinum.';
+  @override
   String get noteNotText =>
       'Þessi skrá er ekki textaminnispunktur, svo '
       'Niman getur ekki sýnt hana hér.';
@@ -2247,6 +2251,8 @@ final class IcelandicStrings extends Strings {
   String get historyReasonSync => 'fyrir samstillingu';
   @override
   String get historyReasonReplace => 'fyrir útskiptingu';
+  @override
+  String get historyReasonExternal => 'breytt utan Niman';
   @override
   String get historyReasonUnknown => 'fundin aftur';
   @override

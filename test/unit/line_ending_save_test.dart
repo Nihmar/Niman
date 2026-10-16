@@ -74,7 +74,13 @@ void main() {
         saveNote: () => null,
         writeNote: () => null,
         saveNoteStream: () =>
-            (path, content, {required editSession, references}) async {
+            (
+              path,
+              content, {
+              required editSession,
+              references,
+              expected,
+            }) async {
               await saveNoteStream(
                 root: dir.path,
                 rel: p.basename(path),

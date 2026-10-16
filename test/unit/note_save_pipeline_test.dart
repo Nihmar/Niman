@@ -39,6 +39,7 @@ final class Harness {
       },
       onSettled: () => settled++,
       hold: tracker?.hold,
+      diskStamp: () => seen,
     );
   }
 
@@ -62,6 +63,12 @@ final class Harness {
 
   /// What each save reported of the file it left, in order.
   final List<DiskStamp?> stamps = [];
+
+  /// What each write was told to expect of the file, in order (#1055).
+  final List<DiskStamp?> expecteds = [];
+
+  /// What the editor last saw of the file: handed to every write.
+  DiskStamp? seen;
 
   /// What the writers answer with: the file the write left.
   DiskStamp? leaves;
@@ -97,8 +104,10 @@ final class Harness {
     String path,
     String content, {
     required int editSession,
+    DiskStamp? expected,
   }) async {
     await _gate();
+    expecteds.add(expected);
     writes.add((path: path, text: content, session: editSession));
     return NoteSaveResult(stamp: leaves);
   }
@@ -108,9 +117,11 @@ final class Harness {
     NoteContentProducer content, {
     required int editSession,
     NoteReferences? references,
+    DiskStamp? expected,
   }) async {
     // Held before the first slice: an edit while it waits must not reach it.
     await _gate();
+    expecteds.add(expected);
     final bytes = <int>[];
     for (var index = 0; ; index++) {
       final slice = await content(index);

@@ -616,6 +616,9 @@ final class SpanishStrings extends Strings {
   String get noteSaveFailedSnack =>
       'No se pudo guardar la nota. Niman lo intentará de nuevo.';
   @override
+  String get noteChangedOnDisk =>
+      'Otro programa cambió esta nota. Esa versión se guardó en el historial.';
+  @override
   String get noteNotText =>
       'Este archivo no es una nota de texto, así que '
       'Niman no puede mostrarlo aquí.';
@@ -2284,6 +2287,8 @@ final class SpanishStrings extends Strings {
   String get historyReasonSync => 'antes de sincronizar';
   @override
   String get historyReasonReplace => 'antes de reemplazar';
+  @override
+  String get historyReasonExternal => 'cambiada fuera de Niman';
   @override
   String get historyReasonUnknown => 'recuperada';
   @override

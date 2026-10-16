@@ -90,7 +90,7 @@ void main() {
       readNote: (path) async => disk[path] ?? '',
       writeNote: (_, text) async => fallbacks.add(text),
       saveNoteStream:
-          (path, content, {required editSession, references}) async {
+          (path, content, {required editSession, references, expected}) async {
             final text = StringBuffer();
             for (var index = 0; ; index++) {
               final slice = await content(index);

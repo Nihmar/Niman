@@ -609,6 +609,10 @@ final class CroatianStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Bilješka se nije mogla spremiti. Niman će pokušati ponovno.';
   @override
+  String get noteChangedOnDisk =>
+      'Drugi program promijenio je ovu bilješku. Ta je verzija sačuvana u '
+      'povijesti.';
+  @override
   String get noteNotText =>
       'Ova datoteka nije tekstualna bilješka, pa je '
       'Niman ne može prikazati ovdje.';
@@ -2254,6 +2258,8 @@ final class CroatianStrings extends Strings {
   String get historyReasonSync => 'prije sinkronizacije';
   @override
   String get historyReasonReplace => 'prije zamjene';
+  @override
+  String get historyReasonExternal => 'promijenjeno izvan Nimana';
   @override
   String get historyReasonUnknown => 'pronađena';
   @override

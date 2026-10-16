@@ -933,6 +933,12 @@ final class _NoteViewState extends State<NoteView>
       if (mounted) setState(() {});
     },
     hold: widget.unsavedTracker?.hold,
+    diskStamp: () => _diskStamp,
+    onExternalKept: (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.maybeOf(context)
+          ?.showSnackBar(SnackBar(content: Text(AppStrings.noteChangedOnDisk)));
+    },
   );
 
   /// The first failure of a run of saves is said once, with a snack bar; the

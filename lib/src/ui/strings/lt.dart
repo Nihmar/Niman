@@ -607,6 +607,9 @@ final class LithuanianStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Užrašo išsaugoti nepavyko. Niman bandys dar kartą.';
   @override
+  String get noteChangedOnDisk =>
+      'Kita programa pakeitė šį užrašą. Ta versija išsaugota istorijoje.';
+  @override
   String get noteNotText =>
       'Šis failas nėra tekstinis užrašas, todėl Niman negali jo čia parodyti.';
   @override
@@ -2254,6 +2257,8 @@ final class LithuanianStrings extends Strings {
   String get historyReasonSync => 'prieš sinchronizavimą';
   @override
   String get historyReasonReplace => 'prieš pakeitimą';
+  @override
+  String get historyReasonExternal => 'pakeista ne Niman programoje';
   @override
   String get historyReasonUnknown => 'atgauta';
   @override

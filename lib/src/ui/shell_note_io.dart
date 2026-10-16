@@ -18,7 +18,7 @@ NoteSaver? noteSaverFor(LibrarySession controller) {
   final ops = controller.ops;
   final root = controller.root;
   if (ops == null || root == null) return null;
-  return (path, content, {required editSession}) {
+  return (path, content, {required editSession, expected}) {
     if (!p.isWithin(root, path)) {
       return writeNoteOffIsolate(path, content).then(
         (written) => NoteSaveResult(
@@ -26,7 +26,12 @@ NoteSaver? noteSaverFor(LibrarySession controller) {
         ),
       );
     }
-    return ops.saveNote(relPath(path, root), content, editSession: editSession);
+    return ops.saveNote(
+      relPath(path, root),
+      content,
+      editSession: editSession,
+      expected: expected,
+    );
   };
 }
 
@@ -40,7 +45,7 @@ NoteStreamSaver? noteStreamSaverFor(LibrarySession controller) {
   final ops = controller.ops;
   final root = controller.root;
   if (ops == null || root == null) return null;
-  return (path, content, {required editSession, references}) {
+  return (path, content, {required editSession, references, expected}) {
     if (!p.isWithin(root, path)) {
       return Future<NoteSaveResult?>.error(
         StateError('"$path" is outside the library'),
@@ -51,6 +56,7 @@ NoteStreamSaver? noteStreamSaverFor(LibrarySession controller) {
       content,
       editSession: editSession,
       references: references,
+      expected: expected,
     );
   };
 }

@@ -608,6 +608,9 @@ final class CzechStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Poznámku se nepodařilo uložit. Niman to zkusí znovu.';
   @override
+  String get noteChangedOnDisk =>
+      'Jiný program tuto poznámku změnil. Ta verze je uložena v historii.';
+  @override
   String get noteNotText =>
       'Tento soubor není textová poznámka, proto ho Niman nemůže zobrazit zde.';
   @override
@@ -2241,6 +2244,8 @@ final class CzechStrings extends Strings {
   String get historyReasonSync => 'před synchronizací';
   @override
   String get historyReasonReplace => 'před nahrazením';
+  @override
+  String get historyReasonExternal => 'změněno mimo Niman';
   @override
   String get historyReasonUnknown => 'nalezená';
   @override

@@ -475,6 +475,7 @@ final class AppStrings {
   static String get noteStatusError => _s.noteStatusError;
   static String get noteStatusSaveFailed => _s.noteStatusSaveFailed;
   static String get noteSaveFailedSnack => _s.noteSaveFailedSnack;
+  static String get noteChangedOnDisk => _s.noteChangedOnDisk;
   static String get noteNotText => _s.noteNotText;
   static String get noteLoadFailed => _s.noteLoadFailed;
   static String get noteLoadMissing => _s.noteLoadMissing;
@@ -1364,6 +1365,7 @@ final class AppStrings {
   static String get historyReasonRestore => _s.historyReasonRestore;
   static String get historyReasonSync => _s.historyReasonSync;
   static String get historyReasonReplace => _s.historyReasonReplace;
+  static String get historyReasonExternal => _s.historyReasonExternal;
   static String get historyReasonUnknown => _s.historyReasonUnknown;
   static String get historySyncBase => _s.historySyncBase;
   static String get historyEmpty => _s.historyEmpty;

@@ -609,6 +609,10 @@ final class FinnishStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Muistiinpanoa ei voitu tallentaa. Niman yrittää uudelleen.';
   @override
+  String get noteChangedOnDisk =>
+      'Toinen ohjelma muutti tätä muistiinpanoa. Se versio on tallessa '
+      'historiassa.';
+  @override
   String get noteNotText =>
       'Tämä tiedosto ei ole tekstimuistiinpano, joten '
       'Niman ei voi näyttää sitä tässä.';
@@ -2264,6 +2268,8 @@ final class FinnishStrings extends Strings {
   String get historyReasonSync => 'ennen synkronointia';
   @override
   String get historyReasonReplace => 'ennen korvausta';
+  @override
+  String get historyReasonExternal => 'muutettu Nimanin ulkopuolella';
   @override
   String get historyReasonUnknown => 'löydetty';
   @override

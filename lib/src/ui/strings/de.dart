@@ -616,6 +616,10 @@ final class GermanStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Die Notiz konnte nicht gespeichert werden. Niman versucht es erneut.';
   @override
+  String get noteChangedOnDisk =>
+      'Ein anderes Programm hat diese Notiz geändert. Diese Fassung ist im '
+      'Verlauf gesichert.';
+  @override
   String get noteNotText =>
       'Diese Datei ist keine Textnotiz, daher kann '
       'Niman sie hier nicht anzeigen.';
@@ -2298,6 +2302,8 @@ final class GermanStrings extends Strings {
   String get historyReasonSync => 'vor dem Synchronisieren';
   @override
   String get historyReasonReplace => 'vor dem Ersetzen';
+  @override
+  String get historyReasonExternal => 'außerhalb von Niman geändert';
   @override
   String get historyReasonUnknown => 'wiedergefunden';
   @override

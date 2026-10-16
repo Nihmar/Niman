@@ -343,8 +343,11 @@ the last edits lost.
 **A note changed by another program.** When a sync client, Niman's own sync or
 another program rewrites a note that is open, every open note whose text you
 have not changed — the tabs behind the one on screen too — shows the new file
-at once. A note with edits of yours keeps them (your text wins and is saved
-over the file, as before).
+at once. A note with edits of yours keeps them: your text wins and is saved
+over the file — but before it is, the version the other program wrote is kept
+in the note's [history](organization.md) (*changed outside Niman*), and a
+message says so. The comparison is of the file with the one the editor last
+read or wrote, so nothing is kept when nobody else touched it.
 
 **Line endings and the byte order mark.** The editor works with plain lines,
 but the file keeps what it had: a note with Windows (`CRLF`) line endings is

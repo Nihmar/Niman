@@ -9,9 +9,14 @@ import 'package:niman/src/core/files.dart';
 /// taken afterwards could be of somebody else's later write.
 final class NoteSaveResult {
   /// A save that left the file as [stamp] says.
-  const new({this.stamp});
+  const new({this.stamp, this.keptExternal = false});
 
   /// The size and time of the file as the save left it, or null when the
   /// writer does not know.
   final DiskStamp? stamp;
+
+  /// Whether the file the save replaced was not the one the editor last saw
+  /// (another program, a sync client had written it since), and that version
+  /// was kept in the note's history before it was overwritten (#1055).
+  final bool keptExternal;
 }

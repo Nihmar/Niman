@@ -320,6 +320,7 @@ abstract base class Strings {
   String get noteStatusError;
   String get noteStatusSaveFailed;
   String get noteSaveFailedSnack;
+  String get noteChangedOnDisk;
   String get noteNotText;
   String get noteLoadFailed;
   String get noteLoadMissing;
@@ -1196,6 +1197,7 @@ abstract base class Strings {
   String get historyReasonRestore;
   String get historyReasonSync;
   String get historyReasonReplace;
+  String get historyReasonExternal;
   String get historyReasonUnknown;
   String get historySyncBase;
   String get historyEmpty;

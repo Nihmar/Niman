@@ -238,7 +238,7 @@ void main() {
           path: path,
           readNote: (_) async => 'start',
           writeNote: (_, _) async => seamWrites++,
-          saveNote: (path, content, {required editSession}) async {
+          saveNote: (path, content, {required editSession, expected}) async {
             saves.add((path, content, editSession));
             return null;
           },

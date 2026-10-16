@@ -612,6 +612,10 @@ final class SwedishStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Anteckningen kunde inte sparas. Niman försöker igen.';
   @override
+  String get noteChangedOnDisk =>
+      'Ett annat program ändrade anteckningen. Den versionen finns kvar i '
+      'historiken.';
+  @override
   String get noteNotText =>
       'Den här filen är inte en textanteckning, så '
       'Niman kan inte visa den här.';
@@ -2259,6 +2263,8 @@ final class SwedishStrings extends Strings {
   String get historyReasonSync => 'före synk';
   @override
   String get historyReasonReplace => 'före ersättning';
+  @override
+  String get historyReasonExternal => 'ändrad utanför Niman';
   @override
   String get historyReasonUnknown => 'återfunnen';
   @override

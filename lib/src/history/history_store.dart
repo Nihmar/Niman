@@ -11,6 +11,7 @@ import 'dart:io';
 
 import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
+import 'package:niman/src/core/files.dart';
 import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/history/snapshot_policy.dart';
 import 'package:path/path.dart' as p;
@@ -135,16 +136,31 @@ final class SnapshotOutcome {
 }
 
 /// Keeps the current content of the note at [rel] as a version when
-/// [request] says so, then rotates. Call it right before overwriting the
+/// the request says so, then rotates. Call it right before overwriting the
 /// note.
 SnapshotOutcome snapshotBeforeWrite(
   String root,
   String rel,
-  SnapshotRequest request,
+  SnapshotRequest asked,
 ) {
   final clock = Stopwatch()..start();
   final note = File(p.join(root, rel));
   final exists = note.existsSync();
+  // A file that is not the one the editor last saw was written by somebody
+  // else, and the save about to replace it is the last chance to keep what
+  // they wrote (#1055). A reason already forced (a restore, a sync) stands.
+  final expected = asked.expected;
+  final foreign =
+      exists && expected != null && !expected.sameAs(DiskStamp.of(note.path));
+  final request = foreign
+      ? SnapshotRequest(
+          limit: asked.limit,
+          interval: asked.interval,
+          now: asked.now,
+          sessionStart: asked.sessionStart,
+          forced: asked.forced ?? HistoryReason.external,
+        )
+      : asked;
   final manifest = exists ? readHistoryManifest(root, rel) : HistoryManifest();
   // The manifest alone often decides: the note is read only when it can.
   final early = exists

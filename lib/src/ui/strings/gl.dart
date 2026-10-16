@@ -613,6 +613,9 @@ final class GalicianStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Non se puido gardar a nota. Niman tentarao de novo.';
   @override
+  String get noteChangedOnDisk =>
+      'Outro programa cambiou esta nota. Esa versión gardouse no historial.';
+  @override
   String get noteNotText =>
       'Este ficheiro non é unha nota de texto, así '
       'que Niman non pode amosalo aquí.';
@@ -2265,6 +2268,8 @@ final class GalicianStrings extends Strings {
   String get historyReasonSync => 'antes de sincronizar';
   @override
   String get historyReasonReplace => 'antes de substituír';
+  @override
+  String get historyReasonExternal => 'cambiada fóra de Niman';
   @override
   String get historyReasonUnknown => 'recuperada';
   @override
