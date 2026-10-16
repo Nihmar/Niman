@@ -16,11 +16,16 @@ final class StemRows {
   final IndexDatabase _db;
 
   /// How many matching rows are fetched before the list is ranked and cut to
-  /// `NoteNames.limit`. The indexed prefix query takes this many; the contains
+  /// `NoteNames.limit`. The indexed prefix query takes this many, in stem
+  /// order (the name typed in full first); the contains
   /// query — which cannot use the stem index (a leading `%`) — is read only
   /// while the prefix rows leave room, so a keystroke is not charged a `%q%`
   /// scan the prefix already answered (#475, #491).
   static const int _fetch = 200;
+
+  /// What a stem that starts with `q` is below: `q` followed by the last
+  /// code point (U+10FFFF) bounds the prefix range from above.
+  static const String _afterPrefix = '\u{10FFFF}';
 
   /// A note, a PDF or an EPUB: the files a `[[…]]` link names, and the
   /// books the `#` half serves. Other attachments are left to embeds.
@@ -54,10 +59,11 @@ final class StemRows {
     final scoped = <Variable<Object>>[
       if (under != null) Variable<String>('${_escapeLike(under)}/%'),
     ];
-    final select =
+    String selectWith(String join) =>
         'SELECT s.stem AS stem, s.source AS source, n.id AS id, n.path AS path '
-        'FROM note_stems AS s JOIN notes AS n ON n.id = s.note_id '
+        'FROM note_stems AS s $join notes AS n ON n.id = s.note_id '
         'WHERE n.is_dir = 0 AND $files$scope';
+    final select = selectWith('JOIN');
     final List<QueryRow> result;
     if (q.isEmpty) {
       result = await _db
@@ -72,15 +78,25 @@ final class StemRows {
       // use — SQLite would evaluate the LIKE against every stem and sort the
       // matches before the LIMIT — so it is read, bounded by what the prefix
       // left, only when the prefix rows do not fill the cap (#491).
+      //
+      // The prefix is a range on the stem column, so the seek is the index's
+      // whatever the LIKE optimizer would make of the pattern, and the rows
+      // come out in stem order: the name typed in full, if there is one,
+      // sorts first, and the cut keeps the closest names rather than the
+      // first folders (#1035). `NoteNames` ranks what is fetched.
       final escaped = _escapeLike(q);
       final prefix = '$escaped%';
       var rows = await _db
           .customSelect(
-            "$select AND s.stem LIKE ? ESCAPE '\\' "
-            'ORDER BY n.path ASC LIMIT ?',
+            // CROSS JOIN fixes the order: the stems by their index, each
+            // joined to its note. Left to itself the planner starts from
+            // the notes (it has no statistics here) and walks every file.
+            '${selectWith('CROSS JOIN')} AND s.stem >= ? AND s.stem < ? '
+            'ORDER BY s.stem ASC LIMIT ?',
             variables: [
               ...scoped,
-              Variable<String>(prefix),
+              Variable<String>(q),
+              Variable<String>('$q$_afterPrefix'),
               const Variable<int>(_fetch),
             ],
           )

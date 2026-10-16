@@ -7,7 +7,13 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:drift/drift.dart'
-    show ApplyInterceptor, InsertMode, QueryExecutor, QueryInterceptor, Value;
+    show
+        ApplyInterceptor,
+        InsertMode,
+        QueryExecutor,
+        QueryInterceptor,
+        Value,
+        Variable;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/db/index_database.dart';
@@ -127,6 +133,57 @@ void main() {
       ('Notes', 'Archive'),
       ('Meeting notes', 'Work'),
     ], reason: 'the two prefix matches by path, the contains match after them');
+  });
+
+  // #1035: the name typed in full is the row Enter writes, whatever the
+  // folder sorts like.
+  test('the name typed in full ranks first, not the first folder', () async {
+    await addNote('Archive/Meeting notes old.md', stems: ['meeting notes old']);
+    await addNote('Work/Meeting notes.md', stems: ['meeting notes']);
+    final suggester = suggesterOver();
+
+    final rows = await suggester.notes('Meeting notes');
+
+    expect(rows.map((r) => r.name), ['Meeting notes', 'Meeting notes old']);
+    expect(rows.first.target, 'Meeting notes');
+  });
+
+  test(
+    'the name typed in full is found past 200 longer prefix matches',
+    () async {
+      for (var i = 0; i < 250; i++) {
+        await addNote('a/proj-$i.md', stems: ['proj-$i']);
+      }
+      await addNote('z/proj.md', stems: ['proj']);
+
+      final rows = await suggesterOver().notes('proj');
+
+      expect(rows.first.name, 'proj');
+      expect(rows.first.folder, 'z');
+    },
+  );
+
+  test('the prefix seek runs on the stem index, in stem order', () async {
+    await addNote('a.md', stems: ['alpha']);
+    counter.reset();
+    await suggesterOver().notes('al');
+    // The statement the app ran, planned with the arguments it ran with.
+    final ran = counter.statements.firstWhere(
+      (s) => s.sql.contains('s.stem >='),
+    );
+    final plan = await db
+        .customSelect(
+          'EXPLAIN QUERY PLAN ${ran.sql}',
+          variables: [
+            for (final arg in ran.args)
+              if (arg is int) Variable<int>(arg) else Variable<String>('$arg'),
+          ],
+        )
+        .get();
+    final detail = plan.map((r) => r.read<String>('detail')).join(' | ');
+    expect(detail, contains('INDEX sqlite_autoindex_note_stems_1'));
+    expect(detail, contains('stem>? AND stem<?'));
+    expect(detail, isNot(contains('TEMP B-TREE')));
   });
 
   // A bare name two notes share resolves to neither for sure: the row the

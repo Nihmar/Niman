@@ -215,12 +215,21 @@ final class NoteNames {
     for (final row in rows) {
       (byNote[row.id] ??= <StemRow>[]).add(row);
     }
-    final ranked = <({NoteSuggestion note, String path, bool prefix})>[];
+    final ranked =
+        <({NoteSuggestion note, String path, int tier, int length})>[];
     for (final group in byNote.values) {
       final first = group.first;
       final named = group.where((r) => r.source == 'file').firstOrNull;
       final name = _displayName(first.path);
+      // The best way the note answers to [q]: its name or an alias typed
+      // in full, one that starts with it, or one that only holds it.
+      final exact = q.isNotEmpty && group.any((r) => r.stem == q);
       final prefix = q.isNotEmpty && group.any((r) => r.stem.startsWith(q));
+      final matching = [
+        for (final r in group)
+          if (q.isEmpty || (prefix ? r.stem.startsWith(q) : r.stem.contains(q)))
+            r.stem.length,
+      ];
       final nameMatched =
           q.isEmpty || (named != null && named.stem.contains(q));
       ranked.add((
@@ -231,11 +240,17 @@ final class NoteNames {
           alias: q.isNotEmpty && !nameMatched ? first.stem : null,
         ),
         path: first.path,
-        prefix: prefix,
+        tier: exact ? 0 : (prefix ? 1 : 2),
+        // The shorter name is the closer one (`proj` before `proj notes`).
+        length: q.isEmpty || matching.isEmpty ? 0 : matching.reduce(min),
       ));
     }
+    // The name typed in full first, then the names it starts, then those
+    // that hold it; each by how much more the name says, then by folder
+    // (#1035).
     ranked.sort((a, b) {
-      if (a.prefix != b.prefix) return a.prefix ? -1 : 1;
+      if (a.tier != b.tier) return a.tier - b.tier;
+      if (a.length != b.length) return a.length - b.length;
       final byFolder = a.note.folder.compareTo(b.note.folder);
       return byFolder != 0 ? byFolder : a.note.name.compareTo(b.note.name);
     });
