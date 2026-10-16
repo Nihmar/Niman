@@ -349,6 +349,19 @@ final class LibraryController implements LibrarySession {
   }
 
   @override
+  Future<List<Note>> childrenPage(
+    int parentId, {
+    required int limit,
+    TreeSort sort = TreeSort.nameAsc,
+    Note? after,
+  }) async {
+    final db = _indexDb;
+    if (db == null) return const [];
+    return await NoteDao(db)
+        .childrenPage(parentId, limit: limit, sort: sort, after: after);
+  }
+
+  @override
   Future<Set<String>> missingPaths(Iterable<String> paths) async {
     final db = _indexDb;
     if (db == null) return const <String>{};

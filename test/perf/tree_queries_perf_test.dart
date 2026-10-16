@@ -53,6 +53,28 @@ void main() {
     expect(ms, lessThan(_bar(20)));
   });
 
+  test('a page of a 200k-note root costs the page, not the folder (#1064)', () async {
+    final dao = NoteDao(db);
+    await dao.childrenPage(0, limit: 2001); // opens the connection
+    final clock = Stopwatch()..start();
+    final first = await dao.childrenPage(0, limit: 2001);
+    final firstMs = clock.elapsedMicroseconds / 1000;
+    clock
+      ..reset()
+      ..start();
+    final deep = await dao.childrenPage(0, limit: 2001, after: first.last);
+    final deepMs = clock.elapsedMicroseconds / 1000;
+    _say(
+      'page of 2001 in a $_rows-row root: first ${firstMs.toStringAsFixed(1)} '
+      'ms, next ${deepMs.toStringAsFixed(1)} ms',
+    );
+
+    expect(first, hasLength(2001));
+    expect(deep.first.path, isNot(first.first.path));
+    expect(firstMs, lessThan(_bar(200)));
+    expect(deepMs, lessThan(_bar(200)));
+  });
+
   test(
     'the tree of a 200k-note root reads its index in order (#1064)',
     () async {

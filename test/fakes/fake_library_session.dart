@@ -886,6 +886,38 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     return kids.map(_toNote).toList();
   }
 
+  @override
+  Future<List<Note>> childrenPage(
+    int parentId, {
+    required int limit,
+    TreeSort sort = TreeSort.nameAsc,
+    Note? after,
+  }) async {
+    treeCalls++;
+    pageCalls++;
+    _treeOutstanding++;
+    if (_treeOutstanding > treePeak) treePeak = _treeOutstanding;
+    try {
+      final gate = treeGate;
+      if (gate != null) await gate.future;
+    } finally {
+      _treeOutstanding--;
+    }
+    final kids = <_Row>[
+      for (final row in _rows)
+        if (!row.trashed && _parentIdOf(row.path) == parentId) row,
+    ]..sort((a, b) => _byTreeSort(a, b, sort));
+    var start = 0;
+    if (after != null) {
+      final at = kids.indexWhere((row) => row.path == after.path);
+      start = at == -1 ? kids.length : at + 1;
+    }
+    return kids.skip(start).take(limit).map(_toNote).toList();
+  }
+
+  /// How many pages of children were read, by [childrenPage].
+  int pageCalls = 0;
+
   /// How many times the tree's rows were read from the fake (#751): a
   /// test holds a change that moved nothing the tree draws to no read.
   int treeCalls = 0;

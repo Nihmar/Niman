@@ -78,12 +78,18 @@ lines or when responsibilities mix.
   outside the folder, a dead Markdown or `../` link) are read again. A move
   the index cannot carry (a destination that is already indexed, a disk that
   does not show it) goes through `applyEvents` as an external change does.
-- **Tree rows:** `NoteDao.tree` reads the root and the open folders parent
-  by parent, in the `notes_tree` index's order (`(parent, is_dir DESC,
-  name_key, name)`; `name_key` is `nameSortKey`: case and accents folded,
-  digit runs by value, #1070), so a name order sorts nothing. The tree
-  widget runs one flatten at a time with one waiting behind it (#1064);
-  the pinned notes come from the `notes_pinned` partial index (#1065).
+- **Tree rows:** the tree reads a folder's children a page at a time
+  (`NoteDao.childrenPage`, a keyset in the sort's own terms, 2000 rows) into
+  `TreeChildCache` (`ui/tree_child_cache.dart`, #1064). A folder is read once
+  per index revision: opening one reads that folder alone, closing one reads
+  nothing, and a new revision or order empties the cache. The last loaded row
+  of a folder with more asks for the next page when it is drawn, so a
+  folder of a hundred thousand notes is a page until the list scrolls to the
+  end of it. In a name order a page walks the `notes_tree` index (`(parent,
+  is_dir DESC, name_key, name)`; `name_key` is `nameSortKey`: case and
+  accents folded, digit runs by value, #1070) and sorts nothing. One flatten
+  runs at a time with one waiting behind it; the pinned notes come from the
+  `notes_pinned` partial index (#1065) and are read once per revision.
 - **Edit:** `NoteOps.saveNote` → history snapshot and atomic write
   (temp + rename) in one isolate pass → the note is rescanned into the
   index. Every mode of the surface shares one tokenizer for links.

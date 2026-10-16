@@ -18,16 +18,27 @@ import 'package:niman/src/ui/ocr/ocr_file_actions.dart';
 import 'package:niman/src/ui/ocr/ocr_tree_order.dart';
 import 'package:niman/src/ui/ocr/ocr_tree_ring.dart';
 import 'package:niman/src/ui/strings.dart';
+import 'package:niman/src/ui/tree_child_cache.dart';
 import 'package:niman/src/ui/tree_drag.dart';
 import 'package:niman/src/ui/tree_rename_field.dart';
 import 'package:niman/src/ui/tree_row_metrics.dart';
 
 /// One row of the flattened tree (note/folder + its depth).
 final class _Row {
-  const new({required this.note, required this.depth, this.sidecar = false});
+  const new({
+    required this.note,
+    required this.depth,
+    this.sidecar = false,
+    this.moreOf,
+  });
 
   final Note note;
   final int depth;
+
+  /// The id of the folder this row is the last loaded child of, when that
+  /// folder has more children to read: drawing the row asks for the next
+  /// page (#1064).
+  final int? moreOf;
 
   /// A text recognition sidecar shown under its file (#595).
   final bool sidecar;
@@ -99,8 +110,16 @@ final class NoteTree extends StatefulWidget {
     this.sort = TreeSort.nameAsc,
     this.ocrQueue,
     this.renaming,
+    this.pageSize = defaultPageSize,
     super.key,
   });
+
+  /// How many children of a folder are read at a time; the rest follow as
+  /// the list scrolls to the end of the ones loaded (#1064).
+  final int pageSize;
+
+  /// The page a folder is read in.
+  static const int defaultPageSize = 2000;
 
   /// Whether the tree is the pane on screen. Hidden under the grid (#727)
   /// it keeps its expansion and its scroll, but lets go of the keyboard.
@@ -726,6 +745,7 @@ final class _NoteTreeState extends State<NoteTree> {
   @override
   void initState() {
     super.initState();
+    _children = TreeChildCache(pageSize: widget.pageSize);
     _focus.addListener(_onFocusChanged);
     const AppLogger(name: 'tree.ui').debug('mount');
   }
@@ -752,6 +772,7 @@ final class _NoteTreeState extends State<NoteTree> {
       // pinned section's roll-up — asked once per library, so it has to be
       // asked again rather than carried over.
       _rows = null;
+      _children.clear();
       _pinnedCollapsed = null;
     }
     // Hidden under the grid the pane lets the keyboard go: the rows it
@@ -777,6 +798,14 @@ final class _NoteTreeState extends State<NoteTree> {
         _rowsSort == widget.sort &&
         _setEquals(_rowsExpanded, widget.expanded)) {
       return cached;
+    }
+    // A new revision or order makes what was read of the folders stale; a
+    // folder opened or closed does not: the rows of the others stand, and
+    // closing one reads nothing (#1064).
+    if (_rowsRevision != revision ||
+        _rowsFollowContents != followsContents ||
+        _rowsSort != widget.sort) {
+      _children.clear();
     }
     _rowsRevision = revision;
     _rowsFollowContents = followsContents;
@@ -827,14 +856,37 @@ final class _NoteTreeState extends State<NoteTree> {
   /// settings file that a frame waited for.
   Future<_Rows> _flatten() async {
     final started = DateTime.now();
-    final allNodes = await widget.controller.tree(
-      widget.expanded,
-      sort: widget.sort,
-    );
+    final cache = _children;
+    final sort = widget.sort;
+    final expanded = widget.expanded;
+    // The folders to show, level by level: each level's missing folders are
+    // read together, and only they — a folder opened is one read, one closed
+    // is none (#1064).
+    var level = <int>[0];
+    var reads = 0;
+    while (level.isNotEmpty) {
+      final missing = [
+        for (final id in level)
+          if (cache[id] == null) id,
+      ];
+      reads += missing.length;
+      await cache.ensure(widget.controller, missing, sort);
+      final next = <int>[];
+      for (final id in level) {
+        for (final note in cache[id]?.rows ?? const <Note>[]) {
+          if (note.isDir && expanded.contains(note.path)) next.add(note.id);
+        }
+      }
+      level = next;
+    }
     final treeMs = DateTime.now().difference(started).inMilliseconds;
     final pinnedAt = DateTime.now();
-    final fields = await widget.controller.fieldSource;
-    final pinned = await fields?.pinnedNotes() ?? const <Note>[];
+    var pinned = cache.pinned;
+    if (pinned == null) {
+      final fields = await widget.controller.fieldSource;
+      pinned = await fields?.pinnedNotes() ?? const <Note>[];
+      cache.pinned = pinned;
+    }
     final pinnedMs = DateTime.now().difference(pinnedAt).inMilliseconds;
     // Asked once per session, not per flatten: after the first answer the
     // state lives here, so a toggle repaints instead of round-tripping
@@ -843,18 +895,13 @@ final class _NoteTreeState extends State<NoteTree> {
     _pinnedCollapsed ??= await widget.controller.pinnedCollapsed;
     final settingsMs = DateTime.now().difference(settingsAt).inMilliseconds;
 
-    final nodesByParent = <int, List<Note>>{};
-    for (final node in allNodes) {
-      nodesByParent.putIfAbsent(node.parent, () => []).add(node);
-    }
-
     final out = <_Row>[];
-    _walkSync(0, 0, nodesByParent, out);
+    _walkSync(0, 0, cache, out);
     _dropMarksOutside(out);
 
     const AppLogger(name: 'tree.ui').debug(
       'flatten: ${DateTime.now().difference(started).inMilliseconds}ms '
-      '(${out.length} rows, ${pinned.length} pinned) '
+      '(${out.length} rows, ${pinned.length} pinned, $reads folder read(s)) '
       '[tree $treeMs, pinned $pinnedMs, settings $settingsMs]',
     );
     return _Rows(pinned: pinned, tree: out);
@@ -872,18 +919,46 @@ final class _NoteTreeState extends State<NoteTree> {
   void _walkSync(
     int parentId,
     int depth,
-    Map<int, List<Note>> nodesByParent,
+    TreeChildCache cache,
     List<_Row> out,
   ) {
-    final children = nodesByParent[parentId] ?? const [];
+    final loaded = cache[parentId];
+    final children = loaded?.rows ?? const <Note>[];
+    // The last child of a folder with more to read asks for them when it is
+    // drawn (#1064).
+    final last = loaded != null && loaded.more && children.isNotEmpty
+        ? children.last
+        : null;
     for (final (note, sidecar) in nestOcrSidecars(children, (n) => n.name)) {
       out.add(
-        _Row(note: note, depth: sidecar ? depth + 1 : depth, sidecar: sidecar),
+        _Row(
+          note: note,
+          depth: sidecar ? depth + 1 : depth,
+          sidecar: sidecar,
+          moreOf: identical(note, last) ? parentId : null,
+        ),
       );
       if (note.isDir && widget.expanded.contains(note.path)) {
-        _walkSync(note.id, depth + 1, nodesByParent, out);
+        _walkSync(note.id, depth + 1, cache, out);
       }
     }
+  }
+
+  /// What has been read of each folder.
+  late TreeChildCache _children;
+
+  /// Reads the page after what is loaded of the folder with id [parentId],
+  /// and draws the rows again with it (#1064).
+  void _loadMore(int parentId) {
+    final cache = _children;
+    unawaited(
+      cache.loadMore(widget.controller, parentId, widget.sort).then((added) {
+        if (!added || !mounted || !identical(cache, _children)) return;
+        setState(() {
+          _rows = _flattenOnce();
+        });
+      }),
+    );
   }
 
   @override
@@ -956,6 +1031,14 @@ final class _NoteTreeState extends State<NoteTree> {
                   return _pinnedItem(rows.pinned, index, walked);
                 }
                 final row = rows.tree[index - header];
+                final more = row.moreOf;
+                if (more != null) {
+                  // After the frame: the page read adds rows, which a
+                  // build must not ask for.
+                  WidgetsBinding.instance.addPostFrameCallback(
+                    (_) => _loadMore(more),
+                  );
+                }
                 final tile = _RowTile(
                   note: row.note,
                   depth: row.depth,

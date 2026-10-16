@@ -808,6 +808,16 @@ abstract interface class LibrarySession {
   /// the field in its own direction, the name breaking ties.
   Future<List<Note>> children(int parentId, {TreeSort sort = TreeSort.nameAsc});
 
+  /// One page of the children of [parentId] in [sort]'s order: at most
+  /// [limit] rows, those after [after], a row of the previous page (#1064).
+  /// A page shorter than [limit] is the last one.
+  Future<List<Note>> childrenPage(
+    int parentId, {
+    required int limit,
+    TreeSort sort = TreeSort.nameAsc,
+    Note? after,
+  });
+
   /// Every note that belongs to the root or to one of the [expandedPaths],
   /// in [sort]'s order the same way [children] reads it.
   Future<List<Note>> tree(
