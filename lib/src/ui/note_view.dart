@@ -898,6 +898,9 @@ final class _NoteViewState extends State<NoteView>
   /// or null when the owner does not track.
   late final UnsavedTracker? _unsaved;
 
+  /// Files changed on disk under the open notes (#1042): the tracker's word.
+  StreamSubscription<Set<String>>? _diskChanges;
+
   /// The [UnsavedNote] view handed to [_unsaved]; it reads this state's
   /// revision pair live, so it cannot hold stale text.
   late final UnsavedNoteAdapter _unsavedNote = UnsavedNoteAdapter(
@@ -988,6 +991,11 @@ final class _NoteViewState extends State<NoteView>
     _activeFormats.addListener(_scheduleMemento);
     _stats.addListener(_onStatsChanged);
     _saves.failure.addListener(_onSaveFailureChanged);
+    _diskChanges = _unsaved?.diskChanges.listen((paths) {
+      if (paths.isEmpty || paths.contains(widget.path)) {
+        unawaited(_reloadIfChanged());
+      }
+    });
     unawaited(_load());
   }
 
@@ -1089,6 +1097,7 @@ final class _NoteViewState extends State<NoteView>
     widget.spellCheck?.removeListener(_onSpellCheckChanged);
     _sourceFind.dispose();
     _saves.failure.removeListener(_onSaveFailureChanged);
+    unawaited(_diskChanges?.cancel());
     _stats
       ..removeListener(_onStatsChanged)
       ..dispose();

@@ -5159,6 +5159,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   Widget _searchSlot(LibrarySession controller, {bool tree = false}) {
     return SearchSlot(
       controller: controller,
+      unsavedTracker: widget.unsavedTracker,
       onOpenNote: _openSearchNote,
       requests: _searchRequests,
       commands: _searchCommands,

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/ui/note_view.dart';
+import 'package:niman/src/ui/unsaved_notes.dart';
 import 'package:path/path.dart' as p;
 
 /// External-change reloads (home-screen widget toggles edit the note in
@@ -182,6 +183,49 @@ void main() {
           .widget
           .buffer;
       expect(buffer.text, 'changed on disk, and longer');
+    });
+  });
+
+  group('NoteView disk changes announced by the tracker (#1042)', () {
+    testWidgets('a clean note adopts the file; a note with edits keeps them', (
+      tester,
+    ) async {
+      final tracker = UnsavedTracker();
+      var disk = 'Acme plan';
+      Widget note(String path) => _app(
+        NoteView(
+          path: path,
+          showLineNumbers: false,
+          autofocusEditor: false,
+          unsavedTracker: tracker,
+          readNote: (_) async => disk,
+          writeNote: (_, _) async {},
+        ),
+      );
+      await tester.pumpWidget(note('/notes/a.md'));
+      await tester.pump();
+      expect(_editorText(tester), 'Acme plan');
+
+      disk = 'Globex plan';
+      tracker.notifyDiskChanged(const {});
+      await tester.pump();
+      await tester.pump();
+      expect(_editorText(tester), 'Globex plan');
+
+      // Another file's change is not this note's business.
+      disk = 'something else';
+      tracker.notifyDiskChanged({'/notes/other.md'});
+      await tester.pump();
+      await tester.pump();
+      expect(_editorText(tester), 'Globex plan');
+
+      // A note with edits keeps them: unsaved edits always win.
+      _surface(tester).replaceText(0, 0, 'typed ');
+      tracker.notifyDiskChanged({'/notes/a.md'});
+      await tester.pump();
+      await tester.pump();
+      expect(_editorText(tester), 'typed Globex plan');
+      await tester.pump(const Duration(seconds: 2));
     });
   });
 
