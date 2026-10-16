@@ -624,6 +624,10 @@ final class GreekStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Δεν ήταν δυνατή η αποθήκευση της σημείωσης. Το Niman θα δοκιμάσει ξανά.';
   @override
+  String get noteChangedOnDisk =>
+      'Ένα άλλο πρόγραμμα άλλαξε αυτή τη σημείωση. Εκείνη η έκδοση φυλάχτηκε '
+      'στο ιστορικό.';
+  @override
   String get noteNotText =>
       'Αυτό το αρχείο δεν είναι σημείωση κειμένου, οπότε το '
       'Niman δεν μπορεί να το εμφανίσει εδώ.';
@@ -2338,6 +2342,8 @@ final class GreekStrings extends Strings {
   String get historyReasonSync => 'πριν τον συγχρονισμό';
   @override
   String get historyReasonReplace => 'πριν την αντικατάσταση';
+  @override
+  String get historyReasonExternal => 'άλλαξε εκτός Niman';
   @override
   String get historyReasonUnknown => 'ανακτημένη';
   @override

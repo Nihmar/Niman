@@ -617,6 +617,10 @@ final class CatalanStrings extends Strings {
   String get noteSaveFailedSnack =>
       'No s’ha pogut guardar la nota. Niman ho tornarà a provar.';
   @override
+  String get noteChangedOnDisk =>
+      'Un altre programa ha canviat aquesta nota. Aquella versió s’ha desat a '
+      'l’historial.';
+  @override
   String get noteNotText =>
       'Aquest fitxer no és una nota de text, així '
       'que Niman no el pot mostrar aquí.';
@@ -2304,6 +2308,8 @@ final class CatalanStrings extends Strings {
   String get historyReasonSync => 'abans de sincronitzar';
   @override
   String get historyReasonReplace => 'abans de reemplaçar';
+  @override
+  String get historyReasonExternal => 'canviada fora de Niman';
   @override
   String get historyReasonUnknown => 'recuperada';
   @override

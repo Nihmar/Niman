@@ -1,4 +1,7 @@
 // T-PP-11: the app-level unsaved registry the window's close guard reads.
+import 'dart:async';
+
+import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/ui/unsaved_notes.dart';
 
@@ -153,5 +156,74 @@ void main() {
     await expectLater(tracker.saveAll(), throwsStateError);
     expect(failing.saveCalls, 1);
     expect(tracker.hasUnsaved, isTrue);
+  });
+
+  group('writes held for notes that left the editor (#1054)', () {
+    test('a newer hold of the note replaces an older one, which never '
+        'writes again', () {
+      fakeAsync((async) {
+        final tracker = UnsavedTracker();
+        final writes = <String>[];
+        var failing = true;
+        Future<void> write(String text) async {
+          if (failing) throw StateError('disk full');
+          writes.add(text);
+        }
+
+        unawaited(
+          tracker
+              .hold('/lib/a.md', () => 'old', () => write('old'))
+              .then((_) {}, onError: (_) {}),
+        );
+        async.flushMicrotasks();
+        unawaited(
+          tracker
+              .hold('/lib/a.md', () => 'new', () => write('new'))
+              .then((_) {}, onError: (_) {}),
+        );
+        async.flushMicrotasks();
+        expect(tracker.unsavedTextOf('/lib/a.md'), 'new');
+        expect(tracker.unsavedPaths, ['/lib/a.md']);
+
+        failing = false;
+        async
+          ..elapse(const Duration(minutes: 1))
+          ..flushMicrotasks();
+        // The older text's retries are gone; the newer one's landed.
+        expect(writes, ['new']);
+        expect(tracker.hasUnsaved, isFalse);
+      });
+    });
+
+    test('takeOver hands the held text to an editor and drops the hold', () {
+      fakeAsync((async) {
+        final tracker = UnsavedTracker();
+        var failing = true;
+        final writes = <String>[];
+        unawaited(
+          tracker
+              .hold('/lib/a.md', () => 'held text', () async {
+                if (failing) throw StateError('disk full');
+                writes.add('held text');
+              })
+              .then((_) {}, onError: (_) {}),
+        );
+        async.flushMicrotasks();
+        expect(tracker.takeOver('/lib/b.md'), isNull);
+        expect(tracker.takeOver('/lib/a.md'), 'held text');
+        expect(tracker.hasUnsaved, isFalse, reason: 'the editor owns it now');
+        expect(tracker.takeOver('/lib/a.md'), isNull);
+
+        failing = false;
+        async
+          ..elapse(const Duration(minutes: 1))
+          ..flushMicrotasks();
+        expect(writes, isEmpty, reason: 'no retry of text that moved on');
+        // And the close guard has nothing of it to wait for.
+        unawaited(tracker.saveAll());
+        async.flushMicrotasks();
+        expect(writes, isEmpty);
+      });
+    });
   });
 }

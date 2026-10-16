@@ -609,6 +609,10 @@ final class AlbanianStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Shënimi nuk u ruajt. Niman do të provojë sërish.';
   @override
+  String get noteChangedOnDisk =>
+      'Një program tjetër e ndryshoi këtë shënim. Ajo version ruhet në '
+      'histori.';
+  @override
   String get noteNotText =>
       'Ky skedar nuk është shënim teksti, ndaj Niman nuk mund ta shfaqë këtu.';
   @override
@@ -2279,6 +2283,8 @@ final class AlbanianStrings extends Strings {
   String get historyReasonSync => 'para sinkronizimit';
   @override
   String get historyReasonReplace => 'para zëvendësimit';
+  @override
+  String get historyReasonExternal => 'ndryshuar jashtë Niman';
   @override
   String get historyReasonUnknown => 'i rikuperuar';
   @override

@@ -89,4 +89,60 @@ void main() {
     expect(writes, {'/notes/a.md': 'typed a'});
     expect(tracker.hasUnsaved, isFalse);
   });
+
+  testWidgets('a note opened again takes back the text a failed write held, '
+      'and the held write never lands over what follows', (tester) async {
+    final tracker = UnsavedTracker();
+    var failing = true;
+    final disk = <String, String>{'/notes/a.md': 'a', '/notes/b.md': 'b'};
+    final writes = <String>[];
+    NoteView view(String path) => NoteView(
+      path: path,
+      showLineNumbers: false,
+      autofocusEditor: false,
+      unsavedTracker: tracker,
+      readNote: (path) async => disk[path]!,
+      writeNote: (path, text) async {
+        if (failing) throw StateError('card removed');
+        writes.add(text);
+        disk[path] = text;
+      },
+    );
+
+    await tester.pumpWidget(_app(view('/notes/a.md')));
+    await tester.pump();
+    type(tester, 'one ');
+    // Switched away while the disk refuses the write: the text is held.
+    await tester.pumpWidget(_app(view('/notes/b.md')));
+    await tester.pump();
+    await tester.pump();
+    expect(tracker.unsavedTextOf('/notes/a.md'), 'one a');
+
+    // Opened again: the disk still has the old text, the editor has the
+    // held one — as unsaved edits of its own.
+    await tester.pumpWidget(_app(view('/notes/a.md')));
+    await tester.pump();
+    await tester.pump();
+    expect(
+      tester
+          .state<MarkdownSourceViewState>(find.byType(MarkdownSourceView))
+          .widget
+          .buffer
+          .text,
+      'one a',
+    );
+    expect(tracker.unsavedPaths, ['/notes/a.md'], reason: 'the editor owns it');
+
+    failing = false;
+    type(tester, 'two ');
+    await tester.pump(const Duration(milliseconds: 600));
+    await tester.pump();
+    // The held write's retry would have come by now: nothing may follow the
+    // editor's own write.
+    await tester.pump(const Duration(seconds: 30));
+
+    expect(disk['/notes/a.md'], 'two one a');
+    expect(writes.last, 'two one a');
+    expect(tracker.hasUnsaved, isFalse);
+  });
 }

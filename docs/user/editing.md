@@ -382,13 +382,19 @@ Nothing is thrown away meanwhile. If the note is switched away from or its tab
 is closed while the write is still running or has failed, its text is kept by
 the app: the note stays marked as unsaved, the write is retried, and quitting
 waits for it (or asks, if it still cannot be written) instead of leaving with
-the last edits lost.
+the last edits lost. If you open that note again meanwhile, it opens with
+those edits in it, as unsaved changes of its own — not with the older text the
+disk still has — and the held write is dropped, so nothing old is ever written
+over what you type next.
 
 **A note changed by another program.** When a sync client, Niman's own sync or
 another program rewrites a note that is open, every open note whose text you
 have not changed — the tabs behind the one on screen too — shows the new file
-at once. A note with edits of yours keeps them (your text wins and is saved
-over the file, as before).
+at once. A note with edits of yours keeps them: your text wins and is saved
+over the file — but before it is, the version the other program wrote is kept
+in the note's [history](organization.md) (*changed outside Niman*), and a
+message says so. The comparison is of the file with the one the editor last
+read or wrote, so nothing is kept when nobody else touched it.
 
 **Line endings and the byte order mark.** The editor works with plain lines,
 but the file keeps what it had: a note with Windows (`CRLF`) line endings is

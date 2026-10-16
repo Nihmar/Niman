@@ -609,6 +609,9 @@ final class SlovakStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Poznámku sa nepodarilo uložiť. Niman to skúsi znova.';
   @override
+  String get noteChangedOnDisk =>
+      'Iný program túto poznámku zmenil. Tá verzia je uložená v histórii.';
+  @override
   String get noteNotText =>
       'Tento súbor nie je textová poznámka, preto ho Niman nemôže zobraziť tu.';
   @override
@@ -2261,6 +2264,8 @@ final class SlovakStrings extends Strings {
   String get historyReasonSync => 'pred synchronizáciou';
   @override
   String get historyReasonReplace => 'pred nahradením';
+  @override
+  String get historyReasonExternal => 'zmenené mimo Niman';
   @override
   String get historyReasonUnknown => 'nájdená';
   @override

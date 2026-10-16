@@ -603,6 +603,9 @@ final class TurkishStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Bu not kaydedilemedi. Niman yeniden deneyecek.';
   @override
+  String get noteChangedOnDisk =>
+      'Başka bir program bu notu değiştirdi. O sürüm geçmişte saklandı.';
+  @override
   String get noteNotText =>
       'Bu dosya bir metin notu değil, bu yüzden Niman onu burada gösteremiyor.';
   @override
@@ -2243,6 +2246,8 @@ final class TurkishStrings extends Strings {
   String get historyReasonSync => 'eşitleme öncesi';
   @override
   String get historyReasonReplace => 'değiştirme öncesi';
+  @override
+  String get historyReasonExternal => 'Niman dışında değiştirildi';
   @override
   String get historyReasonUnknown => 'kurtarılan';
   @override

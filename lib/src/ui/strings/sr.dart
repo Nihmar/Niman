@@ -610,6 +610,10 @@ final class SerbianStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Белешка није могла да се сачува. Niman ће покушати поново.';
   @override
+  String get noteChangedOnDisk =>
+      'Други програм је променио ову белешку. Та верзија је сачувана у '
+      'историји.';
+  @override
   String get noteNotText =>
       'Ова датотека није текстуална белешка, па је '
       'Niman не може приказати овде.';
@@ -2274,6 +2278,8 @@ final class SerbianStrings extends Strings {
   String get historyReasonSync => 'пре синхронизације';
   @override
   String get historyReasonReplace => 'пре замене';
+  @override
+  String get historyReasonExternal => 'промењено изван Nimana';
   @override
   String get historyReasonUnknown => 'пронађена';
   @override

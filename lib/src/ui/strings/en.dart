@@ -606,6 +606,9 @@ final class EnglishStrings extends Strings {
   String get noteSaveFailedSnack =>
       'This note could not be saved. Niman will try again.';
   @override
+  String get noteChangedOnDisk =>
+      'Another program changed this note. That version is kept in History.';
+  @override
   String get noteNotText =>
       'This file is not a text note, so Niman cannot show it here.';
   @override
@@ -2243,6 +2246,8 @@ final class EnglishStrings extends Strings {
   String get historyReasonSync => 'before sync';
   @override
   String get historyReasonReplace => 'before replace';
+  @override
+  String get historyReasonExternal => 'changed outside Niman';
   @override
   String get historyReasonUnknown => 'recovered';
   @override

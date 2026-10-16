@@ -1,5 +1,6 @@
 import 'dart:isolate';
 
+import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/settings/library_config_repo.dart';
 import 'package:niman/src/history/history_manifest.dart';
@@ -43,6 +44,7 @@ final class NoteHistory {
     String path, {
     int? editSession,
     HistoryReason? forced,
+    DiskStamp? expected,
   }) async {
     final settings = await config.config;
     final sessionStart = editSession != null && _sessions[path] != editSession;
@@ -53,6 +55,7 @@ final class NoteHistory {
       now: _now(),
       sessionStart: sessionStart,
       forced: forced,
+      expected: expected,
     );
   }
 

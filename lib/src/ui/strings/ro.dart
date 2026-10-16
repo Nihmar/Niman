@@ -617,6 +617,10 @@ final class RomanianStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Nota nu a putut fi salvată. Niman va încerca din nou.';
   @override
+  String get noteChangedOnDisk =>
+      'Un alt program a modificat această notă. Acea versiune este păstrată '
+      'în istoric.';
+  @override
   String get noteNotText =>
       'Acest fișier nu este o notă text, așa că Niman nu îl poate afișa aici.';
   @override
@@ -2284,6 +2288,8 @@ final class RomanianStrings extends Strings {
   String get historyReasonSync => 'înainte de sincronizare';
   @override
   String get historyReasonReplace => 'înainte de înlocuire';
+  @override
+  String get historyReasonExternal => 'modificată în afara Niman';
   @override
   String get historyReasonUnknown => 'recuperată';
   @override

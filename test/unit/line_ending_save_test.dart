@@ -74,7 +74,13 @@ void main() {
         saveNote: () => null,
         writeNote: () => null,
         saveNoteStream: () =>
-            (path, content, {required editSession, references}) async {
+            (
+              path,
+              content, {
+              required editSession,
+              references,
+              expected,
+            }) async {
               await saveNoteStream(
                 root: dir.path,
                 rel: p.basename(path),
@@ -127,7 +133,7 @@ void main() {
     });
 
     test('a CRLF note with a BOM keeps both', () async {
-      const original = '﻿# Title\r\n\r\nsome words\r\n';
+      const original = '\u{FEFF}# Title\r\n\r\nsome words\r\n';
       final saved = await editAndSave(
         bytes(original),
         after: 'some',

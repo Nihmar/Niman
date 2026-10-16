@@ -8,6 +8,7 @@ String historyReasonLabel(HistoryReason reason) => switch (reason) {
   HistoryReason.restore => AppStrings.historyReasonRestore,
   HistoryReason.sync => AppStrings.historyReasonSync,
   HistoryReason.replace => AppStrings.historyReasonReplace,
+  HistoryReason.external => AppStrings.historyReasonExternal,
   HistoryReason.unknown => AppStrings.historyReasonUnknown,
 };
 

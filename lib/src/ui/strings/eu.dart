@@ -606,6 +606,10 @@ final class BasqueStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Ezin izan da oharra gorde. Nimanek berriro saiatuko da.';
   @override
+  String get noteChangedOnDisk =>
+      'Beste programa batek ohar hau aldatu du. Bertsio hori historian gorde '
+      'da.';
+  @override
   String get noteNotText =>
       'Fitxategi hau ez da testu-ohar bat, beraz '
       'Nimanek ezin du hemen erakutsi.';
@@ -2278,6 +2282,8 @@ final class BasqueStrings extends Strings {
   String get historyReasonSync => 'sinkronizatu aurretik';
   @override
   String get historyReasonReplace => 'ordezkatu aurretik';
+  @override
+  String get historyReasonExternal => 'Nimanetik kanpo aldatua';
   @override
   String get historyReasonUnknown => 'berreskuratua';
   @override

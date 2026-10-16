@@ -615,6 +615,10 @@ final class MacedonianStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Белешката не можеше да се зачува. Niman ќе се обиде повторно.';
   @override
+  String get noteChangedOnDisk =>
+      'Друга програма ја промени оваа белешка. Таа верзија е зачувана во '
+      'историјата.';
+  @override
   String get noteNotText =>
       'Оваа датотека не е текстуална белешка, па '
       'Niman не може да ја прикаже тука.';
@@ -2281,6 +2285,8 @@ final class MacedonianStrings extends Strings {
   String get historyReasonSync => 'пред синхронизација';
   @override
   String get historyReasonReplace => 'пред замена';
+  @override
+  String get historyReasonExternal => 'променето надвор од Niman';
   @override
   String get historyReasonUnknown => 'пронајдена';
   @override

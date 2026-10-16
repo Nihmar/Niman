@@ -615,6 +615,9 @@ final class PolishStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Nie udało się zapisać notatki. Niman spróbuje ponownie.';
   @override
+  String get noteChangedOnDisk =>
+      'Inny program zmienił tę notatkę. Ta wersja jest zachowana w historii.';
+  @override
   String get noteNotText =>
       'Ten plik nie jest notatką tekstową, więc Niman nie może go tu pokazać.';
   @override
@@ -2288,6 +2291,8 @@ final class PolishStrings extends Strings {
   String get historyReasonSync => 'przed synchronizacją';
   @override
   String get historyReasonReplace => 'przed zamianą';
+  @override
+  String get historyReasonExternal => 'zmieniona poza Niman';
   @override
   String get historyReasonUnknown => 'odzyskana';
   @override

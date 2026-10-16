@@ -1203,6 +1203,7 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     String path,
     String content, {
     int? editSession,
+    DiskStamp? expected,
   }) async {
     saves.add((path, content, editSession));
     final failure = saveError;
@@ -1223,6 +1224,7 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     NoteContentProducer content, {
     int? editSession,
     NoteReferences? references,
+    DiskStamp? expected,
   }) async {
     final buffer = StringBuffer();
     for (var index = 0; ; index++) {
