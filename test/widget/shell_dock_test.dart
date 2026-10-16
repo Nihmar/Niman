@@ -388,6 +388,88 @@ void main() {
     expect(tester.getRect(dock).width, 420);
   });
 
+  // #1000: at the dock's narrowest the strip cuts its first tabs — the
+  // outline above all, the pane it opens on — off at the left. The wheel
+  // over it has to bring them back.
+  testWidgets('the wheel over the tab strip scrolls it', (tester) async {
+    await controller.setDockWidth(minDockWidth);
+    await pumpAt(tester, const Size(1400, 900));
+
+    final outline = find.byKey(const Key('dock-pane-outline'));
+    final strip = find.byKey(const Key('dock-pane-strip'));
+    final before = tester.getRect(outline);
+    expect(
+      before.right,
+      lessThanOrEqualTo(tester.getRect(strip).left),
+      reason: 'the first tab starts cut off',
+    );
+
+    final pointer = TestPointer(1, PointerDeviceKind.mouse);
+    await tester.sendEventToBinding(
+      pointer.hover(tester.getRect(strip).center),
+    );
+    await tester.sendEventToBinding(pointer.scroll(const Offset(0, -40)));
+    await settle(tester);
+    expect(
+      tester.getRect(outline).left,
+      greaterThan(before.left),
+      reason: 'the wheel moved it',
+    );
+
+    // One notch is short of the whole tab: notches until it is in view, as
+    // a hand turns the wheel.
+    for (var i = 0; i < 3; i++) {
+      await tester.sendEventToBinding(pointer.scroll(const Offset(0, -40)));
+      await tester.pump();
+    }
+    await settle(tester);
+
+    final after = tester.getRect(outline);
+    expect(after.left, greaterThanOrEqualTo(tester.getRect(strip).left));
+    expect(after.right, lessThanOrEqualTo(tester.getRect(strip).right));
+    expect(after.width, before.width, reason: 'it scrolled, it did not shrink');
+  }, variant: desktopDensity);
+
+  testWidgets('the mouse drags the tab strip as a finger does', (tester) async {
+    await controller.setDockWidth(minDockWidth);
+    await pumpAt(tester, const Size(1400, 900));
+
+    final outline = find.byKey(const Key('dock-pane-outline'));
+    final strip = find.byKey(const Key('dock-pane-strip'));
+    final before = tester.getRect(outline).left;
+
+    await tester.dragFrom(
+      tester.getRect(strip).center,
+      const Offset(120, 0),
+      kind: PointerDeviceKind.mouse,
+    );
+    await settle(tester);
+
+    expect(tester.getRect(outline).left, greaterThan(before));
+  }, variant: desktopDensity);
+
+  // The plain wheel is this strip's own; `Shift`+wheel keeps Flutter's
+  // flip, and one notch stays one step.
+  testWidgets('shift+wheel over the strip stays one step', (tester) async {
+    await controller.setDockWidth(minDockWidth);
+    await pumpAt(tester, const Size(1400, 900));
+
+    final outline = find.byKey(const Key('dock-pane-outline'));
+    final strip = find.byKey(const Key('dock-pane-strip'));
+    final before = tester.getRect(outline).left;
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+    final pointer = TestPointer(1, PointerDeviceKind.mouse);
+    await tester.sendEventToBinding(
+      pointer.hover(tester.getRect(strip).center),
+    );
+    await tester.sendEventToBinding(pointer.scroll(const Offset(0, -40)));
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+    await settle(tester);
+
+    expect(tester.getRect(outline).left - before, closeTo(40, 1));
+  }, variant: desktopDensity);
+
   testWidgets('on a phone the note’s ⋮ offers the same panes as sheets', (
     tester,
   ) async {

@@ -8,6 +8,7 @@
 /// the workspace.
 library;
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/workspace/workspace.dart';
@@ -81,41 +82,11 @@ final class RightDock extends StatelessWidget {
             child: Row(
               children: [
                 const SizedBox(width: 6),
-                // The tabs, from their end: five panes and the close do
-                // not all fit the narrowest dock (200 px) at a thumb's
-                // sizes, and a tab a thumb cannot hit is worse than a
-                // strip that scrolls (the tree footer's own rule, #849).
                 // The strip has the row's larger share, so the pane's name
                 // beside it — the smaller one — keeps a little width.
                 Flexible(
                   flex: 2,
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    reverse: true,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        for (final each in DockPane.values)
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 1),
-                            child: IconButton(
-                              key: Key('dock-pane-${each.name}'),
-                              tooltip: _label(each),
-                              isSelected: each == pane,
-                              visualDensity: VisualDensity.compact,
-                              iconSize: 18,
-                              style: IconButton.styleFrom(
-                                backgroundColor: each == pane
-                                    ? scheme.surfaceContainerHighest
-                                    : null,
-                              ),
-                              icon: Icon(_icon(each, selected: each == pane)),
-                              onPressed: () => onPane(each),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
+                  child: _PaneTabs(pane: pane, onPane: onPane),
                 ),
                 Expanded(
                   child: Padding(
@@ -144,6 +115,119 @@ final class RightDock extends StatelessWidget {
           const Divider(height: 1),
           Expanded(child: paneBuilder(pane)),
         ],
+      ),
+    );
+  }
+}
+
+/// The dock's pane tabs (#1000).
+///
+/// The strip shows its last tabs first — it is laid out from its end, as
+/// the tree footer's is (#849) — so at the dock's narrowest the first ones
+/// are the ones cut off at the left: the outline above all, which is the
+/// pane a fresh dock opens on. A mouse reaches them: the wheel over the
+/// strip scrolls it sideways, and the row drags under a held left button as
+/// a finger drags it on a tablet. The panes do not all fit the narrowest
+/// dock (200 px) at a thumb's sizes, and a tab a thumb cannot hit is worse
+/// than a strip that scrolls.
+final class _PaneTabs extends StatefulWidget {
+  const new({required this.pane, required this.onPane});
+
+  /// The pane showing, drawn as the selected tab.
+  final DockPane pane;
+
+  /// Shows another pane.
+  final ValueChanged<DockPane> onPane;
+
+  @override
+  State<_PaneTabs> createState() => _PaneTabsState();
+}
+
+final class _PaneTabsState extends State<_PaneTabs> {
+  final ScrollController _scroll = ScrollController();
+
+  @override
+  void dispose() {
+    _scroll.dispose();
+    super.dispose();
+  }
+
+  /// A plain vertical wheel over the strip, turned into a horizontal
+  /// scroll (#1000).
+  ///
+  /// Claimed through the pointer-signal resolver, which gives the event to
+  /// the first that asks, as `TextZoomPinch` does: the strip's own
+  /// Scrollable lies deeper and asks first whenever the delta it would take
+  /// is not zero — a tilt wheel, a trackpad's own pan, or `Shift`'s flip —
+  /// so only the plain wheel is left to this one. The delta follows the
+  /// strip's axis direction, which is the direction `Shift`+wheel already
+  /// gives it.
+  void _signal(PointerSignalEvent event) {
+    if (event is! PointerScrollEvent || event.scrollDelta.dx != 0) return;
+    if (!_scroll.hasClients) return;
+    final position = _scroll.position;
+    final delta = axisDirectionIsReversed(position.axisDirection)
+        ? -event.scrollDelta.dy
+        : event.scrollDelta.dy;
+    if (delta == 0) return;
+    // A strip that fits keeps Flutter to itself: nothing is asked for when
+    // there is nowhere to scroll.
+    final target = (position.pixels + delta).clamp(
+      position.minScrollExtent,
+      position.maxScrollExtent,
+    );
+    if (target == position.pixels) return;
+    GestureBinding.instance.pointerSignalResolver.register(
+      event,
+      (_) => position.pointerScroll(delta),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final behavior = ScrollConfiguration.of(context);
+    return ScrollConfiguration(
+      // A mouse drags the strip as a finger does (#1000): Flutter's own
+      // devices — touch, stylus, trackpad — are kept.
+      behavior: behavior.copyWith(
+        dragDevices: {...behavior.dragDevices, PointerDeviceKind.mouse},
+      ),
+      child: Listener(
+        // The gaps between the tabs are the strip's too.
+        behavior: HitTestBehavior.translucent,
+        onPointerSignal: _signal,
+        child: SingleChildScrollView(
+          key: const Key('dock-pane-strip'),
+          controller: _scroll,
+          scrollDirection: Axis.horizontal,
+          reverse: true,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              for (final each in DockPane.values)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 1),
+                  child: IconButton(
+                    key: Key('dock-pane-${each.name}'),
+                    tooltip: RightDock._label(each),
+                    isSelected: each == widget.pane,
+                    visualDensity: VisualDensity.compact,
+                    iconSize: 18,
+                    style: IconButton.styleFrom(
+                      backgroundColor: each == widget.pane
+                          ? scheme.surfaceContainerHighest
+                          : null,
+                    ),
+                    icon: Icon(
+                      RightDock._icon(each, selected: each == widget.pane),
+                    ),
+                    onPressed: () => widget.onPane(each),
+                  ),
+                ),
+            ],
+          ),
+        ),
       ),
     );
   }
