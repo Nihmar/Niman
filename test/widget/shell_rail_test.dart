@@ -17,6 +17,7 @@ import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/search/search_repo.dart';
 import 'package:niman/src/todo/todo_source.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
+import 'package:niman/src/ui/hidden_slot.dart';
 import 'package:niman/src/ui/home/home_screen.dart';
 import 'package:niman/src/ui/key_map.dart';
 import 'package:niman/src/ui/note_tab_bar.dart';
@@ -197,14 +198,14 @@ void main() {
     await tester.tap(railDest('todo'));
     await settle(tester);
 
-    Offstage contentPane(String name) =>
-        tester.widget<Offstage>(find.byKey(Key('content-pane-$name')));
+    HiddenSlot contentPane(String name) =>
+        tester.widget<HiddenSlot>(find.byKey(Key('content-pane-$name')));
 
     // The Todo rail entry is a content destination (#712): the list is
     // the pane's body, the tree and the rail stay, and the pinned tab
     // carries a chip in the row above the panes.
     expect(find.byType(TodoTab), findsOne);
-    expect(contentPane('todo').offstage, isFalse);
+    expect(contentPane('todo').hidden, isFalse);
     expect(find.byKey(const Key('shell-rail')), findsOne);
     expect(find.byKey(const Key('tree-island')), findsOne);
     expect(find.byKey(const Key('panes-island')), findsOne);
@@ -221,7 +222,7 @@ void main() {
     // Files brings the notes back; the chip stays and brings Todo back.
     await tester.tap(railDest('files'));
     await settle(tester);
-    expect(contentPane('todo').offstage, isTrue);
+    expect(contentPane('todo').hidden, isTrue);
     expect(find.byKey(const Key('content-tab-todo')), findsOne);
     expect(
       tester
@@ -232,7 +233,7 @@ void main() {
     );
     await tester.tap(find.byKey(const Key('content-tab-todo')));
     await settle(tester);
-    expect(contentPane('todo').offstage, isFalse);
+    expect(contentPane('todo').hidden, isFalse);
     expect(railIndex(tester), ShellTab.todo);
 
     // The ✕ closes it: no chip, Files on the rail, the tree in place.
@@ -252,11 +253,11 @@ void main() {
     await tester.tap(railDest('home'));
     await settle(tester);
 
-    Offstage contentPane(String name) =>
-        tester.widget<Offstage>(find.byKey(Key('content-pane-$name')));
+    HiddenSlot contentPane(String name) =>
+        tester.widget<HiddenSlot>(find.byKey(Key('content-pane-$name')));
 
     expect(find.byType(HomeScreen), findsOne);
-    expect(contentPane('home').offstage, isFalse);
+    expect(contentPane('home').hidden, isFalse);
     expect(find.byKey(const Key('tree-island')), findsOne);
     expect(find.byKey(const Key('panes-island')), findsOne);
     expect(find.byKey(const Key('content-tab-home')), findsOne);
@@ -268,7 +269,7 @@ void main() {
     await settle(tester);
     await tester.tap(noteRow('alpha.md'));
     await settle(tester);
-    expect(contentPane('home').offstage, isTrue);
+    expect(contentPane('home').hidden, isTrue);
     expect(find.byType(NoteView), findsOne);
     expect(find.byKey(const Key('content-tab-home')), findsOne);
     expect(railIndex(tester), ShellTab.files);
@@ -292,8 +293,8 @@ void main() {
       expect(railIndex(tester), ShellTab.todo);
       expect(
         tester
-            .widget<Offstage>(find.byKey(const Key('content-pane-todo')))
-            .offstage,
+            .widget<HiddenSlot>(find.byKey(const Key('content-pane-todo')))
+            .hidden,
         isFalse,
       );
       expect(find.byType(TodoTab), findsOne);

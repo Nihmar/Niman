@@ -10,6 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/app.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/todo/todo_source.dart';
+import 'package:niman/src/ui/hidden_slot.dart';
 import 'package:niman/src/ui/island.dart';
 import 'package:niman/src/ui/marquee_text.dart';
 import 'package:niman/src/ui/resize_divider.dart';
@@ -240,8 +241,8 @@ void main() {
     expect(dock.hitTestable(), findsOne);
     expect(
       tester
-          .widget<Offstage>(find.byKey(const Key('content-pane-todo')))
-          .offstage,
+          .widget<HiddenSlot>(find.byKey(const Key('content-pane-todo')))
+          .hidden,
       isFalse,
     );
   });
