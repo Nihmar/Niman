@@ -249,6 +249,38 @@ void main() {
     });
   });
 
+  // #1069: the tree's expanded folders ride with the workspace.
+  group('the expanded folders', () {
+    test('survive the stored form; an old one has none', () {
+      final w = _opened(['a.md']).withExpanded(['A', 'A/B']);
+      final back = Workspace.fromJson(jsonDecode(jsonEncode(w.toJson())));
+      expect(back.expanded, ['A', 'A/B']);
+      expect(back, w);
+      expect(Workspace.empty.toJson().containsKey('expanded'), isFalse);
+    });
+
+    test('are deduplicated, mended and bounded to the latest', () {
+      final w = Workspace.fromJson(const {
+        'version': 1,
+        'panes': [
+          {'active': 0, 'tabs': <Object>[]},
+        ],
+        'expanded': ['A', 'A', 3, '', 'B'],
+      });
+      expect(w.expanded, ['A', 'B']);
+      final many = Workspace.empty.withExpanded([
+        for (var i = 0; i < Workspace.maxExpanded + 5; i++) 'f$i',
+      ]);
+      expect(many.expanded.length, Workspace.maxExpanded);
+      expect(many.expanded.first, 'f5');
+    });
+
+    test('closing every tab leaves the tree as it was', () {
+      final w = _opened(['a.md']).withExpanded(['A']).closeAll();
+      expect(w.expanded, ['A']);
+    });
+  });
+
   group('where a note was left', () {
     // #1075: an editor torn down before it was laid out hands in a memento
     // that cannot say where it was scrolled.

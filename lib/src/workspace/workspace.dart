@@ -66,6 +66,7 @@ final class Workspace {
     this.dockOpen = true,
     this.dockPane = DockPane.outline,
     this.places = const NotePlaces(),
+    this.expanded = const <String>[],
   }) : assert(focused >= 0, 'focused is a pane');
 
   /// Reads a stored form.
@@ -114,6 +115,7 @@ final class Workspace {
     final dockPane = dock is Map ? dock['pane'] : null;
     return Workspace(
       places: NotePlaces.fromJson(json['places']),
+      expanded: _expandedFrom(json['expanded']),
       dockOpen: dockOpen is! bool || dockOpen,
       dockPane: DockPane.values.firstWhere(
         (p) => p.name == dockPane,
@@ -159,6 +161,14 @@ final class Workspace {
   /// opened again, in a tab of its own or in the place of another, starts
   /// there.
   final NotePlaces places;
+
+  /// The tree's expanded folders (#1069), library-relative, the one opened
+  /// longest ago first: they are the library's, kept with what is open so
+  /// that a restart or a switch of library finds the tree as it was left.
+  final List<String> expanded;
+
+  /// How many expanded folders are kept: the oldest go first.
+  static const int maxExpanded = 500;
 
   /// The pane with the focus.
   WorkspacePane get focusedPane => panes[focused];
@@ -283,6 +293,7 @@ final class Workspace {
     dockOpen: dockOpen,
     dockPane: dockPane,
     places: _placesWith(tabs),
+    expanded: expanded,
   );
 
   /// Opens a second pane, empty and focused, [axis] of the first. A split
@@ -422,6 +433,13 @@ final class Workspace {
     );
   }
 
+  /// The tree's expanded folders as [folders] say (#1069), the most recent
+  /// last; a pile beyond [maxExpanded] drops its oldest.
+  Workspace withExpanded(Iterable<String> folders) {
+    final next = _expandedFrom(folders.toList());
+    return listEquals(next, expanded) ? this : _copy(expanded: next);
+  }
+
   /// The dock opened or closed.
   Workspace withDock({bool? open, DockPane? pane}) =>
       _copy(dockOpen: open ?? dockOpen, dockPane: pane ?? dockPane);
@@ -445,6 +463,7 @@ final class Workspace {
     'fraction': fraction,
     'dock': {'open': dockOpen, 'pane': dockPane.name},
     if (places.length > 0) 'places': places.toJson(),
+    if (expanded.isNotEmpty) 'expanded': expanded,
     'panes': [
       for (final pane in panes)
         {
@@ -470,8 +489,10 @@ final class Workspace {
     bool? dockOpen,
     DockPane? dockPane,
     NotePlaces? places,
+    List<String>? expanded,
   }) => Workspace(
     places: places ?? this.places,
+    expanded: expanded ?? this.expanded,
     panes: List.unmodifiable(panes ?? this.panes),
     focused: focused ?? this.focused,
     axis: axis ?? this.axis,
@@ -479,6 +500,22 @@ final class Workspace {
     dockOpen: dockOpen ?? this.dockOpen,
     dockPane: dockPane ?? this.dockPane,
   );
+
+  /// The folders of a stored or given list: strings only, each once, at
+  /// most [maxExpanded] of the latest.
+  static List<String> _expandedFrom(Object? raw) {
+    if (raw is! List) return const <String>[];
+    final seen = <String>{};
+    final folders = <String>[
+      for (final folder in raw)
+        if (folder is String && folder.isNotEmpty && seen.add(folder)) folder,
+    ];
+    return List.unmodifiable(
+      folders.length > maxExpanded
+          ? folders.sublist(folders.length - maxExpanded)
+          : folders,
+    );
+  }
 
   /// A tab for [path], where the note was last left if it is known.
   WorkspaceTab _tabFor(String path) =>
@@ -581,6 +618,7 @@ final class Workspace {
       other.dockOpen == dockOpen &&
       other.dockPane == dockPane &&
       other.places == places &&
+      listEquals(other.expanded, expanded) &&
       listEquals(other.panes, panes);
 
   @override
@@ -591,6 +629,7 @@ final class Workspace {
     dockOpen,
     dockPane,
     places,
+    Object.hashAll(expanded),
     Object.hashAll(panes),
   );
 

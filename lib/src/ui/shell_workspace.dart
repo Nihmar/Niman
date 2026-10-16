@@ -77,11 +77,15 @@ final class ShellWorkspace {
   /// A note deleted before this session read the tree has no `removals`
   /// event to arrive on: what the store still opens on one keeps its tab,
   /// flagged missing, here (#289, #372).
-  Future<void> load() async {
-    controller.adopt(await _slot.load());
+  ///
+  /// Answers what was read, for what the shell keeps of its own with it
+  /// (the tree's expanded folders, #1069).
+  Future<Workspace> load() async {
+    final saved = await _slot.load();
+    controller.adopt(saved);
     final open = [for (final tab in value.tabs) tab.path];
-    if (open.isEmpty) return;
-    missing(await _session.missingPaths(open));
+    if (open.isNotEmpty) missing(await _session.missingPaths(open));
+    return saved;
   }
 
   /// Opens [notePath] now: in a new tab when [newTab] (or when one was

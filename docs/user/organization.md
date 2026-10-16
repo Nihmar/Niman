@@ -226,6 +226,11 @@ folder's own size is 0, and the folders keep the lead whichever field is
 chosen. Ties fall back to the name. The order and the way are one setting
 of this device, kept like the tree's width (see [settings](settings.md#library-settings-kept-on-this-device)).
 
+The folders you have open stay open: they are kept with the library's open
+notes on this device, so a restart or a switch of library finds the tree as
+you left it, with the folders above the open note open. Renaming or moving
+a folder keeps what was open under it open; deleting it forgets them.
+
 Windows reports a file's creation time and the index records it, and a
 save keeps it: editing an old note does not make it new. Linux and Android
 do not offer one through the file API the app uses, so **Date created** is

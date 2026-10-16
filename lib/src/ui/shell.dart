@@ -86,6 +86,7 @@ import 'package:niman/src/ui/dock/dock_overlay.dart';
 import 'package:niman/src/ui/dock/right_dock.dart';
 import 'package:niman/src/ui/epub_look_sheet.dart';
 import 'package:niman/src/ui/epub_text_zoom.dart';
+import 'package:niman/src/ui/expanded_folders.dart';
 import 'package:niman/src/ui/folder_grid.dart';
 import 'package:niman/src/ui/history/history_flow.dart';
 import 'package:niman/src/ui/history/history_labels.dart';
@@ -562,7 +563,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     with WidgetsBindingObserver {
   String? _selected;
   bool _selectedIsDir = false;
-  final Set<String> _expanded = <String>{};
+  final ExpandedFolders _expanded = ExpandedFolders();
   bool _busy = false;
 
   /// External-change reload requests for the open note (home-screen
@@ -996,9 +997,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     _creating?.name.complete(null);
     final name = Completer<String?>();
     setState(() {
-      for (var at = folder; at.isNotEmpty; at = parentOf(at)) {
-        _expanded.add(at);
-      }
+      _expanded.addWithAncestors(folder);
       _creating = (folder: folder, isDir: isDir, initial: initial, name: name);
     });
     return name.future;
@@ -1098,6 +1097,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       _noteKeys.moved(from, to);
       WidgetsBinding.instance.addPostFrameCallback((_) => _noteKeys.settle());
       _workspace.moved(from, to);
+      // The folders open under a renamed or moved folder stay open under
+      // its new name (#1069).
+      setState(() => _expanded.moved(from, to));
       // The move rewrote the links other notes hold to it, on disk (#507):
       // an open one re-reads its file, which a clean buffer adopts — and
       // every buffer is clean, the move having saved them first.
@@ -1121,6 +1123,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     },
     onDeleted: (path) {
       _workspace.deleted(path);
+      setState(() => _expanded.deleted(path));
       if (_wide) {
         // The workspace moved the showing tab on already; the tree only
         // lets go of a selected folder that went with it.
@@ -1339,6 +1342,23 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       if (sameNote) _noteReloadToken++;
       _noteOpened();
     });
+  }
+
+  /// Reads back what was left open in the library, and the tree as it was:
+  /// the folders that were expanded, and the ones above the note on screen
+  /// (#1069). From then on the tree's expansion is kept with the workspace.
+  Future<void> _restoreWorkspace() async {
+    final saved = await _workspace.load();
+    if (!mounted) return;
+    setState(() {
+      _expanded.addAll(saved.expanded);
+      if (_workspace.value.activePath case final shown?) {
+        _expanded.addWithAncestors(parentOf(shown));
+      }
+    });
+    _expanded.persistTo(
+      (folders) => _workspace.controller.update((w) => w.withExpanded(folders)),
+    );
   }
 
   /// Whether the shell is the wide one: the tabs' layout (#23). A phone
@@ -2386,7 +2406,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     FocusManager.instance.addListener(_reclaimFocus);
     HardwareKeyboard.instance.addHandler(_historyKeyUnfocused);
     _immersive.addListener(_onImmersiveChanged);
-    unawaited(_workspace.load());
+    unawaited(_restoreWorkspace());
     // Library session events (every note op bumps the revision): the
     // pinned notes follow the files, so each one refreshes the note
     // widgets (issue 6).
@@ -2493,6 +2513,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     _immersive.removeListener(_onImmersiveChanged);
     _immersive.dispose();
     _tabsListenable.dispose();
+    _expanded.dispose();
     _workspace.dispose();
     WidgetsBinding.instance.removeObserver(this);
     _noteHideTimer?.cancel();
@@ -4314,9 +4335,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       _tab = ShellTab.files;
       _sidebarVisible = true;
       if (folder.isEmpty) return;
-      for (var at = folder; at.isNotEmpty && at != '.'; at = parentOf(at)) {
-        _expanded.add(at);
-      }
+      _expanded.addWithAncestors(folder);
       _selected = folder;
       _selectedIsDir = true;
       _treeVisible = true;
@@ -5585,7 +5604,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
               controller: controller,
               sort: _editorSettings.treeSort,
               selectedPath: _selected,
-              expanded: _expanded,
+              expanded: _expanded.folders,
               // The keyboard's walk (#727) lets go while the grid holds the
               // pane, and while the search holds the sidebar's slot.
               active: !_gridOn && !_sidebarShowsView,
@@ -5678,9 +5697,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       return true;
     }
     setState(() {
-      for (var at = parentOf(path); at.isNotEmpty; at = parentOf(at)) {
-        _expanded.add(at);
-      }
+      _expanded.addWithAncestors(parentOf(path));
       _renaming = path;
     });
     return true;
