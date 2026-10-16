@@ -79,9 +79,15 @@ final class ShellMarkedActions {
       ops: ops,
     );
     if (target == null) return;
-    // A row inside another marked folder goes with it.
+    await moveTo(paths, target);
+  }
+
+  /// Moves [paths] into [folder] — a drop's destination (#996), or the
+  /// dialog's answer — each outermost path on its own: a row inside
+  /// another marked folder goes with it.
+  Future<void> moveTo(List<String> paths, String folder) async {
     for (final path in _outermost(paths)) {
-      await rows.moveTo(path, target);
+      await rows.moveTo(path, folder);
     }
   }
 

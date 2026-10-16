@@ -411,11 +411,13 @@ final class _FolderGridState extends State<FolderGrid> {
         },
         child: move == null
             ? grid
-            : DragTarget<String>(
+            : DragTarget<List<String>>(
                 onWillAcceptWithDetails: (details) =>
-                    treeDropMoves(details.data, rows.folder),
-                onAcceptWithDetails: (details) =>
-                    move(details.data, rows.folder),
+                    treeDropPaths(details.data, rows.folder).isNotEmpty,
+                onAcceptWithDetails: (details) {
+                  final movable = treeDropPaths(details.data, rows.folder);
+                  if (movable.isNotEmpty) move(movable, rows.folder);
+                },
                 builder: (context, _, _) => grid,
               ),
       ),

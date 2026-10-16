@@ -120,8 +120,9 @@ final class NoteTree extends StatefulWidget {
   /// null shows none.
   final OcrQueue? ocrQueue;
 
-  /// Moves a dragged row's note or folder into the folder it was dropped
-  /// on (#567); null leaves the rows where they are.
+  /// Moves the dragged rows' notes or folders into the folder they were
+  /// dropped on (#567): the row alone, or every marked row when the drag
+  /// started on one of several (#996); null leaves the rows where they are.
   final TreeMove? onMove;
 
   /// The session providing the index and the change-event stream.
@@ -235,6 +236,11 @@ final class _NoteTreeState extends State<NoteTree> {
   /// leaving the tree (#979). The tree's own rows only, not the pinned
   /// block's copies.
   final Set<String> _marked = {};
+
+  /// The paths a drag started on [path] carries (#996): every marked row's
+  /// when [path] is one of several marked rows, else the row's own.
+  List<String> _dragPaths(String path) =>
+      _marked.length > 1 && _marked.contains(path) ? _marked.toList() : [path];
 
   /// What has been typed to jump to a row by its name, and when the last
   /// letter came: a pause starts a new name (#712).
@@ -932,6 +938,7 @@ final class _NoteTreeState extends State<NoteTree> {
                       : _secondaryTap,
                   onMiddleClick: widget.onOpenInNewTab,
                   onMove: widget.onMove,
+                  dragPaths: _dragPaths(row.note.path),
                   renaming: widget.renaming?.path == row.note.path
                       ? widget.renaming
                       : null,
@@ -1144,6 +1151,7 @@ final class _RowTile extends StatelessWidget {
     this.onSecondaryTapDown,
     this.onMiddleClick,
     this.onMove,
+    this.dragPaths,
     this.icon,
     this.sidecar = false,
     this.ocrQueue,
@@ -1160,6 +1168,11 @@ final class _RowTile extends StatelessWidget {
 
   /// Moves this row by dragging it, and takes drops (#567).
   final TreeMove? onMove;
+
+  /// The paths this row's drag carries when it is dragged (#996): the
+  /// marked rows' when this row is one of several, else null — the row's
+  /// own path alone.
+  final List<String>? dragPaths;
 
   /// A text recognition sidecar under its file: dimmed, with the scan's
   /// icon (#595).
@@ -1295,6 +1308,7 @@ final class _RowTile extends StatelessWidget {
     if (move != null && renaming == null) {
       row = TreeRowDrag(
         note: note,
+        paths: dragPaths,
         onMove: move,
         onLongPress: longPress,
         child: row,

@@ -174,13 +174,17 @@ final class FolderCrumbs extends StatelessWidget {
     _Crumb crumb, {
     required TextStyle style,
   }) {
-    return DragTarget<String>(
+    return DragTarget<List<String>>(
       onWillAcceptWithDetails: (details) =>
-          treeDropMoves(details.data, crumb.path),
-      onAcceptWithDetails: (details) => onMove(details.data, crumb.path),
+          treeDropPaths(details.data, crumb.path).isNotEmpty,
+      onAcceptWithDetails: (details) {
+        final movable = treeDropPaths(details.data, crumb.path);
+        if (movable.isNotEmpty) onMove(movable, crumb.path);
+      },
       builder: (context, candidates, _) {
         final lit = candidates.any(
-          (path) => path != null && treeDropMoves(path, crumb.path),
+          (paths) =>
+              paths != null && treeDropPaths(paths, crumb.path).isNotEmpty,
         );
         // A drop on a crumb lights it as a folder row lights up; the room
         // is reserved either way, so the crumbs do not move under the
