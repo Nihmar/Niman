@@ -5,6 +5,7 @@ import 'package:flutter/gestures.dart' show kMiddleMouseButton;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/core/name_sort_key.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/editor/toolbar.dart';
@@ -604,11 +605,13 @@ final class _NoteTreeState extends State<NoteTree> {
   /// Moves to the first row from [at] + [from] on, wrapping, whose name
   /// starts with [name]; false when none does.
   bool _jumpTo(String name, int at, {required int from}) {
-    final wanted = name.toLowerCase();
+    // The tree's own comparison of names (#1070): case and marks do not
+    // count, so the letter typed finds the row the order puts it in.
+    final wanted = foldName(name);
     final length = _walkLength;
     for (var step = from; step < length + from; step++) {
       final index = (at + step) % length;
-      if (_walkRow(index).note.name.toLowerCase().startsWith(wanted)) {
+      if (foldName(_walkRow(index).note.name).startsWith(wanted)) {
         _move(index);
         return true;
       }

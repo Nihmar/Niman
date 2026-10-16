@@ -16,7 +16,6 @@ part 'index_database.g.dart';
 /// a million — per expanded folder, on the frame that opens it (T-M6-01).
 /// The folder index covers the picker's "every directory, by path", which
 /// otherwise reads a million rows to find a thousand.
-@TableIndex(name: 'notes_parent', columns: {#parent})
 @TableIndex(name: 'notes_dir_path', columns: {#isDir, #path})
 class Notes extends Table {
   /// Primary key.
@@ -30,6 +29,11 @@ class Notes extends Table {
 
   /// Display name (file or folder name).
   TextColumn get name => text()();
+
+  /// The key the tree orders [name] by: lowercased, diacritics folded, digit
+  /// runs padded to compare as numbers (`nameSortKey`, #1070). Written with
+  /// every write of [name]; the `notes_tree` index is built on it.
+  TextColumn get nameKey => text()();
 
   /// Whether this row is a directory.
   BoolColumn get isDir => boolean()();
@@ -344,8 +348,12 @@ class IndexDatabase extends _$IndexDatabase {
   /// v11: `dangling_links` keeps the targets no note answered, keyed by the
   /// stem that would, so a note made later finds the links waiting for it
   /// (#974) — an index written before holds none, and is wiped and rescanned.
+  ///
+  /// v12: `name_key`, the tree's name order — case-insensitive, accent-folded,
+  /// natural (#1070) — and the `notes_tree` index it is read through. An index
+  /// written before has none: wiped and rescanned.
   @override
-  int get schemaVersion => 11;
+  int get schemaVersion => 12;
 
   /// The FTS5 index (design.md: no drift class — raw SQL, `rowid` =
   /// `notes.id`, one row per note, `title` weighted above `body` by the
@@ -374,6 +382,14 @@ class IndexDatabase extends _$IndexDatabase {
       'CREATE VIRTUAL TABLE IF NOT EXISTS note_anchors_fts USING '
       "fts5(headings, blocks, content = '', contentless_delete = 1, "
       "tokenize = 'unicode61 remove_diacritics 2')";
+
+  /// The tree's order in an index: a folder's children, folders first, by
+  /// name key, the name breaking ties — what `NoteDao.children` and `tree`
+  /// read in order, without sorting (#1070, #1064). Not a `@TableIndex`:
+  /// those cannot say `is_dir DESC`. It also answers the lookup by `parent`.
+  static const String _createTreeIndex =
+      'CREATE INDEX IF NOT EXISTS notes_tree ON notes '
+      '(parent, is_dir DESC, name_key, name)';
 
   /// The notes by modification time, files apart from folders: what
   /// `NoteDao.recentlyModified` reads newest first.
@@ -435,6 +451,7 @@ class IndexDatabase extends _$IndexDatabase {
       await m.database.customStatement(_createAnchorsFts);
       await m.database.customStatement(_createRecentIndex);
       await m.database.customStatement(_createPinnedIndex);
+      await m.database.customStatement(_createTreeIndex);
       await tag_counts.createTagCounts(m.database);
     },
     // Every row here is derived from the notes on disk, so an upgrade is a
@@ -452,6 +469,7 @@ class IndexDatabase extends _$IndexDatabase {
       await m.database.customStatement(_createAnchorsFts);
       await m.database.customStatement(_createRecentIndex);
       await m.database.customStatement(_createPinnedIndex);
+      await m.database.customStatement(_createTreeIndex);
       await tag_counts.createTagCounts(m.database);
     },
     beforeOpen: (details) async {

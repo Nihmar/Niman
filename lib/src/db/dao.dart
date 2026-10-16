@@ -24,6 +24,7 @@ final class NoteDao {
           ..where((t) => t.parent.equals(0))
           ..orderBy([
             (t) => OrderingTerm.desc(t.isDir),
+            (t) => OrderingTerm.asc(t.nameKey),
             (t) => OrderingTerm.asc(t.name),
           ]))
         .get();
@@ -68,20 +69,28 @@ final class NoteDao {
   /// The tree's own order terms for [sort] (#726): folders first, then the
   /// field — the name breaking ties where the field cannot (a folder's
   /// size is 0, two files saved in the same second share a time).
+  static OrderingTerm _nameTie(Expression<Object> column, TreeSort sort) =>
+      sort.order == TreeOrder.name && sort.descending
+      ? OrderingTerm.desc(column)
+      : OrderingTerm.asc(column);
+
   static List<OrderingTerm Function($NotesTable)> _treeOrder(TreeSort sort) {
     OrderingTerm by(Expression<Object> column) =>
         sort.descending ? OrderingTerm.desc(column) : OrderingTerm.asc(column);
     return [
       (t) => OrderingTerm.desc(t.isDir),
       switch (sort.order) {
-        TreeOrder.name => (t) => by(t.name),
+        TreeOrder.name => (t) => by(t.nameKey),
         TreeOrder.modified => (t) => by(t.modified),
         TreeOrder.created => (t) => by(t.created),
         TreeOrder.size => (t) => by(t.size),
       },
-      // The field already is the name once: a second, ascending term would
-      // undo a descending name order.
-      if (sort.order != TreeOrder.name) (t) => OrderingTerm.asc(t.name),
+      // The name key breaks ties of another field, and the name itself the
+      // ties of the key (names that differ in case only). In a name order
+      // the field already is the key: the tie-break goes the same way, or a
+      // second ascending term would undo a descending order.
+      if (sort.order != TreeOrder.name) (t) => OrderingTerm.asc(t.nameKey),
+      (t) => _nameTie(t.name, sort),
     ];
   }
 

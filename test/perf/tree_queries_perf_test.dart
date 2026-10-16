@@ -33,9 +33,10 @@ void main() {
       'WITH RECURSIVE s(i) AS (SELECT 1 UNION ALL SELECT i + 1 FROM s '
       'WHERE i < $_rows) '
       'INSERT INTO notes (path, parent, name, is_dir, size, modified, '
-      'created, pinned) '
+      'created, pinned, name_key) '
       "SELECT 'Inbox/n' || i || '.md', 1, 'n' || i || '.md', 0, 0, 0, 0, "
-      'i IN (5, 90000, 199999) FROM s',
+      'i IN (5, 90000, 199999), '
+      "'n' || i || '.md' FROM s",
     );
   });
 

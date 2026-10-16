@@ -8,6 +8,7 @@ import 'package:meta/meta.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/isolate_gauge.dart';
 import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/core/name_sort_key.dart';
 import 'package:niman/src/db/dao.dart';
 import 'package:niman/src/db/index_change.dart';
 import 'package:niman/src/db/index_content_store.dart';
@@ -267,6 +268,7 @@ final class Indexer {
             path: Value(pair.key),
             parent: Value(parentId),
             name: Value(p.basename(pair.key)),
+            nameKey: Value(nameSortKey(p.basename(pair.key))),
             isDir: const Value(false),
             size: Value(probe.size),
             modified: Value(probe.modified),

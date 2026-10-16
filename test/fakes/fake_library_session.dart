@@ -7,6 +7,7 @@ import 'package:niman/src/core/app_theme.dart';
 import 'package:niman/src/core/custom_theme.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/language.dart';
+import 'package:niman/src/core/name_sort_key.dart';
 import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/core/settings/navigation_layout.dart';
@@ -1632,6 +1633,7 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
       path: row.path,
       parent: _parentIdOf(row.path),
       name: row.name,
+      nameKey: nameSortKey(row.name),
       isDir: row.isDir,
       size: row.size,
       modified: row.modified,

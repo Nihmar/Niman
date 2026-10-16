@@ -4,6 +4,7 @@ library;
 import 'package:drift/drift.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/core/name_sort_key.dart';
 import 'package:niman/src/db/dao.dart';
 import 'package:niman/src/db/index_content_store.dart';
 import 'package:niman/src/db/index_database.dart';
@@ -85,6 +86,7 @@ final class IndexMove {
           path: Value(toRel),
           parent: Value(parentId),
           name: Value(p.basename(toRel)),
+          nameKey: Value(nameSortKey(p.basename(toRel))),
           modified: Value(probes[1].modified),
         ),
       );

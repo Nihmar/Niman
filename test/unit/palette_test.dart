@@ -2,6 +2,7 @@
 // commands ranked recent first, then by how well they answer.
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/name_sort_key.dart';
 import 'package:niman/src/db/dao.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/ui/palette/palette_match.dart';
@@ -29,6 +30,7 @@ void main() {
                 path: path,
                 parent: 0,
                 name: path.split('/').last,
+                nameKey: nameSortKey(path.split('/').last),
                 isDir: dir,
                 size: 0,
                 modified: DateTime(2026),

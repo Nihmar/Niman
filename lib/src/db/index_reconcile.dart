@@ -28,6 +28,7 @@ library;
 import 'package:drift/drift.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/core/name_sort_key.dart';
 import 'package:niman/src/db/dangling_link_store.dart';
 import 'package:niman/src/db/dao.dart';
 import 'package:niman/src/db/index_change.dart';
@@ -653,6 +654,7 @@ final class IndexReconciler {
         path: Value(newPath),
         parent: Value(parentId),
         name: Value(newName),
+        nameKey: Value(nameSortKey(newName)),
         isDir: const Value(false),
       ),
     );

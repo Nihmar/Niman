@@ -143,7 +143,7 @@ leave the file at its next write.
 |-----|---------|---------|
 | `editorKind` | `source` | `source` or `wysiwyg` |
 | `enabledEditors` | both | Which editors the settings screen offers (never none) |
-| `treeSort` | `nameAsc` | Tree order and the way (`nameAsc`, `nameDesc`, `modifiedAsc`, `modifiedDesc`, `createdAsc`, `createdDesc`, `sizeAsc`, `sizeDesc`) |
+| `treeSort` | `nameAsc` | Tree order and the way (`nameAsc`, `nameDesc`, `modifiedAsc`, `modifiedDesc`, `createdAsc`, `createdDesc`, `sizeAsc`, `sizeDesc`). Names order without regard to case or accents, and numbers by value: `note 2` before `note 10`, `apple` before `Zebra`, `Émile` among the e's |
 | `treeView` | `list` | How the Files pane shows a folder: `list` (the tree) or `grid` |
 | `pinnedCollapsed` | false | Tree's pinned section rolled up |
 | `lineNumbers` | true | Editor row-number column |

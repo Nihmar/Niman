@@ -1,3 +1,4 @@
+import 'package:niman/src/core/name_sort_key.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/search/tag_repo.dart';
 
@@ -29,6 +30,7 @@ final class FakeTagSource implements TagSource {
             path: path,
             parent: 0,
             name: path.split('/').last,
+            nameKey: nameSortKey(path.split('/').last),
             isDir: false,
             size: 0,
             modified: DateTime.fromMillisecondsSinceEpoch(0),

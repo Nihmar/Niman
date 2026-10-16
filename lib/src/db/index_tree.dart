@@ -10,6 +10,7 @@ import 'package:drift/drift.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/isolate_gauge.dart';
 import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/core/name_sort_key.dart';
 import 'package:niman/src/db/dao.dart';
 import 'package:niman/src/db/index_content_store.dart';
 import 'package:niman/src/db/index_database.dart';
@@ -402,6 +403,7 @@ final class IndexTree {
           NotesCompanion(
             parent: Value(parentId),
             name: Value(e.name),
+            nameKey: Value(nameSortKey(e.name)),
             isDir: Value(e.isDir),
             size: Value(e.size),
             modified: Value(e.modified),
@@ -442,6 +444,7 @@ final class IndexTree {
             path: Value(e.rel),
             parent: Value(parentId),
             name: Value(e.name),
+            nameKey: Value(nameSortKey(e.name)),
             isDir: const Value(false),
             size: Value(e.size),
             modified: Value(e.modified),
@@ -470,6 +473,7 @@ final class IndexTree {
               path: e.rel,
               parent: parentId,
               name: e.name,
+              nameKey: nameSortKey(e.name),
               isDir: e.isDir,
               size: e.size,
               modified: e.modified,
@@ -699,6 +703,7 @@ final class IndexTree {
                 path: prefix,
                 parent: currentId,
                 name: seg,
+                nameKey: nameSortKey(seg),
                 isDir: true,
                 size: 0,
                 modified: probe.modified,
@@ -764,6 +769,7 @@ final class IndexTree {
               path: rel,
               parent: parentId,
               name: p.basename(abs),
+              nameKey: nameSortKey(p.basename(abs)),
               isDir: false,
               size: probe.size,
               modified: probe.modified,
@@ -794,6 +800,7 @@ final class IndexTree {
       NotesCompanion(
         parent: Value(parentId),
         name: Value(p.basename(abs)),
+        nameKey: Value(nameSortKey(p.basename(abs))),
         isDir: const Value(false),
         size: Value(probe.size),
         modified: Value(probe.modified),

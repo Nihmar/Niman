@@ -10,6 +10,7 @@ import 'package:drift/drift.dart'
     show ApplyInterceptor, InsertMode, QueryExecutor, QueryInterceptor, Value;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/name_sort_key.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/links/block_anchors.dart';
 import 'package:niman/src/links/parser.dart';
@@ -33,6 +34,7 @@ void main() {
             path: path,
             parent: 0,
             name: path.split('/').last,
+            nameKey: nameSortKey(path.split('/').last),
             isDir: false,
             size: 1,
             modified: DateTime.fromMillisecondsSinceEpoch(0),
@@ -182,6 +184,7 @@ void main() {
             path: 'Guides',
             parent: 0,
             name: 'Guides',
+            nameKey: nameSortKey('Guides'),
             isDir: true,
             size: 0,
             modified: DateTime.fromMillisecondsSinceEpoch(0),

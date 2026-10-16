@@ -7,6 +7,7 @@
 import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/name_sort_key.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/db/dao.dart';
 import 'package:niman/src/db/index_database.dart';
@@ -30,6 +31,7 @@ void main() {
             path: path,
             parent: parent,
             name: path.split('/').last,
+            nameKey: nameSortKey(path.split('/').last),
             isDir: isDir,
             size: isDir ? 0 : 10,
             modified: DateTime(2026),
@@ -88,6 +90,54 @@ void main() {
   });
 
   // #726: the orders the tree offers, folders first in every one of them.
+  test(
+    'the name order ignores case and marks, and counts numbers (#1070)',
+    () async {
+      final names = [
+        'Zebra.md',
+        'apple.md',
+        '\u00c9mile.md',
+        'zed.md',
+        'note 10.md',
+        'note 2.md',
+        'Note 1.md',
+        'note 02a.md',
+        'Archive',
+      ];
+      for (final name in names) {
+        await add(name, isDir: name == 'Archive');
+      }
+
+      final order = await dao.children(0);
+      final listed = order.map((n) => n.name).where(names.contains).toList();
+
+      expect(listed, [
+        'Archive',
+        'apple.md',
+        '\u00c9mile.md',
+        'Note 1.md',
+        'note 2.md',
+        'note 02a.md',
+        'note 10.md',
+        'Zebra.md',
+        'zed.md',
+      ]);
+    },
+  );
+
+  test('the tree query reads the name order from its index (#1070)', () async {
+    final plan = await db
+        .customSelect(
+          'EXPLAIN QUERY PLAN SELECT * FROM notes WHERE parent = 0 '
+          'ORDER BY is_dir DESC, name_key, name',
+        )
+        .get();
+    final detail = plan.map((r) => r.read<String>('detail')).join('\n');
+
+    expect(detail, contains('notes_tree'));
+    expect(detail, isNot(contains('TEMP B-TREE')));
+  });
+
   group('the tree orders', () {
     late IndexDatabase orderDb;
     late NoteDao orderDao;
@@ -107,6 +157,7 @@ void main() {
               path: path,
               parent: parent,
               name: path.split('/').last,
+              nameKey: nameSortKey(path.split('/').last),
               isDir: isDir,
               size: size,
               modified: modified,

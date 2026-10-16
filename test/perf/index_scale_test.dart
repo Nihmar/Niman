@@ -33,6 +33,7 @@ import 'dart:io';
 import 'package:drift/drift.dart' show Value, Variable, driftRuntimeOptions;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/name_sort_key.dart';
 import 'package:niman/src/db/app_database.dart';
 import 'package:niman/src/db/dao.dart';
 import 'package:niman/src/db/index_database.dart';
@@ -99,6 +100,7 @@ void main() {
             path: _folderName(f),
             parent: 0,
             name: _folderName(f),
+            nameKey: nameSortKey(_folderName(f)),
             isDir: true,
             size: 0,
             modified: DateTime(2026),
@@ -124,6 +126,7 @@ void main() {
             path: '${_folderName(f)}/$name.md',
             parent: folderIds[f]!,
             name: '$name.md',
+            nameKey: nameSortKey('$name.md'),
             isDir: false,
             size: 200,
             modified: DateTime(2026),
