@@ -16,11 +16,10 @@ library;
 import 'package:home_widget/home_widget.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/todo/todo_store.dart';
-import 'package:niman/src/todo/widget_todos.dart';
 import 'package:niman/src/widget/widget_configs.dart';
 import 'package:niman/src/widget/widget_note_ops.dart';
-import 'package:niman/src/widget/widget_payload.dart';
 import 'package:niman/src/widget/widget_theme.dart';
+import 'package:niman/src/widget/widget_todo_payload.dart';
 import 'package:niman/src/widget/widget_updater.dart';
 
 /// The background entrypoint: register with
@@ -39,15 +38,20 @@ Future<void> widgetToggleCallback(Uri? uri) async {
   }
 }
 
+/// The tap-URI query key carrying the language id the payload's labels
+/// were written in (`lg`), so the background re-push words them the same.
+const String widgetLanguageParam = 'lg';
+
 /// Parses a `niman://todo-toggle?id=&library=&line=` URI, or null when
 /// it carries nothing toggleable.
 ///
 /// The native rows append the payload's theme (`td/bg/fg/fs/ac`), so
 /// the re-push wears the same theme instead of flashing the defaults;
 /// taps without it (old widgets) resolve live in the pushing isolate.
-({int id, String library, int line, WidgetTheme? theme})? parseToggleUri(
-  Uri? uri,
-) {
+/// The payload's language rides the same way (`lg`), for the section
+/// headings.
+({int id, String library, int line, WidgetTheme? theme, String? language})?
+parseToggleUri(Uri? uri) {
   if (uri == null) return null;
   if (uri.scheme != 'niman' || uri.host != 'todo-toggle') return null;
   final params = uri.queryParameters;
@@ -62,7 +66,14 @@ Future<void> widgetToggleCallback(Uri? uri) async {
       library.isEmpty) {
     return null;
   }
-  return (id: id, library: library, line: line, theme: widgetThemeFromUri(uri));
+  final language = params[widgetLanguageParam];
+  return (
+    id: id,
+    library: library,
+    line: line,
+    theme: widgetThemeFromUri(uri),
+    language: language == null || language.isEmpty ? null : language,
+  );
 }
 
 /// Completes the toggled line and re-pushes its widget.
@@ -84,10 +95,10 @@ Future<bool> toggleWidgetTodo(
   try {
     final store = (storeFactory ?? TodoStore.new)(root: target.library);
     final snapshot = await store.checkAt(target.line, DateTime.now());
-    final payload = todoWidgetPayload(
-      sortTodosForWidget(snapshot),
+    applyWidgetLanguage(target.language);
+    final payload = buildTodoWidgetPayload(
+      snapshot,
       libraryPath: target.library,
-      total: widgetTodoTotal(snapshot),
       theme: target.theme ?? resolveWidgetTheme(),
     );
     final push = updater ?? WidgetUpdater();
