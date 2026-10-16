@@ -8,11 +8,14 @@ library;
 /// without a match object per word: on a 246 MB note the regex built 41
 /// million of them, and the word count took most of the 12 s its isolate
 /// spent after every edit (0.0.9 stress test).
-int countWords(String text) {
+///
+/// With [start] the count begins at that code unit, so a caller that has
+/// found where a line's text starts does not copy the rest of it out.
+int countWords(String text, {int start = 0}) {
   var words = 0;
   var inWord = false;
-  for (var at = 0; at < text.length; at++) {
-    final space = _isSpace(text.codeUnitAt(at));
+  for (var at = start; at < text.length; at++) {
+    final space = isWordSpace(text.codeUnitAt(at));
     if (!space && !inWord) words++;
     inWord = !space;
   }
@@ -20,7 +23,7 @@ int countWords(String text) {
 }
 
 /// Whether [unit] is whitespace as a regex's `\s` means it.
-bool _isSpace(int unit) {
+bool isWordSpace(int unit) {
   if (unit <= 0x20) {
     return unit == 0x20 || (unit >= 0x09 && unit <= 0x0D);
   }

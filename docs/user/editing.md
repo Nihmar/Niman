@@ -927,6 +927,15 @@ coloured by the language its fence names.
 
 Extras: word count, heading outline, heading folding.
 
+The word count is of your words, not of the Markdown around them. The
+marks at the head of a line — a heading's `#`, a list's `-` or `1.` and
+its task box, a quote's `>` — are not counted, so `## Title` is one word
+and `- [ ] buy milk` is two. A line that is only syntax counts for
+nothing: a rule (`---`, `***`), a table's `|---|---|` row, the pipes
+between a table row's cells and the lines that open and close a code
+fence. The frontmatter at the top of the note, between its two `---`
+lines, is not counted either. The words inside a code block are.
+
 ## Images
 
 Pasting or inserting an image copies the file into the library — notes

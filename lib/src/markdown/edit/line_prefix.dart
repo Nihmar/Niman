@@ -41,8 +41,24 @@ int? verbatimQuotesOf(Block? block) => switch (block?.kind) {
 ///
 /// With [verbatim] the line is a verbatim block's, inside that many quotes
 /// ([verbatimQuotesOf]): past them and the indentation is its text.
-int lineBodyStart(SourceBuffer buffer, int line, {int? verbatim}) {
-  final text = buffer.lineAt(line);
+int lineBodyStart(SourceBuffer buffer, int line, {int? verbatim}) =>
+    buffer.offsetOfLine(line) +
+    lineBodyColumn(buffer.lineAt(line), verbatim: verbatim);
+
+/// The column past the quote marks [text] opens with: each `>` up to three
+/// spaces in, with one space after it, as often as it is written.
+int lineQuoteEnd(String text) {
+  var at = 0;
+  while (true) {
+    final mark = _quoteMark(text, at);
+    if (mark < 0) return at;
+    at = mark;
+  }
+}
+
+/// The column where [text]'s own text begins, past the syntax before it: what
+/// [lineBodyStart] answers for a line, from the line alone.
+int lineBodyColumn(String text, {int? verbatim}) {
   var at = 0;
   // Quote marks, each up to three spaces in, so `> > x` nests like `>> x`.
   for (var quotes = 0; verbatim == null || quotes < verbatim; quotes++) {
@@ -54,7 +70,7 @@ int lineBodyStart(SourceBuffer buffer, int line, {int? verbatim}) {
   while (at < text.length && _isLineSpace(text.codeUnitAt(at))) {
     at++;
   }
-  if (verbatim != null) return buffer.offsetOfLine(line) + at;
+  if (verbatim != null) return at;
   final start = at;
   // A heading's hashes, or a list marker and its task box.
   final hashes = _headingHashes(text, start);
@@ -69,7 +85,7 @@ int lineBodyStart(SourceBuffer buffer, int line, {int? verbatim}) {
   while (at < text.length && _isLineSpace(text.codeUnitAt(at))) {
     at++;
   }
-  return buffer.offsetOfLine(line) + at;
+  return at;
 }
 
 /// The column past the quote mark at [from], or -1 when there is none.

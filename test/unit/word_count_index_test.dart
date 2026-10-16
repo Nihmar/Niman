@@ -3,6 +3,8 @@
 // What it has to be: the answer the whole text gives, reached by counting
 // the lines an edit touched and nothing else — and never by joining the
 // note.
+import 'dart:math';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/editor/outline.dart';
 import 'package:niman/src/editor/word_count.dart';
@@ -158,5 +160,173 @@ void main() {
       ).map((e) => (e.line, e.level, e.text)).toList(),
       <(int, int, String)>[(0, 1, 'One'), (2, 2, 'Two'), (8, 3, 'Three')],
     );
+  });
+
+  group('the count is of the text, not of the syntax (#1051)', () {
+    int counted(String text) => WordCount.of(SourceBuffer.fromText(text)).words;
+
+    test("the marks before a line's text are not words", () {
+      for (final (text, expected) in <(String, int)>[
+        ('# a b', 2),
+        ('## Title', 1),
+        ('###### six', 1),
+        ('#', 0),
+        ('- x y', 2),
+        ('* x y', 2),
+        ('+ x y', 2),
+        ('3. x y', 2),
+        ('3) x y', 2),
+        ('- [ ] buy milk', 2),
+        ('- [x] done', 1),
+        ('  - nested item', 2),
+        ('> q r', 2),
+        ('> > q r', 2),
+        ('>q r', 2),
+        ('> - x', 1),
+        ('> # Heading', 1),
+        ('> [!note] A title', 3),
+        ('#tag stays a word', 4),
+        ('a-b and 5-6', 3),
+        ('**bold** text', 2),
+      ]) {
+        expect(counted(text), expected, reason: text);
+      }
+    });
+
+    test('a line of only syntax counts zero', () {
+      for (final text in <String>[
+        '---',
+        '***',
+        '___',
+        '-----',
+        '- - -',
+        '* * *',
+        '  ---  ',
+        '> ---',
+        '|---|---|',
+        '| --- | :-: | --: |',
+        '---|---',
+        '```',
+        '```dart',
+        '~~~',
+        '~~~~ python',
+        '   ```',
+        '> ```',
+        '-',
+        '1.',
+        '- [ ]',
+      ]) {
+        expect(counted(text), 0, reason: text);
+      }
+    });
+
+    test('what only looks like syntax is text', () {
+      for (final (text, expected) in <(String, int)>[
+        ('--', 1),
+        ('``` inline ```', 3),
+        ('    ```', 1),
+        ('`` x', 2),
+        ('-- dash --', 3),
+      ]) {
+        expect(counted(text), expected, reason: text);
+      }
+    });
+
+    test("a table row is its cells' words, the pipes are not", () {
+      expect(counted('| a | b c |'), 3);
+      expect(counted('|a|b|'), 2);
+      expect(counted('a | b'), 3, reason: 'not a row: no leading pipe');
+      expect(counted('| a | b |\n|---|---|\n| c | d |'), 4);
+    });
+
+    test('frontmatter counts zero, and only the leading block', () {
+      const note =
+          '---\ntitle: A title\ntags: [a, b]\n---\n\n# Heading\nbody text\n';
+      expect(counted(note), 3);
+      expect(counted('---\ntitle: x\n...\nbody'), 1);
+      expect(counted('text\n---\ntitle: x\n---\nbody'), 4);
+      expect(counted('---\nno closing mark\nbody text'), 5);
+    });
+
+    test("a fence counts its lines' words, not its marks", () {
+      expect(counted('```dart\nvar x = 1;\n```'), 4);
+    });
+
+    test('a prose note counts as it did', () {
+      expect(counted('One two\nthree four five\n\nsix'), 6);
+    });
+
+    test('each edit leaves the count the whole text gives', () {
+      final random = Random(1051);
+      const lines = <String>[
+        '# Title words',
+        '## Sub',
+        '- item one',
+        '  - nested item',
+        '1. first',
+        '- [ ] task here',
+        '> quote text',
+        '> > deeper quote',
+        '> [!note] Callout',
+        '---',
+        '***',
+        '|---|---|',
+        '| a | b c |',
+        '```dart',
+        '```',
+        'plain words on a line',
+        '',
+        '---',
+        '...',
+        'title: x y',
+      ];
+      for (var round = 0; round < 200; round++) {
+        final parts = <String>[
+          for (var i = random.nextInt(14); i > 0; i--)
+            lines[random.nextInt(lines.length)],
+        ];
+        // Half the notes open with a frontmatter block, closed or not.
+        if (random.nextBool()) parts.insert(0, '---');
+        final buffer = SourceBuffer.fromText(parts.join('\n'));
+        final words = WordCount.of(buffer);
+        for (var step = 0; step < 12; step++) {
+          final line = random.nextInt(buffer.lineCount);
+          final start = buffer.offsetOfLine(line);
+          final end = start + buffer.lineLengthAt(line);
+          final edit = switch (random.nextInt(5)) {
+            // A line replaced by another.
+            0 => buffer.replaceRange(
+              start,
+              end,
+              lines[random.nextInt(lines.length)],
+            ),
+            // A line inserted before it.
+            1 => buffer.replaceRange(
+              start,
+              start,
+              '${lines[random.nextInt(lines.length)]}\n',
+            ),
+            // The line and its break gone (the last line has no break).
+            2 =>
+              line + 1 < buffer.lineCount
+                  ? buffer.delete(start, buffer.offsetOfLine(line + 1))
+                  : buffer.replaceRange(start, end, ''),
+            // A break typed inside the line.
+            3 => buffer.insert(
+              start + random.nextInt(buffer.lineLengthAt(line) + 1),
+              '\n',
+            ),
+            // A mark typed at the head of the line.
+            _ => buffer.replaceRange(start, start, '- '),
+          };
+          words.edited(edit, buffer);
+          expect(
+            words.words,
+            counted(buffer.text),
+            reason: 'round $round step $step: ${buffer.text}',
+          );
+        }
+      }
+    });
   });
 }
