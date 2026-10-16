@@ -33,8 +33,9 @@ final class NoteHistoryNavigator {
   Future<void> forward() => _step(back: false);
 
   /// Shows the next note in that direction the disk still has: a deleted
-  /// one leaves the history and the step goes on past it. A note closed
-  /// since opens again, in a tab of its own; one open shows its tab.
+  /// one leaves the history and the step goes on past it. A note open
+  /// shows its tab; one closed since opens in the place of the showing
+  /// tab, as a page does in a browser, where it was left (#1076).
   Future<void> _step({required bool back}) async {
     final history = workspace.history;
     while (true) {
@@ -51,9 +52,6 @@ final class NoteHistoryNavigator {
         history.back();
       } else {
         history.forward();
-      }
-      if (workspace.value.locate(target) == null) {
-        workspace.openNextInNewTab();
       }
       show(target);
       return;

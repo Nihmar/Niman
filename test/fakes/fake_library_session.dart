@@ -45,6 +45,7 @@ import 'package:niman/src/templates/repo.dart';
 import 'package:niman/src/update/update_check.dart';
 import 'package:niman/src/widget/widget_configs.dart';
 import 'package:niman/src/workspace/workspace.dart';
+import 'package:niman/src/workspace/workspace_slot.dart';
 import 'package:path/path.dart' as p;
 
 import 'fake_link_source.dart';
@@ -403,15 +404,20 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   Future<void> setPinnedCommands(String json) async =>
       pinnedCommandsJson = json;
 
-  /// What [saveWorkspace] last kept (#23).
+  /// What the workspace slot last kept (#23).
   Workspace workspace = Workspace.empty;
 
-  @override
-  Future<Workspace> get savedWorkspace async => workspace;
+  /// Every root a slot was made for, in order (#1083).
+  final List<String?> workspaceSlotRoots = [];
+
+  /// The root each slot was made for, and what each one kept, by root.
+  final Map<String?, Workspace> workspacesByRoot = {};
 
   @override
-  Future<void> saveWorkspace(Workspace workspace) async =>
-      this.workspace = workspace;
+  WorkspaceSlot get workspaceSlot {
+    workspaceSlotRoots.add(_root);
+    return _FakeWorkspaceSlot(this, _root);
+  }
 
   @override
   Future<bool> get lineNumbersEnabled async => _config.lineNumbers;
@@ -2166,5 +2172,24 @@ final class _FakeWikilinkSuggester implements WikilinkSuggester {
       default:
         return const <BookSuggestion>[];
     }
+  }
+}
+
+/// The fake's [WorkspaceSlot]: bound to the root the session had when it was
+/// made (#1083), as the real one is; what it keeps is the session's workspace.
+final class _FakeWorkspaceSlot implements WorkspaceSlot {
+  new(this._session, this._root);
+
+  final FakeLibrarySession _session;
+  final String? _root;
+
+  @override
+  Future<Workspace> load() async => _session.workspace;
+
+  @override
+  Future<void> save(Workspace workspace) async {
+    _session
+      ..workspace = workspace
+      ..workspacesByRoot[_root] = workspace;
   }
 }

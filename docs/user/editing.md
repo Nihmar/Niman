@@ -99,17 +99,27 @@ motion keeps the ellipsis instead.
 
 - **A click** on a note in the tree shows it in the tab you are on. A
   note that is already open is shown in its tab rather than opened twice.
+  A **double click** opens it alongside instead, and the note the first
+  click replaced comes back in its tab. A note that leaves its tab is
+  remembered where it was left: it opens again at the same place,
+  whichever way it comes back (a click, back, the palette), and after a
+  restart. The place is the line at the top of the view you were in, the
+  editor or the preview, so another window width, text size or note
+  column lands on the same line. Renaming or moving an open note keeps its tab, its place and
+  its undo.
 - **`Ctrl+click`**, the tree's right-click **Open in new tab**, or the
   **+** after the tabs (a new note) opens one alongside.
 - **Switching** is by the tab, by `Ctrl+Tab` / `Ctrl+Shift+Tab`, or by
   the **▾** list, which shows every tab with its folder when the row is
-  too full.
+  too full. With Home or Todo pinned over the notes, `Ctrl+Tab` goes on
+  to the first note tab (`Ctrl+Shift+Tab` to the last), and `Ctrl+W`
+  closes the pinned page, not a note under it.
 - **Back and forward** go through the notes you looked at, in the order
   you looked at them, as a browser goes through pages: the mouse's side
   buttons, or `Alt+←` / `Alt+→` (remappable, and in the palette). One
   history for the window, whichever pane showed the note. A note you
-  closed since opens again in a tab of its own; one deleted since is
-  skipped.
+  closed since opens again in the place of the tab you are on, at the line
+  where you left it, and adds no tab; one deleted since is skipped.
 - **Dragging a tab** along its row reorders it; a line shows where it
   will land. Dropped on the other pane's row or body it moves there,
   keeping everything, undo included. With the window not split, dropping
