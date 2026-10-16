@@ -863,6 +863,11 @@ final class EnglishStrings extends Strings {
   @override
   String get searchLoadMore => 'Show more';
   @override
+  String get searchStop => 'Stop';
+  @override
+  String searchScanning(int scanned, int total) =>
+      'Searching… $scanned of $total notes';
+  @override
   String searchShowingFirst(int shown, int total) =>
       'Showing the first $shown of $total';
   @override

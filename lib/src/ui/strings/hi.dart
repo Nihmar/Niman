@@ -857,6 +857,11 @@ final class HindiStrings extends Strings {
   @override
   String get searchLoadMore => 'और दिखाएँ';
   @override
+  String get searchStop => 'रोकें';
+  @override
+  String searchScanning(int scanned, int total) =>
+      'खोज रहे हैं… $scanned / $total नोट';
+  @override
   String searchShowingFirst(int shown, int total) =>
       '$total में से पहले $shown दिखाए जा रहे हैं';
   @override

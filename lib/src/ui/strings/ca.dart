@@ -878,6 +878,11 @@ final class CatalanStrings extends Strings {
   @override
   String get searchLoadMore => 'Mostra més';
   @override
+  String get searchStop => 'Atura';
+  @override
+  String searchScanning(int scanned, int total) =>
+      "S'està cercant… $scanned de $total notes";
+  @override
   String searchShowingFirst(int shown, int total) =>
       'Es mostren els primers $shown de $total';
   @override

@@ -873,6 +873,11 @@ final class GalicianStrings extends Strings {
   @override
   String get searchLoadMore => 'Mostrar máis';
   @override
+  String get searchStop => 'Parar';
+  @override
+  String searchScanning(int scanned, int total) =>
+      'Buscando… $scanned de $total notas';
+  @override
   String searchShowingFirst(int shown, int total) =>
       'Mostrando os primeiros $shown de $total';
   @override

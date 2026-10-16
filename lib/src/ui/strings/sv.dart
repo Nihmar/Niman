@@ -872,6 +872,11 @@ final class SwedishStrings extends Strings {
   @override
   String get searchLoadMore => 'Visa mer';
   @override
+  String get searchStop => 'Stoppa';
+  @override
+  String searchScanning(int scanned, int total) =>
+      'Söker… $scanned av $total anteckningar';
+  @override
   String searchShowingFirst(int shown, int total) =>
       'De första $shown av $total';
   @override

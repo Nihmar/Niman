@@ -252,6 +252,61 @@ void main() {
     expect(notes.map((n) => n.path).toList(), ['apple.md', 'deep.md']);
   });
 
+  // #1038: the scan reports as it goes and ends when told to.
+  group('the contains scan as a stream', () {
+    setUp(() async {
+      // Enough notes for several steps of four batches of 200 each.
+      for (var i = 0; i < 2000; i++) {
+        final name = 'n${i.toString().padLeft(4, '0')}.md';
+        final body = switch (i) {
+          10 || 450 || 850 || 1900 => 'a quokka here',
+          _ => 'nothing',
+        };
+        await indexNote(name, name, body);
+      }
+    });
+
+    test('progress comes first, then hits in path order, then done', () async {
+      final id = search.begin();
+      final events = await search
+          .searchContainsStream('quokka', id: id)
+          .toList();
+
+      expect(events.first.scanned, 0);
+      expect(events.first.hits, isEmpty);
+      expect(events.first.total, 2003, reason: 'every note counts');
+      expect(events.length, greaterThan(2), reason: 'more than one step');
+      expect(events.last.done, isTrue);
+      expect(events.last.scanned, 2003);
+      expect(events.last.hits.map((h) => h.path), [
+        'n0010.md',
+        'n0450.md',
+        'n0850.md',
+        'n1900.md',
+      ]);
+      // The hits only grow, and a step shows them before the scan ends.
+      for (var i = 1; i < events.length; i++) {
+        expect(
+          events[i].hits.length,
+          greaterThanOrEqualTo(events[i - 1].hits.length),
+        );
+      }
+      expect(events.any((e) => !e.done && e.hits.isNotEmpty), isTrue);
+    });
+
+    test('begin() stops the scan within one step', () async {
+      final id = search.begin();
+      final seen = <ContainsProgress>[];
+      await for (final event in search.searchContainsStream('quokka', id: id)) {
+        seen.add(event);
+        // Stop, as the button does, after the first step has landed.
+        if (seen.length == 2) search.begin();
+      }
+      expect(seen, hasLength(2), reason: 'nothing after the stop');
+      expect(seen.last.scanned, lessThan(2003));
+    });
+  });
+
   group('contains mode (searchContains)', () {
     test('finds intra-word substrings, unlike MATCH; path order', () async {
       final id = search.begin();

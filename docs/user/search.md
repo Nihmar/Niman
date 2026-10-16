@@ -73,8 +73,9 @@ never moves under the pointer.
 **Contains** finds any piece of text, inside words too (`ell` finds
 `hello`), ignoring case and accents. It reads the notes themselves, in
 path order, each only as far as its first match — so it is slower than a
-word search, and slower the larger the library. Typing again stops the
-search in progress.
+word search, and slower the larger the library. While it runs, a bar shows
+how many notes it has read, hits appear as they are found, and **Stop** ends
+it with what it has. Typing again stops the search in progress too.
 
 ## Tag search
 

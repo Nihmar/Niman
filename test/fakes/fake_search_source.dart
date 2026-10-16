@@ -62,6 +62,31 @@ final class FakeSearchSource implements SearchSource {
     ];
   }
 
+  /// While set, the contains scan's events come from it: a scan that takes
+  /// its time, which a test steps by hand.
+  StreamController<ContainsProgress>? containsEvents;
+
+  @override
+  Stream<ContainsProgress> searchContainsStream(
+    String pattern, {
+    required int id,
+    int limit = 200,
+  }) async* {
+    final events = containsEvents;
+    if (events != null) {
+      queries.add(pattern);
+      yield* events.stream;
+      return;
+    }
+    final hits = await searchContains(pattern, id: id, limit: limit);
+    yield ContainsProgress(
+      hits: hits,
+      scanned: hits.length,
+      total: hits.length,
+      done: true,
+    );
+  }
+
   /// The excerpts a word result's row reads, by path; none by default.
   final Map<String, String> excerpts = {};
 

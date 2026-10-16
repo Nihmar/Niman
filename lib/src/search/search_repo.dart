@@ -45,6 +45,30 @@ final class SearchHit {
   final String snippet;
 }
 
+/// How far a contains scan has got (#1038): the hits so far, in path
+/// order, and how many of the library's notes it has read.
+final class ContainsProgress {
+  /// A scan that has read [scanned] of [total] notes and found [hits].
+  const new({
+    required this.hits,
+    required this.scanned,
+    required this.total,
+    this.done = false,
+  });
+
+  /// Every hit found so far, in path order.
+  final List<SearchHit> hits;
+
+  /// How many notes have been read.
+  final int scanned;
+
+  /// How many notes the scan reads in all.
+  final int total;
+
+  /// Whether the scan is over: it found enough hits, or read every note.
+  final bool done;
+}
+
 /// The search data source the UI talks to: FTS word search and the
 /// contains scan, both with the invocation-id guard.
 ///
@@ -73,6 +97,16 @@ abstract interface class SearchSource {
   /// with an excerpt cut around the first match. [id] from [begin];
   /// superseded queries return no hits.
   Future<List<SearchHit>> searchContains(
+    String pattern, {
+    required int id,
+    int limit = 200,
+  });
+
+  /// The contains scan as it goes (#1038): an event after each step with the
+  /// hits found so far and how far the scan has read, the last one with
+  /// [ContainsProgress.done]. Ends without one when [id] is superseded —
+  /// by a new query, or by `begin()` as Stop — within a step of it.
+  Stream<ContainsProgress> searchContainsStream(
     String pattern, {
     required int id,
     int limit = 200,
@@ -246,58 +280,129 @@ final class SearchRepo implements SearchSource {
     required int id,
     int limit = 200,
   }) async {
+    var hits = const <SearchHit>[];
+    await for (final progress in searchContainsStream(
+      pattern,
+      id: id,
+      limit: limit,
+    )) {
+      hits = progress.hits;
+    }
+    return isCurrent(id) ? hits : const [];
+  }
+
+  /// How many notes a scan reads at once: each batch on an isolate of its
+  /// own, the batches of a step side by side (#1038).
+  static const int _scanWorkers = 4;
+
+  @override
+  Stream<ContainsProgress> searchContainsStream(
+    String pattern, {
+    required int id,
+    int limit = 200,
+  }) async* {
     // A scan of the notes themselves, in path order: the index keeps no
     // copy of their text to scan instead. The notes are listed a batch at
     // a time and each batch read on an isolate — every note only up to its
     // first match — with the query asked after each batch whether it is
     // still the one wanted, so a keystroke stops the scan it replaces.
-    if (foldForSearch(pattern).isEmpty) return const [];
+    if (foldForSearch(pattern).isEmpty) {
+      yield const ContainsProgress(hits: [], scanned: 0, total: 0, done: true);
+      return;
+    }
     const log = AppLogger(name: 'search');
     final clock = Stopwatch()..start();
     final hits = <SearchHit>[];
     var after = '';
     var read = 0;
+    var total = 0;
     try {
-      while (hits.length < limit) {
-        final rows = await _db
-            .customSelect(
-              'SELECT id, path, name, title FROM notes '
-              "WHERE is_dir = 0 AND lower(substr(name, -3)) = '.md' "
-              'AND path > ?1 ORDER BY path LIMIT ?2',
-              variables: [
-                Variable<String>(after),
-                const Variable<int>(_scanBatch),
-              ],
-            )
-            .get();
-        if (rows.isEmpty) break;
-        after = rows.last.read<String>('path');
-        final paths = [
-          for (final row in rows) p.join(root, row.read<String>('path')),
-        ];
-        final excerpts = await _containsExcerpts(paths, pattern);
-        read += rows.length;
+      total =
+          (await _db
+                  .customSelect(
+                    'SELECT count(*) AS c FROM notes '
+                    "WHERE is_dir = 0 AND lower(substr(name, -3)) = '.md'",
+                  )
+                  .getSingle())
+              .read<int>('c');
+      // The first sign of the scan, before any note is read.
+      yield ContainsProgress(hits: const [], scanned: 0, total: total);
+      var exhausted = false;
+      while (hits.length < limit && !exhausted) {
+        if (!isCurrent(id)) break;
+        // One step: up to [_scanWorkers] batches listed in path order, each
+        // read on an isolate of its own, side by side.
+        final batches = <List<QueryRow>>[];
+        while (batches.length < _scanWorkers) {
+          final rows = await _db
+              .customSelect(
+                'SELECT id, path, name, title FROM notes '
+                "WHERE is_dir = 0 AND lower(substr(name, -3)) = '.md' "
+                'AND path > ?1 ORDER BY path LIMIT ?2',
+                variables: [
+                  Variable<String>(after),
+                  const Variable<int>(_scanBatch),
+                ],
+              )
+              .get();
+          if (rows.isEmpty) {
+            exhausted = true;
+            break;
+          }
+          after = rows.last.read<String>('path');
+          batches.add(rows);
+          if (rows.length < _scanBatch) {
+            exhausted = true;
+            break;
+          }
+        }
+        if (batches.isEmpty) break;
+        final excerpts = await Future.wait([
+          for (final rows in batches)
+            _containsExcerpts([
+              for (final row in rows) p.join(root, row.read<String>('path')),
+            ], pattern),
+        ]);
+        for (final rows in batches) {
+          read += rows.length;
+        }
         if (!isCurrent(id)) {
           log.debug(
             'contains "$pattern" (id $id): superseded by id $_invocation '
             'after $read note(s) — dropped',
           );
-          return const [];
+          return;
         }
-        for (var i = 0; i < rows.length && hits.length < limit; i++) {
-          final excerpt = excerpts[i];
-          if (excerpt != null) hits.add(_hitOf(rows[i], snippet: excerpt));
+        for (var b = 0; b < batches.length; b++) {
+          final rows = batches[b];
+          for (var i = 0; i < rows.length && hits.length < limit; i++) {
+            final excerpt = excerpts[b][i];
+            if (excerpt != null) hits.add(_hitOf(rows[i], snippet: excerpt));
+          }
+        }
+        if (hits.length < limit && !exhausted) {
+          yield ContainsProgress(
+            hits: List.unmodifiable(hits),
+            scanned: read,
+            total: total,
+          );
         }
       }
     } on Object catch (e) {
       log.warning('contains search failed for "$pattern": $e');
-      return const [];
+      if (!isCurrent(id)) return;
     }
+    if (!isCurrent(id)) return;
     log.debug(
       'contains "$pattern" -> ${hits.length} hit(s) from $read note(s) '
       'in ${clock.elapsedMilliseconds} ms',
     );
-    return hits;
+    yield ContainsProgress(
+      hits: List.unmodifiable(hits),
+      scanned: read,
+      total: total,
+      done: true,
+    );
   }
 
   static SearchHit _hitOf(QueryRow row, {required String snippet}) {

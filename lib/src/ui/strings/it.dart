@@ -880,6 +880,11 @@ final class ItalianStrings extends Strings {
   @override
   String get searchLoadMore => 'Mostra altri';
   @override
+  String get searchStop => 'Ferma';
+  @override
+  String searchScanning(int scanned, int total) =>
+      'Ricerca… $scanned di $total note';
+  @override
   String searchShowingFirst(int shown, int total) => 'Primi $shown di $total';
   @override
   String searchTasksAndEvents(int count) => 'Attività ed eventi · $count';

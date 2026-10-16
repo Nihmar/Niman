@@ -171,6 +171,10 @@ final class _SearchScreenState extends State<SearchScreen> {
   /// and not in [_hits].
   FieldPager? _fieldPager;
 
+  /// How far a contains scan has got, while it runs (#1038); null when no
+  /// scan is running.
+  ContainsProgress? _scan;
+
   /// The words the hits on screen matched: what a hit opens at (#1045).
   List<String> _hitTerms = const [];
 
@@ -332,6 +336,7 @@ final class _SearchScreenState extends State<SearchScreen> {
       _source?.begin();
       setState(() {
         _stale = false;
+        _scan = null;
         _searched = false;
         _hits = const [];
         _shown = 0;
@@ -407,16 +412,53 @@ final class _SearchScreenState extends State<SearchScreen> {
     // The field filter borrows the search source's invocation id: the two
     // are driven by the same box, so a text query typed over a filter (or
     // the other way round) still supersedes what came before it.
+    if (field == null && contains) {
+      // A scan of the notes themselves: hits and progress are shown as the
+      // batches come in, and Stop ends it with what it has (#1038).
+      await for (final progress in source.searchContainsStream(text, id: id)) {
+        if (!source.isCurrent(id) || !mounted) return;
+        _land(
+          id: id,
+          mode: mode,
+          text: text,
+          results: progress.hits,
+          scan: progress.done ? null : progress,
+          clock: clock,
+        );
+      }
+      return;
+    }
     final pager = field == null ? null : await _openFieldPager(field);
     final results = pager != null
         ? await pager.first()
         : field != null
         ? const <SearchHit>[]
-        : contains
-        ? await source.searchContains(text, id: id)
         : await source.search(buildFtsQuery(text), id: id);
     if (!source.isCurrent(id)) return; // a newer query superseded this one
     if (!mounted) return;
+    _land(
+      id: id,
+      mode: mode,
+      text: text,
+      results: results,
+      pager: pager,
+      clock: clock,
+    );
+  }
+
+  /// Puts [results] on screen for the query [text] issued as [id]; with
+  /// [scan] set, more are still to come (#1038).
+  void _land({
+    required int id,
+    required String mode,
+    required String text,
+    required List<SearchHit> results,
+    required Stopwatch clock,
+    FieldPager? pager,
+    ContainsProgress? scan,
+  }) {
+    final contains = mode == 'contains';
+    final field = mode == 'field';
     // The repo already logs the SQL time; this is issue → results landed,
     // i.e. what a keystroke waits for on the UI side (debounce included
     // in the gap back to the 'debouncing' line).
@@ -427,10 +469,13 @@ final class _SearchScreenState extends State<SearchScreen> {
     final resultsFor = '$mode:$text';
     final fresh = resultsFor != _resultsFor;
     _resultsFor = resultsFor;
-    final open = _openWhenFresh;
-    _openWhenFresh = false;
+    // Enter pressed while the results were out opens the first of them, once
+    // there is one.
+    final open = _openWhenFresh && (scan == null || results.isNotEmpty);
+    if (open) _openWhenFresh = false;
     setState(() {
       _stale = false;
+      _scan = scan;
       // A new result set starts at its top, with nothing marked: the old
       // offset and mark belong to rows that are gone (#1044).
       if (fresh) {
@@ -438,16 +483,19 @@ final class _SearchScreenState extends State<SearchScreen> {
         if (_resultsScroll.hasClients) _resultsScroll.jumpTo(0);
       }
       _searched = true;
-      _hitTerms = field != null
+      _hitTerms = field
           ? const []
           : contains
           ? [text]
           : wordTermsOf(text);
       _fieldPager = pager;
       _hits = results;
-      _shown = _pageSize < results.length ? _pageSize : results.length;
-      _excerpts.clear();
-      _excerptWords = field == null && !contains ? text : null;
+      final page = _pageSize < results.length ? _pageSize : results.length;
+      // A scan adding hits keeps the pages the reader has opened.
+      final kept = _shown < results.length ? _shown : results.length;
+      _shown = fresh || kept < page ? page : kept;
+      if (fresh) _excerpts.clear();
+      _excerptWords = !field && !contains ? text : null;
       _taskEventToken = mode == 'words' ? taskEventQuery(text) : null;
     });
     logNextFrame('search.ui', 'results first frame (id $id)');
@@ -758,6 +806,8 @@ final class _SearchScreenState extends State<SearchScreen> {
                 ],
               ),
             ),
+            if (_scan case final scan? when !_replaceMode)
+              _scanBar(Theme.of(context), scan),
             if (_stale && !_replaceMode)
               const LinearProgressIndicator(
                 key: Key('search-busy'),
@@ -807,9 +857,52 @@ final class _SearchScreenState extends State<SearchScreen> {
   int _groupLead(List<TaskEventHit> group) =>
       group.isEmpty ? 0 : 1 + group.length + (_hits.isEmpty ? 0 : 1);
 
+  /// The progress of a contains scan and the way to end it (#1038).
+  Widget _scanBar(ThemeData theme, ContainsProgress scan) => Column(
+    key: const Key('search-scan'),
+    children: [
+      LinearProgressIndicator(
+        value: scan.total > 0 ? scan.scanned / scan.total : null,
+        minHeight: 2,
+      ),
+      Padding(
+        padding: const EdgeInsets.fromLTRB(12, 0, 4, 0),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                AppStrings.searchScanning(scan.scanned, scan.total),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            TextButton(
+              key: const Key('search-stop'),
+              onPressed: _stopScan,
+              child: Text(AppStrings.searchStop),
+            ),
+          ],
+        ),
+      ),
+    ],
+  );
+
+  /// Ends the contains scan with the hits it has found so far (#1038): the
+  /// source is told the query is over, and its stream ends.
+  void _stopScan() {
+    _source?.begin();
+    setState(() => _scan = null);
+  }
+
   Widget _results(ThemeData theme) {
     if (!_searched) return _hint(theme);
     final group = _taskEventRows();
+    // No match is only known once the scan is done (#1038).
+    if (_hits.isEmpty && group.isEmpty && _scan != null) {
+      return const SizedBox.shrink();
+    }
     if (_hits.isEmpty && group.isEmpty) {
       return Center(
         child: Text(

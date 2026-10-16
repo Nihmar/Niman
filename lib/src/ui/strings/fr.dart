@@ -883,6 +883,11 @@ final class FrenchStrings extends Strings {
   @override
   String get searchLoadMore => 'Afficher plus';
   @override
+  String get searchStop => 'Arrêter';
+  @override
+  String searchScanning(int scanned, int total) =>
+      'Recherche… $scanned sur $total notes';
+  @override
   String searchShowingFirst(int shown, int total) =>
       'Les $shown premiers sur $total';
   @override

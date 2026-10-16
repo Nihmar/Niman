@@ -876,6 +876,11 @@ final class MacedonianStrings extends Strings {
   @override
   String get searchLoadMore => 'Прикажи повеќе';
   @override
+  String get searchStop => 'Запри';
+  @override
+  String searchScanning(int scanned, int total) =>
+      'Пребарување… $scanned од $total белешки';
+  @override
   String searchShowingFirst(int shown, int total) => 'Првите $shown од $total';
   @override
   String searchTasksAndEvents(int count) => 'Задачи и настани · $count';

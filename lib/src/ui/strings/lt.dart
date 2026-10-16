@@ -872,6 +872,11 @@ final class LithuanianStrings extends Strings {
   @override
   String get searchLoadMore => 'Rodyti daugiau';
   @override
+  String get searchStop => 'Stabdyti';
+  @override
+  String searchScanning(int scanned, int total) =>
+      'Ieškoma… $scanned iš $total užrašų';
+  @override
   String searchShowingFirst(int shown, int total) =>
       'Pirmieji $shown iš $total';
   @override

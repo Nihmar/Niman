@@ -826,6 +826,72 @@ void main() {
     expect(opened, ['a.md']);
   });
 
+  // #1038: a contains scan shows its progress and its first hits as they
+  // come, says "no matches" only once it is over, and can be stopped.
+  testWidgets('a contains scan streams progress and hits; Stop ends it', (
+    tester,
+  ) async {
+    final events = source.containsEvents = StreamController<ContainsProgress>();
+    addTearDown(events.close);
+    await tester.pumpWidget(buildApp(source));
+    await tester.tap(find.text('Contains'));
+    await tester.pump();
+    await tester.enterText(find.byKey(const Key('search-query')), 'quokka');
+    await tester.pump(const Duration(milliseconds: 200));
+
+    // Started, nothing read yet: a bar, no verdict.
+    events.add(const ContainsProgress(hits: [], scanned: 0, total: 1000));
+    await tester.pump();
+    await tester.pump();
+    expect(find.byKey(const Key('search-scan')), findsOne);
+    expect(find.text('Searching… 0 of 1000 notes'), findsOne);
+    expect(find.text('No matches'), findsNothing);
+
+    // A step read, one hit found: it is on screen with the scan going on.
+    events.add(
+      ContainsProgress(
+        hits: [_hit('q.md', snippet: 'a <mark>quokka</mark>')],
+        scanned: 800,
+        total: 1000,
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+    expect(find.byKey(const Key('search-hit-q.md')), findsOne);
+    expect(find.text('Searching… 800 of 1000 notes'), findsOne);
+
+    // Stop keeps what was found and ends the scan.
+    await tester.tap(find.byKey(const Key('search-stop')));
+    await tester.pump();
+    expect(find.byKey(const Key('search-scan')), findsNothing);
+    expect(find.byKey(const Key('search-hit-q.md')), findsOne);
+    expect(source.isCurrent(1), isFalse, reason: 'the scan was told to end');
+  });
+
+  testWidgets('a scan that finds nothing says so only when it is done', (
+    tester,
+  ) async {
+    final events = source.containsEvents = StreamController<ContainsProgress>();
+    addTearDown(events.close);
+    await tester.pumpWidget(buildApp(source));
+    await tester.tap(find.text('Contains'));
+    await tester.pump();
+    await tester.enterText(find.byKey(const Key('search-query')), 'quokka');
+    await tester.pump(const Duration(milliseconds: 200));
+    events.add(const ContainsProgress(hits: [], scanned: 500, total: 1000));
+    await tester.pump();
+    await tester.pump();
+    expect(find.text('No matches'), findsNothing);
+
+    events.add(
+      const ContainsProgress(hits: [], scanned: 1000, total: 1000, done: true),
+    );
+    await tester.pump();
+    await tester.pump();
+    expect(find.text('No matches'), findsOne);
+    expect(find.byKey(const Key('search-scan')), findsNothing);
+  });
+
   // #1045: a hit opens at the words it matched.
   testWidgets('a hit opens with the words the query searched for', (
     tester,
@@ -956,6 +1022,21 @@ final class _SlowSource implements SearchSource {
   }
 
   @override
+  Stream<ContainsProgress> searchContainsStream(
+    String pattern, {
+    required int id,
+    int limit = 200,
+  }) async* {
+    final hits = await searchContains(pattern, id: id, limit: limit);
+    yield ContainsProgress(
+      hits: hits,
+      scanned: hits.length,
+      total: hits.length,
+      done: true,
+    );
+  }
+
+  @override
   Future<String> excerpt(SearchHit hit, String userText) async => '';
 }
 
@@ -996,6 +1077,21 @@ final class _HangingSource implements SearchSource {
     int limit = 200,
   }) {
     return search(pattern, id: id, limit: limit);
+  }
+
+  @override
+  Stream<ContainsProgress> searchContainsStream(
+    String pattern, {
+    required int id,
+    int limit = 200,
+  }) async* {
+    final hits = await searchContains(pattern, id: id, limit: limit);
+    yield ContainsProgress(
+      hits: hits,
+      scanned: hits.length,
+      total: hits.length,
+      done: true,
+    );
   }
 
   @override

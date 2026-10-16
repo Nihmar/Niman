@@ -823,6 +823,11 @@ final class JapaneseStrings extends Strings {
   @override
   String get searchLoadMore => 'もっと表示';
   @override
+  String get searchStop => '停止';
+  @override
+  String searchScanning(int scanned, int total) =>
+      '検索中… $scanned / $total 件のノート';
+  @override
   String searchShowingFirst(int shown, int total) => '先頭の$shown件を表示（全$total件）';
   @override
   String searchTasksAndEvents(int count) => 'タスクと予定 · $count';

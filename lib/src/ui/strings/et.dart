@@ -862,6 +862,11 @@ final class EstonianStrings extends Strings {
   @override
   String get searchLoadMore => 'Kuva rohkem';
   @override
+  String get searchStop => 'Peata';
+  @override
+  String searchScanning(int scanned, int total) =>
+      'Otsin… $scanned / $total märget';
+  @override
   String searchShowingFirst(int shown, int total) =>
       'Esimesed $shown $total-st';
   @override

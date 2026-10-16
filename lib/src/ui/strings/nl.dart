@@ -874,6 +874,11 @@ final class DutchStrings extends Strings {
   @override
   String get searchLoadMore => 'Meer tonen';
   @override
+  String get searchStop => 'Stop';
+  @override
+  String searchScanning(int scanned, int total) =>
+      'Zoeken… $scanned van $total notities';
+  @override
   String searchShowingFirst(int shown, int total) =>
       'De eerste $shown van $total';
   @override

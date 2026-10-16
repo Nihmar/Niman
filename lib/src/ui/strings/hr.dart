@@ -869,6 +869,11 @@ final class CroatianStrings extends Strings {
   @override
   String get searchLoadMore => 'Prikaži više';
   @override
+  String get searchStop => 'Zaustavi';
+  @override
+  String searchScanning(int scanned, int total) =>
+      'Pretraživanje… $scanned od $total bilješki';
+  @override
   String searchShowingFirst(int shown, int total) => 'Prvih $shown od $total';
   @override
   String searchTasksAndEvents(int count) => 'Zadaci i događaji · $count';

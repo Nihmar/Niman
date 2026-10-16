@@ -875,6 +875,11 @@ final class SlovenianStrings extends Strings {
   @override
   String get searchLoadMore => 'Prikaži več';
   @override
+  String get searchStop => 'Ustavi';
+  @override
+  String searchScanning(int scanned, int total) =>
+      'Iskanje… $scanned od $total zapiskov';
+  @override
   String searchShowingFirst(int shown, int total) => 'Prvih $shown od $total';
   @override
   String searchTasksAndEvents(int count) => 'Opravila in dogodki · $count';
