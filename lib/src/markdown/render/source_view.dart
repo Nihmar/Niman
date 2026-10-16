@@ -1676,6 +1676,10 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// `SourceBuffer.replaceRange`). Without [follow] the note stays where it
   /// is on screen rather than going to the caret: an edit made somewhere the
   /// writer is looking, not where they are typing — a checkbox ticked.
+  ///
+  /// The last [closing] characters of [text] are closers written ahead of the
+  /// caret — the `)` of a `(` — which the history keeps in the step of the
+  /// typing inside the pair.
   void _replaceRange(
     int start,
     int end,
@@ -1683,6 +1687,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     SelectionModel? caret,
     bool verbatim = false,
     bool follow = true,
+    int closing = 0,
   }) {
     if (start < 0 || end < start || end > widget.buffer.length) return;
     _touch.hide();
@@ -1697,6 +1702,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
         removed: removed,
         inserted: buffer.substring(start, start + stored),
       ),
+      closing: closing,
     );
     _styleEdited(edit);
     final next = (caret ?? SelectionModel.at(start + stored)).clampTo(
@@ -1843,11 +1849,33 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     if (edit == null) return false;
     final caret = SelectionModel(anchor: edit.anchor, extent: edit.extent);
     if (edit.text.isEmpty && edit.start == edit.end) {
-      placeCaret(edit.extent);
+      _stepOverCloser(edit.extent);
     } else {
-      _replaceRange(edit.start, edit.end, edit.text, caret: caret);
+      // A pair written at the caret: the characters after the caret are
+      // closers, which the typing inside the pair is one undo step with.
+      final closing = edit.start == edit.end
+          ? edit.start + edit.text.length - edit.extent
+          : 0;
+      _replaceRange(
+        edit.start,
+        edit.end,
+        edit.text,
+        caret: caret,
+        closing: closing,
+      );
     }
     return true;
+  }
+
+  /// Puts the caret at [offset], past a closing character the writer typed
+  /// over: the typing goes on in the undo step that wrote the pair (#1053).
+  void _stepOverCloser(int offset) {
+    _applySelection(
+      _selection.collapsedTo(offset),
+      reveal: true,
+      endStep: false,
+    );
+    _history.stepOver(offset);
   }
 
   /// A line break typed over `[start, end)`, when it means more than a line
@@ -2906,11 +2934,13 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     bool rebuild = false,
     bool reveal = false,
     bool suggest = true,
+    bool endStep = true,
   }) {
     final clamped = next.clampTo(widget.buffer.length);
     // A caret the writer moved ends the typing step: what is typed next is
-    // undone on its own.
-    _history.seal();
+    // undone on its own. Not so a caret that steps over a closer the step
+    // wrote ([_stepOverCloser]).
+    if (endStep) _history.seal();
     final wasRange = !_selection.isCollapsed;
     _ownSelection = clamped;
     if (rebuild || !clamped.isCollapsed || wasRange) setState(() {});

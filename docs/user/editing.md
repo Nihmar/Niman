@@ -315,12 +315,22 @@ browser's copy into Markdown, linked to the page it came from (see
 ### Undo and redo
 
 Undo goes back one step at a time, and a step is what a writer would call
-one thing done rather than one key pressed. Typing is a step until you move
-the caret or press Enter, and a run of Backspace or Delete in one direction
-is a step too — a held Backspace is undone with one `Ctrl/⌘+Z`, not one
-character per press. A line break, a change of direction between Backspace
-and Delete, and a caret move each end the step. The last 200 steps are kept
-for each open note.
+one thing done rather than one key pressed. Typing is a step, and so is a
+run of Backspace or Delete in one direction: a held Backspace is undone with
+one `Ctrl/⌘+Z`, not one character per press.
+
+A step ends when you:
+
+- stop for about a second;
+- start a new word — the word you type after a space is a step of its own,
+  so undo takes words back one at a time;
+- press Enter, or move the caret;
+- change from typing to deleting, or from Backspace to Delete.
+
+A bracket or quote that closes itself belongs to the step of what you type
+inside it: `(like this)` is undone whole, and typing the closing `)` over the
+one the editor wrote does not end the step. The last 200 steps are kept for
+each open note.
 
 ## Markdown support
 

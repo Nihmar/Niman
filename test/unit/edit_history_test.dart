@@ -273,4 +273,196 @@ void main() {
     expect(history.canUndo, isFalse);
     expect(history.canRedo, isFalse);
   });
+
+  group('where a typing step ends (#1053)', () {
+    var now = Duration.zero;
+    EditHistory make() {
+      now = Duration.zero;
+      return EditHistory(clock: () => now);
+    }
+
+    /// Types [text] one character at a time at the end of [buffer].
+    void type(EditHistory history, SourceBuffer buffer, String text) {
+      for (final char in text.split('')) {
+        _typed(history, buffer, buffer.length, char);
+      }
+    }
+
+    /// Types [text] one character at a time from [at], inside the text.
+    void typeInside(
+      EditHistory history,
+      SourceBuffer buffer,
+      int at,
+      String text,
+    ) {
+      for (var i = 0; i < text.length; i++) {
+        _typed(history, buffer, at + i, text[i]);
+      }
+    }
+
+    /// Types a bracket that wrote its pair, the caret between: what the
+    /// surface records as `()` with one closer.
+    void pair(EditHistory history, SourceBuffer buffer, int at) {
+      buffer.replaceRange(at, at, '()');
+      history.record(
+        EditRecord(start: at, removed: '', inserted: '()'),
+        closing: 1,
+      );
+    }
+
+    test('a pause of more than a second ends the step', () {
+      final buffer = SourceBuffer.fromText('');
+      final history = make();
+      type(history, buffer, 'a' * 15);
+      now += const Duration(seconds: 2);
+      type(history, buffer, 'b' * 15);
+      expect(history.length, 2);
+      history.undo(buffer);
+      expect(buffer.text, 'a' * 15);
+    });
+
+    test('a pause of exactly the limit does not', () {
+      final buffer = SourceBuffer.fromText('');
+      final history = make();
+      type(history, buffer, 'ab');
+      now += const Duration(seconds: 1);
+      type(history, buffer, 'cd');
+      expect(history.length, 1);
+    });
+
+    test('keys pressed inside the second keep the step alive', () {
+      final buffer = SourceBuffer.fromText('');
+      final history = make();
+      for (var i = 0; i < 10; i++) {
+        type(history, buffer, 'a');
+        now += const Duration(milliseconds: 600);
+      }
+      expect(history.length, 1, reason: '6 s of typing, no 1 s gap');
+    });
+
+    test('a pause ends a run of deletions too', () {
+      final buffer = SourceBuffer.fromText('abcdef');
+      final history = make();
+      for (var caret = 6; caret > 4; caret--) {
+        final removed = buffer.substring(caret - 1, caret);
+        buffer.delete(caret - 1, caret);
+        history.record(
+          EditRecord(start: caret - 1, removed: removed, inserted: ''),
+        );
+      }
+      now += const Duration(seconds: 2);
+      buffer.delete(3, 4);
+      history.record(const EditRecord(start: 3, removed: 'd', inserted: ''));
+      expect(history.length, 2);
+    });
+
+    test('a word after a space is a step of its own', () {
+      final buffer = SourceBuffer.fromText('');
+      final history = make();
+      type(history, buffer, 'one two');
+      expect(history.length, 2);
+      history.undo(buffer);
+      expect(buffer.text, 'one ', reason: 'the last word goes first');
+      history.undo(buffer);
+      expect(buffer.text, '');
+    });
+
+    test('spaces before the first word do not end the step', () {
+      final buffer = SourceBuffer.fromText('');
+      final history = make();
+      type(history, buffer, '   one');
+      expect(history.length, 1);
+    });
+
+    test('a run of spaces between words is part of the first word', () {
+      final buffer = SourceBuffer.fromText('');
+      final history = make();
+      type(history, buffer, 'one   two');
+      expect(history.length, 2);
+      history.undo(buffer);
+      expect(buffer.text, 'one   ');
+    });
+
+    test('typing inside a bracket pair is the step that wrote the pair', () {
+      final buffer = SourceBuffer.fromText('');
+      final history = make();
+      pair(history, buffer, 0);
+      _typed(history, buffer, 1, 'a');
+      _typed(history, buffer, 2, 'b');
+      _typed(history, buffer, 3, 'c');
+      expect(buffer.text, '(abc)');
+      expect(history.length, 1);
+      history.undo(buffer);
+      expect(buffer.text, '', reason: 'the closer goes with the step');
+      history.redo(buffer);
+      expect(buffer.text, '(abc)');
+    });
+
+    test('stepping over the closer goes on in the same step', () {
+      final buffer = SourceBuffer.fromText('');
+      final history = make();
+      pair(history, buffer, 0);
+      typeInside(history, buffer, 1, 'abc');
+      // `)` typed over the closer: the caret moves, nothing is inserted.
+      history.stepOver(5);
+      _typed(history, buffer, 5, ' ');
+      _typed(history, buffer, 6, 'd');
+      expect(buffer.text, '(abc) d');
+      // `(abc) ` then the word after the space: two steps, not four.
+      expect(history.length, 2);
+    });
+
+    test('a pair inside a pair keeps both closers in the step', () {
+      final buffer = SourceBuffer.fromText('');
+      final history = make();
+      pair(history, buffer, 0);
+      buffer.replaceRange(1, 1, '[]');
+      history.record(
+        const EditRecord(start: 1, removed: '', inserted: '[]'),
+        closing: 1,
+      );
+      _typed(history, buffer, 2, 'x');
+      expect(buffer.text, '([x])');
+      expect(history.length, 1);
+      history
+        ..stepOver(4)
+        ..stepOver(5);
+      _typed(history, buffer, 5, '.');
+      expect(history.length, 1);
+      history.undo(buffer);
+      expect(buffer.text, '');
+    });
+
+    test('a caret move inside the pair ends the step', () {
+      final buffer = SourceBuffer.fromText('');
+      final history = make();
+      pair(history, buffer, 0);
+      history.seal();
+      _typed(history, buffer, 1, 'a');
+      expect(history.length, 2);
+    });
+
+    test('a step over something the step did not write ends it', () {
+      final buffer = SourceBuffer.fromText('');
+      final history = make();
+      type(history, buffer, 'ab');
+      history.stepOver(3);
+      _typed(history, buffer, 2, 'c');
+      expect(history.length, 2);
+    });
+
+    test('typing past the closers joins the step too', () {
+      final buffer = SourceBuffer.fromText('');
+      final history = make();
+      pair(history, buffer, 0);
+      typeInside(history, buffer, 1, 'a');
+      // The caret went to the end of the line without a key of the pair's:
+      // what is typed there still continues what stands before it.
+      _typed(history, buffer, 3, 'b');
+      expect(buffer.text, '(a)b');
+      expect(history.length, 1);
+      history.undo(buffer);
+      expect(buffer.text, '');
+    });
+  });
 }

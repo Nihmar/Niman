@@ -186,6 +186,25 @@ void main() {
           rig.agree('vedi (a)[x]]\n', reason: 'only the pair’s own is stepped');
         });
 
+        testWidgets('a pair typed through is one undo step (#1053)', (
+          tester,
+        ) async {
+          final rig = _Rig(tester, profile, mode, 'vedi\n');
+          await rig.pump();
+          await rig.tapEnd(0);
+          await rig.platform.type('(abc).');
+          rig.agree('vedi(abc).\n');
+          // The pair, the letters inside, the closer stepped over and the
+          // full stop after it: it was four steps, the caret move over `)`
+          // ending the third.
+          final state = tester.state<MarkdownSourceViewState>(
+            find.byType(MarkdownSourceView),
+          )..undo();
+          await tester.pump();
+          rig.agree('vedi\n');
+          expect(state.canUndo, isFalse);
+        });
+
         testWidgets('the Markdown pairs come in pairs, and are typed through', (
           tester,
         ) async {
