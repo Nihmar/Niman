@@ -2098,7 +2098,12 @@ final class _NoteViewState extends State<NoteView>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     _log.info('lifecycle: ${state.name}');
-    if (state == AppLifecycleState.paused) unawaited(_saves.save());
+    // `paused` is a phone's; a desktop window that is minimised or covered
+    // goes `hidden` and never `paused` (#1057).
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.hidden) {
+      unawaited(_saves.save());
+    }
     // Leaving the foreground may be the last thing this process does.
     if (state != AppLifecycleState.resumed && widget.active) {
       _mementoTimer?.cancel();

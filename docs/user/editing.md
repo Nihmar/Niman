@@ -322,6 +322,14 @@ app coming back to the front, a sync that touched it), so a read that failed
 for a moment does not need a trip to another note and back. A file that is not
 text at all is an attachment, and says so instead.
 
+**When a note is saved.** About half a second after the last change (a couple
+of seconds for a note over 2 MB, five over 16 MB), when the editor loses the
+focus, and when the app goes to the background or the window is hidden. A
+writer who never pauses that long is not left unsaved: the first change not
+yet saved is written at most five seconds later (twenty over 2 MB, thirty over
+16 MB), however the typing goes after it, so a crash or a flat battery costs a
+few seconds of writing and not a session.
+
 **Line endings and the byte order mark.** The editor works with plain lines,
 but the file keeps what it had: a note with Windows (`CRLF`) line endings is
 saved with them, and a note that began with a UTF-8 byte order mark is saved

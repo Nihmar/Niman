@@ -144,23 +144,42 @@ final class NoteSavePipeline {
   /// `saveAll` before a sync, #723) awaits the write, not the pending flag.
   Future<void>? _activeSave;
 
+  /// The debounce: restarted by every edit, so it fires once the writer
+  /// pauses.
   Timer? _timer;
 
-  /// The note was edited: a new revision, saved after [_saveDelay].
+  /// The ceiling on the debounce (#1057): started by the first edit after a
+  /// save, never restarted, so a writer who never pauses long enough for the
+  /// debounce still gets a save every [_maxWait]. Null while nothing is owed.
+  Timer? _ceiling;
+
+  /// The note was edited: a new revision, saved after [_saveDelay] of quiet
+  /// — or [_maxWait] after the first edit not yet saved, whichever is first.
   void edited() {
     _revision++;
     _timer?.cancel();
     _timer = Timer(_saveDelay, save);
+    _ceiling ??= Timer(_maxWait, save);
   }
 
   /// The disk holds what the editor does: the note was just taken from it.
-  void markClean() => _lastSavedRevision = _revision;
+  void markClean() {
+    _lastSavedRevision = _revision;
+    _cancelTimers();
+  }
+
+  /// Drops the debounce and the ceiling: no save is owed by the clock.
+  void _cancelTimers() {
+    _timer?.cancel();
+    _ceiling?.cancel();
+    _ceiling = null;
+  }
 
   /// Starts a new editor session, and returns its id.
   int newSession() => _editSession = ++_editSessions;
 
   /// Drops the save an edit scheduled.
-  void cancel() => _timer?.cancel();
+  void cancel() => _cancelTimers();
 
   /// How long after the last edit the note is saved.
   ///
@@ -177,6 +196,22 @@ final class NoteSavePipeline {
     return _saving
         ? const Duration(seconds: 1)
         : const Duration(milliseconds: 500);
+  }
+
+  /// The longest the first unsaved edit waits for a save, however the typing
+  /// goes after it (#1057).
+  ///
+  /// The debounce restarts on every edit, so a writer whose gaps are shorter
+  /// than it — typing, correcting, scrolling and fixing in a 20 MB novel,
+  /// where the debounce is 5 s — never triggered a save for the whole session,
+  /// and a crash or a dead battery took all of it. The streaming save keeps
+  /// the frames smooth, so a periodic one is affordable; a big note waits
+  /// longer between them, as it does for the debounce.
+  Duration get _maxWait {
+    final length = buffer()?.length ?? 0;
+    if (length > 16 << 20) return const Duration(seconds: 30);
+    if (length > 2 << 20) return const Duration(seconds: 20);
+    return const Duration(seconds: 5);
   }
 
   /// Saves the buffer at most once: a request that finds a save in flight
@@ -201,6 +236,10 @@ final class NoteSavePipeline {
       _pending = true;
       return _covering(revision);
     }
+    // Every edit up to this revision is on its way: the ceiling starts again
+    // with the next one.
+    _ceiling?.cancel();
+    _ceiling = null;
     _saving = true;
     final future = _performSave(revision, path ?? notePath());
     _activeSave = future;
@@ -233,7 +272,7 @@ final class NoteSavePipeline {
   /// behind that save — switching during a save dropped every edit made
   /// since it started (#334).
   Future<void> saveOutgoing(String path) {
-    _timer?.cancel();
+    _cancelTimers();
     _pending = false;
     if (!dirty) return _activeSave ?? Future<void>.value();
     if (!_saving) return save(path: path);
@@ -243,7 +282,7 @@ final class NoteSavePipeline {
   /// The editor is going away: whatever it holds is saved, and the returned
   /// future completes when the disk has the note's last edit.
   Future<void> close() {
-    _timer?.cancel();
+    _cancelTimers();
     return dirty ? save() : _activeSave ?? Future<void>.value();
   }
 

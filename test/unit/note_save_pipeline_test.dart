@@ -355,6 +355,95 @@ void main() {
     },
   );
 
+  group('the debounce has a ceiling (#1057)', () {
+    /// Edits every [gap] for [total], and answers when each save landed.
+    List<Duration> editThrough(
+      FakeAsync async, {
+      required Duration gap,
+      required Duration total,
+      String filler = '',
+    }) {
+      final landed = <Duration>[];
+      var seen = 0;
+      var i = 0;
+      while (async.elapsed < total) {
+        harness.edit('$filler${i++}\n');
+        async
+          ..elapse(gap)
+          ..flushMicrotasks();
+        while (seen < harness.writes.length) {
+          landed.add(async.elapsed);
+          seen++;
+        }
+      }
+      return landed;
+    }
+
+    test('typing with gaps shorter than the debounce still saves', () {
+      fakeAsync((async) {
+        harness = Harness();
+        final landed = editThrough(
+          async,
+          gap: const Duration(milliseconds: 400),
+          total: const Duration(seconds: 12),
+        );
+        // The debounce (half a second) never ran out; the ceiling did, five
+        // seconds after the first unsaved edit, and again five after the next.
+        expect(landed.first, lessThanOrEqualTo(const Duration(seconds: 6)));
+        expect(landed.length, greaterThanOrEqualTo(2));
+        expect(
+          harness.writes.last.text,
+          isNot(harness.writes.first.text),
+          reason: 'each save took the text as it stood',
+        );
+      });
+    });
+
+    test('a big note waits longer between saves, but not for ever', () {
+      fakeAsync((async) {
+        harness = Harness();
+        final filler = 'x' * (3 << 20);
+        final landed = editThrough(
+          async,
+          gap: const Duration(milliseconds: 1500),
+          total: const Duration(seconds: 45),
+          filler: filler,
+        );
+        // Over 2 MiB the debounce is two seconds, which gaps of one and a
+        // half never reach; the ceiling is twenty.
+        expect(landed.first, greaterThan(const Duration(seconds: 15)));
+        expect(landed.first, lessThanOrEqualTo(const Duration(seconds: 22)));
+        expect(landed.length, 2);
+      });
+    });
+
+    test('a save restarts the ceiling for the edits after it', () {
+      fakeAsync((async) {
+        harness = Harness()..edit('one\n');
+        async
+          ..elapse(const Duration(milliseconds: 500))
+          ..flushMicrotasks();
+        expect(harness.writes, hasLength(1));
+        // Four seconds of quiet, then one edit: its own five seconds start
+        // here, not at the first edit.
+        async.elapse(const Duration(seconds: 4));
+        harness.edit('two\n');
+        for (var i = 0; i < 12; i++) {
+          async
+            ..elapse(const Duration(milliseconds: 400))
+            ..flushMicrotasks();
+          harness.edit('two $i\n');
+        }
+        // 4.8 s of edits since: not yet.
+        expect(harness.writes, hasLength(1));
+        async
+          ..elapse(const Duration(milliseconds: 400))
+          ..flushMicrotasks();
+        expect(harness.writes, hasLength(2));
+      });
+    });
+  });
+
   test('an edit schedules its own save', () {
     fakeAsync((async) {
       harness = Harness()..edit('two\n');
