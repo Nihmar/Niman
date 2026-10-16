@@ -34,8 +34,9 @@ final class CreateKind {
   /// The entry's outline icon.
   final IconData icon;
 
-  /// The entry's label.
-  final String label;
+  /// The entry's label, read when a menu is built: it follows the language
+  /// in use at that moment, not the one the table was first read in.
+  final String Function() label;
 
   /// Makes the kind in the folder `parent` through the create flow.
   final Future<void> Function(
@@ -52,7 +53,7 @@ final List<CreateKind> createKinds = <CreateKind>[
     value: 'audio',
     keySuffix: 'new-audio-note',
     icon: Icons.mic_outlined,
-    label: AppStrings.newAudioNoteHere,
+    label: () => AppStrings.newAudioNoteHere,
     create: (flow, context, {required parent}) =>
         flow.createAudioNote(context, parent: parent),
   ),
@@ -60,7 +61,7 @@ final List<CreateKind> createKinds = <CreateKind>[
     value: 'slides',
     keySuffix: 'new-slides',
     icon: Icons.slideshow_outlined,
-    label: AppStrings.newSlidesHere,
+    label: () => AppStrings.newSlidesHere,
     create: (flow, context, {required parent}) =>
         flow.createSlidesNote(context, parent: parent),
   ),
@@ -68,7 +69,7 @@ final List<CreateKind> createKinds = <CreateKind>[
     value: 'flashcards',
     keySuffix: 'new-flashcards',
     icon: Icons.style_outlined,
-    label: AppStrings.newFlashcardsHere,
+    label: () => AppStrings.newFlashcardsHere,
     create: (flow, context, {required parent}) =>
         flow.createFlashcards(context, parent: parent),
   ),

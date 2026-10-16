@@ -33,7 +33,7 @@ typedef RowMenuEntry = ({
 RowMenuEntry _kindEntry(CreateKind kind, String prefix) => (
   key: Key('$prefix-${kind.keySuffix}'),
   icon: kind.icon,
-  label: kind.label,
+  label: kind.label(),
   value: kind.value,
   destructive: false,
 );
