@@ -49,6 +49,6 @@ final class NoteFraming {
   /// so no `\r\n` is ever split between two.
   String applyToSlice(String lfSlice, {required bool first}) {
     final lines = lineEnding.apply(lfSlice);
-    return bom && first ? '﻿$lines' : lines;
+    return bom && first ? '\u{FEFF}$lines' : lines;
   }
 }
