@@ -2170,6 +2170,11 @@ final class GermanStrings extends Strings {
       'Dieser Ordner wird nicht unterstützt. Wähle einen Ordner im '
       'Speicher des Geräts.';
   @override
+  String get indexingTitle => 'Indizierung…';
+  @override
+  String get indexingPartial =>
+      'Die Indizierung läuft noch: Ergebnisse können unvollständig sein.';
+  @override
   String indexingCount(int done, int total) => '$done von $total Notizen';
 
   // The known-library list on the home screen (T-ML-05, T-ML-07).

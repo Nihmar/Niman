@@ -12,6 +12,7 @@
 library;
 
 import 'package:drift/drift.dart';
+import 'package:meta/meta.dart';
 import 'package:niman/src/db/index_database.dart';
 
 /// The frontmatter keys the app itself acts on.
@@ -85,11 +86,21 @@ final class FieldRepo implements FieldSource {
   final IndexDatabase _db;
 
   @override
-  Future<List<Note>> pinnedNotes() {
-    return (_db.select(_db.notes)
-          ..where((n) => n.pinned & n.isDir.not())
-          ..orderBy([(n) => OrderingTerm.asc(n.path)]))
-        .get();
+  Future<List<Note>> pinnedNotes() => pinnedQuery().get();
+
+  /// The pinned notes' statement. `pinned = 1` is a literal, not a bound
+  /// variable, so SQLite proves the `notes_pinned` partial index covers it
+  /// and reads the pinned rows alone, already in path order (#1065). The
+  /// folder test stays `NOT is_dir`, which no index answers: written as
+  /// `is_dir = 0` the planner would take `notes_dir_path` over the partial
+  /// index and read every note.
+  @visibleForTesting
+  SimpleSelectStatement<$NotesTable, Note> pinnedQuery() {
+    return _db.select(_db.notes)
+      ..where(
+        (n) => n.pinned.equalsExp(const Constant<bool>(true)) & n.isDir.not(),
+      )
+      ..orderBy([(n) => OrderingTerm.asc(n.path)]);
   }
 
   @override

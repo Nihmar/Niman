@@ -7,6 +7,7 @@ import 'package:niman/src/core/app_theme.dart';
 import 'package:niman/src/core/custom_theme.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/language.dart';
+import 'package:niman/src/core/name_sort_key.dart';
 import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/core/settings/navigation_layout.dart';
@@ -157,15 +158,11 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     if (path == null) return Future<void>.value();
     // Mirrors the real resume: non-blocking, and the in-memory index already
     // mirrors the tree, so there is nothing to reconcile.
-    return open(path, create: false, blockingScan: false);
+    return open(path, create: false);
   }
 
   @override
-  Future<void> open(
-    String path, {
-    required bool create,
-    bool blockingScan = true,
-  }) async {
+  Future<void> open(String path, {required bool create}) async {
     if (_phase != LibraryPhase.none) {
       throw StateError('A library is already open (phase: ${_phase.name})');
     }
@@ -202,7 +199,7 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   Future<void> switchTo(String libraryPath) async {
     if (libraryPath == _root) return;
     if (_phase != LibraryPhase.none) await close();
-    await open(libraryPath, create: false, blockingScan: false);
+    await open(libraryPath, create: false);
   }
 
   /// The known-library list, newest first (T-ML-04).
@@ -331,6 +328,12 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
 
   /// How many times the library was re-read on request.
   int rescans = 0;
+
+  /// Whether the shell last said the app is on screen.
+  bool visible = true;
+
+  @override
+  void appVisibilityChanged({required bool visible}) => this.visible = visible;
 
   @override
   Future<void> rebuildIndex() async {
@@ -899,9 +902,49 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     return kids.map(_toNote).toList();
   }
 
+  @override
+  Future<List<Note>> childrenPage(
+    int parentId, {
+    required int limit,
+    TreeSort sort = TreeSort.nameAsc,
+    Note? after,
+  }) async {
+    treeCalls++;
+    pageCalls++;
+    _treeOutstanding++;
+    if (_treeOutstanding > treePeak) treePeak = _treeOutstanding;
+    try {
+      final gate = treeGate;
+      if (gate != null) await gate.future;
+    } finally {
+      _treeOutstanding--;
+    }
+    final kids = <_Row>[
+      for (final row in _rows)
+        if (!row.trashed && _parentIdOf(row.path) == parentId) row,
+    ]..sort((a, b) => _byTreeSort(a, b, sort));
+    var start = 0;
+    if (after != null) {
+      final at = kids.indexWhere((row) => row.path == after.path);
+      start = at == -1 ? kids.length : at + 1;
+    }
+    return kids.skip(start).take(limit).map(_toNote).toList();
+  }
+
+  /// How many pages of children were read, by [childrenPage].
+  int pageCalls = 0;
+
   /// How many times the tree's rows were read from the fake (#751): a
   /// test holds a change that moved nothing the tree draws to no read.
   int treeCalls = 0;
+
+  /// While set, [tree] waits for it before answering: a read that outlasts
+  /// the changes arriving behind it (#1064).
+  Completer<void>? treeGate;
+
+  /// The most [tree] reads that were outstanding at once.
+  int treePeak = 0;
+  int _treeOutstanding = 0;
 
   @override
   Future<List<Note>> tree(
@@ -909,6 +952,14 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     TreeSort sort = TreeSort.nameAsc,
   }) async {
     treeCalls++;
+    _treeOutstanding++;
+    if (_treeOutstanding > treePeak) treePeak = _treeOutstanding;
+    try {
+      final gate = treeGate;
+      if (gate != null) await gate.future;
+    } finally {
+      _treeOutstanding--;
+    }
     final expanded = Set<String>.from(expandedPaths);
     final results = <_Row>[
       for (final row in _rows)
@@ -1656,6 +1707,7 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
       path: row.path,
       parent: _parentIdOf(row.path),
       name: row.name,
+      nameKey: nameSortKey(row.name),
       isDir: row.isDir,
       size: row.size,
       modified: row.modified,

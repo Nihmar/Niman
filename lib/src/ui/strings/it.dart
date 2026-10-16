@@ -2153,6 +2153,11 @@ final class ItalianStrings extends Strings {
       'Quella cartella non è supportata. Scegline una nella memoria del '
       'dispositivo.';
   @override
+  String get indexingTitle => 'Indicizzazione…';
+  @override
+  String get indexingPartial =>
+      'Indicizzazione in corso: i risultati potrebbero essere incompleti.';
+  @override
   String indexingCount(int done, int total) => '$done di $total note';
 
   // The known-library list on the home screen (T-ML-05, T-ML-07).

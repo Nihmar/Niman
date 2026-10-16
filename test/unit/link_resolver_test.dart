@@ -5,6 +5,7 @@ import 'package:drift/drift.dart'
     show ApplyInterceptor, InsertMode, QueryExecutor, QueryInterceptor;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/name_sort_key.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/links/resolver.dart';
 
@@ -25,6 +26,7 @@ void main() {
             path: path,
             parent: 0,
             name: name,
+            nameKey: nameSortKey(name),
             isDir: false,
             size: 1,
             modified: DateTime.fromMillisecondsSinceEpoch(0),
@@ -526,6 +528,7 @@ void main() {
                 path: 'n$i.md',
                 parent: 0,
                 name: 'n$i.md',
+                nameKey: nameSortKey('n$i.md'),
                 isDir: false,
                 size: 1,
                 modified: DateTime.fromMillisecondsSinceEpoch(0),

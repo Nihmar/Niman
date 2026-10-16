@@ -49,6 +49,17 @@ class $NotesTable extends Notes with TableInfo<$NotesTable, Note> {
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _nameKeyMeta = const VerificationMeta(
+    'nameKey',
+  );
+  @override
+  late final GeneratedColumn<String> nameKey = GeneratedColumn<String>(
+    'name_key',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _isDirMeta = const VerificationMeta('isDir');
   @override
   late final GeneratedColumn<bool> isDir = GeneratedColumn<bool>(
@@ -138,6 +149,7 @@ class $NotesTable extends Notes with TableInfo<$NotesTable, Note> {
     path,
     parent,
     name,
+    nameKey,
     isDir,
     size,
     modified,
@@ -185,6 +197,14 @@ class $NotesTable extends Notes with TableInfo<$NotesTable, Note> {
       );
     } else if (isInserting) {
       context.missing(_nameMeta);
+    }
+    if (data.containsKey('name_key')) {
+      context.handle(
+        _nameKeyMeta,
+        nameKey.isAcceptableOrUnknown(data['name_key']!, _nameKeyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameKeyMeta);
     }
     if (data.containsKey('is_dir')) {
       context.handle(
@@ -267,6 +287,10 @@ class $NotesTable extends Notes with TableInfo<$NotesTable, Note> {
         DriftSqlType.string,
         data['${effectivePrefix}name'],
       )!,
+      nameKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name_key'],
+      )!,
       isDir: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
         data['${effectivePrefix}is_dir'],
@@ -321,6 +345,11 @@ class Note extends DataClass implements Insertable<Note> {
   /// Display name (file or folder name).
   final String name;
 
+  /// The key the tree orders [name] by: lowercased, diacritics folded, digit
+  /// runs padded to compare as numbers (`nameSortKey`, #1070). Written with
+  /// every write of [name]; the `notes_tree` index is built on it.
+  final String nameKey;
+
   /// Whether this row is a directory.
   final bool isDir;
 
@@ -357,6 +386,7 @@ class Note extends DataClass implements Insertable<Note> {
     required this.path,
     required this.parent,
     required this.name,
+    required this.nameKey,
     required this.isDir,
     required this.size,
     required this.modified,
@@ -373,6 +403,7 @@ class Note extends DataClass implements Insertable<Note> {
     map['path'] = Variable<String>(path);
     map['parent'] = Variable<int>(parent);
     map['name'] = Variable<String>(name);
+    map['name_key'] = Variable<String>(nameKey);
     map['is_dir'] = Variable<bool>(isDir);
     map['size'] = Variable<int>(size);
     map['modified'] = Variable<DateTime>(modified);
@@ -396,6 +427,7 @@ class Note extends DataClass implements Insertable<Note> {
       path: Value(path),
       parent: Value(parent),
       name: Value(name),
+      nameKey: Value(nameKey),
       isDir: Value(isDir),
       size: Value(size),
       modified: Value(modified),
@@ -421,6 +453,7 @@ class Note extends DataClass implements Insertable<Note> {
       path: serializer.fromJson<String>(json['path']),
       parent: serializer.fromJson<int>(json['parent']),
       name: serializer.fromJson<String>(json['name']),
+      nameKey: serializer.fromJson<String>(json['nameKey']),
       isDir: serializer.fromJson<bool>(json['isDir']),
       size: serializer.fromJson<int>(json['size']),
       modified: serializer.fromJson<DateTime>(json['modified']),
@@ -439,6 +472,7 @@ class Note extends DataClass implements Insertable<Note> {
       'path': serializer.toJson<String>(path),
       'parent': serializer.toJson<int>(parent),
       'name': serializer.toJson<String>(name),
+      'nameKey': serializer.toJson<String>(nameKey),
       'isDir': serializer.toJson<bool>(isDir),
       'size': serializer.toJson<int>(size),
       'modified': serializer.toJson<DateTime>(modified),
@@ -455,6 +489,7 @@ class Note extends DataClass implements Insertable<Note> {
     String? path,
     int? parent,
     String? name,
+    String? nameKey,
     bool? isDir,
     int? size,
     DateTime? modified,
@@ -468,6 +503,7 @@ class Note extends DataClass implements Insertable<Note> {
     path: path ?? this.path,
     parent: parent ?? this.parent,
     name: name ?? this.name,
+    nameKey: nameKey ?? this.nameKey,
     isDir: isDir ?? this.isDir,
     size: size ?? this.size,
     modified: modified ?? this.modified,
@@ -483,6 +519,7 @@ class Note extends DataClass implements Insertable<Note> {
       path: data.path.present ? data.path.value : this.path,
       parent: data.parent.present ? data.parent.value : this.parent,
       name: data.name.present ? data.name.value : this.name,
+      nameKey: data.nameKey.present ? data.nameKey.value : this.nameKey,
       isDir: data.isDir.present ? data.isDir.value : this.isDir,
       size: data.size.present ? data.size.value : this.size,
       modified: data.modified.present ? data.modified.value : this.modified,
@@ -501,6 +538,7 @@ class Note extends DataClass implements Insertable<Note> {
           ..write('path: $path, ')
           ..write('parent: $parent, ')
           ..write('name: $name, ')
+          ..write('nameKey: $nameKey, ')
           ..write('isDir: $isDir, ')
           ..write('size: $size, ')
           ..write('modified: $modified, ')
@@ -519,6 +557,7 @@ class Note extends DataClass implements Insertable<Note> {
     path,
     parent,
     name,
+    nameKey,
     isDir,
     size,
     modified,
@@ -536,6 +575,7 @@ class Note extends DataClass implements Insertable<Note> {
           other.path == this.path &&
           other.parent == this.parent &&
           other.name == this.name &&
+          other.nameKey == this.nameKey &&
           other.isDir == this.isDir &&
           other.size == this.size &&
           other.modified == this.modified &&
@@ -551,6 +591,7 @@ class NotesCompanion extends UpdateCompanion<Note> {
   final Value<String> path;
   final Value<int> parent;
   final Value<String> name;
+  final Value<String> nameKey;
   final Value<bool> isDir;
   final Value<int> size;
   final Value<DateTime> modified;
@@ -564,6 +605,7 @@ class NotesCompanion extends UpdateCompanion<Note> {
     this.path = const Value.absent(),
     this.parent = const Value.absent(),
     this.name = const Value.absent(),
+    this.nameKey = const Value.absent(),
     this.isDir = const Value.absent(),
     this.size = const Value.absent(),
     this.modified = const Value.absent(),
@@ -578,6 +620,7 @@ class NotesCompanion extends UpdateCompanion<Note> {
     required String path,
     required int parent,
     required String name,
+    required String nameKey,
     required bool isDir,
     required int size,
     required DateTime modified,
@@ -589,6 +632,7 @@ class NotesCompanion extends UpdateCompanion<Note> {
   }) : path = Value(path),
        parent = Value(parent),
        name = Value(name),
+       nameKey = Value(nameKey),
        isDir = Value(isDir),
        size = Value(size),
        modified = Value(modified),
@@ -598,6 +642,7 @@ class NotesCompanion extends UpdateCompanion<Note> {
     Expression<String>? path,
     Expression<int>? parent,
     Expression<String>? name,
+    Expression<String>? nameKey,
     Expression<bool>? isDir,
     Expression<int>? size,
     Expression<DateTime>? modified,
@@ -612,6 +657,7 @@ class NotesCompanion extends UpdateCompanion<Note> {
       if (path != null) 'path': path,
       if (parent != null) 'parent': parent,
       if (name != null) 'name': name,
+      if (nameKey != null) 'name_key': nameKey,
       if (isDir != null) 'is_dir': isDir,
       if (size != null) 'size': size,
       if (modified != null) 'modified': modified,
@@ -628,6 +674,7 @@ class NotesCompanion extends UpdateCompanion<Note> {
     Value<String>? path,
     Value<int>? parent,
     Value<String>? name,
+    Value<String>? nameKey,
     Value<bool>? isDir,
     Value<int>? size,
     Value<DateTime>? modified,
@@ -642,6 +689,7 @@ class NotesCompanion extends UpdateCompanion<Note> {
       path: path ?? this.path,
       parent: parent ?? this.parent,
       name: name ?? this.name,
+      nameKey: nameKey ?? this.nameKey,
       isDir: isDir ?? this.isDir,
       size: size ?? this.size,
       modified: modified ?? this.modified,
@@ -667,6 +715,9 @@ class NotesCompanion extends UpdateCompanion<Note> {
     }
     if (name.present) {
       map['name'] = Variable<String>(name.value);
+    }
+    if (nameKey.present) {
+      map['name_key'] = Variable<String>(nameKey.value);
     }
     if (isDir.present) {
       map['is_dir'] = Variable<bool>(isDir.value);
@@ -702,6 +753,7 @@ class NotesCompanion extends UpdateCompanion<Note> {
           ..write('path: $path, ')
           ..write('parent: $parent, ')
           ..write('name: $name, ')
+          ..write('nameKey: $nameKey, ')
           ..write('isDir: $isDir, ')
           ..write('size: $size, ')
           ..write('modified: $modified, ')
@@ -3164,10 +3216,6 @@ abstract class _$IndexDatabase extends GeneratedDatabase {
   late final $DanglingLinksTable danglingLinks = $DanglingLinksTable(this);
   late final $NoteHeadingsTable noteHeadings = $NoteHeadingsTable(this);
   late final $NoteBlocksTable noteBlocks = $NoteBlocksTable(this);
-  late final Index notesParent = Index(
-    'notes_parent',
-    'CREATE INDEX notes_parent ON notes (parent)',
-  );
   late final Index notesDirPath = Index(
     'notes_dir_path',
     'CREATE INDEX notes_dir_path ON notes (is_dir, path)',
@@ -3207,7 +3255,6 @@ abstract class _$IndexDatabase extends GeneratedDatabase {
     danglingLinks,
     noteHeadings,
     noteBlocks,
-    notesParent,
     notesDirPath,
     stemsNote,
     noteTagsNote,
@@ -3222,6 +3269,7 @@ typedef $$NotesTableCreateCompanionBuilder = NotesCompanion Function({
   required String path,
   required int parent,
   required String name,
+  required String nameKey,
   required bool isDir,
   required int size,
   required DateTime modified,
@@ -3236,6 +3284,7 @@ typedef $$NotesTableUpdateCompanionBuilder = NotesCompanion Function({
   Value<String> path,
   Value<int> parent,
   Value<String> name,
+  Value<String> nameKey,
   Value<bool> isDir,
   Value<int> size,
   Value<DateTime> modified,
@@ -3272,6 +3321,11 @@ class $$NotesTableFilterComposer
 
   ColumnFilters<String> get name => $composableBuilder(
     column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get nameKey => $composableBuilder(
+    column: $table.nameKey,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -3345,6 +3399,11 @@ class $$NotesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get nameKey => $composableBuilder(
+    column: $table.nameKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<bool> get isDir => $composableBuilder(
     column: $table.isDir,
     builder: (column) => ColumnOrderings(column),
@@ -3407,6 +3466,9 @@ class $$NotesTableAnnotationComposer
   GeneratedColumn<String> get name =>
       $composableBuilder(column: $table.name, builder: (column) => column);
 
+  GeneratedColumn<String> get nameKey =>
+      $composableBuilder(column: $table.nameKey, builder: (column) => column);
+
   GeneratedColumn<bool> get isDir =>
       $composableBuilder(column: $table.isDir, builder: (column) => column);
 
@@ -3464,6 +3526,7 @@ class $$NotesTableTableManager
                 Value<String> path = const Value.absent(),
                 Value<int> parent = const Value.absent(),
                 Value<String> name = const Value.absent(),
+                Value<String> nameKey = const Value.absent(),
                 Value<bool> isDir = const Value.absent(),
                 Value<int> size = const Value.absent(),
                 Value<DateTime> modified = const Value.absent(),
@@ -3477,6 +3540,7 @@ class $$NotesTableTableManager
                 path: path,
                 parent: parent,
                 name: name,
+                nameKey: nameKey,
                 isDir: isDir,
                 size: size,
                 modified: modified,
@@ -3492,6 +3556,7 @@ class $$NotesTableTableManager
                 required String path,
                 required int parent,
                 required String name,
+                required String nameKey,
                 required bool isDir,
                 required int size,
                 required DateTime modified,
@@ -3505,6 +3570,7 @@ class $$NotesTableTableManager
                 path: path,
                 parent: parent,
                 name: name,
+                nameKey: nameKey,
                 isDir: isDir,
                 size: size,
                 modified: modified,

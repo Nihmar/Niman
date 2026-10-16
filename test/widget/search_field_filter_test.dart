@@ -2,6 +2,7 @@
 // for any key — the invented ones as much as the known ones.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/name_sort_key.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/frontmatter/fields.dart';
 import 'package:niman/src/search/search_repo.dart';
@@ -26,6 +27,7 @@ final class _FakeFieldSource implements FieldSource {
     path: path,
     parent: 0,
     name: path.split('/').last,
+    nameKey: nameSortKey(path.split('/').last),
     isDir: false,
     size: 0,
     modified: DateTime.fromMillisecondsSinceEpoch(0),

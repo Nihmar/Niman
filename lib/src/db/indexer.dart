@@ -8,10 +8,12 @@ import 'package:meta/meta.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/isolate_gauge.dart';
 import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/core/name_sort_key.dart';
 import 'package:niman/src/db/dao.dart';
 import 'package:niman/src/db/index_change.dart';
 import 'package:niman/src/db/index_content_store.dart';
 import 'package:niman/src/db/index_database.dart';
+import 'package:niman/src/db/index_move.dart';
 import 'package:niman/src/db/index_note_content.dart';
 import 'package:niman/src/db/index_reconcile.dart';
 import 'package:niman/src/db/index_scan.dart';
@@ -43,6 +45,9 @@ final class Indexer {
   /// handle and DAO. Late so one DAO instance serves all three.
   late final IndexContentStore _store = IndexContentStore(_db, _dao);
   late final IndexTree _tree = IndexTree(_db, _dao, _store);
+
+  /// The rewrite of a folder's rows to its new path (#1063).
+  late final IndexMove _move = IndexMove(_db, _dao, _store, _tree);
 
   /// The directory-at-a-time full scan (#302).
   late final IndexReconciler _scan = IndexReconciler(_db, _dao, _tree, _store);
@@ -156,6 +161,32 @@ final class Indexer {
     });
   }
 
+  /// Carries the folder at [fromAbs] and everything indexed under it to
+  /// [toAbs], after the app has moved it on disk (#1063).
+  ///
+  /// The rows are rewritten in place, in one transaction, so no note is read
+  /// and every note keeps its id — with its full-text row, tags and link
+  /// edges, which key on it; only the notes whose links read from their own
+  /// folder are read again. Answers whether it did: false when the index
+  /// does not hold the folder, already holds something at the destination,
+  /// or the disk does not show the move, in which case the caller hands both
+  /// paths to [applyEvents], which indexes whatever it finds.
+  /// [onChanged] fires once, as a tree change.
+  Future<bool> relocateFolder(String root, String fromAbs, String toAbs) {
+    return _synchronized(() async {
+      final from = _tree.safeRel(fromAbs, root);
+      final to = _tree.safeRel(toAbs, root);
+      if (from == null || to == null) return false;
+      _scan.touches.add([from, to]);
+      final moved = await _move.moveFolder(root, from, to);
+      if (!moved) return false;
+      await _store.dangling.flush();
+      final cb = onChanged;
+      if (cb != null) cb(IndexChange.tree);
+      return true;
+    });
+  }
+
   /// Applies a batch of changed absolute paths incrementally.
   ///
   /// The batch is reconciled in one pass: probes batched on a background
@@ -237,6 +268,7 @@ final class Indexer {
             path: Value(pair.key),
             parent: Value(parentId),
             name: Value(p.basename(pair.key)),
+            nameKey: Value(nameSortKey(p.basename(pair.key))),
             isDir: const Value(false),
             size: Value(probe.size),
             modified: Value(probe.modified),
@@ -261,11 +293,20 @@ final class Indexer {
       for (final entry in live.entries) {
         if (paired.containsKey(entry.key)) continue;
         if (entry.value.isDir) {
-          _log.debug('applyEvents: "$root/${entry.key}" -> resync dir');
-          final synced = await _tree.syncDirSubtree(
-            root,
-            p.join(root, entry.key),
+          // A folder the index holds reports its own entries changing, and
+          // each entry its own events: one level. One it does not hold is
+          // new, and nothing under it is indexed. This is also what the
+          // watcher's echo of the app's own folder move comes to, which
+          // would otherwise walk the whole moved subtree (#1063).
+          final known = await _dao.find(entry.key) != null;
+          _log.debug(
+            'applyEvents: "$root/${entry.key}" -> resync dir'
+            '${known ? ' (one level)' : ''}',
           );
+          final abs = p.join(root, entry.key);
+          final synced = known
+              ? await _tree.syncDirLevel(root, abs)
+              : await _tree.syncDirSubtree(root, abs);
           wrote |= synced.wrote;
           tree |= synced.wrote;
           removed.addAll(synced.removed);
@@ -438,12 +479,14 @@ final class Indexer {
     });
   }
 
-  /// Reconciles [abs] with disk: if it exists as a directory the whole
-  /// subtree is re-synced (covering renames/moves whose new path was not in
-  /// the event batch), if it is a file it is upserted, and if it is gone its
-  /// index rows are pruned. Dot components are ignored. [onChanged] fires
-  /// after the writes, and only when the index actually changed; [onRemoved]
-  /// fires with the paths the reconcile pruned.
+  /// Reconciles [abs] with disk: if it exists as a directory its own
+  /// entries are compared with the index, one level and not the subtree
+  /// (the watcher asks for this after a move whose destination it was not
+  /// told, #1062); if it is a file it is upserted, and if it is gone its
+  /// index rows are pruned. A directory the index has no row for is synced
+  /// whole, as is a subfolder it has none for. Dot components are ignored.
+  /// [onChanged] fires after the writes, and only when the index actually
+  /// changed; [onRemoved] fires with the paths the reconcile pruned.
   Future<void> resync(String root, String abs) {
     return _synchronized(() async {
       final rel = _tree.safeRel(abs, root);
@@ -484,7 +527,7 @@ final class Indexer {
     );
     if (probe.isDir) {
       _log.debug('$tag: "$abs" -> resync dir "$rel"');
-      return await _tree.syncDirSubtree(root, abs);
+      return await _tree.syncDirLevel(root, abs);
     }
     if (probe.exists && _tree.awaited(rel)) {
       _log.debug('$tag: "$rel" -> its writer reads it');

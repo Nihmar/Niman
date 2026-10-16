@@ -2141,6 +2141,11 @@ final class HungarianStrings extends Strings {
   String get openLibraryUnsupported =>
       'Ez a mappa nem támogatja. Válassz mappát a készülék tárolóhelyéből.';
   @override
+  String get indexingTitle => 'Indexelés…';
+  @override
+  String get indexingPartial =>
+      'Az indexelés még folyamatban van: az eredmények hiányosak lehetnek.';
+  @override
   String indexingCount(int done, int total) => '$done / $total jegyzet';
 
   // The known-library list on the home screen (T-ML-05, T-ML-07).

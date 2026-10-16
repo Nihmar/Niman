@@ -2126,6 +2126,11 @@ final class BosnianStrings extends Strings {
   String get openLibraryUnsupported =>
       'Ta mapa nije podržana. Odaberite mapu na pohrani uređaja.';
   @override
+  String get indexingTitle => 'Indeksiranje…';
+  @override
+  String get indexingPartial =>
+      'Indeksiranje je u toku: rezultati mogu biti nepotpuni.';
+  @override
   String indexingCount(int done, int total) => '$done od $total bilješki';
 
   // The known-library list on the home screen (T-ML-05, T-ML-07).

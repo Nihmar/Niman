@@ -2139,6 +2139,11 @@ final class AlbanianStrings extends Strings {
       "Kjo tresë s'është e mbështetur. Zgjidhni një tresë në ruajtjen "
       'e redaktorit.';
   @override
+  String get indexingTitle => 'Duke indeksuar…';
+  @override
+  String get indexingPartial =>
+      'Indeksimi vazhdon ende: rezultatet mund të jenë të paplota.';
+  @override
   String indexingCount(int done, int total) => '$done prej $total shënimesh';
 
   // The known-library list on the home screen (T-ML-05, T-ML-07).

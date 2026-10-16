@@ -2126,6 +2126,11 @@ final class BelarusianStrings extends Strings {
   String get openLibraryUnsupported =>
       'Гэтая папка не падтрымліваецца. Абярыце папку з сховішча прыбора.';
   @override
+  String get indexingTitle => 'Індэксацыя…';
+  @override
+  String get indexingPartial =>
+      'Індэксацыя яшчэ ідзе: вынікі могуць быць няпоўнымі.';
+  @override
   String indexingCount(int done, int total) => '$done / $total заўваг';
 
   // The known-library list on the home screen (T-ML-05, T-ML-07).

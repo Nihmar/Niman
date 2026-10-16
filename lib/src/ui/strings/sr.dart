@@ -2126,6 +2126,11 @@ final class SerbianStrings extends Strings {
       'Та фасцикла није подржана. Изаберите фасциклу на складишту '
       'уређаја.';
   @override
+  String get indexingTitle => 'Индексирање…';
+  @override
+  String get indexingPartial =>
+      'Индексирање је у току: резултати могу бити непотпуни.';
+  @override
   String indexingCount(int done, int total) => '$done од $total белешки';
 
   // The known-library list on the home screen (T-ML-05, T-ML-07).

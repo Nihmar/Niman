@@ -2181,6 +2181,11 @@ final class FrenchStrings extends Strings {
       'Ce dossier n’est pas pris en charge. Choisissez un dossier du '
       'stockage de l’appareil.';
   @override
+  String get indexingTitle => 'Indexation…';
+  @override
+  String get indexingPartial =>
+      "L'indexation est en cours : les résultats peuvent être incomplets.";
+  @override
   String indexingCount(int done, int total) => '$done notes sur $total';
 
   // The known-library list on the home screen (T-ML-05, T-ML-07).

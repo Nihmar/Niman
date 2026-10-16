@@ -86,26 +86,63 @@ void main() {
     expect(batches.last.paths, <String>[latePath]);
   });
 
-  test('rename batches carry the parent directory for resync', () async {
-    final parent = p.dirname(p.join(root.path, 'b.md'));
+  /// The batches of a watcher fed [changes], once they have all shipped.
+  Future<List<WatchBatch>> batchesOf(List<WatchChange> changes) async {
+    final source = StreamController<WatchChange>();
     final watcher = FileWatcher(
       root.path,
-      debounce: const Duration(milliseconds: 50),
+      debounce: const Duration(milliseconds: 20),
+      source: (_) => source.stream,
     );
     final batches = await runWith(watcher, (b) async {
-      // Waits for the batch itself rather than a fixed time: the OS
-      // delivers the rename when it does, and under full-suite load on a
-      // shared runner that was past a 400 ms sleep. The timeout only
-      // bounds a watcher that never reports it.
-      final resync = watcher.events
-          .firstWhere((batch) => batch.resyncDirs.contains(parent))
-          .timeout(const Duration(seconds: 10));
-      final bPath = p.join(root.path, 'b.md');
-      File(bPath).writeAsStringSync('x');
-      await File(bPath).rename(p.join(root.path, 'c.md'));
-      await resync;
+      changes.forEach(source.add);
+      await Future<void>.delayed(const Duration(milliseconds: 200));
     });
-    expect(batches.any((b) => b.resyncDirs.contains(parent)), isTrue);
+    await source.close();
+    return batches;
+  }
+
+  test(
+    'a move with no known destination carries its parent for resync',
+    () async {
+      final old = p.join(root.path, 'Archive', 'b.md');
+      final batches = await batchesOf([WatchChange.move(old)]);
+
+      expect(batches.expand((b) => b.resyncDirs), [p.dirname(old)]);
+      expect(batches.expand((b) => b.paths), [old]);
+    },
+  );
+
+  test('a move the OS paired is its two paths and no resync (#1062)', () async {
+    final old = p.join(root.path, 'Archive', 'b.md');
+    final moved = p.join(root.path, 'Archive', 'c.md');
+    final batches = await batchesOf([
+      WatchChange.move(old, destination: moved),
+    ]);
+
+    expect(batches.expand((b) => b.resyncDirs), isEmpty);
+    expect(batches.expand((b) => b.paths), unorderedEquals([old, moved]));
+  });
+
+  test('a rename on disk reports the path it left', () async {
+    final batches = await runWith(
+      FileWatcher(root.path, debounce: const Duration(milliseconds: 50)),
+      (b) async {
+        final bPath = p.join(root.path, 'b.md');
+        File(bPath).writeAsStringSync('x');
+        await File(bPath).rename(p.join(root.path, 'c.md'));
+        // Waits for the batch itself rather than a fixed time: the OS
+        // delivers the rename when it does, and under full-suite load on a
+        // shared runner that was past a 400 ms sleep.
+        final left = p.join(root.path, 'b.md');
+        final deadline = DateTime.now().add(const Duration(seconds: 10));
+        while (!b.expand((x) => x.paths).contains(left) &&
+            DateTime.now().isBefore(deadline)) {
+          await Future<void>.delayed(const Duration(milliseconds: 20));
+        }
+      },
+    );
+    expect(batches.expand((b) => b.paths), contains(p.join(root.path, 'b.md')));
   });
 
   test(

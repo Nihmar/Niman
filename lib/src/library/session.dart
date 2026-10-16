@@ -357,7 +357,8 @@ abstract interface class LibrarySession {
   int get treeRevision;
 
   /// The note the first index is reading, or null when no scan is
-  /// running. Reported only for the blocking scan of an opening library.
+  /// running. Reported while the notes of a newly indexed library are read
+  /// (#1068).
   IndexProgress? get indexProgress;
 
   /// Fires with the new [revision] after every index change.
@@ -402,14 +403,11 @@ abstract interface class LibrarySession {
   /// Opens the library at [path]; with [create] true it is created first
   /// when missing.
   ///
-  /// With [blockingScan] true (the default) the full index scan completes
-  /// before the library becomes ready. With [blockingScan] false (used by
-  /// [resume]) the scan is deferred to a background reconciliation.
-  Future<void> open(
-    String path, {
-    required bool create,
-    bool blockingScan = true,
-  });
+  /// The library is ready as soon as there is an index to show: one that
+  /// holds rows is ready at once and reconciled with the disk behind it, and
+  /// an empty one gets its tree first and its notes read behind the tree
+  /// (#1073). There is no mode that waits for a full walk.
+  Future<void> open(String path, {required bool create});
 
   /// Closes the current library (stops watching; keeps the index).
   Future<void> close();
@@ -472,8 +470,14 @@ abstract interface class LibrarySession {
     required Set<int> placedIds,
   });
 
-  /// Triggers a full rescan immediately (explicit re-index).
+  /// Triggers a full rescan immediately (explicit re-index). A scan already
+  /// running is not doubled: the call completes with the one that follows it.
   Future<void> rescanNow();
+
+  /// Tells the session whether the app is on screen (resumed, or merely
+  /// unfocused) or in the background or hidden (#1067). A hidden app runs no
+  /// periodic full walk; coming back runs the one that fell due.
+  void appVisibilityChanged({required bool visible});
 
   /// Rebuilds the open library's index from disk (#368): the index file is
   /// deleted and re-created, and the notes are read again into it.
@@ -828,6 +832,16 @@ abstract interface class LibrarySession {
   /// [sort]'s order (#726): directories first whatever the field, then
   /// the field in its own direction, the name breaking ties.
   Future<List<Note>> children(int parentId, {TreeSort sort = TreeSort.nameAsc});
+
+  /// One page of the children of [parentId] in [sort]'s order: at most
+  /// [limit] rows, those after [after], a row of the previous page (#1064).
+  /// A page shorter than [limit] is the last one.
+  Future<List<Note>> childrenPage(
+    int parentId, {
+    required int limit,
+    TreeSort sort = TreeSort.nameAsc,
+    Note? after,
+  });
 
   /// Every note that belongs to the root or to one of the [expandedPaths],
   /// in [sort]'s order the same way [children] reads it.

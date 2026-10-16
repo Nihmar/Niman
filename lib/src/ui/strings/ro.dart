@@ -2142,6 +2142,11 @@ final class RomanianStrings extends Strings {
       'Acest dosar nu este compatibil. Alege un dosar din stocarea '
       'dispozitivului.';
   @override
+  String get indexingTitle => 'Se indexează…';
+  @override
+  String get indexingPartial =>
+      'Indexarea încă rulează: rezultatele pot fi incomplete.';
+  @override
   String indexingCount(int done, int total) => '$done din $total note';
 
   // The known-library list on the home screen (T-ML-05, T-ML-07).

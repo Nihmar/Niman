@@ -12,6 +12,7 @@ import 'package:drift/drift.dart'
         driftRuntimeOptions;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/name_sort_key.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/db/indexer.dart';
 import 'package:niman/src/frontmatter/fields.dart';
@@ -52,6 +53,44 @@ void main() {
       await indexer.fullScan(root.path);
 
       expect((await repo.pinnedNotes()).map((n) => n.path), ['a.md', 'b.md']);
+    });
+
+    test('reads the notes_pinned index, not the whole table (#1065)', () async {
+      for (var i = 0; i < 200; i++) {
+        write('n$i.md', i == 7 ? '---\npinned: true\n---\nx' : 'plain $i');
+      }
+      await indexer.fullScan(root.path);
+
+      final generated = repo.pinnedQuery().constructQuery();
+      final plan = await db
+          .customSelect(
+            'EXPLAIN QUERY PLAN ${generated.sql}',
+            variables: generated.introducedVariables,
+          )
+          .get();
+      final detail = plan.map((r) => r.read<String>('detail')).join('\n');
+
+      // A walk of the partial index is the pinned rows alone, in path order.
+      expect(detail, contains('USING INDEX notes_pinned'));
+      expect(detail, isNot(contains('notes_dir_path')));
+      expect(detail, isNot(contains('TEMP B-TREE')));
+    });
+
+    test('a file from before the index builds it when asked (#1065)', () async {
+      Future<bool> hasIndex() async =>
+          (await db
+                  .customSelect(
+                    "SELECT 1 FROM sqlite_master WHERE name = 'notes_pinned'",
+                  )
+                  .get())
+              .isNotEmpty;
+      expect(await hasIndex(), isTrue, reason: 'a new file has it');
+      await db.customStatement('DROP INDEX notes_pinned');
+      expect(await hasIndex(), isFalse);
+
+      await db.ensurePinnedIndex();
+
+      expect(await hasIndex(), isTrue);
     });
 
     test('unpinning a note drops it from the list', () async {
@@ -125,6 +164,7 @@ void main() {
                 path: path(i),
                 parent: 0,
                 name: path(i),
+                nameKey: nameSortKey(path(i)),
                 isDir: false,
                 size: 1,
                 modified: DateTime(2026),

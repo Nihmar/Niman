@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import 'package:meta/meta.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/db/referrer_dao.dart';
@@ -24,6 +25,7 @@ final class NoteDao {
           ..where((t) => t.parent.equals(0))
           ..orderBy([
             (t) => OrderingTerm.desc(t.isDir),
+            (t) => OrderingTerm.asc(t.nameKey),
             (t) => OrderingTerm.asc(t.name),
           ]))
         .get();
@@ -42,6 +44,96 @@ final class NoteDao {
         .get();
   }
 
+  /// One page of the children of [parentId], in [sort]'s order: at most
+  /// [limit] rows, the ones after [after] (a row of the previous page) — a
+  /// keyset, not an offset, so the page after the hundred-thousandth row
+  /// is as cheap as the first (#1064).
+  ///
+  /// The cursor compares the sort's terms one after the other, in their own
+  /// directions: folders first, then the field, then the name key and the
+  /// name — the terms of `notes_tree` for a name order, which then reads
+  /// `limit` index entries and sorts nothing.
+  Future<List<Note>> childrenPage(
+    int parentId, {
+    required int limit,
+    TreeSort sort = TreeSort.nameAsc,
+    Note? after,
+  }) async {
+    final keys = _keysetOf(sort);
+    final variables = <Variable<Object>>[Variable<int>(parentId)];
+    final where = StringBuffer('parent = ?');
+    if (after != null) {
+      final branches = <String>[];
+      for (var i = 0; i < keys.length; i++) {
+        final equal = [
+          for (var j = 0; j < i; j++) '${keys[j].column} = ?',
+          '${keys[i].column} ${keys[i].descending ? '<' : '>'} ?',
+        ];
+        branches.add('(${equal.join(' AND ')})');
+        for (var j = 0; j <= i; j++) {
+          variables.add(keys[j].value(after));
+        }
+      }
+      where.write(' AND (${branches.join(' OR ')})');
+    }
+    final order = [
+      for (final key in keys)
+        '${key.column} ${key.descending ? 'DESC' : 'ASC'}',
+    ].join(', ');
+    variables.add(Variable<int>(limit));
+    final rows = await _db
+        .customSelect(
+          'SELECT * FROM notes WHERE $where ORDER BY $order LIMIT ?',
+          variables: variables,
+          readsFrom: {_db.notes},
+        )
+        .get();
+    return [for (final row in rows) _db.notes.map(row.data)];
+  }
+
+  /// The terms [sort] orders by, with the column each reads and the value
+  /// of a row for it: what a keyset cursor compares.
+  static List<
+    ({String column, bool descending, Variable<Object> Function(Note) value})
+  >
+  _keysetOf(TreeSort sort) {
+    final direction = sort.descending;
+    final isDir = (
+      column: 'is_dir',
+      descending: true,
+      value: (Note n) => Variable<bool>(n.isDir) as Variable<Object>,
+    );
+    final key = (
+      column: 'name_key',
+      descending: sort.order == TreeOrder.name && direction,
+      value: (Note n) => Variable<String>(n.nameKey) as Variable<Object>,
+    );
+    final name = (
+      column: 'name',
+      descending: sort.order == TreeOrder.name && direction,
+      value: (Note n) => Variable<String>(n.name) as Variable<Object>,
+    );
+    if (sort.order == TreeOrder.name) return [isDir, key, name];
+    final field = switch (sort.order) {
+      TreeOrder.modified => (
+        column: 'modified',
+        descending: direction,
+        value: (Note n) => Variable<DateTime>(n.modified) as Variable<Object>,
+      ),
+      TreeOrder.created => (
+        column: 'created',
+        descending: direction,
+        value: (Note n) => Variable<DateTime>(n.created) as Variable<Object>,
+      ),
+      _ => (
+        column: 'size',
+        descending: direction,
+        value: (Note n) => Variable<int>(n.size) as Variable<Object>,
+      ),
+    };
+    return [isDir, field, key, name];
+  }
+
   /// Every note that belongs to the root or to one of the [expandedPaths],
   /// in tree order — [sort]'s order the same way [children] reads it.
   ///
@@ -50,38 +142,64 @@ final class NoteDao {
   Future<List<Note>> tree(
     Iterable<String> expandedPaths, {
     TreeSort sort = TreeSort.nameAsc,
+  }) async {
+    final ids = await _expandedIds(expandedPaths);
+    return await treeQuery(ids, sort: sort).get();
+  }
+
+  /// The ids of the folders at [paths]: a seek on the unique path each.
+  Future<List<int>> _expandedIds(Iterable<String> paths) async {
+    if (paths.isEmpty) return const [];
+    final query = _db.selectOnly(_db.notes)
+      ..addColumns([_db.notes.id])
+      ..where(_db.notes.path.isIn(paths));
+    return [for (final row in await query.get()) row.read(_db.notes.id)!];
+  }
+
+  /// The statement behind [tree]: the children of the root and of the folders
+  /// with the ids [expandedIds], parent by parent.
+  ///
+  /// Ordered by `parent` first, then by the tree's terms, so a name order
+  /// walks the `notes_tree` index one parent after the other and sorts
+  /// nothing (#1064, #1070); the previous `parent = 0 OR parent IN (…)`
+  /// could not use it and sorted every row of every open folder in a
+  /// temporary b-tree. The rows of one parent come out in the same order as
+  /// before, which is all the caller groups them by.
+  @visibleForTesting
+  SimpleSelectStatement<$NotesTable, Note> treeQuery(
+    Iterable<int> expandedIds, {
+    TreeSort sort = TreeSort.nameAsc,
   }) {
-    return (_db.select(_db.notes)
-          ..where(
-            (t) =>
-                t.parent.equals(0) |
-                t.parent.isInQuery(
-                  _db.selectOnly(_db.notes)
-                    ..addColumns([_db.notes.id])
-                    ..where(_db.notes.path.isIn(expandedPaths)),
-                ),
-          )
-          ..orderBy(_treeOrder(sort)))
-        .get();
+    return _db.select(_db.notes)
+      ..where((t) => t.parent.isIn([0, ...expandedIds]))
+      ..orderBy([(t) => OrderingTerm.asc(t.parent), ..._treeOrder(sort)]);
   }
 
   /// The tree's own order terms for [sort] (#726): folders first, then the
   /// field — the name breaking ties where the field cannot (a folder's
   /// size is 0, two files saved in the same second share a time).
+  static OrderingTerm _nameTie(Expression<Object> column, TreeSort sort) =>
+      sort.order == TreeOrder.name && sort.descending
+      ? OrderingTerm.desc(column)
+      : OrderingTerm.asc(column);
+
   static List<OrderingTerm Function($NotesTable)> _treeOrder(TreeSort sort) {
     OrderingTerm by(Expression<Object> column) =>
         sort.descending ? OrderingTerm.desc(column) : OrderingTerm.asc(column);
     return [
       (t) => OrderingTerm.desc(t.isDir),
       switch (sort.order) {
-        TreeOrder.name => (t) => by(t.name),
+        TreeOrder.name => (t) => by(t.nameKey),
         TreeOrder.modified => (t) => by(t.modified),
         TreeOrder.created => (t) => by(t.created),
         TreeOrder.size => (t) => by(t.size),
       },
-      // The field already is the name once: a second, ascending term would
-      // undo a descending name order.
-      if (sort.order != TreeOrder.name) (t) => OrderingTerm.asc(t.name),
+      // The name key breaks ties of another field, and the name itself the
+      // ties of the key (names that differ in case only). In a name order
+      // the field already is the key: the tie-break goes the same way, or a
+      // second ascending term would undo a descending order.
+      if (sort.order != TreeOrder.name) (t) => OrderingTerm.asc(t.nameKey),
+      (t) => _nameTie(t.name, sort),
     ];
   }
 

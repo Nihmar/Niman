@@ -2100,6 +2100,11 @@ final class EstonianStrings extends Strings {
   String get openLibraryUnsupported =>
       'Seda kausta ei toetata. Valige seadme hoiukohast kaust.';
   @override
+  String get indexingTitle => 'Indekseerin…';
+  @override
+  String get indexingPartial =>
+      'Indekseerimine käib veel: tulemused võivad olla mittetäielikud.';
+  @override
   String indexingCount(int done, int total) => '$done / $total märgist';
 
   // The known-library list on the home screen (T-ML-05, T-ML-07).

@@ -2125,6 +2125,11 @@ final class LithuanianStrings extends Strings {
       'Šio katalogo nepalaikoma. Pasirinkite katalogą iš įrenginio '
       'saugyklos.';
   @override
+  String get indexingTitle => 'Indeksuojama…';
+  @override
+  String get indexingPartial =>
+      'Dar indeksuojama: rezultatai gali būti neišsamūs.';
+  @override
   String indexingCount(int done, int total) => '$done / $total pastabos';
 
   // The known-library list on the home screen (T-ML-05, T-ML-07).

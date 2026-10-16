@@ -2152,6 +2152,11 @@ final class DutchStrings extends Strings {
       'Die map wordt niet ondersteund. Kies een map op de opslag van het '
       'apparaat.';
   @override
+  String get indexingTitle => 'Indexeren…';
+  @override
+  String get indexingPartial =>
+      'Er wordt nog geïndexeerd: resultaten kunnen onvolledig zijn.';
+  @override
   String indexingCount(int done, int total) => '$done van $total notities';
 
   // The known-library list on the home screen (T-ML-05, T-ML-07).

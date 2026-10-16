@@ -14,18 +14,28 @@ final class WatchBatch {
     this.missedChanges = false,
   });
 
-  /// Changed absolute paths; for renames this is the OLD path (the new
-  /// path is unknown to the OS event).
+  /// Changed absolute paths; for renames the OLD path, and the new one too
+  /// when the OS paired the move with its destination.
   final List<String> paths;
 
-  /// Directories to resync fully, as absolute paths: parents of rename
-  /// events, whose new path is not part of the event stream.
+  /// Directories to reconcile against a listing of their own entries, as
+  /// absolute paths: parents of moves whose destination the OS did not
+  /// report. A move it did pair is the two paths in [paths] and asks for no
+  /// resync (#1062).
   final List<String> resyncDirs;
 
   /// Whether the watch was down for a while — its source stream ended and
   /// was resubscribed to — so changes made meanwhile left no event, and
   /// only a walk of the whole library finds them.
   final bool missedChanges;
+
+  /// This batch followed by [later], as one: every path and directory once,
+  /// the gap flag if either had it.
+  WatchBatch mergedWith(WatchBatch later) => WatchBatch(
+    paths: <String>{...paths, ...later.paths}.toList(),
+    resyncDirs: <String>{...resyncDirs, ...later.resyncDirs}.toList(),
+    missedChanges: missedChanges || later.missedChanges,
+  );
 }
 
 /// One raw change, as [FileWatcher]'s coalescing sees it.
@@ -48,7 +58,8 @@ final class WatchChange {
   /// Where a move landed, when the OS knows; null otherwise.
   final String? destination;
 
-  /// Whether this is a move, whose parent directory needs a full resync.
+  /// Whether this is a move. Its parent directory is reconciled when the
+  /// destination is unknown; a paired move is the two paths.
   final bool isMove;
 }
 
@@ -103,8 +114,9 @@ final class FileWatcher {
   static const maxPendingPaths = 4096;
 
   /// How many directories one pending batch asks to resync before it
-  /// ships. Each resync walks a whole subtree, so this sits well below
-  /// [maxPendingPaths]; it bounds [WatchBatch.resyncDirs] the same way.
+  /// ships. Each resync lists a directory and compares it with its rows, so
+  /// this sits well below [maxPendingPaths]; it bounds
+  /// [WatchBatch.resyncDirs] the same way.
   static const maxPendingResyncDirs = 256;
 
   static const AppLogger _log = AppLogger(name: 'watcher');
@@ -145,9 +157,19 @@ final class FileWatcher {
   /// Batches of changed paths, coalesced by the debounce window.
   Stream<WatchBatch> get events => _controller.stream;
 
-  /// Begins watching. Each change is coalesced; move events additionally
-  /// resync their parent directory, since the destination may be unknown
-  /// to the OS event.
+  /// Whether the watch is up: started, not stopped, subscribed to a source
+  /// that has not ended, with no gap pending to report. While it is, the
+  /// full rescan is a net under it and can wait longer (#1067).
+  bool get healthy =>
+      _started &&
+      !_closed &&
+      _subscription != null &&
+      _restartTimer == null &&
+      !_missedChanges;
+
+  /// Begins watching. Each change is coalesced; a move whose destination the
+  /// OS did not report additionally resyncs its parent directory, since
+  /// where it went is not part of the event stream.
   Future<void> start() async {
     if (_started || _closed) {
       throw StateError('Watcher is already started or closed');
@@ -163,7 +185,7 @@ final class FileWatcher {
   static WatchChange _toChange(FileSystemEvent event) {
     if (event is FileSystemMoveEvent) {
       // The destination may be unknown to the OS; the parent is resynced
-      // either way, and the destination indexed when it is known.
+      // then, and the destination indexed when it is known.
       _log.debug(
         'watcher event: move "${event.path}" -> '
         '${event.destination ?? 'unknown'}',
@@ -243,11 +265,14 @@ final class FileWatcher {
 
   void _onChange(WatchChange change) {
     if (_closed) return;
-    if (change.isMove) {
+    final destination = change.destination;
+    // A move the OS paired is both of its paths and nothing more: resyncing
+    // the parent as well walked everything beside the renamed note for a
+    // fact the batch already held (#1062).
+    if (change.isMove && destination == null) {
       _addResyncDir(p.dirname(change.path));
     }
     _addPath(change.path);
-    final destination = change.destination;
     if (destination != null) {
       _addPath(destination);
     }

@@ -2094,6 +2094,11 @@ final class HindiStrings extends Strings {
   String get openLibraryUnsupported =>
       'यह फ़ोल्डर समर्थित नहीं है। डिवाइस-स्टोरेज का कोई फ़ोल्डर चुनें।';
   @override
+  String get indexingTitle => 'इंडेक्सिंग…';
+  @override
+  String get indexingPartial =>
+      'इंडेक्सिंग अभी जारी है: परिणाम अधूरे हो सकते हैं।';
+  @override
   String indexingCount(int done, int total) => '$done / $total नोट्स';
 
   // The known-library list on the home screen (T-ML-05, T-ML-07).

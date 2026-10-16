@@ -1126,6 +1126,14 @@ abstract base class Strings {
   /// The first index's counter, e.g. "412 of 10000 notes".
   String indexingCount(int done, int total);
 
+  /// The word in front of that counter in the tree's footer, e.g.
+  /// "Indexing…" (#1068).
+  String get indexingTitle;
+
+  /// What Search, Tags and Links say while the notes are still being read
+  /// into the index (#1068).
+  String get indexingPartial;
+
   // The known-library list on the home screen (T-ML-05, T-ML-07).
   String get knownLibrariesTitle;
   String get libraryUnreachable;

@@ -17,7 +17,6 @@ part 'index_database.g.dart';
 /// a million — per expanded folder, on the frame that opens it (T-M6-01).
 /// The folder index covers the picker's "every directory, by path", which
 /// otherwise reads a million rows to find a thousand.
-@TableIndex(name: 'notes_parent', columns: {#parent})
 @TableIndex(name: 'notes_dir_path', columns: {#isDir, #path})
 class Notes extends Table {
   /// Primary key.
@@ -31,6 +30,11 @@ class Notes extends Table {
 
   /// Display name (file or folder name).
   TextColumn get name => text()();
+
+  /// The key the tree orders [name] by: lowercased, diacritics folded, digit
+  /// runs padded to compare as numbers (`nameSortKey`, #1070). Written with
+  /// every write of [name]; the `notes_tree` index is built on it.
+  TextColumn get nameKey => text()();
 
   /// Whether this row is a directory.
   BoolColumn get isDir => boolean()();
@@ -351,13 +355,17 @@ class IndexDatabase extends _$IndexDatabase {
   /// v11: `dangling_links` keeps the targets no note answered, keyed by the
   /// stem that would, so a note made later finds the links waiting for it
   /// (#974) — an index written before holds none, and is wiped and rescanned.
+  ///
   /// v12: the full-text table keeps a prefix index for two, three and four
   /// letters (#1039), so the first keystrokes of a word are a lookup, not an
   /// expansion of the vocabulary; a frontmatter value compares without
   /// regard to case, in an index that ends in the note (#1037) — the same
   /// wipe and rescan.
+  /// v13: `name_key`, the tree's name order — case-insensitive, accent-folded,
+  /// natural (#1070) — and the `notes_tree` index it is read through. An index
+  /// written before has none: wiped and rescanned.
   @override
-  int get schemaVersion => 12;
+  int get schemaVersion => 13;
 
   /// The FTS5 index (design.md: no drift class — raw SQL, `rowid` =
   /// `notes.id`, one row per note, `title` weighted above `body` by the
@@ -393,10 +401,26 @@ class IndexDatabase extends _$IndexDatabase {
       "fts5(headings, blocks, content = '', contentless_delete = 1, "
       "tokenize = 'unicode61 remove_diacritics 2')";
 
+  /// The tree's order in an index: a folder's children, folders first, by
+  /// name key, the name breaking ties — what `NoteDao.children` and `tree`
+  /// read in order, without sorting (#1070, #1064). Not a `@TableIndex`:
+  /// those cannot say `is_dir DESC`. It also answers the lookup by `parent`.
+  static const String _createTreeIndex =
+      'CREATE INDEX IF NOT EXISTS notes_tree ON notes '
+      '(parent, is_dir DESC, name_key, name)';
+
   /// The notes by modification time, files apart from folders: what
   /// `NoteDao.recentlyModified` reads newest first.
   static const String _createRecentIndex =
       'CREATE INDEX IF NOT EXISTS notes_recent ON notes (is_dir, modified)';
+
+  /// The pinned notes by path: a partial index, one entry per pinned note,
+  /// so `FieldRepo.pinnedNotes` reads the few rows it names, not the table
+  /// (#1065). The query has to say `pinned = 1` as a literal for the planner
+  /// to prove the index covers it.
+  static const String _createPinnedIndex =
+      'CREATE INDEX IF NOT EXISTS notes_pinned ON notes (path) '
+      'WHERE pinned = 1';
 
   /// Builds the `notes_recent` index the Home's recently modified tile
   /// (#535) walks, when this file lacks it; nothing when it has it.
@@ -409,6 +433,12 @@ class IndexDatabase extends _$IndexDatabase {
   /// this file is a wipe and a full rescan. Until it exists, the tile's
   /// query reads the table, which still answers.
   Future<void> ensureRecentIndex() => customStatement(_createRecentIndex);
+
+  /// Builds the `notes_pinned` index (#1065) on a file from before it, the
+  /// way [ensureRecentIndex] does and for the same reason: not a schema
+  /// bump. Until it exists the pinned query reads the table, which still
+  /// answers.
+  Future<void> ensurePinnedIndex() => customStatement(_createPinnedIndex);
 
   /// Builds the tag counts (#692) on a file from before them, the way
   /// [ensureRecentIndex] builds its index, and for the same reason.
@@ -444,6 +474,8 @@ class IndexDatabase extends _$IndexDatabase {
       await m.database.customStatement(_createFts);
       await m.database.customStatement(_createAnchorsFts);
       await m.database.customStatement(_createRecentIndex);
+      await m.database.customStatement(_createPinnedIndex);
+      await m.database.customStatement(_createTreeIndex);
       await tag_counts.createTagCounts(m.database);
       await stem_trigrams.createStemTrigrams(m.database);
     },
@@ -461,6 +493,8 @@ class IndexDatabase extends _$IndexDatabase {
       await m.database.customStatement(_createFts);
       await m.database.customStatement(_createAnchorsFts);
       await m.database.customStatement(_createRecentIndex);
+      await m.database.customStatement(_createPinnedIndex);
+      await m.database.customStatement(_createTreeIndex);
       await tag_counts.createTagCounts(m.database);
       await stem_trigrams.createStemTrigrams(m.database);
     },

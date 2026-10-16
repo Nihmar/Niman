@@ -2114,6 +2114,11 @@ final class NorwegianStrings extends Strings {
   String get openLibraryUnsupported =>
       'Den mappen støttes ikke. Velg en mappe på enhetens lagring.';
   @override
+  String get indexingTitle => 'Indekserer…';
+  @override
+  String get indexingPartial =>
+      'Indekseringen pågår fortsatt: resultatene kan være ufullstendige.';
+  @override
   String indexingCount(int done, int total) => '$done av $total notater';
 
   // The known-library list on the home screen (T-ML-05, T-ML-07).

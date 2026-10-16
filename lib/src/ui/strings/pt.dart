@@ -2138,6 +2138,11 @@ final class PortugueseStrings extends Strings {
       'Essa pasta não é suportada. Escolha uma pasta no armazenamento do '
       'dispositivo.';
   @override
+  String get indexingTitle => 'A indexar…';
+  @override
+  String get indexingPartial =>
+      'A indexação ainda decorre: os resultados podem estar incompletos.';
+  @override
   String indexingCount(int done, int total) => '$done de $total notas';
 
   // The known-library list on the home screen (T-ML-05, T-ML-07).

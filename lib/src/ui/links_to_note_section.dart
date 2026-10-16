@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:niman/src/links/mention_reader.dart';
+import 'package:niman/src/ui/indexing_notice.dart';
 import 'package:niman/src/ui/links_to_note_controller.dart';
 import 'package:niman/src/ui/links_to_note_list.dart';
 import 'package:niman/src/ui/strings.dart';
@@ -118,6 +119,7 @@ final class _LinksToNoteSectionState extends State<LinksToNoteSection> {
               );
             },
           ),
+          if (_open) const IndexingNotice(),
           if (_open)
             ConstrainedBox(
               constraints: const BoxConstraints(

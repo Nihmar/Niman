@@ -2134,6 +2134,11 @@ final class SwedishStrings extends Strings {
   String get openLibraryUnsupported =>
       'Den mappen stöds inte. Välj en mapp i enhetens lagring.';
   @override
+  String get indexingTitle => 'Indexerar…';
+  @override
+  String get indexingPartial =>
+      'Indexeringen pågår fortfarande: resultaten kan vara ofullständiga.';
+  @override
   String indexingCount(int done, int total) => '$done av $total anteckningar';
 
   // The known-library list on the home screen (T-ML-05, T-ML-07).

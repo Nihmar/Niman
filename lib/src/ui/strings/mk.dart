@@ -2141,6 +2141,11 @@ final class MacedonianStrings extends Strings {
       'Таа папка не се поддржува. Одредете папка на складиштето на '
       'уредникот.';
   @override
+  String get indexingTitle => 'Индексирање…';
+  @override
+  String get indexingPartial =>
+      'Индексирањето сè уште трае: резултатите може да се нецелосни.';
+  @override
   String indexingCount(int done, int total) => '$done од $total белешки';
 
   // The known-library list on the home screen (T-ML-05, T-ML-07).

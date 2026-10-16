@@ -50,10 +50,46 @@ lines or when responsibilities mix.
   (`library_device_settings`, `LibraryConfig.deviceKeys`) once into
   `LibraryConfigRepo` (cached per session) → scan files off the UI
   isolate (`Isolate.run` — every stat is a FUSE round trip on Android) →
-  upsert into `IndexDatabase` on main. Behind the ready bump, a sweep off
+  upsert into `IndexDatabase` on main. An index that has rows is ready at
+  once and reconciled with the disk behind the ready bump; an empty one
+  gets its tree first and its notes read behind it — no open waits for a
+  full walk, whichever screen it came from (#1073). Behind the ready bump, a sweep off
   the UI isolate removes the `.niman-tmp-*` files a killed write left
   (`core/files.dart`, #379), taking only files older than
   `staleTempMinimumAge` so a write in flight is never touched.
+- **Keeping the index current:** the file watcher carries live changes;
+  the full walk (`Indexer.fullScan`) is the net under it, run by
+  `RescanScheduler` (`library/rescan_scheduler.dart`, #1067): one walk at a
+  time (a request during one shares a single follow-up), the next periodic
+  one scheduled after the last ended — ten times its duration at least,
+  five minutes at least, three times that while the watch is healthy — and
+  none while the app is in the background or hidden. A watch that restarts
+  (`missedChanges`) and the manual rescan ask for a walk at once. The
+  watcher's batches run through `WatchBatchQueue` — one in flight, the ones
+  that arrive meanwhile merged into one (#1062). A move the OS paired with
+  its destination is those two paths; only a move with no known destination
+  reconciles its parent folder, against a listing of that folder's own
+  entries (`IndexTree.syncDirLevel`), never its subtree.
+- **Folder rename and move:** the app's own rename or move of a folder is
+  `Indexer.relocateFolder` (`db/index_move.dart`, #1063): one statement
+  rewrites the paths of every row under it, so no note is read and every
+  note keeps its id — with its full-text row, tags and link edges. Only the
+  notes with a link that reads from their own folder (an edge to a note
+  outside the folder, a dead Markdown or `../` link) are read again. A move
+  the index cannot carry (a destination that is already indexed, a disk that
+  does not show it) goes through `applyEvents` as an external change does.
+- **Tree rows:** the tree reads a folder's children a page at a time
+  (`NoteDao.childrenPage`, a keyset in the sort's own terms, 2000 rows) into
+  `TreeChildCache` (`ui/tree_child_cache.dart`, #1064). A folder is read once
+  per index revision: opening one reads that folder alone, closing one reads
+  nothing, and a new revision or order empties the cache. The last loaded row
+  of a folder with more asks for the next page when it is drawn, so a
+  folder of a hundred thousand notes is a page until the list scrolls to the
+  end of it. In a name order a page walks the `notes_tree` index (`(parent,
+  is_dir DESC, name_key, name)`; `name_key` is `nameSortKey`: case and
+  accents folded, digit runs by value, #1070) and sorts nothing. One flatten
+  runs at a time with one waiting behind it; the pinned notes come from the
+  `notes_pinned` partial index (#1065) and are read once per revision.
 - **Edit:** `NoteOps.saveNote` → history snapshot and atomic write
   (temp + rename) in one isolate pass → the note is rescanned into the
   index. Every mode of the surface shares one tokenizer for links. Every

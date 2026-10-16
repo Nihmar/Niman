@@ -2140,6 +2140,11 @@ final class FinnishStrings extends Strings {
   String get openLibraryUnsupported =>
       'Tämä kansio ei tue. Valitse kansio laitteen tallennusalueelta.';
   @override
+  String get indexingTitle => 'Indeksoidaan…';
+  @override
+  String get indexingPartial =>
+      'Indeksointi on vielä kesken: tulokset voivat olla puutteellisia.';
+  @override
   String indexingCount(int done, int total) => '$done / $total muistiinpanoa';
 
   // The known-library list on the home screen (T-ML-05, T-ML-07).

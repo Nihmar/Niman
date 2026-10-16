@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:niman/src/core/name_sort_key.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/links/library_links.dart';
 import 'package:niman/src/links/link_preview.dart';
@@ -122,6 +123,7 @@ final class FakeLinkSource implements LibraryLinks {
     path: path,
     parent: 0,
     name: path.split('/').last,
+    nameKey: nameSortKey(path.split('/').last),
     isDir: false,
     size: 0,
     modified: DateTime.fromMillisecondsSinceEpoch(0),

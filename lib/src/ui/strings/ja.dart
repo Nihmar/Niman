@@ -1990,6 +1990,10 @@ final class JapaneseStrings extends Strings {
   String get openLibraryUnsupported =>
       'そのフォルダはサポートされていません。デバイス保存内のフォルダを選んでください。';
   @override
+  String get indexingTitle => 'インデックス作成中…';
+  @override
+  String get indexingPartial => 'インデックスを作成中です。結果が不完全な場合があります。';
+  @override
   String indexingCount(int done, int total) => '$done / $total 件のノート';
 
   // The known-library list on the home screen (T-ML-05, T-ML-07).

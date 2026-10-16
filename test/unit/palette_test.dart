@@ -4,6 +4,7 @@ import 'package:drift/drift.dart'
     show ApplyInterceptor, QueryExecutor, QueryInterceptor, Variable;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/name_sort_key.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/links/note_finder.dart';
 import 'package:niman/src/ui/palette/palette_match.dart';
@@ -30,6 +31,7 @@ void main() {
               path: path,
               parent: 0,
               name: name,
+              nameKey: nameSortKey(name),
               isDir: dir,
               size: 0,
               modified: DateTime(2026),

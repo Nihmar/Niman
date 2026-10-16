@@ -1940,6 +1940,10 @@ final class ChineseStrings extends Strings {
   @override
   String get openLibraryUnsupported => '该文件夹不受支持。请选择设备存储中的文件夹。';
   @override
+  String get indexingTitle => '正在建立索引…';
+  @override
+  String get indexingPartial => '索引仍在建立中，结果可能不完整。';
+  @override
   String indexingCount(int done, int total) => '已索引 $done / $total 篇笔记';
 
   // The known-library list on the home screen (T-ML-05, T-ML-07).

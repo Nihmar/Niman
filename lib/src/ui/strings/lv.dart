@@ -2117,6 +2117,11 @@ final class LatvianStrings extends Strings {
       'Šis katalogs netiek atbalstīts. Izvēlieties katalogu no ierīces '
       'uzglabāšanas.';
   @override
+  String get indexingTitle => 'Indeksē…';
+  @override
+  String get indexingPartial =>
+      'Indeksēšana vēl turpinās: rezultāti var būt nepilnīgi.';
+  @override
   String indexingCount(int done, int total) => '$done / $total piezīmes';
 
   // The known-library list on the home screen (T-ML-05, T-ML-07).

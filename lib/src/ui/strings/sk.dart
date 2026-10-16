@@ -2120,6 +2120,11 @@ final class SlovakStrings extends Strings {
       'Tento priečinok nie je podporovaný. Vyberte priečinok z úložiska '
       'zariadenia.';
   @override
+  String get indexingTitle => 'Indexujem…';
+  @override
+  String get indexingPartial =>
+      'Indexovanie stále beží: výsledky môžu byť neúplné.';
+  @override
   String indexingCount(int done, int total) => '$done / $total poznámok';
 
   // The known-library list on the home screen (T-ML-05, T-ML-07).

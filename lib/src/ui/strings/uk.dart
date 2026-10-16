@@ -2129,6 +2129,11 @@ final class UkrainianStrings extends Strings {
   String get openLibraryUnsupported =>
       'Ця папка не підтримується. Оберіть папку зі сховища пристрою.';
   @override
+  String get indexingTitle => 'Індексація…';
+  @override
+  String get indexingPartial =>
+      'Індексація ще триває: результати можуть бути неповними.';
+  @override
   String indexingCount(int done, int total) => '$done / $total нотаток';
 
   // The known-library list on the home screen (T-ML-05, T-ML-07).

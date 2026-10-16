@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/app.dart';
+import 'package:niman/src/core/name_sort_key.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/editor/outline.dart';
 import 'package:niman/src/library/library_state.dart';
@@ -121,6 +122,7 @@ void main() {
           path: 'Note.md',
           parent: 0,
           name: 'Note.md',
+          nameKey: nameSortKey('Note.md'),
           isDir: false,
           size: 0,
           modified: DateTime.fromMillisecondsSinceEpoch(0),

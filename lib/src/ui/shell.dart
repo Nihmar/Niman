@@ -2606,6 +2606,14 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
+    // Unfocused is still on screen (a desktop window beside another, a
+    // phone's shade pulled down); paused and hidden are not, and a library
+    // nobody sees is not walked on a timer (#1067).
+    widget.controller.appVisibilityChanged(
+      visible:
+          state == AppLifecycleState.resumed ||
+          state == AppLifecycleState.inactive,
+    );
     if (state == AppLifecycleState.paused) {
       // The queued changes go now: the process may not come back.
       widget.controller.sync?.appBackgrounded();

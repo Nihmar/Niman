@@ -41,11 +41,14 @@ import 'package:niman/src/flashcards/review_store.dart';
 import 'package:niman/src/frontmatter/fields.dart';
 import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/library/file_watcher.dart';
+import 'package:niman/src/library/indexing_status.dart';
 import 'package:niman/src/library/library_registry.dart';
 import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/library/note_ops.dart';
+import 'package:niman/src/library/rescan_scheduler.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/library/trash_cleaner.dart';
+import 'package:niman/src/library/watch_batch_queue.dart';
 import 'package:niman/src/links/library_links.dart';
 import 'package:niman/src/links/suggester.dart';
 import 'package:niman/src/reading/reading_positions.dart';
@@ -212,7 +215,16 @@ final class LibraryController implements LibrarySession {
   NoteOps? _ops;
   LibrarySyncService? _sync;
   FileWatcher? _watcher;
-  Timer? _rescanTimer;
+
+  /// The watcher's batches of the open library, run one at a time.
+  WatchBatchQueue? _batches;
+
+  /// The full walks of the open library: one at a time, paced by how long
+  /// the last took (#1067). Null while no library is open.
+  RescanScheduler? _rescans;
+
+  /// Whether the app is on screen; a hidden app runs no periodic walk.
+  bool _foreground = true;
 
   /// Reconciliation scan pending after a non-blocking resume; cancelled in
   /// [_teardown] so a stale scan can never hit a different library.
@@ -237,8 +249,21 @@ final class LibraryController implements LibrarySession {
     final last = _progressShown;
     if (last != null && now.difference(last) < _progressInterval) return;
     _progressShown = now;
-    _bump();
+    // The tree is asked to read its rows again only now and then: titles and
+    // pins reach it as the notes are read (#1068), but a flatten per report
+    // would spend the pass drawing a tree that has barely moved.
+    final treeAt = _progressTreeBump;
+    final tree =
+        treeAt == null || now.difference(treeAt) >= _progressTreeInterval;
+    if (tree) _progressTreeBump = now;
+    _bump(tree: tree);
   }
+
+  DateTime? _progressTreeBump;
+
+  /// How often a running content pass lets the tree read the rows it has
+  /// changed so far.
+  static const _progressTreeInterval = Duration(seconds: 2);
 
   /// How often a running scan redraws the name it is showing.
   static const _progressInterval = Duration(milliseconds: 50);
@@ -328,6 +353,19 @@ final class LibraryController implements LibrarySession {
     final db = _indexDb;
     if (db == null) return const [];
     return await NoteDao(db).children(parentId, sort: sort);
+  }
+
+  @override
+  Future<List<Note>> childrenPage(
+    int parentId, {
+    required int limit,
+    TreeSort sort = TreeSort.nameAsc,
+    Note? after,
+  }) async {
+    final db = _indexDb;
+    if (db == null) return const [];
+    return await NoteDao(db)
+        .childrenPage(parentId, limit: limit, sort: sort, after: after);
   }
 
   @override
@@ -519,7 +557,7 @@ final class LibraryController implements LibrarySession {
         _log.warning('resume: root no longer exists: $last');
         return;
       }
-      await open(last, create: false, blockingScan: false);
+      await open(last, create: false);
     } on Object catch (error) {
       // Resume is best effort; the open screen is reached with lastError.
       _log.error('resume failed: $error');
@@ -529,19 +567,13 @@ final class LibraryController implements LibrarySession {
   /// Opens the library at [path]; with [create] true it is created first
   /// when missing.
   ///
-  /// With [blockingScan] true (the default) the full index scan completes
-  /// before the library becomes ready. With [blockingScan] false (used by
-  /// [resume] for a fast relaunch) the library becomes ready immediately
-  /// from the last index, and a reconciliation scan runs
-  /// [resumeReconcileDelay] later so external changes converge within
-  /// seconds (the scan is still a blocking disk walk, so it must not gate
-  /// the first frame).
+  /// An index that has rows is shown at once: the library becomes ready from
+  /// it and a reconciliation scan runs [resumeReconcileDelay] later, so
+  /// external changes converge within seconds (the scan is a disk walk, so it
+  /// must not gate the first frame) (#1073). One with no rows gets its tree
+  /// first, and its notes are read behind it.
   @override
-  Future<void> open(
-    String path, {
-    required bool create,
-    bool blockingScan = true,
-  }) async {
+  Future<void> open(String path, {required bool create}) async {
     if (_phase != LibraryPhase.none) {
       throw StateError('A library is already open (phase: ${_phase.name})');
     }
@@ -549,7 +581,7 @@ final class LibraryController implements LibrarySession {
     _lastError = null;
     _bump();
     try {
-      _log.info('open start: $path create=$create blockingScan=$blockingScan');
+      _log.info('open start: $path create=$create');
       final abs = p.normalize(path.trim());
       final rootDir = Directory(abs);
       if (create) {
@@ -559,7 +591,7 @@ final class LibraryController implements LibrarySession {
       } else if (!rootDir.existsSync()) {
         throw ArgumentError('Directory does not exist: $abs');
       }
-      await _startSession(abs, blockingScan: blockingScan);
+      await _startSession(abs);
       _log.info('open complete: ready root=$abs');
     } on Object catch (error) {
       _log.error('open failed: $error');
@@ -577,7 +609,7 @@ final class LibraryController implements LibrarySession {
   /// Shared by [open] and [rebuildIndex]: the first does the destination
   /// checks and sets the phase around it, the second runs it over an index
   /// file it has just deleted (#368).
-  Future<void> _startSession(String abs, {required bool blockingScan}) async {
+  Future<void> _startSession(String abs) async {
     // This library's own index file (T-ML-03). Opening a second library
     // no longer scans over the first one's rows, so coming back to it
     // costs a reconciliation rather than a full walk. [_openIndex] also
@@ -637,30 +669,29 @@ final class LibraryController implements LibrarySession {
     // reconciliation. On an index that has rows this is one query and
     // writes nothing.
     final contentOwed = await indexer.indexTreeFirst(abs);
-    if (blockingScan && !contentOwed) {
-      // Only here: the first index is the scan long enough to be worth
-      // watching, and reporting costs a message per note.
-      indexer.onProgress = _onIndexProgress;
-      try {
-        await indexer.fullScan(abs);
-      } finally {
-        indexer.onProgress = null;
-        _indexProgress = null;
-      }
-    }
     final watcher = FileWatcher(
       abs,
       debounce: watcherDebounce,
       source: watchSource,
     );
-    watcher.events.listen(_onWatchBatch);
+    // One batch in flight, the ones that arrive meanwhile merged (#1062).
+    final batches = WatchBatchQueue(_onWatchBatch);
+    _batches = batches;
+    watcher.events.listen((batch) => unawaited(batches.add(batch)));
     await watcher.start();
     // Held so [_teardown] can stop it: an unheld watcher keeps its
     // recursive watch (and its event handling) alive for the whole
     // process, and every reopen adds another one.
     _watcher = watcher;
     _log.info('open: watcher started for $abs');
-    _rescanTimer = Timer.periodic(rescanInterval, (_) => _safeRescan(abs));
+    final rescans = RescanScheduler(
+      scan: () => indexer.fullScan(abs),
+      minInterval: rescanInterval,
+      watcherHealthy: () => watcher.healthy,
+      onPeriodicError: (error, _) => unawaited(_onRescanFailed(abs, error)),
+    )..setForeground(foreground: _foreground);
+    _rescans = rescans;
+    rescans.start();
     _indexer = indexer;
     _ops = ops;
     _root = abs;
@@ -720,7 +751,8 @@ final class LibraryController implements LibrarySession {
     // with the reconciliation and behind the tree, not on open.
     _reconcileTimer = Timer(resumeReconcileDelay, () async {
       await _ensureRecentIndex(indexDb);
-      if (!blockingScan) await _safeRescan(abs);
+      // A first index is a full walk already, running behind the tree.
+      if (!contentOwed) await _safeRescan(abs);
     });
     if (contentOwed) unawaited(_indexContents(abs));
   }
@@ -756,7 +788,7 @@ final class LibraryController implements LibrarySession {
     if (target == _root) return;
     _log.info('switch library: $_root -> $target');
     if (_phase != LibraryPhase.none) await close();
-    await open(target, create: false, blockingScan: false);
+    await open(target, create: false);
   }
 
   /// The libraries the app knows about, most recently opened first.
@@ -929,7 +961,7 @@ final class LibraryController implements LibrarySession {
       throw StateError('No library is open');
     }
     _log.info('manual rescan requested');
-    return indexer.fullScan(root);
+    return _rescans!.run();
   }
 
   /// Rebuilds the open library's index from disk (#368).
@@ -970,7 +1002,7 @@ final class LibraryController implements LibrarySession {
     await _teardown();
     await _deleteIndexOf(root);
     try {
-      await _startSession(root, blockingScan: true);
+      await _startSession(root);
       _log.info('rebuild index complete: ready root=$root');
     } on Object catch (error) {
       _log.error('rebuild index failed: $error');
@@ -1705,8 +1737,11 @@ final class LibraryController implements LibrarySession {
   /// open would keep a connection — and, for the search connection, a
   /// worker isolate — per library ever opened this session.
   Future<void> _teardown() async {
-    _rescanTimer?.cancel();
-    _rescanTimer = null;
+    IndexingStatus.contentOwed.value = false;
+    _rescans?.stop();
+    _rescans = null;
+    _batches?.close();
+    _batches = null;
     _reconcileTimer?.cancel();
     _reconcileTimer = null;
     final watcher = _watcher;
@@ -1831,7 +1866,19 @@ final class LibraryController implements LibrarySession {
     if (indexer == null || phase != LibraryPhase.ready) return;
     try {
       _log.info('first index: reading the notes of $abs');
-      await indexer.fullScan(abs);
+      // Reported while it runs: the walk is long enough to be worth
+      // watching, and reporting costs a message per note.
+      indexer.onProgress = _onIndexProgress;
+      IndexingStatus.contentOwed.value = true;
+      try {
+        await _rescans?.run();
+      } finally {
+        IndexingStatus.contentOwed.value = false;
+        indexer.onProgress = null;
+        _indexProgress = null;
+        _progressTreeBump = null;
+        _bump();
+      }
       _log.info('first index complete');
     } on Object catch (error) {
       // The periodic rescan finds what is still missing and reads it.
@@ -1925,7 +1972,8 @@ final class LibraryController implements LibrarySession {
     _log.debug('index warm-up: ${clock.elapsedMilliseconds} ms');
   }
 
-  /// [IndexDatabase.ensureRecentIndex], [IndexDatabase.ensureTagCounts] and
+  /// [IndexDatabase.ensureRecentIndex], [IndexDatabase.ensurePinnedIndex],
+  /// [IndexDatabase.ensureTagCounts] and
   /// [IndexDatabase.ensureStemTrigrams],
   /// logged rather than thrown: their readers answer without them, only
   /// slower.
@@ -1933,6 +1981,7 @@ final class LibraryController implements LibrarySession {
     final clock = Stopwatch()..start();
     try {
       await db.ensureRecentIndex();
+      await db.ensurePinnedIndex();
       await db.ensureTagCounts();
       await db.ensureStemTrigrams();
       _log.debug(
@@ -1947,22 +1996,36 @@ final class LibraryController implements LibrarySession {
   }
 
   Future<void> _safeRescan(String abs) async {
-    final indexer = _indexer;
-    if (indexer == null || phase != LibraryPhase.ready) return;
+    final rescans = _rescans;
+    if (rescans == null || phase != LibraryPhase.ready) return;
     try {
-      _log.info('periodic rescan start: $abs');
-      await indexer.fullScan(abs);
-      _log.info('periodic rescan complete');
+      _log.info('rescan start: $abs');
+      await rescans.run();
+      _log.info('rescan complete');
     } on Object catch (error) {
-      _log.error('rescan failed: $error');
-      // A rescan outliving its library — closed, switched, or the whole
-      // controller disposed — has nothing left to close.
-      if (_disposed || _root != abs) return;
-      if (!Directory(abs).existsSync()) {
-        await close();
-        _lastError = 'The library folder is no longer available.';
-      }
+      await _onRescanFailed(abs, error);
     }
+  }
+
+  /// What a failed walk of [abs] leaves to do: nothing for a library that
+  /// has gone, and a closed session for one whose folder has.
+  Future<void> _onRescanFailed(String abs, Object error) async {
+    _log.error('rescan failed: $error');
+    // A rescan outliving its library — closed, switched, or the whole
+    // controller disposed — has nothing left to close.
+    if (_disposed || _root != abs) return;
+    if (!Directory(abs).existsSync()) {
+      await close();
+      _lastError = 'The library folder is no longer available.';
+    }
+  }
+
+  /// Tells the session whether the app is on screen. A hidden app runs no
+  /// periodic walk; coming back runs the one that fell due (#1067).
+  @override
+  void appVisibilityChanged({required bool visible}) {
+    _foreground = visible;
+    _rescans?.setForeground(foreground: visible);
   }
 }
 

@@ -7,6 +7,7 @@ import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/search/tag_repo.dart';
+import 'package:niman/src/ui/indexing_notice.dart';
 import 'package:niman/src/ui/search_request.dart';
 import 'package:niman/src/ui/strings.dart';
 
@@ -245,6 +246,7 @@ final class _TagsScreenState extends State<TagsScreen> {
   Widget _tagList() => Column(
     children: [
       _header(AppStrings.tagsTitle, onBack: widget.onBack),
+      const IndexingNotice(),
       Expanded(child: _tagCounts(_counts)),
     ],
   );
@@ -254,6 +256,7 @@ final class _TagsScreenState extends State<TagsScreen> {
   Widget _treeView() => Column(
     children: [
       _header(AppStrings.tagsTitle, onBack: widget.onBack),
+      const IndexingNotice(),
       Expanded(child: _tagTree(_counts)),
     ],
   );

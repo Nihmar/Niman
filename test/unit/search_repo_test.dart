@@ -7,6 +7,7 @@ import 'package:drift/drift.dart'
     show ApplyInterceptor, QueryExecutor, QueryInterceptor, Variable;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/name_sort_key.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/search/query.dart';
 import 'package:niman/src/search/search_repo.dart';
@@ -23,9 +24,15 @@ void main() {
     File(p.join(root.path, path)).writeAsStringSync(body);
     await db.customStatement(
       'INSERT INTO notes '
-      '(path, parent, name, is_dir, size, modified, created, title) '
-      'VALUES (?1, 0, ?2, 0, ?3, 0, 0, ?4)',
-      [path, path.split('/').last, body.length, title],
+      '(path, parent, name, name_key, is_dir, size, modified, created, '
+      'title) VALUES (?1, 0, ?2, ?5, 0, ?3, 0, 0, ?4)',
+      [
+        path,
+        path.split('/').last,
+        body.length,
+        title,
+        nameSortKey(path.split('/').last),
+      ],
     );
     final row = await db
         .customSelect(
@@ -146,8 +153,9 @@ void main() {
     addTearDown(counted.close);
     final repo = SearchRepo(counted, root: root.path);
     await counted.customStatement(
-      'INSERT INTO notes (path, parent, name, is_dir, size, modified, created) '
-      "VALUES ('a.md', 0, 'a.md', 0, 1, 0, 0)",
+      'INSERT INTO notes '
+      '(path, parent, name, name_key, is_dir, size, modified, created) '
+      "VALUES ('a.md', 0, 'a.md', 'a.md', 0, 1, 0, 0)",
     );
     await counted.customStatement(
       'INSERT INTO notes_fts (rowid, title, body) '
