@@ -136,6 +136,11 @@ final class _SearchScreenState extends State<SearchScreen> {
   /// range by its index (#768).
   final ScrollController _resultsScroll = ScrollController();
 
+  /// The text and mode the list now showing was searched for: a result
+  /// set for another one starts at the top (#1044), while a re-run of the
+  /// same query (after a replace) keeps its place.
+  String? _resultsFor;
+
   /// Replace mode (T-M3-10): the panel under the query box and the match
   /// preview replace the results list while active.
   final TextEditingController _replacement = TextEditingController();
@@ -382,7 +387,16 @@ final class _SearchScreenState extends State<SearchScreen> {
       'id $id landed in ${clock.elapsedMilliseconds}ms '
       '(${results.length} hits)',
     );
+    final resultsFor = '$mode:$text';
+    final fresh = resultsFor != _resultsFor;
+    _resultsFor = resultsFor;
     setState(() {
+      // A new result set starts at its top, with nothing marked: the old
+      // offset and mark belong to rows that are gone (#1044).
+      if (fresh) {
+        _currentHit = null;
+        if (_resultsScroll.hasClients) _resultsScroll.jumpTo(0);
+      }
       _searched = true;
       _hits = results;
       _shown = _pageSize < results.length ? _pageSize : results.length;
@@ -482,13 +496,19 @@ final class _SearchScreenState extends State<SearchScreen> {
         _stepHit(-1, open: false);
       case LogicalKeyboardKey.enter || LogicalKeyboardKey.numpadEnter
           when event is KeyDownEvent:
-        final at = _hits.indexWhere((hit) => hit.path == _currentHit);
-        if (at < 0) return KeyEventResult.ignored;
-        _openHit(at);
+        _openMarkedOrFirst();
       default:
         return KeyEventResult.ignored;
     }
     return KeyEventResult.handled;
+  }
+
+  /// Opens the hit marked, or the first when none is (#1044): Enter after
+  /// typing opens the top result, as the palette's does.
+  void _openMarkedOrFirst() {
+    if (_hits.isEmpty || _replaceMode) return;
+    final at = _hits.indexWhere((hit) => hit.path == _currentHit);
+    _openHit(at < 0 ? 0 : at);
   }
 
   /// Brings the hit at [index] into view (#768). A row outside the
@@ -563,6 +583,9 @@ final class _SearchScreenState extends State<SearchScreen> {
                     controller: _query,
                     focusNode: _queryFocus,
                     textInputAction: TextInputAction.search,
+                    // The search action of a touch keyboard (a hardware
+                    // Enter is [_queryKey]'s).
+                    onSubmitted: (_) => _openMarkedOrFirst(),
                     decoration: InputDecoration(
                       hintText: AppStrings.searchHint,
                       // The icon says which of the two the box is doing, so a
@@ -786,12 +809,12 @@ final class _SearchScreenState extends State<SearchScreen> {
                         hit.path,
                         () => source.excerpt(hit, words),
                       ),
-                      builder: (context, excerpt) {
-                        final text = excerpt.data ?? '';
-                        return text.isEmpty
-                            ? const SizedBox.shrink()
-                            : _snippet(theme, text);
-                      },
+                      builder: (context, excerpt) => _excerptSlot(
+                        theme,
+                        excerpt.data ?? '',
+                        loading:
+                            excerpt.connectionState != ConnectionState.done,
+                      ),
                     ),
                 ],
               ),
@@ -828,6 +851,37 @@ final class _SearchScreenState extends State<SearchScreen> {
     opens.newTab(_hits[at].path);
     return true;
   }
+
+  /// The room for a word hit's excerpt, two lines whether it has arrived
+  /// or not (#1044): the row is its final height from the first frame, so
+  /// nothing slides under the pointer while the excerpts load. While it is
+  /// on its way a faint bar holds the line.
+  Widget _excerptSlot(
+    ThemeData theme,
+    String excerpt, {
+    required bool loading,
+  }) => Stack(
+    children: [
+      // Two lines of the snippet's own style, drawn as nothing.
+      const Opacity(opacity: 0, child: Text('\n', maxLines: 2)),
+      if (excerpt.isNotEmpty)
+        _snippet(theme, excerpt)
+      else if (loading)
+        Positioned(
+          left: 0,
+          top: 5,
+          width: 140,
+          height: 8,
+          child: DecoratedBox(
+            key: const Key('search-excerpt-skeleton'),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
+        ),
+    ],
+  );
 
   Widget _snippet(ThemeData theme, String snippet) => Text.rich(
     _highlight(theme, snippet),

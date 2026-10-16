@@ -296,7 +296,7 @@ void main() {
   ) async {
     // A tall surface so every page's items (and the Show more slot) are
     // actually built by the lazy ListView.
-    tester.view.physicalSize = const Size(1000, 4000);
+    tester.view.physicalSize = const Size(1000, 8000);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
@@ -767,6 +767,86 @@ void main() {
     await tester.pumpAndSettle();
     expect(opened.last, 'n1.md');
     expect(row('n1.md').hitTestable(), findsOne);
+  });
+
+  // #1044
+  testWidgets('a new result set starts at the top of the list', (tester) async {
+    source.hits = [
+      for (var i = 0; i < 40; i++) _hit('n$i.md', snippet: 'xy $i'),
+    ];
+    await tester.pumpWidget(buildApp(source));
+    await tester.pump();
+    await tester.enterText(find.byKey(const Key('search-query')), 'xy');
+    await settle(tester);
+
+    double offset() => tester
+        .state<ScrollableState>(
+          find.descendant(
+            of: find.byKey(const Key('search-results')),
+            matching: find.byType(Scrollable),
+          ),
+        )
+        .position
+        .pixels;
+
+    await tester.drag(
+      find.byKey(const Key('search-results')),
+      const Offset(0, -1500),
+    );
+    await tester.pumpAndSettle();
+    expect(offset(), greaterThan(500));
+
+    source.hits = [
+      for (var i = 0; i < 40; i++) _hit('m$i.md', snippet: 'xyz $i'),
+    ];
+    await tester.enterText(find.byKey(const Key('search-query')), 'xyz');
+    await settle(tester);
+    expect(offset(), 0);
+    expect(find.byKey(const Key('search-hit-m0.md')), findsOne);
+  });
+
+  // #1044
+  testWidgets('Enter in the field opens the first hit when none is marked', (
+    tester,
+  ) async {
+    source.hits = [_hit('a.md'), _hit('b.md')];
+    await tester.pumpWidget(buildApp(source));
+    await tester.enterText(find.byKey(const Key('search-query')), 'note');
+    await settle(tester);
+    expect(opened, isEmpty);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pump();
+    expect(opened, ['a.md']);
+
+    // The search action of a touch keyboard does the same.
+    opened.clear();
+    await tester.testTextInput.receiveAction(TextInputAction.search);
+    await tester.pump();
+    expect(opened, ['a.md']);
+  });
+
+  // #1044
+  testWidgets('a word hit keeps its height while its excerpt loads', (
+    tester,
+  ) async {
+    source.hits = [_hit('a.md')];
+    source.excerpts['a.md'] = 'one <mark>xy</mark> two';
+    final gate = source.excerptGates['a.md'] = Completer<void>();
+    await tester.pumpWidget(buildApp(source));
+    await tester.enterText(find.byKey(const Key('search-query')), 'xy');
+    await settle(tester);
+
+    final row = find.byKey(const Key('search-hit-a.md'));
+    final before = tester.getSize(row).height;
+    expect(find.byKey(const Key('search-excerpt-skeleton')), findsOne);
+
+    gate.complete();
+    await tester.pump();
+    await tester.pump();
+    expect(find.byKey(const Key('search-excerpt-skeleton')), findsNothing);
+    expect(find.textContaining('one xy two', findRichText: true), findsOne);
+    expect(tester.getSize(row).height, before);
   });
 }
 

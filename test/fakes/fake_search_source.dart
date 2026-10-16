@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:niman/src/search/search_repo.dart';
 
 /// In-memory [SearchSource] for widget tests.
@@ -58,7 +60,13 @@ final class FakeSearchSource implements SearchSource {
   /// The excerpts a word result's row reads, by path; none by default.
   final Map<String, String> excerpts = {};
 
+  /// Holds a path's excerpt until its completer completes (the excerpt of
+  /// a big note takes its time); a path without a gate answers at once.
+  final Map<String, Completer<void>> excerptGates = {};
+
   @override
-  Future<String> excerpt(SearchHit hit, String userText) async =>
-      excerpts[hit.path] ?? '';
+  Future<String> excerpt(SearchHit hit, String userText) async {
+    await excerptGates[hit.path]?.future;
+    return excerpts[hit.path] ?? '';
+  }
 }
