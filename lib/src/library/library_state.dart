@@ -44,6 +44,7 @@ import 'package:niman/src/library/file_watcher.dart';
 import 'package:niman/src/library/library_registry.dart';
 import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/library/note_ops.dart';
+import 'package:niman/src/library/rescan_scheduler.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/library/trash_cleaner.dart';
 import 'package:niman/src/links/library_links.dart';
@@ -208,7 +209,13 @@ final class LibraryController implements LibrarySession {
   NoteOps? _ops;
   LibrarySyncService? _sync;
   FileWatcher? _watcher;
-  Timer? _rescanTimer;
+
+  /// The full walks of the open library: one at a time, paced by how long
+  /// the last took (#1067). Null while no library is open.
+  RescanScheduler? _rescans;
+
+  /// Whether the app is on screen; a hidden app runs no periodic walk.
+  bool _foreground = true;
 
   /// Reconciliation scan pending after a non-blocking resume; cancelled in
   /// [_teardown] so a stale scan can never hit a different library.
@@ -653,7 +660,14 @@ final class LibraryController implements LibrarySession {
     // process, and every reopen adds another one.
     _watcher = watcher;
     _log.info('open: watcher started for $abs');
-    _rescanTimer = Timer.periodic(rescanInterval, (_) => _safeRescan(abs));
+    final rescans = RescanScheduler(
+      scan: () => indexer.fullScan(abs),
+      minInterval: rescanInterval,
+      watcherHealthy: () => watcher.healthy,
+      onPeriodicError: (error, _) => unawaited(_onRescanFailed(abs, error)),
+    )..setForeground(foreground: _foreground);
+    _rescans = rescans;
+    rescans.start();
     _indexer = indexer;
     _ops = ops;
     _root = abs;
@@ -713,7 +727,8 @@ final class LibraryController implements LibrarySession {
     // with the reconciliation and behind the tree, not on open.
     _reconcileTimer = Timer(resumeReconcileDelay, () async {
       await _ensureRecentIndex(indexDb);
-      if (!blockingScan) await _safeRescan(abs);
+      // A first index is a full walk already, running behind the tree.
+      if (!blockingScan && !contentOwed) await _safeRescan(abs);
     });
     if (contentOwed) unawaited(_indexContents(abs));
   }
@@ -922,7 +937,7 @@ final class LibraryController implements LibrarySession {
       throw StateError('No library is open');
     }
     _log.info('manual rescan requested');
-    return indexer.fullScan(root);
+    return _rescans!.run();
   }
 
   /// Rebuilds the open library's index from disk (#368).
@@ -1701,8 +1716,8 @@ final class LibraryController implements LibrarySession {
   /// open would keep a connection — and, for the search connection, a
   /// worker isolate — per library ever opened this session.
   Future<void> _teardown() async {
-    _rescanTimer?.cancel();
-    _rescanTimer = null;
+    _rescans?.stop();
+    _rescans = null;
     _reconcileTimer?.cancel();
     _reconcileTimer = null;
     final watcher = _watcher;
@@ -1823,7 +1838,7 @@ final class LibraryController implements LibrarySession {
     if (indexer == null || phase != LibraryPhase.ready) return;
     try {
       _log.info('first index: reading the notes of $abs');
-      await indexer.fullScan(abs);
+      await _rescans?.run();
       _log.info('first index complete');
     } on Object catch (error) {
       // The periodic rescan finds what is still missing and reads it.
@@ -1936,22 +1951,36 @@ final class LibraryController implements LibrarySession {
   }
 
   Future<void> _safeRescan(String abs) async {
-    final indexer = _indexer;
-    if (indexer == null || phase != LibraryPhase.ready) return;
+    final rescans = _rescans;
+    if (rescans == null || phase != LibraryPhase.ready) return;
     try {
-      _log.info('periodic rescan start: $abs');
-      await indexer.fullScan(abs);
-      _log.info('periodic rescan complete');
+      _log.info('rescan start: $abs');
+      await rescans.run();
+      _log.info('rescan complete');
     } on Object catch (error) {
-      _log.error('rescan failed: $error');
-      // A rescan outliving its library — closed, switched, or the whole
-      // controller disposed — has nothing left to close.
-      if (_disposed || _root != abs) return;
-      if (!Directory(abs).existsSync()) {
-        await close();
-        _lastError = 'The library folder is no longer available.';
-      }
+      await _onRescanFailed(abs, error);
     }
+  }
+
+  /// What a failed walk of [abs] leaves to do: nothing for a library that
+  /// has gone, and a closed session for one whose folder has.
+  Future<void> _onRescanFailed(String abs, Object error) async {
+    _log.error('rescan failed: $error');
+    // A rescan outliving its library — closed, switched, or the whole
+    // controller disposed — has nothing left to close.
+    if (_disposed || _root != abs) return;
+    if (!Directory(abs).existsSync()) {
+      await close();
+      _lastError = 'The library folder is no longer available.';
+    }
+  }
+
+  /// Tells the session whether the app is on screen. A hidden app runs no
+  /// periodic walk; coming back runs the one that fell due (#1067).
+  @override
+  void appVisibilityChanged({required bool visible}) {
+    _foreground = visible;
+    _rescans?.setForeground(foreground: visible);
   }
 }
 

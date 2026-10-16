@@ -54,6 +54,14 @@ lines or when responsibilities mix.
   the UI isolate removes the `.niman-tmp-*` files a killed write left
   (`core/files.dart`, #379), taking only files older than
   `staleTempMinimumAge` so a write in flight is never touched.
+- **Keeping the index current:** the file watcher carries live changes;
+  the full walk (`Indexer.fullScan`) is the net under it, run by
+  `RescanScheduler` (`library/rescan_scheduler.dart`, #1067): one walk at a
+  time (a request during one shares a single follow-up), the next periodic
+  one scheduled after the last ended — ten times its duration at least,
+  five minutes at least, three times that while the watch is healthy — and
+  none while the app is in the background or hidden. A watch that restarts
+  (`missedChanges`) and the manual rescan ask for a walk at once.
 - **Edit:** `NoteOps.saveNote` → history snapshot and atomic write
   (temp + rename) in one isolate pass → the note is rescanned into the
   index. Every mode of the surface shares one tokenizer for links.

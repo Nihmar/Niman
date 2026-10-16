@@ -145,6 +145,16 @@ final class FileWatcher {
   /// Batches of changed paths, coalesced by the debounce window.
   Stream<WatchBatch> get events => _controller.stream;
 
+  /// Whether the watch is up: started, not stopped, subscribed to a source
+  /// that has not ended, with no gap pending to report. While it is, the
+  /// full rescan is a net under it and can wait longer (#1067).
+  bool get healthy =>
+      _started &&
+      !_closed &&
+      _subscription != null &&
+      _restartTimer == null &&
+      !_missedChanges;
+
   /// Begins watching. Each change is coalesced; move events additionally
   /// resync their parent directory, since the destination may be unknown
   /// to the OS event.

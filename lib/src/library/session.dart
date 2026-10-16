@@ -446,8 +446,14 @@ abstract interface class LibrarySession {
     required Set<int> placedIds,
   });
 
-  /// Triggers a full rescan immediately (explicit re-index).
+  /// Triggers a full rescan immediately (explicit re-index). A scan already
+  /// running is not doubled: the call completes with the one that follows it.
   Future<void> rescanNow();
+
+  /// Tells the session whether the app is on screen (resumed, or merely
+  /// unfocused) or in the background or hidden (#1067). A hidden app runs no
+  /// periodic full walk; coming back runs the one that fell due.
+  void appVisibilityChanged({required bool visible});
 
   /// Rebuilds the open library's index from disk (#368): the index file is
   /// deleted and re-created, and the notes are read again into it.

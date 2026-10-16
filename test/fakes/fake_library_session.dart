@@ -324,6 +324,12 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   /// How many times the library was re-read on request.
   int rescans = 0;
 
+  /// Whether the shell last said the app is on screen.
+  bool visible = true;
+
+  @override
+  void appVisibilityChanged({required bool visible}) => this.visible = visible;
+
   @override
   Future<void> rebuildIndex() async {
     if (_root == null || _phase != LibraryPhase.ready) {
