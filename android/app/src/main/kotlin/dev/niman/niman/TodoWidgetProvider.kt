@@ -34,11 +34,13 @@ class TodoWidgetProvider : HomeWidgetProvider() {
     override fun onEnabled(context: Context) {
         WidgetDebugLog.log(context, "todo provider enabled (first widget placed)")
         super.onEnabled(context)
+        DayChangeScheduler.schedule(context)
     }
 
     override fun onDisabled(context: Context) {
         WidgetDebugLog.log(context, "todo provider disabled (last widget removed)")
         super.onDisabled(context)
+        DayChangeScheduler.cancel(context)
     }
 
     override fun onUpdate(
@@ -47,6 +49,10 @@ class TodoWidgetProvider : HomeWidgetProvider() {
         appWidgetIds: IntArray,
         widgetData: SharedPreferences,
     ) {
+        // The payload's day-bound headings go stale at midnight: keep the
+        // alarm that re-pushes them armed (idempotent; also re-arms it
+        // after a reboot, when the launcher updates the widgets again).
+        DayChangeScheduler.schedule(context)
         for (id in appWidgetIds) {
             val payload = widgetData.getString("todo_$id", null)
             WidgetDebugLog.log(

@@ -21,6 +21,13 @@ short setup dialog: pick the library from the ones you have open
   to 100 tasks; a section's count is the number of tasks listed under it,
   so a heading never promises more than the widget shows, while the
   header's `N open` stays true even when the list is capped.
+- **At midnight:** the sections depend on the day, so the widget
+  re-reads your `todo.txt` when the day turns over — with the app closed —
+  and moves a task due yesterday from *Today* to *Overdue* (and the rest
+  of the buckets with it). The same refresh runs when the clock or the
+  time zone changes and after a restart. It is an inexact system alarm,
+  so it can land a few minutes after midnight, and it only runs while a
+  Todos widget is placed.
 - **Meta line:** each row names its priority, due date and
   `+project` / `@context` / `#tag` markers; rows without any of them
   hide the line so the text stays aligned. The section already says what

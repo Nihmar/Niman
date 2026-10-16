@@ -156,6 +156,21 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/todo_widget_info" />
         </receiver>
+        <!-- The todo widget's day boundary (#1018): the midnight alarm
+             (DayChangeScheduler) and the events that move midnight or lose
+             the alarm re-push the day-bound headings. System broadcasts
+             only; the alarm's own intent is explicit. DATE_CHANGED is left
+             out on purpose: it is an implicit broadcast the system does not
+             promise a manifest receiver, and the alarm covers midnight. -->
+        <receiver
+            android:name=".DayChangeReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.TIME_SET" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+            </intent-filter>
+        </receiver>
         <!-- The widget's scrollable rows (issue 6 follow-up): the
              launcher binds this on demand when it renders the remote
              collection, so a long list scrolls; BIND_REMOTEVIEWS keeps
