@@ -6,6 +6,8 @@ import 'dart:convert';
 
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/files.dart';
+import 'package:niman/src/library/note_save_result.dart';
 import 'package:niman/src/library/note_write_stream.dart';
 import 'package:niman/src/markdown/note_references.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
@@ -28,7 +30,10 @@ final class Harness {
       saveNote: () => streaming ? null : _save,
       writeNote: () => null,
       saveNoteStream: () => streaming ? _saveStream : null,
-      onSaved: saved.add,
+      onSaved: (path, stamp) {
+        saved.add(path);
+        stamps.add(stamp);
+      },
       onSettled: () => settled++,
     );
   }
@@ -43,6 +48,12 @@ final class Harness {
   final List<Write> writes = [];
   final List<NoteReferences?> streamedReferences = [];
   final List<String> saved = [];
+
+  /// What each save reported of the file it left, in order.
+  final List<DiskStamp?> stamps = [];
+
+  /// What the writers answer with: the file the write left.
+  DiskStamp? leaves;
   int settled = 0;
 
   /// Writes wait on these, in order, while [hold] is set.
@@ -71,16 +82,17 @@ final class Harness {
     await gate.future;
   }
 
-  Future<void> _save(
+  Future<NoteSaveResult?> _save(
     String path,
     String content, {
     required int editSession,
   }) async {
     await _gate();
     writes.add((path: path, text: content, session: editSession));
+    return NoteSaveResult(stamp: leaves);
   }
 
-  Future<void> _saveStream(
+  Future<NoteSaveResult?> _saveStream(
     String path,
     NoteContentProducer content, {
     required int editSession,
@@ -96,6 +108,7 @@ final class Harness {
     }
     streamedReferences.add(references);
     writes.add((path: path, text: utf8.decode(bytes), session: editSession));
+    return NoteSaveResult(stamp: leaves);
   }
 
   void dispose() => pipeline.cancel();
@@ -121,6 +134,23 @@ void main() {
     expect(pipeline.lastSavedRevision, pipeline.revision);
     expect(harness.saved, [harness.path]);
     expect(harness.settled, 1);
+  });
+
+  test('a save reports the stamp of the file the write left (#1060)', () async {
+    final stamp = DiskStamp(size: 4, modified: DateTime(2026, 10, 16, 9));
+    harness = Harness()
+      ..leaves = stamp
+      ..edit('two\n');
+    await harness.pipeline.save();
+    expect(harness.stamps, [stamp]);
+
+    // A streamed save answers the same way.
+    harness.dispose();
+    harness = Harness(streaming: true)
+      ..leaves = stamp
+      ..edit('three\n');
+    await harness.pipeline.save();
+    expect(harness.stamps, [stamp]);
   });
 
   test('a clean note is not written', () async {

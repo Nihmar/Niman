@@ -6,13 +6,15 @@ import 'dart:isolate';
 import 'package:flutter/foundation.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/library/note_save_result.dart';
 import 'package:niman/src/library/note_write_stream.dart';
 import 'package:niman/src/markdown/note_references.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 
 /// Saves [content] as the note at absolute [path]; [editSession] is the
-/// editor session the save belongs to (one opening of the note).
-typedef NoteSaver = Future<void> Function(
+/// editor session the save belongs to (one opening of the note). Answers what
+/// the write left on the disk, when the writer can say ([NoteSaveResult]).
+typedef NoteSaver = Future<NoteSaveResult?> Function(
   String path,
   String content, {
   required int editSession,
@@ -25,7 +27,7 @@ typedef NoteSaver = Future<void> Function(
 /// [references] are the note's tags and links as of the text saved, when
 /// the editor keeps them (a long note): the index takes them rather than
 /// reading the note for them.
-typedef NoteStreamSaver = Future<void> Function(
+typedef NoteStreamSaver = Future<NoteSaveResult?> Function(
   String path,
   NoteContentProducer content, {
   required int editSession,
@@ -91,8 +93,9 @@ final class NoteSavePipeline {
   final NoteStreamSaver? Function() saveNoteStream;
 
   /// The note at the path given reached the disk at the revision the
-  /// pipeline now calls saved.
-  final void Function(String path) onSaved;
+  /// pipeline now calls saved, leaving the file as `stamp` says (null when
+  /// the writer could not say).
+  final void Function(String path, DiskStamp? stamp) onSaved;
 
   /// A save ended, written or failed.
   final VoidCallback onSettled;
@@ -308,8 +311,8 @@ final class NoteSavePipeline {
       'session $session)',
     );
     try {
-      await _write(target, joined, session);
-      _saved(target, revision);
+      final saved = await _write(target, joined, session);
+      _saved(target, revision, saved?.stamp);
       _log.info(
         'note saved: $target (${joined.length} chars, '
         '${clock.elapsedMilliseconds} ms)',
@@ -341,13 +344,13 @@ final class NoteSavePipeline {
       '${stream.slices} slices, session $session)',
     );
     try {
-      await saveNoteStream()!(
+      final saved = await saveNoteStream()!(
         target,
         (index) => _nextSlice(stream, index),
         editSession: session,
         references: stream.references,
       );
-      _saved(target, revision);
+      _saved(target, revision, saved?.stamp);
       _log.info(
         'note saved: $target (${lines.length} chars, '
         '${clock.elapsedMilliseconds} ms)',
@@ -362,10 +365,10 @@ final class NoteSavePipeline {
 
   /// [target] holds [revision] now: when it is the note on screen, that is
   /// the revision the disk has.
-  void _saved(String target, int revision) {
+  void _saved(String target, int revision, DiskStamp? stamp) {
     if (target != notePath()) return;
     _lastSavedRevision = revision;
-    onSaved(target);
+    onSaved(target, stamp);
   }
 
   /// The save is over, however it ended: the flag goes, the owner is told,
@@ -436,33 +439,37 @@ final class NoteSavePipeline {
     }
   }
 
-  Future<void> _write(String path, String content, int editSession) async {
+  Future<NoteSaveResult?> _write(
+    String path,
+    String content,
+    int editSession,
+  ) async {
     final saver = saveNote();
     if (saver != null) {
-      await saver(path, content, editSession: editSession);
-      return;
+      return await saver(path, content, editSession: editSession);
     }
     final seam = writeNote();
     if (seam != null) {
       await seam(path, content);
-      return;
+      return null;
     }
     // Encode + atomic write off the UI isolate: the utf8 encode is an O(n)
     // string pass and the write the FUSE round trips — neither may touch
     // the UI frame.
-    final (bytes, encodeMs, writeMs) = await Isolate.run(() async {
+    final (bytes, encodeMs, writeMs, stamp) = await Isolate.run(() async {
       final encodeClock = Stopwatch()..start();
       final encoded = utf8.encode(content);
       final encodeMs = encodeClock.elapsedMilliseconds;
       final writeClock = Stopwatch()..start();
       await writeFileAtomically(File(path), encoded);
       final writeMs = writeClock.elapsedMilliseconds;
-      return (encoded.length, encodeMs, writeMs);
+      return (encoded.length, encodeMs, writeMs, DiskStamp.of(path));
     });
     _log.debug(
       'save write: $bytes bytes (encode $encodeMs ms, write $writeMs ms, '
       'off-isolate)',
     );
+    return NoteSaveResult(stamp: stamp);
   }
 }
 

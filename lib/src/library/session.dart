@@ -21,6 +21,7 @@ import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/library/note_ops.dart';
 import 'package:niman/src/library/note_relocation.dart';
+import 'package:niman/src/library/note_save_result.dart';
 import 'package:niman/src/library/note_write_stream.dart';
 import 'package:niman/src/links/library_links.dart';
 import 'package:niman/src/links/suggester.dart';
@@ -140,7 +141,13 @@ abstract interface class NoteOperations {
   /// of different notes independently. [editSession] names the editor
   /// session the save belongs to — one opening of the note, however many
   /// autosaves it makes.
-  Future<void> saveNote(String path, String content, {int? editSession});
+  ///
+  /// Answers what the write left on the disk, or null when it cannot say.
+  Future<NoteSaveResult?> saveNote(
+    String path,
+    String content, {
+    int? editSession,
+  });
 
   /// Saves a note whose text is never joined: [content] makes the bytes one
   /// slice at a time and the write takes them as they arrive.
@@ -151,7 +158,7 @@ abstract interface class NoteOperations {
   /// [references] are its tags and links as of the text, when the editor
   /// keeps them: the reindex behind the save takes them instead of reading
   /// the note for them.
-  Future<void> saveNoteStream(
+  Future<NoteSaveResult?> saveNoteStream(
     String path,
     NoteContentProducer content, {
     int? editSession,

@@ -680,16 +680,33 @@ final class DiskStamp {
     }
   }
 
-  /// Whether the file at [path] is still the one this stamped.
+  /// [of], asked of the file system without blocking this isolate: the
+  /// stat runs on the I/O threads. What the UI isolate asks with — a
+  /// `statSync` there is a FUSE round trip per call on Android (#1060).
+  static Future<DiskStamp?> ofAsync(String path) async {
+    try {
+      final stat = await FileStat.stat(path);
+      if (stat.type == FileSystemEntityType.notFound) return null;
+      return DiskStamp(size: stat.size, modified: stat.modified);
+    } on Object {
+      return null;
+    }
+  }
+
+  /// Whether [other] is the same size and time as this stamp.
   ///
   /// Size and time together: a write that lands in the same second and
   /// changes the size is caught by the size, and one that keeps the size is
   /// caught by the time. A file whose bytes changed with both unchanged is
   /// the one case this cannot see, and no watcher reports it either.
-  bool matches(String path) {
-    final now = DiskStamp.of(path);
-    return now != null &&
-        now.size == size &&
-        now.modified.millisecondsSinceEpoch == modified.millisecondsSinceEpoch;
-  }
+  bool sameAs(DiskStamp? other) =>
+      other != null &&
+      other.size == size &&
+      other.modified.millisecondsSinceEpoch == modified.millisecondsSinceEpoch;
+
+  /// Whether the file at [path] is still the one this stamped.
+  bool matches(String path) => sameAs(DiskStamp.of(path));
+
+  /// [matches], without blocking this isolate (see [ofAsync]).
+  Future<bool> matchesAsync(String path) async => sameAs(await ofAsync(path));
 }

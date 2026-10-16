@@ -654,7 +654,11 @@ final class _NoteViewState extends State<NoteView>
   /// the comparison against the pane's text are what cost on a 246 MB note
   /// (208 ms to join the pane's text, 734 ms to normalize a fresh read, 44 ms
   /// to compare; measured 2026-09-22).
-  DiskStamp? _diskStat;
+  ///
+  /// Never stat'ed here (#1060): a read brings the stamp of the file from
+  /// before it was read, a save brings the one of the file it left, and a
+  /// look at the file asks the I/O threads ([DiskStamp.ofAsync]).
+  DiskStamp? _diskStamp;
 
   /// The read pane's refresh (T-M2-08), after a pause in the typing.
   Timer? _previewTimer;
@@ -910,8 +914,8 @@ final class _NoteViewState extends State<NoteView>
     saveNote: () => widget.saveNote,
     writeNote: () => widget.writeNote,
     saveNoteStream: () => widget.saveNoteStream,
-    onSaved: (path) {
-      _recordDiskStat(path);
+    onSaved: (path, stamp) {
+      _diskStamp = stamp;
       _unsaved?.noteChanged();
     },
     onSettled: () {
@@ -1190,6 +1194,8 @@ final class _NoteViewState extends State<NoteView>
         caret: (widget.initialCaretOffset ?? 0).clamp(0, text.length),
         ready: ready,
       );
+      // The test seam reads nothing, so it has no stamp to keep.
+      _diskStamp = ready?.stamp;
       _surfaceCaretLine = null;
       _unifiedText = text;
       // A template `{{cursor}}` landing (#53): the surface was given the
@@ -1245,7 +1251,6 @@ final class _NoteViewState extends State<NoteView>
         unawaited(jumpToAnchor(context, anchor, _linkTargets()));
       }
       widget.onLoaded?.call(path, text.length);
-      _recordDiskStat(path);
       _log.info(
         'note loaded: $path (${text.length} chars, '
         '${clock.elapsedMilliseconds} ms)',
@@ -1311,20 +1316,25 @@ final class _NoteViewState extends State<NoteView>
     final generation = _loadGeneration;
     // What the file looked like when it was last read or written, before the
     // read: O(1) against 250 ms of joining and comparing, and O(1) against
-    // the read itself. The test seam reads nothing, so it has no stat to
+    // the read itself. The test seam reads nothing, so it has no stamp to
     // check and reads on.
-    if (widget.readNote == null && _unchangedOnDisk(path)) {
+    if (widget.readNote == null && await _unchangedOnDisk(path)) {
       _log.debug('reload skipped (the file did not change): $path');
       return;
     }
+    // The reader may have typed, or moved on, while the file was asked.
+    if (!mounted || generation != _loadGeneration) return;
+    if (_loading || _saves.busy || _saves.dirty) return;
     final String content;
+    DiskStamp? stamp;
     try {
       if (widget.readNote != null) {
         content = await widget.readNote!(path);
       } else {
         final loaded = await readNoteText(path);
-        if (loaded is! String) return;
-        content = loaded;
+        if (loaded is! NoteTextRead) return;
+        content = loaded.text;
+        stamp = loaded.stamp;
       }
     } on Object catch (error) {
       _log.warning('reload read failed: $path ($error)');
@@ -1339,6 +1349,10 @@ final class _NoteViewState extends State<NoteView>
       return;
     }
     final text = normalizedLineEndings(content);
+    // The file is what the pane has, or is about to be: either way this is
+    // the file that was looked at, so the next look can stop at the stamp
+    // instead of reading it again (#1060).
+    _diskStamp = stamp;
     if (text == _unifiedText) return;
     // Mute the programmatic change like _load does: the listener returns
     // before the revision bump and the save schedule.
@@ -1969,18 +1983,12 @@ final class _NoteViewState extends State<NoteView>
     _refreshPreview();
   }
 
-  /// Records what the note's file looks like now, for [_unchangedOnDisk].
-  ///
-  /// Best effort: a file that cannot be stat'ed (gone, or on a filesystem
-  /// that will not answer) records nothing, and the next reload reads and
-  /// compares the way it always did.
-  void _recordDiskStat(String path) => _diskStat = DiskStamp.of(path);
-
-  /// Whether the file at [path] is the one [_diskStat] recorded.
+  /// Whether the file at [path] is the one [_diskStamp] recorded.
   ///
   /// A file that cannot be stat'ed, or one nothing recorded, is read: the
   /// fallback is the comparison this stands in front of.
-  bool _unchangedOnDisk(String path) => _diskStat?.matches(path) ?? false;
+  Future<bool> _unchangedOnDisk(String path) async =>
+      await _diskStamp?.matchesAsync(path) ?? false;
 
   /// Opens the outline sheet and jumps to whatever was picked; a pointer's
   /// menu grows from [anchor], the outline button.

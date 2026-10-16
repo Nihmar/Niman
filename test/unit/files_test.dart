@@ -647,6 +647,21 @@ void main() {
         isFalse,
       );
     });
+
+    test('asked without blocking, it answers the same (#1060)', () async {
+      final file = File(p.join(tempDir.path, 'async.md'))
+        ..writeAsStringSync('one two three');
+      final stamp = DiskStamp.of(file.path)!;
+      expect(stamp.sameAs(await DiskStamp.ofAsync(file.path)), isTrue);
+      expect(await stamp.matchesAsync(file.path), isTrue);
+
+      file.writeAsStringSync('one two three four');
+      expect(await stamp.matchesAsync(file.path), isFalse);
+
+      final gone = p.join(tempDir.path, 'gone.md');
+      expect(await DiskStamp.ofAsync(gone), isNull);
+      expect(await stamp.matchesAsync(gone), isFalse);
+    });
   });
 
   group('hashFileSha256', () {

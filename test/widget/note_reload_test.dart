@@ -96,6 +96,54 @@ void main() {
       );
     });
 
+    testWidgets('a change adopted is not read again by the next bump (#1060)', (
+      tester,
+    ) async {
+      File(path).writeAsStringSync('one two three');
+      Widget app({int token = 0}) => _app(
+        NoteView(
+          path: path,
+          showLineNumbers: false,
+          autofocusEditor: false,
+          reloadToken: token,
+        ),
+      );
+      // The reload asks the file system, then reads: two real waits.
+      Future<void> settle() async {
+        for (var turn = 0; turn < 2; turn++) {
+          await tester.runAsync(
+            () => Future<void>.delayed(const Duration(milliseconds: 300)),
+          );
+          await tester.pump();
+        }
+      }
+
+      await tester.pumpWidget(app());
+      await settle();
+      await tester.pump();
+
+      File(path).writeAsStringSync('changed on disk, and longer');
+      await tester.pumpWidget(app(token: 1));
+      await settle();
+      final buffer = tester
+          .state<MarkdownSourceViewState>(find.byType(MarkdownSourceView))
+          .widget
+          .buffer;
+      expect(buffer.text, 'changed on disk, and longer');
+
+      // The file is as the pane has it. The test's own edit stands in for
+      // "a read here would replace the pane": if the next bump reads the file
+      // again, it puts the disk's text back over it.
+      buffer.insert(buffer.length, ' AND MORE');
+      await tester.pumpWidget(app(token: 2));
+      await settle();
+      expect(
+        buffer.text,
+        'changed on disk, and longer AND MORE',
+        reason: 'the adopted file was stamped, so nothing was read',
+      );
+    });
+
     testWidgets('a bump after the file changed adopts it', (tester) async {
       File(path).writeAsStringSync('one two three');
       await tester.pumpWidget(
@@ -122,10 +170,13 @@ void main() {
           ),
         ),
       );
-      await tester.runAsync(
-        () => Future<void>.delayed(const Duration(milliseconds: 300)),
-      );
-      await tester.pump();
+      // The reload asks the file system, then reads: two real waits.
+      for (var turn = 0; turn < 2; turn++) {
+        await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 300)),
+        );
+        await tester.pump();
+      }
       final buffer = tester
           .state<MarkdownSourceViewState>(find.byType(MarkdownSourceView))
           .widget

@@ -14,6 +14,7 @@ import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/history/history_store.dart';
 import 'package:niman/src/history/note_history.dart';
 import 'package:niman/src/history/snapshot_policy.dart';
+import 'package:niman/src/library/note_save_result.dart';
 import 'package:niman/src/library/note_tidy.dart';
 import 'package:niman/src/library/note_write_stream.dart';
 import 'package:niman/src/lint/lint_rule.dart';
@@ -109,7 +110,10 @@ final class NoteWriter {
   /// [references] are the note's tags and links as of [content], when the
   /// editor keeps them: handed to the note's reindex with the digest the
   /// write makes ([KnownContent]).
-  Future<void> save(
+  ///
+  /// Answers what the write left on the disk ([NoteSaveResult]), or null when
+  /// the producer abandoned the save and the disk was not touched.
+  Future<NoteSaveResult?> save(
     String path,
     NoteText content, {
     int? editSession,
@@ -250,7 +254,7 @@ final class NoteWriter {
     }
   }
 
-  Future<void> _write(
+  Future<NoteSaveResult?> _write(
     String path,
     NoteText content,
     int? editSession,
@@ -290,7 +294,7 @@ final class NoteWriter {
     // A save the producer abandoned: the disk was not touched, so there is
     // nothing to report, log or reindex — the caller's next save writes the
     // note as it then stands.
-    if (result == null) return;
+    if (result == null) return null;
     history?.report(path, result.snapshot, result.snapshotError);
     _written[path] = (
       sha256: result.sha256,
@@ -305,6 +309,9 @@ final class NoteWriter {
       'total ${queuedAt.elapsedMilliseconds} ms)',
     );
     _reindexWhenQuiet(path, abs, created: result.created, bytes: result.bytes);
+    return NoteSaveResult(
+      stamp: DiskStamp(size: result.bytes, modified: result.modified),
+    );
   }
 
   /// Whether the note at library-relative [path] waits for a reindex this
