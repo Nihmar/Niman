@@ -100,6 +100,30 @@ final class _TodoPointerListState extends State<TodoPointerList> {
     if (editing != null && !widget.items.any((i) => i.id == editing)) {
       _editing = null;
     }
+    _settleMenu();
+  }
+
+  /// The row menu across a publish: it means the task it was opened on, and
+  /// a pick writes by that task's line -- in either file. The same task at
+  /// the same place resolves against the fresh list; a row the publish took
+  /// away or changed closes the menu, so no pick reaches a line that is
+  /// another task's now.
+  void _settleMenu() {
+    final open = _menuRow;
+    if (open == null) return;
+    for (final item in widget.items) {
+      if (item is TodoRowItem &&
+          item.id == open.id &&
+          item.entry.task.raw == open.entry.task.raw) {
+        _menuRow = item;
+        return;
+      }
+    }
+    _menuRow = null;
+    // The anchor is mid-build: it closes once the frame is out.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && _menu.isOpen) _menu.close();
+    });
   }
 
   @override

@@ -242,6 +242,38 @@ void main() {
     expect(source.doneLines, hasLength(3));
   });
 
+  testWidgets('a row menu left open across the removal of its row closes '
+      '(#1009)', (tester) async {
+    await pumpTab(tester, ['alpha', 'beta']);
+    await tester.tap(row0, buttons: kSecondaryButton);
+    await settle(tester);
+    expect(find.byKey(const Key('todo-menu-delete')), findsOne);
+
+    // Another write takes the menu's row away: the next one slides into its
+    // line, and a pick must not land on it.
+    await controller!.deleteTodo(controller!.snapshot!.todo.first);
+    await settle(tester);
+    expect(source.todoLines, ['beta']);
+    expect(find.byKey(const Key('todo-menu-delete')), findsNothing);
+  });
+
+  testWidgets('a row menu survives a publish that leaves its row alone '
+      '(#1009)', (tester) async {
+    await pumpTab(tester, ['alpha', 'beta']);
+    await tester.tap(
+      find.byKey(const Key('todo-row-open-1')),
+      buttons: kSecondaryButton,
+    );
+    await settle(tester);
+
+    await controller!.add('gamma');
+    await settle(tester);
+    expect(find.byKey(const Key('todo-menu-delete')), findsOne);
+    await tester.tap(find.byKey(const Key('todo-menu-delete')));
+    await settle(tester);
+    expect(source.todoLines, ['alpha', 'gamma']);
+  });
+
   testWidgets('a delete leaves the selection on the row that takes its '
       'place, the one before at the end (#910)', (tester) async {
     await pumpTab(tester, ['a', 'b', 'c', 'd']);
