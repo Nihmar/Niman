@@ -40,7 +40,7 @@ the note's. The panel lists:
 - after `[[` — the library's notes, the name shown and the folder dimmed
   (what tells two same-named notes apart). A note is matched by its name
   **and** by its frontmatter aliases: the name you typed in full first, then
-  the names it starts (the shorter first), then those that hold it; a row found
+  the names it starts (the shorter first), then those that hold it (from three characters on); a row found
   through an alias says which one. Choosing a note whose name another
   note shares writes as much of its folder as it takes to name that one
   (`[[Work/Meeting]]`), so the link opens the note that was picked. A note
