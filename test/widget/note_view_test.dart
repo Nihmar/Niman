@@ -7,10 +7,29 @@ import 'package:niman/src/markdown/note_read_failure.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/markdown/surface.dart';
+import 'package:niman/src/spellcheck/editor_spell_check.dart';
+import 'package:niman/src/spellcheck/spell_checker.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/strings.dart';
 
 Widget _app(NoteView view) => MaterialApp(home: Scaffold(body: view));
+
+/// Every word passes: the row's spelling button still has an engine.
+final class _PassingChecker implements SpellChecker {
+  const new();
+
+  @override
+  bool get available => true;
+
+  @override
+  bool isCorrect(String word) => true;
+
+  @override
+  List<String> suggest(String word) => const [];
+
+  @override
+  void dispose() {}
+}
 
 NoteView _view({
   required String path,
@@ -23,8 +42,12 @@ NoteView _view({
   int? initialCaretOffset,
   int caretRequest = 0,
   bool outlineInDock = false,
+  EditorSpellCheck? spellCheck,
+  bool spellCheckInDock = false,
 }) => NoteView(
   outlineInDock: outlineInDock,
+  spellCheckInDock: spellCheckInDock,
+  spellCheck: spellCheck,
   showLineNumbers: showLineNumbers,
   autofocusEditor: autofocusEditor,
   showPreview: showPreview,
@@ -509,6 +532,35 @@ void main() {
       await tester.pump();
       await tester.pump();
       expect(find.byKey(const Key('outline-toggle')), findsNothing);
+      expect(find.byKey(const Key('editor-find-open')), findsOneWidget);
+    });
+
+    testWidgets('the spelling button stays out where the dock has it', (
+      tester,
+    ) async {
+      // The review is the dock's Spelling pane wherever the panel can
+      // show (#712); the row's own button would be a second way there
+      // (#1002).
+      final spell = EditorSpellCheck(
+        createChecker: (_) => const _PassingChecker(),
+      );
+      addTearDown(spell.dispose);
+      Widget view({required bool inDock}) => _app(
+        _view(
+          path: '/notes/a.md',
+          readNote: (_) async => 'hello',
+          spellCheck: spell,
+          spellCheckInDock: inDock,
+        ),
+      );
+      await tester.pumpWidget(view(inDock: false));
+      await tester.pump();
+      await tester.pump();
+      expect(find.byKey(const Key('spell-check-open')), findsOneWidget);
+
+      await tester.pumpWidget(view(inDock: true));
+      await tester.pump();
+      expect(find.byKey(const Key('spell-check-open')), findsNothing);
       expect(find.byKey(const Key('editor-find-open')), findsOneWidget);
     });
 

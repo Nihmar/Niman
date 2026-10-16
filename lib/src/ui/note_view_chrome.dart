@@ -74,7 +74,7 @@ final class NoteStatusRow extends StatelessWidget {
     required this.loading,
     required this.showPreview,
     required this.showWysiwyg,
-    required this.spellCheckAvailable,
+    required this.showSpellCheck,
     required this.canSwitchEditorKind,
     required this.wordCount,
     required this.statusText,
@@ -100,8 +100,9 @@ final class NoteStatusRow extends StatelessWidget {
   /// Whether the WYSIWYG surface is the visible editor.
   final bool showWysiwyg;
 
-  /// Whether the spell checker can open.
-  final bool spellCheckAvailable;
+  /// Whether the spelling button shows: the panel has the review wherever
+  /// it can show, and the row leaves the button out there (#1002).
+  final bool showSpellCheck;
 
   /// Whether the editor-kind toggle shows.
   final bool canSwitchEditorKind;
@@ -129,9 +130,9 @@ final class NoteStatusRow extends StatelessWidget {
   /// place, handed over.
   final Future<void> Function(Rect? anchor) onOutline;
 
-  /// Whether the outline button shows: the dock has the outline where
-  /// there is room for it, and the row leaves it out there. Fixed for a
-  /// window's width, so nothing moves under a pointer on it.
+  /// Whether the outline button shows: the panel has the outline wherever
+  /// it can show, and the row leaves it out there. Fixed for a window's
+  /// width, so nothing moves under a pointer on it.
   final bool showOutline;
 
   /// Opens find (source bar or WYSIWYG panel, chosen by the owner).
@@ -226,7 +227,7 @@ final class NoteStatusRow extends StatelessWidget {
               onPressed: !showPreview ? onFind : null,
             ),
           ),
-        if (!loading && spellCheckAvailable)
+        if (!loading && showSpellCheck)
           Padding(
             padding: iconPadding,
             child: IconButton(

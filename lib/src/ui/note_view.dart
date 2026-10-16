@@ -134,7 +134,7 @@ final class NoteView extends StatefulWidget {
     this.onLoaded,
     this.kindMode = true,
     this.outlineInDock = false,
-    this.onSpellingInDock,
+    this.spellCheckInDock = false,
     this.onNoteKindChanged,
     this.onKindMarkdown,
     this.onPasteAsMarkdown,
@@ -331,15 +331,19 @@ final class NoteView extends StatefulWidget {
   /// the editor. False = always the raw editor.
   final bool kindMode;
 
-  /// Whether the window's dock has the outline: the status row's own
-  /// outline button would then be a second way to the same list, and is
-  /// left out (desktop chrome, 2026-10-09). Off where nothing else has it
-  /// — a phone, a narrow window, a file outside the library.
+  /// Whether the window's panel has the outline (#1002): the status row's
+  /// own outline button would then be a second way to the same list, and is
+  /// left out. True wherever the wide layout shows the panel — docked
+  /// beside the note, or over it on a window without room for both. Off
+  /// where nothing else has it — a phone, a window too narrow for the wide
+  /// layout.
   final bool outlineInDock;
 
-  /// Opens the spelling review in the dock beside the note (#712), where
-  /// the window has one; null reviews in a sheet over the note.
-  final VoidCallback? onSpellingInDock;
+  /// Whether the window's panel has the spelling review (#1002), on the
+  /// same rule as [outlineInDock]: the status row's own spelling button
+  /// would then be a second way to the same pane, and is left out. A phone
+  /// keeps its button — the sheet is its way to the review.
+  final bool spellCheckInDock;
 
   /// Reports the loaded note's kind (the frontmatter `type` value, null =
   /// plain note); the shell shows the kind toggle for known kinds.
@@ -630,7 +634,6 @@ final class _NoteViewState extends State<NoteView>
     onSpellChecked: () {
       if (mounted) setState(() {});
     },
-    inDock: () => widget.onSpellingInDock,
   );
 
   @override
@@ -2219,7 +2222,8 @@ final class _NoteViewState extends State<NoteView>
                       showOutline: !widget.outlineInDock,
                       showPreview: showPreview,
                       showWysiwyg: _wysiwygIn(widget),
-                      spellCheckAvailable:
+                      showSpellCheck:
+                          !widget.spellCheckInDock &&
                           widget.spellCheck != null &&
                           widget.spellCheck!.available,
                       // In its place, and off: a todo.txt has one pane.

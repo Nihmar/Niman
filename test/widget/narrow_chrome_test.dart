@@ -34,7 +34,7 @@ NoteStatusRow _status() => NoteStatusRow(
   loading: false,
   showPreview: false,
   showWysiwyg: false,
-  spellCheckAvailable: true,
+  showSpellCheck: true,
   canSwitchEditorKind: true,
   wordCount: 1234,
   statusText: 'Saved',

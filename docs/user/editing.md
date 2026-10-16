@@ -143,7 +143,8 @@ tabs.
 - **One place per note.** A note is open in one place only: opening it
   again takes you to the pane and tab it is in.
 
-**The side panel.** On a wide window a panel on the right shows the note's **Outline**, its **Tags**, its **Links** or its
+**The side panel.** On a wide window a panel on the right shows the note's **Outline**, its **Tags**, its **Links**, its
+**Spelling** or its
 **History**, one at a time, switched by the icons at its top. A panel too
 narrow for all of its icons shows them from the end, the first ones cut
 off at the left: the wheel over the row scrolls it, and the mouse drags
@@ -155,6 +156,8 @@ it as a finger does on a tablet.
 - **Links** lists the notes that link to this one, each with the line it
   says the link on, and opens one on a click (see
   [links](links.md#links-to-this-note)).
+- **Spelling** lists the note's misspellings, each with its suggestions
+  (see [Spellcheck](#spellcheck)).
 - **History** lists the kept versions, newest first, and opens the
   history screen to compare or restore.
 
@@ -163,9 +166,11 @@ edited. The panel's button in the note's row, its **×**, or
 `Ctrl+Shift+B` shows and hides it. Whether it is open, and which of the
 panes it shows, is remembered with the tabs. The note's **⋮** menu has
 Outline, Tags and Links to this note too: they open the panel where it
-docks, and a sheet on a phone. Where the panel docks, the outline button
-leaves the row under the note — the panel is where the outline is; on a
-narrower window and a phone that button opens the outline as a sheet.
+docks, and a sheet on a phone. Wherever the wide layout can show the
+panel — beside the note, or over it on a narrower window — the note's
+outline and its spelling review live there, and the row under the note
+leaves both their buttons out; a phone keeps them, and there they open
+the outline and the spelling review as sheets.
 
 With 1000 px or more the panel docks beside the note. On a narrower wide
 window — half of a 1080p screen, say — the button stays in its place in
@@ -910,24 +915,24 @@ library, so different libraries can carry different vocabularies; it
 survives app restarts, and the WebDAV sync merges it word by word, so
 a word added on one device is known on the others.
 
-The status row's spelling button opens a panel listing the note's
-misspellings, each with hunspell's suggestions; tapping one replaces the
-word. The panel opens at once on any note, however long: it checks the
-note a little at a time, with a bar showing how far it has got, and the
-list fills as it goes. The suggestions arrive just after the words they
+The spelling panel lists the note's misspellings, each with hunspell's
+suggestions; tapping one replaces the word. The panel opens at once on
+any note, however long: it checks the note a little at a time, with a
+bar showing how far it has got, and the list fills as it goes. The suggestions arrive just after the words they
 belong to. A fix updates the list on the spot, without checking the
 whole note again. The panel lists at most 200 words; when a note has
 more it says so, and **Check again** lists the next ones once some are
 fixed.
 
-On a window with room for the dock the panel is the dock's **Spelling**
-pane, beside the note instead of over it (#712): you keep writing while it
-is open, and it checks the note again after each edit, once you pause. A
+Wherever the wide layout shows the panel, the review is its **Spelling**
+pane — beside the note, or over it on a narrower window (#712): you keep
+writing while it is open, and it checks the note again after each edit,
+once you pause. A
 click on a word selects it in the note; **Ignore** takes the word off the
 list for as long as the note stays open, however much you edit it and even
 if you close the pane and open it again (it is not remembered after that:
 **Add to dictionary** adds it to the library's words for good). The list
 stays on screen while the note is checked again, and if the note changed
 under a word before you used it, nothing is replaced: the list is
-refreshed instead. A phone, or a window too narrow for the dock, keeps the
-panel as a sheet.
+refreshed instead. A phone, and a window too narrow for the wide layout,
+opens it as a sheet over the note from the status row's button.

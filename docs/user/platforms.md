@@ -409,15 +409,17 @@ responsive while a large share is read, and it is capped at 512 MB: past
 that the share is refused rather than copied — the sender's text arrives
 instead, if it attached any.
 
-The **side panel** (outline, tags, the notes that link here, history beside
-the note, and the [journal](journal.md)'s calendar) docks
-beside the note on any wide window at least 1000 px wide: desktops and
-tablets. A narrower wide window keeps the panel's button and opens the
+The **side panel** (outline, the spelling review, tags, the notes that
+link here, history beside the note, and the
+[journal](journal.md)'s calendar) docks beside the note on any wide
+window at least 1000 px wide: desktops and tablets. A narrower wide
+window keeps the panel's button and opens the
 panel over the note instead (see [editing](editing.md#the-side-panel)). A phone,
 upright or turned, has no room for a note and a panel side by side, so
-this is a decision rather than an omission: the note's ⋮ menu opens the
-same ones there, the outline, the tags and *Links to this note* as sheets
-and the history as its screen. The *Links to this note* header under the
+this is a decision rather than an omission: the note's status row keeps
+its outline and spelling buttons there — both open as sheets — and the
+⋮ menu opens the outline, the tags and *Links to this note* as sheets,
+the history as its screen. The *Links to this note* header under the
 note is on every platform. Where the panel shows,
 its left edge drags to make it wider or narrower, like the tree's edge.
 It stops growing before the note gets narrower than 360 px, and it

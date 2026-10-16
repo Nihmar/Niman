@@ -70,7 +70,6 @@ final class NoteEditCommands {
     required this.onInserted,
     required this.spellCheck,
     required this.onSpellChecked,
-    required this.inDock,
   });
 
   /// The note on the editor surface, or null before one is open.
@@ -131,10 +130,6 @@ final class NoteEditCommands {
 
   /// The spelling review closed: the pane is drawn again.
   final VoidCallback onSpellChecked;
-
-  /// Opens the review in the dock, where the window has one (#712); null
-  /// opens it as a sheet over the note.
-  final VoidCallback? Function() inDock;
 
   /// What each toolbar button does. The catalogue and the order live in
   /// `editor/toolbar_item.dart`; the commands stay here, with the
@@ -557,15 +552,12 @@ final class NoteEditCommands {
     );
   }
 
-  /// Opens the spelling review panel (T-PP-09): the dock's pane where the
-  /// window has one ([inDock], #712), else a sheet over the note.
+  /// Opens the spelling review (T-PP-09) as a sheet over the note: the
+  /// phone's way to it. The row's button is left out wherever the panel
+  /// holds the review (#1002), so a sheet is all this opens.
   Future<void> openSpellCheck() async {
     final spell = spellCheck();
     if (spell == null) return;
-    if (inDock() case final open?) {
-      open();
-      return;
-    }
     await showModalBottomSheet<void>(
       context: context(),
       isScrollControlled: true,

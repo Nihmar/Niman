@@ -202,9 +202,7 @@ final class ShellDock {
       return;
     }
     final note = panelNote();
-    // The spelling sheet is the note's own: it opens it where there is no
-    // dock.
-    if (note == null || pane == DockPane.spelling) return;
+    if (note == null) return;
     if (pane == DockPane.outline) {
       final line = await showOutlineSheet(
         context,
