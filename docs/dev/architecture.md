@@ -70,6 +70,14 @@ lines or when responsibilities mix.
   its destination is those two paths; only a move with no known destination
   reconciles its parent folder, against a listing of that folder's own
   entries (`IndexTree.syncDirLevel`), never its subtree.
+- **Folder rename and move:** the app's own rename or move of a folder is
+  `Indexer.relocateFolder` (`db/index_move.dart`, #1063): one statement
+  rewrites the paths of every row under it, so no note is read and every
+  note keeps its id — with its full-text row, tags and link edges. Only the
+  notes with a link that reads from their own folder (an edge to a note
+  outside the folder, a dead Markdown or `../` link) are read again. A move
+  the index cannot carry (a destination that is already indexed, a disk that
+  does not show it) goes through `applyEvents` as an external change does.
 - **Edit:** `NoteOps.saveNote` → history snapshot and atomic write
   (temp + rename) in one isolate pass → the note is rescanned into the
   index. Every mode of the surface shares one tokenizer for links.

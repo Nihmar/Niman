@@ -194,9 +194,14 @@ final class NoteRelocator {
     await _carrySettings(path, newRel, isDir: row.isDir);
     await _carryHome(path, newRel, isDir: row.isDir);
     await carryOutsideLibrary(carryOutside, path, newRel, isDir: row.isDir);
-    // Before the index hears of the move: a folder's reindex re-creates
-    // its notes, and the edges that named them would be gone (#507).
-    await indexer.applyEvents(root, [oldAbs, _abs(newRel)]);
+    // A folder's rows are carried to the new path in place: their ids, and
+    // with them the edges that named them (#507), stay (#1063). A move it
+    // cannot carry goes through the ordinary event path, which reads what
+    // it finds.
+    if (!row.isDir ||
+        !await indexer.relocateFolder(root, oldAbs, _abs(newRel))) {
+      await indexer.applyEvents(root, [oldAbs, _abs(newRel)]);
+    }
     final pending = await _rewriteLinks(
       path,
       newRel,
