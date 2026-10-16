@@ -1,11 +1,15 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:niman/src/editor/context_menu_items.dart';
 import 'package:niman/src/editor/editor_context_menu.dart';
+import 'package:niman/src/editor/highlighting.dart';
+import 'package:niman/src/links/link_path.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
+import 'package:niman/src/ui/strings.dart';
 
 /// The source view's desktop context menu, and the entries it shares with
 /// the touch toolbar: the clipboard's and the spelling's.
@@ -20,6 +24,8 @@ final class SourceContextMenu extends ChangeNotifier {
     required this._selection,
     required this._grouped,
     required this._caretRect,
+    required this._offsetAt,
+    required this._linkAt,
     required this._hideTouch,
     required this._showTouch,
     required this._cut,
@@ -32,6 +38,7 @@ final class SourceContextMenu extends ChangeNotifier {
     required this._formats,
     required this._table,
     required this._structure,
+    this._openLink,
   });
 
   /// The note the view draws.
@@ -47,6 +54,17 @@ final class SourceContextMenu extends ChangeNotifier {
   /// The caret's rectangle in global coordinates, or null while it is not
   /// laid out.
   final Rect? Function() _caretRect;
+
+  /// The note offset a global point falls on, or null outside the text.
+  final int? Function(Offset global) _offsetAt;
+
+  /// The link at an offset — its kind, its text as written, and a Markdown
+  /// link's resolved target — or null (#1099).
+  final (TokenKind, String, String?)? Function(int offset) _linkAt;
+
+  /// Opens a link token, Ctrl+click's own call; null on a surface that
+  /// follows no link, where Open link is shown greyed out.
+  final void Function(TokenKind kind, String raw, String? href)? _openLink;
 
   /// Takes the touch selection's handles and toolbar away.
   final VoidCallback _hideTouch;
@@ -86,6 +104,10 @@ final class SourceContextMenu extends ChangeNotifier {
   /// Where the menu opens, in global coordinates, while it is up.
   Offset? _at;
 
+  /// The link under the pointer — or under the caret, for the menu key —
+  /// while the menu is up, read once as it opens (#1099).
+  (TokenKind, String, String?)? _link;
+
   /// Whether the view this serves is gone.
   bool _disposed = false;
 
@@ -102,10 +124,16 @@ final class SourceContextMenu extends ChangeNotifier {
   }
 
   /// Opens the menu at [global], or at the caret without one (the menu key,
-  /// Shift+F10).
+  /// Shift+F10). The link under the pointer — or under the caret — is read
+  /// now, so the menu can offer Open link and Copy link for it (#1099).
   void show([Offset? global]) {
     final at = global ?? _caretRect()?.bottomLeft;
     if (at == null) return;
+    final buffer = _buffer();
+    final offset = global == null
+        ? _selection().extent.clamp(0, buffer.length)
+        : _offsetAt(global);
+    _link = offset == null ? null : _linkAt(offset);
     _hideTouch();
     _at = at;
     notifyListeners();
@@ -153,12 +181,64 @@ final class SourceContextMenu extends ChangeNotifier {
             clipboard: clipboardItems(hide),
             formats: _formats(),
             extras: spellingItems(hide),
+            linkActions: _linkActions(context),
             table: _table(),
             structure: _structure(),
             onDismiss: hide,
           ),
         ),
       ],
+    );
+  }
+
+  /// The link actions the menu offers for the link read as it opened
+  /// (#1099): Open link and Copy link for a Markdown link whose target
+  /// leaves the library — `LinkPaths.hasScheme`, the resolver's own rule,
+  /// so `https://…`, `mailto:` and `tel:` qualify. Null for a wikilink, a
+  /// note path, a local anchor, or a click that landed on no link at all;
+  /// the menu then opens exactly as it did before.
+  List<ContextMenuAction>? _linkActions(BuildContext context) {
+    final link = _link;
+    if (link == null) return null;
+    final (kind, raw, href) = link;
+    if (kind != TokenKind.link) return null;
+    final target = (href ?? _inlineHrefOf(raw)).trim();
+    if (target.isEmpty || !LinkPaths.hasScheme(target)) return null;
+    final open = _openLink;
+    return <ContextMenuAction>[
+      ContextMenuAction(
+        id: 'menu-open-link',
+        label: AppStrings.menuOpenLink,
+        icon: Icons.open_in_new,
+        onPressed: open == null ? null : () => open(kind, raw, href),
+      ),
+      ContextMenuAction(
+        id: 'menu-copy-link',
+        label: AppStrings.menuCopyLink,
+        icon: Icons.content_copy,
+        onPressed: () => unawaited(_copyLink(context, target)),
+      ),
+    ];
+  }
+
+  /// The target of an inline `[text](href)` as written — what
+  /// `_openLinkToken` reads out of the token — or an empty string when the
+  /// token spells no `](href)`, as a reference link does not.
+  static String _inlineHrefOf(String raw) {
+    final close = raw.indexOf(']');
+    if (close < 0 || raw.length < close + 3 || raw[close + 1] != '(') {
+      return '';
+    }
+    return raw.substring(close + 2, raw.length - 1);
+  }
+
+  /// Puts [target] on the clipboard and says so — the same word the place
+  /// link button gives (#282).
+  Future<void> _copyLink(BuildContext context, String target) async {
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    await Clipboard.setData(ClipboardData(text: target));
+    messenger?.showSnackBar(
+      SnackBar(content: Text(AppStrings.placeLinkCopied)),
     );
   }
 

@@ -765,6 +765,10 @@ final class DanishStrings extends Strings {
   @override
   String get menuAddExternalLink => 'Tilføj eksternt link';
   @override
+  String get menuOpenLink => 'Åbn link';
+  @override
+  String get menuCopyLink => 'Kopiér link';
+  @override
   String get menuFormat => 'Format';
   @override
   String get menuParagraph => 'Afsnit';

@@ -763,6 +763,10 @@ final class EnglishStrings extends Strings {
   @override
   String get menuAddExternalLink => 'Add external link';
   @override
+  String get menuOpenLink => 'Open link';
+  @override
+  String get menuCopyLink => 'Copy link';
+  @override
   String get menuFormat => 'Format';
   @override
   String get menuParagraph => 'Paragraph';

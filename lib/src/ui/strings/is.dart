@@ -769,6 +769,10 @@ final class IcelandicStrings extends Strings {
   @override
   String get menuAddExternalLink => 'Bæta við ytri tengli';
   @override
+  String get menuOpenLink => 'Opna tengil';
+  @override
+  String get menuCopyLink => 'Afrita tengil';
+  @override
   String get menuFormat => 'Snið';
   @override
   String get menuParagraph => 'Málsgrein';

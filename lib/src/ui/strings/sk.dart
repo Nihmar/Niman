@@ -770,6 +770,10 @@ final class SlovakStrings extends Strings {
   @override
   String get menuAddExternalLink => 'Pridať externý odkaz';
   @override
+  String get menuOpenLink => 'Otvoriť odkaz';
+  @override
+  String get menuCopyLink => 'Kopírovať odkaz';
+  @override
   String get menuFormat => 'Formát';
   @override
   String get menuParagraph => 'Odsek';

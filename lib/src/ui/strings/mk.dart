@@ -777,6 +777,10 @@ final class MacedonianStrings extends Strings {
   @override
   String get menuAddExternalLink => 'Додај надворешна врска';
   @override
+  String get menuOpenLink => 'Отвори врска';
+  @override
+  String get menuCopyLink => 'Копирај врска';
+  @override
   String get menuFormat => 'Формат';
   @override
   String get menuParagraph => 'Пасус';

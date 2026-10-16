@@ -770,6 +770,10 @@ final class PortugueseStrings extends Strings {
   @override
   String get menuAddExternalLink => 'Adicionar ligação externa';
   @override
+  String get menuOpenLink => 'Abrir ligação';
+  @override
+  String get menuCopyLink => 'Copiar ligação';
+  @override
   String get menuFormat => 'Formato';
   @override
   String get menuParagraph => 'Parágrafo';

@@ -769,6 +769,10 @@ final class CroatianStrings extends Strings {
   @override
   String get menuAddExternalLink => 'Dodaj vanjsku poveznicu';
   @override
+  String get menuOpenLink => 'Otvori poveznicu';
+  @override
+  String get menuCopyLink => 'Kopiraj poveznicu';
+  @override
   String get menuFormat => 'Oblik';
   @override
   String get menuParagraph => 'Odlomak';

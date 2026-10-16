@@ -717,6 +717,10 @@ final class ChineseStrings extends Strings {
   @override
   String get menuAddExternalLink => '添加外部链接';
   @override
+  String get menuOpenLink => '打开链接';
+  @override
+  String get menuCopyLink => '复制链接';
+  @override
   String get menuFormat => '格式';
   @override
   String get menuParagraph => '段落';

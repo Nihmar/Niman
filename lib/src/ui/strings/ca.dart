@@ -777,6 +777,10 @@ final class CatalanStrings extends Strings {
   @override
   String get menuAddExternalLink => 'Afegeix un enllaç extern';
   @override
+  String get menuOpenLink => "Obre l'enllaç";
+  @override
+  String get menuCopyLink => "Copia l'enllaç";
+  @override
   String get menuFormat => 'Format';
   @override
   String get menuParagraph => 'Paràgraf';

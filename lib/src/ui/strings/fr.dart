@@ -785,6 +785,10 @@ final class FrenchStrings extends Strings {
   @override
   String get menuAddExternalLink => 'Ajouter un lien externe';
   @override
+  String get menuOpenLink => 'Ouvrir le lien';
+  @override
+  String get menuCopyLink => 'Copier le lien';
+  @override
   String get menuFormat => 'Format';
   @override
   String get menuParagraph => 'Paragraphe';

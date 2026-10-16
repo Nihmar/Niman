@@ -769,6 +769,10 @@ final class CzechStrings extends Strings {
   @override
   String get menuAddExternalLink => 'Přidat externí odkaz';
   @override
+  String get menuOpenLink => 'Otevřít odkaz';
+  @override
+  String get menuCopyLink => 'Kopírovat odkaz';
+  @override
   String get menuFormat => 'Formát';
   @override
   String get menuParagraph => 'Odstavec';

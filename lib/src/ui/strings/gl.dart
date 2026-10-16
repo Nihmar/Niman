@@ -771,6 +771,10 @@ final class GalicianStrings extends Strings {
   @override
   String get menuAddExternalLink => 'Engadir ligazón externa';
   @override
+  String get menuOpenLink => 'Abrir a ligazón';
+  @override
+  String get menuCopyLink => 'Copiar a ligazón';
+  @override
   String get menuFormat => 'Formato';
   @override
   String get menuParagraph => 'Parágrafo';

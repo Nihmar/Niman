@@ -766,6 +766,10 @@ final class BasqueStrings extends Strings {
   @override
   String get menuAddExternalLink => 'Gehitu kanpoko esteka';
   @override
+  String get menuOpenLink => 'Ireki esteka';
+  @override
+  String get menuCopyLink => 'Kopiatu esteka';
+  @override
   String get menuFormat => 'Formatua';
   @override
   String get menuParagraph => 'Paragrafoa';

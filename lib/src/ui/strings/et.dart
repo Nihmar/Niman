@@ -760,6 +760,10 @@ final class EstonianStrings extends Strings {
   @override
   String get menuAddExternalLink => 'Lisa väline link';
   @override
+  String get menuOpenLink => 'Ava link';
+  @override
+  String get menuCopyLink => 'Kopeeri link';
+  @override
   String get menuFormat => 'Vorming';
   @override
   String get menuParagraph => 'Lõik';

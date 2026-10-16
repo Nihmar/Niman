@@ -774,6 +774,10 @@ final class BulgarianStrings extends Strings {
   @override
   String get menuAddExternalLink => 'Добави външна връзка';
   @override
+  String get menuOpenLink => 'Отвори връзка';
+  @override
+  String get menuCopyLink => 'Копирай връзка';
+  @override
   String get menuFormat => 'Формат';
   @override
   String get menuParagraph => 'Абзац';

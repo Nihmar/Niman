@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/editor/editor_context_menu.dart';
+import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/editor/toolbar_item.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
@@ -54,6 +55,20 @@ const MarkdownTheme _theme = MarkdownTheme(
 Offset _at(int line, int column) =>
     Offset(5 + column * 14.0 + 7, 8 + line * 21.0 + 10);
 
+/// The visual column of a buffer offset of the link fixture, which in `live`
+/// hides `[[` and `]]` (2) before the wikilink's text and those plus the
+/// Markdown link's `[` (5) before its own.
+Offset _atOffset(_Mode mode, int offset) =>
+    _at(0, mode == _Mode.live ? offset - _hiddenBefore(offset) : offset);
+
+int _hiddenBefore(int offset) => switch (offset) {
+  // The space inside `[[La nota]]`.
+  9 => 2,
+  // The space inside `[il sito](…)`.
+  22 => 5,
+  _ => 0,
+};
+
 /// A checker whose only misspelling is 'wrold', which it would spell 'world'.
 final class _FakeChecker implements SpellChecker {
   const new();
@@ -79,6 +94,7 @@ Future<MarkdownSourceViewState> _pump(
   String text, {
   FormatMenuBuilder? formatMenu,
   EditorSpellCheck? spellCheck,
+  SourceLinkTap? onOpenLink,
   bool live = false,
 }) async {
   tester.view.physicalSize = const Size(700, 500);
@@ -93,6 +109,7 @@ Future<MarkdownSourceViewState> _pump(
           showLineNumbers: false,
           formatMenu: formatMenu,
           spellCheck: spellCheck,
+          onOpenLink: onOpenLink,
           // The same tests in both unified modes (#246). The fixtures here
           // carry no markers, so a click at a column lands on the same
           // character either way — which is what lets one click test hold for
@@ -391,6 +408,22 @@ void main() {
       expect(find.byKey(const Key('context-bold')), findsNothing);
     }, variant: _desktop);
 
+    both('a link under the caret puts its actions above Add link', (
+      tester,
+      mode,
+    ) async {
+      await open(
+        tester,
+        mode,
+        'vedi [il sito](https://example.com) ora',
+        caret: 9,
+      );
+      expect(find.byKey(const Key('menu-open-link')), findsOneWidget);
+      expect(find.byKey(const Key('menu-copy-link')), findsOneWidget);
+      expect(top(tester, 'menu-open-link'), lessThan(top(tester, 'menu-link')));
+      expect(top(tester, 'menu-copy-link'), lessThan(top(tester, 'menu-link')));
+    }, variant: _desktop);
+
     both('Paragraph › Heading 2, and Body takes it off', (tester, mode) async {
       final state = await open(tester, mode, 'titolo', caret: 2);
       await tester.tap(find.byKey(const Key('menu-paragraph')));
@@ -441,6 +474,83 @@ void main() {
         reason: 'the caret is on the definition, to write it',
       );
     }, variant: _desktop);
+
+    group('the link under the pointer (#1099)', () {
+      const note = 'vedi [[La nota]] e [il sito](https://example.com) ora';
+
+      both('a right click on an external link offers its own section', (
+        tester,
+        mode,
+      ) async {
+        final state = await _pump(tester, note, live: mode == _Mode.live);
+        await _rightClick(tester, _atOffset(mode, 22));
+        expect(state.isContextMenuShown, isTrue);
+        expect(find.byKey(const Key('menu-open-link')), findsOneWidget);
+        expect(find.byKey(const Key('menu-copy-link')), findsOneWidget);
+        expect(
+          tester.getTopLeft(find.byKey(const Key('menu-open-link'))).dy,
+          lessThan(tester.getTopLeft(find.text('Paste')).dy),
+          reason: 'the link comes before the clipboard',
+        );
+      }, variant: _desktop);
+
+      both('Copy link puts the target on the clipboard', (tester, mode) async {
+        _mockClipboard(tester);
+        final state = await _pump(tester, note, live: mode == _Mode.live);
+        await _rightClick(tester, _atOffset(mode, 22));
+        await tester.tap(find.byKey(const Key('menu-copy-link')));
+        await tester.pump();
+        expect(_clipboard, 'https://example.com');
+        expect(state.isContextMenuShown, isFalse);
+      }, variant: _desktop);
+
+      both('Open link opens the target, as Ctrl+click does', (
+        tester,
+        mode,
+      ) async {
+        final opened = <(TokenKind, String, String?)>[];
+        final state = await _pump(
+          tester,
+          note,
+          live: mode == _Mode.live,
+          onOpenLink: (kind, raw, href) => opened.add((kind, raw, href)),
+        );
+        await _rightClick(tester, _atOffset(mode, 22));
+        await tester.tap(find.byKey(const Key('menu-open-link')));
+        await tester.pump();
+        expect(opened, <(TokenKind, String, String?)>[
+          (TokenKind.link, '[il sito](https://example.com)', null),
+        ]);
+        expect(state.isContextMenuShown, isFalse);
+      }, variant: _desktop);
+
+      both('a wikilink, a note path and plain text offer none', (
+        tester,
+        mode,
+      ) async {
+        // The caret path is the same reader as the click's: the menu key
+        // opens over whatever the caret sits in.
+        final state = await _pump(
+          tester,
+          '[[La nota]] e [nota](other.md) ora\n',
+          live: mode == _Mode.live,
+        );
+        for (final caret in <int>[4, 19, 0]) {
+          state.placeCaret(caret);
+          await tester.pump();
+          state.showContextMenu();
+          await tester.pump();
+          expect(
+            find.byKey(const Key('menu-open-link')),
+            findsNothing,
+            reason: 'nothing external at $caret',
+          );
+          expect(find.byKey(const Key('menu-copy-link')), findsNothing);
+          state.hideContextMenu();
+          await tester.pump();
+        }
+      }, variant: _desktop);
+    });
 
     both('Insert › Columns writes two columns (#729)', (tester, mode) async {
       final state = await open(tester, mode, 'riga', caret: 4);

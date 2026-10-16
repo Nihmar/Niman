@@ -781,6 +781,10 @@ final class RomanianStrings extends Strings {
   @override
   String get menuAddExternalLink => 'Adaugă link extern';
   @override
+  String get menuOpenLink => 'Deschide linkul';
+  @override
+  String get menuCopyLink => 'Copiază linkul';
+  @override
   String get menuFormat => 'Format';
   @override
   String get menuParagraph => 'Paragraf';

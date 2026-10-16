@@ -58,6 +58,7 @@ final class EditorContextMenu extends StatelessWidget {
     required this.onDismiss,
     this.formats = const [],
     this.extras = const [],
+    this.linkActions,
     this.table,
     this.structure,
     super.key,
@@ -75,6 +76,12 @@ final class EditorContextMenu extends StatelessWidget {
 
   /// The spelling's entries (suggestions, Add to dictionary).
   final List<ContextMenuButtonItem> extras;
+
+  /// What can be done with the link under the pointer (#1099): Open link
+  /// and Copy link, a section of their own at the top. Null for a click
+  /// that was not on a link leaving the library; a phone builds no such
+  /// section, having no right click to open one from.
+  final List<ContextMenuAction>? linkActions;
 
   /// A table's rows and columns, when the menu opened on one of its cells
   /// (#261).
@@ -190,14 +197,20 @@ final class EditorContextMenu extends StatelessWidget {
     }
     final clipboardRows = [for (final item in clipboard) plain(item)];
     final extraRows = [for (final item in extras) plain(item)];
+    final linkRows = [
+      for (final action in linkActions ?? const <ContextMenuAction>[])
+        _actionRow(action, onHover: away),
+    ];
     final blocks = structure == null
         ? <List<Widget>>[
+            linkRows,
             clipboardRows,
             ...sections(table),
             ...formatRows,
             extraRows,
           ]
         : <List<Widget>>[
+            linkRows,
             extraRows,
             ...sections(table),
             ...sections(structure),

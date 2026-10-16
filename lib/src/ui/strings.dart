@@ -551,6 +551,8 @@ final class AppStrings {
   static String get cheatTemplates => _s.cheatTemplates;
   static String get menuAddLink => _s.menuAddLink;
   static String get menuAddExternalLink => _s.menuAddExternalLink;
+  static String get menuOpenLink => _s.menuOpenLink;
+  static String get menuCopyLink => _s.menuCopyLink;
   static String get menuFormat => _s.menuFormat;
   static String get menuParagraph => _s.menuParagraph;
   static String get menuInsert => _s.menuInsert;

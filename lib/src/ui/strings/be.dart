@@ -769,6 +769,10 @@ final class BelarusianStrings extends Strings {
   @override
   String get menuAddExternalLink => 'Дадаць знешнюю спасылку';
   @override
+  String get menuOpenLink => 'Адкрыць спасылку';
+  @override
+  String get menuCopyLink => 'Капіраваць спасылку';
+  @override
   String get menuFormat => 'Фармат';
   @override
   String get menuParagraph => 'Абзац';

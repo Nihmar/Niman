@@ -723,6 +723,10 @@ final class JapaneseStrings extends Strings {
   @override
   String get menuAddExternalLink => '外部リンクを追加';
   @override
+  String get menuOpenLink => 'リンクを開く';
+  @override
+  String get menuCopyLink => 'リンクをコピー';
+  @override
   String get menuFormat => '書式';
   @override
   String get menuParagraph => '段落';

@@ -756,6 +756,10 @@ final class HindiStrings extends Strings {
   @override
   String get menuAddExternalLink => 'बाहरी लिंक जोड़ें';
   @override
+  String get menuOpenLink => 'लिंक खोलें';
+  @override
+  String get menuCopyLink => 'लिंक कॉपी करें';
+  @override
   String get menuFormat => 'फ़ॉर्मैट';
   @override
   String get menuParagraph => 'अनुच्छेद';

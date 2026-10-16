@@ -775,6 +775,10 @@ final class SpanishStrings extends Strings {
   @override
   String get menuAddExternalLink => 'Añadir enlace externo';
   @override
+  String get menuOpenLink => 'Abrir enlace';
+  @override
+  String get menuCopyLink => 'Copiar enlace';
+  @override
   String get menuFormat => 'Formato';
   @override
   String get menuParagraph => 'Párrafo';
