@@ -30,20 +30,32 @@ object TodoWidgetItems {
     const val VIEW_TYPE_COUNT = 2
 
     private const val KIND_SECTION = "section"
+    private const val KIND_ROW = "row"
     private const val TONE_ERROR = "error"
     private const val SEPARATOR = " · "
 
     /**
      * The items of [array] in order; entries that are not objects are
-     * skipped. Each header's `count` is set to the rows that follow it,
+     * skipped, and so is any entry whose `kind` is present and not one
+     * this reader draws (a section or a row): a payload from a newer app
+     * may carry kinds this one has never heard of, and drawing one as an
+     * empty row would leave a dead tap target (#1024). Each header's `count` is set to the rows that follow it,
      * so a header never promises more rows than the list shows under it
      * (#1007), whatever the writer put there.
      */
     fun parse(array: JSONArray?): List<JSONObject> {
         if (array == null) return emptyList()
-        val items = (0 until array.length()).mapNotNull { array.optJSONObject(it) }
+        val items = (0 until array.length())
+            .mapNotNull { array.optJSONObject(it) }
+            .filter { isKnownKind(it) }
         recount(items)
         return items
+    }
+
+    /** Whether [item] has no `kind` (a row) or one this reader draws. */
+    private fun isKnownKind(item: JSONObject): Boolean {
+        val kind = string(item, "kind")
+        return kind.isEmpty() || kind == KIND_ROW || kind == KIND_SECTION
     }
 
     private fun recount(items: List<JSONObject>) {

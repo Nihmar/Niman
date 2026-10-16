@@ -58,6 +58,24 @@ class TodoWidgetItemsTest {
     }
 
     @Test
+    fun `an entry of an unknown kind is skipped, not drawn as an empty row`() {
+        // A payload from a newer app: kinds this reader has never heard of.
+        val items = TodoWidgetItems.parse(
+            JSONArray()
+                .put(header("due.today", "Today", 1))
+                .put(JSONObject().put("kind", "future-thing").put("label", "from tomorrow"))
+                .put(row("task", "due.today"))
+                .put(JSONObject().put("kind", "banner").put("text", "also unknown"))
+                .put(row("explicit", "due.today").put("kind", "row")),
+        )
+        assertEquals(3, items.size)
+        assertEquals(2, TodoWidgetItems.rowCount(items))
+        assertEquals(listOf("task", "explicit"), items.filterNot { TodoWidgetItems.isSection(it) }.map { it.getString("text") })
+        // The header counts the rows it understands, the skipped ones excluded.
+        assertEquals("2", TodoWidgetItems.sectionCount(items.first()))
+    }
+
+    @Test
     fun `a header and a row inflate different layouts`() {
         assertEquals(TodoWidgetItems.VIEW_SECTION, TodoWidgetItems.viewType(header("due.today", "Today", 1)))
         assertEquals(TodoWidgetItems.VIEW_ROW, TodoWidgetItems.viewType(row("task", "due.today")))
