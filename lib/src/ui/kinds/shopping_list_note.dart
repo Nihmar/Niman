@@ -19,6 +19,8 @@ final class ShoppingListKindGui implements NoteKindGUI {
       text: host.text,
       onChanged: host.applyEdit,
       shopping: true,
+      onTapLink: host.openLink,
+      onTapWikiLink: host.openWikiLink,
     );
   }
 }

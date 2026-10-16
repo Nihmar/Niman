@@ -11,6 +11,7 @@ Widget _host(
   bool reduced = false,
   double velocity = 400,
   Duration pause = const Duration(milliseconds: 200),
+  InlineSpan? span,
 }) {
   return MaterialApp(
     home: MediaQuery(
@@ -22,6 +23,7 @@ Widget _host(
             width: width,
             child: MarqueeText(
               text: text,
+              span: span,
               style: const TextStyle(fontSize: 14),
               velocity: velocity,
               pause: pause,
@@ -77,6 +79,26 @@ void main() {
 
     expect(find.text(eight), findsOne);
     expect(find.byType(OverflowBox), findsNothing);
+  });
+
+  testWidgets('a rich line marquees like a plain one (#1094)', (tester) async {
+    await tester.pumpWidget(
+      _host(
+        eight,
+        width: 60,
+        span: const TextSpan(
+          text: eight,
+          style: TextStyle(fontSize: 14, color: Colors.red),
+        ),
+      ),
+    );
+    // One pump builds and schedules the movement; the next runs it.
+    await tester.pump();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(find.text(eight), findsOne);
+    expect(_offset(tester), lessThan(-30), reason: 'the end came into view');
   });
 
   testWidgets('a wider room stops the movement', (tester) async {

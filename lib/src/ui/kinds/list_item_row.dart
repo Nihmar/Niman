@@ -3,6 +3,11 @@ import 'dart:async';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:niman/src/markdown/inline/inline_parser.dart';
+import 'package:niman/src/markdown/read_block.dart';
+import 'package:niman/src/markdown/render/inline_spans.dart';
+import 'package:niman/src/markdown/render/markdown_theme.dart';
+import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/ui/kinds/list_drag_handle.dart';
 import 'package:niman/src/ui/kinds/list_drop_indicator.dart';
 import 'package:niman/src/ui/kinds/list_parser.dart';
@@ -31,6 +36,9 @@ class ListItemRow extends StatefulWidget {
     required this.onDragMove,
     required this.onDragEnd,
     required this.onDragCancel,
+    required this.mathCache,
+    this.onTapLink,
+    this.onTapWikiLink,
     this.shopping = false,
     super.key,
   });
@@ -41,6 +49,16 @@ class ListItemRow extends StatefulWidget {
   /// Whether the row is a shopping-list item: it shows the quantity and
   /// edits it beside the text.
   final bool shopping;
+
+  /// The list view's formulas, shared by its rows.
+  final MathCache mathCache;
+
+  /// Follows a Markdown link in the item's text; null draws the links
+  /// without following them (tests).
+  final void Function(BuildContext context, String href)? onTapLink;
+
+  /// Follows a wikilink in the item's text.
+  final void Function(BuildContext context, String inner)? onTapWikiLink;
 
   /// Whether this row is the active drag source (rendered dimmed).
   final bool isDragSource;
@@ -200,21 +218,7 @@ class _ListItemRowState extends State<ListItemRow>
           height: ListDragHandle.gripHeight,
         ),
         Checkbox(value: item.checked, onChanged: (_) => widget.onToggle()),
-        Expanded(
-          child: widget.isEditing
-              ? _editField()
-              : MarqueeText(
-                  text: item.text,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    decoration: item.checked
-                        ? TextDecoration.lineThrough
-                        : null,
-                    color: item.checked
-                        ? theme.colorScheme.onSurfaceVariant
-                        : null,
-                  ),
-                ),
-        ),
+        Expanded(child: widget.isEditing ? _editField() : _body(context)),
         if (widget.shopping)
           if (widget.isEditing) ...[
             Text(
@@ -328,6 +332,51 @@ class _ListItemRowState extends State<ListItemRow>
       bottom: top ? null : overhang,
       child: ListDropIndicator(indent: indent),
     );
+  }
+
+  /// The item's text, drawn through the read view's own inline renderer
+  /// — its links, wikilinks and shapes as the read view draws them
+  /// (#1094) — and still one line, marqueed when it is longer than the
+  /// row.
+  ///
+  /// The text's own tap recognizers win over the row's tap-to-edit, so a
+  /// link follows the way it does in the read view; anything else taps
+  /// into the in-place edit.
+  Widget _body(BuildContext context) {
+    final theme = Theme.of(context);
+    final item = widget.item;
+    final markdown = markdownThemeOf(context);
+    final base = (theme.textTheme.bodyMedium ?? markdown.body).copyWith(
+      decoration: item.checked ? TextDecoration.lineThrough : null,
+      color: item.checked ? theme.colorScheme.onSurfaceVariant : null,
+    );
+    final onTapLink = widget.onTapLink;
+    final onTapWikiLink = widget.onTapWikiLink;
+    final span = TextSpan(
+      style: base,
+      children: InlineSpans(
+        theme: markdown,
+        base: base,
+        mathCache: widget.mathCache,
+        taps: (
+          onTapLink: onTapLink == null
+              ? null
+              : (text, href) {
+                  if (href != null && href.trim().isNotEmpty) {
+                    onTapLink(context, href);
+                  }
+                },
+          onTapWikiLink: onTapWikiLink == null
+              ? null
+              : (inner) => onTapWikiLink(context, inner),
+          embedResolver: null,
+          embedImages: null,
+          deadLinks: null,
+          linkPreview: null,
+        ),
+      ).of(ReadInline(text: item.text, nodes: InlineParser(item.text).parse())),
+    );
+    return MarqueeText(text: item.text, span: span, style: base);
   }
 
   Widget _editField() {

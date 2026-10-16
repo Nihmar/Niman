@@ -18,12 +18,17 @@ import 'package:flutter/material.dart';
 final class MarqueeText extends StatefulWidget {
   /// Creates the title for [text].
   ///
+  /// [span] draws in place of [text] when it is given — the same words in
+  /// their Markdown's shapes — while [text] stays the line's name: a
+  /// change to it restarts the marquee.
+  ///
   /// [velocity] is in logical pixels per second while moving; [pause] is
   /// how long the line rests at each end; [gap] is the least blank run
   /// kept before the line comes back, so the last word does not touch the
   /// first; [passes] is how many times it makes the trip (0 = forever).
   const new({
     required this.text,
+    this.span,
     this.style,
     this.maxLines = 1,
     this.velocity = 30,
@@ -35,6 +40,10 @@ final class MarqueeText extends StatefulWidget {
 
   /// What to draw.
   final String text;
+
+  /// The line drawn in place of [text] when there is one: its Markdown
+  /// through the read view's own inline renderer, links and all (#1094).
+  final InlineSpan? span;
 
   /// The face; null takes the ambient [DefaultTextStyle].
   final TextStyle? style;
@@ -158,9 +167,8 @@ final class _MarqueeTextState extends State<MarqueeText>
     // More than one line has no one line to scroll; draw it as before.
     if (widget.maxLines != 1) {
       _schedule();
-      return Text(
-        widget.text,
-        style: style,
+      return _line(
+        style,
         maxLines: widget.maxLines,
         overflow: TextOverflow.ellipsis,
       );
@@ -169,7 +177,7 @@ final class _MarqueeTextState extends State<MarqueeText>
       builder: (context, constraints) {
         final maxWidth = constraints.maxWidth;
         final painter = TextPainter(
-          text: TextSpan(text: widget.text, style: style),
+          text: widget.span ?? TextSpan(text: widget.text, style: style),
           maxLines: 1,
           textDirection: Directionality.of(context),
           textScaler: MediaQuery.textScalerOf(context),
@@ -178,9 +186,8 @@ final class _MarqueeTextState extends State<MarqueeText>
         final overflows = maxWidth.isFinite && textWidth > maxWidth;
         if (reduced || !overflows) {
           _schedule();
-          return Text(
-            widget.text,
-            style: style,
+          return _line(
+            style,
             maxLines: 1,
             softWrap: false,
             overflow: TextOverflow.ellipsis,
@@ -200,17 +207,39 @@ final class _MarqueeTextState extends State<MarqueeText>
                   offset: Offset(-_offsetAt(_controller.value), 0),
                   child: child,
                 ),
-                child: Text(
-                  widget.text,
-                  style: style,
-                  maxLines: 1,
-                  softWrap: false,
-                ),
+                child: _line(style, maxLines: 1, softWrap: false),
               ),
             ),
           ),
         );
       },
+    );
+  }
+
+  /// The line as a widget: [MarqueeText.span] when there is one, else
+  /// [MarqueeText.text].
+  Widget _line(
+    TextStyle style, {
+    required int maxLines,
+    TextOverflow? overflow,
+    bool softWrap = true,
+  }) {
+    final span = widget.span;
+    if (span == null) {
+      return Text(
+        widget.text,
+        style: style,
+        maxLines: maxLines,
+        overflow: overflow,
+        softWrap: softWrap,
+      );
+    }
+    return Text.rich(
+      span,
+      style: style,
+      maxLines: maxLines,
+      overflow: overflow,
+      softWrap: softWrap,
     );
   }
 }
