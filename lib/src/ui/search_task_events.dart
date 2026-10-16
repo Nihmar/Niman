@@ -19,7 +19,7 @@ import 'package:niman/src/ui/journal/journal_browser.dart'
     show journalGoalLabel;
 import 'package:niman/src/ui/line_runs.dart';
 import 'package:niman/src/ui/strings.dart';
-import 'package:niman/src/ui/todo_row.dart' show TodoDueLabel;
+import 'package:niman/src/ui/todo_row_timing.dart' show TodoDueLabel;
 
 /// The group's data source: the rows a lone `+project`/`@context` answers
 /// with, and the notifier that says the files behind them moved.

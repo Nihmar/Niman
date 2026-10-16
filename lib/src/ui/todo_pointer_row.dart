@@ -7,14 +7,15 @@
 /// hover or the selection shows the menu button, and a right click opens
 /// that menu at the pointer. The button keeps its room while hidden, so
 /// nothing moves as the pointer comes and goes. No swipe: a mouse does not
-/// swipe. The phone keeps [TodoRow].
+/// swipe. The phone keeps `TodoRow`.
 library;
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/todo/parser.dart';
 import 'package:niman/src/todo/todo_list_item.dart';
 import 'package:niman/src/ui/todo_priority_badge.dart';
-import 'package:niman/src/ui/todo_row.dart';
+import 'package:niman/src/ui/todo_row_timing.dart';
+import 'package:niman/src/ui/todo_row_tokens.dart';
 import 'package:niman/src/ui/tree_rename_field.dart';
 
 /// One row of a desktop's todo list.
