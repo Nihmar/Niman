@@ -873,6 +873,8 @@ final class BosnianStrings extends Strings {
   @override
   String get searchLoadMore => 'Prikaži više';
   @override
+  String searchShowingFirst(int shown, int total) => 'Prvih $shown od $total';
+  @override
   String searchTasksAndEvents(int count) => 'Zadaci i događaji · $count';
   @override
   String searchNotes(int count) => 'Bilješke · $count';

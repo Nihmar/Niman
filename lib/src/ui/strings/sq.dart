@@ -868,6 +868,9 @@ final class AlbanianStrings extends Strings {
   @override
   String get searchLoadMore => 'Shfaq më shumë';
   @override
+  String searchShowingFirst(int shown, int total) =>
+      'Të parat $shown nga $total';
+  @override
   String searchTasksAndEvents(int count) => 'Detyrat dhe ngjarjet · $count';
   @override
   String searchNotes(int count) => 'Shënime · $count';

@@ -1705,6 +1705,7 @@ class $FrontmatterFieldsTable extends FrontmatterFields
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: true,
+    $customConstraints: 'COLLATE NOCASE',
   );
   @override
   List<GeneratedColumn> get $columns => [noteId, key, value];
@@ -1782,7 +1783,7 @@ class FrontmatterField extends DataClass
   /// The key, lowercased; dotted for a nested map's leaf.
   final String key;
 
-  /// One of the key's values, as text.
+  /// One of the key's values, as text; compared without regard to case.
   final String value;
   const FrontmatterField({
     required this.noteId,
@@ -3185,7 +3186,7 @@ abstract class _$IndexDatabase extends GeneratedDatabase {
   );
   late final Index fieldsKeyValue = Index(
     'fields_key_value',
-    'CREATE INDEX fields_key_value ON frontmatter_fields ("key", value)',
+    'CREATE INDEX fields_key_value ON frontmatter_fields ("key", value, note_id)',
   );
   late final Index danglingStem = Index(
     'dangling_stem',

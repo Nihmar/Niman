@@ -873,6 +873,9 @@ final class GalicianStrings extends Strings {
   @override
   String get searchLoadMore => 'Mostrar máis';
   @override
+  String searchShowingFirst(int shown, int total) =>
+      'Mostrando os primeiros $shown de $total';
+  @override
   String searchTasksAndEvents(int count) => 'Tarefas e eventos · $count';
   @override
   String searchNotes(int count) => 'Notas · $count';

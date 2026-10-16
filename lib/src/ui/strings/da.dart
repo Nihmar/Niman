@@ -866,6 +866,9 @@ final class DanishStrings extends Strings {
   @override
   String get searchLoadMore => 'Vis mere';
   @override
+  String searchShowingFirst(int shown, int total) =>
+      'De første $shown af $total';
+  @override
   String searchTasksAndEvents(int count) => 'Opgaver og begivenheder · $count';
   @override
   String searchNotes(int count) => 'Noter · $count';

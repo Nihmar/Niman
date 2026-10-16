@@ -866,6 +866,9 @@ final class NorwegianStrings extends Strings {
   @override
   String get searchLoadMore => 'Vis mer';
   @override
+  String searchShowingFirst(int shown, int total) =>
+      'De første $shown av $total';
+  @override
   String searchTasksAndEvents(int count) => 'Oppgaver og hendelser · $count';
   @override
   String searchNotes(int count) => 'Notater · $count';

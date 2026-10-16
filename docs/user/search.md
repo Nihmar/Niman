@@ -86,3 +86,6 @@ A lone `#tag` token searches that tag (`#work`). Mixed input
 
 Matching is case-insensitive on key and value. Anything that is not
 `key = value` (e.g. `x = y + 1`, a second `=`) is a plain text search.
+
+A filter that matches many notes lists 500 of them, in path order, and says
+how many there are in all; *Show more* reads the next 500.

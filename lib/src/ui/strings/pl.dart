@@ -880,6 +880,8 @@ final class PolishStrings extends Strings {
   @override
   String get searchLoadMore => 'Pokaż więcej';
   @override
+  String searchShowingFirst(int shown, int total) => 'Pierwsze $shown z $total';
+  @override
   String searchTasksAndEvents(int count) => 'Zadania i wydarzenia · $count';
   @override
   String searchNotes(int count) => 'Notatki · $count';

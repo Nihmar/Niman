@@ -870,6 +870,9 @@ final class FinnishStrings extends Strings {
   @override
   String get searchLoadMore => 'Näytä lisää';
   @override
+  String searchShowingFirst(int shown, int total) =>
+      'Ensimmäiset $shown / $total';
+  @override
   String searchTasksAndEvents(int count) => 'Tehtävät ja tapahtumat · $count';
   @override
   String searchNotes(int count) => 'Muistiinpanot · $count';

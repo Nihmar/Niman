@@ -876,6 +876,9 @@ final class GermanStrings extends Strings {
   @override
   String get searchLoadMore => 'Mehr anzeigen';
   @override
+  String searchShowingFirst(int shown, int total) =>
+      'Die ersten $shown von $total';
+  @override
   String searchTasksAndEvents(int count) => 'Aufgaben und Termine · $count';
   @override
   String searchNotes(int count) => 'Notizen · $count';

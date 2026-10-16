@@ -876,6 +876,9 @@ final class SpanishStrings extends Strings {
   @override
   String get searchLoadMore => 'Mostrar más';
   @override
+  String searchShowingFirst(int shown, int total) =>
+      'Mostrando los primeros $shown de $total';
+  @override
   String searchTasksAndEvents(int count) => 'Tareas y eventos · $count';
   @override
   String searchNotes(int count) => 'Notas · $count';

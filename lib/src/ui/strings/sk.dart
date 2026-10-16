@@ -872,6 +872,8 @@ final class SlovakStrings extends Strings {
   @override
   String get searchLoadMore => 'Zobraziť viac';
   @override
+  String searchShowingFirst(int shown, int total) => 'Prvých $shown z $total';
+  @override
   String searchTasksAndEvents(int count) => 'Úlohy a udalosti · $count';
   @override
   String searchNotes(int count) => 'Poznámky · $count';

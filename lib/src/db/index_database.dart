@@ -78,7 +78,13 @@ class Notes extends Table {
 /// makes *any* key filterable (T-M4-03). The primary key answers "the
 /// fields of this note"; the index answers the other direction, "the
 /// notes whose `status` is `draft`", which is what filtering asks.
-@TableIndex(name: 'fields_key_value', columns: {#key, #value})
+///
+/// [value] compares without regard to case (`COLLATE NOCASE`, the way the
+/// stems do), so "the notes whose `status` is `Draft`" is an equality the
+/// index answers: a `lower(value)` over the column could not use it past
+/// the key (#1037). The index ends in the note, so counting the notes of a
+/// key or a value reads the index alone.
+@TableIndex(name: 'fields_key_value', columns: {#key, #value, #noteId})
 class FrontmatterFields extends Table {
   /// The id of the note the field belongs to.
   IntColumn get noteId => integer()();
@@ -86,8 +92,8 @@ class FrontmatterFields extends Table {
   /// The key, lowercased; dotted for a nested map's leaf.
   TextColumn get key => text()();
 
-  /// One of the key's values, as text.
-  TextColumn get value => text()();
+  /// One of the key's values, as text; compared without regard to case.
+  TextColumn get value => text().customConstraint('COLLATE NOCASE')();
 
   @override
   Set<Column> get primaryKey => {noteId, key, value};
@@ -347,7 +353,9 @@ class IndexDatabase extends _$IndexDatabase {
   /// (#974) — an index written before holds none, and is wiped and rescanned.
   /// v12: the full-text table keeps a prefix index for two, three and four
   /// letters (#1039), so the first keystrokes of a word are a lookup, not an
-  /// expansion of the vocabulary — the same wipe and rescan.
+  /// expansion of the vocabulary; a frontmatter value compares without
+  /// regard to case, in an index that ends in the note (#1037) — the same
+  /// wipe and rescan.
   @override
   int get schemaVersion => 12;
 

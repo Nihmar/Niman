@@ -470,6 +470,7 @@ abstract base class Strings {
   String get searchTooShortHint;
   String get searchNoMatches;
   String get searchLoadMore;
+  String searchShowingFirst(int shown, int total);
 
   // The Tasks and events group of a lone `+project`/`@context` (#730).
 

@@ -1854,6 +1854,7 @@ final class _FakeFieldSource implements FieldSource {
     String key,
     String value, {
     int? limit,
+    String? after,
   }) async {
     final wanted = value.trim().toLowerCase();
     final name = key.trim().toLowerCase();
@@ -1866,8 +1867,18 @@ final class _FakeFieldSource implements FieldSource {
       }
     }
     out.sort((a, b) => a.path.compareTo(b.path));
-    return limit == null ? out : out.take(limit).toList();
+    final past = after == null
+        ? out
+        : [
+            for (final note in out)
+              if (note.path.compareTo(after) > 0) note,
+          ];
+    return limit == null ? past : past.take(limit).toList();
   }
+
+  @override
+  Future<int> countWithField(String key, String value) async =>
+      (await notesWithField(key, value)).length;
 
   @override
   Future<List<({Note note, String value})>> fieldValues(String key) async {

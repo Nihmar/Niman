@@ -863,6 +863,8 @@ final class TurkishStrings extends Strings {
   @override
   String get searchLoadMore => 'Daha fazla göster';
   @override
+  String searchShowingFirst(int shown, int total) => 'İlk $shown / $total';
+  @override
   String searchTasksAndEvents(int count) => 'Görevler ve etkinlikler · $count';
   @override
   String searchNotes(int count) => 'Notlar · $count';

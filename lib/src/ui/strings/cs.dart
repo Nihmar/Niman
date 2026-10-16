@@ -870,6 +870,8 @@ final class CzechStrings extends Strings {
   @override
   String get searchLoadMore => 'Zobrazit další';
   @override
+  String searchShowingFirst(int shown, int total) => 'Prvních $shown z $total';
+  @override
   String searchTasksAndEvents(int count) => 'Úkoly a události · $count';
   @override
   String searchNotes(int count) => 'Poznámky · $count';

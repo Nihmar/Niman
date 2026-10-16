@@ -13,10 +13,10 @@ import 'package:niman/src/search/search_repo.dart';
 import 'package:niman/src/search/task_events.dart';
 import 'package:niman/src/ui/action_sheet.dart';
 import 'package:niman/src/ui/pointer_density.dart';
+import 'package:niman/src/ui/search_field_pager.dart';
 import 'package:niman/src/ui/search_request.dart';
 import 'package:niman/src/ui/search_task_events.dart';
 import 'package:niman/src/ui/strings.dart';
-import 'package:niman/src/ui/tree.dart' show displayNameOf;
 
 /// The other ways a hit opens, where the shell has them (#712): in a new
 /// tab, in the other pane, and as a row of the tree.
@@ -158,6 +158,14 @@ final class _SearchScreenState extends State<SearchScreen> {
   bool _searched = false;
   List<SearchHit> _hits = const [];
   int _shown = 0;
+
+  /// The pages of the `key = value` filter [_hits] came from (#1037), or
+  /// null for a text search: the notes past the page read are in the index
+  /// and not in [_hits].
+  FieldPager? _fieldPager;
+
+  /// Whether the next page of the filter is being read.
+  bool _readingMore = false;
 
   /// The lone `+project`/`@context` the results were searched for, when
   /// the box held one (#730): the Tasks and events group answers it, and
@@ -373,8 +381,11 @@ final class _SearchScreenState extends State<SearchScreen> {
     // The field filter borrows the search source's invocation id: the two
     // are driven by the same box, so a text query typed over a filter (or
     // the other way round) still supersedes what came before it.
-    final results = field != null
-        ? await _runFieldFilter(field)
+    final pager = field == null ? null : await _openFieldPager(field);
+    final results = pager != null
+        ? await pager.first()
+        : field != null
+        ? const <SearchHit>[]
         : contains
         ? await source.searchContains(text, id: id)
         : await source.search(buildFtsQuery(text), id: id);
@@ -398,6 +409,7 @@ final class _SearchScreenState extends State<SearchScreen> {
         if (_resultsScroll.hasClients) _resultsScroll.jumpTo(0);
       }
       _searched = true;
+      _fieldPager = pager;
       _hits = results;
       _shown = _pageSize < results.length ? _pageSize : results.length;
       _excerpts.clear();
@@ -418,24 +430,13 @@ final class _SearchScreenState extends State<SearchScreen> {
   /// Whether the box currently holds a `key = value` filter.
   bool get _inFieldMode => _fieldFilter(_query.text.trim()) != null;
 
-  /// Runs a `key = value` filter and shapes its notes like search hits, so
-  /// the results list stays one list. There is no snippet: the match is
-  /// the field, not a place in the text.
-  Future<List<SearchHit>> _runFieldFilter(
-    ({String key, String value}) f,
-  ) async {
+  /// The pages of the `key = value` filter [f], or null where there is no
+  /// field source. Its notes are shaped like search hits, so the results
+  /// list stays one list; there is no snippet: the match is the field, not
+  /// a place in the text.
+  Future<FieldPager?> _openFieldPager(({String key, String value}) f) async {
     final fields = await _acquireFields();
-    if (fields == null) return const [];
-    final notes = await fields.notesWithField(f.key, f.value);
-    return [
-      for (final note in notes)
-        SearchHit(
-          noteId: note.id,
-          path: note.path,
-          title: displayNameOf(note),
-          snippet: '',
-        ),
-    ];
+    return fields == null ? null : FieldPager(fields, f.key, f.value);
   }
 
   /// The shell's `F4`/`Shift+F4` and `Ctrl+Shift+F` land here (#712): the
@@ -540,7 +541,7 @@ final class _SearchScreenState extends State<SearchScreen> {
       // The group's rows sit above the notes: the estimate counts them,
       // or a step would land short by exactly their number.
       final lead = _groupLead(_taskEventRows());
-      final rows = lead + _shown + (_shown < _hits.length ? 1 : 0);
+      final rows = lead + _shown + (_hasMoreRows ? 1 : 0);
       final length = position.maxScrollExtent + position.viewportDimension;
       final offset =
           length * (index + lead) / rows - position.viewportDimension / 2;
@@ -556,11 +557,34 @@ final class _SearchScreenState extends State<SearchScreen> {
   static const int _revealJumps = 8;
 
   void _loadMore() {
+    final next = _shown + _pageSize;
+    if (next >= _hits.length && (_fieldPager?.hasMore ?? false)) {
+      unawaited(_loadMoreFromFilter());
+    }
+    setState(() => _shown = next < _hits.length ? next : _hits.length);
+  }
+
+  /// Reads the filter's next page and lists it after the notes shown
+  /// (#1037); a page that lands for a filter since replaced is dropped.
+  Future<void> _loadMoreFromFilter() async {
+    final pager = _fieldPager;
+    if (pager == null || _readingMore) return;
+    setState(() => _readingMore = true);
+    final more = await pager.next();
+    if (!mounted || !identical(pager, _fieldPager)) return;
     setState(() {
-      final next = _shown + _pageSize;
-      _shown = next < _hits.length ? next : _hits.length;
+      _readingMore = false;
+      _hits = [..._hits, ...more];
+      _shown = _shown + _pageSize < _hits.length
+          ? _shown + _pageSize
+          : _hits.length;
     });
   }
+
+  /// Whether the list ends in its Show more row: notes held and not shown,
+  /// or a filter with pages left to read.
+  bool get _hasMoreRows =>
+      _shown < _hits.length || (_fieldPager?.hasMore ?? false);
 
   @override
   Widget build(BuildContext context) {
@@ -735,7 +759,7 @@ final class _SearchScreenState extends State<SearchScreen> {
     return ListView.builder(
       key: const Key('search-results'),
       controller: _resultsScroll,
-      itemCount: lead + _shown + (_shown < _hits.length ? 1 : 0),
+      itemCount: lead + _shown + (_hasMoreRows ? 1 : 0),
       itemBuilder: (context, index) {
         if (index < lead) {
           if (index == 0) {
@@ -769,6 +793,13 @@ final class _SearchScreenState extends State<SearchScreen> {
             key: const Key('search-load-more'),
             leading: const Icon(Icons.expand_more),
             title: Text(AppStrings.searchLoadMore),
+            // A filter that holds more notes than it lists says how many.
+            subtitle: switch (_fieldPager) {
+              final pager? when pager.hasMore || _shown >= _hits.length => Text(
+                AppStrings.searchShowingFirst(_hits.length, pager.total),
+              ),
+              _ => null,
+            },
             onTap: _loadMore,
           );
         }

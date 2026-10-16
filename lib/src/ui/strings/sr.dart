@@ -871,6 +871,8 @@ final class SerbianStrings extends Strings {
   @override
   String get searchLoadMore => 'Прикажи више';
   @override
+  String searchShowingFirst(int shown, int total) => 'Првих $shown од $total';
+  @override
   String searchTasksAndEvents(int count) => 'Задаци и догађаји · $count';
   @override
   String searchNotes(int count) => 'Белешке · $count';

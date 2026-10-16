@@ -886,6 +886,9 @@ final class GreekStrings extends Strings {
   @override
   String get searchLoadMore => 'Εμφάνιση περισσότερων';
   @override
+  String searchShowingFirst(int shown, int total) =>
+      'Εμφάνιση των πρώτων $shown από $total';
+  @override
   String searchTasksAndEvents(int count) => 'Εργασίες και συμβάντα · $count';
   @override
   String searchNotes(int count) => 'Σημειώσεις · $count';
