@@ -193,6 +193,26 @@ void main() {
     });
   });
 
+  group('where a note was left', () {
+    // #1075: an editor torn down before it was laid out hands in a memento
+    // that cannot say where it was scrolled.
+    test('a memento without a scroll keeps the one the tab had', () {
+      const scrolled = NoteMemento(selectionExtent: 4, scrollOffset: 640);
+      final w = _opened(['a.md'])
+          .withMemento('a.md', scrolled)
+          .withMemento('a.md', const NoteMemento(selectionExtent: 9));
+      expect(w.tabs.single.memento.selectionExtent, 9);
+      expect(w.tabs.single.memento.scrollOffset, 640);
+    });
+
+    test('a scroll that is known replaces the old one, the top included', () {
+      final w = _opened(['a.md'])
+          .withMemento('a.md', const NoteMemento(scrollOffset: 640))
+          .withMemento('a.md', const NoteMemento(scrollOffset: 0));
+      expect(w.tabs.single.memento.scrollOffset, 0);
+    });
+  });
+
   group('the library changing under the tabs', () {
     test('a renamed note keeps its tab, and its memento', () {
       const memento = NoteMemento(selectionExtent: 4);

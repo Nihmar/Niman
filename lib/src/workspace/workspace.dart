@@ -336,8 +336,13 @@ final class Workspace {
   }
 
   /// Remembers where [path] was left.
-  Workspace withMemento(String path, NoteMemento memento) =>
-      _mapTab(path, (tab) => tab.copyWith(memento: memento));
+  ///
+  /// A memento that knows no scroll does not erase the one the tab had
+  /// (#1075).
+  Workspace withMemento(String path, NoteMemento memento) => _mapTab(
+    path,
+    (tab) => tab.copyWith(memento: memento.keepingScrollOf(tab.memento)),
+  );
 
   /// Marks the tabs at [paths] — and, for a folder, every tab under it —
   /// as gone from disk: the file went away from outside the app, so the tab

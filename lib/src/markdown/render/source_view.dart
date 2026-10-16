@@ -984,6 +984,14 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   }
 
   @override
+  void deactivate() {
+    // Before the subtree goes: the scroll position is a child's, and is
+    // gone by [dispose] (#1075).
+    widget.surface?.snapshotView(this);
+    super.deactivate();
+  }
+
+  @override
   void dispose() {
     _tableHoverClear?.cancel();
     _tableHover.dispose();
@@ -1223,6 +1231,10 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
 
   /// How far the note is scrolled, for a memento.
   double get scrollOffset => _scroll.hasClients ? _scroll.offset : 0;
+
+  /// How far the note is scrolled, or null while it is not laid out (or no
+  /// longer): a place that is not known is not the top.
+  double? get shownScroll => _scroll.hasClients ? _scroll.offset : null;
 
   /// Scrolls to [offset], as far as the note reaches.
   void jumpToOffset(double offset) {

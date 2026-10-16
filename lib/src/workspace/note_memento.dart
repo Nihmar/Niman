@@ -60,6 +60,20 @@ final class NoteMemento {
     preview: preview ?? this.preview,
   );
 
+  /// This memento, with [previous]'s scroll where this one knows none: an
+  /// editor torn down before it was laid out cannot say where it was, and
+  /// that is not a note scrolled back to the top (#1075).
+  NoteMemento keepingScrollOf(NoteMemento previous) =>
+      scrollOffset != null || previous.scrollOffset == null
+      ? this
+      : NoteMemento(
+          selectionBase: selectionBase,
+          selectionExtent: selectionExtent,
+          scrollOffset: previous.scrollOffset,
+          editorKind: editorKind,
+          preview: preview,
+        );
+
   /// Whether it remembers nothing.
   bool get isEmpty =>
       selectionBase == null &&
