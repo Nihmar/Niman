@@ -1223,6 +1223,8 @@ final class EstonianStrings extends Strings {
   @override
   String get actionMove => 'Liiguta';
   @override
+  String get actionDuplicate => 'Dubleeri';
+  @override
   String get saveAndClose => 'Salvesta ja sulge';
   @override
   String get closeUnsavedTitle => 'Salvestamata muudused';

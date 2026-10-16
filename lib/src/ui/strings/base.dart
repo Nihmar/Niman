@@ -658,6 +658,7 @@ abstract base class Strings {
   String get renameNameInvalid;
   String renameNameTaken(String name);
   String get actionMove;
+  String get actionDuplicate;
   String get saveAndClose;
   String get closeUnsavedTitle;
 

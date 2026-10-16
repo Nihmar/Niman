@@ -1230,6 +1230,8 @@ final class LatvianStrings extends Strings {
   @override
   String get actionMove => 'Pārvietot';
   @override
+  String get actionDuplicate => 'Dublēt';
+  @override
   String get saveAndClose => 'Saglabāt un aizvērt';
   @override
   String get closeUnsavedTitle => 'Nesaglabātas izmēnas';

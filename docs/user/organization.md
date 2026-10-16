@@ -416,6 +416,16 @@ at the end how many rows moved and how many could not — a row that fails
 does not stop the others — and writes the open notes once for all of them.
 A drop made while another is still moving waits for it.
 
+## Duplicating a file
+
+**Duplicate** in a file's row menu — the tree or the grid, right-click or
+long press — copies the file beside itself under a free name: `note.md`
+becomes `note_1.md`, and the copy appears in the tree at once. The bytes
+are copied as they are, so a picture, a PDF or an audio file duplicates
+whole rather than being re-encoded; a folder is not offered the action,
+its tree being a copy of its own. The open notes are saved first, so the
+copy holds what is on screen rather than the last autosave.
+
 ## Opening a note outside Niman
 
 A note is also a file, and sometimes you want it where Niman is not: to

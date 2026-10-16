@@ -414,6 +414,36 @@ final class NoteOps implements NoteOperations {
     });
   }
 
+  /// Copies the file at [path] beside itself, under a unique name
+  /// (`note.md` → `note_1.md`), and returns the indexed row (#1100).
+  ///
+  /// The bytes are copied as they are, so a picture, a PDF or an audio file
+  /// duplicates whole rather than being re-encoded. Only a file: a folder
+  /// holds a tree of its own, and no menu offers the action for one.
+  @override
+  Future<Note> duplicate(String path) {
+    return _synchronized(() async {
+      final row = await _mustFind(path);
+      if (row.isDir) {
+        throw ArgumentError('duplicate was given a folder: "$path"');
+      }
+      final parent = parentOf(path);
+      final name = p.basename(path);
+      final ext = p.extension(name);
+      final base = ext.isEmpty
+          ? name
+          : name.substring(0, name.length - ext.length);
+      final dir = Directory(_abs(parent));
+      final unique = await uniqueFileName(dir, base, ext);
+      final rel = resolvePath(parent, unique);
+      final copy = File(_abs(rel));
+      await writeFileAtomically(copy, await File(_abs(path)).readAsBytes());
+      _hint(rel, SyncOpKind.changed);
+      await indexer.applyEvents(root, [copy.path]);
+      return await _mustFind(rel);
+    });
+  }
+
   /// The folder at [path], created with its parents if missing.
   ///
   /// No uniquifying: the caller named a folder, not a wish for one. A folder

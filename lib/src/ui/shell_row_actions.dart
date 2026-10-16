@@ -167,6 +167,8 @@ final class ShellRowActions {
         await rename(context, note.path);
       case 'move':
         await move(context, note.path);
+      case 'duplicate':
+        await duplicate(context, note.path);
       case 'delete':
         await delete(context, note.path);
       default:
@@ -273,6 +275,16 @@ final class ShellRowActions {
   Future<void> moveTo(String path, String target) => guard(() async {
     await saveOpen();
     await moveSaved(path, target);
+  });
+
+  /// Copies the file at [path] beside itself, under a unique name (#1100).
+  ///
+  /// The open notes are saved first, so the copy is of what is on screen
+  /// rather than of a buffer's last autosave; the tree hears of the new row
+  /// from the index, as it does of every creation.
+  Future<void> duplicate(BuildContext context, String path) => guard(() async {
+    await saveOpen();
+    await controller.ops!.duplicate(path);
   });
 
   /// [moveTo] for a caller that holds the [guard] and has written the open

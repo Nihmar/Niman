@@ -1243,6 +1243,8 @@ final class DutchStrings extends Strings {
   @override
   String get actionMove => 'Verplaatsen';
   @override
+  String get actionDuplicate => 'Dupliceren';
+  @override
   String get saveAndClose => 'Opslaan en sluiten';
   @override
   String get closeUnsavedTitle => 'Niet-opgeslagen wijzigingen';

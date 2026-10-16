@@ -1234,6 +1234,8 @@ final class UkrainianStrings extends Strings {
   @override
   String get actionMove => 'Перемістити';
   @override
+  String get actionDuplicate => 'Дублювати';
+  @override
   String get saveAndClose => 'Зберегти і закрити';
   @override
   String get closeUnsavedTitle => 'Незбережені зміни';

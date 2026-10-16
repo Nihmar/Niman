@@ -420,6 +420,16 @@ List<List<RowMenuEntry>> rowMenuGroups(
       value: 'move',
       destructive: false,
     ),
+    // A file only: a folder holds a tree of its own, and the action copies
+    // one thing (#1100).
+    if (!note.isDir)
+      (
+        key: const Key('menu-duplicate'),
+        icon: Icons.copy_all_outlined,
+        label: AppStrings.actionDuplicate,
+        value: 'duplicate',
+        destructive: false,
+      ),
   ];
 
   final destroy = <RowMenuEntry>[

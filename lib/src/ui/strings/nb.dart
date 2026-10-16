@@ -1230,6 +1230,8 @@ final class NorwegianStrings extends Strings {
   @override
   String get actionMove => 'Flytt';
   @override
+  String get actionDuplicate => 'Dupliser';
+  @override
   String get saveAndClose => 'Lagre og lukk';
   @override
   String get closeUnsavedTitle => 'Ulagre endringer';

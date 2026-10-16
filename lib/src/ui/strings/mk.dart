@@ -1245,6 +1245,8 @@ final class MacedonianStrings extends Strings {
   @override
   String get actionMove => 'Премести';
   @override
+  String get actionDuplicate => 'Дуплирај';
+  @override
   String get saveAndClose => 'Зачувај и затвори';
   @override
   String get closeUnsavedTitle => 'Незачувани уредувања';

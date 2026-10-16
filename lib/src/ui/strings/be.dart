@@ -1233,6 +1233,8 @@ final class BelarusianStrings extends Strings {
   @override
   String get actionMove => 'Перамясціць';
   @override
+  String get actionDuplicate => 'Дубляваць';
+  @override
   String get saveAndClose => 'Захаваць і зачыніць';
   @override
   String get closeUnsavedTitle => 'Незахаваныя змены';

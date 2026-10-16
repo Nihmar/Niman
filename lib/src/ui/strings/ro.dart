@@ -1249,6 +1249,8 @@ final class RomanianStrings extends Strings {
   @override
   String get actionMove => 'Mută';
   @override
+  String get actionDuplicate => 'Duplică';
+  @override
   String get saveAndClose => 'Salvează și închide';
   @override
   String get closeUnsavedTitle => 'Modificări nesalvate';

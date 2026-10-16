@@ -1248,6 +1248,8 @@ final class ItalianStrings extends Strings {
   @override
   String get actionMove => 'Sposta';
   @override
+  String get actionDuplicate => 'Duplica';
+  @override
   String get saveAndClose => 'Salva e chiudi';
   @override
   String get closeUnsavedTitle => 'Modifiche non salvate';

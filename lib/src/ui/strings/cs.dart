@@ -1231,6 +1231,8 @@ final class CzechStrings extends Strings {
   @override
   String get actionMove => 'Přesunout';
   @override
+  String get actionDuplicate => 'Duplikovat';
+  @override
   String get saveAndClose => 'Uložit a zavřít';
   @override
   String get closeUnsavedTitle => 'Neuložené změny';

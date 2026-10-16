@@ -1232,6 +1232,8 @@ final class LithuanianStrings extends Strings {
   @override
   String get actionMove => 'Perkelti';
   @override
+  String get actionDuplicate => 'Dubliuoti';
+  @override
   String get saveAndClose => 'Išsaugoti ir uždaryti';
   @override
   String get closeUnsavedTitle => 'Neišsaugoti pakeitimai';

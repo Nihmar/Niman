@@ -1216,6 +1216,8 @@ final class HindiStrings extends Strings {
   @override
   String get actionMove => 'स्थानांतरित करें';
   @override
+  String get actionDuplicate => 'प्रतिलिपि बनाएँ';
+  @override
   String get saveAndClose => 'सहेजकर बंद करें';
   @override
   String get closeUnsavedTitle => 'बिना सहेजे बदलाव';
