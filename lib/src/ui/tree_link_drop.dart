@@ -42,17 +42,22 @@ final class TreeLinkDrop extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) => DragTarget<String>(
+  Widget build(BuildContext context) => DragTarget<List<String>>(
     onWillAcceptWithDetails: (details) {
       final row = TreeRowDrag.dragged.value;
-      return row != null && !row.isDir && row.path == details.data;
+      // Several marked rows dragged together are a move (#996): a link is
+      // one file's drag.
+      return row != null &&
+          !row.isDir &&
+          details.data.length == 1 &&
+          row.path == details.data.single;
     },
     // The tree's rows drag by the pointer, so the drag's offset is where
     // the pointer stands.
     onMove: (details) => _follow(details.offset),
     onAcceptWithDetails: (details) {
       _follow(details.offset);
-      onDrop(details.data);
+      onDrop(details.data.single);
     },
     builder: (context, _, _) => child,
   );

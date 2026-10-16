@@ -97,6 +97,22 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  /// The file the reading positions are kept in.
+  File kept() => File(p.join(dir.path, ReadingPositions.filePath));
+
+  /// Lets a reading-position write the pane started reach the disk: it runs
+  /// on an isolate once the widget is gone, and the folder must not be
+  /// removed before it lands, or the removal fails on the file it just put
+  /// there (#998).
+  Future<void> writesLanded(WidgetTester tester) async {
+    for (var i = 0; i < 50 && !kept().existsSync(); i++) {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 10)),
+      );
+      await tester.pump();
+    }
+  }
+
   String twoChapters() => writeTestEpub(
     p.join(dir.path, 'novel.epub'),
     chapters: [
@@ -284,19 +300,9 @@ void main() {
     late ReadingPositions positions;
     setUp(() => positions = ReadingPositions(dir.path));
 
-    /// The file the positions are kept in.
-    File kept() => File(p.join(dir.path, ReadingPositions.filePath));
-
-    /// Lets a write the pane started reach the disk: it runs in the
-    /// test's fake time, its file operations in real time.
+    /// Lets a write the pane started reach the disk, then reads it back.
     Future<BookLocation?> settled(WidgetTester tester) async {
-      for (var i = 0; i < 50; i++) {
-        await tester.runAsync(
-          () => Future<void>.delayed(const Duration(milliseconds: 10)),
-        );
-        await tester.pump();
-        if (kept().existsSync()) break;
-      }
+      await writesLanded(tester);
       return await tester.runAsync<BookLocation?>(
         () => positions.read('novel.epub'),
       );
@@ -559,6 +565,9 @@ void main() {
       await tester.tap(find.byKey(const Key('annotate-button')));
       expect(annotated.single.quote, 'A long paragraph of the book.');
       await tester.pumpWidget(const SizedBox());
+      // The place the pane wrote on its way out lands before the folder
+      // goes (#998).
+      await writesLanded(tester);
     });
 
     testWidgets("the row's button annotates the passage selected", (

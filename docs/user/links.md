@@ -442,8 +442,9 @@ relative to the note. A picture or an audio file is embedded instead
 (`![[photo.png]]`, `![photo.png](Media/photo.png)`), as one added from the
 editor is; a PDF, a book or any other file is linked. A folder dragged
 onto the note writes nothing, and the read view, with no caret, takes no
-drop. The tree's own drops are unchanged: let go on a folder, the row
-moves into it.
+drop. So do several rows marked together (#996): that drag is a move, and
+the link is one file's gesture. The tree's own drops are unchanged: let
+go on a folder, the row moves into it.
 
 ## Link button
 

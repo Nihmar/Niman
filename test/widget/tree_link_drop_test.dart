@@ -4,7 +4,7 @@
 import 'dart:io';
 
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/app.dart';
@@ -124,4 +124,28 @@ void main() {
     expect(view(tester).widget.buffer.text, before);
     expect(await controller.ops!.find('docs'), isNotNull);
   }, variant: TargetPlatformVariant.only(TargetPlatform.linux));
+
+  testWidgets(
+    'several marked rows dragged onto the note write nothing (#996)',
+    (tester) async {
+      await pumpShell(tester);
+      // Mark the folder and the note: the drag of the note then carries two
+      // paths, and a link is one file's gesture (#996).
+      await tester.tap(noteRow('docs'));
+      await settle(tester);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+      await tester.tap(noteRow('beta.md'));
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+      await settle(tester);
+      final before = view(tester).widget.buffer.text;
+      final point =
+          tester.getTopLeft(find.byType(MarkdownSourceView)) +
+          const Offset(80, 12);
+
+      await dragMouse(tester, noteRow('beta.md'), point);
+
+      expect(view(tester).widget.buffer.text, before);
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.linux),
+  );
 }

@@ -384,6 +384,12 @@ a drop would move something — a folder dropped on itself or inside itself,
 or anything dropped where it already is, stays put. It is the same move as
 the menu's: links follow, open notes are saved first.
 
+Rows marked together (see below) are dragged together, too (#996): drag
+any one of them and every marked row moves, each on its own — a marked
+folder carries its contents, and a path inside another marked folder is
+not moved twice. The card under the pointer says how many rows are on
+their way. Dragging an unmarked row still moves that row alone.
+
 ## Opening a note outside Niman
 
 A note is also a file, and sometimes you want it where Niman is not: to

@@ -3,6 +3,7 @@
 // cannot go.
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/ui/tree.dart';
 import 'package:niman/src/ui/tree_drag.dart';
@@ -29,13 +30,23 @@ void main() {
 
   /// The tree over a root note, a folder `docs` holding `inner.md` — pinned
   /// when [pinned] — and an empty folder `other`, both open; every drop
-  /// recorded.
-  Future<List<String>> pump(WidgetTester tester, {bool pinned = false}) async {
+  /// recorded. [extraNotes] are root notes `alpha`-style (name, no
+  /// extension); [marked] turns the marks on, without which nothing can be
+  /// selected (#712).
+  Future<List<String>> pump(
+    WidgetTester tester, {
+    bool pinned = false,
+    bool marked = false,
+    List<String> extraNotes = const <String>[],
+  }) async {
     final moves = <String>[];
     await session.open('/lib', create: false);
     await session.createFolder(parentPath: '', name: 'docs');
     await session.createFolder(parentPath: '', name: 'other');
     await session.createNote(parentPath: '', name: 'nota', content: 'x');
+    for (final name in extraNotes) {
+      await session.createNote(parentPath: '', name: name, content: 'x');
+    }
     await session.createNote(
       parentPath: 'docs',
       name: 'inner',
@@ -50,7 +61,10 @@ void main() {
             expanded: const <String>{'docs', 'other'},
             onToggle: (_) {},
             onSelect: (_) {},
-            onMove: (path, folder) => moves.add('$path -> $folder'),
+            onMove: (paths, folder) =>
+                moves.addAll([for (final path in paths) '$path -> $folder']),
+            onMarkedMenu: marked ? (_, _) {} : null,
+            onDeleteMarked: marked ? (_) {} : null,
           ),
         ),
       ),
@@ -59,7 +73,12 @@ void main() {
     return moves;
   }
 
-  Future<void> dragMouse(WidgetTester tester, Object from, Offset to) async {
+  Future<void> dragMouse(
+    WidgetTester tester,
+    Object from,
+    Offset to, {
+    VoidCallback? during,
+  }) async {
     final start = tester.getCenter(from is Finder ? from : find.text('$from'));
     final mouse = await tester.startGesture(
       start,
@@ -70,6 +89,7 @@ void main() {
       await mouse.moveTo(Offset.lerp(start, to, step / 10)!);
       await tester.pump();
     }
+    during?.call();
     await mouse.up();
     await tester.pumpAndSettle();
   }
@@ -97,6 +117,54 @@ void main() {
     await dragMouse(tester, 'docs', inner);
     await dragMouse(tester, 'inner.md', docs);
     expect(moves, isEmpty);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.linux));
+
+  testWidgets('several marked rows dragged together all move (#996)', (
+    tester,
+  ) async {
+    final moves = await pump(
+      tester,
+      marked: true,
+      extraNotes: ['alpha', 'bravo', 'charlie'],
+    );
+    await tester.tap(find.text('alpha.md'));
+    await tester.pumpAndSettle();
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+    await tester.tap(find.text('charlie.md'));
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+    await tester.pumpAndSettle();
+    await dragMouse(
+      tester,
+      'alpha.md',
+      tester.getCenter(find.text('other')),
+      // The card says how many rows the drag carries, not the one's name.
+      during: () {
+        expect(find.text('Selected: 3'), findsOneWidget);
+        expect(find.text('alpha.md'), findsOneWidget);
+      },
+    );
+    expect(moves, [
+      'alpha.md -> other',
+      'bravo.md -> other',
+      'charlie.md -> other',
+    ]);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.linux));
+
+  testWidgets('a marked folder carries its marked child, once (#996)', (
+    tester,
+  ) async {
+    final moves = await pump(tester, marked: true);
+    await tester.tap(find.text('docs'));
+    await tester.pumpAndSettle();
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+    await tester.tap(find.text('inner.md'));
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+    await tester.pumpAndSettle();
+    await dragMouse(tester, 'docs', tester.getCenter(find.text('other')));
+    // The tree hands every marked path a drop moves; the shell keeps only
+    // the outermost, so docs/inner goes with docs and moves once
+    // (shell_tree_desktop_test.dart).
+    expect(moves, ['docs -> other', 'docs/inner.md -> other']);
   }, variant: TargetPlatformVariant.only(TargetPlatform.linux));
 
   testWidgets('the pinned block: a row into its folder, the rest nowhere', (
@@ -134,7 +202,8 @@ void main() {
             onToggle: (_) {},
             onSelect: (_) {},
             onLongPress: (note, _) => menus.add(note.path),
-            onMove: (path, folder) => moves.add('$path -> $folder'),
+            onMove: (paths, folder) =>
+                moves.addAll([for (final path in paths) '$path -> $folder']),
           ),
         ),
       ),

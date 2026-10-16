@@ -6,6 +6,9 @@
 /// note's folder, the tree's empty space into the library's root. A folder
 /// dropped into itself or under itself, or anything dropped where it
 /// already is, does nothing, and the row under it does not light up.
+///
+/// Dragging one of several marked rows carries them all (#996): the drop
+/// moves the marked paths a move would change, and none of the others.
 library;
 
 import 'package:flutter/foundation.dart';
@@ -13,15 +16,25 @@ import 'package:flutter/gestures.dart' show kTouchSlop;
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/db/index_database.dart';
+import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/tree_row_metrics.dart';
 
-/// Moves the item at path into the folder named second, `''` the root.
-typedef TreeMove = void Function(String path, String folder);
+/// Moves the items at [paths] into the folder named second, `''` the root.
+typedef TreeMove = void Function(List<String> paths, String folder);
 
 /// Whether [path] dropped into [folder] moves anything: not into itself,
 /// not under itself, not where it already is.
 bool treeDropMoves(String path, String folder) =>
     path != folder && !isUnder(path, folder) && parentOf(path) != folder;
+
+/// The paths of [paths] a drop into [folder] would move, in the order
+/// given: what a drop hands to [TreeMove]. A marked folder carries its
+/// contents — a path inside one goes with it — so paths inside another of
+/// [paths] are still listed and the move skips them.
+List<String> treeDropPaths(Iterable<String> paths, String folder) => [
+  for (final path in paths)
+    if (treeDropMoves(path, folder)) path,
+];
 
 /// [child], the row of [note], dragged and dropped on.
 ///
@@ -34,6 +47,7 @@ final class TreeRowDrag extends StatefulWidget {
     required this.note,
     required this.onMove,
     required this.child,
+    this.paths,
     this.onLongPress,
     super.key,
   });
@@ -44,6 +58,10 @@ final class TreeRowDrag extends StatefulWidget {
   /// Runs a drop.
   final TreeMove onMove;
 
+  /// The paths the drag carries: the marked rows' when the row is one of
+  /// several marked (#996), else [note]'s path alone.
+  final List<String>? paths;
+
   /// The long press a touch hold is when it does not move.
   final VoidCallback? onLongPress;
 
@@ -52,7 +70,7 @@ final class TreeRowDrag extends StatefulWidget {
 
   /// The row being dragged, while one is: what a drop outside the tree —
   /// an open note, which takes a link to it (#704) — asks of it, the drag
-  /// itself carrying only the path.
+  /// itself carrying the paths.
   static final ValueNotifier<Note?> dragged = ValueNotifier<Note?>(null);
 
   /// Whether rows are held before they drag: the touch platforms'.
@@ -72,26 +90,28 @@ final class _TreeRowDragState extends State<TreeRowDrag> {
 
   Note get note => widget.note;
 
+  /// The paths the drag carries.
+  List<String> get paths => widget.paths ?? [note.path];
+
   /// The folder a drop on this row moves into.
   String get _folder => note.isDir ? note.path : parentOf(note.path);
 
   @override
   Widget build(BuildContext context) {
     final folder = _folder;
-    return DragTarget<String>(
+    return DragTarget<List<String>>(
       // The row claims every drop over it, even one it will not run: let
       // through, it would reach the tree's root and move there.
       onWillAcceptWithDetails: (_) => true,
       onAcceptWithDetails: (details) {
-        if (treeDropMoves(details.data, folder)) {
-          widget.onMove(details.data, folder);
-        }
+        final movable = treeDropPaths(details.data, folder);
+        if (movable.isNotEmpty) widget.onMove(movable, folder);
       },
       builder: (context, candidates, _) {
         final lit =
             candidates.isNotEmpty &&
             candidates.first != null &&
-            treeDropMoves(candidates.first!, folder);
+            treeDropPaths(candidates.first!, folder).isNotEmpty;
         return DecoratedBox(
           decoration: BoxDecoration(
             color: lit
@@ -105,12 +125,12 @@ final class _TreeRowDragState extends State<TreeRowDrag> {
   }
 
   Widget _draggable(BuildContext context) {
-    final feedback = _TreeDragFeedback(note: note);
+    final feedback = _TreeDragFeedback(note: note, paths: paths);
     final child = widget.child;
     final dimmed = Opacity(opacity: 0.4, child: child);
     if (!TreeRowDrag.holdToDrag) {
-      return Draggable<String>(
-        data: note.path,
+      return Draggable<List<String>>(
+        data: paths,
         feedback: feedback,
         childWhenDragging: dimmed,
         // The pointer is where the drag is: a note it is let go on puts the
@@ -122,8 +142,8 @@ final class _TreeRowDragState extends State<TreeRowDrag> {
         child: child,
       );
     }
-    return LongPressDraggable<String>(
-      data: note.path,
+    return LongPressDraggable<List<String>>(
+      data: paths,
       feedback: feedback,
       childWhenDragging: dimmed,
       onDragStarted: () => _travelled = 0,
@@ -150,9 +170,13 @@ final class TreeRootDrop extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) => DragTarget<String>(
-    onWillAcceptWithDetails: (details) => treeDropMoves(details.data, ''),
-    onAcceptWithDetails: (details) => onMove(details.data, ''),
+  Widget build(BuildContext context) => DragTarget<List<String>>(
+    onWillAcceptWithDetails: (details) =>
+        treeDropPaths(details.data, '').isNotEmpty,
+    onAcceptWithDetails: (details) {
+      final movable = treeDropPaths(details.data, '');
+      if (movable.isNotEmpty) onMove(movable, '');
+    },
     builder: (context, candidates, _) => child,
   );
 }
@@ -168,22 +192,27 @@ final class TreeDropShield extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) => DragTarget<String>(
+  Widget build(BuildContext context) => DragTarget<List<String>>(
     onWillAcceptWithDetails: (_) => true,
     builder: (context, candidates, _) => child,
   );
 }
 
-/// What follows the pointer: the row's icon and name on a card.
+/// What follows the pointer: the row's icon and name on a card — several
+/// rows dragged together say how many, instead of naming one of them.
 final class _TreeDragFeedback extends StatelessWidget {
-  const new({required this.note});
+  const new({required this.note, required this.paths});
 
   final Note note;
+
+  /// The paths the drag carries.
+  final List<String> paths;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final metrics = TreeRowMetrics.of(context);
+    final many = paths.length > 1;
     return Material(
       elevation: 4,
       borderRadius: BorderRadius.circular(6),
@@ -196,11 +225,18 @@ final class _TreeDragFeedback extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
-                note.isDir ? Icons.folder_outlined : Icons.description_outlined,
+                many
+                    ? Icons.layers_outlined
+                    : (note.isDir
+                          ? Icons.folder_outlined
+                          : Icons.description_outlined),
                 size: 16,
               ),
               const SizedBox(width: 6),
-              Text(note.name, style: theme.textTheme.bodyMedium),
+              Text(
+                many ? AppStrings.treeMarkedCount(paths.length) : note.name,
+                style: theme.textTheme.bodyMedium,
+              ),
             ],
           ),
         ),

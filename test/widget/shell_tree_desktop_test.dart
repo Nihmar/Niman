@@ -58,6 +58,80 @@ void main() {
     expect(find.text('Selected: 2'), findsOne);
   }
 
+  /// A row of the tree dragged with the mouse and let go on [to].
+  Future<void> dragMouse(WidgetTester tester, Finder from, Finder to) async {
+    final start = tester.getCenter(from);
+    final end = tester.getCenter(to);
+    final mouse = await tester.startGesture(
+      start,
+      kind: PointerDeviceKind.mouse,
+    );
+    await tester.pump();
+    for (var step = 1; step <= 10; step++) {
+      await mouse.moveTo(Offset.lerp(start, end, step / 10)!);
+      await tester.pump();
+    }
+    await mouse.up();
+    await settle(tester);
+  }
+
+  /// Opens the folder row [folder] with its chevron.
+  Future<void> expand(WidgetTester tester, String folder) async {
+    await tester.tap(
+      find.descendant(
+        of: find
+            .ancestor(of: noteRow(folder), matching: find.byType(InkWell))
+            .first,
+        matching: find.byIcon(Icons.chevron_right),
+      ),
+    );
+    await settle(tester);
+  }
+
+  testWidgets('a drag of one marked row moves them all (#996)', (tester) async {
+    await pump(tester);
+    await tester.tap(noteRow('alpha.md'));
+    await settle(tester);
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+    await tester.tap(noteRow('bravo.md'));
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+    await settle(tester);
+
+    await dragMouse(tester, noteRow('alpha.md'), noteRow('Box'));
+
+    expect(await controller.find('Box/alpha.md'), isNotNull);
+    expect(await controller.find('Box/bravo.md'), isNotNull);
+    expect(await controller.find('charlie.md'), isNotNull);
+  }, variant: _linux);
+
+  testWidgets(
+    'a marked folder dragged with its marked child moves once (#996)',
+    (tester) async {
+      await pump(tester);
+      await controller.createFolder(parentPath: 'Box', name: 'Nested');
+      await controller.createNote(parentPath: 'Box/Nested', name: 'leaf');
+      await controller.createFolder(parentPath: '', name: 'Dest');
+      await settle(tester);
+      await expand(tester, 'Box');
+      await expand(tester, 'Nested');
+      // Mark the folder and the note under it.
+      await tester.tap(noteRow('Box'));
+      await settle(tester);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+      await tester.tap(noteRow('leaf.md'));
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+      await settle(tester);
+
+      await dragMouse(tester, noteRow('Box'), noteRow('Dest'));
+
+      // The folder carried its child; the child did not move on its own.
+      expect(await controller.find('Dest/Box/Nested/leaf.md'), isNotNull);
+      expect(await controller.find('Box'), isNull);
+      expect(await controller.find('Nested'), isNull);
+    },
+    variant: _linux,
+  );
+
   testWidgets('the marked rows go to the trash together, and one Undo '
       'brings them back', (tester) async {
     await pump(tester);
