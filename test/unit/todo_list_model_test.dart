@@ -143,6 +143,35 @@ void main() {
     expect(shape(model.items(<String>{})), ['H:due.none:1', 'open:b']);
   });
 
+  test('hiding is by the entries of the snapshot, never by value (#1016)', () {
+    // The same line index and the same text in both files.
+    final data = snapshot(todo: ['same', 'other'], done: ['same']);
+    List<String> shown(Set<TodoEntry> hidden) => shape(
+      TodoListModel.derive(
+        data,
+        const TodoFilter(),
+        today,
+        hidden: hidden,
+      ).items(<String>{}),
+    );
+
+    // One swipe hides one row: the done twin stays.
+    expect(shown({data.todo.first}), [
+      'H:due.none:1',
+      'open:other',
+      'H:done:1',
+      'done:same',
+    ]);
+    // An equal-valued entry that is not the snapshot's own hides nothing:
+    // the requirement is the instance, and this pins it.
+    final lookalike = TodoEntry(
+      lineIndex: data.todo.first.lineIndex,
+      task: data.todo.first.task,
+    );
+    expect(lookalike == data.todo.first, isFalse);
+    expect(shown({lookalike}), hasLength(shown(const {}).length));
+  });
+
   test('rows remember their file, and their ids tell the files apart', () {
     final model = TodoListModel.derive(
       snapshot(todo: ['a'], done: ['x 2026-09-01 d']),
