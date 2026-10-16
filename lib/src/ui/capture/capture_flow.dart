@@ -271,6 +271,12 @@ Future<Note> createCapturedNote(
 
 /// A paste no text field or editor took: a web address on the clipboard
 /// opens the capture dialog on it; anything else is left alone.
+///
+/// Registered as an ambient `Actions` override, so a focused [TextField]
+/// — which makes its own paste overridable — reaches this action with
+/// the field's own paste as [callingAction] (#1093). That one is handed
+/// the paste instead, and the clipboard is read only where nothing else
+/// took it: the tree, the read view.
 final class CapturePasteAction extends Action<PasteTextIntent> {
   /// The action, calling [onAddress] with the address pasted.
   new(this.onAddress);
@@ -280,6 +286,12 @@ final class CapturePasteAction extends Action<PasteTextIntent> {
 
   @override
   Future<void> invoke(PasteTextIntent intent) async {
+    // A text field (or anything else) that takes the paste: let it.
+    final field = callingAction;
+    if (field != null) {
+      field.invoke(intent);
+      return;
+    }
     final clip = await Clipboard.getData(Clipboard.kTextPlain);
     final url = webAddressIn(clip?.text);
     if (url != null) onAddress(url);

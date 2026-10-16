@@ -115,6 +115,36 @@ void main() {
     await close();
   });
 
+  testWidgets('a link pasted into a field in the shell stays a paste (#1093)', (
+    tester,
+  ) async {
+    clipboard = 'https://example.com/garden';
+    await pumpShell(tester);
+    // A field the shell subtree draws, with no note read behind it: the
+    // tree's in-place rename field.
+    await controller.createFolder(parentPath: '', name: 'Zulu');
+    await settle(tester);
+    await tester.tap(noteRow('Zulu'));
+    await settle(tester);
+    await tester.sendKeyEvent(LogicalKeyboardKey.f2);
+    await settle(tester);
+    final field = find.byKey(const Key('tree-rename-field'));
+    expect(field, findsOneWidget);
+    await tester.tap(field);
+    await tester.pump();
+    await keys(tester, [
+      LogicalKeyboardKey.controlLeft,
+      LogicalKeyboardKey.keyV,
+    ]);
+    // The field took the paste; no capture dialog opened over it.
+    expect(find.byKey(const Key('capture-dialog')), findsNothing);
+    expect(
+      tester.widget<TextField>(field).controller!.text,
+      contains('https://example.com/garden'),
+    );
+    await close();
+  }, variant: desktopDensity);
+
   test('only one web address is a page to capture', () {
     expect(webAddressIn(' https://example.com/a?b=1 '), isNotNull);
     expect(webAddressIn('http://example.com'), isNotNull);
