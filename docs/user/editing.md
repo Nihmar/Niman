@@ -322,6 +322,49 @@ the HTML is used when the clipboard carries it. In the source editor,
 browser's copy into Markdown, linked to the page it came from (see
 [web capture](web-capture.md#paste-as-markdown)).
 
+### Opening and saving a note
+
+**A note that does not open.** The pane says why in one line — the file is no
+longer on the disk, Niman is not allowed to read it, or another program is
+using it at the moment — and offers **Retry**. The note is also tried again by
+itself the next time something asks the editor to look at the file again (the
+app coming back to the front, a sync that touched it), so a read that failed
+for a moment does not need a trip to another note and back. A file that is not
+text at all is an attachment, and says so instead.
+
+**When a note is saved.** About half a second after the last change (a couple
+of seconds for a note over 2 MB, five over 16 MB), when the editor loses the
+focus, and when the app goes to the background or the window is hidden. A
+writer who never pauses that long is not left unsaved: the first change not
+yet saved is written at most five seconds later (twenty over 2 MB, thirty over
+16 MB), however the typing goes after it, so a crash or a flat battery costs a
+few seconds of writing and not a session.
+
+**A save that fails.** A full disk, a card that was pulled out, a program
+holding the file: the status row reads **Could not save · retry** instead of
+*Unsaved*, a message says so once, and Niman tries again after 2, 5 and 15
+seconds — a tap on the status text tries at once, and so does the next change.
+Nothing is thrown away meanwhile. If the note is switched away from or its tab
+is closed while the write is still running or has failed, its text is kept by
+the app: the note stays marked as unsaved, the write is retried, and quitting
+waits for it (or asks, if it still cannot be written) instead of leaving with
+the last edits lost.
+
+**A note changed by another program.** When a sync client, Niman's own sync or
+another program rewrites a note that is open, every open note whose text you
+have not changed — the tabs behind the one on screen too — shows the new file
+at once. A note with edits of yours keeps them (your text wins and is saved
+over the file, as before).
+
+**Line endings and the byte order mark.** The editor works with plain lines,
+but the file keeps what it had: a note with Windows (`CRLF`) line endings is
+saved with them, and a note that began with a UTF-8 byte order mark is saved
+with it, so changing one character of a note changes one character of the
+file — a version-control diff or a sync merge sees that character and not
+every line. A note that mixes endings is saved with the one most of its lines
+had (a tie goes to `LF`), so every line ends alike afterwards; a note of lone
+`CR` lines, as the oldest Mac programs wrote, stays that way.
+
 ## Markdown support
 
 Tables, task lists, footnotes, strikethrough, `==highlight==` (a marker's

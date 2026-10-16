@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/ui/note_view.dart';
+import 'package:niman/src/ui/unsaved_notes.dart';
 import 'package:path/path.dart' as p;
 
 /// External-change reloads (home-screen widget toggles edit the note in
@@ -96,6 +97,54 @@ void main() {
       );
     });
 
+    testWidgets('a change adopted is not read again by the next bump (#1060)', (
+      tester,
+    ) async {
+      File(path).writeAsStringSync('one two three');
+      Widget app({int token = 0}) => _app(
+        NoteView(
+          path: path,
+          showLineNumbers: false,
+          autofocusEditor: false,
+          reloadToken: token,
+        ),
+      );
+      // The reload asks the file system, then reads: two real waits.
+      Future<void> settle() async {
+        for (var turn = 0; turn < 2; turn++) {
+          await tester.runAsync(
+            () => Future<void>.delayed(const Duration(milliseconds: 300)),
+          );
+          await tester.pump();
+        }
+      }
+
+      await tester.pumpWidget(app());
+      await settle();
+      await tester.pump();
+
+      File(path).writeAsStringSync('changed on disk, and longer');
+      await tester.pumpWidget(app(token: 1));
+      await settle();
+      final buffer = tester
+          .state<MarkdownSourceViewState>(find.byType(MarkdownSourceView))
+          .widget
+          .buffer;
+      expect(buffer.text, 'changed on disk, and longer');
+
+      // The file is as the pane has it. The test's own edit stands in for
+      // "a read here would replace the pane": if the next bump reads the file
+      // again, it puts the disk's text back over it.
+      buffer.insert(buffer.length, ' AND MORE');
+      await tester.pumpWidget(app(token: 2));
+      await settle();
+      expect(
+        buffer.text,
+        'changed on disk, and longer AND MORE',
+        reason: 'the adopted file was stamped, so nothing was read',
+      );
+    });
+
     testWidgets('a bump after the file changed adopts it', (tester) async {
       File(path).writeAsStringSync('one two three');
       await tester.pumpWidget(
@@ -122,15 +171,61 @@ void main() {
           ),
         ),
       );
-      await tester.runAsync(
-        () => Future<void>.delayed(const Duration(milliseconds: 300)),
-      );
-      await tester.pump();
+      // The reload asks the file system, then reads: two real waits.
+      for (var turn = 0; turn < 2; turn++) {
+        await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 300)),
+        );
+        await tester.pump();
+      }
       final buffer = tester
           .state<MarkdownSourceViewState>(find.byType(MarkdownSourceView))
           .widget
           .buffer;
       expect(buffer.text, 'changed on disk, and longer');
+    });
+  });
+
+  group('NoteView disk changes announced by the tracker (#1042)', () {
+    testWidgets('a clean note adopts the file; a note with edits keeps them', (
+      tester,
+    ) async {
+      final tracker = UnsavedTracker();
+      var disk = 'Acme plan';
+      Widget note(String path) => _app(
+        NoteView(
+          path: path,
+          showLineNumbers: false,
+          autofocusEditor: false,
+          unsavedTracker: tracker,
+          readNote: (_) async => disk,
+          writeNote: (_, _) async {},
+        ),
+      );
+      await tester.pumpWidget(note('/notes/a.md'));
+      await tester.pump();
+      expect(_editorText(tester), 'Acme plan');
+
+      disk = 'Globex plan';
+      tracker.notifyDiskChanged(const {});
+      await tester.pump();
+      await tester.pump();
+      expect(_editorText(tester), 'Globex plan');
+
+      // Another file's change is not this note's business.
+      disk = 'something else';
+      tracker.notifyDiskChanged({'/notes/other.md'});
+      await tester.pump();
+      await tester.pump();
+      expect(_editorText(tester), 'Globex plan');
+
+      // A note with edits keeps them: unsaved edits always win.
+      _surface(tester).replaceText(0, 0, 'typed ');
+      tracker.notifyDiskChanged({'/notes/a.md'});
+      await tester.pump();
+      await tester.pump();
+      expect(_editorText(tester), 'typed Globex plan');
+      await tester.pump(const Duration(seconds: 2));
     });
   });
 

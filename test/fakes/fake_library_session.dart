@@ -30,6 +30,7 @@ import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/library/note_ops.dart';
 import 'package:niman/src/library/note_relocation.dart';
+import 'package:niman/src/library/note_save_result.dart';
 import 'package:niman/src/library/note_write_stream.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/links/block_anchors.dart';
@@ -132,6 +133,12 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
 
   @override
   Stream<Set<String>> get removals => _removals.stream;
+
+  final StreamController<Set<String>> externalChangesController =
+      StreamController<Set<String>>.broadcast();
+
+  @override
+  Stream<Set<String>> get externalChanges => externalChangesController.stream;
 
   @override
   NoteOperations? get ops => _phase == LibraryPhase.ready ? this : null;
@@ -831,6 +838,9 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     if (!_removals.isClosed) {
       await _removals.close();
     }
+    if (!externalChangesController.isClosed) {
+      await externalChangesController.close();
+    }
   }
 
   /// Simulates a re-index that pruned [paths] from the tree (issue #289):
@@ -1189,7 +1199,11 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   Exception? saveError;
 
   @override
-  Future<void> saveNote(String path, String content, {int? editSession}) async {
+  Future<NoteSaveResult?> saveNote(
+    String path,
+    String content, {
+    int? editSession,
+  }) async {
     saves.add((path, content, editSession));
     final failure = saveError;
     if (failure != null) throw failure;
@@ -1197,13 +1211,14 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     if (gate != null) await gate.future;
     (_findRow(path) ?? _addRow(path, isDir: false)).content = content;
     _bump();
+    return null;
   }
 
   /// Every [saveNoteStream] call, in order: `(path, content, editSession)`.
   final List<(String, String, int?)> streamedSaves = [];
 
   @override
-  Future<void> saveNoteStream(
+  Future<NoteSaveResult?> saveNoteStream(
     String path,
     NoteContentProducer content, {
     int? editSession,
@@ -1219,6 +1234,7 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     streamedSaves.add((path, text, editSession));
     (_findRow(path) ?? _addRow(path, isDir: false)).content = text;
     _bump();
+    return null;
   }
 
   /// Every [tidyNote] call, in order.

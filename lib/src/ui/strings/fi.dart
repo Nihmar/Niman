@@ -604,11 +604,26 @@ final class FinnishStrings extends Strings {
   @override
   String get noteStatusError => 'Virhe';
   @override
+  String get noteStatusSaveFailed => 'Ei tallennettu · yritä uudelleen';
+  @override
+  String get noteSaveFailedSnack =>
+      'Muistiinpanoa ei voitu tallentaa. Niman yrittää uudelleen.';
+  @override
   String get noteNotText =>
       'Tämä tiedosto ei ole tekstimuistiinpano, joten '
       'Niman ei voi näyttää sitä tässä.';
   @override
   String get noteLoadFailed => 'Tätä muistiinpanoa ei voitu avata.';
+  @override
+  String get noteLoadMissing =>
+      'Tämän muistiinpanon tiedostoa ei ole enää levyllä.';
+  @override
+  String get noteLoadDenied =>
+      'Nimanilla ei ole lupaa lukea tätä muistiinpanoa.';
+  @override
+  String get noteLoadLocked =>
+      'Toinen ohjelma käyttää tätä muistiinpanoa. Yritä hetken kuluttua '
+      'uudelleen.';
   @override
   String wordCount(int count) => count == 1 ? '1 sana' : '$count sanaa';
   @override

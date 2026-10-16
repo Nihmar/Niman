@@ -611,11 +611,24 @@ final class SpanishStrings extends Strings {
   @override
   String get noteStatusError => 'Error';
   @override
+  String get noteStatusSaveFailed => 'No guardada · reintentar';
+  @override
+  String get noteSaveFailedSnack =>
+      'No se pudo guardar la nota. Niman lo intentará de nuevo.';
+  @override
   String get noteNotText =>
       'Este archivo no es una nota de texto, así que '
       'Niman no puede mostrarlo aquí.';
   @override
   String get noteLoadFailed => 'No se pudo abrir esta nota.';
+  @override
+  String get noteLoadMissing =>
+      'El archivo de esta nota ya no está en el disco.';
+  @override
+  String get noteLoadDenied => 'Niman no tiene permiso para leer esta nota.';
+  @override
+  String get noteLoadLocked =>
+      'Otro programa está usando esta nota. Inténtalo de nuevo en un momento.';
   @override
   String wordCount(int count) => count == 1 ? '1 palabra' : '$count palabras';
   @override

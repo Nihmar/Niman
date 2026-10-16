@@ -4,6 +4,7 @@
 library;
 
 import 'package:niman/src/core/files.dart';
+import 'package:niman/src/library/note_save_result.dart';
 import 'package:niman/src/library/note_writer.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/note_view.dart';
@@ -19,7 +20,11 @@ NoteSaver? noteSaverFor(LibrarySession controller) {
   if (ops == null || root == null) return null;
   return (path, content, {required editSession}) {
     if (!p.isWithin(root, path)) {
-      return writeNoteOffIsolate(path, content).then((_) {});
+      return writeNoteOffIsolate(path, content).then(
+        (written) => NoteSaveResult(
+          stamp: DiskStamp(size: written.bytes, modified: written.modified),
+        ),
+      );
     }
     return ops.saveNote(relPath(path, root), content, editSession: editSession);
   };
@@ -37,7 +42,9 @@ NoteStreamSaver? noteStreamSaverFor(LibrarySession controller) {
   if (ops == null || root == null) return null;
   return (path, content, {required editSession, references}) {
     if (!p.isWithin(root, path)) {
-      return Future<void>.error(StateError('"$path" is outside the library'));
+      return Future<NoteSaveResult?>.error(
+        StateError('"$path" is outside the library'),
+      );
     }
     return ops.saveNoteStream(
       relPath(path, root),

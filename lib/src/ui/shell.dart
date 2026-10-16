@@ -2471,6 +2471,13 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     // Paths a re-index pruned from the tree: the tabs they hold stay, and
     // are flagged missing (issues #289, #372).
     _inbound.listen(widget.controller.removals, _workspace.missing);
+    // Notes rewritten on disk behind the editors' backs (a sync client,
+    // another program): every open note whose buffer is clean adopts the
+    // change, the tabs behind the one on screen included (#1055).
+    _inbound.listen(
+      widget.controller.externalChanges,
+      widget.unsavedTracker.notifyDiskChanged,
+    );
     // Paths a sync just changed on disk: the open note among them is
     // re-read (its buffer was saved before the sync started).
     _inbound.listen(widget.controller.sync?.localChanges, (paths) {
@@ -5281,6 +5288,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   Widget _searchSlot(LibrarySession controller, {bool tree = false}) {
     return SearchSlot(
       controller: controller,
+      unsavedTracker: widget.unsavedTracker,
       onOpenNote: _openSearchNote,
       requests: _searchRequests,
       commands: _searchCommands,

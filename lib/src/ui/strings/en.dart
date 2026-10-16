@@ -601,10 +601,22 @@ final class EnglishStrings extends Strings {
   @override
   String get noteStatusError => 'Error';
   @override
+  String get noteStatusSaveFailed => 'Could not save · retry';
+  @override
+  String get noteSaveFailedSnack =>
+      'This note could not be saved. Niman will try again.';
+  @override
   String get noteNotText =>
       'This file is not a text note, so Niman cannot show it here.';
   @override
   String get noteLoadFailed => 'This note could not be opened.';
+  @override
+  String get noteLoadMissing => 'This note’s file is no longer on the disk.';
+  @override
+  String get noteLoadDenied => 'Niman is not allowed to read this note.';
+  @override
+  String get noteLoadLocked =>
+      'Another program is using this note. Try again in a moment.';
   @override
   String wordCount(int count) => count == 1 ? '1 word' : '$count words';
   @override

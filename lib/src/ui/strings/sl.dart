@@ -607,10 +607,22 @@ final class SlovenianStrings extends Strings {
   @override
   String get noteStatusError => 'Napaka';
   @override
+  String get noteStatusSaveFailed => 'Ni shranjeno · poskusi znova';
+  @override
+  String get noteSaveFailedSnack =>
+      'Zapiska ni bilo mogoče shraniti. Niman bo poskusil znova.';
+  @override
   String get noteNotText =>
       'Ta datoteka ni besedilni zapisek, zato je Niman tu ne more prikazati.';
   @override
   String get noteLoadFailed => 'Tega zapiska ni bilo mogoče odpreti.';
+  @override
+  String get noteLoadMissing => 'Datoteke tega zapiska ni več na disku.';
+  @override
+  String get noteLoadDenied => 'Niman nima dovoljenja za branje tega zapiska.';
+  @override
+  String get noteLoadLocked =>
+      'Ta zapisek uporablja drug program. Poskusite znova čez trenutek.';
   @override
   String wordCount(int count) => switch (count % 100) {
     1 => '$count beseda',

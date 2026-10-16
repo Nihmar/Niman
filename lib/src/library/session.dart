@@ -21,6 +21,7 @@ import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/library/note_ops.dart';
 import 'package:niman/src/library/note_relocation.dart';
+import 'package:niman/src/library/note_save_result.dart';
 import 'package:niman/src/library/note_write_stream.dart';
 import 'package:niman/src/links/library_links.dart';
 import 'package:niman/src/links/suggester.dart';
@@ -145,7 +146,13 @@ abstract interface class NoteOperations {
   /// of different notes independently. [editSession] names the editor
   /// session the save belongs to — one opening of the note, however many
   /// autosaves it makes.
-  Future<void> saveNote(String path, String content, {int? editSession});
+  ///
+  /// Answers what the write left on the disk, or null when it cannot say.
+  Future<NoteSaveResult?> saveNote(
+    String path,
+    String content, {
+    int? editSession,
+  });
 
   /// Saves a note whose text is never joined: [content] makes the bytes one
   /// slice at a time and the write takes them as they arrive.
@@ -156,7 +163,7 @@ abstract interface class NoteOperations {
   /// [references] are its tags and links as of the text, when the editor
   /// keeps them: the reindex behind the save takes them instead of reading
   /// the note for them.
-  Future<void> saveNoteStream(
+  Future<NoteSaveResult?> saveNoteStream(
     String path,
     NoteContentProducer content, {
     int? editSession,
@@ -357,6 +364,13 @@ abstract interface class LibrarySession {
   /// a note or a folder gone from disk, renamed paths excluded (a rename is
   /// paired, not pruned). What holds a path open — a tab — closes it here.
   Stream<Set<String>> get removals;
+
+  /// Fires with the absolute paths the file watcher reported changed (#1055):
+  /// another program, a sync client or Niman's own sync rewrote them — and,
+  /// as the watcher cannot tell, the app's own saves too. What holds a note
+  /// open compares the file with what it last read or wrote before it
+  /// believes a change.
+  Stream<Set<String>> get externalChanges;
 
   /// Which of [paths] the index does not hold — a note pruned before this
   /// session read the tree, so no [removals] event carries it. What a tab

@@ -607,11 +607,23 @@ final class BosnianStrings extends Strings {
   @override
   String get noteStatusError => 'Greška';
   @override
+  String get noteStatusSaveFailed => 'Nije spremljeno · ponovi';
+  @override
+  String get noteSaveFailedSnack =>
+      'Bilješka se nije mogla spremiti. Niman će pokušati ponovo.';
+  @override
   String get noteNotText =>
       'Ova datoteka nije tekstualna bilješka, pa je '
       'Niman ne može prikazati ovdje.';
   @override
   String get noteLoadFailed => 'Ova bilješka se nije mogla otvoriti.';
+  @override
+  String get noteLoadMissing => 'Datoteke ove bilješke više nema na disku.';
+  @override
+  String get noteLoadDenied => 'Niman nema dozvolu za čitanje ove bilješke.';
+  @override
+  String get noteLoadLocked =>
+      'Drugi program koristi ovu bilješku. Pokušajte ponovo za trenutak.';
   @override
   String wordCount(int count) =>
       count % 10 == 1 && count % 100 != 11 ? '$count riječ' : '$count riječi';

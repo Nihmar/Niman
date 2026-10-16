@@ -610,10 +610,22 @@ final class PolishStrings extends Strings {
   @override
   String get noteStatusError => 'Błąd';
   @override
+  String get noteStatusSaveFailed => 'Nie zapisano · ponów';
+  @override
+  String get noteSaveFailedSnack =>
+      'Nie udało się zapisać notatki. Niman spróbuje ponownie.';
+  @override
   String get noteNotText =>
       'Ten plik nie jest notatką tekstową, więc Niman nie może go tu pokazać.';
   @override
   String get noteLoadFailed => 'Nie udało się otworzyć tej notatki.';
+  @override
+  String get noteLoadMissing => 'Pliku tej notatki nie ma już na dysku.';
+  @override
+  String get noteLoadDenied => 'Niman nie ma uprawnień do odczytu tej notatki.';
+  @override
+  String get noteLoadLocked =>
+      'Inny program używa tej notatki. Spróbuj ponownie za chwilę.';
   @override
   String wordCount(int count) => count == 1
       ? '1 słowo'

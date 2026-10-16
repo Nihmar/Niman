@@ -593,10 +593,23 @@ final class HindiStrings extends Strings {
   @override
   String get noteStatusError => 'त्रुटि';
   @override
+  String get noteStatusSaveFailed => 'सहेजा नहीं गया · फिर कोशिश करें';
+  @override
+  String get noteSaveFailedSnack =>
+      'यह नोट सहेजा नहीं जा सका। Niman फिर कोशिश करेगा।';
+  @override
   String get noteNotText =>
       'यह फ़ाइल टेक्स्ट नोट नहीं है, इसलिए Niman इसे यहाँ नहीं दिखा सकता।';
   @override
   String get noteLoadFailed => 'यह नोट खोला नहीं जा सका।';
+  @override
+  String get noteLoadMissing => 'इस नोट की फ़ाइल अब डिस्क पर नहीं है।';
+  @override
+  String get noteLoadDenied => 'Niman को यह नोट पढ़ने की अनुमति नहीं है।';
+  @override
+  String get noteLoadLocked =>
+      'कोई दूसरा प्रोग्राम इस नोट का उपयोग कर रहा है। थोड़ी देर बाद फिर कोशिश '
+      'करें।';
   @override
   String wordCount(int count) => '$count शब्द';
   @override

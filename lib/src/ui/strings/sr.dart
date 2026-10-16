@@ -605,11 +605,23 @@ final class SerbianStrings extends Strings {
   @override
   String get noteStatusError => 'Грешка';
   @override
+  String get noteStatusSaveFailed => 'Није сачувано · покушај поново';
+  @override
+  String get noteSaveFailedSnack =>
+      'Белешка није могла да се сачува. Niman ће покушати поново.';
+  @override
   String get noteNotText =>
       'Ова датотека није текстуална белешка, па је '
       'Niman не може приказати овде.';
   @override
   String get noteLoadFailed => 'Ова белешка није могла да се отвори.';
+  @override
+  String get noteLoadMissing => 'Датотеке ове белешке више нема на диску.';
+  @override
+  String get noteLoadDenied => 'Niman нема дозволу да чита ову белешку.';
+  @override
+  String get noteLoadLocked =>
+      'Други програм користи ову белешку. Покушајте поново за тренутак.';
   @override
   String wordCount(int count) =>
       count % 10 == 1 && count % 100 != 11 ? '$count реч' : '$count речи';

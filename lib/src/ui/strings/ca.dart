@@ -612,11 +612,24 @@ final class CatalanStrings extends Strings {
   @override
   String get noteStatusError => 'Error';
   @override
+  String get noteStatusSaveFailed => 'No desat · torna-ho a provar';
+  @override
+  String get noteSaveFailedSnack =>
+      'No s’ha pogut guardar la nota. Niman ho tornarà a provar.';
+  @override
   String get noteNotText =>
       'Aquest fitxer no és una nota de text, així '
       'que Niman no el pot mostrar aquí.';
   @override
   String get noteLoadFailed => 'No s’ha pogut obrir aquesta nota.';
+  @override
+  String get noteLoadMissing => 'El fitxer d’aquesta nota ja no és al disc.';
+  @override
+  String get noteLoadDenied => 'Niman no té permís per llegir aquesta nota.';
+  @override
+  String get noteLoadLocked =>
+      'Un altre programa està utilitzant aquesta nota. Torna-ho a provar '
+      'd’aquí a un moment.';
   @override
   String wordCount(int count) => count == 1 ? '1 paraula' : '$count paraules';
   @override

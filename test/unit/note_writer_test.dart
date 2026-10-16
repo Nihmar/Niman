@@ -49,6 +49,18 @@ void main() {
     expect(read('a.md'), 'new');
   });
 
+  test('a save answers with the stamp of the file it left (#1060)', () async {
+    final joined = await writer.save('a.md', 'hello there');
+    expect(joined!.stamp!.matches(p.join(root.path, 'a.md')), isTrue);
+
+    final streamed = await writer.save(
+      'a.md',
+      (int index) async => index == 0 ? utf8.encode('a longer text\n') : null,
+    );
+    expect(streamed!.stamp!.size, 14);
+    expect(streamed.stamp!.matches(p.join(root.path, 'a.md')), isTrue);
+  });
+
   test('saves of one note land in the order they were made', () async {
     final saves = [
       for (var i = 0; i < 20; i++) writer.save('a.md', 'version $i'),

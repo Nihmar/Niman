@@ -603,10 +603,22 @@ final class DanishStrings extends Strings {
   @override
   String get noteStatusError => 'Fejl';
   @override
+  String get noteStatusSaveFailed => 'Ikke gemt · prøv igen';
+  @override
+  String get noteSaveFailedSnack =>
+      'Noten kunne ikke gemmes. Niman prøver igen.';
+  @override
   String get noteNotText =>
       'Denne fil er ikke en tekstnote, så Niman kan ikke vise den her.';
   @override
   String get noteLoadFailed => 'Noten kunne ikke åbnes.';
+  @override
+  String get noteLoadMissing => 'Notens fil findes ikke længere på disken.';
+  @override
+  String get noteLoadDenied => 'Niman har ikke tilladelse til at læse noten.';
+  @override
+  String get noteLoadLocked =>
+      'Et andet program bruger noten. Prøv igen om et øjeblik.';
   @override
   String wordCount(int count) => '$count ord';
   @override
