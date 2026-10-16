@@ -1309,6 +1309,12 @@ final class SerbianStrings extends Strings {
   @override
   String get newNoteHere => 'Нова белешка овде';
   @override
+  String get newAudioNoteHere => 'Нова гласовна белешка овде';
+  @override
+  String get newSlidesHere => 'Нова презентација овде';
+  @override
+  String get newFlashcardsHere => 'Нове картице овде';
+  @override
   String get newFolderHere => 'Нова фасцикла овде';
   @override
   String get newListNoteTitle => 'Нова белешка-списак';

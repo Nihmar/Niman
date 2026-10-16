@@ -1293,6 +1293,12 @@ final class EstonianStrings extends Strings {
   @override
   String get newNoteHere => 'Uus märge siia';
   @override
+  String get newAudioNoteHere => 'Uus häälmärge siia';
+  @override
+  String get newSlidesHere => 'Uus esitlus siia';
+  @override
+  String get newFlashcardsHere => 'Uued kaardid siia';
+  @override
   String get newFolderHere => 'Uus kaust siia';
   @override
   String get newListNoteTitle => 'Uus märge loeteluga';

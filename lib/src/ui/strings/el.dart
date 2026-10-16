@@ -1338,6 +1338,12 @@ final class GreekStrings extends Strings {
   @override
   String get newNoteHere => 'Νέα σημείωση εδώ';
   @override
+  String get newAudioNoteHere => 'Νέα φωνητική σημείωση εδώ';
+  @override
+  String get newSlidesHere => 'Νέα παρουσίαση εδώ';
+  @override
+  String get newFlashcardsHere => 'Νέες κάρτες εδώ';
+  @override
   String get newFolderHere => 'Νέος φάκελος εδώ';
   @override
   String get newListNoteTitle => 'Νέα σημείωση-λίστα';

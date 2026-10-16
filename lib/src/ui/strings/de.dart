@@ -1324,6 +1324,12 @@ final class GermanStrings extends Strings {
   @override
   String get newNoteHere => 'Neue Notiz hier';
   @override
+  String get newAudioNoteHere => 'Neue Sprachnotiz hier';
+  @override
+  String get newSlidesHere => 'Neue Präsentation hier';
+  @override
+  String get newFlashcardsHere => 'Neue Karteikarten hier';
+  @override
   String get newFolderHere => 'Neuer Ordner hier';
   @override
   String get newListNoteTitle => 'Neue Listen-Notiz';

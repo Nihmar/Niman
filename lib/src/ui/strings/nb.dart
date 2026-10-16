@@ -1300,6 +1300,12 @@ final class NorwegianStrings extends Strings {
   @override
   String get newNoteHere => 'Nytt notat her';
   @override
+  String get newAudioNoteHere => 'Nytt talenotat her';
+  @override
+  String get newSlidesHere => 'Ny presentasjon her';
+  @override
+  String get newFlashcardsHere => 'Nye flashcards her';
+  @override
   String get newFolderHere => 'Ny mappe her';
   @override
   String get newListNoteTitle => 'Nytt listenotat';

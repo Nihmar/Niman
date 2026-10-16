@@ -1307,6 +1307,12 @@ final class FinnishStrings extends Strings {
   @override
   String get newNoteHere => 'Uusi muistiinpano tähän';
   @override
+  String get newAudioNoteHere => 'Uusi äänimuistiinpano tähän';
+  @override
+  String get newSlidesHere => 'Uusi esitys tähän';
+  @override
+  String get newFlashcardsHere => 'Uudet muistikortit tähän';
+  @override
   String get newFolderHere => 'Uusi kansio tähän';
   @override
   String get newListNoteTitle => 'Uusi listamuistiinpano';

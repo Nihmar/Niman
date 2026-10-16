@@ -1333,6 +1333,12 @@ final class FrenchStrings extends Strings {
   @override
   String get newNoteHere => 'Nouvelle note ici';
   @override
+  String get newAudioNoteHere => 'Nouvelle note vocale ici';
+  @override
+  String get newSlidesHere => 'Nouvelle présentation ici';
+  @override
+  String get newFlashcardsHere => 'Nouvelles cartes mémoire ici';
+  @override
   String get newFolderHere => 'Nouveau dossier ici';
   @override
   String get newListNoteTitle => 'Nouvelle note-liste';

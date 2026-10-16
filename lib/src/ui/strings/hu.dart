@@ -1311,6 +1311,12 @@ final class HungarianStrings extends Strings {
   @override
   String get newNoteHere => 'Új jegyzet ide';
   @override
+  String get newAudioNoteHere => 'Új hangjegyzet ide';
+  @override
+  String get newSlidesHere => 'Új bemutató ide';
+  @override
+  String get newFlashcardsHere => 'Új kártyák ide';
+  @override
   String get newFolderHere => 'Új mappa ide';
   @override
   String get newListNoteTitle => 'Új listajegyzet';

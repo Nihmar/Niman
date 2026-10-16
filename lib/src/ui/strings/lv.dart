@@ -1303,6 +1303,12 @@ final class LatvianStrings extends Strings {
   @override
   String get newNoteHere => 'Jauna piezīme šeit';
   @override
+  String get newAudioNoteHere => 'Jauna balss piezīme šeit';
+  @override
+  String get newSlidesHere => 'Jauna prezentācija šeit';
+  @override
+  String get newFlashcardsHere => 'Jaunas kartītes šeit';
+  @override
   String get newFolderHere => 'Jauns katalogs šeit';
   @override
   String get newListNoteTitle => 'Jauna piezīme ar sarakstu';

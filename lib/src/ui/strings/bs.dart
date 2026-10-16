@@ -1309,6 +1309,12 @@ final class BosnianStrings extends Strings {
   @override
   String get newNoteHere => 'Nova bilješka ovdje';
   @override
+  String get newAudioNoteHere => 'Nova glasovna bilješka ovdje';
+  @override
+  String get newSlidesHere => 'Nova prezentacija ovdje';
+  @override
+  String get newFlashcardsHere => 'Nove kartice ovdje';
+  @override
   String get newFolderHere => 'Nova mapa ovdje';
   @override
   String get newListNoteTitle => 'Nova bilješka-popis';

@@ -88,6 +88,30 @@ void main() {
     expect(await controller.find('charlie.md'), isNotNull);
   }, variant: _linux);
 
+  testWidgets('a folder menu makes the kinds inside it (#997)', (tester) async {
+    await pump(tester);
+    // Each entry creates the kind it says, in the folder, not in the
+    // library's new-note folder.
+    Future<void> make(String key, String name, String type) async {
+      await tester.tap(noteRow('Box'), buttons: kSecondaryButton);
+      await settle(tester);
+      await tester.tap(find.byKey(Key(key)));
+      await settle(tester);
+      await tester.enterText(dialogField(), name);
+      await tester.tap(find.text('OK'));
+      await settle(tester);
+      expect(await controller.find('Box/$name.md'), isNotNull);
+      expect(
+        await controller.readNote('Box/$name.md'),
+        contains('type: $type'),
+      );
+    }
+
+    await make('menu-new-audio-note', 'Voice', 'audio');
+    await make('menu-new-slides', 'Talk', 'slides');
+    await make('menu-new-flashcards', 'Deck', 'flashcard');
+  }, variant: _linux);
+
   testWidgets('a new note is named in a row of the tree; Esc gives it up', (
     tester,
   ) async {

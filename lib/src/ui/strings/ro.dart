@@ -1317,6 +1317,12 @@ final class RomanianStrings extends Strings {
   @override
   String get newNoteHere => 'Notă nouă aici';
   @override
+  String get newAudioNoteHere => 'Notă vocală nouă aici';
+  @override
+  String get newSlidesHere => 'Prezentare nouă aici';
+  @override
+  String get newFlashcardsHere => 'Carduri noi aici';
+  @override
   String get newFolderHere => 'Dosar nou aici';
   @override
   String get newListNoteTitle => 'Notă de listă nouă';

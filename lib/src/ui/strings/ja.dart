@@ -1234,6 +1234,12 @@ final class JapaneseStrings extends Strings {
   @override
   String get newNoteHere => 'ここに新しいノート';
   @override
+  String get newAudioNoteHere => 'ここに新しい音声ノート';
+  @override
+  String get newSlidesHere => 'ここに新しいスライド';
+  @override
+  String get newFlashcardsHere => 'ここに新しいフラッシュカード';
+  @override
   String get newFolderHere => 'ここに新しいフォルダ';
   @override
   String get newListNoteTitle => '新しいリストノート';

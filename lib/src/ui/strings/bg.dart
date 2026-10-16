@@ -1315,6 +1315,12 @@ final class BulgarianStrings extends Strings {
   @override
   String get newNoteHere => 'Нова бележка тук';
   @override
+  String get newAudioNoteHere => 'Нова гласова бележка тук';
+  @override
+  String get newSlidesHere => 'Нова презентация тук';
+  @override
+  String get newFlashcardsHere => 'Нови карти тук';
+  @override
   String get newFolderHere => 'Нова папка тук';
   @override
   String get newListNoteTitle => 'Нова бележка със списък';

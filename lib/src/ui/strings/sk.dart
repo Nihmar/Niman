@@ -1307,6 +1307,12 @@ final class SlovakStrings extends Strings {
   @override
   String get newNoteHere => 'Nová poznámka sem';
   @override
+  String get newAudioNoteHere => 'Nová hlasová poznámka sem';
+  @override
+  String get newSlidesHere => 'Nová prezentácia sem';
+  @override
+  String get newFlashcardsHere => 'Nové kartičky sem';
+  @override
   String get newFolderHere => 'Nový priečinok sem';
   @override
   String get newListNoteTitle => 'Nová poznámka so zoznamom';

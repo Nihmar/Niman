@@ -1304,6 +1304,12 @@ final class LithuanianStrings extends Strings {
   @override
   String get newNoteHere => 'Nauja pastaba čia';
   @override
+  String get newAudioNoteHere => 'Nauja balso pastaba čia';
+  @override
+  String get newSlidesHere => 'Nauja pateiktis čia';
+  @override
+  String get newFlashcardsHere => 'Naujos kortelės čia';
+  @override
   String get newFolderHere => 'Naujas katalogas čia';
   @override
   String get newListNoteTitle => 'Nauja sąrašo pastaba';

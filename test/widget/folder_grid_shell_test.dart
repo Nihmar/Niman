@@ -394,4 +394,51 @@ void main() {
       reason: 'inside the folder shown',
     );
   });
+
+  testWidgets(
+    'the background menu makes the kinds in the folder shown (#997)',
+    (tester) async {
+      await openShell(tester);
+      await session.createFolder(parentPath: '', name: 'Projects');
+      await session.createNote(parentPath: 'Projects', name: 'Roadmap');
+      await settle(tester);
+
+      await tester.tap(find.byKey(const Key('view-grid-toggle')));
+      await settle(tester);
+      await tester.tap(find.byKey(const Key('grid-tile-Projects')));
+      await settle(tester);
+
+      final grid = tester.getRect(find.byKey(const Key('folder-grid-scroll')));
+      await tester.tapAt(
+        Offset(grid.center.dx, grid.bottom - 20),
+        buttons: kSecondaryMouseButton,
+      );
+      await settle(tester);
+      expect(find.byKey(const Key('tree-menu-new-audio-note')), findsOneWidget);
+      expect(find.byKey(const Key('tree-menu-new-slides')), findsOneWidget);
+      expect(find.byKey(const Key('tree-menu-new-flashcards')), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('tree-menu-new-flashcards')));
+      await settle(tester);
+      await tester.enterText(
+        find.descendant(
+          of: find.byType(AlertDialog),
+          matching: find.byType(TextField),
+        ),
+        'Deck',
+      );
+      await tester.tap(
+        find.descendant(
+          of: find.byType(AlertDialog),
+          matching: find.byType(FilledButton),
+        ),
+      );
+      await settle(tester);
+      expect(
+        await session.readNote('Projects/Deck.md'),
+        contains('type: flashcard'),
+      );
+      expect(await session.find('Deck.md'), isNull, reason: 'not at the root');
+    },
+  );
 }

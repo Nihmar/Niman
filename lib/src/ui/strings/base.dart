@@ -702,6 +702,9 @@ abstract base class Strings {
   String get trashOriginalRoot;
   String trashItemCount(int count);
   String get newNoteHere;
+  String get newAudioNoteHere;
+  String get newSlidesHere;
+  String get newFlashcardsHere;
   String get newFolderHere;
   String get newListNoteTitle;
   String get newListNoteDefault;

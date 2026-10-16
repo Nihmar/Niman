@@ -1301,6 +1301,12 @@ final class CroatianStrings extends Strings {
   @override
   String get newNoteHere => 'Nova napomena ovdje';
   @override
+  String get newAudioNoteHere => 'Nova glasovna napomena ovdje';
+  @override
+  String get newSlidesHere => 'Nova prezentacija ovdje';
+  @override
+  String get newFlashcardsHere => 'Nove kartice ovdje';
+  @override
   String get newFolderHere => 'Novi direktorij ovdje';
   @override
   String get newListNoteTitle => 'Nova popisna napomena';

@@ -1307,6 +1307,12 @@ final class SwedishStrings extends Strings {
   @override
   String get newNoteHere => 'Ny anteckning här';
   @override
+  String get newAudioNoteHere => 'Ny röstanteckning här';
+  @override
+  String get newSlidesHere => 'Ny presentation här';
+  @override
+  String get newFlashcardsHere => 'Nya flashcards här';
+  @override
   String get newFolderHere => 'Ny mapp här';
   @override
   String get newListNoteTitle => 'Ny listaanteckning';

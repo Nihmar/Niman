@@ -326,7 +326,12 @@ What does not ask the rule, because it already says where:
 
 - **Create … here** in a folder's context menu, and the tree's and the
   grid's right-click menus on empty space: the note or folder goes in that
-  folder (the library root, for the empty space of the tree).
+  folder (the library root, for the empty space of the tree). The same
+  menus offer **New voice note here**, **New slides here** and **New
+  flashcards here** (#997): the kind is made right there instead of where
+  the setting says, with the content it always starts from. The list
+  note, the journal and a capture keep folders of their own, so none of
+  them is on a folder's menu.
 - A link that names a path (`[[Sub/Foo]]`), a template whose frontmatter
   names its `folder`, a Home action's own folder, and the folder picked in
   a capture.
@@ -664,7 +669,9 @@ else in it that is not Markdown is kept as a file.
   shown as a checklist: tick, nest, drag, edit, delete, add. A list note
   can be turned into a **shopping list** (a quantity per item) from its
   ⋮ menu, and back. See [list notes](lists.md).
-- **Voice notes:** a note with `type: audio` frontmatter shows a chat
+- **Voice notes:** made with **New voice note** in the Files FAB, or
+  **New voice note here** in a folder's right-click menu; a note with
+  `type: audio` frontmatter shows a chat
   instead of the editor — vocals on the left, written notes on the
   right. Record (or attach) appends a vocal; clips are plain audio
   files under the attachments folder

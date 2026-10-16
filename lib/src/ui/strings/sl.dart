@@ -1308,6 +1308,12 @@ final class SlovenianStrings extends Strings {
   @override
   String get newNoteHere => 'Nova opomba sem';
   @override
+  String get newAudioNoteHere => 'Nova glasovna opomba sem';
+  @override
+  String get newSlidesHere => 'Nova predstavitev sem';
+  @override
+  String get newFlashcardsHere => 'Nove kartice sem';
+  @override
   String get newFolderHere => 'Nova mapa sem';
   @override
   String get newListNoteTitle => 'Nova opomba s seznamom';

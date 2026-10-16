@@ -104,6 +104,11 @@ void main() {
     // And it says which folder it means.
     expect(find.text('New note in the same folder'), findsOneWidget);
     expect(find.text('New note here'), findsNothing);
+    // The kinds a folder chooses are a folder's: on a note they are not
+    // offered, so no "here" is silently the note's own folder (#997).
+    expect(find.byKey(const Key('menu-new-audio-note')), findsNothing);
+    expect(find.byKey(const Key('menu-new-slides')), findsNothing);
+    expect(find.byKey(const Key('menu-new-flashcards')), findsNothing);
   });
 
   testWidgets('on a folder, creating comes first', (tester) async {
@@ -120,6 +125,22 @@ void main() {
     expect(top(tester, 'menu-rename'), lessThan(top(tester, 'menu-delete')));
     // Here "here" is the folder itself, and says so.
     expect(find.text('New note here'), findsOneWidget);
+    // The kinds whose folder is the choice, made inside it (#997).
+    expect(find.text('New voice note here'), findsOneWidget);
+    expect(find.text('New slides here'), findsOneWidget);
+    expect(find.text('New flashcards here'), findsOneWidget);
+    expect(
+      top(tester, 'menu-new-audio-note'),
+      lessThan(top(tester, 'menu-new-folder')),
+    );
+    expect(
+      top(tester, 'menu-new-slides'),
+      lessThan(top(tester, 'menu-new-folder')),
+    );
+    expect(
+      top(tester, 'menu-new-flashcards'),
+      lessThan(top(tester, 'menu-new-folder')),
+    );
     // A folder has no quick note, no widget pin and no history.
     expect(find.byKey(const Key('menu-quick-note')), findsNothing);
     expect(find.byKey(const Key('menu-history')), findsNothing);

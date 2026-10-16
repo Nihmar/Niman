@@ -1303,6 +1303,12 @@ final class CzechStrings extends Strings {
   @override
   String get newNoteHere => 'Nová poznámka zde';
   @override
+  String get newAudioNoteHere => 'Nová hlasová poznámka zde';
+  @override
+  String get newSlidesHere => 'Nová prezentace zde';
+  @override
+  String get newFlashcardsHere => 'Nové kartičky zde';
+  @override
   String get newFolderHere => 'Nová složka zde';
   @override
   String get newListNoteTitle => 'Nová poznámka se seznamem';

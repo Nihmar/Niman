@@ -849,6 +849,9 @@ final class AppStrings {
   static String get shellActionFailed => _s.shellActionFailed;
   static String get newFolderTitle => _s.newFolderTitle;
   static String get newNoteHere => _s.newNoteHere;
+  static String get newAudioNoteHere => _s.newAudioNoteHere;
+  static String get newSlidesHere => _s.newSlidesHere;
+  static String get newFlashcardsHere => _s.newFlashcardsHere;
   static String get newNoteSameFolder => _s.newNoteSameFolder;
   static String get newFromTemplateSameFolder => _s.newFromTemplateSameFolder;
   static String trashOriginalPath(String path) => _s.trashOriginalPath(path);

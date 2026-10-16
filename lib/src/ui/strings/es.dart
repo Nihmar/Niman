@@ -1323,6 +1323,12 @@ final class SpanishStrings extends Strings {
   @override
   String get newNoteHere => 'Nueva nota aquí';
   @override
+  String get newAudioNoteHere => 'Nueva nota de voz aquí';
+  @override
+  String get newSlidesHere => 'Nueva presentación aquí';
+  @override
+  String get newFlashcardsHere => 'Nuevas tarjetas aquí';
+  @override
   String get newFolderHere => 'Nueva carpeta aquí';
   @override
   String get newListNoteTitle => 'Nueva nota-lista';
