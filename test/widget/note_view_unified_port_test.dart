@@ -50,6 +50,7 @@ NoteView _note({
   List<String>? opened,
   String? initialAnchor,
   int? initialCaret,
+  List<String>? initialFind,
   bool showPreview = false,
   bool live = false,
   Future<String?> Function()? pickImagePath,
@@ -74,6 +75,7 @@ NoteView _note({
   onOpenNote: (path, anchor) => opened?.add('$path|$anchor'),
   initialAnchor: initialAnchor,
   initialCaretOffset: initialCaret,
+  initialFind: initialFind,
   showPreview: showPreview,
   showWysiwyg: live,
   pickImagePath: pickImagePath,
@@ -1198,6 +1200,43 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(_surface(tester).selection, const SelectionModel.at(10));
+    });
+  });
+
+  // #1045: a search hit opens at its match, not at the top of the note.
+  group('a search hit opens at the match (#1045)', () {
+    final lines = [for (var i = 0; i < 600; i++) 'line $i']
+      ..[400] = 'the zebra is here, with another Zebra';
+
+    testWidgets('selects and shows the first match, the bar marks it', (
+      tester,
+    ) async {
+      final text = '${lines.join('\r\n')}\r\n';
+      await tester.pumpWidget(
+        _app(_note(text: text, initialFind: const ['absent', 'zebra'])),
+      );
+      await tester.pumpAndSettle();
+      final surface = _surface(tester);
+      final buffer = surface.widget.buffer;
+      final at = buffer.text.indexOf('zebra');
+      expect(
+        surface.selection,
+        SelectionModel(anchor: at, extent: at + 'zebra'.length),
+      );
+      expect(buffer.lineOf(at), 400);
+      expect(
+        find.textContaining('zebra is here', findRichText: true),
+        findsOneWidget,
+        reason: 'the viewport shows the match',
+      );
+    });
+
+    testWidgets('a note without the words opens as it was', (tester) async {
+      await tester.pumpWidget(
+        _app(_note(text: lines.join('\n'), initialFind: const ['nowhere'])),
+      );
+      await tester.pumpAndSettle();
+      expect(_surface(tester).selection, const SelectionModel.at(0));
     });
   });
 

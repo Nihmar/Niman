@@ -826,6 +826,39 @@ void main() {
     expect(opened, ['a.md']);
   });
 
+  // #1045: a hit opens at the words it matched.
+  testWidgets('a hit opens with the words the query searched for', (
+    tester,
+  ) async {
+    source.hits = [_hit('a.md', snippet: 're-read x1')];
+    final at = <String>[];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SearchScreen(
+            controller: session,
+            onOpenNote: opened.add,
+            onOpenHit: (path, terms) => at.add('$path|${terms.join(',')}'),
+            source: source,
+          ),
+        ),
+      ),
+    );
+    await tester.enterText(find.byKey(const Key('search-query')), 're-read x1');
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('search-hit-a.md')));
+    await tester.pump();
+    expect(at, ['a.md|re,read,x1']);
+    expect(opened, isEmpty);
+
+    // Contains mode: the string as typed.
+    await tester.tap(find.text('Contains'));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('search-hit-a.md')));
+    await tester.pump();
+    expect(at.last, 'a.md|re-read x1');
+  });
+
   // #1038: the list on screen while a new query is out is the old one's:
   // it says so, and Enter and the arrows do not act on its rows.
   testWidgets('a pending query marks the old list stale; Enter waits', (

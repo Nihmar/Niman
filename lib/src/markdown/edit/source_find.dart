@@ -131,6 +131,34 @@ final class SourceFindController extends ChangeNotifier
     findFocus.requestFocus();
   }
 
+  /// Opens the bar on the first of [terms] the note holds, as the writer
+  /// would have typed it: that match selected and in view, every other
+  /// marked (#1045). A note that holds none opens as it was. The bar does
+  /// not take the keyboard: the note keeps it.
+  void openFinding(List<String> terms) {
+    final surface = _surface();
+    if (surface == null) return;
+    final text = surface.buffer.text;
+    String? best;
+    var bestAt = -1;
+    for (final term in terms) {
+      if (term.isEmpty) continue;
+      final found = RegExp(
+        RegExp.escape(term),
+        caseSensitive: false,
+        unicode: true,
+      ).firstMatch(text);
+      if (found != null && (bestAt < 0 || found.start < bestAt)) {
+        best = term;
+        bestAt = found.start;
+      }
+    }
+    if (best == null) return;
+    findInput.text = best;
+    _visible = true;
+    _run(reveal: true, from: 0);
+  }
+
   /// Closes the bar and gives the note the keyboard back — unless
   /// [refocus] is false: the note itself is going (another note opens).
   @override

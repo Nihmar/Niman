@@ -17,6 +17,9 @@ In the field, `↓` / `↑` move through the results without opening them and
 a phone keyboard does the same). A new query shows its results from the
 top; until they arrive the old list is dimmed under a progress bar, and
 `Enter` waits for the new results instead of opening a row of the old ones.
+Opening a result of a word or contains search lands on the match: the note
+scrolls to the first occurrence of what you searched for, selects it, and the
+find bar marks every other one (`Esc` closes the bar).
 A right click on a result opens its menu:
 *Open*, *Open in new tab*, *Open to the side*, *Reveal in tree* and
 *Replace in this note*; a middle click or `Ctrl`+click opens it in a new

@@ -9,6 +9,7 @@ import 'package:niman/src/frontmatter/fields.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/search/query.dart';
 import 'package:niman/src/search/replace.dart';
+import 'package:niman/src/search/search_excerpt.dart' show wordTermsOf;
 import 'package:niman/src/search/search_repo.dart';
 import 'package:niman/src/search/task_events.dart';
 import 'package:niman/src/ui/action_sheet.dart';
@@ -50,6 +51,7 @@ final class SearchScreen extends StatefulWidget {
   const new({
     required this.controller,
     required this.onOpenNote,
+    this.onOpenHit,
     this.onOpenTags,
     this.requests,
     this.commands,
@@ -68,6 +70,11 @@ final class SearchScreen extends StatefulWidget {
 
   /// Called with the note's library-relative path when a result is tapped.
   final void Function(String path) onOpenNote;
+
+  /// Called instead of [onOpenNote] when a hit is opened for words it
+  /// matched (#1045): the note opens with the first of them found and
+  /// shown. Null opens every hit as [onOpenNote] does.
+  final void Function(String path, List<String> terms)? onOpenHit;
 
   /// Opens the Tags screen (shell-provided; the tags button shows only
   /// when set).
@@ -163,6 +170,9 @@ final class _SearchScreenState extends State<SearchScreen> {
   /// null for a text search: the notes past the page read are in the index
   /// and not in [_hits].
   FieldPager? _fieldPager;
+
+  /// The words the hits on screen matched: what a hit opens at (#1045).
+  List<String> _hitTerms = const [];
 
   /// Whether the next page of the filter is being read.
   bool _readingMore = false;
@@ -428,6 +438,11 @@ final class _SearchScreenState extends State<SearchScreen> {
         if (_resultsScroll.hasClients) _resultsScroll.jumpTo(0);
       }
       _searched = true;
+      _hitTerms = field != null
+          ? const []
+          : contains
+          ? [text]
+          : wordTermsOf(text);
       _fieldPager = pager;
       _hits = results;
       _shown = _pageSize < results.length ? _pageSize : results.length;
@@ -474,7 +489,18 @@ final class _SearchScreenState extends State<SearchScreen> {
   /// from it. A hit under the page's cut is listed first.
   void _openHit(int index) {
     _markHit(index);
-    widget.onOpenNote(_hits[index].path);
+    _open(_hits[index].path);
+  }
+
+  /// Opens the note at [path] — at the words the hits matched, where the
+  /// shell can show them (#1045).
+  void _open(String path) {
+    final open = widget.onOpenHit;
+    if (open != null && _hitTerms.isNotEmpty) {
+      open(path, _hitTerms);
+    } else {
+      widget.onOpenNote(path);
+    }
   }
 
   /// Makes the hit at [index] the current one, highlighted and in view,
@@ -1009,7 +1035,7 @@ final class _SearchScreenState extends State<SearchScreen> {
     if (now >= 0 && action != 'reveal' && action != 'replace') _markHit(now);
     switch (action) {
       case 'open':
-        widget.onOpenNote(hit.path);
+        _open(hit.path);
       case 'newtab':
         opens?.newTab(hit.path);
       case 'beside':
