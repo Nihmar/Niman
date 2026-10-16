@@ -12,6 +12,7 @@ import 'package:niman/src/ui/action_sheet.dart';
 import 'package:niman/src/ui/folder_picker.dart';
 import 'package:niman/src/ui/shell_row_actions.dart';
 import 'package:niman/src/ui/strings.dart';
+import 'package:niman/src/ui/tree_drag.dart';
 
 /// The marked rows' actions, through the single row's own.
 final class ShellMarkedActions {
@@ -115,7 +116,7 @@ final class ShellMarkedActions {
     List<String> paths,
     String folder,
   ) async {
-    final outermost = _outermost(paths);
+    final outermost = treeOutermost(paths);
     // One row is the row's own move, as ever: no report, and its guard's
     // message when it fails.
     if (outermost.length < 2) {
@@ -191,7 +192,7 @@ final class ShellMarkedActions {
     }
     final gone = <String>[];
     await rows.guard(() async {
-      for (final path in _outermost(paths)) {
+      for (final path in treeOutermost(paths)) {
         await ops.delete(path);
         rows.onDeleted(path);
         gone.add(path);
@@ -223,11 +224,4 @@ final class ShellMarkedActions {
       ),
     );
   }
-
-  /// [paths] without the ones inside another of them: a folder takes what
-  /// it holds along.
-  static List<String> _outermost(List<String> paths) => [
-    for (final path in paths)
-      if (!paths.any((other) => other != path && isUnder(other, path))) path,
-  ];
 }

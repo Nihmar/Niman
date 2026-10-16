@@ -28,6 +28,57 @@ void main() {
     expect(treeDropMoves('docs', 'other'), isTrue);
   });
 
+  test('a drop lists the paths it would move, in the order given', () {
+    expect(treeDropPaths(['b.md', 'a.md'], 'docs'), ['b.md', 'a.md']);
+    // Where it is, itself, and under itself are left out.
+    expect(treeDropPaths(['docs/a.md', 'docs', 'docs/sub', 'x.md'], 'docs'), [
+      'x.md',
+    ]);
+    expect(treeDropPaths(['docs/a.md', 'docs/b.md'], 'docs'), isEmpty);
+    expect(treeDropPaths(const <String>[], 'docs'), isEmpty);
+    // The root: what is in a folder comes out, what is at the root stays.
+    expect(treeDropPaths(['docs/a.md', 'top.md', 'docs'], ''), ['docs/a.md']);
+    // A marked folder and a path inside it are both listed: the move skips
+    // the inner one (treeOutermost).
+    expect(treeDropPaths(['docs', 'docs/a.md'], 'other'), [
+      'docs',
+      'docs/a.md',
+    ]);
+  });
+
+  test('the outermost of the paths drops what a folder carries along', () {
+    expect(treeOutermost(['docs', 'docs/a.md']), ['docs']);
+    expect(treeOutermost(['docs/a.md', 'docs']), ['docs']);
+    expect(treeOutermost(['docs', 'docs/sub', 'docs/sub/a.md']), ['docs']);
+    // Siblings, and a name that merely starts like a folder's, all stay.
+    expect(treeOutermost(['a.md', 'b.md', 'docs', 'docs2/x.md']), [
+      'a.md',
+      'b.md',
+      'docs',
+      'docs2/x.md',
+    ]);
+    expect(treeOutermost(['docs/a.md', 'docs/b.md']), [
+      'docs/a.md',
+      'docs/b.md',
+    ]);
+    expect(treeOutermost(const <String>[]), isEmpty);
+  });
+
+  test('a drop then a move: what is listed, then what is moved', () {
+    List<String> moved(List<String> paths, String folder) =>
+        treeOutermost(treeDropPaths(paths, folder));
+    expect(moved(['docs', 'docs/a.md', 'x.md'], 'other'), ['docs', 'x.md']);
+    // Into the folder a marked path is in: the inner path is left out first,
+    // so the folder is not carried into itself.
+    expect(moved(['docs', 'docs/a.md', 'x.md'], 'docs'), ['x.md']);
+    // Neither is inside the other: both leave their folders for the root.
+    expect(moved(['docs/a.md', 'docs/sub/b.md'], ''), [
+      'docs/a.md',
+      'docs/sub/b.md',
+    ]);
+    expect(moved(['docs/a.md', 'docs/b.md'], 'docs'), isEmpty);
+  });
+
   /// The tree over a root note, a folder `docs` holding `inner.md` — pinned
   /// when [pinned] — and an empty folder `other`, both open; every drop
   /// recorded. [extraNotes] are root notes `alpha`-style (name, no
