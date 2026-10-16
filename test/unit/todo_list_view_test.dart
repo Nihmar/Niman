@@ -1,8 +1,10 @@
 // #1003: the view state the shell shares between the Todo tab and the
 // phone app bar.
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/todo/todo_filter.dart';
 import 'package:niman/src/todo/todo_list_view.dart';
+import 'package:niman/src/todo/todo_sections.dart';
 
 void main() {
   late TodoListView view;
@@ -120,6 +122,14 @@ void main() {
   });
 
   group('collapsed sections', () {
+    test('the fresh start is the settings default, and it folds Done '
+        '(#1014)', () {
+      // One spelling of what a fresh device folds: the settings layer owns
+      // it, the view starts from it, and it is the Done section's id.
+      expect(TodoListView().collapsed, defaultTodoCollapsedSections);
+      expect(TodoListView().collapsed, {todoDoneSectionId});
+    });
+
     test('Done starts folded, the rest open', () {
       expect(view.isCollapsed('done'), isTrue);
       expect(view.isCollapsed('due.today'), isFalse);

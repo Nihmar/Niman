@@ -283,8 +283,10 @@ Set<EditorKind> _enabledEditorsFrom(Object? raw) {
 }
 
 /// The todo sections collapsed in a library nobody has opened on this
-/// device yet: Done, the archive, starts folded (#1003). It is the id of
-/// the Done section (`todoDoneSectionId` in `todo/todo_sections.dart`).
+/// device yet (#1003): only Done, whose id is `todoDoneSectionId` in
+/// `todo/todo_sections.dart`.
+/// This is the one place that spells the default: `TodoListView` starts from
+/// it, and a test pins it to the id.
 const Set<String> defaultTodoCollapsedSections = {'done'};
 
 /// Reads a `todoCollapsedSections` list out of the settings file.

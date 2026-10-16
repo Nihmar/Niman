@@ -30,6 +30,14 @@ final class TodoListModel {
   /// Blank lines are not tasks and are dropped. [hidden] holds entries a
   /// swipe already removed from the screen while their delete is still
   /// being written.
+  ///
+  /// [hidden] matches by **instance**: the very [TodoEntry] objects of
+  /// [snapshot], not equal-looking ones. An entry carries neither its file
+  /// nor a value equality (the same line index and the same text can be in
+  /// `todo.txt` and in `done.txt` at once, and one swipe must hide one
+  /// row), so an entry re-read or re-parsed from the same file is another
+  /// entry and is not hidden. The caller takes them from the snapshot it
+  /// derives from.
   factory derive(
     TodoSnapshot snapshot,
     TodoFilter filter,

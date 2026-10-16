@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
+import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/todo/todo_filter.dart';
-import 'package:niman/src/todo/todo_sections.dart';
 
 /// What the todo list shows: the filter and the sections folded away
 /// (#1003).
@@ -18,7 +18,7 @@ final class TodoListView extends ChangeNotifier {
   /// (default: Done only, as a fresh library has it).
   new({
     this._filter = const TodoFilter(),
-    Set<String> collapsed = const <String>{todoDoneSectionId},
+    Set<String> collapsed = defaultTodoCollapsedSections,
     this.onCollapsedChanged,
   }) : _collapsed = <String>{...collapsed};
 

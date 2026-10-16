@@ -11,7 +11,7 @@ import 'package:niman/src/todo/widget_todos.dart';
 import 'package:niman/src/ui/home/home_host.dart';
 import 'package:niman/src/ui/home/home_tile_frame.dart';
 import 'package:niman/src/ui/strings.dart';
-import 'package:niman/src/ui/todo_row.dart';
+import 'package:niman/src/ui/todo_row_timing.dart';
 
 /// The open tasks.
 ///

@@ -545,12 +545,19 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     _config = _config.copyWith(treeSort: sort);
   }
 
+  /// Make the folded todo sections fail to read, or to save.
+  bool failTodoCollapsedRead = false;
+  bool failTodoCollapsedWrite = false;
+
   @override
-  Future<Set<String>> get todoCollapsedSections async =>
-      _config.todoCollapsedSections;
+  Future<Set<String>> get todoCollapsedSections async {
+    if (failTodoCollapsedRead) throw StateError('sections were not read');
+    return _config.todoCollapsedSections;
+  }
 
   @override
   Future<void> setTodoCollapsedSections(Set<String> ids) async {
+    if (failTodoCollapsedWrite) throw StateError('sections were not saved');
     _config = _config.copyWith(todoCollapsedSections: {...ids});
   }
 

@@ -32,6 +32,7 @@ import 'package:niman/src/todo/todo_controller.dart';
 import 'package:niman/src/todo/todo_filter.dart';
 import 'package:niman/src/todo/todo_list_model.dart';
 import 'package:niman/src/todo/todo_list_view.dart';
+import 'package:niman/src/todo/todo_model_cache.dart';
 import 'package:niman/src/todo/todo_store.dart';
 import 'package:niman/src/ui/device_shape.dart';
 import 'package:niman/src/ui/pointer_density.dart';
@@ -90,23 +91,9 @@ final class TodoTab extends StatefulWidget {
 final class _TodoTabState extends State<TodoTab> {
   static const AppLogger _log = AppLogger(name: 'todo');
 
-  /// Rows swiped away whose delete has not published yet. A dismissed
-  /// [Dismissible] must leave the tree at once, while the controller's
-  /// snapshot arrives after the file write; the next publish (the delete,
-  /// or its failure) clears this, and a failed delete brings the row back.
-  final Set<TodoEntry> _swiped = {};
-  int _swipedVersion = 0;
-
-  /// The model of the last snapshot, filter and day, and the items of the
-  /// last model under the last folded sections: deriving is a pass over
-  /// every line and a sort, and a fold or a rebuild must not repeat it.
-  TodoSnapshot? _modelSnapshot;
-  TodoFilter? _modelFilter;
-  DateTime? _modelDay;
-  int _modelSwiped = -1;
-  TodoListModel? _model;
-  List<TodoListItem>? _items;
-  Set<String>? _itemsCollapsed;
+  /// The derived model and items, and the rows swiped away whose delete has
+  /// not published yet.
+  final TodoModelCache _cache = TodoModelCache();
 
   @override
   void initState() {
@@ -130,11 +117,11 @@ final class _TodoTabState extends State<TodoTab> {
     super.dispose();
   }
 
-  /// A new snapshot: swiped rows are settled, and a token chip neither file
+  /// A publish: swiped rows are settled, and a token chip neither file
   /// carries any more is dropped so it never dead-ends the list. Both files
   /// count: the filter narrows the Done section too.
   void _onPublished() {
-    _swiped.clear();
+    _cache.settle();
     final snapshot = widget.controller.snapshot;
     if (snapshot != null && widget.view.filter.tokens.isNotEmpty) {
       widget.view.pruneTokens(snapshotTokens(snapshot));
@@ -217,45 +204,14 @@ final class _TodoTabState extends State<TodoTab> {
 
   static const double _minColumnWidth = 800;
 
-  /// The model of [snapshot] under the view's filter, derived once for as
-  /// long as the snapshot, the filter, the day and the swiped rows stay.
+  /// The model of [snapshot] under the view's filter.
   TodoListModel _modelOf(TodoSnapshot snapshot) {
-    final filter = widget.view.filter;
-    final day = _today;
-    final cached = _model;
-    if (cached != null &&
-        identical(_modelSnapshot, snapshot) &&
-        _modelFilter == filter &&
-        _modelDay == day &&
-        _modelSwiped == _swipedVersion) {
-      return cached;
-    }
-    _modelSnapshot = snapshot;
-    _modelFilter = filter;
-    _modelDay = day;
-    _modelSwiped = _swipedVersion;
-    _items = null;
-    return _model = TodoListModel.derive(
-      snapshot,
-      filter,
-      day,
-      hidden: _swiped,
-    );
+    return _cache.modelOf(snapshot, widget.view.filter, _today);
   }
 
   /// The headers and rows of [model] under the sections folded now.
   List<TodoListItem> _itemsOf(TodoListModel model) {
-    final collapsed = widget.view.collapsed;
-    final cached = _items;
-    final folded = _itemsCollapsed;
-    if (cached != null &&
-        folded != null &&
-        folded.length == collapsed.length &&
-        folded.containsAll(collapsed)) {
-      return cached;
-    }
-    _itemsCollapsed = collapsed;
-    return _items = model.items(collapsed);
+    return _cache.itemsOf(model, widget.view.collapsed);
   }
 
   /// The list (or loading/empty state) of [model].
@@ -324,10 +280,7 @@ final class _TodoTabState extends State<TodoTab> {
   /// A row swiped away and confirmed: it leaves the screen now, and the
   /// delete follows into the file it was read from.
   void _swipeDelete(TodoRowItem row) {
-    setState(() {
-      _swiped.add(row.entry);
-      _swipedVersion++;
-    });
+    setState(() => _cache.hide(row.entry));
     unawaited(_delete(row));
   }
 

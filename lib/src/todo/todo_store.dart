@@ -40,6 +40,10 @@ const String doneFileName = 'done.txt';
 /// The UI filters entries for display (e.g. hiding blank lines) and
 /// passes [lineIndex] back to the store ops, so display order never
 /// disturbs file order.
+///
+/// An entry is told apart by **identity**, on purpose: it knows neither its
+/// file nor anything else that would make two lookalikes (the same index and
+/// text in `todo.txt` and `done.txt`) the same task, so it has no `==`.
 final class TodoEntry {
   /// Creates an entry for [task] at file line [lineIndex].
   const new({required this.lineIndex, required this.task});

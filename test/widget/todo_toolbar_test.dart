@@ -125,7 +125,8 @@ void main() {
       expect(filter, lessThan(sort));
       expect(find.byIcon(Icons.help_outline), findsOneWidget);
       expect(find.byIcon(Icons.filter_alt_outlined), findsOneWidget);
-      expect(find.byIcon(Icons.sort), findsOneWidget);
+      expect(find.byIcon(Icons.sort_outlined), findsOneWidget);
+      expect(find.byIcon(Icons.sort), findsNothing, reason: 'no filled glyph');
       expect(find.byIcon(Icons.filter_alt), findsNothing, reason: 'no filled');
       // No Open/Done switch, no count: the sections replace them.
       expect(key('todo-view-switch'), findsNothing);
@@ -245,6 +246,9 @@ void main() {
       expect(find.text('Due date'), findsOneWidget, reason: 'the sort key');
       expect(find.text('Add task'), findsOneWidget);
       expect(key('todo-help'), findsOneWidget);
+      // The Sort pill's glyph follows the outline rule too (#1020).
+      expect(find.byIcon(Icons.sort_outlined), findsOneWidget);
+      expect(find.byIcon(Icons.sort), findsNothing);
       expect(key('todo-view-switch'), findsNothing);
       expect(key('todo-count'), findsNothing);
       expect(key('todo-due-menu'), findsNothing);
@@ -308,6 +312,52 @@ void main() {
         reason: 'the Sort pill does not move as a filter comes',
       );
       expect(find.byIcon(Icons.filter_alt_outlined), findsOneWidget);
+    });
+
+    testWidgets('no count moves the Sort pill: the Filter pill holds its width '
+        '(#1015)', (tester) async {
+      windowSized(tester, const Size(1200, 900));
+      await prepare(['a']);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Align(
+              alignment: Alignment.topLeft,
+              child: SizedBox(
+                width: 700,
+                child: TodoToolbar(
+                  controller: controller,
+                  view: view,
+                  labelled: true,
+                  onAddTask: () {},
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      final sort = tester.getRect(key('todo-sort-button'));
+      final filter = tester.getRect(key('todo-filter-button'));
+      for (final count in [9, 99, 1234]) {
+        view.setFilter(
+          TodoFilter(tokens: {for (var i = 0; i < count; i++) '+t$i'}),
+        );
+        await tester.pump();
+        expect(find.text('Filter · $count'), findsOneWidget);
+        expect(
+          tester.getRect(key('todo-filter-button')),
+          filter,
+          reason: 'the Filter pill at $count',
+        );
+        expect(
+          tester.getRect(key('todo-sort-button')),
+          sort,
+          reason: 'the Sort pill at $count',
+        );
+      }
+      expect(tester.takeException(), isNull);
     });
 
     testWidgets('the Filter pill opens the sheet, with the due range', (

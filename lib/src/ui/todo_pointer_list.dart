@@ -12,10 +12,10 @@ import 'dart:async';
 import 'package:flutter/gestures.dart' show kDoubleTapTimeout;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:niman/src/core/calendar_days.dart';
 import 'package:niman/src/todo/line_edits.dart';
 import 'package:niman/src/todo/todo_list_item.dart';
-import 'package:niman/src/ui/os_pickers.dart';
+import 'package:niman/src/ui/todo_list_reveal.dart';
+import 'package:niman/src/ui/todo_menu_pick.dart';
 import 'package:niman/src/ui/todo_pointer_row.dart';
 import 'package:niman/src/ui/todo_row_menu.dart';
 import 'package:niman/src/ui/todo_section_header.dart';
@@ -91,6 +91,16 @@ final class _TodoPointerListState extends State<TodoPointerList> {
   /// The list's scroll position, to bring the selected row into view.
   final ScrollController _scroll = ScrollController();
 
+  /// Brings an item into view (#909): the reveal policy, apart.
+  late final TodoListReveal _reveal = TodoListReveal(
+    listKey: _listKey,
+    scroll: _scroll,
+    items: () => widget.items,
+    keyOf: _keyOf,
+    selected: () => _selected,
+    mounted: () => mounted,
+  );
+
   @override
   void didUpdateWidget(TodoPointerList oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -100,6 +110,30 @@ final class _TodoPointerListState extends State<TodoPointerList> {
     if (editing != null && !widget.items.any((i) => i.id == editing)) {
       _editing = null;
     }
+    _settleMenu();
+  }
+
+  /// The row menu across a publish: it means the task it was opened on, and
+  /// a pick writes by that task's line -- in either file. The same task at
+  /// the same place resolves against the fresh list; a row the publish took
+  /// away or changed closes the menu, so no pick reaches a line that is
+  /// another task's now.
+  void _settleMenu() {
+    final open = _menuRow;
+    if (open == null) return;
+    for (final item in widget.items) {
+      if (item is TodoRowItem &&
+          item.id == open.id &&
+          item.entry.task.raw == open.entry.task.raw) {
+        _menuRow = item;
+        return;
+      }
+    }
+    _menuRow = null;
+    // The anchor is mid-build: it closes once the frame is out.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && _menu.isOpen) _menu.close();
+    });
   }
 
   @override
@@ -206,7 +240,7 @@ final class _TodoPointerListState extends State<TodoPointerList> {
     final selected = at < 0 ? null : items[at];
     void select(int index, {required bool down}) {
       setState(() => _selected = items[index].id);
-      unawaited(_reveal(index, down: down));
+      unawaited(_reveal.run(index, down: down));
     }
 
     switch (event.logicalKey) {
@@ -248,86 +282,6 @@ final class _TodoPointerListState extends State<TodoPointerList> {
         return KeyEventResult.ignored;
     }
     return KeyEventResult.handled;
-  }
-
-  /// Brings the item at [index] into view (#909), scrolling no further than
-  /// its edge: [down] moves bring its bottom in, the others its top. An item
-  /// outside the list's built range has no context to reveal, so the list
-  /// first jumps to where the index is estimated to sit — the list's own
-  /// estimate of its length, shared out by item — and the item, built there
-  /// or near it, is then scrolled to. Each jump lays out real items around
-  /// the target, which sharpens the estimate (the search list's `_revealHit`
-  /// does the same).
-  Future<void> _reveal(int index, {required bool down}) async {
-    for (var jump = 0; jump < _revealJumps; jump++) {
-      await WidgetsBinding.instance.endOfFrame;
-      final items = widget.items;
-      // Another move or a new list since: that one reveals its own.
-      if (!mounted || index >= items.length || items[index].id != _selected) {
-        return;
-      }
-      final target = _itemContext(items[index]);
-      if (target != null) {
-        if (!target.mounted) return;
-        await Scrollable.ensureVisible(
-          target,
-          duration: _stepScroll,
-          alignmentPolicy: _below(target, down: down)
-              ? ScrollPositionAlignmentPolicy.keepVisibleAtEnd
-              : ScrollPositionAlignmentPolicy.keepVisibleAtStart,
-        );
-        return;
-      }
-      if (!_scroll.hasClients) return;
-      final position = _scroll.position;
-      final length = position.maxScrollExtent + position.viewportDimension;
-      final offset =
-          length * index / items.length - position.viewportDimension / 2;
-      position.jumpTo(
-        offset.clamp(position.minScrollExtent, position.maxScrollExtent),
-      );
-    }
-  }
-
-  /// Whether the edge of [target] to bring into view is its bottom: it ends
-  /// below the list's viewport, whichever way the selection moved (the first
-  /// arrow up lands on the last item, from below). Fully in view, a [down]
-  /// move keeps its bottom.
-  bool _below(BuildContext target, {required bool down}) {
-    final item = target.findRenderObject();
-    final list = _listKey.currentContext?.findRenderObject();
-    if (item is! RenderBox || list is! RenderBox) return down;
-    final itemTop = item.localToGlobal(Offset.zero).dy;
-    final itemBottom = itemTop + item.size.height;
-    final listTop = list.localToGlobal(Offset.zero).dy;
-    if (itemBottom > listTop + list.size.height) return true;
-    if (itemTop < listTop) return false;
-    return down;
-  }
-
-  /// How many jumps [_reveal] makes at most: a bound keeps a list that
-  /// keeps changing under it from holding the reveal open.
-  static const int _revealJumps = 8;
-
-  /// How long the scroll to an item takes.
-  static const Duration _stepScroll = Duration(milliseconds: 100);
-
-  /// The context of the built widget of [item], or null while it is not
-  /// built.
-  BuildContext? _itemContext(TodoListItem item) {
-    final key = _keyOf(item);
-    BuildContext? found;
-    void visit(Element element) {
-      if (found != null) return;
-      if (element.widget.key == key) {
-        found = element;
-        return;
-      }
-      element.visitChildren(visit);
-    }
-
-    _listKey.currentContext?.visitChildElements(visit);
-    return found;
   }
 
   /// Checks or unchecks [row]: its line moves to the other file.
@@ -399,46 +353,15 @@ final class _TodoPointerListState extends State<TodoPointerList> {
   }
 
   /// Runs what the row menu picked for [row].
-  Future<void> _runPick(TodoRowItem row, TodoMenuPick pick) async {
-    final task = row.entry.task;
-    final today = widget.today;
-    switch (pick) {
-      case TodoMenuPick.edit:
-        await widget.onEdit(row);
-      case TodoMenuPick.delete:
-        await _delete(row);
-      case TodoMenuPick.dueToday:
-        await widget.onRewrite(row, todoLineWithDue(task, today));
-      case TodoMenuPick.dueTomorrow:
-        await widget.onRewrite(
-          row,
-          todoLineWithDue(task, addCalendarDays(today, 1)),
-        );
-      case TodoMenuPick.dueNextWeek:
-        await widget.onRewrite(
-          row,
-          todoLineWithDue(task, addCalendarDays(today, 7)),
-        );
-      case TodoMenuPick.dueNone:
-        await widget.onRewrite(row, todoLineWithDue(task, null));
-      case TodoMenuPick.duePick:
-        final day = await showDayPicker(
-          context,
-          initialDate: task.due ?? today,
-          firstDate: DateTime(today.year - 5),
-          lastDate: DateTime(today.year + 10),
-        );
-        if (day != null) {
-          await widget.onRewrite(row, todoLineWithDue(task, day));
-        }
-      case TodoMenuPick.priorityA:
-        await widget.onRewrite(row, todoLineWithPriority(task, 'A'));
-      case TodoMenuPick.priorityB:
-        await widget.onRewrite(row, todoLineWithPriority(task, 'B'));
-      case TodoMenuPick.priorityC:
-        await widget.onRewrite(row, todoLineWithPriority(task, 'C'));
-      case TodoMenuPick.priorityNone:
-        await widget.onRewrite(row, todoLineWithPriority(task, null));
-    }
+  Future<void> _runPick(TodoRowItem row, TodoMenuPick pick) {
+    return runTodoMenuPick(
+      context,
+      row,
+      pick,
+      today: widget.today,
+      onEdit: widget.onEdit,
+      onDelete: _delete,
+      onRewrite: widget.onRewrite,
+    );
   }
 }
