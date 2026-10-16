@@ -12,6 +12,7 @@ import 'package:drift/drift.dart'
         driftRuntimeOptions;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/name_sort_key.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/db/indexer.dart';
 import 'package:niman/src/frontmatter/fields.dart';
@@ -163,6 +164,7 @@ void main() {
                 path: path(i),
                 parent: 0,
                 name: path(i),
+                nameKey: nameSortKey(path(i)),
                 isDir: false,
                 size: 1,
                 modified: DateTime(2026),

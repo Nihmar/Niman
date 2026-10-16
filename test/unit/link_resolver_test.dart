@@ -528,6 +528,7 @@ void main() {
                 path: 'n$i.md',
                 parent: 0,
                 name: 'n$i.md',
+                nameKey: nameSortKey('n$i.md'),
                 isDir: false,
                 size: 1,
                 modified: DateTime.fromMillisecondsSinceEpoch(0),
