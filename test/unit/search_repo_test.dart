@@ -176,6 +176,25 @@ void main() {
     expect(await search.search(buildFtsQuery('ze'), id: id), hasLength(2));
   });
 
+  test('a full word is ranked over all its matches, past the cap', () async {
+    final bounded = SearchRepo(db, root: root.path, rankedMatches: 2);
+    await indexNote('p1.md', 'One', 'a project here');
+    await indexNote('p2.md', 'Two', 'another project there');
+    await indexNote('p3.md', 'Three', 'the project again');
+    // The best hit — the word in the title — has the highest rowid.
+    await indexNote('best.md', 'Project plan', 'about the project');
+
+    var id = bounded.begin();
+    final hits = await bounded.search(buildFtsQuery('project'), id: id);
+    expect(hits.first.path, 'best.md');
+    expect(hits, hasLength(4));
+
+    // A short prefix of the same word is the case that is bounded.
+    id = bounded.begin();
+    final short = await bounded.search(buildFtsQuery('pro'), id: id);
+    expect(short, hasLength(2));
+  });
+
   test('a broad query is ranked over a bounded set of matches', () async {
     final bounded = SearchRepo(db, root: root.path, rankedMatches: 2);
     // `zebra` is in two notes, the cap is two: both are ranked, as ever.

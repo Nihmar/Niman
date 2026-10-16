@@ -105,12 +105,22 @@ final class SearchRepo implements SearchSource {
   /// whether its query is still the current one.
   static const int _scanBatch = 200;
 
-  /// How many matches a word search ranks at most (#1039). A broad query
-  /// (`co*` over a large library) has hundreds of thousands, and bm25 is
-  /// computed for each before the limit applies: the query is ranked over
-  /// the first [rankedMatches] of them, in the index's own order, which
-  /// leaves every query that selective enough to matter exactly as it was.
+  /// How many matches a word search ranks at most when its last term is a
+  /// short prefix (#1039). `co*` over a large library has hundreds of
+  /// thousands of matches, and bm25 is computed for each before the limit
+  /// applies: such a query is ranked over the first [rankedMatches] of
+  /// them, in the index's own order. A full word, or a longer prefix, is
+  /// ranked over all its matches: the best title hit must not be dropped
+  /// for sitting past the cap.
   final int rankedMatches;
+
+  /// Whether the last term of the FTS [query] is a prefix of at most four
+  /// characters: the case the prefix index exists for, and the one whose
+  /// matches are most of the library.
+  static bool _endsInShortPrefix(String query) {
+    final last = RegExp(r'"((?:[^"]|"")*)"\*\s*$').firstMatch(query);
+    return last != null && last.group(1)!.replaceAll('""', '"').length <= 4;
+  }
 
   int _invocation = 0;
 
@@ -181,22 +191,25 @@ final class SearchRepo implements SearchSource {
   }
 
   /// The best [limit] matches of the FTS [query] by bm25 (title ten times
-  /// the body), ranked over at most [rankedMatches] of them.
+  /// the body); ranked over at most [rankedMatches] of them when the query
+  /// ends in a short prefix, over all of them otherwise.
   Future<List<QueryRow>> _ranked(String query, int limit) async {
     // The matches come off the index in rowid order and the first query
     // stops after the cap, so it is cheap however broad the query is. Short
     // of the cap, nothing is left out; at it, the ranking sees the matches
     // up to the cap-th one.
-    final edge = await _db
-        .customSelect(
-          'SELECT rowid FROM notes_fts WHERE notes_fts MATCH ?1 '
-          'ORDER BY rowid LIMIT 1 OFFSET ?2',
-          variables: [
-            Variable<String>(query),
-            Variable<int>(rankedMatches - 1),
-          ],
-        )
-        .get();
+    final edge = !_endsInShortPrefix(query)
+        ? const <QueryRow>[]
+        : await _db
+              .customSelect(
+                'SELECT rowid FROM notes_fts WHERE notes_fts MATCH ?1 '
+                'ORDER BY rowid LIMIT 1 OFFSET ?2',
+                variables: [
+                  Variable<String>(query),
+                  Variable<int>(rankedMatches - 1),
+                ],
+              )
+              .get();
     final bound = edge.isEmpty ? null : edge.single.read<int>('rowid');
     return await _db
         .customSelect(
