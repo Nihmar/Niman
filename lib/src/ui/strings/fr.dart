@@ -2057,6 +2057,8 @@ final class FrenchStrings extends Strings {
   @override
   String get movedToTrash => 'Mis à la corbeille';
   @override
+  String get movedMessage => 'Déplacé';
+  @override
   String treeMarkedCount(int count) => 'Sélectionnés: $count';
   @override
   String get deletedMessage => 'Supprimé';

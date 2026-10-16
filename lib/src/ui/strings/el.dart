@@ -2069,6 +2069,8 @@ final class GreekStrings extends Strings {
   @override
   String get movedToTrash => 'Μετακινήθηκε στη σκουπιδιέρα';
   @override
+  String get movedMessage => 'Μετακινήθηκαν';
+  @override
   String treeMarkedCount(int count) => 'Επιλεγμένα: $count';
   @override
   String get deletedMessage => 'Διαγράφηκε';

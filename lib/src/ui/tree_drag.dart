@@ -36,6 +36,17 @@ List<String> treeDropPaths(Iterable<String> paths, String folder) => [
     if (treeDropMoves(path, folder)) path,
 ];
 
+/// [paths] without the ones inside another of them: a folder takes what it
+/// holds along. What a move of marked rows runs on, after [treeDropPaths]
+/// listed them.
+List<String> treeOutermost(Iterable<String> paths) {
+  final all = paths.toList();
+  return [
+    for (final path in all)
+      if (!all.any((other) => other != path && isUnder(other, path))) path,
+  ];
+}
+
 /// [child], the row of [note], dragged and dropped on.
 ///
 /// With a mouse the row is dragged as it is pulled; by touch it is held

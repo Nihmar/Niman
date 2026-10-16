@@ -390,6 +390,11 @@ folder carries its contents, and a path inside another marked folder is
 not moved twice. The card under the pointer says how many rows are on
 their way. Dragging an unmarked row still moves that row alone.
 
+A move of several rows (by a drop, or by the marked rows' **Move…**) says
+at the end how many rows moved and how many could not — a row that fails
+does not stop the others — and writes the open notes once for all of them.
+A drop made while another is still moving waits for it.
+
 ## Opening a note outside Niman
 
 A note is also a file, and sometimes you want it where Niman is not: to

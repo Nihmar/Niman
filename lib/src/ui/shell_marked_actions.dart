@@ -7,18 +7,23 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/files.dart';
+import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/ui/action_sheet.dart';
 import 'package:niman/src/ui/folder_picker.dart';
 import 'package:niman/src/ui/shell_row_actions.dart';
 import 'package:niman/src/ui/strings.dart';
+import 'package:niman/src/ui/tree_drag.dart';
 
 /// The marked rows' actions, through the single row's own.
 final class ShellMarkedActions {
   /// Acts through [rows], the shell's actions on one row.
-  const new(this.rows);
+  new(this.rows);
 
   /// The actions on one row: their guard, their callbacks, their moves.
   final ShellRowActions rows;
+
+  /// The drop being carried out, or the last one: the next waits behind it.
+  Future<void> _lastMove = Future<void>.value();
 
   /// The menu of [paths], at [anchor]: how many, then Move… and Delete.
   Future<void> menu(
@@ -78,17 +83,82 @@ final class ShellMarkedActions {
       ],
       ops: ops,
     );
-    if (target == null) return;
-    await moveTo(paths, target);
+    if (target == null || !context.mounted) return;
+    await moveTo(context, paths, target);
   }
 
   /// Moves [paths] into [folder] — a drop's destination (#996), or the
   /// dialog's answer — each outermost path on its own: a row inside
   /// another marked folder goes with it.
-  Future<void> moveTo(List<String> paths, String folder) async {
-    for (final path in _outermost(paths)) {
-      await rows.moveTo(path, folder);
+  ///
+  /// A drop made while another is still moving waits for it (#1012), so two
+  /// never run over the same rows; the second then finds what the first
+  /// took away and reports it as rows that did not move.
+  Future<void> moveTo(
+    BuildContext context,
+    List<String> paths,
+    String folder,
+  ) async {
+    final before = _lastMove;
+    final done = Completer<void>();
+    _lastMove = done.future;
+    try {
+      await before;
+      if (!context.mounted) return;
+      await _moveNow(context, paths, folder);
+    } finally {
+      done.complete();
     }
+  }
+
+  Future<void> _moveNow(
+    BuildContext context,
+    List<String> paths,
+    String folder,
+  ) async {
+    final outermost = treeOutermost(paths);
+    // One row is the row's own move, as ever: no report, and its guard's
+    // message when it fails.
+    if (outermost.length < 2) {
+      for (final path in outermost) {
+        await rows.moveTo(path, folder);
+      }
+      return;
+    }
+    var ran = false;
+    var moved = 0;
+    var failed = 0;
+    await rows.guard(() async {
+      ran = true;
+      // Once for all of them: a move writes the links of other notes, on
+      // disk, and an open note's buffer must be there first (#507).
+      await rows.saveOpen();
+      for (final path in outermost) {
+        // A row that cannot move must not stop the others, nor be lost
+        // among them: it is counted.
+        try {
+          await rows.moveSaved(path, folder);
+          moved++;
+        } on Object catch (error) {
+          const AppLogger(name: 'shell')
+              .error('could not move "$path": $error');
+          failed++;
+        }
+      }
+    });
+    if (!context.mounted) return;
+    // The guard was busy with another flow: nothing was tried.
+    if (!ran) failed = outermost.length;
+    final movedLine = AppStrings.treeMarkedCount(moved);
+    final failedLine = AppStrings.treeMarkedCount(failed);
+    final report = [
+      if (moved > 0) '${AppStrings.movedMessage} · $movedLine',
+      if (failed > 0) '${AppStrings.shellActionFailed} · $failedLine',
+    ];
+    if (report.isEmpty) return;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(persist: false, content: Text(report.join('\n'))));
   }
 
   /// Deletes [paths]: into the trash at once, one Undo bringing them all
@@ -122,7 +192,7 @@ final class ShellMarkedActions {
     }
     final gone = <String>[];
     await rows.guard(() async {
-      for (final path in _outermost(paths)) {
+      for (final path in treeOutermost(paths)) {
         await ops.delete(path);
         rows.onDeleted(path);
         gone.add(path);
@@ -154,11 +224,4 @@ final class ShellMarkedActions {
       ),
     );
   }
-
-  /// [paths] without the ones inside another of them: a folder takes what
-  /// it holds along.
-  static List<String> _outermost(List<String> paths) => [
-    for (final path in paths)
-      if (!paths.any((other) => other != path && isUnder(other, path))) path,
-  ];
 }

@@ -2031,6 +2031,8 @@ final class ItalianStrings extends Strings {
   @override
   String get movedToTrash => 'Spostato nel cestino';
   @override
+  String get movedMessage => 'Spostato';
+  @override
   String treeMarkedCount(int count) => 'Selezionati: $count';
   @override
   String get deletedMessage => 'Eliminato';

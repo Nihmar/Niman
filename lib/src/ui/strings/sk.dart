@@ -2004,6 +2004,8 @@ final class SlovakStrings extends Strings {
   @override
   String get movedToTrash => 'Presunuté do koša';
   @override
+  String get movedMessage => 'Presunuté';
+  @override
   String treeMarkedCount(int count) => 'Vybrané: $count';
   @override
   String get deletedMessage => 'Vymazané';

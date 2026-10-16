@@ -4,6 +4,7 @@
 import 'dart:io';
 
 import 'package:flutter/gestures.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -11,6 +12,7 @@ import 'package:niman/src/app.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/todo/todo_source.dart';
+import 'package:niman/src/ui/tree_link_drop.dart';
 import 'package:niman/src/ui/window_controller.dart';
 import 'package:path/path.dart' as p;
 
@@ -77,7 +79,12 @@ void main() {
   MarkdownSourceViewState view(WidgetTester tester) =>
       tester.state(find.byType(MarkdownSourceView));
 
-  Future<void> dragMouse(WidgetTester tester, Finder from, Offset to) async {
+  Future<void> dragMouse(
+    WidgetTester tester,
+    Finder from,
+    Offset to, {
+    VoidCallback? during,
+  }) async {
     final start = tester.getCenter(from);
     final mouse = await tester.startGesture(
       start,
@@ -88,6 +95,7 @@ void main() {
       await mouse.moveTo(Offset.lerp(start, to, step / 10)!);
       await tester.pump();
     }
+    during?.call();
     await mouse.up();
     await settle(tester);
   }
@@ -103,7 +111,13 @@ void main() {
     expect(at, isNotNull);
     final before = view(tester).widget.buffer.text;
 
-    await dragMouse(tester, noteRow('beta.md'), point);
+    await dragMouse(
+      tester,
+      noteRow('beta.md'),
+      point,
+      // A file the note takes is not refused (#1027).
+      during: () => expect(find.byKey(TreeLinkDrop.refusedKey), findsNothing),
+    );
 
     expect(
       view(tester).widget.buffer.text,
@@ -119,7 +133,13 @@ void main() {
         tester.getTopLeft(find.byType(MarkdownSourceView)) +
         const Offset(80, 12);
 
-    await dragMouse(tester, noteRow('docs'), point);
+    await dragMouse(
+      tester,
+      noteRow('docs'),
+      point,
+      // A folder passes over the note, as it always did (#1027).
+      during: () => expect(find.byKey(TreeLinkDrop.refusedKey), findsNothing),
+    );
 
     expect(view(tester).widget.buffer.text, before);
     expect(await controller.ops!.find('docs'), isNotNull);
@@ -142,9 +162,23 @@ void main() {
           tester.getTopLeft(find.byType(MarkdownSourceView)) +
           const Offset(80, 12);
 
-      await dragMouse(tester, noteRow('beta.md'), point);
+      await dragMouse(
+        tester,
+        noteRow('beta.md'),
+        point,
+        // The refusal shows while the rows are over the note (#1027): the
+        // tint, and the "no" cursor under the pointer.
+        during: () {
+          expect(find.byKey(TreeLinkDrop.refusedKey), findsOne);
+          expect(
+            RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+            SystemMouseCursors.forbidden,
+          );
+        },
+      );
 
       expect(view(tester).widget.buffer.text, before);
+      expect(find.byKey(TreeLinkDrop.refusedKey), findsNothing);
     },
     variant: TargetPlatformVariant.only(TargetPlatform.linux),
   );

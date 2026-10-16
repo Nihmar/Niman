@@ -1976,6 +1976,8 @@ final class HindiStrings extends Strings {
   @override
   String get movedToTrash => 'ट्रैश में गया';
   @override
+  String get movedMessage => 'ले जाया गया';
+  @override
   String treeMarkedCount(int count) => 'चयनित: $count';
   @override
   String get deletedMessage => 'हटाया गया';

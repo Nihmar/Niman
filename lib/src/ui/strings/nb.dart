@@ -1994,6 +1994,8 @@ final class NorwegianStrings extends Strings {
   @override
   String get movedToTrash => 'Flyttet til papirkorg';
   @override
+  String get movedMessage => 'Flyttet';
+  @override
   String treeMarkedCount(int count) => 'Valgt: $count';
   @override
   String get deletedMessage => 'Slettet';

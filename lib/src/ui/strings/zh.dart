@@ -1837,6 +1837,8 @@ final class ChineseStrings extends Strings {
   @override
   String get movedToTrash => '已移入回收站';
   @override
+  String get movedMessage => '已移动';
+  @override
   String treeMarkedCount(int count) => '已选：$count';
   @override
   String get deletedMessage => '已删除';

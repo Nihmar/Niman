@@ -2018,6 +2018,8 @@ final class FinnishStrings extends Strings {
   @override
   String get movedToTrash => 'Siirretty koriin';
   @override
+  String get movedMessage => 'Siirretty';
+  @override
   String treeMarkedCount(int count) => 'Valittu: $count';
   @override
   String get deletedMessage => 'Poistettu';

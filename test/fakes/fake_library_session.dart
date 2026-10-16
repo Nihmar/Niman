@@ -1453,6 +1453,16 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     return _noteAt(newRel);
   }
 
+  /// The paths [move] fails on, like a file another process holds.
+  final Set<String> failMoves = {};
+
+  /// Holds a [move] of the path until the gate completes (#1012): a test
+  /// watches the tree while a marked move is part-way through.
+  final Map<String, Completer<void>> moveGates = {};
+
+  /// How many times [move] ran, by path, in the order it was asked.
+  final List<String> moveCalls = [];
+
   @override
   Future<Note> move(
     String path,
@@ -1461,6 +1471,12 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     void Function()? onLinksRewritten,
     FlushOpenNotes? flushOpen,
   }) async {
+    moveCalls.add(path);
+    final gate = moveGates[path];
+    if (gate != null) await gate.future;
+    if (failMoves.contains(path)) {
+      throw StateError('"$path" is held by another process');
+    }
     final row = _requireRow(path);
     final same = resolvePath(targetParent, p.basename(path)) == path;
     if (same) return _noteAt(path);

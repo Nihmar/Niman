@@ -2013,6 +2013,8 @@ final class SwedishStrings extends Strings {
   @override
   String get movedToTrash => 'Flyttad till papperskorgen';
   @override
+  String get movedMessage => 'Flyttad';
+  @override
   String treeMarkedCount(int count) => 'Markerade: $count';
   @override
   String get deletedMessage => 'Togs bort';

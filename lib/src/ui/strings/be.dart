@@ -2010,6 +2010,8 @@ final class BelarusianStrings extends Strings {
   @override
   String get movedToTrash => 'Перамешчана ў кошык';
   @override
+  String get movedMessage => 'Перамешчана';
+  @override
   String treeMarkedCount(int count) => 'Выбрана: $count';
   @override
   String get deletedMessage => 'Выдалена';
