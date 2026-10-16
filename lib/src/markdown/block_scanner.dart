@@ -160,9 +160,10 @@ final class BlockScanner {
   /// list has them: current when [settled]. O(chunks) for a note with none.
   Iterable<Block> get divBlocks => _blocks.divBlocks;
 
-  /// The note's quote blocks, in order, as the list has them: the ones a
-  /// `columns` block may stand in (#729). O(chunks) for a note with none.
-  Iterable<Block> get quoteBlocks => _blocks.quoteBlocks;
+  /// The note's quote blocks that hold a `:::` line, in order, as the list
+  /// has them: the ones a `columns` block may stand in (#729, #1048).
+  /// O(chunks) for a note with none.
+  Iterable<Block> get fenceQuoteBlocks => _blocks.fenceQuoteBlocks;
 
   /// How many fence lines of fenced divs the note has, as the list has it.
   int get divCount => _blocks.divCount;
@@ -590,6 +591,9 @@ final class BlockScanner {
       builder.headOpen(old.headingLevel);
     }
     builder.openEnd = oldEnd;
+    // The lines down to the old block's end are not read again: what the
+    // old block said of them stands.
+    if (old.holdsFence) builder.openHoldsFence = true;
     return index + 1;
   }
 

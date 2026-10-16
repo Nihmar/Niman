@@ -75,26 +75,28 @@ final class BlockList with ListMixin<Block> implements List<Block> {
   /// with none answers in O(chunks).
   final List<int> _divs = <int>[];
 
-  /// How many quote blocks each chunk holds: a reader after the columns
-  /// inside quotes (#729) walks the chunks that have any.
+  /// How many quote blocks that hold a `:::` line each chunk has: a reader
+  /// after the columns inside quotes (#729) walks the chunks that have any.
   final List<int> _quotes = <int>[];
 
   static int _quotesIn(List<Block> blocks) {
     var count = 0;
     for (final block in blocks) {
-      if (block.kind == BlockKind.quote) count++;
+      if (block.kind == BlockKind.quote && block.holdsFence) count++;
     }
     return count;
   }
 
-  /// The quote blocks, where they are, in order: the chunks that hold none
-  /// are not walked.
-  Iterable<Block> get quoteBlocks sync* {
+  /// The quote blocks that hold a `:::` line, where they are, in order: the
+  /// chunks that hold none are not walked.
+  Iterable<Block> get fenceQuoteBlocks sync* {
     for (var chunk = 0; chunk < _chunks.length; chunk++) {
       if (_quotes[chunk] == 0) continue;
       final shift = _shifts[chunk];
       for (final block in _chunks[chunk]) {
-        if (block.kind == BlockKind.quote) yield block.shifted(shift);
+        if (block.kind == BlockKind.quote && block.holdsFence) {
+          yield block.shifted(shift);
+        }
       }
     }
   }

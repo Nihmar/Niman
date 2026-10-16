@@ -164,6 +164,69 @@ void main() {
       ]);
     });
 
+    test('the memory of checked lines stays within its cap (#1052)', () {
+      final check = EditorSpellCheck(
+        createChecker: (_) => _FakeChecker({'wrold'}),
+      );
+      // A note scrolled from top to bottom: every line is asked about once.
+      for (var index = 0; index < 100000; index++) {
+        check.rangesFor(index, 'hello wrold line $index', skip: const []);
+      }
+      expect(check.linesChecked, 100000);
+      expect(check.linesHeld, lessThanOrEqualTo(4096));
+      expect(check.linesHeld, greaterThan(1000), reason: 'a window is kept');
+    });
+
+    test('long lines are held to a budget of characters too (#1052)', () {
+      final check = EditorSpellCheck(
+        createChecker: (_) => _FakeChecker({'wrold'}),
+      );
+      final long = 'hello ' * 100000; // 600 000 characters
+      for (var index = 0; index < 20; index++) {
+        check.rangesFor(index, '$long$index', skip: const []);
+      }
+      expect(check.linesHeld, lessThan(8));
+    });
+
+    test('a line pushed down by an edit is still answered (#1052)', () {
+      final check = EditorSpellCheck(
+        createChecker: (_) => _FakeChecker({'wrold'}),
+      );
+      final first = check.rangesFor(5, 'hello wrold', skip: const []);
+      expect(check.linesChecked, 1);
+      // An Enter above: the same line, now at index 6.
+      final shifted = check.rangesFor(6, 'hello wrold', skip: const []);
+      expect(check.linesChecked, 1, reason: 'a lookup, not a check');
+      expect(shifted, first);
+    });
+
+    test('the lines read last are the ones kept (#1052)', () {
+      final check = EditorSpellCheck(
+        createChecker: (_) => _FakeChecker({'wrold'}),
+      );
+      for (var index = 0; index < 5000; index++) {
+        // The line at the top is read again and again, as the one under the
+        // caret is.
+        check
+          ..rangesFor(0, 'kept wrold', skip: const [])
+          ..rangesFor(index + 1, 'other wrold $index', skip: const []);
+      }
+      final before = check.linesChecked;
+      check.rangesFor(0, 'kept wrold', skip: const []);
+      expect(check.linesChecked, before, reason: 'it was never evicted');
+    });
+
+    test('the same line with another skip is another question (#373)', () {
+      final check = EditorSpellCheck(
+        createChecker: (_) => _FakeChecker({'wrold'}),
+      );
+      final skip = spellSkipRanges([const Token(TokenKind.codeInline, 6, 13)]);
+      check.rangesFor(0, 'wrold `wrold`', skip: const []);
+      final skipped = check.rangesFor(0, 'wrold `wrold`', skip: skip);
+      expect(check.linesChecked, 2);
+      expect(skipped, [const TextRange(start: 0, end: 5)]);
+    });
+
     test('skipped code is not checked', () {
       final check = EditorSpellCheck(
         createChecker: (_) => _FakeChecker({'wrold', 'code'}),

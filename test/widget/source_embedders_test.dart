@@ -186,6 +186,25 @@ void main() {
           rig.agree('vedi (a)[x]]\n', reason: 'only the pair’s own is stepped');
         });
 
+        testWidgets('a pair typed through is one undo step (#1053)', (
+          tester,
+        ) async {
+          final rig = _Rig(tester, profile, mode, 'vedi\n');
+          await rig.pump();
+          await rig.tapEnd(0);
+          await rig.platform.type('(abc).');
+          rig.agree('vedi(abc).\n');
+          // The pair, the letters inside, the closer stepped over and the
+          // full stop after it: it was four steps, the caret move over `)`
+          // ending the third.
+          final state = tester.state<MarkdownSourceViewState>(
+            find.byType(MarkdownSourceView),
+          )..undo();
+          await tester.pump();
+          rig.agree('vedi\n');
+          expect(state.canUndo, isFalse);
+        });
+
         testWidgets('the Markdown pairs come in pairs, and are typed through', (
           tester,
         ) async {
@@ -446,6 +465,47 @@ void main() {
           rig.agree(
             '- latte\n- pane\n\n',
             reason: 'Enter on an empty item takes the marker away',
+          );
+        });
+
+        testWidgets(
+          'Enter in a quote carries the quote and its list on (#1049)',
+          (tester) async {
+            final rig = _Rig(tester, profile, mode, '> - latte\n');
+            await rig.pump();
+            await rig.tapEnd(0);
+            await rig.platform.enter();
+            await tester.pump();
+            rig.agree('> - latte\n> - \n');
+            await rig.platform.type('pane');
+            await rig.platform.enter();
+            await tester.pump();
+            await rig.platform.enter();
+            await tester.pump();
+            rig.agree(
+              '> - latte\n> - pane\n> \n',
+              reason: 'an empty item loses its marker, the quote stays',
+            );
+            await rig.platform.enter();
+            await tester.pump();
+            rig.agree(
+              '> - latte\n> - pane\n\n',
+              reason: 'and the next leaves it',
+            );
+          },
+        );
+
+        testWidgets('Enter on an empty nested item goes back a level (#1049)', (
+          tester,
+        ) async {
+          final rig = _Rig(tester, profile, mode, '- a\n  - b\n    - \n');
+          await rig.pump();
+          await rig.tapEnd(2);
+          await rig.platform.enter();
+          await tester.pump();
+          rig.agree(
+            '- a\n  - b\n  - \n',
+            reason: 'one level, not the whole line',
           );
         });
 

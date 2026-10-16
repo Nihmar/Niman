@@ -16,7 +16,8 @@ final class BlockBuilder {
   /// before the first line it is given.
   new(this._rules, {Block? open, this._before})
     : _open = open,
-      openEnd = open?.endLine ?? 0;
+      openEnd = open?.endLine ?? 0,
+      openHoldsFence = open?.holdsFence ?? false;
 
   final BlockRules _rules;
   final List<Block> _blocks = <Block>[];
@@ -29,6 +30,11 @@ final class BlockBuilder {
   /// Where the open block runs to: one past the last line added to it, or
   /// wherever the scan found the old block it turned out to be ending.
   int openEnd;
+
+  /// Whether a line of the open quote block opens a fenced div (#1048), the
+  /// lines the scan has not read again — the old block it converged on —
+  /// counting by what that block said.
+  bool openHoldsFence;
 
   /// The last non-blank block before the ones built here.
   final Block? _before;
@@ -64,13 +70,21 @@ final class BlockBuilder {
       if (level > 0) headOpen(level);
       if (level > 0 || _rules.mergesInto(open, line)) {
         openEnd = line + 1;
+        if (open.kind == BlockKind.quote &&
+            !openHoldsFence &&
+            _rules.quoteLineHoldsFence(line)) {
+          openHoldsFence = true;
+        }
         return;
       }
     }
     final before = previous;
     _close();
-    _open = _rules.blockStarting(line, before);
+    final started = _rules.blockStarting(line, before);
+    _open = started;
     openEnd = line + 1;
+    openHoldsFence =
+        started.kind == BlockKind.quote && _rules.quoteLineHoldsFence(line);
   }
 
   /// Makes the open paragraph the setext heading of [level] its underline
@@ -88,7 +102,10 @@ final class BlockBuilder {
   void _close() {
     final open = _open;
     if (open == null) return;
-    _blocks.add(open.endLine == openEnd ? open : open.cutAt(openEnd));
+    var block = open.endLine == openEnd ? open : open.cutAt(openEnd);
+    if (openHoldsFence && !block.holdsFence) block = block.withFence();
+    _blocks.add(block);
     _open = null;
+    openHoldsFence = false;
   }
 }

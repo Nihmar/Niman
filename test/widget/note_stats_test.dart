@@ -4,12 +4,17 @@
 // it to be asked again.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:niman/src/editor/word_count.dart';
+import 'package:niman/src/editor/word_count_index.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
+import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/note_view_handle.dart';
 
 const String _note = '# Alpha\n\none two\n\n## Beta\n\nthree\n';
+
+/// The words of [text] as the note counts them: its text, not its Markdown
+/// syntax (#1051), counted whole.
+int _wordsOf(String text) => WordCount.of(SourceBuffer.fromText(text)).words;
 
 Widget _app(NoteView view) => MaterialApp(home: Scaffold(body: view));
 
@@ -61,8 +66,8 @@ void main() {
       isTrue,
       reason: 'the counter is built before an edit can follow it',
     );
-    expect(surface.widget.surface!.words.words, countWords(buffer.text));
-    expect(_shownWords(tester), contains(countWords(buffer.text).toString()));
+    expect(surface.widget.surface!.words.words, _wordsOf(buffer.text));
+    expect(_shownWords(tester), contains(_wordsOf(buffer.text).toString()));
   });
 
   testWidgets('an edit inside a line does not move the count of the note', (
@@ -83,7 +88,7 @@ void main() {
       find.byType(MarkdownSourceView),
     );
     final buffer = surface.widget.buffer;
-    final before = countWords(buffer.text);
+    final before = _wordsOf(buffer.text);
 
     // A new line inside the paragraph: two words become three lines of one
     // word each, and the note's word count must not drift.
@@ -128,7 +133,7 @@ void main() {
       }
       final view = key.currentState! as NoteViewHandle;
       expect(view.outline.value.map((e) => e.text), <String>['Alpha', 'Beta']);
-      expect(_shownWords(tester), contains(countWords(text).toString()));
+      expect(_shownWords(tester), contains(_wordsOf(text).toString()));
     },
   );
 }

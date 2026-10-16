@@ -6,10 +6,14 @@
 ///
 /// Three decisions:
 ///
-/// * **Literal, whole-note, on this isolate.** `String.indexOf` over the note
-///   is a native scan; the 22 MB stress note is searched in tens of
-///   milliseconds, and a note past a megabyte is searched a moment
-///   after the query stops changing rather than on every character.
+/// * **Literal, a line at a time, on this isolate.** The note is never joined
+///   (#1047): each line is searched where the buffer keeps it, matches are
+///   offsets, and a note past a megabyte is searched in slices of lines a
+///   moment after the query stops changing rather than on every character.
+///   Replace shifts the matches after it and reads again only its own line;
+///   Replace all makes one edit over the span of the matches, built from the
+///   buffer's pieces, as one undo step. A query that spans lines is the one
+///   case that reads the note whole.
 /// * **The current match is the selection.** Going to a match selects it in
 ///   the note, so Escape leaves it selected and the next keystroke replaces it
 ///   — what every editor does — and the view has one thing to bring into view.
@@ -19,6 +23,7 @@
 library;
 
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/widgets.dart';
 import 'package:niman/src/editor/find_bar.dart';
@@ -76,9 +81,6 @@ final class SourceFindController extends ChangeNotifier
   /// The buffer and the revision the matches were found in.
   SourceBuffer? _buffer;
   int _revision = -1;
-
-  /// The text they were found in, for Replace all.
-  String _text = '';
 
   Timer? _debounce;
 
@@ -226,15 +228,82 @@ final class SourceFindController extends ChangeNotifier
     final start = _starts[_index];
     final end = _ends[_index];
     final replacement = replaceInput.text;
+    final buffer = surface.buffer;
     surface.replaceRange(
       start,
       end,
       replacement,
       caret: SelectionModel.at(start + replacement.length),
     );
-    // The next match is the one after what was put in: a replacement that
-    // contains the query is not found again under the caret.
-    _run(reveal: true, from: start + replacement.length);
+    if (buffer.revision != _revision + 1 ||
+        !identical(buffer, _buffer) ||
+        _hasBreak(findInput.text)) {
+      // Not the edit alone (another edit got in): search again.
+      _run(reveal: true, from: start + replacement.length);
+      return;
+    }
+    // The matches after the one replaced move by what it changed; only the
+    // line it was on is read again (#1047), not the note.
+    _followReplacement(
+      buffer,
+      start,
+      end,
+      replacement.length,
+      from: start + replacement.length,
+    );
+  }
+
+  /// Keeps the matches after the replacement of `[start, end)` by `length`
+  /// characters: the one replaced goes, those after it move, and the line the
+  /// replacement is on is searched again — a replacement can make a match
+  /// with its neighbours, or leave the query in itself.
+  void _followReplacement(
+    SourceBuffer buffer,
+    int start,
+    int end,
+    int length, {
+    required int from,
+  }) {
+    final delta = length - (end - start);
+    final line = buffer.lineOf(start);
+    final lineStart = buffer.offsetOfLine(line);
+    final lineEnd = lineStart + buffer.lineLengthAt(line);
+    final starts = <int>[];
+    final ends = <int>[];
+    var at = 0;
+    // Before the line: unchanged.
+    while (at < _starts.length && _ends[at] <= lineStart) {
+      starts.add(_starts[at]);
+      ends.add(_ends[at]);
+      at++;
+    }
+    // Those on the replaced line are dropped, and the line read again.
+    while (at < _starts.length && _starts[at] < end) {
+      at++;
+    }
+    final query = findInput.text;
+    final pattern = _pattern(query);
+    _matchLine(buffer.lineAt(line), lineStart, query, pattern, starts, ends);
+    // After it: moved. (A match on the same line that began after the one
+    // replaced is found again with the line, so skip those.)
+    while (at < _starts.length && _starts[at] < lineEnd - delta) {
+      at++;
+    }
+    for (; at < _starts.length; at++) {
+      starts.add(_starts[at] + delta);
+      ends.add(_ends[at] + delta);
+    }
+    _starts = starts;
+    _ends = ends;
+    _revision = buffer.revision;
+    if (starts.isEmpty) {
+      _index = -1;
+    } else {
+      final next = starts.indexWhere((s) => s >= from);
+      _index = next < 0 ? 0 : next;
+      _select();
+    }
+    notifyListeners();
   }
 
   @override
@@ -243,19 +312,35 @@ final class SourceFindController extends ChangeNotifier
     final surface = _surface();
     if (surface == null || _starts.isEmpty) return;
     final replacement = replaceInput.text;
-    final text = _text;
+    // The caret stays where the writer had it, moved by the matches before
+    // it; the note is not scrolled to the first match.
+    final buffer = surface.buffer;
+    final was = surface.selection.clampTo(buffer.length);
+    var caret = was.extent;
+    for (var match = 0; match < _starts.length; match++) {
+      if (_ends[match] <= was.extent) {
+        caret += replacement.length - (_ends[match] - _starts[match]);
+      }
+    }
+    // One edit over the span from the first match to the last, built from
+    // the buffer's own pieces (the note is not joined), and so one undo step
+    // however many matches there were; the history keeps only the lines that
+    // changed (#1050).
+    final first = _starts.first;
     final out = StringBuffer();
-    var at = 0;
+    var at = first;
     for (var match = 0; match < _starts.length; match++) {
       out
-        ..write(text.substring(at, _starts[match]))
+        ..write(buffer.substring(at, _starts[match]))
         ..write(replacement);
       at = _ends[match];
     }
-    out.write(text.substring(at));
-    final caret = _starts.first;
-    // One edit, one undo step, however many matches there were.
-    surface.applyEdit(out.toString(), TextSelection.collapsed(offset: caret));
+    surface.replaceRange(
+      first,
+      at,
+      out.toString(),
+      caret: SelectionModel.at(caret),
+    );
     _run(reveal: false);
   }
 
@@ -292,13 +377,14 @@ final class SourceFindController extends ChangeNotifier
     if (buffer == null) return;
     if (!identical(buffer, _buffer) || buffer.revision != _revision) {
       _debounce?.cancel();
-      _run(reveal: false);
+      // At once: the caller acts on the matches it asks for.
+      _run(reveal: false, sync: true);
     }
   }
 
   /// Searches the note; the current match is the first at or after [from]
   /// (the selection's start by default), selected when [reveal].
-  void _run({required bool reveal, int? from}) {
+  void _run({required bool reveal, int? from, bool sync = false}) {
     final surface = _surface();
     final query = findInput.text;
     if (surface == null || query.isEmpty) {
@@ -307,37 +393,60 @@ final class SourceFindController extends ChangeNotifier
       return;
     }
     final buffer = surface.buffer;
-    final text = buffer.text;
+    _slice?.cancel();
+    final scan = ++_scanId;
+    final revision = buffer.revision;
+    final pattern = _pattern(query);
     final starts = <int>[];
     final ends = <int>[];
-    if (_caseSensitive) {
-      var at = text.indexOf(query);
-      while (at >= 0 && starts.length < _maxMatches) {
-        starts.add(at);
-        ends.add(at + query.length);
-        at = text.indexOf(query, at + query.length);
-      }
-    } else {
-      // A pattern, not a lowered copy: lowering can change a string's length
-      // (`İ`), and the offsets have to be the note's.
-      final pattern = RegExp(
-        RegExp.escape(query),
-        caseSensitive: false,
-        unicode: true,
-      );
-      for (final match in pattern.allMatches(text)) {
-        if (match.end == match.start) continue;
-        starts.add(match.start);
-        ends.add(match.end);
-        if (starts.length >= _maxMatches) break;
-      }
+    if (_hasBreak(query)) {
+      // A query that spans lines cannot be found a line at a time: the one
+      // case that reads the note whole.
+      final text = buffer.text;
+      _matchLine(text, 0, query, pattern, starts, ends);
+      _finish(buffer, starts, ends, reveal: reveal, from: from);
+      return;
     }
+    var line = 0;
+    var offset = 0;
+    // A slice of lines, then the frame back: a long note's matches arrive
+    // over several turns instead of one freeze.
+    void slice() {
+      if (scan != _scanId || buffer.revision != revision) return;
+      slices++;
+      final stop = sync || buffer.length <= _immediateLimit
+          ? buffer.lineCount
+          : min(buffer.lineCount, line + _sliceLines);
+      for (; line < stop && starts.length < _maxMatches; line++) {
+        linesRead++;
+        final text = buffer.lineAt(line);
+        _matchLine(text, offset, query, pattern, starts, ends);
+        offset += text.length + buffer.terminatorAt(line).length;
+      }
+      if (line < buffer.lineCount && starts.length < _maxMatches) {
+        _slice = Timer(Duration.zero, slice);
+        return;
+      }
+      _finish(buffer, starts, ends, reveal: reveal, from: from);
+    }
+
+    slice();
+  }
+
+  /// Takes the matches a scan found as the bar's own.
+  void _finish(
+    SourceBuffer buffer,
+    List<int> starts,
+    List<int> ends, {
+    required bool reveal,
+    int? from,
+  }) {
     _starts = starts;
     _ends = ends;
     _buffer = buffer;
     _revision = buffer.revision;
-    _text = text;
-    final anchor = from ?? surface.selection.clampTo(buffer.length).start;
+    final surface = _surface();
+    final anchor = from ?? surface?.selection.clampTo(buffer.length).start ?? 0;
     if (starts.isEmpty) {
       _index = -1;
     } else {
@@ -348,6 +457,59 @@ final class SourceFindController extends ChangeNotifier
     notifyListeners();
   }
 
+  /// The case-insensitive pattern for [query], or null when the search is
+  /// case sensitive. A pattern, not a lowered copy: lowering can change a
+  /// string's length (`İ`), and the offsets have to be the note's.
+  RegExp? _pattern(String query) => _caseSensitive
+      ? null
+      : RegExp(RegExp.escape(query), caseSensitive: false, unicode: true);
+
+  /// Adds the matches of [query] in [text], which starts at [base] in the
+  /// note, to [starts] and [ends].
+  void _matchLine(
+    String text,
+    int base,
+    String query,
+    RegExp? pattern,
+    List<int> starts,
+    List<int> ends,
+  ) {
+    if (pattern == null) {
+      var at = text.indexOf(query);
+      while (at >= 0 && starts.length < _maxMatches) {
+        starts.add(base + at);
+        ends.add(base + at + query.length);
+        at = text.indexOf(query, at + query.length);
+      }
+      return;
+    }
+    for (final match in pattern.allMatches(text)) {
+      if (match.end == match.start) continue;
+      starts.add(base + match.start);
+      ends.add(base + match.end);
+      if (starts.length >= _maxMatches) break;
+    }
+  }
+
+  static bool _hasBreak(String query) =>
+      query.contains('\n') || query.contains('\r');
+
+  /// The scan in progress, and its turn.
+  Timer? _slice;
+  int _scanId = 0;
+
+  /// How many lines a slice of a long note's scan reads.
+  static const int _sliceLines = 20000;
+
+  /// How many lines the scans have read, for a test to see that a
+  /// replacement does not read the note again.
+  @visibleForTesting
+  int linesRead = 0;
+
+  /// How many slices the scans have run: more than one for a long note.
+  @visibleForTesting
+  int slices = 0;
+
   void _select() {
     final surface = _surface();
     if (surface == null || _index < 0 || _index >= _starts.length) return;
@@ -357,12 +519,13 @@ final class SourceFindController extends ChangeNotifier
   }
 
   void _clear() {
+    _slice?.cancel();
+    _scanId++;
     _starts = const <int>[];
     _ends = const <int>[];
     _index = -1;
     _buffer = null;
     _revision = -1;
-    _text = '';
   }
 
   @override
