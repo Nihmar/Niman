@@ -24,8 +24,10 @@ Create one with **New list note** in the Files FAB (or
 
 - **Tick** the box to flip `[ ]` and `[x]`. A ticked item stays in the
   note and reads struck through; it is not removed.
-- **Tap the text** to edit it in place. A long text scrolls itself when
-  it does not fit the row, as a note's name does in the tree.
+- **Tap the text** to edit it in place; a link in it — `[label](https://…)`,
+  a bare address, `[[a note]]` — follows instead, the way it does in the
+  read view. A long text scrolls itself when it does not fit the row, as
+  a note's name does in the tree.
 - **Drag the handle** on the left to reorder an item, or, with a finger,
   **press and hold anywhere on the row** and drag from there — the
   gesture a phone already knows, for a handle a thumb can miss. A mouse

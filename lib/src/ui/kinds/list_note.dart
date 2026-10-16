@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:niman/src/frontmatter/note_kind.dart';
+import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/ui/kinds/list_item_row.dart';
 import 'package:niman/src/ui/kinds/list_parser.dart';
 import 'package:niman/src/ui/kinds/shopping_parser.dart';
@@ -22,7 +23,12 @@ final class ListKindGui implements NoteKindGUI {
 
   @override
   Widget buildBody(BuildContext context, NoteKindHost host) {
-    return ListNoteView(text: host.text, onChanged: host.applyEdit);
+    return ListNoteView(
+      text: host.text,
+      onChanged: host.applyEdit,
+      onTapLink: host.openLink,
+      onTapWikiLink: host.openWikiLink,
+    );
   }
 }
 
@@ -43,6 +49,8 @@ class ListNoteView extends StatefulWidget {
     required this.text,
     required this.onChanged,
     this.shopping = false,
+    this.onTapLink,
+    this.onTapWikiLink,
     super.key,
   });
 
@@ -55,6 +63,13 @@ class ListNoteView extends StatefulWidget {
 
   /// Whether the body is a shopping list, with a quantity per item.
   final bool shopping;
+
+  /// Follows a Markdown link in an item's text, where the host has a way
+  /// (#1094); null draws the links without following them.
+  final void Function(BuildContext context, String href)? onTapLink;
+
+  /// Follows a wikilink in an item's text.
+  final void Function(BuildContext context, String inner)? onTapWikiLink;
 
   @override
   State<ListNoteView> createState() => _ListNoteViewState();
@@ -83,6 +98,9 @@ class _ListNoteViewState extends State<ListNoteView>
     with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   late List<ListItem> _items;
   final TextEditingController _newItem = TextEditingController();
+
+  /// The items' formulas, shared by the rows (#1094).
+  final MathCache _mathCache = MathCache();
 
   /// The add field's focus: an add hands it back to the field so the next
   /// item is typed at once, whichever of Enter or the check button added.
@@ -306,6 +324,7 @@ class _ListNoteViewState extends State<ListNoteView>
     _scroll.dispose();
     _addRowShown.dispose();
     _addRowController.dispose();
+    _mathCache.dispose();
     super.dispose();
   }
 
@@ -695,6 +714,9 @@ class _ListNoteViewState extends State<ListNoteView>
                         key: _rowKey(index),
                         item: item,
                         shopping: widget.shopping,
+                        mathCache: _mathCache,
+                        onTapLink: widget.onTapLink,
+                        onTapWikiLink: widget.onTapWikiLink,
                         isDragSource: _drag?.index == index,
                         isEditing: _editingIndex == index,
                         indicator: indicator,

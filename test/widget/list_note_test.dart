@@ -25,6 +25,14 @@ Finder _rowDelete(int index) => find.descendant(
   matching: find.byKey(const Key('list-delete-item')),
 );
 
+/// Taps the first glyph of [text]: a row's text box is as wide as the
+/// row, and its centre is blank space the row's own tap owns.
+Future<void> _tapText(WidgetTester tester, String text) async {
+  final box = tester.getRect(find.text(text));
+  await tester.tapAt(Offset(box.left + 2, box.center.dy));
+  await tester.pump();
+}
+
 /// Drags [from] to [to] (the handle drag of T-TK-09).
 Future<void> _drag(WidgetTester tester, Finder from, Offset to) async {
   final gesture = await tester.startGesture(tester.getCenter(from));
@@ -92,6 +100,51 @@ void main() {
     await tester.pump();
     expect(_rowEditField(), findsNothing);
     expect(find.text('one edited'), findsOneWidget);
+  });
+
+  testWidgets('a link in an item follows; other text still edits (#1094)', (
+    tester,
+  ) async {
+    const text =
+        '---\ntype: list\n---\n'
+        '- [ ] [label](https://example.com)\n'
+        '- [ ] https://example.com/bare\n'
+        '- [ ] [[Other note]]\n'
+        '- [ ] plain\n';
+    final links = <String>[];
+    final wikis = <String>[];
+    await tester.pumpWidget(
+      _app(
+        ListNoteView(
+          text: text,
+          onChanged: (_) {},
+          onTapLink: (_, href) => links.add(href),
+          onTapWikiLink: (_, inner) => wikis.add(inner),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    // A link follows the way the read view follows it, and the row does
+    // not open its edit.
+    await _tapText(tester, 'label');
+    expect(links, ['https://example.com']);
+    expect(_rowEditField(), findsNothing);
+
+    // A bare address is a link too.
+    await _tapText(tester, 'https://example.com/bare');
+    expect(links, ['https://example.com', 'https://example.com/bare']);
+    expect(_rowEditField(), findsNothing);
+
+    // A wikilink follows as it does in the read view.
+    await _tapText(tester, 'Other note');
+    expect(wikis, ['Other note']);
+    expect(_rowEditField(), findsNothing);
+
+    // Anything that is not a link still taps into the in-place edit.
+    await tester.tap(find.text('plain'));
+    await tester.pump();
+    expect(_rowEditField(), findsOneWidget);
   });
 
   testWidgets('an open edit commits when another row is tapped', (
