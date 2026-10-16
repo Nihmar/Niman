@@ -2022,6 +2022,8 @@ final class MacedonianStrings extends Strings {
   @override
   String get movedToTrash => 'Преместено во корпа';
   @override
+  String get movedMessage => 'Преместено';
+  @override
   String treeMarkedCount(int count) => 'Избрани: $count';
   @override
   String get deletedMessage => 'Избришано';

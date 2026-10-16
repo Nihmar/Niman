@@ -1998,6 +1998,8 @@ final class DanishStrings extends Strings {
   @override
   String get movedToTrash => 'Flyttet til affald';
   @override
+  String get movedMessage => 'Flyttet';
+  @override
   String treeMarkedCount(int count) => 'Valgt: $count';
   @override
   String get deletedMessage => 'Slettet';

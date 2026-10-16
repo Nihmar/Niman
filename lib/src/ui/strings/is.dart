@@ -2004,6 +2004,8 @@ final class IcelandicStrings extends Strings {
   @override
   String get movedToTrash => 'Fært í korpu';
   @override
+  String get movedMessage => 'Fært';
+  @override
   String treeMarkedCount(int count) => 'Valið: $count';
   @override
   String get deletedMessage => 'Eytt';

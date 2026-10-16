@@ -2017,6 +2017,8 @@ final class BasqueStrings extends Strings {
   @override
   String get movedToTrash => 'Zakarrontzira mugitua';
   @override
+  String get movedMessage => 'Mugituta';
+  @override
   String treeMarkedCount(int count) => 'Hautatuta: $count';
   @override
   String get deletedMessage => 'Ezabatua';

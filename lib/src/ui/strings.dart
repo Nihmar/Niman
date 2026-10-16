@@ -1241,6 +1241,7 @@ final class AppStrings {
   static String get annotationOpenNote => _s.annotationOpenNote;
   static String get annotationFailed => _s.annotationFailed;
   static String get movedToTrash => _s.movedToTrash;
+  static String get movedMessage => _s.movedMessage;
   static String treeMarkedCount(int count) => _s.treeMarkedCount(count);
   static String get deletedMessage => _s.deletedMessage;
   static String deleteForeverConfirm(String name) =>

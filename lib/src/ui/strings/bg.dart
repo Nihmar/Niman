@@ -2024,6 +2024,8 @@ final class BulgarianStrings extends Strings {
   @override
   String get movedToTrash => 'Преместен в коша';
   @override
+  String get movedMessage => 'Преместено';
+  @override
   String treeMarkedCount(int count) => 'Избрани: $count';
   @override
   String get deletedMessage => 'Изтрито';

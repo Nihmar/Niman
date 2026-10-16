@@ -2016,6 +2016,8 @@ final class PortugueseStrings extends Strings {
   @override
   String get movedToTrash => 'Movido para a lixeira';
   @override
+  String get movedMessage => 'Movido';
+  @override
   String treeMarkedCount(int count) => 'Selecionados: $count';
   @override
   String get deletedMessage => 'Excluído';

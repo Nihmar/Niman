@@ -2019,6 +2019,8 @@ final class GalicianStrings extends Strings {
   @override
   String get movedToTrash => 'Movida ao paperilleiro';
   @override
+  String get movedMessage => 'Movido';
+  @override
   String treeMarkedCount(int count) => 'Seleccionados: $count';
   @override
   String get deletedMessage => 'Borrado';

@@ -2040,6 +2040,8 @@ final class CatalanStrings extends Strings {
   @override
   String get movedToTrash => 'Moguda a la paperera';
   @override
+  String get movedMessage => 'Mogut';
+  @override
   String treeMarkedCount(int count) => 'Seleccionats: $count';
   @override
   String get deletedMessage => 'Esborrat';

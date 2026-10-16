@@ -2047,6 +2047,8 @@ final class GermanStrings extends Strings {
   @override
   String get movedToTrash => 'In den Papierkorb verschoben';
   @override
+  String get movedMessage => 'Verschoben';
+  @override
   String treeMarkedCount(int count) => 'Ausgewählt: $count';
   @override
   String get deletedMessage => 'Gelöscht';

@@ -2013,6 +2013,8 @@ final class UkrainianStrings extends Strings {
   @override
   String get movedToTrash => 'Переміщено в кошик';
   @override
+  String get movedMessage => 'Переміщено';
+  @override
   String treeMarkedCount(int count) => 'Вибрано: $count';
   @override
   String get deletedMessage => 'Видалено';

@@ -152,7 +152,7 @@ final class ShellMarkedActions {
     final movedLine = AppStrings.treeMarkedCount(moved);
     final failedLine = AppStrings.treeMarkedCount(failed);
     final report = [
-      if (moved > 0) '${AppStrings.actionMove} · $movedLine',
+      if (moved > 0) '${AppStrings.movedMessage} · $movedLine',
       if (failed > 0) '${AppStrings.shellActionFailed} · $failedLine',
     ];
     if (report.isEmpty) return;

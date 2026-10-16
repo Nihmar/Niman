@@ -2020,6 +2020,8 @@ final class RomanianStrings extends Strings {
   @override
   String get movedToTrash => 'Mutat în coș';
   @override
+  String get movedMessage => 'Mutat';
+  @override
   String treeMarkedCount(int count) => 'Selectate: $count';
   @override
   String get deletedMessage => 'Șters';

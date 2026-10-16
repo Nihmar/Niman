@@ -2020,6 +2020,8 @@ final class HungarianStrings extends Strings {
   @override
   String get movedToTrash => 'A kukába került';
   @override
+  String get movedMessage => 'Áthelyezve';
+  @override
   String treeMarkedCount(int count) => 'Kijelölve: $count';
   @override
   String get deletedMessage => 'Törölve';

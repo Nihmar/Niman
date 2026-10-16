@@ -2009,6 +2009,8 @@ final class SerbianStrings extends Strings {
   @override
   String get movedToTrash => 'Премештено у кош';
   @override
+  String get movedMessage => 'Премештено';
+  @override
   String treeMarkedCount(int count) => 'Изабрано: $count';
   @override
   String get deletedMessage => 'Обрисано';

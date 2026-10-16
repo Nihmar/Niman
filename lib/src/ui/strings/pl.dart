@@ -2031,6 +2031,8 @@ final class PolishStrings extends Strings {
   @override
   String get movedToTrash => 'Przeniesiono do kosza';
   @override
+  String get movedMessage => 'Przeniesiono';
+  @override
   String treeMarkedCount(int count) => 'Zaznaczono: $count';
   @override
   String get deletedMessage => 'Usunięto';

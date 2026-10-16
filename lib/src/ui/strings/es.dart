@@ -2036,6 +2036,8 @@ final class SpanishStrings extends Strings {
   @override
   String get movedToTrash => 'Movido a la papelera';
   @override
+  String get movedMessage => 'Movido';
+  @override
   String treeMarkedCount(int count) => 'Seleccionados: $count';
   @override
   String get deletedMessage => 'Eliminado';

@@ -2028,6 +2028,8 @@ final class DutchStrings extends Strings {
   @override
   String get movedToTrash => 'Naar de prullenbak verplaatst';
   @override
+  String get movedMessage => 'Verplaatst';
+  @override
   String treeMarkedCount(int count) => 'Geselecteerd: $count';
   @override
   String get deletedMessage => 'Verwijderd';

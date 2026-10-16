@@ -143,7 +143,7 @@ void main() {
           .descendant(of: find.byType(SnackBar), matching: find.byType(Text))
           .first,
     );
-    expect(report.data, contains('Selected: 2'));
+    expect(report.data, contains('Moved · Selected: 2'));
     expect(report.data, contains('Could not finish that action'));
     expect(report.data, contains('Selected: 1'));
   }, variant: _linux);
@@ -158,7 +158,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
 
     expect(await controller.find('Box/bravo.md'), isNotNull);
-    expect(find.textContaining('Selected: 3'), findsOne);
+    expect(find.textContaining('Moved · Selected: 3'), findsOne);
     expect(find.textContaining('Could not finish'), findsNothing);
   }, variant: _linux);
 

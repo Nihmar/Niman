@@ -1991,6 +1991,8 @@ final class TurkishStrings extends Strings {
   @override
   String get movedToTrash => 'Çöp kutusuna taşındı';
   @override
+  String get movedMessage => 'Taşındı';
+  @override
   String treeMarkedCount(int count) => 'Seçili: $count';
   @override
   String get deletedMessage => 'Silindi';

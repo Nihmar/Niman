@@ -2003,6 +2003,8 @@ final class CroatianStrings extends Strings {
   @override
   String get movedToTrash => 'Premješteno u korpu';
   @override
+  String get movedMessage => 'Premješteno';
+  @override
   String treeMarkedCount(int count) => 'Odabrano: $count';
   @override
   String get deletedMessage => 'Obrisano';
