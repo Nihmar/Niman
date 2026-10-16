@@ -130,11 +130,16 @@ final class _TodoTabState extends State<TodoTab> {
     super.dispose();
   }
 
-  /// A new snapshot: swiped rows are settled, and a token chip neither file
-  /// carries any more is dropped so it never dead-ends the list. Both files
-  /// count: the filter narrows the Done section too.
+  /// A publish: swiped rows are settled -- the version moves with them, so
+  /// the cached model, derived while they were hidden, is not reused when a
+  /// failed delete published the very same snapshot -- and a token chip
+  /// neither file carries any more is dropped so it never dead-ends the
+  /// list. Both files count: the filter narrows the Done section too.
   void _onPublished() {
-    _swiped.clear();
+    if (_swiped.isNotEmpty) {
+      _swiped.clear();
+      _swipedVersion++;
+    }
     final snapshot = widget.controller.snapshot;
     if (snapshot != null && widget.view.filter.tokens.isNotEmpty) {
       widget.view.pruneTokens(snapshotTokens(snapshot));

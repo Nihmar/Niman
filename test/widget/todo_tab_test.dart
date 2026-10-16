@@ -285,6 +285,24 @@ void main() {
     expect(source.todoLines, ['kept']);
   });
 
+  testWidgets('a swipe whose delete fails brings the row back', (tester) async {
+    await pumpTab(tester, todo: ['doomed', 'kept']);
+    source.deleteFailure = Exception('disk full');
+    await tester.drag(find.text('doomed'), const Offset(-600, 0));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('todo-swipe-confirm')));
+    await settle(tester);
+    // The row has left the screen while the write is under way...
+    expect(find.text('doomed'), findsNothing);
+    await settle(tester);
+    // The failure publishes the very same snapshot: the row, still on
+    // disk, is not left hidden by the model derived while it was swiped.
+    expect(find.byKey(const Key('todo-error')), findsOneWidget);
+    expect(source.todoLines, ['doomed', 'kept']);
+    expect(find.text('doomed'), findsOneWidget);
+    expect(find.text('kept'), findsOneWidget);
+  });
+
   testWidgets('no task at all shows the empty state and no Done section', (
     tester,
   ) async {

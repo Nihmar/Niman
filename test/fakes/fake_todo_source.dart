@@ -24,6 +24,11 @@ final class FakeTodoSource implements TodoSource {
   /// stay stable across quiet revisions and move after every write.
   int _version = 0;
 
+  /// When set, deletes throw it instead of removing the line, the way a
+  /// write that fails on disk does -- after a beat, since a real write
+  /// takes longer than a frame to fail.
+  Exception? deleteFailure;
+
   /// The current open lines (for assertions).
   List<String> get todoLines => List<String>.unmodifiable(_todo);
 
@@ -106,6 +111,11 @@ final class FakeTodoSource implements TodoSource {
 
   @override
   Future<TodoSnapshot> deleteTodoAt(int lineIndex) async {
+    final failure = deleteFailure;
+    if (failure != null) {
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+      throw failure;
+    }
     _version++;
     _todo.removeAt(lineIndex);
     return _snapshot();
@@ -113,6 +123,11 @@ final class FakeTodoSource implements TodoSource {
 
   @override
   Future<TodoSnapshot> deleteDoneAt(int lineIndex) async {
+    final failure = deleteFailure;
+    if (failure != null) {
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+      throw failure;
+    }
     _version++;
     _done.removeAt(lineIndex);
     return _snapshot();
