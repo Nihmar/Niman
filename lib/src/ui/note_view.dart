@@ -1219,7 +1219,16 @@ final class _NoteViewState extends State<NoteView>
       }
       if (!mounted || generation != _loadGeneration) return;
       // The buffer uses LF: normalize line endings on load.
-      final text = ready?.text ?? normalizedLineEndings(content);
+      final onDisk = ready?.text ?? normalizedLineEndings(content);
+      // Text the app still owes this note's file — an earlier write of it the
+      // disk would not take — is the note's text, ahead of the file's
+      // (#1054). It is taken only here, once this load is the one that
+      // lands, so a load the reader moved on from does not carry it off. It
+      // is edits of this session the disk does not have: the buffer starts
+      // from it and is unsaved, so its own pipeline writes it.
+      final held = widget.unsavedTracker?.takeOver(path);
+      final text = held ?? onDisk;
+      final restored = held != null && held != onDisk;
       // The note kind (T-TK-02): the frontmatter `type` decides the body
       // (kind GUI or plain editor); detection scans the leading block
       // only, never the whole text.
@@ -1229,7 +1238,7 @@ final class _NoteViewState extends State<NoteView>
       _surface = _surfaceFor(
         text,
         caret: (widget.initialCaretOffset ?? 0).clamp(0, text.length),
-        ready: ready,
+        ready: restored ? null : ready,
       );
       // The test seam reads nothing, so it has no stamp to keep.
       _diskStamp = ready?.stamp;
@@ -1251,6 +1260,11 @@ final class _NoteViewState extends State<NoteView>
       _saves.markClean();
       final session = _saves.newSession();
       _log.debug('edit session $session: $path');
+      if (restored) {
+        _log.info('note opened with its unsaved text back: $path');
+        _edited = true;
+        _saves.edited();
+      }
       _unsaved?.noteChanged();
       setState(() {
         _loading = false;

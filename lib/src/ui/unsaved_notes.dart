@@ -126,6 +126,14 @@ final class UnsavedTracker extends ChangeNotifier {
     String Function() text,
     Future<void> Function() write,
   ) {
+    // A newer text of the note replaces an older one still held: the older
+    // would write after it, or on top of it when it retries.
+    for (final note in _notes.toList()) {
+      if (note is DetachedSave && p.equals(note.path, path)) {
+        note.supersede();
+        _notes.remove(note);
+      }
+    }
     final save = DetachedSave(
       path: path,
       textOf: text,
@@ -134,6 +142,28 @@ final class UnsavedTracker extends ChangeNotifier {
     );
     register(save);
     return save.start();
+  }
+
+  /// The text the app still owes the disk for the note at [path], handed to
+  /// the editor that opens it again (#1054), or null when it owes none.
+  ///
+  /// A note switched away from while the disk would not take its write is
+  /// held here with its text. Opening it again reads the disk — the old
+  /// text — so the editor takes the held text instead, as unsaved edits of
+  /// its own, and the held save is dropped: two owners of one text would
+  /// write the older over the newer when the retry came.
+  String? takeOver(String path) {
+    String? text;
+    for (final note in _notes.toList()) {
+      if (note is DetachedSave && note.unsaved && p.equals(note.path, path)) {
+        // In registration order: the last one is the newest.
+        text = note.text;
+        note.supersede();
+        _notes.remove(note);
+      }
+    }
+    if (text != null) _publish();
+    return text;
   }
 
   /// Tracks [note]; it reads its dirty state live until [unregister].

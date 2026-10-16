@@ -53,13 +53,29 @@ final class DetachedSave implements UnsavedNote {
   Timer? _retry;
   int _failures = 0;
   bool _written = false;
+  bool _superseded = false;
 
   /// Whether the write has failed since it last landed — what is left of the
   /// note is in memory only.
   bool get failed => _failures > 0 && _running == null && !_written;
 
   @override
-  bool get unsaved => !_written;
+  bool get unsaved => !_written && !_superseded;
+
+  /// Hands the note over (#1054): its text is now owned by something that
+  /// writes it after anything this save would write — an editor that opened
+  /// the note again with this text in its buffer, or a newer detached save
+  /// of the same note. A write already running is left to finish (the
+  /// writer keeps one note's writes in order), but nothing is written from
+  /// here on and the save is no longer owed: a retry of stale text must
+  /// never land on top of what came after it.
+  void supersede() {
+    _superseded = true;
+    _retry?.cancel();
+  }
+
+  /// Whether [supersede] was called.
+  bool get superseded => _superseded;
 
   @override
   String get text => textOf();
@@ -74,6 +90,7 @@ final class DetachedSave implements UnsavedNote {
 
   Future<void> _attempt() {
     _retry?.cancel();
+    if (_superseded) return Future<void>.value();
     final run = write().then<void>(
       (_) {
         _written = true;
@@ -83,9 +100,9 @@ final class DetachedSave implements UnsavedNote {
       onError: (Object error, StackTrace stack) {
         _failures++;
         _log.warning('outgoing save failed: $path ($error)');
-        if (_failures <= retryDelays.length) {
+        if (!_superseded && _failures <= retryDelays.length) {
           _retry = Timer(retryDelays[_failures - 1], () {
-            if (!_written && _running == null) unawaited(_quiet(_attempt()));
+            if (unsaved && _running == null) unawaited(_quiet(_attempt()));
           });
         }
         Error.throwWithStackTrace(error, stack);
@@ -104,7 +121,4 @@ final class DetachedSave implements UnsavedNote {
   /// timer has nobody to tell.
   Future<void> _quiet(Future<void> run) =>
       run.then<void>((_) {}, onError: (_) {});
-
-  /// Stops the retries; the save stays owed.
-  void cancelRetries() => _retry?.cancel();
 }

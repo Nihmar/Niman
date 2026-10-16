@@ -338,7 +338,10 @@ Nothing is thrown away meanwhile. If the note is switched away from or its tab
 is closed while the write is still running or has failed, its text is kept by
 the app: the note stays marked as unsaved, the write is retried, and quitting
 waits for it (or asks, if it still cannot be written) instead of leaving with
-the last edits lost.
+the last edits lost. If you open that note again meanwhile, it opens with
+those edits in it, as unsaved changes of its own — not with the older text the
+disk still has — and the held write is dropped, so nothing old is ever written
+over what you type next.
 
 **A note changed by another program.** When a sync client, Niman's own sync or
 another program rewrites a note that is open, every open note whose text you
