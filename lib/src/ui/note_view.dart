@@ -597,6 +597,21 @@ final class _NoteViewState extends State<NoteView>
     _focus.requestFocus();
   }
 
+  @override
+  void takeFocus() {
+    if (!mounted) return;
+    if (!_ready) {
+      // The load puts the caret in once the editor is up.
+      _caretPending = true;
+      return;
+    }
+    if (_previewOnly) {
+      _readViewKey.currentState?.focus();
+      return;
+    }
+    _refocus();
+  }
+
   /// The note's editing commands: the toolbar's, the format keys', the
   /// context menu's, the Tools sheet's and the spelling review's.
   late final NoteEditCommands _commands = NoteEditCommands(

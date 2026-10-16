@@ -14,6 +14,7 @@ import 'package:niman/src/links/suggester.dart';
 import 'package:niman/src/reading/reading_positions.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/ui/attachment_view.dart';
+import 'package:niman/src/ui/detail_deck.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/note_view_handle.dart';
 import 'package:niman/src/ui/ocr/ocr_file_actions.dart';
@@ -73,11 +74,16 @@ final class ShellDetailPane extends StatelessWidget {
     this.saveNoteStream,
     this.createMissingNote,
     this.header,
+    this.shellFocus,
     this.onEditEpubLook,
     this.onEpubTextScale,
     this.epubFullScreen,
     super.key,
   });
+
+  /// The node the shell keeps its accelerators on, for the pane to tell the
+  /// keyboard is in the shell and hand it to the note that shows (#1074).
+  final FocusNode? shellFocus;
 
   /// What goes above a note, by its library-relative path, or null for
   /// nothing: the journal's strip over an entry (#7).
@@ -261,15 +267,21 @@ final class ShellDetailPane extends StatelessWidget {
     // Every mounted note keeps its place in the stack by its path: a
     // switch only flips which one shows, and a tab kept alive keeps its
     // buffer, undo, find and scroll. The ones behind are offstage, with
-    // their tickers (the caret, the spinner) stopped.
-    return Stack(
-      fit: StackFit.expand,
-      children: [
+    // their tickers (the caret, the spinner) and their keyboard stopped
+    // (#1074).
+    return DetailDeck(
+      paneFocused: tabs.every((tab) => tab.focused),
+      shellFocus: shellFocus,
+      slots: [
         for (final tab in tabs)
-          Offstage(
-            key: ValueKey('detail-note-${tab.path}'),
-            offstage: !tab.active,
-            child: TickerMode(enabled: tab.active, child: _note(root, tab)),
+          DeckSlot(
+            id: tab.path,
+            active: tab.active,
+            child: _note(root, tab),
+            takeFocus: () {
+              final Object? state = tab.key?.currentState;
+              if (state is NoteViewHandle) state.takeFocus();
+            },
           ),
       ],
     );

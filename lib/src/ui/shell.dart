@@ -731,11 +731,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// Shows [tab] in the focused pane (#712), where it is already open or
   /// not; the tree and dock stay put.
   void _showContentTab(ShellTab tab, int pane) {
-    // The note behind is only hidden, and a hidden editor keeps its focus
-    // and its keys (#770): the shell takes them back, as a rail switch
-    // does.
-    FocusManager.instance.primaryFocus?.unfocus();
-    _shellFocus.requestFocus();
+    // The deck behind is excluded from focus while the page covers it
+    // (#1074), which lets go of the editor's keys (#770).
     _reviewTab.show(on: false);
     setState(() {
       _compareShows = false;
@@ -3713,7 +3710,10 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     required Widget child,
     bool retainLayout = false,
   }) {
-    final slot = TickerMode(enabled: visible, child: child);
+    final slot = TickerMode(
+      enabled: visible,
+      child: ExcludeFocus(excluding: !visible, child: child),
+    );
     if (retainLayout) {
       return Visibility(
         visible: visible,
@@ -4833,7 +4833,10 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
             offstage: pane != w.focused,
             child: TickerMode(
               enabled: pane == w.focused,
-              child: _detailPane(controller, pane),
+              child: ExcludeFocus(
+                excluding: pane != w.focused,
+                child: _detailPane(controller, pane),
+              ),
             ),
           ),
       ],
@@ -4871,73 +4874,77 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
                 offstage: content != null || compare || review,
                 child: TickerMode(
                   enabled: content == null && !compare && !review,
-                  child: ShellDetailPane(
-                    root: controller.root,
-                    tabs: _deck(pane),
-                    onMemento: _workspace.remember,
-                    zen: _inZen,
-                    // The panel holds the note's outline and spelling
-                    // wherever the wide layout can show it — docked beside
-                    // the note, or over it on a window without room for
-                    // both — so the status row leaves both its buttons
-                    // out (#1002). A phone keeps them: there they open
-                    // their sheets.
-                    outlineInDock: _wide && !_inZen,
-                    spellCheckInDock: _wide && !_inZen,
-                    typewriter: _editorSettings.typewriter,
-                    cascadeChecklist: _editorSettings.cascadeChecklist,
-                    frontmatterPanel: _editorSettings.frontmatterPanel,
-                    linkPreview: _editorSettings.linkPreview,
-                    onToggleTypewriter: _toggleTypewriter,
-                    onLoaded: _workspace.noteLoaded,
-                    onEditedNoteClosed: _tidyClosedNote,
-                    showLineNumbers: _editorSettings.lineNumbers,
-                    noteColumn: _editorSettings.noteColumn,
-                    // The kind toggles and ⋮ sit at the end of the note's
-                    // one row of chrome (#173); there is no header above.
-                    barActions: [..._kindActions, _dockToggle(), _noteMenu()],
-                    autofocusEditor: _editorSettings.autofocusEditor,
-                    // The Files pane opened a note (#727): that tab's own
-                    // view is asked for the caret, and no other.
-                    caretPath: _caretPath,
-                    caretRequest: _caretRequest,
-                    linkType: _editorSettings.linkType,
-                    newItemLocation: _editorSettings.newItemLocation,
-                    attachmentsFolder: _editorSettings.attachmentsFolder,
-                    templateFolder: _editorSettings.templateFolder,
-                    indentWidth: _editorSettings.indentWidth,
-                    sourceFont: _editorSettings.sourceFont,
-                    toolbarLayout: _editorSettings.toolbarLayout,
-                    // A single enabled editor has nowhere to switch to:
-                    // the note hides its switch instead of offering a
-                    // dead toggle.
-                    onEditorKindChanged:
-                        _editorSettings.editorsEnabled.length > 1
-                        ? _setEditorKind
-                        : null,
-                    linkSource: _linkSource,
-                    wikilinkSuggester: _wikilinkSuggester,
-                    onOpenNote: _openNoteFromLink,
-                    kindMode: !_kindRawMode,
-                    onNoteKindChanged: _onNoteKindChanged,
-                    onPasteAsMarkdown: _pasteAsMarkdown,
-                    unsavedTracker: widget.unsavedTracker,
-                    spellCheck: widget.spellCheck,
-                    reloadToken: _noteReloadToken,
-                    linksFollowed: _linksFollowed,
-                    onAnnotate: _annotate,
-                    ocr: _ocrActions,
-                    marks: _annotations,
-                    saveNote: noteSaverFor(controller),
-                    saveNoteStream: noteStreamSaverFor(controller),
-                    createMissingNote: missingNoteCreatorFor(controller),
-                    statusActions: _statusActionsFor(pane),
-                    header: (path) => _journalUi.header(context, path),
-                    onEditEpubLook: (anchor) =>
-                        _editEpubLook(controller, anchor),
-                    onEpubTextScale: (scale) =>
-                        unawaited(keepEpubTextScale(controller, scale)),
-                    epubFullScreen: _immersive.fullScreen,
+                  child: ExcludeFocus(
+                    excluding: content != null || compare || review,
+                    child: ShellDetailPane(
+                      shellFocus: _shellFocus,
+                      root: controller.root,
+                      tabs: _deck(pane),
+                      onMemento: _workspace.remember,
+                      zen: _inZen,
+                      // The panel holds the note's outline and spelling
+                      // wherever the wide layout can show it — docked beside
+                      // the note, or over it on a window without room for
+                      // both — so the status row leaves both its buttons
+                      // out (#1002). A phone keeps them: there they open
+                      // their sheets.
+                      outlineInDock: _wide && !_inZen,
+                      spellCheckInDock: _wide && !_inZen,
+                      typewriter: _editorSettings.typewriter,
+                      cascadeChecklist: _editorSettings.cascadeChecklist,
+                      frontmatterPanel: _editorSettings.frontmatterPanel,
+                      linkPreview: _editorSettings.linkPreview,
+                      onToggleTypewriter: _toggleTypewriter,
+                      onLoaded: _workspace.noteLoaded,
+                      onEditedNoteClosed: _tidyClosedNote,
+                      showLineNumbers: _editorSettings.lineNumbers,
+                      noteColumn: _editorSettings.noteColumn,
+                      // The kind toggles and ⋮ sit at the end of the note's
+                      // one row of chrome (#173); there is no header above.
+                      barActions: [..._kindActions, _dockToggle(), _noteMenu()],
+                      autofocusEditor: _editorSettings.autofocusEditor,
+                      // The Files pane opened a note (#727): that tab's own
+                      // view is asked for the caret, and no other.
+                      caretPath: _caretPath,
+                      caretRequest: _caretRequest,
+                      linkType: _editorSettings.linkType,
+                      newItemLocation: _editorSettings.newItemLocation,
+                      attachmentsFolder: _editorSettings.attachmentsFolder,
+                      templateFolder: _editorSettings.templateFolder,
+                      indentWidth: _editorSettings.indentWidth,
+                      sourceFont: _editorSettings.sourceFont,
+                      toolbarLayout: _editorSettings.toolbarLayout,
+                      // A single enabled editor has nowhere to switch to:
+                      // the note hides its switch instead of offering a
+                      // dead toggle.
+                      onEditorKindChanged:
+                          _editorSettings.editorsEnabled.length > 1
+                          ? _setEditorKind
+                          : null,
+                      linkSource: _linkSource,
+                      wikilinkSuggester: _wikilinkSuggester,
+                      onOpenNote: _openNoteFromLink,
+                      kindMode: !_kindRawMode,
+                      onNoteKindChanged: _onNoteKindChanged,
+                      onPasteAsMarkdown: _pasteAsMarkdown,
+                      unsavedTracker: widget.unsavedTracker,
+                      spellCheck: widget.spellCheck,
+                      reloadToken: _noteReloadToken,
+                      linksFollowed: _linksFollowed,
+                      onAnnotate: _annotate,
+                      ocr: _ocrActions,
+                      marks: _annotations,
+                      saveNote: noteSaverFor(controller),
+                      saveNoteStream: noteStreamSaverFor(controller),
+                      createMissingNote: missingNoteCreatorFor(controller),
+                      statusActions: _statusActionsFor(pane),
+                      header: (path) => _journalUi.header(context, path),
+                      onEditEpubLook: (anchor) =>
+                          _editEpubLook(controller, anchor),
+                      onEpubTextScale: (scale) =>
+                          unawaited(keepEpubTextScale(controller, scale)),
+                      epubFullScreen: _immersive.fullScreen,
+                    ),
                   ),
                 ),
               ),
@@ -4950,7 +4957,10 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
                   offstage: content == null || review,
                   child: TickerMode(
                     enabled: content != null,
-                    child: _tabBodyFor(tab, controller),
+                    child: ExcludeFocus(
+                      excluding: content == null,
+                      child: _tabBodyFor(tab, controller),
+                    ),
                   ),
                 ),
               // A version beside the note (#712): over the deck, which
