@@ -6,6 +6,7 @@ import 'dart:io';
 import 'package:drift/drift.dart' show Variable;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/name_sort_key.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/search/query.dart';
 import 'package:niman/src/search/search_repo.dart';
@@ -22,9 +23,15 @@ void main() {
     File(p.join(root.path, path)).writeAsStringSync(body);
     await db.customStatement(
       'INSERT INTO notes '
-      '(path, parent, name, is_dir, size, modified, created, title) '
-      'VALUES (?1, 0, ?2, 0, ?3, 0, 0, ?4)',
-      [path, path.split('/').last, body.length, title],
+      '(path, parent, name, name_key, is_dir, size, modified, created, '
+      'title) VALUES (?1, 0, ?2, ?5, 0, ?3, 0, 0, ?4)',
+      [
+        path,
+        path.split('/').last,
+        body.length,
+        title,
+        nameSortKey(path.split('/').last),
+      ],
     );
     final row = await db
         .customSelect(

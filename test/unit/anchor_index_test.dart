@@ -6,6 +6,7 @@ import 'dart:io';
 import 'package:drift/drift.dart' show Variable;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/name_sort_key.dart';
 import 'package:niman/src/db/anchor_index.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/db/indexer.dart';
@@ -329,9 +330,10 @@ void main() {
               : 'Team meeting minutes from the archive, number $i';
           batch
             ..customStatement(
-              'INSERT INTO notes (id, path, parent, name, is_dir, size, '
-              'modified, created) '
-              "VALUES ($id, 'bulk/n$i.md', 0, 'n$i.md', 0, 1, 0, 0)",
+              'INSERT INTO notes (id, path, parent, name, name_key, is_dir, '
+              'size, modified, created) '
+              "VALUES ($id, 'bulk/n$i.md', 0, 'n$i.md', "
+              "'${nameSortKey('n$i.md')}', 0, 1, 0, 0)",
             )
             ..customStatement(
               'INSERT INTO note_headings (note_id, line, level, heading) '
@@ -359,9 +361,10 @@ void main() {
           final id = 1000 + i;
           batch
             ..customStatement(
-              'INSERT INTO notes (id, path, parent, name, is_dir, size, '
-              'modified, created) '
-              "VALUES ($id, 'bulk/n$i.md', 0, 'n$i.md', 0, 1, 0, 0)",
+              'INSERT INTO notes (id, path, parent, name, name_key, is_dir, '
+              'size, modified, created) '
+              "VALUES ($id, 'bulk/n$i.md', 0, 'n$i.md', "
+              "'${nameSortKey('n$i.md')}', 0, 1, 0, 0)",
             )
             ..customStatement(
               'INSERT INTO note_headings (note_id, line, level, heading) '
