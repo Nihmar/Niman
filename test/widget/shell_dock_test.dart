@@ -470,6 +470,77 @@ void main() {
     expect(tester.getRect(outline).left - before, closeTo(40, 1));
   }, variant: desktopDensity);
 
+  // #1028: the strip's wheel at its far edge, and while a fling still runs.
+  ScrollPosition stripPosition(WidgetTester tester) => tester
+      .state<ScrollableState>(
+        find.descendant(
+          of: find.byKey(const Key('dock-pane-strip')),
+          matching: find.byType(Scrollable),
+        ),
+      )
+      .position;
+
+  testWidgets('the wheel at the strip’s far edge stays there', (tester) async {
+    await controller.setDockWidth(minDockWidth);
+    await pumpAt(tester, const Size(1400, 900));
+    final position = stripPosition(tester);
+    final strip = find.byKey(const Key('dock-pane-strip'));
+    final pointer = TestPointer(1, PointerDeviceKind.mouse);
+    await tester.sendEventToBinding(
+      pointer.hover(tester.getRect(strip).center),
+    );
+
+    // A notch shorter than what is left clamps to the edge, no further.
+    position.jumpTo(position.maxScrollExtent - 5);
+    await tester.sendEventToBinding(pointer.scroll(const Offset(0, -40)));
+    await tester.pump();
+    expect(position.pixels, position.maxScrollExtent);
+
+    // At the edge a notch the same way asks for nothing: the strip stays,
+    // and no error is thrown for the delta that has nowhere to go.
+    await tester.sendEventToBinding(pointer.scroll(const Offset(0, -40)));
+    await settle(tester);
+    expect(position.pixels, position.maxScrollExtent);
+
+    // The other way still brings it back.
+    await tester.sendEventToBinding(pointer.scroll(const Offset(0, 40)));
+    await settle(tester);
+    expect(position.pixels, lessThan(position.maxScrollExtent));
+  }, variant: desktopDensity);
+
+  testWidgets('a wheel notch during a fling takes the strip over', (
+    tester,
+  ) async {
+    await controller.setDockWidth(minDockWidth);
+    await pumpAt(tester, const Size(1400, 900));
+    final position = stripPosition(tester);
+    final strip = find.byKey(const Key('dock-pane-strip'));
+
+    // A fling, the strip left coasting toward its far edge.
+    (position as ScrollPositionWithSingleContext).goBallistic(300);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 60));
+    final coasting = position.pixels;
+    expect(coasting, greaterThan(0), reason: 'the fling moved it');
+    expect(
+      position.isScrollingNotifier.value,
+      isTrue,
+      reason: 'still coasting',
+    );
+
+    // The notch lands on the strip where it is, and the strip stops there:
+    // the coasting does not carry on under the wheel.
+    final pointer = TestPointer(1, PointerDeviceKind.mouse);
+    await tester.sendEventToBinding(
+      pointer.hover(tester.getRect(strip).center),
+    );
+    await tester.sendEventToBinding(pointer.scroll(const Offset(0, 40)));
+    final wheeled = position.pixels;
+    expect(wheeled, closeTo((coasting - 40).clamp(0, 1 << 20), 0.001));
+    await settle(tester);
+    expect(position.pixels, wheeled, reason: 'the fling was cancelled');
+  }, variant: desktopDensity);
+
   testWidgets('on a phone the note’s ⋮ offers the same panes as sheets', (
     tester,
   ) async {
