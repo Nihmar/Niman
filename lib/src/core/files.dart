@@ -126,11 +126,16 @@ void pinWorkingDirectory(Directory directory) {
 /// which is then published over [file] ([publishTempFile]): flushed to
 /// storage, then renamed. A rename within one filesystem is atomic on
 /// Android and Linux, so readers never observe a partial write.
-Future<void> writeFileAtomically(File file, List<int> data) async {
+///
+/// Answers the stamp of the file that took [file]'s place, when one can be
+/// taken ([publishTempFile]); a caller that stores it (a save's
+/// `lastWritten`) gets the fresh attributes rather than the renamed-over
+/// path's.
+Future<DiskStamp?> writeFileAtomically(File file, List<int> data) async {
   final tmp = atomicTempPath(file, DateTime.now().microsecondsSinceEpoch);
   try {
     await tmp.writeAsBytes(data);
-    await publishTempFile(tmp, file.path);
+    return await publishTempFile(tmp, file.path);
   } catch (_) {
     if (tmp.existsSync()) {
       await tmp.delete();
@@ -153,7 +158,15 @@ Future<void> writeFileAtomically(File file, List<int> data) async {
 /// On Windows [target]'s creation time is carried onto the temp file first,
 /// or the rename would make it the temp's (#759). The temp file stays where
 /// it is when this throws; the caller deletes it.
-Future<void> publishTempFile(File temp, String target) async {
+///
+/// Answers the stamp of the file [target] now is, taken from [temp] **before**
+/// the rename. Android's FUSE storage answers a `stat` of the path a rename
+/// just replaced from its lookup cache, with the attributes of the file that
+/// went: a save that stored that stamp read its own next write as another
+/// program's (#1055, "Another program changed this note"). [temp] was written
+/// by this process, so its attributes are fresh, and the rename does not
+/// change the modification time it reports.
+Future<DiskStamp?> publishTempFile(File temp, String target) async {
   // Opened for appending, which writes nothing: the flush covers the file's
   // data whichever handle wrote it (fsync on Linux and Android,
   // FlushFileBuffers on Windows).
@@ -164,7 +177,9 @@ Future<void> publishTempFile(File temp, String target) async {
     await handle.close();
   }
   keepCreationTime(target: target, replacement: temp.path);
+  final stamp = DiskStamp.of(temp.path);
   await temp.rename(target);
+  return stamp;
 }
 
 /// Whether [name] (a base name) is the temp file of a write: the atomic
