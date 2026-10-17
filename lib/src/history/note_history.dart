@@ -45,6 +45,7 @@ final class NoteHistory {
     int? editSession,
     HistoryReason? forced,
     DiskStamp? expected,
+    DiskStamp? lastWritten,
   }) async {
     final settings = await config.config;
     final sessionStart = editSession != null && _sessions[path] != editSession;
@@ -56,6 +57,7 @@ final class NoteHistory {
       sessionStart: sessionStart,
       forced: forced,
       expected: expected,
+      lastWritten: lastWritten,
     );
   }
 

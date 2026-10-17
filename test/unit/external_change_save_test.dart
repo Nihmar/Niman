@@ -104,6 +104,48 @@ void main() {
     );
   });
 
+  test("the app's own later write is not another program's", () async {
+    final first = await ops.saveNote('a.md', 'mine, saved', editSession: 1);
+    // The app writes the note again outside this editor (a second editor,
+    // Replace all, an outgoing write): the writer knows the file it left.
+    await ops.saveNote('a.md', 'mine, rewritten by the app', editSession: 2);
+
+    final third = await ops.saveNote(
+      'a.md',
+      'mine, edited',
+      editSession: 1,
+      expected: first!.stamp,
+    );
+
+    expect(third!.keptExternal, isFalse);
+    expect(
+      (await versions()).where((v) => v.reason == HistoryReason.external),
+      isEmpty,
+    );
+  });
+
+  test("a foreign write after the app's own is still kept", () async {
+    final first = await ops.saveNote('a.md', 'mine, saved', editSession: 1);
+    await ops.saveNote('a.md', 'the app wrote again', editSession: 2);
+    note().writeAsStringSync('theirs, written outside, and longer');
+
+    final third = await ops.saveNote(
+      'a.md',
+      'mine, edited',
+      editSession: 1,
+      expected: first!.stamp,
+    );
+
+    expect(third!.keptExternal, isTrue);
+    final kept = (await versions()).singleWhere(
+      (v) => v.reason == HistoryReason.external,
+    );
+    expect(
+      await ops.readNoteVersion('a.md', kept.number),
+      'theirs, written outside, and longer',
+    );
+  });
+
   test('a save that expects nothing overwrites without a version', () async {
     await ops.saveNote('a.md', 'mine, saved', editSession: 1);
     note().writeAsStringSync('theirs, written outside, and longer');
