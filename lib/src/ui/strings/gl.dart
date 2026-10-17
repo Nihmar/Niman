@@ -1247,6 +1247,8 @@ final class GalicianStrings extends Strings {
   @override
   String get actionMove => 'Mover';
   @override
+  String get actionDuplicate => 'Duplicar';
+  @override
   String get saveAndClose => 'Gardar e pechar';
   @override
   String get closeUnsavedTitle => 'Cambios sen gardar';

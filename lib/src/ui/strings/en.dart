@@ -1229,6 +1229,8 @@ final class EnglishStrings extends Strings {
   @override
   String get actionMove => 'Move';
   @override
+  String get actionDuplicate => 'Duplicate';
+  @override
   String get saveAndClose => 'Save and close';
   @override
   String get closeUnsavedTitle => 'Unsaved changes';

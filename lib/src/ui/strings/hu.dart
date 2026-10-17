@@ -1247,6 +1247,8 @@ final class HungarianStrings extends Strings {
   @override
   String get actionMove => 'Áthelyezés';
   @override
+  String get actionDuplicate => 'Duplikálás';
+  @override
   String get saveAndClose => 'Mentés és bezárás';
   @override
   String get closeUnsavedTitle => 'Nem mentett módosítások';

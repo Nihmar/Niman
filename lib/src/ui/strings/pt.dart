@@ -1243,6 +1243,8 @@ final class PortugueseStrings extends Strings {
   @override
   String get actionMove => 'Mover';
   @override
+  String get actionDuplicate => 'Duplicar';
+  @override
   String get saveAndClose => 'Salvar e fechar';
   @override
   String get closeUnsavedTitle => 'Alterações não salvas';

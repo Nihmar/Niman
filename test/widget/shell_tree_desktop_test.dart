@@ -186,6 +186,27 @@ void main() {
     await make('menu-new-flashcards', 'Deck', 'flashcard');
   }, variant: _linux);
 
+  testWidgets('Duplicate from the right-click menu copies the file (#1100)', (
+    tester,
+  ) async {
+    await pump(tester);
+    await controller.saveNote('alpha.md', 'first');
+    await settle(tester);
+
+    await tester.tap(noteRow('alpha.md'), buttons: kSecondaryButton);
+    await settle(tester);
+    final duplicate = find.byKey(const Key('menu-duplicate'));
+    expect(duplicate, findsOneWidget);
+    await tester.ensureVisible(duplicate);
+    await settle(tester);
+    await tester.tap(duplicate);
+    await settle(tester);
+
+    expect(await controller.find('alpha_1.md'), isNotNull);
+    expect(await controller.readNote('alpha_1.md'), 'first');
+    expect(noteRow('alpha_1.md'), findsOneWidget);
+  }, variant: _linux);
+
   testWidgets('a new note is named in a row of the tree; Esc gives it up', (
     tester,
   ) async {

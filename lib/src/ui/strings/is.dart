@@ -1240,6 +1240,8 @@ final class IcelandicStrings extends Strings {
   @override
   String get actionMove => 'Færa';
   @override
+  String get actionDuplicate => 'Tvífalda';
+  @override
   String get saveAndClose => 'Vista og loka';
   @override
   String get closeUnsavedTitle => 'Óvistuðar breytingar';

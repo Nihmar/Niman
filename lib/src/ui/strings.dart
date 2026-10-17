@@ -817,6 +817,7 @@ final class AppStrings {
   static String get renameNameInvalid => _s.renameNameInvalid;
   static String renameNameTaken(String name) => _s.renameNameTaken(name);
   static String get actionMove => _s.actionMove;
+  static String get actionDuplicate => _s.actionDuplicate;
 
   /// The close-with-unsaved-edits ask (T-PP-11).
   static String get saveAndClose => _s.saveAndClose;

@@ -100,6 +100,9 @@ void main() {
     );
     expect(top(tester, 'menu-rename'), lessThan(top(tester, 'menu-new-note')));
     expect(top(tester, 'menu-new-note'), lessThan(top(tester, 'menu-delete')));
+    // Duplicate is a note's, beside the other file actions (#1100).
+    expect(top(tester, 'menu-move'), lessThan(top(tester, 'menu-duplicate')));
+    expect(top(tester, 'menu-duplicate'), lessThan(top(tester, 'menu-delete')));
 
     // And it says which folder it means.
     expect(find.text('New note in the same folder'), findsOneWidget);
@@ -144,6 +147,35 @@ void main() {
     // A folder has no quick note, no widget pin and no history.
     expect(find.byKey(const Key('menu-quick-note')), findsNothing);
     expect(find.byKey(const Key('menu-history')), findsNothing);
+    // And nothing to duplicate: the action copies one file (#1100).
+    expect(find.byKey(const Key('menu-duplicate')), findsNothing);
+  });
+
+  testWidgets('Duplicate copies the note beside itself', (tester) async {
+    await pumpLibrary(tester);
+    await controller.createNote(
+      parentPath: '',
+      name: 'Note',
+      content: '# body\n',
+    );
+    await settle(tester);
+
+    await tester.longPress(noteRow('Note.md'));
+    await settle(tester);
+
+    final duplicate = find.byKey(const Key('menu-duplicate'));
+    await tester.ensureVisible(duplicate);
+    await settle(tester);
+    await tester.tap(duplicate);
+    await settle(tester);
+
+    expect(controller.contentOf('Note_1.md'), '# body\n');
+    expect(noteRow('Note_1.md'), findsOneWidget);
+    expect(
+      controller.contentOf('Note.md'),
+      '# body\n',
+      reason: 'the original is untouched',
+    );
   });
 
   testWidgets('deleting is marked as the destructive one', (tester) async {

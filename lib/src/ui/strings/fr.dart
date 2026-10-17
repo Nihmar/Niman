@@ -1266,6 +1266,8 @@ final class FrenchStrings extends Strings {
   @override
   String get actionMove => 'Déplacer';
   @override
+  String get actionDuplicate => 'Dupliquer';
+  @override
   String get saveAndClose => 'Enregistrer et fermer';
   @override
   String get closeUnsavedTitle => 'Modifications non enregistrées';

@@ -1241,6 +1241,8 @@ final class SlovenianStrings extends Strings {
   @override
   String get actionMove => 'Prenesi';
   @override
+  String get actionDuplicate => 'Podvoji';
+  @override
   String get saveAndClose => 'Shrani in zapri';
   @override
   String get closeUnsavedTitle => 'Neshrane spremembe';

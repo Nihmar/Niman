@@ -89,6 +89,47 @@ void main() {
     });
   });
 
+  group('duplicate (#1100)', () {
+    test('copies a note beside itself under a unique name', () async {
+      await ops.createNote(parentPath: '', name: 'Note', content: '# body\n');
+      final copy = await ops.duplicate('Note.md');
+      expect(copy.path, 'Note_1.md');
+      expect(
+        File(p.join(root.path, 'Note_1.md')).readAsStringSync(),
+        '# body\n',
+      );
+      expect(File(p.join(root.path, 'Note.md')).readAsStringSync(), '# body\n');
+      expect(await dao.find('Note_1.md'), isNotNull);
+      // The copy is indexed like any created file: the next one counts on.
+      final twice = await ops.duplicate('Note.md');
+      expect(twice.path, 'Note_2.md');
+    });
+
+    test('copies bytes as they are, not text', () async {
+      final bytes = <int>[0, 1, 2, 0xFE, 0xFF];
+      final file = File(p.join(root.path, 'raw.bin'));
+      await file.writeAsBytes(bytes);
+      await indexer.applyEvents(root.path, [file.path]);
+      final copy = await ops.duplicate('raw.bin');
+      expect(copy.path, 'raw_1.bin');
+      expect(File(p.join(root.path, 'raw_1.bin')).readAsBytesSync(), bytes);
+    });
+
+    test("stays in the note's folder", () async {
+      await ops.createFolder(parentPath: '', name: 'Docs');
+      await ops.createNote(parentPath: 'Docs', name: 'One');
+      final copy = await ops.duplicate('Docs/One.md');
+      expect(copy.path, 'Docs/One_1.md');
+      expect(File(p.join(root.path, 'Docs/One_1.md')).existsSync(), isTrue);
+    });
+
+    test('refuses a folder', () async {
+      await ops.createFolder(parentPath: '', name: 'Docs');
+      await expectLater(() => ops.duplicate('Docs'), throwsArgumentError);
+      expect(Directory(p.join(root.path, 'Docs_1')).existsSync(), isFalse);
+    });
+  });
+
   // T-TPL-02: what a template's `folder:` and `append:` directives need
   // from the ops layer.
   group('notePathsUnder (#7)', () {

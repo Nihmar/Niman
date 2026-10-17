@@ -1251,6 +1251,8 @@ final class PolishStrings extends Strings {
   @override
   String get actionMove => 'Przenieś';
   @override
+  String get actionDuplicate => 'Duplikuj';
+  @override
   String get saveAndClose => 'Zapisz i zamknij';
   @override
   String get closeUnsavedTitle => 'Niezapisane zmiany';

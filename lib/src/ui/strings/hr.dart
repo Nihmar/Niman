@@ -1235,6 +1235,8 @@ final class CroatianStrings extends Strings {
   @override
   String get actionMove => 'Premjesti';
   @override
+  String get actionDuplicate => 'Dupliciraj';
+  @override
   String get saveAndClose => 'Spremi i zatvori';
   @override
   String get closeUnsavedTitle => 'Nespremljene promjene';

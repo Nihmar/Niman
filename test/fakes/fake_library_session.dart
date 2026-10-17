@@ -1453,6 +1453,21 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   }
 
   @override
+  Future<Note> duplicate(String path) async {
+    final row = _requireRow(path);
+    if (row.isDir) {
+      throw ArgumentError('duplicate was given a folder: "$path"');
+    }
+    final parts = splitFileName(row.name);
+    final parent = parentOf(path);
+    final target = _uniqueInParent(parent, parts.base, parts.ext);
+    final rel = resolvePath(parent, target);
+    _addRow(rel, isDir: false).content = row.content;
+    _bump();
+    return _noteAt(rel);
+  }
+
+  @override
   Future<Note> createFolder({
     required String parentPath,
     required String name,

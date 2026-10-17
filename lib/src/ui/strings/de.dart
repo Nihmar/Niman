@@ -1259,6 +1259,8 @@ final class GermanStrings extends Strings {
   @override
   String get actionMove => 'Verschieben';
   @override
+  String get actionDuplicate => 'Duplizieren';
+  @override
   String get saveAndClose => 'Speichern und schließen';
   @override
   String get closeUnsavedTitle => 'Nicht gespeicherte Änderungen';

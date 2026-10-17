@@ -1244,6 +1244,8 @@ final class AlbanianStrings extends Strings {
   @override
   String get actionMove => 'Lëviz';
   @override
+  String get actionDuplicate => 'Dyfisho';
+  @override
   String get saveAndClose => 'Ruaj dhe mbyll';
   @override
   String get closeUnsavedTitle => 'Ndryshime të patura';

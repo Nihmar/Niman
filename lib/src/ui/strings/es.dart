@@ -1256,6 +1256,8 @@ final class SpanishStrings extends Strings {
   @override
   String get actionMove => 'Mover';
   @override
+  String get actionDuplicate => 'Duplicar';
+  @override
   String get saveAndClose => 'Guardar y cerrar';
   @override
   String get closeUnsavedTitle => 'Cambios sin guardar';

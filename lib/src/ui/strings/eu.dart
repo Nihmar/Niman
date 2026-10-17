@@ -1246,6 +1246,8 @@ final class BasqueStrings extends Strings {
   @override
   String get actionMove => 'Mugitu';
   @override
+  String get actionDuplicate => 'Bikoiztu';
+  @override
   String get saveAndClose => 'Gorde eta itxi';
   @override
   String get closeUnsavedTitle => 'Gorde gabeko aldaketak';

@@ -1274,6 +1274,8 @@ final class GreekStrings extends Strings {
   @override
   String get actionMove => 'Μετακίνηση';
   @override
+  String get actionDuplicate => 'Διπλότυπο';
+  @override
   String get saveAndClose => 'Αποθήκευση και κλείσιμο';
   @override
   String get closeUnsavedTitle => 'Μη αποθηκευμένες αλλαγές';

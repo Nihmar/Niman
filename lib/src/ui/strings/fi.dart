@@ -1245,6 +1245,8 @@ final class FinnishStrings extends Strings {
   @override
   String get actionMove => 'Siirrä';
   @override
+  String get actionDuplicate => 'Kopioi';
+  @override
   String get saveAndClose => 'Tallenna ja sulje';
   @override
   String get closeUnsavedTitle => 'Tallentamattomat muutokset';

@@ -1247,6 +1247,8 @@ final class BulgarianStrings extends Strings {
   @override
   String get actionMove => 'Премести';
   @override
+  String get actionDuplicate => 'Дублиране';
+  @override
   String get saveAndClose => 'Запази и затвори';
   @override
   String get closeUnsavedTitle => 'Незапазени промени';

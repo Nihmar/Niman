@@ -1238,6 +1238,8 @@ final class SlovakStrings extends Strings {
   @override
   String get actionMove => 'Presunúť';
   @override
+  String get actionDuplicate => 'Duplikovať';
+  @override
   String get saveAndClose => 'Uložiť a uzavrieť';
   @override
   String get closeUnsavedTitle => 'Neuložené zmeny';

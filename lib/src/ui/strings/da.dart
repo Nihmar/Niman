@@ -1234,6 +1234,8 @@ final class DanishStrings extends Strings {
   @override
   String get actionMove => 'Flyt';
   @override
+  String get actionDuplicate => 'Dupliker';
+  @override
   String get saveAndClose => 'Gem og luk';
   @override
   String get closeUnsavedTitle => 'Ugemte ændringer';

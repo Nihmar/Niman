@@ -1164,6 +1164,8 @@ final class JapaneseStrings extends Strings {
   @override
   String get actionMove => '移動';
   @override
+  String get actionDuplicate => '複製';
+  @override
   String get saveAndClose => '保存して閉じる';
   @override
   String get closeUnsavedTitle => '未保存の変更があります';

@@ -97,6 +97,15 @@ abstract interface class NoteOperations {
     FlushOpenNotes? flushOpen,
   });
 
+  /// Copies the file at [path] beside itself, under a unique name
+  /// (`note.md` → `note_1.md`), and returns the new row (#1100).
+  ///
+  /// The bytes are copied as they are, so a picture, a PDF or an audio
+  /// file duplicates whole rather than being re-encoded. Only a file: a
+  /// folder holds a tree of its own, and no menu offers the action for
+  /// one.
+  Future<Note> duplicate(String path);
+
   /// Moves the note or folder at [path] into [targetParent].
   /// [confirmLinks], [onLinksRewritten], [onLinksProgress] and [flushOpen] are
   /// [rename]'s.

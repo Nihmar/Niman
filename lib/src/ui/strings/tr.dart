@@ -1229,6 +1229,8 @@ final class TurkishStrings extends Strings {
   @override
   String get actionMove => 'Taşı';
   @override
+  String get actionDuplicate => 'Çoğalt';
+  @override
   String get saveAndClose => 'Kaydet ve kapat';
   @override
   String get closeUnsavedTitle => 'Kaydedilmemiş değişiklikler';

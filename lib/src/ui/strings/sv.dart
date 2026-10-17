@@ -1244,6 +1244,8 @@ final class SwedishStrings extends Strings {
   @override
   String get actionMove => 'Flytta';
   @override
+  String get actionDuplicate => 'Duplicera';
+  @override
   String get saveAndClose => 'Spara och stäng';
   @override
   String get closeUnsavedTitle => 'OSparade ändringar';

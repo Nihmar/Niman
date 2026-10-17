@@ -1150,6 +1150,8 @@ final class ChineseStrings extends Strings {
   @override
   String get actionMove => '移动';
   @override
+  String get actionDuplicate => '创建副本';
+  @override
   String get saveAndClose => '保存并关闭';
   @override
   String get closeUnsavedTitle => '有未保存的更改';

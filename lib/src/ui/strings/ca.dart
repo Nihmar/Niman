@@ -1260,6 +1260,8 @@ final class CatalanStrings extends Strings {
   @override
   String get actionMove => 'Mou';
   @override
+  String get actionDuplicate => 'Duplica';
+  @override
   String get saveAndClose => 'Guarda i tanca';
   @override
   String get closeUnsavedTitle => 'Canvis sense guardar';
