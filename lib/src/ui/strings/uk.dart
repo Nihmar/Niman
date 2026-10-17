@@ -770,6 +770,10 @@ final class UkrainianStrings extends Strings {
   @override
   String get menuAddExternalLink => 'Додати зовнішнє посилання';
   @override
+  String get menuOpenLink => 'Відкрити посилання';
+  @override
+  String get menuCopyLink => 'Копіювати посилання';
+  @override
   String get menuFormat => 'Формат';
   @override
   String get menuParagraph => 'Абзац';

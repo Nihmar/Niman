@@ -771,6 +771,10 @@ final class SerbianStrings extends Strings {
   @override
   String get menuAddExternalLink => 'Додај спољну везу';
   @override
+  String get menuOpenLink => 'Отвори везу';
+  @override
+  String get menuCopyLink => 'Копирај везу';
+  @override
   String get menuFormat => 'Формат';
   @override
   String get menuParagraph => 'Пасус';

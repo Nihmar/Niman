@@ -765,6 +765,10 @@ final class LatvianStrings extends Strings {
   @override
   String get menuAddExternalLink => 'Pievienot ārēju saiti';
   @override
+  String get menuOpenLink => 'Atvērt saiti';
+  @override
+  String get menuCopyLink => 'Kopēt saiti';
+  @override
   String get menuFormat => 'Formāts';
   @override
   String get menuParagraph => 'Rindkopa';

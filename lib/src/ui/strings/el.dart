@@ -787,6 +787,10 @@ final class GreekStrings extends Strings {
   @override
   String get menuAddExternalLink => 'Προσθήκη εξωτερικού συνδέσμου';
   @override
+  String get menuOpenLink => 'Άνοιγμα συνδέσμου';
+  @override
+  String get menuCopyLink => 'Αντιγραφή συνδέσμου';
+  @override
   String get menuFormat => 'Μορφή';
   @override
   String get menuParagraph => 'Παράγραφος';

@@ -771,6 +771,10 @@ final class FinnishStrings extends Strings {
   @override
   String get menuAddExternalLink => 'Lisää ulkoinen linkki';
   @override
+  String get menuOpenLink => 'Avaa linkki';
+  @override
+  String get menuCopyLink => 'Kopioi linkki';
+  @override
   String get menuFormat => 'Muotoilu';
   @override
   String get menuParagraph => 'Kappale';

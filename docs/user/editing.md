@@ -580,8 +580,11 @@ The same formatting is also on the **context menu**: right-click in the
 editor (long-press on a phone). It is grouped by what you are doing, as
 Obsidian's is:
 
+- **Open link** and **Copy link** when the click lands on a Markdown
+  link whose target leaves the library (`https://…`, `mailto:…`): the
+  same URL Ctrl+click opens, and the URL on the clipboard;
 - the spelling's suggestions for a misspelled word, and a table's
-  **Row ›**, **Column ›** and sorts on a table's cell, first;
+  **Row ›**, **Column ›** and sorts on a table's cell, next;
 - **Paste as Markdown**: what was copied from a web page, as Markdown
   linked to its page (see
   [web capture](web-capture.md#paste-as-markdown));

@@ -766,6 +766,10 @@ final class NorwegianStrings extends Strings {
   @override
   String get menuAddExternalLink => 'Legg til ekstern lenke';
   @override
+  String get menuOpenLink => 'Åpne lenke';
+  @override
+  String get menuCopyLink => 'Kopier lenke';
+  @override
   String get menuFormat => 'Format';
   @override
   String get menuParagraph => 'Avsnitt';

@@ -777,6 +777,10 @@ final class GermanStrings extends Strings {
   @override
   String get menuAddExternalLink => 'Externen Link hinzufügen';
   @override
+  String get menuOpenLink => 'Link öffnen';
+  @override
+  String get menuCopyLink => 'Link kopieren';
+  @override
   String get menuFormat => 'Format';
   @override
   String get menuParagraph => 'Absatz';

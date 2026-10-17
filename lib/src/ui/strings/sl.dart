@@ -775,6 +775,10 @@ final class SlovenianStrings extends Strings {
   @override
   String get menuAddExternalLink => 'Dodaj zunanjo povezavo';
   @override
+  String get menuOpenLink => 'Odpri povezavo';
+  @override
+  String get menuCopyLink => 'Kopiraj povezavo';
+  @override
   String get menuFormat => 'Oblika';
   @override
   String get menuParagraph => 'Odstavek';

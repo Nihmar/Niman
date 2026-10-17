@@ -775,6 +775,10 @@ final class DutchStrings extends Strings {
   @override
   String get menuAddExternalLink => 'Externe link toevoegen';
   @override
+  String get menuOpenLink => 'Link openen';
+  @override
+  String get menuCopyLink => 'Link kopiëren';
+  @override
   String get menuFormat => 'Opmaak';
   @override
   String get menuParagraph => 'Alinea';

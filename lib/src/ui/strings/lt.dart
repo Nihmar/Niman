@@ -770,6 +770,10 @@ final class LithuanianStrings extends Strings {
   @override
   String get menuAddExternalLink => 'Pridėti išorinę nuorodą';
   @override
+  String get menuOpenLink => 'Atidaryti nuorodą';
+  @override
+  String get menuCopyLink => 'Kopijuoti nuorodą';
+  @override
   String get menuFormat => 'Formatas';
   @override
   String get menuParagraph => 'Pastraipa';

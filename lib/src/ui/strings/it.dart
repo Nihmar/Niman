@@ -780,6 +780,10 @@ final class ItalianStrings extends Strings {
   @override
   String get menuAddExternalLink => 'Aggiungi link esterno';
   @override
+  String get menuOpenLink => 'Apri link';
+  @override
+  String get menuCopyLink => 'Copia link';
+  @override
   String get menuFormat => 'Formato';
   @override
   String get menuParagraph => 'Paragrafo';

@@ -761,6 +761,10 @@ final class TurkishStrings extends Strings {
   @override
   String get menuAddExternalLink => 'Dış bağlantı ekle';
   @override
+  String get menuOpenLink => 'Bağlantıyı aç';
+  @override
+  String get menuCopyLink => 'Bağlantıyı kopyala';
+  @override
   String get menuFormat => 'Biçim';
   @override
   String get menuParagraph => 'Paragraf';

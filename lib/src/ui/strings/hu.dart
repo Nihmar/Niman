@@ -771,6 +771,10 @@ final class HungarianStrings extends Strings {
   @override
   String get menuAddExternalLink => 'Külső hivatkozás hozzáadása';
   @override
+  String get menuOpenLink => 'Hivatkozás megnyitása';
+  @override
+  String get menuCopyLink => 'Hivatkozás másolása';
+  @override
   String get menuFormat => 'Formázás';
   @override
   String get menuParagraph => 'Bekezdés';

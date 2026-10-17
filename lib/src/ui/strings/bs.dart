@@ -773,6 +773,10 @@ final class BosnianStrings extends Strings {
   @override
   String get menuAddExternalLink => 'Dodaj vanjski link';
   @override
+  String get menuOpenLink => 'Otvori link';
+  @override
+  String get menuCopyLink => 'Kopiraj link';
+  @override
   String get menuFormat => 'Format';
   @override
   String get menuParagraph => 'Paragraf';

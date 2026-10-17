@@ -778,6 +778,10 @@ final class PolishStrings extends Strings {
   @override
   String get menuAddExternalLink => 'Dodaj link zewnętrzny';
   @override
+  String get menuOpenLink => 'Otwórz link';
+  @override
+  String get menuCopyLink => 'Kopiuj link';
+  @override
   String get menuFormat => 'Format';
   @override
   String get menuParagraph => 'Akapit';

@@ -404,6 +404,8 @@ abstract base class Strings {
   String get cheatTemplates;
   String get menuAddLink;
   String get menuAddExternalLink;
+  String get menuOpenLink;
+  String get menuCopyLink;
   String get menuFormat;
   String get menuParagraph;
   String get menuInsert;

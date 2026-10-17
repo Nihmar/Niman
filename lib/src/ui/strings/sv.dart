@@ -773,6 +773,10 @@ final class SwedishStrings extends Strings {
   @override
   String get menuAddExternalLink => 'Lägg till extern länk';
   @override
+  String get menuOpenLink => 'Öppna länk';
+  @override
+  String get menuCopyLink => 'Kopiera länk';
+  @override
   String get menuFormat => 'Format';
   @override
   String get menuParagraph => 'Stycke';

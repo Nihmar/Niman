@@ -768,6 +768,10 @@ final class AlbanianStrings extends Strings {
   @override
   String get menuAddExternalLink => 'Shto lidhje të jashtme';
   @override
+  String get menuOpenLink => 'Hap lidhjen';
+  @override
+  String get menuCopyLink => 'Kopjo lidhjen';
+  @override
   String get menuFormat => 'Formati';
   @override
   String get menuParagraph => 'Paragrafi';
