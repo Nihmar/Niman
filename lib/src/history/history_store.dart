@@ -149,9 +149,18 @@ SnapshotOutcome snapshotBeforeWrite(
   // A file that is not the one the editor last saw was written by somebody
   // else, and the save about to replace it is the last chance to keep what
   // they wrote (#1055). A reason already forced (a restore, a sync) stands.
+  // The app's own last write is not somebody else's: a file still matching
+  // it was left by this writer, and the editor's stamp being older is a
+  // stale memory, not a foreign version (a second editor, Replace all, an
+  // outgoing write).
   final expected = asked.expected;
+  final lastWritten = asked.lastWritten;
+  final now = exists ? DiskStamp.of(note.path) : null;
   final foreign =
-      exists && expected != null && !expected.sameAs(DiskStamp.of(note.path));
+      exists &&
+      expected != null &&
+      !expected.sameAs(now) &&
+      !(lastWritten?.sameAs(now) ?? false);
   final request = foreign
       ? SnapshotRequest(
           limit: asked.limit,

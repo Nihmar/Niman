@@ -15,6 +15,7 @@ final class SnapshotRequest {
     this.sessionStart = false,
     this.forced,
     this.expected,
+    this.lastWritten,
   });
 
   /// `historyVersions`: how many unpinned versions to keep (0 = none).
@@ -40,6 +41,13 @@ final class SnapshotRequest {
   /// overwrite their version — which is then kept whatever the interval
   /// ([HistoryReason.external]). Null for a save that holds no such belief.
   final DiskStamp? expected;
+
+  /// The file as this app's own writer last left it (#1055), when it has
+  /// written the note: a file that is still this one was not written by
+  /// somebody else, whatever [expected] says — the editor's memory is only
+  /// stale (a second editor, Replace all, an outgoing write) — so nothing is
+  /// kept for it and the save reports no external change.
+  final DiskStamp? lastWritten;
 }
 
 /// Whether to keep the content about to be overwritten, and why.

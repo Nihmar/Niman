@@ -397,7 +397,9 @@ at once. A note with edits of yours keeps them: your text wins and is saved
 over the file — but before it is, the version the other program wrote is kept
 in the note's [history](organization.md) (*changed outside Niman*), and a
 message says so. The comparison is of the file with the one the editor last
-read or wrote, so nothing is kept when nobody else touched it.
+read or wrote **and** with the one Niman's own writer last left, so nothing is
+kept or announced when the other writer was the app itself (a second editor,
+Replace all, an outgoing write) or when nobody touched it at all.
 
 **Line endings and the byte order mark.** The editor works with plain lines,
 but the file keeps what it had: a note with Windows (`CRLF`) line endings is

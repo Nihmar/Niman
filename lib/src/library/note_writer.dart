@@ -93,6 +93,13 @@ final class NoteWriter {
   /// which takes it while the file is still that one ([KnownContent]).
   final Map<String, KnownContent> _written = <String, KnownContent>{};
 
+  /// A writer's record of what a note's last write left, as the stamp a
+  /// save's external check compares against (`SnapshotRequest.lastWritten`);
+  /// null when this writer has not written the note.
+  static DiskStamp? _stampOf(KnownContent? wrote) => wrote == null
+      ? null
+      : DiskStamp(size: wrote.size, modified: wrote.modified);
+
   /// Writes [content] to the note at library-relative [path], creating
   /// the file when it is not there.
   ///
@@ -285,6 +292,9 @@ final class NoteWriter {
       editSession: editSession,
       forced: forced,
       expected: expected,
+      // The file this writer last left is the app's own write, not
+      // somebody else's, whatever the editor's stamp says (#1055).
+      lastWritten: _stampOf(_written[path]),
     );
     final NoteWriteResult? result;
     try {
