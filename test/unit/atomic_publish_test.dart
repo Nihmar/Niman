@@ -92,9 +92,7 @@ void main() {
     expect(stream, contains('publishTempFile('));
     expect(stream, isNot(contains('.rename(')), reason: 'no rename of its own');
     final files = source(p.join('core', 'files.dart'));
-    final joined = files.substring(
-      files.indexOf('Future<void> writeFileAtomically('),
-    );
+    final joined = files.substring(files.indexOf('writeFileAtomically('));
     expect(
       joined.substring(0, joined.indexOf('\n}\n')),
       allOf(contains('publishTempFile('), isNot(contains('.rename('))),

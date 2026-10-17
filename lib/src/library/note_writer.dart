@@ -722,7 +722,7 @@ Future<NoteWriteResult> writeNoteFile(
   final file = File(abs);
   final created = !file.existsSync();
   if (created) await file.parent.create(recursive: true);
-  await writeFileAtomically(file, encoded);
+  final stamp = await writeFileAtomically(file, encoded);
   return (
     bytes: encoded.length,
     created: created,
@@ -731,6 +731,10 @@ Future<NoteWriteResult> writeNoteFile(
     snapshot: outcome,
     snapshotError: snapshotError,
     sha256: sha256.convert(encoded).toString(),
-    modified: file.statSync().modified,
+    // The temp file's stamp, not the renamed-over path's — see
+    // [publishTempFile]: on Android the path's stat can still answer the
+    // replaced file's attributes, and a save that stored them reported its
+    // own next write as another program's (#1055).
+    modified: stamp?.modified ?? file.statSync().modified,
   );
 }

@@ -426,7 +426,7 @@ final class _Conversation {
       }
       // Flushed to storage, then renamed over the note: the same last step
       // as every other atomic write (#1058).
-      await publishTempFile(temp, start.abs);
+      final stamp = await publishTempFile(temp, start.abs);
       _temp = null;
       _digest.close();
       _answers!.send((
@@ -437,7 +437,11 @@ final class _Conversation {
         snapshot: outcome,
         snapshotError: snapshotError,
         sha256: _digested.toString(),
-        modified: File(start.abs).statSync().modified,
+        // The temp file's stamp, not the renamed-over path's — see
+        // [publishTempFile]: on Android the path's stat can still answer the
+        // replaced file's attributes, and a save that stored them reported
+        // its own next write as another program's (#1055).
+        modified: stamp?.modified ?? File(start.abs).statSync().modified,
       ));
     } on Object catch (error, stack) {
       try {
