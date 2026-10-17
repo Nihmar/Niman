@@ -6,6 +6,20 @@ This file ships inside the build and feeds the in-app changelog (the
 launch dialog after an update and the screen under Settings → Diagnostics
 and info). Update it in the release commit, before the tag.
 
+## [0.2.4] - 2026-10-17
+
+The app's own saves are not another program's.
+
+A save remembers the file it wrote, and the next save compares the note
+against it. On Android that comparison read the attributes of the file the
+write had replaced, from the storage layer's lookup cache, so every second
+save of an open note kept the text before it as an outside change and said
+"Another program changed this note". The stamp now comes from the file the
+write itself left.
+
+### Fixed
+- **Save**: a save stamps the file it wrote, not the one it replaced — the app's own text is no longer kept as an outside version or announced as another program's, on Android where every second save of an open note did it (#1055)
+
 ## [0.2.3] - 2026-10-17
 
 The tree and the editor, a little steadier.
