@@ -85,15 +85,23 @@ final class NewItemFab extends StatelessWidget {
   /// only one that says its folder (issue #131).
   final String? listFolder;
 
+  /// The height of one mini button. The menu is nine of them, and a
+  /// phone's body is not nine 56 dp ones: slim rows are what let the stack
+  /// fit a phone and keep its first entry — Today's journal — on screen.
+  static const double _rowHeight = 40;
+
+  /// The gap between two mini buttons.
+  static const double _rowGap = 8;
+
   @override
   Widget build(BuildContext context) {
     return ConstrainedBox(
       constraints: BoxConstraints(maxHeight: maxHeight ?? double.infinity),
-      child: _column(),
+      child: _column(context),
     );
   }
 
-  Widget _column() {
+  Widget _column(BuildContext context) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.end,
@@ -117,7 +125,7 @@ final class NewItemFab extends StatelessWidget {
                   // The blank beside the buttons belongs to the scrim
                   // behind: a tap there closes the menu.
                   hitTestBehavior: HitTestBehavior.translucent,
-                  child: _menu(),
+                  child: _menu(context),
                 ),
               ),
             ),
@@ -146,88 +154,105 @@ final class NewItemFab extends StatelessWidget {
 
   /// The mini buttons, the first the farthest from the main one, each
   /// followed by the gap to the next and the last by the gap above it.
-  Widget _menu() {
+  ///
+  /// The rows are slim ([_rowHeight]): the menu is nine buttons, and the
+  /// room around the button is the phone's body. The labels and icons keep
+  /// their place; only the boxes around them are smaller.
+  Widget _menu(BuildContext context) {
     final listFolder = this.listFolder;
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        // First, and set apart: the one thing done every day (#7).
-        _MiniFab(
-          key: const Key('journal-today-action'),
-          icon: Icons.today_outlined,
-          label: AppStrings.journalFabToday,
-          open: expanded,
-          onTap: onJournalToday,
-        ),
-        const SizedBox(height: 12),
-        _MiniFab(
-          key: const Key('new-note-action'),
-          icon: Icons.note_add_outlined,
-          label: AppStrings.newNoteTitle,
-          open: expanded,
-          onTap: onNewNote,
-        ),
-        const SizedBox(height: 12),
-        _MiniFab(
-          key: const Key('new-from-template-action'),
-          icon: Icons.file_copy_outlined,
-          label: AppStrings.newFromTemplateTitle,
-          open: expanded,
-          onTap: onNewFromTemplate,
-        ),
-        const SizedBox(height: 12),
-        _MiniFab(
-          key: const Key('new-list-note-action'),
-          icon: Icons.checklist_outlined,
-          label: listFolder == null
-              ? AppStrings.newListNoteTitle
-              : '${AppStrings.newListNoteTitle} · $listFolder',
-          open: expanded,
-          onTap: onNewListNote,
-        ),
-        const SizedBox(height: 12),
-        _MiniFab(
-          key: const Key('new-audio-note-action'),
-          icon: Icons.mic_outlined,
-          label: AppStrings.newAudioNoteTitle,
-          open: expanded,
-          onTap: onNewAudioNote,
-        ),
-        const SizedBox(height: 12),
-        _MiniFab(
-          key: const Key('new-slides-action'),
-          icon: Icons.slideshow_outlined,
-          label: AppStrings.newSlidesTitle,
-          open: expanded,
-          onTap: onNewSlides,
-        ),
-        const SizedBox(height: 12),
-        _MiniFab(
-          key: const Key('new-flashcards-action'),
-          icon: Icons.style_outlined,
-          label: AppStrings.newFlashcardsTitle,
-          open: expanded,
-          onTap: onNewFlashcards,
-        ),
-        const SizedBox(height: 12),
-        _MiniFab(
-          key: const Key('capture-web-page-action'),
-          icon: Icons.language_outlined,
-          label: AppStrings.captureWebPage,
-          open: expanded,
-          onTap: onCaptureWebPage,
-        ),
-        const SizedBox(height: 12),
-        _MiniFab(
-          key: const Key('new-folder-action'),
-          icon: Icons.create_new_folder_outlined,
-          label: AppStrings.newFolderTitle,
-          open: expanded,
-          onTap: onNewFolder,
-        ),
-        const SizedBox(height: 12),
-      ],
+    final theme = Theme.of(context);
+    final compact = theme.floatingActionButtonTheme.copyWith(
+      extendedSizeConstraints: const BoxConstraints.tightFor(
+        height: _rowHeight,
+      ),
+      extendedIconLabelSpacing: 8,
+      extendedPadding: const EdgeInsets.symmetric(horizontal: 12),
+      iconSize: 18,
+      extendedTextStyle: theme.textTheme.labelLarge,
+    );
+    return Theme(
+      data: theme.copyWith(floatingActionButtonTheme: compact),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          // First, and set apart: the one thing done every day (#7).
+          _MiniFab(
+            key: const Key('journal-today-action'),
+            icon: Icons.today_outlined,
+            label: AppStrings.journalFabToday,
+            open: expanded,
+            onTap: onJournalToday,
+          ),
+          const SizedBox(height: _rowGap),
+          _MiniFab(
+            key: const Key('new-note-action'),
+            icon: Icons.note_add_outlined,
+            label: AppStrings.newNoteTitle,
+            open: expanded,
+            onTap: onNewNote,
+          ),
+          const SizedBox(height: _rowGap),
+          _MiniFab(
+            key: const Key('new-from-template-action'),
+            icon: Icons.file_copy_outlined,
+            label: AppStrings.newFromTemplateTitle,
+            open: expanded,
+            onTap: onNewFromTemplate,
+          ),
+          const SizedBox(height: _rowGap),
+          _MiniFab(
+            key: const Key('new-list-note-action'),
+            icon: Icons.checklist_outlined,
+            label: listFolder == null
+                ? AppStrings.newListNoteTitle
+                : '${AppStrings.newListNoteTitle} · $listFolder',
+            open: expanded,
+            onTap: onNewListNote,
+          ),
+          const SizedBox(height: _rowGap),
+          _MiniFab(
+            key: const Key('new-audio-note-action'),
+            icon: Icons.mic_outlined,
+            label: AppStrings.newAudioNoteTitle,
+            open: expanded,
+            onTap: onNewAudioNote,
+          ),
+          const SizedBox(height: _rowGap),
+          _MiniFab(
+            key: const Key('new-slides-action'),
+            icon: Icons.slideshow_outlined,
+            label: AppStrings.newSlidesTitle,
+            open: expanded,
+            onTap: onNewSlides,
+          ),
+          const SizedBox(height: _rowGap),
+          _MiniFab(
+            key: const Key('new-flashcards-action'),
+            icon: Icons.style_outlined,
+            label: AppStrings.newFlashcardsTitle,
+            open: expanded,
+            onTap: onNewFlashcards,
+          ),
+          const SizedBox(height: _rowGap),
+          _MiniFab(
+            key: const Key('capture-web-page-action'),
+            icon: Icons.language_outlined,
+            label: AppStrings.captureWebPage,
+            open: expanded,
+            onTap: onCaptureWebPage,
+          ),
+          const SizedBox(height: _rowGap),
+          _MiniFab(
+            key: const Key('new-folder-action'),
+            icon: Icons.create_new_folder_outlined,
+            label: AppStrings.newFolderTitle,
+            open: expanded,
+            onTap: onNewFolder,
+          ),
+          const SizedBox(height: _rowGap),
+        ],
+      ),
     );
   }
 }
@@ -288,6 +313,9 @@ final class _MiniFab extends StatelessWidget {
           // this route participates in a transition.
           child: FloatingActionButton.extended(
             heroTag: null,
+            // The row is exactly its slim height: the default padded tap
+            // target would put the 48 dp box back around it.
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
             onPressed: onTap,
             icon: Icon(icon),
             // The list note's label carries its folder, so the width is

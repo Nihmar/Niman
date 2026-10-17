@@ -159,8 +159,10 @@ void main() {
     expect(miniOpacity(tester, const Key('new-note-action')), 1);
     expect(scrimInert(tester), isFalse);
 
-    // A tap anywhere on the body (the scrim) closes the menu.
-    await tester.tap(find.byKey(const Key('fab-scrim')));
+    // A tap on the body beside the buttons (the scrim) closes the menu:
+    // the buttons are right-aligned, so their left half is scrim.
+    final menu = tester.getRect(find.byKey(const Key('new-item-menu-scroll')));
+    await tester.tapAt(Offset(menu.left / 2, menu.center.dy));
     await settleFabMenu(tester);
     expect(scrimInert(tester), isTrue);
     expect(miniOpacity(tester, const Key('new-note-action')), 0);
@@ -259,6 +261,38 @@ void main() {
           )
           .position;
       expect(position.maxScrollExtent, 0);
+      // Slim rows: nine of them, and the first — Today's journal — is on
+      // screen without a scroll.
+      expect(
+        tester.getSize(find.byKey(const Key('journal-today-action'))).height,
+        40,
+      );
+      expect(
+        find.byKey(const Key('journal-today-action')).hitTestable(),
+        findsOne,
+      );
+    });
+
+    testWidgets('a tall narrow phone shows the journal entry un-scrolled', (
+      tester,
+    ) async {
+      setSurfaceSize(tester, const Size(360, 780));
+      await tester.pumpWidget(buildApp());
+      await tester.pump();
+      await openLibrary(tester, filePicker);
+      await tester.tap(find.byKey(const Key('new-note-fab')));
+      await settleFabMenu(tester);
+      final position = tester
+          .state<ScrollableState>(
+            find.descendant(of: scroll, matching: find.byType(Scrollable)),
+          )
+          .position;
+      expect(position.maxScrollExtent, 0, reason: 'the slim menu fits');
+      expect(
+        find.byKey(const Key('journal-today-action')).hitTestable(),
+        findsOne,
+        reason: 'the first entry is on screen, no rotation needed',
+      );
     });
   });
 }
