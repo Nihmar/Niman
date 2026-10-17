@@ -6,6 +6,26 @@ This file ships inside the build and feeds the in-app changelog (the
 launch dialog after an update and the screen under Settings → Diagnostics
 and info). Update it in the release commit, before the tag.
 
+## [0.2.3] - 2026-10-17
+
+The tree and the editor, a little steadier.
+
+A row's menu can duplicate the file beside itself, and a right click on a
+link that leaves the library offers to open or copy it. A whole-copy edit
+keeps the selection its batch began with, so a Select all followed by a
+paste, a keystroke or an Android Backspace replaces the note instead of the
+platform's window; a save no longer announces the app's own write as
+another program's; and the + menu's entries fit a phone's screen.
+
+### Added
+- **Duplicate in a file's row menu** (#1100), in the tree or the grid: copies the file beside itself under a free name (`note.md` → `note_1.md`), bytes and all, saving the open notes first
+- **A right click on an external link** (#1099) in the editor offers **Open link** and **Copy link** — the URL Ctrl+click opens, and the URL on the clipboard
+
+### Fixed
+- **Editor**: a whole-copy edit keeps the selection its batch began with, so Select all then a paste, a keystroke or a Backspace replaces the note rather than the platform's window (#1097)
+- **Save**: a write the app itself made later is not read as another program's version and announced as one (#1055)
+- **The + menu**: its rows are slimmer, so its first entry — Today's journal — fits a phone's screen without a scroll
+
 ## [0.2.2] - 2026-10-16
 
 A faster, steadier read.
