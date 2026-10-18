@@ -2754,6 +2754,24 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// a row further on (#544).
   int? _pressOffset;
 
+  /// Whether the mouse went down on the scrollbar's strip (#1106): the drag
+  /// belongs to the scrollbar, so the note takes no caret and no selection
+  /// from it.
+  bool _pressOnScrollbar = false;
+
+  /// The scrollbar's strip at the pane's right edge (#1106): a pointer there
+  /// belongs to the scrollbar, not to the text. The width is the theme's
+  /// thickness and margin, with a little room for the painter's own hover
+  /// area, which reaches past the drawn bar.
+  bool _onScrollbar(Offset local) {
+    final width = context.size?.width;
+    if (width == null) return false;
+    final theme = ScrollbarTheme.of(context);
+    final thickness = theme.thickness?.resolve(const <WidgetState>{}) ?? 8;
+    final strip = thickness + (theme.crossAxisMargin ?? 0) + 4;
+    return local.dx >= width - strip;
+  }
+
   /// [child] with mouse dragging selecting text.
   ///
   /// Mouse only, deliberately: on a phone a vertical drag on the text *scrolls*
@@ -2762,6 +2780,17 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// separate piece of work.
   Widget _mouseSelection(Widget child) => Listener(
     onPointerHover: (event) {
+      // The scrollbar's strip belongs to the scrollbar: the pointer keeps the
+      // arrow there, and neither the table nor the cursor is asked (#1106).
+      if (_onScrollbar(event.localPosition)) {
+        _hoverPosition = null;
+        _leaveTable();
+        _reportLinkHover(null, Offset.zero);
+        if (_hoverCursor.value != SystemMouseCursors.basic) {
+          _hoverCursor.value = SystemMouseCursors.basic;
+        }
+        return;
+      }
       // The offset under the pointer is one question, asked once and shared:
       // both the table and the cursor read it (#505). Outside `live` there is
       // no box and no table, and neither the offset nor the note is touched —
@@ -2777,6 +2806,14 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     onPointerDown: (event) {
       _lastPointerKind = event.kind;
       _pressOffset = null;
+      if (event.kind == PointerDeviceKind.mouse &&
+          _onScrollbar(event.localPosition)) {
+        // The scrollbar takes the drag; the note takes nothing (#1106).
+        _pressOnScrollbar = true;
+        _hoverPosition = null;
+        return;
+      }
+      _pressOnScrollbar = false;
       _trackMouse(event);
       // A mouse asks for the keyboard as it goes down, which is where a click
       // starts a drag; a finger asks on the tap (`onTapUp`), so a finger that
@@ -2813,6 +2850,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       _input.holdSync = true;
     },
     onPointerMove: (event) {
+      if (_pressOnScrollbar) return;
       _trackMouse(event);
       final anchor = _dragAnchor;
       if (anchor == null) return;
@@ -2822,10 +2860,17 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       _select(anchor, offset);
     },
     onPointerUp: (event) {
+      if (_pressOnScrollbar) {
+        _pressOnScrollbar = false;
+        return;
+      }
       _trackMouse(event);
       _endDrag();
     },
-    onPointerCancel: (_) => _endDrag(),
+    onPointerCancel: (_) {
+      _pressOnScrollbar = false;
+      _endDrag();
+    },
     child: child,
   );
 
@@ -4175,6 +4220,12 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                 // The keyboard is asked for on the *tap*: a drag the scroll
                 // view wins is someone reading, not someone about to type.
                 onTapUp: (details) {
+                  // A tap on the scrollbar's strip is the scrollbar's, not the
+                  // text's: no caret, no keyboard (#1106).
+                  if (_onScrollbar(details.localPosition)) {
+                    _lastClick = null;
+                    return;
+                  }
                   // A task box is ticked where it is drawn, and a tick is
                   // neither a caret nor a reason to raise the keyboard; nor
                   // the first of a double click.
