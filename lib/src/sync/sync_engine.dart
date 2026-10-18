@@ -416,7 +416,9 @@ final class SyncEngine {
         '${hints.isEmpty ? '' : '; hints ${report.hintsDone} done, '
                   '${report.hintsFailed} backing off'}'
         '${report.retryAfter == null ? '' : '; server asked to wait '
-                  '${report.retryAfter!.inSeconds}s'}';
+                  '${report.retryAfter!.inSeconds}s'}; up ${report.bytesUp} b, '
+        'down ${report.bytesDown} b; scan ${report.scanMs} ms, '
+        'hash ${report.hashMs} ms, apply ${report.applyMs} ms';
     if (report.clean) {
       _log.info(line);
     } else {
@@ -466,6 +468,7 @@ final class SyncEngine {
       'known, ${rows.length} of ${allRows.length} agreed rows '
       '(${scanClock.elapsedMilliseconds} ms)',
     );
+    report.scanMs = scanClock.elapsedMilliseconds;
 
     onProgress?.call(SyncStage.comparing, 0, 0);
     final localSha = <String, String>{};
@@ -478,6 +481,7 @@ final class SyncEngine {
       capabilities: capabilities,
       rowCount: rowCount,
     );
+    final hashClock = Stopwatch()..start();
     for (var pass = 1; plan.needsHashes && pass <= _hashPasses; pass++) {
       await _scanner.hash(client, plan, localSha, remoteSha);
       plan = planSync(
@@ -490,6 +494,7 @@ final class SyncEngine {
         rowCount: rowCount,
       );
     }
+    report.hashMs = hashClock.elapsedMilliseconds;
     if (report.quick) {
       final kept = <SyncDecision>[];
       for (final decision in plan.decisions) {
@@ -570,6 +575,7 @@ final class SyncEngine {
     );
     final total = plan.decisions.length;
     var index = 0;
+    final applyClock = Stopwatch()..start();
     for (final decision in plan.decisions) {
       onProgress?.call(SyncStage.applying, index++, total);
       final clock = Stopwatch()..start();
@@ -619,6 +625,7 @@ final class SyncEngine {
         _failed(report, decision, e.message);
       }
     }
+    report.applyMs = applyClock.elapsedMilliseconds;
   }
 
   /// Whether the server answers a `PROPFIND` of the destination: after a

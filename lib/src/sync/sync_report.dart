@@ -50,6 +50,22 @@ final class SyncReport {
   /// has to re-read.
   final Set<String> changedLocally = {};
 
+  /// Bytes the run uploaded.
+  int bytesUp = 0;
+
+  /// Bytes the run downloaded.
+  int bytesDown = 0;
+
+  /// Milliseconds the run spent scanning, hashing and applying, so a slow
+  /// run says which phase to look at (#1107).
+  int scanMs = 0;
+
+  /// Milliseconds the run spent hashing.
+  int hashMs = 0;
+
+  /// Milliseconds the run spent applying the plan.
+  int applyMs = 0;
+
   /// The plan the run carried out (the last hashing pass).
   SyncPlan? plan;
 

@@ -184,6 +184,11 @@ final class WebDavClient {
   DateTime? get serverDate => _serverDate;
 
   static const _maxRedirects = 5;
+
+  /// How many bytes the download gathers before the hash and the sink see
+  /// them: the response arrives in socket-sized pieces, and hashing and
+  /// handing on every one of them costs more than the bytes (#1107).
+  static const int _downloadChunk = 64 * 1024;
   static const _log = AppLogger(name: 'webdav');
 
   static Uri _normalizeBase(Uri url) {
@@ -415,16 +420,31 @@ final class WebDavClient {
     }
 
     try {
+      // The response arrives in socket-sized pieces (a few KB each over a
+      // phone link); gathering them keeps the hash and the sink from
+      // paying per piece. The stall timer still sees every piece, so a
+      // silent server is caught as before (#1107).
+      final gathered = BytesBuilder(copy: false);
+      void flush() {
+        if (gathered.isEmpty) return;
+        final chunk = gathered.takeBytes();
+        hasher.add(chunk);
+        body.add(chunk);
+      }
+
       await _unlessStalled((progress) {
         source = response.listen(
           (chunk) {
             progress();
-            hasher.add(chunk);
             bytes += chunk.length;
-            body.add(chunk);
+            gathered.add(chunk);
+            if (gathered.length >= _downloadChunk) flush();
           },
           onError: body.addError,
-          onDone: body.close,
+          onDone: () {
+            flush();
+            unawaited(body.close());
+          },
         );
         return body.stream.pipe(into);
       });
