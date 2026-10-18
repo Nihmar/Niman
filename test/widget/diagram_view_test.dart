@@ -93,6 +93,56 @@ void main() {
     expect(find.byKey(const Key('diagram-full-screen-close')), findsOneWidget);
   });
 
+  testWidgets('a full screen diagram larger than the screen pans freely', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(360, 640);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await _pump(
+      tester,
+      '```mermaid\nsequenceDiagram\n'
+      'participant Alice\nparticipant Bob\nparticipant Carol\n'
+      'Alice->>Bob: A first message long enough to widen the diagram\n'
+      'Bob-->>Alice: A reply that is also long enough to widen it\n'
+      'Carol->>Alice: A third message that goes on and on for a while\n```\n',
+    );
+    final button = find.byKey(const Key('diagram-full-screen'));
+    await tester.ensureVisible(button);
+    await tester.pumpAndSettle();
+    await tester.tap(button);
+    await tester.pumpAndSettle();
+
+    final viewer = tester.widget<InteractiveViewer>(
+      find.byType(InteractiveViewer),
+    );
+    expect(viewer.constrained, isFalse, reason: 'the child keeps its size');
+    final paint = find.descendant(
+      of: find.byType(InteractiveViewer),
+      matching: find.byWidgetPredicate(
+        (widget) => widget is CustomPaint && widget.painter is DiagramPainter,
+      ),
+    );
+    final drawing =
+        (tester.widget<CustomPaint>(paint).painter! as DiagramPainter)
+            .drawing
+            .size;
+    expect(
+      drawing.width,
+      greaterThan(360),
+      reason: 'the diagram is wider than the phone',
+    );
+    expect(tester.getSize(paint), drawing, reason: 'it is not clamped');
+
+    // A drag reaches the part of the diagram that was outside the screen
+    // (#1110): the old `constrained: true` moved it only the boundary's 80.
+    final before = tester.getTopLeft(paint);
+    await tester.drag(find.byType(InteractiveViewer), const Offset(-200, -100));
+    await tester.pumpAndSettle();
+    final after = tester.getTopLeft(paint);
+    expect(after.dx, lessThan(before.dx - 120));
+  });
+
   testWidgets('a diagram wider than the pane is scaled to fit it whole', (
     tester,
   ) async {

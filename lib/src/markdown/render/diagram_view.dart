@@ -185,6 +185,9 @@ final class _DiagramFullScreen extends StatelessWidget {
             Positioned.fill(
               child: Center(
                 child: InteractiveViewer(
+                  // The child keeps its own size, so a diagram larger than
+                  // the screen can be panned to every edge (#1110).
+                  constrained: false,
                   minScale: 0.4,
                   maxScale: 8,
                   boundaryMargin: const EdgeInsets.all(80),
