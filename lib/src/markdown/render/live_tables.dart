@@ -28,9 +28,11 @@ library;
 
 import 'package:flutter/painting.dart';
 import 'package:meta/meta.dart';
+
 import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
+import 'package:niman/src/markdown/render/table_fit.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/markdown/table/markdown_table.dart';
 
@@ -92,7 +94,6 @@ final class LiveTableRow {
 /// How narrow a fitted column's text may get: two characters of the prose,
 /// which is a floor rather than a target — every column is given room in
 /// proportion to what its widest cell wants.
-const double _minCellWidth = 12;
 
 /// A cell's text as it is drawn: how wide its glyphs are, how many
 /// characters of hidden marks it has, and how many of them come before its
@@ -575,7 +576,14 @@ final class LiveTables {
         }
       }
     }
-    final fitted = fits ? column : _fitColumns(column, least, pad, budget);
+    final fitted = fits
+        ? column
+        : fitTableColumns(
+            natural: column,
+            least: least,
+            pad: pad,
+            budget: budget,
+          );
     final edges = <double>[0];
     for (final width in fitted) {
       edges.add(edges.last + width + 2 * pad);
@@ -656,70 +664,6 @@ final class LiveTables {
       if (a[at] != b[at]) return false;
     }
     return true;
-  }
-
-  /// The natural cell [column] widths of a table wider than [budget]: the
-  /// columns shrunk together, each in proportion to what its widest cell
-  /// wants, so the table ends exactly on the pane — every column keeping the
-  /// [pad] either side of it and its widest word at least, as far as the
-  /// pane can give it.
-  static List<double> _fitColumns(
-    List<double> column,
-    List<double> least,
-    double pad,
-    double budget,
-  ) {
-    final count = column.length;
-    final fit = List<double>.filled(count, 0);
-    if (count == 0) return fit;
-    final room = budget - 2 * pad * count;
-    final total = column.fold<double>(0, (sum, width) => sum + width);
-    if (total <= 0 || room <= 0) {
-      // Nothing to go round: the pane is all padding, so the cells take none.
-      return fit;
-    }
-    // Each column keeps at least its widest word, where the pane can give
-    // it: a fitted table breaks a line between words, as the read view
-    // does, and only a word wider than its whole column is broken itself.
-    // The floor is the column's own — capping it at an even share would
-    // break the words of a column the pane gave more room to than the
-    // others — and the branch below is what answers for floors that do not
-    // fit together at all.
-    final floor = <double>[
-      for (var at = 0; at < count; at++)
-        if (least[at] > 0) least[at] else _minCellWidth,
-    ];
-    final words = floor.fold<double>(0, (sum, width) => sum + width);
-    if (words > room) {
-      // Even the words do not fit: the columns share the pane in proportion
-      // to what their widest cells want, and the longest words break.
-      for (var at = 0; at < count; at++) {
-        fit[at] = room * column[at] / total;
-      }
-      return fit;
-    }
-    final pinned = List<bool>.filled(count, false);
-    var taken = 0.0;
-    var pool = total;
-    for (var pass = 0; pass < count; pass++) {
-      var pinnedNow = false;
-      for (var at = 0; at < count; at++) {
-        if (pinned[at] || pool <= 0) continue;
-        if ((room - taken) * column[at] / pool < floor[at]) {
-          pinned[at] = true;
-          fit[at] = floor[at];
-          taken += floor[at];
-          pool -= column[at];
-          pinnedNow = true;
-        }
-      }
-      if (!pinnedNow) break;
-    }
-    for (var at = 0; at < count; at++) {
-      if (pinned[at]) continue;
-      fit[at] = pool <= 0 ? 0 : (room - taken) * column[at] / pool;
-    }
-    return fit;
   }
 
   /// The visual lines of a row laid out in [fitted] columns: each cell's
