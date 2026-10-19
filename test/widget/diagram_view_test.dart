@@ -62,10 +62,7 @@ Future<void> _openFullScreen(WidgetTester tester, String document) async {
   final button = find.byKey(const Key('diagram-full-screen'));
   await tester.ensureVisible(button);
   await tester.pumpAndSettle();
-  // On the button's upper part: beside a short diagram, the block is a few
-  // pixels high, and the rest of the button hangs outside the block's box,
-  // where a hit test does not reach it.
-  await tester.tapAt(tester.getRect(button).topCenter + const Offset(0, 6));
+  await tester.tap(button);
   await tester.pumpAndSettle();
 }
 
@@ -149,6 +146,36 @@ void main() {
     expect(diagram.width, lessThan(block.width / 2));
     expect(diagram.center.dx, moreOrLessEquals(block.center.dx));
     expect(button.right, moreOrLessEquals(block.right));
+  });
+
+  testWidgets('the full screen button of a wide, short diagram opens it', (
+    tester,
+  ) async {
+    // Scaled to the pane's width, a Gantt-like diagram is a few pixels high:
+    // shorter than the button, whose lower part then fell outside the block's
+    // box, where a tap is not tested (#1110).
+    tester.view.physicalSize = const Size(360, 640);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await _pump(tester, _wideShort);
+
+    final block = tester.getRect(find.byType(BlockDiagramView));
+    final button = tester.getRect(find.byKey(const Key('diagram-full-screen')));
+    final canvas = tester.getRect(
+      find
+          .descendant(
+            of: find.byType(BlockDiagramView),
+            matching: find.byType(CustomPaint),
+          )
+          .first,
+    );
+    expect(canvas.height, lessThan(button.height), reason: 'a short diagram');
+    expect(block.contains(button.topLeft), isTrue);
+    expect(block.contains(button.bottomRight - const Offset(0.1, 0.1)), isTrue);
+
+    await tester.tap(find.byKey(const Key('diagram-full-screen')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('diagram-full-screen-close')), findsOneWidget);
   });
 
   testWidgets('a fence in a list item is drawn from its code, the indent off', (

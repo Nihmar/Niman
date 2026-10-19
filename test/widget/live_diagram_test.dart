@@ -103,6 +103,28 @@ void main() {
     });
   }
 
+  testWidgets('the full screen button of a wide, short diagram is tappable', (
+    tester,
+  ) async {
+    // A few pixels high once scaled to the pane, it is shorter than the
+    // button, which must still be inside the block's box to be hit.
+    tester.view.physicalSize = const Size(360, 640);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    const note =
+        '```mermaid\nflowchart LR\n'
+        'A[First step] --> B[Second step] --> C[Third step] --> D[Fourth step]'
+        ' --> E[Fifth step] --> F[Sixth step] --> G[Seventh step]\n'
+        '```\n\ntail\n';
+    await _pumpLive(tester, note);
+    await tester.tap(
+      find.byKey(const Key('diagram-full-screen')),
+      kind: PointerDeviceKind.mouse,
+    );
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('diagram-full-screen-close')), findsOneWidget);
+  });
+
   testWidgets('a fence in a list item is drawn from its code, the indent off', (
     tester,
   ) async {

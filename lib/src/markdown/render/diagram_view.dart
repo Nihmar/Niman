@@ -80,16 +80,19 @@ final class BlockDiagramView extends StatelessWidget {
       ),
     );
     // The button keeps the block's top right corner, wherever the diagram
-    // stands: on the diagram's own, a narrow one put it mid-page.
+    // stands: on the diagram's own, a narrow one put it mid-page. It is laid
+    // out in the stack, not placed over it: a stack is as tall as its tallest
+    // laid-out child, so a wide, short diagram (a Gantt chart, scaled to the
+    // pane's width, is a few pixels high) gets a block as tall as the button
+    // is, and the button stays inside the box a tap is tested against.
     return Padding(
       padding: EdgeInsets.symmetric(vertical: theme.blockSpacing / 2),
       child: Stack(
         children: [
           Center(child: canvas),
           if (fullScreen)
-            Positioned(
-              top: 0,
-              right: 0,
+            Align(
+              alignment: Alignment.topRight,
               child: IconButton(
                 key: const Key('diagram-full-screen'),
                 tooltip: AppStrings.fullScreen,
