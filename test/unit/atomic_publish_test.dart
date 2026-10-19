@@ -86,8 +86,12 @@ void main() {
   test('both writers publish through the one shared helper', () {
     // The helper is the last step of both, so the two cannot drift apart
     // again: the streaming writer once lost the flush the joined path had.
+    // A Windows checkout holds the sources with CRLF endings: the search
+    // below cuts at `\n}\n`, so it reads them as LF whatever git wrote.
     String source(String file) =>
-        File(p.join('lib', 'src', file)).readAsStringSync();
+        File(p.join('lib', 'src', file))
+            .readAsStringSync()
+            .replaceAll('\r\n', '\n');
     final stream = source(p.join('library', 'note_write_stream.dart'));
     expect(stream, contains('publishTempFile('));
     expect(stream, isNot(contains('.rename(')), reason: 'no rename of its own');
