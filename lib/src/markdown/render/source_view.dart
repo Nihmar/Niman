@@ -98,6 +98,7 @@ import 'package:niman/src/markdown/render/math_text.dart';
 import 'package:niman/src/markdown/render/note_margins.dart';
 import 'package:niman/src/markdown/render/note_semantics.dart';
 import 'package:niman/src/markdown/render/scroll_anchor.dart';
+import 'package:niman/src/markdown/render/scrollbar_strip.dart';
 import 'package:niman/src/markdown/render/sliver_columns.dart';
 import 'package:niman/src/markdown/render/sliver_segments.dart';
 import 'package:niman/src/markdown/render/source_context_menu.dart';
@@ -2754,6 +2755,21 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// a row further on (#544).
   int? _pressOffset;
 
+  /// Whether the mouse went down on the scrollbar's strip (#1106): the drag
+  /// belongs to the scrollbar, so the note takes no caret and no selection
+  /// from it.
+  bool _pressOnScrollbar = false;
+
+  /// Whether [global], a position in the window, is on the scrollbar's track
+  /// (#1106): a mouse there belongs to the scrollbar, not to the text. Asked
+  /// of the bar itself ([pointerOnScrollbar]), so there is no strip when the
+  /// platform builds no bar or the note has nothing to scroll.
+  bool _onScrollbar(Offset global) => pointerOnScrollbar(
+    scrollView: _scrollKey.currentContext?.findRenderObject(),
+    metrics: _scroll.hasClients ? _scroll.position : null,
+    global: global,
+  );
+
   /// [child] with mouse dragging selecting text.
   ///
   /// Mouse only, deliberately: on a phone a vertical drag on the text *scrolls*
@@ -2762,6 +2778,17 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// separate piece of work.
   Widget _mouseSelection(Widget child) => Listener(
     onPointerHover: (event) {
+      // The scrollbar's strip belongs to the scrollbar: the pointer keeps the
+      // arrow there, and neither the table nor the cursor is asked (#1106).
+      if (_onScrollbar(event.position)) {
+        _hoverPosition = null;
+        _leaveTable();
+        _reportLinkHover(null, Offset.zero);
+        if (_hoverCursor.value != SystemMouseCursors.basic) {
+          _hoverCursor.value = SystemMouseCursors.basic;
+        }
+        return;
+      }
       // The offset under the pointer is one question, asked once and shared:
       // both the table and the cursor read it (#505). Outside `live` there is
       // no box and no table, and neither the offset nor the note is touched —
@@ -2777,6 +2804,14 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     onPointerDown: (event) {
       _lastPointerKind = event.kind;
       _pressOffset = null;
+      if (event.kind == PointerDeviceKind.mouse &&
+          _onScrollbar(event.position)) {
+        // The scrollbar takes the drag; the note takes nothing (#1106).
+        _pressOnScrollbar = true;
+        _hoverPosition = null;
+        return;
+      }
+      _pressOnScrollbar = false;
       _trackMouse(event);
       // A mouse asks for the keyboard as it goes down, which is where a click
       // starts a drag; a finger asks on the tap (`onTapUp`), so a finger that
@@ -2813,6 +2848,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       _input.holdSync = true;
     },
     onPointerMove: (event) {
+      if (_pressOnScrollbar) return;
       _trackMouse(event);
       final anchor = _dragAnchor;
       if (anchor == null) return;
@@ -2822,10 +2858,17 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       _select(anchor, offset);
     },
     onPointerUp: (event) {
+      if (_pressOnScrollbar) {
+        _pressOnScrollbar = false;
+        return;
+      }
       _trackMouse(event);
       _endDrag();
     },
-    onPointerCancel: (_) => _endDrag(),
+    onPointerCancel: (_) {
+      _pressOnScrollbar = false;
+      _endDrag();
+    },
     child: child,
   );
 
@@ -4175,6 +4218,14 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                 // The keyboard is asked for on the *tap*: a drag the scroll
                 // view wins is someone reading, not someone about to type.
                 onTapUp: (details) {
+                  // A mouse tap on the scrollbar's strip is the scrollbar's,
+                  // not the text's: no caret, no keyboard. A finger is the
+                  // text's anywhere (#1106).
+                  if (details.kind == PointerDeviceKind.mouse &&
+                      _onScrollbar(details.globalPosition)) {
+                    _lastClick = null;
+                    return;
+                  }
                   // A task box is ticked where it is drawn, and a tick is
                   // neither a caret nor a reason to raise the keyboard; nor
                   // the first of a double click.
