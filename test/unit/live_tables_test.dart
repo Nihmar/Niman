@@ -215,10 +215,10 @@ void main() {
 
   // The work a table costs, held to the number of measurements rather than to
   // a wall-clock (a shared runner reads different milliseconds for the same
-  // commit): a revision measures the cells of the rows it changed, a table
-  // that fits measures no word at all, a caret move measures the row it
-  // entered (the one it left stands measured at rest), and a row's pieces are
-  // laid out only when a frame draws it (#494).
+  // commit): a revision measures the cells of the rows it changed (a cell's
+  // floor comes with its width: no word is measured by itself), a caret move
+  // measures the row it entered (the one it left stands measured at rest),
+  // and a row's pieces are laid out only when a frame draws it (#494).
   testWidgets(
     'a revision measures a fitting table once, a caret move its rows',
     (tester) async {
@@ -307,7 +307,7 @@ void main() {
   );
 
   testWidgets(
-    "a fitted table measures its words once, a row's pieces when drawn",
+    "a fitted table measures its cells once, a row's pieces when drawn",
     (tester) async {
       final theme = await _theme(tester);
       // A table wider than any phone pane: two long rows of seven words and a
@@ -349,22 +349,23 @@ void main() {
         }
       }
 
-      // The table wants more room than the pane, so every cell's widest word is
-      // measured beside the cell itself: six cells and eighteen words.
-      expect(count(askAll), 24, reason: 'six cells and eighteen words, once');
+      // The table wants more room than the pane, and its columns' floors cost
+      // no measure of their own: a cell's widest word comes with the layout
+      // that gives its width (#1108), so it is six cells and no word.
+      expect(count(askAll), 6, reason: 'six cells, once');
       expect(count(askAll), 0, reason: 'the same revision measures nothing');
-      // No frame has drawn a row yet: the words stand measured and no piece has
+      // No frame has drawn a row yet: the cells stand measured and no piece has
       // been laid out. A row pays for its pieces when a frame first asks.
       expect(count(() => row(0)!.wrapped), 2, reason: "the header's two cells");
       expect(count(() => row(0)!.wrapped), 0, reason: 'kept by the row');
 
-      // The caret enters the fourth row: that row's two cells and eight words
-      // are measured again, the table's own lay-out standing.
+      // The caret enters the fourth row: that row's two cells are measured
+      // again, the table's own lay-out standing.
       revealed = 3;
       expect(
         count(() => askAll(reveal: 'run')),
-        2 + 8,
-        reason: 'two cells and eight words of one row',
+        2,
+        reason: 'two cells of one row',
       );
       // The caret leaves the table: the row it left is taken back at rest.
       expect(count(askAll), 0, reason: 'the row the caret left stood measured');
@@ -441,7 +442,6 @@ void main() {
     }
     // 'intro', a blank line, the header, the delimiter row and 30 rows.
     for (final budget in <double>[2000, 120]) {
-      final fits = budget > 1000;
       final buffer = SourceBuffer.fromText(note.toString());
       final tables = LiveTables();
       var first = 2;
@@ -481,15 +481,11 @@ void main() {
       first = 3;
       expect(count(askAll), 0, reason: 'a line above the table, at $budget');
 
-      // A letter typed in one cell: that row's three cells, and — in a table
-      // that does not fit — the seven words of the row.
+      // A letter typed in one cell: that row's three cells, fitted table or
+      // not — a floor is measured with its cell.
       final at = buffer.offsetOfLine(first + 2 + 10) + 3;
       buffer.replaceRange(at, at, 'x');
-      expect(
-        count(askAll),
-        fits ? 3 : 3 + 7,
-        reason: 'one row changed, at $budget',
-      );
+      expect(count(askAll), 3, reason: 'one row changed, at $budget');
 
       // And what stands is what a table laid out from nothing draws.
       final fresh = LiveTables();

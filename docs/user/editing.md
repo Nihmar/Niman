@@ -702,6 +702,13 @@ one another; one written with a single space round each cell stays that
 way. A column's alignment (`:--`, `:-:`, `--:`) is drawn in both the read
 view and live mode.
 
+A table wider than the pane is fitted to it, the same way in the read view
+and in live mode: every column shows, its cells wrap inside it, and a column
+keeps its longest word whole where the pane has room for it. A long cell in
+one column does not squeeze the others; where the pane cannot hold all the
+words, the columns share it evenly and only the longest words break. A table
+that already fits keeps each column as wide as its widest cell.
+
 ### Columns
 
 Two or more columns of blocks on one row — a picture and a table beside

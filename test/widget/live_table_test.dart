@@ -63,6 +63,17 @@ const String _longTable =
     '| a first cell far too long for the pane, and still going further |'
     ' second |';
 
+/// The reported four-column table (#1108): short first and last columns,
+/// long prose in the middle.
+const String _wideTable =
+    '| Area | Word-Smith 1.8.6 | Niman 0.2.4 | Ahead |\n'
+    '|---|---|---|---|\n'
+    "| Markdown surface | Obsidian's (source + Live Preview) | "
+    "Niman's own: source, live and read, one widget | Tie |\n"
+    '| Table over notes | The Organizer: any frontmatter key as a column, '
+    'computed readings, filters | none (a table inside a note only) | '
+    'Word-Smith |\n';
+
 /// Pumps [note] in `live` at the pane the test set, and hands back the view.
 Future<MarkdownSourceViewState> _pumpNote(
   WidgetTester tester,
@@ -227,6 +238,51 @@ void main() {
     ];
     expect(seconds.length, 2, reason: 'header and body, one column each');
     expect(seconds.first, closeTo(seconds.last, 0.5));
+  });
+
+  // The test font draws every glyph a square of its size, so the widest words
+  // of this table do not fit a 360 dp pane together: it is the branch that
+  // shares the room by level that is held here, not the one that fits the
+  // words. `table_fit_parity_test.dart` holds the read view to `live`'s widths.
+  testWidgets('a narrow pane shares its room by the words, not the cells', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(360, 600);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await _pumpNote(tester, _wideTable);
+
+    final edges = _grids(tester).first.edges;
+    final width = edges.last;
+    expect(width, lessThanOrEqualTo(360.5), reason: 'the table fits the pane');
+    final columns = [
+      for (var at = 0; at < edges.length - 1; at++) edges[at + 1] - edges[at],
+    ];
+    // The short first column keeps a fair share: sharing by the widest cells
+    // gave it ~9 % because the prose columns' whole cells are long (#1108).
+    expect(
+      columns.first,
+      greaterThanOrEqualTo(0.15 * width),
+      reason: 'the first column is not squeezed to a token',
+    );
+    // No column swallows the pane: the widest is within a small factor of
+    // the narrowest, where the widest words allow.
+    expect(
+      columns.reduce((a, b) => a > b ? a : b) /
+          columns.reduce((a, b) => a < b ? a : b),
+      lessThanOrEqualTo(3.0),
+    );
+
+    // The read view fits the same table to the pane: every header column
+    // stands inside it (#1108).
+    await _pumpReadView(tester, _wideTable);
+    for (final text in ['Area', 'Word-Smith 1.8.6', 'Niman 0.2.4', 'Ahead']) {
+      final rect = tester.getRect(
+        find.textContaining(text, findRichText: true).first,
+      );
+      expect(rect.right, lessThanOrEqualTo(360.5), reason: text);
+    }
   });
 
   testWidgets('a tap in a wrapped row lands in the cell it was on', (

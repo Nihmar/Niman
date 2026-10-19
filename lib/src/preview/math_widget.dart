@@ -372,6 +372,22 @@ final class _RenderInlineMath extends RenderBox {
 
   Size _measure() => boxSizePx(box, style.fontSize);
 
+  // A formula is as wide and as tall as it is drawn, whatever it is asked:
+  // the intrinsic sizes a table cell's paragraph asks its widgets for
+  // (`IntrinsicColumnWidth`, a fitted column's floor) would otherwise read
+  // zero, and a column holding only a formula would be given no room (#1108).
+  @override
+  double computeMinIntrinsicWidth(double height) => _measure().width;
+
+  @override
+  double computeMaxIntrinsicWidth(double height) => _measure().width;
+
+  @override
+  double computeMinIntrinsicHeight(double width) => _measure().height;
+
+  @override
+  double computeMaxIntrinsicHeight(double width) => _measure().height;
+
   @override
   Size computeDryLayout(BoxConstraints constraints) =>
       constraints.constrain(_measure());

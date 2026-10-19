@@ -12,10 +12,12 @@
 ///
 /// A table whose natural width is the pane's or less is laid out that way,
 /// unchanged. One wider than the pane is *fitted* to it instead, as the read
-/// view fits it: the columns are shrunk together in proportion to what
-/// their widest cells want, each cell's text wraps inside its column, and
-/// the row takes as many visual lines as its tallest cell does. Nothing is
-/// clipped and every column shows.
+/// view fits it (`fitTableColumns`, #1108): every column keeps its widest
+/// word where the pane can give it and the rest of the room is shared by
+/// what the columns want; where even the words do not fit, they share it by
+/// those words. Each cell's text wraps inside its column, and the row takes
+/// as many visual lines as its tallest cell does. Nothing is clipped and
+/// every column shows.
 ///
 /// The caret's row stays on the grid, as Obsidian keeps a table a table
 /// while it is written in: only the run the caret is in shows its marks, as
@@ -31,6 +33,8 @@ import 'package:meta/meta.dart';
 import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
+import 'package:niman/src/markdown/render/table_fit.dart';
+import 'package:niman/src/markdown/render/table_measure.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/markdown/table/markdown_table.dart';
 
@@ -89,15 +93,10 @@ final class LiveTableRow {
   final bool last;
 }
 
-/// How narrow a fitted column's text may get: two characters of the prose,
-/// which is a floor rather than a target — every column is given room in
-/// proportion to what its widest cell wants.
-const double _minCellWidth = 12;
-
-/// A cell's text as it is drawn: how wide its glyphs are, how many
-/// characters of hidden marks it has, and how many of them come before its
-/// first glyph.
-typedef _Measured = ({double visible, int hidden, int lead});
+/// A cell's text as it is drawn: how wide its glyphs are, how wide its widest
+/// unbreakable run is (the floor a fitted column keeps), how many characters
+/// of hidden marks it has, and how many of them come before its first glyph.
+typedef _Measured = ({double visible, double least, int hidden, int lead});
 
 /// One line of a table as measured: its cells, and each one's width.
 ///
@@ -118,11 +117,6 @@ final class _RowWork {
 
   /// Per cell, how wide its text draws.
   final List<_Measured> widths;
-
-  /// Per cell, how wide its widest word draws — the floor a fitted column
-  /// keeps. Null until a table wider than its pane is laid out: nothing
-  /// measures a word while the table fits (#494).
-  List<double>? least;
 }
 
 /// One table's lines and their measurements, read once per revision.
@@ -477,44 +471,15 @@ final class LiveTables {
     ];
   }
 
-  /// Every cell of row [row] measured for its widest word.
-  static List<double> _leastRow(
-    Block block,
-    int row,
-    String text,
-    List<(int, int)> cells,
-    List<Token> Function(int line) tokensOf,
-    bool Function(int line, Token token) hidden,
-    TextStyle? Function(Token token) styleOf,
-    MarkdownTheme theme,
-    TextScaler scaler,
-  ) {
-    final line = block.startLine + row;
-    final style = row == 0 ? theme.tableHeader : theme.tableCell;
-    return <double>[
-      for (final (start, end) in cells)
-        _leastWidth(
-          text,
-          tokensOf(line),
-          start,
-          end,
-          style,
-          scaler,
-          (token) => hidden(line, token),
-          styleOf,
-        ),
-    ];
-  }
-
   /// Lays [table]'s block out from [metrics]: its columns measured from every
   /// row's cells, fitted to [budget] when they want more room than it, and
   /// each line's gaps or wrapped pieces worked out.
   ///
-  /// The words of a fitted column are measured only when the table does not
-  /// fit, and a row's wrapped pieces only when a frame first asks for them —
-  /// so a table that fits its pane measures no word and lays no piece out,
-  /// and a fitted table measures the words of its cells once and the pieces
-  /// of its *visible* rows alone (#494).
+  /// A row's wrapped pieces are laid out only when a frame first asks for
+  /// them — so a table that fits its pane lays no piece out, and a fitted
+  /// table lays out the pieces of its *visible* rows alone (#494). Its
+  /// columns' floors cost nothing: each cell's measure gives its widest
+  /// unbreakable run with its width.
   List<LiveTableRow> _layOut(
     _Table table,
     _Metrics metrics,
@@ -549,33 +514,26 @@ final class LiveTables {
       natural.add(natural.last + width + 2 * pad);
     }
     final fits = natural.last <= budget;
-    // The widest word of each column: the room a fitted column keeps, so a
-    // word is not broken where the read view would keep it whole. Measured
-    // only for a table that does not fit, and kept with the row (#494).
+    // The widest unbreakable run of each column: the room a fitted column
+    // keeps, so a word is not broken where the read view would keep it
+    // whole. Measured with the cell, in the one layout that measures it.
     var least = const <double>[];
     if (!fits) {
-      final words = <List<double>>[
-        for (var row = 0; row < lines.length; row++)
-          rows[row].least ??= _leastRow(
-            block,
-            row,
-            lines[row],
-            cells[row],
-            tokensOf,
-            hidden,
-            styleOf,
-            theme,
-            scaler,
-          ),
-      ];
       least = List<double>.filled(columns, 0);
-      for (final row in words) {
+      for (final row in widths) {
         for (var at = 0; at < row.length; at++) {
-          if (row[at] > least[at]) least[at] = row[at];
+          if (row[at].least > least[at]) least[at] = row[at].least;
         }
       }
     }
-    final fitted = fits ? column : _fitColumns(column, least, pad, budget);
+    final fitted = fits
+        ? column
+        : fitTableColumns(
+            natural: column,
+            least: least,
+            pad: pad,
+            budget: budget,
+          );
     final edges = <double>[0];
     for (final width in fitted) {
       edges.add(edges.last + width + 2 * pad);
@@ -656,70 +614,6 @@ final class LiveTables {
       if (a[at] != b[at]) return false;
     }
     return true;
-  }
-
-  /// The natural cell [column] widths of a table wider than [budget]: the
-  /// columns shrunk together, each in proportion to what its widest cell
-  /// wants, so the table ends exactly on the pane — every column keeping the
-  /// [pad] either side of it and its widest word at least, as far as the
-  /// pane can give it.
-  static List<double> _fitColumns(
-    List<double> column,
-    List<double> least,
-    double pad,
-    double budget,
-  ) {
-    final count = column.length;
-    final fit = List<double>.filled(count, 0);
-    if (count == 0) return fit;
-    final room = budget - 2 * pad * count;
-    final total = column.fold<double>(0, (sum, width) => sum + width);
-    if (total <= 0 || room <= 0) {
-      // Nothing to go round: the pane is all padding, so the cells take none.
-      return fit;
-    }
-    // Each column keeps at least its widest word, where the pane can give
-    // it: a fitted table breaks a line between words, as the read view
-    // does, and only a word wider than its whole column is broken itself.
-    // The floor is the column's own — capping it at an even share would
-    // break the words of a column the pane gave more room to than the
-    // others — and the branch below is what answers for floors that do not
-    // fit together at all.
-    final floor = <double>[
-      for (var at = 0; at < count; at++)
-        if (least[at] > 0) least[at] else _minCellWidth,
-    ];
-    final words = floor.fold<double>(0, (sum, width) => sum + width);
-    if (words > room) {
-      // Even the words do not fit: the columns share the pane in proportion
-      // to what their widest cells want, and the longest words break.
-      for (var at = 0; at < count; at++) {
-        fit[at] = room * column[at] / total;
-      }
-      return fit;
-    }
-    final pinned = List<bool>.filled(count, false);
-    var taken = 0.0;
-    var pool = total;
-    for (var pass = 0; pass < count; pass++) {
-      var pinnedNow = false;
-      for (var at = 0; at < count; at++) {
-        if (pinned[at] || pool <= 0) continue;
-        if ((room - taken) * column[at] / pool < floor[at]) {
-          pinned[at] = true;
-          fit[at] = floor[at];
-          taken += floor[at];
-          pool -= column[at];
-          pinnedNow = true;
-        }
-      }
-      if (!pinnedNow) break;
-    }
-    for (var at = 0; at < count; at++) {
-      if (pinned[at]) continue;
-      fit[at] = pool <= 0 ? 0 : (room - taken) * column[at] / pool;
-    }
-    return fit;
   }
 
   /// The visual lines of a row laid out in [fitted] columns: each cell's
@@ -983,7 +877,7 @@ final class LiveTables {
     bool Function(Token token) hiddenAtRest,
     TextStyle? Function(Token token) styleOf,
   ) {
-    if (end <= start) return (visible: 0, hidden: 0, lead: 0);
+    if (end <= start) return (visible: 0, least: 0, hidden: 0, lead: 0);
     final spans = _spans(text, tokens, start, end, hiddenAtRest, styleOf);
     var hidden = 0;
     int? lead;
@@ -1002,54 +896,16 @@ final class LiveTables {
     }
     if (at < end) lead ??= hidden;
     measurements++;
-    final painter = TextPainter(
-      text: TextSpan(children: spans, style: style),
-      textDirection: TextDirection.ltr,
-      textScaler: scaler,
-    )..layout();
-    final width = painter.width;
-    painter.dispose();
-    return (visible: width, hidden: hidden, lead: lead ?? hidden);
-  }
-
-  /// How wide the widest word of `[start, end)` of [text] is: the room a
-  /// column fitted to a pane is never given less than, so a word is not
-  /// broken across two of its lines where the read view would keep it whole.
-  static double _leastWidth(
-    String text,
-    List<Token> tokens,
-    int start,
-    int end,
-    TextStyle style,
-    TextScaler scaler,
-    bool Function(Token token) hiddenAtRest,
-    TextStyle? Function(Token token) styleOf,
-  ) {
-    var most = 0.0;
-    var at = start;
-    while (at < end) {
-      while (at < end && _space(text.codeUnitAt(at))) {
-        at++;
-      }
-      var to = at;
-      while (to < end && !_space(text.codeUnitAt(to))) {
-        to++;
-      }
-      if (to <= at) break;
-      measurements++;
-      final painter = TextPainter(
-        text: TextSpan(
-          children: _spans(text, tokens, at, to, hiddenAtRest, styleOf),
-          style: style,
-        ),
-        textDirection: TextDirection.ltr,
-        textScaler: scaler,
-      )..layout();
-      if (painter.width > most) most = painter.width;
-      painter.dispose();
-      at = to;
-    }
-    return most;
+    final widths = measureTableCell(
+      TextSpan(children: spans, style: style),
+      scaler,
+    );
+    return (
+      visible: widths.natural,
+      least: widths.least,
+      hidden: hidden,
+      lead: lead ?? hidden,
+    );
   }
 
   /// The spans `[start, end)` of [text] is drawn in: its tokens' styles, and
@@ -1144,8 +1000,6 @@ final class LiveTables {
     letterSpacing: spacing,
     wordSpacing: 0,
   );
-
-  static bool _space(int unit) => unit == 0x20 || unit == 0x09;
 }
 
 /// One table's kept work: the lines it measured ([_Metrics]), and the rows it
