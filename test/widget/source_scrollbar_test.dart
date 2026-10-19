@@ -2,6 +2,7 @@
 // arrow, and a drag on it scrolls without moving the caret or the selection.
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
@@ -88,6 +89,43 @@ ScrollPosition _position(WidgetTester tester) => tester
           .first,
     )
     .position;
+
+/// Shows the bar the way a scroll does, so its thumb is painted and a press
+/// can take it, then comes back to the top.
+Future<void> _showBar(WidgetTester tester) async {
+  final position = _position(tester);
+  for (final to in const <double>[1, 0]) {
+    position.jumpTo(to);
+    await tester.pump(const Duration(milliseconds: 100));
+  }
+}
+
+/// The scrollbar's own painter box, the one that decides what it takes.
+RenderCustomPaint _barPaint(WidgetTester tester) => tester
+    .renderObjectList<RenderCustomPaint>(
+      find.descendant(
+        of: find.byType(MarkdownSourceView),
+        matching: find.byType(CustomPaint),
+      ),
+    )
+    .firstWhere((paint) => paint.foregroundPainter is ScrollbarPainter);
+
+/// The x range, in the window, where the scrollbar takes a mouse press at
+/// [y]: read off the painter's own hit test, not worked out again here.
+({double left, double right}) _barSpan(WidgetTester tester, double y) {
+  final paint = _barPaint(tester);
+  final painter = paint.foregroundPainter! as ScrollbarPainter;
+  final xs = <double>[
+    for (var x = 0.0; x < 900; x += 0.5)
+      if (painter.hitTestInteractive(
+        paint.globalToLocal(Offset(x, y)),
+        PointerDeviceKind.mouse,
+      ))
+        x,
+  ];
+  expect(xs, isNotEmpty, reason: 'the scrollbar takes a press somewhere');
+  return (left: xs.first, right: xs.last);
+}
 
 /// The pane's scroll offset.
 double _offset(WidgetTester tester) => _position(tester).pixels;
@@ -180,6 +218,133 @@ void main() {
     await tester.pump();
 
     expect(state.selectedText, isNotEmpty);
+  });
+
+  testWidgets('a plain click on the scrollbar leaves the caret where it was', (
+    tester,
+  ) async {
+    final state = await _pump(tester);
+    await _showBar(tester);
+    final gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    addTearDown(gesture.removePointer);
+    // The caret goes to the text first.
+    await gesture.addPointer(location: const Offset(200, 100));
+    await gesture.down(const Offset(200, 100));
+    await gesture.up();
+    await tester.pump(const Duration(milliseconds: 400));
+    final caret = state.selection.caret;
+    expect(caret, greaterThan(0));
+
+    // Then a click on the bar, down and up, with no drag.
+    await gesture.moveTo(const Offset(896, 300));
+    await tester.pump(const Duration(milliseconds: 100));
+    await gesture.down(const Offset(896, 300));
+    await tester.pump();
+    await gesture.up();
+    await tester.pump(const Duration(milliseconds: 400));
+
+    expect(state.selection.caret, caret);
+    expect(state.selection.isCollapsed, isTrue);
+  });
+
+  testWidgets('a drag from the text into the strip still selects', (
+    tester,
+  ) async {
+    final state = await _pump(tester);
+    await _showBar(tester);
+    final gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: const Offset(200, 50));
+    addTearDown(gesture.removePointer);
+    await tester.pump();
+    await gesture.down(const Offset(200, 50));
+    await tester.pump();
+    await gesture.moveTo(const Offset(896, 50));
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+
+    expect(state.selectedText, isNotEmpty);
+    // Past the end of the line: the whole rest of it.
+    expect(state.selectedText, endsWith('testo'));
+  });
+
+  // The strip is what the scrollbar takes, to the pixel: read off its own
+  // painter, so a theme, a margin or an inset moves both together.
+  final bars = <String, ({ScrollbarThemeData? theme, EdgeInsets padding})>{
+    'default': (theme: null, padding: EdgeInsets.zero),
+    'a themed thickness and margin': (
+      theme: const ScrollbarThemeData(
+        thickness: WidgetStatePropertyAll<double>(14),
+        crossAxisMargin: 5,
+      ),
+      padding: EdgeInsets.zero,
+    ),
+    'a right inset': (theme: null, padding: const EdgeInsets.only(right: 20)),
+    // The track, shown, grows under the pointer: the strip with it.
+    'a visible track': (
+      theme: const ScrollbarThemeData(
+        trackVisibility: WidgetStatePropertyAll<bool>(true),
+      ),
+      padding: EdgeInsets.zero,
+    ),
+  };
+  for (final MapEntry(key: name, value: bar) in bars.entries) {
+    testWidgets('the strip is exactly where the scrollbar takes a press '
+        '($name)', (tester) async {
+      final state = await _pump(
+        tester,
+        scrollbarTheme: bar.theme,
+        padding: bar.padding,
+      );
+      await _showBar(tester);
+      // The pointer is over the bar, as it is when a press comes: the
+      // scrollbar has taken its hovered shape, which is the one it measures.
+      final gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      addTearDown(gesture.removePointer);
+      await gesture.addPointer(location: const Offset(898, 300));
+      await gesture.moveTo(const Offset(898, 300));
+      await tester.pump(const Duration(milliseconds: 300));
+      final span = _barSpan(tester, 300);
+
+      Future<void> press(double x) async {
+        await gesture.moveTo(Offset(x, 300));
+        await tester.pump(const Duration(milliseconds: 300));
+        await gesture.down(Offset(x, 300));
+        await tester.pump();
+        await gesture.up();
+        await tester.pump(const Duration(milliseconds: 400));
+      }
+
+      // Just inside the bar, at either edge: the scrollbar's.
+      await press(span.left + 0.5);
+      expect(state.selection.caret, 0, reason: 'inside, left edge');
+      await press(span.right - 0.5);
+      expect(state.selection.caret, 0, reason: 'inside, right edge');
+
+      // Just outside it, on the text's side: the text's.
+      await press(span.left - 1);
+      expect(state.selection.caret, greaterThan(0), reason: 'outside');
+    });
+  }
+
+  testWidgets('a note with nothing to scroll has no strip', (tester) async {
+    final state = await _pump(tester, note: _note(3));
+    expect(_position(tester).maxScrollExtent, 0);
+    final gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: const Offset(896, 30));
+    addTearDown(gesture.removePointer);
+    await tester.pump();
+
+    // The I-beam, as anywhere on the text.
+    await gesture.moveTo(const Offset(896, 30));
+    await tester.pump();
+    expect(_cursor(tester), SystemMouseCursors.text);
+
+    await gesture.down(const Offset(896, 30));
+    await tester.pump();
+    await gesture.up();
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(state.selection.caret, greaterThan(0));
   });
 
   // The strip belongs to the *mouse's* scrollbar. A finger there is on the

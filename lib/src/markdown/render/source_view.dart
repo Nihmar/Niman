@@ -98,6 +98,7 @@ import 'package:niman/src/markdown/render/math_text.dart';
 import 'package:niman/src/markdown/render/note_margins.dart';
 import 'package:niman/src/markdown/render/note_semantics.dart';
 import 'package:niman/src/markdown/render/scroll_anchor.dart';
+import 'package:niman/src/markdown/render/scrollbar_strip.dart';
 import 'package:niman/src/markdown/render/sliver_columns.dart';
 import 'package:niman/src/markdown/render/sliver_segments.dart';
 import 'package:niman/src/markdown/render/source_context_menu.dart';
@@ -2759,18 +2760,15 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// from it.
   bool _pressOnScrollbar = false;
 
-  /// The scrollbar's strip at the pane's right edge (#1106): a pointer there
-  /// belongs to the scrollbar, not to the text. The width is the theme's
-  /// thickness and margin, with a little room for the painter's own hover
-  /// area, which reaches past the drawn bar.
-  bool _onScrollbar(Offset local) {
-    final width = context.size?.width;
-    if (width == null) return false;
-    final theme = ScrollbarTheme.of(context);
-    final thickness = theme.thickness?.resolve(const <WidgetState>{}) ?? 8;
-    final strip = thickness + (theme.crossAxisMargin ?? 0) + 4;
-    return local.dx >= width - strip;
-  }
+  /// Whether [global], a position in the window, is on the scrollbar's track
+  /// (#1106): a mouse there belongs to the scrollbar, not to the text. Asked
+  /// of the bar itself ([pointerOnScrollbar]), so there is no strip when the
+  /// platform builds no bar or the note has nothing to scroll.
+  bool _onScrollbar(Offset global) => pointerOnScrollbar(
+    scrollView: _scrollKey.currentContext?.findRenderObject(),
+    metrics: _scroll.hasClients ? _scroll.position : null,
+    global: global,
+  );
 
   /// [child] with mouse dragging selecting text.
   ///
@@ -2782,7 +2780,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     onPointerHover: (event) {
       // The scrollbar's strip belongs to the scrollbar: the pointer keeps the
       // arrow there, and neither the table nor the cursor is asked (#1106).
-      if (_onScrollbar(event.localPosition)) {
+      if (_onScrollbar(event.position)) {
         _hoverPosition = null;
         _leaveTable();
         _reportLinkHover(null, Offset.zero);
@@ -2807,7 +2805,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       _lastPointerKind = event.kind;
       _pressOffset = null;
       if (event.kind == PointerDeviceKind.mouse &&
-          _onScrollbar(event.localPosition)) {
+          _onScrollbar(event.position)) {
         // The scrollbar takes the drag; the note takes nothing (#1106).
         _pressOnScrollbar = true;
         _hoverPosition = null;
@@ -4224,7 +4222,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                   // not the text's: no caret, no keyboard. A finger is the
                   // text's anywhere (#1106).
                   if (details.kind == PointerDeviceKind.mouse &&
-                      _onScrollbar(details.localPosition)) {
+                      _onScrollbar(details.globalPosition)) {
                     _lastClick = null;
                     return;
                   }
