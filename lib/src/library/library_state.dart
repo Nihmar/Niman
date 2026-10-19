@@ -9,6 +9,7 @@ import 'package:drift/native.dart';
 // told apart from a transient failure (#368).
 // ignore: experimental_member_use
 import 'package:drift/remote.dart' show DriftRemoteException;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:home_widget/home_widget.dart';
@@ -21,6 +22,7 @@ import 'package:niman/src/core/language.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/settings/custom_theme_repo.dart';
 import 'package:niman/src/core/settings/device_settings_store.dart';
+import 'package:niman/src/core/settings/features.dart';
 import 'package:niman/src/core/settings/legacy_library_settings.dart';
 import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/core/settings/library_config_repo.dart';
@@ -211,6 +213,7 @@ final class LibraryController implements LibrarySession {
   /// The open library's `.niman/settings.json`; null while none is open,
   /// and then every setting reads and writes app-wide.
   LibraryConfigRepo? _configRepo;
+  final ValueNotifier<Features> _features = ValueNotifier(const Features());
   Indexer? _indexer;
   NoteOps? _ops;
   LibrarySyncService? _sync;
@@ -293,6 +296,10 @@ final class LibraryController implements LibrarySession {
   /// Fires with the new [revision] after every index change.
   @override
   Stream<int> get events => _events.stream;
+
+  /// The open library's features (#1109); every one on while none is open.
+  @override
+  ValueListenable<Features> get features => _features;
 
   /// Fires with the new [treeRevision] after a change that may move the
   /// tree's rows (#751).
@@ -646,6 +653,7 @@ final class LibraryController implements LibrarySession {
       abs,
       device: DbDeviceSettingsStore(appDb),
       welcomeDefaults: welcomeDefaults,
+      features: _features,
     );
     _configRepo = config;
     final ops = NoteOps(
@@ -1753,6 +1761,9 @@ final class LibraryController implements LibrarySession {
     _linksDb = null;
     _linksOps = null;
     _configRepo = null;
+    // Nothing is open: every feature reads as on until a library says
+    // otherwise, so the next open never starts from the last one's.
+    _features.value = const Features();
     final sync = _sync;
     _sync = null;
     // A sync going now writes through the index about to close: its
