@@ -183,6 +183,24 @@ final class WebDavClient {
   /// never with this device's clock, which can be minutes off.
   DateTime? get serverDate => _serverDate;
 
+  int _bytesSent = 0;
+  int _bytesReceived = 0;
+  int _bytesHashed = 0;
+
+  /// Body bytes this client has handed to the connection for an upload,
+  /// counted as they leave: a transfer that fails half way counts what it
+  /// sent, and a redirect hop that sends the body again counts it again.
+  int get bytesSent => _bytesSent;
+
+  /// Body bytes this client has received from downloads that kept them,
+  /// counted as they arrive (a failed or short download counts what came).
+  int get bytesReceived => _bytesReceived;
+
+  /// Body bytes received from downloads made only to hash them
+  /// ([download]'s `hashOnly`): the cost of a file whose listing cannot say
+  /// whether it changed, apart from the notes the run really fetched.
+  int get bytesHashed => _bytesHashed;
+
   static const _maxRedirects = 5;
 
   /// How many bytes the download gathers before the hash and the sink see
@@ -376,10 +394,15 @@ final class WebDavClient {
   /// on failure). The sha256 is computed on the way; a body shorter or
   /// longer than its `Content-Length` fails as [WebDavRetryable], and so
   /// does one that stops arriving for [timeout].
+  ///
+  /// The bytes that arrive add to [bytesReceived], or to [bytesHashed] when
+  /// [hashOnly] says [into] throws them away and the download is made only
+  /// for the sha256.
   Future<WebDavDownload> download(
     String path,
-    StreamConsumer<List<int>> into,
-  ) async {
+    StreamConsumer<List<int>> into, {
+    bool hashOnly = false,
+  }) async {
     final clock = Stopwatch()..start();
     final HttpClientResponse response;
     try {
@@ -437,6 +460,11 @@ final class WebDavClient {
           (chunk) {
             progress();
             bytes += chunk.length;
+            if (hashOnly) {
+              _bytesHashed += chunk.length;
+            } else {
+              _bytesReceived += chunk.length;
+            }
             gathered.add(chunk);
             if (gathered.length >= _downloadChunk) flush();
           },
@@ -540,7 +568,10 @@ final class WebDavClient {
         if (modified != null)
           'X-OC-Mtime': '${modified.millisecondsSinceEpoch ~/ 1000}',
       },
-      body: open,
+      body: () => open().map((chunk) {
+        _bytesSent += chunk.length;
+        return chunk;
+      }),
       length: length,
     );
     final status = response.statusCode;

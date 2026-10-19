@@ -283,6 +283,12 @@ final class SyncEngine {
     } on FileSystemException catch (e) {
       _abort(report, SyncAbort.failed, 'local: ${e.message} (${e.path})');
     } finally {
+      // Where the bytes moved is the client: whatever the run did with it,
+      // including what a failed transfer sent or received before it broke.
+      report
+        ..bytesUp = client.bytesSent
+        ..bytesDown = client.bytesReceived
+        ..bytesHashed = client.bytesHashed;
       client.close();
     }
     return await _finish(
@@ -417,8 +423,9 @@ final class SyncEngine {
                   '${report.hintsFailed} backing off'}'
         '${report.retryAfter == null ? '' : '; server asked to wait '
                   '${report.retryAfter!.inSeconds}s'}; up ${report.bytesUp} b, '
-        'down ${report.bytesDown} b; scan ${report.scanMs} ms, '
-        'hash ${report.hashMs} ms, apply ${report.applyMs} ms';
+        'down ${report.bytesDown} b, hashed ${report.bytesHashed} b; '
+        'scan ${report.scanMs} ms, hash ${report.hashMs} ms, '
+        'apply ${report.applyMs} ms';
     if (report.clean) {
       _log.info(line);
     } else {

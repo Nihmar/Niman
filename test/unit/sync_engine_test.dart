@@ -1881,4 +1881,62 @@ void main() {
       expect(await a.queue(), ['changed a.md x0']);
     });
   });
+
+  // #1107: what a run moved and how long each phase took, so a slow sync
+  // says whether the link or the work is to blame.
+  group('the transfer report', () {
+    test('counts what an upload sent and a download received', () async {
+      final text = 'x' * 200000;
+      a.write('big.md', text);
+      final up = await a.sync();
+      expect(up.bytesUp, greaterThanOrEqualTo(text.length));
+      expect(up.bytesUp, lessThan(text.length + 4096));
+      expect(up.bytesDown, 0);
+
+      final down = await b.sync();
+      expect(down.bytesDown, greaterThanOrEqualTo(text.length));
+      expect(down.bytesDown, lessThan(text.length + 4096));
+      expect(down.bytesUp, lessThan(4096));
+      expect(down.bytesHashed, 0);
+    });
+
+    test('counts the merged text a merge uploads', () async {
+      String note(List<String> lines) => '${lines.join('\n')}\n';
+      a.write('note.md', note(['# Title', 'one', 'two', 'three']));
+      await a.sync();
+      await b.sync();
+      a.write('note.md', note(['# Title', 'one', 'two', 'three', 'four']));
+      b.write('note.md', note(['# Notes', 'one', 'two', 'three']));
+      await b.sync();
+
+      final report = await a.sync();
+
+      final merged = utf8.encode(
+        note(['# Notes', 'one', 'two', 'three', 'four']),
+      );
+      expect(report.merged, ['note.md'], reason: report.summary());
+      expect(report.bytesUp, greaterThanOrEqualTo(merged.length));
+      expect(report.bytesUp, lessThan(merged.length + 1024));
+      expect(report.bytesDown, greaterThan(0), reason: 'the remote copy');
+    });
+
+    test('counts a hash by download apart from the notes fetched', () async {
+      server
+        ..etags = false
+        ..collectionEtags = false
+        ..preconditions = false
+        ..supportMove = false;
+      a.write('a.md', 'aaa');
+      await a.sync();
+      // Another device rewrites it in the same second, same size: only the
+      // content tells, so the run downloads it to hash it.
+      server.putFile('a.md', utf8.encode('bbb'));
+
+      final report = await a.sync();
+
+      expect(report.done[SyncActionKind.download], 1, reason: report.summary());
+      expect(report.bytesHashed, 3, reason: 'the hash download');
+      expect(report.bytesDown, 3, reason: 'the note fetched after it');
+    });
+  });
 }

@@ -778,6 +778,81 @@ void main() {
       },
     );
   });
+
+  // #1107: the bytes are counted where they move, so a transfer that is not
+  // a fetched note — a hash download, a merge upload, one that broke half
+  // way — is in the numbers too.
+  group('transfer counters', () {
+    test('start at zero, and an upload counts the bytes it sent', () async {
+      expect(client.bytesSent, 0);
+      expect(client.bytesReceived, 0);
+      expect(client.bytesHashed, 0);
+      await put('a.md', 'twelve bytes');
+      expect(client.bytesSent, 12);
+      expect(client.bytesReceived, 0);
+    });
+
+    test(
+      'a download counts what arrived, a hash download what it hashed',
+      () async {
+        final bytes = List<int>.generate(70000, (i) => i % 251);
+        server.putFile('a.bin', bytes);
+
+        await client.readBytes('a.bin');
+        expect(client.bytesReceived, bytes.length);
+        expect(client.bytesHashed, 0);
+
+        final hashed = await client.download(
+          'a.bin',
+          _Discard(),
+          hashOnly: true,
+        );
+        expect(hashed.sha256, sha256.convert(bytes).toString());
+        expect(
+          client.bytesReceived,
+          bytes.length,
+          reason: 'not a fetched copy',
+        );
+        expect(client.bytesHashed, bytes.length);
+      },
+    );
+
+    test('a download that breaks half way counts what came', () async {
+      server
+        ..putFile('a.bin', List<int>.filled(50000, 1))
+        ..dropNextGet();
+      await expectLater(
+        client.readBytes('a.bin'),
+        throwsA(isA<WebDavRetryable>()),
+      );
+      expect(client.bytesReceived, greaterThan(0));
+      expect(client.bytesReceived, lessThan(50000));
+    });
+
+    test('an upload the server refuses still counts what was sent', () async {
+      server.failPutsTo('a.md', 403);
+      await expectLater(put('a.md', 'refused'), throwsA(isA<WebDavFailure>()));
+      expect(client.bytesSent, 'refused'.length);
+    });
+
+    test('uploadFile counts the file it streamed', () async {
+      final folder = Directory.systemTemp.createTempSync('niman-counter-');
+      addTearDown(() => folder.deleteSync(recursive: true));
+      final file = File(p.join(folder.path, 'a.bin'))
+        ..writeAsBytesSync(List<int>.filled(150000, 7));
+      await client.uploadFile('a.bin', file);
+      expect(client.bytesSent, 150000);
+    });
+  });
+}
+
+/// A sink that drops what it is given.
+final class _Discard implements StreamConsumer<List<int>> {
+  @override
+  Future<void> addStream(Stream<List<int>> stream) => stream.drain<void>();
+
+  @override
+  Future<void> close() async {}
 }
 
 /// An [HttpClient] that reaches the loopback fake over plain http even when

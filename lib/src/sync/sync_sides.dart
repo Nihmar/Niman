@@ -67,7 +67,7 @@ final class SyncSides {
 
   /// The sha256 of the server's copy of [path], downloaded and dropped.
   Future<String> remoteSha(WebDavClient client, String path) async =>
-      (await client.download(path, _DiscardSink())).sha256;
+      (await client.download(path, _DiscardSink(), hashOnly: true)).sha256;
 
   /// The file at [path] still is what the scan saw (both absent counts).
   Future<LocalFileState?> localStillAsPlanned(
@@ -279,7 +279,6 @@ final class SyncSides {
     if (sent != null && sent != sha) {
       throw changed ?? const _ChangedDuringSync();
     }
-    c.report.bytesUp += local.size;
     final listed = await c.client.stat(path);
     if (listed == null) throw notListed;
     await store.putItems([
@@ -355,7 +354,6 @@ final class SyncSides {
           'GET $path: ${download.bytes} bytes, the listing said $expected',
         );
       }
-      c.report.bytesDown += download.bytes;
       return (temp: temp, download: download);
     } on Object {
       if (temp.existsSync()) await temp.delete();
