@@ -13,8 +13,9 @@ import 'package:niman/src/sync/sync_run_context.dart';
 import 'package:niman/src/sync/sync_step_failure.dart';
 import 'package:niman/src/sync/sync_step_outcome.dart';
 import 'package:niman/src/sync/sync_store.dart';
+import 'package:niman/src/sync/transfers/direct_write.dart';
+import 'package:niman/src/sync/transfers/sync_transfers.dart';
 import 'package:niman/src/sync/webdav/webdav_client.dart';
-import 'package:niman/src/sync/webdav/webdav_failure.dart';
 import 'package:niman/src/sync/webdav/webdav_multistatus.dart';
 import 'package:path/path.dart' as p;
 
@@ -30,6 +31,7 @@ final class SyncSides {
     required this.ops,
     required this.store,
     required this._now,
+    this.directWriteLimit = kSyncDirectWriteMaxBytes,
   });
 
   /// Absolute path of the library root.
@@ -42,6 +44,9 @@ final class SyncSides {
   final SyncStore store;
 
   final DateTime Function() _now;
+
+  /// The largest new file a download holds in memory before writing it.
+  final int directWriteLimit;
 
   static const _log = AppLogger(name: 'sync');
 
@@ -66,8 +71,8 @@ final class SyncSides {
   ) => Isolate.run(() => hashLocalFiles(root, paths));
 
   /// The sha256 of the server's copy of [path], downloaded and dropped.
-  Future<String> remoteSha(WebDavClient client, String path) async =>
-      (await client.download(path, _DiscardSink(), hashOnly: true)).sha256;
+  Future<String> remoteSha(SyncTransfers transfers, String path) =>
+      transfers.hashRemote(path);
 
   /// The file at [path] still is what the scan saw (both absent counts).
   Future<LocalFileState?> localStillAsPlanned(
@@ -119,7 +124,7 @@ final class SyncSides {
     if (!unverified(c, now.modified)) return;
     final expected = expectedSha ?? c.rows[path]?.localSha256;
     if (expected == null) return;
-    if (await remoteSha(c.client, path) != expected) {
+    if (await remoteSha(c.transfers, path) != expected) {
       throw const _ChangedDuringSync();
     }
   }
@@ -264,9 +269,9 @@ final class SyncSides {
     DateTime? modified,
   }) async {
     await ensureRemoteParent(c, path);
-    final uploaded = await c.client.uploadFile(
+    final uploaded = await c.transfers.upload(
       path,
-      File(p.join(root, path)),
+      p.join(root, path),
       ifMatch: ifMatch,
       ifNoneMatch: ifNoneMatch,
       modified: modified,
@@ -288,11 +293,23 @@ final class SyncSides {
 
   /// Creates the remote folder [path] goes in, unless the run knows it
   /// exists.
-  Future<void> ensureRemoteParent(SyncRunContext c, String path) async {
+  ///
+  /// Uploads overlap (#1107), and the folder is only known to exist once the
+  /// `MKCOL` has answered: a second upload into the same new folder waits for
+  /// the creation under way rather than sending a `MKCOL` of its own.
+  Future<void> ensureRemoteParent(SyncRunContext c, String path) {
     final slash = path.lastIndexOf('/');
-    if (slash < 0) return;
+    if (slash < 0) return Future<void>.value();
     final parent = path.substring(0, slash);
-    if (c.folders.contains(parent)) return;
+    if (c.folders.contains(parent)) return Future<void>.value();
+    final creating = c.folderCreations[parent];
+    if (creating != null) return creating;
+    final creation = _createRemoteFolders(c, parent);
+    c.folderCreations[parent] = creation;
+    return creation.whenComplete(() => c.folderCreations.remove(parent));
+  }
+
+  Future<void> _createRemoteFolders(SyncRunContext c, String parent) async {
     await c.client.createFolders(parent);
     var folder = parent;
     while (folder.isNotEmpty) {
@@ -318,47 +335,41 @@ final class SyncSides {
       ),
     );
     try {
-      // The sink is ours, not the client's (issue #103). Handing
-      // `temp.openWrite()` straight in left its closing to whatever the
-      // consumer did with it, and the file the download had just written
-      // then went into a rename that never returned on Windows — where,
-      // unlike POSIX, a file with a handle still on it cannot be
-      // renamed. A note never hit it because its temp is written by
-      // `writeAsBytes`, which closes on its own.
-      final sink = temp.openWrite();
-      final WebDavDownload download;
-      try {
-        download = await c.client.download(path, sink);
-      } finally {
-        // The consumer closes the sink; closing a closed sink is a no-op
-        // that hands back the same `done`. Awaiting it is what says the
-        // bytes are on disk and the handle is gone before anyone renames.
-        // A sink the transfer still holds throws straight out of
-        // `close()`, though, and that StateError must not replace the
-        // transfer's own failure (#495).
-        try {
-          await sink.close();
-          await sink.done;
-        } on Object {
-          // The transfer's own failure is the one to report.
-        }
-      }
+      // The transfer writes the temp and closes it before it answers: a
+      // file with a handle still on it cannot be renamed on Windows
+      // (#103, #495; `downloadToFile`).
+      final download = await c.transfers.download(path, temp.path);
       // The client already checked Content-Length. A chunked answer has none,
-      // so compare with the listing too — unless the ETag says the file was
-      // rewritten since, which makes a different size legitimate.
+      // so compare with the listing too.
       final listed = c.remote[path];
-      final expected = listed?.size;
-      final rewritten = download.etag != null && download.etag != listed?.etag;
-      if (expected != null && download.bytes != expected && !rewritten) {
-        throw WebDavProtocolFailure(
-          'GET $path: ${download.bytes} bytes, the listing said $expected',
-        );
-      }
+      checkAgainstListing(
+        path,
+        download,
+        listedSize: listed?.size,
+        listedEtag: listed?.etag,
+      );
       return (temp: temp, download: download);
     } on Object {
       if (temp.existsSync()) await temp.delete();
       rethrow;
     }
+  }
+
+  /// GETs [path], which has no local file, straight to its final name: no
+  /// temp, no rename (`SyncTransfers.downloadNew`). Missing folders are
+  /// created. The file is complete and closed when this answers; when it
+  /// fails, nothing is left at the path.
+  Future<NewFileDownload> fetchNew(SyncRunContext c, String path) async {
+    final target = p.join(root, path);
+    await Directory(p.dirname(target)).create(recursive: true);
+    final listed = c.remote[path];
+    return await c.transfers.downloadNew(
+      path,
+      target,
+      listedSize: listed?.size,
+      listedEtag: listed?.etag,
+      memoryLimit: directWriteLimit,
+    );
   }
 
   /// The server's copy of [path] as a [download] of it describes it,
@@ -384,14 +395,6 @@ final class SyncSides {
 /// path is skipped and the next run decides again.
 final class _ChangedDuringSync implements Exception {
   const new();
-}
-
-final class _DiscardSink implements StreamConsumer<List<int>> {
-  @override
-  Future<void> addStream(Stream<List<int>> stream) => stream.drain<void>();
-
-  @override
-  Future<void> close() async {}
 }
 
 /// The sha256 of each of [paths] under [root], streamed; a file that

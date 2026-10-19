@@ -100,6 +100,9 @@ Future<void> _rewindTo(AppDatabase db, int version) async {
   Future<void> drop(String table, String column) =>
       db.customStatement('ALTER TABLE $table DROP COLUMN $column');
 
+  if (version < 33) {
+    await db.customStatement('DROP TABLE sync_pending_downloads');
+  }
   if (version < 32) await _dropTrustedCertFingerprint(db);
   if (version < 31) {
     for (final column in [
@@ -864,6 +867,7 @@ void main() {
         'sync_destinations',
         'sync_items',
         'sync_ops',
+        'sync_pending_downloads',
         'workspaces',
         'library_device_settings',
         'custom_themes',
@@ -1439,6 +1443,53 @@ void main() {
     });
   });
 
+  group('v32 → v33: downloads being written are remembered', () {
+    for (final from in [32, 21]) {
+      test('a v$from install gets the table, its rows intact', () async {
+        {
+          final db = AppDatabase(NativeDatabase(dbFile));
+          await _rewindTo(db, from);
+          if (from >= 22) {
+            await db.customStatement(
+              'INSERT INTO sync_destinations (library_path, url, username) '
+              "VALUES (?, 'https://nas.example/dav/', 'ale')",
+              [p.normalize('/lib/Work')],
+            );
+          }
+          await db.close();
+        }
+
+        final db = AppDatabase(NativeDatabase(dbFile));
+        addTearDown(db.close);
+        final store = SyncStore(db);
+        if (from >= 22) {
+          expect(
+            (await store.destination('/lib/Work'))!.url,
+            'https://nas.example/dav/',
+          );
+        }
+        await store.pendingDownloads.mark('/lib/Work', 'a.md');
+        expect(await store.pendingDownloads.pending('/lib/Work'), ['a.md']);
+      });
+    }
+
+    test('a table that is there already is left alone', () async {
+      {
+        final db = AppDatabase(NativeDatabase(dbFile));
+        // The file a testing build left: the table made, the number not.
+        await db.customStatement('PRAGMA user_version = 32');
+        await db.close();
+      }
+
+      final db = AppDatabase(NativeDatabase(dbFile));
+      addTearDown(db.close);
+      expect(
+        await SyncStore(db).pendingDownloads.pending('/lib/Work'),
+        isEmpty,
+      );
+    });
+  });
+
   // #312: the app database had one connection per caller, and on the first
   // launch after an update two of them upgraded the same file at once: both
   // read the old schema, one added `welcome_seen`, and the other's `ALTER`
@@ -1485,8 +1536,8 @@ void main() {
       ]);
       expect(rows[0], hasLength(1));
       expect(rows[1], hasLength(1));
-      expect(await versionOf(first), 32);
-      expect(await versionOf(second), 32);
+      expect(await versionOf(first), 33);
+      expect(await versionOf(second), 33);
       // The upgrade ran once, and the row that was there is the row it
       // welcomed.
       expect((await AppSettingsRepo(first).firstRun()).deckSeen, isTrue);
@@ -1520,7 +1571,7 @@ void main() {
 
       final db = open();
       expect((await AppSettingsRepo(db).firstRun()).deckSeen, isFalse);
-      expect(await versionOf(db), 32);
+      expect(await versionOf(db), 33);
       await db.close();
     });
 

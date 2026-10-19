@@ -11,6 +11,8 @@ import 'package:niman/src/sync/sync_report.dart';
 import 'package:niman/src/sync/sync_run_context.dart';
 import 'package:niman/src/sync/sync_sides.dart';
 import 'package:niman/src/sync/sync_store.dart';
+import 'package:niman/src/sync/transfers/inline_sync_transfers.dart';
+import 'package:niman/src/sync/transfers/sync_transfers.dart';
 import 'package:niman/src/sync/webdav/webdav_client.dart';
 import 'package:niman/src/sync/webdav/webdav_failure.dart';
 import 'package:niman/src/sync/webdav/webdav_multistatus.dart';
@@ -226,12 +228,15 @@ final class SyncResolver {
     _log.info('resolve $path: $intent');
     final connection = await _connect();
     final client = connection.client;
+    // One file, one request at a time: nothing here is worth a worker.
+    final transfers = InlineSyncTransfers(client);
     try {
       final capabilities = await _capabilities(client, connection.destination);
       final remote = await client.stat(path);
-      if (shown != null) await _stillAsShown(client, path, shown, remote);
+      if (shown != null) await _stillAsShown(transfers, path, shown, remote);
       final c = SyncRunContext(
         client: client,
+        transfers: transfers,
         capabilities: capabilities,
         local: const {},
         remote: {path: ?remote},
@@ -266,7 +271,7 @@ final class SyncResolver {
   /// copy ([remote], just listed) by ETag when both have one, else by
   /// hashing a fresh download.
   Future<void> _stillAsShown(
-    WebDavClient client,
+    SyncTransfers transfers,
     String path,
     ConflictTexts shown,
     WebDavResource? remote,
@@ -282,7 +287,7 @@ final class SyncResolver {
     } else if (shown.remoteEtag != null && remote.etag != null) {
       remoteSha = remote.etag == shown.remoteEtag ? shown.remoteSha256 : null;
     } else {
-      remoteSha = await sides.remoteSha(client, path);
+      remoteSha = await sides.remoteSha(transfers, path);
     }
     if (remoteSha != shown.remoteSha256) {
       _log.info('resolve $path: refused, changed on the server since shown');

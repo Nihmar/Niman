@@ -253,6 +253,33 @@ final class NoteWriter {
     _reindex(path, abs, created: result.created);
   }
 
+  /// Runs [write], which puts the new file at library-relative [path] on the
+  /// disk by itself — a sync download written straight to its final name —
+  /// in the same per-path order as [save], then does for the file what
+  /// [replaceFromFile] does for a new one: forgets what this writer last
+  /// left at [path] and reads the file into the index.
+  ///
+  /// The file is complete and closed when [write] answers. When it throws,
+  /// nothing is recorded or indexed: [write] leaves nothing behind.
+  Future<T> createdBy<T>(String path, Future<T> Function() write) =>
+      _inTurn(path, () async {
+        final clock = Stopwatch()..start();
+        final T result;
+        try {
+          result = await write();
+        } catch (e) {
+          _log.error('create failed: "$path": $e');
+          rethrow;
+        }
+        _written.remove(path);
+        _log.info(
+          'created from download: "$path" (new file, '
+          '${clock.elapsedMilliseconds} ms)',
+        );
+        _reindex(path, p.join(root, path), created: true);
+        return result;
+      });
+
   /// Completes when every re-index started by a save so far has finished.
   ///
   /// One still waiting for its note to be quiet runs now: whoever asks wants

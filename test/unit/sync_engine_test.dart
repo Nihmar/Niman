@@ -18,6 +18,7 @@ import 'package:niman/src/sync/reconcile.dart';
 import 'package:niman/src/sync/sync_engine.dart';
 import 'package:niman/src/sync/sync_failure.dart';
 import 'package:niman/src/sync/sync_report.dart';
+import 'package:niman/src/sync/sync_step_pool.dart';
 import 'package:niman/src/sync/sync_store.dart';
 import 'package:niman/src/sync/webdav/webdav_client.dart';
 import 'package:path/path.dart' as p;
@@ -38,6 +39,7 @@ final class _Device {
     this.store, {
     this.timeout = const Duration(seconds: 5),
     this.httpClient,
+    this.transferConcurrency = kSyncTransferConcurrency,
   }) : secrets = FakeSyncSecretStore();
 
   static Future<_Device> create(
@@ -45,6 +47,7 @@ final class _Device {
     Duration timeout = const Duration(seconds: 5),
     HttpClient? httpClient,
     DeviceSettingsStore? device,
+    int transferConcurrency = kSyncTransferConcurrency,
   }) async {
     final root = await Directory.current.createTemp('niman_sync_$name');
     final dbDir = await Directory.current.createTemp('niman_sync_db_$name');
@@ -68,6 +71,7 @@ final class _Device {
       SyncStore(app),
       timeout: timeout,
       httpClient: httpClient,
+      transferConcurrency: transferConcurrency,
     );
   }
 
@@ -86,6 +90,9 @@ final class _Device {
   /// a real [HttpClient].
   final HttpClient? httpClient;
 
+  /// How many transfers the engine runs at once.
+  final int transferConcurrency;
+
   String get path => p.normalize(root.path);
 
   late final engine = SyncEngine(
@@ -93,6 +100,7 @@ final class _Device {
     ops: ops,
     store: store,
     secrets: secrets,
+    transferConcurrency: transferConcurrency,
     clientFactory: (destination, password) => WebDavClient(
       url: Uri.parse(destination.url),
       username: destination.username,
@@ -2039,6 +2047,242 @@ void main() {
 
       expect(report.aborted, SyncAbort.authentication);
       expect(report.hashMs, greaterThanOrEqualTo(pause.inMilliseconds));
+    });
+  });
+
+  // #1107: the transfers of a run overlap, a few at a time; every other step
+  // is a barrier that keeps the plan's order.
+  group('parallel transfers', () {
+    bool isData(FakeWebDavRequest r) => !r.path.contains('.niman-probe');
+
+    Future<_Device> device(
+      String name, {
+      int concurrency = kSyncTransferConcurrency,
+    }) async {
+      final d = await _Device.create(name, transferConcurrency: concurrency);
+      await d.connect(server.url);
+      addTearDown(d.close);
+      return d;
+    }
+
+    test('uploads of distinct files overlap, four at most', () async {
+      for (var i = 0; i < 12; i++) {
+        a.write('f$i.md', 'file $i');
+      }
+      server.holdTransfers = const Duration(milliseconds: 150);
+
+      final report = await a.sync();
+
+      expect(report.clean, isTrue, reason: report.summary());
+      expect(report.done[SyncActionKind.upload], 12);
+      expect(
+        server.peakTransfers,
+        inInclusiveRange(2, kSyncTransferConcurrency),
+      );
+      for (var i = 0; i < 12; i++) {
+        expect(remoteText('f$i.md'), 'file $i');
+      }
+    });
+
+    test('downloads overlap too, and land whole', () async {
+      for (var i = 0; i < 12; i++) {
+        server.putFile('d$i.md', utf8.encode('remote $i'));
+      }
+      server.holdTransfers = const Duration(milliseconds: 150);
+
+      final report = await a.sync();
+
+      expect(report.clean, isTrue, reason: report.summary());
+      expect(report.done[SyncActionKind.download], 12);
+      expect(
+        server.peakTransfers,
+        inInclusiveRange(2, kSyncTransferConcurrency),
+      );
+      for (var i = 0; i < 12; i++) {
+        expect(a.read('d$i.md'), 'remote $i');
+      }
+      expect((await a.store.items(a.path)).keys.length, 12);
+    });
+
+    test('a pool of one is the serial run it replaces', () async {
+      final serial = await device('serial', concurrency: 1);
+      for (var i = 0; i < 6; i++) {
+        serial.write('s$i.md', 'file $i');
+      }
+      server.holdTransfers = const Duration(milliseconds: 50);
+
+      final report = await serial.sync();
+
+      expect(report.done[SyncActionKind.upload], 6);
+      expect(server.peakTransfers, 1);
+      final puts = [
+        for (final r in server.requests)
+          if (r.method == 'PUT' && isData(r)) r.path,
+      ];
+      expect(puts, [for (var i = 0; i < 6; i++) '/dav/s$i.md']);
+    });
+
+    test('a delete waits for the uploads before it, and holds back the '
+        'ones after it', () async {
+      a.write('b-gone.md', 'gone');
+      await a.sync();
+      a.delete('b-gone.md');
+      for (var i = 1; i <= 3; i++) {
+        a
+          ..write('a$i.md', 'first $i')
+          ..write('c$i.md', 'last $i');
+      }
+      server
+        ..requests.clear()
+        ..holdTransfers = const Duration(milliseconds: 150);
+
+      final report = await a.sync();
+
+      expect(report.clean, isTrue, reason: report.summary());
+      expect(report.done[SyncActionKind.deleteRemote], 1);
+      final order = [
+        for (final r in server.requests)
+          if ((r.method == 'PUT' || r.method == 'DELETE') && isData(r))
+            '${r.method} ${r.path.split('/').last}',
+      ];
+      final delete = order.indexOf('DELETE b-gone.md');
+      expect(delete, greaterThanOrEqualTo(0), reason: '$order');
+      final before = order.sublist(0, delete);
+      final after = order.sublist(delete + 1);
+      expect(
+        before,
+        unorderedEquals(['PUT a1.md', 'PUT a2.md', 'PUT a3.md']),
+        reason: '$order',
+      );
+      expect(
+        after,
+        unorderedEquals(['PUT c1.md', 'PUT c2.md', 'PUT c3.md']),
+        reason: '$order',
+      );
+    });
+
+    test('uploads into one new folder send one MKCOL', () async {
+      for (var i = 0; i < 6; i++) {
+        a.write('shared/u$i.md', 'file $i');
+      }
+      server.holdTransfers = const Duration(milliseconds: 100);
+
+      final report = await a.sync();
+
+      expect(report.clean, isTrue, reason: report.summary());
+      expect(report.done[SyncActionKind.upload], 6);
+      final makes = [
+        for (final r in server.requests)
+          if (r.method == 'MKCOL' && isData(r)) r.path,
+      ];
+      expect(makes, ['/dav/shared/']);
+    });
+
+    test('the report counts every byte of overlapping transfers', () async {
+      var total = 0;
+      for (var i = 0; i < 8; i++) {
+        final text = '${'x' * (20000 + i)}$i';
+        total += text.length;
+        a.write('big$i.md', text);
+      }
+      server.holdTransfers = const Duration(milliseconds: 50);
+
+      final up = await a.sync();
+
+      expect(up.bytesUp, greaterThanOrEqualTo(total));
+      expect(up.bytesUp, lessThan(total + 8 * 1024));
+      expect(up.bytesDown, 0);
+
+      final down = await b.sync();
+
+      expect(down.bytesDown, total);
+      expect(down.bytesHashed, 0);
+    });
+
+    test('a refused login ends the run and cancels the transfers in flight, '
+        'their temp files with them', () async {
+      for (var i = 0; i < 8; i++) {
+        server.putFile('d$i.md', utf8.encode('x' * 2000));
+      }
+      var gets = 0;
+      server.beforeAnswer = (request) {
+        if (request.method != 'GET' || !isData(request)) return;
+        gets++;
+        // The first body crawls in; the third request finds the login
+        // refused.
+        if (gets == 1) server.trickleNextGet = const Duration(seconds: 1);
+        if (gets == 3) server.credentials = (user: 'u', password: 'p');
+      };
+      final clock = Stopwatch()..start();
+
+      final report = await a.sync();
+
+      expect(report.aborted, SyncAbort.authentication);
+      expect(
+        clock.elapsed,
+        lessThan(const Duration(seconds: 4)),
+        reason: 'the crawling body was cut, not waited for',
+      );
+      expect(report.failures, isEmpty, reason: 'cut short is not failed');
+      expect(report.applyMs, greaterThan(0));
+      final leftovers = [
+        for (final entity in a.root.listSync(recursive: true))
+          if (p.basename(entity.path).contains('niman-tmp-sync')) entity.path,
+      ];
+      expect(leftovers, isEmpty);
+    });
+
+    test('a refused login while uploads overlap ends the run', () async {
+      for (var i = 0; i < 12; i++) {
+        a.write('f$i.md', 'file $i');
+      }
+      server.holdTransfers = const Duration(milliseconds: 100);
+      var puts = 0;
+      server.beforeAnswer = (request) {
+        if (request.method == 'PUT' && isData(request) && ++puts == 5) {
+          server.credentials = (user: 'u', password: 'p');
+        }
+      };
+
+      final report = await a.sync();
+
+      expect(report.aborted, SyncAbort.authentication);
+      expect(report.failures, isEmpty);
+      expect(
+        server.paths.where((path) => path.startsWith('f')).length,
+        lessThan(12),
+      );
+    });
+
+    test('remote files are hashed a few at a time', () async {
+      final now = DateTime.now();
+      server
+        ..etags = false
+        ..collectionEtags = false
+        ..preconditions = false
+        ..supportMove = false
+        ..clock = () => now;
+      for (var i = 0; i < 8; i++) {
+        a.write('h$i.md', 'aaa');
+      }
+      await a.sync();
+      // Rewritten in the same second, same size: only the content tells.
+      for (var i = 0; i < 8; i++) {
+        server.putFile('h$i.md', utf8.encode('bbb'));
+      }
+      server
+        ..requests.clear()
+        ..peakTransfers = 0
+        ..holdTransfers = const Duration(milliseconds: 100);
+
+      final report = await a.sync();
+
+      expect(report.bytesHashed, 8 * 3, reason: report.summary());
+      expect(report.done[SyncActionKind.download], 8);
+      expect(
+        server.peakTransfers,
+        inInclusiveRange(2, kSyncTransferConcurrency),
+      );
     });
   });
 }

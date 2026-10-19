@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:drift/drift.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/db/app_database.dart';
+import 'package:niman/src/sync/pending_download_store.dart';
 import 'package:niman/src/sync/webdav/webdav_probe.dart';
 import 'package:path/path.dart' as p;
 
@@ -54,6 +55,13 @@ final class SyncStore {
   final DateTime Function() _now;
 
   static const _log = AppLogger(name: 'sync');
+
+  /// The downloads being written under their final names, which a run that
+  /// was killed meanwhile finds again.
+  late final PendingDownloadStore pendingDownloads = PendingDownloadStore(
+    _db,
+    now: _now,
+  );
 
   int get _nowMs => _now().millisecondsSinceEpoch;
 
@@ -255,6 +263,7 @@ final class SyncStore {
       final ops = await (_db.delete(
         _db.syncOps,
       )..where((t) => t.libraryPath.equals(path))).go();
+      await pendingDownloads.clearAll(path);
       return (destinations, items, ops);
     });
     _log.info(

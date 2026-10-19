@@ -206,6 +206,27 @@ final class FakeWebDavServer {
   /// client that is still sending (#617). Every other request is answered.
   int? maxPutBytes;
 
+  /// Set, every `GET` and `PUT` waits this long before it is served — long
+  /// enough for transfers that overlap to be in flight together.
+  Duration? holdTransfers;
+
+  /// The most `GET`s and `PUT`s that were being served at once.
+  int peakTransfers = 0;
+
+  int _transfers = 0;
+
+  Future<void> _held(Future<void> Function() serve) async {
+    _transfers++;
+    if (_transfers > peakTransfers) peakTransfers = _transfers;
+    try {
+      final hold = holdTransfers;
+      if (hold != null) await Future<void>.delayed(hold);
+      await serve();
+    } finally {
+      _transfers--;
+    }
+  }
+
   final Map<String, int> _failPuts = {};
 
   /// The next PUT to [path] answers [status] (once).
@@ -387,13 +408,13 @@ final class FakeWebDavServer {
       case 'PROPFIND':
         await _propfind(request, path, headers);
       case 'GET':
-        await _get(request, path);
+        await _held(() => _get(request, path));
       case 'PUT'
           when maxPutBytes != null && request.contentLength > maxPutBytes!:
         final socket = await response.detachSocket(writeHeaders: false);
         socket.destroy();
       case 'PUT':
-        await _put(request, path, headers);
+        await _held(() => _put(request, path, headers));
       case 'MKCOL':
         await request.drain<void>();
         if (_tree.containsKey(path)) {

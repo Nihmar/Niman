@@ -6,6 +6,7 @@ import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
 import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/sync/webdav/webdav_client_config.dart';
 import 'package:niman/src/sync/webdav/webdav_failure.dart';
 import 'package:niman/src/sync/webdav/webdav_multistatus.dart';
 
@@ -129,6 +130,15 @@ final class WebDavClient {
            ? null
            : 'Basic ${base64.encode(utf8.encode('$username:$password'))}',
        _trustedFingerprint = _fingerprintKey(trustedCertificateFingerprint),
+       config = httpClient != null
+           ? null
+           : WebDavClientConfig(
+               url: url.toString(),
+               username: username,
+               password: password,
+               trustedCertificateFingerprint: trustedCertificateFingerprint,
+               timeoutMs: timeout.inMilliseconds,
+             ),
        _ownsHttp = httpClient == null,
        _http = httpClient ?? HttpClient() {
     _http
@@ -152,6 +162,11 @@ final class WebDavClient {
   /// The destination folder, always ending with `/`, with no query,
   /// fragment or user info.
   final Uri baseUrl;
+
+  /// What builds this client again in another isolate (#1107), or null for
+  /// a client over an injected `HttpClient`: a transport that cannot cross
+  /// an isolate, which only a test injects.
+  final WebDavClientConfig? config;
 
   /// How long to wait for a connection, for a response to start, and for
   /// the next chunk of a body, either way.

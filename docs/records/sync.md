@@ -423,6 +423,40 @@ any isolate and is tested against an in-process fake server
 switches turn ETags (strong or weak), collection ETags, `If-Match`, `MOVE`,
 auth, redirects and injected failures on and off.
 
+### The transfers (`lib/src/sync/transfers/`, #1107)
+
+The client's socket reads, its sha256 and the file writes of a download
+cost per-chunk work, and on the app's own isolate they were measured at
+about 5 MB/s where a bare Dart `HttpClient` read the same file at
+68 MiB/s. So the engine does not call the client for a file's bytes: it
+goes through `SyncTransfers`, which has four bulk operations — download a
+path into a temp file, download a path with no local file straight to its
+final name (see "How a new file is written"), download a path only to hash
+it, upload a local file — and the counters and the cancel that go with them.
+
+- `IsolateSyncTransfers` (production) runs them on **one worker isolate per
+  run**, spawned at the first transfer (a run with nothing to move spawns
+  none) and shut down in the run's `finally`. The worker builds its own
+  `WebDavClient` from a sendable `WebDavClientConfig` (URL, credentials, the
+  confirmed certificate fingerprint of #454, the timeout), so the
+  certificate rule is the same code. A download is written and **closed in
+  the worker** before it answers, so the main isolate can rename it on
+  Windows (#103, #495). A failure crosses as the same `WebDavFailure`
+  subtype (a local one as `FileSystemException`), so the engine's handling
+  of auth, retryable answers, 413 and stalls does not know which side
+  threw it. Every answer carries the worker's byte counters, and the
+  worker's goodbye the final ones, so the report is exact. The worker's log
+  lines are forwarded to the app log (`AppLog.forwardTo`).
+- `InlineSyncTransfers` runs the same operations on the run's client, in the
+  calling isolate: what a client over an injected `HttpClient` gets (a
+  test's transport cannot cross an isolate), and what a conflict resolution
+  outside a run uses — one file, nothing to gain from a worker.
+- **Cancel.** A run that stops cancels the transfers: the worker closes its
+  client, the requests in flight fail as retryable, and the downloads among
+  them remove their temp files.
+- The small requests (`PROPFIND`, `MKCOL`, `DELETE`, `MOVE`, the probe) stay
+  on the run's own client.
+
 ### The engine (`lib/src/sync/sync_engine.dart`)
 
 `SyncEngine.run` does one full sync of a library; a second call while
@@ -430,7 +464,9 @@ one runs joins it and gets the same report, saying that it joined.
 
 1. **Destination:** row, password (a user without a stored password
    stops the run), client. Capabilities come from the store; missing or
-   older than 30 days, the probe runs and stores them.
+   older than 30 days, the probe runs and stores them. Then, before
+   anything looks at the files, the downloads an earlier run left
+   unfinished are settled ("How a new file is written").
 2. **Scan:** the local tree off the UI isolate (size + mtime, dot
    folders skipped except `.niman`), the remote tree with `Depth: 1` per
    folder. A missing remote folder stops the run — it never reads as an
@@ -442,12 +478,25 @@ one runs joins it and gets the same report, saying that it joined.
    during the sync" on every run.
 3. **Plan:** `planSync`, then up to three hashing passes (local files
    hashed streamed in an isolate; remote ones downloaded to a discarding
-   sink) until nothing waits for a hash.
+   sink, by the transfer worker) until nothing waits for a hash.
 4. **Confirm:** a first sync (no rows, never synced) and a plan that
    looks like a mass deletion go through the caller's `confirm`. Without
    one, a first sync goes ahead — it cannot delete — and a mass deletion
    is refused.
-5. **Apply**, one decision at a time. Before touching a side, the engine
+5. **Apply**, the plan's decisions in order, except that **transfers
+   overlap** (`sync_applier.dart`, `sync_step_pool.dart`, #1107): up to
+   `kSyncTransferConcurrency` (4) uploads and downloads of distinct paths
+   run at once, which is what hides the round trips between a library's
+   many small files. Every other step — a delete, a move, a conflict, a
+   recorded agreement — is a **barrier**: it waits until everything in
+   flight has finished and runs alone, so a delete after some uploads runs
+   after all of them and before any later one, and only transfers reorder
+   among themselves. A failed path is recorded and the run goes on; a
+   refused login, or no answer from a server that answers no other request
+   either, ends the run, cancels the transfers in flight (their temp files
+   go with them) and leaves the report and the phase times as they were
+   reached. Two uploads into one new folder send one `MKCOL`. The remote
+   hashing of step 3 is bounded the same way. Before touching a side, the engine
    checks it still is what the scan saw (local size + mtime; the remote
    with a PROPFIND when the decision has no precondition): a path that
    moved meanwhile is skipped and decided again next run. A listing
@@ -472,8 +521,10 @@ one runs joins it and gets the same report, saying that it joined.
      the download of a remote one that does not, leave both sides as they
      are and report the path as a conflict (#336) — `.niman/` has no
      history to bring the good copy back.
-   - *download*: `GET` into `.<name>.niman-tmp-sync-<µs>` next to the
-     target, size checked against the listing (unless the ETag says the
+   - *download* of a path with **no local file**: straight to its final
+     name, no temp and no rename — see "How a new file is written".
+   - *download* over a file that **exists**: `GET` into
+     `.<name>.niman-tmp-sync-<µs>` next to the target, size checked against the listing (unless the ETag says the
      file was rewritten since), then `NoteOps.syncReplace`: in the note's
      save order, the replaced text becomes a `sync` version, the temp
      file is renamed over, the index follows. Replacing
@@ -589,6 +640,53 @@ resolutions, in the engine's turn), and under them `SyncSides`
 guards, fetch, upload and the agreed row). A run's state is a
 `SyncRunContext`; `SyncReport`, `SyncConflict` and `SyncFailure` have
 files of their own.
+
+#### How a new file is written
+
+A download of a path with no local file (`SyncNewFileDownload`,
+`transfers/direct_write.dart`) writes no temp and renames nothing. A temp
+keeps the version the user has whole until the new one is complete; a new
+file has no such version, and a rename onto a name per file — thousands of
+them on a first sync — is the pattern a ransomware monitor (Controlled
+folder access, an EDR) flags. It also keeps every file a first sync brings
+away from the Windows rename stall of #103.
+
+- **Up to 16 MiB** (`kSyncDirectWriteMaxBytes`, by the listing's size) the
+  body is received into memory and checked against the listing, and only
+  then is the file created and written in one go: a download that fails
+  leaves nothing. A body that outgrows the limit on the way — a stale
+  listing — fails as retryable.
+- **Larger**, or with no size in the listing, the file is created and the
+  body streamed into it; a failure or a cancel closes and deletes it.
+- The file is **created exclusively**: one that appeared at the path
+  meanwhile is never written over (`DirectWriteRefused`); it is left as it
+  is, the step is skipped, and the next run decides.
+- The write runs inside `NoteOps.syncCreate`: in the note's save order, the
+  path counts as written by the sync for as long as the write lasts (the
+  watcher's reports of it are echoes, however long a large file takes),
+  and the file is indexed as a new one. It is flushed and closed before
+  the step records it.
+
+What this costs is a run killed in the middle: a process stopped
+mid-stream, or between the write and the record, leaves a partial file
+under the real name, which the next scan would take for a new local file
+and upload over the good copy. So the path is **marked** in
+`sync_pending_downloads` (`AppDatabase` v33: library, path, when) before
+the first byte, and the mark is cleared in the transaction that records
+the item row. A run — quick or full — starts, after the capabilities and
+before the scan, by settling every mark (`SyncDownloadRecovery`):
+
+| File at the marked path | Outcome |
+|---|---|
+| none | the mark goes |
+| the server's copy: its size, then its sha256 | kept; the mark goes and the plan records it (*new / new, same sha*) |
+| anything else, or the server's copy gone | moved to `.trash/` — never deleted, it may be the only trace — and the mark goes; a full run downloads the path again in the same run, a quick one leaves it to the next full run |
+
+A server that fails while the marks are settled ends the run with the
+marks left for the next one. Pointing the library at another server
+keeps the marks — a partial file is no less partial there, and must not
+go up as a new one — and removing the library's sync drops them with the
+rest of its state.
 
 ### UI (`lib/src/ui/sync/`, mockups S1–S11)
 
@@ -833,6 +931,20 @@ conflict:
   a merge and a conflict resolved by hand, a queue written offline that
   survives a restart, a server without ETags or preconditions, and a
   write the server refuses with 412.
+- **Transfers** (`test/unit/sync_transfers_test.dart`,
+  `sync_step_pool_test.dart`, the `parallel transfers` group of
+  `sync_engine_test.dart`): the transfer contract run against both
+  implementations (failure kinds, counters, the file closed before the
+  answer), the worker's cancel and certificate rule, the pool's width,
+  barriers and fatal handling, and the engine overlapping transfers,
+  keeping a delete between uploads in place and sending one `MKCOL` for a
+  shared new folder (#1107).
+- **Transfer speed** (`test/perf/sync_transfer_test.dart`, #1107): one 64 MiB
+  file and 200 files of 40 KB, down and up, against a fake server in an
+  isolate of its own, through the old path (transfers on the client, one
+  step at a time) and the new (worker isolate, four at once); also with the
+  client's isolate kept busy and with a pause per transfer. The numbers are
+  printed; `NIMAN_PERF=1` holds the bars.
 - **On a device** (`integration_test/sync_e2e_test.dart`): the real app
   against a server in its own process — set the destination up from the
   settings screen, first sync, an edit that leaves by itself, then a

@@ -908,6 +908,12 @@ final class NoteOps implements NoteOperations {
   Future<void> syncReplace(String path, String tempAbs) =>
       _released(path, () => _syncWrites.replace(path, tempAbs));
 
+  /// Runs [write], which creates the new file at [path] under its final name
+  /// as a sync download, and has the file indexed as a new one: the way a
+  /// file that does not exist yet comes in, with no temp to swap.
+  Future<T> syncCreate<T>(String path, Future<T> Function() write) =>
+      _released(path, () => _syncWrites.create(path, write));
+
   /// Writes [text] at [path] because the sync merged both sides of it.
   Future<void> syncMerge(String path, String text) =>
       _syncWrites.merge(path, text);

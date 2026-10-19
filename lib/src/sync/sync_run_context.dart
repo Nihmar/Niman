@@ -1,6 +1,7 @@
 import 'package:niman/src/db/app_database.dart';
 import 'package:niman/src/sync/reconcile.dart';
 import 'package:niman/src/sync/sync_report.dart';
+import 'package:niman/src/sync/transfers/sync_transfers.dart';
 import 'package:niman/src/sync/webdav/webdav_client.dart';
 import 'package:niman/src/sync/webdav/webdav_multistatus.dart';
 import 'package:niman/src/sync/webdav/webdav_probe.dart';
@@ -12,6 +13,7 @@ final class SyncRunContext {
   /// A context over the scan's results.
   new({
     required this.client,
+    required this.transfers,
     required this.capabilities,
     required this.local,
     required this.remote,
@@ -22,8 +24,11 @@ final class SyncRunContext {
     required this.report,
   });
 
-  /// The client for the destination.
+  /// The client for the destination: the small requests go through it.
   final WebDavClient client;
+
+  /// The bulk transfers: downloads, uploads and hash-by-download.
+  final SyncTransfers transfers;
 
   /// What the server can do.
   final WebDavCapabilities capabilities;
@@ -45,6 +50,11 @@ final class SyncRunContext {
 
   /// The remote folders known to exist; grows as the run creates them.
   final Set<String> folders;
+
+  /// The remote folders being created now, by path: an upload into a folder
+  /// another upload is already creating waits for that one instead of
+  /// sending a `MKCOL` of its own (#1107).
+  final Map<String, Future<void>> folderCreations = {};
 
   /// What the run did so far.
   final SyncReport report;

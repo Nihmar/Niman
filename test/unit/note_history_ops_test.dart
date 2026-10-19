@@ -151,6 +151,16 @@ void main() {
       },
     );
 
+    test('syncCreate of the settings file drops the cached settings', () async {
+      await ops.setTrashEnabled(enabled: false);
+      expect(await ops.trashEnabled, isFalse);
+      File(p.join(root.path, '.niman', 'settings.json'))
+        ..parent.createSync(recursive: true)
+        ..writeAsStringSync('{"trashEnabled": true}');
+      await ops.syncCreate('.niman/settings.json', () async {});
+      expect(await ops.trashEnabled, isTrue);
+    });
+
     test('syncTrash always uses the trash, whatever the toggle', () async {
       await ops.setTrashEnabled(enabled: false);
       await ops.saveNote('Notes/a.md', 'text');

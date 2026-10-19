@@ -1,12 +1,15 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:meta/meta.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/db/app_database.dart';
 import 'package:niman/src/library/note_ops.dart';
 import 'package:niman/src/sync/conflict_texts.dart';
 import 'package:niman/src/sync/reconcile.dart';
+import 'package:niman/src/sync/sync_applier.dart';
 import 'package:niman/src/sync/sync_conflict_merge.dart';
+import 'package:niman/src/sync/sync_download_recovery.dart';
 import 'package:niman/src/sync/sync_failure.dart';
 import 'package:niman/src/sync/sync_report.dart';
 import 'package:niman/src/sync/sync_resolver.dart';
@@ -14,11 +17,14 @@ import 'package:niman/src/sync/sync_run_context.dart';
 import 'package:niman/src/sync/sync_scanner.dart';
 import 'package:niman/src/sync/sync_secrets.dart';
 import 'package:niman/src/sync/sync_sides.dart';
-import 'package:niman/src/sync/sync_step_failure.dart';
-import 'package:niman/src/sync/sync_step_outcome.dart';
+import 'package:niman/src/sync/sync_step_pool.dart';
 import 'package:niman/src/sync/sync_steps.dart';
 import 'package:niman/src/sync/sync_store.dart';
 import 'package:niman/src/sync/sync_transfer_line.dart';
+import 'package:niman/src/sync/transfers/direct_write.dart';
+import 'package:niman/src/sync/transfers/inline_sync_transfers.dart';
+import 'package:niman/src/sync/transfers/isolate_sync_transfers.dart';
+import 'package:niman/src/sync/transfers/sync_transfers.dart';
 import 'package:niman/src/sync/webdav/webdav_client.dart';
 import 'package:niman/src/sync/webdav/webdav_failure.dart';
 
@@ -64,7 +70,11 @@ final class SyncEngine {
   ///
   /// [clientFactory] builds the client for the destination (tests point it
   /// at a fake server or shorten timeouts); [now] is the device clock for
-  /// history snapshots and rows.
+  /// history snapshots and rows. [transfersFactory] builds the run's bulk
+  /// transfers over the run's client, and [transferConcurrency] is how many
+  /// of them go on at once: a test's switches between the ways to move a
+  /// file's bytes (one at a time, over the client, is how a run went before
+  /// #1107).
   new({
     required this.root,
     required this.ops,
@@ -72,8 +82,13 @@ final class SyncEngine {
     required this.secrets,
     WebDavClient Function(SyncDestination destination, String password)?
     clientFactory,
+    @visibleForTesting
+    SyncTransfers Function(WebDavClient client)? transfersFactory,
+    @visibleForTesting this.transferConcurrency = kSyncTransferConcurrency,
+    @visibleForTesting this.directWriteLimit = kSyncDirectWriteMaxBytes,
     DateTime Function()? now,
   }) : _clientFactory = clientFactory ?? _defaultClient,
+       _transfersFactory = transfersFactory ?? _defaultTransfers,
        _now = now ?? DateTime.now;
 
   /// Absolute path of the library root (as stored: normalized).
@@ -88,11 +103,32 @@ final class SyncEngine {
   /// Where the password is.
   final SyncSecretStore secrets;
 
+  /// How many transfers go on at once.
+  final int transferConcurrency;
+
+  /// The largest new file a download holds in memory before writing it.
+  final int directWriteLimit;
+
   final WebDavClient Function(SyncDestination, String) _clientFactory;
+  final SyncTransfers Function(WebDavClient) _transfersFactory;
   final DateTime Function() _now;
 
   /// Reads, checks and records both sides of a path.
-  late final _sides = SyncSides(root: root, ops: ops, store: store, now: _now);
+  late final _sides = SyncSides(
+    root: root,
+    ops: ops,
+    store: store,
+    now: _now,
+    directWriteLimit: directWriteLimit,
+  );
+
+  /// Settles the downloads an earlier run left half written.
+  late final _recovery = SyncDownloadRecovery(
+    root: root,
+    ops: ops,
+    store: store,
+    sides: _sides,
+  );
 
   /// Settles the paths both sides changed.
   late final _merger = SyncConflictMerger(
@@ -112,12 +148,19 @@ final class SyncEngine {
     hashPasses: _hashPasses,
   );
 
+  /// Carries out the plan, its transfers a few at a time.
+  late final _applier = SyncApplier(
+    steps: _steps,
+    concurrency: transferConcurrency,
+  );
+
   /// Looks at both sides before a run plans.
   late final _scanner = SyncScanner(
     root: root,
     store: store,
     sides: _sides,
     now: _now,
+    transferConcurrency: transferConcurrency,
   );
 
   /// Resolves conflicts one file at a time, in the run's turn.
@@ -168,6 +211,16 @@ final class SyncEngine {
       destination: destination,
       client: _clientFactory(destination, password),
     );
+  }
+
+  /// The run's bulk transfers: on a worker isolate of their own, unless the
+  /// client is over an injected transport, which cannot cross an isolate
+  /// (#1107).
+  static SyncTransfers _defaultTransfers(WebDavClient client) {
+    final config = client.config;
+    return config == null
+        ? InlineSyncTransfers(client)
+        : IsolateSyncTransfers(config);
   }
 
   static WebDavClient _defaultClient(
@@ -260,9 +313,11 @@ final class SyncEngine {
       return await _finish(report, hints, e.reason, e.detail, clock);
     }
     final client = connection.client;
+    final transfers = _transfersFactory(client);
     try {
       await _runWith(
         client,
+        transfers,
         connection.destination,
         report,
         hints,
@@ -277,19 +332,22 @@ final class SyncEngine {
     } on WebDavUnsupported catch (e) {
       _abort(report, SyncAbort.unsupported, e.message);
     } on WebDavRetryable catch (e) {
-      _noteRetryAfter(report, e.retryAfter);
+      report.noteRetryAfter(e.retryAfter);
       _abort(report, SyncAbort.offline, e.message);
     } on WebDavFailure catch (e) {
       _abort(report, SyncAbort.failed, e.message);
     } on FileSystemException catch (e) {
       _abort(report, SyncAbort.failed, 'local: ${e.message} (${e.path})');
     } finally {
-      // Where the bytes moved is the client: whatever the run did with it,
-      // including what a failed transfer sent or received before it broke.
+      // Where the bytes moved is the client, or the transfers' own
+      // connections: whatever the run did with them, including what a failed
+      // transfer sent or received before it broke. The transfers end first,
+      // so their counts are final.
+      await transfers.close();
       report
-        ..bytesUp = client.bytesSent
-        ..bytesDown = client.bytesReceived
-        ..bytesHashed = client.bytesHashed;
+        ..bytesUp = client.bytesSent + transfers.bytesSent
+        ..bytesDown = client.bytesReceived + transfers.bytesReceived
+        ..bytesHashed = client.bytesHashed + transfers.bytesHashed;
       client.close();
     }
     return await _finish(
@@ -305,12 +363,6 @@ final class SyncEngine {
     report
       ..aborted = why
       ..abortDetail = detail;
-  }
-
-  static void _noteRetryAfter(SyncReport report, Duration? wait) {
-    if (wait == null) return;
-    final known = report.retryAfter;
-    if (known == null || wait > known) report.retryAfter = wait;
   }
 
   /// Settles the [hints] a run read: none when the run did not get to
@@ -434,6 +486,7 @@ final class SyncEngine {
 
   Future<void> _runWith(
     WebDavClient client,
+    SyncTransfers transfers,
     SyncDestination destination,
     SyncReport report,
     List<SyncOp> hints,
@@ -448,6 +501,10 @@ final class SyncEngine {
       return;
     }
     final capabilities = await _scanner.capabilities(client, destination);
+
+    // Before anything looks at the files: a partial download an earlier run
+    // left under its real name would be taken for a new local file.
+    await _recovery.recover(client, transfers);
 
     onProgress?.call(SyncStage.scanning, 0, 0);
     final scanClock = Stopwatch()..start();
@@ -494,7 +551,7 @@ final class SyncEngine {
     final hashClock = Stopwatch()..start();
     try {
       for (var pass = 1; plan.needsHashes && pass <= _hashPasses; pass++) {
-        await _scanner.hash(client, plan, localSha, remoteSha);
+        await _scanner.hash(transfers, plan, localSha, remoteSha);
         plan = planSync(
           local: local,
           remote: remote,
@@ -577,6 +634,7 @@ final class SyncEngine {
 
     final context = SyncRunContext(
       client: client,
+      transfers: transfers,
       capabilities: capabilities,
       local: local,
       remote: remote,
@@ -586,116 +644,17 @@ final class SyncEngine {
       folders: scan.folders,
       report: report,
     );
-    final total = plan.decisions.length;
-    var index = 0;
     final applyClock = Stopwatch()..start();
     try {
-      for (final decision in plan.decisions) {
-        onProgress?.call(SyncStage.applying, index++, total);
-        final clock = Stopwatch()..start();
-        try {
-          final outcome = await _steps.apply(context, decision);
-          switch (outcome) {
-            case SyncStepOutcome.done:
-              report.done.update(
-                decision.kind,
-                (n) => n + 1,
-                ifAbsent: () => 1,
-              );
-              if (const {
-                SyncActionKind.download,
-                SyncActionKind.trashLocal,
-                SyncActionKind.moveLocal,
-              }.contains(decision.kind)) {
-                report.changedLocally.addAll([
-                  decision.path,
-                  ?decision.fromPath,
-                ]);
-              }
-              _log.info('apply: $decision (${clock.elapsedMilliseconds} ms)');
-            case SyncStepOutcome.skipped:
-              report.skipped.add(decision.path);
-              _log.info(
-                'apply: skipped ${decision.kind.name} "${decision.path}": '
-                'a side changed during the run, decided again next time',
-              );
-            case SyncStepOutcome.conflict:
-              break;
-          }
-        } on WebDavAuthFailure {
-          rethrow;
-        } on WebDavRetryable catch (e) {
-          // No answer at all: the network, and everything will fail — unless
-          // the server still answers, and dropped this one request (#617).
-          if (e.status == null && !await _serverAnswers(client)) rethrow;
-          _noteRetryAfter(report, e.retryAfter);
-          _failed(
-            report,
-            decision,
-            e.status == null
-                ? _refused(context, decision, e.message)
-                : e.message,
-          );
-        } on WebDavFailure catch (e) {
-          _failed(
-            report,
-            decision,
-            e.status == 413
-                ? _refused(context, decision, e.message)
-                : e.message,
-          );
-        } on FileSystemException catch (e) {
-          _failed(report, decision, 'local: ${e.message}');
-        } on SyncStepFailure catch (e) {
-          _failed(report, decision, e.message);
-        }
-      }
+      await _applier.apply(
+        context,
+        plan,
+        onStep: (started, total) =>
+            onProgress?.call(SyncStage.applying, started, total),
+      );
     } finally {
       report.applyMs = applyClock.elapsedMilliseconds;
     }
-  }
-
-  /// Whether the server answers a `PROPFIND` of the destination: after a
-  /// request lost its connection, what tells a network that is down from
-  /// a server that dropped that one request (#617).
-  Future<bool> _serverAnswers(WebDavClient client) async {
-    try {
-      await client.propfind('', depth: 0, collection: true);
-      _log.info('apply: the server still answers, one request was dropped');
-      return true;
-    } on Object catch (e) {
-      _log.info('apply: the server does not answer either ($e)');
-      return false;
-    }
-  }
-
-  /// [error] for a request the server refused while answering others: an
-  /// upload says its size, the usual reason — a server or proxy limit on
-  /// the size of a request (nginx's `client_max_body_size` is 1 MB unless
-  /// set), met with a reset or a 413 (#617).
-  static String _refused(
-    SyncRunContext context,
-    SyncDecision decision,
-    String error,
-  ) {
-    final size = context.local[decision.path]?.size;
-    if (decision.kind != SyncActionKind.upload || size == null) {
-      return '$error (the server answers other requests)';
-    }
-    return '$error (the server refused an upload of ${_megabytes(size)}: '
-        'it may limit the size of uploads)';
-  }
-
-  static String _megabytes(int bytes) {
-    final mb = bytes / (1024 * 1024);
-    return '${mb < 10 ? mb.toStringAsFixed(1) : mb.round()} MB';
-  }
-
-  void _failed(SyncReport report, SyncDecision decision, String error) {
-    report.failures.add((path: decision.path, error: error));
-    _log.warning(
-      'apply failed: ${decision.kind.name} ${decision.path}: $error',
-    );
   }
 
   // --- conflicts, one file at a time ---------------------------------
