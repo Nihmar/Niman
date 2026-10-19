@@ -5,6 +5,7 @@ import 'package:niman/src/library/note_ops.dart';
 import 'package:niman/src/sync/moved_folder.dart';
 import 'package:niman/src/sync/reconcile.dart';
 import 'package:niman/src/sync/sync_conflict_merge.dart';
+import 'package:niman/src/sync/sync_new_file_download.dart';
 import 'package:niman/src/sync/sync_run_context.dart';
 import 'package:niman/src/sync/sync_sides.dart';
 import 'package:niman/src/sync/sync_step_failure.dart';
@@ -48,6 +49,14 @@ final class SyncStepRunner {
 
   /// How many hashing passes a run makes.
   final int hashPasses;
+
+  /// Downloads the files that have no local copy, straight to their names.
+  late final SyncNewFileDownload _newFiles = SyncNewFileDownload(
+    root: root,
+    ops: ops,
+    store: store,
+    sides: sides,
+  );
 
   /// Carries out [d] within the run [c].
   Future<SyncStepOutcome> apply(SyncRunContext c, SyncDecision d) async {
@@ -144,6 +153,10 @@ final class SyncStepRunner {
 
   Future<SyncStepOutcome> _download(SyncRunContext c, SyncDecision d) =>
       sides.guarded(() async {
+        // No file here yet: nothing for a temp to protect, so the copy goes
+        // straight to its name. Only a file that exists is replaced by a
+        // temp renamed over it.
+        if (c.local[d.path] == null) return await _newFiles.run(c, d);
         final fetched = await sides.fetch(c, d.path);
         try {
           await sides.localStillAsPlanned(c, d.path);

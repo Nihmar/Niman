@@ -9,6 +9,7 @@ import 'package:niman/src/sync/conflict_texts.dart';
 import 'package:niman/src/sync/reconcile.dart';
 import 'package:niman/src/sync/sync_applier.dart';
 import 'package:niman/src/sync/sync_conflict_merge.dart';
+import 'package:niman/src/sync/sync_download_recovery.dart';
 import 'package:niman/src/sync/sync_failure.dart';
 import 'package:niman/src/sync/sync_report.dart';
 import 'package:niman/src/sync/sync_resolver.dart';
@@ -20,6 +21,7 @@ import 'package:niman/src/sync/sync_step_pool.dart';
 import 'package:niman/src/sync/sync_steps.dart';
 import 'package:niman/src/sync/sync_store.dart';
 import 'package:niman/src/sync/sync_transfer_line.dart';
+import 'package:niman/src/sync/transfers/direct_write.dart';
 import 'package:niman/src/sync/transfers/inline_sync_transfers.dart';
 import 'package:niman/src/sync/transfers/isolate_sync_transfers.dart';
 import 'package:niman/src/sync/transfers/sync_transfers.dart';
@@ -83,6 +85,7 @@ final class SyncEngine {
     @visibleForTesting
     SyncTransfers Function(WebDavClient client)? transfersFactory,
     @visibleForTesting this.transferConcurrency = kSyncTransferConcurrency,
+    @visibleForTesting this.directWriteLimit = kSyncDirectWriteMaxBytes,
     DateTime Function()? now,
   }) : _clientFactory = clientFactory ?? _defaultClient,
        _transfersFactory = transfersFactory ?? _defaultTransfers,
@@ -103,12 +106,29 @@ final class SyncEngine {
   /// How many transfers go on at once.
   final int transferConcurrency;
 
+  /// The largest new file a download holds in memory before writing it.
+  final int directWriteLimit;
+
   final WebDavClient Function(SyncDestination, String) _clientFactory;
   final SyncTransfers Function(WebDavClient) _transfersFactory;
   final DateTime Function() _now;
 
   /// Reads, checks and records both sides of a path.
-  late final _sides = SyncSides(root: root, ops: ops, store: store, now: _now);
+  late final _sides = SyncSides(
+    root: root,
+    ops: ops,
+    store: store,
+    now: _now,
+    directWriteLimit: directWriteLimit,
+  );
+
+  /// Settles the downloads an earlier run left half written.
+  late final _recovery = SyncDownloadRecovery(
+    root: root,
+    ops: ops,
+    store: store,
+    sides: _sides,
+  );
 
   /// Settles the paths both sides changed.
   late final _merger = SyncConflictMerger(
@@ -481,6 +501,10 @@ final class SyncEngine {
       return;
     }
     final capabilities = await _scanner.capabilities(client, destination);
+
+    // Before anything looks at the files: a partial download an earlier run
+    // left under its real name would be taken for a new local file.
+    await _recovery.recover(client, transfers);
 
     onProgress?.call(SyncStage.scanning, 0, 0);
     final scanClock = Stopwatch()..start();
