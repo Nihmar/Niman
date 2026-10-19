@@ -3,10 +3,10 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/diagrams/diagram_drawing.dart';
-import 'package:niman/src/diagrams/diagram_painter.dart';
 import 'package:niman/src/diagrams/diagram_style.dart';
+import 'package:niman/src/markdown/render/diagram_fitted_viewer.dart';
 
-/// The diagram alone, to pinch and drag.
+/// The diagram alone, opened whole and centred, to pinch and drag.
 final class DiagramFullScreen extends StatelessWidget {
   /// Creates the view of [drawing], painted with [style].
   const new({required this.drawing, required this.style, super.key});
@@ -28,20 +28,14 @@ final class DiagramFullScreen extends StatelessWidget {
         child: Stack(
           children: [
             Positioned.fill(
-              child: Center(
-                child: InteractiveViewer(
-                  // The child keeps its own size, so a diagram larger than
-                  // the screen can be panned to every edge (#1110).
-                  constrained: false,
-                  minScale: 0.4,
-                  maxScale: 8,
-                  boundaryMargin: const EdgeInsets.all(80),
-                  child: SizedBox.fromSize(
-                    size: drawing.size,
-                    child: CustomPaint(
-                      painter: DiagramPainter(drawing: drawing, style: style),
-                    ),
-                  ),
+              // Keyed by the space it has: a rotation or a resize fits the
+              // diagram again rather than keeping a view for another shape.
+              child: LayoutBuilder(
+                builder: (context, constraints) => DiagramFittedViewer(
+                  key: ValueKey(constraints.biggest),
+                  drawing: drawing,
+                  style: style,
+                  viewport: constraints.biggest,
                 ),
               ),
             ),
