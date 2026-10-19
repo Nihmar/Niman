@@ -90,6 +90,7 @@ import 'package:niman/src/ui/dock/right_dock.dart';
 import 'package:niman/src/ui/epub_look_sheet.dart';
 import 'package:niman/src/ui/epub_text_zoom.dart';
 import 'package:niman/src/ui/expanded_folders.dart';
+import 'package:niman/src/ui/feature_off.dart';
 import 'package:niman/src/ui/features/features_host.dart';
 import 'package:niman/src/ui/features_link.dart';
 import 'package:niman/src/ui/folder_grid.dart';
@@ -101,6 +102,7 @@ import 'package:niman/src/ui/home/action_runner.dart';
 import 'package:niman/src/ui/home/home_host.dart';
 import 'package:niman/src/ui/home/home_note_action.dart';
 import 'package:niman/src/ui/home/home_screen.dart';
+import 'package:niman/src/ui/intent_features.dart';
 import 'package:niman/src/ui/island.dart';
 import 'package:niman/src/ui/journal/journal_flow.dart';
 import 'package:niman/src/ui/key_map.dart';
@@ -147,6 +149,7 @@ import 'package:niman/src/ui/shell_fab.dart';
 import 'package:niman/src/ui/shell_features_intro.dart';
 import 'package:niman/src/ui/shell_home_widgets.dart';
 import 'package:niman/src/ui/shell_inbound.dart';
+import 'package:niman/src/ui/shell_intent_gate.dart';
 import 'package:niman/src/ui/shell_journal_ui.dart';
 import 'package:niman/src/ui/shell_layout.dart';
 import 'package:niman/src/ui/shell_marked_actions.dart';
@@ -860,6 +863,17 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     onShowTrash: _openTrash,
   );
 
+  /// What a way in from outside asks before it opens a screen: a shortcut,
+  /// a notification or a widget tap for a feature that is off says so in
+  /// one sentence (#1109).
+  late final ShellIntentGate _intents = ShellIntentGate(
+    features: widget.controller.features,
+    say: (feature) {
+      if (!mounted) return;
+      showFeatureOff(context, feature, openFeatures: _openFeaturesFromWidget);
+    },
+  );
+
   /// The home-screen widgets of this library: pushes out, taps back in
   /// (issue #100 moved the how of it into [ShellHomeWidgets]).
   late final ShellHomeWidgets _homeWidgets = ShellHomeWidgets(
@@ -878,6 +892,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     onRequest: _featuresIntro.requested,
     openNote: _openNoteFromLink,
     mounted: () => mounted,
+    allows: _intents.allows,
     onTargetBlocked: () =>
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(AppStrings.closeSaveFailed))),
@@ -2506,7 +2521,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       if (_followCaptureRoute(payload)) return;
       if (payload == todoReminderPayload && mounted) {
         const AppLogger(name: 'todo').debug('todo tap: opening the todo list');
-        _openTodo();
+        if (_intents.allows(featureOfReminderPayload(payload))) _openTodo();
       } else if (journalReminderDayOf(payload) != null) {
         unawaited(_openReminderPayload(payload!));
       } else if (payload != null &&
@@ -2747,6 +2762,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   Future<void> _openReminderPayload(String payload) async {
     final day = journalReminderDayOf(payload);
     if (day == null || !mounted) return;
+    // A reminder the calendar's switch outlived says so (#1109).
+    if (!_intents.allows(featureOfReminderPayload(payload))) return;
     const AppLogger(name: 'calendar').debug('event reminder tap: $payload');
     _journalUi.showCalendar(context);
     await _journalFlow.openDay(context, day);
@@ -2758,7 +2775,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     if (payload != null) _featuresIntro.requested();
     if (_followCaptureRoute(payload)) return;
     if (payload == todoReminderPayload && mounted) {
-      _openTodo();
+      if (_intents.allows(featureOfReminderPayload(payload))) _openTodo();
     } else if (journalReminderDayOf(payload) != null) {
       await _openReminderPayload(payload!);
     } else if (payload != null &&
@@ -2812,16 +2829,28 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
 
   /// Runs a share: a web page or a quote from one into the capture sheet
   /// (#531), other text into the quick note, a file into the library
-  /// (#40).
+  /// (#40). With Web capture off a page is plain text, and with Quick note
+  /// off text is imported as a note of its own (#1109).
   Future<void> _handleShare(ShareRequest request) async {
     switch (request) {
       case SharedText(:final text, :final subject):
         final web = classifyShare(text, subject: subject);
-        if (web != null) {
-          if (mounted) await _captureFlow.captureShared(context, web);
-          return;
+        switch (sharedTextRoute(
+          isWebPage: web != null,
+          features: widget.controller.features.value,
+        )) {
+          case SharedTextRoute.capture:
+            if (mounted) await _captureFlow.captureShared(context, web!);
+          case SharedTextRoute.quickNote:
+            await _shareText(text);
+          case SharedTextRoute.importAsNote:
+            // No quick note to put it in (#1109): the text is the point of
+            // the share, so it is imported as a note of its own.
+            await _createImportedNote(
+              name: sharedTextNoteName(text, subject: subject),
+              text: text,
+            );
         }
-        await _shareText(text);
       case SharedFile(:final path, :final name):
         await _importSharedFile(path: path, name: name);
     }
@@ -2878,13 +2907,27 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     } on FileSystemException {
       // A cache file that outlives us costs disk, not the import.
     }
+    await _createImportedNote(
+      name: p.basenameWithoutExtension(name),
+      text: text,
+    );
+  }
+
+  /// Makes a note named [name] of [text] where the library's rule puts a new
+  /// note (#850) — a share that arrives with no note open lands at the
+  /// root — and opens it: what a shared file becomes, and shared text when
+  /// there is no quick note to take it (#1109).
+  Future<void> _createImportedNote({
+    required String name,
+    required String text,
+  }) async {
+    final ops = widget.controller.ops;
+    if (ops == null || !mounted) return;
     await _guard(() async {
-      // Where the library's rule puts a new note (#850); a share that
-      // arrives with no note open lands at the root.
       final folder = _newItemRule.folder;
       final imported = await ops.createNote(
         parentPath: folder,
-        name: p.basenameWithoutExtension(name),
+        name: name,
         content: text,
       );
       if (!mounted) return;
@@ -2965,6 +3008,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   Future<void> _runShortcut(ShortcutAction action) async {
     if (!mounted) return;
     const AppLogger(name: 'shortcuts').debug('running ${action.id}');
+    // Published for the app, not for a library: one whose feature this
+    // library has off says so instead (#1109).
+    if (!_intents.allows(featureOfShortcut(action))) return;
     switch (action) {
       case ShortcutAction.quickNote:
         await _openQuickNoteFromTile();

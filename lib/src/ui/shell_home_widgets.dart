@@ -12,9 +12,11 @@ import 'dart:async';
 
 import 'package:niman/src/core/app_theme.dart';
 import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/core/settings/library_features.dart';
 import 'package:niman/src/flashcards/deck_summary.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/todo/todo_store.dart';
+import 'package:niman/src/ui/intent_features.dart';
 import 'package:niman/src/ui/unsaved_notes.dart';
 import 'package:niman/src/widget/study_widget.dart';
 import 'package:niman/src/widget/widget_host.dart';
@@ -46,8 +48,15 @@ final class ShellHomeWidgets {
     required this.mounted,
     required this.onTargetBlocked,
     this.onRequest,
+    this.allows,
     this.unsaved,
   });
+
+  /// Lets a tap through to the feature it opens, or says that it is off
+  /// (#1109); null lets every tap through. A widget that is off is sent the
+  /// off payload, but a tap on one placed before it went off can still
+  /// arrive.
+  final bool Function(LibraryFeature? feature)? allows;
 
   /// The open library's session (and the one a target switches away from).
   final LibrarySession controller;
@@ -264,6 +273,7 @@ final class ShellHomeWidgets {
   /// tab/note the equivalent in-app control opens.
   void _open(WidgetTarget target) {
     if (!mounted()) return;
+    if (allows?.call(featureOfWidgetTarget(target.kind)) == false) return;
     switch (target.kind) {
       case WidgetTargetKind.todo:
         openTodo();
