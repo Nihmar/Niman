@@ -327,6 +327,34 @@ void main() {
       expect(shown.center.dy, _near(viewport.center.dy));
     });
 
+    testWidgets('a viewport with no area shows nothing, then fits', (
+      tester,
+    ) async {
+      _surface(tester, const Size(360, 640));
+      await _openFullScreen(tester, _large);
+
+      // A collapsed window: the fit would divide by zero.
+      tester.view.physicalSize = Size.zero;
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+      expect(find.byType(InteractiveViewer), findsNothing);
+      expect(
+        find.byKey(const Key('diagram-full-screen-close')),
+        findsOneWidget,
+      );
+
+      tester.view.physicalSize = const Size(360, 640);
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      final viewport = _viewport(tester);
+      expect(
+        _scale(tester),
+        _near(
+          DiagramFittedViewer.fitScale(_drawingSize(tester), viewport.size),
+        ),
+      );
+    });
+
     testWidgets('a resize fits the diagram again', (tester) async {
       _surface(tester, const Size(360, 640));
       await _openFullScreen(tester, _large);

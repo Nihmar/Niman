@@ -17,7 +17,7 @@
 /// * `minScale` is `fit`: the whole diagram is one zoom-out away, whatever
 ///   its aspect ratio and the viewport's;
 /// * above `fit` the scene is larger than the viewport, so a pan reaches each
-///   of the scene's edges, with the drawing at least [margin] inside them.
+///   of the scene's edges, with the drawing at least `margin` inside them.
 library;
 
 import 'dart:math' as math;

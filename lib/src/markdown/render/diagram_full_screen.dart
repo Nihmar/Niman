@@ -31,12 +31,17 @@ final class DiagramFullScreen extends StatelessWidget {
               // Keyed by the space it has: a rotation or a resize fits the
               // diagram again rather than keeping a view for another shape.
               child: LayoutBuilder(
-                builder: (context, constraints) => DiagramFittedViewer(
-                  key: ValueKey(constraints.biggest),
-                  drawing: drawing,
-                  style: style,
-                  viewport: constraints.biggest,
-                ),
+                // A viewport with no area (a collapsed window, a pass during
+                // a route transition) has no fit: its scene would be
+                // infinite. Nothing to show until it has one.
+                builder: (context, constraints) => constraints.biggest.isEmpty
+                    ? const SizedBox.shrink()
+                    : DiagramFittedViewer(
+                        key: ValueKey(constraints.biggest),
+                        drawing: drawing,
+                        style: style,
+                        viewport: constraints.biggest,
+                      ),
               ),
             ),
             Positioned(
