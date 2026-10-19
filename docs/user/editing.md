@@ -900,6 +900,12 @@ diagram is one edit away.
     ```
 
 The icon at the top right of a diagram opens it alone, to pinch and drag.
+It opens whole and centred: a diagram larger than the screen is shrunk to
+fit it, a smaller one keeps its own size, and the view never opens
+enlarged. Pinch or scroll to zoom in (up to eight times its own size) and
+drag to reach every edge; zooming out stops at the whole diagram, however
+wide or tall it is. A double tap shows it at its own size where you tapped,
+and a second one shows it whole again. Turning the device fits it again.
 An export carries the diagram as SVG: the HTML, the PDF and the EPUB show
 it, and outside Niman the block stays standard Mermaid.
 
