@@ -1898,6 +1898,18 @@ void main() {
       };
     }
 
+    // No ETags, and a clock that stands still: a rewrite is always in the
+    // second of the upload, so only the content tells it from the original.
+    void bareServer() {
+      final now = DateTime.now();
+      server
+        ..etags = false
+        ..collectionEtags = false
+        ..preconditions = false
+        ..supportMove = false
+        ..clock = () => now;
+    }
+
     bool isData(FakeWebDavRequest r) => !r.path.contains('.niman-probe');
 
     test('counts what an upload sent and a download received', () async {
@@ -1936,11 +1948,7 @@ void main() {
     });
 
     test('counts a hash by download apart from the notes fetched', () async {
-      server
-        ..etags = false
-        ..collectionEtags = false
-        ..preconditions = false
-        ..supportMove = false;
+      bareServer();
       a.write('a.md', 'aaa');
       await a.sync();
       // Another device rewrites it in the same second, same size: only the
@@ -1968,11 +1976,7 @@ void main() {
 
     test('times the hashing of a run that hashes by download', () async {
       const pause = Duration(milliseconds: 25);
-      server
-        ..etags = false
-        ..collectionEtags = false
-        ..preconditions = false
-        ..supportMove = false;
+      bareServer();
       a.write('a.md', 'aaa');
       await a.sync();
       server.putFile('a.md', utf8.encode('bbb'));
@@ -2022,11 +2026,7 @@ void main() {
 
     test('an aborted run keeps the time it spent hashing', () async {
       const pause = Duration(milliseconds: 25);
-      server
-        ..etags = false
-        ..collectionEtags = false
-        ..preconditions = false
-        ..supportMove = false;
+      bareServer();
       a.write('a.md', 'aaa');
       await a.sync();
       server.putFile('a.md', utf8.encode('bbb'));
