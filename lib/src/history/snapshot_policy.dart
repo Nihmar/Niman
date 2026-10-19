@@ -16,6 +16,7 @@ final class SnapshotRequest {
     this.forced,
     this.expected,
     this.lastWritten,
+    this.lastWrittenSha256,
   });
 
   /// `historyVersions`: how many unpinned versions to keep (0 = none).
@@ -48,6 +49,14 @@ final class SnapshotRequest {
   /// stale (a second editor, Replace all, an outgoing write) — so nothing is
   /// kept for it and the save reports no external change.
   final DiskStamp? lastWritten;
+
+  /// The sha256 of the bytes that last write left, with [lastWritten]: a
+  /// file whose stamp matches neither belief but whose bytes still hash to
+  /// this is the app's own write all the same. On Android the stamp a write
+  /// takes is not reliably the one the next save reads back for the same
+  /// file, so the stamp alone kept announcing the app's own text as another
+  /// program's (#1055) — wherever the write took it from.
+  final String? lastWrittenSha256;
 }
 
 /// Whether to keep the content about to be overwritten, and why.

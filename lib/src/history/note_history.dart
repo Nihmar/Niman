@@ -46,6 +46,7 @@ final class NoteHistory {
     HistoryReason? forced,
     DiskStamp? expected,
     DiskStamp? lastWritten,
+    String? lastWrittenSha256,
   }) async {
     final settings = await config.config;
     final sessionStart = editSession != null && _sessions[path] != editSession;
@@ -58,6 +59,7 @@ final class NoteHistory {
       forced: forced,
       expected: expected,
       lastWritten: lastWritten,
+      lastWrittenSha256: lastWrittenSha256,
     );
   }
 
@@ -68,7 +70,9 @@ final class NoteHistory {
       return;
     }
     if (outcome == null) return;
-    if (outcome.decision.take) {
+    // A check the stamps could not settle is what a report of a wrong
+    // "Another program changed this note" needs to read (#1055).
+    if (outcome.decision.take || outcome.external != null) {
       _log.info(outcome.describe(path));
     } else {
       _log.debug(outcome.describe(path));
