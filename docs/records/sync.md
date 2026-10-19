@@ -429,9 +429,10 @@ The client's socket reads, its sha256 and the file writes of a download
 cost per-chunk work, and on the app's own isolate they were measured at
 about 5 MB/s where a bare Dart `HttpClient` read the same file at
 68 MiB/s. So the engine does not call the client for a file's bytes: it
-goes through `SyncTransfers`, which has three bulk operations — download a
-path into a temp file, download a path only to hash it, upload a local file
-— and the counters and the cancel that go with them.
+goes through `SyncTransfers`, which has four bulk operations — download a
+path into a temp file, download a path with no local file straight to its
+final name (see "How a new file is written"), download a path only to hash
+it, upload a local file — and the counters and the cancel that go with them.
 
 - `IsolateSyncTransfers` (production) runs them on **one worker isolate per
   run**, spawned at the first transfer (a run with nothing to move spawns
@@ -463,7 +464,9 @@ one runs joins it and gets the same report, saying that it joined.
 
 1. **Destination:** row, password (a user without a stored password
    stops the run), client. Capabilities come from the store; missing or
-   older than 30 days, the probe runs and stores them.
+   older than 30 days, the probe runs and stores them. Then, before
+   anything looks at the files, the downloads an earlier run left
+   unfinished are settled ("How a new file is written").
 2. **Scan:** the local tree off the UI isolate (size + mtime, dot
    folders skipped except `.niman`), the remote tree with `Depth: 1` per
    folder. A missing remote folder stops the run — it never reads as an
@@ -518,8 +521,10 @@ one runs joins it and gets the same report, saying that it joined.
      the download of a remote one that does not, leave both sides as they
      are and report the path as a conflict (#336) — `.niman/` has no
      history to bring the good copy back.
-   - *download*: `GET` into `.<name>.niman-tmp-sync-<µs>` next to the
-     target, size checked against the listing (unless the ETag says the
+   - *download* of a path with **no local file**: straight to its final
+     name, no temp and no rename — see "How a new file is written".
+   - *download* over a file that **exists**: `GET` into
+     `.<name>.niman-tmp-sync-<µs>` next to the target, size checked against the listing (unless the ETag says the
      file was rewritten since), then `NoteOps.syncReplace`: in the note's
      save order, the replaced text becomes a `sync` version, the temp
      file is renamed over, the index follows. Replacing
@@ -635,6 +640,53 @@ resolutions, in the engine's turn), and under them `SyncSides`
 guards, fetch, upload and the agreed row). A run's state is a
 `SyncRunContext`; `SyncReport`, `SyncConflict` and `SyncFailure` have
 files of their own.
+
+#### How a new file is written
+
+A download of a path with no local file (`SyncNewFileDownload`,
+`transfers/direct_write.dart`) writes no temp and renames nothing. A temp
+keeps the version the user has whole until the new one is complete; a new
+file has no such version, and a rename onto a name per file — thousands of
+them on a first sync — is the pattern a ransomware monitor (Controlled
+folder access, an EDR) flags. It also keeps every file a first sync brings
+away from the Windows rename stall of #103.
+
+- **Up to 16 MiB** (`kSyncDirectWriteMaxBytes`, by the listing's size) the
+  body is received into memory and checked against the listing, and only
+  then is the file created and written in one go: a download that fails
+  leaves nothing. A body that outgrows the limit on the way — a stale
+  listing — fails as retryable.
+- **Larger**, or with no size in the listing, the file is created and the
+  body streamed into it; a failure or a cancel closes and deletes it.
+- The file is **created exclusively**: one that appeared at the path
+  meanwhile is never written over (`DirectWriteRefused`); it is left as it
+  is, the step is skipped, and the next run decides.
+- The write runs inside `NoteOps.syncCreate`: in the note's save order, the
+  path counts as written by the sync for as long as the write lasts (the
+  watcher's reports of it are echoes, however long a large file takes),
+  and the file is indexed as a new one. It is flushed and closed before
+  the step records it.
+
+What this costs is a run killed in the middle: a process stopped
+mid-stream, or between the write and the record, leaves a partial file
+under the real name, which the next scan would take for a new local file
+and upload over the good copy. So the path is **marked** in
+`sync_pending_downloads` (`AppDatabase` v33: library, path, when) before
+the first byte, and the mark is cleared in the transaction that records
+the item row. A run — quick or full — starts, after the capabilities and
+before the scan, by settling every mark (`SyncDownloadRecovery`):
+
+| File at the marked path | Outcome |
+|---|---|
+| none | the mark goes |
+| the server's copy: its size, then its sha256 | kept; the mark goes and the plan records it (*new / new, same sha*) |
+| anything else, or the server's copy gone | moved to `.trash/` — never deleted, it may be the only trace — and the mark goes; a full run downloads the path again in the same run, a quick one leaves it to the next full run |
+
+A server that fails while the marks are settled ends the run with the
+marks left for the next one. Pointing the library at another server
+keeps the marks — a partial file is no less partial there, and must not
+go up as a new one — and removing the library's sync drops them with the
+rest of its state.
 
 ### UI (`lib/src/ui/sync/`, mockups S1–S11)
 

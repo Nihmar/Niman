@@ -376,8 +376,9 @@ class SyncItems extends Table {
 /// byte and clears the mark once the item row is recorded. A mark still
 /// there at the start of a run is a download that did not finish: its file,
 /// if there is one, is checked against the server before anything else sees
-/// it. Nothing here is worth keeping across a retarget or a removal of the
-/// library's sync.
+/// it. A retarget keeps the marks — a partial file is no less partial
+/// against another server, and must not go up to it as a new one — and a
+/// removal of the library's sync drops them with the rest.
 class SyncPendingDownloads extends Table {
   /// Absolute, normalized library root.
   TextColumn get libraryPath => text().named('library_path')();
