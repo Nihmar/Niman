@@ -454,17 +454,23 @@ final class SyncEngine {
     onProgress?.call(SyncStage.scanning, 0, 0);
     final scanClock = Stopwatch()..start();
     final SyncScan scan;
-    if (report.quick) {
-      scan = await _scanner.scanQuick(client, hints, allRows);
-    } else {
-      final local = await _scanner.scanLocal();
-      final remoteScan = await _scanner.scanRemote(client);
-      scan = (
-        local: local,
-        remote: remoteScan.files,
-        folders: remoteScan.folders,
-        rows: allRows,
-      );
+    // A phase the run leaves by an exception still took its time: the
+    // report keeps it, or an aborted run says it spent none (#1107).
+    try {
+      if (report.quick) {
+        scan = await _scanner.scanQuick(client, hints, allRows);
+      } else {
+        final local = await _scanner.scanLocal();
+        final remoteScan = await _scanner.scanRemote(client);
+        scan = (
+          local: local,
+          remote: remoteScan.files,
+          folders: remoteScan.folders,
+          rows: allRows,
+        );
+      }
+    } finally {
+      report.scanMs = scanClock.elapsedMilliseconds;
     }
     final local = scan.local;
     final remote = scan.remote;
@@ -475,7 +481,6 @@ final class SyncEngine {
       'known, ${rows.length} of ${allRows.length} agreed rows '
       '(${scanClock.elapsedMilliseconds} ms)',
     );
-    report.scanMs = scanClock.elapsedMilliseconds;
 
     onProgress?.call(SyncStage.comparing, 0, 0);
     final localSha = <String, String>{};
@@ -489,19 +494,22 @@ final class SyncEngine {
       rowCount: rowCount,
     );
     final hashClock = Stopwatch()..start();
-    for (var pass = 1; plan.needsHashes && pass <= _hashPasses; pass++) {
-      await _scanner.hash(client, plan, localSha, remoteSha);
-      plan = planSync(
-        local: local,
-        remote: remote,
-        rows: rows,
-        capabilities: capabilities,
-        localSha256: localSha,
-        remoteSha256: remoteSha,
-        rowCount: rowCount,
-      );
+    try {
+      for (var pass = 1; plan.needsHashes && pass <= _hashPasses; pass++) {
+        await _scanner.hash(client, plan, localSha, remoteSha);
+        plan = planSync(
+          local: local,
+          remote: remote,
+          rows: rows,
+          capabilities: capabilities,
+          localSha256: localSha,
+          remoteSha256: remoteSha,
+          rowCount: rowCount,
+        );
+      }
+    } finally {
+      report.hashMs = hashClock.elapsedMilliseconds;
     }
-    report.hashMs = hashClock.elapsedMilliseconds;
     if (report.quick) {
       final kept = <SyncDecision>[];
       for (final decision in plan.decisions) {
@@ -583,56 +591,70 @@ final class SyncEngine {
     final total = plan.decisions.length;
     var index = 0;
     final applyClock = Stopwatch()..start();
-    for (final decision in plan.decisions) {
-      onProgress?.call(SyncStage.applying, index++, total);
-      final clock = Stopwatch()..start();
-      try {
-        final outcome = await _steps.apply(context, decision);
-        switch (outcome) {
-          case SyncStepOutcome.done:
-            report.done.update(decision.kind, (n) => n + 1, ifAbsent: () => 1);
-            if (const {
-              SyncActionKind.download,
-              SyncActionKind.trashLocal,
-              SyncActionKind.moveLocal,
-            }.contains(decision.kind)) {
-              report.changedLocally.addAll([decision.path, ?decision.fromPath]);
-            }
-            _log.info('apply: $decision (${clock.elapsedMilliseconds} ms)');
-          case SyncStepOutcome.skipped:
-            report.skipped.add(decision.path);
-            _log.info(
-              'apply: skipped ${decision.kind.name} "${decision.path}": '
-              'a side changed during the run, decided again next time',
-            );
-          case SyncStepOutcome.conflict:
-            break;
+    try {
+      for (final decision in plan.decisions) {
+        onProgress?.call(SyncStage.applying, index++, total);
+        final clock = Stopwatch()..start();
+        try {
+          final outcome = await _steps.apply(context, decision);
+          switch (outcome) {
+            case SyncStepOutcome.done:
+              report.done.update(
+                decision.kind,
+                (n) => n + 1,
+                ifAbsent: () => 1,
+              );
+              if (const {
+                SyncActionKind.download,
+                SyncActionKind.trashLocal,
+                SyncActionKind.moveLocal,
+              }.contains(decision.kind)) {
+                report.changedLocally.addAll([
+                  decision.path,
+                  ?decision.fromPath,
+                ]);
+              }
+              _log.info('apply: $decision (${clock.elapsedMilliseconds} ms)');
+            case SyncStepOutcome.skipped:
+              report.skipped.add(decision.path);
+              _log.info(
+                'apply: skipped ${decision.kind.name} "${decision.path}": '
+                'a side changed during the run, decided again next time',
+              );
+            case SyncStepOutcome.conflict:
+              break;
+          }
+        } on WebDavAuthFailure {
+          rethrow;
+        } on WebDavRetryable catch (e) {
+          // No answer at all: the network, and everything will fail — unless
+          // the server still answers, and dropped this one request (#617).
+          if (e.status == null && !await _serverAnswers(client)) rethrow;
+          _noteRetryAfter(report, e.retryAfter);
+          _failed(
+            report,
+            decision,
+            e.status == null
+                ? _refused(context, decision, e.message)
+                : e.message,
+          );
+        } on WebDavFailure catch (e) {
+          _failed(
+            report,
+            decision,
+            e.status == 413
+                ? _refused(context, decision, e.message)
+                : e.message,
+          );
+        } on FileSystemException catch (e) {
+          _failed(report, decision, 'local: ${e.message}');
+        } on SyncStepFailure catch (e) {
+          _failed(report, decision, e.message);
         }
-      } on WebDavAuthFailure {
-        rethrow;
-      } on WebDavRetryable catch (e) {
-        // No answer at all: the network, and everything will fail — unless
-        // the server still answers, and dropped this one request (#617).
-        if (e.status == null && !await _serverAnswers(client)) rethrow;
-        _noteRetryAfter(report, e.retryAfter);
-        _failed(
-          report,
-          decision,
-          e.status == null ? _refused(context, decision, e.message) : e.message,
-        );
-      } on WebDavFailure catch (e) {
-        _failed(
-          report,
-          decision,
-          e.status == 413 ? _refused(context, decision, e.message) : e.message,
-        );
-      } on FileSystemException catch (e) {
-        _failed(report, decision, 'local: ${e.message}');
-      } on SyncStepFailure catch (e) {
-        _failed(report, decision, e.message);
       }
+    } finally {
+      report.applyMs = applyClock.elapsedMilliseconds;
     }
-    report.applyMs = applyClock.elapsedMilliseconds;
   }
 
   /// Whether the server answers a `PROPFIND` of the destination: after a
