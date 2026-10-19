@@ -1,12 +1,21 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/sync/transfers/direct_write.dart';
 import 'package:niman/src/sync/webdav/webdav_client.dart';
+
+const _log = AppLogger(name: 'sync');
 
 /// `GET`s [path] through [client] into the file at [tempPath], and closes
 /// that file before answering; a failure leaves no file there.
 ///
-/// The one place a download meets the disk, whichever isolate runs it.
+/// The way a file that exists already is replaced ([SyncWriteMode.tempRename]):
+/// the caller renames the finished temp over it, so the version the user has
+/// stays whole until the new one is complete. A new file takes
+/// [downloadNewFile] instead.
+///
+/// Where a download meets the disk, whichever isolate runs it.
 Future<WebDavDownload> downloadToFile(
   WebDavClient client,
   String path,
@@ -45,6 +54,11 @@ Future<WebDavDownload> downloadToFile(
         // The transfer's own failure is the one to report.
       }
     }
+    // Not always renamed over a file: a conflict reads the temp and drops it.
+    _log.info(
+      'write: "$path" ${SyncWriteMode.tempRename.name}, ${download.bytes} '
+      'bytes (into a temp next to the file)',
+    );
     return download;
   } on Object {
     if (temp.existsSync()) await temp.delete();

@@ -1,3 +1,4 @@
+import 'package:niman/src/sync/transfers/direct_write.dart';
 import 'package:niman/src/sync/webdav/webdav_client.dart';
 
 /// The bulk transfers of a sync run — the downloads and the uploads, the
@@ -17,6 +18,25 @@ abstract interface class SyncTransfers {
   /// closed — its handle gone, so Windows can rename it — before this
   /// answers. Nothing is left at [tempPath] when it fails.
   Future<WebDavDownload> download(String path, String tempPath);
+
+  /// `GET`s [path] into [targetPath], a file that does not exist yet, under
+  /// its final name: no temp file, no rename (`downloadNewFile`, and why a
+  /// new file is written that way, in docs/records/sync.md). The file is
+  /// created exclusively, so one that appears meanwhile fails the download
+  /// with a [DirectWriteRefused] and is left as it is; it is written,
+  /// flushed and closed before this answers, and nothing is left at
+  /// [targetPath] when it fails.
+  ///
+  /// [listedSize] and [listedEtag] are what the listing said of the file:
+  /// the body is checked against them before the file is created, and a
+  /// file up to [memoryLimit] bytes is received into memory first.
+  Future<NewFileDownload> downloadNew(
+    String path,
+    String targetPath, {
+    required int? listedSize,
+    required String? listedEtag,
+    int memoryLimit = kSyncDirectWriteMaxBytes,
+  });
 
   /// The sha256 of the server's copy of [path], downloaded and dropped.
   Future<String> hashRemote(String path);

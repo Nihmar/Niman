@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:crypto/crypto.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/sync/transfers/direct_write.dart';
 import 'package:niman/src/sync/transfers/inline_sync_transfers.dart';
 import 'package:niman/src/sync/transfers/isolate_sync_transfers.dart';
 import 'package:niman/src/sync/transfers/sync_transfers.dart';
@@ -202,6 +204,238 @@ void _contract(_Build build) {
     expect(server.requests.where((r) => r.method == 'PUT'), isEmpty);
   });
 
+  group('a new file, written to its final name', () {
+    /// Every name the folder holds at any moment while [action] runs, and
+    /// every rename the file system reports: a temp that lived for a
+    /// millisecond, or a move onto the final name, shows up here.
+    Future<({Set<String> names, List<FileSystemEvent> moves})> watched(
+      Future<void> Function() action,
+    ) async {
+      final names = <String>{};
+      final moves = <FileSystemEvent>[];
+      final events = dir.watch().listen((event) {
+        if (event is FileSystemMoveEvent) moves.add(event);
+        names.add(p.basename(event.path));
+      });
+      final poll = Timer.periodic(const Duration(milliseconds: 1), (_) {
+        if (!dir.existsSync()) return;
+        for (final entry in dir.listSync()) {
+          names.add(p.basename(entry.path));
+        }
+      });
+      try {
+        await action();
+        // The notifications arrive a little behind the calls.
+        await Future<void>.delayed(const Duration(milliseconds: 300));
+      } finally {
+        poll.cancel();
+        await events.cancel();
+      }
+      return (names: names, moves: moves);
+    }
+
+    test('under the limit it is held in memory, with no temp', () async {
+      final body = utf8.encode('a new note ' * 4000);
+      server.putFile('a/new.md', body);
+
+      late NewFileDownload got;
+      final seen = await watched(() async {
+        got = await transfers.downloadNew(
+          'a/new.md',
+          temp('out'),
+          listedSize: body.length,
+          listedEtag: null,
+        );
+      });
+
+      expect(got.mode, SyncWriteMode.directMemory);
+      expect(got.download.bytes, body.length);
+      expect(got.download.sha256, _sha(body));
+      expect(File(temp('out')).readAsBytesSync(), body);
+      // Nothing but the final name ever appeared, and nothing was renamed.
+      expect(seen.names, {'out'});
+      expect(seen.moves, isEmpty);
+      expect(received(), body.length);
+      expect(hashed(), 0);
+    });
+
+    test('over the limit it streams into the final name', () async {
+      final body = List<int>.generate(300000, (i) => i % 253);
+      server.putFile('big.bin', body);
+
+      late NewFileDownload got;
+      final seen = await watched(() async {
+        got = await transfers.downloadNew(
+          'big.bin',
+          temp('out'),
+          listedSize: body.length,
+          listedEtag: null,
+          memoryLimit: 1000,
+        );
+      });
+
+      expect(got.mode, SyncWriteMode.directStream);
+      expect(got.download.sha256, _sha(body));
+      expect(File(temp('out')).readAsBytesSync(), body);
+      expect(seen.names, {'out'});
+      expect(seen.moves, isEmpty);
+      expect(received(), body.length);
+    });
+
+    test('a listing without a size streams too', () async {
+      final body = utf8.encode('no size ' * 100);
+      server.putFile('n.md', body);
+
+      final got = await transfers.downloadNew(
+        'n.md',
+        temp('out'),
+        listedSize: null,
+        listedEtag: null,
+      );
+
+      expect(got.mode, SyncWriteMode.directStream);
+      expect(File(temp('out')).readAsBytesSync(), body);
+    });
+
+    test('an empty file is created, empty', () async {
+      server.putFile('empty.md', const []);
+
+      final got = await transfers.downloadNew(
+        'empty.md',
+        temp('out'),
+        listedSize: 0,
+        listedEtag: null,
+      );
+
+      expect(got.download.bytes, 0);
+      expect(File(temp('out')).readAsBytesSync(), isEmpty);
+    });
+
+    // The same failures, once for each way of writing.
+    for (final streamed in [false, true]) {
+      final how = streamed ? 'streamed' : 'held in memory';
+      final limit = streamed ? 100 : kSyncDirectWriteMaxBytes;
+
+      test('a file that appears first is not overwritten ($how)', () async {
+        server.putFile('a.md', utf8.encode('from the server'));
+        File(temp('out')).writeAsStringSync('the user wrote this');
+
+        await expectLater(
+          transfers.downloadNew(
+            'a.md',
+            temp('out'),
+            listedSize: 'from the server'.length,
+            listedEtag: null,
+            memoryLimit: limit,
+          ),
+          throwsA(isA<DirectWriteRefused>()),
+        );
+
+        expect(File(temp('out')).readAsStringSync(), 'the user wrote this');
+        expect(dir.listSync().length, 1);
+      });
+
+      test('a body cut short leaves nothing ($how)', () async {
+        server
+          ..putFile('a.bin', List<int>.filled(100000, 7))
+          ..dropNextGet();
+
+        await expectLater(
+          transfers.downloadNew(
+            'a.bin',
+            temp('out'),
+            listedSize: 100000,
+            listedEtag: null,
+            memoryLimit: streamed ? 100 : 200000,
+          ),
+          throwsA(isA<WebDavRetryable>()),
+        );
+
+        expect(leftover(), isFalse);
+      });
+
+      test(
+        'a body that disagrees with the listing leaves nothing ($how)',
+        () async {
+          server.putFile('a.bin', List<int>.filled(5000, 7));
+          // The listing's ETag is the file's own, so the size cannot be
+          // explained as a rewrite since.
+          final etag = (await client.stat('a.bin'))!.etag;
+
+          await expectLater(
+            transfers.downloadNew(
+              'a.bin',
+              temp('out'),
+              listedSize: 4000,
+              listedEtag: etag,
+              memoryLimit: streamed ? 100 : 200000,
+            ),
+            throwsA(isA<WebDavProtocolFailure>()),
+          );
+
+          expect(leftover(), isFalse);
+        },
+      );
+
+      test('a missing file leaves nothing ($how)', () async {
+        await expectLater(
+          transfers.downloadNew(
+            'gone.md',
+            temp('out'),
+            listedSize: 10,
+            listedEtag: null,
+            memoryLimit: limit,
+          ),
+          throwsA(isA<WebDavNotFound>()),
+        );
+
+        expect(leftover(), isFalse);
+      });
+    }
+
+    test(
+      'a body that outgrows the memory held for it fails, leaving nothing',
+      () async {
+        server.putFile('grown.bin', List<int>.filled(5000, 9));
+
+        await expectLater(
+          transfers.downloadNew(
+            'grown.bin',
+            temp('out'),
+            listedSize: 50,
+            listedEtag: null,
+            memoryLimit: 100,
+          ),
+          throwsA(
+            isA<WebDavRetryable>().having((e) => e.status, 'status', 200),
+          ),
+        );
+
+        expect(leftover(), isFalse);
+      },
+    );
+
+    test('a folder that is not there is a local failure', () async {
+      server.putFile('a.md', utf8.encode('a'));
+
+      await expectLater(
+        transfers.downloadNew(
+          'a.md',
+          p.join(dir.path, 'no', 'such', 'out'),
+          listedSize: 1,
+          listedEtag: null,
+        ),
+        throwsA(
+          isA<FileSystemException>().having(
+            (e) => e is DirectWriteRefused,
+            'refused',
+            isFalse,
+          ),
+        ),
+      );
+    });
+  });
+
   test('a download that cannot open its file is a local failure', () async {
     server.putFile('a.md', utf8.encode('a'));
 
@@ -288,6 +522,97 @@ void _isolateOnly() {
       transfers.download('a.bin', p.join(dir.path, 'late')),
       throwsA(isA<WebDavRetryable>()),
     );
+  });
+
+  test('a cancel stops a new file streaming in and removes it', () async {
+    server
+      ..putFile('slow.bin', List<int>.filled(600000, 1))
+      ..trickleNextGet = const Duration(milliseconds: 400);
+    final client = clientFor(server.url);
+    addTearDown(client.close);
+    final transfers = IsolateSyncTransfers(client.config!);
+    addTearDown(transfers.close);
+
+    final failure = expectLater(
+      transfers.downloadNew(
+        'slow.bin',
+        p.join(dir.path, 'out'),
+        listedSize: 600000,
+        listedEtag: null,
+        memoryLimit: 1000,
+      ),
+      throwsA(isA<WebDavRetryable>()),
+    );
+    while (!server.requests.any((r) => r.method == 'GET')) {
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+    }
+    await Future<void>.delayed(const Duration(milliseconds: 600));
+    // Part way, under its final name.
+    expect(File(p.join(dir.path, 'out')).existsSync(), isTrue);
+
+    transfers.cancel();
+    await failure;
+
+    expect(dir.listSync(), isEmpty);
+  });
+
+  test('a cancel while a new file is held in memory writes nothing', () async {
+    server
+      ..putFile('slow.bin', List<int>.filled(600000, 1))
+      ..trickleNextGet = const Duration(milliseconds: 400);
+    final client = clientFor(server.url);
+    addTearDown(client.close);
+    final transfers = IsolateSyncTransfers(client.config!);
+    addTearDown(transfers.close);
+
+    final failure = expectLater(
+      transfers.downloadNew(
+        'slow.bin',
+        p.join(dir.path, 'out'),
+        listedSize: 600000,
+        listedEtag: null,
+      ),
+      throwsA(isA<WebDavRetryable>()),
+    );
+    while (!server.requests.any((r) => r.method == 'GET')) {
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+    }
+    await Future<void>.delayed(const Duration(milliseconds: 600));
+    // Nothing on the disk while the body is still arriving.
+    expect(dir.listSync(), isEmpty);
+
+    transfers.cancel();
+    await failure;
+
+    expect(dir.listSync(), isEmpty);
+  });
+
+  test('a close reports every byte of the new files it wrote', () async {
+    final body = List<int>.filled(300000, 3);
+    server.putFile('a.bin', body);
+    final client = clientFor(server.url);
+    addTearDown(client.close);
+    final transfers = IsolateSyncTransfers(client.config!);
+
+    await Future.wait([
+      transfers.downloadNew(
+        'a.bin',
+        p.join(dir.path, 'one'),
+        listedSize: body.length,
+        listedEtag: null,
+      ),
+      transfers.downloadNew(
+        'a.bin',
+        p.join(dir.path, 'two'),
+        listedSize: body.length,
+        listedEtag: null,
+        memoryLimit: 10,
+      ),
+    ]);
+    await transfers.close();
+
+    expect(transfers.bytesReceived, 2 * body.length);
+    expect(client.bytesReceived, 0);
   });
 
   test('a close that never needed the worker spawns none', () async {

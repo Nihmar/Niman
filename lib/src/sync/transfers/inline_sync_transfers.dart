@@ -1,3 +1,4 @@
+import 'package:niman/src/sync/transfers/direct_write.dart';
 import 'package:niman/src/sync/transfers/sync_transfers.dart';
 import 'package:niman/src/sync/transfers/transfer_ops.dart';
 import 'package:niman/src/sync/webdav/webdav_client.dart';
@@ -16,6 +17,22 @@ final class InlineSyncTransfers implements SyncTransfers {
   @override
   Future<WebDavDownload> download(String path, String tempPath) =>
       downloadToFile(_client, path, tempPath);
+
+  @override
+  Future<NewFileDownload> downloadNew(
+    String path,
+    String targetPath, {
+    required int? listedSize,
+    required String? listedEtag,
+    int memoryLimit = kSyncDirectWriteMaxBytes,
+  }) => downloadNewFile(
+    _client,
+    path,
+    targetPath,
+    listedSize: listedSize,
+    listedEtag: listedEtag,
+    memoryLimit: memoryLimit,
+  );
 
   @override
   Future<String> hashRemote(String path) => hashRemoteFile(_client, path);

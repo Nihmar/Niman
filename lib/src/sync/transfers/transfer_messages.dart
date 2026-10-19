@@ -3,6 +3,7 @@ import 'dart:isolate';
 
 import 'package:meta/meta.dart';
 import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/sync/transfers/direct_write.dart';
 import 'package:niman/src/sync/webdav/webdav_client_config.dart';
 
 // The messages between a sync run and its transfer worker isolate (#1107).
@@ -48,6 +49,38 @@ final class DownloadRequest extends TransferRequest {
 
   /// The file the body is written to.
   final String tempPath;
+
+  @override
+  String get what => 'GET $path';
+}
+
+/// `GET` [path] into [targetPath], a file that must not exist yet, with no
+/// temp file and no rename (`downloadNewFile`).
+final class DownloadNewRequest extends TransferRequest {
+  /// See [TransferRequest.new].
+  const new(
+    super.id,
+    this.path,
+    this.targetPath, {
+    required this.listedSize,
+    required this.listedEtag,
+    required this.memoryLimit,
+  });
+
+  /// The remote path.
+  final String path;
+
+  /// The file created and written, under its final name.
+  final String targetPath;
+
+  /// The size the listing gave, or null when it gave none.
+  final int? listedSize;
+
+  /// The ETag the listing gave, or null.
+  final String? listedEtag;
+
+  /// The largest body written from memory.
+  final int memoryLimit;
 
   @override
   String get what => 'GET $path';
@@ -125,8 +158,8 @@ final class TransferReply {
   /// The request answered.
   final int id;
 
-  /// The `WebDavDownload`, the sha256 string or the `WebDavUpload`, by the
-  /// request.
+  /// The `WebDavDownload`, the `NewFileDownload`, the sha256 string or the
+  /// `WebDavUpload`, by the request.
   final Object? result;
 
   /// Why it failed: a `WebDavFailure`, a [TransferLocalFailure] or a
@@ -184,7 +217,8 @@ final class TransferLocalFailure {
     : message = error.message,
       path = error.path,
       osMessage = error.osError?.message,
-      osCode = error.osError?.errorCode;
+      osCode = error.osError?.errorCode,
+      refused = error is DirectWriteRefused;
 
   /// The exception's message.
   final String message;
@@ -198,14 +232,19 @@ final class TransferLocalFailure {
   /// The OS error's code, when there was one.
   final int? osCode;
 
+  /// Whether it was a [DirectWriteRefused]: the file the download meant to
+  /// create was somebody else's, which the run must not take for its own.
+  final bool refused;
+
   /// The exception again, on the receiving side.
-  FileSystemException toException() => FileSystemException(
-    message,
-    path,
-    osMessage == null
+  FileSystemException toException() {
+    final os = osMessage == null
         ? null
-        : OSError(osMessage!, osCode ?? OSError.noErrorCode),
-  );
+        : OSError(osMessage!, osCode ?? OSError.noErrorCode);
+    return refused
+        ? DirectWriteRefused(path ?? '', os)
+        : FileSystemException(message, path, os);
+  }
 }
 
 /// An error the worker did not expect, as text: a bug, not a failed

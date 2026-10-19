@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/sync/transfers/direct_write.dart';
 import 'package:niman/src/sync/transfers/transfer_messages.dart';
 import 'package:niman/src/sync/transfers/transfer_ops.dart';
 import 'package:niman/src/sync/webdav/webdav_client.dart';
@@ -82,6 +83,14 @@ final class _TransferWorker {
             _client,
             request.path,
             request.tempPath,
+          ),
+          DownloadNewRequest() => await downloadNewFile(
+            _client,
+            request.path,
+            request.targetPath,
+            listedSize: request.listedSize,
+            listedEtag: request.listedEtag,
+            memoryLimit: request.memoryLimit,
           ),
           HashRequest() => await hashRemoteFile(_client, request.path),
           UploadRequest() => await uploadFromFile(

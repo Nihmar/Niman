@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/sync/transfers/direct_write.dart';
 import 'package:niman/src/sync/transfers/sync_transfers.dart';
 import 'package:niman/src/sync/transfers/transfer_messages.dart';
 import 'package:niman/src/sync/transfers/transfer_worker.dart';
@@ -57,6 +58,25 @@ final class IsolateSyncTransfers implements SyncTransfers {
         'GET $path',
         (id) => DownloadRequest(id, path, tempPath),
       );
+
+  @override
+  Future<NewFileDownload> downloadNew(
+    String path,
+    String targetPath, {
+    required int? listedSize,
+    required String? listedEtag,
+    int memoryLimit = kSyncDirectWriteMaxBytes,
+  }) async => await _call<NewFileDownload>(
+    'GET $path',
+    (id) => DownloadNewRequest(
+      id,
+      path,
+      targetPath,
+      listedSize: listedSize,
+      listedEtag: listedEtag,
+      memoryLimit: memoryLimit,
+    ),
+  );
 
   @override
   Future<String> hashRemote(String path) async =>
