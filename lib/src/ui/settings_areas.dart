@@ -11,11 +11,13 @@ import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ocr/ocr_installation.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/transcription/transcription_models.dart';
+import 'package:niman/src/ui/features_link.dart';
 import 'package:niman/src/ui/journal/settings_journal.dart';
 import 'package:niman/src/ui/keyboard_shortcuts.dart';
 import 'package:niman/src/ui/ocr/ocr_settings_section.dart';
 import 'package:niman/src/ui/ocr/settings_text_recognition.dart';
 import 'package:niman/src/ui/settings_appearance.dart';
+import 'package:niman/src/ui/settings_area_features.dart';
 import 'package:niman/src/ui/settings_commands.dart';
 import 'package:niman/src/ui/settings_diagnostics.dart';
 import 'package:niman/src/ui/settings_editor.dart';
@@ -166,7 +168,7 @@ List<SettingsArea> settingsAreas({
   void Function(SettingsAreaId area, Key? row)? openArea,
 }) {
   final sync = controller.sync;
-  return [
+  final all = <SettingsArea>[
     SettingsArea(
       id: SettingsAreaId.appearance,
       group: SettingsGroup.app,
@@ -225,6 +227,7 @@ List<SettingsArea> settingsAreas({
       title: AppStrings.commandsTitle,
       subtitle: () => AppStrings.commandsSubtitle,
       build: (highlight) => SettingsCommandsScreen(
+        features: controller.features,
         highlight: highlight,
         // Only where the way in is open: the shortcuts need a keyboard.
         openShortcuts: openArea == null || !keyboardAttached
@@ -304,6 +307,10 @@ List<SettingsArea> settingsAreas({
       build: (highlight) => SettingsNavigationLayoutScreen(
         controller: controller,
         highlight: highlight,
+        // Only where the way in is open: the page links to Features.
+        openFeatures: openArea == null
+            ? null
+            : () => openArea(featuresTarget.area, featuresTarget.row),
       ),
     ),
     SettingsArea(
@@ -375,5 +382,12 @@ List<SettingsArea> settingsAreas({
       build: (highlight) =>
           SettingsRemindersScreen(controller: controller, highlight: highlight),
     ),
+  ];
+  // The area of a feature that is off is not listed (#1109): the list and
+  // the search read this one answer.
+  final features = controller.features.value;
+  return [
+    for (final area in all)
+      if (areaShown(area.id, features)) area,
   ];
 }

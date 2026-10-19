@@ -3,7 +3,9 @@
 // choices is a row showing its current value, changed in a dialog.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/settings/features.dart';
 import 'package:niman/src/core/settings/library_config.dart';
+import 'package:niman/src/core/settings/library_features.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/ui/keyboard_shortcuts.dart';
@@ -397,6 +399,89 @@ void main() {
     await tester.tap(tile, warnIfMissed: false);
     await tester.pumpAndSettle();
     expect(tapped, isFalse);
+  });
+
+  // #1109: the area of a feature that is off is not listed, and the search
+  // does not find its rows.
+  group('the features', () {
+    Features off(Iterable<LibraryFeature> features) =>
+        [for (final feature in features) feature]
+            .fold(const Features(), (all, f) => all.withSwitch(f, on: false));
+
+    const journalArea = Key('settings-area-journal');
+    const studyArea = Key('settings-area-study');
+    const remindersArea = Key('settings-area-reminders');
+
+    testWidgets('the home drops the area of an off feature, and brings it '
+        'back', (tester) async {
+      await pump(tester);
+      expect(find.byKey(journalArea), findsOne);
+      expect(find.byKey(studyArea), findsOne);
+
+      controller.features.value = off([
+        LibraryFeature.journal,
+        LibraryFeature.kindFlashcards,
+      ]);
+      await tester.pumpAndSettle();
+      expect(find.byKey(journalArea), findsNothing);
+      expect(find.byKey(studyArea), findsNothing);
+      expect(find.byKey(const Key('settings-area-folders')), findsOne);
+
+      controller.features.value = const Features();
+      await tester.pumpAndSettle();
+      expect(find.byKey(journalArea), findsOne);
+      expect(find.byKey(studyArea), findsOne);
+    });
+
+    testWidgets('Reminders goes only with todo and the calendar both', (
+      tester,
+    ) async {
+      await pump(tester);
+      controller.features.value = off([LibraryFeature.todo]);
+      await tester.pumpAndSettle();
+      expect(find.byKey(remindersArea), findsOne);
+
+      controller.features.value = off([
+        LibraryFeature.todo,
+        LibraryFeature.calendar,
+      ]);
+      await tester.pumpAndSettle();
+      expect(find.byKey(remindersArea), findsNothing);
+    });
+
+    testWidgets('the search does not find the rows of an off feature', (
+      tester,
+    ) async {
+      Future<void> search() async {
+        await tester.enterText(
+          find.byKey(const Key('settings-search-field')),
+          AppStrings.journalFolderTitle,
+        );
+        await tester.pump(const Duration(milliseconds: 300));
+        await tester.pumpAndSettle();
+      }
+
+      await pump(tester);
+      await search();
+      expect(
+        find.widgetWithText(ListTile, AppStrings.journalFolderTitle),
+        findsWidgets,
+      );
+
+      controller.features.value = off([LibraryFeature.journal]);
+      await tester.pumpAndSettle();
+      // The same words again, asked afresh.
+      await tester.enterText(
+        find.byKey(const Key('settings-search-field')),
+        '',
+      );
+      await tester.pumpAndSettle();
+      await search();
+      expect(
+        find.widgetWithText(ListTile, AppStrings.journalFolderTitle),
+        findsNothing,
+      );
+    });
   });
 
   group('the settings search', () {

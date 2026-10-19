@@ -14,7 +14,12 @@ import 'package:niman/src/ui/settings_navigation.dart';
 /// area it belongs to.
 final class SettingsSectionPane extends StatelessWidget {
   /// Shows [navigation]'s selection among [areas].
-  const new({required this.navigation, required this.areas, super.key});
+  const new({
+    required this.navigation,
+    required this.areas,
+    this.refresh,
+    super.key,
+  });
 
   /// Which area, and which row to flash in it.
   final SettingsNavigation navigation;
@@ -23,10 +28,15 @@ final class SettingsSectionPane extends StatelessWidget {
   /// Settings is open (a library gains a sync engine).
   final List<SettingsArea> Function() areas;
 
+  /// What else changes the areas there are: the library's features
+  /// (#1109). The selection falls back to the first area when its own is
+  /// gone.
+  final Listenable? refresh;
+
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: navigation,
+      listenable: Listenable.merge([navigation, ?refresh]),
       builder: (context, _) {
         final all = areas();
         final area = all.firstWhere(

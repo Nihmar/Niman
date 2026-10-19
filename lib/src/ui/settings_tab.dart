@@ -108,6 +108,7 @@ final class _SettingsTabState extends State<SettingsTab> {
             Expanded(
               child: SettingsSectionPane(
                 navigation: _navigation,
+                refresh: widget.controller.features,
                 areas: () => settingsAreas(
                   controller: widget.controller,
                   spellCheck: widget.spellCheck,

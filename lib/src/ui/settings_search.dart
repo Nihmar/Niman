@@ -17,6 +17,7 @@ import 'package:niman/src/ui/epub_look_sheet.dart';
 import 'package:niman/src/ui/key_map.dart';
 import 'package:niman/src/ui/keyboard_shortcuts.dart';
 import 'package:niman/src/ui/ocr/ocr_settings_section.dart';
+import 'package:niman/src/ui/settings_area_features.dart';
 import 'package:niman/src/ui/settings_areas.dart';
 import 'package:niman/src/ui/settings_commands.dart';
 import 'package:niman/src/ui/settings_keys.dart';
@@ -722,7 +723,7 @@ List<SettingsSearchEntry> settingsSearchEntries({
   // (Re-index now, Switch library): the setting itself is the better
   // answer, and the list shows no twins.
   final titles = {for (final entry in entries) entry.title};
-  return [
+  final all = <SettingsSearchEntry>[
     ...entries,
     for (final command in AppCommand.values)
       if (titles.contains(appCommandLabel(command)))
@@ -768,6 +769,16 @@ List<SettingsSearchEntry> settingsSearchEntries({
             open: () =>
                 openArea(SettingsAreaId.shortcuts, editorShortcutRowKey(item)),
           ),
+  ];
+  // A row of an area whose feature is off is not found (#1109): the area is
+  // not listed either.
+  final features = controller.features.value;
+  return [
+    for (final entry in all)
+      if (entry.areaId case final area? when !areaShown(area, features))
+        ...const <SettingsSearchEntry>[]
+      else
+        entry,
   ];
 }
 
