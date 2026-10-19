@@ -1631,6 +1631,11 @@ final class DutchStrings extends Strings {
   @override
   String get widgetOpenFeatures => 'Functies openen';
 
+  @override
+  String featureOffNamed(String name) => '$name staat uit in deze bibliotheek';
+  @override
+  String get featureOffUnnamed => 'Deze functie staat uit in deze bibliotheek';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Tonen in bestandsbeheer';

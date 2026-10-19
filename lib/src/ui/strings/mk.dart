@@ -1627,6 +1627,13 @@ final class MacedonianStrings extends Strings {
   @override
   String get widgetOpenFeatures => 'Отвори функции';
 
+  @override
+  String featureOffNamed(String name) =>
+      'Во оваа библиотека е исклучено: $name';
+  @override
+  String get featureOffUnnamed =>
+      'Оваа функција е исклучена во оваа библиотека';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Прикажи во управувачот на датотеки';

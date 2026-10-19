@@ -1611,6 +1611,11 @@ final class SlovakStrings extends Strings {
   @override
   String get widgetOpenFeatures => 'Otvoriť funkcie';
 
+  @override
+  String featureOffNamed(String name) => 'V tejto knižnici je vypnuté: $name';
+  @override
+  String get featureOffUnnamed => 'Táto funkcia je v tejto knižnici vypnutá';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Zobraziť v správcovi súborov';

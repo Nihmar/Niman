@@ -1587,6 +1587,11 @@ final class HindiStrings extends Strings {
   @override
   String get widgetOpenFeatures => 'सुविधाएँ खोलें';
 
+  @override
+  String featureOffNamed(String name) => 'इस लाइब्रेरी में बंद है: $name';
+  @override
+  String get featureOffUnnamed => 'यह सुविधा इस लाइब्रेरी में बंद है';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'फ़ाइल प्रबंधक में दिखाएँ';

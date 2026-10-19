@@ -1630,6 +1630,13 @@ final class RomanianStrings extends Strings {
   @override
   String get widgetOpenFeatures => 'Deschide funcțiile';
 
+  @override
+  String featureOffNamed(String name) =>
+      'În această bibliotecă este dezactivat: $name';
+  @override
+  String get featureOffUnnamed =>
+      'Această funcție este dezactivată în această bibliotecă';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Arată în managerul de fișiere';

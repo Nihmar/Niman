@@ -1633,6 +1633,11 @@ final class PolishStrings extends Strings {
   @override
   String get widgetOpenFeatures => 'Otwórz funkcje';
 
+  @override
+  String featureOffNamed(String name) => 'W tej bibliotece wyłączono: $name';
+  @override
+  String get featureOffUnnamed => 'Ta funkcja jest wyłączona w tej bibliotece';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Pokaż w menedżerze plików';

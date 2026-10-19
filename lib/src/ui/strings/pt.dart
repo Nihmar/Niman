@@ -1623,6 +1623,13 @@ final class PortugueseStrings extends Strings {
   @override
   String get widgetOpenFeatures => 'Abrir funcionalidades';
 
+  @override
+  String featureOffNamed(String name) =>
+      'Nesta biblioteca está desativado: $name';
+  @override
+  String get featureOffUnnamed =>
+      'Esta funcionalidade está desativada nesta biblioteca';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Mostrar no gerenciador de arquivos';

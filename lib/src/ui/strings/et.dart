@@ -1593,6 +1593,13 @@ final class EstonianStrings extends Strings {
   @override
   String get widgetOpenFeatures => 'Ava funktsioonid';
 
+  @override
+  String featureOffNamed(String name) =>
+      '$name on selles teegis välja lülitatud';
+  @override
+  String get featureOffUnnamed =>
+      'See funktsioon on selles teegis välja lülitatud';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Näita failihalduris';

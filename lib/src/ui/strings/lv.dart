@@ -1607,6 +1607,11 @@ final class LatvianStrings extends Strings {
   @override
   String get widgetOpenFeatures => 'Atvērt funkcijas';
 
+  @override
+  String featureOffNamed(String name) => 'Šajā bibliotēkā izslēgts: $name';
+  @override
+  String get featureOffUnnamed => 'Šī funkcija ir izslēgta šajā bibliotēkā';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Rādīt failu pārvaldniekā';

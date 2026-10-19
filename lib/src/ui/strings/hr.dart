@@ -1608,6 +1608,13 @@ final class CroatianStrings extends Strings {
   @override
   String get widgetOpenFeatures => 'Otvori značajke';
 
+  @override
+  String featureOffNamed(String name) =>
+      'U ovoj biblioteci je isključeno: $name';
+  @override
+  String get featureOffUnnamed =>
+      'Ova je značajka isključena u ovoj biblioteci';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Prikaži u upravitelju datoteka';

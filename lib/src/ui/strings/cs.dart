@@ -1606,6 +1606,11 @@ final class CzechStrings extends Strings {
   @override
   String get widgetOpenFeatures => 'Otevřít funkce';
 
+  @override
+  String featureOffNamed(String name) => 'V této knihovně je vypnuto: $name';
+  @override
+  String get featureOffUnnamed => 'Tato funkce je v této knihovně vypnutá';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Zobrazit ve správci souborů';

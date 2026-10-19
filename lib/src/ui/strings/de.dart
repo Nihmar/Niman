@@ -1644,6 +1644,13 @@ final class GermanStrings extends Strings {
   @override
   String get widgetOpenFeatures => 'Funktionen öffnen';
 
+  @override
+  String featureOffNamed(String name) =>
+      '$name ist in dieser Bibliothek ausgeschaltet';
+  @override
+  String get featureOffUnnamed =>
+      'Diese Funktion ist in dieser Bibliothek ausgeschaltet';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Im Dateimanager anzeigen';

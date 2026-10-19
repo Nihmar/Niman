@@ -1614,6 +1614,11 @@ final class BelarusianStrings extends Strings {
   @override
   String get widgetOpenFeatures => 'Адкрыць функцыі';
 
+  @override
+  String featureOffNamed(String name) => 'У гэтай бібліятэцы адключана: $name';
+  @override
+  String get featureOffUnnamed => 'Гэта функцыя адключана ў гэтай бібліятэцы';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Паказаць у файлавым менеджары';

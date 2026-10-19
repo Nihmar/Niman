@@ -1659,6 +1659,13 @@ final class FrenchStrings extends Strings {
   @override
   String get widgetOpenFeatures => 'Ouvrir les fonctionnalités';
 
+  @override
+  String featureOffNamed(String name) =>
+      'Désactivé dans cette bibliothèque : $name';
+  @override
+  String get featureOffUnnamed =>
+      'Cette fonction est désactivée dans cette bibliothèque';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Afficher dans le gestionnaire de fichiers';

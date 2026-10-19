@@ -1514,6 +1514,11 @@ final class JapaneseStrings extends Strings {
   @override
   String get widgetOpenFeatures => '機能を開く';
 
+  @override
+  String featureOffNamed(String name) => 'このライブラリでは$nameはオフです';
+  @override
+  String get featureOffUnnamed => 'この機能はこのライブラリではオフです';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'ファイルマネージャーで表示';

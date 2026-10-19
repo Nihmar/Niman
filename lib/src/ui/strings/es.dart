@@ -1643,6 +1643,13 @@ final class SpanishStrings extends Strings {
   @override
   String get widgetOpenFeatures => 'Abrir funciones';
 
+  @override
+  String featureOffNamed(String name) =>
+      'En esta biblioteca está desactivado: $name';
+  @override
+  String get featureOffUnnamed =>
+      'Esta función está desactivada en esta biblioteca';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Mostrar en el gestor de archivos';

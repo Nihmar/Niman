@@ -1607,6 +1607,13 @@ final class NorwegianStrings extends Strings {
   @override
   String get widgetOpenFeatures => 'Åpne funksjoner';
 
+  @override
+  String featureOffNamed(String name) =>
+      '$name er slått av i dette biblioteket';
+  @override
+  String get featureOffUnnamed =>
+      'Denne funksjonen er slått av i dette biblioteket';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Vis i filbehandler';

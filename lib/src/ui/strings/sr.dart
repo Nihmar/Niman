@@ -1616,6 +1616,12 @@ final class SerbianStrings extends Strings {
   @override
   String get widgetOpenFeatures => 'Отвори функције';
 
+  @override
+  String featureOffNamed(String name) =>
+      'У овој библиотеци је искључено: $name';
+  @override
+  String get featureOffUnnamed => 'Ова функција је искључена у овој библиотеци';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Прикажи у управљачу датотека';

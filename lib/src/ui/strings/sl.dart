@@ -1611,6 +1611,12 @@ final class SlovenianStrings extends Strings {
   @override
   String get widgetOpenFeatures => 'Odpri funkcije';
 
+  @override
+  String featureOffNamed(String name) =>
+      'V tej knjižnici je izklopljeno: $name';
+  @override
+  String get featureOffUnnamed => 'Ta funkcija je v tej knjižnici izklopljena';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Pokaži v upravitelju datotek';

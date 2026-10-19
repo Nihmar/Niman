@@ -1647,6 +1647,13 @@ final class CatalanStrings extends Strings {
   @override
   String get widgetOpenFeatures => 'Obre les funcions';
 
+  @override
+  String featureOffNamed(String name) =>
+      'En aquesta biblioteca està desactivat: $name';
+  @override
+  String get featureOffUnnamed =>
+      'Aquesta funció està desactivada en aquesta biblioteca';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Mostra al gestor de fitxers';
