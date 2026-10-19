@@ -3605,6 +3605,51 @@ final class GalicianStrings extends Strings {
   @override
   String get navigationAlwaysShown => 'Sempre visible';
   @override
+  String get featuresTitle => 'Funcións';
+  @override
+  String get featureOffInFeatures => 'Desactivado en Funcións';
+  @override
+  String get featureOffInLibrary => 'Desactivado nesta biblioteca';
+  @override
+  String featureOffInLibraryNamed(String feature) =>
+      'Desactivado nesta biblioteca: $feature';
+  @override
+  String get featureNameSearch => 'Busca';
+  @override
+  String get featureNameQuickNote => 'Nota rápida';
+  @override
+  String get featureNameTemplates => 'Plantillas';
+  @override
+  String get featureNameCapture => 'Captura web';
+  @override
+  String get featureNameTodo => 'Tarefas e lembranzas';
+  @override
+  String get featureNameJournal => 'Diario';
+  @override
+  String get featureNameCalendar => 'Calendario';
+  @override
+  String get featureNameLists => 'Listas';
+  @override
+  String get featureNameShopping => 'Listas da compra';
+  @override
+  String get featureNameAudio => 'Notas de voz';
+  @override
+  String get featureNameTranscription => 'Transcrición';
+  @override
+  String get featureNameSlides => 'Presentacións';
+  @override
+  String get featureNameFlashcards => 'Tarxetas e estudo';
+  @override
+  String get featureNameReaders => 'Lectores de PDF e EPUB';
+  @override
+  String get featureNameAnnotations => 'Anotacións';
+  @override
+  String get featureNameOcr => 'Recoñecemento de texto';
+  @override
+  String get featureNameHome => 'Inicio';
+  @override
+  String get featureNameWidgets => 'Widgets da pantalla de inicio';
+  @override
   String get navigationStart => 'Ábrese en';
   @override
   String navigationStartHidden(String hidden, String start) =>

@@ -3622,6 +3622,51 @@ final class BelarusianStrings extends Strings {
   @override
   String get navigationAlwaysShown => 'Заўсёды паказана';
   @override
+  String get featuresTitle => 'Функцыі';
+  @override
+  String get featureOffInFeatures => 'Выключана ў Функцыях';
+  @override
+  String get featureOffInLibrary => 'Выключана ў гэтай бібліятэцы';
+  @override
+  String featureOffInLibraryNamed(String feature) =>
+      'Выключана ў гэтай бібліятэцы: $feature';
+  @override
+  String get featureNameSearch => 'Пошук';
+  @override
+  String get featureNameQuickNote => 'Хуткая заўвага';
+  @override
+  String get featureNameTemplates => 'Шаблоны';
+  @override
+  String get featureNameCapture => 'Захоп вэб-старонак';
+  @override
+  String get featureNameTodo => 'Заданні і напамінні';
+  @override
+  String get featureNameJournal => 'Дзённік';
+  @override
+  String get featureNameCalendar => 'Каляндар';
+  @override
+  String get featureNameLists => 'Спісы';
+  @override
+  String get featureNameShopping => 'Спісы пакупак';
+  @override
+  String get featureNameAudio => 'Галасавыя заўвагі';
+  @override
+  String get featureNameTranscription => 'Транскрыпцыя';
+  @override
+  String get featureNameSlides => 'Прэзентацыі';
+  @override
+  String get featureNameFlashcards => 'Картачкі і вывучэнне';
+  @override
+  String get featureNameReaders => 'Чытальнікі PDF і EPUB';
+  @override
+  String get featureNameAnnotations => 'Анатацыі';
+  @override
+  String get featureNameOcr => 'Распазнаванне тэксту';
+  @override
+  String get featureNameHome => 'Галоўная';
+  @override
+  String get featureNameWidgets => 'Віджэты галоўнага экрана';
+  @override
   String get navigationStart => 'Адкрываецца на';
   @override
   String navigationStartHidden(String hidden, String start) =>

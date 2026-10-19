@@ -3579,6 +3579,51 @@ final class CzechStrings extends Strings {
   @override
   String get navigationAlwaysShown => 'Vždy zobrazeno';
   @override
+  String get featuresTitle => 'Funkce';
+  @override
+  String get featureOffInFeatures => 'Vypnuto ve Funkcích';
+  @override
+  String get featureOffInLibrary => 'Vypnuto v této knihovně';
+  @override
+  String featureOffInLibraryNamed(String feature) =>
+      'Vypnuto v této knihovně: $feature';
+  @override
+  String get featureNameSearch => 'Hledání';
+  @override
+  String get featureNameQuickNote => 'Rychlá poznámka';
+  @override
+  String get featureNameTemplates => 'Šablony';
+  @override
+  String get featureNameCapture => 'Ukládání webových stránek';
+  @override
+  String get featureNameTodo => 'Úkoly a připomínky';
+  @override
+  String get featureNameJournal => 'Deník';
+  @override
+  String get featureNameCalendar => 'Kalendář';
+  @override
+  String get featureNameLists => 'Seznamy';
+  @override
+  String get featureNameShopping => 'Nákupní seznamy';
+  @override
+  String get featureNameAudio => 'Hlasové poznámky';
+  @override
+  String get featureNameTranscription => 'Přepis';
+  @override
+  String get featureNameSlides => 'Prezentace';
+  @override
+  String get featureNameFlashcards => 'Kartičky a studium';
+  @override
+  String get featureNameReaders => 'Čtečky PDF a EPUB';
+  @override
+  String get featureNameAnnotations => 'Anotace';
+  @override
+  String get featureNameOcr => 'Rozpoznávání textu';
+  @override
+  String get featureNameHome => 'Domů';
+  @override
+  String get featureNameWidgets => 'Widgety na ploše';
+  @override
   String get navigationStart => 'Otevírá se na';
   @override
   String navigationStartHidden(String hidden, String start) =>

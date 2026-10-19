@@ -3541,6 +3541,51 @@ final class TurkishStrings extends Strings {
   @override
   String get navigationAlwaysShown => 'Her zaman gösterilir';
   @override
+  String get featuresTitle => 'Özellikler';
+  @override
+  String get featureOffInFeatures => 'Özelliklerde kapalı';
+  @override
+  String get featureOffInLibrary => 'Bu kütüphanede kapalı';
+  @override
+  String featureOffInLibraryNamed(String feature) =>
+      '$feature bu kütüphanede kapalı';
+  @override
+  String get featureNameSearch => 'Arama';
+  @override
+  String get featureNameQuickNote => 'Hızlı not';
+  @override
+  String get featureNameTemplates => 'Şablonlar';
+  @override
+  String get featureNameCapture => 'Web yakalama';
+  @override
+  String get featureNameTodo => 'Görevler ve hatırlatıcılar';
+  @override
+  String get featureNameJournal => 'Günlük';
+  @override
+  String get featureNameCalendar => 'Takvim';
+  @override
+  String get featureNameLists => 'Listeler';
+  @override
+  String get featureNameShopping => 'Alışveriş listeleri';
+  @override
+  String get featureNameAudio => 'Sesli notlar';
+  @override
+  String get featureNameTranscription => 'Metne dökme';
+  @override
+  String get featureNameSlides => 'Sunumlar';
+  @override
+  String get featureNameFlashcards => 'Bilgi kartları ve çalışma';
+  @override
+  String get featureNameReaders => 'PDF ve EPUB okuyucuları';
+  @override
+  String get featureNameAnnotations => 'Açıklamalar';
+  @override
+  String get featureNameOcr => 'Metin tanıma';
+  @override
+  String get featureNameHome => 'Ana sayfa';
+  @override
+  String get featureNameWidgets => 'Ana ekran widget’ları';
+  @override
   String get navigationStart => 'Açılış ekranı';
   @override
   String navigationStartHidden(String hidden, String start) =>

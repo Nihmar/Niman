@@ -3605,6 +3605,51 @@ final class SlovenianStrings extends Strings {
   @override
   String get navigationAlwaysShown => 'Vedno prikazano';
   @override
+  String get featuresTitle => 'Funkcije';
+  @override
+  String get featureOffInFeatures => 'Izklopljeno v Funkcijah';
+  @override
+  String get featureOffInLibrary => 'Izklopljeno v tej knjižnici';
+  @override
+  String featureOffInLibraryNamed(String feature) =>
+      'Izklopljeno v tej knjižnici: $feature';
+  @override
+  String get featureNameSearch => 'Iskanje';
+  @override
+  String get featureNameQuickNote => 'Hitra opomba';
+  @override
+  String get featureNameTemplates => 'Predloge';
+  @override
+  String get featureNameCapture => 'Shranjevanje spletnih strani';
+  @override
+  String get featureNameTodo => 'Naloge in opomniki';
+  @override
+  String get featureNameJournal => 'Dnevnik';
+  @override
+  String get featureNameCalendar => 'Koledar';
+  @override
+  String get featureNameLists => 'Seznami';
+  @override
+  String get featureNameShopping => 'Nakupovalni seznami';
+  @override
+  String get featureNameAudio => 'Glasovne opombe';
+  @override
+  String get featureNameTranscription => 'Prepis';
+  @override
+  String get featureNameSlides => 'Predstavitve';
+  @override
+  String get featureNameFlashcards => 'Kartice in učenje';
+  @override
+  String get featureNameReaders => 'Bralniki PDF in EPUB';
+  @override
+  String get featureNameAnnotations => 'Opombe';
+  @override
+  String get featureNameOcr => 'Prepoznavanje besedila';
+  @override
+  String get featureNameHome => 'Domov';
+  @override
+  String get featureNameWidgets => 'Pripomočki na domačem zaslonu';
+  @override
   String get navigationStart => 'Odpre se na';
   @override
   String navigationStartHidden(String hidden, String start) =>

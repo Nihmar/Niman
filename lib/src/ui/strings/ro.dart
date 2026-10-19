@@ -3640,6 +3640,51 @@ final class RomanianStrings extends Strings {
   @override
   String get navigationAlwaysShown => 'Mereu vizibil';
   @override
+  String get featuresTitle => 'Funcții';
+  @override
+  String get featureOffInFeatures => 'Dezactivat în Funcții';
+  @override
+  String get featureOffInLibrary => 'Dezactivat în această bibliotecă';
+  @override
+  String featureOffInLibraryNamed(String feature) =>
+      'Dezactivat în această bibliotecă: $feature';
+  @override
+  String get featureNameSearch => 'Căutare';
+  @override
+  String get featureNameQuickNote => 'Notă rapidă';
+  @override
+  String get featureNameTemplates => 'Șabloane';
+  @override
+  String get featureNameCapture => 'Salvarea paginilor web';
+  @override
+  String get featureNameTodo => 'Sarcini și mementouri';
+  @override
+  String get featureNameJournal => 'Jurnal';
+  @override
+  String get featureNameCalendar => 'Calendar';
+  @override
+  String get featureNameLists => 'Liste';
+  @override
+  String get featureNameShopping => 'Liste de cumpărături';
+  @override
+  String get featureNameAudio => 'Note vocale';
+  @override
+  String get featureNameTranscription => 'Transcriere';
+  @override
+  String get featureNameSlides => 'Prezentări';
+  @override
+  String get featureNameFlashcards => 'Carduri și studiu';
+  @override
+  String get featureNameReaders => 'Cititoare PDF și EPUB';
+  @override
+  String get featureNameAnnotations => 'Adnotări';
+  @override
+  String get featureNameOcr => 'Recunoașterea textului';
+  @override
+  String get featureNameHome => 'Acasă';
+  @override
+  String get featureNameWidgets => 'Widgeturi pentru ecranul de start';
+  @override
   String get navigationStart => 'Se deschide pe';
   @override
   String navigationStartHidden(String hidden, String start) =>

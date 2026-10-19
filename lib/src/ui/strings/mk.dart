@@ -3610,6 +3610,51 @@ final class MacedonianStrings extends Strings {
   @override
   String get navigationAlwaysShown => 'Секогаш прикажано';
   @override
+  String get featuresTitle => 'Функции';
+  @override
+  String get featureOffInFeatures => 'Исклучено во Функции';
+  @override
+  String get featureOffInLibrary => 'Исклучено во оваа библиотека';
+  @override
+  String featureOffInLibraryNamed(String feature) =>
+      'Исклучено во оваа библиотека: $feature';
+  @override
+  String get featureNameSearch => 'Пребарување';
+  @override
+  String get featureNameQuickNote => 'Брза белешка';
+  @override
+  String get featureNameTemplates => 'Шаблони';
+  @override
+  String get featureNameCapture => 'Зачувување веб-страници';
+  @override
+  String get featureNameTodo => 'Задачи и потсетници';
+  @override
+  String get featureNameJournal => 'Дневник';
+  @override
+  String get featureNameCalendar => 'Календар';
+  @override
+  String get featureNameLists => 'Листи';
+  @override
+  String get featureNameShopping => 'Листи за купување';
+  @override
+  String get featureNameAudio => 'Гласовни белешки';
+  @override
+  String get featureNameTranscription => 'Транскрипција';
+  @override
+  String get featureNameSlides => 'Презентации';
+  @override
+  String get featureNameFlashcards => 'Картички и учење';
+  @override
+  String get featureNameReaders => 'Читачи за PDF и EPUB';
+  @override
+  String get featureNameAnnotations => 'Анотации';
+  @override
+  String get featureNameOcr => 'Препознавање текст';
+  @override
+  String get featureNameHome => 'Почетна';
+  @override
+  String get featureNameWidgets => 'Виџети на почетниот екран';
+  @override
   String get navigationStart => 'Се отвора на';
   @override
   String navigationStartHidden(String hidden, String start) =>

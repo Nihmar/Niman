@@ -3538,6 +3538,51 @@ final class EnglishStrings extends Strings {
   @override
   String get navigationAlwaysShown => 'Always shown';
   @override
+  String get featuresTitle => 'Features';
+  @override
+  String get featureOffInFeatures => 'Off in Features';
+  @override
+  String get featureOffInLibrary => 'Off in this library';
+  @override
+  String featureOffInLibraryNamed(String feature) =>
+      '$feature is off in this library';
+  @override
+  String get featureNameSearch => 'Search';
+  @override
+  String get featureNameQuickNote => 'Quick note';
+  @override
+  String get featureNameTemplates => 'Templates';
+  @override
+  String get featureNameCapture => 'Web capture';
+  @override
+  String get featureNameTodo => 'Todo and reminders';
+  @override
+  String get featureNameJournal => 'Journal';
+  @override
+  String get featureNameCalendar => 'Calendar';
+  @override
+  String get featureNameLists => 'Lists';
+  @override
+  String get featureNameShopping => 'Shopping lists';
+  @override
+  String get featureNameAudio => 'Audio notes';
+  @override
+  String get featureNameTranscription => 'Transcription';
+  @override
+  String get featureNameSlides => 'Slides';
+  @override
+  String get featureNameFlashcards => 'Flashcards and Study';
+  @override
+  String get featureNameReaders => 'PDF and EPUB readers';
+  @override
+  String get featureNameAnnotations => 'Annotations';
+  @override
+  String get featureNameOcr => 'Text recognition';
+  @override
+  String get featureNameHome => 'Home';
+  @override
+  String get featureNameWidgets => 'Home-screen widgets';
+  @override
   String get navigationStart => 'Opens on';
   @override
   String navigationStartHidden(String hidden, String start) =>

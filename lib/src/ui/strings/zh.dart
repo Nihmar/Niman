@@ -3182,6 +3182,50 @@ final class ChineseStrings extends Strings {
   @override
   String get navigationAlwaysShown => '始终显示';
   @override
+  String get featuresTitle => '功能';
+  @override
+  String get featureOffInFeatures => '在“功能”中已关闭';
+  @override
+  String get featureOffInLibrary => '在此文库中已关闭';
+  @override
+  String featureOffInLibraryNamed(String feature) => '$feature 在此文库中已关闭';
+  @override
+  String get featureNameSearch => '搜索';
+  @override
+  String get featureNameQuickNote => '快速笔记';
+  @override
+  String get featureNameTemplates => '模板';
+  @override
+  String get featureNameCapture => '网页保存';
+  @override
+  String get featureNameTodo => '待办与提醒';
+  @override
+  String get featureNameJournal => '日记';
+  @override
+  String get featureNameCalendar => '日历';
+  @override
+  String get featureNameLists => '列表';
+  @override
+  String get featureNameShopping => '购物清单';
+  @override
+  String get featureNameAudio => '语音笔记';
+  @override
+  String get featureNameTranscription => '转写';
+  @override
+  String get featureNameSlides => '幻灯片';
+  @override
+  String get featureNameFlashcards => '闪卡与学习';
+  @override
+  String get featureNameReaders => 'PDF 和 EPUB 阅读器';
+  @override
+  String get featureNameAnnotations => '批注';
+  @override
+  String get featureNameOcr => '文字识别';
+  @override
+  String get featureNameHome => '主页';
+  @override
+  String get featureNameWidgets => '主屏幕组件';
+  @override
   String get navigationStart => '启动时打开';
   @override
   String navigationStartHidden(String hidden, String start) =>

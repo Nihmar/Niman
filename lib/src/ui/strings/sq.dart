@@ -3606,6 +3606,51 @@ final class AlbanianStrings extends Strings {
   @override
   String get navigationAlwaysShown => 'Gjithmonë i dukshëm';
   @override
+  String get featuresTitle => 'Veçoritë';
+  @override
+  String get featureOffInFeatures => 'Çaktivizuar te Veçoritë';
+  @override
+  String get featureOffInLibrary => 'Çaktivizuar në këtë bibliotekë';
+  @override
+  String featureOffInLibraryNamed(String feature) =>
+      '$feature është çaktivizuar në këtë bibliotekë';
+  @override
+  String get featureNameSearch => 'Kërkimi';
+  @override
+  String get featureNameQuickNote => 'Shënim i shpejtë';
+  @override
+  String get featureNameTemplates => 'Shabllonet';
+  @override
+  String get featureNameCapture => 'Ruajtja e faqeve të uebit';
+  @override
+  String get featureNameTodo => 'Detyra dhe kujtesa';
+  @override
+  String get featureNameJournal => 'Ditari';
+  @override
+  String get featureNameCalendar => 'Kalendari';
+  @override
+  String get featureNameLists => 'Listat';
+  @override
+  String get featureNameShopping => 'Listat e pazarit';
+  @override
+  String get featureNameAudio => 'Shënime zanore';
+  @override
+  String get featureNameTranscription => 'Transkriptimi';
+  @override
+  String get featureNameSlides => 'Prezantimet';
+  @override
+  String get featureNameFlashcards => 'Kartela dhe studim';
+  @override
+  String get featureNameReaders => 'Lexuesit e PDF dhe EPUB';
+  @override
+  String get featureNameAnnotations => 'Anotimet';
+  @override
+  String get featureNameOcr => 'Njohja e tekstit';
+  @override
+  String get featureNameHome => 'Kreu';
+  @override
+  String get featureNameWidgets => 'Widget-et e ekranit kryesor';
+  @override
   String get navigationStart => 'Hapet në';
   @override
   String navigationStartHidden(String hidden, String start) =>

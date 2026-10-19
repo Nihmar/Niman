@@ -3597,6 +3597,51 @@ final class BulgarianStrings extends Strings {
   @override
   String get navigationAlwaysShown => 'Винаги показано';
   @override
+  String get featuresTitle => 'Функции';
+  @override
+  String get featureOffInFeatures => 'Изключено във Функции';
+  @override
+  String get featureOffInLibrary => 'Изключено в тази библиотека';
+  @override
+  String featureOffInLibraryNamed(String feature) =>
+      'Изключено в тази библиотека: $feature';
+  @override
+  String get featureNameSearch => 'Търсене';
+  @override
+  String get featureNameQuickNote => 'Бърза бележка';
+  @override
+  String get featureNameTemplates => 'Шаблони';
+  @override
+  String get featureNameCapture => 'Запазване на уеб страници';
+  @override
+  String get featureNameTodo => 'Задачи и напомняния';
+  @override
+  String get featureNameJournal => 'Дневник';
+  @override
+  String get featureNameCalendar => 'Календар';
+  @override
+  String get featureNameLists => 'Списъци';
+  @override
+  String get featureNameShopping => 'Списъци за пазаруване';
+  @override
+  String get featureNameAudio => 'Гласови бележки';
+  @override
+  String get featureNameTranscription => 'Транскрипция';
+  @override
+  String get featureNameSlides => 'Презентации';
+  @override
+  String get featureNameFlashcards => 'Карти и учене';
+  @override
+  String get featureNameReaders => 'Четци за PDF и EPUB';
+  @override
+  String get featureNameAnnotations => 'Анотации';
+  @override
+  String get featureNameOcr => 'Разпознаване на текст';
+  @override
+  String get featureNameHome => 'Начало';
+  @override
+  String get featureNameWidgets => 'Джаджи на началния екран';
+  @override
   String get navigationStart => 'Отваря се на';
   @override
   String navigationStartHidden(String hidden, String start) =>

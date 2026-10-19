@@ -3574,6 +3574,51 @@ final class LatvianStrings extends Strings {
   @override
   String get navigationAlwaysShown => 'Vienmēr redzams';
   @override
+  String get featuresTitle => 'Funkcijas';
+  @override
+  String get featureOffInFeatures => 'Izslēgts sadaļā Funkcijas';
+  @override
+  String get featureOffInLibrary => 'Izslēgts šajā bibliotēkā';
+  @override
+  String featureOffInLibraryNamed(String feature) =>
+      'Izslēgts šajā bibliotēkā: $feature';
+  @override
+  String get featureNameSearch => 'Meklēšana';
+  @override
+  String get featureNameQuickNote => 'Ātrā piezīme';
+  @override
+  String get featureNameTemplates => 'Šabloni';
+  @override
+  String get featureNameCapture => 'Tīmekļa lapu saglabāšana';
+  @override
+  String get featureNameTodo => 'Uzdevumi un atgādinājumi';
+  @override
+  String get featureNameJournal => 'Dienasgrāmata';
+  @override
+  String get featureNameCalendar => 'Kalendārs';
+  @override
+  String get featureNameLists => 'Saraksti';
+  @override
+  String get featureNameShopping => 'Iepirkumu saraksti';
+  @override
+  String get featureNameAudio => 'Balss piezīmes';
+  @override
+  String get featureNameTranscription => 'Transkripcija';
+  @override
+  String get featureNameSlides => 'Prezentācijas';
+  @override
+  String get featureNameFlashcards => 'Kartītes un mācības';
+  @override
+  String get featureNameReaders => 'PDF un EPUB lasītāji';
+  @override
+  String get featureNameAnnotations => 'Anotācijas';
+  @override
+  String get featureNameOcr => 'Teksta atpazīšana';
+  @override
+  String get featureNameHome => 'Sākums';
+  @override
+  String get featureNameWidgets => 'Sākumekrāna vidžeti';
+  @override
   String get navigationStart => 'Atveras sadaļā';
   @override
   String navigationStartHidden(String hidden, String start) =>

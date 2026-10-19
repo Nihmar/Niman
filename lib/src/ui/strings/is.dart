@@ -3580,6 +3580,51 @@ final class IcelandicStrings extends Strings {
   @override
   String get navigationAlwaysShown => 'Alltaf sýnt';
   @override
+  String get featuresTitle => 'Eiginleikar';
+  @override
+  String get featureOffInFeatures => 'Óvirkt í Eiginleikum';
+  @override
+  String get featureOffInLibrary => 'Óvirkt í þessu bókasafni';
+  @override
+  String featureOffInLibraryNamed(String feature) =>
+      'Óvirkt í þessu bókasafni: $feature';
+  @override
+  String get featureNameSearch => 'Leit';
+  @override
+  String get featureNameQuickNote => 'Hraðminnisblað';
+  @override
+  String get featureNameTemplates => 'Smíðar';
+  @override
+  String get featureNameCapture => 'Vefsíðuvistun';
+  @override
+  String get featureNameTodo => 'Verkefni og minnisbrot';
+  @override
+  String get featureNameJournal => 'Dagbók';
+  @override
+  String get featureNameCalendar => 'Dagatal';
+  @override
+  String get featureNameLists => 'Listar';
+  @override
+  String get featureNameShopping => 'Innkaupalistar';
+  @override
+  String get featureNameAudio => 'Raddminnisblöð';
+  @override
+  String get featureNameTranscription => 'Umritun';
+  @override
+  String get featureNameSlides => 'Kynningar';
+  @override
+  String get featureNameFlashcards => 'Minniskort og nám';
+  @override
+  String get featureNameReaders => 'PDF- og EPUB-lesarar';
+  @override
+  String get featureNameAnnotations => 'Athugasemdir';
+  @override
+  String get featureNameOcr => 'Textagreining';
+  @override
+  String get featureNameHome => 'Heim';
+  @override
+  String get featureNameWidgets => 'Vísar á heimaskjá';
+  @override
   String get navigationStart => 'Opnast á';
   @override
   String navigationStartHidden(String hidden, String start) =>

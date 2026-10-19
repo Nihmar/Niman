@@ -1985,6 +1985,28 @@ abstract base class Strings {
   String get navigationScopeLibrary;
   String get navigationScopeDevice;
   String get navigationAlwaysShown;
+  String get featuresTitle;
+  String get featureOffInFeatures;
+  String get featureOffInLibrary;
+  String featureOffInLibraryNamed(String feature);
+  String get featureNameSearch;
+  String get featureNameQuickNote;
+  String get featureNameTemplates;
+  String get featureNameCapture;
+  String get featureNameTodo;
+  String get featureNameJournal;
+  String get featureNameCalendar;
+  String get featureNameLists;
+  String get featureNameShopping;
+  String get featureNameAudio;
+  String get featureNameTranscription;
+  String get featureNameSlides;
+  String get featureNameFlashcards;
+  String get featureNameReaders;
+  String get featureNameAnnotations;
+  String get featureNameOcr;
+  String get featureNameHome;
+  String get featureNameWidgets;
   String get navigationStart;
   String navigationStartHidden(String hidden, String start);
 

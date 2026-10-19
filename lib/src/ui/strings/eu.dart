@@ -3619,6 +3619,51 @@ final class BasqueStrings extends Strings {
   @override
   String get navigationAlwaysShown => 'Beti ikusgai';
   @override
+  String get featuresTitle => 'Eginbideak';
+  @override
+  String get featureOffInFeatures => 'Itzalita Eginbideetan';
+  @override
+  String get featureOffInLibrary => 'Itzalita liburutegi honetan';
+  @override
+  String featureOffInLibraryNamed(String feature) =>
+      '$feature itzalita dago liburutegi honetan';
+  @override
+  String get featureNameSearch => 'Bilaketa';
+  @override
+  String get featureNameQuickNote => 'Ohar azkarra';
+  @override
+  String get featureNameTemplates => 'Txantiloiak';
+  @override
+  String get featureNameCapture => 'Web-orrien gordetzea';
+  @override
+  String get featureNameTodo => 'Zereginak eta gogorapenak';
+  @override
+  String get featureNameJournal => 'Egunkaria';
+  @override
+  String get featureNameCalendar => 'Egutegia';
+  @override
+  String get featureNameLists => 'Zerrendak';
+  @override
+  String get featureNameShopping => 'Erosketa-zerrendak';
+  @override
+  String get featureNameAudio => 'Ahots-oharrak';
+  @override
+  String get featureNameTranscription => 'Transkripzioa';
+  @override
+  String get featureNameSlides => 'Aurkezpenak';
+  @override
+  String get featureNameFlashcards => 'Fitxak eta ikasketa';
+  @override
+  String get featureNameReaders => 'PDF eta EPUB irakurgailuak';
+  @override
+  String get featureNameAnnotations => 'Oharpenak';
+  @override
+  String get featureNameOcr => 'Testu-ezagutza';
+  @override
+  String get featureNameHome => 'Hasiera';
+  @override
+  String get featureNameWidgets => 'Hasierako pantailako widgetak';
+  @override
   String get navigationStart => 'Hemen irekitzen da';
   @override
   String navigationStartHidden(String hidden, String start) =>

@@ -3605,6 +3605,51 @@ final class FinnishStrings extends Strings {
   @override
   String get navigationAlwaysShown => 'Aina näkyvissä';
   @override
+  String get featuresTitle => 'Ominaisuudet';
+  @override
+  String get featureOffInFeatures => 'Pois käytöstä kohdassa Ominaisuudet';
+  @override
+  String get featureOffInLibrary => 'Pois käytöstä tässä kirjastossa';
+  @override
+  String featureOffInLibraryNamed(String feature) =>
+      '$feature on pois käytöstä tässä kirjastossa';
+  @override
+  String get featureNameSearch => 'Haku';
+  @override
+  String get featureNameQuickNote => 'Pikamuistiinpano';
+  @override
+  String get featureNameTemplates => 'Mallipohjat';
+  @override
+  String get featureNameCapture => 'Verkkosivujen tallennus';
+  @override
+  String get featureNameTodo => 'Tehtävät ja muistutukset';
+  @override
+  String get featureNameJournal => 'Päiväkirja';
+  @override
+  String get featureNameCalendar => 'Kalenteri';
+  @override
+  String get featureNameLists => 'Listat';
+  @override
+  String get featureNameShopping => 'Ostoslistat';
+  @override
+  String get featureNameAudio => 'Äänimuistiinpanot';
+  @override
+  String get featureNameTranscription => 'Litterointi';
+  @override
+  String get featureNameSlides => 'Esitykset';
+  @override
+  String get featureNameFlashcards => 'Muistikortit ja opiskelu';
+  @override
+  String get featureNameReaders => 'PDF- ja EPUB-lukimet';
+  @override
+  String get featureNameAnnotations => 'Merkinnät';
+  @override
+  String get featureNameOcr => 'Tekstintunnistus';
+  @override
+  String get featureNameHome => 'Koti';
+  @override
+  String get featureNameWidgets => 'Aloitusnäytön widgetit';
+  @override
   String get navigationStart => 'Avautuu kohtaan';
   @override
   String navigationStartHidden(String hidden, String start) =>

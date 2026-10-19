@@ -3696,6 +3696,51 @@ final class GreekStrings extends Strings {
   @override
   String get navigationAlwaysShown => 'Πάντα ορατό';
   @override
+  String get featuresTitle => 'Λειτουργίες';
+  @override
+  String get featureOffInFeatures => 'Απενεργοποιημένο στις Λειτουργίες';
+  @override
+  String get featureOffInLibrary => 'Απενεργοποιημένο σε αυτή τη βιβλιοθήκη';
+  @override
+  String featureOffInLibraryNamed(String feature) =>
+      'Απενεργοποιημένο σε αυτή τη βιβλιοθήκη: $feature';
+  @override
+  String get featureNameSearch => 'Αναζήτηση';
+  @override
+  String get featureNameQuickNote => 'Γρήγορη σημείωση';
+  @override
+  String get featureNameTemplates => 'Πρότυπα';
+  @override
+  String get featureNameCapture => 'Αποθήκευση ιστοσελίδων';
+  @override
+  String get featureNameTodo => 'Καθήκοντα και υπενθυμίσεις';
+  @override
+  String get featureNameJournal => 'Ημερολόγιο';
+  @override
+  String get featureNameCalendar => 'Ημερολόγιο συμβάντων';
+  @override
+  String get featureNameLists => 'Λίστες';
+  @override
+  String get featureNameShopping => 'Λίστες αγορών';
+  @override
+  String get featureNameAudio => 'Φωνητικές σημειώσεις';
+  @override
+  String get featureNameTranscription => 'Μεταγραφή';
+  @override
+  String get featureNameSlides => 'Παρουσιάσεις';
+  @override
+  String get featureNameFlashcards => 'Κάρτες και μελέτη';
+  @override
+  String get featureNameReaders => 'Αναγνώστες PDF και EPUB';
+  @override
+  String get featureNameAnnotations => 'Σχολιασμοί';
+  @override
+  String get featureNameOcr => 'Αναγνώριση κειμένου';
+  @override
+  String get featureNameHome => 'Αρχική';
+  @override
+  String get featureNameWidgets => 'Widget αρχικής οθόνης';
+  @override
   String get navigationStart => 'Ανοίγει σε';
   @override
   String navigationStartHidden(String hidden, String start) =>

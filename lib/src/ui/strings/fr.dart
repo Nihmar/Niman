@@ -3689,6 +3689,51 @@ final class FrenchStrings extends Strings {
   @override
   String get navigationAlwaysShown => 'Toujours affiché';
   @override
+  String get featuresTitle => 'Fonctions';
+  @override
+  String get featureOffInFeatures => 'Désactivé dans Fonctions';
+  @override
+  String get featureOffInLibrary => 'Désactivé dans cette bibliothèque';
+  @override
+  String featureOffInLibraryNamed(String feature) =>
+      'Désactivé dans cette bibliothèque : $feature';
+  @override
+  String get featureNameSearch => 'Recherche';
+  @override
+  String get featureNameQuickNote => 'Note rapide';
+  @override
+  String get featureNameTemplates => 'Modèles';
+  @override
+  String get featureNameCapture => 'Capture web';
+  @override
+  String get featureNameTodo => 'Tâches et rappels';
+  @override
+  String get featureNameJournal => 'Journal';
+  @override
+  String get featureNameCalendar => 'Calendrier';
+  @override
+  String get featureNameLists => 'Listes';
+  @override
+  String get featureNameShopping => 'Listes de courses';
+  @override
+  String get featureNameAudio => 'Notes vocales';
+  @override
+  String get featureNameTranscription => 'Transcription';
+  @override
+  String get featureNameSlides => 'Présentations';
+  @override
+  String get featureNameFlashcards => 'Cartes mémoire et révision';
+  @override
+  String get featureNameReaders => 'Lecteurs PDF et EPUB';
+  @override
+  String get featureNameAnnotations => 'Annotations';
+  @override
+  String get featureNameOcr => 'Reconnaissance de texte';
+  @override
+  String get featureNameHome => 'Accueil';
+  @override
+  String get featureNameWidgets => 'Widgets de l’écran d’accueil';
+  @override
   String get navigationStart => 'S’ouvre sur';
   @override
   String navigationStartHidden(String hidden, String start) =>

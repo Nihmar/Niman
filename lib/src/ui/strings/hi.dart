@@ -3532,6 +3532,51 @@ final class HindiStrings extends Strings {
   @override
   String get navigationAlwaysShown => 'हमेशा दिखाया गया';
   @override
+  String get featuresTitle => 'सुविधाएँ';
+  @override
+  String get featureOffInFeatures => 'सुविधाओं में बंद';
+  @override
+  String get featureOffInLibrary => 'इस लाइब्रेरी में बंद';
+  @override
+  String featureOffInLibraryNamed(String feature) =>
+      '$feature इस लाइब्रेरी में बंद है';
+  @override
+  String get featureNameSearch => 'खोज';
+  @override
+  String get featureNameQuickNote => 'क्विक नोट';
+  @override
+  String get featureNameTemplates => 'टेम्पलेट';
+  @override
+  String get featureNameCapture => 'वेब कैप्चर';
+  @override
+  String get featureNameTodo => 'कार्य और रिमाइंडर';
+  @override
+  String get featureNameJournal => 'डायरी';
+  @override
+  String get featureNameCalendar => 'कैलेंडर';
+  @override
+  String get featureNameLists => 'सूचियाँ';
+  @override
+  String get featureNameShopping => 'खरीदारी सूचियाँ';
+  @override
+  String get featureNameAudio => 'वॉइस नोट';
+  @override
+  String get featureNameTranscription => 'ट्रांसक्रिप्शन';
+  @override
+  String get featureNameSlides => 'प्रस्तुतियाँ';
+  @override
+  String get featureNameFlashcards => 'फ़्लैशकार्ड और अध्ययन';
+  @override
+  String get featureNameReaders => 'PDF और EPUB रीडर';
+  @override
+  String get featureNameAnnotations => 'एनोटेशन';
+  @override
+  String get featureNameOcr => 'पाठ पहचान';
+  @override
+  String get featureNameHome => 'होम';
+  @override
+  String get featureNameWidgets => 'होम स्क्रीन विजेट';
+  @override
   String get navigationStart => 'इस पर खुलता है';
   @override
   String navigationStartHidden(String hidden, String start) =>

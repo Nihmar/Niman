@@ -3624,6 +3624,51 @@ final class UkrainianStrings extends Strings {
   @override
   String get navigationAlwaysShown => 'Завжди показано';
   @override
+  String get featuresTitle => 'Функції';
+  @override
+  String get featureOffInFeatures => 'Вимкнено у Функціях';
+  @override
+  String get featureOffInLibrary => 'Вимкнено в цій бібліотеці';
+  @override
+  String featureOffInLibraryNamed(String feature) =>
+      'Вимкнено в цій бібліотеці: $feature';
+  @override
+  String get featureNameSearch => 'Пошук';
+  @override
+  String get featureNameQuickNote => 'Швидка нотатка';
+  @override
+  String get featureNameTemplates => 'Шаблони';
+  @override
+  String get featureNameCapture => 'Збереження вебсторінок';
+  @override
+  String get featureNameTodo => 'Завдання й нагадування';
+  @override
+  String get featureNameJournal => 'Щоденник';
+  @override
+  String get featureNameCalendar => 'Календар';
+  @override
+  String get featureNameLists => 'Списки';
+  @override
+  String get featureNameShopping => 'Списки покупок';
+  @override
+  String get featureNameAudio => 'Голосові нотатки';
+  @override
+  String get featureNameTranscription => 'Транскрипція';
+  @override
+  String get featureNameSlides => 'Презентації';
+  @override
+  String get featureNameFlashcards => 'Картки й навчання';
+  @override
+  String get featureNameReaders => 'Читачі PDF та EPUB';
+  @override
+  String get featureNameAnnotations => 'Анотації';
+  @override
+  String get featureNameOcr => 'Розпізнавання тексту';
+  @override
+  String get featureNameHome => 'Головна';
+  @override
+  String get featureNameWidgets => 'Віджети головного екрана';
+  @override
   String get navigationStart => 'Відкривається на';
   @override
   String navigationStartHidden(String hidden, String start) =>

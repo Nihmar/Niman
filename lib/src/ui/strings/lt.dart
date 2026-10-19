@@ -3623,6 +3623,51 @@ final class LithuanianStrings extends Strings {
   @override
   String get navigationAlwaysShown => 'Visada rodoma';
   @override
+  String get featuresTitle => 'Funkcijos';
+  @override
+  String get featureOffInFeatures => 'Išjungta skiltyje Funkcijos';
+  @override
+  String get featureOffInLibrary => 'Išjungta šioje bibliotekoje';
+  @override
+  String featureOffInLibraryNamed(String feature) =>
+      'Išjungta šioje bibliotekoje: $feature';
+  @override
+  String get featureNameSearch => 'Paieška';
+  @override
+  String get featureNameQuickNote => 'Greita pastaba';
+  @override
+  String get featureNameTemplates => 'Šablonai';
+  @override
+  String get featureNameCapture => 'Tinklalapių išsaugojimas';
+  @override
+  String get featureNameTodo => 'Užduotys ir priminimai';
+  @override
+  String get featureNameJournal => 'Dienoraštis';
+  @override
+  String get featureNameCalendar => 'Kalendorius';
+  @override
+  String get featureNameLists => 'Sąrašai';
+  @override
+  String get featureNameShopping => 'Pirkinių sąrašai';
+  @override
+  String get featureNameAudio => 'Balso pastabos';
+  @override
+  String get featureNameTranscription => 'Transkripcija';
+  @override
+  String get featureNameSlides => 'Pateiktys';
+  @override
+  String get featureNameFlashcards => 'Kortelės ir mokymasis';
+  @override
+  String get featureNameReaders => 'PDF ir EPUB skaitytuvai';
+  @override
+  String get featureNameAnnotations => 'Anotacijos';
+  @override
+  String get featureNameOcr => 'Teksto atpažinimas';
+  @override
+  String get featureNameHome => 'Pradžia';
+  @override
+  String get featureNameWidgets => 'Pradinio ekrano valdikliai';
+  @override
   String get navigationStart => 'Atsidaro skiltyje';
   @override
   String navigationStartHidden(String hidden, String start) =>

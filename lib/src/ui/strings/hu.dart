@@ -3596,6 +3596,51 @@ final class HungarianStrings extends Strings {
   @override
   String get navigationAlwaysShown => 'Mindig látható';
   @override
+  String get featuresTitle => 'Funkciók';
+  @override
+  String get featureOffInFeatures => 'Kikapcsolva a Funkciókban';
+  @override
+  String get featureOffInLibrary => 'Kikapcsolva ebben a könyvtárban';
+  @override
+  String featureOffInLibraryNamed(String feature) =>
+      '$feature ki van kapcsolva ebben a könyvtárban';
+  @override
+  String get featureNameSearch => 'Keresés';
+  @override
+  String get featureNameQuickNote => 'Gyorsjegyzet';
+  @override
+  String get featureNameTemplates => 'Sablonok';
+  @override
+  String get featureNameCapture => 'Weboldalak mentése';
+  @override
+  String get featureNameTodo => 'Teendők és emlékeztetők';
+  @override
+  String get featureNameJournal => 'Napló';
+  @override
+  String get featureNameCalendar => 'Naptár';
+  @override
+  String get featureNameLists => 'Listák';
+  @override
+  String get featureNameShopping => 'Bevásárlólisták';
+  @override
+  String get featureNameAudio => 'Hangjegyzetek';
+  @override
+  String get featureNameTranscription => 'Átirat';
+  @override
+  String get featureNameSlides => 'Bemutatók';
+  @override
+  String get featureNameFlashcards => 'Kártyák és tanulás';
+  @override
+  String get featureNameReaders => 'PDF- és EPUB-olvasók';
+  @override
+  String get featureNameAnnotations => 'Megjegyzések';
+  @override
+  String get featureNameOcr => 'Szövegfelismerés';
+  @override
+  String get featureNameHome => 'Kezdőlap';
+  @override
+  String get featureNameWidgets => 'Kezdőképernyő-widgetek';
+  @override
   String get navigationStart => 'Indításkor';
   @override
   String navigationStartHidden(String hidden, String start) =>

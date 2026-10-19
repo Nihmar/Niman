@@ -3645,6 +3645,51 @@ final class CatalanStrings extends Strings {
   @override
   String get navigationAlwaysShown => 'Sempre visible';
   @override
+  String get featuresTitle => 'Funcions';
+  @override
+  String get featureOffInFeatures => 'Desactivat a Funcions';
+  @override
+  String get featureOffInLibrary => 'Desactivat en aquesta biblioteca';
+  @override
+  String featureOffInLibraryNamed(String feature) =>
+      'Desactivat en aquesta biblioteca: $feature';
+  @override
+  String get featureNameSearch => 'Cerca';
+  @override
+  String get featureNameQuickNote => 'Nota ràpida';
+  @override
+  String get featureNameTemplates => 'Plantilles';
+  @override
+  String get featureNameCapture => 'Captura web';
+  @override
+  String get featureNameTodo => 'Tasques i recordatoris';
+  @override
+  String get featureNameJournal => 'Diari';
+  @override
+  String get featureNameCalendar => 'Calendari';
+  @override
+  String get featureNameLists => 'Llistes';
+  @override
+  String get featureNameShopping => 'Llistes de la compra';
+  @override
+  String get featureNameAudio => 'Notes de veu';
+  @override
+  String get featureNameTranscription => 'Transcripció';
+  @override
+  String get featureNameSlides => 'Presentacions';
+  @override
+  String get featureNameFlashcards => 'Targetes i estudi';
+  @override
+  String get featureNameReaders => 'Lectors de PDF i EPUB';
+  @override
+  String get featureNameAnnotations => 'Anotacions';
+  @override
+  String get featureNameOcr => 'Reconeixement de text';
+  @override
+  String get featureNameHome => 'Inici';
+  @override
+  String get featureNameWidgets => 'Ginys de la pantalla d’inici';
+  @override
   String get navigationStart => 'S’obre a';
   @override
   String navigationStartHidden(String hidden, String start) =>

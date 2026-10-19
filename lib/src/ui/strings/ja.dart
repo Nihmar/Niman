@@ -3276,6 +3276,50 @@ final class JapaneseStrings extends Strings {
   @override
   String get navigationAlwaysShown => '常に表示';
   @override
+  String get featuresTitle => '機能';
+  @override
+  String get featureOffInFeatures => '機能でオフ';
+  @override
+  String get featureOffInLibrary => 'このライブラリでオフ';
+  @override
+  String featureOffInLibraryNamed(String feature) => '$feature はこのライブラリでオフです';
+  @override
+  String get featureNameSearch => '検索';
+  @override
+  String get featureNameQuickNote => 'クイックノート';
+  @override
+  String get featureNameTemplates => 'テンプレート';
+  @override
+  String get featureNameCapture => 'ウェブキャプチャ';
+  @override
+  String get featureNameTodo => 'タスクとリマインダー';
+  @override
+  String get featureNameJournal => '日記';
+  @override
+  String get featureNameCalendar => 'カレンダー';
+  @override
+  String get featureNameLists => 'リスト';
+  @override
+  String get featureNameShopping => '買い物リスト';
+  @override
+  String get featureNameAudio => '音声ノート';
+  @override
+  String get featureNameTranscription => '文字起こし';
+  @override
+  String get featureNameSlides => 'スライド';
+  @override
+  String get featureNameFlashcards => 'フラッシュカードと学習';
+  @override
+  String get featureNameReaders => 'PDF・EPUBリーダー';
+  @override
+  String get featureNameAnnotations => '注釈';
+  @override
+  String get featureNameOcr => '文字認識';
+  @override
+  String get featureNameHome => 'ホーム';
+  @override
+  String get featureNameWidgets => 'ホーム画面ウィジェット';
+  @override
   String get navigationStart => '起動時の画面';
   @override
   String navigationStartHidden(String hidden, String start) =>

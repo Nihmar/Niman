@@ -3624,6 +3624,51 @@ final class DutchStrings extends Strings {
   @override
   String get navigationAlwaysShown => 'Altijd zichtbaar';
   @override
+  String get featuresTitle => 'Functies';
+  @override
+  String get featureOffInFeatures => 'Uitgeschakeld in Functies';
+  @override
+  String get featureOffInLibrary => 'Uitgeschakeld in deze bibliotheek';
+  @override
+  String featureOffInLibraryNamed(String feature) =>
+      '$feature is uitgeschakeld in deze bibliotheek';
+  @override
+  String get featureNameSearch => 'Zoeken';
+  @override
+  String get featureNameQuickNote => 'Snelnotitie';
+  @override
+  String get featureNameTemplates => 'Sjablonen';
+  @override
+  String get featureNameCapture => 'Webpagina’s vastleggen';
+  @override
+  String get featureNameTodo => 'Taken en herinneringen';
+  @override
+  String get featureNameJournal => 'Dagboek';
+  @override
+  String get featureNameCalendar => 'Kalender';
+  @override
+  String get featureNameLists => 'Lijsten';
+  @override
+  String get featureNameShopping => 'Boodschappenlijsten';
+  @override
+  String get featureNameAudio => 'Spraaknotities';
+  @override
+  String get featureNameTranscription => 'Transcriptie';
+  @override
+  String get featureNameSlides => 'Presentaties';
+  @override
+  String get featureNameFlashcards => 'Flashcards en studeren';
+  @override
+  String get featureNameReaders => 'PDF- en EPUB-lezers';
+  @override
+  String get featureNameAnnotations => 'Aantekeningen';
+  @override
+  String get featureNameOcr => 'Tekstherkenning';
+  @override
+  String get featureNameHome => 'Start';
+  @override
+  String get featureNameWidgets => 'Startschermwidgets';
+  @override
   String get navigationStart => 'Opent op';
   @override
   String navigationStartHidden(String hidden, String start) =>

@@ -1877,6 +1877,29 @@ final class AppStrings {
   static String get navigationScopeLibrary => _s.navigationScopeLibrary;
   static String get navigationScopeDevice => _s.navigationScopeDevice;
   static String get navigationAlwaysShown => _s.navigationAlwaysShown;
+  static String get featuresTitle => _s.featuresTitle;
+  static String get featureOffInFeatures => _s.featureOffInFeatures;
+  static String get featureOffInLibrary => _s.featureOffInLibrary;
+  static String featureOffInLibraryNamed(String feature) =>
+      _s.featureOffInLibraryNamed(feature);
+  static String get featureNameSearch => _s.featureNameSearch;
+  static String get featureNameQuickNote => _s.featureNameQuickNote;
+  static String get featureNameTemplates => _s.featureNameTemplates;
+  static String get featureNameCapture => _s.featureNameCapture;
+  static String get featureNameTodo => _s.featureNameTodo;
+  static String get featureNameJournal => _s.featureNameJournal;
+  static String get featureNameCalendar => _s.featureNameCalendar;
+  static String get featureNameLists => _s.featureNameLists;
+  static String get featureNameShopping => _s.featureNameShopping;
+  static String get featureNameAudio => _s.featureNameAudio;
+  static String get featureNameTranscription => _s.featureNameTranscription;
+  static String get featureNameSlides => _s.featureNameSlides;
+  static String get featureNameFlashcards => _s.featureNameFlashcards;
+  static String get featureNameReaders => _s.featureNameReaders;
+  static String get featureNameAnnotations => _s.featureNameAnnotations;
+  static String get featureNameOcr => _s.featureNameOcr;
+  static String get featureNameHome => _s.featureNameHome;
+  static String get featureNameWidgets => _s.featureNameWidgets;
   static String get navigationStart => _s.navigationStart;
   static String navigationStartHidden(String hidden, String start) =>
       _s.navigationStartHidden(hidden, start);

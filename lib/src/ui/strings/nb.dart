@@ -3571,6 +3571,51 @@ final class NorwegianStrings extends Strings {
   @override
   String get navigationAlwaysShown => 'Alltid vist';
   @override
+  String get featuresTitle => 'Funksjoner';
+  @override
+  String get featureOffInFeatures => 'Slått av i Funksjoner';
+  @override
+  String get featureOffInLibrary => 'Slått av i dette biblioteket';
+  @override
+  String featureOffInLibraryNamed(String feature) =>
+      '$feature er slått av i dette biblioteket';
+  @override
+  String get featureNameSearch => 'Søk';
+  @override
+  String get featureNameQuickNote => 'Hurtignotat';
+  @override
+  String get featureNameTemplates => 'Maler';
+  @override
+  String get featureNameCapture => 'Nettsidelagring';
+  @override
+  String get featureNameTodo => 'Å gjøre og påminnelser';
+  @override
+  String get featureNameJournal => 'Dagbok';
+  @override
+  String get featureNameCalendar => 'Kalender';
+  @override
+  String get featureNameLists => 'Lister';
+  @override
+  String get featureNameShopping => 'Handlelister';
+  @override
+  String get featureNameAudio => 'Talenotater';
+  @override
+  String get featureNameTranscription => 'Transkribering';
+  @override
+  String get featureNameSlides => 'Presentasjoner';
+  @override
+  String get featureNameFlashcards => 'Flashcards og studier';
+  @override
+  String get featureNameReaders => 'PDF- og EPUB-lesere';
+  @override
+  String get featureNameAnnotations => 'Merknader';
+  @override
+  String get featureNameOcr => 'Tekstgjenkjenning';
+  @override
+  String get featureNameHome => 'Hjem';
+  @override
+  String get featureNameWidgets => 'Startskjermwidgeter';
+  @override
   String get navigationStart => 'Åpner på';
   @override
   String navigationStartHidden(String hidden, String start) =>

@@ -3596,6 +3596,51 @@ final class SwedishStrings extends Strings {
   @override
   String get navigationAlwaysShown => 'Visas alltid';
   @override
+  String get featuresTitle => 'Funktioner';
+  @override
+  String get featureOffInFeatures => 'Avstängt i Funktioner';
+  @override
+  String get featureOffInLibrary => 'Avstängt i det här biblioteket';
+  @override
+  String featureOffInLibraryNamed(String feature) =>
+      'Avstängt i det här biblioteket: $feature';
+  @override
+  String get featureNameSearch => 'Sök';
+  @override
+  String get featureNameQuickNote => 'Snabbanteckning';
+  @override
+  String get featureNameTemplates => 'Mallar';
+  @override
+  String get featureNameCapture => 'Spara webbsidor';
+  @override
+  String get featureNameTodo => 'Att göra och påminnelser';
+  @override
+  String get featureNameJournal => 'Dagbok';
+  @override
+  String get featureNameCalendar => 'Kalender';
+  @override
+  String get featureNameLists => 'Listor';
+  @override
+  String get featureNameShopping => 'Inköpslistor';
+  @override
+  String get featureNameAudio => 'Röstanteckningar';
+  @override
+  String get featureNameTranscription => 'Transkribering';
+  @override
+  String get featureNameSlides => 'Presentationer';
+  @override
+  String get featureNameFlashcards => 'Flashcards och studier';
+  @override
+  String get featureNameReaders => 'PDF- och EPUB-läsare';
+  @override
+  String get featureNameAnnotations => 'Annoteringar';
+  @override
+  String get featureNameOcr => 'Textigenkänning';
+  @override
+  String get featureNameHome => 'Hem';
+  @override
+  String get featureNameWidgets => 'Startskärmswidgetar';
+  @override
   String get navigationStart => 'Öppnas på';
   @override
   String navigationStartHidden(String hidden, String start) =>

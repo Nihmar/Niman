@@ -3529,6 +3529,51 @@ final class EstonianStrings extends Strings {
   @override
   String get navigationAlwaysShown => 'Alati nähtav';
   @override
+  String get featuresTitle => 'Funktsioonid';
+  @override
+  String get featureOffInFeatures => 'Funktsioonides välja lülitatud';
+  @override
+  String get featureOffInLibrary => 'Selles kogus välja lülitatud';
+  @override
+  String featureOffInLibraryNamed(String feature) =>
+      '$feature on selles kogus välja lülitatud';
+  @override
+  String get featureNameSearch => 'Otsing';
+  @override
+  String get featureNameQuickNote => 'Kiirmärge';
+  @override
+  String get featureNameTemplates => 'Šabloonid';
+  @override
+  String get featureNameCapture => 'Veebilehtede salvestamine';
+  @override
+  String get featureNameTodo => 'Ülesanded ja meeldetuletused';
+  @override
+  String get featureNameJournal => 'Päevik';
+  @override
+  String get featureNameCalendar => 'Kalender';
+  @override
+  String get featureNameLists => 'Loendid';
+  @override
+  String get featureNameShopping => 'Ostunimekirjad';
+  @override
+  String get featureNameAudio => 'Häälmärkmed';
+  @override
+  String get featureNameTranscription => 'Transkriptsioon';
+  @override
+  String get featureNameSlides => 'Esitlused';
+  @override
+  String get featureNameFlashcards => 'Kaardid ja õppimine';
+  @override
+  String get featureNameReaders => 'PDF- ja EPUB-lugejad';
+  @override
+  String get featureNameAnnotations => 'Märkused';
+  @override
+  String get featureNameOcr => 'Tekstituvastus';
+  @override
+  String get featureNameHome => 'Avaleht';
+  @override
+  String get featureNameWidgets => 'Avakuva vidinad';
+  @override
   String get navigationStart => 'Avaneb vaates';
   @override
   String navigationStartHidden(String hidden, String start) =>
