@@ -50,6 +50,29 @@ final class SyncReport {
   /// has to re-read.
   final Set<String> changedLocally = {};
 
+  /// Bytes the run sent in uploads, counted by the client as they left:
+  /// a transfer that failed half way counts what it sent.
+  int bytesUp = 0;
+
+  /// Bytes the run received in downloads it kept (fetched notes, merge
+  /// inputs), counted as they arrived, failed transfers included.
+  int bytesDown = 0;
+
+  /// Bytes the run downloaded only to hash them — the files whose listing
+  /// could not say whether they changed. Not in [bytesDown]: they are not
+  /// notes that arrived, but they cost the same link.
+  int bytesHashed = 0;
+
+  /// Milliseconds the run spent scanning, hashing and applying, so a slow
+  /// run says which phase to look at (#1107).
+  int scanMs = 0;
+
+  /// Milliseconds the run spent hashing.
+  int hashMs = 0;
+
+  /// Milliseconds the run spent applying the plan.
+  int applyMs = 0;
+
   /// The plan the run carried out (the last hashing pass).
   SyncPlan? plan;
 

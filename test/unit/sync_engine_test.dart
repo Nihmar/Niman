@@ -1881,4 +1881,164 @@ void main() {
       expect(await a.queue(), ['changed a.md x0']);
     });
   });
+
+  // #1107: what a run moved and how long each phase took, so a slow sync
+  // says whether the link or the work is to blame.
+  group('the transfer report', () {
+    // Holds the server's answer for [pause] by blocking the isolate it
+    // shares with the test: a phase then takes at least that long, which a
+    // loopback transfer of a few KB never does by itself.
+    void slow(Duration pause, bool Function(FakeWebDavRequest) when) {
+      final previous = server.beforeAnswer;
+      server.beforeAnswer = (request) {
+        previous?.call(request);
+        if (!when(request)) return;
+        final clock = Stopwatch()..start();
+        while (clock.elapsed < pause) {}
+      };
+    }
+
+    // No ETags, and a clock that stands still: a rewrite is always in the
+    // second of the upload, so only the content tells it from the original.
+    void bareServer() {
+      final now = DateTime.now();
+      server
+        ..etags = false
+        ..collectionEtags = false
+        ..preconditions = false
+        ..supportMove = false
+        ..clock = () => now;
+    }
+
+    bool isData(FakeWebDavRequest r) => !r.path.contains('.niman-probe');
+
+    test('counts what an upload sent and a download received', () async {
+      final text = 'x' * 200000;
+      a.write('big.md', text);
+      final up = await a.sync();
+      expect(up.bytesUp, greaterThanOrEqualTo(text.length));
+      expect(up.bytesUp, lessThan(text.length + 4096));
+      expect(up.bytesDown, 0);
+
+      final down = await b.sync();
+      expect(down.bytesDown, greaterThanOrEqualTo(text.length));
+      expect(down.bytesDown, lessThan(text.length + 4096));
+      expect(down.bytesUp, lessThan(4096));
+      expect(down.bytesHashed, 0);
+    });
+
+    test('counts the merged text a merge uploads', () async {
+      String note(List<String> lines) => '${lines.join('\n')}\n';
+      a.write('note.md', note(['# Title', 'one', 'two', 'three']));
+      await a.sync();
+      await b.sync();
+      a.write('note.md', note(['# Title', 'one', 'two', 'three', 'four']));
+      b.write('note.md', note(['# Notes', 'one', 'two', 'three']));
+      await b.sync();
+
+      final report = await a.sync();
+
+      final merged = utf8.encode(
+        note(['# Notes', 'one', 'two', 'three', 'four']),
+      );
+      expect(report.merged, ['note.md'], reason: report.summary());
+      expect(report.bytesUp, greaterThanOrEqualTo(merged.length));
+      expect(report.bytesUp, lessThan(merged.length + 1024));
+      expect(report.bytesDown, greaterThan(0), reason: 'the remote copy');
+    });
+
+    test('counts a hash by download apart from the notes fetched', () async {
+      bareServer();
+      a.write('a.md', 'aaa');
+      await a.sync();
+      // Another device rewrites it in the same second, same size: only the
+      // content tells, so the run downloads it to hash it.
+      server.putFile('a.md', utf8.encode('bbb'));
+
+      final report = await a.sync();
+
+      expect(report.done[SyncActionKind.download], 1, reason: report.summary());
+      expect(report.bytesHashed, 3, reason: 'the hash download');
+      expect(report.bytesDown, 3, reason: 'the note fetched after it');
+    });
+
+    test('times the three phases of a run', () async {
+      const pause = Duration(milliseconds: 25);
+      a.write('a.md', 'a');
+      slow(pause, (r) => isData(r) && r.method == 'PROPFIND');
+      slow(pause, (r) => isData(r) && r.method == 'PUT');
+
+      final report = await a.sync();
+
+      expect(report.scanMs, greaterThanOrEqualTo(pause.inMilliseconds));
+      expect(report.applyMs, greaterThanOrEqualTo(pause.inMilliseconds));
+    });
+
+    test('times the hashing of a run that hashes by download', () async {
+      const pause = Duration(milliseconds: 25);
+      bareServer();
+      a.write('a.md', 'aaa');
+      await a.sync();
+      server.putFile('a.md', utf8.encode('bbb'));
+      slow(pause, (r) => r.method == 'GET');
+
+      final report = await a.sync();
+
+      expect(report.bytesHashed, 3);
+      expect(report.hashMs, greaterThanOrEqualTo(pause.inMilliseconds));
+    });
+
+    test('an aborted run keeps the time it spent applying', () async {
+      const pause = Duration(milliseconds: 25);
+      a
+        ..write('one.md', 'one')
+        ..write('two.md', 'two');
+      var puts = 0;
+      server.beforeAnswer = (request) {
+        if (request.method == 'PUT' && isData(request) && ++puts == 2) {
+          server.failNext(401);
+        }
+      };
+      slow(pause, (r) => r.method == 'PUT' && isData(r));
+
+      final report = await a.sync();
+
+      expect(report.aborted, SyncAbort.authentication);
+      expect(report.applyMs, greaterThanOrEqualTo(2 * pause.inMilliseconds));
+      expect(report.bytesUp, greaterThan(0), reason: 'what went before it');
+    });
+
+    test('an aborted run keeps the time it spent scanning', () async {
+      const pause = Duration(milliseconds: 25);
+      a.write('a.md', 'a');
+      server.beforeAnswer = (request) {
+        if (request.method == 'PROPFIND' && isData(request)) {
+          server.failNext(401);
+        }
+      };
+      slow(pause, (r) => r.method == 'PROPFIND' && isData(r));
+
+      final report = await a.sync();
+
+      expect(report.aborted, SyncAbort.authentication);
+      expect(report.scanMs, greaterThanOrEqualTo(pause.inMilliseconds));
+    });
+
+    test('an aborted run keeps the time it spent hashing', () async {
+      const pause = Duration(milliseconds: 25);
+      bareServer();
+      a.write('a.md', 'aaa');
+      await a.sync();
+      server.putFile('a.md', utf8.encode('bbb'));
+      server.beforeAnswer = (request) {
+        if (request.method == 'GET') server.failNext(401);
+      };
+      slow(pause, (r) => r.method == 'GET');
+
+      final report = await a.sync();
+
+      expect(report.aborted, SyncAbort.authentication);
+      expect(report.hashMs, greaterThanOrEqualTo(pause.inMilliseconds));
+    });
+  });
 }

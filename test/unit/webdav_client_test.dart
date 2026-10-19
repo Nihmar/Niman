@@ -10,6 +10,7 @@ import 'package:niman/src/sync/webdav/webdav_failure.dart';
 import 'package:path/path.dart' as p;
 
 import '../fakes/fake_webdav_server.dart';
+import '../fakes/scripted_http_client.dart';
 import '../fakes/undetachable_http_client.dart';
 
 void main() {
@@ -778,6 +779,209 @@ void main() {
       },
     );
   });
+
+  // #1107: the bytes are counted where they move, so a transfer that is not
+  // a fetched note — a hash download, a merge upload, one that broke half
+  // way — is in the numbers too.
+  group('transfer counters', () {
+    test('start at zero, and an upload counts the bytes it sent', () async {
+      expect(client.bytesSent, 0);
+      expect(client.bytesReceived, 0);
+      expect(client.bytesHashed, 0);
+      await put('a.md', 'twelve bytes');
+      expect(client.bytesSent, 12);
+      expect(client.bytesReceived, 0);
+    });
+
+    test(
+      'a download counts what arrived, a hash download what it hashed',
+      () async {
+        final bytes = List<int>.generate(70000, (i) => i % 251);
+        server.putFile('a.bin', bytes);
+
+        await client.readBytes('a.bin');
+        expect(client.bytesReceived, bytes.length);
+        expect(client.bytesHashed, 0);
+
+        final hashed = await client.download(
+          'a.bin',
+          _Discard(),
+          hashOnly: true,
+        );
+        expect(hashed.sha256, sha256.convert(bytes).toString());
+        expect(
+          client.bytesReceived,
+          bytes.length,
+          reason: 'not a fetched copy',
+        );
+        expect(client.bytesHashed, bytes.length);
+      },
+    );
+
+    test('a download that breaks half way counts what came', () async {
+      server
+        ..putFile('a.bin', List<int>.filled(50000, 1))
+        ..dropNextGet();
+      await expectLater(
+        client.readBytes('a.bin'),
+        throwsA(isA<WebDavRetryable>()),
+      );
+      expect(client.bytesReceived, greaterThan(0));
+      expect(client.bytesReceived, lessThan(50000));
+    });
+
+    test('an upload the server refuses still counts what was sent', () async {
+      server.failPutsTo('a.md', 403);
+      await expectLater(put('a.md', 'refused'), throwsA(isA<WebDavFailure>()));
+      expect(client.bytesSent, 'refused'.length);
+    });
+
+    test('uploadFile counts the file it streamed', () async {
+      final folder = Directory.systemTemp.createTempSync('niman-counter-');
+      addTearDown(() => folder.deleteSync(recursive: true));
+      final file = File(p.join(folder.path, 'a.bin'))
+        ..writeAsBytesSync(List<int>.filled(150000, 7));
+      await client.uploadFile('a.bin', file);
+      expect(client.bytesSent, 150000);
+    });
+  });
+
+  // #1107: the response arrives in socket-sized pieces; the download gathers
+  // them so the hash and the sink are fed 64 KiB at a time. The pieces here
+  // are the test's own, uneven on purpose, which a real socket never
+  // promises.
+  group('the download gathers the pieces of a body', () {
+    const gathered = 64 * 1024;
+
+    WebDavClient scripted(
+      Stream<List<int>> body,
+      int length, {
+      Duration timeout = const Duration(seconds: 5),
+    }) {
+      final made = WebDavClient(
+        url: Uri.parse('http://scripted.invalid/dav/'),
+        httpClient: ScriptedHttpClient(body: body, contentLength: length),
+        timeout: timeout,
+      );
+      addTearDown(made.close);
+      return made;
+    }
+
+    List<int> piece(int length, int seed) =>
+        List<int>.generate(length, (i) => (i * 31 + seed) % 251);
+
+    test('hands the sink pieces of at least 64 KiB, the tail on done, and '
+        'keeps the hash and the count', () async {
+      final pieces = [
+        piece(1024, 1),
+        piece(5461, 2),
+        piece(70 * 1024, 3),
+        piece(30000, 4),
+        piece(40000, 5),
+        piece(1, 6),
+      ];
+      final whole = [for (final chunk in pieces) ...chunk];
+      final sink = _RecordingConsumer();
+      final source = scripted(Stream.fromIterable(pieces), whole.length);
+
+      final result = await source.download('a.bin', sink);
+
+      expect(result.bytes, whole.length);
+      expect(result.sha256, sha256.convert(whole).toString());
+      expect(source.bytesReceived, whole.length);
+      expect(sink.closed, isTrue);
+      expect(sink.bytes, whole, reason: 'the same bytes, in order');
+      expect(sink.pieces, hasLength(3), reason: 'two gathered, one tail');
+      expect(
+        sink.pieces.take(sink.pieces.length - 1),
+        everyElement(greaterThanOrEqualTo(gathered)),
+        reason: 'only the last piece may be shorter',
+      );
+      expect(sink.pieces.last, 1, reason: 'the tail is flushed on done');
+    });
+
+    test(
+      'a body shorter than a gather reaches the sink whole, on done',
+      () async {
+        final pieces = [piece(10, 1), piece(20, 2), piece(30, 3)];
+        final whole = [for (final chunk in pieces) ...chunk];
+        final sink = _RecordingConsumer();
+        final source = scripted(Stream.fromIterable(pieces), whole.length);
+
+        final result = await source.download('a.bin', sink);
+
+        expect(sink.pieces, [60]);
+        expect(sink.bytes, whole);
+        expect(result.sha256, sha256.convert(whole).toString());
+      },
+    );
+
+    test('a body that stalls with a gather half full is the retryable stall '
+        'failure, and what arrived is counted', () async {
+      final body = StreamController<List<int>>();
+      addTearDown(body.close);
+      body.add(piece(1000, 1)); // far from a gather, then silence
+      final sink = _RecordingConsumer();
+      final source = scripted(
+        body.stream,
+        5000,
+        timeout: const Duration(milliseconds: 300),
+      );
+
+      await expectLater(
+        source.download('a.bin', sink).timeout(const Duration(seconds: 10)),
+        throwsA(
+          isA<WebDavRetryable>().having(
+            (failure) => failure.message,
+            'message',
+            contains('body stalled'),
+          ),
+        ),
+      );
+
+      expect(sink.closed, isTrue, reason: 'the sink is released');
+      expect(source.bytesReceived, 1000);
+    });
+
+    test('a body that ends short of its length fails with what the gather '
+        'held counted', () async {
+      final sink = _RecordingConsumer();
+      final source = scripted(Stream.value(piece(1000, 1)), 5000);
+
+      await expectLater(
+        source.download('a.bin', sink),
+        throwsA(isA<WebDavRetryable>()),
+      );
+
+      expect(sink.bytes, hasLength(1000), reason: 'the tail was flushed');
+      expect(source.bytesReceived, 1000);
+    });
+  });
+}
+
+/// A sink that notes the size of each piece it is handed, and the bytes.
+final class _RecordingConsumer implements StreamConsumer<List<int>> {
+  final List<int> pieces = [];
+  final List<int> bytes = [];
+  bool closed = false;
+
+  @override
+  Future<void> addStream(Stream<List<int>> stream) => stream.forEach((chunk) {
+    pieces.add(chunk.length);
+    bytes.addAll(chunk);
+  });
+
+  @override
+  Future<void> close() async => closed = true;
+}
+
+/// A sink that drops what it is given.
+final class _Discard implements StreamConsumer<List<int>> {
+  @override
+  Future<void> addStream(Stream<List<int>> stream) => stream.drain<void>();
+
+  @override
+  Future<void> close() async {}
 }
 
 /// An [HttpClient] that reaches the loopback fake over plain http even when

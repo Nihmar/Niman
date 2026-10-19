@@ -18,6 +18,7 @@ import 'package:niman/src/sync/sync_step_failure.dart';
 import 'package:niman/src/sync/sync_step_outcome.dart';
 import 'package:niman/src/sync/sync_steps.dart';
 import 'package:niman/src/sync/sync_store.dart';
+import 'package:niman/src/sync/sync_transfer_line.dart';
 import 'package:niman/src/sync/webdav/webdav_client.dart';
 import 'package:niman/src/sync/webdav/webdav_failure.dart';
 
@@ -283,6 +284,12 @@ final class SyncEngine {
     } on FileSystemException catch (e) {
       _abort(report, SyncAbort.failed, 'local: ${e.message} (${e.path})');
     } finally {
+      // Where the bytes moved is the client: whatever the run did with it,
+      // including what a failed transfer sent or received before it broke.
+      report
+        ..bytesUp = client.bytesSent
+        ..bytesDown = client.bytesReceived
+        ..bytesHashed = client.bytesHashed;
       client.close();
     }
     return await _finish(
@@ -416,7 +423,7 @@ final class SyncEngine {
         '${hints.isEmpty ? '' : '; hints ${report.hintsDone} done, '
                   '${report.hintsFailed} backing off'}'
         '${report.retryAfter == null ? '' : '; server asked to wait '
-                  '${report.retryAfter!.inSeconds}s'}';
+                  '${report.retryAfter!.inSeconds}s'}; ${transferLine(report)}';
     if (report.clean) {
       _log.info(line);
     } else {
@@ -445,17 +452,23 @@ final class SyncEngine {
     onProgress?.call(SyncStage.scanning, 0, 0);
     final scanClock = Stopwatch()..start();
     final SyncScan scan;
-    if (report.quick) {
-      scan = await _scanner.scanQuick(client, hints, allRows);
-    } else {
-      final local = await _scanner.scanLocal();
-      final remoteScan = await _scanner.scanRemote(client);
-      scan = (
-        local: local,
-        remote: remoteScan.files,
-        folders: remoteScan.folders,
-        rows: allRows,
-      );
+    // A phase the run leaves by an exception still took its time: the
+    // report keeps it, or an aborted run says it spent none (#1107).
+    try {
+      if (report.quick) {
+        scan = await _scanner.scanQuick(client, hints, allRows);
+      } else {
+        final local = await _scanner.scanLocal();
+        final remoteScan = await _scanner.scanRemote(client);
+        scan = (
+          local: local,
+          remote: remoteScan.files,
+          folders: remoteScan.folders,
+          rows: allRows,
+        );
+      }
+    } finally {
+      report.scanMs = scanClock.elapsedMilliseconds;
     }
     final local = scan.local;
     final remote = scan.remote;
@@ -478,17 +491,22 @@ final class SyncEngine {
       capabilities: capabilities,
       rowCount: rowCount,
     );
-    for (var pass = 1; plan.needsHashes && pass <= _hashPasses; pass++) {
-      await _scanner.hash(client, plan, localSha, remoteSha);
-      plan = planSync(
-        local: local,
-        remote: remote,
-        rows: rows,
-        capabilities: capabilities,
-        localSha256: localSha,
-        remoteSha256: remoteSha,
-        rowCount: rowCount,
-      );
+    final hashClock = Stopwatch()..start();
+    try {
+      for (var pass = 1; plan.needsHashes && pass <= _hashPasses; pass++) {
+        await _scanner.hash(client, plan, localSha, remoteSha);
+        plan = planSync(
+          local: local,
+          remote: remote,
+          rows: rows,
+          capabilities: capabilities,
+          localSha256: localSha,
+          remoteSha256: remoteSha,
+          rowCount: rowCount,
+        );
+      }
+    } finally {
+      report.hashMs = hashClock.elapsedMilliseconds;
     }
     if (report.quick) {
       final kept = <SyncDecision>[];
@@ -570,54 +588,70 @@ final class SyncEngine {
     );
     final total = plan.decisions.length;
     var index = 0;
-    for (final decision in plan.decisions) {
-      onProgress?.call(SyncStage.applying, index++, total);
-      final clock = Stopwatch()..start();
-      try {
-        final outcome = await _steps.apply(context, decision);
-        switch (outcome) {
-          case SyncStepOutcome.done:
-            report.done.update(decision.kind, (n) => n + 1, ifAbsent: () => 1);
-            if (const {
-              SyncActionKind.download,
-              SyncActionKind.trashLocal,
-              SyncActionKind.moveLocal,
-            }.contains(decision.kind)) {
-              report.changedLocally.addAll([decision.path, ?decision.fromPath]);
-            }
-            _log.info('apply: $decision (${clock.elapsedMilliseconds} ms)');
-          case SyncStepOutcome.skipped:
-            report.skipped.add(decision.path);
-            _log.info(
-              'apply: skipped ${decision.kind.name} "${decision.path}": '
-              'a side changed during the run, decided again next time',
-            );
-          case SyncStepOutcome.conflict:
-            break;
+    final applyClock = Stopwatch()..start();
+    try {
+      for (final decision in plan.decisions) {
+        onProgress?.call(SyncStage.applying, index++, total);
+        final clock = Stopwatch()..start();
+        try {
+          final outcome = await _steps.apply(context, decision);
+          switch (outcome) {
+            case SyncStepOutcome.done:
+              report.done.update(
+                decision.kind,
+                (n) => n + 1,
+                ifAbsent: () => 1,
+              );
+              if (const {
+                SyncActionKind.download,
+                SyncActionKind.trashLocal,
+                SyncActionKind.moveLocal,
+              }.contains(decision.kind)) {
+                report.changedLocally.addAll([
+                  decision.path,
+                  ?decision.fromPath,
+                ]);
+              }
+              _log.info('apply: $decision (${clock.elapsedMilliseconds} ms)');
+            case SyncStepOutcome.skipped:
+              report.skipped.add(decision.path);
+              _log.info(
+                'apply: skipped ${decision.kind.name} "${decision.path}": '
+                'a side changed during the run, decided again next time',
+              );
+            case SyncStepOutcome.conflict:
+              break;
+          }
+        } on WebDavAuthFailure {
+          rethrow;
+        } on WebDavRetryable catch (e) {
+          // No answer at all: the network, and everything will fail — unless
+          // the server still answers, and dropped this one request (#617).
+          if (e.status == null && !await _serverAnswers(client)) rethrow;
+          _noteRetryAfter(report, e.retryAfter);
+          _failed(
+            report,
+            decision,
+            e.status == null
+                ? _refused(context, decision, e.message)
+                : e.message,
+          );
+        } on WebDavFailure catch (e) {
+          _failed(
+            report,
+            decision,
+            e.status == 413
+                ? _refused(context, decision, e.message)
+                : e.message,
+          );
+        } on FileSystemException catch (e) {
+          _failed(report, decision, 'local: ${e.message}');
+        } on SyncStepFailure catch (e) {
+          _failed(report, decision, e.message);
         }
-      } on WebDavAuthFailure {
-        rethrow;
-      } on WebDavRetryable catch (e) {
-        // No answer at all: the network, and everything will fail — unless
-        // the server still answers, and dropped this one request (#617).
-        if (e.status == null && !await _serverAnswers(client)) rethrow;
-        _noteRetryAfter(report, e.retryAfter);
-        _failed(
-          report,
-          decision,
-          e.status == null ? _refused(context, decision, e.message) : e.message,
-        );
-      } on WebDavFailure catch (e) {
-        _failed(
-          report,
-          decision,
-          e.status == 413 ? _refused(context, decision, e.message) : e.message,
-        );
-      } on FileSystemException catch (e) {
-        _failed(report, decision, 'local: ${e.message}');
-      } on SyncStepFailure catch (e) {
-        _failed(report, decision, e.message);
       }
+    } finally {
+      report.applyMs = applyClock.elapsedMilliseconds;
     }
   }
 
