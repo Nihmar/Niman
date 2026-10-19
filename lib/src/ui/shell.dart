@@ -1325,9 +1325,14 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   }
 
   /// The GUI behind the open note's kind (T-TK-02): null for a plain
-  /// note, no note, or a `type` without a registered GUI (a `type: list`
-  /// note is a list, everything else is a document).
-  NoteKindGUI? get _kindGui => NoteKinds.forType(_noteKind);
+  /// note, no note, a `type` without a registered GUI (a `type: list`
+  /// note is a list, everything else is a document) or one whose feature
+  /// is off (#1109).
+  NoteKindGUI? get _kindGui =>
+      NoteKinds.forType(_noteKind, _features);
+
+  /// The kind the open note is shown as: [_noteKind], when its view is on.
+  String? get _shownKind => _kindGui?.type;
 
   /// Whether the app bar shows the editor/preview eye action: hidden in
   /// kind mode (the note is a list, not a document) unless the user is
@@ -1737,6 +1742,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           initialCaretOffset: _pendingCaretOffset,
           initialFind: _pendingFind,
           kindMode: !_kindRawMode,
+          features: controller.features,
           onNoteKindChanged: _onNoteKindChanged,
           onKindMarkdown: _showKindMarkdown,
           onPasteAsMarkdown: _pasteAsMarkdownOffer,
@@ -3539,16 +3545,14 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     studyEnabled: ref.read(deckStudyStarterProvider) != null,
     makeFlashcards:
         _plainNote && commandFeatureOn(AppCommand.makeFlashcards, _features),
-    // The two views of a list are shopping lists' (#1109): with them off
-    // the note has only the one.
-    kindSwitch: !_features.isOn(LibraryFeature.kindShopping)
-        ? null
-        : switch (_noteKind) {
-            'list' => NoteKindSwitch.toShoppingList,
-            'shopping-list' => NoteKindSwitch.toChecklist,
-            _ => null,
-          },
-    onSelected: (action) {
+    // Shopping needs Lists and its own switch: with it off a list has no
+    // second view to swap to (#1109).
+    kindSwitch: switch (_shownKind) {
+      'list' when _features.isOn(LibraryFeature.kindShopping) =>
+        NoteKindSwitch.toShoppingList,
+      'shopping-list' => NoteKindSwitch.toChecklist,
+      _ => null,
+    },    onSelected: (action) {
       final path = _selected;
       if (path == null) return;
       final anchor = menuAnchorOf(button);
@@ -3591,11 +3595,11 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   );
 
   /// Whether the note on screen is a deck shown as its slides (#534).
-  bool get _showsSlides => _noteKind == 'slides' && !_kindRawMode;
+  bool get _showsSlides => _shownKind == 'slides' && !_kindRawMode;
 
   /// Whether the note on screen is a flashcard deck shown as its cards
   /// (#533).
-  bool get _showsDeck => _noteKind == 'flashcard' && !_kindRawMode;
+  bool get _showsDeck => _shownKind == 'flashcard' && !_kindRawMode;
 
   /// What the deck's ⋮ entries do beyond its view (#533).
   late final DeckMenuFlow _deckFlow = DeckMenuFlow(
@@ -3643,7 +3647,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// shows; [presenter] opens on the presenter view.
   Future<void> _presentSlides({bool presenter = false}) async {
     final note = _panelNote;
-    if (note == null || _noteKind != 'slides') return;
+    if (note == null || _shownKind != 'slides') return;
     await presentSlides(
       context,
       text: note.currentText,
@@ -3663,7 +3667,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   void _switchNoteKind() {
     final note = _panelNote;
     if (note == null) return;
-    note.setNoteKind(_noteKind == 'list' ? 'shopping-list' : 'list');
+    note.setNoteKind(_shownKind == 'list' ? 'shopping-list' : 'list');
   }
 
   @override
@@ -4329,10 +4333,12 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     CommandNeed.notInZen => !_inZen,
     CommandNeed.zenRoom => _immersive.zen.on || _zenPossible,
     CommandNeed.previewToggle => _previewToggleVisible,
+    // The raw kind: an audio note's body is a clip document even with its
+    // view off, and a tidy of it is refused all the same (#840).
     CommandNeed.proseNote => _noteKind != 'audio',
     CommandNeed.twoEditors => _editorSettings.editorsEnabled.length > 1,
     CommandNeed.journalEntry => _shownJournalDay != null,
-    CommandNeed.slidesNote => _noteKind == 'slides',
+    CommandNeed.slidesNote => _shownKind == 'slides',
     CommandNeed.flashcardNote => _showsDeck,
     CommandNeed.plainNote => _plainNote,
     CommandNeed.ocrFile =>
@@ -5185,6 +5191,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
                     wikilinkSuggester: _wikilinkSuggester,
                     onOpenNote: _openNoteFromLink,
                     kindMode: !_kindRawMode,
+                    features: controller.features,
                     onNoteKindChanged: _onNoteKindChanged,
                     onTabKind: _onTabKind,
                     onPasteAsMarkdown: _pasteAsMarkdownOffer,
@@ -5252,7 +5259,10 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         ? _previewToggleVisible
         : previewToggleOffered(
             path: tab.path,
-            kindGui: NoteKinds.forType(_tabKinds[tab.path]),
+            kindGui: NoteKinds.forType(
+              _tabKinds[tab.path],
+              widget.controller.features.value,
+            ),
           );
     if (!offered) return const [];
     final plain = isPlainTextFile(p.basename(tab.path));

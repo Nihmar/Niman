@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:niman/src/core/settings/library_features.dart';
 import 'package:niman/src/frontmatter/note_kind.dart';
 import 'package:niman/src/ui/kinds/list_note.dart';
 
@@ -12,6 +13,9 @@ import 'package:niman/src/ui/kinds/list_note.dart';
 final class ShoppingListKindGui implements NoteKindGUI {
   @override
   String get type => 'shopping-list';
+
+  @override
+  LibraryFeature get feature => LibraryFeature.kindShopping;
 
   @override
   Widget buildBody(BuildContext context, NoteKindHost host) {

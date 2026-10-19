@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/settings/features.dart';
 import 'package:niman/src/core/settings/library_settings.dart' show LinkType;
 import 'package:niman/src/flashcards/review_state.dart';
 import 'package:niman/src/flashcards/study_day.dart';
@@ -185,8 +186,11 @@ Future<void> _doubleTap(WidgetTester tester, Finder finder) async {
 
 void main() {
   test('the flashcard kind is registered', () {
-    expect(NoteKinds.forType('flashcard'), isA<FlashcardKindGui>());
-    expect(NoteKinds.forType('flashcard')!.type, 'flashcard');
+    expect(
+      NoteKinds.forType('flashcard', const Features()),
+      isA<FlashcardKindGui>(),
+    );
+    expect(NoteKinds.forType('flashcard', const Features())!.type, 'flashcard');
   });
 
   group('wide', () {

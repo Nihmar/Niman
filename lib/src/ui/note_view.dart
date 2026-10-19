@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/frame_log.dart';
 import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/core/settings/features.dart';
 import 'package:niman/src/core/settings/library_config.dart'
     show defaultSourceFont;
 import 'package:niman/src/core/settings/library_settings.dart';
@@ -139,6 +140,7 @@ final class NoteView extends StatefulWidget {
     this.onEditedNoteClosed,
     this.onLoaded,
     this.kindMode = true,
+    this.features,
     this.outlineInDock = false,
     this.spellCheckInDock = false,
     this.onNoteKindChanged,
@@ -347,6 +349,10 @@ final class NoteView extends StatefulWidget {
   /// the editor. False = always the raw editor.
   final bool kindMode;
 
+  /// The library's features (#1109): a note of a kind that is off opens in
+  /// the plain editor. Null reads every kind as on.
+  final ValueListenable<Features>? features;
+
   /// Whether the window's panel has the outline (#1002): the status row's
   /// own outline button would then be a second way to the same list, and is
   /// left out. True wherever the wide layout shows the panel — docked
@@ -541,7 +547,7 @@ final class _NoteViewState extends State<NoteView>
   @override
   bool get canInsert {
     if (!_ready) return false;
-    final kind = _noteKind == null ? null : NoteKinds.forType(_noteKind);
+    final kind = NoteKinds.forType(_noteKind, _features);
     return !(widget.kindMode && kind != null);
   }
 
@@ -981,6 +987,14 @@ final class _NoteViewState extends State<NoteView>
         ?.showSnackBar(SnackBar(content: Text(AppStrings.noteSaveFailedSnack)));
   }
 
+  Features get _features => widget.features?.value ?? const Features();
+
+  /// A switch was flipped, or a sync brought another device's: the kind the
+  /// note shows follows it, and the note's text is not touched (#1109).
+  void _featuresChanged() {
+    if (mounted) setState(() {});
+  }
+
   /// The loaded note's kind (the frontmatter `type` value, null = plain
   /// note); null again while a load is in flight.
   String? _noteKind;
@@ -994,6 +1008,7 @@ final class _NoteViewState extends State<NoteView>
     WidgetsBinding.instance.addObserver(this);
     _focus = FocusNode();
     _focus.addListener(_onFocusChanged);
+    widget.features?.addListener(_featuresChanged);
     _deadLinks.sourceChanged();
     // The pane opened the note before this editor was mounted (#727): the
     // surface is built this frame, so the caret is asked for after it.
@@ -1041,6 +1056,10 @@ final class _NoteViewState extends State<NoteView>
   @override
   void didUpdateWidget(covariant NoteView oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.features != widget.features) {
+      oldWidget.features?.removeListener(_featuresChanged);
+      widget.features?.addListener(_featuresChanged);
+    }
     final moved = _followsMove(oldWidget);
     _keepPlaceAcrossModes(oldWidget);
     if (!identical(oldWidget.linkSource, widget.linkSource)) {
@@ -1154,6 +1173,7 @@ final class _NoteViewState extends State<NoteView>
 
   @override
   void dispose() {
+    widget.features?.removeListener(_featuresChanged);
     _handMemento(widget.path);
     _mementoTimer?.cancel();
     _activeFormats.removeListener(_scheduleMemento);
@@ -2396,7 +2416,7 @@ final class _NoteViewState extends State<NoteView>
     // Kind mode (T-TK-02): a known `type` swaps the body for the kind GUI
     // and hides the editor chrome (outline, status row, toolbar) — the
     // note is a list, not a document, on screen.
-    final kindGui = _noteKind == null ? null : NoteKinds.forType(_noteKind);
+    final kindGui = NoteKinds.forType(_noteKind, _features);
     final kindBody = widget.kindMode && kindGui != null;
     // A list or a voice note keeps to the note column like text does
     // (0.0.8 test round): the column is the app's shape, not the editor's.
