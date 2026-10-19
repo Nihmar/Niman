@@ -11,8 +11,10 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:niman/src/core/settings/features.dart';
 import 'package:niman/src/home/home_file.dart';
 import 'package:niman/src/home/home_tile.dart';
+import 'package:niman/src/home/home_tile_feature.dart';
 import 'package:niman/src/templates/engine.dart';
 import 'package:niman/src/ui/home/home_column.dart';
 import 'package:niman/src/ui/home/home_column_editor.dart';
@@ -136,7 +138,16 @@ final class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final home = _home;
     if (home == null || !home.loaded) return const SizedBox.shrink();
-    final layout = home.layout;
+    // The tiles of a feature that is off are not built; the file keeps
+    // them, so turning it back on finds the Home as it was (#1109).
+    return ValueListenableBuilder(
+      valueListenable: widget.host.controller.features,
+      builder: (context, features, _) => _body(home, features),
+    );
+  }
+
+  Widget _body(HomeEditing home, Features features) {
+    final layout = homeLayoutUnder(home.layout, features);
     return LayoutBuilder(
       builder: (context, box) {
         final wide = box.maxWidth >= HomeGridMetrics.minWidth;

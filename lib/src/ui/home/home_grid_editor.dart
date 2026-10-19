@@ -268,7 +268,10 @@ final class _HomeGridEditorState extends State<HomeGridEditor> {
               controller: widget.controller,
               onClose: () => setState(() => _inspected = null),
             ),
-            _ => HomeAddPanel(editing: _editing),
+            _ => HomeAddPanel(
+              editing: _editing,
+              features: widget.controller.features,
+            ),
           },
         ),
       ],
