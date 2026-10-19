@@ -9,15 +9,18 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/shell_create_flow.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// One kind a menu creates inside a folder.
 final class CreateKind {
   /// Describes a kind: the menu's [value] for it, the [keySuffix] its keys
-  /// share, its [icon] and [label], and how [create] makes it.
+  /// share, its [command], its [icon] and [label], and how [create] makes
+  /// it.
   const new({
     required this.value,
+    required this.command,
     required this.keySuffix,
     required this.icon,
     required this.label,
@@ -26,6 +29,10 @@ final class CreateKind {
 
   /// What the menu resolves to when this entry is chosen.
   final String value;
+
+  /// The command that makes the same kind: the entry is offered when the
+  /// command's feature is on (#1109).
+  final AppCommand command;
 
   /// The rest of the entry's key: `menu-<suffix>` on a row's menu,
   /// `tree-menu-<suffix>` on the tree's background menu.
@@ -51,6 +58,7 @@ final class CreateKind {
 final List<CreateKind> createKinds = <CreateKind>[
   CreateKind(
     value: 'audio',
+    command: AppCommand.newAudioNote,
     keySuffix: 'new-audio-note',
     icon: Icons.mic_outlined,
     label: () => AppStrings.newAudioNoteHere,
@@ -59,6 +67,7 @@ final List<CreateKind> createKinds = <CreateKind>[
   ),
   CreateKind(
     value: 'slides',
+    command: AppCommand.newSlides,
     keySuffix: 'new-slides',
     icon: Icons.slideshow_outlined,
     label: () => AppStrings.newSlidesHere,
@@ -67,6 +76,7 @@ final List<CreateKind> createKinds = <CreateKind>[
   ),
   CreateKind(
     value: 'flashcards',
+    command: AppCommand.newFlashcards,
     keySuffix: 'new-flashcards',
     icon: Icons.style_outlined,
     label: () => AppStrings.newFlashcardsHere,

@@ -10,6 +10,7 @@ library;
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:niman/src/core/settings/library_features.dart';
 import 'package:niman/src/home/home_action.dart';
 import 'package:niman/src/home/home_layout.dart';
 import 'package:niman/src/library/session.dart';
@@ -33,12 +34,14 @@ final class ShellPalette {
     required this.ocr,
     required this.spellCheck,
     required this.commandHandlers,
+    required this.commandsOffByFeature,
     required this.labelOf,
     required this.recentNotes,
     required this.wide,
     required this.openNote,
     required this.openSettingsAt,
     required this.runHomeAction,
+    required this.openFeatures,
   });
 
   /// The open library's session.
@@ -55,6 +58,10 @@ final class ShellPalette {
 
   /// The commands that can run now, with what each does.
   final Map<AppCommand, VoidCallback> Function() commandHandlers;
+
+  /// The commands that would run here and now but for their feature being
+  /// off, with that feature (#1109).
+  final Map<AppCommand, LibraryFeature> Function() commandsOffByFeature;
 
   /// A command's name where the shell's state words it better than the
   /// registry; null for the registry's.
@@ -76,6 +83,10 @@ final class ShellPalette {
   /// Runs one of the Home's actions.
   final void Function(HomeAction action) runHomeAction;
 
+  /// Opens Settings → Features, from the quiet line about a feature that is
+  /// off (#1109).
+  final VoidCallback openFeatures;
+
   /// Commands run from the palette this session, most recent first.
   final List<AppCommand> _recentCommands = [];
 
@@ -87,6 +98,14 @@ final class ShellPalette {
     final choice = await showCommandPalette(
       context,
       commands: commands,
+      offCommands: [
+        for (final MapEntry(key: command, value: feature)
+            in commandsOffByFeature().entries)
+          (
+            command: PaletteCommand.of(command, label: labelOf(command)),
+            feature: feature,
+          ),
+      ],
       notesOnly: notesOnly,
       recentCommands: _recentCommands,
       recentNotes: recentNotes(),
@@ -107,6 +126,8 @@ final class ShellPalette {
         openSettingsAt(setting.target);
       case PaletteActionChoice(:final action):
         runHomeAction(action);
+      case PaletteFeaturesChoice():
+        openFeatures();
     }
   }
 

@@ -11,11 +11,13 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:niman/src/core/files.dart';
+import 'package:niman/src/core/settings/library_features.dart';
 import 'package:niman/src/home/home_action.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/home/home_icons.dart';
 import 'package:niman/src/ui/keyboard_presence.dart';
 import 'package:niman/src/ui/palette/palette_command.dart';
+import 'package:niman/src/ui/palette/palette_feature_line.dart';
 import 'package:niman/src/ui/palette/palette_match.dart';
 import 'package:niman/src/ui/palette/palette_reveal.dart';
 import 'package:niman/src/ui/palette/pinned_commands.dart';
@@ -64,6 +66,16 @@ final class PaletteActionChoice extends PaletteChoice {
   final HomeAction action;
 }
 
+/// The link of the quiet line: Settings → Features (#1109).
+final class PaletteFeaturesChoice extends PaletteChoice {
+  /// Picked the link to Features.
+  const new();
+}
+
+/// A command the palette would offer but for its `feature` being off
+/// (#1109): kept to say why a query found nothing.
+typedef PaletteOffCommand = ({PaletteCommand command, LibraryFeature feature});
+
 /// One settings row as the palette lists it (#229): its title, the area
 /// it lives in, and where to open.
 @immutable
@@ -85,7 +97,9 @@ final class PaletteSetting {
 ///
 /// [commands] are the ones that can run here and now; [notesOnly] is
 /// Go to note's palette, with the commands left out. [onTogglePin] pins
-/// and unpins a command (#208); null leaves the pins out.
+/// and unpins a command (#208); null leaves the pins out. [offCommands] are
+/// the commands whose feature is off: never listed, they only let the
+/// palette say so when a query matches nothing else of the commands.
 Future<PaletteChoice?> showCommandPalette(
   BuildContext context, {
   required List<PaletteCommand> commands,
@@ -93,6 +107,7 @@ Future<PaletteChoice?> showCommandPalette(
   List<AppCommand> recentCommands = const [],
   List<String> recentNotes = const [],
   List<PaletteSetting> settings = const [],
+  List<PaletteOffCommand> offCommands = const [],
   Future<List<HomeAction>> Function()? homeActions,
   bool notesOnly = false,
   void Function(AppCommand command)? onTogglePin,
@@ -105,6 +120,7 @@ Future<PaletteChoice?> showCommandPalette(
     transitionDuration: const Duration(milliseconds: 120),
     pageBuilder: (context, _, _) => CommandPalette(
       commands: notesOnly ? const [] : commands,
+      offCommands: notesOnly ? const [] : offCommands,
       searchNotes: searchNotes,
       recentCommands: recentCommands,
       recentNotes: recentNotes,
@@ -124,6 +140,7 @@ final class CommandPalette extends StatefulWidget {
     this.recentCommands = const [],
     this.recentNotes = const [],
     this.settings = const [],
+    this.offCommands = const [],
     this.homeActions,
     this.onTogglePin,
     super.key,
@@ -131,6 +148,10 @@ final class CommandPalette extends StatefulWidget {
 
   /// The commands on offer.
   final List<PaletteCommand> commands;
+
+  /// The commands that would be on offer but for their feature being off
+  /// (#1109).
+  final List<PaletteOffCommand> offCommands;
 
   /// Finds notes by name.
   final Future<List<String>> Function(String query) searchNotes;
@@ -172,6 +193,10 @@ final class _CommandPaletteState extends State<CommandPalette> {
   List<PaletteSetting> _settings = const [];
   List<HomeAction> _allActions = const [];
   List<HomeAction> _actions = const [];
+
+  /// The feature the typed text found commands of, none of them on offer
+  /// (#1109), or null.
+  LibraryFeature? _offFeature;
   int _selected = 0;
   int _token = 0;
   Timer? _debounce;
@@ -256,6 +281,18 @@ final class _CommandPaletteState extends State<CommandPalette> {
     return ranked.take(12).toList();
   }
 
+  /// The feature [query] found commands of when none is on offer: the
+  /// quiet line's, so a list with no command says why (#1109).
+  LibraryFeature? _offFeatureFor(String query) {
+    if (query.trim().isEmpty || _commands.isNotEmpty) return null;
+    return paletteRank(
+      widget.offCommands,
+      query,
+      name: (o) => o.command.name,
+      id: (o) => o.command.command,
+    ).firstOrNull?.feature;
+  }
+
   /// How many of [_commands] are the pinned ones at the head: what the
   /// PINNED heading covers.
   int get _pinnedShown {
@@ -314,6 +351,7 @@ final class _CommandPaletteState extends State<CommandPalette> {
     setState(() {
       _settings = _rankSettings(query);
       _commands = _rankCommands(query);
+      _offFeature = _offFeatureFor(query);
       _actions = _rankActions(query);
       if (query.trim().isEmpty) _notes = widget.recentNotes.take(8).toList();
       _selected = 0;
@@ -556,17 +594,35 @@ final class _CommandPaletteState extends State<CommandPalette> {
                       horizontal: 14,
                       vertical: 8,
                     ),
-                    child: Text(
-                      // Without a keyboard the arrows and alt+P are
-                      // nothing to say (#230): the pin is a tap.
-                      !keys
-                          ? AppStrings.paletteFooterTouch
-                          : widget.onTogglePin == null
-                          ? AppStrings.paletteFooter
-                          : '${AppStrings.paletteFooter} · '
-                                '${AppStrings.palettePinFooter}',
-                      key: const Key('palette-footer'),
-                      style: muted,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          // Without a keyboard the arrows and alt+P are
+                          // nothing to say (#230): the pin is a tap.
+                          !keys
+                              ? AppStrings.paletteFooterTouch
+                              : widget.onTogglePin == null
+                              ? AppStrings.paletteFooter
+                              : '${AppStrings.paletteFooter} · '
+                                    '${AppStrings.palettePinFooter}',
+                          key: const Key('palette-footer'),
+                          style: muted,
+                        ),
+                        if (_offFeature case final feature?)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 2),
+                            child: PaletteFeatureLine(
+                              feature: feature,
+                              onOpen: () {
+                                if (_chosen) return;
+                                _chosen = true;
+                                Navigator.of(context)
+                                    .pop(const PaletteFeaturesChoice());
+                              },
+                            ),
+                          ),
+                      ],
                     ),
                   ),
                 ],

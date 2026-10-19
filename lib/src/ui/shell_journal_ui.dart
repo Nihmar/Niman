@@ -13,6 +13,7 @@ import 'package:niman/src/calendar/calendar_file.dart';
 import 'package:niman/src/calendar/calendar_store.dart';
 import 'package:niman/src/calendar/calendar_writer.dart';
 import 'package:niman/src/calendar/parser.dart';
+import 'package:niman/src/core/settings/library_features.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/journal/journal_settings.dart';
 import 'package:niman/src/library/session.dart';
@@ -98,6 +99,14 @@ final class ShellJournalUi {
   /// Opens the tree's menu for a note at a position.
   final Future<void> Function(Note note, Offset position) showRowMenuAt;
 
+  /// Whether the calendar file's events show under a day: the library has
+  /// the calendar on (#1109).
+  bool get _showsEvents =>
+      controller.features.value.isOn(LibraryFeature.calendar);
+
+  /// Whether the tasks due show under a day: the library has todo on.
+  bool get _showsTasks => controller.features.value.isOn(LibraryFeature.todo);
+
   /// The dock's journal pane, on [focusDay] when an entry is on screen.
   Widget browser(BuildContext context, {DateTime? focusDay}) => JournalBrowser(
     today: journal().today(DateTime.now()),
@@ -106,21 +115,23 @@ final class ShellJournalUi {
     revision: controller.revision,
     onOpenDay: (day, {confirmed = false}) =>
         unawaited(flow.openDay(context, day, confirmed: confirmed)),
-    eventsOn: _eventsOn,
-    goalsOn: _goalsOn,
-    eventDays: calendar.snapshot?.daysWithEvents ?? const <DateTime>{},
-    calendarChanged: calendar,
-    onOpenEvent: openEvent,
-    dueOn: _tasksDueOn,
-    tasksChanged: tasks,
-    onOpenTasks: openTasks,
+    eventsOn: _showsEvents ? _eventsOn : null,
+    goalsOn: _showsEvents ? _goalsOn : null,
+    eventDays: _showsEvents
+        ? calendar.snapshot?.daysWithEvents ?? const <DateTime>{}
+        : const <DateTime>{},
+    calendarChanged: _showsEvents ? calendar : null,
+    onOpenEvent: _showsEvents ? openEvent : null,
+    dueOn: _showsTasks ? _tasksDueOn : null,
+    tasksChanged: _showsTasks ? tasks : null,
+    onOpenTasks: _showsTasks ? openTasks : null,
     knownTokens: knownTokens(),
     eventTimesClock: journal().clockTimes,
-    calendarFile: calendarFile(),
-    onAddEvent: writeEvent,
-    onAddTask: addTask,
-    onEditEvent: editEvent,
-    onDeleteEvent: deleteEvent,
+    calendarFile: _showsEvents ? calendarFile() : null,
+    onAddEvent: _showsEvents ? writeEvent : null,
+    onAddTask: _showsTasks ? addTask : null,
+    onEditEvent: _showsEvents ? editEvent : null,
+    onDeleteEvent: _showsEvents ? deleteEvent : null,
     focusDay: focusDay,
     onEntryMenu: (day, position) => unawaited(_entryMenuAt(day, position)),
   );
@@ -174,28 +185,34 @@ final class ShellJournalUi {
           entryDays: flow.entryDays,
           readEntry: _readEntry,
           revision: controller.revision,
-          eventsOn: _eventsOn,
-          goalsOn: _goalsOn,
-          eventDays: calendar.snapshot?.daysWithEvents ?? const <DateTime>{},
-          calendarChanged: calendar,
-          onOpenEvent: (event) {
-            // The screen goes first: the file opens in the shell.
-            Navigator.of(screen).pop();
-            openEvent(event);
-          },
-          dueOn: _tasksDueOn,
-          tasksChanged: tasks,
-          onOpenTasks: () {
-            Navigator.of(screen).pop();
-            openTasks();
-          },
+          eventsOn: _showsEvents ? _eventsOn : null,
+          goalsOn: _showsEvents ? _goalsOn : null,
+          eventDays: _showsEvents
+              ? calendar.snapshot?.daysWithEvents ?? const <DateTime>{}
+              : const <DateTime>{},
+          calendarChanged: _showsEvents ? calendar : null,
+          onOpenEvent: _showsEvents
+              ? (event) {
+                  // The screen goes first: the file opens in the shell.
+                  Navigator.of(screen).pop();
+                  openEvent(event);
+                }
+              : null,
+          dueOn: _showsTasks ? _tasksDueOn : null,
+          tasksChanged: _showsTasks ? tasks : null,
+          onOpenTasks: _showsTasks
+              ? () {
+                  Navigator.of(screen).pop();
+                  openTasks();
+                }
+              : null,
           knownTokens: knownTokens(),
           eventTimesClock: journal().clockTimes,
-          calendarFile: calendarFile(),
-          onAddEvent: writeEvent,
-          onAddTask: addTask,
-          onEditEvent: editEvent,
-          onDeleteEvent: deleteEvent,
+          calendarFile: _showsEvents ? calendarFile() : null,
+          onAddEvent: _showsEvents ? writeEvent : null,
+          onAddTask: _showsTasks ? addTask : null,
+          onEditEvent: _showsEvents ? editEvent : null,
+          onDeleteEvent: _showsEvents ? deleteEvent : null,
           onOpenDay: (day, {confirmed = false}) {
             // The screen goes first: the entry opens in the shell.
             Navigator.of(screen).pop();
@@ -208,6 +225,8 @@ final class ShellJournalUi {
 
   /// The journal's strip over [path] when it is an entry (#7), else null.
   Widget? header(BuildContext context, String path, {bool compact = false}) {
+    // With the journal off its entries are ordinary notes (#1109).
+    if (!controller.features.value.isOn(LibraryFeature.journal)) return null;
     final settings = journal();
     final day = settings.dayOfPath(path);
     if (day == null) return null;

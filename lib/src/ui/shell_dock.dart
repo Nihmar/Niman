@@ -133,6 +133,7 @@ final class ShellDock {
     }
 
     return RightDock(
+      features: controller.features.value,
       pane: w.dockPane,
       onPane: (pane) =>
           workspace.controller.update((w) => w.withDock(pane: pane)),

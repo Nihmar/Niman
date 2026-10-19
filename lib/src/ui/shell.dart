@@ -19,7 +19,9 @@ import 'package:niman/src/core/frame_log.dart';
 import 'package:niman/src/core/language.dart';
 import 'package:niman/src/core/launch_requests.dart';
 import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/core/settings/features.dart';
 import 'package:niman/src/core/settings/library_config.dart';
+import 'package:niman/src/core/settings/library_features.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/core/settings/navigation_layout.dart';
 import 'package:niman/src/core/share_in.dart';
@@ -88,6 +90,7 @@ import 'package:niman/src/ui/dock/right_dock.dart';
 import 'package:niman/src/ui/epub_look_sheet.dart';
 import 'package:niman/src/ui/epub_text_zoom.dart';
 import 'package:niman/src/ui/expanded_folders.dart';
+import 'package:niman/src/ui/features_link.dart';
 import 'package:niman/src/ui/folder_grid.dart';
 import 'package:niman/src/ui/hidden_slot.dart';
 import 'package:niman/src/ui/history/history_flow.dart';
@@ -122,6 +125,7 @@ import 'package:niman/src/ui/ocr/ocr_notifier.dart';
 import 'package:niman/src/ui/open_library.dart';
 import 'package:niman/src/ui/open_notes_sheet.dart';
 import 'package:niman/src/ui/outside_files.dart';
+import 'package:niman/src/ui/palette/command_features.dart';
 import 'package:niman/src/ui/palette/command_needs.dart';
 import 'package:niman/src/ui/palette/pinned_commands.dart';
 import 'package:niman/src/ui/pane_split.dart';
@@ -609,10 +613,19 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// editor settings; null until the first read.
   NavigationLayout? _navigation;
 
+  /// The library's features (#1109): every surface of the shell asks this,
+  /// and none keeps a boolean of its own.
+  Features get _features => widget.controller.features.value;
+
   /// The tabs the bar and the rail show, in order: placed once per
-  /// layout, not on every frame and every tab switch that asks.
-  List<ShellTab> _shownTabs = [
-    for (final d in visibleDestinations(const NavigationLayout())) d.tab,
+  /// layout and per change of features, not on every frame and every tab
+  /// switch that asks.
+  late List<ShellTab> _shownTabs = [
+    for (final d in visibleDestinations(
+      const NavigationLayout(),
+      features: _features,
+    ))
+      d.tab,
   ];
 
   /// The destinations the bar and the rail show.
@@ -633,7 +646,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// start destination ([startDestination]), or [_homeTab] when the
   /// layout leaves none.
   ShellTab get _startTab => switch (_navigation) {
-    final layout? => startDestination(layout) ?? _homeTab,
+    final layout? => startDestination(layout, features: _features) ?? _homeTab,
     null => _homeTab,
   };
 
@@ -660,7 +673,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     final wasShown = _shown(_tab);
     setState(() {
       _navigation = layout;
-      _shownTabs = [for (final d in visibleDestinations(layout)) d.tab];
+      _shownTabs = [
+        for (final d in visibleDestinations(layout, features: _features)) d.tab,
+      ];
     });
     if (first && !_tabRequested) return _openOnStart();
     if (!wasShown || _shown(_tab)) return;
@@ -671,6 +686,24 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       return;
     }
     _selectShellTab(home);
+  }
+
+  /// A feature was switched (#1109), here or on another device: the
+  /// destinations are placed again, a tab whose feature went off gives way
+  /// as a hidden one does, and everything that asks [_features] is built
+  /// again.
+  void _onFeaturesChanged() {
+    if (!mounted) return;
+    if (_navigation case final layout?) return _setNavigation(layout);
+    setState(() {
+      _shownTabs = [
+        for (final d in visibleDestinations(
+          const NavigationLayout(),
+          features: _features,
+        ))
+          d.tab,
+      ];
+    });
   }
 
   /// Opens the shell on the layout's start destination (#706), where a
@@ -1676,7 +1709,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           kindMode: !_kindRawMode,
           onNoteKindChanged: _onNoteKindChanged,
           onKindMarkdown: _showKindMarkdown,
-          onPasteAsMarkdown: _pasteAsMarkdown,
+          onPasteAsMarkdown: _pasteAsMarkdownOffer,
           unsavedTracker: widget.unsavedTracker,
           spellCheck: widget.spellCheck,
           reloadToken: _noteReloadToken,
@@ -2463,6 +2496,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       ..pushStudy();
     _workspace.controller.addListener(_onWorkspaceChanged);
     _workspace.unsavedPaths = _unsavedRelPaths;
+    widget.controller.features.addListener(_onFeaturesChanged);
     AppKeyMap.current.addListener(_onKeyMapChanged);
     _chosenKeys.attach();
     FocusManager.instance.addListener(_reclaimFocus);
@@ -2566,6 +2600,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     _searchCommands.dispose();
     _treeFocus.dispose();
     _workspace.controller.removeListener(_onWorkspaceChanged);
+    widget.controller.features.removeListener(_onFeaturesChanged);
     // The study is the library's: the tab is app-wide, and a run left in it
     // would show in the next library's panes and grade into this one's
     // review.json (#944).
@@ -3284,12 +3319,22 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     _ => null,
   };
 
+  /// Whether the Recognize text entries are offered: there is OCR, and the
+  /// library has it on (#1109).
+  bool get _offersOcr =>
+      _ocrFlow != null && commandFeatureOn(AppCommand.recognizeText, _features);
+
   /// The file views' Recognize text, or null without OCR or a library.
   OcrFileActions? get _ocrActions {
     final queue = widget.ocrQueue;
     final root = widget.controller.root;
     final ops = widget.controller.ops;
-    if (_ocrFlow == null || queue == null || root == null || ops == null) {
+    final flow = _ocrFlow;
+    if (flow == null ||
+        !_offersOcr ||
+        queue == null ||
+        root == null ||
+        ops == null) {
       return null;
     }
     return OcrFileActions(
@@ -3298,8 +3343,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       ops: ops,
       recognize: _recognize,
       openNote: _openRecognizedText,
-      recognizeAgain: (path, page, languages) =>
-          _ocrFlow.recognizeAgain(path, page, languages),
+      recognizeAgain: flow.recognizeAgain,
     );
   }
 
@@ -3358,7 +3402,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       context,
       note: note,
       isQuickNote: isQuickNote,
-      offersRecognize: _ocrFlow != null,
+      offersRecognize: _offersOcr,
+      features: _features,
       anchor: anchor,
     );
     if (!mounted) return;
@@ -3382,7 +3427,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       isQuickNote: isQuickNote,
       position: position,
       offersNewTab: _wide,
-      offersRecognize: _ocrFlow != null,
+      offersRecognize: _offersOcr,
+      features: _features,
     );
     _treeMenuLog.debug('row menu closed: "${note.path}" -> $action');
     if (!mounted) return;
@@ -3435,9 +3481,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     // An audio note's body is the clip document, not prose (#840).
     tidy: _noteKind != 'audio',
     recognize:
-        _ocrFlow != null &&
-        _shownIsAttachment &&
-        isRecognizableFile(_selected ?? ''),
+        _offersOcr && _shownIsAttachment && isRecognizableFile(_selected ?? ''),
     // A touch device has no key for the palette (#206), the phone's and
     // the tablet's alike (#849); a desktop window has.
     palette: _paletteByTouch,
@@ -3445,12 +3489,17 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     presenterView: _wide,
     deck: _showsDeck,
     studyEnabled: ref.read(deckStudyStarterProvider) != null,
-    makeFlashcards: _plainNote,
-    kindSwitch: switch (_noteKind) {
-      'list' => NoteKindSwitch.toShoppingList,
-      'shopping-list' => NoteKindSwitch.toChecklist,
-      _ => null,
-    },
+    makeFlashcards:
+        _plainNote && commandFeatureOn(AppCommand.makeFlashcards, _features),
+    // The two views of a list are shopping lists' (#1109): with them off
+    // the note has only the one.
+    kindSwitch: !_features.isOn(LibraryFeature.kindShopping)
+        ? null
+        : switch (_noteKind) {
+            'list' => NoteKindSwitch.toShoppingList,
+            'shopping-list' => NoteKindSwitch.toChecklist,
+            _ => null,
+          },
     onSelected: (action) {
       final path = _selected;
       if (path == null) return;
@@ -3612,7 +3661,12 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       windowTitle: narrow ? _windowTitle : _libraryName,
       buildTabs: narrow ? null : _buildTabs,
       tabsStart: _tabsStart,
-      menu: narrow ? null : AppMenuButton(handlers: _commandHandlers),
+      menu: narrow
+          ? null
+          : AppMenuButton(
+              handlers: _commandHandlers,
+              features: () => _features,
+            ),
       sidebarVisible: _sidebarVisible,
       onToggleSidebar: _toggleSidebar,
       shellFocus: _shellFocus,
@@ -3911,6 +3965,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           unawaited(_templateFlow.createFromTemplate(context)),
       onNewFolder: () => unawaited(_createFlow.createFolder(context)),
       onCaptureWebPage: () => unawaited(_captureFlow.capture(context)),
+      features: _features,
     ),
   );
 
@@ -3938,12 +3993,15 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       // Leftmost: it comes and goes, and the row grows from the left, so
       // the buttons a thumb already knows stay where they were.
       if (_workspace.value.tabs.isNotEmpty) _openNotesButton(),
-      IconButton(
-        key: const Key('open-journal'),
-        tooltip: AppStrings.paletteGroupJournal,
-        icon: const Icon(Icons.calendar_today_outlined),
-        onPressed: () => _journalUi.showCalendar(context),
-      ),
+      // The journal's calendar is the command's too, and goes with its
+      // feature (#1109): a setting, not a state, so the row closes up.
+      if (commandFeatureOn(AppCommand.journalCalendar, _features))
+        IconButton(
+          key: const Key('open-journal'),
+          tooltip: AppStrings.paletteGroupJournal,
+          icon: const Icon(Icons.calendar_today_outlined),
+          onPressed: () => _journalUi.showCalendar(context),
+        ),
       _syncActions.button(context, controller),
       IconButton(
         key: const Key('open-trash'),
@@ -4187,10 +4245,30 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// A new feature reaches both by adding its handler to
   /// [_allCommandHandlers] and, if it waits on something, its needs to
   /// [commandNeeds], which the Commands page in Settings reads too.
+  ///
+  /// A command is available when its needs are met and its feature is on
+  /// (#1109): the one question, asked here, that the keys, the palette and
+  /// the app menu all answer to.
   Map<AppCommand, VoidCallback> _commandHandlers() => {
     for (final MapEntry(key: command, value: handler)
         in _allCommandHandlers().entries)
-      if (commandNeeds(command).every(_meets)) command: handler,
+      if (_available(command)) command: handler,
+  };
+
+  /// Whether [command] can run here and now: its needs are met and its
+  /// feature is on.
+  bool _available(AppCommand command) =>
+      commandNeeds(command).every(_meets) &&
+      commandFeatureOn(command, _features);
+
+  /// The commands the palette would offer but for their feature being off
+  /// (#1109), each with that feature: what lets it say why a query found no
+  /// command.
+  Map<AppCommand, LibraryFeature> _commandsOffByFeature() => {
+    for (final command in AppCommand.values)
+      if (featureOf(command) case final feature?
+          when !_features.isOn(feature) && commandNeeds(command).every(_meets))
+        command: feature,
   };
 
   /// Whether [need] holds here and now (#207): with [commandNeeds], what
@@ -4474,6 +4552,13 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     );
   }
 
+  /// Paste as Markdown for the editor's menu, or null when the library has
+  /// web capture off (#1109): the entry goes with the command.
+  ValueChanged<NoteViewHandle>? get _pasteAsMarkdownOffer =>
+      commandFeatureOn(AppCommand.pasteAsMarkdown, _features)
+      ? _pasteAsMarkdown
+      : null;
+
   /// Pastes the clipboard's HTML into [note] as Markdown (#531).
   void _pasteAsMarkdown(NoteViewHandle note) => unawaited(
     pasteAsMarkdown(context, note, ref.read(pasteServicesProvider)),
@@ -4645,12 +4730,14 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     ocr: widget.ocr,
     spellCheck: widget.spellCheck,
     commandHandlers: _commandHandlers,
+    commandsOffByFeature: _commandsOffByFeature,
     labelOf: _paletteLabel,
     recentNotes: () => _workspace.recentNotes,
     wide: () => _wide,
     openNote: (path) => _openNoteFromLink(path, null),
     openSettingsAt: _openSettingsAt,
     runHomeAction: (action) => unawaited(_homeActions.run(context, action)),
+    openFeatures: () => _openSettingsAt(featuresTarget),
   );
 
   /// Opens the settings at [target] (#229): the floating window on a
@@ -5051,7 +5138,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
                     kindMode: !_kindRawMode,
                     onNoteKindChanged: _onNoteKindChanged,
                     onTabKind: _onTabKind,
-                    onPasteAsMarkdown: _pasteAsMarkdown,
+                    onPasteAsMarkdown: _pasteAsMarkdownOffer,
                     unsavedTracker: widget.unsavedTracker,
                     spellCheck: widget.spellCheck,
                     reloadToken: _noteReloadToken,
@@ -5627,6 +5714,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       context,
       position: position,
       here: here,
+      features: _features,
     );
     if (!mounted) return;
     switch (action) {
@@ -5828,7 +5916,11 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// template or a folder, at the library's root.
   Future<void> _showTreeBackgroundMenuAt(Offset position) async {
     _treeMenuLog.debug('background menu asked');
-    final action = await showTreeBackgroundMenuAt(context, position: position);
+    final action = await showTreeBackgroundMenuAt(
+      context,
+      position: position,
+      features: _features,
+    );
     _treeMenuLog.debug('background menu closed -> $action');
     if (!mounted) return;
     switch (action) {

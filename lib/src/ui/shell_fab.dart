@@ -12,6 +12,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:niman/src/core/settings/features.dart';
 import 'package:niman/src/ui/new_item_fab.dart';
 
 /// The state of the "+" menu, and the two widgets that show it.
@@ -91,6 +92,7 @@ final class ShellFab extends ChangeNotifier {
     required VoidCallback onNewFromTemplate,
     required VoidCallback onNewFolder,
     required VoidCallback onCaptureWebPage,
+    Features features = const Features(),
   }) {
     VoidCallback closing(VoidCallback action) => () {
       close();
@@ -111,6 +113,7 @@ final class ShellFab extends ChangeNotifier {
       onNewFromTemplate: closing(onNewFromTemplate),
       onNewFolder: closing(onNewFolder),
       onCaptureWebPage: closing(onCaptureWebPage),
+      features: features,
     );
   }
 

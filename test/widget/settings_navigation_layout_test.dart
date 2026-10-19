@@ -3,6 +3,8 @@
 // keeps the layout on the device instead of in the library.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/settings/features.dart';
+import 'package:niman/src/core/settings/library_features.dart';
 import 'package:niman/src/core/settings/navigation_layout.dart';
 import 'package:niman/src/ui/settings_navigation_layout.dart';
 import 'package:niman/src/ui/shell_navigation.dart';
@@ -188,5 +190,117 @@ void main() {
       findsNothing,
       reason: 'a hidden destination cannot be picked',
     );
+  });
+
+  // #1109: the two layers. A feature that is off greys the row in its
+  // place, with the link where the switch was, and writes nothing.
+  group('a feature that is off', () {
+    Future<void> turnOff(WidgetTester tester, LibraryFeature feature) async {
+      session.features.value = const Features().withSwitch(feature, on: false);
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('keeps its row, greyed, with the link to Features', (
+      tester,
+    ) async {
+      final opened = <bool>[];
+      await session.setNavigation(
+        const NavigationLayout(order: ['search', 'files', 'todo']),
+        onDevice: false,
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SettingsNavigationLayoutScreen(
+            controller: session,
+            openFeatures: () => opened.add(true),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await turnOff(tester, LibraryFeature.todo);
+
+      final row = find.byKey(const Key('navigation-row-todo'));
+      expect(row, findsOne, reason: 'it keeps its place');
+      expect(tester.widget<ListTile>(row).enabled, isFalse);
+      expect(
+        find.descendant(
+          of: row,
+          matching: find.text(AppStrings.featureOffInLibrary),
+        ),
+        findsOne,
+      );
+      expect(find.byKey(const Key('navigation-switch-todo')), findsNothing);
+
+      // Where the switch was, the link; it leads to Features.
+      await tester.tap(find.byKey(const Key('navigation-features-todo')));
+      expect(opened, [true]);
+    });
+
+    testWidgets('is left out of the preview, and nothing is written', (
+      tester,
+    ) async {
+      await pump(tester);
+      expect(previewed(tester), contains('todo'));
+      await turnOff(tester, LibraryFeature.todo);
+
+      expect(previewed(tester), isNot(contains('todo')));
+      expect((await session.navigation).library, isNull);
+      expect((await session.navigation).device, isNull);
+
+      session.features.value = const Features();
+      await tester.pumpAndSettle();
+      expect(previewed(tester), contains('todo'));
+      expect(find.byKey(const Key('navigation-switch-todo')), findsOne);
+    });
+
+    testWidgets('keeps the switch it was given, to come back with', (
+      tester,
+    ) async {
+      await pump(tester);
+      await tester.tap(find.byKey(const Key('navigation-switch-todo')));
+      await tester.pumpAndSettle();
+      final saved = await session.navigation;
+      await turnOff(tester, LibraryFeature.todo);
+
+      expect((await session.navigation).library?.hidden, saved.library?.hidden);
+      session.features.value = const Features();
+      await tester.pumpAndSettle();
+      // Hidden by Navigation: still hidden, its switch off.
+      expect(
+        tester
+            .widget<Switch>(find.byKey(const Key('navigation-switch-todo')))
+            .value,
+        isFalse,
+      );
+      expect(previewed(tester), isNot(contains('todo')));
+    });
+
+    testWidgets('Opens on is chosen among what is shown', (tester) async {
+      await session.setNavigation(
+        const NavigationLayout(
+          order: ['todo', 'files', 'settings'],
+          start: 'todo',
+        ),
+        onDevice: false,
+      );
+      await pump(tester);
+      expect(
+        tester
+            .widget<DropdownButton<ShellTab>>(
+              find.byKey(const Key('navigation-start')),
+            )
+            .value,
+        ShellTab.todo,
+      );
+      await turnOff(tester, LibraryFeature.todo);
+      expect(
+        tester
+            .widget<DropdownButton<ShellTab>>(
+              find.byKey(const Key('navigation-start')),
+            )
+            .value,
+        ShellTab.files,
+      );
+    });
   });
 }
