@@ -205,13 +205,59 @@ void main() {
         await store.putItems([item('a.md', library: library)]);
         await store.enqueue(library, 'a.md', SyncOpKind.changed);
       }
+      for (final library in [lib, other]) {
+        await store.pendingDownloads.mark(library, 'a.md');
+      }
       await store.removeLibrary('$lib/');
+      expect(await store.pendingDownloads.pending(lib), isEmpty);
+      expect(await store.pendingDownloads.pending(other), ['a.md']);
       expect(await store.destination(lib), isNull);
       expect(await store.items(lib), isEmpty);
       expect(await store.pendingOps(lib), isEmpty);
       expect(await store.destination(other), isNotNull);
       expect(await store.items(other), hasLength(1));
       expect(await store.pendingOps(other), hasLength(1));
+    });
+  });
+
+  group('pending downloads', () {
+    test('a mark is kept per library, oldest first, until cleared', () async {
+      await store.pendingDownloads.mark('$lib/', 'b.md');
+      clock = clock.add(const Duration(seconds: 1));
+      await store.pendingDownloads.mark(lib, 'Sub/a.png');
+      await store.pendingDownloads.mark(other, 'x.md');
+      // Marking again is not a second mark.
+      await store.pendingDownloads.mark(lib, 'b.md');
+
+      expect(await store.pendingDownloads.pending(lib), ['Sub/a.png', 'b.md']);
+      expect(await store.pendingDownloads.pending(other), ['x.md']);
+
+      await store.pendingDownloads.clear('$lib/', 'b.md');
+      expect(await store.pendingDownloads.pending(lib), ['Sub/a.png']);
+    });
+
+    test('recording the item clears the mark in the same step', () async {
+      await store.pendingDownloads.mark(lib, 'a.md');
+      await store.pendingDownloads.mark(lib, 'b.md');
+
+      await store.pendingDownloads.recorded(item('a.md'));
+
+      expect(await store.pendingDownloads.pending(lib), ['b.md']);
+      expect((await store.item(lib, 'a.md'))!.localSha256, 'aa');
+    });
+
+    test('a row that cannot be recorded keeps the mark', () async {
+      await store.pendingDownloads.mark(lib, 'a.md');
+
+      // A null in a required column: the insert fails, so nothing is
+      // cleared.
+      await db.customStatement('DROP TABLE sync_items');
+      await expectLater(
+        store.pendingDownloads.recorded(item('a.md')),
+        throwsA(anything),
+      );
+
+      expect(await store.pendingDownloads.pending(lib), ['a.md']);
     });
   });
 

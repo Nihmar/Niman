@@ -368,6 +368,30 @@ class SyncItems extends Table {
   Set<Column> get primaryKey => {libraryPath, path};
 }
 
+/// A file a sync download is writing, or wrote and has not recorded yet
+/// (docs/records/sync.md, "How a new file is written").
+///
+/// A new file is written straight to its final name, with no temp to find
+/// again after a crash, so the sync marks the path here before the first
+/// byte and clears the mark once the item row is recorded. A mark still
+/// there at the start of a run is a download that did not finish: its file,
+/// if there is one, is checked against the server before anything else sees
+/// it. Nothing here is worth keeping across a retarget or a removal of the
+/// library's sync.
+class SyncPendingDownloads extends Table {
+  /// Absolute, normalized library root.
+  TextColumn get libraryPath => text().named('library_path')();
+
+  /// Library-relative, `/`-separated file path.
+  TextColumn get path => text()();
+
+  /// When the mark was set, ms.
+  IntColumn get startedAtMs => integer().named('started_at_ms')();
+
+  @override
+  Set<Column> get primaryKey => {libraryPath, path};
+}
+
 /// A hint that something happened to a path since the last sync
 /// (docs/records/sync.md, "Queue and triggers"): a persisted, coalescing
 /// queue that survives restarts and carries the retry backoff.
@@ -426,6 +450,7 @@ class SyncOps extends Table {
     SyncDestinations,
     SyncItems,
     SyncOps,
+    SyncPendingDownloads,
     Workspaces,
     LibraryDeviceSettings,
     CustomThemes,
@@ -436,7 +461,7 @@ class AppDatabase extends _$AppDatabase {
   new(super.e);
 
   @override
-  int get schemaVersion => 32;
+  int get schemaVersion => 33;
 
   /// The index that makes a custom theme's name unique without regard to
   /// case, and the name it answers to (issue #269).
@@ -788,6 +813,13 @@ class AppDatabase extends _$AppDatabase {
             'ALTER TABLE sync_destinations ADD COLUMN '
             'trusted_cert_fingerprint TEXT',
           );
+        }
+        if (from < 33 && !await _hasTable('sync_pending_downloads')) {
+          // The downloads a sync is writing under their final names, so a
+          // run that was killed mid-write finds them again. Only on a file
+          // that has none: below v22 the sync tables were just made, this
+          // one with them.
+          await m.createTable(syncPendingDownloads);
         }
         // The whole chain is in the file now, with the number that says so
         // (see [_migrating]).

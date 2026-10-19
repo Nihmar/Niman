@@ -3924,6 +3924,290 @@ class SyncOpsCompanion extends UpdateCompanion<SyncOp> {
   }
 }
 
+class $SyncPendingDownloadsTable extends SyncPendingDownloads
+    with TableInfo<$SyncPendingDownloadsTable, SyncPendingDownload> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SyncPendingDownloadsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _libraryPathMeta = const VerificationMeta(
+    'libraryPath',
+  );
+  @override
+  late final GeneratedColumn<String> libraryPath = GeneratedColumn<String>(
+    'library_path',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _pathMeta = const VerificationMeta('path');
+  @override
+  late final GeneratedColumn<String> path = GeneratedColumn<String>(
+    'path',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _startedAtMsMeta = const VerificationMeta(
+    'startedAtMs',
+  );
+  @override
+  late final GeneratedColumn<int> startedAtMs = GeneratedColumn<int>(
+    'started_at_ms',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [libraryPath, path, startedAtMs];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'sync_pending_downloads';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SyncPendingDownload> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('library_path')) {
+      context.handle(
+        _libraryPathMeta,
+        libraryPath.isAcceptableOrUnknown(
+          data['library_path']!,
+          _libraryPathMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_libraryPathMeta);
+    }
+    if (data.containsKey('path')) {
+      context.handle(
+        _pathMeta,
+        path.isAcceptableOrUnknown(data['path']!, _pathMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_pathMeta);
+    }
+    if (data.containsKey('started_at_ms')) {
+      context.handle(
+        _startedAtMsMeta,
+        startedAtMs.isAcceptableOrUnknown(
+          data['started_at_ms']!,
+          _startedAtMsMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_startedAtMsMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {libraryPath, path};
+  @override
+  SyncPendingDownload map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SyncPendingDownload(
+      libraryPath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}library_path'],
+      )!,
+      path: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}path'],
+      )!,
+      startedAtMs: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}started_at_ms'],
+      )!,
+    );
+  }
+
+  @override
+  $SyncPendingDownloadsTable createAlias(String alias) {
+    return $SyncPendingDownloadsTable(attachedDatabase, alias);
+  }
+}
+
+class SyncPendingDownload extends DataClass
+    implements Insertable<SyncPendingDownload> {
+  /// Absolute, normalized library root.
+  final String libraryPath;
+
+  /// Library-relative, `/`-separated file path.
+  final String path;
+
+  /// When the mark was set, ms.
+  final int startedAtMs;
+  const SyncPendingDownload({
+    required this.libraryPath,
+    required this.path,
+    required this.startedAtMs,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['library_path'] = Variable<String>(libraryPath);
+    map['path'] = Variable<String>(path);
+    map['started_at_ms'] = Variable<int>(startedAtMs);
+    return map;
+  }
+
+  SyncPendingDownloadsCompanion toCompanion(bool nullToAbsent) {
+    return SyncPendingDownloadsCompanion(
+      libraryPath: Value(libraryPath),
+      path: Value(path),
+      startedAtMs: Value(startedAtMs),
+    );
+  }
+
+  factory SyncPendingDownload.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SyncPendingDownload(
+      libraryPath: serializer.fromJson<String>(json['libraryPath']),
+      path: serializer.fromJson<String>(json['path']),
+      startedAtMs: serializer.fromJson<int>(json['startedAtMs']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'libraryPath': serializer.toJson<String>(libraryPath),
+      'path': serializer.toJson<String>(path),
+      'startedAtMs': serializer.toJson<int>(startedAtMs),
+    };
+  }
+
+  SyncPendingDownload copyWith({
+    String? libraryPath,
+    String? path,
+    int? startedAtMs,
+  }) => SyncPendingDownload(
+    libraryPath: libraryPath ?? this.libraryPath,
+    path: path ?? this.path,
+    startedAtMs: startedAtMs ?? this.startedAtMs,
+  );
+  SyncPendingDownload copyWithCompanion(SyncPendingDownloadsCompanion data) {
+    return SyncPendingDownload(
+      libraryPath: data.libraryPath.present
+          ? data.libraryPath.value
+          : this.libraryPath,
+      path: data.path.present ? data.path.value : this.path,
+      startedAtMs: data.startedAtMs.present
+          ? data.startedAtMs.value
+          : this.startedAtMs,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SyncPendingDownload(')
+          ..write('libraryPath: $libraryPath, ')
+          ..write('path: $path, ')
+          ..write('startedAtMs: $startedAtMs')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(libraryPath, path, startedAtMs);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SyncPendingDownload &&
+          other.libraryPath == this.libraryPath &&
+          other.path == this.path &&
+          other.startedAtMs == this.startedAtMs);
+}
+
+class SyncPendingDownloadsCompanion
+    extends UpdateCompanion<SyncPendingDownload> {
+  final Value<String> libraryPath;
+  final Value<String> path;
+  final Value<int> startedAtMs;
+  final Value<int> rowid;
+  const SyncPendingDownloadsCompanion({
+    this.libraryPath = const Value.absent(),
+    this.path = const Value.absent(),
+    this.startedAtMs = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  SyncPendingDownloadsCompanion.insert({
+    required String libraryPath,
+    required String path,
+    required int startedAtMs,
+    this.rowid = const Value.absent(),
+  }) : libraryPath = Value(libraryPath),
+       path = Value(path),
+       startedAtMs = Value(startedAtMs);
+  static Insertable<SyncPendingDownload> custom({
+    Expression<String>? libraryPath,
+    Expression<String>? path,
+    Expression<int>? startedAtMs,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (libraryPath != null) 'library_path': libraryPath,
+      if (path != null) 'path': path,
+      if (startedAtMs != null) 'started_at_ms': startedAtMs,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  SyncPendingDownloadsCompanion copyWith({
+    Value<String>? libraryPath,
+    Value<String>? path,
+    Value<int>? startedAtMs,
+    Value<int>? rowid,
+  }) {
+    return SyncPendingDownloadsCompanion(
+      libraryPath: libraryPath ?? this.libraryPath,
+      path: path ?? this.path,
+      startedAtMs: startedAtMs ?? this.startedAtMs,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (libraryPath.present) {
+      map['library_path'] = Variable<String>(libraryPath.value);
+    }
+    if (path.present) {
+      map['path'] = Variable<String>(path.value);
+    }
+    if (startedAtMs.present) {
+      map['started_at_ms'] = Variable<int>(startedAtMs.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SyncPendingDownloadsCompanion(')
+          ..write('libraryPath: $libraryPath, ')
+          ..write('path: $path, ')
+          ..write('startedAtMs: $startedAtMs, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $WorkspacesTable extends Workspaces
     with TableInfo<$WorkspacesTable, WorkspaceRow> {
   @override
@@ -4818,6 +5102,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   );
   late final $SyncItemsTable syncItems = $SyncItemsTable(this);
   late final $SyncOpsTable syncOps = $SyncOpsTable(this);
+  late final $SyncPendingDownloadsTable syncPendingDownloads =
+      $SyncPendingDownloadsTable(this);
   late final $WorkspacesTable workspaces = $WorkspacesTable(this);
   late final $LibraryDeviceSettingsTable libraryDeviceSettings =
       $LibraryDeviceSettingsTable(this);
@@ -4833,6 +5119,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     syncDestinations,
     syncItems,
     syncOps,
+    syncPendingDownloads,
     workspaces,
     libraryDeviceSettings,
     customThemes,
@@ -6684,6 +6971,199 @@ typedef $$SyncOpsTableProcessedTableManager =
       SyncOp,
       PrefetchHooks Function()
     >;
+typedef $$SyncPendingDownloadsTableCreateCompanionBuilder =
+    SyncPendingDownloadsCompanion Function({
+      required String libraryPath,
+      required String path,
+      required int startedAtMs,
+      Value<int> rowid,
+    });
+typedef $$SyncPendingDownloadsTableUpdateCompanionBuilder =
+    SyncPendingDownloadsCompanion Function({
+      Value<String> libraryPath,
+      Value<String> path,
+      Value<int> startedAtMs,
+      Value<int> rowid,
+    });
+
+class $$SyncPendingDownloadsTableFilterComposer
+    extends Composer<_$AppDatabase, $SyncPendingDownloadsTable> {
+  $$SyncPendingDownloadsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get libraryPath => $composableBuilder(
+    column: $table.libraryPath,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get path => $composableBuilder(
+    column: $table.path,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get startedAtMs => $composableBuilder(
+    column: $table.startedAtMs,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$SyncPendingDownloadsTableOrderingComposer
+    extends Composer<_$AppDatabase, $SyncPendingDownloadsTable> {
+  $$SyncPendingDownloadsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get libraryPath => $composableBuilder(
+    column: $table.libraryPath,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get path => $composableBuilder(
+    column: $table.path,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get startedAtMs => $composableBuilder(
+    column: $table.startedAtMs,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$SyncPendingDownloadsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SyncPendingDownloadsTable> {
+  $$SyncPendingDownloadsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get libraryPath => $composableBuilder(
+    column: $table.libraryPath,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get path =>
+      $composableBuilder(column: $table.path, builder: (column) => column);
+
+  GeneratedColumn<int> get startedAtMs => $composableBuilder(
+    column: $table.startedAtMs,
+    builder: (column) => column,
+  );
+}
+
+class $$SyncPendingDownloadsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SyncPendingDownloadsTable,
+          SyncPendingDownload,
+          $$SyncPendingDownloadsTableFilterComposer,
+          $$SyncPendingDownloadsTableOrderingComposer,
+          $$SyncPendingDownloadsTableAnnotationComposer,
+          $$SyncPendingDownloadsTableCreateCompanionBuilder,
+          $$SyncPendingDownloadsTableUpdateCompanionBuilder,
+          (
+            SyncPendingDownload,
+            BaseReferences<
+              _$AppDatabase,
+              $SyncPendingDownloadsTable,
+              SyncPendingDownload
+            >,
+          ),
+          SyncPendingDownload,
+          PrefetchHooks Function()
+        > {
+  $$SyncPendingDownloadsTableTableManager(
+    _$AppDatabase db,
+    $SyncPendingDownloadsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SyncPendingDownloadsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SyncPendingDownloadsTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$SyncPendingDownloadsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> libraryPath = const Value.absent(),
+                Value<String> path = const Value.absent(),
+                Value<int> startedAtMs = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SyncPendingDownloadsCompanion(
+                libraryPath: libraryPath,
+                path: path,
+                startedAtMs: startedAtMs,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String libraryPath,
+                required String path,
+                required int startedAtMs,
+                Value<int> rowid = const Value.absent(),
+              }) => SyncPendingDownloadsCompanion.insert(
+                libraryPath: libraryPath,
+                path: path,
+                startedAtMs: startedAtMs,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$SyncPendingDownloadsTable, SyncPendingDownload>(
+                    table,
+                  ),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $SyncPendingDownloadsTable,
+                    SyncPendingDownload
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$SyncPendingDownloadsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SyncPendingDownloadsTable,
+      SyncPendingDownload,
+      $$SyncPendingDownloadsTableFilterComposer,
+      $$SyncPendingDownloadsTableOrderingComposer,
+      $$SyncPendingDownloadsTableAnnotationComposer,
+      $$SyncPendingDownloadsTableCreateCompanionBuilder,
+      $$SyncPendingDownloadsTableUpdateCompanionBuilder,
+      (
+        SyncPendingDownload,
+        BaseReferences<
+          _$AppDatabase,
+          $SyncPendingDownloadsTable,
+          SyncPendingDownload
+        >,
+      ),
+      SyncPendingDownload,
+      PrefetchHooks Function()
+    >;
 typedef $$WorkspacesTableCreateCompanionBuilder = WorkspacesCompanion Function({
   required String libraryPath,
   required String state,
@@ -7258,6 +7738,8 @@ class $AppDatabaseManager {
       $$SyncItemsTableTableManager(_db, _db.syncItems);
   $$SyncOpsTableTableManager get syncOps =>
       $$SyncOpsTableTableManager(_db, _db.syncOps);
+  $$SyncPendingDownloadsTableTableManager get syncPendingDownloads =>
+      $$SyncPendingDownloadsTableTableManager(_db, _db.syncPendingDownloads);
   $$WorkspacesTableTableManager get workspaces =>
       $$WorkspacesTableTableManager(_db, _db.workspaces);
   $$LibraryDeviceSettingsTableTableManager get libraryDeviceSettings =>
