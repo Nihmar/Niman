@@ -71,6 +71,11 @@ final class AppLog {
 
   static final List<String> _lines = <String>[];
 
+  /// Set in a worker isolate, whose own buffer nobody reads: every event is
+  /// handed to it instead, to be recorded in the isolate that owns the log.
+  static void Function(LogSeverity severity, String name, String message)?
+  forwardTo;
+
   /// The disk mirror every recorded line is also written to, or null
   /// while logging is memory-only.
   ///
@@ -90,6 +95,11 @@ final class AppLog {
   /// Dropped entirely when [enabled] is false.
   static void record(LogSeverity severity, String name, String message) {
     if (!enabled) return;
+    final forward = forwardTo;
+    if (forward != null) {
+      forward(severity, name, message);
+      return;
+    }
     _lines.add(
       '${_timestamp(DateTime.now())} ${severity.name.toUpperCase()} [$name] '
       '$message',

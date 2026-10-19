@@ -25,6 +25,7 @@ fields) — it stores nothing that cannot be reconstructed from disk.
 | `history/` | `.history/` versions: manifest, snapshot policy, disk store (off-isolate), `NoteHistory` service — see [sync.md](../records/sync.md) |
 | `diff/` | Myers line diff with its hunk summary, and the three-way merge over them, shared by history rollback and sync conflicts |
 | `sync/webdav/` | WebDAV client on `dart:io` (streamed GET/PUT, PROPFIND parsing, typed failures) and the capability probe — see [sync.md](../records/sync.md) |
+| `sync/transfers/` | The bulk transfers of a sync run (download, hash-by-download, upload): a worker isolate per run in production, the run's own client in tests — see [sync.md](../records/sync.md) |
 | `sync/` | Sync state store (`sync_destinations`, `sync_items`, `sync_ops`), secure password store, pure reconcile, the engine (full and quick runs), the trigger scheduler and network monitor, and `LibrarySyncService` for the UI |
 | `ui/sync/` | WebDAV settings screen (with the trigger options), status icon and panel (with the queue), first-sync and mass-deletion dialogs, conflict screen (merge by region, or whole copies) |
 | `db/` | `AppDatabase` (app settings, migration chain) + `IndexDatabase` (one per library, schema 1, no migrations — delete to rebuild); the indexer facade, the full scan that reconciles one directory at a time with bounded memory (#302), the tree materialization and the content store |

@@ -423,6 +423,39 @@ any isolate and is tested against an in-process fake server
 switches turn ETags (strong or weak), collection ETags, `If-Match`, `MOVE`,
 auth, redirects and injected failures on and off.
 
+### The transfers (`lib/src/sync/transfers/`, #1107)
+
+The client's socket reads, its sha256 and the file writes of a download
+cost per-chunk work, and on the app's own isolate they were measured at
+about 5 MB/s where a bare Dart `HttpClient` read the same file at
+68 MiB/s. So the engine does not call the client for a file's bytes: it
+goes through `SyncTransfers`, which has three bulk operations — download a
+path into a temp file, download a path only to hash it, upload a local file
+— and the counters and the cancel that go with them.
+
+- `IsolateSyncTransfers` (production) runs them on **one worker isolate per
+  run**, spawned at the first transfer (a run with nothing to move spawns
+  none) and shut down in the run's `finally`. The worker builds its own
+  `WebDavClient` from a sendable `WebDavClientConfig` (URL, credentials, the
+  confirmed certificate fingerprint of #454, the timeout), so the
+  certificate rule is the same code. A download is written and **closed in
+  the worker** before it answers, so the main isolate can rename it on
+  Windows (#103, #495). A failure crosses as the same `WebDavFailure`
+  subtype (a local one as `FileSystemException`), so the engine's handling
+  of auth, retryable answers, 413 and stalls does not know which side
+  threw it. Every answer carries the worker's byte counters, and the
+  worker's goodbye the final ones, so the report is exact. The worker's log
+  lines are forwarded to the app log (`AppLog.forwardTo`).
+- `InlineSyncTransfers` runs the same operations on the run's client, in the
+  calling isolate: what a client over an injected `HttpClient` gets (a
+  test's transport cannot cross an isolate), and what a conflict resolution
+  outside a run uses — one file, nothing to gain from a worker.
+- **Cancel.** A run that stops cancels the transfers: the worker closes its
+  client, the requests in flight fail as retryable, and the downloads among
+  them remove their temp files.
+- The small requests (`PROPFIND`, `MKCOL`, `DELETE`, `MOVE`, the probe) stay
+  on the run's own client.
+
 ### The engine (`lib/src/sync/sync_engine.dart`)
 
 `SyncEngine.run` does one full sync of a library; a second call while
@@ -442,7 +475,7 @@ one runs joins it and gets the same report, saying that it joined.
    during the sync" on every run.
 3. **Plan:** `planSync`, then up to three hashing passes (local files
    hashed streamed in an isolate; remote ones downloaded to a discarding
-   sink) until nothing waits for a hash.
+   sink, by the transfer worker) until nothing waits for a hash.
 4. **Confirm:** a first sync (no rows, never synced) and a plan that
    looks like a mass deletion go through the caller's `confirm`. Without
    one, a first sync goes ahead — it cannot delete — and a mass deletion

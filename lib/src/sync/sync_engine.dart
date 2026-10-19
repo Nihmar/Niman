@@ -21,6 +21,7 @@ import 'package:niman/src/sync/sync_steps.dart';
 import 'package:niman/src/sync/sync_store.dart';
 import 'package:niman/src/sync/sync_transfer_line.dart';
 import 'package:niman/src/sync/transfers/inline_sync_transfers.dart';
+import 'package:niman/src/sync/transfers/isolate_sync_transfers.dart';
 import 'package:niman/src/sync/transfers/sync_transfers.dart';
 import 'package:niman/src/sync/webdav/webdav_client.dart';
 import 'package:niman/src/sync/webdav/webdav_failure.dart';
@@ -81,7 +82,7 @@ final class SyncEngine {
     SyncTransfers Function(WebDavClient client)? transfersFactory,
     DateTime Function()? now,
   }) : _clientFactory = clientFactory ?? _defaultClient,
-       _transfersFactory = transfersFactory ?? InlineSyncTransfers.new,
+       _transfersFactory = transfersFactory ?? _defaultTransfers,
        _now = now ?? DateTime.now;
 
   /// Absolute path of the library root (as stored: normalized).
@@ -177,6 +178,16 @@ final class SyncEngine {
       destination: destination,
       client: _clientFactory(destination, password),
     );
+  }
+
+  /// The run's bulk transfers: on a worker isolate of their own, unless the
+  /// client is over an injected transport, which cannot cross an isolate
+  /// (#1107).
+  static SyncTransfers _defaultTransfers(WebDavClient client) {
+    final config = client.config;
+    return config == null
+        ? InlineSyncTransfers(client)
+        : IsolateSyncTransfers(config);
   }
 
   static WebDavClient _defaultClient(
