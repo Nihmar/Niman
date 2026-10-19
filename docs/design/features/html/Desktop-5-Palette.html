@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Command palette, Todo is off</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;family=Literata:opsz,wght@7..72,400;7..72,600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#7CA0E6}a:hover{color:#A9C0F0}
+.ico{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.fill{fill:currentColor;stroke:none}
+.sub{font-size:13px;color:#A6A29A}
+.lab{font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#A6A29A}
+.mono{font-family:'IBM Plex Mono',monospace;font-size:.95em}
+.tree{display:flex;align-items:center;gap:8px;height:32px;padding:0 10px;border-radius:8px;font-size:13.5px;color:#D9D4CB;white-space:nowrap}
+.tree.sel{background:#363B44;color:#F2EDE5}
+.tab{display:flex;align-items:center;gap:8px;height:30px;padding:0 10px 0 13px;border-radius:7px;font-size:13px;color:#C8C3BA}
+.tab.on{background:#383D46;color:#F2EDE5}
+.railbtn{width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#A6A29A}
+.railbtn.on{background:#363B44;color:#587CD3}
+.ibtn{width:32px;height:32px;border-radius:8px;border:0;background:transparent;color:#A6A29A;display:flex;align-items:center;justify-content:center;padding:0;flex:none}
+.ibtn.on{background:#363B44;color:#F2EDE5}
+.obtn{height:32px;padding:0 12px;border-radius:16px;border:1px solid #4A4F59;background:transparent;color:#F2EDE5;font:500 13px 'IBM Plex Sans',sans-serif;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.tbtn{height:32px;padding:0 10px;border-radius:16px;border:0;background:transparent;color:#A9C0F0;font:500 13px 'IBM Plex Sans',sans-serif;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.fbtn{height:32px;padding:0 18px;border-radius:16px;border:0;background:#587CD3;color:#F2EDE5;font:500 13px 'IBM Plex Sans',sans-serif;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+/* the switch: Material 3, 52x32 */
+.sw{width:52px;height:32px;box-sizing:border-box;border-radius:16px;position:relative;flex:none;display:block;border:2px solid #8C9099;background:transparent}
+.sw::before{content:'';position:absolute;top:50%;left:6px;width:16px;height:16px;margin-top:-8px;border-radius:50%;background:#A6A29A}
+.sw.on{background:#587CD3;border-color:#587CD3}
+.sw.on::before{left:20px;width:24px;height:24px;margin-top:-12px;background:#F2EDE5}
+.sw svg{position:absolute;left:24px;top:50%;width:16px;height:16px;margin-top:-8px;fill:none;stroke:#3A4A6E;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.sw.dis{opacity:.38}
+/* a feature row */
+.card{background:#2C3037;border-radius:14px;overflow:hidden}
+.glab{font-size:12px;line-height:14px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#A6A29A;margin:12px 16px 5px}
+.frow{position:relative;display:flex;align-items:center;gap:14px;padding:6px 16px;min-height:44px;box-sizing:border-box;border-bottom:1px solid #23262B}
+.frow:last-child{border-bottom:0}
+.frow .lead{color:#A6A29A}
+.frow .t{flex:1;min-width:0;line-height:17px;font-size:14px}
+.frow .t .sub{font-size:12.5px;line-height:15px}
+.frow.child{padding-left:46px}
+.frow.child::before{content:'';position:absolute;left:25px;top:0;height:50%;width:12px;border-left:1.5px solid #4A4F59;border-bottom:1.5px solid #4A4F59;border-bottom-left-radius:7px}
+.frow.dis .t,.frow.dis .lead{color:#6B7079}
+.frow.dis .t .sub{color:#6B7079}
+.tag{display:inline-block;margin-left:6px;padding:0 6px;border:1px solid #4A4F59;border-radius:6px;font-size:11px;font-weight:500;line-height:16px;color:#A6A29A;vertical-align:1px}
+/* presets */
+.chips{display:flex;align-items:center;gap:8px}
+.chip{height:34px;box-sizing:border-box;padding:0 14px;border-radius:17px;border:1px solid #4A4F59;display:inline-flex;align-items:center;gap:6px;font:500 13px 'IBM Plex Sans',sans-serif;color:#D9D4CB;white-space:nowrap;flex:none}
+.chip.on{background:#3A4A6E;border-color:#3A4A6E;color:#F2EDE5}
+.chip.dis{opacity:.38}
+.snack{position:absolute;background:#363B44;border-radius:14px;padding:0 8px 0 18px;height:48px;display:flex;align-items:center;gap:12px;box-shadow:0 10px 30px rgba(0,0,0,.45);box-sizing:border-box;z-index:9}
+.snack .msg{flex:1;font-size:14px;color:#F2EDE5}
+.snack .act{font-size:14px;font-weight:600;color:#7CA0E6;padding:0 10px}
+
+.strip{display:flex;align-items:center;gap:14px;height:48px;flex:none}
+.strip.pin{position:absolute;left:0;right:0;top:0;padding:0 32px;background:#23262B;border-bottom:1px solid #2C3037;z-index:3}
+.radio{width:20px;height:20px;box-sizing:border-box;border-radius:50%;border:2px solid #8C9099;flex:none;position:relative}
+.radio.on{border-color:#587CD3}
+.radio.on::after{content:'';position:absolute;left:3px;top:3px;width:10px;height:10px;border-radius:50%;background:#587CD3}
+.rcard{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;border:1px solid #4A4F59;box-sizing:border-box}
+.rcard.on{border:1.5px solid #587CD3;background:#2F3A55;padding:11.5px 13.5px}
+.rcard .n{font-size:14.5px;font-weight:500}
+.rcard .l{font-size:12.5px;color:#A6A29A;margin-top:1px}
+.intro{background:#2C3037;border-radius:14px;border:1px solid #3A4A6E;padding:16px 18px}
+.intro h2{margin:0;font-size:16px;font-weight:600}
+.intro p{margin:6px 0 0;font-size:13.5px;line-height:1.55;color:#C8C3BA}
+.seg{display:flex;border:1px solid #4A4F59;border-radius:20px;overflow:hidden;width:max-content}
+.seg button{height:34px;padding:0 16px;border:0;background:transparent;color:#D9D4CB;font:500 13px 'IBM Plex Sans',sans-serif;display:flex;align-items:center;gap:6px}
+.seg button+button{border-left:1px solid #4A4F59}
+.seg button.on{background:#3A4A6E;color:#F2EDE5}
+</style>
+</head>
+<body>
+
+<div style="width:1280px;height:800px;display:flex;flex-direction:column;background:#1B1D21;color:#F2EDE5;font-family:'IBM Plex Sans',sans-serif;font-size:14px;overflow:hidden;position:relative"><div style="height:40px;flex:none;background:#2C3037;display:flex;align-items:center;gap:6px;padding:0 0 0 4px"><button class="ibtn" style="width:40px;height:40px;color:#587CD3" aria-label="Show the tree"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16" stroke-width="2.6"/></svg></button><div class="tab on">Reading list <svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px;color:#A6A29A" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></div><div style="flex:1"></div><button class="ibtn" aria-label="Side panel"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M15 4v16"/></svg></button><div style="width:12px"></div><button class="ibtn" style="width:46px;height:40px;border-radius:0" aria-label="Minimize"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px" aria-hidden="true"><path d="M6 12h12"/></svg></button><button class="ibtn" style="width:46px;height:40px;border-radius:0" aria-label="Maximize"><svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="1"/></svg></button><button class="ibtn" style="width:46px;height:40px;border-radius:0" aria-label="Close"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div><div style="flex:1;min-height:0;display:flex"><nav style="width:48px;flex:none;background:#2C3037;display:flex;flex-direction:column;align-items:center;padding:6px 0;gap:2px"><div class="railbtn on" title="Files"><svg class="ico" viewBox="0 0 24 24" style="width:20px;height:20px" aria-hidden="true"><path d="M3 6h6l2 2h10v11H3z"/></svg></div><div class="railbtn" title="Search"><svg class="ico" viewBox="0 0 24 24" style="width:20px;height:20px" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg></div><div class="railbtn" title="Home"><svg class="ico" viewBox="0 0 24 24" style="width:20px;height:20px" aria-hidden="true"><path d="M4 11l8-7 8 7v9h-5v-6h-6v6H4z"/></svg></div><div class="railbtn" title="Quick note"><svg class="ico" viewBox="0 0 24 24" style="width:20px;height:20px" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg></div><div style="flex:1"></div><div class="railbtn" title="Settings"><svg class="ico" viewBox="0 0 24 24" style="width:20px;height:20px" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/></svg></div></nav><aside style="width:240px;flex:none;background:#23262B;border-right:1px solid #2C3037;padding:10px 6px;display:flex;flex-direction:column;gap:1px"><div style="display:flex;align-items:center;gap:10px;padding:2px 10px 10px"><div style="width:22px;height:22px;border-radius:6px;background:#587CD3;color:#F2EDE5;font:600 13px Literata,serif;display:flex;align-items:center;justify-content:center">N</div><div style="font-weight:600">Notes</div><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px;color:#A6A29A" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></div><div class="tree" style="padding-left:10px"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px;color:#A6A29A" aria-hidden="true"><path d="M3 6h6l2 2h10v11H3z"/></svg>Ideas</div><div class="tree" style="padding-left:10px"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px;color:#A6A29A" aria-hidden="true"><path d="M3 6h6l2 2h10v11H3z"/></svg>Journal</div><div class="tree" style="padding-left:10px"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px;color:#A6A29A" aria-hidden="true"><path d="M3 6h6l2 2h10v11H3z"/></svg>Projects</div><div class="tree" style="padding-left:10px"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px;color:#A6A29A" aria-hidden="true"><path d="M3 6h6l2 2h10v11H3z"/></svg>Recipes</div><div class="tree" style="padding-left:10px"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px;color:#A6A29A" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></svg>Garden plan.md</div><div class="tree sel" style="padding-left:10px"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px;color:#A6A29A" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></svg>Reading list.md</div><div class="tree" style="padding-left:10px"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px;color:#A6A29A" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></svg>Trip to Lisbon.md</div></aside><main style="flex:1;min-width:0;display:flex;flex-direction:column;background:#1B1D21"><div style="height:46px;flex:none;display:flex;align-items:center;justify-content:flex-end;gap:2px;padding:0 12px;color:#A6A29A"><button class="ibtn" aria-label="More"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px" aria-hidden="true"><circle class="fill" cx="12" cy="5" r="1.6"/><circle class="fill" cx="12" cy="12" r="1.6"/><circle class="fill" cx="12" cy="19" r="1.6"/></svg></button></div><div style="flex:1;display:flex;justify-content:center;padding:4px 32px 0;overflow:hidden"><div style="width:100%;max-width:560px;font-family:Literata,serif;color:#E8E3DA"><h1 style="font:600 26px Literata,serif;margin:0 0 16px;color:#F2EDE5">Reading list</h1><p style="font-size:16px;line-height:1.75;margin:0 0 14px">Books to get through before winter, in the order they are due back at the library.</p><h2 style="font:600 19px Literata,serif;margin:22px 0 10px;color:#F2EDE5">In progress</h2><p style="font-size:16px;line-height:1.75;margin:0 0 14px">The Overstory is slow going but worth it: the chapter on the chestnut is the one to reread. Notes on it live in [[Garden plan]].</p><h2 style="font:600 19px Literata,serif;margin:22px 0 10px;color:#F2EDE5">Next</h2><p style="font-size:16px;line-height:1.75;margin:0 0 14px">Something short in between, then the essays.</p></div></div><div class="sub" style="height:32px;flex:none;display:flex;align-items:center;gap:14px;padding:0 14px;border-top:1px solid #2C3037;font-size:12.5px"><span>Live</span><span style="flex:1"></span><span>112 words</span><span>Saved</span></div></main></div><div style="position:absolute;inset:0;background:rgba(10,11,13,0.35);z-index:5"></div><div style="position:absolute;left:330px;top:64px;width:620px;background:#2C3037;border-radius:10px;overflow:hidden;box-shadow:0 16px 48px rgba(0,0,0,.55);z-index:6"><div style="background:#363B44;height:52px;display:flex;align-items:center;gap:12px;padding:0 14px;color:#A6A29A"><svg class="ico" viewBox="0 0 24 24" style="width:22px;height:22px" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg><span style="color:#F2EDE5;font-size:15px">todo</span><span style="display:inline-block;width:1.5px;height:19px;background:#587CD3;margin-left:-10px"></span></div><div style="height:1px;background:#4A4F59"></div><div style="padding:6px 0"><div style="padding:0 6px"><div style="background:#363B44;border-radius:6px;padding:8px 8px;display:flex;align-items:center;gap:10px"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px;color:#A6A29A" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></svg><span style="font-size:14px">Todo ideas</span><span style="font-size:12.5px;color:#A6A29A">Ideas</span></div></div><div style="padding:0 6px"><div style="border-radius:6px;padding:8px 8px;display:flex;align-items:center;gap:10px"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px;color:#A6A29A" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></svg><span style="font-size:14px">Weekend todo</span><span style="font-size:12.5px;color:#A6A29A">Journal/2026</span></div></div></div><div style="height:1px;background:#4A4F59"></div><div style="padding:8px 14px;font-size:12px;color:#A6A29A;line-height:1.5"><div>↑↓ to navigate · ↵ to use · esc to dismiss</div><div style="margin-top:2px">Todo is off in this library · <a href="#" style="text-decoration:none">Features ›</a></div></div></div></div>
+</body>
+</html>
