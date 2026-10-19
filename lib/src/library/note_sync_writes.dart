@@ -87,8 +87,35 @@ final class NoteSyncWrites {
   /// Whether a sync operation wrote, trashed or moved [path] within
   /// [echoWindow]: the file watcher's event for it is an echo.
   bool changedBySync(String path) {
+    if (_creating.contains(path)) return true;
     final at = _syncWrites[path];
     return at != null && DateTime.now().difference(at) <= echoWindow;
+  }
+
+  /// The new files being written under their own names right now: a large
+  /// one is written for longer than [echoWindow], and the watcher reports
+  /// the file all along.
+  final Set<String> _creating = {};
+
+  /// Runs [write], which creates the new file at [path] under its final name
+  /// (a sync download with no temp, so nothing is swapped in), in the note's
+  /// save order, and then has the file indexed as a new one — the part of
+  /// [replace] that is not the swap.
+  ///
+  /// The path counts as written by the sync for the whole time [write] runs,
+  /// and for [echoWindow] after it, so the watcher's reports of the file
+  /// stay out of the queue. Creating `.niman/settings.json` drops the cached
+  /// settings.
+  Future<T> create<T>(String path, Future<T> Function() write) async {
+    _creating.add(path);
+    try {
+      final result = await writer.createdBy(path, write);
+      if (path == settingsFilePath) await config.reload();
+      return result;
+    } finally {
+      _creating.remove(path);
+      _markSyncWrite(path);
+    }
   }
 
   /// Swaps the verified sync download at [tempAbs] in for the file at

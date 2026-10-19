@@ -97,6 +97,43 @@ void main() {
     expect(ops.changedBySync('c.md'), isFalse);
   });
 
+  test(
+    'a file created under its final name is indexed, not reported',
+    () async {
+      var duringWrite = false;
+      final abs = p.join(root.path, 'Dir', 'new.md');
+
+      final result = await ops.syncCreate('Dir/new.md', () async {
+        // The watcher reports the file from the moment it exists, for as long
+        // as the write lasts.
+        duringWrite = ops.changedBySync('Dir/new.md');
+        Directory(p.dirname(abs)).createSync(recursive: true);
+        File(abs).writeAsStringSync('# From the server\n');
+        return 7;
+      });
+      await ops.writer.indexed;
+
+      expect(result, 7);
+      expect(duringWrite, isTrue);
+      expect(ops.changedBySync('Dir/new.md'), isTrue);
+      expect(hints, isEmpty);
+      expect((await ops.find('Dir/new.md'))?.path, 'Dir/new.md');
+    },
+  );
+
+  test('a creation that fails indexes and records nothing', () async {
+    await expectLater(
+      ops.syncCreate<void>('gone.md', () async {
+        throw const FileSystemException('disk full');
+      }),
+      throwsA(isA<FileSystemException>()),
+    );
+    await ops.writer.indexed;
+
+    expect(await ops.find('gone.md'), isNull);
+    expect(hints, isEmpty);
+  });
+
   test('without a sink nothing is reported and nothing fails', () async {
     ops.syncHints = null;
     await ops.saveNote('a.md', 'text');
