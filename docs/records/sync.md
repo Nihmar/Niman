@@ -879,6 +879,20 @@ conflict:
   a merge and a conflict resolved by hand, a queue written offline that
   survives a restart, a server without ETags or preconditions, and a
   write the server refuses with 412.
+- **Transfers** (`test/unit/sync_transfers_test.dart`,
+  `sync_step_pool_test.dart`, the `parallel transfers` group of
+  `sync_engine_test.dart`): the transfer contract run against both
+  implementations (failure kinds, counters, the file closed before the
+  answer), the worker's cancel and certificate rule, the pool's width,
+  barriers and fatal handling, and the engine overlapping transfers,
+  keeping a delete between uploads in place and sending one `MKCOL` for a
+  shared new folder (#1107).
+- **Transfer speed** (`test/perf/sync_transfer_test.dart`, #1107): one 64 MiB
+  file and 200 files of 40 KB, down and up, against a fake server in an
+  isolate of its own, through the old path (transfers on the client, one
+  step at a time) and the new (worker isolate, four at once); also with the
+  client's isolate kept busy and with a pause per transfer. The numbers are
+  printed; `NIMAN_PERF=1` holds the bars.
 - **On a device** (`integration_test/sync_e2e_test.dart`): the real app
   against a server in its own process — set the destination up from the
   settings screen, first sync, an edit that leaves by itself, then a
