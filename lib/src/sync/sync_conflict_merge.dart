@@ -240,9 +240,9 @@ final class SyncConflictMerger {
     }
     var listed = remote;
     if (uploads) {
-      await c.client.uploadFile(
+      await c.transfers.upload(
         d.path,
-        file,
+        file.path,
         ifMatch: c.capabilities.ifMatch ? remote.guardEtag : null,
       );
       listed =

@@ -13,6 +13,7 @@ import 'package:niman/src/sync/sync_run_context.dart';
 import 'package:niman/src/sync/sync_step_failure.dart';
 import 'package:niman/src/sync/sync_step_outcome.dart';
 import 'package:niman/src/sync/sync_store.dart';
+import 'package:niman/src/sync/transfers/sync_transfers.dart';
 import 'package:niman/src/sync/webdav/webdav_client.dart';
 import 'package:niman/src/sync/webdav/webdav_failure.dart';
 import 'package:niman/src/sync/webdav/webdav_multistatus.dart';
@@ -66,8 +67,8 @@ final class SyncSides {
   ) => Isolate.run(() => hashLocalFiles(root, paths));
 
   /// The sha256 of the server's copy of [path], downloaded and dropped.
-  Future<String> remoteSha(WebDavClient client, String path) async =>
-      (await client.download(path, _DiscardSink(), hashOnly: true)).sha256;
+  Future<String> remoteSha(SyncTransfers transfers, String path) =>
+      transfers.hashRemote(path);
 
   /// The file at [path] still is what the scan saw (both absent counts).
   Future<LocalFileState?> localStillAsPlanned(
@@ -119,7 +120,7 @@ final class SyncSides {
     if (!unverified(c, now.modified)) return;
     final expected = expectedSha ?? c.rows[path]?.localSha256;
     if (expected == null) return;
-    if (await remoteSha(c.client, path) != expected) {
+    if (await remoteSha(c.transfers, path) != expected) {
       throw const _ChangedDuringSync();
     }
   }
@@ -264,9 +265,9 @@ final class SyncSides {
     DateTime? modified,
   }) async {
     await ensureRemoteParent(c, path);
-    final uploaded = await c.client.uploadFile(
+    final uploaded = await c.transfers.upload(
       path,
-      File(p.join(root, path)),
+      p.join(root, path),
       ifMatch: ifMatch,
       ifNoneMatch: ifNoneMatch,
       modified: modified,
@@ -318,31 +319,10 @@ final class SyncSides {
       ),
     );
     try {
-      // The sink is ours, not the client's (issue #103). Handing
-      // `temp.openWrite()` straight in left its closing to whatever the
-      // consumer did with it, and the file the download had just written
-      // then went into a rename that never returned on Windows — where,
-      // unlike POSIX, a file with a handle still on it cannot be
-      // renamed. A note never hit it because its temp is written by
-      // `writeAsBytes`, which closes on its own.
-      final sink = temp.openWrite();
-      final WebDavDownload download;
-      try {
-        download = await c.client.download(path, sink);
-      } finally {
-        // The consumer closes the sink; closing a closed sink is a no-op
-        // that hands back the same `done`. Awaiting it is what says the
-        // bytes are on disk and the handle is gone before anyone renames.
-        // A sink the transfer still holds throws straight out of
-        // `close()`, though, and that StateError must not replace the
-        // transfer's own failure (#495).
-        try {
-          await sink.close();
-          await sink.done;
-        } on Object {
-          // The transfer's own failure is the one to report.
-        }
-      }
+      // The transfer writes the temp and closes it before it answers: a
+      // file with a handle still on it cannot be renamed on Windows
+      // (#103, #495; `downloadToFile`).
+      final download = await c.transfers.download(path, temp.path);
       // The client already checked Content-Length. A chunked answer has none,
       // so compare with the listing too — unless the ETag says the file was
       // rewritten since, which makes a different size legitimate.
@@ -384,14 +364,6 @@ final class SyncSides {
 /// path is skipped and the next run decides again.
 final class _ChangedDuringSync implements Exception {
   const new();
-}
-
-final class _DiscardSink implements StreamConsumer<List<int>> {
-  @override
-  Future<void> addStream(Stream<List<int>> stream) => stream.drain<void>();
-
-  @override
-  Future<void> close() async {}
 }
 
 /// The sha256 of each of [paths] under [root], streamed; a file that

@@ -6,6 +6,7 @@ import 'package:niman/src/db/app_database.dart';
 import 'package:niman/src/sync/reconcile.dart';
 import 'package:niman/src/sync/sync_sides.dart';
 import 'package:niman/src/sync/sync_store.dart';
+import 'package:niman/src/sync/transfers/sync_transfers.dart';
 import 'package:niman/src/sync/webdav/webdav_client.dart';
 import 'package:niman/src/sync/webdav/webdav_failure.dart';
 import 'package:niman/src/sync/webdav/webdav_multistatus.dart';
@@ -198,7 +199,7 @@ final class SyncScanner {
   /// [localSha] and [remoteSha]; a remote file gone since the listing
   /// stays unhashed.
   Future<void> hash(
-    WebDavClient client,
+    SyncTransfers transfers,
     SyncPlan plan,
     Map<String, String> localSha,
     Map<String, String> remoteSha,
@@ -217,7 +218,7 @@ final class SyncScanner {
     ];
     for (final path in remotePaths) {
       try {
-        remoteSha[path] = await sides.remoteSha(client, path);
+        remoteSha[path] = await sides.remoteSha(transfers, path);
       } on WebDavNotFound {
         // Gone since the listing: it stays unhashed and fails as a path,
         // not as a missing destination.

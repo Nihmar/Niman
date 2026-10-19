@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:meta/meta.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/db/app_database.dart';
 import 'package:niman/src/library/note_ops.dart';
@@ -19,6 +20,8 @@ import 'package:niman/src/sync/sync_step_outcome.dart';
 import 'package:niman/src/sync/sync_steps.dart';
 import 'package:niman/src/sync/sync_store.dart';
 import 'package:niman/src/sync/sync_transfer_line.dart';
+import 'package:niman/src/sync/transfers/inline_sync_transfers.dart';
+import 'package:niman/src/sync/transfers/sync_transfers.dart';
 import 'package:niman/src/sync/webdav/webdav_client.dart';
 import 'package:niman/src/sync/webdav/webdav_failure.dart';
 
@@ -64,7 +67,9 @@ final class SyncEngine {
   ///
   /// [clientFactory] builds the client for the destination (tests point it
   /// at a fake server or shorten timeouts); [now] is the device clock for
-  /// history snapshots and rows.
+  /// history snapshots and rows. [transfersFactory] builds the run's bulk
+  /// transfers over the run's client: a test's switch between the ways to
+  /// move a file's bytes.
   new({
     required this.root,
     required this.ops,
@@ -72,8 +77,11 @@ final class SyncEngine {
     required this.secrets,
     WebDavClient Function(SyncDestination destination, String password)?
     clientFactory,
+    @visibleForTesting
+    SyncTransfers Function(WebDavClient client)? transfersFactory,
     DateTime Function()? now,
   }) : _clientFactory = clientFactory ?? _defaultClient,
+       _transfersFactory = transfersFactory ?? InlineSyncTransfers.new,
        _now = now ?? DateTime.now;
 
   /// Absolute path of the library root (as stored: normalized).
@@ -89,6 +97,7 @@ final class SyncEngine {
   final SyncSecretStore secrets;
 
   final WebDavClient Function(SyncDestination, String) _clientFactory;
+  final SyncTransfers Function(WebDavClient) _transfersFactory;
   final DateTime Function() _now;
 
   /// Reads, checks and records both sides of a path.
@@ -260,9 +269,11 @@ final class SyncEngine {
       return await _finish(report, hints, e.reason, e.detail, clock);
     }
     final client = connection.client;
+    final transfers = _transfersFactory(client);
     try {
       await _runWith(
         client,
+        transfers,
         connection.destination,
         report,
         hints,
@@ -284,12 +295,15 @@ final class SyncEngine {
     } on FileSystemException catch (e) {
       _abort(report, SyncAbort.failed, 'local: ${e.message} (${e.path})');
     } finally {
-      // Where the bytes moved is the client: whatever the run did with it,
-      // including what a failed transfer sent or received before it broke.
+      // Where the bytes moved is the client, or the transfers' own
+      // connections: whatever the run did with them, including what a failed
+      // transfer sent or received before it broke. The transfers end first,
+      // so their counts are final.
+      await transfers.close();
       report
-        ..bytesUp = client.bytesSent
-        ..bytesDown = client.bytesReceived
-        ..bytesHashed = client.bytesHashed;
+        ..bytesUp = client.bytesSent + transfers.bytesSent
+        ..bytesDown = client.bytesReceived + transfers.bytesReceived
+        ..bytesHashed = client.bytesHashed + transfers.bytesHashed;
       client.close();
     }
     return await _finish(
@@ -434,6 +448,7 @@ final class SyncEngine {
 
   Future<void> _runWith(
     WebDavClient client,
+    SyncTransfers transfers,
     SyncDestination destination,
     SyncReport report,
     List<SyncOp> hints,
@@ -494,7 +509,7 @@ final class SyncEngine {
     final hashClock = Stopwatch()..start();
     try {
       for (var pass = 1; plan.needsHashes && pass <= _hashPasses; pass++) {
-        await _scanner.hash(client, plan, localSha, remoteSha);
+        await _scanner.hash(transfers, plan, localSha, remoteSha);
         plan = planSync(
           local: local,
           remote: remote,
@@ -577,6 +592,7 @@ final class SyncEngine {
 
     final context = SyncRunContext(
       client: client,
+      transfers: transfers,
       capabilities: capabilities,
       local: local,
       remote: remote,
