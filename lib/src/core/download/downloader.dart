@@ -36,6 +36,7 @@ final class Downloader<T extends Downloadable> {
     this.log = const AppLogger(name: 'download'),
     DownloadStarter? start,
     this.retryDelays = defaultRetryDelays,
+    this.allowed,
   }) : _start = start ?? FileDownload.start;
 
   /// The waits between attempts when none are given.
@@ -65,6 +66,14 @@ final class Downloader<T extends Downloadable> {
   /// The waits before each retry of a download that failed transiently.
   final List<Duration> retryDelays;
 
+  /// Whether a download may start now, or null when one always may.
+  ///
+  /// The library's Features gate (#1109): while the feature the files
+  /// belong to is off, [download] and [resumeInterrupted] start nothing,
+  /// whoever asks. A download already running is not stopped here; the
+  /// files on disk are not touched either.
+  final bool Function()? allowed;
+
   final DownloadStarter _start;
   final Map<String, FileDownload> _running = {};
   final Map<String, Future<void>> _downloads = {};
@@ -84,6 +93,10 @@ final class Downloader<T extends Downloadable> {
   /// waits for it to land.
   Future<void> download(T item) async {
     if (state(item) is Downloaded) return;
+    if (allowed case final allowed? when !allowed()) {
+      log.info('download ${item.id}: refused, its feature is off');
+      return;
+    }
     if (_downloads[item.id] case final running?) {
       await running;
       return;
