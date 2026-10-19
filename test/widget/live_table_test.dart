@@ -240,6 +240,10 @@ void main() {
     expect(seconds.first, closeTo(seconds.last, 0.5));
   });
 
+  // The test font draws every glyph a square of its size, so the widest words
+  // of this table do not fit a 360 dp pane together: it is the branch that
+  // shares the room by level that is held here, not the one that fits the
+  // words. `table_fit_parity_test.dart` holds the read view to `live`'s widths.
   testWidgets('a narrow pane shares its room by the words, not the cells', (
     tester,
   ) async {

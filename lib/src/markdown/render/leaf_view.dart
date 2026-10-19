@@ -24,11 +24,9 @@ import 'package:niman/src/markdown/read_block.dart';
 import 'package:niman/src/markdown/render/code_copy.dart';
 import 'package:niman/src/markdown/render/diagram_view.dart';
 import 'package:niman/src/markdown/render/inline_spans.dart';
-import 'package:niman/src/markdown/render/live_table_grid.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/render/math_text.dart';
-import 'package:niman/src/markdown/render/table_fit.dart';
-import 'package:niman/src/markdown/table/markdown_table.dart';
+import 'package:niman/src/markdown/render/read_table.dart';
 import 'package:niman/src/preview/code_highlight.dart';
 import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/preview/math_widget.dart';
@@ -91,7 +89,7 @@ final class LeafView extends StatelessWidget {
     BlockKind.fencedCode => _fenced(context),
     BlockKind.indentedCode => _code(context, null),
     BlockKind.math => _math(),
-    BlockKind.table => _table(context),
+    BlockKind.table => _table(),
     BlockKind.thematicBreak => _rule(context),
     BlockKind.blank => SizedBox(height: leaf.lines.length * _row(context)),
     BlockKind.html => _html(),
@@ -278,122 +276,14 @@ final class LeafView extends StatelessWidget {
   );
 
   /// A table: its cells, each its inline nodes, fitted to the pane as `live`
-  /// fits it (#1108). Without a measured pane (an export) the columns take
-  /// their intrinsic width, as before.
-  Widget _table(BuildContext context) {
-    final rows = leaf.rows;
-    if (rows.isEmpty) return const SizedBox.shrink();
-    final aligns = leaf.aligns;
-    final head = !leaf.continued;
-    // A hairline: one device pixel, wherever the columns end. A table as
-    // wide as its columns ends on a fraction of a pixel, and a half-pixel
-    // side drawn inside that edge was split across two pixels too faint to
-    // see — the table stood open on its right.
-    final border = TableBorder.all(
-      color: theme.tableBorder,
-      width: LiveTableGridPainter.thickness,
-    );
-    final budget = availableWidth;
-    final pad = theme.tableCellPadding.left;
-    Map<int, TableColumnWidth>? widths;
-    if (budget != null) {
-      final scaler = MediaQuery.textScalerOf(context);
-      final columns = rows.first.length;
-      final natural = List<double>.filled(columns, 0);
-      final least = List<double>.filled(columns, 0);
-      for (var at = 0; at < rows.length; at++) {
-        final row = rows[at];
-        final style = at == 0 && head ? theme.tableHeader : theme.tableCell;
-        for (
-          var column = 0;
-          column < row.length && column < columns;
-          column++
-        ) {
-          final spans = _spans(style).of(row[column]);
-          // A widget (inline math) is measured as its text: a `WidgetSpan`
-          // laid out here has no widget tree under it. The intrinsic path
-          // below — when the table fits — still lays it out through the dry
-          // baseline the renderer implements.
-          final text = spans.any((span) => span is WidgetSpan)
-              ? TextSpan(
-                  text: TextSpan(children: spans)
-                      .toPlainText()
-                      .replaceAll('\uFFFC', ''),
-                  style: style,
-                )
-              : TextSpan(children: spans, style: style);
-          final painter = TextPainter(
-            text: text,
-            textDirection: TextDirection.ltr,
-            textScaler: scaler,
-          )..layout();
-          if (painter.width > natural[column]) natural[column] = painter.width;
-          for (final word in painter.text!.toPlainText().split(_tableSpace)) {
-            if (word.isEmpty) continue;
-            painter
-              ..text = TextSpan(text: word, style: style)
-              ..layout();
-            if (painter.width > least[column]) least[column] = painter.width;
-          }
-        }
-      }
-      final total =
-          natural.fold<double>(0, (sum, width) => sum + width) +
-          2 * pad * columns;
-      if (total > budget) {
-        final fitted = fitTableColumns(
-          natural: natural,
-          least: least,
-          pad: pad,
-          budget: budget,
-        );
-        widths = {
-          for (var at = 0; at < columns; at++)
-            at: FixedColumnWidth(fitted[at] + 2 * pad),
-        };
-      }
-    }
-    // As wide as its columns, as `live` draws it: laid out on the pane's
-    // width, a table spread what its columns left over evenly across them,
-    // and a two-word column stood half the pane wide.
-    return Align(
-      alignment: Alignment.topLeft,
-      child: Table(
-        border: border,
-        columnWidths: widths,
-        defaultColumnWidth: const IntrinsicColumnWidth(),
-        children: <TableRow>[
-          for (var at = 0; at < rows.length; at++)
-            TableRow(
-              children: <Widget>[
-                for (final (column, cell) in rows[at].indexed)
-                  Padding(
-                    padding: theme.tableCellPadding,
-                    child: _cell(
-                      cell,
-                      at == 0 && head ? theme.tableHeader : theme.tableCell,
-                      column < aligns.length
-                          ? _textAlignOf(aligns[column])
-                          : TextAlign.start,
-                    ),
-                  ),
-              ],
-            ),
-        ],
-      ),
-    );
-  }
-
-  Widget _cell(ReadInline cell, TextStyle style, TextAlign align) => Text.rich(
-    TextSpan(children: _spans(style).of(cell), style: style),
-    textAlign: align,
+  /// fits it (#1108).
+  Widget _table() => ReadTable(
+    rows: leaf.rows,
+    aligns: leaf.aligns,
+    head: !leaf.continued,
+    theme: theme,
+    spansOf: _spans,
+    footnoteNumbers: footnoteNumbers,
+    availableWidth: availableWidth,
   );
-
-  static final RegExp _tableSpace = RegExp(r'\s+');
-
-  static TextAlign _textAlignOf(TableAlign align) => switch (align) {
-    TableAlign.center => TextAlign.center,
-    TableAlign.right => TextAlign.right,
-    TableAlign.none || TableAlign.left => TextAlign.start,
-  };
 }
