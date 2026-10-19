@@ -5,6 +5,7 @@ import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/db/app_database.dart';
 import 'package:niman/src/sync/reconcile.dart';
 import 'package:niman/src/sync/sync_sides.dart';
+import 'package:niman/src/sync/sync_step_pool.dart';
 import 'package:niman/src/sync/sync_store.dart';
 import 'package:niman/src/sync/transfers/sync_transfers.dart';
 import 'package:niman/src/sync/webdav/webdav_client.dart';
@@ -33,6 +34,7 @@ final class SyncScanner {
     required this.store,
     required this.sides,
     required this._now,
+    this.transferConcurrency = kSyncTransferConcurrency,
   });
 
   /// Absolute path of the library root.
@@ -43,6 +45,9 @@ final class SyncScanner {
 
   /// The local stat and both sides' hashes.
   final SyncSides sides;
+
+  /// How many remote files are downloaded to be hashed at once.
+  final int transferConcurrency;
 
   final DateTime Function() _now;
 
@@ -216,7 +221,16 @@ final class SyncScanner {
       for (final d in plan.decisions)
         if (d.kind == SyncActionKind.hashRemote) d.path,
     ];
-    for (final path in remotePaths) {
+    // Downloaded a few at a time: each is a round trip and a body, and the
+    // files are independent. A failure other than a vanished file ends the
+    // phase and cancels the others (#1107).
+    final pool = SyncStepPool<String>(
+      concurrency: transferConcurrency,
+      isParallel: (_) => true,
+      keyOf: (path) => path,
+      onFatal: (_) => transfers.cancel(),
+    );
+    await pool.run(remotePaths, (path) async {
       try {
         remoteSha[path] = await sides.remoteSha(transfers, path);
       } on WebDavNotFound {
@@ -224,7 +238,7 @@ final class SyncScanner {
         // not as a missing destination.
         _log.info('hash: remote $path vanished since the listing');
       }
-    }
+    });
     _log.info(
       'hash: ${localPaths.length} local, ${remotePaths.length} remote '
       '(${clock.elapsedMilliseconds} ms)',

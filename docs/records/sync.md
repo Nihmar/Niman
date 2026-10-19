@@ -480,7 +480,20 @@ one runs joins it and gets the same report, saying that it joined.
    looks like a mass deletion go through the caller's `confirm`. Without
    one, a first sync goes ahead — it cannot delete — and a mass deletion
    is refused.
-5. **Apply**, one decision at a time. Before touching a side, the engine
+5. **Apply**, the plan's decisions in order, except that **transfers
+   overlap** (`sync_applier.dart`, `sync_step_pool.dart`, #1107): up to
+   `kSyncTransferConcurrency` (4) uploads and downloads of distinct paths
+   run at once, which is what hides the round trips between a library's
+   many small files. Every other step — a delete, a move, a conflict, a
+   recorded agreement — is a **barrier**: it waits until everything in
+   flight has finished and runs alone, so a delete after some uploads runs
+   after all of them and before any later one, and only transfers reorder
+   among themselves. A failed path is recorded and the run goes on; a
+   refused login, or no answer from a server that answers no other request
+   either, ends the run, cancels the transfers in flight (their temp files
+   go with them) and leaves the report and the phase times as they were
+   reached. Two uploads into one new folder send one `MKCOL`. The remote
+   hashing of step 3 is bounded the same way. Before touching a side, the engine
    checks it still is what the scan saw (local size + mtime; the remote
    with a PROPFIND when the decision has no precondition): a path that
    moved meanwhile is skipped and decided again next run. A listing

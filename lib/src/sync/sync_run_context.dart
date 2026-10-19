@@ -51,6 +51,11 @@ final class SyncRunContext {
   /// The remote folders known to exist; grows as the run creates them.
   final Set<String> folders;
 
+  /// The remote folders being created now, by path: an upload into a folder
+  /// another upload is already creating waits for that one instead of
+  /// sending a `MKCOL` of its own (#1107).
+  final Map<String, Future<void>> folderCreations = {};
+
   /// What the run did so far.
   final SyncReport report;
 }

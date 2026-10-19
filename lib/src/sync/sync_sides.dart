@@ -289,11 +289,23 @@ final class SyncSides {
 
   /// Creates the remote folder [path] goes in, unless the run knows it
   /// exists.
-  Future<void> ensureRemoteParent(SyncRunContext c, String path) async {
+  ///
+  /// Uploads overlap (#1107), and the folder is only known to exist once the
+  /// `MKCOL` has answered: a second upload into the same new folder waits for
+  /// the creation under way rather than sending a `MKCOL` of its own.
+  Future<void> ensureRemoteParent(SyncRunContext c, String path) {
     final slash = path.lastIndexOf('/');
-    if (slash < 0) return;
+    if (slash < 0) return Future<void>.value();
     final parent = path.substring(0, slash);
-    if (c.folders.contains(parent)) return;
+    if (c.folders.contains(parent)) return Future<void>.value();
+    final creating = c.folderCreations[parent];
+    if (creating != null) return creating;
+    final creation = _createRemoteFolders(c, parent);
+    c.folderCreations[parent] = creation;
+    return creation.whenComplete(() => c.folderCreations.remove(parent));
+  }
+
+  Future<void> _createRemoteFolders(SyncRunContext c, String parent) async {
     await c.client.createFolders(parent);
     var folder = parent;
     while (folder.isNotEmpty) {

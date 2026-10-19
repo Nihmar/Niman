@@ -98,6 +98,13 @@ final class SyncReport {
   /// The longest `Retry-After` the server asked for, if any.
   Duration? retryAfter;
 
+  /// Notes a wait the server asked for: the longest one stands.
+  void noteRetryAfter(Duration? wait) {
+    if (wait == null) return;
+    final known = retryAfter;
+    if (known == null || wait > known) retryAfter = wait;
+  }
+
   /// Queued hints the run settled.
   int hintsDone = 0;
 
