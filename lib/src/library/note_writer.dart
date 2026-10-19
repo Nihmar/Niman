@@ -295,6 +295,7 @@ final class NoteWriter {
       // The file this writer last left is the app's own write, not
       // somebody else's, whatever the editor's stamp says (#1055).
       lastWritten: _stampOf(_written[path]),
+      lastWrittenSha256: _written[path]?.sha256,
     );
     final NoteWriteResult? result;
     try {

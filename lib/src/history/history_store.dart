@@ -11,7 +11,7 @@ import 'dart:io';
 
 import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
-import 'package:niman/src/core/files.dart';
+import 'package:niman/src/history/external_write_check.dart';
 import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/history/snapshot_policy.dart';
 import 'package:path/path.dart' as p;
@@ -107,6 +107,7 @@ final class SnapshotOutcome {
     required this.decision,
     this.version,
     this.rotated = const [],
+    this.external,
     this.elapsedMs = 0,
   });
 
@@ -119,6 +120,11 @@ final class SnapshotOutcome {
   /// The version numbers rotation deleted.
   final List<int> rotated;
 
+  /// How the external check was settled when the stamps alone could not
+  /// ([ExternalWriteCheck.note]): the stamps compared and what the bytes
+  /// said. Null when they agreed or nothing was expected.
+  final String? external;
+
   /// Time spent, in milliseconds.
   final int elapsedMs;
 
@@ -130,6 +136,8 @@ final class SnapshotOutcome {
     if (rotated.isNotEmpty) {
       buffer.write(', rotated out ${rotated.map((n) => 'v$n').join(', ')}');
     }
+    final checked = external;
+    if (checked != null) buffer.write(' [external check: $checked]');
     buffer.write(' in $elapsedMs ms');
     return buffer.toString();
   }
@@ -146,21 +154,12 @@ SnapshotOutcome snapshotBeforeWrite(
   final clock = Stopwatch()..start();
   final note = File(p.join(root, rel));
   final exists = note.existsSync();
-  // A file that is not the one the editor last saw was written by somebody
-  // else, and the save about to replace it is the last chance to keep what
-  // they wrote (#1055). A reason already forced (a restore, a sync) stands.
-  // The app's own last write is not somebody else's: a file still matching
-  // it was left by this writer, and the editor's stamp being older is a
-  // stale memory, not a foreign version (a second editor, Replace all, an
-  // outgoing write).
-  final expected = asked.expected;
-  final lastWritten = asked.lastWritten;
-  final now = exists ? DiskStamp.of(note.path) : null;
-  final foreign =
-      exists &&
-      expected != null &&
-      !expected.sameAs(now) &&
-      !(lastWritten?.sameAs(now) ?? false);
+  // A file that is not the one the editor last saw, nor the one the app last
+  // wrote, was written by somebody else, and the save about to replace it is
+  // the last chance to keep what they wrote (#1055). A reason already forced
+  // (a restore, a sync) stands.
+  final check = exists ? ExternalWriteCheck.of(note, asked) : null;
+  final foreign = check?.foreign ?? false;
   final request = foreign
       ? SnapshotRequest(
           limit: asked.limit,
@@ -178,10 +177,11 @@ SnapshotOutcome snapshotBeforeWrite(
   if (early != null) {
     return SnapshotOutcome(
       decision: early,
+      external: check?.note,
       elapsedMs: clock.elapsedMilliseconds,
     );
   }
-  final bytes = exists ? note.readAsBytesSync() : null;
+  final bytes = exists ? check?.bytes ?? note.readAsBytesSync() : null;
   final oldSha = bytes == null ? null : sha256.convert(bytes).toString();
   final decision = decideSnapshot(
     manifest: manifest,
@@ -191,6 +191,7 @@ SnapshotOutcome snapshotBeforeWrite(
   if (!decision.take) {
     return SnapshotOutcome(
       decision: decision,
+      external: check?.note,
       elapsedMs: clock.elapsedMilliseconds,
     );
   }
@@ -218,6 +219,7 @@ SnapshotOutcome snapshotBeforeWrite(
     decision: decision,
     version: version,
     rotated: rotated,
+    external: check?.note,
     elapsedMs: clock.elapsedMilliseconds,
   );
 }

@@ -5,12 +5,16 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:crypto/crypto.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/settings/library_config_repo.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/db/indexer.dart';
 import 'package:niman/src/history/history_manifest.dart';
+import 'package:niman/src/history/history_store.dart';
+import 'package:niman/src/history/snapshot_policy.dart';
 import 'package:niman/src/library/note_ops.dart';
 import 'package:path/path.dart' as p;
 
@@ -144,6 +148,101 @@ void main() {
       await ops.readNoteVersion('a.md', kept.number),
       'theirs, written outside, and longer',
     );
+  });
+
+  // Android's storage does not reliably answer the next save with the
+  // modification time a write took: the stamps then match neither belief,
+  // and only the bytes can tell the app's own write from a stranger's.
+  final drifted = DateTime.utc(2020, 1, 2, 3, 4, 5);
+
+  test(
+    "the app's own write is not another program's when its time drifts",
+    () async {
+      final first = await ops.saveNote('a.md', 'mine, saved', editSession: 1);
+      note().setLastModifiedSync(drifted);
+
+      final second = await ops.saveNote(
+        'a.md',
+        'mine, edited',
+        editSession: 1,
+        expected: first!.stamp,
+      );
+
+      expect(second!.keptExternal, isFalse);
+      expect(
+        (await versions()).where((v) => v.reason == HistoryReason.external),
+        isEmpty,
+      );
+    },
+  );
+
+  test('the same for a streamed save', () async {
+    final first = await ops.saveNoteStream(
+      'a.md',
+      (index) async =>
+          index == 0 ? Uint8List.fromList(utf8.encode('mine, saved')) : null,
+      editSession: 1,
+    );
+    note().setLastModifiedSync(drifted);
+
+    final second = await ops.saveNoteStream(
+      'a.md',
+      (index) async =>
+          index == 0 ? Uint8List.fromList(utf8.encode('mine again')) : null,
+      editSession: 1,
+      expected: first!.stamp,
+    );
+
+    expect(second!.keptExternal, isFalse);
+    expect(
+      (await versions()).where((v) => v.reason == HistoryReason.external),
+      isEmpty,
+    );
+  });
+
+  test('a foreign write of the same size is still kept', () async {
+    final first = await ops.saveNote('a.md', 'mine, saved', editSession: 1);
+    // Same length, other bytes, and a time that is neither stamp's.
+    note().writeAsStringSync('MINE, SAVED');
+    note().setLastModifiedSync(drifted);
+
+    final second = await ops.saveNote(
+      'a.md',
+      'mine, edited',
+      editSession: 1,
+      expected: first!.stamp,
+    );
+
+    expect(second!.keptExternal, isTrue);
+    final kept = (await versions()).singleWhere(
+      (v) => v.reason == HistoryReason.external,
+    );
+    expect(await ops.readNoteVersion('a.md', kept.number), 'MINE, SAVED');
+  });
+
+  test('a check the stamps cannot settle says what it compared', () {
+    note().writeAsStringSync('mine, saved');
+    final bytes = utf8.encode('mine, saved');
+    final written = DiskStamp(size: bytes.length, modified: DateTime.now());
+    note().setLastModifiedSync(drifted);
+
+    final outcome = snapshotBeforeWrite(
+      root.path,
+      'a.md',
+      SnapshotRequest(
+        limit: 10,
+        interval: const Duration(minutes: 5),
+        now: DateTime.now(),
+        expected: written,
+        lastWritten: written,
+        lastWrittenSha256: sha256.convert(bytes).toString(),
+      ),
+    );
+
+    expect(outcome.decision.reason, isNot(HistoryReason.external));
+    final logged = outcome.describe('a.md');
+    expect(logged, contains("same bytes as the app's last write"));
+    expect(logged, contains('on disk 11 b @ 2020-01-02T03:04:05.000Z'));
   });
 
   test('a save that expects nothing overwrites without a version', () async {
