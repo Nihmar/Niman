@@ -159,8 +159,8 @@ void main() {
       ),
     );
     await tester.pump();
-    // Everything the first frame pays: every cell of the table measured, and
-    // every row's widest word, because the table is wider than the pane.
+    // Everything the first frame pays: every cell of the table measured (its
+    // widest word comes with its width), and its visible rows laid out.
     print(
       'first frame: ${LiveTables.measurements} measurements, '
       '${LiveTables.rowsLaid} rows laid out',
