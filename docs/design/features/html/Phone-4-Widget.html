@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Android home screen, Todos widget off</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;family=Literata:opsz,wght@7..72,400;7..72,600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#7CA0E6}a:hover{color:#A9C0F0}
+.ico{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.fill{fill:currentColor;stroke:none}
+.sub{font-size:13px;color:#A6A29A}
+.lab{font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#A6A29A}
+.mono{font-family:'IBM Plex Mono',monospace;font-size:.95em}
+.tree{display:flex;align-items:center;gap:8px;height:32px;padding:0 10px;border-radius:8px;font-size:13.5px;color:#D9D4CB;white-space:nowrap}
+.tree.sel{background:#363B44;color:#F2EDE5}
+.tab{display:flex;align-items:center;gap:8px;height:30px;padding:0 10px 0 13px;border-radius:7px;font-size:13px;color:#C8C3BA}
+.tab.on{background:#383D46;color:#F2EDE5}
+.railbtn{width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#A6A29A}
+.railbtn.on{background:#363B44;color:#587CD3}
+.ibtn{width:32px;height:32px;border-radius:8px;border:0;background:transparent;color:#A6A29A;display:flex;align-items:center;justify-content:center;padding:0;flex:none}
+.ibtn.on{background:#363B44;color:#F2EDE5}
+.obtn{height:32px;padding:0 12px;border-radius:16px;border:1px solid #4A4F59;background:transparent;color:#F2EDE5;font:500 13px 'IBM Plex Sans',sans-serif;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.tbtn{height:32px;padding:0 10px;border-radius:16px;border:0;background:transparent;color:#A9C0F0;font:500 13px 'IBM Plex Sans',sans-serif;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.fbtn{height:32px;padding:0 18px;border-radius:16px;border:0;background:#587CD3;color:#F2EDE5;font:500 13px 'IBM Plex Sans',sans-serif;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+/* the switch: Material 3, 52x32 */
+.sw{width:52px;height:32px;box-sizing:border-box;border-radius:16px;position:relative;flex:none;display:block;border:2px solid #8C9099;background:transparent}
+.sw::before{content:'';position:absolute;top:50%;left:6px;width:16px;height:16px;margin-top:-8px;border-radius:50%;background:#A6A29A}
+.sw.on{background:#587CD3;border-color:#587CD3}
+.sw.on::before{left:20px;width:24px;height:24px;margin-top:-12px;background:#F2EDE5}
+.sw svg{position:absolute;left:24px;top:50%;width:16px;height:16px;margin-top:-8px;fill:none;stroke:#3A4A6E;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.sw.dis{opacity:.38}
+/* a feature row */
+.card{background:#2C3037;border-radius:14px;overflow:hidden}
+.glab{font-size:12px;line-height:14px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#A6A29A;margin:12px 16px 5px}
+.frow{position:relative;display:flex;align-items:center;gap:14px;padding:6px 16px;min-height:44px;box-sizing:border-box;border-bottom:1px solid #23262B}
+.frow:last-child{border-bottom:0}
+.frow .lead{color:#A6A29A}
+.frow .t{flex:1;min-width:0;line-height:17px;font-size:14px}
+.frow .t .sub{font-size:12.5px;line-height:15px}
+.frow.child{padding-left:46px}
+.frow.child::before{content:'';position:absolute;left:25px;top:0;height:50%;width:12px;border-left:1.5px solid #4A4F59;border-bottom:1.5px solid #4A4F59;border-bottom-left-radius:7px}
+.frow.dis .t,.frow.dis .lead{color:#6B7079}
+.frow.dis .t .sub{color:#6B7079}
+.tag{display:inline-block;margin-left:6px;padding:0 6px;border:1px solid #4A4F59;border-radius:6px;font-size:11px;font-weight:500;line-height:16px;color:#A6A29A;vertical-align:1px}
+/* presets */
+.chips{display:flex;align-items:center;gap:8px}
+.chip{height:34px;box-sizing:border-box;padding:0 14px;border-radius:17px;border:1px solid #4A4F59;display:inline-flex;align-items:center;gap:6px;font:500 13px 'IBM Plex Sans',sans-serif;color:#D9D4CB;white-space:nowrap;flex:none}
+.chip.on{background:#3A4A6E;border-color:#3A4A6E;color:#F2EDE5}
+.chip.dis{opacity:.38}
+.snack{position:absolute;background:#363B44;border-radius:14px;padding:0 8px 0 18px;height:48px;display:flex;align-items:center;gap:12px;box-shadow:0 10px 30px rgba(0,0,0,.45);box-sizing:border-box;z-index:9}
+.snack .msg{flex:1;font-size:14px;color:#F2EDE5}
+.snack .act{font-size:14px;font-weight:600;color:#7CA0E6;padding:0 10px}
+
+.ico{width:22px;height:22px}
+.ibtn{width:44px;height:44px;border-radius:22px;color:#D9D4CB}
+.obtn{height:40px;padding:0 16px;border-radius:20px;font-size:14px;gap:8px}
+.tbtn{height:40px;padding:0 12px;border-radius:20px;font-size:14px;gap:8px}
+.fbtn{height:40px;padding:0 20px;border-radius:20px;font-size:14px;gap:8px}
+.glab{margin:18px 20px 6px}
+.frow{gap:12px;padding:8px 12px 8px 16px;min-height:56px}
+.frow .t{font-size:15px}
+.frow .t .sub{font-size:12.5px;line-height:1.35;margin-top:1px}
+.frow.child{padding-left:42px}
+.frow.child::before{left:24px}
+.chip{height:40px;padding:0 16px;border-radius:20px;font-size:14px}
+.snack{left:12px;right:12px;bottom:36px;height:auto;min-height:56px;padding:10px 6px 10px 16px}
+.snack .msg{font-size:14px;line-height:1.4}
+
+.app{display:flex;flex-direction:column;align-items:center;gap:6px;width:72px}
+.app .ic{width:52px;height:52px;border-radius:16px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.14);color:#F2EDE5}
+.app .nm{font-size:12px;color:#F2EDE5;text-shadow:0 1px 3px rgba(0,0,0,.6)}
+.widget{margin:0 12px;background:#2C3037;border-radius:28px;color:#F2EDE5;overflow:hidden;box-shadow:0 6px 18px rgba(0,0,0,.35)}
+.wh{display:flex;align-items:center;gap:8px;padding:14px 18px 0;font-size:13px;color:#A6A29A}
+.wh b{font-weight:600;color:#F2EDE5}
+</style>
+</head>
+<body>
+
+<div style="width:360px;height:800px;background:radial-gradient(circle at 20% 15%,#2F5D73 0,transparent 55%),radial-gradient(circle at 85% 70%,#3B3A6B 0,transparent 60%),linear-gradient(160deg,#1E3A4C,#1B1D2E);color:#F2EDE5;font-family:'IBM Plex Sans',sans-serif;font-size:15px;overflow:hidden;display:flex;flex-direction:column;position:relative"><div style="height:28px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 18px;font-size:12px;color:#F2EDE5"><span>9:41</span><span style="display:flex;gap:6px;align-items:center"><svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px" aria-hidden="true"><path d="M4 20h2v-4M9 20h2v-8M14 20h2V8M19 20h2V4"/></svg><svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px" aria-hidden="true"><path d="M3 9a14 14 0 0 1 18 0M6 12.5a9.5 9.5 0 0 1 12 0M9 16a5 5 0 0 1 6 0"/></svg><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px" aria-hidden="true"><rect x="3" y="8" width="16" height="9" rx="2"/><path d="M21 11v3"/></svg></span></div><div style="flex:1;min-height:0;display:flex;flex-direction:column;justify-content:flex-start"><div style="padding:10px 24px 18px"><div style="font-size:15px;color:#F2EDE5;opacity:.85">Mon, 19 October</div><div style="font:400 52px 'IBM Plex Sans',sans-serif;line-height:1.1;color:#F2EDE5">9:41</div></div><div class="widget"><div class="wh"><b>Niman Todos</b><span>·</span><span>Notes</span></div><div style="display:flex;align-items:center;gap:14px;padding:14px 18px 18px"><div style="width:52px;height:52px;border-radius:26px;background:#363B44;display:flex;align-items:center;justify-content:center;flex:none;color:#A6A29A"><svg class="ico" viewBox="0 0 24 24" style="width:26px;height:26px" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2.5"/><path d="M8 12l3 3 5-6"/><path d="M3.5 20.5L20.5 3.5" stroke="#363B44" stroke-width="5"/><path d="M4 20L20 4"/></svg></div><div style="flex:1;min-width:0"><div style="font-size:16px;font-weight:500;line-height:1.3">Todo is off in this library</div><div style="margin-top:10px"><button class="obtn">Open Features</button></div></div></div></div><div class="widget" style="margin-top:12px"><div class="wh"><b>Niman Study</b><span>·</span><span>Notes</span><span style="flex:1"></span><span style="color:#F2EDE5;font-weight:500">19 today</span></div><div style="padding:10px 18px 16px"><div class="lab" style="margin-bottom:6px">Languages</div><div style="display:flex;align-items:center;height:40px;gap:10px"><svg class="ico" viewBox="0 0 24 24" style="width:20px;height:20px;color:#A6A29A" aria-hidden="true"><rect x="7" y="8" width="14" height="11" rx="2"/><path d="M4 15V6a2 2 0 0 1 2-2h9"/></svg><div style="flex:1;font-size:15px">Spanish vocabulary</div><div style="font-size:13px;color:#A6A29A"><span style="color:#F2EDE5;font-weight:500">12 due</span> · 3 new</div></div><div class="lab" style="margin:8px 0 6px">No category</div><div style="display:flex;align-items:center;height:40px;gap:10px"><svg class="ico" viewBox="0 0 24 24" style="width:20px;height:20px;color:#A6A29A" aria-hidden="true"><rect x="7" y="8" width="14" height="11" rx="2"/><path d="M4 15V6a2 2 0 0 1 2-2h9"/></svg><div style="flex:1;font-size:15px">Anatomy</div><div style="font-size:13px;color:#A6A29A">4 new</div></div></div></div><div style="display:flex;justify-content:space-around;padding:22px 8px 0"><div class="app"><div class="ic" style="background:#587CD3"><span style="font:600 24px Literata,serif;color:#F2EDE5">N</span></div><div class="nm">Niman</div></div><div class="app"><div class="ic" style=""><svg class="ico" viewBox="0 0 24 24" style="width:26px;height:26px" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></div><div class="nm">Camera</div></div><div class="app"><div class="ic" style=""><svg class="ico" viewBox="0 0 24 24" style="width:26px;height:26px" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.8"/><path d="M4 18l5-5 4 4 3-3 4 4"/></svg></div><div class="nm">Photos</div></div><div class="app"><div class="ic" style=""><svg class="ico" viewBox="0 0 24 24" style="width:26px;height:26px" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg></div><div class="nm">Clock</div></div></div><div style="flex:1"></div><div style="display:flex;justify-content:space-around;padding:0 8px 14px"><div class="app"><div class="ic" style=""><svg class="ico" viewBox="0 0 24 24" style="width:26px;height:26px" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A15 15 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg></div><div class="nm">Phone</div></div><div class="app"><div class="ic" style=""><svg class="ico" viewBox="0 0 24 24" style="width:26px;height:26px" aria-hidden="true"><path d="M4 5h16v11H9l-4 4v-4H4z"/></svg></div><div class="nm">Messages</div></div><div class="app"><div class="ic" style=""><svg class="ico" viewBox="0 0 24 24" style="width:26px;height:26px" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg></div><div class="nm">Browser</div></div><div class="app"><div class="ic" style=""><svg class="ico" viewBox="0 0 24 24" style="width:26px;height:26px" aria-hidden="true"><path d="M3 6h6l2 2h10v11H3z"/></svg></div><div class="nm">Files</div></div></div></div><div style="height:24px;flex:none;display:flex;align-items:center;justify-content:center"><i style="width:112px;height:4px;border-radius:2px;background:#4A4F59;display:block"></i></div></div>
+</body>
+</html>
