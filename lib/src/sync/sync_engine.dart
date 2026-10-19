@@ -18,6 +18,7 @@ import 'package:niman/src/sync/sync_step_failure.dart';
 import 'package:niman/src/sync/sync_step_outcome.dart';
 import 'package:niman/src/sync/sync_steps.dart';
 import 'package:niman/src/sync/sync_store.dart';
+import 'package:niman/src/sync/sync_transfer_line.dart';
 import 'package:niman/src/sync/webdav/webdav_client.dart';
 import 'package:niman/src/sync/webdav/webdav_failure.dart';
 
@@ -422,10 +423,7 @@ final class SyncEngine {
         '${hints.isEmpty ? '' : '; hints ${report.hintsDone} done, '
                   '${report.hintsFailed} backing off'}'
         '${report.retryAfter == null ? '' : '; server asked to wait '
-                  '${report.retryAfter!.inSeconds}s'}; up ${report.bytesUp} b, '
-        'down ${report.bytesDown} b, hashed ${report.bytesHashed} b; '
-        'scan ${report.scanMs} ms, hash ${report.hashMs} ms, '
-        'apply ${report.applyMs} ms';
+                  '${report.retryAfter!.inSeconds}s'}; ${transferLine(report)}';
     if (report.clean) {
       _log.info(line);
     } else {
