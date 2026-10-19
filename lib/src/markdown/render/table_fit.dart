@@ -15,8 +15,10 @@ const double tableMinCellWidth = 12;
 /// give it, and the rest of the room is shared by what the columns want.
 /// When even the widest words do not fit, the room is shared by those
 /// words — not by the whole cells, which let one long paragraph squeeze a
-/// short column down to a few characters (#1108) — and only the longest
-/// words break.
+/// short column down to a few characters (#1108) — and no column takes
+/// more than the level the others leave it (see [_shareByLevel]), so a
+/// column that cannot break (a long address) does not take the pane
+/// either. Only the longest words break.
 List<double> fitTableColumns({
   required List<double> natural,
   required List<double> least,
@@ -37,19 +39,14 @@ List<double> fitTableColumns({
   // does, and only a word wider than its whole column is broken itself.
   // The floor is the column's own — capping it at an even share would
   // break the words of a column the pane gave more room to than the
-  // others — and the branch below is what answers for floors that do not
+  // others — and the branch above is what answers for floors that do not
   // fit together at all.
   final floor = <double>[
     for (var at = 0; at < count; at++)
       if (least[at] > 0) least[at] else tableMinCellWidth,
   ];
   final words = floor.fold<double>(0, (sum, width) => sum + width);
-  if (words > room) {
-    for (var at = 0; at < count; at++) {
-      fit[at] = room * floor[at] / words;
-    }
-    return fit;
-  }
+  if (words > room) return _shareByLevel(floor, room);
   final pinned = List<bool>.filled(count, false);
   var taken = 0.0;
   var pool = total;
@@ -70,6 +67,38 @@ List<double> fitTableColumns({
   for (var at = 0; at < count; at++) {
     if (pinned[at]) continue;
     fit[at] = pool <= 0 ? 0 : (room - taken) * natural[at] / pool;
+  }
+  return fit;
+}
+
+/// Shares [room] among columns whose [floor]s do not fit in it: every column
+/// takes its whole floor up to a common level, and the level is the one at
+/// which the room is spent.
+///
+/// A column whose widest word is below the level keeps it whole; the columns
+/// above it are cut to the level, so one floor far wider than the rest — a
+/// long address, a path, a word with no place to break — cannot take the
+/// room the others' words need. Shared in proportion to the floors, such a
+/// column would take nearly the whole pane (#1108). With floors that add up
+/// to [room] exactly, the level is the widest floor and every column keeps
+/// its own: this is the branch above's answer, continued.
+List<double> _shareByLevel(List<double> floor, double room) {
+  final fit = List<double>.filled(floor.length, 0);
+  final order = List<int>.generate(floor.length, (at) => at)
+    ..sort((a, b) => floor[a].compareTo(floor[b]));
+  var left = room;
+  for (var rank = 0; rank < order.length; rank++) {
+    final at = order[rank];
+    final level = left / (order.length - rank);
+    if (floor[at] > level) {
+      // This column and every wider one take the level.
+      for (var rest = rank; rest < order.length; rest++) {
+        fit[order[rest]] = level;
+      }
+      return fit;
+    }
+    fit[at] = floor[at];
+    left -= floor[at];
   }
   return fit;
 }
