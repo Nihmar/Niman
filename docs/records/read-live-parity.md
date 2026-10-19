@@ -56,7 +56,8 @@ in a table's cell too, whose row stays on the grid.
 | `df4f5b9` | An HTML block is drawn in a code block's box in both modes, a row per line. |
 | `65919a1` | `live` hides a block of nothing but definitions while the caret is not in it, and ends the note with the read view's footnotes (`footnoteSliver`, shared); a tap on a footnote puts the caret in its definition. A link definition has no footnote to tap: it is reached with the caret, or in `source`. |
 | `78af1366` | The read view's table is as wide as its columns, where it spread what they left of the pane evenly across them. |
-| `7e73ab5a` | A table wider than the pane is **fitted** to it, its cells wrapped inside their columns (#337): every column shows in `live` as it does in the read view, where `live` clipped the ones past the pane. The two fit the same table slightly differently — `live` gives a column in proportion to what its widest cell wants, with its widest word kept whole; the read view's `Table` does the same, by Flutter's own algorithm — so an over-wide table's columns are not the same x in the two views. The 0.00 above is a table that fits the pane, and stays exact. |
+| `7e73ab5a` | A table wider than the pane is **fitted** to it, its cells wrapped inside their columns (#337): every column shows in `live` as it does in the read view, where `live` clipped the ones past the pane. At first the two fitted the same table differently — `live` in proportion to the widest cells, the read view by Flutter's own algorithm — so an over-wide table's columns were not the same x in the two views; #1108 gave them one rule (below). The 0.00 above is a table that fits the pane, and stays exact. |
+| #1108 | A table wider than the pane is fitted by **one rule in both modes** (`fitTableColumns`, from one measure of each cell, `measureTableCell`): the same table has the same columns in the read view and in `live`, as `table_fit_parity_test.dart` holds. See "A narrow table's columns" below. |
 | `061458e` | `live` draws a table as the read view's grid over its own source: the pipes and the spaces round each cell drawn as room that puts the next cell on its column (`LiveTables`), a cell's padding round each row, the delimiter row taking no room, the grid painted behind (`LiveTableGridPainter`). The caret's row is drawn as written. It is what #261's editing builds on. |
 
 ## Decisions (2026-09-23)
@@ -223,4 +224,36 @@ Decisions taken without the writer, to revisit if they read wrong:
   all before, which the menu's Align would have made plain.
 - **Not done**: a size picker for an inserted table (#262 has two
   columns and one row; the `+` and Tab add the rest).
+
+## A narrow table's columns (#1108, 2026-10-19)
+
+A table wider than the pane was fitted by sharing the room in proportion to
+each column's **widest cell**: one long paragraph took most of the pane and
+squeezed a short column ("Area") down to a few characters, and the read view
+fitted it by another algorithm, so the two surfaces drew different tables.
+
+**Decided: one rule, one measure, in both modes.**
+
+- *The measure* (`measureTableCell`): one text layout per cell gives its
+  natural width and its floor, the narrowest it can be drawn without breaking
+  a word. The floor is the text engine's own `minIntrinsicWidth`, so styled
+  runs (bold, code, a link) count in their style and a no-break space does
+  not end a word. A cell with a widget (a formula, an image) is measured
+  without it, and its column is no narrower than the widget asks
+  (`FittedColumnWidth`); inline math reports its size for that (it used to
+  answer zero).
+- *The rule* (`fitTableColumns`): a table that fits keeps its natural
+  columns. A wider one gives each column its floor and shares the rest by
+  what the columns want. When even the floors do not fit, they share the
+  room **by level**: every column keeps its widest word up to a common level,
+  and a column above it is cut to the level. Sharing by the floors in
+  proportion handed a column with no place to break (a long address) nearly
+  the whole pane; by level it cannot take more than the others leave it.
+  The branches meet where the floors just fit.
+- *The two surfaces keep their own margins*, so the same note is fitted to
+  two room widths that differ by what the margins differ by; given the same
+  room, the columns are the same.
+- The read view's measure is kept with the table (`ReadTable`) until its
+  cells, the typography or the text scale change; `live` keeps it with each
+  row (#494), and no word is measured by itself any more.
 
