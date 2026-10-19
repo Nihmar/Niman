@@ -40,11 +40,17 @@ const MarkdownTheme _theme = MarkdownTheme(
 );
 
 /// A note long enough to scroll in a 900x500 pane.
-String _note() =>
-    [for (var i = 0; i < 80; i++) 'riga numero $i con un po di testo']
+String _note([int lines = 80]) =>
+    [for (var i = 0; i < lines; i++) 'riga numero $i con un po di testo']
         .join('\n');
 
-Future<MarkdownSourceViewState> _pump(WidgetTester tester) async {
+Future<MarkdownSourceViewState> _pump(
+  WidgetTester tester, {
+  TargetPlatform platform = TargetPlatform.linux,
+  String? note,
+  ScrollbarThemeData? scrollbarTheme,
+  EdgeInsets padding = EdgeInsets.zero,
+}) async {
   tester.view.physicalSize = const Size(900, 500);
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
@@ -52,12 +58,17 @@ Future<MarkdownSourceViewState> _pump(WidgetTester tester) async {
     MaterialApp(
       // The desktop scrollbar: MaterialScrollBehavior adds it only on a
       // desktop platform.
-      theme: ThemeData(platform: TargetPlatform.linux),
+      theme: ThemeData(platform: platform, scrollbarTheme: scrollbarTheme),
       home: Scaffold(
-        body: MarkdownSourceView(
-          buffer: SourceBuffer.fromText(_note()),
-          theme: _theme,
-          showLineNumbers: false,
+        body: Builder(
+          builder: (context) => MediaQuery(
+            data: MediaQuery.of(context).copyWith(padding: padding),
+            child: MarkdownSourceView(
+              buffer: SourceBuffer.fromText(note ?? _note()),
+              theme: _theme,
+              showLineNumbers: false,
+            ),
+          ),
         ),
       ),
     ),
@@ -170,4 +181,23 @@ void main() {
 
     expect(state.selectedText, isNotEmpty);
   });
+
+  // The strip belongs to the *mouse's* scrollbar. A finger there is on the
+  // text: Android builds no scrollbar at all, and a desktop touchscreen taps
+  // text like a phone does.
+  for (final platform in const <TargetPlatform>[
+    TargetPlatform.android,
+    TargetPlatform.linux,
+  ]) {
+    testWidgets('a finger tap in the right strip places the caret '
+        '(${platform.name})', (tester) async {
+      final state = await _pump(tester, platform: platform);
+      expect(state.selection.caret, 0);
+
+      await tester.tapAt(const Offset(896, 50));
+      await tester.pump(const Duration(milliseconds: 400));
+
+      expect(state.selection.caret, greaterThan(0));
+    });
+  }
 }

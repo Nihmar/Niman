@@ -4220,9 +4220,11 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                 // The keyboard is asked for on the *tap*: a drag the scroll
                 // view wins is someone reading, not someone about to type.
                 onTapUp: (details) {
-                  // A tap on the scrollbar's strip is the scrollbar's, not the
-                  // text's: no caret, no keyboard (#1106).
-                  if (_onScrollbar(details.localPosition)) {
+                  // A mouse tap on the scrollbar's strip is the scrollbar's,
+                  // not the text's: no caret, no keyboard. A finger is the
+                  // text's anywhere (#1106).
+                  if (details.kind == PointerDeviceKind.mouse &&
+                      _onScrollbar(details.localPosition)) {
                     _lastClick = null;
                     return;
                   }
