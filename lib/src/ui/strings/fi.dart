@@ -1618,6 +1618,18 @@ final class FinnishStrings extends Strings {
   String get pinWidgetUnavailable =>
       'Aloitusnäytön widgetit ovat Androidilla käytettävissä';
 
+  @override
+  String get widgetOffTodo =>
+      'Tehtävät on poistettu käytöstä tässä kirjastossa';
+  @override
+  String get widgetOffStudy =>
+      'Opiskelu on poistettu käytöstä tässä kirjastossa';
+  @override
+  String get widgetOffWidgets =>
+      'Aloitusnäytön widgetit on poistettu käytöstä tässä kirjastossa';
+  @override
+  String get widgetOpenFeatures => 'Avaa ominaisuudet';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Näytä tiedostonhallinnassa';

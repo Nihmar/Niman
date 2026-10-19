@@ -1631,6 +1631,18 @@ final class SpanishStrings extends Strings {
   String get pinWidgetUnavailable =>
       'Los widgets de la pantalla de inicio están disponibles en Android';
 
+  @override
+  String get widgetOffTodo =>
+      'Las tareas están desactivadas en esta biblioteca';
+  @override
+  String get widgetOffStudy => 'El estudio está desactivado en esta biblioteca';
+  @override
+  String get widgetOffWidgets =>
+      'Los widgets de la pantalla de inicio están '
+      'desactivados en esta biblioteca';
+  @override
+  String get widgetOpenFeatures => 'Abrir funciones';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Mostrar en el gestor de archivos';

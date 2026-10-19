@@ -1646,6 +1646,19 @@ final class FrenchStrings extends Strings {
   String get pinWidgetUnavailable =>
       'Les widgets de l’écran d’accueil sont disponibles sur Android';
 
+  @override
+  String get widgetOffTodo =>
+      'Les tâches sont désactivées dans cette bibliothèque';
+  @override
+  String get widgetOffStudy =>
+      'La révision est désactivée dans cette bibliothèque';
+  @override
+  String get widgetOffWidgets =>
+      'Les widgets de l’écran d’accueil sont '
+      'désactivés dans cette bibliothèque';
+  @override
+  String get widgetOpenFeatures => 'Ouvrir les fonctionnalités';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Afficher dans le gestionnaire de fichiers';

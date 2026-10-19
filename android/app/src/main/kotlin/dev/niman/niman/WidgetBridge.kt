@@ -43,6 +43,20 @@ class WidgetBridge(private val activity: Activity) :
         /** Opens Study, the decks, of the carrying library (#533). */
         const val ACTION_OPEN_STUDY = "dev.niman.niman.OPEN_STUDY"
 
+        /**
+         * Opens Settings → Features of the carrying library (#1109): the
+         * button of a widget whose feature is off.
+         */
+        const val ACTION_OPEN_FEATURES = "dev.niman.niman.OPEN_FEATURES"
+
+        /** The intent the off widget's button taps (#1109). */
+        fun featuresIntent(context: Context, libraryPath: String): Intent =
+            Intent(context, MainActivity::class.java)
+                .setAction(ACTION_OPEN_FEATURES)
+                .putExtra(EXTRA_LIBRARY, libraryPath)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+
         /** The intent the Study widget's header taps (#533). */
         fun studyIntent(context: Context, libraryPath: String): Intent =
             Intent(context, MainActivity::class.java)
@@ -82,9 +96,13 @@ class WidgetBridge(private val activity: Activity) :
      */
     fun handleIntent(intent: Intent?, running: Boolean): Boolean {
         if (intent == null) return false
-        if (intent.action !in setOf(ACTION_OPEN_TODO, ACTION_OPEN_NOTE, ACTION_OPEN_STUDY)) {
-            return false
-        }
+        val actions = setOf(
+            ACTION_OPEN_TODO,
+            ACTION_OPEN_NOTE,
+            ACTION_OPEN_STUDY,
+            ACTION_OPEN_FEATURES,
+        )
+        if (intent.action !in actions) return false
         val target = targetOf(intent) ?: return true
         clearExtras(intent)
         if (running) {
@@ -204,6 +222,10 @@ class WidgetBridge(private val activity: Activity) :
             )
             ACTION_OPEN_STUDY -> mapOf(
                 "kind" to "study",
+                "libraryPath" to library,
+            )
+            ACTION_OPEN_FEATURES -> mapOf(
+                "kind" to "features",
                 "libraryPath" to library,
             )
             ACTION_OPEN_NOTE -> {

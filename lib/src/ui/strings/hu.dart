@@ -1615,6 +1615,17 @@ final class HungarianStrings extends Strings {
   String get pinWidgetUnavailable =>
       'A kezdőképernyő-widgetek Androidon érhetők el';
 
+  @override
+  String get widgetOffTodo =>
+      'A teendők ki vannak kapcsolva ebben a könyvtárban';
+  @override
+  String get widgetOffStudy => 'A tanulás ki van kapcsolva ebben a könyvtárban';
+  @override
+  String get widgetOffWidgets =>
+      'A kezdőképernyő-widgetek ki vannak kapcsolva ebben a könyvtárban';
+  @override
+  String get widgetOpenFeatures => 'Funkciók megnyitása';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Megjelenítés a fájlkezelőben';

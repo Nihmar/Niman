@@ -1613,6 +1613,16 @@ final class PortugueseStrings extends Strings {
   String get pinWidgetUnavailable =>
       'Os widgets da tela inicial estão disponíveis no Android';
 
+  @override
+  String get widgetOffTodo => 'As tarefas estão desativadas nesta biblioteca';
+  @override
+  String get widgetOffStudy => 'O estudo está desativado nesta biblioteca';
+  @override
+  String get widgetOffWidgets =>
+      'Os widgets da tela inicial estão desativados nesta biblioteca';
+  @override
+  String get widgetOpenFeatures => 'Abrir funcionalidades';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Mostrar no gerenciador de arquivos';

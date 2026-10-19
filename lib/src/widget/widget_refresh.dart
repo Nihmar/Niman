@@ -12,6 +12,7 @@ import 'package:niman/src/todo/todo_store.dart';
 import 'package:niman/src/widget/widget_configs.dart';
 import 'package:niman/src/widget/widget_host.dart';
 import 'package:niman/src/widget/widget_note_ops.dart';
+import 'package:niman/src/widget/widget_off.dart';
 import 'package:niman/src/widget/widget_pin.dart';
 import 'package:niman/src/widget/widget_placement.dart';
 import 'package:niman/src/widget/widget_reconcile.dart';
@@ -36,7 +37,9 @@ Future<void> refreshTodoWidgets({
   WidgetPlacementStore? placement,
 }) async {
   final root = session.root;
-  if (root == null || snapshot == null) return;
+  final off = widgetOffFeature(WidgetProvider.todo, session.features.value);
+  // A widget that is off needs no snapshot: it is sent the off payload.
+  if (root == null || (snapshot == null && off == null)) return;
   final ids = await reconcilePlacedWidgets(
     session: session,
     root: root,
@@ -47,11 +50,17 @@ Future<void> refreshTodoWidgets({
     adopt: session.adoptTodoWidget,
   );
   if (ids.isEmpty) return;
-  final payload = buildTodoWidgetPayload(
-    snapshot,
-    libraryPath: root,
-    theme: resolveWidgetTheme(),
-  );
+  final payload = off != null
+      ? widgetOffPayload(
+          feature: off,
+          libraryPath: root,
+          theme: resolveWidgetTheme(),
+        )
+      : buildTodoWidgetPayload(
+          snapshot!,
+          libraryPath: root,
+          theme: resolveWidgetTheme(),
+        );
   await pushToWidgets(
     provider: WidgetProvider.todo,
     ids: ids,
@@ -133,6 +142,7 @@ Future<void> refreshNoteWidgets({
       );
     }
   }
+  final off = widgetOffFeature(WidgetProvider.note, session.features.value);
   final notes = <({int id, String notePath})>[
     for (final config in await session.widgetConfigsFor(root))
       if (config.provider == WidgetProvider.note.name &&
@@ -144,7 +154,10 @@ Future<void> refreshNoteWidgets({
   final read = readNote ?? readNoteText;
   final theme = resolveWidgetTheme();
   for (final note in notes) {
-    final payload = await _notePayload(read, root, note.notePath, theme);
+    // Off: the note is not even read (#1109).
+    final payload = off != null
+        ? widgetOffPayload(feature: off, libraryPath: root, theme: theme)
+        : await _notePayload(read, root, note.notePath, theme);
     await push.push(
       provider: WidgetProvider.note,
       androidWidgetId: note.id,

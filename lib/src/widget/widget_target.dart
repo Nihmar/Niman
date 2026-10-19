@@ -26,6 +26,10 @@ enum WidgetTargetKind {
 
   /// The Study destination of the target library (#533).
   study,
+
+  /// Settings → Features of the target library: where a widget whose
+  /// feature is off sends the tap (#1109).
+  features,
 }
 
 /// A widget tap: the library to show, and what to open inside it.

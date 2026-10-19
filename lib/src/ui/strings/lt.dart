@@ -1604,6 +1604,16 @@ final class LithuanianStrings extends Strings {
   String get pinWidgetUnavailable =>
       'Pradinio ekrano valdikliai prieinami Android';
 
+  @override
+  String get widgetOffTodo => 'Užduotys šioje bibliotekoje išjungtos';
+  @override
+  String get widgetOffStudy => 'Mokymasis šioje bibliotekoje išjungtas';
+  @override
+  String get widgetOffWidgets =>
+      'Pradinio ekrano valdikliai šioje bibliotekoje išjungti';
+  @override
+  String get widgetOpenFeatures => 'Atverti funkcijas';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Rodyti failų tvarkytuvėje';

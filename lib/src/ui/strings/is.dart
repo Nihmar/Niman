@@ -1604,6 +1604,16 @@ final class IcelandicStrings extends Strings {
   @override
   String get pinWidgetUnavailable => 'Forsíðu-vísí eru til fáan á Android';
 
+  @override
+  String get widgetOffTodo => 'Verkefni eru óvirk í þessu bókasafni';
+  @override
+  String get widgetOffStudy => 'Nám er óvirkt í þessu bókasafni';
+  @override
+  String get widgetOffWidgets =>
+      'Græjur á heimaskjá eru óvirkar í þessu bókasafni';
+  @override
+  String get widgetOpenFeatures => 'Opna eiginleika';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Sýna í skráastjóra';

@@ -1598,6 +1598,16 @@ final class CroatianStrings extends Strings {
   String get pinWidgetUnavailable =>
       'Widgeti početnog ekrana dostupni su na Androidu';
 
+  @override
+  String get widgetOffTodo => 'Zadaci su isključeni u ovoj biblioteci';
+  @override
+  String get widgetOffStudy => 'Učenje je isključeno u ovoj biblioteci';
+  @override
+  String get widgetOffWidgets =>
+      'Widgeti početnog ekrana isključeni su u ovoj biblioteci';
+  @override
+  String get widgetOpenFeatures => 'Otvori značajke';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Prikaži u upravitelju datoteka';

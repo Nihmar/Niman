@@ -1599,6 +1599,16 @@ final class DanishStrings extends Strings {
   String get pinWidgetUnavailable =>
       'Startskærmswidgets er tilgængelige på Android';
 
+  @override
+  String get widgetOffTodo => 'At gøre er slået fra i dette bibliotek';
+  @override
+  String get widgetOffStudy => 'Studér er slået fra i dette bibliotek';
+  @override
+  String get widgetOffWidgets =>
+      'Startskærmswidgets er slået fra i dette bibliotek';
+  @override
+  String get widgetOpenFeatures => 'Åbn funktioner';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Vis i filhåndtering';

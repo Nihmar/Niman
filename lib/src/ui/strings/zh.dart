@@ -1471,6 +1471,15 @@ final class ChineseStrings extends Strings {
   @override
   String get pinWidgetUnavailable => '主屏幕组件可在 Android 上使用';
 
+  @override
+  String get widgetOffTodo => '此文库中已关闭待办';
+  @override
+  String get widgetOffStudy => '此文库中已关闭学习';
+  @override
+  String get widgetOffWidgets => '此文库中已关闭主屏幕组件';
+  @override
+  String get widgetOpenFeatures => '打开功能';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => '在文件管理器中显示';

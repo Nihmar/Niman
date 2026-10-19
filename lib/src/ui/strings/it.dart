@@ -1625,6 +1625,16 @@ final class ItalianStrings extends Strings {
   @override
   String get pinWidgetUnavailable => 'I widget sono disponibili su Android';
 
+  @override
+  String get widgetOffTodo => 'Le attività sono disattivate in questa libreria';
+  @override
+  String get widgetOffStudy => 'Lo studio è disattivato in questa libreria';
+  @override
+  String get widgetOffWidgets =>
+      'I widget della schermata Home sono disattivati in questa libreria';
+  @override
+  String get widgetOpenFeatures => 'Apri Funzioni';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Mostra nel file manager';

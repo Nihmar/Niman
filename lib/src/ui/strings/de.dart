@@ -1633,6 +1633,17 @@ final class GermanStrings extends Strings {
   String get pinWidgetUnavailable =>
       'Home-Bildschirm-Widgets sind auf Android verfügbar';
 
+  @override
+  String get widgetOffTodo =>
+      'Aufgaben sind in dieser Bibliothek ausgeschaltet';
+  @override
+  String get widgetOffStudy => 'Lernen ist in dieser Bibliothek ausgeschaltet';
+  @override
+  String get widgetOffWidgets =>
+      'Home-Bildschirm-Widgets sind in dieser Bibliothek ausgeschaltet';
+  @override
+  String get widgetOpenFeatures => 'Funktionen öffnen';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Im Dateimanager anzeigen';

@@ -1618,6 +1618,16 @@ final class AlbanianStrings extends Strings {
   String get pinWidgetUnavailable =>
       'Widget-et e ekranit kryesor janë të disponueshme në Android';
 
+  @override
+  String get widgetOffTodo => 'Detyrat janë çaktivizuar në këtë bibliotekë';
+  @override
+  String get widgetOffStudy => 'Studimi është çaktivizuar në këtë bibliotekë';
+  @override
+  String get widgetOffWidgets =>
+      'Widget-et e ekranit kryesor janë çaktivizuar në këtë bibliotekë';
+  @override
+  String get widgetOpenFeatures => 'Hap funksionet';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Shfaq në menaxherin e skedarëve';

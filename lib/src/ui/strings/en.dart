@@ -1592,6 +1592,15 @@ final class EnglishStrings extends Strings {
   String get pinWidgetUnavailable =>
       'Home-screen widgets are available on Android';
 
+  @override
+  String get widgetOffTodo => 'Todo is off in this library';
+  @override
+  String get widgetOffStudy => 'Study is off in this library';
+  @override
+  String get widgetOffWidgets => 'Home-screen widgets are off in this library';
+  @override
+  String get widgetOpenFeatures => 'Open Features';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Show in file manager';

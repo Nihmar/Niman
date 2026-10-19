@@ -1589,6 +1589,15 @@ final class TurkishStrings extends Strings {
   String get pinWidgetUnavailable =>
       'Ana ekran widget’ları Android’da kullanılabilir';
 
+  @override
+  String get widgetOffTodo => 'Görevler bu kütüphanede kapalı';
+  @override
+  String get widgetOffStudy => 'Çalışma bu kütüphanede kapalı';
+  @override
+  String get widgetOffWidgets => 'Ana ekran widget’ları bu kütüphanede kapalı';
+  @override
+  String get widgetOpenFeatures => 'Özellikleri aç';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Dosya yöneticisinde göster';

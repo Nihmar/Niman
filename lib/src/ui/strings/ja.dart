@@ -1505,6 +1505,15 @@ final class JapaneseStrings extends Strings {
   @override
   String get pinWidgetUnavailable => 'ホーム画面のウィジェットはAndroidで利用できます';
 
+  @override
+  String get widgetOffTodo => 'このライブラリではタスクがオフです';
+  @override
+  String get widgetOffStudy => 'このライブラリでは学習がオフです';
+  @override
+  String get widgetOffWidgets => 'このライブラリではホーム画面のウィジェットがオフです';
+  @override
+  String get widgetOpenFeatures => '機能を開く';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'ファイルマネージャーで表示';

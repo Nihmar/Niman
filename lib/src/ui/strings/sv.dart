@@ -1611,6 +1611,16 @@ final class SwedishStrings extends Strings {
   String get pinWidgetUnavailable =>
       'Startskärmswidgets är tillgängliga på Android';
 
+  @override
+  String get widgetOffTodo => 'Att göra är avstängt i det här biblioteket';
+  @override
+  String get widgetOffStudy => 'Studera är avstängt i det här biblioteket';
+  @override
+  String get widgetOffWidgets =>
+      'Startskärmswidgets är avstängda i det här biblioteket';
+  @override
+  String get widgetOpenFeatures => 'Öppna funktioner';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Visa i filhanteraren';

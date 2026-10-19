@@ -842,6 +842,12 @@ abstract base class Strings {
   String get pinnedForWidget;
   String get pinWidgetUnavailable;
 
+  // A home-screen widget whose feature is off (#1109).
+  String get widgetOffTodo;
+  String get widgetOffStudy;
+  String get widgetOffWidgets;
+  String get widgetOpenFeatures;
+
   // Handing a note's file to the OS (issue #76).
   String get openInFileManager;
   String get openInDefaultApp;

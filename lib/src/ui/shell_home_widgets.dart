@@ -41,6 +41,7 @@ final class ShellHomeWidgets {
     required this.decks,
     required this.openTodo,
     required this.openStudy,
+    required this.openFeatures,
     required this.openNote,
     required this.mounted,
     required this.onTargetBlocked,
@@ -76,6 +77,10 @@ final class ShellHomeWidgets {
   /// Shows Study (#533).
   final void Function() openStudy;
 
+  /// Shows the Features settings (#1109): where the button of a widget
+  /// that is off lands.
+  final void Function() openFeatures;
+
   /// Opens a note by library-relative path, at an anchor when given.
   final void Function(String path, String? anchor) openNote;
 
@@ -101,12 +106,16 @@ final class ShellHomeWidgets {
   void start() {
     _taps = targets.targets.listen((target) => unawaited(applyTarget(target)));
     AppThemes.revision.addListener(pushAll);
+    // A switch flipped here or brought by a sync: the widgets of a feature
+    // that went off show it, and those that came back show their data.
+    controller.features.addListener(pushAll);
   }
 
   /// Stops listening. The pended target is deliberately left alone — it
   /// belongs to the shell this one is making way for.
   Future<void> dispose() async {
     AppThemes.revision.removeListener(pushAll);
+    controller.features.removeListener(pushAll);
     await _taps?.cancel();
   }
 
@@ -249,6 +258,8 @@ final class ShellHomeWidgets {
         openTodo();
       case WidgetTargetKind.study:
         openStudy();
+      case WidgetTargetKind.features:
+        openFeatures();
       case WidgetTargetKind.note:
         final note = target.notePath;
         if (note != null) openNote(note, target.anchor);

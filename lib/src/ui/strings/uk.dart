@@ -1607,6 +1607,16 @@ final class UkrainianStrings extends Strings {
   String get pinWidgetUnavailable =>
       'Віджети головного екрана доступні в Android';
 
+  @override
+  String get widgetOffTodo => 'Завдання вимкнено в цій бібліотеці';
+  @override
+  String get widgetOffStudy => 'Навчання вимкнено в цій бібліотеці';
+  @override
+  String get widgetOffWidgets =>
+      'Віджети головного екрана вимкнено в цій бібліотеці';
+  @override
+  String get widgetOpenFeatures => 'Відкрити функції';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Показати у файловому менеджері';

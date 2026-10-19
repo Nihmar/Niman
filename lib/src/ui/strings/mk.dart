@@ -1617,6 +1617,16 @@ final class MacedonianStrings extends Strings {
   String get pinWidgetUnavailable =>
       'Виджетите на домашниот екран се достапни на Android';
 
+  @override
+  String get widgetOffTodo => 'Задачите се исклучени во оваа библиотека';
+  @override
+  String get widgetOffStudy => 'Учењето е исклучено во оваа библиотека';
+  @override
+  String get widgetOffWidgets =>
+      'Виджетите на домашниот екран се исклучени во оваа библиотека';
+  @override
+  String get widgetOpenFeatures => 'Отвори функции';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Прикажи во управувачот на датотеки';

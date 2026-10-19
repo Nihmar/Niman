@@ -12,6 +12,7 @@ import 'package:niman/src/flashcards/deck_summary.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/widget/widget_configs.dart';
 import 'package:niman/src/widget/widget_host.dart';
+import 'package:niman/src/widget/widget_off.dart';
 import 'package:niman/src/widget/widget_placement.dart';
 import 'package:niman/src/widget/widget_reconcile.dart';
 import 'package:niman/src/widget/widget_theme.dart';
@@ -71,7 +72,8 @@ String studyWidgetPayload(
 ///
 /// [decks] is asked only when a Study widget is there to show them, so a
 /// library without one never counts its decks for it; null while they are
-/// not counted yet, which pushes nothing.
+/// not counted yet, which pushes nothing. A widget whose feature is off is
+/// sent the off payload instead, and [decks] is not asked at all (#1109).
 Future<void> refreshStudyWidgets({
   required LibrarySession session,
   required Future<List<DeckSummary>?> Function() decks,
@@ -91,13 +93,24 @@ Future<void> refreshStudyWidgets({
     adopt: session.adoptStudyWidget,
   );
   if (ids.isEmpty) return;
-  final counted = await decks();
-  if (counted == null) return;
-  final payload = studyWidgetPayload(
-    counted,
-    libraryPath: root,
-    theme: resolveWidgetTheme(),
-  );
+  final off = widgetOffFeature(WidgetProvider.study, session.features.value);
+  // Off: the decks are not even counted (#1109).
+  final String payload;
+  if (off != null) {
+    payload = widgetOffPayload(
+      feature: off,
+      libraryPath: root,
+      theme: resolveWidgetTheme(),
+    );
+  } else {
+    final counted = await decks();
+    if (counted == null) return;
+    payload = studyWidgetPayload(
+      counted,
+      libraryPath: root,
+      theme: resolveWidgetTheme(),
+    );
+  }
   await pushToWidgets(
     provider: WidgetProvider.study,
     ids: ids,

@@ -1604,6 +1604,16 @@ final class BelarusianStrings extends Strings {
   String get pinWidgetUnavailable =>
       'Віджэты галоўнага экрана даступныя ў Android';
 
+  @override
+  String get widgetOffTodo => 'Заданні адключаны ў гэтай бібліятэцы';
+  @override
+  String get widgetOffStudy => 'Вывучэнне адключана ў гэтай бібліятэцы';
+  @override
+  String get widgetOffWidgets =>
+      'Віджэты галоўнага экрана адключаны ў гэтай бібліятэцы';
+  @override
+  String get widgetOpenFeatures => 'Адкрыць функцыі';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Паказаць у файлавым менеджары';

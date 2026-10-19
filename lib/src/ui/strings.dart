@@ -1059,6 +1059,10 @@ final class AppStrings {
   static String get pinToWidget => _s.pinToWidget;
   static String get pinnedForWidget => _s.pinnedForWidget;
   static String get pinWidgetUnavailable => _s.pinWidgetUnavailable;
+  static String get widgetOffTodo => _s.widgetOffTodo;
+  static String get widgetOffStudy => _s.widgetOffStudy;
+  static String get widgetOffWidgets => _s.widgetOffWidgets;
+  static String get widgetOpenFeatures => _s.widgetOpenFeatures;
 
   /// Handing a note's file to the OS (issue #76).
   static String get openInFileManager => _s.openInFileManager;

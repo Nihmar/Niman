@@ -872,6 +872,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     },
     openTodo: _openTodo,
     openStudy: () => _onDestinationSelected(ShellTab.study),
+    openFeatures: _openFeaturesFromWidget,
     openNote: _openNoteFromLink,
     mounted: () => mounted,
     onTargetBlocked: () =>
@@ -879,6 +880,18 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
             .showSnackBar(SnackBar(content: Text(AppStrings.closeSaveFailed))),
     unsaved: widget.unsavedTracker,
   );
+
+  /// Where "Open Features" on a home-screen widget that is off lands
+  /// (#1109). Until the Features screen exists (phase 3) it opens Settings
+  /// at its start, as the Settings destination does; phase 3 points this,
+  /// and only this, at Settings → Features.
+  void _openFeaturesFromWidget() {
+    if (_wide) {
+      unawaited(_windows.openSettings(context));
+      return;
+    }
+    _onDestinationSelected(ShellTab.settings);
+  }
 
   /// Selects [tab]; a full-screen note closes to its tree (the selected
   /// note stays highlighted).

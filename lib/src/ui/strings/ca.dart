@@ -1635,6 +1635,18 @@ final class CatalanStrings extends Strings {
   String get pinWidgetUnavailable =>
       'Els ginys de la pantalla d’inici estan disponibles a Android';
 
+  @override
+  String get widgetOffTodo =>
+      'La llista Per fer està desactivada en aquesta biblioteca';
+  @override
+  String get widgetOffStudy => 'L’estudi està desactivat en aquesta biblioteca';
+  @override
+  String get widgetOffWidgets =>
+      'Els ginys de la pantalla d’inici estan '
+      'desactivats en aquesta biblioteca';
+  @override
+  String get widgetOpenFeatures => 'Obre les funcions';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Mostra al gestor de fitxers';

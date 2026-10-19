@@ -1623,6 +1623,16 @@ final class PolishStrings extends Strings {
   String get pinWidgetUnavailable =>
       'Widgety ekranu głównego są dostępne w Androidzie';
 
+  @override
+  String get widgetOffTodo => 'Zadania są wyłączone w tej bibliotece';
+  @override
+  String get widgetOffStudy => 'Nauka jest wyłączona w tej bibliotece';
+  @override
+  String get widgetOffWidgets =>
+      'Widgety ekranu głównego są wyłączone w tej bibliotece';
+  @override
+  String get widgetOpenFeatures => 'Otwórz funkcje';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Pokaż w menedżerze plików';

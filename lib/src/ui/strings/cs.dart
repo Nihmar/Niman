@@ -1596,6 +1596,16 @@ final class CzechStrings extends Strings {
   String get pinWidgetUnavailable =>
       'Vidžety na ploše jsou k dispozici v systému Android';
 
+  @override
+  String get widgetOffTodo => 'Úkoly jsou v této knihovně vypnuté';
+  @override
+  String get widgetOffStudy => 'Studium je v této knihovně vypnuté';
+  @override
+  String get widgetOffWidgets =>
+      'Vidžety na ploše jsou v této knihovně vypnuté';
+  @override
+  String get widgetOpenFeatures => 'Otevřít funkce';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Zobrazit ve správci souborů';

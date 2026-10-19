@@ -1597,6 +1597,16 @@ final class LatvianStrings extends Strings {
   @override
   String get pinWidgetUnavailable => 'Sākumekrāna vidžeti ir pieejami Android';
 
+  @override
+  String get widgetOffTodo => 'Uzdevumi šajā bibliotēkā ir izslēgti';
+  @override
+  String get widgetOffStudy => 'Mācības šajā bibliotēkā ir izslēgtas';
+  @override
+  String get widgetOffWidgets =>
+      'Sākumekrāna vidžeti šajā bibliotēkā ir izslēgti';
+  @override
+  String get widgetOpenFeatures => 'Atvērt funkcijas';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Rādīt failu pārvaldniekā';

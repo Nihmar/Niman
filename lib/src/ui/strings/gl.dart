@@ -1615,6 +1615,17 @@ final class GalicianStrings extends Strings {
   String get pinWidgetUnavailable =>
       'Os widgets da pantalla de inicio están dispoñibles en Android';
 
+  @override
+  String get widgetOffTodo =>
+      'A lista Por facer está desactivada nesta biblioteca';
+  @override
+  String get widgetOffStudy => 'O estudo está desactivado nesta biblioteca';
+  @override
+  String get widgetOffWidgets =>
+      'Os widgets da pantalla de inicio están desactivados nesta biblioteca';
+  @override
+  String get widgetOpenFeatures => 'Abrir funcións';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Amosar no xestor de ficheiros';

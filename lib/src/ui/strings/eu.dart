@@ -1613,6 +1613,17 @@ final class BasqueStrings extends Strings {
   String get pinWidgetUnavailable =>
       'Hasierako pantailako widgetak Android-en daude eskuragarri';
 
+  @override
+  String get widgetOffTodo =>
+      'Egin beharrekoa desaktibatuta dago liburutegi honetan';
+  @override
+  String get widgetOffStudy => 'Ikasketa desaktibatuta dago liburutegi honetan';
+  @override
+  String get widgetOffWidgets =>
+      'Hasierako pantailako widgetak desaktibatuta daude liburutegi honetan';
+  @override
+  String get widgetOpenFeatures => 'Ireki eginbideak';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Erakutsi fitxategi-kudeatzailean';

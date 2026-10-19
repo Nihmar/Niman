@@ -1601,6 +1601,16 @@ final class SlovakStrings extends Strings {
   String get pinWidgetUnavailable =>
       'Vidžety na ploche sú k dispozícii v Androide';
 
+  @override
+  String get widgetOffTodo => 'Úlohy sú v tejto knižnici vypnuté';
+  @override
+  String get widgetOffStudy => 'Štúdium je v tejto knižnici vypnuté';
+  @override
+  String get widgetOffWidgets =>
+      'Vidžety na ploche sú v tejto knižnici vypnuté';
+  @override
+  String get widgetOpenFeatures => 'Otvoriť funkcie';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Zobraziť v správcovi súborov';

@@ -1601,6 +1601,16 @@ final class SlovenianStrings extends Strings {
   String get pinWidgetUnavailable =>
       'Widgeti domačega zaslona so na voljo na Androidu';
 
+  @override
+  String get widgetOffTodo => 'Naloge so v tej knjižnici izklopljene';
+  @override
+  String get widgetOffStudy => 'Učenje je v tej knjižnici izklopljeno';
+  @override
+  String get widgetOffWidgets =>
+      'Widgeti domačega zaslona so v tej knjižnici izklopljeni';
+  @override
+  String get widgetOpenFeatures => 'Odpri funkcije';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Pokaži v upravitelju datotek';

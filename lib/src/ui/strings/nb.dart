@@ -1597,6 +1597,16 @@ final class NorwegianStrings extends Strings {
   String get pinWidgetUnavailable =>
       'Startskjermwidgets er tilgjengelige på Android';
 
+  @override
+  String get widgetOffTodo => 'Å gjøre er slått av i dette biblioteket';
+  @override
+  String get widgetOffStudy => 'Studer er slått av i dette biblioteket';
+  @override
+  String get widgetOffWidgets =>
+      'Startskjermwidgets er slått av i dette biblioteket';
+  @override
+  String get widgetOpenFeatures => 'Åpne funksjoner';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Vis i filbehandler';

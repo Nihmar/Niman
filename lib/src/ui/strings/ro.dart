@@ -1618,6 +1618,18 @@ final class RomanianStrings extends Strings {
   String get pinWidgetUnavailable =>
       'Widgeturile de pe ecranul de start sunt disponibile pe Android';
 
+  @override
+  String get widgetOffTodo =>
+      'Sarcinile sunt dezactivate în această bibliotecă';
+  @override
+  String get widgetOffStudy => 'Studiul este dezactivat în această bibliotecă';
+  @override
+  String get widgetOffWidgets =>
+      'Widgeturile de pe ecranul de start sunt '
+      'dezactivate în această bibliotecă';
+  @override
+  String get widgetOpenFeatures => 'Deschide funcțiile';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Arată în managerul de fișiere';

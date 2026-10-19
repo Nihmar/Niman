@@ -100,6 +100,18 @@ class TodoWidgetProvider : HomeWidgetProvider() {
     private fun viewsFor(context: Context, id: Int, payload: String?): RemoteViews {
         val parsed = payload?.let { runCatching { JSONObject(it) }.getOrNull() }
         val library = parsed?.optString("library").orEmpty()
+        // The feature is off in this library (#1109): the sentence and the
+        // button, no rows.
+        WidgetOff.fromJson(parsed)?.let { off ->
+            return WidgetOffViews.build(
+                context,
+                id,
+                library,
+                off,
+                payload,
+                context.getString(R.string.widget_todo_title_fallback),
+            )
+        }
         val rows = parsed?.optJSONArray("rows")
 
         // The header count names the TRUE open total (payload `total`),

@@ -1617,6 +1617,16 @@ final class BulgarianStrings extends Strings {
   String get pinWidgetUnavailable =>
       'Виджетите на домашния екран са достъпни в Android';
 
+  @override
+  String get widgetOffTodo => 'Задачите са изключени в тази библиотека';
+  @override
+  String get widgetOffStudy => 'Ученето е изключено в тази библиотека';
+  @override
+  String get widgetOffWidgets =>
+      'Виджетите на началния екран са изключени в тази библиотека';
+  @override
+  String get widgetOpenFeatures => 'Отвори функциите';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Показване във файловия мениджър';

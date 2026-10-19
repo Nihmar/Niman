@@ -20,6 +20,7 @@ import 'package:niman/src/todo/todo_store.dart';
 import 'package:niman/src/widget/widget_configs.dart';
 import 'package:niman/src/widget/widget_day_refresh.dart';
 import 'package:niman/src/widget/widget_note_ops.dart';
+import 'package:niman/src/widget/widget_off.dart';
 import 'package:niman/src/widget/widget_theme.dart';
 import 'package:niman/src/widget/widget_todo_payload.dart';
 import 'package:niman/src/widget/widget_updater.dart';
@@ -30,6 +31,9 @@ import 'package:niman/src/widget/widget_updater.dart';
 /// Routes the carrying URI to its op by host; anything else is dropped.
 @pragma('vm:entry-point')
 Future<void> widgetToggleCallback(Uri? uri) async {
+  // A widget whose feature is off shows no rows to tap; a tap that was
+  // already on its way (or a day change) is dropped, not honored (#1109).
+  if (!await widgetUriAllowed(uri)) return;
   switch (uri?.host) {
     case 'todo-toggle':
       await toggleWidgetTodo(uri);

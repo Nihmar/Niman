@@ -1583,6 +1583,16 @@ final class EstonianStrings extends Strings {
   @override
   String get pinWidgetUnavailable => 'Avakuva vidžetid on Androidis saadaval';
 
+  @override
+  String get widgetOffTodo => 'Ülesanded on selles kogus välja lülitatud';
+  @override
+  String get widgetOffStudy => 'Õppimine on selles kogus välja lülitatud';
+  @override
+  String get widgetOffWidgets =>
+      'Avakuva vidžetid on selles kogus välja lülitatud';
+  @override
+  String get widgetOpenFeatures => 'Ava funktsioonid';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Näita failihalduris';

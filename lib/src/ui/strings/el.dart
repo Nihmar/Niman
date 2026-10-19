@@ -1656,6 +1656,19 @@ final class GreekStrings extends Strings {
   String get pinWidgetUnavailable =>
       'Τα widgets της αρχικής οθόνης είναι διαθέσιμα στο Android';
 
+  @override
+  String get widgetOffTodo =>
+      'Τα καθήκοντα είναι απενεργοποιημένα σε αυτή τη βιβλιοθήκη';
+  @override
+  String get widgetOffStudy =>
+      'Η μελέτη είναι απενεργοποιημένη σε αυτή τη βιβλιοθήκη';
+  @override
+  String get widgetOffWidgets =>
+      'Τα widgets της αρχικής οθόνης είναι '
+      'απενεργοποιημένα σε αυτή τη βιβλιοθήκη';
+  @override
+  String get widgetOpenFeatures => 'Άνοιγμα λειτουργιών';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Εμφάνιση στη διαχείριση αρχείων';

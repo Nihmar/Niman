@@ -1606,6 +1606,16 @@ final class SerbianStrings extends Strings {
   String get pinWidgetUnavailable =>
       'Виџети почетног екрана доступни су на Андроиду';
 
+  @override
+  String get widgetOffTodo => 'Задаци су искључени у овој библиотеци';
+  @override
+  String get widgetOffStudy => 'Учење је искључено у овој библиотеци';
+  @override
+  String get widgetOffWidgets =>
+      'Виџети почетног екрана су искључени у овој библиотеци';
+  @override
+  String get widgetOpenFeatures => 'Отвори функције';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Прикажи у управљачу датотека';

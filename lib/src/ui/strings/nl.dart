@@ -1621,6 +1621,16 @@ final class DutchStrings extends Strings {
   String get pinWidgetUnavailable =>
       'Startschermwidgets zijn beschikbaar op Android';
 
+  @override
+  String get widgetOffTodo => 'Te doen staat uit in deze bibliotheek';
+  @override
+  String get widgetOffStudy => 'Studeren staat uit in deze bibliotheek';
+  @override
+  String get widgetOffWidgets =>
+      'Startschermwidgets staan uit in deze bibliotheek';
+  @override
+  String get widgetOpenFeatures => 'Functies openen';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Tonen in bestandsbeheer';

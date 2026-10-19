@@ -1578,6 +1578,15 @@ final class HindiStrings extends Strings {
   @override
   String get pinWidgetUnavailable => 'होम-स्क्रीन विजेट Android पर उपलब्ध हैं';
 
+  @override
+  String get widgetOffTodo => 'इस लाइब्रेरी में कार्य बंद हैं';
+  @override
+  String get widgetOffStudy => 'इस लाइब्रेरी में अध्ययन बंद है';
+  @override
+  String get widgetOffWidgets => 'इस लाइब्रेरी में होम-स्क्रीन विजेट बंद हैं';
+  @override
+  String get widgetOpenFeatures => 'सुविधाएँ खोलें';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'फ़ाइल प्रबंधक में दिखाएँ';
