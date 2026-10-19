@@ -6,6 +6,29 @@ This file ships inside the build and feeds the in-app changelog (the
 launch dialog after an update and the screen under Settings → Diagnostics
 and info). Update it in the release commit, before the tag.
 
+## [0.2.5] - 2026-10-19
+
+A faster sync, and the app's own saves recognised by their bytes.
+
+The sync's transfers leave the app's own thread: a worker downloads and
+uploads a few files at a time, so a library of many small attachments no
+longer waits a round trip per file, and a large file moves at the speed
+the connection allows. A file that does not exist here yet is written
+straight under its own name, with no temp file renamed over it — the
+pattern an antivirus watching for ransomware flags — and a download cut
+short by a crash is found again at the next sync, put in the trash, and
+fetched whole.
+
+### Changed
+- **Sync is faster** (#1107): the transfers run on a worker, up to four at a time, with the downloaded chunks gathered before they are hashed and written; the log reports the bytes moved and the time spent scanning, hashing and transferring
+- **Sync writes a new file under its own name** (#1107): no temp and no rename for a file this device does not have yet — up to 16 MiB it is received whole first, larger files stream in; a file another program creates at the same path meanwhile is left as it is. A download a crash interrupted is checked at the next sync: kept if whole, otherwise moved to the trash and downloaded again, never uploaded
+
+### Fixed
+- **Save**: when the file's time drifts but its size is the app's last write, the bytes decide — the app's own text is no longer kept as an outside version or announced as another program's (#1055)
+- **Editor**: the desktop scrollbar takes its own clicks and drags instead of moving the caret and selecting text (#1106)
+- **Diagrams**: a full-screen diagram keeps its size and pans to every edge, so a long or wide one can be read on a phone (#1110)
+- **Tables**: a narrow table's columns are fitted by their widest words, so a long paragraph no longer squeezes a short column to a few letters, in the editor and in the read view (#1108)
+
 ## [0.2.4] - 2026-10-17
 
 The app's own saves are not another program's.
