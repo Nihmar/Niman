@@ -1531,7 +1531,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// Whether the note on screen is a picture, a PDF or a book: shown by
   /// the pane rather than edited, so none of the editor's controls apply.
   bool get _shownIsAttachment => switch (_shownNote) {
-    final path? => isShownAttachment(path),
+    final path? => isShownAttachment(path, widget.controller.features.value),
     null => false,
   };
 
@@ -1668,7 +1668,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
 
   Widget _phoneNoteView(LibrarySession controller, String selectedPath) {
     // A picture, a PDF or a book, shown rather than read as a note.
-    if (isShownAttachment(selectedPath)) {
+    if (isShownAttachment(selectedPath, controller.features.value)) {
       return TourTarget(
         id: TourTargets.note,
         child: AttachmentView(
@@ -1685,8 +1685,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           anchor: _pendingAnchor,
           reloadToken: _linksFollowed,
           linkType: _editorSettings.linkType,
-          onAnnotate: _annotate,
-          marks: _annotations,
+          onAnnotate: _annotating ? _annotate : null,
+          marks: _annotating ? _annotations : null,
           ocr: _ocrActions,
           fullScreen: _immersive.fullScreen,
         ),
@@ -3352,6 +3352,11 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     onOpen: (path, offset) =>
         _onTemplateNoteFiled(path: path, preview: false, caret: offset),
   );
+
+  /// Whether the readers annotate (#1109): off, they offer no annotating
+  /// and draw no marks, the companion notes untouched.
+  bool get _annotating =>
+      widget.controller.features.value.isOn(LibraryFeature.annotations);
 
   void _annotate(Annotation annotation) =>
       unawaited(_annotations.annotate(context, annotation));
@@ -5199,9 +5204,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
                     spellCheck: widget.spellCheck,
                     reloadToken: _noteReloadToken,
                     linksFollowed: _linksFollowed,
-                    onAnnotate: _annotate,
+                    onAnnotate: _annotating ? _annotate : null,
                     ocr: _ocrActions,
-                    marks: _annotations,
+                    marks: _annotating ? _annotations : null,
                     saveNote: noteSaverFor(controller),
                     saveNoteStream: noteStreamSaverFor(controller),
                     createMissingNote: missingNoteCreatorFor(controller),
@@ -5263,6 +5268,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
               _tabKinds[tab.path],
               widget.controller.features.value,
             ),
+            features: widget.controller.features.value,
           );
     if (!offered) return const [];
     final plain = isPlainTextFile(p.basename(tab.path));
