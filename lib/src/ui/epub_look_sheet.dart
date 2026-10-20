@@ -14,6 +14,7 @@ import 'package:niman/src/epub/epub_looks.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/action_sheet.dart';
 import 'package:niman/src/ui/epub_theme.dart';
+import 'package:niman/src/ui/menu_choice_button.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/theme/theme_row.dart';
 
@@ -160,20 +161,15 @@ final class _EpubLookPanelState extends State<EpubLookPanel> {
     required Key key,
     required String title,
     required T value,
-    required List<(T, String)> options,
+    required List<MenuChoice<T>> options,
     required ValueChanged<T> onChanged,
   }) => ListTile(
     title: Text(title),
-    trailing: DropdownButtonHideUnderline(
-      child: DropdownButton<T>(
-        key: key,
-        value: value,
-        onChanged: (picked) => onChanged(picked as T),
-        items: [
-          for (final (option, label) in options)
-            DropdownMenuItem<T>(value: option, child: Text(label)),
-        ],
-      ),
+    trailing: MenuChoiceButton<T>(
+      key: key,
+      value: value,
+      options: options,
+      onChanged: onChanged,
     ),
   );
 

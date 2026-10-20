@@ -17,6 +17,7 @@ import 'package:niman/src/core/settings/features.dart';
 import 'package:niman/src/core/settings/navigation_layout.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/device_shape.dart';
+import 'package:niman/src/ui/menu_choice_button.dart';
 import 'package:niman/src/ui/settings_area.dart';
 import 'package:niman/src/ui/settings_keys.dart';
 import 'package:niman/src/ui/shell_navigation.dart';
@@ -261,6 +262,7 @@ final class _SettingsNavigationLayoutScreenState
         }
       }
     }
+    String nameOf(ShellTab tab) => starts.firstWhere((d) => d.tab == tab).name;
     return HighlightRow(
       key: SettingsKeys.navigationStart,
       child: ListTile(
@@ -276,20 +278,13 @@ final class _SettingsNavigationLayoutScreenState
         },
         trailing: start == null
             ? null
-            : DropdownButton<ShellTab>(
+            : MenuChoiceButton<ShellTab>(
                 key: const Key('navigation-start'),
                 value: start,
-                items: [
-                  for (final d in starts)
-                    DropdownMenuItem(
-                      key: Key('navigation-start-${d.name}'),
-                      value: d.tab,
-                      child: Text(d.label),
-                    ),
-                ],
+                options: [for (final d in starts) (d.tab, d.label)],
+                itemKey: (tab) => Key('navigation-start-${nameOf(tab)}'),
                 onChanged: (tab) {
-                  if (tab == null) return;
-                  final name = starts.firstWhere((d) => d.tab == tab).name;
+                  final name = nameOf(tab);
                   unawaited(
                     _save(
                       // Files is the start a layout without one has.

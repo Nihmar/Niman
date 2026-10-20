@@ -15,6 +15,7 @@ import 'package:niman/src/ui/device_shape.dart';
 import 'package:niman/src/ui/folder_picker.dart';
 import 'package:niman/src/ui/home/action_field_rows.dart';
 import 'package:niman/src/ui/home/home_icons.dart';
+import 'package:niman/src/ui/menu_choice_button.dart';
 import 'package:niman/src/ui/note_picker.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/template_picker.dart';
@@ -201,20 +202,20 @@ final class _ActionEditorState extends State<_ActionEditor> {
       HomeAction(id: '', label: '', kind: kind, path: _path),
     );
     return [
-      DropdownButtonFormField<HomeActionKind>(
+      MenuChoiceButton<HomeActionKind>(
         key: const Key('home-action-kind'),
-        initialValue: kind,
+        value: kind,
         decoration: InputDecoration(labelText: AppStrings.homeActionKind),
-        items: [
+        options: [
           // A kind whose feature is off is not offered, but the one this
           // action already has stays, or the field would name nothing
           // (#1109).
           for (final k in HomeActionKind.values)
             if (k == kind ||
                 actionKindIsOn(k, widget.controller.features.value))
-              DropdownMenuItem(value: k, child: Text(homeActionKindName(k))),
+              (k, homeActionKindName(k)),
         ],
-        onChanged: (k) => setState(() => _kind = k ?? kind),
+        onChanged: (k) => setState(() => _kind = k),
       ),
       const SizedBox(height: 12),
       TextField(

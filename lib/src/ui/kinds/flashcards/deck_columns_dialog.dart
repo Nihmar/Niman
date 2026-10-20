@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:niman/src/flashcards/deck_table.dart';
+import 'package:niman/src/ui/menu_choice_button.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// The question and answer columns, by index into a table's head.
@@ -83,42 +84,35 @@ final class DeckColumnFields extends StatelessWidget {
   final ValueChanged<DeckColumns> onChanged;
 
   /// Every column, by its head; one with no head is only a number.
-  List<DropdownMenuItem<int>> get _items => [
+  List<MenuChoice<int>> get _options => [
     for (final (at, head) in table.headers.indexed)
-      DropdownMenuItem(
-        value: at,
-        child: Text(head.isEmpty ? '#${at + 1}' : head),
-      ),
+      (at, head.isEmpty ? '#${at + 1}' : head),
   ];
 
   @override
   Widget build(BuildContext context) => Column(
     mainAxisSize: MainAxisSize.min,
     children: [
-      DropdownButtonFormField<int>(
+      MenuChoiceButton<int>(
         key: const Key('deck-column-question'),
-        initialValue: columns.question,
-        items: _items,
+        value: columns.question,
+        options: _options,
         decoration: InputDecoration(
           labelText: AppStrings.flashcardsQuestionColumn,
         ),
-        onChanged: (value) => onChanged((
-          question: value ?? columns.question,
-          answer: columns.answer,
-        )),
+        onChanged: (value) =>
+            onChanged((question: value, answer: columns.answer)),
       ),
       const SizedBox(height: 12),
-      DropdownButtonFormField<int>(
+      MenuChoiceButton<int>(
         key: const Key('deck-column-answer'),
-        initialValue: columns.answer,
-        items: _items,
+        value: columns.answer,
+        options: _options,
         decoration: InputDecoration(
           labelText: AppStrings.flashcardsAnswerColumn,
         ),
-        onChanged: (value) => onChanged((
-          question: columns.question,
-          answer: value ?? columns.answer,
-        )),
+        onChanged: (value) =>
+            onChanged((question: columns.question, answer: value)),
       ),
     ],
   );

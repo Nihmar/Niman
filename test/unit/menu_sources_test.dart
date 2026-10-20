@@ -24,4 +24,23 @@ void main() {
     }
     expect(offenders, isEmpty, reason: 'use menuItem() / menuDivider()');
   });
+
+  // Material's drop-downs take their rows' height as a constructor argument
+  // and refuse one under 48 px (#1119): every choice is MenuChoiceButton.
+  test('no control builds a Material drop-down', () {
+    final raw = RegExp(
+      '(?<![A-Za-z])(DropdownButton|DropdownButtonFormField|DropdownMenu|'
+      r'DropdownMenuItem|DropdownButtonHideUnderline)(<[^>(]*>)?\(',
+    );
+    final offenders = <String>[];
+    for (final entity in Directory('lib').listSync(recursive: true)) {
+      if (entity is! File || !entity.path.endsWith('.dart')) continue;
+      final lines = entity.readAsLinesSync();
+      for (final (i, line) in lines.indexed) {
+        if (line.trimLeft().startsWith('//')) continue;
+        if (raw.hasMatch(line)) offenders.add('${entity.path}:${i + 1}');
+      }
+    }
+    expect(offenders, isEmpty, reason: 'use MenuChoiceButton');
+  });
 }
