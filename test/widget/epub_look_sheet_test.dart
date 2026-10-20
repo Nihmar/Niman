@@ -1,6 +1,7 @@
 // The sheet that sets how the books look (#280): every pick is kept in the
 // library's settings and put on screen at once, where an open book reads
-// it; the text size shows on the book while the slider moves.
+// it; the text size shows on the book while the slider moves. Its choice
+// menus are the app's own (#1119): compact on a pointer, a thumb's on a phone.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/app_theme.dart';
@@ -8,6 +9,8 @@ import 'package:niman/src/core/theme.dart';
 import 'package:niman/src/epub/epub_look.dart';
 import 'package:niman/src/epub/epub_looks.dart';
 import 'package:niman/src/ui/epub_look_sheet.dart';
+import 'package:niman/src/ui/pointer_menu.dart';
+import 'package:niman/src/ui/pointer_menu_scope.dart';
 import 'package:niman/src/ui/strings.dart';
 
 import '../fakes/fake_library_session.dart';
@@ -18,9 +21,14 @@ void main() {
   setUp(() => session = FakeLibrarySession());
   tearDown(EpubLooks.reset);
 
-  Future<void> open(WidgetTester tester) async {
+  Future<void> open(WidgetTester tester, {ThemeData? theme}) async {
+    tester.view.physicalSize = const Size(900, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
     await tester.pumpWidget(
       MaterialApp(
+        theme: theme,
+        builder: (context, child) => PointerMenuScope(child: child!),
         home: Scaffold(
           body: Builder(
             builder: (context) => TextButton(
@@ -99,5 +107,74 @@ void main() {
     expect(EpubLooks.theme, isNull);
     await open(tester);
     expect(find.text(AppStrings.epubSameAsApp), findsNWidgets(2));
+  });
+
+  group("the theme's menu", () {
+    final rows = find.byWidgetPredicate((w) => w is PopupMenuItem<int>);
+
+    Future<void> openMenu(WidgetTester tester, ThemeData theme) async {
+      await open(tester, theme: theme);
+      await tester.tap(find.byKey(const Key('epub-look-theme')));
+      await tester.pumpAndSettle();
+      expect(rows, findsNWidgets(AppPalette.values.length + 1));
+    }
+
+    /// The width every popup menu in the app takes: its widest row,
+    /// rounded up to Material's 56 px steps and capped at five of them —
+    /// not the drop-down's, as wide as the route that opened it.
+    void expectPopupWidth(WidgetTester tester) {
+      final width = tester.getSize(rows.first).width;
+      expect(width % 56, 0, reason: 'a popup menu grows in 56 px steps');
+      expect(width, lessThanOrEqualTo(5 * 56));
+    }
+
+    testWidgets("on a pointer, has the app's compact rows", (tester) async {
+      await openMenu(tester, ThemeData(visualDensity: VisualDensity.compact));
+      for (final row in rows.evaluate()) {
+        expect(row.size!.height, pointerDenseItemHeight);
+      }
+      expectPopupWidth(tester);
+      final body = Theme.of(tester.element(find.byType(Scaffold).first))
+          .textTheme
+          .bodyMedium!;
+      final label = tester
+          .widget<RichText>(
+            find
+                .descendant(of: rows.first, matching: find.byType(RichText))
+                .first,
+          )
+          .text
+          .style!;
+      expect(label.fontSize, body.fontSize);
+      expect(label.fontWeight, body.fontWeight);
+    });
+
+    testWidgets("on a phone, keeps a thumb's rows", (tester) async {
+      await openMenu(tester, ThemeData(visualDensity: VisualDensity.standard));
+      for (final row in rows.evaluate()) {
+        expect(row.size!.height, kMinInteractiveDimension);
+      }
+      expectPopupWidth(tester);
+    });
+
+    testWidgets('checks the theme in use', (tester) async {
+      await session.setEpubLook(EpubLook(theme: AppPalette.gruvbox.id));
+      await openMenu(tester, ThemeData(visualDensity: VisualDensity.compact));
+      final checked = find.descendant(
+        of: rows,
+        matching: find.byIcon(Icons.check),
+      );
+      expect(checked, findsOneWidget);
+      expect(
+        find.ancestor(
+          of: checked,
+          matching: find.widgetWithText(
+            PopupMenuItem<int>,
+            AppStrings.themePaletteGruvbox,
+          ),
+        ),
+        findsOneWidget,
+      );
+    });
   });
 }
