@@ -1682,6 +1682,8 @@ final class BasqueStrings extends Strings {
   @override
   String get appMenuHelp => 'Laguntza';
   @override
+  String get macMenuWindow => 'Leihoa';
+  @override
   String get paletteGroupJournal => 'Egunkaria';
   @override
   String get journalToday => 'Gaurko sarrera';

@@ -1538,6 +1538,8 @@ final class ChineseStrings extends Strings {
   @override
   String get appMenuHelp => '帮助';
   @override
+  String get macMenuWindow => '窗口';
+  @override
   String get paletteGroupJournal => '日记';
   @override
   String get journalToday => '今天的条目';

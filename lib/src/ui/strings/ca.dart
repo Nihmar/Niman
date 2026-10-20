@@ -1705,6 +1705,8 @@ final class CatalanStrings extends Strings {
   @override
   String get appMenuHelp => 'Ajuda';
   @override
+  String get macMenuWindow => 'Finestra';
+  @override
   String get paletteGroupJournal => 'Diari';
   @override
   String get journalToday => 'Entrada d’avui';

@@ -1702,6 +1702,8 @@ final class GermanStrings extends Strings {
   @override
   String get appMenuHelp => 'Hilfe';
   @override
+  String get macMenuWindow => 'Fenster';
+  @override
   String get paletteGroupJournal => 'Tagebuch';
   @override
   String get journalToday => 'Heutiger Eintrag';

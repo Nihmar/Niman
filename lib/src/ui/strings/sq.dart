@@ -1686,6 +1686,8 @@ final class AlbanianStrings extends Strings {
   @override
   String get appMenuHelp => 'Ndihmë';
   @override
+  String get macMenuWindow => 'Dritarja';
+  @override
   String get paletteGroupJournal => 'Ditari';
   @override
   String get journalToday => 'Hyrja e sotme';

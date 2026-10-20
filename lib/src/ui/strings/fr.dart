@@ -1717,6 +1717,8 @@ final class FrenchStrings extends Strings {
   @override
   String get appMenuHelp => 'Aide';
   @override
+  String get macMenuWindow => 'Fenêtre';
+  @override
   String get paletteGroupJournal => 'Journal';
   @override
   String get journalToday => 'Entrée du jour';

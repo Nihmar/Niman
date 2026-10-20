@@ -1685,6 +1685,8 @@ final class MacedonianStrings extends Strings {
   @override
   String get appMenuHelp => 'Помош';
   @override
+  String get macMenuWindow => 'Прозорец';
+  @override
   String get paletteGroupJournal => 'Дневник';
   @override
   String get journalToday => 'Денешен запис';

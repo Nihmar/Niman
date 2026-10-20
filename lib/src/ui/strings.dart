@@ -1093,6 +1093,7 @@ final class AppStrings {
   static String get paletteGroupGoTo => _s.paletteGroupGoTo;
   static String get appMenuTooltip => _s.appMenuTooltip;
   static String get appMenuHelp => _s.appMenuHelp;
+  static String get macMenuWindow => _s.macMenuWindow;
   static String get paletteGroupJournal => _s.paletteGroupJournal;
   static String get journalToday => _s.journalToday;
   static String get journalPrevious => _s.journalPrevious;

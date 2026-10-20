@@ -1665,6 +1665,8 @@ final class NorwegianStrings extends Strings {
   @override
   String get appMenuHelp => 'Hjelp';
   @override
+  String get macMenuWindow => 'Vindu';
+  @override
   String get paletteGroupJournal => 'Dagbok';
   @override
   String get journalToday => 'Dagens innlegg';

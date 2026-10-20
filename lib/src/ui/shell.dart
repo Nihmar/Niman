@@ -120,6 +120,7 @@ import 'package:niman/src/ui/kinds/flashcards/review_tab.dart';
 import 'package:niman/src/ui/kinds/flashcards/review_view.dart';
 import 'package:niman/src/ui/kinds/slides/slides_present.dart';
 import 'package:niman/src/ui/link_update_dialog.dart';
+import 'package:niman/src/ui/mac_menu_bar.dart';
 import 'package:niman/src/ui/note_editor_keys.dart';
 import 'package:niman/src/ui/note_menu.dart';
 import 'package:niman/src/ui/note_tab_bar.dart';
@@ -3873,7 +3874,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       windowTitle: narrow ? _windowTitle : _libraryName,
       buildTabs: narrow ? null : _buildTabs,
       tabsStart: _tabsStart,
-      menu: narrow
+      // A Mac's commands are in the system's menu bar ([MacMenuBar]).
+      menu: narrow || systemMenuBar
           ? null
           : AppMenuButton(
               handlers: _commandHandlers,
@@ -3917,16 +3919,20 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       // A link pasted where nothing else takes a paste — the tree, the read
       // view — is a page to capture (#531): a text field and the editor
       // answer the paste first.
-      () => Actions(
-        actions: <Type, Action<Intent>>{
-          PasteTextIntent: CapturePasteAction(
-            (url) => unawaited(_captureFlow.capture(context, url: url)),
+      () => MacMenuBar(
+        handlers: _commandHandlers,
+        features: () => _features,
+        child: Actions(
+          actions: <Type, Action<Intent>>{
+            PasteTextIntent: CapturePasteAction(
+              (url) => unawaited(_captureFlow.capture(context, url: url)),
+            ),
+          },
+          child: _mouseHistory(
+            narrow
+                ? NarrowShellLayout(props: props)
+                : WideShellLayout(props: props),
           ),
-        },
-        child: _mouseHistory(
-          narrow
-              ? NarrowShellLayout(props: props)
-              : WideShellLayout(props: props),
         ),
       ),
     );

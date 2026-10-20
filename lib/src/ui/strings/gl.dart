@@ -1684,6 +1684,8 @@ final class GalicianStrings extends Strings {
   @override
   String get appMenuHelp => 'Axuda';
   @override
+  String get macMenuWindow => 'Xanela';
+  @override
   String get paletteGroupJournal => 'Diario';
   @override
   String get journalToday => 'Entrada de hoxe';

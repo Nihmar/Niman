@@ -402,6 +402,8 @@ nimanAppShortcuts = List<AppShortcut>.unmodifiable(const <AppShortcut>[
   AppShortcut(
     AppCommand.tabSettings,
     SingleActivator(LogicalKeyboardKey.digit5, control: true),
+    // Every Mac app's settings are ⌘, (the menu bar's Niman menu).
+    apple: SingleActivator(LogicalKeyboardKey.comma, meta: true),
   ),
   AppShortcut(
     AppCommand.tabHome,

@@ -1672,6 +1672,8 @@ final class LithuanianStrings extends Strings {
   @override
   String get appMenuHelp => 'Pagalba';
   @override
+  String get macMenuWindow => 'Langas';
+  @override
   String get paletteGroupJournal => 'Dienoraštis';
   @override
   String get journalToday => 'Šiandienos įrašas';

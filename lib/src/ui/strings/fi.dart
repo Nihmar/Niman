@@ -1688,6 +1688,8 @@ final class FinnishStrings extends Strings {
   @override
   String get appMenuHelp => 'Ohje';
   @override
+  String get macMenuWindow => 'Ikkuna';
+  @override
   String get paletteGroupJournal => 'Päiväkirja';
   @override
   String get journalToday => 'Tämän päivän merkintä';

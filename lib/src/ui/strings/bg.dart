@@ -1685,6 +1685,8 @@ final class BulgarianStrings extends Strings {
   @override
   String get appMenuHelp => 'Помощ';
   @override
+  String get macMenuWindow => 'Прозорец';
+  @override
   String get paletteGroupJournal => 'Дневник';
   @override
   String get journalToday => 'Днешен запис';

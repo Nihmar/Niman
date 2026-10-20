@@ -18,7 +18,7 @@ import 'package:niman/src/ui/palette/palette_command.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// The commands named on their own, which the Help menu holds.
-const List<AppCommand> _help = [
+const List<AppCommand> appMenuHelp = [
   AppCommand.openPalette,
   AppCommand.welcomeTour,
   AppCommand.welcomeDeck,
@@ -42,16 +42,23 @@ final class AppMenuButton extends StatefulWidget {
   State<AppMenuButton> createState() => _AppMenuButtonState();
 }
 
-final class _AppMenuButtonState extends State<AppMenuButton> {
-  /// The commands of [group] the menu lists: in the palette's order, but
-  /// for Go to note, which leads the Go to group.
-  List<AppCommand> _commandsOf(PaletteGroup group, Features features) => [
-    if (group == PaletteGroup.goTo) AppCommand.goToNote,
-    for (final command in AppCommand.values)
-      if (paletteGroup(command) == group && commandFeatureOn(command, features))
-        command,
-  ];
+/// The commands of [group] a menu lists: in the palette's order, but for
+/// Go to note, which leads the Go to group; none whose feature is off.
+List<AppCommand> appMenuCommands(PaletteGroup group, Features features) => [
+  if (group == PaletteGroup.goTo) AppCommand.goToNote,
+  for (final command in AppCommand.values)
+    if (paletteGroup(command) == group && commandFeatureOn(command, features))
+      command,
+];
 
+/// [command]'s name in a menu: with an ellipsis when the palette asks
+/// for more before it runs.
+String appMenuLabel(AppCommand command) {
+  final label = appCommandLabel(command);
+  return paletteAsks(command) ? '$label…' : label;
+}
+
+final class _AppMenuButtonState extends State<AppMenuButton> {
   @override
   Widget build(BuildContext context) {
     final handlers = widget.handlers();
@@ -63,7 +70,6 @@ final class _AppMenuButtonState extends State<AppMenuButton> {
     );
     Widget item(AppCommand command) {
       final binding = keys.bindingOf(command);
-      final label = appCommandLabel(command);
       return MenuItemButton(
         key: Key('app-menu-${command.name}'),
         onPressed: handlers[command],
@@ -73,7 +79,7 @@ final class _AppMenuButtonState extends State<AppMenuButton> {
         trailingIcon: binding is SingleActivator
             ? Text(describeActivator(binding), style: hint)
             : null,
-        child: Text(paletteAsks(command) ? '$label…' : label),
+        child: Text(appMenuLabel(command)),
       );
     }
 
@@ -82,7 +88,7 @@ final class _AppMenuButtonState extends State<AppMenuButton> {
       onOpen: () => setState(() {}),
       menuChildren: [
         for (final group in PaletteGroup.values)
-          if (_commandsOf(group, features) case final commands
+          if (appMenuCommands(group, features) case final commands
               when commands.isNotEmpty)
             SubmenuButton(
               key: Key('app-menu-group-${group.name}'),
@@ -91,7 +97,7 @@ final class _AppMenuButtonState extends State<AppMenuButton> {
             ),
         SubmenuButton(
           key: const Key('app-menu-group-help'),
-          menuChildren: [for (final command in _help) item(command)],
+          menuChildren: [for (final command in appMenuHelp) item(command)],
           child: Text(AppStrings.appMenuHelp),
         ),
       ],

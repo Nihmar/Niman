@@ -1659,6 +1659,8 @@ final class EnglishStrings extends Strings {
   @override
   String get appMenuHelp => 'Help';
   @override
+  String get macMenuWindow => 'Window';
+  @override
   String get paletteGroupJournal => 'Journal';
   @override
   String get journalToday => "Today's entry";
