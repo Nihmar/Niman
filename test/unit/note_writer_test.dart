@@ -301,6 +301,10 @@ void main() {
   test('the default waits only for large notes', () {
     expect(NoteWriter.defaultQuietBeforeReindex(1 << 20), Duration.zero);
     expect(
+      NoteWriter.defaultQuietBeforeReindex(1536 << 10),
+      const Duration(seconds: 2),
+    );
+    expect(
       NoteWriter.defaultQuietBeforeReindex(4 << 20),
       const Duration(seconds: 5),
     );
@@ -308,6 +312,22 @@ void main() {
       NoteWriter.defaultQuietBeforeReindex(250 << 20),
       const Duration(seconds: 30),
     );
+  });
+
+  test('a note of a megabyte and a half waits for quiet', () async {
+    // The 2026-10-20 device log: the reindex of a 1.5 MB save started at
+    // once and the next save waited on the read. The default now holds it
+    // for two seconds; `indexed` still runs it when someone asks.
+    final big = 'x' * (1536 << 10);
+    final waiting = NoteWriter(root: root.path, indexer: indexer);
+    await waiting.save('Big.md', big);
+    expect(
+      await indexer.dao.find('Big.md'),
+      isNull,
+      reason: 'the reindex waits for the note to be quiet',
+    );
+    await waiting.indexed;
+    expect((await indexer.dao.find('Big.md'))!.size, big.length);
   });
 
   test('saves while a reindex runs leave the index on the last one', () async {

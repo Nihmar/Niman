@@ -49,13 +49,19 @@ final class NoteWriter {
   /// for every save; written while the writer types, one reindex ran after
   /// another for as long as they did (device log, 2026-09-23). The index
   /// catches up with the note a little later, and the work is done once. The
-  /// thresholds are the save's own debounce (`cee783e`).
+  /// thresholds are the save's own debounce (`cee783e`), with a tier for
+  /// notes just over a megabyte: a 1.5 MB save took 123 ms, its reindex
+  /// 894 ms, and the next save fell inside that reindex and wrote in 480 ms
+  /// (device log, 2026-10-20). Two seconds after the last save keeps the
+  /// read out of the next write, while an ordinary note still reindexes at
+  /// once.
   final Duration Function(int bytes) quietBeforeReindex;
 
   /// [quietBeforeReindex]'s default.
   static Duration defaultQuietBeforeReindex(int bytes) {
     if (bytes > 16 << 20) return const Duration(seconds: 30);
     if (bytes > 2 << 20) return const Duration(seconds: 5);
+    if (bytes > 1 << 20) return const Duration(seconds: 2);
     return Duration.zero;
   }
 
@@ -396,9 +402,16 @@ final class NoteWriter {
       _reindex(path, abs, created: created);
       return;
     }
-    _log.debug('reindex of "$path" in ${wait.inSeconds} s, if left alone');
+    _log.debug(
+      'reindex of "$path" in ${wait.inMilliseconds} ms, if left alone',
+    );
     _quiet[path] = Timer(wait, () {
       _quiet.remove(path);
+      // A save of the note is queued or running: its own end schedules the
+      // reindex again with the text it wrote. Reading the file beside that
+      // write is what made a 1.5 MB save take 480 ms on the device
+      // (2026-10-20); a read and a write of one note do not overlap.
+      if (_tails.containsKey(path)) return;
       _reindex(path, abs, created: false);
     });
   }
