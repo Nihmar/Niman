@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/settings/features.dart';
 import 'package:niman/src/core/settings/library_features.dart';
 import 'package:niman/src/core/settings/navigation_layout.dart';
+import 'package:niman/src/ui/app_switch.dart';
 import 'package:niman/src/ui/menu_choice_button.dart';
 import 'package:niman/src/ui/settings_navigation_layout.dart';
 import 'package:niman/src/ui/shell_navigation.dart';
@@ -276,7 +277,7 @@ void main() {
       // Hidden by Navigation: still hidden, its switch off.
       expect(
         tester
-            .widget<Switch>(find.byKey(const Key('navigation-switch-todo')))
+            .widget<AppSwitch>(find.byKey(const Key('navigation-switch-todo')))
             .value,
         isFalse,
       );

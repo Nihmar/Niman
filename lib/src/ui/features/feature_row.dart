@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/settings/features.dart';
 import 'package:niman/src/core/settings/library_features.dart';
+import 'package:niman/src/ui/app_switch.dart';
 import 'package:niman/src/ui/feature_names.dart';
 import 'package:niman/src/ui/features/feature_row_text.dart';
 import 'package:niman/src/ui/settings_area.dart';
@@ -94,7 +95,10 @@ final class FeatureRow extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                Switch(value: own, onChanged: needsParent ? null : onChanged),
+                AppSwitch(
+                  value: own,
+                  onChanged: needsParent ? null : onChanged,
+                ),
               ],
             ),
           ),
