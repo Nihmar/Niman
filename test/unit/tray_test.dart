@@ -24,22 +24,27 @@ void main() {
   // item has no right click of its own, and nativeapi publishes the
   // menu's path only for the click trigger — with the other one it tells
   // the desktop the item has no menu.
-  test('Linux opens the menu on the click; Windows on the right one', () {
+  test('Linux and macOS open the menu on the click; Windows its own', () {
     expect(trayContextMenuTrigger(isLinux: true), ContextMenuTrigger.clicked);
     // Windows opens its own popup on the right click (WindowsTrayMenu).
     expect(
       trayContextMenuTrigger(isLinux: false, isWindows: true),
       ContextMenuTrigger.none,
     );
+    // A menu bar extra opens its menu on the click.
     expect(
-      trayContextMenuTrigger(isLinux: false, isWindows: false),
+      trayContextMenuTrigger(isLinux: false, isWindows: false, isMacOS: true),
+      ContextMenuTrigger.clicked,
+    );
+    expect(
+      trayContextMenuTrigger(isLinux: false, isWindows: false, isMacOS: false),
       ContextMenuTrigger.rightClicked,
     );
   });
 
   test('the desktops get the real service; elsewhere the no-op', () {
     final service = createTrayService();
-    if (Platform.isLinux || Platform.isWindows) {
+    if (Platform.isLinux || Platform.isWindows || Platform.isMacOS) {
       expect(service, isA<PlatformTrayService>());
     } else {
       expect(service, isA<NoopTrayService>());
