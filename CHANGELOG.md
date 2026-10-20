@@ -6,6 +6,31 @@ This file ships inside the build and feeds the in-app changelog (the
 launch dialog after an update and the screen under Settings → Diagnostics
 and info). Update it in the release commit, before the tag.
 
+## [0.2.6] - 2026-10-20
+
+A library can turn features off, and the desktop draws its controls for a
+pointer.
+
+Settings → Library → Features is a switchboard of the library's features,
+with presets for writing, plain notes, or tasks and journal. A feature
+switched off is hidden everywhere — commands, menus, Home, the dock,
+settings, search — and stops its background work, but nothing is deleted,
+moved or rewritten: a note of its kind opens as plain Markdown, and turning
+it back on is the whole undo. On a desktop, switches, drop-downs, icon
+buttons, checkboxes, sliders, fields and list rows are now sized for a
+mouse, like the app's menus already were.
+
+### Added
+- **Features** (#1109): a per-library switchboard under Settings → Library, with presets (Everything, Writing, Notes only, Tasks and journal) and dependencies shown as *Needs …*; a library introduces it once, and a new library asks *What is this library for?*. Off cancels its reminders (with Undo) and its downloads, Android widgets show it off, and PDF/EPUB with their readers off offer *Open in default app*. Kept in `.niman/settings.json`, only when it differs from the default
+
+### Changed
+- **Drop-downs** open the app's compact menu, with the current entry checked, in the EPUB look sheet and every other choice in the app (#1119, #1123)
+- **Switches** are compact on desktop, and a switch row flips from anywhere on it (#1125)
+- **Icon buttons, checkboxes, sliders, fields and list rows** are compact on desktop (#1127)
+
+### Fixed
+- **Diagrams**: a blank line in a Mermaid fence no longer makes the note endlessly tall in the live editor (#1120)
+
 ## [0.2.5] - 2026-10-19
 
 A faster sync, and the app's own saves recognised by their bytes.
