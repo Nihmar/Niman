@@ -5,6 +5,7 @@
 // shell turns into a snackbar.
 import 'dart:io';
 
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/ui/file_tree_context.dart';
 import 'package:path/path.dart' as p;
@@ -105,6 +106,50 @@ void main() {
 
   test('the actions are offered on the desktop, where the test runs', () {
     expect(supportsTreeContextActions, isTrue);
+    expect(supportsOpenInDefaultApp, isTrue);
+  });
+
+  group('Android hand-off (#1109)', () {
+    // The bridge is Kotlin; what is held here is the call across it and
+    // what each answer becomes.
+    const channel = MethodChannel('test/open');
+    final calls = <MethodCall>[];
+
+    void answer(Future<Object?> Function(MethodCall call) handler) {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (call) {
+            calls.add(call);
+            return handler(call);
+          });
+    }
+
+    setUpAll(TestWidgetsFlutterBinding.ensureInitialized);
+    setUp(calls.clear);
+    tearDown(
+      () => TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, null),
+    );
+
+    test('the path crosses to the bridge, its answer is the outcome', () async {
+      answer((_) async => true);
+      expect(await openFileOnAndroid(note, channel: channel), isTrue);
+      expect(calls.single.method, 'openFile');
+      expect(calls.single.arguments, {'path': note});
+
+      answer((_) async => false);
+      expect(await openFileOnAndroid(note, channel: channel), isFalse);
+    });
+
+    test('a bridge that fails or is missing is a file not opened', () async {
+      answer((_) async => throw PlatformException(code: 'boom'));
+      expect(await openFileOnAndroid(note, channel: channel), isFalse);
+
+      answer((_) async => throw MissingPluginException());
+      expect(await openFileOnAndroid(note, channel: channel), isFalse);
+
+      answer((_) async => null);
+      expect(await openFileOnAndroid(note, channel: channel), isFalse);
+    });
   });
 
   test('the Windows switch and path are separate, backslashed arguments', () {

@@ -402,10 +402,11 @@ List<List<RowMenuEntry>> rowMenuGroups(
         value: 'beside',
         destructive: false,
       ),
-    // A note is also a file (issue #76). Desktop only: Android has no
-    // file manager to select a path in, so the entries stay off there
-    // rather than being shown and then failing.
-    if (!note.isDir && supportsTreeContextActions) ...[
+    // A note is also a file (issue #76). The file manager is the desktops':
+    // Android has no file manager to select a path in, so that entry stays
+    // off there rather than being shown and then failing. The default app
+    // is on Android too (#1109).
+    if (!note.isDir && supportsTreeContextActions)
       (
         key: const Key('menu-open-file-manager'),
         icon: Icons.folder_open_outlined,
@@ -413,6 +414,7 @@ List<List<RowMenuEntry>> rowMenuGroups(
         value: 'reveal',
         destructive: false,
       ),
+    if (!note.isDir && supportsOpenInDefaultApp)
       (
         key: const Key('menu-open-default-app'),
         icon: Icons.open_in_new,
@@ -420,7 +422,6 @@ List<List<RowMenuEntry>> rowMenuGroups(
         value: 'openexternal',
         destructive: false,
       ),
-    ],
     (
       key: const Key('menu-rename'),
       icon: Icons.edit_outlined,
