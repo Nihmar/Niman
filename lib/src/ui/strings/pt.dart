@@ -3704,7 +3704,8 @@ final class PortugueseStrings extends Strings {
       'Desativado: o texto partilhado vai para Importar';
   @override
   String get featureOffTemplates =>
-      'Desativado: as notas novas e as entradas do diário começam em branco';
+      'Desativado: as notas novas e as entradas do diário começam com o '
+      'conteúdo predefinido';
   @override
   String get featureOffCapture =>
       'Desativado: sem captura de páginas; as ligações ficam como ligações '

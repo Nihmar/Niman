@@ -3723,7 +3723,7 @@ final class DutchStrings extends Strings {
   String get featureOffQuickNote => 'Uit: gedeelde tekst gaat naar Importeren';
   @override
   String get featureOffTemplates =>
-      'Uit: nieuwe notities en dagboekitems beginnen leeg';
+      'Uit: nieuwe notities en dagboekitems beginnen met hun standaardinhoud';
   @override
   String get featureOffCapture =>
       'Uit: geen paginavastlegging; koppelingen blijven gewone koppelingen';

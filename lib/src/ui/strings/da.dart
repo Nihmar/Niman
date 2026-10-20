@@ -3661,7 +3661,7 @@ final class DanishStrings extends Strings {
   String get featureOffQuickNote => 'Fra: delt tekst går til Importér i stedet';
   @override
   String get featureOffTemplates =>
-      'Fra: nye noter og dagbogsindlæg starter tomme';
+      'Fra: nye noter og dagbogsindlæg starter med standardindholdet';
   @override
   String get featureOffCapture =>
       'Fra: ingen sidefangst; links forbliver almindelige links';

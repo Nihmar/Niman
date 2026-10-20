@@ -3669,7 +3669,7 @@ final class NorwegianStrings extends Strings {
   String get featureOffQuickNote => 'Av: delt tekst går til Importer i stedet';
   @override
   String get featureOffTemplates =>
-      'Av: nye notater og dagboksoppføringer starter tomme';
+      'Av: nye notater og dagboksoppføringer starter med standardinnholdet';
   @override
   String get featureOffCapture =>
       'Av: ingen sidefangst; lenker forblir vanlige lenker';

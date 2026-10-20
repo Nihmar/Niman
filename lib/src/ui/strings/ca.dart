@@ -3747,7 +3747,8 @@ final class CatalanStrings extends Strings {
       'Desactivat: el text compartit va a Importa';
   @override
   String get featureOffTemplates =>
-      'Desactivat: les notes noves i les entrades del diari comencen en blanc';
+      'Desactivat: les notes noves i les entrades del diari comencen amb el '
+      'contingut per defecte';
   @override
   String get featureOffCapture =>
       'Desactivat: sense captura de pàgines; els enllaços continuen sent '

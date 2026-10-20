@@ -3680,7 +3680,7 @@ final class IcelandicStrings extends Strings {
       'Slökkt: deildur texti fer í Flytja inn í staðinn';
   @override
   String get featureOffTemplates =>
-      'Slökkt: nýir minnismiðar og dagbókarfærslur byrja auðar';
+      'Slökkt: nýir minnismiðar og dagbókarfærslur byrja með sjálfgefnu efni';
   @override
   String get featureOffCapture =>
       'Slökkt: engin vistun vefsíðna; tenglar haldast venjulegir tenglar';

@@ -3704,7 +3704,8 @@ final class SlovenianStrings extends Strings {
       'Izklopljeno: deljeno besedilo gre namesto tega v: Uvozi';
   @override
   String get featureOffTemplates =>
-      'Izklopljeno: novi zapiski in vnosi v dnevnik se začnejo prazni';
+      'Izklopljeno: novi zapiski in vnosi v dnevnik se začnejo s privzeto '
+      'vsebino';
   @override
   String get featureOffCapture =>
       'Izklopljeno: brez shranjevanja strani; povezave ostanejo navadne '

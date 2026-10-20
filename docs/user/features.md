@@ -38,7 +38,7 @@ library and per device, and off until a server is connected.
 |---|---|---|
 | Finding and writing | Search | No search screen or commands. The index is still kept up to date, so turning Search on again is instant |
 | | Quick note | No quick note. Text shared from another app becomes a new note instead |
-| | Templates | No *new from template* in the menus |
+| | Templates | No *new from template* in the menus; new notes, journal entries and Home actions start with their default, whatever template is set |
 | | Web capture | No page capture; links stay plain links |
 | Planning | Todo and reminders | `todo.txt` stays a plain file; no task reminders |
 | | Journal | Entries stay ordinary notes |

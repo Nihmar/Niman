@@ -3711,7 +3711,8 @@ final class ItalianStrings extends Strings {
       'Disattivato: il testo condiviso va in Importa';
   @override
   String get featureOffTemplates =>
-      'Disattivato: le nuove note e le voci del diario partono vuote';
+      'Disattivato: le nuove note e le voci del diario partono con il loro '
+      'contenuto predefinito';
   @override
   String get featureOffCapture =>
       'Disattivato: niente cattura di pagine; i link restano semplici link';

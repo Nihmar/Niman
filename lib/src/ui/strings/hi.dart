@@ -3630,7 +3630,8 @@ final class HindiStrings extends Strings {
       'बंद: साझा किया गया पाठ इसके बजाय आयात करें में जाता है';
   @override
   String get featureOffTemplates =>
-      'बंद: नए नोट और डायरी प्रविष्टियाँ खाली शुरू होती हैं';
+      'बंद: नए नोट और डायरी प्रविष्टियाँ अपनी डिफ़ॉल्ट शुरुआत के साथ शुरू होती '
+      'हैं';
   @override
   String get featureOffCapture =>
       'बंद: पेज कैप्चर नहीं; लिंक साधारण लिंक ही रहते हैं';

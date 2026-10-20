@@ -3700,7 +3700,8 @@ final class SerbianStrings extends Strings {
       'Искључено: подељени текст иде уместо тога у: Увези';
   @override
   String get featureOffTemplates =>
-      'Искључено: нове белешке и уноси дневника почињу празни';
+      'Искључено: нове белешке и уноси дневника почињу са подразумеваним '
+      'садржајем';
   @override
   String get featureOffCapture =>
       'Искључено: нема чувања страница; везе остају обичне везе';

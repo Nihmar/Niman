@@ -3737,8 +3737,8 @@ final class SpanishStrings extends Strings {
       'Desactivado: el texto compartido va a Importar';
   @override
   String get featureOffTemplates =>
-      'Desactivado: las notas nuevas y las entradas del diario empiezan en '
-      'blanco';
+      'Desactivado: las notas nuevas y las entradas del diario empiezan con su '
+      'contenido por defecto';
   @override
   String get featureOffCapture =>
       'Desactivado: sin captura de páginas; los enlaces siguen siendo enlaces '

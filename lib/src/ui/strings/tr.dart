@@ -3639,7 +3639,7 @@ final class TurkishStrings extends Strings {
       'Kapalı: paylaşılan metin bunun yerine İçe aktar bölümüne gider';
   @override
   String get featureOffTemplates =>
-      'Kapalı: yeni notlar ve günlük girdileri boş başlar';
+      'Kapalı: yeni notlar ve günlük girdileri varsayılan içerikle başlar';
   @override
   String get featureOffCapture =>
       'Kapalı: sayfa yakalama yok; bağlantılar düz bağlantı olarak kalır';

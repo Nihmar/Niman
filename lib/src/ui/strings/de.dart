@@ -3765,7 +3765,8 @@ final class GermanStrings extends Strings {
       'Aus: geteilter Text geht stattdessen nach „Importieren“';
   @override
   String get featureOffTemplates =>
-      'Aus: neue Notizen und Tagebucheinträge beginnen leer';
+      'Aus: neue Notizen und Tagebucheinträge beginnen mit ihrem '
+      'Standardinhalt';
   @override
   String get featureOffCapture =>
       'Aus: keine Seitenerfassung; Links bleiben einfache Links';

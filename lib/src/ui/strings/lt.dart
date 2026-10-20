@@ -3723,7 +3723,8 @@ final class LithuanianStrings extends Strings {
       'Išjungta: bendrinamas tekstas keliauja į: Importuoti';
   @override
   String get featureOffTemplates =>
-      'Išjungta: nauji užrašai ir dienoraščio įrašai prasideda tušti';
+      'Išjungta: nauji užrašai ir dienoraščio įrašai prasideda numatytuoju '
+      'turiniu';
   @override
   String get featureOffCapture =>
       'Išjungta: puslapių neišsaugoma; nuorodos lieka paprastos nuorodos';

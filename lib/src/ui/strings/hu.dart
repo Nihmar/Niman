@@ -3698,7 +3698,8 @@ final class HungarianStrings extends Strings {
       'Ki: a megosztott szöveg a(z) Importálás helyre kerül';
   @override
   String get featureOffTemplates =>
-      'Ki: az új jegyzetek és naplóbejegyzések üresen indulnak';
+      'Ki: az új jegyzetek és naplóbejegyzések az alapértelmezett tartalommal '
+      'indulnak';
   @override
   String get featureOffCapture =>
       'Ki: nincs oldalmentés; a hivatkozások sima hivatkozások maradnak';

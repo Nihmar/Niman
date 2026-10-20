@@ -3691,7 +3691,7 @@ final class SlovakStrings extends Strings {
       'Vypnuté: zdieľaný text ide namiesto toho do: Importovať';
   @override
   String get featureOffTemplates =>
-      'Vypnuté: nové poznámky a záznamy denníka začínajú prázdne';
+      'Vypnuté: nové poznámky a záznamy denníka začínajú s predvoleným obsahom';
   @override
   String get featureOffCapture =>
       'Vypnuté: žiadne ukladanie stránok; odkazy zostávajú obyčajnými odkazmi';

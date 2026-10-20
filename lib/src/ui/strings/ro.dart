@@ -3742,7 +3742,8 @@ final class RomanianStrings extends Strings {
       'Dezactivat: textul partajat merge în Importă';
   @override
   String get featureOffTemplates =>
-      'Dezactivat: notițele noi și intrările din jurnal încep goale';
+      'Dezactivat: notițele noi și intrările din jurnal încep cu conținutul '
+      'implicit';
   @override
   String get featureOffCapture =>
       'Dezactivat: fără captură de pagini; linkurile rămân linkuri simple';

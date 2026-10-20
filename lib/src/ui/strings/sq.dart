@@ -3705,7 +3705,8 @@ final class AlbanianStrings extends Strings {
       'Çaktivizuar: teksti i ndarë shkon te Importo';
   @override
   String get featureOffTemplates =>
-      'Çaktivizuar: shënimet e reja dhe shënimet e ditarit nisin bosh';
+      'Çaktivizuar: shënimet e reja dhe shënimet e ditarit nisin me '
+      'përmbajtjen e tyre të paracaktuar';
   @override
   String get featureOffCapture =>
       'Çaktivizuar: pa ruajtje faqesh; lidhjet mbeten lidhje të zakonshme';

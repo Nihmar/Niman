@@ -3706,7 +3706,8 @@ final class GalicianStrings extends Strings {
       'Desactivado: o texto compartido vai a Importar';
   @override
   String get featureOffTemplates =>
-      'Desactivado: as notas novas e as entradas do diario comezan en branco';
+      'Desactivado: as notas novas e as entradas do diario comezan co seu '
+      'contido por defecto';
   @override
   String get featureOffCapture =>
       'Desactivado: sen captura de páxinas; as ligazóns seguen sendo ligazóns '

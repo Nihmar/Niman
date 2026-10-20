@@ -3677,7 +3677,7 @@ final class CzechStrings extends Strings {
       'Vypnuto: sdílený text jde místo toho do: Importovat';
   @override
   String get featureOffTemplates =>
-      'Vypnuto: nové poznámky a zápisy deníku začínají prázdné';
+      'Vypnuto: nové poznámky a zápisy deníku začínají ve výchozí podobě';
   @override
   String get featureOffCapture =>
       'Vypnuto: žádné ukládání stránek; odkazy zůstávají obyčejnými odkazy';

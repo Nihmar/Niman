@@ -3733,7 +3733,8 @@ final class PolishStrings extends Strings {
       'Wyłączone: udostępniony tekst trafia do: Importuj';
   @override
   String get featureOffTemplates =>
-      'Wyłączone: nowe notatki i wpisy dziennika zaczynają się puste';
+      'Wyłączone: nowe notatki i wpisy dziennika zaczynają się od domyślnej '
+      'treści';
   @override
   String get featureOffCapture =>
       'Wyłączone: brak zapisywania stron; linki pozostają zwykłymi linkami';

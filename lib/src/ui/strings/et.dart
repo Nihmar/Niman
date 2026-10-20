@@ -3627,7 +3627,7 @@ final class EstonianStrings extends Strings {
       'Väljas: jagatud tekst läheb hoopis kohta Impordi';
   @override
   String get featureOffTemplates =>
-      'Väljas: uued märkmed ja päevikukirjed algavad tühjana';
+      'Väljas: uued märkmed ja päevikukirjed algavad vaikimisi sisuga';
   @override
   String get featureOffCapture =>
       'Väljas: lehti ei salvestata; lingid jäävad tavalisteks linkideks';

@@ -3634,7 +3634,7 @@ final class EnglishStrings extends Strings {
   String get featureOffQuickNote => 'Off: shared text goes to Import instead';
   @override
   String get featureOffTemplates =>
-      'Off: new notes and journal entries start blank';
+      'Off: new notes and journal entries start with their default';
   @override
   String get featureOffCapture =>
       'Off: no page capture; links stay plain links';

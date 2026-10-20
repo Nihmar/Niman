@@ -3274,7 +3274,7 @@ final class ChineseStrings extends Strings {
   @override
   String get featureOffQuickNote => '关闭：分享的文本改为进入导入';
   @override
-  String get featureOffTemplates => '关闭：新笔记和日记条目从空白开始';
+  String get featureOffTemplates => '关闭：新笔记和日记条目以默认内容开始';
   @override
   String get featureOffCapture => '关闭：不捕获网页；链接仍是普通链接';
   @override

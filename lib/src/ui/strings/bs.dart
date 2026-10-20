@@ -3706,7 +3706,7 @@ final class BosnianStrings extends Strings {
       'Isključeno: dijeljeni tekst ide umjesto toga u: Uvezi';
   @override
   String get featureOffTemplates =>
-      'Isključeno: nove bilješke i unosi dnevnika počinju prazni';
+      'Isključeno: nove bilješke i unosi dnevnika počinju sa zadanim početkom';
   @override
   String get featureOffCapture =>
       'Isključeno: nema spremanja stranica; veze ostaju obične veze';

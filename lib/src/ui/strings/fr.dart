@@ -3792,7 +3792,8 @@ final class FrenchStrings extends Strings {
       'Désactivé : le texte partagé va dans Importer';
   @override
   String get featureOffTemplates =>
-      'Désactivé : les nouvelles notes et entrées du journal démarrent vides';
+      'Désactivé : les nouvelles notes et entrées du journal démarrent avec '
+      'leur contenu par défaut';
   @override
   String get featureOffCapture =>
       'Désactivé : pas de capture de page ; les liens restent de simples liens';

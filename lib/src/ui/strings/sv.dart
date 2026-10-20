@@ -3694,7 +3694,7 @@ final class SwedishStrings extends Strings {
       'Av: delad text går till Importera i stället';
   @override
   String get featureOffTemplates =>
-      'Av: nya anteckningar och dagboksinlägg börjar tomma';
+      'Av: nya anteckningar och dagboksinlägg börjar med sitt standardinnehåll';
   @override
   String get featureOffCapture =>
       'Av: ingen sidhämtning; länkar förblir vanliga länkar';

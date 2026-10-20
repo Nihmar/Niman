@@ -3675,7 +3675,8 @@ final class LatvianStrings extends Strings {
       'Izslēgts: kopīgotais teksts tiek nosūtīts uz: Importēt';
   @override
   String get featureOffTemplates =>
-      'Izslēgts: jaunas piezīmes un dienasgrāmatas ieraksti sākas tukši';
+      'Izslēgts: jaunas piezīmes un dienasgrāmatas ieraksti sākas ar '
+      'noklusējuma saturu';
   @override
   String get featureOffCapture =>
       'Izslēgts: lapas netiek saglabātas; saites paliek parastas saites';

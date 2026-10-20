@@ -3722,7 +3722,8 @@ final class BasqueStrings extends Strings {
       'Itzalita: partekatutako testua Inportatu atalera doa';
   @override
   String get featureOffTemplates =>
-      'Itzalita: ohar berriak eta egunkariko sarrerak hutsik hasten dira';
+      'Itzalita: ohar berriak eta egunkariko sarrerak lehenetsitako '
+      'edukiarekin hasten dira';
   @override
   String get featureOffCapture =>
       'Itzalita: orrien kapturarik ez; estekak esteka arruntak izaten '

@@ -3368,7 +3368,7 @@ final class JapaneseStrings extends Strings {
   @override
   String get featureOffQuickNote => 'オフ: 共有されたテキストは代わりに読み込むへ送られます';
   @override
-  String get featureOffTemplates => 'オフ: 新しいノートと日記の項目は空で始まります';
+  String get featureOffTemplates => 'オフ: 新しいノートと日記の項目は既定の内容で始まります';
   @override
   String get featureOffCapture => 'オフ: ページのキャプチャなし。リンクは通常のリンクのままです';
   @override

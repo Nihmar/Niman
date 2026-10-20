@@ -3706,7 +3706,8 @@ final class FinnishStrings extends Strings {
   String get featureOffQuickNote => 'Pois: jaettu teksti menee kohtaan Tuo';
   @override
   String get featureOffTemplates =>
-      'Pois: uudet muistiinpanot ja päiväkirjamerkinnät alkavat tyhjinä';
+      'Pois: uudet muistiinpanot ja päiväkirjamerkinnät alkavat '
+      'oletussisällöllä';
   @override
   String get featureOffCapture =>
       'Pois: ei sivujen tallennusta; linkit pysyvät tavallisina linkkeinä';
