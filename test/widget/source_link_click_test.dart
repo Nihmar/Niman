@@ -72,8 +72,9 @@ final List<(TokenKind, String)> _opened = <(TokenKind, String)>[];
 Future<MarkdownSourceViewState> _pump(
   WidgetTester tester,
   String text,
-  _Mode mode,
-) async {
+  _Mode mode, {
+  void Function(MarkdownSourceViewState state)? onOpen,
+}) async {
   _opened.clear();
   tester.view.physicalSize = const Size(900, 500);
   tester.view.devicePixelRatio = 1;
@@ -86,7 +87,14 @@ Future<MarkdownSourceViewState> _pump(
           theme: _theme,
           showLineNumbers: false,
           hideMarkers: mode == _Mode.live,
-          onOpenLink: (kind, raw, href) => _opened.add((kind, raw)),
+          onOpenLink: (kind, raw, href) {
+            _opened.add((kind, raw));
+            onOpen?.call(
+              tester.state<MarkdownSourceViewState>(
+                find.byType(MarkdownSourceView),
+              ),
+            );
+          },
         ),
       ),
     ),
@@ -126,6 +134,30 @@ void main() {
     await _click(tester, _atOffset(mode, 9), control: true);
     expect(_opened, <(TokenKind, String)>[(TokenKind.wikilink, '[[La nota]]')]);
     expect(state.selection.extent, 9, reason: 'the caret went there too');
+  });
+
+  // A `[[#heading]]` in the same note moves the caret to the heading as the
+  // button goes down; the click it ends as placed the caret back on the link
+  // as it was let go, and the view followed it there.
+  both('a link that moves the caret keeps it there after the click', (
+    tester,
+    mode,
+  ) async {
+    const text = 'vedi [[#Titolo]] ora\n\n## Titolo\n';
+    final heading = text.indexOf('## Titolo');
+    final state = await _pump(
+      tester,
+      text,
+      mode,
+      onOpen: (state) => state.placeCaret(heading),
+    );
+    await _click(tester, _atOffset(mode, 9), control: true);
+    expect(_opened, <(TokenKind, String)>[(TokenKind.wikilink, '[[#Titolo]]')]);
+    expect(
+      state.selection.extent,
+      heading,
+      reason: 'the release is no second click on the link',
+    );
   });
 
   both('Ctrl+click on a Markdown link opens it', (tester, mode) async {
