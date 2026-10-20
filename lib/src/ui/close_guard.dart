@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/ui/close_to_tray.dart';
+import 'package:niman/src/ui/mac_quit.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/unsaved_notes.dart';
 import 'package:niman/src/ui/window_controller.dart';
@@ -71,6 +72,7 @@ final class _CloseGuardState extends State<CloseGuard> {
     CloseToTray.enabled.addListener(_syncPrevent);
     CloseToTray.trayShown.addListener(_syncPrevent);
     CloseToTray.quitRequests.addListener(_onQuitRequested);
+    MacQuit.listen(CloseToTray.quit);
     widget.window.onCloseRequested = _onCloseRequested;
     unawaited(_init());
   }
@@ -90,6 +92,7 @@ final class _CloseGuardState extends State<CloseGuard> {
   @override
   void dispose() {
     widget.window.onCloseRequested = null;
+    MacQuit.stop();
     CloseToTray.enabled.removeListener(_syncPrevent);
     CloseToTray.trayShown.removeListener(_syncPrevent);
     CloseToTray.quitRequests.removeListener(_onQuitRequested);
@@ -160,6 +163,9 @@ final class _CloseGuardState extends State<CloseGuard> {
   /// to disk first; a write that fails keeps the window open (the edits
   /// are still only in the buffers).
   Future<void> _showAsk() async {
+    // A quit can come with the window hidden (the tray's Quit, ⌘Q from the
+    // Dock): the ask must be where it can be seen.
+    if (_quitting) await widget.window.show();
     final names = widget.tracker.unsavedPaths.map(p.basename).toList();
     final saveAndClose = await _askDialog(names);
     _asking = false;

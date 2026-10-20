@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:niman/src/core/host_platform.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/ui/caption_buttons.dart';
+import 'package:niman/src/ui/mac_quit.dart';
 import 'package:niman/src/ui/window_minimum_size.dart';
 import 'package:niman/src/ui/window_visibility.dart';
 import 'package:window_manager/window_manager.dart'
@@ -199,8 +200,11 @@ final class WindowManagerController implements WindowController {
     return _manager.setPreventClose(prevent);
   }
 
+  /// On a Mac a close is a quit (the × only hides there): the runner is
+  /// told to let the terminate it is holding through ([MacQuit]).
   @override
   Future<void> close() {
+    if (Platform.isMacOS) return MacQuit.confirm();
     return _manager.close();
   }
 

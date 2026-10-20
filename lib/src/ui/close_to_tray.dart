@@ -7,12 +7,18 @@
 /// tray's *Open Niman* brings it back, and its *Quit* is the way out,
 /// with the same ask about unsaved notes the × always had.
 ///
+/// On a Mac it is not a setting: the × always hides the window and the app
+/// stays in the Dock, whose icon brings the window back, and ⌘Q is the way
+/// out (decision 11 of docs/records/apple-platforms.md).
+///
 /// Two notifiers rather than a service: the setting is read at start and
 /// written by its settings row, the close guard watches it, and the quit
 /// is one signal from the tray to that guard. Held statically, like the
 /// key map, because the guard sits above the library and the row sits
 /// deep inside it.
 library;
+
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 
@@ -31,8 +37,12 @@ final class CloseToTray {
   /// process and quit — a new build ran the old one's code.
   static final ValueNotifier<bool> trayShown = ValueNotifier(true);
 
+  /// Whether the Dock brings a hidden window back (a Mac), so hiding needs
+  /// no tray icon; a test pins it to the platform it describes.
+  static bool dockReopens = Platform.isMacOS;
+
   /// Whether the × hides the window right now.
-  static bool get active => enabled.value && trayShown.value;
+  static bool get active => enabled.value && (trayShown.value || dockReopens);
 
   /// Bumped when the tray's Quit is chosen: the close guard closes the
   /// window for real, asking about unsaved notes first.
