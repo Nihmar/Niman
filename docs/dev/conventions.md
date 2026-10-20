@@ -36,8 +36,12 @@
     `menuItem()`, `menuDivider()` and `MenuRow`. Never build a raw
     `PopupMenuItem` or `PopupMenuDivider` (`test/unit/menu_sources_test.dart`
     fails on one) and never copy the numbers. A drop-down choice is
-    `MenuChoiceButton` (`lib/src/ui/menu_choice_button.dart`), not
-    Material's `DropdownButton`, whose rows are never under 48 px (#1119).
+    `MenuChoiceButton` (`lib/src/ui/menu_choice_button.dart`), inline or,
+    with a `decoration`, as a form's field — never Material's
+    `DropdownButton` or `DropdownButtonFormField`, whose rows are never
+    under 48 px (#1119, #1123; the same source test fails on one). A
+    setting's choice is a `SettingsValueRow` opening `showSettingsChoice`,
+    not a `SimpleDialog` of its own.
 - **Portability:** new tests must be portable — `p.join` for paths
   (never literal `/`), no `chmod`.
 - **Output discipline:** never dump large output into context. Redirect
