@@ -91,6 +91,27 @@ ThemeData buildAppTheme(AppTheme theme, Brightness brightness) {
         behavior: SnackBarBehavior.floating,
         width: 360,
       ),
+      // Material's M3 defaults pin these controls to the standard density
+      // (the theme's own never reaches them), so a mouse is given the
+      // compact ones explicitly (#1127).
+      iconButtonTheme: const IconButtonThemeData(
+        style: ButtonStyle(visualDensity: VisualDensity.compact),
+      ),
+      checkboxTheme: const CheckboxThemeData(
+        visualDensity: VisualDensity.compact,
+      ),
+      sliderTheme: const SliderThemeData(
+        trackHeight: 3,
+        thumbShape: RoundSliderThumbShape(enabledThumbRadius: 7),
+        overlayShape: RoundSliderOverlayShape(overlayRadius: 14),
+      ),
+      // A field that sets its own padding keeps it; one that does not is
+      // a line of text with 8 dp above and below, not the bare line.
+      inputDecorationTheme: const InputDecorationThemeData(
+        isDense: true,
+        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      ),
+      listTileTheme: const ListTileThemeData(dense: true),
     );
   }
   // Two entries per theme, plus a stale pair per edit; a handful of
