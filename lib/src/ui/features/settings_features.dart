@@ -85,6 +85,7 @@ final class _SettingsFeaturesScreenState extends State<SettingsFeaturesScreen> {
         SnackBar(
           key: const Key('features-reminders-snackbar'),
           content: Text(AppStrings.featuresRemindersCancelled(cancelled)),
+          persist: false,
           action: SnackBarAction(
             label: AppStrings.actionUndo,
             onPressed: () => unawaited(undo()),

@@ -24,6 +24,7 @@ void showFeatureOff(
     ..showSnackBar(
       SnackBar(
         content: Text(featureOffSentence(feature)),
+        persist: false,
         action: openFeatures == null
             ? null
             : SnackBarAction(
