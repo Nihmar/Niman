@@ -10,6 +10,7 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:flutter/services.dart';
+import 'package:niman/src/core/host_platform.dart';
 import 'package:path/path.dart' as p;
 import 'package:url_launcher/url_launcher.dart';
 
@@ -62,6 +63,15 @@ base class OsLauncher {
       try {
         await Process.run('explorer', windowsRevealArgs(path));
         return true;
+      } on ProcessException {
+        return false;
+      }
+    }
+    if (Platform.isMacOS) {
+      // Finder opens the folder with the file selected.
+      try {
+        final shown = await Process.run('open', ['-R', path]);
+        return shown.exitCode == 0;
       } on ProcessException {
         return false;
       }
@@ -141,7 +151,7 @@ Future<bool> openFileOnAndroid(
 /// Whether this platform can show a file in a file manager.
 ///
 /// Desktop only: Android has no file manager to select a path in.
-bool get supportsTreeContextActions => Platform.isLinux || Platform.isWindows;
+bool get supportsTreeContextActions => HostPlatform.isDesktop;
 
 /// Whether this platform can hand a file to the application the system
 /// opens it with: the desktops, and Android through its FileProvider.

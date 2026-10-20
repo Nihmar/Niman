@@ -16,6 +16,7 @@ import 'package:niman/src/core/app_theme.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/frame_cost.dart';
 import 'package:niman/src/core/frame_log.dart';
+import 'package:niman/src/core/host_platform.dart';
 import 'package:niman/src/core/language.dart';
 import 'package:niman/src/core/launch_requests.dart';
 import 'package:niman/src/core/logging.dart';
@@ -3953,7 +3954,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
 
   /// The mouse's side buttons over the window, on a desktop (#700). A
   /// phone's back button is the system's Back, which keeps its meaning.
-  Widget _mouseHistory(Widget child) => Platform.isLinux || Platform.isWindows
+  Widget _mouseHistory(Widget child) => HostPlatform.isDesktop
       ? MouseHistoryButtons(
           onBack: () => unawaited(_noteHistory.back()),
           onForward: () => unawaited(_noteHistory.forward()),
@@ -4485,7 +4486,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     CommandNeed.openNote => _shownNote != null,
     CommandNeed.textNote => _shownNote != null && !_shownIsAttachment,
     CommandNeed.wideWindow => _wide,
-    CommandNeed.desktop => Platform.isLinux || Platform.isWindows,
+    CommandNeed.desktop => HostPlatform.isDesktop,
     CommandNeed.notInZen => !_inZen,
     CommandNeed.zenRoom => _immersive.zen.on || _zenPossible,
     CommandNeed.previewToggle => _previewToggleVisible,
@@ -5816,7 +5817,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// opens a note is also what raises the IME, and the "keyboard on open"
   /// setting decides that — so the caret is asked for on a desktop only.
   static bool get _desktop => switch (defaultTargetPlatform) {
-    TargetPlatform.linux || TargetPlatform.windows => true,
+    TargetPlatform.linux ||
+    TargetPlatform.windows ||
+    TargetPlatform.macOS => true,
     _ => false,
   };
 

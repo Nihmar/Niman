@@ -174,7 +174,7 @@ final class SingleInstance {
     final file = _addressFile(dir);
     await file.writeAsString(jsonEncode({'port': port, 'token': token}));
     // Best effort: the token is only as private as this file.
-    if (Platform.isLinux) {
+    if (Platform.isLinux || Platform.isMacOS) {
       try {
         await Process.run('chmod', ['600', file.path]);
       } on Object catch (error) {
