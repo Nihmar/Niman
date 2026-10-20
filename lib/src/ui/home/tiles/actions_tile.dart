@@ -3,7 +3,9 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:niman/src/core/settings/features.dart';
 import 'package:niman/src/home/home_action.dart';
+import 'package:niman/src/home/home_tile_feature.dart';
 import 'package:niman/src/ui/home/home_host.dart';
 import 'package:niman/src/ui/home/home_icons.dart';
 import 'package:niman/src/ui/home/home_tile_frame.dart';
@@ -42,16 +44,22 @@ final class ActionsTile extends StatelessWidget {
       revision: revision,
       initial: (value: const <String>{}),
       load: () => host.controller.missingPaths(paths),
-      builder: (context, gone) => SingleChildScrollView(
-        physics: const NeverScrollableScrollPhysics(),
-        child: Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            for (final action in actions)
-              // A kind a later build wrote is kept in the file, not shown.
-              if (action.kind != null) _button(context, action, gone),
-          ],
+      builder: (context, gone) => ValueListenableBuilder<Features>(
+        valueListenable: host.controller.features,
+        builder: (context, features, _) => SingleChildScrollView(
+          physics: const NeverScrollableScrollPhysics(),
+          child: Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final action in actions)
+                // A kind a later build wrote is kept in the file, not shown;
+                // nor is one whose feature is off (#1109).
+                if (action.kind != null &&
+                    actionKindIsOn(action.kind, features))
+                  _button(context, action.under(features), gone),
+            ],
+          ),
         ),
       ),
     );

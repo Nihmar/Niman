@@ -66,7 +66,7 @@ final class AttachmentBar extends StatelessWidget {
               ),
             ),
             ...actions,
-            if (supportsTreeContextActions)
+            if (supportsOpenInDefaultApp)
               IconButton(
                 key: const Key('attachment-open-outside'),
                 tooltip: AppStrings.openInDefaultApp,

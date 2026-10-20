@@ -1656,6 +1656,19 @@ final class GreekStrings extends Strings {
   String get pinWidgetUnavailable =>
       'Τα widgets της αρχικής οθόνης είναι διαθέσιμα στο Android';
 
+  @override
+  String get widgetOffTodo =>
+      'Τα καθήκοντα είναι απενεργοποιημένα σε αυτή τη βιβλιοθήκη';
+  @override
+  String get widgetOffStudy =>
+      'Η μελέτη είναι απενεργοποιημένη σε αυτή τη βιβλιοθήκη';
+  @override
+  String get widgetOffWidgets =>
+      'Τα widgets της αρχικής οθόνης είναι '
+      'απενεργοποιημένα σε αυτή τη βιβλιοθήκη';
+  @override
+  String get widgetOpenFeatures => 'Άνοιγμα λειτουργιών';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Εμφάνιση στη διαχείριση αρχείων';
@@ -3695,6 +3708,162 @@ final class GreekStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Πάντα ορατό';
+  @override
+  String get featuresTitle => 'Λειτουργίες';
+  @override
+  String get featureOffInFeatures => 'Απενεργοποιημένο στις Λειτουργίες';
+  @override
+  String get featureOffInLibrary => 'Απενεργοποιημένο σε αυτή τη βιβλιοθήκη';
+  @override
+  String featureOffInLibraryNamed(String feature) =>
+      'Απενεργοποιημένο σε αυτή τη βιβλιοθήκη: $feature';
+  @override
+  String get featureNameSearch => 'Αναζήτηση';
+  @override
+  String get featureNameQuickNote => 'Γρήγορη σημείωση';
+  @override
+  String get featureNameTemplates => 'Πρότυπα';
+  @override
+  String get featureNameCapture => 'Αποθήκευση ιστοσελίδων';
+  @override
+  String get featureNameTodo => 'Καθήκοντα και υπενθυμίσεις';
+  @override
+  String get featureNameJournal => 'Ημερολόγιο';
+  @override
+  String get featureNameCalendar => 'Ημερολόγιο συμβάντων';
+  @override
+  String get featureNameLists => 'Λίστες';
+  @override
+  String get featureNameShopping => 'Λίστες αγορών';
+  @override
+  String get featureNameAudio => 'Φωνητικές σημειώσεις';
+  @override
+  String get featureNameTranscription => 'Μεταγραφή';
+  @override
+  String get featureNameSlides => 'Παρουσιάσεις';
+  @override
+  String get featureNameFlashcards => 'Κάρτες και μελέτη';
+  @override
+  String get featureNameReaders => 'Αναγνώστες PDF και EPUB';
+  @override
+  String get featureNameAnnotations => 'Σχολιασμοί';
+  @override
+  String get featureNameOcr => 'Αναγνώριση κειμένου';
+  @override
+  String get featureNameHome => 'Αρχική';
+  @override
+  String get featureNameWidgets => 'Widget αρχικής οθόνης';
+  @override
+  String get featuresDescription =>
+      'Τι χρησιμοποιεί αυτή η βιβλιοθήκη. Ό,τι είναι απενεργοποιημένο '
+      'κρύβεται παντού και η εργασία του στο παρασκήνιο σταματά· στα αρχεία '
+      'σας δεν αλλάζει ούτε διαγράφεται τίποτα.';
+  @override
+  String get featuresPresetLabel => 'Προεπιλογή';
+  @override
+  String get featurePresetEverything => 'Όλα';
+  @override
+  String get featurePresetWriting => 'Γραφή';
+  @override
+  String get featurePresetNotesOnly => 'Μόνο σημειώσεις';
+  @override
+  String get featurePresetTasks => 'Καθήκοντα και ημερολόγιο';
+  @override
+  String get featurePresetCustom => 'Προσαρμοσμένη';
+  @override
+  String get featurePresetEverythingHint => 'όλη η εφαρμογή';
+  @override
+  String get featurePresetWritingHint =>
+      'σημειώσεις, αναζήτηση, πρότυπα, αναγνώστες';
+  @override
+  String get featurePresetNotesOnlyHint => 'σημειώσεις, αναζήτηση, σύνδεσμοι';
+  @override
+  String get featurePresetTasksHint =>
+      'καθήκοντα, ημερολόγιο, ημερολόγιο συμβάντων, Αρχική';
+  @override
+  String get featuresSectionFinding => 'Εύρεση και γραφή';
+  @override
+  String get featuresSectionPlanning => 'Προγραμματισμός';
+  @override
+  String get featuresSectionKinds => 'Είδη σημειώσεων';
+  @override
+  String get featuresSectionReading => 'Ανάγνωση';
+  @override
+  String get featuresSectionAround => 'Γύρω από την εφαρμογή';
+  @override
+  String featureNeeds(String feature) => 'Απαιτεί: $feature';
+  @override
+  String get featureOffSearch =>
+      'Ανενεργό: χωρίς οθόνη και εντολές αναζήτησης· το ευρετήριο εξακολουθεί '
+      'να τηρείται';
+  @override
+  String get featureOffQuickNote =>
+      'Ανενεργό: το κοινοποιημένο κείμενο πηγαίνει στο Εισαγωγή';
+  @override
+  String get featureOffTemplates =>
+      'Ανενεργό: οι νέες σημειώσεις και οι εγγραφές ημερολογίου ξεκινούν με '
+      'την προεπιλογή τους';
+  @override
+  String get featureOffCapture =>
+      'Ανενεργό: χωρίς αποθήκευση σελίδων· οι σύνδεσμοι μένουν απλοί σύνδεσμοι';
+  @override
+  String get featureOffTodo =>
+      'Ανενεργό: το todo.txt μένει απλό αρχείο· χωρίς υπενθυμίσεις';
+  @override
+  String get featureOffJournal =>
+      'Ανενεργό: οι εγγραφές μένουν συνηθισμένες σημειώσεις';
+  @override
+  String get featureOffCalendar =>
+      'Ανενεργό: το calendar.txt μένει απλό αρχείο· χωρίς υπενθυμίσεις '
+      'γεγονότων';
+  @override
+  String get featureOffKind =>
+      'Ανενεργό: αυτές οι σημειώσεις ανοίγουν ως απλό Markdown· το type: '
+      'διατηρείται';
+  @override
+  String get featureOffTranscription =>
+      'Ανενεργό: χωρίς ενέργεια μεταγραφής· οι φωνητικές σημειώσεις '
+      'εξακολουθούν να ηχογραφούνται και να αναπαράγονται';
+  @override
+  String get featureOffReaders =>
+      'Ανενεργό: ανοίγουν στην εφαρμογή του συστήματος';
+  @override
+  String get featureOffAnnotations =>
+      'Ανενεργό: χωρίς επισημάνσεις ή σημάδια· οι σημειώσεις που έχουν ήδη '
+      'γίνει μένουν';
+  @override
+  String get featureOffOcr =>
+      'Ανενεργό: χωρίς σάρωση· το κείμενο που έχει ήδη διαβαστεί μένει';
+  @override
+  String get featureOffHome => 'Ανενεργό: χωρίς οθόνη και πλακίδια Αρχική';
+  @override
+  String get featureOffWidgets =>
+      'Ανενεργό: τα γραφικά στοιχεία δείχνουν ότι αυτό είναι απενεργοποιημένο';
+  @override
+  String get featuresIntroTitle => 'Επιλέξτε τι χρησιμοποιεί αυτή η βιβλιοθήκη';
+  @override
+  String get featuresIntroBody =>
+      'Το Niman σας αφήνει τώρα να επιλέξετε τι χρησιμοποιεί αυτή η '
+      'βιβλιοθήκη. Όλα είναι ενεργά· απενεργοποιήστε ό,τι δεν χρειάζεστε. '
+      'Μπορείτε να το αλλάξετε αργότερα στις Ρυθμίσεις → Λειτουργίες.';
+  @override
+  String get featuresIntroDone => 'Τέλος';
+  @override
+  String get featuresCreatedTitle => 'Σε τι χρησιμεύει αυτή η βιβλιοθήκη;';
+  @override
+  String get featuresCreatedBody =>
+      'Διαλέξτε μια αρχή. Ρυθμίζει μόνο τους διακόπτες παρακάτω· μπορείτε να '
+      'αλλάξετε οποιονδήποτε, τώρα ή αργότερα στις Ρυθμίσεις → Λειτουργίες.';
+  @override
+  String get featuresShowIntroTitle => 'Εμφάνιση ξανά αυτής της εισαγωγής';
+  @override
+  String get featuresShowIntroBody =>
+      'Η κάρτα που εξηγεί αυτή την οθόνη. Δεν αλλάζει κανέναν διακόπτη.';
+  @override
+  String get featuresShowIntroAction => 'Εμφάνιση';
+  @override
+  String featuresRemindersCancelled(int count) =>
+      count == 1 ? 'Ακυρώθηκε 1 υπενθύμιση' : 'Ακυρώθηκαν $count υπενθυμίσεις';
   @override
   String get navigationStart => 'Ανοίγει σε';
   @override

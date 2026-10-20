@@ -1505,6 +1505,15 @@ final class JapaneseStrings extends Strings {
   @override
   String get pinWidgetUnavailable => 'ホーム画面のウィジェットはAndroidで利用できます';
 
+  @override
+  String get widgetOffTodo => 'このライブラリではタスクがオフです';
+  @override
+  String get widgetOffStudy => 'このライブラリでは学習がオフです';
+  @override
+  String get widgetOffWidgets => 'このライブラリではホーム画面のウィジェットがオフです';
+  @override
+  String get widgetOpenFeatures => '機能を開く';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'ファイルマネージャーで表示';
@@ -3275,6 +3284,135 @@ final class JapaneseStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => '常に表示';
+  @override
+  String get featuresTitle => '機能';
+  @override
+  String get featureOffInFeatures => '機能でオフ';
+  @override
+  String get featureOffInLibrary => 'このライブラリでオフ';
+  @override
+  String featureOffInLibraryNamed(String feature) => '$feature はこのライブラリでオフです';
+  @override
+  String get featureNameSearch => '検索';
+  @override
+  String get featureNameQuickNote => 'クイックノート';
+  @override
+  String get featureNameTemplates => 'テンプレート';
+  @override
+  String get featureNameCapture => 'ウェブキャプチャ';
+  @override
+  String get featureNameTodo => 'タスクとリマインダー';
+  @override
+  String get featureNameJournal => '日記';
+  @override
+  String get featureNameCalendar => 'カレンダー';
+  @override
+  String get featureNameLists => 'リスト';
+  @override
+  String get featureNameShopping => '買い物リスト';
+  @override
+  String get featureNameAudio => '音声ノート';
+  @override
+  String get featureNameTranscription => '文字起こし';
+  @override
+  String get featureNameSlides => 'スライド';
+  @override
+  String get featureNameFlashcards => 'フラッシュカードと学習';
+  @override
+  String get featureNameReaders => 'PDF・EPUBリーダー';
+  @override
+  String get featureNameAnnotations => '注釈';
+  @override
+  String get featureNameOcr => '文字認識';
+  @override
+  String get featureNameHome => 'ホーム';
+  @override
+  String get featureNameWidgets => 'ホーム画面ウィジェット';
+  @override
+  String get featuresDescription =>
+      'このライブラリが使うもの。オフにするとあらゆる場所から消え、バックグラウンドの処理も止まります。ファイルは変更も削除もされません。';
+  @override
+  String get featuresPresetLabel => 'プリセット';
+  @override
+  String get featurePresetEverything => 'すべて';
+  @override
+  String get featurePresetWriting => '執筆';
+  @override
+  String get featurePresetNotesOnly => 'ノートのみ';
+  @override
+  String get featurePresetTasks => 'タスクと日記';
+  @override
+  String get featurePresetCustom => 'カスタム';
+  @override
+  String get featurePresetEverythingHint => 'アプリ全体';
+  @override
+  String get featurePresetWritingHint => 'ノート、検索、テンプレート、リーダー';
+  @override
+  String get featurePresetNotesOnlyHint => 'ノート、検索、リンク';
+  @override
+  String get featurePresetTasksHint => 'タスク、日記、カレンダー、ホーム';
+  @override
+  String get featuresSectionFinding => '探す・書く';
+  @override
+  String get featuresSectionPlanning => '計画';
+  @override
+  String get featuresSectionKinds => 'ノートの種類';
+  @override
+  String get featuresSectionReading => '読む';
+  @override
+  String get featuresSectionAround => 'アプリまわり';
+  @override
+  String featureNeeds(String feature) => '$feature が必要';
+  @override
+  String get featureOffSearch => 'オフ: 検索画面もコマンドもなし。インデックスは維持されます';
+  @override
+  String get featureOffQuickNote => 'オフ: 共有されたテキストは代わりに読み込むへ送られます';
+  @override
+  String get featureOffTemplates => 'オフ: 新しいノートと日記の項目は既定の内容で始まります';
+  @override
+  String get featureOffCapture => 'オフ: ページのキャプチャなし。リンクは通常のリンクのままです';
+  @override
+  String get featureOffTodo => 'オフ: todo.txt は通常のファイルのまま。リマインダーなし';
+  @override
+  String get featureOffJournal => 'オフ: 項目は通常のノートのままです';
+  @override
+  String get featureOffCalendar => 'オフ: calendar.txt は通常のファイルのまま。予定のリマインダーなし';
+  @override
+  String get featureOffKind => 'オフ: これらのノートは通常の Markdown として開きます。type: は保持されます';
+  @override
+  String get featureOffTranscription => 'オフ: 文字起こし操作なし。音声ノートの録音と再生はできます';
+  @override
+  String get featureOffReaders => 'オフ: システムのアプリで開きます';
+  @override
+  String get featureOffAnnotations => 'オフ: ハイライトも印もなし。作成済みのノートは残ります';
+  @override
+  String get featureOffOcr => 'オフ: スキャンなし。読み取り済みのテキストは残ります';
+  @override
+  String get featureOffHome => 'オフ: ホーム画面もタイルもなし';
+  @override
+  String get featureOffWidgets => 'オフ: ウィジェットにオフであることが表示されます';
+  @override
+  String get featuresIntroTitle => 'このライブラリが使うものを選びます';
+  @override
+  String get featuresIntroBody =>
+      'Niman では、このライブラリが使うものを選べるようになりました。今はすべてオンです。不要なものはオフにしてください。後から設定 → '
+      '機能で変更できます。';
+  @override
+  String get featuresIntroDone => '完了';
+  @override
+  String get featuresCreatedTitle => 'このライブラリは何のため？';
+  @override
+  String get featuresCreatedBody =>
+      '出発点を選んでください。下のスイッチを設定するだけで、どれでも今すぐでも後から設定 → 機能でも切り替えられます。';
+  @override
+  String get featuresShowIntroTitle => 'この案内をもう一度表示';
+  @override
+  String get featuresShowIntroBody => 'この画面を説明するカードです。スイッチは何も変わりません。';
+  @override
+  String get featuresShowIntroAction => '表示';
+  @override
+  String featuresRemindersCancelled(int count) =>
+      count == 1 ? 'リマインダー1件を取り消しました' : 'リマインダー$count件を取り消しました';
   @override
   String get navigationStart => '起動時の画面';
   @override

@@ -9,6 +9,8 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/files.dart';
+import 'package:niman/src/core/settings/features.dart';
+import 'package:niman/src/core/settings/library_features.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/ui/action_sheet.dart';
 import 'package:niman/src/ui/create_kinds.dart';
@@ -16,6 +18,7 @@ import 'package:niman/src/ui/file_icon.dart';
 import 'package:niman/src/ui/file_tree_context.dart';
 import 'package:niman/src/ui/menu_row.dart';
 import 'package:niman/src/ui/ocr/ocr_file_actions.dart';
+import 'package:niman/src/ui/palette/command_features.dart';
 import 'package:niman/src/ui/pointer_menu.dart';
 import 'package:niman/src/ui/strings.dart';
 
@@ -46,6 +49,7 @@ Future<String?> showRowMenuSheet(
   required Note note,
   required bool isQuickNote,
   bool offersRecognize = false,
+  Features features = const Features(),
   Rect? anchor,
 }) {
   return showActionSheet<String>(
@@ -59,6 +63,7 @@ Future<String?> showRowMenuSheet(
           note,
           isQuickNote: isQuickNote,
           offersRecognize: offersRecognize,
+          features: features,
         ).indexed) ...[
           if (index > 0) const Divider(height: 1, indent: 16, endIndent: 16),
           for (final entry in group)
@@ -89,6 +94,7 @@ Future<String?> showRowMenuAt(
   required Offset position,
   bool offersNewTab = false,
   bool offersRecognize = false,
+  Features features = const Features(),
 }) {
   return _showEntriesAt(
     context,
@@ -98,6 +104,7 @@ Future<String?> showRowMenuAt(
       isQuickNote: isQuickNote,
       offersNewTab: offersNewTab,
       offersRecognize: offersRecognize,
+      features: features,
     ),
   );
 }
@@ -114,6 +121,7 @@ Future<String?> showTreeBackgroundMenuAt(
   BuildContext context, {
   required Offset position,
   String? here,
+  Features features = const Features(),
 }) => _showEntriesAt(
   context,
   position: position,
@@ -126,14 +134,17 @@ Future<String?> showTreeBackgroundMenuAt(
         value: 'note',
         destructive: false,
       ),
-      (
-        key: const Key('tree-menu-new-from-template'),
-        icon: Icons.file_copy_outlined,
-        label: AppStrings.newFromTemplateHere,
-        value: 'template',
-        destructive: false,
-      ),
-      for (final kind in createKinds) _kindEntry(kind, 'tree-menu'),
+      if (features.isOn(LibraryFeature.templates))
+        (
+          key: const Key('tree-menu-new-from-template'),
+          icon: Icons.file_copy_outlined,
+          label: AppStrings.newFromTemplateHere,
+          value: 'template',
+          destructive: false,
+        ),
+      for (final kind in createKinds)
+        if (commandFeatureOn(kind.command, features))
+          _kindEntry(kind, 'tree-menu'),
       (
         key: const Key('tree-menu-new-folder'),
         icon: Icons.create_new_folder_outlined,
@@ -258,12 +269,14 @@ final class RowMenuHeader extends StatelessWidget {
 /// its menu is opened at all, or merely beside the note, which is the
 /// afterthought it looks like.
 ///
-/// [offersNewTab] adds Open in new tab first, where tabs exist (#23).
+/// [offersNewTab] adds Open in new tab first, where tabs exist (#23). An
+/// entry whose feature is off in [features] is left out (#1109).
 List<List<RowMenuEntry>> rowMenuGroups(
   Note note, {
   required bool isQuickNote,
   bool offersNewTab = false,
   bool offersRecognize = false,
+  Features features = const Features(),
 }) {
   // "Here" is the folder the row is, or the folder the note sits in —
   // two different places, and on a note the word was doing the reader no
@@ -276,21 +289,23 @@ List<List<RowMenuEntry>> rowMenuGroups(
       value: 'note',
       destructive: false,
     ),
-    (
-      key: const Key('menu-new-from-template'),
-      icon: Icons.file_copy_outlined,
-      label: note.isDir
-          ? AppStrings.newFromTemplateHere
-          : AppStrings.newFromTemplateSameFolder,
-      value: 'template',
-      destructive: false,
-    ),
+    if (features.isOn(LibraryFeature.templates))
+      (
+        key: const Key('menu-new-from-template'),
+        icon: Icons.file_copy_outlined,
+        label: note.isDir
+            ? AppStrings.newFromTemplateHere
+            : AppStrings.newFromTemplateSameFolder,
+        value: 'template',
+        destructive: false,
+      ),
     // The kinds whose folder is the choice, created here (#997): a voice
     // note, slides, a deck. A list note is left out — it is bound to the
     // list folder — and so are the journal and the capture, each bound to
     // a folder of its own.
     if (note.isDir)
-      for (final kind in createKinds) _kindEntry(kind, 'menu'),
+      for (final kind in createKinds)
+        if (commandFeatureOn(kind.command, features)) _kindEntry(kind, 'menu'),
     if (note.isDir)
       (
         key: const Key('menu-new-folder'),
@@ -303,7 +318,7 @@ List<List<RowMenuEntry>> rowMenuGroups(
 
   // What this note is: the roles it can be given, and its own past.
   final roles = <RowMenuEntry>[
-    if (!note.isDir)
+    if (!note.isDir && features.isOn(LibraryFeature.quickNote))
       (
         key: const Key('menu-quick-note'),
         icon: isQuickNote ? Icons.sticky_note_2 : Icons.sticky_note_2_outlined,
@@ -316,7 +331,7 @@ List<List<RowMenuEntry>> rowMenuGroups(
     // Any note, folders excluded: the next placed note widget adopts
     // the pin (issue 6). Shown everywhere; off Android the pin just
     // reports itself unavailable.
-    if (!note.isDir)
+    if (!note.isDir && features.isOn(LibraryFeature.widgets))
       (
         key: const Key('menu-pin-widget'),
         icon: Icons.widgets_outlined,
@@ -387,10 +402,11 @@ List<List<RowMenuEntry>> rowMenuGroups(
         value: 'beside',
         destructive: false,
       ),
-    // A note is also a file (issue #76). Desktop only: Android has no
-    // file manager to select a path in, so the entries stay off there
-    // rather than being shown and then failing.
-    if (!note.isDir && supportsTreeContextActions) ...[
+    // A note is also a file (issue #76). The file manager is the desktops':
+    // Android has no file manager to select a path in, so that entry stays
+    // off there rather than being shown and then failing. The default app
+    // is on Android too (#1109).
+    if (!note.isDir && supportsTreeContextActions)
       (
         key: const Key('menu-open-file-manager'),
         icon: Icons.folder_open_outlined,
@@ -398,6 +414,7 @@ List<List<RowMenuEntry>> rowMenuGroups(
         value: 'reveal',
         destructive: false,
       ),
+    if (!note.isDir && supportsOpenInDefaultApp)
       (
         key: const Key('menu-open-default-app'),
         icon: Icons.open_in_new,
@@ -405,7 +422,6 @@ List<List<RowMenuEntry>> rowMenuGroups(
         value: 'openexternal',
         destructive: false,
       ),
-    ],
     (
       key: const Key('menu-rename'),
       icon: Icons.edit_outlined,

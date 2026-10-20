@@ -1613,6 +1613,16 @@ final class PortugueseStrings extends Strings {
   String get pinWidgetUnavailable =>
       'Os widgets da tela inicial estão disponíveis no Android';
 
+  @override
+  String get widgetOffTodo => 'As tarefas estão desativadas nesta biblioteca';
+  @override
+  String get widgetOffStudy => 'O estudo está desativado nesta biblioteca';
+  @override
+  String get widgetOffWidgets =>
+      'Os widgets da tela inicial estão desativados nesta biblioteca';
+  @override
+  String get widgetOpenFeatures => 'Abrir funcionalidades';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Mostrar no gerenciador de arquivos';
@@ -3603,6 +3613,158 @@ final class PortugueseStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Sempre visível';
+  @override
+  String get featuresTitle => 'Funcionalidades';
+  @override
+  String get featureOffInFeatures => 'Desativado em Funcionalidades';
+  @override
+  String get featureOffInLibrary => 'Desativado nesta biblioteca';
+  @override
+  String featureOffInLibraryNamed(String feature) =>
+      'Desativado nesta biblioteca: $feature';
+  @override
+  String get featureNameSearch => 'Pesquisa';
+  @override
+  String get featureNameQuickNote => 'Nota rápida';
+  @override
+  String get featureNameTemplates => 'Modelos';
+  @override
+  String get featureNameCapture => 'Captura da web';
+  @override
+  String get featureNameTodo => 'Tarefas e lembretes';
+  @override
+  String get featureNameJournal => 'Diário';
+  @override
+  String get featureNameCalendar => 'Calendário';
+  @override
+  String get featureNameLists => 'Listas';
+  @override
+  String get featureNameShopping => 'Listas de compras';
+  @override
+  String get featureNameAudio => 'Notas de voz';
+  @override
+  String get featureNameTranscription => 'Transcrição';
+  @override
+  String get featureNameSlides => 'Apresentações';
+  @override
+  String get featureNameFlashcards => 'Cartões e estudo';
+  @override
+  String get featureNameReaders => 'Leitores de PDF e EPUB';
+  @override
+  String get featureNameAnnotations => 'Anotações';
+  @override
+  String get featureNameOcr => 'Reconhecimento de texto';
+  @override
+  String get featureNameHome => 'Início';
+  @override
+  String get featureNameWidgets => 'Widgets da tela inicial';
+  @override
+  String get featuresDescription =>
+      'O que esta biblioteca usa. Desativado, desaparece em todo o lado e o '
+      'trabalho em segundo plano para; nos seus ficheiros nada é alterado nem '
+      'apagado.';
+  @override
+  String get featuresPresetLabel => 'Predefinição';
+  @override
+  String get featurePresetEverything => 'Tudo';
+  @override
+  String get featurePresetWriting => 'Escrita';
+  @override
+  String get featurePresetNotesOnly => 'Só notas';
+  @override
+  String get featurePresetTasks => 'Tarefas e diário';
+  @override
+  String get featurePresetCustom => 'Personalizada';
+  @override
+  String get featurePresetEverythingHint => 'a app toda';
+  @override
+  String get featurePresetWritingHint => 'notas, pesquisa, modelos, leitores';
+  @override
+  String get featurePresetNotesOnlyHint => 'notas, pesquisa, ligações';
+  @override
+  String get featurePresetTasksHint => 'tarefas, diário, calendário, Início';
+  @override
+  String get featuresSectionFinding => 'Procurar e escrever';
+  @override
+  String get featuresSectionPlanning => 'Planeamento';
+  @override
+  String get featuresSectionKinds => 'Tipos de nota';
+  @override
+  String get featuresSectionReading => 'Leitura';
+  @override
+  String get featuresSectionAround => 'Em redor da app';
+  @override
+  String featureNeeds(String feature) => 'Precisa de $feature';
+  @override
+  String get featureOffSearch =>
+      'Desativado: sem ecrã nem comandos de pesquisa; o índice continua a ser '
+      'mantido';
+  @override
+  String get featureOffQuickNote =>
+      'Desativado: o texto partilhado vai para Importar';
+  @override
+  String get featureOffTemplates =>
+      'Desativado: as notas novas e as entradas do diário começam com o '
+      'conteúdo predefinido';
+  @override
+  String get featureOffCapture =>
+      'Desativado: sem captura de páginas; as ligações ficam como ligações '
+      'simples';
+  @override
+  String get featureOffTodo =>
+      'Desativado: todo.txt fica um ficheiro simples; sem lembretes';
+  @override
+  String get featureOffJournal => 'Desativado: as entradas ficam notas normais';
+  @override
+  String get featureOffCalendar =>
+      'Desativado: calendar.txt fica um ficheiro simples; sem lembretes de '
+      'eventos';
+  @override
+  String get featureOffKind =>
+      'Desativado: estas notas abrem-se como Markdown simples; type: é mantido';
+  @override
+  String get featureOffTranscription =>
+      'Desativado: sem ação de transcrever; as notas de voz continuam a '
+      'gravar e a reproduzir';
+  @override
+  String get featureOffReaders => 'Desativado: abrem-se na app do sistema';
+  @override
+  String get featureOffAnnotations =>
+      'Desativado: sem realces nem marcas; as notas já criadas ficam';
+  @override
+  String get featureOffOcr =>
+      'Desativado: sem digitalização; o texto já lido fica';
+  @override
+  String get featureOffHome => 'Desativado: sem ecrã nem mosaicos de Início';
+  @override
+  String get featureOffWidgets =>
+      'Desativado: os widgets mostram que está desativado';
+  @override
+  String get featuresIntroTitle => 'Escolha o que esta biblioteca usa';
+  @override
+  String get featuresIntroBody =>
+      'O Niman agora deixa-o escolher o que esta biblioteca usa. Tudo está '
+      'ativado; desative o que não precisar. Pode alterá-lo mais tarde em '
+      'Configurações → Funcionalidades.';
+  @override
+  String get featuresIntroDone => 'Concluído';
+  @override
+  String get featuresCreatedTitle => 'Para que serve esta biblioteca?';
+  @override
+  String get featuresCreatedBody =>
+      'Escolha um ponto de partida. Só define os interruptores abaixo; pode '
+      'alterar qualquer um, agora ou mais tarde em Configurações → '
+      'Funcionalidades.';
+  @override
+  String get featuresShowIntroTitle => 'Mostrar esta introdução outra vez';
+  @override
+  String get featuresShowIntroBody =>
+      'O cartão que explica este ecrã. Não altera nenhum interruptor.';
+  @override
+  String get featuresShowIntroAction => 'Mostrar';
+  @override
+  String featuresRemindersCancelled(int count) =>
+      count == 1 ? '1 lembrete cancelado' : '$count lembretes cancelados';
   @override
   String get navigationStart => 'Abre em';
   @override

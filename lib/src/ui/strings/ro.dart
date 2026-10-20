@@ -1618,6 +1618,18 @@ final class RomanianStrings extends Strings {
   String get pinWidgetUnavailable =>
       'Widgeturile de pe ecranul de start sunt disponibile pe Android';
 
+  @override
+  String get widgetOffTodo =>
+      'Sarcinile sunt dezactivate în această bibliotecă';
+  @override
+  String get widgetOffStudy => 'Studiul este dezactivat în această bibliotecă';
+  @override
+  String get widgetOffWidgets =>
+      'Widgeturile de pe ecranul de start sunt '
+      'dezactivate în această bibliotecă';
+  @override
+  String get widgetOpenFeatures => 'Deschide funcțiile';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Arată în managerul de fișiere';
@@ -3639,6 +3651,159 @@ final class RomanianStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Mereu vizibil';
+  @override
+  String get featuresTitle => 'Funcții';
+  @override
+  String get featureOffInFeatures => 'Dezactivat în Funcții';
+  @override
+  String get featureOffInLibrary => 'Dezactivat în această bibliotecă';
+  @override
+  String featureOffInLibraryNamed(String feature) =>
+      'Dezactivat în această bibliotecă: $feature';
+  @override
+  String get featureNameSearch => 'Căutare';
+  @override
+  String get featureNameQuickNote => 'Notă rapidă';
+  @override
+  String get featureNameTemplates => 'Șabloane';
+  @override
+  String get featureNameCapture => 'Salvarea paginilor web';
+  @override
+  String get featureNameTodo => 'Sarcini și mementouri';
+  @override
+  String get featureNameJournal => 'Jurnal';
+  @override
+  String get featureNameCalendar => 'Calendar';
+  @override
+  String get featureNameLists => 'Liste';
+  @override
+  String get featureNameShopping => 'Liste de cumpărături';
+  @override
+  String get featureNameAudio => 'Note vocale';
+  @override
+  String get featureNameTranscription => 'Transcriere';
+  @override
+  String get featureNameSlides => 'Prezentări';
+  @override
+  String get featureNameFlashcards => 'Carduri și studiu';
+  @override
+  String get featureNameReaders => 'Cititoare PDF și EPUB';
+  @override
+  String get featureNameAnnotations => 'Adnotări';
+  @override
+  String get featureNameOcr => 'Recunoașterea textului';
+  @override
+  String get featureNameHome => 'Acasă';
+  @override
+  String get featureNameWidgets => 'Widgeturi pentru ecranul de start';
+  @override
+  String get featuresDescription =>
+      'Ce folosește această bibliotecă. Dezactivat, dispare peste tot și '
+      'munca lui în fundal se oprește; în fișierele tale nu se schimbă și nu '
+      'se șterge nimic.';
+  @override
+  String get featuresPresetLabel => 'Presetare';
+  @override
+  String get featurePresetEverything => 'Totul';
+  @override
+  String get featurePresetWriting => 'Scriere';
+  @override
+  String get featurePresetNotesOnly => 'Doar notițe';
+  @override
+  String get featurePresetTasks => 'Sarcini și jurnal';
+  @override
+  String get featurePresetCustom => 'Personalizat';
+  @override
+  String get featurePresetEverythingHint => 'toată aplicația';
+  @override
+  String get featurePresetWritingHint => 'notițe, căutare, șabloane, cititoare';
+  @override
+  String get featurePresetNotesOnlyHint => 'notițe, căutare, legături';
+  @override
+  String get featurePresetTasksHint => 'sarcini, jurnal, calendar, Acasă';
+  @override
+  String get featuresSectionFinding => 'Căutare și scriere';
+  @override
+  String get featuresSectionPlanning => 'Planificare';
+  @override
+  String get featuresSectionKinds => 'Tipuri de notițe';
+  @override
+  String get featuresSectionReading => 'Citire';
+  @override
+  String get featuresSectionAround => 'În jurul aplicației';
+  @override
+  String featureNeeds(String feature) => 'Necesită $feature';
+  @override
+  String get featureOffSearch =>
+      'Dezactivat: fără ecran sau comenzi de căutare; indexul rămâne '
+      'actualizat';
+  @override
+  String get featureOffQuickNote =>
+      'Dezactivat: textul partajat merge în Importă';
+  @override
+  String get featureOffTemplates =>
+      'Dezactivat: notițele noi și intrările din jurnal încep cu conținutul '
+      'implicit';
+  @override
+  String get featureOffCapture =>
+      'Dezactivat: fără captură de pagini; linkurile rămân linkuri simple';
+  @override
+  String get featureOffTodo =>
+      'Dezactivat: todo.txt rămâne un fișier simplu; fără mementouri';
+  @override
+  String get featureOffJournal =>
+      'Dezactivat: intrările rămân notițe obișnuite';
+  @override
+  String get featureOffCalendar =>
+      'Dezactivat: calendar.txt rămâne un fișier simplu; fără mementouri '
+      'pentru evenimente';
+  @override
+  String get featureOffKind =>
+      'Dezactivat: aceste notițe se deschid ca Markdown simplu; type: se '
+      'păstrează';
+  @override
+  String get featureOffTranscription =>
+      'Dezactivat: fără acțiunea de transcriere; notițele vocale se '
+      'înregistrează și se redau în continuare';
+  @override
+  String get featureOffReaders =>
+      'Dezactivat: se deschid în aplicația sistemului';
+  @override
+  String get featureOffAnnotations =>
+      'Dezactivat: fără evidențieri sau semne; notițele deja create rămân';
+  @override
+  String get featureOffOcr =>
+      'Dezactivat: fără scanare; textul deja citit rămâne';
+  @override
+  String get featureOffHome => 'Dezactivat: fără ecran sau dale Acasă';
+  @override
+  String get featureOffWidgets =>
+      'Dezactivat: widgeturile arată că funcția este dezactivată';
+  @override
+  String get featuresIntroTitle => 'Alege ce folosește această bibliotecă';
+  @override
+  String get featuresIntroBody =>
+      'Niman îți permite acum să alegi ce folosește această bibliotecă. Totul '
+      'este activat; dezactivează ce nu ai nevoie. Poți schimba asta mai '
+      'târziu în Setări → Funcții.';
+  @override
+  String get featuresIntroDone => 'Gata';
+  @override
+  String get featuresCreatedTitle => 'Pentru ce este această bibliotecă?';
+  @override
+  String get featuresCreatedBody =>
+      'Alege un punct de plecare. Setează doar comutatoarele de mai jos; poți '
+      'schimba oricare dintre ele, acum sau mai târziu în Setări → Funcții.';
+  @override
+  String get featuresShowIntroTitle => 'Afișează din nou această introducere';
+  @override
+  String get featuresShowIntroBody =>
+      'Cardul care explică acest ecran. Nu schimbă niciun comutator.';
+  @override
+  String get featuresShowIntroAction => 'Afișează';
+  @override
+  String featuresRemindersCancelled(int count) =>
+      count == 1 ? '1 memento anulat' : '$count mementouri anulate';
   @override
   String get navigationStart => 'Se deschide pe';
   @override

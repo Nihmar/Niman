@@ -4,6 +4,8 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/settings/features.dart';
+import 'package:niman/src/core/settings/library_features.dart';
 import 'package:niman/src/widget/widget_note_ops.dart';
 import 'package:niman/src/widget/widget_toggle.dart';
 import 'package:niman/src/widget/widget_updater.dart';
@@ -187,6 +189,42 @@ void main() {
       });
     });
 
+    test('a list whose kind is off is drawn as plain text (#1109)', () async {
+      const list = '---\ntype: list\n---\n- [ ] milk\n';
+      final off = const Features().withSwitch(
+        LibraryFeature.kindList,
+        on: false,
+      );
+
+      final payload = jsonDecode(
+        await notePayloadFor('/lib', 'List.md', list, features: off),
+      ) as Map<String, Object?>;
+      expect(payload['kind'], 'note');
+      expect(payload['body'], contains('- [ ] milk'));
+      final on = jsonDecode(
+        await notePayloadFor('/lib', 'List.md', list),
+      ) as Map<String, Object?>;
+      expect(on['kind'], 'list');
+    });
+
+    test('the rows of a list that is off are left alone (#1109)', () async {
+      const list = '---\ntype: list\n---\n- [ ] milk\n';
+      final file = File(p.join(root.path, 'List.md'))..writeAsStringSync(list);
+      Future<Features> off(String _) async =>
+          const Features().withSwitch(LibraryFeature.kindList, on: false);
+
+      expect(
+        await toggleWidgetNoteRow(
+          toggleUri(3),
+          updater: recorder(),
+          readFeatures: off,
+        ),
+        isFalse,
+      );
+      expect(file.readAsStringSync(), list, reason: 'the file is untouched');
+      expect(saves, isEmpty);
+    });
+
     test('a stale line fails quiet', () async {
       File(p.join(root.path, 'List.md'))
           .writeAsStringSync('---\ntype: list\n---\n- [ ] milk\n');
@@ -278,6 +316,23 @@ void main() {
         },
       );
     }
+
+    test('an add into a list that is off is left alone (#1109)', () async {
+      const list = '---\ntype: list\n---\n- [ ] milk\n';
+      final file = File(p.join(root.path, 'List.md'))..writeAsStringSync(list);
+
+      expect(
+        await addWidgetNoteRow(
+          addUri('bread'),
+          updater: recorder(),
+          readFeatures: (_) async =>
+              const Features().withSwitch(LibraryFeature.kindList, on: false),
+        ),
+        isFalse,
+      );
+      expect(file.readAsStringSync(), list);
+      expect(saves, isEmpty);
+    });
 
     test('add appends the item and re-pushes the rows', () async {
       File(p.join(root.path, 'List.md'))

@@ -9,6 +9,7 @@ library;
 import 'dart:io';
 import 'dart:isolate';
 
+import 'package:flutter/services.dart';
 import 'package:path/path.dart' as p;
 import 'package:url_launcher/url_launcher.dart';
 
@@ -47,7 +48,11 @@ base class OsLauncher {
   const new();
 
   /// Opens [path] with the OS default application for its type.
-  Future<bool> openFile(String path) => launchUrl(Uri.file(path));
+  ///
+  /// On Android through the app's own bridge ([openFileOnAndroid]): a
+  /// `file:` URI is not one another app may be handed there.
+  Future<bool> openFile(String path) =>
+      Platform.isAndroid ? openFileOnAndroid(path) : launchUrl(Uri.file(path));
 
   /// Shows [path] in the OS file manager.
   Future<bool> revealFile(String path) async {
@@ -111,12 +116,37 @@ List<String> windowsRevealArgs(String path) => [
   path.replaceAll('/', r'\'),
 ];
 
-/// Whether this platform can hand a file to the OS at all.
+/// The channel the Android side opens a library file in another app over.
+const MethodChannel _openChannel = MethodChannel('niman/open');
+
+/// Hands the file at [path] to the Android app that opens its type, through
+/// a `content://` URI the app's FileProvider names for it (#1109).
 ///
-/// Desktop only: Android reaches its files through the system picker,
-/// has no file manager to select a path in, and cannot be given a
-/// filesystem path for an app to open.
+/// False when the file is gone, the provider will not name it, or no app
+/// opens its type: the caller says so, and nothing else changes.
+Future<bool> openFileOnAndroid(
+  String path, {
+  MethodChannel channel = _openChannel,
+}) async {
+  try {
+    return await channel.invokeMethod<bool>('openFile', {'path': path}) ??
+        false;
+  } on PlatformException {
+    return false;
+  } on MissingPluginException {
+    return false;
+  }
+}
+
+/// Whether this platform can show a file in a file manager.
+///
+/// Desktop only: Android has no file manager to select a path in.
 bool get supportsTreeContextActions => Platform.isLinux || Platform.isWindows;
+
+/// Whether this platform can hand a file to the application the system
+/// opens it with: the desktops, and Android through its FileProvider.
+bool get supportsOpenInDefaultApp =>
+    supportsTreeContextActions || Platform.isAndroid;
 
 /// Runs [action] on the file at [absolutePath], through [launcher].
 ///
@@ -128,7 +158,11 @@ Future<TreeContextOutcome> runTreeContextAction(
   TreeContextAction action, {
   OsLauncher launcher = const OsLauncher(),
 }) async {
-  if (!supportsTreeContextActions) return TreeContextOutcome.unsupported;
+  final supported = switch (action) {
+    TreeContextAction.openInFileManager => supportsTreeContextActions,
+    TreeContextAction.openInDefaultApp => supportsOpenInDefaultApp,
+  };
+  if (!supported) return TreeContextOutcome.unsupported;
   // Off the UI isolate like every other stat in the app: the library may
   // sit on a network share, where one `existsSync` is a round trip.
   final onDisk = await Isolate.run(() => File(absolutePath).existsSync());

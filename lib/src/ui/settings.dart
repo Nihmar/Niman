@@ -6,6 +6,7 @@ import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ocr/ocr_installation.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/transcription/transcription_models.dart';
+import 'package:niman/src/ui/features/features_host.dart';
 import 'package:niman/src/ui/keyboard_presence.dart';
 import 'package:niman/src/ui/settings_area.dart';
 import 'package:niman/src/ui/settings_area_rows.dart';
@@ -37,6 +38,7 @@ final class SettingsBody extends StatefulWidget {
     this.navigation,
     this.libraryRows = true,
     this.target,
+    this.featuresHost = const FeaturesHost(),
     super.key,
   });
 
@@ -74,6 +76,9 @@ final class SettingsBody extends StatefulWidget {
   /// Where to open: the area, and the row to flash in it (#229). Null
   /// opens the settings home, as a tap on Settings does.
   final SettingsTarget? target;
+
+  /// What the Features area asks of the shell (#1109).
+  final FeaturesHost featuresHost;
 
   @override
   State<SettingsBody> createState() => _SettingsBodyState();
@@ -222,6 +227,7 @@ final class _SettingsBodyState extends State<SettingsBody> {
     ocr: widget.ocr,
     keyboardAttached: _keyboard.attached,
     version: _version,
+    featuresHost: widget.featuresHost,
     openArea: _openArea,
   );
 
@@ -248,7 +254,8 @@ final class _SettingsBodyState extends State<SettingsBody> {
     final libraryName = _libraryName;
     final keyboardAttached = _keyboard.attached;
     return ListenableBuilder(
-      listenable: _keyboard,
+      // The areas follow the library's features too (#1109).
+      listenable: Listenable.merge([_keyboard, controller.features]),
       builder: (context, _) {
         return Column(
           children: [

@@ -96,6 +96,18 @@ class NoteWidgetProvider : HomeWidgetProvider() {
     private fun viewsFor(context: Context, id: Int, payload: String?): RemoteViews {
         val parsed = payload?.let { runCatching { JSONObject(it) }.getOrNull() }
         val library = parsed?.optString("library").orEmpty()
+        // The Home-screen widgets feature is off in this library (#1109):
+        // the sentence and the button, not the note.
+        WidgetOff.fromJson(parsed)?.let { off ->
+            return WidgetOffViews.build(
+                context,
+                id,
+                library,
+                off,
+                payload,
+                context.getString(R.string.widget_note_title_fallback),
+            )
+        }
         val note = parsed?.optString("note").orEmpty()
         val title = parsed?.optString("title").orEmpty()
             .ifEmpty { context.getString(R.string.widget_note_title_fallback) }

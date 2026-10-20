@@ -8,6 +8,8 @@ import 'package:niman/src/core/download/download_state.dart';
 import 'package:niman/src/core/download/downloader.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/resume_observer.dart';
+import 'package:niman/src/core/settings/library_features.dart';
+import 'package:niman/src/library/feature_download_gate.dart';
 import 'package:niman/src/transcription/transcription_model.dart';
 import 'package:niman/src/transcription/transcription_settings.dart';
 import 'package:niman/src/transcription/transcription_settings_store.dart';
@@ -24,11 +26,16 @@ export 'package:niman/src/core/download/downloader.dart' show DownloadStarter;
 /// retries and resumes, run in [Downloader].
 final class TranscriptionModels extends ChangeNotifier {
   /// Models kept in the directory [directory] resolves to.
+  ///
+  /// `downloadsAllowed` says whether the open library has transcription on
+  /// (#1109): while it does not, no model is fetched, not by a pick or a
+  /// resume.
   new({
     required Future<String> Function() directory,
     bool? phone,
     DownloadStarter? startDownload,
     List<Duration> retryDelays = Downloader.defaultRetryDelays,
+    bool Function()? downloadsAllowed,
   }) : _files = DownloadFiles(directory, transcriptionModels, log: _log),
        _store = TranscriptionSettingsStore(directory),
        phone = phone ?? Platform.isAndroid {
@@ -42,6 +49,7 @@ final class TranscriptionModels extends ChangeNotifier {
       log: _log,
       start: startDownload,
       retryDelays: retryDelays,
+      allowed: downloadsAllowed,
     );
   }
 
@@ -218,7 +226,11 @@ const _log = AppLogger(name: 'transcription');
 /// The installation's transcription models, shared by the settings, the
 /// models page and the audio notes.
 final transcriptionModelsProvider = Provider<TranscriptionModels>((ref) {
-  final models = TranscriptionModels(directory: WhisperController.getModelDir);
+  final models = TranscriptionModels(
+    directory: WhisperController.getModelDir,
+    // Read per download, from whichever library is open then.
+    downloadsAllowed: featureDownloadGate(ref, LibraryFeature.transcription),
+  );
   unawaited(models.load());
   // Back in the foreground: pick up the downloads the freeze cut off.
   final observer = ResumeObserver(() => unawaited(models.resumeInterrupted()));

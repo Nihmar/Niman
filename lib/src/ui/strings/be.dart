@@ -1604,6 +1604,16 @@ final class BelarusianStrings extends Strings {
   String get pinWidgetUnavailable =>
       'Віджэты галоўнага экрана даступныя ў Android';
 
+  @override
+  String get widgetOffTodo => 'Заданні адключаны ў гэтай бібліятэцы';
+  @override
+  String get widgetOffStudy => 'Вывучэнне адключана ў гэтай бібліятэцы';
+  @override
+  String get widgetOffWidgets =>
+      'Віджэты галоўнага экрана адключаны ў гэтай бібліятэцы';
+  @override
+  String get widgetOpenFeatures => 'Адкрыць функцыі';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Паказаць у файлавым менеджары';
@@ -3621,6 +3631,159 @@ final class BelarusianStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Заўсёды паказана';
+  @override
+  String get featuresTitle => 'Функцыі';
+  @override
+  String get featureOffInFeatures => 'Выключана ў Функцыях';
+  @override
+  String get featureOffInLibrary => 'Выключана ў гэтай бібліятэцы';
+  @override
+  String featureOffInLibraryNamed(String feature) =>
+      'Выключана ў гэтай бібліятэцы: $feature';
+  @override
+  String get featureNameSearch => 'Пошук';
+  @override
+  String get featureNameQuickNote => 'Хуткая заўвага';
+  @override
+  String get featureNameTemplates => 'Шаблоны';
+  @override
+  String get featureNameCapture => 'Захоп вэб-старонак';
+  @override
+  String get featureNameTodo => 'Заданні і напамінні';
+  @override
+  String get featureNameJournal => 'Дзённік';
+  @override
+  String get featureNameCalendar => 'Каляндар';
+  @override
+  String get featureNameLists => 'Спісы';
+  @override
+  String get featureNameShopping => 'Спісы пакупак';
+  @override
+  String get featureNameAudio => 'Галасавыя заўвагі';
+  @override
+  String get featureNameTranscription => 'Транскрыпцыя';
+  @override
+  String get featureNameSlides => 'Прэзентацыі';
+  @override
+  String get featureNameFlashcards => 'Картачкі і вывучэнне';
+  @override
+  String get featureNameReaders => 'Чытальнікі PDF і EPUB';
+  @override
+  String get featureNameAnnotations => 'Анатацыі';
+  @override
+  String get featureNameOcr => 'Распазнаванне тэксту';
+  @override
+  String get featureNameHome => 'Галоўная';
+  @override
+  String get featureNameWidgets => 'Віджэты галоўнага экрана';
+  @override
+  String get featuresDescription =>
+      'Што выкарыстоўвае гэтая бібліятэка. Выключанае схавана ўсюды, а яго '
+      'праца ў фоне спыняецца; у вашых файлах нічога не змяняецца і не '
+      'выдаляецца.';
+  @override
+  String get featuresPresetLabel => 'Набор';
+  @override
+  String get featurePresetEverything => 'Усё';
+  @override
+  String get featurePresetWriting => 'Пісьмо';
+  @override
+  String get featurePresetNotesOnly => 'Толькі нататкі';
+  @override
+  String get featurePresetTasks => 'Заданні і дзённік';
+  @override
+  String get featurePresetCustom => 'Уласны';
+  @override
+  String get featurePresetEverythingHint => 'ўся праграма';
+  @override
+  String get featurePresetWritingHint => 'нататкі, пошук, шаблоны, чытальнікі';
+  @override
+  String get featurePresetNotesOnlyHint => 'нататкі, пошук, спасылкі';
+  @override
+  String get featurePresetTasksHint => 'заданні, дзённік, каляндар, Галоўная';
+  @override
+  String get featuresSectionFinding => 'Пошук і пісьмо';
+  @override
+  String get featuresSectionPlanning => 'Планаванне';
+  @override
+  String get featuresSectionKinds => 'Віды нататак';
+  @override
+  String get featuresSectionReading => 'Чытанне';
+  @override
+  String get featuresSectionAround => 'Вакол праграмы';
+  @override
+  String featureNeeds(String feature) => 'Патрабуе: $feature';
+  @override
+  String get featureOffSearch =>
+      'Выключана: няма экрана і каманд пошуку; індэкс і далей вядзецца';
+  @override
+  String get featureOffQuickNote =>
+      'Выключана: падзелены тэкст ідзе ў: Імпартаваць';
+  @override
+  String get featureOffTemplates =>
+      'Выключана: новыя нататкі і запісы дзённіка пачынаюцца са стандартнага '
+      'пачатку';
+  @override
+  String get featureOffCapture =>
+      'Выключана: няма захавання старонак; спасылкі застаюцца звычайнымі '
+      'спасылкамі';
+  @override
+  String get featureOffTodo =>
+      'Выключана: todo.txt застаецца звычайным файлам; няма напамінаў';
+  @override
+  String get featureOffJournal =>
+      'Выключана: запісы застаюцца звычайнымі нататкамі';
+  @override
+  String get featureOffCalendar =>
+      'Выключана: calendar.txt застаецца звычайным файлам; няма напамінаў пра '
+      'падзеі';
+  @override
+  String get featureOffKind =>
+      'Выключана: гэтыя нататкі адчыняюцца як звычайны Markdown; type: '
+      'захоўваецца';
+  @override
+  String get featureOffTranscription =>
+      'Выключана: няма дзеяння транскрыпцыі; галасавыя нататкі і далей можна '
+      'запісваць і прайграваць';
+  @override
+  String get featureOffReaders => 'Выключана: адчыняюцца ў сістэмнай праграме';
+  @override
+  String get featureOffAnnotations =>
+      'Выключана: няма вылучэнняў і адзнак; ужо створаныя нататкі застаюцца';
+  @override
+  String get featureOffOcr =>
+      'Выключана: няма сканавання; ужо прачытаны тэкст застаецца';
+  @override
+  String get featureOffHome => 'Выключана: няма экрана і плітак Галоўная';
+  @override
+  String get featureOffWidgets =>
+      'Выключана: віджэты паказваюць, што гэта выключана';
+  @override
+  String get featuresIntroTitle =>
+      'Выберыце, што выкарыстоўвае гэтая бібліятэка';
+  @override
+  String get featuresIntroBody =>
+      'Niman цяпер дазваляе выбраць, што выкарыстоўвае гэтая бібліятэка. Усё '
+      'ўключана; выключыце тое, што вам не патрэбна. Змяніць гэта можна '
+      'пазней у: Налады → Функцыі.';
+  @override
+  String get featuresIntroDone => 'Гатова';
+  @override
+  String get featuresCreatedTitle => 'Для чаго гэтая бібліятэка?';
+  @override
+  String get featuresCreatedBody =>
+      'Выберыце пачатак. Ён толькі ўсталёўвае пераключальнікі ніжэй; любы з '
+      'іх можна змяніць, цяпер або пазней у: Налады → Функцыі.';
+  @override
+  String get featuresShowIntroTitle => 'Паказаць гэты ўступ зноў';
+  @override
+  String get featuresShowIntroBody =>
+      'Картка, якая тлумачыць гэты экран. Яна не змяняе ніводнага '
+      'пераключальніка.';
+  @override
+  String get featuresShowIntroAction => 'Паказаць';
+  @override
+  String featuresRemindersCancelled(int count) => 'Скасаваныя напаміны: $count';
   @override
   String get navigationStart => 'Адкрываецца на';
   @override

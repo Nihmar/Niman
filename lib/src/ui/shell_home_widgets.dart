@@ -12,9 +12,11 @@ import 'dart:async';
 
 import 'package:niman/src/core/app_theme.dart';
 import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/core/settings/library_features.dart';
 import 'package:niman/src/flashcards/deck_summary.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/todo/todo_store.dart';
+import 'package:niman/src/ui/intent_features.dart';
 import 'package:niman/src/ui/unsaved_notes.dart';
 import 'package:niman/src/widget/study_widget.dart';
 import 'package:niman/src/widget/widget_host.dart';
@@ -41,11 +43,20 @@ final class ShellHomeWidgets {
     required this.decks,
     required this.openTodo,
     required this.openStudy,
+    required this.openFeatures,
     required this.openNote,
     required this.mounted,
     required this.onTargetBlocked,
+    this.onRequest,
+    this.allows,
     this.unsaved,
   });
+
+  /// Lets a tap through to the feature it opens, or says that it is off
+  /// (#1109); null lets every tap through. A widget that is off is sent the
+  /// off payload, but a tap on one placed before it went off can still
+  /// arrive.
+  final bool Function(LibraryFeature? feature)? allows;
 
   /// The open library's session (and the one a target switches away from).
   final LibrarySession controller;
@@ -76,6 +87,10 @@ final class ShellHomeWidgets {
   /// Shows Study (#533).
   final void Function() openStudy;
 
+  /// Shows the Features settings (#1109): where the button of a widget
+  /// that is off lands.
+  final void Function() openFeatures;
+
   /// Opens a note by library-relative path, at an anchor when given.
   final void Function(String path, String? anchor) openNote;
 
@@ -88,6 +103,11 @@ final class ShellHomeWidgets {
   /// on a widget that did nothing says why.
   final void Function() onTargetBlocked;
 
+  /// Called when a tap on a widget asked for something to open, at launch
+  /// or while running: the Features introduction (#1109) is not shown over
+  /// a request from outside.
+  final void Function()? onRequest;
+
   /// The target a library switch is carrying.
   ///
   /// Static because the switch is what tears this flow down: the shell
@@ -99,14 +119,21 @@ final class ShellHomeWidgets {
 
   /// Starts listening: widget taps, and the theme the payloads wear.
   void start() {
-    _taps = targets.targets.listen((target) => unawaited(applyTarget(target)));
+    _taps = targets.targets.listen((target) {
+      onRequest?.call();
+      unawaited(applyTarget(target));
+    });
     AppThemes.revision.addListener(pushAll);
+    // A switch flipped here or brought by a sync: the widgets of a feature
+    // that went off show it, and those that came back show their data.
+    controller.features.addListener(pushAll);
   }
 
   /// Stops listening. The pended target is deliberately left alone — it
   /// belongs to the shell this one is making way for.
   Future<void> dispose() async {
     AppThemes.revision.removeListener(pushAll);
+    controller.features.removeListener(pushAll);
     await _taps?.cancel();
   }
 
@@ -182,6 +209,7 @@ final class ShellHomeWidgets {
     final pending = _pending;
     _pending = null;
     if (pending != null) {
+      onRequest?.call();
       final current = controller.root;
       if (current != null &&
           p.normalize(pending.libraryPath) == p.normalize(current)) {
@@ -193,6 +221,7 @@ final class ShellHomeWidgets {
     }
     final target = await targets.consumeLaunchTarget();
     if (target == null) return;
+    onRequest?.call();
     await applyTarget(target);
   }
 
@@ -244,11 +273,14 @@ final class ShellHomeWidgets {
   /// tab/note the equivalent in-app control opens.
   void _open(WidgetTarget target) {
     if (!mounted()) return;
+    if (allows?.call(featureOfWidgetTarget(target.kind)) == false) return;
     switch (target.kind) {
       case WidgetTargetKind.todo:
         openTodo();
       case WidgetTargetKind.study:
         openStudy();
+      case WidgetTargetKind.features:
+        openFeatures();
       case WidgetTargetKind.note:
         final note = target.notePath;
         if (note != null) openNote(note, target.anchor);

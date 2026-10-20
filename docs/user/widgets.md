@@ -3,6 +3,8 @@
 Android only — on Linux and Windows the **Pin to home widget** row
 just says the widgets are unavailable.
 
+A widget whose feature is switched off in [Features](features.md) says so, and tapping it opens Settings → Features.
+
 Add one from the launcher: long-press the home screen, then
 **Widgets** → **Niman Todos**, **Niman Note** or **Niman Study**. Placement walks a
 short setup dialog: pick the library from the ones you have open

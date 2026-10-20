@@ -4,11 +4,16 @@
 ///
 /// The preview is the bar or the rail itself, drawn from the layout being
 /// edited: what the shell will show, not a picture of it.
+///
+/// A destination whose feature the library has off (#1109) keeps its row,
+/// greyed, with a link to Features where its switch was. The layout it is
+/// kept in is not touched, and the preview leaves it out.
 library;
 
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:niman/src/core/settings/features.dart';
 import 'package:niman/src/core/settings/navigation_layout.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/app_switch.dart';
@@ -23,10 +28,19 @@ import 'package:niman/src/ui/strings.dart';
 final class SettingsNavigationLayoutScreen extends StatefulWidget {
   /// The area for [controller]'s library; [highlight] is the row the
   /// settings search landed on.
-  const new({required this.controller, this.highlight, super.key});
+  const new({
+    required this.controller,
+    this.highlight,
+    this.openFeatures,
+    super.key,
+  });
 
   /// The session holding the settings.
   final LibrarySession controller;
+
+  /// Opens Settings → Features, from the link of a row whose feature is
+  /// off; null leaves the link as text.
+  final VoidCallback? openFeatures;
 
   /// The row to flash, or null.
   final Key? highlight;
@@ -46,13 +60,22 @@ final class _SettingsNavigationLayoutScreenState
     super.initState();
     unawaited(_load());
     _sessionEvents = widget.controller.events.listen((_) => unawaited(_load()));
+    widget.controller.features.addListener(_onFeaturesChanged);
   }
 
   @override
   void dispose() {
+    widget.controller.features.removeListener(_onFeaturesChanged);
     unawaited(_sessionEvents?.cancel());
     super.dispose();
   }
+
+  /// A switch of Features: the rows and the preview follow it.
+  void _onFeaturesChanged() {
+    if (mounted) setState(() {});
+  }
+
+  Features get _features => widget.controller.features.value;
 
   Future<void> _load() async {
     final navigation = await widget.controller.ops?.navigation;
@@ -74,9 +97,7 @@ final class _SettingsNavigationLayoutScreenState
   }
 
   /// The layout with [placed] as the user left it.
-  Future<void> _keep(
-    List<({ShellDestination destination, bool hidden})> placed,
-  ) => _save(
+  Future<void> _keep(List<PlacedShellDestination> placed) => _save(
     _layout.keep([
       for (final p in placed) (name: p.destination.name, hidden: p.hidden),
     ]),
@@ -87,8 +108,8 @@ final class _SettingsNavigationLayoutScreenState
   Widget build(BuildContext context) {
     final navigation = _navigation;
     final theme = Theme.of(context);
-    final placed = placedDestinations(_layout);
-    final visible = visibleDestinations(_layout);
+    final placed = placedDestinations(_layout, features: _features);
+    final visible = visibleDestinations(_layout, features: _features);
     final wide = isWideShell(context);
     final list = ReorderableListView(
       key: const Key('navigation-layout-list'),
@@ -157,8 +178,18 @@ final class _SettingsNavigationLayoutScreenState
               index: i,
               child: const Icon(Icons.drag_handle),
             ),
+            // A feature that is off: the row keeps its place, greyed, and
+            // the link to Features stands where the switch was (#1109).
+            enabled: !p.off,
             title: Text(p.destination.label),
-            trailing: lockedDestinations.contains(p.destination.name)
+            subtitle: p.off ? Text(AppStrings.featureOffInLibrary) : null,
+            trailing: p.off
+                ? TextButton(
+                    key: Key('navigation-features-${p.destination.name}'),
+                    onPressed: widget.openFeatures,
+                    child: Text('${AppStrings.featureOffInFeatures} ›'),
+                  )
+                : lockedDestinations.contains(p.destination.name)
                 ? Tooltip(
                     message: AppStrings.navigationAlwaysShown,
                     child: const Padding(
@@ -177,7 +208,11 @@ final class _SettingsNavigationLayoutScreenState
                             _keep([
                               for (final q in placed)
                                 if (q.destination == p.destination)
-                                  (destination: q.destination, hidden: !shown)
+                                  (
+                                    destination: q.destination,
+                                    hidden: !shown,
+                                    off: q.off,
+                                  )
                                 else
                                   q,
                             ]),
@@ -217,11 +252,12 @@ final class _SettingsNavigationLayoutScreenState
   /// can be; a chosen one hidden since says which took its place.
   Widget _startRow(ThemeData theme) {
     final layout = _layout;
-    final starts = startDestinations(layout);
-    final start = startDestination(layout);
+    final features = _features;
+    final starts = startDestinations(layout, features: features);
+    final start = startDestination(layout, features: features);
     String? hiddenStart;
     if (layout.start case final name?) {
-      for (final p in placedDestinations(layout)) {
+      for (final p in placedDestinations(layout, features: features)) {
         if (p.destination.name == name && p.destination.tab != start) {
           hiddenStart = p.destination.label;
         }
@@ -232,7 +268,10 @@ final class _SettingsNavigationLayoutScreenState
       key: SettingsKeys.navigationStart,
       child: ListTile(
         title: Text(AppStrings.navigationStart),
-        subtitle: switch ((hiddenStart, startLabel(layout))) {
+        subtitle: switch ((
+          hiddenStart,
+          startLabel(layout, features: features),
+        )) {
           (final hidden?, final shown?) => Text(
             AppStrings.navigationStartHidden(hidden, shown),
           ),

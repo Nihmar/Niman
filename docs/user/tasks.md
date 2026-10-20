@@ -3,6 +3,8 @@
 The Todo tab reads `todo.txt` files (todo.txt grammar: `x (A)
 2016-05-20 2016-04-30 description +project @context #tag key:value`).
 
+Todo and Calendar are [Features](features.md). Switched off, `todo.txt` and `calendar.txt` stay plain files, the reminders already scheduled are cancelled, and none is scheduled until it is switched on again.
+
 ## The list
 
 The open tasks come in sections that follow the sort:

@@ -1604,6 +1604,16 @@ final class IcelandicStrings extends Strings {
   @override
   String get pinWidgetUnavailable => 'Forsíðu-vísí eru til fáan á Android';
 
+  @override
+  String get widgetOffTodo => 'Verkefni eru óvirk í þessu bókasafni';
+  @override
+  String get widgetOffStudy => 'Nám er óvirkt í þessu bókasafni';
+  @override
+  String get widgetOffWidgets =>
+      'Græjur á heimaskjá eru óvirkar í þessu bókasafni';
+  @override
+  String get widgetOpenFeatures => 'Opna eiginleika';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Sýna í skráastjóra';
@@ -3579,6 +3589,156 @@ final class IcelandicStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Alltaf sýnt';
+  @override
+  String get featuresTitle => 'Eiginleikar';
+  @override
+  String get featureOffInFeatures => 'Óvirkt í Eiginleikum';
+  @override
+  String get featureOffInLibrary => 'Óvirkt í þessu bókasafni';
+  @override
+  String featureOffInLibraryNamed(String feature) =>
+      'Óvirkt í þessu bókasafni: $feature';
+  @override
+  String get featureNameSearch => 'Leit';
+  @override
+  String get featureNameQuickNote => 'Hraðminnisblað';
+  @override
+  String get featureNameTemplates => 'Smíðar';
+  @override
+  String get featureNameCapture => 'Vefsíðuvistun';
+  @override
+  String get featureNameTodo => 'Verkefni og minnisbrot';
+  @override
+  String get featureNameJournal => 'Dagbók';
+  @override
+  String get featureNameCalendar => 'Dagatal';
+  @override
+  String get featureNameLists => 'Listar';
+  @override
+  String get featureNameShopping => 'Innkaupalistar';
+  @override
+  String get featureNameAudio => 'Raddminnisblöð';
+  @override
+  String get featureNameTranscription => 'Umritun';
+  @override
+  String get featureNameSlides => 'Kynningar';
+  @override
+  String get featureNameFlashcards => 'Minniskort og nám';
+  @override
+  String get featureNameReaders => 'PDF- og EPUB-lesarar';
+  @override
+  String get featureNameAnnotations => 'Athugasemdir';
+  @override
+  String get featureNameOcr => 'Textagreining';
+  @override
+  String get featureNameHome => 'Heim';
+  @override
+  String get featureNameWidgets => 'Vísar á heimaskjá';
+  @override
+  String get featuresDescription =>
+      'Hvað þetta bókasafn notar. Þegar slökkt er, er það falið alls staðar '
+      'og vinna þess í bakgrunni stöðvast; engu í skrám þínum er breytt eða '
+      'eytt.';
+  @override
+  String get featuresPresetLabel => 'Forstilling';
+  @override
+  String get featurePresetEverything => 'Allt';
+  @override
+  String get featurePresetWriting => 'Skrif';
+  @override
+  String get featurePresetNotesOnly => 'Aðeins minnismiðar';
+  @override
+  String get featurePresetTasks => 'Verkefni og dagbók';
+  @override
+  String get featurePresetCustom => 'Sérsniðið';
+  @override
+  String get featurePresetEverythingHint => 'allt forritið';
+  @override
+  String get featurePresetWritingHint => 'minnismiðar, leit, sniðmát, lesarar';
+  @override
+  String get featurePresetNotesOnlyHint => 'minnismiðar, leit, tenglar';
+  @override
+  String get featurePresetTasksHint => 'verkefni, dagbók, dagatal, Heim';
+  @override
+  String get featuresSectionFinding => 'Leit og skrif';
+  @override
+  String get featuresSectionPlanning => 'Skipulag';
+  @override
+  String get featuresSectionKinds => 'Tegundir minnismiða';
+  @override
+  String get featuresSectionReading => 'Lestur';
+  @override
+  String get featuresSectionAround => 'Í kringum forritið';
+  @override
+  String featureNeeds(String feature) => 'Þarf $feature';
+  @override
+  String get featureOffSearch =>
+      'Slökkt: engin leitarskjámynd eða leitarskipanir; vísirinn er enn '
+      'haldinn við';
+  @override
+  String get featureOffQuickNote =>
+      'Slökkt: deildur texti fer í Flytja inn í staðinn';
+  @override
+  String get featureOffTemplates =>
+      'Slökkt: nýir minnismiðar og dagbókarfærslur byrja með sjálfgefnu efni';
+  @override
+  String get featureOffCapture =>
+      'Slökkt: engin vistun vefsíðna; tenglar haldast venjulegir tenglar';
+  @override
+  String get featureOffTodo =>
+      'Slökkt: todo.txt helst venjuleg skrá; engar áminningar';
+  @override
+  String get featureOffJournal =>
+      'Slökkt: færslur haldast venjulegir minnismiðar';
+  @override
+  String get featureOffCalendar =>
+      'Slökkt: calendar.txt helst venjuleg skrá; engar áminningar um viðburði';
+  @override
+  String get featureOffKind =>
+      'Slökkt: þessir minnismiðar opnast sem venjulegt Markdown; type: er '
+      'haldið';
+  @override
+  String get featureOffTranscription =>
+      'Slökkt: engin umritunaraðgerð; hljóðminnismiðar eru enn teknir upp og '
+      'spilaðir';
+  @override
+  String get featureOffReaders => 'Slökkt: þau opnast í kerfisforritinu';
+  @override
+  String get featureOffAnnotations =>
+      'Slökkt: engar auðkenningar eða merki; minnismiðar sem þegar eru gerðir '
+      'haldast';
+  @override
+  String get featureOffOcr =>
+      'Slökkt: engin skönnun; texti sem þegar er lesinn helst';
+  @override
+  String get featureOffHome => 'Slökkt: engin Heim-skjámynd eða reitir';
+  @override
+  String get featureOffWidgets => 'Slökkt: græjur sýna að þetta er slökkt';
+  @override
+  String get featuresIntroTitle => 'Veldu hvað þetta bókasafn notar';
+  @override
+  String get featuresIntroBody =>
+      'Niman leyfir þér nú að velja hvað þetta bókasafn notar. Allt er virkt; '
+      'slökktu á því sem þú þarft ekki. Þú getur breytt þessu síðar í '
+      'Stillingar → Eiginleikar.';
+  @override
+  String get featuresIntroDone => 'Lokið';
+  @override
+  String get featuresCreatedTitle => 'Til hvers er þetta bókasafn?';
+  @override
+  String get featuresCreatedBody =>
+      'Veldu upphaf. Það stillir aðeins rofana hér að neðan; þú getur breytt '
+      'hverjum þeirra, núna eða síðar í Stillingar → Eiginleikar.';
+  @override
+  String get featuresShowIntroTitle => 'Sýna þessa kynningu aftur';
+  @override
+  String get featuresShowIntroBody =>
+      'Spjaldið sem útskýrir þessa skjámynd. Það breytir engum rofa.';
+  @override
+  String get featuresShowIntroAction => 'Sýna';
+  @override
+  String featuresRemindersCancelled(int count) =>
+      count == 1 ? '1 áminningu aflýst' : '$count áminningum aflýst';
   @override
   String get navigationStart => 'Opnast á';
   @override

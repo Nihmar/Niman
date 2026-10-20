@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/core/settings/library_features.dart';
 import 'package:niman/src/core/settings/library_settings.dart'
     show LinkType, defaultAttachmentsFolder;
 import 'package:niman/src/frontmatter/note_kind.dart';
@@ -39,6 +40,9 @@ String audioNoteContent() => '---\ntype: audio\n---\n';
 final class AudioKindGui implements NoteKindGUI {
   @override
   String get type => 'audio';
+
+  @override
+  LibraryFeature get feature => LibraryFeature.kindAudio;
 
   @override
   Widget buildBody(BuildContext context, NoteKindHost host) {

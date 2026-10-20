@@ -32,7 +32,9 @@ final class OcrInstallation extends ChangeNotifier {
   /// build is published); `findInstalled` looks for one already on the
   /// device, on a worker isolate in the app; `probe` opens a freshly
   /// downloaded engine and answers its version, or null when this device
-  /// will not load it.
+  /// will not load it. `downloadsAllowed` says whether the open library
+  /// has text recognition on (#1109): while it does not, nothing is fetched,
+  /// not by a click, a recognition or a resume.
   new({
     required Future<String> Function() directory,
     required this.build,
@@ -40,6 +42,7 @@ final class OcrInstallation extends ChangeNotifier {
     required this._probe,
     DownloadStarter? startDownload,
     List<Duration> retryDelays = Downloader.defaultRetryDelays,
+    bool Function()? downloadsAllowed,
   }) : _directory = directory,
        _settingsFile = JsonFile(directory, settingsFileName),
        _catalog = {
@@ -57,6 +60,7 @@ final class OcrInstallation extends ChangeNotifier {
       log: _log,
       start: startDownload,
       retryDelays: retryDelays,
+      allowed: downloadsAllowed,
     );
   }
 

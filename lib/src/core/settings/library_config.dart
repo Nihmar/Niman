@@ -5,6 +5,7 @@ import 'package:meta/meta.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/settings/device_settings_store.dart';
+import 'package:niman/src/core/settings/features.dart';
 import 'package:niman/src/core/settings/library_settings.dart'
     show
         EditorKind,
@@ -450,6 +451,8 @@ final class LibraryConfig {
     this.navigation,
     this.deviceNavigation,
     this.deviceHome,
+    this.features = const Features(),
+    this.featuresReviewed = false,
     this.extra = const {},
   });
 
@@ -593,6 +596,8 @@ final class LibraryConfig {
         },
         _ => null,
       },
+      features: Features.fromJson(json['features']),
+      featuresReviewed: _boolOr(json['featuresReviewed'], false),
       extra: extra,
     );
   }
@@ -822,6 +827,14 @@ final class LibraryConfig {
   /// it wins over the file.
   final Map<String, Object?>? deviceHome;
 
+  /// Which of the library's features are on (#1109); every one when the
+  /// file has no `features` key.
+  final Features features;
+
+  /// Whether the Features introduction has been seen in this library; false
+  /// when the file does not say.
+  final bool featuresReviewed;
+
   /// Keys this build does not understand, preserved verbatim.
   final Map<String, Object?> extra;
 
@@ -877,6 +890,8 @@ final class LibraryConfig {
     bool clearDeviceNavigation = false,
     Map<String, Object?>? deviceHome,
     bool clearDeviceHome = false,
+    Features? features,
+    bool? featuresReviewed,
   }) {
     return LibraryConfig(
       trashEnabled: trashEnabled ?? this.trashEnabled,
@@ -932,6 +947,8 @@ final class LibraryConfig {
           ? null
           : deviceNavigation ?? this.deviceNavigation,
       deviceHome: clearDeviceHome ? null : deviceHome ?? this.deviceHome,
+      features: features ?? this.features,
+      featuresReviewed: featuresReviewed ?? this.featuresReviewed,
       extra: extra,
     );
   }
@@ -1074,6 +1091,8 @@ final class LibraryConfig {
     'navigation',
     'deviceNavigation',
     'deviceHome',
+    'features',
+    'featuresReviewed',
     ...JournalSettings.keys,
     ...EpubLook.keys,
   };
@@ -1151,6 +1170,11 @@ final class LibraryConfig {
       json['deviceNavigation'] = layout.toJson();
     }
     if (deviceHome case final home?) json['deviceHome'] = home;
+    // Only the switches that are off: a library that never opens the
+    // screen writes no key, and its file stays as it was.
+    final off = features.toJson();
+    if (off.isNotEmpty) json['features'] = off;
+    if (featuresReviewed) json['featuresReviewed'] = true;
     if (lintRulesOff.isNotEmpty) {
       // Canonical order, so the file does not churn on a set rebuilt
       // insertion-ordered differently.
@@ -1258,6 +1282,8 @@ final class LibraryConfig {
         navigation == other.navigation &&
         deviceNavigation == other.deviceNavigation &&
         _deepEquals(deviceHome, other.deviceHome) &&
+        features == other.features &&
+        featuresReviewed == other.featuresReviewed &&
         _deepEquals(extra, other.extra);
   }
 

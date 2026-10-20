@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:niman/src/core/settings/device_settings_store.dart';
+import 'package:niman/src/core/settings/features.dart';
 import 'package:niman/src/core/settings/library_config.dart';
 
 /// The open library's settings, read once from
@@ -23,13 +25,16 @@ final class LibraryConfigRepo {
     String libraryPath, {
     DeviceSettingsStore? device,
     Map<String, Object?>? welcomeDefaults,
-  }) : _store = LibraryConfigStore(
+    ValueNotifier<Features>? features,
+  }) : _features = features ?? ValueNotifier(const Features()),
+       _store = LibraryConfigStore(
          libraryPath,
          device: device,
          welcomeDefaults: welcomeDefaults,
        );
 
   final LibraryConfigStore _store;
+  final ValueNotifier<Features> _features;
 
   Future<LibraryConfig>? _config;
   Future<void> _chain = Future<void>.value();
@@ -38,16 +43,30 @@ final class LibraryConfigRepo {
   /// file for upload); a change of a device setting alone does not.
   void Function()? onWritten;
 
+  /// The library's features (#1109), as the settings hold them: every one
+  /// on until the file has been read, then the value of each read, write
+  /// and reload that changes it. What every surface rebuilds from.
+  ValueListenable<Features> get features => _features;
+
   /// The library's settings; the first call reads the file, later ones
   /// return the cached value.
-  Future<LibraryConfig> get config => _config ??= _store.read();
+  Future<LibraryConfig> get config => _config ??= _store.read().then(_seen);
+
+  LibraryConfig _seen(LibraryConfig config) {
+    _features.value = config.features;
+    return config;
+  }
 
   /// Drops the cached settings, so the next read comes from the file —
   /// after something other than this repo replaced it (a sync download).
   /// Waits for a write in progress, which would otherwise put its own
-  /// copy back into the cache.
+  /// copy back into the cache. The file is read again at once, so a change
+  /// a sync brought reaches whoever listens to [features].
   Future<void> reload() {
-    final next = _chain.then((_) => _config = null);
+    final next = _chain.then((_) async {
+      _config = null;
+      await config;
+    });
     _chain = next.then<void>((_) {}, onError: (Object _) {});
     return next;
   }
@@ -62,6 +81,7 @@ final class LibraryConfigRepo {
       if (updated == current) return;
       final fileChanged = await _store.write(updated);
       _config = Future<LibraryConfig>.value(updated);
+      _features.value = updated.features;
       if (fileChanged) onWritten?.call();
     });
     _chain = next.then<void>((_) {}, onError: (Object _) {});

@@ -10,10 +10,25 @@ library;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:niman/src/core/settings/features.dart';
+import 'package:niman/src/core/settings/library_features.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/workspace/workspace.dart';
 
-/// The dock: a row of pane tabs and a close, over the pane shown.
+/// The feature [pane] belongs to (#1109), or null for a core one: the
+/// note's own, and the library's journal calendar for the journal.
+LibraryFeature? featureOfDockPane(DockPane pane) => switch (pane) {
+  DockPane.journal => LibraryFeature.journal,
+  DockPane.outline ||
+  DockPane.spelling ||
+  DockPane.tags ||
+  DockPane.links ||
+  DockPane.history => null,
+};
+
+/// The dock: a row of pane tabs and a close, over the pane shown. A pane
+/// whose feature is off in [features] has no tab, and the dock shows the
+/// outline in its place until it is back; the pane it was left on is kept.
 final class RightDock extends StatelessWidget {
   /// Shows [pane], built by [paneBuilder].
   const new({
@@ -21,8 +36,18 @@ final class RightDock extends StatelessWidget {
     required this.onPane,
     required this.onClose,
     required this.paneBuilder,
+    this.features = const Features(),
     super.key,
   });
+
+  /// The library's features.
+  final Features features;
+
+  /// Whether [pane] has a place in the dock.
+  bool _offers(DockPane pane) => switch (featureOfDockPane(pane)) {
+    final feature? => features.isOn(feature),
+    null => true,
+  };
 
   /// The pane showing.
   final DockPane pane;
@@ -71,6 +96,7 @@ final class RightDock extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final shown = _offers(pane) ? pane : DockPane.outline;
     return Material(
       key: const Key('right-dock'),
       color: scheme.surfaceContainerLow,
@@ -86,13 +112,20 @@ final class RightDock extends StatelessWidget {
                 // beside it — the smaller one — keeps a little width.
                 Flexible(
                   flex: 2,
-                  child: _PaneTabs(pane: pane, onPane: onPane),
+                  child: _PaneTabs(
+                    pane: shown,
+                    panes: [
+                      for (final each in DockPane.values)
+                        if (_offers(each)) each,
+                    ],
+                    onPane: onPane,
+                  ),
                 ),
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                     child: Text(
-                      _label(pane),
+                      _label(shown),
                       textAlign: TextAlign.end,
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.labelMedium?.copyWith(
@@ -113,7 +146,7 @@ final class RightDock extends StatelessWidget {
             ),
           ),
           const Divider(height: 1),
-          Expanded(child: paneBuilder(pane)),
+          Expanded(child: paneBuilder(shown)),
         ],
       ),
     );
@@ -131,10 +164,13 @@ final class RightDock extends StatelessWidget {
 /// dock (200 px) at a thumb's sizes, and a tab a thumb cannot hit is worse
 /// than a strip that scrolls.
 final class _PaneTabs extends StatefulWidget {
-  const new({required this.pane, required this.onPane});
+  const new({required this.pane, required this.panes, required this.onPane});
 
   /// The pane showing, drawn as the selected tab.
   final DockPane pane;
+
+  /// The panes there are tabs for, in order.
+  final List<DockPane> panes;
 
   /// Shows another pane.
   final ValueChanged<DockPane> onPane;
@@ -209,7 +245,7 @@ final class _PaneTabsState extends State<_PaneTabs> {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              for (final each in DockPane.values)
+              for (final each in widget.panes)
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 1),
                   child: IconButton(

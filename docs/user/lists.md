@@ -7,6 +7,8 @@ field at the bottom adds the next one. The note is still an ordinary
 `.md` file — the raw editor (the pencil beside the ⋮) always has it, and
 everything the GUI writes is plain Markdown.
 
+Lists and Shopping lists are [Features](features.md). Switched off, these notes open as plain Markdown with their `type:` kept.
+
 ```markdown
 ---
 type: list

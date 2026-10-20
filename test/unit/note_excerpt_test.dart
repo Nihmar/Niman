@@ -1,5 +1,7 @@
 // Note excerpts (issue 6): titles, prose excerpts and checklist rows.
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/settings/features.dart';
+import 'package:niman/src/core/settings/library_features.dart';
 import 'package:niman/src/widget/note_excerpt.dart';
 
 void main() {
@@ -19,6 +21,25 @@ void main() {
       );
       expect(isListNoteContent('# plain note\n'), isFalse);
       expect(isListNoteContent('---\ntype: audio\n---\n'), isFalse);
+    });
+
+    test('a list kind that is off is a plain note (#1109)', () {
+      const list = '---\ntype: list\n---\n- [ ] milk\n';
+      const shopping = '---\ntype: shopping-list\n---\n- [ ] milk ×2\n';
+      const on = Features();
+      final listsOff = on.withSwitch(LibraryFeature.kindList, on: false);
+      final shoppingOff = on.withSwitch(LibraryFeature.kindShopping, on: false);
+
+      expect(isListNoteContent(list), isTrue);
+      expect(isListNoteContent(list, listsOff), isFalse);
+      // Shopping goes with Lists, and has a switch of its own.
+      expect(isListNoteContent(shopping, listsOff), isFalse);
+      expect(isListNoteContent(shopping, shoppingOff), isFalse);
+      expect(isListNoteContent(list, shoppingOff), isTrue);
+
+      expect(isListNoteOff(list, listsOff), isTrue);
+      expect(isListNoteOff(list, on), isFalse);
+      expect(isListNoteOff('# plain\n', listsOff), isFalse);
     });
   });
 

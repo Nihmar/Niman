@@ -14,6 +14,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:niman/src/annotations/annotation.dart';
 import 'package:niman/src/annotations/annotation_mark_source.dart';
+import 'package:niman/src/core/settings/features.dart';
+import 'package:niman/src/core/settings/library_features.dart';
 import 'package:niman/src/core/settings/library_settings.dart' show LinkType;
 import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/reading/reading_positions.dart';
@@ -40,11 +42,17 @@ const Set<String> pictureExtensions = {
 
 /// Whether the file at [path] is an attachment the pane shows: a picture
 /// ([pictureExtensions]), a PDF or an EPUB.
-bool isShownAttachment(String path) {
+///
+/// With the readers off under [features] (#1109) a PDF and an EPUB are not:
+/// they take the path of any file the pane does not show — the message that
+/// it is not a text note and, where the platform has one, the hand-off to
+/// the system's application. A picture is shown whatever the readers say.
+bool isShownAttachment(String path, [Features features = const Features()]) {
   final extension = p.extension(path).toLowerCase();
-  return extension == '.pdf' ||
-      extension == '.epub' ||
-      pictureExtensions.contains(extension);
+  if (extension == '.pdf' || extension == '.epub') {
+    return features.isOn(LibraryFeature.readers);
+  }
+  return pictureExtensions.contains(extension);
 }
 
 /// Whether the file at [path] is a book, read by [EpubPane].

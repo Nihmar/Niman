@@ -1635,6 +1635,18 @@ final class CatalanStrings extends Strings {
   String get pinWidgetUnavailable =>
       'Els ginys de la pantalla d’inici estan disponibles a Android';
 
+  @override
+  String get widgetOffTodo =>
+      'La llista Per fer està desactivada en aquesta biblioteca';
+  @override
+  String get widgetOffStudy => 'L’estudi està desactivat en aquesta biblioteca';
+  @override
+  String get widgetOffWidgets =>
+      'Els ginys de la pantalla d’inici estan '
+      'desactivats en aquesta biblioteca';
+  @override
+  String get widgetOpenFeatures => 'Obre les funcions';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Mostra al gestor de fitxers';
@@ -3644,6 +3656,161 @@ final class CatalanStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Sempre visible';
+  @override
+  String get featuresTitle => 'Funcions';
+  @override
+  String get featureOffInFeatures => 'Desactivat a Funcions';
+  @override
+  String get featureOffInLibrary => 'Desactivat en aquesta biblioteca';
+  @override
+  String featureOffInLibraryNamed(String feature) =>
+      'Desactivat en aquesta biblioteca: $feature';
+  @override
+  String get featureNameSearch => 'Cerca';
+  @override
+  String get featureNameQuickNote => 'Nota ràpida';
+  @override
+  String get featureNameTemplates => 'Plantilles';
+  @override
+  String get featureNameCapture => 'Captura web';
+  @override
+  String get featureNameTodo => 'Tasques i recordatoris';
+  @override
+  String get featureNameJournal => 'Diari';
+  @override
+  String get featureNameCalendar => 'Calendari';
+  @override
+  String get featureNameLists => 'Llistes';
+  @override
+  String get featureNameShopping => 'Llistes de la compra';
+  @override
+  String get featureNameAudio => 'Notes de veu';
+  @override
+  String get featureNameTranscription => 'Transcripció';
+  @override
+  String get featureNameSlides => 'Presentacions';
+  @override
+  String get featureNameFlashcards => 'Targetes i estudi';
+  @override
+  String get featureNameReaders => 'Lectors de PDF i EPUB';
+  @override
+  String get featureNameAnnotations => 'Anotacions';
+  @override
+  String get featureNameOcr => 'Reconeixement de text';
+  @override
+  String get featureNameHome => 'Inici';
+  @override
+  String get featureNameWidgets => 'Ginys de la pantalla d’inici';
+  @override
+  String get featuresDescription =>
+      'Què fa servir aquesta biblioteca. Desactivat, desapareix a tot arreu i '
+      'el seu treball en segon pla s’atura; als teus fitxers no es canvia ni '
+      's’esborra res.';
+  @override
+  String get featuresPresetLabel => 'Predefinit';
+  @override
+  String get featurePresetEverything => 'Tot';
+  @override
+  String get featurePresetWriting => 'Escriptura';
+  @override
+  String get featurePresetNotesOnly => 'Només notes';
+  @override
+  String get featurePresetTasks => 'Tasques i diari';
+  @override
+  String get featurePresetCustom => 'Personalitzat';
+  @override
+  String get featurePresetEverythingHint => 'tota l’app';
+  @override
+  String get featurePresetWritingHint => 'notes, cerca, plantilles, lectors';
+  @override
+  String get featurePresetNotesOnlyHint => 'notes, cerca, enllaços';
+  @override
+  String get featurePresetTasksHint => 'tasques, diari, calendari, Inici';
+  @override
+  String get featuresSectionFinding => 'Cercar i escriure';
+  @override
+  String get featuresSectionPlanning => 'Planificació';
+  @override
+  String get featuresSectionKinds => 'Tipus de nota';
+  @override
+  String get featuresSectionReading => 'Lectura';
+  @override
+  String get featuresSectionAround => 'Al voltant de l’app';
+  @override
+  String featureNeeds(String feature) => 'Necessita $feature';
+  @override
+  String get featureOffSearch =>
+      'Desactivat: sense pantalla ni ordres de cerca; l’índex es continua '
+      'mantenint';
+  @override
+  String get featureOffQuickNote =>
+      'Desactivat: el text compartit va a Importa';
+  @override
+  String get featureOffTemplates =>
+      'Desactivat: les notes noves i les entrades del diari comencen amb el '
+      'contingut per defecte';
+  @override
+  String get featureOffCapture =>
+      'Desactivat: sense captura de pàgines; els enllaços continuen sent '
+      'enllaços normals';
+  @override
+  String get featureOffTodo =>
+      'Desactivat: todo.txt continua sent un fitxer normal; sense recordatoris';
+  @override
+  String get featureOffJournal =>
+      'Desactivat: les entrades continuen sent notes normals';
+  @override
+  String get featureOffCalendar =>
+      'Desactivat: calendar.txt continua sent un fitxer normal; sense '
+      'recordatoris d’esdeveniments';
+  @override
+  String get featureOffKind =>
+      'Desactivat: aquestes notes s’obren com a Markdown simple; type: es '
+      'conserva';
+  @override
+  String get featureOffTranscription =>
+      'Desactivat: sense acció de transcriure; les notes de veu continuen '
+      'gravant-se i reproduint-se';
+  @override
+  String get featureOffReaders => 'Desactivat: s’obren a l’app del sistema';
+  @override
+  String get featureOffAnnotations =>
+      'Desactivat: sense ressaltats ni marques; les notes ja creades es queden';
+  @override
+  String get featureOffOcr =>
+      'Desactivat: sense escaneig; el text ja llegit es queda';
+  @override
+  String get featureOffHome => 'Desactivat: sense pantalla ni mosaics d’Inici';
+  @override
+  String get featureOffWidgets =>
+      'Desactivat: els ginys mostren que està desactivat';
+  @override
+  String get featuresIntroTitle => 'Tria què fa servir aquesta biblioteca';
+  @override
+  String get featuresIntroBody =>
+      'Niman ara et deixa triar què fa servir aquesta biblioteca. Tot està '
+      'activat; desactiva el que no necessitis. Ho podràs canviar més '
+      'endavant a Configuració → Funcions.';
+  @override
+  String get featuresIntroDone => 'Fet';
+  @override
+  String get featuresCreatedTitle => 'Per a què serveix aquesta biblioteca?';
+  @override
+  String get featuresCreatedBody =>
+      'Tria un punt de partida. Només ajusta els interruptors de sota; en '
+      'pots canviar qualsevol, ara o més endavant a Configuració → Funcions.';
+  @override
+  String get featuresShowIntroTitle =>
+      'Mostra aquesta introducció una altra vegada';
+  @override
+  String get featuresShowIntroBody =>
+      'La targeta que explica aquesta pantalla. No canvia cap interruptor.';
+  @override
+  String get featuresShowIntroAction => 'Mostra';
+  @override
+  String featuresRemindersCancelled(int count) => count == 1
+      ? '1 recordatori cancel·lat'
+      : '$count recordatoris cancel·lats';
   @override
   String get navigationStart => 'S’obre a';
   @override

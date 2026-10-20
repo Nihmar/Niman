@@ -1059,6 +1059,10 @@ final class AppStrings {
   static String get pinToWidget => _s.pinToWidget;
   static String get pinnedForWidget => _s.pinnedForWidget;
   static String get pinWidgetUnavailable => _s.pinWidgetUnavailable;
+  static String get widgetOffTodo => _s.widgetOffTodo;
+  static String get widgetOffStudy => _s.widgetOffStudy;
+  static String get widgetOffWidgets => _s.widgetOffWidgets;
+  static String get widgetOpenFeatures => _s.widgetOpenFeatures;
 
   /// Handing a note's file to the OS (issue #76).
   static String get openInFileManager => _s.openInFileManager;
@@ -1877,6 +1881,71 @@ final class AppStrings {
   static String get navigationScopeLibrary => _s.navigationScopeLibrary;
   static String get navigationScopeDevice => _s.navigationScopeDevice;
   static String get navigationAlwaysShown => _s.navigationAlwaysShown;
+  static String get featuresTitle => _s.featuresTitle;
+  static String get featureOffInFeatures => _s.featureOffInFeatures;
+  static String get featureOffInLibrary => _s.featureOffInLibrary;
+  static String featureOffInLibraryNamed(String feature) =>
+      _s.featureOffInLibraryNamed(feature);
+  static String get featureNameSearch => _s.featureNameSearch;
+  static String get featureNameQuickNote => _s.featureNameQuickNote;
+  static String get featureNameTemplates => _s.featureNameTemplates;
+  static String get featureNameCapture => _s.featureNameCapture;
+  static String get featureNameTodo => _s.featureNameTodo;
+  static String get featureNameJournal => _s.featureNameJournal;
+  static String get featureNameCalendar => _s.featureNameCalendar;
+  static String get featureNameLists => _s.featureNameLists;
+  static String get featureNameShopping => _s.featureNameShopping;
+  static String get featureNameAudio => _s.featureNameAudio;
+  static String get featureNameTranscription => _s.featureNameTranscription;
+  static String get featureNameSlides => _s.featureNameSlides;
+  static String get featureNameFlashcards => _s.featureNameFlashcards;
+  static String get featureNameReaders => _s.featureNameReaders;
+  static String get featureNameAnnotations => _s.featureNameAnnotations;
+  static String get featureNameOcr => _s.featureNameOcr;
+  static String get featureNameHome => _s.featureNameHome;
+  static String get featureNameWidgets => _s.featureNameWidgets;
+  static String get featuresDescription => _s.featuresDescription;
+  static String get featuresPresetLabel => _s.featuresPresetLabel;
+  static String get featurePresetEverything => _s.featurePresetEverything;
+  static String get featurePresetWriting => _s.featurePresetWriting;
+  static String get featurePresetNotesOnly => _s.featurePresetNotesOnly;
+  static String get featurePresetTasks => _s.featurePresetTasks;
+  static String get featurePresetCustom => _s.featurePresetCustom;
+  static String get featurePresetEverythingHint =>
+      _s.featurePresetEverythingHint;
+  static String get featurePresetWritingHint => _s.featurePresetWritingHint;
+  static String get featurePresetNotesOnlyHint => _s.featurePresetNotesOnlyHint;
+  static String get featurePresetTasksHint => _s.featurePresetTasksHint;
+  static String get featuresSectionFinding => _s.featuresSectionFinding;
+  static String get featuresSectionPlanning => _s.featuresSectionPlanning;
+  static String get featuresSectionKinds => _s.featuresSectionKinds;
+  static String get featuresSectionReading => _s.featuresSectionReading;
+  static String get featuresSectionAround => _s.featuresSectionAround;
+  static String featureNeeds(String feature) => _s.featureNeeds(feature);
+  static String get featureOffSearch => _s.featureOffSearch;
+  static String get featureOffQuickNote => _s.featureOffQuickNote;
+  static String get featureOffTemplates => _s.featureOffTemplates;
+  static String get featureOffCapture => _s.featureOffCapture;
+  static String get featureOffTodo => _s.featureOffTodo;
+  static String get featureOffJournal => _s.featureOffJournal;
+  static String get featureOffCalendar => _s.featureOffCalendar;
+  static String get featureOffKind => _s.featureOffKind;
+  static String get featureOffTranscription => _s.featureOffTranscription;
+  static String get featureOffReaders => _s.featureOffReaders;
+  static String get featureOffAnnotations => _s.featureOffAnnotations;
+  static String get featureOffOcr => _s.featureOffOcr;
+  static String get featureOffHome => _s.featureOffHome;
+  static String get featureOffWidgets => _s.featureOffWidgets;
+  static String get featuresIntroTitle => _s.featuresIntroTitle;
+  static String get featuresIntroBody => _s.featuresIntroBody;
+  static String get featuresIntroDone => _s.featuresIntroDone;
+  static String get featuresCreatedTitle => _s.featuresCreatedTitle;
+  static String get featuresCreatedBody => _s.featuresCreatedBody;
+  static String get featuresShowIntroTitle => _s.featuresShowIntroTitle;
+  static String get featuresShowIntroBody => _s.featuresShowIntroBody;
+  static String get featuresShowIntroAction => _s.featuresShowIntroAction;
+  static String featuresRemindersCancelled(int count) =>
+      _s.featuresRemindersCancelled(count);
   static String get navigationStart => _s.navigationStart;
   static String navigationStartHidden(String hidden, String start) =>
       _s.navigationStartHidden(hidden, start);

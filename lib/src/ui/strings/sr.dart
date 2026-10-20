@@ -1606,6 +1606,16 @@ final class SerbianStrings extends Strings {
   String get pinWidgetUnavailable =>
       'Виџети почетног екрана доступни су на Андроиду';
 
+  @override
+  String get widgetOffTodo => 'Задаци су искључени у овој библиотеци';
+  @override
+  String get widgetOffStudy => 'Учење је искључено у овој библиотеци';
+  @override
+  String get widgetOffWidgets =>
+      'Виџети почетног екрана су искључени у овој библиотеци';
+  @override
+  String get widgetOpenFeatures => 'Отвори функције';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Прикажи у управљачу датотека';
@@ -3601,6 +3611,154 @@ final class SerbianStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Увек приказано';
+  @override
+  String get featuresTitle => 'Функције';
+  @override
+  String get featureOffInFeatures => 'Искључено у Функцијама';
+  @override
+  String get featureOffInLibrary => 'Искључено у овој библиотеци';
+  @override
+  String featureOffInLibraryNamed(String feature) =>
+      'Искључено у овој библиотеци: $feature';
+  @override
+  String get featureNameSearch => 'Претрага';
+  @override
+  String get featureNameQuickNote => 'Брза белешка';
+  @override
+  String get featureNameTemplates => 'Шаблони';
+  @override
+  String get featureNameCapture => 'Чување веб-страница';
+  @override
+  String get featureNameTodo => 'Задаци и подсећања';
+  @override
+  String get featureNameJournal => 'Дневник';
+  @override
+  String get featureNameCalendar => 'Календар';
+  @override
+  String get featureNameLists => 'Листе';
+  @override
+  String get featureNameShopping => 'Листе за куповину';
+  @override
+  String get featureNameAudio => 'Гласовне белешке';
+  @override
+  String get featureNameTranscription => 'Транскрипција';
+  @override
+  String get featureNameSlides => 'Презентације';
+  @override
+  String get featureNameFlashcards => 'Картице и учење';
+  @override
+  String get featureNameReaders => 'PDF и EPUB читачи';
+  @override
+  String get featureNameAnnotations => 'Анотације';
+  @override
+  String get featureNameOcr => 'Препознавање текста';
+  @override
+  String get featureNameHome => 'Почетна';
+  @override
+  String get featureNameWidgets => 'Виџети почетног екрана';
+  @override
+  String get featuresDescription =>
+      'Шта ова библиотека користи. Искључено је свуда скривено, а његов рад у '
+      'позадини стаје; у вашим датотекама ништа се не мења нити брише.';
+  @override
+  String get featuresPresetLabel => 'Шаблон';
+  @override
+  String get featurePresetEverything => 'Све';
+  @override
+  String get featurePresetWriting => 'Писање';
+  @override
+  String get featurePresetNotesOnly => 'Само белешке';
+  @override
+  String get featurePresetTasks => 'Задаци и дневник';
+  @override
+  String get featurePresetCustom => 'Прилагођено';
+  @override
+  String get featurePresetEverythingHint => 'цела апликација';
+  @override
+  String get featurePresetWritingHint => 'белешке, претрага, шаблони, читачи';
+  @override
+  String get featurePresetNotesOnlyHint => 'белешке, претрага, везе';
+  @override
+  String get featurePresetTasksHint => 'задаци, дневник, календар, Почетна';
+  @override
+  String get featuresSectionFinding => 'Тражење и писање';
+  @override
+  String get featuresSectionPlanning => 'Планирање';
+  @override
+  String get featuresSectionKinds => 'Врсте белешки';
+  @override
+  String get featuresSectionReading => 'Читање';
+  @override
+  String get featuresSectionAround => 'Око апликације';
+  @override
+  String featureNeeds(String feature) => 'Захтева: $feature';
+  @override
+  String get featureOffSearch =>
+      'Искључено: нема екрана ни наредби за претрагу; индекс се и даље води';
+  @override
+  String get featureOffQuickNote =>
+      'Искључено: подељени текст иде уместо тога у: Увези';
+  @override
+  String get featureOffTemplates =>
+      'Искључено: нове белешке и уноси дневника почињу са подразумеваним '
+      'садржајем';
+  @override
+  String get featureOffCapture =>
+      'Искључено: нема чувања страница; везе остају обичне везе';
+  @override
+  String get featureOffTodo =>
+      'Искључено: todo.txt остаје обична датотека; нема подсетника';
+  @override
+  String get featureOffJournal => 'Искључено: уноси остају обичне белешке';
+  @override
+  String get featureOffCalendar =>
+      'Искључено: calendar.txt остаје обична датотека; нема подсетника за '
+      'догађаје';
+  @override
+  String get featureOffKind =>
+      'Искључено: ове се белешке отварају као обичан Markdown; type: остаје';
+  @override
+  String get featureOffTranscription =>
+      'Искључено: нема радње транскрипције; гласовне белешке се и даље могу '
+      'снимати и пуштати';
+  @override
+  String get featureOffReaders =>
+      'Искључено: отварају се у системској апликацији';
+  @override
+  String get featureOffAnnotations =>
+      'Искључено: нема истицања ни ознака; већ направљене белешке остају';
+  @override
+  String get featureOffOcr =>
+      'Искључено: нема скенирања; већ прочитани текст остаје';
+  @override
+  String get featureOffHome => 'Искључено: нема екрана ни плочица Почетна';
+  @override
+  String get featureOffWidgets =>
+      'Искључено: виџети показују да је ово искључено';
+  @override
+  String get featuresIntroTitle => 'Изаберите шта ова библиотека користи';
+  @override
+  String get featuresIntroBody =>
+      'Niman вам сада омогућава да изаберете шта ова библиотека користи. Све '
+      'је укључено; искључите оно што вам не треба. То можете променити '
+      'касније у: Подешавања → Функције.';
+  @override
+  String get featuresIntroDone => 'Готово';
+  @override
+  String get featuresCreatedTitle => 'Чему служи ова библиотека?';
+  @override
+  String get featuresCreatedBody =>
+      'Изаберите почетак. Поставља само прекидаче у наставку; било који '
+      'можете променити, сада или касније у: Подешавања → Функције.';
+  @override
+  String get featuresShowIntroTitle => 'Поново прикажи овај увод';
+  @override
+  String get featuresShowIntroBody =>
+      'Картица која објашњава овај екран. Не мења ниједан прекидач.';
+  @override
+  String get featuresShowIntroAction => 'Прикажи';
+  @override
+  String featuresRemindersCancelled(int count) => 'Отказани подсетници: $count';
   @override
   String get navigationStart => 'Отвара се на';
   @override

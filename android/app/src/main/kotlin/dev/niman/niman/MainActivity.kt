@@ -30,6 +30,7 @@ class MainActivity : FlutterActivity() {
     private val pageReader = PageReaderBridge(this)
     private val shares = ShareBridge(this)
     private val clipboard = ClipboardBridge(this)
+    private val openFile = OpenFileBridge(this)
 
     /** The launching intent, handled once (#721). */
     private val launch = LaunchIntent()
@@ -54,6 +55,7 @@ class MainActivity : FlutterActivity() {
         pageReader.attach(flutterEngine.dartExecutor.binaryMessenger)
         shares.attach(flutterEngine.dartExecutor.binaryMessenger)
         clipboard.attach(flutterEngine.dartExecutor.binaryMessenger)
+        openFile.attach(flutterEngine.dartExecutor.binaryMessenger)
         // Cold start: this runs while Dart is still booting, so the
         // launching intent's action waits until Dart asks for it.
         //

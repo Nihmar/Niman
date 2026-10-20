@@ -10,6 +10,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/core/settings/library_features.dart';
 import 'package:niman/src/journal/journal_days.dart';
 import 'package:niman/src/journal/journal_settings.dart';
 import 'package:niman/src/library/session.dart';
@@ -162,7 +163,10 @@ final class JournalFlow {
       );
 
   /// Makes [day]'s entry at [path] from the journal's template and opens
-  /// it. The template's questions are asked like any template's; its
+  /// it. With the Templates feature off (#1109) the template is not read
+  /// and the entry starts with [builtInJournalTemplate]: the setting stays
+  /// in `settings.json` and is used again once the feature is on. The
+  /// template's questions are asked like any template's; its
   /// `niman:` directives are not followed, since the journal already says
   /// where the entry goes and what it is called.
   Future<void> _create(
@@ -174,7 +178,10 @@ final class JournalFlow {
     final ops = controller.ops!;
     final messenger = ScaffoldMessenger.of(context);
     var source = builtInJournalTemplate;
-    if (settings.template case final template?) {
+    final template = controller.features.value.isOn(LibraryFeature.templates)
+        ? settings.template
+        : null;
+    if (template != null) {
       try {
         final folder = await ops.templateFolder;
         source = await expandTemplateIncludes(

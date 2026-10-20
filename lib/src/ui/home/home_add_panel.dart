@@ -4,27 +4,40 @@ library;
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:niman/src/core/settings/features.dart';
 import 'package:niman/src/home/home_tile.dart';
+import 'package:niman/src/home/home_tile_feature.dart';
 import 'package:niman/src/ui/home/home_editing.dart';
 import 'package:niman/src/ui/home/home_icons.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// The hidden tiles and the kinds to add.
 final class HomeAddPanel extends StatelessWidget {
-  /// The panel of [editing]'s Home.
-  const new({required this.editing, super.key});
+  /// The panel of [editing]'s Home; a kind whose feature is off under
+  /// [features] is not offered (#1109).
+  const new({required this.editing, required this.features, super.key});
 
   /// The Home being edited.
   final HomeEditing editing;
 
+  /// The library's features: the Home's file keeps the tiles of one that is
+  /// off, but adding one is not offered.
+  final ValueListenable<Features> features;
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => ValueListenableBuilder<Features>(
+    valueListenable: features,
+    builder: (context, features, _) => _panel(context, features),
+  );
+
+  Widget _panel(BuildContext context, Features features) {
     final theme = Theme.of(context);
     final layout = editing.layout;
     final hidden = [
       for (final t in layout.editable)
-        if (t.hidden) t,
+        if (t.hidden && tileKindIsOn(t.kind, features)) t,
     ];
     final header = theme.textTheme.labelMedium?.copyWith(
       color: theme.colorScheme.onSurfaceVariant,
@@ -57,7 +70,8 @@ final class HomeAddPanel extends StatelessWidget {
         ],
         title(AppStrings.homeAddTiles),
         for (final kind in HomeTileKind.values)
-          _AddRow(editing: editing, kind: kind),
+          if (tileKindIsOn(kind, features))
+            _AddRow(editing: editing, kind: kind),
       ],
     );
   }

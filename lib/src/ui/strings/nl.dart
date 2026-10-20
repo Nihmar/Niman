@@ -1621,6 +1621,16 @@ final class DutchStrings extends Strings {
   String get pinWidgetUnavailable =>
       'Startschermwidgets zijn beschikbaar op Android';
 
+  @override
+  String get widgetOffTodo => 'Te doen staat uit in deze bibliotheek';
+  @override
+  String get widgetOffStudy => 'Studeren staat uit in deze bibliotheek';
+  @override
+  String get widgetOffWidgets =>
+      'Startschermwidgets staan uit in deze bibliotheek';
+  @override
+  String get widgetOpenFeatures => 'Functies openen';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Tonen in bestandsbeheer';
@@ -3623,6 +3633,154 @@ final class DutchStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Altijd zichtbaar';
+  @override
+  String get featuresTitle => 'Functies';
+  @override
+  String get featureOffInFeatures => 'Uitgeschakeld in Functies';
+  @override
+  String get featureOffInLibrary => 'Uitgeschakeld in deze bibliotheek';
+  @override
+  String featureOffInLibraryNamed(String feature) =>
+      '$feature is uitgeschakeld in deze bibliotheek';
+  @override
+  String get featureNameSearch => 'Zoeken';
+  @override
+  String get featureNameQuickNote => 'Snelnotitie';
+  @override
+  String get featureNameTemplates => 'Sjablonen';
+  @override
+  String get featureNameCapture => 'Webpagina’s vastleggen';
+  @override
+  String get featureNameTodo => 'Taken en herinneringen';
+  @override
+  String get featureNameJournal => 'Dagboek';
+  @override
+  String get featureNameCalendar => 'Kalender';
+  @override
+  String get featureNameLists => 'Lijsten';
+  @override
+  String get featureNameShopping => 'Boodschappenlijsten';
+  @override
+  String get featureNameAudio => 'Spraaknotities';
+  @override
+  String get featureNameTranscription => 'Transcriptie';
+  @override
+  String get featureNameSlides => 'Presentaties';
+  @override
+  String get featureNameFlashcards => 'Flashcards en studeren';
+  @override
+  String get featureNameReaders => 'PDF- en EPUB-lezers';
+  @override
+  String get featureNameAnnotations => 'Aantekeningen';
+  @override
+  String get featureNameOcr => 'Tekstherkenning';
+  @override
+  String get featureNameHome => 'Start';
+  @override
+  String get featureNameWidgets => 'Startschermwidgets';
+  @override
+  String get featuresDescription =>
+      'Wat deze bibliotheek gebruikt. Uit verbergt het overal en stopt het '
+      'werk op de achtergrond; er wordt niets in je bestanden gewijzigd of '
+      'verwijderd.';
+  @override
+  String get featuresPresetLabel => 'Voorinstelling';
+  @override
+  String get featurePresetEverything => 'Alles';
+  @override
+  String get featurePresetWriting => 'Schrijven';
+  @override
+  String get featurePresetNotesOnly => 'Alleen notities';
+  @override
+  String get featurePresetTasks => 'Taken en dagboek';
+  @override
+  String get featurePresetCustom => 'Aangepast';
+  @override
+  String get featurePresetEverythingHint => 'de hele app';
+  @override
+  String get featurePresetWritingHint => 'notities, zoeken, sjablonen, lezers';
+  @override
+  String get featurePresetNotesOnlyHint => 'notities, zoeken, koppelingen';
+  @override
+  String get featurePresetTasksHint => 'taken, dagboek, agenda, Start';
+  @override
+  String get featuresSectionFinding => 'Zoeken en schrijven';
+  @override
+  String get featuresSectionPlanning => 'Plannen';
+  @override
+  String get featuresSectionKinds => 'Soorten notities';
+  @override
+  String get featuresSectionReading => 'Lezen';
+  @override
+  String get featuresSectionAround => 'Rond de app';
+  @override
+  String featureNeeds(String feature) => 'Vereist $feature';
+  @override
+  String get featureOffSearch =>
+      'Uit: geen zoekscherm of zoekopdrachten; de index wordt nog wel '
+      'bijgehouden';
+  @override
+  String get featureOffQuickNote => 'Uit: gedeelde tekst gaat naar Importeren';
+  @override
+  String get featureOffTemplates =>
+      'Uit: nieuwe notities en dagboekitems beginnen met hun standaardinhoud';
+  @override
+  String get featureOffCapture =>
+      'Uit: geen paginavastlegging; koppelingen blijven gewone koppelingen';
+  @override
+  String get featureOffTodo =>
+      'Uit: todo.txt blijft een gewoon bestand; geen herinneringen';
+  @override
+  String get featureOffJournal => 'Uit: items blijven gewone notities';
+  @override
+  String get featureOffCalendar =>
+      'Uit: calendar.txt blijft een gewoon bestand; geen herinneringen voor '
+      'afspraken';
+  @override
+  String get featureOffKind =>
+      'Uit: deze notities openen als gewone Markdown; type: blijft behouden';
+  @override
+  String get featureOffTranscription =>
+      'Uit: geen transcriptieactie; audionotities kun je nog steeds opnemen '
+      'en afspelen';
+  @override
+  String get featureOffReaders => 'Uit: ze openen in de app van het systeem';
+  @override
+  String get featureOffAnnotations =>
+      'Uit: geen markeringen of tekens; bestaande notities blijven';
+  @override
+  String get featureOffOcr => 'Uit: geen scans; de al gelezen tekst blijft';
+  @override
+  String get featureOffHome => 'Uit: geen Start-scherm of tegels';
+  @override
+  String get featureOffWidgets => 'Uit: widgets laten zien dat dit uit staat';
+  @override
+  String get featuresIntroTitle => 'Kies wat deze bibliotheek gebruikt';
+  @override
+  String get featuresIntroBody =>
+      'Niman laat je nu kiezen wat deze bibliotheek gebruikt. Alles staat '
+      'aan; zet uit wat je niet nodig hebt. Je kunt dit later wijzigen in '
+      'Instellingen → Functies.';
+  @override
+  String get featuresIntroDone => 'Klaar';
+  @override
+  String get featuresCreatedTitle => 'Waarvoor is deze bibliotheek?';
+  @override
+  String get featuresCreatedBody =>
+      'Kies een begin. Het stelt alleen de schakelaars hieronder in; je kunt '
+      'ze stuk voor stuk omzetten, nu of later in Instellingen → Functies.';
+  @override
+  String get featuresShowIntroTitle => 'Deze introductie opnieuw tonen';
+  @override
+  String get featuresShowIntroBody =>
+      'De kaart die dit scherm uitlegt. Er verandert geen enkele schakelaar '
+      'door.';
+  @override
+  String get featuresShowIntroAction => 'Tonen';
+  @override
+  String featuresRemindersCancelled(int count) => count == 1
+      ? '1 herinnering geannuleerd'
+      : '$count herinneringen geannuleerd';
   @override
   String get navigationStart => 'Opent op';
   @override

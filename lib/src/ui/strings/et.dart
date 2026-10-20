@@ -1583,6 +1583,16 @@ final class EstonianStrings extends Strings {
   @override
   String get pinWidgetUnavailable => 'Avakuva vidžetid on Androidis saadaval';
 
+  @override
+  String get widgetOffTodo => 'Ülesanded on selles kogus välja lülitatud';
+  @override
+  String get widgetOffStudy => 'Õppimine on selles kogus välja lülitatud';
+  @override
+  String get widgetOffWidgets =>
+      'Avakuva vidžetid on selles kogus välja lülitatud';
+  @override
+  String get widgetOpenFeatures => 'Ava funktsioonid';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Näita failihalduris';
@@ -3528,6 +3538,154 @@ final class EstonianStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Alati nähtav';
+  @override
+  String get featuresTitle => 'Funktsioonid';
+  @override
+  String get featureOffInFeatures => 'Funktsioonides välja lülitatud';
+  @override
+  String get featureOffInLibrary => 'Selles kogus välja lülitatud';
+  @override
+  String featureOffInLibraryNamed(String feature) =>
+      '$feature on selles kogus välja lülitatud';
+  @override
+  String get featureNameSearch => 'Otsing';
+  @override
+  String get featureNameQuickNote => 'Kiirmärge';
+  @override
+  String get featureNameTemplates => 'Šabloonid';
+  @override
+  String get featureNameCapture => 'Veebilehtede salvestamine';
+  @override
+  String get featureNameTodo => 'Ülesanded ja meeldetuletused';
+  @override
+  String get featureNameJournal => 'Päevik';
+  @override
+  String get featureNameCalendar => 'Kalender';
+  @override
+  String get featureNameLists => 'Loendid';
+  @override
+  String get featureNameShopping => 'Ostunimekirjad';
+  @override
+  String get featureNameAudio => 'Häälmärkmed';
+  @override
+  String get featureNameTranscription => 'Transkriptsioon';
+  @override
+  String get featureNameSlides => 'Esitlused';
+  @override
+  String get featureNameFlashcards => 'Kaardid ja õppimine';
+  @override
+  String get featureNameReaders => 'PDF- ja EPUB-lugejad';
+  @override
+  String get featureNameAnnotations => 'Märkused';
+  @override
+  String get featureNameOcr => 'Tekstituvastus';
+  @override
+  String get featureNameHome => 'Avaleht';
+  @override
+  String get featureNameWidgets => 'Avakuva vidinad';
+  @override
+  String get featuresDescription =>
+      'Mida see kogu kasutab. Väljas peidetakse see kõikjalt ja selle '
+      'taustatöö peatub; sinu failides ei muudeta ega kustutata midagi.';
+  @override
+  String get featuresPresetLabel => 'Eelseadistus';
+  @override
+  String get featurePresetEverything => 'Kõik';
+  @override
+  String get featurePresetWriting => 'Kirjutamine';
+  @override
+  String get featurePresetNotesOnly => 'Ainult märkmed';
+  @override
+  String get featurePresetTasks => 'Ülesanded ja päevik';
+  @override
+  String get featurePresetCustom => 'Kohandatud';
+  @override
+  String get featurePresetEverythingHint => 'kogu rakendus';
+  @override
+  String get featurePresetWritingHint => 'märkmed, otsing, mallid, lugejad';
+  @override
+  String get featurePresetNotesOnlyHint => 'märkmed, otsing, lingid';
+  @override
+  String get featurePresetTasksHint => 'ülesanded, päevik, kalender, Avaleht';
+  @override
+  String get featuresSectionFinding => 'Otsimine ja kirjutamine';
+  @override
+  String get featuresSectionPlanning => 'Planeerimine';
+  @override
+  String get featuresSectionKinds => 'Märkmetüübid';
+  @override
+  String get featuresSectionReading => 'Lugemine';
+  @override
+  String get featuresSectionAround => 'Rakenduse ümber';
+  @override
+  String featureNeeds(String feature) => 'Vajab: $feature';
+  @override
+  String get featureOffSearch =>
+      'Väljas: otsinguvaadet ega -käske pole; indeksit peetakse endiselt';
+  @override
+  String get featureOffQuickNote =>
+      'Väljas: jagatud tekst läheb hoopis kohta Impordi';
+  @override
+  String get featureOffTemplates =>
+      'Väljas: uued märkmed ja päevikukirjed algavad vaikimisi sisuga';
+  @override
+  String get featureOffCapture =>
+      'Väljas: lehti ei salvestata; lingid jäävad tavalisteks linkideks';
+  @override
+  String get featureOffTodo =>
+      'Väljas: todo.txt jääb tavaliseks failiks; meeldetuletusi pole';
+  @override
+  String get featureOffJournal =>
+      'Väljas: kirjed jäävad tavalisteks märkmeteks';
+  @override
+  String get featureOffCalendar =>
+      'Väljas: calendar.txt jääb tavaliseks failiks; sündmuste meeldetuletusi '
+      'pole';
+  @override
+  String get featureOffKind =>
+      'Väljas: need märkmed avanevad tavalise Markdownina; type: säilib';
+  @override
+  String get featureOffTranscription =>
+      'Väljas: transkribeerimistoimingut pole; helimärkmeid saab endiselt '
+      'salvestada ja esitada';
+  @override
+  String get featureOffReaders => 'Väljas: need avanevad süsteemirakenduses';
+  @override
+  String get featureOffAnnotations =>
+      'Väljas: esiletõstmisi ega märke pole; juba tehtud märkmed jäävad';
+  @override
+  String get featureOffOcr => 'Väljas: skannimist pole; juba loetud tekst jääb';
+  @override
+  String get featureOffHome => 'Väljas: Avaleht-vaadet ega paane pole';
+  @override
+  String get featureOffWidgets =>
+      'Väljas: vidinad näitavad, et see on välja lülitatud';
+  @override
+  String get featuresIntroTitle => 'Vali, mida see kogu kasutab';
+  @override
+  String get featuresIntroBody =>
+      'Niman laseb nüüd valida, mida see kogu kasutab. Kõik on sees; lülita '
+      'välja see, mida sa ei vaja. Seda saab hiljem muuta jaotises Seaded → '
+      'Funktsioonid.';
+  @override
+  String get featuresIntroDone => 'Valmis';
+  @override
+  String get featuresCreatedTitle => 'Milleks see kogu on?';
+  @override
+  String get featuresCreatedBody =>
+      'Vali algus. See seab ainult allolevad lülitid; igaüht neist saad ümber '
+      'lülitada, kohe või hiljem jaotises Seaded → Funktsioonid.';
+  @override
+  String get featuresShowIntroTitle => 'Näita seda tutvustust uuesti';
+  @override
+  String get featuresShowIntroBody =>
+      'Kaart, mis selgitab seda vaadet. See ei muuda ühtegi lülitit.';
+  @override
+  String get featuresShowIntroAction => 'Näita';
+  @override
+  String featuresRemindersCancelled(int count) => count == 1
+      ? '1 meeldetuletus tühistatud'
+      : '$count meeldetuletust tühistatud';
   @override
   String get navigationStart => 'Avaneb vaates';
   @override

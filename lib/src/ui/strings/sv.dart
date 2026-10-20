@@ -1611,6 +1611,16 @@ final class SwedishStrings extends Strings {
   String get pinWidgetUnavailable =>
       'Startskärmswidgets är tillgängliga på Android';
 
+  @override
+  String get widgetOffTodo => 'Att göra är avstängt i det här biblioteket';
+  @override
+  String get widgetOffStudy => 'Studera är avstängt i det här biblioteket';
+  @override
+  String get widgetOffWidgets =>
+      'Startskärmswidgets är avstängda i det här biblioteket';
+  @override
+  String get widgetOpenFeatures => 'Öppna funktioner';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Visa i filhanteraren';
@@ -3595,6 +3605,153 @@ final class SwedishStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Visas alltid';
+  @override
+  String get featuresTitle => 'Funktioner';
+  @override
+  String get featureOffInFeatures => 'Avstängt i Funktioner';
+  @override
+  String get featureOffInLibrary => 'Avstängt i det här biblioteket';
+  @override
+  String featureOffInLibraryNamed(String feature) =>
+      'Avstängt i det här biblioteket: $feature';
+  @override
+  String get featureNameSearch => 'Sök';
+  @override
+  String get featureNameQuickNote => 'Snabbanteckning';
+  @override
+  String get featureNameTemplates => 'Mallar';
+  @override
+  String get featureNameCapture => 'Spara webbsidor';
+  @override
+  String get featureNameTodo => 'Att göra och påminnelser';
+  @override
+  String get featureNameJournal => 'Dagbok';
+  @override
+  String get featureNameCalendar => 'Kalender';
+  @override
+  String get featureNameLists => 'Listor';
+  @override
+  String get featureNameShopping => 'Inköpslistor';
+  @override
+  String get featureNameAudio => 'Röstanteckningar';
+  @override
+  String get featureNameTranscription => 'Transkribering';
+  @override
+  String get featureNameSlides => 'Presentationer';
+  @override
+  String get featureNameFlashcards => 'Flashcards och studier';
+  @override
+  String get featureNameReaders => 'PDF- och EPUB-läsare';
+  @override
+  String get featureNameAnnotations => 'Annoteringar';
+  @override
+  String get featureNameOcr => 'Textigenkänning';
+  @override
+  String get featureNameHome => 'Hem';
+  @override
+  String get featureNameWidgets => 'Startskärmswidgetar';
+  @override
+  String get featuresDescription =>
+      'Vad det här biblioteket använder. Avstängt döljs det överallt och dess '
+      'arbete i bakgrunden upphör; inget i dina filer ändras eller tas bort.';
+  @override
+  String get featuresPresetLabel => 'Förval';
+  @override
+  String get featurePresetEverything => 'Allt';
+  @override
+  String get featurePresetWriting => 'Skrivande';
+  @override
+  String get featurePresetNotesOnly => 'Bara anteckningar';
+  @override
+  String get featurePresetTasks => 'Uppgifter och dagbok';
+  @override
+  String get featurePresetCustom => 'Anpassat';
+  @override
+  String get featurePresetEverythingHint => 'hela appen';
+  @override
+  String get featurePresetWritingHint => 'anteckningar, sök, mallar, läsare';
+  @override
+  String get featurePresetNotesOnlyHint => 'anteckningar, sök, länkar';
+  @override
+  String get featurePresetTasksHint => 'att göra, dagbok, kalender, Hem';
+  @override
+  String get featuresSectionFinding => 'Hitta och skriva';
+  @override
+  String get featuresSectionPlanning => 'Planering';
+  @override
+  String get featuresSectionKinds => 'Anteckningstyper';
+  @override
+  String get featuresSectionReading => 'Läsning';
+  @override
+  String get featuresSectionAround => 'Runt appen';
+  @override
+  String featureNeeds(String feature) => 'Kräver $feature';
+  @override
+  String get featureOffSearch =>
+      'Av: ingen sökvy eller sökkommandon; indexet förs fortfarande';
+  @override
+  String get featureOffQuickNote =>
+      'Av: delad text går till Importera i stället';
+  @override
+  String get featureOffTemplates =>
+      'Av: nya anteckningar och dagboksinlägg börjar med sitt standardinnehåll';
+  @override
+  String get featureOffCapture =>
+      'Av: ingen sidhämtning; länkar förblir vanliga länkar';
+  @override
+  String get featureOffTodo =>
+      'Av: todo.txt förblir en vanlig fil; inga påminnelser';
+  @override
+  String get featureOffJournal => 'Av: inlägg förblir vanliga anteckningar';
+  @override
+  String get featureOffCalendar =>
+      'Av: calendar.txt förblir en vanlig fil; inga påminnelser om händelser';
+  @override
+  String get featureOffKind =>
+      'Av: de här anteckningarna öppnas som vanlig Markdown; type: behålls';
+  @override
+  String get featureOffTranscription =>
+      'Av: ingen transkriberingsåtgärd; ljudanteckningar kan fortfarande '
+      'spelas in och spelas upp';
+  @override
+  String get featureOffReaders => 'Av: de öppnas i systemets app';
+  @override
+  String get featureOffAnnotations =>
+      'Av: inga markeringar eller tecken; de anteckningar som redan gjorts '
+      'finns kvar';
+  @override
+  String get featureOffOcr =>
+      'Av: ingen skanning; den text som redan lästs finns kvar';
+  @override
+  String get featureOffHome => 'Av: ingen Hem-vy eller brickor';
+  @override
+  String get featureOffWidgets => 'Av: widgetar visar att det här är avstängt';
+  @override
+  String get featuresIntroTitle => 'Välj vad det här biblioteket använder';
+  @override
+  String get featuresIntroBody =>
+      'Niman låter dig nu välja vad det här biblioteket använder. Allt är på; '
+      'stäng av det du inte behöver. Du kan ändra det senare i Inställningar '
+      '→ Funktioner.';
+  @override
+  String get featuresIntroDone => 'Klart';
+  @override
+  String get featuresCreatedTitle =>
+      'Vad ska det här biblioteket användas till?';
+  @override
+  String get featuresCreatedBody =>
+      'Välj en start. Den ställer bara in reglagen nedan; du kan växla vilket '
+      'som helst av dem, nu eller senare i Inställningar → Funktioner.';
+  @override
+  String get featuresShowIntroTitle => 'Visa den här introduktionen igen';
+  @override
+  String get featuresShowIntroBody =>
+      'Kortet som förklarar den här vyn. Det ändrar inget reglage.';
+  @override
+  String get featuresShowIntroAction => 'Visa';
+  @override
+  String featuresRemindersCancelled(int count) =>
+      count == 1 ? '1 påminnelse avbruten' : '$count påminnelser avbrutna';
   @override
   String get navigationStart => 'Öppnas på';
   @override

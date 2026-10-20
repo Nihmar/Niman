@@ -9,6 +9,8 @@ see [organization](organization.md#where-new-notes-and-folders-go)),
 unless the template names a `folder` or the creation is *Create … here* on
 a folder.
 
+Templates are one of the [Features](features.md). Switched off, the menus offer no *new from template*.
+
 On a desktop the template is picked the way the command palette picks
 (#712): type to narrow the list, `↑` / `↓` to move, `Enter` to choose,
 `Esc` to give up. The new note's name is then typed in a row of the tree,

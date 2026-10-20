@@ -4,12 +4,16 @@
 ///
 /// It lists what the palette lists and runs it the same way: the shell's
 /// handlers for the commands that can run now. One that cannot is shown
-/// disabled, so a menu keeps its shape whatever is on screen.
+/// disabled, so a menu keeps its shape whatever is on screen. One whose
+/// feature the library has off is not listed at all (#1109), and a group
+/// left with nothing goes with them.
 library;
 
 import 'package:flutter/material.dart';
+import 'package:niman/src/core/settings/features.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/key_map.dart';
+import 'package:niman/src/ui/palette/command_features.dart';
 import 'package:niman/src/ui/palette/palette_command.dart';
 import 'package:niman/src/ui/strings.dart';
 
@@ -20,22 +24,38 @@ const List<AppCommand> _help = [
   AppCommand.welcomeDeck,
 ];
 
+Features _everythingOn() => const Features();
+
 /// The title bar's menu button.
 final class AppMenuButton extends StatefulWidget {
-  /// Creates the button; [handlers] are the commands that can run now.
-  const new({required this.handlers, super.key});
+  /// Creates the button; [handlers] are the commands that can run now and
+  /// [features] the library's.
+  const new({required this.handlers, this.features = _everythingOn, super.key});
 
   /// What each command does, for the ones that can run here and now.
   final Map<AppCommand, VoidCallback> Function() handlers;
+
+  /// The library's features, read as the menu opens.
+  final Features Function() features;
 
   @override
   State<AppMenuButton> createState() => _AppMenuButtonState();
 }
 
 final class _AppMenuButtonState extends State<AppMenuButton> {
+  /// The commands of [group] the menu lists: in the palette's order, but
+  /// for Go to note, which leads the Go to group.
+  List<AppCommand> _commandsOf(PaletteGroup group, Features features) => [
+    if (group == PaletteGroup.goTo) AppCommand.goToNote,
+    for (final command in AppCommand.values)
+      if (paletteGroup(command) == group && commandFeatureOn(command, features))
+        command,
+  ];
+
   @override
   Widget build(BuildContext context) {
     final handlers = widget.handlers();
+    final features = widget.features();
     final keys = AppKeyMap.current.value;
     final theme = Theme.of(context);
     final hint = theme.textTheme.bodySmall?.copyWith(
@@ -62,15 +82,13 @@ final class _AppMenuButtonState extends State<AppMenuButton> {
       onOpen: () => setState(() {}),
       menuChildren: [
         for (final group in PaletteGroup.values)
-          SubmenuButton(
-            key: Key('app-menu-group-${group.name}'),
-            menuChildren: [
-              if (group == PaletteGroup.goTo) item(AppCommand.goToNote),
-              for (final command in AppCommand.values)
-                if (paletteGroup(command) == group) item(command),
-            ],
-            child: Text(paletteGroupName(group)),
-          ),
+          if (_commandsOf(group, features) case final commands
+              when commands.isNotEmpty)
+            SubmenuButton(
+              key: Key('app-menu-group-${group.name}'),
+              menuChildren: [for (final command in commands) item(command)],
+              child: Text(paletteGroupName(group)),
+            ),
         SubmenuButton(
           key: const Key('app-menu-group-help'),
           menuChildren: [for (final command in _help) item(command)],

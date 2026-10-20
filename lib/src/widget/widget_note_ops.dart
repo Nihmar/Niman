@@ -18,10 +18,12 @@ import 'dart:isolate';
 
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/core/settings/features.dart';
 import 'package:niman/src/markdown/note_bytes.dart';
 import 'package:niman/src/ui/kinds/list_parser.dart';
 import 'package:niman/src/widget/note_excerpt.dart';
 import 'package:niman/src/widget/widget_configs.dart';
+import 'package:niman/src/widget/widget_off.dart';
 import 'package:niman/src/widget/widget_payload.dart';
 import 'package:niman/src/widget/widget_theme.dart';
 import 'package:niman/src/widget/widget_updater.dart';
@@ -78,12 +80,14 @@ Future<void> writeNoteText(String root, String notePath, String content) async {
 /// The payload for the note at [notePath] in [root] from [content]
 /// (excerpt, checklist rows or `missing` when the file is gone).
 /// [theme] wears the app theme (absent in old callers: the widget
-/// renders its defaults).
+/// renders its defaults). A list note whose kind is off under [features]
+/// is the excerpt of a plain note (#1109).
 Future<String> notePayloadFor(
   String root,
   String notePath,
   String? content, {
   WidgetTheme? theme,
+  Features features = const Features(),
 }) async {
   if (content == null) {
     return noteWidgetPayload(
@@ -95,7 +99,7 @@ Future<String> notePayloadFor(
       theme: theme,
     );
   }
-  if (isListNoteContent(content)) {
+  if (isListNoteContent(content, features)) {
     final list = checklistRows(content);
     return noteWidgetPayload(
       libraryPath: root,
@@ -168,6 +172,7 @@ Future<bool> toggleWidgetNoteRow(
   Future<void> Function(String root, String notePath, String content)?
   writeNote,
   WidgetUpdater? updater,
+  Future<Features> Function(String root)? readFeatures,
 }) async {
   final target = parseNoteRowToggleUri(uri);
   if (target == null) {
@@ -180,6 +185,13 @@ Future<bool> toggleWidgetNoteRow(
     final content = await read(target.library, target.note);
     if (content == null) {
       const AppLogger(name: 'widgets').warning('note-row toggle: note missing');
+      return false;
+    }
+    final features = await (readFeatures ?? readWidgetFeatures)(target.library);
+    // A list whose kind is off is drawn as plain text: no row to flip.
+    if (isListNoteOff(content, features)) {
+      const AppLogger(name: 'widgets')
+          .warning('note-row toggle: the list kind is off');
       return false;
     }
     ListItem? item;
@@ -204,6 +216,7 @@ Future<bool> toggleWidgetNoteRow(
       updated,
       updater,
       target.theme,
+      features,
     );
     return true;
   } on Object catch (error) {
@@ -263,6 +276,7 @@ Future<bool> addWidgetNoteRow(
   Future<void> Function(String root, String notePath, String content)?
   writeNote,
   WidgetUpdater? updater,
+  Future<Features> Function(String root)? readFeatures,
 }) async {
   final target = parseNoteRowAddUri(uri);
   if (target == null) {
@@ -276,7 +290,8 @@ Future<bool> addWidgetNoteRow(
       const AppLogger(name: 'widgets').warning('note-row add: note missing');
       return false;
     }
-    if (!isListNoteContent(content)) {
+    final features = await (readFeatures ?? readWidgetFeatures)(target.library);
+    if (!isListNoteContent(content, features)) {
       const AppLogger(name: 'widgets')
           .warning('note-row add: note is no longer a list');
       return false;
@@ -291,6 +306,7 @@ Future<bool> addWidgetNoteRow(
       updated,
       updater,
       target.theme,
+      features,
     );
     return true;
   } on Object catch (error) {
@@ -310,12 +326,14 @@ Future<void> _pushNoteWidget(
   String content,
   WidgetUpdater? updater,
   WidgetTheme? theme,
+  Features features,
 ) async {
   final payload = await notePayloadFor(
     library,
     note,
     content,
     theme: theme ?? resolveWidgetTheme(),
+    features: features,
   );
   final push = updater ?? WidgetUpdater();
   await push.push(

@@ -16,6 +16,7 @@ library;
 // ignore_for_file: public_member_api_docs
 
 import 'package:flutter/widgets.dart';
+import 'package:niman/src/core/settings/library_features.dart';
 
 /// The key of every settings row that can be searched for.
 abstract final class SettingsKeys {
@@ -74,6 +75,10 @@ abstract final class SettingsKeys {
   static const resetAllReviews = Key('reset-all-reviews-setting');
   static const navigationScope = Key('navigation-scope-setting');
   static const navigationStart = Key('navigation-start-setting');
+
+  // Features (#1109): one row per switch, by the id it is stored under.
+  static Key featureRow(LibraryFeature feature) =>
+      Key('feature-row-${feature.id}');
 
   // Trash and history.
   static const trash = Key('trash-setting');

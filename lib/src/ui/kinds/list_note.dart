@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:niman/src/core/settings/library_features.dart';
 import 'package:niman/src/frontmatter/note_kind.dart';
 import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/ui/kinds/list_item_row.dart';
@@ -20,6 +21,9 @@ String listNoteContent() => '---\ntype: list\n---\n';
 final class ListKindGui implements NoteKindGUI {
   @override
   String get type => 'list';
+
+  @override
+  LibraryFeature get feature => LibraryFeature.kindList;
 
   @override
   Widget buildBody(BuildContext context, NoteKindHost host) {

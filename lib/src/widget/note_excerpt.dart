@@ -8,6 +8,8 @@
 /// the content in.
 library;
 
+import 'package:niman/src/core/settings/features.dart';
+import 'package:niman/src/frontmatter/note_kind.dart';
 import 'package:niman/src/frontmatter/parser.dart';
 import 'package:niman/src/ui/kinds/list_parser.dart';
 import 'package:niman/src/ui/kinds/shopping_parser.dart';
@@ -61,10 +63,19 @@ String noteWidgetTitle(String notePath) {
 /// Whether [content] is a list note (`type: list` frontmatter, or the
 /// `shopping-list` subtype, which is the same checklist with a quantity
 /// per row).
-bool isListNoteContent(String content) {
+///
+/// A note whose kind is off under [features] (#1109) is not one: the
+/// widget draws it as plain text, as the app opens it as Markdown.
+bool isListNoteContent(String content, [Features features = const Features()]) {
   final type = frontmatterTypeOf(content);
-  return type == 'list' || type == 'shopping-list';
+  if (type != 'list' && type != 'shopping-list') return false;
+  return NoteKinds.forType(type, features) != null;
 }
+
+/// Whether [content] is a list note whose kind is off under [features]:
+/// what the rows' background ops leave alone (#1109).
+bool isListNoteOff(String content, Features features) =>
+    isListNoteContent(content) && !isListNoteContent(content, features);
 
 /// The body lines of [content] without its frontmatter block.
 List<String> noteBodyLines(String content) {

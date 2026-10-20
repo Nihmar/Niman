@@ -1,10 +1,11 @@
-import 'dart:typed_data';
-
+import 'package:flutter/foundation.dart';
 import 'package:meta/meta.dart';
 import 'package:niman/src/core/app_theme.dart';
 import 'package:niman/src/core/custom_theme.dart';
 import 'package:niman/src/core/files.dart' show DiskStamp;
 import 'package:niman/src/core/language.dart';
+import 'package:niman/src/core/settings/features.dart';
+import 'package:niman/src/core/settings/features_introduction.dart';
 import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/core/settings/navigation_layout.dart';
@@ -369,6 +370,28 @@ abstract interface class LibrarySession {
   /// running. Reported while the notes of a newly indexed library are read
   /// (#1068).
   IndexProgress? get indexProgress;
+
+  /// The open library's features (#1109), every one on while none is open.
+  ///
+  /// Changes after the settings file is read, a switch is changed, and a
+  /// sync brings another device's: every surface that offers a feature
+  /// rebuilds from it and keeps no boolean of its own.
+  ValueListenable<Features> get features;
+
+  /// Sets (and persists) the library's [features] (#1109), the switches of
+  /// Settings → Features. [features] follows at once; the files stay as
+  /// they are — off is inert.
+  Future<void> setFeatures(Features features);
+
+  /// The introduction Settings → Features has still to show for the open
+  /// library (#1109): [FeaturesIntroduction.none] once the library's
+  /// `featuresReviewed` is set, otherwise the card of a library being
+  /// created or of one that existed before the switches did.
+  Future<FeaturesIntroduction> get featuresIntroduction;
+
+  /// Records that the introduction was seen (#1109): `featuresReviewed`,
+  /// written when the Features screen is left, never when it opens.
+  Future<void> markFeaturesReviewed();
 
   /// Fires with the new [revision] after every index change.
   Stream<int> get events;

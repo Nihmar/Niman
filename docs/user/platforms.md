@@ -42,7 +42,12 @@ the two agree.
 - **Launcher shortcuts:** long-press the icon (see
   [shortcuts](shortcuts.md)).
 - **Home-screen widgets:** the Niman Todos, Niman Note and Niman Study widgets
-  (see [widgets](widgets.md)).
+  (see [widgets](widgets.md)). The *Home-screen widgets* switch in
+  [Features](features.md) is shown on every platform, tagged *Android*: it
+  travels with the library and acts where widgets exist.
+- **PDF and EPUB with the readers off:** the file goes to the system's app
+  through a read-only `content://` grant for that one start, as the desktops
+  hand over a path (see [features](features.md)).
 - **PDF export:** through the system WebView's print adapter, in-process:
   no browser is installed or run, and the PDF's text stays selectable.
   A folder's PDF zip prints each note the same way, one PDF per note.

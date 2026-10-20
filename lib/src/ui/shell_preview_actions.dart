@@ -8,6 +8,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:niman/src/core/settings/features.dart';
 import 'package:niman/src/ui/attachment_view.dart';
 import 'package:niman/src/ui/strings.dart';
 
@@ -15,8 +16,11 @@ import 'package:niman/src/ui/strings.dart';
 /// [kindGui] (null for a plain note): not on an attachment, which has no
 /// editor to flip from, nor on a note shown as its kind (a list), which is
 /// not a document (#1081).
-bool previewToggleOffered({required String path, required Object? kindGui}) =>
-    !isShownAttachment(path) && kindGui == null;
+bool previewToggleOffered({
+  required String path,
+  required Object? kindGui,
+  Features features = const Features(),
+}) => !isShownAttachment(path, features) && kindGui == null;
 
 /// The app-bar eye action: flips the editor and the preview in the note's
 /// one pane (the phone's app bar and the wide layout's status row).

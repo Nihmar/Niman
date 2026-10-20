@@ -5,6 +5,8 @@ shows it as a deck: one slide per part of the note, presented full screen
 and exported as a PDF of slides. It is still an ordinary `.md` file — the
 pencil beside the ⋮ opens the raw editor, where the slides are written.
 
+Slides are one of the [Features](features.md). Switched off, a slides note opens as plain Markdown with its `type:` kept.
+
 ```markdown
 ---
 type: slides

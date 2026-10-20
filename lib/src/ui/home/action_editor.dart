@@ -9,6 +9,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/home/home_action.dart';
+import 'package:niman/src/home/home_tile_feature.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/app_switch_list_tile.dart';
 import 'package:niman/src/ui/device_shape.dart';
@@ -207,7 +208,13 @@ final class _ActionEditorState extends State<_ActionEditor> {
         value: kind,
         decoration: InputDecoration(labelText: AppStrings.homeActionKind),
         options: [
-          for (final k in HomeActionKind.values) (k, homeActionKindName(k)),
+          // A kind whose feature is off is not offered, but the one this
+          // action already has stays, or the field would name nothing
+          // (#1109).
+          for (final k in HomeActionKind.values)
+            if (k == kind ||
+                actionKindIsOn(k, widget.controller.features.value))
+              (k, homeActionKindName(k)),
         ],
         onChanged: (k) => setState(() => _kind = k),
       ),

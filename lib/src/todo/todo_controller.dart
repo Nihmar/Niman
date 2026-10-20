@@ -20,7 +20,10 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:niman/src/calendar/calendar_store.dart';
 import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/core/settings/library_features.dart';
 import 'package:niman/src/library/session.dart';
+import 'package:niman/src/todo/reminder_cancellation.dart';
+import 'package:niman/src/todo/reminder_feature_follower.dart';
 import 'package:niman/src/todo/reminders.dart';
 import 'package:niman/src/todo/todo_source.dart';
 import 'package:niman/src/todo/todo_store.dart';
@@ -54,6 +57,15 @@ final class TodoController extends ChangeNotifier {
 
   final DateTime Function() _clock;
   final TodoSource Function(String root) _sourceFactory;
+
+  /// Cancels and restores the alarms as the library's Todo and Calendar
+  /// switches flip (#1109), whoever flipped them.
+  late final ReminderFeatureFollower _follower = ReminderFeatureFollower(
+    features: session.features,
+    scheduledFor: _scheduledFor,
+    resync: _syncReminders,
+    isOpen: () => session.root != null,
+  );
 
   static const AppLogger _log = AppLogger(name: 'todo');
 
@@ -89,6 +101,7 @@ final class TodoController extends ChangeNotifier {
   Future<void> open() async {
     _log.info('todo open: root=${session.root}');
     _events ??= session.events.listen((_) => _scheduleRefresh());
+    _follower.start();
     await _refreshReminderSettings();
     await _reload();
   }
@@ -106,6 +119,15 @@ final class TodoController extends ChangeNotifier {
       _log.warning('todo reminder settings unavailable: $error');
     }
   }
+
+  /// What the latest flip of the Todo or Calendar switch cancelled, once
+  /// its alarms are reconciled (#1109).
+  ///
+  /// The Features screen awaits it right after it flips a switch, for the
+  /// snackbar's count. The flip itself started the work -- this controller
+  /// listens to the library's features, so a switch a sync brought follows
+  /// the same path -- and reading this starts nothing.
+  Future<ReminderCancellation> get featureReconcile => _follower.settled;
 
   /// Appends [line] to `todo.txt`.
   Future<void> add(String line) {
@@ -240,17 +262,46 @@ final class TodoController extends ChangeNotifier {
       // One wanted set over both files: an event's `rem:HH:MM` and a
       // task's stamp are the same reminder to the OS, with ids salted
       // apart and payloads that say which file a tap opens (#730).
+      // A feature that is off wants none: the file keeps its `rem:`s and
+      // the alarms come back with the switch (#1109).
+      final features = session.features.value;
       await service.reconcile({
-        ...wantedReminders(snapshot, _clock(), showTokens: _reminderShowTokens),
-        ...calendarWantedReminders(
-          _calendar,
-          _clock(),
-          showTokens: _reminderShowTokens,
-        ),
+        if (features.isOn(LibraryFeature.todo))
+          ...wantedReminders(
+            snapshot,
+            _clock(),
+            showTokens: _reminderShowTokens,
+          ),
+        if (features.isOn(LibraryFeature.calendar))
+          ...calendarWantedReminders(
+            _calendar,
+            _clock(),
+            showTokens: _reminderShowTokens,
+          ),
       });
     } on Object catch (error) {
       _log.warning('todo reminders sync failed: $error');
     }
+  }
+
+  /// How many reminders the files have for [feature] right now, whatever
+  /// its switch says: what turning it off cancels.
+  int _scheduledFor(LibraryFeature feature) {
+    final snapshot = _snapshot;
+    if (snapshot == null) return 0;
+    return switch (feature) {
+      LibraryFeature.todo => wantedReminders(
+        snapshot,
+        _clock(),
+        showTokens: _reminderShowTokens,
+      ).length,
+      LibraryFeature.calendar => calendarWantedReminders(
+        _calendar,
+        _clock(),
+        showTokens: _reminderShowTokens,
+      ).length,
+      _ => 0,
+    };
   }
 
   /// Schedules a debounced [_reload] for a session revision event.
@@ -320,6 +371,7 @@ final class TodoController extends ChangeNotifier {
   @override
   void dispose() {
     _disposed = true;
+    _follower.dispose();
     _refreshTimer?.cancel();
     unawaited(_events?.cancel());
     super.dispose();

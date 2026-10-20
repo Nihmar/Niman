@@ -6,6 +6,8 @@ coming back when it is about to be forgotten. It is still an ordinary
 `.md` file — the cards are the note's own tables, lines and highlights,
 and the pencil beside the ⋮ opens the raw editor where they are written.
 
+Flashcards and Study are one of the [Features](features.md). Switched off, a deck opens as plain Markdown with its `type:` kept, and `.niman/review.json` is left as it is.
+
 ```markdown
 ---
 type: flashcard

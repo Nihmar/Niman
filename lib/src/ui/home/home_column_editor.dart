@@ -5,8 +5,11 @@ library;
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:niman/src/core/settings/features.dart';
 import 'package:niman/src/home/home_tile.dart';
+import 'package:niman/src/home/home_tile_feature.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/app_switch.dart';
 import 'package:niman/src/ui/home/home_edit_dialogs.dart';
@@ -93,7 +96,10 @@ final class HomeColumnEditor extends StatelessWidget {
                 ],
               ),
             ),
-            footer: _AddSection(editing: editing),
+            footer: _AddSection(
+              editing: editing,
+              features: controller.features,
+            ),
             itemCount: tiles.length,
             onReorderItem: (from, to) => _reorder(tiles, from, to),
             itemBuilder: (context, i) {
@@ -150,17 +156,29 @@ final class HomeColumnEditor extends StatelessWidget {
 
 /// The kinds to add: the ones a Home holds several of, and the ones it
 /// holds none of yet.
+///
+/// A kind whose feature is off is not offered (#1109); the tiles the Home
+/// already holds are kept.
 final class _AddSection extends StatelessWidget {
-  const new({required this.editing});
+  const new({required this.editing, required this.features});
 
   final HomeEditing editing;
 
+  final ValueListenable<Features> features;
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => ValueListenableBuilder<Features>(
+    valueListenable: features,
+    builder: (context, features, _) => _section(context, features),
+  );
+
+  Widget _section(BuildContext context, Features features) {
     final layout = editing.layout;
     final kinds = [
       for (final kind in HomeTileKind.values)
-        if (kind.repeats || layout.tiles.every((t) => t.kind != kind)) kind,
+        if (tileKindIsOn(kind, features) &&
+            (kind.repeats || layout.tiles.every((t) => t.kind != kind)))
+          kind,
     ];
     final theme = Theme.of(context);
     return Column(

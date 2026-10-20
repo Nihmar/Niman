@@ -51,6 +51,12 @@ void main() {
       ..putFile('.keep', const []);
     library = Directory.systemTemp.createTempSync('niman_e2e_lib_');
     scratch = Directory.systemTemp.createTempSync('niman_e2e_app_');
+    // The Features introduction (#1109) opens by itself on the first normal
+    // open of a library that has not been through it, over the shell this
+    // walk drives: by its settings this library is past it.
+    Directory(p.join(library.path, '.niman')).createSync();
+    File(p.join(library.path, '.niman', 'settings.json'))
+        .writeAsStringSync('{"featuresReviewed": true}\n');
     File(p.join(library.path, 'Plan.md'))
         .writeAsStringSync('# Plan\nwrite the sync\ntest it\n');
     appDb = AppDatabase(NativeDatabase(File(p.join(scratch.path, 'app.db'))));

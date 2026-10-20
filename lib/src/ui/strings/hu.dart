@@ -1615,6 +1615,17 @@ final class HungarianStrings extends Strings {
   String get pinWidgetUnavailable =>
       'A kezdőképernyő-widgetek Androidon érhetők el';
 
+  @override
+  String get widgetOffTodo =>
+      'A teendők ki vannak kapcsolva ebben a könyvtárban';
+  @override
+  String get widgetOffStudy => 'A tanulás ki van kapcsolva ebben a könyvtárban';
+  @override
+  String get widgetOffWidgets =>
+      'A kezdőképernyő-widgetek ki vannak kapcsolva ebben a könyvtárban';
+  @override
+  String get widgetOpenFeatures => 'Funkciók megnyitása';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Megjelenítés a fájlkezelőben';
@@ -3595,6 +3606,160 @@ final class HungarianStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Mindig látható';
+  @override
+  String get featuresTitle => 'Funkciók';
+  @override
+  String get featureOffInFeatures => 'Kikapcsolva a Funkciókban';
+  @override
+  String get featureOffInLibrary => 'Kikapcsolva ebben a könyvtárban';
+  @override
+  String featureOffInLibraryNamed(String feature) =>
+      '$feature ki van kapcsolva ebben a könyvtárban';
+  @override
+  String get featureNameSearch => 'Keresés';
+  @override
+  String get featureNameQuickNote => 'Gyorsjegyzet';
+  @override
+  String get featureNameTemplates => 'Sablonok';
+  @override
+  String get featureNameCapture => 'Weboldalak mentése';
+  @override
+  String get featureNameTodo => 'Teendők és emlékeztetők';
+  @override
+  String get featureNameJournal => 'Napló';
+  @override
+  String get featureNameCalendar => 'Naptár';
+  @override
+  String get featureNameLists => 'Listák';
+  @override
+  String get featureNameShopping => 'Bevásárlólisták';
+  @override
+  String get featureNameAudio => 'Hangjegyzetek';
+  @override
+  String get featureNameTranscription => 'Átirat';
+  @override
+  String get featureNameSlides => 'Bemutatók';
+  @override
+  String get featureNameFlashcards => 'Kártyák és tanulás';
+  @override
+  String get featureNameReaders => 'PDF- és EPUB-olvasók';
+  @override
+  String get featureNameAnnotations => 'Megjegyzések';
+  @override
+  String get featureNameOcr => 'Szövegfelismerés';
+  @override
+  String get featureNameHome => 'Kezdőlap';
+  @override
+  String get featureNameWidgets => 'Kezdőképernyő-widgetek';
+  @override
+  String get featuresDescription =>
+      'Mit használ ez a könyvtár. Kikapcsolva mindenhonnan eltűnik, és a '
+      'háttérben végzett munkája leáll; a fájljaidban semmi sem változik és '
+      'semmi sem törlődik.';
+  @override
+  String get featuresPresetLabel => 'Előbeállítás';
+  @override
+  String get featurePresetEverything => 'Minden';
+  @override
+  String get featurePresetWriting => 'Írás';
+  @override
+  String get featurePresetNotesOnly => 'Csak jegyzetek';
+  @override
+  String get featurePresetTasks => 'Feladatok és napló';
+  @override
+  String get featurePresetCustom => 'Egyéni';
+  @override
+  String get featurePresetEverythingHint => 'az egész alkalmazás';
+  @override
+  String get featurePresetWritingHint =>
+      'jegyzetek, keresés, sablonok, olvasók';
+  @override
+  String get featurePresetNotesOnlyHint => 'jegyzetek, keresés, hivatkozások';
+  @override
+  String get featurePresetTasksHint => 'teendők, napló, naptár, Kezdőlap';
+  @override
+  String get featuresSectionFinding => 'Keresés és írás';
+  @override
+  String get featuresSectionPlanning => 'Tervezés';
+  @override
+  String get featuresSectionKinds => 'Jegyzettípusok';
+  @override
+  String get featuresSectionReading => 'Olvasás';
+  @override
+  String get featuresSectionAround => 'Az alkalmazás körül';
+  @override
+  String featureNeeds(String feature) => 'Szükséges hozzá: $feature';
+  @override
+  String get featureOffSearch =>
+      'Ki: nincs keresőképernyő és keresési parancs; az indexet továbbra is '
+      'vezeti';
+  @override
+  String get featureOffQuickNote =>
+      'Ki: a megosztott szöveg a(z) Importálás helyre kerül';
+  @override
+  String get featureOffTemplates =>
+      'Ki: az új jegyzetek és naplóbejegyzések az alapértelmezett tartalommal '
+      'indulnak';
+  @override
+  String get featureOffCapture =>
+      'Ki: nincs oldalmentés; a hivatkozások sima hivatkozások maradnak';
+  @override
+  String get featureOffTodo =>
+      'Ki: a todo.txt egyszerű fájl marad; nincsenek emlékeztetők';
+  @override
+  String get featureOffJournal =>
+      'Ki: a bejegyzések közönséges jegyzetek maradnak';
+  @override
+  String get featureOffCalendar =>
+      'Ki: a calendar.txt egyszerű fájl marad; nincsenek eseményemlékeztetők';
+  @override
+  String get featureOffKind =>
+      'Ki: ezek a jegyzetek sima Markdownként nyílnak meg; a type: megmarad';
+  @override
+  String get featureOffTranscription =>
+      'Ki: nincs átírási művelet; a hangjegyzetek továbbra is rögzíthetők és '
+      'lejátszhatók';
+  @override
+  String get featureOffReaders => 'Ki: a rendszer alkalmazásában nyílnak meg';
+  @override
+  String get featureOffAnnotations =>
+      'Ki: nincsenek kiemelések vagy jelölések; a már elkészült jegyzetek '
+      'megmaradnak';
+  @override
+  String get featureOffOcr =>
+      'Ki: nincs beolvasás; a már felismert szöveg megmarad';
+  @override
+  String get featureOffHome => 'Ki: nincs Kezdőlap-képernyő és csempe';
+  @override
+  String get featureOffWidgets =>
+      'Ki: a widgetek jelzik, hogy ez ki van kapcsolva';
+  @override
+  String get featuresIntroTitle => 'Válaszd ki, mit használjon ez a könyvtár';
+  @override
+  String get featuresIntroBody =>
+      'A Niman mostantól engedi kiválasztani, mit használjon ez a könyvtár. '
+      'Minden be van kapcsolva; kapcsold ki, amire nincs szükséged. Később '
+      'módosíthatod itt: Beállítások → Funkciók.';
+  @override
+  String get featuresIntroDone => 'Kész';
+  @override
+  String get featuresCreatedTitle => 'Mire való ez a könyvtár?';
+  @override
+  String get featuresCreatedBody =>
+      'Válassz egy kiindulást. Csak az alábbi kapcsolókat állítja be; '
+      'bármelyiket átkapcsolhatod, most vagy később itt: Beállítások → '
+      'Funkciók.';
+  @override
+  String get featuresShowIntroTitle => 'Bemutató megjelenítése újra';
+  @override
+  String get featuresShowIntroBody =>
+      'A kártya, amely elmagyarázza ezt a képernyőt. Egyetlen kapcsolót sem '
+      'változtat meg.';
+  @override
+  String get featuresShowIntroAction => 'Megjelenítés';
+  @override
+  String featuresRemindersCancelled(int count) =>
+      count == 1 ? '1 emlékeztető törölve' : '$count emlékeztető törölve';
   @override
   String get navigationStart => 'Indításkor';
   @override

@@ -2,9 +2,11 @@
 /// until a note is chosen. Pure props in, [NoteView] out.
 library;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:niman/src/annotations/annotation.dart';
 import 'package:niman/src/annotations/annotation_mark_source.dart';
+import 'package:niman/src/core/settings/features.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/editor/toolbar_layout.dart';
@@ -47,6 +49,7 @@ final class ShellDetailPane extends StatelessWidget {
     required this.unsavedTracker,
     required this.statusActions,
     required this.spellCheck,
+    this.features,
     this.caretPath,
     this.caretRequest = 0,
     this.onPasteAsMarkdown,
@@ -105,6 +108,10 @@ final class ShellDetailPane extends StatelessWidget {
 
   /// Which book is read in full screen (#621).
   final ValueNotifier<Object?>? epubFullScreen;
+
+  /// The library's features (#1109), forwarded to every [NoteView]: a note
+  /// of a kind that is off opens in the plain editor.
+  final ValueListenable<Features>? features;
 
   /// Absolute library root; null until the session is ready.
   final String? root;
@@ -306,7 +313,8 @@ final class ShellDetailPane extends StatelessWidget {
     );
   }
 
-  Widget _view(String root, DetailTab tab) => isShownAttachment(tab.path)
+  Widget _view(String root, DetailTab tab) =>
+      isShownAttachment(tab.path, features?.value ?? const Features())
       // A picture, a PDF or a book, shown rather than read as a note.
       ? AttachmentView(
           key: tab.key,
@@ -373,6 +381,7 @@ final class ShellDetailPane extends StatelessWidget {
     initialCaretOffset: tab.caret,
     initialFind: tab.find,
     kindMode: kindMode,
+    features: features,
     outlineInDock: outlineInDock,
     spellCheckInDock: spellCheckInDock,
     // Only the note showing in the focused pane tells the shell what

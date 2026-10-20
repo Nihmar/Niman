@@ -4,6 +4,8 @@ import 'dart:isolate';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:niman/src/core/resume_observer.dart';
+import 'package:niman/src/core/settings/library_features.dart';
+import 'package:niman/src/library/feature_download_gate.dart';
 import 'package:niman/src/ocr/ocr_engine_build.dart';
 import 'package:niman/src/ocr/ocr_engine_locator.dart';
 import 'package:niman/src/ocr/ocr_installation.dart';
@@ -21,6 +23,8 @@ final ocrInstallationProvider = Provider<OcrInstallation>((ref) {
     // Opening a library is disk I/O, and a slow one on a phone.
     findInstalled: () => Isolate.run(findInstalledOcrEngine),
     probe: (path) => Isolate.run(() => openOcrEngine(path)?.versionString()),
+    // Read per download, from whichever library is open then.
+    downloadsAllowed: featureDownloadGate(ref, LibraryFeature.ocr),
   );
   unawaited(installation.load());
   // Back in the foreground: pick up the downloads the freeze cut off.

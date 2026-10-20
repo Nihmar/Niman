@@ -2,6 +2,8 @@
 
 Full-text search across titles, body, and tags, powered by SQLite FTS5.
 
+Search is one of the [Features](features.md). Switched off, there is no search screen or command; the index is still kept, so switching it on again is instant.
+
 On a wide window Search is a **sidebar view** beside the note: picking it
 shows the field and the results in the left island, with the tree, the
 panes and the dock where they were, and opening a result keeps the

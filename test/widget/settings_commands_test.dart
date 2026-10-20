@@ -3,6 +3,8 @@
 // #264: it says it is a reference, and its keys lead to where they change.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/settings/features.dart';
+import 'package:niman/src/core/settings/library_features.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/key_map.dart';
 import 'package:niman/src/ui/keyboard_presence.dart';
@@ -11,7 +13,9 @@ import 'package:niman/src/ui/strings.dart';
 
 void main() {
   late bool wasAttached;
+  late ValueNotifier<Features> features;
   setUp(() {
+    features = ValueNotifier(const Features());
     wasAttached = KeyboardPresence.shared.attached;
     KeyboardPresence.shared.attached = true;
   });
@@ -22,7 +26,12 @@ void main() {
     void Function(AppCommand? command)? openShortcuts,
   }) async {
     await tester.pumpWidget(
-      MaterialApp(home: SettingsCommandsScreen(openShortcuts: openShortcuts)),
+      MaterialApp(
+        home: SettingsCommandsScreen(
+          features: features,
+          openShortcuts: openShortcuts,
+        ),
+      ),
     );
     await tester.pumpAndSettle();
   }
@@ -121,5 +130,47 @@ void main() {
     await pump(tester, openShortcuts: (_) {});
     expect(find.text(AppStrings.commandsKeysNote), findsNothing);
     expect(find.byKey(const Key('commands-open-shortcuts')), findsNothing);
+  });
+
+  // #1109: a command whose feature is off is listed, greyed, and says why.
+  testWidgets('a command of a feature that is off is greyed and says so', (
+    tester,
+  ) async {
+    features.value = const Features().withSwitch(
+      LibraryFeature.todo,
+      on: false,
+    );
+    await pump(tester);
+
+    final off = find.byKey(commandRowKey(AppCommand.newTodo));
+    expect(off, findsOne);
+    expect(
+      tester
+          .widget<ListTile>(
+            find.descendant(of: off, matching: find.byType(ListTile)),
+          )
+          .enabled,
+      isFalse,
+    );
+    expect(
+      inRow(AppCommand.newTodo, find.text(AppStrings.featureOffInFeatures)),
+      findsOne,
+    );
+    // The rest of the page is as it was.
+    expect(
+      inRow(AppCommand.newNote, find.text(AppStrings.featureOffInFeatures)),
+      findsNothing,
+    );
+    expect(
+      inRow(AppCommand.renameNote, find.text(AppStrings.commandNeedOpenNote)),
+      findsOne,
+    );
+
+    features.value = const Features();
+    await tester.pumpAndSettle();
+    expect(
+      inRow(AppCommand.newTodo, find.text(AppStrings.featureOffInFeatures)),
+      findsNothing,
+    );
   });
 }

@@ -3,6 +3,7 @@
 // the Commands page.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/settings/features.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/key_map.dart';
 import 'package:niman/src/ui/keyboard_presence.dart';
@@ -61,7 +62,11 @@ void main() {
     tester,
   ) async {
     KeyboardPresence.shared.attached = false;
-    await tester.pumpWidget(const MaterialApp(home: SettingsCommandsScreen()));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SettingsCommandsScreen(features: ValueNotifier(const Features())),
+      ),
+    );
     await tester.pumpAndSettle();
     expect(find.text(paletteKeys()), findsNothing);
     expect(find.text(AppStrings.commandNeedNone), findsWidgets);

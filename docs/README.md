@@ -5,7 +5,8 @@ Four folders, by what each holds:
 - **`user/`** — how to use Niman: getting started, the Home, editing, list notes
   and shopping lists, slide notes, flashcards, export, organization, the journal, search, text
   recognition, web capture, links,
-  templates, tasks and reminders, themes, home-screen widgets, settings,
+  templates, tasks and reminders, themes, the per-library Features switches,
+  home-screen widgets, settings,
   shortcuts, sync, and platform notes.
 - **`dev/`** — how to build and change Niman: architecture, build
   instructions, code conventions, the documentation site and the release

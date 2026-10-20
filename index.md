@@ -32,6 +32,8 @@ you need:
 - [Tasks and reminders](docs/user/tasks.md) — `todo.txt`, and alarms that
   fire.
 - [Themes](docs/user/themes.md) — the shipped palettes, and one of your own.
+- [Features](docs/user/features.md) — what a library uses, switch by switch,
+  and what off means.
 - [Settings reference](docs/user/settings.md) — every key, per library.
 - [Shortcuts](docs/user/shortcuts.md) — the keyboard, and what is remappable.
 - [Sync](docs/user/sync.md) — WebDAV to your own server.

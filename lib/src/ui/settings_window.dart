@@ -13,6 +13,7 @@ import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ocr/ocr_installation.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/transcription/transcription_models.dart';
+import 'package:niman/src/ui/features/features_host.dart';
 import 'package:niman/src/ui/floating_window.dart';
 import 'package:niman/src/ui/settings_areas.dart';
 import 'package:niman/src/ui/settings_tab.dart';
@@ -27,6 +28,7 @@ Route<void> settingsWindowRoute(
   TranscriptionModels? transcription,
   OcrInstallation? ocr,
   SettingsTarget? target,
+  FeaturesHost featuresHost = const FeaturesHost(),
 }) {
   return floatingWindowRoute(
     context,
@@ -39,6 +41,7 @@ Route<void> settingsWindowRoute(
       ocr: ocr,
       libraryRows: false,
       target: target,
+      featuresHost: featuresHost,
     ),
   );
 }

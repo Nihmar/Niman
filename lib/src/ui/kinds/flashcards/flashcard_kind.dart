@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:niman/src/core/settings/library_features.dart';
 import 'package:niman/src/frontmatter/note_kind.dart';
 import 'package:niman/src/ui/kinds/flashcards/deck_note_view.dart';
 
@@ -7,6 +8,9 @@ import 'package:niman/src/ui/kinds/flashcards/deck_note_view.dart';
 final class FlashcardKindGui implements NoteKindGUI {
   @override
   String get type => 'flashcard';
+
+  @override
+  LibraryFeature get feature => LibraryFeature.kindFlashcards;
 
   @override
   Widget buildBody(BuildContext context, NoteKindHost host) =>

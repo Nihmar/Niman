@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The "Open Features" button of a widget whose feature is off (#1109): an
+     outlined pill in the widget's own secondary tone, so it reads as a
+     button on every launcher and in both palettes. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <stroke
+        android:width="1dp"
+        android:color="@color/widget_text_secondary" />
+    <corners android:radius="20dp" />
+</shape>

@@ -1597,6 +1597,16 @@ final class LatvianStrings extends Strings {
   @override
   String get pinWidgetUnavailable => 'Sākumekrāna vidžeti ir pieejami Android';
 
+  @override
+  String get widgetOffTodo => 'Uzdevumi šajā bibliotēkā ir izslēgti';
+  @override
+  String get widgetOffStudy => 'Mācības šajā bibliotēkā ir izslēgtas';
+  @override
+  String get widgetOffWidgets =>
+      'Sākumekrāna vidžeti šajā bibliotēkā ir izslēgti';
+  @override
+  String get widgetOpenFeatures => 'Atvērt funkcijas';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Rādīt failu pārvaldniekā';
@@ -3573,6 +3583,157 @@ final class LatvianStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Vienmēr redzams';
+  @override
+  String get featuresTitle => 'Funkcijas';
+  @override
+  String get featureOffInFeatures => 'Izslēgts sadaļā Funkcijas';
+  @override
+  String get featureOffInLibrary => 'Izslēgts šajā bibliotēkā';
+  @override
+  String featureOffInLibraryNamed(String feature) =>
+      'Izslēgts šajā bibliotēkā: $feature';
+  @override
+  String get featureNameSearch => 'Meklēšana';
+  @override
+  String get featureNameQuickNote => 'Ātrā piezīme';
+  @override
+  String get featureNameTemplates => 'Šabloni';
+  @override
+  String get featureNameCapture => 'Tīmekļa lapu saglabāšana';
+  @override
+  String get featureNameTodo => 'Uzdevumi un atgādinājumi';
+  @override
+  String get featureNameJournal => 'Dienasgrāmata';
+  @override
+  String get featureNameCalendar => 'Kalendārs';
+  @override
+  String get featureNameLists => 'Saraksti';
+  @override
+  String get featureNameShopping => 'Iepirkumu saraksti';
+  @override
+  String get featureNameAudio => 'Balss piezīmes';
+  @override
+  String get featureNameTranscription => 'Transkripcija';
+  @override
+  String get featureNameSlides => 'Prezentācijas';
+  @override
+  String get featureNameFlashcards => 'Kartītes un mācības';
+  @override
+  String get featureNameReaders => 'PDF un EPUB lasītāji';
+  @override
+  String get featureNameAnnotations => 'Anotācijas';
+  @override
+  String get featureNameOcr => 'Teksta atpazīšana';
+  @override
+  String get featureNameHome => 'Sākums';
+  @override
+  String get featureNameWidgets => 'Sākumekrāna vidžeti';
+  @override
+  String get featuresDescription =>
+      'Ko izmanto šī bibliotēka. Izslēgtais tiek paslēpts visur, un tā darbs '
+      'fonā apstājas; jūsu failos nekas netiek mainīts vai dzēsts.';
+  @override
+  String get featuresPresetLabel => 'Sagatave';
+  @override
+  String get featurePresetEverything => 'Viss';
+  @override
+  String get featurePresetWriting => 'Rakstīšana';
+  @override
+  String get featurePresetNotesOnly => 'Tikai piezīmes';
+  @override
+  String get featurePresetTasks => 'Uzdevumi un dienasgrāmata';
+  @override
+  String get featurePresetCustom => 'Pielāgota';
+  @override
+  String get featurePresetEverythingHint => 'visa lietotne';
+  @override
+  String get featurePresetWritingHint =>
+      'piezīmes, meklēšana, veidnes, lasītāji';
+  @override
+  String get featurePresetNotesOnlyHint => 'piezīmes, meklēšana, saites';
+  @override
+  String get featurePresetTasksHint =>
+      'uzdevumi, dienasgrāmata, kalendārs, Sākums';
+  @override
+  String get featuresSectionFinding => 'Meklēšana un rakstīšana';
+  @override
+  String get featuresSectionPlanning => 'Plānošana';
+  @override
+  String get featuresSectionKinds => 'Piezīmju veidi';
+  @override
+  String get featuresSectionReading => 'Lasīšana';
+  @override
+  String get featuresSectionAround => 'Ap lietotni';
+  @override
+  String featureNeeds(String feature) => 'Nepieciešams: $feature';
+  @override
+  String get featureOffSearch =>
+      'Izslēgts: nav meklēšanas ekrāna un komandu; indekss joprojām tiek '
+      'uzturēts';
+  @override
+  String get featureOffQuickNote =>
+      'Izslēgts: kopīgotais teksts tiek nosūtīts uz: Importēt';
+  @override
+  String get featureOffTemplates =>
+      'Izslēgts: jaunas piezīmes un dienasgrāmatas ieraksti sākas ar '
+      'noklusējuma saturu';
+  @override
+  String get featureOffCapture =>
+      'Izslēgts: lapas netiek saglabātas; saites paliek parastas saites';
+  @override
+  String get featureOffTodo =>
+      'Izslēgts: todo.txt paliek parasts fails; atgādinājumu nav';
+  @override
+  String get featureOffJournal => 'Izslēgts: ieraksti paliek parastas piezīmes';
+  @override
+  String get featureOffCalendar =>
+      'Izslēgts: calendar.txt paliek parasts fails; atgādinājumu par '
+      'notikumiem nav';
+  @override
+  String get featureOffKind =>
+      'Izslēgts: šīs piezīmes tiek atvērtas kā parasts Markdown; type: paliek';
+  @override
+  String get featureOffTranscription =>
+      'Izslēgts: nav atšifrēšanas darbības; audio piezīmes joprojām var '
+      'ierakstīt un atskaņot';
+  @override
+  String get featureOffReaders =>
+      'Izslēgts: tie tiek atvērti sistēmas lietotnē';
+  @override
+  String get featureOffAnnotations =>
+      'Izslēgts: nav izcēlumu un atzīmju; jau izveidotās piezīmes paliek';
+  @override
+  String get featureOffOcr =>
+      'Izslēgts: nav skenēšanas; jau nolasītais teksts paliek';
+  @override
+  String get featureOffHome => 'Izslēgts: nav Sākums ekrāna un flīžu';
+  @override
+  String get featureOffWidgets => 'Izslēgts: logrīki rāda, ka tas ir izslēgts';
+  @override
+  String get featuresIntroTitle => 'Izvēlieties, ko izmanto šī bibliotēka';
+  @override
+  String get featuresIntroBody =>
+      'Niman tagad ļauj izvēlēties, ko izmanto šī bibliotēka. Viss ir '
+      'ieslēgts; izslēdziet to, kas nav vajadzīgs. To var mainīt vēlāk '
+      'sadaļā: Iestatījumi → Funkcijas.';
+  @override
+  String get featuresIntroDone => 'Gatavs';
+  @override
+  String get featuresCreatedTitle => 'Kam paredzēta šī bibliotēka?';
+  @override
+  String get featuresCreatedBody =>
+      'Izvēlieties sākumu. Tas iestata tikai tālāk redzamos slēdžus; jebkuru '
+      'no tiem var pārslēgt, tagad vai vēlāk sadaļā: Iestatījumi → Funkcijas.';
+  @override
+  String get featuresShowIntroTitle => 'Rādīt šo ievadu vēlreiz';
+  @override
+  String get featuresShowIntroBody =>
+      'Kartīte, kas izskaidro šo ekrānu. Tā nemaina nevienu slēdzi.';
+  @override
+  String get featuresShowIntroAction => 'Rādīt';
+  @override
+  String featuresRemindersCancelled(int count) =>
+      'Atcelti atgādinājumi: $count';
   @override
   String get navigationStart => 'Atveras sadaļā';
   @override

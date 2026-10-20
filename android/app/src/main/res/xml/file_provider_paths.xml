@@ -4,4 +4,9 @@
          directory's updates/ folder and shared read-only with the system
          package installer. -->
     <files-path name="updates" path="updates/" />
+    <!-- A library's files (#1109): a PDF or a book handed to the app that
+         opens it. The library sits wherever the user put it, on the
+         device's storage or a card, so the root is named; the provider is
+         not exported, and only a file Niman itself offers gets a URI. -->
+    <root-path name="library" path="" />
 </paths>

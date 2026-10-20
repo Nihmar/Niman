@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:niman/src/core/settings/features.dart';
+import 'package:niman/src/core/settings/library_features.dart';
+import 'package:niman/src/ui/app_shortcuts.dart';
+import 'package:niman/src/ui/palette/command_features.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// The expandable "+" FAB (T-UI-05): the main round button reveals the
@@ -8,6 +12,7 @@ import 'package:niman/src/ui/strings.dart';
 /// note dialog directly. Controlled by the shell ([expanded]) so it can
 /// cover the body with a tap-to-dismiss scrim while the menu is open;
 /// tapping the main FAB again (or choosing an action) collapses the menu.
+/// An action whose feature is off in [features] is not listed (#1109).
 final class NewItemFab extends StatelessWidget {
   /// Creates an expandable FAB wired to the shell's create handlers.
   ///
@@ -26,10 +31,14 @@ final class NewItemFab extends StatelessWidget {
     required this.onNewFolder,
     required this.onJournalToday,
     required this.onCaptureWebPage,
+    this.features = const Features(),
     this.listFolder,
     this.maxHeight,
     super.key,
   });
+
+  /// The library's features: the action of one that is off is left out.
+  final Features features;
 
   /// The most the button and its menu may take, or null for what the
   /// parent allows. The menu scrolls to stay within it (#849).
@@ -92,6 +101,9 @@ final class NewItemFab extends StatelessWidget {
 
   /// The gap between two mini buttons.
   static const double _rowGap = 8;
+
+  /// Whether the menu lists the action that is [command] (#1109).
+  bool _offers(AppCommand command) => commandFeatureOn(command, features);
 
   @override
   Widget build(BuildContext context) {
@@ -177,14 +189,16 @@ final class NewItemFab extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           // First, and set apart: the one thing done every day (#7).
-          _MiniFab(
-            key: const Key('journal-today-action'),
-            icon: Icons.today_outlined,
-            label: AppStrings.journalFabToday,
-            open: expanded,
-            onTap: onJournalToday,
-          ),
-          const SizedBox(height: _rowGap),
+          if (_offers(AppCommand.journalToday)) ...[
+            _MiniFab(
+              key: const Key('journal-today-action'),
+              icon: Icons.today_outlined,
+              label: AppStrings.journalFabToday,
+              open: expanded,
+              onTap: onJournalToday,
+            ),
+            const SizedBox(height: _rowGap),
+          ],
           _MiniFab(
             key: const Key('new-note-action'),
             icon: Icons.note_add_outlined,
@@ -193,56 +207,68 @@ final class NewItemFab extends StatelessWidget {
             onTap: onNewNote,
           ),
           const SizedBox(height: _rowGap),
-          _MiniFab(
-            key: const Key('new-from-template-action'),
-            icon: Icons.file_copy_outlined,
-            label: AppStrings.newFromTemplateTitle,
-            open: expanded,
-            onTap: onNewFromTemplate,
-          ),
-          const SizedBox(height: _rowGap),
-          _MiniFab(
-            key: const Key('new-list-note-action'),
-            icon: Icons.checklist_outlined,
-            label: listFolder == null
-                ? AppStrings.newListNoteTitle
-                : '${AppStrings.newListNoteTitle} · $listFolder',
-            open: expanded,
-            onTap: onNewListNote,
-          ),
-          const SizedBox(height: _rowGap),
-          _MiniFab(
-            key: const Key('new-audio-note-action'),
-            icon: Icons.mic_outlined,
-            label: AppStrings.newAudioNoteTitle,
-            open: expanded,
-            onTap: onNewAudioNote,
-          ),
-          const SizedBox(height: _rowGap),
-          _MiniFab(
-            key: const Key('new-slides-action'),
-            icon: Icons.slideshow_outlined,
-            label: AppStrings.newSlidesTitle,
-            open: expanded,
-            onTap: onNewSlides,
-          ),
-          const SizedBox(height: _rowGap),
-          _MiniFab(
-            key: const Key('new-flashcards-action'),
-            icon: Icons.style_outlined,
-            label: AppStrings.newFlashcardsTitle,
-            open: expanded,
-            onTap: onNewFlashcards,
-          ),
-          const SizedBox(height: _rowGap),
-          _MiniFab(
-            key: const Key('capture-web-page-action'),
-            icon: Icons.language_outlined,
-            label: AppStrings.captureWebPage,
-            open: expanded,
-            onTap: onCaptureWebPage,
-          ),
-          const SizedBox(height: _rowGap),
+          if (features.isOn(LibraryFeature.templates)) ...[
+            _MiniFab(
+              key: const Key('new-from-template-action'),
+              icon: Icons.file_copy_outlined,
+              label: AppStrings.newFromTemplateTitle,
+              open: expanded,
+              onTap: onNewFromTemplate,
+            ),
+            const SizedBox(height: _rowGap),
+          ],
+          if (_offers(AppCommand.newListNote)) ...[
+            _MiniFab(
+              key: const Key('new-list-note-action'),
+              icon: Icons.checklist_outlined,
+              label: listFolder == null
+                  ? AppStrings.newListNoteTitle
+                  : '${AppStrings.newListNoteTitle} · $listFolder',
+              open: expanded,
+              onTap: onNewListNote,
+            ),
+            const SizedBox(height: _rowGap),
+          ],
+          if (_offers(AppCommand.newAudioNote)) ...[
+            _MiniFab(
+              key: const Key('new-audio-note-action'),
+              icon: Icons.mic_outlined,
+              label: AppStrings.newAudioNoteTitle,
+              open: expanded,
+              onTap: onNewAudioNote,
+            ),
+            const SizedBox(height: _rowGap),
+          ],
+          if (_offers(AppCommand.newSlides)) ...[
+            _MiniFab(
+              key: const Key('new-slides-action'),
+              icon: Icons.slideshow_outlined,
+              label: AppStrings.newSlidesTitle,
+              open: expanded,
+              onTap: onNewSlides,
+            ),
+            const SizedBox(height: _rowGap),
+          ],
+          if (_offers(AppCommand.newFlashcards)) ...[
+            _MiniFab(
+              key: const Key('new-flashcards-action'),
+              icon: Icons.style_outlined,
+              label: AppStrings.newFlashcardsTitle,
+              open: expanded,
+              onTap: onNewFlashcards,
+            ),
+            const SizedBox(height: _rowGap),
+          ],
+          if (_offers(AppCommand.captureWebPage)) ...[
+            _MiniFab(
+              key: const Key('capture-web-page-action'),
+              icon: Icons.language_outlined,
+              label: AppStrings.captureWebPage,
+              open: expanded,
+              onTap: onCaptureWebPage,
+            ),
+            const SizedBox(height: _rowGap),
+          ],
           _MiniFab(
             key: const Key('new-folder-action'),
             icon: Icons.create_new_folder_outlined,

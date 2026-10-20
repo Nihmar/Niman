@@ -2,7 +2,8 @@
 /// the same destinations in the two shapes the layouts need — a bar
 /// along the bottom of a phone, a rail down the side of a wide window —
 /// in the order and with the ones hidden the library's
-/// [NavigationLayout] says (#536).
+/// [NavigationLayout] says (#536), and without the ones whose feature the
+/// library has off (#1109).
 ///
 /// Both live here, against the one-class-per-file habit, precisely
 /// because they are one thing said twice: a destination added to one and
@@ -12,6 +13,8 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:niman/src/core/settings/features.dart';
+import 'package:niman/src/core/settings/library_features.dart';
 import 'package:niman/src/core/settings/navigation_layout.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/island.dart';
@@ -69,6 +72,18 @@ enum ShellTab {
   /// slots; hidden until asked for ([defaultHiddenDestinations]).
   study,
 }
+
+/// The feature [tab] belongs to (#1109), or null for a destination that is
+/// core: Files, and Settings, the way back to the switch that turned the
+/// rest off.
+LibraryFeature? featureOfTab(ShellTab tab) => switch (tab) {
+  ShellTab.files || ShellTab.settings => null,
+  ShellTab.todo => LibraryFeature.todo,
+  ShellTab.search => LibraryFeature.search,
+  ShellTab.quickNote => LibraryFeature.quickNote,
+  ShellTab.home => LibraryFeature.home,
+  ShellTab.study => LibraryFeature.kindFlashcards,
+};
 
 /// One destination, as both shapes draw it.
 ///
@@ -149,24 +164,50 @@ const Set<String> lockedDestinations = {'settings'};
 /// offers it.
 const Set<String> defaultHiddenDestinations = {'study'};
 
-/// The destinations as [layout] places them, the hidden ones included,
-/// for the settings that edit it.
-List<({ShellDestination destination, bool hidden})> placedDestinations(
-  NavigationLayout layout,
-) {
+/// One destination as [placedDestinations] places it.
+///
+/// A destination is shown when it is neither `hidden` — what Navigation
+/// says — nor `off`, its feature being off in the library (#1109). The two
+/// are kept apart so that turning a feature off writes nothing to the
+/// layout: turning it on again restores the order and the visibility the
+/// user had.
+typedef PlacedShellDestination = ({
+  ShellDestination destination,
+  bool hidden,
+  bool off,
+});
+
+/// The destinations as [layout] places them, the hidden ones and the ones
+/// whose feature is off included, for the settings that edit it.
+List<PlacedShellDestination> placedDestinations(
+  NavigationLayout layout, {
+  Features features = const Features(),
+}) {
   final all = {for (final d in shellDestinations()) d.name: d};
   final placed = layout.place(
     all.keys.toList(),
     defaultHidden: defaultHiddenDestinations,
     locked: lockedDestinations,
   );
+  bool off(String name) => switch (featureOfTab(all[name]!.tab)) {
+    final feature? => !features.isOn(feature),
+    null => false,
+  };
   // A bar needs two destinations (`NavigationBar` asserts it, #667): a
   // layout that hides all but Settings — a file edited by hand, a build
-  // that dropped one — shows the first hidden ones back.
-  var missing = minShownDestinations - placed.where((p) => !p.hidden).length;
+  // that dropped one — shows the first hidden ones back. One whose feature
+  // is off is not among them; Files and Settings are core, so there are
+  // always two to count on.
+  var missing =
+      minShownDestinations -
+      placed.where((p) => !p.hidden && !off(p.name)).length;
   return [
     for (final p in placed)
-      (destination: all[p.name]!, hidden: p.hidden && missing-- <= 0),
+      (
+        destination: all[p.name]!,
+        hidden: p.hidden && (off(p.name) || missing-- <= 0),
+        off: off(p.name),
+      ),
   ];
 }
 
@@ -174,9 +215,12 @@ List<({ShellDestination destination, bool hidden})> placedDestinations(
 const int minShownDestinations = 2;
 
 /// The destinations [layout] shows, in its order.
-List<ShellDestination> visibleDestinations(NavigationLayout layout) => [
-  for (final placed in placedDestinations(layout))
-    if (!placed.hidden) placed.destination,
+List<ShellDestination> visibleDestinations(
+  NavigationLayout layout, {
+  Features features = const Features(),
+}) => [
+  for (final placed in placedDestinations(layout, features: features))
+    if (!placed.hidden && !placed.off) placed.destination,
 ];
 
 /// What cannot be a start (#706): Settings, and the quick note — a note,
@@ -185,8 +229,11 @@ const Set<ShellTab> _notStarts = {ShellTab.settings, ShellTab.quickNote};
 
 /// The destinations [layout] shows that the app can open on, in its
 /// order: what the Navigation area offers as the start.
-List<ShellDestination> startDestinations(NavigationLayout layout) => [
-  for (final d in visibleDestinations(layout))
+List<ShellDestination> startDestinations(
+  NavigationLayout layout, {
+  Features features = const Features(),
+}) => [
+  for (final d in visibleDestinations(layout, features: features))
     if (!_notStarts.contains(d.tab)) d,
 ];
 
@@ -194,8 +241,11 @@ List<ShellDestination> startDestinations(NavigationLayout layout) => [
 /// and can be one; Files otherwise, as before a start could be chosen;
 /// and with Files hidden too, the first shown that can be. Null when no
 /// destination shown can be a start.
-ShellTab? startDestination(NavigationLayout layout) {
-  final starts = startDestinations(layout);
+ShellTab? startDestination(
+  NavigationLayout layout, {
+  Features features = const Features(),
+}) {
+  final starts = startDestinations(layout, features: features);
   for (final d in starts) {
     if (d.name == layout.start) return d.tab;
   }
@@ -207,8 +257,11 @@ ShellTab? startDestination(NavigationLayout layout) {
 
 /// The name of the destination [layout] opens on, for the settings that
 /// show it; null when none can be a start.
-String? startLabel(NavigationLayout layout) {
-  final start = startDestination(layout);
+String? startLabel(
+  NavigationLayout layout, {
+  Features features = const Features(),
+}) {
+  final start = startDestination(layout, features: features);
   for (final d in shellDestinations()) {
     if (d.tab == start) return d.label;
   }

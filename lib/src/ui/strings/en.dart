@@ -1592,6 +1592,15 @@ final class EnglishStrings extends Strings {
   String get pinWidgetUnavailable =>
       'Home-screen widgets are available on Android';
 
+  @override
+  String get widgetOffTodo => 'Todo is off in this library';
+  @override
+  String get widgetOffStudy => 'Study is off in this library';
+  @override
+  String get widgetOffWidgets => 'Home-screen widgets are off in this library';
+  @override
+  String get widgetOpenFeatures => 'Open Features';
+
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Show in file manager';
@@ -3537,6 +3546,147 @@ final class EnglishStrings extends Strings {
 
   @override
   String get navigationAlwaysShown => 'Always shown';
+  @override
+  String get featuresTitle => 'Features';
+  @override
+  String get featureOffInFeatures => 'Off in Features';
+  @override
+  String get featureOffInLibrary => 'Off in this library';
+  @override
+  String featureOffInLibraryNamed(String feature) =>
+      '$feature is off in this library';
+  @override
+  String get featureNameSearch => 'Search';
+  @override
+  String get featureNameQuickNote => 'Quick note';
+  @override
+  String get featureNameTemplates => 'Templates';
+  @override
+  String get featureNameCapture => 'Web capture';
+  @override
+  String get featureNameTodo => 'Todo and reminders';
+  @override
+  String get featureNameJournal => 'Journal';
+  @override
+  String get featureNameCalendar => 'Calendar';
+  @override
+  String get featureNameLists => 'Lists';
+  @override
+  String get featureNameShopping => 'Shopping lists';
+  @override
+  String get featureNameAudio => 'Audio notes';
+  @override
+  String get featureNameTranscription => 'Transcription';
+  @override
+  String get featureNameSlides => 'Slides';
+  @override
+  String get featureNameFlashcards => 'Flashcards and Study';
+  @override
+  String get featureNameReaders => 'PDF and EPUB readers';
+  @override
+  String get featureNameAnnotations => 'Annotations';
+  @override
+  String get featureNameOcr => 'Text recognition';
+  @override
+  String get featureNameHome => 'Home';
+  @override
+  String get featureNameWidgets => 'Home-screen widgets';
+  @override
+  String get featuresDescription =>
+      'What this library uses. Off hides it everywhere and stops its '
+      'background work; nothing in your files is changed or deleted.';
+  @override
+  String get featuresPresetLabel => 'Preset';
+  @override
+  String get featurePresetEverything => 'Everything';
+  @override
+  String get featurePresetWriting => 'Writing';
+  @override
+  String get featurePresetNotesOnly => 'Notes only';
+  @override
+  String get featurePresetTasks => 'Tasks & journal';
+  @override
+  String get featurePresetCustom => 'Custom';
+  @override
+  String get featurePresetEverythingHint => 'the whole app';
+  @override
+  String get featurePresetWritingHint => 'notes, search, templates, readers';
+  @override
+  String get featurePresetNotesOnlyHint => 'notes, search, links';
+  @override
+  String get featurePresetTasksHint => 'todo, journal, calendar, Home';
+  @override
+  String get featuresSectionFinding => 'Finding and writing';
+  @override
+  String get featuresSectionPlanning => 'Planning';
+  @override
+  String get featuresSectionKinds => 'Note kinds';
+  @override
+  String get featuresSectionReading => 'Reading';
+  @override
+  String get featuresSectionAround => 'Around the app';
+  @override
+  String featureNeeds(String feature) => 'Needs $feature';
+  @override
+  String get featureOffSearch =>
+      'Off: no search screen or commands; the index is still kept';
+  @override
+  String get featureOffQuickNote => 'Off: shared text goes to Import instead';
+  @override
+  String get featureOffTemplates =>
+      'Off: new notes and journal entries start with their default';
+  @override
+  String get featureOffCapture =>
+      'Off: no page capture; links stay plain links';
+  @override
+  String get featureOffTodo => 'Off: todo.txt stays a plain file; no reminders';
+  @override
+  String get featureOffJournal => 'Off: entries stay ordinary notes';
+  @override
+  String get featureOffCalendar =>
+      'Off: calendar.txt stays a plain file; no event reminders';
+  @override
+  String get featureOffKind =>
+      'Off: these notes open as plain Markdown; type: is kept';
+  @override
+  String get featureOffTranscription =>
+      'Off: no transcribe action; audio notes still record and play';
+  @override
+  String get featureOffReaders => 'Off: they open in the system app';
+  @override
+  String get featureOffAnnotations =>
+      'Off: no highlights or marks; the notes already made stay';
+  @override
+  String get featureOffOcr => 'Off: no scanning; the text already read stays';
+  @override
+  String get featureOffHome => 'Off: no Home screen or tiles';
+  @override
+  String get featureOffWidgets => 'Off: widgets show that this is off';
+  @override
+  String get featuresIntroTitle => 'Choose what this library uses';
+  @override
+  String get featuresIntroBody =>
+      'Niman now lets you choose what this library uses. Everything is on; '
+      'turn off what you do not need. You can change it later in Settings → '
+      'Features.';
+  @override
+  String get featuresIntroDone => 'Done';
+  @override
+  String get featuresCreatedTitle => 'What is this library for?';
+  @override
+  String get featuresCreatedBody =>
+      'Pick a start. It only sets the switches below; you can flip any of '
+      'them, now or later in Settings → Features.';
+  @override
+  String get featuresShowIntroTitle => 'Show this introduction again';
+  @override
+  String get featuresShowIntroBody =>
+      'The card that explains this screen. It does not change any switch.';
+  @override
+  String get featuresShowIntroAction => 'Show';
+  @override
+  String featuresRemindersCancelled(int count) =>
+      count == 1 ? '1 reminder cancelled' : '$count reminders cancelled';
   @override
   String get navigationStart => 'Opens on';
   @override

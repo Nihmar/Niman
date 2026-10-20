@@ -6,7 +6,8 @@
 /// needs an open note or a wide window is simply not there without one,
 /// and looks missing. This page says so. The conditions come from
 /// [commandNeeds], the same table the shell filters its handlers by, so
-/// the page and the palette cannot disagree.
+/// the page and the palette cannot disagree. A command whose feature the
+/// library has off (#1109) is listed greyed, with *Off in Features*.
 ///
 /// It is a reference, and nothing is changed here (#264): it looks enough
 /// like Keyboard shortcuts to pass for a second place to set keys. So it
@@ -14,11 +15,14 @@
 /// to that command's row in it.
 library;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:niman/src/core/settings/features.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/key_map.dart';
 import 'package:niman/src/ui/keyboard_presence.dart';
 import 'package:niman/src/ui/keyboard_shortcuts.dart';
+import 'package:niman/src/ui/palette/command_features.dart';
 import 'package:niman/src/ui/palette/command_needs.dart';
 import 'package:niman/src/ui/palette/palette_command.dart';
 import 'package:niman/src/ui/settings_area.dart';
@@ -32,7 +36,15 @@ final class SettingsCommandsScreen extends StatelessWidget {
   /// The page; [highlight] is the row the settings search landed on.
   /// [openShortcuts] opens Keyboard shortcuts at a command's row (or at
   /// the top, for null); without it the keys are only shown.
-  const new({this.highlight, this.openShortcuts, super.key});
+  const new({
+    required this.features,
+    this.highlight,
+    this.openShortcuts,
+    super.key,
+  });
+
+  /// The library's features, whose off switches grey their commands.
+  final ValueListenable<Features> features;
 
   /// The row to flash, or null.
   final Key? highlight;
@@ -55,7 +67,7 @@ final class SettingsCommandsScreen extends StatelessWidget {
       body: SettingsHighlight(
         target: highlight,
         child: ListenableBuilder(
-          listenable: KeyboardPresence.shared,
+          listenable: Listenable.merge([KeyboardPresence.shared, features]),
           builder: (context, _) => ValueListenableBuilder<KeyMap>(
             valueListenable: AppKeyMap.current,
             // Every row built, not a lazy list: the search lands on a row
@@ -83,6 +95,7 @@ final class SettingsCommandsScreen extends StatelessWidget {
                       for (final command in commands)
                         _CommandRow(
                           command: command,
+                          featureOn: commandFeatureOn(command, features.value),
                           // No keyboard, no keys to name (#230): what a
                           // command needs is the point of this page, and
                           // that stays.
@@ -149,9 +162,15 @@ final class _KeysNote extends StatelessWidget {
 /// One command: its name, when it shows, and its keys if it has any —
 /// a keycap that, given [onKeys], leads to where they are changed.
 final class _CommandRow extends StatelessWidget {
-  const new({required this.command, required this.keys, this.onKeys});
+  const new({
+    required this.command,
+    required this.featureOn,
+    required this.keys,
+    this.onKeys,
+  });
 
   final AppCommand command;
+  final bool featureOn;
   final SingleActivator? keys;
   final VoidCallback? onKeys;
 
@@ -164,9 +183,13 @@ final class _CommandRow extends StatelessWidget {
       key: commandRowKey(command),
       child: ListTile(
         dense: true,
+        // Off in Features: kept in its place, greyed, and said so.
+        enabled: featureOn,
         title: Text(paletteAsks(command) ? '$name…' : name),
         subtitle: Text(
-          needs.isEmpty
+          !featureOn
+              ? AppStrings.featureOffInFeatures
+              : needs.isEmpty
               ? AppStrings.commandNeedNone
               : [for (final need in needs) commandNeedLabel(need)].join(' · '),
         ),

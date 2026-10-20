@@ -1,13 +1,15 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:meta/meta.dart';
 import 'package:niman/src/core/app_theme.dart';
 import 'package:niman/src/core/custom_theme.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/language.dart';
 import 'package:niman/src/core/name_sort_key.dart';
+import 'package:niman/src/core/settings/features.dart';
+import 'package:niman/src/core/settings/features_introduction.dart';
 import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/core/settings/navigation_layout.dart';
@@ -118,6 +120,36 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
 
   @override
   int get treeRevision => _treeRevision;
+
+  /// The fake library's features; tests set `features.value` to turn some
+  /// off.
+  @override
+  final ValueNotifier<Features> features = ValueNotifier(const Features());
+
+  /// The introduction the fake library has still to show: what
+  /// [featuresIntroduction] answers until [markFeaturesReviewed]. None by
+  /// default, so a test of something else never meets the Features screen
+  /// opening by itself; a test of the introduction sets it.
+  FeaturesIntroduction pendingIntroduction = FeaturesIntroduction.none;
+
+  /// Whether the introduction was seen: `featuresReviewed`, as the settings
+  /// file would hold it.
+  bool featuresReviewed = false;
+
+  @override
+  Future<void> setFeatures(Features features) async {
+    _config = _config.copyWith(features: features);
+    this.features.value = features;
+  }
+
+  @override
+  Future<FeaturesIntroduction> get featuresIntroduction async =>
+      featuresReviewed ? FeaturesIntroduction.none : pendingIntroduction;
+
+  @override
+  Future<void> markFeaturesReviewed() async {
+    featuresReviewed = true;
+  }
 
   /// The fake indexes nothing, so there is never a scan to report on.
   /// Tests that need the indexing line set this and pump.

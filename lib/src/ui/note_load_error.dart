@@ -3,8 +3,9 @@
 ///
 /// A message in the user's words, never the exception: the detail is in
 /// the log. When the file is not text — an attachment picked in the tree —
-/// the desktop offers it to the application the system opens it with,
-/// through the same path as the tree row's own entry (issue #76). Any other
+/// the desktops and Android offer it to the application the system opens it
+/// with, through the same path as the tree row's own entry (issue #76, and
+/// #1109 for Android). Any other
 /// failure offers to try again (#1059): a read that failed for a moment — a
 /// sharing violation, a half-written sync file — is not a verdict on the note.
 library;
@@ -79,7 +80,7 @@ class NoteLoadError extends StatelessWidget {
                 onPressed: onRetry,
               ),
             ],
-            if (offerDefaultApp && supportsTreeContextActions) ...[
+            if (offerDefaultApp && supportsOpenInDefaultApp) ...[
               const SizedBox(height: 16),
               OutlinedButton.icon(
                 key: const Key('note-load-error-open-outside'),
