@@ -42,7 +42,7 @@ abstract interface class WindowController {
   Future<void> hide();
 
   /// Whether this platform gets the app's own title bar instead of the
-  /// system one. Both desktops (T-PP-22); Android has no window to own.
+  /// system one. The desktops (T-PP-22); Android has no window to own.
   bool get customTitleBar;
 
   /// Hands the title bar to Flutter: the system bar goes, the app draws
@@ -109,7 +109,7 @@ final class WindowManagerController implements WindowController {
   final ValueNotifier<bool> _maximized = ValueNotifier<bool>(false);
 
   @override
-  bool get customTitleBar => Platform.isLinux || Platform.isWindows;
+  bool get customTitleBar => HostPlatform.isDesktop;
 
   @override
   ValueListenable<bool> get maximized => _maximized;
@@ -151,6 +151,10 @@ final class WindowManagerController implements WindowController {
     // neither. Keeping the window's real frame styles is also what
     // leaves Aero Snap and Win+Arrow working, since both hang off the
     // system caption the app is only painting over.
+    //
+    // macOS: the hidden style only, which keeps the traffic lights over a
+    // transparent title bar and lets the content run under it; the bar
+    // leaves their room (title_bar.dart).
     if (Platform.isLinux) await _manager.setAsFrameless();
     await _manager.setTitleBarStyle(TitleBarStyle.hidden);
     _log.info('custom title bar applied');

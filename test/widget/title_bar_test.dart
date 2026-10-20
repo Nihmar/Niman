@@ -7,6 +7,10 @@
 //
 // #498 rides it too: the sidebar tooltip names the key bound now, not the
 // shipped one.
+//
+// On a Mac the system draws the window's buttons, the traffic lights at the
+// bar's left (docs/records/apple-platforms.md).
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -139,6 +143,23 @@ void main() {
     final wide = window.captionButtons.last.close;
     expect(wide.right, greaterThan(narrow.right));
     expect(wide, _drawnRect(tester, 'window-close'));
+  });
+
+  testWidgets('on a Mac the bar leaves the buttons to the traffic lights', (
+    tester,
+  ) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
+    try {
+      await tester.pumpWidget(_host(FakeWindowController()));
+
+      expect(find.byKey(const Key('window-minimize')), findsNothing);
+      expect(find.byKey(const Key('window-close')), findsNothing);
+      // The toggle starts past the lights, which sit at the bar's left.
+      final toggle = tester.getTopLeft(find.byKey(const Key('toggle-sidebar')));
+      expect(toggle.dx, greaterThanOrEqualTo(70));
+    } finally {
+      debugDefaultTargetPlatformOverride = null;
+    }
   });
 }
 
