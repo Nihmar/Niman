@@ -11,6 +11,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:niman/src/calendar/calendar_writer.dart';
 import 'package:niman/src/core/theme_tokens.dart';
+import 'package:niman/src/ui/app_switch.dart';
 import 'package:niman/src/ui/journal/journal_flow.dart' show journalDayLabel;
 import 'package:niman/src/ui/menu_choice_button.dart';
 import 'package:niman/src/ui/os_pickers.dart';
@@ -304,7 +305,7 @@ final class _CalendarEventFormState extends State<CalendarEventForm> {
                     ],
                     onChanged: (lead) => setState(() => _lead = lead),
                   ),
-                Switch(
+                AppSwitch(
                   key: const Key('calendar-event-remind'),
                   value: _remind,
                   onChanged: _start == null

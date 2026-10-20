@@ -11,6 +11,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/settings/navigation_layout.dart';
 import 'package:niman/src/library/session.dart';
+import 'package:niman/src/ui/app_switch.dart';
 import 'package:niman/src/ui/device_shape.dart';
 import 'package:niman/src/ui/menu_choice_button.dart';
 import 'package:niman/src/ui/settings_area.dart';
@@ -165,7 +166,7 @@ final class _SettingsNavigationLayoutScreenState
                       child: Icon(Icons.lock_outline),
                     ),
                   )
-                : Switch(
+                : AppSwitch(
                     key: Key('navigation-switch-${p.destination.name}'),
                     value: !p.hidden,
                     // The last ones shown stay: a bar needs two (#667).
