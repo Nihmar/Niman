@@ -3661,6 +3661,111 @@ final class AlbanianStrings extends Strings {
   @override
   String get featureNameWidgets => 'Widget-et e ekranit kryesor';
   @override
+  String get featuresDescription =>
+      'Çfarë përdor kjo bibliotekë. Kur çaktivizohet, fshihet kudo dhe puna e '
+      'saj në sfond ndalon; në skedarët tuaj nuk ndryshohet e nuk fshihet '
+      'asgjë.';
+  @override
+  String get featuresPresetLabel => 'Paravendosje';
+  @override
+  String get featurePresetEverything => 'Gjithçka';
+  @override
+  String get featurePresetWriting => 'Shkrim';
+  @override
+  String get featurePresetNotesOnly => 'Vetëm shënime';
+  @override
+  String get featurePresetTasks => 'Detyra dhe ditar';
+  @override
+  String get featurePresetCustom => 'E personalizuar';
+  @override
+  String get featurePresetEverythingHint => 'e gjithë aplikacioni';
+  @override
+  String get featurePresetWritingHint => 'shënime, kërkim, shabllone, lexues';
+  @override
+  String get featurePresetNotesOnlyHint => 'shënime, kërkim, lidhje';
+  @override
+  String get featurePresetTasksHint => 'detyra, ditar, kalendar, Kreu';
+  @override
+  String get featuresSectionFinding => 'Gjetje dhe shkrim';
+  @override
+  String get featuresSectionPlanning => 'Planifikim';
+  @override
+  String get featuresSectionKinds => 'Llojet e shënimeve';
+  @override
+  String get featuresSectionReading => 'Leximi';
+  @override
+  String get featuresSectionAround => 'Rreth aplikacionit';
+  @override
+  String featureNeeds(String feature) => 'Kërkon: $feature';
+  @override
+  String get featureOffSearch =>
+      'Çaktivizuar: pa ekran e komanda kërkimi; indeksi vazhdon të mbahet';
+  @override
+  String get featureOffQuickNote =>
+      'Çaktivizuar: teksti i ndarë shkon te Importo';
+  @override
+  String get featureOffTemplates =>
+      'Çaktivizuar: shënimet e reja dhe shënimet e ditarit nisin bosh';
+  @override
+  String get featureOffCapture =>
+      'Çaktivizuar: pa ruajtje faqesh; lidhjet mbeten lidhje të zakonshme';
+  @override
+  String get featureOffTodo =>
+      'Çaktivizuar: todo.txt mbetet skedar i zakonshëm; pa kujtesa';
+  @override
+  String get featureOffJournal =>
+      'Çaktivizuar: shënimet mbeten shënime të zakonshme';
+  @override
+  String get featureOffCalendar =>
+      'Çaktivizuar: calendar.txt mbetet skedar i zakonshëm; pa kujtesa për '
+      'ngjarje';
+  @override
+  String get featureOffKind =>
+      'Çaktivizuar: këto shënime hapen si Markdown i thjeshtë; type: ruhet';
+  @override
+  String get featureOffTranscription =>
+      'Çaktivizuar: pa veprim transkriptimi; shënimet zanore regjistrohen e '
+      'luhen ende';
+  @override
+  String get featureOffReaders =>
+      'Çaktivizuar: hapen në aplikacionin e sistemit';
+  @override
+  String get featureOffAnnotations =>
+      'Çaktivizuar: pa theksime e shenja; shënimet e bëra tashmë mbeten';
+  @override
+  String get featureOffOcr =>
+      'Çaktivizuar: pa skanim; teksti i lexuar tashmë mbetet';
+  @override
+  String get featureOffHome => 'Çaktivizuar: pa ekran e pllaka Kreu';
+  @override
+  String get featureOffWidgets =>
+      'Çaktivizuar: miniaplikacionet tregojnë se kjo është çaktivizuar';
+  @override
+  String get featuresIntroTitle => 'Zgjidhni çfarë përdor kjo bibliotekë';
+  @override
+  String get featuresIntroBody =>
+      'Niman tani ju lejon të zgjidhni çfarë përdor kjo bibliotekë. Gjithçka '
+      'është aktive; çaktivizoni atë që nuk ju duhet. Mund ta ndryshoni më '
+      'vonë te Vendosjet → Veçoritë.';
+  @override
+  String get featuresIntroDone => 'U krye';
+  @override
+  String get featuresCreatedTitle => 'Për çfarë është kjo bibliotekë?';
+  @override
+  String get featuresCreatedBody =>
+      'Zgjidhni një fillim. Ai vendos vetëm çelësat më poshtë; mund të '
+      'ndryshoni cilindo, tani ose më vonë te Vendosjet → Veçoritë.';
+  @override
+  String get featuresShowIntroTitle => 'Shfaqe sërish këtë hyrje';
+  @override
+  String get featuresShowIntroBody =>
+      'Karta që shpjegon këtë ekran. Nuk ndryshon asnjë çelës.';
+  @override
+  String get featuresShowIntroAction => 'Shfaq';
+  @override
+  String featuresRemindersCancelled(int count) =>
+      count == 1 ? '1 kujtesë u anulua' : '$count kujtesa u anuluan';
+  @override
   String get navigationStart => 'Hapet në';
   @override
   String navigationStartHidden(String hidden, String start) =>

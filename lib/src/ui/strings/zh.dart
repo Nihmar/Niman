@@ -3235,6 +3235,90 @@ final class ChineseStrings extends Strings {
   @override
   String get featureNameWidgets => '主屏幕组件';
   @override
+  String get featuresDescription =>
+      '此文库使用的内容。关闭后，它会在所有位置隐藏，后台工作也会停止；你的文件不会有任何更改或删除。';
+  @override
+  String get featuresPresetLabel => '预设';
+  @override
+  String get featurePresetEverything => '全部';
+  @override
+  String get featurePresetWriting => '写作';
+  @override
+  String get featurePresetNotesOnly => '仅笔记';
+  @override
+  String get featurePresetTasks => '待办与日记';
+  @override
+  String get featurePresetCustom => '自定义';
+  @override
+  String get featurePresetEverythingHint => '整个应用';
+  @override
+  String get featurePresetWritingHint => '笔记、搜索、模板、阅读器';
+  @override
+  String get featurePresetNotesOnlyHint => '笔记、搜索、链接';
+  @override
+  String get featurePresetTasksHint => '待办、日记、日历、主页';
+  @override
+  String get featuresSectionFinding => '查找与写作';
+  @override
+  String get featuresSectionPlanning => '规划';
+  @override
+  String get featuresSectionKinds => '笔记类型';
+  @override
+  String get featuresSectionReading => '阅读';
+  @override
+  String get featuresSectionAround => '应用周边';
+  @override
+  String featureNeeds(String feature) => '需要$feature';
+  @override
+  String get featureOffSearch => '关闭：没有搜索界面和命令；索引仍会保留';
+  @override
+  String get featureOffQuickNote => '关闭：分享的文本改为进入导入';
+  @override
+  String get featureOffTemplates => '关闭：新笔记和日记条目从空白开始';
+  @override
+  String get featureOffCapture => '关闭：不捕获网页；链接仍是普通链接';
+  @override
+  String get featureOffTodo => '关闭：todo.txt 仍是普通文件；没有提醒';
+  @override
+  String get featureOffJournal => '关闭：条目仍是普通笔记';
+  @override
+  String get featureOffCalendar => '关闭：calendar.txt 仍是普通文件；没有日程提醒';
+  @override
+  String get featureOffKind => '关闭：这些笔记按普通 Markdown 打开；type: 会保留';
+  @override
+  String get featureOffTranscription => '关闭：没有转写操作；语音笔记仍可录制和播放';
+  @override
+  String get featureOffReaders => '关闭：它们在系统应用中打开';
+  @override
+  String get featureOffAnnotations => '关闭：没有高亮和标记；已有的笔记保留';
+  @override
+  String get featureOffOcr => '关闭：没有扫描；已识别的文字保留';
+  @override
+  String get featureOffHome => '关闭：没有主页界面和磁贴';
+  @override
+  String get featureOffWidgets => '关闭：小组件会显示此功能已关闭';
+  @override
+  String get featuresIntroTitle => '选择此文库使用的内容';
+  @override
+  String get featuresIntroBody =>
+      'Niman 现在让你选择此文库使用的内容。目前全部开启；请关闭你不需要的。你以后可以在设置 → 功能中更改。';
+  @override
+  String get featuresIntroDone => '完成';
+  @override
+  String get featuresCreatedTitle => '这个文库用来做什么？';
+  @override
+  String get featuresCreatedBody =>
+      '选一个起点。它只会设置下面的开关；你可以逐个切换，现在或以后在设置 → 功能中都可以。';
+  @override
+  String get featuresShowIntroTitle => '再次显示此简介';
+  @override
+  String get featuresShowIntroBody => '解释此界面的卡片。它不会更改任何开关。';
+  @override
+  String get featuresShowIntroAction => '显示';
+  @override
+  String featuresRemindersCancelled(int count) =>
+      count == 1 ? '已取消 1 条提醒' : '已取消 $count 条提醒';
+  @override
   String get navigationStart => '启动时打开';
   @override
   String navigationStartHidden(String hidden, String start) =>

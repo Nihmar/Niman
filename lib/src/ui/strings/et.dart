@@ -3584,6 +3584,109 @@ final class EstonianStrings extends Strings {
   @override
   String get featureNameWidgets => 'Avakuva vidinad';
   @override
+  String get featuresDescription =>
+      'Mida see kogu kasutab. Väljas peidetakse see kõikjalt ja selle '
+      'taustatöö peatub; sinu failides ei muudeta ega kustutata midagi.';
+  @override
+  String get featuresPresetLabel => 'Eelseadistus';
+  @override
+  String get featurePresetEverything => 'Kõik';
+  @override
+  String get featurePresetWriting => 'Kirjutamine';
+  @override
+  String get featurePresetNotesOnly => 'Ainult märkmed';
+  @override
+  String get featurePresetTasks => 'Ülesanded ja päevik';
+  @override
+  String get featurePresetCustom => 'Kohandatud';
+  @override
+  String get featurePresetEverythingHint => 'kogu rakendus';
+  @override
+  String get featurePresetWritingHint => 'märkmed, otsing, mallid, lugejad';
+  @override
+  String get featurePresetNotesOnlyHint => 'märkmed, otsing, lingid';
+  @override
+  String get featurePresetTasksHint => 'ülesanded, päevik, kalender, Avaleht';
+  @override
+  String get featuresSectionFinding => 'Otsimine ja kirjutamine';
+  @override
+  String get featuresSectionPlanning => 'Planeerimine';
+  @override
+  String get featuresSectionKinds => 'Märkmetüübid';
+  @override
+  String get featuresSectionReading => 'Lugemine';
+  @override
+  String get featuresSectionAround => 'Rakenduse ümber';
+  @override
+  String featureNeeds(String feature) => 'Vajab: $feature';
+  @override
+  String get featureOffSearch =>
+      'Väljas: otsinguvaadet ega -käske pole; indeksit peetakse endiselt';
+  @override
+  String get featureOffQuickNote =>
+      'Väljas: jagatud tekst läheb hoopis kohta Impordi';
+  @override
+  String get featureOffTemplates =>
+      'Väljas: uued märkmed ja päevikukirjed algavad tühjana';
+  @override
+  String get featureOffCapture =>
+      'Väljas: lehti ei salvestata; lingid jäävad tavalisteks linkideks';
+  @override
+  String get featureOffTodo =>
+      'Väljas: todo.txt jääb tavaliseks failiks; meeldetuletusi pole';
+  @override
+  String get featureOffJournal =>
+      'Väljas: kirjed jäävad tavalisteks märkmeteks';
+  @override
+  String get featureOffCalendar =>
+      'Väljas: calendar.txt jääb tavaliseks failiks; sündmuste meeldetuletusi '
+      'pole';
+  @override
+  String get featureOffKind =>
+      'Väljas: need märkmed avanevad tavalise Markdownina; type: säilib';
+  @override
+  String get featureOffTranscription =>
+      'Väljas: transkribeerimistoimingut pole; helimärkmeid saab endiselt '
+      'salvestada ja esitada';
+  @override
+  String get featureOffReaders => 'Väljas: need avanevad süsteemirakenduses';
+  @override
+  String get featureOffAnnotations =>
+      'Väljas: esiletõstmisi ega märke pole; juba tehtud märkmed jäävad';
+  @override
+  String get featureOffOcr => 'Väljas: skannimist pole; juba loetud tekst jääb';
+  @override
+  String get featureOffHome => 'Väljas: Avaleht-vaadet ega paane pole';
+  @override
+  String get featureOffWidgets =>
+      'Väljas: vidinad näitavad, et see on välja lülitatud';
+  @override
+  String get featuresIntroTitle => 'Vali, mida see kogu kasutab';
+  @override
+  String get featuresIntroBody =>
+      'Niman laseb nüüd valida, mida see kogu kasutab. Kõik on sees; lülita '
+      'välja see, mida sa ei vaja. Seda saab hiljem muuta jaotises Seaded → '
+      'Funktsioonid.';
+  @override
+  String get featuresIntroDone => 'Valmis';
+  @override
+  String get featuresCreatedTitle => 'Milleks see kogu on?';
+  @override
+  String get featuresCreatedBody =>
+      'Vali algus. See seab ainult allolevad lülitid; igaüht neist saad ümber '
+      'lülitada, kohe või hiljem jaotises Seaded → Funktsioonid.';
+  @override
+  String get featuresShowIntroTitle => 'Näita seda tutvustust uuesti';
+  @override
+  String get featuresShowIntroBody =>
+      'Kaart, mis selgitab seda vaadet. See ei muuda ühtegi lülitit.';
+  @override
+  String get featuresShowIntroAction => 'Näita';
+  @override
+  String featuresRemindersCancelled(int count) => count == 1
+      ? '1 meeldetuletus tühistatud'
+      : '$count meeldetuletust tühistatud';
+  @override
   String get navigationStart => 'Avaneb vaates';
   @override
   String navigationStartHidden(String hidden, String start) =>

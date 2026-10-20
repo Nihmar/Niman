@@ -3678,6 +3678,110 @@ final class LithuanianStrings extends Strings {
   @override
   String get featureNameWidgets => 'Pradinio ekrano valdikliai';
   @override
+  String get featuresDescription =>
+      'Ką naudoja ši biblioteka. Išjungta visur paslepiama, o jos darbas fone '
+      'sustoja; jūsų failuose niekas nekeičiama ir netrinama.';
+  @override
+  String get featuresPresetLabel => 'Išankstinis rinkinys';
+  @override
+  String get featurePresetEverything => 'Viskas';
+  @override
+  String get featurePresetWriting => 'Rašymas';
+  @override
+  String get featurePresetNotesOnly => 'Tik užrašai';
+  @override
+  String get featurePresetTasks => 'Užduotys ir dienoraštis';
+  @override
+  String get featurePresetCustom => 'Pasirinktinis';
+  @override
+  String get featurePresetEverythingHint => 'visa programėlė';
+  @override
+  String get featurePresetWritingHint =>
+      'užrašai, paieška, šablonai, skaitytuvai';
+  @override
+  String get featurePresetNotesOnlyHint => 'užrašai, paieška, nuorodos';
+  @override
+  String get featurePresetTasksHint =>
+      'užduotys, dienoraštis, kalendorius, Pradžia';
+  @override
+  String get featuresSectionFinding => 'Paieška ir rašymas';
+  @override
+  String get featuresSectionPlanning => 'Planavimas';
+  @override
+  String get featuresSectionKinds => 'Užrašų rūšys';
+  @override
+  String get featuresSectionReading => 'Skaitymas';
+  @override
+  String get featuresSectionAround => 'Aplink programėlę';
+  @override
+  String featureNeeds(String feature) => 'Reikia: $feature';
+  @override
+  String get featureOffSearch =>
+      'Išjungta: nėra paieškos ekrano ir komandų; indeksas vis dar tvarkomas';
+  @override
+  String get featureOffQuickNote =>
+      'Išjungta: bendrinamas tekstas keliauja į: Importuoti';
+  @override
+  String get featureOffTemplates =>
+      'Išjungta: nauji užrašai ir dienoraščio įrašai prasideda tušti';
+  @override
+  String get featureOffCapture =>
+      'Išjungta: puslapių neišsaugoma; nuorodos lieka paprastos nuorodos';
+  @override
+  String get featureOffTodo =>
+      'Išjungta: todo.txt lieka paprastas failas; priminimų nėra';
+  @override
+  String get featureOffJournal => 'Išjungta: įrašai lieka paprasti užrašai';
+  @override
+  String get featureOffCalendar =>
+      'Išjungta: calendar.txt lieka paprastas failas; priminimų apie įvykius '
+      'nėra';
+  @override
+  String get featureOffKind =>
+      'Išjungta: šie užrašai atsidaro kaip paprastas Markdown; type: išlieka';
+  @override
+  String get featureOffTranscription =>
+      'Išjungta: nėra perrašymo veiksmo; garso užrašus vis dar galima įrašyti '
+      'ir groti';
+  @override
+  String get featureOffReaders =>
+      'Išjungta: jie atsidaro sistemos programėlėje';
+  @override
+  String get featureOffAnnotations =>
+      'Išjungta: nėra paryškinimų ir žymų; jau padaryti užrašai lieka';
+  @override
+  String get featureOffOcr =>
+      'Išjungta: nėra skenavimo; jau perskaitytas tekstas lieka';
+  @override
+  String get featureOffHome => 'Išjungta: nėra Pradžia ekrano ir plytelių';
+  @override
+  String get featureOffWidgets => 'Išjungta: valdikliai rodo, kad tai išjungta';
+  @override
+  String get featuresIntroTitle => 'Pasirinkite, ką naudoja ši biblioteka';
+  @override
+  String get featuresIntroBody =>
+      'Dabar Niman leidžia pasirinkti, ką naudoja ši biblioteka. Viskas '
+      'įjungta; išjunkite tai, ko nereikia. Vėliau tai galite pakeisti '
+      'skiltyje: Nustatymai → Funkcijos.';
+  @override
+  String get featuresIntroDone => 'Baigta';
+  @override
+  String get featuresCreatedTitle => 'Kam skirta ši biblioteka?';
+  @override
+  String get featuresCreatedBody =>
+      'Pasirinkite pradžią. Ji nustato tik žemiau esančius jungiklius; bet '
+      'kurį jų galite perjungti, dabar arba vėliau skiltyje: Nustatymai → '
+      'Funkcijos.';
+  @override
+  String get featuresShowIntroTitle => 'Rodyti šią įžangą dar kartą';
+  @override
+  String get featuresShowIntroBody =>
+      'Kortelė, aiškinanti šį ekraną. Ji nekeičia jokio jungiklio.';
+  @override
+  String get featuresShowIntroAction => 'Rodyti';
+  @override
+  String featuresRemindersCancelled(int count) => 'Atšaukti priminimai: $count';
+  @override
   String get navigationStart => 'Atsidaro skiltyje';
   @override
   String navigationStartHidden(String hidden, String start) =>

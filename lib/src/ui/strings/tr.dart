@@ -3595,6 +3595,110 @@ final class TurkishStrings extends Strings {
   @override
   String get featureNameWidgets => 'Ana ekran widget’ları';
   @override
+  String get featuresDescription =>
+      'Bu kütüphanenin neyi kullandığı. Kapalı olan her yerden gizlenir ve '
+      'arka plandaki işi durur; dosyalarınızda hiçbir şey değiştirilmez veya '
+      'silinmez.';
+  @override
+  String get featuresPresetLabel => 'Hazır ayar';
+  @override
+  String get featurePresetEverything => 'Her şey';
+  @override
+  String get featurePresetWriting => 'Yazma';
+  @override
+  String get featurePresetNotesOnly => 'Yalnızca notlar';
+  @override
+  String get featurePresetTasks => 'Görevler ve günlük';
+  @override
+  String get featurePresetCustom => 'Özel';
+  @override
+  String get featurePresetEverythingHint => 'uygulamanın tamamı';
+  @override
+  String get featurePresetWritingHint => 'notlar, arama, şablonlar, okuyucular';
+  @override
+  String get featurePresetNotesOnlyHint => 'notlar, arama, bağlantılar';
+  @override
+  String get featurePresetTasksHint => 'görevler, günlük, takvim, Ana sayfa';
+  @override
+  String get featuresSectionFinding => 'Bulma ve yazma';
+  @override
+  String get featuresSectionPlanning => 'Planlama';
+  @override
+  String get featuresSectionKinds => 'Not türleri';
+  @override
+  String get featuresSectionReading => 'Okuma';
+  @override
+  String get featuresSectionAround => 'Uygulamanın çevresi';
+  @override
+  String featureNeeds(String feature) => 'Gerektirir: $feature';
+  @override
+  String get featureOffSearch =>
+      'Kapalı: arama ekranı ve komutları yok; dizin yine de tutulur';
+  @override
+  String get featureOffQuickNote =>
+      'Kapalı: paylaşılan metin bunun yerine İçe aktar bölümüne gider';
+  @override
+  String get featureOffTemplates =>
+      'Kapalı: yeni notlar ve günlük girdileri boş başlar';
+  @override
+  String get featureOffCapture =>
+      'Kapalı: sayfa yakalama yok; bağlantılar düz bağlantı olarak kalır';
+  @override
+  String get featureOffTodo =>
+      'Kapalı: todo.txt düz bir dosya olarak kalır; hatırlatıcı yok';
+  @override
+  String get featureOffJournal => 'Kapalı: girdiler sıradan not olarak kalır';
+  @override
+  String get featureOffCalendar =>
+      'Kapalı: calendar.txt düz bir dosya olarak kalır; etkinlik '
+      'hatırlatıcısı yok';
+  @override
+  String get featureOffKind =>
+      'Kapalı: bu notlar düz Markdown olarak açılır; type: korunur';
+  @override
+  String get featureOffTranscription =>
+      'Kapalı: yazıya dökme eylemi yok; sesli notlar yine kaydedilir ve '
+      'oynatılır';
+  @override
+  String get featureOffReaders => 'Kapalı: sistem uygulamasında açılırlar';
+  @override
+  String get featureOffAnnotations =>
+      'Kapalı: vurgu veya işaret yok; önceden yapılmış notlar kalır';
+  @override
+  String get featureOffOcr => 'Kapalı: tarama yok; önceden okunmuş metin kalır';
+  @override
+  String get featureOffHome => 'Kapalı: Ana sayfa ekranı ve kutucuklar yok';
+  @override
+  String get featureOffWidgets =>
+      'Kapalı: widget’lar bunun kapalı olduğunu gösterir';
+  @override
+  String get featuresIntroTitle => 'Bu kütüphanenin neyi kullandığını seçin';
+  @override
+  String get featuresIntroBody =>
+      'Niman artık bu kütüphanenin neyi kullanacağını seçmenize izin veriyor. '
+      'Her şey açık; ihtiyacınız olmayanı kapatın. Bunu daha sonra Ayarlar → '
+      'Özellikler bölümünden değiştirebilirsiniz.';
+  @override
+  String get featuresIntroDone => 'Bitti';
+  @override
+  String get featuresCreatedTitle => 'Bu kütüphane ne için?';
+  @override
+  String get featuresCreatedBody =>
+      'Bir başlangıç seçin. Yalnızca aşağıdaki anahtarları ayarlar; hangisini '
+      'isterseniz şimdi ya da daha sonra Ayarlar → Özellikler bölümünden '
+      'değiştirebilirsiniz.';
+  @override
+  String get featuresShowIntroTitle => 'Bu tanıtımı yeniden göster';
+  @override
+  String get featuresShowIntroBody =>
+      'Bu ekranı açıklayan kart. Hiçbir anahtarı değiştirmez.';
+  @override
+  String get featuresShowIntroAction => 'Göster';
+  @override
+  String featuresRemindersCancelled(int count) => count == 1
+      ? '1 hatırlatıcı iptal edildi'
+      : '$count hatırlatıcı iptal edildi';
+  @override
   String get navigationStart => 'Açılış ekranı';
   @override
   String navigationStartHidden(String hidden, String start) =>

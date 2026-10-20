@@ -3634,6 +3634,108 @@ final class CzechStrings extends Strings {
   @override
   String get featureNameWidgets => 'Widgety na ploše';
   @override
+  String get featuresDescription =>
+      'Co tato knihovna používá. Vypnuté je všude skryté a jeho práce na '
+      'pozadí se zastaví; ve vašich souborech se nic nemění ani nemaže.';
+  @override
+  String get featuresPresetLabel => 'Předvolba';
+  @override
+  String get featurePresetEverything => 'Vše';
+  @override
+  String get featurePresetWriting => 'Psaní';
+  @override
+  String get featurePresetNotesOnly => 'Jen poznámky';
+  @override
+  String get featurePresetTasks => 'Úkoly a deník';
+  @override
+  String get featurePresetCustom => 'Vlastní';
+  @override
+  String get featurePresetEverythingHint => 'celá aplikace';
+  @override
+  String get featurePresetWritingHint => 'poznámky, hledání, šablony, čtečky';
+  @override
+  String get featurePresetNotesOnlyHint => 'poznámky, hledání, odkazy';
+  @override
+  String get featurePresetTasksHint => 'úkoly, deník, kalendář, Domů';
+  @override
+  String get featuresSectionFinding => 'Hledání a psaní';
+  @override
+  String get featuresSectionPlanning => 'Plánování';
+  @override
+  String get featuresSectionKinds => 'Druhy poznámek';
+  @override
+  String get featuresSectionReading => 'Čtení';
+  @override
+  String get featuresSectionAround => 'Kolem aplikace';
+  @override
+  String featureNeeds(String feature) => 'Vyžaduje: $feature';
+  @override
+  String get featureOffSearch =>
+      'Vypnuto: žádná obrazovka ani příkazy hledání; index se stále vede';
+  @override
+  String get featureOffQuickNote =>
+      'Vypnuto: sdílený text jde místo toho do: Importovat';
+  @override
+  String get featureOffTemplates =>
+      'Vypnuto: nové poznámky a zápisy deníku začínají prázdné';
+  @override
+  String get featureOffCapture =>
+      'Vypnuto: žádné ukládání stránek; odkazy zůstávají obyčejnými odkazy';
+  @override
+  String get featureOffTodo =>
+      'Vypnuto: todo.txt zůstává obyčejným souborem; žádné připomínky';
+  @override
+  String get featureOffJournal =>
+      'Vypnuto: zápisy zůstávají obyčejnými poznámkami';
+  @override
+  String get featureOffCalendar =>
+      'Vypnuto: calendar.txt zůstává obyčejným souborem; žádné připomínky '
+      'událostí';
+  @override
+  String get featureOffKind =>
+      'Vypnuto: tyto poznámky se otevírají jako obyčejný Markdown; type: '
+      'zůstává';
+  @override
+  String get featureOffTranscription =>
+      'Vypnuto: žádná akce přepisu; hlasové poznámky lze dál nahrávat a '
+      'přehrávat';
+  @override
+  String get featureOffReaders => 'Vypnuto: otevírají se v systémové aplikaci';
+  @override
+  String get featureOffAnnotations =>
+      'Vypnuto: žádná zvýraznění ani značky; už vytvořené poznámky zůstávají';
+  @override
+  String get featureOffOcr =>
+      'Vypnuto: žádné skenování; už přečtený text zůstává';
+  @override
+  String get featureOffHome => 'Vypnuto: žádná obrazovka ani dlaždice Domů';
+  @override
+  String get featureOffWidgets => 'Vypnuto: widgety ukazují, že je to vypnuté';
+  @override
+  String get featuresIntroTitle => 'Vyberte, co tato knihovna používá';
+  @override
+  String get featuresIntroBody =>
+      'Niman vám nyní umožňuje vybrat, co tato knihovna používá. Vše je '
+      'zapnuté; vypněte, co nepotřebujete. Později to můžete změnit v: '
+      'Nastavení → Funkce.';
+  @override
+  String get featuresIntroDone => 'Hotovo';
+  @override
+  String get featuresCreatedTitle => 'K čemu je tato knihovna?';
+  @override
+  String get featuresCreatedBody =>
+      'Vyberte začátek. Nastaví jen přepínače níže; kterýkoli z nich můžete '
+      'změnit, hned nebo později v: Nastavení → Funkce.';
+  @override
+  String get featuresShowIntroTitle => 'Zobrazit tento úvod znovu';
+  @override
+  String get featuresShowIntroBody =>
+      'Karta, která vysvětluje tuto obrazovku. Nemění žádný přepínač.';
+  @override
+  String get featuresShowIntroAction => 'Zobrazit';
+  @override
+  String featuresRemindersCancelled(int count) => 'Zrušené připomínky: $count';
+  @override
   String get navigationStart => 'Otevírá se na';
   @override
   String navigationStartHidden(String hidden, String start) =>

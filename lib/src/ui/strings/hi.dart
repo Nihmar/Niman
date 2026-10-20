@@ -3586,6 +3586,108 @@ final class HindiStrings extends Strings {
   @override
   String get featureNameWidgets => 'होम स्क्रीन विजेट';
   @override
+  String get featuresDescription =>
+      'यह लाइब्रेरी क्या इस्तेमाल करती है। बंद करने पर वह हर जगह छिप जाता है '
+      'और उसका बैकग्राउंड काम रुक जाता है; आपकी फ़ाइलों में कुछ भी बदला या '
+      'मिटाया नहीं जाता।';
+  @override
+  String get featuresPresetLabel => 'प्रीसेट';
+  @override
+  String get featurePresetEverything => 'सब कुछ';
+  @override
+  String get featurePresetWriting => 'लेखन';
+  @override
+  String get featurePresetNotesOnly => 'सिर्फ़ नोट';
+  @override
+  String get featurePresetTasks => 'कार्य और डायरी';
+  @override
+  String get featurePresetCustom => 'कस्टम';
+  @override
+  String get featurePresetEverythingHint => 'पूरा ऐप';
+  @override
+  String get featurePresetWritingHint => 'नोट, खोज, टेम्पलेट, रीडर';
+  @override
+  String get featurePresetNotesOnlyHint => 'नोट, खोज, लिंक';
+  @override
+  String get featurePresetTasksHint => 'कार्य, डायरी, कैलेंडर, होम';
+  @override
+  String get featuresSectionFinding => 'खोजना और लिखना';
+  @override
+  String get featuresSectionPlanning => 'योजना';
+  @override
+  String get featuresSectionKinds => 'नोट के प्रकार';
+  @override
+  String get featuresSectionReading => 'पढ़ना';
+  @override
+  String get featuresSectionAround => 'ऐप के आसपास';
+  @override
+  String featureNeeds(String feature) => 'इसके लिए ज़रूरी: $feature';
+  @override
+  String get featureOffSearch =>
+      'बंद: कोई खोज स्क्रीन या कमांड नहीं; इंडेक्स फिर भी बना रहता है';
+  @override
+  String get featureOffQuickNote =>
+      'बंद: साझा किया गया पाठ इसके बजाय आयात करें में जाता है';
+  @override
+  String get featureOffTemplates =>
+      'बंद: नए नोट और डायरी प्रविष्टियाँ खाली शुरू होती हैं';
+  @override
+  String get featureOffCapture =>
+      'बंद: पेज कैप्चर नहीं; लिंक साधारण लिंक ही रहते हैं';
+  @override
+  String get featureOffTodo =>
+      'बंद: todo.txt साधारण फ़ाइल ही रहती है; कोई रिमाइंडर नहीं';
+  @override
+  String get featureOffJournal => 'बंद: प्रविष्टियाँ साधारण नोट ही रहती हैं';
+  @override
+  String get featureOffCalendar =>
+      'बंद: calendar.txt साधारण फ़ाइल ही रहती है; इवेंट के रिमाइंडर नहीं';
+  @override
+  String get featureOffKind =>
+      'बंद: ये नोट साधारण Markdown की तरह खुलते हैं; type: बना रहता है';
+  @override
+  String get featureOffTranscription =>
+      'बंद: ट्रांसक्राइब करने की कार्रवाई नहीं; ऑडियो नोट फिर भी रिकॉर्ड और '
+      'चलाए जा सकते हैं';
+  @override
+  String get featureOffReaders => 'बंद: वे सिस्टम ऐप में खुलते हैं';
+  @override
+  String get featureOffAnnotations =>
+      'बंद: कोई हाइलाइट या निशान नहीं; बने हुए नोट बने रहते हैं';
+  @override
+  String get featureOffOcr =>
+      'बंद: कोई स्कैन नहीं; पढ़ा जा चुका पाठ बना रहता है';
+  @override
+  String get featureOffHome => 'बंद: कोई होम स्क्रीन या टाइल नहीं';
+  @override
+  String get featureOffWidgets => 'बंद: विजेट दिखाते हैं कि यह बंद है';
+  @override
+  String get featuresIntroTitle =>
+      'चुनें कि यह लाइब्रेरी क्या इस्तेमाल करती है';
+  @override
+  String get featuresIntroBody =>
+      'Niman अब आपको चुनने देता है कि यह लाइब्रेरी क्या इस्तेमाल करे। सब कुछ '
+      'चालू है; जिसकी ज़रूरत न हो उसे बंद कर दें। इसे बाद में सेटिंग → '
+      'सुविधाएँ में बदला जा सकता है।';
+  @override
+  String get featuresIntroDone => 'हो गया';
+  @override
+  String get featuresCreatedTitle => 'यह लाइब्रेरी किसलिए है?';
+  @override
+  String get featuresCreatedBody =>
+      'एक शुरुआत चुनें। यह सिर्फ़ नीचे के स्विच सेट करती है; आप किसी को भी '
+      'बदल सकते हैं, अभी या बाद में सेटिंग → सुविधाएँ में।';
+  @override
+  String get featuresShowIntroTitle => 'यह परिचय फिर से दिखाएँ';
+  @override
+  String get featuresShowIntroBody =>
+      'वह कार्ड जो इस स्क्रीन को समझाता है। यह कोई स्विच नहीं बदलता।';
+  @override
+  String get featuresShowIntroAction => 'दिखाएँ';
+  @override
+  String featuresRemindersCancelled(int count) =>
+      count == 1 ? '1 रिमाइंडर रद्द किया गया' : '$count रिमाइंडर रद्द किए गए';
+  @override
   String get navigationStart => 'इस पर खुलता है';
   @override
   String navigationStartHidden(String hidden, String start) =>

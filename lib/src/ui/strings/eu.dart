@@ -3675,6 +3675,120 @@ final class BasqueStrings extends Strings {
   @override
   String get featureNameWidgets => 'Hasierako pantailako widgetak';
   @override
+  String get featuresDescription =>
+      'Liburutegi honek zer erabiltzen duen. Itzalita dagoenean, nonahi '
+      'ezkutatzen da eta atzeko planoko lana gelditzen da; zure fitxategietan '
+      'ez da ezer aldatzen edo ezabatzen.';
+  @override
+  String get featuresPresetLabel => 'Aurrezarpena';
+  @override
+  String get featurePresetEverything => 'Dena';
+  @override
+  String get featurePresetWriting => 'Idaztea';
+  @override
+  String get featurePresetNotesOnly => 'Oharrak soilik';
+  @override
+  String get featurePresetTasks => 'Zereginak eta egunkaria';
+  @override
+  String get featurePresetCustom => 'Pertsonalizatua';
+  @override
+  String get featurePresetEverythingHint => 'aplikazio osoa';
+  @override
+  String get featurePresetWritingHint =>
+      'oharrak, bilaketa, txantiloiak, irakurgailuak';
+  @override
+  String get featurePresetNotesOnlyHint => 'oharrak, bilaketa, estekak';
+  @override
+  String get featurePresetTasksHint =>
+      'zereginak, egunkaria, egutegia, Hasiera';
+  @override
+  String get featuresSectionFinding => 'Bilatu eta idatzi';
+  @override
+  String get featuresSectionPlanning => 'Plangintza';
+  @override
+  String get featuresSectionKinds => 'Ohar motak';
+  @override
+  String get featuresSectionReading => 'Irakurketa';
+  @override
+  String get featuresSectionAround => 'Aplikazioaren inguruan';
+  @override
+  String featureNeeds(String feature) => '$feature behar du';
+  @override
+  String get featureOffSearch =>
+      'Itzalita: bilaketa-pantailarik eta -aginduirik ez; indizea eguneratzen '
+      'jarraitzen da';
+  @override
+  String get featureOffQuickNote =>
+      'Itzalita: partekatutako testua Inportatu atalera doa';
+  @override
+  String get featureOffTemplates =>
+      'Itzalita: ohar berriak eta egunkariko sarrerak hutsik hasten dira';
+  @override
+  String get featureOffCapture =>
+      'Itzalita: orrien kapturarik ez; estekak esteka arruntak izaten '
+      'jarraitzen dute';
+  @override
+  String get featureOffTodo =>
+      'Itzalita: todo.txt fitxategi arrunta izaten jarraitzen du; gogorapenik '
+      'ez';
+  @override
+  String get featureOffJournal =>
+      'Itzalita: sarrerak ohar arruntak izaten jarraitzen dute';
+  @override
+  String get featureOffCalendar =>
+      'Itzalita: calendar.txt fitxategi arrunta izaten jarraitzen du; '
+      'gertaeren gogorapenik ez';
+  @override
+  String get featureOffKind =>
+      'Itzalita: ohar hauek Markdown arrunt gisa irekitzen dira; type: '
+      'gordetzen da';
+  @override
+  String get featureOffTranscription =>
+      'Itzalita: transkribatzeko ekintzarik ez; ahots-oharrak grabatu eta '
+      'erreproduzitu daitezke oraindik';
+  @override
+  String get featureOffReaders =>
+      'Itzalita: sistemaren aplikazioan irekitzen dira';
+  @override
+  String get featureOffAnnotations =>
+      'Itzalita: nabarmentzerik edo markarik ez; jada egindako oharrak '
+      'mantentzen dira';
+  @override
+  String get featureOffOcr =>
+      'Itzalita: eskaneatzerik ez; jada irakurritako testua mantentzen da';
+  @override
+  String get featureOffHome => 'Itzalita: Hasiera pantailarik eta lauzarik ez';
+  @override
+  String get featureOffWidgets =>
+      'Itzalita: widgetek hau itzalita dagoela erakusten dute';
+  @override
+  String get featuresIntroTitle =>
+      'Aukeratu liburutegi honek zer erabiltzen duen';
+  @override
+  String get featuresIntroBody =>
+      'Niman-ek orain liburutegi honek zer erabiltzen duen aukeratzen uzten '
+      'dizu. Dena aktibatuta dago; desaktibatu behar ez duzuna. Geroago alda '
+      'dezakezu hemen: Ezarpenak → Eginbideak.';
+  @override
+  String get featuresIntroDone => 'Eginda';
+  @override
+  String get featuresCreatedTitle => 'Zertarako da liburutegi hau?';
+  @override
+  String get featuresCreatedBody =>
+      'Aukeratu hasiera bat. Beheko etengailuak soilik ezartzen ditu; edozein '
+      'alda dezakezu, orain edo geroago hemen: Ezarpenak → Eginbideak.';
+  @override
+  String get featuresShowIntroTitle => 'Erakutsi sarrera hau berriro';
+  @override
+  String get featuresShowIntroBody =>
+      'Pantaila hau azaltzen duen txartela. Ez du etengailurik aldatzen.';
+  @override
+  String get featuresShowIntroAction => 'Erakutsi';
+  @override
+  String featuresRemindersCancelled(int count) => count == 1
+      ? 'Gogorapen 1 bertan behera'
+      : '$count gogorapen bertan behera';
+  @override
   String get navigationStart => 'Hemen irekitzen da';
   @override
   String navigationStartHidden(String hidden, String start) =>

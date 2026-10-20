@@ -3619,6 +3619,107 @@ final class DanishStrings extends Strings {
   @override
   String get featureNameWidgets => 'Startskærmswidgets';
   @override
+  String get featuresDescription =>
+      'Hvad dette bibliotek bruger. Slået fra skjules det overalt, og dets '
+      'arbejde i baggrunden stopper; intet i dine filer ændres eller slettes.';
+  @override
+  String get featuresPresetLabel => 'Forvalg';
+  @override
+  String get featurePresetEverything => 'Alt';
+  @override
+  String get featurePresetWriting => 'Skrivning';
+  @override
+  String get featurePresetNotesOnly => 'Kun noter';
+  @override
+  String get featurePresetTasks => 'Opgaver og dagbog';
+  @override
+  String get featurePresetCustom => 'Tilpasset';
+  @override
+  String get featurePresetEverythingHint => 'hele appen';
+  @override
+  String get featurePresetWritingHint => 'noter, søgning, skabeloner, læsere';
+  @override
+  String get featurePresetNotesOnlyHint => 'noter, søgning, links';
+  @override
+  String get featurePresetTasksHint => 'at gøre, dagbog, kalender, Hjem';
+  @override
+  String get featuresSectionFinding => 'Find og skriv';
+  @override
+  String get featuresSectionPlanning => 'Planlægning';
+  @override
+  String get featuresSectionKinds => 'Notetyper';
+  @override
+  String get featuresSectionReading => 'Læsning';
+  @override
+  String get featuresSectionAround => 'Rundt om appen';
+  @override
+  String featureNeeds(String feature) => 'Kræver $feature';
+  @override
+  String get featureOffSearch =>
+      'Fra: ingen søgeskærm eller søgekommandoer; indekset bliver stadig ført';
+  @override
+  String get featureOffQuickNote => 'Fra: delt tekst går til Importér i stedet';
+  @override
+  String get featureOffTemplates =>
+      'Fra: nye noter og dagbogsindlæg starter tomme';
+  @override
+  String get featureOffCapture =>
+      'Fra: ingen sidefangst; links forbliver almindelige links';
+  @override
+  String get featureOffTodo =>
+      'Fra: todo.txt forbliver en almindelig fil; ingen påmindelser';
+  @override
+  String get featureOffJournal => 'Fra: indlæg forbliver almindelige noter';
+  @override
+  String get featureOffCalendar =>
+      'Fra: calendar.txt forbliver en almindelig fil; ingen påmindelser om '
+      'begivenheder';
+  @override
+  String get featureOffKind =>
+      'Fra: disse noter åbner som almindelig Markdown; type: bevares';
+  @override
+  String get featureOffTranscription =>
+      'Fra: ingen transskriptionshandling; lydnoter kan stadig optages og '
+      'afspilles';
+  @override
+  String get featureOffReaders => 'Fra: de åbner i systemets app';
+  @override
+  String get featureOffAnnotations =>
+      'Fra: ingen markeringer eller tegn; de noter, der allerede er lavet, '
+      'bliver';
+  @override
+  String get featureOffOcr =>
+      'Fra: ingen scanning; den tekst, der allerede er læst, bliver';
+  @override
+  String get featureOffHome => 'Fra: ingen Hjem-skærm eller felter';
+  @override
+  String get featureOffWidgets => 'Fra: widgets viser, at dette er slået fra';
+  @override
+  String get featuresIntroTitle => 'Vælg, hvad dette bibliotek bruger';
+  @override
+  String get featuresIntroBody =>
+      'Niman lader dig nu vælge, hvad dette bibliotek bruger. Alt er slået '
+      'til; slå fra, hvad du ikke har brug for. Du kan ændre det senere i '
+      'Indstillinger → Funktioner.';
+  @override
+  String get featuresIntroDone => 'Færdig';
+  @override
+  String get featuresCreatedTitle => 'Hvad skal dette bibliotek bruges til?';
+  @override
+  String get featuresCreatedBody =>
+      'Vælg en start. Den indstiller kun kontakterne nedenfor; du kan skifte '
+      'hver af dem, nu eller senere i Indstillinger → Funktioner.';
+  @override
+  String get featuresShowIntroTitle => 'Vis denne introduktion igen';
+  @override
+  String get featuresShowIntroBody =>
+      'Kortet, der forklarer denne skærm. Det ændrer ingen kontakt.';
+  @override
+  String get featuresShowIntroAction => 'Vis';
+  @override
+  String featuresRemindersCancelled(int count) =>
+      count == 1 ? '1 påmindelse annulleret' : '$count påmindelser annulleret';
+  @override
   String get navigationStart => 'Åbner på';
   @override
   String navigationStartHidden(String hidden, String start) =>

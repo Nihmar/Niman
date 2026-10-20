@@ -3651,6 +3651,108 @@ final class SwedishStrings extends Strings {
   @override
   String get featureNameWidgets => 'Startskärmswidgetar';
   @override
+  String get featuresDescription =>
+      'Vad det här biblioteket använder. Avstängt döljs det överallt och dess '
+      'arbete i bakgrunden upphör; inget i dina filer ändras eller tas bort.';
+  @override
+  String get featuresPresetLabel => 'Förval';
+  @override
+  String get featurePresetEverything => 'Allt';
+  @override
+  String get featurePresetWriting => 'Skrivande';
+  @override
+  String get featurePresetNotesOnly => 'Bara anteckningar';
+  @override
+  String get featurePresetTasks => 'Uppgifter och dagbok';
+  @override
+  String get featurePresetCustom => 'Anpassat';
+  @override
+  String get featurePresetEverythingHint => 'hela appen';
+  @override
+  String get featurePresetWritingHint => 'anteckningar, sök, mallar, läsare';
+  @override
+  String get featurePresetNotesOnlyHint => 'anteckningar, sök, länkar';
+  @override
+  String get featurePresetTasksHint => 'att göra, dagbok, kalender, Hem';
+  @override
+  String get featuresSectionFinding => 'Hitta och skriva';
+  @override
+  String get featuresSectionPlanning => 'Planering';
+  @override
+  String get featuresSectionKinds => 'Anteckningstyper';
+  @override
+  String get featuresSectionReading => 'Läsning';
+  @override
+  String get featuresSectionAround => 'Runt appen';
+  @override
+  String featureNeeds(String feature) => 'Kräver $feature';
+  @override
+  String get featureOffSearch =>
+      'Av: ingen sökvy eller sökkommandon; indexet förs fortfarande';
+  @override
+  String get featureOffQuickNote =>
+      'Av: delad text går till Importera i stället';
+  @override
+  String get featureOffTemplates =>
+      'Av: nya anteckningar och dagboksinlägg börjar tomma';
+  @override
+  String get featureOffCapture =>
+      'Av: ingen sidhämtning; länkar förblir vanliga länkar';
+  @override
+  String get featureOffTodo =>
+      'Av: todo.txt förblir en vanlig fil; inga påminnelser';
+  @override
+  String get featureOffJournal => 'Av: inlägg förblir vanliga anteckningar';
+  @override
+  String get featureOffCalendar =>
+      'Av: calendar.txt förblir en vanlig fil; inga påminnelser om händelser';
+  @override
+  String get featureOffKind =>
+      'Av: de här anteckningarna öppnas som vanlig Markdown; type: behålls';
+  @override
+  String get featureOffTranscription =>
+      'Av: ingen transkriberingsåtgärd; ljudanteckningar kan fortfarande '
+      'spelas in och spelas upp';
+  @override
+  String get featureOffReaders => 'Av: de öppnas i systemets app';
+  @override
+  String get featureOffAnnotations =>
+      'Av: inga markeringar eller tecken; de anteckningar som redan gjorts '
+      'finns kvar';
+  @override
+  String get featureOffOcr =>
+      'Av: ingen skanning; den text som redan lästs finns kvar';
+  @override
+  String get featureOffHome => 'Av: ingen Hem-vy eller brickor';
+  @override
+  String get featureOffWidgets => 'Av: widgetar visar att det här är avstängt';
+  @override
+  String get featuresIntroTitle => 'Välj vad det här biblioteket använder';
+  @override
+  String get featuresIntroBody =>
+      'Niman låter dig nu välja vad det här biblioteket använder. Allt är på; '
+      'stäng av det du inte behöver. Du kan ändra det senare i Inställningar '
+      '→ Funktioner.';
+  @override
+  String get featuresIntroDone => 'Klart';
+  @override
+  String get featuresCreatedTitle =>
+      'Vad ska det här biblioteket användas till?';
+  @override
+  String get featuresCreatedBody =>
+      'Välj en start. Den ställer bara in reglagen nedan; du kan växla vilket '
+      'som helst av dem, nu eller senare i Inställningar → Funktioner.';
+  @override
+  String get featuresShowIntroTitle => 'Visa den här introduktionen igen';
+  @override
+  String get featuresShowIntroBody =>
+      'Kortet som förklarar den här vyn. Det ändrar inget reglage.';
+  @override
+  String get featuresShowIntroAction => 'Visa';
+  @override
+  String featuresRemindersCancelled(int count) =>
+      count == 1 ? '1 påminnelse avbruten' : '$count påminnelser avbrutna';
+  @override
   String get navigationStart => 'Öppnas på';
   @override
   String navigationStartHidden(String hidden, String start) =>

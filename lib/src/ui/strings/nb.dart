@@ -3626,6 +3626,106 @@ final class NorwegianStrings extends Strings {
   @override
   String get featureNameWidgets => 'Startskjermwidgeter';
   @override
+  String get featuresDescription =>
+      'Hva dette biblioteket bruker. Slått av skjules det overalt, og '
+      'arbeidet i bakgrunnen stopper; ingenting i filene dine endres eller '
+      'slettes.';
+  @override
+  String get featuresPresetLabel => 'Forhåndsvalg';
+  @override
+  String get featurePresetEverything => 'Alt';
+  @override
+  String get featurePresetWriting => 'Skriving';
+  @override
+  String get featurePresetNotesOnly => 'Bare notater';
+  @override
+  String get featurePresetTasks => 'Oppgaver og dagbok';
+  @override
+  String get featurePresetCustom => 'Egendefinert';
+  @override
+  String get featurePresetEverythingHint => 'hele appen';
+  @override
+  String get featurePresetWritingHint => 'notater, søk, maler, lesere';
+  @override
+  String get featurePresetNotesOnlyHint => 'notater, søk, lenker';
+  @override
+  String get featurePresetTasksHint => 'å gjøre, dagbok, kalender, Hjem';
+  @override
+  String get featuresSectionFinding => 'Finne og skrive';
+  @override
+  String get featuresSectionPlanning => 'Planlegging';
+  @override
+  String get featuresSectionKinds => 'Notattyper';
+  @override
+  String get featuresSectionReading => 'Lesing';
+  @override
+  String get featuresSectionAround => 'Rundt appen';
+  @override
+  String featureNeeds(String feature) => 'Krever $feature';
+  @override
+  String get featureOffSearch =>
+      'Av: ingen søkeskjerm eller søkekommandoer; indeksen føres fortsatt';
+  @override
+  String get featureOffQuickNote => 'Av: delt tekst går til Importer i stedet';
+  @override
+  String get featureOffTemplates =>
+      'Av: nye notater og dagboksoppføringer starter tomme';
+  @override
+  String get featureOffCapture =>
+      'Av: ingen sidefangst; lenker forblir vanlige lenker';
+  @override
+  String get featureOffTodo =>
+      'Av: todo.txt forblir en vanlig fil; ingen påminnelser';
+  @override
+  String get featureOffJournal => 'Av: oppføringer forblir vanlige notater';
+  @override
+  String get featureOffCalendar =>
+      'Av: calendar.txt forblir en vanlig fil; ingen påminnelser om hendelser';
+  @override
+  String get featureOffKind =>
+      'Av: disse notatene åpnes som vanlig Markdown; type: beholdes';
+  @override
+  String get featureOffTranscription =>
+      'Av: ingen transkripsjonshandling; lydnotater kan fortsatt tas opp og '
+      'spilles av';
+  @override
+  String get featureOffReaders => 'Av: de åpnes i systemets app';
+  @override
+  String get featureOffAnnotations =>
+      'Av: ingen markeringer eller tegn; notatene som allerede er laget, blir';
+  @override
+  String get featureOffOcr =>
+      'Av: ingen skanning; teksten som allerede er lest, blir';
+  @override
+  String get featureOffHome => 'Av: ingen Hjem-skjerm eller fliser';
+  @override
+  String get featureOffWidgets => 'Av: widgeter viser at dette er slått av';
+  @override
+  String get featuresIntroTitle => 'Velg hva dette biblioteket bruker';
+  @override
+  String get featuresIntroBody =>
+      'Niman lar deg nå velge hva dette biblioteket bruker. Alt er på; slå av '
+      'det du ikke trenger. Du kan endre det senere i Innstillinger → '
+      'Funksjoner.';
+  @override
+  String get featuresIntroDone => 'Ferdig';
+  @override
+  String get featuresCreatedTitle => 'Hva skal dette biblioteket brukes til?';
+  @override
+  String get featuresCreatedBody =>
+      'Velg en start. Den stiller bare inn bryterne nedenfor; du kan skifte '
+      'hver av dem, nå eller senere i Innstillinger → Funksjoner.';
+  @override
+  String get featuresShowIntroTitle => 'Vis denne introduksjonen igjen';
+  @override
+  String get featuresShowIntroBody =>
+      'Kortet som forklarer denne skjermen. Det endrer ingen bryter.';
+  @override
+  String get featuresShowIntroAction => 'Vis';
+  @override
+  String featuresRemindersCancelled(int count) =>
+      count == 1 ? '1 påminnelse avbrutt' : '$count påminnelser avbrutt';
+  @override
   String get navigationStart => 'Åpner på';
   @override
   String navigationStartHidden(String hidden, String start) =>

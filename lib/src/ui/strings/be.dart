@@ -3677,6 +3677,113 @@ final class BelarusianStrings extends Strings {
   @override
   String get featureNameWidgets => 'Віджэты галоўнага экрана';
   @override
+  String get featuresDescription =>
+      'Што выкарыстоўвае гэтая бібліятэка. Выключанае схавана ўсюды, а яго '
+      'праца ў фоне спыняецца; у вашых файлах нічога не змяняецца і не '
+      'выдаляецца.';
+  @override
+  String get featuresPresetLabel => 'Набор';
+  @override
+  String get featurePresetEverything => 'Усё';
+  @override
+  String get featurePresetWriting => 'Пісьмо';
+  @override
+  String get featurePresetNotesOnly => 'Толькі нататкі';
+  @override
+  String get featurePresetTasks => 'Заданні і дзённік';
+  @override
+  String get featurePresetCustom => 'Уласны';
+  @override
+  String get featurePresetEverythingHint => 'ўся праграма';
+  @override
+  String get featurePresetWritingHint => 'нататкі, пошук, шаблоны, чытальнікі';
+  @override
+  String get featurePresetNotesOnlyHint => 'нататкі, пошук, спасылкі';
+  @override
+  String get featurePresetTasksHint => 'заданні, дзённік, каляндар, Галоўная';
+  @override
+  String get featuresSectionFinding => 'Пошук і пісьмо';
+  @override
+  String get featuresSectionPlanning => 'Планаванне';
+  @override
+  String get featuresSectionKinds => 'Віды нататак';
+  @override
+  String get featuresSectionReading => 'Чытанне';
+  @override
+  String get featuresSectionAround => 'Вакол праграмы';
+  @override
+  String featureNeeds(String feature) => 'Патрабуе: $feature';
+  @override
+  String get featureOffSearch =>
+      'Выключана: няма экрана і каманд пошуку; індэкс і далей вядзецца';
+  @override
+  String get featureOffQuickNote =>
+      'Выключана: падзелены тэкст ідзе ў: Імпартаваць';
+  @override
+  String get featureOffTemplates =>
+      'Выключана: новыя нататкі і запісы дзённіка пачынаюцца пустымі';
+  @override
+  String get featureOffCapture =>
+      'Выключана: няма захавання старонак; спасылкі застаюцца звычайнымі '
+      'спасылкамі';
+  @override
+  String get featureOffTodo =>
+      'Выключана: todo.txt застаецца звычайным файлам; няма напамінаў';
+  @override
+  String get featureOffJournal =>
+      'Выключана: запісы застаюцца звычайнымі нататкамі';
+  @override
+  String get featureOffCalendar =>
+      'Выключана: calendar.txt застаецца звычайным файлам; няма напамінаў пра '
+      'падзеі';
+  @override
+  String get featureOffKind =>
+      'Выключана: гэтыя нататкі адчыняюцца як звычайны Markdown; type: '
+      'захоўваецца';
+  @override
+  String get featureOffTranscription =>
+      'Выключана: няма дзеяння транскрыпцыі; галасавыя нататкі і далей можна '
+      'запісваць і прайграваць';
+  @override
+  String get featureOffReaders => 'Выключана: адчыняюцца ў сістэмнай праграме';
+  @override
+  String get featureOffAnnotations =>
+      'Выключана: няма вылучэнняў і адзнак; ужо створаныя нататкі застаюцца';
+  @override
+  String get featureOffOcr =>
+      'Выключана: няма сканавання; ужо прачытаны тэкст застаецца';
+  @override
+  String get featureOffHome => 'Выключана: няма экрана і плітак Галоўная';
+  @override
+  String get featureOffWidgets =>
+      'Выключана: віджэты паказваюць, што гэта выключана';
+  @override
+  String get featuresIntroTitle =>
+      'Выберыце, што выкарыстоўвае гэтая бібліятэка';
+  @override
+  String get featuresIntroBody =>
+      'Niman цяпер дазваляе выбраць, што выкарыстоўвае гэтая бібліятэка. Усё '
+      'ўключана; выключыце тое, што вам не патрэбна. Змяніць гэта можна '
+      'пазней у: Налады → Функцыі.';
+  @override
+  String get featuresIntroDone => 'Гатова';
+  @override
+  String get featuresCreatedTitle => 'Для чаго гэтая бібліятэка?';
+  @override
+  String get featuresCreatedBody =>
+      'Выберыце пачатак. Ён толькі ўсталёўвае пераключальнікі ніжэй; любы з '
+      'іх можна змяніць, цяпер або пазней у: Налады → Функцыі.';
+  @override
+  String get featuresShowIntroTitle => 'Паказаць гэты ўступ зноў';
+  @override
+  String get featuresShowIntroBody =>
+      'Картка, якая тлумачыць гэты экран. Яна не змяняе ніводнага '
+      'пераключальніка.';
+  @override
+  String get featuresShowIntroAction => 'Паказаць';
+  @override
+  String featuresRemindersCancelled(int count) => 'Скасаваныя напаміны: $count';
+  @override
   String get navigationStart => 'Адкрываецца на';
   @override
   String navigationStartHidden(String hidden, String start) =>

@@ -3747,6 +3747,114 @@ final class FrenchStrings extends Strings {
   @override
   String get featureNameWidgets => 'Widgets de l’écran d’accueil';
   @override
+  String get featuresDescription =>
+      'Ce que cette bibliothèque utilise. Désactivé, cela disparaît partout '
+      'et son travail en arrière-plan s’arrête ; rien n’est modifié ni '
+      'supprimé dans vos fichiers.';
+  @override
+  String get featuresPresetLabel => 'Préréglage';
+  @override
+  String get featurePresetEverything => 'Tout';
+  @override
+  String get featurePresetWriting => 'Écriture';
+  @override
+  String get featurePresetNotesOnly => 'Notes seules';
+  @override
+  String get featurePresetTasks => 'Tâches et journal';
+  @override
+  String get featurePresetCustom => 'Personnalisé';
+  @override
+  String get featurePresetEverythingHint => 'toute l’application';
+  @override
+  String get featurePresetWritingHint => 'notes, recherche, modèles, lecteurs';
+  @override
+  String get featurePresetNotesOnlyHint => 'notes, recherche, liens';
+  @override
+  String get featurePresetTasksHint => 'tâches, journal, calendrier, Accueil';
+  @override
+  String get featuresSectionFinding => 'Chercher et écrire';
+  @override
+  String get featuresSectionPlanning => 'Organisation';
+  @override
+  String get featuresSectionKinds => 'Types de notes';
+  @override
+  String get featuresSectionReading => 'Lecture';
+  @override
+  String get featuresSectionAround => 'Autour de l’application';
+  @override
+  String featureNeeds(String feature) => 'Nécessite $feature';
+  @override
+  String get featureOffSearch =>
+      'Désactivé : ni écran ni commandes de recherche ; l’index reste tenu à '
+      'jour';
+  @override
+  String get featureOffQuickNote =>
+      'Désactivé : le texte partagé va dans Importer';
+  @override
+  String get featureOffTemplates =>
+      'Désactivé : les nouvelles notes et entrées du journal démarrent vides';
+  @override
+  String get featureOffCapture =>
+      'Désactivé : pas de capture de page ; les liens restent de simples liens';
+  @override
+  String get featureOffTodo =>
+      'Désactivé : todo.txt reste un fichier ordinaire ; pas de rappels';
+  @override
+  String get featureOffJournal =>
+      'Désactivé : les entrées restent des notes ordinaires';
+  @override
+  String get featureOffCalendar =>
+      'Désactivé : calendar.txt reste un fichier ordinaire ; pas de rappels '
+      'd’événements';
+  @override
+  String get featureOffKind =>
+      'Désactivé : ces notes s’ouvrent en Markdown simple ; type: est conservé';
+  @override
+  String get featureOffTranscription =>
+      'Désactivé : pas d’action de transcription ; les notes audio '
+      's’enregistrent et se lisent toujours';
+  @override
+  String get featureOffReaders =>
+      'Désactivé : ils s’ouvrent dans l’application du système';
+  @override
+  String get featureOffAnnotations =>
+      'Désactivé : ni surlignages ni marques ; les notes déjà créées restent';
+  @override
+  String get featureOffOcr =>
+      'Désactivé : pas de numérisation ; le texte déjà lu reste';
+  @override
+  String get featureOffHome => 'Désactivé : ni écran ni tuiles Accueil';
+  @override
+  String get featureOffWidgets =>
+      'Désactivé : les widgets indiquent que la fonction est désactivée';
+  @override
+  String get featuresIntroTitle =>
+      'Choisissez ce que cette bibliothèque utilise';
+  @override
+  String get featuresIntroBody =>
+      'Niman vous laisse désormais choisir ce que cette bibliothèque utilise. '
+      'Tout est activé ; désactivez ce dont vous n’avez pas besoin. Vous '
+      'pourrez le modifier plus tard dans Paramètres → Fonctions.';
+  @override
+  String get featuresIntroDone => 'Terminé';
+  @override
+  String get featuresCreatedTitle => 'À quoi sert cette bibliothèque ?';
+  @override
+  String get featuresCreatedBody =>
+      'Choisissez un point de départ. Il règle seulement les interrupteurs '
+      'ci-dessous ; vous pouvez les modifier un par un, maintenant ou plus '
+      'tard dans Paramètres → Fonctions.';
+  @override
+  String get featuresShowIntroTitle => 'Afficher de nouveau cette introduction';
+  @override
+  String get featuresShowIntroBody =>
+      'La carte qui explique cet écran. Elle ne modifie aucun interrupteur.';
+  @override
+  String get featuresShowIntroAction => 'Afficher';
+  @override
+  String featuresRemindersCancelled(int count) =>
+      count == 1 ? '1 rappel annulé' : '$count rappels annulés';
+  @override
   String get navigationStart => 'S’ouvre sur';
   @override
   String navigationStartHidden(String hidden, String start) =>

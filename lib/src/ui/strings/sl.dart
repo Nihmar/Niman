@@ -3660,6 +3660,110 @@ final class SlovenianStrings extends Strings {
   @override
   String get featureNameWidgets => 'Pripomočki na domačem zaslonu';
   @override
+  String get featuresDescription =>
+      'Kaj ta knjižnica uporablja. Izklopljeno je povsod skrito in njegovo '
+      'delo v ozadju se ustavi; v vaših datotekah se nič ne spremeni ali '
+      'izbriše.';
+  @override
+  String get featuresPresetLabel => 'Prednastavitev';
+  @override
+  String get featurePresetEverything => 'Vse';
+  @override
+  String get featurePresetWriting => 'Pisanje';
+  @override
+  String get featurePresetNotesOnly => 'Samo zapiski';
+  @override
+  String get featurePresetTasks => 'Naloge in dnevnik';
+  @override
+  String get featurePresetCustom => 'Po meri';
+  @override
+  String get featurePresetEverythingHint => 'celotna aplikacija';
+  @override
+  String get featurePresetWritingHint => 'zapiski, iskanje, predloge, bralniki';
+  @override
+  String get featurePresetNotesOnlyHint => 'zapiski, iskanje, povezave';
+  @override
+  String get featurePresetTasksHint => 'naloge, dnevnik, koledar, Domov';
+  @override
+  String get featuresSectionFinding => 'Iskanje in pisanje';
+  @override
+  String get featuresSectionPlanning => 'Načrtovanje';
+  @override
+  String get featuresSectionKinds => 'Vrste zapiskov';
+  @override
+  String get featuresSectionReading => 'Branje';
+  @override
+  String get featuresSectionAround => 'Okoli aplikacije';
+  @override
+  String featureNeeds(String feature) => 'Potrebuje: $feature';
+  @override
+  String get featureOffSearch =>
+      'Izklopljeno: brez iskalnega zaslona in ukazov; kazalo se še vedno vodi';
+  @override
+  String get featureOffQuickNote =>
+      'Izklopljeno: deljeno besedilo gre namesto tega v: Uvozi';
+  @override
+  String get featureOffTemplates =>
+      'Izklopljeno: novi zapiski in vnosi v dnevnik se začnejo prazni';
+  @override
+  String get featureOffCapture =>
+      'Izklopljeno: brez shranjevanja strani; povezave ostanejo navadne '
+      'povezave';
+  @override
+  String get featureOffTodo =>
+      'Izklopljeno: todo.txt ostane navadna datoteka; brez opomnikov';
+  @override
+  String get featureOffJournal => 'Izklopljeno: vnosi ostanejo navadni zapiski';
+  @override
+  String get featureOffCalendar =>
+      'Izklopljeno: calendar.txt ostane navadna datoteka; brez opomnikov za '
+      'dogodke';
+  @override
+  String get featureOffKind =>
+      'Izklopljeno: ti zapiski se odprejo kot navaden Markdown; type: ostane';
+  @override
+  String get featureOffTranscription =>
+      'Izklopljeno: brez dejanja prepisa; glasovne zapiske je še vedno mogoče '
+      'snemati in predvajati';
+  @override
+  String get featureOffReaders =>
+      'Izklopljeno: odprejo se v sistemski aplikaciji';
+  @override
+  String get featureOffAnnotations =>
+      'Izklopljeno: brez označb in oznak; že narejeni zapiski ostanejo';
+  @override
+  String get featureOffOcr =>
+      'Izklopljeno: brez skeniranja; že prebrano besedilo ostane';
+  @override
+  String get featureOffHome => 'Izklopljeno: brez zaslona in ploščic Domov';
+  @override
+  String get featureOffWidgets =>
+      'Izklopljeno: pripomočki pokažejo, da je to izklopljeno';
+  @override
+  String get featuresIntroTitle => 'Izberite, kaj ta knjižnica uporablja';
+  @override
+  String get featuresIntroBody =>
+      'Niman vam zdaj omogoča izbrati, kaj ta knjižnica uporablja. Vse je '
+      'vklopljeno; izklopite, česar ne potrebujete. To lahko pozneje '
+      'spremenite v: Nastavitve → Funkcije.';
+  @override
+  String get featuresIntroDone => 'Končano';
+  @override
+  String get featuresCreatedTitle => 'Za kaj je ta knjižnica?';
+  @override
+  String get featuresCreatedBody =>
+      'Izberite začetek. Nastavi samo stikala spodaj; katerokoli lahko '
+      'preklopite, zdaj ali pozneje v: Nastavitve → Funkcije.';
+  @override
+  String get featuresShowIntroTitle => 'Znova pokaži ta uvod';
+  @override
+  String get featuresShowIntroBody =>
+      'Kartica, ki razlaga ta zaslon. Ne spremeni nobenega stikala.';
+  @override
+  String get featuresShowIntroAction => 'Pokaži';
+  @override
+  String featuresRemindersCancelled(int count) => 'Preklicani opomniki: $count';
+  @override
   String get navigationStart => 'Odpre se na';
   @override
   String navigationStartHidden(String hidden, String start) =>

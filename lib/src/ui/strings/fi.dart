@@ -3662,6 +3662,112 @@ final class FinnishStrings extends Strings {
   @override
   String get featureNameWidgets => 'Aloitusnäytön widgetit';
   @override
+  String get featuresDescription =>
+      'Mitä tämä kirjasto käyttää. Pois päältä oleva piilotetaan kaikkialta '
+      'ja sen taustatyö pysähtyy; tiedostoihisi ei muuteta eikä poisteta '
+      'mitään.';
+  @override
+  String get featuresPresetLabel => 'Esiasetus';
+  @override
+  String get featurePresetEverything => 'Kaikki';
+  @override
+  String get featurePresetWriting => 'Kirjoittaminen';
+  @override
+  String get featurePresetNotesOnly => 'Vain muistiinpanot';
+  @override
+  String get featurePresetTasks => 'Tehtävät ja päiväkirja';
+  @override
+  String get featurePresetCustom => 'Mukautettu';
+  @override
+  String get featurePresetEverythingHint => 'koko sovellus';
+  @override
+  String get featurePresetWritingHint => 'muistiinpanot, haku, mallit, lukimet';
+  @override
+  String get featurePresetNotesOnlyHint => 'muistiinpanot, haku, linkit';
+  @override
+  String get featurePresetTasksHint => 'tehtävät, päiväkirja, kalenteri, Koti';
+  @override
+  String get featuresSectionFinding => 'Etsiminen ja kirjoittaminen';
+  @override
+  String get featuresSectionPlanning => 'Suunnittelu';
+  @override
+  String get featuresSectionKinds => 'Muistiinpanotyypit';
+  @override
+  String get featuresSectionReading => 'Lukeminen';
+  @override
+  String get featuresSectionAround => 'Sovelluksen ympärillä';
+  @override
+  String featureNeeds(String feature) => 'Vaatii: $feature';
+  @override
+  String get featureOffSearch =>
+      'Pois: ei hakunäkymää eikä hakukomentoja; hakemistoa ylläpidetään '
+      'edelleen';
+  @override
+  String get featureOffQuickNote => 'Pois: jaettu teksti menee kohtaan Tuo';
+  @override
+  String get featureOffTemplates =>
+      'Pois: uudet muistiinpanot ja päiväkirjamerkinnät alkavat tyhjinä';
+  @override
+  String get featureOffCapture =>
+      'Pois: ei sivujen tallennusta; linkit pysyvät tavallisina linkkeinä';
+  @override
+  String get featureOffTodo =>
+      'Pois: todo.txt pysyy tavallisena tiedostona; ei muistutuksia';
+  @override
+  String get featureOffJournal =>
+      'Pois: merkinnät pysyvät tavallisina muistiinpanoina';
+  @override
+  String get featureOffCalendar =>
+      'Pois: calendar.txt pysyy tavallisena tiedostona; ei '
+      'tapahtumamuistutuksia';
+  @override
+  String get featureOffKind =>
+      'Pois: nämä muistiinpanot avautuvat tavallisena Markdownina; type: '
+      'säilyy';
+  @override
+  String get featureOffTranscription =>
+      'Pois: ei litterointitoimintoa; äänimuistiinpanoja voi edelleen '
+      'tallentaa ja toistaa';
+  @override
+  String get featureOffReaders =>
+      'Pois: ne avautuvat järjestelmän sovelluksessa';
+  @override
+  String get featureOffAnnotations =>
+      'Pois: ei korostuksia eikä merkkejä; jo tehdyt muistiinpanot säilyvät';
+  @override
+  String get featureOffOcr => 'Pois: ei skannausta; jo luettu teksti säilyy';
+  @override
+  String get featureOffHome => 'Pois: ei Koti-näkymää eikä ruutuja';
+  @override
+  String get featureOffWidgets =>
+      'Pois: widgetit näyttävät, että tämä on pois päältä';
+  @override
+  String get featuresIntroTitle => 'Valitse, mitä tämä kirjasto käyttää';
+  @override
+  String get featuresIntroBody =>
+      'Niman antaa nyt valita, mitä tämä kirjasto käyttää. Kaikki on päällä; '
+      'sammuta se, mitä et tarvitse. Voit muuttaa tätä myöhemmin kohdassa '
+      'Asetukset → Ominaisuudet.';
+  @override
+  String get featuresIntroDone => 'Valmis';
+  @override
+  String get featuresCreatedTitle => 'Mihin tätä kirjastoa käytetään?';
+  @override
+  String get featuresCreatedBody =>
+      'Valitse aloitus. Se asettaa vain alla olevat kytkimet; voit vaihtaa '
+      'mitä tahansa niistä, nyt tai myöhemmin kohdassa Asetukset → '
+      'Ominaisuudet.';
+  @override
+  String get featuresShowIntroTitle => 'Näytä tämä esittely uudelleen';
+  @override
+  String get featuresShowIntroBody =>
+      'Kortti, joka selittää tämän näkymän. Se ei muuta yhtään kytkintä.';
+  @override
+  String get featuresShowIntroAction => 'Näytä';
+  @override
+  String featuresRemindersCancelled(int count) =>
+      count == 1 ? '1 muistutus peruttu' : '$count muistutusta peruttu';
+  @override
   String get navigationStart => 'Avautuu kohtaan';
   @override
   String navigationStartHidden(String hidden, String start) =>
