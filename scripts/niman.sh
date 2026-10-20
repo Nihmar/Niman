@@ -4,11 +4,11 @@
 set -u
 
 # Flutter fallback when not on PATH (AGENTS.md: Env).
-if ! command -v flutter >/dev/null 2>&1   && [ -x /home/alessandro/develop/flutter/bin/flutter ]; then
-  export PATH="$PATH:/home/alessandro/develop/flutter/bin"
+if ! command -v flutter >/dev/null 2>&1   && [ -x "$HOME/develop/flutter/bin/flutter" ]; then
+  export PATH="$PATH:$HOME/develop/flutter/bin"
 fi
 if ! command -v flutter >/dev/null 2>&1; then
-  echo "error: flutter not found - export PATH or install under /home/alessandro/develop/flutter" >&2
+  echo "error: flutter not found - export PATH or install under $HOME/develop/flutter" >&2
   exit 1
 fi
 
