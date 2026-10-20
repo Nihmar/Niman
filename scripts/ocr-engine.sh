@@ -54,7 +54,7 @@ case "$target" in
   android-arm64-v8a | android-x86_64)
     ndk="${ANDROID_NDK_HOME:?ANDROID_NDK_HOME}"
     common+=(-DCMAKE_TOOLCHAIN_FILE="$ndk/build/cmake/android.toolchain.cmake"
-      -DANDROID_ABI="${target#android-}" -DANDROID_PLATFORM=android-35
+      -DANDROID_ABI="${target#android-}" -DANDROID_PLATFORM=android-34
       -DANDROID_STL=c++_static -DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON
       "-DCMAKE_C_FLAGS=$gc_flags" "-DCMAKE_CXX_FLAGS=$gc_flags"
       "-DCMAKE_SHARED_LINKER_FLAGS=-Wl,-z,max-page-size=16384 $elf_link")

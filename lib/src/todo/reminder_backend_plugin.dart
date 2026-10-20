@@ -176,7 +176,7 @@ final class PluginReminderBackend implements ReminderBackend {
   ///
   /// A defensive query, not a gate: `USE_EXACT_ALARM` is declared and
   /// auto-granted at install, so this is true on any stock Android the
-  /// app runs on (minSdk 35). It can still come back false on an OEM
+  /// app runs on (minSdk 34). It can still come back false on an OEM
   /// build that gates exact alarms behind its own toggle, and there is no
   /// in-app remedy — requesting `SCHEDULE_EXACT_ALARM` would trade an
   /// always-granted privilege for one denied by default on Android 14+.

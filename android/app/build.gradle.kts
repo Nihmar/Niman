@@ -40,7 +40,7 @@ android {
         applicationId = "dev.niman.niman"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = 35
+        minSdk = 34
         targetSdk = flutter.targetSdkVersion
         // Uses the version code from pubspec.yaml. When using split APKs, 1000 * ABI_VERSION
         // is added automatically by Flutter. (https://developer.android.com/studio/build/configure-apk-splits#configure-APK-versions)
@@ -52,7 +52,7 @@ android {
 
     packaging {
         jniLibs {
-            // 64-bit only (arm64-v8a, x86_64). minSdk 35 devices are
+            // 64-bit only (arm64-v8a, x86_64). minSdk 34 devices are
             // practically all 64-bit, and armeabi-v7a was the heaviest ABI
             // once whisper_ggml and its FFmpeg joined (55 MB of native code,
             // plain + NEON copies; see docs/dev/transcription.md).
