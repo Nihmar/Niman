@@ -13,6 +13,7 @@ import 'dart:isolate';
 
 import 'package:ffi/ffi.dart';
 import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/spellcheck/mac_spell_checker.dart';
 import 'package:niman/src/spellcheck/spell_checker.dart';
 import 'package:niman/src/spellcheck/windows_spell_checker.dart';
 import 'package:path/path.dart' as p;
@@ -405,11 +406,13 @@ void destroyHunspellHandles(List<HunspellHandle> handles) {
 /// already in the log.
 ///
 /// Nothing installed is not an error: the answer is [NoopSpellChecker]s, as
-/// [createSpellChecker]'s is. Windows' own checker is the exception — a COM
-/// object of the system's, asked for where it is used — and it is built on
-/// the calling isolate as it always was.
+/// [createSpellChecker]'s is. Windows' and the Mac's own checkers are the
+/// exception — the system's, asked for where they are used — and they are
+/// built on the calling isolate.
 Future<List<SpellChecker>> loadSpellCheckers(List<String> dictionaries) async {
-  if (Platform.isWindows) return _checkersHere(dictionaries);
+  if (Platform.isWindows || Platform.isMacOS) {
+    return _checkersHere(dictionaries);
+  }
   final handles = await Isolate.run(
     () => openHunspellHandles(dictionaries: dictionaries),
   );
@@ -424,15 +427,15 @@ Future<List<SpellChecker>> loadSpellCheckers(List<String> dictionaries) async {
   return checkers.isEmpty ? const <SpellChecker>[NoopSpellChecker()] : checkers;
 }
 
-/// The engines built where they are asked for: the machine's own on Windows,
-/// the no-op where nothing loads.
+/// The engines built where they are asked for: the machine's own on Windows
+/// and macOS, the no-op where nothing loads.
 List<SpellChecker> _checkersHere(List<String> dictionaries) => <SpellChecker>[
   if (dictionaries.isEmpty) createSpellChecker(),
   for (final name in dictionaries) createSpellChecker(dictionary: name),
 ];
 
-/// The best checker this machine can offer: on Windows the system's own,
-/// then hunspell wherever it is installed.
+/// The best checker this machine can offer: on Windows and macOS the
+/// system's own, then hunspell wherever it is installed.
 ///
 /// [dictionary] names the user's chosen dictionary (null = the locale's).
 /// This loads where it is called — see [loadSpellCheckers] for the path that
@@ -441,14 +444,17 @@ SpellChecker createSpellChecker({String? dictionary}) =>
     (Platform.isWindows
         ? WindowsSpellChecker.open(language: dictionary)
         : null) ??
+    (Platform.isMacOS ? MacSpellChecker.open(language: dictionary) : null) ??
     HunspellSpellChecker.open(dictionary: dictionary) ??
     const NoopSpellChecker();
 
-/// The dictionaries the settings offer: the languages Windows spellchecks,
-/// or every hunspell pair found on the machine.
+/// The dictionaries the settings offer: the languages Windows or macOS
+/// spellchecks, or every hunspell pair found on the machine.
 List<String> availableSpellDictionaries() {
   final names = Platform.isWindows
       ? windowsSpellLanguages()
+      : Platform.isMacOS
+      ? macSpellLanguages()
       : discoverDictionaries().keys.toList();
   return names..sort();
 }
