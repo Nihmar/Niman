@@ -136,4 +136,79 @@ void main() {
       expect(_shownWords(tester), contains(_wordsOf(text).toString()));
     },
   );
+
+  // The log of 2026-10-20: a note with no headings, then a big one with many.
+  // The outline was asked for as the big note loaded, when the panes still
+  // drew the note before it, and their empty outline was taken as the big
+  // note's — for good, since nothing asked again until an edit — so every
+  // `[[#heading]]` in it said the heading was not there.
+  for (final preview in <bool>[false, true]) {
+    testWidgets('a note opened after another gets its own outline'
+        '${preview ? ' (preview shown)' : ''}', (tester) async {
+      final big = StringBuffer('# Alpha\n\n');
+      for (var i = 0; i < 1500; i++) {
+        big.writeln('one two three four five six seven eight nine ten');
+      }
+      big.write('\n## Beta\n\nlast words\n');
+      final text = big.toString();
+      expect(text.length, greaterThan(64 * 1024));
+      final notes = <String, String>{
+        '/notes/plain.md': 'no headings here\n',
+        '/notes/big.md': text,
+      };
+      final key = GlobalKey<State<NoteView>>();
+      Widget at(String path) => _app(
+        NoteView(
+          key: key,
+          path: path,
+          showLineNumbers: false,
+          showPreview: preview,
+          autofocusEditor: false,
+          readNote: (path) async => notes[path]!,
+        ),
+      );
+      await tester.pumpWidget(at('/notes/plain.md'));
+      await tester.pumpAndSettle();
+      final view = key.currentState! as NoteViewHandle;
+      expect(view.outline.value, isEmpty);
+
+      await tester.pumpWidget(at('/notes/big.md'));
+      for (var i = 0; i < 20; i++) {
+        await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 50)),
+        );
+        await tester.pump(const Duration(milliseconds: 1));
+      }
+      expect(view.outline.value.map((e) => e.text), <String>['Alpha', 'Beta']);
+    });
+  }
+
+  // Every note opens at revision 0: the revision alone took the note just
+  // opened for the one before it, and kept that one's outline.
+  testWidgets('a small note opened after another gets its own outline', (
+    tester,
+  ) async {
+    final notes = <String, String>{
+      '/notes/one.md': '# Uno\n\ntext\n',
+      '/notes/two.md': '# Due\n\ntext\n',
+    };
+    final key = GlobalKey<State<NoteView>>();
+    Widget at(String path) => _app(
+      NoteView(
+        key: key,
+        path: path,
+        showLineNumbers: false,
+        autofocusEditor: false,
+        readNote: (path) async => notes[path]!,
+      ),
+    );
+    await tester.pumpWidget(at('/notes/one.md'));
+    await tester.pumpAndSettle();
+    final view = key.currentState! as NoteViewHandle;
+    expect(view.outline.value.map((e) => e.text), <String>['Uno']);
+
+    await tester.pumpWidget(at('/notes/two.md'));
+    await tester.pumpAndSettle();
+    expect(view.outline.value.map((e) => e.text), <String>['Due']);
+  });
 }

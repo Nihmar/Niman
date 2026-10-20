@@ -67,6 +67,10 @@ final class NoteStatsController extends ChangeNotifier {
   /// changed, where the statistics used to compare its whole text.
   int _revision = -1;
 
+  /// The surface [_revision] is of: every note opens at revision 0, so the
+  /// revision alone took a note just opened for the one before it.
+  MarkdownSurfaceController? _revisionOf;
+
   Timer? _timer;
   bool _disposed = false;
 
@@ -94,15 +98,28 @@ final class NoteStatsController extends ChangeNotifier {
       // count is not there yet (a big one, counted in the background) keeps
       // the count it has and takes the next refresh's.
       final revision = surface.revision;
-      if (revision == _revision && surface.words.isCounted) return;
+      if (identical(surface, _revisionOf) &&
+          revision == _revision &&
+          surface.words.isCounted) {
+        return;
+      }
       final counted = surface.words.isCounted ? surface.words.words : null;
       final headings = _outlineNow(surface);
       // The pane's scan may still be carrying on an edit that changed the rest
       // of the note, and the outline is the whole note's: this revision is not
       // done until it lands, so the refresh asks again rather than keeping
       // the outline from before the edit for as long as nobody types.
-      if (sourceView()?.scanSettled ?? true) {
+      // Nor is a note whose outline no pane has read yet: a big one just
+      // opened, before its panes are built for it — kept as done, the outline
+      // stayed empty until an edit. The source pane's scan is waited for;
+      // with no source pane there is nothing to wait for, and the next
+      // refresh asks again (the note view's, once the panes are built).
+      final source = sourceView();
+      if (headings == null) {
+        if (source != null) schedule();
+      } else if (source?.scanSettled ?? true) {
         _revision = revision;
+        _revisionOf = surface;
       } else {
         schedule();
       }
