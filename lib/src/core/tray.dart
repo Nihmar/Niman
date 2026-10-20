@@ -26,6 +26,7 @@ import 'package:nativeapi/nativeapi.dart'
         TrayIconRightClickedEvent;
 import 'package:niman/src/core/app_channel.dart';
 import 'package:niman/src/core/app_theme.dart';
+import 'package:niman/src/core/host_platform.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/shortcuts.dart';
 import 'package:niman/src/core/theme.dart';
@@ -44,7 +45,7 @@ enum TrayCommand {
 
 /// What the shell needs from the desktop tray.
 ///
-/// Implemented by [PlatformTrayService] (Linux/Windows) and
+/// Implemented by [PlatformTrayService] (the desktops) and
 /// [NoopTrayService] (elsewhere), plus a fake in widget tests.
 abstract interface class TrayService {
   /// Creates the tray icon: [openLabel] at the top, then [labels]' quick
@@ -90,12 +91,19 @@ abstract interface class TrayService {
 /// closed. The left click still brings the window back, the convention
 /// there.
 ///
-/// Elsewhere (macOS): the right click.
+/// macOS: the click, as every menu bar extra opens its menu; the window
+/// comes back from the menu's Open or from the Dock.
 ///
-/// [isLinux] and [isWindows] override the host platform for the test.
-ContextMenuTrigger trayContextMenuTrigger({bool? isLinux, bool? isWindows}) {
+/// [isLinux], [isWindows] and [isMacOS] override the host platform for the
+/// test.
+ContextMenuTrigger trayContextMenuTrigger({
+  bool? isLinux,
+  bool? isWindows,
+  bool? isMacOS,
+}) {
   if (isLinux ?? Platform.isLinux) return ContextMenuTrigger.clicked;
   if (isWindows ?? Platform.isWindows) return ContextMenuTrigger.none;
+  if (isMacOS ?? Platform.isMacOS) return ContextMenuTrigger.clicked;
   return ContextMenuTrigger.rightClicked;
 }
 
@@ -105,7 +113,7 @@ ContextMenuTrigger trayContextMenuTrigger({bool? isLinux, bool? isWindows}) {
 /// [isDesktop] overrides the host platform so a plain test can cover the
 /// branch that does not run here (T-PP-01).
 TrayService createTrayService({bool? isDesktop}) {
-  if (isDesktop ?? (Platform.isLinux || Platform.isWindows)) {
+  if (isDesktop ?? HostPlatform.isDesktop) {
     return PlatformTrayService();
   }
   return const NoopTrayService();
@@ -202,7 +210,11 @@ final class PlatformTrayService implements TrayService {
       tray
         ..setContextMenu(built.menu)
         ..addListener((event) {
-          if (event is TrayIconClickedEvent) _activated.add(null);
+          // On a Mac the click opens the menu, so it does not also raise
+          // the window behind it.
+          if (event is TrayIconClickedEvent && !Platform.isMacOS) {
+            _activated.add(null);
+          }
           if (event is TrayIconRightClickedEvent) {
             _log.info(
               'tray: right click (trigger ${tray.getContextMenuTrigger()}, '
