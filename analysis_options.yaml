@@ -23,6 +23,7 @@ analyzer:
     - linux/**
     - windows/**
     - macos/**
+    - ios/**
   language:
     strict-casts: true
     strict-inference: true
