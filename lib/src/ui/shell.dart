@@ -264,9 +264,11 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
     // And the commands pinned in its palette (#208).
     await PinnedCommands.load(session);
     // Whether the window's × hides Niman to the tray (#209): the tray is
-    // the desktops', so nowhere else hides.
+    // the desktops', so nowhere else hides. On a Mac it always does, to the
+    // Dock, with no setting (decision 11 of docs/records/apple-platforms.md).
     CloseToTray.enabled.value =
-        (Platform.isLinux || Platform.isWindows) && await session.closeToTray;
+        Platform.isMacOS ||
+        ((Platform.isLinux || Platform.isWindows) && await session.closeToTray);
   }
 
   /// Applies the stored UI language (T-L10N-03).
