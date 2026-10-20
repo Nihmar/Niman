@@ -794,9 +794,9 @@ most-accurate-and-hungry, and a downloaded model can be deleted there to
 free its space.
 
 A WAV recording transcribes on every platform. A recording in another
-format transcribes on Android (a clip is converted first) but not on the
-desktops, where the menu says so under **Transcribe**; convert it to WAV
-with a tool of your own first.
+format (m4a, mp3, AAC…) transcribes on Android and on a Mac (a clip is
+converted first) but not on Linux and Windows, where the menu says so under
+**Transcribe**; convert it to WAV with a tool of your own first.
 
 ## Exporting
 
