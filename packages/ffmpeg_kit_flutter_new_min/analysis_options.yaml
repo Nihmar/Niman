@@ -1,0 +1,5 @@
+# Third-party code (see README.md), kept as published: the app's lint set
+# is not applied to it.
+analyzer:
+  exclude:
+    - "**"
