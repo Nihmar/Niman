@@ -1461,9 +1461,13 @@ final class _NoteViewState extends State<NoteView>
       _deadLinks.refresh();
       // The editor gets this frame: the preview's parse and first layout
       // start right after the text is on screen, so a large note shows it
-      // before the preview works (T-PP-22).
+      // before the preview works (T-PP-22). The outline is asked for again
+      // then too: a big note's comes off a pane's scan, and the panes drew
+      // the note before this one until this frame built them for it.
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) _refreshPreview();
+        if (!mounted) return;
+        _refreshPreview();
+        if (widget.path == path) _stats.refresh();
       });
       if (widget.initialFind case final terms? when terms.isNotEmpty) {
         WidgetsBinding.instance.addPostFrameCallback((_) {

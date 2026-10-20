@@ -72,8 +72,9 @@ final List<(TokenKind, String)> _opened = <(TokenKind, String)>[];
 Future<MarkdownSourceViewState> _pump(
   WidgetTester tester,
   String text,
-  _Mode mode,
-) async {
+  _Mode mode, {
+  void Function(MarkdownSourceViewState state)? onOpen,
+}) async {
   _opened.clear();
   tester.view.physicalSize = const Size(900, 500);
   tester.view.devicePixelRatio = 1;
@@ -86,7 +87,14 @@ Future<MarkdownSourceViewState> _pump(
           theme: _theme,
           showLineNumbers: false,
           hideMarkers: mode == _Mode.live,
-          onOpenLink: (kind, raw, href) => _opened.add((kind, raw)),
+          onOpenLink: (kind, raw, href) {
+            _opened.add((kind, raw));
+            onOpen?.call(
+              tester.state<MarkdownSourceViewState>(
+                find.byType(MarkdownSourceView),
+              ),
+            );
+          },
         ),
       ),
     ),
@@ -127,6 +135,42 @@ void main() {
     expect(_opened, <(TokenKind, String)>[(TokenKind.wikilink, '[[La nota]]')]);
     expect(state.selection.extent, 9, reason: 'the caret went there too');
   });
+
+  // A link to a heading of the same note moves the caret to the heading as
+  // the button goes down; the click it ends as placed the caret back on the
+  // link as it was let go, and the view followed it there. Every form that
+  // can land in the same note, wikilink or Markdown link: the surface opens
+  // them all the same way, so none may give the release a second click.
+  const sameNote = <(String, TokenKind, String)>[
+    ('[[#Titolo]]', TokenKind.wikilink, '[[#Titolo]]'),
+    ('[[#Titolo|qui]]', TokenKind.wikilink, '[[#Titolo|qui]]'),
+    ('[[Nota#Titolo]]', TokenKind.wikilink, '[[Nota#Titolo]]'),
+    ('[qui](#Titolo)', TokenKind.link, '[qui](#Titolo)'),
+    ('[qui][r]\n\n[r]: #Titolo', TokenKind.link, '[qui][r]'),
+  ];
+  for (final (line0, kind, raw) in sameNote) {
+    both('$raw: a link that moves the caret keeps it there', (
+      tester,
+      mode,
+    ) async {
+      final text = '$line0\n\n## Titolo\n';
+      final heading = text.indexOf('## Titolo');
+      final state = await _pump(
+        tester,
+        text,
+        mode,
+        onOpen: (state) => state.placeCaret(heading),
+      );
+      // The link opens the line: its second glyph, whatever the mode hides.
+      await _click(tester, _at(0, 1), control: true);
+      expect(_opened, <(TokenKind, String)>[(kind, raw)]);
+      expect(
+        state.selection.extent,
+        heading,
+        reason: 'the release is no second click on the link',
+      );
+    });
+  }
 
   both('Ctrl+click on a Markdown link opens it', (tester, mode) async {
     await _pump(tester, note, mode);

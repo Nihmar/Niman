@@ -451,6 +451,12 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// caret: the control answers the tap itself.
   bool _controlPress = false;
 
+  /// The mouse press that went down opened a link ([_openLinkAt]), so the
+  /// click it ends as is spent: placing the caret where it was let go would
+  /// take the caret, and the view, back from wherever the link led — an
+  /// anchor in the same note is lines away.
+  bool _pressOpenedLink = false;
+
   /// The keyboard, wired to the buffer this view draws.
   late SourceInput _input;
 
@@ -2804,6 +2810,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     onPointerDown: (event) {
       _lastPointerKind = event.kind;
       _pressOffset = null;
+      _pressOpenedLink = false;
       if (event.kind == PointerDeviceKind.mouse &&
           _onScrollbar(event.position)) {
         // The scrollbar takes the drag; the note takes nothing (#1106).
@@ -2833,7 +2840,10 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       if (_taskBoxAt(event.position) != null) return;
       final offset = _pressOffset = offsetAt(event.position);
       if (offset == null) return;
-      if (_openLinkAt(offset)) return;
+      if (_openLinkAt(offset)) {
+        _pressOpenedLink = true;
+        return;
+      }
       // Shift+click extends the selection from its anchor to the click, and
       // a drag from there goes on extending it (#546).
       if (HardwareKeyboard.instance.isShiftPressed) {
@@ -4230,6 +4240,14 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                   // neither a caret nor a reason to raise the keyboard; nor
                   // the first of a double click.
                   if (_toggleTaskAt(details.globalPosition)) {
+                    _lastClick = null;
+                    return;
+                  }
+                  // The press opened a link: it placed the caret it meant to,
+                  // and the link may have moved it since.
+                  if (_pressOpenedLink) {
+                    _pressOpenedLink = false;
+                    _pressOffset = null;
                     _lastClick = null;
                     return;
                   }
