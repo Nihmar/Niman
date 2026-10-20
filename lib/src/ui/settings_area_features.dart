@@ -21,6 +21,8 @@ LibraryFeature? featureOfArea(SettingsAreaId area) => switch (area) {
   SettingsAreaId.commands ||
   SettingsAreaId.updates ||
   SettingsAreaId.diagnostics ||
+  // Always listed: it is where the switches are (#1109).
+  SettingsAreaId.features ||
   SettingsAreaId.folders ||
   SettingsAreaId.navigation ||
   SettingsAreaId.trashHistory ||

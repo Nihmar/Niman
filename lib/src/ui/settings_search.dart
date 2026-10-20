@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/app_channel.dart';
+import 'package:niman/src/core/settings/library_features.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/core/settings/navigation_layout.dart';
 import 'package:niman/src/core/theme.dart';
@@ -14,6 +15,7 @@ import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/transcription/transcription_models.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/epub_look_sheet.dart';
+import 'package:niman/src/ui/feature_names.dart';
 import 'package:niman/src/ui/key_map.dart';
 import 'package:niman/src/ui/keyboard_shortcuts.dart';
 import 'package:niman/src/ui/ocr/ocr_settings_section.dart';
@@ -113,6 +115,7 @@ List<SettingsSearchEntry> settingsSearchEntries({
   final trashHistory = libraryArea(AppStrings.settingsAreaTrashHistory);
   final study = libraryArea(AppStrings.tabStudy);
   final navigation = libraryArea(AppStrings.settingsAreaNavigation);
+  final featuresArea = libraryArea(AppStrings.featuresTitle);
   final maintenance = AppStrings.settingsGroupMaintenance;
   final entries = <SettingsSearchEntry>[
     SettingsSearchEntry(
@@ -419,6 +422,19 @@ List<SettingsSearchEntry> settingsSearchEntries({
       areaId: SettingsAreaId.navigation,
       open: () => pushNavigation(SettingsKeys.navigationStart),
     ),
+    // The switches of Features (#1109): found by their names, and opened
+    // with their row flashed. The value is what the library does, so a
+    // child whose parent is off reads Off.
+    for (final feature in LibraryFeature.values)
+      SettingsSearchEntry(
+        title: featureName(feature),
+        area: featuresArea,
+        rowKey: SettingsKeys.featureRow(feature),
+        value: () async => onOff(on: controller.features.value.isOn(feature)),
+        areaId: SettingsAreaId.features,
+        open: () =>
+            openArea(SettingsAreaId.features, SettingsKeys.featureRow(feature)),
+      ),
     SettingsSearchEntry(
       title: AppStrings.journalFolderTitle,
       area: journal,

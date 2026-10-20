@@ -5,6 +5,7 @@ import 'package:niman/src/ocr/ocr_installation.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/transcription/transcription_models.dart';
 import 'package:niman/src/ui/device_shape.dart';
+import 'package:niman/src/ui/features/features_host.dart';
 import 'package:niman/src/ui/settings.dart';
 import 'package:niman/src/ui/settings_areas.dart';
 import 'package:niman/src/ui/settings_navigation.dart';
@@ -28,6 +29,7 @@ final class SettingsTab extends StatefulWidget {
     this.ocr,
     this.libraryRows = true,
     this.target,
+    this.featuresHost = const FeaturesHost(),
     super.key,
   });
 
@@ -54,6 +56,10 @@ final class SettingsTab extends StatefulWidget {
 
   /// Where to open: an area and a row in it (#229); null opens the home.
   final SettingsTarget? target;
+
+  /// What the Features area asks of the shell (#1109): the reminder count
+  /// for its snackbar, and the introduction a normal open asked for.
+  final FeaturesHost featuresHost;
 
   /// The left column's width: the areas' names and the search, no more.
   static const double listWidth = 280;
@@ -87,6 +93,7 @@ final class _SettingsTabState extends State<SettingsTab> {
             ocr: widget.ocr,
             libraryRows: widget.libraryRows,
             target: widget.target,
+            featuresHost: widget.featuresHost,
           );
         }
         return Row(
@@ -102,6 +109,7 @@ final class _SettingsTabState extends State<SettingsTab> {
                 navigation: _navigation,
                 libraryRows: widget.libraryRows,
                 target: widget.target,
+                featuresHost: widget.featuresHost,
               ),
             ),
             const VerticalDivider(width: 1),
@@ -115,6 +123,7 @@ final class _SettingsTabState extends State<SettingsTab> {
                   transcription: widget.transcription,
                   ocr: widget.ocr,
                   keyboardAttached: true,
+                  featuresHost: widget.featuresHost,
                   openArea: (area, row) =>
                       _navigation.select(area, highlight: row),
                 ),

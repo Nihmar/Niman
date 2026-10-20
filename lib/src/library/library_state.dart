@@ -23,6 +23,7 @@ import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/settings/custom_theme_repo.dart';
 import 'package:niman/src/core/settings/device_settings_store.dart';
 import 'package:niman/src/core/settings/features.dart';
+import 'package:niman/src/core/settings/features_introduction.dart';
 import 'package:niman/src/core/settings/legacy_library_settings.dart';
 import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/core/settings/library_config_repo.dart';
@@ -213,7 +214,12 @@ final class LibraryController implements LibrarySession {
   /// The open library's `.niman/settings.json`; null while none is open,
   /// and then every setting reads and writes app-wide.
   LibraryConfigRepo? _configRepo;
+
   final ValueNotifier<Features> _features = ValueNotifier(const Features());
+
+  /// Whether the open that made this session was of a folder with no
+  /// settings file: a library being created (#1109).
+  bool _createdLibrary = false;
   Indexer? _indexer;
   NoteOps? _ops;
   LibrarySyncService? _sync;
@@ -630,10 +636,18 @@ final class LibraryController implements LibrarySession {
     final appDb = await appDatabase;
     AppLog.enabled = await AppSettingsRepo(appDb).debugLogsEnabled();
     _startUpdateChecks(appDb);
+    // Whether this open is a library being created: a folder with no
+    // settings file, asked before the seed below can write one (#1109). A
+    // rebuild of the index is not an open and says nothing about it.
+    final opening = _phase == LibraryPhase.opening;
+    final hadSettings = !opening || _hasSettingsFile(abs);
     // Before anything reads the settings: a library upgraded from the
     // `library_settings` table gets its `.niman/settings.json` here,
     // now that the folder is known to be reachable (T-ML-02).
     await LegacyLibrarySettings(appDb).seed(abs);
+    if (opening) {
+      _createdLibrary = !hadSettings && !_hasSettingsFile(abs);
+    }
     final indexer = Indexer(indexDb)
       ..onChanged = _onIndexChanged
       ..onRemoved = (removed) => _onRemoved(abs, removed);
@@ -1126,6 +1140,10 @@ final class LibraryController implements LibrarySession {
   Future<LibraryConfig> get _library async =>
       await _configRepo?.config ?? LibraryConfig.defaults;
 
+  /// Whether the library at [abs] has a `.niman/settings.json`.
+  bool _hasSettingsFile(String abs) =>
+      File(p.join(abs, '.niman', 'settings.json')).existsSync();
+
   /// Applies [change] to the open library's settings; a no-op with none
   /// open, since there is nothing to write it to.
   Future<void> _editLibrary(
@@ -1301,6 +1319,22 @@ final class LibraryController implements LibrarySession {
   /// The library tree sort order.
   @override
   Future<TreeSort> get treeSort async => (await _library).treeSort;
+
+  @override
+  Future<void> setFeatures(Features features) =>
+      _editLibrary((c) => c.copyWith(features: features));
+
+  @override
+  Future<FeaturesIntroduction> get featuresIntroduction async {
+    if ((await _library).featuresReviewed) return FeaturesIntroduction.none;
+    return _createdLibrary
+        ? FeaturesIntroduction.created
+        : FeaturesIntroduction.existing;
+  }
+
+  @override
+  Future<void> markFeaturesReviewed() =>
+      _editLibrary((c) => c.copyWith(featuresReviewed: true));
 
   /// Sets (and persists) the library tree sort order.
   @override

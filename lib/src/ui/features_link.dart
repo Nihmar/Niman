@@ -9,6 +9,8 @@ library;
 import 'package:niman/src/ui/settings_areas.dart';
 
 /// The place the links to Features open: the Library group of Settings,
-/// at its first row. Until the Features area exists that is Folders and
-/// paths, the group's first area.
-const SettingsTarget featuresTarget = (area: SettingsAreaId.folders, row: null);
+/// at its first row.
+const SettingsTarget featuresTarget = (
+  area: SettingsAreaId.features,
+  row: null,
+);
