@@ -1,7 +1,7 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:niman/src/core/host_platform.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/storage_access.dart';
 import 'package:niman/src/db/app_database.dart';
@@ -169,8 +169,7 @@ final class _OpenLibraryScreenState extends State<OpenLibraryScreen> {
                   // A file needs no library to be read or edited (#77);
                   // the desktops only, where a picked file is the file
                   // itself rather than a copy.
-                  if (widget.outsideFiles != null &&
-                      (Platform.isLinux || Platform.isWindows))
+                  if (widget.outsideFiles != null && HostPlatform.isDesktop)
                     Padding(
                       padding: const EdgeInsets.only(top: 8),
                       child: TextButton.icon(
