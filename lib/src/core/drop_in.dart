@@ -1,7 +1,8 @@
 /// The drop target the platform runners report on (#224).
 ///
 /// The window's own drag-and-drop is taken by the runner — GDK in
-/// `linux/runner`, `WM_DROPFILES` in `windows/runner` — which hands what
+/// `linux/runner`, OLE in `windows/runner`, the window's own dragging
+/// destination in `macos/Runner` — which hands what
 /// it sees to Dart over the `niman/drop` method channel as one of the
 /// [WindowDrop] events below. The desktop_drop plugin used to take the
 /// drag instead; on KDE/Wayland it preferred the portal file-transfer
@@ -13,10 +14,10 @@
 library;
 
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:niman/src/core/host_platform.dart';
 
 /// Something the window's drop target reports.
 sealed class WindowDrop {
@@ -90,7 +91,7 @@ List<String> dropPathsFrom(Object? payload) {
 
 /// What the window's own drop target reports, to whoever draws it.
 ///
-/// Implemented by [PlatformDropTargetService] (Linux, Windows) and
+/// Implemented by [PlatformDropTargetService] (the desktops) and
 /// [NoopDropTargetService] (elsewhere), plus a fake in widget tests.
 abstract interface class DropTargetService {
   /// The drags and drops the window's target sees, in the order they
@@ -108,7 +109,7 @@ abstract interface class DropTargetService {
 /// [isDesktop] overrides the host platform so a plain test can cover the
 /// branch that does not run here.
 DropTargetService createDropTargetService({bool? isDesktop}) {
-  if (isDesktop ?? (Platform.isLinux || Platform.isWindows)) {
+  if (isDesktop ?? HostPlatform.isDesktop) {
     return PlatformDropTargetService();
   }
   return const NoopDropTargetService();
