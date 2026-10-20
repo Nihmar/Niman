@@ -508,8 +508,13 @@ library.
 - **Anything else** (an audio clip, an archive) does not go
   in the editor: the pane says the file is not a text note, and on
   desktop offers **Open in default app** right there.
+- **With the readers off** ([Features](features.md)), a PDF or a book is
+  not shown either: the pane names the file and offers **Open in default
+  app**, on every platform. Pictures are still shown.
 
 ### Annotating a PDF or a book
+
+Annotations are one of the [Features](features.md), and need the readers: switched off, there is no annotating or highlighting, and the companion notes stay.
 
 A PDF or a book is annotated in a note of its own, its **companion
 note**, without leaving the file:
@@ -706,7 +711,8 @@ else in it that is not Markdown is kept as a file.
   the note its **create** button makes goes where
   [new notes go](#where-new-notes-and-folders-go). Text
   shared into Niman from another app lands at its end
-  ([platforms](platforms.md)), and the note opens.
+  ([platforms](platforms.md)), and the note opens. With Quick note switched
+  off in [Features](features.md), shared text becomes a new note instead.
 - **List notes:** created under `listNoteFolder` (default `Lists`) and
   shown as a checklist: tick, nest, drag, edit, delete, add. A list note
   can be turned into a **shopping list** (a quantity per item) from its
@@ -765,6 +771,8 @@ else in it that is not Markdown is kept as a file.
   See [templates](templates.md).
 
 ## Transcribing a voice note
+
+Transcription is one of the [Features](features.md), and needs Audio notes: switched off, there is no *Transcribe*, and no model is downloaded.
 
 A recording can be written down on the device, with nothing uploaded:
 open the vocal's ⋮ menu (a long press or a right click) and pick

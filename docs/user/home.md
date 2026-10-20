@@ -4,6 +4,8 @@ A library's **Home** is a page of tiles: what you come back to every day —
 today's journal entry, the tasks due, the notes you changed last — and
 buttons for what you do every day.
 
+Home is one of the [Features](features.md): switched off there, the library has no Home, and a tile of a feature that is off is not drawn.
+
 ## Where it is
 
 Home is one of the destinations of the navigation: in the phone's bottom

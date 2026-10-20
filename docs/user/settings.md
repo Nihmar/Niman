@@ -13,7 +13,7 @@ library.
 Settings is split into areas, grouped by what they change: **App**
 (appearance, themes, editor, keyboard shortcuts, commands, text
 recognition, updates, diagnostics),
-the open **Library** (folders, journal, study, navigation, trash and history, sync,
+the open **Library** (features, folders, journal, study, navigation, trash and history, sync,
 transcription, reminders), and **Maintenance** (re-index, rebuild the index, switch or
 close the library; in the settings window only the first two, since the
 rail's library window switches and closes).
@@ -47,6 +47,18 @@ choices: a drop-down under the field on a desktop, a dialog on a phone
 (#712). A size or a width is a slider: in the row itself on a desktop,
 the value at its end and kept when you let go; in a dialog on a phone.
 
+### Features
+
+**Settings → Library → Features**, the group's first row, switches the
+macro features of the open library on and off: search, quick note,
+templates, web capture, todo, journal, calendar, the note kinds, the PDF
+and EPUB readers, annotations, text recognition, Home and the Android
+widgets. Four presets (Everything, Writing, Notes only, Tasks & journal)
+set the switches in one tap. An area of a feature that is off is not listed
+here, nor found by the search at the top (Reminders goes only when Todo
+and Calendar are both off). Nothing in the library's files is changed by a
+switch. The whole story is in [features.md](features.md).
+
 ### Navigation
 
 **Settings → Navigation** orders the phone's bottom bar and the
@@ -66,6 +78,11 @@ beside the list is a preview of the result.
 **Study** starts hidden: a library with no flashcards has no use for it.
 The first deck made offers to show it, once; its switch here shows it any
 time.
+
+A destination whose feature is switched off in
+[Features](features.md) stays in this list, greyed, *Off in this library*,
+with **Off in Features ›** where its switch was; nothing is written to the
+layout for it, so turning the feature on restores what you had.
 
 A hidden destination is still in the command palette (*Go to: …*). On
 a phone it opens as a page, with a back arrow to where you were; on the
@@ -123,6 +140,8 @@ sync) in `.niman/settings.json`.
 | `journalTemplate` | none (= a heading with the date) | The template an entry is made from, library-relative |
 | `journalDayStart` | 0 | The hour a new day begins (0–6): at 4, until four in the morning is still yesterday |
 | `journalClockTimes` | false | Read an event's time as a clock (`09:00–12:00`, in the device's zone) rather than as `calendar.txt` writes it (`9-12`); the file is never touched by it (**Settings → Journal → Calendar → Event times**) |
+| `features` | none (= every feature on) | The switches that are off, by id: `{"todo": false}` (**Settings → Features**); an absent id reads as on, so a feature a later build adds is born on, and an id this build does not know is kept. Written only once a switch has been flipped (see [features](features.md)) |
+| `featuresReviewed` | false | Whether the Features introduction has been through its screen: written when the screen is left, never when it opens, and synced with the library |
 | `navigation` | none (= every destination, in the shipped order) | The bar's and the rail's order, hidden destinations and start (**Settings → Navigation**): `{"order": [names], "hidden": [names], "start": name}` with `files`, `todo`, `search`, `home`, `quicknote`, `settings`, where `start` (**Opens on**) is absent for Files; a destination a later build adds goes in after its default neighbour, shown, and a name this build does not know is kept |
 
 The **Diagnostics and info** area also carries the first run again

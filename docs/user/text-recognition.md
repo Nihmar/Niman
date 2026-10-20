@@ -4,6 +4,8 @@ Niman can read the text of a scanned PDF or a picture — a contract, a
 whiteboard, a receipt, a book page — and write it into a note next to the
 file, so search finds it. It runs on the device: nothing is sent anywhere.
 
+Text recognition is one of the [Features](features.md). Switched off, there is no *Recognize text*, no engine is downloaded, and the text already read stays.
+
 The work is tracked in [#532](https://github.com/Nihmar/Niman/issues/532)
 and landed in four steps: the engine and its languages, **Recognize
 text**, the text beside its scan, and the recognized lines on the scan.

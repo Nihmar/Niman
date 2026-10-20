@@ -2,6 +2,8 @@
 
 One note per day, made the first time you open that day.
 
+The journal is one of the [Features](features.md). Switched off, entries stay ordinary notes and Settings has no Journal area.
+
 An entry is an ordinary note: it lives in the library like any other,
 syncs, is found by search and links to and from other notes. What makes
 it an entry is where it is and what it is called, set in **Settings →

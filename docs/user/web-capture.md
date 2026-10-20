@@ -7,6 +7,8 @@ copied in the browser can also be [pasted as Markdown](#paste-as-markdown)
 into the note being written. The work is tracked in
 [#531](https://github.com/Nihmar/Niman/issues/531).
 
+Web capture is one of the [Features](features.md). Switched off, there is no capture, and a shared link is plain text.
+
 ## On the desktop
 
 Three ways in, all to the same dialog:
