@@ -15,6 +15,7 @@ library;
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:niman/src/editor/toolbar_item.dart';
+import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/key_map.dart';
 
 /// The key each formatting action ships with; an item that is missing
@@ -129,7 +130,7 @@ final class EditorFormatKeys {
     // to another key, and the two surfaces would disagree.
     for (final MapEntry(key: item, value: shipped)
         in editorShortcutDefaults.entries) {
-      if (!shipped.accepts(event, keyboard)) continue;
+      if (!hostKeys(shipped).accepts(event, keyboard)) continue;
       if (map.isEditorChanged(item) && actions().containsKey(item)) return true;
     }
     return false;

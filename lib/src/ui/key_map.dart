@@ -77,7 +77,10 @@ final class KeyMap {
   static SingleActivator? defaultOf(AppCommand command) {
     for (final shortcut in nimanAppShortcuts) {
       if (shortcut.command == command) {
-        return shortcut.activation as SingleActivator;
+        return hostKeys(
+          shortcut.activation as SingleActivator,
+          apple: shortcut.apple,
+        );
       }
     }
     return null;
@@ -92,7 +95,10 @@ final class KeyMap {
 
   /// The key [item]'s formatting ships with, or null.
   static SingleActivator? editorDefaultOf(ToolbarItem item) =>
-      editorShortcutDefaults[item];
+      switch (editorShortcutDefaults[item]) {
+        final keys? => hostKeys(keys),
+        null => null,
+      };
 
   /// The key [item] runs on now, or null for none.
   SingleActivator? editorBindingOf(ToolbarItem item) =>
