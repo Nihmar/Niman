@@ -35,6 +35,16 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
+    // The API-level gate CI runs (`:app:lintBetaDebug`): minSdk is below
+    // compileSdk, so a framework call newer than minSdk compiles and only
+    // crashes on the older device. Only those two checks, both errors, so
+    // the gate fails on exactly that and on nothing unrelated.
+    lint {
+        checkOnly += setOf("NewApi", "InlinedApi")
+        error += setOf("NewApi", "InlinedApi")
+        abortOnError = true
+    }
+
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "dev.niman.niman"
