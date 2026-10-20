@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/settings/features.dart';
 import 'package:niman/src/core/settings/library_features.dart';
 import 'package:niman/src/core/settings/navigation_layout.dart';
+import 'package:niman/src/ui/menu_choice_button.dart';
 import 'package:niman/src/ui/settings_navigation_layout.dart';
 import 'package:niman/src/ui/shell_navigation.dart';
 import 'package:niman/src/ui/strings.dart';
@@ -286,7 +287,7 @@ void main() {
       await pump(tester);
       expect(
         tester
-            .widget<DropdownButton<ShellTab>>(
+            .widget<MenuChoiceButton<ShellTab>>(
               find.byKey(const Key('navigation-start')),
             )
             .value,
@@ -295,7 +296,7 @@ void main() {
       await turnOff(tester, LibraryFeature.todo);
       expect(
         tester
-            .widget<DropdownButton<ShellTab>>(
+            .widget<MenuChoiceButton<ShellTab>>(
               find.byKey(const Key('navigation-start')),
             )
             .value,
