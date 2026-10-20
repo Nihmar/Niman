@@ -3,6 +3,7 @@ import 'dart:ui' show Rect;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:niman/src/core/host_platform.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/ui/caption_buttons.dart';
 import 'package:niman/src/ui/window_minimum_size.dart';
@@ -318,13 +319,13 @@ final class NoopWindowController implements WindowController {
 }
 
 /// Creates the platform controller: `window_manager` on the desktops
-/// (Linux/Windows), a no-op elsewhere (the Android close path must keep
+/// (Linux, Windows, macOS), a no-op elsewhere (the Android close path must keep
 /// behaving exactly as before — T-PP-11's AC).
 ///
 /// [isDesktop] overrides the host platform so a plain test can cover the
 /// branch that does not run here (T-PP-01).
 WindowController createWindowController({bool? isDesktop}) {
-  return (isDesktop ?? (Platform.isLinux || Platform.isWindows))
+  return (isDesktop ?? HostPlatform.isDesktop)
       ? WindowManagerController()
       : NoopWindowController();
 }

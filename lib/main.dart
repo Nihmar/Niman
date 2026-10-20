@@ -10,6 +10,7 @@ import 'package:niman/src/core/app_channel.dart';
 import 'package:niman/src/core/crash_reporter.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/frame_cost.dart';
+import 'package:niman/src/core/host_platform.dart';
 import 'package:niman/src/core/launch_args.dart';
 import 'package:niman/src/core/launch_requests.dart';
 import 'package:niman/src/core/log_file.dart';
@@ -33,7 +34,7 @@ Future<void> main(List<String> args) async {
   // [_pinWorkingDirectory]): the one it was started in belongs to whoever
   // launched it, and it can be rebuilt under a running app (#319).
   unawaited(_pinWorkingDirectory());
-  final desktop = Platform.isLinux || Platform.isWindows;
+  final desktop = HostPlatform.isDesktop;
   // One Niman per session (#41): a later launch hands itself to the first
   // and ends here, before it opens anything.
   final instance = desktop ? await _claimSession(launch) : null;
