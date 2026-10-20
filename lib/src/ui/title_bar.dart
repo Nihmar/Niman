@@ -82,10 +82,9 @@ final class AppTitleBar extends StatelessWidget {
     // the rail's glyphs; the tabs still start at the tree's edge.
     final gap = _systemWindowButtons ? _trafficLights : _toggleGap;
     final leading = gap + _toggleSize;
-    final titleInset = (ShellRail.panelStart - leading).clamp(
-      8.0,
-      double.infinity,
-    );
+    // Past the lights the panel's edge is behind the toggle: the name
+    // simply follows it.
+    final titleInset = _systemWindowButtons ? 8.0 : _titleInset;
     return Material(
       key: const Key('title-bar'),
       color: theme.colorScheme.surfaceContainer,
@@ -275,6 +274,10 @@ const double _toggleSize = 34;
 /// The gap before the sidebar toggle: what centres its glyph on the
 /// rail's glyphs under it (#708).
 const double _toggleGap = ShellRail.glyphCentre - _toggleSize / 2;
+
+/// The title's room before the name: what puts it at the panel's left
+/// edge, past the toggle (#708).
+const double _titleInset = ShellRail.panelStart - (_toggleGap + _toggleSize);
 
 /// Whether the system draws the window's buttons: macOS's traffic lights,
 /// at the bar's left over a transparent title bar
