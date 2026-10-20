@@ -545,9 +545,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(
         find.byKey(
-          Key(
-            'settings-search-${(SettingsKeys.featureRow(LibraryFeature.search) as ValueKey<String>).value}',
-          ),
+          Key('settings-search-feature-row-${LibraryFeature.search.id}'),
         ),
         findsOneWidget,
       );
