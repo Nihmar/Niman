@@ -434,6 +434,13 @@ final class SourceLine extends StatelessWidget {
         formulas: inline,
       );
     }
+    // A typeset formula's lines take no room: the formula is drawn under
+    // its first one instead, as a diagram is under its fence's. Nor do
+    // definitions out of the caret's reach: the read view does not draw them
+    // there, and ends the note with the footnotes, as `live` does.
+    final collapsed = typeset || drawn || folded
+        ? _lineStyle(revealed: revealed).copyWith(fontSize: 0.01, height: 1)
+        : null;
     Widget paragraph = Text.rich(
       _span(
         revealed: revealed,
@@ -441,18 +448,23 @@ final class SourceLine extends StatelessWidget {
         concealed: concealed,
       ),
       key: paragraphKey,
-      // A typeset formula's lines take no room: the formula is drawn under
-      // its first one instead. Nor do definitions out of the caret's reach:
-      // the read view does not draw them there, and ends the note with the
-      // footnotes, as `live` does.
-      style: typeset || drawn || folded
-          ? _lineStyle(revealed: revealed).copyWith(fontSize: 0.01, height: 1)
-          : _lineStyle(revealed: revealed),
+      style: collapsed ?? _lineStyle(revealed: revealed),
+      // A line that takes no room is held to it by a strut, not by its
+      // glyphs alone. An empty one has no glyphs: the engine sizes it from
+      // the font's metrics, which are nothing at a hundredth of a pixel, and
+      // scales them by the style's height over that nothing — NaN, which a
+      // box clamps to its largest height. In a scroll view that is no end:
+      // a blank line in a drawn diagram's fence was an endless block (#1120).
+      // A forced strut's metrics are guarded against nothing, so the line is
+      // as tall as its strut, which is no room.
+      //
       // A table row is at least a line of its text tall. A row of empty
       // cells is all room between cells, drawn in glyphs of no size, and
       // without a floor it closed to nothing: no row to click into, where
       // the read view draws a line's height.
-      strutStyle: table != null && !folded
+      strutStyle: collapsed != null
+          ? StrutStyle.fromTextStyle(collapsed, forceStrutHeight: true)
+          : table != null
           ? StrutStyle.fromTextStyle(_lineStyle(revealed: revealed))
           : null,
       // A table's row is laid out as the row it is: the cells are put where
