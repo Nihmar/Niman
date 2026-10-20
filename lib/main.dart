@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -22,6 +23,10 @@ import 'package:path/path.dart' as p;
 /// Entrypoint of the Niman application.
 Future<void> main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
+  // The Mac app is not sandboxed (docs/records/apple-platforms.md), so it
+  // declares no user-selected file entitlement, and file_picker refuses
+  // every dialog unless told not to look for one.
+  if (Platform.isMacOS) await FilePicker.skipEntitlementsChecks();
   CrashReporter.install();
   unawaited(_attachLogFile());
   unawaited(_registerWidgetToggle());
