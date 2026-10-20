@@ -6,10 +6,14 @@ library;
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:niman/src/core/settings/features_introduction.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ocr/ocr_installation.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/transcription/transcription_models.dart';
+import 'package:niman/src/ui/features/features_host.dart';
+import 'package:niman/src/ui/features/settings_features.dart';
+import 'package:niman/src/ui/features_link.dart';
 import 'package:niman/src/ui/library_window.dart';
 import 'package:niman/src/ui/settings_areas.dart';
 import 'package:niman/src/ui/settings_window.dart';
@@ -26,6 +30,7 @@ final class ShellWindows {
     required this.ocr,
     required this.unsaved,
     required this.wide,
+    this.featuresHost = const FeaturesHost(),
   });
 
   /// The open library's session.
@@ -46,6 +51,9 @@ final class ShellWindows {
   /// Whether the window is wide: a floating window there, a page on a
   /// phone.
   final bool Function() wide;
+
+  /// What Settings → Features asks of the shell (#1109).
+  final FeaturesHost featuresHost;
 
   /// The floating window up over the shell, if any: its key does not open
   /// a second, and a library that closes from inside it takes it down.
@@ -74,8 +82,43 @@ final class ShellWindows {
           transcription: transcription,
           ocr: ocr,
           target: target,
+          featuresHost: featuresHost,
         ),
       );
+
+  /// Settings → Features with the introduction above the presets (#1109): a
+  /// library's first normal open. The floating Settings window on a wide
+  /// window, the Features screen itself on a phone.
+  ///
+  /// Leaving it — **Done**, back, `Esc`, closing the window — is what
+  /// records that the introduction was seen.
+  Future<void> openFeaturesIntroduction(
+    BuildContext context,
+    FeaturesIntroduction introduction,
+  ) {
+    final host = featuresHost.withIntroduction(introduction);
+    if (wide()) {
+      return show(
+        context,
+        settingsWindowRoute(
+          context,
+          controller: controller,
+          spellCheck: spellCheck,
+          transcription: transcription,
+          ocr: ocr,
+          target: featuresTarget,
+          featuresHost: host,
+        ),
+      );
+    }
+    return show(
+      context,
+      MaterialPageRoute<void>(
+        builder: (context) =>
+            SettingsFeaturesScreen(controller: controller, host: host),
+      ),
+    );
+  }
 
   /// The known libraries: a floating window on a wide window (#203), the
   /// full screen on a phone.

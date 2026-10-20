@@ -45,6 +45,7 @@ final class ShellHomeWidgets {
     required this.openNote,
     required this.mounted,
     required this.onTargetBlocked,
+    this.onRequest,
     this.unsaved,
   });
 
@@ -93,6 +94,11 @@ final class ShellHomeWidgets {
   /// on a widget that did nothing says why.
   final void Function() onTargetBlocked;
 
+  /// Called when a tap on a widget asked for something to open, at launch
+  /// or while running: the Features introduction (#1109) is not shown over
+  /// a request from outside.
+  final void Function()? onRequest;
+
   /// The target a library switch is carrying.
   ///
   /// Static because the switch is what tears this flow down: the shell
@@ -104,7 +110,10 @@ final class ShellHomeWidgets {
 
   /// Starts listening: widget taps, and the theme the payloads wear.
   void start() {
-    _taps = targets.targets.listen((target) => unawaited(applyTarget(target)));
+    _taps = targets.targets.listen((target) {
+      onRequest?.call();
+      unawaited(applyTarget(target));
+    });
     AppThemes.revision.addListener(pushAll);
     // A switch flipped here or brought by a sync: the widgets of a feature
     // that went off show it, and those that came back show their data.
@@ -191,6 +200,7 @@ final class ShellHomeWidgets {
     final pending = _pending;
     _pending = null;
     if (pending != null) {
+      onRequest?.call();
       final current = controller.root;
       if (current != null &&
           p.normalize(pending.libraryPath) == p.normalize(current)) {
@@ -202,6 +212,7 @@ final class ShellHomeWidgets {
     }
     final target = await targets.consumeLaunchTarget();
     if (target == null) return;
+    onRequest?.call();
     await applyTarget(target);
   }
 

@@ -15,6 +15,7 @@
 //   cp Personaggio.md /tmp/niman/repro_lib/Templates/
 // then:
 //   flutter test integration_test/template_backlink_freeze_test.dart -d linux
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:drift/drift.dart' show driftRuntimeOptions;
@@ -64,6 +65,17 @@ Future<void> runScenario(
     // nobody reads.
     markTestSkipped('no scratch library at $libraryPath (see the header)');
     return;
+  }
+  // The Features introduction (#1109) opens over the shell on the first
+  // normal open of a library that has not been through it: this repro is
+  // about the editor, so the library is marked as past it.
+  final settings = File('$libraryPath/.niman/settings.json');
+  final json = settings.existsSync()
+      ? jsonDecode(settings.readAsStringSync()) as Map<String, Object?>
+      : <String, Object?>{};
+  if (json['featuresReviewed'] != true) {
+    settings.parent.createSync(recursive: true);
+    settings.writeAsStringSync(jsonEncode({...json, 'featuresReviewed': true}));
   }
   final scratch = Directory.systemTemp.createTempSync('niman_it_');
   addTearDown(() => scratch.deleteSync(recursive: true));

@@ -90,6 +90,7 @@ import 'package:niman/src/ui/dock/right_dock.dart';
 import 'package:niman/src/ui/epub_look_sheet.dart';
 import 'package:niman/src/ui/epub_text_zoom.dart';
 import 'package:niman/src/ui/expanded_folders.dart';
+import 'package:niman/src/ui/features/features_host.dart';
 import 'package:niman/src/ui/features_link.dart';
 import 'package:niman/src/ui/folder_grid.dart';
 import 'package:niman/src/ui/hidden_slot.dart';
@@ -143,6 +144,7 @@ import 'package:niman/src/ui/shell_dock.dart';
 import 'package:niman/src/ui/shell_editor_settings.dart';
 import 'package:niman/src/ui/shell_export_flow.dart';
 import 'package:niman/src/ui/shell_fab.dart';
+import 'package:niman/src/ui/shell_features_intro.dart';
 import 'package:niman/src/ui/shell_home_widgets.dart';
 import 'package:niman/src/ui/shell_inbound.dart';
 import 'package:niman/src/ui/shell_journal_ui.dart';
@@ -873,6 +875,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     openTodo: _openTodo,
     openStudy: () => _onDestinationSelected(ShellTab.study),
     openFeatures: _openFeaturesFromWidget,
+    onRequest: _featuresIntro.requested,
     openNote: _openNoteFromLink,
     mounted: () => mounted,
     onTargetBlocked: () =>
@@ -882,16 +885,10 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   );
 
   /// Where "Open Features" on a home-screen widget that is off lands
-  /// (#1109). Until the Features screen exists (phase 3) it opens Settings
-  /// at its start, as the Settings destination does; phase 3 points this,
-  /// and only this, at Settings → Features.
-  void _openFeaturesFromWidget() {
-    if (_wide) {
-      unawaited(_windows.openSettings(context));
-      return;
-    }
-    _onDestinationSelected(ShellTab.settings);
-  }
+  /// (#1109): Settings → Features, the way the palette's link opens it. The
+  /// screen is opened for its own sake, so the introduction's flag is left
+  /// as it was.
+  void _openFeaturesFromWidget() => _openSettingsAt(featuresTarget);
 
   /// Selects [tab]; a full-screen note closes to its tree (the selected
   /// note stays highlighted).
@@ -1262,7 +1259,27 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// taps, finished recognitions, shortcuts, shares, the tray, launches,
   /// the library's events — each listened to in [initState] and all of
   /// them cancelled at once in [dispose].
-  final ShellInbound _inbound = ShellInbound();
+  late final ShellInbound _inbound = ShellInbound(
+    onRequest: () => _featuresIntro.requested(),
+  );
+
+  /// The introduction of Settings → Features (#1109): shown once, on a
+  /// normal open of a library that has not been through it. What
+  /// [_inbound] marks as a request from outside, and what a launch carried,
+  /// keeps it away.
+  late final ShellFeaturesIntro _featuresIntro = ShellFeaturesIntro(
+    controller: widget.controller,
+    open: (introduction) =>
+        unawaited(_windows.openFeaturesIntroduction(context, introduction)),
+    mounted: () => mounted,
+  );
+
+  /// What Settings → Features asks of this shell (#1109): how many
+  /// reminders a switch cancelled, from the todo controller that follows
+  /// the switches.
+  late final FeaturesHost _featuresHost = FeaturesHost(
+    featureReconcile: () => _todoController.featureReconcile,
+  );
 
   /// A heading anchor to land on after the next note opens (T-M3-07).
   String? _pendingAnchor;
@@ -2491,7 +2508,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           mounted) {
         _openRecognizedText(payload.substring(ocrNotificationPrefix.length));
       }
-    });
+    }, request: true);
     // Recognitions as they finish (#594).
     _inbound.listen(widget.ocrQueue?.finished, (job) {
       if (!mounted) return;
@@ -2547,15 +2564,18 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     _inbound.listen(
       widget.shortcuts.actions,
       (action) => unawaited(_runShortcut(action)),
+      request: true,
     );
     // What other apps share in while the shell is up (#40).
     _inbound.listen(
       widget.shareIn.requests,
       (request) => unawaited(_handleShare(request)),
+      request: true,
     );
     _inbound.listen(
       widget.tray.actions,
       (action) => unawaited(_runShortcut(action)),
+      request: true,
     );
     _inbound.listen(
       widget.tray.activated,
@@ -2576,27 +2596,39 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     _inbound.listen(
       widget.launchRequests.files,
       (path) => unawaited(_openPath(path)),
+      request: true,
     );
     // Folders dropped on the window (#75).
     _inbound.listen(
       widget.launchRequests.folders,
       (path) => unawaited(_openFolder(path)),
+      request: true,
     );
     // Links dropped on the window (#531).
     _inbound.listen(widget.launchRequests.pages, (url) {
       if (mounted) unawaited(_captureFlow.capture(context, url: url));
-    });
+    }, request: true);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final path = widget.launchRequests.consumeFile();
-      if (path != null && mounted) unawaited(_openPath(path));
+      if (path != null && mounted) {
+        _featuresIntro.requested();
+        unawaited(_openPath(path));
+      }
     });
-    unawaited(_applyReminderLaunch());
-    unawaited(_applyShortcutLaunch());
-    unawaited(_applyShareLaunch());
-    // The welcome's "show me around" (#266): asked once a library is
-    // open, because the tour points at the shell.
-    unawaited(offerTour(context, ref));
-    unawaited(_homeWidgets.applyLaunchTarget());
+    // What a cold start carried — a notification, a launcher action, a
+    // share, a widget, a file — opens its own target. The Features
+    // introduction (#1109) waits for all of them, and for the welcome's
+    // offer of the tour, and is shown only when none was found.
+    final launches = [
+      _applyReminderLaunch(),
+      _applyShortcutLaunch(),
+      _applyShareLaunch(),
+      _homeWidgets.applyLaunchTarget(),
+      // The welcome's "show me around" (#266): asked once a library is
+      // open, because the tour points at the shell.
+      offerTour(context, ref),
+    ];
+    unawaited(_featuresIntro.offer(launches));
     unawaited(_refreshEditorSettings());
     unawaited(_loadLinkSource());
   }
@@ -2717,6 +2749,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// A notification tap that started the app lands on the Todo tab.
   Future<void> _applyReminderLaunch() async {
     final payload = await widget.reminders.consumeLaunchPayload();
+    if (payload != null) _featuresIntro.requested();
     if (_followCaptureRoute(payload)) return;
     if (payload == todoReminderPayload && mounted) {
       _openTodo();
@@ -2737,6 +2770,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   Future<void> _applyShortcutLaunch() async {
     final action = await widget.shortcuts.consumeLaunchAction();
     if (action == null) return;
+    _featuresIntro.requested();
     await _runShortcut(action);
   }
 
@@ -2749,6 +2783,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   Future<void> _applyShareLaunch() async {
     final request = await widget.shareIn.consumeLaunchRequest();
     if (request == null) return;
+    _featuresIntro.requested();
     await _handleShare(request);
   }
 
@@ -4734,6 +4769,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     ocr: widget.ocr,
     unsaved: widget.unsavedTracker,
     wide: () => _wide,
+    featuresHost: _featuresHost,
   );
 
   /// The command palette (#155).
@@ -5393,6 +5429,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         transcription: widget.transcription,
         ocr: widget.ocr,
         target: _settingsTarget,
+        featuresHost: _featuresHost,
       ),
     };
   }
