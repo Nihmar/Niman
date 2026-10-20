@@ -6,6 +6,24 @@ This file ships inside the build and feeds the in-app changelog (the
 launch dialog after an update and the screen under Settings → Diagnostics
 and info). Update it in the release commit, before the tag.
 
+## [0.2.7] - 2026-10-20
+
+Niman runs on Android 14, and a link to a heading of the same note lands
+there.
+
+The Android app now installs from Android 14 (API 34) up, where it needed
+Android 15 before; nothing it does required the newer version. A Ctrl+click
+on a link to a heading of the note you are in moves the view to the heading
+and keeps it there, and a note opened after another shows its own outline.
+
+### Changed
+- **Android 14**: the minimum is now Android 14 (API 34), down from Android 15 (#1131)
+
+### Fixed
+- **Links**: a Ctrl+click on a link to a heading of the same note — `[[#heading]]`, with an alias, `[[Note#heading]]`, `[text](#heading)` or a reference link — jumps to the heading instead of putting the caret back on the link (#1129)
+- **Outline**: a note opened after another shows its own outline, and a big note's outline is there without an edit first (#1129)
+- **Features**: a feature's row in Settings → Library → Features uses the compact desktop switch like every other (#1130)
+
 ## [0.2.6] - 2026-10-20
 
 A library can turn features off, and the desktop draws its controls for a
