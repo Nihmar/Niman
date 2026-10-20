@@ -1,5 +1,7 @@
 // A Mermaid fence in `live` (#530): drawn while the caret is out of it, its
 // source again while the caret is in it.
+import 'dart:io';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -10,6 +12,7 @@ import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/markdown/surface.dart';
 import 'package:niman/src/markdown/surface_controller.dart';
 import 'package:niman/src/preview/math_cache.dart';
+import 'package:path/path.dart' as p;
 
 const MarkdownTheme _theme = MarkdownTheme(
   body: TextStyle(fontSize: 14, height: 1.5, fontFamily: 'monospace'),
@@ -52,10 +55,14 @@ Iterable<DiagramPainter> _painters(WidgetTester tester) => tester
 
 Future<MarkdownSurfaceController> _pumpLive(
   WidgetTester tester,
-  String note,
-) async {
+  String note, {
+  int? caret,
+}) async {
   final buffer = SourceBuffer.fromText(note);
-  final surface = MarkdownSurfaceController(buffer, caret: note.length);
+  final surface = MarkdownSurfaceController(
+    buffer,
+    caret: caret ?? note.length,
+  );
   await tester.pumpWidget(
     MaterialApp(
       home: Scaffold(
@@ -167,4 +174,55 @@ void main() {
     expect(_painters(tester), isEmpty);
     expect(find.textContaining('flowchart TD'), findsWidgets);
   });
+
+  testWidgets('a blank line in a drawn fence takes no room (#1120)', (
+    tester,
+  ) async {
+    // The line has no glyphs, and was sized from the metrics of a font a
+    // hundredth of a pixel tall: NaN, which its box clamped to no end.
+    await _pumpLive(
+      tester,
+      '```mermaid\nflowchart TD\n\nA --> B\n```\n\ntail\n',
+    );
+    expect(tester.takeException(), isNull);
+    expect(_painters(tester), isNotEmpty);
+    final position = tester
+        .state<ScrollableState>(find.byType(Scrollable).first)
+        .position;
+    expect(position.maxScrollExtent, 0);
+  });
+
+  testWidgets(
+    'the reported flowchart, scrolled to from the top, ends (#1120)',
+    (tester) async {
+      tester.view.physicalSize = const Size(400, 800);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      // Subgraphs parted by blank lines, as the report's note has them.
+      final diagram = File(
+        p.join('test', 'fixtures', 'markdown', 'mermaid-blank-lines.md'),
+      ).readAsStringSync();
+      final note = StringBuffer();
+      for (var i = 0; i < 40; i++) {
+        note.write('Paragraph $i of the note.\n\n');
+      }
+      note.write('$diagram\ntail\n');
+      await _pumpLive(tester, note.toString(), caret: 0);
+      final position = tester
+          .state<ScrollableState>(find.byType(Scrollable).first)
+          .position;
+      // Down a viewport at a time, as a reader scrolls: the diagram comes into
+      // the cache area on the way, and the note still ends.
+      var steps = 0;
+      while (position.pixels < position.maxScrollExtent) {
+        expect(++steps, lessThan(50), reason: 'the note never ends');
+        position.jumpTo(position.pixels + 400);
+        await tester.pump();
+        expect(tester.takeException(), isNull);
+        expect(position.maxScrollExtent.isFinite, isTrue);
+      }
+      expect(_painters(tester), isNotEmpty);
+      expect(find.textContaining('tail'), findsOneWidget);
+    },
+  );
 }
