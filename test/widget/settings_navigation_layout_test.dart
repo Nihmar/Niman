@@ -84,7 +84,14 @@ void main() {
       await tester.pumpAndSettle();
     }
     final last = find.byKey(Key('navigation-switch-${hideable.first}'));
-    expect(tester.widget<Switch>(last).onChanged, isNull);
+    expect(
+      tester
+          .widget<Switch>(
+            find.descendant(of: last, matching: find.byType(Switch)),
+          )
+          .onChanged,
+      isNull,
+    );
 
     await tester.tap(last);
     await tester.pumpAndSettle();

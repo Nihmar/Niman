@@ -8,6 +8,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:niman/src/home/home_tile.dart';
 import 'package:niman/src/library/session.dart';
+import 'package:niman/src/ui/app_switch.dart';
 import 'package:niman/src/ui/home/home_edit_dialogs.dart';
 import 'package:niman/src/ui/home/home_editing.dart';
 import 'package:niman/src/ui/home/home_icons.dart';
@@ -131,7 +132,7 @@ final class HomeColumnEditor extends StatelessWidget {
                         ),
                         icon: const Icon(Icons.tune),
                       ),
-                    Switch(
+                    AppSwitch(
                       key: Key('home-switch-${tile.id}'),
                       value: !tile.hidden,
                       onChanged: (shown) => _show(tile, shown),

@@ -16,6 +16,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/frontmatter/typed_fields.dart';
+import 'package:niman/src/ui/app_switch_list_tile.dart';
 import 'package:niman/src/ui/menu_choice_button.dart';
 import 'package:niman/src/ui/os_pickers.dart';
 import 'package:niman/src/ui/strings.dart';
@@ -189,7 +190,7 @@ final class _FrontmatterFieldDialogState
             ),
             const SizedBox(height: 12),
             if (_type == FrontmatterFieldType.boolean)
-              SwitchListTile(
+              AppSwitchListTile(
                 key: const Key('frontmatter-bool-field'),
                 contentPadding: EdgeInsets.zero,
                 value: _bool,

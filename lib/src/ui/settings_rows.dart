@@ -21,6 +21,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/ui/action_sheet.dart';
+import 'package:niman/src/ui/app_switch.dart';
 import 'package:niman/src/ui/settings_dialogs.dart';
 
 export 'package:niman/src/ui/settings_dialogs.dart';
@@ -178,7 +179,7 @@ final class SettingsSwitchRow extends StatelessWidget {
       description: description,
       enabled: onChanged != null,
       onTap: onChanged == null ? null : () => onChanged(!value),
-      control: Switch(value: value, onChanged: onChanged),
+      control: AppSwitch(value: value, onChanged: onChanged),
     );
   }
 }

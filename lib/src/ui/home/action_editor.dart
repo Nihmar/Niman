@@ -10,6 +10,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:niman/src/home/home_action.dart';
 import 'package:niman/src/library/session.dart';
+import 'package:niman/src/ui/app_switch_list_tile.dart';
 import 'package:niman/src/ui/device_shape.dart';
 import 'package:niman/src/ui/folder_picker.dart';
 import 'package:niman/src/ui/home/action_field_rows.dart';
@@ -258,7 +259,7 @@ final class _ActionEditorState extends State<_ActionEditor> {
           ),
           const SizedBox(height: 8),
           ActionFieldEditor(rows: _fields),
-          SwitchListTile(
+          AppSwitchListTile(
             key: const Key('home-action-open'),
             contentPadding: EdgeInsets.zero,
             title: Text(AppStrings.homeActionOpenAfter),

@@ -20,6 +20,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/ui/app_switch_list_tile.dart';
 
 /// A screen that talks to the platform's text input directly and records what
 /// comes back.
@@ -99,7 +100,7 @@ final class _TextInputProbeScreenState extends State<TextInputProbeScreen>
             'carry that many chars, which is what the design calls untenable.',
           ),
           const SizedBox(height: 16),
-          SwitchListTile(
+          AppSwitchListTile(
             key: const Key('input-probe-delta'),
             contentPadding: EdgeInsets.zero,
             value: _deltaModel,

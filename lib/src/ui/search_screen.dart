@@ -13,6 +13,7 @@ import 'package:niman/src/search/search_excerpt.dart' show wordTermsOf;
 import 'package:niman/src/search/search_repo.dart';
 import 'package:niman/src/search/task_events.dart';
 import 'package:niman/src/ui/action_sheet.dart';
+import 'package:niman/src/ui/app_switch.dart';
 import 'package:niman/src/ui/indexing_notice.dart';
 import 'package:niman/src/ui/pointer_density.dart';
 import 'package:niman/src/ui/search_field_pager.dart';
@@ -1366,7 +1367,7 @@ final class _SearchScreenState extends State<SearchScreen> {
                 AppStrings.replaceCaseSensitive,
                 style: theme.textTheme.bodySmall,
               ),
-              Switch(
+              AppSwitch(
                 key: const Key('replace-case'),
                 value: _replaceCase,
                 onChanged: (value) async {
