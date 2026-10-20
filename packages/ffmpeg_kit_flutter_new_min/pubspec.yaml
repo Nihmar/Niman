@@ -1,0 +1,30 @@
+name: ffmpeg_kit_flutter_new_min
+description: FFmpeg Kit Minimal for Flutter, as Niman ships it - Android only (see README.md).
+publish_to: none
+repository: https://github.com/sk3llo/ffmpeg_kit_flutter
+homepage: https://github.com/sk3llo/ffmpeg_kit_flutter
+version: 2.1.0
+
+environment:
+  sdk: ">=3.1.0 <4.0.0"
+  flutter: ">=3.0.0"
+
+flutter:
+  plugin:
+    platforms:
+      # Niman: Android only. The iOS and macOS frameworks (76 MB, and no
+      # arm64 slice for the iOS simulator) are left out; see README.md.
+      android:
+        package: com.antonkarpenko.ffmpegkit
+        pluginClass: FFmpegKitFlutterPlugin
+
+dependencies:
+  ffmpeg_kit_flutter_platform_interface: ^0.2.1
+
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  plugin_platform_interface: ^2.1.8
