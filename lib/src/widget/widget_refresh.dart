@@ -7,6 +7,7 @@
 library;
 
 import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/core/settings/features.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/todo/todo_store.dart';
 import 'package:niman/src/widget/widget_configs.dart';
@@ -157,7 +158,13 @@ Future<void> refreshNoteWidgets({
     // Off: the note is not even read (#1109).
     final payload = off != null
         ? widgetOffPayload(feature: off, libraryPath: root, theme: theme)
-        : await _notePayload(read, root, note.notePath, theme);
+        : await _notePayload(
+            read,
+            root,
+            note.notePath,
+            theme,
+            session.features.value,
+          );
     await push.push(
       provider: WidgetProvider.note,
       androidWidgetId: note.id,
@@ -177,11 +184,13 @@ Future<String> _notePayload(
   String root,
   String notePath,
   WidgetTheme theme,
+  Features features,
 ) async {
   return await notePayloadFor(
     root,
     notePath,
     await read(root, notePath),
     theme: theme,
+    features: features,
   );
 }
