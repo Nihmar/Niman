@@ -135,3 +135,8 @@ jobs:
       - name: Kotlin unit tests
         working-directory: android
         run: ./gradlew :app:testBetaDebugUnitTest
+      # Every framework call in the app's own Kotlin exists at minSdk
+      # (NewApi / InlinedApi only; android/app/build.gradle.kts `lint`).
+      - name: Android API-level lint
+        working-directory: android
+        run: ./gradlew :app:lintBetaDebug

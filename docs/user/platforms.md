@@ -1,6 +1,6 @@
 # Platform notes
 
-Supported today: **Android** (minSdk 35), **Linux** (Wayland),
+Supported today: **Android** (minSdk 34, Android 14), **Linux** (Wayland),
 **Windows**. macOS/iOS are not built yet, but the code is kept portable.
 New tests must be portable too (see [conventions](../dev/conventions.md)).
 

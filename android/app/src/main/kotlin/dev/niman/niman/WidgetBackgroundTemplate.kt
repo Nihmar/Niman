@@ -13,7 +13,7 @@ import android.content.Intent
  * fill-in URI actually merges: an IMMUTABLE template (like
  * `HomeWidgetBackgroundIntent.getBroadcast`) drops the row URI on
  * API 31+, the worker then receives an empty string, Dart parses no
- * target, and the tap silently does nothing. minSdk is 35, so
+ * target, and the tap silently does nothing. minSdk is 34, so
  * FLAG_MUTABLE needs no version gate.
  *
  * The broadcast lands on [WidgetTapReceiver] (which logs the URI, then

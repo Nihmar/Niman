@@ -270,7 +270,7 @@ class MainActivity : FlutterActivity() {
      * dropped and the Dart future never resolves; a retry re-checks the
      * grant state first, so the app recovers on the next tap.
      *
-     * minSdk is 35, so the permission always exists — no version gate.
+     * minSdk is 34 (the permission is API 30), so it always exists — no version gate.
      */
     private fun requestAllFilesAccess(result: MethodChannel.Result) {
         if (Environment.isExternalStorageManager()) {
