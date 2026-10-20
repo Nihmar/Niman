@@ -1,0 +1,22 @@
+name: niman_apple
+description: Niman's native code for macOS and iOS, shared between the two (docs/records/apple-platforms.md).
+version: 0.0.1
+publish_to: none
+
+environment:
+  sdk: ^3.10.0
+  flutter: ">=3.38.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+flutter:
+  plugin:
+    platforms:
+      ios:
+        pluginClass: NimanApplePlugin
+        sharedDarwinSource: true
+      macos:
+        pluginClass: NimanApplePlugin
+        sharedDarwinSource: true

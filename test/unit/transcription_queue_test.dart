@@ -254,6 +254,42 @@ void main() {
     );
   });
 
+  test('where the system decodes, another format is decoded, then converted '
+      'like any WAV', () async {
+    // The Apple platforms: AVFoundation writes a WAV at the source's rate,
+    // and the clip then takes the recorded clips' path.
+    final decoded = <({String source, String target})>[];
+    queue.dispose();
+    queue = TranscriptionQueue(
+      models: models,
+      transcriber: transcriber,
+      packageConverts: false,
+      decode: ({required source, required target}) async {
+        decoded.add((source: source, target: target));
+        await File(target).writeAsBytes(_wav());
+      },
+      workDirectory: () async {
+        final created = await Directory.systemTemp.createTemp('niman_q_');
+        work.add(created);
+        return created;
+      },
+    );
+    final clip = p.join(library.path, 'c.m4a');
+    await File(clip).writeAsBytes([1, 2, 3]);
+    expect(queue.supports(clip), true);
+
+    final job = enqueue('c.m4a');
+    await until(() => transcriber.pending.length == 1);
+
+    expect(decoded.single.source, clip);
+    expect(p.isWithin(work.single.path, decoded.single.target), true);
+    final call = transcriber.calls.single;
+    expect(p.basename(call.audioPath), 'input.wav');
+    transcriber.pending.single.complete('ciao');
+    await until(() => job.finished);
+    expect(job.phase, TranscriptionPhase.done);
+  });
+
   test('a format this platform cannot read fails with a reason', () async {
     await File(p.join(library.path, 'c.m4a')).writeAsBytes([1, 2, 3]);
     expect(queue.supports(p.join(library.path, 'c.m4a')), false);

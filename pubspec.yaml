@@ -79,6 +79,10 @@ dependencies:
   # verdict; see the Risks section of plan/m-platform-parity.md).
   nativeapi: 0.2.4
 
+  # The native code macOS and iOS share (docs/records/apple-platforms.md):
+  # AVFoundation's audio decoding in place of FFmpeg, for one.
+  niman_apple:
+    path: packages/niman_apple
 
   package_info_plus: ^10.2.1
   path: ^1.9.1
