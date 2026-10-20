@@ -12,6 +12,7 @@ import 'package:niman/src/ocr/ocr_installation.dart';
 import 'package:niman/src/ocr/ocr_language.dart';
 import 'package:niman/src/ocr/ocr_sidecar.dart';
 import 'package:niman/src/ui/device_shape.dart';
+import 'package:niman/src/ui/menu_choice_button.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:path/path.dart' as p;
 
@@ -149,46 +150,39 @@ final class _RecognizeFormState extends State<_RecognizeForm> {
             _HasText(text: AppStrings.ocrPdfHasText),
           ],
           const SizedBox(height: 16),
-          DropdownButtonFormField<OcrLanguage>(
+          MenuChoiceButton<OcrLanguage>(
             key: const Key('recognize-language'),
-            initialValue: _language,
+            value: _language,
             menuMaxHeight: 420,
-            isExpanded: true,
             decoration: InputDecoration(
               labelText: AppStrings.ocrLanguageTitle,
               border: const OutlineInputBorder(),
             ),
-            items: [
+            options: [
               for (final language in ocrLanguagesByName)
-                DropdownMenuItem(value: language, child: Text(language.native)),
+                (language, language.native),
             ],
             onChanged: (language) => setState(() {
-              _language = language ?? _language;
+              _language = language;
               if (_also == _language) _also = null;
             }),
           ),
           const SizedBox(height: 12),
-          DropdownButtonFormField<String>(
+          MenuChoiceButton<OcrLanguage?>(
             key: const Key('recognize-also'),
-            initialValue: _also?.code ?? '',
+            value: _also,
             menuMaxHeight: 420,
-            isExpanded: true,
             decoration: InputDecoration(
               labelText: AppStrings.ocrAlsoTitle,
               helperText: AppStrings.ocrAlsoSubtitle,
               border: const OutlineInputBorder(),
             ),
-            items: [
-              DropdownMenuItem(value: '', child: Text(AppStrings.ocrAlsoNone)),
+            options: [
+              (null, AppStrings.ocrAlsoNone),
               for (final language in ocrLanguagesByName)
-                if (language != _language)
-                  DropdownMenuItem(
-                    value: language.code,
-                    child: Text(language.native),
-                  ),
+                if (language != _language) (language, language.native),
             ],
-            onChanged: (code) =>
-                setState(() => _also = ocrLanguageByCode(code)),
+            onChanged: (language) => setState(() => _also = language),
           ),
           if (count != null && count > 1) ...[
             const SizedBox(height: 16),

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/templates/prompts.dart';
+import 'package:niman/src/ui/menu_choice_button.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// Asks a template's questions, all of them at once (T-TPL-03).
@@ -163,14 +164,11 @@ final class _TemplateFormState extends State<_TemplateForm> {
                 decoration: InputDecoration(labelText: field.heading),
                 onSubmitted: (_) => _submit(),
               ),
-              TemplateFieldKind.choice => DropdownButtonFormField<String>(
+              TemplateFieldKind.choice => MenuChoiceButton<String?>(
                 key: Key('template-field-${field.label}'),
-                initialValue: _picked[field.label],
+                value: _picked[field.label],
                 decoration: InputDecoration(labelText: field.heading),
-                items: [
-                  for (final option in field.choices)
-                    DropdownMenuItem(value: option, child: Text(option)),
-                ],
+                options: [for (final option in field.choices) (option, option)],
                 onChanged: (value) => setState(() {
                   _picked[field.label] = value ?? '';
                 }),

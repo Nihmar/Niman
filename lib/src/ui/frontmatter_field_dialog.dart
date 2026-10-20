@@ -16,6 +16,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/frontmatter/typed_fields.dart';
+import 'package:niman/src/ui/menu_choice_button.dart';
 import 'package:niman/src/ui/os_pickers.dart';
 import 'package:niman/src/ui/strings.dart';
 
@@ -165,21 +166,17 @@ final class _FrontmatterFieldDialogState
               onSubmitted: (_) => _canSave ? _save() : null,
             ),
             const SizedBox(height: 12),
-            DropdownButtonFormField<FrontmatterFieldType>(
+            MenuChoiceButton<FrontmatterFieldType>(
               key: const Key('frontmatter-type-field'),
-              initialValue: _type,
+              value: _type,
               decoration: InputDecoration(
                 labelText: AppStrings.frontmatterTypeLabel,
               ),
-              items: [
+              options: [
                 for (final type in FrontmatterFieldType.values)
-                  DropdownMenuItem<FrontmatterFieldType>(
-                    value: type,
-                    child: Text(_typeLabel(type)),
-                  ),
+                  (type, _typeLabel(type)),
               ],
               onChanged: (type) {
-                if (type == null) return;
                 setState(() {
                   // A value typed as a date becomes the picker's own date, so
                   // switching the type does not throw the value away.

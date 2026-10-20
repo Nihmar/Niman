@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:niman/src/calendar/calendar_writer.dart';
 import 'package:niman/src/core/theme_tokens.dart';
 import 'package:niman/src/ui/journal/journal_flow.dart' show journalDayLabel;
+import 'package:niman/src/ui/menu_choice_button.dart';
 import 'package:niman/src/ui/os_pickers.dart';
 import 'package:niman/src/ui/strings.dart';
 
@@ -291,21 +292,17 @@ final class _CalendarEventFormState extends State<CalendarEventForm> {
                   ),
                 ),
                 if (_remind && _start != null)
-                  DropdownButton<int>(
+                  MenuChoiceButton<int>(
                     key: const Key('calendar-event-lead'),
                     value: _lead,
-                    underline: const SizedBox.shrink(),
-                    items: [
+                    options: [
                       // The event's own lead too, when it is not one of
                       // the offered ones: editing must not quietly move a
                       // reminder that was set elsewhere.
                       for (final lead in {...calendarReminderLeads, _lead})
-                        DropdownMenuItem(
-                          value: lead,
-                          child: Text(AppStrings.calendarRemindBefore(lead)),
-                        ),
+                        (lead, AppStrings.calendarRemindBefore(lead)),
                     ],
-                    onChanged: (lead) => setState(() => _lead = lead ?? _lead),
+                    onChanged: (lead) => setState(() => _lead = lead),
                   ),
                 Switch(
                   key: const Key('calendar-event-remind'),

@@ -15,6 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:niman/src/editor/list_tally.dart';
 import 'package:niman/src/ui/action_sheet.dart';
 import 'package:niman/src/ui/device_shape.dart';
+import 'package:niman/src/ui/menu_choice_button.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// One list the count could run on.
@@ -189,60 +190,44 @@ final class _ListTallySheetState extends State<_ListTallySheet> {
         ],
       );
     }
-    return DropdownButtonFormField<int>(
+    return MenuChoiceButton<int>(
       key: const Key('tally-source-picker'),
-      initialValue: _index,
-      isExpanded: true,
+      value: _index,
       decoration: InputDecoration(
         labelText: AppStrings.tallySourceLabel,
         border: const OutlineInputBorder(),
         isDense: true,
       ),
-      items: <DropdownMenuItem<int>>[
-        for (var i = 0; i < widget.candidates.length; i++)
-          DropdownMenuItem<int>(
-            value: i,
-            child: Text(
-              widget.candidates[i].label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
+      options: [
+        for (final (i, candidate) in widget.candidates.indexed)
+          (i, candidate.label),
       ],
-      onChanged: (value) => value == null ? null : _pick(value),
+      onChanged: _pick,
     );
   }
 
-  Widget _cutField() => DropdownButtonFormField<TallyCut>(
+  Widget _cutField() => MenuChoiceButton<TallyCut>(
     key: const Key('tally-cut-picker'),
-    initialValue: _cut,
-    isExpanded: true,
+    value: _cut,
     decoration: InputDecoration(
       labelText: AppStrings.tallyCutLabel,
       border: const OutlineInputBorder(),
       isDense: true,
     ),
-    items: <DropdownMenuItem<TallyCut>>[
-      for (final cut in TallyCut.values)
-        DropdownMenuItem<TallyCut>(value: cut, child: Text(_cutLabel(cut))),
-    ],
-    onChanged: (value) => value == null ? null : setState(() => _cut = value),
+    options: [for (final cut in TallyCut.values) (cut, _cutLabel(cut))],
+    onChanged: (value) => setState(() => _cut = value),
   );
 
-  Widget _sortField() => DropdownButtonFormField<TallySort>(
+  Widget _sortField() => MenuChoiceButton<TallySort>(
     key: const Key('tally-sort-picker'),
-    initialValue: _sort,
-    isExpanded: true,
+    value: _sort,
     decoration: InputDecoration(
       labelText: AppStrings.tallySortLabel,
       border: const OutlineInputBorder(),
       isDense: true,
     ),
-    items: <DropdownMenuItem<TallySort>>[
-      for (final sort in TallySort.values)
-        DropdownMenuItem<TallySort>(value: sort, child: Text(_sortLabel(sort))),
-    ],
-    onChanged: (value) => value == null ? null : setState(() => _sort = value),
+    options: [for (final sort in TallySort.values) (sort, _sortLabel(sort))],
+    onChanged: (value) => setState(() => _sort = value),
   );
 
   Widget _preview(ThemeData theme, List<TallyRow> rows) {
