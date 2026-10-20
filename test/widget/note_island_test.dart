@@ -160,8 +160,12 @@ void main() {
       expect(tab().left, tester.getRect(panes).left);
     },
     // A desktop draws the bar's toggle at its own density: on a phone's
-    // the tabs lined up while a desktop put them 6 px left.
-    variant: TargetPlatformVariant.desktop(),
+    // the tabs lined up while a desktop put them 6 px left. A Mac's bar
+    // starts past the traffic lights (the test after the next).
+    variant: const TargetPlatformVariant({
+      TargetPlatform.linux,
+      TargetPlatform.windows,
+    }),
   );
 
   testWidgets(
@@ -182,7 +186,33 @@ void main() {
           .first;
       expect(tester.getRect(title).left, tester.getRect(tree).left);
     },
-    variant: TargetPlatformVariant.desktop(),
+    variant: const TargetPlatformVariant({
+      TargetPlatform.linux,
+      TargetPlatform.windows,
+    }),
+  );
+
+  testWidgets(
+    'on a Mac the bar starts past the traffic lights, and the tabs keep the '
+    "tree's edge while there is one",
+    (tester) async {
+      // docs/records/apple-platforms.md: the system draws the window's
+      // buttons at the bar's left, so the toggle cannot stand over the rail.
+      await pumpAt(tester, size);
+      Rect tab() => tester.getRect(find.byKey(const Key('note-tab-0')));
+      Rect toggle() => tester.getRect(find.byKey(const Key('toggle-sidebar')));
+      expect(toggle().left, greaterThanOrEqualTo(70));
+      expect(tab().left, tester.getRect(panes).left);
+
+      // With the tree gone the island starts under the lights: the tabs
+      // follow the toggle instead.
+      await tester.tap(find.byKey(const Key('toggle-sidebar')));
+      await settle(tester);
+      expect(tree, findsNothing);
+      expect(tab().left, greaterThan(toggle().right));
+      expect(tab().left, lessThan(toggle().right + 8));
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.macOS),
   );
 
   testWidgets('the tree and the side panel come and go, and the panes keep '
