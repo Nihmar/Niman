@@ -167,11 +167,15 @@ void main() {
     test('picks the service the host platform ships', () async {
       final service = createReminderService();
       try {
-        // Android and the desktops have real services (T-PP-03); anything
-        // else falls back to the Noop.
+        // Android, the Apple platforms and the desktops have real services
+        // (T-PP-03); anything else falls back to the Noop.
         expect(
           service,
-          Platform.isAndroid || Platform.isLinux || Platform.isWindows
+          Platform.isAndroid ||
+                  Platform.isIOS ||
+                  Platform.isMacOS ||
+                  Platform.isLinux ||
+                  Platform.isWindows
               ? isA<LocalReminderService>()
               : isA<NoopReminderService>(),
         );
