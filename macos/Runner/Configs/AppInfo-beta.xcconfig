@@ -1,0 +1,8 @@
+// The beta (testing) flavor: a bundle id of its own, so its own
+// Application Support folder, preferences and keychain items, beside an
+// installed release (the Android beta flavor's rule, issue #106).
+#include "AppInfo.xcconfig"
+
+PRODUCT_NAME = Niman (Testing)
+
+PRODUCT_BUNDLE_IDENTIFIER = dev.niman.niman.beta
