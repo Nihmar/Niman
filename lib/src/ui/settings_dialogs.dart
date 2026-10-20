@@ -27,13 +27,19 @@ Rect? _takeChoiceAnchor() {
 /// One option in a [showSettingsChoice] dialog.
 final class SettingsOption<T> {
   /// Creates an option labelled [label] for the value [value].
-  const new(this.value, this.label);
+  const new(this.value, this.label, {this.key});
 
   /// The value chosen by this option.
   final T value;
 
   /// What the option reads as, in the list and as the row's value.
   final String label;
+
+  /// The key of the option's entry; `settings-choice-<value>` when null.
+  final Key? key;
+
+  /// The key the option's entry is drawn with.
+  Key get entryKey => key ?? Key('settings-choice-$value');
 }
 
 /// Asks for one of [options], returning the chosen value or null.
@@ -63,7 +69,7 @@ Future<T?> showSettingsChoice<T>(
       items: (context) => [
         for (final option in options)
           ListTile(
-            key: Key('settings-choice-${option.value}'),
+            key: option.entryKey,
             dense: true,
             leading: option.value == current
                 ? const Icon(Icons.check, size: 20)
@@ -93,7 +99,7 @@ Future<T?> showSettingsChoice<T>(
           ),
         for (final option in options)
           ListTile(
-            key: Key('settings-choice-${option.value}'),
+            key: option.entryKey,
             leading: Icon(
               option.value == current
                   ? Icons.radio_button_checked

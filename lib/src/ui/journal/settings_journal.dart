@@ -110,26 +110,26 @@ final class _SettingsJournalScreenState extends State<SettingsJournalScreen> {
         ? const <TemplateEntry>[]
         : await source.templates();
     if (!mounted) return;
-    // A record, so "none" can be told from a dismissed dialog.
-    final picked = await showDialog<({String? path})>(
-      context: context,
-      builder: (context) => SimpleDialog(
-        key: const Key('journal-template-picker'),
-        title: Text(AppStrings.journalTemplateTitle),
-        children: [
-          SimpleDialogOption(
-            key: const Key('journal-template-none'),
-            onPressed: () => Navigator.pop(context, (path: null)),
-            child: Text(AppStrings.journalTemplateNone),
+    // A record, so "none" can be told from a dismissed choice.
+    final picked = await showSettingsChoice<({String? path})>(
+      context,
+      dialogKey: const Key('journal-template-picker'),
+      title: AppStrings.journalTemplateTitle,
+      subtitle: AppStrings.journalTemplateSubtitle,
+      current: (path: settings.template),
+      options: [
+        SettingsOption(
+          (path: null),
+          AppStrings.journalTemplateNone,
+          key: const Key('journal-template-none'),
+        ),
+        for (final template in templates)
+          SettingsOption(
+            (path: template.path),
+            template.name,
+            key: Key('journal-template-${template.path}'),
           ),
-          for (final template in templates)
-            SimpleDialogOption(
-              key: Key('journal-template-${template.path}'),
-              onPressed: () => Navigator.pop(context, (path: template.path)),
-              child: Text(template.name),
-            ),
-        ],
-      ),
+      ],
     );
     if (picked == null) return;
     await _save(
@@ -140,20 +140,20 @@ final class _SettingsJournalScreenState extends State<SettingsJournalScreen> {
   }
 
   Future<void> _pickDayStart(JournalSettings settings) async {
-    final hour = await showDialog<int>(
-      context: context,
-      builder: (context) => SimpleDialog(
-        key: const Key('journal-day-start-picker'),
-        title: Text(AppStrings.journalDayStartTitle),
-        children: [
-          for (var hour = 0; hour <= maxJournalDayStartHour; hour++)
-            SimpleDialogOption(
-              key: Key('journal-day-start-$hour'),
-              onPressed: () => Navigator.pop(context, hour),
-              child: Text(_hourLabel(hour)),
-            ),
-        ],
-      ),
+    final hour = await showSettingsChoice<int>(
+      context,
+      dialogKey: const Key('journal-day-start-picker'),
+      title: AppStrings.journalDayStartTitle,
+      subtitle: AppStrings.journalDayStartSubtitle,
+      current: settings.dayStartHour,
+      options: [
+        for (var hour = 0; hour <= maxJournalDayStartHour; hour++)
+          SettingsOption(
+            hour,
+            _hourLabel(hour),
+            key: Key('journal-day-start-$hour'),
+          ),
+      ],
     );
     if (hour == null) return;
     await _save(settings.copyWith(dayStartHour: hour));
@@ -164,22 +164,22 @@ final class _SettingsJournalScreenState extends State<SettingsJournalScreen> {
   /// Picks how an event's time is read: as the file writes it, or as a
   /// clock in the reader's own zone (#730).
   Future<void> _pickEventTimes(JournalSettings settings) async {
-    final clock = await showDialog<bool>(
-      context: context,
-      builder: (context) => SimpleDialog(
-        title: Text(AppStrings.journalEventTimesTitle),
-        children: [
-          for (final (value, label) in [
-            (false, AppStrings.journalEventTimesWritten),
-            (true, AppStrings.journalEventTimesClock),
-          ])
-            SimpleDialogOption(
-              key: Key('journal-event-times-${value ? 'clock' : 'written'}'),
-              onPressed: () => Navigator.pop(context, value),
-              child: Text(label),
-            ),
-        ],
-      ),
+    final clock = await showSettingsChoice<bool>(
+      context,
+      title: AppStrings.journalEventTimesTitle,
+      subtitle: AppStrings.journalEventTimesSubtitle,
+      current: settings.clockTimes,
+      options: [
+        for (final (value, label) in [
+          (false, AppStrings.journalEventTimesWritten),
+          (true, AppStrings.journalEventTimesClock),
+        ])
+          SettingsOption(
+            value,
+            label,
+            key: Key('journal-event-times-${value ? 'clock' : 'written'}'),
+          ),
+      ],
     );
     if (clock == null) return;
     await _save(settings.copyWith(clockTimes: clock));
