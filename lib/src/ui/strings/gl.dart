@@ -1626,13 +1626,6 @@ final class GalicianStrings extends Strings {
   @override
   String get widgetOpenFeatures => 'Abrir funcións';
 
-  @override
-  String featureOffNamed(String name) =>
-      'Nesta biblioteca está desactivado: $name';
-  @override
-  String get featureOffUnnamed =>
-      'Esta función está desactivada nesta biblioteca';
-
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Amosar no xestor de ficheiros';

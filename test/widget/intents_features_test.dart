@@ -247,16 +247,15 @@ void main() {
 
       shortcuts.emit(ShortcutAction.newTodo);
       await settle(tester);
-      expect(sentence('Todo is off in this library'), findsOneWidget);
+      expect(
+        sentence('Todo and reminders is off in this library'),
+        findsOneWidget,
+      );
       expect(find.byKey(const Key('todo-dialog-save')), findsNothing);
 
       shortcuts.emit(ShortcutAction.newVoice);
       await settle(tester);
-      expect(
-        sentence('This feature is off in this library'),
-        findsOneWidget,
-        reason: 'no name among the strings yet: the unnamed form',
-      );
+      expect(sentence('Audio notes is off in this library'), findsOneWidget);
       await close();
     });
 
@@ -266,7 +265,10 @@ void main() {
 
       reminders.tap(todoReminderPayload);
       await settle(tester);
-      expect(sentence('Todo is off in this library'), findsOneWidget);
+      expect(
+        sentence('Todo and reminders is off in this library'),
+        findsOneWidget,
+      );
       expect(find.text(AppStrings.todoEmptyOpen), findsNothing);
 
       controller.features.value = const Features();
@@ -297,13 +299,19 @@ void main() {
         WidgetTarget(kind: WidgetTargetKind.todo, libraryPath: home),
       );
       await settle(tester);
-      expect(sentence('Todo is off in this library'), findsOneWidget);
+      expect(
+        sentence('Todo and reminders is off in this library'),
+        findsOneWidget,
+      );
 
       targets.emit(
         WidgetTarget(kind: WidgetTargetKind.study, libraryPath: home),
       );
       await settle(tester);
-      expect(sentence('Flashcards is off in this library'), findsOneWidget);
+      expect(
+        sentence('Flashcards and Study is off in this library'),
+        findsOneWidget,
+      );
       await close();
     });
 

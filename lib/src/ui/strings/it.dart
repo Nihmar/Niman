@@ -1635,13 +1635,6 @@ final class ItalianStrings extends Strings {
   @override
   String get widgetOpenFeatures => 'Apri Funzioni';
 
-  @override
-  String featureOffNamed(String name) =>
-      'In questa libreria è disattivato: $name';
-  @override
-  String get featureOffUnnamed =>
-      'Questa funzione è disattivata in questa libreria';
-
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Mostra nel file manager';

@@ -1617,11 +1617,6 @@ final class UkrainianStrings extends Strings {
   @override
   String get widgetOpenFeatures => 'Відкрити функції';
 
-  @override
-  String featureOffNamed(String name) => 'У цій бібліотеці вимкнено: $name';
-  @override
-  String get featureOffUnnamed => 'Ця функція вимкнена в цій бібліотеці';
-
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Показати у файловому менеджері';

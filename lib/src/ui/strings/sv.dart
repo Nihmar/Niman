@@ -1621,13 +1621,6 @@ final class SwedishStrings extends Strings {
   @override
   String get widgetOpenFeatures => 'Öppna funktioner';
 
-  @override
-  String featureOffNamed(String name) =>
-      '$name är avstängt i det här biblioteket';
-  @override
-  String get featureOffUnnamed =>
-      'Den här funktionen är avstängd i det här biblioteket';
-
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Visa i filhanteraren';

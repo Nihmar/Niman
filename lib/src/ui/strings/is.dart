@@ -1614,12 +1614,6 @@ final class IcelandicStrings extends Strings {
   @override
   String get widgetOpenFeatures => 'Opna eiginleika';
 
-  @override
-  String featureOffNamed(String name) => 'Óvirkt í þessu bókasafni: $name';
-  @override
-  String get featureOffUnnamed =>
-      'Þessi eiginleiki er óvirkur í þessu bókasafni';
-
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Sýna í skráastjóra';

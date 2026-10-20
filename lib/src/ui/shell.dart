@@ -899,10 +899,11 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     unsaved: widget.unsavedTracker,
   );
 
-  /// Where "Open Features" on a home-screen widget that is off lands
-  /// (#1109): Settings → Features, the way the palette's link opens it. The
-  /// screen is opened for its own sake, so the introduction's flag is left
-  /// as it was.
+  /// Where "Open Features" lands (#1109): on a home-screen widget that is
+  /// off, and on the sentence a shortcut or a notification for a feature
+  /// that is off says. Settings → Features, the way the palette's link
+  /// opens it: the screen is opened for its own sake, so the introduction's
+  /// flag is left as it was.
   void _openFeaturesFromWidget() => _openSettingsAt(featuresTarget);
 
   /// Selects [tab]; a full-screen note closes to its tree (the selected
@@ -1343,8 +1344,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// note, no note, a `type` without a registered GUI (a `type: list`
   /// note is a list, everything else is a document) or one whose feature
   /// is off (#1109).
-  NoteKindGUI? get _kindGui =>
-      NoteKinds.forType(_noteKind, _features);
+  NoteKindGUI? get _kindGui => NoteKinds.forType(_noteKind, _features);
 
   /// The kind the open note is shown as: [_noteKind], when its view is on.
   String? get _shownKind => _kindGui?.type;
@@ -3603,7 +3603,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         NoteKindSwitch.toShoppingList,
       'shopping-list' => NoteKindSwitch.toChecklist,
       _ => null,
-    },    onSelected: (action) {
+    },
+    onSelected: (action) {
       final path = _selected;
       if (path == null) return;
       final anchor = menuAnchorOf(button);

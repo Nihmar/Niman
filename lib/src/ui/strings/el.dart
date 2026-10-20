@@ -1669,13 +1669,6 @@ final class GreekStrings extends Strings {
   @override
   String get widgetOpenFeatures => 'Άνοιγμα λειτουργιών';
 
-  @override
-  String featureOffNamed(String name) =>
-      'Σε αυτή τη βιβλιοθήκη είναι απενεργοποιημένο: $name';
-  @override
-  String get featureOffUnnamed =>
-      'Αυτή η λειτουργία είναι απενεργοποιημένη σε αυτή τη βιβλιοθήκη';
-
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Εμφάνιση στη διαχείριση αρχείων';

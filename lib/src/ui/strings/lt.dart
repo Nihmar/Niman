@@ -1614,11 +1614,6 @@ final class LithuanianStrings extends Strings {
   @override
   String get widgetOpenFeatures => 'Atverti funkcijas';
 
-  @override
-  String featureOffNamed(String name) => 'Šioje bibliotekoje išjungta: $name';
-  @override
-  String get featureOffUnnamed => 'Ši funkcija išjungta šioje bibliotekoje';
-
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Rodyti failų tvarkytuvėje';

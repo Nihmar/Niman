@@ -5,38 +5,12 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/settings/library_features.dart';
+import 'package:niman/src/ui/feature_names.dart';
 import 'package:niman/src/ui/strings.dart';
 
-/// "Todo is off in this library", say, or the unnamed form for a feature
-/// that has no name among the strings yet.
-String featureOffSentence(LibraryFeature feature) => switch (_nameOf(feature)) {
-  final name? => AppStrings.featureOffNamed(name),
-  null => AppStrings.featureOffUnnamed,
-};
-
-// phase 2 names: the Features screen gives each feature a name of its own;
-// until it lands this borrows the ones the app already says, and a feature
-// with none is said without a name.
-String? _nameOf(LibraryFeature feature) => switch (feature) {
-  LibraryFeature.search => AppStrings.tabSearch,
-  LibraryFeature.quickNote => AppStrings.quickNoteTitle,
-  LibraryFeature.todo => AppStrings.todoTitle,
-  LibraryFeature.journal => AppStrings.paletteGroupJournal,
-  LibraryFeature.calendar => AppStrings.journalCalendarTitle,
-  LibraryFeature.kindList => AppStrings.cheatLists,
-  LibraryFeature.kindShopping => AppStrings.shoppingListName,
-  LibraryFeature.kindFlashcards => AppStrings.flashcardsName,
-  LibraryFeature.ocr => AppStrings.settingsSectionTextRecognition,
-  LibraryFeature.home => AppStrings.tabHome,
-  LibraryFeature.templates ||
-  LibraryFeature.capture ||
-  LibraryFeature.kindAudio ||
-  LibraryFeature.transcription ||
-  LibraryFeature.kindSlides ||
-  LibraryFeature.readers ||
-  LibraryFeature.annotations ||
-  LibraryFeature.widgets => null,
-};
+/// "Todo and reminders is off in this library", say.
+String featureOffSentence(LibraryFeature feature) =>
+    AppStrings.featureOffInLibraryNamed(featureName(feature));
 
 /// Says [feature] is off, in a snack bar; [openFeatures], when given, is
 /// its action.

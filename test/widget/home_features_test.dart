@@ -185,6 +185,6 @@ void main() {
     await settle(tester);
 
     expect(tile('tasksDue'), findsOne);
-    expect(find.text('Todo is off in this library'), findsOne);
+    expect(find.text('Todo and reminders is off in this library'), findsOne);
   });
 }

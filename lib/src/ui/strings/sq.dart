@@ -1628,13 +1628,6 @@ final class AlbanianStrings extends Strings {
   @override
   String get widgetOpenFeatures => 'Hap funksionet';
 
-  @override
-  String featureOffNamed(String name) =>
-      'Në këtë bibliotekë është çaktivizuar: $name';
-  @override
-  String get featureOffUnnamed =>
-      'Kjo veçori është çaktivizuar në këtë bibliotekë';
-
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Shfaq në menaxherin e skedarëve';

@@ -1063,8 +1063,6 @@ final class AppStrings {
   static String get widgetOffStudy => _s.widgetOffStudy;
   static String get widgetOffWidgets => _s.widgetOffWidgets;
   static String get widgetOpenFeatures => _s.widgetOpenFeatures;
-  static String featureOffNamed(String name) => _s.featureOffNamed(name);
-  static String get featureOffUnnamed => _s.featureOffUnnamed;
 
   /// Handing a note's file to the OS (issue #76).
   static String get openInFileManager => _s.openInFileManager;

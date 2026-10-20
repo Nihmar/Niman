@@ -1627,11 +1627,6 @@ final class BulgarianStrings extends Strings {
   @override
   String get widgetOpenFeatures => 'Отвори функциите';
 
-  @override
-  String featureOffNamed(String name) => 'В тази библиотека е изключено: $name';
-  @override
-  String get featureOffUnnamed => 'Тази функция е изключена в тази библиотека';
-
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Показване във файловия мениджър';

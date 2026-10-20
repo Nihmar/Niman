@@ -1601,11 +1601,6 @@ final class EnglishStrings extends Strings {
   @override
   String get widgetOpenFeatures => 'Open Features';
 
-  @override
-  String featureOffNamed(String name) => '$name is off in this library';
-  @override
-  String get featureOffUnnamed => 'This feature is off in this library';
-
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Show in file manager';

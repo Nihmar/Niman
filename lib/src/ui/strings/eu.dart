@@ -1624,13 +1624,6 @@ final class BasqueStrings extends Strings {
   @override
   String get widgetOpenFeatures => 'Ireki eginbideak';
 
-  @override
-  String featureOffNamed(String name) =>
-      'Liburutegi honetan desaktibatuta dago: $name';
-  @override
-  String get featureOffUnnamed =>
-      'Funtzio hau desaktibatuta dago liburutegi honetan';
-
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Erakutsi fitxategi-kudeatzailean';

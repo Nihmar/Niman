@@ -1480,11 +1480,6 @@ final class ChineseStrings extends Strings {
   @override
   String get widgetOpenFeatures => '打开功能';
 
-  @override
-  String featureOffNamed(String name) => '$name在此文库中已关闭';
-  @override
-  String get featureOffUnnamed => '此功能在此文库中已关闭';
-
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => '在文件管理器中显示';

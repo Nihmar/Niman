@@ -1630,12 +1630,6 @@ final class FinnishStrings extends Strings {
   @override
   String get widgetOpenFeatures => 'Avaa ominaisuudet';
 
-  @override
-  String featureOffNamed(String name) => 'Pois päältä tässä kirjastossa: $name';
-  @override
-  String get featureOffUnnamed =>
-      'Tämä toiminto on pois päältä tässä kirjastossa';
-
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Näytä tiedostonhallinnassa';

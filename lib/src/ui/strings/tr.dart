@@ -1598,11 +1598,6 @@ final class TurkishStrings extends Strings {
   @override
   String get widgetOpenFeatures => 'Özellikleri aç';
 
-  @override
-  String featureOffNamed(String name) => '$name bu kitaplıkta kapalı';
-  @override
-  String get featureOffUnnamed => 'Bu özellik bu kitaplıkta kapalı';
-
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Dosya yöneticisinde göster';

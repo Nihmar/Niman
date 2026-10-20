@@ -1626,13 +1626,6 @@ final class HungarianStrings extends Strings {
   @override
   String get widgetOpenFeatures => 'Funkciók megnyitása';
 
-  @override
-  String featureOffNamed(String name) =>
-      'Ebben a könyvtárban ki van kapcsolva: $name';
-  @override
-  String get featureOffUnnamed =>
-      'Ez a funkció ki van kapcsolva ebben a könyvtárban';
-
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Megjelenítés a fájlkezelőben';

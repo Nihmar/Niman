@@ -1609,12 +1609,6 @@ final class DanishStrings extends Strings {
   @override
   String get widgetOpenFeatures => 'Åbn funktioner';
 
-  @override
-  String featureOffNamed(String name) => '$name er slået fra i dette bibliotek';
-  @override
-  String get featureOffUnnamed =>
-      'Denne funktion er slået fra i dette bibliotek';
-
   // Handing a note's file to the OS (issue #76).
   @override
   String get openInFileManager => 'Vis i filhåndtering';

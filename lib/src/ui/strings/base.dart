@@ -848,11 +848,6 @@ abstract base class Strings {
   String get widgetOffWidgets;
   String get widgetOpenFeatures;
 
-  // A feature that is off in this library, said where something led to it
-  // (#1109): a shortcut, a notification, a widget.
-  String featureOffNamed(String name);
-  String get featureOffUnnamed;
-
   // Handing a note's file to the OS (issue #76).
   String get openInFileManager;
   String get openInDefaultApp;
