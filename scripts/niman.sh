@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Niman dev helper: terse output, full logs in /tmp/niman/niman-<cmd>.log.
-#   analyze | test | check | integration | apk [testing] | linux
+#   analyze | test | check | integration | apk [beta] | linux [beta] | macos [beta]
 set -u
 
 # Flutter fallback when not on PATH (AGENTS.md: Env).
@@ -101,9 +101,35 @@ linux_build() {
   return $status
 }
 
+macos_build() {
+  # The official app by default; "beta" builds the testing build. Both are
+  # Xcode schemes (macos/Runner.xcodeproj): beta has a bundle id of its own,
+  # dev.niman.niman.beta, and with it its own Application Support folder.
+  local flavor="${1:-official}"
+  local name="Niman"
+  case "$flavor" in
+    official) flutter build macos --release --flavor official >"$log" 2>&1 ;;
+    beta)
+      name="Niman (Testing)"
+      flutter build macos --release --flavor beta \
+        --dart-define=APP_CHANNEL=testing >"$log" 2>&1
+      ;;
+    *)
+      echo "error: unknown macos flavor '$flavor' (expected official or beta)" >&2
+      usage >&2
+      return 2
+      ;;
+  esac
+  local status=$?
+  tail -n 3 "$log"
+  if [ $status -eq 0 ]; then
+    echo "artifact: build/macos/Build/Products/Release-$flavor/$name.app"
+  fi
+  return $status
+}
 usage() {
   cat <<'EOF'
-usage: ./scripts/niman.sh <analyze|test|check|integration|apk|linux>
+usage: ./scripts/niman.sh <analyze|test|check|integration|apk|linux|macos>
   analyze  flutter analyze --fatal-infos (issue lines + summary only)
   test     flutter test (tail only)
   check    analyze + test; use before committing
@@ -113,6 +139,8 @@ usage: ./scripts/niman.sh <analyze|test|check|integration|apk|linux>
                   (beta: the testing build, app ID dev.niman.niman.beta)
   linux [beta]    flutter build linux --release
                   (beta: the testing build, its own data folder niman-testing)
+  macos [beta]    flutter build macos --release
+                  (beta: the testing build, bundle id dev.niman.niman.beta)
 Full logs: /tmp/niman/niman-<cmd>.log
 EOF
 }
@@ -124,5 +152,6 @@ case "$cmd" in
   integration) integration ;;
   apk) apk "${2:-}" ;;
   linux) linux_build "${2:-}" ;;
+  macos) macos_build "${2:-}" ;;
   *) usage; exit 1 ;;
 esac
