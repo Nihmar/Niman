@@ -1643,6 +1643,8 @@ final class HindiStrings extends Strings {
   @override
   String get appMenuHelp => 'सहायता';
   @override
+  String get macMenuWindow => 'विंडो';
+  @override
   String get paletteGroupJournal => 'डायरी';
   @override
   String get journalToday => 'आज की प्रविष्टि';

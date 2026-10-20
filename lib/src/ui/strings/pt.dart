@@ -1679,6 +1679,8 @@ final class PortugueseStrings extends Strings {
   @override
   String get appMenuHelp => 'Ajuda';
   @override
+  String get macMenuWindow => 'Janela';
+  @override
   String get paletteGroupJournal => 'Diário';
   @override
   String get journalToday => 'Entrada de hoje';

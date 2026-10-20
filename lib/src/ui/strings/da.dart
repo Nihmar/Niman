@@ -1665,6 +1665,8 @@ final class DanishStrings extends Strings {
   @override
   String get appMenuHelp => 'Hjælp';
   @override
+  String get macMenuWindow => 'Vindue';
+  @override
   String get paletteGroupJournal => 'Dagbog';
   @override
   String get journalToday => 'Dagens indlæg';

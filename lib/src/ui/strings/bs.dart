@@ -1673,6 +1673,8 @@ final class BosnianStrings extends Strings {
   @override
   String get appMenuHelp => 'Pomoć';
   @override
+  String get macMenuWindow => 'Prozor';
+  @override
   String get paletteGroupJournal => 'Dnevnik';
   @override
   String get journalToday => 'Današnji unos';

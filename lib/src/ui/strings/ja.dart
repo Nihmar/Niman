@@ -1570,6 +1570,8 @@ final class JapaneseStrings extends Strings {
   @override
   String get appMenuHelp => 'ヘルプ';
   @override
+  String get macMenuWindow => 'ウインドウ';
+  @override
   String get paletteGroupJournal => '日記';
   @override
   String get journalToday => '今日のエントリ';

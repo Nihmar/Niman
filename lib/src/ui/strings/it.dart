@@ -1691,6 +1691,8 @@ final class ItalianStrings extends Strings {
   @override
   String get appMenuHelp => 'Aiuto';
   @override
+  String get macMenuWindow => 'Finestra';
+  @override
   String get paletteGroupJournal => 'Diario';
   @override
   String get journalToday => 'Voce di oggi';

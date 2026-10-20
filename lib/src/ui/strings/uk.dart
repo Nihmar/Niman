@@ -1673,6 +1673,8 @@ final class UkrainianStrings extends Strings {
   @override
   String get appMenuHelp => 'Довідка';
   @override
+  String get macMenuWindow => 'Вікно';
+  @override
   String get paletteGroupJournal => 'Щоденник';
   @override
   String get journalToday => 'Сьогоднішній запис';

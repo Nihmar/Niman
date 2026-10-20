@@ -1670,6 +1670,8 @@ final class BelarusianStrings extends Strings {
   @override
   String get appMenuHelp => 'Даведка';
   @override
+  String get macMenuWindow => 'Акно';
+  @override
   String get paletteGroupJournal => 'Дзённік';
   @override
   String get journalToday => 'Сённяшні запіс';

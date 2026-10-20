@@ -1662,6 +1662,8 @@ final class CzechStrings extends Strings {
   @override
   String get appMenuHelp => 'Nápověda';
   @override
+  String get macMenuWindow => 'Okno';
+  @override
   String get paletteGroupJournal => 'Deník';
   @override
   String get journalToday => 'Dnešní záznam';

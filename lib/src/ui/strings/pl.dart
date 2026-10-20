@@ -1689,6 +1689,8 @@ final class PolishStrings extends Strings {
   @override
   String get appMenuHelp => 'Pomoc';
   @override
+  String get macMenuWindow => 'Okno';
+  @override
   String get paletteGroupJournal => 'Dziennik';
   @override
   String get journalToday => 'Dzisiejszy wpis';

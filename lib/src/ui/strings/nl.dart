@@ -1687,6 +1687,8 @@ final class DutchStrings extends Strings {
   @override
   String get appMenuHelp => 'Help';
   @override
+  String get macMenuWindow => 'Venster';
+  @override
   String get paletteGroupJournal => 'Dagboek';
   @override
   String get journalToday => 'Vandaag';

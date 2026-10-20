@@ -1725,6 +1725,8 @@ final class GreekStrings extends Strings {
   @override
   String get appMenuHelp => 'Βοήθεια';
   @override
+  String get macMenuWindow => 'Παράθυρο';
+  @override
   String get paletteGroupJournal => 'Ημερολόγιο';
   @override
   String get journalToday => 'Σημερινή καταχώριση';

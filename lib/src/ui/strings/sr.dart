@@ -1672,6 +1672,8 @@ final class SerbianStrings extends Strings {
   @override
   String get appMenuHelp => 'Помоћ';
   @override
+  String get macMenuWindow => 'Прозор';
+  @override
   String get paletteGroupJournal => 'Дневник';
   @override
   String get journalToday => 'Данашњи унос';

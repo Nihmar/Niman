@@ -1699,6 +1699,8 @@ final class SpanishStrings extends Strings {
   @override
   String get appMenuHelp => 'Ayuda';
   @override
+  String get macMenuWindow => 'Ventana';
+  @override
   String get paletteGroupJournal => 'Diario';
   @override
   String get journalToday => 'Entrada de hoy';

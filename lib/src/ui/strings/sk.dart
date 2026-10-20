@@ -1667,6 +1667,8 @@ final class SlovakStrings extends Strings {
   @override
   String get appMenuHelp => 'Pomocník';
   @override
+  String get macMenuWindow => 'Okno';
+  @override
   String get paletteGroupJournal => 'Denník';
   @override
   String get journalToday => 'Dnešný záznam';

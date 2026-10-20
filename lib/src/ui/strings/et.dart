@@ -1649,6 +1649,8 @@ final class EstonianStrings extends Strings {
   @override
   String get appMenuHelp => 'Abi';
   @override
+  String get macMenuWindow => 'Aken';
+  @override
   String get paletteGroupJournal => 'Päevik';
   @override
   String get journalToday => 'Tänane sissekanne';

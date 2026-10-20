@@ -1670,6 +1670,8 @@ final class IcelandicStrings extends Strings {
   @override
   String get appMenuHelp => 'Hjálp';
   @override
+  String get macMenuWindow => 'Gluggi';
+  @override
   String get paletteGroupJournal => 'Dagbók';
   @override
   String get journalToday => 'Færsla dagsins';

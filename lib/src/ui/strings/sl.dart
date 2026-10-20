@@ -1667,6 +1667,8 @@ final class SlovenianStrings extends Strings {
   @override
   String get appMenuHelp => 'Pomoč';
   @override
+  String get macMenuWindow => 'Okno';
+  @override
   String get paletteGroupJournal => 'Dnevnik';
   @override
   String get journalToday => 'Današnji vnos';

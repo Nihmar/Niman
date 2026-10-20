@@ -1686,6 +1686,8 @@ final class RomanianStrings extends Strings {
   @override
   String get appMenuHelp => 'Ajutor';
   @override
+  String get macMenuWindow => 'Fereastră';
+  @override
   String get paletteGroupJournal => 'Jurnal';
   @override
   String get journalToday => 'Intrarea de azi';

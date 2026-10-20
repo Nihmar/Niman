@@ -1663,6 +1663,8 @@ final class LatvianStrings extends Strings {
   @override
   String get appMenuHelp => 'Palīdzība';
   @override
+  String get macMenuWindow => 'Logs';
+  @override
   String get paletteGroupJournal => 'Dienasgrāmata';
   @override
   String get journalToday => 'Šodienas ieraksts';

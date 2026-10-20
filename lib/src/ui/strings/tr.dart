@@ -1654,6 +1654,8 @@ final class TurkishStrings extends Strings {
   @override
   String get appMenuHelp => 'Yardım';
   @override
+  String get macMenuWindow => 'Pencere';
+  @override
   String get paletteGroupJournal => 'Günlük';
   @override
   String get journalToday => 'Bugünün girdisi';

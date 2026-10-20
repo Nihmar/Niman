@@ -1682,6 +1682,8 @@ final class HungarianStrings extends Strings {
   @override
   String get appMenuHelp => 'Súgó';
   @override
+  String get macMenuWindow => 'Ablak';
+  @override
   String get paletteGroupJournal => 'Napló';
   @override
   String get journalToday => 'Mai bejegyzés';

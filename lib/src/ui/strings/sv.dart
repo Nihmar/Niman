@@ -1677,6 +1677,8 @@ final class SwedishStrings extends Strings {
   @override
   String get appMenuHelp => 'Hjälp';
   @override
+  String get macMenuWindow => 'Fönster';
+  @override
   String get paletteGroupJournal => 'Dagbok';
   @override
   String get journalToday => 'Dagens anteckning';
