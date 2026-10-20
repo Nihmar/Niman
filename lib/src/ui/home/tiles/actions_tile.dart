@@ -57,7 +57,7 @@ final class ActionsTile extends StatelessWidget {
                 // nor is one whose feature is off (#1109).
                 if (action.kind != null &&
                     actionKindIsOn(action.kind, features))
-                  _button(context, action, gone),
+                  _button(context, action.under(features), gone),
             ],
           ),
         ),

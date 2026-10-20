@@ -8,6 +8,8 @@ library;
 
 import 'package:meta/meta.dart';
 import 'package:niman/src/core/files.dart';
+import 'package:niman/src/core/settings/features.dart';
+import 'package:niman/src/core/settings/library_features.dart';
 
 /// What an action does.
 enum HomeActionKind {
@@ -190,6 +192,14 @@ final class HomeAction {
     HomeActionKind.addTask || HomeActionKind.capture => true,
     _ => false,
   };
+
+  /// This action as it runs under [features] (#1109): with Templates off
+  /// a new note starts without its template, as it would with none set.
+  /// The file keeps the template, which is used again once it is on.
+  HomeAction under(Features features) =>
+      template == null || features.isOn(LibraryFeature.templates)
+      ? this
+      : copyWith(clearTemplate: true);
 
   /// The library paths it depends on: what has to exist for it to run.
   /// A folder is not among them — a missing one is made.

@@ -5,6 +5,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/settings/features.dart';
+import 'package:niman/src/core/settings/library_features.dart';
 import 'package:niman/src/journal/journal_settings.dart';
 import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/ui/journal/journal_flow.dart';
@@ -135,6 +137,52 @@ void main() {
       session.contentOf(path),
       '# Tuesday 2026-09-22\n[[2026-09-21]] · 00:30\n',
     );
+  });
+
+  // #1109: with Templates off an entry starts with the journal's own
+  // default, whatever template is configured — the setting is not touched
+  // and the template is used again when the feature is back on.
+  testWidgets('with templates off the entry starts with its default (#1109)', (
+    tester,
+  ) async {
+    final _ = await session.ensureFolder('Templates');
+    await session.createNote(
+      parentPath: 'Templates',
+      name: 'Day',
+      content: '# Custom {{title}}\n{{ask:Mood}}\n',
+    );
+    const configured = JournalSettings(template: 'Templates/Day.md');
+    await session.setJournal(configured);
+    session.features.value = const Features().withSwitch(
+      LibraryFeature.templates,
+      on: false,
+    );
+    final context = await pump(tester);
+
+    await flow.openToday(context);
+    await tester.pump();
+
+    // No question, no template text, no complaint: the default start.
+    expect(find.byKey(const Key('template-form')), findsNothing);
+    expect(created.single.$1, today);
+    expect(session.contentOf(today), '# Wednesday 23 September 2026\n\n');
+    expect(created.single.$2, '# Wednesday 23 September 2026\n\n'.length);
+    expect(await session.journal, configured, reason: 'off is inert');
+
+    // On again: the same setting makes the next day's entry.
+    session.features.value = const Features();
+    now = DateTime(2026, 9, 24, 10, 30);
+    final next = flow.openToday(context);
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const Key('template-field-Mood')), 'ok');
+    await tester.tap(find.byKey(const Key('template-form-ok')));
+    await tester.pumpAndSettle();
+    await next;
+    expect(
+      session.contentOf('Journal/2026/09/2026-09-24.md'),
+      '# Custom 2026-09-24\nok\n',
+    );
+    expect(await session.journal, configured);
   });
 
   testWidgets('a template that is gone still makes the entry', (tester) async {

@@ -136,5 +136,7 @@ Monday — and `{{date|-1d}}` links it to the Sunday before
 template's own questions are asked; its `niman:` directives are not
 followed, since the journal already says where the entry goes and what
 it is called. A template that cannot be read is said so, and the entry
-is made without it.
+is made without it. With the [Templates feature](features.md) off, the
+template is not used: an entry starts with its date as a heading, and the
+setting is kept for when Templates is on again.
 

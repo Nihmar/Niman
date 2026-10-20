@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/app.dart';
+import 'package:niman/src/core/settings/features.dart';
+import 'package:niman/src/core/settings/library_features.dart';
 import 'package:niman/src/home/home_action.dart';
 import 'package:niman/src/home/home_layout.dart';
 import 'package:niman/src/home/home_tile.dart';
@@ -230,6 +232,40 @@ void main() {
     await press(tester, 'b');
     expect(find.textContaining('Templates/Book.md'), findsWidgets);
     expect(find.byKey(const Key('template-form')), findsNothing);
+  });
+
+  // #1109: Templates off, a new note starts as it would with none set.
+  testWidgets('with templates off an action makes its note without the '
+      'template (#1109)', (tester) async {
+    await controller.createFolder(parentPath: '', name: 'Templates');
+    await controller.createNote(
+      parentPath: 'Templates',
+      name: 'Meeting',
+      content: '---\nstatus: open\n---\n# {{ask:Topic}}\n',
+    );
+    const action = HomeAction(
+      id: 'm',
+      label: 'Meeting',
+      kind: HomeActionKind.newNote,
+      template: 'Templates/Meeting.md',
+      name: FieldPreset.value('Monday'),
+      open: false,
+    );
+    controller.libraryHome = _withActions([action]);
+    controller.features.value = const Features().withSwitch(
+      LibraryFeature.templates,
+      on: false,
+    );
+    await open(tester);
+
+    await press(tester, 'm');
+
+    expect(find.byKey(const Key('template-form')), findsNothing);
+    final content = controller.contentOf('Monday.md');
+    expect(content, isNotNull);
+    expect(content, isNot(contains('status: open')));
+    expect(content, isNot(contains('Topic')));
+    expect(controller.libraryHome?.tiles.single.actions.single, action);
   });
 
   testWidgets('a task starts with its project and context', (tester) async {

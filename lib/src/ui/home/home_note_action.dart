@@ -24,7 +24,7 @@ const String homeNameLabel = 'niman:name';
 /// How many values a field's suggestions hold.
 const int _suggestions = 8;
 
-/// Makes the note [action] describes, through [templates].
+/// Makes the note [requested] describes, through [templates].
 ///
 /// A fixed value answers the template's question of the same label, or
 /// else fills that frontmatter key; it may hold template commands
@@ -33,10 +33,12 @@ const int _suggestions = 8;
 /// key as suggestions. With nothing to ask, no form shows.
 Future<void> makeHomeNote(
   BuildContext context,
-  HomeAction action, {
+  HomeAction requested, {
   required LibrarySession controller,
   required ShellTemplateFlow templates,
 }) async {
+  // With Templates off (#1109) the action's template is left unread.
+  final action = requested.under(controller.features.value);
   final source = await controller.templateSource;
   final templateFolder = await source?.folder ?? '';
   if (!context.mounted) return;

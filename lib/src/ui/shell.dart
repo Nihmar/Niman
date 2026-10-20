@@ -5595,7 +5595,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     openSearch: (query) => _showSearch(SearchRequest.forText(query)),
     openTag: (tag) => _showSearch(SearchRequest.forTag(tag)),
     openTodo: _openTodo,
-    runAction: (action) => unawaited(_homeActions.run(context, action)),
+    runAction: (action) => unawaited(
+      _homeActions.run(context, action.under(widget.controller.features.value)),
+    ),
     decks: () => _decks,
     study: _studyPaths,
   );
