@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:niman/src/ui/action_sheet.dart';
+import 'package:niman/src/ui/pointer_menu.dart';
 
 /// One button of the editor toolbar (T-UI-08).
 final class EditorToolbarButton {
@@ -226,9 +227,9 @@ final class EditorToolbar extends StatelessWidget {
                     iconColor: theme.colorScheme.onPrimaryContainer,
                   )
                 : null,
-            leadingIcon: Icon(button.icon, size: 18),
+            leadingIcon: Icon(button.icon, size: theme.menuIconSize),
             trailingIcon: button.active
-                ? const Icon(Icons.check, size: 18)
+                ? Icon(Icons.check, size: theme.menuIconSize)
                 : null,
             child: Text(button.tooltip),
           ),
