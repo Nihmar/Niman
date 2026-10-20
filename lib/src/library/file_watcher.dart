@@ -88,13 +88,19 @@ typedef WatchSource = Stream<WatchChange> Function(String root);
 /// several batches instead of growing one unbounded list.
 final class FileWatcher {
   /// Creates a watcher for [root] with the given [debounce] window;
-  /// [source] replaces the OS watch and is injected in tests.
+  /// [source] replaces the OS watch and is injected in tests, as is
+  /// [watchSupported], which otherwise asks `dart:io` whether the platform
+  /// can watch at all.
   new(
     this.root, {
     this.debounce = defaultDebounce,
     this.restartBackoff = defaultRestartBackoff,
     WatchSource? source,
-  }) : _source = source ?? _watchFileSystem;
+    bool? watchSupported,
+  }) : _source = source ?? _watchFileSystem,
+       _watchSupported =
+           watchSupported ??
+           (source != null || FileSystemEntity.isWatchSupported);
 
   /// How long a batching window stays open, by default.
   static const defaultDebounce = Duration(milliseconds: 250);
@@ -133,6 +139,10 @@ final class FileWatcher {
   final Duration restartBackoff;
 
   final WatchSource _source;
+
+  /// Whether there is anything to subscribe to: `dart:io` has no file
+  /// watching on iOS, where `Directory.watch` throws.
+  final bool _watchSupported;
   final StreamController<WatchBatch> _controller =
       StreamController<WatchBatch>.broadcast();
   final Set<String> _paths = <String>{};
@@ -175,6 +185,13 @@ final class FileWatcher {
       throw StateError('Watcher is already started or closed');
     }
     _started = true;
+    if (!_watchSupported) {
+      // iOS: no watch to subscribe to (docs/records/apple-platforms.md,
+      // File watching). Nothing is subscribed, so [healthy] stays false and
+      // the periodic rescan, at its unstretched pace, finds what changed.
+      _log.info('watcher off: "$root" (no file watching on this platform)');
+      return;
+    }
     _log.info('watcher start: "$root" (recursive)');
     _listen(_source(root));
   }
