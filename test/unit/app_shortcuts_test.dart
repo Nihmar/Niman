@@ -1,5 +1,6 @@
 // T-PP-10: the accelerator registry is the single source for what runs and
 // what the in-app reference documents.
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -157,5 +158,86 @@ void main() {
       ),
     });
     expect(zoomKeys(), {'Z', '-', 'Numpad Subtract'});
+  });
+
+  group('on a Mac or an iPad', () {
+    /// [actual] is [expected]: an activator has no `==` of its own.
+    void expectKeys(SingleActivator? actual, SingleActivator expected) {
+      expect(
+        actual != null && KeyMap.sameKeys(actual, expected),
+        isTrue,
+        reason: 'not ${describeActivator(expected, apple: false)}',
+      );
+    }
+
+    setUp(() => debugDefaultTargetPlatformOverride = TargetPlatform.macOS);
+    tearDown(() => debugDefaultTargetPlatformOverride = null);
+
+    test('the shipped Ctrl is ⌘', () {
+      expectKeys(
+        KeyMap.defaultOf(AppCommand.newNote),
+        const SingleActivator(LogicalKeyboardKey.keyN, meta: true),
+      );
+      expectKeys(
+        KeyMap.editorDefaultOf(ToolbarItem.bold),
+        const SingleActivator(LogicalKeyboardKey.keyB, meta: true),
+      );
+    });
+
+    test('a key the system keeps takes its Mac counterpart', () {
+      // ⌘Q quits, ⌘Tab switches apps, ⌥← moves by a word, F11 shows the
+      // desktop.
+      expectKeys(
+        KeyMap.defaultOf(AppCommand.quickNote),
+        const SingleActivator(LogicalKeyboardKey.keyQ, control: true),
+      );
+      expectKeys(
+        KeyMap.defaultOf(AppCommand.nextTab),
+        const SingleActivator(LogicalKeyboardKey.tab, control: true),
+      );
+      expectKeys(
+        KeyMap.defaultOf(AppCommand.noteBack),
+        const SingleActivator(LogicalKeyboardKey.bracketLeft, meta: true),
+      );
+      expectKeys(
+        KeyMap.defaultOf(AppCommand.zenMode),
+        const SingleActivator(
+          LogicalKeyboardKey.keyF,
+          control: true,
+          meta: true,
+        ),
+      );
+    });
+
+    test('a key without Ctrl stays as shipped', () {
+      expectKeys(
+        KeyMap.defaultOf(AppCommand.renameNote),
+        const SingleActivator(LogicalKeyboardKey.f2),
+      );
+    });
+
+    test('keys read as the system writes them', () {
+      expect(
+        describeActivator(
+          const SingleActivator(
+            LogicalKeyboardKey.keyN,
+            meta: true,
+            shift: true,
+          ),
+        ),
+        '⇧⌘N',
+      );
+      expect(
+        describeActivator(
+          const SingleActivator(
+            LogicalKeyboardKey.keyN,
+            meta: true,
+            shift: true,
+          ),
+          apple: false,
+        ),
+        'Meta+Shift+N',
+      );
+    });
   });
 }
