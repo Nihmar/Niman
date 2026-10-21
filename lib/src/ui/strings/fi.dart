@@ -2208,6 +2208,9 @@ final class FinnishStrings extends Strings {
   @override
   String get openLibraryChooseFolder => 'Valitse kirjaston kansio';
   @override
+  String get openLibraryNoneInDocuments =>
+      'Täällä ei ole vielä kirjastoa: luo sellainen.';
+  @override
   String get openLibraryChooseParent =>
       'Valitse kansio, jossa kirjasto luodaan';
   @override

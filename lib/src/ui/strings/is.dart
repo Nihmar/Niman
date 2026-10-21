@@ -2190,6 +2190,9 @@ final class IcelandicStrings extends Strings {
   @override
   String get openLibraryChooseFolder => 'Velja mappa bókasafns';
   @override
+  String get openLibraryNoneInDocuments =>
+      'Ekkert safn hér enn: búðu eitt til.';
+  @override
   String get openLibraryChooseParent =>
       'Velja mappa þar sem bókasafnið á að búa til';
   @override

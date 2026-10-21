@@ -3,13 +3,16 @@
 library;
 
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/library_root.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/storage_access.dart';
+import 'package:niman/src/library/container_path.dart';
 import 'package:niman/src/ui/strings.dart';
+import 'package:path/path.dart' as p;
 
 const AppLogger _log = AppLogger(name: 'storage');
 
@@ -48,13 +51,28 @@ final class LibraryPickFailed extends LibraryPick {
   final String message;
 }
 
-/// Opens the system folder picker titled [title].
+/// Opens the system folder picker titled [title]; [forParent] when the
+/// folder is the one a new library is made in.
 ///
 /// Checks the permission first, since it can be revoked while a screen
 /// is up. On Android the picker answers with a SAF tree URI rather than
 /// a path; the library is read by path, so this maps it to the real one
 /// and checks that it can be reached.
-Future<LibraryPick> pickLibraryFolder(String title) async {
+///
+/// An iPhone's libraries live in the app's Documents (decision 4 of
+/// docs/records/apple-platforms.md), which iOS's picker cannot hand over
+/// by path: a new library is made there with no pick, and an existing one
+/// is chosen from the folders there ([context] shows the list).
+Future<LibraryPick> pickLibraryFolder(
+  BuildContext context,
+  String title, {
+  bool forParent = false,
+}) async {
+  if (await containerDocuments() case final documents?) {
+    if (forParent) return LibraryPicked(documents);
+    if (!context.mounted) return const LibraryPickCancelled();
+    return await _chooseInDocuments(context, title, documents);
+  }
   if (!await StorageAccess.hasAllFilesAccess()) {
     _log.warning('pick blocked: no all-files access');
     return const LibraryPickNeedsAccess();
@@ -85,6 +103,53 @@ Future<LibraryPick> pickLibraryFolder(String title) async {
     // For example "unknown_path" from SAF for protected trees.
     return LibraryPickFailed(AppStrings.folderPickFailed(error));
   }
+}
+
+/// The libraries in an iPhone's [documents] — its folders, by name —
+/// offered in a list titled [title].
+Future<LibraryPick> _chooseInDocuments(
+  BuildContext context,
+  String title,
+  String documents,
+) async {
+  final names = await Isolate.run(() => libraryFolderNames(documents));
+  if (!context.mounted) return const LibraryPickCancelled();
+  final chosen = await showDialog<String>(
+    context: context,
+    builder: (context) => SimpleDialog(
+      title: Text(title),
+      children: [
+        if (names.isEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+            child: Text(AppStrings.openLibraryNoneInDocuments),
+          ),
+        for (final name in names)
+          SimpleDialogOption(
+            key: Key('documents-library-$name'),
+            onPressed: () => Navigator.of(context).pop(name),
+            child: Text(name),
+          ),
+      ],
+    ),
+  );
+  return chosen == null
+      ? const LibraryPickCancelled()
+      : LibraryPicked(p.join(documents, chosen));
+}
+
+/// The folders in [documents] a library can be: not hidden, and not iOS's
+/// own `Inbox`, where documents opened from elsewhere are copied.
+List<String> libraryFolderNames(String documents) {
+  final dir = Directory(documents);
+  if (!dir.existsSync()) return const [];
+  return [
+    for (final entry in dir.listSync(followLinks: false))
+      if (entry is Directory)
+        if (p.basename(entry.path) case final name
+            when !name.startsWith('.') && name != 'Inbox')
+          name,
+  ]..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
 }
 
 /// Asks for the new library folder's name; null when cancelled.

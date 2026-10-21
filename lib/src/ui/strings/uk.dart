@@ -2193,6 +2193,9 @@ final class UkrainianStrings extends Strings {
   @override
   String get openLibraryChooseFolder => 'Обрати папку бібліотеки';
   @override
+  String get openLibraryNoneInDocuments =>
+      'Тут ще немає бібліотеки: створіть її.';
+  @override
   String get openLibraryChooseParent =>
       'Оберіть папку, в якій буде створено бібліотеку';
   @override

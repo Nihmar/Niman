@@ -2003,6 +2003,8 @@ final class ChineseStrings extends Strings {
   @override
   String get openLibraryChooseFolder => '选择文库文件夹';
   @override
+  String get openLibraryNoneInDocuments => '这里还没有资料库：请创建一个。';
+  @override
   String get openLibraryChooseParent => '选择将创建文库的文件夹';
   @override
   String get openLibraryUnsupported => '该文件夹不受支持。请选择设备存储中的文件夹。';

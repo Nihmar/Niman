@@ -2205,6 +2205,9 @@ final class BasqueStrings extends Strings {
   @override
   String get openLibraryChooseFolder => 'Hautatu bibliotekaren karpeta';
   @override
+  String get openLibraryNoneInDocuments =>
+      'Oraindik ez dago liburutegirik hemen: sortu bat.';
+  @override
   String get openLibraryChooseParent => 'Hautatu karpeta non sortuko den';
   @override
   String get openLibraryUnsupported =>

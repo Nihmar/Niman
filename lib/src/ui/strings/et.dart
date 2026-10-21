@@ -2165,6 +2165,9 @@ final class EstonianStrings extends Strings {
   @override
   String get openLibraryChooseFolder => 'Vali kogu kaust';
   @override
+  String get openLibraryNoneInDocuments =>
+      'Siin pole veel ühtegi raamatukogu: loo üks.';
+  @override
   String get openLibraryChooseParent => 'Vali kaust, kuhu kogu luuakse';
   @override
   String get openLibraryUnsupported =>

@@ -2206,6 +2206,9 @@ final class AlbanianStrings extends Strings {
   @override
   String get openLibraryChooseFolder => 'Zgjidh tresën e bibliotekës';
   @override
+  String get openLibraryNoneInDocuments =>
+      'Këtu nuk ka ende bibliotekë: krijoni një.';
+  @override
   String get openLibraryChooseParent =>
       'Zgjidh tresën në të cilën do të krijohet biblioteka';
   @override

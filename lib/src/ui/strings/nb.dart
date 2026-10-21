@@ -2178,6 +2178,9 @@ final class NorwegianStrings extends Strings {
   @override
   String get openLibraryChooseFolder => 'Velg biblioteksmappen';
   @override
+  String get openLibraryNoneInDocuments =>
+      'Ikke noe bibliotek her ennå: opprett et.';
+  @override
   String get openLibraryChooseParent =>
       'Velg mappen biblioteket skal opprettes i';
   @override

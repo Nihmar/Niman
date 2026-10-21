@@ -2052,6 +2052,8 @@ final class JapaneseStrings extends Strings {
   @override
   String get openLibraryChooseFolder => 'ライブラリのフォルダを選ぶ';
   @override
+  String get openLibraryNoneInDocuments => 'ここにはまだライブラリがありません。作成してください。';
+  @override
   String get openLibraryChooseParent => 'ライブラリを作成するフォルダを選ぶ';
   @override
   String get openLibraryUnsupported =>

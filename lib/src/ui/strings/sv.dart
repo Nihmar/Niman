@@ -2200,6 +2200,8 @@ final class SwedishStrings extends Strings {
   @override
   String get openLibraryChooseFolder => 'Välj biblioteksmappen';
   @override
+  String get openLibraryNoneInDocuments => 'Inget bibliotek här än: skapa ett.';
+  @override
   String get openLibraryChooseParent => 'Välj mappen biblioteket ska skapas i';
   @override
   String get openLibraryUnsupported =>

@@ -2208,6 +2208,9 @@ final class BulgarianStrings extends Strings {
   @override
   String get openLibraryChooseFolder => 'Изберете папката на библиотеката';
   @override
+  String get openLibraryNoneInDocuments =>
+      'Тук все още няма библиотека: създайте една.';
+  @override
   String get openLibraryChooseParent =>
       'Изберете папката, в която ще бъде създадена библиотеката';
   @override

@@ -2176,6 +2176,9 @@ final class CzechStrings extends Strings {
   @override
   String get openLibraryChooseFolder => 'Vybrat složku knihovny';
   @override
+  String get openLibraryNoneInDocuments =>
+      'Zatím tu není žádná knihovna: vytvořte ji.';
+  @override
   String get openLibraryChooseParent =>
       'Vybrat složku, ve které se knihovna vytvoří';
   @override

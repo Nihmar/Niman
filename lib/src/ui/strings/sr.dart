@@ -2190,6 +2190,9 @@ final class SerbianStrings extends Strings {
   @override
   String get openLibraryChooseFolder => 'Изабери фасциклу библиотеке';
   @override
+  String get openLibraryNoneInDocuments =>
+      'Овде још нема библиотеке: направите је.';
+  @override
   String get openLibraryChooseParent =>
       'Изабери фасциклу у којој ће библиотека бити креирана';
   @override

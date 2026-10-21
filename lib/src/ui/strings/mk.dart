@@ -2205,6 +2205,9 @@ final class MacedonianStrings extends Strings {
   @override
   String get openLibraryChooseFolder => 'Одбери папка на библиотека';
   @override
+  String get openLibraryNoneInDocuments =>
+      'Тука сè уште нема библиотека: создадете една.';
+  @override
   String get openLibraryChooseParent =>
       'Одбери папка во која ќе се креира библиотека';
   @override

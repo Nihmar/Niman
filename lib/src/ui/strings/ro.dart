@@ -2209,6 +2209,9 @@ final class RomanianStrings extends Strings {
   @override
   String get openLibraryChooseFolder => 'Alege dosarul bibliotecii';
   @override
+  String get openLibraryNoneInDocuments =>
+      'Încă nu există nicio bibliotecă aici: creează una.';
+  @override
   String get openLibraryChooseParent =>
       'Alege dosarul în care se va crea biblioteca';
   @override

@@ -2224,6 +2224,9 @@ final class SpanishStrings extends Strings {
   @override
   String get openLibraryChooseFolder => 'Elegir la carpeta de la biblioteca';
   @override
+  String get openLibraryNoneInDocuments =>
+      'Todavía no hay ninguna biblioteca aquí: crea una.';
+  @override
   String get openLibraryChooseParent =>
       'Elegir la carpeta en la que se creará la biblioteca';
   @override

@@ -2263,6 +2263,9 @@ final class GreekStrings extends Strings {
   @override
   String get openLibraryChooseFolder => 'Επιλογή φακέλου βιβλιοθήκης';
   @override
+  String get openLibraryNoneInDocuments =>
+      'Δεν υπάρχει ακόμη βιβλιοθήκη εδώ: δημιουργήστε μία.';
+  @override
   String get openLibraryChooseParent =>
       'Επιλογή φακέλου όπου θα δημιουργηθεί η βιβλιοθήκη';
   @override

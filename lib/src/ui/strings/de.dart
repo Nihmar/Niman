@@ -2236,6 +2236,9 @@ final class GermanStrings extends Strings {
   @override
   String get openLibraryChooseFolder => 'Bibliotheks-Ordner wählen';
   @override
+  String get openLibraryNoneInDocuments =>
+      'Hier gibt es noch keine Bibliothek: lege eine an.';
+  @override
   String get openLibraryChooseParent =>
       'Ordner wählen, in dem die Bibliothek erstellt wird';
   @override

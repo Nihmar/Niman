@@ -2216,6 +2216,9 @@ final class DutchStrings extends Strings {
   @override
   String get openLibraryChooseFolder => 'Kies de bibliotheekmap';
   @override
+  String get openLibraryNoneInDocuments =>
+      'Hier is nog geen bibliotheek: maak er een aan.';
+  @override
   String get openLibraryChooseParent =>
       'Kies de map waarin de bibliotheek wordt aangemaakt';
   @override

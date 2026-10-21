@@ -2183,6 +2183,8 @@ final class SlovenianStrings extends Strings {
   @override
   String get openLibraryChooseFolder => 'Izberi mapo knjižnice';
   @override
+  String get openLibraryNoneInDocuments => 'Tu še ni knjižnice: ustvarite jo.';
+  @override
   String get openLibraryChooseParent =>
       'Izberi mapo, v katero se knjižnica ustvari';
   @override

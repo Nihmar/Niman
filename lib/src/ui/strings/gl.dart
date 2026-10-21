@@ -2204,6 +2204,9 @@ final class GalicianStrings extends Strings {
   @override
   String get openLibraryChooseFolder => 'Escoller o cartafol da biblioteca';
   @override
+  String get openLibraryNoneInDocuments =>
+      'Aínda non hai ningunha biblioteca aquí: crea unha.';
+  @override
   String get openLibraryChooseParent =>
       'Escoller o cartafol onde se creará a biblioteca';
   @override

@@ -2213,6 +2213,9 @@ final class PolishStrings extends Strings {
   @override
   String get openLibraryChooseFolder => 'Wybierz katalog biblioteki';
   @override
+  String get openLibraryNoneInDocuments =>
+      'Nie ma tu jeszcze biblioteki: utwórz ją.';
+  @override
   String get openLibraryChooseParent =>
       'Wybierz katalog, w którym będzie utworzona biblioteka';
   @override

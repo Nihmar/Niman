@@ -1335,6 +1335,7 @@ final class AppStrings {
   static String get openLibraryCreateTitle => _s.openLibraryCreateTitle;
   static String get openLibraryFolderName => _s.openLibraryFolderName;
   static String get openLibraryChooseFolder => _s.openLibraryChooseFolder;
+  static String get openLibraryNoneInDocuments => _s.openLibraryNoneInDocuments;
   static String get openLibraryChooseParent => _s.openLibraryChooseParent;
   static String get openLibraryUnsupported => _s.openLibraryUnsupported;
 

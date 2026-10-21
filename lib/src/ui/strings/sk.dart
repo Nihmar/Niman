@@ -2184,6 +2184,9 @@ final class SlovakStrings extends Strings {
   @override
   String get openLibraryChooseFolder => 'Vybrať priečinok knižnice';
   @override
+  String get openLibraryNoneInDocuments =>
+      'Zatiaľ tu nie je žiadna knižnica: vytvorte ju.';
+  @override
   String get openLibraryChooseParent =>
       'Vybrať priečinok, do ktorého sa knižnica vytvorí';
   @override

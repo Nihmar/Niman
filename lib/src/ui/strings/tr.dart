@@ -2172,6 +2172,9 @@ final class TurkishStrings extends Strings {
   @override
   String get openLibraryChooseFolder => 'Kütüphane klasörünü seç';
   @override
+  String get openLibraryNoneInDocuments =>
+      'Burada henüz kitaplık yok: bir tane oluşturun.';
+  @override
   String get openLibraryChooseParent =>
       'Kütüphanenin oluşturulacağı klasörü seç';
   @override

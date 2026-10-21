@@ -2206,6 +2206,9 @@ final class HungarianStrings extends Strings {
   @override
   String get openLibraryChooseFolder => 'A könyvtár mappájának kiválasztása';
   @override
+  String get openLibraryNoneInDocuments =>
+      'Még nincs itt könyvtár: hozz létre egyet.';
+  @override
   String get openLibraryChooseParent =>
       'A mappa kiválasztása, amelybe a könyvtár létrehozandó';
   @override

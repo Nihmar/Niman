@@ -2228,6 +2228,9 @@ final class CatalanStrings extends Strings {
   @override
   String get openLibraryChooseFolder => 'Tria la carpeta de la biblioteca';
   @override
+  String get openLibraryNoneInDocuments =>
+      'Encara no hi ha cap biblioteca aquí: creeu-ne una.';
+  @override
   String get openLibraryChooseParent =>
       'Tria la carpeta on es crearà la biblioteca';
   @override

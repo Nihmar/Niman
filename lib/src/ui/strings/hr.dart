@@ -2184,6 +2184,9 @@ final class CroatianStrings extends Strings {
   @override
   String get openLibraryChooseFolder => 'Odaberi direktorij biblioteke';
   @override
+  String get openLibraryNoneInDocuments =>
+      'Ovdje još nema knjižnice: izradite je.';
+  @override
   String get openLibraryChooseParent =>
       'Odaberi direktorij u kojem će se kreirati biblioteka';
   @override

@@ -2188,6 +2188,9 @@ final class LithuanianStrings extends Strings {
   @override
   String get openLibraryChooseFolder => 'Pasirinkti bibliotekos katalogą';
   @override
+  String get openLibraryNoneInDocuments =>
+      'Čia dar nėra bibliotekos: sukurkite ją.';
+  @override
   String get openLibraryChooseParent =>
       'Pasirinkite katalogą, kuriame sukuriama biblioteka';
   @override

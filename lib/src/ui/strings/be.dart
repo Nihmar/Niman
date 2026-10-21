@@ -2191,6 +2191,9 @@ final class BelarusianStrings extends Strings {
   @override
   String get openLibraryChooseFolder => 'Абраць папку бібліятэкі';
   @override
+  String get openLibraryNoneInDocuments =>
+      'Тут яшчэ няма бібліятэкі: стварыце яе.';
+  @override
   String get openLibraryChooseParent =>
       'Абярыце папку, у якой будзе створана бібліятэка';
   @override

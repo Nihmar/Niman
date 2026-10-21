@@ -2251,6 +2251,9 @@ final class FrenchStrings extends Strings {
   @override
   String get openLibraryChooseFolder => 'Choisir le dossier de la bibliothèque';
   @override
+  String get openLibraryNoneInDocuments =>
+      'Aucune bibliothèque ici pour le moment : créez-en une.';
+  @override
   String get openLibraryChooseParent =>
       'Choisir le dossier dans lequel la bibliothèque sera créée';
   @override

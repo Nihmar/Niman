@@ -2169,6 +2169,8 @@ final class EnglishStrings extends Strings {
   @override
   String get openLibraryChooseFolder => 'Choose the library folder';
   @override
+  String get openLibraryNoneInDocuments => 'No library here yet: create one.';
+  @override
   String get openLibraryChooseParent =>
       'Choose the folder the library will be created in';
   @override

@@ -2191,6 +2191,9 @@ final class BosnianStrings extends Strings {
   @override
   String get openLibraryChooseFolder => 'Odaberite mapu biblioteke';
   @override
+  String get openLibraryNoneInDocuments =>
+      'Ovdje još nema biblioteke: napravite je.';
+  @override
   String get openLibraryChooseParent =>
       'Odaberite mapu u kojoj će biblioteka biti kreirana';
   @override

@@ -2158,6 +2158,9 @@ final class HindiStrings extends Strings {
   @override
   String get openLibraryChooseFolder => 'लाइब्रेरी-फ़ोल्डर चुनें';
   @override
+  String get openLibraryNoneInDocuments =>
+      'यहाँ अभी कोई लाइब्रेरी नहीं है: एक बनाएँ।';
+  @override
   String get openLibraryChooseParent =>
       'वह फ़ोल्डर चुनें जिसमें लाइब्रेरी बनेगी';
   @override

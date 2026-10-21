@@ -2180,6 +2180,9 @@ final class DanishStrings extends Strings {
   @override
   String get openLibraryChooseFolder => 'Vælg biblioteksmappen';
   @override
+  String get openLibraryNoneInDocuments =>
+      'Intet bibliotek her endnu: opret et.';
+  @override
   String get openLibraryChooseParent => 'Vælg mappen, biblioteket oprettes i';
   @override
   String get openLibraryUnsupported =>

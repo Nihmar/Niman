@@ -2218,6 +2218,9 @@ final class ItalianStrings extends Strings {
   @override
   String get openLibraryChooseFolder => 'Scegli la cartella della libreria';
   @override
+  String get openLibraryNoneInDocuments =>
+      'Ancora nessuna libreria qui: creane una.';
+  @override
   String get openLibraryChooseParent =>
       'Scegli la cartella in cui creare la libreria';
   @override

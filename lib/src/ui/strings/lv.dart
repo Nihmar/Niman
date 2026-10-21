@@ -2181,6 +2181,9 @@ final class LatvianStrings extends Strings {
   @override
   String get openLibraryChooseFolder => 'Izvēlēties bibliotēkas katalogu';
   @override
+  String get openLibraryNoneInDocuments =>
+      'Šeit vēl nav bibliotēkas: izveidojiet to.';
+  @override
   String get openLibraryChooseParent =>
       'Izvēlēties katalogu, kurā bibliotēka tiks izveidota';
   @override

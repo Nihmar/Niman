@@ -120,7 +120,10 @@ final class _LibraryWindowState extends State<LibraryWindow> {
   }
 
   Future<void> _create() async {
-    final parent = await _pick(AppStrings.openLibraryChooseParent);
+    final parent = await _pick(
+      AppStrings.openLibraryChooseParent,
+      forParent: true,
+    );
     if (parent == null || !mounted) return;
     final name = await showNewLibraryDialog(context);
     if (name == null || name.isEmpty) return;
@@ -130,12 +133,12 @@ final class _LibraryWindowState extends State<LibraryWindow> {
     });
   }
 
-  Future<String?> _pick(String title) async {
+  Future<String?> _pick(String title, {bool forParent = false}) async {
     setState(() {
       _busy = true;
       _error = null;
     });
-    final pick = await pickLibraryFolder(title);
+    final pick = await pickLibraryFolder(context, title, forParent: forParent);
     if (!mounted) return null;
     setState(() {
       _busy = false;

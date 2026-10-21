@@ -1156,6 +1156,7 @@ abstract base class Strings {
   String get openLibraryCreateTitle;
   String get openLibraryFolderName;
   String get openLibraryChooseFolder;
+  String get openLibraryNoneInDocuments;
   String get openLibraryChooseParent;
   String get openLibraryUnsupported;
 
