@@ -25,6 +25,17 @@ const int epubMaxBytes = 1 << 30;
 /// The most files a book may hold.
 const int epubMaxEntries = 100000;
 
+/// The most one file read as text may expand to, in uncompressed bytes.
+///
+/// The total budget lets a single entry take the whole gigabyte, and a text
+/// entry costs several times its size once read: decoded to a string (two
+/// bytes a character), then parsed into a DOM (an order of magnitude more),
+/// on a phone. A novel is about a megabyte of text and its chapters' XHTML a
+/// few at the most, a whole library's worth in one file ten; 32 MiB leaves
+/// a book written as one file markup and all several times over, and stops
+/// what only a hostile or broken book is.
+const int epubMaxTextBytes = 32 << 20;
+
 /// Why a file could not be read as a book.
 enum EpubRefusal {
   /// Not an EPUB: not a zip, or one without a package document or chapters.
@@ -55,20 +66,27 @@ final class EpubRefused extends FormatException {
 
 /// The zip of a book, decoded from its file and read within a budget.
 final class EpubArchive {
-  /// Decodes [input]'s directory, refusing a zip past the bounds.
+  /// Decodes [input]'s directory, refusing a zip past the bounds: [maxBytes]
+  /// for all its entries together, [maxEntries] files, and [maxTextBytes]
+  /// for any one read as text.
   ///
   /// Throws [EpubRefused].
-  factory open(InputStream input, {int maxBytes = epubMaxBytes}) {
+  factory open(
+    InputStream input, {
+    int maxBytes = epubMaxBytes,
+    int maxEntries = epubMaxEntries,
+    int maxTextBytes = epubMaxTextBytes,
+  }) {
     final Archive archive;
     try {
       archive = ZipDecoder().decodeStream(input);
     } on Object catch (error) {
       throw EpubRefused(EpubRefusal.notABook, 'not a zip: $error');
     }
-    if (archive.length > epubMaxEntries) {
+    if (archive.length > maxEntries) {
       throw EpubRefused(
         EpubRefusal.tooLarge,
-        '${archive.length} entries, over $epubMaxEntries',
+        '${archive.length} entries, over $maxEntries',
       );
     }
     final declared = archive.fold<int>(0, (sum, file) => sum + file.size);
@@ -78,30 +96,36 @@ final class EpubArchive {
         'its entries expand to $declared bytes, over $maxBytes',
       );
     }
-    return EpubArchive._(archive, maxBytes);
+    return EpubArchive._(archive, maxBytes, maxTextBytes);
   }
 
-  new _(this._archive, this._maxBytes);
+  new _(this._archive, this._maxBytes, this._maxTextBytes);
 
   final Archive _archive;
   final int _maxBytes;
+  final int _maxTextBytes;
   int _read = 0;
 
   /// Whether the zip holds [path].
   bool has(String path) => _archive.findFile(path) != null;
 
   /// The bytes of [path], or null when the zip does not hold it. Throws
-  /// [EpubRefused] when reading it would pass the budget.
-  Uint8List? bytes(String path) {
+  /// [EpubRefused] when reading it would pass the budget, or [limit] when
+  /// that is given.
+  Uint8List? bytes(String path, {int? limit}) {
     final file = _archive.findFile(path);
     if (file == null) return null;
+    final left = _maxBytes - _read;
+    final within = limit == null || limit > left ? left : limit;
     final Uint8List? bytes;
     try {
-      bytes = readEntryWithin(file, _maxBytes - _read);
+      bytes = readEntryWithin(file, within);
     } on EntryOverBudget {
       throw EpubRefused(
         EpubRefusal.tooLarge,
-        '"$path" expands past the $_maxBytes-byte budget',
+        within == left
+            ? '"$path" expands past the $_maxBytes-byte budget'
+            : '"$path" expands past the $within bytes one file may',
       );
     } finally {
       // The inflated bytes are cached on the entry: let them go.
@@ -111,9 +135,10 @@ final class EpubArchive {
     return bytes ?? Uint8List(0);
   }
 
-  /// [path] as text, or null when the zip does not hold it.
+  /// [path] as text, or null when the zip does not hold it. Throws
+  /// [EpubRefused] when it expands past what one file read as text may.
   String? text(String path) {
-    final bytes = this.bytes(path);
+    final bytes = this.bytes(path, limit: _maxTextBytes);
     return bytes == null ? null : utf8.decode(bytes, allowMalformed: true);
   }
 

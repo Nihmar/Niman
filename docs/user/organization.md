@@ -745,7 +745,9 @@ was; a shared book's copy is deleted.
 - a book whose text is protected (DRM), which says so;
 - a file that is not an EPUB;
 - a book that would expand past what the app can take in, refused before
-  it is unpacked, as a Notion export is.
+  it is unpacked, as a Notion export is — or whose text is in a single
+  file of more than 32 MiB (a novel's is about one), which a phone could
+  not hold once read.
 
 Formulas come in as TeX where the book draws them as images with their
 TeX attached. Formulas written as MathML alone are left out, as the
