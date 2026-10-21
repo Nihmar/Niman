@@ -2,6 +2,7 @@ import AVFoundation
 
 #if os(iOS)
   import Flutter
+  import UIKit
 #else
   import FlutterMacOS
 #endif
@@ -27,6 +28,19 @@ public class NimanApplePlugin: NSObject, FlutterPlugin {
     // The clipboard's HTML, for Paste as Markdown, as Linux's runner reads it.
     let clipboard = FlutterMethodChannel(name: "niman/clipboard", binaryMessenger: messenger)
     clipboard.setMethodCallHandler(ClipboardBridge.handle)
+    #if os(iOS)
+      // The screen kept on while slides are presented, as Android's
+      // keep-screen-on flag (a Mac takes a power assertion from Dart).
+      let screen = FlutterMethodChannel(name: "niman/screen", binaryMessenger: messenger)
+      screen.setMethodCallHandler { call, result in
+        guard call.method == "keepOn", let on = call.arguments as? Bool else {
+          result(FlutterMethodNotImplemented)
+          return
+        }
+        UIApplication.shared.isIdleTimerDisabled = on
+        result(nil)
+      }
+    #endif
   }
 
   #if os(macOS)
