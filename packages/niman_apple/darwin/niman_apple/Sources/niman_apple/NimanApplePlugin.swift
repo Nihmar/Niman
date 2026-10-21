@@ -16,7 +16,21 @@ public class NimanApplePlugin: NSObject, FlutterPlugin {
     #endif
     let audio = FlutterMethodChannel(name: "niman/audio", binaryMessenger: messenger)
     registrar.addMethodCallDelegate(NimanApplePlugin(), channel: audio)
+    #if os(macOS)
+      // WebKit prints the PDF export and reads script-built pages, as
+      // Android's WebView does (README.md).
+      let pdf = FlutterMethodChannel(name: "niman/pdf", binaryMessenger: messenger)
+      pdf.setMethodCallHandler(pdfBridge.handle)
+      let pageReader = FlutterMethodChannel(name: "niman/page_reader", binaryMessenger: messenger)
+      pageReader.setMethodCallHandler(pageReaderBridge.handle)
+    #endif
   }
+
+  #if os(macOS)
+    /// The bridges, alive for the app's life as their channels are.
+    private static let pdfBridge = PdfBridge()
+    private static let pageReaderBridge = PageReaderBridge()
+  #endif
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
     switch call.method {

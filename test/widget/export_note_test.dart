@@ -12,6 +12,7 @@ import 'package:niman/src/export/epub_note.dart';
 import 'package:niman/src/export/export_files.dart';
 import 'package:niman/src/export/export_tree_book.dart';
 import 'package:niman/src/export/pdf_printer.dart';
+import 'package:niman/src/export/pdf_webview.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/todo/todo_source.dart';
 import 'package:niman/src/ui/strings.dart';
@@ -23,6 +24,11 @@ import '../fakes/fake_window_controller.dart';
 import '../fakes/shell_harness.dart';
 
 void main() {
+  // A desktop that prints with an engine it finds (Linux, Windows): on a
+  // Mac host the system WebView would print instead.
+  setUp(() => debugSystemWebViewPrints = false);
+  tearDown(() => debugSystemWebViewPrints = null);
+
   late FakeLibrarySession controller;
   late FakeFilePicker filePicker;
 

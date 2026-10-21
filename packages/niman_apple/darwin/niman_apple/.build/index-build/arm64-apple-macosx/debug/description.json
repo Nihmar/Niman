@@ -1,0 +1,266 @@
+{
+  "builtTestProducts" : [
+
+  ],
+  "copyCommands" : {
+
+  },
+  "explicitTargetDependencyImportCheckingMode" : {
+    "none" : {
+
+    }
+  },
+  "generatedSourceTargetSet" : [
+
+  ],
+  "pluginDescriptions" : [
+
+  ],
+  "swiftCommands" : {
+    "C.niman_apple-arm64-apple-macosx-debug.module" : {
+      "executable" : "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "fileList" : "/Users/alessandromanente/Projects/Niman/packages/niman_apple/darwin/niman_apple/.build/index-build/arm64-apple-macosx/debug/niman_apple.build/sources",
+      "importPath" : "/Users/alessandromanente/Projects/Niman/packages/niman_apple/darwin/niman_apple/.build/index-build/arm64-apple-macosx/debug/Modules",
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/alessandromanente/Projects/Niman/packages/niman_apple/darwin/niman_apple/Sources/niman_apple/AudioDecoder.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/alessandromanente/Projects/Niman/packages/niman_apple/darwin/niman_apple/Sources/niman_apple/NimanApplePlugin.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/alessandromanente/Projects/Niman/packages/niman_apple/darwin/niman_apple/Sources/niman_apple/PageReaderBridge.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/alessandromanente/Projects/Niman/packages/niman_apple/darwin/niman_apple/Sources/niman_apple/PdfBridge.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/alessandromanente/Projects/Niman/packages/niman_apple/darwin/niman_apple/.build/index-build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/alessandromanente/Projects/Niman/packages/niman_apple/darwin/niman_apple/.build/index-build/arm64-apple-macosx/debug/niman_apple.build/sources"
+        }
+      ],
+      "isLibrary" : true,
+      "moduleName" : "niman_apple",
+      "moduleOutputPath" : "/Users/alessandromanente/Projects/Niman/packages/niman_apple/darwin/niman_apple/.build/index-build/arm64-apple-macosx/debug/Modules/niman_apple.swiftmodule",
+      "objects" : [
+        "/Users/alessandromanente/Projects/Niman/packages/niman_apple/darwin/niman_apple/.build/index-build/arm64-apple-macosx/debug/niman_apple.build/AudioDecoder.swift.o",
+        "/Users/alessandromanente/Projects/Niman/packages/niman_apple/darwin/niman_apple/.build/index-build/arm64-apple-macosx/debug/niman_apple.build/NimanApplePlugin.swift.o",
+        "/Users/alessandromanente/Projects/Niman/packages/niman_apple/darwin/niman_apple/.build/index-build/arm64-apple-macosx/debug/niman_apple.build/PageReaderBridge.swift.o",
+        "/Users/alessandromanente/Projects/Niman/packages/niman_apple/darwin/niman_apple/.build/index-build/arm64-apple-macosx/debug/niman_apple.build/PdfBridge.swift.o"
+      ],
+      "otherArguments" : [
+        "-target",
+        "arm64-apple-macosx14.0",
+        "-incremental",
+        "-enable-batch-mode",
+        "-serialize-diagnostics",
+        "-Onone",
+        "-enable-testing",
+        "-j12",
+        "-DSWIFT_PACKAGE",
+        "-DDEBUG",
+        "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+        "-module-cache-path",
+        "/Users/alessandromanente/Projects/Niman/packages/niman_apple/darwin/niman_apple/.build/index-build/arm64-apple-macosx/debug/ModuleCache",
+        "-parseable-output",
+        "-parse-as-library",
+        "-emit-objc-header",
+        "-emit-objc-header-path",
+        "/Users/alessandromanente/Projects/Niman/packages/niman_apple/darwin/niman_apple/.build/index-build/arm64-apple-macosx/debug/niman_apple.build/include/niman_apple-Swift.h",
+        "-swift-version",
+        "5",
+        "-Xfrontend",
+        "-experimental-lazy-typecheck",
+        "-Xfrontend",
+        "-experimental-skip-all-function-bodies",
+        "-Xfrontend",
+        "-experimental-allow-module-with-compiler-errors",
+        "-Xfrontend",
+        "-empty-abi-descriptor",
+        "-plugin-path",
+        "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
+        "-sdk",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk",
+        "-F",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-I",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-L",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-g",
+        "-Xcc",
+        "-isysroot",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk",
+        "-Xcc",
+        "-F",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-Xcc",
+        "-fPIC",
+        "-Xcc",
+        "-g",
+        "-package-name",
+        "niman_apple"
+      ],
+      "outputFileMapPath" : "/Users/alessandromanente/Projects/Niman/packages/niman_apple/darwin/niman_apple/.build/index-build/arm64-apple-macosx/debug/niman_apple.build/output-file-map.json",
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/alessandromanente/Projects/Niman/packages/niman_apple/darwin/niman_apple/.build/index-build/arm64-apple-macosx/debug/Modules/niman_apple.swiftmodule"
+        }
+      ],
+      "prepareForIndexing" : true,
+      "sources" : [
+        "/Users/alessandromanente/Projects/Niman/packages/niman_apple/darwin/niman_apple/Sources/niman_apple/AudioDecoder.swift",
+        "/Users/alessandromanente/Projects/Niman/packages/niman_apple/darwin/niman_apple/Sources/niman_apple/NimanApplePlugin.swift",
+        "/Users/alessandromanente/Projects/Niman/packages/niman_apple/darwin/niman_apple/Sources/niman_apple/PageReaderBridge.swift",
+        "/Users/alessandromanente/Projects/Niman/packages/niman_apple/darwin/niman_apple/Sources/niman_apple/PdfBridge.swift"
+      ],
+      "tempsPath" : "/Users/alessandromanente/Projects/Niman/packages/niman_apple/darwin/niman_apple/.build/index-build/arm64-apple-macosx/debug/niman_apple.build",
+      "wholeModuleOptimization" : false
+    }
+  },
+  "swiftFrontendCommands" : {
+
+  },
+  "swiftTargetScanArgs" : {
+    "niman_apple" : [
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "-module-name",
+      "niman_apple",
+      "-package-name",
+      "niman_apple",
+      "-c",
+      "/Users/alessandromanente/Projects/Niman/packages/niman_apple/darwin/niman_apple/Sources/niman_apple/AudioDecoder.swift",
+      "/Users/alessandromanente/Projects/Niman/packages/niman_apple/darwin/niman_apple/Sources/niman_apple/NimanApplePlugin.swift",
+      "/Users/alessandromanente/Projects/Niman/packages/niman_apple/darwin/niman_apple/Sources/niman_apple/PageReaderBridge.swift",
+      "/Users/alessandromanente/Projects/Niman/packages/niman_apple/darwin/niman_apple/Sources/niman_apple/PdfBridge.swift",
+      "-I",
+      "/Users/alessandromanente/Projects/Niman/packages/niman_apple/darwin/niman_apple/.build/index-build/arm64-apple-macosx/debug/Modules",
+      "-target",
+      "arm64-apple-macosx14.0",
+      "-incremental",
+      "-enable-batch-mode",
+      "-serialize-diagnostics",
+      "-Onone",
+      "-enable-testing",
+      "-j12",
+      "-DSWIFT_PACKAGE",
+      "-DDEBUG",
+      "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+      "-module-cache-path",
+      "/Users/alessandromanente/Projects/Niman/packages/niman_apple/darwin/niman_apple/.build/index-build/arm64-apple-macosx/debug/ModuleCache",
+      "-parseable-output",
+      "-parse-as-library",
+      "-emit-objc-header",
+      "-emit-objc-header-path",
+      "/Users/alessandromanente/Projects/Niman/packages/niman_apple/darwin/niman_apple/.build/index-build/arm64-apple-macosx/debug/niman_apple.build/include/niman_apple-Swift.h",
+      "-swift-version",
+      "5",
+      "-Xfrontend",
+      "-experimental-lazy-typecheck",
+      "-Xfrontend",
+      "-experimental-skip-all-function-bodies",
+      "-Xfrontend",
+      "-experimental-allow-module-with-compiler-errors",
+      "-Xfrontend",
+      "-empty-abi-descriptor",
+      "-plugin-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
+      "-sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk",
+      "-F",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-I",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-L",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-g",
+      "-Xcc",
+      "-isysroot",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk",
+      "-Xcc",
+      "-F",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-Xcc",
+      "-fPIC",
+      "-Xcc",
+      "-g",
+      "-package-name",
+      "niman_apple",
+      "-driver-use-frontend-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"
+    ]
+  },
+  "targetDependencyMap" : {
+    "niman_apple" : [
+
+    ]
+  },
+  "testDiscoveryCommands" : {
+
+  },
+  "testEntryPointCommands" : {
+
+  },
+  "traitConfiguration" : {
+    "default" : [
+      {
+
+      }
+    ]
+  },
+  "writeCommands" : {
+    "/Users/alessandromanente/Projects/Niman/packages/niman_apple/darwin/niman_apple/.build/index-build/arm64-apple-macosx/debug/niman_apple.build/sources" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<sources-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/alessandromanente/Projects/Niman/packages/niman_apple/darwin/niman_apple/Sources/niman_apple/AudioDecoder.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/alessandromanente/Projects/Niman/packages/niman_apple/darwin/niman_apple/Sources/niman_apple/NimanApplePlugin.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/alessandromanente/Projects/Niman/packages/niman_apple/darwin/niman_apple/Sources/niman_apple/PageReaderBridge.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/alessandromanente/Projects/Niman/packages/niman_apple/darwin/niman_apple/Sources/niman_apple/PdfBridge.swift"
+        }
+      ],
+      "outputFilePath" : "/Users/alessandromanente/Projects/Niman/packages/niman_apple/darwin/niman_apple/.build/index-build/arm64-apple-macosx/debug/niman_apple.build/sources"
+    },
+    "/Users/alessandromanente/Projects/Niman/packages/niman_apple/darwin/niman_apple/.build/index-build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt" : {
+      "alwaysOutOfDate" : true,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<swift-get-version>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"
+        }
+      ],
+      "outputFilePath" : "/Users/alessandromanente/Projects/Niman/packages/niman_apple/darwin/niman_apple/.build/index-build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"
+    }
+  }
+}

@@ -15,6 +15,7 @@ import 'dart:io';
 import 'package:niman/src/capture/browser/webview_page_browser.dart';
 import 'package:niman/src/core/process_run.dart';
 import 'package:niman/src/export/pdf_printer.dart';
+import 'package:niman/src/export/pdf_webview.dart';
 
 /// Runs a page and gives its DOM.
 abstract interface class PageBrowser {
@@ -89,7 +90,7 @@ final class EnginePageBrowser implements PageBrowser {
 /// a Linux desktop without a Chromium. Call it on the UI isolate: the
 /// WebView's channel needs its token.
 Future<PageBrowser?> findPageBrowser() async {
-  if (Platform.isAndroid) return WebViewPageBrowser.forThisIsolate();
+  if (systemWebViewPrints) return WebViewPageBrowser.forThisIsolate();
   final engine = await findPdfEngine();
   return engine == null ? null : EnginePageBrowser(engine);
 }

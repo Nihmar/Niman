@@ -7,14 +7,28 @@
 library;
 
 import 'dart:async';
+import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:niman/src/export/pdf_printer.dart';
 
-/// The channel the Android WebView printer answers on.
+/// The channel the system WebView printer answers on.
 const String webViewPdfChannel = 'niman/pdf';
 
-/// Prints through the system WebView, on Android.
+/// Whether the system's own WebView prints here, through [webViewPdfChannel]
+/// — Android's, and WebKit on a Mac (`packages/niman_apple`) — rather than a
+/// browser found on the machine. It reads script-built pages too
+/// (`niman/page_reader`).
+bool get systemWebViewPrints =>
+    debugSystemWebViewPrints ?? (Platform.isAndroid || Platform.isMacOS);
+
+/// Pins [systemWebViewPrints] for a test that describes one platform's
+/// export, whatever the host it runs on; null follows the host.
+@visibleForTesting
+bool? debugSystemWebViewPrints;
+
+/// Prints through the system WebView, where [systemWebViewPrints].
 ///
 /// The channel is the engine: where it is missing (this is not Android,
 /// or the bridge was never attached) the outcome is [PdfNoEngine], and
