@@ -20,7 +20,9 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:niman/src/history/history_legacy.dart';
+import 'package:niman/src/history/history_lock.dart';
 import 'package:niman/src/history/history_log.dart';
+import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/history/history_objects.dart';
 import 'package:niman/src/history/history_store.dart';
 import 'package:path/path.dart' as p;
@@ -87,17 +89,32 @@ PackOutcome packNoteHistory(String root, String rel) {
     successorContent = content;
   }
   // The newest stays whole: compressed hard now that no save waits for it.
+  // One a crash cut short — its header gone, or its stream — is written
+  // again from the note when the note still holds it: a save that found
+  // the note unchanged since this version left the check here.
   final newest = versions.last.sha256;
-  if (isFastWhole(root, newest)) {
+  if (chainDepth(root, newest) == null || isFastWhole(root, newest)) {
     final file = File(historyObjectPath(root, newest));
-    final before = file.lengthSync();
-    final content = readObject(root, newest);
-    if (content != null) {
+    final before = file.existsSync() ? file.lengthSync() : 0;
+    final content =
+        readObject(root, newest) ?? _repairFromNote(root, rel, newest);
+    if (content != null && isFastWhole(root, newest)) {
       storeHard(root, newest, content);
       saved += before - file.lengthSync();
     }
   }
   return (packed: packed, saved: saved);
+}
+
+/// The note at [rel] as it is, written as object [sha] when it still holds
+/// that content; null when it does not.
+Uint8List? _repairFromNote(String root, String rel, String sha) {
+  final note = File(p.join(root, rel));
+  if (!note.existsSync()) return null;
+  final bytes = note.readAsBytesSync();
+  if (shaOf(bytes) != sha) return null;
+  writeObject(root, sha, bytes);
+  return readObject(root, sha);
 }
 
 /// What a whole pass over a library's history did.
@@ -129,39 +146,50 @@ UpkeepOutcome maintainHistory(
   if (!history.existsSync()) return empty;
   var migrated = 0;
   for (final rel in legacyNotesUnder(root, history)) {
-    migrated += importLegacyHistory(root, rel);
+    migrated += withHistoryLock(root, [
+      rel,
+    ], () => importLegacyHistory(root, rel));
   }
   final notes = _logged(root, history);
   var packed = 0;
   var saved = 0;
-  final named = <String>{};
   for (final rel in notes) {
-    final log = readLog(root, rel);
-    if (log == null) continue;
-    if (logWantsCompacting(log)) writeLog(root, rel, log.manifest);
+    // Compacted under the note's lock, from a read made under it: a line a
+    // save or a pin appends meanwhile waits, and is in what is rewritten.
+    withHistoryLock(root, [rel], () {
+      final log = readLog(root, rel);
+      if (log != null && logWantsCompacting(log)) {
+        writeLog(root, rel, log.manifest, highest: log.highest);
+      }
+    });
     final outcome = packNoteHistory(root, rel);
     packed += outcome.packed;
     saved += outcome.saved;
-    for (final v in log.manifest.versions) {
+  }
+  final named = <String>{};
+  for (final rel in notes) {
+    for (final v
+        in readLog(root, rel)?.manifest.versions ?? <HistoryVersion>[]) {
       named.add(v.sha256);
     }
   }
-  // A delta's base is named too, however far down its chain.
   final queue = [...named];
   while (queue.isNotEmpty) {
     final base = deltaBaseOf(root, queue.removeLast());
     if (base != null && named.add(base)) queue.add(base);
   }
-  final cutoff = (now ?? DateTime.now()).subtract(grace);
   var collected = 0;
   var collectedBytes = 0;
-  for (final MapEntry(key: sha, value: file) in listObjects(root).entries) {
-    if (named.contains(sha)) continue;
-    final stat = file.statSync();
-    if (!stat.modified.isBefore(cutoff)) continue;
-    file.deleteSync();
-    collected++;
-    collectedBytes += stat.size;
+  final cutoff = (now ?? DateTime.now()).subtract(grace);
+  {
+    for (final MapEntry(key: sha, value: file) in listObjects(root).entries) {
+      if (named.contains(sha)) continue;
+      final stat = file.statSync();
+      if (!stat.modified.isBefore(cutoff)) continue;
+      file.deleteSync();
+      collected++;
+      collectedBytes += stat.size;
+    }
   }
   _pruneEmptyFans(root);
   return (
