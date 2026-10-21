@@ -45,6 +45,14 @@ public class NimanApplePlugin: NSObject, FlutterPlugin {
         UIApplication.shared.isIdleTimerDisabled = on
         result(nil)
       }
+      // The home screen's quick actions and the notes Files opens.
+      let shortcuts = FlutterMethodChannel(name: "niman/shortcuts", binaryMessenger: messenger)
+      shortcuts.setMethodCallHandler(sceneBridge.handleShortcuts)
+      let app = FlutterMethodChannel(name: "niman/apple_app", binaryMessenger: messenger)
+      app.setMethodCallHandler(sceneBridge.handleApp)
+      sceneBridge.shortcutChannel = shortcuts
+      sceneBridge.appChannel = app
+      registrar.addSceneDelegate(sceneBridge)
     #endif
   }
 
@@ -55,6 +63,9 @@ public class NimanApplePlugin: NSObject, FlutterPlugin {
     private static let pdfBridge = PdfBridgeIOS()
   #endif
   private static let pageReaderBridge = PageReaderBridge()
+  #if os(iOS)
+    private static let sceneBridge = SceneBridge()
+  #endif
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
     switch call.method {

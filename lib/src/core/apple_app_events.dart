@@ -1,10 +1,11 @@
-/// What a Mac's app delegate hands the app (docs/records/apple-platforms.md):
-/// the notes Finder asks it to open, and the Dock menu's quick actions,
-/// over `niman/mac_app` (macos/Runner/AppDelegate.swift).
+/// What the Apple platforms' app hands Dart (docs/records/apple-platforms.md),
+/// over `niman/apple_app`: the notes the system asks it to open — Finder on a
+/// Mac (macos/Runner/AppDelegate.swift), the Files app on an iPhone
+/// (`packages/niman_apple`'s scene bridge) — and a Mac's Dock menu.
 ///
-/// A Mac opens a file in the running app rather than starting another, and
-/// a double-clicked note starts the app before Dart listens: the delegate
-/// keeps those and hands them over when `takePendingFiles` first asks.
+/// Both open a file in the running app rather than starting another, and a
+/// note opened from outside starts the app before Dart listens: the native
+/// side keeps those and hands them over when `takePendingFiles` first asks.
 library;
 
 import 'dart:async';
@@ -12,7 +13,7 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 
 /// The app delegate's channel.
-final class MacAppEvents {
+final class AppleAppEvents {
   new _() {
     _channel.setMethodCallHandler((call) async {
       switch (call.method) {
@@ -25,9 +26,9 @@ final class MacAppEvents {
   }
 
   /// The one listener, made when first asked for.
-  static final MacAppEvents instance = MacAppEvents._();
+  static final AppleAppEvents instance = AppleAppEvents._();
 
-  static const MethodChannel _channel = MethodChannel('niman/mac_app');
+  static const MethodChannel _channel = MethodChannel('niman/apple_app');
 
   final StreamController<String> _files = StreamController.broadcast();
   final StreamController<String> _dockActions = StreamController.broadcast();

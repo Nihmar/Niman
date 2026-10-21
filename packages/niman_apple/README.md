@@ -10,3 +10,5 @@ Niman's native code for macOS and iOS, in one Swift source shared by both
 | `niman/clipboard` | `readHtml` | macOS and iOS: the pasteboard's HTML and the page it came from — `public.html` and `org.chromium.source-url` from Chrome and Edge, `public.html` from Firefox, a web archive's main resource from Safari — for Paste as Markdown. As Linux's `clipboard_html.cc`. |
 | `niman/page_reader` | `read` `{url, timeoutMs, maxCharacters}`, `cancel` | macOS and iOS: an offscreen WebKit view runs the page, waits for its text to stop growing, and answers its `outerHTML`. As Android's `PageReaderBridge.kt`. |
 | `niman/screen` | `keepOn` `bool` | iOS: the idle timer off while slides are presented, as Android's keep-screen-on flag (a Mac's power assertion is taken from Dart). |
+| `niman/shortcuts` | `publish` `[{id, label}]`, `consumeLaunchAction`; sends `shortcut` | iOS: the home screen's quick actions, as Android's launcher shortcuts (scene bridge). |
+| `niman/apple_app` | `takePendingFiles`; sends `open` | iOS: the notes the Files app opens, kept until Dart asks (a Mac's app delegate answers the same channel). |

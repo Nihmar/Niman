@@ -80,13 +80,16 @@ abstract interface class ShortcutService {
   Future<void> dispose();
 }
 
-/// Creates the platform service: launcher shortcuts on Android, a no-op
-/// elsewhere (no desktop has the equivalent menu).
+/// Creates the platform service: launcher shortcuts on Android, the home
+/// screen's quick actions on iOS (`packages/niman_apple`, the same
+/// channel), a no-op elsewhere (no desktop has the equivalent menu).
 ///
 /// [isAndroid] overrides the host platform so a plain test can cover the
 /// branch that does not run here (T-PP-01).
 ShortcutService createShortcutService({bool? isAndroid}) {
-  if (isAndroid ?? Platform.isAndroid) return PlatformShortcutService();
+  if (isAndroid ?? (Platform.isAndroid || Platform.isIOS)) {
+    return PlatformShortcutService();
+  }
   return const NoopShortcutService();
 }
 

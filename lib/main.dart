@@ -8,6 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:niman/src/app.dart';
 import 'package:niman/src/core/app_channel.dart';
+import 'package:niman/src/core/apple_app_events.dart';
 import 'package:niman/src/core/crash_reporter.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/frame_cost.dart';
@@ -16,7 +17,6 @@ import 'package:niman/src/core/launch_args.dart';
 import 'package:niman/src/core/launch_requests.dart';
 import 'package:niman/src/core/log_file.dart';
 import 'package:niman/src/core/logging.dart';
-import 'package:niman/src/core/mac_app_events.dart';
 import 'package:niman/src/core/shortcuts.dart';
 import 'package:niman/src/core/single_instance.dart';
 import 'package:niman/src/widget/widget_toggle.dart';
@@ -45,17 +45,17 @@ Future<void> main(List<String> args) async {
   // and ends here, before it opens anything.
   final instance = desktop ? await _claimSession(launch) : null;
   if (desktop && instance == null) exit(0);
-  // A Mac opens a note in the running app instead of starting another: the
-  // app delegate's files join the later launches, and the ones it kept
-  // from before Dart listened — a double-clicked note started the app —
+  // A Mac or an iPhone opens a note in the running app instead of starting
+  // another: those files join the later launches, and the ones kept from
+  // before Dart listened — a note opened from outside started the app —
   // the first of them as the file the app started with.
-  final macFiles = Platform.isMacOS
-      ? await MacAppEvents.instance.takePendingFiles()
+  final appleFiles = Platform.isMacOS || Platform.isIOS
+      ? await AppleAppEvents.instance.takePendingFiles()
       : const <String>[];
   final launches = instance?.launches.map(LaunchArgs.fromJson);
   final later = launches == null
       ? null
-      : _withMacFiles(launches, kept: macFiles.skip(1)).asBroadcastStream();
+      : _withAppleFiles(launches, kept: appleFiles.skip(1)).asBroadcastStream();
   runApp(
     ProviderScope(
       overrides: [
@@ -71,10 +71,22 @@ Future<void> main(List<String> args) async {
                         .cast<ShortcutAction>(),
             ),
           ),
+        // An iPhone has no later launches, only the notes the Files app
+        // asks it to open.
+        if (Platform.isIOS)
+          launchRequestsProvider.overrideWithValue(
+            LaunchRequests(
+              file: appleFiles.firstOrNull,
+              later: _withAppleFiles(
+                const Stream<LaunchArgs>.empty(),
+                kept: appleFiles.skip(1),
+              ).asBroadcastStream(),
+            ),
+          ),
         if (desktop)
           launchRequestsProvider.overrideWithValue(
             LaunchRequests(
-              file: launch.openPath ?? macFiles.firstOrNull,
+              file: launch.openPath ?? appleFiles.firstOrNull,
               later: later ?? const Stream.empty(),
             ),
           ),
@@ -84,14 +96,15 @@ Future<void> main(List<String> args) async {
   );
 }
 
-/// [launches], with a Mac's notes to open as launches that open them: the
-/// ones Finder hands the running app, after [kept], the ones held from
-/// before Dart listened. Elsewhere [launches] alone.
-Stream<LaunchArgs> _withMacFiles(
+/// [launches], with the Apple platforms' notes to open as launches that
+/// open them: the ones Finder or the Files app hands the running app, after
+/// [kept], the ones held from before Dart listened. Elsewhere [launches]
+/// alone.
+Stream<LaunchArgs> _withAppleFiles(
   Stream<LaunchArgs> launches, {
   required Iterable<String> kept,
 }) {
-  if (!Platform.isMacOS) return launches;
+  if (!Platform.isMacOS && !Platform.isIOS) return launches;
   final merged = StreamController<LaunchArgs>();
   final subscriptions = <StreamSubscription<LaunchArgs>>[];
   merged
@@ -99,7 +112,7 @@ Stream<LaunchArgs> _withMacFiles(
       for (final stream in [
         launches,
         Stream.fromIterable(kept).map((path) => LaunchArgs(openPath: path)),
-        MacAppEvents.instance.files.map((path) => LaunchArgs(openPath: path)),
+        AppleAppEvents.instance.files.map((path) => LaunchArgs(openPath: path)),
       ]) {
         subscriptions.add(stream.listen(merged.add));
       }

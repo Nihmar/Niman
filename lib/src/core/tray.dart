@@ -27,9 +27,9 @@ import 'package:nativeapi/nativeapi.dart'
         TrayIconRightClickedEvent;
 import 'package:niman/src/core/app_channel.dart';
 import 'package:niman/src/core/app_theme.dart';
+import 'package:niman/src/core/apple_app_events.dart';
 import 'package:niman/src/core/host_platform.dart';
 import 'package:niman/src/core/logging.dart';
-import 'package:niman/src/core/mac_app_events.dart';
 import 'package:niman/src/core/shortcuts.dart';
 import 'package:niman/src/core/theme.dart';
 import 'package:niman/src/core/windows_tray_menu.dart';
@@ -196,11 +196,11 @@ final class PlatformTrayService implements TrayService {
     // words, and they run the way the tray's do.
     if (Platform.isMacOS) {
       unawaited(
-        MacAppEvents.instance.setDockMenu([
+        AppleAppEvents.instance.setDockMenu([
           for (final MapEntry(:key, :value) in labels.entries) (key.id, value),
         ]),
       );
-      _dock ??= MacAppEvents.instance.dockActions.listen((id) {
+      _dock ??= AppleAppEvents.instance.dockActions.listen((id) {
         if (ShortcutAction.fromId(id) case final action?) {
           _log.debug('dock action: $id');
           _actions.add(action);

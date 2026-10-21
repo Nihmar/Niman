@@ -10,7 +10,7 @@ class AppDelegate: FlutterAppDelegate {
   /// Set when Dart has run its close guard and lets the quit through.
   var quitConfirmed = false
 
-  /// The app's channel (`niman/mac_app`, lib/src/core/mac_app_events.dart):
+  /// The app's channel (`niman/apple_app`, lib/src/core/apple_app_events.dart):
   /// the files Finder asks to open, and the Dock menu.
   var appChannel: FlutterMethodChannel?
 
@@ -91,7 +91,7 @@ class AppDelegate: FlutterAppDelegate {
     appChannel?.invokeMethod("dockAction", arguments: id)
   }
 
-  /// Dart's side of `niman/mac_app`.
+  /// Dart's side of `niman/apple_app`.
   func handleApp(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
     switch call.method {
     case "takePendingFiles":

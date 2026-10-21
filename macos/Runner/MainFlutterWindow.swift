@@ -29,8 +29,8 @@ class MainFlutterWindow: NSWindow, NSDraggingDestination {
     }
     (NSApp.delegate as? AppDelegate)?.quitChannel = quit
 
-    // Finder's files and the Dock menu (lib/src/core/mac_app_events.dart).
-    let app = FlutterMethodChannel(name: "niman/mac_app", binaryMessenger: messenger)
+    // Finder's files and the Dock menu (lib/src/core/apple_app_events.dart).
+    let app = FlutterMethodChannel(name: "niman/apple_app", binaryMessenger: messenger)
     if let delegate = NSApp.delegate as? AppDelegate {
       app.setMethodCallHandler(delegate.handleApp)
       delegate.appChannel = app
