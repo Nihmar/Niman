@@ -68,11 +68,11 @@ void main() {
     final stat = File(p.join(root.path, 'note1.md')).statSync();
     expect(note1.modified, toStoredSecond(stat.modified));
     // The creation time the tree's order reads (#726): on Windows the
-    // stat's own, and the modification time where the file system keeps
-    // none — which is every other system this runs on.
+    // stat's own, on a Mac the birth time read apart, and the modification
+    // time where the file system keeps none.
     expect(
       note1.created,
-      toStoredSecond(createdOf(stat)),
+      toStoredSecond(createdOf(stat, p.join(root.path, 'note1.md'))),
       reason: 'the creation time, or the fallback',
     );
 
