@@ -351,6 +351,61 @@ void main() {
     expect(await caretAt(0), await caretAt(text.indexOf('a first')));
   });
 
+  testWidgets('a space typed at a cell’s end is one space wide', (
+    tester,
+  ) async {
+    // The spaces round a cell's text are drawn as the room that puts the next
+    // cell on its column, one run as wide as the whole column's remainder. A
+    // space typed at the end of a cell's text is one of them — the cell's
+    // text is trimmed — so it used to take its share of that room: on a table
+    // whose column is much wider than the cell, one press of the space bar
+    // moved the caret most of the way across the column (#1160). The
+    // writer's own spaces stand as wide as a space does now, and the room is
+    // the pipe's, where no cell's text is.
+    const note =
+        'x\n\n| a | b |\n|---|---|\n'
+        '| Aria | one |\n'
+        '| a cell far longer than the one above it | two |\n\n';
+    final state = await _pumpNote(tester, note);
+    const line = 4;
+    final buffer = state.widget.buffer;
+    final lineStart = buffer.offsetOfLine(line);
+    int columnOf(String word) => buffer.lineAt(line).indexOf(word);
+    Future<Rect> caretAt(int column) async {
+      state.placeCaret(lineStart + column);
+      await tester.pump();
+      return state.caretRect!;
+    }
+
+    final end = columnOf('Aria') + 'Aria'.length;
+    // The test's face is fixed-width: a space's step is a letter's.
+    final letter =
+        (await caretAt(end - 1)).left - (await caretAt(end - 2)).left;
+    final cellEnd = await caretAt(end);
+    final afterSpace = await caretAt(end + 1);
+    expect(
+      afterSpace.left - cellEnd.left,
+      closeTo(letter, 0.01),
+      reason: 'one space typed at the cell\u2019s end is one space wide',
+    );
+
+    // And the room is still the room: the cell after it does not move, and
+    // three spaces typed there step the caret three characters' worth.
+    final second = await caretAt(columnOf('one'));
+    buffer.replaceRange(lineStart + end, lineStart + end, '   ');
+    await tester.pump();
+    expect(
+      (await caretAt(columnOf('one'))).left,
+      closeTo(second.left, 0.01),
+      reason: 'the next cell keeps its column',
+    );
+    expect(
+      (await caretAt(columnOf('Aria') + 'Aria'.length + 3)).left - cellEnd.left,
+      closeTo(3 * letter, 0.02),
+      reason: 'three spaces, three characters',
+    );
+  });
+
   testWidgets('in source, a table too wide for the pane is its text', (
     tester,
   ) async {
