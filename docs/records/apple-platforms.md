@@ -555,6 +555,53 @@ not a platform quietly behind.
   Mac's window and tray; both are pinned exactly already, and the spike
   tests them first.
 
+## What the spike answered (2026-10-20 and 21)
+
+Phase 1 ran on the Mac mini: the macOS port went on to most of phase 2 on
+`spike/macos`, and the iOS runner boots in the simulator on `spike/ios`.
+The **to verify** items above, answered:
+
+- **`window_manager` 0.5.2 on macOS:** the hidden title bar keeps the
+  traffic lights over a transparent bar, and close interception
+  (`setPreventClose`) works; the bar leaves the lights their room.
+- **`nativeapi` 0.2.4's tray on macOS:** the status item and its menu
+  work; a click opens the menu. Its Dart API does not expose the template
+  image, so `cnativeapi`'s C call does that (a direct dependency, pinned).
+- **`file_picker`:** on an unsandboxed Mac its Darwin handler refuses every
+  dialog over entitlements the app has no use for, unless
+  `skipEntitlementsChecks()` is called at startup. On iOS it returns the
+  picked folder's path, with no copy, no security scope and no bookmark.
+- **The sandbox's folder grant** is moot on the Mac: `flutter create`
+  turns the App Sandbox on, and the runner turns it off (decision 3).
+- **`Directory.watch` on iOS:** `isWatchSupported` is false and the call
+  throws; the watcher checks first and leaves the folder to the rescan.
+- **The math rasteriser** stays off on a Mac: Impeller on Metal smooths
+  the paths' edges itself.
+- **FFmpeg can be left out of the Apple builds:** an Android-only copy of
+  `ffmpeg_kit_flutter_new_min` replaces it (its 2.1.0 iOS frameworks also
+  have no arm64 simulator slice), and AVFoundation decodes other formats
+  in `packages/niman_apple`.
+- **WebKit's PDF against Chrome's:** paginated A4 with real text through
+  the print operation (`createPDF` makes one endless page); pagination,
+  columns and math checked on the Mac.
+- **`home_widget`'s intent process:** not answered yet — the widget spike.
+
+And what the plan did not foresee:
+
+- On macOS the Dart UI isolate runs on the main thread, so the system's
+  spell checker is a synchronous FFI call, as Windows' COM one is.
+- WebKit ends its print on a thread of its own: a channel answered from
+  there reached Dart only at the next event. And a background isolate's
+  channel replies stalled the same way on a Mac, so the folder export's
+  isolate asks the UI isolate to print each page.
+- Tesseract picks its SIMD sources for one processor: the universal OCR
+  engine is two builds joined with `lipo`. CMake 4 needs Leptonica's
+  policy version named.
+- The Mac's FSEvents reports the watched folder itself, and the read
+  view's goldens need a `macos/` set (CoreText); the integration files run
+  the real app, in the host's language.
+- A Swift package of the app's own needs the runner at macOS 14.
+
 ## Decided (2026-10-16)
 
 1. **A Mac mini** joins the hosts within days; the native work happens
