@@ -12,6 +12,7 @@ import 'package:niman/src/db/indexer.dart';
 import 'package:niman/src/library/note_ops.dart';
 import 'package:niman/src/library/note_write_stream.dart';
 import 'package:niman/src/library/note_writer.dart';
+import 'package:niman/src/library/reindex_scheduler.dart';
 import 'package:niman/src/markdown/note_references.dart';
 import 'package:path/path.dart' as p;
 
@@ -301,17 +302,17 @@ void main() {
   });
 
   test('the default waits only for large notes', () {
-    expect(NoteWriter.defaultQuietBeforeReindex(1 << 20), Duration.zero);
+    expect(ReindexScheduler.defaultQuietBeforeReindex(1 << 20), Duration.zero);
     expect(
-      NoteWriter.defaultQuietBeforeReindex(1536 << 10),
+      ReindexScheduler.defaultQuietBeforeReindex(1536 << 10),
       const Duration(seconds: 2),
     );
     expect(
-      NoteWriter.defaultQuietBeforeReindex(4 << 20),
+      ReindexScheduler.defaultQuietBeforeReindex(4 << 20),
       const Duration(seconds: 5),
     );
     expect(
-      NoteWriter.defaultQuietBeforeReindex(250 << 20),
+      ReindexScheduler.defaultQuietBeforeReindex(250 << 20),
       const Duration(seconds: 30),
     );
   });
