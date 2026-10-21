@@ -20,7 +20,7 @@ import 'package:niman/src/db/indexer.dart';
 import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/library/note_ops.dart';
 import 'package:niman/src/library/note_write_stream.dart';
-import 'package:niman/src/library/note_writer.dart';
+import 'package:niman/src/library/note_writer_blocking.dart';
 import 'package:path/path.dart' as p;
 
 /// The attributes a path's lookup cache still answers after a rename.

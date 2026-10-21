@@ -16,7 +16,6 @@ import 'package:home_widget/home_widget.dart';
 import 'package:niman/src/core/app_channel.dart';
 import 'package:niman/src/core/app_theme.dart';
 import 'package:niman/src/core/custom_theme.dart';
-import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/frame_log.dart';
 import 'package:niman/src/core/isolate_gauge.dart';
 import 'package:niman/src/core/language.dart';
@@ -29,6 +28,8 @@ import 'package:niman/src/core/settings/legacy_library_settings.dart';
 import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/core/settings/library_config_repo.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
+import 'package:niman/src/core/temp_sweep_blocking.dart'
+    show sweepStaleTempFiles;
 import 'package:niman/src/core/text_scale.dart';
 import 'package:niman/src/core/theme.dart';
 import 'package:niman/src/core/week_start.dart';

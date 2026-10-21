@@ -40,6 +40,7 @@ import 'package:niman/src/core/isolate_gauge.dart';
 import 'package:niman/src/history/history_store.dart';
 import 'package:niman/src/history/snapshot_policy.dart';
 import 'package:niman/src/library/note_writer.dart';
+import 'package:niman/src/library/note_writer_blocking.dart';
 import 'package:path/path.dart' as p;
 
 /// One slice of a note, encoded and ready for the file.

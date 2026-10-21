@@ -15,7 +15,6 @@ import 'package:niman/src/core/settings/navigation_layout.dart';
 import 'package:niman/src/db/dao.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/db/indexer.dart';
-import 'package:niman/src/editor/outline.dart';
 import 'package:niman/src/frontmatter/edit_in_file.dart';
 import 'package:niman/src/frontmatter/parser.dart';
 import 'package:niman/src/history/history_manifest.dart';
@@ -24,6 +23,7 @@ import 'package:niman/src/home/home_file.dart';
 import 'package:niman/src/home/home_layout.dart';
 import 'package:niman/src/journal/journal_settings.dart';
 import 'package:niman/src/library/note_op_seams.dart';
+import 'package:niman/src/library/note_ops_blocking.dart';
 import 'package:niman/src/library/note_relocation.dart';
 import 'package:niman/src/library/note_save_result.dart';
 import 'package:niman/src/library/note_sync_writes.dart';
@@ -964,71 +964,4 @@ final class NoteOps implements NoteOperations {
   /// there. Ends with an empty manifest.
   @override
   Future<void> emptyTrash() => _trash.empty();
-}
-
-/// [NoteOperations.markdownOnDisk]'s listing, for a background isolate: the
-/// existence check, the listing and a stat per file are each a FUSE round
-/// trip on Android (#1143).
-List<DiskNoteStamp> markdownFilesIn(String root, String folder) {
-  final dir = Directory(folder.isEmpty ? root : p.join(root, folder));
-  if (!dir.existsSync()) return const [];
-  return [
-    for (final entry in dir.listSync())
-      if (entry is File && entry.path.toLowerCase().endsWith('.md'))
-        if (entry.statSync() case final stat)
-          (
-            path: p.relative(entry.path, from: root).replaceAll(r'\', '/'),
-            size: stat.size,
-            modified: stat.modified,
-          ),
-  ];
-}
-
-String _noteTextAt(String path) {
-  final bytes = File(path).readAsBytesSync();
-  var text = decodeNoteText(bytes);
-  if (text.isNotEmpty && text.codeUnitAt(0) == 0xFEFF) {
-    text = text.substring(1);
-  }
-  return text;
-}
-
-/// The heading texts of the note file at absolute [path], read as it lies.
-///
-/// The whole file is read, decoded — leniently, without its BOM, as
-/// [NoteOps.readNote] does — and walked for its headings, so this is work
-/// for a background isolate ([IsolateGauge.run]), never the UI's (#491).
-List<String> headingsOfNoteFile(String path) {
-  return [for (final heading in outlineOfText(_noteTextAt(path))) heading.text];
-}
-
-/// The block anchors of the note file at absolute [path] (#844), read as
-/// [headingsOfNoteFile] reads: work for a background isolate.
-List<BlockAnchor> blocksOfNoteFile(String path) =>
-    blockAnchorsOfText(_noteTextAt(path));
-
-/// The first [PreviewLimits.bytes] bytes of the note file at absolute [path],
-/// decoded as a note is, its BOM off and its line endings `\n` (#846): work
-/// for a background isolate.
-NotePreviewText previewTextOfNoteFile(String path) {
-  final file = File(path).openSync();
-  List<int> head;
-  final bool truncated;
-  try {
-    head = file.readSync(PreviewLimits.bytes);
-    truncated = file.lengthSync() > PreviewLimits.bytes;
-  } finally {
-    file.closeSync();
-  }
-  // A cut inside a UTF-8 sequence would send the whole head to the
-  // Latin-1-mixed decoder: it is backed up to the last whole one.
-  if (truncated) head = head.sublist(0, utf8CompleteUpTo(head));
-  var text = decodeNoteText(Uint8List.fromList(head));
-  if (text.isNotEmpty && text.codeUnitAt(0) == 0xFEFF) {
-    text = text.substring(1);
-  }
-  return NotePreviewText(
-    text: text.replaceAll('\r\n', '\n').replaceAll('\r', '\n'),
-    truncated: truncated,
-  );
 }

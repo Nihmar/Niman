@@ -1,11 +1,16 @@
 // No synchronous file call on the UI isolate (AGENTS.md, #1143): on Android
 // every `statSync` or `listSync` is a round trip through FUSE, and the frame
-// waits for it. The rule had exceptions nobody had listed; this lists where
-// the synchronous calls are allowed — files whose calls all run on a
-// background isolate — and says where each runs. A synchronous call in any
-// other file is either moved off the UI isolate (the asynchronous call, or
-// the `Isolate.run` its caller makes) or its file joins this list, with the
-// isolate it runs on: a decision, not an accident.
+// waits for it. This lists where the synchronous calls are allowed: files
+// whose calls all run on a background isolate, and where each runs.
+//
+// The list is per file, so a file on it must be isolate-only: a file that
+// also holds code the UI isolate runs would let a new `existsSync()` pass
+// there. Such a file keeps its blocking helpers in a `<name>_blocking.dart`
+// beside it (`files_blocking.dart`, `note_ops_blocking.dart`, ...) and the
+// list names that. A synchronous call in any other file is either moved off
+// the UI isolate (the asynchronous call, or the `Isolate.run` its caller
+// makes) or goes into such a file, with the isolate it runs on: a decision,
+// not an accident.
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -17,10 +22,14 @@ const Map<String, String> _offTheUiIsolate = {
   'calendar/calendar_store.dart': 'the reads its Isolate.run calls',
   'core/download/download_files.dart': 'the scan and deletes it Isolate.runs',
   'core/download/file_download.dart': "the download's spawned isolate",
-  'core/files.dart':
-      'the sweep, the name check and the hash run in isolates; '
-      'DiskStamp.of is the synchronous form for them (ofAsync for the UI)',
+  'core/disk_stamp.dart':
+      'DiskStamp.of and matches, the synchronous form for isolates '
+      '(ofAsync for the UI): the one file here that mixes, a value class '
+      'with nothing else in it',
+  'core/files_blocking.dart':
+      'the hash and the name check, in isolates (files.dart is not allowed)',
   'core/library_state_file.dart': 'the load its Isolate.run calls',
+  'core/temp_sweep_blocking.dart': "the sweep's walk, in Isolate.run",
   'db/index_note_content.dart': 'the note reads of the reader isolate',
   'db/index_scan.dart': 'the walk, the listing and the probes, in isolates',
   'epub/epub_document.dart': 'readEpub, in its Isolate.run',
@@ -48,20 +57,22 @@ const Map<String, String> _offTheUiIsolate = {
   'library/attachment_store.dart': 'the copy its Isolate.run calls',
   'library/audio_import.dart': 'the copy and the rename, in Isolate.run',
   'library/markdown_import.dart': 'the import, in IsolateGauge.run',
-  'library/note_ops.dart': 'the outline and preview reads, in isolates',
+  'library/note_ops_blocking.dart':
+      'the listing, the outline and the preview reads, in isolates',
   'library/note_tidy.dart': 'the tidy read, in Isolate.run',
   'library/note_write_stream.dart': "the stream writer's spawned isolate",
-  'library/note_writer.dart': 'replaceFileFrom and writeNoteFile, isolates',
+  'library/note_writer_blocking.dart':
+      'replaceFileFrom and writeNoteFile, in the writer isolates',
   'library/wav_duration.dart': 'the probe, in Isolate.run',
   'links/link_spot_slices.dart': 'the slice read, in Isolate.run',
   'markdown/note_load.dart': 'loadNoteSync, in Isolate.run',
   'search/replace.dart': 'the preview and replace chunks, in Isolate.run',
   'spellcheck/hunspell_spell_checker.dart':
       'the dictionary search and load, in Isolate.run',
-  'sync/sync_scanner.dart': 'scanLocalFiles, in Isolate.run',
   'sync/sync_probe.dart': "the watcher batch's probe, in Isolate.run",
+  'sync/sync_scanner_blocking.dart': 'scanLocalFiles, in Isolate.run',
   'sync/sync_sides.dart': 'hashLocalFiles, in Isolate.run',
-  'todo/todo_store.dart': 'the reads and probes its Isolate.run calls',
+  'todo/todo_store_blocking.dart': 'the reads and probes, in Isolate.run',
   'ui/drop_target.dart': 'foldersAmong, in Isolate.run',
   'ui/file_tree_context.dart': 'the exists check, in Isolate.run',
   'ui/kinds/flashcards/review_run.dart': 'the deck reads, in Isolate.run',
@@ -70,12 +81,19 @@ const Map<String, String> _offTheUiIsolate = {
   'widget/widget_note_ops.dart': 'the note read, in Isolate.run',
 };
 
+/// The blocking calls of `dart:io`'s files, directories, links and
+/// processes — every method that has an asynchronous twin, listed by name:
+/// a pattern for any `...Sync(` would catch `changedBySync` and the like.
 final RegExp _syncCall = RegExp(
-  r'\.(existsSync|statSync|listSync|readAsStringSync|readAsBytesSync|'
+  r'(\.(existsSync|statSync|listSync|readAsStringSync|readAsBytesSync|'
   'readAsLinesSync|writeAsStringSync|writeAsBytesSync|createSync|'
-  'deleteSync|renameSync|copySync|lengthSync|lastModifiedSync|'
-  'setLastModifiedSync|openSync|resolveSymbolicLinksSync|typeSync|'
-  r'isDirectorySync|isFileSync|isLinkSync|identicalSync)\(',
+  'createTempSync|deleteSync|renameSync|copySync|lengthSync|'
+  'lastModifiedSync|lastAccessedSync|setLastModifiedSync|setLastAccessedSync|'
+  'openSync|resolveSymbolicLinksSync|typeSync|isDirectorySync|isFileSync|'
+  'isLinkSync|identicalSync|readSync|readIntoSync|readByteSync|writeFromSync|'
+  'writeByteSync|setPositionSync|positionSync|truncateSync|flushSync|'
+  r'closeSync|lockSync|unlockSync|targetSync|updateSync)\('
+  r'|Process\.runSync\()',
 );
 
 void main() {

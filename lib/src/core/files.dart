@@ -1,10 +1,13 @@
 import 'dart:io';
 
-import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
 import 'package:niman/src/core/creation_time.dart';
+import 'package:niman/src/core/disk_stamp.dart';
+import 'package:niman/src/core/files_blocking.dart' show directoryHoldsName;
 import 'package:niman/src/core/isolate_gauge.dart';
 import 'package:path/path.dart' as p;
+
+export 'package:niman/src/core/disk_stamp.dart';
 
 /// Suffix added to the target name when writing a temporary file.
 const _tempMarker = '.niman-tmp';
@@ -58,23 +61,6 @@ final RegExp _whitespaceRuns = RegExp(r'\s+');
 
 /// The number of uniqueness attempts when resolving name collisions.
 const _uniqueAttempts = 100;
-
-/// The number of bytes read per chunk when hashing a file.
-const _hashChunkSize = 65536;
-
-/// Collects the final [Digest] emitted by a chunked hash conversion.
-final class _DigestCollector implements Sink<Digest> {
-  /// The last emitted digest, or null before the conversion completes.
-  Digest? last;
-
-  @override
-  void add(Digest data) {
-    last = data;
-  }
-
-  @override
-  void close() {}
-}
 
 /// The fallback note name used when [sanitizeName] produces an empty name.
 const defaultNoteName = 'Untitled';
@@ -190,7 +176,7 @@ Future<DiskStamp?> publishTempFile(File temp, String target) async {
 bool isTempFileName(String name) =>
     name.startsWith('.') && name.contains('$_tempMarker-');
 
-/// The age a temp file must have passed before [sweepStaleTempFiles] takes
+/// The age a temp file must have passed before `sweepStaleTempFiles` takes
 /// it.
 ///
 /// A temp file lives for the write it belongs to and no longer — the rename
@@ -200,124 +186,6 @@ bool isTempFileName(String name) =>
 /// file) by a wide margin, while leaving a crash's leftovers not long after
 /// the next open.
 const staleTempMinimumAge = Duration(minutes: 5);
-
-/// Deletes the temp files a killed write left in the library under [root] —
-/// the atomic writes' and the sync download's alike, and the folders a
-/// book's conversion stages its notes in — and answers how many went
-/// (#379, #1138).
-///
-/// A write goes to a hidden temp name in the target's own directory and is
-/// renamed onto it ([atomicTempPath], and the sync's `.niman-tmp-sync-`);
-/// the rename is the only thing that removes the temp, so a process killed
-/// between the two leaves it for good. Nothing else notices: the index walk
-/// skips hidden entries and the sync skips dot names, so the file sits in
-/// the user's library, is never indexed or synced, and reads as content
-/// when the folder is listed.
-///
-/// Only files older than [minimumAge] are taken, so a write still running
-/// when the sweep passes is left for its rename. A symlink is neither
-/// followed nor removed — only real directories are descended — so a link
-/// cannot lead the sweep out of the library. The hidden folders are walked
-/// too (that is where `.niman/` and `.history/` leave theirs); a `.git/` is
-/// not, so a library that versions its notes is not walked whole.
-///
-/// Top-level and stateless, so it runs on the walk's own kind of background
-/// isolate (every `listSync`/`statSync` is a FUSE round trip on Android).
-int sweepStaleTempFiles(
-  String root, {
-  Duration minimumAge = staleTempMinimumAge,
-}) {
-  final cutoff = DateTime.now().subtract(minimumAge);
-  var removed = 0;
-  final pending = <Directory>[Directory(root)];
-  while (pending.isNotEmpty) {
-    final dir = pending.removeLast();
-    final List<FileSystemEntity> entries;
-    try {
-      entries = dir.listSync(followLinks: false);
-    } on FileSystemException {
-      // Gone between its parent's listing and its own.
-      continue;
-    }
-    for (final entry in entries) {
-      if (entry is Directory) {
-        final name = _baseName(entry.path);
-        if (name == '.git') continue;
-        // A whole folder staged for a write that never finished — a book's
-        // conversion, written aside and renamed in (#1138) — goes whole.
-        if (isTempFileName(name) &&
-            entry.statSync().modified.isBefore(cutoff)) {
-          try {
-            entry.deleteSync(recursive: true);
-            removed++;
-          } on FileSystemException {
-            // Renamed in, or gone, while the sweep walked.
-          }
-          continue;
-        }
-        pending.add(entry);
-      } else if (entry is File &&
-          isTempFileName(_baseName(entry.path)) &&
-          _isStaleTemp(entry, cutoff)) {
-        try {
-          entry.deleteSync();
-          removed++;
-        } on FileSystemException {
-          // Renamed onto its target, or otherwise gone, while the sweep
-          // walked: nothing to remove.
-        }
-      }
-    }
-  }
-  return removed;
-}
-
-/// Whether [file] was last touched before [cutoff] — the age guard that
-/// keeps a running write's temp out of the sweep.
-bool _isStaleTemp(File file, DateTime cutoff) {
-  try {
-    return file.statSync().modified.isBefore(cutoff);
-  } on FileSystemException {
-    return false;
-  }
-}
-
-/// The last path segment of [path], cut by hand like [atomicTempPath]: the
-/// sweep runs where `package:path`'s platform style would ask for a working
-/// directory a rebuild may have taken (#319).
-String _baseName(String path) {
-  final slash = path.lastIndexOf('/');
-  final backslash = path.lastIndexOf(r'\');
-  final cut = slash > backslash ? slash : backslash;
-  return cut < 0 ? path : path.substring(cut + 1);
-}
-
-/// Computes the hex sha256 digest of [file]'s content.
-///
-/// Reads in 64 KiB chunks so novel-length files never need a full-file
-/// in-memory copy.
-Future<String> hashFileSha256(File file) async {
-  final raf = file.openSync();
-  try {
-    final collector = _DigestCollector();
-    final sink = sha256.startChunkedConversion(collector);
-    for (
-      var chunk = raf.readSync(_hashChunkSize);
-      chunk.isNotEmpty;
-      chunk = raf.readSync(_hashChunkSize)
-    ) {
-      sink.add(chunk);
-    }
-    sink.close();
-    final digest = collector.last;
-    if (digest == null) {
-      throw StateError('sha256 digest was not produced');
-    }
-    return digest.toString();
-  } finally {
-    raf.closeSync();
-  }
-}
 
 /// Sanitizes [input] into a valid note or folder name.
 ///
@@ -445,24 +313,11 @@ Future<bool> excludedEntryIn(
   // can take it.
   final name = p.basename(abs);
   final held = await IsolateGauge.run(
-    () => _holdsName(dir, name),
+    () => directoryHoldsName(dir, name),
     'rename "$name"',
   );
   return !held;
 }
-
-/// Whether the directory at [dir] holds an entry named [name] exactly as
-/// written.
-///
-/// Top-level and synchronous so `Isolate.run` can take it: its closure
-/// carries two strings, and the `listSync` behind it cannot run on the UI
-/// isolate. A filesystem that folds case answers for either spelling of a
-/// path, so only the folder's own listing says whether the name belongs to
-/// somebody else (#354, #492).
-bool _holdsName(String dir, String name) =>
-    Directory(dir)
-        .listSync(followLinks: false)
-        .any((entry) => p.basename(entry.path) == name);
 
 /// The decision [_excludedEntry] makes, with what it asks the platform and
 /// the directory handed in: whether its filesystems fold case, and the names
@@ -698,70 +553,4 @@ Future<String> trashDirName(Directory dir, String base) async {
     return (base: fileName, ext: '');
   }
   return (base: fileName.substring(0, dot), ext: fileName.substring(dot));
-}
-
-/// What a file looked like when it was last read or written: its size and
-/// its modification time.
-///
-/// A watcher reports that something happened to a path, not that the note
-/// changed: a touch, a rescan, a copy of the same content and an event
-/// already acted on all arrive as "changed". Comparing what is on disk now
-/// against what was last seen is O(1) — a stat — and it is what tells the two
-/// apart without reading the file back and comparing its text, which on a
-/// note of hundreds of megabytes is hundreds of milliseconds (see
-/// `docs/records/huge-notes.md`).
-final class DiskStamp {
-  /// Records [size] and [modified].
-  const new({required this.size, required this.modified});
-
-  /// The file's size in bytes.
-  final int size;
-
-  /// When it was last written, to the millisecond.
-  final DateTime modified;
-
-  /// What the file at [path] looks like now, or null when there is nothing
-  /// to stamp — the file is gone, or the filesystem will not answer.
-  ///
-  /// `statSync` answers for a missing file too, with a `notFound` type and a
-  /// zero size: stamping that would make a deleted note look unchanged.
-  static DiskStamp? of(String path) {
-    try {
-      final stat = File(path).statSync();
-      if (stat.type == FileSystemEntityType.notFound) return null;
-      return DiskStamp(size: stat.size, modified: stat.modified);
-    } on Object {
-      return null;
-    }
-  }
-
-  /// [of], asked of the file system without blocking this isolate: the
-  /// stat runs on the I/O threads. What the UI isolate asks with — a
-  /// `statSync` there is a FUSE round trip per call on Android (#1060).
-  static Future<DiskStamp?> ofAsync(String path) async {
-    try {
-      final stat = await FileStat.stat(path);
-      if (stat.type == FileSystemEntityType.notFound) return null;
-      return DiskStamp(size: stat.size, modified: stat.modified);
-    } on Object {
-      return null;
-    }
-  }
-
-  /// Whether [other] is the same size and time as this stamp.
-  ///
-  /// Size and time together: a write that lands in the same second and
-  /// changes the size is caught by the size, and one that keeps the size is
-  /// caught by the time. A file whose bytes changed with both unchanged is
-  /// the one case this cannot see, and no watcher reports it either.
-  bool sameAs(DiskStamp? other) =>
-      other != null &&
-      other.size == size &&
-      other.modified.millisecondsSinceEpoch == modified.millisecondsSinceEpoch;
-
-  /// Whether the file at [path] is still the one this stamped.
-  bool matches(String path) => sameAs(DiskStamp.of(path));
-
-  /// [matches], without blocking this isolate (see [ofAsync]).
-  Future<bool> matchesAsync(String path) async => sameAs(await ofAsync(path));
 }

@@ -11,7 +11,7 @@ import 'package:niman/src/db/anchor_index.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/db/indexer.dart';
 import 'package:niman/src/editor/outline.dart';
-import 'package:niman/src/library/note_ops.dart';
+import 'package:niman/src/library/note_ops_blocking.dart';
 import 'package:niman/src/links/block_anchors.dart';
 import 'package:niman/src/links/suggester.dart';
 import 'package:path/path.dart' as p;

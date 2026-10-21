@@ -16,7 +16,7 @@ import 'dart:isolate';
 import 'package:flutter/services.dart';
 import 'package:niman/src/core/app_channel.dart';
 import 'package:niman/src/core/changelog.dart';
-import 'package:niman/src/core/files.dart';
+import 'package:niman/src/core/files_blocking.dart' show hashFileSha256;
 import 'package:niman/src/core/isolate_gauge.dart';
 import 'package:niman/src/update/app_version.dart';
 import 'package:niman/src/update/cancellable_stream.dart';
