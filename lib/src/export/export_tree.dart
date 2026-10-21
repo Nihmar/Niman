@@ -170,7 +170,7 @@ final class TreeExport {
   }) async {
     if (format == ExportTreeFormat.pdf &&
         engine == null &&
-        !Platform.isAndroid) {
+        !systemWebViewPrints) {
       throw const TreeExportNoEngine();
     }
     final events = ReceivePort();
@@ -186,7 +186,7 @@ final class TreeExport {
         engine: engine,
         runner: runner,
         // The root isolate's token, so the spawned isolate may open the
-        // WebView channel when Android prints.
+        // WebView channel where the system WebView prints.
         token: RootIsolateToken.instance,
         events: events.sendPort,
       ),
@@ -297,7 +297,7 @@ final class TreeExport {
   Future<void> cancel() async {
     if (_done.isCompleted) return;
     _cancelled = true;
-    if (_format == ExportTreeFormat.pdf && Platform.isAndroid) {
+    if (_format == ExportTreeFormat.pdf && systemWebViewPrints) {
       // The platform print is on the main thread and the isolate waits on
       // it: stopping it is what frees the bridge for the next export (M7).
       unawaited(WebViewPdfPrinter.cancel());
@@ -361,9 +361,12 @@ typedef TreeExportRequest = ({
 });
 
 Future<void> _exportTree(TreeExportRequest request) async {
-  // Android prints through the WebView channel, which a background isolate
-  // may only open with the root isolate's token.
-  if (request.format == ExportTreeFormat.pdf && Platform.isAndroid) {
+  // The system WebView (Android's, a Mac's WebKit) prints through its
+  // channel, which a background isolate may only open with the root
+  // isolate's token. This isolate sees none of the UI isolate's state, so
+  // it goes by what that one decided: no engine handed over means the
+  // WebView prints (with none to hand over, start refused the export).
+  if (request.format == ExportTreeFormat.pdf && request.engine == null) {
     final token = request.token;
     if (token != null) {
       BackgroundIsolateBinaryMessenger.ensureInitialized(token);
