@@ -18,6 +18,11 @@ dependencies:
   archive: ^4.3.0
   audioplayers: ^6.8.1
 
+  # nativeapi's C layer, pinned to the version nativeapi resolves: its tray
+  # draws a template image on a Mac (the menu bar's own black or white),
+  # which nativeapi 0.2.4 does not expose to Dart.
+  cnativeapi: 0.2.7
+
   # The sync's automatic triggers: Wi-Fi only, and a retry as soon as the
   # network comes back (docs/records/sync.md, "Queue and triggers").
   connectivity_plus: ^7.3.1
