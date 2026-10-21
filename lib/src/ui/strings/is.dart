@@ -207,6 +207,8 @@ final class IcelandicStrings extends Strings {
   String get updateTestingBuild =>
       'Prófunarútgáfur uppfæra sig ekki sjálfar: settu þá næstu upp handvirkt.';
   @override
+  String get updateFromAppStore => 'App Store heldur Niman uppfærðu.';
+  @override
   String get settingsSpellCheckTitle => 'Stafsetningarprófun';
   @override
   String get settingsSpellCheckSubtitle =>

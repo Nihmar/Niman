@@ -543,7 +543,7 @@ List<SettingsSearchEntry> settingsSearchEntries({
       value: noValue,
       open: () => push(TrashScreen(controller: controller)),
     ),
-    if (!isTestingBuild) ...[
+    if (appUpdatesItself) ...[
       SettingsSearchEntry(
         title: AppStrings.autoUpdateTitle,
         area: AppStrings.settingsSectionUpdates,

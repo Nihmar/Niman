@@ -214,6 +214,8 @@ final class ItalianStrings extends Strings {
       'Le build di prova non si aggiornano da sole: installa la prossima a '
       'mano.';
   @override
+  String get updateFromAppStore => "Niman si aggiorna dall'App Store.";
+  @override
   String get settingsSpellCheckTitle => 'Controlla ortografia';
   @override
   String get settingsSpellCheckSubtitle =>

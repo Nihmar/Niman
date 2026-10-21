@@ -210,6 +210,8 @@ final class DanishStrings extends Strings {
   String get updateTestingBuild =>
       'Testversioner opdaterer ikke sig selv: installer den næste manuelt.';
   @override
+  String get updateFromAppStore => 'App Store holder Niman opdateret.';
+  @override
   String get settingsSpellCheckTitle => 'Stavekontrol';
   @override
   String get settingsSpellCheckSubtitle =>

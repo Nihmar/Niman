@@ -208,6 +208,8 @@ final class NorwegianStrings extends Strings {
   String get updateTestingBuild =>
       'Testversjoner oppdaterer seg ikke selv: installer den neste manuelt.';
   @override
+  String get updateFromAppStore => 'App Store holder Niman oppdatert.';
+  @override
   String get settingsSpellCheckTitle => 'Stavekontroll';
   @override
   String get settingsSpellCheckSubtitle =>

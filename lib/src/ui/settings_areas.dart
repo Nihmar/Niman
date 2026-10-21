@@ -262,7 +262,8 @@ List<SettingsArea> settingsAreas({
           highlight: highlight,
         ),
       ),
-    // A test build lists it too, to say why it has nothing to check (#900).
+    // A test build lists it too, to say why it has nothing to check (#900),
+    // and so does iOS, which the App Store updates.
     SettingsArea(
       id: SettingsAreaId.updates,
       group: SettingsGroup.app,

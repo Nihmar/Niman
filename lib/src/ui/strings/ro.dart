@@ -214,6 +214,8 @@ final class RomanianStrings extends Strings {
       'Versiunile de test nu se actualizează singure: instalați-o manual pe '
       'următoarea.';
   @override
+  String get updateFromAppStore => 'App Store ține Niman la zi.';
+  @override
   String get settingsSpellCheckTitle => 'Verificarea ortografiei';
   @override
   String get settingsSpellCheckSubtitle =>

@@ -216,6 +216,8 @@ final class FrenchStrings extends Strings {
       'Les versions de test ne se mettent pas à jour seules : installez la '
       'suivante à la main.';
   @override
+  String get updateFromAppStore => "L'App Store tient Niman à jour.";
+  @override
   String get settingsSpellCheckTitle => 'Vérifier l’orthographe';
   @override
   String get settingsSpellCheckSubtitle =>

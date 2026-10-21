@@ -210,6 +210,8 @@ final class SwedishStrings extends Strings {
   String get updateTestingBuild =>
       'Testversioner uppdaterar inte sig själva: installera nästa för hand.';
   @override
+  String get updateFromAppStore => 'App Store håller Niman uppdaterat.';
+  @override
   String get settingsSpellCheckTitle => 'Stavkontroll';
   @override
   String get settingsSpellCheckSubtitle =>

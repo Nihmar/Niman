@@ -210,6 +210,8 @@ final class DutchStrings extends Strings {
       'Testversies werken zichzelf niet bij: installeer de volgende met de '
       'hand.';
   @override
+  String get updateFromAppStore => 'De App Store houdt Niman up-to-date.';
+  @override
   String get settingsSpellCheckTitle => 'Spellingscontrole';
   @override
   String get settingsSpellCheckSubtitle =>

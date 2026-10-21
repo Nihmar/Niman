@@ -193,6 +193,8 @@ final class JapaneseStrings extends Strings {
   @override
   String get updateTestingBuild => 'テスト版は自動で更新されません。次の版は手動でインストールしてください。';
   @override
+  String get updateFromAppStore => 'App Store が Niman を最新に保ちます。';
+  @override
   String get settingsSpellCheckTitle => 'スペルチェック';
   @override
   String get settingsSpellCheckSubtitle => '入力しながらスペルミスに下線をつけます。';

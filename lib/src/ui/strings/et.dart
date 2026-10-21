@@ -206,6 +206,8 @@ final class EstonianStrings extends Strings {
   String get updateTestingBuild =>
       'Testversioonid ei uuenda end ise: paigalda järgmine käsitsi.';
   @override
+  String get updateFromAppStore => 'App Store hoiab Nimani ajakohasena.';
+  @override
   String get settingsSpellCheckTitle => 'Õigekirjapide';
   @override
   String get settingsSpellCheckSubtitle =>

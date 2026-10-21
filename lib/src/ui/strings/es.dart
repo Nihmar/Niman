@@ -213,6 +213,8 @@ final class SpanishStrings extends Strings {
       'Las versiones de prueba no se actualizan solas: instala la siguiente a '
       'mano.';
   @override
+  String get updateFromAppStore => 'El App Store mantiene Niman actualizado.';
+  @override
   String get settingsSpellCheckTitle => 'Comprobar ortografía';
   @override
   String get settingsSpellCheckSubtitle =>

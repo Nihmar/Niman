@@ -213,6 +213,8 @@ final class GreekStrings extends Strings {
       'Οι δοκιμαστικές εκδόσεις δεν ενημερώνονται μόνες τους: εγκαταστήστε '
       'την επόμενη χειροκίνητα.';
   @override
+  String get updateFromAppStore => 'Το App Store ενημερώνει το Niman.';
+  @override
   String get settingsSpellCheckTitle => 'Έλεγχος ορθογραφίας';
   @override
   String get settingsSpellCheckSubtitle =>

@@ -190,6 +190,8 @@ final class ChineseStrings extends Strings {
   @override
   String get updateTestingBuild => '测试版不会自动更新：请手动安装下一个版本。';
   @override
+  String get updateFromAppStore => 'App Store 会让 Niman 保持最新。';
+  @override
   String get settingsSpellCheckTitle => '拼写检查';
   @override
   String get settingsSpellCheckSubtitle => '输入时把拼错的词加下划线。';

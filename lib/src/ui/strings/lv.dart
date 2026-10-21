@@ -207,6 +207,8 @@ final class LatvianStrings extends Strings {
   String get updateTestingBuild =>
       'Testa versijas pašas neatjauninās: nākamo instalējiet manuāli.';
   @override
+  String get updateFromAppStore => 'App Store atjaunina Niman.';
+  @override
   String get settingsSpellCheckTitle => 'Orfogrāfiskā pārbaude';
   @override
   String get settingsSpellCheckSubtitle =>

@@ -210,6 +210,8 @@ final class CzechStrings extends Strings {
   String get updateTestingBuild =>
       'Testovací sestavení se neaktualizují sama: další nainstalujte ručně.';
   @override
+  String get updateFromAppStore => 'Niman aktualizuje App Store.';
+  @override
   String get settingsSpellCheckTitle => 'Kontrola pravopisu';
   @override
   String get settingsSpellCheckSubtitle =>

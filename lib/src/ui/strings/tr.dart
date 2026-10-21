@@ -205,6 +205,8 @@ final class TurkishStrings extends Strings {
   String get updateTestingBuild =>
       'Test sürümleri kendini güncellemez: bir sonrakini elle yükleyin.';
   @override
+  String get updateFromAppStore => "App Store, Niman'ı güncel tutar.";
+  @override
   String get settingsSpellCheckTitle => 'Yazım denetimi';
   @override
   String get settingsSpellCheckSubtitle =>

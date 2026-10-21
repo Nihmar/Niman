@@ -200,6 +200,8 @@ final class HindiStrings extends Strings {
   String get updateTestingBuild =>
       'टेस्ट बिल्ड अपने आप अपडेट नहीं होते: अगला वाला स्वयं इंस्टॉल करें।';
   @override
+  String get updateFromAppStore => 'App Store Niman को अद्यतन रखता है।';
+  @override
   String get settingsSpellCheckTitle => 'व्याकरण जाँचें';
   @override
   String get settingsSpellCheckSubtitle =>

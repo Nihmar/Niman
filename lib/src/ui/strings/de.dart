@@ -213,6 +213,8 @@ final class GermanStrings extends Strings {
       'Testversionen aktualisieren sich nicht selbst: Installiere die nächste '
       'von Hand.';
   @override
+  String get updateFromAppStore => 'Der App Store hält Niman aktuell.';
+  @override
   String get settingsSpellCheckTitle => 'Rechtschreibung prüfen';
   @override
   String get settingsSpellCheckSubtitle =>

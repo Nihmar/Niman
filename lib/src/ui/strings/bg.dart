@@ -214,6 +214,8 @@ final class BulgarianStrings extends Strings {
       'Тестовите версии не се актуализират сами: инсталирайте следващата '
       'ръчно.';
   @override
+  String get updateFromAppStore => 'App Store поддържа Niman актуален.';
+  @override
   String get settingsSpellCheckTitle => 'Проверка за правопис';
   @override
   String get settingsSpellCheckSubtitle =>

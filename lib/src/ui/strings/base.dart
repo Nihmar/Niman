@@ -92,6 +92,7 @@ abstract base class Strings {
   String get updateInstallPermissionMissing;
   String get updateReleasePage;
   String get updateTestingBuild;
+  String get updateFromAppStore;
   String get settingsSpellCheckTitle;
   String get settingsSpellCheckSubtitle;
   String get spellCheckDictionaryTitle;

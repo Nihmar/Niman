@@ -206,6 +206,8 @@ final class EnglishStrings extends Strings {
   String get updateTestingBuild =>
       'Test builds do not update themselves: install the next one by hand.';
   @override
+  String get updateFromAppStore => 'The App Store keeps Niman up to date.';
+  @override
   String get settingsSpellCheckTitle => 'Check spelling';
   @override
   String get settingsSpellCheckSubtitle =>

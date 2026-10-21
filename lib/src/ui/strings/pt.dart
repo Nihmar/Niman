@@ -209,6 +209,8 @@ final class PortugueseStrings extends Strings {
       'As versões de teste não se atualizam sozinhas: instale a seguinte à '
       'mão.';
   @override
+  String get updateFromAppStore => 'A App Store mantém o Niman atualizado.';
+  @override
   String get settingsSpellCheckTitle => 'Conferir ortografia';
   @override
   String get settingsSpellCheckSubtitle =>

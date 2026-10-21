@@ -200,6 +200,7 @@ final class AppStrings {
       _s.updateInstallPermissionMissing;
   static String get updateReleasePage => _s.updateReleasePage;
   static String get updateTestingBuild => _s.updateTestingBuild;
+  static String get updateFromAppStore => _s.updateFromAppStore;
   static String get settingsSpellCheckTitle => _s.settingsSpellCheckTitle;
   static String get settingsSpellCheckSubtitle => _s.settingsSpellCheckSubtitle;
   static String get spellCheckDictionaryTitle => _s.spellCheckDictionaryTitle;

@@ -212,6 +212,8 @@ final class BosnianStrings extends Strings {
   String get updateTestingBuild =>
       'Testne verzije se ne ažuriraju same: sljedeću instalirajte ručno.';
   @override
+  String get updateFromAppStore => 'App Store ažurira Niman.';
+  @override
   String get settingsSpellCheckTitle => 'Provjera pravopisa';
   @override
   String get settingsSpellCheckSubtitle =>

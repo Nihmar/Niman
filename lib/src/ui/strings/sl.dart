@@ -214,6 +214,8 @@ final class SlovenianStrings extends Strings {
       'Preizkusne različice se ne posodabljajo same: naslednjo namestite '
       'ročno.';
   @override
+  String get updateFromAppStore => 'Niman posodablja App Store.';
+  @override
   String get settingsSpellCheckTitle => 'Preverjanje pravopisa';
   @override
   String get settingsSpellCheckSubtitle =>

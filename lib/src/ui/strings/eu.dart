@@ -206,6 +206,9 @@ final class BasqueStrings extends Strings {
   String get updateTestingBuild =>
       'Proba-bertsioak ez dira berez eguneratzen: instalatu hurrengoa eskuz.';
   @override
+  String get updateFromAppStore =>
+      'App Storeak Niman eguneratuta mantentzen du.';
+  @override
   String get settingsSpellCheckTitle => 'Ortografia-egiaztapena';
   @override
   String get settingsSpellCheckSubtitle =>

@@ -212,6 +212,8 @@ final class UkrainianStrings extends Strings {
   String get updateTestingBuild =>
       'Тестові збірки не оновлюються самі: наступну встановіть вручну.';
   @override
+  String get updateFromAppStore => 'App Store оновлює Niman.';
+  @override
   String get settingsSpellCheckTitle => 'Перевірка орфографії';
   @override
   String get settingsSpellCheckSubtitle =>

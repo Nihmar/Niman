@@ -1119,9 +1119,10 @@ final class LibraryController implements LibrarySession {
   /// The scheduler only reads the settings store and GitHub; drift writes
   /// stay on the main isolate, in its callbacks.
   void _startUpdateChecks(AppDatabase appDb) {
-    // Testing builds check no release channel (issue #106): the stored
-    // toggle is irrelevant, nothing polls and no banner can appear.
-    if (isTestingBuild) return;
+    // Testing builds check no release channel (issue #106), and iOS is the
+    // App Store's to update: the stored toggle is irrelevant, nothing
+    // polls and no banner can appear.
+    if (!appUpdatesItself) return;
     if (_updateScheduler != null) return;
     // What an earlier update left in Android's updates folder has done its
     // work, or was not wanted: the next one is fetched afresh (#900). Once,

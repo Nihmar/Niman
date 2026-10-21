@@ -207,6 +207,8 @@ final class HungarianStrings extends Strings {
   String get updateTestingBuild =>
       'A tesztverziók nem frissülnek maguktól: a következőt kézzel telepítse.';
   @override
+  String get updateFromAppStore => 'Az App Store naprakészen tartja a Nimant.';
+  @override
   String get settingsSpellCheckTitle => 'Helyesírásellenőrzés';
   @override
   String get settingsSpellCheckSubtitle =>

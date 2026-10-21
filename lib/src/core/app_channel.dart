@@ -27,6 +27,11 @@ const String appChannel = String.fromEnvironment(
 /// release channel, so there is nothing for them to check.
 const bool isTestingBuild = appChannel == 'testing';
 
+/// Whether this build checks for and installs its own updates: not a
+/// testing build ([isTestingBuild]), and not on iOS, which the App Store
+/// (or TestFlight) updates.
+bool get appUpdatesItself => !isTestingBuild && !Platform.isIOS;
+
 /// The folder this build keeps its own files in: the settings database, the
 /// indexes, the log, the single-instance claim.
 ///

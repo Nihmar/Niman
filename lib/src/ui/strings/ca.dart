@@ -212,6 +212,8 @@ final class CatalanStrings extends Strings {
       'Les versions de prova no s’actualitzen soles: instal·leu la següent a '
       'mà.';
   @override
+  String get updateFromAppStore => "L'App Store manté el Niman al dia.";
+  @override
   String get settingsSpellCheckTitle => 'Comprovació d’ortografia';
   @override
   String get settingsSpellCheckSubtitle =>
