@@ -34,16 +34,25 @@ import 'package:path/path.dart' as p;
 final class NoteWriter {
   /// Creates the writer for the library at [root], re-indexing each saved
   /// note through [indexer]; without [history] no versions are kept.
+  ///
+  /// [readIntoIndex] replaces the read of a note into the index, which is
+  /// the indexer's: a seam for a test that holds a read in its read phase.
   new({
     required this.root,
     required this.indexer,
     this.history,
     Duration Function(int bytes) quietBeforeReindex =
         ReindexScheduler.defaultQuietBeforeReindex,
+    Future<bool> Function(
+      String path, {
+      required bool created,
+      required ReadCancel cancel,
+    })?
+    readIntoIndex,
   }) {
     _reindexer = ReindexScheduler(
       chainOf: (path) => _tails[path],
-      read: _readIntoIndex,
+      read: readIntoIndex ?? _readIntoIndex,
       quietBeforeReindex: quietBeforeReindex,
     );
   }
@@ -130,12 +139,14 @@ final class NoteWriter {
   ///
   /// A reindex of the note still reading it is cancelled
   /// ([ReindexScheduler.cancelRead]): the job writes the note, so what the
-  /// read finds is already old.
+  /// read finds is already old. The job starts once that read has let go of
+  /// the file, not before.
   Future<T> _inTurn<T>(String path, Future<T> Function() job) {
-    _reindexer.cancelRead(path);
+    final released = _reindexer.cancelRead(path);
     final previous = _tails[path] ?? Future<void>.value();
     final run = previous
         .then<void>((_) {}, onError: (Object _) {})
+        .then((_) => released)
         .then((_) => job());
     final tail = run.then<void>((_) {}, onError: (Object _) {});
     _tails[path] = tail;

@@ -441,4 +441,48 @@ void main() {
     expect(read('Via ops.md'), 'from ops');
     expect(await ops.find('Via ops.md'), isNotNull);
   });
+
+  group('a read that holds the note', () {
+    // A reindex in its read phase holds the note open; on Windows an open
+    // file can be neither replaced nor deleted, and the save that cancelled
+    // the read is about to swap the note in (#1137).
+    test('lets go of it before the save that cancelled it writes', () async {
+      File(p.join(root.path, 'a.md')).writeAsStringSync('old');
+      final events = <String>[];
+      final started = Completer<void>();
+      final gate = Completer<void>();
+      final reading = NoteWriter(
+        root: root.path,
+        indexer: indexer,
+        readIntoIndex: (path, {required created, required cancel}) async {
+          final release = cancel.holdFiles();
+          if (!started.isCompleted) started.complete();
+          await gate.future;
+          events.add('released');
+          release();
+          return !cancel.isCancelled;
+        },
+      );
+      await reading.save('a.md', 'first');
+      await started.future;
+
+      Future<NoteBytes?> produce(int index) async {
+        if (index > 0) return null;
+        events.add('write');
+        return utf8.encode('second');
+      }
+
+      final second = reading.save('a.md', produce);
+      // A writer that does not wait writes within a few turns of the event
+      // loop; 100 ms is far past them.
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+      expect(events, isEmpty, reason: 'the read still holds the note open');
+
+      gate.complete();
+      await second;
+      expect(events, ['released', 'write']);
+      expect(read('a.md'), 'second');
+      await reading.indexed;
+    });
+  });
 }

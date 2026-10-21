@@ -100,7 +100,18 @@ final class ReindexScheduler {
   /// reading beside the write is what made a 1.5 MB save take 480 ms against
   /// 123 on a tablet (device log, 2026-10-20). The note is read again once
   /// its chain is idle, or quiet.
-  void cancelRead(String path) => _reads.remove(path)?.cancel();
+  ///
+  /// Answers when the cancelled read holds no file of the note any more: it
+  /// stops at its next safe point, not at once (`ReadCancel.released`), and
+  /// the write about to swap the note in must wait for that — on Windows a
+  /// file another handle holds open cannot be replaced. Only the read of the
+  /// file is waited for, never the parse: a read in its parse holds nothing.
+  Future<void> cancelRead(String path) {
+    final cancel = _reads.remove(path);
+    if (cancel == null) return Future<void>.value();
+    cancel.cancel();
+    return cancel.released;
+  }
 
   /// [path]'s save chain is idle: the reindex it owes runs now — unless a
   /// save left the note waiting to be quiet, whose timer runs it. A note new
