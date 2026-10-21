@@ -90,7 +90,8 @@ final class TreeFooterBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     // On a touch device (an Android tablet's wide shell, #849) the footer
-    // is a thumb's: 56 px tall, every button its 48.
+    // is a thumb's, every button its 48: 54 px tall, the note's status row
+    // beside it (3 + 48 + 3), so the two rows' tops meet (#1134).
     final touch = thumbDense(theme);
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -119,7 +120,7 @@ final class TreeFooterBar extends StatelessWidget {
         ];
         final bar = Container(
           key: const Key('tree-footer'),
-          height: touch ? 56 : 44,
+          height: touch ? 54 : 44,
           decoration: BoxDecoration(
             border: Border(top: BorderSide(color: theme.dividerColor)),
           ),

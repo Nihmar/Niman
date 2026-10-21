@@ -188,6 +188,7 @@ import 'package:niman/src/ui/tour/tour_targets.dart';
 import 'package:niman/src/ui/trash.dart';
 import 'package:niman/src/ui/tree.dart';
 import 'package:niman/src/ui/tree_click_clock.dart';
+import 'package:niman/src/ui/tree_header.dart';
 import 'package:niman/src/ui/tree_view_toggle.dart';
 import 'package:niman/src/ui/unsaved_notes.dart';
 import 'package:niman/src/ui/update_banner.dart';
@@ -5101,6 +5102,20 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
                     offstage: _sidebarShowsView,
                     child: Column(
                       children: [
+                        // Without a title bar of the app's own, nothing
+                        // else says which library this is (#1134).
+                        if (!widget.window.customTitleBar) ...[
+                          TreeHeader(
+                            library: _libraryName,
+                            folder: _treeFolder,
+                            height: NoteTabBar.rowHeight(
+                              touch: thumbDense(Theme.of(context)),
+                            ),
+                            onSwitchLibrary: () =>
+                                _windows.switchLibrary(context),
+                          ),
+                          const Divider(height: 1),
+                        ],
                         Expanded(child: _treePane(controller)),
                         if (controller.sync case final sync?)
                           SyncProgressStrip(sync: sync),
