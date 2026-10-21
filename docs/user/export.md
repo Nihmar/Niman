@@ -113,7 +113,10 @@ one zip:
   inside the book, each one once; an attachment no chapter shows is left
   out. The book's metadata and cover are the `index.md` frontmatter at the
   exported folder's root. One EPUB, not one per note — a folder is a book,
-  and the format is what its reader expects.
+  and the format is what its reader expects. It is the way back from
+  [converting a book into notes](organization.md#converting-a-book-into-notes):
+  the converted folder's `index.md`, numbered chapters and pictures make
+  the book again, with its metadata and cover.
 
 Anything whose name starts with a dot (`.niman`, `.trash`, `.history`,
 `.draft.md`) is not part of an export, folders and files alike: those

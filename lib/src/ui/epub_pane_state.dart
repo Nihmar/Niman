@@ -363,6 +363,7 @@ final class EpubPaneState extends State<EpubPane> {
             onContents: document == null || document.contents.isEmpty
                 ? null
                 : (anchor) => unawaited(_showContents(anchor)),
+            onConvert: document == null ? null : widget.onConvert,
             here: document == null || widget.positions == null
                 ? null
                 : () => _places.here(),

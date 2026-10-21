@@ -681,9 +681,75 @@ drop lands without it, for the reason
   was.
 - **A Notion export** (the `.zip` of *Export → Markdown & CSV*) is
   imported: see [Importing a Notion export](#importing-a-notion-export).
+- **A book** (`.epub`) is offered for conversion into notes: see
+  [Converting a book into notes](#converting-a-book-into-notes). With no
+  library open, a message says one is needed.
 - **With no library open**, a dropped folder opens as the library, the
   way *Open existing* would open it.
 - **Anything else** is left alone, and a message names it.
+
+## Converting a book into notes
+
+A book in EPUB is read in the note pane like a note, and it can also
+become notes of the library: editable, searchable, linkable, and exportable to another tool.
+**Convert to Markdown…** is on the book's own row in the reader, in the
+tree's menu on an `.epub` row, in the palette (*Library: Convert EPUB to
+Markdown…*, which converts the book on screen or the one selected, and
+otherwise asks for a file), in *Settings → Maintenance* (a book outside
+the library), and it is what dropping a book on the window or sharing one
+to Niman on Android does.
+
+The dialog says what the book will make, and asks two things:
+
+- **One note per chapter** (the default for a book of several) or **one
+  note** of the whole book.
+- **Into** which folder: the one the book is in, when it is in the library,
+  otherwise the top of the library; any other can be picked.
+
+**One note per chapter** makes a folder named after the book (`Dune`, or
+`Dune 2` when that is taken):
+
+- **The chapters.** Each one is a note named after its entry in the
+  book's contents, numbered so the tree lists them in reading order:
+  `01 Arrakis.md`, `02 Muad'Dib.md`. A chapter's own sections stay
+  headings inside its note.
+- **Parts.** A book in parts gets a folder a part, its chapters in it:
+  `02 Book Two/03 The Storm.md`. A part's own page — its title, an
+  epigraph — is the folder's first note, `00 Book Two.md`. A part that is
+  one long file with its chapters inside it is split at the chapters all
+  the same.
+- **The opening.** What comes before the first chapter (a title page, a
+  dedication) is a note of its own, `00 Front matter.md`.
+- **`index.md`.** It carries the book's details as frontmatter (title,
+  author, language, publisher, date, ISBN, series, description, subjects
+  as tags, cover), then the cover and the contents as links to the notes.
+  These are the keys a folder's [EPUB export](export.md) reads, so the
+  folder exports back to a book with its metadata.
+- **Pictures.** They are copied into the book folder's attachments folder
+  (`assets`), each picture once, and the notes point at them there:
+  the folder can be moved, and exports back as a book, with its pictures.
+- **Links within the book.** They point at the note they land in, at its
+  heading when they land on one; links to the web stay as they were.
+
+**One note** is the whole book in a single note beside the folder's
+others, its pictures in the library's attachments folder.
+
+The conversion runs in the background. A progress dialog shows each
+picture and note being written, and **Cancel** stops it with nothing left
+in the library. When it is done, the tree shows the new folder and
+`index.md` opens (or the one note does). The book itself stays where it
+was; a shared book's copy is deleted.
+
+**Not converted:**
+
+- a book whose text is protected (DRM), which says so;
+- a file that is not an EPUB;
+- a book that would expand past what the app can take in, refused before
+  it is unpacked, as a Notion export is.
+
+Formulas come in as TeX where the book draws them as images with their
+TeX attached. Formulas written as MathML alone are left out, as the
+reader leaves them out.
 
 ## Importing a Notion export
 

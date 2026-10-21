@@ -131,6 +131,7 @@ Set<CommandNeed> commandNeeds(AppCommand command) => switch (command) {
   AppCommand.welcomeDeck ||
   AppCommand.reindexLibrary ||
   AppCommand.exportLibrary ||
+  AppCommand.convertEpub ||
   AppCommand.switchLibrary ||
   AppCommand.tabFiles ||
   AppCommand.tabTodo ||

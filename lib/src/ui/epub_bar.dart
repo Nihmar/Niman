@@ -1,6 +1,7 @@
 /// A book's row, under it in the note pane (#280): its name, how the books
-/// look, its contents, a link to the place being read (#282), annotating
-/// it (#284), full screen (#621), and on desktop the system's application.
+/// look, its contents, converting it into notes (#1138), a link to the
+/// place being read (#282), annotating it (#284), full screen (#621), and on
+/// desktop the system's application.
 library;
 
 import 'package:flutter/material.dart';
@@ -24,6 +25,7 @@ final class EpubBar extends StatelessWidget {
     required this.linkType,
     this.onEditLook,
     this.onContents,
+    this.onConvert,
     this.here,
     this.onAnnotate,
     this.fullScreen = false,
@@ -47,6 +49,10 @@ final class EpubBar extends StatelessWidget {
   /// Opens the book's contents, from the button's place, as
   /// [onEditLook].
   final ValueChanged<Rect?>? onContents;
+
+  /// Converts the book into notes (#1138); null while it is read, or
+  /// where there is no library to convert it into.
+  final VoidCallback? onConvert;
 
   /// The place being read, for the link to it.
   final PlaceToLink? Function()? here;
@@ -88,6 +94,13 @@ final class EpubBar extends StatelessWidget {
             null => null,
           },
         ),
+      ),
+      IconButton(
+        key: const Key('epub-convert-button'),
+        tooltip: AppStrings.epubConvertAction,
+        icon: const Icon(Icons.note_add_outlined),
+        visualDensity: VisualDensity.compact,
+        onPressed: onConvert,
       ),
       PlaceLinkButton(here: here, linkType: linkType),
       IconButton(

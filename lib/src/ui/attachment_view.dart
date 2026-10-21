@@ -72,6 +72,7 @@ final class AttachmentView extends StatelessWidget {
     this.reloadToken = 0,
     this.linkType = LinkType.wikilink,
     this.onAnnotate,
+    this.onConvertBook,
     this.marks,
     this.ocr,
     this.fullScreen,
@@ -113,6 +114,9 @@ final class AttachmentView extends StatelessWidget {
   /// null offers no annotating.
   final void Function(Annotation annotation)? onAnnotate;
 
+  /// Converts the book at the path it is handed into notes (#1138).
+  final ValueChanged<String>? onConvertBook;
+
   /// Where the library's books and PDFs were annotated (#285); null marks
   /// nothing.
   final AnnotationMarkSource? marks;
@@ -140,6 +144,10 @@ final class AttachmentView extends StatelessWidget {
         reloadToken: reloadToken,
         linkType: linkType,
         onAnnotate: onAnnotate,
+        onConvert: switch (onConvertBook) {
+          final convert? => () => convert(path),
+          null => null,
+        },
         marks: marks,
         fullScreen: fullScreen,
       );

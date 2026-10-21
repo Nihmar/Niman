@@ -123,6 +123,10 @@ enum AppCommand {
   /// Write the whole library out as one zip (#24).
   exportLibrary,
 
+  /// Convert a book into notes (#1138): the one on screen, the selected
+  /// one, or one picked.
+  convertEpub,
+
   /// The Markdown cheatsheet (#265): every construct, written and shown.
   markdownCheatsheet,
 
@@ -444,6 +448,7 @@ String appCommandLabel(AppCommand command) => switch (command) {
   AppCommand.exportNote => AppStrings.exportTitle,
   AppCommand.recognizeText => AppStrings.ocrRecognizeAction,
   AppCommand.exportLibrary => AppStrings.exportLibraryTitle,
+  AppCommand.convertEpub => AppStrings.epubConvertCommand,
   AppCommand.markdownCheatsheet => AppStrings.cheatsheetTitle,
   AppCommand.welcomeTour => AppStrings.welcomeTourCommand,
   AppCommand.welcomeDeck => AppStrings.welcomeDeckCommand,

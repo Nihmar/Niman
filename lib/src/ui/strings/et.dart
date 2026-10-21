@@ -1797,7 +1797,7 @@ final class EstonianStrings extends Strings {
   String get notionImportFailed => 'Notioni eksporti ei õnnestunud importida';
   @override
   String dropRejected(String names) =>
-      'Siin avanevad ainult Markdowni failid ja kaustad: $names';
+      'Siin avanevad ainult Markdowni failid, EPUB-raamatud ja kaustad: $names';
   @override
   String importFolderTitle(String name) => 'Kas importida „$name“?';
   @override
@@ -1808,6 +1808,54 @@ final class EstonianStrings extends Strings {
   String importFolderDone(String folder) => 'Imporditud kausta $folder';
   @override
   String importFolderEmpty(String name) => 'Kaustas $name pole Markdowni faile';
+  @override
+  String get epubConvertAction => 'Teisenda Markdowniks…';
+  @override
+  String get epubConvertCommand => 'Teisenda EPUB Markdowniks';
+  @override
+  String get epubConvertSettingsTitle => 'Teisenda EPUB Markdowniks';
+  @override
+  String get epubConvertTitle => 'Teisenda Markdowniks';
+  @override
+  String get epubConvertReading => 'Raamatut loetakse…';
+  @override
+  String get epubConvertPerChapter => 'Üks märge peatüki kohta';
+  @override
+  String epubConvertPerChapterDetail(int notes, int folders) =>
+      'Märkmeid: $notes · kaustu: $folders';
+  @override
+  String get epubConvertOneNote => 'Üks märge';
+  @override
+  String get epubConvertOneNoteDetail => 'Kogu raamat ühes märkmes';
+  @override
+  String get epubConvertInto => 'Kausta';
+  @override
+  String get epubConvertStart => 'Teisenda';
+  @override
+  String epubConvertProgress(int done, int total) => 'Kirjutamine $done/$total';
+  @override
+  String epubConvertDone(String made, int notes, int pictures) =>
+      'Teisendatud: $made (märkmeid: $notes, pilte: $pictures)';
+  @override
+  String get epubConvertProtected =>
+      'See raamat on kaitstud (DRM): selle teksti ei saa teisendada';
+  @override
+  String epubConvertNotABook(String name) => '„$name“ ei ole loetav EPUB';
+  @override
+  String get epubConvertTooLarge => 'See raamat on teisendamiseks liiga suur';
+  @override
+  String get epubConvertFailed => 'Raamatut ei õnnestunud teisendada';
+  @override
+  String get epubConvertNeedsLibrary =>
+      'Raamatu märkmeteks teisendamiseks ava kogu';
+  @override
+  String get epubConvertChapterName => 'Peatükk {n}';
+  @override
+  String get epubConvertOpening => 'Eessõnalehed';
+  @override
+  String get epubConvertContents => 'Sisukord';
+  @override
+  String get epubConvertPickTitle => 'Vali teisendatav EPUB';
   @override
   String get openFileTitle => 'Ava fail';
   @override

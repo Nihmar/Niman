@@ -1832,7 +1832,7 @@ final class AlbanianStrings extends Strings {
   String get notionImportFailed => 'Eksporti i Notion nuk u importua dot';
   @override
   String dropRejected(String names) =>
-      'Këtu hapen vetëm skedarë Markdown dhe dosje: $names';
+      'Këtu hapen vetëm skedarë Markdown, libra EPUB dhe dosje: $names';
   @override
   String importFolderTitle(String name) => 'Të importohet “$name”?';
   @override
@@ -1843,6 +1843,58 @@ final class AlbanianStrings extends Strings {
   String importFolderDone(String folder) => 'U importua në $folder';
   @override
   String importFolderEmpty(String name) => 'Nuk ka skedarë Markdown në $name';
+  @override
+  String get epubConvertAction => 'Shndërro në Markdown…';
+  @override
+  String get epubConvertCommand => 'Shndërro EPUB në Markdown';
+  @override
+  String get epubConvertSettingsTitle => 'Shndërro një EPUB në Markdown';
+  @override
+  String get epubConvertTitle => 'Shndërro në Markdown';
+  @override
+  String get epubConvertReading => 'Po lexohet libri…';
+  @override
+  String get epubConvertPerChapter => 'Një shënim për çdo kapitull';
+  @override
+  String epubConvertPerChapterDetail(int notes, int folders) =>
+      'Shënime: $notes · dosje: $folders';
+  @override
+  String get epubConvertOneNote => 'Një shënim';
+  @override
+  String get epubConvertOneNoteDetail =>
+      'I gjithë libri në një shënim të vetëm';
+  @override
+  String get epubConvertInto => 'Në';
+  @override
+  String get epubConvertStart => 'Shndërro';
+  @override
+  String epubConvertProgress(int done, int total) =>
+      'Po shkruhet $done nga $total';
+  @override
+  String epubConvertDone(String made, int notes, int pictures) =>
+      'U shndërrua në $made (shënime: $notes, figura: $pictures)';
+  @override
+  String get epubConvertProtected =>
+      'Ky libër është i mbrojtur (DRM): teksti i tij nuk mund të shndërrohet';
+  @override
+  String epubConvertNotABook(String name) =>
+      '“$name” nuk është një EPUB i lexueshëm';
+  @override
+  String get epubConvertTooLarge =>
+      'Ky libër është shumë i madh për t’u shndërruar';
+  @override
+  String get epubConvertFailed => 'Libri nuk mund të shndërrohej';
+  @override
+  String get epubConvertNeedsLibrary =>
+      'Hapni një bibliotekë për ta shndërruar një libër në shënime';
+  @override
+  String get epubConvertChapterName => 'Kapitulli {n}';
+  @override
+  String get epubConvertOpening => 'Faqet hyrëse';
+  @override
+  String get epubConvertContents => 'Përmbajtja';
+  @override
+  String get epubConvertPickTitle => 'Zgjidhni një EPUB për ta shndërruar';
   @override
   String get openFileTitle => 'Hap skedar';
   @override

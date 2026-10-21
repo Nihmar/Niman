@@ -50,6 +50,7 @@ final class EpubPane extends StatefulWidget {
     this.reloadToken = 0,
     this.linkType = LinkType.wikilink,
     this.onAnnotate,
+    this.onConvert,
     this.marks,
     this.fullScreen,
     super.key,
@@ -96,6 +97,9 @@ final class EpubPane extends StatefulWidget {
   /// Annotates a paragraph of the book in its companion note (#284); null
   /// offers no annotating.
   final void Function(Annotation annotation)? onAnnotate;
+
+  /// Converts the book into notes (#1138); offered once it is read.
+  final VoidCallback? onConvert;
 
   /// Where the library's files were annotated (#285): the paragraphs a
   /// companion note points at are marked, and a tap opens the note. Null

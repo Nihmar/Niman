@@ -1811,7 +1811,7 @@ final class DanishStrings extends Strings {
   String get notionImportFailed => 'Notion-eksporten kunne ikke importeres';
   @override
   String dropRejected(String names) =>
-      'Kun Markdown-filer og mapper åbnes her: $names';
+      'Her åbnes kun Markdown-filer, EPUB-bøger og mapper: $names';
   @override
   String importFolderTitle(String name) => 'Importér “$name”?';
   @override
@@ -1822,6 +1822,54 @@ final class DanishStrings extends Strings {
   String importFolderDone(String folder) => 'Importeret til $folder';
   @override
   String importFolderEmpty(String name) => 'Ingen Markdown-filer i $name';
+  @override
+  String get epubConvertAction => 'Konvertér til Markdown…';
+  @override
+  String get epubConvertCommand => 'Konvertér EPUB til Markdown';
+  @override
+  String get epubConvertSettingsTitle => 'Konvertér en EPUB til Markdown';
+  @override
+  String get epubConvertTitle => 'Konvertér til Markdown';
+  @override
+  String get epubConvertReading => 'Læser bogen…';
+  @override
+  String get epubConvertPerChapter => 'Én note pr. kapitel';
+  @override
+  String epubConvertPerChapterDetail(int notes, int folders) =>
+      'Noter: $notes · mapper: $folders';
+  @override
+  String get epubConvertOneNote => 'Én note';
+  @override
+  String get epubConvertOneNoteDetail => 'Hele bogen i en enkelt note';
+  @override
+  String get epubConvertInto => 'Til';
+  @override
+  String get epubConvertStart => 'Konvertér';
+  @override
+  String epubConvertProgress(int done, int total) => 'Skriver $done af $total';
+  @override
+  String epubConvertDone(String made, int notes, int pictures) =>
+      'Konverteret til $made (noter: $notes, billeder: $pictures)';
+  @override
+  String get epubConvertProtected =>
+      'Denne bog er beskyttet (DRM): teksten kan ikke konverteres';
+  @override
+  String epubConvertNotABook(String name) => '“$name” er ikke en læsbar EPUB';
+  @override
+  String get epubConvertTooLarge => 'Denne bog er for stor til at konvertere';
+  @override
+  String get epubConvertFailed => 'Bogen kunne ikke konverteres';
+  @override
+  String get epubConvertNeedsLibrary =>
+      'Åbn et bibliotek for at konvertere en bog til noter';
+  @override
+  String get epubConvertChapterName => 'Kapitel {n}';
+  @override
+  String get epubConvertOpening => 'Forsats';
+  @override
+  String get epubConvertContents => 'Indhold';
+  @override
+  String get epubConvertPickTitle => 'Vælg en EPUB at konvertere';
   @override
   String get openFileTitle => 'Åbn fil';
   @override

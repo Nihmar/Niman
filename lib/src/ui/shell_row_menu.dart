@@ -386,6 +386,15 @@ List<List<RowMenuEntry>> rowMenuGroups(
         value: 'recognize',
         destructive: false,
       ),
+    // A book: its chapters into notes of the library (#1138).
+    if (!note.isDir && _isBook(note.name))
+      (
+        key: const Key('menu-convert-epub'),
+        icon: Icons.note_add_outlined,
+        label: AppStrings.epubConvertAction,
+        value: 'convertepub',
+        destructive: false,
+      ),
     if (!note.isDir && offersNewTab)
       (
         key: const Key('menu-open-new-tab'),
@@ -466,3 +475,6 @@ List<List<RowMenuEntry>> rowMenuGroups(
     destroy,
   ];
 }
+
+/// Whether [name] is a book the app reads, and can convert into notes.
+bool _isBook(String name) => name.toLowerCase().endsWith('.epub');

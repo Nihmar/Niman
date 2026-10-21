@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/import/notion.dart';
 import 'package:niman/src/library/session.dart';
+import 'package:niman/src/ui/epub_convert_flow.dart';
 import 'package:niman/src/ui/settings_area.dart';
 import 'package:niman/src/ui/settings_keys.dart';
 import 'package:niman/src/ui/strings.dart';
@@ -176,6 +179,24 @@ final class SettingsMaintenanceGroup extends StatelessWidget {
             leading: const Icon(Icons.archive_outlined),
             title: Text(AppStrings.notionImportTitle),
             onTap: () => _importNotion(context),
+          ),
+        ),
+        // A book outside the library, into notes (#1138): the tree's menu,
+        // the reader's row and a drop convert one already at hand.
+        HighlightRow(
+          key: SettingsKeys.epubConvert,
+          child: ListTile(
+            dense: compact,
+            visualDensity: compact ? VisualDensity.compact : null,
+            leading: const Icon(Icons.menu_book_outlined),
+            title: Text(AppStrings.epubConvertSettingsTitle),
+            onTap: () => unawaited(
+              EpubConvertFlow(
+                session: controller,
+                reveal: (_) {},
+                open: (_) {},
+              ).pickAndRun(context),
+            ),
           ),
         ),
         // Above "Close library" on purpose: switching is the common

@@ -582,6 +582,19 @@ void main() {
       expect(hidden.existsSync(), isTrue);
     });
 
+    test("a book's staging folder goes whole once stale, not before", () {
+      final staging = Directory(
+        p.join(tempDir.path, '.epub.niman-tmp-1790060822793600'),
+      )..createSync();
+      File(p.join(staging.path, '01 Chapter.md')).writeAsStringSync('text');
+      // Fresh: a conversion may still be writing into it.
+      expect(sweepStaleTempFiles(tempDir.path), 0);
+      expect(staging.existsSync(), isTrue);
+      // Past the age a conversion takes, whatever its own clock says.
+      expect(sweepStaleTempFiles(tempDir.path, minimumAge: Duration.zero), 1);
+      expect(staging.existsSync(), isFalse);
+    });
+
     test('keeps a temp file young enough to be a write in flight', () {
       final fresh = File(
         p.join(tempDir.path, '.a.md.niman-tmp-1790060822793602'),

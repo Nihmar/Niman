@@ -85,6 +85,7 @@ PaletteGroup? paletteGroup(AppCommand command) => switch (command) {
   AppCommand.revealInTree => PaletteGroup.view,
   AppCommand.reindexLibrary ||
   AppCommand.exportLibrary ||
+  AppCommand.convertEpub ||
   AppCommand.switchLibrary => PaletteGroup.library,
   AppCommand.journalToday ||
   AppCommand.journalPrevious ||
@@ -119,6 +120,7 @@ bool paletteAsks(AppCommand command) => switch (command) {
   AppCommand.deckColumns ||
   AppCommand.deckReset ||
   AppCommand.exportLibrary ||
+  AppCommand.convertEpub ||
   AppCommand.openFile ||
   AppCommand.switchLibrary => true,
   _ => false,

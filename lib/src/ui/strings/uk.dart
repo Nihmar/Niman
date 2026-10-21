@@ -1821,7 +1821,7 @@ final class UkrainianStrings extends Strings {
   String get notionImportFailed => 'Не вдалося імпортувати експорт Notion';
   @override
   String dropRejected(String names) =>
-      'Тут відкриваються лише файли Markdown і теки: $names';
+      'Тут відкриваються лише файли Markdown, книги EPUB і теки: $names';
   @override
   String importFolderTitle(String name) => 'Імпортувати «$name»?';
   @override
@@ -1832,6 +1832,54 @@ final class UkrainianStrings extends Strings {
   String importFolderDone(String folder) => 'Імпортовано до $folder';
   @override
   String importFolderEmpty(String name) => 'У $name немає файлів Markdown';
+  @override
+  String get epubConvertAction => 'Перетворити на Markdown…';
+  @override
+  String get epubConvertCommand => 'Перетворити EPUB на Markdown';
+  @override
+  String get epubConvertSettingsTitle => 'Перетворити EPUB на Markdown';
+  @override
+  String get epubConvertTitle => 'Перетворити на Markdown';
+  @override
+  String get epubConvertReading => 'Читання книги…';
+  @override
+  String get epubConvertPerChapter => 'Одна нотатка на розділ';
+  @override
+  String epubConvertPerChapterDetail(int notes, int folders) =>
+      'Нотатки: $notes · теки: $folders';
+  @override
+  String get epubConvertOneNote => 'Одна нотатка';
+  @override
+  String get epubConvertOneNoteDetail => 'Уся книга в одній нотатці';
+  @override
+  String get epubConvertInto => 'До';
+  @override
+  String get epubConvertStart => 'Перетворити';
+  @override
+  String epubConvertProgress(int done, int total) => 'Запис $done з $total';
+  @override
+  String epubConvertDone(String made, int notes, int pictures) =>
+      'Перетворено до $made (нотатки: $notes, зображення: $pictures)';
+  @override
+  String get epubConvertProtected =>
+      'Ця книга захищена (DRM): її текст не можна перетворити';
+  @override
+  String epubConvertNotABook(String name) => '«$name» не є читабельним EPUB';
+  @override
+  String get epubConvertTooLarge => 'Ця книга завелика для перетворення';
+  @override
+  String get epubConvertFailed => 'Не вдалося перетворити книгу';
+  @override
+  String get epubConvertNeedsLibrary =>
+      'Відкрийте бібліотеку, щоб перетворити книгу на нотатки';
+  @override
+  String get epubConvertChapterName => 'Розділ {n}';
+  @override
+  String get epubConvertOpening => 'Початкові сторінки';
+  @override
+  String get epubConvertContents => 'Зміст';
+  @override
+  String get epubConvertPickTitle => 'Виберіть EPUB для перетворення';
   @override
   String get openFileTitle => 'Відкрити файл';
   @override

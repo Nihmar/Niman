@@ -62,6 +62,7 @@ LibraryFeature? featureOf(AppCommand command) => switch (command) {
   AppCommand.convertListToMindMap ||
   AppCommand.exportNote ||
   AppCommand.exportLibrary ||
+  AppCommand.convertEpub ||
   AppCommand.markdownCheatsheet ||
   AppCommand.welcomeTour ||
   AppCommand.welcomeDeck ||

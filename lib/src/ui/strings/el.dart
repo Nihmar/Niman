@@ -1879,7 +1879,7 @@ final class GreekStrings extends Strings {
       'Δεν ήταν δυνατή η εισαγωγή της εξαγωγής Notion';
   @override
   String dropRejected(String names) =>
-      'Εδώ ανοίγουν μόνο αρχεία Markdown και φάκελοι: $names';
+      'Εδώ ανοίγουν μόνο αρχεία Markdown, βιβλία EPUB και φάκελοι: $names';
   @override
   String importFolderTitle(String name) => 'Εισαγωγή «$name»;';
   @override
@@ -1890,6 +1890,57 @@ final class GreekStrings extends Strings {
   String importFolderDone(String folder) => 'Εισήχθη στο $folder';
   @override
   String importFolderEmpty(String name) => 'Κανένα αρχείο Markdown στο $name';
+  @override
+  String get epubConvertAction => 'Μετατροπή σε Markdown…';
+  @override
+  String get epubConvertCommand => 'Μετατροπή EPUB σε Markdown';
+  @override
+  String get epubConvertSettingsTitle => 'Μετατροπή ενός EPUB σε Markdown';
+  @override
+  String get epubConvertTitle => 'Μετατροπή σε Markdown';
+  @override
+  String get epubConvertReading => 'Ανάγνωση του βιβλίου…';
+  @override
+  String get epubConvertPerChapter => 'Μία σημείωση ανά κεφάλαιο';
+  @override
+  String epubConvertPerChapterDetail(int notes, int folders) =>
+      'Σημειώσεις: $notes · φάκελοι: $folders';
+  @override
+  String get epubConvertOneNote => 'Μία σημείωση';
+  @override
+  String get epubConvertOneNoteDetail => 'Όλο το βιβλίο σε μία σημείωση';
+  @override
+  String get epubConvertInto => 'Σε';
+  @override
+  String get epubConvertStart => 'Μετατροπή';
+  @override
+  String epubConvertProgress(int done, int total) => 'Εγγραφή $done από $total';
+  @override
+  String epubConvertDone(String made, int notes, int pictures) =>
+      'Μετατράπηκε σε $made (σημειώσεις: $notes, εικόνες: $pictures)';
+  @override
+  String get epubConvertProtected =>
+      'Αυτό το βιβλίο είναι προστατευμένο (DRM): το κείμενό του δεν μπορεί να '
+      'μετατραπεί';
+  @override
+  String epubConvertNotABook(String name) =>
+      'Το «$name» δεν είναι αναγνώσιμο EPUB';
+  @override
+  String get epubConvertTooLarge =>
+      'Αυτό το βιβλίο είναι πολύ μεγάλο για μετατροπή';
+  @override
+  String get epubConvertFailed => 'Δεν ήταν δυνατή η μετατροπή του βιβλίου';
+  @override
+  String get epubConvertNeedsLibrary =>
+      'Ανοίξτε μια βιβλιοθήκη για να μετατρέψετε ένα βιβλίο σε σημειώσεις';
+  @override
+  String get epubConvertChapterName => 'Κεφάλαιο {n}';
+  @override
+  String get epubConvertOpening => 'Προλογικές σελίδες';
+  @override
+  String get epubConvertContents => 'Περιεχόμενα';
+  @override
+  String get epubConvertPickTitle => 'Επιλέξτε ένα EPUB για μετατροπή';
   @override
   String get openFileTitle => 'Άνοιγμα αρχείου';
   @override

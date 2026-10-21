@@ -1801,7 +1801,8 @@ final class TurkishStrings extends Strings {
   String get notionImportFailed => 'Notion dışa aktarımı içe aktarılamadı';
   @override
   String dropRejected(String names) =>
-      'Burada yalnızca Markdown dosyaları ve klasörler açılır: $names';
+      'Burada yalnızca Markdown dosyaları, EPUB kitapları ve klasörler '
+      'açılır: $names';
   @override
   String importFolderTitle(String name) => '“$name” içe aktarılsın mı?';
   @override
@@ -1812,6 +1813,56 @@ final class TurkishStrings extends Strings {
   String importFolderDone(String folder) => '$folder klasörüne aktarıldı';
   @override
   String importFolderEmpty(String name) => '$name içinde Markdown dosyası yok';
+  @override
+  String get epubConvertAction => 'Markdown’a dönüştür…';
+  @override
+  String get epubConvertCommand => 'EPUB’u Markdown’a dönüştür';
+  @override
+  String get epubConvertSettingsTitle => 'Bir EPUB’u Markdown’a dönüştür';
+  @override
+  String get epubConvertTitle => 'Markdown’a dönüştür';
+  @override
+  String get epubConvertReading => 'Kitap okunuyor…';
+  @override
+  String get epubConvertPerChapter => 'Bölüm başına bir not';
+  @override
+  String epubConvertPerChapterDetail(int notes, int folders) =>
+      'Notlar: $notes · klasörler: $folders';
+  @override
+  String get epubConvertOneNote => 'Tek not';
+  @override
+  String get epubConvertOneNoteDetail => 'Kitabın tamamı tek bir notta';
+  @override
+  String get epubConvertInto => 'Hedef';
+  @override
+  String get epubConvertStart => 'Dönüştür';
+  @override
+  String epubConvertProgress(int done, int total) =>
+      'Yazılıyor: $done / $total';
+  @override
+  String epubConvertDone(String made, int notes, int pictures) =>
+      '$made içine dönüştürüldü (notlar: $notes, resimler: $pictures)';
+  @override
+  String get epubConvertProtected =>
+      'Bu kitap korumalı (DRM): metni dönüştürülemez';
+  @override
+  String epubConvertNotABook(String name) =>
+      '“$name” okunabilir bir EPUB değil';
+  @override
+  String get epubConvertTooLarge => 'Bu kitap dönüştürmek için çok büyük';
+  @override
+  String get epubConvertFailed => 'Kitap dönüştürülemedi';
+  @override
+  String get epubConvertNeedsLibrary =>
+      'Bir kitabı notlara dönüştürmek için bir kitaplık açın';
+  @override
+  String get epubConvertChapterName => 'Bölüm {n}';
+  @override
+  String get epubConvertOpening => 'Ön sayfalar';
+  @override
+  String get epubConvertContents => 'İçindekiler';
+  @override
+  String get epubConvertPickTitle => 'Dönüştürülecek bir EPUB seçin';
   @override
   String get openFileTitle => 'Dosya aç';
   @override

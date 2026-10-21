@@ -1812,7 +1812,7 @@ final class LatvianStrings extends Strings {
   String get notionImportFailed => 'Neizdevās importēt Notion eksportu';
   @override
   String dropRejected(String names) =>
-      'Šeit atveras tikai Markdown faili un mapes: $names';
+      'Šeit atveras tikai Markdown faili, EPUB grāmatas un mapes: $names';
   @override
   String importFolderTitle(String name) => 'Vai importēt “$name”?';
   @override
@@ -1823,6 +1823,55 @@ final class LatvianStrings extends Strings {
   String importFolderDone(String folder) => 'Importēts mapē $folder';
   @override
   String importFolderEmpty(String name) => 'Mapē $name nav Markdown failu';
+  @override
+  String get epubConvertAction => 'Pārvērst Markdown formātā…';
+  @override
+  String get epubConvertCommand => 'Pārvērst EPUB Markdown formātā';
+  @override
+  String get epubConvertSettingsTitle => 'Pārvērst EPUB Markdown formātā';
+  @override
+  String get epubConvertTitle => 'Pārvērst Markdown formātā';
+  @override
+  String get epubConvertReading => 'Notiek grāmatas lasīšana…';
+  @override
+  String get epubConvertPerChapter => 'Viena piezīme katrai nodaļai';
+  @override
+  String epubConvertPerChapterDetail(int notes, int folders) =>
+      'Piezīmes: $notes · mapes: $folders';
+  @override
+  String get epubConvertOneNote => 'Viena piezīme';
+  @override
+  String get epubConvertOneNoteDetail => 'Visa grāmata vienā piezīmē';
+  @override
+  String get epubConvertInto => 'Uz';
+  @override
+  String get epubConvertStart => 'Pārvērst';
+  @override
+  String epubConvertProgress(int done, int total) => 'Raksta $done no $total';
+  @override
+  String epubConvertDone(String made, int notes, int pictures) =>
+      'Pārvērsts uz $made (piezīmes: $notes, attēli: $pictures)';
+  @override
+  String get epubConvertProtected =>
+      'Šī grāmata ir aizsargāta (DRM): tās tekstu nevar pārvērst';
+  @override
+  String epubConvertNotABook(String name) => '“$name” nav lasāms EPUB';
+  @override
+  String get epubConvertTooLarge =>
+      'Šī grāmata ir pārāk liela, lai to pārvērstu';
+  @override
+  String get epubConvertFailed => 'Grāmatu neizdevās pārvērst';
+  @override
+  String get epubConvertNeedsLibrary =>
+      'Atveriet bibliotēku, lai pārvērstu grāmatu piezīmēs';
+  @override
+  String get epubConvertChapterName => '{n}. nodaļa';
+  @override
+  String get epubConvertOpening => 'Ievada lapas';
+  @override
+  String get epubConvertContents => 'Saturs';
+  @override
+  String get epubConvertPickTitle => 'Izvēlieties pārvēršamo EPUB';
   @override
   String get openFileTitle => 'Atvērt failu';
   @override

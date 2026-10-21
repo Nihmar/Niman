@@ -1854,7 +1854,7 @@ final class CatalanStrings extends Strings {
       'No s’ha pogut importar l’exportació de Notion';
   @override
   String dropRejected(String names) =>
-      'Aquí només s’obren fitxers Markdown i carpetes: $names';
+      'Aquí només s’obren fitxers Markdown, llibres EPUB i carpetes: $names';
   @override
   String importFolderTitle(String name) => 'Voleu importar «$name»?';
   @override
@@ -1865,6 +1865,56 @@ final class CatalanStrings extends Strings {
   String importFolderDone(String folder) => 'Importat a $folder';
   @override
   String importFolderEmpty(String name) => 'No hi ha fitxers Markdown a $name';
+  @override
+  String get epubConvertAction => 'Converteix a Markdown…';
+  @override
+  String get epubConvertCommand => 'Converteix un EPUB a Markdown';
+  @override
+  String get epubConvertSettingsTitle => 'Converteix un EPUB a Markdown';
+  @override
+  String get epubConvertTitle => 'Converteix a Markdown';
+  @override
+  String get epubConvertReading => 'S’està llegint el llibre…';
+  @override
+  String get epubConvertPerChapter => 'Una nota per capítol';
+  @override
+  String epubConvertPerChapterDetail(int notes, int folders) =>
+      'Notes: $notes · carpetes: $folders';
+  @override
+  String get epubConvertOneNote => 'Una nota';
+  @override
+  String get epubConvertOneNoteDetail => 'Tot el llibre en una sola nota';
+  @override
+  String get epubConvertInto => 'A';
+  @override
+  String get epubConvertStart => 'Converteix';
+  @override
+  String epubConvertProgress(int done, int total) =>
+      'S’està escrivint $done de $total';
+  @override
+  String epubConvertDone(String made, int notes, int pictures) =>
+      'Convertit a $made (notes: $notes, imatges: $pictures)';
+  @override
+  String get epubConvertProtected =>
+      'Aquest llibre està protegit (DRM): el seu text no es pot convertir';
+  @override
+  String epubConvertNotABook(String name) => '«$name» no és un EPUB llegible';
+  @override
+  String get epubConvertTooLarge =>
+      'Aquest llibre és massa gran per convertir-lo';
+  @override
+  String get epubConvertFailed => 'No s’ha pogut convertir el llibre';
+  @override
+  String get epubConvertNeedsLibrary =>
+      'Obriu una biblioteca per convertir un llibre en notes';
+  @override
+  String get epubConvertChapterName => 'Capítol {n}';
+  @override
+  String get epubConvertOpening => 'Pàgines preliminars';
+  @override
+  String get epubConvertContents => 'Índex';
+  @override
+  String get epubConvertPickTitle => 'Trieu un EPUB per convertir';
   @override
   String get openFileTitle => 'Obre un fitxer';
   @override
