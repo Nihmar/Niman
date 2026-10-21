@@ -3,13 +3,15 @@
 ///
 /// Android sets `FLAG_KEEP_SCREEN_ON` on the window and Linux takes GTK's
 /// idle inhibit, both over `niman/screen`; Windows asks
-/// `SetThreadExecutionState` directly.
+/// `SetThreadExecutionState` directly, and a Mac takes a power assertion
+/// (keep_awake_mac.dart).
 library;
 
 import 'dart:ffi';
 import 'dart:io';
 
 import 'package:flutter/services.dart';
+import 'package:niman/src/core/keep_awake_mac.dart';
 import 'package:niman/src/core/logging.dart';
 
 const MethodChannel _channel = MethodChannel('niman/screen');
@@ -34,6 +36,10 @@ Future<void> keepScreenOn({required bool on}) async {
             ? _esContinuous | _esDisplayRequired | _esSystemRequired
             : _esContinuous,
       );
+    } else if (Platform.isMacOS) {
+      if (!macKeepScreenOn(on: on)) {
+        const AppLogger(name: 'slides').warning('keep the screen on: refused');
+      }
     } else if (Platform.isAndroid || Platform.isLinux) {
       await _channel.invokeMethod<void>('keepOn', on);
     }
