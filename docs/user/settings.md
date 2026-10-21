@@ -265,3 +265,11 @@ listing only what is new since the version you last saw. Beside them, the **Mark
 cheatsheet**: every construct Niman reads, written and shown (see
 [editing](editing.md#markdown-support)); from here its examples are
 copied, since no note is open to insert them in.
+
+An exported debug log starts by naming what it came from: the version and
+build number, the channel (release or test), the build mode and the commit
+it was built from, the system and its cores, the device (Android: maker,
+model and Android version), and every screen's size, density and refresh
+rate. A log handed over for a bug or a slow screen is then comparable with
+the next one, and a frame time can be read against the screen's own
+budget — 16.7 ms at 60 Hz, 8.3 ms at 120.
