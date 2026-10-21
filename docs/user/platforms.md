@@ -2,8 +2,8 @@
 
 Supported today: **Android** (minSdk 34, Android 14), **Linux** (Wayland),
 **Windows**, and **macOS** (14 and later) in **preview** — see
-[macOS](#macos) for what it still lacks. iOS is not released yet, but the
-code is kept portable.
+[macOS](#macos) for what it still lacks. **iOS and iPadOS** (17 and later)
+run but are not released yet — see [iOS](#ios).
 New tests must be portable too (see [conventions](../dev/conventions.md)).
 
 Export is one feature on every platform: Markdown, HTML, PDF and EPUB
@@ -280,6 +280,65 @@ Still missing on a Mac:
 
 The formulas' smoother drawing that Linux and Windows get is off on a Mac
 by design: its renderer already smooths their edges.
+
+## iOS
+
+**Not released yet.** The app runs on iPhones and iPads (iOS 17 and later),
+but is not on the App Store or TestFlight: that needs an Apple Developer
+account. An iPhone has the Android phone's layout and an iPad the Android
+tablet's — the layout follows the window, not the device — so what this
+page says of Android's screens holds there.
+
+- **Libraries live in Niman's own folder**, which Files shows as *On My
+  iPhone › Niman* (*On My iPad*): each folder there is a library, and you
+  and other apps see its `.md` files. Creating a library makes a folder
+  there; opening one lists them. A library leaves the device through
+  Niman's [WebDAV sync](sync.md) or a copy in Files. A folder elsewhere —
+  iCloud Drive, another app's storage — cannot be a library: iOS gives
+  such a folder's files out lazily, which a large library cannot be
+  scanned through. This is a decision for now, not an omission. Deleting
+  the app deletes its folder, libraries included.
+- **Updates** come from the App Store once Niman is there; the app does not
+  look for them itself.
+- **Reminders** for `todo.txt` and `calendar.txt` are scheduled with the
+  system, so they arrive with Niman closed, as on Android; iOS asks for
+  permission the first time one is set. iOS holds at most 64 at a time:
+  Niman schedules the 64 soonest, and the later ones each time it runs
+  after some of those have fired.
+- **Quick actions:** press and hold the icon (see
+  [shortcuts](shortcuts.md)).
+- **Opening a `.md` from Files** or another app's *Share* or *Open in*
+  opens it in Niman, in place: a note outside a library opens on its own.
+- **Spell check** is the system's own, in the languages the keyboards
+  have; the per-library personal dictionary applies on top.
+- **PDF export** goes through WebKit: paginated A4 with real, selectable
+  text, nothing to install. **Web capture** runs a page with too little
+  text in WebKit too (see [web capture](web-capture.md)).
+- **Web capture** starts from **New ▸ Capture web page**; iOS gives a
+  capture under way about half a minute once you leave Niman, and its end
+  is a notification (see [web capture](web-capture.md)).
+- **Sync** after you leave the app gets the same half minute (see
+  [sync](sync.md)).
+- **Text recognition:** the engine comes inside the app — iOS loads no
+  code an app downloads — and the languages are downloaded as elsewhere
+  (see [text recognition](text-recognition.md)).
+- **Transcription** reads WAV and, decoded by the system, m4a, mp3, AAC
+  and the other formats iOS plays.
+- **Link preview** is a long press in the read view, as on Android.
+- **Paste as Markdown** reads the HTML Safari and the other browsers put
+  on the clipboard.
+- **Slides** keep the screen on while they are presented.
+- **A hardware keyboard** gets the keys with `⌘`, as on a Mac (see
+  [shortcuts](shortcuts.md)).
+- **Date created** is the file's own creation time, kept across saves
+  (see [Date created](#date-created)).
+
+Still missing on iOS:
+
+- **Share → Niman** from other apps — text, files and pages — which needs a
+  share extension;
+- the [home-screen widgets](widgets.md);
+- a release: TestFlight first, then the App Store.
 
 ## Home
 

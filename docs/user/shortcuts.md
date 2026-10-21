@@ -3,7 +3,8 @@
 ## Keyboard (desktop)
 
 App-level accelerators, as Niman ships them. Settings → Keyboard
-shortcuts lists them and lets you change them. On a Mac `⌘` stands for
+shortcuts lists them and lets you change them. On a Mac — and on an iPad
+or iPhone with a hardware keyboard — `⌘` stands for
 `Ctrl` and the keys read as the system writes them (`⇧⌘N`); where `⌘`
 would take a key macOS keeps, the Mac has a key of its own, named below.
 The Mac's menu bar holds the same commands, each with its key:
@@ -242,10 +243,10 @@ In the file tree, `Ctrl+click` a note (or middle-click its tab to close
 it) to open it in a tab of its own — see
 [editing](editing.md#open-notes-and-tabs).
 
-## Launcher quick actions (Android)
+## Launcher quick actions (Android and iOS)
 
 Long-press the app icon for dynamic shortcuts (labels localized,
-published at startup):
+published at startup; on iOS they are the icon's quick actions):
 
 - **Quick note** — opens the quick note
 - **Today's journal entry** — opens today's [journal](journal.md) entry,
@@ -253,7 +254,7 @@ published at startup):
 - **New todo** — opens the Todo tab's add-task dialog
 - **New note** — the Files FAB's "New note" flow
 - **New list note** — the Files FAB's "New list note" flow (desktop tray
-  and Linux launcher; Android launchers show the first four)
+  and Linux launcher; Android launchers and iOS show the first four)
 - **New voice note** — the Files FAB's "New voice note" flow (likewise)
 
 Each shortcut runs the same flow as its in-app button, so the two can
