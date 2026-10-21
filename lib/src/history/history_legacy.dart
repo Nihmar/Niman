@@ -21,6 +21,7 @@ library;
 
 import 'dart:io';
 
+import 'package:niman/src/history/history_lock.dart';
 import 'package:niman/src/history/history_log.dart';
 import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/history/history_objects.dart';
@@ -31,6 +32,16 @@ String legacyManifestPath(String root, String rel) =>
     p.join(root, historyFolderName, '$rel.json');
 
 final RegExp _versionSuffix = RegExp(r'\.v(\d+)$');
+
+/// Whether [rel] has an old history to move in: a manifest, or version
+/// files — a manifest lost used to leave those.
+///
+/// Neither writes nor locks, so a read can ask before it takes a lock it
+/// does not need. The manifest is one stat; the version files are a listing
+/// of the note's folder, asked only when there is no manifest.
+bool hasLegacyHistory(String root, String rel) =>
+    File(legacyManifestPath(root, rel)).existsSync() ||
+    _versionFiles(root, rel).isNotEmpty;
 
 /// Moves the old history of [rel], if it has one, into the objects and a
 /// log; answers how many versions came in. Does nothing where a log is
@@ -109,7 +120,10 @@ List<String> legacyNotesUnder(String root, Directory dir) {
   for (final entry in dir.listSync(recursive: true, followLinks: false)) {
     if (entry is! File) continue;
     final rel = p.split(p.relative(entry.path, from: history)).join('/');
-    if (rel.startsWith('$historyObjectsFolderName/')) continue;
+    if (rel.startsWith('$historyObjectsFolderName/') ||
+        rel.startsWith('$historyLocksFolderName/')) {
+      continue;
+    }
     if (rel.endsWith('.json')) {
       notes.add(rel.substring(0, rel.length - '.json'.length));
       continue;

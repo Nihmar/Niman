@@ -22,12 +22,15 @@ FoldedLog get emptyHistoryLog =>
 /// The log of [rel] folded, its old history moved in first when it has
 /// one — under the note's lock, since the move writes.
 ///
-/// The log is read again after the move whatever it answered: a move that
-/// lost the race to another (`history_legacy.dart`) writes nothing, and
-/// the log is the other's.
+/// A note with neither a log nor an old history, which is most of them to
+/// a read, takes no lock: a read of nothing must not wait on one, nor fail
+/// on a store that cannot hold one. The log is read again after a move
+/// whatever it answered: a move that lost the race to another
+/// (`history_legacy.dart`) writes nothing, and the log is the other's.
 FoldedLog loadHistoryLog(String root, String rel) {
   final log = readLog(root, rel);
   if (log != null) return log;
+  if (!hasLegacyHistory(root, rel)) return emptyHistoryLog;
   withHistoryLock(root, [rel], () => importLegacyHistory(root, rel));
   return readLog(root, rel) ?? emptyHistoryLog;
 }
@@ -104,12 +107,20 @@ void deleteHistoryLog(String root, String rel) {
 }
 
 /// Removes [dir] and its empty parents, stopping at `.history/` itself.
+///
+/// Each folder is deleted outright, without listing it first: a delete of a
+/// folder that holds anything fails, and that answers the question in one
+/// call where a listing of a folder of thousands of logs is thousands of
+/// entries.
 void pruneHistoryFolders(String root, Directory dir) {
   final stop = p.normalize(p.join(root, historyFolderName));
   var current = dir;
-  while (p.isWithin(stop, current.path) && current.existsSync()) {
-    if (current.listSync().isNotEmpty) return;
-    current.deleteSync();
+  while (p.isWithin(stop, current.path)) {
+    try {
+      current.deleteSync();
+    } on FileSystemException {
+      return; // not empty, or gone
+    }
     current = current.parent;
   }
 }

@@ -28,13 +28,21 @@ int moveNoteHistory(String root, String fromRel, String toRel) {
       _deleteNote(root, fromRel);
       return 0;
     }
+    final from = File(historyLogPath(root, fromRel));
+    final to = File(historyLogPath(root, toRel));
+    // A rename that only changes case, where the file system does not tell
+    // the cases apart (Windows, Android's shared storage): both names are
+    // the one log, which is renamed in place. Merged "with itself" and then
+    // deleted as the source, the history would be gone.
+    if (_sameFile(from, to)) {
+      from.renameSync(to.path);
+      return source.versions.length;
+    }
     final targetLog = loadHistoryLog(root, toRel);
     final target = presentVersions(root, targetLog);
     if (target.versions.isEmpty) {
-      final to = File(historyLogPath(root, toRel));
-      to.parent.createSync(recursive: true);
-      File(historyLogPath(root, fromRel)).renameSync(to.path);
-      pruneHistoryFolders(root, File(historyLogPath(root, fromRel)).parent);
+      inFolderOf(to, () => from.renameSync(to.path));
+      pruneHistoryFolders(root, from.parent);
       return source.versions.length;
     }
     final offset = nextVersionNumber(targetLog, target) - 1;
@@ -71,9 +79,12 @@ int moveFolderHistory(String root, String fromRel, String toRel) {
   final from = Directory(p.join(root, historyFolderName, fromRel));
   if (!from.existsSync()) return 0;
   final to = Directory(p.join(root, historyFolderName, toRel));
-  if (!to.existsSync()) {
-    to.parent.createSync(recursive: true);
-    from.renameSync(to.path);
+  if (!to.existsSync() || _sameFolder(from, to)) {
+    // A folder renamed in case alone where the cases are one is "already
+    // there": merging it into itself and deleting the source would delete
+    // it.
+    final target = File(to.path);
+    inFolderOf(target, () => from.renameSync(to.path));
     return _notesUnder(root, to).length;
   }
   // Something already lives at the target: merge note by note.
@@ -86,6 +97,12 @@ int moveFolderHistory(String root, String fromRel, String toRel) {
   if (from.existsSync()) from.deleteSync(recursive: true);
   return notes.length;
 }
+
+bool _sameFile(File a, File b) =>
+    b.existsSync() && FileSystemEntity.identicalSync(a.path, b.path);
+
+bool _sameFolder(Directory a, Directory b) =>
+    FileSystemEntity.identicalSync(a.path, b.path);
 
 /// The notes under [dir] (in `.history/`) that have history, old or new,
 /// as library-relative paths.

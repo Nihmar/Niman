@@ -147,12 +147,29 @@ FoldedLog? readLog(String root, String rel) {
 void appendLog(String root, String rel, List<String> lines) {
   if (lines.isEmpty) return;
   final file = File(historyLogPath(root, rel));
-  file.parent.createSync(recursive: true);
-  final handle = file.openSync(mode: FileMode.append);
-  try {
-    handle.writeStringSync('\n${lines.join('\n')}\n');
-  } finally {
-    handle.closeSync();
+  inFolderOf(file, () {
+    final handle = file.openSync(mode: FileMode.append);
+    try {
+      handle.writeStringSync('\n${lines.join('\n')}\n');
+    } finally {
+      handle.closeSync();
+    }
+  });
+}
+
+/// Runs [write], which puts something in [file]'s folder, with the folder
+/// made first — and made again when it was pruned in between: another
+/// note's delete or move tidies the folders it leaves empty, and a folder
+/// made a moment ago may be one of them (no lock of this note's sits in it
+/// any more to keep it).
+T inFolderOf<T>(File file, T Function() write) {
+  for (var attempt = 0; ; attempt++) {
+    file.parent.createSync(recursive: true);
+    try {
+      return write();
+    } on PathNotFoundException {
+      if (attempt >= 4) rethrow;
+    }
   }
 }
 
@@ -172,7 +189,6 @@ void writeLog(
     if (file.existsSync()) file.deleteSync();
     return;
   }
-  file.parent.createSync(recursive: true);
   final text = [
     for (final v in manifest.versions) keptLine(v),
     for (final e in manifest.pins.entries) pinLine(e.key, e.value),
@@ -186,15 +202,17 @@ void writeLog(
     ),
   );
   try {
-    final handle = temp.openSync(mode: FileMode.writeOnly);
-    try {
-      handle
-        ..writeStringSync('$text\n')
-        ..flushSync();
-    } finally {
-      handle.closeSync();
-    }
-    temp.renameSync(file.path);
+    inFolderOf(file, () {
+      final handle = temp.openSync(mode: FileMode.writeOnly);
+      try {
+        handle
+          ..writeStringSync('$text\n')
+          ..flushSync();
+      } finally {
+        handle.closeSync();
+      }
+      temp.renameSync(file.path);
+    });
   } on Object {
     if (temp.existsSync()) temp.deleteSync();
     rethrow;

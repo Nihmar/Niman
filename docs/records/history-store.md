@@ -25,6 +25,8 @@ go on.
 .history/
   .objects/
     3f/a1c4…            one version's content, named by its sha256
+  .locks/
+    9c2e….lock          one writer at a time on a note's log
   Projects/
     Plan.md.log         Plan.md's history: one line an event
 ```
@@ -55,6 +57,34 @@ go on.
   of the oldest version applies at most 15. A delta is kept only when it
   is under half the object it replaces, and never against a base whose own
   chain leads back to it.
+
+## One writer at a time
+
+A save's snapshot, a sync's pin, the upkeep's compaction and a move read a
+log, decide, and write it, from isolates that share nothing. Each runs
+holding the note's lock (`history_lock.dart`, `history_lock_file.dart`):
+
+- **Flat, apart from the notes.** `.history/.locks/<sha256 of the path in
+  lower case>.lock`. A release has no folder of the note's to tidy (a
+  listing of a folder of 30k logs on every save is a round trip each on
+  Android), and a case-only rename, whose two names are one file on
+  Windows and Android, asks for one lock and not two. Folding the case
+  makes two notes that differ by case alone take turns on Linux, which is
+  harmless.
+- **Owned.** The file holds its holder's token and a release deletes it
+  only while it still does: a holder whose lock was broken as stale must
+  not delete the next holder's.
+- **Broken once.** A lock older than 30 s is a crash's leftover. Breaking
+  it holds a `.break` guard created exclusively and looks at the lock
+  again once held, so two waiters that saw it stale do not take turns
+  deleting each other's fresh lock.
+- **Waiting is for a lock that is there.** Only "already exists" waits (up
+  to 10 s, then `HistoryLockTimeout`). A store that cannot hold a lock
+  (read-only, full, a path in the way) raises at once, so a save does not
+  pay 10 s a snapshot for it. Windows alone is given half a second for
+  the refusal that follows a delete still pending.
+- **Reads take none.** A note with no log and no old history reads as
+  empty without a lock.
 
 ## What is flushed, and why that is safe
 

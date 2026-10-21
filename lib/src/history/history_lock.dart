@@ -7,30 +7,43 @@
 /// read while the other appended a line the compaction then dropped. So
 /// every read-decide-write of a log runs holding the note's lock.
 ///
-/// The lock is a file, `.history/<path>.log.lock`, created exclusively — an
-/// operation the file system answers once, whichever isolate or process
-/// asks — and deleted when the work is done. A lock older than [_stale] was
-/// left by a crash and is broken; one held longer than [_patience] is a
-/// stall, and the work gives up rather than wait for ever.
+/// The locks live apart from the notes' folders, flat, in
+/// `.history/.locks/`, one file a note named by the hash of its path folded
+/// to lower case — so a case-only rename, whose two names are one file on
+/// Windows and Android, asks for one lock and not two, and a release has no
+/// folder of the note's to tidy (listing a folder of 30k logs on every save
+/// would be a round trip each on Android). Folding over-locks two notes
+/// whose names differ by case on Linux, which only makes them take turns.
+/// How a lock file is taken, broken and released is `history_lock_file.dart`.
 ///
 /// Synchronous, like the store: it runs on background isolates, where a
 /// short sleep blocks nothing a user waits on.
 library;
 
+import 'dart:convert';
 import 'dart:io';
 
+import 'package:niman/src/history/history_lock_file.dart';
 import 'package:niman/src/history/history_objects.dart';
 import 'package:path/path.dart' as p;
 
-/// How old a lock must be to be taken for a crash's leftover.
-const Duration _stale = Duration(seconds: 30);
+/// The locks folder's name inside `.history/`: a dot name, so no note's
+/// folder can take it. Walkers of `.history/` skip it like `.objects`.
+const String historyLocksFolderName = '.locks';
 
-/// How long a writer waits for a lock before it gives up.
-const Duration _patience = Duration(seconds: 10);
+/// The file name of the store-wide lock the packer holds around a delta's
+/// loop check and write; not a hash, so no note's lock is it.
+const String _packLockName = 'pack';
+
+/// The folder holding the locks of the library at [root].
+String historyLocksPath(String root) =>
+    p.join(root, historyFolderName, historyLocksFolderName);
 
 /// The lock of the note at [rel]'s history.
-String historyLockPath(String root, String rel) =>
-    p.join(root, historyFolderName, '$rel.log.lock');
+String historyLockPath(String root, String rel) => p.join(
+  historyLocksPath(root),
+  '${shaOf(utf8.encode(rel.toLowerCase()))}.lock',
+);
 
 /// A history lock not had in time.
 final class HistoryLockTimeout implements Exception {
@@ -50,74 +63,57 @@ final class HistoryLockTimeout implements Exception {
 final Set<String> _heldHere = {};
 
 /// Runs [body] holding the locks of [rels], taken in path order so two
-/// writers asking for the same two never wait on each other.
+/// writers asking for the same two never wait on each other. Names that
+/// are one lock — differing by case — are taken once.
 ///
-/// Throws [HistoryLockTimeout] when a lock is held past the patience.
-T withHistoryLock<T>(String root, Iterable<String> rels, T Function() body) {
+/// Throws [HistoryLockTimeout] when a lock is held past the patience, and a
+/// [FileSystemException] when the store cannot hold a lock at all.
+T withHistoryLock<T>(
+  String root,
+  Iterable<String> rels,
+  T Function() body, {
+  Duration stale = historyLockStale,
+}) => _withLocks(
+  root,
+  {for (final rel in rels) historyLockPath(root, rel): rel},
+  body,
+  stale,
+);
+
+/// Runs [body] holding the store-wide pack lock: what makes the packer's
+/// check that a delta leads to no loop, and the write of that delta, one
+/// step across the isolates that pack at once.
+T withHistoryPackLock<T>(String root, T Function() body) => _withLocks(
+  root,
+  {p.join(historyLocksPath(root), '$_packLockName.lock'): _packLockName},
+  body,
+  historyLockStale,
+);
+
+T _withLocks<T>(
+  String root,
+  Map<String, String> named,
+  T Function() body,
+  Duration stale,
+) {
   final ordered = [
-    for (final rel in {...rels}.toList()..sort())
-      if (!_heldHere.contains(historyLockPath(root, rel))) rel,
+    for (final path in named.keys.toList()..sort())
+      if (!_heldHere.contains(path)) path,
   ];
-  final held = <File>[];
+  final held = <(File, String)>[];
   try {
-    for (final rel in ordered) {
-      held.add(_acquire(root, rel));
-      _heldHere.add(held.last.path);
+    for (final path in ordered) {
+      final lock = File(path);
+      final token = acquireLockFile(lock, stale: stale);
+      if (token == null) throw HistoryLockTimeout(named[path]!);
+      held.add((lock, token));
+      _heldHere.add(path);
     }
     return body();
   } finally {
-    for (final lock in held.reversed) {
+    for (final (lock, token) in held.reversed) {
       _heldHere.remove(lock.path);
-      try {
-        lock.deleteSync();
-      } on FileSystemException {
-        // Broken as stale by another writer: nothing left to release.
-      }
-      // A delete or a move inside could not prune the folder while the
-      // lock was in it: an emptied one goes now.
-      _prune(root, lock.parent);
+      releaseLockFile(lock, token);
     }
-  }
-}
-
-/// Removes [dir] and its empty parents, stopping at `.history/` itself.
-void _prune(String root, Directory dir) {
-  final stop = p.normalize(p.join(root, historyFolderName));
-  var current = dir;
-  try {
-    while (p.isWithin(stop, current.path) && current.listSync().isEmpty) {
-      current.deleteSync();
-      current = current.parent;
-    }
-  } on FileSystemException {
-    // Gone already, or filled again by another writer: nothing to prune.
-  }
-}
-
-File _acquire(String root, String rel) {
-  final lock = File(historyLockPath(root, rel));
-  final clock = Stopwatch()..start();
-  var pause = 1;
-  while (true) {
-    try {
-      lock.parent.createSync(recursive: true);
-      lock.createSync(exclusive: true);
-      return lock;
-    } on FileSystemException {
-      // Held, or the folder raced away: look at the lock, then wait.
-    }
-    try {
-      final age = DateTime.now().difference(lock.statSync().modified);
-      if (lock.existsSync() && age > _stale) {
-        lock.deleteSync();
-        continue;
-      }
-    } on FileSystemException {
-      // Released between the attempt and the look: try again.
-      continue;
-    }
-    if (clock.elapsed > _patience) throw HistoryLockTimeout(rel);
-    sleep(Duration(milliseconds: pause));
-    pause = pause < 32 ? pause * 2 : 32;
   }
 }

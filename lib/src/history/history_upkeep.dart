@@ -236,13 +236,16 @@ Set<String>? namedObjects(
 }
 
 /// Every note with a log under [history], library-relative; the objects
-/// folder is not walked.
+/// and locks folders are not walked.
 List<String> _logged(String root, Directory history) {
   final out = <String>[];
   void walk(Directory dir) {
     for (final entry in dir.listSync(followLinks: false)) {
       if (entry is Directory) {
-        if (p.equals(entry.path, historyObjectsPath(root))) continue;
+        if (p.equals(entry.path, historyObjectsPath(root)) ||
+            p.equals(entry.path, historyLocksPath(root))) {
+          continue;
+        }
         walk(entry);
       } else if (entry is File && entry.path.endsWith('.log')) {
         final rel = p

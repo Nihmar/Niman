@@ -179,7 +179,8 @@ void main() {
     () async {
       write('a.md', 'one');
       save('a.md', 'two', forced());
-      final lock = File(historyLockPath(root.path, 'a.md'))..createSync();
+      final lock = File(historyLockPath(root.path, 'a.md'))
+        ..createSync(recursive: true);
       // Another isolate holds the note's lock for a while: a compaction, a
       // pin. The save waits for it rather than writing beside it.
       final releaser = Isolate.run(() {
@@ -412,7 +413,9 @@ void main() {
       expect(deleteNoteHistory(root.path, 'a.md'), 2);
       expect(listObjects(root.path), isEmpty);
       expect(
-        Directory(p.join(root.path, historyFolderName)).listSync(),
+        Directory(p.join(root.path, historyFolderName))
+            .listSync()
+            .where((e) => p.basename(e.path) != historyLocksFolderName),
         isEmpty,
       );
     });
