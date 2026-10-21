@@ -222,6 +222,15 @@ Decisions taken without the writer, to revisit if they read wrong:
   column's alignment, and `live` gives the room before it (`LiveTables`);
   `read_live_page_test` holds the two to the pixel. It was not drawn at
   all before, which the menu's Align would have made plain.
+- **A cell's spaces are room, a typed space is a space** (#1160,
+  2026-10-21): the spaces round a cell's text stay the room that puts the
+  next cell on its column, but they are drawn one space wide where the gap
+  has room for them, and what is left over is the pipes' — so a space
+  typed at the end of a cell's text moves the caret one space, not its
+  share of the column's remainder (on a wide column that was twenty
+  characters a press). A gap too narrow to give its own spaces their
+  width is spread evenly as before, and a line's first gap, which sets the
+  first cell half a spacing in as the read view does, is left whole.
 - **Not done**: a size picker for an inserted table (#262 has two
   columns and one row; the `+` and Tab add the rest).
 

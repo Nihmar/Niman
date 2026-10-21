@@ -713,6 +713,12 @@ one another; one written with a single space round each cell stays that
 way. A column's alignment (`:--`, `:-:`, `--:`) is drawn in both the read
 view and live mode.
 
+The spaces round a cell's text are the room that sets each cell on its
+column, not text you read: `| Aria   |` and `| Aria |` are drawn alike, at
+one width or the other. A space you type at the end of a cell's text is
+still one space wide, as it is in the note — the room past it stays the
+column's, and the cells after it do not move.
+
 A table wider than the pane is fitted to it, the same way in the read view
 and in live mode: every column shows, its cells wrap inside it, and a column
 keeps its longest word whole where the pane has room for it. A long cell in
