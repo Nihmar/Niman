@@ -233,6 +233,7 @@
 				9705A1C41CF9048500538489 /* Embed Frameworks */,
 				3B06AD1E1E4923F5004D2608 /* Thin Binary */,
 				FDDEDE040C66C28B826AA7E6 /* [CP] Embed Pods Frameworks */,
+				594FB121B6E748E2656A3A25 /* Bundle the OCR engine */,
 			);
 			buildRules = (
 			);
@@ -362,6 +363,27 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "/bin/sh \"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\" embed_and_thin";
+		};
+		594FB121B6E748E2656A3A25 /* Bundle the OCR engine */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/../build/ocr-engine/niman-ocr-ios-arm64.dylib",
+				"$(SRCROOT)/../build/ocr-engine/niman-ocr-ios-sim-arm64.dylib",
+			);
+			name = "Bundle the OCR engine";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/niman_ocr.framework/niman_ocr",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# The OCR engine (scripts/ocr-engine.sh ios-arm64 | ios-sim-arm64\n# build/ocr-engine), bundled as a framework: iOS loads no code an app\n# downloaded, and takes no bare library in a bundle\n# (docs/records/apple-platforms.md).\nif [ \"$PLATFORM_NAME\" = iphonesimulator ]; then\n  target=ios-sim-arm64; platform=iPhoneSimulator\nelse\n  target=ios-arm64; platform=iPhoneOS\nfi\nsrc=\"$SRCROOT/../build/ocr-engine/niman-ocr-$target.dylib\"\nframework=\"$BUILT_PRODUCTS_DIR/$FRAMEWORKS_FOLDER_PATH/niman_ocr.framework\"\nif [ ! -f \"$src\" ]; then\n  echo \"warning: no OCR engine at $src: the app is built without OCR (scripts/ocr-engine.sh $target build/ocr-engine)\"\n  rm -rf \"$framework\"\n  exit 0\nfi\nmkdir -p \"$framework\"\ncp -f \"$src\" \"$framework/niman_ocr\"\ncat >\"$framework/Info.plist\" <<PLIST\n<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n<plist version=\"1.0\">\n<dict>\n\t<key>CFBundleExecutable</key><string>niman_ocr</string>\n\t<key>CFBundleIdentifier</key><string>dev.niman.niman.ocr</string>\n\t<key>CFBundleInfoDictionaryVersion</key><string>6.0</string>\n\t<key>CFBundleName</key><string>niman_ocr</string>\n\t<key>CFBundlePackageType</key><string>FMWK</string>\n\t<key>CFBundleShortVersionString</key><string>5.5.3</string>\n\t<key>CFBundleVersion</key><string>1</string>\n\t<key>CFBundleSupportedPlatforms</key><array><string>$platform</string></array>\n\t<key>MinimumOSVersion</key><string>17.0</string>\n</dict>\n</plist>\nPLIST\ncodesign --force --timestamp=none --sign \"${EXPANDED_CODE_SIGN_IDENTITY:--}\" \"$framework\"\n";
 		};
 		6A19251D37CABE6C01728CC7 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;

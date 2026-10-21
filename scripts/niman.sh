@@ -187,6 +187,14 @@ ios_build() {
       return 2
       ;;
   esac
+  # The OCR engine is bundled in the iOS app (an Xcode build phase wraps
+  # it in a framework): built once, then reused.
+  local ocr=build/ocr-engine/niman-ocr-ios-arm64.dylib
+  if [ ! -f "$ocr" ]; then
+    echo "building the OCR engine (once)..."
+    ./scripts/ocr-engine.sh ios-arm64 build/ocr-engine >"$log" 2>&1 ||
+      { tail -n 20 "$log"; return 1; }
+  fi
   flutter build ios --release --no-codesign --flavor "$flavor" \
     "${define[@]}" >"$log" 2>&1
   local status=$?

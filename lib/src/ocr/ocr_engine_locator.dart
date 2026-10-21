@@ -39,6 +39,16 @@ String macBundledOcrEngine([String? executable]) => p.join(
   'libniman_ocr.dylib',
 );
 
+/// Where an iPhone app bundles the engine: a framework in its `Frameworks`,
+/// beside its executable (`scripts/ocr-engine.sh ios-arm64`). iOS loads no
+/// code an app downloaded, and takes no bare library in a bundle.
+String iosBundledOcrEngine([String? executable]) => p.join(
+  p.dirname(executable ?? Platform.resolvedExecutable),
+  'Frameworks',
+  'niman_ocr.framework',
+  'niman_ocr',
+);
+
 /// The distribution libraries tried on Linux, newest first.
 const List<String> systemOcrEngineNames = [
   'libtesseract.so.5',
@@ -46,8 +56,9 @@ const List<String> systemOcrEngineNames = [
 ];
 
 /// The engine already on this device, without a download: a library
-/// bundled in the package ([bundledOcrEngineNames], or a Mac app's
-/// [macBundledOcrEngine]), else on Linux the distribution's
+/// bundled in the package ([bundledOcrEngineNames], or an Apple app's
+/// [macBundledOcrEngine] and [iosBundledOcrEngine]), else on Linux the
+/// distribution's
 /// ([systemOcrEngineNames]); null when none opens or none is recent
 /// enough.
 ///
@@ -55,16 +66,18 @@ const List<String> systemOcrEngineNames = [
 /// engine is not probed here: once loaded, Windows locks the file until
 /// the app exits, and the settings page must still be able to delete it.
 ///
-/// [open], [linux] and [macos] are seams for tests; a name that fails to
-/// open is skipped, a missing library being the common case.
+/// [open], [linux], [macos] and [ios] are seams for tests; a name that
+/// fails to open is skipped, a missing library being the common case.
 OcrEngineLibrary? findInstalledOcrEngine({
   DynamicLibrary Function(String name) open = DynamicLibrary.open,
   bool? linux,
   bool? macos,
+  bool? ios,
 }) {
   final candidates = [
     if (macos ?? Platform.isMacOS)
       (macBundledOcrEngine(), OcrEngineSource.bundled),
+    if (ios ?? Platform.isIOS) (iosBundledOcrEngine(), OcrEngineSource.bundled),
     for (final name in bundledOcrEngineNames) (name, OcrEngineSource.bundled),
     if (linux ?? Platform.isLinux)
       for (final name in systemOcrEngineNames) (name, OcrEngineSource.system),

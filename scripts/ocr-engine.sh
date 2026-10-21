@@ -8,13 +8,15 @@
 #   scripts/ocr-engine.sh <target> <out dir>
 #   targets: linux-x64 | android-arm64-v8a | android-x86_64 | windows-x64
 #            | macos-universal (macos-arm64 and macos-x86_64, joined)
+#            | ios-arm64 | ios-sim-arm64 (the simulator on Apple silicon)
 #
 # Android needs ANDROID_NDK_HOME; Windows runs under Git Bash with MSVC;
 # the Mac needs Xcode, cmake and ninja.
 # The library lands in <out dir> as niman-ocr-<target>.<so|dll|dylib>.
 # The Mac's is bundled in the app rather than downloaded: under the
 # hardened runtime the app loads only a library signed with its own team
-# (docs/records/apple-platforms.md).
+# (docs/records/apple-platforms.md). iOS's too, inside a framework: iOS
+# loads no code an app downloaded, and takes no bare library in a bundle.
 set -euo pipefail
 
 TESSERACT_VERSION=5.5.3
@@ -98,6 +100,21 @@ case "$target" in
     lib_glob='libtesseract*.dylib'
     ext=dylib
     ;;
+  ios-arm64 | ios-sim-arm64)
+    # An iPhone's, or the Apple silicon simulator's: the Mac's link, for
+    # iOS 17 and the SDK of either.
+    printf '_Tess*\n' >"$work/exports.txt"
+    sdk=iphoneos
+    if [ "$target" = ios-sim-arm64 ]; then sdk=iphonesimulator; fi
+    common+=(-DCMAKE_SYSTEM_NAME=iOS "-DCMAKE_OSX_SYSROOT=$sdk"
+      -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_SYSTEM_PROCESSOR=arm64
+      -DCMAKE_OSX_DEPLOYMENT_TARGET=17.0 -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+      "-DCMAKE_C_FLAGS=$gc_flags" "-DCMAKE_CXX_FLAGS=$gc_flags"
+      "-DCMAKE_SHARED_LINKER_FLAGS=-Wl,-dead_strip -Wl,-exported_symbols_list,$work/exports.txt")
+    strip_cmd=(strip -x)
+    lib_glob='libtesseract*.dylib'
+    ext=dylib
+    ;;
   windows-x64)
     generator=(-G "Visual Studio 17 2022" -A x64)
     # Static CRT in both libraries; Leptonica's old cmake_minimum_required
@@ -141,8 +158,12 @@ lib="$(find tesseract-build -name "$lib_glob" -type f | head -1)"
 dest="$out/niman-ocr-$target.$ext"
 cp "$lib" "$dest"
 "${strip_cmd[@]}" "$dest"
-# The name the app's bundle loads it by, wherever the build put it.
-if [ "$ext" = dylib ]; then install_name_tool -id @rpath/libniman_ocr.dylib "$dest"; fi
+# The name the app's bundle loads it by, wherever the build put it: a
+# Mac's beside its Frameworks' others, iOS's as its framework's binary.
+case "$target" in
+  ios-*) install_name_tool -id @rpath/niman_ocr.framework/niman_ocr "$dest" ;;
+  macos-*) install_name_tool -id @rpath/libniman_ocr.dylib "$dest" ;;
+esac
 mkdir -p "$out/licenses"
 cp tesseract-src/LICENSE "$out/licenses/tesseract.txt"
 cp leptonica-src/leptonica-license.txt "$out/licenses/leptonica.txt"

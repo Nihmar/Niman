@@ -24,6 +24,7 @@ void main() {
       final found = findInstalledOcrEngine(
         linux: true,
         macos: false,
+        ios: false,
         open: (name) {
           tried.add(name);
           throw ArgumentError(name);
@@ -33,11 +34,37 @@ void main() {
       expect(tried, [...bundledOcrEngineNames, ...systemOcrEngineNames]);
     });
 
+    test('an iPhone looks for its framework beside the executable', () {
+      final tried = <String>[];
+      findInstalledOcrEngine(
+        linux: false,
+        macos: false,
+        ios: true,
+        open: (name) {
+          tried.add(name);
+          throw ArgumentError(name);
+        },
+      );
+      expect(tried.first, iosBundledOcrEngine());
+      expect(
+        iosBundledOcrEngine(p.join('/var', 'Bundle', 'Runner.app', 'Runner')),
+        p.join(
+          '/var',
+          'Bundle',
+          'Runner.app',
+          'Frameworks',
+          'niman_ocr.framework',
+          'niman_ocr',
+        ),
+      );
+    });
+
     test("a Mac looks in its app bundle's Frameworks first", () {
       final tried = <String>[];
       findInstalledOcrEngine(
         linux: false,
         macos: true,
+        ios: false,
         open: (name) {
           tried.add(name);
           throw ArgumentError(name);
