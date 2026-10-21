@@ -4,12 +4,58 @@
 library;
 
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:archive/archive_io.dart';
 import 'package:niman/src/core/process_run.dart';
 import 'package:niman/src/export/pdf_printer.dart';
-import 'package:niman/src/export/pdf_webview.dart';
 import 'package:path/path.dart' as p;
+
+/// A page the export's isolate asks the UI isolate to print with the
+/// system WebView, and where the [PdfOutcome] goes.
+///
+/// The isolate does not open the WebView's channel itself: on a Mac a
+/// background isolate's answer waited for the next event to wake the main
+/// thread, so an export stood still until something was clicked. The UI
+/// isolate's call is the one a single note's export makes.
+final class TreeExportPrint {
+  /// Asks for [htmlPath] printed into [pdfPath], answered on [reply].
+  const new(this.htmlPath, this.pdfPath, this.reply);
+
+  /// The page.
+  final String htmlPath;
+
+  /// Where the PDF goes.
+  final String pdfPath;
+
+  /// Where the outcome goes back to.
+  final SendPort reply;
+}
+
+/// Prints by asking the UI isolate to, over [_parent] ([TreeExportPrint]).
+final class _RelayPdfPrinter implements PdfPrinter {
+  const new(this._parent);
+
+  final SendPort _parent;
+
+  @override
+  Future<bool> get canPrint async => true;
+
+  @override
+  Future<PdfOutcome> print(
+    String htmlPath,
+    String pdfPath, {
+    PdfPaper paper = PdfPaper.a4,
+  }) async {
+    final reply = ReceivePort();
+    try {
+      _parent.send(TreeExportPrint(htmlPath, pdfPath, reply.sendPort));
+      return await reply.first as PdfOutcome;
+    } finally {
+      reply.close();
+    }
+  }
+}
 
 /// A PDF folder was asked for with no engine to print with.
 final class TreeExportNoEngine implements Exception {
@@ -29,7 +75,8 @@ abstract final class ExportTreePrinter {
   /// [engine] is the desktop browser (Edge, Chromium); null where the
   /// system WebView prints (Android, a Mac's WebKit). It is the caller's
   /// decision, made on the UI isolate: this runs on another, which sees
-  /// none of that one's state. [runner] runs the engine's
+  /// none of that one's state, and asks the UI isolate to print over
+  /// [parent] ([TreeExportPrint]). [runner] runs the engine's
   /// process: null runs the real one, and a test hands in a top-level
   /// function of its own — a closure cannot cross the isolate boundary.
   static Future<void> printInto(
@@ -38,8 +85,9 @@ abstract final class ExportTreePrinter {
     String? engine,
     ProcessRunner? runner,
     String page,
-    String stem,
-  ) async {
+    String stem, {
+    required SendPort parent,
+  }) async {
     final htmlPath = p.join(scratch.path, 'page.html');
     final pdfPath = p.join(scratch.path, 'page.pdf');
     File(htmlPath).writeAsStringSync(page);
@@ -51,7 +99,7 @@ abstract final class ExportTreePrinter {
       // Never written, or already gone.
     }
     final printer = engine == null
-        ? const WebViewPdfPrinter()
+        ? _RelayPdfPrinter(parent)
         : ProcessPdfPrinter(engine: engine, run: runner ?? runProcess);
     final outcome = await printer.print(htmlPath, pdfPath);
     switch (outcome) {
