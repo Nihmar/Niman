@@ -1,6 +1,4 @@
 import 'dart:async';
-import 'dart:io';
-import 'dart:isolate';
 
 import 'package:flutter/foundation.dart';
 import 'package:niman/src/core/logging.dart';
@@ -11,6 +9,7 @@ import 'package:niman/src/sync/reconcile.dart';
 import 'package:niman/src/sync/sync_conflict.dart';
 import 'package:niman/src/sync/sync_engine.dart';
 import 'package:niman/src/sync/sync_failure.dart';
+import 'package:niman/src/sync/sync_probe.dart';
 import 'package:niman/src/sync/sync_report.dart';
 import 'package:niman/src/sync/sync_scheduler.dart';
 import 'package:niman/src/sync/sync_secrets.dart';
@@ -331,7 +330,9 @@ final class LibrarySyncService extends ChangeNotifier implements SyncService {
     testClientFactory,
     DateTime Function()? now,
     Duration quickDelay = const Duration(seconds: 5),
+    ExistenceProbe? probe,
   }) : _testClient = testClientFactory ?? _defaultTestClient,
+       _probe = probe ?? probeExistence,
        _now = now ?? DateTime.now {
     scheduler = SyncScheduler(
       run: ({required quick}) => _runEngine(quick: quick, background: true),
@@ -366,6 +367,10 @@ final class LibrarySyncService extends ChangeNotifier implements SyncService {
 
   final WebDavClient Function(Uri, String, String, String?) _testClient;
   final DateTime Function() _now;
+
+  /// Asks which watched paths still exist; a test replaces it to hold an
+  /// answer back.
+  final ExistenceProbe _probe;
   final StreamController<Set<String>> _changes =
       StreamController<Set<String>>.broadcast();
   bool _disposed = false;
@@ -486,6 +491,11 @@ final class LibrarySyncService extends ChangeNotifier implements SyncService {
   /// them at once: a watcher batch can name hundreds of files (a folder
   /// copied in, a checkout), and this asked each one twice on the UI
   /// isolate, a FUSE round trip apiece on Android (#1143).
+  ///
+  /// The answer is a snapshot, so the caller awaits this before it handles
+  /// the next batch: two probes left to race could end in the wrong order,
+  /// the older batch's "changed" queued after the newer one's "deleted" for
+  /// a file that is gone.
   Future<void> watched(List<String> paths, List<String> folders) async {
     if (_disposed || _status.destination == null) return;
     final candidates = <(String, String)>[];
@@ -498,25 +508,22 @@ final class LibrarySyncService extends ChangeNotifier implements SyncService {
     if (candidates.isEmpty) return;
     final List<bool> exist;
     try {
-      final asked = [for (final (abs, _) in candidates) abs];
-      exist = await Isolate.run(
-        () => [
-          for (final abs in asked)
-            FileSystemEntity.typeSync(abs) != FileSystemEntityType.notFound,
-        ],
-      );
+      exist = await _probe([for (final (abs, _) in candidates) abs]);
     } on Object catch (error) {
       _log.warning('queue: the watcher batch was not probed ($error)');
       return;
     }
     if (_disposed) return;
+    var queued = 0;
     for (var at = 0; at < candidates.length; at++) {
-      hint(
-        candidates[at].$2,
-        exist[at] ? SyncOpKind.changed : SyncOpKind.deleted,
-      );
+      final rel = candidates[at].$2;
+      // The sync may have written the file while the probe ran: what the
+      // probe saw is then its own work, and its echo is still an echo.
+      if (engine.ops.changedBySync(rel)) continue;
+      hint(rel, exist[at] ? SyncOpKind.changed : SyncOpKind.deleted);
+      queued++;
     }
-    _log.debug('queue: ${candidates.length} hints from the watcher');
+    _log.debug('queue: $queued hints from the watcher');
   }
 
   String? _relative(String abs) {

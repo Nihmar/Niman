@@ -59,7 +59,7 @@ const Map<String, String> _offTheUiIsolate = {
   'spellcheck/hunspell_spell_checker.dart':
       'the dictionary search and load, in Isolate.run',
   'sync/sync_scanner.dart': 'scanLocalFiles, in Isolate.run',
-  'sync/sync_service.dart': "the watcher batch's probe, in Isolate.run",
+  'sync/sync_probe.dart': "the watcher batch's probe, in Isolate.run",
   'sync/sync_sides.dart': 'hashLocalFiles, in Isolate.run',
   'todo/todo_store.dart': 'the reads and probes its Isolate.run calls',
   'ui/drop_target.dart': 'foldersAmong, in Isolate.run',

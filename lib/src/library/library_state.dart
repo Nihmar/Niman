@@ -62,6 +62,7 @@ import 'package:niman/src/search/search_repo.dart';
 import 'package:niman/src/search/tag_repo.dart';
 import 'package:niman/src/sync/network_monitor.dart';
 import 'package:niman/src/sync/sync_engine.dart';
+import 'package:niman/src/sync/sync_probe.dart';
 import 'package:niman/src/sync/sync_secrets.dart';
 import 'package:niman/src/sync/sync_service.dart';
 import 'package:niman/src/sync/sync_store.dart';
@@ -115,6 +116,7 @@ final class LibraryController implements LibrarySession {
     this.watchSource,
     SyncSecretStore? syncSecrets,
     this.syncNetwork,
+    this.syncProbe,
   }) : _searchDbFactory = searchDbFactory ?? indexDbFactory,
        syncSecrets = syncSecrets ?? SecureSyncSecretStore();
 
@@ -180,6 +182,10 @@ final class LibraryController implements LibrarySession {
   /// app passes `connectivity_plus`); null, as in tests, counts the
   /// network as always usable.
   final NetworkMonitor Function()? syncNetwork;
+
+  /// Answers which watched paths still exist, for the sync's queue; null is
+  /// the background-isolate probe. Tests inject one to hold an answer back.
+  final ExistenceProbe? syncProbe;
 
   final StreamController<int> _events = StreamController<int>.broadcast();
 
@@ -741,6 +747,7 @@ final class LibraryController implements LibrarySession {
       secrets: syncSecrets,
       network: syncNetwork?.call(),
       phone: Platform.isAndroid || Platform.isIOS,
+      probe: syncProbe,
     );
     _sync = sync;
     ops.syncHints = sync.hint;
@@ -1867,14 +1874,16 @@ final class LibraryController implements LibrarySession {
       if (batch.paths.isNotEmpty) {
         await indexer.applyEvents(root, batch.paths);
       }
-      // What changed behind the ops' back (another app, a background
-      // isolate, a hand edit) reaches the sync queue this way.
-      final sync = _sync;
-      if (sync != null) unawaited(sync.watched(batch.paths, batch.resyncDirs));
-      // And the editors that hold those notes open (#1055).
+      // The editors that hold those notes open (#1055), before the sync's
+      // probe below: they have no reason to wait for it.
       if (batch.paths.isNotEmpty && !_externalChanges.isClosed) {
         _externalChanges.add(batch.paths.toSet());
       }
+      // What changed behind the ops' back (another app, a background
+      // isolate, a hand edit) reaches the sync queue this way. Awaited, so
+      // the batch queue runs the probes one batch at a time: left to race,
+      // an older batch's answer could be queued after a newer one's.
+      await _sync?.watched(batch.paths, batch.resyncDirs);
     } on Object catch (error) {
       // Transient watcher errors are covered by the periodic rescan.
       _log.warning('watch batch failed: $error');
