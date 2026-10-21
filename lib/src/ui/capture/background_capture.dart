@@ -8,7 +8,8 @@
 /// service, which must end within three minutes of its last start: at
 /// [captureTimeLimit] from then the reading under way gives up, the
 /// captures still waiting fail rather than run without the service, and
-/// the service ends (#643).
+/// the service ends (#643). iOS holds background time instead, for about
+/// half a minute (ios_capture_notifier.dart).
 library;
 
 import 'dart:async';

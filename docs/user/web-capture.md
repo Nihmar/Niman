@@ -86,6 +86,13 @@ Niman to the front: a notification's button that did not would have to
 start a second copy of the app's engine. Once the pictures are being
 saved, a capture can no longer be cancelled.
 
+On an iPhone or iPad only the end is a notification — **Saved: …** or
+**Could not capture …**, and a tap opens the note — as iOS shows no
+notification that is under way, and gives a notification no buttons of its
+own. iOS keeps Niman running for about half a minute once you are back in
+the browser; a capture still going then pauses, and finishes when you come
+back to Niman.
+
 **New ▸ Capture web page** opens the same sheet inside the app, with the
 address to type — the clipboard's, when it holds one.
 
