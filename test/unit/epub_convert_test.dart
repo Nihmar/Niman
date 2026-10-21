@@ -434,7 +434,9 @@ void main() {
           (path: 'c$i.xhtml', body: '<h1>C$i</h1><p>${'text ' * 500}</p>'),
       ],
     ).path;
-    for (var round = 0; round < 5; round++) {
+    // At once, then at the first step, among the notes, and at their end:
+    // forty chapters, so a step each and index.md after them.
+    for (final at in <int?>[null, 0, 10, 25, 40]) {
       final conversion = await EpubConversion.start(
         source: source,
         libraryRoot: library,
@@ -443,10 +445,21 @@ void main() {
         attachments: 'assets',
         words: _words,
       );
-      // Let it get into the book on some rounds, not on others.
-      await Future<void>.delayed(Duration(milliseconds: round * 20));
-      expect(await conversion.cancel(), isTrue);
+      // Asked from the progress listener, not after a delay: a wait in time
+      // lets a fast host finish first. The cancel is marked before its first
+      // await, so it is seen before the isolate asks to move its notes in.
+      Future<bool>? cancelled;
+      if (at == null) {
+        cancelled = conversion.cancel();
+      } else {
+        conversion.progress.addListener(() {
+          if ((conversion.progress.value?.done ?? -1) >= at) {
+            cancelled ??= conversion.cancel();
+          }
+        });
+      }
       await expectLater(conversion.done, throwsA(isA<EpubConvertCancelled>()));
+      expect(await cancelled, isTrue);
       // A killed isolate holds the file open (errno 32 on Windows).
       File(source).renameSync(book('moved.epub'));
       File(book('moved.epub')).renameSync(source);
