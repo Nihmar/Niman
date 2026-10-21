@@ -5,7 +5,15 @@
 /// The move is safe to cut short anywhere. The objects go first, then the
 /// log — written whole and flushed — and the old files only once the log is
 /// there; a log on disk therefore means the move finished, and old files
-/// beside one are leftovers to delete. A version whose file no longer hashes
+/// beside one are leftovers to delete.
+///
+/// Two isolates can move the same history at once — the upkeep at a
+/// library's first open after the update, and a save of that very note.
+/// The one that finds a version file gone, or the log already written, has
+/// lost the race: the other wrote the whole log before deleting a file, so
+/// this one writes nothing, and its caller reads what the other wrote. Left
+/// to carry on, it would have written a log without the versions it could
+/// no longer read, over the whole one. A version whose file no longer hashes
 /// to what its manifest recorded stays out, as it always read as missing
 /// (#378); a file the manifest did not describe comes in as an `unknown`
 /// version, as it always read.
@@ -45,8 +53,10 @@ int importLegacyHistory(String root, String rel) {
     final List<int> bytes;
     try {
       bytes = file.readAsBytesSync();
+    } on PathNotFoundException {
+      return 0; // another move finished it: its log is there
     } on FileSystemException {
-      continue;
+      continue; // unreadable: it never read as a version either
     }
     final sha = shaOf(bytes);
     if (described != null &&
@@ -65,6 +75,7 @@ int importLegacyHistory(String root, String rel) {
       ),
     );
   }
+  if (File(historyLogPath(root, rel)).existsSync()) return 0;
   final numbers = {for (final v in kept) v.number};
   writeLog(
     root,
@@ -122,7 +133,9 @@ Map<int, File> _versionFiles(String root, String rel) {
     final match = _versionSuffix.firstMatch(name);
     if (match == null || match.start != prefix.length - 2) continue;
     final number = int.tryParse(match.group(1)!);
-    if (number != null && number > 0) out[number] = entry;
+    // Made from its path rather than taken from the listing: a listing's
+    // files skip `IOOverrides`, which the race's test reads them through.
+    if (number != null && number > 0) out[number] = File(entry.path);
   }
   return out;
 }

@@ -25,12 +25,14 @@ import 'package:path/path.dart' as p;
 export 'package:niman/src/history/history_objects.dart' show historyFolderName;
 
 /// The log of [rel] folded, the old history moved in first when it has one.
+///
+/// The log is read again after the move whatever it answered: a move that
+/// lost the race to another (`history_legacy.dart`) writes nothing, and the
+/// log is the other's.
 FoldedLog _load(String root, String rel) {
   final log = readLog(root, rel);
   if (log != null) return log;
-  if (importLegacyHistory(root, rel) == 0) {
-    return (manifest: HistoryManifest(), lines: 0);
-  }
+  importLegacyHistory(root, rel);
   return readLog(root, rel) ?? (manifest: HistoryManifest(), lines: 0);
 }
 

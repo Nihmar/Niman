@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -315,6 +317,24 @@ void main() {
       );
     });
 
+    test('a move that loses the race to another writes nothing over it', () {
+      // The upkeep and a save move the same history at once: the other one
+      // finishes — its whole log written, the old files deleted — between
+      // this one listing v2 and reading it.
+      legacy('a.md', {1: 'one', 2: 'two'});
+      final manifest = IOOverrides.runZoned(
+        () => readHistoryManifest(root.path, 'a.md'),
+        createFile: (path) {
+          final real = Zone.root.run(() => File(path));
+          return path.endsWith('.v2')
+              ? _RacedFile(real, () => importLegacyHistory(root.path, 'a.md'))
+              : real;
+        },
+      );
+      expect(manifest.versions.map((v) => v.number), [1, 2]);
+      expect(version('a.md', 2), 'two');
+    });
+
     test('deleting an old history does not move it in first', () {
       legacy('a.md', {1: 'one', 2: 'two'});
       expect(deleteNoteHistory(root.path, 'a.md'), 2);
@@ -325,4 +345,43 @@ void main() {
       );
     });
   });
+}
+
+/// A version file whose first read lets another move of the same history run
+/// to its end first: by then the file is gone, as the other move deleted it.
+final class _RacedFile implements File {
+  _RacedFile(this._real, this._other);
+
+  final File _real;
+  final int Function() _other;
+  static bool _raced = false;
+
+  @override
+  String get path => _real.path;
+
+  @override
+  Directory get parent => _real.parent;
+
+  @override
+  bool existsSync() => _real.existsSync();
+
+  @override
+  void deleteSync({bool recursive = false}) =>
+      _real.deleteSync(recursive: recursive);
+
+  @override
+  FileStat statSync() => _real.statSync();
+
+  @override
+  Uint8List readAsBytesSync() {
+    if (!_raced) {
+      _raced = true;
+      _other();
+    }
+    return _real.readAsBytesSync();
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) =>
+      throw UnimplementedError('${invocation.memberName}');
 }
