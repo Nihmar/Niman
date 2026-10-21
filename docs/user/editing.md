@@ -115,7 +115,8 @@ motion keeps the ellipsis instead.
   from the launcher, the tree, the search or a link — fills that tab. A
   pane holds one new tab: **+** again shows the one it has, and a new
   tab dragged to a pane that has one stays where it is. A pane with
-  nothing open shows the same launcher.
+  nothing open shows the same launcher. On a tablet the system Back
+  closes a new tab as it closes a note's.
 - **Switching** is by the tab, by `Ctrl+Tab` / `Ctrl+Shift+Tab`, or by
   the **▾** list, which shows every tab with its folder when the row is
   too full. With Home or Todo pinned over the notes, `Ctrl+Tab` goes on
@@ -129,7 +130,9 @@ motion keeps the ellipsis instead.
   tablet — the arrows at the start of the tab row. One
   history for the window, whichever pane showed the note. A note you
   closed since opens again in the place of the tab you are on, at the line
-  where you left it, and adds no tab; one deleted since is skipped.
+  where you left it, and adds no tab; one deleted since is skipped. From
+  a new tab, or a pane with nothing open, Back first shows the note you
+  just left.
 - **Dragging a tab** along its row reorders it; a line shows where it
   will land. A finger holds the tab a moment first, so a swipe along the
   row scrolls it instead. Dropped on the other pane's row or body it moves there,

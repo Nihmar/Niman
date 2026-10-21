@@ -2175,7 +2175,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
               sidebarVisible: _sidebarVisible,
               onToggleSidebar: _toggleSidebar,
               arrows: constraints.maxWidth >= TabRowLead.arrowsRoom,
-              onBack: history.previous == null
+              onBack: _noteHistory.backTarget == null
                   ? null
                   : () => unawaited(_noteHistory.back()),
               onForward: history.next == null
@@ -5925,7 +5925,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           _sidebarShowsView ||
           _compareShows && _compare != null ||
           _reviewTab.shows ||
-          _workspace.value.activePath != null ||
+          !_workspace.value.focusedPane.isEmpty ||
           _gridCanStepUp);
 
   /// The wide shell's Back (#849): the topmost thing on screen goes
@@ -5947,7 +5947,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       _closeContentTab();
     } else if (_sidebarShowsView) {
       _onDestinationSelected(ShellTab.files);
-    } else if (_workspace.value.activePath != null) {
+    } else if (!_workspace.value.focusedPane.isEmpty) {
+      // A new tab too: it goes as a note's tab does.
       _workspace.closeActive();
     } else if (_gridCanStepUp) {
       _gridUp();

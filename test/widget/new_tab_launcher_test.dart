@@ -125,4 +125,27 @@ void main() {
     expect(controller.workspace.activePath, 'delta.md');
     expect(controller.workspace.tabs, hasLength(3));
   });
+
+  testWidgets("Back closes the new tab, as it does a note's", (tester) async {
+    await pumpShell(tester);
+    await tester.tap(find.byKey(const Key('tab-new')));
+    await settle(tester);
+
+    expect(await tester.binding.handlePopRoute(), isTrue);
+    await settle(tester);
+    expect(launcher, findsNothing);
+    expect(controller.workspace.focusedPane.tabs, hasLength(2));
+  });
+
+  testWidgets('the back arrow on the new tab shows the note it left', (
+    tester,
+  ) async {
+    await pumpShell(tester);
+    await tester.tap(find.byKey(const Key('tab-new')));
+    await settle(tester);
+
+    await tester.tap(find.byKey(const Key('tabs-back')));
+    await settle(tester);
+    expect(controller.workspace.activePath, 'beta.md');
+  });
 }
