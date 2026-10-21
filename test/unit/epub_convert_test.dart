@@ -423,6 +423,73 @@ void main() {
     expect(Directory(library).listSync(), isEmpty);
   });
 
+  test('a cancel leaves the book closed, free to delete or move', () async {
+    final source = writeTestEpub(
+      book('free.epub'),
+      chapters: [
+        for (var i = 0; i < 40; i++)
+          (path: 'c$i.xhtml', body: '<h1>C$i</h1><p>${'text ' * 500}</p>'),
+      ],
+    ).path;
+    for (var round = 0; round < 5; round++) {
+      final conversion = await EpubConversion.start(
+        source: source,
+        libraryRoot: library,
+        parent: '',
+        oneNote: false,
+        attachments: 'assets',
+        words: _words,
+      );
+      // Let it get into the book on some rounds, not on others.
+      await Future<void>.delayed(Duration(milliseconds: round * 20));
+      expect(await conversion.cancel(), isTrue);
+      await expectLater(conversion.done, throwsA(isA<EpubConvertCancelled>()));
+      // A killed isolate holds the file open (errno 32 on Windows).
+      File(source).renameSync(book('moved.epub'));
+      File(book('moved.epub')).renameSync(source);
+      expect(Directory(library).listSync(), isEmpty);
+    }
+    File(source).deleteSync();
+    expect(Directory(library).listSync(), isEmpty);
+  });
+
+  test(
+    'a stop between two steps ends it with its book and folder freed',
+    () async {
+      final source = writeTestEpub(
+        book('stopped.epub'),
+        chapters: [
+          for (var i = 0; i < 10; i++)
+            (path: 'c$i.xhtml', body: '<h1>C$i</h1><p>x</p>'),
+        ],
+      ).path;
+      final staging = p.join(library, '.epub.niman-tmp-3');
+      var asked = 0;
+      var seen = 0;
+      await expectLater(
+        convertEpub(
+          (
+            source: source,
+            libraryRoot: library,
+            parent: '',
+            staging: staging,
+            oneNote: false,
+            attachments: 'assets',
+            words: _words,
+          ),
+          progress: (_) => seen++,
+          // True from the fourth step on: after some notes were written.
+          stopped: () => ++asked > 3,
+        ),
+        throwsA(isA<EpubConvertStopped>()),
+      );
+      expect(seen, 3);
+      expect(Directory(staging).existsSync(), isFalse);
+      expect(Directory(library).listSync(), isEmpty);
+      File(source).deleteSync();
+    },
+  );
+
   test('a cancel counts its job out of the gauge', () async {
     final source = writeTestEpub(
       book('gauge.epub'),

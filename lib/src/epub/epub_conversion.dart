@@ -1,6 +1,8 @@
 /// A book's conversion to notes (#1138), from the main isolate's side: the
 /// isolate that writes it (`epub_convert_job.dart`), its progress, and a
-/// cancel that leaves the library as it was.
+/// cancel that leaves the library as it was: the isolate is asked to stop
+/// and ends through its own `finally` blocks — the book closed, its hidden
+/// folder deleted — and is never killed mid-write.
 library;
 
 import 'dart:async';
@@ -19,7 +21,7 @@ export 'package:niman/src/epub/epub_convert_failures.dart';
 
 /// One conversion running.
 final class EpubConversion {
-  new _(this._isolate, this._staging, this._events, this._exits);
+  new _(this._staging, this._events, this._exits);
 
   /// Starts converting the book [source] into the folder [parent]
   /// (library-relative) of [libraryRoot].
@@ -47,21 +49,24 @@ final class EpubConversion {
       attachments: attachments,
       words: words,
     );
-    final isolate = await Isolate.spawn(convertEpubEntry, (
+    await Isolate.spawn(convertEpubEntry, (
       request,
       events.sendPort,
     ), onExit: exits.sendPort);
-    return EpubConversion._(isolate, staging, events, exits).._listen(source);
+    return EpubConversion._(staging, events, exits).._listen(source);
   }
 
-  final Isolate _isolate;
   final String _staging;
   final ReceivePort _events;
   final ReceivePort _exits;
   final Completer<EpubConverted> _done = Completer<EpubConverted>();
+  final Completer<void> _exited = Completer<void>();
   bool _finishing = false;
   bool _cancelling = false;
   int? _gauge;
+
+  /// Where the isolate is told to stop; null until it says it is ready.
+  SendPort? _control;
 
   /// How far it has got; null before the first step.
   final ValueNotifier<EpubConvertProgress?> progress = ValueNotifier(null);
@@ -79,6 +84,10 @@ final class EpubConversion {
     );
     _events.listen((message) {
       switch (message) {
+        case ('ready', final SendPort control):
+          _control = control;
+          // A cancel that came before the isolate was ready asks now.
+          if (_cancelling) control.send('stop');
         case ('progress', final int done, final int total, final String what):
           progress.value = (done: done, total: total, what: what);
         case ('finishing', final SendPort reply):
@@ -112,8 +121,10 @@ final class EpubConversion {
     });
     // An isolate gone without its last word died: nothing it wrote stays.
     _exits.listen((_) {
-      // A cancel kills it: its exit is the cancel's to answer.
-      if (!_done.isCompleted && !_cancelling) {
+      // A cancel waits for the exit: the answer is the cancel's.
+      if (_cancelling) {
+        if (!_exited.isCompleted) _exited.complete();
+      } else if (!_done.isCompleted) {
         unawaited(_discard());
         _settle(gauge, error: const EpubConvertFailed('the isolate died'));
       }
@@ -122,8 +133,8 @@ final class EpubConversion {
 
   void _settle(int gauge, {EpubConverted? value, Object? error}) {
     // A cancel answers for itself: a refusal or a failure the isolate had
-    // sent before it was killed, delivered while the cancel deletes what it
-    // wrote, is not the answer any more.
+    // sent before the stop reached it, delivered while the cancel waits for
+    // its end, is not the answer any more.
     if (_done.isCompleted || _cancelling) return;
     IsolateGauge.finishJob(gauge, error: error);
     _events.close();
@@ -135,19 +146,29 @@ final class EpubConversion {
     }
   }
 
-  /// Stops it, when it still can: the isolate killed and what it wrote
-  /// deleted. Answers whether it stopped.
+  /// Stops it, when it still can: the isolate is asked to stop, ends
+  /// between two of its steps with its book closed and what it wrote
+  /// deleted, and only then does this answer — whether it stopped.
+  ///
+  /// It is never killed: a kill skips the `finally` that closes the book
+  /// (a file Windows will not let be deleted) and leaves the isolate free
+  /// to write into the folder deleted under it. The wait is the length of
+  /// the step it is in; the book's reading and planning, which come before
+  /// the first step, are not interrupted.
   Future<bool> cancel() async {
     if (!cancellable) return false;
     _cancelling = true;
-    _isolate.kill(priority: Isolate.immediate);
-    _events.close();
-    _exits.close();
     // Counted out now: a cancelled job left in would read in an exported
     // log as one still running, warned about, for the rest of the session.
     if (_gauge case final gauge?) {
       IsolateGauge.finishJob(gauge, error: const EpubConvertCancelled());
     }
+    _control?.send('stop');
+    await _exited.future;
+    _events.close();
+    _exits.close();
+    // The backstop, for an isolate that died before its own cleanup: it has
+    // exited, so nothing writes any more.
     await _discard();
     if (!_done.isCompleted) _done.completeError(const EpubConvertCancelled());
     return true;

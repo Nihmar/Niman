@@ -97,17 +97,34 @@ EpubConvertPreview previewEpub(String source, EpubConvertWords words) =>
     });
 
 /// Converts the book [request] names, telling [progress] how far it has
-/// got. Before it moves anything into the library it asks [mayFinish]: a
+/// got.
+///
+/// A stop is cooperative. Between its steps — before each picture, each
+/// note, the index, and the moving in — it gives the event loop a turn, so a
+/// stop message can be delivered, and asks [stopped]: true ends it there
+/// with [EpubConvertStopped], its `finally` blocks run — the book closed,
+/// the hidden folder deleted. A killed isolate runs none of them: it leaves
+/// the book open (on Windows, a file that cannot be moved or deleted) and
+/// may still be writing into the folder its canceller is deleting.
+///
+/// Before it moves anything into the library it asks [mayFinish]: a
 /// conversion cancelled by then answers false, and stops with nothing
 /// moved in; one that goes on cannot be cancelled any more.
 Future<EpubConverted> convertEpub(
   EpubConvertRequest request, {
   void Function(EpubConvertProgress progress)? progress,
   Future<bool> Function()? mayFinish,
+  bool Function()? stopped,
 }) async {
   final staging = Directory(request.staging);
+  // The turn the event loop is given, and the stop it may have delivered.
+  Future<void> step() async {
+    await Future<void>.delayed(Duration.zero);
+    if (stopped?.call() ?? false) throw const EpubConvertStopped();
+  }
+
   try {
-    final result = _withBook(request.source, (book) {
+    final result = await _withBookAsync(request.source, (book) async {
       staging.createSync(recursive: true);
       final title = _titleOf(book, request.source);
       final plan = EpubPlan.of(
@@ -127,6 +144,7 @@ Future<EpubConverted> convertEpub(
       // Pictures first: the notes are written knowing where each one went.
       final at = <int, String>{};
       for (final index in pictures) {
+        await step();
         progress?.call((
           done: done++,
           total: total,
@@ -142,6 +160,7 @@ Future<EpubConverted> convertEpub(
         );
       }
       for (final note in written) {
+        await step();
         progress?.call((done: done++, total: total, what: note.path));
         final file = File(p.joinAll([staging.path, ...note.path.split('/')]));
         file.parent.createSync(recursive: true);
@@ -150,6 +169,7 @@ Future<EpubConverted> convertEpub(
         );
       }
       if (!request.oneNote) {
+        await step();
         progress?.call((done: done++, total: total, what: 'index.md'));
         File(p.join(staging.path, 'index.md')).writeAsStringSync(
           renderIndex(
@@ -162,6 +182,7 @@ Future<EpubConverted> convertEpub(
       }
       return (plan: plan, written: written, pictures: at.length);
     });
+    await step();
     if (!(await mayFinish?.call() ?? true)) throw const EpubConvertStopped();
     return request.oneNote
         ? await _moveNoteIn(request, result.written.single, result.pictures)
@@ -233,6 +254,20 @@ T _withBook<T>(String source, T Function(EpubBook book) work) {
   }
 }
 
+/// [_withBook] for a [work] that yields: the file is held open across its
+/// awaits and closed when it ends, however it ends.
+Future<T> _withBookAsync<T>(
+  String source,
+  Future<T> Function(EpubBook book) work,
+) async {
+  final input = InputFileStream(source);
+  try {
+    return await work(parseEpub(EpubArchive.open(input)));
+  } finally {
+    input.closeSync();
+  }
+}
+
 String _titleOf(EpubBook book, String source) =>
     book.info.title ?? p.basenameWithoutExtension(source);
 
@@ -287,13 +322,23 @@ final RegExp _picture = RegExp('$epubPictureScheme:(\\d+)');
 
 /// The entry of the conversion's isolate: [convertEpub], its progress and
 /// its end sent to the port it is handed, as plain messages.
+///
+/// Its first message hands the main isolate a port to stop it by: a `'stop'`
+/// sent there is seen at the next step boundary of [convertEpub].
 Future<void> convertEpubEntry(
   (EpubConvertRequest request, SendPort events) message,
 ) async {
   final (request, events) = message;
+  var stop = false;
+  final control = ReceivePort()
+    ..listen((message) {
+      if (message == 'stop') stop = true;
+    });
+  events.send(('ready', control.sendPort));
   try {
     final converted = await convertEpub(
       request,
+      stopped: () => stop,
       progress: (progress) => events.send((
         'progress',
         progress.done,
@@ -323,5 +368,9 @@ Future<void> convertEpubEntry(
     events.send(('refused', refused.reason.name, refused.detail));
   } on Object catch (error) {
     events.send(('failed', '$error'));
+  } finally {
+    // The isolate ends when its last port closes; its exit is what a cancel
+    // waits for.
+    control.close();
   }
 }
