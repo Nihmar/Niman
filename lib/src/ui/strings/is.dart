@@ -1818,7 +1818,7 @@ final class IcelandicStrings extends Strings {
       'Ekki tókst að flytja inn Notion-útflutninginn';
   @override
   String dropRejected(String names) =>
-      'Hér opnast aðeins Markdown-skrár og möppur: $names';
+      'Hér opnast aðeins Markdown-skrár, EPUB-bækur og möppur: $names';
   @override
   String importFolderTitle(String name) => 'Flytja inn „$name“?';
   @override
@@ -1829,6 +1829,55 @@ final class IcelandicStrings extends Strings {
   String importFolderDone(String folder) => 'Flutt inn í $folder';
   @override
   String importFolderEmpty(String name) => 'Engar Markdown-skrár í $name';
+  @override
+  String get epubConvertAction => 'Umbreyta í Markdown…';
+  @override
+  String get epubConvertCommand => 'Umbreyta EPUB í Markdown';
+  @override
+  String get epubConvertSettingsTitle => 'Umbreyta EPUB í Markdown';
+  @override
+  String get epubConvertTitle => 'Umbreyta í Markdown';
+  @override
+  String get epubConvertReading => 'Les bókina…';
+  @override
+  String get epubConvertPerChapter => 'Ein glósa á kafla';
+  @override
+  String epubConvertPerChapterDetail(int notes, int folders) =>
+      'Glósur: $notes · möppur: $folders';
+  @override
+  String get epubConvertOneNote => 'Ein glósa';
+  @override
+  String get epubConvertOneNoteDetail => 'Öll bókin í einni glósu';
+  @override
+  String get epubConvertInto => 'Í';
+  @override
+  String get epubConvertStart => 'Umbreyta';
+  @override
+  String epubConvertProgress(int done, int total) => 'Skrifa $done af $total';
+  @override
+  String epubConvertDone(String made, int notes, int pictures) =>
+      'Umbreytt í $made (glósur: $notes, myndir: $pictures)';
+  @override
+  String get epubConvertProtected =>
+      'Þessi bók er varin (DRM): ekki er hægt að umbreyta textanum';
+  @override
+  String epubConvertNotABook(String name) =>
+      '„$name“ er ekki læsileg EPUB-skrá';
+  @override
+  String get epubConvertTooLarge => 'Þessi bók er of stór til að umbreyta';
+  @override
+  String get epubConvertFailed => 'Ekki tókst að umbreyta bókinni';
+  @override
+  String get epubConvertNeedsLibrary =>
+      'Opnaðu safn til að umbreyta bók í glósur';
+  @override
+  String get epubConvertChapterName => 'Kafli {n}';
+  @override
+  String get epubConvertOpening => 'Forsíður';
+  @override
+  String get epubConvertContents => 'Efnisyfirlit';
+  @override
+  String get epubConvertPickTitle => 'Veldu EPUB til að umbreyta';
   @override
   String get openFileTitle => 'Opna skrá';
   @override

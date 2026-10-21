@@ -1833,7 +1833,8 @@ final class FinnishStrings extends Strings {
   String get notionImportFailed => 'Notion-vientiä ei voitu tuoda';
   @override
   String dropRejected(String names) =>
-      'Täällä avautuvat vain Markdown-tiedostot ja kansiot: $names';
+      'Täällä avautuvat vain Markdown-tiedostot, EPUB-kirjat ja kansiot: '
+      '$names';
   @override
   String importFolderTitle(String name) => 'Tuodaanko ”$name”?';
   @override
@@ -1845,6 +1846,55 @@ final class FinnishStrings extends Strings {
   @override
   String importFolderEmpty(String name) =>
       'Kansiossa $name ei ole Markdown-tiedostoja';
+  @override
+  String get epubConvertAction => 'Muunna Markdowniksi…';
+  @override
+  String get epubConvertCommand => 'Muunna EPUB Markdowniksi';
+  @override
+  String get epubConvertSettingsTitle => 'Muunna EPUB Markdowniksi';
+  @override
+  String get epubConvertTitle => 'Muunna Markdowniksi';
+  @override
+  String get epubConvertReading => 'Luetaan kirjaa…';
+  @override
+  String get epubConvertPerChapter => 'Yksi muistiinpano lukua kohden';
+  @override
+  String epubConvertPerChapterDetail(int notes, int folders) =>
+      'Muistiinpanoja: $notes · kansioita: $folders';
+  @override
+  String get epubConvertOneNote => 'Yksi muistiinpano';
+  @override
+  String get epubConvertOneNoteDetail => 'Koko kirja yhdessä muistiinpanossa';
+  @override
+  String get epubConvertInto => 'Kohteeseen';
+  @override
+  String get epubConvertStart => 'Muunna';
+  @override
+  String epubConvertProgress(int done, int total) =>
+      'Kirjoitetaan $done/$total';
+  @override
+  String epubConvertDone(String made, int notes, int pictures) =>
+      'Muunnettu kohteeseen $made (muistiinpanoja: $notes, kuvia: $pictures)';
+  @override
+  String get epubConvertProtected =>
+      'Tämä kirja on suojattu (DRM): sen tekstiä ei voi muuntaa';
+  @override
+  String epubConvertNotABook(String name) => '”$name” ei ole luettava EPUB';
+  @override
+  String get epubConvertTooLarge => 'Tämä kirja on liian suuri muunnettavaksi';
+  @override
+  String get epubConvertFailed => 'Kirjaa ei voitu muuntaa';
+  @override
+  String get epubConvertNeedsLibrary =>
+      'Avaa kirjasto muuntaaksesi kirjan muistiinpanoiksi';
+  @override
+  String get epubConvertChapterName => 'Luku {n}';
+  @override
+  String get epubConvertOpening => 'Alkusivut';
+  @override
+  String get epubConvertContents => 'Sisällys';
+  @override
+  String get epubConvertPickTitle => 'Valitse muunnettava EPUB';
   @override
   String get openFileTitle => 'Avaa tiedosto';
   @override

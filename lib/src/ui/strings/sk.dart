@@ -1814,7 +1814,7 @@ final class SlovakStrings extends Strings {
   String get notionImportFailed => 'Export z Notionu sa nepodarilo importovať';
   @override
   String dropRejected(String names) =>
-      'Tu sa otvárajú len súbory Markdown a priečinky: $names';
+      'Tu sa otvárajú iba súbory Markdown, knihy EPUB a priečinky: $names';
   @override
   String importFolderTitle(String name) => 'Importovať „$name“?';
   @override
@@ -1826,6 +1826,55 @@ final class SlovakStrings extends Strings {
   @override
   String importFolderEmpty(String name) =>
       'V priečinku $name nie sú súbory Markdown';
+  @override
+  String get epubConvertAction => 'Previesť na Markdown…';
+  @override
+  String get epubConvertCommand => 'Previesť EPUB na Markdown';
+  @override
+  String get epubConvertSettingsTitle => 'Previesť EPUB na Markdown';
+  @override
+  String get epubConvertTitle => 'Previesť na Markdown';
+  @override
+  String get epubConvertReading => 'Číta sa kniha…';
+  @override
+  String get epubConvertPerChapter => 'Jedna poznámka na kapitolu';
+  @override
+  String epubConvertPerChapterDetail(int notes, int folders) =>
+      'Poznámky: $notes · priečinky: $folders';
+  @override
+  String get epubConvertOneNote => 'Jedna poznámka';
+  @override
+  String get epubConvertOneNoteDetail => 'Celá kniha v jednej poznámke';
+  @override
+  String get epubConvertInto => 'Do';
+  @override
+  String get epubConvertStart => 'Previesť';
+  @override
+  String epubConvertProgress(int done, int total) =>
+      'Zapisuje sa $done z $total';
+  @override
+  String epubConvertDone(String made, int notes, int pictures) =>
+      'Prevedené do $made (poznámky: $notes, obrázky: $pictures)';
+  @override
+  String get epubConvertProtected =>
+      'Táto kniha je chránená (DRM): jej text nemožno previesť';
+  @override
+  String epubConvertNotABook(String name) => '„$name“ nie je čitateľný EPUB';
+  @override
+  String get epubConvertTooLarge => 'Táto kniha je na prevod príliš veľká';
+  @override
+  String get epubConvertFailed => 'Knihu sa nepodarilo previesť';
+  @override
+  String get epubConvertNeedsLibrary =>
+      'Otvorte knižnicu, aby ste mohli previesť knihu na poznámky';
+  @override
+  String get epubConvertChapterName => 'Kapitola {n}';
+  @override
+  String get epubConvertOpening => 'Úvodné strany';
+  @override
+  String get epubConvertContents => 'Obsah';
+  @override
+  String get epubConvertPickTitle => 'Vyberte EPUB na prevod';
   @override
   String get openFileTitle => 'Otvoriť súbor';
   @override

@@ -1162,6 +1162,32 @@ final class AppStrings {
   static String importFolderBody(int count) => _s.importFolderBody(count);
   static String importFolderDone(String folder) => _s.importFolderDone(folder);
   static String importFolderEmpty(String name) => _s.importFolderEmpty(name);
+  static String get epubConvertAction => _s.epubConvertAction;
+  static String get epubConvertCommand => _s.epubConvertCommand;
+  static String get epubConvertSettingsTitle => _s.epubConvertSettingsTitle;
+  static String get epubConvertTitle => _s.epubConvertTitle;
+  static String get epubConvertReading => _s.epubConvertReading;
+  static String get epubConvertPerChapter => _s.epubConvertPerChapter;
+  static String epubConvertPerChapterDetail(int notes, int folders) =>
+      _s.epubConvertPerChapterDetail(notes, folders);
+  static String get epubConvertOneNote => _s.epubConvertOneNote;
+  static String get epubConvertOneNoteDetail => _s.epubConvertOneNoteDetail;
+  static String get epubConvertInto => _s.epubConvertInto;
+  static String get epubConvertStart => _s.epubConvertStart;
+  static String epubConvertProgress(int done, int total) =>
+      _s.epubConvertProgress(done, total);
+  static String epubConvertDone(String made, int notes, int pictures) =>
+      _s.epubConvertDone(made, notes, pictures);
+  static String get epubConvertProtected => _s.epubConvertProtected;
+  static String epubConvertNotABook(String name) =>
+      _s.epubConvertNotABook(name);
+  static String get epubConvertTooLarge => _s.epubConvertTooLarge;
+  static String get epubConvertFailed => _s.epubConvertFailed;
+  static String get epubConvertNeedsLibrary => _s.epubConvertNeedsLibrary;
+  static String get epubConvertChapterName => _s.epubConvertChapterName;
+  static String get epubConvertOpening => _s.epubConvertOpening;
+  static String get epubConvertContents => _s.epubConvertContents;
+  static String get epubConvertPickTitle => _s.epubConvertPickTitle;
   static String get openFileTitle => _s.openFileTitle;
   static String get outsideFileNote => _s.outsideFileNote;
   static String get typewriterOn => _s.typewriterOn;

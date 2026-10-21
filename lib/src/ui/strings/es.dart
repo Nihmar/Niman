@@ -1850,7 +1850,7 @@ final class SpanishStrings extends Strings {
       'No se pudo importar la exportación de Notion';
   @override
   String dropRejected(String names) =>
-      'Aquí solo se abren archivos Markdown y carpetas: $names';
+      'Aquí solo se abren archivos Markdown, libros EPUB y carpetas: $names';
   @override
   String importFolderTitle(String name) => '¿Importar «$name»?';
   @override
@@ -1861,6 +1861,56 @@ final class SpanishStrings extends Strings {
   String importFolderDone(String folder) => 'Importado en $folder';
   @override
   String importFolderEmpty(String name) => 'No hay archivos Markdown en $name';
+  @override
+  String get epubConvertAction => 'Convertir a Markdown…';
+  @override
+  String get epubConvertCommand => 'Convertir EPUB a Markdown';
+  @override
+  String get epubConvertSettingsTitle => 'Convertir un EPUB a Markdown';
+  @override
+  String get epubConvertTitle => 'Convertir a Markdown';
+  @override
+  String get epubConvertReading => 'Leyendo el libro…';
+  @override
+  String get epubConvertPerChapter => 'Una nota por capítulo';
+  @override
+  String epubConvertPerChapterDetail(int notes, int folders) =>
+      'Notas: $notes · carpetas: $folders';
+  @override
+  String get epubConvertOneNote => 'Una nota';
+  @override
+  String get epubConvertOneNoteDetail => 'Todo el libro en una sola nota';
+  @override
+  String get epubConvertInto => 'En';
+  @override
+  String get epubConvertStart => 'Convertir';
+  @override
+  String epubConvertProgress(int done, int total) =>
+      'Escribiendo $done de $total';
+  @override
+  String epubConvertDone(String made, int notes, int pictures) =>
+      'Convertido en $made (notas: $notes, imágenes: $pictures)';
+  @override
+  String get epubConvertProtected =>
+      'Este libro está protegido (DRM): su texto no se puede convertir';
+  @override
+  String epubConvertNotABook(String name) => '«$name» no es un EPUB legible';
+  @override
+  String get epubConvertTooLarge =>
+      'Este libro es demasiado grande para convertirlo';
+  @override
+  String get epubConvertFailed => 'No se pudo convertir el libro';
+  @override
+  String get epubConvertNeedsLibrary =>
+      'Abre una biblioteca para convertir un libro en notas';
+  @override
+  String get epubConvertChapterName => 'Capítulo {n}';
+  @override
+  String get epubConvertOpening => 'Páginas preliminares';
+  @override
+  String get epubConvertContents => 'Índice';
+  @override
+  String get epubConvertPickTitle => 'Elige un EPUB para convertir';
   @override
   String get openFileTitle => 'Abrir archivo';
   @override

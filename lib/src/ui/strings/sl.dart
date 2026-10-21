@@ -1813,7 +1813,7 @@ final class SlovenianStrings extends Strings {
   String get notionImportFailed => 'Izvoz iz Notiona ni bilo mogoče uvoziti';
   @override
   String dropRejected(String names) =>
-      'Tu se odpirajo samo datoteke Markdown in mape: $names';
+      'Tu se odpirajo le datoteke Markdown, knjige EPUB in mape: $names';
   @override
   String importFolderTitle(String name) => 'Uvozim »$name«?';
   @override
@@ -1824,6 +1824,55 @@ final class SlovenianStrings extends Strings {
   String importFolderDone(String folder) => 'Uvoženo v $folder';
   @override
   String importFolderEmpty(String name) => 'V $name ni datotek Markdown';
+  @override
+  String get epubConvertAction => 'Pretvori v Markdown…';
+  @override
+  String get epubConvertCommand => 'Pretvori EPUB v Markdown';
+  @override
+  String get epubConvertSettingsTitle => 'Pretvori EPUB v Markdown';
+  @override
+  String get epubConvertTitle => 'Pretvori v Markdown';
+  @override
+  String get epubConvertReading => 'Branje knjige…';
+  @override
+  String get epubConvertPerChapter => 'En zapisek na poglavje';
+  @override
+  String epubConvertPerChapterDetail(int notes, int folders) =>
+      'Zapiski: $notes · mape: $folders';
+  @override
+  String get epubConvertOneNote => 'En zapisek';
+  @override
+  String get epubConvertOneNoteDetail => 'Vsa knjiga v enem zapisku';
+  @override
+  String get epubConvertInto => 'V';
+  @override
+  String get epubConvertStart => 'Pretvori';
+  @override
+  String epubConvertProgress(int done, int total) =>
+      'Zapisovanje $done od $total';
+  @override
+  String epubConvertDone(String made, int notes, int pictures) =>
+      'Pretvorjeno v $made (zapiski: $notes, slike: $pictures)';
+  @override
+  String get epubConvertProtected =>
+      'Ta knjiga je zaščitena (DRM): njenega besedila ni mogoče pretvoriti';
+  @override
+  String epubConvertNotABook(String name) => '»$name« ni berljiv EPUB';
+  @override
+  String get epubConvertTooLarge => 'Ta knjiga je prevelika za pretvorbo';
+  @override
+  String get epubConvertFailed => 'Knjige ni bilo mogoče pretvoriti';
+  @override
+  String get epubConvertNeedsLibrary =>
+      'Odprite knjižnico, da knjigo pretvorite v zapiske';
+  @override
+  String get epubConvertChapterName => 'Poglavje {n}';
+  @override
+  String get epubConvertOpening => 'Uvodne strani';
+  @override
+  String get epubConvertContents => 'Kazalo';
+  @override
+  String get epubConvertPickTitle => 'Izberite EPUB za pretvorbo';
   @override
   String get openFileTitle => 'Odpri datoteko';
   @override

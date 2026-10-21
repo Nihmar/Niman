@@ -1816,7 +1816,7 @@ final class LithuanianStrings extends Strings {
   String get notionImportFailed => 'Nepavyko importuoti Notion eksporto';
   @override
   String dropRejected(String names) =>
-      'Čia atidaromi tik Markdown failai ir aplankai: $names';
+      'Čia atidaromi tik Markdown failai, EPUB knygos ir aplankai: $names';
   @override
   String importFolderTitle(String name) => 'Importuoti „$name“?';
   @override
@@ -1827,6 +1827,54 @@ final class LithuanianStrings extends Strings {
   String importFolderDone(String folder) => 'Importuota į $folder';
   @override
   String importFolderEmpty(String name) => 'Aplanke $name nėra Markdown failų';
+  @override
+  String get epubConvertAction => 'Konvertuoti į Markdown…';
+  @override
+  String get epubConvertCommand => 'Konvertuoti EPUB į Markdown';
+  @override
+  String get epubConvertSettingsTitle => 'Konvertuoti EPUB į Markdown';
+  @override
+  String get epubConvertTitle => 'Konvertuoti į Markdown';
+  @override
+  String get epubConvertReading => 'Skaitoma knyga…';
+  @override
+  String get epubConvertPerChapter => 'Viena pastaba skyriui';
+  @override
+  String epubConvertPerChapterDetail(int notes, int folders) =>
+      'Pastabos: $notes · aplankai: $folders';
+  @override
+  String get epubConvertOneNote => 'Viena pastaba';
+  @override
+  String get epubConvertOneNoteDetail => 'Visa knyga vienoje pastaboje';
+  @override
+  String get epubConvertInto => 'Į';
+  @override
+  String get epubConvertStart => 'Konvertuoti';
+  @override
+  String epubConvertProgress(int done, int total) => 'Rašoma $done iš $total';
+  @override
+  String epubConvertDone(String made, int notes, int pictures) =>
+      'Konvertuota į $made (pastabos: $notes, paveikslėliai: $pictures)';
+  @override
+  String get epubConvertProtected =>
+      'Ši knyga apsaugota (DRM): jos teksto konvertuoti negalima';
+  @override
+  String epubConvertNotABook(String name) => '„$name“ nėra skaitomas EPUB';
+  @override
+  String get epubConvertTooLarge => 'Ši knyga per didelė konvertuoti';
+  @override
+  String get epubConvertFailed => 'Knygos konvertuoti nepavyko';
+  @override
+  String get epubConvertNeedsLibrary =>
+      'Atidarykite biblioteką, kad knygą konvertuotumėte į pastabas';
+  @override
+  String get epubConvertChapterName => '{n} skyrius';
+  @override
+  String get epubConvertOpening => 'Įžanginiai puslapiai';
+  @override
+  String get epubConvertContents => 'Turinys';
+  @override
+  String get epubConvertPickTitle => 'Pasirinkite EPUB konvertuoti';
   @override
   String get openFileTitle => 'Atidaryti failą';
   @override

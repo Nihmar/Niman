@@ -1829,7 +1829,8 @@ final class BasqueStrings extends Strings {
   String get notionImportFailed => 'Ezin izan da Notion esportazioa inportatu';
   @override
   String dropRejected(String names) =>
-      'Hemen Markdown fitxategiak eta karpetak soilik irekitzen dira: $names';
+      'Hemen Markdown fitxategiak, EPUB liburuak eta karpetak soilik '
+      'irekitzen dira: $names';
   @override
   String importFolderTitle(String name) => '«$name» inportatu?';
   @override
@@ -1841,6 +1842,55 @@ final class BasqueStrings extends Strings {
   @override
   String importFolderEmpty(String name) =>
       'Ez dago Markdown fitxategirik $name karpetan';
+  @override
+  String get epubConvertAction => 'Bihurtu Markdown-era…';
+  @override
+  String get epubConvertCommand => 'Bihurtu EPUB Markdown-era';
+  @override
+  String get epubConvertSettingsTitle => 'Bihurtu EPUB bat Markdown-era';
+  @override
+  String get epubConvertTitle => 'Bihurtu Markdown-era';
+  @override
+  String get epubConvertReading => 'Liburua irakurtzen…';
+  @override
+  String get epubConvertPerChapter => 'Ohar bat kapituluko';
+  @override
+  String epubConvertPerChapterDetail(int notes, int folders) =>
+      'Oharrak: $notes · karpetak: $folders';
+  @override
+  String get epubConvertOneNote => 'Ohar bakarra';
+  @override
+  String get epubConvertOneNoteDetail => 'Liburu osoa ohar bakar batean';
+  @override
+  String get epubConvertInto => 'Hona';
+  @override
+  String get epubConvertStart => 'Bihurtu';
+  @override
+  String epubConvertProgress(int done, int total) => 'Idazten: $done / $total';
+  @override
+  String epubConvertDone(String made, int notes, int pictures) =>
+      'Hona bihurtua: $made (oharrak: $notes, irudiak: $pictures)';
+  @override
+  String get epubConvertProtected =>
+      'Liburu hau babestuta dago (DRM): ezin da bere testua bihurtu';
+  @override
+  String epubConvertNotABook(String name) =>
+      '«$name» ez da EPUB irakurgarri bat';
+  @override
+  String get epubConvertTooLarge => 'Liburu hau handiegia da bihurtzeko';
+  @override
+  String get epubConvertFailed => 'Ezin izan da liburua bihurtu';
+  @override
+  String get epubConvertNeedsLibrary =>
+      'Ireki liburutegi bat liburu bat ohar bihurtzeko';
+  @override
+  String get epubConvertChapterName => '{n}. kapitulua';
+  @override
+  String get epubConvertOpening => 'Hasierako orriak';
+  @override
+  String get epubConvertContents => 'Aurkibidea';
+  @override
+  String get epubConvertPickTitle => 'Aukeratu bihurtzeko EPUB bat';
   @override
   String get openFileTitle => 'Ireki fitxategia';
   @override

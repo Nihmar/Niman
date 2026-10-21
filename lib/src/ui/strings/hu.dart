@@ -1832,7 +1832,7 @@ final class HungarianStrings extends Strings {
   String get notionImportFailed => 'A Notion-exportot nem sikerült importálni';
   @override
   String dropRejected(String names) =>
-      'Itt csak Markdown-fájlok és mappák nyílnak meg: $names';
+      'Itt csak Markdown-fájlok, EPUB-könyvek és mappák nyílnak meg: $names';
   @override
   String importFolderTitle(String name) => 'Importálod: „$name”?';
   @override
@@ -1843,6 +1843,54 @@ final class HungarianStrings extends Strings {
   String importFolderDone(String folder) => 'Importálva ide: $folder';
   @override
   String importFolderEmpty(String name) => 'Nincs Markdown-fájl itt: $name';
+  @override
+  String get epubConvertAction => 'Átalakítás Markdownná…';
+  @override
+  String get epubConvertCommand => 'EPUB átalakítása Markdownná';
+  @override
+  String get epubConvertSettingsTitle => 'EPUB átalakítása Markdownná';
+  @override
+  String get epubConvertTitle => 'Átalakítás Markdownná';
+  @override
+  String get epubConvertReading => 'A könyv olvasása…';
+  @override
+  String get epubConvertPerChapter => 'Fejezetenként egy jegyzet';
+  @override
+  String epubConvertPerChapterDetail(int notes, int folders) =>
+      'Jegyzetek: $notes · mappák: $folders';
+  @override
+  String get epubConvertOneNote => 'Egyetlen jegyzet';
+  @override
+  String get epubConvertOneNoteDetail => 'Az egész könyv egyetlen jegyzetben';
+  @override
+  String get epubConvertInto => 'Ide';
+  @override
+  String get epubConvertStart => 'Átalakítás';
+  @override
+  String epubConvertProgress(int done, int total) => 'Írás: $done / $total';
+  @override
+  String epubConvertDone(String made, int notes, int pictures) =>
+      'Átalakítva ide: $made (jegyzetek: $notes, képek: $pictures)';
+  @override
+  String get epubConvertProtected =>
+      'Ez a könyv védett (DRM): a szövege nem alakítható át';
+  @override
+  String epubConvertNotABook(String name) => '„$name” nem olvasható EPUB';
+  @override
+  String get epubConvertTooLarge => 'Ez a könyv túl nagy az átalakításhoz';
+  @override
+  String get epubConvertFailed => 'A könyvet nem sikerült átalakítani';
+  @override
+  String get epubConvertNeedsLibrary =>
+      'Nyiss meg egy könyvtárat, hogy a könyvet jegyzetekké alakíthasd';
+  @override
+  String get epubConvertChapterName => '{n}. fejezet';
+  @override
+  String get epubConvertOpening => 'Előzéklapok';
+  @override
+  String get epubConvertContents => 'Tartalom';
+  @override
+  String get epubConvertPickTitle => 'Válassz egy átalakítandó EPUB-ot';
   @override
   String get openFileTitle => 'Fájl megnyitása';
   @override

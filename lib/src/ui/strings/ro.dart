@@ -1835,7 +1835,7 @@ final class RomanianStrings extends Strings {
   String get notionImportFailed => 'Exportul din Notion nu a putut fi importat';
   @override
   String dropRejected(String names) =>
-      'Aici se deschid doar fișiere Markdown și dosare: $names';
+      'Aici se deschid doar fișiere Markdown, cărți EPUB și dosare: $names';
   @override
   String importFolderTitle(String name) => 'Imporți „$name”?';
   @override
@@ -1846,6 +1846,56 @@ final class RomanianStrings extends Strings {
   String importFolderDone(String folder) => 'Importat în $folder';
   @override
   String importFolderEmpty(String name) => 'Niciun fișier Markdown în $name';
+  @override
+  String get epubConvertAction => 'Convertește în Markdown…';
+  @override
+  String get epubConvertCommand => 'Convertește EPUB în Markdown';
+  @override
+  String get epubConvertSettingsTitle => 'Convertește un EPUB în Markdown';
+  @override
+  String get epubConvertTitle => 'Convertește în Markdown';
+  @override
+  String get epubConvertReading => 'Se citește cartea…';
+  @override
+  String get epubConvertPerChapter => 'O notă pe capitol';
+  @override
+  String epubConvertPerChapterDetail(int notes, int folders) =>
+      'Note: $notes · dosare: $folders';
+  @override
+  String get epubConvertOneNote => 'O singură notă';
+  @override
+  String get epubConvertOneNoteDetail => 'Toată cartea într-o singură notă';
+  @override
+  String get epubConvertInto => 'În';
+  @override
+  String get epubConvertStart => 'Convertește';
+  @override
+  String epubConvertProgress(int done, int total) =>
+      'Se scrie $done din $total';
+  @override
+  String epubConvertDone(String made, int notes, int pictures) =>
+      'Convertit în $made (note: $notes, imagini: $pictures)';
+  @override
+  String get epubConvertProtected =>
+      'Această carte este protejată (DRM): textul ei nu poate fi convertit';
+  @override
+  String epubConvertNotABook(String name) => '„$name” nu este un EPUB lizibil';
+  @override
+  String get epubConvertTooLarge =>
+      'Această carte este prea mare pentru a fi convertită';
+  @override
+  String get epubConvertFailed => 'Cartea nu a putut fi convertită';
+  @override
+  String get epubConvertNeedsLibrary =>
+      'Deschide o bibliotecă pentru a converti o carte în note';
+  @override
+  String get epubConvertChapterName => 'Capitolul {n}';
+  @override
+  String get epubConvertOpening => 'Pagini preliminare';
+  @override
+  String get epubConvertContents => 'Cuprins';
+  @override
+  String get epubConvertPickTitle => 'Alege un EPUB de convertit';
   @override
   String get openFileTitle => 'Deschide fișier';
   @override

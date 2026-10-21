@@ -1787,7 +1787,7 @@ final class HindiStrings extends Strings {
   String get notionImportFailed => 'Notion निर्यात आयात नहीं हो सका';
   @override
   String dropRejected(String names) =>
-      'यहाँ केवल Markdown फ़ाइलें और फ़ोल्डर खुलते हैं: $names';
+      'यहाँ केवल Markdown फ़ाइलें, EPUB किताबें और फ़ोल्डर खुलते हैं: $names';
   @override
   String importFolderTitle(String name) => '“$name” आयात करें?';
   @override
@@ -1798,6 +1798,55 @@ final class HindiStrings extends Strings {
   String importFolderDone(String folder) => '$folder में आयात किया गया';
   @override
   String importFolderEmpty(String name) => '$name में कोई Markdown फ़ाइल नहीं';
+  @override
+  String get epubConvertAction => 'Markdown में बदलें…';
+  @override
+  String get epubConvertCommand => 'EPUB को Markdown में बदलें';
+  @override
+  String get epubConvertSettingsTitle => 'किसी EPUB को Markdown में बदलें';
+  @override
+  String get epubConvertTitle => 'Markdown में बदलें';
+  @override
+  String get epubConvertReading => 'किताब पढ़ी जा रही है…';
+  @override
+  String get epubConvertPerChapter => 'हर अध्याय के लिए एक नोट';
+  @override
+  String epubConvertPerChapterDetail(int notes, int folders) =>
+      'नोट: $notes · फ़ोल्डर: $folders';
+  @override
+  String get epubConvertOneNote => 'एक नोट';
+  @override
+  String get epubConvertOneNoteDetail => 'पूरी किताब एक ही नोट में';
+  @override
+  String get epubConvertInto => 'यहाँ';
+  @override
+  String get epubConvertStart => 'बदलें';
+  @override
+  String epubConvertProgress(int done, int total) =>
+      '$total में से $done लिखा जा रहा है';
+  @override
+  String epubConvertDone(String made, int notes, int pictures) =>
+      '$made में बदला गया (नोट: $notes, चित्र: $pictures)';
+  @override
+  String get epubConvertProtected =>
+      'यह किताब सुरक्षित (DRM) है: इसका पाठ बदला नहीं जा सकता';
+  @override
+  String epubConvertNotABook(String name) => '“$name” पढ़ने योग्य EPUB नहीं है';
+  @override
+  String get epubConvertTooLarge => 'यह किताब बदलने के लिए बहुत बड़ी है';
+  @override
+  String get epubConvertFailed => 'किताब बदली नहीं जा सकी';
+  @override
+  String get epubConvertNeedsLibrary =>
+      'किताब को नोट्स में बदलने के लिए कोई लाइब्रेरी खोलें';
+  @override
+  String get epubConvertChapterName => 'अध्याय {n}';
+  @override
+  String get epubConvertOpening => 'प्रारंभिक पृष्ठ';
+  @override
+  String get epubConvertContents => 'विषय-सूची';
+  @override
+  String get epubConvertPickTitle => 'बदलने के लिए कोई EPUB चुनें';
   @override
   String get openFileTitle => 'फ़ाइल खोलें';
   @override

@@ -1704,7 +1704,7 @@ final class JapaneseStrings extends Strings {
   String get notionImportFailed => 'Notion のエクスポートを読み込めませんでした';
   @override
   String dropRejected(String names) =>
-      'ここで開けるのは Markdown ファイルとフォルダーだけです：$names';
+      'ここで開けるのは Markdown ファイル、EPUB の本、フォルダーだけです：$names';
   @override
   String importFolderTitle(String name) => '「$name」を読み込みますか？';
   @override
@@ -1714,6 +1714,52 @@ final class JapaneseStrings extends Strings {
   String importFolderDone(String folder) => '$folder に読み込みました';
   @override
   String importFolderEmpty(String name) => '$name に Markdown ファイルはありません';
+  @override
+  String get epubConvertAction => 'Markdown に変換…';
+  @override
+  String get epubConvertCommand => 'EPUB を Markdown に変換';
+  @override
+  String get epubConvertSettingsTitle => 'EPUB を Markdown に変換';
+  @override
+  String get epubConvertTitle => 'Markdown に変換';
+  @override
+  String get epubConvertReading => '本を読み込んでいます…';
+  @override
+  String get epubConvertPerChapter => '章ごとに1つのノート';
+  @override
+  String epubConvertPerChapterDetail(int notes, int folders) =>
+      'ノート：$notes · フォルダー：$folders';
+  @override
+  String get epubConvertOneNote => '1つのノート';
+  @override
+  String get epubConvertOneNoteDetail => '本全体を1つのノートに';
+  @override
+  String get epubConvertInto => '保存先';
+  @override
+  String get epubConvertStart => '変換';
+  @override
+  String epubConvertProgress(int done, int total) => '$total 件中 $done 件を書き込み中';
+  @override
+  String epubConvertDone(String made, int notes, int pictures) =>
+      '$made に変換しました（ノート：$notes、画像：$pictures）';
+  @override
+  String get epubConvertProtected => 'この本は保護されています（DRM）：本文を変換できません';
+  @override
+  String epubConvertNotABook(String name) => '「$name」 は読み込める EPUB ではありません';
+  @override
+  String get epubConvertTooLarge => 'この本は大きすぎて変換できません';
+  @override
+  String get epubConvertFailed => '本を変換できませんでした';
+  @override
+  String get epubConvertNeedsLibrary => '本をノートに変換するにはライブラリを開いてください';
+  @override
+  String get epubConvertChapterName => '第{n}章';
+  @override
+  String get epubConvertOpening => '前付け';
+  @override
+  String get epubConvertContents => '目次';
+  @override
+  String get epubConvertPickTitle => '変換する EPUB を選択';
   @override
   String get openFileTitle => 'ファイルを開く';
   @override

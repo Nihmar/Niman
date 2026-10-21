@@ -1665,7 +1665,7 @@ final class ChineseStrings extends Strings {
   @override
   String get notionImportFailed => '无法导入 Notion 导出';
   @override
-  String dropRejected(String names) => '这里只能打开 Markdown 文件和文件夹：$names';
+  String dropRejected(String names) => '这里只能打开 Markdown 文件、EPUB 图书和文件夹：$names';
   @override
   String importFolderTitle(String name) => '导入“$name”？';
   @override
@@ -1675,6 +1675,52 @@ final class ChineseStrings extends Strings {
   String importFolderDone(String folder) => '已导入到 $folder';
   @override
   String importFolderEmpty(String name) => '$name 中没有 Markdown 文件';
+  @override
+  String get epubConvertAction => '转换为 Markdown…';
+  @override
+  String get epubConvertCommand => '将 EPUB 转换为 Markdown';
+  @override
+  String get epubConvertSettingsTitle => '将 EPUB 转换为 Markdown';
+  @override
+  String get epubConvertTitle => '转换为 Markdown';
+  @override
+  String get epubConvertReading => '正在读取图书…';
+  @override
+  String get epubConvertPerChapter => '每章一个笔记';
+  @override
+  String epubConvertPerChapterDetail(int notes, int folders) =>
+      '笔记：$notes · 文件夹：$folders';
+  @override
+  String get epubConvertOneNote => '一个笔记';
+  @override
+  String get epubConvertOneNoteDetail => '整本书放在一个笔记中';
+  @override
+  String get epubConvertInto => '保存到';
+  @override
+  String get epubConvertStart => '转换';
+  @override
+  String epubConvertProgress(int done, int total) => '正在写入 $done / $total';
+  @override
+  String epubConvertDone(String made, int notes, int pictures) =>
+      '已转换到 $made（笔记：$notes，图片：$pictures）';
+  @override
+  String get epubConvertProtected => '这本书受保护（DRM）：无法转换其文本';
+  @override
+  String epubConvertNotABook(String name) => '“$name” 不是可读取的 EPUB';
+  @override
+  String get epubConvertTooLarge => '这本书太大，无法转换';
+  @override
+  String get epubConvertFailed => '无法转换这本书';
+  @override
+  String get epubConvertNeedsLibrary => '请打开一个资料库，以便将图书转换为笔记';
+  @override
+  String get epubConvertChapterName => '第 {n} 章';
+  @override
+  String get epubConvertOpening => '前置页';
+  @override
+  String get epubConvertContents => '目录';
+  @override
+  String get epubConvertPickTitle => '选择要转换的 EPUB';
   @override
   String get openFileTitle => '打开文件';
   @override

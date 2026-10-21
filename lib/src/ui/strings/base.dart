@@ -950,6 +950,30 @@ abstract base class Strings {
   String importFolderBody(int count);
   String importFolderDone(String folder);
   String importFolderEmpty(String name);
+  // Converting an EPUB into notes (#1138). The chapter name keeps `{n}`
+  // for the number: the conversion fills it in on its isolate.
+  String get epubConvertAction;
+  String get epubConvertCommand;
+  String get epubConvertSettingsTitle;
+  String get epubConvertTitle;
+  String get epubConvertReading;
+  String get epubConvertPerChapter;
+  String epubConvertPerChapterDetail(int notes, int folders);
+  String get epubConvertOneNote;
+  String get epubConvertOneNoteDetail;
+  String get epubConvertInto;
+  String get epubConvertStart;
+  String epubConvertProgress(int done, int total);
+  String epubConvertDone(String made, int notes, int pictures);
+  String get epubConvertProtected;
+  String epubConvertNotABook(String name);
+  String get epubConvertTooLarge;
+  String get epubConvertFailed;
+  String get epubConvertNeedsLibrary;
+  String get epubConvertChapterName;
+  String get epubConvertOpening;
+  String get epubConvertContents;
+  String get epubConvertPickTitle;
   String get openFileTitle;
   String get outsideFileNote;
   String get typewriterOn;
