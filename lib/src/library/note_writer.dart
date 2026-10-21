@@ -128,8 +128,8 @@ final class NoteWriter {
   /// [content] is the note's text, already joined — or a
   /// [NoteContentProducer], which makes its bytes a slice at a time so a
   /// note too long to join on the UI isolate is never joined at all (see
-  /// [saveNoteStream]); [contentLength] is then its length in characters,
-  /// for the sizes the log reports.
+  /// [saveNoteStream]). Its length is the editor's to log: the writer only
+  /// sees bytes, after the write.
   ///
   /// [references] are the note's tags and links as of [content], when the
   /// editor keeps them: handed to the note's reindex with the digest the
@@ -147,7 +147,6 @@ final class NoteWriter {
     NoteText content, {
     int? editSession,
     HistoryReason? forced,
-    int? contentLength,
     NoteReferences? references,
     DiskStamp? expected,
   }) {
@@ -160,7 +159,6 @@ final class NoteWriter {
         editSession,
         forced,
         queuedAt,
-        contentLength,
         references: references,
         expected: expected,
       ),
@@ -220,7 +218,7 @@ final class NoteWriter {
         final tidied = await _tidiedOffIsolate(p.join(root, path), rules);
         if (tidied == null) return false;
         _log.info('tidy: "$path"');
-        await _write(path, tidied, null, null, Stopwatch()..start(), null);
+        await _write(path, tidied, null, null, Stopwatch()..start());
         return true;
       });
 
@@ -342,8 +340,7 @@ final class NoteWriter {
     NoteText content,
     int? editSession,
     HistoryReason? forced,
-    Stopwatch queuedAt,
-    int? contentLength, {
+    Stopwatch queuedAt, {
     NoteReferences? references,
     DiskStamp? expected,
   }) async {
@@ -351,9 +348,9 @@ final class NoteWriter {
     final abs = p.join(root, path);
     final session = editSession == null ? '' : ', session $editSession';
     final force = forced == null ? '' : ', forced ${forced.name}';
-    final length = content is String ? content.length : contentLength ?? 0;
+    final length = content is String ? '${content.length} chars' : 'streamed';
     _log.debug(
-      'save start: "$path" ($length chars$session$force, '
+      'save start: "$path" ($length$session$force, '
       'waited $waitMs ms)',
     );
     final request = await history?.requestFor(
