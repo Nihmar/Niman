@@ -22,6 +22,14 @@ List<ReleaseAsset> sampleAssets() => const [
     downloadUrl: 'https://example.com/niman-1.0.0.pkg.tar.zst',
   ),
   ReleaseAsset(
+    name: 'niman-1.0.0-macos.dmg',
+    downloadUrl: 'https://example.com/niman-1.0.0-macos.dmg',
+  ),
+  ReleaseAsset(
+    name: 'niman-1.0.0-macos.zip',
+    downloadUrl: 'https://example.com/niman-1.0.0-macos.zip',
+  ),
+  ReleaseAsset(
     name: 'niman-1.0.0-windows-x64-setup.exe',
     downloadUrl: 'https://example.com/niman-1.0.0-windows-x64-setup.exe',
   ),
@@ -176,6 +184,8 @@ void main() {
         current: const AppVersion(0, 0, 3),
         isAndroid: true,
         isWindows: false,
+        isMacOS: false,
+        isLinux: false,
         linuxVariant: LinuxVariant.unknown,
       );
       expect(result, isA<UpdateAvailable>());
@@ -189,6 +199,8 @@ void main() {
         current: const AppVersion(0, 0, 3),
         isAndroid: false,
         isWindows: true,
+        isMacOS: false,
+        isLinux: false,
         linuxVariant: LinuxVariant.unknown,
       );
       expect(
@@ -197,12 +209,41 @@ void main() {
       );
     });
 
+    test('newer release on macos offers the disk image', () {
+      final result = checkForUpdate(
+        release: release(),
+        current: const AppVersion(0, 0, 3),
+        isAndroid: false,
+        isWindows: false,
+        isMacOS: true,
+        isLinux: false,
+        linuxVariant: LinuxVariant.unknown,
+      );
+      expect((result as UpdateAvailable).asset.name, 'niman-1.0.0-macos.dmg');
+    });
+
+    test('a platform the releases carry nothing for is offered nothing', () {
+      // iOS: the App Store updates it. It was offered Linux's .tar.gz.
+      final result = checkForUpdate(
+        release: release(),
+        current: const AppVersion(0, 0, 3),
+        isAndroid: false,
+        isWindows: false,
+        isMacOS: false,
+        isLinux: false,
+        linuxVariant: LinuxVariant.unknown,
+      );
+      expect(result, isA<UpToDate>());
+    });
+
     test('newer release on linux appimage offers the appimage', () {
       final result = checkForUpdate(
         release: release(),
         current: const AppVersion(0, 0, 3),
         isAndroid: false,
         isWindows: false,
+        isMacOS: false,
+        isLinux: true,
         linuxVariant: LinuxVariant.appImage,
       );
       expect(
@@ -222,6 +263,8 @@ void main() {
             current: current,
             isAndroid: true,
             isWindows: false,
+            isMacOS: false,
+            isLinux: false,
             linuxVariant: LinuxVariant.unknown,
           ),
           isA<UpToDate>(),
@@ -237,6 +280,8 @@ void main() {
         current: const AppVersion(0, 0, 3),
         isAndroid: false,
         isWindows: false,
+        isMacOS: false,
+        isLinux: true,
         linuxVariant: LinuxVariant.unknown,
       );
       expect(result, isA<UpdateAvailable>());
@@ -260,6 +305,8 @@ void main() {
         current: const AppVersion(0, 0, 3),
         isAndroid: false,
         isWindows: false,
+        isMacOS: false,
+        isLinux: true,
         linuxVariant: LinuxVariant.unknown,
       );
       expect(result, isA<UpToDate>());

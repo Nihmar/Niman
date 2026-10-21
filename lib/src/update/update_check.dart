@@ -74,27 +74,32 @@ final class UpToDate extends UpdateCheck {
 
 /// Compares [release] against [current] and selects this device's asset:
 /// [selectAndroidAsset] on Android, [selectWindowsAsset] on Windows,
-/// [selectLinuxAsset] with the installed [linuxVariant] on Linux.
-/// Returns [UpToDate] when nothing is newer or the release carries no
-/// asset for this device.
+/// [selectMacAsset] on macOS, [selectLinuxAsset] with the installed
+/// [linuxVariant] on Linux. Returns [UpToDate] when nothing is newer or the
+/// release carries no asset for this device — and on any other platform,
+/// which the releases carry nothing for (iOS is updated by the App Store):
+/// it was offered Linux's `.tar.gz` before.
 UpdateCheck checkForUpdate({
   required LatestRelease release,
   required AppVersion current,
   required bool isAndroid,
   required bool isWindows,
+  required bool isMacOS,
+  required bool isLinux,
   required LinuxVariant linuxVariant,
 }) {
   if (release.version.compareTo(current) <= 0) {
     return UpToDate(current);
   }
-  final ReleaseAsset? asset;
-  if (isAndroid) {
-    asset = selectAndroidAsset(release.assets);
-  } else if (isWindows) {
-    asset = selectWindowsAsset(release.assets);
-  } else {
-    asset = selectLinuxAsset(release.assets, linuxVariant);
-  }
+  final asset = isAndroid
+      ? selectAndroidAsset(release.assets)
+      : isWindows
+      ? selectWindowsAsset(release.assets)
+      : isMacOS
+      ? selectMacAsset(release.assets)
+      : isLinux
+      ? selectLinuxAsset(release.assets, linuxVariant)
+      : null;
   if (asset == null) return UpToDate(current);
   return UpdateAvailable(version: release.version, asset: asset);
 }

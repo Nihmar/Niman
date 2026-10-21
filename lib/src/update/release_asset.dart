@@ -9,6 +9,8 @@
 ///   `niman-<V>-....pkg.tar.zst` (Arch)
 /// - Windows: `niman-<V>-windows-x64-setup.exe` (installer),
 ///   `niman-<V>-windows-x64.zip` (portable, never auto-applied)
+/// - macOS: `niman-<V>-macos.dmg` (the disk image), `niman-<V>-macos.zip`
+///   (the app zipped, never auto-applied)
 library;
 
 /// One downloadable file attached to a GitHub release.
@@ -84,6 +86,16 @@ ReleaseAsset? selectAndroidAsset(List<ReleaseAsset> assets) {
 ReleaseAsset? selectWindowsAsset(List<ReleaseAsset> assets) {
   for (final asset in assets) {
     if (asset.name.endsWith('-setup.exe')) return asset;
+  }
+  return null;
+}
+
+/// Selects the macOS update asset: the disk image (`-macos.dmg`). The
+/// zipped app is never auto-applied. Returns null when the release
+/// carries no disk image.
+ReleaseAsset? selectMacAsset(List<ReleaseAsset> assets) {
+  for (final asset in assets) {
+    if (asset.name.endsWith('-macos.dmg')) return asset;
   }
   return null;
 }
