@@ -333,6 +333,7 @@ final class ShellWorkspace {
   /// flags; [indexChanged] is what lifts one.
   void missing(Set<String> paths) {
     if (paths.isEmpty) return;
+    history.forgetNotes(paths);
     _flagged++;
     controller.update((w) => w.withMissing(paths));
   }

@@ -63,8 +63,14 @@ final class NoteHistory {
 
   /// Takes [path] out of the history — a note deleted, or one the disk no
   /// longer has — and with it a folder's notes when [path] is a folder.
-  void forget(String path) {
-    bool gone(String entry) => entry == path || entry.startsWith('$path/');
+  void forget(String path) =>
+      _drop((entry) => entry == path || entry.startsWith('$path/'));
+
+  /// Takes the notes at [paths] out of the history: gone from disk, a
+  /// re-index found, rather than deleted here.
+  void forgetNotes(Set<String> paths) => _drop(paths.contains);
+
+  void _drop(bool Function(String entry) gone) {
     _back.removeWhere(gone);
     _forward.removeWhere(gone);
     if (_current case final now? when gone(now)) _current = null;

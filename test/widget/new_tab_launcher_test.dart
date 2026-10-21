@@ -148,4 +148,21 @@ void main() {
     await settle(tester);
     expect(controller.workspace.activePath, 'beta.md');
   });
+
+  testWidgets('a note gone from disk leaves the launcher', (tester) async {
+    await pumpShell(tester);
+    // alpha's tab stays, flagged; the history lets the note go.
+    controller.addRemoval({'alpha.md'});
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('tab-new')));
+    await settle(tester);
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('launcher-recent-0')),
+        matching: find.text('beta'),
+      ),
+      findsOne,
+    );
+    expect(find.byKey(const Key('launcher-recent-1')), findsNothing);
+  });
 }

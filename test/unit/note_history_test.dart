@@ -50,6 +50,12 @@ void main() {
     expect(history.back(), isNull, reason: 'a, a collapsed to one step');
   });
 
+  test('notes gone from disk leave it, and no longer show as recent', () {
+    final history = through(['a.md', 'x.md', 'b.md', 'y.md'])
+      ..forgetNotes({'x.md', 'y.md'});
+    expect(history.recent(5), ['b.md', 'a.md']);
+  });
+
   test("a rename or a move is followed, a folder's notes with it", () {
     final history = through(['a.md', 'x/1.md', 'b.md'])
       ..moved('x', 'y')
