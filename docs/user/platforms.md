@@ -418,7 +418,8 @@ root when no note is open), and opened. A copy, because Android hands the sender
 file as a read-only `content://` reference, not a path Niman could edit
 in place. A Notion export (a `.zip`) shared the same way is
 [imported](organization.md#importing-a-notion-export) instead of copied
-as one note. That copy is made in the background, so the app stays
+as one note, and a book (`.epub`), shared or opened with Niman from a file
+manager, is [converted into notes](organization.md#converting-a-book-into-notes). That copy is made in the background, so the app stays
 responsive while a large share is read, and it is capped at 512 MB: past
 that the share is refused rather than copied — the sender's text arrives
 instead, if it attached any.

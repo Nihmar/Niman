@@ -21,7 +21,7 @@ fields) — it stores nothing that cannot be reconstructed from disk.
 | `flashcards/` | Decks (#533): the cards read from a note (`Deck.read`), the SM-2 scheduler and the study session, the review states kept in `.niman/review.json`, and the deck catalog Study counts from — see [flashcards.md](../records/flashcards.md); the deck view and the review are `ui/kinds/flashcards/`, Study and its settings `ui/study/` |
 | `annotations/` | A file's companion notes, the annotation model and its marks — see [annotations.md](../records/annotations.md) |
 | `capture/` | Capturing a web page as a note (#531): the download and its charsets (`fetch/`), a Dart port of Mozilla's Readability.js (`readability/`, held to upstream's test pages), the pictures into the attachments folder, the note — see [web-capture.md](../records/web-capture.md) |
-| `epub/` | Reading an EPUB into Markdown, its table of contents, its look and its marks — see [epub-reader.md](../records/epub-reader.md) |
+| `epub/` | Reading an EPUB within bounds into its parts (`epub_archive`, `epub_info`, `epub_book`), joined for the reader (`epub_document`) or converted into notes (#1138: `epub_convert_plan`, `epub_convert_render`, `epub_convert_job`, `epub_conversion`), its look and its marks — see [epub-reader.md](../records/epub-reader.md) |
 | `history/` | `.history/` versions: manifest, snapshot policy, disk store (off-isolate), `NoteHistory` service — see [sync.md](../records/sync.md) |
 | `diff/` | Myers line diff with its hunk summary, and the three-way merge over them, shared by history rollback and sync conflicts |
 | `sync/webdav/` | WebDAV client on `dart:io` (streamed GET/PUT, PROPFIND parsing, typed failures) and the capability probe — see [sync.md](../records/sync.md) |
