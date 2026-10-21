@@ -2,10 +2,12 @@
 /// copy a version, and `.history/<path>.json`, a manifest rewritten on every
 /// snapshot. Read only to be moved into the objects and the log.
 ///
-/// The move is safe to cut short anywhere. The objects go first, then the
-/// log — written whole and flushed — and the old files only once the log is
-/// there; a log on disk therefore means the move finished, and old files
-/// beside one are leftovers to delete.
+/// The move is safe to cut short anywhere. The objects go first, flushed
+/// — the old files are the only other copy, and a power loss must not leave
+/// a truncated object with them gone — then the log, written whole and
+/// flushed, and the old files only once the log is there; a log on disk
+/// therefore means the move finished, and old files beside one are
+/// leftovers to delete.
 ///
 /// Two isolates can move the same history at once — the upkeep at a
 /// library's first open after the update, and a save of that very note.
@@ -87,6 +89,11 @@ int importLegacyHistory(String root, String rel) {
     );
   }
   if (File(historyLogPath(root, rel)).existsSync()) return 0;
+  // The objects are on disk before the log says so, and before the copies
+  // they replace are deleted: a log on disk means the move finished.
+  for (final sha in {for (final v in kept) v.sha256}) {
+    flushObject(root, sha);
+  }
   final numbers = {for (final v in kept) v.number};
   writeLog(
     root,

@@ -15,9 +15,14 @@
 /// for 1.5 MB of prose where the hard level takes 62 — and 1 for a delta.
 /// The upkeep turns a fast one into a delta or a hard one.
 ///
-/// Nothing is flushed: an object is trusted only when what it rebuilds
-/// hashes to its name, so one a crash cut short reads as a missing version
-/// — what a drifted version always read as (#378) — never as content.
+/// A new object is not flushed: an object is trusted only when what it
+/// rebuilds hashes to its name, so one a crash cut short reads as a missing
+/// version — what a drifted version always read as (#378) — never as
+/// content, and the note it was kept from still holds that content. An
+/// object the upkeep REPLACES — a whole one turned into a delta, or
+/// compressed hard — is flushed before it is renamed over the good copy,
+/// as is every object the old history's move writes before it deletes the
+/// old files: for those the copy that goes is the only other one.
 ///
 /// Synchronous and top-level, like the rest of the store: it runs on a
 /// background isolate.
@@ -92,16 +97,24 @@ bool writeObject(String root, String sha, List<int> bytes) {
 bool isFastWhole(String root, String sha) =>
     _header(File(historyObjectPath(root, sha)))?.fast ?? false;
 
+/// Flushes the object [sha] already on disk: written once without, and
+/// about to be the only copy of a version.
+void flushObject(String root, String sha) {
+  File(historyObjectPath(root, sha))
+      .writeAsBytesSync(const <int>[], mode: FileMode.append, flush: true);
+}
+
 /// Stores the fast-compressed object [sha], whose content is [content],
 /// compressed hard: no longer one the upkeep compresses again, and kept as
-/// it was when the hard level saves nothing.
+/// it was when the hard level saves nothing. Flushed before it replaces
+/// the copy it came from.
 void storeHard(String root, String sha, Uint8List content) {
   final file = File(historyObjectPath(root, sha));
   final bytes = file.readAsBytesSync();
   final header = _parseHeader(bytes);
   if (header == null || !header.fast) return;
   final payload = ZLibEncoder(level: 9).convert(content);
-  _write(file, [
+  _write(file, flush: true, [
     ..._magic,
     _whole,
     if (_wholeHeader + payload.length < bytes.length)
@@ -192,7 +205,7 @@ bool storeAsDelta(
   final now = file.lengthSync();
   if (_deltaHeader + payload.length > now ~/ 2) return false;
   final prefix = [..._magic, _delta, ..._hexBytes(baseSha)];
-  _write(file, [...prefix, ...payload]);
+  _write(file, flush: true, [...prefix, ...payload]);
   _touch(File(historyObjectPath(root, baseSha)));
   return true;
 }
@@ -280,9 +293,9 @@ _Header? _parseHeader(Uint8List bytes) {
 }
 
 /// Writes [bytes] to a temp file beside [file] and renames it over: a
-/// reader sees the old object or the new one, never half of either. Not
-/// flushed (see the library's doc).
-void _write(File file, List<int> bytes) {
+/// reader sees the old object or the new one, never half of either. Flushed
+/// before the rename when [flush] (see the library's doc).
+void _write(File file, List<int> bytes, {bool flush = false}) {
   file.parent.createSync(recursive: true);
   final temp = File(
     p.join(
@@ -293,7 +306,7 @@ void _write(File file, List<int> bytes) {
   );
   try {
     temp
-      ..writeAsBytesSync(bytes)
+      ..writeAsBytesSync(bytes, flush: flush)
       ..renameSync(file.path);
   } on Object {
     if (temp.existsSync()) temp.deleteSync();

@@ -104,8 +104,16 @@ rename: that part of the save is unchanged. Its history is not.
   that version's object again if the object no longer reads. The note
   holds exactly that content, so a damaged newest version repairs itself.
 
+- **The exceptions flush.** An object that is new can go unflushed
+  because the note still holds its content. An object the upkeep
+  *replaces* — a whole one turned into a delta, or compressed hard — has
+  no such copy behind it, so its temp file is flushed before the rename,
+  and the old history's move flushes every object it wrote before the log
+  says it finished and before the old files are deleted.
+
 The cost of all this: a crash can lose the newest entry of a note's
-history. It cannot lose the note.
+history. It cannot lose the note, nor an older version the upkeep was
+rewriting.
 
 ## The upkeep
 
@@ -132,8 +140,8 @@ and beside the stale-temp sweep.
 store did, and moves a note's history in the first time it is touched; the
 upkeep moves in what is left.
 
-- **Order.** The objects go first, then the log (written whole and
-  flushed), and the old files only once the log is there. A log on disk
+- **Order.** The objects go first and are flushed, then the log (written
+  whole and flushed), and the old files only once the log is there. A log on disk
   therefore means the move finished, and old files beside it are leftovers
   to delete.
 - **Drift.** A version whose file no longer hashes to its manifest's
