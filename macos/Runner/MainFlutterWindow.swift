@@ -29,6 +29,13 @@ class MainFlutterWindow: NSWindow, NSDraggingDestination {
     }
     (NSApp.delegate as? AppDelegate)?.quitChannel = quit
 
+    // Finder's files and the Dock menu (lib/src/core/mac_app_events.dart).
+    let app = FlutterMethodChannel(name: "niman/mac_app", binaryMessenger: messenger)
+    if let delegate = NSApp.delegate as? AppDelegate {
+      app.setMethodCallHandler(delegate.handleApp)
+      delegate.appChannel = app
+    }
+
     // The window is the drop target: the Flutter view under it takes no
     // drags of its own, so what is dragged over it reaches the window.
     dropChannel = FlutterMethodChannel(name: "niman/drop", binaryMessenger: messenger)
