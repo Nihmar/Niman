@@ -761,7 +761,7 @@ final class LibraryController implements LibrarySession {
     // opening state: the first flatten otherwise paid drift's statement
     // preparation and SQLite's page cache right as the shell built
     // (78-118 ms in the log, T-PP-22).
-    unawaited(_warmUpTree(indexer.dao));
+    unawaited(_warmUpTree(indexer.dao, settings.treeSort));
     await AppSettingsRepo(appDb).setLastLibraryPath(abs);
     // The list the home screen shows (T-ML-04). Opening is what puts a
     // folder on it, so a library the app has never seen needs no
@@ -1877,10 +1877,17 @@ final class LibraryController implements LibrarySession {
     }
   }
 
-  /// Prepares the tree's first query off the critical path.
-  Future<void> _warmUpTree(NoteDao dao) async {
+  /// Prepares the tree's first query off the critical path: the root's
+  /// first page in the library's order, the very statement the first
+  /// flatten runs (its `LIMIT` is bound).
+  ///
+  /// Not the root's every row, which is what it read until the tree began
+  /// to page (#1064) and went on reading after: 850 ms for a root of 200 000
+  /// notes, each row of it sent to this isolate to warm a statement nothing
+  /// ran (#1135).
+  Future<void> _warmUpTree(NoteDao dao, TreeSort sort) async {
     try {
-      await dao.tree(const <String>[]);
+      await dao.childrenPage(0, limit: 1, sort: sort);
     } on Object catch (error) {
       _log.debug('tree warm-up failed ($error)');
     }
