@@ -10,6 +10,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:cnativeapi/cnativeapi.dart' show cnativeApiBindings;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nativeapi/nativeapi.dart'
@@ -129,8 +130,15 @@ final trayServiceProvider = Provider<TrayService>((ref) {
 /// The `nativeapi` StatusNotifier tray.
 final class PlatformTrayService implements TrayService {
   /// Creates the service; [iconAsset] is a test seam (and the M7 branding
-  /// hook: the Niman mark is downscaled to `tray.png`).
-  new({this.iconAsset = 'assets/branding/tray.png'});
+  /// hook: the Niman mark is downscaled to `tray.png`). A Mac takes
+  /// `tray_template.png` instead: the tile with the N cut out, which the
+  /// menu bar draws in its own black or white, as it does every extra.
+  new({String? iconAsset})
+    : iconAsset =
+          iconAsset ??
+          (Platform.isMacOS
+              ? 'assets/branding/tray_template.png'
+              : 'assets/branding/tray.png');
 
   static const AppLogger _log = AppLogger(name: 'tray');
 
@@ -200,6 +208,13 @@ final class PlatformTrayService implements TrayService {
       if (icon != null) {
         _icon = icon;
         tray.icon = icon;
+        // Only its shape counts there: the system paints it to the bar.
+        if (Platform.isMacOS) {
+          cnativeApiBindings.native_tray_icon_set_icon_template(
+            tray.nativeHandle,
+            true,
+          );
+        }
       }
       final built = _buildMenu(labels, ends);
       if (built == null) {

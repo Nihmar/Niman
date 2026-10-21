@@ -24,6 +24,11 @@ To build the `.icns`, rename `icon_NxN-2x.png` → `icon_NxN@2x.png`
 (the @ character was replaced during export), put everything in `niman.iconset/`
 and run `iconutil -c icns niman.iconset`.
 
+## Menu bar template (macOS)
+`assets/branding/tray_template.png`, 36 px (18 pt at 2x): the reduced mark
+(`svg/niman-mark-16.svg`) as a solid tile with the N cut out, black on
+transparent. macOS uses only its alpha and paints it the menu bar's colour.
+
 ## windows/
 `icon-16…256.png` sources for the `.ico` (Inno Setup / executable).
 `Square44x44Logo.png` and `Square150x150Logo.png` for the MSIX package.
