@@ -61,10 +61,6 @@ final class ShellWorkspace {
   String? _following;
   bool _followed = false;
 
-  /// The next note opened goes into a new tab (Ctrl+click, the row menu,
-  /// the tab bar's +) instead of the showing one.
-  bool _nextInNewTab = false;
-
   /// Open notes, most recently shown first.
   final List<String> _recent = [];
 
@@ -125,21 +121,21 @@ final class ShellWorkspace {
   Future<Workspace> load() async {
     final saved = await _slot.load();
     controller.adopt(saved);
-    final open = [for (final tab in value.tabs) tab.path];
+    final open = [
+      for (final tab in value.tabs)
+        if (!tab.isBlank) tab.path,
+    ];
     if (open.isNotEmpty) missing(await _session.missingPaths(open));
     return saved;
   }
 
-  /// Opens [notePath] now: in a new tab when [newTab] (or when one was
-  /// asked for with [openNextInNewTab]), in place of the showing one
-  /// otherwise. Already open, it is shown where it is.
+  /// Opens [notePath] now: in a new tab when [newTab], in place of the
+  /// showing one otherwise. Already open, it is shown where it is.
   void show(String notePath, {bool newTab = false}) {
-    final fresh = newTab || _nextInNewTab;
-    _nextInNewTab = false;
     _following = notePath;
     _followed = true;
     controller.update(
-      (w) => fresh ? w.open(notePath) : w.replaceActive(notePath),
+      (w) => newTab ? w.open(notePath) : w.replaceActive(notePath),
     );
   }
 
@@ -149,9 +145,9 @@ final class ShellWorkspace {
   void reopenBeforeShowing(String path) =>
       controller.update((w) => w.openBeforeActive(path));
 
-  /// The next note the shell opens, however it opens it, goes into a new
-  /// tab: for the flows that pick their note later (a new note's name).
-  void openNextInNewTab() => _nextInNewTab = true;
+  /// Shows the focused pane's new tab, its launcher in it (#1134): what
+  /// the tab bar's `+` does. The note opened next fills it.
+  void newTab() => controller.update((w) => w.newTab());
 
   /// The shell now shows [notePath] (library-relative), or no note.
   ///
@@ -173,13 +169,9 @@ final class ShellWorkspace {
     _followed = true;
     scheduleMicrotask(() {
       if (notePath != null) {
-        final fresh = alongside || _nextInNewTab;
-        _nextInNewTab = false;
         controller.update(
-          (w) => fresh
-              ? alongside
-                    ? _capped(w.open(notePath), notePath)
-                    : w.open(notePath)
+          (w) => alongside
+              ? _capped(w.open(notePath), notePath)
               : w.replaceActive(notePath),
         );
       } else if (previous != null && !keepOnNone) {
@@ -278,7 +270,7 @@ final class ShellWorkspace {
   List<String> get recentNotes => [
     ..._recent,
     for (final tab in value.tabs)
-      if (!_recent.contains(tab.path)) tab.path,
+      if (!tab.isBlank && !_recent.contains(tab.path)) tab.path,
   ];
 
   /// Records a loaded note's [length], for [largeNote].

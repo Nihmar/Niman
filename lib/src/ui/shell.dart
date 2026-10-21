@@ -133,6 +133,7 @@ import 'package:niman/src/ui/outside_files.dart';
 import 'package:niman/src/ui/palette/command_features.dart';
 import 'package:niman/src/ui/palette/command_needs.dart';
 import 'package:niman/src/ui/palette/pinned_commands.dart';
+import 'package:niman/src/ui/pane_launcher.dart';
 import 'package:niman/src/ui/pane_split.dart';
 import 'package:niman/src/ui/pointer_density.dart';
 import 'package:niman/src/ui/quick_note_tab.dart';
@@ -2170,10 +2171,10 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       onActivate: (index) => _activateTab(pane, index),
       onClose: (index) => _workspace.close(pane, index),
       onNew: () {
+        _takePane(pane);
         _workspace
           ..focus(pane)
-          ..openNextInNewTab();
-        unawaited(_createFlow.createNote(context));
+          ..newTab();
       },
       onSplit: w.isSplit
           ? null
@@ -2427,6 +2428,13 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// window (#769): the panes are on screen beside it, and its hits stay
   /// there to step through.
   void _activateTab(int pane, int index) {
+    _takePane(pane);
+    _workspace.activate(pane, index);
+  }
+
+  /// [pane] is about to show one of its own tabs: the pages over it give
+  /// way, and the Files tab it lives in shows.
+  void _takePane(int pane) {
     // Only the pane that shows the compare page gives it up: a version
     // stays open beside the note being edited in the other one (#975).
     if (_compareIn(pane)) setState(() => _compareShows = false);
@@ -2434,7 +2442,25 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     if (_tab != ShellTab.files && !_sidebarShowsView) {
       _onDestinationSelected(ShellTab.files);
     }
-    _workspace.activate(pane, index);
+  }
+
+  /// [pane]'s launcher (#1134), while it shows no note: each way in takes
+  /// the pane's focus first, so the note it makes or picks lands there.
+  Widget _launcher(int pane) {
+    void inPane(VoidCallback action) {
+      _workspace.focus(pane);
+      action();
+    }
+
+    return PaneLauncher(
+      onNewNote: () => inPane(() => unawaited(_createFlow.createNote(context))),
+      onNewFromTemplate: () =>
+          inPane(() => unawaited(_templateFlow.createFromTemplate(context))),
+      onGoToNote: () =>
+          inPane(() => unawaited(_palette.open(context, notesOnly: true))),
+      recent: _workspace.history.recent(5),
+      onOpen: (path) => inPane(() => _openSearchNote(path)),
+    );
   }
 
   /// The note the shell shows, as registered in [_LibraryShell.openNotes].
@@ -3931,10 +3957,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       if (_phoneNote != null) _closeFullScreenNote();
       setState(() => _selected = null);
     },
-    onNewNote: () {
-      _workspace.openNextInNewTab();
-      unawaited(_createFlow.createNote(context));
-    },
+    // A phone opens every note alongside the others: the new one joins
+    // them once it is named, and a cancel leaves nothing behind (#1133).
+    onNewNote: () => unawaited(_createFlow.createNote(context)),
   );
 
   /// Closes [path] from the switcher. The note on screen gives way to the
@@ -5243,6 +5268,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
                     shellFocus: _shellFocus,
                     root: controller.root,
                     tabs: _deck(pane),
+                    launcher: _launcher(pane),
                     onMemento: _workspace.remember,
                     zen: _inZen,
                     // The panel holds the note's outline and spelling

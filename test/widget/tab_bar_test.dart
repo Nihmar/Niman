@@ -611,6 +611,7 @@ void main() {
 
     // No bottom navigation on the wide split layout.
     expect(find.byType(NavigationBar), findsNothing);
-    expect(find.text('Select a note'), findsOne);
+    // An empty pane offers the ways in (#1134).
+    expect(find.byKey(const Key('launcher-new-note')), findsOne);
   });
 }

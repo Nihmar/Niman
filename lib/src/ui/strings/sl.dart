@@ -1617,7 +1617,9 @@ final class SlovenianStrings extends Strings {
   @override
   String get openInDefaultApp => 'Odpri s privzeto aplikacijo';
   @override
-  String get newNoteTabTooltip => 'Nov zapisek v novem zavihku';
+  String get newTab => 'Nov zavihek';
+  @override
+  String get launcherRecent => 'Nedavni zapiski';
   @override
   String get openNotesTooltip => 'Odprti zapiski';
   @override

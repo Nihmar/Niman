@@ -1636,7 +1636,9 @@ final class RomanianStrings extends Strings {
   @override
   String get openInDefaultApp => 'Deschide cu aplicația implicită';
   @override
-  String get newNoteTabTooltip => 'Notă nouă într-o filă nouă';
+  String get newTab => 'Filă nouă';
+  @override
+  String get launcherRecent => 'Note recente';
   @override
   String get openNotesTooltip => 'Note deschise';
   @override

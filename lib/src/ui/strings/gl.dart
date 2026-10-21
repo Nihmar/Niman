@@ -1632,7 +1632,9 @@ final class GalicianStrings extends Strings {
   @override
   String get openInDefaultApp => 'Abrir coa aplicación predeterminada';
   @override
-  String get newNoteTabTooltip => 'Nota nova nunha lapela nova';
+  String get newTab => 'Lapela nova';
+  @override
+  String get launcherRecent => 'Notas recentes';
   @override
   String get openNotesTooltip => 'Notas abertas';
   @override

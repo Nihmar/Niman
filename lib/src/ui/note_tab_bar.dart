@@ -4,8 +4,8 @@
 /// close button, and — while the note holds edits the disk has not got
 /// yet — a dot where the close button sits, which gives way to it under
 /// the pointer. A middle click closes, as in every tabbed app. Past the
-/// tabs: `+` for a new note in a new tab, and ▾ listing every tab, for
-/// the row that no longer fits.
+/// tabs: `+` for a new tab, the pane's launcher in it (#1134), and ▾
+/// listing every tab, for the row that no longer fits.
 library;
 
 import 'dart:async';
@@ -27,6 +27,7 @@ import 'package:path/path.dart' as p;
 
 /// A tab's label: the note's name, `.md` dropped like the tree drops it.
 String noteTabLabel(String path) {
+  if (path.isEmpty) return AppStrings.newTab;
   final name = p.posix.basename(path);
   return isMarkdownNote(name) ? name.substring(0, name.length - 3) : name;
 }
@@ -129,7 +130,7 @@ final class NoteTabBar extends StatefulWidget {
   /// Closes the tab at the index.
   final ValueChanged<int> onClose;
 
-  /// Makes a new note, in a new tab.
+  /// Shows the pane's new tab.
   final VoidCallback onNew;
 
   @override
@@ -328,7 +329,7 @@ final class _NoteTabBarState extends State<NoteTabBar> {
           value: 'all',
           child: Text(AppStrings.closeAllNotes),
         ),
-        if (widget.onTabAction != null) ...[
+        if (widget.onTabAction != null && !widget.tabs[index].isBlank) ...[
           menuDivider(context),
           for (final (action, label) in [
             (NoteTabAction.reveal, AppStrings.revealInTree),
@@ -448,7 +449,7 @@ final class _NoteTabBarState extends State<NoteTabBar> {
             ),
             IconButton(
               key: const Key('tab-new'),
-              tooltip: AppStrings.newNoteTabTooltip,
+              tooltip: AppStrings.newTab,
               icon: const Icon(Icons.add, size: 18),
               visualDensity: touch ? null : VisualDensity.compact,
               onPressed: widget.onNew,
@@ -600,7 +601,7 @@ final class _NoteTab extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(right: 4),
       child: Tooltip(
-        message: tab.path,
+        message: tab.isBlank ? AppStrings.newTab : tab.path,
         waitDuration: const Duration(milliseconds: 600),
         // Hover only: a held finger lifts the tab (#1080), which the
         // tooltip's own long press would take from it.

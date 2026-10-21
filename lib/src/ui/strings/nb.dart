@@ -1613,7 +1613,9 @@ final class NorwegianStrings extends Strings {
   @override
   String get openInDefaultApp => 'Åpne i standardappen';
   @override
-  String get newNoteTabTooltip => 'Nytt notat i ny fane';
+  String get newTab => 'Ny fane';
+  @override
+  String get launcherRecent => 'Nylige notater';
   @override
   String get openNotesTooltip => 'Åpne notater';
   @override

@@ -1620,7 +1620,9 @@ final class IcelandicStrings extends Strings {
   @override
   String get openInDefaultApp => 'Opna í sjálfgefnu forriti';
   @override
-  String get newNoteTabTooltip => 'Nýr minnispunktur í nýjum flipa';
+  String get newTab => 'Nýr flipi';
+  @override
+  String get launcherRecent => 'Nýleg minnisblöð';
   @override
   String get openNotesTooltip => 'Opnir minnispunktar';
   @override

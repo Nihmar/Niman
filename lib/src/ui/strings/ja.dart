@@ -1520,7 +1520,9 @@ final class JapaneseStrings extends Strings {
   @override
   String get openInDefaultApp => '既定のアプリで開く';
   @override
-  String get newNoteTabTooltip => '新しいタブで新しいノート';
+  String get newTab => '新しいタブ';
+  @override
+  String get launcherRecent => '最近のノート';
   @override
   String get openNotesTooltip => '開いているノート';
   @override

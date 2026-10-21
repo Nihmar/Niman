@@ -1634,7 +1634,9 @@ final class AlbanianStrings extends Strings {
   @override
   String get openInDefaultApp => 'Hap me aplikacionin e parazgjedhur';
   @override
-  String get newNoteTabTooltip => 'Shënim i ri në skedë të re';
+  String get newTab => 'Skedë e re';
+  @override
+  String get launcherRecent => 'Shënimet e fundit';
   @override
   String get openNotesTooltip => 'Shënime të hapura';
   @override

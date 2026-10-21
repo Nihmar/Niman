@@ -1620,7 +1620,9 @@ final class LithuanianStrings extends Strings {
   @override
   String get openInDefaultApp => 'Atverti numatytąja programa';
   @override
-  String get newNoteTabTooltip => 'Naujas užrašas naujoje kortelėje';
+  String get newTab => 'Nauja kortelė';
+  @override
+  String get launcherRecent => 'Naujausi užrašai';
   @override
   String get openNotesTooltip => 'Atverti užrašai';
   @override

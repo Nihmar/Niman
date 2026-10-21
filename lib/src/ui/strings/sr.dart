@@ -1622,7 +1622,9 @@ final class SerbianStrings extends Strings {
   @override
   String get openInDefaultApp => 'Отвори подразумеваном апликацијом';
   @override
-  String get newNoteTabTooltip => 'Нова белешка у новој картици';
+  String get newTab => 'Нова картица';
+  @override
+  String get launcherRecent => 'Недавне белешке';
   @override
   String get openNotesTooltip => 'Отворене белешке';
   @override

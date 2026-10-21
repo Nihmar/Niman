@@ -1607,7 +1607,9 @@ final class EnglishStrings extends Strings {
   @override
   String get openInDefaultApp => 'Open in default app';
   @override
-  String get newNoteTabTooltip => 'New note in a new tab';
+  String get newTab => 'New tab';
+  @override
+  String get launcherRecent => 'Recent notes';
   @override
   String get openNotesTooltip => 'Open notes';
   @override

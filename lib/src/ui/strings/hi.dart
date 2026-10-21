@@ -1593,7 +1593,9 @@ final class HindiStrings extends Strings {
   @override
   String get openInDefaultApp => 'डिफ़ॉल्ट ऐप में खोलें';
   @override
-  String get newNoteTabTooltip => 'नए टैब में नया नोट';
+  String get newTab => 'नया टैब';
+  @override
+  String get launcherRecent => 'हाल के नोट';
   @override
   String get openNotesTooltip => 'खुले नोट';
   @override
