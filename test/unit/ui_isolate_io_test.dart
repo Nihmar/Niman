@@ -97,9 +97,39 @@ final RegExp _syncCall = RegExp(
   r'|Process\.runSync\()',
 );
 
+/// The files that call the Windows creation-time helpers
+/// (`core/creation_time.dart`), which reach the file system through `kernel32`
+/// over FFI — a blocking call the pattern above cannot see — and why each is
+/// allowed to.
+///
+/// **A decided exception, not an accident**: the three calls
+/// (`GetFileAttributesEx`, `CreateFile`, `SetFileTime`) run on Windows only,
+/// on the file a save just wrote, a few microseconds in all; the FUSE round
+/// trip the rule exists for (#1143) is Android's. Moving them to an isolate
+/// would cost the spawn of one (milliseconds) per save to save microseconds,
+/// and the callers that save from the UI isolate (the todo files, the
+/// attachment swap, the editor-only documents) do it rarely. The saves that
+/// are frequent, the notes', already run them on the writer's isolate.
+const Map<String, String> _creationTimeCallers = {
+  'core/files.dart':
+      'publishTempFile: the UI isolate (todo files, editor-only '
+      "documents) and the writers' isolates",
+  'frontmatter/edit_in_file.dart': 'editFrontmatterKeyInFile, in Isolate.run',
+  'library/note_writer.dart':
+      'swapFileIn and copyFileOver: the UI isolate '
+      '(attachments, sync downloads)',
+  'library/note_writer_blocking.dart':
+      'replaceFileFrom, in the writer isolates',
+};
+
+final RegExp _creationTimeCall = RegExp(
+  r'\b(keepCreationTime|readCreationTime|writeCreationTime)\(',
+);
+
 void main() {
   final sources = p.join('lib', 'src');
   final calls = <String, List<String>>{};
+  final creationTimeCalls = <String, List<String>>{};
   for (final entity in Directory(sources).listSync(recursive: true)) {
     if (entity is! File || !entity.path.endsWith('.dart')) continue;
     if (entity.path.endsWith('.g.dart')) continue;
@@ -110,6 +140,12 @@ void main() {
       if (line.trimLeft().startsWith('//')) continue;
       if (_syncCall.hasMatch(line)) {
         (calls[rel] ??= []).add('lib/src/$rel:${i + 1}: ${line.trim()}');
+      }
+      if (rel != 'core/creation_time.dart' &&
+          _creationTimeCall.hasMatch(line)) {
+        (creationTimeCalls[rel] ??= []).add(
+          'lib/src/$rel:${i + 1}: ${line.trim()}',
+        );
       }
     }
   }
@@ -137,5 +173,25 @@ void main() {
         if (!calls.containsKey(file)) file,
     ];
     expect(stale, isEmpty, reason: 'take the files that no longer do off');
+  });
+
+  test('the Windows FFI file calls are made only where it was decided', () {
+    final offenders = [
+      for (final MapEntry(key: file, value: lines) in creationTimeCalls.entries)
+        if (!_creationTimeCallers.containsKey(file)) ...lines,
+    ];
+    expect(
+      offenders,
+      isEmpty,
+      reason:
+          'keepCreationTime is a blocking kernel32 call made over FFI: '
+          'a new caller either runs on a background isolate or is decided '
+          'here, with the reason (see _creationTimeCallers)',
+    );
+    final stale = [
+      for (final file in _creationTimeCallers.keys)
+        if (!creationTimeCalls.containsKey(file)) file,
+    ];
+    expect(stale, isEmpty, reason: 'take the files that no longer call off');
   });
 }
