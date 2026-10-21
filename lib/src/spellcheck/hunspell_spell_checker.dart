@@ -13,7 +13,7 @@ import 'dart:isolate';
 
 import 'package:ffi/ffi.dart';
 import 'package:niman/src/core/logging.dart';
-import 'package:niman/src/spellcheck/mac_spell_checker.dart';
+import 'package:niman/src/spellcheck/apple_spell_checker.dart';
 import 'package:niman/src/spellcheck/spell_checker.dart';
 import 'package:niman/src/spellcheck/windows_spell_checker.dart';
 import 'package:path/path.dart' as p;
@@ -407,10 +407,10 @@ void destroyHunspellHandles(List<HunspellHandle> handles) {
 ///
 /// Nothing installed is not an error: the answer is [NoopSpellChecker]s, as
 /// [createSpellChecker]'s is. Windows' and the Mac's own checkers are the
-/// exception — the system's, asked for where they are used — and they are
-/// built on the calling isolate.
+/// exception, as is iOS's — the system's, asked for where they are used —
+/// and they are built on the calling isolate.
 Future<List<SpellChecker>> loadSpellCheckers(List<String> dictionaries) async {
-  if (Platform.isWindows || Platform.isMacOS) {
+  if (Platform.isWindows || Platform.isMacOS || Platform.isIOS) {
     return _checkersHere(dictionaries);
   }
   final handles = await Isolate.run(
@@ -444,19 +444,22 @@ SpellChecker createSpellChecker({String? dictionary}) =>
     (Platform.isWindows
         ? WindowsSpellChecker.open(language: dictionary)
         : null) ??
-    (Platform.isMacOS ? MacSpellChecker.open(language: dictionary) : null) ??
+    (Platform.isMacOS || Platform.isIOS
+        ? AppleSpellChecker.open(language: dictionary)
+        : null) ??
     HunspellSpellChecker.open(dictionary: dictionary) ??
     const NoopSpellChecker();
 
-/// The dictionaries the settings offer: the languages Windows or macOS
-/// spellchecks, or every hunspell pair found on the machine, looked for on
-/// a background isolate: the search lists every dictionary folder (#1143).
-/// A Mac's are asked on this one, as its checker wants the main thread.
+/// The dictionaries the settings offer: the languages Windows or the Apple
+/// system spellchecks, or every hunspell pair found on the machine, looked
+/// for on a background isolate: the search lists every dictionary folder
+/// (#1143). Apple's are asked on this one, as their checker wants the main
+/// thread.
 Future<List<String>> availableSpellDictionaries() async {
   final names = Platform.isWindows
       ? windowsSpellLanguages()
-      : Platform.isMacOS
-      ? macSpellLanguages()
+      : Platform.isMacOS || Platform.isIOS
+      ? appleSpellLanguages()
       : await Isolate.run(() => discoverDictionaries().keys.toList());
   return names..sort();
 }
