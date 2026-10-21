@@ -72,6 +72,16 @@ rem before compiling anything. Moving those sockets under the profile
 rem fixes it and is inert where nothing blocks them.
 if not exist "%USERPROFILE%\.javasock" mkdir "%USERPROFILE%\.javasock"
 if not defined JAVA_TOOL_OPTIONS set "JAVA_TOOL_OPTIONS=-Djdk.net.unixdomain.tmpdir=%USERPROFILE%\.javasock"
+if "%flavor%"=="frames" (
+  rem The device run of #1145: the testing build in profile mode with the
+  rem frame instrumentation on, so an exported log splits each action's
+  rem frames into build and raster and carries its memory (#1144).
+  call flutter build apk --profile --flavor beta --dart-define=APP_CHANNEL=testing --dart-define=NIMAN_FRAMES=true --target-platform android-arm64 --dart-define=APP_COMMIT=%commit% >"%log%" 2>&1
+  set "status=!errorlevel!"
+  powershell -NoProfile -Command "Get-Content -Tail 3 '%log%'"
+  if "!status!"=="0" echo artifact: build\app\outputs\flutter-apk\app-beta-profile.apk
+  exit /b !status!
+)
 if "%flavor%"=="beta" (
   rem The testing build (issue #106): the release pipeline plus the
   rem flavor's separate application ID; APP_CHANNEL marks the Dart side,
@@ -109,14 +119,15 @@ if "%status%"=="0" echo artifact: build\windows\x64\runner\Release\niman.exe
 exit /b %status%
 
 :usage
-echo usage: scripts\niman.bat ^<analyze^|test^|check^|integration^|apk [beta]^|windows [beta]^>
+echo usage: scripts\niman.bat ^<analyze^|test^|check^|integration^|apk [beta^|frames]^|windows [beta]^>
 echo   analyze  flutter analyze --fatal-infos (issue lines + summary only)
 echo   test     flutter test (tail only)
 echo   check    analyze + test; use before committing
 echo   integration  the headless integration_test/ files (issue #241);
 echo            sync_e2e needs a Linux host with a display
 echo   apk      flutter build apk --release
-echo            (beta: the testing build, app ID dev.niman.niman.beta)
+echo            (beta: the testing build, app ID dev.niman.niman.beta;
+echo             frames: that build in profile mode with NIMAN_FRAMES)
 echo   windows  flutter build windows --release
 echo            (beta: the testing build, its own data folder niman-testing)
 echo Full logs: %%TEMP%%\niman\niman-^<cmd^>.log
