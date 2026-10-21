@@ -1843,7 +1843,7 @@ final class PortugueseStrings extends Strings {
   @override
   String get epubConvertAction => 'Converter para Markdown…';
   @override
-  String get epubConvertCommand => 'Converter EPUB para Markdown';
+  String get epubConvertCommand => 'Converter EPUB para Markdown…';
   @override
   String get epubConvertSettingsTitle => 'Converter um EPUB para Markdown';
   @override

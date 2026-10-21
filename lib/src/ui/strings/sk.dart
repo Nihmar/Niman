@@ -1829,7 +1829,7 @@ final class SlovakStrings extends Strings {
   @override
   String get epubConvertAction => 'Previesť na Markdown…';
   @override
-  String get epubConvertCommand => 'Previesť EPUB na Markdown';
+  String get epubConvertCommand => 'Previesť EPUB na Markdown…';
   @override
   String get epubConvertSettingsTitle => 'Previesť EPUB na Markdown';
   @override

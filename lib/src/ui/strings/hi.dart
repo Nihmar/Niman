@@ -1801,7 +1801,7 @@ final class HindiStrings extends Strings {
   @override
   String get epubConvertAction => 'Markdown में बदलें…';
   @override
-  String get epubConvertCommand => 'EPUB को Markdown में बदलें';
+  String get epubConvertCommand => 'EPUB को Markdown में बदलें…';
   @override
   String get epubConvertSettingsTitle => 'किसी EPUB को Markdown में बदलें';
   @override

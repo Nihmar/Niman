@@ -1884,7 +1884,7 @@ final class FrenchStrings extends Strings {
   @override
   String get epubConvertAction => 'Convertir en Markdown…';
   @override
-  String get epubConvertCommand => 'Convertir un EPUB en Markdown';
+  String get epubConvertCommand => 'Convertir un EPUB en Markdown…';
   @override
   String get epubConvertSettingsTitle => 'Convertir un EPUB en Markdown';
   @override

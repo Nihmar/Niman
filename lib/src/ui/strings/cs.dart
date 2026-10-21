@@ -1822,7 +1822,7 @@ final class CzechStrings extends Strings {
   @override
   String get epubConvertAction => 'Převést na Markdown…';
   @override
-  String get epubConvertCommand => 'Převést EPUB na Markdown';
+  String get epubConvertCommand => 'Převést EPUB na Markdown…';
   @override
   String get epubConvertSettingsTitle => 'Převést EPUB na Markdown';
   @override

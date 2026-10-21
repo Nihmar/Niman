@@ -1835,7 +1835,7 @@ final class UkrainianStrings extends Strings {
   @override
   String get epubConvertAction => 'Перетворити на Markdown…';
   @override
-  String get epubConvertCommand => 'Перетворити EPUB на Markdown';
+  String get epubConvertCommand => 'Перетворити EPUB на Markdown…';
   @override
   String get epubConvertSettingsTitle => 'Перетворити EPUB на Markdown';
   @override

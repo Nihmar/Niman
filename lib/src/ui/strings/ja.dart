@@ -1717,7 +1717,7 @@ final class JapaneseStrings extends Strings {
   @override
   String get epubConvertAction => 'Markdown に変換…';
   @override
-  String get epubConvertCommand => 'EPUB を Markdown に変換';
+  String get epubConvertCommand => 'EPUB を Markdown に変換…';
   @override
   String get epubConvertSettingsTitle => 'EPUB を Markdown に変換';
   @override

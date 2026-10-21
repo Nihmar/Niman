@@ -1816,7 +1816,7 @@ final class TurkishStrings extends Strings {
   @override
   String get epubConvertAction => 'Markdown’a dönüştür…';
   @override
-  String get epubConvertCommand => 'EPUB’u Markdown’a dönüştür';
+  String get epubConvertCommand => 'EPUB’u Markdown’a dönüştür…';
   @override
   String get epubConvertSettingsTitle => 'Bir EPUB’u Markdown’a dönüştür';
   @override

@@ -1825,7 +1825,7 @@ final class DanishStrings extends Strings {
   @override
   String get epubConvertAction => 'Konvertér til Markdown…';
   @override
-  String get epubConvertCommand => 'Konvertér EPUB til Markdown';
+  String get epubConvertCommand => 'Konvertér EPUB til Markdown…';
   @override
   String get epubConvertSettingsTitle => 'Konvertér en EPUB til Markdown';
   @override

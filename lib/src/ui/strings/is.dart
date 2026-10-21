@@ -1832,7 +1832,7 @@ final class IcelandicStrings extends Strings {
   @override
   String get epubConvertAction => 'Umbreyta í Markdown…';
   @override
-  String get epubConvertCommand => 'Umbreyta EPUB í Markdown';
+  String get epubConvertCommand => 'Umbreyta EPUB í Markdown…';
   @override
   String get epubConvertSettingsTitle => 'Umbreyta EPUB í Markdown';
   @override

@@ -694,7 +694,7 @@ A book in EPUB is read in the note pane like a note, and it can also
 become notes of the library: editable, searchable, linkable, and exportable to another tool.
 **Convert to Markdown…** is on the book's own row in the reader, in the
 tree's menu on an `.epub` row, in the palette (*Library: Convert EPUB to
-Markdown*, which converts the book on screen or the one selected, and
+Markdown…*, which converts the book on screen or the one selected, and
 otherwise asks for a file), in *Settings → Maintenance* (a book outside
 the library), and it is what dropping a book on the window or sharing one
 to Niman on Android does.

@@ -1822,7 +1822,7 @@ final class NorwegianStrings extends Strings {
   @override
   String get epubConvertAction => 'Konverter til Markdown…';
   @override
-  String get epubConvertCommand => 'Konverter EPUB til Markdown';
+  String get epubConvertCommand => 'Konverter EPUB til Markdown…';
   @override
   String get epubConvertSettingsTitle => 'Konverter en EPUB til Markdown';
   @override

@@ -1831,7 +1831,7 @@ final class BelarusianStrings extends Strings {
   @override
   String get epubConvertAction => 'Пераўтварыць у Markdown…';
   @override
-  String get epubConvertCommand => 'Пераўтварыць EPUB у Markdown';
+  String get epubConvertCommand => 'Пераўтварыць EPUB у Markdown…';
   @override
   String get epubConvertSettingsTitle => 'Пераўтварыць EPUB у Markdown';
   @override
