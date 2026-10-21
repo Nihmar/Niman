@@ -6,6 +6,21 @@ This file ships inside the build and feeds the in-app changelog (the
 launch dialog after an update and the screen under Settings → Diagnostics
 and info). Update it in the release commit, before the tag.
 
+## [0.2.9] - 2026-10-21
+
+A settings database that lost pages no longer stops the sync.
+
+Niman keeps its settings, the known libraries and the sync state in one
+small database. When a disk or a copying tool zeroed pages of it, the file
+still opened and failed at the first query that reached one, so the sync
+failed every minute and never ran. The app now checks the file as it opens
+it and, if sqlite calls it unreadable, sets it aside as `niman.db.corrupt-`
+plus the date and starts a new one: the libraries and the sync destination
+have to be set again, and nothing is deleted.
+
+### Fixed
+- **Settings**: a damaged settings database is set aside and replaced instead of failing every query, the sync's included
+
 ## [0.2.8] - 2026-10-21
 
 An EPUB book converts into notes, a note's history takes far less room, and
