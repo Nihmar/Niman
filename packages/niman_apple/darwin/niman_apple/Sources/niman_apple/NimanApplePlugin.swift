@@ -23,10 +23,10 @@ public class NimanApplePlugin: NSObject, FlutterPlugin {
       pdf.setMethodCallHandler(pdfBridge.handle)
       let pageReader = FlutterMethodChannel(name: "niman/page_reader", binaryMessenger: messenger)
       pageReader.setMethodCallHandler(pageReaderBridge.handle)
-      // The clipboard's HTML, for Paste as Markdown, as Linux's runner reads it.
-      let clipboard = FlutterMethodChannel(name: "niman/clipboard", binaryMessenger: messenger)
-      clipboard.setMethodCallHandler(ClipboardBridge.handle)
     #endif
+    // The clipboard's HTML, for Paste as Markdown, as Linux's runner reads it.
+    let clipboard = FlutterMethodChannel(name: "niman/clipboard", binaryMessenger: messenger)
+    clipboard.setMethodCallHandler(ClipboardBridge.handle)
   }
 
   #if os(macOS)
