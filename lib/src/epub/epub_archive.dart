@@ -10,6 +10,7 @@
 library;
 
 import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
@@ -168,3 +169,40 @@ String _decoded(String uri) =>
 
 /// A `%` that does not open a two-digit escape.
 final RegExp _badEscape = RegExp('%(?![0-9A-Fa-f]{2})');
+
+/// Whether the file at [path] is an EPUB, whatever it is called: the format
+/// opens its zip on a `mimetype` entry, stored as it is, that says
+/// `application/epub+zip`. A shared book can come named `msf:1234`, with
+/// nothing in its name to tell it by (#1138).
+Future<bool> looksLikeEpub(String path) async {
+  RandomAccessFile? file;
+  try {
+    file = await File(path).open();
+    final head = await file.read(128);
+    if (head.length < 58) return false;
+    // A zip's local file header, its name at 30 and its data after the name
+    // and the extra field.
+    if (head[0] != 0x50 || head[1] != 0x4B || head[2] != 3 || head[3] != 4) {
+      return false;
+    }
+    final nameLength = head[26] | (head[27] << 8);
+    final extraLength = head[28] | (head[29] << 8);
+    final dataAt = 30 + nameLength + extraLength;
+    if (nameLength != 8 || dataAt + _epubMime.length > head.length) {
+      return false;
+    }
+    return ascii.decode(head.sublist(30, 38), allowInvalid: true) ==
+            'mimetype' &&
+        ascii.decode(
+              head.sublist(dataAt, dataAt + _epubMime.length),
+              allowInvalid: true,
+            ) ==
+            _epubMime;
+  } on FileSystemException {
+    return false;
+  } finally {
+    await file?.close();
+  }
+}
+
+const String _epubMime = 'application/epub+zip';

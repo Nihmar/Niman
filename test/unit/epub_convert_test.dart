@@ -4,10 +4,12 @@
 // XHTML is written in pieces, and a space between two would be a word
 // of the book: its literals run on without one.
 // ignore_for_file: missing_whitespace_between_adjacent_strings
+import 'dart:async';
 import 'dart:io';
 
 import 'package:archive/archive.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/isolate_gauge.dart';
 import 'package:niman/src/epub/epub_archive.dart';
 import 'package:niman/src/epub/epub_conversion.dart';
 import 'package:niman/src/epub/epub_convert_job.dart';
@@ -325,6 +327,26 @@ void main() {
     expect(Directory(library).listSync(), isEmpty);
   });
 
+  test(
+    'a book is known by its mimetype entry, whatever it is called',
+    () async {
+      final named = writeTestEpub(
+        book('msf-1234'),
+        chapters: [(path: 'c1.xhtml', body: '<p>x</p>')],
+      ).path;
+      expect(await looksLikeEpub(named), isTrue);
+      final zip = File(book('notion.zip'))
+        ..writeAsBytesSync(
+          ZipEncoder().encodeBytes(
+            Archive()..add(ArchiveFile.string('page.md', '# Page')),
+          ),
+        );
+      expect(await looksLikeEpub(zip.path), isFalse);
+      File(book('short')).writeAsStringSync('PK');
+      expect(await looksLikeEpub(book('short')), isFalse);
+    },
+  );
+
   test('a file that is not a book is refused', () async {
     final source = book('notes.epub');
     File(source).writeAsStringSync('not a zip at all');
@@ -398,6 +420,56 @@ void main() {
       ), mayFinish: () async => false),
       throwsA(isA<EpubConvertStopped>()),
     );
+    expect(Directory(library).listSync(), isEmpty);
+  });
+
+  test('a cancel counts its job out of the gauge', () async {
+    final source = writeTestEpub(
+      book('gauge.epub'),
+      chapters: [
+        for (var i = 0; i < 40; i++)
+          (path: 'c$i.xhtml', body: '<h1>C$i</h1><p>${'text ' * 500}</p>'),
+      ],
+    ).path;
+    final before = IsolateGauge.inFlight;
+    final conversion = await EpubConversion.start(
+      source: source,
+      libraryRoot: library,
+      parent: '',
+      oneNote: false,
+      attachments: 'assets',
+      words: _words,
+    );
+    expect(IsolateGauge.inFlight, before + 1);
+    expect(await conversion.cancel(), isTrue);
+    await expectLater(conversion.done, throwsA(isA<EpubConvertCancelled>()));
+    expect(IsolateGauge.inFlight, before);
+  });
+
+  test('a cancel racing a refusal answers once, and throws nothing', () async {
+    final source = book('race.epub');
+    File(source).writeAsStringSync('not a zip: refused at once');
+    final uncaught = <Object>[];
+    await runZonedGuarded(() async {
+      for (var round = 0; round < 20; round++) {
+        final conversion = await EpubConversion.start(
+          source: source,
+          libraryRoot: library,
+          parent: '',
+          oneNote: false,
+          attachments: 'assets',
+          words: _words,
+        );
+        // Whichever lands first — the refusal or the cancel — is the answer.
+        final cancelled = conversion.cancel();
+        await expectLater(
+          conversion.done,
+          throwsA(anyOf(isA<EpubConvertCancelled>(), isA<EpubRefused>())),
+        );
+        await cancelled;
+      }
+    }, (error, _) => uncaught.add(error));
+    expect(uncaught, isEmpty);
     expect(Directory(library).listSync(), isEmpty);
   });
 

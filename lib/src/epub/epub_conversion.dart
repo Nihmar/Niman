@@ -10,28 +10,12 @@ import 'dart:isolate';
 import 'package:flutter/foundation.dart';
 import 'package:niman/src/core/isolate_gauge.dart';
 import 'package:niman/src/epub/epub_archive.dart';
+import 'package:niman/src/epub/epub_convert_failures.dart';
 import 'package:niman/src/epub/epub_convert_job.dart';
 import 'package:niman/src/epub/epub_convert_plan.dart';
 import 'package:path/path.dart' as p;
 
-/// A conversion that was stopped before it moved anything in: the library
-/// holds nothing of it.
-final class EpubConvertCancelled implements Exception {
-  /// Stopped.
-  const new();
-}
-
-/// A conversion that failed for a reason other than the book's own.
-final class EpubConvertFailed implements Exception {
-  /// Failed with [message], for the log.
-  const new(this.message);
-
-  /// What went wrong.
-  final String message;
-
-  @override
-  String toString() => 'EpubConvertFailed: $message';
-}
+export 'package:niman/src/epub/epub_convert_failures.dart';
 
 /// One conversion running.
 final class EpubConversion {
@@ -77,6 +61,7 @@ final class EpubConversion {
   final Completer<EpubConverted> _done = Completer<EpubConverted>();
   bool _finishing = false;
   bool _cancelling = false;
+  int? _gauge;
 
   /// How far it has got; null before the first step.
   final ValueNotifier<EpubConvertProgress?> progress = ValueNotifier(null);
@@ -89,7 +74,9 @@ final class EpubConversion {
   bool get cancellable => !_finishing && !_cancelling && !_done.isCompleted;
 
   void _listen(String source) {
-    final gauge = IsolateGauge.begin('convert "${p.basename(source)}"');
+    final gauge = _gauge = IsolateGauge.begin(
+      'convert "${p.basename(source)}"',
+    );
     _events.listen((message) {
       switch (message) {
         case ('progress', final int done, final int total, final String what):
@@ -134,7 +121,10 @@ final class EpubConversion {
   }
 
   void _settle(int gauge, {EpubConverted? value, Object? error}) {
-    if (_done.isCompleted) return;
+    // A cancel answers for itself: a refusal or a failure the isolate had
+    // sent before it was killed, delivered while the cancel deletes what it
+    // wrote, is not the answer any more.
+    if (_done.isCompleted || _cancelling) return;
     IsolateGauge.finishJob(gauge, error: error);
     _events.close();
     _exits.close();
@@ -151,10 +141,15 @@ final class EpubConversion {
     if (!cancellable) return false;
     _cancelling = true;
     _isolate.kill(priority: Isolate.immediate);
-    await _discard();
-    _done.completeError(const EpubConvertCancelled());
     _events.close();
     _exits.close();
+    // Counted out now: a cancelled job left in would read in an exported
+    // log as one still running, warned about, for the rest of the session.
+    if (_gauge case final gauge?) {
+      IsolateGauge.finishJob(gauge, error: const EpubConvertCancelled());
+    }
+    await _discard();
+    if (!_done.isCompleted) _done.completeError(const EpubConvertCancelled());
     return true;
   }
 

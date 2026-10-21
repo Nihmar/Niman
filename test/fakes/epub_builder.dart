@@ -78,7 +78,11 @@ File writeTestEpub(
       '</${o}package>';
 
   final archive = Archive()
-    ..add(ArchiveFile.string('mimetype', 'application/epub+zip'))
+    // First and stored as it is, as the format asks: what a reader (and
+    // `looksLikeEpub`) knows an EPUB by.
+    ..add(
+      ArchiveFile.noCompress('mimetype', 20, 'application/epub+zip'.codeUnits),
+    )
     ..add(
       ArchiveFile.string(
         'META-INF/container.xml',

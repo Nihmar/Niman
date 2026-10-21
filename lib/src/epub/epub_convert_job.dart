@@ -25,6 +25,7 @@ import 'package:crypto/crypto.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/epub/epub_archive.dart';
 import 'package:niman/src/epub/epub_book.dart';
+import 'package:niman/src/epub/epub_convert_failures.dart';
 import 'package:niman/src/epub/epub_convert_plan.dart';
 import 'package:niman/src/epub/epub_convert_render.dart';
 import 'package:niman/src/library/markdown_import.dart' show freeFolderName;
@@ -283,12 +284,6 @@ String _keepPicture(
 }
 
 final RegExp _picture = RegExp('$epubPictureScheme:(\\d+)');
-
-/// A conversion told not to finish: its writes are deleted on the way out.
-final class EpubConvertStopped implements Exception {
-  /// Stopped.
-  const new();
-}
 
 /// The entry of the conversion's isolate: [convertEpub], its progress and
 /// its end sent to the port it is handed, as plain messages.

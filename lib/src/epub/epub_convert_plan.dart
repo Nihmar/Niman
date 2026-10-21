@@ -30,6 +30,7 @@ import 'dart:math';
 
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/epub/epub_book.dart';
+import 'package:niman/src/epub/epub_book_text.dart';
 import 'package:path/path.dart' as p;
 
 /// What a note averages before the plan splits one level deeper.
@@ -68,7 +69,7 @@ final class EpubPlan {
     required EpubConvertWords words,
     bool oneNote = false,
   }) {
-    final text = _joined(book);
+    final text = epubBookText(book);
     if (oneNote) {
       final name = '${sanitizeName(title, fallback: defaultNoteName)}.md';
       return EpubPlan._(
@@ -151,66 +152,12 @@ final class EpubPlan {
   }
 }
 
-/// The book's text as the reader joins it, and where each file opens in it.
-final class _Joined {
-  new(this.lines, this._starts, this._anchors, this._spine);
-
-  final List<String> lines;
-  final Map<String, int> _starts;
-  final Map<String, Map<String, int>> _anchors;
-  final List<String> _spine;
-
-  /// Where [file] opens — or, for a file with no text (a part's title page),
-  /// the next file of the spine with some — plus [fragment]'s line in it.
-  int? lineOf(String file, String fragment) {
-    final start = _starts[file];
-    if (start != null) {
-      if (fragment.isEmpty) return start;
-      return _anchors[file]?[fragment] ?? start;
-    }
-    final at = _spine.indexOf(file);
-    if (at < 0) return null;
-    for (final next in _spine.skip(at + 1)) {
-      if (_starts[next] case final start?) return start;
-    }
-    return null;
-  }
-
-  /// Whether [line] is where a file of the book opens.
-  bool opensFile(int line) => _starts.containsValue(line);
-
-  int get bytes => lines.fold(0, (sum, line) => sum + line.length + 1);
-}
-
-_Joined _joined(EpubBook book) {
-  final starts = <String, int>{};
-  final anchors = <String, Map<String, int>>{};
-  final lines = <String>[];
-  for (final chapter in book.chapters) {
-    if (lines.isNotEmpty) {
-      // As the reader joins them: a rule, a blank line on each side.
-      lines
-        ..add('')
-        ..add('---')
-        ..add('');
-    }
-    final start = lines.length;
-    starts[chapter.file] = start;
-    anchors[chapter.file] = {
-      for (final entry in chapter.anchors.entries)
-        entry.key: start + entry.value,
-    };
-    lines.addAll(chapter.markdown.split('\n'));
-  }
-  return _Joined(lines, starts, anchors, book.spine);
-}
-
 /// The contents entries that open somewhere in the text, their depths made
 /// a tree's (no entry more than one level under the one before it); or a
 /// chapter file an entry when the book has no usable contents.
 List<EpubPlannedEntry> _entries(
   EpubBook book,
-  _Joined text,
+  EpubBookText text,
   EpubConvertWords words,
 ) {
   final out = <EpubPlannedEntry>[];
@@ -246,7 +193,7 @@ String? _firstHeading(String markdown) {
 final RegExp _heading = RegExp(r'^#{1,6}\s+(.+?)\s*#*\s*$');
 
 /// The deepest level the book splits at: see the library's doc.
-int _splitDepth(List<EpubPlannedEntry> entries, _Joined text) {
+int _splitDepth(List<EpubPlannedEntry> entries, EpubBookText text) {
   if (entries.isEmpty) return 0;
   var depth = 0;
   for (final entry in entries) {
@@ -265,7 +212,7 @@ int _splitDepth(List<EpubPlannedEntry> entries, _Joined text) {
 /// The notes [split] makes of [text], named and numbered in their folders.
 List<EpubPlannedNote> _place(
   List<EpubPlannedEntry> split,
-  _Joined text,
+  EpubBookText text,
   EpubConvertWords words,
 ) {
   // Stable by line: the contents' own order breaks a tie.
