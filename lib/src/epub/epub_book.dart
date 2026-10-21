@@ -184,6 +184,7 @@ Iterable<EpubBook?> _readSteps(EpubArchive archive) sync* {
   }
 
   final pictures = <String>[];
+  final pictureIndex = <String, int>{};
   final links = <EpubTarget>[];
   final chapters = <EpubChapterText>[];
   var formulaSvgs = 0;
@@ -203,11 +204,10 @@ Iterable<EpubBook?> _readSteps(EpubArchive archive) sync* {
       picture: (src) {
         final resolved = _resolve(dir, src);
         if (!archive.has(resolved)) return null;
-        var index = pictures.indexOf(resolved);
-        if (index < 0) {
-          index = pictures.length;
+        final index = pictureIndex.putIfAbsent(resolved, () {
           pictures.add(resolved);
-        }
+          return pictures.length - 1;
+        });
         return '$epubPictureScheme:$index';
       },
       link: (href) {

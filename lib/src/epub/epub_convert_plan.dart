@@ -137,19 +137,39 @@ final class EpubPlan {
 
   /// The note that holds [line], among [written]: the last one opening at or
   /// above it, or — when that one was not written — the next one that was.
+  ///
+  /// [written] is in reading order, so its notes open at ascending lines:
+  /// found by bisection, as a link and a contents entry each ask it.
   EpubPlannedNote? noteAt(int line, List<EpubPlannedNote> written) {
     if (written.isEmpty) return null;
-    var found = written.first;
-    for (final note in written) {
-      if (note.start > line) break;
-      found = note;
-    }
-    if (line < found.end || identical(found, written.last)) return found;
-    return written.firstWhere(
-      (note) => note.start >= line,
-      orElse: () => written.last,
-    );
+    // The first note opening past `line`; the one before it is the last at
+    // or above it.
+    final past = _firstOpening(written, (note) => note.start > line);
+    final at = past == 0 ? 0 : past - 1;
+    final found = written[at];
+    if (line < found.end || at == written.length - 1) return found;
+    final next = _firstOpening(written, (note) => note.start >= line);
+    return written[next == written.length ? written.length - 1 : next];
   }
+}
+
+/// The index of the first of [notes] that [satisfies] - [notes].length when
+/// none does - given that once a note does, the ones after it do.
+int _firstOpening(
+  List<EpubPlannedNote> notes,
+  bool Function(EpubPlannedNote note) satisfies,
+) {
+  var low = 0;
+  var high = notes.length;
+  while (low < high) {
+    final middle = (low + high) >> 1;
+    if (satisfies(notes[middle])) {
+      high = middle;
+    } else {
+      low = middle + 1;
+    }
+  }
+  return low;
 }
 
 /// The contents entries that open somewhere in the text, their depths made
@@ -224,6 +244,8 @@ List<EpubPlannedNote> _place(
   final entries = [for (final (_, entry) in ordered) entry];
   // The tree: each entry's children, by index; -1 is the book's folder.
   final children = <int, List<int>>{-1: []};
+  // Each entry's place among its parent's children, for its number.
+  final positions = <int>[];
   final parents = <int>[];
   final stack = <int>[];
   for (var i = 0; i < entries.length; i++) {
@@ -232,6 +254,7 @@ List<EpubPlannedNote> _place(
     }
     final parent = stack.isEmpty ? -1 : stack.last;
     parents.add(parent);
+    positions.add(children[parent]!.length);
     (children[parent] ??= []).add(i);
     children[i] = [];
     stack.add(i);
@@ -263,11 +286,7 @@ List<EpubPlannedNote> _place(
     final entry = entries[i];
     final parent = parents[i];
     final siblings = children[parent]!;
-    final name = numbered(
-      siblings.indexOf(i) + 1,
-      siblings.length,
-      entry.title,
-    );
+    final name = numbered(positions[i] + 1, siblings.length, entry.title);
     final folder = folders[parent]!;
     if (children[i]!.isEmpty) {
       notes.add((
