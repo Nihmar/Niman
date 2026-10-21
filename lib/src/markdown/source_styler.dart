@@ -47,8 +47,13 @@ import 'package:niman/src/markdown/source_edit.dart';
 
 /// A note's lines, coloured by the engine's reading of them.
 final class SourceStyler {
-  /// Reads [buffer] here, now.
-  new(this.buffer) : _scanner = BlockScanner(buffer) {
+  /// Reads [buffer] here, now: all of its blocks, or its first [firstLines]
+  /// lines' when given, the rest owed — read as far as a line asks
+  /// ([blockOf]), and carried on by [advance] — as after an edit that
+  /// changed the rest of the note. Its link definitions are read whole
+  /// either way.
+  new(this.buffer, {int? firstLines})
+    : _scanner = BlockScanner(buffer, firstLines: firstLines) {
     final holdings = _holdingsOf(
       buffer,
       0,
@@ -342,20 +347,31 @@ final class SourceStyler {
       ? _scanner.index.blocks
       : null;
 
-  /// The fence lines of the note's fenced divs (#729), in order, or null
-  /// while the scan is of an earlier revision or still owes part of the
-  /// note, as [blocks] is. O(chunks) for a note with none.
-  Iterable<Block>? get divBlocks =>
-      revision == buffer.revision && _scanner.settled
-      ? _scanner.divBlocks
-      : null;
+  /// The fence lines of the note's fenced divs (#729), in order, as far as
+  /// the scan has read them: all of them once [settled], and while it still
+  /// owes part of the note the ones that end before the first line it owes —
+  /// the list past that line is hints. Null while the scan is of an earlier
+  /// revision. O(chunks) for a note with none.
+  ///
+  /// So far, not null: a long note opens on a scan of its top (#1132), and a
+  /// `columns` block there is drawn side by side in its first frame rather
+  /// than stacked until the rest of the note is read.
+  Iterable<Block>? get divBlocks => _readSoFar(_scanner.divBlocks);
 
   /// The note's quote blocks that hold a `:::` line (#729, #1048), in order,
-  /// or null while [divBlocks] is.
+  /// as far as [divBlocks] answers.
   Iterable<Block>? get fenceQuoteBlocks =>
-      revision == buffer.revision && _scanner.settled
-      ? _scanner.fenceQuoteBlocks
-      : null;
+      _readSoFar(_scanner.fenceQuoteBlocks);
+
+  /// [blocks] as far as the scan has made them current, or null when it is
+  /// of an earlier revision.
+  Iterable<Block>? _readSoFar(Iterable<Block> blocks) {
+    if (revision != buffer.revision) return null;
+    final frontier = _scanner.frontier;
+    if (frontier == null) return blocks;
+    // A block that ends at the first owed line may be one the scan cut.
+    return blocks.takeWhile((block) => block.endLine < frontier);
+  }
 
   /// How many lines the scan behind the colours has read, for the test that
   /// holds a tap on a task box to the work the tap may do: one that settled

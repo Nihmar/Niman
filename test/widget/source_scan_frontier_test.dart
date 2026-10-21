@@ -70,7 +70,9 @@ void main() {
         ),
       ),
     );
-    await tester.pump();
+    // The open reads the note's top and the rest after its first frame
+    // (#1132): this is about an edit's scan, so the open's is let finish.
+    await tester.pump(Duration.zero);
     final view = tester.state<MarkdownSourceViewState>(
       find.byType(MarkdownSourceView),
     );
@@ -122,5 +124,76 @@ void main() {
     await tester.pump(Duration.zero);
     expect(view.scanSettled, isTrue);
     expect(view.headings, hasLength(5000));
+  });
+
+  // #1132: the whole scan of a 16 000-line note was most of the frame that
+  // opened it on a tablet. A long note's first frame reads its top; the rest
+  // is carried on after it, as an edit's owed scan is.
+  testWidgets('a long note opens on a scan of its top, and reads on after', (
+    tester,
+  ) async {
+    final note = [
+      for (var at = 0; at < 3000; at++) ...['# h$at', 'prose $at', ''],
+    ].join('\n');
+    final buffer = SourceBuffer.fromText(note);
+    expect(
+      buffer.lineCount,
+      greaterThan(MarkdownSourceViewState.progressiveLines),
+    );
+    tester.view.physicalSize = const Size(700, 500);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    bool? settledAtFirstFrame;
+    tester.binding.addPostFrameCallback((_) {
+      settledAtFirstFrame = tester
+          .state<MarkdownSourceViewState>(find.byType(MarkdownSourceView))
+          .scanSettled;
+    });
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: MarkdownSourceView(buffer: buffer, theme: _theme),
+        ),
+      ),
+    );
+    expect(
+      settledAtFirstFrame,
+      isFalse,
+      reason: 'the first frame read its top',
+    );
+
+    final view = tester.state<MarkdownSourceViewState>(
+      find.byType(MarkdownSourceView),
+    );
+    await tester.pump(Duration.zero);
+    expect(view.scanSettled, isTrue);
+    expect(view.headings, hasLength(3000));
+    final fresh = SourceStyler(SourceBuffer.fromText(note));
+    for (final line in <int>[0, 1, 4500, 8998]) {
+      expect(view.tokensOf(line), fresh.tokensOf(line), reason: 'line $line');
+    }
+  });
+
+  testWidgets('a short note opens on the whole of it', (tester) async {
+    final note = [
+      for (var at = 0; at < 100; at++) ...['# h$at', 'prose $at', ''],
+    ].join('\n');
+    bool? settledAtFirstFrame;
+    tester.binding.addPostFrameCallback((_) {
+      settledAtFirstFrame = tester
+          .state<MarkdownSourceViewState>(find.byType(MarkdownSourceView))
+          .scanSettled;
+    });
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: MarkdownSourceView(
+            buffer: SourceBuffer.fromText(note),
+            theme: _theme,
+          ),
+        ),
+      ),
+    );
+    expect(settledAtFirstFrame, isTrue, reason: 'its outline at once');
   });
 }
