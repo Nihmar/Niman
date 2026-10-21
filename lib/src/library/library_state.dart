@@ -35,6 +35,7 @@ import 'package:niman/src/core/theme.dart';
 import 'package:niman/src/core/week_start.dart';
 import 'package:niman/src/core/welcome.dart';
 import 'package:niman/src/db/app_database.dart';
+import 'package:niman/src/db/app_database_recovery.dart';
 import 'package:niman/src/db/dao.dart';
 import 'package:niman/src/db/index_change.dart';
 import 'package:niman/src/db/index_database.dart';
@@ -2160,9 +2161,10 @@ Future<AppDatabase>? _appDatabase;
 Future<AppDatabase> defaultAppDatabase() =>
     _appDatabase ??= _openDefaultAppDatabase();
 
-Future<AppDatabase> _openDefaultAppDatabase() async => AppDatabase(
-  NativeDatabase(await defaultAppDbFile(), setup: appDatabaseSetup),
-);
+Future<AppDatabase> _openDefaultAppDatabase() async {
+  final file = await defaultAppDbFile();
+  return await openAppDatabaseRecovering(file);
+}
 
 /// Forgets the connection [defaultAppDatabase] handed out, when [db] is
 /// that connection, so the next call opens a fresh one: a closed drift
