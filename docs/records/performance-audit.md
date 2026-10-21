@@ -248,11 +248,11 @@ it reaches.
 
 1. **A device run with `NIMAN_FRAMES` on the tablet** (#1145): a paced
    session through scenarios 1, 2, 4 and 6 on a profile build, the log
-   exported with the new header. The read pane's first frame (37 ms median)
-   and the tree's flatten (19 ms median, 90 ms worst) are the two numbers
-   that miss the budget on every sample; neither can be split into build,
-   layout and paint without that run. Everything after this item is
-   ordered by guess until it lands.
+   exported with the new header. The read pane's first frame (37 ms
+   median, every sample over) and the tree's flatten (19 ms median, 90 ms
+   worst) are the two actions that miss the budget at the median; neither
+   can be split into build, layout and paint without that run. Everything
+   after this item is ordered by guess until it lands.
 2. **The read pane's first frame** — 8 of 8 over 16.7 ms on the device.
    This pass took the frontmatter's parse out of it; the rest is the
    source pane re-laying its lines out at the new width and the read pane's
