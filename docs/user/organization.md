@@ -110,10 +110,18 @@ whatever pointed inside it. A note in the trash keeps
 its history until the trash is emptied or the item deleted for good; a hard
 delete (trash off) removes it at once.
 
-**On disk.** `.history/<path>.v<n>` holds each version byte for byte,
-and `.history/<path>.json` lists them (time, reason, size, hash). The
-folder is plain files: if the list is lost it is rebuilt from the
-version files. It is never indexed, searched, or synced.
+**On disk.** `.history/<path>.log` lists a note's versions (time, reason,
+size, hash), and `.history/.objects/` holds their content, compressed,
+each kept once however many notes or versions share it. Older versions
+are stored as the difference from the one after them, so twenty
+sessions of edits to a long note take a few percent of twenty copies.
+Keeping a version adds nothing a save has to wait for on the disk: the
+note is written as before, and a version a crash interrupts is simply
+missing from the list. The tidying — compressing, storing differences,
+removing what no note's history names any more — runs in the background
+after an editing session and when a library opens. A history kept by an
+older Niman (`<path>.v<n>` files) moves to this form the first time it is
+used, nothing lost. The folder is never indexed, searched, or synced.
 
 ## Frontmatter
 
