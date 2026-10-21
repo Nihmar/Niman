@@ -104,11 +104,26 @@ final class _FrontmatterFieldsState extends State<FrontmatterFields> {
   /// motion (note_view), so the chrome of a note moves at one pace.
   static const Duration _motion = Duration(milliseconds: 200);
 
+  /// The block [_parsed] was read from, and what it read.
+  String? _parsedOf;
+  ({List<FrontmatterField> fields, String? error})? _parsed;
+
+  /// The fields of the block [text], read once per text: the panel builds
+  /// with the note — at every flip to the read pane, every frame of its
+  /// motion — and the YAML parse was 3 % of a flip's samples (#1132).
+  ({List<FrontmatterField> fields, String? error}) _fieldsIn(String text) {
+    if (text != _parsedOf || _parsed == null) {
+      _parsed = frontmatterFieldsIn(text);
+      _parsedOf = text;
+    }
+    return _parsed!;
+  }
+
   @override
   Widget build(BuildContext context) {
     final block = frontmatterBlock(widget.note);
     if (block == null) return const SizedBox.shrink();
-    final parsed = frontmatterFieldsIn(block.text);
+    final parsed = _fieldsIn(block.text);
     final malformed = parsed.error != null;
     // A hidden panel is the same panel at no height, never an absent one:
     // it keeps its state (the raw toggle), and the size it gains back when
@@ -573,7 +588,7 @@ final class _FrontmatterFieldsState extends State<FrontmatterFields> {
   FrontmatterField? _fieldNamed(String key) {
     final block = frontmatterBlock(widget.note);
     if (block == null) return null;
-    final fields = frontmatterFieldsIn(block.text).fields;
+    final fields = _fieldsIn(block.text).fields;
     return fields.where((field) => field.key == key).firstOrNull;
   }
 
