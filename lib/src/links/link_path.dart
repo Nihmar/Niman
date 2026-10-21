@@ -20,7 +20,9 @@ import 'package:path/path.dart' as p;
 typedef LinkSpec = ({String t, String? heading, bool exact, String? near});
 
 /// A Markdown href read: the file it names, percent-decoded, and the
-/// `#fragment` after it as written (without the `#`), null when absent.
+/// `#fragment` after it (without the `#`), null when absent: a note's
+/// heading percent-decoded as the path is, any other file's place as
+/// written.
 ///
 /// Kept apart, never joined in one string: a decoded `%23` is a `#` of the
 /// file's name, and a string that was split again would cut inside it.
@@ -31,16 +33,32 @@ abstract final class LinkPaths {
   /// The href [h] (trimmed, no scheme, not an anchor) as a target to
   /// resolve: split at its first `#` as written, then its path percent-
   /// decoded, as Obsidian writes a Markdown link (`My%20Note.md`, and
-  /// `C%23%20tips.md` for `C# tips.md`), its fragment left alone, a book's
-  /// place (#282) decoding its own parts. Null when it names no file (no
-  /// extension). Opening a link and indexing it read it through this one
-  /// function.
+  /// `C%23%20tips.md` for `C# tips.md`).
+  ///
+  /// The fragment of a link to a note is a heading, and is percent-decoded
+  /// like the path (`#The%20Storm`, as Obsidian and the EPUB conversion
+  /// write one): the heading lookup slugs it, and an escape would never
+  /// match. Any other file's fragment is a place in it (#282), left as
+  /// written for `BookLocation.fromFragment` to decode its own parts —
+  /// decoded here, a `%26` in a chapter's name would split the place.
+  /// Null when it names no file (no extension). Opening a link and
+  /// indexing it read it through this one function.
   static MarkdownTarget? markdownTarget(String h) {
     final hash = h.indexOf('#');
     final path = percentDecoded(hash == -1 ? h : h.substring(0, hash));
     if (p.url.extension(path).isEmpty) return null;
-    return (path: path, fragment: hash == -1 ? null : h.substring(hash + 1));
+    if (hash == -1) return (path: path, fragment: null);
+    final fragment = h.substring(hash + 1);
+    return (
+      path: path,
+      fragment: isMarkdownNote(path) ? percentDecoded(fragment) : fragment,
+    );
   }
+
+  /// The heading a Markdown `#fragment`-only href [h] (`#The%20Storm`, its
+  /// `#` included) names in the note it is written in: percent-decoded, as
+  /// the fragment of a link to another note is ([markdownTarget]).
+  static String localHeading(String h) => percentDecoded(h.substring(1));
 
   /// Whether the note at [path] is one a target naming [target] — already
   /// normalized, `.md` dropped (`folder/note`) — qualifies among the notes
