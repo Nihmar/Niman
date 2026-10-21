@@ -242,7 +242,8 @@ final class NoteWriter {
       'replaced from download: "$path" (${result.created ? 'new file, ' : ''}'
       '${clock.elapsedMilliseconds} ms)',
     );
-    _reindexer.reindex(path, created: result.created);
+    // Not a save of the editor's burst of typing: no wait for its quiet.
+    _reindexer.reindexNow(path, created: result.created);
   }
 
   /// Runs [write], which puts the new file at library-relative [path] on the

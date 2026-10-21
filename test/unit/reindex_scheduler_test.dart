@@ -100,4 +100,39 @@ void main() {
       });
     });
   });
+
+  group('a replace is not part of a burst of typing', () {
+    test('it does not wait for the quiet timer of an earlier save', () {
+      fakeAsync((async) {
+        final h = _Harness(quiet: (_) => const Duration(seconds: 30));
+        h.scheduler.whenQuiet('a.md', created: false, bytes: 3 << 20);
+        expect(h.scheduler.awaits('a.md'), isTrue);
+
+        // A sync download replaces the note: its turn, then its reindex.
+        unawaited(h.beginSave('a.md'));
+        h.scheduler.reindexNow('a.md', created: false);
+        h.endSave('a.md');
+        async.flushMicrotasks();
+        expect(h.reads, hasLength(1), reason: 'read at once, not in 30 s');
+
+        // The timer it replaced does not read the note a second time.
+        async.elapse(const Duration(minutes: 1));
+        expect(h.reads, hasLength(1));
+        expect(h.scheduler.awaits('a.md'), isFalse);
+      });
+    });
+
+    test('a save of the burst still waits for its own quiet', () {
+      fakeAsync((async) {
+        final h = _Harness(quiet: (_) => const Duration(seconds: 30));
+        unawaited(h.beginSave('a.md'));
+        h.scheduler.whenQuiet('a.md', created: false, bytes: 3 << 20);
+        h.endSave('a.md');
+        async.flushMicrotasks();
+        expect(h.reads, isEmpty);
+        async.elapse(const Duration(seconds: 30));
+        expect(h.reads, hasLength(1));
+      });
+    });
+  });
 }

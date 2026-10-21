@@ -163,6 +163,15 @@ final class ReindexScheduler {
     });
   }
 
+  /// Reindexes [path] as soon as its save chain is idle, whatever wait an
+  /// earlier save left it: for a change that is no part of the editor's
+  /// burst of typing — a note replaced by a sync download or from outside —
+  /// whose text the wait would only keep out of the index.
+  void reindexNow(String path, {required bool created}) {
+    _quiet.remove(path)?.cancel();
+    reindex(path, created: created);
+  }
+
   /// Re-reads the saved note into the index, after the save completed.
   ///
   /// An existing note is rescanned, not passed through the (size, mtime)

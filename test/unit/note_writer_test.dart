@@ -442,6 +442,36 @@ void main() {
     expect(await ops.find('Via ops.md'), isNotNull);
   });
 
+  test('a note replaced from a download is not kept waiting for the quiet '
+      'of an earlier save', () async {
+    // The save left a long wait; the download is no part of that typing, and
+    // its text should reach the index when its turn ends, not an hour later.
+    File(p.join(root.path, 'a.md')).writeAsStringSync('old');
+    final reads = <bool>[];
+    final readStarted = Completer<void>();
+    final replacing = NoteWriter(
+      root: root.path,
+      indexer: indexer,
+      quietBeforeReindex: (_) => const Duration(hours: 1),
+      readIntoIndex: (path, {required created, required cancel}) async {
+        reads.add(created);
+        if (!readStarted.isCompleted) readStarted.complete();
+        return true;
+      },
+    );
+    await replacing.save('a.md', 'first');
+    expect(replacing.awaits('a.md'), isTrue, reason: 'waiting to be quiet');
+    expect(reads, isEmpty);
+
+    final temp = File(p.join(root.path, 'a.md.download'))
+      ..writeAsStringSync('from the server');
+    await replacing.replaceFromFile('a.md', temp.path);
+    await readStarted.future.timeout(const Duration(seconds: 10));
+    expect(reads, [false]);
+    expect(replacing.awaits('a.md'), isFalse);
+    expect(read('a.md'), 'from the server');
+  });
+
   group('a read that holds the note', () {
     // A reindex in its read phase holds the note open; on Windows an open
     // file can be neither replaced nor deleted, and the save that cancelled
