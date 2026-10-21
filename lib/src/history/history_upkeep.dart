@@ -19,10 +19,10 @@ library;
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:meta/meta.dart';
 import 'package:niman/src/history/history_legacy.dart';
 import 'package:niman/src/history/history_lock.dart';
 import 'package:niman/src/history/history_log.dart';
-import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/history/history_objects.dart';
 import 'package:niman/src/history/history_store.dart';
 import 'package:path/path.dart' as p;
@@ -166,22 +166,14 @@ UpkeepOutcome maintainHistory(
     packed += outcome.packed;
     saved += outcome.saved;
   }
-  final named = <String>{};
-  for (final rel in notes) {
-    for (final v
-        in readLog(root, rel)?.manifest.versions ?? <HistoryVersion>[]) {
-      named.add(v.sha256);
-    }
-  }
-  final queue = [...named];
-  while (queue.isNotEmpty) {
-    final base = deltaBaseOf(root, queue.removeLast());
-    if (base != null && named.add(base)) queue.add(base);
-  }
+  // What the logs name, read only now, right before the sweep: a pass that
+  // packs a large library takes long enough for a note to move meanwhile.
+  final named = namedObjects(root);
   var collected = 0;
   var collectedBytes = 0;
   final cutoff = (now ?? DateTime.now()).subtract(grace);
-  {
+  // Nothing is collected from a listing that would not hold still.
+  if (named != null) {
     for (final MapEntry(key: sha, value: file) in listObjects(root).entries) {
       if (named.contains(sha)) continue;
       final stat = file.statSync();
@@ -200,6 +192,47 @@ UpkeepOutcome maintainHistory(
     collected: collected,
     collectedBytes: collectedBytes,
   );
+}
+
+/// Every object a log names, directly or as a delta's base, however far
+/// down its chain; null when the logs would not hold still.
+///
+/// A log listed and gone when it is read was moved meanwhile — a note
+/// renamed while the upkeep ran — and its versions are under a name the
+/// listing did not have: the logs are listed again, up to [attempts] times.
+/// Missing a moved log's objects would collect a history that is still
+/// there. [afterListing] lets a test move a log at that moment.
+Set<String>? namedObjects(
+  String root, {
+  int attempts = 5,
+  @visibleForTesting void Function()? afterListing,
+}) {
+  final history = Directory(p.join(root, historyFolderName));
+  for (var attempt = 0; attempt < attempts; attempt++) {
+    final notes = history.existsSync() ? _logged(root, history) : <String>[];
+    afterListing?.call();
+    final named = <String>{};
+    var steady = true;
+    for (final rel in notes) {
+      final log = readLog(root, rel);
+      if (log == null) {
+        steady = false;
+        break;
+      }
+      for (final v in log.manifest.versions) {
+        named.add(v.sha256);
+      }
+    }
+    if (!steady) continue;
+    // A delta's base is named too, however far down its chain.
+    final queue = [...named];
+    while (queue.isNotEmpty) {
+      final base = deltaBaseOf(root, queue.removeLast());
+      if (base != null && named.add(base)) queue.add(base);
+    }
+    return named;
+  }
+  return null;
 }
 
 /// Every note with a log under [history], library-relative; the objects
