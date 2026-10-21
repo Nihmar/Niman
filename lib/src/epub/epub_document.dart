@@ -180,7 +180,7 @@ EpubDocument readEpub(String path, String pictureDir) {
       final start = chapterStart[file];
       if (start == null) return null;
       if (fragment.isEmpty) return start;
-      return anchors[file]?[fragment] ?? start;
+      return epubAnchorLine(anchors[file], fragment) ?? start;
     }
 
     return EpubDocument(

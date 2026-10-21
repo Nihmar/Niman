@@ -23,7 +23,7 @@ final class EpubBookText {
     final start = _starts[file];
     if (start != null) {
       if (fragment.isEmpty) return start;
-      return _anchors[file]?[fragment] ?? start;
+      return epubAnchorLine(_anchors[file], fragment) ?? start;
     }
     final at = _spine.indexOf(file);
     if (at < 0) return null;

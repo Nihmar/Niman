@@ -52,6 +52,17 @@ typedef EpubChapterText = ({
   Map<String, int> anchors,
 });
 
+/// The line of [fragment] among a chapter's [anchors] (its `id`s), or null
+/// when it names none.
+///
+/// A fragment is a URL's: `Cap%C3%ADtulo` names the `id="Capítulo"`. It is
+/// read decoded; the text as written still answers where an `id` really
+/// spells a `%`.
+int? epubAnchorLine(Map<String, int>? anchors, String fragment) {
+  if (anchors == null || fragment.isEmpty) return null;
+  return anchors[percentDecoded(fragment)] ?? anchors[fragment];
+}
+
 /// A book, read into its parts.
 final class EpubBook {
   /// The parts of a read book.

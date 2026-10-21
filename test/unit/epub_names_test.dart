@@ -12,8 +12,10 @@ import 'package:archive/archive.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/epub/epub_archive.dart';
 import 'package:niman/src/epub/epub_book.dart';
+import 'package:niman/src/epub/epub_book_text.dart';
 import 'package:niman/src/epub/epub_convert_job.dart';
 import 'package:niman/src/epub/epub_convert_plan.dart';
+import 'package:niman/src/epub/epub_document.dart';
 import 'package:path/path.dart' as p;
 
 import '../fakes/epub_builder.dart';
@@ -109,6 +111,61 @@ void main() {
       }
     });
   }
+
+  group('a percent-encoded fragment', () {
+    late String source;
+
+    setUp(() {
+      source = writeTestEpub(
+        p.join(tmp.path, 'anchors.epub'),
+        title: 'Anchors',
+        chapters: [
+          (
+            path: 'ch.xhtml',
+            body:
+                '<h1>Book</h1><p>Start.</p>'
+                '<h2 id="Capítulo">Chapter</h2><p>One.</p>'
+                '<h2 id="año">Year</h2><p>Two.</p>'
+                '<h2 id="50%25">Half</h2><p>Three.</p>'
+                '<p><a href="#Cap%C3%ADtulo">a</a> '
+                '<a href="ch.xhtml#a%C3%B1o">b</a> '
+                '<a href="#50%25">c</a></p>',
+          ),
+        ],
+        nav:
+            '<ol><li><a href="ch.xhtml">Book</a></li>'
+            '<li><a href="ch.xhtml#Cap%C3%ADtulo">Chapter</a></li>'
+            '<li><a href="ch.xhtml#a%C3%B1o">Year</a></li>'
+            '<li><a href="ch.xhtml#50%25">Half</a></li></ol>',
+      ).path;
+    });
+
+    test('opens the id it names, in the reader', () {
+      final document = readEpub(source, p.join(tmp.path, 'pictures'));
+      final lines = [for (final entry in document.contents) entry.line];
+      expect(lines, hasLength(4));
+      expect(lines.toSet(), hasLength(4), reason: 'one line an entry');
+      expect(lines, orderedEquals([...lines]..sort()));
+      expect(
+        document.links.toSet(),
+        hasLength(3),
+        reason: 'each link at its own heading',
+      );
+    });
+
+    test('opens the id it names, in the conversion plan', () {
+      final book = parse(source);
+      final text = epubBookText(book);
+      final lines = [
+        for (final entry in book.contents)
+          text.lineOf(entry.file, entry.fragment),
+      ];
+      expect(lines.toSet(), hasLength(4));
+      expect(text.lines[lines[1]!], '## Chapter');
+      expect(text.lines[lines[2]!], '## Year');
+      expect(text.lines[lines[3]!], '## Half');
+    });
+  });
 
   test('a name with a stray % or a byte that is not UTF-8 is a name', () {
     // `100%.xhtml` opens no escape; `%FF` is not UTF-8. Neither ends the
