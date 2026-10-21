@@ -1,7 +1,9 @@
 # Platform notes
 
 Supported today: **Android** (minSdk 34, Android 14), **Linux** (Wayland),
-**Windows**. macOS/iOS are not built yet, but the code is kept portable.
+**Windows**, and **macOS** (14 and later) in **preview** — see
+[macOS](#macos) for what it still lacks. iOS is not released yet, but the
+code is kept portable.
 New tests must be portable too (see [conventions](../dev/conventions.md)).
 
 Export is one feature on every platform: Markdown, HTML, PDF and EPUB
@@ -211,6 +213,66 @@ the two agree.
   browsers write with the page it came from (see
   [web capture](web-capture.md#paste-as-markdown)).
 
+## macOS
+
+**Preview.** The Mac is a desktop: what this page says of the Linux and
+Windows window — the [density](#density), the tabs in the title bar,
+renaming in a tree row, dragging into a note, opening a file outside a
+library, previewing a link on hover — holds there too. It stays a preview
+until the home-screen widgets reach it (they come after iOS's), and the
+list at the end says what else it still lacks.
+
+- **Getting it:** `niman-<V>-macos.dmg` on the release page — open it and
+  drag Niman onto Applications. One app for Apple silicon and Intel Macs.
+  It is not yet signed with an Apple Developer ID, so on the first launch
+  macOS refuses it: open System Settings → Privacy & Security and choose
+  **Open Anyway** (a right click → Open no longer gets past it since
+  macOS 15).
+- **Updates** download the new disk image and open it; drag Niman onto
+  Applications again to replace it.
+- **A library is any folder**: the app is not sandboxed, so it reads and
+  writes where the library is, as on Linux.
+- **The window:** Niman's own title bar beside the system's traffic
+  lights. The × hides the window and the app stays in the Dock — a click
+  on its icon brings it back — and `⌘Q` quits, asking first about notes
+  with unsaved edits. There is no *Close to the tray* setting: closing
+  already does that.
+- **The menu bar** holds every command, grouped as the command palette
+  groups them, each with its key; Settings is `⌘,`. A menu item shows no
+  key where the note needs that key first (`⌘B` stays bold). Niman's icon
+  in the menu bar, drawn in the bar's own black or white, opens the quick
+  actions menu. Keys use `⌘` (see [shortcuts](shortcuts.md)).
+- **Reminders** for `todo.txt` and `calendar.txt` are scheduled with the
+  system, so they arrive with Niman closed, as on Android; macOS asks for
+  permission the first time one is set.
+- **Spell check** is the system's own (the one TextEdit and Mail use),
+  in the languages the Mac has; the per-library personal dictionary
+  applies on top.
+- **PDF export** goes through WebKit, the engine behind Safari: paginated
+  A4 with real, selectable text, a note's or a folder's, nothing to
+  install. **Web capture** runs a page with too little text in WebKit
+  too, keeping nothing between captures (see [web capture](web-capture.md)).
+- **Text recognition:** the engine comes inside the app — a Mac loads
+  only libraries signed with the app — and the languages are downloaded as
+  elsewhere (see [text recognition](text-recognition.md)).
+- **Transcription** reads WAV and, decoded by the system, m4a, mp3, AAC
+  and the other formats macOS plays.
+- **Dropping files, folders and links** on the window opens, imports or
+  captures them, with the frame Linux draws while a drag is over it.
+- A tree row's right-click menu can **show the note in Finder**, selected.
+- **Date created** is the file's own creation time, kept across saves
+  (see [Date created](#date-created)).
+
+Still missing on a Mac:
+
+- the [home-screen widgets](widgets.md);
+- opening a `.md` from Finder with Niman, and the Dock icon's menu;
+- **Paste as Markdown**, which pastes plain text for now: the Mac's
+  clipboard HTML is not read yet;
+- keeping the screen on while slides are presented;
+- the formulas' smoother drawing Linux and Windows get: a Mac's renderer
+  already smooths their edges, so it is off there.
+
 ## Home
 
 On Linux, Windows and an Android tablet the [Home](home.md) is a grid
@@ -303,11 +365,11 @@ window and full screen on a phone ([flashcards](flashcards.md#studying)).
 
 ## Date created
 
-The tree's **Date created** order reads the creation time Windows keeps
-for every file. A save writes the note to a temporary file and renames
-it over the note; Windows would give the note the temporary file's
-creation time, so the save first copies the note's own onto it, and an
-edited note keeps the date it was created. Linux and Android report no
+The tree's **Date created** order reads the creation time Windows and
+macOS keep for every file. A save writes the note to a temporary file and
+renames it over the note; the system would give the note the temporary
+file's creation time, so the save first copies the note's own onto it, and
+an edited note keeps the date it was created. Linux and Android report no
 creation time through the file API the app uses, so there **Date
 created** is the last modification time — a decision, not an omission
 (#726, #759).

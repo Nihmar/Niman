@@ -169,7 +169,9 @@ few words. Then the page is run in a browser and read again:
 - **Windows**: Edge, run hidden;
 - **Linux**: a Chromium-based browser found on `PATH` — Chromium, Chrome,
   Edge, Brave, Vivaldi — the one the PDF export already uses;
-- **Android**: a WebView Niman keeps hidden.
+- **Android**: a WebView Niman keeps hidden;
+- **macOS**: WebKit, the engine behind Safari, in a view Niman keeps
+  hidden and that keeps nothing between captures.
 
 The browser runs with a profile of its own, deleted afterwards: your own
 browser, its sign-ins and its cookies are never used.
