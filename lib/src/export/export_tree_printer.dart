@@ -26,8 +26,10 @@ abstract final class ExportTreePrinter {
   /// Prints [page] with the machine's printer and adds the PDF to [encoder]
   /// as `<stem>.pdf`.
   ///
-  /// [engine] is the desktop browser (Edge, Chromium); Android prints
-  /// through its WebView and needs none. [runner] runs the engine's
+  /// [engine] is the desktop browser (Edge, Chromium); null where the
+  /// system WebView prints (Android, a Mac's WebKit). It is the caller's
+  /// decision, made on the UI isolate: this runs on another, which sees
+  /// none of that one's state. [runner] runs the engine's
   /// process: null runs the real one, and a test hands in a top-level
   /// function of its own — a closure cannot cross the isolate boundary.
   static Future<void> printInto(
@@ -48,7 +50,7 @@ abstract final class ExportTreePrinter {
     } on FileSystemException {
       // Never written, or already gone.
     }
-    final printer = Platform.isAndroid
+    final printer = engine == null
         ? const WebViewPdfPrinter()
         : ProcessPdfPrinter(engine: engine, run: runner ?? runProcess);
     final outcome = await printer.print(htmlPath, pdfPath);

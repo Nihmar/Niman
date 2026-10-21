@@ -170,11 +170,11 @@ final class ShellExportFlow {
               closeOnDone: modal,
               onCancel: () {
                 cancelled = true;
-                // Android's WebView print is the one engine that can be
-                // stopped mid-flight; a desktop process is left to its
+                // The system WebView's print is the one engine that can
+                // be stopped mid-flight; a desktop process is left to its
                 // own timeout, and the flag aborts before anything is
                 // written or drawn.
-                if (Platform.isAndroid) {
+                if (systemWebViewPrints) {
                   unawaited(WebViewPdfPrinter.cancel());
                 }
               },
@@ -352,14 +352,14 @@ final class ShellExportFlow {
     // land before it starts — and before the pickers, so the write happens
     // while the user is choosing (M2).
     await guard(saveOpen);
-    // Android's WebView needs no engine at all; the desktop looks for one
-    // now, before the chooser asks whether PDF is on offer.
-    final engine = Platform.isAndroid ? null : await pdfEngineLookup();
+    // The system WebView needs no engine at all; Linux and Windows look
+    // for one now, before the chooser asks whether PDF is on offer.
+    final engine = systemWebViewPrints ? null : await pdfEngineLookup();
     if (!context.mounted) return;
     final format = await _chooseExportTreeFormat(
       context,
       library: library,
-      pdfAvailable: Platform.isAndroid || engine != null,
+      pdfAvailable: systemWebViewPrints || engine != null,
       anchor: anchor,
     );
     if (format == null || !context.mounted) return;

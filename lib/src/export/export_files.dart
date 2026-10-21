@@ -2,7 +2,6 @@
 /// desktop, SAF on Android, as the theme and the debug log already save.
 library;
 
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
@@ -98,10 +97,11 @@ typedef EpubNoteExport = Future<ExportPayload> Function({
 });
 
 /// The printer a note's PDF goes through; tests hand in their own, since
-/// no engine can be started under `flutter test`. Android's WebView prints
-/// in-process through its channel, so nothing is searched for there.
+/// no engine can be started under `flutter test`. The system WebView
+/// (Android's, a Mac's WebKit) prints in-process through its channel, so
+/// nothing is searched for there.
 final pdfPrinterProvider = Provider<PdfPrinter>((ref) {
-  if (Platform.isAndroid) return const WebViewPdfPrinter();
+  if (systemWebViewPrints) return const WebViewPdfPrinter();
   return ProcessPdfPrinter();
 });
 
