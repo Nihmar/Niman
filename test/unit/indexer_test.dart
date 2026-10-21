@@ -11,6 +11,7 @@ import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/db/index_scan.dart';
 import 'package:niman/src/db/indexer.dart';
 import 'package:niman/src/db/read_cancel.dart';
+import 'package:niman/src/frontmatter/fields.dart';
 import 'package:niman/src/links/resolver.dart';
 import 'package:path/path.dart' as p;
 
@@ -313,6 +314,34 @@ void main() {
     await indexer.applyEvents(root.path, [made]);
     expect(heard.last.$1, IndexChange.tree);
     expect(heard.last.$2, isNull);
+  });
+
+  // #1132: the tree read 1 pinned note between two reads of 2 while a
+  // pinned note was saved. That one was an edit — a line typed into the
+  // frontmatter broke its YAML for a save — but a save that keeps the pin
+  // must never show the pinned list without it, whatever reads beside it.
+  test('the pinned list holds while a pinned note is saved', () async {
+    const pinned = '---\npinned: true\n---\n';
+    File(p.join(root.path, 'note1.md')).writeAsStringSync('${pinned}one');
+    File(p.join(root.path, 'note2.md')).writeAsStringSync('${pinned}two');
+    await indexer.fullScan(root.path);
+    final fields = FieldRepo(db);
+    expect(await fields.pinnedNotes(), hasLength(2));
+
+    final abs = p.join(root.path, 'note1.md');
+    final counts = <int>{};
+    for (var save = 0; save < 20; save++) {
+      File(abs).writeAsStringSync('$pinned${'one, saved ' * save}');
+      final reindex = indexer.rescanFiles(root.path, [abs]);
+      // Reads queued beside the reindex's writes, as the tree's are.
+      final reads = [
+        for (var i = 0; i < 5; i++)
+          fields.pinnedNotes().then((rows) => counts.add(rows.length)),
+      ];
+      await reindex;
+      await Future.wait(reads);
+    }
+    expect(counts, {2});
   });
 
   // A save of the note makes a read of it obsolete, and reading beside the
