@@ -2,7 +2,7 @@
 rem Niman dev helper for Windows hosts: terse output, full logs under
 rem %TEMP%\niman. Mirrors scripts/niman.sh and adds the windows build,
 rem which cannot be cross-built from Linux.
-rem Commands: analyze, test, check, integration, apk [beta], windows [beta].
+rem Commands: analyze, test, check, integration, apk [beta|frames], windows [beta].
 setlocal enabledelayedexpansion
 
 where flutter >nul 2>&1
@@ -65,6 +65,17 @@ powershell -NoProfile -Command "Get-Content -Tail 8 '%log%'"
 exit /b %status%
 
 :apk
+rem Only the flavors declared in android/app/build.gradle.kts exist: refuse
+rem anything else before building, or a typo (apk frmes) builds the official
+rem APK without a word (issue #393, as scripts/niman.sh does).
+if "%flavor%"=="" goto :apk_flavor_ok
+if "%flavor%"=="official" goto :apk_flavor_ok
+if "%flavor%"=="beta" goto :apk_flavor_ok
+if "%flavor%"=="frames" goto :apk_flavor_ok
+1>&2 echo error: unknown apk flavor '%flavor%' ^(expected official, beta or frames^)
+call :usage 1>&2
+exit /b 2
+:apk_flavor_ok
 rem A security agent that watches the temp directory (Trend Micro here)
 rem blocks the unix-domain socket the JVM opens there for every Selector,
 rem and Gradle then dies with "Unable to establish loopback connection"
