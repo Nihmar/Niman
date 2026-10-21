@@ -125,7 +125,14 @@ final class EpubConvertFlow {
           builder: (context) => EpubConvertProgressDialog(conversion),
         ),
       );
-      await _settle(conversion, source, name, messenger);
+      await settle(
+        context,
+        done: conversion.done,
+        source: source,
+        root: root,
+        messenger: messenger,
+        name: name,
+      );
     } finally {
       if (consume) {
         try {
@@ -137,37 +144,51 @@ final class EpubConvertFlow {
     }
   }
 
-  Future<void> _settle(
-    EpubConversion conversion,
-    String source,
+  /// Tells, on [messenger], how the conversion that [done] answers for ended,
+  /// and — when it wrote — shows what it made.
+  ///
+  /// The tree is not asked to re-read the library: the new folder is moved
+  /// in whole and the watcher finds it, as it does an imported folder
+  /// (#382). A full rescan walked the whole library with the user waiting
+  /// and no dialog on screen, and threw when the library had been closed
+  /// meanwhile. The folder is shown and its note opened only if the library
+  /// the conversion wrote into ([root]) is still the one open, and the
+  /// screen still there: a conversion takes a while, and the user may have
+  /// switched library, or closed it, in the meantime.
+  @visibleForTesting
+  Future<void> settle(
+    BuildContext context, {
+    required Future<EpubConverted> done,
+    required String source,
+    required String root,
+    required ScaffoldMessengerState? messenger,
     String? name,
-    ScaffoldMessengerState? messenger,
-  ) async {
+  }) async {
+    final shown = epubDisplayName(source, name);
     final EpubConverted converted;
     try {
-      converted = await conversion.done;
+      converted = await done;
     } on EpubConvertCancelled {
-      _log.info('convert "${epubDisplayName(source, name)}": cancelled');
+      _log.info('convert "$shown": cancelled');
       return;
     } on Object catch (error) {
-      _log.warning('convert "${epubDisplayName(source, name)}" failed: $error');
+      _log.warning('convert "$shown" failed: $error');
       messenger?.showSnackBar(
         SnackBar(content: Text(epubConvertProblem(error, source, name: name))),
       );
       return;
     }
     _log.info(
-      'convert "${epubDisplayName(source, name)}" -> "${converted.made}": '
+      'convert "$shown" -> "${converted.made}": '
       '${converted.notes} note(s), ${converted.pictures} picture(s)',
     );
-    // Asked for now rather than waiting for the watcher: the tree is where
-    // the user looks next, and the notes have just been written.
-    await session.rescanNow();
-    final folder = converted.made.endsWith('.md')
-        ? p.posix.dirname(converted.made)
-        : converted.made;
-    reveal(folder == '.' ? '' : folder);
-    open(converted.open);
+    if (context.mounted && session.root == root) {
+      final folder = converted.made.endsWith('.md')
+          ? p.posix.dirname(converted.made)
+          : converted.made;
+      reveal(folder == '.' ? '' : folder);
+      open(converted.open);
+    }
     messenger?.showSnackBar(
       SnackBar(
         content: Text(
