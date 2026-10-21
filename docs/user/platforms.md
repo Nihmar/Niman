@@ -336,17 +336,28 @@ also splits into two panes, each with its own tabs.
 
 On an Android tablet, or any wide window without the app's own title
 bar, the same tabs head the notes instead of sitting in the title bar.
+There the row also holds what the title bar and the keyboard give a
+desktop: it starts with the **sidebar's toggle** and the **back** and
+**forward** arrows, and ends with the **side panel's toggle** — with a
+note open or none, each a thumb's size, filled while its panel shows.
+The arrows are greyed at the ends of the history rather than hidden; a
+row too narrow for them and the tabs (a small tablet with the tree and
+the side panel open) leaves them out until there is room. A line over the
+tree names the **library** and the folder the selection is in, with the
+library switch beside it; on Linux and Windows the title bar says it.
 
 On an Android phone the same open notes are reached from a **switcher** instead
 of tabs: a count on the note bar opens the list. One note is on screen
 at a time, and the phone has no split: a phone's width holds one note,
-in landscape too. The phone keeps at most 30 notes open: opening one more
+in landscape too. With no tabs there is no new tab either: the switcher's
+*New note* makes a note, and a phone with no note on screen shows its
+tree, which is its way in. The phone keeps at most 30 notes open: opening one more
 closes the one shown longest ago that has no unsaved edits, and it opens
 again where you left it.
 
 **Back and forward** through the notes looked at work everywhere from a
-keyboard (`Alt+←` / `Alt+→`). The mouse's side buttons do it on Linux and
-Windows; on Android a mouse's back button is the system's Back, which
+keyboard (`Alt+←` / `Alt+→`), and on a tablet from the tab row's arrows.
+The mouse's side buttons do it on Linux and Windows; on Android a mouse's back button is the system's Back, which
 keeps its meaning — closing the note, leaving a screen. On a phone that
 is the note's page, a screen opened from the navigation, the folder the
 grid is in; on a tablet's wide layout it takes the topmost thing off the
