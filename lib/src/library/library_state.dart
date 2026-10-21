@@ -777,6 +777,9 @@ final class LibraryController implements LibrarySession {
     // killed write left (issue #379) are swept on a background isolate so
     // a folder full of them never holds the library shut.
     unawaited(_sweepStaleTempFiles(abs));
+    // The history's upkeep (#1148) too: an old `.history/` moved in, the
+    // versions packed into deltas, what no log names collected.
+    unawaited(ops.history.maintain());
     _bump();
     // What a file from before the Home lacks (#671, #692) is built here,
     // with the reconciliation and behind the tree, not on open.
@@ -1808,6 +1811,7 @@ final class LibraryController implements LibrarySession {
     _watcher = null;
     await watcher?.stop();
     _indexer = null;
+    _ops?.history.dispose();
     _ops = null;
     _links = null;
     _linksDb = null;

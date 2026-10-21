@@ -1,10 +1,13 @@
+import 'dart:async';
 import 'dart:isolate';
 
 import 'package:niman/src/core/files.dart';
+import 'package:niman/src/core/isolate_gauge.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/settings/library_config_repo.dart';
 import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/history/history_store.dart';
+import 'package:niman/src/history/history_upkeep.dart';
 import 'package:niman/src/history/snapshot_policy.dart';
 import 'package:niman/src/markdown/note_bytes.dart';
 
@@ -33,6 +36,13 @@ final class NoteHistory {
   /// The editing session that last saved each note, by library-relative
   /// path.
   final Map<String, int> _sessions = {};
+
+  /// How long after a note's last kept version its history is packed: an
+  /// editing session's versions pack once, and never on a save's path.
+  static const Duration packDelay = Duration(seconds: 30);
+
+  /// The packs waiting for [packDelay], by library-relative path.
+  final Map<String, Timer> _packs = {};
 
   /// What a save of [path] asks of history: from the library settings,
   /// the clock, and whether [editSession] is new for this note.
@@ -77,6 +87,67 @@ final class NoteHistory {
     } else {
       _log.debug(outcome.describe(path));
     }
+    if (outcome.version != null) _schedulePack(path);
+  }
+
+  void _schedulePack(String path) {
+    _packs.remove(path)?.cancel();
+    _packs[path] = Timer(packDelay, () {
+      _packs.remove(path);
+      unawaited(_pack(path));
+    });
+  }
+
+  /// Packs the history of [path] (#1148): its older versions stored as
+  /// deltas, its newest compressed hard.
+  Future<void> _pack(String path) async {
+    final clock = Stopwatch()..start();
+    try {
+      final root = this.root;
+      final outcome = await IsolateGauge.run(
+        () => packNoteHistory(root, path),
+        'pack history "$path"',
+      );
+      _log.debug(
+        'pack "$path": ${outcome.packed} delta(s), '
+        '${(outcome.saved / 1024).round()} KB saved '
+        '(${clock.elapsedMilliseconds} ms)',
+      );
+    } on Object catch (e) {
+      _log.warning('pack "$path" failed: $e');
+    }
+  }
+
+  /// The upkeep of the whole library's history (#1148): an old history
+  /// moved in, every note's packed, the objects no log names collected.
+  /// Once an open, behind the library's ready state.
+  Future<void> maintain() async {
+    final clock = Stopwatch()..start();
+    try {
+      final root = this.root;
+      final outcome = await IsolateGauge.run(
+        () => maintainHistory(root),
+        'history upkeep "$root"',
+      );
+      _log.info(
+        'upkeep: ${outcome.notes} note(s), ${outcome.migrated} old '
+        'version(s) moved in, ${outcome.packed} packed '
+        '(${(outcome.savedBytes / 1024).round()} KB saved), '
+        '${outcome.collected} object(s) collected '
+        '(${(outcome.collectedBytes / 1024).round()} KB) '
+        'in ${clock.elapsedMilliseconds} ms',
+      );
+    } on Object catch (e) {
+      _log.warning('upkeep failed: $e');
+    }
+  }
+
+  /// Drops the packs still waiting: the library is closing.
+  void dispose() {
+    for (final timer in _packs.values) {
+      timer.cancel();
+    }
+    _packs.clear();
   }
 
   /// The versions kept for [path] (oldest first) and its pins.
