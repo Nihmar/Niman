@@ -111,7 +111,7 @@ numbers each file prints, against the bar it holds.
 | Open | 21 MB note, to the first frame | 853 ms | 5 000 ms |
 | Open | 200 KB note, cold (scan + tokenize) | 38.2 ms | 239.5 ms |
 | Open | height map over 1 M lines, first screen | 0.1 ms | 5 ms |
-| Read | first visible content: 50 KB / 200 KB / Geometria | 341 / 83 / 74 ms | 250 / 120 / 120 ms |
+| Read | first visible content: 50 KB / 200 KB / Geometria | 114–125 / 71–72 / 71–75 ms (was 341 / 83 / 74, #1140) | 250 / 120 / 120 ms |
 | Type | a keystroke, data layers | 0.205 ms | 0.507 ms |
 | Type | a keystroke to its frame, 20 000 lines | 6.86 ms | ×1 of 400 lines |
 | Type | the reveal frame, 20 000 lines | 3.14 ms | 3 ms |
@@ -122,24 +122,35 @@ numbers each file prints, against the bar it holds.
 | Tree | pinned notes over 200 000 rows | 0.45 ms | — |
 | Index | 50 000 notes: open to ready / first tree read / word search | 115 / 1 / 2–9 ms | — |
 | Index | first full scan of 2 000 notes on disk / rescan unchanged | 3 110 / 54 ms | — |
-| Live | a fitted table scrolled down, median step | 18–20 ms | 16 ms |
+| Live | a fitted table scrolled down / up, median step | 12 / 10–11 ms (was 18–20 / 11, #1141) | 16 ms |
 | Live | columns keystroke / read layout / scroll frame | 24.7 / 28 / 1.9 ms | ×1.5 / ×1.3 / ×1.5 |
 | Live | list drag, a held frame at 5 000 items | 12.1 ms | ×1 of 500 |
-| Sync | large download / upload, busy isolate | 108 / 99 MiB/s | ×1.5 of idle |
+| Sync | large download, busy isolate: the isolate's own work left it | 98 % (old path 29 %, #1142) | 90 % |
+| Sync | large upload, busy isolate | 97–99 MiB/s (old path 24–25) | ×2 of the old path |
 | Links | rewrite after 100 000 files moved | 389 ms | 1 000 ms |
 | Spell | dictionary load / a screen of 60 lines | 7.6 / 0.95 ms | — / 12 ms |
 
-Three bars do not hold on this host, **on `main` as on this branch** (run
-twice each, alone): they are older than this pass, and each has an issue.
+Three bars did not hold on this host, on `main` as on the #1132 branch.
+None was the code; each now holds, run twice, alone:
 
 - `read_view_timing_test.dart`, the 50 KB fixture's first content: 341–348
-  ms against 250. It is the file's first case, and the two after it read 74–85
-  ms: the first pays the harness's warm-up. → #1140
+  ms against 250. It was the file's first case, and its warm-up — a heading
+  and a paragraph — left KaTeX, the table and the highlighter cold. Warmed
+  on one block of each kind its first screen holds, it reads 114–125 ms
+  (#1140).
 - `live_table_scroll_test.dart`, the median step scrolling down: 18–20 ms
-  against a 60 Hz frame. → #1141
-- `sync_transfer_test.dart`, a large download with the isolate busy: 105–108
-  MiB/s on both paths, against 1.5× the idle one. The download hashes
-  nothing, so it is the disk's speed either way. → #1142
+  against a 60 Hz frame. The down leg was the first a file scrolls and paid
+  the JIT: a second round of the same note reads 7–11 ms, and a CPU profile
+  of the steady state is the surface's rebuild per step, flat, 6.0 ms down
+  against 5.4 up. Measured after a round thrown away, 12 ms down and 10–11
+  up (#1141).
+- `sync_transfer_test.dart`, a large download with the isolate busy: the
+  bar asked twice the old path's speed, which a download — no hash, the
+  disk's speed on either path — cannot show. What the worker buys a
+  download is the isolate: the old path kept its speed by taking it, and
+  the load it ran (the app's frames) got 29 % of its ticks; the worker
+  leaves it 98 %. The download is held to that share and to its idle speed
+  (#1142).
 
 ## The million
 
@@ -167,28 +178,27 @@ it is part of #1145.
 ## I/O on the UI isolate
 
 The rule is that no disk call runs on the UI isolate: on Android each
-`statSync` or `listSync` is a round trip through FUSE. `lib/` has 192
-synchronous file calls in 58 files. Most run where the rule wants them —
-inside an `Isolate.run` (the history store, the scan, the stream writer, the
-deck and todo probes, the note preview, the calendar). What runs on the UI
-isolate is single stats and one-off reads, on a user's action or once per
-open:
+`statSync` or `listSync` is a round trip through FUSE. This pass counted
+192 synchronous file calls in 58 files of `lib/`, most of them inside an
+`Isolate.run`. #1143 moved the rest: since `4b423040` every one runs on a
+background isolate, and `test/unit/ui_isolate_io_test.dart` lists the files
+allowed one with the isolate each runs it on, so a new one elsewhere fails
+the suite. Three of the calls it moved were more than a stat:
 
-- `library_state.dart`: the existence checks of a library being opened
-  (`:577`, `:609`, `:612`, `:978`, `:1155`, `:2081`, `:2119`);
-- `known_library_list.dart:24`: one `existsSync` per known library, as the
-  opening screen lists them;
-- `library_picker.dart:73`: the picked folder's `statSync`;
-- `todo_store.dart:372`: an `existsSync` before each todo write;
-- `json_file.dart:44`, `library_config.dart:1383`: an `existsSync` before an
-  asynchronous read or write;
-- `legacy_library_settings.dart:67`: a `readAsStringSync`, once, when a
-  library is upgraded from the old settings table;
-- `shell.dart:2894` (a shared file imported), `editor_only.dart:46`, `:57`
-  (the editor-only window).
+- **The trash, on every delete.** The manifest's upkeep stat-ed every item
+  it names, twice: a trash of a thousand items cost two thousand round
+  trips a delete. One asynchronous listing replaces them.
+- **The watcher's batch.** Each changed path was stat-ed twice before its
+  sync hint was queued; a folder copied in is hundreds. The batch is
+  probed at once, on an isolate.
+- **Every atomic write.** Its stamp was a `statSync`, and the free-name
+  search of a create, a rename or a trash stat-ed every candidate.
 
-None is on a frame's path, and none is O(library). They are the rule's
-exceptions all the same, and are listed in #1143 to be moved or justified.
+The very_good lint `avoid_slow_async_io` asks for the synchronous calls,
+and four places carried an `ignore` against it; it is off, with the
+platform rule as the reason. The library picker's reachability check was
+a `statSync`, which never throws: an unreachable folder passed it, and now
+does not.
 
 ## Background work
 
@@ -202,9 +212,29 @@ reads (#1135, this pass).
 
 ## Memory
 
-Not measured in this pass. #511 owns the desktop's; Android's — bitmaps,
-editors kept alive, the undo history, isolate peaks — and a ceiling for a
-library of a million notes need the device, and are #1144.
+#511 owns the desktop's. For Android (#1144) this pass set what can be set
+off the device and made the device run measure the rest.
+
+**A million notes cost the open nothing.** The scale test now measures the
+resident memory a library's open adds up to its first tree read: **1 MB at
+fifty thousand notes, 2 MB at a million**, on the reference host. The tree
+pages and the index stays on disk, so the open is constant in the
+library's size, and that is the ceiling `index_scale_test.dart` holds: 32
+MB under `NIMAN_PERF`, which an open that brought the rows into Dart (a
+million notes are hundreds of MB there) fails many times over. A first
+full scan of 2 000 notes on disk adds 8 MB, an unchanged rescan nothing.
+
+**Every action's log line carries the memory.** The first-frame line of
+each timed action (a note's open, the read pane, a tab, a search result,
+a note's close), the frame window's summary, the library's open and every
+rescan now end with `rss <now> MB (peak <max>)`. An exported log of the
+#1145 session therefore gives each scenario its memory beside its time,
+on a named device and build — opening the 1.5 MB note, the read pane
+beside it, five tabs, a first index. The breakdown the log cannot give
+(Dart heap, native heap with the bitmaps and PDFium, graphics) is
+`adb shell dumpsys meminfo dev.niman.niman.beta`, taken at the same
+points; Android Studio's profiler on the profile build shows the isolates'
+peaks. Those numbers land here with the device run.
 
 ## Third-party surface
 
@@ -222,10 +252,21 @@ are 85 MB.
 | `libsqlite3.so` | 1.7 MB | — |
 | `libcnativeapi.so` | 1.6 MB | 1.5 MB |
 
-An arm64-only build still carries **20 MB of x86_64 libraries**: the
-plugins with prebuilt natives package every ABI they have. That is #1146;
-what FFmpeg is there for, and what each plugin costs at startup, is the
-dependency inventory, #1136. The universal beta APK is 142.9 MB.
+An arm64-only build still carried **20 MB of x86_64 libraries**: the
+plugins with prebuilt natives package every ABI they have, whatever
+`--target-platform` asks. And the release workflow passed none, so the
+release shipped the universal APK, 142.9 MB, with a whole x86_64 copy of the
+Dart snapshot and the engine besides.
+
+**After #1146.** A release build drops `x86_64` at packaging, as every build
+already dropped `armeabi-v7a`, and the scripts and the release workflow build
+for `android-arm64` alone. The beta APK is **71.5 MB**, its native libraries
+`arm64-v8a` only (65.1 MiB uncompressed): 21 MB under the arm64 build above,
+71 MB under what a release shipped. x86-64 is an emulator's ABI, and a debug
+build keeps it, so `flutter run` still installs there; a release no longer
+installs on an x86-64 device, a decision recorded in
+`docs/user/platforms.md`. What FFmpeg's 15 MB is there for, and what each
+plugin costs at startup, is the dependency inventory, #1136.
 
 ## What #1132 changed
 
@@ -261,11 +302,12 @@ it reaches.
    ms worst, the same for 10 KB as for 1.5 MB — two flushed writes, the
    version and the manifest. The snapshot line now says which (#1132);
    the fix waits for the device's answer.
-4. **The fitted table's scroll** (#1141), the read view's first-content bar
-   (#1140) and the sync bar (#1142): three bars that no longer hold on the
-   reference host.
-5. **Memory on Android** (#1144).
-6. **The UI isolate's remaining synchronous stats** (#1143).
-7. **The APK's foreign libraries** (#1146, #1136): 20 MB of another ABI in
-   every arm64 install, and FFmpeg's 15 MB for a reason the inventory has
-   to name.
+4. **Memory on Android** (#1144): the per-action numbers from the device
+   run's log, and the `dumpsys` breakdown of the scenarios beside them.
+   The million-note open is held (2 MB).
+5. **FFmpeg's 15 MB** (#1136): what it is there for. The foreign ABI is
+   gone (#1146, 142.9 → 71.5 MB).
+
+Done in this pass's second round: the three bars that did not hold
+(#1140, #1141, #1142 — none was the code), the synchronous calls on the UI
+isolate (#1143) and the APK's x86_64 libraries (#1146).

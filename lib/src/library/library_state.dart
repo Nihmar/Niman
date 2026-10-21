@@ -17,6 +17,7 @@ import 'package:niman/src/core/app_channel.dart';
 import 'package:niman/src/core/app_theme.dart';
 import 'package:niman/src/core/custom_theme.dart';
 import 'package:niman/src/core/files.dart';
+import 'package:niman/src/core/frame_log.dart';
 import 'package:niman/src/core/isolate_gauge.dart';
 import 'package:niman/src/core/language.dart';
 import 'package:niman/src/core/logging.dart';
@@ -611,7 +612,7 @@ final class LibraryController implements LibrarySession {
         throw ArgumentError('Directory does not exist: $abs');
       }
       await _startSession(abs);
-      _log.info('open complete: ready root=$abs');
+      _log.info('open complete: ready root=$abs, ${memoryNow()}');
     } on Object catch (error) {
       _log.error('open failed: $error');
       _lastError = '$error';
@@ -2071,7 +2072,7 @@ final class LibraryController implements LibrarySession {
     try {
       _log.info('rescan start: $abs');
       await rescans.run();
-      _log.info('rescan complete');
+      _log.info('rescan complete, ${memoryNow()}');
     } on Object catch (error) {
       await _onRescanFailed(abs, error);
     }
