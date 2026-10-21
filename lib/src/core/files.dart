@@ -202,8 +202,9 @@ bool isTempFileName(String name) =>
 const staleTempMinimumAge = Duration(minutes: 5);
 
 /// Deletes the temp files a killed write left in the library under [root] —
-/// the atomic writes' and the sync download's alike — and answers how many
-/// went (#379).
+/// the atomic writes' and the sync download's alike, and the folders a
+/// book's conversion stages its notes in — and answers how many went
+/// (#379, #1138).
 ///
 /// A write goes to a hidden temp name in the target's own directory and is
 /// renamed onto it ([atomicTempPath], and the sync's `.niman-tmp-sync-`);
@@ -240,7 +241,20 @@ int sweepStaleTempFiles(
     }
     for (final entry in entries) {
       if (entry is Directory) {
-        if (_baseName(entry.path) == '.git') continue;
+        final name = _baseName(entry.path);
+        if (name == '.git') continue;
+        // A whole folder staged for a write that never finished — a book's
+        // conversion, written aside and renamed in (#1138) — goes whole.
+        if (isTempFileName(name) &&
+            entry.statSync().modified.isBefore(cutoff)) {
+          try {
+            entry.deleteSync(recursive: true);
+            removed++;
+          } on FileSystemException {
+            // Renamed in, or gone, while the sweep walked.
+          }
+          continue;
+        }
         pending.add(entry);
       } else if (entry is File &&
           isTempFileName(_baseName(entry.path)) &&

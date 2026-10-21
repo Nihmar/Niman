@@ -19,7 +19,9 @@ typedef TestChapter = ({String path, String body});
 /// [files] are other files of the zip, by their full path, listed in the
 /// manifest when under `OEBPS/`. [prefix] writes the OPF's elements as
 /// `<opf:item>`, as some books do. [omit] names chapters listed in the
-/// manifest and spine but left out of the zip.
+/// manifest and spine but left out of the zip. [metadata] is written inside
+/// the OPF's `<metadata>` after the title, [items] inside its `<manifest>`,
+/// and [unique] names the package's `unique-identifier`.
 File writeTestEpub(
   String path, {
   required List<TestChapter> chapters,
@@ -29,6 +31,9 @@ File writeTestEpub(
   Map<String, List<int>> files = const {},
   bool prefix = false,
   Set<String> omit = const {},
+  String metadata = '',
+  String items = '',
+  String? unique,
 }) {
   final o = prefix ? 'opf:' : '';
   final manifest = StringBuffer();
@@ -65,9 +70,10 @@ File writeTestEpub(
   final opf =
       '<?xml version="1.0" encoding="UTF-8"?>'
       '<${o}package $ns version="3.0" '
+      '${unique == null ? '' : 'unique-identifier="$unique" '}'
       'xmlns:dc="http://purl.org/dc/elements/1.1/">'
-      '<${o}metadata><dc:title>$title</dc:title></${o}metadata>'
-      '<${o}manifest>$manifest</${o}manifest>'
+      '<${o}metadata><dc:title>$title</dc:title>$metadata</${o}metadata>'
+      '<${o}manifest>$manifest$items</${o}manifest>'
       '<${o}spine${ncx != null ? ' toc="ncx"' : ''}>$spine</${o}spine>'
       '</${o}package>';
 
