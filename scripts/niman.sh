@@ -130,9 +130,35 @@ macos_build() {
   esac
   local status=$?
   tail -n 3 "$log"
-  if [ $status -eq 0 ]; then
-    echo "artifact: build/macos/Build/Products/Release-$flavor/$name.app"
+  if [ $status -ne 0 ]; then return $status; fi
+  local app="build/macos/Build/Products/Release-$flavor/$name.app"
+  echo "artifact: $app"
+  # The disk image the release attaches and the updater opens
+  # (lib/src/update/release_asset.dart): the app beside a link to
+  # Applications, to drag it onto.
+  local version suffix=""
+  version="$(sed -n 's/^version: *\([0-9.]*\).*/\1/p' pubspec.yaml)"
+  [ "$flavor" = beta ] && suffix=-testing
+  local dmg="build/macos/niman-$version-macos$suffix.dmg"
+  macos_dmg "$app" "$name" "$dmg" || { tail -n 5 "$log"; return 1; }
+  echo "artifact: $dmg"
+}
+macos_dmg() { # <app> <volume name> <dmg>
+  local stage
+  stage="$(mktemp -d)"
+  cp -R "$1" "$stage/" && ln -s /Applications "$stage/Applications" || return 1
+  rm -f "$3"
+  # diskutil's own command where the system has it; hdiutil's create, which
+  # it deprecates, on an older macOS.
+  if diskutil image create from --help >/dev/null 2>&1; then
+    diskutil image create from --format UDZO --volumeName "$2" \
+      "$stage" "$3" >>"$log" 2>&1
+  else
+    hdiutil create -volname "$2" -srcfolder "$stage" -format UDZO "$3" \
+      >>"$log" 2>&1
   fi
+  local status=$?
+  rm -rf "$stage"
   return $status
 }
 usage() {
@@ -147,7 +173,7 @@ usage: ./scripts/niman.sh <analyze|test|check|integration|apk|linux|macos>
                   (beta: the testing build, app ID dev.niman.niman.beta)
   linux [beta]    flutter build linux --release
                   (beta: the testing build, its own data folder niman-testing)
-  macos [beta]    flutter build macos --release
+  macos [beta]    flutter build macos --release, and its disk image
                   (beta: the testing build, bundle id dev.niman.niman.beta)
 Full logs: /tmp/niman/niman-<cmd>.log
 EOF
