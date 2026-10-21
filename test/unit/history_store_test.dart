@@ -350,7 +350,7 @@ void main() {
 /// A version file whose first read lets another move of the same history run
 /// to its end first: by then the file is gone, as the other move deleted it.
 final class _RacedFile implements File {
-  _RacedFile(this._real, this._other);
+  new(this._real, this._other);
 
   final File _real;
   final int Function() _other;
