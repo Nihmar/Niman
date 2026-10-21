@@ -137,7 +137,9 @@ can be deleted again from the same page.
   3.9 MB on Windows. On **Linux**, when the distribution's Tesseract is
   installed (`tesseract` on Arch, `libtesseract5` on Debian and Ubuntu),
   Niman uses it and downloads no engine at all: the page says **System
-  library**.
+  library**. On a **Mac** the engine (about 4 MB) comes inside the app,
+  since a Mac loads only libraries signed with the app: nothing to
+  download but the languages.
 - **The languages** — 123 of them, each a separate download.
 
 Every file is checked against the checksum the app carries before it is
@@ -177,5 +179,6 @@ In the app's own folder, under `ocr/`, never in the library:
 | Settings | `ocr/ocr.json` (quality, default language, "Also") |
 
 The app folder is `~/.local/share/dev.niman.niman` on Linux,
-`%APPDATA%\dev.niman\niman` on Windows, and the app's private storage on
-Android; the testing build keeps its own.
+`%APPDATA%\dev.niman\niman` on Windows, `~/Library/Application
+Support/dev.niman.niman` on a Mac (where there is no engine folder), and
+the app's private storage on Android; the testing build keeps its own.
