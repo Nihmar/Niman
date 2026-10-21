@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Niman dev helper: terse output, full logs in /tmp/niman/niman-<cmd>.log.
 #   analyze | test | check | integration | apk [beta] | linux [beta] | macos [beta]
+#   | ios [beta]
 set -u
 
 # Flutter fallback when not on PATH (AGENTS.md: Env).
@@ -170,6 +171,31 @@ macos_build() {
   macos_dmg "$app" "$name" "$dmg" || { tail -n 5 "$log"; return 1; }
   echo "artifact: $dmg"
 }
+ios_build() {
+  # The official app by default; "beta" builds the testing build, bundle id
+  # dev.niman.niman.beta (Xcode schemes, as on the Mac). Unsigned: signing
+  # for a device, and TestFlight, need the Apple Developer Program; this is
+  # the release build those will sign.
+  local flavor="${1:-official}"
+  local define=()
+  case "$flavor" in
+    official) ;;
+    beta) define=(--dart-define=APP_CHANNEL=testing) ;;
+    *)
+      echo "error: unknown ios flavor '$flavor' (expected official or beta)" >&2
+      usage >&2
+      return 2
+      ;;
+  esac
+  flutter build ios --release --no-codesign --flavor "$flavor" \
+    "${define[@]}" >"$log" 2>&1
+  local status=$?
+  tail -n 3 "$log"
+  if [ $status -eq 0 ]; then
+    echo "artifact: build/ios/iphoneos/Runner.app (unsigned)"
+  fi
+  return $status
+}
 macos_dmg() { # <app> <volume name> <dmg>
   local stage
   stage="$(mktemp -d)"
@@ -190,7 +216,7 @@ macos_dmg() { # <app> <volume name> <dmg>
 }
 usage() {
   cat <<'EOF'
-usage: ./scripts/niman.sh <analyze|test|check|integration|apk|linux|macos>
+usage: ./scripts/niman.sh <analyze|test|check|integration|apk|linux|macos|ios>
   analyze  flutter analyze --fatal-infos (issue lines + summary only)
   test     flutter test (tail only)
   check    analyze + test; use before committing
@@ -202,6 +228,8 @@ usage: ./scripts/niman.sh <analyze|test|check|integration|apk|linux|macos>
   linux [beta]    flutter build linux --release
                   (beta: the testing build, its own data folder niman-testing)
   macos [beta]    flutter build macos --release, and its disk image
+                  (beta: the testing build, bundle id dev.niman.niman.beta)
+  ios [beta]      flutter build ios --release --no-codesign
                   (beta: the testing build, bundle id dev.niman.niman.beta)
 Full logs: /tmp/niman/niman-<cmd>.log
 EOF
@@ -215,5 +243,6 @@ case "$cmd" in
   apk) apk "${2:-}" ;;
   linux) linux_build "${2:-}" ;;
   macos) macos_build "${2:-}" ;;
+  ios) ios_build "${2:-}" ;;
   *) usage; exit 1 ;;
 esac
