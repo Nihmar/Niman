@@ -288,6 +288,8 @@ void main() {
     transcriber.pending.single.complete('ciao');
     await until(() => job.finished);
     expect(job.phase, TranscriptionPhase.done);
+    // The queue removes its folder after the job: tearDown would race it.
+    await until(() => !work.single.existsSync());
   });
 
   test('a format this platform cannot read fails with a reason', () async {
