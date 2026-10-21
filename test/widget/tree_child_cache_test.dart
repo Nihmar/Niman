@@ -91,6 +91,32 @@ void main() {
     expect(controller.pageCalls - before, 2, reason: 'the root and docs');
   });
 
+  testWidgets('a note saved in place reads its own folder again, alone', (
+    tester,
+  ) async {
+    // #1132: a title typed into a note's frontmatter re-read every open
+    // folder after each save. The save says which folder it moved rows in.
+    await controller.createFolder(parentPath: '', name: 'docs');
+    await controller.createFolder(parentPath: '', name: 'other');
+    await controller.createNote(parentPath: 'docs', name: 'inside');
+    await controller.createNote(parentPath: 'other', name: 'beside');
+    final expanded = ValueNotifier<Set<String>>(const {'docs', 'other'});
+    addTearDown(expanded.dispose);
+    await tester.pumpWidget(tree(expanded));
+    await tester.pumpAndSettle();
+    final before = controller.pageCalls;
+
+    await controller.saveNote(
+      'docs/inside.md',
+      '---\ntitle: Renamed by its title\n---\n',
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Renamed by its title'), findsOneWidget);
+    expect(find.text('beside.md'), findsOneWidget);
+    expect(controller.pageCalls - before, 1, reason: 'docs alone');
+  });
+
   testWidgets('a big folder is read a page at a time as the list scrolls', (
     tester,
   ) async {

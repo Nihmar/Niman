@@ -293,6 +293,28 @@ void main() {
     expect(changes.last, IndexChange.tree);
   });
 
+  // #1132: a reindex in place moved rows in the note's own folder alone,
+  // and says so; a create could have moved them anywhere.
+  test('a change says which folders it moved rows in', () async {
+    await indexer.fullScan(root.path);
+    final docs = (await dao.find('docs'))!;
+    final heard = <(IndexChange, Set<int>?)>[];
+    indexer.onChanged = (change) => heard.add((change, indexer.changedFolders));
+
+    final abs = p.join(root.path, 'docs', 'doc1.md');
+    File(abs).writeAsStringSync('---\ntitle: A title\n---\n');
+    await indexer.rescanFiles(root.path, [abs]);
+    expect(heard.single.$1, IndexChange.tree);
+    expect(heard.single.$2, {docs.id});
+    expect(indexer.changedFolders, isNull, reason: 'only during the call');
+
+    final made = p.join(root.path, 'note3.md');
+    File(made).writeAsStringSync('new');
+    await indexer.applyEvents(root.path, [made]);
+    expect(heard.last.$1, IndexChange.tree);
+    expect(heard.last.$2, isNull);
+  });
+
   // A save of the note makes a read of it obsolete, and reading beside the
   // write slowed a 1.5 MB save from 123 to 480 ms (device log, 2026-10-20):
   // the writer cancels the read, and the rescan writes nothing.

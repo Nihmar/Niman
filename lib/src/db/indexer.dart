@@ -62,6 +62,43 @@ final class Indexer {
   /// changed the note's title, date or pin (#760) — [IndexChange.tree].
   void Function(IndexChange change)? onChanged;
 
+  /// The folders whose rows the change [onChanged] is hearing of moved, by
+  /// row id (0 = the root), read during that call — or null when it could
+  /// have moved rows anywhere.
+  ///
+  /// Only the writes of notes in place say: a reindex ([rescanFiles]) and a
+  /// pin ([applyFrontmatter]) reshape a row in its own folder and nowhere
+  /// else. A create, a rename, a scan answer null. A tree that re-reads the
+  /// folders named rather than every one it shows spends one read on a
+  /// note's new title, not one per open folder (#1132).
+  Set<int>? get changedFolders => _changedFolders;
+  Set<int>? _changedFolders;
+
+  /// Tells [onChanged] of [change], which moved rows in [folders] alone.
+  void _changedIn(IndexChange change, Set<int>? folders) {
+    final cb = onChanged;
+    if (cb == null) return;
+    _changedFolders = folders;
+    try {
+      cb(change);
+    } finally {
+      _changedFolders = null;
+    }
+  }
+
+  /// The parent folders of the notes at [rels], or null for too many to ask
+  /// at once: then any folder may have moved.
+  Future<Set<int>?> _parentsOf(List<String> rels) async {
+    if (rels.length > 500) return null;
+    final parent = _db.notes.parent;
+    final rows =
+        await (_db.selectOnly(_db.notes)
+              ..addColumns([parent])
+              ..where(_db.notes.path.isIn(rels)))
+            .get();
+    return {for (final row in rows) row.read(parent)!};
+  }
+
   /// Callback invoked with the library-relative paths a scan or a batch
   /// pruned from the tree — a note or a folder gone from disk. Renames are
   /// paired, not pruned, so they never arrive here. Lets a caller close
@@ -471,9 +508,11 @@ final class Indexer {
         'rescan: ${changed.length} note(s), read $readMs ms, '
         'rows ${writeClock.elapsedMilliseconds} ms',
       );
-      if (wrote || drawn) {
-        final cb = onChanged;
-        if (cb != null) cb(drawn ? IndexChange.tree : IndexChange.contents);
+      if ((wrote || drawn) && onChanged != null) {
+        _changedIn(
+          drawn ? IndexChange.tree : IndexChange.contents,
+          await _parentsOf([for (final c in changed) c.rel]),
+        );
       }
       return true;
     });
@@ -502,8 +541,7 @@ final class Indexer {
           pinned: head?.pinned ?? false,
         ),
       );
-      final cb = onChanged;
-      if (cb != null) cb(IndexChange.tree);
+      _changedIn(IndexChange.tree, {row.parent});
     });
   }
 

@@ -51,6 +51,7 @@ import 'package:niman/src/library/note_ops.dart';
 import 'package:niman/src/library/rescan_scheduler.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/library/trash_cleaner.dart';
+import 'package:niman/src/library/tree_moves.dart';
 import 'package:niman/src/library/watch_batch_queue.dart';
 import 'package:niman/src/links/library_links.dart';
 import 'package:niman/src/links/suggester.dart';
@@ -201,6 +202,9 @@ final class LibraryController implements LibrarySession {
   final AppLogger _log = const AppLogger(name: 'session');
   int _revision = 0;
   int _treeRevision = 0;
+
+  /// What the recent revisions moved in the tree ([foldersMovedSince]).
+  final TreeMoves _moves = TreeMoves();
   LibraryPhase _phase = LibraryPhase.none;
   String? _root;
   String? _lastError;
@@ -302,6 +306,10 @@ final class LibraryController implements LibrarySession {
   /// Fires with the new [revision] after every index change.
   @override
   Stream<int> get events => _events.stream;
+
+  @override
+  Set<int>? foldersMovedSince(int since, {required bool tree}) =>
+      _moves.since(since, tree: tree);
 
   /// The open library's features (#1109); every one on while none is open.
   @override
@@ -648,8 +656,10 @@ final class LibraryController implements LibrarySession {
     if (opening) {
       _createdLibrary = !hadSettings && !_hasSettingsFile(abs);
     }
-    final indexer = Indexer(indexDb)
-      ..onChanged = _onIndexChanged
+    final indexer = Indexer(indexDb);
+    indexer
+      ..onChanged = ((change) =>
+          _onIndexChanged(change, folders: indexer.changedFolders))
       ..onRemoved = (removed) => _onRemoved(abs, removed);
     // One reader of `.niman/settings.json` per session: the four
     // per-library settings and the overrides (T-ML-10) share its cache.
@@ -1742,13 +1752,20 @@ final class LibraryController implements LibrarySession {
     }
   }
 
-  void _bump({bool tree = true}) {
+  /// A new revision — and a new tree revision when [tree] — which moved rows
+  /// in [folders] alone, or anywhere when null ([foldersMovedSince]).
+  void _bump({bool tree = true, Set<int>? folders}) {
     _revision++;
+    if (tree) _treeRevision++;
+    _moves.record(
+      revision: _revision,
+      treeRevision: tree ? _treeRevision : null,
+      folders: folders,
+    );
     if (!_events.isClosed) {
       _events.add(_revision);
     }
     if (!tree) return;
-    _treeRevision++;
     if (!_treeEvents.isClosed) {
       _treeEvents.add(_treeRevision);
     }
@@ -1758,9 +1775,11 @@ final class LibraryController implements LibrarySession {
   /// and — when the rows' shape moved, and not for a save's new size and
   /// time (#751) — the tree hears that it has rows to read again. Every
   /// other bump is the session's own (the phase, a progress report, a
-  /// setting): all of them may move what the tree draws.
-  void _onIndexChanged(IndexChange change) {
-    _bump(tree: change == IndexChange.tree);
+  /// setting): all of them may move what the tree draws. [folders] are the
+  /// ones the write moved rows in, when the indexer says
+  /// ([Indexer.changedFolders]).
+  void _onIndexChanged(IndexChange change, {Set<int>? folders}) {
+    _bump(tree: change == IndexChange.tree, folders: folders);
     if (!_indexEvents.isClosed) _indexEvents.add(null);
   }
 

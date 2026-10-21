@@ -844,13 +844,23 @@ final class _NoteTreeState extends State<NoteTree> {
         _setEquals(_rowsExpanded, widget.expanded)) {
       return cached;
     }
-    // A new revision or order makes what was read of the folders stale; a
-    // folder opened or closed does not: the rows of the others stand, and
+    // A new order makes what was read of the folders stale, and so does a
+    // revision — of the folders it moved rows in, when it says which: a
+    // note's new title re-reads its own folder, not every open one (#1132).
+    // A folder opened or closed does not: the rows of the others stand, and
     // closing one reads nothing (#1064).
-    if (_rowsRevision != revision ||
-        _rowsFollowContents != followsContents ||
-        _rowsSort != widget.sort) {
+    final since = _rowsRevision;
+    if (_rowsFollowContents != followsContents || _rowsSort != widget.sort) {
       _children.clear();
+    } else if (since != revision) {
+      final moved = since == null
+          ? null
+          : widget.controller.foldersMovedSince(since, tree: !followsContents);
+      if (moved == null) {
+        _children.clear();
+      } else {
+        _children.forget(moved);
+      }
     }
     _rowsRevision = revision;
     _rowsFollowContents = followsContents;

@@ -36,6 +36,7 @@ import 'package:niman/src/library/note_relocation.dart';
 import 'package:niman/src/library/note_save_result.dart';
 import 'package:niman/src/library/note_write_stream.dart';
 import 'package:niman/src/library/session.dart';
+import 'package:niman/src/library/tree_moves.dart';
 import 'package:niman/src/links/block_anchors.dart';
 import 'package:niman/src/links/library_links.dart';
 import 'package:niman/src/links/suggester.dart';
@@ -1293,9 +1294,21 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     if (failure != null) throw failure;
     final gate = saveGate;
     if (gate != null) await gate.future;
-    (_findRow(path) ?? _addRow(path, isDir: false)).content = content;
-    _bump();
+    _saved(path, content);
     return null;
+  }
+
+  /// [path] holds [content] now: a save of a note in place moves rows in its
+  /// own folder alone, as the real reindex says (#1132); a new one, anywhere.
+  void _saved(String path, String content) {
+    final row = _findRow(path);
+    if (row == null) {
+      _addRow(path, isDir: false).content = content;
+      _bump();
+      return;
+    }
+    row.content = content;
+    bumpTree(folders: {_parentIdOf(path)});
   }
 
   /// Every [saveNoteStream] call, in order: `(path, content, editSession)`.
@@ -1317,8 +1330,7 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     }
     final text = buffer.toString();
     streamedSaves.add((path, text, editSession));
-    (_findRow(path) ?? _addRow(path, isDir: false)).content = text;
-    _bump();
+    _saved(path, text);
     return null;
   }
 
@@ -1726,9 +1738,22 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
 
   // -- internal model --------------------------------------------------
 
-  void _bump() {
-    bumpContents();
+  void _bump() => bumpTree();
+
+  /// A tree revision, which moved rows in [folders] alone (row ids, 0 = the
+  /// root) or anywhere when null: what the real indexer says of a reindex
+  /// that changed a title, or of a create (#1132).
+  void bumpTree({Set<int>? folders}) {
+    _revision++;
     _treeRevision++;
+    _moves.record(
+      revision: _revision,
+      treeRevision: _treeRevision,
+      folders: folders,
+    );
+    if (!_events.isClosed) {
+      _events.add(_revision);
+    }
     if (!_treeEvents.isClosed) {
       _treeEvents.add(_treeRevision);
     }
@@ -1738,10 +1763,17 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   /// and time. The real indexer reports it as `IndexChange.contents`.
   void bumpContents() {
     _revision++;
+    _moves.record(revision: _revision);
     if (!_events.isClosed) {
       _events.add(_revision);
     }
   }
+
+  final TreeMoves _moves = TreeMoves();
+
+  @override
+  Set<int>? foldersMovedSince(int since, {required bool tree}) =>
+      _moves.since(since, tree: tree);
 
   /// The row as an indexed note, with the frontmatter fields the real
   /// indexer would have derived from its content (T-M4-02) — so a widget
