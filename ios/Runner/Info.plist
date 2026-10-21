@@ -70,5 +70,12 @@
 	     InfoPlist.xcstrings. -->
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Niman uses the microphone to record voice notes.</string>
+	<!-- The libraries live in the app's Documents (decision 4 of
+	     docs/records/apple-platforms.md): shown in the Files app, opened
+	     there in place rather than copied. -->
+	<key>UIFileSharingEnabled</key>
+	<true/>
+	<key>LSSupportsOpeningDocumentsInPlace</key>
+	<true/>
 </dict>
 </plist>
