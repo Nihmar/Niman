@@ -123,11 +123,14 @@ void main() {
   ) async {
     // A phone's window: Settings is a tab there. A wide one has the rail
     // instead, and since #202 opens Settings as a floating window — a
-    // different walk through the same flow.
-    tester.view
-      ..physicalSize = const Size(420, 900)
-      ..devicePixelRatio = 1.0;
-    addTearDown(tester.view.reset);
+    // different walk through the same flow. A phone is one already, and
+    // its keyboard's inset, in its own pixels, would cover a faked one.
+    if (!Platform.isAndroid && !Platform.isIOS) {
+      tester.view
+        ..physicalSize = const Size(420, 900)
+        ..devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+    }
 
     // The first-run deck (#266) reads the real app database, not the
     // session this test hands the app: on a fresh machine — a CI runner,
