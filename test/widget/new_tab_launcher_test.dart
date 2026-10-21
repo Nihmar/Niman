@@ -64,7 +64,8 @@ void main() {
     expect(launcher, findsOne);
     expect(find.text('New tab'), findsOne);
     expect(controller.workspace.activePath, isNull);
-    expect(controller.workspace.tabs, hasLength(3));
+    expect(controller.workspace.focusedPane.tabs, hasLength(3));
+    expect(controller.workspace.tabs, hasLength(2), reason: 'no note in it');
 
     await tester.tap(noteRow('gamma.md'));
     await settle(tester);
@@ -88,7 +89,7 @@ void main() {
     await tester.tap(find.byKey(const Key('tab-new')));
     await settle(tester);
     expect(launcher, findsOne);
-    expect(controller.workspace.tabs, hasLength(3));
+    expect(controller.workspace.focusedPane.tabs, hasLength(3));
   });
 
   testWidgets('the launcher lists the notes shown last, and opens them', (

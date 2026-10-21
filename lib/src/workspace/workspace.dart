@@ -185,8 +185,9 @@ final class Workspace {
   /// Whether the window is split.
   bool get isSplit => panes.length == 2;
 
-  /// Every open note, pane by pane.
-  Iterable<WorkspaceTab> get tabs => panes.expand((pane) => pane.tabs);
+  /// Every open note, pane by pane: a new tab holds none.
+  Iterable<WorkspaceTab> get tabs =>
+      panes.expand((pane) => pane.tabs).where((tab) => !tab.isBlank);
 
   /// Where [path] is open, or null.
   ({int pane, int index})? locate(String path) {
@@ -327,8 +328,8 @@ final class Workspace {
     final source = panes[from];
     if (index < 0 || index >= source.tabs.length) return this;
     final tab = source.tabs[index];
-    // A new tab stays in its pane: the other may have one of its own.
-    if (tab.isBlank) return this;
+    // A pane holds one new tab: one goes only where there is none.
+    if (tab.isBlank && panes[to].tabs.any((t) => t.isBlank)) return this;
     final landingAt = (at ?? panes[to].tabs.length).clamp(
       0,
       panes[to].tabs.length,

@@ -121,10 +121,7 @@ final class ShellWorkspace {
   Future<Workspace> load() async {
     final saved = await _slot.load();
     controller.adopt(saved);
-    final open = [
-      for (final tab in value.tabs)
-        if (!tab.isBlank) tab.path,
-    ];
+    final open = [for (final tab in value.tabs) tab.path];
     if (open.isNotEmpty) missing(await _session.missingPaths(open));
     return saved;
   }
@@ -270,7 +267,7 @@ final class ShellWorkspace {
   List<String> get recentNotes => [
     ..._recent,
     for (final tab in value.tabs)
-      if (!tab.isBlank && !_recent.contains(tab.path)) tab.path,
+      if (!_recent.contains(tab.path)) tab.path,
   ];
 
   /// Records a loaded note's [length], for [largeNote].

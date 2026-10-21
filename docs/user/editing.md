@@ -113,7 +113,8 @@ motion keeps the ellipsis instead.
   the launcher in its place: **New note**, **New from template**, **Go to
   note**, and the notes you looked at last. The note you open next —
   from the launcher, the tree, the search or a link — fills that tab. A
-  pane holds one new tab: **+** again shows the one it has. A pane with
+  pane holds one new tab: **+** again shows the one it has, and a new
+  tab dragged to a pane that has one stays where it is. A pane with
   nothing open shows the same launcher.
 - **Switching** is by the tab, by `Ctrl+Tab` / `Ctrl+Shift+Tab`, or by
   the **▾** list, which shows every tab with its folder when the row is

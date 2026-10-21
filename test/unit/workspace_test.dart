@@ -601,7 +601,7 @@ void main() {
 
     test('a pane holds one: `+` again shows the one it has', () {
       final w = _opened(['a.md']).newTab().activate(0, 0).newTab();
-      expect(w.tabs, hasLength(2));
+      expect(w.focusedPane.tabs, hasLength(2));
       expect(w.focusedPane.showsBlank, isTrue);
     });
 
@@ -615,7 +615,7 @@ void main() {
     test('a note already open shows its tab and the new one stays', () {
       final w = _opened(['a.md']).newTab().open('a.md');
       expect(_row(w), '[a.md] ');
-      expect(w.tabs.last.isBlank, isTrue);
+      expect(w.focusedPane.tabs.last.isBlank, isTrue);
     });
 
     test('an empty pane gets one too', () {
@@ -630,9 +630,25 @@ void main() {
       expect(w.places.length, 0);
     });
 
-    test('it stays in its pane', () {
+    test('it is no open note', () {
+      final w = _opened(['a.md']).newTab();
+      expect([for (final tab in w.tabs) tab.path], ['a.md']);
+    });
+
+    test('it moves only to a pane without one', () {
       final w = _opened(['a.md']).newTab().split(SplitAxis.right);
-      expect(w.moveTab(0, 1, 1), w);
+      final moved = w.moveTab(0, 1, 1);
+      expect(_row(moved), '[a.md]');
+      expect(blanked(_row(moved, 1)), '[+]');
+      final both = w.newTab();
+      expect(both.moveTab(0, 1, 1), both);
+    });
+
+    test('dragged to an edge, it splits the window and goes there', () {
+      final w = _opened(['a.md']).newTab().splitWith(0, 1, SplitAxis.right);
+      expect(_row(w), '[a.md]');
+      expect(blanked(_row(w, 1)), '[+]');
+      expect(w.focused, 1);
     });
 
     test('it is stored, once per pane', () {
@@ -651,7 +667,7 @@ void main() {
           },
         ],
       });
-      expect(twice.tabs, hasLength(1));
+      expect(twice.focusedPane.tabs, hasLength(1));
     });
   });
 }
