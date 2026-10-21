@@ -22,7 +22,11 @@ final class ReindexScheduler {
     required this.chainOf,
     required this.read,
     this.quietBeforeReindex = defaultQuietBeforeReindex,
+    this.now = DateTime.now,
   });
+
+  /// The clock the reads are timed with: a seam for a test in fake time.
+  final DateTime Function() now;
 
   /// The tail of the save chain of the note at a library-relative path, or
   /// null when it has none running.
@@ -52,7 +56,20 @@ final class ReindexScheduler {
   /// ([cancelRead]); two seconds after the last save keeps the saves of one
   /// burst of typing from starting, and dropping, a read each, while an
   /// ordinary note still reindexes at once.
+  ///
+  /// This is the floor of the wait, by size. A note whose reads are slow
+  /// waits longer, by what they measured ([quietFor]).
   final Duration Function(int bytes) quietBeforeReindex;
+
+  /// The reads shorter than this are not measured: the editor saves no more
+  /// often than every half second (`NoteSavePipeline`'s save delay), and a read
+  /// that ends in a quarter of that is over before the next save of a burst
+  /// comes to cancel it.
+  static const Duration slowRead = Duration(milliseconds: 250);
+
+  /// The longest wait a measured read asks for: the largest of the sizes'
+  /// own ([defaultQuietBeforeReindex]).
+  static const Duration longestMeasuredWait = Duration(seconds: 30);
 
   /// [quietBeforeReindex]'s default.
   static Duration defaultQuietBeforeReindex(int bytes) {
@@ -63,6 +80,12 @@ final class ReindexScheduler {
   }
 
   static const _log = AppLogger(name: 'save');
+
+  /// How long the last read of each note that reads slowly took, by path:
+  /// a read the next save cancelled counts for as long as it ran, which is
+  /// the least it needed. A note read in less than [slowRead] has no entry,
+  /// so the map holds the slow notes alone.
+  final Map<String, Duration> _slowReads = <String, Duration>{};
 
   /// Re-index jobs not finished yet.
   final Set<Future<void>> _indexing = {};
@@ -88,6 +111,42 @@ final class ReindexScheduler {
   /// The read of each reindex still reading its note, by path: a write of
   /// the note asked for meanwhile cancels it ([cancelRead]).
   final Map<String, ReadCancel> _reads = <String, ReadCancel>{};
+
+  /// How long the note at [path], of [bytes] bytes, is left quiet before it
+  /// is read into the index: the longer of what its size asks for
+  /// ([quietBeforeReindex]) and twice what its last read took, up to
+  /// [longestMeasuredWait].
+  ///
+  /// The size is a guess; a tablet read a 0.6 to 1 MB note in 400 to 600 ms
+  /// against a save every 500 ms, so each save cancelled the read that the
+  /// one before it started and the index stayed on the old text for as long
+  /// as the typing went on (#1137 review). Twice the time the read took is
+  /// what it needs to end unbroken, with the same again for a slower turn
+  /// of the disk. The read is timed as the scheduler sees it, from asking
+  /// the indexer to its answer, so the indexer's queue counts too: a long
+  /// queue ahead of the note is a reason to read it less often as well.
+  Duration quietFor(String path, int bytes) {
+    final bySize = quietBeforeReindex(bytes);
+    final last = _slowReads[path];
+    if (last == null) return bySize;
+    final measured = last * 2;
+    final capped = measured > longestMeasuredWait
+        ? longestMeasuredWait
+        : measured;
+    return capped > bySize ? capped : bySize;
+  }
+
+  /// Remembers how long the read of [path] ran, if it was slow.
+  void _measure(String path, Duration ran, {required bool finished}) {
+    if (ran < slowRead) {
+      if (finished) _slowReads.remove(path);
+      return;
+    }
+    final before = _slowReads[path];
+    _slowReads[path] = finished || before == null || ran > before
+        ? ran
+        : before;
+  }
 
   /// Whether the note at [path] waits for a reindex this scheduler will run
   /// once it is left alone, or once its saves end: the scans that are not
@@ -149,7 +208,7 @@ final class ReindexScheduler {
   /// note has no row yet and is indexed at once.
   void whenQuiet(String path, {required bool created, required int bytes}) {
     _quiet.remove(path)?.cancel();
-    final wait = created ? Duration.zero : quietBeforeReindex(bytes);
+    final wait = created ? Duration.zero : quietFor(path, bytes);
     if (wait == Duration.zero) {
       reindex(path, created: created);
       return;
@@ -194,7 +253,7 @@ final class ReindexScheduler {
       return;
     }
     _reindexing.add(path);
-    final clock = Stopwatch()..start();
+    final started = now();
     late final Future<void> job;
     final cancel = ReadCancel();
     if (!created) _reads[path] = cancel;
@@ -202,9 +261,11 @@ final class ReindexScheduler {
     job = read(path, created: created, cancel: cancel)
         .then((done) {
           dropped = !done;
+          final ran = now().difference(started);
+          if (!created) _measure(path, ran, finished: done);
           _log.debug(
             '${done ? 'reindexed' : 'reindex dropped, saved again'}: '
-            '"$path" (${clock.elapsedMilliseconds} ms)',
+            '"$path" (${ran.inMilliseconds} ms)',
           );
         }, onError: (Object e) => _log.warning('reindex failed: "$path": $e'))
         .whenComplete(() {
