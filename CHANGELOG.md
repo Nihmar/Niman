@@ -6,6 +6,38 @@ This file ships inside the build and feeds the in-app changelog (the
 launch dialog after an update and the screen under Settings → Diagnostics
 and info). Update it in the release commit, before the tag.
 
+## [0.2.8] - 2026-10-21
+
+An EPUB book converts into notes, a note's history takes far less room, and
+the app stops touching files on its own thread.
+
+A book opened in the reader, selected in the tree, found in the palette,
+dropped on the window or shared into Niman can be converted into a folder
+of notes, one per chapter, with its pictures and links carried over; the
+conversion asks first and can be cancelled at any step. A note's history is
+kept as objects named by their content and packed into deltas off the
+save's path, so a long history costs a fraction of the disk it did. No
+file call runs on the UI isolate any more, a note is never read beside a
+write of it, and the tree re-reads only the folders a change moved rows in.
+
+### Added
+- **EPUB**: convert a book into notes from the reader, the tree, the palette, Settings, a drop or a share (#1138, #1151)
+- **Diagnostics**: an exported log names its build and its device, and every action's log line says what the app holds (#1135, #1144)
+
+### Changed
+- **History**: versions are objects named by their content, listed by a log, packed into deltas and collected off the save's path (#1148)
+- **Android**: a release ships arm64-v8a alone (#1146)
+- **Performance**: the tree warms its paged statement and re-reads only the folders a change moved rows in; a long note opens on a scan of its top; the frontmatter panel reads its YAML once per block (#1132, #1135)
+- **Links**: a Markdown link's `#fragment` is percent-decoded like its path (#1151)
+
+### Fixed
+- **Saving**: a note is never read beside a write of it, a reindex stays out of the next save, and a save waits for the read it cancelled (#1132, #1137)
+- **Editor**: a long note opened over one still read on is read on too (#1132)
+- **Live editor**: a table's + handles follow it when the note scrolls
+- **I/O**: no synchronous file call on the UI isolate (#1143)
+- **Sync**: a watcher batch's probe finishes before the next batch's begins (#1147)
+- **Build**: a build from a tree with uncommitted changes says `-dirty`, and `niman.bat` refuses an unknown apk flavor (#1147)
+
 ## [0.2.7] - 2026-10-20
 
 Niman runs on Android 14, and a link to a heading of the same note lands
