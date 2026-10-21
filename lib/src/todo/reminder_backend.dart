@@ -74,6 +74,13 @@ abstract interface class ReminderBackend {
   /// [exact] picks minute precision over a Doze-batched fallback.
   Future<void> schedule(TodoReminder reminder, {required bool exact});
 
+  /// How many notifications the system keeps pending, or null for no
+  /// limit. iOS keeps the 64 most recently scheduled and drops the rest
+  /// without a word, so the service hands such a backend only the soonest
+  /// that many; the next reconcile — every resume and reload makes one —
+  /// tops the window up as they fire.
+  int? get pendingLimit;
+
   /// Whether [schedule] posts a reminder whose moment has already passed.
   ///
   /// Android's alarm is a future instant: a past one cannot be armed, and

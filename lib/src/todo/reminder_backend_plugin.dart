@@ -216,6 +216,9 @@ final class PluginReminderBackend implements ReminderBackend {
   /// passed while the app was closed was already delivered by the system,
   /// so there is nothing for the app to show late.
   @override
+  int? get pendingLimit => null;
+
+  @override
   bool get firesOverdue => false;
 
   @override

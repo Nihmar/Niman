@@ -13,8 +13,12 @@ final class FakeReminderBackend implements ReminderBackend {
   ///
   /// [firesOverdue] defaults to the Android answer (false); pass true for
   /// a fake desktop, whose timer fires an already-past reminder.
-  new({List<int>? pending, this.firesOverdue = false})
+  new({List<int>? pending, this.firesOverdue = false, this.pendingLimit})
     : _pending = <int>{...?pending};
+
+  /// The fake system's limit on pending notifications (iOS's 64), if any.
+  @override
+  final int? pendingLimit;
 
   final Set<int> _pending;
 
@@ -82,6 +86,9 @@ final class FakeReminderBackend implements ReminderBackend {
 
   @override
   void noteWanted(Iterable<TodoReminder> wanted) {}
+
+  /// The system delivers [id]: it is no longer pending.
+  void fire(int id) => _pending.remove(id);
 
   @override
   Future<void> cancel(int id) async {

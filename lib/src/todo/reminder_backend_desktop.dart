@@ -109,6 +109,9 @@ final class DesktopReminderBackend implements ReminderBackend {
   @override
   bool get firesOverdue => true;
 
+  @override
+  int? get pendingLimit => null;
+
   /// Posts [reminder], logging rather than throwing: the timer callback has
   /// no caller to return an error to.
   ///

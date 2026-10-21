@@ -8,11 +8,13 @@
 /// alarms to manage: a calendar trigger is exact, and the permission
 /// prompt is the only precondition.
 ///
-/// iOS keeps only the 64 most recently scheduled notifications; topping
-/// that window up is iOS work of its own (phase 3), not done here.
+/// iOS keeps only the 64 most recently scheduled notifications: the
+/// backend says so (`pendingLimit`), and the service schedules the soonest
+/// 64, topping the window up on every reconcile.
 library;
 
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:niman/src/core/logging.dart';
@@ -132,6 +134,10 @@ final class DarwinReminderBackend implements ReminderBackend {
 
   /// False: a scheduled notification is a future instant, and one whose
   /// moment passed while Niman was closed was delivered by the system.
+  /// iOS's 64; a Mac documents no limit.
+  @override
+  int? get pendingLimit => Platform.isIOS ? 64 : null;
+
   @override
   bool get firesOverdue => false;
 
