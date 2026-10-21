@@ -14,6 +14,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
+import 'package:niman/src/core/percent.dart';
 import 'package:niman/src/import/bounded_entry.dart';
 import 'package:path/path.dart' as p;
 import 'package:xml/xml.dart';
@@ -158,17 +159,10 @@ final class EpubArchive {
       for (final reference in document.descendantElements)
         if (reference.localName == 'CipherReference')
           if (reference.getAttribute('URI') case final uri?)
-            p.posix.normalize(_decoded(uri)),
+            p.posix.normalize(percentDecoded(uri)),
     };
   }
 }
-
-/// [uri] percent-decoded, or as written where a stray `%` is a character.
-String _decoded(String uri) =>
-    _badEscape.hasMatch(uri) ? uri : Uri.decodeFull(uri);
-
-/// A `%` that does not open a two-digit escape.
-final RegExp _badEscape = RegExp('%(?![0-9A-Fa-f]{2})');
 
 /// Whether the file at [path] is an EPUB, whatever it is called: the format
 /// opens its zip on a `mimetype` entry, stored as it is, that says

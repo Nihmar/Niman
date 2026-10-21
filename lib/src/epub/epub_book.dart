@@ -18,6 +18,7 @@ import 'dart:typed_data';
 
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart' as html;
+import 'package:niman/src/core/percent.dart';
 import 'package:niman/src/epub/epub_archive.dart';
 import 'package:niman/src/epub/epub_info.dart';
 import 'package:niman/src/markdown/from_html/html_markdown.dart';
@@ -255,17 +256,15 @@ final RegExp _scheme = RegExp('^[A-Za-z][A-Za-z0-9+.-]*:');
 String _resolve(String dir, String href) {
   final hash = href.indexOf('#');
   final bare = hash < 0 ? href : href.substring(0, hash);
-  // Percent-decoded where the escapes are well formed; a stray `%` is a
-  // character of the name.
-  final decoded = _badEscape.hasMatch(bare) ? bare : Uri.decodeComponent(bare);
+  // A book spells a name either way — `cit%C3%A9.xhtml`, or the raw UTF-8
+  // `cité.xhtml` that most books with accents or CJK names write — and a
+  // stray `%` is a character of it: [percentDecoded] reads all three.
+  final decoded = percentDecoded(bare);
   final joined = dir.isEmpty || dir == '.'
       ? decoded
       : p.posix.join(dir, decoded);
   return p.posix.normalize(joined);
 }
-
-/// A `%` that does not open a two-digit escape.
-final RegExp _badEscape = RegExp('%(?![0-9A-Fa-f]{2})');
 
 /// The elements under [node] named [local], whatever their prefix: an OPF
 /// may write `<item>` or `<opf:item>`.
