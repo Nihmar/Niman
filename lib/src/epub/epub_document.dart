@@ -5,7 +5,7 @@
 /// (the OPF), whose manifest lists the book's files and whose spine says
 /// the order its chapters are read in; the table of contents is the EPUB 3
 /// navigation document or the EPUB 2 NCX. Every chapter is converted
-/// ([HtmlMarkdown]) and the chapters are joined in spine order, a rule
+/// (`HtmlMarkdown`) and the chapters are joined in spine order, a rule
 /// between them. What the reader needs besides the text comes with it:
 /// the table of contents and the book's own links, as lines of that text,
 /// and the pictures, extracted to a folder of the app's cache.
@@ -17,12 +17,10 @@ import 'dart:isolate';
 
 import 'package:archive/archive.dart';
 import 'package:crypto/crypto.dart';
-import 'package:html/dom.dart' as dom;
-import 'package:html/parser.dart' as html;
-import 'package:niman/src/markdown/from_html/html_markdown.dart';
+import 'package:niman/src/epub/epub_archive.dart';
+import 'package:niman/src/epub/epub_book.dart';
 import 'package:niman/src/reading/book_location.dart';
 import 'package:path/path.dart' as p;
-import 'package:xml/xml.dart';
 
 /// One entry of a book's table of contents: its title, the line of the
 /// book's text it opens on, and how deep it is nested (0 at the top).
@@ -70,10 +68,10 @@ final class EpubDocument {
   final String? mathReport;
 
   /// How the text names a picture: `epub-picture:3`.
-  static const String pictureScheme = 'epub-picture';
+  static const String pictureScheme = epubPictureScheme;
 
   /// How the text names a link into the book: `epub-link:3`.
-  static const String linkScheme = 'epub-link';
+  static const String linkScheme = epubLinkScheme;
 
   /// The line [target] — a link's href in the text — goes to, or null
   /// when it is not a link into the book.
@@ -152,117 +150,60 @@ String pictureDirOf(String path, String cacheDir) {
 
 /// Reads the EPUB at [path], here; see [openEpub].
 ///
-/// Throws a [FormatException] when the file is not an EPUB it can read.
+/// Throws a [FormatException] when the file is not an EPUB it can read: an
+/// [EpubRefused] says why (not a book, protected, too large).
 EpubDocument readEpub(String path, String pictureDir) {
-  final archive = ZipDecoder().decodeBytes(File(path).readAsBytesSync());
-  final book = _Book(archive);
-  final opfPath = book.packagePath();
-  final opf = book.xml(opfPath);
-  final opfDir = p.posix.dirname(opfPath);
+  final input = InputFileStream(path);
+  try {
+    final book = parseEpub(EpubArchive.open(input));
+    final text = StringBuffer();
+    final chapterStart = <String, int>{};
+    final anchors = <String, Map<String, int>>{};
+    var line = 0;
+    for (final chapter in book.chapters) {
+      if (text.isNotEmpty) {
+        // A rule between two chapters, a blank line on each side of it.
+        text.write('\n\n---\n\n');
+        line += 4;
+      }
+      chapterStart[chapter.file] = line;
+      anchors[chapter.file] = {
+        for (final entry in chapter.anchors.entries)
+          entry.key: line + entry.value,
+      };
+      text.write(chapter.markdown);
+      line += '\n'.allMatches(chapter.markdown).length;
+    }
+    text.write('\n');
 
-  final manifest = <String, _Item>{};
-  for (final item in _named(opf, 'item')) {
-    final id = item.getAttribute('id');
-    final href = item.getAttribute('href');
-    if (id == null || href == null) continue;
-    manifest[id] = (
-      path: _resolve(opfDir, href),
-      type: item.getAttribute('media-type') ?? '',
-      properties: item.getAttribute('properties') ?? '',
+    int? lineOf(String file, String fragment) {
+      final start = chapterStart[file];
+      if (start == null) return null;
+      if (fragment.isEmpty) return start;
+      return anchors[file]?[fragment] ?? start;
+    }
+
+    return EpubDocument(
+      title: book.info.title ?? p.basenameWithoutExtension(path),
+      markdown: text.toString(),
+      contents: [
+        for (final entry in book.contents)
+          if (lineOf(entry.file, entry.fragment) case final line?)
+            (title: entry.title, line: line, depth: entry.depth),
+      ],
+      pictures: _extract(book, pictureDir),
+      links: [
+        for (final target in book.links) lineOf(target.file, target.fragment),
+      ],
+      chapters: [
+        for (final MapEntry(key: file, value: line) in chapterStart.entries)
+          (file: file, line: line),
+      ],
+      mathReport: _mathReport(book.formulaSvgs, book.firstTex, book.mathMl),
     );
+  } finally {
+    input.closeSync();
   }
-  final spine = [
-    for (final ref in _named(opf, 'itemref'))
-      if (manifest[ref.getAttribute('idref')] case final item?) item.path,
-  ];
-  if (spine.isEmpty) throw const FormatException('the book has no chapters');
-
-  final pictures = <String>[];
-  final targets = <({String file, String fragment})>[];
-  final chapterStart = <String, int>{};
-  final anchors = <String, Map<String, int>>{};
-  final text = StringBuffer();
-  var line = 0;
-  var formulaSvgs = 0;
-  var mathMl = 0;
-  String? firstTex;
-  for (final chapter in spine) {
-    final file = book.file(chapter);
-    if (file == null) continue;
-    final dir = p.posix.dirname(chapter);
-    final chapterText = book.text(file);
-    for (final match in _svgFormula.allMatches(chapterText)) {
-      formulaSvgs++;
-      firstTex ??= match.group(1);
-    }
-    mathMl += _mathMl.allMatches(chapterText).length;
-    final converted = HtmlMarkdown(
-      picture: (src) {
-        final resolved = _resolve(dir, src);
-        if (book.file(resolved) == null) return null;
-        var index = pictures.indexOf(resolved);
-        if (index < 0) {
-          index = pictures.length;
-          pictures.add(resolved);
-        }
-        return '${EpubDocument.pictureScheme}:$index';
-      },
-      link: (href) {
-        if (_scheme.hasMatch(href)) return href;
-        final hash = href.indexOf('#');
-        final target = hash < 0 ? href : href.substring(0, hash);
-        final fragment = hash < 0 ? '' : href.substring(hash + 1);
-        targets.add((
-          file: target.isEmpty ? chapter : _resolve(dir, target),
-          fragment: fragment,
-        ));
-        return '${EpubDocument.linkScheme}:${targets.length - 1}';
-      },
-    ).convert(chapterText);
-    if (converted.markdown.trim().isEmpty) continue;
-    if (text.isNotEmpty) {
-      // A rule between two chapters, a blank line on each side of it.
-      text.write('\n\n---\n\n');
-      line += 4;
-    }
-    chapterStart[chapter] = line;
-    anchors[chapter] = {
-      for (final entry in converted.anchors.entries)
-        entry.key: line + entry.value,
-    };
-    text.write(converted.markdown);
-    line += '\n'.allMatches(converted.markdown).length;
-  }
-  // A spine that resolved to no readable text is as unreadable as an
-  // empty one: the reader is told rather than shown a blank pane (#377).
-  if (chapterStart.isEmpty) {
-    throw const FormatException('the book has no chapters');
-  }
-  text.write('\n');
-
-  int? lineOf(String file, String fragment) {
-    final start = chapterStart[file];
-    if (start == null) return null;
-    if (fragment.isEmpty) return start;
-    return anchors[file]?[fragment] ?? start;
-  }
-
-  return EpubDocument(
-    title: _title(opf) ?? p.basenameWithoutExtension(path),
-    markdown: text.toString(),
-    contents: [
-      for (final entry in book.contents(opf, manifest))
-        if (lineOf(entry.file, entry.fragment) case final line?)
-          (title: entry.title, line: line, depth: entry.depth),
-    ],
-    pictures: _extract(book, pictures, pictureDir),
-    links: [for (final target in targets) lineOf(target.file, target.fragment)],
-    chapters: [
-      for (final MapEntry(key: file, value: line) in chapterStart.entries)
-        (file: file, line: line),
-    ],
-    mathReport: _mathReport(formulaSvgs, firstTex, mathMl),
-  );
 }
 
 /// The math a book's chapters showed, as one log line's worth (#303):
@@ -274,191 +215,22 @@ String? _mathReport(int formulas, String? firstTex, int mathMl) {
   return '$formulas svg formulas$sample$ml';
 }
 
-/// A formula SVG's TeX, in its `aria-label`; an ad-hoc diagnostic (#303).
-final RegExp _svgFormula = RegExp(
-  '<svg[^>]*aria-label="([^"]*)"',
-  caseSensitive: false,
-);
-
-/// A MathML element; an ad-hoc diagnostic (#303).
-final RegExp _mathMl = RegExp(r'<math[\s>]', caseSensitive: false);
-
-/// A file of the book's manifest.
-typedef _Item = ({String path, String type, String properties});
-
-/// Where a table of contents entry points.
-typedef _Entry = ({String title, String file, String fragment, int depth});
-
-/// An `http:`, `mailto:`… href, which leaves the book.
-final RegExp _scheme = RegExp('^[A-Za-z][A-Za-z0-9+.-]*:');
-
-/// [href], as written in a file of folder [dir], as a path in the zip.
-String _resolve(String dir, String href) {
-  final hash = href.indexOf('#');
-  final bare = hash < 0 ? href : href.substring(0, hash);
-  // Percent-decoded where the escapes are well formed; a stray `%` is a
-  // character of the name.
-  final decoded = _badEscape.hasMatch(bare) ? bare : Uri.decodeComponent(bare);
-  final joined = dir.isEmpty || dir == '.'
-      ? decoded
-      : p.posix.join(dir, decoded);
-  return p.posix.normalize(joined);
-}
-
-/// A `%` that does not open a two-digit escape.
-final RegExp _badEscape = RegExp('%(?![0-9A-Fa-f]{2})');
-
-/// The elements under [node] named [local], whatever their prefix: an OPF
-/// may write `<item>` or `<opf:item>`.
-Iterable<XmlElement> _named(XmlNode node, String local) =>
-    node.descendantElements.where((element) => element.localName == local);
-
-/// The first child of [element] named [local], whatever its prefix.
-XmlElement? _child(XmlElement element, String local) => element.childElements
-    .where((child) => child.localName == local)
-    .firstOrNull;
-
-String? _title(XmlDocument opf) {
-  for (final element in opf.descendantElements) {
-    if (element.localName == 'title' && element.innerText.trim().isNotEmpty) {
-      return element.innerText.trim();
-    }
-  }
-  return null;
-}
-
-/// Writes [pictures] under [dir], each once: a book opened again finds its
-/// pictures where it left them.
-Map<String, String> _extract(_Book book, List<String> pictures, String dir) {
+/// Writes the book's pictures under [dir], each once: a book opened again
+/// finds its pictures where it left them.
+Map<String, String> _extract(EpubBook book, String dir) {
   final out = <String, String>{};
-  if (pictures.isEmpty) return out;
+  if (book.pictures.isEmpty) return out;
   Directory(dir).createSync(recursive: true);
-  for (var index = 0; index < pictures.length; index++) {
-    final file = book.file(pictures[index]);
-    if (file == null) continue;
+  for (var index = 0; index < book.pictures.length; index++) {
     final target = File(
-      p.join(dir, '$index${p.extension(pictures[index]).toLowerCase()}'),
+      p.join(dir, '$index${p.extension(book.pictures[index]).toLowerCase()}'),
     );
     if (!target.existsSync()) {
-      final bytes = file.readBytes();
+      final bytes = book.pictureBytes(index);
       if (bytes == null) continue;
       target.writeAsBytesSync(bytes, flush: true);
     }
     out['${EpubDocument.pictureScheme}:$index'] = target.path;
   }
   return out;
-}
-
-/// The zip, read as a book.
-final class _Book {
-  new(this._archive);
-
-  final Archive _archive;
-
-  ArchiveFile? file(String path) => _archive.findFile(path);
-
-  String text(ArchiveFile file) =>
-      utf8.decode(file.readBytes() ?? const <int>[], allowMalformed: true);
-
-  XmlDocument xml(String path) {
-    final entry = file(path);
-    if (entry == null) throw FormatException('"$path" is not in the book');
-    return XmlDocument.parse(text(entry));
-  }
-
-  /// The package document's path, from `META-INF/container.xml`.
-  String packagePath() {
-    final container = xml('META-INF/container.xml');
-    final rootfile = _named(container, 'rootfile').firstOrNull;
-    final path = rootfile?.getAttribute('full-path');
-    if (path == null) throw const FormatException('no package document');
-    return path;
-  }
-
-  /// The table of contents: the EPUB 3 navigation document when there is
-  /// one, the EPUB 2 NCX otherwise.
-  List<_Entry> contents(XmlDocument opf, Map<String, _Item> manifest) {
-    final nav = manifest.values
-        .where((item) => item.properties.split(' ').contains('nav'))
-        .firstOrNull;
-    if (nav != null) {
-      final entries = _navContents(nav.path);
-      if (entries.isNotEmpty) return entries;
-    }
-    final spine = _named(opf, 'spine').firstOrNull;
-    final ncx =
-        manifest[spine?.getAttribute('toc')] ??
-        manifest.values
-            .where((item) => item.type == 'application/x-dtbncx+xml')
-            .firstOrNull;
-    return ncx == null ? const [] : _ncxContents(ncx.path);
-  }
-
-  List<_Entry> _navContents(String path) {
-    final entry = file(path);
-    if (entry == null) return const [];
-    final document = html.parse(text(entry));
-    final navs = document.getElementsByTagName('nav');
-    final toc =
-        navs
-            .where((nav) => (nav.attributes['epub:type'] ?? '') == 'toc')
-            .firstOrNull ??
-        navs.firstOrNull;
-    final list = toc?.querySelector('ol');
-    if (list == null) return const [];
-    final dir = p.posix.dirname(path);
-    final out = <_Entry>[];
-    void walk(dom.Element ol, int depth) {
-      for (final li in ol.children) {
-        if (li.localName != 'li') continue;
-        final a = li.querySelector('a');
-        final href = a?.attributes['href'];
-        if (a != null && href != null) {
-          final title = a.text.replaceAll(RegExp(r'\s+'), ' ').trim();
-          if (title.isNotEmpty) out.add(_entry(dir, href, title, depth));
-        }
-        for (final nested in li.children) {
-          if (nested.localName == 'ol') walk(nested, depth + 1);
-        }
-      }
-    }
-
-    walk(list, 0);
-    return out;
-  }
-
-  List<_Entry> _ncxContents(String path) {
-    final ncx = xml(path);
-    final map = _named(ncx, 'navMap').firstOrNull;
-    if (map == null) return const [];
-    final dir = p.posix.dirname(path);
-    final out = <_Entry>[];
-    void walk(XmlElement parent, int depth) {
-      for (final point in parent.childElements) {
-        if (point.localName != 'navPoint') continue;
-        final title = _child(
-          point,
-          'navLabel',
-        )?.innerText.replaceAll(RegExp(r'\s+'), ' ').trim();
-        final src = _child(point, 'content')?.getAttribute('src');
-        if (title != null && title.isNotEmpty && src != null) {
-          out.add(_entry(dir, src, title, depth));
-        }
-        walk(point, depth + 1);
-      }
-    }
-
-    walk(map, 0);
-    return out;
-  }
-
-  static _Entry _entry(String dir, String href, String title, int depth) {
-    final hash = href.indexOf('#');
-    return (
-      title: title,
-      file: _resolve(dir, href),
-      fragment: hash < 0 ? '' : href.substring(hash + 1),
-      depth: depth,
-    );
-  }
 }
