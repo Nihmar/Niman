@@ -367,12 +367,12 @@ final class TodoStore implements TodoSource {
     String name,
     TodoFileContent file, {
     required bool allowCreate,
-  }) {
+  }) async {
     final target = File(p.join(root, name));
-    if (!target.existsSync() && !allowCreate) {
+    if (!allowCreate && !await target.exists()) {
       throw StateError('Missing todo file: "$name"');
     }
-    return writeFileAtomically(target, utf8.encode(joinTodoFile(file)));
+    await writeFileAtomically(target, utf8.encode(joinTodoFile(file)));
   }
 }
 

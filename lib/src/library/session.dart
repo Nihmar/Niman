@@ -38,6 +38,10 @@ import 'package:niman/src/update/update_check.dart';
 import 'package:niman/src/widget/widget_configs.dart';
 import 'package:niman/src/workspace/workspace_slot.dart';
 
+/// A Markdown file as the disk has it: its library-relative path, size and
+/// modification time ([NoteOperations.markdownOnDisk]).
+typedef DiskNoteStamp = ({String path, int size, DateTime modified});
+
 /// Operations the UI layer performs on an open library.
 ///
 /// Implemented by [NoteOps] (real disk + index, production) and by an
@@ -121,6 +125,12 @@ abstract interface class NoteOperations {
 
   /// The indexed note/folder at library-relative [path], or null.
   Future<Note?> find(String path);
+
+  /// The Markdown files directly in [folder] (library-relative, '' for the
+  /// root) as the disk has them now, whether the index has caught up with
+  /// them or not; empty when the folder is not there. Read off the UI
+  /// isolate.
+  Future<List<DiskNoteStamp>> markdownOnDisk(String folder);
 
   /// The paths of the notes [query] finds by name, alias or title, best
   /// matches first (#155, #1043); none for a text under two characters.

@@ -63,7 +63,7 @@ Future<bool> refreshWidgetTodoForNewDay(
     return false;
   }
   try {
-    if (!Directory(target.library).existsSync()) return false;
+    if (!await Directory(target.library).exists()) return false;
     final store = (storeFactory ?? TodoStore.new)(root: target.library);
     final snapshot = await store.load();
     applyWidgetLanguage(target.language);

@@ -14,6 +14,7 @@ import 'package:niman/src/core/drop_in.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/todo/todo_source.dart';
 import 'package:niman/src/ui/capture/capture_services.dart';
+import 'package:niman/src/ui/drop_target.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/window_controller.dart';
@@ -90,6 +91,13 @@ void main() {
 
   Future<void> dropped(WidgetTester tester, List<String> paths) async {
     await fromHost(tester, 'drop', paths);
+    // The drop asks which paths are folders on a background isolate, whose
+    // answer the fake clock does not move: the same question, asked after
+    // it on the real clock, comes back after it.
+    await tester.runAsync(() async {
+      await foldersAmong(paths);
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+    });
     await settle(tester);
   }
 

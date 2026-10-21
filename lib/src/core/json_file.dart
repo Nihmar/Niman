@@ -41,7 +41,6 @@ final class JsonFile {
 
 Future<String?> _read(String path) async {
   final file = File(path);
-  if (!file.existsSync()) return null;
   try {
     return await file.readAsString();
   } on FileSystemException {

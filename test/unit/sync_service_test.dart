@@ -323,7 +323,7 @@ void main() {
       File(abs)
         ..parent.createSync()
         ..writeAsStringSync('from another app');
-      service.watched([abs, p.join(path, '.history', 'x.v1')], []);
+      await service.watched([abs, p.join(path, '.history', 'x.v1')], []);
       await eventually(
         () => remote('Notes/b.md') == 'from another app',
         reason: 'upload',
@@ -334,7 +334,7 @@ void main() {
       server.putFile('c.md', utf8.encode('remote'));
       await service.syncNow();
       await ops.writer.indexed;
-      service.watched([p.join(path, 'c.md')], []);
+      await service.watched([p.join(path, 'c.md')], []);
       await pumpEventQueue();
       expect(await store.pendingOps(path), isEmpty);
     });

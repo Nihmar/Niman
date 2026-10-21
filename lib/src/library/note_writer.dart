@@ -730,7 +730,7 @@ Future<void> copyFileOver(
   } on Object {
     // The staged copy never becomes the live file: a failure here leaves
     // [abs] holding exactly the bytes it held before (issue #369).
-    if (staged.existsSync()) {
+    if (await staged.exists()) {
       try {
         await delete(staged).timeout(grace);
       } on Object {

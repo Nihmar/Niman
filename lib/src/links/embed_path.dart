@@ -12,11 +12,10 @@
 /// read view draws no file of the user's and an export inlines none of its
 /// bytes (#385).
 //
-// The probes are the async dart:io forms on purpose: the lint prefers the
-// sync ones, and a stat on Android is a FUSE round trip the UI isolate must
-// not wait on (`AGENTS.md`). Callers that read many targets in a row — an
-// export — resolve them together, on a background isolate.
-// ignore_for_file: avoid_slow_async_io
+// The probes are the async dart:io forms on purpose: a stat on Android is a
+// FUSE round trip the UI isolate must not wait on (`AGENTS.md`). Callers
+// that read many targets in a row — an export — resolve them together, on a
+// background isolate.
 library;
 
 import 'dart:io';

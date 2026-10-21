@@ -488,7 +488,8 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
   /// them at once.
   /// Choosing none means the locale default.
   Future<void> _chooseSpellDictionaries(EditorSpellCheck spell) async {
-    final names = availableSpellDictionaries();
+    final names = await availableSpellDictionaries();
+    if (!mounted) return;
     final selected = _spellDictionaries.toSet();
     final choice = await showDialog<List<String>>(
       context: context,

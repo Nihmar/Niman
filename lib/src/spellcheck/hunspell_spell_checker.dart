@@ -445,10 +445,11 @@ SpellChecker createSpellChecker({String? dictionary}) =>
     const NoopSpellChecker();
 
 /// The dictionaries the settings offer: the languages Windows spellchecks,
-/// or every hunspell pair found on the machine.
-List<String> availableSpellDictionaries() {
+/// or every hunspell pair found on the machine, looked for on a background
+/// isolate: the search lists every dictionary folder (#1143).
+Future<List<String>> availableSpellDictionaries() async {
   final names = Platform.isWindows
       ? windowsSpellLanguages()
-      : discoverDictionaries().keys.toList();
+      : await Isolate.run(() => discoverDictionaries().keys.toList());
   return names..sort();
 }

@@ -61,7 +61,7 @@ Future<WebDavDownload> downloadToFile(
     );
     return download;
   } on Object {
-    if (temp.existsSync()) await temp.delete();
+    if (await temp.exists()) await temp.delete();
     rethrow;
   }
 }

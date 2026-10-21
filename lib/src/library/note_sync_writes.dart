@@ -147,8 +147,9 @@ final class NoteSyncWrites {
   Future<void> trash(String path) {
     return serialize(() async {
       final abs = _abs(path);
-      final isDir = Directory(abs).existsSync();
-      if (!isDir && !File(abs).existsSync()) return;
+      final type = await FileSystemEntity.type(abs);
+      if (type == FileSystemEntityType.notFound) return;
+      final isDir = type == FileSystemEntityType.directory;
       _markSyncWrite(path);
       final trashAbs = await moveIntoTrash(path, isDir: isDir);
       await indexer.applyEvents(root, [abs, trashAbs]);
@@ -176,10 +177,10 @@ final class NoteSyncWrites {
     return serialize(() async {
       final fromAbs = _abs(from);
       final toAbs = _abs(to);
-      if (!File(fromAbs).existsSync()) {
+      if (!await File(fromAbs).exists()) {
         throw FileSystemException('Nothing to move', fromAbs);
       }
-      if (File(toAbs).existsSync() || Directory(toAbs).existsSync()) {
+      if (await FileSystemEntity.type(toAbs) != FileSystemEntityType.notFound) {
         throw FileSystemException('Already taken', toAbs);
       }
       await Directory(p.dirname(toAbs)).create(recursive: true);

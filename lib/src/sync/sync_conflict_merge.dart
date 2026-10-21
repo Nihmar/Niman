@@ -155,7 +155,7 @@ final class SyncConflictMerger {
       );
       return SyncStepOutcome.conflict;
     } finally {
-      if (fetched.temp.existsSync()) await fetched.temp.delete();
+      if (await fetched.temp.exists()) await fetched.temp.delete();
     }
   });
 

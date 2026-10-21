@@ -115,7 +115,7 @@ final class SyncScanner {
           rows[entry.key] = entry.value;
         }
       }
-      final localDir = Directory(p.join(root, path)).existsSync();
+      final localDir = await FileSystemEntity.isDirectory(p.join(root, path));
       if (localDir) {
         local.addAll(await scanLocal(under: path));
       } else {

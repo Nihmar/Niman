@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/db/app_database.dart';
@@ -12,19 +13,32 @@ typedef KnownLibraries = ({List<KnownLibrary> entries, Set<String> missing});
 
 /// Reads the known libraries and checks which folders still exist.
 ///
-/// The check is a stat per row, not a walk: the list is a handful of
-/// entries, and the alternative is a row that opens onto an empty tree
-/// because its drive is unplugged.
+/// The check is a stat per row, not a walk: the alternative is a row that
+/// opens onto an empty tree because its drive is unplugged. The stats run
+/// together on a background isolate: one per library ever opened, each a
+/// FUSE round trip on Android, and an unplugged drive's can hang (#1143).
 Future<KnownLibraries> loadKnownLibraries(LibrarySession session) async {
   final entries = await session.knownLibraries();
-  final missing = <String>{};
-  for (final entry in entries) {
-    // Sync on purpose: `exists()` spawns an isolate per call, which costs
-    // more than the stat it avoids for a list this short.
-    if (!Directory(entry.path).existsSync()) missing.add(entry.path);
-  }
+  if (entries.isEmpty) return (entries: entries, missing: <String>{});
+  final missing = await missingFolders([
+    for (final entry in entries) entry.path,
+  ]);
   return (entries: entries, missing: missing);
 }
+
+/// Which of the paths it is handed are not folders right now, asked on a
+/// background isolate. A widget test swaps it for the same check made in
+/// place: its fake clock does not drive an isolate's answer.
+@visibleForTesting
+Future<Set<String>> Function(List<String> paths) missingFolders =
+    _missingFolders;
+
+Future<Set<String>> _missingFolders(List<String> paths) => Isolate.run(
+  () => {
+    for (final path in paths)
+      if (!Directory(path).existsSync()) path,
+  },
+);
 
 /// The libraries the app knows about, on the home screen (T-ML-05).
 ///

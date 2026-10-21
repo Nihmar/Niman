@@ -17,6 +17,7 @@ library;
 
 import 'dart:async';
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/drop_in.dart';
@@ -33,20 +34,28 @@ typedef SortedDrop = ({
   List<String> rejected,
 });
 
+/// Which of the dropped [paths] are folders, asked on a background isolate
+/// together: one stat apiece, which the UI isolate does not make (#1143).
+Future<Set<String>> foldersAmong(List<String> paths) => Isolate.run(
+  () => {
+    for (final path in paths)
+      if (FileSystemEntity.isDirectorySync(path)) path,
+  },
+);
+
 /// Sorts the dropped [paths]: Markdown files to open, folders and Notion
-/// exports to import, and the rest, which is left alone. [isFolder]
-/// stands in for the disk in tests.
+/// exports to import, and the rest, which is left alone. [isFolder] answers
+/// for the disk: [foldersAmong] asks it off the UI isolate.
 SortedDrop sortDrop(
   List<String> paths, {
-  bool Function(String path)? isFolder,
+  required bool Function(String path) isFolder,
 }) {
-  final folder = isFolder ?? FileSystemEntity.isDirectorySync;
   final files = <String>[];
   final folders = <String>[];
   final rejected = <String>[];
   for (final path in paths) {
     final extension = p.extension(path).toLowerCase().replaceFirst('.', '');
-    if (folder(path)) {
+    if (isFolder(path)) {
       folders.add(path);
     } else if (editorOnlyExtensions.contains(extension)) {
       files.add(path);
@@ -148,14 +157,23 @@ final class _AppDropTargetState extends State<AppDropTarget> {
           );
           return;
         }
-        final sorted = sortDrop(paths);
-        _log.debug(
-          'drop sorted: ${sorted.files.length} file(s), '
-          '${sorted.folders.length} folder(s), '
-          '${sorted.rejected.length} left alone',
-        );
-        deliverDrop(sorted, widget.requests, messenger);
+        unawaited(_sort(paths, messenger));
     }
+  }
+
+  Future<void> _sort(
+    List<String> paths,
+    ScaffoldMessengerState? messenger,
+  ) async {
+    final folders = await foldersAmong(paths);
+    if (!mounted) return;
+    final sorted = sortDrop(paths, isFolder: folders.contains);
+    _log.debug(
+      'drop sorted: ${sorted.files.length} file(s), '
+      '${sorted.folders.length} folder(s), '
+      '${sorted.rejected.length} left alone',
+    );
+    deliverDrop(sorted, widget.requests, messenger);
   }
 
   @override

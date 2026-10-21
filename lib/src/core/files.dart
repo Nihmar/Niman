@@ -137,7 +137,7 @@ Future<DiskStamp?> writeFileAtomically(File file, List<int> data) async {
     await tmp.writeAsBytes(data);
     return await publishTempFile(tmp, file.path);
   } catch (_) {
-    if (tmp.existsSync()) {
+    if (await tmp.exists()) {
       await tmp.delete();
     }
     rethrow;
@@ -177,7 +177,7 @@ Future<DiskStamp?> publishTempFile(File temp, String target) async {
     await handle.close();
   }
   keepCreationTime(target: target, replacement: temp.path);
-  final stamp = DiskStamp.of(temp.path);
+  final stamp = await DiskStamp.ofAsync(temp.path);
   await temp.rename(target);
   return stamp;
 }
@@ -499,7 +499,7 @@ Future<String> uniqueFileName(
     final candidate = i == 0 ? '$base$ext' : '${base}_$i$ext';
     final abs = p.join(dir.path, candidate);
     if (await _excludedEntry(dir, abs, exclude)) return candidate;
-    if (!_entryExists(abs)) {
+    if (!await _entryExists(abs)) {
       return candidate;
     }
   }
@@ -518,7 +518,7 @@ Future<String> uniqueFolderName(
     final candidate = i == 0 ? base : '${base}_$i';
     final abs = p.join(dir.path, candidate);
     if (await _excludedEntry(dir, abs, exclude)) return candidate;
-    if (!_entryExists(abs)) {
+    if (!await _entryExists(abs)) {
       return candidate;
     }
   }
@@ -531,8 +531,8 @@ Future<String> uniqueFolderName(
 /// A name is free only when no entry of any kind holds it: asking only
 /// after the kind about to be created lets a file pick the name of a folder
 /// (or the reverse), and the rename or create onto it then fails.
-bool _entryExists(String path) =>
-    FileSystemEntity.typeSync(path, followLinks: false) !=
+Future<bool> _entryExists(String path) async =>
+    await FileSystemEntity.type(path, followLinks: false) !=
     FileSystemEntityType.notFound;
 
 /// The slash-separated path of the file at absolute [path] in the library
@@ -645,13 +645,13 @@ int trashTimestampSuffix(DateTime now) {
 /// target, which silently destroyed the earlier copy, #335).
 Future<String> trashFileName(Directory dir, String base, String ext) async {
   final plain = '$base$ext';
-  if (!_entryExists(p.join(dir.path, plain))) {
+  if (!await _entryExists(p.join(dir.path, plain))) {
     return plain;
   }
   final stamp = trashTimestampSuffix(DateTime.now());
   var counter = 1;
   var candidate = '$base.$stamp$ext';
-  while (_entryExists(p.join(dir.path, candidate))) {
+  while (await _entryExists(p.join(dir.path, candidate))) {
     counter += 1;
     candidate = '$base.$stamp-$counter$ext';
   }
@@ -663,13 +663,13 @@ Future<String> trashFileName(Directory dir, String base, String ext) async {
 /// counter while even that is taken (#335).
 Future<String> trashDirName(Directory dir, String base) async {
   final plain = base;
-  if (!_entryExists(p.join(dir.path, plain))) {
+  if (!await _entryExists(p.join(dir.path, plain))) {
     return plain;
   }
   final stamp = trashTimestampSuffix(DateTime.now());
   var counter = 1;
   var candidate = '$base.$stamp';
-  while (_entryExists(p.join(dir.path, candidate))) {
+  while (await _entryExists(p.join(dir.path, candidate))) {
     counter += 1;
     candidate = '$base.$stamp-$counter';
   }

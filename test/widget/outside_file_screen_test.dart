@@ -36,9 +36,6 @@ final class _FakeDocument extends EditorOnlyDocument {
   }
 
   @override
-  bool get exists => true;
-
-  @override
   Stream<void> changes() => _changes.stream;
 
   /// Something else wrote [content] to it.

@@ -2891,7 +2891,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     final ops = widget.controller.ops;
     if (ops == null || !mounted) return;
     final source = File(path);
-    if (!source.existsSync()) return;
+    if (!await source.exists()) return;
     if (p.extension(name).toLowerCase() == '.zip') {
       await _importNotionArchive(source, name, consume: true);
       return;

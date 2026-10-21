@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
@@ -196,6 +197,12 @@ final class NoteOps implements NoteOperations {
   /// The indexed note/folder at library-relative [path], or null.
   @override
   Future<Note?> find(String path) => _dao.find(path);
+
+  @override
+  Future<List<DiskNoteStamp>> markdownOnDisk(String folder) {
+    final library = root;
+    return Isolate.run(() => markdownFilesIn(library, folder));
+  }
 
   @override
   Future<List<String>> notesNamed(String query, {int limit = 50}) =>
@@ -473,7 +480,6 @@ final class NoteOps implements NoteOperations {
       final canonical = segments.join('/');
       final dir = Directory(_abs(canonical));
       // The async form runs off the UI isolate (#875).
-      // ignore: avoid_slow_async_io
       if (!await dir.exists()) {
         await dir.create(recursive: true);
         // Every folder on the way is new too, so the index hears about
@@ -494,7 +500,7 @@ final class NoteOps implements NoteOperations {
   Future<Note> appendToNote(String path, String content) {
     return _synchronized(() async {
       final file = File(_abs(path));
-      final existing = file.existsSync() ? await file.readAsString() : '';
+      final existing = await file.exists() ? await file.readAsString() : '';
       final joined = existing.isEmpty
           ? content
           : '${_endingInABlankLine(existing)}$content';
@@ -958,6 +964,24 @@ final class NoteOps implements NoteOperations {
   /// there. Ends with an empty manifest.
   @override
   Future<void> emptyTrash() => _trash.empty();
+}
+
+/// [NoteOperations.markdownOnDisk]'s listing, for a background isolate: the
+/// existence check, the listing and a stat per file are each a FUSE round
+/// trip on Android (#1143).
+List<DiskNoteStamp> markdownFilesIn(String root, String folder) {
+  final dir = Directory(folder.isEmpty ? root : p.join(root, folder));
+  if (!dir.existsSync()) return const [];
+  return [
+    for (final entry in dir.listSync())
+      if (entry is File && entry.path.toLowerCase().endsWith('.md'))
+        if (entry.statSync() case final stat)
+          (
+            path: p.relative(entry.path, from: root).replaceAll(r'\', '/'),
+            size: stat.size,
+            modified: stat.modified,
+          ),
+  ];
 }
 
 String _noteTextAt(String path) {

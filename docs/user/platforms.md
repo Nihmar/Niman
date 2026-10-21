@@ -33,7 +33,9 @@ the two agree.
   `MANAGE_EXTERNAL_STORAGE`. SAF tree grants are not a substitute — they
   only open `content://`, never the filesystem.
 - **FUSE cost:** every file stat/list is a round trip, so all disk reads
-  run off the UI isolate (`Isolate.run`); Drift writes stay on main.
+  run off the UI isolate (`Isolate.run`); Drift writes stay on main. The
+  files allowed a synchronous file call, and the isolate each runs it on,
+  are listed in `test/unit/ui_isolate_io_test.dart` (#1143).
 - **Reminders:** exact alarms fire with the screen off or the process
   killed. Grant notification permission and, in Niman's **App info** page
   (*Informazioni app*), turn on **Allow background usage** (*Consenti
