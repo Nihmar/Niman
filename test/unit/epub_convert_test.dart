@@ -4,11 +4,14 @@
 // XHTML is written in pieces, and a space between two would be a word
 // of the book: its literals run on without one.
 // ignore_for_file: missing_whitespace_between_adjacent_strings
+import 'dart:async';
 import 'dart:io';
 
 import 'package:archive/archive.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/isolate_gauge.dart';
 import 'package:niman/src/epub/epub_archive.dart';
+import 'package:niman/src/epub/epub_book.dart';
 import 'package:niman/src/epub/epub_conversion.dart';
 import 'package:niman/src/epub/epub_convert_job.dart';
 import 'package:niman/src/epub/epub_convert_plan.dart';
@@ -45,6 +48,7 @@ void main() {
     bool oneNote = false,
   }) => convertEpub((
     source: source,
+    name: null,
     libraryRoot: library,
     parent: parent,
     staging: p.join(library, '.epub.niman-tmp-1'),
@@ -325,6 +329,26 @@ void main() {
     expect(Directory(library).listSync(), isEmpty);
   });
 
+  test(
+    'a book is known by its mimetype entry, whatever it is called',
+    () async {
+      final named = writeTestEpub(
+        book('msf-1234'),
+        chapters: [(path: 'c1.xhtml', body: '<p>x</p>')],
+      ).path;
+      expect(await looksLikeEpub(named), isTrue);
+      final zip = File(book('notion.zip'))
+        ..writeAsBytesSync(
+          ZipEncoder().encodeBytes(
+            Archive()..add(ArchiveFile.string('page.md', '# Page')),
+          ),
+        );
+      expect(await looksLikeEpub(zip.path), isFalse);
+      File(book('short')).writeAsStringSync('PK');
+      expect(await looksLikeEpub(book('short')), isFalse);
+    },
+  );
+
   test('a file that is not a book is refused', () async {
     final source = book('notes.epub');
     File(source).writeAsStringSync('not a zip at all');
@@ -389,6 +413,7 @@ void main() {
     await expectLater(
       convertEpub((
         source: source,
+        name: null,
         libraryRoot: library,
         parent: '',
         staging: p.join(library, '.epub.niman-tmp-2'),
@@ -398,6 +423,208 @@ void main() {
       ), mayFinish: () async => false),
       throwsA(isA<EpubConvertStopped>()),
     );
+    expect(Directory(library).listSync(), isEmpty);
+  });
+
+  test('a cancel leaves the book closed, free to delete or move', () async {
+    final source = writeTestEpub(
+      book('free.epub'),
+      chapters: [
+        for (var i = 0; i < 40; i++)
+          (path: 'c$i.xhtml', body: '<h1>C$i</h1><p>${'text ' * 500}</p>'),
+      ],
+    ).path;
+    // At once, then at the first step, among the notes, and at their end:
+    // forty chapters, so a step each and index.md after them.
+    for (final at in <int?>[null, 0, 10, 25, 40]) {
+      final conversion = await EpubConversion.start(
+        source: source,
+        libraryRoot: library,
+        parent: '',
+        oneNote: false,
+        attachments: 'assets',
+        words: _words,
+      );
+      // Asked from the progress listener, not after a delay: a wait in time
+      // lets a fast host finish first. The cancel is marked before its first
+      // await, so it is seen before the isolate asks to move its notes in.
+      Future<bool>? cancelled;
+      if (at == null) {
+        cancelled = conversion.cancel();
+      } else {
+        conversion.progress.addListener(() {
+          if ((conversion.progress.value?.done ?? -1) >= at) {
+            cancelled ??= conversion.cancel();
+          }
+        });
+      }
+      await expectLater(conversion.done, throwsA(isA<EpubConvertCancelled>()));
+      expect(await cancelled, isTrue);
+      // A killed isolate holds the file open (errno 32 on Windows).
+      File(source).renameSync(book('moved.epub'));
+      File(book('moved.epub')).renameSync(source);
+      expect(Directory(library).listSync(), isEmpty);
+    }
+    File(source).deleteSync();
+    expect(Directory(library).listSync(), isEmpty);
+  });
+
+  test(
+    'a stop between two steps ends it with its book and folder freed',
+    () async {
+      final source = writeTestEpub(
+        book('stopped.epub'),
+        chapters: [
+          for (var i = 0; i < 10; i++)
+            (path: 'c$i.xhtml', body: '<h1>C$i</h1><p>x</p>'),
+        ],
+      ).path;
+      final staging = p.join(library, '.epub.niman-tmp-3');
+      var seen = 0;
+      await expectLater(
+        convertEpub(
+          (
+            source: source,
+            name: null,
+            libraryRoot: library,
+            parent: '',
+            staging: staging,
+            oneNote: false,
+            attachments: 'assets',
+            words: _words,
+          ),
+          progress: (_) => seen++,
+          // True once three steps were written: after some notes were.
+          stopped: () => seen >= 3,
+        ),
+        throwsA(isA<EpubConvertStopped>()),
+      );
+      expect(seen, 3);
+      expect(Directory(staging).existsSync(), isFalse);
+      expect(Directory(library).listSync(), isEmpty);
+      File(source).deleteSync();
+    },
+  );
+
+  test(
+    'a stop while the book is read ends it before any step, all freed',
+    () async {
+      final source = writeTestEpub(
+        book('reading.epub'),
+        chapters: [
+          for (var i = 0; i < 60; i++)
+            (path: 'c$i.xhtml', body: '<h1>C$i</h1><p>${'text ' * 200}</p>'),
+        ],
+      ).path;
+      final staging = p.join(library, '.epub.niman-tmp-4');
+      var asked = 0;
+      var seen = 0;
+      await expectLater(
+        convertEpub(
+          (
+            source: source,
+            name: null,
+            libraryRoot: library,
+            parent: '',
+            staging: staging,
+            oneNote: false,
+            attachments: 'assets',
+            words: _words,
+          ),
+          progress: (_) => seen++,
+          // Asked once before each chapter: true at the second one.
+          stopped: () => ++asked >= 2,
+        ),
+        throwsA(isA<EpubConvertStopped>()),
+      );
+      // Stopped at the second chapter of sixty: not one step was reached.
+      expect(asked, 2);
+      expect(seen, 0);
+      expect(Directory(staging).existsSync(), isFalse);
+      expect(Directory(library).listSync(), isEmpty);
+      File(source).deleteSync();
+    },
+  );
+
+  test('the stepped read is the plain read, a chapter at a time', () async {
+    final source = writeTestEpub(
+      book('stepped.epub'),
+      chapters: [
+        for (var i = 0; i < 6; i++)
+          (
+            path: 'c$i.xhtml',
+            body: '<h1 id="h$i">C$i</h1><p><a href="c0.xhtml#h0">back</a></p>',
+          ),
+      ],
+      nav: '<li><a href="c0.xhtml">C0</a></li>',
+    ).path;
+    final first = InputFileStream(source);
+    final second = InputFileStream(source);
+    final plain = parseEpub(EpubArchive.open(first));
+    var turns = 0;
+    final stepped = await parseEpubStepped(
+      EpubArchive.open(second),
+      between: () async => turns++,
+    );
+    first.closeSync();
+    second.closeSync();
+    expect(turns, 6);
+    // Records hold maps, which compare by identity: compare what they say.
+    expect('${stepped.chapters}', '${plain.chapters}');
+    expect(stepped.contents, plain.contents);
+    expect(stepped.links, plain.links);
+    expect(stepped.pictures, plain.pictures);
+    expect(stepped.info.title, plain.info.title);
+    File(source).deleteSync();
+  });
+
+  test('a cancel counts its job out of the gauge', () async {
+    final source = writeTestEpub(
+      book('gauge.epub'),
+      chapters: [
+        for (var i = 0; i < 40; i++)
+          (path: 'c$i.xhtml', body: '<h1>C$i</h1><p>${'text ' * 500}</p>'),
+      ],
+    ).path;
+    final before = IsolateGauge.inFlight;
+    final conversion = await EpubConversion.start(
+      source: source,
+      libraryRoot: library,
+      parent: '',
+      oneNote: false,
+      attachments: 'assets',
+      words: _words,
+    );
+    expect(IsolateGauge.inFlight, before + 1);
+    expect(await conversion.cancel(), isTrue);
+    await expectLater(conversion.done, throwsA(isA<EpubConvertCancelled>()));
+    expect(IsolateGauge.inFlight, before);
+  });
+
+  test('a cancel racing a refusal answers once, and throws nothing', () async {
+    final source = book('race.epub');
+    File(source).writeAsStringSync('not a zip: refused at once');
+    final uncaught = <Object>[];
+    await runZonedGuarded(() async {
+      for (var round = 0; round < 20; round++) {
+        final conversion = await EpubConversion.start(
+          source: source,
+          libraryRoot: library,
+          parent: '',
+          oneNote: false,
+          attachments: 'assets',
+          words: _words,
+        );
+        // Whichever lands first — the refusal or the cancel — is the answer.
+        final cancelled = conversion.cancel();
+        await expectLater(
+          conversion.done,
+          throwsA(anyOf(isA<EpubConvertCancelled>(), isA<EpubRefused>())),
+        );
+        await cancelled;
+      }
+    }, (error, _) => uncaught.add(error));
+    expect(uncaught, isEmpty);
     expect(Directory(library).listSync(), isEmpty);
   });
 

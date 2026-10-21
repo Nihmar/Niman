@@ -10,7 +10,7 @@ import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/name_sort_key.dart';
 import 'package:niman/src/db/index_database.dart';
-import 'package:niman/src/library/note_ops.dart';
+import 'package:niman/src/library/note_ops_blocking.dart';
 import 'package:niman/src/links/link_preview.dart';
 import 'package:niman/src/links/preview_reader.dart';
 import 'package:niman/src/ui/link_preview/link_preview_body.dart';

@@ -1826,7 +1826,7 @@ final class LatvianStrings extends Strings {
   @override
   String get epubConvertAction => 'Pārvērst Markdown formātā…';
   @override
-  String get epubConvertCommand => 'Pārvērst EPUB Markdown formātā';
+  String get epubConvertCommand => 'Pārvērst EPUB Markdown formātā…';
   @override
   String get epubConvertSettingsTitle => 'Pārvērst EPUB Markdown formātā';
   @override

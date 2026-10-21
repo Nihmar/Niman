@@ -1678,7 +1678,7 @@ final class ChineseStrings extends Strings {
   @override
   String get epubConvertAction => '转换为 Markdown…';
   @override
-  String get epubConvertCommand => '将 EPUB 转换为 Markdown';
+  String get epubConvertCommand => '将 EPUB 转换为 Markdown…';
   @override
   String get epubConvertSettingsTitle => '将 EPUB 转换为 Markdown';
   @override

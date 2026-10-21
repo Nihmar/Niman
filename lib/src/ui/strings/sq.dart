@@ -1846,7 +1846,7 @@ final class AlbanianStrings extends Strings {
   @override
   String get epubConvertAction => 'Shndërro në Markdown…';
   @override
-  String get epubConvertCommand => 'Shndërro EPUB në Markdown';
+  String get epubConvertCommand => 'Shndërro EPUB në Markdown…';
   @override
   String get epubConvertSettingsTitle => 'Shndërro një EPUB në Markdown';
   @override

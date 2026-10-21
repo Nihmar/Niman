@@ -70,7 +70,7 @@ String? _linkTarget(
   final target = plan.noteAt(line, written);
   if (target == null) return null;
   final heading = line > target.start ? _headingAt(plan, line) : null;
-  final anchor = heading == null ? '' : '#${Uri.encodeComponent(heading)}';
+  final anchor = heading == null ? '' : '#${_encoded(heading)}';
   if (identical(target, note) || target.path == note.path) {
     return anchor.isEmpty ? _href(p.posix.basename(note.path)) : anchor;
   }
@@ -87,8 +87,16 @@ String? _headingAt(EpubPlan plan, int line) {
 /// same folder), each segment percent-encoded: a link's target.
 String _href(String path, {String from = ''}) {
   final relative = from.isEmpty ? path : p.posix.relative(path, from: from);
-  return relative.split('/').map(Uri.encodeComponent).join('/');
+  return relative.split('/').map(_encoded).join('/');
 }
+
+/// [text] as a part of a link's destination: everything but letters, digits
+/// and `-_.!~*'` escaped — the parentheses too, which [Uri.encodeComponent]
+/// leaves and which would end a destination written bare, as `index.md`'s
+/// are. The one rule of every destination a conversion writes (the notes'
+/// own are between `<…>`, and need no more), read back by `percentDecoded`.
+String _encoded(String text) =>
+    Uri.encodeComponent(text).replaceAll('(', '%28').replaceAll(')', '%29');
 
 /// `index.md` of [plan]: the book's metadata as frontmatter, then its title,
 /// its authors, its cover and its contents as links to the notes. [cover]
@@ -117,7 +125,7 @@ String renderIndex(
       final heading = entry.line > target.start
           ? _headingAt(plan, entry.line)
           : null;
-      final anchor = heading == null ? '' : '#${Uri.encodeComponent(heading)}';
+      final anchor = heading == null ? '' : '#${_encoded(heading)}';
       final link = '[${_text(entry.title)}](${_href(target.path)}$anchor)';
       out.write('${'  ' * entry.depth}- $link\n');
     }

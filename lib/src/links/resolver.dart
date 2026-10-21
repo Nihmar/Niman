@@ -125,7 +125,7 @@ final class LinkResolver implements LinkSource {
     if (h.isEmpty) return Future.value(UnresolvedNote(target: href));
     if (LinkPaths.hasScheme(h)) return Future.value(ExternalLink(url: h));
     if (h.startsWith('#')) {
-      return Future.value(LocalAnchor(heading: h.substring(1)));
+      return Future.value(LocalAnchor(heading: LinkPaths.localHeading(h)));
     }
     final read = LinkPaths.markdownTarget(h);
     // A file: a note, or one that is not (a PDF, a book, a picture).

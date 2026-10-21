@@ -25,6 +25,10 @@ go on.
 .history/
   .objects/
     3f/a1c4…            one version's content, named by its sha256
+  .locks/
+    9c2e….lock          one writer at a time on a note's log
+  .generation           a token every move of logs changes
+  .legacy-done          no history kept the old way is left
   Projects/
     Plan.md.log         Plan.md's history: one line an event
 ```
@@ -56,6 +60,34 @@ go on.
   is under half the object it replaces, and never against a base whose own
   chain leads back to it.
 
+## One writer at a time
+
+A save's snapshot, a sync's pin, the upkeep's compaction and a move read a
+log, decide, and write it, from isolates that share nothing. Each runs
+holding the note's lock (`history_lock.dart`, `history_lock_file.dart`):
+
+- **Flat, apart from the notes.** `.history/.locks/<sha256 of the path in
+  lower case>.lock`. A release has no folder of the note's to tidy (a
+  listing of a folder of 30k logs on every save is a round trip each on
+  Android), and a case-only rename, whose two names are one file on
+  Windows and Android, asks for one lock and not two. Folding the case
+  makes two notes that differ by case alone take turns on Linux, which is
+  harmless.
+- **Owned.** The file holds its holder's token and a release deletes it
+  only while it still does: a holder whose lock was broken as stale must
+  not delete the next holder's.
+- **Broken once.** A lock older than 30 s is a crash's leftover. Breaking
+  it holds a `.break` guard created exclusively and looks at the lock
+  again once held, so two waiters that saw it stale do not take turns
+  deleting each other's fresh lock.
+- **Waiting is for a lock that is there.** Only "already exists" waits (up
+  to 10 s, then `HistoryLockTimeout`). A store that cannot hold a lock
+  (read-only, full, a path in the way) raises at once, so a save does not
+  pay 10 s a snapshot for it. Windows alone is given half a second for
+  the refusal that follows a delete still pending.
+- **Reads take none.** A note with no log and no old history reads as
+  empty without a lock.
+
 ## What is flushed, and why that is safe
 
 On a save's path, nothing is flushed. The note itself still is, before its
@@ -74,8 +106,16 @@ rename: that part of the save is unchanged. Its history is not.
   that version's object again if the object no longer reads. The note
   holds exactly that content, so a damaged newest version repairs itself.
 
+- **The exceptions flush.** An object that is new can go unflushed
+  because the note still holds its content. An object the upkeep
+  *replaces* — a whole one turned into a delta, or compressed hard — has
+  no such copy behind it, so its temp file is flushed before the rename,
+  and the old history's move flushes every object it wrote before the log
+  says it finished and before the old files are deleted.
+
 The cost of all this: a crash can lose the newest entry of a note's
-history. It cannot lose the note.
+history. It cannot lose the note, nor an older version the upkeep was
+rewriting.
 
 ## The upkeep
 
@@ -93,6 +133,33 @@ history. It cannot lose the note.
 - **Move in** the history kept the old way.
 - **Compact** the logs that grew.
 
+- **One failure is one note's.** A note whose lock times out, whose path is
+  too long for Windows, or an object another pass already deleted, is
+  counted and left (`failed` in the outcome, a warning in the log); the
+  other notes are still packed and the sweep still runs. A stat of a file
+  that is gone answers an epoch, which is older than any cutoff, so the
+  sweep takes only a file that is there.
+- **A log moved during the walk.** The sweep names the objects the logs
+  hold from a fresh listing. A log moved from a folder not yet listed into
+  one already listed is in neither listing, and no read fails. Every move of
+  logs (a rename, a move, a folder's) therefore holds the store-wide move
+  lock and ends by changing the token in `.generation`; the pass reads the
+  token before it lists and after it has read the logs, and names nothing
+  if a move was running at either read or the token changed. It tries
+  again up to five times, and a pass that never settles collects nothing.
+- **Two packers.** A delta is computed outside any lock, but checking that
+  its base does not lead back to it and writing it are one step under the
+  store-wide pack lock: two notes sharing content in opposite order, packed
+  at once by the timer and the upkeep, could otherwise make each object a
+  delta of the other.
+- **The old history is looked for until there is none.** The upkeep walks
+  `.history/` for `.v<n>` and `.json` files (never the objects or the
+  locks) and, once none is left, writes `.legacy-done`. After that neither
+  the upkeep nor a read of a note without a log looks again: the walk of a
+  library of 1M notes, and a listing of a note's folder, are once. Delete
+  the file to have them looked for again (a copy of the library made by an
+  older version).
+
 The whole pass runs once each time a library opens, after the ready state
 and beside the stale-temp sweep.
 
@@ -102,8 +169,8 @@ and beside the stale-temp sweep.
 store did, and moves a note's history in the first time it is touched; the
 upkeep moves in what is left.
 
-- **Order.** The objects go first, then the log (written whole and
-  flushed), and the old files only once the log is there. A log on disk
+- **Order.** The objects go first and are flushed, then the log (written
+  whole and flushed), and the old files only once the log is there. A log on disk
   therefore means the move finished, and old files beside it are leftovers
   to delete.
 - **Drift.** A version whose file no longer hashes to its manifest's

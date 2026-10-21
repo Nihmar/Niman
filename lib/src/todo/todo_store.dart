@@ -25,15 +25,13 @@ import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/frontmatter/parser.dart';
 import 'package:niman/src/todo/parser.dart';
+import 'package:niman/src/todo/todo_file_names.dart';
 import 'package:niman/src/todo/todo_files.dart';
 import 'package:niman/src/todo/todo_source.dart';
+import 'package:niman/src/todo/todo_store_blocking.dart';
 import 'package:path/path.dart' as p;
 
-/// The open-tasks file at the library root.
-const String todoFileName = 'todo.txt';
-
-/// The completed-tasks file at the library root.
-const String doneFileName = 'done.txt';
+export 'package:niman/src/todo/todo_file_names.dart';
 
 /// One task with its 0-based line index in its file.
 ///
@@ -351,13 +349,13 @@ final class TodoStore implements TodoSource {
   /// [Isolate.run] closure captures only the sendable path — the store
   /// itself holds an unsendable future chain.
   Future<List<Uint8List?>> _readFiles(String rootPath) {
-    return Isolate.run(() => _readTodoFiles(rootPath));
+    return Isolate.run(() => readTodoFiles(rootPath));
   }
 
   /// Stats both files off the UI isolate (same capture rule as
   /// [_readFiles]).
   Future<List<int>> _probeFiles(String rootPath) {
-    return Isolate.run(() => _probeTodoFiles(rootPath));
+    return Isolate.run(() => probeTodoFiles(rootPath));
   }
 
   /// Atomically rewrites [name] with [file]'s lines. A missing file is
@@ -376,25 +374,6 @@ final class TodoStore implements TodoSource {
   }
 }
 
-/// Reads both files' raw bytes off the caller's isolate (the Android
-/// FUSE rule: no disk reads on the UI isolate).
-///
-/// Top-level and fully synchronous so it can be handed to [Isolate.run];
-/// captures only the sendable [root]. Returns `[todoBytes, doneBytes]`
-/// (null per missing file). Byte buffers (not strings) cross the isolate
-/// boundary; decoding and line splitting stay on the caller.
-List<Uint8List?> _readTodoFiles(String root) {
-  Uint8List? read(String name) {
-    final file = File(p.join(root, name));
-    if (!file.existsSync()) {
-      return null;
-    }
-    return file.readAsBytesSync();
-  }
-
-  return <Uint8List?>[read(todoFileName), read(doneFileName)];
-}
-
 /// Builds a [TodoFileProbe] from a ([size], [mtimeUs]) pair ([size] < 0 =
 /// missing file).
 TodoFileProbe _fileProbe(int size, int mtimeUs) {
@@ -406,25 +385,6 @@ TodoFileProbe _fileProbe(int size, int mtimeUs) {
     size: size,
     modified: DateTime.fromMicrosecondsSinceEpoch(mtimeUs),
   );
-}
-
-/// Stats both files off the caller's isolate.
-///
-/// Top-level and fully synchronous so it can be handed to [Isolate.run];
-/// captures only the sendable [root]. Returns
-/// `[todoSize, todoMtimeUs, doneSize, doneMtimeUs]` (-1 per missing
-/// file); only plain ints cross the isolate boundary.
-List<int> _probeTodoFiles(String root) {
-  List<int> probe(String name) {
-    final file = File(p.join(root, name));
-    if (!file.existsSync()) {
-      return <int>[-1, -1];
-    }
-    final stat = file.statSync();
-    return <int>[stat.size, stat.modified.microsecondsSinceEpoch];
-  }
-
-  return <int>[...probe(todoFileName), ...probe(doneFileName)];
 }
 
 /// Parses raw [bytes] (null = missing file) into snapshot entries.

@@ -1849,7 +1849,7 @@ final class FinnishStrings extends Strings {
   @override
   String get epubConvertAction => 'Muunna Markdowniksi…';
   @override
-  String get epubConvertCommand => 'Muunna EPUB Markdowniksi';
+  String get epubConvertCommand => 'Muunna EPUB Markdowniksi…';
   @override
   String get epubConvertSettingsTitle => 'Muunna EPUB Markdowniksi';
   @override

@@ -1864,7 +1864,7 @@ final class SpanishStrings extends Strings {
   @override
   String get epubConvertAction => 'Convertir a Markdown…';
   @override
-  String get epubConvertCommand => 'Convertir EPUB a Markdown';
+  String get epubConvertCommand => 'Convertir EPUB a Markdown…';
   @override
   String get epubConvertSettingsTitle => 'Convertir un EPUB a Markdown';
   @override

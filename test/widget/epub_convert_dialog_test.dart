@@ -22,6 +22,8 @@ void main() {
     required EpubPreviewer read,
     Future<String?> Function(String current)? pickFolder,
     Future<void> Function()? act,
+    String? name,
+    String source = '/books/Dune.epub',
   }) async {
     EpubConvertChoice? answer;
     var answered = false;
@@ -33,7 +35,8 @@ void main() {
               onPressed: () async {
                 answer = await showEpubConvertDialog(
                   context,
-                  source: '/books/Dune.epub',
+                  source: source,
+                  name: name,
                   parent: 'Books',
                   preview: read,
                   pickFolder: pickFolder,
@@ -59,7 +62,7 @@ void main() {
     (tester) async {
       final choice = await ask(
         tester,
-        read: (_, _) async => preview(),
+        read: (_, _, {name}) async => preview(),
         act: () async {
           expect(find.text('Dune'), findsOneWidget);
           expect(find.text('Frank Herbert'), findsOneWidget);
@@ -80,7 +83,7 @@ void main() {
   ) async {
     final choice = await ask(
       tester,
-      read: (_, _) async => preview(),
+      read: (_, _, {name}) async => preview(),
       pickFolder: (current) async => 'Reading',
       act: () async {
         await tester.tap(find.byKey(const Key('epub-convert-one-note')));
@@ -96,7 +99,7 @@ void main() {
   testWidgets('a book of one chapter starts on one note', (tester) async {
     final choice = await ask(
       tester,
-      read: (_, _) async => preview(notes: 1, folders: 0),
+      read: (_, _, {name}) async => preview(notes: 1, folders: 0),
       act: () => tester.tap(find.byKey(const Key('epub-convert-start'))),
     );
     expect(choice?.oneNote, isTrue);
@@ -107,7 +110,7 @@ void main() {
   ) async {
     final choice = await ask(
       tester,
-      read: (_, _) async =>
+      read: (_, _, {name}) async =>
           throw const EpubRefused(EpubRefusal.protected, 'drm'),
       act: () async {
         expect(find.text(AppStrings.epubConvertProtected), findsOneWidget);
@@ -116,5 +119,28 @@ void main() {
       },
     );
     expect(choice, isNull);
+  });
+
+  testWidgets('a share is read and named as it came, not as its copy is', (
+    tester,
+  ) async {
+    String? readAs;
+    await ask(
+      tester,
+      name: 'Dune.epub',
+      source: '/cache/1729512345678-Dune.epub',
+      read: (source, _, {name}) async {
+        readAs = name;
+        throw const EpubRefused(EpubRefusal.notABook, 'no');
+      },
+      act: () async {
+        expect(
+          find.text(AppStrings.epubConvertNotABook('Dune.epub')),
+          findsOneWidget,
+        );
+        await tester.tap(find.text(AppStrings.actionCancel));
+      },
+    );
+    expect(readAs, 'Dune.epub');
   });
 }

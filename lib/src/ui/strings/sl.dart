@@ -1827,7 +1827,7 @@ final class SlovenianStrings extends Strings {
   @override
   String get epubConvertAction => 'Pretvori v Markdown…';
   @override
-  String get epubConvertCommand => 'Pretvori EPUB v Markdown';
+  String get epubConvertCommand => 'Pretvori EPUB v Markdown…';
   @override
   String get epubConvertSettingsTitle => 'Pretvori EPUB v Markdown';
   @override

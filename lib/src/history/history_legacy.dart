@@ -2,10 +2,12 @@
 /// copy a version, and `.history/<path>.json`, a manifest rewritten on every
 /// snapshot. Read only to be moved into the objects and the log.
 ///
-/// The move is safe to cut short anywhere. The objects go first, then the
-/// log — written whole and flushed — and the old files only once the log is
-/// there; a log on disk therefore means the move finished, and old files
-/// beside one are leftovers to delete.
+/// The move is safe to cut short anywhere. The objects go first, flushed
+/// — the old files are the only other copy, and a power loss must not leave
+/// a truncated object with them gone — then the log, written whole and
+/// flushed, and the old files only once the log is there; a log on disk
+/// therefore means the move finished, and old files beside one are
+/// leftovers to delete.
 ///
 /// Two isolates can move the same history at once — the upkeep at a
 /// library's first open after the update, and a save of that very note.
@@ -21,6 +23,7 @@ library;
 
 import 'dart:io';
 
+import 'package:niman/src/history/history_folders.dart';
 import 'package:niman/src/history/history_log.dart';
 import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/history/history_objects.dart';
@@ -31,6 +34,18 @@ String legacyManifestPath(String root, String rel) =>
     p.join(root, historyFolderName, '$rel.json');
 
 final RegExp _versionSuffix = RegExp(r'\.v(\d+)$');
+
+/// Whether [rel] has an old history to move in: a manifest, or version
+/// files — a manifest lost used to leave those.
+///
+/// Neither writes nor locks, so a read can ask before it takes a lock it
+/// does not need. The manifest is one stat; the version files are a listing
+/// of the note's folder, asked only when there is no manifest and the
+/// upkeep has not yet found the library clear of old history.
+bool hasLegacyHistory(String root, String rel) =>
+    !legacyIsDone(root) &&
+    (File(legacyManifestPath(root, rel)).existsSync() ||
+        _versionFiles(root, rel).isNotEmpty);
 
 /// Moves the old history of [rel], if it has one, into the objects and a
 /// log; answers how many versions came in. Does nothing where a log is
@@ -76,6 +91,11 @@ int importLegacyHistory(String root, String rel) {
     );
   }
   if (File(historyLogPath(root, rel)).existsSync()) return 0;
+  // The objects are on disk before the log says so, and before the copies
+  // they replace are deleted: a log on disk means the move finished.
+  for (final sha in {for (final v in kept) v.sha256}) {
+    flushObject(root, sha);
+  }
   final numbers = {for (final v in kept) v.number};
   writeLog(
     root,
@@ -102,22 +122,56 @@ int deleteLegacyHistory(String root, String rel) {
 
 /// Every note under [dir] (`.history/` or a folder in it) that still has
 /// old history, as library-relative paths: what a library-wide pass moves.
+///
+/// The objects and locks folders are not walked — they hold a file an
+/// object, the bulk of the store — rather than listed and filtered after.
 List<String> legacyNotesUnder(String root, Directory dir) {
   if (!dir.existsSync()) return const [];
   final history = p.join(root, historyFolderName);
+  final skipped = [
+    p.join(history, historyObjectsFolderName),
+    p.join(history, historyLocksFolderName),
+  ];
   final notes = <String>{};
-  for (final entry in dir.listSync(recursive: true, followLinks: false)) {
-    if (entry is! File) continue;
-    final rel = p.split(p.relative(entry.path, from: history)).join('/');
-    if (rel.startsWith('$historyObjectsFolderName/')) continue;
-    if (rel.endsWith('.json')) {
-      notes.add(rel.substring(0, rel.length - '.json'.length));
-      continue;
+  final pending = [dir];
+  while (pending.isNotEmpty) {
+    final List<FileSystemEntity> entries;
+    try {
+      entries = pending.removeLast().listSync(followLinks: false);
+    } on FileSystemException {
+      continue; // moved or deleted while the walk ran
     }
-    final match = _versionSuffix.firstMatch(rel);
-    if (match != null) notes.add(rel.substring(0, match.start));
+    for (final entry in entries) {
+      if (entry is Directory) {
+        if (!skipped.any((s) => p.equals(s, entry.path))) pending.add(entry);
+        continue;
+      }
+      if (entry is! File) continue;
+      final rel = p.split(p.relative(entry.path, from: history)).join('/');
+      if (rel.endsWith('.json')) {
+        notes.add(rel.substring(0, rel.length - '.json'.length));
+        continue;
+      }
+      final match = _versionSuffix.firstMatch(rel);
+      if (match != null) notes.add(rel.substring(0, match.start));
+    }
   }
   return notes.toList()..sort();
+}
+
+/// Whether the upkeep found no old history left in the library at [root]
+/// and said so ([markLegacyDone]): none is looked for after that, by the
+/// upkeep or by a read of a note with no log.
+bool legacyIsDone(String root) =>
+    File(p.join(root, historyFolderName, historyLegacyDoneFileName))
+        .existsSync();
+
+/// Records that the library at [root] holds no old history. Delete
+/// `.history/.legacy-done` to have it looked for again (a copy of the
+/// library made by an older version).
+void markLegacyDone(String root) {
+  File(p.join(root, historyFolderName, historyLegacyDoneFileName))
+      .writeAsStringSync('');
 }
 
 /// The old `.v<n>` files of [rel], by number.

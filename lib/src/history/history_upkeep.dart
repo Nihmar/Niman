@@ -19,11 +19,17 @@ library;
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:meta/meta.dart';
+import 'package:niman/src/history/history_generation.dart';
 import 'package:niman/src/history/history_legacy.dart';
+import 'package:niman/src/history/history_lock.dart';
 import 'package:niman/src/history/history_log.dart';
 import 'package:niman/src/history/history_objects.dart';
 import 'package:niman/src/history/history_store.dart';
 import 'package:path/path.dart' as p;
+
+/// How long a pass waits for a move of logs to end before it lists again.
+const Duration _movePause = Duration(milliseconds: 20);
 
 /// How old an unnamed object must be before the collection takes it.
 const Duration historyGarbageGrace = Duration(hours: 1);
@@ -87,12 +93,16 @@ PackOutcome packNoteHistory(String root, String rel) {
     successorContent = content;
   }
   // The newest stays whole: compressed hard now that no save waits for it.
+  // One a crash cut short — its header gone, or its stream — is written
+  // again from the note when the note still holds it: a save that found
+  // the note unchanged since this version left the check here.
   final newest = versions.last.sha256;
-  if (isFastWhole(root, newest)) {
+  if (chainDepth(root, newest) == null || isFastWhole(root, newest)) {
     final file = File(historyObjectPath(root, newest));
-    final before = file.lengthSync();
-    final content = readObject(root, newest);
-    if (content != null) {
+    final before = file.existsSync() ? file.lengthSync() : 0;
+    final content =
+        readObject(root, newest) ?? _repairFromNote(root, rel, newest);
+    if (content != null && isFastWhole(root, newest)) {
       storeHard(root, newest, content);
       saved += before - file.lengthSync();
     }
@@ -100,7 +110,20 @@ PackOutcome packNoteHistory(String root, String rel) {
   return (packed: packed, saved: saved);
 }
 
-/// What a whole pass over a library's history did.
+/// The note at [rel] as it is, written as object [sha] when it still holds
+/// that content; null when it does not.
+Uint8List? _repairFromNote(String root, String rel, String sha) {
+  final note = File(p.join(root, rel));
+  if (!note.existsSync()) return null;
+  final bytes = note.readAsBytesSync();
+  if (shaOf(bytes) != sha) return null;
+  writeObject(root, sha, bytes);
+  return readObject(root, sha);
+}
+
+/// What a whole pass over a library's history did. `failed` counts the notes
+/// and objects it could not do its work on and went on without, and
+/// `failure` says why of the first.
 typedef UpkeepOutcome = ({
   int notes,
   int migrated,
@@ -108,14 +131,27 @@ typedef UpkeepOutcome = ({
   int savedBytes,
   int collected,
   int collectedBytes,
+  int failed,
+  String? failure,
 });
 
 /// Moves every old history in, packs every note's, compacts the logs that
 /// grew, and collects the objects no log names and older than [grace].
+///
+/// A note or an object that cannot be done — a lock held past its patience,
+/// a path too long for Windows, an object another pass deleted first — is
+/// counted and left, and the pass goes on: one note must not stop the
+/// others' packing, nor the collection, at every open.
+///
+/// [beforeNote] runs before each note is done, and [beforeCollect] before
+/// each unnamed object is looked at for collection: for a test to make
+/// one fail, or to take the object away as another pass would.
 UpkeepOutcome maintainHistory(
   String root, {
   Duration grace = historyGarbageGrace,
   DateTime? now,
+  @visibleForTesting void Function(String rel)? beforeNote,
+  @visibleForTesting void Function(File object)? beforeCollect,
 }) {
   final history = Directory(p.join(root, historyFolderName));
   const empty = (
@@ -125,43 +161,88 @@ UpkeepOutcome maintainHistory(
     savedBytes: 0,
     collected: 0,
     collectedBytes: 0,
+    failed: 0,
+    failure: null,
   );
   if (!history.existsSync()) return empty;
+  var failed = 0;
+  String? failure;
+  void fail(String what, Object error) {
+    failed++;
+    failure ??= '$what: $error';
+  }
+
   var migrated = 0;
-  for (final rel in legacyNotesUnder(root, history)) {
-    migrated += importLegacyHistory(root, rel);
+  if (!legacyIsDone(root)) {
+    var moveFailed = false;
+    for (final rel in legacyNotesUnder(root, history)) {
+      try {
+        migrated += withHistoryLock(root, [
+          rel,
+        ], () => importLegacyHistory(root, rel));
+      } on Object catch (e) {
+        moveFailed = true;
+        fail('moving in "$rel"', e);
+      }
+    }
+    // Looked at once more, and said so when nothing is left: the next open
+    // lists no `.history/` for it.
+    if (!moveFailed && legacyNotesUnder(root, history).isEmpty) {
+      try {
+        markLegacyDone(root);
+      } on FileSystemException catch (e) {
+        fail('recording the old history moved in', e);
+      }
+    }
   }
   final notes = _logged(root, history);
   var packed = 0;
   var saved = 0;
-  final named = <String>{};
   for (final rel in notes) {
-    final log = readLog(root, rel);
-    if (log == null) continue;
-    if (logWantsCompacting(log)) writeLog(root, rel, log.manifest);
-    final outcome = packNoteHistory(root, rel);
-    packed += outcome.packed;
-    saved += outcome.saved;
-    for (final v in log.manifest.versions) {
-      named.add(v.sha256);
+    try {
+      beforeNote?.call(rel);
+      // Compacted under the note's lock, from a read made under it: a line
+      // a save or a pin appends meanwhile waits, and is in what is
+      // rewritten.
+      withHistoryLock(root, [rel], () {
+        final log = readLog(root, rel);
+        if (log != null && logWantsCompacting(log)) {
+          writeLog(root, rel, log.manifest, highest: log.highest);
+        }
+      });
+      final outcome = packNoteHistory(root, rel);
+      packed += outcome.packed;
+      saved += outcome.saved;
+    } on Object catch (e) {
+      fail('packing "$rel"', e);
     }
   }
-  // A delta's base is named too, however far down its chain.
-  final queue = [...named];
-  while (queue.isNotEmpty) {
-    final base = deltaBaseOf(root, queue.removeLast());
-    if (base != null && named.add(base)) queue.add(base);
-  }
-  final cutoff = (now ?? DateTime.now()).subtract(grace);
+  // What the logs name, read only now, right before the sweep: a pass that
+  // packs a large library takes long enough for a note to move meanwhile.
+  final named = namedObjects(root);
   var collected = 0;
   var collectedBytes = 0;
-  for (final MapEntry(key: sha, value: file) in listObjects(root).entries) {
-    if (named.contains(sha)) continue;
-    final stat = file.statSync();
-    if (!stat.modified.isBefore(cutoff)) continue;
-    file.deleteSync();
-    collected++;
-    collectedBytes += stat.size;
+  final cutoff = (now ?? DateTime.now()).subtract(grace);
+  // Nothing is collected from a listing that would not hold still.
+  if (named != null) {
+    for (final MapEntry(key: sha, value: file) in listObjects(root).entries) {
+      if (named.contains(sha)) continue;
+      beforeCollect?.call(file);
+      // A stat of a file another pass just deleted answers an epoch, which
+      // is before any cutoff: only a file that is there is old enough.
+      final stat = file.statSync();
+      if (stat.type != FileSystemEntityType.file) continue;
+      if (!stat.modified.isBefore(cutoff)) continue;
+      try {
+        file.deleteSync();
+        collected++;
+        collectedBytes += stat.size;
+      } on PathNotFoundException {
+        // Collected by another pass between the stat and the delete.
+      } on FileSystemException catch (e) {
+        fail('collecting $sha', e);
+      }
+    }
   }
   _pruneEmptyFans(root);
   return (
@@ -171,17 +252,97 @@ UpkeepOutcome maintainHistory(
     savedBytes: saved,
     collected: collected,
     collectedBytes: collectedBytes,
+    failed: failed,
+    failure: failure,
   );
 }
 
+/// Every object a log names, directly or as a delta's base, however far
+/// down its chain; null when the logs would not hold still.
+///
+/// A log listed and gone when it is read was moved meanwhile — a note
+/// renamed while the upkeep ran — and its versions are under a name the
+/// listing did not have: the logs are listed again, up to [attempts] times.
+/// Missing a moved log's objects would collect a history that is still
+/// there.
+///
+/// A log can also be moved from a folder the walk had not reached into one
+/// it had left, and then it is in neither listing and no read fails. A move
+/// of logs changes the store's generation (`history_generation.dart`): one
+/// running when the pass began or ended, or finished meanwhile, makes the
+/// pass start again.
+///
+/// [afterFolder] lets a test move a log once a folder is listed, and
+/// [afterListing] once the whole walk is.
+Set<String>? namedObjects(
+  String root, {
+  int attempts = 5,
+  @visibleForTesting void Function(Directory folder)? afterFolder,
+  @visibleForTesting void Function()? afterListing,
+}) {
+  final history = Directory(p.join(root, historyFolderName));
+  for (var attempt = 0; attempt < attempts; attempt++) {
+    final generation = historyGeneration(root);
+    if (generation == null) {
+      sleep(_movePause * (attempt + 1)); // a move is running: let it end
+      continue;
+    }
+    final notes = history.existsSync()
+        ? _logged(root, history, afterFolder)
+        : <String>[];
+    afterListing?.call();
+    final named = <String>{};
+    var steady = true;
+    for (final rel in notes) {
+      final FoldedLog? log;
+      try {
+        log = readLog(root, rel);
+      } on FileSystemException {
+        return null; // a log that cannot be read names what it names
+      }
+      if (log == null) {
+        steady = false;
+        break;
+      }
+      for (final v in log.manifest.versions) {
+        named.add(v.sha256);
+      }
+    }
+    if (!steady) continue;
+    if (historyGeneration(root) != generation) continue;
+    // A delta's base is named too, however far down its chain.
+    final queue = [...named];
+    while (queue.isNotEmpty) {
+      final base = deltaBaseOf(root, queue.removeLast());
+      if (base != null && named.add(base)) queue.add(base);
+    }
+    return named;
+  }
+  return null;
+}
+
 /// Every note with a log under [history], library-relative; the objects
-/// folder is not walked.
-List<String> _logged(String root, Directory history) {
+/// and locks folders are not walked.
+List<String> _logged(
+  String root,
+  Directory history, [
+  void Function(Directory folder)? afterFolder,
+]) {
   final out = <String>[];
   void walk(Directory dir) {
-    for (final entry in dir.listSync(followLinks: false)) {
+    final List<FileSystemEntity> entries;
+    try {
+      entries = dir.listSync(followLinks: false);
+    } on FileSystemException {
+      return; // moved or deleted while the walk ran: the generation says
+    }
+    afterFolder?.call(dir);
+    for (final entry in entries) {
       if (entry is Directory) {
-        if (p.equals(entry.path, historyObjectsPath(root))) continue;
+        if (p.equals(entry.path, historyObjectsPath(root)) ||
+            p.equals(entry.path, historyLocksPath(root))) {
+          continue;
+        }
         walk(entry);
       } else if (entry is File && entry.path.endsWith('.log')) {
         final rel = p
@@ -196,10 +357,17 @@ List<String> _logged(String root, Directory history) {
   return out..sort();
 }
 
+/// Removes the objects folders left empty: each deleted outright, and a
+/// folder that holds an object refuses.
 void _pruneEmptyFans(String root) {
   final dir = Directory(historyObjectsPath(root));
   if (!dir.existsSync()) return;
   for (final fan in dir.listSync(followLinks: false)) {
-    if (fan is Directory && fan.listSync().isEmpty) fan.deleteSync();
+    if (fan is! Directory) continue;
+    try {
+      fan.deleteSync();
+    } on FileSystemException {
+      // Not empty, or filled again meanwhile.
+    }
   }
 }

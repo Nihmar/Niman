@@ -1856,7 +1856,7 @@ final class ItalianStrings extends Strings {
   @override
   String get epubConvertAction => 'Converti in Markdown…';
   @override
-  String get epubConvertCommand => 'Converti EPUB in Markdown';
+  String get epubConvertCommand => 'Converti EPUB in Markdown…';
   @override
   String get epubConvertSettingsTitle => 'Converti un EPUB in Markdown';
   @override

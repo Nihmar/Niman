@@ -7,6 +7,8 @@ import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/name_sort_key.dart';
 import 'package:niman/src/db/index_database.dart';
+import 'package:niman/src/editor/outline.dart';
+import 'package:niman/src/links/anchor.dart';
 import 'package:niman/src/links/resolver.dart';
 
 void main() {
@@ -358,12 +360,13 @@ void main() {
             .having((r) => r.note.id, 'note', tips.id)
             .having((r) => r.heading, 'heading', 'Section'),
       );
-      // A real fragment next to an encoded one: only the first raw # splits.
+      // A real fragment next to an encoded one: only the first raw # splits,
+      // and the fragment is decoded like the path (`A#B`, a heading's own #).
       expect(
         await resolver.resolveMarkdown('C%23%20tips.md#A%23B'),
         isA<ResolvedNote>()
             .having((r) => r.note.id, 'note', tips.id)
-            .having((r) => r.heading, 'heading', 'A%23B'),
+            .having((r) => r.heading, 'heading', 'A#B'),
       );
       // The batch reads it the same way.
       final batch = await resolver.resolveBatch([
@@ -451,6 +454,76 @@ void main() {
       // The fragment keeps its case: the heading lookup slugs it, and a
       // place in a book names a file whose name has one (#282).
       expect((r as ResolvedNote).heading, 'Heading');
+    });
+
+    // The heading lookup slugs the fragment, so an escape left in it
+    // (`The%20Storm` -> `the-20storm`) never matched `## The Storm`. The
+    // EPUB conversion, Obsidian and other editors write headings this way.
+    group('the #fragment of a note link is percent-decoded like its path', () {
+      const outline = [
+        OutlineEntry(line: 0, level: 1, text: 'The Storm'),
+        OutlineEntry(line: 4, level: 1, text: 'Capítulo 1'),
+        OutlineEntry(line: 8, level: 1, text: '100%'),
+      ];
+
+      /// The line of the outline the heading [r] carries lands on.
+      int? landing(String? heading) {
+        final anchor = parseAnchor(heading ?? '');
+        return anchor is HeadingAnchor ? headingLineOf(outline, anchor) : null;
+      }
+
+      test('to another note', () async {
+        await addNote('note.md', stem: 'note');
+        final r = await resolver.resolveMarkdown('note.md#The%20Storm');
+        expect(r, isA<ResolvedNote>());
+        expect((r as ResolvedNote).heading, 'The Storm');
+        expect(landing(r.heading), 0);
+        final batch = await resolver.resolveBatch([
+          'note.md#The%20Storm',
+        ], markdown: true);
+        expect(
+          (batch['note.md#The%20Storm']! as ResolvedNote).heading,
+          'The Storm',
+        );
+      });
+
+      test('in the same note, with text beyond ASCII', () async {
+        final r = await resolver.resolveMarkdown('#Cap%C3%ADtulo%201');
+        expect(r, isA<LocalAnchor>());
+        expect((r as LocalAnchor).heading, 'Capítulo 1');
+        expect(landing(r.heading), 4);
+        final angle = await resolver.resolveMarkdown('#Cap%C3%ADtulo%201');
+        expect((angle as LocalAnchor).heading, 'Capítulo 1');
+      });
+
+      test('a stray % is kept as written', () async {
+        await addNote('note.md', stem: 'note');
+        final other = await resolver.resolveMarkdown('note.md#100%');
+        expect((other as ResolvedNote).heading, '100%');
+        expect(landing(other.heading), 8);
+        final local = await resolver.resolveMarkdown('#100%');
+        expect((local as LocalAnchor).heading, '100%');
+      });
+
+      test('a plain slug stays as it is', () async {
+        await addNote('note.md', stem: 'note');
+        final other = await resolver.resolveMarkdown('note.md#the-storm');
+        expect((other as ResolvedNote).heading, 'the-storm');
+        expect(landing(other.heading), 0);
+        final local = await resolver.resolveMarkdown('#the-storm');
+        expect((local as LocalAnchor).heading, 'the-storm');
+      });
+
+      test(
+        'a place in a book keeps its escapes for the book to read',
+        () async {
+          await addNote('Books/Dune.epub', stem: 'dune.epub');
+          final r = await resolver.resolveMarkdown(
+            'Books/Dune.epub#chapter=a%26b.xhtml&line=4',
+          );
+          expect((r as ResolvedNote).heading, 'chapter=a%26b.xhtml&line=4');
+        },
+      );
     });
 
     test('a path is percent-decoded, as Obsidian writes it', () async {

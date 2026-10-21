@@ -18,6 +18,7 @@ import 'dart:typed_data';
 
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart' as html;
+import 'package:niman/src/core/percent.dart';
 import 'package:niman/src/epub/epub_archive.dart';
 import 'package:niman/src/epub/epub_info.dart';
 import 'package:niman/src/markdown/from_html/html_markdown.dart';
@@ -50,6 +51,17 @@ typedef EpubChapterText = ({
   String markdown,
   Map<String, int> anchors,
 });
+
+/// The line of [fragment] among a chapter's [anchors] (its `id`s), or null
+/// when it names none.
+///
+/// A fragment is a URL's: `Cap%C3%ADtulo` names the `id="Capítulo"`. It is
+/// read decoded; the text as written still answers where an `id` really
+/// spells a `%`.
+int? epubAnchorLine(Map<String, int>? anchors, String fragment) {
+  if (anchors == null || fragment.isEmpty) return null;
+  return anchors[percentDecoded(fragment)] ?? anchors[fragment];
+}
 
 /// A book, read into its parts.
 final class EpubBook {
@@ -108,6 +120,37 @@ final class EpubBook {
 ///
 /// Throws [EpubRefused]: not a book, or one whose chapters are encrypted.
 EpubBook parseEpub(EpubArchive archive) {
+  EpubBook? book;
+  for (final step in _readSteps(archive)) {
+    book = step;
+  }
+  return book!;
+}
+
+/// [parseEpub] that gives the event loop a turn, and [between] a call,
+/// before each of the spine's chapters.
+///
+/// Converting a chapter is the parse's expensive part, so on a big book it
+/// is what a stop would otherwise wait for: [between] is where a cancel
+/// throws. Whatever it throws ends the read there. It is the same read as
+/// [parseEpub] — one parser, driven a chapter at a time.
+Future<EpubBook> parseEpubStepped(
+  EpubArchive archive, {
+  Future<void> Function()? between,
+}) async {
+  final steps = _readSteps(archive).iterator;
+  while (steps.moveNext()) {
+    if (steps.current case final book?) return book;
+    await Future<void>.delayed(Duration.zero);
+    await between?.call();
+  }
+  throw StateError('the read ended without a book');
+}
+
+/// The read of [archive], one step at a time: null before each chapter of
+/// the spine, then the book, last. Lazy — nothing is read until the
+/// iteration asks.
+Iterable<EpubBook?> _readSteps(EpubArchive archive) sync* {
   final opfPath = archive.packagePath();
   final opf = archive.xml(opfPath);
   final opfDir = p.posix.dirname(opfPath);
@@ -141,12 +184,14 @@ EpubBook parseEpub(EpubArchive archive) {
   }
 
   final pictures = <String>[];
+  final pictureIndex = <String, int>{};
   final links = <EpubTarget>[];
   final chapters = <EpubChapterText>[];
   var formulaSvgs = 0;
   var mathMl = 0;
   String? firstTex;
   for (final chapter in spine) {
+    yield null;
     final text = archive.text(chapter);
     if (text == null) continue;
     final dir = p.posix.dirname(chapter);
@@ -159,11 +204,10 @@ EpubBook parseEpub(EpubArchive archive) {
       picture: (src) {
         final resolved = _resolve(dir, src);
         if (!archive.has(resolved)) return null;
-        var index = pictures.indexOf(resolved);
-        if (index < 0) {
-          index = pictures.length;
+        final index = pictureIndex.putIfAbsent(resolved, () {
           pictures.add(resolved);
-        }
+          return pictures.length - 1;
+        });
         return '$epubPictureScheme:$index';
       },
       link: (href) {
@@ -190,7 +234,7 @@ EpubBook parseEpub(EpubArchive archive) {
   if (chapters.isEmpty) {
     throw const EpubRefused(EpubRefusal.notABook, 'the book has no chapters');
   }
-  return EpubBook(
+  yield EpubBook(
     info: epubInfoOf(opf, (id) => manifest[id]?.path),
     spine: spine,
     chapters: chapters,
@@ -223,17 +267,15 @@ final RegExp _scheme = RegExp('^[A-Za-z][A-Za-z0-9+.-]*:');
 String _resolve(String dir, String href) {
   final hash = href.indexOf('#');
   final bare = hash < 0 ? href : href.substring(0, hash);
-  // Percent-decoded where the escapes are well formed; a stray `%` is a
-  // character of the name.
-  final decoded = _badEscape.hasMatch(bare) ? bare : Uri.decodeComponent(bare);
+  // A book spells a name either way — `cit%C3%A9.xhtml`, or the raw UTF-8
+  // `cité.xhtml` that most books with accents or CJK names write — and a
+  // stray `%` is a character of it: [percentDecoded] reads all three.
+  final decoded = percentDecoded(bare);
   final joined = dir.isEmpty || dir == '.'
       ? decoded
       : p.posix.join(dir, decoded);
   return p.posix.normalize(joined);
 }
-
-/// A `%` that does not open a two-digit escape.
-final RegExp _badEscape = RegExp('%(?![0-9A-Fa-f]{2})');
 
 /// The elements under [node] named [local], whatever their prefix: an OPF
 /// may write `<item>` or `<opf:item>`.

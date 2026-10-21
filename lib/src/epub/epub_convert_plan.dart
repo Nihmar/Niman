@@ -30,6 +30,7 @@ import 'dart:math';
 
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/epub/epub_book.dart';
+import 'package:niman/src/epub/epub_book_text.dart';
 import 'package:path/path.dart' as p;
 
 /// What a note averages before the plan splits one level deeper.
@@ -68,7 +69,7 @@ final class EpubPlan {
     required EpubConvertWords words,
     bool oneNote = false,
   }) {
-    final text = _joined(book);
+    final text = epubBookText(book);
     if (oneNote) {
       final name = '${sanitizeName(title, fallback: defaultNoteName)}.md';
       return EpubPlan._(
@@ -136,73 +137,39 @@ final class EpubPlan {
 
   /// The note that holds [line], among [written]: the last one opening at or
   /// above it, or — when that one was not written — the next one that was.
+  ///
+  /// [written] is in reading order, so its notes open at ascending lines:
+  /// found by bisection, as a link and a contents entry each ask it.
   EpubPlannedNote? noteAt(int line, List<EpubPlannedNote> written) {
     if (written.isEmpty) return null;
-    var found = written.first;
-    for (final note in written) {
-      if (note.start > line) break;
-      found = note;
-    }
-    if (line < found.end || identical(found, written.last)) return found;
-    return written.firstWhere(
-      (note) => note.start >= line,
-      orElse: () => written.last,
-    );
+    // The first note opening past `line`; the one before it is the last at
+    // or above it.
+    final past = _firstOpening(written, (note) => note.start > line);
+    final at = past == 0 ? 0 : past - 1;
+    final found = written[at];
+    if (line < found.end || at == written.length - 1) return found;
+    final next = _firstOpening(written, (note) => note.start >= line);
+    return written[next == written.length ? written.length - 1 : next];
   }
 }
 
-/// The book's text as the reader joins it, and where each file opens in it.
-final class _Joined {
-  new(this.lines, this._starts, this._anchors, this._spine);
-
-  final List<String> lines;
-  final Map<String, int> _starts;
-  final Map<String, Map<String, int>> _anchors;
-  final List<String> _spine;
-
-  /// Where [file] opens — or, for a file with no text (a part's title page),
-  /// the next file of the spine with some — plus [fragment]'s line in it.
-  int? lineOf(String file, String fragment) {
-    final start = _starts[file];
-    if (start != null) {
-      if (fragment.isEmpty) return start;
-      return _anchors[file]?[fragment] ?? start;
+/// The index of the first of [notes] that [satisfies] - [notes].length when
+/// none does - given that once a note does, the ones after it do.
+int _firstOpening(
+  List<EpubPlannedNote> notes,
+  bool Function(EpubPlannedNote note) satisfies,
+) {
+  var low = 0;
+  var high = notes.length;
+  while (low < high) {
+    final middle = (low + high) >> 1;
+    if (satisfies(notes[middle])) {
+      high = middle;
+    } else {
+      low = middle + 1;
     }
-    final at = _spine.indexOf(file);
-    if (at < 0) return null;
-    for (final next in _spine.skip(at + 1)) {
-      if (_starts[next] case final start?) return start;
-    }
-    return null;
   }
-
-  /// Whether [line] is where a file of the book opens.
-  bool opensFile(int line) => _starts.containsValue(line);
-
-  int get bytes => lines.fold(0, (sum, line) => sum + line.length + 1);
-}
-
-_Joined _joined(EpubBook book) {
-  final starts = <String, int>{};
-  final anchors = <String, Map<String, int>>{};
-  final lines = <String>[];
-  for (final chapter in book.chapters) {
-    if (lines.isNotEmpty) {
-      // As the reader joins them: a rule, a blank line on each side.
-      lines
-        ..add('')
-        ..add('---')
-        ..add('');
-    }
-    final start = lines.length;
-    starts[chapter.file] = start;
-    anchors[chapter.file] = {
-      for (final entry in chapter.anchors.entries)
-        entry.key: start + entry.value,
-    };
-    lines.addAll(chapter.markdown.split('\n'));
-  }
-  return _Joined(lines, starts, anchors, book.spine);
+  return low;
 }
 
 /// The contents entries that open somewhere in the text, their depths made
@@ -210,7 +177,7 @@ _Joined _joined(EpubBook book) {
 /// chapter file an entry when the book has no usable contents.
 List<EpubPlannedEntry> _entries(
   EpubBook book,
-  _Joined text,
+  EpubBookText text,
   EpubConvertWords words,
 ) {
   final out = <EpubPlannedEntry>[];
@@ -246,7 +213,7 @@ String? _firstHeading(String markdown) {
 final RegExp _heading = RegExp(r'^#{1,6}\s+(.+?)\s*#*\s*$');
 
 /// The deepest level the book splits at: see the library's doc.
-int _splitDepth(List<EpubPlannedEntry> entries, _Joined text) {
+int _splitDepth(List<EpubPlannedEntry> entries, EpubBookText text) {
   if (entries.isEmpty) return 0;
   var depth = 0;
   for (final entry in entries) {
@@ -265,7 +232,7 @@ int _splitDepth(List<EpubPlannedEntry> entries, _Joined text) {
 /// The notes [split] makes of [text], named and numbered in their folders.
 List<EpubPlannedNote> _place(
   List<EpubPlannedEntry> split,
-  _Joined text,
+  EpubBookText text,
   EpubConvertWords words,
 ) {
   // Stable by line: the contents' own order breaks a tie.
@@ -277,6 +244,8 @@ List<EpubPlannedNote> _place(
   final entries = [for (final (_, entry) in ordered) entry];
   // The tree: each entry's children, by index; -1 is the book's folder.
   final children = <int, List<int>>{-1: []};
+  // Each entry's place among its parent's children, for its number.
+  final positions = <int>[];
   final parents = <int>[];
   final stack = <int>[];
   for (var i = 0; i < entries.length; i++) {
@@ -285,6 +254,7 @@ List<EpubPlannedNote> _place(
     }
     final parent = stack.isEmpty ? -1 : stack.last;
     parents.add(parent);
+    positions.add(children[parent]!.length);
     (children[parent] ??= []).add(i);
     children[i] = [];
     stack.add(i);
@@ -316,11 +286,7 @@ List<EpubPlannedNote> _place(
     final entry = entries[i];
     final parent = parents[i];
     final siblings = children[parent]!;
-    final name = numbered(
-      siblings.indexOf(i) + 1,
-      siblings.length,
-      entry.title,
-    );
+    final name = numbered(positions[i] + 1, siblings.length, entry.title);
     final folder = folders[parent]!;
     if (children[i]!.isEmpty) {
       notes.add((

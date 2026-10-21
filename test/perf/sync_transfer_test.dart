@@ -139,7 +139,8 @@ final class _Device {
 }
 
 /// A finished run, with the bytes it was asked to move and, on a busy
-/// isolate, the share of its load the isolate still ran.
+/// isolate, the share of its load the isolate still ran (see `_Load.stop`;
+/// `measure` hands it back relative to an idle isolate's).
 typedef _Run = ({_Path path, SyncReport report, int payload, double? share});
 
 String _rate(_Run run) => formatRate(run.payload, run.report.applyMs) ?? 'n/a';
@@ -167,12 +168,28 @@ final class _Load {
   int _slices = 0;
 
   /// The share of its ticks the load ran: the isolate's own work — a frame,
-  /// in the app — that a transfer on it did not push back. 1 is all of it.
+  /// in the app — that a transfer on it did not push back.
+  ///
+  /// Not absolute: a periodic timer fires as often as the platform's clock
+  /// lets it, and Windows' resolution (about 15 ms) fires an 8 ms one every
+  /// other tick at best, so an isolate with nothing else to do reads about
+  /// half. What it measures is the share relative to an idle isolate's own,
+  /// `_idleShare`, taken in the same run.
   double stop() {
     _timer.cancel();
     final ticks = _wall.elapsedMilliseconds / _tick.inMilliseconds;
-    return ticks < 1 ? 1 : (_slices / ticks).clamp(0, 1).toDouble();
+    return ticks < 1 ? 1 : _slices / ticks;
   }
+}
+
+/// What [_Load] reads on an isolate with nothing else to do: the most of its
+/// ticks the platform lets it run, the 1 that a busy isolate's share is
+/// measured against. The server is on an isolate of its own, so this one is
+/// idle for the half second it waits.
+Future<double> _idleShare() async {
+  final load = _Load();
+  await Future<void>.delayed(const Duration(milliseconds: 500));
+  return load.stop();
 }
 
 String _name(int index) => 'f${index.toString().padLeft(3, '0')}.png';
@@ -230,7 +247,7 @@ void main() {
       final r = result.report;
       final share = result.share == null
           ? ''
-          : ', the isolate ran ${(result.share! * 100).round()} % of its load';
+          : ', the load ran ${(result.share! * 100).round()} % of its ticks';
       print(
         '[perf] $name, ${path.label}: scan ${r.scanMs} ms, '
         'hash ${r.hashMs} ms, apply ${r.applyMs} ms = ${_rate(result)} '
@@ -238,6 +255,29 @@ void main() {
         '$share',
       );
       runs[path] = result;
+    }
+    if (runs.values.any((run) => run.share != null)) {
+      // Relative to the isolate with nothing else to do, so a platform whose
+      // timers fire less often than the load asks reads the same 1 an exact
+      // one does. Printed with the raw reading it came from.
+      final idle = await _idleShare();
+      print(
+        '[perf] $name: an idle isolate runs ${(idle * 100).round()} % '
+        'of the load ticks, the 100 % the shares below are read against',
+      );
+      for (final path in runs.keys.toList()) {
+        final run = runs[path]!;
+        runs[path] = (
+          path: run.path,
+          report: run.report,
+          payload: run.payload,
+          share: run.share! / idle,
+        );
+        print(
+          '[perf] $name, ${path.label}: the isolate ran '
+          '${(runs[path]!.share! * 100).round()} % of its load',
+        );
+      }
     }
     final before = runs[_Path.inlineSerial]!.report.applyMs;
     final after = runs[_Path.isolatePool]!.report.applyMs;
@@ -332,9 +372,15 @@ void main() {
       (path) => down(path, busy: true),
     );
     final pooled = runs[_Path.isolatePool]!;
-    // The backstop: the worker's transfer leaves most of the isolate's work
-    // in place, as the old path's took most of it.
-    expect(pooled.share, greaterThan(runs[_Path.inlineSerial]!.share!));
+    // The backstop: the worker's transfer leaves the isolate's work at least
+    // as much in place as the old path's did. Not strictly more: on a host
+    // fast enough that neither path pushes the load back both read 1, a tie
+    // that is no fault of the worker; the margin is the noise of two
+    // wall-clock readings.
+    expect(
+      pooled.share,
+      greaterThanOrEqualTo(runs[_Path.inlineSerial]!.share! - 0.05),
+    );
     if (_strict) {
       expect(
         pooled.share,

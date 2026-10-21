@@ -8,7 +8,8 @@ import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/editor/outline.dart';
 import 'package:niman/src/export/export_anchors.dart';
 import 'package:niman/src/export/export_note.dart';
-import 'package:niman/src/library/note_ops.dart' show headingsOfNoteFile;
+import 'package:niman/src/library/note_ops_blocking.dart'
+    show headingsOfNoteFile;
 import 'package:niman/src/links/anchor.dart';
 import 'package:niman/src/links/block_anchors.dart';
 import 'package:niman/src/markdown/block_index.dart';

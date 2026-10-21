@@ -1,11 +1,16 @@
 // No synchronous file call on the UI isolate (AGENTS.md, #1143): on Android
 // every `statSync` or `listSync` is a round trip through FUSE, and the frame
-// waits for it. The rule had exceptions nobody had listed; this lists where
-// the synchronous calls are allowed — files whose calls all run on a
-// background isolate — and says where each runs. A synchronous call in any
-// other file is either moved off the UI isolate (the asynchronous call, or
-// the `Isolate.run` its caller makes) or its file joins this list, with the
-// isolate it runs on: a decision, not an accident.
+// waits for it. This lists where the synchronous calls are allowed: files
+// whose calls all run on a background isolate, and where each runs.
+//
+// The list is per file, so a file on it must be isolate-only: a file that
+// also holds code the UI isolate runs would let a new `existsSync()` pass
+// there. Such a file keeps its blocking helpers in a `<name>_blocking.dart`
+// beside it (`files_blocking.dart`, `note_ops_blocking.dart`, ...) and the
+// list names that. A synchronous call in any other file is either moved off
+// the UI isolate (the asynchronous call, or the `Isolate.run` its caller
+// makes) or goes into such a file, with the isolate it runs on: a decision,
+// not an accident.
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -17,10 +22,14 @@ const Map<String, String> _offTheUiIsolate = {
   'calendar/calendar_store.dart': 'the reads its Isolate.run calls',
   'core/download/download_files.dart': 'the scan and deletes it Isolate.runs',
   'core/download/file_download.dart': "the download's spawned isolate",
-  'core/files.dart':
-      'the sweep, the name check and the hash run in isolates; '
-      'DiskStamp.of is the synchronous form for them (ofAsync for the UI)',
+  'core/disk_stamp.dart':
+      'DiskStamp.of and matches, the synchronous form for isolates '
+      '(ofAsync for the UI): the one file here that mixes, a value class '
+      'with nothing else in it',
+  'core/files_blocking.dart':
+      'the hash and the name check, in isolates (files.dart is not allowed)',
   'core/library_state_file.dart': 'the load its Isolate.run calls',
+  'core/temp_sweep_blocking.dart': "the sweep's walk, in Isolate.run",
   'db/index_note_content.dart': 'the note reads of the reader isolate',
   'db/index_scan.dart': 'the walk, the listing and the probes, in isolates',
   'epub/epub_document.dart': 'readEpub, in its Isolate.run',
@@ -39,24 +48,32 @@ const Map<String, String> _offTheUiIsolate = {
   'history/history_log.dart': 'the log, read and written by the store',
   'history/history_objects.dart': 'the objects, read and written by the store',
   'history/history_upkeep.dart': "the upkeep, in NoteHistory's isolates",
+  'history/history_access.dart': 'the log, read and written by the store',
+  'history/history_generation.dart': "the move's token, in the store's moves",
+  'history/history_lock_file.dart': "the note's lock, taken by the store",
+  'history/history_moves.dart':
+      "moves and deletes, from NoteHistory's isolates",
+  'history/history_pins.dart': "pins, from NoteHistory's isolates",
   'home/note_preview.dart': 'the preview read, in Isolate.run',
   'library/attachment_store.dart': 'the copy its Isolate.run calls',
   'library/audio_import.dart': 'the copy and the rename, in Isolate.run',
   'library/markdown_import.dart': 'the import, in IsolateGauge.run',
-  'library/note_ops.dart': 'the outline and preview reads, in isolates',
+  'library/note_ops_blocking.dart':
+      'the listing, the outline and the preview reads, in isolates',
   'library/note_tidy.dart': 'the tidy read, in Isolate.run',
   'library/note_write_stream.dart': "the stream writer's spawned isolate",
-  'library/note_writer.dart': 'replaceFileFrom and writeNoteFile, isolates',
+  'library/note_writer_blocking.dart':
+      'replaceFileFrom and writeNoteFile, in the writer isolates',
   'library/wav_duration.dart': 'the probe, in Isolate.run',
   'links/link_spot_slices.dart': 'the slice read, in Isolate.run',
   'markdown/note_load.dart': 'loadNoteSync, in Isolate.run',
   'search/replace.dart': 'the preview and replace chunks, in Isolate.run',
   'spellcheck/hunspell_spell_checker.dart':
       'the dictionary search and load, in Isolate.run',
-  'sync/sync_scanner.dart': 'scanLocalFiles, in Isolate.run',
-  'sync/sync_service.dart': "the watcher batch's probe, in Isolate.run",
+  'sync/sync_probe.dart': "the watcher batch's probe, in Isolate.run",
+  'sync/sync_scanner_blocking.dart': 'scanLocalFiles, in Isolate.run',
   'sync/sync_sides.dart': 'hashLocalFiles, in Isolate.run',
-  'todo/todo_store.dart': 'the reads and probes its Isolate.run calls',
+  'todo/todo_store_blocking.dart': 'the reads and probes, in Isolate.run',
   'ui/drop_target.dart': 'foldersAmong, in Isolate.run',
   'ui/file_tree_context.dart': 'the exists check, in Isolate.run',
   'ui/kinds/flashcards/review_run.dart': 'the deck reads, in Isolate.run',
@@ -65,17 +82,54 @@ const Map<String, String> _offTheUiIsolate = {
   'widget/widget_note_ops.dart': 'the note read, in Isolate.run',
 };
 
+/// The blocking calls of `dart:io`'s files, directories, links and
+/// processes — every method that has an asynchronous twin, listed by name:
+/// a pattern for any `...Sync(` would catch `changedBySync` and the like.
 final RegExp _syncCall = RegExp(
-  r'\.(existsSync|statSync|listSync|readAsStringSync|readAsBytesSync|'
+  r'(\.(existsSync|statSync|listSync|readAsStringSync|readAsBytesSync|'
   'readAsLinesSync|writeAsStringSync|writeAsBytesSync|createSync|'
-  'deleteSync|renameSync|copySync|lengthSync|lastModifiedSync|'
-  'setLastModifiedSync|openSync|resolveSymbolicLinksSync|typeSync|'
-  r'isDirectorySync|isFileSync|isLinkSync|identicalSync)\(',
+  'createTempSync|deleteSync|renameSync|copySync|lengthSync|'
+  'lastModifiedSync|lastAccessedSync|setLastModifiedSync|setLastAccessedSync|'
+  'openSync|resolveSymbolicLinksSync|typeSync|isDirectorySync|isFileSync|'
+  'isLinkSync|identicalSync|readSync|readIntoSync|readByteSync|writeFromSync|'
+  'writeByteSync|setPositionSync|positionSync|truncateSync|flushSync|'
+  r'closeSync|lockSync|unlockSync|targetSync|updateSync)\('
+  r'|Process\.runSync\()',
+);
+
+/// The files that call the Windows creation-time helpers
+/// (`core/creation_time.dart`), which reach the file system through `kernel32`
+/// over FFI — a blocking call the pattern above cannot see — and why each is
+/// allowed to.
+///
+/// **A decided exception, not an accident**: the three calls
+/// (`GetFileAttributesEx`, `CreateFile`, `SetFileTime`) run on Windows only,
+/// on the file a save just wrote, a few microseconds in all; the FUSE round
+/// trip the rule exists for (#1143) is Android's. Moving them to an isolate
+/// would cost the spawn of one (milliseconds) per save to save microseconds,
+/// and the callers that save from the UI isolate (the todo files, the
+/// attachment swap, the editor-only documents) do it rarely. The saves that
+/// are frequent, the notes', already run them on the writer's isolate.
+const Map<String, String> _creationTimeCallers = {
+  'core/files.dart':
+      'publishTempFile: the UI isolate (todo files, editor-only '
+      "documents) and the writers' isolates",
+  'frontmatter/edit_in_file.dart': 'editFrontmatterKeyInFile, in Isolate.run',
+  'library/note_writer.dart':
+      'swapFileIn and copyFileOver: the UI isolate '
+      '(attachments, sync downloads)',
+  'library/note_writer_blocking.dart':
+      'replaceFileFrom, in the writer isolates',
+};
+
+final RegExp _creationTimeCall = RegExp(
+  r'\b(keepCreationTime|readCreationTime|writeCreationTime)\(',
 );
 
 void main() {
   final sources = p.join('lib', 'src');
   final calls = <String, List<String>>{};
+  final creationTimeCalls = <String, List<String>>{};
   for (final entity in Directory(sources).listSync(recursive: true)) {
     if (entity is! File || !entity.path.endsWith('.dart')) continue;
     if (entity.path.endsWith('.g.dart')) continue;
@@ -86,6 +140,12 @@ void main() {
       if (line.trimLeft().startsWith('//')) continue;
       if (_syncCall.hasMatch(line)) {
         (calls[rel] ??= []).add('lib/src/$rel:${i + 1}: ${line.trim()}');
+      }
+      if (rel != 'core/creation_time.dart' &&
+          _creationTimeCall.hasMatch(line)) {
+        (creationTimeCalls[rel] ??= []).add(
+          'lib/src/$rel:${i + 1}: ${line.trim()}',
+        );
       }
     }
   }
@@ -113,5 +173,25 @@ void main() {
         if (!calls.containsKey(file)) file,
     ];
     expect(stale, isEmpty, reason: 'take the files that no longer do off');
+  });
+
+  test('the Windows FFI file calls are made only where it was decided', () {
+    final offenders = [
+      for (final MapEntry(key: file, value: lines) in creationTimeCalls.entries)
+        if (!_creationTimeCallers.containsKey(file)) ...lines,
+    ];
+    expect(
+      offenders,
+      isEmpty,
+      reason:
+          'keepCreationTime is a blocking kernel32 call made over FFI: '
+          'a new caller either runs on a background isolate or is decided '
+          'here, with the reason (see _creationTimeCallers)',
+    );
+    final stale = [
+      for (final file in _creationTimeCallers.keys)
+        if (!creationTimeCalls.containsKey(file)) file,
+    ];
+    expect(stale, isEmpty, reason: 'take the files that no longer call off');
   });
 }

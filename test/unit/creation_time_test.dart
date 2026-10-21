@@ -14,6 +14,7 @@ import 'package:niman/src/db/index_scan.dart';
 import 'package:niman/src/frontmatter/edit_in_file.dart';
 import 'package:niman/src/library/note_write_stream.dart';
 import 'package:niman/src/library/note_writer.dart';
+import 'package:niman/src/library/note_writer_blocking.dart';
 import 'package:path/path.dart' as p;
 
 /// 2020-01-01 UTC as a Windows `FILETIME`: 100 ns ticks since 1601.

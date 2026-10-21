@@ -1893,7 +1893,7 @@ final class GreekStrings extends Strings {
   @override
   String get epubConvertAction => 'Μετατροπή σε Markdown…';
   @override
-  String get epubConvertCommand => 'Μετατροπή EPUB σε Markdown';
+  String get epubConvertCommand => 'Μετατροπή EPUB σε Markdown…';
   @override
   String get epubConvertSettingsTitle => 'Μετατροπή ενός EPUB σε Markdown';
   @override

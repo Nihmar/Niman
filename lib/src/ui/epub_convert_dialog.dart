@@ -14,7 +14,6 @@ import 'package:niman/src/epub/epub_conversion.dart';
 import 'package:niman/src/epub/epub_convert_job.dart';
 import 'package:niman/src/epub/epub_convert_plan.dart';
 import 'package:niman/src/ui/strings.dart';
-import 'package:path/path.dart' as p;
 
 /// What the dialog answers: one note or a note a chapter, and the folder
 /// the book goes in, library-relative ('' for the top).
@@ -24,8 +23,9 @@ typedef EpubConvertChoice = ({bool oneNote, String parent});
 /// test's own.
 typedef EpubPreviewer = Future<EpubConvertPreview> Function(
   String source,
-  EpubConvertWords words,
-);
+  EpubConvertWords words, {
+  String? name,
+});
 
 /// The words a conversion writes, in the interface's language.
 EpubConvertWords epubConvertWords() => (
@@ -35,7 +35,8 @@ EpubConvertWords epubConvertWords() => (
 );
 
 /// Asks how to convert the book at [source] and where to; null when the
-/// dialog is dismissed or the book cannot be converted.
+/// dialog is dismissed or the book cannot be converted. [name] is what the
+/// book is called when its file is not (a share's copy in the cache).
 ///
 /// [pickFolder] asks for another folder, from the one chosen; null keeps
 /// the folder [parent] as it is.
@@ -43,12 +44,14 @@ Future<EpubConvertChoice?> showEpubConvertDialog(
   BuildContext context, {
   required String source,
   required String parent,
+  String? name,
   Future<String?> Function(String current)? pickFolder,
   EpubPreviewer preview = previewEpubOnIsolate,
 }) => showDialog<EpubConvertChoice>(
   context: context,
   builder: (context) => EpubConvertDialog(
     source: source,
+    name: name,
     parent: parent,
     pickFolder: pickFolder,
     preview: preview,
@@ -62,12 +65,17 @@ final class EpubConvertDialog extends StatefulWidget {
     required this.source,
     required this.parent,
     required this.preview,
+    this.name,
     this.pickFolder,
     super.key,
   });
 
   /// The book, absolute.
   final String source;
+
+  /// What the book is called when its file is not; see
+  /// [showEpubConvertDialog].
+  final String? name;
 
   /// The folder it goes in to start with.
   final String parent;
@@ -96,12 +104,22 @@ final class _EpubConvertDialogState extends State<EpubConvertDialog> {
 
   Future<void> _read() async {
     try {
-      final preview = await widget.preview(widget.source, epubConvertWords());
+      final preview = await widget.preview(
+        widget.source,
+        epubConvertWords(),
+        name: widget.name,
+      );
       if (!mounted) return;
       setState(() => _preview = preview);
     } on Object catch (error) {
       if (!mounted) return;
-      setState(() => _problem = epubConvertProblem(error, widget.source));
+      setState(
+        () => _problem = epubConvertProblem(
+          error,
+          widget.source,
+          name: widget.name,
+        ),
+      );
     }
   }
 
@@ -213,10 +231,16 @@ final class _EpubConvertDialogState extends State<EpubConvertDialog> {
 }
 
 /// What to tell the user about [error], a conversion of the book at
-/// [source] that did not happen.
-String epubConvertProblem(Object error, String source) => switch (error) {
+/// [source] that did not happen, called [name] when its file is not.
+String epubConvertProblem(
+  Object error,
+  String source, {
+  String? name,
+}) => switch (error) {
   EpubRefused(reason: EpubRefusal.protected) => AppStrings.epubConvertProtected,
   EpubRefused(reason: EpubRefusal.tooLarge) => AppStrings.epubConvertTooLarge,
-  EpubRefused() => AppStrings.epubConvertNotABook(p.basename(source)),
+  EpubRefused() => AppStrings.epubConvertNotABook(
+    epubDisplayName(source, name),
+  ),
   _ => AppStrings.epubConvertFailed,
 };

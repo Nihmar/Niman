@@ -1868,7 +1868,7 @@ final class CatalanStrings extends Strings {
   @override
   String get epubConvertAction => 'Converteix a Markdown…';
   @override
-  String get epubConvertCommand => 'Converteix un EPUB a Markdown';
+  String get epubConvertCommand => 'Converteix un EPUB a Markdown…';
   @override
   String get epubConvertSettingsTitle => 'Converteix un EPUB a Markdown';
   @override

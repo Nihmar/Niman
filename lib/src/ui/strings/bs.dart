@@ -1836,7 +1836,7 @@ final class BosnianStrings extends Strings {
   @override
   String get epubConvertAction => 'Pretvori u Markdown…';
   @override
-  String get epubConvertCommand => 'Pretvori EPUB u Markdown';
+  String get epubConvertCommand => 'Pretvori EPUB u Markdown…';
   @override
   String get epubConvertSettingsTitle => 'Pretvori EPUB u Markdown';
   @override

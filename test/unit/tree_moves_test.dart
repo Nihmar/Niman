@@ -32,4 +32,30 @@ void main() {
     expect(moves.since(3, tree: true), {4, 5});
     expect(moves.since(2, tree: true), isNull, reason: 'revision 3 forgotten');
   });
+
+  test('contents-only changes pushing the tree changes out claim nothing', () {
+    // The tree change is forgotten and only saves' sizes and times are held:
+    // an empty log of tree changes must not read as "the tree did not move".
+    final moves = TreeMoves()
+      ..record(revision: 1, treeRevision: 1, folders: {7});
+    for (var r = 2; r <= 70; r++) {
+      moves.record(revision: r);
+    }
+    expect(moves.since(0, tree: true), isNull, reason: 'revision 1 forgotten');
+    expect(moves.since(1, tree: true), isEmpty, reason: 'nothing after it');
+    expect(moves.since(0, tree: false), isNull);
+    expect(moves.since(6, tree: false), isNull);
+    expect(moves.since(70, tree: false), isEmpty);
+  });
+
+  test('a log that forgot only older changes still answers for newer', () {
+    final moves = TreeMoves(kept: 3)
+      ..record(revision: 1, treeRevision: 1, folders: {1})
+      ..record(revision: 2)
+      ..record(revision: 3)
+      ..record(revision: 4, treeRevision: 2, folders: {2})
+      ..record(revision: 5);
+    expect(moves.since(1, tree: true), {2});
+    expect(moves.since(0, tree: true), isNull);
+  });
 }

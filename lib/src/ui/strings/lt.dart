@@ -1830,7 +1830,7 @@ final class LithuanianStrings extends Strings {
   @override
   String get epubConvertAction => 'Konvertuoti į Markdown…';
   @override
-  String get epubConvertCommand => 'Konvertuoti EPUB į Markdown';
+  String get epubConvertCommand => 'Konvertuoti EPUB į Markdown…';
   @override
   String get epubConvertSettingsTitle => 'Konvertuoti EPUB į Markdown';
   @override

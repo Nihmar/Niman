@@ -21,7 +21,9 @@ typedef TestChapter = ({String path, String body});
 /// `<opf:item>`, as some books do. [omit] names chapters listed in the
 /// manifest and spine but left out of the zip. [metadata] is written inside
 /// the OPF's `<metadata>` after the title, [items] inside its `<manifest>`,
-/// and [unique] names the package's `unique-identifier`.
+/// and [unique] names the package's `unique-identifier`. [hrefs] writes a
+/// chapter's manifest `href` another way than its path (percent-encoded,
+/// say), by the path.
 File writeTestEpub(
   String path, {
   required List<TestChapter> chapters,
@@ -34,13 +36,14 @@ File writeTestEpub(
   String metadata = '',
   String items = '',
   String? unique,
+  Map<String, String> hrefs = const {},
 }) {
   final o = prefix ? 'opf:' : '';
   final manifest = StringBuffer();
   final spine = StringBuffer();
   for (final (index, chapter) in chapters.indexed) {
     manifest.write(
-      '<${o}item id="c$index" href="${chapter.path}" '
+      '<${o}item id="c$index" href="${hrefs[chapter.path] ?? chapter.path}" '
       'media-type="application/xhtml+xml"/>',
     );
     spine.write('<${o}itemref idref="c$index"/>');
@@ -78,7 +81,11 @@ File writeTestEpub(
       '</${o}package>';
 
   final archive = Archive()
-    ..add(ArchiveFile.string('mimetype', 'application/epub+zip'))
+    // First and stored as it is, as the format asks: what a reader (and
+    // `looksLikeEpub`) knows an EPUB by.
+    ..add(
+      ArchiveFile.noCompress('mimetype', 20, 'application/epub+zip'.codeUnits),
+    )
     ..add(
       ArchiveFile.string(
         'META-INF/container.xml',

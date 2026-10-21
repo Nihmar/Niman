@@ -12,6 +12,7 @@ import 'package:niman/src/db/indexer.dart';
 import 'package:niman/src/library/note_ops.dart';
 import 'package:niman/src/library/note_write_stream.dart';
 import 'package:niman/src/library/note_writer.dart';
+import 'package:niman/src/library/reindex_scheduler.dart';
 import 'package:niman/src/markdown/note_references.dart';
 import 'package:path/path.dart' as p;
 
@@ -301,17 +302,17 @@ void main() {
   });
 
   test('the default waits only for large notes', () {
-    expect(NoteWriter.defaultQuietBeforeReindex(1 << 20), Duration.zero);
+    expect(ReindexScheduler.defaultQuietBeforeReindex(1 << 20), Duration.zero);
     expect(
-      NoteWriter.defaultQuietBeforeReindex(1536 << 10),
+      ReindexScheduler.defaultQuietBeforeReindex(1536 << 10),
       const Duration(seconds: 2),
     );
     expect(
-      NoteWriter.defaultQuietBeforeReindex(4 << 20),
+      ReindexScheduler.defaultQuietBeforeReindex(4 << 20),
       const Duration(seconds: 5),
     );
     expect(
-      NoteWriter.defaultQuietBeforeReindex(250 << 20),
+      ReindexScheduler.defaultQuietBeforeReindex(250 << 20),
       const Duration(seconds: 30),
     );
   });
@@ -439,5 +440,79 @@ void main() {
     await ops.writer.indexed;
     expect(read('Via ops.md'), 'from ops');
     expect(await ops.find('Via ops.md'), isNotNull);
+  });
+
+  test('a note replaced from a download is not kept waiting for the quiet '
+      'of an earlier save', () async {
+    // The save left a long wait; the download is no part of that typing, and
+    // its text should reach the index when its turn ends, not an hour later.
+    File(p.join(root.path, 'a.md')).writeAsStringSync('old');
+    final reads = <bool>[];
+    final readStarted = Completer<void>();
+    final replacing = NoteWriter(
+      root: root.path,
+      indexer: indexer,
+      quietBeforeReindex: (_) => const Duration(hours: 1),
+      readIntoIndex: (path, {required created, required cancel}) async {
+        reads.add(created);
+        if (!readStarted.isCompleted) readStarted.complete();
+        return true;
+      },
+    );
+    await replacing.save('a.md', 'first');
+    expect(replacing.awaits('a.md'), isTrue, reason: 'waiting to be quiet');
+    expect(reads, isEmpty);
+
+    final temp = File(p.join(root.path, 'a.md.download'))
+      ..writeAsStringSync('from the server');
+    await replacing.replaceFromFile('a.md', temp.path);
+    await readStarted.future.timeout(const Duration(seconds: 10));
+    expect(reads, [false]);
+    expect(replacing.awaits('a.md'), isFalse);
+    expect(read('a.md'), 'from the server');
+  });
+
+  group('a read that holds the note', () {
+    // A reindex in its read phase holds the note open; on Windows an open
+    // file can be neither replaced nor deleted, and the save that cancelled
+    // the read is about to swap the note in (#1137).
+    test('lets go of it before the save that cancelled it writes', () async {
+      File(p.join(root.path, 'a.md')).writeAsStringSync('old');
+      final events = <String>[];
+      final started = Completer<void>();
+      final gate = Completer<void>();
+      final reading = NoteWriter(
+        root: root.path,
+        indexer: indexer,
+        readIntoIndex: (path, {required created, required cancel}) async {
+          final release = cancel.holdFiles();
+          if (!started.isCompleted) started.complete();
+          await gate.future;
+          events.add('released');
+          release();
+          return !cancel.isCancelled;
+        },
+      );
+      await reading.save('a.md', 'first');
+      await started.future;
+
+      Future<NoteBytes?> produce(int index) async {
+        if (index > 0) return null;
+        events.add('write');
+        return utf8.encode('second');
+      }
+
+      final second = reading.save('a.md', produce);
+      // A writer that does not wait writes within a few turns of the event
+      // loop; 100 ms is far past them.
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+      expect(events, isEmpty, reason: 'the read still holds the note open');
+
+      gate.complete();
+      await second;
+      expect(events, ['released', 'write']);
+      expect(read('a.md'), 'second');
+      await reading.indexed;
+    });
   });
 }

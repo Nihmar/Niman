@@ -4,7 +4,9 @@ import 'dart:io';
 import 'package:crypto/crypto.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/files.dart';
+import 'package:niman/src/core/files_blocking.dart';
 import 'package:niman/src/core/isolate_gauge.dart';
+import 'package:niman/src/core/temp_sweep_blocking.dart';
 import 'package:path/path.dart' as p;
 
 final DateTime _epoch = DateTime.fromMillisecondsSinceEpoch(0);

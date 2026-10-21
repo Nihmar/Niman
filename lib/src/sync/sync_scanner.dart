@@ -4,6 +4,7 @@ import 'dart:isolate';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/db/app_database.dart';
 import 'package:niman/src/sync/reconcile.dart';
+import 'package:niman/src/sync/sync_scanner_blocking.dart';
 import 'package:niman/src/sync/sync_sides.dart';
 import 'package:niman/src/sync/sync_step_pool.dart';
 import 'package:niman/src/sync/sync_store.dart';
@@ -141,7 +142,7 @@ final class SyncScanner {
   /// Whether [path] can hold syncable files: a syncable file, or a folder
   /// the scans walk.
   static bool _inSyncScope(String path) =>
-      isSyncablePath(path) || _descends(path);
+      isSyncablePath(path) || syncDescends(path);
 
   static String _parentOf(String path) {
     final slash = path.lastIndexOf('/');
@@ -168,7 +169,7 @@ final class SyncScanner {
       final folder = queue.removeLast();
       for (final item in await client.list(folder)) {
         if (item.isCollection) {
-          if (_descends(item.path)) {
+          if (syncDescends(item.path)) {
             folders.add(item.path);
             queue.add(item.path);
           }
@@ -244,45 +245,4 @@ final class SyncScanner {
       '(${clock.elapsedMilliseconds} ms)',
     );
   }
-}
-
-/// Whether a folder at library-relative [path] is walked: not a dot
-/// folder, except `.niman` at the root (for its two synced files).
-bool _descends(String path) {
-  if (path == '.niman') return true;
-  return !path.split('/').any((s) => s.startsWith('.'));
-}
-
-/// Every syncable file under [root] — or only under its folder [under] —
-/// with size and mtime (no hashes).
-///
-/// Top-level so `Isolate.run` can take it. Symlinks are not followed.
-Future<Map<String, LocalFileState>> scanLocalFiles(
-  String root, {
-  String under = '',
-}) async {
-  final files = <String, LocalFileState>{};
-  if (under.isNotEmpty &&
-      (!_descends(under) || !Directory(p.join(root, under)).existsSync())) {
-    return files;
-  }
-  final queue = [under];
-  while (queue.isNotEmpty) {
-    final folder = queue.removeLast();
-    final dir = Directory(folder.isEmpty ? root : p.join(root, folder));
-    await for (final entity in dir.list(followLinks: false)) {
-      final name = p.basename(entity.path);
-      final rel = folder.isEmpty ? name : '$folder/$name';
-      if (entity is Directory) {
-        if (_descends(rel)) queue.add(rel);
-      } else if (entity is File && isSyncablePath(rel)) {
-        final stat = entity.statSync();
-        files[rel] = LocalFileState(
-          size: stat.size,
-          mtimeMs: stat.modified.millisecondsSinceEpoch,
-        );
-      }
-    }
-  }
-  return files;
 }

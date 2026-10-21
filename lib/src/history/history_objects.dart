@@ -15,9 +15,14 @@
 /// for 1.5 MB of prose where the hard level takes 62 — and 1 for a delta.
 /// The upkeep turns a fast one into a delta or a hard one.
 ///
-/// Nothing is flushed: an object is trusted only when what it rebuilds
-/// hashes to its name, so one a crash cut short reads as a missing version
-/// — what a drifted version always read as (#378) — never as content.
+/// A new object is not flushed: an object is trusted only when what it
+/// rebuilds hashes to its name, so one a crash cut short reads as a missing
+/// version — what a drifted version always read as (#378) — never as
+/// content, and the note it was kept from still holds that content. An
+/// object the upkeep REPLACES — a whole one turned into a delta, or
+/// compressed hard — is flushed before it is renamed over the good copy,
+/// as is every object the old history's move writes before it deletes the
+/// old files: for those the copy that goes is the only other one.
 ///
 /// Synchronous and top-level, like the rest of the store: it runs on a
 /// background isolate.
@@ -27,15 +32,15 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
+import 'package:meta/meta.dart';
+import 'package:niman/src/history/history_folders.dart';
+import 'package:niman/src/history/history_lock.dart';
 import 'package:niman/src/history/text_delta.dart';
+
 import 'package:path/path.dart' as p;
 
-/// The history folder's name inside the library root.
-const String historyFolderName = '.history';
-
-/// The objects folder's name inside `.history/`: a dot name, so no note's
-/// folder can take it.
-const String historyObjectsFolderName = '.objects';
+export 'package:niman/src/history/history_folders.dart'
+    show historyFolderName, historyObjectsFolderName;
 
 /// The longest chain of deltas a read follows before it gives up: the packer
 /// keeps them to [maxDeltaChain], so a longer one is damage, or a loop.
@@ -92,16 +97,24 @@ bool writeObject(String root, String sha, List<int> bytes) {
 bool isFastWhole(String root, String sha) =>
     _header(File(historyObjectPath(root, sha)))?.fast ?? false;
 
+/// Flushes the object [sha] already on disk: written once without, and
+/// about to be the only copy of a version.
+void flushObject(String root, String sha) {
+  File(historyObjectPath(root, sha))
+      .writeAsBytesSync(const <int>[], mode: FileMode.append, flush: true);
+}
+
 /// Stores the fast-compressed object [sha], whose content is [content],
 /// compressed hard: no longer one the upkeep compresses again, and kept as
-/// it was when the hard level saves nothing.
+/// it was when the hard level saves nothing. Flushed before it replaces
+/// the copy it came from.
 void storeHard(String root, String sha, Uint8List content) {
   final file = File(historyObjectPath(root, sha));
   final bytes = file.readAsBytesSync();
   final header = _parseHeader(bytes);
   if (header == null || !header.fast) return;
   final payload = ZLibEncoder(level: 9).convert(content);
-  _write(file, [
+  _write(file, flush: true, [
     ..._magic,
     _whole,
     if (_wholeHeader + payload.length < bytes.length)
@@ -167,33 +180,51 @@ int? chainDepth(String root, String sha) {
 /// [content] and [baseContent], when the caller has them, spare reading
 /// them again. Never makes a loop: a base whose own chain reaches [sha] is
 /// refused.
+///
+/// Two packers at once — a note's timer and the upkeep, each in an isolate
+/// of its own — could each see the other's object whole and make each a
+/// delta of the other, both unreadable. So the check that the base does not
+/// lead back, and the write, are one step under the store-wide pack lock
+/// (the delta itself, the long part, is computed before it).
+/// [beforeLock] lets a test run something between the two.
 bool storeAsDelta(
   String root,
   String sha,
   String baseSha, {
   Uint8List? content,
   Uint8List? baseContent,
+  @visibleForTesting void Function()? beforeLock,
 }) {
   if (sha == baseSha) return false;
   final file = File(historyObjectPath(root, sha));
+  if (!_wholeAndLoopFree(root, file, sha, baseSha)) return false;
+  final target = content ?? readObject(root, sha);
+  final base = baseContent ?? readObject(root, baseSha);
+  if (target == null || base == null) return false;
+  final payload = ZLibEncoder(level: 9).convert(computeDelta(base, target));
+  beforeLock?.call();
+  return withHistoryPackLock(root, () {
+    if (!_wholeAndLoopFree(root, file, sha, baseSha)) return false;
+    final now = file.lengthSync();
+    if (_deltaHeader + payload.length > now ~/ 2) return false;
+    final prefix = [..._magic, _delta, ..._hexBytes(baseSha)];
+    _write(file, flush: true, [...prefix, ...payload]);
+    _touch(File(historyObjectPath(root, baseSha)));
+    return true;
+  });
+}
+
+/// Whether the object [sha] (in [file]) is whole, and [baseSha]'s chain
+/// does not lead back to it: a loop reads as nothing.
+bool _wholeAndLoopFree(String root, File file, String sha, String baseSha) {
   final header = _header(file);
   if (header == null || header.base != null) return false;
-  // The base must not lead back here: a loop reads as nothing.
   final seen = <String>{};
   for (String? at = baseSha; at != null; at = deltaBaseOf(root, at)) {
     if (at == sha || !seen.add(at) || seen.length > _readableChain) {
       return false;
     }
   }
-  final target = content ?? readObject(root, sha);
-  final base = baseContent ?? readObject(root, baseSha);
-  if (target == null || base == null) return false;
-  final payload = ZLibEncoder(level: 9).convert(computeDelta(base, target));
-  final now = file.lengthSync();
-  if (_deltaHeader + payload.length > now ~/ 2) return false;
-  final prefix = [..._magic, _delta, ..._hexBytes(baseSha)];
-  _write(file, [...prefix, ...payload]);
-  _touch(File(historyObjectPath(root, baseSha)));
   return true;
 }
 
@@ -280,9 +311,9 @@ _Header? _parseHeader(Uint8List bytes) {
 }
 
 /// Writes [bytes] to a temp file beside [file] and renames it over: a
-/// reader sees the old object or the new one, never half of either. Not
-/// flushed (see the library's doc).
-void _write(File file, List<int> bytes) {
+/// reader sees the old object or the new one, never half of either. Flushed
+/// before the rename when [flush] (see the library's doc).
+void _write(File file, List<int> bytes, {bool flush = false}) {
   file.parent.createSync(recursive: true);
   final temp = File(
     p.join(
@@ -293,7 +324,7 @@ void _write(File file, List<int> bytes) {
   );
   try {
     temp
-      ..writeAsBytesSync(bytes)
+      ..writeAsBytesSync(bytes, flush: flush)
       ..renameSync(file.path);
   } on Object {
     if (temp.existsSync()) temp.deleteSync();

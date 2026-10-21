@@ -1852,7 +1852,7 @@ final class PolishStrings extends Strings {
   @override
   String get epubConvertAction => 'Konwertuj na Markdown…';
   @override
-  String get epubConvertCommand => 'Konwertuj EPUB na Markdown';
+  String get epubConvertCommand => 'Konwertuj EPUB na Markdown…';
   @override
   String get epubConvertSettingsTitle => 'Konwertuj EPUB na Markdown';
   @override

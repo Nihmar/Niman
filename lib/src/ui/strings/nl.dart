@@ -1853,7 +1853,7 @@ final class DutchStrings extends Strings {
   @override
   String get epubConvertAction => 'Omzetten naar Markdown…';
   @override
-  String get epubConvertCommand => 'EPUB omzetten naar Markdown';
+  String get epubConvertCommand => 'EPUB omzetten naar Markdown…';
   @override
   String get epubConvertSettingsTitle => 'Een EPUB omzetten naar Markdown';
   @override

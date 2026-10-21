@@ -1846,7 +1846,7 @@ final class HungarianStrings extends Strings {
   @override
   String get epubConvertAction => 'Átalakítás Markdownná…';
   @override
-  String get epubConvertCommand => 'EPUB átalakítása Markdownná';
+  String get epubConvertCommand => 'EPUB átalakítása Markdownná…';
   @override
   String get epubConvertSettingsTitle => 'EPUB átalakítása Markdownná';
   @override

@@ -1840,7 +1840,7 @@ final class SwedishStrings extends Strings {
   @override
   String get epubConvertAction => 'Konvertera till Markdown…';
   @override
-  String get epubConvertCommand => 'Konvertera EPUB till Markdown';
+  String get epubConvertCommand => 'Konvertera EPUB till Markdown…';
   @override
   String get epubConvertSettingsTitle => 'Konvertera en EPUB till Markdown';
   @override

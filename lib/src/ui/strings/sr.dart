@@ -1835,7 +1835,7 @@ final class SerbianStrings extends Strings {
   @override
   String get epubConvertAction => 'Претвори у Markdown…';
   @override
-  String get epubConvertCommand => 'Претвори EPUB у Markdown';
+  String get epubConvertCommand => 'Претвори EPUB у Markdown…';
   @override
   String get epubConvertSettingsTitle => 'Претвори EPUB у Markdown';
   @override

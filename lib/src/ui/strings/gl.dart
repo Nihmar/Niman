@@ -1846,7 +1846,7 @@ final class GalicianStrings extends Strings {
   @override
   String get epubConvertAction => 'Converter a Markdown…';
   @override
-  String get epubConvertCommand => 'Converter EPUB a Markdown';
+  String get epubConvertCommand => 'Converter EPUB a Markdown…';
   @override
   String get epubConvertSettingsTitle => 'Converter un EPUB a Markdown';
   @override

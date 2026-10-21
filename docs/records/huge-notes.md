@@ -366,11 +366,14 @@ written next to it.
    already folded them to one running and one after it, but on this note one
    is longer than the pause between two saves. A note past 2 MB is now
    reindexed once it has been left alone for 5 s, past 16 MB for 30 s, each
-   save starting the wait again (`NoteWriter.quietBeforeReindex`, the save's
-   own thresholds). The index is a little behind the note while it is being
-   written, and the note is read back once. `NoteWriter.indexed` runs a
+   save starting the wait again (`ReindexScheduler.quietBeforeReindex`, the
+   save's own thresholds). The index is a little behind the note while it is
+   being written, and the note is read back once. `NoteWriter.indexed` runs a
    waiting reindex at once, since whoever asks wants the index as the disk has
-   it.
+   it. The sizes are a floor: a note whose read took a quarter of a second or
+   more waits twice as long as that read (at most 30 s), because a 0.6 to 1 MB
+   note read in 400 to 600 ms was cancelled by the save every half second and
+   never reached the index while the writer typed (`quietFor`, 2026-10-21).
 
 10. ~~**A pin reads the whole note, twice.**~~ Done (2026-09-24). Unpinning
     the stress note ran a phone out of memory: the edit read the whole note to

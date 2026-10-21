@@ -11,6 +11,12 @@
 /// with no plugin. Linux and Android keep no creation time `dart:io`
 /// reports (the order falls back to the modification time there), so on
 /// them [keepCreationTime] does nothing.
+///
+/// The calls are synchronous and run on whichever isolate saves, the UI's
+/// included (the todo files, the attachment swap): three `kernel32` calls on
+/// a local file, microseconds against the milliseconds an isolate to run
+/// them would cost. A decided exception to the no-blocking-call rule
+/// (#1143), listed with its reason in `test/unit/ui_isolate_io_test.dart`.
 library;
 
 import 'dart:ffi';

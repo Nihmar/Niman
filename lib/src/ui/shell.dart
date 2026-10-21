@@ -34,6 +34,7 @@ import 'package:niman/src/editor/diagram_templates.dart';
 import 'package:niman/src/editor/editor_only.dart';
 import 'package:niman/src/editor/markdown_format.dart';
 import 'package:niman/src/editor/plain_text.dart';
+import 'package:niman/src/epub/epub_archive.dart';
 import 'package:niman/src/export/export_files.dart';
 import 'package:niman/src/export/pdf_printer.dart';
 import 'package:niman/src/flashcards/deck_catalog_controller.dart';
@@ -2922,8 +2923,12 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     if (!await source.exists()) return;
     // A shared book is converted into notes (#1138), never decoded as a
     // note's text: its cache copy goes once it is.
-    if (isBook(name)) {
-      if (mounted) await _epubConvert.run(context, path, consume: true);
+    // Told by its name, or — a provider that names it `msf:1234` — by the
+    // `mimetype` the format opens on.
+    if (isBook(name) || await looksLikeEpub(path)) {
+      if (mounted) {
+        await _epubConvert.run(context, path, name: name, consume: true);
+      }
       return;
     }
     if (p.extension(name).toLowerCase() == '.zip') {

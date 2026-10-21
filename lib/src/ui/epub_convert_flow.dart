@@ -16,6 +16,7 @@ import 'package:niman/src/epub/epub_conversion.dart';
 import 'package:niman/src/epub/epub_convert_job.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/epub_convert_dialog.dart';
+import 'package:niman/src/ui/epub_convert_progress_dialog.dart';
 import 'package:niman/src/ui/folder_picker.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:path/path.dart' as p;
@@ -59,9 +60,12 @@ final class EpubConvertFlow {
 
   /// Converts the book at [source], an absolute path. [consume] deletes it
   /// afterwards, whatever happened: a share's copy in the app's cache.
+  /// [name] is what the book is called when its file is not: the name a
+  /// share came with, rather than its copy's (`<millis>-Dune.epub`).
   Future<void> run(
     BuildContext context,
     String source, {
+    String? name,
     bool consume = false,
   }) async {
     final messenger = ScaffoldMessenger.maybeOf(context);
@@ -84,6 +88,7 @@ final class EpubConvertFlow {
       final choice = await showEpubConvertDialog(
         context,
         source: source,
+        name: name,
         parent: parent,
         preview: preview,
         pickFolder: (current) async {
@@ -102,6 +107,7 @@ final class EpubConvertFlow {
       if (choice == null || !context.mounted) return;
       final conversion = await EpubConversion.start(
         source: source,
+        name: name,
         libraryRoot: root,
         parent: choice.parent,
         oneNote: choice.oneNote,
@@ -119,7 +125,14 @@ final class EpubConvertFlow {
           builder: (context) => EpubConvertProgressDialog(conversion),
         ),
       );
-      await _settle(conversion, source, messenger);
+      await settle(
+        context,
+        done: conversion.done,
+        source: source,
+        root: root,
+        messenger: messenger,
+        name: name,
+      );
     } finally {
       if (consume) {
         try {
@@ -131,36 +144,51 @@ final class EpubConvertFlow {
     }
   }
 
-  Future<void> _settle(
-    EpubConversion conversion,
-    String source,
-    ScaffoldMessengerState? messenger,
-  ) async {
+  /// Tells, on [messenger], how the conversion that [done] answers for ended,
+  /// and — when it wrote — shows what it made.
+  ///
+  /// The tree is not asked to re-read the library: the new folder is moved
+  /// in whole and the watcher finds it, as it does an imported folder
+  /// (#382). A full rescan walked the whole library with the user waiting
+  /// and no dialog on screen, and threw when the library had been closed
+  /// meanwhile. The folder is shown and its note opened only if the library
+  /// the conversion wrote into ([root]) is still the one open, and the
+  /// screen still there: a conversion takes a while, and the user may have
+  /// switched library, or closed it, in the meantime.
+  @visibleForTesting
+  Future<void> settle(
+    BuildContext context, {
+    required Future<EpubConverted> done,
+    required String source,
+    required String root,
+    required ScaffoldMessengerState? messenger,
+    String? name,
+  }) async {
+    final shown = epubDisplayName(source, name);
     final EpubConverted converted;
     try {
-      converted = await conversion.done;
+      converted = await done;
     } on EpubConvertCancelled {
-      _log.info('convert "${p.basename(source)}": cancelled');
+      _log.info('convert "$shown": cancelled');
       return;
     } on Object catch (error) {
-      _log.warning('convert "${p.basename(source)}" failed: $error');
+      _log.warning('convert "$shown" failed: $error');
       messenger?.showSnackBar(
-        SnackBar(content: Text(epubConvertProblem(error, source))),
+        SnackBar(content: Text(epubConvertProblem(error, source, name: name))),
       );
       return;
     }
     _log.info(
-      'convert "${p.basename(source)}" -> "${converted.made}": '
+      'convert "$shown" -> "${converted.made}": '
       '${converted.notes} note(s), ${converted.pictures} picture(s)',
     );
-    // Asked for now rather than waiting for the watcher: the tree is where
-    // the user looks next, and the notes have just been written.
-    await session.rescanNow();
-    final folder = converted.made.endsWith('.md')
-        ? p.posix.dirname(converted.made)
-        : converted.made;
-    reveal(folder == '.' ? '' : folder);
-    open(converted.open);
+    if (context.mounted && session.root == root) {
+      final folder = converted.made.endsWith('.md')
+          ? p.posix.dirname(converted.made)
+          : converted.made;
+      reveal(folder == '.' ? '' : folder);
+      open(converted.open);
+    }
     messenger?.showSnackBar(
       SnackBar(
         content: Text(
@@ -173,76 +201,4 @@ final class EpubConvertFlow {
       ),
     );
   }
-}
-
-/// The conversion's progress, with the way to stop it; it closes itself
-/// when the conversion ends, however it ends.
-final class EpubConvertProgressDialog extends StatefulWidget {
-  /// Follows [conversion].
-  const new(this.conversion, {super.key});
-
-  /// The conversion followed.
-  final EpubConversion conversion;
-
-  @override
-  State<EpubConvertProgressDialog> createState() =>
-      _EpubConvertProgressDialogState();
-}
-
-final class _EpubConvertProgressDialogState
-    extends State<EpubConvertProgressDialog> {
-  @override
-  void initState() {
-    super.initState();
-    unawaited(
-      widget.conversion.done.then<void>(
-        (_) => _close(),
-        onError: (Object _) => _close(),
-      ),
-    );
-  }
-
-  void _close() {
-    if (mounted) Navigator.of(context).pop();
-  }
-
-  @override
-  Widget build(BuildContext context) => AlertDialog(
-    key: const Key('epub-convert-progress'),
-    title: Text(AppStrings.epubConvertTitle),
-    content: ValueListenableBuilder<EpubConvertProgress?>(
-      valueListenable: widget.conversion.progress,
-      builder: (context, progress, _) => Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          LinearProgressIndicator(
-            value: progress == null || progress.total == 0
-                ? null
-                : progress.done / progress.total,
-          ),
-          const SizedBox(height: 12),
-          Text(
-            progress == null
-                ? AppStrings.epubConvertReading
-                : AppStrings.epubConvertProgress(progress.done, progress.total),
-          ),
-          if (progress != null)
-            Text(
-              p.posix.basename(progress.what),
-              style: Theme.of(context).textTheme.bodySmall,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-        ],
-      ),
-    ),
-    actions: [
-      TextButton(
-        key: const Key('epub-convert-cancel'),
-        onPressed: () => unawaited(widget.conversion.cancel()),
-        child: Text(AppStrings.actionCancel),
-      ),
-    ],
-  );
 }

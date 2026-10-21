@@ -1848,7 +1848,7 @@ final class BulgarianStrings extends Strings {
   @override
   String get epubConvertAction => 'Преобразуване в Markdown…';
   @override
-  String get epubConvertCommand => 'Преобразуване на EPUB в Markdown';
+  String get epubConvertCommand => 'Преобразуване на EPUB в Markdown…';
   @override
   String get epubConvertSettingsTitle => 'Преобразуване на EPUB в Markdown';
   @override

@@ -3,7 +3,7 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:niman/src/core/download/download_files.dart';
-import 'package:niman/src/core/files.dart';
+import 'package:niman/src/core/files_blocking.dart' show hashFileSha256;
 
 /// A download running in its own isolate: a transcription model, the OCR
 /// engine, an OCR language.

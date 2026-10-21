@@ -1813,7 +1813,7 @@ final class EnglishStrings extends Strings {
   @override
   String get epubConvertAction => 'Convert to Markdown…';
   @override
-  String get epubConvertCommand => 'Convert EPUB to Markdown';
+  String get epubConvertCommand => 'Convert EPUB to Markdown…';
   @override
   String get epubConvertSettingsTitle => 'Convert an EPUB to Markdown';
   @override

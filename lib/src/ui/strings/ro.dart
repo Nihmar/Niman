@@ -1849,7 +1849,7 @@ final class RomanianStrings extends Strings {
   @override
   String get epubConvertAction => 'Convertește în Markdown…';
   @override
-  String get epubConvertCommand => 'Convertește EPUB în Markdown';
+  String get epubConvertCommand => 'Convertește EPUB în Markdown…';
   @override
   String get epubConvertSettingsTitle => 'Convertește un EPUB în Markdown';
   @override

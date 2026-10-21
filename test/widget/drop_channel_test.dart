@@ -32,6 +32,18 @@ void main() {
   late PlatformDropTargetService drops;
   late File note;
 
+  // Which dropped paths are folders is asked on a background isolate, whose
+  // answer the fake clock does not drive: the same check, made in place,
+  // answers when the test pumps.
+  final foldersOffIsolate = foldersAmong;
+  setUpAll(
+    () => foldersAmong = (paths) async => {
+      for (final path in paths)
+        if (FileSystemEntity.isDirectorySync(path)) path,
+    },
+  );
+  tearDownAll(() => foldersAmong = foldersOffIsolate);
+
   setUp(() {
     controller = FakeLibrarySession();
     filePicker = useFakeFilePicker();
@@ -91,13 +103,6 @@ void main() {
 
   Future<void> dropped(WidgetTester tester, List<String> paths) async {
     await fromHost(tester, 'drop', paths);
-    // The drop asks which paths are folders on a background isolate, whose
-    // answer the fake clock does not move: the same question, asked after
-    // it on the real clock, comes back after it.
-    await tester.runAsync(() async {
-      await foldersAmong(paths);
-      await Future<void>.delayed(const Duration(milliseconds: 20));
-    });
     await settle(tester);
   }
 

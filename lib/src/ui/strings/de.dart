@@ -1865,7 +1865,7 @@ final class GermanStrings extends Strings {
   @override
   String get epubConvertAction => 'In Markdown umwandeln…';
   @override
-  String get epubConvertCommand => 'EPUB in Markdown umwandeln';
+  String get epubConvertCommand => 'EPUB in Markdown umwandeln…';
   @override
   String get epubConvertSettingsTitle => 'Ein EPUB in Markdown umwandeln';
   @override

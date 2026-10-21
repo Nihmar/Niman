@@ -1811,7 +1811,7 @@ final class EstonianStrings extends Strings {
   @override
   String get epubConvertAction => 'Teisenda Markdowniks…';
   @override
-  String get epubConvertCommand => 'Teisenda EPUB Markdowniks';
+  String get epubConvertCommand => 'Teisenda EPUB Markdowniks…';
   @override
   String get epubConvertSettingsTitle => 'Teisenda EPUB Markdowniks';
   @override

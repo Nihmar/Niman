@@ -6,6 +6,7 @@
 /// {"pin":"syncBase","v":12}                                         pinned
 /// {"pin":"syncBase","v":null}                                       unpinned
 /// {"drop":[3,4]}                                                    rotated
+/// {"highest":17}                          the highest number ever, kept
 /// ```
 ///
 /// Read by folding the lines in order into a [HistoryManifest]. A line that
@@ -43,14 +44,21 @@ String pinLine(String pin, int? number) =>
 String dropLine(Iterable<int> numbers) =>
     jsonEncode({'drop': numbers.toList()});
 
-/// What a log holds: the history it folds to, and how many lines it took.
-typedef FoldedLog = ({HistoryManifest manifest, int lines});
+/// What a log holds: the history it folds to, how many lines it took, and
+/// the highest version number it ever named — kept, dropped or pinned —
+/// which the next version must pass, so no number is ever given twice.
+typedef FoldedLog = ({HistoryManifest manifest, int lines, int highest});
 
 /// Folds the log [text] into the history it describes.
 FoldedLog foldLog(String text) {
   final versions = <int, HistoryVersion>{};
   final pins = <String, int>{};
   var lines = 0;
+  var highest = 0;
+  void saw(int number) {
+    if (number > highest) highest = number;
+  }
+
   for (final line in const LineSplitter().convert(text)) {
     if (line.trim().isEmpty) continue;
     lines++;
@@ -63,21 +71,29 @@ FoldedLog foldLog(String text) {
     if (json is! Map) continue;
     final pin = json['pin'];
     final drop = json['drop'];
-    if (pin is String) {
+    final kept = json['highest'];
+    if (kept is int) {
+      saw(kept);
+    } else if (pin is String) {
       final number = json['v'];
       if (number is int && number > 0) {
         pins[pin] = number;
+        saw(number);
       } else if (number == null) {
         pins.remove(pin);
       }
     } else if (drop is List) {
       for (final number in drop.whereType<int>()) {
+        saw(number);
         versions.remove(number);
         pins.removeWhere((_, pinned) => pinned == number);
       }
     } else {
       final version = _version(json);
-      if (version != null) versions[version.number] = version;
+      if (version != null) {
+        versions[version.number] = version;
+        saw(version.number);
+      }
     }
   }
   return (
@@ -89,6 +105,7 @@ FoldedLog foldLog(String text) {
       },
     ),
     lines: lines,
+    highest: highest,
   );
 }
 
@@ -130,28 +147,52 @@ FoldedLog? readLog(String root, String rel) {
 void appendLog(String root, String rel, List<String> lines) {
   if (lines.isEmpty) return;
   final file = File(historyLogPath(root, rel));
-  file.parent.createSync(recursive: true);
-  final handle = file.openSync(mode: FileMode.append);
-  try {
-    handle.writeStringSync('\n${lines.join('\n')}\n');
-  } finally {
-    handle.closeSync();
+  inFolderOf(file, () {
+    final handle = file.openSync(mode: FileMode.append);
+    try {
+      handle.writeStringSync('\n${lines.join('\n')}\n');
+    } finally {
+      handle.closeSync();
+    }
+  });
+}
+
+/// Runs [write], which puts something in [file]'s folder, with the folder
+/// made first — and made again when it was pruned in between: another
+/// note's delete or move tidies the folders it leaves empty, and a folder
+/// made a moment ago may be one of them (no lock of this note's sits in it
+/// any more to keep it).
+T inFolderOf<T>(File file, T Function() write) {
+  for (var attempt = 0; ; attempt++) {
+    file.parent.createSync(recursive: true);
+    try {
+      return write();
+    } on PathNotFoundException {
+      if (attempt >= 4) rethrow;
+    }
   }
 }
 
 /// Replaces the log of [rel] with the lines that rebuild [manifest]: kept
-/// versions oldest first, then the pins. Atomic and flushed, since it is
-/// the only copy of the list; removes the log when [manifest] is empty.
-void writeLog(String root, String rel, HistoryManifest manifest) {
+/// versions oldest first, then the pins, then [highest] — the highest number
+/// the old log named, which a compaction must not forget. Atomic and
+/// flushed, since it is the only copy of the list; removes the log when
+/// [manifest] is empty.
+void writeLog(
+  String root,
+  String rel,
+  HistoryManifest manifest, {
+  int highest = 0,
+}) {
   final file = File(historyLogPath(root, rel));
   if (manifest.versions.isEmpty) {
     if (file.existsSync()) file.deleteSync();
     return;
   }
-  file.parent.createSync(recursive: true);
   final text = [
     for (final v in manifest.versions) keptLine(v),
     for (final e in manifest.pins.entries) pinLine(e.key, e.value),
+    if (highest > 0) jsonEncode({'highest': highest}),
   ].join('\n');
   final temp = File(
     p.join(
@@ -161,15 +202,17 @@ void writeLog(String root, String rel, HistoryManifest manifest) {
     ),
   );
   try {
-    final handle = temp.openSync(mode: FileMode.writeOnly);
-    try {
-      handle
-        ..writeStringSync('$text\n')
-        ..flushSync();
-    } finally {
-      handle.closeSync();
-    }
-    temp.renameSync(file.path);
+    inFolderOf(file, () {
+      final handle = temp.openSync(mode: FileMode.writeOnly);
+      try {
+        handle
+          ..writeStringSync('$text\n')
+          ..flushSync();
+      } finally {
+        handle.closeSync();
+      }
+      temp.renameSync(file.path);
+    });
   } on Object {
     if (temp.existsSync()) temp.deleteSync();
     rethrow;

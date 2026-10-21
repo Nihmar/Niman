@@ -1845,7 +1845,7 @@ final class BasqueStrings extends Strings {
   @override
   String get epubConvertAction => 'Bihurtu Markdown-era…';
   @override
-  String get epubConvertCommand => 'Bihurtu EPUB Markdown-era';
+  String get epubConvertCommand => 'Bihurtu EPUB Markdown-era…';
   @override
   String get epubConvertSettingsTitle => 'Bihurtu EPUB bat Markdown-era';
   @override

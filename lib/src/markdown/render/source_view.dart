@@ -91,6 +91,7 @@ import 'package:niman/src/markdown/render/live_quote_content.dart';
 import 'package:niman/src/markdown/render/live_quote_runs.dart';
 import 'package:niman/src/markdown/render/live_run.dart';
 import 'package:niman/src/markdown/render/live_table_commands.dart';
+import 'package:niman/src/markdown/render/live_table_grid_tracker.dart';
 import 'package:niman/src/markdown/render/live_table_handles.dart';
 import 'package:niman/src/markdown/render/live_tables.dart';
 import 'package:niman/src/markdown/render/markdown_blocks_sliver.dart';
@@ -687,6 +688,15 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// The first line of the table under the mouse, or null.
   final ValueNotifier<int?> _tableHover = ValueNotifier<int?>(null);
 
+  /// Settles the grid the handles are built on against the frame that drew
+  /// the table.
+  late final LiveTableGridTracker _tableGridSettled = LiveTableGridTracker(
+    drawn: () {
+      final block = _tableInPlay;
+      return block == null ? null : _drawnTableGrid(block);
+    },
+  );
+
   /// The pointer over the note: the text's, or the hand's over a task box a
   /// click ticks (#505). A notifier, not state, so crossing a box repaints the
   /// pointer alone and never rebuilds the note.
@@ -998,6 +1008,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   void dispose() {
     _tableHoverClear?.cancel();
     _tableHover.dispose();
+    _tableGridSettled.dispose();
     _hoverCursor.dispose();
     widget.surface?.detachView(this);
     widget.spellCheck?.removeListener(_onSpellingChanged);
@@ -4385,7 +4396,12 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
         child: OverlayPortal(
           controller: _tableOverlay,
           overlayChildBuilder: (context) => ListenableBuilder(
-            listenable: Listenable.merge([_scroll, _tableHover, _caretSpot]),
+            listenable: Listenable.merge([
+              _scroll,
+              _tableHover,
+              _caretSpot,
+              _tableGridSettled,
+            ]),
             builder: (context, _) => _tableHandles(context),
           ),
           child: OverlayPortal(
@@ -4780,12 +4796,51 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   }
 
   /// [block]'s grid, globally: from its first row's top to its last row's
-  /// foot, as wide as its columns — or null while those rows are not drawn.
+  /// foot, as wide as its columns — or null while no row of it is drawn.
+  ///
+  /// Its height is worked out from the map the note is laid out by
+  /// ([_lineBox]) at the scroll offset the note has *now*, not read off the
+  /// drawn rows: a scroll notifies before the frame that moves them, and
+  /// what a row's paragraph says is the last frame's. [_tableGridSettled]
+  /// checks it against the rows once a frame has drawn them.
+  ///
+  /// Only the left edge is read from a drawn row — a row laid out in fitted
+  /// columns stands away from its box's left, which the grid painter draws
+  /// from — and a scroll does not move it.
+  Rect? _tableGrid(Block block) {
+    final note = _noteBox;
+    if (note == null || !_scroll.hasClients) return null;
+    final row = _tableRowAt(context, block.startLine, block, _caretSpot.value);
+    if (row == null) return null;
+    double? left;
+    for (var line = block.startLine; line < block.endLine; line++) {
+      final piece = _piecesOf(line).firstOrNull;
+      final render = piece == null ? null : _renderOf(piece.key);
+      if (piece == null || render == null) continue;
+      left = render.localToGlobal(Offset(-piece.x, 0)).dx;
+      break;
+    }
+    if (left == null) return null;
+    final top = _lineBox(block.startLine).top;
+    final foot = _lineBox(block.endLine - 1);
+    final origin = note.localToGlobal(Offset(0, -_scroll.offset));
+    return Rect.fromLTRB(
+      left,
+      origin.dy + top,
+      left + row.edges.last,
+      origin.dy + foot.top + foot.height,
+    );
+  }
+
+  /// [block]'s grid as the rows are drawn, globally: each row's own
+  /// paragraph says where it stands. That is the last frame's layout, so it
+  /// is for checking [_tableGrid] against once a frame has drawn
+  /// ([LiveTableGridTracker]), never to build on.
   ///
   /// A row laid out in fitted columns is as tall as its wrapped pieces, and
   /// its pieces stand away from its left edge: the grid reaches its foot,
   /// not the height of its first paragraph.
-  Rect? _tableGrid(Block block) {
+  Rect? _drawnTableGrid(Block block) {
     final firstLine = block.startLine;
     final lastLine = block.endLine - 1;
     final row = _tableRowAt(context, firstLine, block, _caretSpot.value);
@@ -4798,9 +4853,6 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     if (first == null || last == null) return null;
     final pad = widget.theme.tableCellPadding;
     final wrapped = row.wrapped.isNotEmpty;
-    // The line's own box, from a piece's own transform: a piece stands away
-    // from the left edge and past the cell padding, so the box is that much
-    // up and left of it — the same origin the grid painter draws from.
     final top = first.localToGlobal(
       Offset(-firstPiece.x, -(wrapped ? firstPiece.y : pad.top)),
     );
@@ -4908,7 +4960,9 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
 
   Widget _tableHandles(BuildContext overlayContext) {
     final block = _tableInPlay;
-    final grid = block == null ? null : _tableGrid(block);
+    final grid = _tableGridSettled.settle(
+      block == null ? null : _tableGrid(block),
+    );
     final note = _noteBox;
     final overlay = Overlay.of(overlayContext).context.findRenderObject();
     if (block == null ||

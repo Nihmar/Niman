@@ -1,15 +1,19 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/history/history_folders.dart';
 import 'package:niman/src/history/history_legacy.dart';
+import 'package:niman/src/history/history_lock.dart';
 import 'package:niman/src/history/history_log.dart';
 import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/history/history_objects.dart';
 import 'package:niman/src/history/history_store.dart';
+import 'package:niman/src/history/history_upkeep.dart';
 import 'package:niman/src/history/snapshot_policy.dart';
 import 'package:path/path.dart' as p;
 
@@ -115,10 +119,17 @@ void main() {
     final file = object('first, long enough to be more than a header');
     file.writeAsBytesSync(file.readAsBytesSync().sublist(0, 9));
     expect(readHistoryVersion(root.path, 'a.md', 1), isNull);
-    // The note holds that content again, unchanged since v1: the next
-    // snapshot finds it so and writes the object again, whole.
+    // The note holds that content again, unchanged since v1: the save takes
+    // nothing and does not wait on checking v1; the upkeep finds it cut
+    // short and writes it again from the note, whole.
     write('a.md', 'first, long enough to be more than a header');
-    save('a.md', 'third', forced());
+    final outcome = save(
+      'a.md',
+      'first, long enough to be more than a header',
+      forced(),
+    );
+    expect(outcome.version, isNull, reason: outcome.describe('a.md'));
+    maintainHistory(root.path, now: t0.add(const Duration(days: 1)));
     expect(version('a.md', 1), 'first, long enough to be more than a header');
   });
 
@@ -135,6 +146,100 @@ void main() {
     );
     expect(result.pinned, isNull);
     expect(readHistoryManifest(root.path, 'a.md').pins[syncBasePin], isNull);
+  });
+
+  test('a pin on a version whose object went keeps its number to itself', () {
+    write('a.md', 'agreed');
+    save('a.md', 'edited', forced());
+    pinHistoryVersion(root.path, 'a.md', syncBasePin, 1, limit: 10);
+    // v1's object goes (by hand, or a sync tool), the pin still names v1.
+    object('agreed').deleteSync();
+    final outcome = save('a.md', 'edited again', forced());
+    // The next version is not v1 again: the pin would have moved onto
+    // content both sides never agreed on, and merged on it (#378).
+    expect(outcome.version!.number, 2);
+    final manifest = readHistoryManifest(root.path, 'a.md');
+    expect(manifest.pins[syncBasePin], isNull);
+    expect(version('a.md', 2), 'edited');
+  });
+
+  test('numbers stay unique through rotation and compaction', () {
+    write('a.md', 'text 0');
+    for (var i = 1; i <= 60; i++) {
+      save('a.md', 'text $i', forced(limit: 1));
+    }
+    final numbers = readHistoryManifest(
+      root.path,
+      'a.md',
+    ).versions.map((v) => v.number);
+    expect(numbers, [60]);
+  });
+
+  test('a compaction keeps the highest number the log ever named', () {
+    // Five versions, then the newest one's object goes: what a reader can
+    // have is v1 to v4, and a compaction of the log (long after many pin
+    // changes) rewrites it from those alone. Only its `highest` line
+    // remembers v5; without it the next version would take 5 again, and a
+    // pin that still named 5 would move onto content nobody agreed on.
+    write('a.md', 'text 0');
+    for (var i = 1; i <= 5; i++) {
+      save('a.md', 'text $i', forced());
+    }
+    expect(
+      readHistoryManifest(root.path, 'a.md').versions.map((v) => v.number),
+      [1, 2, 3, 4, 5],
+    );
+    object('text 4').deleteSync();
+    for (var i = 0; i < 40; i++) {
+      pinHistoryVersion(
+        root.path,
+        'a.md',
+        syncBasePin,
+        i.isEven ? 1 : null,
+        limit: 10,
+      );
+    }
+    final log = File(historyLogPath(root.path, 'a.md')).readAsStringSync();
+    expect(log, contains('"highest":5'));
+    expect(log, isNot(contains('"v":5,')));
+    final outcome = save('a.md', 'text 6', forced());
+    expect(outcome.version!.number, 6);
+  });
+
+  test(
+    'a save waits for the lock another writer holds, then appends',
+    () async {
+      write('a.md', 'one');
+      save('a.md', 'two', forced());
+      final lock = File(historyLockPath(root.path, 'a.md'))
+        ..createSync(recursive: true);
+      // Another isolate holds the note's lock for a while: a compaction, a
+      // pin. The save waits for it rather than writing beside it.
+      final releaser = Isolate.run(() {
+        sleep(const Duration(milliseconds: 300));
+        lock.deleteSync();
+      });
+      final clock = Stopwatch()..start();
+      save('a.md', 'three', forced());
+      expect(clock.elapsedMilliseconds, greaterThanOrEqualTo(250));
+      await releaser;
+      expect(
+        readHistoryManifest(root.path, 'a.md').versions.map((v) => v.number),
+        [1, 2],
+      );
+    },
+  );
+
+  test('a lock a crash left is broken once stale', () {
+    write('a.md', 'one');
+    File(historyLockPath(root.path, 'a.md'))
+      ..createSync(recursive: true)
+      ..setLastModifiedSync(
+        DateTime.now().subtract(const Duration(minutes: 5)),
+      );
+    save('a.md', 'two', forced());
+    expect(version('a.md', 1), 'one');
+    expect(File(historyLockPath(root.path, 'a.md')).existsSync(), isFalse);
   });
 
   test('a log line cut short is skipped, and the next append reads', () {
@@ -340,7 +445,9 @@ void main() {
       expect(deleteNoteHistory(root.path, 'a.md'), 2);
       expect(listObjects(root.path), isEmpty);
       expect(
-        Directory(p.join(root.path, historyFolderName)).listSync(),
+        Directory(p.join(root.path, historyFolderName))
+            .listSync()
+            .where((e) => p.basename(e.path) != historyLocksFolderName),
         isEmpty,
       );
     });

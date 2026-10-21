@@ -200,6 +200,27 @@ void main() {
     expect(object.existsSync(), isTrue);
   });
 
+  test('a note renamed while the upkeep lists the logs keeps its objects', () {
+    sessions('a.md', 3);
+    final shas = {
+      for (final v in readHistoryManifest(root.path, 'a.md').versions) v.sha256,
+    };
+    var moved = false;
+    final named = namedObjects(
+      root.path,
+      afterListing: () {
+        if (moved) return;
+        moved = true;
+        moveNoteHistory(root.path, 'a.md', 'b.md');
+      },
+    );
+    expect(named, containsAll(shas));
+    maintainHistory(root.path, now: later);
+    for (final v in readHistoryManifest(root.path, 'b.md').versions) {
+      expect(readHistoryVersion(root.path, 'b.md', v.number), isNotNull);
+    }
+  });
+
   test('a delta that would make a loop is refused', () {
     write('a.md', textAt(0));
     final first = sha(textAt(0));

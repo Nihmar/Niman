@@ -34,9 +34,16 @@ typedef SortedDrop = ({
   List<String> rejected,
 });
 
-/// Which of the dropped [paths] are folders, asked on a background isolate
+/// Which of the dropped paths are folders, asked on a background isolate
 /// together: one stat apiece, which the UI isolate does not make (#1143).
-Future<Set<String>> foldersAmong(List<String> paths) => Isolate.run(
+///
+/// A widget test swaps it for the same check made in place: its fake clock
+/// does not drive an isolate's answer, and a test that waits for one waits
+/// on a guess.
+@visibleForTesting
+Future<Set<String>> Function(List<String> paths) foldersAmong = _foldersAmong;
+
+Future<Set<String>> _foldersAmong(List<String> paths) => Isolate.run(
   () => {
     for (final path in paths)
       if (FileSystemEntity.isDirectorySync(path)) path,

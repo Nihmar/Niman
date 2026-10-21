@@ -1847,7 +1847,7 @@ final class MacedonianStrings extends Strings {
   @override
   String get epubConvertAction => 'Претвори во Markdown…';
   @override
-  String get epubConvertCommand => 'Претвори EPUB во Markdown';
+  String get epubConvertCommand => 'Претвори EPUB во Markdown…';
   @override
   String get epubConvertSettingsTitle => 'Претвори EPUB во Markdown';
   @override
