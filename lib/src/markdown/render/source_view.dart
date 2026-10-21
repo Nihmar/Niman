@@ -3638,6 +3638,11 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   void _restyle() {
     final buffer = widget.buffer;
     final reading = ++_stylings;
+    // The scan a slice was waiting to carry on is the styler's this one
+    // replaces: left waiting, it kept the new styler's from being carried
+    // on, and found the old one gone when it ran.
+    _scanSlice?.cancel();
+    _scanSlice = null;
     if (buffer.lineCount < backgroundLines) {
       final progressive = buffer.lineCount >= progressiveLines;
       _styler = SourceStyler(

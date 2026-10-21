@@ -174,6 +174,31 @@ void main() {
     }
   });
 
+  testWidgets('a long note opened over one still read on is read on too', (
+    tester,
+  ) async {
+    // The first note's slice is still waiting when the second replaces it:
+    // the second's scan is carried on all the same, not left owed.
+    String note(String name) => [
+      for (var at = 0; at < 3000; at++) ...['# $name$at', 'prose $at', ''],
+    ].join('\n');
+    Widget view(SourceBuffer buffer) => MaterialApp(
+      home: Scaffold(
+        body: MarkdownSourceView(buffer: buffer, theme: _theme),
+      ),
+    );
+    await tester.pumpWidget(view(SourceBuffer.fromText(note('a'))));
+    final state = tester.state<MarkdownSourceViewState>(
+      find.byType(MarkdownSourceView),
+    );
+    expect(state.scanSettled, isFalse, reason: 'a slice is waiting');
+    await tester.pumpWidget(view(SourceBuffer.fromText(note('b'))));
+    await tester.pump(Duration.zero);
+    expect(state.scanSettled, isTrue);
+    expect(state.headings, hasLength(3000));
+    expect(state.headings!.first.text, 'b0');
+  });
+
   testWidgets('a short note opens on the whole of it', (tester) async {
     final note = [
       for (var at = 0; at < 100; at++) ...['# h$at', 'prose $at', ''],
