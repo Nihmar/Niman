@@ -129,6 +129,7 @@ jobs:
     # for a device unsigned, and the integration files run in a simulator.
     # The Dart suites are the Mac job's — they run on the host either way.
     runs-on: macos-26
+    timeout-minutes: 90
     permissions:
       contents: read
     steps:
@@ -161,10 +162,25 @@ jobs:
           xcrun simctl bootstatus "$udid" -b
           echo "SIMULATOR=$udid" >> "$GITHUB_ENV"
 
+      # A run that never reaches the app sat silent for two hours once,
+      # after the Xcode build: the steps have a ceiling, the tool's verbose
+      # output goes to a file, and a failure prints its tail and the
+      # simulator's own log.
       - name: App boot (iPhone simulator)
-        run: flutter test integration_test/app_boot_test.dart -d "$SIMULATOR" --flavor beta
+        timeout-minutes: 25
+        run: flutter test integration_test/app_boot_test.dart -d "$SIMULATOR" --flavor beta -v > "$RUNNER_TEMP/app_boot.log" 2>&1
       - name: WebDAV sync end to end (iPhone simulator)
-        run: flutter test integration_test/sync_e2e_test.dart -d "$SIMULATOR" --flavor beta
+        timeout-minutes: 25
+        run: flutter test integration_test/sync_e2e_test.dart -d "$SIMULATOR" --flavor beta -v > "$RUNNER_TEMP/sync_e2e.log" 2>&1
+      - name: What the simulator runs said
+        if: failure()
+        run: |
+          for log in "$RUNNER_TEMP"/app_boot.log "$RUNNER_TEMP"/sync_e2e.log; do
+            [ -f "$log" ] && { echo "== $log"; tail -n 150 "$log"; }
+          done
+          echo "== simulator log"
+          xcrun simctl spawn "$SIMULATOR" log show --last 30m --style compact \
+            --predicate 'process == "Runner" OR subsystem == "com.apple.runningboard"' | tail -n 150
 
   android-unit:
     name: Android unit tests
