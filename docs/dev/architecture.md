@@ -93,7 +93,9 @@ lines or when responsibilities mix.
   `notes_pinned` partial index (#1065) and are read once per revision.
 - **Edit:** `NoteOps.saveNote` → history snapshot and atomic write
   (temp + rename) in one isolate pass → the note is rescanned into the
-  index. Every mode of the surface shares one tokenizer for links. Every
+  index, never beside a write of it: a reindex due while the note's saves
+  run waits for them, and a save asked for while one reads the note cancels
+  it (`NoteWriter`, #1132). Every mode of the surface shares one tokenizer for links. Every
   atomic write — the joined one and the streaming one alike — ends in
   `publishTempFile` (`core/files.dart`): the temp file is flushed to storage
   before the rename, so a power cut after it cannot bring the note back
