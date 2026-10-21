@@ -1,4 +1,5 @@
-/// A file's creation time on a Mac (#759, docs/records/apple-platforms.md).
+/// A file's creation time on a Mac and on iOS (#759,
+/// docs/records/apple-platforms.md).
 ///
 /// APFS keeps a birth time, and the atomic save loses it as Windows' does:
 /// the note renamed over is the temp file, born at the save. `dart:io` does
@@ -13,8 +14,9 @@ import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
 
-/// [path]'s creation time, or null off macOS or where it cannot be read.
-DateTime? macCreationTime(String path) {
+/// [path]'s creation time, or null off the Apple platforms or where it
+/// cannot be read.
+DateTime? appleCreationTime(String path) {
   final api = _LibSystem.instance;
   if (api == null) return null;
   return using((arena) {
@@ -39,8 +41,8 @@ DateTime? macCreationTime(String path) {
 }
 
 /// Sets [path]'s creation time to [created], leaving its other times
-/// alone; answers whether it did. False off macOS.
-bool setMacCreationTime(String path, DateTime created) {
+/// alone; answers whether it did. False off the Apple platforms.
+bool setAppleCreationTime(String path, DateTime created) {
   final api = _LibSystem.instance;
   if (api == null) return false;
   return using((arena) {
@@ -108,7 +110,7 @@ final class _LibSystem {
         'setattrlist',
       );
 
-  static final _LibSystem? instance = Platform.isMacOS
+  static final _LibSystem? instance = Platform.isMacOS || Platform.isIOS
       ? _LibSystem._(DynamicLibrary.process())
       : null;
 

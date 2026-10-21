@@ -373,8 +373,8 @@ window and full screen on a phone ([flashcards](flashcards.md#studying)).
 
 ## Date created
 
-The tree's **Date created** order reads the creation time Windows and
-macOS keep for every file. A save writes the note to a temporary file and
+The tree's **Date created** order reads the creation time Windows, macOS
+and iOS keep for every file. A save writes the note to a temporary file and
 renames it over the note; the system would give the note the temporary
 file's creation time, so the save first copies the note's own onto it, and
 an edited note keeps the date it was created. Linux and Android report no

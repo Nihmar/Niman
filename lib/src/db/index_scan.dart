@@ -10,7 +10,7 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:meta/meta.dart';
-import 'package:niman/src/core/creation_time_mac.dart';
+import 'package:niman/src/core/creation_time_apple.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/isolate_gauge.dart';
 import 'package:path/path.dart' as p;
@@ -404,13 +404,15 @@ final class DiskProbe {
 
 /// When the file at [path] was created (#726), from its stat [st]: Windows
 /// keeps a birth time — `dart:io` exposes it as the stat's `changed` — and
-/// so does a Mac, read apart since `dart:io` does not report it there
-/// (creation_time_mac.dart). Linux and Android keep none `dart:io`
-/// reports, so the modification time stands in, as where a Mac's read
-/// fails.
+/// so do a Mac and an iPhone, read apart since `dart:io` does not report
+/// it there (creation_time_apple.dart). Linux and Android keep none
+/// `dart:io` reports, so the modification time stands in, as where an
+/// Apple read fails.
 DateTime createdOf(FileStat st, String path) {
   if (Platform.isWindows) return st.changed;
-  if (Platform.isMacOS) return macCreationTime(path) ?? st.modified;
+  if (Platform.isMacOS || Platform.isIOS) {
+    return appleCreationTime(path) ?? st.modified;
+  }
   return st.modified;
 }
 

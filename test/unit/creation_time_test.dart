@@ -3,14 +3,14 @@
 // note the temp's age — so the tree's "Date created" order put an edited old
 // note first. Each writer that renames over a note is saved through here,
 // and the creation time read back. Windows and macOS are the platforms that
-// keep one (a Mac's through setattrlist, creation_time_mac.dart).
+// keep one (a Mac's through setattrlist, creation_time_apple.dart).
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/creation_time.dart';
-import 'package:niman/src/core/creation_time_mac.dart';
+import 'package:niman/src/core/creation_time_apple.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/db/index_scan.dart';
 import 'package:niman/src/frontmatter/edit_in_file.dart';
@@ -44,7 +44,7 @@ void main() {
     File(abs).writeAsStringSync(text);
     expect(
       Platform.isMacOS
-          ? setMacCreationTime(abs, DateTime.utc(2020))
+          ? setAppleCreationTime(abs, DateTime.utc(2020))
           : writeCreationTime(abs, _old2020),
       isTrue,
     );
@@ -54,7 +54,7 @@ void main() {
 
   void expectStillOld(String abs) {
     if (Platform.isMacOS) {
-      expect(macCreationTime(abs)?.toUtc(), DateTime.utc(2020));
+      expect(appleCreationTime(abs)?.toUtc(), DateTime.utc(2020));
     } else {
       expect(readCreationTime(abs), _old2020);
     }
