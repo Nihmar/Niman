@@ -10,6 +10,7 @@ import 'package:niman/src/db/index_change.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/db/index_scan.dart';
 import 'package:niman/src/db/indexer.dart';
+import 'package:niman/src/db/read_cancel.dart';
 import 'package:niman/src/links/resolver.dart';
 import 'package:path/path.dart' as p;
 
@@ -290,6 +291,32 @@ void main() {
     await File(oldAbs).rename(newAbs);
     await indexer.applyEvents(root.path, [oldAbs, newAbs]);
     expect(changes.last, IndexChange.tree);
+  });
+
+  // A save of the note makes a read of it obsolete, and reading beside the
+  // write slowed a 1.5 MB save from 123 to 480 ms (device log, 2026-10-20):
+  // the writer cancels the read, and the rescan writes nothing.
+  test('a cancelled rescan writes nothing', () async {
+    await indexer.fullScan(root.path);
+    final abs = p.join(root.path, 'note1.md');
+    File(abs).writeAsStringSync('changed, and longer');
+
+    final early = ReadCancel()..cancel();
+    expect(await indexer.rescanFiles(root.path, [abs], cancel: early), isFalse);
+    expect((await dao.find('note1.md'))!.size, 'hello'.length);
+
+    // Cancelled as the read reaches the note: its isolate is killed there.
+    final reading = ReadCancel();
+    indexer.onProgress = (_) => reading.cancel();
+    expect(
+      await indexer.rescanFiles(root.path, [abs], cancel: reading),
+      isFalse,
+    );
+    indexer.onProgress = null;
+    expect((await dao.find('note1.md'))!.size, 'hello'.length);
+
+    expect(await indexer.rescanFiles(root.path, [abs]), isTrue);
+    expect((await dao.find('note1.md'))!.size, 'changed, and longer'.length);
   });
 
   // #760: a save that changes the title, the date or the pin has changed

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -5,10 +6,11 @@ import 'package:crypto/crypto.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/settings/library_config_repo.dart';
+import 'package:niman/src/db/index_change.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/db/indexer.dart';
 import 'package:niman/src/library/note_ops.dart';
-
+import 'package:niman/src/library/note_write_stream.dart';
 import 'package:niman/src/library/note_writer.dart';
 import 'package:niman/src/markdown/note_references.dart';
 import 'package:path/path.dart' as p;
@@ -328,6 +330,70 @@ void main() {
     );
     await waiting.indexed;
     expect((await indexer.dao.find('Big.md'))!.size, big.length);
+  });
+
+  test(
+    'a reindex due during a save runs after it, even a failed one',
+    () async {
+      // The note is never read beside a write of it: the reindex waits for
+      // the save. When that save fails, nothing reschedules the reindex but
+      // the writer's own debt — the index stayed on the old text before.
+      final quiet = NoteWriter(
+        root: root.path,
+        indexer: indexer,
+        quietBeforeReindex: (_) => const Duration(milliseconds: 50),
+      );
+      await quiet.save('a.md', 'first');
+      await quiet.indexed;
+      await quiet.save('a.md', 'second, longer');
+
+      final gate = Completer<void>();
+      Future<NoteBytes?> failing(int index) async {
+        await gate.future;
+        throw StateError('the producer failed');
+      }
+
+      final save = quiet.save('a.md', failing);
+      await Future<void>.delayed(const Duration(milliseconds: 150));
+      expect(quiet.awaits('a.md'), isTrue, reason: 'owed to the save chain');
+      expect(
+        (await indexer.dao.find('a.md'))!.size,
+        'first'.length,
+        reason: 'not read while the save runs',
+      );
+
+      gate.complete();
+      await expectLater(save, throwsStateError);
+      // Not `indexed`, which would run it whatever: the writer runs it alone.
+      for (var i = 0; i < 100; i++) {
+        if ((await indexer.dao.find('a.md'))!.size != 'first'.length) break;
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+      }
+      expect((await indexer.dao.find('a.md'))!.size, 'second, longer'.length);
+      expect(quiet.awaits('a.md'), isFalse);
+    },
+  );
+
+  test('a save cancels the reindex reading its note', () async {
+    // The read is of a text the save replaces, and it slowed the save down
+    // (device log, 2026-10-20): it is dropped, and writes nothing.
+    await writer.save('a.md', 'first');
+    await writer.indexed;
+    final changes = <IndexChange>[];
+    indexer.onChanged = changes.add;
+    Future<void>? second;
+    // The reindex reports the note as it starts reading it: a save then.
+    indexer.onProgress = (_) =>
+        second ??= writer.save('a.md', 'second, longer');
+    await writer.save('a.md', 'first, again');
+    while (second == null) {
+      await Future<void>.delayed(const Duration(milliseconds: 5));
+    }
+    await second;
+    indexer.onProgress = null;
+    await writer.indexed;
+    expect(changes, [IndexChange.contents], reason: 'one reindex wrote');
+    expect((await indexer.dao.find('a.md'))!.size, 'second, longer'.length);
   });
 
   test('saves while a reindex runs leave the index on the last one', () async {

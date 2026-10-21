@@ -18,6 +18,7 @@ import 'package:niman/src/db/index_note_content.dart';
 import 'package:niman/src/db/index_reconcile.dart';
 import 'package:niman/src/db/index_scan.dart';
 import 'package:niman/src/db/index_tree.dart';
+import 'package:niman/src/db/read_cancel.dart';
 import 'package:niman/src/frontmatter/parser.dart';
 import 'package:path/path.dart' as p;
 
@@ -382,12 +383,19 @@ final class Indexer {
   /// [known] is what the writer knows of notes it wrote, by
   /// library-relative path ([KnownContent]): taken where the file is still
   /// the one it wrote.
-  Future<void> rescanFiles(
+  ///
+  /// [cancel] drops the rescan, before it starts or while it reads, and it
+  /// writes nothing: a save of the note made the read obsolete, and the
+  /// writer reads the note again once it is quiet. Once the rows are being
+  /// written it finishes. Answers false when it was dropped.
+  Future<bool> rescanFiles(
     String root,
     List<String> paths, {
     Map<String, KnownContent> known = const {},
+    ReadCancel? cancel,
   }) {
     return _synchronized(() async {
+      if (cancel?.isCancelled ?? false) return false;
       final seen = <String>{};
       final absList = <String>[];
       final rels = <String>[];
@@ -398,7 +406,7 @@ final class Indexer {
         absList.add(abs);
         rels.add(rel);
       }
-      if (absList.isEmpty) return;
+      if (absList.isEmpty) return true;
       _scan.touches.add(rels);
 
       final probes = await _tree.probeAll(absList);
@@ -406,16 +414,28 @@ final class Indexer {
       for (var i = 0; i < rels.length; i++) {
         if (probes[i].exists) live[rels[i]] = probes[i];
       }
-      if (live.isEmpty) return;
+      if (live.isEmpty) return true;
 
       // Forced content read: the (size, mtime) shortcut must not apply.
       // Notes only, as on every other content path — this one took the
       // caller's word for it, and a `todo.txt` handed to it by the pin
       // flow was read and indexed as if it were a note.
-      final contents = await _tree.readRelContents(root, <String>[
-        for (final rel in live.keys)
-          if (isNoteFile(p.basename(rel))) rel,
-      ], known: known);
+      final readClock = Stopwatch()..start();
+      final contents = await _tree.readRelContents(
+        root,
+        <String>[
+          for (final rel in live.keys)
+            if (isNoteFile(p.basename(rel))) rel,
+        ],
+        known: known,
+        cancel: cancel,
+      );
+      final readMs = readClock.elapsedMilliseconds;
+      if (cancel?.isCancelled ?? false) {
+        _log.debug('rescan: dropped after $readMs ms of reading, saved again');
+        return false;
+      }
+      final writeClock = Stopwatch()..start();
       var wrote = false;
       final changed = <NoteContent>[];
       for (final entry in live.entries) {
@@ -436,7 +456,7 @@ final class Indexer {
         wrote |= updated > 0;
         changed.add(content);
       }
-      if (changed.isEmpty) return;
+      if (changed.isEmpty) return true;
       // Content rows (FTS, tags, stems, links) follow the forced read; a
       // new title, date or pin among them is drawn by the tree (#760).
       final drawn = await _store.applyContent({
@@ -444,10 +464,18 @@ final class Indexer {
       }, paired: const {});
       // A new alias answers the links waiting for it (#974).
       await _store.dangling.flush();
+      // Which half of a reindex is the cost — the note's read and parse
+      // on an isolate, or the rows — is what the device log of 2026-10-20
+      // could not say of its 894 ms.
+      _log.debug(
+        'rescan: ${changed.length} note(s), read $readMs ms, '
+        'rows ${writeClock.elapsedMilliseconds} ms',
+      );
       if (wrote || drawn) {
         final cb = onChanged;
         if (cb != null) cb(drawn ? IndexChange.tree : IndexChange.contents);
       }
+      return true;
     });
   }
 

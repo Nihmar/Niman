@@ -1,8 +1,8 @@
 // The 2026-10-20 device log: a 1.5 MB note saved twice in a second, its
 // reindex reading the whole file between the two writes. The second write
 // took 480 ms against the first's 123 ms. `NoteWriter.quietBeforeReindex`
-// now holds a note of that size for two seconds, so the next save cannot
-// fall inside the reindex.
+// now holds a note of that size for two seconds, so the next save of a burst
+// does not fall inside the reindex — and one that does cancels it.
 //
 // This is the same shape as the other benchmarks in this repository: the
 // numbers are printed on every run, and the design's ratio is asserted only
@@ -34,7 +34,6 @@ void main() {
     root = await Directory.current.createTemp('niman_save_quiet_');
     dbDir = await Directory.current.createTemp('niman_save_quiet_db_');
     db = IndexDatabase(NativeDatabase(File(p.join(dbDir.path, 'test.sqlite'))));
-    addTearDown(db.close);
     indexer = Indexer(db);
     writer = NoteWriter(root: root.path, indexer: indexer);
   });

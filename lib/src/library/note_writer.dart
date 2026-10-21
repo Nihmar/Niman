@@ -10,6 +10,7 @@ import 'package:niman/src/core/isolate_gauge.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/db/index_note_content.dart';
 import 'package:niman/src/db/indexer.dart';
+import 'package:niman/src/db/read_cancel.dart';
 import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/history/history_store.dart';
 import 'package:niman/src/history/note_history.dart';
@@ -52,9 +53,10 @@ final class NoteWriter {
   /// thresholds are the save's own debounce (`cee783e`), with a tier for
   /// notes just over a megabyte: a 1.5 MB save took 123 ms, its reindex
   /// 894 ms, and the next save fell inside that reindex and wrote in 480 ms
-  /// (device log, 2026-10-20). Two seconds after the last save keeps the
-  /// read out of the next write, while an ordinary note still reindexes at
-  /// once.
+  /// (device log, 2026-10-20). A write now cancels a read of its note
+  /// ([_inTurn]); two seconds after the last save keeps the saves of one
+  /// burst of typing from starting, and dropping, a read each, while an
+  /// ordinary note still reindexes at once.
   final Duration Function(int bytes) quietBeforeReindex;
 
   /// [quietBeforeReindex]'s default.
@@ -94,6 +96,15 @@ final class NoteWriter {
 
   /// The reindexes waiting for their note to be quiet, by path.
   final Map<String, Timer> _quiet = <String, Timer>{};
+
+  /// The reindexes due while their note's save chain was busy, by path:
+  /// whether the note is new to the index. Each runs once the chain is idle
+  /// ([_settled]), so the note is never read beside a write of it.
+  final Map<String, bool> _owed = <String, bool>{};
+
+  /// The read of each reindex still reading its note, by path: a write of
+  /// the note asked for meanwhile cancels it ([_inTurn]).
+  final Map<String, ReadCancel> _reads = <String, ReadCancel>{};
 
   /// What the last write of each note left, by path: handed to its reindex,
   /// which takes it while the file is still that one ([KnownContent]).
@@ -159,7 +170,14 @@ final class NoteWriter {
   /// Runs [job] on [path]'s save chain: after every write of the note asked
   /// for before it, and before every one asked for after. A failed job does
   /// not stop the ones behind it.
+  ///
+  /// A reindex of the note still reading it is cancelled: the job writes the
+  /// note, so what the read finds is already old, and reading beside the
+  /// write is what made a 1.5 MB save take 480 ms against 123 on a tablet
+  /// (device log, 2026-10-20). The note is read again once the chain is
+  /// idle, or quiet.
   Future<T> _inTurn<T>(String path, Future<T> Function() job) {
+    _reads.remove(path)?.cancel();
     final previous = _tails[path] ?? Future<void>.value();
     final run = previous
         .then<void>((_) {}, onError: (Object _) {})
@@ -168,10 +186,23 @@ final class NoteWriter {
     _tails[path] = tail;
     unawaited(
       tail.whenComplete(() {
-        if (identical(_tails[path], tail)) _tails.remove(path)?.ignore();
+        if (!identical(_tails[path], tail)) return;
+        _tails.remove(path)?.ignore();
+        _settled(path);
       }),
     );
     return run;
+  }
+
+  /// [path]'s save chain is idle: the reindex it owes runs now — unless a
+  /// save left the note waiting to be quiet, whose timer runs it. A note new
+  /// to the index does not wait: until it is read it has no row at all.
+  void _settled(String path) {
+    final created = _owed.remove(path);
+    if (created == null) return;
+    if (!created && _quiet.containsKey(path)) return;
+    _quiet.remove(path)?.cancel();
+    _reindex(path, p.join(root, path), created: created);
   }
 
   /// Tidies the note at [path] (`formatMarkdown`), in its turn among its
@@ -288,16 +319,21 @@ final class NoteWriter {
 
   /// Completes when every re-index started by a save so far has finished.
   ///
-  /// One still waiting for its note to be quiet runs now: whoever asks wants
-  /// the index as the disk has it.
+  /// One still waiting for its note to be quiet runs now, and one owed to a
+  /// note whose saves are still running runs once they end: whoever asks
+  /// wants the index as the disk has it.
   Future<void> get indexed async {
-    final waiting = _quiet.keys.toList();
-    for (final path in waiting) {
-      _quiet.remove(path)?.cancel();
-      _reindex(path, p.join(root, path), created: false);
-    }
-    while (_indexing.isNotEmpty) {
-      await Future.wait(_indexing.toList());
+    while (true) {
+      for (final path in _quiet.keys.toList()) {
+        _quiet.remove(path)?.cancel();
+        _reindex(path, p.join(root, path), created: false);
+      }
+      final pending = <Future<void>>[
+        ..._indexing,
+        for (final path in _owed.keys) ?_tails[path],
+      ];
+      if (pending.isEmpty) return;
+      await Future.wait(pending);
     }
   }
 
@@ -373,9 +409,11 @@ final class NoteWriter {
   }
 
   /// Whether the note at library-relative [path] waits for a reindex this
-  /// writer will run once it is left alone: the scans that are not the
-  /// writer's leave it be meanwhile (`Indexer.awaitedByWriter`).
-  bool awaits(String path) => _quiet.containsKey(path);
+  /// writer will run once it is left alone, or once its saves end: the scans
+  /// that are not the writer's leave it be meanwhile
+  /// (`Indexer.awaitedByWriter`).
+  bool awaits(String path) =>
+      _quiet.containsKey(path) || _owed.containsKey(path);
 
   /// Reads the note at library-relative [path], of [bytes] bytes, back into
   /// the index as a save of it does: once it has been left alone for
@@ -407,11 +445,6 @@ final class NoteWriter {
     );
     _quiet[path] = Timer(wait, () {
       _quiet.remove(path);
-      // A save of the note is queued or running: its own end schedules the
-      // reindex again with the text it wrote. Reading the file beside that
-      // write is what made a 1.5 MB save take 480 ms on the device
-      // (2026-10-20); a read and a write of one note do not overlap.
-      if (_tails.containsKey(path)) return;
       _reindex(path, abs, created: false);
     });
   }
@@ -464,7 +497,15 @@ final class NoteWriter {
   /// same second (one letter swapped for another) would otherwise read as
   /// "nothing happened". A new file has no row to rescan, so it goes
   /// through `applyEvents`, which creates it.
+  ///
+  /// Never beside a write of the note: while its save chain is busy the
+  /// reindex is owed, and runs once the chain is idle ([_settled]). A write
+  /// asked for while it reads cancels it ([_inTurn]); it is owed again then.
   void _reindex(String path, String abs, {required bool created}) {
+    if (_tails.containsKey(path)) {
+      _owed[path] = (_owed[path] ?? false) || created;
+      return;
+    }
     if (_reindexing.contains(path)) {
       _reindexAgain.add(path);
       return;
@@ -473,23 +514,40 @@ final class NoteWriter {
     final clock = Stopwatch()..start();
     late final Future<void> job;
     final wrote = _written[path];
+    final cancel = ReadCancel();
+    if (!created) _reads[path] = cancel;
+    var dropped = false;
     job =
         (created
-                ? indexer.applyEvents(root, [abs])
-                : indexer.rescanFiles(root, [abs], known: {path: ?wrote}))
+                ? indexer.applyEvents(root, [abs]).then((_) => true)
+                : indexer.rescanFiles(
+                    root,
+                    [abs],
+                    known: {path: ?wrote},
+                    cancel: cancel,
+                  ))
             .then(
-              (_) => _log.debug(
-                'reindexed: "$path" (${clock.elapsedMilliseconds} ms)',
-              ),
+              (done) {
+                dropped = !done;
+                _log.debug(
+                  '${done ? 'reindexed' : 'reindex dropped, saved again'}: '
+                  '"$path" (${clock.elapsedMilliseconds} ms)',
+                );
+              },
               onError: (Object e) =>
                   _log.warning('reindex failed: "$path": $e'),
             )
             .whenComplete(() {
               _indexing.remove(job);
               _reindexing.remove(path);
-              // Saved again while this one ran: once more, for what the
-              // disk holds now.
-              if (_reindexAgain.remove(path)) {
+              if (identical(_reads[path], cancel)) _reads.remove(path);
+              // Saved again while this one ran, or dropped for a save: once
+              // more, for what the disk holds now — unless a save left the
+              // note waiting to be quiet, whose timer runs it. A save that
+              // failed or was abandoned leaves no timer, and the note is
+              // still owed the read this one did not finish.
+              final again = _reindexAgain.remove(path) || dropped;
+              if (again && !_quiet.containsKey(path)) {
                 _reindex(path, abs, created: false);
               }
             });
