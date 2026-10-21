@@ -14,7 +14,8 @@ everywhere; PDF goes through each platform's own printer (below).
 Slide notes ([slides](slides.md)) present on every platform, the screen
 kept on while they do: Android through the window's keep-screen-on flag,
 Linux through GTK's idle inhibit (the desktop's own screen saver and
-lock wait), Windows through `SetThreadExecutionState`. The presenter
+lock wait), Windows through `SetThreadExecutionState`, a Mac through a
+power assertion. The presenter
 view shares the one window with the slides: putting the slides on a
 second screen and the presenter view on the first needs a second window,
 which Flutter offers only behind an experimental flag on the desktops and
@@ -253,18 +254,25 @@ list at the end says what else it still lacks.
 - **Dropping files, folders and links** on the window opens, imports or
   captures them, with the frame Linux draws while a drag is over it.
 - A tree row's right-click menu can **show the note in Finder**, selected.
+- **Opening a `.md` from Finder:** Niman is in its *Open With* menu, as an
+  alternate — the default stays the app you chose. Double-clicking a note
+  set to open with Niman, or dropping one on its Dock icon, opens it in the
+  Niman already running, or starts one.
+- **The Dock icon's menu** holds the same quick actions as the menu bar's
+  icon.
+- **Paste as Markdown** reads the clipboard's HTML the browsers write:
+  Safari, Chrome, Edge and Firefox, with the page it came from except from
+  Firefox.
+- **Slides** keep the screen on while they are presented.
 - **Date created** is the file's own creation time, kept across saves
   (see [Date created](#date-created)).
 
 Still missing on a Mac:
 
-- the [home-screen widgets](widgets.md);
-- opening a `.md` from Finder with Niman, and the Dock icon's menu;
-- **Paste as Markdown**, which pastes plain text for now: the Mac's
-  clipboard HTML is not read yet;
-- keeping the screen on while slides are presented;
-- the formulas' smoother drawing Linux and Windows get: a Mac's renderer
-  already smooths their edges, so it is off there.
+- the [home-screen widgets](widgets.md).
+
+The formulas' smoother drawing that Linux and Windows get is off on a Mac
+by design: its renderer already smooths their edges.
 
 ## Home
 

@@ -158,7 +158,8 @@ changed since.
   terminal — and the plain text is pasted, with nothing to undo.
 - **The page it came from** is known on Windows and Linux, where the
   browsers put it on the clipboard beside the HTML (Chromium-family
-  browsers and Firefox both do). Android's clipboard does not carry it,
+  browsers and Firefox both do), and on a Mac from Safari, Chrome and
+  Edge. Android's clipboard does not carry it,
   so on a phone the paste is not linked to its page.
 
 ## When the page has too little text

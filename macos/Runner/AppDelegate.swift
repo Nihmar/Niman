@@ -10,6 +10,18 @@ class AppDelegate: FlutterAppDelegate {
   /// Set when Dart has run its close guard and lets the quit through.
   var quitConfirmed = false
 
+  /// The app's channel (`niman/mac_app`, lib/src/core/mac_app_events.dart):
+  /// the files Finder asks to open, and the Dock menu.
+  var appChannel: FlutterMethodChannel?
+
+  /// Files asked for before Dart listens — a double-clicked note starts
+  /// the app — handed over when it first asks.
+  private var pendingFiles: [String] = []
+  private var dartListens = false
+
+  /// The Dock menu's quick actions, as Dart named them: id and label.
+  private var dockItems: [(id: String, label: String)] = []
+
   override func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
     return true
   }
@@ -43,6 +55,56 @@ class AppDelegate: FlutterAppDelegate {
       }
     }
     return .terminateCancel
+  }
+
+  // A note opened from Finder (Open With, a double click, a drop on the
+  // Dock icon): to Dart, or kept until it listens.
+  override func application(_ application: NSApplication, open urls: [URL]) {
+    // The plugins hear of them as without this: Flutter forwards them.
+    super.application(application, open: urls)
+    let paths = urls.filter(\.isFileURL).map(\.path)
+    guard dartListens, let channel = appChannel else {
+      pendingFiles += paths
+      return
+    }
+    for path in paths {
+      channel.invokeMethod("open", arguments: path)
+    }
+  }
+
+  // The Dock icon's menu: the quick actions the menu bar extra holds.
+  override func applicationDockMenu(_ sender: NSApplication) -> NSMenu? {
+    guard !dockItems.isEmpty else { return nil }
+    let menu = NSMenu()
+    for item in dockItems {
+      let entry = NSMenuItem(title: item.label, action: #selector(dockChosen(_:)), keyEquivalent: "")
+      entry.target = self
+      entry.representedObject = item.id
+      menu.addItem(entry)
+    }
+    return menu
+  }
+
+  @objc private func dockChosen(_ item: NSMenuItem) {
+    guard let id = item.representedObject as? String else { return }
+    mainFlutterWindow?.makeKeyAndOrderFront(nil)
+    appChannel?.invokeMethod("dockAction", arguments: id)
+  }
+
+  /// Dart's side of `niman/mac_app`.
+  func handleApp(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+    switch call.method {
+    case "takePendingFiles":
+      dartListens = true
+      result(pendingFiles)
+      pendingFiles = []
+    case "setDockMenu":
+      let items = call.arguments as? [[String]] ?? []
+      dockItems = items.compactMap { $0.count == 2 ? (id: $0[0], label: $0[1]) : nil }
+      result(nil)
+    default:
+      result(FlutterMethodNotImplemented)
+    }
   }
 
   /// Lets the quit through and terminates.

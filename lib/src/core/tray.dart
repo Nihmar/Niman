@@ -29,6 +29,7 @@ import 'package:niman/src/core/app_channel.dart';
 import 'package:niman/src/core/app_theme.dart';
 import 'package:niman/src/core/host_platform.dart';
 import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/core/mac_app_events.dart';
 import 'package:niman/src/core/shortcuts.dart';
 import 'package:niman/src/core/theme.dart';
 import 'package:niman/src/core/windows_tray_menu.dart';
@@ -174,6 +175,9 @@ final class PlatformTrayService implements TrayService {
   @override
   Stream<TrayCommand> get commands => _commands.stream;
 
+  /// The Dock menu's choices (a Mac), once listened to.
+  StreamSubscription<String>? _dock;
+
   /// The labels the menu currently carries, so a repeat call with the same
   /// ones costs nothing.
   Map<ShortcutAction, String> _labels = const {};
@@ -188,6 +192,21 @@ final class PlatformTrayService implements TrayService {
     required String quitLabel,
   }) async {
     final ends = (open: openLabel, quit: quitLabel);
+    // A Mac's Dock icon menu holds the same quick actions, in the same
+    // words, and they run the way the tray's do.
+    if (Platform.isMacOS) {
+      unawaited(
+        MacAppEvents.instance.setDockMenu([
+          for (final MapEntry(:key, :value) in labels.entries) (key.id, value),
+        ]),
+      );
+      _dock ??= MacAppEvents.instance.dockActions.listen((id) {
+        if (ShortcutAction.fromId(id) case final action?) {
+          _log.debug('dock action: $id');
+          _actions.add(action);
+        }
+      });
+    }
     final existing = _tray;
     if (existing != null) {
       if (!mapEquals(_labels, labels) || _ends != ends) {
@@ -374,6 +393,8 @@ final class PlatformTrayService implements TrayService {
 
   @override
   Future<void> dispose() async {
+    await _dock?.cancel();
+    _dock = null;
     _tray?.dispose();
     _menu?.dispose();
     for (final item in _items) {
