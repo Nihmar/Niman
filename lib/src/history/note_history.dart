@@ -137,6 +137,12 @@ final class NoteHistory {
         '(${(outcome.collectedBytes / 1024).round()} KB) '
         'in ${clock.elapsedMilliseconds} ms',
       );
+      if (outcome.failed > 0) {
+        _log.warning(
+          'upkeep left ${outcome.failed} item(s) undone, the first: '
+          '${outcome.failure}',
+        );
+      }
     } on Object catch (e) {
       _log.warning('upkeep failed: $e');
     }

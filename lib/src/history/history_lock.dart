@@ -23,26 +23,32 @@ library;
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:crypto/crypto.dart';
+import 'package:niman/src/history/history_folders.dart';
 import 'package:niman/src/history/history_lock_file.dart';
-import 'package:niman/src/history/history_objects.dart';
 import 'package:path/path.dart' as p;
-
-/// The locks folder's name inside `.history/`: a dot name, so no note's
-/// folder can take it. Walkers of `.history/` skip it like `.objects`.
-const String historyLocksFolderName = '.locks';
 
 /// The file name of the store-wide lock the packer holds around a delta's
 /// loop check and write; not a hash, so no note's lock is it.
 const String _packLockName = 'pack';
 
+/// The file name of the store-wide lock a move of logs holds: what tells the
+/// upkeep a log may be moving.
+const String _moveLockName = 'move';
+
 /// The folder holding the locks of the library at [root].
 String historyLocksPath(String root) =>
     p.join(root, historyFolderName, historyLocksFolderName);
 
+/// The store-wide lock a move of logs holds while it runs
+/// (`history_generation.dart`).
+String historyMoveLockPath(String root) =>
+    p.join(historyLocksPath(root), '$_moveLockName.lock');
+
 /// The lock of the note at [rel]'s history.
 String historyLockPath(String root, String rel) => p.join(
   historyLocksPath(root),
-  '${shaOf(utf8.encode(rel.toLowerCase()))}.lock',
+  '${sha256.convert(utf8.encode(rel.toLowerCase()))}.lock',
 );
 
 /// A history lock not had in time.
@@ -86,6 +92,15 @@ T withHistoryLock<T>(
 T withHistoryPackLock<T>(String root, T Function() body) => _withLocks(
   root,
   {p.join(historyLocksPath(root), '$_packLockName.lock'): _packLockName},
+  body,
+  historyLockStale,
+);
+
+/// Runs [body] holding the store-wide move lock, which says a log is being
+/// moved while it runs.
+T withHistoryMoveLock<T>(String root, T Function() body) => _withLocks(
+  root,
+  {historyMoveLockPath(root): _moveLockName},
   body,
   historyLockStale,
 );

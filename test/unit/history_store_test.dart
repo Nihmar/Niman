@@ -6,6 +6,7 @@ import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/history/history_folders.dart';
 import 'package:niman/src/history/history_legacy.dart';
 import 'package:niman/src/history/history_lock.dart';
 import 'package:niman/src/history/history_log.dart';
@@ -172,6 +173,37 @@ void main() {
       'a.md',
     ).versions.map((v) => v.number);
     expect(numbers, [60]);
+  });
+
+  test('a compaction keeps the highest number the log ever named', () {
+    // Five versions, then the newest one's object goes: what a reader can
+    // have is v1 to v4, and a compaction of the log (long after many pin
+    // changes) rewrites it from those alone. Only its `highest` line
+    // remembers v5; without it the next version would take 5 again, and a
+    // pin that still named 5 would move onto content nobody agreed on.
+    write('a.md', 'text 0');
+    for (var i = 1; i <= 5; i++) {
+      save('a.md', 'text $i', forced());
+    }
+    expect(
+      readHistoryManifest(root.path, 'a.md').versions.map((v) => v.number),
+      [1, 2, 3, 4, 5],
+    );
+    object('text 4').deleteSync();
+    for (var i = 0; i < 40; i++) {
+      pinHistoryVersion(
+        root.path,
+        'a.md',
+        syncBasePin,
+        i.isEven ? 1 : null,
+        limit: 10,
+      );
+    }
+    final log = File(historyLogPath(root.path, 'a.md')).readAsStringSync();
+    expect(log, contains('"highest":5'));
+    expect(log, isNot(contains('"v":5,')));
+    final outcome = save('a.md', 'text 6', forced());
+    expect(outcome.version!.number, 6);
   });
 
   test(

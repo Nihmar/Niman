@@ -27,6 +27,8 @@ go on.
     3f/a1c4…            one version's content, named by its sha256
   .locks/
     9c2e….lock          one writer at a time on a note's log
+  .generation           a token every move of logs changes
+  .legacy-done          no history kept the old way is left
   Projects/
     Plan.md.log         Plan.md's history: one line an event
 ```
@@ -130,6 +132,33 @@ rewriting.
   has its modification time refreshed for the same reason.
 - **Move in** the history kept the old way.
 - **Compact** the logs that grew.
+
+- **One failure is one note's.** A note whose lock times out, whose path is
+  too long for Windows, or an object another pass already deleted, is
+  counted and left (`failed` in the outcome, a warning in the log); the
+  other notes are still packed and the sweep still runs. A stat of a file
+  that is gone answers an epoch, which is older than any cutoff, so the
+  sweep takes only a file that is there.
+- **A log moved during the walk.** The sweep names the objects the logs
+  hold from a fresh listing. A log moved from a folder not yet listed into
+  one already listed is in neither listing, and no read fails. Every move of
+  logs (a rename, a move, a folder's) therefore holds the store-wide move
+  lock and ends by changing the token in `.generation`; the pass reads the
+  token before it lists and after it has read the logs, and names nothing
+  if a move was running at either read or the token changed. It tries
+  again up to five times, and a pass that never settles collects nothing.
+- **Two packers.** A delta is computed outside any lock, but checking that
+  its base does not lead back to it and writing it are one step under the
+  store-wide pack lock: two notes sharing content in opposite order, packed
+  at once by the timer and the upkeep, could otherwise make each object a
+  delta of the other.
+- **The old history is looked for until there is none.** The upkeep walks
+  `.history/` for `.v<n>` and `.json` files (never the objects or the
+  locks) and, once none is left, writes `.legacy-done`. After that neither
+  the upkeep nor a read of a note without a log looks again: the walk of a
+  library of 1M notes, and a listing of a note's folder, are once. Delete
+  the file to have them looked for again (a copy of the library made by an
+  older version).
 
 The whole pass runs once each time a library opens, after the ready state
 and beside the stale-temp sweep.

@@ -49,6 +49,7 @@ const Map<String, String> _offTheUiIsolate = {
   'history/history_objects.dart': 'the objects, read and written by the store',
   'history/history_upkeep.dart': "the upkeep, in NoteHistory's isolates",
   'history/history_access.dart': 'the log, read and written by the store',
+  'history/history_generation.dart': "the move's token, in the store's moves",
   'history/history_lock_file.dart': "the note's lock, taken by the store",
   'history/history_moves.dart':
       "moves and deletes, from NoteHistory's isolates",

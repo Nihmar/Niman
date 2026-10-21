@@ -32,15 +32,15 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
+import 'package:meta/meta.dart';
+import 'package:niman/src/history/history_folders.dart';
+import 'package:niman/src/history/history_lock.dart';
 import 'package:niman/src/history/text_delta.dart';
+
 import 'package:path/path.dart' as p;
 
-/// The history folder's name inside the library root.
-const String historyFolderName = '.history';
-
-/// The objects folder's name inside `.history/`: a dot name, so no note's
-/// folder can take it.
-const String historyObjectsFolderName = '.objects';
+export 'package:niman/src/history/history_folders.dart'
+    show historyFolderName, historyObjectsFolderName;
 
 /// The longest chain of deltas a read follows before it gives up: the packer
 /// keeps them to [maxDeltaChain], so a longer one is damage, or a loop.
@@ -180,33 +180,51 @@ int? chainDepth(String root, String sha) {
 /// [content] and [baseContent], when the caller has them, spare reading
 /// them again. Never makes a loop: a base whose own chain reaches [sha] is
 /// refused.
+///
+/// Two packers at once — a note's timer and the upkeep, each in an isolate
+/// of its own — could each see the other's object whole and make each a
+/// delta of the other, both unreadable. So the check that the base does not
+/// lead back, and the write, are one step under the store-wide pack lock
+/// (the delta itself, the long part, is computed before it).
+/// [beforeLock] lets a test run something between the two.
 bool storeAsDelta(
   String root,
   String sha,
   String baseSha, {
   Uint8List? content,
   Uint8List? baseContent,
+  @visibleForTesting void Function()? beforeLock,
 }) {
   if (sha == baseSha) return false;
   final file = File(historyObjectPath(root, sha));
+  if (!_wholeAndLoopFree(root, file, sha, baseSha)) return false;
+  final target = content ?? readObject(root, sha);
+  final base = baseContent ?? readObject(root, baseSha);
+  if (target == null || base == null) return false;
+  final payload = ZLibEncoder(level: 9).convert(computeDelta(base, target));
+  beforeLock?.call();
+  return withHistoryPackLock(root, () {
+    if (!_wholeAndLoopFree(root, file, sha, baseSha)) return false;
+    final now = file.lengthSync();
+    if (_deltaHeader + payload.length > now ~/ 2) return false;
+    final prefix = [..._magic, _delta, ..._hexBytes(baseSha)];
+    _write(file, flush: true, [...prefix, ...payload]);
+    _touch(File(historyObjectPath(root, baseSha)));
+    return true;
+  });
+}
+
+/// Whether the object [sha] (in [file]) is whole, and [baseSha]'s chain
+/// does not lead back to it: a loop reads as nothing.
+bool _wholeAndLoopFree(String root, File file, String sha, String baseSha) {
   final header = _header(file);
   if (header == null || header.base != null) return false;
-  // The base must not lead back here: a loop reads as nothing.
   final seen = <String>{};
   for (String? at = baseSha; at != null; at = deltaBaseOf(root, at)) {
     if (at == sha || !seen.add(at) || seen.length > _readableChain) {
       return false;
     }
   }
-  final target = content ?? readObject(root, sha);
-  final base = baseContent ?? readObject(root, baseSha);
-  if (target == null || base == null) return false;
-  final payload = ZLibEncoder(level: 9).convert(computeDelta(base, target));
-  final now = file.lengthSync();
-  if (_deltaHeader + payload.length > now ~/ 2) return false;
-  final prefix = [..._magic, _delta, ..._hexBytes(baseSha)];
-  _write(file, flush: true, [...prefix, ...payload]);
-  _touch(File(historyObjectPath(root, baseSha)));
   return true;
 }
 

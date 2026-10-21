@@ -107,6 +107,14 @@ bool _isHeld(FileSystemException e, File lock, Stopwatch deniedFor) {
       deniedFor.elapsed < _deletePending;
 }
 
+/// Whether [lock] is taken: there, and not older than [stale] (one that old
+/// is a crash's leftover, which the next writer breaks).
+bool lockFileHeld(File lock, {Duration stale = historyLockStale}) {
+  final stat = lock.statSync();
+  return stat.type == FileSystemEntityType.file &&
+      DateTime.now().difference(stat.modified) <= stale;
+}
+
 /// Whether [lock] is there and older than [stale]. A lock that is not there
 /// is not stale: a stat of nothing answers the epoch, which is.
 bool _isStale(File lock, Duration stale) {

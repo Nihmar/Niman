@@ -7,6 +7,7 @@ library;
 import 'dart:io';
 
 import 'package:niman/src/history/history_access.dart';
+import 'package:niman/src/history/history_generation.dart';
 import 'package:niman/src/history/history_legacy.dart';
 import 'package:niman/src/history/history_lock.dart';
 import 'package:niman/src/history/history_log.dart';
@@ -22,60 +23,74 @@ import 'package:path/path.dart' as p;
 /// Returns how many versions moved.
 int moveNoteHistory(String root, String fromRel, String toRel) {
   if (fromRel == toRel) return 0;
-  return withHistoryLock(root, [fromRel, toRel], () {
-    final source = presentVersions(root, loadHistoryLog(root, fromRel));
-    if (source.versions.isEmpty) {
-      _deleteNote(root, fromRel);
-      return 0;
-    }
-    final from = File(historyLogPath(root, fromRel));
-    final to = File(historyLogPath(root, toRel));
-    // A rename that only changes case, where the file system does not tell
-    // the cases apart (Windows, Android's shared storage): both names are
-    // the one log, which is renamed in place. Merged "with itself" and then
-    // deleted as the source, the history would be gone.
-    if (_sameFile(from, to)) {
-      from.renameSync(to.path);
-      return source.versions.length;
-    }
-    final targetLog = loadHistoryLog(root, toRel);
-    final target = presentVersions(root, targetLog);
-    if (target.versions.isEmpty) {
-      inFolderOf(to, () => from.renameSync(to.path));
-      pruneHistoryFolders(root, from.parent);
-      return source.versions.length;
-    }
-    final offset = nextVersionNumber(targetLog, target) - 1;
-    writeLog(
-      root,
-      toRel,
-      HistoryManifest(
-        versions: [
-          ...target.versions,
-          for (final v in source.versions)
-            HistoryVersion(
-              number: v.number + offset,
-              savedAt: v.savedAt,
-              reason: v.reason,
-              size: v.size,
-              sha256: v.sha256,
-            ),
-        ],
-        pins: {
-          ...target.pins,
-          for (final e in source.pins.entries) e.key: e.value + offset,
-        },
-      ),
-    );
-    deleteHistoryLog(root, fromRel);
-    return source.versions.length;
-  });
+  return withHistoryLock(root, [
+    fromRel,
+    toRel,
+  ], () => _moveNote(root, fromRel, toRel));
 }
+
+int _moveNote(String root, String fromRel, String toRel) =>
+    trackingHistoryMove(root, () {
+      final source = presentVersions(root, loadHistoryLog(root, fromRel));
+      if (source.versions.isEmpty) {
+        _deleteNote(root, fromRel);
+        return 0;
+      }
+      final from = File(historyLogPath(root, fromRel));
+      final to = File(historyLogPath(root, toRel));
+      // A rename that only changes case, where the file system does not tell
+      // the cases apart (Windows, Android's shared storage): both names are
+      // the one log, which is renamed in place. Merged "with itself" and then
+      // deleted as the source, the history would be gone.
+      if (_sameFile(from, to)) {
+        from.renameSync(to.path);
+        return source.versions.length;
+      }
+      final targetLog = loadHistoryLog(root, toRel);
+      final target = presentVersions(root, targetLog);
+      if (target.versions.isEmpty) {
+        inFolderOf(to, () => from.renameSync(to.path));
+        pruneHistoryFolders(root, from.parent);
+        return source.versions.length;
+      }
+      final offset = nextVersionNumber(targetLog, target) - 1;
+      writeLog(
+        root,
+        toRel,
+        HistoryManifest(
+          versions: [
+            ...target.versions,
+            for (final v in source.versions)
+              HistoryVersion(
+                number: v.number + offset,
+                savedAt: v.savedAt,
+                reason: v.reason,
+                size: v.size,
+                sha256: v.sha256,
+              ),
+          ],
+          pins: {
+            ...target.pins,
+            for (final e in source.pins.entries) e.key: e.value + offset,
+          },
+        ),
+      );
+      deleteHistoryLog(root, fromRel);
+      return source.versions.length;
+    });
 
 /// Moves the history of every note under the folder [fromRel] to [toRel]
 /// (a folder rename or move). Returns how many notes' histories moved.
 int moveFolderHistory(String root, String fromRel, String toRel) {
   if (fromRel == toRel) return 0;
+  // A library with no history of the folder's has nothing to track.
+  if (!Directory(p.join(root, historyFolderName, fromRel)).existsSync()) {
+    return 0;
+  }
+  return trackingHistoryMove(root, () => _moveFolder(root, fromRel, toRel));
+}
+
+int _moveFolder(String root, String fromRel, String toRel) {
   final from = Directory(p.join(root, historyFolderName, fromRel));
   if (!from.existsSync()) return 0;
   final to = Directory(p.join(root, historyFolderName, toRel));
