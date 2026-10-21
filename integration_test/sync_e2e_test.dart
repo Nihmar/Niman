@@ -235,7 +235,7 @@ void main() {
     expect(find.byKey(const Key('sync-panel')), findsOneWidget);
     await tester.tap(find.byKey(const Key('sync-conflict-Plan.md')));
     await pumpFor(tester);
-    await tester.tap(find.text('Resolve'));
+    await tester.tap(find.text(AppStrings.syncResolveAction));
     await pumpFor(tester);
     expect(find.byType(SyncConflictScreen), findsOneWidget);
     await waitUntil(
