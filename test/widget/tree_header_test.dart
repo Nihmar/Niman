@@ -8,6 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/app.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/todo/todo_source.dart';
+import 'package:niman/src/ui/tree_header.dart';
 import 'package:niman/src/ui/window_controller.dart';
 import 'package:path/path.dart' as p;
 
@@ -88,5 +89,31 @@ void main() {
   testWidgets("a title bar of the app's own says it instead", (tester) async {
     await pumpShell(tester, ownBar: true);
     expect(header, findsNothing);
+  });
+
+  testWidgets('a large text scale cuts the folder line, not the row', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(textScaler: TextScaler.linear(2)),
+          child: Material(
+            child: Column(
+              children: [
+                TreeHeader(
+                  library: 'Notes',
+                  folder: 'projects/2026',
+                  height: 56,
+                  onSwitchLibrary: () {},
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.takeException(), isNull);
+    expect(tester.getSize(find.byKey(const Key('tree-header'))).height, 56);
   });
 }

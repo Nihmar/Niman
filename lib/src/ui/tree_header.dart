@@ -66,13 +66,17 @@ final class TreeHeader extends StatelessWidget {
                     fontWeight: FontWeight.w700,
                   ),
                 ),
+                // The line that gives way when a large text scale leaves
+                // the row too short for both.
                 if (folder.isNotEmpty)
-                  Text(
-                    folder,
-                    key: const Key('tree-header-folder'),
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: scheme.onSurfaceVariant,
+                  Flexible(
+                    child: Text(
+                      folder,
+                      key: const Key('tree-header-folder'),
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: scheme.onSurfaceVariant,
+                      ),
                     ),
                   ),
               ],
