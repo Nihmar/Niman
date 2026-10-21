@@ -4,11 +4,11 @@
 /// and no more.
 library;
 
-import 'dart:async';
 import 'dart:io';
 import 'dart:isolate';
 
 import 'package:crypto/crypto.dart';
+import 'package:niman/src/db/killable_note_read.dart';
 import 'package:niman/src/db/read_cancel.dart';
 import 'package:niman/src/editor/outline.dart';
 import 'package:niman/src/frontmatter/parser.dart';
@@ -108,6 +108,73 @@ typedef KnownContent = ({
   NoteReferences? references,
 });
 
+/// A note's bytes as [readRawNote] left them: read and closed, not yet
+/// parsed.
+///
+/// The read and the parse of a note are two steps because only the first
+/// touches the disk: an isolate may be stopped at any point of the second,
+/// and at none of the first (`readNoteContentsKillable`).
+final class RawNote {
+  /// Creates a note's bytes.
+  const new({required this.rel, required this.bytes, this.asWritten});
+
+  /// Library-relative note path.
+  final String rel;
+
+  /// The file's bytes.
+  final List<int> bytes;
+
+  /// What the app knew of the note, when the file is still the one it wrote
+  /// — as it was before the read and after it, so a file swapped in between
+  /// is not taken for it — or null.
+  final KnownContent? asWritten;
+}
+
+/// Reads the note at [rel] under [root], the file closed when this answers;
+/// null when it cannot be read (deleted or replaced mid-scan: the next scan
+/// picks it up).
+///
+/// [known] is what the app knows of the note, if it wrote it.
+Future<RawNote?> readRawNote(
+  String root,
+  String rel,
+  KnownContent? known,
+) async {
+  try {
+    final file = File(p.join(root, rel));
+    final before = known == null ? null : file.statSync();
+    final bytes = await file.readAsBytes();
+    // The digest the write made, when the file is still the one it wrote:
+    // 1.9 s of hashing on the 247 MB stress note
+    // (`docs/records/huge-notes.md`, item 8), for bytes that were hashed as
+    // they were written. And the tags and links the editor kept, block by
+    // block: 5.1 s of that reindex, for blocks it had read as they were
+    // written.
+    final asWritten =
+        known != null &&
+        _isAsWritten(before!, known) &&
+        _isAsWritten(file.statSync(), known);
+    return RawNote(rel: rel, bytes: bytes, asWritten: asWritten ? known : null);
+  } on FileSystemException {
+    return null;
+  }
+}
+
+/// Parses [raw]: the digest, the text, and what the index derives from it.
+/// Pure — no disk, so it can be interrupted anywhere.
+NoteContent parseRawNote(RawNote raw) {
+  var text = decodeNoteText(raw.bytes);
+  // A UTF-8 BOM is content for FTS but noise for matching the editor.
+  if (text.isNotEmpty && text.codeUnitAt(0) == 0xFEFF) {
+    text = text.substring(1);
+  }
+  final wrote = raw.asWritten;
+  final sha = wrote != null
+      ? wrote.sha256
+      : sha256.convert(raw.bytes).toString();
+  return _extractContent(raw.rel, sha, text, references: wrote?.references);
+}
+
 /// Reads and parses the notes at [rels] (library-relative, under [root]) —
 /// one file read per note returning digest **and** text, with frontmatter,
 /// inline tags and links extracted on this (index) isolate.
@@ -130,39 +197,8 @@ Future<List<NoteContent>> readNoteContents(
     // Posted before the read, so what the screen names is the note being
     // worked on rather than the one just finished.
     progress?.send(rel);
-    try {
-      final file = File(p.join(root, rel));
-      final wrote = known[rel];
-      final before = wrote == null ? null : file.statSync();
-      final bytes = await file.readAsBytes();
-      var text = decodeNoteText(bytes);
-      // A UTF-8 BOM is content for FTS but noise for matching the editor.
-      if (text.isNotEmpty && text.codeUnitAt(0) == 0xFEFF) {
-        text = text.substring(1);
-      }
-      // The digest the write made, when the file is still the one it
-      // wrote — as it was before the read and after it, so a file swapped
-      // in between is not taken for it: 1.9 s of hashing on the 247 MB
-      // stress note (`docs/records/huge-notes.md`, item 8), for bytes that were
-      // hashed as they were written.
-      // And the tags and links the editor kept, block by block: 5.1 s of
-      // that reindex, for blocks it had read as they were written.
-      final asWritten =
-          wrote != null &&
-          _isAsWritten(before!, wrote) &&
-          _isAsWritten(file.statSync(), wrote);
-      final sha = asWritten ? wrote.sha256 : sha256.convert(bytes).toString();
-      out.add(
-        _extractContent(
-          rel,
-          sha,
-          text,
-          references: asWritten ? wrote.references : null,
-        ),
-      );
-    } on FileSystemException {
-      continue;
-    }
+    final raw = await readRawNote(root, rel, known[rel]);
+    if (raw != null) out.add(parseRawNote(raw));
   }
   return out;
 }
@@ -179,10 +215,11 @@ bool _isAsWritten(FileStat stat, KnownContent wrote) =>
 /// it captures that method's context, which holds the async body's
 /// future — unsendable, and the open failed with it.
 ///
-/// With [cancel], the isolate is killed when it is cancelled and the batch
-/// answers empty: a reindex of a 1.5 MB note parsed it for 894 ms on a
-/// tablet, and the save that fell inside it wrote in 480 ms against 123
-/// (device log, 2026-10-20) — for a read the save had made obsolete.
+/// With [cancel], the batch answers empty when it is cancelled, and stops
+/// at once if it is parsing: a reindex of a 1.5 MB note parsed it for 894
+/// ms on a tablet, and the save that fell inside it wrote in 480 ms against
+/// 123 (device log, 2026-10-20) — for a read the save had made obsolete.
+/// The isolate is stopped without a file open (`readNoteContentsKillable`).
 Future<List<NoteContent>> readBatchOnIsolate(
   String root,
   List<String> batch,
@@ -195,77 +232,7 @@ Future<List<NoteContent>> readBatchOnIsolate(
       () => readNoteContents(root, batch, progress: progress, known: known),
     );
   }
-  return _readKillable(root, batch, progress, known, cancel);
-}
-
-/// [readBatchOnIsolate] on an isolate of its own, which [cancel] kills.
-Future<List<NoteContent>> _readKillable(
-  String root,
-  List<String> batch,
-  SendPort? progress,
-  Map<String, KnownContent> known,
-  ReadCancel cancel,
-) async {
-  if (cancel.isCancelled) return const [];
-  final answers = ReceivePort();
-  final done = Completer<List<NoteContent>>();
-  answers.listen((message) {
-    if (done.isCompleted) return;
-    if (message is List<NoteContent>) {
-      done.complete(message);
-    } else if (message is List && message.length == 2) {
-      // What `onError` sends: the error and its stack, as text.
-      done.completeError(RemoteError('${message[0]}', '${message[1]}'));
-    } else {
-      // `onExit` with no answer before it: the isolate went away.
-      done.completeError(StateError('the note reader exited unanswered'));
-    }
-  });
-  try {
-    final isolate = await Isolate.spawn(
-      _readEntry,
-      (
-        answers: answers.sendPort,
-        root: root,
-        batch: batch,
-        progress: progress,
-        known: known,
-      ),
-      onError: answers.sendPort,
-      onExit: answers.sendPort,
-    );
-    unawaited(
-      cancel.whenCancelled.then((_) {
-        if (done.isCompleted) return;
-        isolate.kill(priority: Isolate.immediate);
-        done.complete(const []);
-      }),
-    );
-    return await done.future;
-  } finally {
-    answers.close();
-  }
-}
-
-/// What [_readEntry] is spawned with.
-typedef _ReadRequest = ({
-  SendPort answers,
-  String root,
-  List<String> batch,
-  SendPort? progress,
-  Map<String, KnownContent> known,
-});
-
-/// The killable reader's isolate: reads the batch and exits with it, so the
-/// contents pass to the spawner without a copy.
-Future<void> _readEntry(_ReadRequest request) async {
-  final read = await readNoteContents(
-    request.root,
-    request.batch,
-    progress: request.progress,
-    known: request.known,
-  );
-  Isolate.exit(request.answers, read);
+  return readNoteContentsKillable(root, batch, progress, known, cancel);
 }
 
 /// Parses [text] into a [NoteContent] (pure: frontmatter, tags, links);

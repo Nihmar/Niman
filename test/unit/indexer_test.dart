@@ -356,7 +356,8 @@ void main() {
     expect(await indexer.rescanFiles(root.path, [abs], cancel: early), isFalse);
     expect((await dao.find('note1.md'))!.size, 'hello'.length);
 
-    // Cancelled as the read reaches the note: its isolate is killed there.
+    // Cancelled as the read reaches the note: it stops there, its file closed
+    // (the test's teardown deletes the folder, which an open file refuses).
     final reading = ReadCancel();
     indexer.onProgress = (_) => reading.cancel();
     expect(
