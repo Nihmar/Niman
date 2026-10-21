@@ -60,6 +60,16 @@ scripts\niman.bat windows    # Windows build (on a Windows host)
 scripts\niman.bat windows beta  # Windows testing build (its own data folder)
 ```
 
+Every build the scripts make carries the commit it was cut from
+(`--dart-define=APP_COMMIT=<short hash>`, read by
+`lib/src/core/build_identity.dart` into the header of an exported debug log,
+#1135). A tree with uncommitted changes is not that commit, so the hash gets
+a `-dirty` suffix (`6dad6c8d-dirty`) when `git status` reports anything,
+untracked files included but for the agents' own `.claude/` folder: a beta
+built from a worktree in the middle of an edit says so, and a log that
+names a bare hash can be trusted to be that commit. Both scripts do it the
+same way; the release workflow builds from a tag and passes the bare hash.
+
 `check` (`.github/workflows/check.yml`) runs the formatting gate, analyze,
 `flutter test` and the integration files on every pull request, so the
 suite cannot rot unnoticed again (issue #241). The WebDAV sync flow needs

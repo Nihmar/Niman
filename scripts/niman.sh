@@ -18,6 +18,13 @@ log="/tmp/niman/niman-${cmd}.log"
 # The commit a build is made from, named in its exported debug log
 # (APP_COMMIT, issue #1135).
 commit="$(git rev-parse --short HEAD 2>/dev/null || echo unknown)"
+# A tree with uncommitted changes is not the commit it was cut from: the build
+# says so (-dirty), or an exported log names a commit the code never was.
+# Untracked files count, except the agents' own folder (.claude/).
+if [ "$commit" != unknown ] &&
+  git status --porcelain 2>/dev/null | grep -qv '^?? \.claude/'; then
+  commit="$commit-dirty"
+fi
 
 analyze() {
   flutter analyze --fatal-infos >"$log" 2>&1

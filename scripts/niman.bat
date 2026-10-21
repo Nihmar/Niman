@@ -21,6 +21,10 @@ rem The commit a build is made from, named in its exported debug log
 rem (APP_COMMIT, issue #1135).
 set "commit=unknown"
 for /f %%c in ('git rev-parse --short HEAD 2^>nul') do set "commit=%%c"
+rem A tree with uncommitted changes is not the commit it was cut from: the
+rem build says so (-dirty), or an exported log names a commit the code never
+rem was. Untracked files count, except the agents' own folder (.claude/).
+if not "%commit%"=="unknown" for /f "delims=" %%s in ('git status --porcelain 2^>nul ^| findstr /v /b /c:"?? .claude/"') do set "commit=%commit%-dirty"
 
 if "%cmd%"=="analyze" goto :analyze
 if "%cmd%"=="test" goto :test
