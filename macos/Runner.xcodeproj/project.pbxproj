@@ -271,6 +271,7 @@
 				33CC110E2044A8840003C045 /* Bundle Framework */,
 				3399D490228B24CF009A79C7 /* ShellScript */,
 				E7C866842E497C7017D5657E /* [CP] Embed Pods Frameworks */,
+				246D8A0913194D74F36833DB /* Bundle the OCR engine */,
 			);
 			buildRules = (
 			);
@@ -359,6 +360,26 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		246D8A0913194D74F36833DB /* Bundle the OCR engine */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/../build/ocr-engine/niman-ocr-macos-universal.dylib",
+			);
+			name = "Bundle the OCR engine";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/libniman_ocr.dylib",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# The OCR engine (scripts/ocr-engine.sh macos-universal build/ocr-engine),\n# bundled rather than downloaded: under the hardened runtime the app loads\n# only a library signed with its own team (docs/records/apple-platforms.md).\nsrc=\"$SRCROOT/../build/ocr-engine/niman-ocr-macos-universal.dylib\"\ndest=\"$BUILT_PRODUCTS_DIR/$FRAMEWORKS_FOLDER_PATH/libniman_ocr.dylib\"\nif [ ! -f \"$src\" ]; then\n  echo \"warning: no OCR engine at $src: the app is built without OCR (scripts/ocr-engine.sh macos-universal build/ocr-engine)\"\n  rm -f \"$dest\"\n  exit 0\nfi\nmkdir -p \"$(dirname \"$dest\")\"\ncp -f \"$src\" \"$dest\"\ncodesign --force --timestamp=none --sign \"${EXPANDED_CODE_SIGN_IDENTITY:--}\" \"$dest\"\n";
+		};
 		28B9A9D60F140202D9060E09 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;

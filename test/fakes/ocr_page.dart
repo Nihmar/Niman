@@ -17,6 +17,9 @@ final String? liveTessdata = [
   '/usr/share/tessdata',
   '/usr/share/tesseract-ocr/5/tessdata',
   '/usr/share/tesseract-ocr/4.00/tessdata',
+  // A Mac's, from Homebrew's tesseract.
+  '/opt/homebrew/share/tessdata',
+  '/usr/local/share/tessdata',
 ].where((dir) => File(p.join(dir, 'eng.traineddata')).existsSync()).firstOrNull;
 
 /// [lines] in Literata on a white 1600 × 600 page, as RGBA.
