@@ -18,6 +18,7 @@ import 'package:niman/src/db/index_note_content.dart';
 import 'package:niman/src/db/index_reconcile.dart';
 import 'package:niman/src/db/index_scan.dart';
 import 'package:niman/src/db/index_tree.dart';
+import 'package:niman/src/db/read_cancel.dart';
 import 'package:niman/src/frontmatter/parser.dart';
 import 'package:path/path.dart' as p;
 
@@ -60,6 +61,43 @@ final class Indexer {
   /// [IndexChange.contents], a rename, a create, a pin — or a save that
   /// changed the note's title, date or pin (#760) — [IndexChange.tree].
   void Function(IndexChange change)? onChanged;
+
+  /// The folders whose rows the change [onChanged] is hearing of moved, by
+  /// row id (0 = the root), read during that call — or null when it could
+  /// have moved rows anywhere.
+  ///
+  /// Only the writes of notes in place say: a reindex ([rescanFiles]) and a
+  /// pin ([applyFrontmatter]) reshape a row in its own folder and nowhere
+  /// else. A create, a rename, a scan answer null. A tree that re-reads the
+  /// folders named rather than every one it shows spends one read on a
+  /// note's new title, not one per open folder (#1132).
+  Set<int>? get changedFolders => _changedFolders;
+  Set<int>? _changedFolders;
+
+  /// Tells [onChanged] of [change], which moved rows in [folders] alone.
+  void _changedIn(IndexChange change, Set<int>? folders) {
+    final cb = onChanged;
+    if (cb == null) return;
+    _changedFolders = folders;
+    try {
+      cb(change);
+    } finally {
+      _changedFolders = null;
+    }
+  }
+
+  /// The parent folders of the notes at [rels], or null for too many to ask
+  /// at once: then any folder may have moved.
+  Future<Set<int>?> _parentsOf(List<String> rels) async {
+    if (rels.length > 500) return null;
+    final parent = _db.notes.parent;
+    final rows =
+        await (_db.selectOnly(_db.notes)
+              ..addColumns([parent])
+              ..where(_db.notes.path.isIn(rels)))
+            .get();
+    return {for (final row in rows) row.read(parent)!};
+  }
 
   /// Callback invoked with the library-relative paths a scan or a batch
   /// pruned from the tree — a note or a folder gone from disk. Renames are
@@ -382,12 +420,19 @@ final class Indexer {
   /// [known] is what the writer knows of notes it wrote, by
   /// library-relative path ([KnownContent]): taken where the file is still
   /// the one it wrote.
-  Future<void> rescanFiles(
+  ///
+  /// [cancel] drops the rescan, before it starts or while it reads, and it
+  /// writes nothing: a save of the note made the read obsolete, and the
+  /// writer reads the note again once it is quiet. Once the rows are being
+  /// written it finishes. Answers false when it was dropped.
+  Future<bool> rescanFiles(
     String root,
     List<String> paths, {
     Map<String, KnownContent> known = const {},
+    ReadCancel? cancel,
   }) {
     return _synchronized(() async {
+      if (cancel?.isCancelled ?? false) return false;
       final seen = <String>{};
       final absList = <String>[];
       final rels = <String>[];
@@ -398,7 +443,7 @@ final class Indexer {
         absList.add(abs);
         rels.add(rel);
       }
-      if (absList.isEmpty) return;
+      if (absList.isEmpty) return true;
       _scan.touches.add(rels);
 
       final probes = await _tree.probeAll(absList);
@@ -406,16 +451,28 @@ final class Indexer {
       for (var i = 0; i < rels.length; i++) {
         if (probes[i].exists) live[rels[i]] = probes[i];
       }
-      if (live.isEmpty) return;
+      if (live.isEmpty) return true;
 
       // Forced content read: the (size, mtime) shortcut must not apply.
       // Notes only, as on every other content path — this one took the
       // caller's word for it, and a `todo.txt` handed to it by the pin
       // flow was read and indexed as if it were a note.
-      final contents = await _tree.readRelContents(root, <String>[
-        for (final rel in live.keys)
-          if (isNoteFile(p.basename(rel))) rel,
-      ], known: known);
+      final readClock = Stopwatch()..start();
+      final contents = await _tree.readRelContents(
+        root,
+        <String>[
+          for (final rel in live.keys)
+            if (isNoteFile(p.basename(rel))) rel,
+        ],
+        known: known,
+        cancel: cancel,
+      );
+      final readMs = readClock.elapsedMilliseconds;
+      if (cancel?.isCancelled ?? false) {
+        _log.debug('rescan: dropped after $readMs ms of reading, saved again');
+        return false;
+      }
+      final writeClock = Stopwatch()..start();
       var wrote = false;
       final changed = <NoteContent>[];
       for (final entry in live.entries) {
@@ -436,7 +493,7 @@ final class Indexer {
         wrote |= updated > 0;
         changed.add(content);
       }
-      if (changed.isEmpty) return;
+      if (changed.isEmpty) return true;
       // Content rows (FTS, tags, stems, links) follow the forced read; a
       // new title, date or pin among them is drawn by the tree (#760).
       final drawn = await _store.applyContent({
@@ -444,10 +501,20 @@ final class Indexer {
       }, paired: const {});
       // A new alias answers the links waiting for it (#974).
       await _store.dangling.flush();
-      if (wrote || drawn) {
-        final cb = onChanged;
-        if (cb != null) cb(drawn ? IndexChange.tree : IndexChange.contents);
+      // Which half of a reindex is the cost — the note's read and parse
+      // on an isolate, or the rows — is what the device log of 2026-10-20
+      // could not say of its 894 ms.
+      _log.debug(
+        'rescan: ${changed.length} note(s), read $readMs ms, '
+        'rows ${writeClock.elapsedMilliseconds} ms',
+      );
+      if ((wrote || drawn) && onChanged != null) {
+        _changedIn(
+          drawn ? IndexChange.tree : IndexChange.contents,
+          await _parentsOf([for (final c in changed) c.rel]),
+        );
       }
+      return true;
     });
   }
 
@@ -474,8 +541,7 @@ final class Indexer {
           pinned: head?.pinned ?? false,
         ),
       );
-      final cb = onChanged;
-      if (cb != null) cb(IndexChange.tree);
+      _changedIn(IndexChange.tree, {row.parent});
     });
   }
 

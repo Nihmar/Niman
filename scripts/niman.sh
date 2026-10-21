@@ -15,6 +15,9 @@ fi
 cmd="${1:-}"
 mkdir -p /tmp/niman
 log="/tmp/niman/niman-${cmd}.log"
+# The commit a build is made from, named in its exported debug log
+# (APP_COMMIT, issue #1135).
+commit="$(git rev-parse --short HEAD 2>/dev/null || echo unknown)"
 
 analyze() {
   flutter analyze --fatal-infos >"$log" 2>&1
@@ -72,12 +75,14 @@ apk() {
     # The testing build (issue #106): the release pipeline plus the
     # flavor's separate application ID; APP_CHANNEL marks the Dart
     # side, which hides and skips update management.
-    flutter build apk --release --flavor "$flavor" --dart-define="APP_CHANNEL=testing" >"$log" 2>&1
+    flutter build apk --release --flavor "$flavor" --dart-define="APP_CHANNEL=testing" \
+      --dart-define="APP_COMMIT=$commit" >"$log" 2>&1
   else
     # The official APK (issue #106): AGP drops the no-flavor variant
     # once the channel dimension has a flavor, so the official build
     # is the explicit "official" flavor (no application ID suffix).
-    flutter build apk --release --flavor official >"$log" 2>&1
+    flutter build apk --release --flavor official \
+      --dart-define="APP_COMMIT=$commit" >"$log" 2>&1
   fi
   local status=$?
   tail -n 3 "$log"
@@ -92,7 +97,8 @@ linux_build() {
   # so it never shares a database with the installed release.
   local channel=()
   if [ "${1:-}" = "beta" ]; then channel=(--dart-define=APP_CHANNEL=testing); fi
-  flutter build linux --release "${channel[@]}" >"$log" 2>&1
+  flutter build linux --release "${channel[@]}" \
+    --dart-define="APP_COMMIT=$commit" >"$log" 2>&1
   local status=$?
   tail -n 3 "$log"
   if [ $status -eq 0 ]; then

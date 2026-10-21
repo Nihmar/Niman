@@ -32,7 +32,14 @@ import 'package:niman/src/markdown/table_line_syntax.dart';
 
 /// Reads a note's lines into blocks, and keeps up with edits.
 final class BlockScanner {
-  /// Scans [buffer] from the top, all of it.
+  /// Scans [buffer] from the top: all of it, or its first [firstLines] lines
+  /// when given, the rest left to [advance] and to the readers that catch
+  /// the scan up to the line they ask for ([blockAt]), as an edit's owed
+  /// scan is.
+  ///
+  /// The whole scan of a 16 000-line note was most of the frame that opened
+  /// it on a tablet (20 ms, device log, 2026-10-20), and the frame draws the
+  /// top of it: a first scan of a few thousand lines draws the same lines.
   ///
   /// An edit's rescan reads at most [budget] lines past the edit before it
   /// leaves the rest to [advance] (see [edited]).
@@ -43,11 +50,20 @@ final class BlockScanner {
   new(
     this.buffer, {
     this.budget = defaultBudget,
+    int? firstLines,
     this._leftOver = const <int>[],
     this._lazy = const <bool>[],
     this.appSyntax = true,
   }) : _blocks = BlockList() {
-    _rebuild(start: 0, headEnd: 0, tailStart: 0, settledFrom: 0, budget: null);
+    _rebuild(
+      start: 0,
+      headEnd: 0,
+      tailStart: 0,
+      settledFrom: 0,
+      // At least a line, or the frontier would be the note's first line
+      // with nothing before it to reopen.
+      budget: firstLines == null || firstLines > 0 ? firstLines : 1,
+    );
     // The changes are counted from the list a reader first takes.
     _changes
       ..clear()
@@ -451,6 +467,17 @@ final class BlockScanner {
       final (index, block, end) = _hintAt(line, tailStart, headEnd, edit);
       if (block == null) {
         keepFrom = _firstIndexWhere(tailStart, (b) => b.startLine >= line);
+        // No scan ever read these lines — a first scan cut short: one hint
+        // stands for them up to the next block, so the list tiles the note
+        // as the edits expect, and every reader catches the scan up first.
+        final next = keepFrom < _blocks.length
+            ? _at(keepFrom).startLine
+            : buffer.lineCount;
+        if (next > line) {
+          rebuilt.add(
+            Block(kind: BlockKind.paragraph, startLine: line, endLine: next),
+          );
+        }
       } else if (block.startLine >= line) {
         keepFrom = index;
       } else {

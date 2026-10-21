@@ -157,6 +157,11 @@ final class _FolderGridState extends State<FolderGrid> {
   String? _rowsFolder;
   TreeSort _rowsSort = TreeSort.nameAsc;
 
+  /// The row id of the folder [_rowsFolder] resolved to (0 = the root), once
+  /// [_load] has read it: a revision that moved no row in it leaves the
+  /// tiles as they are (#1132).
+  int? _rowsDir;
+
   /// The rows of the last build, for the keyboard to walk.
   _GridRows? _current;
 
@@ -225,6 +230,24 @@ final class _FolderGridState extends State<FolderGrid> {
                 _rowsFollowContents == followsContents))) {
       return cached;
     }
+    final since = _rowsRevision;
+    final dir = _rowsDir;
+    if (cached != null &&
+        since != null &&
+        dir != null &&
+        _rowsSort == widget.sort &&
+        _rowsFolder == widget.folder &&
+        _rowsFollowContents == followsContents) {
+      final moved = widget.controller.foldersMovedSince(
+        since,
+        tree: !followsContents,
+      );
+      if (moved != null && !moved.contains(dir)) {
+        _rowsRevision = revision;
+        return cached;
+      }
+    }
+    if (_rowsFolder != widget.folder) _rowsDir = null;
     _rowsRevision = revision;
     _rowsFollowContents = followsContents;
     _rowsSort = widget.sort;
@@ -253,6 +276,7 @@ final class _FolderGridState extends State<FolderGrid> {
       at = parentOf(at);
     }
     final children = await widget.controller.children(dir?.id ?? 0, sort: sort);
+    if (asked == _rowsFolder) _rowsDir = dir?.id ?? 0;
     final rows = _GridRows(
       folder: at,
       rows: nestOcrSidecars(children, (note) => note.name).toList(),

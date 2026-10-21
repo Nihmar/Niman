@@ -9,6 +9,7 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:crypto/crypto.dart';
+import 'package:niman/src/db/read_cancel.dart';
 import 'package:niman/src/editor/outline.dart';
 import 'package:niman/src/frontmatter/parser.dart';
 import 'package:niman/src/links/block_anchors.dart';
@@ -177,15 +178,94 @@ bool _isAsWritten(FileStat stat, KnownContent wrote) =>
 /// closure captures only these three sendable values. Inlined in a method
 /// it captures that method's context, which holds the async body's
 /// future — unsendable, and the open failed with it.
+///
+/// With [cancel], the isolate is killed when it is cancelled and the batch
+/// answers empty: a reindex of a 1.5 MB note parsed it for 894 ms on a
+/// tablet, and the save that fell inside it wrote in 480 ms against 123
+/// (device log, 2026-10-20) — for a read the save had made obsolete.
 Future<List<NoteContent>> readBatchOnIsolate(
   String root,
   List<String> batch,
   SendPort? progress, [
   Map<String, KnownContent> known = const {},
+  ReadCancel? cancel,
 ]) {
-  return Isolate.run(
-    () => readNoteContents(root, batch, progress: progress, known: known),
+  if (cancel == null) {
+    return Isolate.run(
+      () => readNoteContents(root, batch, progress: progress, known: known),
+    );
+  }
+  return _readKillable(root, batch, progress, known, cancel);
+}
+
+/// [readBatchOnIsolate] on an isolate of its own, which [cancel] kills.
+Future<List<NoteContent>> _readKillable(
+  String root,
+  List<String> batch,
+  SendPort? progress,
+  Map<String, KnownContent> known,
+  ReadCancel cancel,
+) async {
+  if (cancel.isCancelled) return const [];
+  final answers = ReceivePort();
+  final done = Completer<List<NoteContent>>();
+  answers.listen((message) {
+    if (done.isCompleted) return;
+    if (message is List<NoteContent>) {
+      done.complete(message);
+    } else if (message is List && message.length == 2) {
+      // What `onError` sends: the error and its stack, as text.
+      done.completeError(RemoteError('${message[0]}', '${message[1]}'));
+    } else {
+      // `onExit` with no answer before it: the isolate went away.
+      done.completeError(StateError('the note reader exited unanswered'));
+    }
+  });
+  try {
+    final isolate = await Isolate.spawn(
+      _readEntry,
+      (
+        answers: answers.sendPort,
+        root: root,
+        batch: batch,
+        progress: progress,
+        known: known,
+      ),
+      onError: answers.sendPort,
+      onExit: answers.sendPort,
+    );
+    unawaited(
+      cancel.whenCancelled.then((_) {
+        if (done.isCompleted) return;
+        isolate.kill(priority: Isolate.immediate);
+        done.complete(const []);
+      }),
+    );
+    return await done.future;
+  } finally {
+    answers.close();
+  }
+}
+
+/// What [_readEntry] is spawned with.
+typedef _ReadRequest = ({
+  SendPort answers,
+  String root,
+  List<String> batch,
+  SendPort? progress,
+  Map<String, KnownContent> known,
+});
+
+/// The killable reader's isolate: reads the batch and exits with it, so the
+/// contents pass to the spawner without a copy.
+Future<void> _readEntry(_ReadRequest request) async {
+  final read = await readNoteContents(
+    request.root,
+    request.batch,
+    progress: request.progress,
+    known: request.known,
   );
+  Isolate.exit(request.answers, read);
 }
 
 /// Parses [text] into a [NoteContent] (pure: frontmatter, tags, links);

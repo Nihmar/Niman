@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/app.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/library/library_state.dart';
+import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/tree.dart';
 
 import '../fakes/fake_library_session.dart';
@@ -53,6 +54,23 @@ void main() {
       reads,
       reason: 'a save moved nothing the tree draws',
     );
+  });
+
+  // #1132: two flattens on the device log followed an open of the 1.5 MB
+  // note. They were folders toggled — a tap each — not the open: a note
+  // opened moves nothing the tree draws, and reads no row again.
+  testWidgets('opening a note leaves the tree rows where they are', (
+    tester,
+  ) async {
+    await open(tester);
+    final reads = controller.treeCalls;
+    final pages = controller.pageCalls;
+    expect(find.byType(NoteView), findsNothing);
+    await tester.tap(find.text('alpha.md'));
+    await settle(tester);
+    expect(find.byType(NoteView), findsOneWidget, reason: 'the note opened');
+    expect(controller.treeCalls, reads, reason: 'no flatten for an open');
+    expect(controller.pageCalls, pages, reason: 'no folder read again');
   });
 
   testWidgets('a save flattens a tree the field order reads', (tester) async {

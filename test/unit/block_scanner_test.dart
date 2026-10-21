@@ -1160,6 +1160,116 @@ void main() {
       },
     );
   });
+
+  // #1132: the first scan of a long note reads the lines its first frame
+  // draws, and leaves the rest owed as an edit's rescan does.
+  group('a first scan cut short', () {
+    const pieces = <String>[
+      '',
+      '',
+      'prose',
+      r'$$',
+      'x = 1',
+      '```',
+      '~~~',
+      '# h',
+      '- item',
+      '1. one',
+      '   cont',
+      '> quote',
+      'lazy',
+      '    code',
+      '| a | b |',
+      '|---|---|',
+      '---',
+      '===',
+      '  ---',
+      '<div>',
+      '</div>',
+      ':::',
+      '::: columns',
+    ];
+
+    test('answers every line as a whole scan, read in any order', () {
+      final random = Random(20261021);
+      String piece() => pieces[random.nextInt(pieces.length)];
+      for (var round = 0; round < 1000; round++) {
+        final text = [
+          if (random.nextBool()) '---\ntitle: t\n---',
+          ...List<String>.generate(10 + random.nextInt(150), (_) => piece()),
+        ].join('\n');
+        final fresh = BlockScanner(SourceBuffer.fromText(text));
+        final scanner = BlockScanner(
+          SourceBuffer.fromText(text),
+          firstLines: random.nextInt(12),
+          budget: 1 + random.nextInt(8),
+        );
+        final lines = scanner.buffer.lineCount;
+        for (var probe = 0; probe < 4; probe++) {
+          if (random.nextBool()) scanner.advance(random.nextInt(9));
+          final line = random.nextInt(lines);
+          expect(
+            _describedBlock(scanner.blockAt(line)),
+            _describedBlock(fresh.blockAt(line)),
+            reason: 'round $round line $line on $text',
+          );
+        }
+        expect(_described(scanner), _described(fresh), reason: text);
+        expect(scanner.settled, isTrue);
+      }
+    });
+
+    test('takes edits before it is done as a whole scan would', () {
+      final random = Random(1132);
+      String piece() => pieces[random.nextInt(pieces.length)];
+      for (var round = 0; round < 500; round++) {
+        final buffer = SourceBuffer.fromText(
+          List<String>.generate(
+            20 + random.nextInt(120),
+            (_) => piece(),
+          ).join('\n'),
+        );
+        final scanner = BlockScanner(
+          buffer,
+          firstLines: random.nextInt(20),
+          budget: 3,
+        );
+        for (var step = 0; step < 8; step++) {
+          final line = random.nextInt(buffer.lineCount);
+          final at = buffer.offsetOfLine(line);
+          final end = at + buffer.lineAt(line).length;
+          final edit = random.nextBool()
+              ? buffer.replaceRange(at, at, '${piece()}\n')
+              : buffer.replaceRange(at, end, piece());
+          scanner.edited(edit);
+          if (random.nextBool()) scanner.advance(random.nextInt(6));
+          final fresh = BlockScanner(SourceBuffer.fromText(buffer.text));
+          final probe = random.nextInt(buffer.lineCount);
+          expect(
+            _describedBlock(scanner.blockAt(probe)),
+            _describedBlock(fresh.blockAt(probe)),
+            reason: 'round $round step $step line $probe on ${buffer.text}',
+          );
+        }
+        final fresh = BlockScanner(SourceBuffer.fromText(buffer.text));
+        expect(_described(scanner), _described(fresh), reason: buffer.text);
+      }
+    });
+
+    test('reads its first lines and no more', () {
+      // Paragraphs, so the block holding a line ends near it: a reader
+      // catches the scan up to the end of the block it asks for.
+      final text = List<String>.generate(10000, (i) => 'line $i').join('\n\n');
+      final scanner = BlockScanner(
+        SourceBuffer.fromText(text),
+        firstLines: 100,
+      );
+      expect(scanner.scannedLineTotal, 100);
+      expect(scanner.settled, isFalse);
+      expect(scanner.blockAt(10), isNotNull);
+      expect(scanner.scannedLineTotal, 100, reason: 'line 10 was read');
+    });
+  });
 }
 
 /// A short random document from [alphabet].

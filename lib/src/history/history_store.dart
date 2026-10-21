@@ -109,6 +109,8 @@ final class SnapshotOutcome {
     this.rotated = const [],
     this.external,
     this.elapsedMs = 0,
+    this.keepMs = 0,
+    this.manifestMs = 0,
   });
 
   /// Whether a version was taken, and why.
@@ -128,6 +130,16 @@ final class SnapshotOutcome {
   /// Time spent, in milliseconds.
   final int elapsedMs;
 
+  /// Of [elapsedMs], the version file's write and the manifest's, when a
+  /// version was taken: each is a write, a flush and a rename. A first save
+  /// of a session took 213 ms for a 1.5 MB note and 219 ms for a 10 KB one
+  /// on a tablet (device log, 2026-10-20), so it is not the copy's size;
+  /// these say which of the two it is.
+  final int keepMs;
+
+  /// See [keepMs].
+  final int manifestMs;
+
   /// A log-ready summary.
   String describe(String rel) {
     final buffer = StringBuffer('snapshot "$rel": $decision');
@@ -139,6 +151,7 @@ final class SnapshotOutcome {
     final checked = external;
     if (checked != null) buffer.write(' [external check: $checked]');
     buffer.write(' in $elapsedMs ms');
+    if (v != null) buffer.write(' (version $keepMs, manifest $manifestMs)');
     return buffer.toString();
   }
 }
@@ -202,9 +215,11 @@ SnapshotOutcome snapshotBeforeWrite(
     size: bytes!.length,
     sha256: oldSha!,
   );
+  final keepAt = clock.elapsedMilliseconds;
   final target = File(historyVersionPath(root, rel, version.number));
   target.parent.createSync(recursive: true);
   _writeAtomicallySync(target, bytes);
+  final manifestAt = clock.elapsedMilliseconds;
   var next = manifest.adding(version);
   final overflow = next.overflow(request.limit);
   final rotated = <int>[];
@@ -214,6 +229,7 @@ SnapshotOutcome snapshotBeforeWrite(
     rotated.add(old.number);
   }
   next = next.removing(rotated.toSet());
+  final rotatedAt = clock.elapsedMilliseconds;
   writeHistoryManifest(root, rel, next);
   return SnapshotOutcome(
     decision: decision,
@@ -221,6 +237,8 @@ SnapshotOutcome snapshotBeforeWrite(
     rotated: rotated,
     external: check?.note,
     elapsedMs: clock.elapsedMilliseconds,
+    keepMs: manifestAt - keepAt,
+    manifestMs: clock.elapsedMilliseconds - rotatedAt,
   );
 }
 

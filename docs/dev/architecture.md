@@ -83,7 +83,12 @@ lines or when responsibilities mix.
   (`NoteDao.childrenPage`, a keyset in the sort's own terms, 2000 rows) into
   `TreeChildCache` (`ui/tree_child_cache.dart`, #1064). A folder is read once
   per index revision: opening one reads that folder alone, closing one reads
-  nothing, and a new revision or order empties the cache. The last loaded row
+  nothing, and a new order empties the cache. A new revision empties what it
+  moved: a reindex of a note in place or a pin names the note's folder
+  (`Indexer.changedFolders`), the session keeps what each recent revision
+  moved (`TreeMoves`, `foldersMovedSince`), and the tree and the folder grid
+  re-read those folders and the pinned notes alone (#1132); any other change
+  empties the cache. The last loaded row
   of a folder with more asks for the next page when it is drawn, so a
   folder of a hundred thousand notes is a page until the list scrolls to the
   end of it. In a name order a page walks the `notes_tree` index (`(parent,
@@ -93,7 +98,9 @@ lines or when responsibilities mix.
   `notes_pinned` partial index (#1065) and are read once per revision.
 - **Edit:** `NoteOps.saveNote` → history snapshot and atomic write
   (temp + rename) in one isolate pass → the note is rescanned into the
-  index. Every mode of the surface shares one tokenizer for links. Every
+  index, never beside a write of it: a reindex due while the note's saves
+  run waits for them, and a save asked for while one reads the note cancels
+  it (`NoteWriter`, #1132). Every mode of the surface shares one tokenizer for links. Every
   atomic write — the joined one and the streaming one alike — ends in
   `publishTempFile` (`core/files.dart`): the temp file is flushed to storage
   before the rename, so a power cut after it cannot bring the note back

@@ -104,7 +104,7 @@ jobs:
       # The official flavor (issue #106): AGP drops the no-flavor
       # variant once the channel dimension has a flavor, so the
       # official APK is built from the explicit flavor.
-      - run: flutter build apk --release --flavor official --build-name="$VERSION" --build-number="$GITHUB_RUN_NUMBER"
+      - run: flutter build apk --release --flavor official --build-name="$VERSION" --build-number="$GITHUB_RUN_NUMBER" --dart-define=APP_COMMIT="${GITHUB_SHA::7}"
 
       - name: Stage artifact
         run: |
@@ -162,7 +162,7 @@ jobs:
           echo "VERSION=$VERSION" >> "$GITHUB_ENV"
 
       - run: flutter pub get
-      - run: flutter build linux --release --build-name="$VERSION" --build-number="$GITHUB_RUN_NUMBER"
+      - run: flutter build linux --release --build-name="$VERSION" --build-number="$GITHUB_RUN_NUMBER" --dart-define=APP_COMMIT="${GITHUB_SHA::7}"
 
       - name: Linux tarball (bundle + icon + `niman` launcher)
         run: |
@@ -246,7 +246,7 @@ jobs:
       - run: flutter pub get
       - name: Build Windows bundle
         shell: bash
-        run: flutter build windows --release --build-name="$VERSION" --build-number="$GITHUB_RUN_NUMBER"
+        run: flutter build windows --release --build-name="$VERSION" --build-number="$GITHUB_RUN_NUMBER" --dart-define=APP_COMMIT="${GITHUB_SHA::7}"
 
       # A clean Windows has no Visual C++ runtime (#35): the bundle must
       # carry it, or niman.exe does not start there. windows/CMakeLists.txt

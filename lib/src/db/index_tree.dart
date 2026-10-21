@@ -16,6 +16,7 @@ import 'package:niman/src/db/index_content_store.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/db/index_note_content.dart';
 import 'package:niman/src/db/index_scan.dart';
+import 'package:niman/src/db/read_cancel.dart';
 import 'package:path/path.dart' as p;
 
 /// Mirrors the library tree on disk into the index rows (#51).
@@ -119,12 +120,16 @@ final class IndexTree {
   ///
   /// [known] holds what the app knows of notes it wrote itself
   /// ([KnownContent]), taken when the file is still the one written.
+  ///
+  /// [cancel] stops the read where it is: what was read before it stays in
+  /// the answer, and the caller that cancelled knows it is not all.
   Future<Map<String, NoteContent>> readRelContents(
     String root,
     List<String> rels, {
     Map<String, KnownContent> known = const {},
     int total = 0,
     int doneBase = 0,
+    ReadCancel? cancel,
   }) async {
     if (rels.isEmpty) return const {};
     final contents = <String, NoteContent>{};
@@ -152,13 +157,14 @@ final class IndexTree {
     final send = port?.sendPort;
     try {
       for (var i = 0; i < rels.length; i += _contentBatch) {
+        if (cancel?.isCancelled ?? false) break;
         final end = i + _contentBatch < rels.length
             ? i + _contentBatch
             : rels.length;
         final batch = rels.sublist(i, end);
         final read = await readBatchOnIsolate(root, batch, send, {
           for (final rel in batch) rel: ?known[rel],
-        });
+        }, cancel);
         for (final c in read) {
           contents[c.rel] = c;
         }

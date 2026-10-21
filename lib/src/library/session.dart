@@ -396,6 +396,13 @@ abstract interface class LibrarySession {
   /// Fires with the new [revision] after every index change.
   Stream<int> get events;
 
+  /// The folders whose rows moved since [since] — a [treeRevision] when
+  /// [tree], a [revision] otherwise — by row id (0 = the root), or null when
+  /// any may have: a change that did not say which, or one too long ago to
+  /// remember. What a tree re-reads instead of every folder it shows
+  /// (#1132).
+  Set<int>? foldersMovedSince(int since, {required bool tree});
+
   /// Fires with the new [treeRevision] after a change that may move the
   /// tree's rows (#751).
   Stream<int> get treeEvents;

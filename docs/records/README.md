@@ -20,6 +20,7 @@ comments (`docs/records/<name>.md`).
 | [read-live-parity.md](read-live-parity.md) | Where the read view and `live` stand, and the decisions that aligned them |
 | [huge-notes.md](huge-notes.md) | The 246 MB note: what was measured and what changed because of it |
 | [desktop-performance.md](desktop-performance.md) | The desktop audit (#62): the cold-start and integration-test baseline, the animation inventory and the proposed policy |
+| [performance-audit.md](performance-audit.md) | The performance baseline (#1135): the scenarios, Android's numbers from the device logs, the Linux perf suite, a million notes, the APK's libraries, and the prioritized list |
 | [workspace.md](workspace.md) | The open-note model — tabs and panes (#23) |
 | [epub-reader.md](epub-reader.md) | Reading an EPUB into Markdown (#280) |
 | [annotations.md](annotations.md) | Annotating a PDF or a book in a companion note (#284) |

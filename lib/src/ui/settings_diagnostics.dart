@@ -7,6 +7,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:niman/src/core/build_identity.dart';
 import 'package:niman/src/core/changelog.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/editor/text_input_probe.dart';
@@ -120,9 +121,11 @@ final class _SettingsDiagnosticsScreenState
     final phase =
         'phase: ${controller.phase.name}, '
         'lastError: ${controller.lastError ?? '-'}';
+    final identity = await buildIdentity();
     final content = <String>[
       '# Niman debug log',
       '# exported: ${now.toIso8601String()}',
+      ...identity,
       '# library: ${controller.root ?? '(none)'}',
       '# $phase',
       '',

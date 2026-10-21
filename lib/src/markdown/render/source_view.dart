@@ -53,6 +53,7 @@ import 'package:niman/src/markdown/active_formats.dart';
 import 'package:niman/src/markdown/background_scan.dart';
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_parser.dart';
+import 'package:niman/src/markdown/block_scanner.dart';
 import 'package:niman/src/markdown/buffer_block_anchors.dart';
 import 'package:niman/src/markdown/callout.dart';
 import 'package:niman/src/markdown/column_layout.dart';
@@ -2106,14 +2107,14 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   int _runsRevision = -1;
 
   /// Whether a layout asked for [_liveRuns] while the scan owed part of the
-  /// note, and drew every block stacked: the scan settling owes it a
-  /// layout ([_carryScanOn]).
+  /// note, and drew the blocks past what it had read stacked: the scan
+  /// settling owes it a layout ([_carryScanOn]).
   bool _runsOwed = false;
 
   /// The outermost `columns` blocks `live` draws, read off the scan's fence
-  /// lines: none in `source`, and none while the scan owes part of the note
-  /// — its blocks there are hints. That answer is not kept: the scan
-  /// settles at the same revision.
+  /// lines: none in `source`, and while the scan owes part of the note only
+  /// the ones that open where it has read — its blocks past that are hints.
+  /// That answer is not kept: the scan settles at the same revision.
   List<LiveRun> get _liveRuns {
     if (!widget.hideMarkers) return const <LiveRun>[];
     final revision = widget.buffer.revision;
@@ -2125,13 +2126,16 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       _runsOwed = styler != null;
       return const <LiveRun>[];
     }
-    _runsOwed = false;
     // The note's own, and the ones in its quotes and callouts, read off
-    // each quote's content.
-    _runs = [
+    // each quote's content. An opener the scan has read is followed to its
+    // closer: the blocks on the way are caught up as they are asked for.
+    final runs = [
       ...LiveRun.of(fences, styler.blockOf, widget.buffer.lineAt),
       ..._quoteRuns.of(quotes, widget.buffer),
     ]..sort((a, b) => a.start.compareTo(b.start));
+    _runsOwed = !styler.settled;
+    if (_runsOwed) return runs;
+    _runs = runs;
     _runsRevision = revision;
     return _runs;
   }
@@ -3609,6 +3613,22 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   @visibleForTesting
   static int backgroundLines = 50000;
 
+  /// From how many lines on a note read in place reads the blocks of its top
+  /// alone before its first frame, and the rest a slice at a time after it
+  /// ([_carryScanOn]).
+  ///
+  /// The whole scan of a 16 000-line note was most of the 20 ms frame that
+  /// opened it on a tablet (device log, 2026-10-20), for a frame that draws
+  /// a screen of it. Below this the scan is a few milliseconds, and a note
+  /// read whole has its outline at once.
+  @visibleForTesting
+  static int progressiveLines = BlockScanner.defaultBudget;
+
+  /// How many lines of such a note are read before its first frame: a
+  /// screen and more. A frame placed further down — a note reopened where
+  /// it was read — reads on as far as its lines ([SourceStyler.blockOf]).
+  static const int _firstScanLines = 512;
+
   /// Reads the note's colours again, from the top.
   ///
   /// A long note is read in an isolate ([SourceStyler.inBackground]): the
@@ -3618,8 +3638,18 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   void _restyle() {
     final buffer = widget.buffer;
     final reading = ++_stylings;
+    // The scan a slice was waiting to carry on is the styler's this one
+    // replaces: left waiting, it kept the new styler's from being carried
+    // on, and found the old one gone when it ran.
+    _scanSlice?.cancel();
+    _scanSlice = null;
     if (buffer.lineCount < backgroundLines) {
-      _styler = SourceStyler(buffer);
+      final progressive = buffer.lineCount >= progressiveLines;
+      _styler = SourceStyler(
+        buffer,
+        firstLines: progressive ? _firstScanLines : null,
+      );
+      if (progressive) _carryScanOn();
       return;
     }
     _styler = null;
