@@ -108,6 +108,37 @@ final class EpubBook {
 ///
 /// Throws [EpubRefused]: not a book, or one whose chapters are encrypted.
 EpubBook parseEpub(EpubArchive archive) {
+  EpubBook? book;
+  for (final step in _readSteps(archive)) {
+    book = step;
+  }
+  return book!;
+}
+
+/// [parseEpub] that gives the event loop a turn, and [between] a call,
+/// before each of the spine's chapters.
+///
+/// Converting a chapter is the parse's expensive part, so on a big book it
+/// is what a stop would otherwise wait for: [between] is where a cancel
+/// throws. Whatever it throws ends the read there. It is the same read as
+/// [parseEpub] — one parser, driven a chapter at a time.
+Future<EpubBook> parseEpubStepped(
+  EpubArchive archive, {
+  Future<void> Function()? between,
+}) async {
+  final steps = _readSteps(archive).iterator;
+  while (steps.moveNext()) {
+    if (steps.current case final book?) return book;
+    await Future<void>.delayed(Duration.zero);
+    await between?.call();
+  }
+  throw StateError('the read ended without a book');
+}
+
+/// The read of [archive], one step at a time: null before each chapter of
+/// the spine, then the book, last. Lazy — nothing is read until the
+/// iteration asks.
+Iterable<EpubBook?> _readSteps(EpubArchive archive) sync* {
   final opfPath = archive.packagePath();
   final opf = archive.xml(opfPath);
   final opfDir = p.posix.dirname(opfPath);
@@ -147,6 +178,7 @@ EpubBook parseEpub(EpubArchive archive) {
   var mathMl = 0;
   String? firstTex;
   for (final chapter in spine) {
+    yield null;
     final text = archive.text(chapter);
     if (text == null) continue;
     final dir = p.posix.dirname(chapter);
@@ -190,7 +222,7 @@ EpubBook parseEpub(EpubArchive archive) {
   if (chapters.isEmpty) {
     throw const EpubRefused(EpubRefusal.notABook, 'the book has no chapters');
   }
-  return EpubBook(
+  yield EpubBook(
     info: epubInfoOf(opf, (id) => manifest[id]?.path),
     spine: spine,
     chapters: chapters,

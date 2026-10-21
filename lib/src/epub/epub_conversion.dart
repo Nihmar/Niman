@@ -153,8 +153,8 @@ final class EpubConversion {
   /// It is never killed: a kill skips the `finally` that closes the book
   /// (a file Windows will not let be deleted) and leaves the isolate free
   /// to write into the folder deleted under it. The wait is the length of
-  /// the step it is in; the book's reading and planning, which come before
-  /// the first step, are not interrupted.
+  /// the step it is in: one chapter's reading, the planning (a fraction of
+  /// a second for a book of thousands of chapters), one picture, one note.
   Future<bool> cancel() async {
     if (!cancellable) return false;
     _cancelling = true;

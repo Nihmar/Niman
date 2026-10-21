@@ -99,9 +99,10 @@ EpubConvertPreview previewEpub(String source, EpubConvertWords words) =>
 /// Converts the book [request] names, telling [progress] how far it has
 /// got.
 ///
-/// A stop is cooperative. Between its steps — before each picture, each
-/// note, the index, and the moving in — it gives the event loop a turn, so a
-/// stop message can be delivered, and asks [stopped]: true ends it there
+/// A stop is cooperative. Between its steps — before each chapter the book
+/// is read by, each picture, each note, the index, and the moving in — it
+/// gives the event loop a turn, so a stop message can be delivered, and asks
+/// [stopped]: true ends it there
 /// with [EpubConvertStopped], its `finally` blocks run — the book closed,
 /// the hidden folder deleted. A killed isolate runs none of them: it leaves
 /// the book open (on Windows, a file that cannot be moved or deleted) and
@@ -124,7 +125,7 @@ Future<EpubConverted> convertEpub(
   }
 
   try {
-    final result = await _withBookAsync(request.source, (book) async {
+    final result = await _withBookAsync(request.source, step, (book) async {
       staging.createSync(recursive: true);
       final title = _titleOf(book, request.source);
       final plan = EpubPlan.of(
@@ -255,14 +256,17 @@ T _withBook<T>(String source, T Function(EpubBook book) work) {
 }
 
 /// [_withBook] for a [work] that yields: the file is held open across its
-/// awaits and closed when it ends, however it ends.
+/// awaits and closed when it ends, however it ends. [between] runs before
+/// each chapter of the book's reading, which it may end by throwing.
 Future<T> _withBookAsync<T>(
   String source,
+  Future<void> Function() between,
   Future<T> Function(EpubBook book) work,
 ) async {
   final input = InputFileStream(source);
   try {
-    return await work(parseEpub(EpubArchive.open(input)));
+    final archive = EpubArchive.open(input);
+    return await work(await parseEpubStepped(archive, between: between));
   } finally {
     input.closeSync();
   }

@@ -11,6 +11,7 @@ import 'package:archive/archive.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/isolate_gauge.dart';
 import 'package:niman/src/epub/epub_archive.dart';
+import 'package:niman/src/epub/epub_book.dart';
 import 'package:niman/src/epub/epub_conversion.dart';
 import 'package:niman/src/epub/epub_convert_job.dart';
 import 'package:niman/src/epub/epub_convert_plan.dart';
@@ -464,6 +465,42 @@ void main() {
         ],
       ).path;
       final staging = p.join(library, '.epub.niman-tmp-3');
+      var seen = 0;
+      await expectLater(
+        convertEpub(
+          (
+            source: source,
+            libraryRoot: library,
+            parent: '',
+            staging: staging,
+            oneNote: false,
+            attachments: 'assets',
+            words: _words,
+          ),
+          progress: (_) => seen++,
+          // True once three steps were written: after some notes were.
+          stopped: () => seen >= 3,
+        ),
+        throwsA(isA<EpubConvertStopped>()),
+      );
+      expect(seen, 3);
+      expect(Directory(staging).existsSync(), isFalse);
+      expect(Directory(library).listSync(), isEmpty);
+      File(source).deleteSync();
+    },
+  );
+
+  test(
+    'a stop while the book is read ends it before any step, all freed',
+    () async {
+      final source = writeTestEpub(
+        book('reading.epub'),
+        chapters: [
+          for (var i = 0; i < 60; i++)
+            (path: 'c$i.xhtml', body: '<h1>C$i</h1><p>${'text ' * 200}</p>'),
+        ],
+      ).path;
+      final staging = p.join(library, '.epub.niman-tmp-4');
       var asked = 0;
       var seen = 0;
       await expectLater(
@@ -478,17 +515,51 @@ void main() {
             words: _words,
           ),
           progress: (_) => seen++,
-          // True from the fourth step on: after some notes were written.
-          stopped: () => ++asked > 3,
+          // Asked once before each chapter: true at the second one.
+          stopped: () => ++asked >= 2,
         ),
         throwsA(isA<EpubConvertStopped>()),
       );
-      expect(seen, 3);
+      // Stopped at the second chapter of sixty: not one step was reached.
+      expect(asked, 2);
+      expect(seen, 0);
       expect(Directory(staging).existsSync(), isFalse);
       expect(Directory(library).listSync(), isEmpty);
       File(source).deleteSync();
     },
   );
+
+  test('the stepped read is the plain read, a chapter at a time', () async {
+    final source = writeTestEpub(
+      book('stepped.epub'),
+      chapters: [
+        for (var i = 0; i < 6; i++)
+          (
+            path: 'c$i.xhtml',
+            body: '<h1 id="h$i">C$i</h1><p><a href="c0.xhtml#h0">back</a></p>',
+          ),
+      ],
+      nav: '<li><a href="c0.xhtml">C0</a></li>',
+    ).path;
+    final first = InputFileStream(source);
+    final second = InputFileStream(source);
+    final plain = parseEpub(EpubArchive.open(first));
+    var turns = 0;
+    final stepped = await parseEpubStepped(
+      EpubArchive.open(second),
+      between: () async => turns++,
+    );
+    first.closeSync();
+    second.closeSync();
+    expect(turns, 6);
+    // Records hold maps, which compare by identity: compare what they say.
+    expect('${stepped.chapters}', '${plain.chapters}');
+    expect(stepped.contents, plain.contents);
+    expect(stepped.links, plain.links);
+    expect(stepped.pictures, plain.pictures);
+    expect(stepped.info.title, plain.info.title);
+    File(source).deleteSync();
+  });
 
   test('a cancel counts its job out of the gauge', () async {
     final source = writeTestEpub(
