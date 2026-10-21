@@ -87,6 +87,7 @@ import 'package:niman/src/ui/device_shape.dart';
 import 'package:niman/src/ui/dismiss_chain.dart';
 import 'package:niman/src/ui/dock/close_overlay_action.dart';
 import 'package:niman/src/ui/dock/dock_overlay.dart';
+import 'package:niman/src/ui/dock/dock_toggles.dart';
 import 'package:niman/src/ui/dock/right_dock.dart';
 import 'package:niman/src/ui/epub_convert_flow.dart';
 import 'package:niman/src/ui/epub_look_sheet.dart';
@@ -176,6 +177,7 @@ import 'package:niman/src/ui/study/study_view.dart';
 import 'package:niman/src/ui/sync/sync_status.dart';
 import 'package:niman/src/ui/tab_body_stack.dart';
 import 'package:niman/src/ui/tab_drag.dart';
+import 'package:niman/src/ui/tab_row_lead.dart';
 import 'package:niman/src/ui/text_zoom_pinch.dart';
 import 'package:niman/src/ui/todo_edit_dialog.dart';
 import 'package:niman/src/ui/todo_list_buttons.dart';
@@ -2127,27 +2129,64 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
 
   /// The open notes' tabs over panes [panesWidth] wide, with [filler]
   /// past them. Split right, the row divides at the same x as the panes
-  /// do, so nothing moves when the window splits (the Split mockup).
-  Widget _tabRow(Widget filler, {required double panesWidth}) =>
-      ListenableBuilder(
-        listenable: _tabsListenable,
-        builder: (context, _) {
-          final w = _workspace.value;
-          if (!w.isSplit || w.axis == SplitAxis.down) {
-            return _paneTabs(0, filler);
-          }
-          final detail = panesWidth - PaneSplit.dividerWidth;
-          return Row(
-            children: [
-              SizedBox(
-                width: detail * w.fraction + PaneSplit.dividerWidth,
-                child: _paneTabs(0, filler),
-              ),
-              Expanded(child: _paneTabs(1, filler)),
-            ],
-          );
-        },
+  /// do, so nothing moves when the window splits (the Split mockup). With
+  /// [chrome] — the panes heading their own row — it carries the panels'
+  /// toggles and the history's arrows too (#1134).
+  Widget _tabRow(
+    Widget filler, {
+    required double panesWidth,
+    bool chrome = false,
+  }) => ListenableBuilder(
+    listenable: _tabsListenable,
+    builder: (context, _) {
+      final w = _workspace.value;
+      if (!w.isSplit || w.axis == SplitAxis.down) {
+        return _paneTabs(0, filler, chrome: chrome);
+      }
+      final detail = panesWidth - PaneSplit.dividerWidth;
+      return Row(
+        children: [
+          SizedBox(
+            width: detail * w.fraction + PaneSplit.dividerWidth,
+            child: _paneTabs(0, filler, chrome: chrome),
+          ),
+          Expanded(child: _paneTabs(1, filler, chrome: chrome)),
+        ],
       );
+    },
+  );
+
+  /// [pane]'s tab row, headed — with [chrome] — by the sidebar's toggle
+  /// and the history's arrows on the first pane, and ended by the dock's
+  /// toggle on the row's last pane (#1134): where Obsidian has them, and
+  /// where a thumb finds them with a note open or not.
+  Widget _paneTabs(int pane, Widget filler, {bool chrome = false}) {
+    final tabs = _paneTabsOnly(pane, filler);
+    if (!chrome) return tabs;
+    final w = _workspace.value;
+    final history = _workspace.history;
+    final last = w.isSplit && w.axis == SplitAxis.right ? 1 : 0;
+    return LayoutBuilder(
+      builder: (context, constraints) => Row(
+        children: [
+          if (pane == 0)
+            TabRowLead(
+              sidebarVisible: _sidebarVisible,
+              onToggleSidebar: _toggleSidebar,
+              arrows: constraints.maxWidth >= TabRowLead.arrowsRoom,
+              onBack: history.previous == null
+                  ? null
+                  : () => unawaited(_noteHistory.back()),
+              onForward: history.next == null
+                  ? null
+                  : () => unawaited(_noteHistory.forward()),
+            ),
+          Expanded(child: tabs),
+          if (pane == last) _dockToggle(),
+        ],
+      ),
+    );
+  }
 
   /// Where the tabs start in the title bar: the panes' island's left
   /// edge, past the base and the tree's island.
@@ -2155,9 +2194,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       ShellRail.panelStart +
       (_sidebarVisible ? _editorSettings.treeWidth + ResizeDivider.width : 0);
 
-  /// [pane]'s tab row, with the pinned content tab's chip (#712) at its
+  /// [pane]'s tabs, with the pinned content tab's chip (#712) at their
   /// end when that pane holds one.
-  Widget _paneTabs(int pane, Widget filler) {
+  Widget _paneTabsOnly(int pane, Widget filler) {
     final w = _workspace.value;
     final tabs = w.panes[pane];
     final bar = NoteTabBar(
@@ -5112,7 +5151,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
                 // below it.
                 if (!widget.window.customTitleBar) ...[
                   SizedBox(
-                    key: const Key('pane-tab-row'),
+                    key: paneTabRowKey,
                     height: NoteTabBar.rowHeight(
                       touch: thumbDense(Theme.of(context)),
                     ),
@@ -5120,6 +5159,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
                       builder: (context, constraints) => _tabRow(
                         const SizedBox.shrink(),
                         panesWidth: constraints.maxWidth,
+                        chrome: true,
                       ),
                     ),
                   ),
@@ -5172,7 +5212,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// Shows or hides the dock (the note row's button, Ctrl+Shift+B).
   void _toggleDock() => _dock.toggleOpen();
 
-  /// The note row's dock button: always there on the wide layout.
+  /// The dock's button: on the note row under a title bar of the app's
+  /// own, at the end of the panes' tab row without one (#1134).
   Widget _dockToggle() => _dock.toggle();
 
   /// Opens [pane] for the note: in the dock where it fits, else as a
@@ -5290,7 +5331,13 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
                     noteColumn: _editorSettings.noteColumn,
                     // The kind toggles and ⋮ sit at the end of the note's
                     // one row of chrome (#173); there is no header above.
-                    barActions: [..._kindActions, _dockToggle(), _noteMenu()],
+                    // Where the panes head their own tab row, the dock's
+                    // toggle ends that row instead (#1134).
+                    barActions: [
+                      ..._kindActions,
+                      if (widget.window.customTitleBar) _dockToggle(),
+                      _noteMenu(),
+                    ],
                     autofocusEditor: _editorSettings.autofocusEditor,
                     // The Files pane opened a note (#727): that tab's own
                     // view is asked for the caret, and no other.
