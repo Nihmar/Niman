@@ -46,6 +46,7 @@ import 'package:niman/src/epub/epub_looks.dart';
 import 'package:niman/src/flashcards/review_store.dart';
 import 'package:niman/src/frontmatter/fields.dart';
 import 'package:niman/src/history/history_manifest.dart';
+import 'package:niman/src/library/container_path.dart';
 import 'package:niman/src/library/file_watcher.dart';
 import 'package:niman/src/library/indexing_status.dart';
 import 'package:niman/src/library/library_registry.dart';
@@ -579,9 +580,15 @@ final class LibraryController implements LibrarySession {
 
   Future<void> _doResume() async {
     try {
-      final last = await AppSettingsRepo(await appDatabase).lastLibraryPath();
-      _log.info('resume: lastLibraryPath=$last');
-      if (last == null) return;
+      final stored = await AppSettingsRepo(await appDatabase).lastLibraryPath();
+      _log.info('resume: lastLibraryPath=$stored');
+      if (stored == null) return;
+      // An iPhone's container may have moved since: the library is the one
+      // at the same place inside today's Documents.
+      final documents = await containerDocuments();
+      final last = documents == null
+          ? stored
+          : rebaseContainerPath(stored, documents);
       final dir = Directory(last);
       if (!await dir.exists()) {
         _log.warning('resume: root no longer exists: $last');
@@ -612,7 +619,10 @@ final class LibraryController implements LibrarySession {
     _bump();
     try {
       _log.info('open start: $path create=$create');
-      final abs = p.normalize(path.trim());
+      final documents = await containerDocuments();
+      final abs = documents == null
+          ? p.normalize(path.trim())
+          : rebaseContainerPath(path.trim(), documents);
       final rootDir = Directory(abs);
       if (create) {
         await rootDir.create(recursive: true);
@@ -837,7 +847,17 @@ final class LibraryController implements LibrarySession {
   /// The libraries the app knows about, most recently opened first.
   @override
   Future<List<KnownLibrary>> knownLibraries() async {
-    return await LibraryRegistry(await appDatabase).all();
+    final known = await LibraryRegistry(await appDatabase).all();
+    final documents = await containerDocuments();
+    if (documents == null) return known;
+    // On iPhone a library remembered before the container moved is the one
+    // at the same place in today's Documents; listed once, by its newest.
+    final seen = <String>{};
+    return [
+      for (final library in known)
+        if (seen.add(rebaseContainerPath(library.path, documents)))
+          library.copyWith(path: rebaseContainerPath(library.path, documents)),
+    ];
   }
 
   /// The home-screen widget instances reading [libraryPath] (issue 6).
@@ -2140,7 +2160,9 @@ Future<File> defaultAppDbFile() async {
 Future<File> libraryIndexFile(String libraryPath) async {
   final dir = Directory(p.join((await appSupportDirectory()).path, 'indexes'));
   await dir.create(recursive: true);
-  final digest = sha256.convert(utf8.encode(p.normalize(libraryPath)));
+  // On iOS the key is the path inside the app's Documents, which outlives
+  // the container's own path (container_path.dart).
+  final digest = sha256.convert(utf8.encode(libraryIndexKey(libraryPath)));
   return File(p.join(dir.path, '${digest.toString().substring(0, 16)}.db'));
 }
 
