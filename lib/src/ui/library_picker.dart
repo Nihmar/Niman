@@ -11,6 +11,7 @@ import 'package:niman/src/core/library_root.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/storage_access.dart';
 import 'package:niman/src/library/container_path.dart';
+import 'package:niman/src/ui/library_picker_blocking.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:path/path.dart' as p;
 
@@ -136,20 +137,6 @@ Future<LibraryPick> _chooseInDocuments(
   return chosen == null
       ? const LibraryPickCancelled()
       : LibraryPicked(p.join(documents, chosen));
-}
-
-/// The folders in [documents] a library can be: not hidden, and not iOS's
-/// own `Inbox`, where documents opened from elsewhere are copied.
-List<String> libraryFolderNames(String documents) {
-  final dir = Directory(documents);
-  if (!dir.existsSync()) return const [];
-  return [
-    for (final entry in dir.listSync(followLinks: false))
-      if (entry is Directory)
-        if (p.basename(entry.path) case final name
-            when !name.startsWith('.') && name != 'Inbox')
-          name,
-  ]..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
 }
 
 /// Asks for the new library folder's name; null when cancelled.

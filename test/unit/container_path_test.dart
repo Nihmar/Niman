@@ -6,7 +6,7 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/library/container_path.dart';
-import 'package:niman/src/ui/library_picker.dart';
+import 'package:niman/src/ui/library_picker_blocking.dart';
 import 'package:path/path.dart' as p;
 
 void main() {

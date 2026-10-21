@@ -78,6 +78,8 @@ const Map<String, String> _offTheUiIsolate = {
   'ui/file_tree_context.dart': 'the exists check, in Isolate.run',
   'ui/kinds/flashcards/review_run.dart': 'the deck reads, in Isolate.run',
   'ui/known_library_list.dart': 'the folder checks, in Isolate.run',
+  'ui/library_picker_blocking.dart':
+      "libraryFolderNames, in _chooseInDocuments' Isolate.run",
   'ui/theme/theme_files.dart': 'the theme read, in Isolate.run',
   'widget/widget_note_ops.dart': 'the note read, in Isolate.run',
 };
