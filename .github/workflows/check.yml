@@ -123,6 +123,49 @@ jobs:
       - name: WebDAV sync end to end (macOS desktop)
         run: flutter test integration_test/sync_e2e_test.dart -d macos
 
+  ios:
+    name: iOS build and simulator
+    # The iPhone app, beside the Mac's: its Swift and build phases, built
+    # for a device unsigned, and the integration files run in a simulator.
+    # The Dart suites are the Mac job's — they run on the host either way.
+    runs-on: macos-26
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      # ninja builds the OCR engine the simulator's app bundles.
+      - name: Build tools
+        run: brew install ninja
+
+      - run: flutter pub get
+
+      - name: OCR engine (simulator)
+        run: ./scripts/ocr-engine.sh ios-sim-arm64 build/ocr-engine
+
+      # The device's own architecture and SDK: Swift built for a simulator
+      # only can hide what does not compile on an iPhone. Unsigned, and
+      # without OCR, whose phase skips a missing engine with a warning.
+      - name: Build the beta app for a device
+        run: flutter build ios --debug --no-codesign --flavor beta --dart-define=APP_CHANNEL=testing
+
+      - name: Boot an iPhone simulator
+        run: |
+          udid=$(xcrun simctl list devices available --json | jq -r '[.devices | to_entries[] | select(.key | contains("iOS")) | .value[] | select(.name | startswith("iPhone"))][0].udid')
+          xcrun simctl bootstatus "$udid" -b
+          echo "SIMULATOR=$udid" >> "$GITHUB_ENV"
+
+      - name: App boot (iPhone simulator)
+        run: flutter test integration_test/app_boot_test.dart -d "$SIMULATOR" --flavor beta
+      - name: WebDAV sync end to end (iPhone simulator)
+        run: flutter test integration_test/sync_e2e_test.dart -d "$SIMULATOR" --flavor beta
+
   android-unit:
     name: Android unit tests
     runs-on: ubuntu-latest
