@@ -138,8 +138,9 @@ final class _Device {
   }
 }
 
-/// A finished run, with the bytes it was asked to move.
-typedef _Run = ({_Path path, SyncReport report, int payload});
+/// A finished run, with the bytes it was asked to move and, on a busy
+/// isolate, the share of its load the isolate still ran.
+typedef _Run = ({_Path path, SyncReport report, int payload, double? share});
 
 String _rate(_Run run) => formatRate(run.payload, run.report.applyMs) ?? 'n/a';
 
@@ -147,12 +148,32 @@ double _mibPerSecond(_Run run) =>
     run.payload / (1024 * 1024) / (run.report.applyMs.clamp(1, 1 << 40) / 1000);
 
 /// Keeps this isolate busy about three quarters of the time, in slices of
-/// 6 ms: what drawing frames, watching the tree and indexing do to the
-/// isolate the sync used to run on.
-Timer _loadTheIsolate() => Timer.periodic(const Duration(milliseconds: 8), (_) {
-  final slice = Stopwatch()..start();
-  while (slice.elapsedMilliseconds < 6) {}
-});
+/// 6 ms every 8: what drawing frames, watching the tree and indexing do to
+/// the isolate the sync used to run on.
+final class _Load {
+  new() {
+    _wall.start();
+    _timer = Timer.periodic(_tick, (_) {
+      _slices++;
+      final slice = Stopwatch()..start();
+      while (slice.elapsedMilliseconds < 6) {}
+    });
+  }
+
+  static const Duration _tick = Duration(milliseconds: 8);
+
+  final Stopwatch _wall = Stopwatch();
+  late final Timer _timer;
+  int _slices = 0;
+
+  /// The share of its ticks the load ran: the isolate's own work — a frame,
+  /// in the app — that a transfer on it did not push back. 1 is all of it.
+  double stop() {
+    _timer.cancel();
+    final ticks = _wall.elapsedMilliseconds / _tick.inMilliseconds;
+    return ticks < 1 ? 1 : (_slices / ticks).clamp(0, 1).toDouble();
+  }
+}
 
 String _name(int index) => 'f${index.toString().padLeft(3, '0')}.png';
 
@@ -183,15 +204,16 @@ void main() {
     final d = await _Device.create(path, server.url);
     try {
       await arrange(d);
-      final load = busy ? _loadTheIsolate() : null;
+      final load = busy ? _Load() : null;
       final SyncReport report;
+      double? share;
       try {
         report = await d.sync();
       } finally {
-        load?.cancel();
+        share = load?.stop();
       }
       check(report);
-      return (path: path, report: report, payload: payload);
+      return (path: path, report: report, payload: payload, share: share);
     } finally {
       await d.close();
     }
@@ -206,10 +228,14 @@ void main() {
     for (final path in _Path.values) {
       final result = await scenario(path);
       final r = result.report;
+      final share = result.share == null
+          ? ''
+          : ', the isolate ran ${(result.share! * 100).round()} % of its load';
       print(
         '[perf] $name, ${path.label}: scan ${r.scanMs} ms, '
         'hash ${r.hashMs} ms, apply ${r.applyMs} ms = ${_rate(result)} '
-        'of ${formatBytes(result.payload)}',
+        'of ${formatBytes(result.payload)}'
+        '$share',
       );
       runs[path] = result;
     }
@@ -283,25 +309,45 @@ void main() {
     }
   });
 
+  // A download hashes nothing: on either path it runs at the disk's speed,
+  // busy or not, so no bar of speed tells the two apart (#1142). What does is
+  // the isolate: the old path keeps its speed by taking it, chunk after chunk,
+  // and the load it was running — the app's frames — got about a third of
+  // its ticks on the reference host. The worker leaves it all of them.
   test('one large file down, the isolate busy', () async {
-    final runs = await measure('large download, busy isolate', (path) {
-      return run(
-        path,
-        hold: Duration.zero,
-        payload: _largeBytes,
-        busy: true,
-        arrange: (d) => server.putGenerated('big.bin', _largeBytes, seed: 7),
-        check: (report) {
-          expect(report.done[SyncActionKind.download], 1);
-          expect(report.bytesDown, _largeBytes);
-          expect(report.clean, isTrue, reason: report.summary());
-        },
-      );
-    });
+    Future<_Run> down(_Path path, {required bool busy}) => run(
+      path,
+      hold: Duration.zero,
+      payload: _largeBytes,
+      busy: busy,
+      arrange: (d) => server.putGenerated('big.bin', _largeBytes, seed: 7),
+      check: (report) {
+        expect(report.done[SyncActionKind.download], 1);
+        expect(report.bytesDown, _largeBytes);
+        expect(report.clean, isTrue, reason: report.summary());
+      },
+    );
+    final runs = await measure(
+      'large download, busy isolate',
+      (path) => down(path, busy: true),
+    );
+    final pooled = runs[_Path.isolatePool]!;
+    // The backstop: the worker's transfer leaves most of the isolate's work
+    // in place, as the old path's took most of it.
+    expect(pooled.share, greaterThan(runs[_Path.inlineSerial]!.share!));
     if (_strict) {
       expect(
-        _mibPerSecond(runs[_Path.isolatePool]!),
-        greaterThan(2 * _mibPerSecond(runs[_Path.inlineSerial]!)),
+        pooled.share,
+        greaterThan(0.9),
+        reason: 'the worker leaves the busy isolate its own work',
+      );
+      final idle = await down(_Path.isolatePool, busy: false);
+      print(
+        '[perf] large download, idle isolate, isolate + pool: ${_rate(idle)}',
+      );
+      expect(
+        _mibPerSecond(pooled),
+        greaterThan(0.8 * _mibPerSecond(idle)),
         reason: 'the worker keeps its speed while the isolate is busy',
       );
     }
