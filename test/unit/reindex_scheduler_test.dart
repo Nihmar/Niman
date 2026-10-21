@@ -107,6 +107,40 @@ void main() {
     });
   });
 
+  group('a read dropped for a save that wrote nothing', () {
+    // The save cancels the read in flight, and then writes nothing: it
+    // failed, or its producer abandoned it (`NoteWriter.save` answers null
+    // and calls neither `whenQuiet` nor `reindex`). To the scheduler the two
+    // are the same, a chain that ends with no reindex asked for, and the
+    // note is still owed the read that was dropped.
+    test('is read again after a save that failed or was abandoned', () {
+      fakeAsync((async) {
+        final h = _Harness(async: async);
+        final gate = Completer<void>();
+        h.onRead = (cancel) async {
+          if (h.reads.length > 1) return true; // the read owed
+          final release = cancel.holdFiles();
+          await gate.future;
+          release();
+          return !cancel.isCancelled;
+        };
+        h.scheduler.reindex('a.md', created: false);
+        async.flushMicrotasks();
+
+        unawaited(h.beginSave('a.md'));
+        gate.complete();
+        async.flushMicrotasks();
+        expect(h.reads, hasLength(1), reason: 'not beside the save');
+        expect(h.scheduler.awaits('a.md'), isTrue, reason: 'owed');
+
+        h.endSave('a.md'); // nothing written, nothing asked for
+        async.flushMicrotasks();
+        expect(h.reads, hasLength(2), reason: 'the dropped read is retried');
+        expect(h.scheduler.awaits('a.md'), isFalse);
+      });
+    });
+  });
+
   group('a replace is not part of a burst of typing', () {
     test('it does not wait for the quiet timer of an earlier save', () {
       fakeAsync((async) {
