@@ -62,10 +62,13 @@ android {
 
     packaging {
         jniLibs {
-            // 64-bit only (arm64-v8a, x86_64). minSdk 34 devices are
-            // practically all 64-bit, and armeabi-v7a was the heaviest ABI
-            // once whisper_ggml and its FFmpeg joined (55 MB of native code,
-            // plain + NEON copies; see docs/dev/transcription.md).
+            // 64-bit only: armeabi-v7a goes here, for every build, and
+            // x86_64 is dropped from a release below (a release is arm64-v8a
+            // alone, #1146; a debug build keeps x86_64 for the emulator).
+            // minSdk 34 devices are practically all 64-bit, and armeabi-v7a
+            // was the heaviest ABI once whisper_ggml and its FFmpeg joined
+            // (55 MB of native code, plain + NEON copies; see
+            // docs/dev/transcription.md).
             // ndk.abiFilters is not enough: the Flutter Gradle plugin adds
             // its own target platforms, so the ABI is dropped at packaging,
             // which every build path (scripts, CI, flutter run) goes through.

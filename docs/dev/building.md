@@ -50,6 +50,7 @@ Terse output; full logs in `/tmp/niman/niman-<cmd>.log`
 ./scripts/niman.sh integration  # integration_test/; run before every commit (issue #241)
 ./scripts/niman.sh apk       # Android release APK
 ./scripts/niman.sh apk beta  # Android testing build (issue #106)
+./scripts/niman.sh apk frames  # that build in profile mode, with the frame log (#1145)
 ./scripts/niman.sh linux     # Linux release bundle
 ./scripts/niman.sh linux beta  # Linux testing build (its own data folder)
 scripts\niman.bat check      # Windows equivalent
@@ -124,6 +125,18 @@ the `beta` product flavor.
 
 A local rebuild after a commit uses **`beta`** by default; the official
 artifacts are built only when asked (see `AGENTS.md`).
+
+`./scripts/niman.sh apk frames` (`scripts
+iman.bat apk frames`) builds the
+testing app for measuring frames on a device (#1145): the `beta` flavor in
+**profile** mode, with `--dart-define=NIMAN_FRAMES=true`. That define turns
+the frame instrumentation on, so an exported debug log splits each action's
+frames into build and raster time and carries the app's memory (#1144);
+[the desktop numbers](../records/desktop-performance.md) were taken the same
+way. It installs beside the release, being the `beta` flavor, and its
+artifact is `build/app/outputs/flutter-apk/app-beta-profile.apk`. Both
+scripts refuse any other flavor word before the build starts, rather than
+building the official APK for a typo.
 
 ## The desktop testing build
 
