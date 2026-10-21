@@ -92,6 +92,11 @@ final class Workspace {
         for (final rawTab in rawTabs) {
           if (rawTab is! Map) continue;
           final path = rawTab['path'];
+          // A pane's new tab, once: it holds no note to be open twice.
+          if (path == '') {
+            if (!tabs.any((tab) => tab.isBlank)) tabs.add(WorkspaceTab.blank);
+            continue;
+          }
           if (path is! String || path.isEmpty || !seen.add(path)) continue;
           tabs.add(
             WorkspaceTab(
@@ -173,14 +178,16 @@ final class Workspace {
   /// The pane with the focus.
   WorkspacePane get focusedPane => panes[focused];
 
-  /// The note showing in the focused pane: the one "the note" means.
+  /// The note showing in the focused pane: the one "the note" means; null
+  /// while that pane shows nothing or its new tab.
   String? get activePath => focusedPane.activeTab?.path;
 
   /// Whether the window is split.
   bool get isSplit => panes.length == 2;
 
-  /// Every open note, pane by pane.
-  Iterable<WorkspaceTab> get tabs => panes.expand((pane) => pane.tabs);
+  /// Every open note, pane by pane: a new tab holds none.
+  Iterable<WorkspaceTab> get tabs =>
+      panes.expand((pane) => pane.tabs).where((tab) => !tab.isBlank);
 
   /// Where [path] is open, or null.
   ({int pane, int index})? locate(String path) {
@@ -191,12 +198,13 @@ final class Workspace {
     return null;
   }
 
-  /// Opens [path]: shows its tab where it already is, or adds one after
-  /// the focused pane's active tab.
+  /// Opens [path]: shows its tab where it already is, fills the focused
+  /// pane's new tab when that shows, or adds one after its active tab.
   Workspace open(String path) {
     final at = locate(path);
     if (at != null) return activate(at.pane, at.index);
     final pane = focusedPane;
+    if (pane.showsBlank) return replaceActive(path);
     final insert = pane.active + 1;
     final tabs = [...pane.tabs]..insert(insert, _tabFor(path));
     return _withPane(focused, WorkspacePane.clamped(tabs, insert));
@@ -214,7 +222,7 @@ final class Workspace {
     final tabs = [...pane.tabs]..[pane.active] = _tabFor(path);
     return _copy(
       panes: _replaced(focused, WorkspacePane.clamped(tabs, pane.active)),
-      places: places.remember(replaced.path, replaced.memento),
+      places: _placesWith([replaced]),
     );
   }
 
@@ -225,7 +233,7 @@ final class Workspace {
   Workspace openBeforeActive(String path) {
     if (locate(path) != null) return this;
     final pane = focusedPane;
-    if (pane.isEmpty) return open(path);
+    if (pane.isEmpty || pane.showsBlank) return open(path);
     final tabs = [...pane.tabs]..insert(pane.active, _tabFor(path));
     return _withPane(focused, WorkspacePane.clamped(tabs, pane.active + 1));
   }
@@ -238,6 +246,17 @@ final class Workspace {
       panes: _replaced(pane, WorkspacePane.clamped(target.tabs, index)),
       focused: pane,
     );
+  }
+
+  /// Shows the focused pane's new tab (#1133, #1134): the one it has, or
+  /// one added after the showing tab — a pane holds one new tab at most.
+  Workspace newTab() {
+    final pane = focusedPane;
+    final blank = pane.tabs.indexWhere((tab) => tab.isBlank);
+    if (blank >= 0) return activate(focused, blank);
+    final insert = pane.active + 1;
+    final tabs = [...pane.tabs]..insert(insert, WorkspaceTab.blank);
+    return _withPane(focused, WorkspacePane.clamped(tabs, insert));
   }
 
   /// Gives [pane] the focus — an empty one too: the next note opens
@@ -309,6 +328,8 @@ final class Workspace {
     final source = panes[from];
     if (index < 0 || index >= source.tabs.length) return this;
     final tab = source.tabs[index];
+    // A pane holds one new tab: one goes only where there is none.
+    if (tab.isBlank && panes[to].tabs.any((t) => t.isBlank)) return this;
     final landingAt = (at ?? panes[to].tabs.length).clamp(
       0,
       panes[to].tabs.length,
@@ -525,6 +546,7 @@ final class Workspace {
   NotePlaces _placesWith(Iterable<WorkspaceTab> closed) {
     var next = places;
     for (final tab in closed) {
+      if (tab.isBlank) continue;
       next = next.remember(tab.path, tab.memento);
     }
     return next;

@@ -1629,7 +1629,9 @@ final class PortugueseStrings extends Strings {
   @override
   String get openInDefaultApp => 'Abrir no app padrão';
   @override
-  String get newNoteTabTooltip => 'Nova nota num novo separador';
+  String get newTab => 'Novo separador';
+  @override
+  String get launcherRecent => 'Notas recentes';
   @override
   String get openNotesTooltip => 'Notas abertas';
   @override

@@ -87,6 +87,7 @@ import 'package:niman/src/ui/device_shape.dart';
 import 'package:niman/src/ui/dismiss_chain.dart';
 import 'package:niman/src/ui/dock/close_overlay_action.dart';
 import 'package:niman/src/ui/dock/dock_overlay.dart';
+import 'package:niman/src/ui/dock/dock_toggles.dart';
 import 'package:niman/src/ui/dock/right_dock.dart';
 import 'package:niman/src/ui/epub_convert_flow.dart';
 import 'package:niman/src/ui/epub_look_sheet.dart';
@@ -133,6 +134,7 @@ import 'package:niman/src/ui/outside_files.dart';
 import 'package:niman/src/ui/palette/command_features.dart';
 import 'package:niman/src/ui/palette/command_needs.dart';
 import 'package:niman/src/ui/palette/pinned_commands.dart';
+import 'package:niman/src/ui/pane_launcher.dart';
 import 'package:niman/src/ui/pane_split.dart';
 import 'package:niman/src/ui/pointer_density.dart';
 import 'package:niman/src/ui/quick_note_tab.dart';
@@ -175,6 +177,7 @@ import 'package:niman/src/ui/study/study_view.dart';
 import 'package:niman/src/ui/sync/sync_status.dart';
 import 'package:niman/src/ui/tab_body_stack.dart';
 import 'package:niman/src/ui/tab_drag.dart';
+import 'package:niman/src/ui/tab_row_lead.dart';
 import 'package:niman/src/ui/text_zoom_pinch.dart';
 import 'package:niman/src/ui/todo_edit_dialog.dart';
 import 'package:niman/src/ui/todo_list_buttons.dart';
@@ -185,6 +188,7 @@ import 'package:niman/src/ui/tour/tour_targets.dart';
 import 'package:niman/src/ui/trash.dart';
 import 'package:niman/src/ui/tree.dart';
 import 'package:niman/src/ui/tree_click_clock.dart';
+import 'package:niman/src/ui/tree_header.dart';
 import 'package:niman/src/ui/tree_view_toggle.dart';
 import 'package:niman/src/ui/unsaved_notes.dart';
 import 'package:niman/src/ui/update_banner.dart';
@@ -2126,27 +2130,64 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
 
   /// The open notes' tabs over panes [panesWidth] wide, with [filler]
   /// past them. Split right, the row divides at the same x as the panes
-  /// do, so nothing moves when the window splits (the Split mockup).
-  Widget _tabRow(Widget filler, {required double panesWidth}) =>
-      ListenableBuilder(
-        listenable: _tabsListenable,
-        builder: (context, _) {
-          final w = _workspace.value;
-          if (!w.isSplit || w.axis == SplitAxis.down) {
-            return _paneTabs(0, filler);
-          }
-          final detail = panesWidth - PaneSplit.dividerWidth;
-          return Row(
-            children: [
-              SizedBox(
-                width: detail * w.fraction + PaneSplit.dividerWidth,
-                child: _paneTabs(0, filler),
-              ),
-              Expanded(child: _paneTabs(1, filler)),
-            ],
-          );
-        },
+  /// do, so nothing moves when the window splits (the Split mockup). With
+  /// [chrome] — the panes heading their own row — it carries the panels'
+  /// toggles and the history's arrows too (#1134).
+  Widget _tabRow(
+    Widget filler, {
+    required double panesWidth,
+    bool chrome = false,
+  }) => ListenableBuilder(
+    listenable: _tabsListenable,
+    builder: (context, _) {
+      final w = _workspace.value;
+      if (!w.isSplit || w.axis == SplitAxis.down) {
+        return _paneTabs(0, filler, chrome: chrome);
+      }
+      final detail = panesWidth - PaneSplit.dividerWidth;
+      return Row(
+        children: [
+          SizedBox(
+            width: detail * w.fraction + PaneSplit.dividerWidth,
+            child: _paneTabs(0, filler, chrome: chrome),
+          ),
+          Expanded(child: _paneTabs(1, filler, chrome: chrome)),
+        ],
       );
+    },
+  );
+
+  /// [pane]'s tab row, headed — with [chrome] — by the sidebar's toggle
+  /// and the history's arrows on the first pane, and ended by the dock's
+  /// toggle on the row's last pane (#1134): where Obsidian has them, and
+  /// where a thumb finds them with a note open or not.
+  Widget _paneTabs(int pane, Widget filler, {bool chrome = false}) {
+    final tabs = _paneTabsOnly(pane, filler);
+    if (!chrome) return tabs;
+    final w = _workspace.value;
+    final history = _workspace.history;
+    final last = w.isSplit && w.axis == SplitAxis.right ? 1 : 0;
+    return LayoutBuilder(
+      builder: (context, constraints) => Row(
+        children: [
+          if (pane == 0)
+            TabRowLead(
+              sidebarVisible: _sidebarVisible,
+              onToggleSidebar: _toggleSidebar,
+              arrows: constraints.maxWidth >= TabRowLead.arrowsRoom,
+              onBack: _noteHistory.backTarget == null
+                  ? null
+                  : () => unawaited(_noteHistory.back()),
+              onForward: history.next == null
+                  ? null
+                  : () => unawaited(_noteHistory.forward()),
+            ),
+          Expanded(child: tabs),
+          if (pane == last) _dockToggle(),
+        ],
+      ),
+    );
+  }
 
   /// Where the tabs start in the title bar: the panes' island's left
   /// edge, past the base and the tree's island.
@@ -2154,9 +2195,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       ShellRail.panelStart +
       (_sidebarVisible ? _editorSettings.treeWidth + ResizeDivider.width : 0);
 
-  /// [pane]'s tab row, with the pinned content tab's chip (#712) at its
+  /// [pane]'s tabs, with the pinned content tab's chip (#712) at their
   /// end when that pane holds one.
-  Widget _paneTabs(int pane, Widget filler) {
+  Widget _paneTabsOnly(int pane, Widget filler) {
     final w = _workspace.value;
     final tabs = w.panes[pane];
     final bar = NoteTabBar(
@@ -2170,10 +2211,10 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       onActivate: (index) => _activateTab(pane, index),
       onClose: (index) => _workspace.close(pane, index),
       onNew: () {
+        _takePane(pane);
         _workspace
           ..focus(pane)
-          ..openNextInNewTab();
-        unawaited(_createFlow.createNote(context));
+          ..newTab();
       },
       onSplit: w.isSplit
           ? null
@@ -2427,6 +2468,13 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// window (#769): the panes are on screen beside it, and its hits stay
   /// there to step through.
   void _activateTab(int pane, int index) {
+    _takePane(pane);
+    _workspace.activate(pane, index);
+  }
+
+  /// [pane] is about to show one of its own tabs: the pages over it give
+  /// way, and the Files tab it lives in shows.
+  void _takePane(int pane) {
     // Only the pane that shows the compare page gives it up: a version
     // stays open beside the note being edited in the other one (#975).
     if (_compareIn(pane)) setState(() => _compareShows = false);
@@ -2434,7 +2482,25 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     if (_tab != ShellTab.files && !_sidebarShowsView) {
       _onDestinationSelected(ShellTab.files);
     }
-    _workspace.activate(pane, index);
+  }
+
+  /// [pane]'s launcher (#1134), while it shows no note: each way in takes
+  /// the pane's focus first, so the note it makes or picks lands there.
+  Widget _launcher(int pane) {
+    void inPane(VoidCallback action) {
+      _workspace.focus(pane);
+      action();
+    }
+
+    return PaneLauncher(
+      onNewNote: () => inPane(() => unawaited(_createFlow.createNote(context))),
+      onNewFromTemplate: () =>
+          inPane(() => unawaited(_templateFlow.createFromTemplate(context))),
+      onGoToNote: () =>
+          inPane(() => unawaited(_palette.open(context, notesOnly: true))),
+      recent: _workspace.history.recent(5),
+      onOpen: (path) => inPane(() => _openSearchNote(path)),
+    );
   }
 
   /// The note the shell shows, as registered in [_LibraryShell.openNotes].
@@ -3931,10 +3997,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       if (_phoneNote != null) _closeFullScreenNote();
       setState(() => _selected = null);
     },
-    onNewNote: () {
-      _workspace.openNextInNewTab();
-      unawaited(_createFlow.createNote(context));
-    },
+    // A phone opens every note alongside the others: the new one joins
+    // them once it is named, and a cancel leaves nothing behind (#1133).
+    onNewNote: () => unawaited(_createFlow.createNote(context)),
   );
 
   /// Closes [path] from the switcher. The note on screen gives way to the
@@ -5037,6 +5102,20 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
                     offstage: _sidebarShowsView,
                     child: Column(
                       children: [
+                        // Without a title bar of the app's own, nothing
+                        // else says which library this is (#1134).
+                        if (!widget.window.customTitleBar) ...[
+                          TreeHeader(
+                            library: _libraryName,
+                            folder: _treeFolder,
+                            height: NoteTabBar.rowHeight(
+                              touch: thumbDense(Theme.of(context)),
+                            ),
+                            onSwitchLibrary: () =>
+                                _windows.switchLibrary(context),
+                          ),
+                          const Divider(height: 1),
+                        ],
                         Expanded(child: _treePane(controller)),
                         if (controller.sync case final sync?)
                           SyncProgressStrip(sync: sync),
@@ -5087,7 +5166,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
                 // below it.
                 if (!widget.window.customTitleBar) ...[
                   SizedBox(
-                    key: const Key('pane-tab-row'),
+                    key: paneTabRowKey,
                     height: NoteTabBar.rowHeight(
                       touch: thumbDense(Theme.of(context)),
                     ),
@@ -5095,6 +5174,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
                       builder: (context, constraints) => _tabRow(
                         const SizedBox.shrink(),
                         panesWidth: constraints.maxWidth,
+                        chrome: true,
                       ),
                     ),
                   ),
@@ -5147,7 +5227,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// Shows or hides the dock (the note row's button, Ctrl+Shift+B).
   void _toggleDock() => _dock.toggleOpen();
 
-  /// The note row's dock button: always there on the wide layout.
+  /// The dock's button: on the note row under a title bar of the app's
+  /// own, at the end of the panes' tab row without one (#1134).
   Widget _dockToggle() => _dock.toggle();
 
   /// Opens [pane] for the note: in the dock where it fits, else as a
@@ -5243,6 +5324,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
                     shellFocus: _shellFocus,
                     root: controller.root,
                     tabs: _deck(pane),
+                    launcher: _launcher(pane),
                     onMemento: _workspace.remember,
                     zen: _inZen,
                     // The panel holds the note's outline and spelling
@@ -5264,7 +5346,13 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
                     noteColumn: _editorSettings.noteColumn,
                     // The kind toggles and ⋮ sit at the end of the note's
                     // one row of chrome (#173); there is no header above.
-                    barActions: [..._kindActions, _dockToggle(), _noteMenu()],
+                    // Where the panes head their own tab row, the dock's
+                    // toggle ends that row instead (#1134).
+                    barActions: [
+                      ..._kindActions,
+                      if (widget.window.customTitleBar) _dockToggle(),
+                      _noteMenu(),
+                    ],
                     autofocusEditor: _editorSettings.autofocusEditor,
                     // The Files pane opened a note (#727): that tab's own
                     // view is asked for the caret, and no other.
@@ -5837,7 +5925,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           _sidebarShowsView ||
           _compareShows && _compare != null ||
           _reviewTab.shows ||
-          _workspace.value.activePath != null ||
+          !_workspace.value.focusedPane.isEmpty ||
           _gridCanStepUp);
 
   /// The wide shell's Back (#849): the topmost thing on screen goes
@@ -5859,7 +5947,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       _closeContentTab();
     } else if (_sidebarShowsView) {
       _onDestinationSelected(ShellTab.files);
-    } else if (_workspace.value.activePath != null) {
+    } else if (!_workspace.value.focusedPane.isEmpty) {
+      // A new tab too: it goes as a note's tab does.
       _workspace.closeActive();
     } else if (_gridCanStepUp) {
       _gridUp();

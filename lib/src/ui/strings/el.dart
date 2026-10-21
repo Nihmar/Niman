@@ -1675,7 +1675,9 @@ final class GreekStrings extends Strings {
   @override
   String get openInDefaultApp => 'Άνοιγμα με την προεπιλεγμένη εφαρμογή';
   @override
-  String get newNoteTabTooltip => 'Νέα σημείωση σε νέα καρτέλα';
+  String get newTab => 'Νέα καρτέλα';
+  @override
+  String get launcherRecent => 'Πρόσφατες σημειώσεις';
   @override
   String get openNotesTooltip => 'Ανοιχτές σημειώσεις';
   @override

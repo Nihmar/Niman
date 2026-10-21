@@ -1623,7 +1623,9 @@ final class BosnianStrings extends Strings {
   @override
   String get openInDefaultApp => 'Otvori u zadanoj aplikaciji';
   @override
-  String get newNoteTabTooltip => 'Nova bilješka u novoj kartici';
+  String get newTab => 'Nova kartica';
+  @override
+  String get launcherRecent => 'Nedavne bilješke';
   @override
   String get openNotesTooltip => 'Otvorene bilješke';
   @override

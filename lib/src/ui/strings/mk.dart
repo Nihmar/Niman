@@ -1633,7 +1633,9 @@ final class MacedonianStrings extends Strings {
   @override
   String get openInDefaultApp => 'Отвори со стандардната апликација';
   @override
-  String get newNoteTabTooltip => 'Нова белешка во нов јазичок';
+  String get newTab => 'Нов јазичок';
+  @override
+  String get launcherRecent => 'Неодамнешни белешки';
   @override
   String get openNotesTooltip => 'Отворени белешки';
   @override

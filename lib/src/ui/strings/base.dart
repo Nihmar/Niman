@@ -851,7 +851,8 @@ abstract base class Strings {
   // Handing a note's file to the OS (issue #76).
   String get openInFileManager;
   String get openInDefaultApp;
-  String get newNoteTabTooltip;
+  String get newTab;
+  String get launcherRecent;
   String get openNotesTooltip;
   String get closeTabTooltip;
   String get openInNewTab;

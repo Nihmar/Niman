@@ -1604,7 +1604,9 @@ final class TurkishStrings extends Strings {
   @override
   String get openInDefaultApp => 'Varsayılan uygulamada aç';
   @override
-  String get newNoteTabTooltip => 'Yeni sekmede yeni not';
+  String get newTab => 'Yeni sekme';
+  @override
+  String get launcherRecent => 'Son notlar';
   @override
   String get openNotesTooltip => 'Açık notlar';
   @override

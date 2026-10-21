@@ -1665,7 +1665,9 @@ final class FrenchStrings extends Strings {
   @override
   String get openInDefaultApp => 'Ouvrir avec l’application par défaut';
   @override
-  String get newNoteTabTooltip => 'Nouvelle note dans un nouvel onglet';
+  String get newTab => 'Nouvel onglet';
+  @override
+  String get launcherRecent => 'Notes récentes';
   @override
   String get openNotesTooltip => 'Notes ouvertes';
   @override

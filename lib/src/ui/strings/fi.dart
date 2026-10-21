@@ -1636,7 +1636,9 @@ final class FinnishStrings extends Strings {
   @override
   String get openInDefaultApp => 'Avaa oletussovelluksessa';
   @override
-  String get newNoteTabTooltip => 'Uusi muistiinpano uuteen välilehteen';
+  String get newTab => 'Uusi välilehti';
+  @override
+  String get launcherRecent => 'Viimeisimmät muistiinpanot';
   @override
   String get openNotesTooltip => 'Avoimet muistiinpanot';
   @override

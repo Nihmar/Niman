@@ -1639,7 +1639,9 @@ final class PolishStrings extends Strings {
   @override
   String get openInDefaultApp => 'Otwórz w domyślnej aplikacji';
   @override
-  String get newNoteTabTooltip => 'Nowa notatka w nowej karcie';
+  String get newTab => 'Nowa karta';
+  @override
+  String get launcherRecent => 'Ostatnie notatki';
   @override
   String get openNotesTooltip => 'Otwarte notatki';
   @override

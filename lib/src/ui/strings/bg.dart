@@ -1633,7 +1633,9 @@ final class BulgarianStrings extends Strings {
   @override
   String get openInDefaultApp => 'Отваряне с приложението по подразбиране';
   @override
-  String get newNoteTabTooltip => 'Нова бележка в нов раздел';
+  String get newTab => 'Нов раздел';
+  @override
+  String get launcherRecent => 'Последни бележки';
   @override
   String get openNotesTooltip => 'Отворени бележки';
   @override

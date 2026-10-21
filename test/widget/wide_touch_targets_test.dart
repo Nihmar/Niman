@@ -69,6 +69,10 @@ void main() {
     'note-tab-close-0',
     'tab-new',
     'tab-list',
+    // The panes' own row heads with the sidebar's toggle and ends with
+    // the dock's (#1134).
+    'tabs-toggle-sidebar',
+    'dock-toggle',
     'new-item-menu',
     'open-trash',
     'toggle-sort',

@@ -1650,7 +1650,9 @@ final class GermanStrings extends Strings {
   @override
   String get openInDefaultApp => 'Mit Standard-App öffnen';
   @override
-  String get newNoteTabTooltip => 'Neue Notiz in neuem Tab';
+  String get newTab => 'Neuer Tab';
+  @override
+  String get launcherRecent => 'Zuletzt geöffnet';
   @override
   String get openNotesTooltip => 'Offene Notizen';
   @override

@@ -1649,7 +1649,9 @@ final class SpanishStrings extends Strings {
   @override
   String get openInDefaultApp => 'Abrir con la app predeterminada';
   @override
-  String get newNoteTabTooltip => 'Nota nueva en una pestaña nueva';
+  String get newTab => 'Pestaña nueva';
+  @override
+  String get launcherRecent => 'Notas recientes';
   @override
   String get openNotesTooltip => 'Notas abiertas';
   @override

@@ -26,6 +26,17 @@ final class NoteHistoryNavigator {
   /// Shows the note at a library-relative path.
   final void Function(String path) show;
 
+  /// The note [back] shows: the one the history has as shown while no
+  /// note is on screen — a new tab, an empty pane, left without a step —
+  /// and the one before it otherwise. Null with neither.
+  String? get backTarget =>
+      _reopens ? workspace.history.current : workspace.history.previous;
+
+  /// Whether [back] shows the history's current note again rather than
+  /// stepping: the screen left it for no note at all.
+  bool get _reopens =>
+      workspace.value.activePath == null && workspace.history.current != null;
+
   /// Shows the note before, if there is one.
   Future<void> back() => _step(back: true);
 
@@ -39,7 +50,8 @@ final class NoteHistoryNavigator {
   Future<void> _step({required bool back}) async {
     final history = workspace.history;
     while (true) {
-      final target = back ? history.previous : history.next;
+      final reopen = back && _reopens;
+      final target = back ? backTarget : history.next;
       if (target == null) return;
       final gone = await missing([target]);
       if (gone.contains(target)) {
@@ -47,11 +59,12 @@ final class NoteHistoryNavigator {
         continue;
       }
       // Something was shown while the disk answered: step from there.
-      if ((back ? history.previous : history.next) != target) continue;
-      if (back) {
-        history.back();
-      } else {
+      if ((back ? backTarget : history.next) != target) continue;
+      // A note reopened is the history's current one already: no step.
+      if (!back) {
         history.forward();
+      } else if (!reopen) {
+        history.back();
       }
       show(target);
       return;

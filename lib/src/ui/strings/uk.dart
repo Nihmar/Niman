@@ -1623,7 +1623,9 @@ final class UkrainianStrings extends Strings {
   @override
   String get openInDefaultApp => 'Відкрити у типовій програмі';
   @override
-  String get newNoteTabTooltip => 'Нова нотатка в новій вкладці';
+  String get newTab => 'Нова вкладка';
+  @override
+  String get launcherRecent => 'Останні нотатки';
   @override
   String get openNotesTooltip => 'Відкриті нотатки';
   @override

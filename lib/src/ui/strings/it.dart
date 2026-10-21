@@ -1641,7 +1641,9 @@ final class ItalianStrings extends Strings {
   @override
   String get openInDefaultApp => 'Apri con l’app predefinita';
   @override
-  String get newNoteTabTooltip => 'Nuova nota in una nuova scheda';
+  String get newTab => 'Nuova scheda';
+  @override
+  String get launcherRecent => 'Note recenti';
   @override
   String get openNotesTooltip => 'Note aperte';
   @override

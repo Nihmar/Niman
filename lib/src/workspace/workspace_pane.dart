@@ -29,8 +29,13 @@ final class WorkspacePane {
   /// The index of the tab showing, or -1 when there is none.
   final int active;
 
-  /// The tab showing, or null for an empty pane.
-  WorkspaceTab? get activeTab => active < 0 ? null : tabs[active];
+  /// The note tab showing, or null for an empty pane or one showing its
+  /// new tab: either way there is no note on screen.
+  WorkspaceTab? get activeTab =>
+      active < 0 || tabs[active].isBlank ? null : tabs[active];
+
+  /// Whether the pane shows its new tab (#1134).
+  bool get showsBlank => active >= 0 && tabs[active].isBlank;
 
   /// Whether nothing is open in it.
   bool get isEmpty => tabs.isEmpty;

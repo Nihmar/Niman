@@ -1653,7 +1653,9 @@ final class CatalanStrings extends Strings {
   @override
   String get openInDefaultApp => 'Obre amb l’aplicació per defecte';
   @override
-  String get newNoteTabTooltip => 'Nota nova en una pestanya nova';
+  String get newTab => 'Pestanya nova';
+  @override
+  String get launcherRecent => 'Notes recents';
   @override
   String get openNotesTooltip => 'Notes obertes';
   @override

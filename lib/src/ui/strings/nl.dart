@@ -1637,7 +1637,9 @@ final class DutchStrings extends Strings {
   @override
   String get openInDefaultApp => 'Openen met standaardapp';
   @override
-  String get newNoteTabTooltip => 'Nieuwe notitie in een nieuw tabblad';
+  String get newTab => 'Nieuw tabblad';
+  @override
+  String get launcherRecent => 'Recente notities';
   @override
   String get openNotesTooltip => 'Open notities';
   @override

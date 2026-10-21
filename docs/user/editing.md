@@ -107,8 +107,16 @@ motion keeps the ellipsis instead.
   editor or the preview, so another window width, text size or note
   column lands on the same line. Renaming or moving an open note keeps its tab, its place and
   its undo.
-- **`Ctrl+click`**, the tree's right-click **Open in new tab**, or the
-  **+** after the tabs (a new note) opens one alongside.
+- **`Ctrl+click`** or the tree's right-click **Open in new tab** opens a
+  note alongside.
+- **The + after the tabs** opens a **new tab** with no note in it, and
+  the launcher in its place: **New note**, **New from template**, **Go to
+  note**, and the notes you looked at last. The note you open next —
+  from the launcher, the tree, the search or a link — fills that tab. A
+  pane holds one new tab: **+** again shows the one it has, and a new
+  tab dragged to a pane that has one stays where it is. A pane with
+  nothing open shows the same launcher. On a tablet the system Back
+  closes a new tab as it closes a note's.
 - **Switching** is by the tab, by `Ctrl+Tab` / `Ctrl+Shift+Tab`, or by
   the **▾** list, which shows every tab with its folder when the row is
   too full. With Home or Todo pinned over the notes, `Ctrl+Tab` goes on
@@ -118,10 +126,13 @@ motion keeps the ellipsis instead.
   finger; a thin bar under it shows where you are.
 - **Back and forward** go through the notes you looked at, in the order
   you looked at them, as a browser goes through pages: the mouse's side
-  buttons, or `Alt+←` / `Alt+→` (remappable, and in the palette). One
+  buttons, `Alt+←` / `Alt+→` (remappable, and in the palette), or — on a
+  tablet — the arrows at the start of the tab row. One
   history for the window, whichever pane showed the note. A note you
   closed since opens again in the place of the tab you are on, at the line
-  where you left it, and adds no tab; one deleted since is skipped.
+  where you left it, and adds no tab; one deleted since is skipped. From
+  a new tab, or a pane with nothing open, Back first shows the note you
+  just left.
 - **Dragging a tab** along its row reorders it; a line shows where it
   will land. A finger holds the tab a moment first, so a swipe along the
   row scrolls it instead. Dropped on the other pane's row or body it moves there,

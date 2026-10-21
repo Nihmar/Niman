@@ -36,6 +36,7 @@ Widget detailPane(
   Map<String, String> movedFrom = const {},
   bool showPreview = false,
 }) => ShellDetailPane(
+  launcher: const SizedBox.shrink(),
   root: paneRoot,
   shellFocus: shellFocus,
   tabs: [

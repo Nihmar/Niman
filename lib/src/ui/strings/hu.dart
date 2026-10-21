@@ -1632,7 +1632,9 @@ final class HungarianStrings extends Strings {
   @override
   String get openInDefaultApp => 'Megnyitás az alapértelmezett alkalmazással';
   @override
-  String get newNoteTabTooltip => 'Új jegyzet új lapon';
+  String get newTab => 'Új lap';
+  @override
+  String get launcherRecent => 'Legutóbbi jegyzetek';
   @override
   String get openNotesTooltip => 'Megnyitott jegyzetek';
   @override

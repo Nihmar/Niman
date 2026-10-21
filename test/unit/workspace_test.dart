@@ -567,7 +567,7 @@ void main() {
             'active': 9,
             'tabs': [
               {'path': 'a.md'},
-              {'path': ''},
+              {'path': 7},
               {'nope': 1},
               {'path': 'b.md', 'memento': 'garbage'},
             ],
@@ -585,6 +585,89 @@ void main() {
       expect(w.focused, 0);
       expect(_row(w), 'a.md [b.md]');
       expect(w.tabs.last.memento.isEmpty, isTrue);
+    });
+  });
+
+  // #1133, #1134: `+` opens a tab with no note, the pane's launcher in it.
+  group('the new tab', () {
+    String blanked(String row) => row.replaceAll('[]', '[+]');
+
+    test('opens after the showing tab and shows no note', () {
+      final w = _opened(['a.md', 'b.md']).activate(0, 0).newTab();
+      expect(blanked(_row(w)), 'a.md [+] b.md');
+      expect(w.activePath, isNull);
+      expect(w.focusedPane.showsBlank, isTrue);
+    });
+
+    test('a pane holds one: `+` again shows the one it has', () {
+      final w = _opened(['a.md']).newTab().activate(0, 0).newTab();
+      expect(w.focusedPane.tabs, hasLength(2));
+      expect(w.focusedPane.showsBlank, isTrue);
+    });
+
+    test('a note opened, or shown in place, fills it', () {
+      final base = _opened(['a.md']).newTab();
+      expect(_row(base.open('b.md')), 'a.md [b.md]');
+      expect(_row(base.replaceActive('b.md')), 'a.md [b.md]');
+      expect(_row(base.openBeforeActive('b.md')), 'a.md [b.md]');
+    });
+
+    test('a note already open shows its tab and the new one stays', () {
+      final w = _opened(['a.md']).newTab().open('a.md');
+      expect(_row(w), '[a.md] ');
+      expect(w.focusedPane.tabs.last.isBlank, isTrue);
+    });
+
+    test('an empty pane gets one too', () {
+      final w = Workspace.empty.newTab();
+      expect(blanked(_row(w)), '[+]');
+      expect(w.activePath, isNull);
+    });
+
+    test('closing it keeps no place, and it stays out of the places', () {
+      final w = _opened(['a.md']).newTab().close(0, 1);
+      expect(_row(w), '[a.md]');
+      expect(w.places.length, 0);
+    });
+
+    test('it is no open note', () {
+      final w = _opened(['a.md']).newTab();
+      expect([for (final tab in w.tabs) tab.path], ['a.md']);
+    });
+
+    test('it moves only to a pane without one', () {
+      final w = _opened(['a.md']).newTab().split(SplitAxis.right);
+      final moved = w.moveTab(0, 1, 1);
+      expect(_row(moved), '[a.md]');
+      expect(blanked(_row(moved, 1)), '[+]');
+      final both = w.newTab();
+      expect(both.moveTab(0, 1, 1), both);
+    });
+
+    test('dragged to an edge, it splits the window and goes there', () {
+      final w = _opened(['a.md']).newTab().splitWith(0, 1, SplitAxis.right);
+      expect(_row(w), '[a.md]');
+      expect(blanked(_row(w, 1)), '[+]');
+      expect(w.focused, 1);
+    });
+
+    test('it is stored, once per pane', () {
+      final w = _opened(['a.md']).newTab();
+      final read = Workspace.fromJson(jsonDecode(jsonEncode(w.toJson())));
+      expect(read, w);
+      final twice = Workspace.fromJson(const {
+        'version': Workspace.formatVersion,
+        'panes': [
+          {
+            'active': 0,
+            'tabs': [
+              {'path': ''},
+              {'path': ''},
+            ],
+          },
+        ],
+      });
+      expect(twice.focusedPane.tabs, hasLength(1));
     });
   });
 }

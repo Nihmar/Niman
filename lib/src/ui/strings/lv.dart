@@ -1613,7 +1613,9 @@ final class LatvianStrings extends Strings {
   @override
   String get openInDefaultApp => 'Atvērt noklusējuma lietotnē';
   @override
-  String get newNoteTabTooltip => 'Jauna piezīme jaunā cilnē';
+  String get newTab => 'Jauna cilne';
+  @override
+  String get launcherRecent => 'Nesenās piezīmes';
   @override
   String get openNotesTooltip => 'Atvērtās piezīmes';
   @override

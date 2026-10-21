@@ -1612,7 +1612,9 @@ final class CzechStrings extends Strings {
   @override
   String get openInDefaultApp => 'Otevřít ve výchozí aplikaci';
   @override
-  String get newNoteTabTooltip => 'Nová poznámka v nové kartě';
+  String get newTab => 'Nová karta';
+  @override
+  String get launcherRecent => 'Nedávné poznámky';
   @override
   String get openNotesTooltip => 'Otevřené poznámky';
   @override

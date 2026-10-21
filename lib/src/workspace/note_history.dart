@@ -29,6 +29,12 @@ final class NoteHistory {
   /// The note going forward would show, or null.
   String? get next => _forward.isEmpty ? null : _forward.last;
 
+  /// Up to [count] notes shown, the latest first, each once: what a new
+  /// tab's launcher offers (#1134).
+  List<String> recent(int count) => [
+    ...{?_current, ..._back.reversed},
+  ].take(count).toList();
+
   /// [path] is shown: the note before it goes behind, and what was ahead
   /// is dropped. Showing the note already current changes nothing — nor
   /// does the step [back] or [forward] just took, which made it current
@@ -57,8 +63,14 @@ final class NoteHistory {
 
   /// Takes [path] out of the history — a note deleted, or one the disk no
   /// longer has — and with it a folder's notes when [path] is a folder.
-  void forget(String path) {
-    bool gone(String entry) => entry == path || entry.startsWith('$path/');
+  void forget(String path) =>
+      _drop((entry) => entry == path || entry.startsWith('$path/'));
+
+  /// Takes the notes at [paths] out of the history: gone from disk, a
+  /// re-index found, rather than deleted here.
+  void forgetNotes(Set<String> paths) => _drop(paths.contains);
+
+  void _drop(bool Function(String entry) gone) {
     _back.removeWhere(gone);
     _forward.removeWhere(gone);
     if (_current case final now? when gone(now)) _current = null;

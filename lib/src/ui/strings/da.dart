@@ -1615,7 +1615,9 @@ final class DanishStrings extends Strings {
   @override
   String get openInDefaultApp => 'Åbn i standardappen';
   @override
-  String get newNoteTabTooltip => 'Ny note i en ny fane';
+  String get newTab => 'Ny fane';
+  @override
+  String get launcherRecent => 'Seneste noter';
   @override
   String get openNotesTooltip => 'Åbne noter';
   @override

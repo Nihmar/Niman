@@ -45,6 +45,7 @@ Widget _deck(
   void Function(String, NoteMemento)? onMemento,
   Future<void> Function(String, String)? write,
 }) => ShellDetailPane(
+  launcher: const SizedBox.shrink(),
   root: '/lib',
   tabs: [
     for (final path in ['a.md', 'b.md'])

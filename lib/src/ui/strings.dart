@@ -1067,7 +1067,8 @@ final class AppStrings {
   /// Handing a note's file to the OS (issue #76).
   static String get openInFileManager => _s.openInFileManager;
   static String get openInDefaultApp => _s.openInDefaultApp;
-  static String get newNoteTabTooltip => _s.newNoteTabTooltip;
+  static String get newTab => _s.newTab;
+  static String get launcherRecent => _s.launcherRecent;
   static String get openNotesTooltip => _s.openNotesTooltip;
   static String get closeTabTooltip => _s.closeTabTooltip;
   static String get openInNewTab => _s.openInNewTab;

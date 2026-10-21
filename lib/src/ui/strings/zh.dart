@@ -1486,7 +1486,9 @@ final class ChineseStrings extends Strings {
   @override
   String get openInDefaultApp => '用默认应用打开';
   @override
-  String get newNoteTabTooltip => '在新标签页中新建笔记';
+  String get newTab => '新标签页';
+  @override
+  String get launcherRecent => '最近的笔记';
   @override
   String get openNotesTooltip => '打开的笔记';
   @override

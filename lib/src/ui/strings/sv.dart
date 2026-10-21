@@ -1627,7 +1627,9 @@ final class SwedishStrings extends Strings {
   @override
   String get openInDefaultApp => 'Öppna i standardappen';
   @override
-  String get newNoteTabTooltip => 'Ny anteckning i en ny flik';
+  String get newTab => 'Ny flik';
+  @override
+  String get launcherRecent => 'Senaste anteckningar';
   @override
   String get openNotesTooltip => 'Öppna anteckningar';
   @override

@@ -1617,7 +1617,9 @@ final class SlovakStrings extends Strings {
   @override
   String get openInDefaultApp => 'Otvoriť v predvolenej aplikácii';
   @override
-  String get newNoteTabTooltip => 'Nová poznámka na novej karte';
+  String get newTab => 'Nová karta';
+  @override
+  String get launcherRecent => 'Nedávne poznámky';
   @override
   String get openNotesTooltip => 'Otvorené poznámky';
   @override

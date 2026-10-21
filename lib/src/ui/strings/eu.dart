@@ -1630,7 +1630,9 @@ final class BasqueStrings extends Strings {
   @override
   String get openInDefaultApp => 'Ireki aplikazio lehenetsian';
   @override
-  String get newNoteTabTooltip => 'Ohar berria fitxa berrian';
+  String get newTab => 'Fitxa berria';
+  @override
+  String get launcherRecent => 'Azken oharrak';
   @override
   String get openNotesTooltip => 'Ohar irekiak';
   @override

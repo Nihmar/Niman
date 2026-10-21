@@ -1620,7 +1620,9 @@ final class BelarusianStrings extends Strings {
   @override
   String get openInDefaultApp => 'Адкрыць у прадвызначанай праграме';
   @override
-  String get newNoteTabTooltip => 'Новая нататка ў новай укладцы';
+  String get newTab => 'Новая ўкладка';
+  @override
+  String get launcherRecent => 'Апошнія нататкі';
   @override
   String get openNotesTooltip => 'Адкрытыя нататкі';
   @override

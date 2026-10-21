@@ -1599,7 +1599,9 @@ final class EstonianStrings extends Strings {
   @override
   String get openInDefaultApp => 'Ava vaikerakenduses';
   @override
-  String get newNoteTabTooltip => 'Uus märge uuel vahekaardil';
+  String get newTab => 'Uus vahekaart';
+  @override
+  String get launcherRecent => 'Hiljutised märkmed';
   @override
   String get openNotesTooltip => 'Avatud märkmed';
   @override

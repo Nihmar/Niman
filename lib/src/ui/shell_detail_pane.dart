@@ -1,5 +1,5 @@
-/// The wide layout's right-hand pane (#51): the note editor, or a prompt
-/// until a note is chosen. Pure props in, [NoteView] out.
+/// The wide layout's right-hand pane (#51): the note editor, or the
+/// launcher while no note shows (#1134). Pure props in, [NoteView] out.
 library;
 
 import 'package:flutter/foundation.dart';
@@ -25,7 +25,7 @@ import 'package:niman/src/ui/unsaved_notes.dart';
 import 'package:niman/src/workspace/note_memento.dart';
 import 'package:path/path.dart' as p;
 
-/// Right-hand pane: the note editor, or a prompt until a note is chosen.
+/// Right-hand pane: the note editor, or the launcher while no note shows.
 final class ShellDetailPane extends StatelessWidget {
   /// Creates the pane; every value arrives as a prop.
   const new({
@@ -49,6 +49,7 @@ final class ShellDetailPane extends StatelessWidget {
     required this.unsavedTracker,
     required this.statusActions,
     required this.spellCheck,
+    required this.launcher,
     this.features,
     this.caretPath,
     this.caretRequest = 0,
@@ -273,20 +274,32 @@ final class ShellDetailPane extends StatelessWidget {
   /// library) keeps the dead-link snackbar instead of the offer.
   final Future<String> Function(String path)? createMissingNote;
 
+  /// What the pane shows while no note does: a new tab, or nothing open.
+  final Widget launcher;
+
   @override
   Widget build(BuildContext context) {
     final root = this.root;
-    if (root == null || !tabs.any((tab) => tab.active)) {
+    if (root == null) {
       return Center(
         key: const ValueKey('detail-empty'),
         child: Text(AppStrings.selectANote),
       );
     }
-    // Every mounted note keeps its place in the stack by its path: a
-    // switch only flips which one shows, and a tab kept alive keeps its
-    // buffer, undo, find and scroll. The ones behind are offstage, with
-    // their tickers (the caret, the spinner) and their keyboard stopped
-    // (#1074).
+    // Over the deck, which stays where it is: the notes kept alive behind
+    // a new tab keep their buffer, undo and place.
+    return Stack(
+      fit: StackFit.expand,
+      children: [_deck(root), if (!tabs.any((tab) => tab.active)) launcher],
+    );
+  }
+
+  /// Every mounted note keeps its place in the stack by its path: a
+  /// switch only flips which one shows, and a tab kept alive keeps its
+  /// buffer, undo, find and scroll. The ones behind are offstage, with
+  /// their tickers (the caret, the spinner) and their keyboard stopped
+  /// (#1074).
+  Widget _deck(String root) {
     return DetailDeck(
       paneFocused: tabs.every((tab) => tab.focused),
       shellFocus: shellFocus,
