@@ -138,3 +138,16 @@ dependencies {
     // against the reference implementation instead.
     testImplementation("org.json:json:20250517")
 }
+
+// A release ships arm64-v8a alone (#1146). x86_64 is the emulator's ABI: the
+// debug build `flutter run` installs there keeps it, and no release install
+// runs on one. The plugins that bring prebuilt native libraries (FFmpeg,
+// whisper, nativeapi) package every ABI they have, whatever
+// `--target-platform` asks, so an arm64 release carried 20 MB of x86_64
+// libraries it never loads; they are dropped at packaging, per variant, as
+// armeabi-v7a is above for every one.
+androidComponents {
+    onVariants(selector().withBuildType("release")) { variant ->
+        variant.packaging.jniLibs.excludes.add("**/x86_64/**")
+    }
+}

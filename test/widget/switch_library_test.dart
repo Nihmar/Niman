@@ -5,6 +5,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/ui/known_library_list.dart';
 import 'package:niman/src/ui/settings.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/switch_library_screen.dart';
@@ -46,6 +47,17 @@ final class _SaveFailed implements Exception {
 }
 
 void main() {
+  // The folder checks run on a background isolate, whose answer the fake
+  // clock does not drive: the same check, made in place, on real folders.
+  final checkOffIsolate = missingFolders;
+  setUpAll(
+    () => missingFolders = (paths) async => {
+      for (final path in paths)
+        if (!Directory(path).existsSync()) path,
+    },
+  );
+  tearDownAll(() => missingFolders = checkOffIsolate);
+
   late FakeLibrarySession session;
   late UnsavedTracker unsaved;
   late Directory tmp;

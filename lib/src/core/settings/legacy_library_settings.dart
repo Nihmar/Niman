@@ -45,7 +45,7 @@ final class LegacyLibrarySettings {
     if (entry == null) return;
 
     final store = LibraryConfigStore(libraryPath);
-    final merged = <String, Object?>{...entry, ..._rawFile(store)};
+    final merged = <String, Object?>{...entry, ...await _rawFile(store)};
     try {
       await store.write(LibraryConfig.fromJsonMap(merged));
     } on Object catch (error) {
@@ -62,10 +62,9 @@ final class LegacyLibrarySettings {
   /// Read raw rather than through [LibraryConfig]: parsing fills every
   /// missing key with a default, and a default is precisely what the
   /// parked value should be allowed to replace.
-  Map<String, Object?> _rawFile(LibraryConfigStore store) {
+  Future<Map<String, Object?>> _rawFile(LibraryConfigStore store) async {
     try {
-      if (!store.file.existsSync()) return const {};
-      final decoded = jsonDecode(store.file.readAsStringSync());
+      final decoded = jsonDecode(await store.file.readAsString());
       if (decoded is! Map) return const {};
       return {
         for (final entry in decoded.entries) entry.key.toString(): entry.value,

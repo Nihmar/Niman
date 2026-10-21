@@ -44,6 +44,6 @@ Future<Directory> appSupportDirectory() async {
   final own = Directory(
     p.join(support.parent.path, '${p.basename(support.path)}-testing'),
   );
-  if (!own.existsSync()) await own.create(recursive: true);
+  await own.create(recursive: true);
   return own;
 }

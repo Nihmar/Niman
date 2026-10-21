@@ -618,8 +618,7 @@ final class ShellExportFlow {
     var path = p.join(folder, wanted);
     // A stat per candidate, awaited: a `statSync` here would be a FUSE
     // round trip on the UI isolate on Android, and the rule is no disk I/O
-    // there. The lint prefers the sync form; the platform rule wins.
-    // ignore: avoid_slow_async_io
+    // there.
     for (var n = 2; await File(path).exists(); n++) {
       path = p.join(folder, '$stem ($n).$extension');
     }

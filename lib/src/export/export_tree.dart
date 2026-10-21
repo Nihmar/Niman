@@ -283,7 +283,7 @@ final class TreeExport {
     } on FileSystemException {
       // Never written, or held open by the isolate Windows has not let go
       // of yet.
-      return !File(_zipPath).existsSync();
+      return !await File(_zipPath).exists();
     }
   }
 

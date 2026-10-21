@@ -107,9 +107,7 @@ final class NoteTrash {
   /// Not serialized itself: the caller runs it inside the op chain.
   Future<String> moveIntoTrash(String path, {required bool isDir}) async {
     final trashDir = Directory(_abs('.trash'));
-    if (!trashDir.existsSync()) {
-      await trashDir.create(recursive: true);
-    }
+    await trashDir.create(recursive: true);
     final name = p.basename(path);
     String target;
     if (isDir) {
@@ -132,9 +130,10 @@ final class NoteTrash {
   Future<List<TrashItem>> items() {
     return serialize(() async {
       final manifest = await _readManifest();
+      final held = await _trashEntries();
       return [
         for (final entry in manifest.entries)
-          if (_existsInTrash(entry.key))
+          if (held.containsKey(entry.key))
             TrashItem(
               name: entry.key,
               originalPath: entry.value.originalPath,
@@ -159,11 +158,11 @@ final class NoteTrash {
         throw StateError('Not a managed trash item: "$trashName"');
       }
       final trashAbs = _abs('.trash/$trashName');
-      final isDir = Directory(trashAbs).existsSync();
+      final isDir = await FileSystemEntity.isDirectory(trashAbs);
       final originalName = p.basename(entry.originalPath);
       final originalParent = parentOf(entry.originalPath);
       final originalDir = Directory(_abs(originalParent));
-      final restoreParent = originalDir.existsSync() ? originalParent : '';
+      final restoreParent = await originalDir.exists() ? originalParent : '';
       final parentDirObj = Directory(_abs(restoreParent));
       String target;
       if (isDir) {
@@ -198,10 +197,10 @@ final class NoteTrash {
         throw StateError('Not a managed trash item: "$trashName"');
       }
       final trashAbs = _abs('.trash/$trashName');
-      final isDir = Directory(trashAbs).existsSync();
+      final isDir = await FileSystemEntity.isDirectory(trashAbs);
       if (isDir) {
         await Directory(trashAbs).delete(recursive: true);
-      } else if (File(trashAbs).existsSync()) {
+      } else if (await File(trashAbs).exists()) {
         await File(trashAbs).delete();
       }
       await _writeManifest(manifest);
@@ -215,23 +214,19 @@ final class NoteTrash {
   /// manifest.
   Future<void> empty() {
     return serialize(() async {
-      final trashDir = Directory(_abs('.trash'));
+      final held = await _trashEntries();
       // Read before the items go: the manifest is what knows where each
       // one came from, and so whose history is now orphaned.
       final origins = [
         for (final entry in (await _readManifest()).entries)
-          (
-            entry.value.originalPath,
-            Directory(_abs('.trash/${entry.key}')).existsSync(),
-          ),
+          (entry.value.originalPath, held[entry.key] ?? false),
       ];
-      if (trashDir.existsSync()) {
-        for (final entry in trashDir.listSync()) {
-          if (entry is Directory) {
-            await entry.delete(recursive: true);
-          } else {
-            await entry.delete();
-          }
+      for (final MapEntry(key: name, value: isDir) in held.entries) {
+        final abs = _abs('.trash/$name');
+        if (isDir) {
+          await Directory(abs).delete(recursive: true);
+        } else {
+          await File(abs).delete();
         }
       }
       await _writeManifest(<String, _ManifestEntry>{});
@@ -249,13 +244,28 @@ final class NoteTrash {
     required bool isDir,
   }) async {
     final abs = _abs(originalPath);
-    if (File(abs).existsSync() || Directory(abs).existsSync()) return;
+    if (await FileSystemEntity.type(abs) != FileSystemEntityType.notFound) {
+      return;
+    }
     await history.deleted(originalPath, isDir: isDir);
   }
 
-  bool _existsInTrash(String name) {
-    final abs = _abs('.trash/$name');
-    return Directory(abs).existsSync() || File(abs).existsSync();
+  /// What `.trash/` holds: each entry's name, and whether it is a folder.
+  ///
+  /// One asynchronous listing, where the manifest's upkeep used to stat
+  /// every item it names, twice, on the UI isolate — on every delete, so a
+  /// trash of a thousand items cost two thousand FUSE round trips a delete
+  /// on Android (#1143).
+  Future<Map<String, bool>> _trashEntries() async {
+    final dir = Directory(_abs('.trash'));
+    try {
+      return {
+        await for (final entry in dir.list())
+          p.basename(entry.path): entry is Directory,
+      };
+    } on PathNotFoundException {
+      return const {};
+    }
   }
 
   // -- manifest --------------------------------------------------------
@@ -266,8 +276,12 @@ final class NoteTrash {
   /// can never take the trash screen down.
   Future<Map<String, _ManifestEntry>> _readManifest() async {
     final file = File(_abs('.trash/$manifestFileName'));
-    if (!file.existsSync()) return <String, _ManifestEntry>{};
-    final raw = file.readAsStringSync();
+    final String raw;
+    try {
+      raw = await file.readAsString();
+    } on PathNotFoundException {
+      return <String, _ManifestEntry>{};
+    }
     if (raw.trim().isEmpty) return <String, _ManifestEntry>{};
     Object? decoded;
     try {
@@ -301,11 +315,11 @@ final class NoteTrash {
   /// so the file converges with `.trash/` even when something removed an
   /// item without going through the ops.
   Future<void> _writeManifest(Map<String, _ManifestEntry> manifest) async {
-    final trashDir = Directory(_abs('.trash'));
-    if (!trashDir.existsSync()) await trashDir.create(recursive: true);
+    await Directory(_abs('.trash')).create(recursive: true);
+    final held = await _trashEntries();
     final kept = {
       for (final entry in manifest.entries)
-        if (_existsInTrash(entry.key)) entry.key: entry.value,
+        if (held.containsKey(entry.key)) entry.key: entry.value,
     };
     final payload = jsonEncode({
       for (final entry in kept.entries) entry.key: entry.value.toJson(),

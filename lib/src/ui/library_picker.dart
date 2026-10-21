@@ -68,11 +68,16 @@ Future<LibraryPick> pickLibraryFolder(String title) async {
     }
     if (Platform.isAndroid) {
       // The folder must be reachable through the FUSE layer; fail here,
-      // where the cause is still obvious.
-      try {
-        Directory(path).statSync();
-      } on FileSystemException catch (e) {
-        return LibraryPickFailed(AppStrings.folderAccessDenied(e));
+      // where the cause is still obvious. A stat does not throw: one that
+      // cannot reach the folder answers `notFound`, which the old
+      // synchronous check took for success (#1143).
+      final stat = await FileStat.stat(path);
+      if (stat.type != FileSystemEntityType.directory) {
+        return LibraryPickFailed(
+          AppStrings.folderAccessDenied(
+            FileSystemException('Folder not reachable', path),
+          ),
+        );
       }
     }
     return LibraryPicked(path);

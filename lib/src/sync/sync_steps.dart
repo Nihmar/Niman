@@ -161,7 +161,7 @@ final class SyncStepRunner {
         try {
           await sides.localStillAsPlanned(c, d.path);
         } on Object {
-          if (fetched.temp.existsSync()) await fetched.temp.delete();
+          if (await fetched.temp.exists()) await fetched.temp.delete();
           rethrow;
         }
         // A JSON state file whose remote copy does not parse is not a newer
@@ -172,7 +172,6 @@ final class SyncStepRunner {
         if (jsonStateFiles.contains(d.path) &&
             // The async stat is on purpose: a blocking one on the UI isolate
             // is the FUSE round trip this engine keeps off its frames.
-            // ignore: avoid_slow_async_io
             await File(p.join(root, d.path)).exists() &&
             !await _isJsonObject(fetched.temp)) {
           await fetched.temp.delete();

@@ -17,6 +17,7 @@ import 'package:niman/src/core/app_channel.dart';
 import 'package:niman/src/core/app_theme.dart';
 import 'package:niman/src/core/custom_theme.dart';
 import 'package:niman/src/core/files.dart';
+import 'package:niman/src/core/frame_log.dart';
 import 'package:niman/src/core/isolate_gauge.dart';
 import 'package:niman/src/core/language.dart';
 import 'package:niman/src/core/logging.dart';
@@ -574,7 +575,7 @@ final class LibraryController implements LibrarySession {
       _log.info('resume: lastLibraryPath=$last');
       if (last == null) return;
       final dir = Directory(last);
-      if (!dir.existsSync()) {
+      if (!await dir.exists()) {
         _log.warning('resume: root no longer exists: $last');
         return;
       }
@@ -606,14 +607,12 @@ final class LibraryController implements LibrarySession {
       final abs = p.normalize(path.trim());
       final rootDir = Directory(abs);
       if (create) {
-        if (!rootDir.existsSync()) {
-          await rootDir.create(recursive: true);
-        }
-      } else if (!rootDir.existsSync()) {
+        await rootDir.create(recursive: true);
+      } else if (!await rootDir.exists()) {
         throw ArgumentError('Directory does not exist: $abs');
       }
       await _startSession(abs);
-      _log.info('open complete: ready root=$abs');
+      _log.info('open complete: ready root=$abs, ${memoryNow()}');
     } on Object catch (error) {
       _log.error('open failed: $error');
       _lastError = '$error';
@@ -648,13 +647,13 @@ final class LibraryController implements LibrarySession {
     // settings file, asked before the seed below can write one (#1109). A
     // rebuild of the index is not an open and says nothing about it.
     final opening = _phase == LibraryPhase.opening;
-    final hadSettings = !opening || _hasSettingsFile(abs);
+    final hadSettings = !opening || await _hasSettingsFile(abs);
     // Before anything reads the settings: a library upgraded from the
     // `library_settings` table gets its `.niman/settings.json` here,
     // now that the folder is known to be reachable (T-ML-02).
     await LegacyLibrarySettings(appDb).seed(abs);
     if (opening) {
-      _createdLibrary = !hadSettings && !_hasSettingsFile(abs);
+      _createdLibrary = !hadSettings && !await _hasSettingsFile(abs);
     }
     final indexer = Indexer(indexDb);
     indexer
@@ -975,7 +974,7 @@ final class LibraryController implements LibrarySession {
       final file = await locate(libraryPath);
       for (final sidecar in const ['', '-wal', '-shm']) {
         final part = File('${file.path}$sidecar');
-        if (part.existsSync()) {
+        if (await part.exists()) {
           await part.delete();
         }
       }
@@ -1151,8 +1150,8 @@ final class LibraryController implements LibrarySession {
       await _configRepo?.config ?? LibraryConfig.defaults;
 
   /// Whether the library at [abs] has a `.niman/settings.json`.
-  bool _hasSettingsFile(String abs) =>
-      File(p.join(abs, '.niman', 'settings.json')).existsSync();
+  Future<bool> _hasSettingsFile(String abs) =>
+      File(p.join(abs, '.niman', 'settings.json')).exists();
 
   /// Applies [change] to the open library's settings; a no-op with none
   /// open, since there is nothing to write it to.
@@ -1866,7 +1865,8 @@ final class LibraryController implements LibrarySession {
       }
       // What changed behind the ops' back (another app, a background
       // isolate, a hand edit) reaches the sync queue this way.
-      _sync?.watched(batch.paths, batch.resyncDirs);
+      final sync = _sync;
+      if (sync != null) unawaited(sync.watched(batch.paths, batch.resyncDirs));
       // And the editors that hold those notes open (#1055).
       if (batch.paths.isNotEmpty && !_externalChanges.isClosed) {
         _externalChanges.add(batch.paths.toSet());
@@ -2072,7 +2072,7 @@ final class LibraryController implements LibrarySession {
     try {
       _log.info('rescan start: $abs');
       await rescans.run();
-      _log.info('rescan complete');
+      _log.info('rescan complete, ${memoryNow()}');
     } on Object catch (error) {
       await _onRescanFailed(abs, error);
     }
@@ -2085,7 +2085,7 @@ final class LibraryController implements LibrarySession {
     // A rescan outliving its library — closed, switched, or the whole
     // controller disposed — has nothing left to close.
     if (_disposed || _root != abs) return;
-    if (!Directory(abs).existsSync()) {
+    if (!await Directory(abs).exists()) {
       await close();
       _lastError = 'The library folder is no longer available.';
     }
@@ -2123,9 +2123,7 @@ Future<File> defaultAppDbFile() async {
 /// would want to keep.
 Future<File> libraryIndexFile(String libraryPath) async {
   final dir = Directory(p.join((await appSupportDirectory()).path, 'indexes'));
-  if (!dir.existsSync()) {
-    await dir.create(recursive: true);
-  }
+  await dir.create(recursive: true);
   final digest = sha256.convert(utf8.encode(p.normalize(libraryPath)));
   return File(p.join(dir.path, '${digest.toString().substring(0, 16)}.db'));
 }

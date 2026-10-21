@@ -112,7 +112,7 @@ final class SingleInstance {
     Map<String, Object?> launch,
   ) async {
     final file = _addressFile(dir);
-    if (!file.existsSync()) return false;
+    if (!await file.exists()) return false;
     try {
       final handed = await _send(await file.readAsString(), launch);
       if (handed) _log.info('handed the launch to the running Niman');

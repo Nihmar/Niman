@@ -99,24 +99,7 @@ final class CompanionNotes {
     String folder, {
     required String root,
   }) async {
-    final dirPath = folder.isEmpty ? root : p.join(root, folder);
-    // One stat before the isolate: a library with no annotations folder —
-    // a widget test's fake among them — costs nothing, and the isolate is
-    // only worth spawning when there is a folder to list.
-    if (!Directory(dirPath).existsSync()) return const {};
-    final listed = await Isolate.run(() {
-      final dir = Directory(dirPath);
-      return [
-        for (final entry in dir.listSync())
-          if (entry is File && entry.path.toLowerCase().endsWith('.md'))
-            if (entry.statSync() case final stat)
-              (
-                path: p.relative(entry.path, from: root).replaceAll(r'\', '/'),
-                size: stat.size,
-                modified: stat.modified,
-              ),
-      ];
-    });
+    final listed = await ops.markdownOnDisk(folder);
     final stale = <String>[];
     for (final entry in listed) {
       final indexed = await ops.find(entry.path);

@@ -64,25 +64,39 @@ apk() {
   # (app-<typo>-release.apk) for an artifact that never was produced
   # (issue #393).
   case "$flavor" in
-    official | beta) ;;
+    official | beta | frames) ;;
     *)
-      echo "error: unknown apk flavor '$flavor' (expected official or beta)" >&2
+      echo "error: unknown apk flavor '$flavor' (expected official, beta or frames)" >&2
       usage >&2
       return 2
       ;;
   esac
+  if [ "$flavor" = "frames" ]; then
+    # The device run of #1145: the testing build in profile mode with the
+    # frame instrumentation on, so an exported log splits each action's
+    # frames into build and raster and carries its memory (#1144).
+    flutter build apk --profile --flavor beta --dart-define="APP_CHANNEL=testing" \
+      --dart-define=NIMAN_FRAMES=true --target-platform android-arm64 \
+      --dart-define="APP_COMMIT=$commit" >"$log" 2>&1
+    local status=$?
+    tail -n 3 "$log"
+    if [ $status -eq 0 ]; then
+      echo "artifact: build/app/outputs/flutter-apk/app-beta-profile.apk"
+    fi
+    return $status
+  fi
   if [ "$flavor" = "beta" ]; then
     # The testing build (issue #106): the release pipeline plus the
     # flavor's separate application ID; APP_CHANNEL marks the Dart
     # side, which hides and skips update management.
     flutter build apk --release --flavor "$flavor" --dart-define="APP_CHANNEL=testing" \
-      --dart-define="APP_COMMIT=$commit" >"$log" 2>&1
+      --target-platform android-arm64 --dart-define="APP_COMMIT=$commit" >"$log" 2>&1
   else
     # The official APK (issue #106): AGP drops the no-flavor variant
     # once the channel dimension has a flavor, so the official build
     # is the explicit "official" flavor (no application ID suffix).
     flutter build apk --release --flavor official \
-      --dart-define="APP_COMMIT=$commit" >"$log" 2>&1
+      --target-platform android-arm64 --dart-define="APP_COMMIT=$commit" >"$log" 2>&1
   fi
   local status=$?
   tail -n 3 "$log"
@@ -115,8 +129,9 @@ usage: ./scripts/niman.sh <analyze|test|check|integration|apk|linux>
   check    analyze + test; use before committing
   integration  the integration_test/ suite (issue #241);
              sync_e2e needs a Linux display
-  apk [beta]      flutter build apk --release
-                  (beta: the testing build, app ID dev.niman.niman.beta)
+  apk [beta|frames]  flutter build apk --release
+                  (beta: the testing build, app ID dev.niman.niman.beta;
+                   frames: that build in profile mode with NIMAN_FRAMES)
   linux [beta]    flutter build linux --release
                   (beta: the testing build, its own data folder niman-testing)
 Full logs: /tmp/niman/niman-<cmd>.log

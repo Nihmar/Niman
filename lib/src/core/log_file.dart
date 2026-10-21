@@ -81,9 +81,7 @@ final class LogFile {
     final parts = <String>[];
     for (final file in <File>[File('$path.1'), File(path)]) {
       try {
-        if (file.existsSync()) {
-          parts.add(await file.readAsString());
-        }
+        parts.add(await file.readAsString());
       } on Object {
         // A missing or unreadable generation is not worth failing an
         // export over: the other one plus the memory buffer still help.
@@ -99,9 +97,7 @@ final class LogFile {
     _pending.clear();
     for (final file in <File>[File('$path.1'), File(path)]) {
       try {
-        if (file.existsSync()) {
-          await file.delete();
-        }
+        await file.delete();
       } on Object {
         // Nothing to do; the next write recreates it.
       }
@@ -112,7 +108,8 @@ final class LogFile {
     try {
       final file = File(path);
       await file.parent.create(recursive: true);
-      if (file.existsSync() && await file.length() >= maxBytes) {
+      final stat = await file.stat();
+      if (stat.type != FileSystemEntityType.notFound && stat.size >= maxBytes) {
         // One rotation: the previous generation is overwritten, so disk
         // use stays under 2 * maxBytes no matter how long the app runs.
         await file.rename('$path.1');

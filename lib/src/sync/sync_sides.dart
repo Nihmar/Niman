@@ -350,7 +350,7 @@ final class SyncSides {
       );
       return (temp: temp, download: download);
     } on Object {
-      if (temp.existsSync()) await temp.delete();
+      if (await temp.exists()) await temp.delete();
       rethrow;
     }
   }

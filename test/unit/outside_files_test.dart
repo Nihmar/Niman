@@ -69,7 +69,7 @@ void main() {
       final document = EditorOnlyDocument(file.path);
       expect(document.name, 'README.md');
       expect(document.folder, dir.path);
-      expect(document.exists, isTrue);
+      expect(File(document.filePath).existsSync(), isTrue);
       expect(await document.read(), '# Hi');
       await document.write('# Hello');
       expect(file.readAsStringSync(), '# Hello');

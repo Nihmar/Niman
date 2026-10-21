@@ -1010,6 +1010,10 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     return Future<Note?>.value(row == null ? null : _toNote(row));
   }
 
+  /// Nothing: the fake's index is its disk, so no file is ahead of it.
+  @override
+  Future<List<DiskNoteStamp>> markdownOnDisk(String folder) async => const [];
+
   @override
   Future<List<String>> notesNamed(String query, {int limit = 50}) async {
     final q = query.trim().toLowerCase();

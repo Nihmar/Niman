@@ -1380,7 +1380,7 @@ final class LibraryConfigStore {
     try {
       raw = await file.readAsString();
     } on Object catch (error) {
-      if (file.parent.existsSync()) {
+      if (await file.parent.exists()) {
         _log.warning(
           'settings.json is missing or unreadable in ${file.parent.path} '
           '($error): this library is on defaults',

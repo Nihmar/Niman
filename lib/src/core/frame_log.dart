@@ -1,8 +1,18 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart' show State;
 import 'package:niman/src/core/logging.dart';
+
+/// The process's resident memory now and its peak so far, for a log line
+/// (#1144): what Android weighs when it picks a backgrounded app to kill.
+/// Each action's frame line carries it, so an exported log says what every
+/// open, pane and tab cost in memory as well as in time.
+String memoryNow() =>
+    'rss ${_mb(ProcessInfo.currentRss)} MB (peak ${_mb(ProcessInfo.maxRss)})';
+
+String _mb(int bytes) => (bytes / (1024 * 1024)).toStringAsFixed(0);
 
 /// Logs one line when the next UI frame lands.
 ///
@@ -22,7 +32,8 @@ void logNextFrame(String name, String what) {
     final delta = DateTime.now().difference(started);
     AppLogger(name: name).debug(
       '$what: first frame '
-      '${(delta.inMicroseconds / 1000).toStringAsFixed(2)}ms after call',
+      '${(delta.inMicroseconds / 1000).toStringAsFixed(2)}ms after call, '
+      '${memoryNow()}',
     );
   });
 }
@@ -107,7 +118,8 @@ final class FrameProbe {
       AppLogger(name: name).debug(
         '$what: $frames frame(s) in ${window.inMilliseconds}ms, '
         '$over over budget, worst build ${_ms(worstBuild)}, '
-        'worst raster ${_ms(worstRaster)}, build total ${_ms(buildTotal)}',
+        'worst raster ${_ms(worstRaster)}, build total ${_ms(buildTotal)}, '
+        '${memoryNow()}',
       );
     });
   }

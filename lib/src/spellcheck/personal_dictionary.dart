@@ -67,7 +67,7 @@ final class PersonalDictionary extends ChangeNotifier {
     try {
       await _file.parent.create(recursive: true);
       var existing = '';
-      if (_file.existsSync()) existing = await _file.readAsString();
+      if (await _file.exists()) existing = await _file.readAsString();
       final prefix = existing.isEmpty || existing.endsWith('\n') ? '' : '\n';
       await _file.writeAsString('$prefix$word\n', mode: FileMode.append);
     } on Object catch (error) {
@@ -91,7 +91,7 @@ final class PersonalDictionary extends ChangeNotifier {
     try {
       // A library nobody has added a word to has no dictionary yet: that is
       // the normal start, not a failure worth a warning in every log.
-      if (!_file.existsSync()) return;
+      if (!await _file.exists()) return;
       final raw = await _file.readAsString();
       for (final line in raw.split('\n')) {
         final word = line.trim();

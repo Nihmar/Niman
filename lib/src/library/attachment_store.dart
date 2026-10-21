@@ -68,7 +68,7 @@ Future<String> storeAttachmentBytes({
   await assets.create(recursive: true);
   final target = File(p.join(assets.path, '$digest$extension'));
   final relative = '$attachmentsFolder/$digest$extension';
-  if (target.existsSync()) return relative;
+  if (await target.exists()) return relative;
   final temp = File(_tempName(assets.path, digest, extension));
   await temp.writeAsBytes(bytes, flush: true);
   // Not a bare rename: on Windows one can go in and never come out

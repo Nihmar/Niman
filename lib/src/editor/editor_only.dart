@@ -42,9 +42,6 @@ base class EditorOnlyDocument {
   Future<void> write(String content) =>
       writeFileAtomically(File(filePath), utf8.encode(content));
 
-  /// Whether the file is still there.
-  bool get exists => File(filePath).existsSync();
-
   /// Fires when something else changes the file on disk, so an open
   /// editor can take the change in (and keep its own unsaved edits when
   /// it has some).
@@ -52,10 +49,10 @@ base class EditorOnlyDocument {
   /// The folder is watched rather than the file: an editor saving by
   /// rename — Niman's own write included — replaces the file, and a watch
   /// on the old one would go quiet.
-  Stream<void> changes() {
+  Stream<void> changes() async* {
     final dir = Directory(folder);
-    if (!dir.existsSync()) return const Stream.empty();
-    return dir
+    if (!await dir.exists()) return;
+    yield* dir
         .watch()
         .where((event) => p.equals(event.path, filePath))
         .map((_) {});

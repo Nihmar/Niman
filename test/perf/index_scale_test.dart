@@ -237,6 +237,7 @@ void main() {
       rescanInterval: const Duration(hours: 1),
       resumeReconcileDelay: const Duration(hours: 1),
     );
+    final rssBefore = ProcessInfo.currentRss;
     final open = await timed(
       'open to ready',
       () => controller.open(root.path, create: false),
@@ -249,11 +250,21 @@ void main() {
       () => controller.children(0),
     );
 
+    // What the open holds in memory: the tree pages, the index is not
+    // loaded, so a million notes must cost what fifty thousand do (#1144).
+    final held = ProcessInfo.currentRss - rssBefore;
+    _say('rss delta, open to the first tree read: ${_mb(held)} MB');
+
     expect(open, lessThan(_bar(5000)), reason: 'open took $open ms');
     expect(
       firstFrame,
       lessThan(_bar(2000)),
       reason: 'tree read took $firstFrame ms',
+    );
+    expect(
+      held,
+      lessThan(_bar(_openRssCeiling.toDouble())),
+      reason: 'the open held ${_mb(held)} MB',
     );
     await controller.close();
     await controller.dispose();
@@ -433,6 +444,13 @@ void _say(String line) => print(line);
 
 /// [bytes] in whole mebibytes.
 int _mb(int bytes) => (bytes / (1024 * 1024)).round();
+
+/// The memory a library's open may add, to its first tree read, whatever
+/// the library's size (#1144): the reference host reads 1 MB at fifty
+/// thousand notes and 2 MB at a million, the tree paged and the index left
+/// on disk. An open that brought the rows into Dart — a million notes are
+/// hundreds of MB there — fails it many times over.
+const int _openRssCeiling = 32 * 1024 * 1024;
 
 /// Writes a small note library for the disk-reconcile test: folders of
 /// fifty notes, each with a title, a tag and a unique word. Small on

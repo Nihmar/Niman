@@ -26,3 +26,12 @@ analyzer:
     strict-casts: true
     strict-inference: true
     strict-raw-types: true
+
+linter:
+  rules:
+    # It asks for the synchronous `dart:io` call in place of the asynchronous
+    # one, which is faster on a command line. Here a synchronous call on the
+    # UI isolate is a FUSE round trip the frame waits for on Android
+    # (AGENTS.md): the synchronous calls belong on background isolates, and
+    # `test/unit/ui_isolate_io_test.dart` holds where they are (#1143).
+    avoid_slow_async_io: false

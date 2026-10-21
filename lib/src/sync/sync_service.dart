@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:flutter/foundation.dart';
 import 'package:niman/src/core/logging.dart';
@@ -480,18 +481,42 @@ final class LibrarySyncService extends ChangeNotifier implements SyncService {
   /// Queues hints for what the file watcher saw: [paths] changed (or
   /// vanished), [folders] need a look as a whole. Echoes of the sync's
   /// own writes are dropped.
-  void watched(List<String> paths, List<String> folders) {
+  ///
+  /// Whether each is still there is asked on a background isolate, all of
+  /// them at once: a watcher batch can name hundreds of files (a folder
+  /// copied in, a checkout), and this asked each one twice on the UI
+  /// isolate, a FUSE round trip apiece on Android (#1143).
+  Future<void> watched(List<String> paths, List<String> folders) async {
     if (_disposed || _status.destination == null) return;
-    var queued = 0;
+    final candidates = <(String, String)>[];
     for (final abs in {...paths, ...folders}) {
       final rel = _relative(abs);
       if (rel == null || rel.isEmpty || !_inScope(rel)) continue;
       if (engine.ops.changedBySync(rel)) continue;
-      final exists = File(abs).existsSync() || Directory(abs).existsSync();
-      hint(rel, exists ? SyncOpKind.changed : SyncOpKind.deleted);
-      queued++;
+      candidates.add((abs, rel));
     }
-    if (queued > 0) _log.debug('queue: $queued hints from the watcher');
+    if (candidates.isEmpty) return;
+    final List<bool> exist;
+    try {
+      final asked = [for (final (abs, _) in candidates) abs];
+      exist = await Isolate.run(
+        () => [
+          for (final abs in asked)
+            FileSystemEntity.typeSync(abs) != FileSystemEntityType.notFound,
+        ],
+      );
+    } on Object catch (error) {
+      _log.warning('queue: the watcher batch was not probed ($error)');
+      return;
+    }
+    if (_disposed) return;
+    for (var at = 0; at < candidates.length; at++) {
+      hint(
+        candidates[at].$2,
+        exist[at] ? SyncOpKind.changed : SyncOpKind.deleted,
+      );
+    }
+    _log.debug('queue: ${candidates.length} hints from the watcher');
   }
 
   String? _relative(String abs) {
