@@ -1,6 +1,7 @@
 /// The clipboard's HTML as the platform runner reads it (#531): the GTK
 /// runner on Linux (`linux/runner/clipboard_html.cc`), the activity's
-/// bridge on Android (`ClipboardBridge.kt`), over one channel.
+/// bridge on Android (`ClipboardBridge.kt`), `packages/niman_apple` on
+/// macOS (`ClipboardBridge.swift`), over one channel.
 library;
 
 import 'package:flutter/services.dart';
