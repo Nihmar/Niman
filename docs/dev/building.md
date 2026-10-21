@@ -12,8 +12,14 @@
   no `sqlite3.dll`).
 
 - Android NDK 29.0.13113456 (required by `whisper_ggml`).
-- The APK is 64-bit only (`arm64-v8a`, `x86_64`): `armeabi-v7a` is
-  excluded at packaging in `android/app/build.gradle.kts`.
+- A release APK is `arm64-v8a` only. `armeabi-v7a` is excluded at
+  packaging for every build in `android/app/build.gradle.kts`, and
+  `x86_64` for release builds (#1146): the plugins with prebuilt native
+  libraries package every ABI they have, whatever `--target-platform`
+  asks. A debug build keeps `x86_64`, so `flutter run` still installs on
+  an emulator. The scripts and the release workflow pass
+  `--target-platform android-arm64`, so no `x86_64` Dart snapshot is
+  compiled only to be dropped.
 - **Linux desktop build**: GTK 3 and the plugins' system libraries — the
   list CI installs, in `check.yml` and `release.yml` alike:
 

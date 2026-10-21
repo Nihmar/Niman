@@ -104,7 +104,7 @@ jobs:
       # The official flavor (issue #106): AGP drops the no-flavor
       # variant once the channel dimension has a flavor, so the
       # official APK is built from the explicit flavor.
-      - run: flutter build apk --release --flavor official --build-name="$VERSION" --build-number="$GITHUB_RUN_NUMBER" --dart-define=APP_COMMIT="${GITHUB_SHA::7}"
+      - run: flutter build apk --release --flavor official --target-platform android-arm64 --build-name="$VERSION" --build-number="$GITHUB_RUN_NUMBER" --dart-define=APP_COMMIT="${GITHUB_SHA::7}"
 
       - name: Stage artifact
         run: |

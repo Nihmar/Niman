@@ -76,12 +76,12 @@ if "%flavor%"=="beta" (
   rem The testing build (issue #106): the release pipeline plus the
   rem flavor's separate application ID; APP_CHANNEL marks the Dart side,
   rem which hides and skips update management.
-  call flutter build apk --release --flavor beta --dart-define=APP_CHANNEL=testing --dart-define=APP_COMMIT=%commit% >"%log%" 2>&1
+  call flutter build apk --release --flavor beta --dart-define=APP_CHANNEL=testing --target-platform android-arm64 --dart-define=APP_COMMIT=%commit% >"%log%" 2>&1
 ) else (
   rem The official APK (issue #106): AGP drops the no-flavor variant
   rem once the channel dimension has a flavor, so the official build
   rem is the explicit "official" flavor (no application ID suffix).
-  call flutter build apk --release --flavor official --dart-define=APP_COMMIT=%commit% >"%log%" 2>&1
+  call flutter build apk --release --flavor official --target-platform android-arm64 --dart-define=APP_COMMIT=%commit% >"%log%" 2>&1
 )
 set "status=%errorlevel%"
 powershell -NoProfile -Command "Get-Content -Tail 3 '%log%'"

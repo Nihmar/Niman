@@ -76,13 +76,13 @@ apk() {
     # flavor's separate application ID; APP_CHANNEL marks the Dart
     # side, which hides and skips update management.
     flutter build apk --release --flavor "$flavor" --dart-define="APP_CHANNEL=testing" \
-      --dart-define="APP_COMMIT=$commit" >"$log" 2>&1
+      --target-platform android-arm64 --dart-define="APP_COMMIT=$commit" >"$log" 2>&1
   else
     # The official APK (issue #106): AGP drops the no-flavor variant
     # once the channel dimension has a flavor, so the official build
     # is the explicit "official" flavor (no application ID suffix).
     flutter build apk --release --flavor official \
-      --dart-define="APP_COMMIT=$commit" >"$log" 2>&1
+      --target-platform android-arm64 --dart-define="APP_COMMIT=$commit" >"$log" 2>&1
   fi
   local status=$?
   tail -n 3 "$log"
