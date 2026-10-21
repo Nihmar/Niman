@@ -79,6 +79,50 @@ jobs:
   # LaunchIntentTest, ShareCopyTest) ran nowhere: the job above never starts
   # Gradle, and the release build compiles the main sources only (#813).
   # A job of its own, so it runs alongside the Dart one.
+  macos:
+    name: macOS test and build
+    # From phase 2 of docs/records/apple-platforms.md on, every pull request
+    # runs on a Mac too (decision 12): the suites, a build of the app, and
+    # the integration files, which run the real app as Linux's do.
+    runs-on: macos-26
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      # ninja builds the OCR engine the app bundles (cmake is on the
+      # image); tesseract brings the English model the live OCR case reads
+      # with, through that engine (NIMAN_OCR_ENGINE) — the library a Mac
+      # ships, not Homebrew's.
+      - name: Build tools and the English OCR model
+        run: brew install ninja tesseract
+
+      - run: flutter pub get
+
+      - name: OCR engine
+        run: ./scripts/ocr-engine.sh macos-universal build/ocr-engine
+
+      - name: Unit and widget tests
+        env:
+          NIMAN_OCR_ENGINE: ${{ github.workspace }}/build/ocr-engine/niman-ocr-macos-universal.dylib
+        run: flutter test
+
+      # The runner, the plugins' Swift and the Xcode build phases.
+      - name: Build the beta app
+        run: flutter build macos --debug --flavor beta --dart-define=APP_CHANNEL=testing
+
+      # One file per step, as on Linux; a Mac needs no virtual display.
+      - name: App boot
+        run: flutter test integration_test/app_boot_test.dart
+      - name: WebDAV sync end to end (macOS desktop)
+        run: flutter test integration_test/sync_e2e_test.dart -d macos
+
   android-unit:
     name: Android unit tests
     runs-on: ubuntu-latest
