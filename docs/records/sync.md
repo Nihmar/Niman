@@ -31,6 +31,14 @@ settled before the code. History ships first; sync builds on it.
 
 ### Layout
 
+**Since #1148 the store is content-addressed**: objects named by their
+sha256 under `.history/.objects/`, a delta against the next version for the
+older ones, and an append-only log a note, `.history/<path>.log`, with
+nothing flushed on a save's path. [history-store.md](history-store.md) has
+the layout, the crash analysis and the measurements; what follows is the
+layout this section first designed, kept for the decisions it records. The
+version semantics, rotation and pins below hold for both.
+
 ```
 .history/
   Projects/
@@ -87,7 +95,9 @@ versions would last five seconds.
   Moving the pin to a new version releases the old one to normal
   rotation.
 - Rotation runs after each snapshot and deletes the oldest unpinned
-  versions beyond the limit (file first, then manifest).
+  versions beyond the limit (file first, then manifest). Since #1148 it
+  writes a `drop` line to the log, and the background collection deletes
+  the objects no log names any more.
 - A version is trusted only when its bytes still hash to the manifest's
   `sha256`. A file that drifted (a partial write, a sync race, an edit by
   hand) is never returned, nor pinned as the base: the version counts as

@@ -1,9 +1,14 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/history/history_legacy.dart';
+import 'package:niman/src/history/history_log.dart';
 import 'package:niman/src/history/history_manifest.dart';
+import 'package:niman/src/history/history_objects.dart';
 import 'package:niman/src/history/history_store.dart';
 import 'package:niman/src/history/snapshot_policy.dart';
 import 'package:path/path.dart' as p;
@@ -31,6 +36,10 @@ void main() {
   String version(String rel, int n) =>
       utf8.decode(readHistoryVersion(root.path, rel, n)!);
 
+  String sha(String text) => sha256.convert(utf8.encode(text)).toString();
+
+  File object(String text) => File(historyObjectPath(root.path, sha(text)));
+
   SnapshotRequest forced({int limit = 10, DateTime? now}) => SnapshotRequest(
     limit: limit,
     interval: const Duration(minutes: 5),
@@ -50,12 +59,21 @@ void main() {
     final outcome = save('Notes/a.md', 'second', forced());
     expect(outcome.version!.number, 1);
     expect(version('Notes/a.md', 1), 'first');
-    expect(
-      File(historyVersionPath(root.path, 'Notes/a.md', 1)).existsSync(),
-      isTrue,
-    );
+    expect(object('first').existsSync(), isTrue);
+    expect(File(historyLogPath(root.path, 'Notes/a.md')).existsSync(), isTrue);
     final manifest = readHistoryManifest(root.path, 'Notes/a.md');
     expect(manifest.versions.single.reason, HistoryReason.restore);
+  });
+
+  test('the same content is kept once, whichever note keeps it', () {
+    write('a.md', 'shared text');
+    write('b.md', 'shared text');
+    save('a.md', 'a2', forced());
+    save('b.md', 'b2', forced());
+    final objects = listObjects(root.path);
+    expect(objects.keys, [sha('shared text')]);
+    expect(version('a.md', 1), 'shared text');
+    expect(version('b.md', 1), 'shared text');
   });
 
   test('N+1 saves keep exactly N versions', () {
@@ -86,21 +104,32 @@ void main() {
       'claims', () {
     write('a.md', 'first');
     save('a.md', 'second', forced());
-    // The version file drifts: a partial write, a killed process, a sync
-    // race, an edit by hand.
-    File(historyVersionPath(root.path, 'a.md', 1)).writeAsStringSync('damaged');
+    // The object drifts: an edit by hand, a sync race.
+    object('first').writeAsStringSync('damaged');
     expect(readHistoryVersion(root.path, 'a.md', 1), isNull);
+  });
+
+  test('an object a crash cut short reads as a missing version', () {
+    write('a.md', 'first, long enough to be more than a header');
+    save('a.md', 'second', forced());
+    final file = object('first, long enough to be more than a header');
+    file.writeAsBytesSync(file.readAsBytesSync().sublist(0, 9));
+    expect(readHistoryVersion(root.path, 'a.md', 1), isNull);
+    // The note holds that content again, unchanged since v1: the next
+    // snapshot finds it so and writes the object again, whole.
+    write('a.md', 'first, long enough to be more than a header');
+    save('a.md', 'third', forced());
+    expect(version('a.md', 1), 'first, long enough to be more than a header');
   });
 
   test('the sync base skips a drifted version and pins none', () {
     write('a.md', 'base');
     save('a.md', 'second', forced());
-    final sha = sha256.convert(utf8.encode('base')).toString();
-    File(historyVersionPath(root.path, 'a.md', 1)).writeAsStringSync('damaged');
+    object('base').writeAsStringSync('damaged');
     final result = pinSyncBaseVersion(
       root.path,
       'a.md',
-      sha,
+      sha('base'),
       limit: 3,
       now: t0,
     );
@@ -108,24 +137,32 @@ void main() {
     expect(readHistoryManifest(root.path, 'a.md').pins[syncBasePin], isNull);
   });
 
-  test('a rebuilt version without a stored hash still reads back', () {
+  test('a log line cut short is skipped, and the next append reads', () {
     write('a.md', 'one');
     save('a.md', 'two', forced());
-    File(historyManifestPath(root.path, 'a.md')).deleteSync();
-    expect(readHistoryVersion(root.path, 'a.md', 1), isNotNull);
-    expect(version('a.md', 1), 'one');
-  });
-
-  test('a lost manifest is rebuilt from the version files', () {
-    write('a.md', 'one');
-    save('a.md', 'two', forced());
+    // A crash in the middle of an append: half a line, no newline.
+    File(historyLogPath(root.path, 'a.md'))
+        .writeAsStringSync('{"v":2,"t":17', mode: FileMode.append);
+    expect(readHistoryManifest(root.path, 'a.md').versions, hasLength(1));
     save('a.md', 'three', forced());
-    File(historyManifestPath(root.path, 'a.md')).deleteSync();
     final manifest = readHistoryManifest(root.path, 'a.md');
     expect(manifest.versions.map((v) => v.number), [1, 2]);
-    expect(manifest.versions.first.reason, HistoryReason.unknown);
-    // Numbering carries on after the rebuilt versions.
-    expect(save('a.md', 'four', forced()).version!.number, 3);
+    expect(version('a.md', 2), 'two');
+  });
+
+  test('a log rotated many times is compacted, not grown', () {
+    write('a.md', 'text 0');
+    for (var i = 1; i <= 200; i++) {
+      save('a.md', 'text $i', forced(limit: 2));
+    }
+    final lines = File(historyLogPath(root.path, 'a.md'))
+        .readAsLinesSync()
+        .where((l) => l.trim().isNotEmpty);
+    expect(lines.length, lessThan(30));
+    expect(
+      readHistoryManifest(root.path, 'a.md').versions.map((v) => v.number),
+      [199, 200],
+    );
   });
 
   test('a similarly named note does not borrow versions', () {
@@ -169,7 +206,17 @@ void main() {
     );
   });
 
-  test('deleting history removes the files and empty folders', () {
+  test('a folder moved onto one with history merges note by note', () {
+    write('A/n.md', 'a one');
+    save('A/n.md', 'a two', forced());
+    write('B/n.md', 'b one');
+    save('B/n.md', 'b two', forced());
+    expect(moveFolderHistory(root.path, 'A', 'B'), 1);
+    expect(version('B/n.md', 1), 'b one');
+    expect(version('B/n.md', 2), 'a one');
+  });
+
+  test('deleting history removes the log and empty folders', () {
     write('Dir/n.md', 'one');
     save('Dir/n.md', 'two', forced());
     expect(deleteNoteHistory(root.path, 'Dir/n.md'), 1);
@@ -177,5 +224,164 @@ void main() {
       Directory(p.join(root.path, historyFolderName, 'Dir')).existsSync(),
       isFalse,
     );
+    // The object stays for the collection (history_upkeep_test.dart).
+    expect(object('one').existsSync(), isTrue);
   });
+
+  group('the history kept before #1148', () {
+    /// Lays out the old history of [rel]: a whole copy a version and the
+    /// manifest describing them.
+    void legacy(
+      String rel,
+      Map<int, String> versions, {
+      Map<String, int> pins = const {},
+      Map<int, String> claimed = const {},
+      bool manifest = true,
+    }) {
+      for (final MapEntry(key: n, value: text) in versions.entries) {
+        File(p.join(root.path, historyFolderName, '$rel.v$n'))
+          ..createSync(recursive: true)
+          ..writeAsStringSync(text);
+      }
+      if (!manifest) return;
+      File(legacyManifestPath(root.path, rel)).writeAsStringSync(
+        HistoryManifest(
+          versions: [
+            for (final MapEntry(key: n, value: text) in versions.entries)
+              HistoryVersion(
+                number: n,
+                savedAt: t0.add(Duration(minutes: n)),
+                reason: HistoryReason.session,
+                size: text.length,
+                sha256: sha(claimed[n] ?? text),
+              ),
+          ],
+          pins: pins,
+        ).encode(),
+      );
+    }
+
+    test('moves in the first time it is read, numbers and pins kept', () {
+      legacy('Notes/a.md', {3: 'three', 5: 'five'}, pins: {syncBasePin: 3});
+      final manifest = readHistoryManifest(root.path, 'Notes/a.md');
+      expect(manifest.versions.map((v) => v.number), [3, 5]);
+      expect(manifest.versions.first.reason, HistoryReason.session);
+      expect(
+        manifest.versions.first.savedAt,
+        t0.add(const Duration(minutes: 3)),
+      );
+      expect(manifest.pins, {syncBasePin: 3});
+      expect(version('Notes/a.md', 3), 'three');
+      expect(version('Notes/a.md', 5), 'five');
+      final folder = Directory(p.join(root.path, historyFolderName, 'Notes'));
+      expect(folder.listSync().map((e) => p.basename(e.path)), [
+        'a.md.log',
+      ], reason: 'the old files go once the log is written');
+    });
+
+    test('a version that drifted stays out, as it always read', () {
+      legacy('a.md', {1: 'damaged', 2: 'two'}, claimed: {1: 'one'});
+      final manifest = readHistoryManifest(root.path, 'a.md');
+      expect(manifest.versions.map((v) => v.number), [2]);
+    });
+
+    test('files without a manifest come in as unknown versions', () {
+      legacy('a.md', {1: 'one', 2: 'two'}, manifest: false);
+      final manifest = readHistoryManifest(root.path, 'a.md');
+      expect(manifest.versions.map((v) => v.reason), [
+        HistoryReason.unknown,
+        HistoryReason.unknown,
+      ]);
+      expect(version('a.md', 1), 'one');
+    });
+
+    test('a snapshot on an old history numbers after it', () {
+      legacy('a.md', {7: 'seven'});
+      write('a.md', 'current');
+      expect(save('a.md', 'newer', forced()).version!.number, 8);
+      expect(version('a.md', 7), 'seven');
+      expect(version('a.md', 8), 'current');
+    });
+
+    test('a move cut short before the old files went is finished', () {
+      legacy('a.md', {1: 'one'});
+      readHistoryManifest(root.path, 'a.md');
+      // The old files again, as a crash between the log and the delete
+      // would leave them: the log stands, the leftovers go.
+      legacy('a.md', {1: 'stale'});
+      expect(importLegacyHistory(root.path, 'a.md'), 0);
+      expect(version('a.md', 1), 'one');
+      expect(
+        File(p.join(root.path, historyFolderName, 'a.md.v1')).existsSync(),
+        isFalse,
+      );
+    });
+
+    test('a move that loses the race to another writes nothing over it', () {
+      // The upkeep and a save move the same history at once: the other one
+      // finishes — its whole log written, the old files deleted — between
+      // this one listing v2 and reading it.
+      legacy('a.md', {1: 'one', 2: 'two'});
+      final manifest = IOOverrides.runZoned(
+        () => readHistoryManifest(root.path, 'a.md'),
+        createFile: (path) {
+          final real = Zone.root.run(() => File(path));
+          return path.endsWith('.v2')
+              ? _RacedFile(real, () => importLegacyHistory(root.path, 'a.md'))
+              : real;
+        },
+      );
+      expect(manifest.versions.map((v) => v.number), [1, 2]);
+      expect(version('a.md', 2), 'two');
+    });
+
+    test('deleting an old history does not move it in first', () {
+      legacy('a.md', {1: 'one', 2: 'two'});
+      expect(deleteNoteHistory(root.path, 'a.md'), 2);
+      expect(listObjects(root.path), isEmpty);
+      expect(
+        Directory(p.join(root.path, historyFolderName)).listSync(),
+        isEmpty,
+      );
+    });
+  });
+}
+
+/// A version file whose first read lets another move of the same history run
+/// to its end first: by then the file is gone, as the other move deleted it.
+final class _RacedFile implements File {
+  new(this._real, this._other);
+
+  final File _real;
+  final int Function() _other;
+  static bool _raced = false;
+
+  @override
+  String get path => _real.path;
+
+  @override
+  Directory get parent => _real.parent;
+
+  @override
+  bool existsSync() => _real.existsSync();
+
+  @override
+  void deleteSync({bool recursive = false}) =>
+      _real.deleteSync(recursive: recursive);
+
+  @override
+  FileStat statSync() => _real.statSync();
+
+  @override
+  Uint8List readAsBytesSync() {
+    if (!_raced) {
+      _raced = true;
+      _other();
+    }
+    return _real.readAsBytesSync();
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) =>
+      throw UnimplementedError('${invocation.memberName}');
 }
