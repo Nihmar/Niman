@@ -134,6 +134,14 @@ macos_build() {
   # dev.niman.niman.beta, and with it its own Application Support folder.
   local flavor="${1:-official}"
   local name="Niman"
+  # The OCR engine is bundled in the Mac app (an Xcode build phase copies
+  # it in): built once, then reused.
+  local ocr=build/ocr-engine/niman-ocr-macos-universal.dylib
+  if [ ! -f "$ocr" ]; then
+    echo "building the OCR engine (once)..."
+    ./scripts/ocr-engine.sh macos-universal build/ocr-engine >"$log" 2>&1 ||
+      { tail -n 20 "$log"; return 1; }
+  fi
   case "$flavor" in
     official) flutter build macos --release --flavor official >"$log" 2>&1 ;;
     beta)

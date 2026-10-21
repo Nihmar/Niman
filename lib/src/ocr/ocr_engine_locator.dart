@@ -2,6 +2,7 @@ import 'dart:ffi';
 import 'dart:io';
 
 import 'package:niman/src/ocr/tesseract_bindings.dart';
+import 'package:path/path.dart' as p;
 
 /// Where the engine comes from.
 enum OcrEngineSource {
@@ -27,6 +28,17 @@ typedef OcrEngineLibrary = ({
 /// The library names a package may bundle the engine under.
 const List<String> bundledOcrEngineNames = ['libniman_ocr.so', 'niman_ocr.dll'];
 
+/// Where a Mac app bundles the engine: its own `Frameworks` folder, beside
+/// the executable's (`scripts/ocr-engine.sh macos-universal`). A Mac's is
+/// never downloaded — under the hardened runtime the app loads only a
+/// library signed with its own team — and a bare name would not be looked
+/// for there, so the path is the bundle's.
+String macBundledOcrEngine([String? executable]) => p.join(
+  p.dirname(p.dirname(executable ?? Platform.resolvedExecutable)),
+  'Frameworks',
+  'libniman_ocr.dylib',
+);
+
 /// The distribution libraries tried on Linux, newest first.
 const List<String> systemOcrEngineNames = [
   'libtesseract.so.5',
@@ -34,21 +46,25 @@ const List<String> systemOcrEngineNames = [
 ];
 
 /// The engine already on this device, without a download: a library
-/// bundled in the package ([bundledOcrEngineNames]), else on Linux the
-/// distribution's ([systemOcrEngineNames]); null when none opens or none
-/// is recent enough.
+/// bundled in the package ([bundledOcrEngineNames], or a Mac app's
+/// [macBundledOcrEngine]), else on Linux the distribution's
+/// ([systemOcrEngineNames]); null when none opens or none is recent
+/// enough.
 ///
 /// It opens libraries, so it runs on a worker isolate. The downloaded
 /// engine is not probed here: once loaded, Windows locks the file until
 /// the app exits, and the settings page must still be able to delete it.
 ///
-/// [open] and [linux] are seams for tests; a name that fails to open is
-/// skipped, a missing library being the common case.
+/// [open], [linux] and [macos] are seams for tests; a name that fails to
+/// open is skipped, a missing library being the common case.
 OcrEngineLibrary? findInstalledOcrEngine({
   DynamicLibrary Function(String name) open = DynamicLibrary.open,
   bool? linux,
+  bool? macos,
 }) {
   final candidates = [
+    if (macos ?? Platform.isMacOS)
+      (macBundledOcrEngine(), OcrEngineSource.bundled),
     for (final name in bundledOcrEngineNames) (name, OcrEngineSource.bundled),
     if (linux ?? Platform.isLinux)
       for (final name in systemOcrEngineNames) (name, OcrEngineSource.system),

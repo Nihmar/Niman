@@ -3,6 +3,7 @@ import 'dart:ffi';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/ocr/ocr_engine_locator.dart';
 import 'package:niman/src/ocr/tesseract.dart';
+import 'package:path/path.dart' as p;
 
 import '../fakes/ocr_page.dart';
 
@@ -22,6 +23,7 @@ void main() {
       final tried = <String>[];
       final found = findInstalledOcrEngine(
         linux: true,
+        macos: false,
         open: (name) {
           tried.add(name);
           throw ArgumentError(name);
@@ -29,6 +31,31 @@ void main() {
       );
       expect(found, isNull);
       expect(tried, [...bundledOcrEngineNames, ...systemOcrEngineNames]);
+    });
+
+    test("a Mac looks in its app bundle's Frameworks first", () {
+      final tried = <String>[];
+      findInstalledOcrEngine(
+        linux: false,
+        macos: true,
+        open: (name) {
+          tried.add(name);
+          throw ArgumentError(name);
+        },
+      );
+      expect(tried.first, macBundledOcrEngine());
+      expect(
+        macBundledOcrEngine(
+          p.join('/Applications', 'Niman.app', 'Contents', 'MacOS', 'Niman'),
+        ),
+        p.join(
+          '/Applications',
+          'Niman.app',
+          'Contents',
+          'Frameworks',
+          'libniman_ocr.dylib',
+        ),
+      );
     });
 
     test('a library that is not Tesseract is not an engine', () {
