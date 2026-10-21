@@ -43,6 +43,7 @@ void main() {
     final library = Directory(p.join(tmp.path, 'library'))..createSync();
     final converted = await convertEpub((
       source: source,
+      name: null,
       libraryRoot: library.path,
       parent: '',
       staging: p.join(library.path, '.epub.niman-tmp-1'),

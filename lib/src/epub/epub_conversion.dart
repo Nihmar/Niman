@@ -32,6 +32,7 @@ final class EpubConversion {
     required bool oneNote,
     required String attachments,
     required EpubConvertWords words,
+    String? name,
   }) async {
     final parentAbs = p.joinAll([libraryRoot, ...parent.split('/')]);
     final staging = p.join(
@@ -42,6 +43,7 @@ final class EpubConversion {
     final exits = ReceivePort();
     final request = (
       source: source,
+      name: name,
       libraryRoot: libraryRoot,
       parent: parent,
       staging: staging,
@@ -186,8 +188,9 @@ final class EpubConversion {
 /// What the book at [source] would make, read on an isolate.
 Future<EpubConvertPreview> previewEpubOnIsolate(
   String source,
-  EpubConvertWords words,
-) => IsolateGauge.run(
-  () => previewEpub(source, words),
+  EpubConvertWords words, {
+  String? name,
+}) => IsolateGauge.run(
+  () => previewEpub(source, words, name: name),
   'preview "${p.basename(source)}"',
 );

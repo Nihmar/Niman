@@ -78,6 +78,7 @@ void main() {
     );
     final converted = await convertEpub((
       source: source.path,
+      name: null,
       libraryRoot: library.path,
       parent: '',
       staging: p.join(library.path, '.epub.niman-tmp-1'),

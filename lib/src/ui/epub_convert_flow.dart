@@ -60,9 +60,12 @@ final class EpubConvertFlow {
 
   /// Converts the book at [source], an absolute path. [consume] deletes it
   /// afterwards, whatever happened: a share's copy in the app's cache.
+  /// [name] is what the book is called when its file is not: the name a
+  /// share came with, rather than its copy's (`<millis>-Dune.epub`).
   Future<void> run(
     BuildContext context,
     String source, {
+    String? name,
     bool consume = false,
   }) async {
     final messenger = ScaffoldMessenger.maybeOf(context);
@@ -85,6 +88,7 @@ final class EpubConvertFlow {
       final choice = await showEpubConvertDialog(
         context,
         source: source,
+        name: name,
         parent: parent,
         preview: preview,
         pickFolder: (current) async {
@@ -103,6 +107,7 @@ final class EpubConvertFlow {
       if (choice == null || !context.mounted) return;
       final conversion = await EpubConversion.start(
         source: source,
+        name: name,
         libraryRoot: root,
         parent: choice.parent,
         oneNote: choice.oneNote,
@@ -120,7 +125,7 @@ final class EpubConvertFlow {
           builder: (context) => EpubConvertProgressDialog(conversion),
         ),
       );
-      await _settle(conversion, source, messenger);
+      await _settle(conversion, source, name, messenger);
     } finally {
       if (consume) {
         try {
@@ -135,23 +140,24 @@ final class EpubConvertFlow {
   Future<void> _settle(
     EpubConversion conversion,
     String source,
+    String? name,
     ScaffoldMessengerState? messenger,
   ) async {
     final EpubConverted converted;
     try {
       converted = await conversion.done;
     } on EpubConvertCancelled {
-      _log.info('convert "${p.basename(source)}": cancelled');
+      _log.info('convert "${epubDisplayName(source, name)}": cancelled');
       return;
     } on Object catch (error) {
-      _log.warning('convert "${p.basename(source)}" failed: $error');
+      _log.warning('convert "${epubDisplayName(source, name)}" failed: $error');
       messenger?.showSnackBar(
-        SnackBar(content: Text(epubConvertProblem(error, source))),
+        SnackBar(content: Text(epubConvertProblem(error, source, name: name))),
       );
       return;
     }
     _log.info(
-      'convert "${p.basename(source)}" -> "${converted.made}": '
+      'convert "${epubDisplayName(source, name)}" -> "${converted.made}": '
       '${converted.notes} note(s), ${converted.pictures} picture(s)',
     );
     // Asked for now rather than waiting for the watcher: the tree is where

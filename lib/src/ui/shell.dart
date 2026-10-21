@@ -2926,7 +2926,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     // Told by its name, or — a provider that names it `msf:1234` — by the
     // `mimetype` the format opens on.
     if (isBook(name) || await looksLikeEpub(path)) {
-      if (mounted) await _epubConvert.run(context, path, consume: true);
+      if (mounted) {
+        await _epubConvert.run(context, path, name: name, consume: true);
+      }
       return;
     }
     if (p.extension(name).toLowerCase() == '.zip') {

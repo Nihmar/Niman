@@ -48,6 +48,7 @@ void main() {
     bool oneNote = false,
   }) => convertEpub((
     source: source,
+    name: null,
     libraryRoot: library,
     parent: parent,
     staging: p.join(library, '.epub.niman-tmp-1'),
@@ -412,6 +413,7 @@ void main() {
     await expectLater(
       convertEpub((
         source: source,
+        name: null,
         libraryRoot: library,
         parent: '',
         staging: p.join(library, '.epub.niman-tmp-2'),
@@ -470,6 +472,7 @@ void main() {
         convertEpub(
           (
             source: source,
+            name: null,
             libraryRoot: library,
             parent: '',
             staging: staging,
@@ -507,6 +510,7 @@ void main() {
         convertEpub(
           (
             source: source,
+            name: null,
             libraryRoot: library,
             parent: '',
             staging: staging,

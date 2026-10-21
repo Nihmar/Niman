@@ -36,6 +36,11 @@ typedef EpubConvertRequest = ({
   /// The `.epub`, absolute.
   String source,
 
+  /// What the book is called when its file is not called that: a share
+  /// is copied into the cache under a name of its own
+  /// (`1729512345678-Dune.epub`). Null for a file that is named as it is.
+  String? name,
+
   /// The library, absolute.
   String libraryRoot,
 
@@ -76,25 +81,28 @@ typedef EpubConvertProgress = ({int done, int total, String what});
 /// The book at [source] read and planned: what a conversion would write.
 ///
 /// Throws [EpubRefused] when it is not a book that can be converted.
-EpubConvertPreview previewEpub(String source, EpubConvertWords words) =>
-    _withBook(source, (book) {
-      final plan = EpubPlan.of(
-        book,
-        title: _titleOf(book, source),
-        words: words,
-      );
-      final written = _written(plan);
-      return (
-        title: plan.title,
-        authors: book.info.authors,
-        notes: written.length,
-        folders: {
-          for (final note in written)
-            if (noteFolderOf(note.path).isNotEmpty) noteFolderOf(note.path),
-        }.length,
-        pictures: _picturesNamed(plan, written).length,
-      );
-    });
+EpubConvertPreview previewEpub(
+  String source,
+  EpubConvertWords words, {
+  String? name,
+}) => _withBook(source, (book) {
+  final plan = EpubPlan.of(
+    book,
+    title: _titleOf(book, source, name),
+    words: words,
+  );
+  final written = _written(plan);
+  return (
+    title: plan.title,
+    authors: book.info.authors,
+    notes: written.length,
+    folders: {
+      for (final note in written)
+        if (noteFolderOf(note.path).isNotEmpty) noteFolderOf(note.path),
+    }.length,
+    pictures: _picturesNamed(plan, written).length,
+  );
+});
 
 /// Converts the book [request] names, telling [progress] how far it has
 /// got.
@@ -127,7 +135,7 @@ Future<EpubConverted> convertEpub(
   try {
     final result = await _withBookAsync(request.source, step, (book) async {
       staging.createSync(recursive: true);
-      final title = _titleOf(book, request.source);
+      final title = _titleOf(book, request.source, request.name);
       final plan = EpubPlan.of(
         book,
         title: title,
@@ -272,8 +280,16 @@ Future<T> _withBookAsync<T>(
   }
 }
 
-String _titleOf(EpubBook book, String source) =>
-    book.info.title ?? p.basenameWithoutExtension(source);
+/// The book's title, or — when it has none — the name of its file.
+String _titleOf(EpubBook book, String source, String? name) =>
+    book.info.title ??
+    p.basenameWithoutExtension(epubDisplayName(source, name));
+
+/// What the book at [source] is called to a person: [name] when it is given
+/// (a share's own, whatever its copy in the cache is called), else its
+/// file's name.
+String epubDisplayName(String source, String? name) =>
+    name == null || name.trim().isEmpty ? p.basename(source) : p.basename(name);
 
 /// The notes of [plan] that have text.
 List<EpubPlannedNote> _written(EpubPlan plan) => [
