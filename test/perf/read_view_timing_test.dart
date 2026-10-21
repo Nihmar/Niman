@@ -84,6 +84,45 @@ const List<String> _fixtures = <String>[
   'Geometria 1.md',
 ];
 
+/// One block of every kind the fixtures' first screens hold, to warm the
+/// pipeline with before the first measured open. Trimmed, so its frontmatter
+/// opens on the first line.
+final String _warmUp =
+    r'''
+---
+title: Warm up
+tags:
+  - warm
+---
+
+# Warm up
+
+| A | B |
+| ---: | --- |
+| one | **two** |
+
+$$
+f(x) = \begin{cases} x & \text{if } x \ge 0 \\ -x & \text{else} \end{cases}
+$$
+
+- an item
+  - a nested one
+- [ ] a task
+- [x] a done one
+
+A paragraph with [[A link]], ~~struck~~ and *emphasis*.
+
+![A figure](assets/warm.png)
+
+> A quote
+
+```python
+let a = [1, 2];
+fn_call(a, b);
+```
+'''
+        .trimLeft();
+
 /// A cache that renders in-line, as the preview's own tests do.
 MathCache _mathCache() => MathCache(
   renderer: (tex, {required displayMode}) =>
@@ -124,12 +163,14 @@ void main() {
       // this the smallest fixture reports three times what it costs while the
       // larger ones — measured after it — report the truth. Standard practice
       // for a benchmark, and the reason the numbers below are comparable to
-      // each other at all.
+      // each other at all. The note holds one block of every kind the
+      // fixtures open on — a heading alone left KaTeX, the table and the
+      // highlighter cold, and the first fixture paid them (#1140).
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
             body: MarkdownReadView(
-              buffer: SourceBuffer.fromText('# Warm up\n\nA paragraph.'),
+              buffer: SourceBuffer.fromText(_warmUp),
               parser: ReadParser(),
               mathCache: _mathCache(),
             ),
