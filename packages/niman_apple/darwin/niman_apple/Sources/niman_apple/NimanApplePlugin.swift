@@ -22,9 +22,14 @@ public class NimanApplePlugin: NSObject, FlutterPlugin {
       // Android's WebView does (README.md).
       let pdf = FlutterMethodChannel(name: "niman/pdf", binaryMessenger: messenger)
       pdf.setMethodCallHandler(pdfBridge.handle)
-      let pageReader = FlutterMethodChannel(name: "niman/page_reader", binaryMessenger: messenger)
-      pageReader.setMethodCallHandler(pageReaderBridge.handle)
+    #else
+      // WebKit prints the PDF export through a page renderer on iOS.
+      let pdf = FlutterMethodChannel(name: "niman/pdf", binaryMessenger: messenger)
+      pdf.setMethodCallHandler(pdfBridge.handle)
     #endif
+    // Script-built pages are run in WebKit, on both (README.md).
+    let pageReader = FlutterMethodChannel(name: "niman/page_reader", binaryMessenger: messenger)
+    pageReader.setMethodCallHandler(pageReaderBridge.handle)
     // The clipboard's HTML, for Paste as Markdown, as Linux's runner reads it.
     let clipboard = FlutterMethodChannel(name: "niman/clipboard", binaryMessenger: messenger)
     clipboard.setMethodCallHandler(ClipboardBridge.handle)
@@ -43,11 +48,13 @@ public class NimanApplePlugin: NSObject, FlutterPlugin {
     #endif
   }
 
+  /// The bridges, alive for the app's life as their channels are.
   #if os(macOS)
-    /// The bridges, alive for the app's life as their channels are.
     private static let pdfBridge = PdfBridge()
-    private static let pageReaderBridge = PageReaderBridge()
+  #else
+    private static let pdfBridge = PdfBridgeIOS()
   #endif
+  private static let pageReaderBridge = PageReaderBridge()
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
     switch call.method {
