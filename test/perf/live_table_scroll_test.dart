@@ -18,9 +18,10 @@
 // is the frame that draws them: the steps of both legs are printed, and the
 // *median* one is held to a 60 Hz frame under `NIMAN_PERF=1` alone, since a
 // shared runner reads different milliseconds for the same commit
-// (`AGENTS.md`). The worst is printed too: the first step of each leg builds
-// the rows it brings in, and that step — 51 ms on this host, 265 ms at the
-// device's open — is what is left of the case.
+// (`AGENTS.md`). The worst is printed too. Both legs are measured after a
+// round on a note of the same shape, thrown away: the first leg a file
+// scrolls pays the JIT, which read as a step of 67 ms and a median of 20 down
+// against 11 up, and was taken for the table's (#1141).
 //
 // Roboto is loaded from the Flutter cache when it is there, so the rows are
 // measured with the font the device measured them with; without it the test
@@ -136,7 +137,6 @@ void main() {
 
   testWidgets('a fitted table, scrolled out and back, is not measured '
       'again', (tester) async {
-    final buffer = SourceBuffer.fromText(_note(24));
     tester.view.physicalSize = const Size(390, 800);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
@@ -144,27 +144,27 @@ void main() {
     // built again, as a note view's rebuild does.
     final rebuild = ValueNotifier<int>(0);
     addTearDown(rebuild.dispose);
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: ValueListenableBuilder<int>(
-            valueListenable: rebuild,
-            builder: (context, _, _) => MarkdownSurface(
-              buffer: buffer,
-              mode: MarkdownSurfaceMode.live,
-              theme: _theme(),
+
+    Future<void> open(String text) async {
+      final buffer = SourceBuffer.fromText(text);
+      await tester.pumpWidget(
+        MaterialApp(
+          // A new tree per note: nothing the warm-up laid out is reused.
+          key: ValueKey(text),
+          home: Scaffold(
+            body: ValueListenableBuilder<int>(
+              valueListenable: rebuild,
+              builder: (context, _, _) => MarkdownSurface(
+                buffer: buffer,
+                mode: MarkdownSurfaceMode.live,
+                theme: _theme(),
+              ),
             ),
           ),
         ),
-      ),
-    );
-    await tester.pump();
-    // Everything the first frame pays: every cell of the table measured (its
-    // widest word comes with its width), and its visible rows laid out.
-    print(
-      'first frame: ${LiveTables.measurements} measurements, '
-      '${LiveTables.rowsLaid} rows laid out',
-    );
+      );
+      await tester.pump();
+    }
 
     Future<List<int>> leg(double dy, int steps) async {
       final times = <int>[];
@@ -189,6 +189,25 @@ void main() {
         '(${times.map((t) => t ~/ 1000).join(', ')})',
       );
     }
+
+    // A round on a note of the same shape first, thrown away. The first leg a
+    // file scrolls pays the JIT for every path a step takes: it read 18-20 ms
+    // a step down against 11 back up, and a second round of the very same
+    // note reads 7-11 ms down (#1141). The device's build is compiled ahead
+    // of time and has no such leg.
+    await open(_note(24).replaceAll('Storia', 'Racconto'));
+    await leg(-200, 12);
+    await leg(200, 12);
+
+    final measuredBefore = LiveTables.measurements;
+    final laidBefore = LiveTables.rowsLaid;
+    await open(_note(24));
+    // Everything the first frame pays: every cell of the table measured (its
+    // widest word comes with its width), and its visible rows laid out.
+    print(
+      'first frame: ${LiveTables.measurements - measuredBefore} '
+      'measurements, ${LiveTables.rowsLaid - laidBefore} rows laid out',
+    );
 
     // Down through the table, then back to the top: the way the report
     // scrolled, and the way the rows leave and come back.
