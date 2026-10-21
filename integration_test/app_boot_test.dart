@@ -58,13 +58,13 @@ void main() {
     await tester.pumpAndSettle();
 
     // The deck, in front of the open-library screen.
-    expect(find.text('Your notes are files'), findsOne);
+    expect(find.text(AppStrings.welcomeNotesTitle), findsOne);
     expect(find.text(AppStrings.openLibraryExisting), findsNothing);
 
     await tester.tap(find.byKey(const Key('welcome-skip')));
     await tester.pumpAndSettle();
 
-    expect(find.text('Your notes are files'), findsNothing);
+    expect(find.text(AppStrings.welcomeNotesTitle), findsNothing);
     expect(find.text(AppStrings.openLibraryCreate), findsOne);
     expect(welcome.deckSeen, isTrue);
   });
