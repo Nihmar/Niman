@@ -27,6 +27,7 @@
 		33CC10F32044A3C60003C045 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 33CC10F22044A3C60003C045 /* Assets.xcassets */; };
 		33CC10F62044A3C60003C045 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 33CC10F42044A3C60003C045 /* MainMenu.xib */; };
 		33CC11132044BFA00003C045 /* MainFlutterWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33CC11122044BFA00003C045 /* MainFlutterWindow.swift */; };
+		3874AAB2336BAF468431A81E /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 8470231F18347B5BC537D98F /* InfoPlist.xcstrings */; };
 		78A318202AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage in Frameworks */ = {isa = PBXBuildFile; productRef = 78A3181F2AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage */; };
 		8642EEDB6512408612134635 /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B6AE7E583D781C89E710DC46 /* Pods_Runner.framework */; };
 		C1D94A0B3291E6F4C834B76C /* Pods_RunnerTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9C42ED4BFC7B096CC6E3057C /* Pods_RunnerTests.framework */; };
@@ -90,6 +91,7 @@
 		7AFA3C8E1D35360C0083082E /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
 		7CBDBFC8A96E0EB051BDD1B6 /* Pods-Runner.debug-beta.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.debug-beta.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.debug-beta.xcconfig"; sourceTree = "<group>"; };
 		817BD60E49B4164B16D11866 /* Pods-Runner.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.profile.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.profile.xcconfig"; sourceTree = "<group>"; };
+		8470231F18347B5BC537D98F /* InfoPlist.xcstrings */ = {isa = PBXFileReference; includeInIndex = 1; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
 		8858002B2E3AFB15A16482ED /* Pods-RunnerTests.debug-official.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.debug-official.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.debug-official.xcconfig"; sourceTree = "<group>"; };
 		892677F5E13447A30B313E1C /* Pods-RunnerTests.profile-official.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.profile-official.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.profile-official.xcconfig"; sourceTree = "<group>"; };
 		9740EEB21CF90195004384FC /* Debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
@@ -199,6 +201,7 @@
 				33E51914231749380026EE4D /* Release.entitlements */,
 				33CC11242044D66E0003C045 /* Resources */,
 				33BA886A226E78AF003329D5 /* Configs */,
+				8470231F18347B5BC537D98F /* InfoPlist.xcstrings */,
 			);
 			path = Runner;
 			sourceTree = "<group>";
@@ -322,8 +325,44 @@
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
-				en,
 				Base,
+				be,
+				bg,
+				bs,
+				ca,
+				cs,
+				da,
+				de,
+				el,
+				en,
+				es,
+				et,
+				eu,
+				fi,
+				fr,
+				gl,
+				hi,
+				hr,
+				hu,
+				is,
+				it,
+				ja,
+				lt,
+				lv,
+				mk,
+				nb,
+				nl,
+				pl,
+				pt,
+				ro,
+				sk,
+				sl,
+				sq,
+				sr,
+				sv,
+				tr,
+				uk,
+				"zh-Hans",
 			);
 			mainGroup = 33CC10E42044A3C60003C045;
 			packageReferences = (
@@ -354,6 +393,7 @@
 			files = (
 				33CC10F32044A3C60003C045 /* Assets.xcassets in Resources */,
 				33CC10F62044A3C60003C045 /* MainMenu.xib in Resources */,
+				3874AAB2336BAF468431A81E /* InfoPlist.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

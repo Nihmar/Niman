@@ -67,5 +67,9 @@
 			</dict>
 		</dict>
 	</array>
+	<!-- Asked before the first voice note; every language's is in
+	     InfoPlist.xcstrings. -->
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Niman uses the microphone to record voice notes.</string>
 </dict>
 </plist>

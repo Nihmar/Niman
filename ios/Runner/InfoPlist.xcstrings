@@ -1,0 +1,234 @@
+{
+  "sourceLanguage": "en",
+  "version": "1.0",
+  "strings": {
+    "NSMicrophoneUsageDescription": {
+      "comment": "Asked before the first voice note is recorded.",
+      "extractionState": "manual",
+      "localizations": {
+        "be": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niman выкарыстоўвае мікрафон для запісу галасавых нататак."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niman използва микрофона, за да записва гласови бележки."
+          }
+        },
+        "bs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niman koristi mikrofon za snimanje glasovnih bilješki."
+          }
+        },
+        "ca": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El Niman fa servir el micròfon per enregistrar notes de veu."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niman používá mikrofon k nahrávání hlasových poznámek."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niman bruger mikrofonen til at optage stemmenoter."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niman verwendet das Mikrofon, um Sprachnotizen aufzunehmen."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Το Niman χρησιμοποιεί το μικρόφωνο για να ηχογραφεί φωνητικές σημειώσεις."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niman uses the microphone to record voice notes."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niman usa el micrófono para grabar notas de voz."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niman kasutab mikrofoni häälmärkmete salvestamiseks."
+          }
+        },
+        "eu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niman-ek mikrofonoa erabiltzen du ahots-oharrak grabatzeko."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niman käyttää mikrofonia äänimuistiinpanojen tallentamiseen."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niman utilise le micro pour enregistrer des notes vocales."
+          }
+        },
+        "gl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niman usa o micrófono para gravar notas de voz."
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niman वॉइस नोट रिकॉर्ड करने के लिए माइक्रोफ़ोन का उपयोग करता है।"
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niman koristi mikrofon za snimanje glasovnih bilješki."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A Niman a mikrofont hangjegyzetek rögzítésére használja."
+          }
+        },
+        "is": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niman notar hljóðnemann til að taka upp raddglósur."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niman usa il microfono per registrare le note vocali."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niman はボイスメモの録音にマイクを使用します。"
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niman naudoja mikrofoną balso užrašams įrašyti."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niman izmanto mikrofonu balss piezīmju ierakstīšanai."
+          }
+        },
+        "mk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niman го користи микрофонот за снимање гласовни белешки."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niman bruker mikrofonen til å ta opp talenotater."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niman gebruikt de microfoon om spraaknotities op te nemen."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niman używa mikrofonu do nagrywania notatek głosowych."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O Niman usa o microfone para gravar notas de voz."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niman folosește microfonul pentru a înregistra note vocale."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niman používa mikrofón na nahrávanie hlasových poznámok."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niman uporablja mikrofon za snemanje glasovnih zapiskov."
+          }
+        },
+        "sq": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niman përdor mikrofonin për të regjistruar shënime zanore."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niman користи микрофон за снимање гласовних белешки."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niman använder mikrofonen för att spela in röstanteckningar."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niman, sesli notlar kaydetmek için mikrofonu kullanır."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niman використовує мікрофон для запису голосових нотаток."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niman 使用麦克风录制语音笔记。"
+          }
+        }
+      }
+    }
+  }
+}
