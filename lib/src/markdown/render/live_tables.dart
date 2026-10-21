@@ -753,7 +753,9 @@ final class LiveTables {
   /// caret by one space and not by its share of the whole column (#1160).
   /// What is left of the gap is the room the next cell's column takes, and
   /// it is the pipes' and the gap's middle's: the cells' text stays where
-  /// the read view sets it, whichever side of a pipe it is on.
+  /// the read view sets it, whichever side of a pipe it is on. A row written
+  /// without its closing pipe has no pipe to take what is left: its last
+  /// cell's spaces keep their width, and the room ends the line.
   ///
   /// A line's first glyph is set half its spacing in: a cell of the read
   /// view, a paragraph of its own, half the [ambient] spacing; here, when
@@ -776,7 +778,7 @@ final class LiveTables {
     // [start, end) drawn [width] wide, its characters spaced evenly.
     void add(int start, int end, double width) {
       final count = end - start;
-      if (count <= 0 || width <= 0) return;
+      if (count <= 0) return;
       // Each character keeps a hundredth of its size: the spacing is what
       // is left of the width.
       final spacing = start == 0
@@ -803,12 +805,19 @@ final class LiveTables {
         final middle = count - head - tail;
         final kept = (head + tail) * space;
         // What is left over is the room, and it needs a character to take
-        // it: a gap that is all spaces, or one too narrow to give each of
-        // them its own width, is spread evenly as it always was.
+        // it: the pipe between the cells. A gap too narrow to give its own
+        // spaces their width is spread evenly as it always was.
         if (middle > 0 && kept < width) {
           add(start, start + head, head * space);
           add(start + head, end - tail, width - kept);
           add(end - tail, end, tail * space);
+          return;
+        }
+        // A row written without its closing pipe has no pipe to take the
+        // room: its last cell's spaces keep their own width, and the room
+        // ends the line, past the row's last character.
+        if (middle == 0 && end == text.length && kept < width) {
+          add(start, end, kept);
           return;
         }
       }
@@ -849,9 +858,10 @@ final class LiveTables {
     return gaps;
   }
 
-  /// Whether [char] is a space a gap's room is kept off: the space and the
-  /// tab, the whitespace a note is written with.
-  static bool _isGapSpace(int char) => char == 0x20 || char == 0x09;
+  /// Whether [char] is a space a gap's room is kept off: the whitespace
+  /// `String.trim` takes off a cell's text, which is what puts it in the gap
+  /// — the space and the tab above all.
+  static bool _isGapSpace(int char) => String.fromCharCode(char).trim().isEmpty;
 
   /// Where the caret goes from [column] of table row [text]: [column]
   /// itself when it is in a cell's text, and otherwise — the pipes and the

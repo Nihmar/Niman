@@ -230,7 +230,10 @@ Decisions taken without the writer, to revisit if they read wrong:
   share of the column's remainder (on a wide column that was twenty
   characters a press). A gap too narrow to give its own spaces their
   width is spread evenly as before, and a line's first gap, which sets the
-  first cell half a spacing in as the read view does, is left whole.
+  first cell half a spacing in as the read view does, is left whole. A row
+  written without its closing pipe has no pipe to take the room: its last
+  cell's spaces keep their width and the room ends the line, where no cell
+  stands.
 - **Not done**: a size picker for an inserted table (#262 has two
   columns and one row; the `+` and Tab add the rest).
 

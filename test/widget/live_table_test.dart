@@ -97,6 +97,25 @@ Future<MarkdownSourceViewState> _pumpNote(
   return tester.state<MarkdownSourceViewState>(find.byType(MarkdownSourceView));
 }
 
+/// Types [typed] at [at] in [buffer], the way the platform reports an edit:
+/// the note whole, the caret after what was typed.
+Future<void> _typeAt(
+  WidgetTester tester,
+  SourceBuffer buffer,
+  int at,
+  String typed,
+) async {
+  final text = buffer.text;
+  tester.testTextInput.updateEditingValue(
+    TextEditingValue(
+      text: text.replaceRange(at, at, typed),
+      selection: TextSelection.collapsed(offset: at + typed.length),
+    ),
+  );
+  await tester.pump();
+  await tester.pump();
+}
+
 /// A table whose first cell holds an escaped pipe: one cell, so the cell
 /// after it is `c` — the read view's own count.
 const String _escaped = '| a \\| b | c |\n|---|---|\n| one | two |\n';
@@ -367,6 +386,9 @@ void main() {
         '| Aria | one |\n'
         '| a cell far longer than the one above it | two |\n\n';
     final state = await _pumpNote(tester, note);
+    // The platform's own text path is the one a keystroke takes.
+    await tester.tap(find.byType(MarkdownSourceView));
+    await tester.pump();
     const line = 4;
     final buffer = state.widget.buffer;
     final lineStart = buffer.offsetOfLine(line);
@@ -382,29 +404,71 @@ void main() {
     final letter =
         (await caretAt(end - 1)).left - (await caretAt(end - 2)).left;
     final cellEnd = await caretAt(end);
-    final afterSpace = await caretAt(end + 1);
+    final second = await caretAt(columnOf('one'));
+    // Each press of the space bar at the cell's end moves the caret one
+    // space, and the cell after it keeps its column.
+    await _typeAt(tester, buffer, lineStart + end, ' ');
     expect(
-      afterSpace.left - cellEnd.left,
+      (await caretAt(end + 1)).left - cellEnd.left,
       closeTo(letter, 0.01),
       reason: 'one space typed at the cell\u2019s end is one space wide',
     );
-
-    // And the room is still the room: the cell after it does not move, and
-    // three spaces typed there step the caret three characters' worth.
-    final second = await caretAt(columnOf('one'));
-    buffer.replaceRange(lineStart + end, lineStart + end, '   ');
-    await tester.pump();
+    await _typeAt(tester, buffer, lineStart + end + 1, ' ');
+    expect(
+      (await caretAt(end + 2)).left - cellEnd.left,
+      closeTo(2 * letter, 0.01),
+      reason: 'a second space is a second space',
+    );
+    await _typeAt(tester, buffer, lineStart + end + 2, ' ');
+    expect(
+      (await caretAt(end + 3)).left - cellEnd.left,
+      closeTo(3 * letter, 0.02),
+      reason: 'three spaces, three characters',
+    );
     expect(
       (await caretAt(columnOf('one'))).left,
       closeTo(second.left, 0.01),
       reason: 'the next cell keeps its column',
     );
-    expect(
-      (await caretAt(columnOf('Aria') + 'Aria'.length + 3)).left - cellEnd.left,
-      closeTo(3 * letter, 0.02),
-      reason: 'three spaces, three characters',
-    );
   });
+
+  testWidgets(
+    'a space typed at the end of a row written without its closing pipe '
+    'is one space wide',
+    (tester) async {
+      // A row written without its closing pipe has no pipe for the room to
+      // stand in, and the room used to end the line: a space typed at the
+      // last cell's end took the whole remainder of the column (#1160). Its
+      // spaces keep their own width now, and the room ends the line past
+      // them, where no cell stands.
+      const note =
+          'x\n\n| a | a wide header |\n|---|---|\n'
+          '| Aria | one\n'
+          '| a cell | a much longer second one\n\n';
+      final state = await _pumpNote(tester, note);
+      await tester.tap(find.byType(MarkdownSourceView));
+      await tester.pump();
+      const line = 4;
+      final buffer = state.widget.buffer;
+      final lineStart = buffer.offsetOfLine(line);
+      Future<Rect> caretAt(int column) async {
+        state.placeCaret(lineStart + column);
+        await tester.pump();
+        return state.caretRect!;
+      }
+
+      final end = buffer.lineAt(line).indexOf('one') + 'one'.length;
+      final letter =
+          (await caretAt(end - 1)).left - (await caretAt(end - 2)).left;
+      final cellEnd = await caretAt(end);
+      await _typeAt(tester, buffer, lineStart + end, ' ');
+      expect(
+        (await caretAt(end + 1)).left - cellEnd.left,
+        closeTo(letter, 0.01),
+        reason: 'one space typed at the row\u2019s last cell is one space',
+      );
+    },
+  );
 
   testWidgets('in source, a table too wide for the pane is its text', (
     tester,
