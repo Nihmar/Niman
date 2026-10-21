@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:niman/src/core/background_time.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/db/app_database.dart';
 import 'package:niman/src/sync/conflict_texts.dart';
@@ -717,11 +718,16 @@ final class LibrarySyncService extends ChangeNotifier implements SyncService {
       ),
     );
     try {
-      final run = await engine.run(
-        quick: quick,
-        confirm: confirm,
-        onProgress: (stage, done, total) =>
-            _set(_status.copyWith(stage: stage, done: done, total: total)),
+      // A run under way finishes once the app is left (iOS suspends it
+      // otherwise), the one started as it goes to the background above all.
+      final run = await withBackgroundTime(
+        'sync',
+        () => engine.run(
+          quick: quick,
+          confirm: confirm,
+          onProgress: (stage, done, total) =>
+              _set(_status.copyWith(stage: stage, done: done, total: total)),
+        ),
       );
       final report = run.report;
       if (report.changedLocally.isNotEmpty && !_changes.isClosed) {

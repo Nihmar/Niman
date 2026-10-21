@@ -53,6 +53,10 @@ public class NimanApplePlugin: NSObject, FlutterPlugin {
       sceneBridge.shortcutChannel = shortcuts
       sceneBridge.appChannel = app
       registrar.addSceneDelegate(sceneBridge)
+      // A sync or a capture under way finishes once the app is left.
+      let background = FlutterMethodChannel(name: "niman/background", binaryMessenger: messenger)
+      background.setMethodCallHandler(backgroundBridge.handle)
+      registrar.addSceneDelegate(backgroundBridge)
     #endif
   }
 
@@ -65,6 +69,7 @@ public class NimanApplePlugin: NSObject, FlutterPlugin {
   private static let pageReaderBridge = PageReaderBridge()
   #if os(iOS)
     private static let sceneBridge = SceneBridge()
+    private static let backgroundBridge = BackgroundBridge()
   #endif
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
