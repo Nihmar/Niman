@@ -12,13 +12,13 @@
 library;
 
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:niman/src/capture/capture_quote.dart';
 import 'package:niman/src/capture/shared_page.dart';
 import 'package:niman/src/core/android_task.dart';
+import 'package:niman/src/core/host_platform.dart';
 import 'package:niman/src/core/settings/library_settings.dart' show LinkType;
 import 'package:niman/src/db/index_database.dart' show Note;
 import 'package:niman/src/library/session.dart';
@@ -57,7 +57,7 @@ final class CaptureFlow {
     this.onAppended,
     this.clock = DateTime.now,
     bool? useSheet,
-  }) : useSheet = useSheet ?? Platform.isAndroid;
+  }) : useSheet = useSheet ?? HostPlatform.isMobile;
 
   /// The open library's session.
   final LibrarySession controller;

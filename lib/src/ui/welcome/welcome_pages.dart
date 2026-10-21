@@ -2,8 +2,7 @@
 /// them, in one table so the order and the copy are reviewable here.
 library;
 
-import 'dart:io';
-
+import 'package:niman/src/core/host_platform.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// One page of the deck.
@@ -55,12 +54,13 @@ List<WelcomePage> themedPages() => [
 
 /// The device page: one body, whichever platform this is.
 ///
-/// Android gets the share sheet, the home-screen widgets and voice notes;
-/// a desktop gets the tray, the panes and the file association. The page
-/// exists on every platform — it says what *this* one can do.
+/// A phone or a tablet (Android, iOS) gets the share sheet, the
+/// home-screen widgets and voice notes; a desktop gets the tray, the panes
+/// and the file association. The page exists on every platform — it says
+/// what *this* one can do.
 WelcomePage devicePage({bool? isAndroid}) => WelcomePage(
   title: AppStrings.welcomeDeviceTitle,
-  body: (isAndroid ?? Platform.isAndroid)
+  body: (isAndroid ?? HostPlatform.isMobile)
       ? AppStrings.welcomeAndroidBody
       : AppStrings.welcomeDesktopBody,
 );

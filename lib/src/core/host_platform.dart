@@ -15,4 +15,9 @@ abstract final class HostPlatform {
   /// mouse, files on a disk the user browses.
   static final bool isDesktop =
       Platform.isLinux || Platform.isWindows || Platform.isMacOS;
+
+  /// Android or iOS: a phone's or a tablet's system, driven by touch, its
+  /// screen the app's alone (immersive full screen, sheets for dialogs).
+  /// What the window measures is `device_shape.dart`'s question, not this.
+  static final bool isMobile = Platform.isAndroid || Platform.isIOS;
 }
