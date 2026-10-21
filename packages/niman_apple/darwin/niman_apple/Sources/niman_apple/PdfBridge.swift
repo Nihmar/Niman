@@ -125,10 +125,17 @@
       answer(FlutterError(code: "print-failed", message: error.localizedDescription, details: nil))
     }
 
+    // WebKit ends its print on a thread of its own: the answer goes back to
+    // the main thread, the only one a channel may answer on. Answered
+    // there, the reply waited for the next event to wake the main thread —
+    // an export stood still until something was clicked.
     @objc private func printed(
       _ operation: NSPrintOperation, success: Bool, contextInfo: UnsafeMutableRawPointer?
     ) {
-      answer(success ? nil : FlutterError(code: "print-failed", message: "WebKit did not print", details: nil))
+      DispatchQueue.main.async {
+        self.answer(
+          success ? nil : FlutterError(code: "print-failed", message: "WebKit did not print", details: nil))
+      }
     }
 
     /// Answers the waiting print once, and lets the view go.
