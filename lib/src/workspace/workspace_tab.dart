@@ -11,9 +11,16 @@ final class WorkspaceTab {
     this.missing = false,
   });
 
+  /// A new tab (#1133, #1134): no note yet, the pane's launcher in its
+  /// place. A note opened while it shows fills it.
+  static const WorkspaceTab blank = WorkspaceTab('');
+
   /// The note's library-relative path, `/`-separated like every path the
-  /// library hands out.
+  /// library hands out; empty for [blank].
   final String path;
+
+  /// Whether this is a new tab, with no note in it.
+  bool get isBlank => path.isEmpty;
 
   /// Where the note was left.
   final NoteMemento memento;
