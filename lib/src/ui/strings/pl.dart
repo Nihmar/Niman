@@ -212,6 +212,8 @@ final class PolishStrings extends Strings {
   String get updateTestingBuild =>
       'Wersje testowe nie aktualizują się same: następną zainstaluj ręcznie.';
   @override
+  String get updateFromAppStore => 'App Store dba o aktualizacje Nimana.';
+  @override
   String get settingsSpellCheckTitle => 'Sprawdzanie pisowni';
   @override
   String get settingsSpellCheckSubtitle =>
@@ -1691,6 +1693,8 @@ final class PolishStrings extends Strings {
   @override
   String get appMenuHelp => 'Pomoc';
   @override
+  String get macMenuWindow => 'Okno';
+  @override
   String get paletteGroupJournal => 'Dziennik';
   @override
   String get journalToday => 'Dzisiejszy wpis';
@@ -2208,6 +2212,9 @@ final class PolishStrings extends Strings {
   String get openLibraryFolderName => 'Nazwa katalogu';
   @override
   String get openLibraryChooseFolder => 'Wybierz katalog biblioteki';
+  @override
+  String get openLibraryNoneInDocuments =>
+      'Nie ma tu jeszcze biblioteki: utwórz ją.';
   @override
   String get openLibraryChooseParent =>
       'Wybierz katalog, w którym będzie utworzona biblioteka';

@@ -211,6 +211,8 @@ final class GalicianStrings extends Strings {
   String get updateTestingBuild =>
       'As versións de proba non se actualizan soas: instala a seguinte á man.';
   @override
+  String get updateFromAppStore => 'A App Store mantén Niman ao día.';
+  @override
   String get settingsSpellCheckTitle => 'Comprobación ortográfica';
   @override
   String get settingsSpellCheckSubtitle =>
@@ -1684,6 +1686,8 @@ final class GalicianStrings extends Strings {
   @override
   String get appMenuHelp => 'Axuda';
   @override
+  String get macMenuWindow => 'Xanela';
+  @override
   String get paletteGroupJournal => 'Diario';
   @override
   String get journalToday => 'Entrada de hoxe';
@@ -2199,6 +2203,9 @@ final class GalicianStrings extends Strings {
   String get openLibraryFolderName => 'Nome do cartafol';
   @override
   String get openLibraryChooseFolder => 'Escoller o cartafol da biblioteca';
+  @override
+  String get openLibraryNoneInDocuments =>
+      'Aínda non hai ningunha biblioteca aquí: crea unha.';
   @override
   String get openLibraryChooseParent =>
       'Escoller o cartafol onde se creará a biblioteca';

@@ -214,6 +214,8 @@ final class BulgarianStrings extends Strings {
       'Тестовите версии не се актуализират сами: инсталирайте следващата '
       'ръчно.';
   @override
+  String get updateFromAppStore => 'App Store поддържа Niman актуален.';
+  @override
   String get settingsSpellCheckTitle => 'Проверка за правопис';
   @override
   String get settingsSpellCheckSubtitle =>
@@ -1685,6 +1687,8 @@ final class BulgarianStrings extends Strings {
   @override
   String get appMenuHelp => 'Помощ';
   @override
+  String get macMenuWindow => 'Прозорец';
+  @override
   String get paletteGroupJournal => 'Дневник';
   @override
   String get journalToday => 'Днешен запис';
@@ -2203,6 +2207,9 @@ final class BulgarianStrings extends Strings {
   String get openLibraryFolderName => 'Име на папка';
   @override
   String get openLibraryChooseFolder => 'Изберете папката на библиотеката';
+  @override
+  String get openLibraryNoneInDocuments =>
+      'Тук все още няма библиотека: създайте една.';
   @override
   String get openLibraryChooseParent =>
       'Изберете папката, в която ще бъде създадена библиотеката';

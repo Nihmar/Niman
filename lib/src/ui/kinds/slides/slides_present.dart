@@ -1,8 +1,8 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:niman/src/core/host_platform.dart';
 import 'package:niman/src/core/keep_awake.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
@@ -73,7 +73,7 @@ Future<void> presentSlides(
           // Not laid out for a phone: a key that asks for it there (Alt+F5
           // on a hardware keyboard) presents the slide alone (#673).
           presenter: presenter && !phone,
-          touch: Platform.isAndroid,
+          touch: HostPlatform.isMobile,
           exitWhenUpright: phone && byTurning,
         ),
       ),
@@ -106,7 +106,7 @@ Future<bool> _takeScreen(
 }) async {
   var wasFullScreen = false;
   try {
-    if (Platform.isAndroid) {
+    if (HostPlatform.isMobile) {
       await SystemChrome.setEnabledSystemUIMode(
         on ? SystemUiMode.immersiveSticky : SystemUiMode.edgeToEdge,
       );

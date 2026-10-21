@@ -212,6 +212,8 @@ final class CatalanStrings extends Strings {
       'Les versions de prova no s’actualitzen soles: instal·leu la següent a '
       'mà.';
   @override
+  String get updateFromAppStore => "L'App Store manté el Niman al dia.";
+  @override
   String get settingsSpellCheckTitle => 'Comprovació d’ortografia';
   @override
   String get settingsSpellCheckSubtitle =>
@@ -1705,6 +1707,8 @@ final class CatalanStrings extends Strings {
   @override
   String get appMenuHelp => 'Ajuda';
   @override
+  String get macMenuWindow => 'Finestra';
+  @override
   String get paletteGroupJournal => 'Diari';
   @override
   String get journalToday => 'Entrada d’avui';
@@ -2223,6 +2227,9 @@ final class CatalanStrings extends Strings {
   String get openLibraryFolderName => 'Nom de la carpeta';
   @override
   String get openLibraryChooseFolder => 'Tria la carpeta de la biblioteca';
+  @override
+  String get openLibraryNoneInDocuments =>
+      'Encara no hi ha cap biblioteca aquí: creeu-ne una.';
   @override
   String get openLibraryChooseParent =>
       'Tria la carpeta on es crearà la biblioteca';

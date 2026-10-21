@@ -205,6 +205,8 @@ final class TurkishStrings extends Strings {
   String get updateTestingBuild =>
       'Test sürümleri kendini güncellemez: bir sonrakini elle yükleyin.';
   @override
+  String get updateFromAppStore => "App Store, Niman'ı güncel tutar.";
+  @override
   String get settingsSpellCheckTitle => 'Yazım denetimi';
   @override
   String get settingsSpellCheckSubtitle =>
@@ -1656,6 +1658,8 @@ final class TurkishStrings extends Strings {
   @override
   String get appMenuHelp => 'Yardım';
   @override
+  String get macMenuWindow => 'Pencere';
+  @override
   String get paletteGroupJournal => 'Günlük';
   @override
   String get journalToday => 'Bugünün girdisi';
@@ -2167,6 +2171,9 @@ final class TurkishStrings extends Strings {
   String get openLibraryFolderName => 'Klasör adı';
   @override
   String get openLibraryChooseFolder => 'Kütüphane klasörünü seç';
+  @override
+  String get openLibraryNoneInDocuments =>
+      'Burada henüz kitaplık yok: bir tane oluşturun.';
   @override
   String get openLibraryChooseParent =>
       'Kütüphanenin oluşturulacağı klasörü seç';

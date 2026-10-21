@@ -200,6 +200,7 @@ final class AppStrings {
       _s.updateInstallPermissionMissing;
   static String get updateReleasePage => _s.updateReleasePage;
   static String get updateTestingBuild => _s.updateTestingBuild;
+  static String get updateFromAppStore => _s.updateFromAppStore;
   static String get settingsSpellCheckTitle => _s.settingsSpellCheckTitle;
   static String get settingsSpellCheckSubtitle => _s.settingsSpellCheckSubtitle;
   static String get spellCheckDictionaryTitle => _s.spellCheckDictionaryTitle;
@@ -1093,6 +1094,7 @@ final class AppStrings {
   static String get paletteGroupGoTo => _s.paletteGroupGoTo;
   static String get appMenuTooltip => _s.appMenuTooltip;
   static String get appMenuHelp => _s.appMenuHelp;
+  static String get macMenuWindow => _s.macMenuWindow;
   static String get paletteGroupJournal => _s.paletteGroupJournal;
   static String get journalToday => _s.journalToday;
   static String get journalPrevious => _s.journalPrevious;
@@ -1333,6 +1335,7 @@ final class AppStrings {
   static String get openLibraryCreateTitle => _s.openLibraryCreateTitle;
   static String get openLibraryFolderName => _s.openLibraryFolderName;
   static String get openLibraryChooseFolder => _s.openLibraryChooseFolder;
+  static String get openLibraryNoneInDocuments => _s.openLibraryNoneInDocuments;
   static String get openLibraryChooseParent => _s.openLibraryChooseParent;
   static String get openLibraryUnsupported => _s.openLibraryUnsupported;
 

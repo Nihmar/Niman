@@ -227,13 +227,18 @@ enum AppCommand {
 @immutable
 final class AppShortcut {
   /// Creates a registry entry.
-  const new(this.command, this.activation);
+  const new(this.command, this.activation, {this.apple});
 
   /// What runs.
   final AppCommand command;
 
   /// The keys that run it.
   final ShortcutActivator activation;
+
+  /// The keys on a Mac or an iPad, where [activation] with ⌘ for Ctrl
+  /// ([hostKeys]) would take a key the system keeps or one that means
+  /// something else there; null when that swap is right.
+  final SingleActivator? apple;
 }
 
 /// Every app accelerator as shipped, in the order the reference lists
@@ -262,6 +267,8 @@ nimanAppShortcuts = List<AppShortcut>.unmodifiable(const <AppShortcut>[
   AppShortcut(
     AppCommand.quickNote,
     SingleActivator(LogicalKeyboardKey.keyQ, control: true),
+    // ⌘Q quits.
+    apple: SingleActivator(LogicalKeyboardKey.keyQ, control: true),
   ),
   // Not Ctrl+Alt: Linux desktops switch workspaces on it, and on
   // Windows it is AltGr, which types letters on many layouts.
@@ -288,18 +295,25 @@ nimanAppShortcuts = List<AppShortcut>.unmodifiable(const <AppShortcut>[
   AppShortcut(
     AppCommand.nextTab,
     SingleActivator(LogicalKeyboardKey.tab, control: true),
+    // ⌘Tab switches applications; ⌃Tab is the tabs' key on a Mac too.
+    apple: SingleActivator(LogicalKeyboardKey.tab, control: true),
   ),
   AppShortcut(
     AppCommand.previousTab,
     SingleActivator(LogicalKeyboardKey.tab, control: true, shift: true),
+    apple: SingleActivator(LogicalKeyboardKey.tab, control: true, shift: true),
   ),
+  // On a Mac ⌥← moves the caret by a word, and ⌘[ ⌘] are back and
+  // forward in Finder and Safari.
   AppShortcut(
     AppCommand.noteBack,
     SingleActivator(LogicalKeyboardKey.arrowLeft, alt: true),
+    apple: SingleActivator(LogicalKeyboardKey.bracketLeft, meta: true),
   ),
   AppShortcut(
     AppCommand.noteForward,
     SingleActivator(LogicalKeyboardKey.arrowRight, alt: true),
+    apple: SingleActivator(LogicalKeyboardKey.bracketRight, meta: true),
   ),
   AppShortcut(
     AppCommand.splitRight,
@@ -323,7 +337,12 @@ nimanAppShortcuts = List<AppShortcut>.unmodifiable(const <AppShortcut>[
   ),
   // F11, the key that means fullscreen elsewhere: the issue's
   // Ctrl+Shift+Z is redo in both editors.
-  AppShortcut(AppCommand.zenMode, SingleActivator(LogicalKeyboardKey.f11)),
+  // F11 shows the desktop on a Mac; ⌃⌘F is its full screen.
+  AppShortcut(
+    AppCommand.zenMode,
+    SingleActivator(LogicalKeyboardKey.f11),
+    apple: SingleActivator(LogicalKeyboardKey.keyF, control: true, meta: true),
+  ),
   // F2, the file managers' rename (#707).
   AppShortcut(AppCommand.renameNote, SingleActivator(LogicalKeyboardKey.f2)),
   // F5 is what presents in every slide app (#534).
@@ -383,6 +402,8 @@ nimanAppShortcuts = List<AppShortcut>.unmodifiable(const <AppShortcut>[
   AppShortcut(
     AppCommand.tabSettings,
     SingleActivator(LogicalKeyboardKey.digit5, control: true),
+    // Every Mac app's settings are ⌘, (the menu bar's Niman menu).
+    apple: SingleActivator(LogicalKeyboardKey.comma, meta: true),
   ),
   AppShortcut(
     AppCommand.tabHome,
@@ -477,9 +498,19 @@ String appCommandLabel(AppCommand command) => switch (command) {
   AppCommand.revealInTree => AppStrings.revealInTree,
 };
 
-/// The keys as a human reads them ("Ctrl+Shift+N").
-String describeActivator(ShortcutActivator activation) {
+/// The keys as a human reads them: "Ctrl+Shift+N", or on a Mac or an
+/// iPad the system's glyphs in its order, "⌃⌥⇧⌘N".
+String describeActivator(ShortcutActivator activation, {bool? apple}) {
   if (activation is! SingleActivator) return activation.toString();
+  if (apple ?? platformModifierIsMeta) {
+    return <String>[
+      if (activation.control) '⌃',
+      if (activation.alt) '⌥',
+      if (activation.shift) '⇧',
+      if (activation.meta) '⌘',
+      keyName(activation.trigger),
+    ].join();
+  }
   return <String>[
     if (activation.control) 'Ctrl',
     if (activation.meta) 'Meta',
@@ -498,9 +529,29 @@ String tooltipWithKeys(String label, SingleActivator? keys) {
 }
 
 /// Whether the platform's own shortcut modifier is Meta rather than
-/// Control: macOS, and nowhere else.
+/// Control: macOS, and an iPad's keyboard (⌘).
 bool get platformModifierIsMeta =>
-    defaultTargetPlatform == TargetPlatform.macOS;
+    defaultTargetPlatform == TargetPlatform.macOS ||
+    defaultTargetPlatform == TargetPlatform.iOS;
+
+/// Shipped [keys] as this host presses them (docs/records/apple-platforms.md).
+///
+/// The tables are written with Ctrl, the modifier Linux, Windows and
+/// Android press; a Mac or an iPad presses ⌘ in its place — or [apple],
+/// where that swap would take a key the system keeps. Only shipped keys go
+/// through here: a key the user chose is the key they pressed.
+SingleActivator hostKeys(SingleActivator keys, {SingleActivator? apple}) {
+  if (!platformModifierIsMeta) return keys;
+  if (apple != null) return apple;
+  if (!keys.control) return keys;
+  return SingleActivator(
+    keys.trigger,
+    meta: true,
+    shift: keys.shift,
+    alt: keys.alt,
+    includeRepeats: keys.includeRepeats,
+  );
+}
 
 /// The key the editors' find bar opens on (issue #381): `Ctrl+F`, or
 /// `Meta+F` on macOS, which binds no `Ctrl+F` at all.
@@ -582,7 +633,7 @@ Map<ShortcutActivator, VoidCallback> appShortcutBindings(
     if (map.isChanged(shortcut.command)) continue;
     for (final keys
         in _alsoShipped[shortcut.command] ?? const <SingleActivator>[]) {
-      bindings[keys] = handler;
+      bindings[hostKeys(keys)] = handler;
     }
   }
   return bindings;

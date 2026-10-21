@@ -208,6 +208,8 @@ final class NorwegianStrings extends Strings {
   String get updateTestingBuild =>
       'Testversjoner oppdaterer seg ikke selv: installer den neste manuelt.';
   @override
+  String get updateFromAppStore => 'App Store holder Niman oppdatert.';
+  @override
   String get settingsSpellCheckTitle => 'Stavekontroll';
   @override
   String get settingsSpellCheckSubtitle =>
@@ -1665,6 +1667,8 @@ final class NorwegianStrings extends Strings {
   @override
   String get appMenuHelp => 'Hjelp';
   @override
+  String get macMenuWindow => 'Vindu';
+  @override
   String get paletteGroupJournal => 'Dagbok';
   @override
   String get journalToday => 'Dagens innlegg';
@@ -2173,6 +2177,9 @@ final class NorwegianStrings extends Strings {
   String get openLibraryFolderName => 'Mappenavn';
   @override
   String get openLibraryChooseFolder => 'Velg biblioteksmappen';
+  @override
+  String get openLibraryNoneInDocuments =>
+      'Ikke noe bibliotek her ennå: opprett et.';
   @override
   String get openLibraryChooseParent =>
       'Velg mappen biblioteket skal opprettes i';

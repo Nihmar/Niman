@@ -10,6 +10,7 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:meta/meta.dart';
+import 'package:niman/src/core/creation_time_apple.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/isolate_gauge.dart';
 import 'package:path/path.dart' as p;
@@ -94,7 +95,7 @@ void _walkDir(
         isDir: true,
         size: 0,
         modified: st.modified,
-        created: createdOf(st),
+        created: createdOf(st, dir.path),
       ),
     );
   }
@@ -115,7 +116,7 @@ void _walkDir(
           isDir: false,
           size: st.size,
           modified: st.modified,
-          created: createdOf(st),
+          created: createdOf(st, ent.path),
         ),
       );
     } else {
@@ -213,7 +214,7 @@ DirListing _listOne(String root, String abs, List<String> pending) {
   try {
     final stat = Directory(abs).statSync();
     final modified = stat.modified;
-    final created = createdOf(stat);
+    final created = createdOf(stat, abs);
     final children = Directory(abs).listSync(followLinks: false)
       ..sort((a, b) => p.basename(a.path).compareTo(p.basename(b.path)));
     for (final ent in children) {
@@ -230,7 +231,7 @@ DirListing _listOne(String root, String abs, List<String> pending) {
           isDir: true,
           size: 0,
           modified: st.modified,
-          created: createdOf(st),
+          created: createdOf(st, ent.path),
         );
         entries.add(entry);
         subdirs.add(entry);
@@ -243,7 +244,7 @@ DirListing _listOne(String root, String abs, List<String> pending) {
             isDir: false,
             size: st.size,
             modified: st.modified,
-            created: createdOf(st),
+            created: createdOf(st, ent.path),
           ),
         );
       } else {
@@ -401,11 +402,19 @@ final class DiskProbe {
   final DateTime created;
 }
 
-/// When [st] says the file was created (#726): Windows keeps a birth
-/// time — `dart:io` exposes it as the stat's `changed` — and the other
-/// systems keep none, so the modification time stands in there.
-DateTime createdOf(FileStat st) =>
-    Platform.isWindows ? st.changed : st.modified;
+/// When the file at [path] was created (#726), from its stat [st]: Windows
+/// keeps a birth time — `dart:io` exposes it as the stat's `changed` — and
+/// so do a Mac and an iPhone, read apart since `dart:io` does not report
+/// it there (creation_time_apple.dart). Linux and Android keep none
+/// `dart:io` reports, so the modification time stands in, as where an
+/// Apple read fails.
+DateTime createdOf(FileStat st, String path) {
+  if (Platform.isWindows) return st.changed;
+  if (Platform.isMacOS || Platform.isIOS) {
+    return appleCreationTime(path) ?? st.modified;
+  }
+  return st.modified;
+}
 
 /// Probes [paths] (exists? directory? size? mtime?) — top-level so it can
 /// run on a background isolate via Isolate.run: on Android every stat is
@@ -428,7 +437,7 @@ DiskProbe _probePath(String path) {
     isDir: isDir,
     size: type == FileSystemEntityType.file ? st.size : 0,
     modified: st.modified,
-    created: createdOf(st),
+    created: createdOf(st, path),
   );
 }
 

@@ -1,6 +1,8 @@
 // T-PP-11: the close guard over a fake window — it asks before closing
 // while a tracked note is dirty, stays out of the way when clean, and
 // degrades to tracking only when the platform is unavailable.
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/ui/close_guard.dart';
@@ -51,6 +53,7 @@ void main() {
   tearDown(() {
     CloseToTray.enabled.value = false;
     CloseToTray.trayShown.value = true;
+    CloseToTray.dockReopens = Platform.isMacOS;
   });
 
   // #209: with close-to-tray on, the × hides the window and nothing ends.
@@ -94,6 +97,8 @@ void main() {
       final window = FakeWindowController();
       CloseToTray.enabled.value = true;
       CloseToTray.trayShown.value = false;
+      // Linux and Windows: a Mac's Dock would bring the window back.
+      CloseToTray.dockReopens = false;
       await tester.pumpWidget(_host(tracker, window));
       await tester.pump();
       expect(window.preventHistory, isEmpty, reason: 'nothing to hide into');
@@ -102,6 +107,23 @@ void main() {
       await tester.pumpAndSettle();
       expect(window.hideCalls, 0);
       expect(window.closeCalls, 1);
+    });
+
+    testWidgets('on a Mac the × hides with no tray icon: the Dock is there', (
+      tester,
+    ) async {
+      final tracker = UnsavedTracker();
+      final window = FakeWindowController();
+      CloseToTray.enabled.value = true;
+      CloseToTray.trayShown.value = false;
+      CloseToTray.dockReopens = true;
+      await tester.pumpWidget(_host(tracker, window));
+      await tester.pump();
+
+      window.onCloseRequested!();
+      await tester.pumpAndSettle();
+      expect(window.hideCalls, 1);
+      expect(window.closeCalls, 0);
     });
 
     testWidgets("the tray's Quit closes for real, asking about unsaved", (

@@ -206,6 +206,9 @@ final class BasqueStrings extends Strings {
   String get updateTestingBuild =>
       'Proba-bertsioak ez dira berez eguneratzen: instalatu hurrengoa eskuz.';
   @override
+  String get updateFromAppStore =>
+      'App Storeak Niman eguneratuta mantentzen du.';
+  @override
   String get settingsSpellCheckTitle => 'Ortografia-egiaztapena';
   @override
   String get settingsSpellCheckSubtitle =>
@@ -1682,6 +1685,8 @@ final class BasqueStrings extends Strings {
   @override
   String get appMenuHelp => 'Laguntza';
   @override
+  String get macMenuWindow => 'Leihoa';
+  @override
   String get paletteGroupJournal => 'Egunkaria';
   @override
   String get journalToday => 'Gaurko sarrera';
@@ -2199,6 +2204,9 @@ final class BasqueStrings extends Strings {
   String get openLibraryFolderName => 'Biltegiko izena';
   @override
   String get openLibraryChooseFolder => 'Hautatu bibliotekaren karpeta';
+  @override
+  String get openLibraryNoneInDocuments =>
+      'Oraindik ez dago liburutegirik hemen: sortu bat.';
   @override
   String get openLibraryChooseParent => 'Hautatu karpeta non sortuko den';
   @override

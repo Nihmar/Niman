@@ -9,6 +9,7 @@ import 'package:niman/src/capture/browser/page_browser.dart';
 import 'package:niman/src/capture/web_capture.dart';
 import 'package:niman/src/ui/capture/background_capture.dart';
 import 'package:niman/src/ui/capture/capture_dialog.dart';
+import 'package:niman/src/ui/capture/ios_capture_notifier.dart';
 import 'package:niman/src/ui/capture/plugin_capture_notifier.dart';
 
 /// The capture's services.
@@ -43,14 +44,17 @@ Future<WebReading> readPageToCapture(
   void Function(CaptureProgress progress)? onProgress,
 }) => readWebPage(url, browser: browser, onProgress: onProgress);
 
-/// The app's capture services: on Android the notifications say how a
-/// background capture goes; elsewhere none runs — the desktop's dialog
-/// stays on screen until the note is made.
+/// The app's capture services: on a phone the notifications say how a
+/// background capture goes — Android's, or iOS's in the shape it allows;
+/// elsewhere none runs — the desktop's dialog stays on screen until the
+/// note is made.
 final captureServicesProvider = Provider<CaptureServices>(
   (ref) => CaptureServices(
     background: BackgroundCapture(
       notifier: Platform.isAndroid
           ? PluginCaptureNotifier()
+          : Platform.isIOS
+          ? IosCaptureNotifier()
           : const SilentCaptureNotifier(),
     ),
   ),

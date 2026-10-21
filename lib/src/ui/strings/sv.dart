@@ -210,6 +210,8 @@ final class SwedishStrings extends Strings {
   String get updateTestingBuild =>
       'Testversioner uppdaterar inte sig själva: installera nästa för hand.';
   @override
+  String get updateFromAppStore => 'App Store håller Niman uppdaterat.';
+  @override
   String get settingsSpellCheckTitle => 'Stavkontroll';
   @override
   String get settingsSpellCheckSubtitle =>
@@ -1679,6 +1681,8 @@ final class SwedishStrings extends Strings {
   @override
   String get appMenuHelp => 'Hjälp';
   @override
+  String get macMenuWindow => 'Fönster';
+  @override
   String get paletteGroupJournal => 'Dagbok';
   @override
   String get journalToday => 'Dagens anteckning';
@@ -2195,6 +2199,8 @@ final class SwedishStrings extends Strings {
   String get openLibraryFolderName => 'Mappnamn';
   @override
   String get openLibraryChooseFolder => 'Välj biblioteksmappen';
+  @override
+  String get openLibraryNoneInDocuments => 'Inget bibliotek här än: skapa ett.';
   @override
   String get openLibraryChooseParent => 'Välj mappen biblioteket ska skapas i';
   @override

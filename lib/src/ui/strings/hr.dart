@@ -211,6 +211,8 @@ final class CroatianStrings extends Strings {
   String get updateTestingBuild =>
       'Testne verzije se ne ažuriraju same: sljedeću instalirajte ručno.';
   @override
+  String get updateFromAppStore => 'App Store ažurira Niman.';
+  @override
   String get settingsSpellCheckTitle => 'Kontrola pravopisa';
   @override
   String get settingsSpellCheckSubtitle =>
@@ -1666,6 +1668,8 @@ final class CroatianStrings extends Strings {
   @override
   String get appMenuHelp => 'Pomoć';
   @override
+  String get macMenuWindow => 'Prozor';
+  @override
   String get paletteGroupJournal => 'Dnevnik';
   @override
   String get journalToday => 'Današnji unos';
@@ -2179,6 +2183,9 @@ final class CroatianStrings extends Strings {
   String get openLibraryFolderName => 'Ime direktorija';
   @override
   String get openLibraryChooseFolder => 'Odaberi direktorij biblioteke';
+  @override
+  String get openLibraryNoneInDocuments =>
+      'Ovdje još nema knjižnice: izradite je.';
   @override
   String get openLibraryChooseParent =>
       'Odaberi direktorij u kojem će se kreirati biblioteka';

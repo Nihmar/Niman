@@ -184,6 +184,17 @@ void main() {
     expect(done, isTrue);
   });
 
+  test('a platform without file watching starts unwatched', () async {
+    // iOS: Directory.watch throws there, and a library must still open.
+    final watcher = FileWatcher(root.path, watchSupported: false);
+    final batches = await runWith(watcher, (batches) async {
+      expect(watcher.healthy, isFalse);
+      await File(p.join(root.path, 'a.md')).writeAsString('x');
+      await Future<void>.delayed(const Duration(milliseconds: 400));
+    });
+    expect(batches, isEmpty);
+  });
+
   test('restarting a stopped watcher throws', () async {
     final watcher = FileWatcher(root.path);
     await watcher.start();

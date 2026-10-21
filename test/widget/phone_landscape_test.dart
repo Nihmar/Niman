@@ -1,8 +1,8 @@
 // #849: a phone is a phone, on every orientation. Turned to landscape it is
 // 780-915 dp wide, wider than the shell's old width-only line, and used to
 // get the desktop's rail, panes and floating Settings. The shape now asks
-// what the device is: Android with a shortest side under 600 dp is a phone
-// and keeps the phone's layout; a tablet keeps the wide one, with the
+// what the device is: Android or iOS with a shortest side under 600 dp is a
+// phone and keeps the phone's layout; a tablet keeps the wide one, with the
 // touch device's insets, Back, rail and palette.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -29,6 +29,12 @@ const _tablet = Size(1024, 768);
 const _shortTablet = Size(960, 600);
 
 final _android = TargetPlatformVariant.only(TargetPlatform.android);
+
+/// The two touch systems: an iPhone is a phone as an Android phone is.
+const _mobile = TargetPlatformVariant({
+  TargetPlatform.android,
+  TargetPlatform.iOS,
+});
 
 void main() {
   late FakeLibrarySession controller;
@@ -105,7 +111,7 @@ void main() {
   final palette = find.byKey(const Key('command-palette'));
 
   group('the line between a phone and a tablet', () {
-    testWidgets('a phone is Android under 600 dp on its shortest side', (
+    testWidgets('a phone is Android or iOS under 600 dp on its shortest side', (
       tester,
     ) async {
       late bool phone;
@@ -129,7 +135,7 @@ void main() {
       await tester.pump();
       expect(phone, isFalse, reason: '600 dp is the first tablet');
       expect(wide, isTrue);
-    }, variant: _android);
+    }, variant: _mobile);
 
     testWidgets('a static override never rebuilt still follows the window', (
       tester,
@@ -298,7 +304,7 @@ void main() {
         findsOne,
       );
       expect(paneTabs, findsNothing);
-    }, variant: _android);
+    }, variant: _mobile);
 
     testWidgets('turning it keeps the shape, the note and its Back', (
       tester,

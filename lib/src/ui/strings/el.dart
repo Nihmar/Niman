@@ -213,6 +213,8 @@ final class GreekStrings extends Strings {
       'Οι δοκιμαστικές εκδόσεις δεν ενημερώνονται μόνες τους: εγκαταστήστε '
       'την επόμενη χειροκίνητα.';
   @override
+  String get updateFromAppStore => 'Το App Store ενημερώνει το Niman.';
+  @override
   String get settingsSpellCheckTitle => 'Έλεγχος ορθογραφίας';
   @override
   String get settingsSpellCheckSubtitle =>
@@ -1727,6 +1729,8 @@ final class GreekStrings extends Strings {
   @override
   String get appMenuHelp => 'Βοήθεια';
   @override
+  String get macMenuWindow => 'Παράθυρο';
+  @override
   String get paletteGroupJournal => 'Ημερολόγιο';
   @override
   String get journalToday => 'Σημερινή καταχώριση';
@@ -2258,6 +2262,9 @@ final class GreekStrings extends Strings {
   String get openLibraryFolderName => 'Όνομα φακέλου';
   @override
   String get openLibraryChooseFolder => 'Επιλογή φακέλου βιβλιοθήκης';
+  @override
+  String get openLibraryNoneInDocuments =>
+      'Δεν υπάρχει ακόμη βιβλιοθήκη εδώ: δημιουργήστε μία.';
   @override
   String get openLibraryChooseParent =>
       'Επιλογή φακέλου όπου θα δημιουργηθεί η βιβλιοθήκη';

@@ -207,6 +207,8 @@ final class HungarianStrings extends Strings {
   String get updateTestingBuild =>
       'A tesztverziók nem frissülnek maguktól: a következőt kézzel telepítse.';
   @override
+  String get updateFromAppStore => 'Az App Store naprakészen tartja a Nimant.';
+  @override
   String get settingsSpellCheckTitle => 'Helyesírásellenőrzés';
   @override
   String get settingsSpellCheckSubtitle =>
@@ -1684,6 +1686,8 @@ final class HungarianStrings extends Strings {
   @override
   String get appMenuHelp => 'Súgó';
   @override
+  String get macMenuWindow => 'Ablak';
+  @override
   String get paletteGroupJournal => 'Napló';
   @override
   String get journalToday => 'Mai bejegyzés';
@@ -2201,6 +2205,9 @@ final class HungarianStrings extends Strings {
   String get openLibraryFolderName => 'A mappa neve';
   @override
   String get openLibraryChooseFolder => 'A könyvtár mappájának kiválasztása';
+  @override
+  String get openLibraryNoneInDocuments =>
+      'Még nincs itt könyvtár: hozz létre egyet.';
   @override
   String get openLibraryChooseParent =>
       'A mappa kiválasztása, amelybe a könyvtár létrehozandó';

@@ -210,6 +210,8 @@ final class SlovakStrings extends Strings {
   String get updateTestingBuild =>
       'Testovacie zostavy sa neaktualizujú samy: ďalšiu nainštalujte ručne.';
   @override
+  String get updateFromAppStore => 'Niman aktualizuje App Store.';
+  @override
   String get settingsSpellCheckTitle => 'Kontrola pravopisu';
   @override
   String get settingsSpellCheckSubtitle =>
@@ -1669,6 +1671,8 @@ final class SlovakStrings extends Strings {
   @override
   String get appMenuHelp => 'Pomocník';
   @override
+  String get macMenuWindow => 'Okno';
+  @override
   String get paletteGroupJournal => 'Denník';
   @override
   String get journalToday => 'Dnešný záznam';
@@ -2179,6 +2183,9 @@ final class SlovakStrings extends Strings {
   String get openLibraryFolderName => 'Názov priečinoku';
   @override
   String get openLibraryChooseFolder => 'Vybrať priečinok knižnice';
+  @override
+  String get openLibraryNoneInDocuments =>
+      'Zatiaľ tu nie je žiadna knižnica: vytvorte ju.';
   @override
   String get openLibraryChooseParent =>
       'Vybrať priečinok, do ktorého sa knižnica vytvorí';

@@ -206,6 +206,8 @@ final class EnglishStrings extends Strings {
   String get updateTestingBuild =>
       'Test builds do not update themselves: install the next one by hand.';
   @override
+  String get updateFromAppStore => 'The App Store keeps Niman up to date.';
+  @override
   String get settingsSpellCheckTitle => 'Check spelling';
   @override
   String get settingsSpellCheckSubtitle =>
@@ -1659,6 +1661,8 @@ final class EnglishStrings extends Strings {
   @override
   String get appMenuHelp => 'Help';
   @override
+  String get macMenuWindow => 'Window';
+  @override
   String get paletteGroupJournal => 'Journal';
   @override
   String get journalToday => "Today's entry";
@@ -2164,6 +2168,8 @@ final class EnglishStrings extends Strings {
   String get openLibraryFolderName => 'Folder name';
   @override
   String get openLibraryChooseFolder => 'Choose the library folder';
+  @override
+  String get openLibraryNoneInDocuments => 'No library here yet: create one.';
   @override
   String get openLibraryChooseParent =>
       'Choose the folder the library will be created in';

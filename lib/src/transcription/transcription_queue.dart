@@ -7,6 +7,7 @@ import 'package:niman/src/core/download/download_state.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/transcription/clip_preparation.dart';
 import 'package:niman/src/transcription/speech_transcriber.dart';
+import 'package:niman/src/transcription/system_audio_decoder.dart';
 import 'package:niman/src/transcription/transcription_job.dart';
 import 'package:niman/src/transcription/transcription_model.dart';
 import 'package:niman/src/transcription/transcription_models.dart';
@@ -32,12 +33,18 @@ final class TranscriptionQueue extends ChangeNotifier {
     WavConverter? convert,
     Future<Directory> Function()? workDirectory,
     bool? packageConverts,
+    AudioDecoder? decode,
   }) : _transcriber = transcriber ?? WhisperTranscriber(),
        _convert = convert ?? convertWavForWhisper,
        _workDirectory =
            workDirectory ??
            (() => Directory.systemTemp.createTemp('niman_transcribe_')),
-       _packageConverts = packageConverts ?? Platform.isAndroid {
+       _packageConverts = packageConverts ?? Platform.isAndroid,
+       // A test that pins the host with [packageConverts] pins its decoder
+       // too: none unless it hands one.
+       _decode = packageConverts == null
+           ? decode ?? systemAudioDecoder()
+           : decode {
     models.addListener(_onModels);
   }
 
@@ -48,6 +55,9 @@ final class TranscriptionQueue extends ChangeNotifier {
   final WavConverter _convert;
   final Future<Directory> Function() _workDirectory;
   final bool _packageConverts;
+
+  /// Decodes other formats to WAV where the system can (Apple), or null.
+  final AudioDecoder? _decode;
 
   final List<TranscriptionJob> _jobs = [];
   TranscriptionJob? _running;
@@ -64,9 +74,12 @@ final class TranscriptionQueue extends ChangeNotifier {
   List<TranscriptionJob> get jobs => List.unmodifiable(_jobs);
 
   /// Whether [audioPath] can be transcribed here: WAV everywhere, other
-  /// formats only where the package has FFmpeg (Android).
+  /// formats where the package has FFmpeg (Android) or the system decodes
+  /// them (AVFoundation on the Apple platforms).
   bool supports(String audioPath) =>
-      _packageConverts || p.extension(audioPath).toLowerCase() == '.wav';
+      _packageConverts ||
+      _decode != null ||
+      p.extension(audioPath).toLowerCase() == '.wav';
 
   /// The job for [clipTarget] in [notePath] not taken yet, if any.
   TranscriptionJob? jobFor(String notePath, String clipTarget) {
@@ -223,6 +236,7 @@ final class TranscriptionQueue extends ChangeNotifier {
         work: work,
         convert: _convert,
         packageConverts: _packageConverts,
+        decode: _decode,
         label: '$job',
       );
       if (!_jobs.contains(job)) return;

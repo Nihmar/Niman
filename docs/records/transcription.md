@@ -60,7 +60,7 @@ progress, and the text goes into the clip's description.
 | File | Role |
 |------|------|
 | `transcription/wav_convert.dart`, `wav_resampler.dart` | WAV (PCM 8/16/24/32, float 32/64, extensible, any channels) to 16 kHz mono PCM16 in an isolate, streamed in blocks. Windowed-sinc filter, cutoff at 90 % of the lower Nyquist, 256 precomputed phases. |
-| `transcription/clip_preparation.dart` | The clip copied into a temp work folder: converted when WAV; on Android other formats are copied for the package's FFmpeg; elsewhere refused. |
+| `transcription/clip_preparation.dart` | The clip copied into a temp work folder: converted when WAV; on Android other formats are copied for the package's FFmpeg; on macOS and iOS they are decoded to WAV by AVFoundation (`transcription/system_audio_decoder.dart`, `packages/niman_apple`) and then converted; elsewhere refused. |
 | `transcription/speech_transcriber.dart` | `SpeechTranscriber` seam; `WhisperTranscriber` (keeps the model loaded, suppresses non-speech tokens, turns the package's `null` into an error); `cleanTranscript` drops `[...]` markers and joins segments. |
 | `transcription/transcription_job.dart`, `transcription_queue.dart` | `TranscriptionQueue` behind `transcriptionQueueProvider`: one job at a time, jobs wait for a downloading model, a cancelled running job's result is discarded, the model is released when the queue empties, finished jobs wait until their note takes them. |
 | `ui/kinds/audio_clip_menu.dart` | The clip menu, split out of the bubble, with the Transcribe item. |
@@ -181,8 +181,12 @@ to 16 kHz mono is tracked separately in
   rejects anything else ("WAV file must be 16 kHz"). The app records
   with the `record` defaults (44.1 kHz), so every clip needs a
   conversion first. Before transcribing, the package tries ffmpeg
-  (`ffmpeg_kit` on Android, `ffmpeg` from PATH on desktop) and silently
-  passes the file through when that fails.
+  (`ffmpeg_kit` on Android, `ffmpeg` from PATH on Linux and Windows) and
+  silently passes the file through when that fails. On macOS and iOS
+  there is no FFmpeg: the app overrides `ffmpeg_kit_flutter_new_min` with
+  an Android-only copy (`packages/ffmpeg_kit_flutter_new_min/README.md`)
+  whose run fails at once there, so the package reads the WAV the app
+  already prepared.
 - **The package converts next to the input.** It writes
   `<audio>.wav` beside the source file, which would land inside the
   library. Always hand it a temp copy.

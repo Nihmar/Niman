@@ -208,6 +208,8 @@ final class FinnishStrings extends Strings {
   String get updateTestingBuild =>
       'Testiversiot eivät päivitä itseään: asenna seuraava käsin.';
   @override
+  String get updateFromAppStore => 'App Store pitää Nimanin ajan tasalla.';
+  @override
   String get settingsSpellCheckTitle => 'Oikoluku';
   @override
   String get settingsSpellCheckSubtitle =>
@@ -1688,6 +1690,8 @@ final class FinnishStrings extends Strings {
   @override
   String get appMenuHelp => 'Ohje';
   @override
+  String get macMenuWindow => 'Ikkuna';
+  @override
   String get paletteGroupJournal => 'Päiväkirja';
   @override
   String get journalToday => 'Tämän päivän merkintä';
@@ -2203,6 +2207,9 @@ final class FinnishStrings extends Strings {
   String get openLibraryFolderName => 'Kansion nimi';
   @override
   String get openLibraryChooseFolder => 'Valitse kirjaston kansio';
+  @override
+  String get openLibraryNoneInDocuments =>
+      'Täällä ei ole vielä kirjastoa: luo sellainen.';
   @override
   String get openLibraryChooseParent =>
       'Valitse kansio, jossa kirjasto luodaan';

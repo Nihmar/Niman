@@ -1,7 +1,7 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:niman/src/core/host_platform.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/storage_access.dart';
 import 'package:niman/src/db/app_database.dart';
@@ -169,8 +169,7 @@ final class _OpenLibraryScreenState extends State<OpenLibraryScreen> {
                   // A file needs no library to be read or edited (#77);
                   // the desktops only, where a picked file is the file
                   // itself rather than a copy.
-                  if (widget.outsideFiles != null &&
-                      (Platform.isLinux || Platform.isWindows))
+                  if (widget.outsideFiles != null && HostPlatform.isDesktop)
                     Padding(
                       padding: const EdgeInsets.only(top: 8),
                       child: TextButton.icon(
@@ -269,7 +268,10 @@ final class _OpenLibraryScreenState extends State<OpenLibraryScreen> {
 
   Future<void> _createNew() async {
     _pickerError = null;
-    final parent = await _pickDirectory(AppStrings.openLibraryChooseParent);
+    final parent = await _pickDirectory(
+      AppStrings.openLibraryChooseParent,
+      forParent: true,
+    );
     if (parent == null) return;
     final name = await _promptName();
     if (name == null || name.isEmpty) return;
@@ -279,9 +281,9 @@ final class _OpenLibraryScreenState extends State<OpenLibraryScreen> {
 
   /// Opens the native directory picker; `null` when the user cancels or
   /// the pick fails, which then says why.
-  Future<String?> _pickDirectory(String title) async {
+  Future<String?> _pickDirectory(String title, {bool forParent = false}) async {
     _setBusy(true);
-    final pick = await pickLibraryFolder(title);
+    final pick = await pickLibraryFolder(context, title, forParent: forParent);
     if (!mounted) return null;
     _setBusy(false);
     switch (pick) {

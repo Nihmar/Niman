@@ -12,6 +12,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/key_map.dart';
@@ -60,11 +61,11 @@ final class AppTitleBar extends StatelessWidget {
   /// The window seam the buttons act through.
   final WindowController window;
 
-  Widget _title(ThemeData theme) => Align(
+  Widget _title(ThemeData theme, double inset) => Align(
     alignment: Alignment.centerLeft,
     child: Padding(
       // The name starts at the panel's edge under it (#708).
-      padding: const EdgeInsets.only(left: _titleInset, right: 8),
+      padding: EdgeInsets.only(left: inset, right: 8),
       child: MarqueeText(
         text: title,
         style: theme.textTheme.labelMedium?.copyWith(
@@ -77,6 +78,13 @@ final class AppTitleBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    // On a Mac the toggle comes after the traffic lights rather than over
+    // the rail's glyphs; the tabs still start at the tree's edge.
+    final gap = _systemWindowButtons ? _trafficLights : _toggleGap;
+    final leading = gap + _toggleSize;
+    // Past the lights the panel's edge is behind the toggle: the name
+    // simply follows it.
+    final titleInset = _systemWindowButtons ? 8.0 : _titleInset;
     return Material(
       key: const Key('title-bar'),
       color: theme.colorScheme.surfaceContainer,
@@ -84,7 +92,7 @@ final class AppTitleBar extends StatelessWidget {
         height: 38,
         child: Row(
           children: [
-            const SizedBox(width: _toggleGap),
+            SizedBox(width: gap),
             ValueListenableBuilder<KeyMap>(
               // The keys are remappable (#159), so the tooltip is built
               // from the map in force instead of a hard-coded pair (#498):
@@ -96,7 +104,7 @@ final class AppTitleBar extends StatelessWidget {
                     ? AppStrings.hideSidebarTooltip
                     : AppStrings.showSidebarTooltip;
                 // Its width fixed, not left to the platform's density: the
-                // tabs are placed past [_leading], and a desktop drew the
+                // tabs are placed past the toggle, and a desktop drew the
                 // button 6 px narrower than a phone (34 against 40), which
                 // put them that far left of the panes under them.
                 return SizedBox.square(
@@ -120,8 +128,8 @@ final class AppTitleBar extends StatelessWidget {
               // The title keeps the tree's width; the tabs start at its
               // edge. Everything that is not a tab still drags.
               SizedBox(
-                width: (tabsStart - _leading).clamp(_tabsGap, double.infinity),
-                child: DragToMoveArea(child: _title(theme)),
+                width: (tabsStart - leading).clamp(_tabsGap, double.infinity),
+                child: DragToMoveArea(child: _title(theme, titleInset)),
               ),
               Expanded(
                 child: tabs(const DragToMoveArea(child: SizedBox.expand())),
@@ -131,10 +139,10 @@ final class AppTitleBar extends StatelessWidget {
                 // The whole middle is the drag area (double-click
                 // maximizes, handled by the widget); the title rides at
                 // its left.
-                child: DragToMoveArea(child: _title(theme)),
+                child: DragToMoveArea(child: _title(theme, titleInset)),
               ),
             ?menu,
-            _WindowButtons(window: window),
+            if (!_systemWindowButtons) _WindowButtons(window: window),
           ],
         ),
       ),
@@ -177,7 +185,7 @@ final class SlimTitleBar extends StatelessWidget {
         height: 38,
         child: Row(
           children: [
-            const SizedBox(width: 4),
+            SizedBox(width: _systemWindowButtons ? _trafficLights : 4),
             leading,
             Expanded(
               child: DragToMoveArea(
@@ -192,7 +200,7 @@ final class SlimTitleBar extends StatelessWidget {
               ),
             ),
             ...actions,
-            _WindowButtons(window: window),
+            if (!_systemWindowButtons) _WindowButtons(window: window),
           ],
         ),
       ),
@@ -267,12 +275,19 @@ const double _toggleSize = 34;
 /// rail's glyphs under it (#708).
 const double _toggleGap = ShellRail.glyphCentre - _toggleSize / 2;
 
-/// Left of the title: the leading gap and the sidebar toggle.
-const double _leading = _toggleGap + _toggleSize;
-
 /// The title's room before the name: what puts it at the panel's left
 /// edge, past the toggle (#708).
-const double _titleInset = ShellRail.panelStart - _leading;
+const double _titleInset = ShellRail.panelStart - (_toggleGap + _toggleSize);
+
+/// Whether the system draws the window's buttons: macOS's traffic lights,
+/// at the bar's left over a transparent title bar
+/// (docs/records/apple-platforms.md). The bar then draws none of its own
+/// and starts past them.
+bool get _systemWindowButtons => defaultTargetPlatform == TargetPlatform.macOS;
+
+/// The room the traffic lights take at the bar's left, their margins
+/// included.
+const double _trafficLights = 76;
 
 /// The least room between the sidebar toggle and the first tab, a guard
 /// only: the tabs start at the panes' island, which with the tree hidden

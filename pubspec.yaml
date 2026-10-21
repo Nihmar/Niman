@@ -18,6 +18,11 @@ dependencies:
   archive: ^4.3.0
   audioplayers: ^6.8.1
 
+  # nativeapi's C layer, pinned to the version nativeapi resolves: its tray
+  # draws a template image on a Mac (the menu bar's own black or white),
+  # which nativeapi 0.2.4 does not expose to Dart.
+  cnativeapi: 0.2.7
+
   # The sync's automatic triggers: Wi-Fi only, and a retry as soon as the
   # network comes back (docs/records/sync.md, "Queue and triggers").
   connectivity_plus: ^7.3.1
@@ -79,6 +84,11 @@ dependencies:
   # verdict; see the Risks section of plan/m-platform-parity.md).
   nativeapi: 0.2.4
 
+  # The native code macOS and iOS share (docs/records/apple-platforms.md):
+  # AVFoundation's audio decoding in place of FFmpeg, for one.
+  niman_apple:
+    path: packages/niman_apple
+
   package_info_plus: ^10.2.1
   path: ^1.9.1
   path_provider: ^2.1.6
@@ -107,9 +117,10 @@ dependencies:
   url_launcher: ^6.3.2
 
   # On-device speech-to-text (whisper.cpp) for the audio notes'
-  # "Trascrivi" action. Pulls ffmpeg_kit_flutter_new_min on Android;
-  # on desktop it only reads 16 kHz mono PCM16 WAV unless `ffmpeg` is on
-  # PATH, so clips are converted before they reach it.
+  # "Trascrivi" action. Pulls ffmpeg_kit_flutter_new_min on Android (and
+  # on nothing else: see dependency_overrides); elsewhere it only reads
+  # 16 kHz mono PCM16 WAV unless `ffmpeg` is on PATH, so clips are
+  # converted before they reach it.
   whisper_ggml: ^2.6.0
 
   # The desktop window is owned by this package (T-PP-16 spike winner):
@@ -140,6 +151,13 @@ dev_dependencies:
 
   # Strict lint set for the whole project.
   very_good_analysis: ^11.0.0
+
+# whisper_ggml's FFmpeg, without its iOS and macOS frameworks: the Apple
+# builds decode other formats with AVFoundation instead
+# (packages/ffmpeg_kit_flutter_new_min/README.md). Android is unchanged.
+dependency_overrides:
+  ffmpeg_kit_flutter_new_min:
+    path: packages/ffmpeg_kit_flutter_new_min
 
 # The following section is specific to Flutter packages.
 flutter:

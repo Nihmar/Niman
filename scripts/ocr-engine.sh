@@ -7,9 +7,16 @@
 #
 #   scripts/ocr-engine.sh <target> <out dir>
 #   targets: linux-x64 | android-arm64-v8a | android-x86_64 | windows-x64
+#            | macos-universal (macos-arm64 and macos-x86_64, joined)
+#            | ios-arm64 | ios-sim-arm64 (the simulator on Apple silicon)
 #
-# Android needs ANDROID_NDK_HOME; Windows runs under Git Bash with MSVC.
-# The library lands in <out dir> as niman-ocr-<target>.<so|dll>.
+# Android needs ANDROID_NDK_HOME; Windows runs under Git Bash with MSVC;
+# the Mac needs Xcode, cmake and ninja.
+# The library lands in <out dir> as niman-ocr-<target>.<so|dll|dylib>.
+# The Mac's is bundled in the app rather than downloaded: under the
+# hardened runtime the app loads only a library signed with its own team
+# (docs/records/apple-platforms.md). iOS's too, inside a framework: iOS
+# loads no code an app downloaded, and takes no bare library in a bundle.
 set -euo pipefail
 
 TESSERACT_VERSION=5.5.3
@@ -18,6 +25,23 @@ CPU_FEATURES_VERSION=v0.11.0
 
 target="${1:?target}"
 out="$(mkdir -p "${2:?out dir}" && cd "$2" && pwd)"
+
+# Tesseract picks its SIMD sources (NEON or AVX) for a build's one
+# processor: a universal CMake build linked NEON calls into its x86_64
+# half. Each half is built on its own, then the two are joined.
+if [ "$target" = macos-universal ]; then
+  for arch in arm64 x86_64; do
+    "$0" "macos-$arch" "$out/.macos-$arch" >/dev/null || exit 1
+  done
+  dest="$out/niman-ocr-macos-universal.dylib"
+  lipo -create "$out/.macos-arm64/niman-ocr-macos-arm64.dylib" \
+    "$out/.macos-x86_64/niman-ocr-macos-x86_64.dylib" -output "$dest"
+  rm -rf "$out/licenses"
+  mv "$out/.macos-arm64/licenses" "$out/licenses"
+  rm -rf "$out/.macos-arm64" "$out/.macos-x86_64"
+  echo "$dest $(wc -c <"$dest") bytes"
+  exit 0
+fi
 work="${OCR_ENGINE_WORK:-${TMPDIR:-/tmp}/niman/ocr-engine}/$target"
 mkdir -p "$work"
 cd "$work"
@@ -59,6 +83,37 @@ case "$target" in
       "-DCMAKE_C_FLAGS=$gc_flags" "-DCMAKE_CXX_FLAGS=$gc_flags"
       "-DCMAKE_SHARED_LINKER_FLAGS=-Wl,-z,max-page-size=16384 $elf_link")
     strip_cmd=("$(ls -d "$ndk"/toolchains/llvm/prebuilt/*/bin | head -1)/llvm-strip" --strip-unneeded)
+    ;;
+  macos-arm64 | macos-x86_64)
+    # One Mac architecture, linked the Mach-O way: ld64 dead-strips where
+    # ELF garbage-collects sections, and an exported symbols list does what
+    # the version script does. The processor is named, as a cross build's
+    # is, so Tesseract picks that one's SIMD sources. CMake 4 refuses
+    # Leptonica's old minimum version unless told which policies to take.
+    printf '_Tess*\n' >"$work/exports.txt"
+    common+=("-DCMAKE_OSX_ARCHITECTURES=${target#macos-}"
+      -DCMAKE_SYSTEM_NAME=Darwin "-DCMAKE_SYSTEM_PROCESSOR=${target#macos-}"
+      -DCMAKE_OSX_DEPLOYMENT_TARGET=14.0 -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+      "-DCMAKE_C_FLAGS=$gc_flags" "-DCMAKE_CXX_FLAGS=$gc_flags"
+      "-DCMAKE_SHARED_LINKER_FLAGS=-Wl,-dead_strip -Wl,-exported_symbols_list,$work/exports.txt")
+    strip_cmd=(strip -x)
+    lib_glob='libtesseract*.dylib'
+    ext=dylib
+    ;;
+  ios-arm64 | ios-sim-arm64)
+    # An iPhone's, or the Apple silicon simulator's: the Mac's link, for
+    # iOS 17 and the SDK of either.
+    printf '_Tess*\n' >"$work/exports.txt"
+    sdk=iphoneos
+    if [ "$target" = ios-sim-arm64 ]; then sdk=iphonesimulator; fi
+    common+=(-DCMAKE_SYSTEM_NAME=iOS "-DCMAKE_OSX_SYSROOT=$sdk"
+      -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_SYSTEM_PROCESSOR=arm64
+      -DCMAKE_OSX_DEPLOYMENT_TARGET=17.0 -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+      "-DCMAKE_C_FLAGS=$gc_flags" "-DCMAKE_CXX_FLAGS=$gc_flags"
+      "-DCMAKE_SHARED_LINKER_FLAGS=-Wl,-dead_strip -Wl,-exported_symbols_list,$work/exports.txt")
+    strip_cmd=(strip -x)
+    lib_glob='libtesseract*.dylib'
+    ext=dylib
     ;;
   windows-x64)
     generator=(-G "Visual Studio 17 2022" -A x64)
@@ -103,6 +158,12 @@ lib="$(find tesseract-build -name "$lib_glob" -type f | head -1)"
 dest="$out/niman-ocr-$target.$ext"
 cp "$lib" "$dest"
 "${strip_cmd[@]}" "$dest"
+# The name the app's bundle loads it by, wherever the build put it: a
+# Mac's beside its Frameworks' others, iOS's as its framework's binary.
+case "$target" in
+  ios-*) install_name_tool -id @rpath/niman_ocr.framework/niman_ocr "$dest" ;;
+  macos-*) install_name_tool -id @rpath/libniman_ocr.dylib "$dest" ;;
+esac
 mkdir -p "$out/licenses"
 cp tesseract-src/LICENSE "$out/licenses/tesseract.txt"
 cp leptonica-src/leptonica-license.txt "$out/licenses/leptonica.txt"

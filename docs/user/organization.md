@@ -242,8 +242,8 @@ notes on this device, so a restart or a switch of library finds the tree as
 you left it, with the folders above the open note open. Renaming or moving
 a folder keeps what was open under it open; deleting it forgets them.
 
-Windows reports a file's creation time and the index records it, and a
-save keeps it: editing an old note does not make it new. Linux and Android
+Windows, macOS and iOS report a file's creation time and the index records
+it, and a save keeps it: editing an old note does not make it new. Linux and Android
 do not offer one through the file API the app uses, so **Date created** is
 the modification time there — the order above it (see
 [platforms](platforms.md#date-created)).
@@ -870,9 +870,9 @@ most-accurate-and-hungry, and a downloaded model can be deleted there to
 free its space.
 
 A WAV recording transcribes on every platform. A recording in another
-format transcribes on Android (a clip is converted first) but not on the
-desktops, where the menu says so under **Transcribe**; convert it to WAV
-with a tool of your own first.
+format (m4a, mp3, AAC…) transcribes on Android and on a Mac (a clip is
+converted first) but not on Linux and Windows, where the menu says so under
+**Transcribe**; convert it to WAV with a tool of your own first.
 
 ## Exporting
 

@@ -209,6 +209,8 @@ final class PortugueseStrings extends Strings {
       'As versões de teste não se atualizam sozinhas: instale a seguinte à '
       'mão.';
   @override
+  String get updateFromAppStore => 'A App Store mantém o Niman atualizado.';
+  @override
   String get settingsSpellCheckTitle => 'Conferir ortografia';
   @override
   String get settingsSpellCheckSubtitle =>
@@ -1681,6 +1683,8 @@ final class PortugueseStrings extends Strings {
   @override
   String get appMenuHelp => 'Ajuda';
   @override
+  String get macMenuWindow => 'Janela';
+  @override
   String get paletteGroupJournal => 'Diário';
   @override
   String get journalToday => 'Entrada de hoje';
@@ -2197,6 +2201,9 @@ final class PortugueseStrings extends Strings {
   String get openLibraryFolderName => 'Nome da pasta';
   @override
   String get openLibraryChooseFolder => 'Escolha a pasta da biblioteca';
+  @override
+  String get openLibraryNoneInDocuments =>
+      'Ainda não há nenhuma biblioteca aqui: crie uma.';
   @override
   String get openLibraryChooseParent =>
       'Escolha a pasta em que a biblioteca será criada';

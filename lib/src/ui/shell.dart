@@ -16,6 +16,7 @@ import 'package:niman/src/core/app_theme.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/frame_cost.dart';
 import 'package:niman/src/core/frame_log.dart';
+import 'package:niman/src/core/host_platform.dart';
 import 'package:niman/src/core/language.dart';
 import 'package:niman/src/core/launch_requests.dart';
 import 'package:niman/src/core/logging.dart';
@@ -119,6 +120,7 @@ import 'package:niman/src/ui/kinds/flashcards/review_tab.dart';
 import 'package:niman/src/ui/kinds/flashcards/review_view.dart';
 import 'package:niman/src/ui/kinds/slides/slides_present.dart';
 import 'package:niman/src/ui/link_update_dialog.dart';
+import 'package:niman/src/ui/mac_menu_bar.dart';
 import 'package:niman/src/ui/note_editor_keys.dart';
 import 'package:niman/src/ui/note_menu.dart';
 import 'package:niman/src/ui/note_tab_bar.dart';
@@ -269,9 +271,11 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
     // And the commands pinned in its palette (#208).
     await PinnedCommands.load(session);
     // Whether the window's × hides Niman to the tray (#209): the tray is
-    // the desktops', so nowhere else hides.
+    // the desktops', so nowhere else hides. On a Mac it always does, to the
+    // Dock, with no setting (decision 11 of docs/records/apple-platforms.md).
     CloseToTray.enabled.value =
-        (Platform.isLinux || Platform.isWindows) && await session.closeToTray;
+        Platform.isMacOS ||
+        ((Platform.isLinux || Platform.isWindows) && await session.closeToTray);
   }
 
   /// Applies the stored UI language (T-L10N-03).
@@ -3870,7 +3874,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       windowTitle: narrow ? _windowTitle : _libraryName,
       buildTabs: narrow ? null : _buildTabs,
       tabsStart: _tabsStart,
-      menu: narrow
+      // A Mac's commands are in the system's menu bar ([MacMenuBar]).
+      menu: narrow || systemMenuBar
           ? null
           : AppMenuButton(
               handlers: _commandHandlers,
@@ -3914,16 +3919,20 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       // A link pasted where nothing else takes a paste — the tree, the read
       // view — is a page to capture (#531): a text field and the editor
       // answer the paste first.
-      () => Actions(
-        actions: <Type, Action<Intent>>{
-          PasteTextIntent: CapturePasteAction(
-            (url) => unawaited(_captureFlow.capture(context, url: url)),
+      () => MacMenuBar(
+        handlers: _commandHandlers,
+        features: () => _features,
+        child: Actions(
+          actions: <Type, Action<Intent>>{
+            PasteTextIntent: CapturePasteAction(
+              (url) => unawaited(_captureFlow.capture(context, url: url)),
+            ),
+          },
+          child: _mouseHistory(
+            narrow
+                ? NarrowShellLayout(props: props)
+                : WideShellLayout(props: props),
           ),
-        },
-        child: _mouseHistory(
-          narrow
-              ? NarrowShellLayout(props: props)
-              : WideShellLayout(props: props),
         ),
       ),
     );
@@ -3953,7 +3962,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
 
   /// The mouse's side buttons over the window, on a desktop (#700). A
   /// phone's back button is the system's Back, which keeps its meaning.
-  Widget _mouseHistory(Widget child) => Platform.isLinux || Platform.isWindows
+  Widget _mouseHistory(Widget child) => HostPlatform.isDesktop
       ? MouseHistoryButtons(
           onBack: () => unawaited(_noteHistory.back()),
           onForward: () => unawaited(_noteHistory.forward()),
@@ -4485,7 +4494,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     CommandNeed.openNote => _shownNote != null,
     CommandNeed.textNote => _shownNote != null && !_shownIsAttachment,
     CommandNeed.wideWindow => _wide,
-    CommandNeed.desktop => Platform.isLinux || Platform.isWindows,
+    CommandNeed.desktop => HostPlatform.isDesktop,
     CommandNeed.notInZen => !_inZen,
     CommandNeed.zenRoom => _immersive.zen.on || _zenPossible,
     CommandNeed.previewToggle => _previewToggleVisible,
@@ -5816,7 +5825,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// opens a note is also what raises the IME, and the "keyboard on open"
   /// setting decides that — so the caret is asked for on a desktop only.
   static bool get _desktop => switch (defaultTargetPlatform) {
-    TargetPlatform.linux || TargetPlatform.windows => true,
+    TargetPlatform.linux ||
+    TargetPlatform.windows ||
+    TargetPlatform.macOS => true,
     _ => false,
   };
 

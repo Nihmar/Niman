@@ -1,7 +1,9 @@
 # Platform notes
 
 Supported today: **Android** (minSdk 34, Android 14), **Linux** (Wayland),
-**Windows**. macOS/iOS are not built yet, but the code is kept portable.
+**Windows**, and **macOS** (14 and later) in **preview** — see
+[macOS](#macos) for what it still lacks. **iOS and iPadOS** (17 and later)
+run but are not released yet — see [iOS](#ios).
 New tests must be portable too (see [conventions](../dev/conventions.md)).
 
 Export is one feature on every platform: Markdown, HTML, PDF and EPUB
@@ -12,7 +14,8 @@ everywhere; PDF goes through each platform's own printer (below).
 Slide notes ([slides](slides.md)) present on every platform, the screen
 kept on while they do: Android through the window's keep-screen-on flag,
 Linux through GTK's idle inhibit (the desktop's own screen saver and
-lock wait), Windows through `SetThreadExecutionState`. The presenter
+lock wait), Windows through `SetThreadExecutionState`, a Mac through a
+power assertion. The presenter
 view shares the one window with the slides: putting the slides on a
 second screen and the presenter view on the first needs a second window,
 which Flutter offers only behind an experimental flag on the desktops and
@@ -211,6 +214,132 @@ the two agree.
   browsers write with the page it came from (see
   [web capture](web-capture.md#paste-as-markdown)).
 
+## macOS
+
+**Preview.** The Mac is a desktop: what this page says of the Linux and
+Windows window — the [density](#density), the tabs in the title bar,
+renaming in a tree row, dragging into a note, opening a file outside a
+library, previewing a link on hover — holds there too. It stays a preview
+until the home-screen widgets reach it (they come after iOS's), and the
+list at the end says what else it still lacks.
+
+- **Getting it:** `niman-<V>-macos.dmg` on the release page — open it and
+  drag Niman onto Applications. One app for Apple silicon and Intel Macs.
+  It is not yet signed with an Apple Developer ID, so on the first launch
+  macOS refuses it: open System Settings → Privacy & Security and choose
+  **Open Anyway** (a right click → Open no longer gets past it since
+  macOS 15).
+- **Updates** download the new disk image and open it; drag Niman onto
+  Applications again to replace it.
+- **A library is any folder**: the app is not sandboxed, so it reads and
+  writes where the library is, as on Linux.
+- **The window:** Niman's own title bar beside the system's traffic
+  lights. The × hides the window and the app stays in the Dock — a click
+  on its icon brings it back — and `⌘Q` quits, asking first about notes
+  with unsaved edits. There is no *Close to the tray* setting: closing
+  already does that.
+- **The menu bar** holds every command, grouped as the command palette
+  groups them, each with its key; Settings is `⌘,`. A menu item shows no
+  key where the note needs that key first (`⌘B` stays bold). Niman's icon
+  in the menu bar, drawn in the bar's own black or white, opens the quick
+  actions menu. Keys use `⌘` (see [shortcuts](shortcuts.md)).
+- **Reminders** for `todo.txt` and `calendar.txt` are scheduled with the
+  system, so they arrive with Niman closed, as on Android; macOS asks for
+  permission the first time one is set.
+- **Spell check** is the system's own (the one TextEdit and Mail use),
+  in the languages the Mac has; the per-library personal dictionary
+  applies on top.
+- **PDF export** goes through WebKit, the engine behind Safari: paginated
+  A4 with real, selectable text, a note's or a folder's, nothing to
+  install. **Web capture** runs a page with too little text in WebKit
+  too, keeping nothing between captures (see [web capture](web-capture.md)).
+- **Text recognition:** the engine comes inside the app — a Mac loads
+  only libraries signed with the app — and the languages are downloaded as
+  elsewhere (see [text recognition](text-recognition.md)).
+- **Transcription** reads WAV and, decoded by the system, m4a, mp3, AAC
+  and the other formats macOS plays.
+- **Dropping files, folders and links** on the window opens, imports or
+  captures them, with the frame Linux draws while a drag is over it.
+- A tree row's right-click menu can **show the note in Finder**, selected.
+- **Opening a `.md` from Finder:** Niman is in its *Open With* menu, as an
+  alternate — the default stays the app you chose. Double-clicking a note
+  set to open with Niman, or dropping one on its Dock icon, opens it in the
+  Niman already running, or starts one.
+- **The Dock icon's menu** holds the same quick actions as the menu bar's
+  icon.
+- **Paste as Markdown** reads the clipboard's HTML the browsers write:
+  Safari, Chrome, Edge and Firefox, with the page it came from except from
+  Firefox.
+- **Slides** keep the screen on while they are presented.
+- **Date created** is the file's own creation time, kept across saves
+  (see [Date created](#date-created)).
+
+Still missing on a Mac:
+
+- the [home-screen widgets](widgets.md).
+
+The formulas' smoother drawing that Linux and Windows get is off on a Mac
+by design: its renderer already smooths their edges.
+
+## iOS
+
+**Not released yet.** The app runs on iPhones and iPads (iOS 17 and later),
+but is not on the App Store or TestFlight: that needs an Apple Developer
+account. An iPhone has the Android phone's layout and an iPad the Android
+tablet's — the layout follows the window, not the device — so what this
+page says of Android's screens holds there.
+
+- **Libraries live in Niman's own folder**, which Files shows as *On My
+  iPhone › Niman* (*On My iPad*): each folder there is a library, and you
+  and other apps see its `.md` files. Creating a library makes a folder
+  there; opening one lists them. A library leaves the device through
+  Niman's [WebDAV sync](sync.md) or a copy in Files. A folder elsewhere —
+  iCloud Drive, another app's storage — cannot be a library: iOS gives
+  such a folder's files out lazily, which a large library cannot be
+  scanned through. This is a decision for now, not an omission. Deleting
+  the app deletes its folder, libraries included.
+- **Updates** come from the App Store once Niman is there; the app does not
+  look for them itself.
+- **Reminders** for `todo.txt` and `calendar.txt` are scheduled with the
+  system, so they arrive with Niman closed, as on Android; iOS asks for
+  permission the first time one is set. iOS holds at most 64 at a time:
+  Niman schedules the 64 soonest, and the later ones each time it runs
+  after some of those have fired.
+- **Quick actions:** press and hold the icon (see
+  [shortcuts](shortcuts.md)).
+- **Opening a `.md` from Files** or another app's *Share* or *Open in*
+  opens it in Niman, in place: a note outside a library opens on its own.
+- **Spell check** is the system's own, in the languages the keyboards
+  have; the per-library personal dictionary applies on top.
+- **PDF export** goes through WebKit: paginated A4 with real, selectable
+  text, nothing to install. **Web capture** runs a page with too little
+  text in WebKit too (see [web capture](web-capture.md)).
+- **Web capture** starts from **New ▸ Capture web page**; iOS gives a
+  capture under way about half a minute once you leave Niman, and its end
+  is a notification (see [web capture](web-capture.md)).
+- **Sync** after you leave the app gets the same half minute (see
+  [sync](sync.md)).
+- **Text recognition:** the engine comes inside the app — iOS loads no
+  code an app downloads — and the languages are downloaded as elsewhere
+  (see [text recognition](text-recognition.md)).
+- **Transcription** reads WAV and, decoded by the system, m4a, mp3, AAC
+  and the other formats iOS plays.
+- **Link preview** is a long press in the read view, as on Android.
+- **Paste as Markdown** reads the HTML Safari and the other browsers put
+  on the clipboard.
+- **Slides** keep the screen on while they are presented.
+- **A hardware keyboard** gets the keys with `⌘`, as on a Mac (see
+  [shortcuts](shortcuts.md)).
+- **Date created** is the file's own creation time, kept across saves
+  (see [Date created](#date-created)).
+
+Still missing on iOS:
+
+- **Share → Niman** from other apps — text, files and pages — which needs a
+  share extension;
+- the [home-screen widgets](widgets.md);
+- a release: TestFlight first, then the App Store.
+
 ## Home
 
 On Linux, Windows and an Android tablet the [Home](home.md) is a grid
@@ -303,11 +432,11 @@ window and full screen on a phone ([flashcards](flashcards.md#studying)).
 
 ## Date created
 
-The tree's **Date created** order reads the creation time Windows keeps
-for every file. A save writes the note to a temporary file and renames
-it over the note; Windows would give the note the temporary file's
-creation time, so the save first copies the note's own onto it, and an
-edited note keeps the date it was created. Linux and Android report no
+The tree's **Date created** order reads the creation time Windows, macOS
+and iOS keep for every file. A save writes the note to a temporary file and
+renames it over the note; the system would give the note the temporary
+file's creation time, so the save first copies the note's own onto it, and
+an edited note keeps the date it was created. Linux and Android report no
 creation time through the file API the app uses, so there **Date
 created** is the last modification time — a decision, not an omission
 (#726, #759).

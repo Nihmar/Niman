@@ -1,0 +1,29 @@
+{
+  "": {
+    "swift-dependencies": "/Users/alessandromanente/Projects/Niman/packages/niman_apple/darwin/niman_apple/.build/index-build/arm64-apple-macosx/debug/niman_apple.build/primary.swiftdeps"
+  },
+  "/Users/alessandromanente/Projects/Niman/packages/niman_apple/darwin/niman_apple/Sources/niman_apple/AudioDecoder.swift": {
+    "dependencies": "/Users/alessandromanente/Projects/Niman/packages/niman_apple/darwin/niman_apple/.build/index-build/arm64-apple-macosx/debug/niman_apple.build/AudioDecoder.d",
+    "object": "/Users/alessandromanente/Projects/Niman/packages/niman_apple/darwin/niman_apple/.build/index-build/arm64-apple-macosx/debug/niman_apple.build/AudioDecoder.swift.o",
+    "swiftmodule": "/Users/alessandromanente/Projects/Niman/packages/niman_apple/darwin/niman_apple/.build/index-build/arm64-apple-macosx/debug/niman_apple.build/AudioDecoder~partial.swiftmodule",
+    "swift-dependencies": "/Users/alessandromanente/Projects/Niman/packages/niman_apple/darwin/niman_apple/.build/index-build/arm64-apple-macosx/debug/niman_apple.build/AudioDecoder.swiftdeps",
+    "diagnostics": "/Users/alessandromanente/Projects/Niman/packages/niman_apple/darwin/niman_apple/.build/index-build/arm64-apple-macosx/debug/niman_apple.build/AudioDecoder.dia"  },
+  "/Users/alessandromanente/Projects/Niman/packages/niman_apple/darwin/niman_apple/Sources/niman_apple/NimanApplePlugin.swift": {
+    "dependencies": "/Users/alessandromanente/Projects/Niman/packages/niman_apple/darwin/niman_apple/.build/index-build/arm64-apple-macosx/debug/niman_apple.build/NimanApplePlugin.d",
+    "object": "/Users/alessandromanente/Projects/Niman/packages/niman_apple/darwin/niman_apple/.build/index-build/arm64-apple-macosx/debug/niman_apple.build/NimanApplePlugin.swift.o",
+    "swiftmodule": "/Users/alessandromanente/Projects/Niman/packages/niman_apple/darwin/niman_apple/.build/index-build/arm64-apple-macosx/debug/niman_apple.build/NimanApplePlugin~partial.swiftmodule",
+    "swift-dependencies": "/Users/alessandromanente/Projects/Niman/packages/niman_apple/darwin/niman_apple/.build/index-build/arm64-apple-macosx/debug/niman_apple.build/NimanApplePlugin.swiftdeps",
+    "diagnostics": "/Users/alessandromanente/Projects/Niman/packages/niman_apple/darwin/niman_apple/.build/index-build/arm64-apple-macosx/debug/niman_apple.build/NimanApplePlugin.dia"  },
+  "/Users/alessandromanente/Projects/Niman/packages/niman_apple/darwin/niman_apple/Sources/niman_apple/PageReaderBridge.swift": {
+    "dependencies": "/Users/alessandromanente/Projects/Niman/packages/niman_apple/darwin/niman_apple/.build/index-build/arm64-apple-macosx/debug/niman_apple.build/PageReaderBridge.d",
+    "object": "/Users/alessandromanente/Projects/Niman/packages/niman_apple/darwin/niman_apple/.build/index-build/arm64-apple-macosx/debug/niman_apple.build/PageReaderBridge.swift.o",
+    "swiftmodule": "/Users/alessandromanente/Projects/Niman/packages/niman_apple/darwin/niman_apple/.build/index-build/arm64-apple-macosx/debug/niman_apple.build/PageReaderBridge~partial.swiftmodule",
+    "swift-dependencies": "/Users/alessandromanente/Projects/Niman/packages/niman_apple/darwin/niman_apple/.build/index-build/arm64-apple-macosx/debug/niman_apple.build/PageReaderBridge.swiftdeps",
+    "diagnostics": "/Users/alessandromanente/Projects/Niman/packages/niman_apple/darwin/niman_apple/.build/index-build/arm64-apple-macosx/debug/niman_apple.build/PageReaderBridge.dia"  },
+  "/Users/alessandromanente/Projects/Niman/packages/niman_apple/darwin/niman_apple/Sources/niman_apple/PdfBridge.swift": {
+    "dependencies": "/Users/alessandromanente/Projects/Niman/packages/niman_apple/darwin/niman_apple/.build/index-build/arm64-apple-macosx/debug/niman_apple.build/PdfBridge.d",
+    "object": "/Users/alessandromanente/Projects/Niman/packages/niman_apple/darwin/niman_apple/.build/index-build/arm64-apple-macosx/debug/niman_apple.build/PdfBridge.swift.o",
+    "swiftmodule": "/Users/alessandromanente/Projects/Niman/packages/niman_apple/darwin/niman_apple/.build/index-build/arm64-apple-macosx/debug/niman_apple.build/PdfBridge~partial.swiftmodule",
+    "swift-dependencies": "/Users/alessandromanente/Projects/Niman/packages/niman_apple/darwin/niman_apple/.build/index-build/arm64-apple-macosx/debug/niman_apple.build/PdfBridge.swiftdeps",
+    "diagnostics": "/Users/alessandromanente/Projects/Niman/packages/niman_apple/darwin/niman_apple/.build/index-build/arm64-apple-macosx/debug/niman_apple.build/PdfBridge.dia"  }
+}

@@ -212,6 +212,8 @@ final class UkrainianStrings extends Strings {
   String get updateTestingBuild =>
       'Тестові збірки не оновлюються самі: наступну встановіть вручну.';
   @override
+  String get updateFromAppStore => 'App Store оновлює Niman.';
+  @override
   String get settingsSpellCheckTitle => 'Перевірка орфографії';
   @override
   String get settingsSpellCheckSubtitle =>
@@ -1675,6 +1677,8 @@ final class UkrainianStrings extends Strings {
   @override
   String get appMenuHelp => 'Довідка';
   @override
+  String get macMenuWindow => 'Вікно';
+  @override
   String get paletteGroupJournal => 'Щоденник';
   @override
   String get journalToday => 'Сьогоднішній запис';
@@ -2188,6 +2192,9 @@ final class UkrainianStrings extends Strings {
   String get openLibraryFolderName => 'Назва папки';
   @override
   String get openLibraryChooseFolder => 'Обрати папку бібліотеки';
+  @override
+  String get openLibraryNoneInDocuments =>
+      'Тут ще немає бібліотеки: створіть її.';
   @override
   String get openLibraryChooseParent =>
       'Оберіть папку, в якій буде створено бібліотеку';

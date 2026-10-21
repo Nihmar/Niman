@@ -79,6 +79,109 @@ jobs:
   # LaunchIntentTest, ShareCopyTest) ran nowhere: the job above never starts
   # Gradle, and the release build compiles the main sources only (#813).
   # A job of its own, so it runs alongside the Dart one.
+  macos:
+    name: macOS test and build
+    # From phase 2 of docs/records/apple-platforms.md on, every pull request
+    # runs on a Mac too (decision 12): the suites, a build of the app, and
+    # the integration files, which run the real app as Linux's do.
+    runs-on: macos-26
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      # ninja builds the OCR engine the app bundles (cmake is on the
+      # image); tesseract brings the English model the live OCR case reads
+      # with, through that engine (NIMAN_OCR_ENGINE) — the library a Mac
+      # ships, not Homebrew's.
+      - name: Build tools and the English OCR model
+        run: brew install ninja tesseract
+
+      - run: flutter pub get
+
+      - name: OCR engine
+        run: ./scripts/ocr-engine.sh macos-universal build/ocr-engine
+
+      - name: Unit and widget tests
+        env:
+          NIMAN_OCR_ENGINE: ${{ github.workspace }}/build/ocr-engine/niman-ocr-macos-universal.dylib
+        run: flutter test
+
+      # The runner, the plugins' Swift and the Xcode build phases.
+      - name: Build the beta app
+        run: flutter build macos --debug --flavor beta --dart-define=APP_CHANNEL=testing
+
+      # One file per step, as on Linux; a Mac needs no virtual display.
+      - name: App boot
+        run: flutter test integration_test/app_boot_test.dart
+      - name: WebDAV sync end to end (macOS desktop)
+        run: flutter test integration_test/sync_e2e_test.dart -d macos
+
+  ios:
+    name: iOS build and simulator
+    # The iPhone app, beside the Mac's: its Swift and build phases, built
+    # for a device unsigned, and the integration files run in a simulator.
+    # The Dart suites are the Mac job's — they run on the host either way.
+    runs-on: macos-26
+    timeout-minutes: 90
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      # ninja builds the OCR engine the simulator's app bundles.
+      - name: Build tools
+        run: brew install ninja
+
+      - run: flutter pub get
+
+      - name: OCR engine (simulator)
+        run: ./scripts/ocr-engine.sh ios-sim-arm64 build/ocr-engine
+
+      # The device's own architecture and SDK: Swift built for a simulator
+      # only can hide what does not compile on an iPhone. Unsigned, and
+      # without OCR, whose phase skips a missing engine with a warning.
+      - name: Build the beta app for a device
+        run: flutter build ios --debug --no-codesign --flavor beta --dart-define=APP_CHANNEL=testing
+
+      - name: Boot an iPhone simulator
+        run: |
+          udid=$(xcrun simctl list devices available --json | jq -r '[.devices | to_entries[] | select(.key | contains("iOS")) | .value[] | select(.name | startswith("iPhone"))][0].udid')
+          xcrun simctl bootstatus "$udid" -b
+          echo "SIMULATOR=$udid" >> "$GITHUB_ENV"
+
+      # A run that never reaches the app sat silent for two hours once,
+      # after the Xcode build: the steps have a ceiling, the tool's verbose
+      # output goes to a file, and a failure prints its tail and the
+      # simulator's own log.
+      - name: App boot (iPhone simulator)
+        timeout-minutes: 25
+        run: flutter test integration_test/app_boot_test.dart -d "$SIMULATOR" --flavor beta -v > "$RUNNER_TEMP/app_boot.log" 2>&1
+      - name: WebDAV sync end to end (iPhone simulator)
+        timeout-minutes: 25
+        run: flutter test integration_test/sync_e2e_test.dart -d "$SIMULATOR" --flavor beta -v > "$RUNNER_TEMP/sync_e2e.log" 2>&1
+      - name: What the simulator runs said
+        if: failure()
+        run: |
+          for log in "$RUNNER_TEMP"/app_boot.log "$RUNNER_TEMP"/sync_e2e.log; do
+            [ -f "$log" ] && { echo "== $log"; tail -n 150 "$log"; }
+          done
+          echo "== simulator log"
+          xcrun simctl spawn "$SIMULATOR" log show --last 30m --style compact \
+            --predicate 'process == "Runner" OR subsystem == "com.apple.runningboard"' | tail -n 150
+
   android-unit:
     name: Android unit tests
     runs-on: ubuntu-latest

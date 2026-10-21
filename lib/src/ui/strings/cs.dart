@@ -210,6 +210,8 @@ final class CzechStrings extends Strings {
   String get updateTestingBuild =>
       'Testovací sestavení se neaktualizují sama: další nainstalujte ručně.';
   @override
+  String get updateFromAppStore => 'Niman aktualizuje App Store.';
+  @override
   String get settingsSpellCheckTitle => 'Kontrola pravopisu';
   @override
   String get settingsSpellCheckSubtitle =>
@@ -1664,6 +1666,8 @@ final class CzechStrings extends Strings {
   @override
   String get appMenuHelp => 'Nápověda';
   @override
+  String get macMenuWindow => 'Okno';
+  @override
   String get paletteGroupJournal => 'Deník';
   @override
   String get journalToday => 'Dnešní záznam';
@@ -2171,6 +2175,9 @@ final class CzechStrings extends Strings {
   String get openLibraryFolderName => 'Název složky';
   @override
   String get openLibraryChooseFolder => 'Vybrat složku knihovny';
+  @override
+  String get openLibraryNoneInDocuments =>
+      'Zatím tu není žádná knihovna: vytvořte ji.';
   @override
   String get openLibraryChooseParent =>
       'Vybrat složku, ve které se knihovna vytvoří';

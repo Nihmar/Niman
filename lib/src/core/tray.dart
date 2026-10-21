@@ -10,6 +10,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:cnativeapi/cnativeapi.dart' show cnativeApiBindings;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nativeapi/nativeapi.dart'
@@ -26,6 +27,8 @@ import 'package:nativeapi/nativeapi.dart'
         TrayIconRightClickedEvent;
 import 'package:niman/src/core/app_channel.dart';
 import 'package:niman/src/core/app_theme.dart';
+import 'package:niman/src/core/apple_app_events.dart';
+import 'package:niman/src/core/host_platform.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/shortcuts.dart';
 import 'package:niman/src/core/theme.dart';
@@ -44,7 +47,7 @@ enum TrayCommand {
 
 /// What the shell needs from the desktop tray.
 ///
-/// Implemented by [PlatformTrayService] (Linux/Windows) and
+/// Implemented by [PlatformTrayService] (the desktops) and
 /// [NoopTrayService] (elsewhere), plus a fake in widget tests.
 abstract interface class TrayService {
   /// Creates the tray icon: [openLabel] at the top, then [labels]' quick
@@ -90,12 +93,19 @@ abstract interface class TrayService {
 /// closed. The left click still brings the window back, the convention
 /// there.
 ///
-/// Elsewhere (macOS): the right click.
+/// macOS: the click, as every menu bar extra opens its menu; the window
+/// comes back from the menu's Open or from the Dock.
 ///
-/// [isLinux] and [isWindows] override the host platform for the test.
-ContextMenuTrigger trayContextMenuTrigger({bool? isLinux, bool? isWindows}) {
+/// [isLinux], [isWindows] and [isMacOS] override the host platform for the
+/// test.
+ContextMenuTrigger trayContextMenuTrigger({
+  bool? isLinux,
+  bool? isWindows,
+  bool? isMacOS,
+}) {
   if (isLinux ?? Platform.isLinux) return ContextMenuTrigger.clicked;
   if (isWindows ?? Platform.isWindows) return ContextMenuTrigger.none;
+  if (isMacOS ?? Platform.isMacOS) return ContextMenuTrigger.clicked;
   return ContextMenuTrigger.rightClicked;
 }
 
@@ -105,7 +115,7 @@ ContextMenuTrigger trayContextMenuTrigger({bool? isLinux, bool? isWindows}) {
 /// [isDesktop] overrides the host platform so a plain test can cover the
 /// branch that does not run here (T-PP-01).
 TrayService createTrayService({bool? isDesktop}) {
-  if (isDesktop ?? (Platform.isLinux || Platform.isWindows)) {
+  if (isDesktop ?? HostPlatform.isDesktop) {
     return PlatformTrayService();
   }
   return const NoopTrayService();
@@ -121,8 +131,15 @@ final trayServiceProvider = Provider<TrayService>((ref) {
 /// The `nativeapi` StatusNotifier tray.
 final class PlatformTrayService implements TrayService {
   /// Creates the service; [iconAsset] is a test seam (and the M7 branding
-  /// hook: the Niman mark is downscaled to `tray.png`).
-  new({this.iconAsset = 'assets/branding/tray.png'});
+  /// hook: the Niman mark is downscaled to `tray.png`). A Mac takes
+  /// `tray_template.png` instead: the tile with the N cut out, which the
+  /// menu bar draws in its own black or white, as it does every extra.
+  new({String? iconAsset})
+    : iconAsset =
+          iconAsset ??
+          (Platform.isMacOS
+              ? 'assets/branding/tray_template.png'
+              : 'assets/branding/tray.png');
 
   static const AppLogger _log = AppLogger(name: 'tray');
 
@@ -158,6 +175,9 @@ final class PlatformTrayService implements TrayService {
   @override
   Stream<TrayCommand> get commands => _commands.stream;
 
+  /// The Dock menu's choices (a Mac), once listened to.
+  StreamSubscription<String>? _dock;
+
   /// The labels the menu currently carries, so a repeat call with the same
   /// ones costs nothing.
   Map<ShortcutAction, String> _labels = const {};
@@ -172,6 +192,21 @@ final class PlatformTrayService implements TrayService {
     required String quitLabel,
   }) async {
     final ends = (open: openLabel, quit: quitLabel);
+    // A Mac's Dock icon menu holds the same quick actions, in the same
+    // words, and they run the way the tray's do.
+    if (Platform.isMacOS) {
+      unawaited(
+        AppleAppEvents.instance.setDockMenu([
+          for (final MapEntry(:key, :value) in labels.entries) (key.id, value),
+        ]),
+      );
+      _dock ??= AppleAppEvents.instance.dockActions.listen((id) {
+        if (ShortcutAction.fromId(id) case final action?) {
+          _log.debug('dock action: $id');
+          _actions.add(action);
+        }
+      });
+    }
     final existing = _tray;
     if (existing != null) {
       if (!mapEquals(_labels, labels) || _ends != ends) {
@@ -192,6 +227,13 @@ final class PlatformTrayService implements TrayService {
       if (icon != null) {
         _icon = icon;
         tray.icon = icon;
+        // Only its shape counts there: the system paints it to the bar.
+        if (Platform.isMacOS) {
+          cnativeApiBindings.native_tray_icon_set_icon_template(
+            tray.nativeHandle,
+            true,
+          );
+        }
       }
       final built = _buildMenu(labels, ends);
       if (built == null) {
@@ -202,7 +244,11 @@ final class PlatformTrayService implements TrayService {
       tray
         ..setContextMenu(built.menu)
         ..addListener((event) {
-          if (event is TrayIconClickedEvent) _activated.add(null);
+          // On a Mac the click opens the menu, so it does not also raise
+          // the window behind it.
+          if (event is TrayIconClickedEvent && !Platform.isMacOS) {
+            _activated.add(null);
+          }
           if (event is TrayIconRightClickedEvent) {
             _log.info(
               'tray: right click (trigger ${tray.getContextMenuTrigger()}, '
@@ -347,6 +393,8 @@ final class PlatformTrayService implements TrayService {
 
   @override
   Future<void> dispose() async {
+    await _dock?.cancel();
+    _dock = null;
     _tray?.dispose();
     _menu?.dispose();
     for (final item in _items) {

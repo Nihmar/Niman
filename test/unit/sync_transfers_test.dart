@@ -214,6 +214,9 @@ void _contract(_Build build) {
       final names = <String>{};
       final moves = <FileSystemEvent>[];
       final events = dir.watch().listen((event) {
+        // A Mac's FSEvents reports the watched folder itself too, which
+        // Linux's inotify does not: only what is inside it counts.
+        if (p.equals(event.path, dir.path)) return;
         if (event is FileSystemMoveEvent) moves.add(event);
         names.add(p.basename(event.path));
       });

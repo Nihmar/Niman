@@ -34,6 +34,21 @@ String? notificationRoute(NotificationResponse response) {
   return action == null || action.isEmpty ? response.payload : action;
 }
 
+/// Loads the timezone database and sets the local zone, which the
+/// scheduled notifications' instants are expressed in.
+Future<void> initializeReminderTimezone(AppLogger log) async {
+  tzdata.initializeTimeZones();
+  try {
+    final local = await FlutterTimezone.getLocalTimezone();
+    tz.setLocalLocation(tz.getLocation(local.identifier));
+    log.info('todo reminders: timezone ${local.identifier}');
+  } on Object catch (error) {
+    // Scheduling falls back to tz.local (UTC). Instants still line up,
+    // since a TZDateTime.from conversion preserves them, but say so.
+    log.warning('todo reminders: local timezone unknown ($error)');
+  }
+}
+
 /// Reminders through the notifications plugin.
 final class PluginReminderBackend implements ReminderBackend {
   /// Creates the backend; the plugin is only touched on-device.
@@ -76,16 +91,7 @@ final class PluginReminderBackend implements ReminderBackend {
     if (_ready) {
       return;
     }
-    tzdata.initializeTimeZones();
-    try {
-      final local = await FlutterTimezone.getLocalTimezone();
-      tz.setLocalLocation(tz.getLocation(local.identifier));
-      _log.info('todo reminders: timezone ${local.identifier}');
-    } on Object catch (error) {
-      // Scheduling falls back to tz.local (UTC). Instants still line up,
-      // since a TZDateTime.from conversion preserves them, but say so.
-      _log.warning('todo reminders: local timezone unknown ($error)');
-    }
+    await initializeReminderTimezone(_log);
     await _initializeWithIcon();
     // Create the channel up front instead of letting the first schedule
     // create it implicitly: it then exists, with a description the user
@@ -209,6 +215,9 @@ final class PluginReminderBackend implements ReminderBackend {
   /// False: an Android alarm is a future instant. A reminder whose moment
   /// passed while the app was closed was already delivered by the system,
   /// so there is nothing for the app to show late.
+  @override
+  int? get pendingLimit => null;
+
   @override
   bool get firesOverdue => false;
 

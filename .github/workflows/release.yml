@@ -285,9 +285,75 @@ jobs:
             dist/niman-*-windows-x64-setup.exe
             dist/niman-*-windows-x64.zip
 
+  macos:
+    name: macOS disk image
+    # Apple silicon, Xcode 26: the app is universal (arm64 and x86_64)
+    # whatever the runner (docs/records/apple-platforms.md).
+    runs-on: macos-26
+    # Read-only: the build only reads the checkout (issue #393).
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Version from tag
+        # niman.sh names the image after pubspec.yaml's version, which a
+        # release bumps with its tag: a tag the pubspec does not carry
+        # would publish an image named after another version.
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "error: tag must be vX.Y.Z (got $GITHUB_REF_NAME)" >&2
+            exit 1
+          fi
+          if ! grep -q "^version: $VERSION+" pubspec.yaml; then
+            echo "error: pubspec.yaml's version is not $VERSION" >&2
+            exit 1
+          fi
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+
+      # The OCR engine is built and bundled with the app (a Mac's is never
+      # downloaded); cmake is on the image, ninja is not.
+      - name: Build tools for the OCR engine
+        run: brew install ninja
+
+      - run: flutter pub get
+
+      # Signed ad hoc, as a build with no Developer ID is: Gatekeeper asks
+      # for "Open Anyway" on the first launch. Developer ID signing and
+      # notarisation come with the Apple Developer Program's secrets.
+      - name: Build the app and its disk image
+        run: |
+          if ! ./scripts/niman.sh macos; then
+            tail -n 60 /tmp/niman/niman-macos.log
+            exit 1
+          fi
+
+      - name: Stage artifacts
+        run: |
+          mkdir -p dist
+          cp "build/macos/niman-$VERSION-macos.dmg" dist/
+          # ditto keeps the bundle's symlinks and signature, as zip -r
+          # does not.
+          ditto -c -k --keepParent build/macos/Build/Products/Release-official/Niman.app \
+            "dist/niman-$VERSION-macos.zip"
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: macos
+          path: |
+            dist/niman-*-macos.dmg
+            dist/niman-*-macos.zip
+
   github-release:
     name: Publish GitHub Release
-    needs: [android, linux, windows]
+    needs: [android, linux, windows, macos]
     runs-on: ubuntu-latest
     # Write is needed to create the release and upload its assets; it is the
     # only job that gets it (issue #393).

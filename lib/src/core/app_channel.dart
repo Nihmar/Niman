@@ -27,20 +27,31 @@ const String appChannel = String.fromEnvironment(
 /// release channel, so there is nothing for them to check.
 const bool isTestingBuild = appChannel == 'testing';
 
+/// Whether this build checks for and installs its own updates: not a
+/// testing build ([isTestingBuild]), and not on iOS, which the App Store
+/// (or TestFlight) updates.
+bool get appUpdatesItself => !isTestingBuild && !Platform.isIOS;
+
 /// The folder this build keeps its own files in: the settings database, the
 /// indexes, the log, the single-instance claim.
 ///
-/// The platform's application-support folder — except for a desktop testing
-/// build, which keeps a sibling of its own (`…/niman-testing`). On Android
-/// the testing build is another application ID and has its own folder by
-/// construction; on the desktop both builds are one `niman.exe` under one
-/// product name, and they shared one database. A testing build migrated it
+/// The platform's application-support folder — except for a Linux or Windows
+/// testing build, which keeps a sibling of its own (`…/niman-testing`). On
+/// Android and the Apple platforms the testing build is another application
+/// or bundle ID and has its own folder by construction; on Linux and
+/// Windows both builds are one `niman.exe` under one product name, and they
+/// shared one database. A testing build migrated it
 /// to a schema the installed release did not know, the release took the
 /// version back down, and the testing build's next migration failed on the
 /// columns it had already dropped (2026-09-22). Two builds, two folders.
 Future<Directory> appSupportDirectory() async {
   final support = await getApplicationSupportDirectory();
-  if (!isTestingBuild || Platform.isAndroid || Platform.isIOS) return support;
+  if (!isTestingBuild ||
+      Platform.isAndroid ||
+      Platform.isIOS ||
+      Platform.isMacOS) {
+    return support;
+  }
   final own = Directory(
     p.join(support.parent.path, '${p.basename(support.path)}-testing'),
   );

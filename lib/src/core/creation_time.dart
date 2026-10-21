@@ -8,9 +8,11 @@
 ///
 /// The fix is the one the rename leaves room for: just before it, the
 /// note's creation time is written onto the temp file, through `kernel32`
-/// with no plugin. Linux and Android keep no creation time `dart:io`
-/// reports (the order falls back to the modification time there), so on
-/// them [keepCreationTime] does nothing.
+/// with no plugin. A Mac and an iPhone lose it the same way and keep it
+/// the same way, through `setattrlist` (creation_time_apple.dart). Linux
+/// and Android keep no creation time `dart:io` reports (the order falls
+/// back to the modification time there), so on them [keepCreationTime]
+/// does nothing.
 ///
 /// The calls are synchronous and run on whichever isolate saves, the UI's
 /// included (the todo files, the attachment swap): three `kernel32` calls on
@@ -23,14 +25,20 @@ import 'dart:ffi';
 import 'dart:io';
 
 import 'package:ffi/ffi.dart';
+import 'package:niman/src/core/creation_time_apple.dart';
 
 /// Writes [target]'s creation time onto [replacement], the file about to be
 /// renamed over it, so the rename keeps it (#759).
 ///
-/// Windows only, and best effort: where [target] does not exist yet (a new
-/// note) or either call fails, [replacement] keeps its own time and the
-/// save goes on — a creation time is worth less than the save itself.
+/// Windows, macOS and iOS, and best effort: where [target] does not exist yet
+/// (a new note) or either call fails, [replacement] keeps its own time and
+/// the save goes on — a creation time is worth less than the save itself.
 void keepCreationTime({required String target, required String replacement}) {
+  if (Platform.isMacOS || Platform.isIOS) {
+    final created = appleCreationTime(target);
+    if (created != null) setAppleCreationTime(replacement, created);
+    return;
+  }
   if (!Platform.isWindows) return;
   final created = readCreationTime(target);
   if (created == null) return;

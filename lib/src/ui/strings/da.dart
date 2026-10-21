@@ -210,6 +210,8 @@ final class DanishStrings extends Strings {
   String get updateTestingBuild =>
       'Testversioner opdaterer ikke sig selv: installer den næste manuelt.';
   @override
+  String get updateFromAppStore => 'App Store holder Niman opdateret.';
+  @override
   String get settingsSpellCheckTitle => 'Stavekontrol';
   @override
   String get settingsSpellCheckSubtitle =>
@@ -1667,6 +1669,8 @@ final class DanishStrings extends Strings {
   @override
   String get appMenuHelp => 'Hjælp';
   @override
+  String get macMenuWindow => 'Vindue';
+  @override
   String get paletteGroupJournal => 'Dagbog';
   @override
   String get journalToday => 'Dagens indlæg';
@@ -2175,6 +2179,9 @@ final class DanishStrings extends Strings {
   String get openLibraryFolderName => 'Mappenavn';
   @override
   String get openLibraryChooseFolder => 'Vælg biblioteksmappen';
+  @override
+  String get openLibraryNoneInDocuments =>
+      'Intet bibliotek her endnu: opret et.';
   @override
   String get openLibraryChooseParent => 'Vælg mappen, biblioteket oprettes i';
   @override

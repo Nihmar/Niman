@@ -213,6 +213,8 @@ final class GermanStrings extends Strings {
       'Testversionen aktualisieren sich nicht selbst: Installiere die nächste '
       'von Hand.';
   @override
+  String get updateFromAppStore => 'Der App Store hält Niman aktuell.';
+  @override
   String get settingsSpellCheckTitle => 'Rechtschreibung prüfen';
   @override
   String get settingsSpellCheckSubtitle =>
@@ -1702,6 +1704,8 @@ final class GermanStrings extends Strings {
   @override
   String get appMenuHelp => 'Hilfe';
   @override
+  String get macMenuWindow => 'Fenster';
+  @override
   String get paletteGroupJournal => 'Tagebuch';
   @override
   String get journalToday => 'Heutiger Eintrag';
@@ -2231,6 +2235,9 @@ final class GermanStrings extends Strings {
   String get openLibraryFolderName => 'Ordnername';
   @override
   String get openLibraryChooseFolder => 'Bibliotheks-Ordner wählen';
+  @override
+  String get openLibraryNoneInDocuments =>
+      'Hier gibt es noch keine Bibliothek: lege eine an.';
   @override
   String get openLibraryChooseParent =>
       'Ordner wählen, in dem die Bibliothek erstellt wird';

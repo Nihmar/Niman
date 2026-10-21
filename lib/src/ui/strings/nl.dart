@@ -210,6 +210,8 @@ final class DutchStrings extends Strings {
       'Testversies werken zichzelf niet bij: installeer de volgende met de '
       'hand.';
   @override
+  String get updateFromAppStore => 'De App Store houdt Niman up-to-date.';
+  @override
   String get settingsSpellCheckTitle => 'Spellingscontrole';
   @override
   String get settingsSpellCheckSubtitle =>
@@ -1689,6 +1691,8 @@ final class DutchStrings extends Strings {
   @override
   String get appMenuHelp => 'Help';
   @override
+  String get macMenuWindow => 'Venster';
+  @override
   String get paletteGroupJournal => 'Dagboek';
   @override
   String get journalToday => 'Vandaag';
@@ -2211,6 +2215,9 @@ final class DutchStrings extends Strings {
   String get openLibraryFolderName => 'Mapnaam';
   @override
   String get openLibraryChooseFolder => 'Kies de bibliotheekmap';
+  @override
+  String get openLibraryNoneInDocuments =>
+      'Hier is nog geen bibliotheek: maak er een aan.';
   @override
   String get openLibraryChooseParent =>
       'Kies de map waarin de bibliotheek wordt aangemaakt';

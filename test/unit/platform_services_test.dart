@@ -41,15 +41,34 @@ void main() {
   });
 
   group('reminders', () {
-    test('are Android and desktop; the Noop is for anything else', () {
-      final android = createReminderService(isAndroid: true, isDesktop: false);
-      final desktop = createReminderService(isAndroid: false, isDesktop: true);
-      final other = createReminderService(isAndroid: false, isDesktop: false);
+    test('are Android, Apple and desktop; the Noop is for anything else', () {
+      final android = createReminderService(
+        isAndroid: true,
+        isApple: false,
+        isDesktop: false,
+      );
+      final apple = createReminderService(
+        isAndroid: false,
+        isApple: true,
+        isDesktop: false,
+      );
+      final desktop = createReminderService(
+        isAndroid: false,
+        isApple: false,
+        isDesktop: true,
+      );
+      final other = createReminderService(
+        isAndroid: false,
+        isApple: false,
+        isDesktop: false,
+      );
       addTearDown(android.dispose);
+      addTearDown(apple.dispose);
       addTearDown(desktop.dispose);
       addTearDown(other.dispose);
 
       expect(android, isA<LocalReminderService>());
+      expect(apple, isA<LocalReminderService>());
       expect(desktop, isA<LocalReminderService>());
       expect(other, isA<NoopReminderService>());
     });

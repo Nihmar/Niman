@@ -3,7 +3,11 @@
 ## Keyboard (desktop)
 
 App-level accelerators, as Niman ships them. Settings → Keyboard
-shortcuts lists them and lets you change them:
+shortcuts lists them and lets you change them. On a Mac — and on an iPad
+or iPhone with a hardware keyboard — `⌘` stands for
+`Ctrl` and the keys read as the system writes them (`⇧⌘N`); where `⌘`
+would take a key macOS keeps, the Mac has a key of its own, named below.
+The Mac's menu bar holds the same commands, each with its key:
 
 - `Ctrl/⌘+Shift+P` — the command palette: commands and notes in one
   search
@@ -16,7 +20,7 @@ shortcuts lists them and lets you change them:
 - `Ctrl/⌘+Shift+N` — new list note
 - `Ctrl/⌘+Shift+A` — new voice note
 - `Ctrl/⌘+T` — new todo
-- `Ctrl/⌘+Q` — quick note
+- `Ctrl+Q` — quick note (`⌃Q` on a Mac, where `⌘Q` quits)
 - `Ctrl/⌘+Shift+W` — capture a web page as a note, the clipboard's address
   when it holds one (see [web capture](web-capture.md))
 - `Ctrl/⌘+Shift+V` — paste as Markdown: what was copied from a web page
@@ -33,13 +37,15 @@ shortcuts lists them and lets you change them:
   opening it in the pane (see [search](search.md))
 - `Ctrl/⌘+B` — show or hide the sidebar
 - `Ctrl/⌘+W` — close the note on screen (its tab)
-- `Ctrl/⌘+Tab` / `Ctrl/⌘+Shift+Tab` — next / previous open note
+- `Ctrl+Tab` / `Ctrl+Shift+Tab` — next / previous open note (`⌃Tab` /
+  `⌃⇧Tab` on a Mac too, where `⌘Tab` switches apps)
 - `Ctrl/⌘+\` — split the window right with the note on screen
 - `Ctrl/⌘+Shift+B` — show or hide the side panel (outline, tags, links,
   history, the journal's calendar); on a window too narrow to dock it, it
   opens over the note
 - `F11` — Zen mode: the note and nothing else; `Esc` or `F11` again
-  leaves it (see [editing](editing.md#zen-mode))
+  leaves it (see [editing](editing.md#zen-mode)); `⌃⌘F` on a Mac, where
+  `F11` shows the desktop
 - `F5` — present the slides note on screen, `Alt+F5` its presenter view
   (see [slide notes](slides.md#presenting)); on a flashcard deck, study it
   (see [flashcards](flashcards.md#studying))
@@ -64,7 +70,8 @@ shortcuts lists them and lets you change them:
 - `Ctrl/⌘+1…7` — Files, Todo, Search, Quick note, Settings,
   [Home](home.md) and [Study](flashcards.md#study-the-decks) tabs (on a
   wide window Settings opens as a floating window; Study opens even while
-  it is hidden from the navigation)
+  it is hidden from the navigation); on a Mac Settings is `⌘,`, as in
+  every Mac app
 
 Formatting, in both editors, on the note's selection:
 
@@ -130,8 +137,8 @@ open** setting:
   right click does
 - `Backspace` / `Alt+Up` — in the grid, up one folder
 
-A modified key is left to the app's own shortcuts: `Alt+←` / `Alt+→` walk
-the notes' history and `Ctrl/⌘+Shift+PageUp` / `PageDown` the journal,
+A modified key is left to the app's own shortcuts: `Alt+←` / `Alt+→` (`⌘[`
+/ `⌘]` on a Mac, where `⌥←` moves by a word) walk the notes' history and `Ctrl/⌘+Shift+PageUp` / `PageDown` the journal,
 even while a row or a tile holds the cursor.
 
 Editor find/replace follows the familiar bindings:
@@ -236,10 +243,10 @@ In the file tree, `Ctrl+click` a note (or middle-click its tab to close
 it) to open it in a tab of its own — see
 [editing](editing.md#open-notes-and-tabs).
 
-## Launcher quick actions (Android)
+## Launcher quick actions (Android and iOS)
 
 Long-press the app icon for dynamic shortcuts (labels localized,
-published at startup):
+published at startup; on iOS they are the icon's quick actions):
 
 - **Quick note** — opens the quick note
 - **Today's journal entry** — opens today's [journal](journal.md) entry,
@@ -247,7 +254,7 @@ published at startup):
 - **New todo** — opens the Todo tab's add-task dialog
 - **New note** — the Files FAB's "New note" flow
 - **New list note** — the Files FAB's "New list note" flow (desktop tray
-  and Linux launcher; Android launchers show the first four)
+  and Linux launcher; Android launchers and iOS show the first four)
 - **New voice note** — the Files FAB's "New voice note" flow (likewise)
 
 Each shortcut runs the same flow as its in-app button, so the two can

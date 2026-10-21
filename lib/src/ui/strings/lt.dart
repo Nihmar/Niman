@@ -212,6 +212,8 @@ final class LithuanianStrings extends Strings {
   String get updateTestingBuild =>
       'Bandomosios versijos neatsinaujina pačios: kitą įdiekite rankiniu būdu.';
   @override
+  String get updateFromAppStore => 'App Store atnaujina Niman.';
+  @override
   String get settingsSpellCheckTitle => 'Rašybos patikra';
   @override
   String get settingsSpellCheckSubtitle => 'Paryškina rašybos klaidas rašant.';
@@ -1672,6 +1674,8 @@ final class LithuanianStrings extends Strings {
   @override
   String get appMenuHelp => 'Pagalba';
   @override
+  String get macMenuWindow => 'Langas';
+  @override
   String get paletteGroupJournal => 'Dienoraštis';
   @override
   String get journalToday => 'Šiandienos įrašas';
@@ -2183,6 +2187,9 @@ final class LithuanianStrings extends Strings {
   String get openLibraryFolderName => 'Katalogo pavadinimas';
   @override
   String get openLibraryChooseFolder => 'Pasirinkti bibliotekos katalogą';
+  @override
+  String get openLibraryNoneInDocuments =>
+      'Čia dar nėra bibliotekos: sukurkite ją.';
   @override
   String get openLibraryChooseParent =>
       'Pasirinkite katalogą, kuriame sukuriama biblioteka';

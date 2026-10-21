@@ -48,10 +48,12 @@ base class EditorOnlyDocument {
   ///
   /// The folder is watched rather than the file: an editor saving by
   /// rename — Niman's own write included — replaces the file, and a watch
-  /// on the old one would go quiet.
+  /// on the old one would go quiet. Where the platform watches nothing
+  /// (iOS), [Directory.watch] throws, and the file is simply not followed:
+  /// the editor opens it as it is.
   Stream<void> changes() async* {
     final dir = Directory(folder);
-    if (!await dir.exists()) return;
+    if (!FileSystemEntity.isWatchSupported || !await dir.exists()) return;
     yield* dir
         .watch()
         .where((event) => p.equals(event.path, filePath))

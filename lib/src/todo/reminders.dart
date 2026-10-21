@@ -34,6 +34,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/todo/reminder_backend.dart';
+import 'package:niman/src/todo/reminder_backend_darwin.dart';
 import 'package:niman/src/todo/reminder_backend_desktop.dart';
 import 'package:niman/src/todo/reminder_backend_plugin.dart';
 import 'package:niman/src/todo/reminder_health.dart';
@@ -75,14 +76,24 @@ abstract interface class ReminderService {
   Future<void> dispose();
 }
 
-/// Creates the platform service: scheduled OS notifications on Android,
-/// an in-process timer on the desktops (T-PP-03), a no-op elsewhere.
+/// Creates the platform service: scheduled OS notifications on Android and
+/// on the Apple platforms, an in-process timer on Linux and Windows
+/// (T-PP-03), a no-op elsewhere.
 ///
-/// [isAndroid] and [isDesktop] override the host platform so a plain test
-/// can cover the branches that do not run here (T-PP-01).
-ReminderService createReminderService({bool? isAndroid, bool? isDesktop}) {
+/// [isAndroid], [isApple] and [isDesktop] override the host platform so a
+/// plain test can cover the branches that do not run here (T-PP-01).
+ReminderService createReminderService({
+  bool? isAndroid,
+  bool? isApple,
+  bool? isDesktop,
+}) {
   if (isAndroid ?? Platform.isAndroid) {
     return LocalReminderService();
+  }
+  // Before the desktop: a Mac is one too, but the system delivers its
+  // scheduled notifications with Niman closed, as Android does.
+  if (isApple ?? (Platform.isMacOS || Platform.isIOS)) {
+    return LocalReminderService(backend: DarwinReminderBackend());
   }
   if (isDesktop ?? (Platform.isLinux || Platform.isWindows)) {
     return LocalReminderService(backend: DesktopReminderBackend());
@@ -211,8 +222,9 @@ final class LocalReminderService implements ReminderService {
     }
   }
 
-  /// One full replace pass for [wanted] (serialized by [_drain]).
-  Future<void> _reconcileOnce(Map<int, TodoReminder> wanted) async {
+  /// One full replace pass for [all] (serialized by [_drain]).
+  Future<void> _reconcileOnce(Map<int, TodoReminder> all) async {
+    final wanted = _withinLimit(all);
     try {
       await _ensureReady();
     } on Object catch (error) {
@@ -275,6 +287,21 @@ final class LocalReminderService implements ReminderService {
     // Niman asked for, and the two can differ (a rejected alarm, an OEM
     // limit). This line is what makes an exported log conclusive.
     await _logPending('after reconcile');
+  }
+
+  /// [all], or its soonest [ReminderBackend.pendingLimit] where the system
+  /// keeps no more pending (iOS): the rest would be dropped without a word,
+  /// so they wait for a later reconcile instead, as the soonest fire.
+  Map<int, TodoReminder> _withinLimit(Map<int, TodoReminder> all) {
+    final limit = _backend.pendingLimit;
+    if (limit == null || all.length <= limit) return all;
+    final soonest = all.entries.toList()
+      ..sort((a, b) => a.value.when.compareTo(b.value.when));
+    _log.info(
+      'todo reminders: ${all.length} wanted, the system keeps $limit: '
+      'the soonest $limit are scheduled',
+    );
+    return Map.fromEntries(soonest.take(limit));
   }
 
   /// Logs the reminders whose moment has already passed (T-RL-01).

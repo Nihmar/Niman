@@ -211,6 +211,8 @@ final class BelarusianStrings extends Strings {
   String get updateTestingBuild =>
       'Тэставыя зборкі не абнаўляюцца самі: наступную ўсталюйце ўручную.';
   @override
+  String get updateFromAppStore => 'App Store абнаўляе Niman.';
+  @override
   String get settingsSpellCheckTitle => 'Праверка арфаграфіі';
   @override
   String get settingsSpellCheckSubtitle =>
@@ -1672,6 +1674,8 @@ final class BelarusianStrings extends Strings {
   @override
   String get appMenuHelp => 'Даведка';
   @override
+  String get macMenuWindow => 'Акно';
+  @override
   String get paletteGroupJournal => 'Дзённік';
   @override
   String get journalToday => 'Сённяшні запіс';
@@ -2186,6 +2190,9 @@ final class BelarusianStrings extends Strings {
   String get openLibraryFolderName => 'Назва папкі';
   @override
   String get openLibraryChooseFolder => 'Абраць папку бібліятэкі';
+  @override
+  String get openLibraryNoneInDocuments =>
+      'Тут яшчэ няма бібліятэкі: стварыце яе.';
   @override
   String get openLibraryChooseParent =>
       'Абярыце папку, у якой будзе створана бібліятэка';

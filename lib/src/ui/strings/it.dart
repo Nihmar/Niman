@@ -214,6 +214,8 @@ final class ItalianStrings extends Strings {
       'Le build di prova non si aggiornano da sole: installa la prossima a '
       'mano.';
   @override
+  String get updateFromAppStore => "Niman si aggiorna dall'App Store.";
+  @override
   String get settingsSpellCheckTitle => 'Controlla ortografia';
   @override
   String get settingsSpellCheckSubtitle =>
@@ -1693,6 +1695,8 @@ final class ItalianStrings extends Strings {
   @override
   String get appMenuHelp => 'Aiuto';
   @override
+  String get macMenuWindow => 'Finestra';
+  @override
   String get paletteGroupJournal => 'Diario';
   @override
   String get journalToday => 'Voce di oggi';
@@ -2213,6 +2217,9 @@ final class ItalianStrings extends Strings {
   String get openLibraryFolderName => 'Nome della cartella';
   @override
   String get openLibraryChooseFolder => 'Scegli la cartella della libreria';
+  @override
+  String get openLibraryNoneInDocuments =>
+      'Ancora nessuna libreria qui: creane una.';
   @override
   String get openLibraryChooseParent =>
       'Scegli la cartella in cui creare la libreria';

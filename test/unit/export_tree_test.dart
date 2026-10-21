@@ -9,6 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/process_run.dart';
 import 'package:niman/src/export/export_tree.dart';
 import 'package:niman/src/export/export_tree_pages.dart';
+import 'package:niman/src/export/pdf_webview.dart';
 import 'package:path/path.dart' as p;
 
 /// The engine's stand-in for a folder's PDF run: writes the page itself as
@@ -64,6 +65,11 @@ final String? _caseFoldSkip = () {
 }();
 
 void main() {
+  // A desktop that prints with an engine it finds (Linux, Windows): on a
+  // Mac host the system WebView would print instead.
+  setUp(() => debugSystemWebViewPrints = false);
+  tearDown(() => debugSystemWebViewPrints = null);
+
   late Directory lib;
   late String notes;
   late String zip;

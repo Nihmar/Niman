@@ -7,8 +7,9 @@
 ///
 /// A PDF export writes one PDF per note, at the note's own relative path —
 /// not one combined file — printed by the machine's browser engine, or by
-/// Android's WebView ([WebViewPdfPrinter], through the `niman/pdf`
-/// channel, which is why the isolate asks for the root token).
+/// the system WebView ([WebViewPdfPrinter], through the `niman/pdf`
+/// channel), which the isolate asks the UI isolate to call
+/// ([TreeExportPrint]).
 ///
 /// Links and pictures are resolved **inside the exported subtree**: a
 /// target that is there becomes a relative link, one that is not stays as
@@ -26,11 +27,9 @@ library;
 import 'dart:async';
 import 'dart:io';
 import 'dart:isolate';
-import 'dart:ui' show RootIsolateToken;
 
 import 'package:archive/archive_io.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart' show BackgroundIsolateBinaryMessenger;
 import 'package:niman/src/core/isolate_gauge.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/process_run.dart';
@@ -170,7 +169,7 @@ final class TreeExport {
   }) async {
     if (format == ExportTreeFormat.pdf &&
         engine == null &&
-        !Platform.isAndroid) {
+        !systemWebViewPrints) {
       throw const TreeExportNoEngine();
     }
     final events = ReceivePort();
@@ -185,9 +184,6 @@ final class TreeExport {
         language: language,
         engine: engine,
         runner: runner,
-        // The root isolate's token, so the spawned isolate may open the
-        // WebView channel when Android prints.
-        token: RootIsolateToken.instance,
         events: events.sendPort,
       ),
       onError: errors.sendPort,
@@ -239,6 +235,13 @@ final class TreeExport {
         // A typed failure the isolate asked to report without throwing:
         // only a message keeps the type across the boundary.
         unawaited(_settle(gauge, error: message));
+      } else if (message is TreeExportPrint) {
+        // The isolate's page, printed here: see [TreeExportPrint].
+        unawaited(
+          const WebViewPdfPrinter()
+              .print(message.htmlPath, message.pdfPath)
+              .then(message.reply.send),
+        );
       } else if (message is _TreeExportDone) {
         // The whole archive is written; a cancel from here on is too late.
         _completed = true;
@@ -297,7 +300,7 @@ final class TreeExport {
   Future<void> cancel() async {
     if (_done.isCompleted) return;
     _cancelled = true;
-    if (_format == ExportTreeFormat.pdf && Platform.isAndroid) {
+    if (_format == ExportTreeFormat.pdf && systemWebViewPrints) {
       // The platform print is on the main thread and the isolate waits on
       // it: stopping it is what frees the bridge for the next export (M7).
       unawaited(WebViewPdfPrinter.cancel());
@@ -356,19 +359,10 @@ typedef TreeExportRequest = ({
   String language,
   String? engine,
   ProcessRunner? runner,
-  RootIsolateToken? token,
   SendPort events,
 });
 
 Future<void> _exportTree(TreeExportRequest request) async {
-  // Android prints through the WebView channel, which a background isolate
-  // may only open with the root isolate's token.
-  if (request.format == ExportTreeFormat.pdf && Platform.isAndroid) {
-    final token = request.token;
-    if (token != null) {
-      BackgroundIsolateBinaryMessenger.ensureInitialized(token);
-    }
-  }
   final tree = ExportTreePages.walk(request.dir);
   // A book needs a chapter: EPUB 3's spine must hold at least one itemref,
   // and a folder of attachments is not a book (E2). Asked before the
@@ -479,6 +473,7 @@ Future<void> _exportTree(TreeExportRequest request) async {
               request.runner,
               page,
               tree.names[entry.rel]!,
+              parent: request.events,
             );
           } else {
             encoder!.addArchiveFile(

@@ -43,7 +43,12 @@ Pending work is tracked in [GitHub Issues](https://github.com/Nihmar/Niman/issue
   runs it against a build of `scripts/ocr-engine.sh` instead). A second job,
   in parallel, runs the Android app module's Kotlin unit tests
   (`android/app/src/test`) on the JVM: `flutter build apk --config-only`,
-  then `cd android && ./gradlew :app:testBetaDebugUnitTest` (#813). Run checks
+  then `cd android && ./gradlew :app:testBetaDebugUnitTest` (#813). A third,
+  on `macos-26`, runs the suite on a Mac (the live OCR case against the
+  bundled engine it builds), a debug build of the beta app, and `app_boot`
+  and `sync_e2e` (`-d macos`). A fourth, on `macos-26` too, builds the iOS
+  beta app for a device unsigned and runs `app_boot` and `sync_e2e` in an
+  iPhone simulator. Run checks
   locally too:
   - Linux: `./scripts/niman.sh check` (logs: `/tmp/niman/niman-check.log`),
     plus `./scripts/niman.sh integration` for `integration_test/`

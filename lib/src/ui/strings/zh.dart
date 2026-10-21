@@ -190,6 +190,8 @@ final class ChineseStrings extends Strings {
   @override
   String get updateTestingBuild => '测试版不会自动更新：请手动安装下一个版本。';
   @override
+  String get updateFromAppStore => 'App Store 会让 Niman 保持最新。';
+  @override
   String get settingsSpellCheckTitle => '拼写检查';
   @override
   String get settingsSpellCheckSubtitle => '输入时把拼错的词加下划线。';
@@ -1538,6 +1540,8 @@ final class ChineseStrings extends Strings {
   @override
   String get appMenuHelp => '帮助';
   @override
+  String get macMenuWindow => '窗口';
+  @override
   String get paletteGroupJournal => '日记';
   @override
   String get journalToday => '今天的条目';
@@ -1998,6 +2002,8 @@ final class ChineseStrings extends Strings {
   String get openLibraryFolderName => '文件夹名称';
   @override
   String get openLibraryChooseFolder => '选择文库文件夹';
+  @override
+  String get openLibraryNoneInDocuments => '这里还没有资料库：请创建一个。';
   @override
   String get openLibraryChooseParent => '选择将创建文库的文件夹';
   @override

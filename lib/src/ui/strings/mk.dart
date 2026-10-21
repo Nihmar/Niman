@@ -211,6 +211,8 @@ final class MacedonianStrings extends Strings {
   String get updateTestingBuild =>
       'Тестните верзии не се ажурираат сами: следната инсталирајте ја рачно.';
   @override
+  String get updateFromAppStore => 'App Store го ажурира Niman.';
+  @override
   String get settingsSpellCheckTitle => 'Проверка на правопис';
   @override
   String get settingsSpellCheckSubtitle =>
@@ -1685,6 +1687,8 @@ final class MacedonianStrings extends Strings {
   @override
   String get appMenuHelp => 'Помош';
   @override
+  String get macMenuWindow => 'Прозорец';
+  @override
   String get paletteGroupJournal => 'Дневник';
   @override
   String get journalToday => 'Денешен запис';
@@ -2200,6 +2204,9 @@ final class MacedonianStrings extends Strings {
   String get openLibraryFolderName => 'Име на папка';
   @override
   String get openLibraryChooseFolder => 'Одбери папка на библиотека';
+  @override
+  String get openLibraryNoneInDocuments =>
+      'Тука сè уште нема библиотека: создадете една.';
   @override
   String get openLibraryChooseParent =>
       'Одбери папка во која ќе се креира библиотека';

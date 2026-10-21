@@ -212,6 +212,8 @@ final class BosnianStrings extends Strings {
   String get updateTestingBuild =>
       'Testne verzije se ne ažuriraju same: sljedeću instalirajte ručno.';
   @override
+  String get updateFromAppStore => 'App Store ažurira Niman.';
+  @override
   String get settingsSpellCheckTitle => 'Provjera pravopisa';
   @override
   String get settingsSpellCheckSubtitle =>
@@ -1675,6 +1677,8 @@ final class BosnianStrings extends Strings {
   @override
   String get appMenuHelp => 'Pomoć';
   @override
+  String get macMenuWindow => 'Prozor';
+  @override
   String get paletteGroupJournal => 'Dnevnik';
   @override
   String get journalToday => 'Današnji unos';
@@ -2186,6 +2190,9 @@ final class BosnianStrings extends Strings {
   String get openLibraryFolderName => 'Ime mape';
   @override
   String get openLibraryChooseFolder => 'Odaberite mapu biblioteke';
+  @override
+  String get openLibraryNoneInDocuments =>
+      'Ovdje još nema biblioteke: napravite je.';
   @override
   String get openLibraryChooseParent =>
       'Odaberite mapu u kojoj će biblioteka biti kreirana';

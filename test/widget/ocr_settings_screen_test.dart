@@ -191,10 +191,16 @@ void main() {
     expect(find.byKey(const Key('ocr-delete-fast/ita')), findsNothing);
     expect(find.byKey(const Key('ocr-download-best/ita')), findsOne);
     await real(tester, () async {
-      final saved = await File(
-        p.join(dir.path, OcrInstallation.settingsFileName),
-      ).readAsString();
-      expect(saved, contains('"best"'));
+      // The row saves without waiting for the write, and the frames above
+      // run on the test's clock: under a loaded run the file lands after
+      // them, so it is waited for rather than read at once.
+      final file = File(p.join(dir.path, OcrInstallation.settingsFileName));
+      bool saved() =>
+          file.existsSync() && file.readAsStringSync().contains('"best"');
+      for (var i = 0; i < 200 && !saved(); i++) {
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+      }
+      expect(saved(), isTrue);
     });
   });
 

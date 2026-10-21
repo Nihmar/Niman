@@ -5,7 +5,8 @@ import 'package:whisper_ggml/whisper_ggml.dart';
 /// in tests.
 abstract interface class SpeechTranscriber {
   /// The raw text spoken in [audioPath] (16 kHz mono PCM16 WAV, or any
-  /// format on Android, where the package converts with FFmpeg).
+  /// format on Android, where the package converts with FFmpeg; the Apple
+  /// platforms decode other formats before, with AVFoundation).
   ///
   /// [language] is an ISO 639-1 code or `auto`; [onProgress] gets coarse
   /// 0–100 steps.

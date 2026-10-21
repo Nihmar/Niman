@@ -105,6 +105,8 @@ Future<UpdateAvailable?> checkNow({required AppVersion current}) async {
     current: current,
     isAndroid: Platform.isAndroid,
     isWindows: Platform.isWindows,
+    isMacOS: Platform.isMacOS,
+    isLinux: Platform.isLinux,
     linuxVariant: Platform.isLinux
         ? detectLinuxVariant()
         : LinuxVariant.unknown,
@@ -340,6 +342,8 @@ Future<void> _verifyDownload(ReleaseAsset asset, File file) async {
 /// - Android: opens the system package installer for the APK (issue #81)
 ///   and returns whether it launched; the user still confirms there.
 /// - Windows: launches the setup installer and returns true.
+/// - macOS: opens the disk image, which Finder mounts and shows with the
+///   Applications folder to drag Niman onto, and returns false.
 /// - Linux: reveals the Downloads folder (best effort) and returns false.
 Future<bool> applyDownloadedUpdate(File file) {
   if (Platform.isAndroid) return installApk(file);
@@ -352,6 +356,14 @@ Future<bool> _applyDesktop(File file) async {
   if (Platform.isWindows) {
     await Process.start(file.path, []);
     return true;
+  }
+  if (Platform.isMacOS) {
+    try {
+      await Process.run('open', [file.path]);
+    } on ProcessException {
+      // Opening is a courtesy; the file is downloaded either way.
+    }
+    return false;
   }
   if (Platform.isLinux) {
     try {

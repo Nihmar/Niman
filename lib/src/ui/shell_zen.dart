@@ -8,10 +8,10 @@
 library;
 
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/services.dart' show SystemChrome, SystemUiMode;
 import 'package:flutter/widgets.dart';
+import 'package:niman/src/core/host_platform.dart';
 import 'package:niman/src/ui/window_controller.dart';
 import 'package:niman/src/ui/zen_mode.dart';
 
@@ -68,7 +68,7 @@ final class ShellImmersive extends ChangeNotifier {
   /// notify there would rebuild the shell while the tree is locked.
   void _applyFullScreen() {
     final on = fullScreen.value != null;
-    if (Platform.isAndroid) {
+    if (HostPlatform.isMobile) {
       unawaited(
         SystemChrome.setEnabledSystemUIMode(
           on ? SystemUiMode.immersiveSticky : SystemUiMode.edgeToEdge,

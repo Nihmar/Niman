@@ -92,6 +92,7 @@ abstract base class Strings {
   String get updateInstallPermissionMissing;
   String get updateReleasePage;
   String get updateTestingBuild;
+  String get updateFromAppStore;
   String get settingsSpellCheckTitle;
   String get settingsSpellCheckSubtitle;
   String get spellCheckDictionaryTitle;
@@ -877,6 +878,7 @@ abstract base class Strings {
   String get paletteGroupGoTo;
   String get appMenuTooltip;
   String get appMenuHelp;
+  String get macMenuWindow;
   String get paletteGroupJournal;
   String get journalToday;
   String get journalPrevious;
@@ -1154,6 +1156,7 @@ abstract base class Strings {
   String get openLibraryCreateTitle;
   String get openLibraryFolderName;
   String get openLibraryChooseFolder;
+  String get openLibraryNoneInDocuments;
   String get openLibraryChooseParent;
   String get openLibraryUnsupported;
 

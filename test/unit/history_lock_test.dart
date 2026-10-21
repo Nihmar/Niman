@@ -121,25 +121,31 @@ void main() {
     expect(lock.readAsStringSync(), 'another writer');
   });
 
-  test('two waiters that find a lock stale never both take it', () async {
-    final path = root.path;
-    var overlaps = 0;
-    for (var round = 0; round < 25; round++) {
-      File(historyLockPath(path, 'a.md'))
-        ..parent.createSync(recursive: true)
-        ..writeAsStringSync('a writer that crashed')
-        ..setLastModifiedSync(
-          DateTime.now().subtract(const Duration(minutes: 5)),
-        );
-      final start = DateTime.now().millisecondsSinceEpoch + 300;
-      final runs = await Future.wait([
-        for (var i = 0; i < 8; i++)
-          Isolate.run(() => _holdWhenStart(path, 'a.md', start)),
-      ]);
-      overlaps += runs.fold(0, (sum, n) => sum + n);
-    }
-    expect(overlaps, 0);
-  });
+  // 25 rounds of eight isolates, each round starting 300 ms out: 14 s on an
+  // idle Mac, past the default 30 s on a shared three-core runner.
+  test(
+    'two waiters that find a lock stale never both take it',
+    timeout: const Timeout(Duration(minutes: 2)),
+    () async {
+      final path = root.path;
+      var overlaps = 0;
+      for (var round = 0; round < 25; round++) {
+        File(historyLockPath(path, 'a.md'))
+          ..parent.createSync(recursive: true)
+          ..writeAsStringSync('a writer that crashed')
+          ..setLastModifiedSync(
+            DateTime.now().subtract(const Duration(minutes: 5)),
+          );
+        final start = DateTime.now().millisecondsSinceEpoch + 300;
+        final runs = await Future.wait([
+          for (var i = 0; i < 8; i++)
+            Isolate.run(() => _holdWhenStart(path, 'a.md', start)),
+        ]);
+        overlaps += runs.fold(0, (sum, n) => sum + n);
+      }
+      expect(overlaps, 0);
+    },
+  );
 
   test('a store that cannot hold a lock fails at once, not after 10 s', () {
     // A file where the locks folder should be: nothing can be created in it.

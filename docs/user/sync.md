@@ -40,7 +40,9 @@ Once the first sync is done, Niman syncs by itself:
 - **a few seconds after you stop editing**: only the files you changed
   are sent, one small request each (while you keep typing, at the
   latest after a minute);
-- **when you leave the app**, if something is still waiting;
+- **when you leave the app**, if something is still waiting — on an
+  iPhone or iPad, which stops an app it no longer shows, a sync under way
+  then gets about half a minute to finish;
 - **when the library opens and when you come back to the app**, and
   **every minute while it is open**: a full comparison with the server,
   which brings in what changed on other devices;

@@ -86,6 +86,13 @@ Niman to the front: a notification's button that did not would have to
 start a second copy of the app's engine. Once the pictures are being
 saved, a capture can no longer be cancelled.
 
+On an iPhone or iPad only the end is a notification — **Saved: …** or
+**Could not capture …**, and a tap opens the note — as iOS shows no
+notification that is under way, and gives a notification no buttons of its
+own. iOS keeps Niman running for about half a minute once you are back in
+the browser; a capture still going then pauses, and finishes when you come
+back to Niman.
+
 **New ▸ Capture web page** opens the same sheet inside the app, with the
 address to type — the clipboard's, when it holds one.
 
@@ -158,7 +165,8 @@ changed since.
   terminal — and the plain text is pasted, with nothing to undo.
 - **The page it came from** is known on Windows and Linux, where the
   browsers put it on the clipboard beside the HTML (Chromium-family
-  browsers and Firefox both do). Android's clipboard does not carry it,
+  browsers and Firefox both do), and on a Mac from Safari, Chrome and
+  Edge. Android's clipboard does not carry it,
   so on a phone the paste is not linked to its page.
 
 ## When the page has too little text
@@ -169,7 +177,9 @@ few words. Then the page is run in a browser and read again:
 - **Windows**: Edge, run hidden;
 - **Linux**: a Chromium-based browser found on `PATH` — Chromium, Chrome,
   Edge, Brave, Vivaldi — the one the PDF export already uses;
-- **Android**: a WebView Niman keeps hidden.
+- **Android**: a WebView Niman keeps hidden;
+- **macOS**: WebKit, the engine behind Safari, in a view Niman keeps
+  hidden and that keeps nothing between captures.
 
 The browser runs with a profile of its own, deleted afterwards: your own
 browser, its sign-ins and its cookies are never used.

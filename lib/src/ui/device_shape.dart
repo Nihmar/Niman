@@ -23,15 +23,17 @@ import 'package:niman/src/core/settings/library_settings.dart'
 /// free to part.
 const double phoneShortestSide = 600;
 
-/// Whether the window [view] is a phone's: Android, with a shortest side
-/// under [phoneShortestSide].
+/// Whether the window [view] is a phone's: Android or iOS, with a shortest
+/// side under [phoneShortestSide]. An iPhone turned to landscape is still
+/// a phone; an iPad, like an Android tablet, is not.
 bool _phoneIn(FlutterView view) =>
-    defaultTargetPlatform == TargetPlatform.android &&
+    (defaultTargetPlatform == TargetPlatform.android ||
+        defaultTargetPlatform == TargetPlatform.iOS) &&
     (view.physicalSize / view.devicePixelRatio).shortestSide <
         phoneShortestSide;
 
-/// Whether the window is a phone's: Android, with a shortest side under
-/// [phoneShortestSide].
+/// Whether the window is a phone's: Android or iOS, with a shortest side
+/// under [phoneShortestSide].
 ///
 /// The window, not the display: split-screen hands a tablet a narrow window
 /// where the phone layout is right, and DeX or an external display hands a

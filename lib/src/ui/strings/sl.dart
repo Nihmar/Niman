@@ -214,6 +214,8 @@ final class SlovenianStrings extends Strings {
       'Preizkusne različice se ne posodabljajo same: naslednjo namestite '
       'ročno.';
   @override
+  String get updateFromAppStore => 'Niman posodablja App Store.';
+  @override
   String get settingsSpellCheckTitle => 'Preverjanje pravopisa';
   @override
   String get settingsSpellCheckSubtitle =>
@@ -1669,6 +1671,8 @@ final class SlovenianStrings extends Strings {
   @override
   String get appMenuHelp => 'Pomoč';
   @override
+  String get macMenuWindow => 'Okno';
+  @override
   String get paletteGroupJournal => 'Dnevnik';
   @override
   String get journalToday => 'Današnji vnos';
@@ -2178,6 +2182,8 @@ final class SlovenianStrings extends Strings {
   String get openLibraryFolderName => 'Ime mape';
   @override
   String get openLibraryChooseFolder => 'Izberi mapo knjižnice';
+  @override
+  String get openLibraryNoneInDocuments => 'Tu še ni knjižnice: ustvarite jo.';
   @override
   String get openLibraryChooseParent =>
       'Izberi mapo, v katero se knjižnica ustvari';

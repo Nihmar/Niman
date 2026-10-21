@@ -211,6 +211,8 @@ final class SerbianStrings extends Strings {
   String get updateTestingBuild =>
       'Тестне верзије се не ажурирају саме: следећу инсталирајте ручно.';
   @override
+  String get updateFromAppStore => 'App Store ажурира Niman.';
+  @override
   String get settingsSpellCheckTitle => 'Провера правописа';
   @override
   String get settingsSpellCheckSubtitle =>
@@ -1674,6 +1676,8 @@ final class SerbianStrings extends Strings {
   @override
   String get appMenuHelp => 'Помоћ';
   @override
+  String get macMenuWindow => 'Прозор';
+  @override
   String get paletteGroupJournal => 'Дневник';
   @override
   String get journalToday => 'Данашњи унос';
@@ -2185,6 +2189,9 @@ final class SerbianStrings extends Strings {
   String get openLibraryFolderName => 'Име фасцикле';
   @override
   String get openLibraryChooseFolder => 'Изабери фасциклу библиотеке';
+  @override
+  String get openLibraryNoneInDocuments =>
+      'Овде још нема библиотеке: направите је.';
   @override
   String get openLibraryChooseParent =>
       'Изабери фасциклу у којој ће библиотека бити креирана';

@@ -214,6 +214,8 @@ final class RomanianStrings extends Strings {
       'Versiunile de test nu se actualizează singure: instalați-o manual pe '
       'următoarea.';
   @override
+  String get updateFromAppStore => 'App Store ține Niman la zi.';
+  @override
   String get settingsSpellCheckTitle => 'Verificarea ortografiei';
   @override
   String get settingsSpellCheckSubtitle =>
@@ -1688,6 +1690,8 @@ final class RomanianStrings extends Strings {
   @override
   String get appMenuHelp => 'Ajutor';
   @override
+  String get macMenuWindow => 'Fereastră';
+  @override
   String get paletteGroupJournal => 'Jurnal';
   @override
   String get journalToday => 'Intrarea de azi';
@@ -2204,6 +2208,9 @@ final class RomanianStrings extends Strings {
   String get openLibraryFolderName => 'Numele dosarului';
   @override
   String get openLibraryChooseFolder => 'Alege dosarul bibliotecii';
+  @override
+  String get openLibraryNoneInDocuments =>
+      'Încă nu există nicio bibliotecă aici: creează una.';
   @override
   String get openLibraryChooseParent =>
       'Alege dosarul în care se va crea biblioteca';

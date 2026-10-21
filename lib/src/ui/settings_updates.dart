@@ -142,7 +142,7 @@ final class _SettingsUpdatesScreenState extends State<SettingsUpdatesScreen> {
       body: ListView(
         padding: const EdgeInsets.only(bottom: 16),
         children: [
-          if (!isTestingBuild) ...[
+          if (appUpdatesItself) ...[
             HighlightRow(
               key: SettingsKeys.autoUpdate,
               child: SettingsSwitchRow(
@@ -190,7 +190,9 @@ final class _SettingsUpdatesScreenState extends State<SettingsUpdatesScreen> {
             SettingsRowFrame(
               key: const Key('settings-update-testing'),
               title: AppStrings.settingsSectionUpdates,
-              description: AppStrings.updateTestingBuild,
+              description: isTestingBuild
+                  ? AppStrings.updateTestingBuild
+                  : AppStrings.updateFromAppStore,
             ),
         ],
       ),

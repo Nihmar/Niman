@@ -206,6 +206,8 @@ final class AlbanianStrings extends Strings {
   String get updateTestingBuild =>
       'Versionet provë nuk përditësohen vetë: instaloni tjetrin me dorë.';
   @override
+  String get updateFromAppStore => 'App Store e mban Niman të përditësuar.';
+  @override
   String get settingsSpellCheckTitle => 'Kontrolli i shkrimit';
   @override
   String get settingsSpellCheckSubtitle =>
@@ -1686,6 +1688,8 @@ final class AlbanianStrings extends Strings {
   @override
   String get appMenuHelp => 'Ndihmë';
   @override
+  String get macMenuWindow => 'Dritarja';
+  @override
   String get paletteGroupJournal => 'Ditari';
   @override
   String get journalToday => 'Hyrja e sotme';
@@ -2201,6 +2205,9 @@ final class AlbanianStrings extends Strings {
   String get openLibraryFolderName => 'Emri i tresës';
   @override
   String get openLibraryChooseFolder => 'Zgjidh tresën e bibliotekës';
+  @override
+  String get openLibraryNoneInDocuments =>
+      'Këtu nuk ka ende bibliotekë: krijoni një.';
   @override
   String get openLibraryChooseParent =>
       'Zgjidh tresën në të cilën do të krijohet biblioteka';

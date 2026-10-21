@@ -1,15 +1,18 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:niman/src/app.dart';
 import 'package:niman/src/core/app_channel.dart';
+import 'package:niman/src/core/apple_app_events.dart';
 import 'package:niman/src/core/crash_reporter.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/frame_cost.dart';
+import 'package:niman/src/core/host_platform.dart';
 import 'package:niman/src/core/launch_args.dart';
 import 'package:niman/src/core/launch_requests.dart';
 import 'package:niman/src/core/log_file.dart';
@@ -22,6 +25,10 @@ import 'package:path/path.dart' as p;
 /// Entrypoint of the Niman application.
 Future<void> main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
+  // The Mac app is not sandboxed (docs/records/apple-platforms.md), so it
+  // declares no user-selected file entitlement, and file_picker refuses
+  // every dialog unless told not to look for one.
+  if (Platform.isMacOS) await FilePicker.skipEntitlementsChecks();
   CrashReporter.install();
   unawaited(_attachLogFile());
   unawaited(_registerWidgetToggle());
@@ -33,12 +40,22 @@ Future<void> main(List<String> args) async {
   // [_pinWorkingDirectory]): the one it was started in belongs to whoever
   // launched it, and it can be rebuilt under a running app (#319).
   unawaited(_pinWorkingDirectory());
-  final desktop = Platform.isLinux || Platform.isWindows;
+  final desktop = HostPlatform.isDesktop;
   // One Niman per session (#41): a later launch hands itself to the first
   // and ends here, before it opens anything.
   final instance = desktop ? await _claimSession(launch) : null;
   if (desktop && instance == null) exit(0);
-  final later = instance?.launches.map(LaunchArgs.fromJson).asBroadcastStream();
+  // A Mac or an iPhone opens a note in the running app instead of starting
+  // another: those files join the later launches, and the ones kept from
+  // before Dart listened — a note opened from outside started the app —
+  // the first of them as the file the app started with.
+  final appleFiles = Platform.isMacOS || Platform.isIOS
+      ? await AppleAppEvents.instance.takePendingFiles()
+      : const <String>[];
+  final launches = instance?.launches.map(LaunchArgs.fromJson);
+  final later = launches == null
+      ? null
+      : _withAppleFiles(launches, kept: appleFiles.skip(1)).asBroadcastStream();
   runApp(
     ProviderScope(
       overrides: [
@@ -54,10 +71,22 @@ Future<void> main(List<String> args) async {
                         .cast<ShortcutAction>(),
             ),
           ),
+        // An iPhone has no later launches, only the notes the Files app
+        // asks it to open.
+        if (Platform.isIOS)
+          launchRequestsProvider.overrideWithValue(
+            LaunchRequests(
+              file: appleFiles.firstOrNull,
+              later: _withAppleFiles(
+                const Stream<LaunchArgs>.empty(),
+                kept: appleFiles.skip(1),
+              ).asBroadcastStream(),
+            ),
+          ),
         if (desktop)
           launchRequestsProvider.overrideWithValue(
             LaunchRequests(
-              file: launch.openPath,
+              file: launch.openPath ?? appleFiles.firstOrNull,
               later: later ?? const Stream.empty(),
             ),
           ),
@@ -65,6 +94,35 @@ Future<void> main(List<String> args) async {
       child: const NimanApp(),
     ),
   );
+}
+
+/// [launches], with the Apple platforms' notes to open as launches that
+/// open them: the ones Finder or the Files app hands the running app, after
+/// [kept], the ones held from before Dart listened. Elsewhere [launches]
+/// alone.
+Stream<LaunchArgs> _withAppleFiles(
+  Stream<LaunchArgs> launches, {
+  required Iterable<String> kept,
+}) {
+  if (!Platform.isMacOS && !Platform.isIOS) return launches;
+  final merged = StreamController<LaunchArgs>();
+  final subscriptions = <StreamSubscription<LaunchArgs>>[];
+  merged
+    ..onListen = () {
+      for (final stream in [
+        launches,
+        Stream.fromIterable(kept).map((path) => LaunchArgs(openPath: path)),
+        AppleAppEvents.instance.files.map((path) => LaunchArgs(openPath: path)),
+      ]) {
+        subscriptions.add(stream.listen(merged.add));
+      }
+    }
+    ..onCancel = () async {
+      for (final subscription in subscriptions) {
+        await subscription.cancel();
+      }
+    };
+  return merged.stream;
 }
 
 /// The process's working directory, when it can still be read, and the

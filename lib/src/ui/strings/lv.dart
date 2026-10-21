@@ -207,6 +207,8 @@ final class LatvianStrings extends Strings {
   String get updateTestingBuild =>
       'Testa versijas pašas neatjauninās: nākamo instalējiet manuāli.';
   @override
+  String get updateFromAppStore => 'App Store atjaunina Niman.';
+  @override
   String get settingsSpellCheckTitle => 'Orfogrāfiskā pārbaude';
   @override
   String get settingsSpellCheckSubtitle =>
@@ -1665,6 +1667,8 @@ final class LatvianStrings extends Strings {
   @override
   String get appMenuHelp => 'Palīdzība';
   @override
+  String get macMenuWindow => 'Logs';
+  @override
   String get paletteGroupJournal => 'Dienasgrāmata';
   @override
   String get journalToday => 'Šodienas ieraksts';
@@ -2176,6 +2180,9 @@ final class LatvianStrings extends Strings {
   String get openLibraryFolderName => 'Kataloga nosaukums';
   @override
   String get openLibraryChooseFolder => 'Izvēlēties bibliotēkas katalogu';
+  @override
+  String get openLibraryNoneInDocuments =>
+      'Šeit vēl nav bibliotēkas: izveidojiet to.';
   @override
   String get openLibraryChooseParent =>
       'Izvēlēties katalogu, kurā bibliotēka tiks izveidota';

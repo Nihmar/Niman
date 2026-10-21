@@ -1,11 +1,11 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:niman/src/core/download/download_files.dart';
 import 'package:niman/src/core/download/download_state.dart';
 import 'package:niman/src/core/download/downloader.dart';
+import 'package:niman/src/core/host_platform.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/resume_observer.dart';
 import 'package:niman/src/core/settings/library_features.dart';
@@ -38,7 +38,7 @@ final class TranscriptionModels extends ChangeNotifier {
     bool Function()? downloadsAllowed,
   }) : _files = DownloadFiles(directory, transcriptionModels, log: _log),
        _store = TranscriptionSettingsStore(directory),
-       phone = phone ?? Platform.isAndroid {
+       phone = phone ?? HostPlatform.isMobile {
     _downloader = Downloader<TranscriptionModel>(
       files: _files,
       state: stateOf,

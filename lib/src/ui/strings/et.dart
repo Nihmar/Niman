@@ -206,6 +206,8 @@ final class EstonianStrings extends Strings {
   String get updateTestingBuild =>
       'Testversioonid ei uuenda end ise: paigalda järgmine käsitsi.';
   @override
+  String get updateFromAppStore => 'App Store hoiab Nimani ajakohasena.';
+  @override
   String get settingsSpellCheckTitle => 'Õigekirjapide';
   @override
   String get settingsSpellCheckSubtitle =>
@@ -1651,6 +1653,8 @@ final class EstonianStrings extends Strings {
   @override
   String get appMenuHelp => 'Abi';
   @override
+  String get macMenuWindow => 'Aken';
+  @override
   String get paletteGroupJournal => 'Päevik';
   @override
   String get journalToday => 'Tänane sissekanne';
@@ -2160,6 +2164,9 @@ final class EstonianStrings extends Strings {
   String get openLibraryFolderName => 'Kausta nimi';
   @override
   String get openLibraryChooseFolder => 'Vali kogu kaust';
+  @override
+  String get openLibraryNoneInDocuments =>
+      'Siin pole veel ühtegi raamatukogu: loo üks.';
   @override
   String get openLibraryChooseParent => 'Vali kaust, kuhu kogu luuakse';
   @override

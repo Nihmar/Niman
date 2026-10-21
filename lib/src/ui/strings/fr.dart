@@ -216,6 +216,8 @@ final class FrenchStrings extends Strings {
       'Les versions de test ne se mettent pas à jour seules : installez la '
       'suivante à la main.';
   @override
+  String get updateFromAppStore => "L'App Store tient Niman à jour.";
+  @override
   String get settingsSpellCheckTitle => 'Vérifier l’orthographe';
   @override
   String get settingsSpellCheckSubtitle =>
@@ -1717,6 +1719,8 @@ final class FrenchStrings extends Strings {
   @override
   String get appMenuHelp => 'Aide';
   @override
+  String get macMenuWindow => 'Fenêtre';
+  @override
   String get paletteGroupJournal => 'Journal';
   @override
   String get journalToday => 'Entrée du jour';
@@ -2246,6 +2250,9 @@ final class FrenchStrings extends Strings {
   String get openLibraryFolderName => 'Nom du dossier';
   @override
   String get openLibraryChooseFolder => 'Choisir le dossier de la bibliothèque';
+  @override
+  String get openLibraryNoneInDocuments =>
+      'Aucune bibliothèque ici pour le moment : créez-en une.';
   @override
   String get openLibraryChooseParent =>
       'Choisir le dossier dans lequel la bibliothèque sera créée';

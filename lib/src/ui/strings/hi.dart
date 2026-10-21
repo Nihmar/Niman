@@ -200,6 +200,8 @@ final class HindiStrings extends Strings {
   String get updateTestingBuild =>
       'टेस्ट बिल्ड अपने आप अपडेट नहीं होते: अगला वाला स्वयं इंस्टॉल करें।';
   @override
+  String get updateFromAppStore => 'App Store Niman को अद्यतन रखता है।';
+  @override
   String get settingsSpellCheckTitle => 'व्याकरण जाँचें';
   @override
   String get settingsSpellCheckSubtitle =>
@@ -1645,6 +1647,8 @@ final class HindiStrings extends Strings {
   @override
   String get appMenuHelp => 'सहायता';
   @override
+  String get macMenuWindow => 'विंडो';
+  @override
   String get paletteGroupJournal => 'डायरी';
   @override
   String get journalToday => 'आज की प्रविष्टि';
@@ -2153,6 +2157,9 @@ final class HindiStrings extends Strings {
   String get openLibraryFolderName => 'फ़ोल्डर का नाम';
   @override
   String get openLibraryChooseFolder => 'लाइब्रेरी-फ़ोल्डर चुनें';
+  @override
+  String get openLibraryNoneInDocuments =>
+      'यहाँ अभी कोई लाइब्रेरी नहीं है: एक बनाएँ।';
   @override
   String get openLibraryChooseParent =>
       'वह फ़ोल्डर चुनें जिसमें लाइब्रेरी बनेगी';

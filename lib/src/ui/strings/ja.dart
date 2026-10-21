@@ -193,6 +193,8 @@ final class JapaneseStrings extends Strings {
   @override
   String get updateTestingBuild => 'テスト版は自動で更新されません。次の版は手動でインストールしてください。';
   @override
+  String get updateFromAppStore => 'App Store が Niman を最新に保ちます。';
+  @override
   String get settingsSpellCheckTitle => 'スペルチェック';
   @override
   String get settingsSpellCheckSubtitle => '入力しながらスペルミスに下線をつけます。';
@@ -1572,6 +1574,8 @@ final class JapaneseStrings extends Strings {
   @override
   String get appMenuHelp => 'ヘルプ';
   @override
+  String get macMenuWindow => 'ウインドウ';
+  @override
   String get paletteGroupJournal => '日記';
   @override
   String get journalToday => '今日のエントリ';
@@ -2047,6 +2051,8 @@ final class JapaneseStrings extends Strings {
   String get openLibraryFolderName => 'フォルダ名';
   @override
   String get openLibraryChooseFolder => 'ライブラリのフォルダを選ぶ';
+  @override
+  String get openLibraryNoneInDocuments => 'ここにはまだライブラリがありません。作成してください。';
   @override
   String get openLibraryChooseParent => 'ライブラリを作成するフォルダを選ぶ';
   @override

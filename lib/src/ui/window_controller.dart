@@ -3,8 +3,10 @@ import 'dart:ui' show Rect;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:niman/src/core/host_platform.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/ui/caption_buttons.dart';
+import 'package:niman/src/ui/mac_quit.dart';
 import 'package:niman/src/ui/window_minimum_size.dart';
 import 'package:niman/src/ui/window_visibility.dart';
 import 'package:window_manager/window_manager.dart'
@@ -40,7 +42,7 @@ abstract interface class WindowController {
   Future<void> hide();
 
   /// Whether this platform gets the app's own title bar instead of the
-  /// system one. Both desktops (T-PP-22); Android has no window to own.
+  /// system one. The desktops (T-PP-22); Android has no window to own.
   bool get customTitleBar;
 
   /// Hands the title bar to Flutter: the system bar goes, the app draws
@@ -107,7 +109,7 @@ final class WindowManagerController implements WindowController {
   final ValueNotifier<bool> _maximized = ValueNotifier<bool>(false);
 
   @override
-  bool get customTitleBar => Platform.isLinux || Platform.isWindows;
+  bool get customTitleBar => HostPlatform.isDesktop;
 
   @override
   ValueListenable<bool> get maximized => _maximized;
@@ -149,6 +151,10 @@ final class WindowManagerController implements WindowController {
     // neither. Keeping the window's real frame styles is also what
     // leaves Aero Snap and Win+Arrow working, since both hang off the
     // system caption the app is only painting over.
+    //
+    // macOS: the hidden style only, which keeps the traffic lights over a
+    // transparent title bar and lets the content run under it; the bar
+    // leaves their room (title_bar.dart).
     if (Platform.isLinux) await _manager.setAsFrameless();
     await _manager.setTitleBarStyle(TitleBarStyle.hidden);
     _log.info('custom title bar applied');
@@ -198,8 +204,11 @@ final class WindowManagerController implements WindowController {
     return _manager.setPreventClose(prevent);
   }
 
+  /// On a Mac a close is a quit (the × only hides there): the runner is
+  /// told to let the terminate it is holding through ([MacQuit]).
   @override
   Future<void> close() {
+    if (Platform.isMacOS) return MacQuit.confirm();
     return _manager.close();
   }
 
@@ -318,13 +327,13 @@ final class NoopWindowController implements WindowController {
 }
 
 /// Creates the platform controller: `window_manager` on the desktops
-/// (Linux/Windows), a no-op elsewhere (the Android close path must keep
+/// (Linux, Windows, macOS), a no-op elsewhere (the Android close path must keep
 /// behaving exactly as before — T-PP-11's AC).
 ///
 /// [isDesktop] overrides the host platform so a plain test can cover the
 /// branch that does not run here (T-PP-01).
 WindowController createWindowController({bool? isDesktop}) {
-  return (isDesktop ?? (Platform.isLinux || Platform.isWindows))
+  return (isDesktop ?? HostPlatform.isDesktop)
       ? WindowManagerController()
       : NoopWindowController();
 }

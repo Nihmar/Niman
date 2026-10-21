@@ -1,14 +1,15 @@
 #!/usr/bin/env bash
 # Niman dev helper: terse output, full logs in /tmp/niman/niman-<cmd>.log.
-#   analyze | test | check | integration | apk [testing] | linux
+#   analyze | test | check | integration | apk [beta] | linux [beta] | macos [beta]
+#   | ios [beta]
 set -u
 
 # Flutter fallback when not on PATH (AGENTS.md: Env).
-if ! command -v flutter >/dev/null 2>&1   && [ -x /home/alessandro/develop/flutter/bin/flutter ]; then
-  export PATH="$PATH:/home/alessandro/develop/flutter/bin"
+if ! command -v flutter >/dev/null 2>&1   && [ -x "$HOME/develop/flutter/bin/flutter" ]; then
+  export PATH="$PATH:$HOME/develop/flutter/bin"
 fi
 if ! command -v flutter >/dev/null 2>&1; then
-  echo "error: flutter not found - export PATH or install under /home/alessandro/develop/flutter" >&2
+  echo "error: flutter not found - export PATH or install under $HOME/develop/flutter" >&2
   exit 1
 fi
 
@@ -128,9 +129,102 @@ linux_build() {
   return $status
 }
 
+macos_build() {
+  # The official app by default; "beta" builds the testing build. Both are
+  # Xcode schemes (macos/Runner.xcodeproj): beta has a bundle id of its own,
+  # dev.niman.niman.beta, and with it its own Application Support folder.
+  local flavor="${1:-official}"
+  local name="Niman"
+  # The OCR engine is bundled in the Mac app (an Xcode build phase copies
+  # it in): built once, then reused.
+  local ocr=build/ocr-engine/niman-ocr-macos-universal.dylib
+  if [ ! -f "$ocr" ]; then
+    echo "building the OCR engine (once)..."
+    ./scripts/ocr-engine.sh macos-universal build/ocr-engine >"$log" 2>&1 ||
+      { tail -n 20 "$log"; return 1; }
+  fi
+  case "$flavor" in
+    official) flutter build macos --release --flavor official >"$log" 2>&1 ;;
+    beta)
+      name="Niman (Testing)"
+      flutter build macos --release --flavor beta \
+        --dart-define=APP_CHANNEL=testing >"$log" 2>&1
+      ;;
+    *)
+      echo "error: unknown macos flavor '$flavor' (expected official or beta)" >&2
+      usage >&2
+      return 2
+      ;;
+  esac
+  local status=$?
+  tail -n 3 "$log"
+  if [ $status -ne 0 ]; then return $status; fi
+  local app="build/macos/Build/Products/Release-$flavor/$name.app"
+  echo "artifact: $app"
+  # The disk image the release attaches and the updater opens
+  # (lib/src/update/release_asset.dart): the app beside a link to
+  # Applications, to drag it onto.
+  local version suffix=""
+  version="$(sed -n 's/^version: *\([0-9.]*\).*/\1/p' pubspec.yaml)"
+  [ "$flavor" = beta ] && suffix=-testing
+  local dmg="build/macos/niman-$version-macos$suffix.dmg"
+  macos_dmg "$app" "$name" "$dmg" || { tail -n 5 "$log"; return 1; }
+  echo "artifact: $dmg"
+}
+ios_build() {
+  # The official app by default; "beta" builds the testing build, bundle id
+  # dev.niman.niman.beta (Xcode schemes, as on the Mac). Unsigned: signing
+  # for a device, and TestFlight, need the Apple Developer Program; this is
+  # the release build those will sign.
+  local flavor="${1:-official}"
+  local define=()
+  case "$flavor" in
+    official) ;;
+    beta) define=(--dart-define=APP_CHANNEL=testing) ;;
+    *)
+      echo "error: unknown ios flavor '$flavor' (expected official or beta)" >&2
+      usage >&2
+      return 2
+      ;;
+  esac
+  # The OCR engine is bundled in the iOS app (an Xcode build phase wraps
+  # it in a framework): built once, then reused.
+  local ocr=build/ocr-engine/niman-ocr-ios-arm64.dylib
+  if [ ! -f "$ocr" ]; then
+    echo "building the OCR engine (once)..."
+    ./scripts/ocr-engine.sh ios-arm64 build/ocr-engine >"$log" 2>&1 ||
+      { tail -n 20 "$log"; return 1; }
+  fi
+  flutter build ios --release --no-codesign --flavor "$flavor" \
+    "${define[@]}" >"$log" 2>&1
+  local status=$?
+  tail -n 3 "$log"
+  if [ $status -eq 0 ]; then
+    echo "artifact: build/ios/iphoneos/Runner.app (unsigned)"
+  fi
+  return $status
+}
+macos_dmg() { # <app> <volume name> <dmg>
+  local stage
+  stage="$(mktemp -d)"
+  cp -R "$1" "$stage/" && ln -s /Applications "$stage/Applications" || return 1
+  rm -f "$3"
+  # diskutil's own command where the system has it; hdiutil's create, which
+  # it deprecates, on an older macOS.
+  if diskutil image create from --help >/dev/null 2>&1; then
+    diskutil image create from --format UDZO --volumeName "$2" \
+      "$stage" "$3" >>"$log" 2>&1
+  else
+    hdiutil create -volname "$2" -srcfolder "$stage" -format UDZO "$3" \
+      >>"$log" 2>&1
+  fi
+  local status=$?
+  rm -rf "$stage"
+  return $status
+}
 usage() {
   cat <<'EOF'
-usage: ./scripts/niman.sh <analyze|test|check|integration|apk|linux>
+usage: ./scripts/niman.sh <analyze|test|check|integration|apk|linux|macos|ios>
   analyze  flutter analyze --fatal-infos (issue lines + summary only)
   test     flutter test (tail only)
   check    analyze + test; use before committing
@@ -141,6 +235,10 @@ usage: ./scripts/niman.sh <analyze|test|check|integration|apk|linux>
                    frames: that build in profile mode with NIMAN_FRAMES)
   linux [beta]    flutter build linux --release
                   (beta: the testing build, its own data folder niman-testing)
+  macos [beta]    flutter build macos --release, and its disk image
+                  (beta: the testing build, bundle id dev.niman.niman.beta)
+  ios [beta]      flutter build ios --release --no-codesign
+                  (beta: the testing build, bundle id dev.niman.niman.beta)
 Full logs: /tmp/niman/niman-<cmd>.log
 EOF
 }
@@ -152,5 +250,7 @@ case "$cmd" in
   integration) integration ;;
   apk) apk "${2:-}" ;;
   linux) linux_build "${2:-}" ;;
+  macos) macos_build "${2:-}" ;;
+  ios) ios_build "${2:-}" ;;
   *) usage; exit 1 ;;
 esac

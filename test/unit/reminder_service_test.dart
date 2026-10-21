@@ -86,6 +86,30 @@ void main() {
       await service.dispose();
     });
 
+    test('where the system keeps a few, the soonest are scheduled', () async {
+      // iOS keeps 64 pending and drops the rest without a word: the service
+      // schedules the soonest, and a later reconcile tops the window up.
+      backend = FakeReminderBackend(pending: <int>[9], pendingLimit: 2);
+      final service = serviceOf();
+      await service.reconcile(
+        wanted([
+          reminderAt(1, hours: 5),
+          reminderAt(2, hours: 1),
+          reminderAt(3, hours: 3),
+        ]),
+      );
+      expect(backend.scheduled.map((r) => r.id).toList()..sort(), <int>[2, 3]);
+      expect(backend.cancelled, <int>[9]);
+
+      // The soonest fired: the next one in line takes its place.
+      backend.fire(2);
+      await service.reconcile(
+        wanted([reminderAt(1, hours: 5), reminderAt(3, hours: 3)]),
+      );
+      expect(backend.pending.toList()..sort(), <int>[1, 3]);
+      await service.dispose();
+    });
+
     test('an empty set clears everything', () async {
       backend = FakeReminderBackend(pending: <int>[7]);
       final service = serviceOf();
