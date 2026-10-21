@@ -28,6 +28,7 @@ import 'package:niman/src/epub/epub_book.dart';
 import 'package:niman/src/epub/epub_convert_failures.dart';
 import 'package:niman/src/epub/epub_convert_plan.dart';
 import 'package:niman/src/epub/epub_convert_render.dart';
+import 'package:niman/src/epub/epub_picture_type.dart';
 import 'package:niman/src/library/markdown_import.dart' show freeFolderName;
 import 'package:path/path.dart' as p;
 
@@ -328,8 +329,7 @@ String _keepPicture(
   String path,
   Uint8List bytes,
 ) {
-  final name =
-      '${sha256.convert(bytes)}${p.posix.extension(path).toLowerCase()}';
+  final name = '${sha256.convert(bytes)}${epubPictureExtension(path, bytes)}';
   final file = File(p.join(staging, attachments, name));
   if (!file.existsSync()) {
     file.parent.createSync(recursive: true);
