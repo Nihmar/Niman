@@ -59,9 +59,10 @@ SortedDrop sortDrop(
       folders.add(path);
     } else if (editorOnlyExtensions.contains(extension)) {
       files.add(path);
-    } else if (extension == 'zip') {
-      // A Notion export, offered for import (#25): the shell decides by
-      // the extension what the archive is.
+    } else if (extension == 'zip' || extension == 'epub') {
+      // A Notion export, offered for import (#25), or a book, offered for
+      // conversion into notes (#1138): the shell decides by the extension
+      // what the archive is.
       folders.add(path);
     } else {
       rejected.add(path);

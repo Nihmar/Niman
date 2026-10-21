@@ -45,6 +45,7 @@ final class ShellRowActions {
     required this.onExport,
     required this.onExportFolder,
     this.onRecognize,
+    this.onConvertBook,
     this.renameInPlace,
     this.confirmLinks,
     this.onLinksRewritten,
@@ -118,6 +119,9 @@ final class ShellRowActions {
   /// Recognizes the text of the file at `path` (#594); null offers none.
   final void Function(String path)? onRecognize;
 
+  /// Converts the book at `path` into notes (#1138).
+  final void Function(String path)? onConvertBook;
+
   /// Runs [action] for [note], creating in [here] where the action makes
   /// something new. A null action (the menu was dismissed) does nothing.
   /// [anchor] is where the row's menu opened, for a choice that asks more.
@@ -155,6 +159,8 @@ final class ShellRowActions {
         await onExportFolder(note.path, anchor);
       case 'recognize':
         onRecognize?.call(note.path);
+      case 'convertepub':
+        onConvertBook?.call(note.path);
       case 'newtab':
         onOpenInNewTab(note.path);
       case 'beside':

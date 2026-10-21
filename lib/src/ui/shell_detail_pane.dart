@@ -57,6 +57,7 @@ final class ShellDetailPane extends StatelessWidget {
     this.templateFolder,
     this.linksFollowed = 0,
     this.onAnnotate,
+    this.onConvertBook,
     this.ocr,
     this.marks,
     this.zen = false,
@@ -251,6 +252,9 @@ final class ShellDetailPane extends StatelessWidget {
   /// Annotates a place of a book or a PDF in its companion note (#284).
   final void Function(Annotation annotation)? onAnnotate;
 
+  /// Converts a book into notes (#1138), by its absolute path.
+  final ValueChanged<String>? onConvertBook;
+
   /// Recognizes a PDF's or a picture's text (#594); null offers none.
   final OcrFileActions? ocr;
 
@@ -327,6 +331,7 @@ final class ShellDetailPane extends StatelessWidget {
           reloadToken: linksFollowed,
           linkType: linkType,
           onAnnotate: onAnnotate,
+          onConvertBook: onConvertBook,
           ocr: ocr,
           marks: marks,
           fullScreen: epubFullScreen,

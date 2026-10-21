@@ -114,6 +114,30 @@ void main() {
     expect(find.byKey(const Key('menu-new-flashcards')), findsNothing);
   });
 
+  testWidgets('a book offers its conversion into notes, a note does not', (
+    tester,
+  ) async {
+    await pumpLibrary(tester);
+    await controller.seedFile('Dune.epub');
+    await controller.createNote(parentPath: '', name: 'Note');
+    await settle(tester);
+
+    await tester.longPress(noteRow('Dune.epub'));
+    await settle(tester);
+    expect(find.byKey(const Key('menu-convert-epub')), findsOneWidget);
+    // Among what the file is, before what to make beside it.
+    expect(
+      top(tester, 'menu-convert-epub'),
+      lessThan(top(tester, 'menu-new-note')),
+    );
+    await tester.tapAt(Offset.zero);
+    await settle(tester);
+
+    await tester.longPress(noteRow('Note.md'));
+    await settle(tester);
+    expect(find.byKey(const Key('menu-convert-epub')), findsNothing);
+  });
+
   testWidgets('on a folder, creating comes first', (tester) async {
     await pumpLibrary(tester);
     await controller.createFolder(parentPath: '', name: 'Books');

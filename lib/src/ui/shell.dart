@@ -87,6 +87,7 @@ import 'package:niman/src/ui/dismiss_chain.dart';
 import 'package:niman/src/ui/dock/close_overlay_action.dart';
 import 'package:niman/src/ui/dock/dock_overlay.dart';
 import 'package:niman/src/ui/dock/right_dock.dart';
+import 'package:niman/src/ui/epub_convert_flow.dart';
 import 'package:niman/src/ui/epub_look_sheet.dart';
 import 'package:niman/src/ui/epub_text_zoom.dart';
 import 'package:niman/src/ui/expanded_folders.dart';
@@ -1167,6 +1168,27 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     shownNote: () => _shownNote,
   );
 
+  /// Converting a book into notes (#1138): from its row in the reader, the
+  /// tree, the palette, a drop or a share.
+  late final EpubConvertFlow _epubConvert = EpubConvertFlow(
+    session: widget.controller,
+    reveal: _revealFolder,
+    open: (note) => _openNoteFromLink(note, null),
+  );
+
+  void _convertBook(String path) => unawaited(_epubConvert.run(context, path));
+
+  /// The palette's conversion: the book on screen, else the book selected
+  /// in the tree, else one picked.
+  Future<void> _convertEpubCommand() async {
+    final root = widget.controller.root;
+    final book = [_shownNote, _selected].nonNulls.where(isBook).firstOrNull;
+    if (root != null && book != null) {
+      return await _epubConvert.run(context, p.join(root, book));
+    }
+    await _epubConvert.pickAndRun(context);
+  }
+
   /// What a tree row's menu choice does: rename, move, delete, pin, open
   /// outside the app (issue #100 moved them into [ShellRowActions]).
   /// What several marked tree rows do together (#712).
@@ -1260,6 +1282,11 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       anchor: anchor,
     ),
     onRecognize: _recognize,
+    onConvertBook: (path) {
+      if (widget.controller.root case final root?) {
+        _convertBook(p.join(root, path));
+      }
+    },
   );
 
   /// Note creation from the library's templates (#51, T-M4-07): the flow
@@ -1701,6 +1728,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           reloadToken: _linksFollowed,
           linkType: _editorSettings.linkType,
           onAnnotate: _annotating ? _annotate : null,
+          onConvertBook: _convertBook,
           marks: _annotating ? _annotations : null,
           ocr: _ocrActions,
           fullScreen: _immersive.fullScreen,
@@ -2892,6 +2920,12 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     if (ops == null || !mounted) return;
     final source = File(path);
     if (!await source.exists()) return;
+    // A shared book is converted into notes (#1138), never decoded as a
+    // note's text: its cache copy goes once it is.
+    if (isBook(name)) {
+      if (mounted) await _epubConvert.run(context, path, consume: true);
+      return;
+    }
     if (p.extension(name).toLowerCase() == '.zip') {
       await _importNotionArchive(source, name, consume: true);
       return;
@@ -4470,6 +4504,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       AppCommand.recognizeText: () {
         if (_shownNote case final path?) _recognize(path);
       },
+      AppCommand.convertEpub: () => unawaited(_convertEpubCommand()),
       AppCommand.exportLibrary: () =>
           unawaited(_exportFlow.runFolderExport(context, '', library: true)),
       AppCommand.markdownCheatsheet: () => unawaited(_openCheatsheet()),
@@ -4564,6 +4599,11 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   Future<void> _openFolder(String path) async {
     if (p.extension(path).toLowerCase() == '.zip') {
       await _importNotionArchive(File(path), p.basename(path));
+      return;
+    }
+    // A book: into notes (#1138), or a word that a library is needed.
+    if (isBook(path)) {
+      await _epubConvert.run(context, path);
       return;
     }
     final root = widget.controller.root;
@@ -5252,6 +5292,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
                     reloadToken: _noteReloadToken,
                     linksFollowed: _linksFollowed,
                     onAnnotate: _annotating ? _annotate : null,
+                    onConvertBook: _convertBook,
                     ocr: _ocrActions,
                     marks: _annotating ? _annotations : null,
                     saveNote: noteSaverFor(controller),

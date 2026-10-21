@@ -19,9 +19,11 @@ void main() {
       '/a/dir',
       // A Notion export goes the way a folder does: to import (#25).
       '/a/Export.ZIP',
+      // And a book, to its conversion into notes (#1138).
+      '/a/Dune.epub',
     ], isFolder: (path) => path == '/a/dir');
     expect(drop.files, ['/a/notes.md', '/a/README.MARKDOWN', '/a/todo.txt']);
-    expect(drop.folders, ['/a/dir', '/a/Export.ZIP']);
+    expect(drop.folders, ['/a/dir', '/a/Export.ZIP', '/a/Dune.epub']);
     expect(drop.rejected, ['/a/pic.png']);
   });
 

@@ -48,6 +48,7 @@ void main() {
     void Function(Annotation annotation)? onAnnotate,
     AnnotationMarkSource? marks,
     ValueNotifier<Object?>? fullScreen,
+    VoidCallback? onConvert,
   }) => MaterialApp(
     home: Scaffold(
       appBar: AppBar(title: const Text('chrome')),
@@ -59,6 +60,7 @@ void main() {
         anchor: anchor,
         reloadToken: reloadToken,
         onAnnotate: onAnnotate,
+        onConvert: onConvert,
         marks: marks,
         fullScreen: fullScreen,
       ),
@@ -74,6 +76,7 @@ void main() {
     void Function(Annotation annotation)? onAnnotate,
     AnnotationMarkSource? marks,
     ValueNotifier<Object?>? fullScreen,
+    VoidCallback? onConvert,
   }) async {
     // Real time: the book is read on an isolate, which fake time never
     // lets finish.
@@ -87,6 +90,7 @@ void main() {
           onAnnotate: onAnnotate,
           marks: marks,
           fullScreen: fullScreen,
+          onConvert: onConvert,
         ),
       );
       final state = tester.state<EpubPaneState>(find.byType(EpubPane));
@@ -245,6 +249,25 @@ void main() {
     expect(find.byKey(const Key('epub-contents')), findsNothing);
     expect(find.text('The end.'), findsOneWidget);
     expect(find.text('Chapter one'), findsNothing);
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('the convert button waits for the book, then converts it', (
+    tester,
+  ) async {
+    final path = twoChapters();
+    var converted = 0;
+    // Before the book is read, the button is there and does nothing.
+    await tester.pumpWidget(pane(path, onConvert: () => converted++));
+    expect(
+      tester
+          .widget<IconButton>(find.byKey(const Key('epub-convert-button')))
+          .onPressed,
+      isNull,
+    );
+    await pump(tester, path, onConvert: () => converted++);
+    await tester.tap(find.byKey(const Key('epub-convert-button')));
+    expect(converted, 1);
     await tester.pumpWidget(const SizedBox());
   });
 

@@ -713,6 +713,14 @@ List<SettingsSearchEntry> settingsSearchEntries({
       open: () => flashHome(SettingsKeys.notionImport),
       onHome: true,
     ),
+    SettingsSearchEntry(
+      title: AppStrings.epubConvertSettingsTitle,
+      area: maintenance,
+      rowKey: SettingsKeys.epubConvert,
+      value: noValue,
+      open: () => flashHome(SettingsKeys.epubConvert),
+      onHome: true,
+    ),
     if (libraryRows) ...[
       SettingsSearchEntry(
         title: AppStrings.switchLibraryTitle,
