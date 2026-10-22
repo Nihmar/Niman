@@ -158,3 +158,9 @@ Phases 1–4 in `feat`-prefixed commits on `docs/kanban-record` (#1165,
 - **Not tried**: either view running in the real app (the tests use a
   harness, not the shell), a screen reader speaking the announcements,
   and the vertical edge scroll of a column during a drag.
+- **Export** (#1170, 2026-10-22): the board is drawn in HTML, PDF and
+  EPUB, with the feature on. Up to four columns print on A4 landscape,
+  more on A4 portrait at two to a row (the 60 mm column floor decides
+  both, in `lib/src/export/kanban_sheet.dart`). The raster fallback draws
+  the same board. Cards resolve references and footnotes over the whole
+  note.

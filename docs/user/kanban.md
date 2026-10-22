@@ -91,8 +91,12 @@ phone's sheet. A screen reader reads a card as *Card 2 of 5, column
 Doing*, offers the moves as actions on it, and announces where a card
 went.
 
+## Export
+
+HTML, PDF and EPUB draw the board: see [export](export.md#a-note). A
+board of up to four columns prints on A4 landscape.
+
 ## Not yet
 
-HTML, PDF and EPUB export show a board as its sections and tasks; drawing
-the board is tracked in #1170. Several boards in one view, cards that are
-notes, and a board over a query of tags are tracked in #1171.
+Several boards in one view, cards that are notes, and a board over a query
+of tags are tracked in #1171.
