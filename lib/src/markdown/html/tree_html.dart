@@ -10,6 +10,7 @@ import 'package:niman/src/markdown/block_tree.dart';
 import 'package:niman/src/markdown/column_layout.dart';
 import 'package:niman/src/markdown/html/code_html.dart';
 import 'package:niman/src/markdown/html/footnote_html.dart';
+import 'package:niman/src/markdown/html/html_definitions.dart';
 import 'package:niman/src/markdown/html/html_hooks.dart';
 import 'package:niman/src/markdown/html/leaf_text.dart';
 import 'package:niman/src/markdown/html/table_html.dart';
@@ -30,13 +31,22 @@ final class TreeHtml {
   ///
   /// [hooks] draw what a page draws its own way: the export's code, its
   /// formulas, callouts and links.
+  ///
+  /// [shared] makes [source] one piece of a larger note: its link
+  /// references and footnotes are the whole note's ([HtmlDefinitions],
+  /// filled by [collect] over every piece first), its citations are counted
+  /// across the pieces, and the footnotes' section is not written here:
+  /// the caller writes it once, after the last piece.
   new(
     this.source, {
     this.extensions = true,
     this.appSyntax = true,
     this.hooks = const HtmlHooks(),
+    HtmlDefinitions? shared,
   }) : _body = _withoutLastBreak(source),
-       _lines = _withoutLastBreak(source).split('\n');
+       _lines = _withoutLastBreak(source).split('\n'),
+       _shared = shared != null,
+       _defs = shared ?? HtmlDefinitions(xhtml: hooks.xhtml);
 
   /// The note.
   final String source;
@@ -63,24 +73,9 @@ final class TreeHtml {
       : text;
   StringBuffer _out = StringBuffer();
   int _last = 0x0A;
-  final Map<String, LinkReference> _references = <String, LinkReference>{};
-  final Map<String, FootnoteNode> _definitions = <String, FootnoteNode>{};
-  late final Set<String> _footnoteKeys = _definitions.keys.toSet();
-  late final FootnoteHtml _footnotes = FootnoteHtml(
-    _definitions,
-    xhtml: hooks.xhtml,
-  );
-
-  /// Each footnote definition's body, written where it stands, so that the
-  /// citations in it count in the note's order, as `cmark-gfm` counts them
-  /// — cited or not, by itself or by another — its links back left as
-  /// [_backrefs] until the citations are all counted.
-  final Map<FootnoteNode, String> _bodies =
-      Map<FootnoteNode, String>.identity();
-
-  /// Where a footnote's links back go in its body: its last U+0000, the
-  /// body's tail.
-  static const String _backrefs = '\u0000';
+  final bool _shared;
+  final HtmlDefinitions _defs;
+  late final Set<String> _footnoteKeys = _defs.definitions.keys.toSet();
 
   /// Each paragraph's inline text, the link reference definitions it
   /// starts with taken out.
@@ -91,9 +86,20 @@ final class TreeHtml {
     final tree = BlockTree.of(_body, appSyntax: appSyntax);
     _collect(tree);
     _blocks(tree, tight: false);
-    _section();
+    if (!_shared) {
+      final section = _defs.footnotes.section(_defs.bodies);
+      if (section.isNotEmpty) {
+        _cr();
+        _write(section);
+      }
+    }
     return _out.toString();
   }
+
+  /// Only reads the definitions [source] holds into the shared set, writing
+  /// nothing: the first pass over a note's pieces, so that a link or a
+  /// footnote in one resolves against a definition in another.
+  void collect() => _collect(BlockTree.of(_body, appSyntax: appSyntax));
 
   /// What [write] writes, apart from the page: a callout's body, for the
   /// hooks to frame.
@@ -127,7 +133,10 @@ final class TreeHtml {
         case QuoteNode(:final children) || ItemNode(:final children):
           _collect(children);
         case FootnoteNode(:final label, :final children):
-          _definitions.putIfAbsent(LinkReferences.normalize(label), () => node);
+          _defs.definitions.putIfAbsent(
+            LinkReferences.normalize(label),
+            () => node,
+          );
           _collect(children);
         case ListNode(:final items):
           _collect(items);
@@ -137,7 +146,7 @@ final class TreeHtml {
           _collect(children);
         case LeafNode(:final kind) when kind == BlockKind.paragraph:
           final text = LeafText.paragraph(LeafText.linesOf(node, _lines));
-          final rest = LinkReferences.parseInto(text, _references);
+          final rest = LinkReferences.parseInto(text, _defs.references);
           _paragraphs[node] = text.substring(rest);
         case LeafNode():
           break;
@@ -199,8 +208,18 @@ final class TreeHtml {
         case ColumnNode(:final children):
           _blocks(children, tight: false);
         case FootnoteNode(:final children):
-          _bodies[node] = _captured(
-            () => _blocks(children, tight: false, tail: _backrefs),
+          // The first definition of a label is the one written; the others
+          // are written too, for the citations in them to count.
+          final body = _captured(
+            () => _blocks(
+              children,
+              tight: false,
+              tail: FootnoteHtml.backrefsMark,
+            ),
+          );
+          _defs.bodies.putIfAbsent(
+            LinkReferences.normalize(node.label),
+            () => body,
           );
         case LeafNode():
           if (!_leaf(node, tight: tight, tail: mine) && mine != null) {
@@ -472,36 +491,14 @@ final class TreeHtml {
       out,
       InlineParser(
         text,
-        references: _references,
+        references: _defs.references,
         footnotes: _footnoteKeys,
         extendedAutolinks: extensions,
         appSyntax: appSyntax,
       ).parse(),
-      footnote: _footnotes.reference,
+      footnote: _defs.footnotes.reference,
       tagFilter: extensions,
       hooks: hooks,
     );
-  }
-
-  /// The footnotes cited, at the note's end.
-  void _section() {
-    if (_footnotes.cited.isEmpty) return;
-    _cr();
-    _write(
-      '<section class="footnotes" '
-      'data-footnotes${hooks.xhtml ? '=""' : ''}>\n<ol>\n',
-    );
-    for (var at = 0; at < _footnotes.cited.length; at++) {
-      final key = _footnotes.cited[at];
-      final definition = _definitions[key];
-      if (definition == null) continue;
-      _write('<li id="fn-${_footnotes.idOf(key)}">\n');
-      final body = _bodies[definition]!;
-      final tail = body.lastIndexOf(_backrefs);
-      _write(body.replaceRange(tail, tail + 1, _footnotes.backrefs(key)));
-      _cr();
-      _write('</li>\n');
-    }
-    _write('</ol>\n</section>\n');
   }
 }
