@@ -192,4 +192,13 @@ void main() {
 </D:multistatus>''';
     expect(parseMultistatus(body, base).map((i) => i.path), ['here.md']);
   });
+
+  // #1162: the ETag a PUT answered is compared with the one a listing
+  // serves, and the two may be spelled differently by the same server.
+  test('ETags compare weakly, with or without their quotes', () {
+    expect(sameEtag('"abc"', '"abc"'), isTrue);
+    expect(sameEtag('W/"abc"', '"abc"'), isTrue);
+    expect(sameEtag('abc', '"abc"'), isTrue);
+    expect(sameEtag('"abc"', '"abd"'), isFalse);
+  });
 }

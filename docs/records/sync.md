@@ -297,6 +297,13 @@ Pure functions, no I/O and no clock, one unit test per row above:
   write guards: `If-Match` with the remote ETag, `If-None-Match: *` for
   a path that should not exist, or `checkRemoteFirst` when the server
   honors neither.
+- **After an upload** the row is recorded from a listing of the file,
+  which comes after the `PUT`. When the `PUT` answered an ETag and the
+  listing shows another one (weak comparison), another device wrote in
+  between: nothing is recorded, the step is skipped, and the next run
+  sees both sides changed and reports the conflict. Recorded, that write
+  would read as agreed, and the next edit here would replace it unasked
+  (#1162).
 - **Renames:** a `deleteRemote` of A and an `upload` of a new B with A's
   agreed content (unique on both sides) become one `moveRemote` when the
   server has `MOVE`; a `trashLocal` of A and a `download` of a new B with

@@ -116,6 +116,20 @@ String? ifMatchGuard(String? etag) {
   return etag;
 }
 
+/// Whether ETags [a] and [b] name the same version, by weak comparison
+/// (RFC 7232, 2.3.2): a `W/` does not count, and neither do the quotes
+/// `OC-ETag` leaves out. What a `PUT` answered is compared with what a
+/// listing serves, and a server may say the one with the other's
+/// spelling.
+bool sameEtag(String a, String b) => _bareEtag(a) == _bareEtag(b);
+
+String _bareEtag(String etag) {
+  final strong = etag.startsWith('W/') || etag.startsWith('w/')
+      ? etag.substring(2)
+      : etag;
+  return strong.replaceAll('"', '');
+}
+
 /// The items of a `207 Multi-Status` [body], with paths made relative to
 /// [base] (the folder URL the client was created with, trailing slash
 /// included).
