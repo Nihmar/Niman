@@ -29,6 +29,12 @@ import 'package:niman/src/links/resolver.dart';
 final class MovedLinks {
   const new _(this._old);
 
+  /// The links already resolved to a moved file, each told by its target
+  /// text and its form, with the old path it resolved to: for a reader that
+  /// resolved its links before the move, and asks the resolver nothing more
+  /// (the tasks of `todo.txt`, #1152).
+  const new resolved(this._old);
+
   /// No link of the note resolved to a moved file.
   static const MovedLinks none = MovedLinks._(<(String, bool), String>{});
 

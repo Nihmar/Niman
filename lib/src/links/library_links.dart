@@ -19,7 +19,12 @@ import 'package:niman/src/links/resolver.dart';
 
 /// The library's links: the four readers in one.
 abstract interface class LibraryLinks
-    implements LinkSource, DeadLinkSource, MentionSource, PreviewSource;
+    implements
+        LinkSource,
+        QueryResolver,
+        DeadLinkSource,
+        MentionSource,
+        PreviewSource;
 
 /// [LibraryLinks] over the library's index; each call goes to the reader
 /// that owns it.
@@ -67,6 +72,11 @@ final class IndexLibraryLinks implements LibraryLinks {
   @override
   Future<ResolveResult> resolveMarkdown(String href, {String? from}) =>
       _resolver.resolveMarkdown(href, from: from);
+
+  @override
+  Future<Map<LinkQuery, ResolveResult>> resolveQueries(
+    Iterable<LinkQuery> queries,
+  ) => _resolver.resolveQueries(queries);
 
   @override
   Stream<void> get changes => _dead.changes;

@@ -103,9 +103,20 @@ abstract interface class LinkSource {
 /// than a wiki target.
 typedef LinkQuery = ({String target, String? from, bool markdown});
 
+/// Resolves many links at once, each with the note it is written in: the
+/// batched side of [LinkResolver], for a reader that holds a few thousand
+/// links (the tasks of `todo.txt`, #1152) and cannot ask for them one by one.
+abstract interface class QueryResolver {
+  /// Resolves [queries] in as few lookups as the index allows; the result is
+  /// keyed by the query, one entry for each distinct one.
+  Future<Map<LinkQuery, ResolveResult>> resolveQueries(
+    Iterable<LinkQuery> queries,
+  );
+}
+
 /// Resolves wiki targets (`[[…]]` target part) and markdown hrefs against
 /// the note index. Not a DAO and not stateful: callers create one per use.
-final class LinkResolver implements LinkSource {
+final class LinkResolver implements LinkSource, QueryResolver {
   /// Creates a resolver over the drift [IndexDatabase].
   const new(this._db);
 
@@ -236,6 +247,7 @@ final class LinkResolver implements LinkSource {
   /// Resolves many links, each with the note it is written in, in as few
   /// queries as [resolveBatch]: one stems lookup per distinct last segment,
   /// one notes lookup, then the per-link rules in Dart (#491).
+  @override
   Future<Map<LinkQuery, ResolveResult>> resolveQueries(
     Iterable<LinkQuery> queries,
   ) async {

@@ -64,6 +64,7 @@ import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/spellcheck/personal_dictionary.dart';
 import 'package:niman/src/spellcheck/spell_check_provider.dart';
 import 'package:niman/src/todo/reminders.dart';
+import 'package:niman/src/todo/task_links.dart';
 import 'package:niman/src/todo/todo_controller.dart';
 import 'package:niman/src/todo/todo_filter.dart';
 import 'package:niman/src/todo/todo_list_view.dart';
@@ -1061,6 +1062,11 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// The todo state (T-TD-04): owned here so the tab body and the tab's
   /// app-bar add action share one controller.
   late final TodoController _todoController;
+
+  /// The links of the tasks, resolved (#1152): beside the controller whose
+  /// snapshot it reads, so the Todo tab, a note's task list and the rename
+  /// rewrite share one map. Inert while the Todo feature is off.
+  late final TaskLinkMap _taskLinks;
 
   /// What the Todo list shows (#1003): its filter, its sort and the folded
   /// sections. Owned here, next to the controller, because the phone's app
@@ -2578,6 +2584,15 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       reminders: widget.reminders,
       sourceFactory: widget.todoSourceFactory,
     );
+    _taskLinks = TaskLinkMap(
+      tasks: _todoController,
+      snapshot: () => _todoController.snapshot,
+      links: () => widget.controller.linkSource,
+      enabled: () =>
+          widget.controller.root != null &&
+          widget.controller.features.value.isOn(LibraryFeature.todo),
+      enabledChanges: widget.controller.features,
+    );
     _todoView = todoListViewFor(widget.controller);
     // The todo widgets follow the snapshot: every mutation notifies, and
     // the initial open notifies too, so one listener covers both.
@@ -2792,6 +2807,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     unawaited(_inbound.cancel());
     _todoController.removeListener(_homeWidgets.pushTodos);
     _calendarController.removeListener(_pushCalendarReminders);
+    _taskLinks.dispose();
     _todoController.dispose();
     _todoView.dispose();
     _calendarController.dispose();

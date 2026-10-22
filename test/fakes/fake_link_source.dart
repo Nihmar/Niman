@@ -94,6 +94,28 @@ final class FakeLinkSource implements LibraryLinks {
     return mentions['$referrerPath -> $path'] ?? Mention.unread;
   }
 
+  /// How many batches [resolveQueries] has been asked for.
+  int queryBatches = 0;
+
+  /// While set, [resolveQueries] waits for it: a batch still being resolved.
+  /// Called once per batch, with the number of that batch (from 1).
+  Future<void> Function(int batch)? queryGate;
+
+  @override
+  Future<Map<LinkQuery, ResolveResult>> resolveQueries(
+    Iterable<LinkQuery> queries,
+  ) async {
+    final batch = ++queryBatches;
+    final asked = queries.toSet();
+    await queryGate?.call(batch);
+    return {
+      for (final query in asked)
+        query: query.markdown
+            ? await resolveMarkdown(query.target, from: query.from)
+            : await resolveWiki(query.target, from: query.from),
+    };
+  }
+
   @override
   Stream<void> get changes => _changes.stream;
 
