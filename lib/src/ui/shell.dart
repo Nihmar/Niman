@@ -2625,6 +2625,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       targets: _taskLinkTargets,
       source: () => _linkSource,
       previewEnabled: () => _editorSettings.linkPreview,
+      suggester: () => _wikilinkSuggester,
     );
     _todoView = todoListViewFor(widget.controller);
     // The todo widgets follow the snapshot: every mutation notifies, and
@@ -3647,6 +3648,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       knownTokens: snapshot == null
           ? const <String>{}
           : snapshotTokens(snapshot),
+      linkSuggester: _todoLinks.suggester,
       health: reminders.health.value,
       onOpenReminderSettings: reminders.openHealthSettings,
     );

@@ -16,6 +16,10 @@
 /// break never gets in. A wide window gives the dialog more width, and
 /// one with the room picks the due date and the reminder in place, under
 /// their rows, rather than in pickers stacked over the dialog (#268).
+///
+/// Typing `[[` in the description lists the library's notes under it, the
+/// ones the editor's wikilink panel lists, and picking one writes the link
+/// the editor would write (#1152).
 library;
 
 import 'dart:async';
@@ -24,12 +28,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
+import 'package:niman/src/links/suggester.dart';
 import 'package:niman/src/todo/parser.dart';
 import 'package:niman/src/todo/reminder_health.dart';
 import 'package:niman/src/ui/os_pickers.dart';
 import 'package:niman/src/ui/reminder_health_message.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/todo_date_panel.dart';
+import 'package:niman/src/ui/todo_link_options.dart';
+import 'package:niman/src/ui/todo_link_suggestions.dart';
 import 'package:niman/src/ui/todo_priority_chips.dart';
 import 'package:niman/src/ui/todo_token_completion.dart';
 
@@ -38,7 +45,8 @@ import 'package:niman/src/ui/todo_token_completion.dart';
 /// [today] stamps the creation date of an added task and seeds the
 /// pickers. [knownTokens] (sigil-included: `+p`, `@c`, `#t`) completes
 /// the word under the caret. [due], with no [initial], fills the due date
-/// in — Add task from a day (#730). [onDelete], given only with
+/// in — Add task from a day (#730). [linkSuggester] gives the library's
+/// notes for a `[[` link typed in the text (#1152). [onDelete], given only with
 /// [initial], shows Delete: the dialog closes as a cancel, then it runs.
 Future<String?> showTodoTaskDialog(
   BuildContext context, {
@@ -47,6 +55,7 @@ Future<String?> showTodoTaskDialog(
   String text = '',
   DateTime? due,
   Set<String> knownTokens = const <String>{},
+  WikilinkSuggester? Function()? linkSuggester,
   VoidCallback? onDelete,
   ReminderHealth health = ReminderHealth.ok,
   Future<bool> Function()? onOpenReminderSettings,
@@ -59,6 +68,7 @@ Future<String?> showTodoTaskDialog(
       due: due,
       today: today,
       knownTokens: knownTokens,
+      linkSuggester: linkSuggester,
       onDelete: initial == null ? null : onDelete,
       health: health,
       onOpenReminderSettings: onOpenReminderSettings,
@@ -76,6 +86,7 @@ final class _TodoTaskDialog extends StatefulWidget {
     required this.due,
     required this.today,
     required this.knownTokens,
+    required this.linkSuggester,
     required this.onDelete,
     required this.health,
     required this.onOpenReminderSettings,
@@ -92,6 +103,9 @@ final class _TodoTaskDialog extends StatefulWidget {
 
   final DateTime today;
   final Set<String> knownTokens;
+
+  /// The notes a `[[` link can name; null offers none.
+  final WikilinkSuggester? Function()? linkSuggester;
   final VoidCallback? onDelete;
 
   /// The reminder preconditions as last known; a failing one is warned
@@ -119,6 +133,12 @@ final class _TodoTaskDialogState extends State<_TodoTaskDialog> {
     ),
   );
   late final FocusNode _focus = FocusNode();
+
+  /// The notes offered while a `[[` link is typed (#1152).
+  late final TodoLinkSuggestions _links = TodoLinkSuggestions(
+    _field,
+    () => widget.linkSuggester?.call(),
+  );
 
   late String? _priority = widget.initial?.priority;
   late DateTime? _due = widget.initial?.due ?? widget.due;
@@ -150,6 +170,7 @@ final class _TodoTaskDialogState extends State<_TodoTaskDialog> {
   @override
   void dispose() {
     _focus.removeListener(_onFocusChanged);
+    _links.dispose();
     _field.dispose();
     _focus.dispose();
     super.dispose();
@@ -157,6 +178,7 @@ final class _TodoTaskDialogState extends State<_TodoTaskDialog> {
 
   /// [FocusNode] callback: [setState] when focus toggles (see [initState]).
   void _onFocusChanged() {
+    if (!_focus.hasFocus) _links.close();
     setState(() {});
   }
 
@@ -427,6 +449,7 @@ final class _TodoTaskDialogState extends State<_TodoTaskDialog> {
             // could fire, so a suggestion did nothing at all (#311). Inside
             // the field's own tap region, the tap is the field's.
             TextFieldTapRegion(child: _completionList(_completions)),
+          TodoLinkOptions(suggestions: _links),
           if (tokens.isNotEmpty)
             Padding(
               padding: const EdgeInsets.only(top: 8),
@@ -586,6 +609,9 @@ final class _TodoTaskDialogState extends State<_TodoTaskDialog> {
       canRequestFocus: false,
       skipTraversal: true,
       onKeyEvent: (node, event) {
+        // A list of notes under the field takes the keys it needs (#1152).
+        final listed = _links.handleKey(event);
+        if (listed == KeyEventResult.handled) return listed;
         final enter =
             event.logicalKey == LogicalKeyboardKey.enter ||
             event.logicalKey == LogicalKeyboardKey.numpadEnter;
@@ -606,8 +632,14 @@ final class _TodoTaskDialogState extends State<_TodoTaskDialog> {
         inputFormatters: const [_NoLineBreaks()],
         decoration: InputDecoration(hintText: AppStrings.todoDescriptionHint),
         textInputAction: TextInputAction.done,
-        onChanged: (_) => setState(() {}),
-        onSubmitted: (_) => _save(),
+        onChanged: (_) {
+          _links.edited();
+          setState(() {});
+        },
+        onSubmitted: (_) {
+          // The break of the `Enter` that picked a note is not a save.
+          if (!_links.justPicked) _save();
+        },
       ),
     );
   }

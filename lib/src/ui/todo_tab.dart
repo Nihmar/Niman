@@ -242,6 +242,7 @@ final class _TodoTabState extends State<TodoTab> {
             key: const Key('todo-quick-add-row'),
             onAdd: _quickAdd,
             knownTokens: _knownTokens,
+            linkSuggester: widget.links?.suggester,
           ),
         Expanded(
           child: model.isEmpty
@@ -338,6 +339,7 @@ final class _TodoTabState extends State<TodoTab> {
       initial: row.entry.task,
       today: _today,
       knownTokens: _knownTokens(),
+      linkSuggester: widget.links?.suggester,
       onDelete: () => unawaited(_delete(row)),
       health: reminders?.health.value ?? ReminderHealth.ok,
       onOpenReminderSettings: reminders?.openHealthSettings,

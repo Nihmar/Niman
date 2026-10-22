@@ -8,6 +8,7 @@ import 'package:flutter/painting.dart' show Rect;
 import 'package:flutter/widgets.dart' show BuildContext;
 import 'package:niman/src/links/library_links.dart';
 import 'package:niman/src/links/parser.dart';
+import 'package:niman/src/links/suggester.dart';
 import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/todo/task_links.dart';
 import 'package:niman/src/todo/task_row_links.dart';
@@ -36,6 +37,7 @@ final class TodoLinkHost {
     required this.targets,
     required LibraryLinks? Function() source,
     required bool Function() previewEnabled,
+    this.suggester,
   }) : _previews = LinkPreviewController(
          source: source,
          notePath: () => todoFileName,
@@ -44,6 +46,10 @@ final class TodoLinkHost {
 
   /// The resolved links of the tasks.
   final TaskLinkMap map;
+
+  /// The library's notes for a `[[` typed in a task's text: the suggester the
+  /// editor's wikilink panel reads. Null offers none.
+  final WikilinkSuggester? Function()? suggester;
 
   /// What following a link written in `todo.txt` needs, for a tap at
   /// [Rect] (null on a phone).
