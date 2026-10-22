@@ -4318,4 +4318,32 @@ final class AlbanianStrings extends Strings {
   String get kanbanColumnDone => 'Përfunduar';
   @override
   String get showKanbanTooltip => 'Shfaq tabelën';
+  @override
+  String get kanbanAddCard => 'Shto një kartë';
+  @override
+  String get kanbanAddColumn => 'Shto një kolonë';
+  @override
+  String get kanbanCardHint => 'Titulli i kartës';
+  @override
+  String get kanbanColumnHint => 'Emri i kolonës';
+  @override
+  String get kanbanCardActions => 'Veprimet e kartës';
+  @override
+  String get kanbanColumnActions => 'Veprimet e kolonës';
+  @override
+  String get kanbanDeleteColumn => 'Fshi kolonën';
+  @override
+  String get kanbanMoveLeft => 'Zhvendos majtas';
+  @override
+  String get kanbanMoveRight => 'Zhvendos djathtas';
+  @override
+  String get kanbanMoveUp => 'Zhvendos lart';
+  @override
+  String get kanbanMoveDown => 'Zhvendos poshtë';
+  @override
+  String kanbanCardLabel(int position, int total, String column) =>
+      'Karta $position nga $total, kolona $column';
+  @override
+  String kanbanMovedTo(String column, int position, int total) =>
+      'U zhvendos te $column, pozicioni $position nga $total';
 }

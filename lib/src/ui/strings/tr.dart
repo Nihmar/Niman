@@ -4249,4 +4249,32 @@ final class TurkishStrings extends Strings {
   String get kanbanColumnDone => 'Bitti';
   @override
   String get showKanbanTooltip => 'Panoyu göster';
+  @override
+  String get kanbanAddCard => 'Kart ekle';
+  @override
+  String get kanbanAddColumn => 'Sütun ekle';
+  @override
+  String get kanbanCardHint => 'Kart başlığı';
+  @override
+  String get kanbanColumnHint => 'Sütun adı';
+  @override
+  String get kanbanCardActions => 'Kart işlemleri';
+  @override
+  String get kanbanColumnActions => 'Sütun işlemleri';
+  @override
+  String get kanbanDeleteColumn => 'Sütunu sil';
+  @override
+  String get kanbanMoveLeft => 'Sola taşı';
+  @override
+  String get kanbanMoveRight => 'Sağa taşı';
+  @override
+  String get kanbanMoveUp => 'Yukarı taşı';
+  @override
+  String get kanbanMoveDown => 'Aşağı taşı';
+  @override
+  String kanbanCardLabel(int position, int total, String column) =>
+      'Kart $position / $total, sütun $column';
+  @override
+  String kanbanMovedTo(String column, int position, int total) =>
+      '$column sütununa taşındı, sıra $position / $total';
 }

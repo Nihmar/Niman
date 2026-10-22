@@ -4318,4 +4318,32 @@ final class MacedonianStrings extends Strings {
   String get kanbanColumnDone => 'Завршено';
   @override
   String get showKanbanTooltip => 'Прикажи ја таблата';
+  @override
+  String get kanbanAddCard => 'Додај картичка';
+  @override
+  String get kanbanAddColumn => 'Додај колона';
+  @override
+  String get kanbanCardHint => 'Наслов на картичката';
+  @override
+  String get kanbanColumnHint => 'Име на колоната';
+  @override
+  String get kanbanCardActions => 'Дејства на картичката';
+  @override
+  String get kanbanColumnActions => 'Дејства на колоната';
+  @override
+  String get kanbanDeleteColumn => 'Избриши колона';
+  @override
+  String get kanbanMoveLeft => 'Премести лево';
+  @override
+  String get kanbanMoveRight => 'Премести десно';
+  @override
+  String get kanbanMoveUp => 'Премести горе';
+  @override
+  String get kanbanMoveDown => 'Премести долу';
+  @override
+  String kanbanCardLabel(int position, int total, String column) =>
+      'Картичка $position од $total, колона $column';
+  @override
+  String kanbanMovedTo(String column, int position, int total) =>
+      'Преместено во $column, позиција $position од $total';
 }

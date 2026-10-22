@@ -4355,4 +4355,32 @@ final class RomanianStrings extends Strings {
   String get kanbanColumnDone => 'Finalizat';
   @override
   String get showKanbanTooltip => 'Arată panoul';
+  @override
+  String get kanbanAddCard => 'Adaugă un card';
+  @override
+  String get kanbanAddColumn => 'Adaugă o coloană';
+  @override
+  String get kanbanCardHint => 'Titlul cardului';
+  @override
+  String get kanbanColumnHint => 'Numele coloanei';
+  @override
+  String get kanbanCardActions => 'Acțiuni card';
+  @override
+  String get kanbanColumnActions => 'Acțiuni coloană';
+  @override
+  String get kanbanDeleteColumn => 'Șterge coloana';
+  @override
+  String get kanbanMoveLeft => 'Mută la stânga';
+  @override
+  String get kanbanMoveRight => 'Mută la dreapta';
+  @override
+  String get kanbanMoveUp => 'Mută în sus';
+  @override
+  String get kanbanMoveDown => 'Mută în jos';
+  @override
+  String kanbanCardLabel(int position, int total, String column) =>
+      'Card $position din $total, coloana $column';
+  @override
+  String kanbanMovedTo(String column, int position, int total) =>
+      'Mutat în $column, poziția $position din $total';
 }

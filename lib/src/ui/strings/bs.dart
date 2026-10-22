@@ -4310,4 +4310,32 @@ final class BosnianStrings extends Strings {
   String get kanbanColumnDone => 'Završeno';
   @override
   String get showKanbanTooltip => 'Prikaži ploču';
+  @override
+  String get kanbanAddCard => 'Dodaj karticu';
+  @override
+  String get kanbanAddColumn => 'Dodaj kolonu';
+  @override
+  String get kanbanCardHint => 'Naslov kartice';
+  @override
+  String get kanbanColumnHint => 'Naziv kolone';
+  @override
+  String get kanbanCardActions => 'Radnje kartice';
+  @override
+  String get kanbanColumnActions => 'Radnje kolone';
+  @override
+  String get kanbanDeleteColumn => 'Obriši kolonu';
+  @override
+  String get kanbanMoveLeft => 'Premjesti ulijevo';
+  @override
+  String get kanbanMoveRight => 'Premjesti udesno';
+  @override
+  String get kanbanMoveUp => 'Premjesti gore';
+  @override
+  String get kanbanMoveDown => 'Premjesti dolje';
+  @override
+  String kanbanCardLabel(int position, int total, String column) =>
+      'Kartica $position od $total, kolona $column';
+  @override
+  String kanbanMovedTo(String column, int position, int total) =>
+      'Premješteno u $column, pozicija $position od $total';
 }

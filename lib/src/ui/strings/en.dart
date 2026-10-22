@@ -4233,4 +4233,32 @@ final class EnglishStrings extends Strings {
   String get kanbanColumnDone => 'Done';
   @override
   String get showKanbanTooltip => 'Show board';
+  @override
+  String get kanbanAddCard => 'Add a card';
+  @override
+  String get kanbanAddColumn => 'Add a column';
+  @override
+  String get kanbanCardHint => 'Card title';
+  @override
+  String get kanbanColumnHint => 'Column name';
+  @override
+  String get kanbanCardActions => 'Card actions';
+  @override
+  String get kanbanColumnActions => 'Column actions';
+  @override
+  String get kanbanDeleteColumn => 'Delete column';
+  @override
+  String get kanbanMoveLeft => 'Move left';
+  @override
+  String get kanbanMoveRight => 'Move right';
+  @override
+  String get kanbanMoveUp => 'Move up';
+  @override
+  String get kanbanMoveDown => 'Move down';
+  @override
+  String kanbanCardLabel(int position, int total, String column) =>
+      'Card $position of $total, column $column';
+  @override
+  String kanbanMovedTo(String column, int position, int total) =>
+      'Moved to $column, position $position of $total';
 }

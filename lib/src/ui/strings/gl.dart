@@ -4321,4 +4321,32 @@ final class GalicianStrings extends Strings {
   String get kanbanColumnDone => 'Feito';
   @override
   String get showKanbanTooltip => 'Amosar o taboleiro';
+  @override
+  String get kanbanAddCard => 'Engadir unha tarxeta';
+  @override
+  String get kanbanAddColumn => 'Engadir unha columna';
+  @override
+  String get kanbanCardHint => 'Título da tarxeta';
+  @override
+  String get kanbanColumnHint => 'Nome da columna';
+  @override
+  String get kanbanCardActions => 'Accións da tarxeta';
+  @override
+  String get kanbanColumnActions => 'Accións da columna';
+  @override
+  String get kanbanDeleteColumn => 'Eliminar a columna';
+  @override
+  String get kanbanMoveLeft => 'Mover á esquerda';
+  @override
+  String get kanbanMoveRight => 'Mover á dereita';
+  @override
+  String get kanbanMoveUp => 'Mover cara arriba';
+  @override
+  String get kanbanMoveDown => 'Mover cara abaixo';
+  @override
+  String kanbanCardLabel(int position, int total, String column) =>
+      'Tarxeta $position de $total, columna $column';
+  @override
+  String kanbanMovedTo(String column, int position, int total) =>
+      'Movida a $column, posición $position de $total';
 }

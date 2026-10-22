@@ -4343,4 +4343,32 @@ final class BasqueStrings extends Strings {
   String get kanbanColumnDone => 'Eginda';
   @override
   String get showKanbanTooltip => 'Erakutsi taula';
+  @override
+  String get kanbanAddCard => 'Gehitu txartel bat';
+  @override
+  String get kanbanAddColumn => 'Gehitu zutabe bat';
+  @override
+  String get kanbanCardHint => 'Txartelaren izenburua';
+  @override
+  String get kanbanColumnHint => 'Zutabearen izena';
+  @override
+  String get kanbanCardActions => 'Txartelaren ekintzak';
+  @override
+  String get kanbanColumnActions => 'Zutabearen ekintzak';
+  @override
+  String get kanbanDeleteColumn => 'Ezabatu zutabea';
+  @override
+  String get kanbanMoveLeft => 'Eraman ezkerrera';
+  @override
+  String get kanbanMoveRight => 'Eraman eskuinera';
+  @override
+  String get kanbanMoveUp => 'Eraman gora';
+  @override
+  String get kanbanMoveDown => 'Eraman behera';
+  @override
+  String kanbanCardLabel(int position, int total, String column) =>
+      '$position. txartela $total artean, $column zutabea';
+  @override
+  String kanbanMovedTo(String column, int position, int total) =>
+      '$column zutabera eraman da, $position. posizioa $total artean';
 }

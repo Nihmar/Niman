@@ -4380,4 +4380,32 @@ final class GermanStrings extends Strings {
   String get kanbanColumnDone => 'Erledigt';
   @override
   String get showKanbanTooltip => 'Board zeigen';
+  @override
+  String get kanbanAddCard => 'Karte hinzufügen';
+  @override
+  String get kanbanAddColumn => 'Spalte hinzufügen';
+  @override
+  String get kanbanCardHint => 'Kartentitel';
+  @override
+  String get kanbanColumnHint => 'Spaltenname';
+  @override
+  String get kanbanCardActions => 'Kartenaktionen';
+  @override
+  String get kanbanColumnActions => 'Spaltenaktionen';
+  @override
+  String get kanbanDeleteColumn => 'Spalte löschen';
+  @override
+  String get kanbanMoveLeft => 'Nach links verschieben';
+  @override
+  String get kanbanMoveRight => 'Nach rechts verschieben';
+  @override
+  String get kanbanMoveUp => 'Nach oben verschieben';
+  @override
+  String get kanbanMoveDown => 'Nach unten verschieben';
+  @override
+  String kanbanCardLabel(int position, int total, String column) =>
+      'Karte $position von $total, Spalte $column';
+  @override
+  String kanbanMovedTo(String column, int position, int total) =>
+      'Verschoben nach $column, Position $position von $total';
 }

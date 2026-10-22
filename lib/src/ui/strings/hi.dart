@@ -4233,4 +4233,32 @@ final class HindiStrings extends Strings {
   String get kanbanColumnDone => 'पूर्ण';
   @override
   String get showKanbanTooltip => 'बोर्ड दिखाएँ';
+  @override
+  String get kanbanAddCard => 'कार्ड जोड़ें';
+  @override
+  String get kanbanAddColumn => 'कॉलम जोड़ें';
+  @override
+  String get kanbanCardHint => 'कार्ड का शीर्षक';
+  @override
+  String get kanbanColumnHint => 'कॉलम का नाम';
+  @override
+  String get kanbanCardActions => 'कार्ड की क्रियाएँ';
+  @override
+  String get kanbanColumnActions => 'कॉलम की क्रियाएँ';
+  @override
+  String get kanbanDeleteColumn => 'कॉलम हटाएँ';
+  @override
+  String get kanbanMoveLeft => 'बाएँ ले जाएँ';
+  @override
+  String get kanbanMoveRight => 'दाएँ ले जाएँ';
+  @override
+  String get kanbanMoveUp => 'ऊपर ले जाएँ';
+  @override
+  String get kanbanMoveDown => 'नीचे ले जाएँ';
+  @override
+  String kanbanCardLabel(int position, int total, String column) =>
+      'कार्ड $position / $total, कॉलम $column';
+  @override
+  String kanbanMovedTo(String column, int position, int total) =>
+      '$column में ले जाया गया, स्थान $position / $total';
 }

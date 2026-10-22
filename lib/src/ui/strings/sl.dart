@@ -4306,4 +4306,32 @@ final class SlovenianStrings extends Strings {
   String get kanbanColumnDone => 'Opravljeno';
   @override
   String get showKanbanTooltip => 'Pokaži tablo';
+  @override
+  String get kanbanAddCard => 'Dodaj kartico';
+  @override
+  String get kanbanAddColumn => 'Dodaj stolpec';
+  @override
+  String get kanbanCardHint => 'Naslov kartice';
+  @override
+  String get kanbanColumnHint => 'Ime stolpca';
+  @override
+  String get kanbanCardActions => 'Dejanja kartice';
+  @override
+  String get kanbanColumnActions => 'Dejanja stolpca';
+  @override
+  String get kanbanDeleteColumn => 'Izbriši stolpec';
+  @override
+  String get kanbanMoveLeft => 'Premakni levo';
+  @override
+  String get kanbanMoveRight => 'Premakni desno';
+  @override
+  String get kanbanMoveUp => 'Premakni gor';
+  @override
+  String get kanbanMoveDown => 'Premakni dol';
+  @override
+  String kanbanCardLabel(int position, int total, String column) =>
+      'Kartica $position od $total, stolpec $column';
+  @override
+  String kanbanMovedTo(String column, int position, int total) =>
+      'Premaknjeno v $column, mesto $position od $total';
 }

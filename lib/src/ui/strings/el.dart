@@ -4421,4 +4421,32 @@ final class GreekStrings extends Strings {
   String get kanbanColumnDone => 'Ολοκληρώθηκε';
   @override
   String get showKanbanTooltip => 'Εμφάνιση πίνακα';
+  @override
+  String get kanbanAddCard => 'Προσθήκη κάρτας';
+  @override
+  String get kanbanAddColumn => 'Προσθήκη στήλης';
+  @override
+  String get kanbanCardHint => 'Τίτλος κάρτας';
+  @override
+  String get kanbanColumnHint => 'Όνομα στήλης';
+  @override
+  String get kanbanCardActions => 'Ενέργειες κάρτας';
+  @override
+  String get kanbanColumnActions => 'Ενέργειες στήλης';
+  @override
+  String get kanbanDeleteColumn => 'Διαγραφή στήλης';
+  @override
+  String get kanbanMoveLeft => 'Μετακίνηση αριστερά';
+  @override
+  String get kanbanMoveRight => 'Μετακίνηση δεξιά';
+  @override
+  String get kanbanMoveUp => 'Μετακίνηση πάνω';
+  @override
+  String get kanbanMoveDown => 'Μετακίνηση κάτω';
+  @override
+  String kanbanCardLabel(int position, int total, String column) =>
+      'Κάρτα $position από $total, στήλη $column';
+  @override
+  String kanbanMovedTo(String column, int position, int total) =>
+      'Μετακινήθηκε στη στήλη $column, θέση $position από $total';
 }

@@ -4291,4 +4291,32 @@ final class SlovakStrings extends Strings {
   String get kanbanColumnDone => 'Hotovo';
   @override
   String get showKanbanTooltip => 'Zobraziť tabuľu';
+  @override
+  String get kanbanAddCard => 'Pridať kartu';
+  @override
+  String get kanbanAddColumn => 'Pridať stĺpec';
+  @override
+  String get kanbanCardHint => 'Názov karty';
+  @override
+  String get kanbanColumnHint => 'Názov stĺpca';
+  @override
+  String get kanbanCardActions => 'Akcie karty';
+  @override
+  String get kanbanColumnActions => 'Akcie stĺpca';
+  @override
+  String get kanbanDeleteColumn => 'Odstrániť stĺpec';
+  @override
+  String get kanbanMoveLeft => 'Presunúť doľava';
+  @override
+  String get kanbanMoveRight => 'Presunúť doprava';
+  @override
+  String get kanbanMoveUp => 'Presunúť nahor';
+  @override
+  String get kanbanMoveDown => 'Presunúť nadol';
+  @override
+  String kanbanCardLabel(int position, int total, String column) =>
+      'Karta $position z $total, stĺpec $column';
+  @override
+  String kanbanMovedTo(String column, int position, int total) =>
+      'Presunuté do $column, pozícia $position z $total';
 }

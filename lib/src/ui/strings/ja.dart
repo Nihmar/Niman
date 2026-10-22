@@ -3934,4 +3934,32 @@ final class JapaneseStrings extends Strings {
   String get kanbanColumnDone => '完了';
   @override
   String get showKanbanTooltip => 'ボードを表示';
+  @override
+  String get kanbanAddCard => 'カードを追加';
+  @override
+  String get kanbanAddColumn => '列を追加';
+  @override
+  String get kanbanCardHint => 'カードのタイトル';
+  @override
+  String get kanbanColumnHint => '列の名前';
+  @override
+  String get kanbanCardActions => 'カードの操作';
+  @override
+  String get kanbanColumnActions => '列の操作';
+  @override
+  String get kanbanDeleteColumn => '列を削除';
+  @override
+  String get kanbanMoveLeft => '左へ移動';
+  @override
+  String get kanbanMoveRight => '右へ移動';
+  @override
+  String get kanbanMoveUp => '上へ移動';
+  @override
+  String get kanbanMoveDown => '下へ移動';
+  @override
+  String kanbanCardLabel(int position, int total, String column) =>
+      'カード $position/$total、列「$column」';
+  @override
+  String kanbanMovedTo(String column, int position, int total) =>
+      '「$column」へ移動しました、$position/$total 番目';
 }

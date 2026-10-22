@@ -4314,4 +4314,32 @@ final class PortugueseStrings extends Strings {
   String get kanbanColumnDone => 'Concluído';
   @override
   String get showKanbanTooltip => 'Mostrar o quadro';
+  @override
+  String get kanbanAddCard => 'Adicionar um cartão';
+  @override
+  String get kanbanAddColumn => 'Adicionar uma coluna';
+  @override
+  String get kanbanCardHint => 'Título do cartão';
+  @override
+  String get kanbanColumnHint => 'Nome da coluna';
+  @override
+  String get kanbanCardActions => 'Ações do cartão';
+  @override
+  String get kanbanColumnActions => 'Ações da coluna';
+  @override
+  String get kanbanDeleteColumn => 'Excluir coluna';
+  @override
+  String get kanbanMoveLeft => 'Mover para a esquerda';
+  @override
+  String get kanbanMoveRight => 'Mover para a direita';
+  @override
+  String get kanbanMoveUp => 'Mover para cima';
+  @override
+  String get kanbanMoveDown => 'Mover para baixo';
+  @override
+  String kanbanCardLabel(int position, int total, String column) =>
+      'Cartão $position de $total, coluna $column';
+  @override
+  String kanbanMovedTo(String column, int position, int total) =>
+      'Movido para $column, posição $position de $total';
 }

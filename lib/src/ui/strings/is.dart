@@ -4288,4 +4288,32 @@ final class IcelandicStrings extends Strings {
   String get kanbanColumnDone => 'Lokið';
   @override
   String get showKanbanTooltip => 'Sýna töfluna';
+  @override
+  String get kanbanAddCard => 'Bæta við spjaldi';
+  @override
+  String get kanbanAddColumn => 'Bæta við dálki';
+  @override
+  String get kanbanCardHint => 'Titill spjalds';
+  @override
+  String get kanbanColumnHint => 'Heiti dálks';
+  @override
+  String get kanbanCardActions => 'Aðgerðir spjalds';
+  @override
+  String get kanbanColumnActions => 'Aðgerðir dálks';
+  @override
+  String get kanbanDeleteColumn => 'Eyða dálki';
+  @override
+  String get kanbanMoveLeft => 'Færa til vinstri';
+  @override
+  String get kanbanMoveRight => 'Færa til hægri';
+  @override
+  String get kanbanMoveUp => 'Færa upp';
+  @override
+  String get kanbanMoveDown => 'Færa niður';
+  @override
+  String kanbanCardLabel(int position, int total, String column) =>
+      'Spjald $position af $total, dálkur $column';
+  @override
+  String kanbanMovedTo(String column, int position, int total) =>
+      'Fært í $column, staða $position af $total';
 }

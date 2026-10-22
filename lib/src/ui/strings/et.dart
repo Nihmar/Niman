@@ -4233,4 +4233,32 @@ final class EstonianStrings extends Strings {
   String get kanbanColumnDone => 'Tehtud';
   @override
   String get showKanbanTooltip => 'Näita tahvlit';
+  @override
+  String get kanbanAddCard => 'Lisa kaart';
+  @override
+  String get kanbanAddColumn => 'Lisa veerg';
+  @override
+  String get kanbanCardHint => 'Kaardi pealkiri';
+  @override
+  String get kanbanColumnHint => 'Veeru nimi';
+  @override
+  String get kanbanCardActions => 'Kaardi toimingud';
+  @override
+  String get kanbanColumnActions => 'Veeru toimingud';
+  @override
+  String get kanbanDeleteColumn => 'Kustuta veerg';
+  @override
+  String get kanbanMoveLeft => 'Liiguta vasakule';
+  @override
+  String get kanbanMoveRight => 'Liiguta paremale';
+  @override
+  String get kanbanMoveUp => 'Liiguta üles';
+  @override
+  String get kanbanMoveDown => 'Liiguta alla';
+  @override
+  String kanbanCardLabel(int position, int total, String column) =>
+      'Kaart $position/$total, veerg $column';
+  @override
+  String kanbanMovedTo(String column, int position, int total) =>
+      'Liigutatud veergu $column, koht $position/$total';
 }

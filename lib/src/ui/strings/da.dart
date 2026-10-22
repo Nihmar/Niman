@@ -4266,4 +4266,32 @@ final class DanishStrings extends Strings {
   String get kanbanColumnDone => 'Færdig';
   @override
   String get showKanbanTooltip => 'Vis tavlen';
+  @override
+  String get kanbanAddCard => 'Tilføj et kort';
+  @override
+  String get kanbanAddColumn => 'Tilføj en kolonne';
+  @override
+  String get kanbanCardHint => 'Kortets titel';
+  @override
+  String get kanbanColumnHint => 'Kolonnens navn';
+  @override
+  String get kanbanCardActions => 'Korthandlinger';
+  @override
+  String get kanbanColumnActions => 'Kolonnehandlinger';
+  @override
+  String get kanbanDeleteColumn => 'Slet kolonne';
+  @override
+  String get kanbanMoveLeft => 'Flyt til venstre';
+  @override
+  String get kanbanMoveRight => 'Flyt til højre';
+  @override
+  String get kanbanMoveUp => 'Flyt op';
+  @override
+  String get kanbanMoveDown => 'Flyt ned';
+  @override
+  String kanbanCardLabel(int position, int total, String column) =>
+      'Kort $position af $total, kolonne $column';
+  @override
+  String kanbanMovedTo(String column, int position, int total) =>
+      'Flyttet til $column, plads $position af $total';
 }

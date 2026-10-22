@@ -4304,4 +4304,32 @@ final class SerbianStrings extends Strings {
   String get kanbanColumnDone => 'Завршено';
   @override
   String get showKanbanTooltip => 'Прикажи таблу';
+  @override
+  String get kanbanAddCard => 'Додај картицу';
+  @override
+  String get kanbanAddColumn => 'Додај колону';
+  @override
+  String get kanbanCardHint => 'Наслов картице';
+  @override
+  String get kanbanColumnHint => 'Назив колоне';
+  @override
+  String get kanbanCardActions => 'Радње картице';
+  @override
+  String get kanbanColumnActions => 'Радње колоне';
+  @override
+  String get kanbanDeleteColumn => 'Обриши колону';
+  @override
+  String get kanbanMoveLeft => 'Премести улево';
+  @override
+  String get kanbanMoveRight => 'Премести удесно';
+  @override
+  String get kanbanMoveUp => 'Премести горе';
+  @override
+  String get kanbanMoveDown => 'Премести доле';
+  @override
+  String kanbanCardLabel(int position, int total, String column) =>
+      'Картица $position од $total, колона $column';
+  @override
+  String kanbanMovedTo(String column, int position, int total) =>
+      'Премештено у $column, позиција $position од $total';
 }

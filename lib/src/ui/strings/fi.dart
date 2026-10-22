@@ -4319,4 +4319,32 @@ final class FinnishStrings extends Strings {
   String get kanbanColumnDone => 'Valmis';
   @override
   String get showKanbanTooltip => 'Näytä taulu';
+  @override
+  String get kanbanAddCard => 'Lisää kortti';
+  @override
+  String get kanbanAddColumn => 'Lisää sarake';
+  @override
+  String get kanbanCardHint => 'Kortin otsikko';
+  @override
+  String get kanbanColumnHint => 'Sarakkeen nimi';
+  @override
+  String get kanbanCardActions => 'Kortin toiminnot';
+  @override
+  String get kanbanColumnActions => 'Sarakkeen toiminnot';
+  @override
+  String get kanbanDeleteColumn => 'Poista sarake';
+  @override
+  String get kanbanMoveLeft => 'Siirrä vasemmalle';
+  @override
+  String get kanbanMoveRight => 'Siirrä oikealle';
+  @override
+  String get kanbanMoveUp => 'Siirrä ylös';
+  @override
+  String get kanbanMoveDown => 'Siirrä alas';
+  @override
+  String kanbanCardLabel(int position, int total, String column) =>
+      'Kortti $position/$total, sarake $column';
+  @override
+  String kanbanMovedTo(String column, int position, int total) =>
+      'Siirretty sarakkeeseen $column, paikka $position/$total';
 }

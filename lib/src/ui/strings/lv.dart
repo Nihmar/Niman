@@ -4278,4 +4278,32 @@ final class LatvianStrings extends Strings {
   String get kanbanColumnDone => 'Pabeigti';
   @override
   String get showKanbanTooltip => 'Rādīt dēli';
+  @override
+  String get kanbanAddCard => 'Pievienot karti';
+  @override
+  String get kanbanAddColumn => 'Pievienot kolonnu';
+  @override
+  String get kanbanCardHint => 'Kartes nosaukums';
+  @override
+  String get kanbanColumnHint => 'Kolonnas nosaukums';
+  @override
+  String get kanbanCardActions => 'Kartes darbības';
+  @override
+  String get kanbanColumnActions => 'Kolonnas darbības';
+  @override
+  String get kanbanDeleteColumn => 'Dzēst kolonnu';
+  @override
+  String get kanbanMoveLeft => 'Pārvietot pa kreisi';
+  @override
+  String get kanbanMoveRight => 'Pārvietot pa labi';
+  @override
+  String get kanbanMoveUp => 'Pārvietot uz augšu';
+  @override
+  String get kanbanMoveDown => 'Pārvietot uz leju';
+  @override
+  String kanbanCardLabel(int position, int total, String column) =>
+      'Karte $position no $total, kolonna $column';
+  @override
+  String kanbanMovedTo(String column, int position, int total) =>
+      'Pārvietota uz $column, pozīcija $position no $total';
 }

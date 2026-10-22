@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:niman/src/core/settings/library_features.dart';
 import 'package:niman/src/frontmatter/note_kind.dart';
-import 'package:niman/src/ui/kinds/kanban/kanban_placeholder_view.dart';
+import 'package:niman/src/ui/kinds/kanban/kanban_note_view.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// The text a new board is created with: the type and three empty columns,
@@ -15,8 +15,8 @@ String kanbanNoteContent() =>
 /// The `kanban` note kind (#1154): a board, one column per `##` heading and
 /// one card per top-level list item under it.
 ///
-/// The body is a temporary, read-only placeholder: the wide board (#1167)
-/// and the phone board (#1168) replace it.
+/// The body is the board of columns on a wide window (#1167); the phone's
+/// board (#1168) is still the read-only placeholder.
 final class KanbanKindGui implements NoteKindGUI {
   @override
   String get type => 'kanban';
@@ -26,5 +26,5 @@ final class KanbanKindGui implements NoteKindGUI {
 
   @override
   Widget buildBody(BuildContext context, NoteKindHost host) =>
-      KanbanPlaceholderView(text: host.text);
+      KanbanNoteView(text: host.text, host: host);
 }

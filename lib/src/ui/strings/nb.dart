@@ -4271,4 +4271,32 @@ final class NorwegianStrings extends Strings {
   String get kanbanColumnDone => 'Ferdig';
   @override
   String get showKanbanTooltip => 'Vis tavlen';
+  @override
+  String get kanbanAddCard => 'Legg til et kort';
+  @override
+  String get kanbanAddColumn => 'Legg til en kolonne';
+  @override
+  String get kanbanCardHint => 'Korttittel';
+  @override
+  String get kanbanColumnHint => 'Kolonnenavn';
+  @override
+  String get kanbanCardActions => 'Korthandlinger';
+  @override
+  String get kanbanColumnActions => 'Kolonnehandlinger';
+  @override
+  String get kanbanDeleteColumn => 'Slett kolonne';
+  @override
+  String get kanbanMoveLeft => 'Flytt til venstre';
+  @override
+  String get kanbanMoveRight => 'Flytt til høyre';
+  @override
+  String get kanbanMoveUp => 'Flytt opp';
+  @override
+  String get kanbanMoveDown => 'Flytt ned';
+  @override
+  String kanbanCardLabel(int position, int total, String column) =>
+      'Kort $position av $total, kolonne $column';
+  @override
+  String kanbanMovedTo(String column, int position, int total) =>
+      'Flyttet til $column, plass $position av $total';
 }

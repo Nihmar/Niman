@@ -4335,4 +4335,32 @@ final class DutchStrings extends Strings {
   String get kanbanColumnDone => 'Klaar';
   @override
   String get showKanbanTooltip => 'Bord tonen';
+  @override
+  String get kanbanAddCard => 'Kaart toevoegen';
+  @override
+  String get kanbanAddColumn => 'Kolom toevoegen';
+  @override
+  String get kanbanCardHint => 'Titel van de kaart';
+  @override
+  String get kanbanColumnHint => 'Naam van de kolom';
+  @override
+  String get kanbanCardActions => 'Kaartacties';
+  @override
+  String get kanbanColumnActions => 'Kolomacties';
+  @override
+  String get kanbanDeleteColumn => 'Kolom verwijderen';
+  @override
+  String get kanbanMoveLeft => 'Naar links verplaatsen';
+  @override
+  String get kanbanMoveRight => 'Naar rechts verplaatsen';
+  @override
+  String get kanbanMoveUp => 'Naar boven verplaatsen';
+  @override
+  String get kanbanMoveDown => 'Naar beneden verplaatsen';
+  @override
+  String kanbanCardLabel(int position, int total, String column) =>
+      'Kaart $position van $total, kolom $column';
+  @override
+  String kanbanMovedTo(String column, int position, int total) =>
+      'Verplaatst naar $column, positie $position van $total';
 }

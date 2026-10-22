@@ -2,8 +2,8 @@ import 'package:flutter/widgets.dart';
 import 'package:niman/src/kanban/board_parser.dart';
 
 /// TEMPORARY, read-only: the columns of a board with their cards' titles,
-/// as plain text. The wide board and the phone board take its place in the
-/// phases that follow the kind's registration (#1166).
+/// as plain text. It is what a body too narrow for the wide board (#1167)
+/// shows until the phone board (#1168) takes its place.
 final class KanbanPlaceholderView extends StatelessWidget {
   /// Creates the placeholder over the note [text].
   const new({required this.text, super.key});

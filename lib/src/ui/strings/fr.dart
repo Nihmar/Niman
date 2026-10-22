@@ -4414,4 +4414,32 @@ final class FrenchStrings extends Strings {
   String get kanbanColumnDone => 'Terminé';
   @override
   String get showKanbanTooltip => 'Afficher le tableau';
+  @override
+  String get kanbanAddCard => 'Ajouter une carte';
+  @override
+  String get kanbanAddColumn => 'Ajouter une colonne';
+  @override
+  String get kanbanCardHint => 'Titre de la carte';
+  @override
+  String get kanbanColumnHint => 'Nom de la colonne';
+  @override
+  String get kanbanCardActions => 'Actions de la carte';
+  @override
+  String get kanbanColumnActions => 'Actions de la colonne';
+  @override
+  String get kanbanDeleteColumn => 'Supprimer la colonne';
+  @override
+  String get kanbanMoveLeft => 'Déplacer à gauche';
+  @override
+  String get kanbanMoveRight => 'Déplacer à droite';
+  @override
+  String get kanbanMoveUp => 'Déplacer vers le haut';
+  @override
+  String get kanbanMoveDown => 'Déplacer vers le bas';
+  @override
+  String kanbanCardLabel(int position, int total, String column) =>
+      'Carte $position sur $total, colonne $column';
+  @override
+  String kanbanMovedTo(String column, int position, int total) =>
+      'Déplacée vers $column, position $position sur $total';
 }

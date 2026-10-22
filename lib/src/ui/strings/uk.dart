@@ -4324,4 +4324,32 @@ final class UkrainianStrings extends Strings {
   String get kanbanColumnDone => 'Готово';
   @override
   String get showKanbanTooltip => 'Показати дошку';
+  @override
+  String get kanbanAddCard => 'Додати картку';
+  @override
+  String get kanbanAddColumn => 'Додати стовпець';
+  @override
+  String get kanbanCardHint => 'Назва картки';
+  @override
+  String get kanbanColumnHint => 'Назва стовпця';
+  @override
+  String get kanbanCardActions => 'Дії картки';
+  @override
+  String get kanbanColumnActions => 'Дії стовпця';
+  @override
+  String get kanbanDeleteColumn => 'Видалити стовпець';
+  @override
+  String get kanbanMoveLeft => 'Перемістити ліворуч';
+  @override
+  String get kanbanMoveRight => 'Перемістити праворуч';
+  @override
+  String get kanbanMoveUp => 'Перемістити вгору';
+  @override
+  String get kanbanMoveDown => 'Перемістити вниз';
+  @override
+  String kanbanCardLabel(int position, int total, String column) =>
+      'Картка $position з $total, стовпець $column';
+  @override
+  String kanbanMovedTo(String column, int position, int total) =>
+      'Переміщено до $column, позиція $position з $total';
 }

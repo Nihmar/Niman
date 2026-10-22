@@ -4324,4 +4324,32 @@ final class LithuanianStrings extends Strings {
   String get kanbanColumnDone => 'Atlikta';
   @override
   String get showKanbanTooltip => 'Rodyti lentą';
+  @override
+  String get kanbanAddCard => 'Pridėti kortelę';
+  @override
+  String get kanbanAddColumn => 'Pridėti stulpelį';
+  @override
+  String get kanbanCardHint => 'Kortelės pavadinimas';
+  @override
+  String get kanbanColumnHint => 'Stulpelio pavadinimas';
+  @override
+  String get kanbanCardActions => 'Kortelės veiksmai';
+  @override
+  String get kanbanColumnActions => 'Stulpelio veiksmai';
+  @override
+  String get kanbanDeleteColumn => 'Ištrinti stulpelį';
+  @override
+  String get kanbanMoveLeft => 'Perkelti į kairę';
+  @override
+  String get kanbanMoveRight => 'Perkelti į dešinę';
+  @override
+  String get kanbanMoveUp => 'Perkelti aukštyn';
+  @override
+  String get kanbanMoveDown => 'Perkelti žemyn';
+  @override
+  String kanbanCardLabel(int position, int total, String column) =>
+      'Kortelė $position iš $total, stulpelis $column';
+  @override
+  String kanbanMovedTo(String column, int position, int total) =>
+      'Perkelta į $column, vieta $position iš $total';
 }

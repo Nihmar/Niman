@@ -4301,4 +4301,32 @@ final class SwedishStrings extends Strings {
   String get kanbanColumnDone => 'Klart';
   @override
   String get showKanbanTooltip => 'Visa tavlan';
+  @override
+  String get kanbanAddCard => 'Lägg till ett kort';
+  @override
+  String get kanbanAddColumn => 'Lägg till en kolumn';
+  @override
+  String get kanbanCardHint => 'Kortets titel';
+  @override
+  String get kanbanColumnHint => 'Kolumnens namn';
+  @override
+  String get kanbanCardActions => 'Kortåtgärder';
+  @override
+  String get kanbanColumnActions => 'Kolumnåtgärder';
+  @override
+  String get kanbanDeleteColumn => 'Ta bort kolumn';
+  @override
+  String get kanbanMoveLeft => 'Flytta åt vänster';
+  @override
+  String get kanbanMoveRight => 'Flytta åt höger';
+  @override
+  String get kanbanMoveUp => 'Flytta upp';
+  @override
+  String get kanbanMoveDown => 'Flytta ned';
+  @override
+  String kanbanCardLabel(int position, int total, String column) =>
+      'Kort $position av $total, kolumn $column';
+  @override
+  String kanbanMovedTo(String column, int position, int total) =>
+      'Flyttat till $column, plats $position av $total';
 }

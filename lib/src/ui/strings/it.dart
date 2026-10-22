@@ -4322,4 +4322,32 @@ final class ItalianStrings extends Strings {
   String get kanbanColumnDone => 'Fatto';
   @override
   String get showKanbanTooltip => 'Mostra la bacheca';
+  @override
+  String get kanbanAddCard => 'Aggiungi una scheda';
+  @override
+  String get kanbanAddColumn => 'Aggiungi una colonna';
+  @override
+  String get kanbanCardHint => 'Titolo della scheda';
+  @override
+  String get kanbanColumnHint => 'Nome della colonna';
+  @override
+  String get kanbanCardActions => 'Azioni della scheda';
+  @override
+  String get kanbanColumnActions => 'Azioni della colonna';
+  @override
+  String get kanbanDeleteColumn => 'Elimina colonna';
+  @override
+  String get kanbanMoveLeft => 'Sposta a sinistra';
+  @override
+  String get kanbanMoveRight => 'Sposta a destra';
+  @override
+  String get kanbanMoveUp => 'Sposta su';
+  @override
+  String get kanbanMoveDown => 'Sposta giù';
+  @override
+  String kanbanCardLabel(int position, int total, String column) =>
+      'Scheda $position di $total, colonna $column';
+  @override
+  String kanbanMovedTo(String column, int position, int total) =>
+      'Spostata in $column, posizione $position di $total';
 }

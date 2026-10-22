@@ -4309,4 +4309,32 @@ final class HungarianStrings extends Strings {
   String get kanbanColumnDone => 'Kész';
   @override
   String get showKanbanTooltip => 'Tábla megjelenítése';
+  @override
+  String get kanbanAddCard => 'Kártya hozzáadása';
+  @override
+  String get kanbanAddColumn => 'Oszlop hozzáadása';
+  @override
+  String get kanbanCardHint => 'A kártya címe';
+  @override
+  String get kanbanColumnHint => 'Az oszlop neve';
+  @override
+  String get kanbanCardActions => 'Kártyaműveletek';
+  @override
+  String get kanbanColumnActions => 'Oszlopműveletek';
+  @override
+  String get kanbanDeleteColumn => 'Oszlop törlése';
+  @override
+  String get kanbanMoveLeft => 'Mozgatás balra';
+  @override
+  String get kanbanMoveRight => 'Mozgatás jobbra';
+  @override
+  String get kanbanMoveUp => 'Mozgatás felfelé';
+  @override
+  String get kanbanMoveDown => 'Mozgatás lefelé';
+  @override
+  String kanbanCardLabel(int position, int total, String column) =>
+      'Kártya: $position/$total, oszlop: $column';
+  @override
+  String kanbanMovedTo(String column, int position, int total) =>
+      'Áthelyezve ide: $column, pozíció: $position/$total';
 }

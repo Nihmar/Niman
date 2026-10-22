@@ -4326,4 +4326,32 @@ final class BelarusianStrings extends Strings {
   String get kanbanColumnDone => 'Гатова';
   @override
   String get showKanbanTooltip => 'Паказаць дошку';
+  @override
+  String get kanbanAddCard => 'Дадаць картку';
+  @override
+  String get kanbanAddColumn => 'Дадаць слупок';
+  @override
+  String get kanbanCardHint => 'Назва карткі';
+  @override
+  String get kanbanColumnHint => 'Назва слупка';
+  @override
+  String get kanbanCardActions => 'Дзеянні карткі';
+  @override
+  String get kanbanColumnActions => 'Дзеянні слупка';
+  @override
+  String get kanbanDeleteColumn => 'Выдаліць слупок';
+  @override
+  String get kanbanMoveLeft => 'Перамясціць улева';
+  @override
+  String get kanbanMoveRight => 'Перамясціць управа';
+  @override
+  String get kanbanMoveUp => 'Перамясціць уверх';
+  @override
+  String get kanbanMoveDown => 'Перамясціць уніз';
+  @override
+  String kanbanCardLabel(int position, int total, String column) =>
+      'Картка $position з $total, слупок $column';
+  @override
+  String kanbanMovedTo(String column, int position, int total) =>
+      'Перамешчана ў $column, пазіцыя $position з $total';
 }

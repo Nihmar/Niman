@@ -4354,4 +4354,32 @@ final class SpanishStrings extends Strings {
   String get kanbanColumnDone => 'Hecho';
   @override
   String get showKanbanTooltip => 'Mostrar el tablero';
+  @override
+  String get kanbanAddCard => 'Añadir una tarjeta';
+  @override
+  String get kanbanAddColumn => 'Añadir una columna';
+  @override
+  String get kanbanCardHint => 'Título de la tarjeta';
+  @override
+  String get kanbanColumnHint => 'Nombre de la columna';
+  @override
+  String get kanbanCardActions => 'Acciones de la tarjeta';
+  @override
+  String get kanbanColumnActions => 'Acciones de la columna';
+  @override
+  String get kanbanDeleteColumn => 'Eliminar columna';
+  @override
+  String get kanbanMoveLeft => 'Mover a la izquierda';
+  @override
+  String get kanbanMoveRight => 'Mover a la derecha';
+  @override
+  String get kanbanMoveUp => 'Mover arriba';
+  @override
+  String get kanbanMoveDown => 'Mover abajo';
+  @override
+  String kanbanCardLabel(int position, int total, String column) =>
+      'Tarjeta $position de $total, columna $column';
+  @override
+  String kanbanMovedTo(String column, int position, int total) =>
+      'Movida a $column, posición $position de $total';
 }
