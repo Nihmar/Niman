@@ -49,6 +49,7 @@ library and per device, and off until a server is connected.
 | | Transcription | No *Transcribe*; audio notes still record and play. Needs Audio notes |
 | | Slides | The same as the other kinds |
 | | Flashcards and Study | The same; there is no Study |
+| | Kanban boards | The same as the other kinds |
 | Reading | PDF and EPUB readers | A PDF or a book opens in the system's app |
 | | Annotations | No annotating or highlighting; the companion notes stay. Needs the readers |
 | | Text recognition | No scanning; the text already read stays. Does not need the readers |

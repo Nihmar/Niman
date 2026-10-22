@@ -868,7 +868,8 @@ Twenty-two kinds are drawn:
 - **Git graphs** (`gitGraph`): branches as lanes, commits with their ids,
   tags and types, merges and cherry-picks, left to right or top to bottom.
 - **Kanban boards** (`kanban`): columns of cards, each with its ticket,
-  assignee and priority.
+  assignee and priority. A note of your own that you move cards in is a
+  [kanban board](kanban.md), not this diagram.
 - **Quadrant charts** (`quadrantChart`): four named quadrants, the axes'
   ends, and points placed from 0 to 1 on each axis.
 - **XY charts** (`xychart-beta`): bars and lines over categories, the

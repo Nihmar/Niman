@@ -128,3 +128,33 @@ One branch, `feat/kanban`, one PR into `main`; a commit per step.
 
 Main risk: a heading-and-list note not written for a board (prose between
 cards, nested headings). Kept to the rules above and tested on such files.
+
+## As built (2026-10-22)
+
+Phases 1–4 in `feat`-prefixed commits on `docs/kanban-record` (#1165,
+#1166, #1167, #1168); the user documentation is `docs/user/kanban.md`.
+
+- **Model** (`lib/src/kanban/`): `parseKanban` and the edits. Only `-`, `*`
+  and `+` items open a card (at most three spaces in); numbered items are
+  prose. Tags and `due:` are read from the title line through
+  `parseTodoLine`. An edit takes the text and column/card indexes and
+  parses internally, so a caller cannot hand it a stale board. A move's
+  `toIndex` is the card's final place in the destination.
+- **Limits**: a 40,000-card board takes about a second to read, since the
+  tokenizer reads every line. A note whose first line is `---` with no
+  closing one is all frontmatter, so it has no column.
+- **Kind**: `KanbanKindGui`, `LibraryFeature.kindKanban`, offered by the
+  FAB, the tree footer's New menu, **New kanban board here**, and the
+  `newKanban` command (no default chord). The Study empty state has no
+  entry: its button is the deck's.
+- **Wide view**: also used by a tablet in portrait. Pointers pick a card
+  up at once, touch needs a long press; a touch screen on a desktop
+  platform does not drag, and uses the card menu or the keys. `Alt+←/→`
+  on a focused card moves the card, ahead of the global back/forward.
+  Deleting a column asks nothing; the note's undo restores it.
+- **Phone view**: tabs with counts, the ⋮ beside the strip for the
+  column, **+** for a new column (selected after it is made), and the
+  card's sheet for **Move to…**. The selected column survives edits.
+- **Not tried**: either view running in the real app (the tests use a
+  harness, not the shell), a screen reader speaking the announcements,
+  and the vertical edge scroll of a column during a drag.
