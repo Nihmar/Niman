@@ -4346,4 +4346,6 @@ final class BosnianStrings extends Strings {
   String get kanbanEmptyColumn => 'Nema kartica u ovoj koloni';
   @override
   String get kanbanEditCard => 'Uredi karticu';
+  @override
+  String taskLinkOpenTooltip(String path) => 'Otvori $path';
 }

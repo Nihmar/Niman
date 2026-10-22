@@ -4391,4 +4391,6 @@ final class RomanianStrings extends Strings {
   String get kanbanEmptyColumn => 'Niciun card în această coloană';
   @override
   String get kanbanEditCard => 'Editează cardul';
+  @override
+  String taskLinkOpenTooltip(String path) => 'Deschide $path';
 }

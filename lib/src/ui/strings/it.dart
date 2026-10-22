@@ -4358,4 +4358,6 @@ final class ItalianStrings extends Strings {
   String get kanbanEmptyColumn => 'Nessuna scheda in questa colonna';
   @override
   String get kanbanEditCard => 'Modifica scheda';
+  @override
+  String taskLinkOpenTooltip(String path) => 'Apri $path';
 }

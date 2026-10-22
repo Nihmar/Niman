@@ -4399,4 +4399,6 @@ final class CatalanStrings extends Strings {
   String get kanbanEmptyColumn => 'No hi ha targetes en aquesta columna';
   @override
   String get kanbanEditCard => 'Edita la targeta';
+  @override
+  String taskLinkOpenTooltip(String path) => 'Obre $path';
 }

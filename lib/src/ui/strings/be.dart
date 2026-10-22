@@ -4363,4 +4363,6 @@ final class BelarusianStrings extends Strings {
   String get kanbanEmptyColumn => 'У гэтым слупку няма картак';
   @override
   String get kanbanEditCard => 'Змяніць картку';
+  @override
+  String taskLinkOpenTooltip(String path) => 'Адкрыць $path';
 }

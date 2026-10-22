@@ -4379,4 +4379,6 @@ final class PolishStrings extends Strings {
   String get kanbanEmptyColumn => 'Brak kart w tej kolumnie';
   @override
   String get kanbanEditCard => 'Edytuj kartę';
+  @override
+  String taskLinkOpenTooltip(String path) => 'Otwórz $path';
 }

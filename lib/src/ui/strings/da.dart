@@ -4302,4 +4302,6 @@ final class DanishStrings extends Strings {
   String get kanbanEmptyColumn => 'Ingen kort i denne kolonne';
   @override
   String get kanbanEditCard => 'Rediger kort';
+  @override
+  String taskLinkOpenTooltip(String path) => 'Åbn $path';
 }

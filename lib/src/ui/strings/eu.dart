@@ -4379,4 +4379,6 @@ final class BasqueStrings extends Strings {
   String get kanbanEmptyColumn => 'Zutabe honetan ez dago txartelik';
   @override
   String get kanbanEditCard => 'Editatu txartela';
+  @override
+  String taskLinkOpenTooltip(String path) => 'Ireki $path';
 }

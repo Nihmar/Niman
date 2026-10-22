@@ -17,6 +17,7 @@ import 'package:niman/src/todo/todo_list_item.dart';
 import 'package:niman/src/ui/menu_row.dart';
 import 'package:niman/src/ui/pointer_menu.dart';
 import 'package:niman/src/ui/strings.dart';
+import 'package:niman/src/ui/todo_link_host.dart';
 import 'package:niman/src/ui/todo_row.dart';
 import 'package:niman/src/ui/todo_section_header.dart';
 
@@ -35,6 +36,7 @@ final class TodoPhoneList extends StatelessWidget {
     required this.onDelete,
     required this.onSwipeDelete,
     required this.onToggleSection,
+    this.links,
     super.key,
   });
 
@@ -64,6 +66,9 @@ final class TodoPhoneList extends StatelessWidget {
   /// Folds a section, or opens it.
   final ValueChanged<String> onToggleSection;
 
+  /// The links of the tasks, drawn as chips (#1152); null draws them dead.
+  final TodoLinkHost? links;
+
   static const AppLogger _log = AppLogger(name: 'todo');
 
   @override
@@ -89,6 +94,7 @@ final class TodoPhoneList extends StatelessWidget {
                 done: row.done,
                 showPriority: showPriority,
                 today: today,
+                links: links,
                 onToggle: (checked) =>
                     unawaited(onToggle(row, checked: checked)),
                 onEdit: () => unawaited(onEdit(row)),

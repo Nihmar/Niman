@@ -4269,4 +4269,6 @@ final class HindiStrings extends Strings {
   String get kanbanEmptyColumn => 'इस कॉलम में कोई कार्ड नहीं है';
   @override
   String get kanbanEditCard => 'कार्ड संपादित करें';
+  @override
+  String taskLinkOpenTooltip(String path) => '$path खोलें';
 }

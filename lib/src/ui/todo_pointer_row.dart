@@ -8,11 +8,17 @@
 /// that menu at the pointer. The button keeps its room while hidden, so
 /// nothing moves as the pointer comes and goes. No swipe: a mouse does not
 /// swipe. The phone keeps `TodoRow`.
+///
+/// The links in the text are chips after it on the same line (#1152): the
+/// text gives way to them, and they are not drawn in it as well.
 library;
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/todo/parser.dart';
+import 'package:niman/src/todo/task_row_links.dart';
 import 'package:niman/src/todo/todo_list_item.dart';
+import 'package:niman/src/ui/todo_link_chip.dart';
+import 'package:niman/src/ui/todo_link_host.dart';
 import 'package:niman/src/ui/todo_priority_badge.dart';
 import 'package:niman/src/ui/todo_row_timing.dart';
 import 'package:niman/src/ui/todo_row_tokens.dart';
@@ -33,6 +39,7 @@ final class TodoPointerRow extends StatefulWidget {
     required this.onSubmitText,
     required this.onCancelEdit,
     required this.onMenuAt,
+    this.links,
     super.key,
   });
 
@@ -67,6 +74,10 @@ final class TodoPointerRow extends StatefulWidget {
   /// Opens the row's menu at a point on screen.
   final ValueChanged<Offset> onMenuAt;
 
+  /// The links of the tasks and how to follow one; null draws the links
+  /// as chips that do nothing.
+  final TodoLinkHost? links;
+
   @override
   State<TodoPointerRow> createState() => _TodoPointerRowState();
 }
@@ -78,7 +89,7 @@ final class _TodoPointerRowState extends State<TodoPointerRow> {
   Widget build(BuildContext context) {
     final entry = widget.row.entry;
     final task = entry.task;
-    final display = taskDisplayText(task.description);
+    final linked = taskRowLinksOf(task, map: widget.links?.map);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final priority = task.priority;
@@ -131,16 +142,7 @@ final class _TodoPointerRowState extends State<TodoPointerRow> {
                               },
                               onCancel: widget.onCancelEdit,
                             )
-                          : Text(
-                              display.isEmpty ? task.raw : display,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: task.completed
-                                  ? const TextStyle(
-                                      decoration: TextDecoration.lineThrough,
-                                    )
-                                  : null,
-                            ),
+                          : _textAndLinks(task, linked),
                     ),
                     // What the task says about itself, at most half the
                     // row: the text keeps the rest.
@@ -202,6 +204,50 @@ final class _TodoPointerRowState extends State<TodoPointerRow> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  /// The text, then a chip per link after it: the text gives way to them,
+  /// and they to no more than three fifths of the room, scaled down past
+  /// that, so a long name or a crowd of links never pushes the row wide.
+  Widget _textAndLinks(TodoTask task, TaskRowLinks linked) {
+    final display = linked.text;
+    return LayoutBuilder(
+      builder: (context, room) => Row(
+        children: [
+          Flexible(
+            child: Text(
+              display.isEmpty && linked.chips.isEmpty ? task.raw : display,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: task.completed
+                  ? const TextStyle(decoration: TextDecoration.lineThrough)
+                  : null,
+            ),
+          ),
+          if (linked.chips.isNotEmpty)
+            ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: room.maxWidth * 0.6),
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: AlignmentDirectional.centerStart,
+                child: Row(
+                  children: [
+                    for (final link in linked.chips)
+                      Padding(
+                        padding: const EdgeInsetsDirectional.only(start: 8),
+                        child: TodoLinkChip(
+                          link: link,
+                          host: widget.links,
+                          compact: true,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }

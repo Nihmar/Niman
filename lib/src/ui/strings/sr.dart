@@ -4341,4 +4341,6 @@ final class SerbianStrings extends Strings {
   String get kanbanEmptyColumn => 'Нема картица у овој колони';
   @override
   String get kanbanEditCard => 'Уреди картицу';
+  @override
+  String taskLinkOpenTooltip(String path) => 'Отвори $path';
 }

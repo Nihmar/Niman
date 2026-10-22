@@ -4345,4 +4345,6 @@ final class CroatianStrings extends Strings {
   String get kanbanEmptyColumn => 'Nema kartica u ovom stupcu';
   @override
   String get kanbanEditCard => 'Uredi karticu';
+  @override
+  String taskLinkOpenTooltip(String path) => 'Otvori $path';
 }

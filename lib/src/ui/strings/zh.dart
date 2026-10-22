@@ -3873,4 +3873,6 @@ final class ChineseStrings extends Strings {
   String get kanbanEmptyColumn => '此列中没有卡片';
   @override
   String get kanbanEditCard => '编辑卡片';
+  @override
+  String taskLinkOpenTooltip(String path) => '打开 $path';
 }

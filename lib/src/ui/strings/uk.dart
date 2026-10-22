@@ -4360,4 +4360,6 @@ final class UkrainianStrings extends Strings {
   String get kanbanEmptyColumn => 'У цьому стовпці немає карток';
   @override
   String get kanbanEditCard => 'Редагувати картку';
+  @override
+  String taskLinkOpenTooltip(String path) => 'Відкрити $path';
 }

@@ -4355,4 +4355,6 @@ final class FinnishStrings extends Strings {
   String get kanbanEmptyColumn => 'Tässä sarakkeessa ei ole kortteja';
   @override
   String get kanbanEditCard => 'Muokkaa korttia';
+  @override
+  String taskLinkOpenTooltip(String path) => 'Avaa $path';
 }

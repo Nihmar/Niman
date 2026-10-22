@@ -4342,4 +4342,6 @@ final class SlovenianStrings extends Strings {
   String get kanbanEmptyColumn => 'V tem stolpcu ni kartic';
   @override
   String get kanbanEditCard => 'Uredi kartico';
+  @override
+  String taskLinkOpenTooltip(String path) => 'Odpri $path';
 }

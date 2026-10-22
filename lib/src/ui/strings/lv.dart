@@ -4314,4 +4314,6 @@ final class LatvianStrings extends Strings {
   String get kanbanEmptyColumn => 'Šajā kolonnā nav karšu';
   @override
   String get kanbanEditCard => 'Rediģēt karti';
+  @override
+  String taskLinkOpenTooltip(String path) => 'Atvērt $path';
 }

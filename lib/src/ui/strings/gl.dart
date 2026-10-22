@@ -4357,4 +4357,6 @@ final class GalicianStrings extends Strings {
   String get kanbanEmptyColumn => 'Non hai tarxetas nesta columna';
   @override
   String get kanbanEditCard => 'Editar a tarxeta';
+  @override
+  String taskLinkOpenTooltip(String path) => 'Abrir $path';
 }

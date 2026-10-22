@@ -4338,4 +4338,6 @@ final class SwedishStrings extends Strings {
   String get kanbanEmptyColumn => 'Inga kort i den här kolumnen';
   @override
   String get kanbanEditCard => 'Redigera kort';
+  @override
+  String taskLinkOpenTooltip(String path) => 'Öppna $path';
 }

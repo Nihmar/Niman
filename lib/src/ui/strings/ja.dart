@@ -3970,4 +3970,6 @@ final class JapaneseStrings extends Strings {
   String get kanbanEmptyColumn => 'この列にカードはありません';
   @override
   String get kanbanEditCard => 'カードを編集';
+  @override
+  String taskLinkOpenTooltip(String path) => '$path を開く';
 }

@@ -4458,4 +4458,6 @@ final class GreekStrings extends Strings {
   String get kanbanEmptyColumn => 'Δεν υπάρχουν κάρτες σε αυτή τη στήλη';
   @override
   String get kanbanEditCard => 'Επεξεργασία κάρτας';
+  @override
+  String taskLinkOpenTooltip(String path) => 'Άνοιγμα $path';
 }

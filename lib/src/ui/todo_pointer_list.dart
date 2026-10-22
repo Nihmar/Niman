@@ -14,6 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:niman/src/todo/line_edits.dart';
 import 'package:niman/src/todo/todo_list_item.dart';
+import 'package:niman/src/ui/todo_link_host.dart';
 import 'package:niman/src/ui/todo_list_reveal.dart';
 import 'package:niman/src/ui/todo_menu_pick.dart';
 import 'package:niman/src/ui/todo_pointer_row.dart';
@@ -33,6 +34,7 @@ final class TodoPointerList extends StatefulWidget {
     required this.onDelete,
     required this.onRewrite,
     required this.onToggleSection,
+    this.links,
     super.key,
   });
 
@@ -60,6 +62,9 @@ final class TodoPointerList extends StatefulWidget {
 
   /// Folds a section, or opens it.
   final ValueChanged<String> onToggleSection;
+
+  /// The links of the tasks, drawn as chips (#1152); null draws them dead.
+  final TodoLinkHost? links;
 
   @override
   State<TodoPointerList> createState() => _TodoPointerListState();
@@ -184,6 +189,7 @@ final class _TodoPointerListState extends State<TodoPointerList> {
                   onSubmitText: (text) => unawaited(_writeText(row, text)),
                   onCancelEdit: () => setState(() => _editing = null),
                   onMenuAt: (at) => _openMenu(row, at),
+                  links: widget.links,
                 );
             }
           },

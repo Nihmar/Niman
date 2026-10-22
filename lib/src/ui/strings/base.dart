@@ -2296,4 +2296,6 @@ abstract base class Strings {
   String get kanbanLongPressHint;
   String get kanbanEmptyColumn;
   String get kanbanEditCard;
+
+  String taskLinkOpenTooltip(String path);
 }

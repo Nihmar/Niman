@@ -4327,4 +4327,6 @@ final class SlovakStrings extends Strings {
   String get kanbanEmptyColumn => 'V tomto stĺpci nie sú žiadne karty';
   @override
   String get kanbanEditCard => 'Upraviť kartu';
+  @override
+  String taskLinkOpenTooltip(String path) => 'Otvoriť $path';
 }

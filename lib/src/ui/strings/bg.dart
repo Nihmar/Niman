@@ -4349,4 +4349,6 @@ final class BulgarianStrings extends Strings {
   String get kanbanEmptyColumn => 'Няма карти в тази колона';
   @override
   String get kanbanEditCard => 'Редактиране на карта';
+  @override
+  String taskLinkOpenTooltip(String path) => 'Отвори $path';
 }

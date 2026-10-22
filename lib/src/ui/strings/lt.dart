@@ -4361,4 +4361,6 @@ final class LithuanianStrings extends Strings {
   String get kanbanEmptyColumn => 'Šiame stulpelyje kortelių nėra';
   @override
   String get kanbanEditCard => 'Redaguoti kortelę';
+  @override
+  String taskLinkOpenTooltip(String path) => 'Atidaryti $path';
 }

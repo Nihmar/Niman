@@ -4269,4 +4269,6 @@ final class EnglishStrings extends Strings {
   String get kanbanEmptyColumn => 'No cards in this column';
   @override
   String get kanbanEditCard => 'Edit card';
+  @override
+  String taskLinkOpenTooltip(String path) => 'Open $path';
 }

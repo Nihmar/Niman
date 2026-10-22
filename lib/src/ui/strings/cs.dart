@@ -4313,4 +4313,6 @@ final class CzechStrings extends Strings {
   String get kanbanEmptyColumn => 'V tomto sloupci nejsou žádné karty';
   @override
   String get kanbanEditCard => 'Upravit kartu';
+  @override
+  String taskLinkOpenTooltip(String path) => 'Otevřít $path';
 }

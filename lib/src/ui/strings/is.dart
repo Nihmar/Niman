@@ -4324,4 +4324,6 @@ final class IcelandicStrings extends Strings {
   String get kanbanEmptyColumn => 'Engin spjöld í þessum dálki';
   @override
   String get kanbanEditCard => 'Breyta spjaldi';
+  @override
+  String taskLinkOpenTooltip(String path) => 'Opna $path';
 }

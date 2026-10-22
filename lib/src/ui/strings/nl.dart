@@ -4372,4 +4372,6 @@ final class DutchStrings extends Strings {
   String get kanbanEmptyColumn => 'Geen kaarten in deze kolom';
   @override
   String get kanbanEditCard => 'Kaart bewerken';
+  @override
+  String taskLinkOpenTooltip(String path) => '$path openen';
 }

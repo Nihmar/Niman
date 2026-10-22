@@ -4451,4 +4451,6 @@ final class FrenchStrings extends Strings {
   String get kanbanEmptyColumn => 'Aucune carte dans cette colonne';
   @override
   String get kanbanEditCard => 'Modifier la carte';
+  @override
+  String taskLinkOpenTooltip(String path) => 'Ouvrir $path';
 }

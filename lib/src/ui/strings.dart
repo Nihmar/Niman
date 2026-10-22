@@ -2190,4 +2190,6 @@ final class AppStrings {
   static String get kanbanLongPressHint => _s.kanbanLongPressHint;
   static String get kanbanEmptyColumn => _s.kanbanEmptyColumn;
   static String get kanbanEditCard => _s.kanbanEditCard;
+  static String taskLinkOpenTooltip(String path) =>
+      _s.taskLinkOpenTooltip(path);
 }

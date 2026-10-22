@@ -40,6 +40,7 @@ import 'package:niman/src/ui/reminder_health_banner.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/todo_edit_dialog.dart';
 import 'package:niman/src/ui/todo_filter_strip.dart';
+import 'package:niman/src/ui/todo_link_host.dart';
 import 'package:niman/src/ui/todo_list_actions.dart';
 import 'package:niman/src/ui/todo_phone_list.dart';
 import 'package:niman/src/ui/todo_pointer_list.dart';
@@ -62,6 +63,7 @@ final class TodoTab extends StatefulWidget {
     this.clock,
     this.onAddTask,
     this.column = NoteColumn.off,
+    this.links,
     super.key,
   });
 
@@ -83,6 +85,11 @@ final class TodoTab extends StatefulWidget {
 
   /// Creates a task; the desktop toolbar shows the button.
   final VoidCallback? onAddTask;
+
+  /// The links of the tasks and how to follow one (#1152): each link in a
+  /// task's text is a chip, and the rows follow the map as it resolves.
+  /// Null still draws the chips, which then do nothing.
+  final TodoLinkHost? links;
 
   @override
   State<TodoTab> createState() => _TodoTabState();
@@ -142,7 +149,11 @@ final class _TodoTabState extends State<TodoTab> {
         final labelled =
             shellWide && constraints.maxWidth >= TodoToolbar.labelledMinWidth;
         return ListenableBuilder(
-          listenable: Listenable.merge([widget.controller, widget.view]),
+          listenable: Listenable.merge([
+            widget.controller,
+            widget.view,
+            ?widget.links?.map,
+          ]),
           builder: (context, _) {
             final controller = widget.controller;
             final snapshot = controller.snapshot;
@@ -245,6 +256,7 @@ final class _TodoTabState extends State<TodoTab> {
                   onDelete: _delete,
                   onRewrite: _rewrite,
                   onToggleSection: _toggleSection,
+                  links: widget.links,
                 )
               : TodoPhoneList(
                   items: _itemsOf(model),
@@ -255,6 +267,7 @@ final class _TodoTabState extends State<TodoTab> {
                   onDelete: _delete,
                   onSwipeDelete: _swipeDelete,
                   onToggleSection: _toggleSection,
+                  links: widget.links,
                 ),
         ),
       ],

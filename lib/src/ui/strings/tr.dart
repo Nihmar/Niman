@@ -4285,4 +4285,6 @@ final class TurkishStrings extends Strings {
   String get kanbanEmptyColumn => 'Bu sütunda kart yok';
   @override
   String get kanbanEditCard => 'Kartı düzenle';
+  @override
+  String taskLinkOpenTooltip(String path) => '$path dosyasını aç';
 }

@@ -4390,4 +4390,6 @@ final class SpanishStrings extends Strings {
   String get kanbanEmptyColumn => 'No hay tarjetas en esta columna';
   @override
   String get kanbanEditCard => 'Editar tarjeta';
+  @override
+  String taskLinkOpenTooltip(String path) => 'Abrir $path';
 }

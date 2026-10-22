@@ -4345,4 +4345,6 @@ final class HungarianStrings extends Strings {
   String get kanbanEmptyColumn => 'Nincs kártya ebben az oszlopban';
   @override
   String get kanbanEditCard => 'Kártya szerkesztése';
+  @override
+  String taskLinkOpenTooltip(String path) => '$path megnyitása';
 }

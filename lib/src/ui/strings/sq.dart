@@ -4354,4 +4354,6 @@ final class AlbanianStrings extends Strings {
   String get kanbanEmptyColumn => 'Nuk ka karta në këtë kolonë';
   @override
   String get kanbanEditCard => 'Redakto kartën';
+  @override
+  String taskLinkOpenTooltip(String path) => 'Hap $path';
 }

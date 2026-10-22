@@ -4417,4 +4417,6 @@ final class GermanStrings extends Strings {
   String get kanbanEmptyColumn => 'Keine Karten in dieser Spalte';
   @override
   String get kanbanEditCard => 'Karte bearbeiten';
+  @override
+  String taskLinkOpenTooltip(String path) => '$path öffnen';
 }

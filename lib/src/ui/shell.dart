@@ -123,6 +123,7 @@ import 'package:niman/src/ui/kinds/slides/slides_present.dart';
 import 'package:niman/src/ui/link_update_dialog.dart';
 import 'package:niman/src/ui/mac_menu_bar.dart';
 import 'package:niman/src/ui/note_editor_keys.dart';
+import 'package:niman/src/ui/note_link_targets.dart';
 import 'package:niman/src/ui/note_menu.dart';
 import 'package:niman/src/ui/note_tab_bar.dart';
 import 'package:niman/src/ui/note_view.dart';
@@ -183,6 +184,7 @@ import 'package:niman/src/ui/tab_drag.dart';
 import 'package:niman/src/ui/tab_row_lead.dart';
 import 'package:niman/src/ui/text_zoom_pinch.dart';
 import 'package:niman/src/ui/todo_edit_dialog.dart';
+import 'package:niman/src/ui/todo_link_host.dart';
 import 'package:niman/src/ui/todo_list_buttons.dart';
 import 'package:niman/src/ui/todo_tab.dart';
 import 'package:niman/src/ui/tour/tour_host.dart';
@@ -1068,6 +1070,10 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// rewrite share one map. Inert while the Todo feature is off.
   late final TaskLinkMap _taskLinks;
 
+  /// How the Todo tab follows a link in a task (#1152): the map, and the
+  /// targets of a tap on a chip.
+  late final TodoLinkHost _todoLinks;
+
   /// What the Todo list shows (#1003): its filter, its sort and the folded
   /// sections. Owned here, next to the controller, because the phone's app
   /// bar (Filter and Sort) and the tab body read and set the same state.
@@ -1480,6 +1486,27 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
 
   /// Opens a note reached through a link (T-M3-07), at the heading
   /// [anchor] when there is one.
+  /// What following a link written in a task asks (#1152): `todo.txt` sits
+  /// at the library root, a link in it is resolved from there, and it opens
+  /// a note, or offers to create one, as a link in a note does. [anchor] is
+  /// where the pointer went down, when a pointer did.
+  NoteLinkTargets _taskLinkTargets(Rect? anchor) {
+    final root = widget.controller.root ?? '';
+    return NoteLinkTargets(
+      source: _linkSource,
+      notePath: p.join(root, todoFileName),
+      libraryRoot: widget.controller.root,
+      newItemLocation: _editorSettings.newItemLocation,
+      // A task has no headings of its own: an anchor lands in the note the
+      // link opens.
+      outline: const [],
+      jumpToHeading: (_) {},
+      onOpenNote: _openNoteFromLink,
+      createMissingNote: missingNoteCreatorFor(widget.controller),
+      anchor: anchor,
+    );
+  }
+
   void _openNoteFromLink(String path, String? anchor) {
     const AppLogger(name: 'links').debug(
       'shell open request: $path anchor=${anchor == null ? '-' : '"$anchor"'} '
@@ -2593,6 +2620,12 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           widget.controller.features.value.isOn(LibraryFeature.todo),
       enabledChanges: widget.controller.features,
     );
+    _todoLinks = TodoLinkHost(
+      map: _taskLinks,
+      targets: _taskLinkTargets,
+      source: () => _linkSource,
+      previewEnabled: () => _editorSettings.linkPreview,
+    );
     _todoView = todoListViewFor(widget.controller);
     // The todo widgets follow the snapshot: every mutation notifies, and
     // the initial open notifies too, so one listener covers both.
@@ -2807,6 +2840,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     unawaited(_inbound.cancel());
     _todoController.removeListener(_homeWidgets.pushTodos);
     _calendarController.removeListener(_pushCalendarReminders);
+    _todoLinks.dispose();
     _taskLinks.dispose();
     _todoController.dispose();
     _todoView.dispose();
@@ -5627,6 +5661,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         reminders: widget.reminders,
         onAddTask: _addTodo,
         column: _editorSettings.noteColumn,
+        links: _todoLinks,
       ),
       ShellTab.search => _searchSlot(controller),
       // Empty unless the shell actually sent the user here to choose: an

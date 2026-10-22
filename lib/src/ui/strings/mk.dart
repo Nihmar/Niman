@@ -4355,4 +4355,6 @@ final class MacedonianStrings extends Strings {
   String get kanbanEmptyColumn => 'Нема картички во оваа колона';
   @override
   String get kanbanEditCard => 'Уреди картичка';
+  @override
+  String taskLinkOpenTooltip(String path) => 'Отвори $path';
 }

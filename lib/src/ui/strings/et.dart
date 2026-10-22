@@ -4269,4 +4269,6 @@ final class EstonianStrings extends Strings {
   String get kanbanEmptyColumn => 'Selles veerus pole kaarte';
   @override
   String get kanbanEditCard => 'Muuda kaarti';
+  @override
+  String taskLinkOpenTooltip(String path) => 'Ava $path';
 }
