@@ -14,12 +14,14 @@ import 'package:niman/src/home/home_file.dart';
 import 'package:niman/src/library/device_home_carry.dart';
 import 'package:niman/src/library/note_op_seams.dart';
 import 'package:niman/src/library/note_writer.dart';
+import 'package:niman/src/library/relocation_tasks.dart';
 import 'package:niman/src/links/link_moves.dart';
 import 'package:niman/src/links/moved_links.dart';
 import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/links/rewrite.dart';
 import 'package:niman/src/reading/reading_positions.dart';
 import 'package:niman/src/sync/sync_store.dart';
+import 'package:niman/src/todo/task_link_rewrites.dart';
 import 'package:path/path.dart' as p;
 
 /// Asks whether the links in [notes] notes, which pointed at what has just
@@ -88,6 +90,7 @@ final class _LinksToMove {
     required this.moves,
     required this.referrers,
     required this.followed,
+    this.tasks,
   });
 
   /// Nothing points at what moves.
@@ -109,6 +112,10 @@ final class _LinksToMove {
   /// when no moved file shares its name with another one, so the text of a
   /// link says what it named and nothing was read before the move.
   final Map<String, MovedLinks>? followed;
+
+  /// The rewrite of the tasks' links that named a moved file, planned
+  /// before the move; null when none did (#1152).
+  final PendingTaskRewrite? tasks;
 }
 
 /// Moves a note or a folder on disk and carries along everything that
@@ -185,12 +192,15 @@ final class NoteRelocator {
   /// updated row.
   ///
   /// [flushOpen] saves the open notes' unsaved edits before each referrer
-  /// is read for the rewrite (#913).
+  /// is read for the rewrite (#913). [taskLinks] plans the rewrite of the
+  /// links in the tasks of `todo.txt` and `done.txt`, which goes with the
+  /// notes' (#1152).
   Future<Relocated> relocate(
     Note row,
     String path,
     String newRel, {
     FlushOpenNotes? flushOpen,
+    TaskLinkRewrites? taskLinks,
   }) async {
     final oldAbs = _abs(path);
     // Before anything moves: the index still says what each link named, and
@@ -202,6 +212,7 @@ final class NoteRelocator {
       newRel,
       isDir: row.isDir,
       follow: mode != LinkUpdate.never,
+      taskLinks: taskLinks,
     );
     if (row.isDir) {
       await Directory(oldAbs).rename(_abs(newRel));
@@ -277,6 +288,7 @@ final class NoteRelocator {
     String to, {
     required bool isDir,
     required bool follow,
+    TaskLinkRewrites? taskLinks,
   }) async {
     final oldPaths = isDir ? await dao.filePathsUnder(from) : <String>[from];
     final rows = oldPaths.isEmpty
@@ -320,7 +332,24 @@ final class NoteRelocator {
         }
       }
     }
-    return _LinksToMove(moves: moves, referrers: referrers, followed: followed);
+    // The tasks' links are asked the same way, while the index still says
+    // what each named (#1152).
+    final tasks = follow
+        ? await planTaskRewrite(
+            taskLinks,
+            oldPaths: oldPaths,
+            moves: moves,
+            from: from,
+            to: to,
+            isDir: isDir,
+          )
+        : null;
+    return _LinksToMove(
+      moves: moves,
+      referrers: referrers,
+      followed: followed,
+      tasks: tasks,
+    );
   }
 
   /// Rewrites the links in every note that pointed at what moved from [from]
@@ -345,7 +374,9 @@ final class NoteRelocator {
     required _LinksToMove links,
     FlushOpenNotes? flushOpen,
   }) async {
-    if (links.referrers.isEmpty) return null;
+    // A move no note links to can still be one the tasks do (#1152).
+    final tasks = links.tasks;
+    if (links.referrers.isEmpty && tasks == null) return null;
     // A referrer inside the moved subtree moved with it; one note is
     // rewritten once however many of its old paths were referrers.
     final targets = <(String oldReferrer, String path)>[];
@@ -356,21 +387,16 @@ final class NoteRelocator {
     }
     // The rewrite is not done now, so the referrers' edges are not renewed
     // by a save: they are read again here (#856).
-    if (mode != LinkUpdate.automatic) {
+    if (mode != LinkUpdate.automatic && targets.isNotEmpty) {
       await _reresolve([for (final (_, path) in targets) path]);
     }
     if (mode == LinkUpdate.never) return null;
     // A renamed file is the one case a bare-name wikilink follows.
-    String? renamedFrom;
-    String? renamedTo;
-    if (!isDir) {
-      final oldName = p.basename(from);
-      final newName = p.basename(to);
-      if (oldName != newName) {
-        renamedFrom = oldName;
-        renamedTo = newName;
-      }
-    }
+    final (from: renamedFrom, to: renamedTo) = renamedBaseNames(
+      from,
+      to,
+      isDir: isDir,
+    );
     final followed = links.followed;
     Future<String?> rewritten(String oldReferrer, String path) async {
       final text = await readNote(path);
@@ -421,6 +447,8 @@ final class NoteRelocator {
         const AppLogger(name: 'links')
             .info('$updated note(s) updated after "$from" -> "$to"');
       }
+      // The tasks go with the notes, after them: a failure there is its own.
+      await applyTaskRewrite(tasks);
     }
 
     // Not here, in the move's own turn of the op chain: renaming a note a
@@ -428,7 +456,7 @@ final class NoteRelocator {
     // sync write behind a thousand reads and saves (#1041).
     if (mode == LinkUpdate.automatic) {
       return PendingLinkRewrite(
-        count: () async => targets.length,
+        count: () async => targets.length + (tasks?.count ?? 0),
         apply: write,
         automatic: true,
       );
@@ -443,7 +471,7 @@ final class NoteRelocator {
               .warning('could not read links in "$path": $error');
         }
       }
-      return changing;
+      return changing + (tasks?.count ?? 0);
     }
 
     return PendingLinkRewrite(count: count, apply: write);

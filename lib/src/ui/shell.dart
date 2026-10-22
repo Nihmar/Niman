@@ -64,6 +64,7 @@ import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/spellcheck/personal_dictionary.dart';
 import 'package:niman/src/spellcheck/spell_check_provider.dart';
 import 'package:niman/src/todo/reminders.dart';
+import 'package:niman/src/todo/task_link_rewriter.dart';
 import 'package:niman/src/todo/task_links.dart';
 import 'package:niman/src/todo/todo_controller.dart';
 import 'package:niman/src/todo/todo_filter.dart';
@@ -1227,6 +1228,11 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       if (mounted) setState(() => _noteReloadToken++);
     },
     onLinksProgress: _showLinksProgress,
+    // The links in the tasks follow the move too (#1152).
+    taskLinks: TaskLinkRewriter(
+      map: _taskLinks,
+      write: _todoController.replaceLines,
+    ),
     controller: widget.controller,
     guard: _guard,
     saveOpen: () => widget.unsavedTracker.saveAll(),

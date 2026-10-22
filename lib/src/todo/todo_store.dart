@@ -25,6 +25,8 @@ import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/frontmatter/parser.dart';
 import 'package:niman/src/todo/parser.dart';
+import 'package:niman/src/todo/task_line_edit.dart';
+import 'package:niman/src/todo/task_link.dart' show TaskFile;
 import 'package:niman/src/todo/todo_file_names.dart';
 import 'package:niman/src/todo/todo_files.dart';
 import 'package:niman/src/todo/todo_source.dart';
@@ -241,6 +243,29 @@ final class TodoStore implements TodoSource {
     return _mutate(
       op: 'delete-done',
       apply: (todo, done) => done.removeAt(lineIndex),
+    );
+  }
+
+  /// Replaces the lines [edits] name (the rename rewrite of the links in
+  /// the tasks, #1152). Both files are read again here, inside the writer
+  /// chain, so an edit lands on the line as it is now: an edit finds its line
+  /// by its old text ([applyLineEdits]), and a line another tool changed or
+  /// removed is left alone. Every other line is written back byte-identical,
+  /// and a file no edit changed is not written. Returns the fresh snapshot.
+  @override
+  Future<TodoSnapshot> replaceLines(List<TaskLineEdit> edits) {
+    return _mutate(
+      op: 'replace-lines',
+      apply: (todo, done) {
+        applyLineEdits(todo, [
+          for (final edit in edits)
+            if (edit.file == TaskFile.todo) edit,
+        ]);
+        applyLineEdits(done, [
+          for (final edit in edits)
+            if (edit.file == TaskFile.done) edit,
+        ]);
+      },
     );
   }
 
