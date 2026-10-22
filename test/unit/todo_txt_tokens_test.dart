@@ -55,6 +55,20 @@ void main() {
     expect(_runs(''), isEmpty);
   });
 
+  test('a wikilink is one run, with nothing coloured inside', () {
+    expect(_runs('Plan [[Ideas +work @x key:v]] +home'), [
+      'wikilink [[Ideas +work @x key:v]]',
+      'todoProject +home',
+    ]);
+    expect(_runs('(A) See [[Note#Heading]] and [[Note#^b7]] #tag'), [
+      'todoPriority (A)',
+      'wikilink [[Note#Heading]]',
+      'wikilink [[Note#^b7]]',
+      'tag #tag',
+    ]);
+    expect(_runs('x [[a|b @c]]'), ['todoDone x [[a|b @c]]']);
+  });
+
   test('a date is a date only at the head', () {
     expect(_runs('Pay 2026-09-24'), isEmpty);
     expect(_runs('2026-09-24 Pay'), ['todoDate 2026-09-24']);

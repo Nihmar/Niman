@@ -150,6 +150,39 @@ final RegExp _projectPattern = RegExp(r'(?:^|\s)\+(\S+)');
 final RegExp _contextPattern = RegExp(r'(?:^|\s)@(\S+)');
 final RegExp _hashtagPattern = RegExp(r'(?:^|\s)#(\S+)');
 
+/// A wikilink, `[[…]]`, as the Markdown tokenizer reads one: no bracket and
+/// no line break inside.
+final RegExp _wikilinkPattern = RegExp(r'\[\[[^\[\]\n]*\]\]');
+
+/// The placeholder a wikilink is masked with: not blank space, not a sigil,
+/// not a letter, so no token pattern can match inside or across it.
+const String _linkMask = '\u0000';
+
+/// The `[start, end)` offsets of the wikilinks in [text], in order.
+///
+/// A wikilink is one opaque run to a task line (#1152): the `+`, `@`, `#`
+/// and `key:` inside `[[Ideas +work]]` are the link's own text, never a
+/// project, a context, a tag or a tag-value. The editor's colouring reads
+/// the same spans.
+List<(int, int)> wikilinkSpans(String text) {
+  if (!text.contains('[[')) return const <(int, int)>[];
+  return <(int, int)>[
+    for (final match in _wikilinkPattern.allMatches(text))
+      (match.start, match.end),
+  ];
+}
+
+/// [text] with every wikilink replaced by as many [_linkMask]s: the same
+/// length, so a match offset on the result is an offset in [text], and no
+/// token pattern sees into a link.
+String maskWikilinks(String text) {
+  if (!text.contains('[[')) return text;
+  return text.replaceAllMapped(
+    _wikilinkPattern,
+    (match) => _linkMask * match.group(0)!.length,
+  );
+}
+
 /// A strict `YYYY-MM-DD` value (also used to validate the date part of
 /// `rem:`).
 final RegExp _dateValue = RegExp(r'^(\d{4})-(\d{2})-(\d{2})$');
@@ -226,15 +259,18 @@ TodoTask parseTodoLine(String line) {
   final completionDate = completed ? firstDate : null;
   final creationDate = completed ? secondDate : firstDate;
   final description = rest.replaceFirst(_trailingSpace, '');
-  final projects = _tokenValues(_projectPattern, description);
-  final contexts = _tokenValues(_contextPattern, description);
-  final hashtags = _tokenValues(_hashtagPattern, description);
+  // The tokens are read off the description with its wikilinks masked, and
+  // taken from the description itself: a link is never a token (#1152).
+  final readable = maskWikilinks(description);
+  final projects = _tokenValues(_projectPattern, readable, description);
+  final contexts = _tokenValues(_contextPattern, readable, description);
+  final hashtags = _tokenValues(_hashtagPattern, readable, description);
   DateTime? due;
   DateTime? reminder;
   final keyValues = <TodoKeyValue>[];
-  for (final match in _keyValuePattern.allMatches(description)) {
+  for (final match in _keyValuePattern.allMatches(readable)) {
     final key = match.group(1)!;
-    final value = match.group(2)!;
+    final value = _tailOf(match, 2, description);
     if (key == 'due' && due == null) {
       final date = _checkedDateValue(value);
       if (date != null) {
@@ -354,10 +390,7 @@ String uncompleteTodoLine(String line) {
 /// own tag while the rest of the line stays byte-identical.
 String withKeyValueTag(String description, String key, String? value) {
   final tag = RegExp('(?:^|\\s)${RegExp.escape(key)}:(?:\\S+)?(?=\\s|\$)');
-  final out = description
-      .replaceAll(tag, '')
-      .replaceAll(RegExp(r'\s+'), ' ')
-      .trim();
+  final out = _collapsed(_withoutMatches(description, tag));
   if (value == null) {
     return out;
   }
@@ -375,10 +408,7 @@ String withoutToken(String description, String token) {
     return description;
   }
   final word = RegExp('(?:^|\\s)${RegExp.escape(token)}(?=\\s|\$)');
-  return description
-      .replaceAll(word, '')
-      .replaceAll(RegExp(r'\s+'), ' ')
-      .trim();
+  return _collapsed(_withoutMatches(description, word));
 }
 
 /// The word of a `key:value` annotation tag embedded in a description
@@ -397,12 +427,11 @@ final RegExp _keyValueWordPattern = RegExp(
 /// syntax with nothing to explain them. A setting brings them back for
 /// people who file by project.
 String taskDisplayText(String description) {
-  return withoutKeyValueTags(description)
-      .replaceAll(_projectPattern, '')
-      .replaceAll(_contextPattern, '')
-      .replaceAll(_hashtagPattern, '')
-      .replaceAll(RegExp(r'\s+'), ' ')
-      .trim();
+  var out = withoutKeyValueTags(description);
+  for (final pattern in [_projectPattern, _contextPattern, _hashtagPattern]) {
+    out = _withoutMatches(out, pattern);
+  }
+  return _collapsed(out);
 }
 
 /// Returns [description] without its `key:value` annotation tags — the
@@ -413,10 +442,7 @@ String withoutKeyValueTags(String description) {
   if (!description.contains(':')) {
     return description.trim();
   }
-  return description
-      .replaceAll(_keyValueWordPattern, '')
-      .replaceAll(RegExp(r'\s+'), ' ')
-      .trim();
+  return _collapsed(_withoutMatches(description, _keyValueWordPattern));
 }
 
 /// Formats [date] as `YYYY-MM-DD` (drops any time part).
@@ -434,11 +460,49 @@ String formatTodoStamp(DateTime stamp) {
   return '${formatTodoDate(stamp)}T$hours:$minutes';
 }
 
-/// The token values of [pattern] in [description], in occurrence order.
-List<String> _tokenValues(RegExp pattern, String description) {
+/// The token values of [pattern] over [readable] (the description with its
+/// wikilinks masked), in occurrence order, as [description] writes them.
+List<String> _tokenValues(RegExp pattern, String readable, String description) {
   return <String>[
-    for (final match in pattern.allMatches(description)) match.group(1)!,
+    for (final match in pattern.allMatches(readable))
+      _tailOf(match, 1, description),
   ];
+}
+
+/// The text of [group] of [match] as [text] writes it: every pattern here
+/// ends in its value group, so the group is the last of the match and
+/// [text] and the masked text it was matched on agree on where it is.
+String _tailOf(Match match, int group, String text) {
+  return text.substring(match.end - match.group(group)!.length, match.end);
+}
+
+/// [text] without what [pattern] matches outside its wikilinks.
+String _withoutMatches(String text, RegExp pattern) {
+  final matches = pattern.allMatches(maskWikilinks(text)).toList();
+  if (matches.isEmpty) return text;
+  final out = StringBuffer();
+  var from = 0;
+  for (final match in matches) {
+    out.write(text.substring(from, match.start));
+    from = match.end;
+  }
+  out.write(text.substring(from));
+  return out.toString();
+}
+
+/// [text] with each run of blank space outside a wikilink collapsed to one
+/// space, and trimmed: a link keeps its own spacing.
+String _collapsed(String text) {
+  final out = StringBuffer();
+  var from = 0;
+  for (final match in RegExp(r'\s+').allMatches(maskWikilinks(text))) {
+    out
+      ..write(text.substring(from, match.start))
+      ..write(' ');
+    from = match.end;
+  }
+  out.write(text.substring(from));
+  return out.toString().trim();
 }
 
 /// A calendar-valid date, or null (rejects e.g. month 13 or Feb 30 —

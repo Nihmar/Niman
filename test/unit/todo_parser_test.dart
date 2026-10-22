@@ -291,6 +291,95 @@ void main() {
     });
   });
 
+  group('wikilinks are one opaque run (#1152)', () {
+    test('a token inside a link is part of the link text', () {
+      final task = parseTodoLine('plan [[Ideas +work]] and [[a|b @c]] soon');
+      expect(task.projects, isEmpty);
+      expect(task.contexts, isEmpty);
+      expect(task.hashtags, isEmpty);
+    });
+
+    test('an anchor is no tag', () {
+      for (final line in [
+        'read [[Note#Heading]]',
+        'read [[Note#^b7]]',
+        'read [[Note#Heading#Sub]] now',
+      ]) {
+        final task = parseTodoLine(line);
+        expect(task.hashtags, isEmpty, reason: line);
+        expect(task.toLine(), line);
+      }
+    });
+
+    test('a key:value inside a link is no tag', () {
+      final task = parseTodoLine('call [[x key:v]] due:2026-09-08');
+      expect(task.keyValues, isEmpty);
+      expect(task.due, DateTime(2026, 9, 8));
+    });
+
+    test('a link in a due slot, and a key before a link, still read', () {
+      final task = parseTodoLine('see ref:[[A b]] [[A c:d]]');
+      expect([for (final kv in task.keyValues) kv.token], ['ref:[[A b]]']);
+    });
+
+    test('tokens outside the links read as before', () {
+      final task = parseTodoLine(
+        '(A) 2026-09-01 call [[Ideas +work]] +home @phone #bills '
+        'k:v [[x #y]]',
+      );
+      expect(task.projects, ['home']);
+      expect(task.contexts, ['phone']);
+      expect(task.hashtags, ['bills']);
+      expect([for (final kv in task.keyValues) kv.token], ['k:v']);
+      expect(task.description, endsWith('[[x #y]]'));
+    });
+
+    test('a sigil glued to a link is still no token', () {
+      final task = parseTodoLine('a[[x]] +[[y z]]');
+      expect(task.projects, ['[[y z]]']);
+      expect(task.contexts, isEmpty);
+    });
+
+    test('the raw line round-trips', () {
+      for (final line in [
+        '(B)  call   [[Ideas  +work]]   +home ',
+        'x 2026-09-02 2026-09-01 done [[a#b]] @c',
+        '[[Unclosed +work',
+        '[[a]][[b +c]]',
+      ]) {
+        expect(parseTodoLine(line).toLine(), line);
+      }
+      // An unclosed link is no link: its token reads.
+      expect(parseTodoLine('[[Unclosed +work').projects, ['work']);
+    });
+
+    test('the key:value helpers leave a link intact', () {
+      expect(
+        withKeyValueTag('call [[Ideas due:x  y]] later', 'due', '2026-09-08'),
+        'call [[Ideas due:x  y]] later due:2026-09-08',
+      );
+      expect(
+        withKeyValueTag('[[a due:x]] due:2026-09-01', 'due', null),
+        '[[a due:x]]',
+      );
+      expect(
+        withoutKeyValueTags('call [[a  rem:x]] due:2026-09-09'),
+        'call [[a  rem:x]]',
+      );
+    });
+
+    test('the token helpers leave a link intact', () {
+      expect(
+        withoutToken('plan [[Ideas +work]] +work', '+work'),
+        'plan [[Ideas +work]]',
+      );
+      expect(
+        taskDisplayText('plan [[Ideas +work @x  #y]] +home due:2026-09-09'),
+        'plan [[Ideas +work @x  #y]]',
+      );
+    });
+  });
+
   group('withKeyValueTag', () {
     test('replaces an existing tag where it stands', () {
       expect(
