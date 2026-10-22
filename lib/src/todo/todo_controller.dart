@@ -25,6 +25,7 @@ import 'package:niman/src/library/session.dart';
 import 'package:niman/src/todo/reminder_cancellation.dart';
 import 'package:niman/src/todo/reminder_feature_follower.dart';
 import 'package:niman/src/todo/reminders.dart';
+import 'package:niman/src/todo/task_line_edit.dart';
 import 'package:niman/src/todo/todo_source.dart';
 import 'package:niman/src/todo/todo_store.dart';
 
@@ -180,6 +181,13 @@ final class TodoController extends ChangeNotifier {
       'delete-done@${entry.lineIndex}',
       (store) => store.deleteDoneAt(entry.lineIndex),
     );
+  }
+
+  /// Replaces the task lines [edits] name, one write for each file (the
+  /// rename rewrite of the links in the tasks, #1152). A failure is logged
+  /// and shown on [error], never thrown: the move that asked is done.
+  Future<void> replaceLines(List<TaskLineEdit> edits) {
+    return _apply('replace-lines', (store) => store.replaceLines(edits));
   }
 
   /// The calendar file, whose own reminders (#730) join the tasks' in the

@@ -8,6 +8,7 @@
 library;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:niman/src/todo/task_line_edit.dart';
 import 'package:niman/src/todo/todo_store.dart';
 
 /// What the todo UI layer needs from `todo.txt` / `done.txt`.
@@ -47,6 +48,11 @@ abstract interface class TodoSource {
 
   /// Removes the `done.txt` line at [lineIndex] outright.
   Future<TodoSnapshot> deleteDoneAt(int lineIndex);
+
+  /// Applies [edits] to the lines they name, one write for each file that
+  /// changes (`applyLineEdits`: found by their text, a line that is gone is
+  /// skipped).
+  Future<TodoSnapshot> replaceLines(List<TaskLineEdit> edits);
 }
 
 /// Builds the todo file source per library root.

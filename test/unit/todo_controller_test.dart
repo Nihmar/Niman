@@ -5,6 +5,8 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/todo/reminders.dart';
+import 'package:niman/src/todo/task_line_edit.dart';
+import 'package:niman/src/todo/task_link.dart' show TaskFile;
 import 'package:niman/src/todo/todo_controller.dart';
 import 'package:path/path.dart' as p;
 
@@ -67,6 +69,27 @@ void main() {
     expect(
       [for (final entry in controller.snapshot!.done) entry.task.description],
       ['old', 'stray'],
+    );
+  });
+
+  test('replaceLines rewrites the named lines and publishes them', () async {
+    writeRaw('todo.txt', 'call [[Old]]\nother\n');
+    await controller.open();
+    var published = 0;
+    controller.addListener(() => published++);
+    await controller.replaceLines(const [
+      TaskLineEdit(
+        file: TaskFile.todo,
+        lineIndex: 0,
+        from: 'call [[Old]]',
+        to: 'call [[New]]',
+      ),
+    ]);
+    expect(published, 1);
+    expect(controller.snapshot!.todo.first.task.description, 'call [[New]]');
+    expect(
+      File(p.join(root.path, 'todo.txt')).readAsStringSync(),
+      'call [[New]]\nother\n',
     );
   });
 

@@ -1,4 +1,6 @@
 import 'package:niman/src/todo/parser.dart';
+import 'package:niman/src/todo/task_line_edit.dart';
+import 'package:niman/src/todo/task_link.dart' show TaskFile;
 import 'package:niman/src/todo/todo_source.dart';
 import 'package:niman/src/todo/todo_store.dart';
 
@@ -130,6 +132,21 @@ final class FakeTodoSource implements TodoSource {
     }
     _version++;
     _done.removeAt(lineIndex);
+    return _snapshot();
+  }
+
+  @override
+  Future<TodoSnapshot> replaceLines(List<TaskLineEdit> edits) async {
+    final changed =
+        applyLineEdits(_todo, [
+          for (final edit in edits)
+            if (edit.file == TaskFile.todo) edit,
+        ]) +
+        applyLineEdits(_done, [
+          for (final edit in edits)
+            if (edit.file == TaskFile.done) edit,
+        ]);
+    if (changed > 0) _version++;
     return _snapshot();
   }
 
