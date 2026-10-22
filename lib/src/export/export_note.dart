@@ -57,7 +57,7 @@ ExportPayload exportMarkdown({
 /// `text` is the note as it stands — the caller saves the editor first —
 /// `title` is what its page is called (`displayNameOf`), `path` its
 /// library-relative path (its name becomes the file's), and `root` the
-/// library's absolute root.
+/// library's absolute root. `kanban` says the Kanban feature is on (#1170).
 Future<ExportPayload> exportNote({
   required String text,
   required String title,
@@ -66,6 +66,7 @@ Future<ExportPayload> exportNote({
   required String language,
   required ExportFileFormat format,
   LinkSource? linkSource,
+  bool kanban = false,
 }) async {
   switch (format) {
     case ExportFileFormat.markdown:
@@ -80,6 +81,7 @@ Future<ExportPayload> exportNote({
         notePath: p.join(root, path),
         root: root,
         linkSource: linkSource,
+        kanban: kanban,
       );
       final page = await ExportSources.page(source, language: language);
       return (

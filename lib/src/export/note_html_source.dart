@@ -12,6 +12,7 @@ final class NoteHtmlSource {
     this.images = const <String, String>{},
     this.links = const <String, String>{},
     this.anchors = const <String, String>{},
+    this.kanban = false,
   });
 
   /// The note, as written.
@@ -37,4 +38,9 @@ final class NoteHtmlSource {
   /// the target's headings tell. An empty id is a heading the target lacks.
   /// A fragment that is not here is read as a heading path.
   final Map<String, String> anchors;
+
+  /// Whether the Kanban feature is on (#1170): a `type: kanban` note is then
+  /// drawn as a board. Off, it is the sections and tasks it is in any other
+  /// editor.
+  final bool kanban;
 }

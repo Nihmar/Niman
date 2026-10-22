@@ -98,8 +98,9 @@ abstract final class ExportTreeBook {
   static Future<({int formulas, int sources})> addChapter(
     EpubBook book,
     ExportTreeWalk tree,
-    ExportTreeEntry entry,
-  ) async {
+    ExportTreeEntry entry, {
+    bool kanban = false,
+  }) async {
     final rel = entry.rel;
     final noteDir = p.dirname(rel);
     final href = 'OEBPS/text/${tree.names[rel]}.xhtml';
@@ -122,6 +123,7 @@ abstract final class ExportTreeBook {
       // A book's chapters link to each other, as the HTML zip's pages do.
       links: ExportTreePages.linkUrls(text, noteDir, tree, '.xhtml'),
       anchors: ExportTreePages.linkAnchors(text, noteDir, tree),
+      kanban: kanban,
     );
     final html = NoteHtml(source);
     final body = html.body();
@@ -131,6 +133,7 @@ abstract final class ExportTreeBook {
       body: body,
       fontFaces: html.fontFaces,
       hasSvg: html.usesSvg,
+      hasBoard: html.boardSheet != null,
     );
     return (
       formulas: _count(body, '<svg'),

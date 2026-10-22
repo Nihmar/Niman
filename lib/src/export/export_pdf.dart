@@ -59,7 +59,8 @@ typedef PdfProgressListener = void Function(PdfExportProgress progress);
 /// [PdfExportCancelled] rather than a file.
 ///
 /// [slides], a slides note's slides as Markdown (#534), prints them one
-/// 16:9 sheet each instead of the note on A4.
+/// 16:9 sheet each instead of the note on A4. [kanban] says the Kanban
+/// feature is on (#1170): a board is then drawn as one.
 Future<PdfExport> exportNotePdf({
   required String text,
   required String title,
@@ -74,6 +75,7 @@ Future<PdfExport> exportNotePdf({
   PdfProgressListener? onProgress,
   bool Function()? isCancelled,
   List<String>? slides,
+  bool kanban = false,
 }) async {
   final chosen = printer ?? ProcessPdfPrinter();
   // Nothing to print with: the note is drawn, and its page — the reads,
@@ -98,6 +100,7 @@ Future<PdfExport> exportNotePdf({
     notePath: p.join(root, path),
     root: root,
     linkSource: linkSource,
+    kanban: kanban,
   );
   final page = slides == null
       ? await ExportSources.page(source, language: language)

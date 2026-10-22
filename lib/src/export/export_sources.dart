@@ -32,6 +32,7 @@ abstract final class ExportSources {
     required String notePath,
     required String root,
     LinkSource? linkSource,
+    bool kanban = false,
   }) async => NoteHtmlSource(
     text: text,
     title: title,
@@ -41,6 +42,7 @@ abstract final class ExportSources {
       root: root,
       linkSource: linkSource,
     ),
+    kanban: kanban,
   );
 
   /// The pictures [text] shows, resolved and read: `data:` URIs by the
@@ -138,6 +140,7 @@ abstract final class ExportSources {
     required String notePath,
     required String root,
     LinkSource? linkSource,
+    bool kanban = false,
   }) async => NoteHtmlSource(
     text: text,
     title: title,
@@ -147,6 +150,7 @@ abstract final class ExportSources {
       root: root,
       linkSource: linkSource,
     ),
+    kanban: kanban,
   );
 
   /// The pictures [text] shows, resolved, by the target as written: `file:`
@@ -174,13 +178,18 @@ abstract final class ExportSources {
   /// isolate like [page]: the parse, the highlighting and the formulas
   /// are the same work whichever file they end in. The fonts go back too —
   /// a book declares them once, not once per chapter — and whether the
-  /// chapter drew SVG, which the package must declare (E6).
-  static Future<({String body, String? fontFaces, bool hasSvg})> xhtml(
-    NoteHtmlSource source,
-  ) => Isolate.run(() {
+  /// chapter drew SVG, which the package must declare (E6), and whether it
+  /// is a kanban board, whose style the book adds (#1170).
+  static Future<({String body, String? fontFaces, bool hasSvg, bool hasBoard})>
+  xhtml(NoteHtmlSource source) => Isolate.run(() {
     final html = NoteHtml(source);
     final body = html.body();
-    return (body: body, fontFaces: html.fontFaces, hasSvg: html.usesSvg);
+    return (
+      body: body,
+      fontFaces: html.fontFaces,
+      hasSvg: html.usesSvg,
+      hasBoard: html.boardSheet != null,
+    );
   });
 
   /// The whole page for [source], built off the UI isolate (#24): the
@@ -196,6 +205,7 @@ abstract final class ExportSources {
       body: html.body(),
       fontFaces: html.fontFaces,
       language: language,
+      board: html.boardSheet,
     );
   });
 

@@ -130,7 +130,8 @@ abstract final class ExportTreePages {
   ///
   /// [linkExtension] is what a note link points at — the page the zip
   /// holds, `.html` or `.pdf` — and [embedPictures] is the printed page's
-  /// own picture form, a `file:` URL the engine fetches.
+  /// own picture form, a `file:` URL the engine fetches. [kanban] says the
+  /// Kanban feature is on (#1170): a board is then drawn as one.
   static String page(
     String text,
     String rel,
@@ -138,6 +139,7 @@ abstract final class ExportTreePages {
     String language,
     String linkExtension, {
     bool embedPictures = false,
+    bool kanban = false,
   }) {
     final noteDir = p.dirname(rel);
     final title = pageTitle(text, rel);
@@ -149,6 +151,7 @@ abstract final class ExportTreePages {
           : imageUrls(text, noteDir, tree),
       links: linkUrls(text, noteDir, tree, linkExtension),
       anchors: linkAnchors(text, noteDir, tree),
+      kanban: kanban,
     );
     final html = NoteHtml(source);
     return htmlPage(
@@ -156,6 +159,7 @@ abstract final class ExportTreePages {
       body: html.body(),
       fontFaces: html.fontFaces,
       language: language,
+      board: html.boardSheet,
     );
   }
 
