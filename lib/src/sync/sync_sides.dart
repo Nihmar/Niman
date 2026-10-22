@@ -286,6 +286,16 @@ final class SyncSides {
     }
     final listed = await c.client.stat(path);
     if (listed == null) throw notListed;
+    // The listing comes after the PUT: another device's write landing in
+    // between would be recorded as agreed, and the next edit here would go
+    // over it unasked. A PUT that named its ETag says which version is this
+    // device's; a listing of another one is left for the next run, which
+    // sees both sides changed (#1162).
+    final put = uploaded.etag;
+    final now = listed.etag;
+    if (put != null && now != null && !sameEtag(put, now)) {
+      throw changed ?? const _ChangedDuringSync();
+    }
     await store.putItems([
       await row(c, path, sha: sent ?? sha, local: local, remote: listed),
     ]);

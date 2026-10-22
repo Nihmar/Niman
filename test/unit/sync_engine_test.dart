@@ -1006,6 +1006,39 @@ void main() {
       server = await FakeWebDavServer.start(); // for tearDown
     });
 
+    // #1162: the row an upload records came from the listing after the
+    // PUT, so another device's write landing between the two was recorded
+    // as agreed — and this device's next edit went over it unasked.
+    test(
+      'a write landing between the PUT and its listing stays a conflict',
+      () async {
+        String note(String line) => '# Plan\n$line\nship it\n';
+        a.write('note.md', note('test it'));
+        expect((await a.sync()).clean, isTrue);
+
+        a.write('note.md', note('test it here'));
+        var put = false;
+        var rewritten = false;
+        server.beforeAnswer = (request) {
+          if (!request.path.endsWith('/note.md')) return;
+          if (request.method == 'PUT') put = true;
+          if (request.method == 'PROPFIND' && put && !rewritten) {
+            rewritten = true;
+            server.putFile('note.md', utf8.encode(note('test it on the NAS')));
+          }
+        };
+        final report = await a.sync();
+        server.beforeAnswer = null;
+        expect(rewritten, isTrue);
+        expect(report.skipped, ['note.md'], reason: report.summary());
+
+        a.write('note.md', note('test it on the phone'));
+        final next = await a.sync();
+        expect(next.conflicts.single.path, 'note.md', reason: next.summary());
+        expect(remoteText('note.md'), note('test it on the NAS'));
+      },
+    );
+
     test('a failing file is reported and the others still sync', () async {
       a.write('a.md', 'a');
       await a.sync();

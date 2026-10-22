@@ -165,13 +165,15 @@ jobs:
       # A run that never reaches the app sat silent for two hours once,
       # after the Xcode build: the steps have a ceiling, the tool's verbose
       # output goes to a file, and a failure prints its tail and the
-      # simulator's own log.
+      # simulator's own log. The tool can lose the app at launch and wait
+      # for it forever; the script gives that wait a limit and launches
+      # again (#1162).
       - name: App boot (iPhone simulator)
         timeout-minutes: 25
-        run: flutter test integration_test/app_boot_test.dart -d "$SIMULATOR" --flavor beta -v > "$RUNNER_TEMP/app_boot.log" 2>&1
+        run: ./scripts/ios-sim-test.sh integration_test/app_boot_test.dart "$SIMULATOR" "$RUNNER_TEMP/app_boot.log"
       - name: WebDAV sync end to end (iPhone simulator)
         timeout-minutes: 25
-        run: flutter test integration_test/sync_e2e_test.dart -d "$SIMULATOR" --flavor beta -v > "$RUNNER_TEMP/sync_e2e.log" 2>&1
+        run: ./scripts/ios-sim-test.sh integration_test/sync_e2e_test.dart "$SIMULATOR" "$RUNNER_TEMP/sync_e2e.log"
       - name: What the simulator runs said
         if: failure()
         run: |
