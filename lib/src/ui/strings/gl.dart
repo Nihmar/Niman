@@ -4349,4 +4349,12 @@ final class GalicianStrings extends Strings {
   @override
   String kanbanMovedTo(String column, int position, int total) =>
       'Movida a $column, posición $position de $total';
+  @override
+  String get kanbanMoveTo => 'Mover a…';
+  @override
+  String get kanbanLongPressHint => 'Mantén premida unha tarxeta para movela';
+  @override
+  String get kanbanEmptyColumn => 'Non hai tarxetas nesta columna';
+  @override
+  String get kanbanEditCard => 'Editar a tarxeta';
 }

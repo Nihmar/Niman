@@ -4371,4 +4371,12 @@ final class PolishStrings extends Strings {
   @override
   String kanbanMovedTo(String column, int position, int total) =>
       'Przeniesiono do $column, pozycja $position z $total';
+  @override
+  String get kanbanMoveTo => 'Przenieś do…';
+  @override
+  String get kanbanLongPressHint => 'Przytrzymaj kartę, aby ją przenieść';
+  @override
+  String get kanbanEmptyColumn => 'Brak kart w tej kolumnie';
+  @override
+  String get kanbanEditCard => 'Edytuj kartę';
 }

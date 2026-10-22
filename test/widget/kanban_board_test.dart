@@ -5,99 +5,13 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:niman/src/core/settings/library_settings.dart' show LinkType;
-import 'package:niman/src/frontmatter/note_kind.dart';
 import 'package:niman/src/kanban/card_edits.dart';
 import 'package:niman/src/kanban/column_edits.dart';
 import 'package:niman/src/ui/kinds/kanban/kanban_card_tile.dart';
-import 'package:niman/src/ui/kinds/kanban/kanban_kind.dart';
 import 'package:niman/src/ui/strings.dart';
 
+import '../fakes/kanban_harness.dart';
 import '../fakes/kanban_samples.dart';
-
-/// A note window over a text the board edits; it rebuilds the board as the
-/// shell does.
-final class _Host implements NoteKindHost {
-  new(this.value);
-
-  String value;
-  final List<String> edits = [];
-  VoidCallback? changed;
-
-  @override
-  String get text => value;
-
-  @override
-  void applyEdit(String newText) {
-    edits.add(newText);
-    value = newText;
-    changed?.call();
-  }
-
-  @override
-  String? get libraryRoot => null;
-
-  @override
-  String get notePath => 'board.md';
-
-  @override
-  String get attachmentsFolder => '';
-
-  @override
-  LinkType get linkType => LinkType.wikilink;
-
-  @override
-  Future<String?> resolveEmbed(String target) async => null;
-
-  @override
-  void openLink(BuildContext context, String href) {}
-
-  @override
-  void openWikiLink(BuildContext context, String inner) {}
-
-  @override
-  VoidCallback? get showMarkdown => null;
-}
-
-final class _Harness extends StatefulWidget {
-  const new(this.host);
-
-  final _Host host;
-
-  @override
-  State<_Harness> createState() => _HarnessState();
-}
-
-final class _HarnessState extends State<_Harness> {
-  @override
-  void initState() {
-    super.initState();
-    widget.host.changed = () => setState(() {});
-  }
-
-  @override
-  Widget build(BuildContext context) => MaterialApp(
-    home: Scaffold(
-      body: Builder(
-        builder: (context) => KanbanKindGui().buildBody(context, widget.host),
-      ),
-    ),
-  );
-}
-
-Future<_Host> _show(
-  WidgetTester tester,
-  String text, {
-  Size size = const Size(1400, 900),
-}) async {
-  tester.view.physicalSize = size;
-  tester.view.devicePixelRatio = 1;
-  addTearDown(tester.view.reset);
-  final host = _Host(text);
-  await tester.pumpWidget(_Harness(host));
-  await tester.pumpAndSettle();
-  return host;
-}
 
 Finder _title(String text) => find.textContaining(text, findRichText: true);
 
@@ -144,7 +58,7 @@ void desktopTest(String name, Future<void> Function(WidgetTester) body) =>
 void main() {
   group('the board', () {
     testWidgets('draws the columns and the cards of the note', (tester) async {
-      await _show(tester, issueBoard);
+      await showKanbanBoard(tester, issueBoard);
       expect(find.byKey(const Key('kanban-board')), findsOneWidget);
       expect(
         [
@@ -180,17 +94,17 @@ void main() {
       expect(find.byKey(const Key('kanban-card-box')), findsNWidgets(4));
     });
 
-    testWidgets('a body narrower than a tablet keeps the placeholder', (
+    testWidgets('a body narrower than a tablet gets the phone board', (
       tester,
     ) async {
-      await _show(tester, issueBoard, size: const Size(500, 800));
-      expect(find.byKey(const Key('kanban-placeholder')), findsOneWidget);
+      await showKanbanBoard(tester, issueBoard, size: const Size(500, 800));
+      expect(find.byKey(const Key('kanban-tabs')), findsOneWidget);
       expect(find.byKey(const Key('kanban-board')), findsNothing);
     });
 
     testWidgets('a card has a semantic label with its place', (tester) async {
       final handle = tester.ensureSemantics();
-      await _show(tester, issueBoard);
+      await showKanbanBoard(tester, issueBoard);
       expect(
         find.bySemanticsLabel(
           RegExp(AppStrings.kanbanCardLabel(2, 2, 'To do')),
@@ -205,7 +119,7 @@ void main() {
     testWidgets('ticking a box is toggleCard, and the card stays', (
       tester,
     ) async {
-      final host = await _show(tester, issueBoard);
+      final host = await showKanbanBoard(tester, issueBoard);
       await tester.tap(find.byKey(const Key('kanban-card-box')).first);
       await tester.pumpAndSettle();
       expect(host.edits, [toggleCard(issueBoard, 0, 0)]);
@@ -220,7 +134,7 @@ void main() {
     testWidgets('only the box character changes in an Obsidian board', (
       tester,
     ) async {
-      final host = await _show(tester, obsidianBoard);
+      final host = await showKanbanBoard(tester, obsidianBoard);
       await tester.tap(find.byKey(const Key('kanban-card-box')).first);
       await tester.pumpAndSettle();
       expect(host.value, toggleCard(obsidianBoard, 0, 0));
@@ -235,7 +149,7 @@ void main() {
     testWidgets('adding a card writes it at the end of its column', (
       tester,
     ) async {
-      final host = await _show(tester, issueBoard);
+      final host = await showKanbanBoard(tester, issueBoard);
       await tester.tap(find.byKey(const Key('kanban-add')).first);
       await tester.pumpAndSettle();
       await tester.enterText(
@@ -251,7 +165,7 @@ void main() {
     });
 
     testWidgets('adding a column writes a heading at the end', (tester) async {
-      final host = await _show(tester, issueBoard);
+      final host = await showKanbanBoard(tester, issueBoard);
       await tester.tap(find.byKey(const Key('kanban-add')).last);
       await tester.pumpAndSettle();
       await tester.enterText(
@@ -265,7 +179,7 @@ void main() {
     });
 
     testWidgets('a tap on the picked card edits its title', (tester) async {
-      final host = await _show(tester, issueBoard);
+      final host = await showKanbanBoard(tester, issueBoard);
       await tester.tap(_title('Write the brief'));
       await tester.pump();
       expect(find.byKey(const Key('kanban-card-field')), findsNothing);
@@ -285,7 +199,7 @@ void main() {
     testWidgets('Enter edits the focused card, Esc leaves it as it was', (
       tester,
     ) async {
-      final host = await _show(tester, issueBoard);
+      final host = await showKanbanBoard(tester, issueBoard);
       await tester.tap(_title('Write the brief'));
       await tester.pump();
       await tester.sendKeyEvent(LogicalKeyboardKey.enter);
@@ -302,7 +216,7 @@ void main() {
     });
 
     testWidgets('Delete removes the focused card', (tester) async {
-      final host = await _show(tester, issueBoard);
+      final host = await showKanbanBoard(tester, issueBoard);
       await tester.tap(_title('Write the brief'));
       await tester.pump();
       await tester.sendKeyEvent(LogicalKeyboardKey.delete);
@@ -314,7 +228,7 @@ void main() {
     testWidgets('a column is renamed and deleted from its menu', (
       tester,
     ) async {
-      final host = await _show(tester, issueBoard);
+      final host = await showKanbanBoard(tester, issueBoard);
       await tester.tap(find.byKey(const Key('kanban-column-menu')).first);
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('kanban-column-rename')));
@@ -339,7 +253,7 @@ void main() {
     testWidgets('Alt+Right moves it a column on, and the focus follows', (
       tester,
     ) async {
-      final host = await _show(tester, issueBoard);
+      final host = await showKanbanBoard(tester, issueBoard);
       await tester.tap(_title('Write the brief'));
       await tester.pump();
       await _alt(tester, LogicalKeyboardKey.arrowRight);
@@ -361,7 +275,7 @@ void main() {
 
     testWidgets('Alt+Down moves it within its column, Alt+Left at the edge '
         'does nothing', (tester) async {
-      final host = await _show(tester, issueBoard);
+      final host = await showKanbanBoard(tester, issueBoard);
       await tester.tap(_title('Write the brief'));
       await tester.pump();
       await _alt(tester, LogicalKeyboardKey.arrowLeft);
@@ -381,7 +295,7 @@ void main() {
     testWidgets('the card menu moves it, and disables what has no place', (
       tester,
     ) async {
-      final host = await _show(tester, issueBoard);
+      final host = await showKanbanBoard(tester, issueBoard);
       await tester.tap(
         find.descendant(
           of: _tile('Write the brief'),
@@ -417,7 +331,7 @@ void main() {
 
   group('dragging a card', () {
     desktopTest('to the end of another column', (tester) async {
-      final host = await _show(tester, issueBoard);
+      final host = await showKanbanBoard(tester, issueBoard);
       final from = tester.getCenter(_tile('Write the brief'));
       final target = tester.getRect(_tile('Draft the slides'));
       await _drag(tester, from, Offset(target.center.dx, target.bottom - 4));
@@ -433,7 +347,7 @@ void main() {
     });
 
     desktopTest('to the top of another column', (tester) async {
-      final host = await _show(tester, issueBoard);
+      final host = await showKanbanBoard(tester, issueBoard);
       final from = tester.getCenter(_tile('Write the brief'));
       final target = tester.getRect(_tile('Pick the date'));
       await _drag(tester, from, Offset(target.center.dx, target.top + 4));
@@ -451,7 +365,7 @@ void main() {
     desktopTest('down its own column, to the place after the next card', (
       tester,
     ) async {
-      final host = await _show(tester, issueBoard);
+      final host = await showKanbanBoard(tester, issueBoard);
       final from = tester.getCenter(_tile('Write the brief'));
       final next = tester.getRect(_tile('Book the venue'));
       await _drag(tester, from, Offset(next.center.dx, next.bottom - 4));
@@ -467,14 +381,14 @@ void main() {
     });
 
     desktopTest('dropped on its own place, it changes nothing', (tester) async {
-      final host = await _show(tester, issueBoard);
+      final host = await showKanbanBoard(tester, issueBoard);
       final from = tester.getCenter(_tile('Write the brief'));
       await _drag(tester, from, from + const Offset(0, 30));
       expect(host.edits, isEmpty);
     });
 
     desktopTest('a drop marker shows where it would land', (tester) async {
-      await _show(tester, issueBoard);
+      await showKanbanBoard(tester, issueBoard);
       final from = tester.getCenter(_tile('Write the brief'));
       final target = tester.getRect(_tile('Draft the slides'));
       final gesture = await tester.startGesture(
@@ -496,7 +410,7 @@ void main() {
     desktopTest('held at the edge, the board scrolls under the card', (
       tester,
     ) async {
-      await _show(tester, issueBoard, size: const Size(800, 600));
+      await showKanbanBoard(tester, issueBoard, size: const Size(800, 600));
       final scrollable = find
           .descendant(
             of: find.byKey(const Key('kanban-board')),
@@ -527,7 +441,7 @@ void main() {
     });
 
     testWidgets('a touch picks a card up with a long press', (tester) async {
-      final host = await _show(tester, issueBoard);
+      final host = await showKanbanBoard(tester, issueBoard);
       final from = tester.getCenter(_tile('Write the brief'));
       final target = tester.getRect(_tile('Draft the slides'));
       final to = Offset(target.center.dx, target.bottom - 4);

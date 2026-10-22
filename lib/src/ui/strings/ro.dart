@@ -4383,4 +4383,12 @@ final class RomanianStrings extends Strings {
   @override
   String kanbanMovedTo(String column, int position, int total) =>
       'Mutat în $column, poziția $position din $total';
+  @override
+  String get kanbanMoveTo => 'Mută în…';
+  @override
+  String get kanbanLongPressHint => 'Ține apăsat pe un card pentru a-l muta';
+  @override
+  String get kanbanEmptyColumn => 'Niciun card în această coloană';
+  @override
+  String get kanbanEditCard => 'Editează cardul';
 }

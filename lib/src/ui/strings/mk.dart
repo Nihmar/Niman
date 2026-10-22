@@ -4346,4 +4346,13 @@ final class MacedonianStrings extends Strings {
   @override
   String kanbanMovedTo(String column, int position, int total) =>
       'Преместено во $column, позиција $position од $total';
+  @override
+  String get kanbanMoveTo => 'Премести во…';
+  @override
+  String get kanbanLongPressHint =>
+      'Задржете притисната картичка за да ја преместите';
+  @override
+  String get kanbanEmptyColumn => 'Нема картички во оваа колона';
+  @override
+  String get kanbanEditCard => 'Уреди картичка';
 }

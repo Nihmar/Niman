@@ -2186,4 +2186,8 @@ final class AppStrings {
       _s.kanbanCardLabel(position, total, column);
   static String kanbanMovedTo(String column, int position, int total) =>
       _s.kanbanMovedTo(column, position, total);
+  static String get kanbanMoveTo => _s.kanbanMoveTo;
+  static String get kanbanLongPressHint => _s.kanbanLongPressHint;
+  static String get kanbanEmptyColumn => _s.kanbanEmptyColumn;
+  static String get kanbanEditCard => _s.kanbanEditCard;
 }

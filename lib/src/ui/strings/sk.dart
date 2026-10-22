@@ -4319,4 +4319,12 @@ final class SlovakStrings extends Strings {
   @override
   String kanbanMovedTo(String column, int position, int total) =>
       'Presunuté do $column, pozícia $position z $total';
+  @override
+  String get kanbanMoveTo => 'Presunúť do…';
+  @override
+  String get kanbanLongPressHint => 'Podržaním karty ju presuniete';
+  @override
+  String get kanbanEmptyColumn => 'V tomto stĺpci nie sú žiadne karty';
+  @override
+  String get kanbanEditCard => 'Upraviť kartu';
 }

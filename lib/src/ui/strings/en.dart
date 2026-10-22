@@ -4261,4 +4261,12 @@ final class EnglishStrings extends Strings {
   @override
   String kanbanMovedTo(String column, int position, int total) =>
       'Moved to $column, position $position of $total';
+  @override
+  String get kanbanMoveTo => 'Move to…';
+  @override
+  String get kanbanLongPressHint => 'Long-press a card to move it';
+  @override
+  String get kanbanEmptyColumn => 'No cards in this column';
+  @override
+  String get kanbanEditCard => 'Edit card';
 }

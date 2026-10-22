@@ -3962,4 +3962,12 @@ final class JapaneseStrings extends Strings {
   @override
   String kanbanMovedTo(String column, int position, int total) =>
       '「$column」へ移動しました、$position/$total 番目';
+  @override
+  String get kanbanMoveTo => '移動先…';
+  @override
+  String get kanbanLongPressHint => 'カードを長押しすると移動できます';
+  @override
+  String get kanbanEmptyColumn => 'この列にカードはありません';
+  @override
+  String get kanbanEditCard => 'カードを編集';
 }

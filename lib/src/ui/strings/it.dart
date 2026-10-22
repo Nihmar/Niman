@@ -4350,4 +4350,12 @@ final class ItalianStrings extends Strings {
   @override
   String kanbanMovedTo(String column, int position, int total) =>
       'Spostata in $column, posizione $position di $total';
+  @override
+  String get kanbanMoveTo => 'Sposta in…';
+  @override
+  String get kanbanLongPressHint => 'Tieni premuta una scheda per spostarla';
+  @override
+  String get kanbanEmptyColumn => 'Nessuna scheda in questa colonna';
+  @override
+  String get kanbanEditCard => 'Modifica scheda';
 }

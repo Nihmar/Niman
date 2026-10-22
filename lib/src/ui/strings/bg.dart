@@ -4340,4 +4340,13 @@ final class BulgarianStrings extends Strings {
   @override
   String kanbanMovedTo(String column, int position, int total) =>
       'Преместена в $column, позиция $position от $total';
+  @override
+  String get kanbanMoveTo => 'Преместване в…';
+  @override
+  String get kanbanLongPressHint =>
+      'Натиснете и задръжте карта, за да я преместите';
+  @override
+  String get kanbanEmptyColumn => 'Няма карти в тази колона';
+  @override
+  String get kanbanEditCard => 'Редактиране на карта';
 }

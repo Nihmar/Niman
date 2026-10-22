@@ -4352,4 +4352,12 @@ final class UkrainianStrings extends Strings {
   @override
   String kanbanMovedTo(String column, int position, int total) =>
       'Переміщено до $column, позиція $position з $total';
+  @override
+  String get kanbanMoveTo => 'Перемістити до…';
+  @override
+  String get kanbanLongPressHint => 'Утримуйте картку, щоб перемістити її';
+  @override
+  String get kanbanEmptyColumn => 'У цьому стовпці немає карток';
+  @override
+  String get kanbanEditCard => 'Редагувати картку';
 }

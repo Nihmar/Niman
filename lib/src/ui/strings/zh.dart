@@ -3865,4 +3865,12 @@ final class ChineseStrings extends Strings {
   @override
   String kanbanMovedTo(String column, int position, int total) =>
       '已移至「$column」，第 $position 位，共 $total 位';
+  @override
+  String get kanbanMoveTo => '移动到…';
+  @override
+  String get kanbanLongPressHint => '长按卡片可移动';
+  @override
+  String get kanbanEmptyColumn => '此列中没有卡片';
+  @override
+  String get kanbanEditCard => '编辑卡片';
 }

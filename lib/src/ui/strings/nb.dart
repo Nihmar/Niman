@@ -4299,4 +4299,12 @@ final class NorwegianStrings extends Strings {
   @override
   String kanbanMovedTo(String column, int position, int total) =>
       'Flyttet til $column, plass $position av $total';
+  @override
+  String get kanbanMoveTo => 'Flytt til…';
+  @override
+  String get kanbanLongPressHint => 'Trykk lenge på et kort for å flytte det';
+  @override
+  String get kanbanEmptyColumn => 'Ingen kort i denne kolonnen';
+  @override
+  String get kanbanEditCard => 'Rediger kort';
 }

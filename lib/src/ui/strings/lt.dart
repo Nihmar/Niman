@@ -4352,4 +4352,13 @@ final class LithuanianStrings extends Strings {
   @override
   String kanbanMovedTo(String column, int position, int total) =>
       'Perkelta į $column, vieta $position iš $total';
+  @override
+  String get kanbanMoveTo => 'Perkelti į…';
+  @override
+  String get kanbanLongPressHint =>
+      'Palaikykite nuspaudę kortelę, kad ją perkeltumėte';
+  @override
+  String get kanbanEmptyColumn => 'Šiame stulpelyje kortelių nėra';
+  @override
+  String get kanbanEditCard => 'Redaguoti kortelę';
 }

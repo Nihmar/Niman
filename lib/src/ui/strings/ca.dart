@@ -4391,4 +4391,12 @@ final class CatalanStrings extends Strings {
   @override
   String kanbanMovedTo(String column, int position, int total) =>
       'Moguda a $column, posició $position de $total';
+  @override
+  String get kanbanMoveTo => 'Mou a…';
+  @override
+  String get kanbanLongPressHint => 'Mantén premuda una targeta per moure-la';
+  @override
+  String get kanbanEmptyColumn => 'No hi ha targetes en aquesta columna';
+  @override
+  String get kanbanEditCard => 'Edita la targeta';
 }

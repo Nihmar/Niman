@@ -4363,4 +4363,13 @@ final class DutchStrings extends Strings {
   @override
   String kanbanMovedTo(String column, int position, int total) =>
       'Verplaatst naar $column, positie $position van $total';
+  @override
+  String get kanbanMoveTo => 'Verplaatsen naar…';
+  @override
+  String get kanbanLongPressHint =>
+      'Houd een kaart lang ingedrukt om hem te verplaatsen';
+  @override
+  String get kanbanEmptyColumn => 'Geen kaarten in deze kolom';
+  @override
+  String get kanbanEditCard => 'Kaart bewerken';
 }

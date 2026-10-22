@@ -2291,4 +2291,9 @@ abstract base class Strings {
   String get kanbanMoveDown;
   String kanbanCardLabel(int position, int total, String column);
   String kanbanMovedTo(String column, int position, int total);
+  // The kanban board on a phone (#1168).
+  String get kanbanMoveTo;
+  String get kanbanLongPressHint;
+  String get kanbanEmptyColumn;
+  String get kanbanEditCard;
 }

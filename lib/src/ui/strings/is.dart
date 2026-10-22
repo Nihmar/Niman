@@ -4316,4 +4316,12 @@ final class IcelandicStrings extends Strings {
   @override
   String kanbanMovedTo(String column, int position, int total) =>
       'Fært í $column, staða $position af $total';
+  @override
+  String get kanbanMoveTo => 'Færa í…';
+  @override
+  String get kanbanLongPressHint => 'Haltu spjaldi inni til að færa það';
+  @override
+  String get kanbanEmptyColumn => 'Engin spjöld í þessum dálki';
+  @override
+  String get kanbanEditCard => 'Breyta spjaldi';
 }

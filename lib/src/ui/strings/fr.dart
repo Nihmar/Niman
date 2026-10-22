@@ -4442,4 +4442,13 @@ final class FrenchStrings extends Strings {
   @override
   String kanbanMovedTo(String column, int position, int total) =>
       'Déplacée vers $column, position $position sur $total';
+  @override
+  String get kanbanMoveTo => 'Déplacer vers…';
+  @override
+  String get kanbanLongPressHint =>
+      'Appuyez longuement sur une carte pour la déplacer';
+  @override
+  String get kanbanEmptyColumn => 'Aucune carte dans cette colonne';
+  @override
+  String get kanbanEditCard => 'Modifier la carte';
 }

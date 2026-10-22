@@ -4306,4 +4306,12 @@ final class LatvianStrings extends Strings {
   @override
   String kanbanMovedTo(String column, int position, int total) =>
       'Pārvietota uz $column, pozīcija $position no $total';
+  @override
+  String get kanbanMoveTo => 'Pārvietot uz…';
+  @override
+  String get kanbanLongPressHint => 'Turiet nospiestu karti, lai to pārvietotu';
+  @override
+  String get kanbanEmptyColumn => 'Šajā kolonnā nav karšu';
+  @override
+  String get kanbanEditCard => 'Rediģēt karti';
 }

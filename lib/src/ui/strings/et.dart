@@ -4261,4 +4261,12 @@ final class EstonianStrings extends Strings {
   @override
   String kanbanMovedTo(String column, int position, int total) =>
       'Liigutatud veergu $column, koht $position/$total';
+  @override
+  String get kanbanMoveTo => 'Liiguta veergu…';
+  @override
+  String get kanbanLongPressHint => 'Kaardi liigutamiseks vajuta seda pikalt';
+  @override
+  String get kanbanEmptyColumn => 'Selles veerus pole kaarte';
+  @override
+  String get kanbanEditCard => 'Muuda kaarti';
 }

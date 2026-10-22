@@ -4449,4 +4449,13 @@ final class GreekStrings extends Strings {
   @override
   String kanbanMovedTo(String column, int position, int total) =>
       'Μετακινήθηκε στη στήλη $column, θέση $position από $total';
+  @override
+  String get kanbanMoveTo => 'Μετακίνηση σε…';
+  @override
+  String get kanbanLongPressHint =>
+      'Πατήστε παρατεταμένα μια κάρτα για να τη μετακινήσετε';
+  @override
+  String get kanbanEmptyColumn => 'Δεν υπάρχουν κάρτες σε αυτή τη στήλη';
+  @override
+  String get kanbanEditCard => 'Επεξεργασία κάρτας';
 }

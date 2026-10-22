@@ -4371,4 +4371,12 @@ final class BasqueStrings extends Strings {
   @override
   String kanbanMovedTo(String column, int position, int total) =>
       '$column zutabera eraman da, $position. posizioa $total artean';
+  @override
+  String get kanbanMoveTo => 'Eraman hona…';
+  @override
+  String get kanbanLongPressHint => 'Sakatu luze txartel bat mugitzeko';
+  @override
+  String get kanbanEmptyColumn => 'Zutabe honetan ez dago txartelik';
+  @override
+  String get kanbanEditCard => 'Editatu txartela';
 }

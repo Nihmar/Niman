@@ -4346,4 +4346,12 @@ final class AlbanianStrings extends Strings {
   @override
   String kanbanMovedTo(String column, int position, int total) =>
       'U zhvendos te $column, pozicioni $position nga $total';
+  @override
+  String get kanbanMoveTo => 'Zhvendos te…';
+  @override
+  String get kanbanLongPressHint => 'Mbaj shtypur një kartë për ta zhvendosur';
+  @override
+  String get kanbanEmptyColumn => 'Nuk ka karta në këtë kolonë';
+  @override
+  String get kanbanEditCard => 'Redakto kartën';
 }

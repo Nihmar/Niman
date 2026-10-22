@@ -15,8 +15,8 @@ String kanbanNoteContent() =>
 /// The `kanban` note kind (#1154): a board, one column per `##` heading and
 /// one card per top-level list item under it.
 ///
-/// The body is the board of columns on a wide window (#1167); the phone's
-/// board (#1168) is still the read-only placeholder.
+/// The body is the board of columns on a wide window (#1167) and one column
+/// at a time, in tabs, on a phone (#1168).
 final class KanbanKindGui implements NoteKindGUI {
   @override
   String get type => 'kanban';

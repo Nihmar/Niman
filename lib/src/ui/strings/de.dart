@@ -4408,4 +4408,13 @@ final class GermanStrings extends Strings {
   @override
   String kanbanMovedTo(String column, int position, int total) =>
       'Verschoben nach $column, Position $position von $total';
+  @override
+  String get kanbanMoveTo => 'Verschieben nach…';
+  @override
+  String get kanbanLongPressHint =>
+      'Karte lange drücken, um sie zu verschieben';
+  @override
+  String get kanbanEmptyColumn => 'Keine Karten in dieser Spalte';
+  @override
+  String get kanbanEditCard => 'Karte bearbeiten';
 }

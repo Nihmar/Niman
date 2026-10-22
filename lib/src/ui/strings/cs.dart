@@ -4305,4 +4305,12 @@ final class CzechStrings extends Strings {
   @override
   String kanbanMovedTo(String column, int position, int total) =>
       'Přesunuto do $column, pozice $position z $total';
+  @override
+  String get kanbanMoveTo => 'Přesunout do…';
+  @override
+  String get kanbanLongPressHint => 'Podržením karty ji přesunete';
+  @override
+  String get kanbanEmptyColumn => 'V tomto sloupci nejsou žádné karty';
+  @override
+  String get kanbanEditCard => 'Upravit kartu';
 }

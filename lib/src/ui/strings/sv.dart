@@ -4329,4 +4329,13 @@ final class SwedishStrings extends Strings {
   @override
   String kanbanMovedTo(String column, int position, int total) =>
       'Flyttat till $column, plats $position av $total';
+  @override
+  String get kanbanMoveTo => 'Flytta till…';
+  @override
+  String get kanbanLongPressHint =>
+      'Tryck länge på ett kort för att flytta det';
+  @override
+  String get kanbanEmptyColumn => 'Inga kort i den här kolumnen';
+  @override
+  String get kanbanEditCard => 'Redigera kort';
 }

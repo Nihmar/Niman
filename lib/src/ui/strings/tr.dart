@@ -4277,4 +4277,12 @@ final class TurkishStrings extends Strings {
   @override
   String kanbanMovedTo(String column, int position, int total) =>
       '$column sütununa taşındı, sıra $position / $total';
+  @override
+  String get kanbanMoveTo => 'Şuraya taşı…';
+  @override
+  String get kanbanLongPressHint => 'Bir kartı taşımak için uzun basın';
+  @override
+  String get kanbanEmptyColumn => 'Bu sütunda kart yok';
+  @override
+  String get kanbanEditCard => 'Kartı düzenle';
 }

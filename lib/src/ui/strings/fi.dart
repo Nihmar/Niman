@@ -4347,4 +4347,12 @@ final class FinnishStrings extends Strings {
   @override
   String kanbanMovedTo(String column, int position, int total) =>
       'Siirretty sarakkeeseen $column, paikka $position/$total';
+  @override
+  String get kanbanMoveTo => 'Siirrä sarakkeeseen…';
+  @override
+  String get kanbanLongPressHint => 'Siirrä kortti painamalla sitä pitkään';
+  @override
+  String get kanbanEmptyColumn => 'Tässä sarakkeessa ei ole kortteja';
+  @override
+  String get kanbanEditCard => 'Muokkaa korttia';
 }

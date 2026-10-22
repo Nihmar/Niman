@@ -7,7 +7,8 @@ import 'package:niman/src/ui/kinds/kanban/kanban_palette.dart';
 /// What a card looks like (#1167): its box, [title] (the text, or the field
 /// that edits it), the first line of its body, its chips and, in the corner,
 /// its [menu]. The one face is drawn at rest, lifted under the pointer, and
-/// while it is edited.
+/// while it is edited. The phone's board (#1168) draws it with a larger box
+/// and without the corner.
 final class KanbanCardFace extends StatelessWidget {
   /// The face of [card].
   const new({
@@ -15,6 +16,8 @@ final class KanbanCardFace extends StatelessWidget {
     required this.title,
     required this.onToggle,
     this.menu,
+    this.boxExtent = 32,
+    this.reserveMenu = true,
     super.key,
   });
 
@@ -30,6 +33,12 @@ final class KanbanCardFace extends StatelessWidget {
   /// The ⋮ menu; null where the face is a copy.
   final Widget? menu;
 
+  /// The side of the box's touch target.
+  final double boxExtent;
+
+  /// Whether the corner keeps its place when there is no [menu].
+  final bool reserveMenu;
+
   @override
   Widget build(BuildContext context) {
     final palette = KanbanPalette.of(context);
@@ -42,8 +51,8 @@ final class KanbanCardFace extends StatelessWidget {
         children: [
           if (card.hasBox)
             SizedBox(
-              width: 32,
-              height: 32,
+              width: boxExtent,
+              height: boxExtent,
               child: Checkbox(
                 key: const Key('kanban-card-box'),
                 value: card.checked,
@@ -56,7 +65,8 @@ final class KanbanCardFace extends StatelessWidget {
             const SizedBox(width: 8),
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.only(top: 6),
+              // Level with the middle of a line beside the box.
+              padding: EdgeInsets.only(top: (boxExtent - 20) / 2),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -81,7 +91,10 @@ final class KanbanCardFace extends StatelessWidget {
               ),
             ),
           ),
-          SizedBox(width: 32, height: 32, child: menu),
+          if (menu != null || reserveMenu)
+            SizedBox(width: 32, height: 32, child: menu)
+          else
+            const SizedBox(width: 8),
         ],
       ),
     );

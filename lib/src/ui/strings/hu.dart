@@ -4337,4 +4337,12 @@ final class HungarianStrings extends Strings {
   @override
   String kanbanMovedTo(String column, int position, int total) =>
       'Áthelyezve ide: $column, pozíció: $position/$total';
+  @override
+  String get kanbanMoveTo => 'Áthelyezés ide…';
+  @override
+  String get kanbanLongPressHint => 'Tartsa nyomva a kártyát az áthelyezéshez';
+  @override
+  String get kanbanEmptyColumn => 'Nincs kártya ebben az oszlopban';
+  @override
+  String get kanbanEditCard => 'Kártya szerkesztése';
 }

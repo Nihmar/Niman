@@ -4294,4 +4294,12 @@ final class DanishStrings extends Strings {
   @override
   String kanbanMovedTo(String column, int position, int total) =>
       'Flyttet til $column, plads $position af $total';
+  @override
+  String get kanbanMoveTo => 'Flyt til…';
+  @override
+  String get kanbanLongPressHint => 'Tryk længe på et kort for at flytte det';
+  @override
+  String get kanbanEmptyColumn => 'Ingen kort i denne kolonne';
+  @override
+  String get kanbanEditCard => 'Rediger kort';
 }

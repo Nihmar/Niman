@@ -4337,4 +4337,12 @@ final class CroatianStrings extends Strings {
   @override
   String kanbanMovedTo(String column, int position, int total) =>
       'Premješteno u $column, mjesto $position od $total';
+  @override
+  String get kanbanMoveTo => 'Premjesti u…';
+  @override
+  String get kanbanLongPressHint => 'Dugo pritisnite karticu da je premjestite';
+  @override
+  String get kanbanEmptyColumn => 'Nema kartica u ovom stupcu';
+  @override
+  String get kanbanEditCard => 'Uredi karticu';
 }

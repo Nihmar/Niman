@@ -4261,4 +4261,12 @@ final class HindiStrings extends Strings {
   @override
   String kanbanMovedTo(String column, int position, int total) =>
       '$column में ले जाया गया, स्थान $position / $total';
+  @override
+  String get kanbanMoveTo => 'यहाँ ले जाएँ…';
+  @override
+  String get kanbanLongPressHint => 'कार्ड को ले जाने के लिए उसे देर तक दबाएँ';
+  @override
+  String get kanbanEmptyColumn => 'इस कॉलम में कोई कार्ड नहीं है';
+  @override
+  String get kanbanEditCard => 'कार्ड संपादित करें';
 }

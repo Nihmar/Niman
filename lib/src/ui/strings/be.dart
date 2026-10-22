@@ -4354,4 +4354,13 @@ final class BelarusianStrings extends Strings {
   @override
   String kanbanMovedTo(String column, int position, int total) =>
       'Перамешчана ў $column, пазіцыя $position з $total';
+  @override
+  String get kanbanMoveTo => 'Перамясціць у…';
+  @override
+  String get kanbanLongPressHint =>
+      'Націсніце і ўтрымлівайце картку, каб перамясціць яе';
+  @override
+  String get kanbanEmptyColumn => 'У гэтым слупку няма картак';
+  @override
+  String get kanbanEditCard => 'Змяніць картку';
 }
