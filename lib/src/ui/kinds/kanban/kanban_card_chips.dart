@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:niman/src/kanban/card_text.dart';
 import 'package:niman/src/kanban/kanban_card.dart';
-import 'package:niman/src/ui/kinds/kanban/kanban_card_text.dart';
 import 'package:niman/src/ui/kinds/kanban/kanban_palette.dart';
 
 /// The tags and the due date of a card, as chips (#1167).
