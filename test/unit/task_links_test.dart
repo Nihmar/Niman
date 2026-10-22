@@ -262,6 +262,26 @@ void main() {
       expect(map.index.linkCount, 2);
     });
 
+    test('settled builds an index change still waiting out the debounce '
+        '(a note made, then renamed at once)', () async {
+      final slow = TaskLinkMap(
+        tasks: tasks,
+        snapshot: () => tasks.value,
+        links: () async => links,
+        indexDebounce: const Duration(hours: 1),
+      );
+      addTearDown(slow.dispose);
+      tasks.value = _snapshot(['Ask [[Fresh]]']);
+      await slow.settled;
+      expect(slow.linksOf(tasks.value!.todo.single.task).single.isDead, isTrue);
+
+      links.notes.add('Fresh.md');
+      links.announceChange();
+      await pumpEventQueue();
+      await slow.settled;
+      expect(slow.tasksFor('Fresh.md').open, hasLength(1));
+    });
+
     test('a failed resolution leaves the last answer', () async {
       await publish(['Plan [[Ideas]]']);
       links.queryGate = (_) => throw StateError('index closed');

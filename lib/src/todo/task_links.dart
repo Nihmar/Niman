@@ -102,7 +102,17 @@ final class TaskLinkMap extends ChangeNotifier {
 
   /// Completes once no build is running or waiting: what a test, or a flow
   /// that wants the map current, awaits after a change.
-  Future<void> get settled => _idle?.future ?? Future<void>.value();
+  ///
+  /// An index change still waiting out [indexDebounce] is built now rather
+  /// than left behind: a note made and renamed inside that window would
+  /// otherwise be missing from the answer the rename asks for.
+  Future<void> get settled {
+    if (_timer?.isActive ?? false) {
+      _timer!.cancel();
+      _request();
+    }
+    return _idle?.future ?? Future<void>.value();
+  }
 
   void _request() {
     if (_disposed) return;
