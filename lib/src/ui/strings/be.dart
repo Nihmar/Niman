@@ -4310,4 +4310,57 @@ final class BelarusianStrings extends Strings {
   String get commandNeedPlainNote => 'Патрэбна адкрытая нататка без тыпу';
   @override
   String get studyNothingToday => 'Сёння няма чаго вучыць';
+  @override
+  String get featureNameKanban => 'Канбан-дошкі';
+  @override
+  String get newKanbanHere => 'Новая канбан-дошка тут';
+  @override
+  String get newKanbanTitle => 'Новая канбан-дошка';
+  @override
+  String get newKanbanDefault => 'Мая дошка';
+  @override
+  String get kanbanColumnTodo => 'Трэба зрабіць';
+  @override
+  String get kanbanColumnDoing => 'У працы';
+  @override
+  String get kanbanColumnDone => 'Гатова';
+  @override
+  String get showKanbanTooltip => 'Паказаць дошку';
+  @override
+  String get kanbanAddCard => 'Дадаць картку';
+  @override
+  String get kanbanAddColumn => 'Дадаць слупок';
+  @override
+  String get kanbanCardHint => 'Назва карткі';
+  @override
+  String get kanbanColumnHint => 'Назва слупка';
+  @override
+  String get kanbanCardActions => 'Дзеянні карткі';
+  @override
+  String get kanbanColumnActions => 'Дзеянні слупка';
+  @override
+  String get kanbanDeleteColumn => 'Выдаліць слупок';
+  @override
+  String get kanbanMoveLeft => 'Перамясціць улева';
+  @override
+  String get kanbanMoveRight => 'Перамясціць управа';
+  @override
+  String get kanbanMoveUp => 'Перамясціць уверх';
+  @override
+  String get kanbanMoveDown => 'Перамясціць уніз';
+  @override
+  String kanbanCardLabel(int position, int total, String column) =>
+      'Картка $position з $total, слупок $column';
+  @override
+  String kanbanMovedTo(String column, int position, int total) =>
+      'Перамешчана ў $column, пазіцыя $position з $total';
+  @override
+  String get kanbanMoveTo => 'Перамясціць у…';
+  @override
+  String get kanbanLongPressHint =>
+      'Націсніце і ўтрымлівайце картку, каб перамясціць яе';
+  @override
+  String get kanbanEmptyColumn => 'У гэтым слупку няма картак';
+  @override
+  String get kanbanEditCard => 'Змяніць картку';
 }

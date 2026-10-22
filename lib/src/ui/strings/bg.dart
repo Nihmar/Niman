@@ -4296,4 +4296,57 @@ final class BulgarianStrings extends Strings {
   String get commandNeedPlainNote => 'Изисква отворена бележка без тип';
   @override
   String get studyNothingToday => 'Днес няма нищо за учене';
+  @override
+  String get featureNameKanban => 'Канбан дъски';
+  @override
+  String get newKanbanHere => 'Нова канбан дъска тук';
+  @override
+  String get newKanbanTitle => 'Нова канбан дъска';
+  @override
+  String get newKanbanDefault => 'Моята дъска';
+  @override
+  String get kanbanColumnTodo => 'За правене';
+  @override
+  String get kanbanColumnDoing => 'В процес';
+  @override
+  String get kanbanColumnDone => 'Готово';
+  @override
+  String get showKanbanTooltip => 'Покажи дъската';
+  @override
+  String get kanbanAddCard => 'Добавяне на карта';
+  @override
+  String get kanbanAddColumn => 'Добавяне на колона';
+  @override
+  String get kanbanCardHint => 'Заглавие на картата';
+  @override
+  String get kanbanColumnHint => 'Име на колоната';
+  @override
+  String get kanbanCardActions => 'Действия за картата';
+  @override
+  String get kanbanColumnActions => 'Действия за колоната';
+  @override
+  String get kanbanDeleteColumn => 'Изтриване на колоната';
+  @override
+  String get kanbanMoveLeft => 'Преместване наляво';
+  @override
+  String get kanbanMoveRight => 'Преместване надясно';
+  @override
+  String get kanbanMoveUp => 'Преместване нагоре';
+  @override
+  String get kanbanMoveDown => 'Преместване надолу';
+  @override
+  String kanbanCardLabel(int position, int total, String column) =>
+      'Карта $position от $total, колона $column';
+  @override
+  String kanbanMovedTo(String column, int position, int total) =>
+      'Преместена в $column, позиция $position от $total';
+  @override
+  String get kanbanMoveTo => 'Преместване в…';
+  @override
+  String get kanbanLongPressHint =>
+      'Натиснете и задръжте карта, за да я преместите';
+  @override
+  String get kanbanEmptyColumn => 'Няма карти в тази колона';
+  @override
+  String get kanbanEditCard => 'Редактиране на карта';
 }

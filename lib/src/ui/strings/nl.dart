@@ -4319,4 +4319,57 @@ final class DutchStrings extends Strings {
   String get commandNeedPlainNote => 'Vereist een geopende notitie zonder type';
   @override
   String get studyNothingToday => 'Vandaag niets te studeren';
+  @override
+  String get featureNameKanban => 'Kanbanborden';
+  @override
+  String get newKanbanHere => 'Nieuw kanbanbord hier';
+  @override
+  String get newKanbanTitle => 'Nieuw kanbanbord';
+  @override
+  String get newKanbanDefault => 'Mijn bord';
+  @override
+  String get kanbanColumnTodo => 'Te doen';
+  @override
+  String get kanbanColumnDoing => 'Bezig';
+  @override
+  String get kanbanColumnDone => 'Klaar';
+  @override
+  String get showKanbanTooltip => 'Bord tonen';
+  @override
+  String get kanbanAddCard => 'Kaart toevoegen';
+  @override
+  String get kanbanAddColumn => 'Kolom toevoegen';
+  @override
+  String get kanbanCardHint => 'Titel van de kaart';
+  @override
+  String get kanbanColumnHint => 'Naam van de kolom';
+  @override
+  String get kanbanCardActions => 'Kaartacties';
+  @override
+  String get kanbanColumnActions => 'Kolomacties';
+  @override
+  String get kanbanDeleteColumn => 'Kolom verwijderen';
+  @override
+  String get kanbanMoveLeft => 'Naar links verplaatsen';
+  @override
+  String get kanbanMoveRight => 'Naar rechts verplaatsen';
+  @override
+  String get kanbanMoveUp => 'Naar boven verplaatsen';
+  @override
+  String get kanbanMoveDown => 'Naar beneden verplaatsen';
+  @override
+  String kanbanCardLabel(int position, int total, String column) =>
+      'Kaart $position van $total, kolom $column';
+  @override
+  String kanbanMovedTo(String column, int position, int total) =>
+      'Verplaatst naar $column, positie $position van $total';
+  @override
+  String get kanbanMoveTo => 'Verplaatsen naar…';
+  @override
+  String get kanbanLongPressHint =>
+      'Houd een kaart lang ingedrukt om hem te verplaatsen';
+  @override
+  String get kanbanEmptyColumn => 'Geen kaarten in deze kolom';
+  @override
+  String get kanbanEditCard => 'Kaart bewerken';
 }

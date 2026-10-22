@@ -117,6 +117,7 @@ Set<CommandNeed> commandNeeds(AppCommand command) => switch (command) {
   AppCommand.newAudioNote ||
   AppCommand.newSlides ||
   AppCommand.newFlashcards ||
+  AppCommand.newKanban ||
   AppCommand.newTodo ||
   AppCommand.captureWebPage ||
   AppCommand.quickNote ||

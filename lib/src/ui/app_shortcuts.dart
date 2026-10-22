@@ -33,6 +33,9 @@ enum AppCommand {
   /// A new `type: flashcard` note (#533).
   newFlashcards,
 
+  /// A new `type: kanban` note (#1166).
+  newKanban,
+
   /// A new todo task.
   newTodo,
 
@@ -433,6 +436,7 @@ String appCommandLabel(AppCommand command) => switch (command) {
   AppCommand.newAudioNote => AppStrings.shortcutNewAudio,
   AppCommand.newSlides => AppStrings.newSlidesTitle,
   AppCommand.newFlashcards => AppStrings.newFlashcardsTitle,
+  AppCommand.newKanban => AppStrings.newKanbanTitle,
   AppCommand.studyDeck => AppStrings.flashcardsStudyDeck,
   AppCommand.deckColumns => AppStrings.flashcardsColumnsTitle,
   AppCommand.deckReset => AppStrings.flashcardsResetAction,

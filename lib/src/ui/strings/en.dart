@@ -4217,4 +4217,56 @@ final class EnglishStrings extends Strings {
   String get commandNeedPlainNote => 'Needs an open note of no particular type';
   @override
   String get studyNothingToday => 'Nothing to study today';
+  @override
+  String get featureNameKanban => 'Kanban boards';
+  @override
+  String get newKanbanHere => 'New Kanban board here';
+  @override
+  String get newKanbanTitle => 'New Kanban board';
+  @override
+  String get newKanbanDefault => 'My board';
+  @override
+  String get kanbanColumnTodo => 'To do';
+  @override
+  String get kanbanColumnDoing => 'Doing';
+  @override
+  String get kanbanColumnDone => 'Done';
+  @override
+  String get showKanbanTooltip => 'Show board';
+  @override
+  String get kanbanAddCard => 'Add a card';
+  @override
+  String get kanbanAddColumn => 'Add a column';
+  @override
+  String get kanbanCardHint => 'Card title';
+  @override
+  String get kanbanColumnHint => 'Column name';
+  @override
+  String get kanbanCardActions => 'Card actions';
+  @override
+  String get kanbanColumnActions => 'Column actions';
+  @override
+  String get kanbanDeleteColumn => 'Delete column';
+  @override
+  String get kanbanMoveLeft => 'Move left';
+  @override
+  String get kanbanMoveRight => 'Move right';
+  @override
+  String get kanbanMoveUp => 'Move up';
+  @override
+  String get kanbanMoveDown => 'Move down';
+  @override
+  String kanbanCardLabel(int position, int total, String column) =>
+      'Card $position of $total, column $column';
+  @override
+  String kanbanMovedTo(String column, int position, int total) =>
+      'Moved to $column, position $position of $total';
+  @override
+  String get kanbanMoveTo => 'Move to…';
+  @override
+  String get kanbanLongPressHint => 'Long-press a card to move it';
+  @override
+  String get kanbanEmptyColumn => 'No cards in this column';
+  @override
+  String get kanbanEditCard => 'Edit card';
 }

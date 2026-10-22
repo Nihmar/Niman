@@ -12,6 +12,7 @@ import 'package:niman/src/core/settings/library_features.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/todo/todo_source.dart';
+import 'package:niman/src/ui/kinds/kanban/kanban_note_view.dart';
 import 'package:niman/src/ui/kinds/list_note.dart';
 import 'package:niman/src/ui/kinds/slides/slides_view.dart';
 import 'package:niman/src/ui/window_controller.dart';
@@ -77,6 +78,7 @@ void main() {
       await tester.pump();
       if (find.byType(ListNoteView).evaluate().isNotEmpty ||
           find.byType(SlidesNoteView).evaluate().isNotEmpty ||
+          find.byType(KanbanNoteView).evaluate().isNotEmpty ||
           find.byType(MarkdownSourceView).evaluate().isNotEmpty) {
         break;
       }
@@ -184,5 +186,28 @@ void main() {
     expect(find.byType(SlidesNoteView), findsNothing);
     expect(find.byType(MarkdownSourceView), findsOneWidget);
     expect(onDisk(), slides);
+  });
+
+  testWidgets('a board with Kanban off opens as Markdown, bytes unchanged', (
+    tester,
+  ) async {
+    const board = '---\ntype: kanban\n---\n\n## To do\n- [ ] Pane\n';
+    await openNote(tester, board);
+    expect(find.byType(KanbanNoteView), findsOneWidget);
+    final placeholder = find.byType(KanbanNoteView);
+    expect(
+      find.descendant(of: placeholder, matching: find.text('To do')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: placeholder, matching: find.text('Pane')),
+      findsOneWidget,
+    );
+
+    controller.features.value = _off(LibraryFeature.kindKanban);
+    await settle(tester);
+    expect(find.byType(KanbanNoteView), findsNothing);
+    expect(find.byType(MarkdownSourceView), findsOneWidget);
+    expect(onDisk(), board);
   });
 }

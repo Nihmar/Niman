@@ -25,6 +25,7 @@ IconData featureIcon(LibraryFeature feature) => switch (feature) {
   LibraryFeature.transcription => Icons.subtitles_outlined,
   LibraryFeature.kindSlides => Icons.slideshow_outlined,
   LibraryFeature.kindFlashcards => Icons.style_outlined,
+  LibraryFeature.kindKanban => Icons.view_kanban_outlined,
   LibraryFeature.readers => Icons.menu_book_outlined,
   LibraryFeature.annotations => Icons.border_color_outlined,
   LibraryFeature.ocr => Icons.document_scanner_outlined,
@@ -48,7 +49,8 @@ String featureOffLine(LibraryFeature feature) => switch (feature) {
   LibraryFeature.kindShopping ||
   LibraryFeature.kindAudio ||
   LibraryFeature.kindSlides ||
-  LibraryFeature.kindFlashcards => AppStrings.featureOffKind,
+  LibraryFeature.kindFlashcards ||
+  LibraryFeature.kindKanban => AppStrings.featureOffKind,
   LibraryFeature.transcription => AppStrings.featureOffTranscription,
   LibraryFeature.readers => AppStrings.featureOffReaders,
   LibraryFeature.annotations => AppStrings.featureOffAnnotations,

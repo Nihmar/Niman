@@ -34,6 +34,7 @@ void main() {
           'transcription',
           'kinds.slides',
           'kinds.flashcards',
+          'kinds.kanban',
           'readers',
           'annotations',
           'ocr',

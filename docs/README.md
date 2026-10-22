@@ -3,7 +3,7 @@
 Four folders, by what each holds:
 
 - **`user/`** — how to use Niman: getting started, the Home, editing, list notes
-  and shopping lists, slide notes, flashcards, export, organization, the journal, search, text
+  and shopping lists, slide notes, flashcards, kanban boards, export, organization, the journal, search, text
   recognition, web capture, links,
   templates, tasks and reminders, themes, the per-library Features switches,
   home-screen widgets, settings,

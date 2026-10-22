@@ -15,6 +15,7 @@ import 'package:niman/src/flashcards/card_edits.dart';
 import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/kinds/audio_note.dart';
+import 'package:niman/src/ui/kinds/kanban/kanban_kind.dart';
 import 'package:niman/src/ui/kinds/list_note.dart';
 import 'package:niman/src/ui/kinds/slides/slides_kind.dart';
 import 'package:niman/src/ui/name_dialog.dart';
@@ -182,6 +183,27 @@ final class ShellCreateFlow {
       made = true;
     });
     if (made && context.mounted) await offerStudy(context, controller);
+  }
+
+  /// A Kanban board (#1166): a note with `type: kanban` frontmatter in
+  /// [parent] (default: where the library's rule puts new notes), with three
+  /// empty columns to start from.
+  Future<void> createKanban(BuildContext context, {String? parent}) async {
+    final folder = parent ?? newItemRule.folder;
+    final name = await showNameDialog(
+      context,
+      title: AppStrings.newKanbanTitle,
+      initial: AppStrings.newKanbanDefault,
+    );
+    if (name == null) return;
+    await guard(() async {
+      final row = await controller.ops!.createNote(
+        parentPath: folder,
+        name: name,
+        content: kanbanNoteContent(),
+      );
+      onCreated((path: row.path, isDir: false, hasKind: true));
+    });
   }
 
   /// A folder in [parent] (default: where the library's rule puts new

@@ -187,6 +187,17 @@ void main() {
       expect(created.last.path, 'My slides.md');
     });
 
+    testWidgets('a Kanban board follows the rule too', (tester) async {
+      await pumpHost(tester);
+      await confirmName(tester, () => creates.createKanban(context));
+      expect(created.single.path, 'Projects/Niman/My board.md');
+      expect(created.single.hasKind, isTrue);
+
+      location = NewItemLocation.libraryRoot;
+      await confirmName(tester, () => creates.createKanban(context));
+      expect(created.last.path, 'My board.md');
+    });
+
     testWidgets('"Create here" names its folder and bypasses the rule', (
       tester,
     ) async {

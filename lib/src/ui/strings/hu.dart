@@ -4293,4 +4293,56 @@ final class HungarianStrings extends Strings {
       'Típus nélküli megnyitott jegyzetet igényel';
   @override
   String get studyNothingToday => 'Ma nincs mit tanulni';
+  @override
+  String get featureNameKanban => 'Kanban-táblák';
+  @override
+  String get newKanbanHere => 'Új kanban-tábla ide';
+  @override
+  String get newKanbanTitle => 'Új kanban-tábla';
+  @override
+  String get newKanbanDefault => 'Saját tábla';
+  @override
+  String get kanbanColumnTodo => 'Teendő';
+  @override
+  String get kanbanColumnDoing => 'Folyamatban';
+  @override
+  String get kanbanColumnDone => 'Kész';
+  @override
+  String get showKanbanTooltip => 'Tábla megjelenítése';
+  @override
+  String get kanbanAddCard => 'Kártya hozzáadása';
+  @override
+  String get kanbanAddColumn => 'Oszlop hozzáadása';
+  @override
+  String get kanbanCardHint => 'A kártya címe';
+  @override
+  String get kanbanColumnHint => 'Az oszlop neve';
+  @override
+  String get kanbanCardActions => 'Kártyaműveletek';
+  @override
+  String get kanbanColumnActions => 'Oszlopműveletek';
+  @override
+  String get kanbanDeleteColumn => 'Oszlop törlése';
+  @override
+  String get kanbanMoveLeft => 'Mozgatás balra';
+  @override
+  String get kanbanMoveRight => 'Mozgatás jobbra';
+  @override
+  String get kanbanMoveUp => 'Mozgatás felfelé';
+  @override
+  String get kanbanMoveDown => 'Mozgatás lefelé';
+  @override
+  String kanbanCardLabel(int position, int total, String column) =>
+      'Kártya: $position/$total, oszlop: $column';
+  @override
+  String kanbanMovedTo(String column, int position, int total) =>
+      'Áthelyezve ide: $column, pozíció: $position/$total';
+  @override
+  String get kanbanMoveTo => 'Áthelyezés ide…';
+  @override
+  String get kanbanLongPressHint => 'Tartsa nyomva a kártyát az áthelyezéshez';
+  @override
+  String get kanbanEmptyColumn => 'Nincs kártya ebben az oszlopban';
+  @override
+  String get kanbanEditCard => 'Kártya szerkesztése';
 }

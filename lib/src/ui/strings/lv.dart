@@ -4262,4 +4262,56 @@ final class LatvianStrings extends Strings {
   String get commandNeedPlainNote => 'Nepieciešama atvērta piezīme bez veida';
   @override
   String get studyNothingToday => 'Šodien nav ko mācīties';
+  @override
+  String get featureNameKanban => 'Kanban dēļi';
+  @override
+  String get newKanbanHere => 'Jauns kanban dēlis šeit';
+  @override
+  String get newKanbanTitle => 'Jauns kanban dēlis';
+  @override
+  String get newKanbanDefault => 'Mans dēlis';
+  @override
+  String get kanbanColumnTodo => 'Darāmie';
+  @override
+  String get kanbanColumnDoing => 'Procesā';
+  @override
+  String get kanbanColumnDone => 'Pabeigti';
+  @override
+  String get showKanbanTooltip => 'Rādīt dēli';
+  @override
+  String get kanbanAddCard => 'Pievienot karti';
+  @override
+  String get kanbanAddColumn => 'Pievienot kolonnu';
+  @override
+  String get kanbanCardHint => 'Kartes nosaukums';
+  @override
+  String get kanbanColumnHint => 'Kolonnas nosaukums';
+  @override
+  String get kanbanCardActions => 'Kartes darbības';
+  @override
+  String get kanbanColumnActions => 'Kolonnas darbības';
+  @override
+  String get kanbanDeleteColumn => 'Dzēst kolonnu';
+  @override
+  String get kanbanMoveLeft => 'Pārvietot pa kreisi';
+  @override
+  String get kanbanMoveRight => 'Pārvietot pa labi';
+  @override
+  String get kanbanMoveUp => 'Pārvietot uz augšu';
+  @override
+  String get kanbanMoveDown => 'Pārvietot uz leju';
+  @override
+  String kanbanCardLabel(int position, int total, String column) =>
+      'Karte $position no $total, kolonna $column';
+  @override
+  String kanbanMovedTo(String column, int position, int total) =>
+      'Pārvietota uz $column, pozīcija $position no $total';
+  @override
+  String get kanbanMoveTo => 'Pārvietot uz…';
+  @override
+  String get kanbanLongPressHint => 'Turiet nospiestu karti, lai to pārvietotu';
+  @override
+  String get kanbanEmptyColumn => 'Šajā kolonnā nav karšu';
+  @override
+  String get kanbanEditCard => 'Rediģēt karti';
 }

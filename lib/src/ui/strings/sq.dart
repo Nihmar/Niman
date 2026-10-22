@@ -4302,4 +4302,56 @@ final class AlbanianStrings extends Strings {
   String get commandNeedPlainNote => 'Kërkon një shënim të hapur pa lloj';
   @override
   String get studyNothingToday => 'Asgjë për të studiuar sot';
+  @override
+  String get featureNameKanban => 'Tabela Kanban';
+  @override
+  String get newKanbanHere => 'Tabelë e re Kanban këtu';
+  @override
+  String get newKanbanTitle => 'Tabelë e re Kanban';
+  @override
+  String get newKanbanDefault => 'Tabela ime';
+  @override
+  String get kanbanColumnTodo => 'Për të bërë';
+  @override
+  String get kanbanColumnDoing => 'Në proces';
+  @override
+  String get kanbanColumnDone => 'Përfunduar';
+  @override
+  String get showKanbanTooltip => 'Shfaq tabelën';
+  @override
+  String get kanbanAddCard => 'Shto një kartë';
+  @override
+  String get kanbanAddColumn => 'Shto një kolonë';
+  @override
+  String get kanbanCardHint => 'Titulli i kartës';
+  @override
+  String get kanbanColumnHint => 'Emri i kolonës';
+  @override
+  String get kanbanCardActions => 'Veprimet e kartës';
+  @override
+  String get kanbanColumnActions => 'Veprimet e kolonës';
+  @override
+  String get kanbanDeleteColumn => 'Fshi kolonën';
+  @override
+  String get kanbanMoveLeft => 'Zhvendos majtas';
+  @override
+  String get kanbanMoveRight => 'Zhvendos djathtas';
+  @override
+  String get kanbanMoveUp => 'Zhvendos lart';
+  @override
+  String get kanbanMoveDown => 'Zhvendos poshtë';
+  @override
+  String kanbanCardLabel(int position, int total, String column) =>
+      'Karta $position nga $total, kolona $column';
+  @override
+  String kanbanMovedTo(String column, int position, int total) =>
+      'U zhvendos te $column, pozicioni $position nga $total';
+  @override
+  String get kanbanMoveTo => 'Zhvendos te…';
+  @override
+  String get kanbanLongPressHint => 'Mbaj shtypur një kartë për ta zhvendosur';
+  @override
+  String get kanbanEmptyColumn => 'Nuk ka karta në këtë kolonë';
+  @override
+  String get kanbanEditCard => 'Redakto kartën';
 }

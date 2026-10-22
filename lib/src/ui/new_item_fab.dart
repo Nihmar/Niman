@@ -27,6 +27,7 @@ final class NewItemFab extends StatelessWidget {
     required this.onNewAudioNote,
     required this.onNewSlides,
     required this.onNewFlashcards,
+    required this.onNewKanban,
     required this.onNewFromTemplate,
     required this.onNewFolder,
     required this.onJournalToday,
@@ -82,6 +83,9 @@ final class NewItemFab extends StatelessWidget {
 
   /// Creates a flashcard deck in the FAB target folder (#533).
   final VoidCallback onNewFlashcards;
+
+  /// Creates a Kanban board in the FAB target folder (#1166).
+  final VoidCallback onNewKanban;
 
   /// Creates a new folder in the FAB target folder.
   final VoidCallback onNewFolder;
@@ -256,6 +260,16 @@ final class NewItemFab extends StatelessWidget {
               label: AppStrings.newFlashcardsTitle,
               open: expanded,
               onTap: onNewFlashcards,
+            ),
+            const SizedBox(height: _rowGap),
+          ],
+          if (_offers(AppCommand.newKanban)) ...[
+            _MiniFab(
+              key: const Key('new-kanban-action'),
+              icon: Icons.view_kanban_outlined,
+              label: AppStrings.newKanbanTitle,
+              open: expanded,
+              onTap: onNewKanban,
             ),
             const SizedBox(height: _rowGap),
           ],

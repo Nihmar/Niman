@@ -4285,4 +4285,57 @@ final class SwedishStrings extends Strings {
   String get commandNeedPlainNote => 'Kräver en öppen anteckning utan typ';
   @override
   String get studyNothingToday => 'Inget att studera i dag';
+  @override
+  String get featureNameKanban => 'Kanbantavlor';
+  @override
+  String get newKanbanHere => 'Ny kanbantavla här';
+  @override
+  String get newKanbanTitle => 'Ny kanbantavla';
+  @override
+  String get newKanbanDefault => 'Min tavla';
+  @override
+  String get kanbanColumnTodo => 'Att göra';
+  @override
+  String get kanbanColumnDoing => 'Pågår';
+  @override
+  String get kanbanColumnDone => 'Klart';
+  @override
+  String get showKanbanTooltip => 'Visa tavlan';
+  @override
+  String get kanbanAddCard => 'Lägg till ett kort';
+  @override
+  String get kanbanAddColumn => 'Lägg till en kolumn';
+  @override
+  String get kanbanCardHint => 'Kortets titel';
+  @override
+  String get kanbanColumnHint => 'Kolumnens namn';
+  @override
+  String get kanbanCardActions => 'Kortåtgärder';
+  @override
+  String get kanbanColumnActions => 'Kolumnåtgärder';
+  @override
+  String get kanbanDeleteColumn => 'Ta bort kolumn';
+  @override
+  String get kanbanMoveLeft => 'Flytta åt vänster';
+  @override
+  String get kanbanMoveRight => 'Flytta åt höger';
+  @override
+  String get kanbanMoveUp => 'Flytta upp';
+  @override
+  String get kanbanMoveDown => 'Flytta ned';
+  @override
+  String kanbanCardLabel(int position, int total, String column) =>
+      'Kort $position av $total, kolumn $column';
+  @override
+  String kanbanMovedTo(String column, int position, int total) =>
+      'Flyttat till $column, plats $position av $total';
+  @override
+  String get kanbanMoveTo => 'Flytta till…';
+  @override
+  String get kanbanLongPressHint =>
+      'Tryck länge på ett kort för att flytta det';
+  @override
+  String get kanbanEmptyColumn => 'Inga kort i den här kolumnen';
+  @override
+  String get kanbanEditCard => 'Redigera kort';
 }

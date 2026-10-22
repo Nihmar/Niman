@@ -74,6 +74,8 @@ any step; nothing of it is left in your library.
   speaker notes, and exported as a PDF of slides.
 - [Flashcards](flashcards.md) — a note as a deck of cards: its tables,
   `::` lines and highlights, studied with spaced repetition.
+- [Kanban boards](kanban.md) — a note as columns of cards, dragged on a
+  computer, moved from a sheet on a phone.
 - [Organization](organization.md) — trash, history, templates, tags — and
   reading pictures, PDFs and books.
 - [Export](export.md) — a note, a folder or the library out as Markdown,

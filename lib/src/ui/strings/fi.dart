@@ -4303,4 +4303,56 @@ final class FinnishStrings extends Strings {
   String get commandNeedPlainNote => 'Vaatii avoimen tyypittömän muistiinpanon';
   @override
   String get studyNothingToday => 'Tänään ei ole opiskeltavaa';
+  @override
+  String get featureNameKanban => 'Kanban-taulut';
+  @override
+  String get newKanbanHere => 'Uusi kanban-taulu tähän';
+  @override
+  String get newKanbanTitle => 'Uusi kanban-taulu';
+  @override
+  String get newKanbanDefault => 'Oma taulu';
+  @override
+  String get kanbanColumnTodo => 'Tehtävänä';
+  @override
+  String get kanbanColumnDoing => 'Työn alla';
+  @override
+  String get kanbanColumnDone => 'Valmis';
+  @override
+  String get showKanbanTooltip => 'Näytä taulu';
+  @override
+  String get kanbanAddCard => 'Lisää kortti';
+  @override
+  String get kanbanAddColumn => 'Lisää sarake';
+  @override
+  String get kanbanCardHint => 'Kortin otsikko';
+  @override
+  String get kanbanColumnHint => 'Sarakkeen nimi';
+  @override
+  String get kanbanCardActions => 'Kortin toiminnot';
+  @override
+  String get kanbanColumnActions => 'Sarakkeen toiminnot';
+  @override
+  String get kanbanDeleteColumn => 'Poista sarake';
+  @override
+  String get kanbanMoveLeft => 'Siirrä vasemmalle';
+  @override
+  String get kanbanMoveRight => 'Siirrä oikealle';
+  @override
+  String get kanbanMoveUp => 'Siirrä ylös';
+  @override
+  String get kanbanMoveDown => 'Siirrä alas';
+  @override
+  String kanbanCardLabel(int position, int total, String column) =>
+      'Kortti $position/$total, sarake $column';
+  @override
+  String kanbanMovedTo(String column, int position, int total) =>
+      'Siirretty sarakkeeseen $column, paikka $position/$total';
+  @override
+  String get kanbanMoveTo => 'Siirrä sarakkeeseen…';
+  @override
+  String get kanbanLongPressHint => 'Siirrä kortti painamalla sitä pitkään';
+  @override
+  String get kanbanEmptyColumn => 'Tässä sarakkeessa ei ole kortteja';
+  @override
+  String get kanbanEditCard => 'Muokkaa korttia';
 }

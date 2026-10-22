@@ -2163,4 +2163,31 @@ final class AppStrings {
   static String get makeFlashcardsNone => _s.makeFlashcardsNone;
   static String get commandNeedPlainNote => _s.commandNeedPlainNote;
   static String get studyNothingToday => _s.studyNothingToday;
+  static String get featureNameKanban => _s.featureNameKanban;
+  static String get newKanbanHere => _s.newKanbanHere;
+  static String get newKanbanTitle => _s.newKanbanTitle;
+  static String get newKanbanDefault => _s.newKanbanDefault;
+  static String get kanbanColumnTodo => _s.kanbanColumnTodo;
+  static String get kanbanColumnDoing => _s.kanbanColumnDoing;
+  static String get kanbanColumnDone => _s.kanbanColumnDone;
+  static String get showKanbanTooltip => _s.showKanbanTooltip;
+  static String get kanbanAddCard => _s.kanbanAddCard;
+  static String get kanbanAddColumn => _s.kanbanAddColumn;
+  static String get kanbanCardHint => _s.kanbanCardHint;
+  static String get kanbanColumnHint => _s.kanbanColumnHint;
+  static String get kanbanCardActions => _s.kanbanCardActions;
+  static String get kanbanColumnActions => _s.kanbanColumnActions;
+  static String get kanbanDeleteColumn => _s.kanbanDeleteColumn;
+  static String get kanbanMoveLeft => _s.kanbanMoveLeft;
+  static String get kanbanMoveRight => _s.kanbanMoveRight;
+  static String get kanbanMoveUp => _s.kanbanMoveUp;
+  static String get kanbanMoveDown => _s.kanbanMoveDown;
+  static String kanbanCardLabel(int position, int total, String column) =>
+      _s.kanbanCardLabel(position, total, column);
+  static String kanbanMovedTo(String column, int position, int total) =>
+      _s.kanbanMovedTo(column, position, total);
+  static String get kanbanMoveTo => _s.kanbanMoveTo;
+  static String get kanbanLongPressHint => _s.kanbanLongPressHint;
+  static String get kanbanEmptyColumn => _s.kanbanEmptyColumn;
+  static String get kanbanEditCard => _s.kanbanEditCard;
 }

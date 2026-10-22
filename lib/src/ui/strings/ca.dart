@@ -4347,4 +4347,56 @@ final class CatalanStrings extends Strings {
   String get commandNeedPlainNote => 'Cal una nota oberta sense tipus';
   @override
   String get studyNothingToday => 'Avui no hi ha res per estudiar';
+  @override
+  String get featureNameKanban => 'Taulers Kanban';
+  @override
+  String get newKanbanHere => 'Nou tauler Kanban aquí';
+  @override
+  String get newKanbanTitle => 'Nou tauler Kanban';
+  @override
+  String get newKanbanDefault => 'El meu tauler';
+  @override
+  String get kanbanColumnTodo => 'Per fer';
+  @override
+  String get kanbanColumnDoing => 'En curs';
+  @override
+  String get kanbanColumnDone => 'Fet';
+  @override
+  String get showKanbanTooltip => 'Mostra el tauler';
+  @override
+  String get kanbanAddCard => 'Afegeix una targeta';
+  @override
+  String get kanbanAddColumn => 'Afegeix una columna';
+  @override
+  String get kanbanCardHint => 'Títol de la targeta';
+  @override
+  String get kanbanColumnHint => 'Nom de la columna';
+  @override
+  String get kanbanCardActions => 'Accions de la targeta';
+  @override
+  String get kanbanColumnActions => 'Accions de la columna';
+  @override
+  String get kanbanDeleteColumn => 'Suprimeix la columna';
+  @override
+  String get kanbanMoveLeft => "Mou a l'esquerra";
+  @override
+  String get kanbanMoveRight => 'Mou a la dreta';
+  @override
+  String get kanbanMoveUp => 'Mou amunt';
+  @override
+  String get kanbanMoveDown => 'Mou avall';
+  @override
+  String kanbanCardLabel(int position, int total, String column) =>
+      'Targeta $position de $total, columna $column';
+  @override
+  String kanbanMovedTo(String column, int position, int total) =>
+      'Moguda a $column, posició $position de $total';
+  @override
+  String get kanbanMoveTo => 'Mou a…';
+  @override
+  String get kanbanLongPressHint => 'Mantén premuda una targeta per moure-la';
+  @override
+  String get kanbanEmptyColumn => 'No hi ha targetes en aquesta columna';
+  @override
+  String get kanbanEditCard => 'Edita la targeta';
 }

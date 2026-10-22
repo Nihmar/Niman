@@ -4327,4 +4327,56 @@ final class BasqueStrings extends Strings {
   String get commandNeedPlainNote => 'Motarik gabeko ohar ireki bat behar du';
   @override
   String get studyNothingToday => 'Gaur ez dago ezer ikasteko';
+  @override
+  String get featureNameKanban => 'Kanban taulak';
+  @override
+  String get newKanbanHere => 'Kanban taula berria hemen';
+  @override
+  String get newKanbanTitle => 'Kanban taula berria';
+  @override
+  String get newKanbanDefault => 'Nire taula';
+  @override
+  String get kanbanColumnTodo => 'Egiteko';
+  @override
+  String get kanbanColumnDoing => 'Egiten';
+  @override
+  String get kanbanColumnDone => 'Eginda';
+  @override
+  String get showKanbanTooltip => 'Erakutsi taula';
+  @override
+  String get kanbanAddCard => 'Gehitu txartel bat';
+  @override
+  String get kanbanAddColumn => 'Gehitu zutabe bat';
+  @override
+  String get kanbanCardHint => 'Txartelaren izenburua';
+  @override
+  String get kanbanColumnHint => 'Zutabearen izena';
+  @override
+  String get kanbanCardActions => 'Txartelaren ekintzak';
+  @override
+  String get kanbanColumnActions => 'Zutabearen ekintzak';
+  @override
+  String get kanbanDeleteColumn => 'Ezabatu zutabea';
+  @override
+  String get kanbanMoveLeft => 'Eraman ezkerrera';
+  @override
+  String get kanbanMoveRight => 'Eraman eskuinera';
+  @override
+  String get kanbanMoveUp => 'Eraman gora';
+  @override
+  String get kanbanMoveDown => 'Eraman behera';
+  @override
+  String kanbanCardLabel(int position, int total, String column) =>
+      '$position. txartela $total artean, $column zutabea';
+  @override
+  String kanbanMovedTo(String column, int position, int total) =>
+      '$column zutabera eraman da, $position. posizioa $total artean';
+  @override
+  String get kanbanMoveTo => 'Eraman hona…';
+  @override
+  String get kanbanLongPressHint => 'Sakatu luze txartel bat mugitzeko';
+  @override
+  String get kanbanEmptyColumn => 'Zutabe honetan ez dago txartelik';
+  @override
+  String get kanbanEditCard => 'Editatu txartela';
 }

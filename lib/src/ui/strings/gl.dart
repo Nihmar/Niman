@@ -4305,4 +4305,56 @@ final class GalicianStrings extends Strings {
   String get commandNeedPlainNote => 'Require unha nota aberta sen tipo';
   @override
   String get studyNothingToday => 'Hoxe non hai nada que estudar';
+  @override
+  String get featureNameKanban => 'Taboleiros Kanban';
+  @override
+  String get newKanbanHere => 'Novo taboleiro Kanban aquí';
+  @override
+  String get newKanbanTitle => 'Novo taboleiro Kanban';
+  @override
+  String get newKanbanDefault => 'O meu taboleiro';
+  @override
+  String get kanbanColumnTodo => 'Por facer';
+  @override
+  String get kanbanColumnDoing => 'En curso';
+  @override
+  String get kanbanColumnDone => 'Feito';
+  @override
+  String get showKanbanTooltip => 'Amosar o taboleiro';
+  @override
+  String get kanbanAddCard => 'Engadir unha tarxeta';
+  @override
+  String get kanbanAddColumn => 'Engadir unha columna';
+  @override
+  String get kanbanCardHint => 'Título da tarxeta';
+  @override
+  String get kanbanColumnHint => 'Nome da columna';
+  @override
+  String get kanbanCardActions => 'Accións da tarxeta';
+  @override
+  String get kanbanColumnActions => 'Accións da columna';
+  @override
+  String get kanbanDeleteColumn => 'Eliminar a columna';
+  @override
+  String get kanbanMoveLeft => 'Mover á esquerda';
+  @override
+  String get kanbanMoveRight => 'Mover á dereita';
+  @override
+  String get kanbanMoveUp => 'Mover cara arriba';
+  @override
+  String get kanbanMoveDown => 'Mover cara abaixo';
+  @override
+  String kanbanCardLabel(int position, int total, String column) =>
+      'Tarxeta $position de $total, columna $column';
+  @override
+  String kanbanMovedTo(String column, int position, int total) =>
+      'Movida a $column, posición $position de $total';
+  @override
+  String get kanbanMoveTo => 'Mover a…';
+  @override
+  String get kanbanLongPressHint => 'Mantén premida unha tarxeta para movela';
+  @override
+  String get kanbanEmptyColumn => 'Non hai tarxetas nesta columna';
+  @override
+  String get kanbanEditCard => 'Editar a tarxeta';
 }

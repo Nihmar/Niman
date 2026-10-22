@@ -4405,4 +4405,57 @@ final class GreekStrings extends Strings {
   String get commandNeedPlainNote => 'Απαιτεί ανοιχτή σημείωση χωρίς τύπο';
   @override
   String get studyNothingToday => 'Τίποτα για μελέτη σήμερα';
+  @override
+  String get featureNameKanban => 'Πίνακες Kanban';
+  @override
+  String get newKanbanHere => 'Νέος πίνακας Kanban εδώ';
+  @override
+  String get newKanbanTitle => 'Νέος πίνακας Kanban';
+  @override
+  String get newKanbanDefault => 'Ο πίνακάς μου';
+  @override
+  String get kanbanColumnTodo => 'Προς εκτέλεση';
+  @override
+  String get kanbanColumnDoing => 'Σε εξέλιξη';
+  @override
+  String get kanbanColumnDone => 'Ολοκληρώθηκε';
+  @override
+  String get showKanbanTooltip => 'Εμφάνιση πίνακα';
+  @override
+  String get kanbanAddCard => 'Προσθήκη κάρτας';
+  @override
+  String get kanbanAddColumn => 'Προσθήκη στήλης';
+  @override
+  String get kanbanCardHint => 'Τίτλος κάρτας';
+  @override
+  String get kanbanColumnHint => 'Όνομα στήλης';
+  @override
+  String get kanbanCardActions => 'Ενέργειες κάρτας';
+  @override
+  String get kanbanColumnActions => 'Ενέργειες στήλης';
+  @override
+  String get kanbanDeleteColumn => 'Διαγραφή στήλης';
+  @override
+  String get kanbanMoveLeft => 'Μετακίνηση αριστερά';
+  @override
+  String get kanbanMoveRight => 'Μετακίνηση δεξιά';
+  @override
+  String get kanbanMoveUp => 'Μετακίνηση πάνω';
+  @override
+  String get kanbanMoveDown => 'Μετακίνηση κάτω';
+  @override
+  String kanbanCardLabel(int position, int total, String column) =>
+      'Κάρτα $position από $total, στήλη $column';
+  @override
+  String kanbanMovedTo(String column, int position, int total) =>
+      'Μετακινήθηκε στη στήλη $column, θέση $position από $total';
+  @override
+  String get kanbanMoveTo => 'Μετακίνηση σε…';
+  @override
+  String get kanbanLongPressHint =>
+      'Πατήστε παρατεταμένα μια κάρτα για να τη μετακινήσετε';
+  @override
+  String get kanbanEmptyColumn => 'Δεν υπάρχουν κάρτες σε αυτή τη στήλη';
+  @override
+  String get kanbanEditCard => 'Επεξεργασία κάρτας';
 }

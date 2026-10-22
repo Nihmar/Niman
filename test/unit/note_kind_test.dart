@@ -51,12 +51,14 @@ void main() {
         'audio',
         'slides',
         'flashcard',
+        'kanban',
       ]);
       expect(featureOfKind('list'), LibraryFeature.kindList);
       expect(featureOfKind('shopping-list'), LibraryFeature.kindShopping);
       expect(featureOfKind('audio'), LibraryFeature.kindAudio);
       expect(featureOfKind('slides'), LibraryFeature.kindSlides);
       expect(featureOfKind('flashcard'), LibraryFeature.kindFlashcards);
+      expect(featureOfKind('kanban'), LibraryFeature.kindKanban);
       expect(featureOfKind('recipe'), isNull);
       expect(featureOfKind(null), isNull);
       for (final type in NoteKinds.types) {

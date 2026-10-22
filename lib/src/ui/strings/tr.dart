@@ -4233,4 +4233,56 @@ final class TurkishStrings extends Strings {
   String get commandNeedPlainNote => 'Türü olmayan açık bir not gerektirir';
   @override
   String get studyNothingToday => 'Bugün çalışılacak bir şey yok';
+  @override
+  String get featureNameKanban => 'Kanban panoları';
+  @override
+  String get newKanbanHere => 'Buraya yeni Kanban panosu';
+  @override
+  String get newKanbanTitle => 'Yeni Kanban panosu';
+  @override
+  String get newKanbanDefault => 'Panom';
+  @override
+  String get kanbanColumnTodo => 'Yapılacak';
+  @override
+  String get kanbanColumnDoing => 'Yapılıyor';
+  @override
+  String get kanbanColumnDone => 'Bitti';
+  @override
+  String get showKanbanTooltip => 'Panoyu göster';
+  @override
+  String get kanbanAddCard => 'Kart ekle';
+  @override
+  String get kanbanAddColumn => 'Sütun ekle';
+  @override
+  String get kanbanCardHint => 'Kart başlığı';
+  @override
+  String get kanbanColumnHint => 'Sütun adı';
+  @override
+  String get kanbanCardActions => 'Kart işlemleri';
+  @override
+  String get kanbanColumnActions => 'Sütun işlemleri';
+  @override
+  String get kanbanDeleteColumn => 'Sütunu sil';
+  @override
+  String get kanbanMoveLeft => 'Sola taşı';
+  @override
+  String get kanbanMoveRight => 'Sağa taşı';
+  @override
+  String get kanbanMoveUp => 'Yukarı taşı';
+  @override
+  String get kanbanMoveDown => 'Aşağı taşı';
+  @override
+  String kanbanCardLabel(int position, int total, String column) =>
+      'Kart $position / $total, sütun $column';
+  @override
+  String kanbanMovedTo(String column, int position, int total) =>
+      '$column sütununa taşındı, sıra $position / $total';
+  @override
+  String get kanbanMoveTo => 'Şuraya taşı…';
+  @override
+  String get kanbanLongPressHint => 'Bir kartı taşımak için uzun basın';
+  @override
+  String get kanbanEmptyColumn => 'Bu sütunda kart yok';
+  @override
+  String get kanbanEditCard => 'Kartı düzenle';
 }

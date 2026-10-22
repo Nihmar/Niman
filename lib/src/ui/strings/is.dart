@@ -4272,4 +4272,56 @@ final class IcelandicStrings extends Strings {
   String get commandNeedPlainNote => 'Krefst opinnar glósu án tegundar';
   @override
   String get studyNothingToday => 'Ekkert að læra í dag';
+  @override
+  String get featureNameKanban => 'Kanban-töflur';
+  @override
+  String get newKanbanHere => 'Ný kanban-tafla hér';
+  @override
+  String get newKanbanTitle => 'Ný kanban-tafla';
+  @override
+  String get newKanbanDefault => 'Taflan mín';
+  @override
+  String get kanbanColumnTodo => 'Á döfinni';
+  @override
+  String get kanbanColumnDoing => 'Í vinnslu';
+  @override
+  String get kanbanColumnDone => 'Lokið';
+  @override
+  String get showKanbanTooltip => 'Sýna töfluna';
+  @override
+  String get kanbanAddCard => 'Bæta við spjaldi';
+  @override
+  String get kanbanAddColumn => 'Bæta við dálki';
+  @override
+  String get kanbanCardHint => 'Titill spjalds';
+  @override
+  String get kanbanColumnHint => 'Heiti dálks';
+  @override
+  String get kanbanCardActions => 'Aðgerðir spjalds';
+  @override
+  String get kanbanColumnActions => 'Aðgerðir dálks';
+  @override
+  String get kanbanDeleteColumn => 'Eyða dálki';
+  @override
+  String get kanbanMoveLeft => 'Færa til vinstri';
+  @override
+  String get kanbanMoveRight => 'Færa til hægri';
+  @override
+  String get kanbanMoveUp => 'Færa upp';
+  @override
+  String get kanbanMoveDown => 'Færa niður';
+  @override
+  String kanbanCardLabel(int position, int total, String column) =>
+      'Spjald $position af $total, dálkur $column';
+  @override
+  String kanbanMovedTo(String column, int position, int total) =>
+      'Fært í $column, staða $position af $total';
+  @override
+  String get kanbanMoveTo => 'Færa í…';
+  @override
+  String get kanbanLongPressHint => 'Haltu spjaldi inni til að færa það';
+  @override
+  String get kanbanEmptyColumn => 'Engin spjöld í þessum dálki';
+  @override
+  String get kanbanEditCard => 'Breyta spjaldi';
 }

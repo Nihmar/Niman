@@ -23,6 +23,7 @@ String featureName(LibraryFeature feature) => switch (feature) {
   LibraryFeature.transcription => AppStrings.featureNameTranscription,
   LibraryFeature.kindSlides => AppStrings.featureNameSlides,
   LibraryFeature.kindFlashcards => AppStrings.featureNameFlashcards,
+  LibraryFeature.kindKanban => AppStrings.featureNameKanban,
   LibraryFeature.readers => AppStrings.featureNameReaders,
   LibraryFeature.annotations => AppStrings.featureNameAnnotations,
   LibraryFeature.ocr => AppStrings.featureNameOcr,

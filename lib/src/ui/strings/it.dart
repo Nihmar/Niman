@@ -4306,4 +4306,56 @@ final class ItalianStrings extends Strings {
   String get commandNeedPlainNote => 'Richiede una nota aperta senza un tipo';
   @override
   String get studyNothingToday => 'Niente da studiare oggi';
+  @override
+  String get featureNameKanban => 'Bacheche Kanban';
+  @override
+  String get newKanbanHere => 'Nuova bacheca Kanban qui';
+  @override
+  String get newKanbanTitle => 'Nuova bacheca Kanban';
+  @override
+  String get newKanbanDefault => 'La mia bacheca';
+  @override
+  String get kanbanColumnTodo => 'Da fare';
+  @override
+  String get kanbanColumnDoing => 'In corso';
+  @override
+  String get kanbanColumnDone => 'Fatto';
+  @override
+  String get showKanbanTooltip => 'Mostra la bacheca';
+  @override
+  String get kanbanAddCard => 'Aggiungi una scheda';
+  @override
+  String get kanbanAddColumn => 'Aggiungi una colonna';
+  @override
+  String get kanbanCardHint => 'Titolo della scheda';
+  @override
+  String get kanbanColumnHint => 'Nome della colonna';
+  @override
+  String get kanbanCardActions => 'Azioni della scheda';
+  @override
+  String get kanbanColumnActions => 'Azioni della colonna';
+  @override
+  String get kanbanDeleteColumn => 'Elimina colonna';
+  @override
+  String get kanbanMoveLeft => 'Sposta a sinistra';
+  @override
+  String get kanbanMoveRight => 'Sposta a destra';
+  @override
+  String get kanbanMoveUp => 'Sposta su';
+  @override
+  String get kanbanMoveDown => 'Sposta giù';
+  @override
+  String kanbanCardLabel(int position, int total, String column) =>
+      'Scheda $position di $total, colonna $column';
+  @override
+  String kanbanMovedTo(String column, int position, int total) =>
+      'Spostata in $column, posizione $position di $total';
+  @override
+  String get kanbanMoveTo => 'Sposta in…';
+  @override
+  String get kanbanLongPressHint => 'Tieni premuta una scheda per spostarla';
+  @override
+  String get kanbanEmptyColumn => 'Nessuna scheda in questa colonna';
+  @override
+  String get kanbanEditCard => 'Modifica scheda';
 }

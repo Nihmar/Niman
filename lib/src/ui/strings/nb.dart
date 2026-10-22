@@ -4255,4 +4255,56 @@ final class NorwegianStrings extends Strings {
   String get commandNeedPlainNote => 'Krever et åpent notat uten type';
   @override
   String get studyNothingToday => 'Ingenting å studere i dag';
+  @override
+  String get featureNameKanban => 'Kanban-tavler';
+  @override
+  String get newKanbanHere => 'Ny kanban-tavle her';
+  @override
+  String get newKanbanTitle => 'Ny kanban-tavle';
+  @override
+  String get newKanbanDefault => 'Min tavle';
+  @override
+  String get kanbanColumnTodo => 'Å gjøre';
+  @override
+  String get kanbanColumnDoing => 'Pågår';
+  @override
+  String get kanbanColumnDone => 'Ferdig';
+  @override
+  String get showKanbanTooltip => 'Vis tavlen';
+  @override
+  String get kanbanAddCard => 'Legg til et kort';
+  @override
+  String get kanbanAddColumn => 'Legg til en kolonne';
+  @override
+  String get kanbanCardHint => 'Korttittel';
+  @override
+  String get kanbanColumnHint => 'Kolonnenavn';
+  @override
+  String get kanbanCardActions => 'Korthandlinger';
+  @override
+  String get kanbanColumnActions => 'Kolonnehandlinger';
+  @override
+  String get kanbanDeleteColumn => 'Slett kolonne';
+  @override
+  String get kanbanMoveLeft => 'Flytt til venstre';
+  @override
+  String get kanbanMoveRight => 'Flytt til høyre';
+  @override
+  String get kanbanMoveUp => 'Flytt opp';
+  @override
+  String get kanbanMoveDown => 'Flytt ned';
+  @override
+  String kanbanCardLabel(int position, int total, String column) =>
+      'Kort $position av $total, kolonne $column';
+  @override
+  String kanbanMovedTo(String column, int position, int total) =>
+      'Flyttet til $column, plass $position av $total';
+  @override
+  String get kanbanMoveTo => 'Flytt til…';
+  @override
+  String get kanbanLongPressHint => 'Trykk lenge på et kort for å flytte det';
+  @override
+  String get kanbanEmptyColumn => 'Ingen kort i denne kolonnen';
+  @override
+  String get kanbanEditCard => 'Rediger kort';
 }

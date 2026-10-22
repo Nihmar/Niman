@@ -4302,4 +4302,57 @@ final class MacedonianStrings extends Strings {
   String get commandNeedPlainNote => 'Бара отворена белешка без тип';
   @override
   String get studyNothingToday => 'Денес нема ништо за учење';
+  @override
+  String get featureNameKanban => 'Канбан табли';
+  @override
+  String get newKanbanHere => 'Нова канбан табла овде';
+  @override
+  String get newKanbanTitle => 'Нова канбан табла';
+  @override
+  String get newKanbanDefault => 'Мојата табла';
+  @override
+  String get kanbanColumnTodo => 'За правење';
+  @override
+  String get kanbanColumnDoing => 'Во тек';
+  @override
+  String get kanbanColumnDone => 'Завршено';
+  @override
+  String get showKanbanTooltip => 'Прикажи ја таблата';
+  @override
+  String get kanbanAddCard => 'Додај картичка';
+  @override
+  String get kanbanAddColumn => 'Додај колона';
+  @override
+  String get kanbanCardHint => 'Наслов на картичката';
+  @override
+  String get kanbanColumnHint => 'Име на колоната';
+  @override
+  String get kanbanCardActions => 'Дејства на картичката';
+  @override
+  String get kanbanColumnActions => 'Дејства на колоната';
+  @override
+  String get kanbanDeleteColumn => 'Избриши колона';
+  @override
+  String get kanbanMoveLeft => 'Премести лево';
+  @override
+  String get kanbanMoveRight => 'Премести десно';
+  @override
+  String get kanbanMoveUp => 'Премести горе';
+  @override
+  String get kanbanMoveDown => 'Премести долу';
+  @override
+  String kanbanCardLabel(int position, int total, String column) =>
+      'Картичка $position од $total, колона $column';
+  @override
+  String kanbanMovedTo(String column, int position, int total) =>
+      'Преместено во $column, позиција $position од $total';
+  @override
+  String get kanbanMoveTo => 'Премести во…';
+  @override
+  String get kanbanLongPressHint =>
+      'Задржете притисната картичка за да ја преместите';
+  @override
+  String get kanbanEmptyColumn => 'Нема картички во оваа колона';
+  @override
+  String get kanbanEditCard => 'Уреди картичка';
 }

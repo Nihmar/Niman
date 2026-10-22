@@ -4293,4 +4293,56 @@ final class CroatianStrings extends Strings {
   String get commandNeedPlainNote => 'Traži otvorenu bilješku bez vrste';
   @override
   String get studyNothingToday => 'Danas nema ništa za učenje';
+  @override
+  String get featureNameKanban => 'Kanban ploče';
+  @override
+  String get newKanbanHere => 'Nova kanban ploča ovdje';
+  @override
+  String get newKanbanTitle => 'Nova kanban ploča';
+  @override
+  String get newKanbanDefault => 'Moja ploča';
+  @override
+  String get kanbanColumnTodo => 'Za napraviti';
+  @override
+  String get kanbanColumnDoing => 'U tijeku';
+  @override
+  String get kanbanColumnDone => 'Gotovo';
+  @override
+  String get showKanbanTooltip => 'Prikaži ploču';
+  @override
+  String get kanbanAddCard => 'Dodaj karticu';
+  @override
+  String get kanbanAddColumn => 'Dodaj stupac';
+  @override
+  String get kanbanCardHint => 'Naslov kartice';
+  @override
+  String get kanbanColumnHint => 'Naziv stupca';
+  @override
+  String get kanbanCardActions => 'Radnje kartice';
+  @override
+  String get kanbanColumnActions => 'Radnje stupca';
+  @override
+  String get kanbanDeleteColumn => 'Izbriši stupac';
+  @override
+  String get kanbanMoveLeft => 'Premjesti ulijevo';
+  @override
+  String get kanbanMoveRight => 'Premjesti udesno';
+  @override
+  String get kanbanMoveUp => 'Premjesti gore';
+  @override
+  String get kanbanMoveDown => 'Premjesti dolje';
+  @override
+  String kanbanCardLabel(int position, int total, String column) =>
+      'Kartica $position od $total, stupac $column';
+  @override
+  String kanbanMovedTo(String column, int position, int total) =>
+      'Premješteno u $column, mjesto $position od $total';
+  @override
+  String get kanbanMoveTo => 'Premjesti u…';
+  @override
+  String get kanbanLongPressHint => 'Dugo pritisnite karticu da je premjestite';
+  @override
+  String get kanbanEmptyColumn => 'Nema kartica u ovom stupcu';
+  @override
+  String get kanbanEditCard => 'Uredi karticu';
 }

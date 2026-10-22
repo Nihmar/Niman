@@ -11,6 +11,13 @@ are in both choosers, note and folder alike. EPUB is platform-neutral
 Dart — no engine, no WebView — so a book is built the same way
 everywhere; PDF goes through each platform's own printer (below).
 
+Kanban boards ([kanban](kanban.md)) are on every platform, drawn to the
+surface: columns side by side from a tablet's width up, one column at a
+time under tabs on a phone, where a card moves from a sheet instead of
+being dragged across columns (#1154). A touch screen on a desktop moves a
+card with its menu or the keys; a finger's drag there would take the
+column's scroll.
+
 Slide notes ([slides](slides.md)) present on every platform, the screen
 kept on while they do: Android through the window's keep-screen-on flag,
 Linux through GTK's idle inhibit (the desktop's own screen saver and

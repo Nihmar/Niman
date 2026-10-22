@@ -4327,4 +4327,56 @@ final class PolishStrings extends Strings {
   String get commandNeedPlainNote => 'Wymaga otwartej notatki bez typu';
   @override
   String get studyNothingToday => 'Dziś nie ma nic do nauki';
+  @override
+  String get featureNameKanban => 'Tablice Kanban';
+  @override
+  String get newKanbanHere => 'Nowa tablica Kanban tutaj';
+  @override
+  String get newKanbanTitle => 'Nowa tablica Kanban';
+  @override
+  String get newKanbanDefault => 'Moja tablica';
+  @override
+  String get kanbanColumnTodo => 'Do zrobienia';
+  @override
+  String get kanbanColumnDoing => 'W toku';
+  @override
+  String get kanbanColumnDone => 'Gotowe';
+  @override
+  String get showKanbanTooltip => 'Pokaż tablicę';
+  @override
+  String get kanbanAddCard => 'Dodaj kartę';
+  @override
+  String get kanbanAddColumn => 'Dodaj kolumnę';
+  @override
+  String get kanbanCardHint => 'Tytuł karty';
+  @override
+  String get kanbanColumnHint => 'Nazwa kolumny';
+  @override
+  String get kanbanCardActions => 'Akcje karty';
+  @override
+  String get kanbanColumnActions => 'Akcje kolumny';
+  @override
+  String get kanbanDeleteColumn => 'Usuń kolumnę';
+  @override
+  String get kanbanMoveLeft => 'Przenieś w lewo';
+  @override
+  String get kanbanMoveRight => 'Przenieś w prawo';
+  @override
+  String get kanbanMoveUp => 'Przenieś w górę';
+  @override
+  String get kanbanMoveDown => 'Przenieś w dół';
+  @override
+  String kanbanCardLabel(int position, int total, String column) =>
+      'Karta $position z $total, kolumna $column';
+  @override
+  String kanbanMovedTo(String column, int position, int total) =>
+      'Przeniesiono do $column, pozycja $position z $total';
+  @override
+  String get kanbanMoveTo => 'Przenieś do…';
+  @override
+  String get kanbanLongPressHint => 'Przytrzymaj kartę, aby ją przenieść';
+  @override
+  String get kanbanEmptyColumn => 'Brak kart w tej kolumnie';
+  @override
+  String get kanbanEditCard => 'Edytuj kartę';
 }

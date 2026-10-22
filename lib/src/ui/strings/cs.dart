@@ -4261,4 +4261,56 @@ final class CzechStrings extends Strings {
   String get commandNeedPlainNote => 'Vyžaduje otevřenou poznámku bez typu';
   @override
   String get studyNothingToday => 'Dnes není co studovat';
+  @override
+  String get featureNameKanban => 'Kanban tabule';
+  @override
+  String get newKanbanHere => 'Nová kanban tabule zde';
+  @override
+  String get newKanbanTitle => 'Nová kanban tabule';
+  @override
+  String get newKanbanDefault => 'Moje tabule';
+  @override
+  String get kanbanColumnTodo => 'K udělání';
+  @override
+  String get kanbanColumnDoing => 'Rozpracováno';
+  @override
+  String get kanbanColumnDone => 'Hotovo';
+  @override
+  String get showKanbanTooltip => 'Zobrazit tabuli';
+  @override
+  String get kanbanAddCard => 'Přidat kartu';
+  @override
+  String get kanbanAddColumn => 'Přidat sloupec';
+  @override
+  String get kanbanCardHint => 'Název karty';
+  @override
+  String get kanbanColumnHint => 'Název sloupce';
+  @override
+  String get kanbanCardActions => 'Akce karty';
+  @override
+  String get kanbanColumnActions => 'Akce sloupce';
+  @override
+  String get kanbanDeleteColumn => 'Smazat sloupec';
+  @override
+  String get kanbanMoveLeft => 'Přesunout doleva';
+  @override
+  String get kanbanMoveRight => 'Přesunout doprava';
+  @override
+  String get kanbanMoveUp => 'Přesunout nahoru';
+  @override
+  String get kanbanMoveDown => 'Přesunout dolů';
+  @override
+  String kanbanCardLabel(int position, int total, String column) =>
+      'Karta $position z $total, sloupec $column';
+  @override
+  String kanbanMovedTo(String column, int position, int total) =>
+      'Přesunuto do $column, pozice $position z $total';
+  @override
+  String get kanbanMoveTo => 'Přesunout do…';
+  @override
+  String get kanbanLongPressHint => 'Podržením karty ji přesunete';
+  @override
+  String get kanbanEmptyColumn => 'V tomto sloupci nejsou žádné karty';
+  @override
+  String get kanbanEditCard => 'Upravit kartu';
 }

@@ -4217,4 +4217,56 @@ final class HindiStrings extends Strings {
   String get commandNeedPlainNote => 'बिना प्रकार का एक खुला नोट चाहिए';
   @override
   String get studyNothingToday => 'आज पढ़ने के लिए कुछ नहीं';
+  @override
+  String get featureNameKanban => 'कानबन बोर्ड';
+  @override
+  String get newKanbanHere => 'यहाँ नया कानबन बोर्ड';
+  @override
+  String get newKanbanTitle => 'नया कानबन बोर्ड';
+  @override
+  String get newKanbanDefault => 'मेरा बोर्ड';
+  @override
+  String get kanbanColumnTodo => 'करना है';
+  @override
+  String get kanbanColumnDoing => 'जारी है';
+  @override
+  String get kanbanColumnDone => 'पूर्ण';
+  @override
+  String get showKanbanTooltip => 'बोर्ड दिखाएँ';
+  @override
+  String get kanbanAddCard => 'कार्ड जोड़ें';
+  @override
+  String get kanbanAddColumn => 'कॉलम जोड़ें';
+  @override
+  String get kanbanCardHint => 'कार्ड का शीर्षक';
+  @override
+  String get kanbanColumnHint => 'कॉलम का नाम';
+  @override
+  String get kanbanCardActions => 'कार्ड की क्रियाएँ';
+  @override
+  String get kanbanColumnActions => 'कॉलम की क्रियाएँ';
+  @override
+  String get kanbanDeleteColumn => 'कॉलम हटाएँ';
+  @override
+  String get kanbanMoveLeft => 'बाएँ ले जाएँ';
+  @override
+  String get kanbanMoveRight => 'दाएँ ले जाएँ';
+  @override
+  String get kanbanMoveUp => 'ऊपर ले जाएँ';
+  @override
+  String get kanbanMoveDown => 'नीचे ले जाएँ';
+  @override
+  String kanbanCardLabel(int position, int total, String column) =>
+      'कार्ड $position / $total, कॉलम $column';
+  @override
+  String kanbanMovedTo(String column, int position, int total) =>
+      '$column में ले जाया गया, स्थान $position / $total';
+  @override
+  String get kanbanMoveTo => 'यहाँ ले जाएँ…';
+  @override
+  String get kanbanLongPressHint => 'कार्ड को ले जाने के लिए उसे देर तक दबाएँ';
+  @override
+  String get kanbanEmptyColumn => 'इस कॉलम में कोई कार्ड नहीं है';
+  @override
+  String get kanbanEditCard => 'कार्ड संपादित करें';
 }

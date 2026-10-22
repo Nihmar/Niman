@@ -2268,4 +2268,32 @@ abstract base class Strings {
   String get makeFlashcardsNone;
   String get commandNeedPlainNote;
   String get studyNothingToday;
+  // Kanban boards (#1166).
+  String get featureNameKanban;
+  String get newKanbanHere;
+  String get newKanbanTitle;
+  String get newKanbanDefault;
+  String get kanbanColumnTodo;
+  String get kanbanColumnDoing;
+  String get kanbanColumnDone;
+  String get showKanbanTooltip;
+  // The kanban board view (#1167).
+  String get kanbanAddCard;
+  String get kanbanAddColumn;
+  String get kanbanCardHint;
+  String get kanbanColumnHint;
+  String get kanbanCardActions;
+  String get kanbanColumnActions;
+  String get kanbanDeleteColumn;
+  String get kanbanMoveLeft;
+  String get kanbanMoveRight;
+  String get kanbanMoveUp;
+  String get kanbanMoveDown;
+  String kanbanCardLabel(int position, int total, String column);
+  String kanbanMovedTo(String column, int position, int total);
+  // The kanban board on a phone (#1168).
+  String get kanbanMoveTo;
+  String get kanbanLongPressHint;
+  String get kanbanEmptyColumn;
+  String get kanbanEditCard;
 }

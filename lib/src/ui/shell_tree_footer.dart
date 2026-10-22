@@ -42,6 +42,9 @@ enum NewShellItem {
   /// A flashcard deck (frontmatter type: flashcard) in the current folder.
   flashcards,
 
+  /// A Kanban board (frontmatter type: kanban) in the current folder.
+  kanban,
+
   /// A note copied from a template.
   template,
 
@@ -256,6 +259,14 @@ final class TreeFooterBar extends StatelessWidget {
           Icons.style_outlined,
           AppStrings.newFlashcardsTitle,
           key: const Key('new-flashcards-action'),
+        ),
+      if (offers(AppCommand.newKanban))
+        _item(
+          context,
+          NewShellItem.kanban,
+          Icons.view_kanban_outlined,
+          AppStrings.newKanbanTitle,
+          key: const Key('new-kanban-action'),
         ),
       if (features.isOn(LibraryFeature.templates))
         _item(

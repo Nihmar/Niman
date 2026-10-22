@@ -4339,4 +4339,56 @@ final class RomanianStrings extends Strings {
   String get commandNeedPlainNote => 'Necesită o notă deschisă fără tip';
   @override
   String get studyNothingToday => 'Nimic de studiat azi';
+  @override
+  String get featureNameKanban => 'Panouri Kanban';
+  @override
+  String get newKanbanHere => 'Panou Kanban nou aici';
+  @override
+  String get newKanbanTitle => 'Panou Kanban nou';
+  @override
+  String get newKanbanDefault => 'Panoul meu';
+  @override
+  String get kanbanColumnTodo => 'De făcut';
+  @override
+  String get kanbanColumnDoing => 'În lucru';
+  @override
+  String get kanbanColumnDone => 'Finalizat';
+  @override
+  String get showKanbanTooltip => 'Arată panoul';
+  @override
+  String get kanbanAddCard => 'Adaugă un card';
+  @override
+  String get kanbanAddColumn => 'Adaugă o coloană';
+  @override
+  String get kanbanCardHint => 'Titlul cardului';
+  @override
+  String get kanbanColumnHint => 'Numele coloanei';
+  @override
+  String get kanbanCardActions => 'Acțiuni card';
+  @override
+  String get kanbanColumnActions => 'Acțiuni coloană';
+  @override
+  String get kanbanDeleteColumn => 'Șterge coloana';
+  @override
+  String get kanbanMoveLeft => 'Mută la stânga';
+  @override
+  String get kanbanMoveRight => 'Mută la dreapta';
+  @override
+  String get kanbanMoveUp => 'Mută în sus';
+  @override
+  String get kanbanMoveDown => 'Mută în jos';
+  @override
+  String kanbanCardLabel(int position, int total, String column) =>
+      'Card $position din $total, coloana $column';
+  @override
+  String kanbanMovedTo(String column, int position, int total) =>
+      'Mutat în $column, poziția $position din $total';
+  @override
+  String get kanbanMoveTo => 'Mută în…';
+  @override
+  String get kanbanLongPressHint => 'Ține apăsat pe un card pentru a-l muta';
+  @override
+  String get kanbanEmptyColumn => 'Niciun card în această coloană';
+  @override
+  String get kanbanEditCard => 'Editează cardul';
 }

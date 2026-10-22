@@ -4364,4 +4364,57 @@ final class GermanStrings extends Strings {
   String get commandNeedPlainNote => 'Benötigt eine geöffnete Notiz ohne Typ';
   @override
   String get studyNothingToday => 'Heute nichts zu lernen';
+  @override
+  String get featureNameKanban => 'Kanban-Boards';
+  @override
+  String get newKanbanHere => 'Neues Kanban-Board hier';
+  @override
+  String get newKanbanTitle => 'Neues Kanban-Board';
+  @override
+  String get newKanbanDefault => 'Mein Board';
+  @override
+  String get kanbanColumnTodo => 'Zu erledigen';
+  @override
+  String get kanbanColumnDoing => 'In Arbeit';
+  @override
+  String get kanbanColumnDone => 'Erledigt';
+  @override
+  String get showKanbanTooltip => 'Board zeigen';
+  @override
+  String get kanbanAddCard => 'Karte hinzufügen';
+  @override
+  String get kanbanAddColumn => 'Spalte hinzufügen';
+  @override
+  String get kanbanCardHint => 'Kartentitel';
+  @override
+  String get kanbanColumnHint => 'Spaltenname';
+  @override
+  String get kanbanCardActions => 'Kartenaktionen';
+  @override
+  String get kanbanColumnActions => 'Spaltenaktionen';
+  @override
+  String get kanbanDeleteColumn => 'Spalte löschen';
+  @override
+  String get kanbanMoveLeft => 'Nach links verschieben';
+  @override
+  String get kanbanMoveRight => 'Nach rechts verschieben';
+  @override
+  String get kanbanMoveUp => 'Nach oben verschieben';
+  @override
+  String get kanbanMoveDown => 'Nach unten verschieben';
+  @override
+  String kanbanCardLabel(int position, int total, String column) =>
+      'Karte $position von $total, Spalte $column';
+  @override
+  String kanbanMovedTo(String column, int position, int total) =>
+      'Verschoben nach $column, Position $position von $total';
+  @override
+  String get kanbanMoveTo => 'Verschieben nach…';
+  @override
+  String get kanbanLongPressHint =>
+      'Karte lange drücken, um sie zu verschieben';
+  @override
+  String get kanbanEmptyColumn => 'Keine Karten in dieser Spalte';
+  @override
+  String get kanbanEditCard => 'Karte bearbeiten';
 }

@@ -48,6 +48,9 @@ enum LibraryFeature {
   /// Note kinds: flashcards and Study.
   kindFlashcards('kinds.flashcards'),
 
+  /// Note kinds: Kanban boards.
+  kindKanban('kinds.kanban'),
+
   /// Reading: the PDF and EPUB readers.
   readers('readers'),
 

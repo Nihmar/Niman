@@ -140,7 +140,7 @@ aliases: [My alias]
 Any key is stored and filterable (`key = value` in search). Keys the app
 acts on: `title`, `tags`, `date`, `pinned`, `aliases`, `type` (`list`
 shows the checklist, `shopping-list` the same with a quantity per item,
-`audio` shows the recordings, `slides` shows a deck). Everything else is your own vocabulary —
+`audio` shows the recordings, `slides` shows a deck, `kanban` shows a board). Everything else is your own vocabulary —
 stored, searchable, but driving nothing.
 
 `pinned: true` notes appear in the tree's pinned section.
@@ -345,8 +345,8 @@ What does not ask the rule, because it already says where:
 - **Create … here** in a folder's context menu, and the tree's and the
   grid's right-click menus on empty space: the note or folder goes in that
   folder (the library root, for the empty space of the tree). The same
-  menus offer **New voice note here**, **New slides here** and **New
-  flashcards here** (#997): the kind is made right there instead of where
+  menus offer **New voice note here**, **New slides here**, **New
+  flashcards here** and **New kanban board here** (#997): the kind is made right there instead of where
   the setting says, with the content it always starts from. The list
   note, the journal and a capture keep folders of their own, so none of
   them is on a folder's menu.
@@ -843,6 +843,9 @@ else in it that is not Markdown is kept as a file.
   slide per `---`, speaker notes after `Note:`, presented full screen
   (`F5`) or in the presenter view, and exported as a PDF of 16:9 slides.
   See [slide notes](slides.md).
+- **Kanban boards:** a note with `type: kanban` frontmatter is a board: a
+  `##` heading per column, a list item per card. See
+  [kanban boards](kanban.md).
 - **Templates:** live under `templateFolder` (default `Templates`).
   See [templates](templates.md).
 
