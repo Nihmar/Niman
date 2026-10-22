@@ -100,7 +100,7 @@ abstract final class ExportTreePrinter {
     }
     final printer = engine == null
         ? _RelayPdfPrinter(parent)
-        : ProcessPdfPrinter(engine: engine, run: runner ?? runProcess);
+        : ProcessPdfPrinter(engine: engine, run: runner ?? runEngine);
     final outcome = await printer.print(htmlPath, pdfPath);
     switch (outcome) {
       case PdfPrinted():
