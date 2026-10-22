@@ -45,7 +45,10 @@ void main() {
     test("a folder's creating entries follow their features", () {
       final folder = noteRow(isDir: true, name: 'Books');
       final all = values(folder, const Features());
-      expect(all, containsAll(['template', 'audio', 'slides', 'flashcards']));
+      expect(
+        all,
+        containsAll(['template', 'audio', 'slides', 'flashcards', 'kanban']),
+      );
 
       final none = values(
         folder,
@@ -54,12 +57,14 @@ void main() {
           LibraryFeature.kindAudio,
           LibraryFeature.kindSlides,
           LibraryFeature.kindFlashcards,
+          LibraryFeature.kindKanban,
         ]),
       );
       expect(none, isNot(contains('template')));
       expect(none, isNot(contains('audio')));
       expect(none, isNot(contains('slides')));
       expect(none, isNot(contains('flashcards')));
+      expect(none, isNot(contains('kanban')));
       // Notes and folders are core.
       expect(none, containsAll(['note', 'folder']));
     });

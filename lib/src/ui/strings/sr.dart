@@ -4288,4 +4288,20 @@ final class SerbianStrings extends Strings {
   String get commandNeedPlainNote => 'Захтева отворену белешку без врсте';
   @override
   String get studyNothingToday => 'Данас нема ничега за учење';
+  @override
+  String get featureNameKanban => 'Канбан табле';
+  @override
+  String get newKanbanHere => 'Нова канбан табла овде';
+  @override
+  String get newKanbanTitle => 'Нова канбан табла';
+  @override
+  String get newKanbanDefault => 'Моја табла';
+  @override
+  String get kanbanColumnTodo => 'За урадити';
+  @override
+  String get kanbanColumnDoing => 'У току';
+  @override
+  String get kanbanColumnDone => 'Завршено';
+  @override
+  String get showKanbanTooltip => 'Прикажи таблу';
 }

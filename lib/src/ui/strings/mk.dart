@@ -4302,4 +4302,20 @@ final class MacedonianStrings extends Strings {
   String get commandNeedPlainNote => 'Бара отворена белешка без тип';
   @override
   String get studyNothingToday => 'Денес нема ништо за учење';
+  @override
+  String get featureNameKanban => 'Канбан табли';
+  @override
+  String get newKanbanHere => 'Нова канбан табла овде';
+  @override
+  String get newKanbanTitle => 'Нова канбан табла';
+  @override
+  String get newKanbanDefault => 'Мојата табла';
+  @override
+  String get kanbanColumnTodo => 'За правење';
+  @override
+  String get kanbanColumnDoing => 'Во тек';
+  @override
+  String get kanbanColumnDone => 'Завршено';
+  @override
+  String get showKanbanTooltip => 'Прикажи ја таблата';
 }

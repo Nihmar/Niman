@@ -4293,4 +4293,20 @@ final class CroatianStrings extends Strings {
   String get commandNeedPlainNote => 'Traži otvorenu bilješku bez vrste';
   @override
   String get studyNothingToday => 'Danas nema ništa za učenje';
+  @override
+  String get featureNameKanban => 'Kanban ploče';
+  @override
+  String get newKanbanHere => 'Nova kanban ploča ovdje';
+  @override
+  String get newKanbanTitle => 'Nova kanban ploča';
+  @override
+  String get newKanbanDefault => 'Moja ploča';
+  @override
+  String get kanbanColumnTodo => 'Za napraviti';
+  @override
+  String get kanbanColumnDoing => 'U tijeku';
+  @override
+  String get kanbanColumnDone => 'Gotovo';
+  @override
+  String get showKanbanTooltip => 'Prikaži ploču';
 }

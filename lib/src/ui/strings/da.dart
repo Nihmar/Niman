@@ -4250,4 +4250,20 @@ final class DanishStrings extends Strings {
   String get commandNeedPlainNote => 'Kræver en åben note uden type';
   @override
   String get studyNothingToday => 'Intet at studere i dag';
+  @override
+  String get featureNameKanban => 'Kanban-tavler';
+  @override
+  String get newKanbanHere => 'Ny kanban-tavle her';
+  @override
+  String get newKanbanTitle => 'Ny kanban-tavle';
+  @override
+  String get newKanbanDefault => 'Min tavle';
+  @override
+  String get kanbanColumnTodo => 'Skal gøres';
+  @override
+  String get kanbanColumnDoing => 'I gang';
+  @override
+  String get kanbanColumnDone => 'Færdig';
+  @override
+  String get showKanbanTooltip => 'Vis tavlen';
 }

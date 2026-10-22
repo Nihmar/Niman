@@ -4302,4 +4302,20 @@ final class AlbanianStrings extends Strings {
   String get commandNeedPlainNote => 'Kërkon një shënim të hapur pa lloj';
   @override
   String get studyNothingToday => 'Asgjë për të studiuar sot';
+  @override
+  String get featureNameKanban => 'Tabela Kanban';
+  @override
+  String get newKanbanHere => 'Tabelë e re Kanban këtu';
+  @override
+  String get newKanbanTitle => 'Tabelë e re Kanban';
+  @override
+  String get newKanbanDefault => 'Tabela ime';
+  @override
+  String get kanbanColumnTodo => 'Për të bërë';
+  @override
+  String get kanbanColumnDoing => 'Në proces';
+  @override
+  String get kanbanColumnDone => 'Përfunduar';
+  @override
+  String get showKanbanTooltip => 'Shfaq tabelën';
 }

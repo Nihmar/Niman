@@ -4275,4 +4275,20 @@ final class SlovakStrings extends Strings {
   String get commandNeedPlainNote => 'Vyžaduje otvorenú poznámku bez typu';
   @override
   String get studyNothingToday => 'Dnes nie je čo študovať';
+  @override
+  String get featureNameKanban => 'Kanban tabule';
+  @override
+  String get newKanbanHere => 'Nová kanban tabuľa sem';
+  @override
+  String get newKanbanTitle => 'Nová kanban tabuľa';
+  @override
+  String get newKanbanDefault => 'Moja tabuľa';
+  @override
+  String get kanbanColumnTodo => 'Treba urobiť';
+  @override
+  String get kanbanColumnDoing => 'Rozpracované';
+  @override
+  String get kanbanColumnDone => 'Hotovo';
+  @override
+  String get showKanbanTooltip => 'Zobraziť tabuľu';
 }

@@ -4347,4 +4347,20 @@ final class CatalanStrings extends Strings {
   String get commandNeedPlainNote => 'Cal una nota oberta sense tipus';
   @override
   String get studyNothingToday => 'Avui no hi ha res per estudiar';
+  @override
+  String get featureNameKanban => 'Taulers Kanban';
+  @override
+  String get newKanbanHere => 'Nou tauler Kanban aquí';
+  @override
+  String get newKanbanTitle => 'Nou tauler Kanban';
+  @override
+  String get newKanbanDefault => 'El meu tauler';
+  @override
+  String get kanbanColumnTodo => 'Per fer';
+  @override
+  String get kanbanColumnDoing => 'En curs';
+  @override
+  String get kanbanColumnDone => 'Fet';
+  @override
+  String get showKanbanTooltip => 'Mostra el tauler';
 }

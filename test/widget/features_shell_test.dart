@@ -97,6 +97,7 @@ void main() {
       (LibraryFeature.todo, AppCommand.newTodo, 'new todo'),
       (LibraryFeature.search, AppCommand.focusSearch, 'focus search'),
       (LibraryFeature.kindSlides, AppCommand.newSlides, 'new slides'),
+      (LibraryFeature.kindKanban, AppCommand.newKanban, 'new kanban'),
       (LibraryFeature.journal, AppCommand.journalToday, 'journal'),
     ];
     for (final (feature, command, query) in cases) {
@@ -140,6 +141,7 @@ void main() {
         LibraryFeature.journal,
         LibraryFeature.templates,
         LibraryFeature.kindSlides,
+        LibraryFeature.kindKanban,
         LibraryFeature.capture,
       ]);
       await settle(tester);
@@ -150,6 +152,7 @@ void main() {
         'journal-today-action',
         'new-from-template-action',
         'new-slides-action',
+        'new-kanban-action',
         'capture-web-page-action',
       ]) {
         expect(find.byKey(Key(key)), findsNothing, reason: key);
@@ -166,6 +169,7 @@ void main() {
       controller.features.value = offFeatures([
         LibraryFeature.journal,
         LibraryFeature.kindAudio,
+        LibraryFeature.kindKanban,
         LibraryFeature.templates,
       ]);
       await settle(tester);
@@ -174,6 +178,7 @@ void main() {
       for (final key in [
         'journal-today-action',
         'new-audio-note-action',
+        'new-kanban-action',
         'new-from-template-action',
       ]) {
         expect(find.byKey(Key(key)), findsNothing, reason: key);

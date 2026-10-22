@@ -4,6 +4,7 @@ import 'package:niman/src/core/settings/library_features.dart';
 import 'package:niman/src/core/settings/library_settings.dart' show LinkType;
 import 'package:niman/src/ui/kinds/audio_note.dart';
 import 'package:niman/src/ui/kinds/flashcards/flashcard_kind.dart';
+import 'package:niman/src/ui/kinds/kanban/kanban_kind.dart';
 import 'package:niman/src/ui/kinds/list_note.dart';
 import 'package:niman/src/ui/kinds/shopping_list_note.dart';
 import 'package:niman/src/ui/kinds/slides/slides_kind.dart';
@@ -74,6 +75,7 @@ final class NoteKinds {
     AudioKindGui(),
     SlidesKindGui(),
     FlashcardKindGui(),
+    KanbanKindGui(),
   ];
 
   /// The `type` of every registered kind.

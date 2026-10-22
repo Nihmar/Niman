@@ -4285,4 +4285,20 @@ final class SwedishStrings extends Strings {
   String get commandNeedPlainNote => 'Kräver en öppen anteckning utan typ';
   @override
   String get studyNothingToday => 'Inget att studera i dag';
+  @override
+  String get featureNameKanban => 'Kanbantavlor';
+  @override
+  String get newKanbanHere => 'Ny kanbantavla här';
+  @override
+  String get newKanbanTitle => 'Ny kanbantavla';
+  @override
+  String get newKanbanDefault => 'Min tavla';
+  @override
+  String get kanbanColumnTodo => 'Att göra';
+  @override
+  String get kanbanColumnDoing => 'Pågår';
+  @override
+  String get kanbanColumnDone => 'Klart';
+  @override
+  String get showKanbanTooltip => 'Visa tavlan';
 }

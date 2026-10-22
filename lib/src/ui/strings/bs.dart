@@ -4294,4 +4294,20 @@ final class BosnianStrings extends Strings {
   String get commandNeedPlainNote => 'Zahtijeva otvorenu bilješku bez tipa';
   @override
   String get studyNothingToday => 'Danas nema ništa za učenje';
+  @override
+  String get featureNameKanban => 'Kanban ploče';
+  @override
+  String get newKanbanHere => 'Nova kanban ploča ovdje';
+  @override
+  String get newKanbanTitle => 'Nova kanban ploča';
+  @override
+  String get newKanbanDefault => 'Moja ploča';
+  @override
+  String get kanbanColumnTodo => 'Za uraditi';
+  @override
+  String get kanbanColumnDoing => 'U toku';
+  @override
+  String get kanbanColumnDone => 'Završeno';
+  @override
+  String get showKanbanTooltip => 'Prikaži ploču';
 }

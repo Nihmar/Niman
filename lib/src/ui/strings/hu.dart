@@ -4293,4 +4293,20 @@ final class HungarianStrings extends Strings {
       'Típus nélküli megnyitott jegyzetet igényel';
   @override
   String get studyNothingToday => 'Ma nincs mit tanulni';
+  @override
+  String get featureNameKanban => 'Kanban-táblák';
+  @override
+  String get newKanbanHere => 'Új kanban-tábla ide';
+  @override
+  String get newKanbanTitle => 'Új kanban-tábla';
+  @override
+  String get newKanbanDefault => 'Saját tábla';
+  @override
+  String get kanbanColumnTodo => 'Teendő';
+  @override
+  String get kanbanColumnDoing => 'Folyamatban';
+  @override
+  String get kanbanColumnDone => 'Kész';
+  @override
+  String get showKanbanTooltip => 'Tábla megjelenítése';
 }

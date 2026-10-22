@@ -4339,4 +4339,20 @@ final class RomanianStrings extends Strings {
   String get commandNeedPlainNote => 'Necesită o notă deschisă fără tip';
   @override
   String get studyNothingToday => 'Nimic de studiat azi';
+  @override
+  String get featureNameKanban => 'Panouri Kanban';
+  @override
+  String get newKanbanHere => 'Panou Kanban nou aici';
+  @override
+  String get newKanbanTitle => 'Panou Kanban nou';
+  @override
+  String get newKanbanDefault => 'Panoul meu';
+  @override
+  String get kanbanColumnTodo => 'De făcut';
+  @override
+  String get kanbanColumnDoing => 'În lucru';
+  @override
+  String get kanbanColumnDone => 'Finalizat';
+  @override
+  String get showKanbanTooltip => 'Arată panoul';
 }

@@ -4255,4 +4255,20 @@ final class NorwegianStrings extends Strings {
   String get commandNeedPlainNote => 'Krever et åpent notat uten type';
   @override
   String get studyNothingToday => 'Ingenting å studere i dag';
+  @override
+  String get featureNameKanban => 'Kanban-tavler';
+  @override
+  String get newKanbanHere => 'Ny kanban-tavle her';
+  @override
+  String get newKanbanTitle => 'Ny kanban-tavle';
+  @override
+  String get newKanbanDefault => 'Min tavle';
+  @override
+  String get kanbanColumnTodo => 'Å gjøre';
+  @override
+  String get kanbanColumnDoing => 'Pågår';
+  @override
+  String get kanbanColumnDone => 'Ferdig';
+  @override
+  String get showKanbanTooltip => 'Vis tavlen';
 }

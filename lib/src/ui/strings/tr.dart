@@ -4233,4 +4233,20 @@ final class TurkishStrings extends Strings {
   String get commandNeedPlainNote => 'Türü olmayan açık bir not gerektirir';
   @override
   String get studyNothingToday => 'Bugün çalışılacak bir şey yok';
+  @override
+  String get featureNameKanban => 'Kanban panoları';
+  @override
+  String get newKanbanHere => 'Buraya yeni Kanban panosu';
+  @override
+  String get newKanbanTitle => 'Yeni Kanban panosu';
+  @override
+  String get newKanbanDefault => 'Panom';
+  @override
+  String get kanbanColumnTodo => 'Yapılacak';
+  @override
+  String get kanbanColumnDoing => 'Yapılıyor';
+  @override
+  String get kanbanColumnDone => 'Bitti';
+  @override
+  String get showKanbanTooltip => 'Panoyu göster';
 }

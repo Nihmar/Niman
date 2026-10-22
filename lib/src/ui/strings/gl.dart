@@ -4305,4 +4305,20 @@ final class GalicianStrings extends Strings {
   String get commandNeedPlainNote => 'Require unha nota aberta sen tipo';
   @override
   String get studyNothingToday => 'Hoxe non hai nada que estudar';
+  @override
+  String get featureNameKanban => 'Taboleiros Kanban';
+  @override
+  String get newKanbanHere => 'Novo taboleiro Kanban aquí';
+  @override
+  String get newKanbanTitle => 'Novo taboleiro Kanban';
+  @override
+  String get newKanbanDefault => 'O meu taboleiro';
+  @override
+  String get kanbanColumnTodo => 'Por facer';
+  @override
+  String get kanbanColumnDoing => 'En curso';
+  @override
+  String get kanbanColumnDone => 'Feito';
+  @override
+  String get showKanbanTooltip => 'Amosar o taboleiro';
 }

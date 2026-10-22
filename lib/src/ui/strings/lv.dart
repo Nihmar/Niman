@@ -4262,4 +4262,20 @@ final class LatvianStrings extends Strings {
   String get commandNeedPlainNote => 'Nepieciešama atvērta piezīme bez veida';
   @override
   String get studyNothingToday => 'Šodien nav ko mācīties';
+  @override
+  String get featureNameKanban => 'Kanban dēļi';
+  @override
+  String get newKanbanHere => 'Jauns kanban dēlis šeit';
+  @override
+  String get newKanbanTitle => 'Jauns kanban dēlis';
+  @override
+  String get newKanbanDefault => 'Mans dēlis';
+  @override
+  String get kanbanColumnTodo => 'Darāmie';
+  @override
+  String get kanbanColumnDoing => 'Procesā';
+  @override
+  String get kanbanColumnDone => 'Pabeigti';
+  @override
+  String get showKanbanTooltip => 'Rādīt dēli';
 }

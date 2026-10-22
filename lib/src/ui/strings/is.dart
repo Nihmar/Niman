@@ -4272,4 +4272,20 @@ final class IcelandicStrings extends Strings {
   String get commandNeedPlainNote => 'Krefst opinnar glósu án tegundar';
   @override
   String get studyNothingToday => 'Ekkert að læra í dag';
+  @override
+  String get featureNameKanban => 'Kanban-töflur';
+  @override
+  String get newKanbanHere => 'Ný kanban-tafla hér';
+  @override
+  String get newKanbanTitle => 'Ný kanban-tafla';
+  @override
+  String get newKanbanDefault => 'Taflan mín';
+  @override
+  String get kanbanColumnTodo => 'Á döfinni';
+  @override
+  String get kanbanColumnDoing => 'Í vinnslu';
+  @override
+  String get kanbanColumnDone => 'Lokið';
+  @override
+  String get showKanbanTooltip => 'Sýna töfluna';
 }

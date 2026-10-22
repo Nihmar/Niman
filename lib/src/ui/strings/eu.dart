@@ -4327,4 +4327,20 @@ final class BasqueStrings extends Strings {
   String get commandNeedPlainNote => 'Motarik gabeko ohar ireki bat behar du';
   @override
   String get studyNothingToday => 'Gaur ez dago ezer ikasteko';
+  @override
+  String get featureNameKanban => 'Kanban taulak';
+  @override
+  String get newKanbanHere => 'Kanban taula berria hemen';
+  @override
+  String get newKanbanTitle => 'Kanban taula berria';
+  @override
+  String get newKanbanDefault => 'Nire taula';
+  @override
+  String get kanbanColumnTodo => 'Egiteko';
+  @override
+  String get kanbanColumnDoing => 'Egiten';
+  @override
+  String get kanbanColumnDone => 'Eginda';
+  @override
+  String get showKanbanTooltip => 'Erakutsi taula';
 }

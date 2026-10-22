@@ -4310,4 +4310,20 @@ final class BelarusianStrings extends Strings {
   String get commandNeedPlainNote => 'Патрэбна адкрытая нататка без тыпу';
   @override
   String get studyNothingToday => 'Сёння няма чаго вучыць';
+  @override
+  String get featureNameKanban => 'Канбан-дошкі';
+  @override
+  String get newKanbanHere => 'Новая канбан-дошка тут';
+  @override
+  String get newKanbanTitle => 'Новая канбан-дошка';
+  @override
+  String get newKanbanDefault => 'Мая дошка';
+  @override
+  String get kanbanColumnTodo => 'Трэба зрабіць';
+  @override
+  String get kanbanColumnDoing => 'У працы';
+  @override
+  String get kanbanColumnDone => 'Гатова';
+  @override
+  String get showKanbanTooltip => 'Паказаць дошку';
 }

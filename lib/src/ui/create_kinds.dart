@@ -83,6 +83,15 @@ final List<CreateKind> createKinds = <CreateKind>[
     create: (flow, context, {required parent}) =>
         flow.createFlashcards(context, parent: parent),
   ),
+  CreateKind(
+    value: 'kanban',
+    command: AppCommand.newKanban,
+    keySuffix: 'new-kanban',
+    icon: Icons.view_kanban_outlined,
+    label: () => AppStrings.newKanbanHere,
+    create: (flow, context, {required parent}) =>
+        flow.createKanban(context, parent: parent),
+  ),
 ];
 
 /// The kind a menu's [action] chose, or null when it is not one of them.

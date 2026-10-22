@@ -1401,6 +1401,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       'audio' => Icons.mic_outlined,
       'slides' => Icons.slideshow_outlined,
       'flashcard' => Icons.style_outlined,
+      'kanban' => Icons.view_kanban_outlined,
       'shopping-list' => Icons.shopping_cart_outlined,
       _ => Icons.checklist,
     };
@@ -1427,6 +1428,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
             'audio' => AppStrings.showAudioTooltip,
             'slides' => AppStrings.showSlidesTooltip,
             'flashcard' => AppStrings.showFlashcardsTooltip,
+            'kanban' => AppStrings.showKanbanTooltip,
             _ => AppStrings.showListTooltip,
           },
           icon: Icon(icon),
@@ -4178,6 +4180,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       onNewAudioNote: () => unawaited(_createFlow.createAudioNote(context)),
       onNewSlides: () => unawaited(_createFlow.createSlidesNote(context)),
       onNewFlashcards: () => unawaited(_createFlow.createFlashcards(context)),
+      onNewKanban: () => unawaited(_createFlow.createKanban(context)),
       onNewFromTemplate: () =>
           unawaited(_templateFlow.createFromTemplate(context)),
       onNewFolder: () => unawaited(_createFlow.createFolder(context)),
@@ -4543,6 +4546,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           unawaited(_createFlow.createSlidesNote(context)),
       AppCommand.newFlashcards: () =>
           unawaited(_createFlow.createFlashcards(context)),
+      AppCommand.newKanban: () => unawaited(_createFlow.createKanban(context)),
       AppCommand.studyDeck: () => unawaited(_studyDeck()),
       AppCommand.deckColumns: () => unawaited(_chooseDeckColumns()),
       AppCommand.deckReset: () => unawaited(_resetDeckReview()),
@@ -6020,6 +6024,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         unawaited(_createFlow.createSlidesNote(context));
       case NewShellItem.flashcards:
         unawaited(_createFlow.createFlashcards(context));
+      case NewShellItem.kanban:
+        unawaited(_createFlow.createKanban(context));
       case NewShellItem.template:
         unawaited(_templateFlow.createFromTemplate(context));
       case NewShellItem.captureWebPage:

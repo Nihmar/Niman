@@ -4296,4 +4296,20 @@ final class BulgarianStrings extends Strings {
   String get commandNeedPlainNote => 'Изисква отворена бележка без тип';
   @override
   String get studyNothingToday => 'Днес няма нищо за учене';
+  @override
+  String get featureNameKanban => 'Канбан дъски';
+  @override
+  String get newKanbanHere => 'Нова канбан дъска тук';
+  @override
+  String get newKanbanTitle => 'Нова канбан дъска';
+  @override
+  String get newKanbanDefault => 'Моята дъска';
+  @override
+  String get kanbanColumnTodo => 'За правене';
+  @override
+  String get kanbanColumnDoing => 'В процес';
+  @override
+  String get kanbanColumnDone => 'Готово';
+  @override
+  String get showKanbanTooltip => 'Покажи дъската';
 }

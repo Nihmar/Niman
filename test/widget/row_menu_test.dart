@@ -112,6 +112,7 @@ void main() {
     expect(find.byKey(const Key('menu-new-audio-note')), findsNothing);
     expect(find.byKey(const Key('menu-new-slides')), findsNothing);
     expect(find.byKey(const Key('menu-new-flashcards')), findsNothing);
+    expect(find.byKey(const Key('menu-new-kanban')), findsNothing);
   });
 
   testWidgets('a book offers its conversion into notes, a note does not', (
@@ -156,6 +157,7 @@ void main() {
     expect(find.text('New voice note here'), findsOneWidget);
     expect(find.text('New slides here'), findsOneWidget);
     expect(find.text('New flashcards here'), findsOneWidget);
+    expect(find.text('New Kanban board here'), findsOneWidget);
     expect(
       top(tester, 'menu-new-audio-note'),
       lessThan(top(tester, 'menu-new-folder')),

@@ -4306,4 +4306,20 @@ final class ItalianStrings extends Strings {
   String get commandNeedPlainNote => 'Richiede una nota aperta senza un tipo';
   @override
   String get studyNothingToday => 'Niente da studiare oggi';
+  @override
+  String get featureNameKanban => 'Bacheche Kanban';
+  @override
+  String get newKanbanHere => 'Nuova bacheca Kanban qui';
+  @override
+  String get newKanbanTitle => 'Nuova bacheca Kanban';
+  @override
+  String get newKanbanDefault => 'La mia bacheca';
+  @override
+  String get kanbanColumnTodo => 'Da fare';
+  @override
+  String get kanbanColumnDoing => 'In corso';
+  @override
+  String get kanbanColumnDone => 'Fatto';
+  @override
+  String get showKanbanTooltip => 'Mostra la bacheca';
 }

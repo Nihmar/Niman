@@ -4217,4 +4217,20 @@ final class EnglishStrings extends Strings {
   String get commandNeedPlainNote => 'Needs an open note of no particular type';
   @override
   String get studyNothingToday => 'Nothing to study today';
+  @override
+  String get featureNameKanban => 'Kanban boards';
+  @override
+  String get newKanbanHere => 'New Kanban board here';
+  @override
+  String get newKanbanTitle => 'New Kanban board';
+  @override
+  String get newKanbanDefault => 'My board';
+  @override
+  String get kanbanColumnTodo => 'To do';
+  @override
+  String get kanbanColumnDoing => 'Doing';
+  @override
+  String get kanbanColumnDone => 'Done';
+  @override
+  String get showKanbanTooltip => 'Show board';
 }

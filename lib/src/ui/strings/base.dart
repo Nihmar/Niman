@@ -2268,4 +2268,13 @@ abstract base class Strings {
   String get makeFlashcardsNone;
   String get commandNeedPlainNote;
   String get studyNothingToday;
+  // Kanban boards (#1166).
+  String get featureNameKanban;
+  String get newKanbanHere;
+  String get newKanbanTitle;
+  String get newKanbanDefault;
+  String get kanbanColumnTodo;
+  String get kanbanColumnDoing;
+  String get kanbanColumnDone;
+  String get showKanbanTooltip;
 }

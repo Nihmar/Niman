@@ -4298,4 +4298,20 @@ final class PortugueseStrings extends Strings {
   String get commandNeedPlainNote => 'Requer uma nota aberta sem tipo';
   @override
   String get studyNothingToday => 'Nada para estudar hoje';
+  @override
+  String get featureNameKanban => 'Quadros Kanban';
+  @override
+  String get newKanbanHere => 'Novo quadro Kanban aqui';
+  @override
+  String get newKanbanTitle => 'Novo quadro Kanban';
+  @override
+  String get newKanbanDefault => 'O meu quadro';
+  @override
+  String get kanbanColumnTodo => 'Por fazer';
+  @override
+  String get kanbanColumnDoing => 'Em curso';
+  @override
+  String get kanbanColumnDone => 'Concluído';
+  @override
+  String get showKanbanTooltip => 'Mostrar o quadro';
 }

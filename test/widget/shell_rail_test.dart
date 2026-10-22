@@ -516,6 +516,7 @@ void main() {
       expect(find.byKey(const Key('tree-menu-new-audio-note')), findsOne);
       expect(find.byKey(const Key('tree-menu-new-slides')), findsOne);
       expect(find.byKey(const Key('tree-menu-new-flashcards')), findsOne);
+      expect(find.byKey(const Key('tree-menu-new-kanban')), findsOne);
       expect(find.byKey(const Key('menu-new-note')), findsNothing);
 
       await tester.tap(find.byKey(const Key('tree-menu-new-folder')));

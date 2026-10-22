@@ -4308,4 +4308,20 @@ final class UkrainianStrings extends Strings {
   String get commandNeedPlainNote => 'Потрібна відкрита нотатка без типу';
   @override
   String get studyNothingToday => 'Сьогодні нічого вчити';
+  @override
+  String get featureNameKanban => 'Канбан-дошки';
+  @override
+  String get newKanbanHere => 'Нова канбан-дошка тут';
+  @override
+  String get newKanbanTitle => 'Нова канбан-дошка';
+  @override
+  String get newKanbanDefault => 'Моя дошка';
+  @override
+  String get kanbanColumnTodo => 'Зробити';
+  @override
+  String get kanbanColumnDoing => 'У роботі';
+  @override
+  String get kanbanColumnDone => 'Готово';
+  @override
+  String get showKanbanTooltip => 'Показати дошку';
 }

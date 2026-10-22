@@ -4364,4 +4364,20 @@ final class GermanStrings extends Strings {
   String get commandNeedPlainNote => 'Benötigt eine geöffnete Notiz ohne Typ';
   @override
   String get studyNothingToday => 'Heute nichts zu lernen';
+  @override
+  String get featureNameKanban => 'Kanban-Boards';
+  @override
+  String get newKanbanHere => 'Neues Kanban-Board hier';
+  @override
+  String get newKanbanTitle => 'Neues Kanban-Board';
+  @override
+  String get newKanbanDefault => 'Mein Board';
+  @override
+  String get kanbanColumnTodo => 'Zu erledigen';
+  @override
+  String get kanbanColumnDoing => 'In Arbeit';
+  @override
+  String get kanbanColumnDone => 'Erledigt';
+  @override
+  String get showKanbanTooltip => 'Board zeigen';
 }

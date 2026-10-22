@@ -36,6 +36,7 @@ void main() {
       expect(featureOf(AppCommand.presenterView), LibraryFeature.kindSlides);
       expect(featureOf(AppCommand.studyDeck), LibraryFeature.kindFlashcards);
       expect(featureOf(AppCommand.tabStudy), LibraryFeature.kindFlashcards);
+      expect(featureOf(AppCommand.newKanban), LibraryFeature.kindKanban);
       expect(featureOf(AppCommand.tabHome), LibraryFeature.home);
     });
 

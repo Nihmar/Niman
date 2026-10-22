@@ -4327,4 +4327,20 @@ final class PolishStrings extends Strings {
   String get commandNeedPlainNote => 'Wymaga otwartej notatki bez typu';
   @override
   String get studyNothingToday => 'Dziś nie ma nic do nauki';
+  @override
+  String get featureNameKanban => 'Tablice Kanban';
+  @override
+  String get newKanbanHere => 'Nowa tablica Kanban tutaj';
+  @override
+  String get newKanbanTitle => 'Nowa tablica Kanban';
+  @override
+  String get newKanbanDefault => 'Moja tablica';
+  @override
+  String get kanbanColumnTodo => 'Do zrobienia';
+  @override
+  String get kanbanColumnDoing => 'W toku';
+  @override
+  String get kanbanColumnDone => 'Gotowe';
+  @override
+  String get showKanbanTooltip => 'Pokaż tablicę';
 }

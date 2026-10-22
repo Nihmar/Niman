@@ -4405,4 +4405,20 @@ final class GreekStrings extends Strings {
   String get commandNeedPlainNote => 'Απαιτεί ανοιχτή σημείωση χωρίς τύπο';
   @override
   String get studyNothingToday => 'Τίποτα για μελέτη σήμερα';
+  @override
+  String get featureNameKanban => 'Πίνακες Kanban';
+  @override
+  String get newKanbanHere => 'Νέος πίνακας Kanban εδώ';
+  @override
+  String get newKanbanTitle => 'Νέος πίνακας Kanban';
+  @override
+  String get newKanbanDefault => 'Ο πίνακάς μου';
+  @override
+  String get kanbanColumnTodo => 'Προς εκτέλεση';
+  @override
+  String get kanbanColumnDoing => 'Σε εξέλιξη';
+  @override
+  String get kanbanColumnDone => 'Ολοκληρώθηκε';
+  @override
+  String get showKanbanTooltip => 'Εμφάνιση πίνακα';
 }

@@ -4217,4 +4217,20 @@ final class HindiStrings extends Strings {
   String get commandNeedPlainNote => 'बिना प्रकार का एक खुला नोट चाहिए';
   @override
   String get studyNothingToday => 'आज पढ़ने के लिए कुछ नहीं';
+  @override
+  String get featureNameKanban => 'कानबन बोर्ड';
+  @override
+  String get newKanbanHere => 'यहाँ नया कानबन बोर्ड';
+  @override
+  String get newKanbanTitle => 'नया कानबन बोर्ड';
+  @override
+  String get newKanbanDefault => 'मेरा बोर्ड';
+  @override
+  String get kanbanColumnTodo => 'करना है';
+  @override
+  String get kanbanColumnDoing => 'जारी है';
+  @override
+  String get kanbanColumnDone => 'पूर्ण';
+  @override
+  String get showKanbanTooltip => 'बोर्ड दिखाएँ';
 }

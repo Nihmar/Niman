@@ -4290,4 +4290,20 @@ final class SlovenianStrings extends Strings {
   String get commandNeedPlainNote => 'Zahteva odprt zapisek brez vrste';
   @override
   String get studyNothingToday => 'Danes ni ničesar za učenje';
+  @override
+  String get featureNameKanban => 'Kanban table';
+  @override
+  String get newKanbanHere => 'Nova kanban tabla sem';
+  @override
+  String get newKanbanTitle => 'Nova kanban tabla';
+  @override
+  String get newKanbanDefault => 'Moja tabla';
+  @override
+  String get kanbanColumnTodo => 'Za narediti';
+  @override
+  String get kanbanColumnDoing => 'V teku';
+  @override
+  String get kanbanColumnDone => 'Opravljeno';
+  @override
+  String get showKanbanTooltip => 'Pokaži tablo';
 }

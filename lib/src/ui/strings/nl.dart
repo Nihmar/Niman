@@ -4319,4 +4319,20 @@ final class DutchStrings extends Strings {
   String get commandNeedPlainNote => 'Vereist een geopende notitie zonder type';
   @override
   String get studyNothingToday => 'Vandaag niets te studeren';
+  @override
+  String get featureNameKanban => 'Kanbanborden';
+  @override
+  String get newKanbanHere => 'Nieuw kanbanbord hier';
+  @override
+  String get newKanbanTitle => 'Nieuw kanbanbord';
+  @override
+  String get newKanbanDefault => 'Mijn bord';
+  @override
+  String get kanbanColumnTodo => 'Te doen';
+  @override
+  String get kanbanColumnDoing => 'Bezig';
+  @override
+  String get kanbanColumnDone => 'Klaar';
+  @override
+  String get showKanbanTooltip => 'Bord tonen';
 }

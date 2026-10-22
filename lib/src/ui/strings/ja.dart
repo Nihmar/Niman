@@ -3918,4 +3918,20 @@ final class JapaneseStrings extends Strings {
   String get commandNeedPlainNote => '種類のない開いているノートが必要です';
   @override
   String get studyNothingToday => '今日の学習はありません';
+  @override
+  String get featureNameKanban => 'かんばんボード';
+  @override
+  String get newKanbanHere => 'ここに新しいかんばんボード';
+  @override
+  String get newKanbanTitle => '新しいかんばんボード';
+  @override
+  String get newKanbanDefault => 'マイボード';
+  @override
+  String get kanbanColumnTodo => '未着手';
+  @override
+  String get kanbanColumnDoing => '進行中';
+  @override
+  String get kanbanColumnDone => '完了';
+  @override
+  String get showKanbanTooltip => 'ボードを表示';
 }

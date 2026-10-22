@@ -4308,4 +4308,20 @@ final class LithuanianStrings extends Strings {
   String get commandNeedPlainNote => 'Reikia atidaryto užrašo be tipo';
   @override
   String get studyNothingToday => 'Šiandien nėra ką mokytis';
+  @override
+  String get featureNameKanban => 'Kanban lentos';
+  @override
+  String get newKanbanHere => 'Nauja kanban lenta čia';
+  @override
+  String get newKanbanTitle => 'Nauja kanban lenta';
+  @override
+  String get newKanbanDefault => 'Mano lenta';
+  @override
+  String get kanbanColumnTodo => 'Planuojama';
+  @override
+  String get kanbanColumnDoing => 'Vykdoma';
+  @override
+  String get kanbanColumnDone => 'Atlikta';
+  @override
+  String get showKanbanTooltip => 'Rodyti lentą';
 }

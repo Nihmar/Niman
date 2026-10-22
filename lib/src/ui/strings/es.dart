@@ -4338,4 +4338,20 @@ final class SpanishStrings extends Strings {
   String get commandNeedPlainNote => 'Requiere una nota abierta sin tipo';
   @override
   String get studyNothingToday => 'Nada que estudiar hoy';
+  @override
+  String get featureNameKanban => 'Tableros Kanban';
+  @override
+  String get newKanbanHere => 'Nuevo tablero Kanban aquí';
+  @override
+  String get newKanbanTitle => 'Nuevo tablero Kanban';
+  @override
+  String get newKanbanDefault => 'Mi tablero';
+  @override
+  String get kanbanColumnTodo => 'Por hacer';
+  @override
+  String get kanbanColumnDoing => 'En curso';
+  @override
+  String get kanbanColumnDone => 'Hecho';
+  @override
+  String get showKanbanTooltip => 'Mostrar el tablero';
 }

@@ -2163,4 +2163,12 @@ final class AppStrings {
   static String get makeFlashcardsNone => _s.makeFlashcardsNone;
   static String get commandNeedPlainNote => _s.commandNeedPlainNote;
   static String get studyNothingToday => _s.studyNothingToday;
+  static String get featureNameKanban => _s.featureNameKanban;
+  static String get newKanbanHere => _s.newKanbanHere;
+  static String get newKanbanTitle => _s.newKanbanTitle;
+  static String get newKanbanDefault => _s.newKanbanDefault;
+  static String get kanbanColumnTodo => _s.kanbanColumnTodo;
+  static String get kanbanColumnDoing => _s.kanbanColumnDoing;
+  static String get kanbanColumnDone => _s.kanbanColumnDone;
+  static String get showKanbanTooltip => _s.showKanbanTooltip;
 }

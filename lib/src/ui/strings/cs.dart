@@ -4261,4 +4261,20 @@ final class CzechStrings extends Strings {
   String get commandNeedPlainNote => 'Vyžaduje otevřenou poznámku bez typu';
   @override
   String get studyNothingToday => 'Dnes není co studovat';
+  @override
+  String get featureNameKanban => 'Kanban tabule';
+  @override
+  String get newKanbanHere => 'Nová kanban tabule zde';
+  @override
+  String get newKanbanTitle => 'Nová kanban tabule';
+  @override
+  String get newKanbanDefault => 'Moje tabule';
+  @override
+  String get kanbanColumnTodo => 'K udělání';
+  @override
+  String get kanbanColumnDoing => 'Rozpracováno';
+  @override
+  String get kanbanColumnDone => 'Hotovo';
+  @override
+  String get showKanbanTooltip => 'Zobrazit tabuli';
 }

@@ -38,6 +38,7 @@ LibraryFeature? featureOf(AppCommand command) => switch (command) {
   AppCommand.deckReset ||
   AppCommand.makeFlashcards ||
   AppCommand.tabStudy => LibraryFeature.kindFlashcards,
+  AppCommand.newKanban => LibraryFeature.kindKanban,
   AppCommand.recognizeText => LibraryFeature.ocr,
   AppCommand.tabHome => LibraryFeature.home,
   AppCommand.newNote ||

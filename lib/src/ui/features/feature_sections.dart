@@ -37,6 +37,7 @@ List<FeatureSection> featureSections() => [
       LibraryFeature.transcription,
       LibraryFeature.kindSlides,
       LibraryFeature.kindFlashcards,
+      LibraryFeature.kindKanban,
     ],
   ),
   (

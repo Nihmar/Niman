@@ -4217,4 +4217,20 @@ final class EstonianStrings extends Strings {
   String get commandNeedPlainNote => 'Vajab avatud tüübita märget';
   @override
   String get studyNothingToday => 'Täna pole midagi õppida';
+  @override
+  String get featureNameKanban => 'Kanbani tahvlid';
+  @override
+  String get newKanbanHere => 'Uus kanbani tahvel siia';
+  @override
+  String get newKanbanTitle => 'Uus kanbani tahvel';
+  @override
+  String get newKanbanDefault => 'Minu tahvel';
+  @override
+  String get kanbanColumnTodo => 'Tegemata';
+  @override
+  String get kanbanColumnDoing => 'Tegemisel';
+  @override
+  String get kanbanColumnDone => 'Tehtud';
+  @override
+  String get showKanbanTooltip => 'Näita tahvlit';
 }

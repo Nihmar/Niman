@@ -184,6 +184,7 @@ void main() {
     await make('menu-new-audio-note', 'Voice', 'audio');
     await make('menu-new-slides', 'Talk', 'slides');
     await make('menu-new-flashcards', 'Deck', 'flashcard');
+    await make('menu-new-kanban', 'Board', 'kanban');
   }, variant: _linux);
 
   testWidgets('Duplicate from the right-click menu copies the file (#1100)', (

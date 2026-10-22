@@ -4303,4 +4303,20 @@ final class FinnishStrings extends Strings {
   String get commandNeedPlainNote => 'Vaatii avoimen tyypittömän muistiinpanon';
   @override
   String get studyNothingToday => 'Tänään ei ole opiskeltavaa';
+  @override
+  String get featureNameKanban => 'Kanban-taulut';
+  @override
+  String get newKanbanHere => 'Uusi kanban-taulu tähän';
+  @override
+  String get newKanbanTitle => 'Uusi kanban-taulu';
+  @override
+  String get newKanbanDefault => 'Oma taulu';
+  @override
+  String get kanbanColumnTodo => 'Tehtävänä';
+  @override
+  String get kanbanColumnDoing => 'Työn alla';
+  @override
+  String get kanbanColumnDone => 'Valmis';
+  @override
+  String get showKanbanTooltip => 'Näytä taulu';
 }

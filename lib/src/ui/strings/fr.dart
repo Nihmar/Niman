@@ -4398,4 +4398,20 @@ final class FrenchStrings extends Strings {
   String get commandNeedPlainNote => 'Nécessite une note ouverte sans type';
   @override
   String get studyNothingToday => 'Rien à réviser aujourd’hui';
+  @override
+  String get featureNameKanban => 'Tableaux Kanban';
+  @override
+  String get newKanbanHere => 'Nouveau tableau Kanban ici';
+  @override
+  String get newKanbanTitle => 'Nouveau tableau Kanban';
+  @override
+  String get newKanbanDefault => 'Mon tableau';
+  @override
+  String get kanbanColumnTodo => 'À faire';
+  @override
+  String get kanbanColumnDoing => 'En cours';
+  @override
+  String get kanbanColumnDone => 'Terminé';
+  @override
+  String get showKanbanTooltip => 'Afficher le tableau';
 }

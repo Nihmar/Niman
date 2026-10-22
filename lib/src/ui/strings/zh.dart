@@ -3821,4 +3821,20 @@ final class ChineseStrings extends Strings {
   String get commandNeedPlainNote => '需要打开一个没有类型的笔记';
   @override
   String get studyNothingToday => '今天没有要学习的内容';
+  @override
+  String get featureNameKanban => '看板';
+  @override
+  String get newKanbanHere => '在此新建看板';
+  @override
+  String get newKanbanTitle => '新建看板';
+  @override
+  String get newKanbanDefault => '我的看板';
+  @override
+  String get kanbanColumnTodo => '待办';
+  @override
+  String get kanbanColumnDoing => '进行中';
+  @override
+  String get kanbanColumnDone => '已完成';
+  @override
+  String get showKanbanTooltip => '显示看板';
 }
