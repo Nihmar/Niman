@@ -14,8 +14,13 @@ import 'package:path/path.dart' as p;
 
 void main() {
   late Directory root;
+  // The logs' times: any fixed day will do.
   final t0 = DateTime(2026, 10, 21, 9);
-  final later = t0.add(const Duration(days: 1));
+  // An upkeep past the grace. The grace is read on the objects' file
+  // times, which the store stamps with the real clock, so this one
+  // comes from that clock too: a day after [t0] was past the grace
+  // only until the morning of that day.
+  final later = DateTime.now().add(const Duration(days: 1));
 
   setUp(() async {
     root = await Directory.current.createTemp('niman_upkeep_');
