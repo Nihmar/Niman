@@ -9,6 +9,8 @@
 /// mixes orientations.
 library;
 
+import 'package:niman/src/export/pdf_printer.dart';
+
 /// The narrowest a column may be on a landscape sheet, in millimetres.
 const double kanbanColumnMinMm = 60;
 
@@ -36,6 +38,9 @@ enum KanbanSheet {
   double get usableMm =>
       (this == landscape ? kanbanA4LongMm : kanbanA4ShortMm) -
       2 * kanbanMarginMm;
+
+  /// The paper a printer is asked for to print this sheet.
+  PdfPaper get paper => this == landscape ? PdfPaper.a4Landscape : PdfPaper.a4;
 }
 
 /// The most columns one row of [sheet] holds at [kanbanColumnMinMm] each,
@@ -59,3 +64,7 @@ final int kanbanPortraitColumns = _columnsPerRow(KanbanSheet.portrait);
 KanbanSheet kanbanSheetFor(int columns) => columns <= kanbanLandscapeColumns
     ? KanbanSheet.landscape
     : KanbanSheet.portrait;
+
+/// The paper a page whose board prints on [sheet] is printed on: a note
+/// with no board ([sheet] null) is A4 portrait, as it always was.
+PdfPaper kanbanPaper(KanbanSheet? sheet) => sheet?.paper ?? PdfPaper.a4;

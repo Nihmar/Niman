@@ -13,8 +13,10 @@ import 'dart:typed_data';
 
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/export/html_page.dart';
+import 'package:niman/src/export/kanban_sheet.dart';
 import 'package:niman/src/export/note_html.dart';
 import 'package:niman/src/export/note_html_source.dart';
+import 'package:niman/src/export/pdf_printer.dart';
 import 'package:niman/src/export/picture_mime.dart';
 import 'package:niman/src/links/embed_path.dart';
 import 'package:niman/src/links/resolver.dart';
@@ -198,14 +200,26 @@ abstract final class ExportSources {
   static Future<String> page(
     NoteHtmlSource source, {
     required String language,
+  }) async => (await printable(source, language: language)).html;
+
+  /// [page], and the paper a printer must be told to print it on (#1170):
+  /// A4 portrait, or A4 landscape for a board whose columns fit one row of
+  /// it. Both come from one parse, off the UI isolate.
+  static Future<({String html, PdfPaper paper})> printable(
+    NoteHtmlSource source, {
+    required String language,
   }) => Isolate.run(() {
     final html = NoteHtml(source);
-    return htmlPage(
-      title: source.title,
-      body: html.body(),
-      fontFaces: html.fontFaces,
-      language: language,
-      board: html.boardSheet,
+    final board = html.boardSheet;
+    return (
+      html: htmlPage(
+        title: source.title,
+        body: html.body(),
+        fontFaces: html.fontFaces,
+        language: language,
+        board: board,
+      ),
+      paper: kanbanPaper(board),
     );
   });
 

@@ -10,13 +10,12 @@
 /// export points elsewhere.
 library;
 
+import 'package:niman/src/export/export_board.dart';
 import 'package:niman/src/export/export_hooks.dart';
 import 'package:niman/src/export/kanban_html.dart';
 import 'package:niman/src/export/kanban_sheet.dart';
 import 'package:niman/src/export/math_svg.dart';
 import 'package:niman/src/export/note_html_source.dart';
-import 'package:niman/src/frontmatter/parser.dart';
-import 'package:niman/src/kanban/board_parser.dart';
 import 'package:niman/src/kanban/kanban_board.dart';
 import 'package:niman/src/markdown/html/html_hooks.dart';
 import 'package:niman/src/markdown/html/tree_html.dart';
@@ -36,10 +35,10 @@ final class NoteHtml {
 
   /// The board the note is, or null for any other note (#1170): a
   /// `type: kanban` note with the Kanban feature on. Read once.
-  late final KanbanBoard? _board =
-      source.kanban && parseFrontmatter(source.text)?.type == 'kanban'
-      ? parseKanban(source.text)
-      : null;
+  late final KanbanBoard? _board = exportedBoard(
+    source.text,
+    kanban: source.kanban,
+  );
 
   /// The note's body as HTML.
   String body() => _render(_hooks);

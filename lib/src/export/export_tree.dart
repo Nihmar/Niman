@@ -246,7 +246,7 @@ final class TreeExport {
         // The isolate's page, printed here: see [TreeExportPrint].
         unawaited(
           const WebViewPdfPrinter()
-              .print(message.htmlPath, message.pdfPath)
+              .print(message.htmlPath, message.pdfPath, paper: message.paper)
               .then(message.reply.send),
         );
       } else if (message is _TreeExportDone) {
@@ -465,7 +465,7 @@ Future<void> _exportTree(TreeExportRequest request) async {
           formulaCount += drawn.formulas;
           sourceCount += drawn.sources;
         } else {
-          final page = ExportTreePages.page(
+          final built = ExportTreePages.built(
             ExportTreePages.readNote(entry.abs),
             entry.rel,
             tree,
@@ -485,13 +485,15 @@ Future<void> _exportTree(TreeExportRequest request) async {
               scratch!,
               request.engine,
               request.runner,
-              page,
+              built.html,
               tree.names[entry.rel]!,
               parent: request.events,
+              // Each note on the sheet of its own (#1170).
+              paper: built.paper,
             );
           } else {
             encoder!.addArchiveFile(
-              ArchiveFile.string('${tree.names[entry.rel]}.html', page),
+              ArchiveFile.string('${tree.names[entry.rel]}.html', built.html),
             );
           }
         }
