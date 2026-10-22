@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:niman/src/kanban/kanban_column.dart';
 import 'package:niman/src/ui/kinds/kanban/kanban_palette.dart';
+import 'package:niman/src/ui/pointer_menu.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// The strip along the top of the phone's board (#1168): one tab per column
@@ -92,7 +93,8 @@ final class KanbanTabStrip extends StatelessWidget {
             icon: const Icon(Icons.more_vert),
             onSelected: (run) => run(),
             itemBuilder: (context) => [
-              PopupMenuItem<VoidCallback>(
+              menuItem<VoidCallback>(
+                context,
                 key: const Key('kanban-column-rename'),
                 value: onRename,
                 child: Row(
@@ -103,7 +105,8 @@ final class KanbanTabStrip extends StatelessWidget {
                   ],
                 ),
               ),
-              PopupMenuItem<VoidCallback>(
+              menuItem<VoidCallback>(
+                context,
                 key: const Key('kanban-column-delete'),
                 value: onDeleteColumn,
                 child: Row(

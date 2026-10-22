@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:niman/src/ui/kinds/kanban/kanban_board_controller.dart';
 import 'package:niman/src/ui/kinds/kanban/kanban_palette.dart';
+import 'package:niman/src/ui/pointer_menu.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// The head of a column (#1167): its name, how many cards it holds and the
@@ -144,7 +145,8 @@ final class _KanbanColumnHeaderState extends State<KanbanColumnHeader> {
             icon: Icon(Icons.more_vert, size: 18, color: palette.muted),
             onSelected: _run,
             itemBuilder: (context) => [
-              PopupMenuItem<_Action>(
+              menuItem<_Action>(
+                context,
                 key: const Key('kanban-column-rename'),
                 value: _Action.rename,
                 child: Row(
@@ -155,7 +157,8 @@ final class _KanbanColumnHeaderState extends State<KanbanColumnHeader> {
                   ],
                 ),
               ),
-              PopupMenuItem<_Action>(
+              menuItem<_Action>(
+                context,
                 key: const Key('kanban-column-delete'),
                 value: _Action.delete,
                 child: Row(
