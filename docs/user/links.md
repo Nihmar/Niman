@@ -456,6 +456,14 @@ the link is one file's gesture. The note says so while they are over it
 shows the "no" cursor — let go there and nothing is written. The tree's own
 drops are unchanged: let go on a folder, the row moves into it.
 
+## Links from a task
+
+A task in `todo.txt` links a note with a wikilink in its text, and the
+forms above all work there: a heading, a block, an alias. The Todo list
+draws it as a chip, a tap opens the note, and a dead one offers to create
+it; a renamed or moved note is followed there as it is in a note. See
+[tasks](tasks.md#links-to-notes).
+
 ## Link button
 
 The editor's link button inserts a wikilink by default; set the

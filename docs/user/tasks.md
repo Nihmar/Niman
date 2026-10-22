@@ -52,7 +52,59 @@ four icons in a pane too narrow for the pills.
   the filter chips.
 - `key:value` tags are annotations. Known: `due:YYYY-MM-DD` (badge,
   filter) and `rem:YYYY-MM-DDTHH:MM` (schedules a reminder).
+- `[[Note]]` is a link to a note (see *Links to notes* below); inside
+  the brackets a `+`, `@`, `#` or `key:` is part of the link, not a
+  token.
 - Untouched lines round-trip byte-stable; edits normalize spacing.
+
+## Links to notes
+
+A task can point at a note: write a wikilink in its text, the way a note
+does. `(A) Call the plumber [[House/Repairs]] due:2026-11-02` links the
+note *Repairs*; a task can hold any number of links. A heading
+(`[[Repairs#Boiler]]`), a block (`[[Repairs#^b7]]`) and an alias
+(`[[Repairs|the plumber's notes]]`) are written as in a note, and a
+Markdown link to a note (`[plumber](House/Repairs.md)`) is read too —
+Niman writes wikilinks. The link is resolved like any other, from the
+library root: a bare name finds the note anywhere, a path finds it by its
+tail, and case does not matter. See [links](links.md) for the forms.
+
+The Todo list draws each link as a **chip** with the note's name, and the
+link's words are taken out of the task's text, so they are not shown
+twice. A link to a heading reads `Repairs › Boiler`, one to a block
+`Repairs › ^b7`; an alias, when you wrote one, is the chip's text. A chip
+you have just typed shows at once, from the words, and settles when the
+library has answered: it never shows as raw `[[…]]`, and nothing in the
+row moves when it does. On a phone the chips sit under the task, after the
+due date and the tokens; on a desktop they follow the task's text on its
+line.
+
+- **Tap** (or click) a chip to open the note. A heading or a block link
+  opens the note scrolled to it, as a wikilink in a note does. On a
+  desktop, hovering a chip says where it goes (`Open House/Repairs.md`).
+  The rest of the row still opens the task.
+- **Long-press** a chip on a phone or a tablet to preview the note in a
+  sheet with an **Open** action, as a long press on a wikilink does
+  (when *Preview a link* is on; see [links](links.md)).
+- A link to a name two notes share asks which one, as in a note.
+- A link to a note that does not exist is a **dead link**: its chip is
+  dashed and dimmed, with a broken-link icon and the name as you wrote it.
+  Tap it to be offered the note, created where a new note goes, as for a
+  dead link in a note; decline and nothing changes.
+
+Typing `[[` in a task — in the dialog, or in the field at the top of the
+list on a desktop — lists the library's notes under the field, the ones the
+editor lists for a wikilink; `#` after a note's name lists its headings and
+`#^` its blocks. Tap one, or move with `↑` / `↓` and press `Enter` or
+`Tab`, to write the link in its shortest form that finds that note alone;
+`Esc` closes the list. The task stays one line.
+
+Renaming or moving a note rewrites the task links that name it, as it does
+a note's (see *Updating the links to what moved* in [links](links.md)).
+
+Other todo.txt tools see the words `[[House/Repairs]]` in the task's text,
+and nothing else: a link is only text on the line, so `todo.txt` stays the
+source of truth and syncs line by line like the rest of it.
 
 ## Editing and deleting
 
@@ -77,8 +129,8 @@ On a desktop the list is driven by the mouse and the keyboard (#712):
   that opens the same menu;
 - a field at the top adds a task per `Enter`, as typed — `+project`,
   `@context` and `due:` included, with the tokens already in the list
-  completed as you type them (`Tab` takes the first) — and keeps the
-  cursor for the next one;
+  completed as you type them (`Tab` takes the first) and `[[` completing
+  a link to a note — and keeps the cursor for the next one;
 - **Filter** and **Sort** open under their pills.
 
 Deleting removes the line from `todo.txt` (or `done.txt`, for a task in
@@ -132,7 +184,8 @@ and toggles a task on a row tap, with the app closed or not. See
 ## The task dialog
 
 Adding or editing a task opens one dialog: the description, with
-completion for the `+project`, `@context` and `#tag` already in use, the
+completion for the `+project`, `@context` and `#tag` already in use and
+for a `[[` link to a note (see *Links to notes*), the
 priority, the due date and the reminder. **Add task** from a day in the
 journal opens the same dialog with that day already set as the due date
 (see [journal](journal.md)). A long description wraps and
