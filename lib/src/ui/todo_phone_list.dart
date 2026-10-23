@@ -12,7 +12,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/logging.dart';
-import 'package:niman/src/todo/parser.dart';
+import 'package:niman/src/todo/task_link_label.dart';
 import 'package:niman/src/todo/todo_list_item.dart';
 import 'package:niman/src/ui/menu_row.dart';
 import 'package:niman/src/ui/pointer_menu.dart';
@@ -138,7 +138,7 @@ final class TodoPhoneList extends StatelessWidget {
   Future<bool> _confirmDelete(BuildContext context, TodoRowItem row) async {
     final entry = row.entry;
     _log.debug('todo swipe: line ${entry.lineIndex}, asking');
-    final display = taskDisplayText(entry.task.description);
+    final display = taskPlainText(entry.task.description);
     final name = '“${display.isEmpty ? entry.task.raw : display}”';
     final confirmed = await showDialog<bool>(
       context: context,

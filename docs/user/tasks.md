@@ -79,6 +79,11 @@ row moves when it does. On a phone the chips sit under the task, after the
 due date and the tokens; on a desktop they follow the task's text on its
 line.
 
+Where a task is shown as plain text — a reminder's notification, the
+home-screen widget, the Home's *Tasks due* tile, the day's due list in the
+journal — a link reads the same words as its chip, `Repairs` or
+`Repairs › Boiler`, never `[[…]]`.
+
 - **Tap** (or click) a chip to open the note. A heading or a block link
   opens the note scrolled to it, as a wikilink in a note does. On a
   desktop, hovering a chip says where it goes (`Open House/Repairs.md`).

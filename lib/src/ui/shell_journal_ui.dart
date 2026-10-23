@@ -17,7 +17,7 @@ import 'package:niman/src/core/settings/library_features.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/journal/journal_settings.dart';
 import 'package:niman/src/library/session.dart';
-import 'package:niman/src/todo/parser.dart';
+import 'package:niman/src/todo/task_link_label.dart';
 import 'package:niman/src/todo/todo_controller.dart';
 import 'package:niman/src/todo/todo_store.dart';
 import 'package:niman/src/ui/journal/journal_browser.dart';
@@ -161,7 +161,7 @@ final class ShellJournalUi {
   List<String> _tasksDueOn(DateTime day) => [
     for (final entry in tasks.snapshot?.todo ?? const <TodoEntry>[])
       if (!entry.task.completed && entry.task.due == day)
-        taskDisplayText(entry.task.description),
+        taskPlainText(entry.task.description),
   ];
 
   /// The text of [day]'s journal entry, for the calendar's recent list.

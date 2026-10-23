@@ -3,13 +3,13 @@
 library;
 
 import 'package:flutter/foundation.dart';
-import 'package:niman/src/links/link_path.dart';
 import 'package:niman/src/links/link_query.dart';
 import 'package:niman/src/links/parser.dart';
 import 'package:niman/src/links/preview_link.dart';
 import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/todo/parser.dart';
 import 'package:niman/src/todo/task_link.dart';
+import 'package:niman/src/todo/task_link_label.dart';
 import 'package:niman/src/todo/task_links.dart';
 
 /// How far a link is known to name a note.
@@ -121,39 +121,21 @@ TaskRowLink _chip(TaskLink link, String description, bool pending) {
     UnresolvedNote() when pending => TaskRowLinkState.pending,
     _ => TaskRowLinkState.dead,
   };
-  final anchor = [for (final level in headingPathOf(link.anchor)) level]
-      .join(_levels);
   final name = switch (state) {
-    TaskRowLinkState.live => _stem(link.notePath!),
-    TaskRowLinkState.dead => _written(link),
-    _ => _stem(_written(link)),
+    TaskRowLinkState.live => noteNameOf(link.notePath!),
+    TaskRowLinkState.dead => writtenNoteOf(link),
+    _ => noteNameOf(writtenNoteOf(link)),
   };
-  final label = link.alias ?? (anchor.isEmpty ? name : '$name$_levels$anchor');
   final preview = switch (link.link) {
     final WikiLink w => PreviewLink.wiki(
       description.substring(w.start + 2, w.end - 2),
     ),
     final MarkdownLink m => PreviewLink.markdown(m.href),
   };
-  return TaskRowLink(link: link, state: state, label: label, preview: preview);
-}
-
-/// Between a note's name and the heading in a chip.
-const String _levels = ' › ';
-
-/// The note a link names, as written: the path of a Markdown link, the
-/// target of a wikilink.
-String _written(TaskLink link) {
-  if (link.link is MarkdownLink) {
-    return LinkPaths.markdownTarget(link.target)?.path ?? link.target;
-  }
-  return link.target;
-}
-
-/// The name of the note at [path], its folder and its `.md` taken off.
-String _stem(String path) {
-  final name = path.substring(path.lastIndexOf('/') + 1);
-  return name.toLowerCase().endsWith('.md')
-      ? name.substring(0, name.length - 3)
-      : name;
+  return TaskRowLink(
+    link: link,
+    state: state,
+    label: taskLinkLabel(link, name),
+    preview: preview,
+  );
 }
