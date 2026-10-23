@@ -4376,4 +4376,57 @@ final class PortugueseStrings extends Strings {
   @override
   String get moveToTasksSubtitle =>
       'Transforma os itens com caixa em tarefas e retira-os da nota';
+  @override
+  String get todoBlockTitle => 'Tarefas';
+  @override
+  String get todoBlockLinkedHere => 'ligadas aqui';
+  @override
+  String todoBlockLinkedTo(String note) => 'ligadas a $note';
+  @override
+  String todoBlockProject(String name) => 'projeto $name';
+  @override
+  String todoBlockContext(String name) => 'contexto $name';
+  @override
+  String todoBlockTag(String name) => 'etiqueta $name';
+  @override
+  String get todoBlockDueOverdue => 'em atraso';
+  @override
+  String get todoBlockDueToday => 'vence hoje';
+  @override
+  String todoBlockDueWithin(int days) => 'vence nos próximos $days dias';
+  @override
+  String todoBlockDueOn(String date) => 'vence $date';
+  @override
+  String todoBlockDueBetween(String from, String to) => 'vence de $from a $to';
+  @override
+  String todoBlockPriority(String range) => 'prioridade $range';
+  @override
+  String get todoBlockDoneOnly => 'concluídas';
+  @override
+  String get todoBlockOpenAndDone => 'abertas e concluídas';
+  @override
+  String get todoBlockSortPriority => 'por prioridade';
+  @override
+  String get todoBlockSortFile => 'na ordem do ficheiro';
+  @override
+  String todoBlockUnknownKey(String key) => 'Chave desconhecida $key';
+  @override
+  String todoBlockUnknownKeySuggest(String key, String suggestion) =>
+      'Chave desconhecida $key — quis dizer $suggestion?';
+  @override
+  String todoBlockBadValue(String key, String value, String expected) =>
+      'Não é possível ler “$value” para $key. Esperado: $expected';
+  @override
+  String todoBlockMissingValue(String key) => '$key precisa de um valor';
+  @override
+  String get todoBlockNoColon => 'Esperado “chave: valor”';
+  @override
+  String todoBlockRepeatedKey(String key) => '$key foi indicada duas vezes';
+  @override
+  String todoBlockLine(int n) => 'Linha $n do bloco';
+  @override
+  String todoBlockNoNote(String name) => 'Nenhuma nota corresponde a $name';
+  @override
+  String todoBlockSeveralNotes(String name) =>
+      'Várias notas correspondem a $name';
 }

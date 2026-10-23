@@ -47,6 +47,7 @@ import 'package:niman/src/markdown/render/markdown_read_view.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/render/scroll_anchor.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
+import 'package:niman/src/markdown/render/todo_block_scope.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/markdown/source_edit.dart';
 import 'package:niman/src/markdown/surface.dart';
@@ -73,6 +74,7 @@ import 'package:niman/src/ui/note_stats.dart';
 import 'package:niman/src/ui/note_task_items.dart';
 import 'package:niman/src/ui/note_tasks_host.dart';
 import 'package:niman/src/ui/note_tasks_section.dart';
+import 'package:niman/src/ui/note_todo_blocks.dart';
 import 'package:niman/src/ui/note_top_bar.dart';
 import 'package:niman/src/ui/note_view_adapters.dart';
 import 'package:niman/src/ui/note_view_chrome.dart';
@@ -1788,7 +1790,7 @@ final class _NoteViewState extends State<NoteView>
     // At the *note* text size, as the preview is (T-M6-12): without this the
     // surface drew the note at the interface size, so the note's size setting
     // did nothing. The find bar above it keeps the interface's.
-    final note = MediaQuery(
+    final live = MediaQuery(
       data: MediaQuery.of(context)
           .copyWith(textScaler: noteTextScalerOf(context)),
       child: MarkdownSurface(
@@ -1853,6 +1855,7 @@ final class _NoteViewState extends State<NoteView>
         },
       ),
     );
+    final note = TodoBlockScope(builder: _todoBlocks, child: live);
     // A row of the tree let go on the note writes a link to its file
     // where the pointer let it go (#704).
     final dropping = TreeLinkDrop(
@@ -1942,6 +1945,18 @@ final class _NoteViewState extends State<NoteView>
   /// reported one.
   int? _surfaceCaretLine;
 
+  /// What draws the note's `todo` fences as lists of tasks (#1152), or null
+  /// where there is no list to draw them from: the Todo feature is off, or the
+  /// note is outside a library. The fence is the code it is on disk then.
+  TodoBlockBuilder? get _todoBlocks {
+    final tasks = widget.tasks;
+    final path = _pathInLibrary;
+    if (tasks == null || path == null || !_features.isOn(LibraryFeature.todo)) {
+      return null;
+    }
+    return NoteTodoBlocks(host: tasks, notePath: path);
+  }
+
   /// The preview, at the *note* text size rather than the interface one
   /// (T-M6-12).
   ///
@@ -1951,29 +1966,32 @@ final class _NoteViewState extends State<NoteView>
   ///
   /// The unified surface's read mode: one engine, the same theme as the editor
   /// (docs/records/unified-surface.md).
-  Widget _buildPreview(BuildContext context) => MediaQuery(
-    data: MediaQuery.of(context)
-        .copyWith(textScaler: noteTextScalerOf(context)),
-    child: MarkdownReadView(
-      key: _readViewKey,
-      buffer: _unifiedSource,
-      parser: _unifiedParser,
-      mathCache: _mathCache,
-      controller: _previewScroll,
-      onTapLink: (text, href) =>
-          unawaited(openHref(context, href ?? '', _linkTargets())),
-      onTapWikiLink: (inner) => unawaited(
-        // The same rule the parser and the preview use, so a wikilink means
-        // one thing however it is drawn. `inner` is the `[[…]]` content, and
-        // `parseWikiRef` reads it (#477 needs the target it names).
-        openWiki(context, parseWikiRef(inner), _linkTargets()),
+  Widget _buildPreview(BuildContext context) => TodoBlockScope(
+    builder: _todoBlocks,
+    child: MediaQuery(
+      data: MediaQuery.of(context)
+          .copyWith(textScaler: noteTextScalerOf(context)),
+      child: MarkdownReadView(
+        key: _readViewKey,
+        buffer: _unifiedSource,
+        parser: _unifiedParser,
+        mathCache: _mathCache,
+        controller: _previewScroll,
+        onTapLink: (text, href) =>
+            unawaited(openHref(context, href ?? '', _linkTargets())),
+        onTapWikiLink: (inner) => unawaited(
+          // The same rule the parser and the preview use, so a wikilink means
+          // one thing however it is drawn. `inner` is the `[[…]]` content, and
+          // `parseWikiRef` reads it (#477 needs the target it names).
+          openWiki(context, parseWikiRef(inner), _linkTargets()),
+        ),
+        embedResolver: _resolveEmbed,
+        deadLinks: _deadLinks,
+        linkPreview: _preview.hooks(context),
+        column: widget.noteColumn,
+        knownScan: _editorScanOf,
+        onToggleTask: _toggleTaskFromRead,
       ),
-      embedResolver: _resolveEmbed,
-      deadLinks: _deadLinks,
-      linkPreview: _preview.hooks(context),
-      column: widget.noteColumn,
-      knownScan: _editorScanOf,
-      onToggleTask: _toggleTaskFromRead,
     ),
   );
 

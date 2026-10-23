@@ -4328,4 +4328,57 @@ final class DanishStrings extends Strings {
   @override
   String get moveToTasksSubtitle =>
       'Gør afkrydsningspunkter til opgaver og fjerner dem fra noten';
+  @override
+  String get todoBlockTitle => 'Opgaver';
+  @override
+  String get todoBlockLinkedHere => 'knyttet hertil';
+  @override
+  String todoBlockLinkedTo(String note) => 'knyttet til $note';
+  @override
+  String todoBlockProject(String name) => 'projekt $name';
+  @override
+  String todoBlockContext(String name) => 'kontekst $name';
+  @override
+  String todoBlockTag(String name) => 'tag $name';
+  @override
+  String get todoBlockDueOverdue => 'forfaldne';
+  @override
+  String get todoBlockDueToday => 'forfalder i dag';
+  @override
+  String todoBlockDueWithin(int days) => 'forfalder inden for $days dage';
+  @override
+  String todoBlockDueOn(String date) => 'forfalder $date';
+  @override
+  String todoBlockDueBetween(String from, String to) =>
+      'forfalder fra $from til $to';
+  @override
+  String todoBlockPriority(String range) => 'prioritet $range';
+  @override
+  String get todoBlockDoneOnly => 'udførte';
+  @override
+  String get todoBlockOpenAndDone => 'åbne og udførte';
+  @override
+  String get todoBlockSortPriority => 'efter prioritet';
+  @override
+  String get todoBlockSortFile => 'i filens rækkefølge';
+  @override
+  String todoBlockUnknownKey(String key) => 'Ukendt nøgle $key';
+  @override
+  String todoBlockUnknownKeySuggest(String key, String suggestion) =>
+      'Ukendt nøgle $key — mente du $suggestion?';
+  @override
+  String todoBlockBadValue(String key, String value, String expected) =>
+      'Kan ikke læse “$value” for $key. Forventet: $expected';
+  @override
+  String todoBlockMissingValue(String key) => '$key mangler en værdi';
+  @override
+  String get todoBlockNoColon => 'Forventet “nøgle: værdi”';
+  @override
+  String todoBlockRepeatedKey(String key) => '$key er angivet to gange';
+  @override
+  String todoBlockLine(int n) => 'Linje $n i blokken';
+  @override
+  String todoBlockNoNote(String name) => 'Ingen note passer til $name';
+  @override
+  String todoBlockSeveralNotes(String name) => 'Flere noter passer til $name';
 }

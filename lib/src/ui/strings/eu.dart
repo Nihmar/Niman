@@ -4406,4 +4406,58 @@ final class BasqueStrings extends Strings {
   @override
   String get moveToTasksSubtitle =>
       'Laukidun elementuak zeregin bihurtzen ditu eta oharretik kentzen ditu';
+  @override
+  String get todoBlockTitle => 'Zereginak';
+  @override
+  String get todoBlockLinkedHere => 'hemen estekatuak';
+  @override
+  String todoBlockLinkedTo(String note) => '$note oharrari estekatuak';
+  @override
+  String todoBlockProject(String name) => '$name proiektua';
+  @override
+  String todoBlockContext(String name) => '$name testuingurua';
+  @override
+  String todoBlockTag(String name) => '$name etiketa';
+  @override
+  String get todoBlockDueOverdue => 'epez kanpo';
+  @override
+  String get todoBlockDueToday => 'gaur epea';
+  @override
+  String todoBlockDueWithin(int days) => 'epea $days egunen barruan';
+  @override
+  String todoBlockDueOn(String date) => 'epea $date';
+  @override
+  String todoBlockDueBetween(String from, String to) =>
+      'epea $from eta $to artean';
+  @override
+  String todoBlockPriority(String range) => '$range lehentasuna';
+  @override
+  String get todoBlockDoneOnly => 'eginak';
+  @override
+  String get todoBlockOpenAndDone => 'irekiak eta eginak';
+  @override
+  String get todoBlockSortPriority => 'lehentasunaren arabera';
+  @override
+  String get todoBlockSortFile => 'fitxategiaren ordenan';
+  @override
+  String todoBlockUnknownKey(String key) => 'Gako ezezaguna: $key';
+  @override
+  String todoBlockUnknownKeySuggest(String key, String suggestion) =>
+      'Gako ezezaguna: $key — $suggestion esan nahi zenuen?';
+  @override
+  String todoBlockBadValue(String key, String value, String expected) =>
+      '“$value” ezin da $key gakoarentzat irakurri. Espero da: $expected';
+  @override
+  String todoBlockMissingValue(String key) => '$key gakoak balioa behar du';
+  @override
+  String get todoBlockNoColon => '“gakoa: balioa” espero da';
+  @override
+  String todoBlockRepeatedKey(String key) => '$key bitan eman da';
+  @override
+  String todoBlockLine(int n) => 'Blokearen $n. lerroa';
+  @override
+  String todoBlockNoNote(String name) => 'Ez dago $name izeneko oharrik';
+  @override
+  String todoBlockSeveralNotes(String name) =>
+      'Ohar batzuk bat datoz $name izenarekin';
 }

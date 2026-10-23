@@ -8,6 +8,7 @@ import 'package:flutter/painting.dart' show Rect;
 import 'package:flutter/widgets.dart' show BuildContext;
 import 'package:niman/src/links/library_links.dart';
 import 'package:niman/src/links/parser.dart';
+import 'package:niman/src/links/resolver.dart' show ResolveResult;
 import 'package:niman/src/links/suggester.dart';
 import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/todo/task_links.dart';
@@ -38,7 +39,8 @@ final class TodoLinkHost {
     required LibraryLinks? Function() source,
     required bool Function() previewEnabled,
     this.suggester,
-  }) : _previews = LinkPreviewController(
+  }) : _source = source,
+       _previews = LinkPreviewController(
          source: source,
          notePath: () => todoFileName,
          enabled: previewEnabled,
@@ -55,8 +57,18 @@ final class TodoLinkHost {
   /// [Rect] (null on a phone).
   final NoteLinkTargets Function(Rect? anchor) targets;
 
+  final LibraryLinks? Function() _source;
   final LinkPreviewController _previews;
   final MathCache _math = MathCache();
+
+  /// What the wikilink target [target], written in the note at library-relative
+  /// [from], names; null while no library's links are open.
+  Future<ResolveResult?> resolveWiki(String target, {String? from}) {
+    final links = _source();
+    return links == null
+        ? Future<ResolveResult?>.value()
+        : links.resolveWiki(target, from: from);
+  }
 
   /// Follows [chip] as a tap on it in a note would: the note opens (at its
   /// heading or block), a name two notes share asks which, and a note that

@@ -4338,4 +4338,57 @@ final class CzechStrings extends Strings {
   @override
   String get moveToTasksSubtitle =>
       'Změní položky s polem na úkoly a odebere je z poznámky';
+  @override
+  String get todoBlockTitle => 'Úkoly';
+  @override
+  String get todoBlockLinkedHere => 'propojené s touto poznámkou';
+  @override
+  String todoBlockLinkedTo(String note) => 'propojené s $note';
+  @override
+  String todoBlockProject(String name) => 'projekt $name';
+  @override
+  String todoBlockContext(String name) => 'kontext $name';
+  @override
+  String todoBlockTag(String name) => 'štítek $name';
+  @override
+  String get todoBlockDueOverdue => 'po termínu';
+  @override
+  String get todoBlockDueToday => 'termín dnes';
+  @override
+  String todoBlockDueWithin(int days) => 'termín do $days dní';
+  @override
+  String todoBlockDueOn(String date) => 'termín $date';
+  @override
+  String todoBlockDueBetween(String from, String to) =>
+      'termín od $from do $to';
+  @override
+  String todoBlockPriority(String range) => 'priorita $range';
+  @override
+  String get todoBlockDoneOnly => 'hotové';
+  @override
+  String get todoBlockOpenAndDone => 'otevřené i hotové';
+  @override
+  String get todoBlockSortPriority => 'podle priority';
+  @override
+  String get todoBlockSortFile => 'v pořadí souboru';
+  @override
+  String todoBlockUnknownKey(String key) => 'Neznámý klíč $key';
+  @override
+  String todoBlockUnknownKeySuggest(String key, String suggestion) =>
+      'Neznámý klíč $key — mysleli jste $suggestion?';
+  @override
+  String todoBlockBadValue(String key, String value, String expected) =>
+      'Nelze přečíst „$value“ pro $key. Očekává se: $expected';
+  @override
+  String todoBlockMissingValue(String key) => '$key potřebuje hodnotu';
+  @override
+  String get todoBlockNoColon => 'Očekává se „klíč: hodnota“';
+  @override
+  String todoBlockRepeatedKey(String key) => '$key je uveden dvakrát';
+  @override
+  String todoBlockLine(int n) => 'Řádek $n bloku';
+  @override
+  String todoBlockNoNote(String name) => 'Žádná poznámka neodpovídá $name';
+  @override
+  String todoBlockSeveralNotes(String name) => 'Více poznámek odpovídá $name';
 }

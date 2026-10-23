@@ -4341,4 +4341,58 @@ final class LatvianStrings extends Strings {
   @override
   String get moveToTasksSubtitle =>
       'Pārvērš punktus ar izvēles rūtiņu uzdevumos un noņem tos no piezīmes';
+  @override
+  String get todoBlockTitle => 'Uzdevumi';
+  @override
+  String get todoBlockLinkedHere => 'saistīti ar šo';
+  @override
+  String todoBlockLinkedTo(String note) => 'saistīti ar $note';
+  @override
+  String todoBlockProject(String name) => 'projekts $name';
+  @override
+  String todoBlockContext(String name) => 'konteksts $name';
+  @override
+  String todoBlockTag(String name) => 'birka $name';
+  @override
+  String get todoBlockDueOverdue => 'nokavēti';
+  @override
+  String get todoBlockDueToday => 'termiņš šodien';
+  @override
+  String todoBlockDueWithin(int days) => 'termiņš tuvāko $days dienu laikā';
+  @override
+  String todoBlockDueOn(String date) => 'termiņš $date';
+  @override
+  String todoBlockDueBetween(String from, String to) =>
+      'termiņš no $from līdz $to';
+  @override
+  String todoBlockPriority(String range) => 'prioritāte $range';
+  @override
+  String get todoBlockDoneOnly => 'izpildīti';
+  @override
+  String get todoBlockOpenAndDone => 'atvērti un izpildīti';
+  @override
+  String get todoBlockSortPriority => 'pēc prioritātes';
+  @override
+  String get todoBlockSortFile => 'faila secībā';
+  @override
+  String todoBlockUnknownKey(String key) => 'Nezināma atslēga $key';
+  @override
+  String todoBlockUnknownKeySuggest(String key, String suggestion) =>
+      'Nezināma atslēga $key — vai domājāt $suggestion?';
+  @override
+  String todoBlockBadValue(String key, String value, String expected) =>
+      'Nevar nolasīt “$value” atslēgai $key. Gaidīts: $expected';
+  @override
+  String todoBlockMissingValue(String key) => '$key vajag vērtību';
+  @override
+  String get todoBlockNoColon => 'Gaidīts “atslēga: vērtība”';
+  @override
+  String todoBlockRepeatedKey(String key) => '$key norādīta divreiz';
+  @override
+  String todoBlockLine(int n) => 'Bloka $n. rindiņa';
+  @override
+  String todoBlockNoNote(String name) => 'Neviena piezīme neatbilst $name';
+  @override
+  String todoBlockSeveralNotes(String name) =>
+      'Vairākas piezīmes atbilst $name';
 }

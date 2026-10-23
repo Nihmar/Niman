@@ -5,6 +5,7 @@ library;
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';
+import 'package:niman/src/links/resolver.dart' show ResolveResult;
 import 'package:niman/src/todo/reminders.dart';
 import 'package:niman/src/todo/task_links.dart';
 import 'package:niman/src/todo/todo_controller.dart';
@@ -53,6 +54,9 @@ final class NoteTasksHost {
   /// The day the due badges are told against.
   DateTime get today => todoDayOf(clock);
 
+  /// The tasks as the controller holds them, or null before they are read.
+  TodoSnapshot? get snapshot => controller.snapshot;
+
   /// Ticks an open task, or reopens a [done] one.
   Future<void> toggle(TodoEntry entry, {required bool done}) =>
       done ? controller.uncheck(entry) : controller.check(entry);
@@ -86,6 +90,11 @@ final class NoteTasksHost {
     final lead = oneLine(selection);
     await addTask(lead.isEmpty ? ' $link' : '$lead $link');
   }
+
+  /// What the wikilink target [target], written in the note at library-relative
+  /// [from], names: a `todo` block's `link: [[Note]]`.
+  Future<ResolveResult?> resolveNote(String target, {required String from}) =>
+      links.resolveWiki(target, from: from);
 
   /// The wikilink that names the note at [notePath] alone.
   Future<String> linkTo(String notePath) async {

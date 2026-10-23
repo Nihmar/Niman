@@ -16,7 +16,11 @@ import 'package:niman/src/todo/todo_block_query.dart';
 @immutable
 final class TodoBlock {
   /// A block of [query] and [errors].
-  const new({required this.query, this.errors = const <TodoBlockError>[]});
+  const new({
+    required this.query,
+    this.errors = const <TodoBlockError>[],
+    this.linkLine = 0,
+  });
 
   /// Reads the body of a fence, [source], one `key: value` to a line.
   ///
@@ -29,6 +33,10 @@ final class TodoBlock {
 
   /// The lines that could not be read, in order.
   final List<TodoBlockError> errors;
+
+  /// The line `link:` is on (1-based), or 0 when the block has none: where a
+  /// note it names that is not there is pointed at.
+  final int linkLine;
 
   /// Whether some line could not be read.
   bool get hasErrors => errors.isNotEmpty;
@@ -45,6 +53,7 @@ final class _Reader {
   final Set<String> seen = <String>{};
 
   TodoBlockLink link = const LinkThis();
+  int linkLine = 0;
   final List<String> projects = <String>[];
   final List<String> contexts = <String>[];
   final List<String> tags = <String>[];
@@ -73,6 +82,7 @@ final class _Reader {
         sort: sort,
       ),
       errors: errors,
+      linkLine: linkLine,
     );
   }
 
@@ -106,6 +116,8 @@ final class _Reader {
       fail(TodoBlockErrorKind.repeatedKey);
     } else if (!_take(key, value)) {
       fail(TodoBlockErrorKind.badValue);
+    } else if (key == 'link') {
+      linkLine = n;
     }
   }
 

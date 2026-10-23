@@ -4349,4 +4349,58 @@ final class IcelandicStrings extends Strings {
   @override
   String get moveToTasksSubtitle =>
       'Breytir liðum með gátreit í verkefni og tekur þá úr minnispunktinum';
+  @override
+  String get todoBlockTitle => 'Verkefni';
+  @override
+  String get todoBlockLinkedHere => 'tengd hingað';
+  @override
+  String todoBlockLinkedTo(String note) => 'tengd við $note';
+  @override
+  String todoBlockProject(String name) => 'verkefni $name';
+  @override
+  String todoBlockContext(String name) => 'samhengi $name';
+  @override
+  String todoBlockTag(String name) => 'merki $name';
+  @override
+  String get todoBlockDueOverdue => 'komin fram yfir skiladag';
+  @override
+  String get todoBlockDueToday => 'skiladagur í dag';
+  @override
+  String todoBlockDueWithin(int days) => 'skiladagur innan $days daga';
+  @override
+  String todoBlockDueOn(String date) => 'skiladagur $date';
+  @override
+  String todoBlockDueBetween(String from, String to) =>
+      'skiladagur frá $from til $to';
+  @override
+  String todoBlockPriority(String range) => 'forgangur $range';
+  @override
+  String get todoBlockDoneOnly => 'lokið';
+  @override
+  String get todoBlockOpenAndDone => 'opin og kláruð';
+  @override
+  String get todoBlockSortPriority => 'eftir forgangi';
+  @override
+  String get todoBlockSortFile => 'í röð skrárinnar';
+  @override
+  String todoBlockUnknownKey(String key) => 'Óþekktur lykill $key';
+  @override
+  String todoBlockUnknownKeySuggest(String key, String suggestion) =>
+      'Óþekktur lykill $key — áttirðu við $suggestion?';
+  @override
+  String todoBlockBadValue(String key, String value, String expected) =>
+      'Ekki er hægt að lesa “$value” fyrir $key. Búist var við: $expected';
+  @override
+  String todoBlockMissingValue(String key) => '$key þarf gildi';
+  @override
+  String get todoBlockNoColon => 'Búist var við “lykill: gildi”';
+  @override
+  String todoBlockRepeatedKey(String key) => '$key er gefinn tvisvar';
+  @override
+  String todoBlockLine(int n) => 'Lína $n í blokkinni';
+  @override
+  String todoBlockNoNote(String name) => 'Engin minnispunktur passar við $name';
+  @override
+  String todoBlockSeveralNotes(String name) =>
+      'Margir minnispunktar passa við $name';
 }

@@ -2203,4 +2203,35 @@ final class AppStrings {
   static String get moveToTasksHasSubItems => _s.moveToTasksHasSubItems;
   static String get moveToTasksNeedsItem => _s.moveToTasksNeedsItem;
   static String get moveToTasksSubtitle => _s.moveToTasksSubtitle;
+  static String get todoBlockTitle => _s.todoBlockTitle;
+  static String get todoBlockLinkedHere => _s.todoBlockLinkedHere;
+  static String todoBlockLinkedTo(String note) => _s.todoBlockLinkedTo(note);
+  static String todoBlockProject(String name) => _s.todoBlockProject(name);
+  static String todoBlockContext(String name) => _s.todoBlockContext(name);
+  static String todoBlockTag(String name) => _s.todoBlockTag(name);
+  static String get todoBlockDueOverdue => _s.todoBlockDueOverdue;
+  static String get todoBlockDueToday => _s.todoBlockDueToday;
+  static String todoBlockDueWithin(int days) => _s.todoBlockDueWithin(days);
+  static String todoBlockDueOn(String date) => _s.todoBlockDueOn(date);
+  static String todoBlockDueBetween(String from, String to) =>
+      _s.todoBlockDueBetween(from, to);
+  static String todoBlockPriority(String range) => _s.todoBlockPriority(range);
+  static String get todoBlockDoneOnly => _s.todoBlockDoneOnly;
+  static String get todoBlockOpenAndDone => _s.todoBlockOpenAndDone;
+  static String get todoBlockSortPriority => _s.todoBlockSortPriority;
+  static String get todoBlockSortFile => _s.todoBlockSortFile;
+  static String todoBlockUnknownKey(String key) => _s.todoBlockUnknownKey(key);
+  static String todoBlockUnknownKeySuggest(String key, String suggestion) =>
+      _s.todoBlockUnknownKeySuggest(key, suggestion);
+  static String todoBlockBadValue(String key, String value, String expected) =>
+      _s.todoBlockBadValue(key, value, expected);
+  static String todoBlockMissingValue(String key) =>
+      _s.todoBlockMissingValue(key);
+  static String get todoBlockNoColon => _s.todoBlockNoColon;
+  static String todoBlockRepeatedKey(String key) =>
+      _s.todoBlockRepeatedKey(key);
+  static String todoBlockLine(int n) => _s.todoBlockLine(n);
+  static String todoBlockNoNote(String name) => _s.todoBlockNoNote(name);
+  static String todoBlockSeveralNotes(String name) =>
+      _s.todoBlockSeveralNotes(name);
 }

@@ -4404,4 +4404,57 @@ final class PolishStrings extends Strings {
   @override
   String get moveToTasksSubtitle =>
       'Zamienia pozycje z polem wyboru w zadania i usuwa je z notatki';
+  @override
+  String get todoBlockTitle => 'Zadania';
+  @override
+  String get todoBlockLinkedHere => 'powiązane z tą notatką';
+  @override
+  String todoBlockLinkedTo(String note) => 'powiązane z $note';
+  @override
+  String todoBlockProject(String name) => 'projekt $name';
+  @override
+  String todoBlockContext(String name) => 'kontekst $name';
+  @override
+  String todoBlockTag(String name) => 'tag $name';
+  @override
+  String get todoBlockDueOverdue => 'po terminie';
+  @override
+  String get todoBlockDueToday => 'termin dziś';
+  @override
+  String todoBlockDueWithin(int days) => 'termin w ciągu $days dni';
+  @override
+  String todoBlockDueOn(String date) => 'termin $date';
+  @override
+  String todoBlockDueBetween(String from, String to) =>
+      'termin od $from do $to';
+  @override
+  String todoBlockPriority(String range) => 'priorytet $range';
+  @override
+  String get todoBlockDoneOnly => 'zrobione';
+  @override
+  String get todoBlockOpenAndDone => 'otwarte i zrobione';
+  @override
+  String get todoBlockSortPriority => 'według priorytetu';
+  @override
+  String get todoBlockSortFile => 'w kolejności pliku';
+  @override
+  String todoBlockUnknownKey(String key) => 'Nieznany klucz $key';
+  @override
+  String todoBlockUnknownKeySuggest(String key, String suggestion) =>
+      'Nieznany klucz $key — czy chodziło o $suggestion?';
+  @override
+  String todoBlockBadValue(String key, String value, String expected) =>
+      'Nie można odczytać „$value” dla $key. Oczekiwano: $expected';
+  @override
+  String todoBlockMissingValue(String key) => '$key wymaga wartości';
+  @override
+  String get todoBlockNoColon => 'Oczekiwano „klucz: wartość”';
+  @override
+  String todoBlockRepeatedKey(String key) => '$key podano dwa razy';
+  @override
+  String todoBlockLine(int n) => 'Wiersz $n bloku';
+  @override
+  String todoBlockNoNote(String name) => 'Żadna notatka nie pasuje do $name';
+  @override
+  String todoBlockSeveralNotes(String name) => 'Kilka notatek pasuje do $name';
 }

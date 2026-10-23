@@ -4379,4 +4379,58 @@ final class AlbanianStrings extends Strings {
   @override
   String get moveToTasksSubtitle =>
       'I kthen elementet me kuti në detyra dhe i heq nga shënimi';
+  @override
+  String get todoBlockTitle => 'Detyra';
+  @override
+  String get todoBlockLinkedHere => 'të lidhura këtu';
+  @override
+  String todoBlockLinkedTo(String note) => 'të lidhura me $note';
+  @override
+  String todoBlockProject(String name) => 'projekti $name';
+  @override
+  String todoBlockContext(String name) => 'konteksti $name';
+  @override
+  String todoBlockTag(String name) => 'etiketa $name';
+  @override
+  String get todoBlockDueOverdue => 'me afat të kaluar';
+  @override
+  String get todoBlockDueToday => 'afati sot';
+  @override
+  String todoBlockDueWithin(int days) => 'afati brenda $days ditëve';
+  @override
+  String todoBlockDueOn(String date) => 'afati $date';
+  @override
+  String todoBlockDueBetween(String from, String to) =>
+      'afati nga $from deri më $to';
+  @override
+  String todoBlockPriority(String range) => 'përparësia $range';
+  @override
+  String get todoBlockDoneOnly => 'të kryera';
+  @override
+  String get todoBlockOpenAndDone => 'të hapura dhe të kryera';
+  @override
+  String get todoBlockSortPriority => 'sipas përparësisë';
+  @override
+  String get todoBlockSortFile => 'sipas rendit të skedarit';
+  @override
+  String todoBlockUnknownKey(String key) => 'Çelës i panjohur $key';
+  @override
+  String todoBlockUnknownKeySuggest(String key, String suggestion) =>
+      'Çelës i panjohur $key — mos donit të thoshit $suggestion?';
+  @override
+  String todoBlockBadValue(String key, String value, String expected) =>
+      '“$value” nuk lexohet për $key. Pritet: $expected';
+  @override
+  String todoBlockMissingValue(String key) => '$key ka nevojë për një vlerë';
+  @override
+  String get todoBlockNoColon => 'Pritet “çelësi: vlera”';
+  @override
+  String todoBlockRepeatedKey(String key) => '$key është dhënë dy herë';
+  @override
+  String todoBlockLine(int n) => 'Rreshti $n i bllokut';
+  @override
+  String todoBlockNoNote(String name) => 'Asnjë shënim nuk përputhet me $name';
+  @override
+  String todoBlockSeveralNotes(String name) =>
+      'Disa shënime përputhen me $name';
 }

@@ -4366,4 +4366,56 @@ final class SerbianStrings extends Strings {
   @override
   String get moveToTasksSubtitle =>
       'Претвара ставке са кукицом у задатке и уклања их из белешке';
+  @override
+  String get todoBlockTitle => 'Задаци';
+  @override
+  String get todoBlockLinkedHere => 'повезано са овом белешком';
+  @override
+  String todoBlockLinkedTo(String note) => 'повезано са $note';
+  @override
+  String todoBlockProject(String name) => 'пројекат $name';
+  @override
+  String todoBlockContext(String name) => 'контекст $name';
+  @override
+  String todoBlockTag(String name) => 'ознака $name';
+  @override
+  String get todoBlockDueOverdue => 'закаснело';
+  @override
+  String get todoBlockDueToday => 'рок данас';
+  @override
+  String todoBlockDueWithin(int days) => 'рок у наредних $days дана';
+  @override
+  String todoBlockDueOn(String date) => 'рок $date';
+  @override
+  String todoBlockDueBetween(String from, String to) => 'рок од $from до $to';
+  @override
+  String todoBlockPriority(String range) => 'приоритет $range';
+  @override
+  String get todoBlockDoneOnly => 'завршено';
+  @override
+  String get todoBlockOpenAndDone => 'отворено и завршено';
+  @override
+  String get todoBlockSortPriority => 'по приоритету';
+  @override
+  String get todoBlockSortFile => 'редом из датотеке';
+  @override
+  String todoBlockUnknownKey(String key) => 'Непознат кључ $key';
+  @override
+  String todoBlockUnknownKeySuggest(String key, String suggestion) =>
+      'Непознат кључ $key — да ли сте мислили $suggestion?';
+  @override
+  String todoBlockBadValue(String key, String value, String expected) =>
+      'Не могу да прочитам “$value” за $key. Очекује се: $expected';
+  @override
+  String todoBlockMissingValue(String key) => '$key тражи вредност';
+  @override
+  String get todoBlockNoColon => 'Очекује се “кључ: вредност”';
+  @override
+  String todoBlockRepeatedKey(String key) => '$key је наведен двапут';
+  @override
+  String todoBlockLine(int n) => 'Ред $n блока';
+  @override
+  String todoBlockNoNote(String name) => 'Ниједна белешка не одговара $name';
+  @override
+  String todoBlockSeveralNotes(String name) => 'Више белешки одговара $name';
 }

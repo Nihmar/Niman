@@ -4310,4 +4310,58 @@ final class TurkishStrings extends Strings {
   @override
   String get moveToTasksSubtitle =>
       'Onay kutulu öğeleri göreve dönüştürür ve nottan çıkarır';
+  @override
+  String get todoBlockTitle => 'Görevler';
+  @override
+  String get todoBlockLinkedHere => 'buraya bağlı';
+  @override
+  String todoBlockLinkedTo(String note) => '$note notuna bağlı';
+  @override
+  String todoBlockProject(String name) => 'proje $name';
+  @override
+  String todoBlockContext(String name) => 'bağlam $name';
+  @override
+  String todoBlockTag(String name) => 'etiket $name';
+  @override
+  String get todoBlockDueOverdue => 'gecikmiş';
+  @override
+  String get todoBlockDueToday => 'son tarih bugün';
+  @override
+  String todoBlockDueWithin(int days) => 'son tarih $days gün içinde';
+  @override
+  String todoBlockDueOn(String date) => 'son tarih $date';
+  @override
+  String todoBlockDueBetween(String from, String to) =>
+      'son tarih $from – $to arası';
+  @override
+  String todoBlockPriority(String range) => 'öncelik $range';
+  @override
+  String get todoBlockDoneOnly => 'tamamlanan';
+  @override
+  String get todoBlockOpenAndDone => 'açık ve tamamlanan';
+  @override
+  String get todoBlockSortPriority => 'önceliğe göre';
+  @override
+  String get todoBlockSortFile => 'dosya sırasına göre';
+  @override
+  String todoBlockUnknownKey(String key) => 'Bilinmeyen anahtar $key';
+  @override
+  String todoBlockUnknownKeySuggest(String key, String suggestion) =>
+      'Bilinmeyen anahtar $key — şunu mu demek istediniz: $suggestion?';
+  @override
+  String todoBlockBadValue(String key, String value, String expected) =>
+      '$key için “$value” okunamadı. Beklenen: $expected';
+  @override
+  String todoBlockMissingValue(String key) => '$key için bir değer gerekli';
+  @override
+  String get todoBlockNoColon => 'Beklenen “anahtar: değer”';
+  @override
+  String todoBlockRepeatedKey(String key) => '$key iki kez verilmiş';
+  @override
+  String todoBlockLine(int n) => 'Bloğun $n. satırı';
+  @override
+  String todoBlockNoNote(String name) => '$name ile eşleşen not yok';
+  @override
+  String todoBlockSeveralNotes(String name) =>
+      '$name ile birden çok not eşleşiyor';
 }

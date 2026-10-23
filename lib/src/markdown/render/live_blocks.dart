@@ -16,6 +16,7 @@ import 'package:niman/src/markdown/render/diagram_view.dart';
 import 'package:niman/src/markdown/render/embed_view.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/render/math_text.dart';
+import 'package:niman/src/markdown/render/todo_block_scope.dart';
 import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/preview/math_widget.dart';
 
@@ -25,8 +26,9 @@ typedef LiveFormula = ({int start, int end, String tex});
 
 /// A Mermaid diagram as `live` draws it: its fence's lines, `[start, end)`,
 /// and the source between them (#530) — on its first line, the one it is
-/// drawn under, and null on the others, which only hide.
-typedef LiveDiagram = ({int start, int end, String? source});
+/// drawn under, and null on the others, which only hide. A `todo` fence is
+/// drawn the same way, as the list of tasks it asks for (#1152): `todo`.
+typedef LiveDiagram = ({int start, int end, String? source, bool todo});
 
 /// [line] — the formula's first line, its source hidden — with the formula
 /// typeset under it, centred as the read view centres it.
@@ -82,6 +84,39 @@ Widget liveDiagramUnder(
         source: source,
         theme: theme,
         onTapSource: onTapSource,
+      ),
+    ),
+  ],
+);
+
+/// [line] — the fence's first line, its source hidden — with the list of
+/// tasks the `todo` fence asks for drawn under it, as the read view draws it
+/// (#1152).
+///
+/// [onTapSource] and [onPointerDown] are as for [liveDiagramUnder]: a tap on
+/// the head or on an error puts the caret in the block, which shows its
+/// source again.
+Widget liveTodoUnder(
+  Widget line, {
+  required String source,
+  required MarkdownTheme theme,
+  required void Function(PointerDownEvent event) onPointerDown,
+  required void Function(int line) onTapSource,
+}) => Column(
+  crossAxisAlignment: CrossAxisAlignment.stretch,
+  children: <Widget>[
+    line,
+    Listener(
+      onPointerDown: onPointerDown,
+      child: Builder(
+        builder: (context) =>
+            TodoBlockScope.of(context)?.build(
+              context,
+              source: source,
+              theme: theme,
+              onTapSource: onTapSource,
+            ) ??
+            const SizedBox.shrink(),
       ),
     ),
   ],

@@ -4372,4 +4372,56 @@ final class HungarianStrings extends Strings {
   @override
   String get moveToTasksSubtitle =>
       'A jelölőnégyzetes elemeket feladattá alakítja, és kiveszi a jegyzetből';
+  @override
+  String get todoBlockTitle => 'Feladatok';
+  @override
+  String get todoBlockLinkedHere => 'ide kapcsolt';
+  @override
+  String todoBlockLinkedTo(String note) => '$note jegyzethez kapcsolt';
+  @override
+  String todoBlockProject(String name) => '$name projekt';
+  @override
+  String todoBlockContext(String name) => '$name környezet';
+  @override
+  String todoBlockTag(String name) => '$name címke';
+  @override
+  String get todoBlockDueOverdue => 'lejárt';
+  @override
+  String get todoBlockDueToday => 'ma esedékes';
+  @override
+  String todoBlockDueWithin(int days) => 'esedékes $days napon belül';
+  @override
+  String todoBlockDueOn(String date) => 'esedékes: $date';
+  @override
+  String todoBlockDueBetween(String from, String to) => 'esedékes: $from – $to';
+  @override
+  String todoBlockPriority(String range) => 'prioritás: $range';
+  @override
+  String get todoBlockDoneOnly => 'kész';
+  @override
+  String get todoBlockOpenAndDone => 'nyitott és kész';
+  @override
+  String get todoBlockSortPriority => 'prioritás szerint';
+  @override
+  String get todoBlockSortFile => 'a fájl sorrendjében';
+  @override
+  String todoBlockUnknownKey(String key) => 'Ismeretlen kulcs: $key';
+  @override
+  String todoBlockUnknownKeySuggest(String key, String suggestion) =>
+      'Ismeretlen kulcs: $key — erre gondolt: $suggestion?';
+  @override
+  String todoBlockBadValue(String key, String value, String expected) =>
+      'A(z) “$value” nem olvasható a(z) $key kulcshoz. Várható: $expected';
+  @override
+  String todoBlockMissingValue(String key) => 'A(z) $key kulcshoz érték kell';
+  @override
+  String get todoBlockNoColon => 'Várható: “kulcs: érték”';
+  @override
+  String todoBlockRepeatedKey(String key) => 'A(z) $key kétszer szerepel';
+  @override
+  String todoBlockLine(int n) => 'A blokk $n. sora';
+  @override
+  String todoBlockNoNote(String name) => 'Egy jegyzet sem egyezik: $name';
+  @override
+  String todoBlockSeveralNotes(String name) => 'Több jegyzet is egyezik: $name';
 }

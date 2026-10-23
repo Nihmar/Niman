@@ -4383,4 +4383,58 @@ final class FinnishStrings extends Strings {
   String get moveToTasksSubtitle =>
       'Muuttaa valintaruudulliset kohdat '
       'tehtäviksi ja poistaa ne muistiinpanosta';
+  @override
+  String get todoBlockTitle => 'Tehtävät';
+  @override
+  String get todoBlockLinkedHere => 'tähän linkitetyt';
+  @override
+  String todoBlockLinkedTo(String note) => 'linkitetty muistiinpanoon $note';
+  @override
+  String todoBlockProject(String name) => 'projekti $name';
+  @override
+  String todoBlockContext(String name) => 'konteksti $name';
+  @override
+  String todoBlockTag(String name) => 'tunniste $name';
+  @override
+  String get todoBlockDueOverdue => 'myöhässä';
+  @override
+  String get todoBlockDueToday => 'erääntyy tänään';
+  @override
+  String todoBlockDueWithin(int days) => 'erääntyy $days päivän sisällä';
+  @override
+  String todoBlockDueOn(String date) => 'erääntyy $date';
+  @override
+  String todoBlockDueBetween(String from, String to) => 'erääntyy $from–$to';
+  @override
+  String todoBlockPriority(String range) => 'prioriteetti $range';
+  @override
+  String get todoBlockDoneOnly => 'tehdyt';
+  @override
+  String get todoBlockOpenAndDone => 'avoimet ja tehdyt';
+  @override
+  String get todoBlockSortPriority => 'prioriteetin mukaan';
+  @override
+  String get todoBlockSortFile => 'tiedoston järjestyksessä';
+  @override
+  String todoBlockUnknownKey(String key) => 'Tuntematon avain $key';
+  @override
+  String todoBlockUnknownKeySuggest(String key, String suggestion) =>
+      'Tuntematon avain $key — tarkoititko $suggestion?';
+  @override
+  String todoBlockBadValue(String key, String value, String expected) =>
+      'Arvoa “$value” ei voi lukea avaimelle $key. Odotettu: $expected';
+  @override
+  String todoBlockMissingValue(String key) => '$key tarvitsee arvon';
+  @override
+  String get todoBlockNoColon => 'Odotettu “avain: arvo”';
+  @override
+  String todoBlockRepeatedKey(String key) => '$key on annettu kahdesti';
+  @override
+  String todoBlockLine(int n) => 'Lohkon rivi $n';
+  @override
+  String todoBlockNoNote(String name) =>
+      'Mikään muistiinpano ei vastaa nimeä $name';
+  @override
+  String todoBlockSeveralNotes(String name) =>
+      'Useampi muistiinpano vastaa nimeä $name';
 }

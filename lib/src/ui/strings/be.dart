@@ -4390,4 +4390,57 @@ final class BelarusianStrings extends Strings {
   @override
   String get moveToTasksSubtitle =>
       'Зрабіць з пунктаў са сцяжком заданні і прыбраць іх з нататкі';
+  @override
+  String get todoBlockTitle => 'Задачы';
+  @override
+  String get todoBlockLinkedHere => 'звязаныя з гэтай нататкай';
+  @override
+  String todoBlockLinkedTo(String note) => 'звязаныя з $note';
+  @override
+  String todoBlockProject(String name) => 'праект $name';
+  @override
+  String todoBlockContext(String name) => 'кантэкст $name';
+  @override
+  String todoBlockTag(String name) => 'тэг $name';
+  @override
+  String get todoBlockDueOverdue => 'пратэрмінаваныя';
+  @override
+  String get todoBlockDueToday => 'тэрмін сёння';
+  @override
+  String todoBlockDueWithin(int days) => 'тэрмін у бліжэйшыя $days дн.';
+  @override
+  String todoBlockDueOn(String date) => 'тэрмін $date';
+  @override
+  String todoBlockDueBetween(String from, String to) => 'тэрмін з $from па $to';
+  @override
+  String todoBlockPriority(String range) => 'прыярытэт $range';
+  @override
+  String get todoBlockDoneOnly => 'выкананыя';
+  @override
+  String get todoBlockOpenAndDone => 'адкрытыя і выкананыя';
+  @override
+  String get todoBlockSortPriority => 'па прыярытэце';
+  @override
+  String get todoBlockSortFile => 'у парадку файла';
+  @override
+  String todoBlockUnknownKey(String key) => 'Невядомы ключ $key';
+  @override
+  String todoBlockUnknownKeySuggest(String key, String suggestion) =>
+      'Невядомы ключ $key — магчыма, $suggestion?';
+  @override
+  String todoBlockBadValue(String key, String value, String expected) =>
+      'Не ўдалося прачытаць “$value” для $key. Чакаецца: $expected';
+  @override
+  String todoBlockMissingValue(String key) => 'Для $key патрэбна значэнне';
+  @override
+  String get todoBlockNoColon => 'Чакаецца “ключ: значэнне”';
+  @override
+  String todoBlockRepeatedKey(String key) => '$key паказаны двойчы';
+  @override
+  String todoBlockLine(int n) => 'Радок $n блока';
+  @override
+  String todoBlockNoNote(String name) => 'Ніводная нататка не адпавядае $name';
+  @override
+  String todoBlockSeveralNotes(String name) =>
+      'Некалькі нататак адпавядаюць $name';
 }

@@ -4487,4 +4487,59 @@ final class GreekStrings extends Strings {
   String get moveToTasksSubtitle =>
       'Μετατρέπει τα στοιχεία με πλαίσιο ελέγχου '
       'σε καθήκοντα και τα αφαιρεί από τη σημείωση';
+  @override
+  String get todoBlockTitle => 'Εργασίες';
+  @override
+  String get todoBlockLinkedHere => 'συνδεδεμένες εδώ';
+  @override
+  String todoBlockLinkedTo(String note) => 'συνδεδεμένες με $note';
+  @override
+  String todoBlockProject(String name) => 'έργο $name';
+  @override
+  String todoBlockContext(String name) => 'συμφραζόμενο $name';
+  @override
+  String todoBlockTag(String name) => 'ετικέτα $name';
+  @override
+  String get todoBlockDueOverdue => 'εκπρόθεσμες';
+  @override
+  String get todoBlockDueToday => 'προθεσμία σήμερα';
+  @override
+  String todoBlockDueWithin(int days) => 'προθεσμία εντός $days ημερών';
+  @override
+  String todoBlockDueOn(String date) => 'προθεσμία $date';
+  @override
+  String todoBlockDueBetween(String from, String to) =>
+      'προθεσμία από $from έως $to';
+  @override
+  String todoBlockPriority(String range) => 'προτεραιότητα $range';
+  @override
+  String get todoBlockDoneOnly => 'ολοκληρωμένες';
+  @override
+  String get todoBlockOpenAndDone => 'ανοιχτές και ολοκληρωμένες';
+  @override
+  String get todoBlockSortPriority => 'κατά προτεραιότητα';
+  @override
+  String get todoBlockSortFile => 'με τη σειρά του αρχείου';
+  @override
+  String todoBlockUnknownKey(String key) => 'Άγνωστο κλειδί $key';
+  @override
+  String todoBlockUnknownKeySuggest(String key, String suggestion) =>
+      'Άγνωστο κλειδί $key — εννοούσατε $suggestion;';
+  @override
+  String todoBlockBadValue(String key, String value, String expected) =>
+      'Δεν διαβάζεται το “$value” για το $key. Αναμένεται: $expected';
+  @override
+  String todoBlockMissingValue(String key) => 'Το $key χρειάζεται τιμή';
+  @override
+  String get todoBlockNoColon => 'Αναμένεται “κλειδί: τιμή”';
+  @override
+  String todoBlockRepeatedKey(String key) => 'Το $key δίνεται δύο φορές';
+  @override
+  String todoBlockLine(int n) => 'Γραμμή $n του μπλοκ';
+  @override
+  String todoBlockNoNote(String name) =>
+      'Καμία σημείωση δεν ταιριάζει με $name';
+  @override
+  String todoBlockSeveralNotes(String name) =>
+      'Πολλές σημειώσεις ταιριάζουν με $name';
 }

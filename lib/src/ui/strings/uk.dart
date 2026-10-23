@@ -4385,4 +4385,58 @@ final class UkrainianStrings extends Strings {
   @override
   String get moveToTasksSubtitle =>
       'Перетворює пункти з прапорцем на завдання й прибирає їх із нотатки';
+  @override
+  String get todoBlockTitle => 'Завдання';
+  @override
+  String get todoBlockLinkedHere => 'пов’язані з цією нотаткою';
+  @override
+  String todoBlockLinkedTo(String note) => 'пов’язані з $note';
+  @override
+  String todoBlockProject(String name) => 'проєкт $name';
+  @override
+  String todoBlockContext(String name) => 'контекст $name';
+  @override
+  String todoBlockTag(String name) => 'тег $name';
+  @override
+  String get todoBlockDueOverdue => 'прострочені';
+  @override
+  String get todoBlockDueToday => 'термін сьогодні';
+  @override
+  String todoBlockDueWithin(int days) => 'термін протягом $days дн.';
+  @override
+  String todoBlockDueOn(String date) => 'термін $date';
+  @override
+  String todoBlockDueBetween(String from, String to) =>
+      'термін від $from до $to';
+  @override
+  String todoBlockPriority(String range) => 'пріоритет $range';
+  @override
+  String get todoBlockDoneOnly => 'виконані';
+  @override
+  String get todoBlockOpenAndDone => 'відкриті й виконані';
+  @override
+  String get todoBlockSortPriority => 'за пріоритетом';
+  @override
+  String get todoBlockSortFile => 'у порядку файлу';
+  @override
+  String todoBlockUnknownKey(String key) => 'Невідомий ключ $key';
+  @override
+  String todoBlockUnknownKeySuggest(String key, String suggestion) =>
+      'Невідомий ключ $key — можливо, $suggestion?';
+  @override
+  String todoBlockBadValue(String key, String value, String expected) =>
+      'Не вдалося прочитати “$value” для $key. Очікується: $expected';
+  @override
+  String todoBlockMissingValue(String key) => '$key потрібне значення';
+  @override
+  String get todoBlockNoColon => 'Очікується “ключ: значення”';
+  @override
+  String todoBlockRepeatedKey(String key) => '$key вказано двічі';
+  @override
+  String todoBlockLine(int n) => 'Рядок $n блока';
+  @override
+  String todoBlockNoNote(String name) => 'Жодна нотатка не відповідає $name';
+  @override
+  String todoBlockSeveralNotes(String name) =>
+      'Кілька нотаток відповідають $name';
 }

@@ -38,8 +38,10 @@ final class NoteTaskRow extends StatelessWidget {
   /// Whether the task is a line of `done.txt`.
   final bool done;
 
-  /// The note the list is for: the link to it is not drawn.
-  final String notePath;
+  /// The note the list is for, library-relative: the link to it is not drawn.
+  /// Null for a list that is about no note (every task), which draws them
+  /// all.
+  final String? notePath;
 
   /// The wall-clock day for the due state.
   final DateTime today;

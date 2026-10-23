@@ -4445,4 +4445,58 @@ final class GermanStrings extends Strings {
   String get moveToTasksSubtitle =>
       'Macht Punkte mit Kontrollkästchen zu '
       'Aufgaben und nimmt sie aus der Notiz';
+  @override
+  String get todoBlockTitle => 'Aufgaben';
+  @override
+  String get todoBlockLinkedHere => 'hier verknüpft';
+  @override
+  String todoBlockLinkedTo(String note) => 'mit $note verknüpft';
+  @override
+  String todoBlockProject(String name) => 'Projekt $name';
+  @override
+  String todoBlockContext(String name) => 'Kontext $name';
+  @override
+  String todoBlockTag(String name) => 'Tag $name';
+  @override
+  String get todoBlockDueOverdue => 'überfällig';
+  @override
+  String get todoBlockDueToday => 'heute fällig';
+  @override
+  String todoBlockDueWithin(int days) => 'fällig innerhalb von $days Tagen';
+  @override
+  String todoBlockDueOn(String date) => 'fällig $date';
+  @override
+  String todoBlockDueBetween(String from, String to) =>
+      'fällig von $from bis $to';
+  @override
+  String todoBlockPriority(String range) => 'Priorität $range';
+  @override
+  String get todoBlockDoneOnly => 'erledigt';
+  @override
+  String get todoBlockOpenAndDone => 'offen und erledigt';
+  @override
+  String get todoBlockSortPriority => 'nach Priorität';
+  @override
+  String get todoBlockSortFile => 'in Dateireihenfolge';
+  @override
+  String todoBlockUnknownKey(String key) => 'Unbekannter Schlüssel $key';
+  @override
+  String todoBlockUnknownKeySuggest(String key, String suggestion) =>
+      'Unbekannter Schlüssel $key — meinten Sie $suggestion?';
+  @override
+  String todoBlockBadValue(String key, String value, String expected) =>
+      '„$value“ ist für $key nicht lesbar. Erwartet: $expected';
+  @override
+  String todoBlockMissingValue(String key) => '$key braucht einen Wert';
+  @override
+  String get todoBlockNoColon => 'Erwartet „Schlüssel: Wert“';
+  @override
+  String todoBlockRepeatedKey(String key) => '$key ist doppelt angegeben';
+  @override
+  String todoBlockLine(int n) => 'Zeile $n des Blocks';
+  @override
+  String todoBlockNoNote(String name) => 'Keine Notiz passt zu $name';
+  @override
+  String todoBlockSeveralNotes(String name) =>
+      'Mehrere Notizen passen zu $name';
 }
