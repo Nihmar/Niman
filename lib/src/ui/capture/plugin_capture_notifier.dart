@@ -15,6 +15,7 @@
 library;
 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:niman/src/core/android_task.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/todo/todo_reminder.dart';
 import 'package:niman/src/ui/capture/background_capture.dart';
@@ -85,9 +86,11 @@ final class PluginCaptureNotifier implements CaptureNotifier {
         body: body,
         notificationDetails: _working(cancel),
         startType: AndroidServiceStartType.startNotSticky,
-        foregroundServiceTypes: {
-          AndroidServiceForegroundType.foregroundServiceTypeShortService,
-        },
+        // Android 14 has the type; before it the service runs untyped,
+        // which keeps the process alive all the same.
+        foregroundServiceTypes: await supportsShortService()
+            ? {AndroidServiceForegroundType.foregroundServiceTypeShortService}
+            : null,
       );
       _serving = true;
     } on Object catch (error) {

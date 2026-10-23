@@ -5,6 +5,7 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.os.PowerManager
@@ -113,6 +114,9 @@ class MainActivity : FlutterActivity() {
             .setMethodCallHandler { call, result ->
                 when (call.method) {
                     "moveToBack" -> result.success(moveTaskToBack(true))
+                    // The `shortService` foreground type is Android 14's.
+                    "supportsShortService" ->
+                        result.success(Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
                     else -> result.notImplemented()
                 }
             }
@@ -270,7 +274,7 @@ class MainActivity : FlutterActivity() {
      * dropped and the Dart future never resolves; a retry re-checks the
      * grant state first, so the app recovers on the next tap.
      *
-     * minSdk is 34 (the permission is API 30), so it always exists — no version gate.
+     * minSdk is 30 (the permission is API 30), so it always exists — no version gate.
      */
     private fun requestAllFilesAccess(result: MethodChannel.Result) {
         if (Environment.isExternalStorageManager()) {

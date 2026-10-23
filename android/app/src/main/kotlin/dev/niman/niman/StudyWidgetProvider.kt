@@ -142,7 +142,7 @@ class StudyWidgetProvider : HomeWidgetProvider() {
             context,
             id,
             intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE,
+            PendingIntent.FLAG_UPDATE_CURRENT or WidgetBackgroundTemplate.mutableFlag(),
         )
     }
 }

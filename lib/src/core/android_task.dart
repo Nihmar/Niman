@@ -11,6 +11,20 @@ import 'package:niman/src/core/logging.dart';
 
 const MethodChannel _channel = MethodChannel('niman/task');
 
+/// Whether the system knows the `shortService` foreground service type,
+/// which is Android 14's; false elsewhere than Android, and on an older
+/// Android, where the service runs untyped.
+Future<bool> supportsShortService() async {
+  if (!Platform.isAndroid) return false;
+  try {
+    return await _channel.invokeMethod<bool>('supportsShortService') ?? false;
+  } on PlatformException {
+    return false;
+  } on MissingPluginException {
+    return false;
+  }
+}
+
 /// Moves the app behind the one the user came from; elsewhere than
 /// Android, nothing.
 Future<void> moveTaskToBack() async {
