@@ -68,6 +68,7 @@ final class ShellDetailPane extends StatelessWidget {
     this.linkPreview = true,
     this.outlineInDock = false,
     this.spellCheckInDock = false,
+    this.relatedInDock = false,
     this.typewriter = false,
     this.sourceFont = SourceFont.monospace,
     this.cascadeChecklist = true,
@@ -209,6 +210,9 @@ final class ShellDetailPane extends StatelessWidget {
   /// See [NoteView.spellCheckInDock]: the panel has the spelling review
   /// too, so the row leaves its spelling button out.
   final bool spellCheckInDock;
+
+  /// See [NoteView.relatedInDock].
+  final bool relatedInDock;
 
   /// Reports the loaded note's kind.
   final void Function(String? type) onNoteKindChanged;
@@ -412,6 +416,7 @@ final class ShellDetailPane extends StatelessWidget {
     features: features,
     outlineInDock: outlineInDock,
     spellCheckInDock: spellCheckInDock,
+    relatedInDock: relatedInDock,
     // Only the note showing in the focused pane tells the shell what
     // kind it is.
     onNoteKindChanged: (kind) {

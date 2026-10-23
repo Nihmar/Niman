@@ -135,6 +135,13 @@ void main() {
       tester,
     ) async {
       await pumpAt(tester, const Size(1400, 900));
+      // The open panel has the tasks: the note leaves its header out until
+      // the panel is closed.
+      expect(find.byKey(const Key('right-dock')), findsOneWidget);
+      expect(find.byKey(const Key('tasks-for-note-section')), findsNothing);
+      await tester.tap(find.byKey(const Key('dock-toggle')));
+      await settle(tester);
+      expect(find.byKey(const Key('right-dock')), findsNothing);
       expect(find.byKey(const Key('tasks-for-note-section')), findsOneWidget);
       expect(
         tester.widget<Text>(find.byKey(const Key('tasks-for-note-count'))).data,
