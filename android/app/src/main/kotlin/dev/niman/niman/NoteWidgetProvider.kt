@@ -24,9 +24,9 @@ import org.json.JSONObject
  * [NoteItemAddActivity] — a floating dialog over the launcher where the
  * item is typed on the home screen (RemoteViews cannot capture typed
  * text) and lands through the same background path — and the header
- * opens the note. Checked rows render checked through
- * `setCompoundButtonChecked` (a plain `setChecked` is off the RemoteViews
- * allowlist). Normal notes stay read-only (RemoteViews cannot edit text
+ * opens the note. Checked rows show a checked box, not an
+ * unchecked one (RemoteViews cannot set a CheckBox's state before
+ * Android 12; see [NoteWidgetService]). Normal notes stay read-only (RemoteViews cannot edit text
  * in place, and editing and moving rows live in the app). The widget
  * never reads the note file itself.
  */

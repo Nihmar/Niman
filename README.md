@@ -219,7 +219,7 @@ the [issue tracker](https://github.com/Nihmar/Niman/issues).
 
 ## Platforms
 
-- **Android** (minSdk 34, Android 14), **Linux** (Wayland), **Windows**.
+- **Android** (minSdk 30, Android 11), **Linux** (Wayland), **Windows**.
 - macOS and iOS are not built yet, but the code is kept portable.
 
 ## Release

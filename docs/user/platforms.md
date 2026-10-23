@@ -1,6 +1,6 @@
 # Platform notes
 
-Supported today: **Android** (minSdk 34, Android 14), **Linux** (Wayland),
+Supported today: **Android** (minSdk 30, Android 11), **Linux** (Wayland),
 **Windows**, and **macOS** (14 and later) in **preview** — see
 [macOS](#macos) for what it still lacks. **iOS and iPadOS** (17 and later)
 run but are not released yet — see [iOS](#ios).
@@ -39,6 +39,11 @@ the two agree.
 
 ## Android
 
+- **Android version:** Android 11 and later (minSdk 30, the oldest with
+  "All files access"; #1178). Below it the storage model would differ
+  (legacy storage permissions), so it is out of scope for now. Before
+  Android 14 the web-capture service runs untyped, so it has no
+  three-minute limit.
 - **Devices:** 64-bit ARM (`arm64-v8a`). The released APK carries that
   ABI alone: 32-bit ARM was dropped for size (the native libraries came to
   55 MB), and x86-64 is an emulator's, which runs a debug build from
