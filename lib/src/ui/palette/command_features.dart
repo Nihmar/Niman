@@ -24,6 +24,7 @@ LibraryFeature? featureOf(AppCommand command) => switch (command) {
   AppCommand.pasteAsMarkdown => LibraryFeature.capture,
   AppCommand.newTodo ||
   AppCommand.newTaskForNote ||
+  AppCommand.moveToTasks ||
   AppCommand.tabTodo => LibraryFeature.todo,
   AppCommand.journalToday ||
   AppCommand.journalPrevious ||

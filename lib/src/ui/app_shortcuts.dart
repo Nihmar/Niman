@@ -117,6 +117,10 @@ enum AppCommand {
   /// Turn the list at the caret into a mind map (#530).
   convertListToMindMap,
 
+  /// Turn the checkbox items under the selection into todo.txt tasks linked
+  /// to the note (#1152).
+  moveToTasks,
+
   /// Paste the clipboard's HTML as Markdown at the caret (#531).
   pasteAsMarkdown,
 
@@ -473,6 +477,7 @@ String appCommandLabel(AppCommand command) => switch (command) {
   AppCommand.insertMindMap => AppStrings.commandInsertMindMap,
   AppCommand.insertColumns => AppStrings.commandInsertColumns,
   AppCommand.convertListToMindMap => AppStrings.commandConvertListToMindMap,
+  AppCommand.moveToTasks => AppStrings.moveToTasks,
   AppCommand.pasteAsMarkdown => AppStrings.pasteAsMarkdown,
   AppCommand.exportNote => AppStrings.exportTitle,
   AppCommand.recognizeText => AppStrings.ocrRecognizeAction,

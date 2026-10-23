@@ -56,6 +56,7 @@ final class ShellDetailPane extends StatelessWidget {
     this.caretPath,
     this.caretRequest = 0,
     this.onPasteAsMarkdown,
+    this.onMoveToTasks,
     this.reloadToken = 0,
     this.templateFolder,
     this.linksFollowed = 0,
@@ -214,6 +215,9 @@ final class ShellDetailPane extends StatelessWidget {
 
   /// Forwarded to every [NoteView] ([NoteView.onPasteAsMarkdown]).
   final ValueChanged<NoteViewHandle>? onPasteAsMarkdown;
+
+  /// Forwarded to every [NoteView] ([NoteView.onMoveToTasks]).
+  final ValueChanged<NoteViewHandle>? onMoveToTasks;
 
   /// The open notes' unsaved edits (T-PP-11): the detail editor reports
   /// its dirty state here for the window's close guard.
@@ -415,6 +419,7 @@ final class ShellDetailPane extends StatelessWidget {
       if (tab.active && tab.focused) onNoteKindChanged(kind);
     },
     onPasteAsMarkdown: onPasteAsMarkdown,
+    onMoveToTasks: onMoveToTasks,
     unsavedTracker: unsavedTracker,
     statusActions: statusActions,
     spellCheck: spellCheck,

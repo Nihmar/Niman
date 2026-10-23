@@ -38,6 +38,10 @@ final class FakeTodoSource implements TodoSource {
   /// When set, [addLines] throws it before either file is written.
   Exception? addLinesFailureEarly;
 
+  /// Called as [addLines] begins, before anything is written: a test reads
+  /// the state of the world at the moment the files are written.
+  void Function()? onAddLines;
+
   /// The current open lines (for assertions).
   List<String> get todoLines => List<String>.unmodifiable(_todo);
 
@@ -162,6 +166,7 @@ final class FakeTodoSource implements TodoSource {
     required List<String> todo,
     required List<String> done,
   }) async {
+    onAddLines?.call();
     final early = addLinesFailureEarly;
     if (early != null) throw early;
     _version++;

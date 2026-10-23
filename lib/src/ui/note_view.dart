@@ -19,6 +19,8 @@ import 'package:niman/src/editor/md_editing.dart';
 import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/editor/outline.dart';
 import 'package:niman/src/editor/plain_text.dart';
+import 'package:niman/src/editor/task_items.dart';
+import 'package:niman/src/editor/task_items_edit.dart';
 import 'package:niman/src/editor/toolbar_item.dart';
 import 'package:niman/src/editor/toolbar_layout.dart';
 import 'package:niman/src/editor/word_count_index.dart';
@@ -68,6 +70,7 @@ import 'package:niman/src/ui/note_links.dart';
 import 'package:niman/src/ui/note_load_error.dart';
 import 'package:niman/src/ui/note_save_pipeline.dart';
 import 'package:niman/src/ui/note_stats.dart';
+import 'package:niman/src/ui/note_task_items.dart';
 import 'package:niman/src/ui/note_tasks_host.dart';
 import 'package:niman/src/ui/note_tasks_section.dart';
 import 'package:niman/src/ui/note_top_bar.dart';
@@ -150,6 +153,7 @@ final class NoteView extends StatefulWidget {
     this.onNoteKindChanged,
     this.onKindMarkdown,
     this.onPasteAsMarkdown,
+    this.onMoveToTasks,
     this.toolbarTop = false,
     this.zen = false,
     this.typewriter = false,
@@ -388,6 +392,10 @@ final class NoteView extends StatefulWidget {
   /// Paste as Markdown from the editor's menu (#531), run by the shell on
   /// this note; null leaves the entry out.
   final ValueChanged<NoteViewHandle>? onPasteAsMarkdown;
+
+  /// Move to tasks from the editor's menu and Tools sheet (#1152), run by
+  /// the shell on this note; null leaves the entry out.
+  final ValueChanged<NoteViewHandle>? onMoveToTasks;
 
   /// Whether the formatting toolbar sits above the editor (desktop)
   /// instead of below it (phone, where it extends the keyboard).
@@ -630,6 +638,25 @@ final class _NoteViewState extends State<NoteView>
   @override
   void convertListToMindMap() => _commands.convertListToMindMap();
 
+  /// The checkbox items Move to tasks (#1152) reads and takes out.
+  late final NoteTaskItems _taskItems = NoteTaskItems(
+    surface: () => _surface,
+    sourceView: () => _sourceViewKey.currentState,
+    canInsert: () => canInsert,
+    focus: _refocus,
+  );
+
+  @override
+  List<TaskItem> get taskItems => _taskItems.selected();
+
+  @override
+  TakenTaskItems? takeOutTaskItems(List<TaskItem> items) =>
+      mounted ? _taskItems.takeOut(items) : null;
+
+  @override
+  bool putBackTaskItems(TakenTaskItems taken) =>
+      mounted && _taskItems.putBack(taken);
+
   /// Gives the editor the keyboard back after a command — unless a window
   /// or a dialog stands over the note (#772). The cheatsheet's window
   /// inserts while it stays open; Flutter lets a route below take the focus
@@ -674,6 +701,11 @@ final class _NoteViewState extends State<NoteView>
     toolbarLayout: () => widget.toolbarLayout,
     pasteAsMarkdown: () => switch (widget.onPasteAsMarkdown) {
       final paste? => () => paste(this),
+      null => null,
+    },
+    taskItems: _taskItems,
+    moveToTasks: () => switch (widget.onMoveToTasks) {
+      final move? => () => move(this),
       null => null,
     },
     libraryRoot: () => widget.libraryRoot,

@@ -7,6 +7,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/editor/outline.dart';
+import 'package:niman/src/editor/task_items.dart';
+import 'package:niman/src/editor/task_items_edit.dart';
 import 'package:niman/src/links/mentions.dart';
 import 'package:niman/src/ui/dock/links_dock_pane.dart';
 import 'package:niman/src/ui/links_to_note_section.dart';
@@ -46,6 +48,15 @@ final class _Note implements NoteViewHandle {
 
   @override
   void convertListToMindMap() {}
+
+  @override
+  List<TaskItem> get taskItems => const [];
+
+  @override
+  TakenTaskItems? takeOutTaskItems(List<TaskItem> items) => null;
+
+  @override
+  bool putBackTaskItems(TakenTaskItems taken) => false;
 
   @override
   PastedText? pasteText(String text) => null;

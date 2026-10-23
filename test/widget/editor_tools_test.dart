@@ -80,6 +80,53 @@ void main() {
       expect(returned, isFalse, reason: 'the sheet should still be open');
       expect(picked, isNull);
     });
+
+    testWidgets('Move to tasks is a tool, with a reason of its own (#1152)', (
+      tester,
+    ) async {
+      await _pumpOpener<EditorTool>(
+        tester,
+        (context) => showEditorToolsSheet(
+          context,
+          available: const <EditorTool>{},
+          reasons: {EditorTool.moveToTasks: AppStrings.moveToTasksHasSubItems},
+        ),
+        (_) {},
+      );
+      final row = find.byKey(const Key('editor-tool-moveToTasks'));
+      expect(row, findsOneWidget);
+      expect(tester.widget<ListTile>(row).enabled, isFalse);
+      expect(find.text(AppStrings.moveToTasksHasSubItems), findsOneWidget);
+    });
+
+    testWidgets('Move to tasks resolves, and can be left out (#1152)', (
+      tester,
+    ) async {
+      EditorTool? picked;
+      await _pumpOpener<EditorTool>(
+        tester,
+        (context) => showEditorToolsSheet(
+          context,
+          available: const <EditorTool>{EditorTool.moveToTasks},
+        ),
+        (value) => picked = value,
+      );
+      await tester.tap(find.byKey(const Key('editor-tool-moveToTasks')));
+      await settle(tester);
+      expect(picked, EditorTool.moveToTasks);
+
+      await _pumpOpener<EditorTool>(
+        tester,
+        (context) => showEditorToolsSheet(
+          context,
+          available: const <EditorTool>{},
+          hidden: const <EditorTool>{EditorTool.moveToTasks},
+        ),
+        (_) {},
+      );
+      expect(find.byKey(const Key('editor-tool-moveToTasks')), findsNothing);
+      expect(find.byKey(const Key('editor-tool-mindMap')), findsOneWidget);
+    });
   });
 
   group('the count sheet', () {

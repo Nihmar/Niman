@@ -59,6 +59,8 @@ Future<String?> showTodoTaskDialog(
   VoidCallback? onDelete,
   ReminderHealth health = ReminderHealth.ok,
   Future<bool> Function()? onOpenReminderSettings,
+  String? title,
+  String? confirmLabel,
 }) {
   return showDialog<String>(
     context: context,
@@ -72,6 +74,8 @@ Future<String?> showTodoTaskDialog(
       onDelete: initial == null ? null : onDelete,
       health: health,
       onOpenReminderSettings: onOpenReminderSettings,
+      title: title,
+      confirmLabel: confirmLabel,
     ),
   );
 }
@@ -90,6 +94,8 @@ final class _TodoTaskDialog extends StatefulWidget {
     required this.onDelete,
     required this.health,
     required this.onOpenReminderSettings,
+    required this.title,
+    required this.confirmLabel,
   });
 
   final TodoTask? initial;
@@ -116,6 +122,11 @@ final class _TodoTaskDialog extends StatefulWidget {
   /// Opens the system screen that fixes [health]; null leaves the action
   /// out.
   final Future<bool> Function()? onOpenReminderSettings;
+
+  /// The title and the save button's words when they are not the add or
+  /// edit dialog's own.
+  final String? title;
+  final String? confirmLabel;
 
   @override
   State<_TodoTaskDialog> createState() => _TodoTaskDialogState();
@@ -390,7 +401,7 @@ final class _TodoTaskDialogState extends State<_TodoTaskDialog> {
         FilledButton(
           key: const Key('todo-dialog-save'),
           onPressed: _field.text.trim().isEmpty ? null : _save,
-          child: Text(AppStrings.todoSave),
+          child: Text(widget.confirmLabel ?? AppStrings.todoSave),
         ),
       ],
     );
@@ -401,7 +412,8 @@ final class _TodoTaskDialogState extends State<_TodoTaskDialog> {
   /// no room for a third button on a phone.
   Widget _title(bool adding) {
     final text = Text(
-      adding ? AppStrings.todoAddTitle : AppStrings.todoEditTitle,
+      widget.title ??
+          (adding ? AppStrings.todoAddTitle : AppStrings.todoEditTitle),
     );
     final onDelete = widget.onDelete;
     if (onDelete == null) return text;

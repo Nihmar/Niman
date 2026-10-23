@@ -8,6 +8,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/name_sort_key.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/editor/outline.dart';
+import 'package:niman/src/editor/task_items.dart';
+import 'package:niman/src/editor/task_items_edit.dart';
 import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/search/tag_repo.dart';
 import 'package:niman/src/ui/dock/history_dock_pane.dart';
@@ -51,6 +53,15 @@ final class _Note implements NoteViewHandle {
 
   @override
   void convertListToMindMap() {}
+
+  @override
+  List<TaskItem> get taskItems => const [];
+
+  @override
+  TakenTaskItems? takeOutTaskItems(List<TaskItem> items) => null;
+
+  @override
+  bool putBackTaskItems(TakenTaskItems taken) => false;
 
   @override
   PastedText? pasteText(String text) => null;

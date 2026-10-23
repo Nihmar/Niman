@@ -13,6 +13,7 @@ import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/spellcheck/spell_check_sheet.dart';
 import 'package:niman/src/spellcheck/spell_checker.dart';
 import 'package:niman/src/ui/note_edit_commands.dart';
+import 'package:niman/src/ui/note_task_items.dart';
 import 'package:niman/src/ui/note_view_handle.dart';
 
 /// 'teh' is wrong; its suggestion is 'the'.
@@ -60,6 +61,13 @@ void main() {
       indentWidth: () => 2,
       toolbarLayout: () => ToolbarLayout.defaults,
       pasteAsMarkdown: () => null,
+      taskItems: NoteTaskItems(
+        surface: () => surface,
+        sourceView: () => null,
+        canInsert: () => true,
+        focus: () {},
+      ),
+      moveToTasks: () => null,
       libraryRoot: () => null,
       pickImage: () async => null,
       importImage: (_, _) async => '',

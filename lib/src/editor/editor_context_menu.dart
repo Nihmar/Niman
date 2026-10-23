@@ -143,6 +143,7 @@ final class EditorContextMenu extends StatelessWidget {
       icon: action.icon,
       label: action.label,
       active: action.active,
+      tooltip: action.hint,
       onPressed: pressed == null ? null : () => _run(pressed),
       onHover: onHover,
     );
@@ -237,13 +238,19 @@ final class EditorContextMenu extends StatelessWidget {
         AdaptiveTextSelectionToolbar.getButtonLabel(context, item);
     // The bar has no room for a greyed-out word: what cannot run is left
     // out on a phone.
+    bool leads(ContextMenuItem item) => item is ContextMenuAction && item.leads;
     final entries = <(Widget, VoidCallback)>[
+      for (final part in [table, structure])
+        for (final section in part ?? const <List<ContextMenuItem>>[])
+          for (final item in section)
+            if (leads(item)) ?_mobileEntry(context, item),
       for (final item in clipboard)
         if (item.onPressed case final pressed?) (Text(label(item)), pressed),
       if (structure == null) ...[
         for (final part in [table])
           for (final section in part ?? const <List<ContextMenuItem>>[])
-            for (final item in section) ?_mobileEntry(context, item),
+            for (final item in section)
+              if (!leads(item)) ?_mobileEntry(context, item),
         // The active state reads the way the toolbar's does: the format
         // that is on stands out.
         for (final entry in formats)
@@ -266,7 +273,8 @@ final class EditorContextMenu extends StatelessWidget {
           if (item.onPressed case final pressed?) (Text(label(item)), pressed),
         for (final part in [table, structure])
           for (final section in part ?? const <List<ContextMenuItem>>[])
-            for (final item in section) ?_mobileEntry(context, item),
+            for (final item in section)
+              if (!leads(item)) ?_mobileEntry(context, item),
       ],
     ];
     return [
@@ -290,6 +298,23 @@ final class EditorContextMenu extends StatelessWidget {
     ContextMenuAction(:final onPressed?) => (
       Text(item.label, key: Key(item.id)),
       () => _run(onPressed),
+    ),
+    // An action that cannot run but says why keeps its place, dimmed, and
+    // gives its reason when tapped: the bar has no tooltip.
+    ContextMenuAction(:final hint?) => (
+      Text(
+        item.label,
+        key: Key(item.id),
+        style: TextStyle(
+          color: Theme.of(context).colorScheme.onSurface
+              .withValues(alpha: 0.38),
+        ),
+      ),
+      () {
+        onDismiss();
+        ScaffoldMessenger.maybeOf(context)
+            ?.showSnackBar(SnackBar(content: Text(hint)));
+      },
     ),
     ContextMenuAction() => null,
     ContextMenuGroup() => (

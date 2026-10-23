@@ -123,6 +123,7 @@ import 'package:niman/src/ui/kinds/flashcards/review_view.dart';
 import 'package:niman/src/ui/kinds/slides/slides_present.dart';
 import 'package:niman/src/ui/link_update_dialog.dart';
 import 'package:niman/src/ui/mac_menu_bar.dart';
+import 'package:niman/src/ui/move_to_tasks_flow.dart';
 import 'package:niman/src/ui/note_editor_keys.dart';
 import 'package:niman/src/ui/note_link_targets.dart';
 import 'package:niman/src/ui/note_menu.dart';
@@ -1850,6 +1851,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           onNoteKindChanged: _onNoteKindChanged,
           onKindMarkdown: _showKindMarkdown,
           onPasteAsMarkdown: _pasteAsMarkdownOffer,
+          onMoveToTasks: _moveToTasksOffer,
           unsavedTracker: widget.unsavedTracker,
           spellCheck: widget.spellCheck,
           reloadToken: _noteReloadToken,
@@ -4662,6 +4664,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           _panelNote?.insertAtCaret(mermaidMindMapTemplate),
       AppCommand.insertColumns: () => _panelNote?.insertColumns(),
       AppCommand.convertListToMindMap: () => _panelNote?.convertListToMindMap(),
+      AppCommand.moveToTasks: () {
+        if (_panelNote case final note?) _moveToTasks(note);
+      },
       AppCommand.pasteAsMarkdown: () {
         if (_panelNote case final note?) _pasteAsMarkdown(note);
       },
@@ -4870,6 +4875,15 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       commandFeatureOn(AppCommand.pasteAsMarkdown, _features)
       ? _pasteAsMarkdown
       : null;
+
+  /// Move to tasks for the editor's menu and Tools sheet (#1152), or null when
+  /// the library has the Todo feature off: the entry goes with the command.
+  ValueChanged<NoteViewHandle>? get _moveToTasksOffer =>
+      commandFeatureOn(AppCommand.moveToTasks, _features) ? _moveToTasks : null;
+
+  /// Moves the checkbox items under [note]'s selection to the tasks (#1152).
+  void _moveToTasks(NoteViewHandle note) =>
+      unawaited(MoveToTasksFlow(_noteTasks).run(context, note));
 
   /// Pastes the clipboard's HTML into [note] as Markdown (#531).
   void _pasteAsMarkdown(NoteViewHandle note) => unawaited(
@@ -5477,6 +5491,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
                     onNoteKindChanged: _onNoteKindChanged,
                     onTabKind: _onTabKind,
                     onPasteAsMarkdown: _pasteAsMarkdownOffer,
+                    onMoveToTasks: _moveToTasksOffer,
                     unsavedTracker: widget.unsavedTracker,
                     spellCheck: widget.spellCheck,
                     reloadToken: _noteReloadToken,

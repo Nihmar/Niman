@@ -13,6 +13,7 @@ import 'package:niman/src/editor/list_tally_edit.dart';
 import 'package:niman/src/editor/list_to_mindmap.dart' as mindmap;
 import 'package:niman/src/editor/list_window.dart';
 import 'package:niman/src/editor/md_editing.dart';
+import 'package:niman/src/editor/task_items.dart';
 import 'package:niman/src/editor/toolbar_item.dart';
 import 'package:niman/src/editor/toolbar_layout.dart';
 import 'package:niman/src/links/attachment_embed.dart';
@@ -30,6 +31,7 @@ import 'package:niman/src/ui/editor_menu.dart';
 import 'package:niman/src/ui/editor_tools_sheet.dart';
 import 'package:niman/src/ui/heading_level_sheet.dart';
 import 'package:niman/src/ui/list_tally_sheet.dart';
+import 'package:niman/src/ui/note_task_items.dart';
 import 'package:niman/src/ui/note_view_handle.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:path/path.dart' as p;
@@ -64,6 +66,8 @@ final class NoteEditCommands {
     required this.indentWidth,
     required this.toolbarLayout,
     required this.pasteAsMarkdown,
+    required this.taskItems,
+    required this.moveToTasks,
     required this.libraryRoot,
     required this.pickImage,
     required this.importImage,
@@ -110,6 +114,13 @@ final class NoteEditCommands {
 
   /// Paste as Markdown, for the context menu (#531); null leaves it out.
   final VoidCallback? Function() pasteAsMarkdown;
+
+  /// The note's checkbox items (#1152), for Move to tasks' menu entries.
+  final NoteTaskItems taskItems;
+
+  /// Move to tasks, for the context menu and the Tools sheet (#1152); null
+  /// leaves it out.
+  final VoidCallback? Function() moveToTasks;
 
   /// The library root images are imported into; null disables insert.
   final String? Function() libraryRoot;
@@ -226,6 +237,10 @@ final class NoteEditCommands {
       onImage: insertImage,
       onFootnote: _insertFootnote,
       onPasteMarkdown: pasteAsMarkdown(),
+      onMoveToTasks: moveToTasks(),
+      moves: moveToTasks() == null
+          ? MoveAvailability.none
+          : taskItems.availability(),
     );
   }
 
@@ -366,12 +381,22 @@ final class NoteEditCommands {
   /// this side knows which surface is showing, and each one finds its
   /// lists its own way.
   Future<void> _openTools({Rect? anchor}) async {
+    final move = moveToTasks();
+    final moves = move == null
+        ? MoveAvailability.none
+        : taskItems.availability();
     final tool = await showEditorToolsSheet(
       context(),
       available: <EditorTool>{
         if (_hasListToCount) EditorTool.countList,
         if (_hasListAtCaret) EditorTool.mindMap,
+        if (moves == MoveAvailability.ready) EditorTool.moveToTasks,
       },
+      reasons: {
+        if (moves == MoveAvailability.blocked)
+          EditorTool.moveToTasks: AppStrings.moveToTasksHasSubItems,
+      },
+      hidden: <EditorTool>{if (move == null) EditorTool.moveToTasks},
       anchor: anchor,
     );
     if (!mounted() || tool == null) return;
@@ -380,6 +405,8 @@ final class NoteEditCommands {
         await _countList();
       case EditorTool.mindMap:
         convertListToMindMap();
+      case EditorTool.moveToTasks:
+        move?.call();
     }
   }
 

@@ -60,12 +60,14 @@ final class TaskItem {
 /// [blockAt] is the block holding a line, from the scan the caller already
 /// keeps; without one the note is scanned as far as [last] and the item
 /// after it. Reads the range's blocks and the one block after each item,
-/// never the note.
+/// never the note. With [untilMovable], the first item that can be moved
+/// ends the walk: what a menu asks before it offers the command.
 List<TaskItem> taskItemsIn({
   required SourceBuffer buffer,
   required int first,
   required int last,
   Block? Function(int line)? blockAt,
+  bool untilMovable = false,
 }) {
   final blockOf = blockAt ?? BlockScanner(buffer).blockAt;
   final items = <TaskItem>[];
@@ -76,9 +78,28 @@ List<TaskItem> taskItemsIn({
     if (block == null) break;
     final item = _itemOf(buffer, block, blockOf);
     if (item != null) items.add(item);
+    if (untilMovable && (item?.movable ?? false)) break;
     line = block.endLine;
   }
   return items;
+}
+
+/// What Move to tasks can do with the items under the selection.
+enum MoveAvailability {
+  /// No checkbox item with words is there.
+  none,
+
+  /// Items are there, and each one has sub-items.
+  blocked,
+
+  /// At least one item can be moved.
+  ready;
+
+  /// The availability [items] make.
+  static MoveAvailability of(List<TaskItem> items) {
+    if (items.any((item) => item.movable)) return ready;
+    return items.any((item) => item.hasSubItems) ? blocked : none;
+  }
 }
 
 /// The item [block] is, or null when it is not a checkbox item.

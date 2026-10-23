@@ -68,6 +68,7 @@ PaletteGroup? paletteGroup(AppCommand command) => switch (command) {
   AppCommand.insertMindMap ||
   AppCommand.insertColumns ||
   AppCommand.convertListToMindMap ||
+  AppCommand.moveToTasks ||
   AppCommand.pasteAsMarkdown ||
   AppCommand.markdownCheatsheet => PaletteGroup.editor,
   AppCommand.toggleSidebar ||

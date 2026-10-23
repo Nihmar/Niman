@@ -5,6 +5,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:niman/src/editor/context_menu_items.dart';
 import 'package:niman/src/editor/md_editing.dart';
+import 'package:niman/src/editor/task_items.dart';
 import 'package:niman/src/editor/toolbar_item.dart';
 import 'package:niman/src/ui/strings.dart';
 
@@ -16,7 +17,10 @@ typedef MenuCommand = MarkdownEdit Function(String text, TextSelection sel);
 /// command, its `context` lines either side given to it; the image and
 /// the footnote go through their own callbacks. [onPasteMarkdown], when
 /// there is one, opens the menu: Paste as Markdown (#531), which a phone
-/// shows right after the clipboard's Paste.
+/// shows right after the clipboard's Paste. [onMoveToTasks], when there is
+/// one, offers Move to tasks (#1152) first, on the checkbox items [moves]
+/// finds under the selection: greyed with its reason where they all have
+/// sub-items, and left out where there are none.
 ContextMenuPart editorMenu({
   required Set<ToolbarItem> active,
   required int headingLevel,
@@ -24,6 +28,8 @@ ContextMenuPart editorMenu({
   required VoidCallback onImage,
   required VoidCallback onFootnote,
   VoidCallback? onPasteMarkdown,
+  VoidCallback? onMoveToTasks,
+  MoveAvailability moves = MoveAvailability.none,
 }) {
   ContextMenuAction wrap(
     String id,
@@ -72,6 +78,19 @@ ContextMenuPart editorMenu({
   ];
 
   return [
+    if (onMoveToTasks != null && moves != MoveAvailability.none)
+      [
+        ContextMenuAction(
+          id: 'menu-move-to-tasks',
+          label: AppStrings.moveToTasks,
+          icon: Icons.assignment_return_outlined,
+          leads: true,
+          onPressed: moves == MoveAvailability.ready ? onMoveToTasks : null,
+          hint: moves == MoveAvailability.blocked
+              ? AppStrings.moveToTasksHasSubItems
+              : null,
+        ),
+      ],
     if (onPasteMarkdown != null)
       [
         ContextMenuAction(

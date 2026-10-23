@@ -30,6 +30,8 @@ final class ContextMenuAction extends ContextMenuItem {
     required super.icon,
     required this.onPressed,
     this.active = false,
+    this.hint,
+    this.leads = false,
   });
 
   /// What it does, or null when it does not apply.
@@ -37,6 +39,14 @@ final class ContextMenuAction extends ContextMenuItem {
 
   /// Whether its format is on at the caret.
   final bool active;
+
+  /// Why it cannot be done here, while [onPressed] is null: the desktop's
+  /// tooltip on the greyed row, and what a phone's bar says when it is tapped.
+  final String? hint;
+
+  /// Whether a phone's bar shows it before the clipboard's entries: the
+  /// action the writer came to the line's menu for (Move to tasks, #1152).
+  final bool leads;
 }
 
 /// A submenu: its actions, in sections set apart.

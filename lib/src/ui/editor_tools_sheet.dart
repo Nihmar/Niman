@@ -14,10 +14,14 @@ import 'package:niman/src/ui/strings.dart';
 /// that comes and goes is a row nobody learns is there, and the writer
 /// is owed the reason at the moment they look for it rather than after
 /// they tap. A pointer's menu grows from [anchor], the control that
-/// opened it.
+/// opened it. [hidden] tools are not listed at all (a feature the library has
+/// off). [reasons] gives, for a tool that cannot run, a reason of its
+/// own in place of the tool's usual one.
 Future<EditorTool?> showEditorToolsSheet(
   BuildContext context, {
   required Set<EditorTool> available,
+  Map<EditorTool, String> reasons = const <EditorTool, String>{},
+  Set<EditorTool> hidden = const <EditorTool>{},
   Rect? anchor,
 }) {
   return showActionSheet<EditorTool>(
@@ -27,20 +31,21 @@ Future<EditorTool?> showEditorToolsSheet(
     title: AppStrings.editorToolsTitle,
     items: (context) => [
       for (final tool in EditorTool.values)
-        ListTile(
-          key: Key('editor-tool-${tool.name}'),
-          enabled: available.contains(tool),
-          leading: Icon(tool.icon),
-          title: Text(tool.label),
-          subtitle: Text(
-            available.contains(tool)
-                ? tool.description
-                : tool.unavailableReason,
+        if (!hidden.contains(tool))
+          ListTile(
+            key: Key('editor-tool-${tool.name}'),
+            enabled: available.contains(tool),
+            leading: Icon(tool.icon),
+            title: Text(tool.label),
+            subtitle: Text(
+              available.contains(tool)
+                  ? tool.description
+                  : reasons[tool] ?? tool.unavailableReason,
+            ),
+            onTap: available.contains(tool)
+                ? () => Navigator.of(context).pop(tool)
+                : null,
           ),
-          onTap: available.contains(tool)
-              ? () => Navigator.of(context).pop(tool)
-              : null,
-        ),
     ],
   );
 }
