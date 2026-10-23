@@ -10,12 +10,15 @@ import 'package:niman/src/export/html_spans.dart';
 import 'package:niman/src/export/html_text.dart';
 import 'package:niman/src/export/math_svg.dart';
 import 'package:niman/src/export/note_html_source.dart';
+import 'package:niman/src/export/printed_todo_block.dart';
+import 'package:niman/src/export/todo_block_html.dart';
 import 'package:niman/src/links/block_anchors.dart'
     show trailingBlockId, withoutTrailingBlockId;
 import 'package:niman/src/links/parser.dart';
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_node.dart';
 import 'package:niman/src/markdown/callout.dart';
+import 'package:niman/src/markdown/fence_body.dart';
 import 'package:niman/src/markdown/html/html_hooks.dart';
 import 'package:niman/src/markdown/inline/inline_html.dart';
 import 'package:niman/src/markdown/inline/inline_node.dart';
@@ -53,6 +56,8 @@ final class ExportHooks extends HtmlHooks {
   String? leaf(LeafNode leaf, List<String> lines) {
     switch (leaf.kind) {
       case BlockKind.fencedCode:
+        final list = _todoList(lines);
+        if (list != null) return list;
         final diagram = mermaidBlockHtml(lines);
         if (diagram != null) {
           usedDiagram = true;
@@ -75,6 +80,16 @@ final class ExportHooks extends HtmlHooks {
           BlockKind.listItem:
         return null;
     }
+  }
+
+  /// The list a closed `todo` fence of [lines] is, as the export found it, or
+  /// null for any other fence and for one that was not asked for (#1152).
+  String? _todoList(List<String> lines) {
+    final parts = fenceBody(lines);
+    if (parts == null || !parts.closed) return null;
+    if (parts.language.toLowerCase() != 'todo') return null;
+    final printed = source.todoBlocks[todoBlockKey(parts.code)];
+    return printed == null ? null : todoBlockHtml(printed);
   }
 
   @override
@@ -152,6 +167,28 @@ final class ExportHooks extends HtmlHooks {
       return false;
     }
     return _noteHref.hasMatch(lower);
+  }
+}
+
+/// The `todo` fences a page holds, drawn nothing: what an export asks the
+/// tasks about before the page is built (#1152).
+final class TodoBlockSources extends HtmlHooks {
+  /// Hooks that only collect.
+  new();
+
+  /// The source of each closed `todo` fence, in order, as written.
+  final List<String> sources = <String>[];
+
+  @override
+  String? leaf(LeafNode leaf, List<String> lines) {
+    if (leaf.kind != BlockKind.fencedCode) return '';
+    final parts = fenceBody(lines);
+    if (parts != null &&
+        parts.closed &&
+        parts.language.toLowerCase() == 'todo') {
+      sources.add(parts.code);
+    }
+    return '';
   }
 }
 

@@ -4458,4 +4458,88 @@ final class GreekStrings extends Strings {
   String get kanbanEmptyColumn => 'Δεν υπάρχουν κάρτες σε αυτή τη στήλη';
   @override
   String get kanbanEditCard => 'Επεξεργασία κάρτας';
+  @override
+  String taskLinkOpenTooltip(String path) => 'Άνοιγμα $path';
+  @override
+  String get tasksForNoteTitle => 'Καθήκοντα για αυτή τη σημείωση';
+  @override
+  String get tasksForNoteEmpty =>
+      'Κανένα καθήκον δεν παραπέμπει σε αυτή τη σημείωση';
+  @override
+  String get tasksForNoteNew => 'Νέο καθήκον';
+  @override
+  String get tasksForNoteNewHere => 'Νέο καθήκον για αυτή τη σημείωση';
+  @override
+  String get moveToTasks => 'Μετακίνηση σε καθήκοντα';
+  @override
+  String get moveToTasksConfirm => 'Μετακίνηση';
+  @override
+  String get movedToTasksOne => 'Μετακινήθηκε σε καθήκοντα';
+  @override
+  String movedToTasks(int n) => 'Μετακινήθηκαν $n σε καθήκοντα';
+  @override
+  String get moveToTasksHasSubItems =>
+      'Έχει υποστοιχεία — μετακινήστε τα πρώτα';
+  @override
+  String get moveToTasksNeedsItem =>
+      'Τοποθετήστε τον δρομέα σε στοιχείο με πλαίσιο ελέγχου';
+  @override
+  String get moveToTasksSubtitle =>
+      'Μετατρέπει τα στοιχεία με πλαίσιο ελέγχου '
+      'σε καθήκοντα και τα αφαιρεί από τη σημείωση';
+  @override
+  String get todoBlockTitle => 'Εργασίες';
+  @override
+  String get todoBlockLinkedHere => 'συνδεδεμένες εδώ';
+  @override
+  String todoBlockLinkedTo(String note) => 'συνδεδεμένες με $note';
+  @override
+  String todoBlockProject(String name) => 'έργο $name';
+  @override
+  String todoBlockContext(String name) => 'συμφραζόμενο $name';
+  @override
+  String todoBlockTag(String name) => 'ετικέτα $name';
+  @override
+  String get todoBlockDueOverdue => 'εκπρόθεσμες';
+  @override
+  String get todoBlockDueToday => 'προθεσμία σήμερα';
+  @override
+  String todoBlockDueWithin(int days) => 'προθεσμία εντός $days ημερών';
+  @override
+  String todoBlockDueOn(String date) => 'προθεσμία $date';
+  @override
+  String todoBlockDueBetween(String from, String to) =>
+      'προθεσμία από $from έως $to';
+  @override
+  String todoBlockPriority(String range) => 'προτεραιότητα $range';
+  @override
+  String get todoBlockDoneOnly => 'ολοκληρωμένες';
+  @override
+  String get todoBlockOpenAndDone => 'ανοιχτές και ολοκληρωμένες';
+  @override
+  String get todoBlockSortPriority => 'κατά προτεραιότητα';
+  @override
+  String get todoBlockSortFile => 'με τη σειρά του αρχείου';
+  @override
+  String todoBlockUnknownKey(String key) => 'Άγνωστο κλειδί $key';
+  @override
+  String todoBlockUnknownKeySuggest(String key, String suggestion) =>
+      'Άγνωστο κλειδί $key — εννοούσατε $suggestion;';
+  @override
+  String todoBlockBadValue(String key, String value, String expected) =>
+      'Δεν διαβάζεται το “$value” για το $key. Αναμένεται: $expected';
+  @override
+  String todoBlockMissingValue(String key) => 'Το $key χρειάζεται τιμή';
+  @override
+  String get todoBlockNoColon => 'Αναμένεται “κλειδί: τιμή”';
+  @override
+  String todoBlockRepeatedKey(String key) => 'Το $key δίνεται δύο φορές';
+  @override
+  String todoBlockLine(int n) => 'Γραμμή $n του μπλοκ';
+  @override
+  String todoBlockNoNote(String name) =>
+      'Καμία σημείωση δεν ταιριάζει με $name';
+  @override
+  String todoBlockSeveralNotes(String name) =>
+      'Πολλές σημειώσεις ταιριάζουν με $name';
 }

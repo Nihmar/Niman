@@ -25,6 +25,8 @@ import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/frontmatter/parser.dart';
 import 'package:niman/src/todo/parser.dart';
+import 'package:niman/src/todo/task_line_edit.dart';
+import 'package:niman/src/todo/task_link.dart' show TaskFile;
 import 'package:niman/src/todo/todo_file_names.dart';
 import 'package:niman/src/todo/todo_files.dart';
 import 'package:niman/src/todo/todo_source.dart';
@@ -241,6 +243,68 @@ final class TodoStore implements TodoSource {
     return _mutate(
       op: 'delete-done',
       apply: (todo, done) => done.removeAt(lineIndex),
+    );
+  }
+
+  /// Replaces the lines [edits] name (the rename rewrite of the links in
+  /// the tasks, #1152). Both files are read again here, inside the writer
+  /// chain, so an edit lands on the line as it is now: an edit finds its line
+  /// by its old text ([applyLineEdits]), and a line another tool changed or
+  /// removed is left alone. Every other line is written back byte-identical,
+  /// and a file no edit changed is not written. Returns the fresh snapshot.
+  @override
+  Future<TodoSnapshot> replaceLines(List<TaskLineEdit> edits) {
+    return _mutate(
+      op: 'replace-lines',
+      apply: (todo, done) {
+        applyLineEdits(todo, [
+          for (final edit in edits)
+            if (edit.file == TaskFile.todo) edit,
+        ]);
+        applyLineEdits(done, [
+          for (final edit in edits)
+            if (edit.file == TaskFile.done) edit,
+        ]);
+      },
+    );
+  }
+
+  /// Appends the [todo] lines to `todo.txt` and the [done] lines to
+  /// `done.txt` in one pass, creating either file when missing (Move to
+  /// tasks, #1152). `todo.txt` is written first: a failure between the two
+  /// files leaves tasks in the note and in the file, never in neither.
+  ///
+  /// Throws [ArgumentError] when a line holds more than one line.
+  @override
+  Future<TodoSnapshot> addLines({
+    required List<String> todo,
+    required List<String> done,
+  }) async {
+    [...todo, ...done].forEach(_requireSingleLine);
+    return await _mutate(
+      op: 'add-lines',
+      ensureFiles: true,
+      allowCreate: true,
+      apply: (todoLines, doneLines) {
+        todoLines.addAll(todo);
+        doneLines.addAll(done);
+      },
+    );
+  }
+
+  /// Removes the last line equal to each of [todo] and [done] from its file
+  /// ([removeLastEqual]): Undo of [addLines].
+  @override
+  Future<TodoSnapshot> removeLines({
+    required List<String> todo,
+    required List<String> done,
+  }) {
+    return _mutate(
+      op: 'remove-lines',
+      apply: (todoLines, doneLines) {
+        removeLastEqual(todoLines, todo);
+        removeLastEqual(doneLines, done);
+      },
     );
   }
 

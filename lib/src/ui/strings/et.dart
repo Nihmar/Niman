@@ -4269,4 +4269,84 @@ final class EstonianStrings extends Strings {
   String get kanbanEmptyColumn => 'Selles veerus pole kaarte';
   @override
   String get kanbanEditCard => 'Muuda kaarti';
+  @override
+  String taskLinkOpenTooltip(String path) => 'Ava $path';
+  @override
+  String get tasksForNoteTitle => 'Selle märke ülesanded';
+  @override
+  String get tasksForNoteEmpty => 'Ükski ülesanne ei viita sellele märkele';
+  @override
+  String get tasksForNoteNew => 'Uus ülesanne';
+  @override
+  String get tasksForNoteNewHere => 'Uus ülesanne sellele märkele';
+  @override
+  String get moveToTasks => 'Teisalda ülesannetesse';
+  @override
+  String get moveToTasksConfirm => 'Teisalda';
+  @override
+  String get movedToTasksOne => 'Teisaldatud ülesannetesse';
+  @override
+  String movedToTasks(int n) => 'Teisaldatud ülesannetesse: $n';
+  @override
+  String get moveToTasksHasSubItems =>
+      'Sisaldab alamüksusi — teisalda need esmalt';
+  @override
+  String get moveToTasksNeedsItem => 'Pane kursor märkeruuduga real';
+  @override
+  String get moveToTasksSubtitle =>
+      'Muudab märkeruuduga read ülesanneteks ja eemaldab need märkmest';
+  @override
+  String get todoBlockTitle => 'Ülesanded';
+  @override
+  String get todoBlockLinkedHere => 'siia lingitud';
+  @override
+  String todoBlockLinkedTo(String note) => 'lingitud märkmega $note';
+  @override
+  String todoBlockProject(String name) => 'projekt $name';
+  @override
+  String todoBlockContext(String name) => 'kontekst $name';
+  @override
+  String todoBlockTag(String name) => 'silt $name';
+  @override
+  String get todoBlockDueOverdue => 'tähtaja ületanud';
+  @override
+  String get todoBlockDueToday => 'tähtaeg täna';
+  @override
+  String todoBlockDueWithin(int days) => 'tähtaeg $days päeva jooksul';
+  @override
+  String todoBlockDueOn(String date) => 'tähtaeg $date';
+  @override
+  String todoBlockDueBetween(String from, String to) =>
+      'tähtaeg $from kuni $to';
+  @override
+  String todoBlockPriority(String range) => 'prioriteet $range';
+  @override
+  String get todoBlockDoneOnly => 'tehtud';
+  @override
+  String get todoBlockOpenAndDone => 'avatud ja tehtud';
+  @override
+  String get todoBlockSortPriority => 'prioriteedi järgi';
+  @override
+  String get todoBlockSortFile => 'faili järjekorras';
+  @override
+  String todoBlockUnknownKey(String key) => 'Tundmatu võti $key';
+  @override
+  String todoBlockUnknownKeySuggest(String key, String suggestion) =>
+      'Tundmatu võti $key — kas mõtlesite $suggestion?';
+  @override
+  String todoBlockBadValue(String key, String value, String expected) =>
+      'Väärtust “$value” ei saa võtmele $key lugeda. Oodatud: $expected';
+  @override
+  String todoBlockMissingValue(String key) => '$key vajab väärtust';
+  @override
+  String get todoBlockNoColon => 'Oodatud “võti: väärtus”';
+  @override
+  String todoBlockRepeatedKey(String key) => '$key on antud kaks korda';
+  @override
+  String todoBlockLine(int n) => 'Ploki rida $n';
+  @override
+  String todoBlockNoNote(String name) => 'Ükski märge ei vasta nimele $name';
+  @override
+  String todoBlockSeveralNotes(String name) =>
+      'Mitu märget vastab nimele $name';
 }

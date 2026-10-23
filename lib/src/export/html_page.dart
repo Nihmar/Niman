@@ -69,7 +69,8 @@ body {
 .note { max-width: 46rem; margin: 0 auto; overflow-wrap: break-word; }
 h1, h2, h3, h4, h5, h6 { line-height: 1.25; margin: 1.6em 0 0.6em; }
 h1 { font-size: 1.9em; } h2 { font-size: 1.5em; } h3 { font-size: 1.25em; }
-p, ul, ol, table, pre, blockquote, .callout, .math-block, .diagram {
+p, ul, ol, table, pre, blockquote, .callout, .math-block, .diagram,
+.todo-block {
   margin: 0 0 1em; }
 a { color: var(--accent); }
 .wikilink { color: var(--accent); }
@@ -111,6 +112,14 @@ details.callout > summary { cursor: pointer; }
 .column { flex: 1 1 0; min-width: min(16em, 100%); }
 .column > :last-child { margin-bottom: 0; }
 .column .columns { flex-direction: column; }
+.todo-block { border: 1px solid var(--line); border-radius: 6px;
+  padding: 0.4em 1em; }
+.todo-block.todo-failed { border-color: #e45649; }
+.todo-block p, .todo-block ul { margin: 0.4em 0; }
+.todo-head { color: var(--muted); }
+.todo-head strong { color: var(--text); }
+.todo-tasks, .todo-problems { list-style: none; padding: 0; }
+.todo-done { color: var(--muted); text-decoration: line-through; }
 .footnotes { font-size: 0.9em; color: var(--muted);
   border-top: 1px solid var(--line); margin-top: 2em; }
 .hljs-comment, .hljs-quote { color: #a0a1a7; font-style: italic; }
@@ -136,7 +145,7 @@ details.callout > summary { cursor: pointer; }
   :root { --text: #000; --bg: #fff; }
   body { padding: 0; font-size: 11pt; }
   .note { max-width: none; }
-  pre, blockquote, .callout, .math-block, .diagram, table, img {
+  pre, blockquote, .callout, .math-block, .diagram, .todo-block, table, img {
     break-inside: avoid; }
   h1, h2, h3, h4, h5, h6 { break-after: avoid; }
   a { color: inherit; }

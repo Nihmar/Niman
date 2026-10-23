@@ -4349,4 +4349,82 @@ final class BulgarianStrings extends Strings {
   String get kanbanEmptyColumn => 'Няма карти в тази колона';
   @override
   String get kanbanEditCard => 'Редактиране на карта';
+  @override
+  String taskLinkOpenTooltip(String path) => 'Отвори $path';
+  @override
+  String get tasksForNoteTitle => 'Задачи за тази бележка';
+  @override
+  String get tasksForNoteEmpty => 'Никоя задача не води към тази бележка';
+  @override
+  String get tasksForNoteNew => 'Нова задача';
+  @override
+  String get tasksForNoteNewHere => 'Нова задача за тази бележка';
+  @override
+  String get moveToTasks => 'Преместване в задачи';
+  @override
+  String get moveToTasksConfirm => 'Премести';
+  @override
+  String get movedToTasksOne => 'Преместено в задачи';
+  @override
+  String movedToTasks(int n) => 'Преместени в задачи: $n';
+  @override
+  String get moveToTasksHasSubItems => 'Има подточки — първо преместете тях';
+  @override
+  String get moveToTasksNeedsItem => 'Поставете курсора върху точка с отметка';
+  @override
+  String get moveToTasksSubtitle =>
+      'Превръща точките с отметка в задачи и ги премахва от бележката';
+  @override
+  String get todoBlockTitle => 'Задачи';
+  @override
+  String get todoBlockLinkedHere => 'свързани с тази бележка';
+  @override
+  String todoBlockLinkedTo(String note) => 'свързани с $note';
+  @override
+  String todoBlockProject(String name) => 'проект $name';
+  @override
+  String todoBlockContext(String name) => 'контекст $name';
+  @override
+  String todoBlockTag(String name) => 'етикет $name';
+  @override
+  String get todoBlockDueOverdue => 'просрочени';
+  @override
+  String get todoBlockDueToday => 'срок днес';
+  @override
+  String todoBlockDueWithin(int days) => 'срок до $days дни';
+  @override
+  String todoBlockDueOn(String date) => 'срок $date';
+  @override
+  String todoBlockDueBetween(String from, String to) => 'срок от $from до $to';
+  @override
+  String todoBlockPriority(String range) => 'приоритет $range';
+  @override
+  String get todoBlockDoneOnly => 'свършени';
+  @override
+  String get todoBlockOpenAndDone => 'отворени и свършени';
+  @override
+  String get todoBlockSortPriority => 'по приоритет';
+  @override
+  String get todoBlockSortFile => 'по реда във файла';
+  @override
+  String todoBlockUnknownKey(String key) => 'Непознат ключ $key';
+  @override
+  String todoBlockUnknownKeySuggest(String key, String suggestion) =>
+      'Непознат ключ $key — може би $suggestion?';
+  @override
+  String todoBlockBadValue(String key, String value, String expected) =>
+      'Не може да се прочете “$value” за $key. Очаква се: $expected';
+  @override
+  String todoBlockMissingValue(String key) => '$key се нуждае от стойност';
+  @override
+  String get todoBlockNoColon => 'Очаква се “ключ: стойност”';
+  @override
+  String todoBlockRepeatedKey(String key) => '$key е зададен два пъти';
+  @override
+  String todoBlockLine(int n) => 'Ред $n от блока';
+  @override
+  String todoBlockNoNote(String name) => 'Нито една бележка не съвпада с $name';
+  @override
+  String todoBlockSeveralNotes(String name) =>
+      'Няколко бележки съвпадат с $name';
 }

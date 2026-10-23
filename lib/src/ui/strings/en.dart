@@ -4269,4 +4269,82 @@ final class EnglishStrings extends Strings {
   String get kanbanEmptyColumn => 'No cards in this column';
   @override
   String get kanbanEditCard => 'Edit card';
+  @override
+  String taskLinkOpenTooltip(String path) => 'Open $path';
+  @override
+  String get tasksForNoteTitle => 'Tasks for this note';
+  @override
+  String get tasksForNoteEmpty => 'No task links to this note';
+  @override
+  String get tasksForNoteNew => 'New task';
+  @override
+  String get tasksForNoteNewHere => 'New task for this note';
+  @override
+  String get moveToTasks => 'Move to tasks';
+  @override
+  String get moveToTasksConfirm => 'Move';
+  @override
+  String get movedToTasksOne => 'Moved to tasks';
+  @override
+  String movedToTasks(int n) => 'Moved $n to tasks';
+  @override
+  String get moveToTasksHasSubItems => 'Has sub-items — move them first';
+  @override
+  String get moveToTasksNeedsItem => 'Put the caret on a checkbox item';
+  @override
+  String get moveToTasksSubtitle =>
+      'Turn checkbox items into tasks and take them out of the note';
+  @override
+  String get todoBlockTitle => 'Tasks';
+  @override
+  String get todoBlockLinkedHere => 'linked here';
+  @override
+  String todoBlockLinkedTo(String note) => 'linked to $note';
+  @override
+  String todoBlockProject(String name) => 'project $name';
+  @override
+  String todoBlockContext(String name) => 'context $name';
+  @override
+  String todoBlockTag(String name) => 'tag $name';
+  @override
+  String get todoBlockDueOverdue => 'overdue';
+  @override
+  String get todoBlockDueToday => 'due today';
+  @override
+  String todoBlockDueWithin(int days) =>
+      days == 1 ? 'due within 1 day' : 'due within $days days';
+  @override
+  String todoBlockDueOn(String date) => 'due $date';
+  @override
+  String todoBlockDueBetween(String from, String to) => 'due $from to $to';
+  @override
+  String todoBlockPriority(String range) => 'priority $range';
+  @override
+  String get todoBlockDoneOnly => 'done';
+  @override
+  String get todoBlockOpenAndDone => 'open and done';
+  @override
+  String get todoBlockSortPriority => 'by priority';
+  @override
+  String get todoBlockSortFile => 'in file order';
+  @override
+  String todoBlockUnknownKey(String key) => 'Unknown key $key';
+  @override
+  String todoBlockUnknownKeySuggest(String key, String suggestion) =>
+      'Unknown key $key — did you mean $suggestion?';
+  @override
+  String todoBlockBadValue(String key, String value, String expected) =>
+      'Can’t read “$value” for $key. Expected: $expected';
+  @override
+  String todoBlockMissingValue(String key) => '$key needs a value';
+  @override
+  String get todoBlockNoColon => 'Expected “key: value”';
+  @override
+  String todoBlockRepeatedKey(String key) => '$key is given twice';
+  @override
+  String todoBlockLine(int n) => 'Line $n of the block';
+  @override
+  String todoBlockNoNote(String name) => 'No note matches $name';
+  @override
+  String todoBlockSeveralNotes(String name) => 'Several notes match $name';
 }

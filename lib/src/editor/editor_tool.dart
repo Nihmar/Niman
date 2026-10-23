@@ -21,7 +21,11 @@ enum EditorTool {
   countList(Icons.functions),
 
   /// Replace the list at the cursor with a mind map (#530).
-  mindMap(Icons.account_tree_outlined);
+  mindMap(Icons.account_tree_outlined),
+
+  /// Turn the checkbox items under the selection into todo.txt tasks
+  /// (#1152).
+  moveToTasks(Icons.assignment_return_outlined);
 
   new(this.icon);
 
@@ -36,12 +40,14 @@ enum EditorTool {
   String get label => switch (this) {
     EditorTool.countList => AppStrings.toolCountListTitle,
     EditorTool.mindMap => AppStrings.commandConvertListToMindMap,
+    EditorTool.moveToTasks => AppStrings.moveToTasks,
   };
 
   /// What the tool does, under its name.
   String get description => switch (this) {
     EditorTool.countList => AppStrings.toolCountListSubtitle,
     EditorTool.mindMap => AppStrings.toolMindMapSubtitle,
+    EditorTool.moveToTasks => AppStrings.moveToTasksSubtitle,
   };
 
   /// Why the tool cannot run on this note right now.
@@ -53,5 +59,6 @@ enum EditorTool {
   String get unavailableReason => switch (this) {
     EditorTool.countList => AppStrings.toolCountListNeedsList,
     EditorTool.mindMap => AppStrings.toolMindMapNeedsList,
+    EditorTool.moveToTasks => AppStrings.moveToTasksNeedsItem,
   };
 }

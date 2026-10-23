@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:niman/src/editor/outline.dart';
+import 'package:niman/src/editor/task_items.dart';
+import 'package:niman/src/editor/task_items_edit.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/spellcheck/spell_issue.dart';
 
@@ -38,6 +40,26 @@ abstract interface class NoteViewHandle {
 
   /// The note's text as it is in the editor now, saved or not.
   String get currentText;
+
+  /// The text selected in the editor now, or an empty string when nothing is
+  /// selected or the note takes no text there ([canInsert]): what New task
+  /// (#1152) makes the description of the task.
+  String get selectedText;
+
+  /// The checkbox items under the selection (the caret's own when nothing is
+  /// selected), each with whether Move to tasks can move it (#1152). Empty
+  /// when the note takes no text there ([canInsert]).
+  List<TaskItem> get taskItems;
+
+  /// Takes [items] out of the note as one undoable edit, saved like any other,
+  /// and answers what was taken, to put back; null when the note no longer
+  /// holds them where they were.
+  TakenTaskItems? takeOutTaskItems(List<TaskItem> items);
+
+  /// Puts [taken] back where the lines stood, or at the nearest place there
+  /// is: Undo of a move to tasks. False when the note is gone or takes no
+  /// text, and nothing was put back.
+  bool putBackTaskItems(TakenTaskItems taken);
 
   /// Takes the caret to the heading on source [line] and shows it.
   void jumpToHeading(int line);

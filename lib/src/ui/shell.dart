@@ -38,6 +38,7 @@ import 'package:niman/src/editor/plain_text.dart';
 import 'package:niman/src/epub/epub_archive.dart';
 import 'package:niman/src/export/export_files.dart';
 import 'package:niman/src/export/pdf_printer.dart';
+import 'package:niman/src/export/printed_todo_block.dart';
 import 'package:niman/src/flashcards/deck_catalog_controller.dart';
 import 'package:niman/src/flashcards/library_decks.dart';
 import 'package:niman/src/frontmatter/note_kind.dart';
@@ -64,6 +65,8 @@ import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/spellcheck/personal_dictionary.dart';
 import 'package:niman/src/spellcheck/spell_check_provider.dart';
 import 'package:niman/src/todo/reminders.dart';
+import 'package:niman/src/todo/task_link_rewriter.dart';
+import 'package:niman/src/todo/task_links.dart';
 import 'package:niman/src/todo/todo_controller.dart';
 import 'package:niman/src/todo/todo_filter.dart';
 import 'package:niman/src/todo/todo_list_view.dart';
@@ -94,6 +97,7 @@ import 'package:niman/src/ui/epub_convert_flow.dart';
 import 'package:niman/src/ui/epub_look_sheet.dart';
 import 'package:niman/src/ui/epub_text_zoom.dart';
 import 'package:niman/src/ui/expanded_folders.dart';
+import 'package:niman/src/ui/export_todo_blocks.dart';
 import 'package:niman/src/ui/feature_off.dart';
 import 'package:niman/src/ui/features/features_host.dart';
 import 'package:niman/src/ui/features_link.dart';
@@ -121,9 +125,12 @@ import 'package:niman/src/ui/kinds/flashcards/review_view.dart';
 import 'package:niman/src/ui/kinds/slides/slides_present.dart';
 import 'package:niman/src/ui/link_update_dialog.dart';
 import 'package:niman/src/ui/mac_menu_bar.dart';
+import 'package:niman/src/ui/move_to_tasks_flow.dart';
 import 'package:niman/src/ui/note_editor_keys.dart';
+import 'package:niman/src/ui/note_link_targets.dart';
 import 'package:niman/src/ui/note_menu.dart';
 import 'package:niman/src/ui/note_tab_bar.dart';
+import 'package:niman/src/ui/note_tasks_host.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/note_view_handle.dart';
 import 'package:niman/src/ui/note_view_memento.dart';
@@ -182,6 +189,7 @@ import 'package:niman/src/ui/tab_drag.dart';
 import 'package:niman/src/ui/tab_row_lead.dart';
 import 'package:niman/src/ui/text_zoom_pinch.dart';
 import 'package:niman/src/ui/todo_edit_dialog.dart';
+import 'package:niman/src/ui/todo_link_host.dart';
 import 'package:niman/src/ui/todo_list_buttons.dart';
 import 'package:niman/src/ui/todo_tab.dart';
 import 'package:niman/src/ui/tour/tour_host.dart';
@@ -1062,6 +1070,24 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// app-bar add action share one controller.
   late final TodoController _todoController;
 
+  /// The links of the tasks, resolved (#1152): beside the controller whose
+  /// snapshot it reads, so the Todo tab, a note's task list and the rename
+  /// rewrite share one map. Inert while the Todo feature is off.
+  late final TaskLinkMap _taskLinks;
+
+  /// How the Todo tab follows a link in a task (#1152): the map, and the
+  /// targets of a tap on a chip.
+  late final TodoLinkHost _todoLinks;
+
+  /// What a note's task list (#1152) reads and does: the map, a tick, the
+  /// task dialog, Add task. Shared by the three places the list lives in.
+  late final NoteTasksHost _noteTasks = NoteTasksHost(
+    links: _todoLinks,
+    controller: _todoController,
+    reminders: widget.reminders,
+    addTask: (text) => _addTodo(text: text),
+  );
+
   /// What the Todo list shows (#1003): its filter, its sort and the folded
   /// sections. Owned here, next to the controller, because the phone's app
   /// bar (Filter and Sort) and the tab body read and set the same state.
@@ -1173,9 +1199,18 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     epubMetadataProblem: widget.epubMetadataProblem,
     epubExport: widget.epubExport,
     linkSource: () => _linkSource,
+    todoBlocks: _exportTodoBlocks,
     wide: () => _wide,
     shownNote: () => _shownNote,
   );
+
+  /// The lists the `todo` fences of a note are at this moment, for an export
+  /// to print in their place (#1152); none while the Todo feature is off,
+  /// where the fence is the code it is.
+  Future<PrintedTodoBlocks> _exportTodoBlocks(String path, String text) =>
+      widget.controller.features.value.isOn(LibraryFeature.todo)
+      ? ExportTodoBlocks(_noteTasks).of(text: text, notePath: path)
+      : Future<PrintedTodoBlocks>.value(const <String, PrintedTodoBlock>{});
 
   /// Converting a book into notes (#1138): from its row in the reader, the
   /// tree, the palette, a drop or a share.
@@ -1215,6 +1250,11 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       if (mounted) setState(() => _noteReloadToken++);
     },
     onLinksProgress: _showLinksProgress,
+    // The links in the tasks follow the move too (#1152).
+    taskLinks: TaskLinkRewriter(
+      map: _taskLinks,
+      write: _todoController.replaceLines,
+    ),
     controller: widget.controller,
     guard: _guard,
     saveOpen: () => widget.unsavedTracker.saveAll(),
@@ -1474,6 +1514,27 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
 
   /// Opens a note reached through a link (T-M3-07), at the heading
   /// [anchor] when there is one.
+  /// What following a link written in a task asks (#1152): `todo.txt` sits
+  /// at the library root, a link in it is resolved from there, and it opens
+  /// a note, or offers to create one, as a link in a note does. [anchor] is
+  /// where the pointer went down, when a pointer did.
+  NoteLinkTargets _taskLinkTargets(Rect? anchor) {
+    final root = widget.controller.root ?? '';
+    return NoteLinkTargets(
+      source: _linkSource,
+      notePath: p.join(root, todoFileName),
+      libraryRoot: widget.controller.root,
+      newItemLocation: _editorSettings.newItemLocation,
+      // A task has no headings of its own: an anchor lands in the note the
+      // link opens.
+      outline: const [],
+      jumpToHeading: (_) {},
+      onOpenNote: _openNoteFromLink,
+      createMissingNote: missingNoteCreatorFor(widget.controller),
+      anchor: anchor,
+    );
+  }
+
   void _openNoteFromLink(String path, String? anchor) {
     const AppLogger(name: 'links').debug(
       'shell open request: $path anchor=${anchor == null ? '-' : '"$anchor"'} '
@@ -1791,6 +1852,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           libraryRoot: controller.root,
           linkSource: _linkSource,
           wikilinkSuggester: _wikilinkSuggester,
+          tasks: _noteTasks,
           onOpenNote: _openNoteFromLink,
           initialAnchor: _pendingAnchor,
           initialCaretOffset: _pendingCaretOffset,
@@ -1800,6 +1862,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           onNoteKindChanged: _onNoteKindChanged,
           onKindMarkdown: _showKindMarkdown,
           onPasteAsMarkdown: _pasteAsMarkdownOffer,
+          onMoveToTasks: _moveToTasksOffer,
           unsavedTracker: widget.unsavedTracker,
           spellCheck: widget.spellCheck,
           reloadToken: _noteReloadToken,
@@ -1840,6 +1903,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     panelNote: () => _panelNote,
     journalBrowser: (context) =>
         _journalUi.browser(context, focusDay: _shownJournalDay),
+    tasks: () => _noteTasks,
     // All versions: the page, whatever the window.
     onOpenHistory: (path) => unawaited(_openHistoryPage(path)),
     onOpenNoteFromLink: (path) => _openNoteFromLink(path, null),
@@ -2578,6 +2642,22 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       reminders: widget.reminders,
       sourceFactory: widget.todoSourceFactory,
     );
+    _taskLinks = TaskLinkMap(
+      tasks: _todoController,
+      snapshot: () => _todoController.snapshot,
+      links: () => widget.controller.linkSource,
+      enabled: () =>
+          widget.controller.root != null &&
+          widget.controller.features.value.isOn(LibraryFeature.todo),
+      enabledChanges: widget.controller.features,
+    );
+    _todoLinks = TodoLinkHost(
+      map: _taskLinks,
+      targets: _taskLinkTargets,
+      source: () => _linkSource,
+      previewEnabled: () => _editorSettings.linkPreview,
+      suggester: () => _wikilinkSuggester,
+    );
     _todoView = todoListViewFor(widget.controller);
     // The todo widgets follow the snapshot: every mutation notifies, and
     // the initial open notifies too, so one listener covers both.
@@ -2792,6 +2872,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     unawaited(_inbound.cancel());
     _todoController.removeListener(_homeWidgets.pushTodos);
     _calendarController.removeListener(_pushCalendarReminders);
+    _todoLinks.dispose();
+    _taskLinks.dispose();
     _todoController.dispose();
     _todoView.dispose();
     _calendarController.dispose();
@@ -3597,6 +3679,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       knownTokens: snapshot == null
           ? const <String>{}
           : snapshotTokens(snapshot),
+      linkSuggester: _todoLinks.suggester,
       health: reminders.health.value,
       onOpenReminderSettings: reminders.openHealthSettings,
     );
@@ -3604,6 +3687,15 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       return;
     }
     await _guard(() => _todoController.add(line));
+  }
+
+  /// Adds a task that links the note on screen (#1152): the task dialog opens
+  /// with `[[Note]]` written in, after the text selected in the editor when
+  /// there is some.
+  Future<void> _newTaskForNote() {
+    final path = _shownNote;
+    if (path == null) return Future<void>.value();
+    return _noteTasks.add(path, selection: _panelNote?.selectedText ?? '');
   }
 
   /// Long-press context menu on a tree row (T-UI-05): the note actions,
@@ -3707,6 +3799,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     studyEnabled: ref.read(deckStudyStarterProvider) != null,
     makeFlashcards:
         _plainNote && commandFeatureOn(AppCommand.makeFlashcards, _features),
+    tasks: _features.isOn(LibraryFeature.todo),
     // Shopping needs Lists and its own switch: with it off a list has no
     // second view to swap to (#1109).
     kindSwitch: switch (_shownKind) {
@@ -3723,6 +3816,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         NoteMenuAction.outline => _showPanel(DockPane.outline, anchor: anchor),
         NoteMenuAction.tags => _showPanel(DockPane.tags),
         NoteMenuAction.links => _showPanel(DockPane.links),
+        NoteMenuAction.tasks => _showPanel(DockPane.tasks),
+        NoteMenuAction.newTask => _newTaskForNote(),
         NoteMenuAction.typewriter => Future<void>.sync(_toggleTypewriter),
         NoteMenuAction.palette => _palette.open(context),
         NoteMenuAction.format => _formatNote(),
@@ -4558,6 +4653,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         _openTodo();
         unawaited(_addTodo());
       },
+      AppCommand.newTaskForNote: () => unawaited(_newTaskForNote()),
       AppCommand.quickNote: () => unawaited(_openQuickNoteFromTile()),
       AppCommand.journalToday: () => unawaited(_journalFlow.openToday(context)),
       AppCommand.journalPrevious: () =>
@@ -4579,6 +4675,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           _panelNote?.insertAtCaret(mermaidMindMapTemplate),
       AppCommand.insertColumns: () => _panelNote?.insertColumns(),
       AppCommand.convertListToMindMap: () => _panelNote?.convertListToMindMap(),
+      AppCommand.moveToTasks: () {
+        if (_panelNote case final note?) _moveToTasks(note);
+      },
       AppCommand.pasteAsMarkdown: () {
         if (_panelNote case final note?) _pasteAsMarkdown(note);
       },
@@ -4787,6 +4886,15 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       commandFeatureOn(AppCommand.pasteAsMarkdown, _features)
       ? _pasteAsMarkdown
       : null;
+
+  /// Move to tasks for the editor's menu and Tools sheet (#1152), or null when
+  /// the library has the Todo feature off: the entry goes with the command.
+  ValueChanged<NoteViewHandle>? get _moveToTasksOffer =>
+      commandFeatureOn(AppCommand.moveToTasks, _features) ? _moveToTasks : null;
+
+  /// Moves the checkbox items under [note]'s selection to the tasks (#1152).
+  void _moveToTasks(NoteViewHandle note) =>
+      unawaited(MoveToTasksFlow(_noteTasks).run(context, note));
 
   /// Pastes the clipboard's HTML into [note] as Markdown (#531).
   void _pasteAsMarkdown(NoteViewHandle note) => unawaited(
@@ -5387,12 +5495,14 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
                         : null,
                     linkSource: _linkSource,
                     wikilinkSuggester: _wikilinkSuggester,
+                    tasks: _noteTasks,
                     onOpenNote: _openNoteFromLink,
                     kindMode: !_kindRawMode,
                     features: controller.features,
                     onNoteKindChanged: _onNoteKindChanged,
                     onTabKind: _onTabKind,
                     onPasteAsMarkdown: _pasteAsMarkdownOffer,
+                    onMoveToTasks: _moveToTasksOffer,
                     unsavedTracker: widget.unsavedTracker,
                     spellCheck: widget.spellCheck,
                     reloadToken: _noteReloadToken,
@@ -5611,6 +5721,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         reminders: widget.reminders,
         onAddTask: _addTodo,
         column: _editorSettings.noteColumn,
+        links: _todoLinks,
       ),
       ShellTab.search => _searchSlot(controller),
       // Empty unless the shell actually sent the user here to choose: an

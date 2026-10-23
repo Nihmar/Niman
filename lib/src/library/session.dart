@@ -34,6 +34,7 @@ import 'package:niman/src/search/search_repo.dart';
 import 'package:niman/src/search/tag_repo.dart';
 import 'package:niman/src/sync/sync_service.dart';
 import 'package:niman/src/templates/repo.dart';
+import 'package:niman/src/todo/task_link_rewrites.dart';
 import 'package:niman/src/update/update_check.dart';
 import 'package:niman/src/widget/widget_configs.dart';
 import 'package:niman/src/workspace/workspace_slot.dart';
@@ -92,7 +93,9 @@ abstract interface class NoteOperations {
   /// tells how far the rewrite, which runs after the rename has returned,
   /// has come (#1041); [flushOpen] saves the open notes' unsaved
   /// edits right before each is rewritten, so an autosave cannot write the
-  /// old links back over the rewrite (#913).
+  /// old links back over the rewrite (#913); [taskLinks] plans the rewrite of
+  /// the links in the tasks that goes with the notes' (#1152), and with no
+  /// seam the tasks are left as written.
   Future<Note> rename(
     String path,
     String newName, {
@@ -100,6 +103,7 @@ abstract interface class NoteOperations {
     void Function()? onLinksRewritten,
     LinkRewriteProgress? onLinksProgress,
     FlushOpenNotes? flushOpen,
+    TaskLinkRewrites? taskLinks,
   });
 
   /// Copies the file at [path] beside itself, under a unique name
@@ -112,8 +116,8 @@ abstract interface class NoteOperations {
   Future<Note> duplicate(String path);
 
   /// Moves the note or folder at [path] into [targetParent].
-  /// [confirmLinks], [onLinksRewritten], [onLinksProgress] and [flushOpen] are
-  /// [rename]'s.
+  /// [confirmLinks], [onLinksRewritten], [onLinksProgress], [flushOpen] and
+  /// [taskLinks] are [rename]'s.
   Future<Note> move(
     String path,
     String targetParent, {
@@ -121,6 +125,7 @@ abstract interface class NoteOperations {
     void Function()? onLinksRewritten,
     LinkRewriteProgress? onLinksProgress,
     FlushOpenNotes? flushOpen,
+    TaskLinkRewrites? taskLinks,
   });
 
   /// The indexed note/folder at library-relative [path], or null.

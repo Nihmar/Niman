@@ -3970,4 +3970,80 @@ final class JapaneseStrings extends Strings {
   String get kanbanEmptyColumn => 'この列にカードはありません';
   @override
   String get kanbanEditCard => 'カードを編集';
+  @override
+  String taskLinkOpenTooltip(String path) => '$path を開く';
+  @override
+  String get tasksForNoteTitle => 'このノートのタスク';
+  @override
+  String get tasksForNoteEmpty => 'このノートにリンクしているタスクはありません';
+  @override
+  String get tasksForNoteNew => '新しいタスク';
+  @override
+  String get tasksForNoteNewHere => 'このノートの新しいタスク';
+  @override
+  String get moveToTasks => 'タスクに移動';
+  @override
+  String get moveToTasksConfirm => '移動';
+  @override
+  String get movedToTasksOne => 'タスクに移動しました';
+  @override
+  String movedToTasks(int n) => '$n 件をタスクに移動しました';
+  @override
+  String get moveToTasksHasSubItems => 'サブ項目があります — 先にそちらを移動してください';
+  @override
+  String get moveToTasksNeedsItem => 'チェックボックスの項目にカーソルを置いてください';
+  @override
+  String get moveToTasksSubtitle => 'チェックボックスの項目をタスクにして、ノートから取り除きます';
+  @override
+  String get todoBlockTitle => 'タスク';
+  @override
+  String get todoBlockLinkedHere => 'このノートにリンク';
+  @override
+  String todoBlockLinkedTo(String note) => '$note にリンク';
+  @override
+  String todoBlockProject(String name) => 'プロジェクト $name';
+  @override
+  String todoBlockContext(String name) => 'コンテキスト $name';
+  @override
+  String todoBlockTag(String name) => 'タグ $name';
+  @override
+  String get todoBlockDueOverdue => '期限切れ';
+  @override
+  String get todoBlockDueToday => '今日が期限';
+  @override
+  String todoBlockDueWithin(int days) => '$days 日以内が期限';
+  @override
+  String todoBlockDueOn(String date) => '期限 $date';
+  @override
+  String todoBlockDueBetween(String from, String to) => '期限 $from から $to';
+  @override
+  String todoBlockPriority(String range) => '優先度 $range';
+  @override
+  String get todoBlockDoneOnly => '完了';
+  @override
+  String get todoBlockOpenAndDone => '未完了と完了';
+  @override
+  String get todoBlockSortPriority => '優先度順';
+  @override
+  String get todoBlockSortFile => 'ファイルの順';
+  @override
+  String todoBlockUnknownKey(String key) => '不明なキー $key';
+  @override
+  String todoBlockUnknownKeySuggest(String key, String suggestion) =>
+      '不明なキー $key — $suggestion のことですか？';
+  @override
+  String todoBlockBadValue(String key, String value, String expected) =>
+      '$key の “$value” を読み取れません。使える値: $expected';
+  @override
+  String todoBlockMissingValue(String key) => '$key には値が必要です';
+  @override
+  String get todoBlockNoColon => '“キー: 値” の形式で書いてください';
+  @override
+  String todoBlockRepeatedKey(String key) => '$key が 2 回指定されています';
+  @override
+  String todoBlockLine(int n) => 'ブロックの $n 行目';
+  @override
+  String todoBlockNoNote(String name) => '$name に一致するノートがありません';
+  @override
+  String todoBlockSeveralNotes(String name) => '$name に一致するノートが複数あります';
 }

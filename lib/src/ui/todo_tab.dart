@@ -26,7 +26,6 @@ import 'package:flutter/material.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/todo/parser.dart';
-import 'package:niman/src/todo/reminder_health.dart';
 import 'package:niman/src/todo/reminders.dart';
 import 'package:niman/src/todo/todo_controller.dart';
 import 'package:niman/src/todo/todo_filter.dart';
@@ -38,12 +37,13 @@ import 'package:niman/src/ui/device_shape.dart';
 import 'package:niman/src/ui/pointer_density.dart';
 import 'package:niman/src/ui/reminder_health_banner.dart';
 import 'package:niman/src/ui/strings.dart';
-import 'package:niman/src/ui/todo_edit_dialog.dart';
 import 'package:niman/src/ui/todo_filter_strip.dart';
+import 'package:niman/src/ui/todo_link_host.dart';
 import 'package:niman/src/ui/todo_list_actions.dart';
 import 'package:niman/src/ui/todo_phone_list.dart';
 import 'package:niman/src/ui/todo_pointer_list.dart';
 import 'package:niman/src/ui/todo_quick_add.dart';
+import 'package:niman/src/ui/todo_task_edit.dart';
 import 'package:niman/src/ui/todo_toolbar.dart';
 
 /// The Todo tab body.
@@ -62,6 +62,7 @@ final class TodoTab extends StatefulWidget {
     this.clock,
     this.onAddTask,
     this.column = NoteColumn.off,
+    this.links,
     super.key,
   });
 
@@ -83,6 +84,11 @@ final class TodoTab extends StatefulWidget {
 
   /// Creates a task; the desktop toolbar shows the button.
   final VoidCallback? onAddTask;
+
+  /// The links of the tasks and how to follow one (#1152): each link in a
+  /// task's text is a chip, and the rows follow the map as it resolves.
+  /// Null still draws the chips, which then do nothing.
+  final TodoLinkHost? links;
 
   @override
   State<TodoTab> createState() => _TodoTabState();
@@ -142,7 +148,11 @@ final class _TodoTabState extends State<TodoTab> {
         final labelled =
             shellWide && constraints.maxWidth >= TodoToolbar.labelledMinWidth;
         return ListenableBuilder(
-          listenable: Listenable.merge([widget.controller, widget.view]),
+          listenable: Listenable.merge([
+            widget.controller,
+            widget.view,
+            ?widget.links?.map,
+          ]),
           builder: (context, _) {
             final controller = widget.controller;
             final snapshot = controller.snapshot;
@@ -231,6 +241,7 @@ final class _TodoTabState extends State<TodoTab> {
             key: const Key('todo-quick-add-row'),
             onAdd: _quickAdd,
             knownTokens: _knownTokens,
+            linkSuggester: widget.links?.suggester,
           ),
         Expanded(
           child: model.isEmpty
@@ -245,6 +256,7 @@ final class _TodoTabState extends State<TodoTab> {
                   onDelete: _delete,
                   onRewrite: _rewrite,
                   onToggleSection: _toggleSection,
+                  links: widget.links,
                 )
               : TodoPhoneList(
                   items: _itemsOf(model),
@@ -255,6 +267,7 @@ final class _TodoTabState extends State<TodoTab> {
                   onDelete: _delete,
                   onSwipeDelete: _swipeDelete,
                   onToggleSection: _toggleSection,
+                  links: widget.links,
                 ),
         ),
       ],
@@ -318,21 +331,16 @@ final class _TodoTabState extends State<TodoTab> {
   }
 
   /// Opens the edit dialog and applies the result to [row]'s file.
-  Future<void> _edit(TodoRowItem row) async {
-    final reminders = widget.reminders;
-    final line = await showTodoTaskDialog(
+  Future<void> _edit(TodoRowItem row) {
+    return editTodoTask(
       context,
-      initial: row.entry.task,
+      controller: widget.controller,
+      entry: row.entry,
+      done: row.done,
       today: _today,
-      knownTokens: _knownTokens(),
-      onDelete: () => unawaited(_delete(row)),
-      health: reminders?.health.value ?? ReminderHealth.ok,
-      onOpenReminderSettings: reminders?.openHealthSettings,
+      links: widget.links,
+      reminders: widget.reminders,
     );
-    if (line == null || !mounted) {
-      return;
-    }
-    await _rewrite(row, line);
   }
 
   /// The completion pool for the edit dialog: every token in both

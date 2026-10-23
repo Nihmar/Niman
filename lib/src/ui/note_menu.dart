@@ -42,6 +42,14 @@ enum NoteMenuAction {
   /// room for the dock, a sheet on a phone.
   links,
 
+  /// The tasks that link the note (#1152): the dock's pane where there is
+  /// room for the dock, a sheet on a phone.
+  tasks,
+
+  /// A new task that links the note (#1152): the task dialog, with the link
+  /// written in -- and the text selected in the editor before it.
+  newTask,
+
   /// Typewriter mode on or off (#70): on the phone, where there is no
   /// key and no switch on the status row, the way to it beside the note.
   typewriter,
@@ -111,8 +119,13 @@ final class NoteMenuButton extends StatelessWidget {
     this.deck = false,
     this.studyEnabled = false,
     this.makeFlashcards = false,
+    this.tasks = false,
     super.key,
   });
+
+  /// Whether the Todo feature is on, so the note has a task list (#1152):
+  /// the menu offers *Tasks for this note*.
+  final bool tasks;
 
   /// Whether the note on screen is a plain note, of no `type`: its menu
   /// offers to make it a deck (#533).
@@ -226,6 +239,20 @@ final class NoteMenuButton extends StatelessWidget {
             Icons.link_outlined,
             AppStrings.linksToNoteTitle,
           ),
+          if (tasks)
+            _item(
+              context,
+              NoteMenuAction.tasks,
+              Icons.check_box_outlined,
+              AppStrings.tasksForNoteTitle,
+            ),
+          if (tasks)
+            _item(
+              context,
+              NoteMenuAction.newTask,
+              Icons.add_task_outlined,
+              AppStrings.tasksForNoteNew,
+            ),
           if (kindSwitch case final kind?)
             _item(
               context,

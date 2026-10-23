@@ -17,6 +17,7 @@ import 'package:niman/src/export/export_note.dart';
 import 'package:niman/src/export/export_sources.dart';
 import 'package:niman/src/export/pdf_printer.dart';
 import 'package:niman/src/export/pdf_raster.dart';
+import 'package:niman/src/export/printed_todo_block.dart';
 import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/preview/math_cache.dart';
@@ -62,6 +63,9 @@ typedef PdfProgressListener = void Function(PdfExportProgress progress);
 /// [slides], a slides note's slides as Markdown (#534), prints them one
 /// 16:9 sheet each instead of the note on A4. [kanban] says the Kanban
 /// feature is on (#1170): a board is then drawn as one.
+///
+/// [todoBlocks] are the lists the note's `todo` fences are at this moment
+/// (#1152), printed in place of their source whichever way the page is made.
 Future<PdfExport> exportNotePdf({
   required String text,
   required String title,
@@ -76,6 +80,7 @@ Future<PdfExport> exportNotePdf({
   PdfProgressListener? onProgress,
   bool Function()? isCancelled,
   List<String>? slides,
+  PrintedTodoBlocks todoBlocks = const <String, PrintedTodoBlock>{},
   bool kanban = false,
 }) async {
   final chosen = printer ?? ProcessPdfPrinter();
@@ -93,6 +98,7 @@ Future<PdfExport> exportNotePdf({
       onProgress: onProgress,
       isCancelled: isCancelled,
       slides: slides,
+      todoBlocks: todoBlocks,
       kanban: kanban,
     );
   }
@@ -102,6 +108,7 @@ Future<PdfExport> exportNotePdf({
     notePath: p.join(root, path),
     root: root,
     linkSource: linkSource,
+    todoBlocks: todoBlocks,
     kanban: kanban,
   );
   // The sheet follows the page: slides on their own, a board on the sheet
@@ -146,6 +153,7 @@ Future<PdfExport> exportNotePdf({
           onProgress: onProgress,
           isCancelled: isCancelled,
           slides: slides,
+          todoBlocks: todoBlocks,
           kanban: kanban,
         );
       case PdfFailed(:final message):
@@ -165,6 +173,7 @@ Future<PdfExport> exportNotePdf({
           onProgress: onProgress,
           isCancelled: isCancelled,
           slides: slides,
+          todoBlocks: todoBlocks,
           kanban: kanban,
         );
     }
@@ -193,6 +202,7 @@ Future<PdfExport> _draw({
   PdfProgressListener? onProgress,
   bool Function()? isCancelled,
   List<String>? slides,
+  PrintedTodoBlocks todoBlocks = const <String, PrintedTodoBlock>{},
   bool kanban = false,
 }) async {
   if (theme == null || mathCache == null) throw const NoPdfEngine();
@@ -223,6 +233,7 @@ Future<PdfExport> _draw({
           images: images,
           onProgress: drawn(onProgress),
           isCancelled: isCancelled,
+          todoBlocks: todoBlocks,
           board: exportedBoard(text, kanban: kanban),
         )
       : await rasterSlidesPdf(
@@ -232,6 +243,7 @@ Future<PdfExport> _draw({
           images: images,
           onProgress: drawn(onProgress),
           isCancelled: isCancelled,
+          todoBlocks: todoBlocks,
         );
   return (
     payload: _payload(path, bytes),

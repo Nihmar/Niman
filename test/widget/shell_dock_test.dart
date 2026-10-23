@@ -577,6 +577,9 @@ void main() {
   ) async {
     controller.linkSourceOverride = linksToAlpha();
     await pumpAt(tester, const Size(1400, 900));
+    // The strip scrolls (#1000): the tab is brought into view first, as the
+    // tasks tab (#1152) pushed it a step towards the cut-off end.
+    await tester.ensureVisible(find.byKey(const Key('dock-pane-links')));
     await tester.tap(find.byKey(const Key('dock-pane-links')));
     await settle(tester);
 

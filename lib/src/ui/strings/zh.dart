@@ -3873,4 +3873,80 @@ final class ChineseStrings extends Strings {
   String get kanbanEmptyColumn => '此列中没有卡片';
   @override
   String get kanbanEditCard => '编辑卡片';
+  @override
+  String taskLinkOpenTooltip(String path) => '打开 $path';
+  @override
+  String get tasksForNoteTitle => '本笔记的任务';
+  @override
+  String get tasksForNoteEmpty => '没有任务链接到本笔记';
+  @override
+  String get tasksForNoteNew => '新建任务';
+  @override
+  String get tasksForNoteNewHere => '为本笔记新建任务';
+  @override
+  String get moveToTasks => '移至任务';
+  @override
+  String get moveToTasksConfirm => '移动';
+  @override
+  String get movedToTasksOne => '已移至任务';
+  @override
+  String movedToTasks(int n) => '已将 $n 项移至任务';
+  @override
+  String get moveToTasksHasSubItems => '含有子项 — 请先移动子项';
+  @override
+  String get moveToTasksNeedsItem => '请将光标放在带复选框的项目上';
+  @override
+  String get moveToTasksSubtitle => '将带复选框的项目转为任务，并从笔记中移除';
+  @override
+  String get todoBlockTitle => '任务';
+  @override
+  String get todoBlockLinkedHere => '链接到此笔记';
+  @override
+  String todoBlockLinkedTo(String note) => '链接到 $note';
+  @override
+  String todoBlockProject(String name) => '项目 $name';
+  @override
+  String todoBlockContext(String name) => '情境 $name';
+  @override
+  String todoBlockTag(String name) => '标签 $name';
+  @override
+  String get todoBlockDueOverdue => '已逾期';
+  @override
+  String get todoBlockDueToday => '今天到期';
+  @override
+  String todoBlockDueWithin(int days) => '$days 天内到期';
+  @override
+  String todoBlockDueOn(String date) => '到期 $date';
+  @override
+  String todoBlockDueBetween(String from, String to) => '到期 $from 至 $to';
+  @override
+  String todoBlockPriority(String range) => '优先级 $range';
+  @override
+  String get todoBlockDoneOnly => '已完成';
+  @override
+  String get todoBlockOpenAndDone => '未完成和已完成';
+  @override
+  String get todoBlockSortPriority => '按优先级';
+  @override
+  String get todoBlockSortFile => '按文件顺序';
+  @override
+  String todoBlockUnknownKey(String key) => '未知的键 $key';
+  @override
+  String todoBlockUnknownKeySuggest(String key, String suggestion) =>
+      '未知的键 $key — 您是指 $suggestion 吗？';
+  @override
+  String todoBlockBadValue(String key, String value, String expected) =>
+      '无法读取 $key 的“$value”。应为：$expected';
+  @override
+  String todoBlockMissingValue(String key) => '$key 需要一个值';
+  @override
+  String get todoBlockNoColon => '应为“键: 值”';
+  @override
+  String todoBlockRepeatedKey(String key) => '$key 被指定了两次';
+  @override
+  String todoBlockLine(int n) => '代码块的第 $n 行';
+  @override
+  String todoBlockNoNote(String name) => '没有笔记与 $name 匹配';
+  @override
+  String todoBlockSeveralNotes(String name) => '有多篇笔记与 $name 匹配';
 }

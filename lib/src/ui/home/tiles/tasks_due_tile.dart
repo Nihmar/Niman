@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/todo/parser.dart';
+import 'package:niman/src/todo/task_link_label.dart';
 import 'package:niman/src/todo/todo_store.dart';
 import 'package:niman/src/todo/widget_todos.dart';
 import 'package:niman/src/ui/home/home_host.dart';
@@ -88,7 +89,7 @@ final class TasksDueTile extends StatelessWidget {
   }
 
   static String _text(TodoTask task) {
-    final display = taskDisplayText(task.description);
+    final display = taskPlainText(task.description);
     return display.isEmpty ? task.raw : display;
   }
 }

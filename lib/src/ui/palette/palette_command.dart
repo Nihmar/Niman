@@ -43,6 +43,7 @@ PaletteGroup? paletteGroup(AppCommand command) => switch (command) {
   AppCommand.newFlashcards ||
   AppCommand.newKanban ||
   AppCommand.newTodo ||
+  AppCommand.newTaskForNote ||
   AppCommand.captureWebPage ||
   AppCommand.quickNote ||
   AppCommand.renameNote ||
@@ -67,6 +68,7 @@ PaletteGroup? paletteGroup(AppCommand command) => switch (command) {
   AppCommand.insertMindMap ||
   AppCommand.insertColumns ||
   AppCommand.convertListToMindMap ||
+  AppCommand.moveToTasks ||
   AppCommand.pasteAsMarkdown ||
   AppCommand.markdownCheatsheet => PaletteGroup.editor,
   AppCommand.toggleSidebar ||
@@ -112,6 +114,7 @@ bool paletteAsks(AppCommand command) => switch (command) {
   AppCommand.newNote ||
   AppCommand.newListNote ||
   AppCommand.newTodo ||
+  AppCommand.newTaskForNote ||
   AppCommand.captureWebPage ||
   AppCommand.renameNote ||
   AppCommand.moveNote ||

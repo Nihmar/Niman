@@ -168,7 +168,7 @@ tabs.
   again takes you to the pane and tab it is in.
 
 **The side panel.** On a wide window a panel on the right shows the note's **Outline**, its **Tags**, its **Links**, its
-**Spelling** or its
+**Tasks**, its **Spelling** or its
 **History**, one at a time, switched by the icons at its top. A panel too
 narrow for all of its icons shows them from the end, the first ones cut
 off at the left: the wheel over the row scrolls it, and the mouse drags
@@ -180,6 +180,10 @@ it as a finger does on a tablet.
 - **Links** lists the notes that link to this one, each with the line it
   says the link on, and opens one on a click (see
   [links](links.md#links-to-this-note)).
+- **Tasks** lists the tasks that link this note, open ones by due date and
+  Done folded, and ticks, opens or adds one (see
+  [tasks](tasks.md#tasks-for-this-note)). It is there while the Todo feature
+  is on.
 - **Spelling** lists the note's misspellings, each with its suggestions
   (see [Spellcheck](#spellcheck)).
 - **History** lists the kept versions, newest first, and opens the
@@ -189,8 +193,8 @@ It follows the note in the focused pane, and changes as the note is
 edited. The panel's button in the note's row, its **×**, or
 `Ctrl+Shift+B` shows and hides it. Whether it is open, and which of the
 panes it shows, is remembered with the tabs. The note's **⋮** menu has
-Outline, Tags and Links to this note too: they open the panel where it
-docks, and a sheet on a phone. Wherever the wide layout can show the
+Outline, Tags, Links to this note and Tasks for this note too: they open the
+panel where it docks, and a sheet on a phone. Wherever the wide layout can show the
 panel — beside the note, or over it on a narrower window — the note's
 outline and its spelling review live there, and the row under the note
 leaves both their buttons out; a phone keeps them, and there they open
@@ -600,6 +604,12 @@ Obsidian's is:
 - **Open link** and **Copy link** when the click lands on a Markdown
   link whose target leaves the library (`https://…`, `mailto:…`): the
   same URL Ctrl+click opens, and the URL on the clipboard;
+- **Move to tasks** on a checkbox line (`- [ ]` / `- [x]`), or on a selection
+  of them — the item becomes a task and leaves the note (see
+  [Move to tasks](tasks.md#move-to-tasks)). On a phone it is the first
+  entry of the bar; where the item has sub-items it is greyed, with the
+  reason as its tooltip on a desktop and as a message when tapped on a phone,
+  and on a line that is no checkbox item it is not there;
 - the spelling's suggestions for a misspelled word, and a table's
   **Row ›**, **Column ›** and sorts on a table's cell, next;
 - **Paste as Markdown**: what was copied from a web page, as Markdown
@@ -946,6 +956,15 @@ outermost item becomes the root; several get a root to hang from. A
 paragraph or a code block an item holds joins that item's words, and the
 cursor may stand in one. The **Tools** section below lists the sheet.
 
+### Lists of tasks
+
+A fenced block whose language is `todo` is drawn as a live list of tasks from
+`todo.txt` and `done.txt` — the tasks that link the note, or any filter of the
+whole list — in the read view and in live mode, and printed as it is in an
+export. With the caret in the block it shows its source, coloured. The lines it
+takes, its errors and its Add task are described with the tasks:
+[A list of tasks in a note](tasks.md#a-list-of-tasks-in-a-note).
+
 ## Tools
 
 The toolbar's **Tools** button opens the editor's extra tools. They are
@@ -978,6 +997,15 @@ for `- ` or `- [ ] `.
   selected together move together, and an item selected with its own children
   keeps its shape. Inside a quote or a callout the rule is the same, behind the
   `>`.
+
+### Move to tasks
+
+Turns the checkbox items under the cursor or the selection into tasks of the
+Todo tab and takes them out of the note. It is also on the context menu and in
+the command palette, and is described with the tasks:
+[Move to tasks](tasks.md#move-to-tasks). Listed greyed with the reason where
+the cursor is on an item with sub-items or on no checkbox item, and not
+listed while the library has Todo off.
 
 ### Count a list
 

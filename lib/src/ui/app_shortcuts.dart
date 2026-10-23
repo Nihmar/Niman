@@ -39,6 +39,9 @@ enum AppCommand {
   /// A new todo task.
   newTodo,
 
+  /// A new todo task that links the note on screen (#1152).
+  newTaskForNote,
+
   /// A web page captured as a note (#531).
   captureWebPage,
 
@@ -113,6 +116,10 @@ enum AppCommand {
 
   /// Turn the list at the caret into a mind map (#530).
   convertListToMindMap,
+
+  /// Turn the checkbox items under the selection into todo.txt tasks linked
+  /// to the note (#1152).
+  moveToTasks,
 
   /// Paste the clipboard's HTML as Markdown at the caret (#531).
   pasteAsMarkdown,
@@ -444,6 +451,7 @@ String appCommandLabel(AppCommand command) => switch (command) {
   AppCommand.presentSlides => AppStrings.slidesPresent,
   AppCommand.presenterView => AppStrings.slidesPresenterView,
   AppCommand.newTodo => AppStrings.shortcutNewTodo,
+  AppCommand.newTaskForNote => AppStrings.tasksForNoteNewHere,
   AppCommand.captureWebPage => AppStrings.captureWebPage,
   AppCommand.quickNote => AppStrings.shortcutQuickNote,
   AppCommand.journalToday => AppStrings.journalToday,
@@ -469,6 +477,7 @@ String appCommandLabel(AppCommand command) => switch (command) {
   AppCommand.insertMindMap => AppStrings.commandInsertMindMap,
   AppCommand.insertColumns => AppStrings.commandInsertColumns,
   AppCommand.convertListToMindMap => AppStrings.commandConvertListToMindMap,
+  AppCommand.moveToTasks => AppStrings.moveToTasks,
   AppCommand.pasteAsMarkdown => AppStrings.pasteAsMarkdown,
   AppCommand.exportNote => AppStrings.exportTitle,
   AppCommand.recognizeText => AppStrings.ocrRecognizeAction,

@@ -13,6 +13,7 @@ import 'package:niman/src/export/export_files.dart';
 import 'package:niman/src/export/export_tree_book.dart';
 import 'package:niman/src/export/pdf_printer.dart';
 import 'package:niman/src/export/pdf_webview.dart';
+import 'package:niman/src/export/printed_todo_block.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/todo/todo_source.dart';
 import 'package:niman/src/ui/strings.dart';
@@ -56,6 +57,7 @@ void main() {
           required language,
           linkSource,
           isCancelled,
+          todoBlocks = const {},
           kanban = false,
         }) async => (
           name: 'note.epub',
@@ -70,13 +72,17 @@ void main() {
     String? pdfEngine,
     EpubMetadataProblem? epubProblem,
     PdfPrinter? pdfPrinter,
+    String noteText = '# Note\n',
+    List<String> todo = const <String>[],
   }) async {
     setSurfaceSize(tester, size);
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
           librarySessionProvider.overrideWithValue(controller),
-          todoSourceFactoryProvider.overrideWithValue((_) => FakeTodoSource()),
+          todoSourceFactoryProvider.overrideWithValue(
+            (_) => FakeTodoSource(todo: todo),
+          ),
           windowControllerProvider.overrideWithValue(
             FakeWindowController(customTitleBar: true),
           ),
@@ -124,7 +130,7 @@ void main() {
     await controller.createNote(
       parentPath: '',
       name: 'note',
-      content: '# Note\n',
+      content: noteText,
     );
     await settle(tester);
     await tester.tap(noteRow('note.md'));
@@ -281,6 +287,7 @@ void main() {
           required language,
           linkSource,
           isCancelled,
+          todoBlocks = const {},
           kanban = false,
         }) async {
           await release.future;
@@ -304,6 +311,42 @@ void main() {
     expect(saved?.name, 'note.epub');
   });
 
+  testWidgets('an export hands over the lists its todo fences are (#1152)', (
+    tester,
+  ) async {
+    place = '/tmp/note.epub';
+    PrintedTodoBlocks? handed;
+    epubExport =
+        ({
+          required text,
+          required title,
+          required path,
+          required root,
+          required language,
+          linkSource,
+          isCancelled,
+          todoBlocks = const {},
+          kanban = false,
+        }) async {
+          handed = todoBlocks;
+          return (
+            name: 'note.epub',
+            bytes: Uint8List(0),
+            mimeType: 'application/epub+zip',
+          );
+        };
+    await pumpShell(
+      tester,
+      noteText: '# Note\n\n```todo\nlink: any\n```\n',
+      todo: ['Pay the bill +house'],
+    );
+    await chooseExport(tester, 'epub');
+
+    final block = handed![todoBlockKey('link: any')]!;
+    expect(block.head, 'Tasks · 1');
+    expect(block.tasks, [(done: false, text: 'Pay the bill +house')]);
+  });
+
   testWidgets('an EPUB export can be stopped from its dialog', (tester) async {
     final release = Completer<void>();
     epubExport =
@@ -315,6 +358,7 @@ void main() {
           required language,
           linkSource,
           isCancelled,
+          todoBlocks = const {},
           kanban = false,
         }) async {
           await release.future;

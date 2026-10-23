@@ -17,6 +17,7 @@ import 'package:niman/src/calendar/calendar_store.dart';
 import 'package:niman/src/calendar/parser.dart';
 import 'package:niman/src/templates/engine.dart';
 import 'package:niman/src/todo/parser.dart';
+import 'package:niman/src/todo/task_link_label.dart';
 import 'package:niman/src/todo/todo_store.dart';
 import 'package:niman/src/ui/strings.dart';
 
@@ -246,9 +247,7 @@ Map<int, TodoReminder> wantedReminders(
     // nothing to explain them, but someone who files by project reads
     // them as part of the task. A line written elsewhere can be nothing
     // but tokens, which would leave a titleless notification.
-    final title = showTokens
-        ? withoutKeyValueTags(task.description)
-        : taskDisplayText(task.description);
+    final title = taskPlainText(task.description, markers: showTokens);
     wanted[todoReminderId(task.description)] = TodoReminder(
       id: todoReminderId(task.description),
       title: title.isEmpty ? AppStrings.todoReminderFallbackTitle : title,

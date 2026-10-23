@@ -38,6 +38,9 @@ enum DockPane {
   /// (#842).
   links,
 
+  /// The tasks that link the note (#1152): open by due date, Done folded.
+  tasks,
+
   /// The note's kept versions.
   history,
 

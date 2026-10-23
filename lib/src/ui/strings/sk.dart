@@ -4327,4 +4327,83 @@ final class SlovakStrings extends Strings {
   String get kanbanEmptyColumn => 'V tomto stĺpci nie sú žiadne karty';
   @override
   String get kanbanEditCard => 'Upraviť kartu';
+  @override
+  String taskLinkOpenTooltip(String path) => 'Otvoriť $path';
+  @override
+  String get tasksForNoteTitle => 'Úlohy k tejto poznámke';
+  @override
+  String get tasksForNoteEmpty => 'Žiadna úloha na túto poznámku neodkazuje';
+  @override
+  String get tasksForNoteNew => 'Nová úloha';
+  @override
+  String get tasksForNoteNewHere => 'Nová úloha k tejto poznámke';
+  @override
+  String get moveToTasks => 'Presunúť do úloh';
+  @override
+  String get moveToTasksConfirm => 'Presunúť';
+  @override
+  String get movedToTasksOne => 'Presunuté do úloh';
+  @override
+  String movedToTasks(int n) => 'Presunuté do úloh: $n';
+  @override
+  String get moveToTasksHasSubItems => 'Má podpoložky — najprv presuňte tie';
+  @override
+  String get moveToTasksNeedsItem => 'Umiestnite kurzor na položku s políčkom';
+  @override
+  String get moveToTasksSubtitle =>
+      'Zmení položky s políčkom na úlohy a odstráni ich z poznámky';
+  @override
+  String get todoBlockTitle => 'Úlohy';
+  @override
+  String get todoBlockLinkedHere => 'prepojené s touto poznámkou';
+  @override
+  String todoBlockLinkedTo(String note) => 'prepojené s $note';
+  @override
+  String todoBlockProject(String name) => 'projekt $name';
+  @override
+  String todoBlockContext(String name) => 'kontext $name';
+  @override
+  String todoBlockTag(String name) => 'štítok $name';
+  @override
+  String get todoBlockDueOverdue => 'po termíne';
+  @override
+  String get todoBlockDueToday => 'termín dnes';
+  @override
+  String todoBlockDueWithin(int days) => 'termín do $days dní';
+  @override
+  String todoBlockDueOn(String date) => 'termín $date';
+  @override
+  String todoBlockDueBetween(String from, String to) =>
+      'termín od $from do $to';
+  @override
+  String todoBlockPriority(String range) => 'priorita $range';
+  @override
+  String get todoBlockDoneOnly => 'hotové';
+  @override
+  String get todoBlockOpenAndDone => 'otvorené aj hotové';
+  @override
+  String get todoBlockSortPriority => 'podľa priority';
+  @override
+  String get todoBlockSortFile => 'v poradí súboru';
+  @override
+  String todoBlockUnknownKey(String key) => 'Neznámy kľúč $key';
+  @override
+  String todoBlockUnknownKeySuggest(String key, String suggestion) =>
+      'Neznámy kľúč $key — mysleli ste $suggestion?';
+  @override
+  String todoBlockBadValue(String key, String value, String expected) =>
+      'Nedá sa prečítať „$value“ pre $key. Očakáva sa: $expected';
+  @override
+  String todoBlockMissingValue(String key) => '$key potrebuje hodnotu';
+  @override
+  String get todoBlockNoColon => 'Očakáva sa „kľúč: hodnota“';
+  @override
+  String todoBlockRepeatedKey(String key) => '$key je uvedený dvakrát';
+  @override
+  String todoBlockLine(int n) => 'Riadok $n bloku';
+  @override
+  String todoBlockNoNote(String name) => 'Žiadna poznámka nezodpovedá $name';
+  @override
+  String todoBlockSeveralNotes(String name) =>
+      'Viaceré poznámky zodpovedajú $name';
 }

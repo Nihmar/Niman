@@ -4361,4 +4361,84 @@ final class LithuanianStrings extends Strings {
   String get kanbanEmptyColumn => 'Šiame stulpelyje kortelių nėra';
   @override
   String get kanbanEditCard => 'Redaguoti kortelę';
+  @override
+  String taskLinkOpenTooltip(String path) => 'Atidaryti $path';
+  @override
+  String get tasksForNoteTitle => 'Šios pastabos užduotys';
+  @override
+  String get tasksForNoteEmpty => 'Jokia užduotis nenurodo į šią pastabą';
+  @override
+  String get tasksForNoteNew => 'Nauja užduotis';
+  @override
+  String get tasksForNoteNewHere => 'Nauja užduotis šiai pastabai';
+  @override
+  String get moveToTasks => 'Perkelti į užduotis';
+  @override
+  String get moveToTasksConfirm => 'Perkelti';
+  @override
+  String get movedToTasksOne => 'Perkelta į užduotis';
+  @override
+  String movedToTasks(int n) => 'Perkelta į užduotis: $n';
+  @override
+  String get moveToTasksHasSubItems =>
+      'Turi požymių — pirmiausia perkelkite juos';
+  @override
+  String get moveToTasksNeedsItem =>
+      'Padėkite žymeklį ant elemento su žymės langeliu';
+  @override
+  String get moveToTasksSubtitle =>
+      'Elementus su žymės langeliu paverčia užduotimis ir pašalina iš pastabos';
+  @override
+  String get todoBlockTitle => 'Užduotys';
+  @override
+  String get todoBlockLinkedHere => 'susietos čia';
+  @override
+  String todoBlockLinkedTo(String note) => 'susietos su $note';
+  @override
+  String todoBlockProject(String name) => 'projektas $name';
+  @override
+  String todoBlockContext(String name) => 'kontekstas $name';
+  @override
+  String todoBlockTag(String name) => 'žyma $name';
+  @override
+  String get todoBlockDueOverdue => 'pavėluotos';
+  @override
+  String get todoBlockDueToday => 'terminas šiandien';
+  @override
+  String todoBlockDueWithin(int days) => 'terminas per artimiausias $days d.';
+  @override
+  String todoBlockDueOn(String date) => 'terminas $date';
+  @override
+  String todoBlockDueBetween(String from, String to) =>
+      'terminas nuo $from iki $to';
+  @override
+  String todoBlockPriority(String range) => 'prioritetas $range';
+  @override
+  String get todoBlockDoneOnly => 'atliktos';
+  @override
+  String get todoBlockOpenAndDone => 'atviros ir atliktos';
+  @override
+  String get todoBlockSortPriority => 'pagal prioritetą';
+  @override
+  String get todoBlockSortFile => 'failo tvarka';
+  @override
+  String todoBlockUnknownKey(String key) => 'Nežinomas raktas $key';
+  @override
+  String todoBlockUnknownKeySuggest(String key, String suggestion) =>
+      'Nežinomas raktas $key — ar turėjote omenyje $suggestion?';
+  @override
+  String todoBlockBadValue(String key, String value, String expected) =>
+      'Nepavyko perskaityti „$value“ raktui $key. Tikėtasi: $expected';
+  @override
+  String todoBlockMissingValue(String key) => '$key reikia reikšmės';
+  @override
+  String get todoBlockNoColon => 'Tikėtasi „raktas: reikšmė“';
+  @override
+  String todoBlockRepeatedKey(String key) => '$key nurodytas du kartus';
+  @override
+  String todoBlockLine(int n) => 'Bloko $n eilutė';
+  @override
+  String todoBlockNoNote(String name) => 'Jokia pastaba neatitinka $name';
+  @override
+  String todoBlockSeveralNotes(String name) => 'Kelios pastabos atitinka $name';
 }

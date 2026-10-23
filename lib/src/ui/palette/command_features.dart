@@ -22,7 +22,10 @@ LibraryFeature? featureOf(AppCommand command) => switch (command) {
   AppCommand.quickNote || AppCommand.tabQuickNote => LibraryFeature.quickNote,
   AppCommand.captureWebPage ||
   AppCommand.pasteAsMarkdown => LibraryFeature.capture,
-  AppCommand.newTodo || AppCommand.tabTodo => LibraryFeature.todo,
+  AppCommand.newTodo ||
+  AppCommand.newTaskForNote ||
+  AppCommand.moveToTasks ||
+  AppCommand.tabTodo => LibraryFeature.todo,
   AppCommand.journalToday ||
   AppCommand.journalPrevious ||
   AppCommand.journalNext ||

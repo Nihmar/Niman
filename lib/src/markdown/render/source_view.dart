@@ -108,6 +108,7 @@ import 'package:niman/src/markdown/render/source_folds.dart';
 import 'package:niman/src/markdown/render/source_line.dart';
 import 'package:niman/src/markdown/render/source_template_hint.dart';
 import 'package:niman/src/markdown/render/source_touch.dart';
+import 'package:niman/src/markdown/render/todo_block_scope.dart';
 import 'package:niman/src/markdown/render/wikilink_suggest.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/markdown/source_edit.dart';
@@ -3699,7 +3700,9 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// The Mermaid block line [index] is part of, for `live` mode to draw in
   /// its lines' place: its fence's lines, and on the first of them — the
   /// one the diagram is drawn under — the source between them. Null for any
-  /// other line, and for a `mermaid` fence with no code.
+  /// other line, and for a `mermaid` fence with no code. A closed `todo` fence
+  /// is one too where the note's tasks are at hand ([TodoBlockScope]): drawn
+  /// as the list it asks for, empty or not (#1152).
   ///
   /// Every line of the block asks, every build: the block's text is read
   /// for its first line alone, where reading it for each made a diagram of
@@ -3708,18 +3711,59 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   LiveDiagram? _diagramOf(int index) {
     final block = _styler?.blockOf(index);
     if (block == null || block.kind != BlockKind.fencedCode) return null;
-    final info = block.fenceInfo;
-    if (info == null || info.toLowerCase() != 'mermaid') return null;
+    final info = block.fenceInfo?.toLowerCase();
+    if (info == 'todo' && TodoBlockScope.of(context) != null) {
+      return _todoBlockOf(index, block);
+    }
+    if (info != 'mermaid') return null;
     if (index != block.startLine) {
       final lineAt = widget.buffer.lineAt;
       if (!fenceHasCode(lineAt, block.startLine, block.endLine)) return null;
-      return (start: block.startLine, end: block.endLine, source: null);
+      return (
+        start: block.startLine,
+        end: block.endLine,
+        source: null,
+        todo: false,
+      );
     }
     final lines = BlockParser.blockText(block, widget.buffer).split('\n');
     // The code as the read view and the export read it.
     final code = fenceBody(lines)?.code;
     if (code == null || code.trim().isEmpty) return null;
-    return (start: block.startLine, end: block.endLine, source: code);
+    return (
+      start: block.startLine,
+      end: block.endLine,
+      source: code,
+      todo: false,
+    );
+  }
+
+  /// The `todo` fence [block], line [index] of it, as [_diagramOf] answers for
+  /// a diagram: null for a fence the note has not closed, whose body would be
+  /// the rest of the note.
+  LiveDiagram? _todoBlockOf(int index, Block block) {
+    final lineAt = widget.buffer.lineAt;
+    final last = block.endLine - 1;
+    if (last <= block.startLine ||
+        fenceBody(<String>[lineAt(block.startLine), lineAt(last)])?.closed !=
+            true) {
+      return null;
+    }
+    if (index != block.startLine) {
+      return (
+        start: block.startLine,
+        end: block.endLine,
+        source: null,
+        todo: true,
+      );
+    }
+    final lines = BlockParser.blockText(block, widget.buffer).split('\n');
+    return (
+      start: block.startLine,
+      end: block.endLine,
+      source: fenceBody(lines)?.code ?? '',
+      todo: true,
+    );
   }
 
   /// Moves the colours along [edit], already made to the buffer.
@@ -4874,6 +4918,9 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// fence has none: it is drawn as the diagram.
   Widget _codeCopies(BuildContext overlayContext) {
     const nothing = SizedBox.shrink();
+    // A `todo` fence is drawn as its list, like a diagram, where the tasks are
+    // at hand: no code to copy.
+    final drawsTodo = TodoBlockScope.of(context) != null;
     final styler = _styler;
     final note = _noteBox;
     final overlay = Overlay.of(overlayContext).context.findRenderObject();
@@ -4909,7 +4956,9 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
         continue;
       }
       final info = block.fenceInfo?.toLowerCase();
-      if (block.kind == BlockKind.fencedCode && info != 'mermaid') {
+      if (block.kind == BlockKind.fencedCode &&
+          info != 'mermaid' &&
+          !(info == 'todo' && drawsTodo)) {
         final lastBox = _lineBox(block.endLine - 1);
         final end = lastBox.top + lastBox.height - widget.padding.top;
         final y =

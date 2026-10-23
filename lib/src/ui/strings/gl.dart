@@ -4357,4 +4357,82 @@ final class GalicianStrings extends Strings {
   String get kanbanEmptyColumn => 'Non hai tarxetas nesta columna';
   @override
   String get kanbanEditCard => 'Editar a tarxeta';
+  @override
+  String taskLinkOpenTooltip(String path) => 'Abrir $path';
+  @override
+  String get tasksForNoteTitle => 'Tarefas desta nota';
+  @override
+  String get tasksForNoteEmpty => 'Ningunha tarefa liga con esta nota';
+  @override
+  String get tasksForNoteNew => 'Tarefa nova';
+  @override
+  String get tasksForNoteNewHere => 'Tarefa nova para esta nota';
+  @override
+  String get moveToTasks => 'Mover a tarefas';
+  @override
+  String get moveToTasksConfirm => 'Mover';
+  @override
+  String get movedToTasksOne => 'Movido a tarefas';
+  @override
+  String movedToTasks(int n) => 'Movidas $n a tarefas';
+  @override
+  String get moveToTasksHasSubItems => 'Ten subelementos — móveos primeiro';
+  @override
+  String get moveToTasksNeedsItem => 'Pon o cursor nun elemento con caixa';
+  @override
+  String get moveToTasksSubtitle =>
+      'Converte os elementos con caixa en tarefas e sácaos da nota';
+  @override
+  String get todoBlockTitle => 'Tarefas';
+  @override
+  String get todoBlockLinkedHere => 'ligadas aquí';
+  @override
+  String todoBlockLinkedTo(String note) => 'ligadas a $note';
+  @override
+  String todoBlockProject(String name) => 'proxecto $name';
+  @override
+  String todoBlockContext(String name) => 'contexto $name';
+  @override
+  String todoBlockTag(String name) => 'etiqueta $name';
+  @override
+  String get todoBlockDueOverdue => 'atrasadas';
+  @override
+  String get todoBlockDueToday => 'vence hoxe';
+  @override
+  String todoBlockDueWithin(int days) => 'vence nos próximos $days días';
+  @override
+  String todoBlockDueOn(String date) => 'vence $date';
+  @override
+  String todoBlockDueBetween(String from, String to) => 'vence de $from a $to';
+  @override
+  String todoBlockPriority(String range) => 'prioridade $range';
+  @override
+  String get todoBlockDoneOnly => 'feitas';
+  @override
+  String get todoBlockOpenAndDone => 'abertas e feitas';
+  @override
+  String get todoBlockSortPriority => 'por prioridade';
+  @override
+  String get todoBlockSortFile => 'na orde do ficheiro';
+  @override
+  String todoBlockUnknownKey(String key) => 'Chave descoñecida $key';
+  @override
+  String todoBlockUnknownKeySuggest(String key, String suggestion) =>
+      'Chave descoñecida $key — quixo dicir $suggestion?';
+  @override
+  String todoBlockBadValue(String key, String value, String expected) =>
+      'Non se pode ler “$value” para $key. Espérase: $expected';
+  @override
+  String todoBlockMissingValue(String key) => '$key precisa un valor';
+  @override
+  String get todoBlockNoColon => 'Espérase “chave: valor”';
+  @override
+  String todoBlockRepeatedKey(String key) => '$key está indicada dúas veces';
+  @override
+  String todoBlockLine(int n) => 'Liña $n do bloque';
+  @override
+  String todoBlockNoNote(String name) => 'Ningunha nota coincide con $name';
+  @override
+  String todoBlockSeveralNotes(String name) =>
+      'Varias notas coinciden con $name';
 }

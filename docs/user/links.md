@@ -194,6 +194,9 @@ three places, one list:
 - **as a sheet on a phone**, from the note's ⋮ menu — *Links to this note* —
   as the Outline and Tags are (see [platforms](platforms.md)).
 
+The tasks that link a note are listed the same way, in the same three places:
+see [Tasks for this note](tasks.md#tasks-for-this-note).
+
 A row is the note's name, its folder dimmed, and the line it says the link
 on, cut to two rows of the list (a long line is a window around the link, with
 `…` where it was cut; a list or quote mark is taken off its head). A tap opens
@@ -455,6 +458,14 @@ the link is one file's gesture. The note says so while they are over it
 (#1027): it is tinted and ringed in the error colour, with a "no" sign, and the pointer
 shows the "no" cursor — let go there and nothing is written. The tree's own
 drops are unchanged: let go on a folder, the row moves into it.
+
+## Links from a task
+
+A task in `todo.txt` links a note with a wikilink in its text, and the
+forms above all work there: a heading, a block, an alias. The Todo list
+draws it as a chip, a tap opens the note, and a dead one offers to create
+it; a renamed or moved note is followed there as it is in a note. See
+[tasks](tasks.md#links-to-notes).
 
 ## Link button
 

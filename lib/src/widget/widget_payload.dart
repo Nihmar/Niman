@@ -12,6 +12,7 @@ library;
 import 'dart:convert';
 
 import 'package:niman/src/todo/parser.dart';
+import 'package:niman/src/todo/task_link_label.dart';
 import 'package:niman/src/todo/todo_sections.dart';
 import 'package:niman/src/todo/todo_store.dart';
 import 'package:niman/src/todo/widget_todos.dart';
@@ -181,7 +182,7 @@ List<Map<String, Object?>> _items(WidgetTodoSection section) {
 Map<String, Object?> _row(TodoEntry entry, String sectionId) {
   final task = entry.task;
   return {
-    'text': taskDisplayText(task.description),
+    'text': taskPlainText(task.description),
     'due': task.due == null ? null : formatTodoDate(task.due!),
     'priority': task.priority,
     'projects': task.projects,

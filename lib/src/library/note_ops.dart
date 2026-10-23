@@ -40,6 +40,7 @@ import 'package:niman/src/lint/lint_rule.dart';
 import 'package:niman/src/markdown/note_bytes.dart';
 import 'package:niman/src/markdown/note_references.dart';
 import 'package:niman/src/sync/sync_store.dart';
+import 'package:niman/src/todo/task_link_rewrites.dart';
 import 'package:path/path.dart' as p;
 
 export 'package:niman/src/library/note_op_seams.dart' show SyncHintSink;
@@ -549,8 +550,12 @@ final class NoteOps implements NoteOperations {
     void Function()? onLinksRewritten,
     LinkRewriteProgress? onLinksProgress,
     FlushOpenNotes? flushOpen,
+    TaskLinkRewrites? taskLinks,
   }) async {
-    final done = await _released(path, () => _rename(path, newName, flushOpen));
+    final done = await _released(
+      path,
+      () => _rename(path, newName, flushOpen, taskLinks),
+    );
     _askLinks(done, confirmLinks, onLinksRewritten, onLinksProgress);
     return done.row;
   }
@@ -559,6 +564,7 @@ final class NoteOps implements NoteOperations {
     String path,
     String newName,
     FlushOpenNotes? flushOpen,
+    TaskLinkRewrites? taskLinks,
   ) {
     return _synchronized(() async {
       final row = await _mustFind(path);
@@ -591,7 +597,13 @@ final class NoteOps implements NoteOperations {
       }
       final newRel = resolvePath(parent, target);
       if (newRel == path) return (row: row, pending: null);
-      return await _relocator.relocate(row, path, newRel, flushOpen: flushOpen);
+      return await _relocator.relocate(
+        row,
+        path,
+        newRel,
+        flushOpen: flushOpen,
+        taskLinks: taskLinks,
+      );
     });
   }
 
@@ -608,10 +620,11 @@ final class NoteOps implements NoteOperations {
     void Function()? onLinksRewritten,
     LinkRewriteProgress? onLinksProgress,
     FlushOpenNotes? flushOpen,
+    TaskLinkRewrites? taskLinks,
   }) async {
     final done = await _released(
       path,
-      () => _move(path, targetParent, flushOpen),
+      () => _move(path, targetParent, flushOpen, taskLinks),
     );
     _askLinks(done, confirmLinks, onLinksRewritten, onLinksProgress);
     return done.row;
@@ -621,6 +634,7 @@ final class NoteOps implements NoteOperations {
     String path,
     String targetParent,
     FlushOpenNotes? flushOpen,
+    TaskLinkRewrites? taskLinks,
   ) {
     return _synchronized(() async {
       final row = await _mustFind(path);
@@ -642,7 +656,13 @@ final class NoteOps implements NoteOperations {
         target = await uniqueFileName(targetDir, parts.base, parts.ext);
       }
       final newRel = resolvePath(targetParent, target);
-      return await _relocator.relocate(row, path, newRel, flushOpen: flushOpen);
+      return await _relocator.relocate(
+        row,
+        path,
+        newRel,
+        flushOpen: flushOpen,
+        taskLinks: taskLinks,
+      );
     });
   }
 

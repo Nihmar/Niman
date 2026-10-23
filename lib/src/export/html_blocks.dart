@@ -12,6 +12,7 @@ import 'package:niman/src/markdown/callout.dart';
 import 'package:niman/src/markdown/fence_body.dart';
 import 'package:niman/src/markdown/render/callout_style.dart';
 import 'package:niman/src/markdown/render/math_text.dart' show displayTexOf;
+import 'package:niman/src/preview/app_grammars.dart';
 
 /// The face an exported diagram's labels are set in: the sans its boxes
 /// are measured for, where the reader's own face — often a serif in an
@@ -96,6 +97,7 @@ String _pre(String text, String cls) =>
 /// [code] coloured by [language]'s grammar, or null when there is none.
 String? _highlighted(String code, String language) {
   if (language.isEmpty) return null;
+  ensureAppGrammars();
   try {
     return highlight.parse(code, language: language.toLowerCase()).toHtml();
   } on Object {

@@ -14,6 +14,7 @@ import 'package:niman/src/core/files.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/library/note_relocation.dart';
 import 'package:niman/src/library/session.dart';
+import 'package:niman/src/todo/task_link_rewrites.dart';
 import 'package:niman/src/ui/carried_notes.dart';
 import 'package:niman/src/ui/create_kinds.dart';
 import 'package:niman/src/ui/file_tree_context.dart';
@@ -50,6 +51,7 @@ final class ShellRowActions {
     this.confirmLinks,
     this.onLinksRewritten,
     this.onLinksProgress,
+    this.taskLinks,
   });
 
   /// Asks whether the links to what a rename or a move took are to follow,
@@ -64,6 +66,10 @@ final class ShellRowActions {
   /// How far the rewrite of the links to what moved has come (#1041): it runs
   /// after [onMoved], one batch of notes at a time.
   final LinkRewriteProgress? onLinksProgress;
+
+  /// Plans the rewrite of the links in the tasks that goes with the notes'
+  /// (#1152); null leaves the tasks as written.
+  final TaskLinkRewrites? taskLinks;
 
   /// Starts a rename in place in the tree (#707): true when it did — a
   /// desktop with the tree on screen — false to ask in a dialog.
@@ -221,6 +227,7 @@ final class ShellRowActions {
         onLinksRewritten: onLinksRewritten,
         onLinksProgress: onLinksProgress,
         flushOpen: saveOpen,
+        taskLinks: taskLinks,
       );
       onMoved(sel, row.path);
     });
@@ -244,6 +251,7 @@ final class ShellRowActions {
         onLinksRewritten: onLinksRewritten,
         onLinksProgress: onLinksProgress,
         flushOpen: saveOpen,
+        taskLinks: taskLinks,
       );
       onMoved(path, renamed.path);
     });
@@ -304,6 +312,7 @@ final class ShellRowActions {
       onLinksRewritten: onLinksRewritten,
       onLinksProgress: onLinksProgress,
       flushOpen: saveOpen,
+      taskLinks: taskLinks,
     );
     onMoved(path, row.path);
   }

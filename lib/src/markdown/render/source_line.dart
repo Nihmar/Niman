@@ -515,14 +515,22 @@ final class SourceLine extends StatelessWidget {
     }
     if (drawn) {
       if (index != drawing.start) return line;
-      return liveDiagramUnder(
-        line,
-        // The block's first line is the one that carries its source.
-        source: drawing.source!,
-        theme: theme,
-        onPointerDown: onDiagramDown,
-        onTapSource: (inner) => onDiagramLine(drawing.start + inner),
-      );
+      // The block's first line is the one that carries its source.
+      return drawing.todo
+          ? liveTodoUnder(
+              line,
+              source: drawing.source!,
+              theme: theme,
+              onPointerDown: onDiagramDown,
+              onTapSource: (inner) => onDiagramLine(drawing.start + inner),
+            )
+          : liveDiagramUnder(
+              line,
+              source: drawing.source!,
+              theme: theme,
+              onPointerDown: onDiagramDown,
+              onTapSource: (inner) => onDiagramLine(drawing.start + inner),
+            );
     }
     final resolver = embedResolver;
     final pictured = resolver == null || pictures.isEmpty

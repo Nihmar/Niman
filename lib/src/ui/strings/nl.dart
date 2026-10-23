@@ -4372,4 +4372,84 @@ final class DutchStrings extends Strings {
   String get kanbanEmptyColumn => 'Geen kaarten in deze kolom';
   @override
   String get kanbanEditCard => 'Kaart bewerken';
+  @override
+  String taskLinkOpenTooltip(String path) => '$path openen';
+  @override
+  String get tasksForNoteTitle => 'Taken voor deze notitie';
+  @override
+  String get tasksForNoteEmpty => 'Geen taak verwijst naar deze notitie';
+  @override
+  String get tasksForNoteNew => 'Nieuwe taak';
+  @override
+  String get tasksForNoteNewHere => 'Nieuwe taak voor deze notitie';
+  @override
+  String get moveToTasks => 'Verplaats naar taken';
+  @override
+  String get moveToTasksConfirm => 'Verplaats';
+  @override
+  String get movedToTasksOne => 'Verplaatst naar taken';
+  @override
+  String movedToTasks(int n) => '$n verplaatst naar taken';
+  @override
+  String get moveToTasksHasSubItems => 'Heeft subitems — verplaats die eerst';
+  @override
+  String get moveToTasksNeedsItem =>
+      'Zet de cursor op een item met selectievakje';
+  @override
+  String get moveToTasksSubtitle =>
+      'Maakt items met selectievakje tot taken en haalt ze uit de notitie';
+  @override
+  String get todoBlockTitle => 'Taken';
+  @override
+  String get todoBlockLinkedHere => 'hieraan gekoppeld';
+  @override
+  String todoBlockLinkedTo(String note) => 'gekoppeld aan $note';
+  @override
+  String todoBlockProject(String name) => 'project $name';
+  @override
+  String todoBlockContext(String name) => 'context $name';
+  @override
+  String todoBlockTag(String name) => 'tag $name';
+  @override
+  String get todoBlockDueOverdue => 'te laat';
+  @override
+  String get todoBlockDueToday => 'vandaag verschuldigd';
+  @override
+  String todoBlockDueWithin(int days) => 'verschuldigd binnen $days dagen';
+  @override
+  String todoBlockDueOn(String date) => 'verschuldigd $date';
+  @override
+  String todoBlockDueBetween(String from, String to) =>
+      'verschuldigd van $from tot $to';
+  @override
+  String todoBlockPriority(String range) => 'prioriteit $range';
+  @override
+  String get todoBlockDoneOnly => 'afgerond';
+  @override
+  String get todoBlockOpenAndDone => 'open en afgerond';
+  @override
+  String get todoBlockSortPriority => 'op prioriteit';
+  @override
+  String get todoBlockSortFile => 'in bestandsvolgorde';
+  @override
+  String todoBlockUnknownKey(String key) => 'Onbekende sleutel $key';
+  @override
+  String todoBlockUnknownKeySuggest(String key, String suggestion) =>
+      'Onbekende sleutel $key — bedoelde je $suggestion?';
+  @override
+  String todoBlockBadValue(String key, String value, String expected) =>
+      '“$value” is niet te lezen voor $key. Verwacht: $expected';
+  @override
+  String todoBlockMissingValue(String key) => '$key heeft een waarde nodig';
+  @override
+  String get todoBlockNoColon => 'Verwacht “sleutel: waarde”';
+  @override
+  String todoBlockRepeatedKey(String key) => '$key is twee keer opgegeven';
+  @override
+  String todoBlockLine(int n) => 'Regel $n van het blok';
+  @override
+  String todoBlockNoNote(String name) => 'Geen notitie komt overeen met $name';
+  @override
+  String todoBlockSeveralNotes(String name) =>
+      'Meerdere notities komen overeen met $name';
 }

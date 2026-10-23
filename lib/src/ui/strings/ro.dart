@@ -4391,4 +4391,83 @@ final class RomanianStrings extends Strings {
   String get kanbanEmptyColumn => 'Niciun card în această coloană';
   @override
   String get kanbanEditCard => 'Editează cardul';
+  @override
+  String taskLinkOpenTooltip(String path) => 'Deschide $path';
+  @override
+  String get tasksForNoteTitle => 'Sarcinile acestei note';
+  @override
+  String get tasksForNoteEmpty => 'Nicio sarcină nu trimite la această notă';
+  @override
+  String get tasksForNoteNew => 'Sarcină nouă';
+  @override
+  String get tasksForNoteNewHere => 'Sarcină nouă pentru această notă';
+  @override
+  String get moveToTasks => 'Mută în sarcini';
+  @override
+  String get moveToTasksConfirm => 'Mută';
+  @override
+  String get movedToTasksOne => 'Mutat în sarcini';
+  @override
+  String movedToTasks(int n) => 'Mutate $n în sarcini';
+  @override
+  String get moveToTasksHasSubItems => 'Are subelemente — mutați-le mai întâi';
+  @override
+  String get moveToTasksNeedsItem => 'Puneți cursorul pe un element cu casetă';
+  @override
+  String get moveToTasksSubtitle =>
+      'Transformă elementele cu casetă în sarcini și le scoate din notă';
+  @override
+  String get todoBlockTitle => 'Sarcini';
+  @override
+  String get todoBlockLinkedHere => 'legate aici';
+  @override
+  String todoBlockLinkedTo(String note) => 'legate de $note';
+  @override
+  String todoBlockProject(String name) => 'proiect $name';
+  @override
+  String todoBlockContext(String name) => 'context $name';
+  @override
+  String todoBlockTag(String name) => 'etichetă $name';
+  @override
+  String get todoBlockDueOverdue => 'întârziate';
+  @override
+  String get todoBlockDueToday => 'termen azi';
+  @override
+  String todoBlockDueWithin(int days) => 'termen în următoarele $days zile';
+  @override
+  String todoBlockDueOn(String date) => 'termen $date';
+  @override
+  String todoBlockDueBetween(String from, String to) =>
+      'termen de la $from la $to';
+  @override
+  String todoBlockPriority(String range) => 'prioritate $range';
+  @override
+  String get todoBlockDoneOnly => 'terminate';
+  @override
+  String get todoBlockOpenAndDone => 'deschise și terminate';
+  @override
+  String get todoBlockSortPriority => 'după prioritate';
+  @override
+  String get todoBlockSortFile => 'în ordinea fișierului';
+  @override
+  String todoBlockUnknownKey(String key) => 'Cheie necunoscută $key';
+  @override
+  String todoBlockUnknownKeySuggest(String key, String suggestion) =>
+      'Cheie necunoscută $key — ați vrut să scrieți $suggestion?';
+  @override
+  String todoBlockBadValue(String key, String value, String expected) =>
+      'Nu se poate citi „$value” pentru $key. Se așteaptă: $expected';
+  @override
+  String todoBlockMissingValue(String key) => '$key are nevoie de o valoare';
+  @override
+  String get todoBlockNoColon => 'Se așteaptă „cheie: valoare”';
+  @override
+  String todoBlockRepeatedKey(String key) => '$key este dată de două ori';
+  @override
+  String todoBlockLine(int n) => 'Linia $n a blocului';
+  @override
+  String todoBlockNoNote(String name) => 'Nicio notă nu se potrivește cu $name';
+  @override
+  String todoBlockSeveralNotes(String name) =>
+      'Mai multe note se potrivesc cu $name';
 }

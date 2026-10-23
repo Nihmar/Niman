@@ -4342,4 +4342,84 @@ final class SlovenianStrings extends Strings {
   String get kanbanEmptyColumn => 'V tem stolpcu ni kartic';
   @override
   String get kanbanEditCard => 'Uredi kartico';
+  @override
+  String taskLinkOpenTooltip(String path) => 'Odpri $path';
+  @override
+  String get tasksForNoteTitle => 'Naloge za to opombo';
+  @override
+  String get tasksForNoteEmpty => 'Nobena naloga ne povezuje na to opombo';
+  @override
+  String get tasksForNoteNew => 'Nova naloga';
+  @override
+  String get tasksForNoteNewHere => 'Nova naloga za to opombo';
+  @override
+  String get moveToTasks => 'Premakni med naloge';
+  @override
+  String get moveToTasksConfirm => 'Premakni';
+  @override
+  String get movedToTasksOne => 'Premaknjeno med naloge';
+  @override
+  String movedToTasks(int n) => 'Premaknjeno med naloge: $n';
+  @override
+  String get moveToTasksHasSubItems =>
+      'Ima podpostavke — najprej premaknite njih';
+  @override
+  String get moveToTasksNeedsItem =>
+      'Postavite kazalko na postavko s potrditvenim poljem';
+  @override
+  String get moveToTasksSubtitle =>
+      'Postavke s potrditvenim poljem spremeni '
+      'v naloge in jih odstrani iz opombe';
+  @override
+  String get todoBlockTitle => 'Opravila';
+  @override
+  String get todoBlockLinkedHere => 'povezana sem';
+  @override
+  String todoBlockLinkedTo(String note) => 'povezana z $note';
+  @override
+  String todoBlockProject(String name) => 'projekt $name';
+  @override
+  String todoBlockContext(String name) => 'kontekst $name';
+  @override
+  String todoBlockTag(String name) => 'oznaka $name';
+  @override
+  String get todoBlockDueOverdue => 'zamujena';
+  @override
+  String get todoBlockDueToday => 'rok danes';
+  @override
+  String todoBlockDueWithin(int days) => 'rok v naslednjih $days dneh';
+  @override
+  String todoBlockDueOn(String date) => 'rok $date';
+  @override
+  String todoBlockDueBetween(String from, String to) => 'rok od $from do $to';
+  @override
+  String todoBlockPriority(String range) => 'prioriteta $range';
+  @override
+  String get todoBlockDoneOnly => 'opravljena';
+  @override
+  String get todoBlockOpenAndDone => 'odprta in opravljena';
+  @override
+  String get todoBlockSortPriority => 'po prioriteti';
+  @override
+  String get todoBlockSortFile => 'po vrstnem redu datoteke';
+  @override
+  String todoBlockUnknownKey(String key) => 'Neznan ključ $key';
+  @override
+  String todoBlockUnknownKeySuggest(String key, String suggestion) =>
+      'Neznan ključ $key — ste mislili $suggestion?';
+  @override
+  String todoBlockBadValue(String key, String value, String expected) =>
+      'Vrednosti “$value” za $key ni mogoče prebrati. Pričakovano: $expected';
+  @override
+  String todoBlockMissingValue(String key) => '$key potrebuje vrednost';
+  @override
+  String get todoBlockNoColon => 'Pričakovano “ključ: vrednost”';
+  @override
+  String todoBlockRepeatedKey(String key) => '$key je naveden dvakrat';
+  @override
+  String todoBlockLine(int n) => 'Vrstica $n bloka';
+  @override
+  String todoBlockNoNote(String name) => 'Nobena beležka ne ustreza $name';
+  @override
+  String todoBlockSeveralNotes(String name) => 'Več beležk ustreza $name';
 }

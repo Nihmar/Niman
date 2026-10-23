@@ -4,7 +4,8 @@
 /// Read by the grammar the Todo tab parses the file with ([parseTodoLine]):
 /// the same prefix — completion mark, priority, dates — and the same
 /// tokens, which open a line or follow whitespace, so `a+b` and `C#` stay
-/// text here as they do there.
+/// text here as they do there. A wikilink is one run of its own
+/// ([TokenKind.wikilink]), and nothing inside it is a token (#1152).
 library;
 
 import 'package:niman/src/editor/highlighting.dart';
@@ -40,12 +41,15 @@ List<Token> todoTxtTokens(String line) {
   if (date != null && task.creationDate != null) {
     tokens.add(Token(TokenKind.todoDate, at, date.end));
   }
-  // The description's tokens, wherever they are.
+  // The description's tokens, wherever they are: the words of the line with
+  // its links masked, so a link's inside is never read, and the links.
   final spans = <Token>[
-    for (final match in _word.allMatches(line))
+    for (final match in _word.allMatches(maskWikilinks(line)))
       if (_kindOf(match.group(0)!) case final kind?)
         Token(kind, match.start, match.end),
-  ];
+    for (final (start, end) in wikilinkSpans(line))
+      Token(TokenKind.wikilink, start, end),
+  ]..sort((a, b) => a.start.compareTo(b.start));
   for (final span in spans) {
     if (tokens.isNotEmpty && span.start < tokens.last.end) continue;
     tokens.add(span);

@@ -4269,4 +4269,82 @@ final class HindiStrings extends Strings {
   String get kanbanEmptyColumn => 'इस कॉलम में कोई कार्ड नहीं है';
   @override
   String get kanbanEditCard => 'कार्ड संपादित करें';
+  @override
+  String taskLinkOpenTooltip(String path) => '$path खोलें';
+  @override
+  String get tasksForNoteTitle => 'इस नोट के कार्य';
+  @override
+  String get tasksForNoteEmpty => 'कोई कार्य इस नोट से लिंक नहीं है';
+  @override
+  String get tasksForNoteNew => 'नया कार्य';
+  @override
+  String get tasksForNoteNewHere => 'इस नोट के लिए नया कार्य';
+  @override
+  String get moveToTasks => 'कार्यों में ले जाएँ';
+  @override
+  String get moveToTasksConfirm => 'ले जाएँ';
+  @override
+  String get movedToTasksOne => 'कार्यों में ले जाया गया';
+  @override
+  String movedToTasks(int n) => '$n को कार्यों में ले जाया गया';
+  @override
+  String get moveToTasksHasSubItems =>
+      'इसमें उप-आइटम हैं — पहले उन्हें ले जाएँ';
+  @override
+  String get moveToTasksNeedsItem => 'कर्सर को चेकबॉक्स वाले आइटम पर रखें';
+  @override
+  String get moveToTasksSubtitle =>
+      'चेकबॉक्स वाले आइटम को कार्य बनाता है और नोट से हटा देता है';
+  @override
+  String get todoBlockTitle => 'कार्य';
+  @override
+  String get todoBlockLinkedHere => 'यहाँ से जुड़े';
+  @override
+  String todoBlockLinkedTo(String note) => '$note से जुड़े';
+  @override
+  String todoBlockProject(String name) => 'प्रोजेक्ट $name';
+  @override
+  String todoBlockContext(String name) => 'संदर्भ $name';
+  @override
+  String todoBlockTag(String name) => 'टैग $name';
+  @override
+  String get todoBlockDueOverdue => 'समय-सीमा पार';
+  @override
+  String get todoBlockDueToday => 'आज की समय-सीमा';
+  @override
+  String todoBlockDueWithin(int days) => 'अगले $days दिनों में समय-सीमा';
+  @override
+  String todoBlockDueOn(String date) => 'समय-सीमा $date';
+  @override
+  String todoBlockDueBetween(String from, String to) => 'समय-सीमा $from से $to';
+  @override
+  String todoBlockPriority(String range) => 'प्राथमिकता $range';
+  @override
+  String get todoBlockDoneOnly => 'पूरे हुए';
+  @override
+  String get todoBlockOpenAndDone => 'खुले और पूरे हुए';
+  @override
+  String get todoBlockSortPriority => 'प्राथमिकता के अनुसार';
+  @override
+  String get todoBlockSortFile => 'फ़ाइल के क्रम में';
+  @override
+  String todoBlockUnknownKey(String key) => 'अज्ञात कुंजी $key';
+  @override
+  String todoBlockUnknownKeySuggest(String key, String suggestion) =>
+      'अज्ञात कुंजी $key — क्या आपका मतलब $suggestion था?';
+  @override
+  String todoBlockBadValue(String key, String value, String expected) =>
+      '$key के लिए “$value” पढ़ा नहीं जा सका। अपेक्षित: $expected';
+  @override
+  String todoBlockMissingValue(String key) => '$key को एक मान चाहिए';
+  @override
+  String get todoBlockNoColon => 'अपेक्षित “कुंजी: मान”';
+  @override
+  String todoBlockRepeatedKey(String key) => '$key दो बार दिया गया है';
+  @override
+  String todoBlockLine(int n) => 'ब्लॉक की पंक्ति $n';
+  @override
+  String todoBlockNoNote(String name) => '$name से कोई नोट मेल नहीं खाता';
+  @override
+  String todoBlockSeveralNotes(String name) => '$name से कई नोट मेल खाते हैं';
 }

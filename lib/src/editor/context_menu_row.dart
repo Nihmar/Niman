@@ -16,8 +16,12 @@ final class ContextMenuRow extends StatelessWidget {
     this.active = false,
     this.trailing,
     this.onHover,
+    this.tooltip,
     super.key,
   });
+
+  /// Why the row is greyed out, shown as its tooltip while it is.
+  final String? tooltip;
 
   /// Called as the pointer comes onto the row: a group's row opens its
   /// submenu, any other closes the one open.
@@ -100,8 +104,12 @@ final class ContextMenuRow extends StatelessWidget {
         ),
       ),
     );
-    if (hover == null) return row;
-    return MouseRegion(onEnter: (_) => hover(), child: row);
+    final why = tooltip;
+    final shown = why == null || enabled
+        ? row
+        : Tooltip(message: why, child: row);
+    if (hover == null) return shown;
+    return MouseRegion(onEnter: (_) => hover(), child: shown);
   }
 }
 

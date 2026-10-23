@@ -9,12 +9,15 @@ import 'package:niman/src/ui/dock/history_dock_pane.dart';
 import 'package:niman/src/ui/dock/links_dock_pane.dart';
 import 'package:niman/src/ui/dock/spelling_dock_pane.dart';
 import 'package:niman/src/ui/dock/tags_dock_pane.dart';
+import 'package:niman/src/ui/dock/tasks_dock_pane.dart';
+import 'package:niman/src/ui/note_tasks_host.dart';
 import 'package:niman/src/ui/note_view_handle.dart';
 import 'package:niman/src/ui/shell_dock.dart';
 import 'package:niman/src/ui/shell_workspace.dart';
 import 'package:niman/src/workspace/workspace.dart';
 
 import '../fakes/fake_library_session.dart';
+import '../fakes/note_tasks_fixture.dart';
 
 /// The parts of a note the panes read; anything else is a test mistake.
 final class _Note implements NoteViewHandle {
@@ -28,7 +31,7 @@ final class _Note implements NoteViewHandle {
   String get currentText => '';
 
   @override
-  String get notePath => 'Celestia.md';
+  String get notePath => '/fake/Celestia.md';
 
   @override
   dynamic noSuchMethod(Invocation invocation) =>
@@ -38,6 +41,7 @@ final class _Note implements NoteViewHandle {
 void main() {
   late FakeLibrarySession session;
   late ShellDock dock;
+  late NoteTasksHost tasks;
   final note = _Note();
 
   setUp(() {
@@ -50,6 +54,7 @@ void main() {
       wide: () => false,
       panelNote: () => note,
       journalBrowser: (_) => const Text('journal-browser'),
+      tasks: () => tasks,
       onOpenHistory: (_) {},
       onOpenNoteFromLink: (_) {},
       onChanged: () {},
@@ -105,5 +110,26 @@ void main() {
     await show(tester, DockPane.links);
     expect(find.byType(LinksDockPane), findsOneWidget);
     expect(find.byType(TagsDockPane), findsNothing);
+  });
+
+  testWidgets('the tasks request opens the tasks of the note in a sheet', (
+    tester,
+  ) async {
+    await session.open('/fake', create: false);
+    final fixture = (await tester.runAsync(
+      () => NoteTasksFixture.open(
+        todo: ['Call the plumber [[Celestia]]', 'Other [[Ideas]]'],
+        notes: ['Celestia.md', 'Ideas.md'],
+      ),
+    ))!;
+    addTearDown(fixture.dispose);
+    tasks = fixture.host;
+    await show(tester, DockPane.tasks);
+    expect(find.byType(TasksDockPane), findsOneWidget);
+    expect(find.byType(TagsDockPane), findsNothing);
+    await fixture.settle(tester);
+    expect(find.text('Call the plumber'), findsOneWidget);
+    expect(find.text('Other'), findsNothing);
+    expect(find.byKey(const Key('tasks-for-note-add')), findsOneWidget);
   });
 }

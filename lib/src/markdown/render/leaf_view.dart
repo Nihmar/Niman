@@ -27,6 +27,7 @@ import 'package:niman/src/markdown/render/inline_spans.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/render/math_text.dart';
 import 'package:niman/src/markdown/render/read_table.dart';
+import 'package:niman/src/markdown/render/todo_block_scope.dart';
 import 'package:niman/src/preview/code_highlight.dart';
 import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/preview/math_widget.dart';
@@ -154,10 +155,20 @@ final class LeafView extends StatelessWidget {
     );
   }
 
-  /// A fenced block: a Mermaid diagram when its language says so, code
-  /// otherwise.
+  /// A fenced block: a Mermaid diagram or a list of tasks when its language
+  /// says so, code otherwise.
   Widget _fenced(BuildContext context) {
     final language = leaf.node.fenceInfo;
+    // A `todo` fence is its question, empty or not: the list it asks for,
+    // where the note's tasks are at hand, and the code it is where not.
+    if (language != null &&
+        language.toLowerCase() == 'todo' &&
+        !leaf.continued &&
+        leaf.closed) {
+      final list = TodoBlockScope.of(context)
+          ?.build(context, source: leaf.code.join('\n'), theme: theme);
+      if (list != null) return list;
+    }
     if (language != null &&
         language.toLowerCase() == 'mermaid' &&
         !leaf.continued) {

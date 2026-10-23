@@ -4355,4 +4355,86 @@ final class FinnishStrings extends Strings {
   String get kanbanEmptyColumn => 'Tässä sarakkeessa ei ole kortteja';
   @override
   String get kanbanEditCard => 'Muokkaa korttia';
+  @override
+  String taskLinkOpenTooltip(String path) => 'Avaa $path';
+  @override
+  String get tasksForNoteTitle => 'Tämän muistiinpanon tehtävät';
+  @override
+  String get tasksForNoteEmpty =>
+      'Mikään tehtävä ei linkitä tähän muistiinpanoon';
+  @override
+  String get tasksForNoteNew => 'Uusi tehtävä';
+  @override
+  String get tasksForNoteNewHere => 'Uusi tehtävä tälle muistiinpanolle';
+  @override
+  String get moveToTasks => 'Siirrä tehtäviin';
+  @override
+  String get moveToTasksConfirm => 'Siirrä';
+  @override
+  String get movedToTasksOne => 'Siirretty tehtäviin';
+  @override
+  String movedToTasks(int n) => 'Siirretty tehtäviin: $n';
+  @override
+  String get moveToTasksHasSubItems => 'Sisältää alakohtia — siirrä ne ensin';
+  @override
+  String get moveToTasksNeedsItem =>
+      'Aseta kohdistin valintaruudulliselle riville';
+  @override
+  String get moveToTasksSubtitle =>
+      'Muuttaa valintaruudulliset kohdat '
+      'tehtäviksi ja poistaa ne muistiinpanosta';
+  @override
+  String get todoBlockTitle => 'Tehtävät';
+  @override
+  String get todoBlockLinkedHere => 'tähän linkitetyt';
+  @override
+  String todoBlockLinkedTo(String note) => 'linkitetty muistiinpanoon $note';
+  @override
+  String todoBlockProject(String name) => 'projekti $name';
+  @override
+  String todoBlockContext(String name) => 'konteksti $name';
+  @override
+  String todoBlockTag(String name) => 'tunniste $name';
+  @override
+  String get todoBlockDueOverdue => 'myöhässä';
+  @override
+  String get todoBlockDueToday => 'erääntyy tänään';
+  @override
+  String todoBlockDueWithin(int days) => 'erääntyy $days päivän sisällä';
+  @override
+  String todoBlockDueOn(String date) => 'erääntyy $date';
+  @override
+  String todoBlockDueBetween(String from, String to) => 'erääntyy $from–$to';
+  @override
+  String todoBlockPriority(String range) => 'prioriteetti $range';
+  @override
+  String get todoBlockDoneOnly => 'tehdyt';
+  @override
+  String get todoBlockOpenAndDone => 'avoimet ja tehdyt';
+  @override
+  String get todoBlockSortPriority => 'prioriteetin mukaan';
+  @override
+  String get todoBlockSortFile => 'tiedoston järjestyksessä';
+  @override
+  String todoBlockUnknownKey(String key) => 'Tuntematon avain $key';
+  @override
+  String todoBlockUnknownKeySuggest(String key, String suggestion) =>
+      'Tuntematon avain $key — tarkoititko $suggestion?';
+  @override
+  String todoBlockBadValue(String key, String value, String expected) =>
+      'Arvoa “$value” ei voi lukea avaimelle $key. Odotettu: $expected';
+  @override
+  String todoBlockMissingValue(String key) => '$key tarvitsee arvon';
+  @override
+  String get todoBlockNoColon => 'Odotettu “avain: arvo”';
+  @override
+  String todoBlockRepeatedKey(String key) => '$key on annettu kahdesti';
+  @override
+  String todoBlockLine(int n) => 'Lohkon rivi $n';
+  @override
+  String todoBlockNoNote(String name) =>
+      'Mikään muistiinpano ei vastaa nimeä $name';
+  @override
+  String todoBlockSeveralNotes(String name) =>
+      'Useampi muistiinpano vastaa nimeä $name';
 }

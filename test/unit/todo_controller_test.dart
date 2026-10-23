@@ -5,6 +5,8 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/todo/reminders.dart';
+import 'package:niman/src/todo/task_line_edit.dart';
+import 'package:niman/src/todo/task_link.dart' show TaskFile;
 import 'package:niman/src/todo/todo_controller.dart';
 import 'package:path/path.dart' as p;
 
@@ -70,6 +72,27 @@ void main() {
     );
   });
 
+  test('replaceLines rewrites the named lines and publishes them', () async {
+    writeRaw('todo.txt', 'call [[Old]]\nother\n');
+    await controller.open();
+    var published = 0;
+    controller.addListener(() => published++);
+    await controller.replaceLines(const [
+      TaskLineEdit(
+        file: TaskFile.todo,
+        lineIndex: 0,
+        from: 'call [[Old]]',
+        to: 'call [[New]]',
+      ),
+    ]);
+    expect(published, 1);
+    expect(controller.snapshot!.todo.first.task.description, 'call [[New]]');
+    expect(
+      File(p.join(root.path, 'todo.txt')).readAsStringSync(),
+      'call [[New]]\nother\n',
+    );
+  });
+
   test('a quiet revision skips the content read', () async {
     writeRaw('todo.txt', 'open\n');
     await controller.open();
@@ -124,6 +147,34 @@ void main() {
     await controller.check(entry);
     expect(controller.error, isNotNull);
     expect(controller.snapshot!.todo.single.task.description, 'kept');
+  });
+
+  test('addMoved writes both files, and removeMoved takes them back', () async {
+    await controller.open();
+    await controller.add('kept');
+    final added = await controller.addMoved(
+      todo: ['2026-09-07 a [[N]]'],
+      done: ['x 2026-09-07 2026-09-07 b [[N]]'],
+    );
+    expect(added, isTrue);
+    expect(controller.snapshot!.todo, hasLength(2));
+    expect(controller.snapshot!.done.single.task.description, 'b [[N]]');
+    final removed = await controller.removeMoved(
+      todo: ['2026-09-07 a [[N]]'],
+      done: ['x 2026-09-07 2026-09-07 b [[N]]'],
+    );
+    expect(removed, isTrue);
+    expect(controller.snapshot!.todo.single.task.description, 'kept');
+    expect(controller.snapshot!.done, isEmpty);
+  });
+
+  test('addMoved answers false when the write failed', () async {
+    await controller.open();
+    // A directory where todo.txt should be written: the write cannot land.
+    Directory(p.join(root.path, 'todo.txt')).createSync();
+    final added = await controller.addMoved(todo: ['a'], done: const []);
+    expect(added, isFalse);
+    expect(controller.error, isNotNull);
   });
 
   test('closing the library clears the snapshot', () async {

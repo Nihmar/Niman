@@ -25,6 +25,7 @@ import 'package:niman/src/library/session.dart';
 import 'package:niman/src/todo/reminder_cancellation.dart';
 import 'package:niman/src/todo/reminder_feature_follower.dart';
 import 'package:niman/src/todo/reminders.dart';
+import 'package:niman/src/todo/task_line_edit.dart';
 import 'package:niman/src/todo/todo_source.dart';
 import 'package:niman/src/todo/todo_store.dart';
 
@@ -182,6 +183,39 @@ final class TodoController extends ChangeNotifier {
     );
   }
 
+  /// Replaces the task lines [edits] name, one write for each file (the
+  /// rename rewrite of the links in the tasks, #1152). A failure is logged
+  /// and shown on [error], never thrown: the move that asked is done.
+  Future<void> replaceLines(List<TaskLineEdit> edits) {
+    return _apply('replace-lines', (store) => store.replaceLines(edits));
+  }
+
+  /// Appends the tasks Move to tasks (#1152) takes out of a note: the [todo]
+  /// lines to `todo.txt` and the [done] ones to `done.txt`, `todo.txt`
+  /// first. True when both files took them: the note's lines may go only
+  /// then, for a failure shown on [error] has left them where they were.
+  Future<bool> addMoved({
+    required List<String> todo,
+    required List<String> done,
+  }) {
+    return _apply(
+      'add-moved',
+      (store) => store.addLines(todo: todo, done: done),
+    );
+  }
+
+  /// Takes back what [addMoved] appended (Undo of a move): the last line
+  /// equal to each of [todo] and [done]. True when the files took it.
+  Future<bool> removeMoved({
+    required List<String> todo,
+    required List<String> done,
+  }) {
+    return _apply(
+      'remove-moved',
+      (store) => store.removeLines(todo: todo, done: done),
+    );
+  }
+
   /// The calendar file, whose own reminders (#730) join the tasks' in the
   /// wanted set. The shell keeps it current — one listener on the calendar
   /// controller. Setting it reconciles, the way a publish does.
@@ -193,16 +227,18 @@ final class TodoController extends ChangeNotifier {
 
   /// Runs [op] on the current store and publishes the returned snapshot
   /// (no-op while no library is open; failures surface on [error]).
-  /// [label] names the op in the debug log.
-  Future<void> _apply(
+  /// [label] names the op in the debug log. True when the op was done: false
+  /// with no library open, or when it failed.
+  Future<bool> _apply(
     String label,
     Future<TodoSnapshot> Function(TodoSource store) op,
   ) async {
     final store = _store;
     if (store == null || _disposed) {
       _log.debug('todo $label dropped (no store)');
-      return;
+      return false;
     }
+    var done = true;
     try {
       _snapshot = await op(store);
       _probes = await store.probe();
@@ -214,11 +250,13 @@ final class TodoController extends ChangeNotifier {
     } on Object catch (error) {
       _error = '$error';
       _log.warning('todo $label failed: $error');
+      done = false;
     }
     if (!_disposed) {
       notifyListeners();
       unawaited(_syncReminders());
     }
+    return done;
   }
 
   /// Converges OS reminders with what is on disk: the shell calls this on

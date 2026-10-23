@@ -4307,4 +4307,84 @@ final class NorwegianStrings extends Strings {
   String get kanbanEmptyColumn => 'Ingen kort i denne kolonnen';
   @override
   String get kanbanEditCard => 'Rediger kort';
+  @override
+  String taskLinkOpenTooltip(String path) => 'Åpne $path';
+  @override
+  String get tasksForNoteTitle => 'Oppgaver for dette notatet';
+  @override
+  String get tasksForNoteEmpty => 'Ingen oppgaver lenker til dette notatet';
+  @override
+  String get tasksForNoteNew => 'Ny oppgave';
+  @override
+  String get tasksForNoteNewHere => 'Ny oppgave for dette notatet';
+  @override
+  String get moveToTasks => 'Flytt til oppgaver';
+  @override
+  String get moveToTasksConfirm => 'Flytt';
+  @override
+  String get movedToTasksOne => 'Flyttet til oppgaver';
+  @override
+  String movedToTasks(int n) => 'Flyttet $n til oppgaver';
+  @override
+  String get moveToTasksHasSubItems => 'Har underpunkter — flytt dem først';
+  @override
+  String get moveToTasksNeedsItem =>
+      'Sett markøren på et punkt med avkrysningsboks';
+  @override
+  String get moveToTasksSubtitle =>
+      'Gjør punkter med avkrysningsboks til '
+      'oppgaver og fjerner dem fra notatet';
+  @override
+  String get todoBlockTitle => 'Oppgaver';
+  @override
+  String get todoBlockLinkedHere => 'knyttet hit';
+  @override
+  String todoBlockLinkedTo(String note) => 'knyttet til $note';
+  @override
+  String todoBlockProject(String name) => 'prosjekt $name';
+  @override
+  String todoBlockContext(String name) => 'kontekst $name';
+  @override
+  String todoBlockTag(String name) => 'tagg $name';
+  @override
+  String get todoBlockDueOverdue => 'forfalt';
+  @override
+  String get todoBlockDueToday => 'forfaller i dag';
+  @override
+  String todoBlockDueWithin(int days) => 'forfaller innen $days dager';
+  @override
+  String todoBlockDueOn(String date) => 'forfaller $date';
+  @override
+  String todoBlockDueBetween(String from, String to) =>
+      'forfaller fra $from til $to';
+  @override
+  String todoBlockPriority(String range) => 'prioritet $range';
+  @override
+  String get todoBlockDoneOnly => 'utført';
+  @override
+  String get todoBlockOpenAndDone => 'åpne og utførte';
+  @override
+  String get todoBlockSortPriority => 'etter prioritet';
+  @override
+  String get todoBlockSortFile => 'i filens rekkefølge';
+  @override
+  String todoBlockUnknownKey(String key) => 'Ukjent nøkkel $key';
+  @override
+  String todoBlockUnknownKeySuggest(String key, String suggestion) =>
+      'Ukjent nøkkel $key — mente du $suggestion?';
+  @override
+  String todoBlockBadValue(String key, String value, String expected) =>
+      'Kan ikke lese “$value” for $key. Forventet: $expected';
+  @override
+  String todoBlockMissingValue(String key) => '$key trenger en verdi';
+  @override
+  String get todoBlockNoColon => 'Forventet “nøkkel: verdi”';
+  @override
+  String todoBlockRepeatedKey(String key) => '$key er oppgitt to ganger';
+  @override
+  String todoBlockLine(int n) => 'Linje $n i blokken';
+  @override
+  String todoBlockNoNote(String name) => 'Ingen notater passer til $name';
+  @override
+  String todoBlockSeveralNotes(String name) => 'Flere notater passer til $name';
 }

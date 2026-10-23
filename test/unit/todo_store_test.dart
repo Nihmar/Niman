@@ -1,9 +1,12 @@
 // T-TD-02 AC: todo store — move semantics (order preserved, untouched
 // lines byte-identical), line-ending preservation, and serialized
 // concurrent ops, all against a temp library root.
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/todo/task_line_edit.dart';
+import 'package:niman/src/todo/task_link.dart' show TaskFile;
 import 'package:niman/src/todo/todo_store.dart';
 import 'package:path/path.dart' as p;
 
@@ -235,6 +238,98 @@ void main() {
     });
   });
 
+  group('replaceLines', () {
+    TaskLineEdit todoEdit(int at, String from, String to) =>
+        TaskLineEdit(file: TaskFile.todo, lineIndex: at, from: from, to: to);
+
+    test('replaces the named lines; every other byte stays', () async {
+      writeRaw('todo.txt', 'first  \n(A) call [[Old]]  +p\n\tthird\n');
+      writeRaw('done.txt', 'x 2026-09-06 see [[Old]]\nx keep\n');
+      await store.replaceLines([
+        todoEdit(1, '(A) call [[Old]]  +p', '(A) call [[New]]  +p'),
+        const TaskLineEdit(
+          file: TaskFile.done,
+          lineIndex: 0,
+          from: 'x 2026-09-06 see [[Old]]',
+          to: 'x 2026-09-06 see [[New]]',
+        ),
+      ]);
+      expect(readRaw('todo.txt'), 'first  \n(A) call [[New]]  +p\n\tthird\n');
+      expect(readRaw('done.txt'), 'x 2026-09-06 see [[New]]\nx keep\n');
+    });
+
+    test('a file with no match is not written', () async {
+      writeRaw('todo.txt', 'one\n');
+      writeRaw('done.txt', 'x two [[Old]]\n');
+      final stamp = File(p.join(root.path, 'todo.txt')).lastModifiedSync();
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+      await store.replaceLines([
+        const TaskLineEdit(
+          file: TaskFile.done,
+          lineIndex: 0,
+          from: 'x two [[Old]]',
+          to: 'x two [[New]]',
+        ),
+      ]);
+      expect(readRaw('done.txt'), 'x two [[New]]\n');
+      expect(File(p.join(root.path, 'todo.txt')).lastModifiedSync(), stamp);
+    });
+
+    test(
+      'keeps CRLF and the lack of a final newline; a BOM is read past',
+      () async {
+        File(p.join(root.path, 'todo.txt')).writeAsBytesSync([
+          0xEF, 0xBB, 0xBF, // The store reads past it, as for every op.
+          ...utf8.encode('a [[Old]]\r\nb\r\nc [[Old]]'),
+        ]);
+        await store.replaceLines([
+          todoEdit(2, 'c [[Old]]', 'c [[New]]'),
+          todoEdit(0, 'a [[Old]]', 'a [[New]]'),
+        ]);
+        expect(readRaw('todo.txt'), 'a [[New]]\r\nb\r\nc [[New]]');
+      },
+    );
+
+    test('finds a line another tool moved', () async {
+      // Planned at line 1; two lines were added above since.
+      writeRaw('todo.txt', 'x\ny\nfirst\nsecond [[Old]]\n');
+      await store.replaceLines([
+        todoEdit(1, 'second [[Old]]', 'second [[New]]'),
+      ]);
+      expect(readRaw('todo.txt'), 'x\ny\nfirst\nsecond [[New]]\n');
+    });
+
+    test('skips a line another tool edited or removed', () async {
+      writeRaw('todo.txt', 'edited [[Old]] +w\nother\n');
+      await store.replaceLines([
+        todoEdit(0, 'edited [[Old]]', 'edited [[New]]'),
+        todoEdit(1, 'gone [[Old]]', 'gone [[New]]'),
+      ]);
+      expect(readRaw('todo.txt'), 'edited [[Old]] +w\nother\n');
+    });
+
+    test('two identical lines are replaced once each', () async {
+      writeRaw('todo.txt', 'dup [[Old]]\nmid\ndup [[Old]]\n');
+      await store.replaceLines([
+        todoEdit(2, 'dup [[Old]]', 'dup [[New]]'),
+        todoEdit(0, 'dup [[Old]]', 'dup [[New]]'),
+      ]);
+      expect(readRaw('todo.txt'), 'dup [[New]]\nmid\ndup [[New]]\n');
+    });
+
+    test('one edit replaces one of two identical lines', () async {
+      writeRaw('todo.txt', 'dup [[Old]]\ndup [[Old]]\n');
+      await store.replaceLines([todoEdit(1, 'dup [[Old]]', 'dup [[New]]')]);
+      expect(readRaw('todo.txt'), 'dup [[Old]]\ndup [[New]]\n');
+    });
+
+    test('lines under a frontmatter block keep their file index', () async {
+      writeRaw('todo.txt', '---\ntitle: t\n---\nlink [[Old]]\n');
+      await store.replaceLines([todoEdit(3, 'link [[Old]]', 'link [[New]]')]);
+      expect(readRaw('todo.txt'), '---\ntitle: t\n---\nlink [[New]]\n');
+    });
+  });
+
   group('migrateCompleted', () {
     test('moves x lines to done.txt preserving order', () async {
       writeRaw(
@@ -314,6 +409,52 @@ void main() {
       expect(after.todo.size, 'a\nb\n'.length);
       // A repeated probe with no writes is stable.
       expect(await store.probe() == after, isTrue);
+    });
+  });
+
+  group('addLines / removeLines (Move to tasks, #1152)', () {
+    test('appends to both files, creating the missing ones', () async {
+      final snapshot = await store.addLines(
+        todo: ['2026-10-23 a [[N]]', '2026-10-23 b [[N]]'],
+        done: ['x 2026-10-23 2026-10-23 c [[N]]'],
+      );
+      expect(readRaw('todo.txt'), '2026-10-23 a [[N]]\n2026-10-23 b [[N]]');
+      expect(readRaw('done.txt'), 'x 2026-10-23 2026-10-23 c [[N]]');
+      expect(snapshot.todo, hasLength(2));
+      expect(snapshot.done.single.task.completed, isTrue);
+    });
+
+    test('keeps the lines already there and their line ending', () async {
+      writeRaw('todo.txt', 'old\r\nolder\r\n');
+      await store.addLines(todo: ['new'], done: const []);
+      expect(readRaw('todo.txt'), 'old\r\nolder\r\nnew\r\n');
+    });
+
+    test('a line of two lines is refused before anything is written', () async {
+      writeRaw('todo.txt', 'old');
+      await expectLater(
+        store.addLines(todo: ['fine', 'bad\nline'], done: const []),
+        throwsArgumentError,
+      );
+      expect(readRaw('todo.txt'), 'old');
+    });
+
+    test('removeLines takes the last equal line of each file', () async {
+      writeRaw('todo.txt', 'same\nmid\nsame\n');
+      writeRaw('done.txt', 'x 2026-10-23 gone\nx 2026-10-23 kept\n');
+      await store.removeLines(todo: ['same'], done: ['x 2026-10-23 gone']);
+      expect(readRaw('todo.txt'), 'same\nmid\n');
+      expect(readRaw('done.txt'), 'x 2026-10-23 kept\n');
+    });
+
+    test('removeLines skips a line another tool changed', () async {
+      writeRaw('todo.txt', 'edited by hand\n');
+      final snapshot = await store.removeLines(
+        todo: ['the line it was'],
+        done: const [],
+      );
+      expect(readRaw('todo.txt'), 'edited by hand\n');
+      expect(snapshot.todo, hasLength(1));
     });
   });
 

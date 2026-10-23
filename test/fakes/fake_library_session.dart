@@ -47,6 +47,7 @@ import 'package:niman/src/search/search_repo.dart';
 import 'package:niman/src/search/tag_repo.dart';
 import 'package:niman/src/sync/sync_service.dart';
 import 'package:niman/src/templates/repo.dart';
+import 'package:niman/src/todo/task_link_rewrites.dart';
 import 'package:niman/src/update/update_check.dart';
 import 'package:niman/src/widget/widget_configs.dart';
 import 'package:niman/src/workspace/workspace.dart';
@@ -1575,6 +1576,7 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     void Function()? onLinksRewritten,
     LinkRewriteProgress? onLinksProgress,
     FlushOpenNotes? flushOpen,
+    TaskLinkRewrites? taskLinks,
   }) async {
     final row = _requireRow(path);
     final parent = parentOf(path);
@@ -1617,6 +1619,7 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     void Function()? onLinksRewritten,
     LinkRewriteProgress? onLinksProgress,
     FlushOpenNotes? flushOpen,
+    TaskLinkRewrites? taskLinks,
   }) async {
     moveCalls.add(path);
     final gate = moveGates[path];

@@ -17,6 +17,7 @@ import 'package:niman/src/reading/reading_positions.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/ui/attachment_view.dart';
 import 'package:niman/src/ui/detail_deck.dart';
+import 'package:niman/src/ui/note_tasks_host.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/note_view_handle.dart';
 import 'package:niman/src/ui/ocr/ocr_file_actions.dart';
@@ -51,9 +52,11 @@ final class ShellDetailPane extends StatelessWidget {
     required this.spellCheck,
     required this.launcher,
     this.features,
+    this.tasks,
     this.caretPath,
     this.caretRequest = 0,
     this.onPasteAsMarkdown,
+    this.onMoveToTasks,
     this.reloadToken = 0,
     this.templateFolder,
     this.linksFollowed = 0,
@@ -190,6 +193,9 @@ final class ShellDetailPane extends StatelessWidget {
   /// The library the wikilink suggester panel reads (#475).
   final WikilinkSuggester? wikilinkSuggester;
 
+  /// The tasks that link a note (#1152), for the section under it.
+  final NoteTasksHost? tasks;
+
   /// Opens a note from a link, landing on a heading anchor when given.
   final void Function(String path, String? anchor) onOpenNote;
 
@@ -209,6 +215,9 @@ final class ShellDetailPane extends StatelessWidget {
 
   /// Forwarded to every [NoteView] ([NoteView.onPasteAsMarkdown]).
   final ValueChanged<NoteViewHandle>? onPasteAsMarkdown;
+
+  /// Forwarded to every [NoteView] ([NoteView.onMoveToTasks]).
+  final ValueChanged<NoteViewHandle>? onMoveToTasks;
 
   /// The open notes' unsaved edits (T-PP-11): the detail editor reports
   /// its dirty state here for the window's close guard.
@@ -394,6 +403,7 @@ final class ShellDetailPane extends StatelessWidget {
     libraryRoot: root,
     linkSource: linkSource,
     wikilinkSuggester: wikilinkSuggester,
+    tasks: tasks,
     onOpenNote: onOpenNote,
     initialAnchor: tab.anchor,
     initialCaretOffset: tab.caret,
@@ -409,6 +419,7 @@ final class ShellDetailPane extends StatelessWidget {
       if (tab.active && tab.focused) onNoteKindChanged(kind);
     },
     onPasteAsMarkdown: onPasteAsMarkdown,
+    onMoveToTasks: onMoveToTasks,
     unsavedTracker: unsavedTracker,
     statusActions: statusActions,
     spellCheck: spellCheck,
