@@ -129,7 +129,7 @@ way [Links to this note](links.md#links-to-this-note) is:
 
 **Add task** heads the list. The open tasks follow, the soonest due first and
 the ones with no due date last, in the order of `todo.txt`; then **Done (n)**,
-folded, lists the completed ones from `done.txt`. A row is a task as the Todo
+folded, lists the completed ones from `done.txt`, the latest first. A row is a task as the Todo
 tab draws it — checkbox, priority, text, due date, `+project` / `@context` /
 `#tag` and a chip for each other note it links — without the link to *this*
 note, which is what the list is about. A heading or block that link names
