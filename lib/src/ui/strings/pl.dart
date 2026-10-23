@@ -4385,4 +4385,8 @@ final class PolishStrings extends Strings {
   String get tasksForNoteTitle => 'Zadania do tej notatki';
   @override
   String get tasksForNoteEmpty => 'Żadne zadanie nie prowadzi do tej notatki';
+  @override
+  String get tasksForNoteNew => 'Nowe zadanie';
+  @override
+  String get tasksForNoteNewHere => 'Nowe zadanie do tej notatki';
 }

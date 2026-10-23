@@ -4351,4 +4351,8 @@ final class CroatianStrings extends Strings {
   String get tasksForNoteTitle => 'Zadaće za ovu napomenu';
   @override
   String get tasksForNoteEmpty => 'Nijedna zadaća ne vodi na ovu napomenu';
+  @override
+  String get tasksForNoteNew => 'Nova zadaća';
+  @override
+  String get tasksForNoteNewHere => 'Nova zadaća za ovu napomenu';
 }

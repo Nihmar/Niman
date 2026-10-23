@@ -4423,4 +4423,8 @@ final class GermanStrings extends Strings {
   String get tasksForNoteTitle => 'Aufgaben zu dieser Notiz';
   @override
   String get tasksForNoteEmpty => 'Keine Aufgabe verlinkt auf diese Notiz';
+  @override
+  String get tasksForNoteNew => 'Neue Aufgabe';
+  @override
+  String get tasksForNoteNewHere => 'Neue Aufgabe zu dieser Notiz';
 }

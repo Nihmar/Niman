@@ -39,6 +39,11 @@ abstract interface class NoteViewHandle {
   /// The note's text as it is in the editor now, saved or not.
   String get currentText;
 
+  /// The text selected in the editor now, or an empty string when nothing is
+  /// selected or the note takes no text there ([canInsert]): what New task
+  /// (#1152) makes the description of the task.
+  String get selectedText;
+
   /// Takes the caret to the heading on source [line] and shows it.
   void jumpToHeading(int line);
 

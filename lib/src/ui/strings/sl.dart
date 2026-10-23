@@ -4348,4 +4348,8 @@ final class SlovenianStrings extends Strings {
   String get tasksForNoteTitle => 'Naloge za to opombo';
   @override
   String get tasksForNoteEmpty => 'Nobena naloga ne povezuje na to opombo';
+  @override
+  String get tasksForNoteNew => 'Nova naloga';
+  @override
+  String get tasksForNoteNewHere => 'Nova naloga za to opombo';
 }

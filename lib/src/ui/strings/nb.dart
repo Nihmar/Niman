@@ -4313,4 +4313,8 @@ final class NorwegianStrings extends Strings {
   String get tasksForNoteTitle => 'Oppgaver for dette notatet';
   @override
   String get tasksForNoteEmpty => 'Ingen oppgaver lenker til dette notatet';
+  @override
+  String get tasksForNoteNew => 'Ny oppgave';
+  @override
+  String get tasksForNoteNewHere => 'Ny oppgave for dette notatet';
 }

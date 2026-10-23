@@ -2300,4 +2300,6 @@ abstract base class Strings {
   String taskLinkOpenTooltip(String path);
   String get tasksForNoteTitle;
   String get tasksForNoteEmpty;
+  String get tasksForNoteNew;
+  String get tasksForNoteNewHere;
 }

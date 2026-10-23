@@ -4362,4 +4362,8 @@ final class FinnishStrings extends Strings {
   @override
   String get tasksForNoteEmpty =>
       'Mikään tehtävä ei linkitä tähän muistiinpanoon';
+  @override
+  String get tasksForNoteNew => 'Uusi tehtävä';
+  @override
+  String get tasksForNoteNewHere => 'Uusi tehtävä tälle muistiinpanolle';
 }

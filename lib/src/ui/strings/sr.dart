@@ -4347,4 +4347,8 @@ final class SerbianStrings extends Strings {
   String get tasksForNoteTitle => 'Задаци за ову белешку';
   @override
   String get tasksForNoteEmpty => 'Ниједан задатак не води ка овој белешци';
+  @override
+  String get tasksForNoteNew => 'Нови задатак';
+  @override
+  String get tasksForNoteNewHere => 'Нови задатак за ову белешку';
 }

@@ -4367,4 +4367,8 @@ final class LithuanianStrings extends Strings {
   String get tasksForNoteTitle => 'Šios pastabos užduotys';
   @override
   String get tasksForNoteEmpty => 'Jokia užduotis nenurodo į šią pastabą';
+  @override
+  String get tasksForNoteNew => 'Nauja užduotis';
+  @override
+  String get tasksForNoteNewHere => 'Nauja užduotis šiai pastabai';
 }

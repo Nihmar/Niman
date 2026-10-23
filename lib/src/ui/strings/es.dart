@@ -4396,4 +4396,8 @@ final class SpanishStrings extends Strings {
   String get tasksForNoteTitle => 'Tareas de esta nota';
   @override
   String get tasksForNoteEmpty => 'Ninguna tarea enlaza con esta nota';
+  @override
+  String get tasksForNoteNew => 'Nueva tarea';
+  @override
+  String get tasksForNoteNewHere => 'Nueva tarea para esta nota';
 }

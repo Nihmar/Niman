@@ -2194,4 +2194,6 @@ final class AppStrings {
       _s.taskLinkOpenTooltip(path);
   static String get tasksForNoteTitle => _s.tasksForNoteTitle;
   static String get tasksForNoteEmpty => _s.tasksForNoteEmpty;
+  static String get tasksForNoteNew => _s.tasksForNoteNew;
+  static String get tasksForNoteNewHere => _s.tasksForNoteNewHere;
 }

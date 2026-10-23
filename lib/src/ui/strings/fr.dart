@@ -4457,4 +4457,8 @@ final class FrenchStrings extends Strings {
   String get tasksForNoteTitle => 'Tâches de cette note';
   @override
   String get tasksForNoteEmpty => 'Aucune tâche ne renvoie à cette note';
+  @override
+  String get tasksForNoteNew => 'Nouvelle tâche';
+  @override
+  String get tasksForNoteNewHere => 'Nouvelle tâche pour cette note';
 }

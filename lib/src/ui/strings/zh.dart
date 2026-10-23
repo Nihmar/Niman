@@ -3879,4 +3879,8 @@ final class ChineseStrings extends Strings {
   String get tasksForNoteTitle => '本笔记的任务';
   @override
   String get tasksForNoteEmpty => '没有任务链接到本笔记';
+  @override
+  String get tasksForNoteNew => '新建任务';
+  @override
+  String get tasksForNoteNewHere => '为本笔记新建任务';
 }

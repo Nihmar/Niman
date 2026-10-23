@@ -4378,4 +4378,8 @@ final class DutchStrings extends Strings {
   String get tasksForNoteTitle => 'Taken voor deze notitie';
   @override
   String get tasksForNoteEmpty => 'Geen taak verwijst naar deze notitie';
+  @override
+  String get tasksForNoteNew => 'Nieuwe taak';
+  @override
+  String get tasksForNoteNewHere => 'Nieuwe taak voor deze notitie';
 }

@@ -1,7 +1,8 @@
 // #1152: the whole shell with "Tasks for this note" in its three places -- the
 // side panel's Tasks pane, the header under the note, the sheet of the phone's
-// ⋮ menu -- and Add task opening the task dialog with the note's link already
-// in the description.
+// ⋮ menu -- and Add task / New task opening the task dialog with the note's
+// link already in the description (and the text selected in the editor before
+// it).
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -10,6 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/app.dart';
 import 'package:niman/src/core/settings/library_features.dart';
 import 'package:niman/src/library/library_state.dart';
+import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/todo/todo_source.dart';
 import 'package:niman/src/ui/window_controller.dart';
@@ -158,6 +160,8 @@ void main() {
       await pumpAt(tester, const Size(400, 800));
       await openMenu(tester);
       expect(find.byKey(const Key('note-menu-tasks')), findsOneWidget);
+      expect(find.byKey(const Key('note-menu-newTask')), findsOneWidget);
+      expect(find.text('New task'), findsOneWidget);
       await tester.tap(find.byKey(const Key('note-menu-tasks')));
       await settle(tester);
 
@@ -175,6 +179,36 @@ void main() {
       expect(find.text('Done (1)'), findsOneWidget);
     });
 
+    testWidgets('New task opens the dialog with the note linked', (
+      tester,
+    ) async {
+      await pumpAt(tester, const Size(400, 800));
+      await openMenu(tester);
+      await tester.tap(find.byKey(const Key('note-menu-newTask')));
+      await settle(tester);
+      expect(find.byType(AlertDialog), findsOneWidget);
+      expect(dialogText(tester), '[[alpha]]');
+    });
+
+    testWidgets('New task puts the selected text before the link', (
+      tester,
+    ) async {
+      await pumpAt(
+        tester,
+        const Size(400, 800),
+        content: 'Fix   the\n  boiler soon\nthen rest\n',
+      );
+      // "Fix   the\n  boiler soon": a selection over two lines.
+      tester
+          .state<MarkdownSourceViewState>(find.byType(MarkdownSourceView))
+          .select(const SelectionModel(anchor: 0, extent: 24));
+      await tester.pump();
+      await openMenu(tester);
+      await tester.tap(find.byKey(const Key('note-menu-newTask')));
+      await settle(tester);
+      expect(dialogText(tester), 'Fix the boiler soon [[alpha]]');
+    });
+
     testWidgets('the menu has neither entry while the Todo feature is off', (
       tester,
     ) async {
@@ -186,6 +220,45 @@ void main() {
       await openMenu(tester);
       expect(find.byKey(const Key('note-menu-links')), findsOneWidget);
       expect(find.byKey(const Key('note-menu-tasks')), findsNothing);
+      expect(find.byKey(const Key('note-menu-newTask')), findsNothing);
+    });
+  });
+
+  group('the command palette', () {
+    Future<void> search(WidgetTester tester) async {
+      await tester.tap(find.byKey(const Key('note-menu')));
+      await settle(tester);
+      await tester.tap(find.byKey(const Key('note-menu-palette')));
+      await settle(tester);
+      await tester.enterText(
+        find.byKey(const Key('palette-field')),
+        'New task for',
+      );
+      await tester.pump(const Duration(milliseconds: 200));
+    }
+
+    testWidgets('offers New task for this note, which opens the dialog', (
+      tester,
+    ) async {
+      await pumpAt(tester, const Size(400, 800));
+      await search(tester);
+      expect(find.textContaining('New task for this note'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('palette-item-0')));
+      await settle(tester);
+      expect(find.byType(AlertDialog), findsOneWidget);
+      expect(dialogText(tester), '[[alpha]]');
+    });
+
+    testWidgets('does not offer it while the Todo feature is off', (
+      tester,
+    ) async {
+      await pumpAt(tester, const Size(400, 800));
+      await controller.setFeatures(
+        controller.features.value.withSwitch(LibraryFeature.todo, on: false),
+      );
+      await settle(tester);
+      await search(tester);
+      expect(find.textContaining('New task for this note'), findsNothing);
     });
   });
 }

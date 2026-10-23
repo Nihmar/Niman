@@ -4333,4 +4333,8 @@ final class SlovakStrings extends Strings {
   String get tasksForNoteTitle => 'Úlohy k tejto poznámke';
   @override
   String get tasksForNoteEmpty => 'Žiadna úloha na túto poznámku neodkazuje';
+  @override
+  String get tasksForNoteNew => 'Nová úloha';
+  @override
+  String get tasksForNoteNewHere => 'Nová úloha k tejto poznámke';
 }

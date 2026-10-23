@@ -3976,4 +3976,8 @@ final class JapaneseStrings extends Strings {
   String get tasksForNoteTitle => 'このノートのタスク';
   @override
   String get tasksForNoteEmpty => 'このノートにリンクしているタスクはありません';
+  @override
+  String get tasksForNoteNew => '新しいタスク';
+  @override
+  String get tasksForNoteNewHere => 'このノートの新しいタスク';
 }

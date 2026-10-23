@@ -39,6 +39,9 @@ enum AppCommand {
   /// A new todo task.
   newTodo,
 
+  /// A new todo task that links the note on screen (#1152).
+  newTaskForNote,
+
   /// A web page captured as a note (#531).
   captureWebPage,
 
@@ -444,6 +447,7 @@ String appCommandLabel(AppCommand command) => switch (command) {
   AppCommand.presentSlides => AppStrings.slidesPresent,
   AppCommand.presenterView => AppStrings.slidesPresenterView,
   AppCommand.newTodo => AppStrings.shortcutNewTodo,
+  AppCommand.newTaskForNote => AppStrings.tasksForNoteNewHere,
   AppCommand.captureWebPage => AppStrings.captureWebPage,
   AppCommand.quickNote => AppStrings.shortcutQuickNote,
   AppCommand.journalToday => AppStrings.journalToday,

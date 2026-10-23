@@ -4366,4 +4366,8 @@ final class UkrainianStrings extends Strings {
   String get tasksForNoteTitle => 'Завдання до цієї нотатки';
   @override
   String get tasksForNoteEmpty => 'Жодне завдання не посилається на цю нотатку';
+  @override
+  String get tasksForNoteNew => 'Нове завдання';
+  @override
+  String get tasksForNoteNewHere => 'Нове завдання до цієї нотатки';
 }

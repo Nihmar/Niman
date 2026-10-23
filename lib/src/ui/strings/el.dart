@@ -4465,4 +4465,8 @@ final class GreekStrings extends Strings {
   @override
   String get tasksForNoteEmpty =>
       'Κανένα καθήκον δεν παραπέμπει σε αυτή τη σημείωση';
+  @override
+  String get tasksForNoteNew => 'Νέο καθήκον';
+  @override
+  String get tasksForNoteNewHere => 'Νέο καθήκον για αυτή τη σημείωση';
 }

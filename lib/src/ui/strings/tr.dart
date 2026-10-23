@@ -4291,4 +4291,8 @@ final class TurkishStrings extends Strings {
   String get tasksForNoteTitle => 'Bu notun görevleri';
   @override
   String get tasksForNoteEmpty => 'Hiçbir görev bu nota bağlanmıyor';
+  @override
+  String get tasksForNoteNew => 'Yeni görev';
+  @override
+  String get tasksForNoteNewHere => 'Bu not için yeni görev';
 }

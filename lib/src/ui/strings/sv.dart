@@ -4345,4 +4345,8 @@ final class SwedishStrings extends Strings {
   @override
   String get tasksForNoteEmpty =>
       'Ingen uppgift länkar till den här anteckningen';
+  @override
+  String get tasksForNoteNew => 'Ny uppgift';
+  @override
+  String get tasksForNoteNewHere => 'Ny uppgift för den här anteckningen';
 }

@@ -3676,6 +3676,15 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     await _guard(() => _todoController.add(line));
   }
 
+  /// Adds a task that links the note on screen (#1152): the task dialog opens
+  /// with `[[Note]]` written in, after the text selected in the editor when
+  /// there is some.
+  Future<void> _newTaskForNote() {
+    final path = _shownNote;
+    if (path == null) return Future<void>.value();
+    return _noteTasks.add(path, selection: _panelNote?.selectedText ?? '');
+  }
+
   /// Long-press context menu on a tree row (T-UI-05): the note actions,
   /// scoped to the pressed row. New note/folder target the row's folder
   /// (issue #100 moved the menu itself into `shell_row_menu.dart`).
@@ -3795,6 +3804,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         NoteMenuAction.tags => _showPanel(DockPane.tags),
         NoteMenuAction.links => _showPanel(DockPane.links),
         NoteMenuAction.tasks => _showPanel(DockPane.tasks),
+        NoteMenuAction.newTask => _newTaskForNote(),
         NoteMenuAction.typewriter => Future<void>.sync(_toggleTypewriter),
         NoteMenuAction.palette => _palette.open(context),
         NoteMenuAction.format => _formatNote(),
@@ -4630,6 +4640,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         _openTodo();
         unawaited(_addTodo());
       },
+      AppCommand.newTaskForNote: () => unawaited(_newTaskForNote()),
       AppCommand.quickNote: () => unawaited(_openQuickNoteFromTile()),
       AppCommand.journalToday: () => unawaited(_journalFlow.openToday(context)),
       AppCommand.journalPrevious: () =>

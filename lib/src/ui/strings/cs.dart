@@ -4319,4 +4319,8 @@ final class CzechStrings extends Strings {
   String get tasksForNoteTitle => 'Úkoly k této poznámce';
   @override
   String get tasksForNoteEmpty => 'Žádný úkol na tuto poznámku neodkazuje';
+  @override
+  String get tasksForNoteNew => 'Nový úkol';
+  @override
+  String get tasksForNoteNewHere => 'Nový úkol k této poznámce';
 }

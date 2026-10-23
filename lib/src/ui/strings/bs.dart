@@ -4352,4 +4352,8 @@ final class BosnianStrings extends Strings {
   String get tasksForNoteTitle => 'Zadaci za ovu bilješku';
   @override
   String get tasksForNoteEmpty => 'Nijedan zadatak ne vodi na ovu bilješku';
+  @override
+  String get tasksForNoteNew => 'Novi zadatak';
+  @override
+  String get tasksForNoteNewHere => 'Novi zadatak za ovu bilješku';
 }

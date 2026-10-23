@@ -4386,4 +4386,8 @@ final class BasqueStrings extends Strings {
   @override
   String get tasksForNoteEmpty =>
       'Ez dago ohar honetara estekatzen duen zereginik';
+  @override
+  String get tasksForNoteNew => 'Zeregin berria';
+  @override
+  String get tasksForNoteNewHere => 'Zeregin berria ohar honentzat';
 }

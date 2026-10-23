@@ -4356,4 +4356,8 @@ final class PortugueseStrings extends Strings {
   String get tasksForNoteTitle => 'Tarefas desta nota';
   @override
   String get tasksForNoteEmpty => 'Nenhuma tarefa aponta para esta nota';
+  @override
+  String get tasksForNoteNew => 'Nova tarefa';
+  @override
+  String get tasksForNoteNewHere => 'Nova tarefa para esta nota';
 }

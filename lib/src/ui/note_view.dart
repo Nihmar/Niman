@@ -545,6 +545,14 @@ final class _NoteViewState extends State<NoteView>
   String get currentText => _unifiedText;
 
   @override
+  String get selectedText {
+    final surface = _surface;
+    if (!canInsert || surface == null) return '';
+    final at = surface.selection.clampTo(surface.buffer.length);
+    return at.isCollapsed ? '' : surface.buffer.substring(at.start, at.end);
+  }
+
+  @override
   String get notePath => widget.path;
 
   @override

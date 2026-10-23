@@ -41,6 +41,9 @@ final class _Note implements NoteViewHandle {
   bool get canInsert => true;
 
   @override
+  String get selectedText => '';
+
+  @override
   void insertAtCaret(String markdown) => currentText += markdown;
 
   @override

@@ -4363,4 +4363,8 @@ final class GalicianStrings extends Strings {
   String get tasksForNoteTitle => 'Tarefas desta nota';
   @override
   String get tasksForNoteEmpty => 'Ningunha tarefa liga con esta nota';
+  @override
+  String get tasksForNoteNew => 'Tarefa nova';
+  @override
+  String get tasksForNoteNewHere => 'Tarefa nova para esta nota';
 }

@@ -4405,4 +4405,8 @@ final class CatalanStrings extends Strings {
   String get tasksForNoteTitle => "Tasques d'aquesta nota";
   @override
   String get tasksForNoteEmpty => 'Cap tasca enllaça amb aquesta nota';
+  @override
+  String get tasksForNoteNew => 'Tasca nova';
+  @override
+  String get tasksForNoteNewHere => 'Tasca nova per a aquesta nota';
 }

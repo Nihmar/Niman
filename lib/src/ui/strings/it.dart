@@ -4364,4 +4364,8 @@ final class ItalianStrings extends Strings {
   String get tasksForNoteTitle => 'Attività di questa nota';
   @override
   String get tasksForNoteEmpty => 'Nessuna attività rimanda a questa nota';
+  @override
+  String get tasksForNoteNew => 'Nuova attività';
+  @override
+  String get tasksForNoteNewHere => 'Nuova attività per questa nota';
 }

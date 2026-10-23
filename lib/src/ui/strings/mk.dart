@@ -4361,4 +4361,8 @@ final class MacedonianStrings extends Strings {
   String get tasksForNoteTitle => 'Задачи за оваа белешка';
   @override
   String get tasksForNoteEmpty => 'Ниедна задача не води до оваа белешка';
+  @override
+  String get tasksForNoteNew => 'Нова задача';
+  @override
+  String get tasksForNoteNewHere => 'Нова задача за оваа белешка';
 }

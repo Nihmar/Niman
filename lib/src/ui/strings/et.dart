@@ -4275,4 +4275,8 @@ final class EstonianStrings extends Strings {
   String get tasksForNoteTitle => 'Selle märke ülesanded';
   @override
   String get tasksForNoteEmpty => 'Ükski ülesanne ei viita sellele märkele';
+  @override
+  String get tasksForNoteNew => 'Uus ülesanne';
+  @override
+  String get tasksForNoteNewHere => 'Uus ülesanne sellele märkele';
 }

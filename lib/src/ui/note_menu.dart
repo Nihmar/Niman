@@ -46,6 +46,10 @@ enum NoteMenuAction {
   /// room for the dock, a sheet on a phone.
   tasks,
 
+  /// A new task that links the note (#1152): the task dialog, with the link
+  /// written in -- and the text selected in the editor before it.
+  newTask,
+
   /// Typewriter mode on or off (#70): on the phone, where there is no
   /// key and no switch on the status row, the way to it beside the note.
   typewriter,
@@ -241,6 +245,13 @@ final class NoteMenuButton extends StatelessWidget {
               NoteMenuAction.tasks,
               Icons.check_box_outlined,
               AppStrings.tasksForNoteTitle,
+            ),
+          if (tasks)
+            _item(
+              context,
+              NoteMenuAction.newTask,
+              Icons.add_task_outlined,
+              AppStrings.tasksForNoteNew,
             ),
           if (kindSwitch case final kind?)
             _item(

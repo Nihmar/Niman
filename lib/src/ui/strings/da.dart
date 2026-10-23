@@ -4308,4 +4308,8 @@ final class DanishStrings extends Strings {
   String get tasksForNoteTitle => 'Opgaver til denne note';
   @override
   String get tasksForNoteEmpty => 'Ingen opgave linker til denne note';
+  @override
+  String get tasksForNoteNew => 'Ny opgave';
+  @override
+  String get tasksForNoteNewHere => 'Ny opgave til denne note';
 }

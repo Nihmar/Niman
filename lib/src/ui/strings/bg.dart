@@ -4355,4 +4355,8 @@ final class BulgarianStrings extends Strings {
   String get tasksForNoteTitle => 'Задачи за тази бележка';
   @override
   String get tasksForNoteEmpty => 'Никоя задача не води към тази бележка';
+  @override
+  String get tasksForNoteNew => 'Нова задача';
+  @override
+  String get tasksForNoteNewHere => 'Нова задача за тази бележка';
 }

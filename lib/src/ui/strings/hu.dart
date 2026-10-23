@@ -4351,4 +4351,8 @@ final class HungarianStrings extends Strings {
   String get tasksForNoteTitle => 'A jegyzet feladatai';
   @override
   String get tasksForNoteEmpty => 'Egy feladat sem hivatkozik erre a jegyzetre';
+  @override
+  String get tasksForNoteNew => 'Új feladat';
+  @override
+  String get tasksForNoteNewHere => 'Új feladat ehhez a jegyzethez';
 }

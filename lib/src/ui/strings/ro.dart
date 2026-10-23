@@ -4397,4 +4397,8 @@ final class RomanianStrings extends Strings {
   String get tasksForNoteTitle => 'Sarcinile acestei note';
   @override
   String get tasksForNoteEmpty => 'Nicio sarcină nu trimite la această notă';
+  @override
+  String get tasksForNoteNew => 'Sarcină nouă';
+  @override
+  String get tasksForNoteNewHere => 'Sarcină nouă pentru această notă';
 }

@@ -4360,4 +4360,8 @@ final class AlbanianStrings extends Strings {
   String get tasksForNoteTitle => 'Detyrat e këtij shënimi';
   @override
   String get tasksForNoteEmpty => 'Asnjë detyrë nuk lidhet me këtë shënim';
+  @override
+  String get tasksForNoteNew => 'Detyrë e re';
+  @override
+  String get tasksForNoteNewHere => 'Detyrë e re për këtë shënim';
 }

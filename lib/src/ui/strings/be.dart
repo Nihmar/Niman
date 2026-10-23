@@ -4370,4 +4370,8 @@ final class BelarusianStrings extends Strings {
   @override
   String get tasksForNoteEmpty =>
       'Ніводнае заданне не спасылаецца на гэту нататку';
+  @override
+  String get tasksForNoteNew => 'Новае заданне';
+  @override
+  String get tasksForNoteNewHere => 'Новае заданне для гэтай нататкі';
 }

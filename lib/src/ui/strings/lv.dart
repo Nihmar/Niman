@@ -4320,4 +4320,8 @@ final class LatvianStrings extends Strings {
   String get tasksForNoteTitle => 'Šīs piezīmes uzdevumi';
   @override
   String get tasksForNoteEmpty => 'Neviens uzdevums nesaistās ar šo piezīmi';
+  @override
+  String get tasksForNoteNew => 'Jauns uzdevums';
+  @override
+  String get tasksForNoteNewHere => 'Jauns uzdevums šai piezīmei';
 }

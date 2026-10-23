@@ -4275,4 +4275,8 @@ final class HindiStrings extends Strings {
   String get tasksForNoteTitle => 'इस नोट के कार्य';
   @override
   String get tasksForNoteEmpty => 'कोई कार्य इस नोट से लिंक नहीं है';
+  @override
+  String get tasksForNoteNew => 'नया कार्य';
+  @override
+  String get tasksForNoteNewHere => 'इस नोट के लिए नया कार्य';
 }

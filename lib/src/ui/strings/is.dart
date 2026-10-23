@@ -4330,4 +4330,8 @@ final class IcelandicStrings extends Strings {
   String get tasksForNoteTitle => 'Verkefni fyrir þennan minnispunkt';
   @override
   String get tasksForNoteEmpty => 'Ekkert verkefni vísar á þennan minnispunkt';
+  @override
+  String get tasksForNoteNew => 'Nýtt verkefni';
+  @override
+  String get tasksForNoteNewHere => 'Nýtt verkefni fyrir þennan minnispunkt';
 }

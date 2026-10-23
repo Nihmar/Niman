@@ -81,6 +81,7 @@ Set<CommandNeed> commandNeeds(AppCommand command) => switch (command) {
   AppCommand.convertListToMindMap ||
   AppCommand.pasteAsMarkdown ||
   AppCommand.exportNote ||
+  AppCommand.newTaskForNote ||
   AppCommand.noteHistory => const {CommandNeed.textNote},
   AppCommand.closeTab ||
   AppCommand.nextTab ||

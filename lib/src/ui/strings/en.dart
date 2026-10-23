@@ -4275,4 +4275,8 @@ final class EnglishStrings extends Strings {
   String get tasksForNoteTitle => 'Tasks for this note';
   @override
   String get tasksForNoteEmpty => 'No task links to this note';
+  @override
+  String get tasksForNoteNew => 'New task';
+  @override
+  String get tasksForNoteNewHere => 'New task for this note';
 }
