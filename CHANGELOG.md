@@ -6,6 +6,43 @@ This file ships inside the build and feeds the in-app changelog (the
 launch dialog after an update and the screen under Settings → Diagnostics
 and info). Update it in the release commit, before the tag.
 
+## [0.3.0] - 2026-10-23
+
+Niman comes to the Mac and the iPhone, a note can be a kanban board, and
+tasks and notes link both ways.
+
+macOS and iOS join Android, Linux and Windows, in preview: a Mac gets its
+own title bar beside the traffic lights, the menu bar's commands, a menu bar
+extra, ⌘ keys and a disk image in the release; an iPhone or an iPad keeps
+its libraries in the Files app and has reminders, the system's spell
+checker, PDF export and a sync that finishes once the app is left. A note
+can be a kanban board, with its columns and cards kept as Markdown, edited
+by hand on a desktop and with Move to… on a phone, and exported as the
+board it is. A task can link a note with `[[`: the note lists the tasks
+that link it, a new task can be made from it, its checkbox items can move
+to the tasks, and a `todo` block in it draws the tasks it asks for.
+
+### Added
+- **macOS**: the app, in preview — title bar, menu bar commands, menu bar extra, ⌘ keys, the × hiding to the Dock, notes opened from Finder, reminders, spell check, PDF export, OCR and a disk image in the release
+- **iOS and iPadOS**: the app, in preview — libraries in the Files app, quick actions, reminders, spell check, PDF export, OCR, Paste as Markdown, background sync and capture
+- **Kanban**: a note kind that is a board of columns and cards, on desktop and phone, exported to HTML, PDF and EPUB as a board (#1165–#1170)
+- **Tasks**: a link to a note in a task, completed by `[[`, kept up to date on a rename or a move, shown as a chip (#1152)
+- **Tasks**: a note lists the tasks that link it, under the note, in the side panel and in its ⋮ menu; New task from a note; Move to tasks for its checkbox items; a `todo` block that draws a list of tasks (#1152)
+- **Workspace**: `+` opens a new tab with a launcher, and a header over the tree names the library and the folder (#1133, #1134)
+- **Android**: runs on Android 11 (#1178)
+
+### Changed
+- **Tablet**: the tab row carries the panels' toggles and back/forward (#1134)
+- **Notes**: on a wide window the links and tasks headers under the note step aside while the side panel is open
+
+### Fixed
+- **Windows**: closing to the tray hands the foreground to the window below, so other programs take clicks again
+- **Live editor**: a space typed in a table cell is one space wide (#1160)
+- **Sync**: a write landing between an upload and its listing stays a conflict (#1162)
+- **Windows**: Edge runs without the compatibility layer (#1176)
+- **Workspace**: notes gone from disk leave the history; Back from a new tab closes it (#1134)
+- **Kanban**: Add a card sits under the column's title and takes the typing at the first click
+
 ## [0.2.9] - 2026-10-21
 
 A settings database that lost pages no longer stops the sync.
