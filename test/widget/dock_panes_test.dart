@@ -85,6 +85,9 @@ final class _Note implements NoteViewHandle {
   String get notePath => 'Celestia.md';
 
   @override
+  String? get notePathInLibrary => notePath;
+
+  @override
   Future<String?> resolveEmbed(String target) async => null;
 }
 

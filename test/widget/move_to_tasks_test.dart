@@ -14,10 +14,12 @@ import 'package:niman/src/ui/move_to_tasks_flow.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/note_view_handle.dart';
 import 'package:niman/src/ui/strings.dart';
+import 'package:path/path.dart' as p;
 
 import '../fakes/note_tasks_fixture.dart';
 
-const String _path = 'House/Repairs.md';
+// Where the shell opens it: on disk, in the fixture's library at `/fake`.
+final String _path = p.join('/fake', 'House', 'Repairs.md');
 
 const String _note =
     '# Repairs\n'
@@ -49,6 +51,7 @@ void main() {
             builder: (context) => NoteView(
               key: key,
               path: _path,
+              libraryRoot: '/fake',
               showLineNumbers: false,
               autofocusEditor: false,
               toolbarTop: true,

@@ -118,6 +118,10 @@ abstract interface class NoteViewHandle {
   /// The path of the note on screen, as the shell gave it.
   String get notePath;
 
+  /// The note's slash-separated path in the open library — what a link to
+  /// it is made from — or null for a note opened from outside one.
+  String? get notePathInLibrary;
+
   /// The note's spelling review, for the dock's pane (#712); null where
   /// the note has no spell check.
   SpellReview? get spellReview;

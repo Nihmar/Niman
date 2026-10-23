@@ -23,6 +23,9 @@ final class _Note implements NoteViewHandle {
   final String notePath;
 
   @override
+  String? get notePathInLibrary => notePath;
+
+  @override
   String get currentText => '';
 
   @override

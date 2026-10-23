@@ -34,6 +34,9 @@ final class _Note implements NoteViewHandle {
   String get notePath => '/fake/Celestia.md';
 
   @override
+  String? get notePathInLibrary => 'Celestia.md';
+
+  @override
   dynamic noSuchMethod(Invocation invocation) =>
       throw UnimplementedError('${invocation.memberName}');
 }
