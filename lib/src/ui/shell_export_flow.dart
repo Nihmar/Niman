@@ -26,6 +26,7 @@ import 'package:niman/src/export/export_working_dialog.dart';
 import 'package:niman/src/export/pdf_export_progress_dialog.dart';
 import 'package:niman/src/export/pdf_printer.dart';
 import 'package:niman/src/export/pdf_webview.dart';
+import 'package:niman/src/export/printed_todo_block.dart';
 import 'package:niman/src/export/slide_page.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/links/resolver.dart';
@@ -52,6 +53,7 @@ final class ShellExportFlow {
     required this.epubMetadataProblem,
     required this.epubExport,
     required this.linkSource,
+    required this.todoBlocks,
     required this.wide,
     required this.shownNote,
   });
@@ -86,6 +88,11 @@ final class ShellExportFlow {
 
   /// The library's link source, for the links an export resolves.
   final LinkSource? Function() linkSource;
+
+  /// The lists a note's `todo` fences are right now (#1152), by the key of
+  /// their source: asked of the tasks, on this isolate, for the note at
+  /// library-relative `path` whose text is `text` — an export reads nothing.
+  final Future<PrintedTodoBlocks> Function(String path, String text) todoBlocks;
 
   /// Whether the window is wide: a dialog asks there, a sheet on a phone.
   final bool Function() wide;
@@ -193,6 +200,7 @@ final class ShellExportFlow {
             root: root,
             language: AppLanguages.resolved.id,
             linkSource: linkSource(),
+            todoBlocks: await todoBlocks(path, text),
             printer: pdfPrinter,
             theme: theme,
             mathCache: cache,
@@ -234,13 +242,15 @@ final class ShellExportFlow {
           );
         }
         try {
+          final text = await ops.readNote(path);
           payload = await epubExport(
-            text: await ops.readNote(path),
+            text: text,
             title: title,
             path: path,
             root: root,
             language: AppLanguages.resolved.id,
             linkSource: linkSource(),
+            todoBlocks: await todoBlocks(path, text),
             isCancelled: () => cancelled,
           );
         } on EpubExportCancelled {
@@ -250,8 +260,9 @@ final class ShellExportFlow {
           if (!done.isCompleted) done.complete();
         }
       } else {
+        final text = await ops.readNote(path);
         payload = await exportNote(
-          text: await ops.readNote(path),
+          text: text,
           title: title,
           path: path,
           root: root,
@@ -262,6 +273,7 @@ final class ShellExportFlow {
               ? ExportFileFormat.markdown
               : ExportFileFormat.html,
           linkSource: linkSource(),
+          todoBlocks: await todoBlocks(path, text),
         );
       }
       final String? place;

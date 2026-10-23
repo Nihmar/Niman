@@ -16,6 +16,7 @@ import 'package:niman/src/export/html_page.dart';
 import 'package:niman/src/export/note_html.dart';
 import 'package:niman/src/export/note_html_source.dart';
 import 'package:niman/src/export/picture_mime.dart';
+import 'package:niman/src/export/printed_todo_block.dart';
 import 'package:niman/src/links/embed_path.dart';
 import 'package:niman/src/links/resolver.dart';
 import 'package:path/path.dart' as p;
@@ -26,12 +27,16 @@ const AppLogger _log = AppLogger(name: 'export');
 abstract final class ExportSources {
   /// A whole note's page source: its [text], its [title], and every picture
   /// it shows as a `data:` URI, by the target as the note writes it.
+  ///
+  /// [todoBlocks] are the lists its `todo` fences are at the moment of the
+  /// export (#1152).
   static Future<NoteHtmlSource> forNote({
     required String text,
     required String title,
     required String notePath,
     required String root,
     LinkSource? linkSource,
+    PrintedTodoBlocks todoBlocks = const <String, PrintedTodoBlock>{},
   }) async => NoteHtmlSource(
     text: text,
     title: title,
@@ -41,6 +46,7 @@ abstract final class ExportSources {
       root: root,
       linkSource: linkSource,
     ),
+    todoBlocks: todoBlocks,
   );
 
   /// The pictures [text] shows, resolved and read: `data:` URIs by the
@@ -138,6 +144,7 @@ abstract final class ExportSources {
     required String notePath,
     required String root,
     LinkSource? linkSource,
+    PrintedTodoBlocks todoBlocks = const <String, PrintedTodoBlock>{},
   }) async => NoteHtmlSource(
     text: text,
     title: title,
@@ -147,6 +154,7 @@ abstract final class ExportSources {
       root: root,
       linkSource: linkSource,
     ),
+    todoBlocks: todoBlocks,
   );
 
   /// The pictures [text] shows, resolved, by the target as written: `file:`
@@ -211,7 +219,12 @@ abstract final class ExportSources {
     final fonts = <String>{};
     for (final slide in slides) {
       final html = NoteHtml(
-        NoteHtmlSource(text: slide, title: source.title, images: source.images),
+        NoteHtmlSource(
+          text: slide,
+          title: source.title,
+          images: source.images,
+          todoBlocks: source.todoBlocks,
+        ),
       );
       body.write('<section class="slide">\n${html.body()}</section>\n');
       if (html.fontFaces case final faces?) fonts.add(faces);
@@ -224,6 +237,12 @@ abstract final class ExportSources {
       style: slidesPageStyle,
     );
   });
+
+  /// The source of each closed `todo` fence [text] holds, in order (#1152):
+  /// what an export puts to the tasks before the page is built, so the page
+  /// reads nothing.
+  static List<String> todoBlockSources(String text) =>
+      NoteHtml(NoteHtmlSource(text: text, title: '')).todoBlockSources();
 
   /// The picture targets [text] names, as written: an embed's
   /// (`![[photo.png]]`) and a Markdown image's `src`, as the page reads

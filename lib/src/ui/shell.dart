@@ -38,6 +38,7 @@ import 'package:niman/src/editor/plain_text.dart';
 import 'package:niman/src/epub/epub_archive.dart';
 import 'package:niman/src/export/export_files.dart';
 import 'package:niman/src/export/pdf_printer.dart';
+import 'package:niman/src/export/printed_todo_block.dart';
 import 'package:niman/src/flashcards/deck_catalog_controller.dart';
 import 'package:niman/src/flashcards/library_decks.dart';
 import 'package:niman/src/frontmatter/note_kind.dart';
@@ -96,6 +97,7 @@ import 'package:niman/src/ui/epub_convert_flow.dart';
 import 'package:niman/src/ui/epub_look_sheet.dart';
 import 'package:niman/src/ui/epub_text_zoom.dart';
 import 'package:niman/src/ui/expanded_folders.dart';
+import 'package:niman/src/ui/export_todo_blocks.dart';
 import 'package:niman/src/ui/feature_off.dart';
 import 'package:niman/src/ui/features/features_host.dart';
 import 'package:niman/src/ui/features_link.dart';
@@ -1197,9 +1199,18 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     epubMetadataProblem: widget.epubMetadataProblem,
     epubExport: widget.epubExport,
     linkSource: () => _linkSource,
+    todoBlocks: _exportTodoBlocks,
     wide: () => _wide,
     shownNote: () => _shownNote,
   );
+
+  /// The lists the `todo` fences of a note are at this moment, for an export
+  /// to print in their place (#1152); none while the Todo feature is off,
+  /// where the fence is the code it is.
+  Future<PrintedTodoBlocks> _exportTodoBlocks(String path, String text) =>
+      widget.controller.features.value.isOn(LibraryFeature.todo)
+      ? ExportTodoBlocks(_noteTasks).of(text: text, notePath: path)
+      : Future<PrintedTodoBlocks>.value(const <String, PrintedTodoBlock>{});
 
   /// Converting a book into notes (#1138): from its row in the reader, the
   /// tree, the palette, a drop or a share.

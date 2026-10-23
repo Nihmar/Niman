@@ -12,6 +12,7 @@ import 'package:niman/src/export/export_note.dart';
 import 'package:niman/src/export/export_tree_book.dart';
 import 'package:niman/src/export/pdf_printer.dart';
 import 'package:niman/src/export/pdf_webview.dart';
+import 'package:niman/src/export/printed_todo_block.dart';
 import 'package:niman/src/links/resolver.dart';
 
 /// Where an exported file is written; the place it landed, or null when
@@ -94,6 +95,7 @@ typedef EpubNoteExport = Future<ExportPayload> Function({
   required String language,
   LinkSource? linkSource,
   bool Function()? isCancelled,
+  PrintedTodoBlocks todoBlocks,
 });
 
 /// The printer a note's PDF goes through; tests hand in their own, since

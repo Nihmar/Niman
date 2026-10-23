@@ -38,6 +38,14 @@ final class NoteHtml {
   /// package declares the `svg` property for a chapter that did (E6).
   bool get usesSvg => _math.usesSvg || _hooks.usedDiagram;
 
+  /// The source of each closed `todo` fence of the note, in order (#1152):
+  /// what an export puts to the tasks before the page is built.
+  List<String> todoBlockSources() {
+    final targets = TodoBlockSources();
+    TreeHtml(source.text, hooks: targets).render();
+    return targets.sources;
+  }
+
   /// The pictures the page will draw, as written: each image's `src` and
   /// each embed's target, in order — what an export resolves before the
   /// page is built (#24). Nothing is typeset for it.

@@ -1,4 +1,5 @@
 import 'package:meta/meta.dart';
+import 'package:niman/src/export/printed_todo_block.dart';
 
 /// What a note's page is made from (#24), everything the disk and the index
 /// had to say already read, so building the page reads nothing and can run
@@ -12,6 +13,7 @@ final class NoteHtmlSource {
     this.images = const <String, String>{},
     this.links = const <String, String>{},
     this.anchors = const <String, String>{},
+    this.todoBlocks = const <String, PrintedTodoBlock>{},
   });
 
   /// The note, as written.
@@ -37,4 +39,9 @@ final class NoteHtmlSource {
   /// the target's headings tell. An empty id is a heading the target lacks.
   /// A fragment that is not here is read as a heading path.
   final Map<String, String> anchors;
+
+  /// The lists the note's `todo` fences are, as they are at the moment of the
+  /// export, by `todoBlockKey` of the fence's source (#1152). A fence that is
+  /// not here is printed as the code it is on disk.
+  final Map<String, PrintedTodoBlock> todoBlocks;
 }

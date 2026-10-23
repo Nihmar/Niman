@@ -14,6 +14,7 @@ import 'package:niman/src/export/epub_book.dart';
 import 'package:niman/src/export/export_note.dart';
 import 'package:niman/src/export/export_sources.dart';
 import 'package:niman/src/export/note_html_source.dart';
+import 'package:niman/src/export/printed_todo_block.dart';
 import 'package:niman/src/links/resolver.dart';
 import 'package:path/path.dart' as p;
 
@@ -39,6 +40,8 @@ final class EpubExportCancelled implements Exception {
 /// before the book, between its pictures, after the page is built — and
 /// answers with [EpubExportCancelled] rather than a file; the typesetting
 /// inside [ExportSources.xhtml] is one isolate pass and runs to its end.
+/// [todoBlocks] are the lists the note's `todo` fences are at this moment
+/// (#1152).
 Future<ExportPayload> exportNoteEpub({
   required String text,
   required String title,
@@ -48,6 +51,7 @@ Future<ExportPayload> exportNoteEpub({
   LinkSource? linkSource,
   Directory? scratch,
   bool Function()? isCancelled,
+  PrintedTodoBlocks todoBlocks = const <String, PrintedTodoBlock>{},
 }) async {
   if (isCancelled?.call() ?? false) throw const EpubExportCancelled();
   final dir = scratch ?? await Directory.systemTemp.createTemp('niman-epub-');
@@ -87,7 +91,12 @@ Future<ExportPayload> exportNoteEpub({
         );
         if (href != null) images[entry.key] = href;
       }
-      final source = NoteHtmlSource(text: text, title: title, images: images);
+      final source = NoteHtmlSource(
+        text: text,
+        title: title,
+        images: images,
+        todoBlocks: todoBlocks,
+      );
       final chapter = await ExportSources.xhtml(source);
       if (isCancelled?.call() ?? false) throw const EpubExportCancelled();
       // A diagnostic for a formula that never shows (#303): what the chapter

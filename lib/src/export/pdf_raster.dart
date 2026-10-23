@@ -25,10 +25,13 @@ import 'package:flutter/rendering.dart';
 import 'package:niman/src/export/pdf_breaks.dart';
 import 'package:niman/src/export/pdf_printer.dart';
 import 'package:niman/src/export/pdf_writer.dart';
+import 'package:niman/src/export/printed_todo_block.dart';
+import 'package:niman/src/export/printed_todo_builder.dart';
 import 'package:niman/src/export/slide_page.dart';
 import 'package:niman/src/markdown/read_parser.dart';
 import 'package:niman/src/markdown/render/markdown_export.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
+import 'package:niman/src/markdown/render/todo_block_scope.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/preview/math_cache.dart';
 
@@ -45,6 +48,10 @@ const double a4HeightPx = a4Height / pointsPerPixel;
 /// The page margin the print CSS uses, in logical pixels (18 mm).
 const double pdfPageMarginPx = 18 * 96 / 25.4;
 
+/// What draws the note's `todo` fences, or null where it has none.
+TodoBlockBuilder? _printed(PrintedTodoBlocks blocks) =>
+    blocks.isEmpty ? null : PrintedTodoBuilder(blocks);
+
 /// Lays [text] out and draws its pages, answering the PDF's bytes.
 ///
 /// [images] are the note's pictures, by the target as written, decoded here
@@ -55,11 +62,15 @@ const double pdfPageMarginPx = 18 * 96 / 25.4;
 /// [onProgress] reports how many of the note's pages have been drawn, and
 /// [isCancelled] is asked between pages: a cancel stops before the next
 /// page and throws [PdfExportCancelled].
+///
+/// [todoBlocks] are the lists the note's `todo` fences are at this moment
+/// (#1152), drawn in place of their source.
 Future<Uint8List> rasterPdf({
   required String text,
   required MarkdownTheme theme,
   required MathCache mathCache,
   Map<String, Uint8List>? images,
+  PrintedTodoBlocks todoBlocks = const <String, PrintedTodoBlock>{},
   void Function(int done, int total)? onProgress,
   bool Function()? isCancelled,
   double pageWidth = a4WidthPx,
@@ -88,14 +99,17 @@ Future<Uint8List> rasterPdf({
     height: pageHeight,
     child: KeyedSubtree(
       key: key,
-      child: MarkdownExportView(
-        buffer: SourceBuffer.fromText(text),
-        parser: ReadParser(),
-        theme: theme,
-        mathCache: mathCache,
-        width: contentWidth,
-        padding: EdgeInsets.zero,
-        embedImages: decoded.isEmpty ? null : decoded,
+      child: TodoBlockScope(
+        builder: _printed(todoBlocks),
+        child: MarkdownExportView(
+          buffer: SourceBuffer.fromText(text),
+          parser: ReadParser(),
+          theme: theme,
+          mathCache: mathCache,
+          width: contentWidth,
+          padding: EdgeInsets.zero,
+          embedImages: decoded.isEmpty ? null : decoded,
+        ),
       ),
     ),
   );
@@ -158,6 +172,7 @@ Future<Uint8List> rasterSlidesPdf({
   required MarkdownTheme theme,
   required MathCache mathCache,
   Map<String, Uint8List>? images,
+  PrintedTodoBlocks todoBlocks = const <String, PrintedTodoBlock>{},
   void Function(int done, int total)? onProgress,
   bool Function()? isCancelled,
   double pixelRatio = 2,
@@ -186,14 +201,17 @@ Future<Uint8List> rasterSlidesPdf({
       final layout = _OffscreenLayout(
         width: width,
         height: height,
-        child: MarkdownExportView(
-          buffer: SourceBuffer.fromText(slides[index]),
-          parser: ReadParser(),
-          theme: theme,
-          mathCache: mathCache,
-          width: width,
-          padding: slidePadding,
-          embedImages: decoded.isEmpty ? null : decoded,
+        child: TodoBlockScope(
+          builder: _printed(todoBlocks),
+          child: MarkdownExportView(
+            buffer: SourceBuffer.fromText(slides[index]),
+            parser: ReadParser(),
+            theme: theme,
+            mathCache: mathCache,
+            width: width,
+            padding: slidePadding,
+            embedImages: decoded.isEmpty ? null : decoded,
+          ),
         ),
       );
       try {

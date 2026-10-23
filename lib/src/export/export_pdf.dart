@@ -16,6 +16,7 @@ import 'package:niman/src/export/export_note.dart';
 import 'package:niman/src/export/export_sources.dart';
 import 'package:niman/src/export/pdf_printer.dart';
 import 'package:niman/src/export/pdf_raster.dart';
+import 'package:niman/src/export/printed_todo_block.dart';
 import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/preview/math_cache.dart';
@@ -60,6 +61,9 @@ typedef PdfProgressListener = void Function(PdfExportProgress progress);
 ///
 /// [slides], a slides note's slides as Markdown (#534), prints them one
 /// 16:9 sheet each instead of the note on A4.
+///
+/// [todoBlocks] are the lists the note's `todo` fences are at this moment
+/// (#1152), printed in place of their source whichever way the page is made.
 Future<PdfExport> exportNotePdf({
   required String text,
   required String title,
@@ -74,6 +78,7 @@ Future<PdfExport> exportNotePdf({
   PdfProgressListener? onProgress,
   bool Function()? isCancelled,
   List<String>? slides,
+  PrintedTodoBlocks todoBlocks = const <String, PrintedTodoBlock>{},
 }) async {
   final chosen = printer ?? ProcessPdfPrinter();
   // Nothing to print with: the note is drawn, and its page — the reads,
@@ -90,6 +95,7 @@ Future<PdfExport> exportNotePdf({
       onProgress: onProgress,
       isCancelled: isCancelled,
       slides: slides,
+      todoBlocks: todoBlocks,
     );
   }
   final source = await ExportSources.forPrint(
@@ -98,6 +104,7 @@ Future<PdfExport> exportNotePdf({
     notePath: p.join(root, path),
     root: root,
     linkSource: linkSource,
+    todoBlocks: todoBlocks,
   );
   final page = slides == null
       ? await ExportSources.page(source, language: language)
@@ -136,6 +143,7 @@ Future<PdfExport> exportNotePdf({
           onProgress: onProgress,
           isCancelled: isCancelled,
           slides: slides,
+          todoBlocks: todoBlocks,
         );
       case PdfFailed(:final message):
         _log.warning('the PDF engine failed ($message): drawing the note');
@@ -154,6 +162,7 @@ Future<PdfExport> exportNotePdf({
           onProgress: onProgress,
           isCancelled: isCancelled,
           slides: slides,
+          todoBlocks: todoBlocks,
         );
     }
   } finally {
@@ -181,6 +190,7 @@ Future<PdfExport> _draw({
   PdfProgressListener? onProgress,
   bool Function()? isCancelled,
   List<String>? slides,
+  PrintedTodoBlocks todoBlocks = const <String, PrintedTodoBlock>{},
 }) async {
   if (theme == null || mathCache == null) throw const NoPdfEngine();
   // The pictures are read here, off the UI isolate, and drawn by the
@@ -210,6 +220,7 @@ Future<PdfExport> _draw({
           images: images,
           onProgress: drawn(onProgress),
           isCancelled: isCancelled,
+          todoBlocks: todoBlocks,
         )
       : await rasterSlidesPdf(
           slides: slides,
@@ -218,6 +229,7 @@ Future<PdfExport> _draw({
           images: images,
           onProgress: drawn(onProgress),
           isCancelled: isCancelled,
+          todoBlocks: todoBlocks,
         );
   return (
     payload: _payload(path, bytes),

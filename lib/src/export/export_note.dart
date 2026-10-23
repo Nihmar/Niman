@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:niman/src/export/export_sources.dart';
+import 'package:niman/src/export/printed_todo_block.dart';
 import 'package:niman/src/links/resolver.dart';
 import 'package:path/path.dart' as p;
 
@@ -57,7 +58,8 @@ ExportPayload exportMarkdown({
 /// `text` is the note as it stands — the caller saves the editor first —
 /// `title` is what its page is called (`displayNameOf`), `path` its
 /// library-relative path (its name becomes the file's), and `root` the
-/// library's absolute root.
+/// library's absolute root. `todoBlocks` are the lists the note's `todo`
+/// fences are at this moment (#1152).
 Future<ExportPayload> exportNote({
   required String text,
   required String title,
@@ -66,6 +68,7 @@ Future<ExportPayload> exportNote({
   required String language,
   required ExportFileFormat format,
   LinkSource? linkSource,
+  PrintedTodoBlocks todoBlocks = const <String, PrintedTodoBlock>{},
 }) async {
   switch (format) {
     case ExportFileFormat.markdown:
@@ -80,6 +83,7 @@ Future<ExportPayload> exportNote({
         notePath: p.join(root, path),
         root: root,
         linkSource: linkSource,
+        todoBlocks: todoBlocks,
       );
       final page = await ExportSources.page(source, language: language);
       return (
