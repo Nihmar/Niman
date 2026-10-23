@@ -1,5 +1,7 @@
 #include "flutter_window.h"
 
+#include <dwmapi.h>
+
 #include <cmath>
 #include <optional>
 #include <shellapi.h>
@@ -27,6 +29,32 @@ constexpr char kLeftKey[] = "left";
 constexpr char kTopKey[] = "top";
 constexpr char kRightKey[] = "right";
 constexpr char kBottomKey[] = "bottom";
+
+// Posted to the window when it is being hidden, so the hand-over of the
+// foreground runs once the hide is done.
+constexpr UINT kHandOverForegroundMessage = WM_APP + 1;
+
+// Whether |window| is one Windows would activate in place of a closed one:
+// on screen, not minimized, enabled, and not a tool window, a no-activate one
+// or one DWM keeps cloaked (a suspended Store app's window is visible and
+// cloaked).
+bool CanTakeForeground(HWND window) {
+  if (!::IsWindowVisible(window) || ::IsIconic(window) ||
+      !::IsWindowEnabled(window)) {
+    return false;
+  }
+  const LONG_PTR ex_style = ::GetWindowLongPtr(window, GWL_EXSTYLE);
+  if (ex_style & (WS_EX_TOOLWINDOW | WS_EX_NOACTIVATE)) {
+    return false;
+  }
+  DWORD cloaked = 0;
+  if (SUCCEEDED(::DwmGetWindowAttribute(window, DWMWA_CLOAKED, &cloaked,
+                                        sizeof(cloaked))) &&
+      cloaked != 0) {
+    return false;
+  }
+  return true;
+}
 
 // Reads |value| as a pixel coordinate. The Flutter standard codec hands
 // whole numbers over as ints and fractions as doubles, and which of the two
@@ -253,6 +281,24 @@ FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
     case WM_CANCELMODE:
       pressed_caption_button_ = 0;
       break;
+
+    // The window is going to the tray. `window_manager` hides it with
+    // ShowWindow(SW_HIDE), and when the hide comes from a click on the bar's
+    // close button the window stays the foreground one, invisible: Windows
+    // does not move the activation on. The hand-over runs after the hide, from
+    // the queue, whatever asked for it. lparam 0 is a ShowWindow call — not
+    // an owner being minimized, which moves the activation itself.
+    case WM_SHOWWINDOW:
+      if (wparam == FALSE && lparam == 0) {
+        ::PostMessage(hwnd, kHandOverForegroundMessage, 0, 0);
+      }
+      break;
+
+    case kHandOverForegroundMessage:
+      if (!::IsWindowVisible(hwnd) && ::GetForegroundWindow() == hwnd) {
+        HandOverForeground(hwnd);
+      }
+      return 0;
   }
 
   return Win32Window::MessageHandler(hwnd, message, wparam, lparam);
@@ -303,6 +349,21 @@ void FlutterWindow::ActivateCaptionButton(HWND window, LRESULT button) const {
       break;
     default:
       break;
+  }
+}
+
+void FlutterWindow::HandOverForeground(HWND window) {
+  for (HWND next = ::GetWindow(window, GW_HWNDNEXT); next != nullptr;
+       next = ::GetWindow(next, GW_HWNDNEXT)) {
+    if (CanTakeForeground(next)) {
+      ::SetForegroundWindow(next);
+      return;
+    }
+  }
+  // Nothing on screen to take it: the desktop does, as when the last window
+  // closes.
+  if (HWND desktop = ::GetShellWindow()) {
+    ::SetForegroundWindow(desktop);
   }
 }
 
