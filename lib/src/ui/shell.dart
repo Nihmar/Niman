@@ -127,6 +127,7 @@ import 'package:niman/src/ui/note_editor_keys.dart';
 import 'package:niman/src/ui/note_link_targets.dart';
 import 'package:niman/src/ui/note_menu.dart';
 import 'package:niman/src/ui/note_tab_bar.dart';
+import 'package:niman/src/ui/note_tasks_host.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/note_view_handle.dart';
 import 'package:niman/src/ui/note_view_memento.dart';
@@ -1075,6 +1076,15 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// targets of a tap on a chip.
   late final TodoLinkHost _todoLinks;
 
+  /// What a note's task list (#1152) reads and does: the map, a tick, the
+  /// task dialog, Add task. Shared by the three places the list lives in.
+  late final NoteTasksHost _noteTasks = NoteTasksHost(
+    links: _todoLinks,
+    controller: _todoController,
+    reminders: widget.reminders,
+    addTask: (text) => _addTodo(text: text),
+  );
+
   /// What the Todo list shows (#1003): its filter, its sort and the folded
   /// sections. Owned here, next to the controller, because the phone's app
   /// bar (Filter and Sort) and the tab body read and set the same state.
@@ -1830,6 +1840,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           libraryRoot: controller.root,
           linkSource: _linkSource,
           wikilinkSuggester: _wikilinkSuggester,
+          tasks: _noteTasks,
           onOpenNote: _openNoteFromLink,
           initialAnchor: _pendingAnchor,
           initialCaretOffset: _pendingCaretOffset,
@@ -1879,6 +1890,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     panelNote: () => _panelNote,
     journalBrowser: (context) =>
         _journalUi.browser(context, focusDay: _shownJournalDay),
+    tasks: () => _noteTasks,
     // All versions: the page, whatever the window.
     onOpenHistory: (path) => unawaited(_openHistoryPage(path)),
     onOpenNoteFromLink: (path) => _openNoteFromLink(path, null),
@@ -3765,6 +3777,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     studyEnabled: ref.read(deckStudyStarterProvider) != null,
     makeFlashcards:
         _plainNote && commandFeatureOn(AppCommand.makeFlashcards, _features),
+    tasks: _features.isOn(LibraryFeature.todo),
     // Shopping needs Lists and its own switch: with it off a list has no
     // second view to swap to (#1109).
     kindSwitch: switch (_shownKind) {
@@ -3781,6 +3794,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         NoteMenuAction.outline => _showPanel(DockPane.outline, anchor: anchor),
         NoteMenuAction.tags => _showPanel(DockPane.tags),
         NoteMenuAction.links => _showPanel(DockPane.links),
+        NoteMenuAction.tasks => _showPanel(DockPane.tasks),
         NoteMenuAction.typewriter => Future<void>.sync(_toggleTypewriter),
         NoteMenuAction.palette => _palette.open(context),
         NoteMenuAction.format => _formatNote(),
@@ -5445,6 +5459,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
                         : null,
                     linkSource: _linkSource,
                     wikilinkSuggester: _wikilinkSuggester,
+                    tasks: _noteTasks,
                     onOpenNote: _openNoteFromLink,
                     kindMode: !_kindRawMode,
                     features: controller.features,

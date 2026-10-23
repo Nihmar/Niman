@@ -20,6 +20,8 @@ import 'package:niman/src/ui/dock/outline_dock_pane.dart';
 import 'package:niman/src/ui/dock/right_dock.dart';
 import 'package:niman/src/ui/dock/spelling_dock_pane.dart';
 import 'package:niman/src/ui/dock/tags_dock_pane.dart';
+import 'package:niman/src/ui/dock/tasks_dock_pane.dart';
+import 'package:niman/src/ui/note_tasks_host.dart';
 import 'package:niman/src/ui/note_view_handle.dart';
 import 'package:niman/src/ui/outline_panel.dart';
 import 'package:niman/src/ui/shell_workspace.dart';
@@ -39,6 +41,7 @@ final class ShellDock {
     required this.wide,
     required this.panelNote,
     required this.journalBrowser,
+    required this.tasks,
     required this.onOpenHistory,
     required this.onOpenNoteFromLink,
     required this.onChanged,
@@ -62,6 +65,9 @@ final class ShellDock {
 
   /// The journal's calendar, the one pane that is the library's.
   final Widget Function(BuildContext context) journalBrowser;
+
+  /// The tasks that link a note, for the Tasks pane (#1152).
+  final NoteTasksHost Function() tasks;
 
   /// Opens the history of a path (the history pane's list).
   final void Function(String path) onOpenHistory;
@@ -167,6 +173,11 @@ final class ShellDock {
       links: controller.linkSource,
       libraryRoot: controller.root,
       onOpenNote: open,
+    ),
+    DockPane.tasks => TasksDockPane(
+      note: panelNote(),
+      host: tasks(),
+      libraryRoot: controller.root,
     ),
     DockPane.spelling => SpellingDockPane(note: panelNote()),
     DockPane.history => HistoryDockPane(

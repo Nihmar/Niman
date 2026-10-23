@@ -9,6 +9,7 @@ import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/settings/features.dart';
 import 'package:niman/src/core/settings/library_config.dart'
     show defaultSourceFont;
+import 'package:niman/src/core/settings/library_features.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/core/text_scale.dart';
 import 'package:niman/src/editor/editor_shortcuts.dart';
@@ -67,6 +68,8 @@ import 'package:niman/src/ui/note_links.dart';
 import 'package:niman/src/ui/note_load_error.dart';
 import 'package:niman/src/ui/note_save_pipeline.dart';
 import 'package:niman/src/ui/note_stats.dart';
+import 'package:niman/src/ui/note_tasks_host.dart';
+import 'package:niman/src/ui/note_tasks_section.dart';
 import 'package:niman/src/ui/note_top_bar.dart';
 import 'package:niman/src/ui/note_view_adapters.dart';
 import 'package:niman/src/ui/note_view_chrome.dart';
@@ -128,6 +131,7 @@ final class NoteView extends StatefulWidget {
     this.saveNoteStream,
     this.linkSource,
     this.wikilinkSuggester,
+    this.tasks,
     this.onOpenNote,
     this.createMissingNote,
     this.initialAnchor,
@@ -289,6 +293,11 @@ final class NoteView extends StatefulWidget {
   /// their aliases and their headings. Null (no open library) draws no
   /// panel, and the link is typed as it was before.
   final WikilinkSuggester? wikilinkSuggester;
+
+  /// The tasks that link a note (#1152), for the "Tasks for this note"
+  /// section under it. Null — no library — draws none; the section is also
+  /// left out while the library's Todo feature is off.
+  final NoteTasksHost? tasks;
 
   /// Opens a note by library-relative path, then (optionally) jumps to a
   /// heading; the shell implements it (T-M3-07).
@@ -2515,6 +2524,15 @@ final class _NoteViewState extends State<NoteView>
                       source: widget.linkSource,
                       path: _pathInLibrary,
                       onOpenNote: (path) => widget.onOpenNote?.call(path, null),
+                    ),
+                  ),
+                // The tasks that link it (#1152), under the links.
+                if (!_loading && _ready && _features.isOn(LibraryFeature.todo))
+                  NoteColumnPadding(
+                    column: widget.noteColumn,
+                    child: NoteTasksSection(
+                      host: widget.tasks,
+                      path: _pathInLibrary,
                     ),
                   ),
                 NoteColumnPadding(

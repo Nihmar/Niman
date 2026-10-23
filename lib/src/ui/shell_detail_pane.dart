@@ -17,6 +17,7 @@ import 'package:niman/src/reading/reading_positions.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/ui/attachment_view.dart';
 import 'package:niman/src/ui/detail_deck.dart';
+import 'package:niman/src/ui/note_tasks_host.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/note_view_handle.dart';
 import 'package:niman/src/ui/ocr/ocr_file_actions.dart';
@@ -51,6 +52,7 @@ final class ShellDetailPane extends StatelessWidget {
     required this.spellCheck,
     required this.launcher,
     this.features,
+    this.tasks,
     this.caretPath,
     this.caretRequest = 0,
     this.onPasteAsMarkdown,
@@ -189,6 +191,9 @@ final class ShellDetailPane extends StatelessWidget {
 
   /// The library the wikilink suggester panel reads (#475).
   final WikilinkSuggester? wikilinkSuggester;
+
+  /// The tasks that link a note (#1152), for the section under it.
+  final NoteTasksHost? tasks;
 
   /// Opens a note from a link, landing on a heading anchor when given.
   final void Function(String path, String? anchor) onOpenNote;
@@ -394,6 +399,7 @@ final class ShellDetailPane extends StatelessWidget {
     libraryRoot: root,
     linkSource: linkSource,
     wikilinkSuggester: wikilinkSuggester,
+    tasks: tasks,
     onOpenNote: onOpenNote,
     initialAnchor: tab.anchor,
     initialCaretOffset: tab.caret,

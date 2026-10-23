@@ -1,6 +1,7 @@
-/// The right dock (#175): the note's outline, its tags and its history,
-/// one at a time, beside the note on a window wide enough for both — and
-/// the journal's calendar (#7), which is the library's, not the note's.
+/// The right dock (#175): the note's outline, its tags, its links, its tasks
+/// and its history, one at a time, beside the note on a window wide enough
+/// for both — and the journal's calendar (#7), which is the library's, not the
+/// note's.
 ///
 /// It follows the focused pane's note: with the window split, the dock
 /// speaks for the note the next key would go to. Closing it gives the
@@ -19,6 +20,7 @@ import 'package:niman/src/workspace/workspace.dart';
 /// note's own, and the library's journal calendar for the journal.
 LibraryFeature? featureOfDockPane(DockPane pane) => switch (pane) {
   DockPane.journal => LibraryFeature.journal,
+  DockPane.tasks => LibraryFeature.todo,
   DockPane.outline ||
   DockPane.spelling ||
   DockPane.tags ||
@@ -76,6 +78,7 @@ final class RightDock extends StatelessWidget {
     DockPane.outline => AppStrings.outlineTooltip,
     DockPane.tags => AppStrings.tagsTitle,
     DockPane.links => AppStrings.linksToNoteTitle,
+    DockPane.tasks => AppStrings.tasksForNoteTitle,
     DockPane.spelling => AppStrings.spellCheckTitle,
     DockPane.history => AppStrings.noteHistoryTitle,
     DockPane.journal => AppStrings.paletteGroupJournal,
@@ -86,6 +89,7 @@ final class RightDock extends StatelessWidget {
         DockPane.outline => Icons.toc,
         DockPane.tags => selected ? Icons.sell : Icons.sell_outlined,
         DockPane.links => selected ? Icons.link : Icons.link_outlined,
+        DockPane.tasks => selected ? Icons.check_box : Icons.check_box_outlined,
         DockPane.spelling => Icons.spellcheck,
         DockPane.history => Icons.history,
         DockPane.journal =>
