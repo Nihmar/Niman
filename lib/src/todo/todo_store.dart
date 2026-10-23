@@ -269,6 +269,45 @@ final class TodoStore implements TodoSource {
     );
   }
 
+  /// Appends the [todo] lines to `todo.txt` and the [done] lines to
+  /// `done.txt` in one pass, creating either file when missing (Move to
+  /// tasks, #1152). `todo.txt` is written first: a failure between the two
+  /// files leaves tasks in the note and in the file, never in neither.
+  ///
+  /// Throws [ArgumentError] when a line holds more than one line.
+  @override
+  Future<TodoSnapshot> addLines({
+    required List<String> todo,
+    required List<String> done,
+  }) async {
+    [...todo, ...done].forEach(_requireSingleLine);
+    return await _mutate(
+      op: 'add-lines',
+      ensureFiles: true,
+      allowCreate: true,
+      apply: (todoLines, doneLines) {
+        todoLines.addAll(todo);
+        doneLines.addAll(done);
+      },
+    );
+  }
+
+  /// Removes the last line equal to each of [todo] and [done] from its file
+  /// ([removeLastEqual]): Undo of [addLines].
+  @override
+  Future<TodoSnapshot> removeLines({
+    required List<String> todo,
+    required List<String> done,
+  }) {
+    return _mutate(
+      op: 'remove-lines',
+      apply: (todoLines, doneLines) {
+        removeLastEqual(todoLines, todo);
+        removeLastEqual(doneLines, done);
+      },
+    );
+  }
+
   /// Checks the `todo.txt` line at [lineIndex] on [today]: removes it
   /// from `todo.txt` and appends the completed line to the end of
   /// `done.txt` ([completeTodoLine], so priority and the creation date

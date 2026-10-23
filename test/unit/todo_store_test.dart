@@ -412,6 +412,52 @@ void main() {
     });
   });
 
+  group('addLines / removeLines (Move to tasks, #1152)', () {
+    test('appends to both files, creating the missing ones', () async {
+      final snapshot = await store.addLines(
+        todo: ['2026-10-23 a [[N]]', '2026-10-23 b [[N]]'],
+        done: ['x 2026-10-23 2026-10-23 c [[N]]'],
+      );
+      expect(readRaw('todo.txt'), '2026-10-23 a [[N]]\n2026-10-23 b [[N]]');
+      expect(readRaw('done.txt'), 'x 2026-10-23 2026-10-23 c [[N]]');
+      expect(snapshot.todo, hasLength(2));
+      expect(snapshot.done.single.task.completed, isTrue);
+    });
+
+    test('keeps the lines already there and their line ending', () async {
+      writeRaw('todo.txt', 'old\r\nolder\r\n');
+      await store.addLines(todo: ['new'], done: const []);
+      expect(readRaw('todo.txt'), 'old\r\nolder\r\nnew\r\n');
+    });
+
+    test('a line of two lines is refused before anything is written', () async {
+      writeRaw('todo.txt', 'old');
+      await expectLater(
+        store.addLines(todo: ['fine', 'bad\nline'], done: const []),
+        throwsArgumentError,
+      );
+      expect(readRaw('todo.txt'), 'old');
+    });
+
+    test('removeLines takes the last equal line of each file', () async {
+      writeRaw('todo.txt', 'same\nmid\nsame\n');
+      writeRaw('done.txt', 'x 2026-10-23 gone\nx 2026-10-23 kept\n');
+      await store.removeLines(todo: ['same'], done: ['x 2026-10-23 gone']);
+      expect(readRaw('todo.txt'), 'same\nmid\n');
+      expect(readRaw('done.txt'), 'x 2026-10-23 kept\n');
+    });
+
+    test('removeLines skips a line another tool changed', () async {
+      writeRaw('todo.txt', 'edited by hand\n');
+      final snapshot = await store.removeLines(
+        todo: ['the line it was'],
+        done: const [],
+      );
+      expect(readRaw('todo.txt'), 'edited by hand\n');
+      expect(snapshot.todo, hasLength(1));
+    });
+  });
+
   group('serialization', () {
     test('concurrent adds land in call order', () async {
       final futures = <Future<TodoSnapshot>>[

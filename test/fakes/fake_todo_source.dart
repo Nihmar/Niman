@@ -31,6 +31,13 @@ final class FakeTodoSource implements TodoSource {
   /// takes longer than a frame to fail.
   Exception? deleteFailure;
 
+  /// When set, [addLines] throws it after `todo.txt` took its lines and
+  /// before `done.txt` did, the way a second write that fails does.
+  Exception? addLinesFailure;
+
+  /// When set, [addLines] throws it before either file is written.
+  Exception? addLinesFailureEarly;
+
   /// The current open lines (for assertions).
   List<String> get todoLines => List<String>.unmodifiable(_todo);
 
@@ -147,6 +154,32 @@ final class FakeTodoSource implements TodoSource {
             if (edit.file == TaskFile.done) edit,
         ]);
     if (changed > 0) _version++;
+    return _snapshot();
+  }
+
+  @override
+  Future<TodoSnapshot> addLines({
+    required List<String> todo,
+    required List<String> done,
+  }) async {
+    final early = addLinesFailureEarly;
+    if (early != null) throw early;
+    _version++;
+    _todo.addAll(todo);
+    final failure = addLinesFailure;
+    if (failure != null) throw failure;
+    _done.addAll(done);
+    return _snapshot();
+  }
+
+  @override
+  Future<TodoSnapshot> removeLines({
+    required List<String> todo,
+    required List<String> done,
+  }) async {
+    if (removeLastEqual(_todo, todo) + removeLastEqual(_done, done) > 0) {
+      _version++;
+    }
     return _snapshot();
   }
 

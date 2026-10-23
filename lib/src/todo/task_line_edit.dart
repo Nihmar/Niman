@@ -64,3 +64,18 @@ int applyLineEdits(List<String> lines, Iterable<TaskLineEdit> edits) {
   }
   return replaced.length;
 }
+
+/// Removes from [lines] the last line equal to each of [wanted], in place,
+/// and tells how many were removed (Undo of a move to tasks, #1152). A line
+/// that is not there -- changed or removed by another tool since -- is
+/// skipped, and every other line is left as it is.
+int removeLastEqual(List<String> lines, Iterable<String> wanted) {
+  var removed = 0;
+  for (final line in wanted) {
+    final at = lines.lastIndexOf(line);
+    if (at < 0) continue;
+    lines.removeAt(at);
+    removed++;
+  }
+  return removed;
+}
