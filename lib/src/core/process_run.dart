@@ -42,14 +42,22 @@ typedef ProcessRunner = Future<ProcessAnswer> Function(
 /// code, so its output exists for a log line and nothing else.
 const int processOutputLimit = 64 * 1024;
 
-/// Runs [exe] with [args], through `dart:io`.
+/// Runs [exe] with [args], through `dart:io`, in [environment] when one is
+/// given — whole, in place of this process's own — and in this process's
+/// own environment otherwise.
 Future<ProcessAnswer> runProcess(
   String exe,
   List<String> args, {
   Duration? timeout,
   int? outputLimit,
+  Map<String, String>? environment,
 }) async {
-  final process = await Process.start(exe, args);
+  final process = await Process.start(
+    exe,
+    args,
+    environment: environment,
+    includeParentEnvironment: environment == null,
+  );
   final stdoutDone = collectProcessOutput(
     process.stdout,
     limit: outputLimit ?? processOutputLimit,
@@ -96,3 +104,34 @@ Future<void> _kill(Process process) async {
     process.kill(ProcessSignal.sigkill);
   }
 }
+
+/// Runs the browser engine — the PDF export's printer, the web capture's
+/// reader — as [runProcess] does, in [engineEnvironment].
+Future<ProcessAnswer> runEngine(
+  String exe,
+  List<String> args, {
+  Duration? timeout,
+  int? outputLimit,
+}) => runProcess(
+  exe,
+  args,
+  timeout: timeout,
+  outputLimit: outputLimit,
+  environment: engineEnvironment(Platform.environment),
+);
+
+/// [environment] without Windows' compatibility layer (`__COMPAT_LAYER`).
+///
+/// Windows hands its compatibility shims down to the programs a process
+/// starts through that variable — it carried `DetectorsAppHealth` here.
+/// Edge refuses to run under one: it starts itself again without it
+/// (`--edge-skip-compat-layer-relaunch`) and exits at once, so the process
+/// the export started ends before the PDF is written, and the copy it
+/// started writes its `--dump-dom` to an output that is not ours. Every
+/// export then read "no PDF" and drew pictures; every capture read an empty
+/// page (#1176). Started without the layer, Edge runs in the process that
+/// was started. Windows spells its variables in any case.
+Map<String, String> engineEnvironment(Map<String, String> environment) => {
+  for (final MapEntry(:key, :value) in environment.entries)
+    if (key.toUpperCase() != '__COMPAT_LAYER') key: value,
+};
