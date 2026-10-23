@@ -24,6 +24,13 @@
          with the screen off. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <!-- Android 12 and 12L (API 31-32), before USE_EXACT_ALARM exists:
+         SCHEDULE_EXACT_ALARM is granted at install there. From API 33 it
+         would be denied by default, so it stops at 32; before API 31
+         exact alarms need no permission. -->
+    <uses-permission
+        android:name="android.permission.SCHEDULE_EXACT_ALARM"
+        android:maxSdkVersion="32" />
     <!-- Let the plugin's alarm receivers survive a device reboot and an
          app re-install so scheduled task reminders are re-registered.
          flutter_local_notifications (>=16) declares only the bare minimum

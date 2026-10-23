@@ -159,6 +159,9 @@ final class TreeExport {
   /// [runner] runs the engine's process; null runs the real one, and a test
   /// hands in a top-level function of its own — a closure cannot cross the
   /// isolate boundary.
+  ///
+  /// [kanban] says the Kanban feature is on (#1170): a `type: kanban` note
+  /// of the folder is then drawn as a board.
   static Future<TreeExport> start({
     required String dir,
     required String zipPath,
@@ -166,6 +169,7 @@ final class TreeExport {
     required String language,
     String? engine,
     ProcessRunner? runner,
+    bool kanban = false,
   }) async {
     if (format == ExportTreeFormat.pdf &&
         engine == null &&
@@ -184,6 +188,7 @@ final class TreeExport {
         language: language,
         engine: engine,
         runner: runner,
+        kanban: kanban,
         events: events.sendPort,
       ),
       onError: errors.sendPort,
@@ -203,6 +208,7 @@ final class TreeExport {
     required String language,
     String? engine,
     ProcessRunner? runner,
+    bool kanban = false,
   }) async {
     final export = await start(
       dir: dir,
@@ -211,6 +217,7 @@ final class TreeExport {
       language: language,
       engine: engine,
       runner: runner,
+      kanban: kanban,
     );
     await export.done;
   }
@@ -239,7 +246,7 @@ final class TreeExport {
         // The isolate's page, printed here: see [TreeExportPrint].
         unawaited(
           const WebViewPdfPrinter()
-              .print(message.htmlPath, message.pdfPath)
+              .print(message.htmlPath, message.pdfPath, paper: message.paper)
               .then(message.reply.send),
         );
       } else if (message is _TreeExportDone) {
@@ -359,6 +366,7 @@ typedef TreeExportRequest = ({
   String language,
   String? engine,
   ProcessRunner? runner,
+  bool kanban,
   SendPort events,
 });
 
@@ -448,11 +456,16 @@ Future<void> _exportTree(TreeExportRequest request) async {
         await encoder!.addFile(File(entry.abs), entry.rel);
       } else if (ExportTreePages.isNote(entry.rel)) {
         if (book != null) {
-          final drawn = await ExportTreeBook.addChapter(book, tree, entry);
+          final drawn = await ExportTreeBook.addChapter(
+            book,
+            tree,
+            entry,
+            kanban: request.kanban,
+          );
           formulaCount += drawn.formulas;
           sourceCount += drawn.sources;
         } else {
-          final page = ExportTreePages.page(
+          final built = ExportTreePages.built(
             ExportTreePages.readNote(entry.abs),
             entry.rel,
             tree,
@@ -464,6 +477,7 @@ Future<void> _exportTree(TreeExportRequest request) async {
             // beside it in the zip has nothing to resolve against, so it is
             // a `file:` URL the engine fetches.
             embedPictures: request.format == ExportTreeFormat.pdf,
+            kanban: request.kanban,
           );
           if (request.format == ExportTreeFormat.pdf) {
             await ExportTreePrinter.printInto(
@@ -471,13 +485,15 @@ Future<void> _exportTree(TreeExportRequest request) async {
               scratch!,
               request.engine,
               request.runner,
-              page,
+              built.html,
               tree.names[entry.rel]!,
               parent: request.events,
+              // Each note on the sheet of its own (#1170).
+              paper: built.paper,
             );
           } else {
             encoder!.addArchiveFile(
-              ArchiveFile.string('${tree.names[entry.rel]}.html', page),
+              ArchiveFile.string('${tree.names[entry.rel]}.html', built.html),
             );
           }
         }

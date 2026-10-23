@@ -57,6 +57,22 @@ EPUB, not as its source; a block with an error prints its error lines. A
 folder's or the library's export has no tasks at hand and prints the block as
 the code it is on disk.
 
+A kanban board exports as its board, in every format, while Kanban boards
+are on in [Features](features.md) (off, it exports as its sections and
+tasks). Each column is a section headed by its name and its number of
+cards; each card is a box with its box, its title, its tags and `due:`
+as chips, and its body. Links, footnotes and pictures in a card work as
+in the rest of the note. Obsidian's settings footer is left out.
+
+- **HTML** — the columns side by side, scrolling sideways; stacked on a
+  narrow screen.
+- **PDF** — a board of up to four columns prints on **A4 landscape**, the
+  columns in one row; five or more print on A4 portrait, two columns to
+  a row. A card is never split across two pages. Without a browser
+  engine the board is drawn the same way, as pictures of the pages.
+- **EPUB** — the columns one after another, since an e-reader's page is
+  narrow.
+
 A link to another note becomes the text it shows on a page exported on
 its own — a wikilink highlighted, a Markdown link its own words — since
 one page has nothing to point at; a link to a website stays a link.

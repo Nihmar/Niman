@@ -4,6 +4,7 @@ import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.view.View
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
 import es.antonborri.home_widget.HomeWidgetPlugin
@@ -75,12 +76,19 @@ class NoteWidgetService : RemoteViewsService() {
             val (row, library, note, theme) = snapshot(position)
             if (row == null) return views
             views.setTextViewText(R.id.widget_note_row_text, row.optString("text", ""))
-            // The checked state is what makes a done row read as done:
-            // `setCompoundButtonChecked` is on the RemoteViews allowlist
-            // (a plain `setChecked` is not).
-            views.setCompoundButtonChecked(
+            // The checked state is what makes a done row read as done.
+            // RemoteViews cannot set a CheckBox's state before Android 12
+            // (`setCompoundButtonChecked` is API 31, a plain `setChecked`
+            // is off its allowlist), so the layout holds an unchecked box
+            // and a checked one and the row shows the one it is.
+            val checked = row.optBoolean("checked", false)
+            views.setViewVisibility(
                 R.id.widget_note_row_check,
-                row.optBoolean("checked", false),
+                if (checked) View.GONE else View.VISIBLE,
+            )
+            views.setViewVisibility(
+                R.id.widget_note_row_check_done,
+                if (checked) View.VISIBLE else View.GONE,
             )
             // The app theme rides in the payload: without it (an old
             // push) the layout defaults stand.

@@ -33,7 +33,7 @@ const Duration browserReadTimeout = Duration(seconds: 45);
 /// A desktop engine, run headless.
 final class EnginePageBrowser implements PageBrowser {
   /// Reads pages with the engine at [engine], running it with [run].
-  const new(this.engine, {this.run = runProcess});
+  const new(this.engine, {this.run = runEngine});
 
   /// The engine's executable.
   final String engine;

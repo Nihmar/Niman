@@ -21,7 +21,9 @@ import java.util.concurrent.atomic.AtomicBoolean
  * adapter paginates it, and [NimanPdfWriter] — under `android.print`, the
  * only package that may call the adapter's callbacks — writes the pages
  * straight into the PDF file. A4, with the 18 mm margin the page's own
- * print CSS asks for — the attribute is in thousandths of an inch.
+ * print CSS asks for — the attribute is in thousandths of an inch — or the
+ * other sheets of [PdfSheet]: A4 landscape for a wide kanban board (#1170),
+ * a 16:9 slide.
  *
  * One print at a time: the view and the answer belong to the activity,
  * and a second call while one runs is refused rather than raced.
@@ -34,9 +36,6 @@ class PdfBridge(private val context: Context) : MethodChannel.MethodCallHandler 
     companion object {
         /** The Dart-facing channel. */
         const val CHANNEL = "niman/pdf"
-
-        /** 18 mm in thousandths of an inch. */
-        const val MARGIN_MILS = 709
 
         /** A slide's sheet (#534): 10 × 5.625 in, 16:9, landscape. */
         val SLIDE_SHEET = PrintAttributes.MediaSize("niman-slide", "16:9", 10000, 5625)
@@ -93,7 +92,7 @@ class PdfBridge(private val context: Context) : MethodChannel.MethodCallHandler 
                     result.error("print-busy", "another page is being printed", null)
                     return
                 }
-                print(htmlPath, pdfPath, call.argument<String>("paper") == "slides", result)
+                print(htmlPath, pdfPath, PdfSheet.forName(call.argument<String>("paper")), result)
             }
             // The export was cancelled: destroy the view and answer the
             // waiting print, instead of staying busy until the watchdog.
@@ -125,7 +124,7 @@ class PdfBridge(private val context: Context) : MethodChannel.MethodCallHandler 
     private fun print(
         htmlPath: String,
         pdfPath: String,
-        slides: Boolean,
+        sheet: PdfSheet,
         result: MethodChannel.Result,
     ) {
         busy = true
@@ -165,7 +164,7 @@ class PdfBridge(private val context: Context) : MethodChannel.MethodCallHandler 
         view.settings.allowContentAccess = true
         view.webViewClient = object : WebViewClient() {
             override fun onPageFinished(view: WebView, url: String?) {
-                write(view, pdfPath, slides) { ok, error -> finish(ok, error) }
+                write(view, pdfPath, sheet) { ok, error -> finish(ok, error) }
             }
         }
         view.loadUrl(Uri.fromFile(File(htmlPath)).toString())
@@ -175,13 +174,19 @@ class PdfBridge(private val context: Context) : MethodChannel.MethodCallHandler 
     private fun write(
         view: WebView,
         pdfPath: String,
-        slides: Boolean,
+        sheet: PdfSheet,
         done: (Boolean, String?) -> Unit,
     ) {
-        // A slides note (#534) prints one 16:9 sheet a slide, edge to edge.
-        val margin = if (slides) 0 else MARGIN_MILS
+        // A slides note (#534) prints one 16:9 sheet a slide, edge to edge;
+        // a wide kanban board (#1170) prints on A4 on its side.
+        val margin = sheet.marginMils
+        val media = when (sheet) {
+            PdfSheet.SLIDES -> SLIDE_SHEET
+            PdfSheet.A4_LANDSCAPE -> PrintAttributes.MediaSize.ISO_A4.asLandscape()
+            PdfSheet.A4 -> PrintAttributes.MediaSize.ISO_A4
+        }
         val attributes = PrintAttributes.Builder()
-            .setMediaSize(if (slides) SLIDE_SHEET else PrintAttributes.MediaSize.ISO_A4)
+            .setMediaSize(media)
             // The WebView's adapter refuses a layout whose attributes say
             // nothing about resolution: without it `onLayout` answers
             // "attributes must specify print resolution" and every export

@@ -52,6 +52,7 @@ Future<ExportPayload> exportNoteEpub({
   Directory? scratch,
   bool Function()? isCancelled,
   PrintedTodoBlocks todoBlocks = const <String, PrintedTodoBlock>{},
+  bool kanban = false,
 }) async {
   if (isCancelled?.call() ?? false) throw const EpubExportCancelled();
   final dir = scratch ?? await Directory.systemTemp.createTemp('niman-epub-');
@@ -96,6 +97,7 @@ Future<ExportPayload> exportNoteEpub({
         title: title,
         images: images,
         todoBlocks: todoBlocks,
+        kanban: kanban,
       );
       final chapter = await ExportSources.xhtml(source);
       if (isCancelled?.call() ?? false) throw const EpubExportCancelled();
@@ -111,6 +113,7 @@ Future<ExportPayload> exportNoteEpub({
         body: chapter.body,
         fontFaces: chapter.fontFaces,
         hasSvg: chapter.hasSvg,
+        hasBoard: chapter.hasBoard,
       );
     } finally {
       await book.close();

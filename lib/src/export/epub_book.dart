@@ -19,6 +19,7 @@ import 'dart:io';
 import 'package:archive/archive_io.dart';
 import 'package:niman/src/export/epub_package.dart';
 import 'package:niman/src/export/html_page.dart';
+import 'package:niman/src/export/kanban_style.dart';
 import 'package:niman/src/export/picture_mime.dart';
 import 'package:path/path.dart' as p;
 
@@ -53,6 +54,7 @@ final class EpubBook {
   final List<EpubPictureEntry> _picturesInOrder = <EpubPictureEntry>[];
   String? _fonts;
   bool _closed = false;
+  bool _hasBoard = false;
   EpubPictureEntry? _cover;
 
   /// Starts a book at [path], titled [title], in [language] (a BCP 47 code).
@@ -125,15 +127,18 @@ final class EpubBook {
   ///
   /// [fontFaces] are the maths fonts the chapter's formulas need, declared
   /// once for the whole book; [hasSvg] says the chapter embeds inline SVG
-  /// (a formula), which the package must declare.
+  /// (a formula), which the package must declare; [hasBoard] says it is a
+  /// kanban board, whose style the book then carries (#1170).
   void addChapter({
     required String href,
     required String title,
     required String body,
     String? fontFaces,
     bool hasSvg = false,
+    bool hasBoard = false,
   }) {
     _fonts ??= fontFaces;
+    _hasBoard = _hasBoard || hasBoard;
     final id = 'ch${_chapters.length + 1}';
     final xhtml = epubChapterXhtml(
       href: href,
@@ -150,7 +155,10 @@ final class EpubBook {
     if (_closed) return;
     _closed = true;
     _encoder.addArchiveFile(
-      ArchiveFile.string('$epubOpfDir/style.css', pageStyle),
+      ArchiveFile.string(
+        '$epubOpfDir/style.css',
+        _hasBoard ? '$pageStyle$kanbanEpubStyle' : pageStyle,
+      ),
     );
     _encoder.addArchiveFile(
       ArchiveFile.string('$epubOpfDir/fonts.css', _fonts ?? ''),

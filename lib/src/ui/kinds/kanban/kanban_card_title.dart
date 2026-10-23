@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:niman/src/frontmatter/note_kind.dart';
+import 'package:niman/src/kanban/card_text.dart';
 import 'package:niman/src/kanban/kanban_card.dart';
 import 'package:niman/src/markdown/inline/inline_parser.dart';
 import 'package:niman/src/markdown/read_block.dart';
 import 'package:niman/src/markdown/render/inline_spans.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/preview/math_cache.dart';
-import 'package:niman/src/ui/kinds/kanban/kanban_card_text.dart';
 
 /// A card's title as the read view draws inline text (#1167): links,
 /// wikilinks and formulas as they are there, without the tags and the due

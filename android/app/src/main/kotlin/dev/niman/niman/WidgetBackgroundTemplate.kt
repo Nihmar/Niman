@@ -3,6 +3,7 @@ package dev.niman.niman
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 
 /**
  * The tap template for the widget row collections (issue 6).
@@ -13,8 +14,8 @@ import android.content.Intent
  * fill-in URI actually merges: an IMMUTABLE template (like
  * `HomeWidgetBackgroundIntent.getBroadcast`) drops the row URI on
  * API 31+, the worker then receives an empty string, Dart parses no
- * target, and the tap silently does nothing. minSdk is 34, so
- * FLAG_MUTABLE needs no version gate.
+ * target, and the tap silently does nothing. FLAG_MUTABLE is API 31, so [mutableFlag] adds it from there; before
+ * it every PendingIntent is mutable already.
  *
  * The broadcast lands on [WidgetTapReceiver] (which logs the URI, then
  * delegates to the plugin worker) instead of the plugin's receiver
@@ -31,7 +32,15 @@ object WidgetBackgroundTemplate {
             context,
             0,
             intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE,
+            PendingIntent.FLAG_UPDATE_CURRENT or mutableFlag(),
         )
     }
+
+    /**
+     * FLAG_MUTABLE from Android 12 (API 31), where an unflagged
+     * PendingIntent stops being mutable; nothing before it (the flag does
+     * not exist, and the intent is mutable anyway).
+     */
+    fun mutableFlag(sdk: Int = Build.VERSION.SDK_INT): Int =
+        if (sdk >= Build.VERSION_CODES.S) PendingIntent.FLAG_MUTABLE else 0
 }

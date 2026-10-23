@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- One checklist row of the list-note widget (issue 6): inflated per
      position by NoteWidgetService for the remote collection. The checked
-     state is set with setCompoundButtonChecked (on the RemoteViews
-     allowlist; a plain setChecked is not). Tapping anywhere on the row
+     state picks one of two boxes, XML-checked or not, by visibility:
+     RemoteViews cannot set a CheckBox's state before Android 12
+     (setCompoundButtonChecked is API 31, a plain setChecked is off its
+     allowlist). Tapping anywhere on the row
      (checkbox included) flips the item in the background. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/widget_note_row"
@@ -20,6 +22,15 @@
         android:layout_height="wrap_content"
         android:clickable="false"
         android:focusable="false" />
+
+    <CheckBox
+        android:id="@+id/widget_note_row_check_done"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:checked="true"
+        android:clickable="false"
+        android:focusable="false"
+        android:visibility="gone" />
 
     <TextView
         android:id="@+id/widget_note_row_text"

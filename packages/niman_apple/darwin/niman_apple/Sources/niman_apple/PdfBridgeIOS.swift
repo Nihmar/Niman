@@ -10,8 +10,9 @@
   /// iOS has no print operation that saves a file: an offscreen
   /// `WKWebView` lays the page out, a `UIPrintPageRenderer` paginates its
   /// print formatter, and each page is drawn into a PDF context — real
-  /// text, which selects and searches. A4 with an 18 mm margin, or a 16:9
-  /// sheet a slide with none (#534).
+  /// text, which selects and searches. A4 with an 18 mm margin, A4 landscape
+  /// with the same one for a wide kanban board (#1170), or a 16:9 sheet a
+  /// slide with none (#534).
   ///
   /// One print at a time (`print-busy`), and a watchdog for a page whose
   /// load never ends.
@@ -22,8 +23,22 @@
     /// A4, in points.
     static let a4 = CGSize(width: 595.28, height: 841.89)
 
+    /// A4 on its side, in points: a wide kanban board's sheet (#1170).
+    static let a4Landscape = CGSize(width: 841.89, height: 595.28)
+
     /// A slide's sheet: 10 × 5.625 in, 16:9.
     static let slide = CGSize(width: 720, height: 405)
+
+    /// The sheet the channel's `paper` names, and the margin it prints with:
+    /// a slide edge to edge, any other sheet with the note's margin. A name
+    /// this side does not know is A4, as a channel older than it was.
+    static func sheet(_ paper: String) -> (size: CGSize, margin: CGFloat) {
+      switch paper {
+      case "slides": return (slide, 0)
+      case "a4Landscape": return (a4Landscape, margin)
+      default: return (a4, margin)
+      }
+    }
 
     /// Longer than a slow note takes to lay out, shorter than the Dart
     /// side's own timeout.
@@ -33,7 +48,7 @@
     private var pending: FlutterResult?
     private var watchdog: DispatchWorkItem?
     private var pdfPath = ""
-    private var slides = false
+    private var paper = "a4"
 
     func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
       switch call.method {
@@ -49,7 +64,7 @@
           result(FlutterError(code: "print-busy", message: "another page is being printed", details: nil))
           return
         }
-        print(htmlPath: htmlPath, pdfPath: pdfPath, slides: args["paper"] as? String == "slides", result: result)
+        print(htmlPath: htmlPath, pdfPath: pdfPath, paper: args["paper"] as? String ?? "a4", result: result)
       case "cancel":
         answer(FlutterError(code: "print-cancelled", message: "the export was cancelled", details: nil))
         result(nil)
@@ -58,17 +73,17 @@
       }
     }
 
-    private func print(htmlPath: String, pdfPath: String, slides: Bool, result: @escaping FlutterResult) {
+    private func print(htmlPath: String, pdfPath: String, paper: String, result: @escaping FlutterResult) {
       pending = result
       self.pdfPath = pdfPath
-      self.slides = slides
+      self.paper = paper
       let timer = DispatchWorkItem { [weak self] in
         self?.answer(FlutterError(code: "print-timeout", message: "the page did not finish", details: nil))
       }
       watchdog = timer
       DispatchQueue.main.asyncAfter(deadline: .now() + Self.watchdogSeconds, execute: timer)
-      let paper = slides ? Self.slide : Self.a4
-      let width = slides ? paper.width : paper.width - 2 * Self.margin
+      let sheet = Self.sheet(paper)
+      let width = sheet.size.width - 2 * sheet.margin
       let view = WKWebView(frame: CGRect(x: 0, y: 0, width: width, height: 1000))
       view.navigationDelegate = self
       webView = view
@@ -80,12 +95,13 @@
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
       guard webView === self.webView else { return }
-      let paper = CGRect(origin: .zero, size: slides ? Self.slide : Self.a4)
-      let margin = slides ? 0 : Self.margin
-      let renderer = PageRenderer(paper: paper, printable: paper.insetBy(dx: margin, dy: margin))
+      let sheet = Self.sheet(paper)
+      let paperRect = CGRect(origin: .zero, size: sheet.size)
+      let renderer = PageRenderer(
+        paper: paperRect, printable: paperRect.insetBy(dx: sheet.margin, dy: sheet.margin))
       renderer.addPrintFormatter(webView.viewPrintFormatter(), startingAtPageAt: 0)
       let data = NSMutableData()
-      UIGraphicsBeginPDFContextToData(data, paper, nil)
+      UIGraphicsBeginPDFContextToData(data, paperRect, nil)
       let pages = renderer.numberOfPages
       renderer.prepare(forDrawingPages: NSRange(location: 0, length: pages))
       for index in 0..<pages {

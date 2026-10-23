@@ -59,7 +59,8 @@ ExportPayload exportMarkdown({
 /// `title` is what its page is called (`displayNameOf`), `path` its
 /// library-relative path (its name becomes the file's), and `root` the
 /// library's absolute root. `todoBlocks` are the lists the note's `todo`
-/// fences are at this moment (#1152).
+/// fences are at this moment (#1152). `kanban` says the Kanban feature is on
+/// (#1170).
 Future<ExportPayload> exportNote({
   required String text,
   required String title,
@@ -69,6 +70,7 @@ Future<ExportPayload> exportNote({
   required ExportFileFormat format,
   LinkSource? linkSource,
   PrintedTodoBlocks todoBlocks = const <String, PrintedTodoBlock>{},
+  bool kanban = false,
 }) async {
   switch (format) {
     case ExportFileFormat.markdown:
@@ -84,6 +86,7 @@ Future<ExportPayload> exportNote({
         root: root,
         linkSource: linkSource,
         todoBlocks: todoBlocks,
+        kanban: kanban,
       );
       final page = await ExportSources.page(source, language: language);
       return (

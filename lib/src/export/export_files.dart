@@ -96,6 +96,7 @@ typedef EpubNoteExport = Future<ExportPayload> Function({
   LinkSource? linkSource,
   bool Function()? isCancelled,
   PrintedTodoBlocks todoBlocks,
+  bool kanban,
 });
 
 /// The printer a note's PDF goes through; tests hand in their own, since

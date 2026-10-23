@@ -71,6 +71,33 @@ final class FootnoteHtml {
     return out.join(' ');
   }
 
+  /// Where a footnote's links back go in its body, while the body is
+  /// written and the citations are not all counted: its last U+0000, the
+  /// body's tail.
+  static const String backrefsMark = '\u0000';
+
+  /// The section the note ends with, listing the footnotes cited, each from
+  /// its body in [bodies] (by normalized label) with its links back put in
+  /// place; empty when none is cited.
+  String section(Map<String, String> bodies) {
+    if (cited.isEmpty) return '';
+    final out = StringBuffer(
+      '<section class="footnotes" '
+      'data-footnotes${xhtml ? '=""' : ''}>\n<ol>\n',
+    );
+    for (final key in cited) {
+      if (!definitions.containsKey(key)) continue;
+      out.write('<li id="fn-${idOf(key)}">\n');
+      final body = bodies[key]!;
+      final tail = body.lastIndexOf(backrefsMark);
+      out.write(body.replaceRange(tail, tail + 1, backrefs(key)));
+      if (!body.endsWith('\n')) out.write('\n');
+      out.write('</li>\n');
+    }
+    out.write('</ol>\n</section>\n');
+    return out.toString();
+  }
+
   /// The label footnote [key] is written with in its id.
   String idOf(String key) => InlineHtml.escapeHref(_written[key]!);
 }

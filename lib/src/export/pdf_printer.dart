@@ -76,9 +76,17 @@ final class PdfExportCancelled implements Exception {
 }
 
 /// The sheet a page is printed on.
+///
+/// A browser engine takes it from the page's own `@page` (the page is built
+/// for the paper it asks for); the system WebViews are told it by name
+/// through the `niman/pdf` channel, [name] being the channel's word for it.
 enum PdfPaper {
   /// A4 with the page's margin: a note.
   a4,
+
+  /// A4 on its side with the page's margin: a kanban board whose columns
+  /// fit one row of it (#1170).
+  a4Landscape,
 
   /// 16:9 with no margin, one slide a sheet (#534).
   slides,
@@ -284,7 +292,7 @@ final class ProcessPdfPrinter implements PdfPrinter {
   new({
     this.engine,
     this.findEngine,
-    this.run = runProcess,
+    this.run = runEngine,
     this.size = fileSize,
     this.timeout = const Duration(minutes: 2),
   });

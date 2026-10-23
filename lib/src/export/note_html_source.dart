@@ -14,6 +14,7 @@ final class NoteHtmlSource {
     this.links = const <String, String>{},
     this.anchors = const <String, String>{},
     this.todoBlocks = const <String, PrintedTodoBlock>{},
+    this.kanban = false,
   });
 
   /// The note, as written.
@@ -44,4 +45,10 @@ final class NoteHtmlSource {
   /// export, by `todoBlockKey` of the fence's source (#1152). A fence that is
   /// not here is printed as the code it is on disk.
   final Map<String, PrintedTodoBlock> todoBlocks;
+
+  ///
+  /// Whether the Kanban feature is on (#1170): a `type: kanban` note is then
+  /// drawn as a board. Off, it is the sections and tasks it is in any other
+  /// editor.
+  final bool kanban;
 }
