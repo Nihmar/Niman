@@ -64,7 +64,7 @@ final class _NoteTasksListState extends State<NoteTasksList> {
               onTap: () => setState(() => _doneOpen = !_doneOpen),
             ),
           if (_doneOpen && tasks.done.isNotEmpty)
-            for (final entry in tasks.done)
+            for (final entry in latestDoneFirst(tasks.done))
               _row(host, path, today, entry, done: true),
         ];
         return ListView(

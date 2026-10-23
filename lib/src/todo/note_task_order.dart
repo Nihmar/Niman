@@ -19,3 +19,10 @@ List<TodoEntry> sortedByDue(List<TodoEntry> open) {
   });
   return [...dated, ...undated];
 }
+
+/// [done] with the latest completed first: `done.txt` is appended to as
+/// tasks are archived, so its last lines are the newest, and a note's list
+/// shows what was just done at the top of its Done section.
+List<TodoEntry> latestDoneFirst(List<TodoEntry> done) => [
+  for (var i = done.length - 1; i >= 0; i--) done[i],
+];

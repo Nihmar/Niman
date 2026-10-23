@@ -66,4 +66,16 @@ void main() {
       expect([for (final e in input) e.lineIndex], [0, 1]);
     });
   });
+
+  group('the order of the done tasks', () {
+    test('the latest archived first: done.txt grows at its end', () {
+      final done = [
+        _entry(0, 'x 2026-09-01 First'),
+        _entry(1, 'x 2026-09-05 Second'),
+        _entry(2, 'x 2026-10-15 Latest'),
+      ];
+      expect([for (final e in latestDoneFirst(done)) e.lineIndex], [2, 1, 0]);
+      expect([for (final e in done) e.lineIndex], [0, 1, 2]);
+    });
+  });
 }
