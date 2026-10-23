@@ -4351,4 +4351,19 @@ final class SerbianStrings extends Strings {
   String get tasksForNoteNew => 'Нови задатак';
   @override
   String get tasksForNoteNewHere => 'Нови задатак за ову белешку';
+  @override
+  String get moveToTasks => 'Премести у задатке';
+  @override
+  String get moveToTasksConfirm => 'Премести';
+  @override
+  String get movedToTasksOne => 'Премештено у задатке';
+  @override
+  String movedToTasks(int n) => 'Премештено у задатке: $n';
+  @override
+  String get moveToTasksHasSubItems => 'Има подставке — прво их преместите';
+  @override
+  String get moveToTasksNeedsItem => 'Поставите курсор на ставку са кукицом';
+  @override
+  String get moveToTasksSubtitle =>
+      'Претвара ставке са кукицом у задатке и уклања их из белешке';
 }

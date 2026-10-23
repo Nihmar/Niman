@@ -4349,4 +4349,21 @@ final class SwedishStrings extends Strings {
   String get tasksForNoteNew => 'Ny uppgift';
   @override
   String get tasksForNoteNewHere => 'Ny uppgift för den här anteckningen';
+  @override
+  String get moveToTasks => 'Flytta till uppgifter';
+  @override
+  String get moveToTasksConfirm => 'Flytta';
+  @override
+  String get movedToTasksOne => 'Flyttad till uppgifter';
+  @override
+  String movedToTasks(int n) => 'Flyttade $n till uppgifter';
+  @override
+  String get moveToTasksHasSubItems => 'Har underpunkter — flytta dem först';
+  @override
+  String get moveToTasksNeedsItem =>
+      'Placera markören på en punkt med kryssruta';
+  @override
+  String get moveToTasksSubtitle =>
+      'Gör punkter med kryssruta till uppgifter '
+      'och tar bort dem från anteckningen';
 }

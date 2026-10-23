@@ -4461,4 +4461,21 @@ final class FrenchStrings extends Strings {
   String get tasksForNoteNew => 'Nouvelle tâche';
   @override
   String get tasksForNoteNewHere => 'Nouvelle tâche pour cette note';
+  @override
+  String get moveToTasks => 'Déplacer vers les tâches';
+  @override
+  String get moveToTasksConfirm => 'Déplacer';
+  @override
+  String get movedToTasksOne => 'Déplacé vers les tâches';
+  @override
+  String movedToTasks(int n) => '$n déplacées vers les tâches';
+  @override
+  String get moveToTasksHasSubItems =>
+      "Contient des sous-éléments — déplacez-les d'abord";
+  @override
+  String get moveToTasksNeedsItem =>
+      'Placez le curseur sur un élément avec case à cocher';
+  @override
+  String get moveToTasksSubtitle =>
+      'Transforme les éléments à cocher en tâches et les retire de la note';
 }

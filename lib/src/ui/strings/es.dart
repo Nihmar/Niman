@@ -4400,4 +4400,19 @@ final class SpanishStrings extends Strings {
   String get tasksForNoteNew => 'Nueva tarea';
   @override
   String get tasksForNoteNewHere => 'Nueva tarea para esta nota';
+  @override
+  String get moveToTasks => 'Mover a tareas';
+  @override
+  String get moveToTasksConfirm => 'Mover';
+  @override
+  String get movedToTasksOne => 'Movido a tareas';
+  @override
+  String movedToTasks(int n) => 'Movidas $n a tareas';
+  @override
+  String get moveToTasksHasSubItems => 'Tiene subelementos — muévelos primero';
+  @override
+  String get moveToTasksNeedsItem => 'Pon el cursor en un elemento con casilla';
+  @override
+  String get moveToTasksSubtitle =>
+      'Convierte los elementos con casilla en tareas y los saca de la nota';
 }

@@ -3883,4 +3883,18 @@ final class ChineseStrings extends Strings {
   String get tasksForNoteNew => '新建任务';
   @override
   String get tasksForNoteNewHere => '为本笔记新建任务';
+  @override
+  String get moveToTasks => '移至任务';
+  @override
+  String get moveToTasksConfirm => '移动';
+  @override
+  String get movedToTasksOne => '已移至任务';
+  @override
+  String movedToTasks(int n) => '已将 $n 项移至任务';
+  @override
+  String get moveToTasksHasSubItems => '含有子项 — 请先移动子项';
+  @override
+  String get moveToTasksNeedsItem => '请将光标放在带复选框的项目上';
+  @override
+  String get moveToTasksSubtitle => '将带复选框的项目转为任务，并从笔记中移除';
 }

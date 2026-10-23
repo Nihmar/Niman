@@ -2302,4 +2302,11 @@ abstract base class Strings {
   String get tasksForNoteEmpty;
   String get tasksForNoteNew;
   String get tasksForNoteNewHere;
+  String get moveToTasks;
+  String get moveToTasksConfirm;
+  String get movedToTasksOne;
+  String movedToTasks(int n);
+  String get moveToTasksHasSubItems;
+  String get moveToTasksNeedsItem;
+  String get moveToTasksSubtitle;
 }

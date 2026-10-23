@@ -4374,4 +4374,20 @@ final class BelarusianStrings extends Strings {
   String get tasksForNoteNew => 'Новае заданне';
   @override
   String get tasksForNoteNewHere => 'Новае заданне для гэтай нататкі';
+  @override
+  String get moveToTasks => 'Перанесці ў заданні';
+  @override
+  String get moveToTasksConfirm => 'Перанесці';
+  @override
+  String get movedToTasksOne => 'Перанесена ў заданні';
+  @override
+  String movedToTasks(int n) => 'Перанесена ў заданні: $n';
+  @override
+  String get moveToTasksHasSubItems =>
+      'Ёсць укладзеныя пункты — спачатку перанясіце іх';
+  @override
+  String get moveToTasksNeedsItem => 'Паставіце курсор на пункт са сцяжком';
+  @override
+  String get moveToTasksSubtitle =>
+      'Зрабіць з пунктаў са сцяжком заданні і прыбраць іх з нататкі';
 }

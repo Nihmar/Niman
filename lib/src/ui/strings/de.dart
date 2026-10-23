@@ -4427,4 +4427,22 @@ final class GermanStrings extends Strings {
   String get tasksForNoteNew => 'Neue Aufgabe';
   @override
   String get tasksForNoteNewHere => 'Neue Aufgabe zu dieser Notiz';
+  @override
+  String get moveToTasks => 'In Aufgaben verschieben';
+  @override
+  String get moveToTasksConfirm => 'Verschieben';
+  @override
+  String get movedToTasksOne => 'In Aufgaben verschoben';
+  @override
+  String movedToTasks(int n) => '$n in Aufgaben verschoben';
+  @override
+  String get moveToTasksHasSubItems =>
+      'Hat Unterpunkte — zuerst diese verschieben';
+  @override
+  String get moveToTasksNeedsItem =>
+      'Den Cursor auf einen Punkt mit Kontrollkästchen setzen';
+  @override
+  String get moveToTasksSubtitle =>
+      'Macht Punkte mit Kontrollkästchen zu '
+      'Aufgaben und nimmt sie aus der Notiz';
 }

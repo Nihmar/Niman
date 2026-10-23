@@ -4352,4 +4352,22 @@ final class SlovenianStrings extends Strings {
   String get tasksForNoteNew => 'Nova naloga';
   @override
   String get tasksForNoteNewHere => 'Nova naloga za to opombo';
+  @override
+  String get moveToTasks => 'Premakni med naloge';
+  @override
+  String get moveToTasksConfirm => 'Premakni';
+  @override
+  String get movedToTasksOne => 'Premaknjeno med naloge';
+  @override
+  String movedToTasks(int n) => 'Premaknjeno med naloge: $n';
+  @override
+  String get moveToTasksHasSubItems =>
+      'Ima podpostavke — najprej premaknite njih';
+  @override
+  String get moveToTasksNeedsItem =>
+      'Postavite kazalko na postavko s potrditvenim poljem';
+  @override
+  String get moveToTasksSubtitle =>
+      'Postavke s potrditvenim poljem spremeni '
+      'v naloge in jih odstrani iz opombe';
 }

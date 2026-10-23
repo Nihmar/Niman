@@ -4390,4 +4390,20 @@ final class BasqueStrings extends Strings {
   String get tasksForNoteNew => 'Zeregin berria';
   @override
   String get tasksForNoteNewHere => 'Zeregin berria ohar honentzat';
+  @override
+  String get moveToTasks => 'Eraman zereginetara';
+  @override
+  String get moveToTasksConfirm => 'Eraman';
+  @override
+  String get movedToTasksOne => 'Zereginetara eraman da';
+  @override
+  String movedToTasks(int n) => '$n zereginetara eraman dira';
+  @override
+  String get moveToTasksHasSubItems =>
+      'Azpielementuak ditu — eraman itzazu lehenik';
+  @override
+  String get moveToTasksNeedsItem => 'Jarri kurtsorea laukidun elementu batean';
+  @override
+  String get moveToTasksSubtitle =>
+      'Laukidun elementuak zeregin bihurtzen ditu eta oharretik kentzen ditu';
 }

@@ -4295,4 +4295,19 @@ final class TurkishStrings extends Strings {
   String get tasksForNoteNew => 'Yeni görev';
   @override
   String get tasksForNoteNewHere => 'Bu not için yeni görev';
+  @override
+  String get moveToTasks => 'Görevlere taşı';
+  @override
+  String get moveToTasksConfirm => 'Taşı';
+  @override
+  String get movedToTasksOne => 'Görevlere taşındı';
+  @override
+  String movedToTasks(int n) => '$n öğe görevlere taşındı';
+  @override
+  String get moveToTasksHasSubItems => 'Alt öğeleri var — önce onları taşıyın';
+  @override
+  String get moveToTasksNeedsItem => 'İmleci onay kutulu bir öğeye getirin';
+  @override
+  String get moveToTasksSubtitle =>
+      'Onay kutulu öğeleri göreve dönüştürür ve nottan çıkarır';
 }

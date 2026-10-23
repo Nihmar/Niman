@@ -4279,4 +4279,20 @@ final class EstonianStrings extends Strings {
   String get tasksForNoteNew => 'Uus ülesanne';
   @override
   String get tasksForNoteNewHere => 'Uus ülesanne sellele märkele';
+  @override
+  String get moveToTasks => 'Teisalda ülesannetesse';
+  @override
+  String get moveToTasksConfirm => 'Teisalda';
+  @override
+  String get movedToTasksOne => 'Teisaldatud ülesannetesse';
+  @override
+  String movedToTasks(int n) => 'Teisaldatud ülesannetesse: $n';
+  @override
+  String get moveToTasksHasSubItems =>
+      'Sisaldab alamüksusi — teisalda need esmalt';
+  @override
+  String get moveToTasksNeedsItem => 'Pane kursor märkeruuduga real';
+  @override
+  String get moveToTasksSubtitle =>
+      'Muudab märkeruuduga read ülesanneteks ja eemaldab need märkmest';
 }

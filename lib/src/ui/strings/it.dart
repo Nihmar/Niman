@@ -4368,4 +4368,20 @@ final class ItalianStrings extends Strings {
   String get tasksForNoteNew => 'Nuova attività';
   @override
   String get tasksForNoteNewHere => 'Nuova attività per questa nota';
+  @override
+  String get moveToTasks => 'Sposta nelle attività';
+  @override
+  String get moveToTasksConfirm => 'Sposta';
+  @override
+  String get movedToTasksOne => 'Spostato nelle attività';
+  @override
+  String movedToTasks(int n) => 'Spostate $n nelle attività';
+  @override
+  String get moveToTasksHasSubItems =>
+      'Ha sotto-elementi — sposta prima quelli';
+  @override
+  String get moveToTasksNeedsItem => 'Metti il cursore su una voce con casella';
+  @override
+  String get moveToTasksSubtitle =>
+      'Trasforma le voci con casella in attività e le toglie dalla nota';
 }

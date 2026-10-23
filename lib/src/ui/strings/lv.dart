@@ -4324,4 +4324,21 @@ final class LatvianStrings extends Strings {
   String get tasksForNoteNew => 'Jauns uzdevums';
   @override
   String get tasksForNoteNewHere => 'Jauns uzdevums šai piezīmei';
+  @override
+  String get moveToTasks => 'Pārvietot uz uzdevumiem';
+  @override
+  String get moveToTasksConfirm => 'Pārvietot';
+  @override
+  String get movedToTasksOne => 'Pārvietots uz uzdevumiem';
+  @override
+  String movedToTasks(int n) => 'Pārvietoti uz uzdevumiem: $n';
+  @override
+  String get moveToTasksHasSubItems =>
+      'Ir apakšpunkti — vispirms pārvietojiet tos';
+  @override
+  String get moveToTasksNeedsItem =>
+      'Novietojiet kursoru uz punkta ar izvēles rūtiņu';
+  @override
+  String get moveToTasksSubtitle =>
+      'Pārvērš punktus ar izvēles rūtiņu uzdevumos un noņem tos no piezīmes';
 }

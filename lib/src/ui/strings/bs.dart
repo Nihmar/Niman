@@ -4356,4 +4356,19 @@ final class BosnianStrings extends Strings {
   String get tasksForNoteNew => 'Novi zadatak';
   @override
   String get tasksForNoteNewHere => 'Novi zadatak za ovu bilješku';
+  @override
+  String get moveToTasks => 'Premjesti u zadatke';
+  @override
+  String get moveToTasksConfirm => 'Premjesti';
+  @override
+  String get movedToTasksOne => 'Premješteno u zadatke';
+  @override
+  String movedToTasks(int n) => 'Premješteno u zadatke: $n';
+  @override
+  String get moveToTasksHasSubItems => 'Ima podstavki — prvo premjestite njih';
+  @override
+  String get moveToTasksNeedsItem => 'Postavite kursor na stavku s kvačicom';
+  @override
+  String get moveToTasksSubtitle =>
+      'Pretvara stavke s kvačicom u zadatke i uklanja ih iz bilješke';
 }

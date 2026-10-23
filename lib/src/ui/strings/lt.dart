@@ -4371,4 +4371,21 @@ final class LithuanianStrings extends Strings {
   String get tasksForNoteNew => 'Nauja užduotis';
   @override
   String get tasksForNoteNewHere => 'Nauja užduotis šiai pastabai';
+  @override
+  String get moveToTasks => 'Perkelti į užduotis';
+  @override
+  String get moveToTasksConfirm => 'Perkelti';
+  @override
+  String get movedToTasksOne => 'Perkelta į užduotis';
+  @override
+  String movedToTasks(int n) => 'Perkelta į užduotis: $n';
+  @override
+  String get moveToTasksHasSubItems =>
+      'Turi požymių — pirmiausia perkelkite juos';
+  @override
+  String get moveToTasksNeedsItem =>
+      'Padėkite žymeklį ant elemento su žymės langeliu';
+  @override
+  String get moveToTasksSubtitle =>
+      'Elementus su žymės langeliu paverčia užduotimis ir pašalina iš pastabos';
 }

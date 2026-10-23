@@ -4323,4 +4323,19 @@ final class CzechStrings extends Strings {
   String get tasksForNoteNew => 'Nový úkol';
   @override
   String get tasksForNoteNewHere => 'Nový úkol k této poznámce';
+  @override
+  String get moveToTasks => 'Přesunout do úkolů';
+  @override
+  String get moveToTasksConfirm => 'Přesunout';
+  @override
+  String get movedToTasksOne => 'Přesunuto do úkolů';
+  @override
+  String movedToTasks(int n) => 'Přesunuto do úkolů: $n';
+  @override
+  String get moveToTasksHasSubItems => 'Má podpoložky — nejdřív přesuňte je';
+  @override
+  String get moveToTasksNeedsItem => 'Umístěte kurzor na položku s polem';
+  @override
+  String get moveToTasksSubtitle =>
+      'Změní položky s polem na úkoly a odebere je z poznámky';
 }

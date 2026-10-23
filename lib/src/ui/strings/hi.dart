@@ -4279,4 +4279,20 @@ final class HindiStrings extends Strings {
   String get tasksForNoteNew => 'नया कार्य';
   @override
   String get tasksForNoteNewHere => 'इस नोट के लिए नया कार्य';
+  @override
+  String get moveToTasks => 'कार्यों में ले जाएँ';
+  @override
+  String get moveToTasksConfirm => 'ले जाएँ';
+  @override
+  String get movedToTasksOne => 'कार्यों में ले जाया गया';
+  @override
+  String movedToTasks(int n) => '$n को कार्यों में ले जाया गया';
+  @override
+  String get moveToTasksHasSubItems =>
+      'इसमें उप-आइटम हैं — पहले उन्हें ले जाएँ';
+  @override
+  String get moveToTasksNeedsItem => 'कर्सर को चेकबॉक्स वाले आइटम पर रखें';
+  @override
+  String get moveToTasksSubtitle =>
+      'चेकबॉक्स वाले आइटम को कार्य बनाता है और नोट से हटा देता है';
 }

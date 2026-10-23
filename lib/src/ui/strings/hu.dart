@@ -4355,4 +4355,21 @@ final class HungarianStrings extends Strings {
   String get tasksForNoteNew => 'Új feladat';
   @override
   String get tasksForNoteNewHere => 'Új feladat ehhez a jegyzethez';
+  @override
+  String get moveToTasks => 'Áthelyezés a feladatok közé';
+  @override
+  String get moveToTasksConfirm => 'Áthelyezés';
+  @override
+  String get movedToTasksOne => 'Áthelyezve a feladatok közé';
+  @override
+  String movedToTasks(int n) => '$n áthelyezve a feladatok közé';
+  @override
+  String get moveToTasksHasSubItems =>
+      'Vannak alelemei — előbb azokat helyezze át';
+  @override
+  String get moveToTasksNeedsItem =>
+      'Tegye a kurzort egy jelölőnégyzetes elemre';
+  @override
+  String get moveToTasksSubtitle =>
+      'A jelölőnégyzetes elemeket feladattá alakítja, és kiveszi a jegyzetből';
 }

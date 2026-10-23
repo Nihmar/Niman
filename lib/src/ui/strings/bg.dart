@@ -4359,4 +4359,19 @@ final class BulgarianStrings extends Strings {
   String get tasksForNoteNew => 'Нова задача';
   @override
   String get tasksForNoteNewHere => 'Нова задача за тази бележка';
+  @override
+  String get moveToTasks => 'Преместване в задачи';
+  @override
+  String get moveToTasksConfirm => 'Премести';
+  @override
+  String get movedToTasksOne => 'Преместено в задачи';
+  @override
+  String movedToTasks(int n) => 'Преместени в задачи: $n';
+  @override
+  String get moveToTasksHasSubItems => 'Има подточки — първо преместете тях';
+  @override
+  String get moveToTasksNeedsItem => 'Поставете курсора върху точка с отметка';
+  @override
+  String get moveToTasksSubtitle =>
+      'Превръща точките с отметка в задачи и ги премахва от бележката';
 }

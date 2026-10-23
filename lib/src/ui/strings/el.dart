@@ -4469,4 +4469,22 @@ final class GreekStrings extends Strings {
   String get tasksForNoteNew => 'Νέο καθήκον';
   @override
   String get tasksForNoteNewHere => 'Νέο καθήκον για αυτή τη σημείωση';
+  @override
+  String get moveToTasks => 'Μετακίνηση σε καθήκοντα';
+  @override
+  String get moveToTasksConfirm => 'Μετακίνηση';
+  @override
+  String get movedToTasksOne => 'Μετακινήθηκε σε καθήκοντα';
+  @override
+  String movedToTasks(int n) => 'Μετακινήθηκαν $n σε καθήκοντα';
+  @override
+  String get moveToTasksHasSubItems =>
+      'Έχει υποστοιχεία — μετακινήστε τα πρώτα';
+  @override
+  String get moveToTasksNeedsItem =>
+      'Τοποθετήστε τον δρομέα σε στοιχείο με πλαίσιο ελέγχου';
+  @override
+  String get moveToTasksSubtitle =>
+      'Μετατρέπει τα στοιχεία με πλαίσιο ελέγχου '
+      'σε καθήκοντα και τα αφαιρεί από τη σημείωση';
 }

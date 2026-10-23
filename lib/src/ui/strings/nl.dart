@@ -4382,4 +4382,20 @@ final class DutchStrings extends Strings {
   String get tasksForNoteNew => 'Nieuwe taak';
   @override
   String get tasksForNoteNewHere => 'Nieuwe taak voor deze notitie';
+  @override
+  String get moveToTasks => 'Verplaats naar taken';
+  @override
+  String get moveToTasksConfirm => 'Verplaats';
+  @override
+  String get movedToTasksOne => 'Verplaatst naar taken';
+  @override
+  String movedToTasks(int n) => '$n verplaatst naar taken';
+  @override
+  String get moveToTasksHasSubItems => 'Heeft subitems — verplaats die eerst';
+  @override
+  String get moveToTasksNeedsItem =>
+      'Zet de cursor op een item met selectievakje';
+  @override
+  String get moveToTasksSubtitle =>
+      'Maakt items met selectievakje tot taken en haalt ze uit de notitie';
 }

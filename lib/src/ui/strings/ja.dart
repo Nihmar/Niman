@@ -3980,4 +3980,18 @@ final class JapaneseStrings extends Strings {
   String get tasksForNoteNew => '新しいタスク';
   @override
   String get tasksForNoteNewHere => 'このノートの新しいタスク';
+  @override
+  String get moveToTasks => 'タスクに移動';
+  @override
+  String get moveToTasksConfirm => '移動';
+  @override
+  String get movedToTasksOne => 'タスクに移動しました';
+  @override
+  String movedToTasks(int n) => '$n 件をタスクに移動しました';
+  @override
+  String get moveToTasksHasSubItems => 'サブ項目があります — 先にそちらを移動してください';
+  @override
+  String get moveToTasksNeedsItem => 'チェックボックスの項目にカーソルを置いてください';
+  @override
+  String get moveToTasksSubtitle => 'チェックボックスの項目をタスクにして、ノートから取り除きます';
 }

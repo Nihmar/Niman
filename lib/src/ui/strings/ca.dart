@@ -4409,4 +4409,19 @@ final class CatalanStrings extends Strings {
   String get tasksForNoteNew => 'Tasca nova';
   @override
   String get tasksForNoteNewHere => 'Tasca nova per a aquesta nota';
+  @override
+  String get moveToTasks => 'Mou a tasques';
+  @override
+  String get moveToTasksConfirm => 'Mou';
+  @override
+  String get movedToTasksOne => "S'ha mogut a tasques";
+  @override
+  String movedToTasks(int n) => "S'han mogut $n a tasques";
+  @override
+  String get moveToTasksHasSubItems => 'Té subelements — mou-los primer';
+  @override
+  String get moveToTasksNeedsItem => 'Posa el cursor en un element amb casella';
+  @override
+  String get moveToTasksSubtitle =>
+      'Converteix els elements amb casella en tasques i els treu de la nota';
 }

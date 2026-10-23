@@ -4366,4 +4366,21 @@ final class FinnishStrings extends Strings {
   String get tasksForNoteNew => 'Uusi tehtävä';
   @override
   String get tasksForNoteNewHere => 'Uusi tehtävä tälle muistiinpanolle';
+  @override
+  String get moveToTasks => 'Siirrä tehtäviin';
+  @override
+  String get moveToTasksConfirm => 'Siirrä';
+  @override
+  String get movedToTasksOne => 'Siirretty tehtäviin';
+  @override
+  String movedToTasks(int n) => 'Siirretty tehtäviin: $n';
+  @override
+  String get moveToTasksHasSubItems => 'Sisältää alakohtia — siirrä ne ensin';
+  @override
+  String get moveToTasksNeedsItem =>
+      'Aseta kohdistin valintaruudulliselle riville';
+  @override
+  String get moveToTasksSubtitle =>
+      'Muuttaa valintaruudulliset kohdat '
+      'tehtäviksi ja poistaa ne muistiinpanosta';
 }

@@ -4370,4 +4370,19 @@ final class UkrainianStrings extends Strings {
   String get tasksForNoteNew => 'Нове завдання';
   @override
   String get tasksForNoteNewHere => 'Нове завдання до цієї нотатки';
+  @override
+  String get moveToTasks => 'Перемістити в завдання';
+  @override
+  String get moveToTasksConfirm => 'Перемістити';
+  @override
+  String get movedToTasksOne => 'Переміщено в завдання';
+  @override
+  String movedToTasks(int n) => 'Переміщено в завдання: $n';
+  @override
+  String get moveToTasksHasSubItems => 'Має підпункти — спершу перемістіть їх';
+  @override
+  String get moveToTasksNeedsItem => 'Поставте курсор на пункт із прапорцем';
+  @override
+  String get moveToTasksSubtitle =>
+      'Перетворює пункти з прапорцем на завдання й прибирає їх із нотатки';
 }

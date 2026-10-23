@@ -4312,4 +4312,20 @@ final class DanishStrings extends Strings {
   String get tasksForNoteNew => 'Ny opgave';
   @override
   String get tasksForNoteNewHere => 'Ny opgave til denne note';
+  @override
+  String get moveToTasks => 'Flyt til opgaver';
+  @override
+  String get moveToTasksConfirm => 'Flyt';
+  @override
+  String get movedToTasksOne => 'Flyttet til opgaver';
+  @override
+  String movedToTasks(int n) => 'Flyttede $n til opgaver';
+  @override
+  String get moveToTasksHasSubItems => 'Har underpunkter — flyt dem først';
+  @override
+  String get moveToTasksNeedsItem =>
+      'Sæt markøren på et punkt med afkrydsningsfelt';
+  @override
+  String get moveToTasksSubtitle =>
+      'Gør afkrydsningspunkter til opgaver og fjerner dem fra noten';
 }

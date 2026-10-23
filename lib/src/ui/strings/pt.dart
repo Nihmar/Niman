@@ -4360,4 +4360,20 @@ final class PortugueseStrings extends Strings {
   String get tasksForNoteNew => 'Nova tarefa';
   @override
   String get tasksForNoteNewHere => 'Nova tarefa para esta nota';
+  @override
+  String get moveToTasks => 'Mover para tarefas';
+  @override
+  String get moveToTasksConfirm => 'Mover';
+  @override
+  String get movedToTasksOne => 'Movido para tarefas';
+  @override
+  String movedToTasks(int n) => '$n movidas para tarefas';
+  @override
+  String get moveToTasksHasSubItems => 'Tem subitens — mova-os primeiro';
+  @override
+  String get moveToTasksNeedsItem =>
+      'Coloque o cursor num item com caixa de seleção';
+  @override
+  String get moveToTasksSubtitle =>
+      'Transforma os itens com caixa em tarefas e retira-os da nota';
 }

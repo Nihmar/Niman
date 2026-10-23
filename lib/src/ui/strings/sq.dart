@@ -4364,4 +4364,19 @@ final class AlbanianStrings extends Strings {
   String get tasksForNoteNew => 'Detyrë e re';
   @override
   String get tasksForNoteNewHere => 'Detyrë e re për këtë shënim';
+  @override
+  String get moveToTasks => 'Zhvendos te detyrat';
+  @override
+  String get moveToTasksConfirm => 'Zhvendos';
+  @override
+  String get movedToTasksOne => 'U zhvendos te detyrat';
+  @override
+  String movedToTasks(int n) => 'U zhvendosën $n te detyrat';
+  @override
+  String get moveToTasksHasSubItems => 'Ka nënelemente — zhvendosi ata së pari';
+  @override
+  String get moveToTasksNeedsItem => 'Vendos kursorin te një element me kuti';
+  @override
+  String get moveToTasksSubtitle =>
+      'I kthen elementet me kuti në detyra dhe i heq nga shënimi';
 }

@@ -4355,4 +4355,19 @@ final class CroatianStrings extends Strings {
   String get tasksForNoteNew => 'Nova zadaća';
   @override
   String get tasksForNoteNewHere => 'Nova zadaća za ovu napomenu';
+  @override
+  String get moveToTasks => 'Premjesti u zadaće';
+  @override
+  String get moveToTasksConfirm => 'Premjesti';
+  @override
+  String get movedToTasksOne => 'Premješteno u zadaće';
+  @override
+  String movedToTasks(int n) => 'Premješteno u zadaće: $n';
+  @override
+  String get moveToTasksHasSubItems => 'Ima podstavke — prvo premjestite njih';
+  @override
+  String get moveToTasksNeedsItem => 'Postavite pokazivač na stavku s kvačicom';
+  @override
+  String get moveToTasksSubtitle =>
+      'Pretvara stavke s kvačicom u zadaće i uklanja ih iz napomene';
 }

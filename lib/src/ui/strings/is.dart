@@ -4334,4 +4334,19 @@ final class IcelandicStrings extends Strings {
   String get tasksForNoteNew => 'Nýtt verkefni';
   @override
   String get tasksForNoteNewHere => 'Nýtt verkefni fyrir þennan minnispunkt';
+  @override
+  String get moveToTasks => 'Færa í verkefni';
+  @override
+  String get moveToTasksConfirm => 'Færa';
+  @override
+  String get movedToTasksOne => 'Fært í verkefni';
+  @override
+  String movedToTasks(int n) => '$n fært í verkefni';
+  @override
+  String get moveToTasksHasSubItems => 'Hefur undirliði — færðu þá fyrst';
+  @override
+  String get moveToTasksNeedsItem => 'Settu bendilinn á lið með gátreit';
+  @override
+  String get moveToTasksSubtitle =>
+      'Breytir liðum með gátreit í verkefni og tekur þá úr minnispunktinum';
 }

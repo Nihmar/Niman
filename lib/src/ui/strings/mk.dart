@@ -4365,4 +4365,21 @@ final class MacedonianStrings extends Strings {
   String get tasksForNoteNew => 'Нова задача';
   @override
   String get tasksForNoteNewHere => 'Нова задача за оваа белешка';
+  @override
+  String get moveToTasks => 'Премести во задачи';
+  @override
+  String get moveToTasksConfirm => 'Премести';
+  @override
+  String get movedToTasksOne => 'Преместено во задачи';
+  @override
+  String movedToTasks(int n) => 'Преместени во задачи: $n';
+  @override
+  String get moveToTasksHasSubItems => 'Има подставки — прво преместете ги нив';
+  @override
+  String get moveToTasksNeedsItem =>
+      'Поставете го курсорот на ставка со квадратче';
+  @override
+  String get moveToTasksSubtitle =>
+      'Ги претвора ставките со квадратче во '
+      'задачи и ги отстранува од белешката';
 }

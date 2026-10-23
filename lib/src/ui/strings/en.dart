@@ -4279,4 +4279,19 @@ final class EnglishStrings extends Strings {
   String get tasksForNoteNew => 'New task';
   @override
   String get tasksForNoteNewHere => 'New task for this note';
+  @override
+  String get moveToTasks => 'Move to tasks';
+  @override
+  String get moveToTasksConfirm => 'Move';
+  @override
+  String get movedToTasksOne => 'Moved to tasks';
+  @override
+  String movedToTasks(int n) => 'Moved $n to tasks';
+  @override
+  String get moveToTasksHasSubItems => 'Has sub-items — move them first';
+  @override
+  String get moveToTasksNeedsItem => 'Put the caret on a checkbox item';
+  @override
+  String get moveToTasksSubtitle =>
+      'Turn checkbox items into tasks and take them out of the note';
 }

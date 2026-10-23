@@ -4367,4 +4367,19 @@ final class GalicianStrings extends Strings {
   String get tasksForNoteNew => 'Tarefa nova';
   @override
   String get tasksForNoteNewHere => 'Tarefa nova para esta nota';
+  @override
+  String get moveToTasks => 'Mover a tarefas';
+  @override
+  String get moveToTasksConfirm => 'Mover';
+  @override
+  String get movedToTasksOne => 'Movido a tarefas';
+  @override
+  String movedToTasks(int n) => 'Movidas $n a tarefas';
+  @override
+  String get moveToTasksHasSubItems => 'Ten subelementos — móveos primeiro';
+  @override
+  String get moveToTasksNeedsItem => 'Pon o cursor nun elemento con caixa';
+  @override
+  String get moveToTasksSubtitle =>
+      'Converte os elementos con caixa en tarefas e sácaos da nota';
 }

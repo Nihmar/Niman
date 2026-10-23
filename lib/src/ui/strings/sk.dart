@@ -4337,4 +4337,19 @@ final class SlovakStrings extends Strings {
   String get tasksForNoteNew => 'Nová úloha';
   @override
   String get tasksForNoteNewHere => 'Nová úloha k tejto poznámke';
+  @override
+  String get moveToTasks => 'Presunúť do úloh';
+  @override
+  String get moveToTasksConfirm => 'Presunúť';
+  @override
+  String get movedToTasksOne => 'Presunuté do úloh';
+  @override
+  String movedToTasks(int n) => 'Presunuté do úloh: $n';
+  @override
+  String get moveToTasksHasSubItems => 'Má podpoložky — najprv presuňte tie';
+  @override
+  String get moveToTasksNeedsItem => 'Umiestnite kurzor na položku s políčkom';
+  @override
+  String get moveToTasksSubtitle =>
+      'Zmení položky s políčkom na úlohy a odstráni ich z poznámky';
 }

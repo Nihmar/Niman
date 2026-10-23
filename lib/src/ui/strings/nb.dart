@@ -4317,4 +4317,21 @@ final class NorwegianStrings extends Strings {
   String get tasksForNoteNew => 'Ny oppgave';
   @override
   String get tasksForNoteNewHere => 'Ny oppgave for dette notatet';
+  @override
+  String get moveToTasks => 'Flytt til oppgaver';
+  @override
+  String get moveToTasksConfirm => 'Flytt';
+  @override
+  String get movedToTasksOne => 'Flyttet til oppgaver';
+  @override
+  String movedToTasks(int n) => 'Flyttet $n til oppgaver';
+  @override
+  String get moveToTasksHasSubItems => 'Har underpunkter — flytt dem først';
+  @override
+  String get moveToTasksNeedsItem =>
+      'Sett markøren på et punkt med avkrysningsboks';
+  @override
+  String get moveToTasksSubtitle =>
+      'Gjør punkter med avkrysningsboks til '
+      'oppgaver og fjerner dem fra notatet';
 }

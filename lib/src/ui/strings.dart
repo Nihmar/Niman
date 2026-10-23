@@ -2196,4 +2196,11 @@ final class AppStrings {
   static String get tasksForNoteEmpty => _s.tasksForNoteEmpty;
   static String get tasksForNoteNew => _s.tasksForNoteNew;
   static String get tasksForNoteNewHere => _s.tasksForNoteNewHere;
+  static String get moveToTasks => _s.moveToTasks;
+  static String get moveToTasksConfirm => _s.moveToTasksConfirm;
+  static String get movedToTasksOne => _s.movedToTasksOne;
+  static String movedToTasks(int n) => _s.movedToTasks(n);
+  static String get moveToTasksHasSubItems => _s.moveToTasksHasSubItems;
+  static String get moveToTasksNeedsItem => _s.moveToTasksNeedsItem;
+  static String get moveToTasksSubtitle => _s.moveToTasksSubtitle;
 }

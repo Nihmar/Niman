@@ -4401,4 +4401,19 @@ final class RomanianStrings extends Strings {
   String get tasksForNoteNew => 'Sarcină nouă';
   @override
   String get tasksForNoteNewHere => 'Sarcină nouă pentru această notă';
+  @override
+  String get moveToTasks => 'Mută în sarcini';
+  @override
+  String get moveToTasksConfirm => 'Mută';
+  @override
+  String get movedToTasksOne => 'Mutat în sarcini';
+  @override
+  String movedToTasks(int n) => 'Mutate $n în sarcini';
+  @override
+  String get moveToTasksHasSubItems => 'Are subelemente — mutați-le mai întâi';
+  @override
+  String get moveToTasksNeedsItem => 'Puneți cursorul pe un element cu casetă';
+  @override
+  String get moveToTasksSubtitle =>
+      'Transformă elementele cu casetă în sarcini și le scoate din notă';
 }

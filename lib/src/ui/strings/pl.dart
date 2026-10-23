@@ -4389,4 +4389,19 @@ final class PolishStrings extends Strings {
   String get tasksForNoteNew => 'Nowe zadanie';
   @override
   String get tasksForNoteNewHere => 'Nowe zadanie do tej notatki';
+  @override
+  String get moveToTasks => 'Przenieś do zadań';
+  @override
+  String get moveToTasksConfirm => 'Przenieś';
+  @override
+  String get movedToTasksOne => 'Przeniesiono do zadań';
+  @override
+  String movedToTasks(int n) => 'Przeniesiono do zadań: $n';
+  @override
+  String get moveToTasksHasSubItems => 'Ma podpunkty — najpierw przenieś je';
+  @override
+  String get moveToTasksNeedsItem => 'Ustaw kursor na pozycji z polem wyboru';
+  @override
+  String get moveToTasksSubtitle =>
+      'Zamienia pozycje z polem wyboru w zadania i usuwa je z notatki';
 }
