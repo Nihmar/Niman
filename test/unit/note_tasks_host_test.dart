@@ -19,7 +19,7 @@ void main() {
       addTearDown(fixture.dispose);
       await fixture.host.add('House/Repairs.md');
       await fixture.host.add('Ideas.md');
-      expect(fixture.added, ['[[Repairs]]', '[[Ideas]]']);
+      expect(fixture.added, [' [[Repairs]]', ' [[Ideas]]']);
     });
 
     test('puts the selection, on one line, before the link', () async {
@@ -36,7 +36,7 @@ void main() {
       final fixture = await NoteTasksFixture.open();
       addTearDown(fixture.dispose);
       await fixture.host.add('Ideas.md', selection: ' \n ');
-      expect(fixture.added, ['[[Ideas]]']);
+      expect(fixture.added, [' [[Ideas]]']);
     });
 
     test('collapses white space', () {

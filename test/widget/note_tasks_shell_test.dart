@@ -120,7 +120,15 @@ void main() {
       await tester.tap(find.byKey(const Key('tasks-for-note-add')));
       await settle(tester);
       expect(find.byType(AlertDialog), findsOneWidget);
-      expect(dialogText(tester), '[[alpha]]');
+      expect(dialogText(tester), ' [[alpha]]');
+      // The caret waits before the space: what is typed is its own word.
+      final field = tester.widget<EditableText>(
+        find.descendant(
+          of: find.byType(AlertDialog),
+          matching: find.byType(EditableText),
+        ),
+      );
+      expect(field.controller.selection.baseOffset, 0);
     });
 
     testWidgets('the header under the note counts the open tasks', (
@@ -187,7 +195,7 @@ void main() {
       await tester.tap(find.byKey(const Key('note-menu-newTask')));
       await settle(tester);
       expect(find.byType(AlertDialog), findsOneWidget);
-      expect(dialogText(tester), '[[alpha]]');
+      expect(dialogText(tester), ' [[alpha]]');
     });
 
     testWidgets('New task puts the selected text before the link', (
@@ -246,7 +254,7 @@ void main() {
       await tester.tap(find.byKey(const Key('palette-item-0')));
       await settle(tester);
       expect(find.byType(AlertDialog), findsOneWidget);
-      expect(dialogText(tester), '[[alpha]]');
+      expect(dialogText(tester), ' [[alpha]]');
     });
 
     testWidgets('does not offer it while the Todo feature is off', (

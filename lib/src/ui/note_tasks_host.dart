@@ -76,10 +76,15 @@ final class NoteTasksHost {
   /// library-relative [notePath]: its description is `[[Note]]`, the shortest
   /// form that names this note alone (as the `[[` completion writes it), with
   /// [selection] — the text selected in the editor — before it.
+  ///
+  /// The dialog opens with the caret at the start, so a link alone is
+  /// written after a space: what is typed there lands before it as its own
+  /// word (`Call [[Repairs]]`, never `Call[[Repairs]]`), and the dialog's
+  /// trim takes the space off when nothing is typed.
   Future<void> add(String notePath, {String selection = ''}) async {
     final link = await linkTo(notePath);
     final lead = oneLine(selection);
-    await addTask(lead.isEmpty ? link : '$lead $link');
+    await addTask(lead.isEmpty ? ' $link' : '$lead $link');
   }
 
   /// The wikilink that names the note at [notePath] alone.
