@@ -168,7 +168,7 @@ tabs.
   again takes you to the pane and tab it is in.
 
 **The side panel.** On a wide window a panel on the right shows the note's **Outline**, its **Tags**, its **Links**, its
-**Spelling** or its
+**Tasks**, its **Spelling** or its
 **History**, one at a time, switched by the icons at its top. A panel too
 narrow for all of its icons shows them from the end, the first ones cut
 off at the left: the wheel over the row scrolls it, and the mouse drags
@@ -180,6 +180,10 @@ it as a finger does on a tablet.
 - **Links** lists the notes that link to this one, each with the line it
   says the link on, and opens one on a click (see
   [links](links.md#links-to-this-note)).
+- **Tasks** lists the tasks that link this note, open ones by due date and
+  Done folded, and ticks, opens or adds one (see
+  [tasks](tasks.md#tasks-for-this-note)). It is there while the Todo feature
+  is on.
 - **Spelling** lists the note's misspellings, each with its suggestions
   (see [Spellcheck](#spellcheck)).
 - **History** lists the kept versions, newest first, and opens the
@@ -189,8 +193,8 @@ It follows the note in the focused pane, and changes as the note is
 edited. The panel's button in the note's row, its **×**, or
 `Ctrl+Shift+B` shows and hides it. Whether it is open, and which of the
 panes it shows, is remembered with the tabs. The note's **⋮** menu has
-Outline, Tags and Links to this note too: they open the panel where it
-docks, and a sheet on a phone. Wherever the wide layout can show the
+Outline, Tags, Links to this note and Tasks for this note too: they open the
+panel where it docks, and a sheet on a phone. Wherever the wide layout can show the
 panel — beside the note, or over it on a narrower window — the note's
 outline and its spelling review live there, and the row under the note
 leaves both their buttons out; a phone keeps them, and there they open

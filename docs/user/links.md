@@ -194,6 +194,9 @@ three places, one list:
 - **as a sheet on a phone**, from the note's ⋮ menu — *Links to this note* —
   as the Outline and Tags are (see [platforms](platforms.md)).
 
+The tasks that link a note are listed the same way, in the same three places:
+see [Tasks for this note](tasks.md#tasks-for-this-note).
+
 A row is the note's name, its folder dimmed, and the line it says the link
 on, cut to two rows of the list (a long line is a window around the link, with
 `…` where it was cut; a list or quote mark is taken off its head). A tap opens

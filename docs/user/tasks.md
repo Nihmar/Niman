@@ -111,6 +111,43 @@ Other todo.txt tools see the words `[[House/Repairs]]` in the task's text,
 and nothing else: a link is only text on the line, so `todo.txt` stays the
 source of truth and syncs line by line like the rest of it.
 
+## Tasks for this note
+
+A note shows the tasks that link it. It is in three places, one list, the
+way [Links to this note](links.md#links-to-this-note) is:
+
+- **under the note**, a header — *Tasks for this note*, with the number of
+  open tasks — below *Links to this note*, that opens onto the list and shuts
+  again. It is always there while a library is open and the Todo feature is
+  on, so it never appears under your thumb; with no task linking in it opens
+  onto the words that say so. With the Todo feature off (Settings → Features)
+  there is no header, no pane and no menu entry;
+- **in the side panel** on a wide window, the *Tasks* pane, after Links and
+  before History, following the note in the focused pane;
+- **as a sheet on a phone**, from the note's ⋮ menu — *Tasks for this note* —
+  as the Outline, Tags and Links are (see [platforms](platforms.md)).
+
+**Add task** heads the list. The open tasks follow, the soonest due first and
+the ones with no due date last, in the order of `todo.txt`; then **Done (n)**,
+folded, lists the completed ones from `done.txt`. A row is a task as the Todo
+tab draws it — checkbox, priority, text, due date, `+project` / `@context` /
+`#tag` and a chip for each other note it links — without the link to *this*
+note, which is what the list is about. A heading or block that link names
+stays, as a small `§ Boiler` chip. The checkbox ticks the task (a ticked one
+goes to *Done*, and unticking it there reopens it); a tap on the text opens
+the task dialog, to change it, give it a date or delete it. The list follows
+`todo.txt`: a task edited in the Todo tab, in a text editor or by sync shows
+at once, and a renamed note keeps its tasks (their links are rewritten).
+
+**Add task** opens the dialog with `[[Note]]` already in the description — the
+shortest form that finds this note alone, as the `[[` completion writes it — and
+the caret at the start, ready for the words of the task. **New task** in the
+note's ⋮ menu does the same from the note itself and, on a desktop, so does
+*Note: New task for this note…* in the command palette. With text selected in
+the editor, the selection (on one line, its white space collapsed) is the
+description, and the link follows it: select "Order the filter cartridges" and
+choose *New task* to get `Order the filter cartridges [[Repairs]]`.
+
 ## Editing and deleting
 
 On a phone, tap a task to edit it; the trash icon in the dialog's title
