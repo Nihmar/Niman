@@ -121,7 +121,8 @@ way [Links to this note](links.md#links-to-this-note) is:
   again. It is always there while a library is open and the Todo feature is
   on, so it never appears under your thumb; with no task linking in it opens
   onto the words that say so. With the Todo feature off (Settings → Features)
-  there is no header, no pane and no menu entry;
+  there is no header, no pane and no menu entry. On a wide window the header
+  steps aside while the side panel is open, as *Links to this note* does;
 - **in the side panel** on a wide window, the *Tasks* pane, after Links and
   before History, following the note in the focused pane;
 - **as a sheet on a phone**, from the note's ⋮ menu — *Tasks for this note* —

@@ -187,7 +187,9 @@ three places, one list:
 - **under the note**, a header — *Links to this note*, with the count — that
   opens onto the list and shuts again. It is always there while a library is
   open, so it never appears under your thumb; with no one linking in, it opens
-  onto the words that say so. A note opened from outside a library has none;
+  onto the words that say so. A note opened from outside a library has none,
+  and on a wide window it steps aside while the side panel is open — the
+  panel has the same list — and comes back when the panel is closed;
 - **in the side panel** on a wide window (beside the note from 1000 px up,
   over it below), the *Links* pane beside Outline, Tags and History,
   following the note in the focused pane;

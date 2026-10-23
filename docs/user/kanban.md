@@ -62,8 +62,9 @@ A window wide enough shows the columns side by side, scrolling sideways.
   where it will land. With a finger, press and hold the card first.
 - **Tap** a card to select it, tap its title again to edit it; `Enter`
   saves, `Esc` cancels.
-- **Add a card** with the dashed field at the foot of a column and a
-  **column** with the one after the last column. The column's ⋮ renames
+- **Add a card** with the dashed field under a column's title (on a phone,
+  at the foot of the column's cards) and a **column** with the one after the
+  last column. The field takes the typing at the first click. The column's ⋮ renames
   or deletes it.
 - A card's ⋮ (or a right-click) moves it left, right, up or down, and
   deletes it.

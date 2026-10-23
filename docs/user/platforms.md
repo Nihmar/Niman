@@ -589,7 +589,9 @@ this is a decision rather than an omission: the note's status row keeps
 its outline and spelling buttons there — both open as sheets — and the
 ⋮ menu opens the outline, the tags, *Links to this note* and *Tasks for
 this note* as sheets, the history as its screen. The *Links to this note*
-and *Tasks for this note* headers under the note are on every platform. Where the panel shows,
+and *Tasks for this note* headers under the note are on every platform;
+on a wide window they step aside while the panel is open, since it holds
+the same lists. Where the panel shows,
 its left edge drags to make it wider or narrower, like the tree's edge.
 It stops growing before the note gets narrower than 360 px, and it
 keeps its width for the next launch.

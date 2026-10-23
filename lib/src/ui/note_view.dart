@@ -152,6 +152,7 @@ final class NoteView extends StatefulWidget {
     this.features,
     this.outlineInDock = false,
     this.spellCheckInDock = false,
+    this.relatedInDock = false,
     this.onNoteKindChanged,
     this.onKindMarkdown,
     this.onPasteAsMarkdown,
@@ -382,6 +383,10 @@ final class NoteView extends StatefulWidget {
   /// keeps its button — the sheet is its way to the review.
   final bool spellCheckInDock;
 
+  /// Whether the window's panel is open on a wide layout: it has the notes
+  /// and tasks that link this one, so the rows under the note are left out.
+  final bool relatedInDock;
+
   /// Reports the loaded note's kind (the frontmatter `type` value, null =
   /// plain note); the shell shows the kind toggle for known kinds.
   final void Function(String? type)? onNoteKindChanged;
@@ -564,6 +569,9 @@ final class _NoteViewState extends State<NoteView>
 
   @override
   String get notePath => widget.path;
+
+  @override
+  String? get notePathInLibrary => _pathInLibrary;
 
   @override
   Future<String?> resolveEmbed(String target) => _resolveEmbed(target);
@@ -2575,7 +2583,7 @@ final class _NoteViewState extends State<NoteView>
                 if (!_loading && _stats.frontmatterError != null)
                   FrontmatterWarningBanner(message: _stats.frontmatterError!),
                 // The notes that link to this one (#842), under the note.
-                if (!_loading && _ready)
+                if (!_loading && _ready && !widget.relatedInDock)
                   NoteColumnPadding(
                     column: widget.noteColumn,
                     child: LinksToNoteSection(
@@ -2585,7 +2593,10 @@ final class _NoteViewState extends State<NoteView>
                     ),
                   ),
                 // The tasks that link it (#1152), under the links.
-                if (!_loading && _ready && _features.isOn(LibraryFeature.todo))
+                if (!_loading &&
+                    _ready &&
+                    !widget.relatedInDock &&
+                    _features.isOn(LibraryFeature.todo))
                   NoteColumnPadding(
                     column: widget.noteColumn,
                     child: NoteTasksSection(

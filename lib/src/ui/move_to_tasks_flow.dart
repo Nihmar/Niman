@@ -49,7 +49,15 @@ final class MoveToTasksFlow {
       );
       return;
     }
-    final link = await tasks.linkTo(note.notePath);
+    // The link is made from the note's place in the library, never from where
+    // it sits on disk: `[[Note]]`, or its folders too when a second note
+    // shares the name.
+    final path = note.notePathInLibrary;
+    if (path == null) {
+      _say(context, AppStrings.shellActionFailed);
+      return;
+    }
+    final link = await tasks.linkTo(path);
     if (!context.mounted) return;
     final lines = await _lines(context, movable, link);
     if (lines == null || !context.mounted) return;

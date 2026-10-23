@@ -12,8 +12,8 @@ import 'package:niman/src/ui/kinds/kanban/kanban_places.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// One column of the board (#1167): a tinted, rounded lane of [width] with
-/// its header, its cards in a list of their own and **+ Add a card** at the
-/// foot, which stays in view while the cards scroll.
+/// its header, **+ Add a card** under it, which stays in view while the cards
+/// scroll, and its cards in a list of their own.
 final class KanbanColumnView extends StatefulWidget {
   /// Column [index], [column] of the board.
   const new({
@@ -157,13 +157,25 @@ final class KanbanColumnViewState extends State<KanbanColumnView> {
               name: column.name,
               count: cards.length,
             ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(8, 2, 8, 0),
+              child: KanbanAddField(
+                label: AppStrings.kanbanAddCard,
+                hint: AppStrings.kanbanCardHint,
+                keepOpen: true,
+                onAdd: (title) {
+                  _scrollToEnd = true;
+                  widget.controller.edits.addCard(widget.index, title);
+                },
+              ),
+            ),
             Expanded(
               child: cards.isEmpty
                   ? _empty()
                   : ListView.builder(
                       key: _listKey,
                       controller: _scroll,
-                      padding: const EdgeInsets.fromLTRB(8, 6, 8, 0),
+                      padding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
                       itemCount: cards.length,
                       itemBuilder: (context, i) => KanbanCardTile(
                         key: ValueKey(i),
@@ -177,18 +189,6 @@ final class KanbanColumnViewState extends State<KanbanColumnView> {
                       ),
                     ),
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(8, 2, 8, 8),
-              child: KanbanAddField(
-                label: AppStrings.kanbanAddCard,
-                hint: AppStrings.kanbanCardHint,
-                keepOpen: true,
-                onAdd: (title) {
-                  _scrollToEnd = true;
-                  widget.controller.edits.addCard(widget.index, title);
-                },
-              ),
-            ),
           ],
         ),
       ),
@@ -199,7 +199,7 @@ final class KanbanColumnViewState extends State<KanbanColumnView> {
   Widget _empty() {
     return Padding(
       key: _listKey,
-      padding: const EdgeInsets.fromLTRB(8, 6, 8, 0),
+      padding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
       child: ValueListenableBuilder<DropSpot?>(
         valueListenable: widget.controller.spot,
         builder: (context, spot, _) => Align(

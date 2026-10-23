@@ -44,6 +44,13 @@ class FlutterWindow : public Win32Window {
   // client origin.
   void SetCaptionButtons(const flutter::EncodableMap& buttons);
 
+  // Gives the foreground to the window under |window| in the z-order, as
+  // Windows does when a window closes — or to the desktop when none can take
+  // it. |window| has just been hidden and is still the foreground window: a
+  // window nobody can see would otherwise keep the keyboard and the
+  // activation, and on Windows 10 the other programs stop taking clicks.
+  static void HandOverForeground(HWND window);
+
   // The project to run.
   flutter::DartProject project_;
 

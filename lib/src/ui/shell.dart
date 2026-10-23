@@ -5456,6 +5456,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
                     // their sheets.
                     outlineInDock: _wide && !_inZen,
                     spellCheckInDock: _wide && !_inZen,
+                    relatedInDock: _wide && !_inZen && _dockShown,
                     typewriter: _editorSettings.typewriter,
                     cascadeChecklist: _editorSettings.cascadeChecklist,
                     frontmatterPanel: _editorSettings.frontmatterPanel,

@@ -26,6 +26,9 @@ final class _Note implements NoteViewHandle {
   final String notePath;
 
   @override
+  String? get notePathInLibrary => notePath;
+
+  @override
   dynamic noSuchMethod(Invocation invocation) =>
       throw UnimplementedError('${invocation.memberName}');
 }

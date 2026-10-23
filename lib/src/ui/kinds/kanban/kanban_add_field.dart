@@ -59,7 +59,14 @@ final class _KanbanAddFieldState extends State<KanbanAddField> {
     if (_open && !_focus.hasFocus) _close(add: true);
   }
 
-  void _openField() => setState(() => _open = true);
+  void _openField() {
+    setState(() => _open = true);
+    // The tap that opens the field is still settling its own focus; asking
+    // after the frame is what makes the field take it on the first click.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && _open) _focus.requestFocus();
+    });
+  }
 
   void _close({required bool add}) {
     if (!_open) return;
@@ -126,7 +133,6 @@ final class _KanbanAddFieldState extends State<KanbanAddField> {
         key: const Key('kanban-add-field'),
         controller: _text,
         focusNode: _focus,
-        autofocus: true,
         decoration: InputDecoration(
           isDense: true,
           filled: true,

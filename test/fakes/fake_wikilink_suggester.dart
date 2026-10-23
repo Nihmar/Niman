@@ -4,6 +4,7 @@
 import 'dart:async';
 
 import 'package:niman/src/links/suggester.dart';
+import 'package:path/path.dart' as p;
 
 /// A canned [WikilinkSuggester] for the panel's widget tests.
 final class FakeWikilinkSuggester implements WikilinkSuggester {
@@ -116,6 +117,8 @@ final class FakeWikilinkSuggester implements WikilinkSuggester {
 
   @override
   Future<String> targetOf(String path) async {
+    // A target is made from the library-relative path, as the real one is.
+    if (p.isAbsolute(path)) throw ArgumentError.value(path, 'path');
     final name = path.split('/').last;
     return name.toLowerCase().endsWith('.md')
         ? name.substring(0, name.length - 3)
