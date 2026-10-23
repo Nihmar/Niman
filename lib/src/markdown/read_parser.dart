@@ -39,6 +39,15 @@ final class ReadParser {
   /// reading does not scan for them again.
   DocumentScope? scope;
 
+  /// The definitions of the note whose pieces this parser reads, or null.
+  ///
+  /// A piece of a note — a kanban card's text, drawn on its own — is a
+  /// buffer of its own, and a reference link or a footnote in it is defined
+  /// somewhere else in the note. When this is set, every buffer is read
+  /// with these definitions instead of a scan of its own, and the footnotes
+  /// are numbered over the note, not over the piece.
+  DocumentScope? shared;
+
   /// The numbers the footnotes are cited as, for [_numbersOf]'s scope.
   Map<String, int> _numbers = const <String, int>{};
   DocumentScope? _numbered;
@@ -95,6 +104,8 @@ final class ReadParser {
 
   /// The document-scoped definitions, scanned once per revision.
   DocumentScope _scopeOf(SourceBuffer buffer) {
+    final note = shared;
+    if (note != null) return note;
     final cached = scope;
     if (cached != null &&
         identical(cached.source, buffer) &&
@@ -106,6 +117,8 @@ final class ReadParser {
 
   /// The number each footnote of [scope] is cited as — its place in the
   /// section, counting from one — by its normalized label.
+  Map<String, int> footnoteNumbersOf(DocumentScope scope) => _numbersOf(scope);
+
   Map<String, int> _numbersOf(DocumentScope scope) {
     if (identical(_numbered, scope)) return _numbers;
     _numbered = scope;

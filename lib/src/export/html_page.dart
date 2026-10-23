@@ -4,20 +4,29 @@
 library;
 
 import 'package:niman/src/export/html_text.dart';
+import 'package:niman/src/export/kanban_sheet.dart';
+import 'package:niman/src/export/kanban_style.dart';
 import 'package:niman/src/export/slide_page.dart';
 
 /// A whole page titled [title] around [body]; [fontFaces] are the maths
 /// fonts, when a formula on it needs them, and [style] what a page of its
-/// own kind adds after the page's (the slides' sheets, #534).
+/// own kind adds after the page's (the slides' sheets, #534). [board] is
+/// the sheet a kanban board on the page prints on (#1170), null for a page
+/// with none: the board's style comes with it, and a landscape one asks the
+/// printer for its sheet.
 String htmlPage({
   required String title,
   required String body,
   String? fontFaces,
   String language = 'en',
   String? style,
+  KanbanSheet? board,
 }) {
   final fonts = fontFaces == null ? '' : '<style>$fontFaces</style>\n';
   final own = style == null ? '' : '<style>$style</style>\n';
+  final boardStyle = board == null
+      ? ''
+      : '<style>${kanbanPageStyle(board)}</style>\n';
   return '<!DOCTYPE html>\n'
       '<html lang="${escapeAttribute(language)}">\n'
       '<head>\n'
@@ -26,6 +35,7 @@ String htmlPage({
       '<meta name="generator" content="Niman">\n'
       '<title>${escapeHtml(title)}</title>\n'
       '<style>$pageStyle</style>\n'
+      '$boardStyle'
       '$own'
       '$fonts'
       '</head>\n'

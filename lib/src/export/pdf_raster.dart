@@ -13,7 +13,8 @@
 /// falls between two lines of text ([rasterBreaks]), so a page never cuts
 /// one in half. A picture taller than a page has nowhere to break and is
 /// cut. A machine with an engine prints the page's HTML instead, where the
-/// print CSS keeps blocks whole.
+/// print CSS keeps blocks whole. A kanban board is drawn by
+/// `pdf_raster_board.dart` instead, which pages it card by card.
 library;
 
 import 'dart:math' as math;
@@ -21,20 +22,21 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
+import 'package:niman/src/export/kanban_sheet.dart';
 import 'package:niman/src/export/pdf_breaks.dart';
 import 'package:niman/src/export/pdf_printer.dart';
+import 'package:niman/src/export/pdf_raster_board.dart';
+import 'package:niman/src/export/pdf_raster_support.dart';
 import 'package:niman/src/export/pdf_writer.dart';
 import 'package:niman/src/export/slide_page.dart';
+import 'package:niman/src/kanban/kanban_board.dart';
 import 'package:niman/src/markdown/read_parser.dart';
 import 'package:niman/src/markdown/render/markdown_export.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/preview/math_cache.dart';
 
-/// One logical pixel in PDF points: the layout runs at 96 per inch, the
-/// writer's unit is 1/72 inch, so the same sheet is smaller on the page.
-const double pointsPerPixel = 72 / 96;
+export 'package:niman/src/export/pdf_raster_support.dart' show pointsPerPixel;
 
 /// A4's width in the logical pixels a page is laid out in (96 per inch).
 const double a4WidthPx = a4Width / pointsPerPixel;
@@ -55,6 +57,10 @@ const double pdfPageMarginPx = 18 * 96 / 25.4;
 /// [onProgress] reports how many of the note's pages have been drawn, and
 /// [isCancelled] is asked between pages: a cancel stops before the next
 /// page and throws [PdfExportCancelled].
+///
+/// [board], the kanban board the note is (#1170), is drawn as a board on
+/// the sheet its columns fit, A4 landscape or portrait, instead of the
+/// note's Markdown: see [rasterBoardPdf].
 Future<Uint8List> rasterPdf({
   required String text,
   required MarkdownTheme theme,
@@ -66,7 +72,26 @@ Future<Uint8List> rasterPdf({
   double pageHeight = a4HeightPx,
   double margin = pdfPageMarginPx,
   double pixelRatio = 2,
+  KanbanBoard? board,
 }) async {
+  if (board != null && board.columns.isNotEmpty) {
+    final sheet = kanbanSheetFor(board.columns.length);
+    final landscape = sheet == KanbanSheet.landscape;
+    return await rasterBoardPdf(
+      board: board,
+      sheet: sheet,
+      theme: theme,
+      mathCache: mathCache,
+      // A4 on its side: the sheet's short side is the page's height.
+      pageWidth: landscape ? math.max(pageWidth, pageHeight) : pageWidth,
+      pageHeight: landscape ? math.min(pageWidth, pageHeight) : pageHeight,
+      margin: margin,
+      images: images,
+      onProgress: onProgress,
+      isCancelled: isCancelled,
+      pixelRatio: pixelRatio,
+    );
+  }
   final contentWidth = pageWidth - 2 * margin;
   final contentHeight = pageHeight - 2 * margin;
   // Decoded before the tree is built: the offscreen layout has no frame
@@ -76,14 +101,14 @@ Future<Uint8List> rasterPdf({
   final maxPicture = math.max(1, (contentWidth * pixelRatio).round());
   for (final entry in (images ?? const <String, Uint8List>{}).entries) {
     try {
-      decoded[entry.key] = await _decode(entry.value, maxPicture);
+      decoded[entry.key] = await decodePicture(entry.value, maxPicture);
     } on Object {
       // A picture the engine cannot decode is left as the note's own
       // words, not made the export's failure.
     }
   }
   final key = GlobalKey();
-  final layout = _OffscreenLayout(
+  final layout = OffscreenLayout(
     width: contentWidth,
     height: pageHeight,
     child: KeyedSubtree(
@@ -131,7 +156,7 @@ Future<Uint8List> rasterPdf({
         try {
           // Compressed into the file here: the fallback holds one page's
           // pixels at a time, not every page of the note (M6).
-          writer.addPage(await _pageImage(image));
+          writer.addPage(await pageImage(image));
         } finally {
           image.dispose();
         }
@@ -167,7 +192,7 @@ Future<Uint8List> rasterSlidesPdf({
   final decoded = <String, ui.Image>{};
   for (final entry in (images ?? const <String, Uint8List>{}).entries) {
     try {
-      decoded[entry.key] = await _decode(
+      decoded[entry.key] = await decodePicture(
         entry.value,
         (width * pixelRatio).round(),
       );
@@ -183,7 +208,7 @@ Future<Uint8List> rasterSlidesPdf({
     onProgress?.call(0, slides.length);
     for (var index = 0; index < slides.length; index++) {
       if (isCancelled?.call() ?? false) throw const PdfExportCancelled();
-      final layout = _OffscreenLayout(
+      final layout = OffscreenLayout(
         width: width,
         height: height,
         child: MarkdownExportView(
@@ -204,7 +229,7 @@ Future<Uint8List> rasterSlidesPdf({
             pixelRatio: pixelRatio,
           );
           try {
-            writer.addPage(await _pageImage(image));
+            writer.addPage(await pageImage(image));
           } finally {
             image.dispose();
           }
@@ -222,114 +247,4 @@ Future<Uint8List> rasterSlidesPdf({
       image.dispose();
     }
   }
-}
-
-/// [bytes] as a picture the export can draw: never wider than the page
-/// needs, so a phone photo does not decode to a screenful of pixels per
-/// pixel of the note.
-Future<ui.Image> _decode(Uint8List bytes, int maxWidth) async {
-  final codec = await ui.instantiateImageCodec(
-    bytes,
-    targetWidth: maxWidth,
-    allowUpscaling: false,
-  );
-  try {
-    final frame = await codec.getNextFrame();
-    return frame.image;
-  } finally {
-    codec.dispose();
-  }
-}
-
-/// [image] as RGB over white: a page has no transparency to keep.
-Future<PdfPageImage> _pageImage(ui.Image image) async {
-  final data = await image.toByteData(
-    format: ui.ImageByteFormat.rawStraightRgba,
-  );
-  if (data == null) {
-    throw StateError('the page could not be read back');
-  }
-  final rgba = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
-  final rgb = Uint8List(image.width * image.height * 3);
-  for (var at = 0, out = 0; at + 3 < rgba.length; at += 4, out += 3) {
-    final alpha = rgba[at + 3];
-    final white = 255 - alpha;
-    rgb[out] = _clamp(rgba[at] * alpha ~/ 255 + white);
-    rgb[out + 1] = _clamp(rgba[at + 1] * alpha ~/ 255 + white);
-    rgb[out + 2] = _clamp(rgba[at + 2] * alpha ~/ 255 + white);
-  }
-  return PdfPageImage(width: image.width, height: image.height, rgb: rgb);
-}
-
-int _clamp(int value) => value < 0 ? 0 : (value > 255 ? 255 : value);
-
-/// The offscreen pipeline `markdown_export.dart` leaves to its caller: a
-/// windowless `RenderView` whose child gets the width and all the height it
-/// asks for.
-final class _OffscreenLayout {
-  new({required this.child, required this.width, required this.height});
-
-  final Widget child;
-  final double width;
-  final double height;
-
-  final PipelineOwner _pipeline = PipelineOwner();
-  final FocusManager _focus = FocusManager();
-  late final BuildOwner _build = BuildOwner(focusManager: _focus);
-  late final RenderView _view = RenderView(
-    view: _platformView(ui.PlatformDispatcher.instance),
-    configuration: ViewConfiguration(
-      logicalConstraints: BoxConstraints(minWidth: width, maxWidth: width),
-    ),
-  );
-
-  /// Lays [child] out and answers its render box.
-  RenderBox layOut() {
-    _pipeline.rootNode = _view;
-    _view.prepareInitialFrame();
-    RenderObjectToWidgetAdapter<RenderBox>(
-      container: _view,
-      // The tree is offscreen, so the inherited widgets a window would
-      // bring — the text direction, the text scaling — are placed here.
-      child: Directionality(
-        textDirection: TextDirection.ltr,
-        child: MediaQuery(
-          // The page in the reader's terms: the height cap a picture takes
-          // its half of needs a surface to measure against, and the tree
-          // has none of its own.
-          data: MediaQueryData(
-            size: Size(width, height),
-            textScaler: TextScaler.noScaling,
-          ),
-          child: child,
-        ),
-      ),
-    ).attachToRenderTree(_build);
-    _pipeline
-      ..flushLayout()
-      ..flushCompositingBits();
-    final box = _view.child;
-    if (box == null) {
-      throw StateError('the note did not lay out');
-    }
-    return box;
-  }
-
-  /// Lets the tree and its owners go.
-  void dispose() {
-    _pipeline.rootNode = null;
-    _build.finalizeTree();
-    _focus.dispose();
-  }
-}
-
-/// The platform view the offscreen tree runs on, or a failure that says
-/// what is missing: `implicitView!` died with a null-check error that
-/// names neither the view nor the export (P5).
-ui.FlutterView _platformView(ui.PlatformDispatcher dispatcher) {
-  final view = dispatcher.implicitView;
-  if (view == null) {
-    throw StateError('the note cannot be laid out without a platform view');
-  }
-  return view;
 }

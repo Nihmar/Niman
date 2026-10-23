@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:niman/src/kanban/card_text.dart';
 import 'package:niman/src/kanban/kanban_card.dart';
 import 'package:niman/src/ui/kinds/kanban/kanban_card_chips.dart';
-import 'package:niman/src/ui/kinds/kanban/kanban_card_text.dart';
 import 'package:niman/src/ui/kinds/kanban/kanban_palette.dart';
 
 /// What a card looks like (#1167): its box, [title] (the text, or the field

@@ -48,6 +48,7 @@ Future<ExportPayload> exportNoteEpub({
   LinkSource? linkSource,
   Directory? scratch,
   bool Function()? isCancelled,
+  bool kanban = false,
 }) async {
   if (isCancelled?.call() ?? false) throw const EpubExportCancelled();
   final dir = scratch ?? await Directory.systemTemp.createTemp('niman-epub-');
@@ -87,7 +88,12 @@ Future<ExportPayload> exportNoteEpub({
         );
         if (href != null) images[entry.key] = href;
       }
-      final source = NoteHtmlSource(text: text, title: title, images: images);
+      final source = NoteHtmlSource(
+        text: text,
+        title: title,
+        images: images,
+        kanban: kanban,
+      );
       final chapter = await ExportSources.xhtml(source);
       if (isCancelled?.call() ?? false) throw const EpubExportCancelled();
       // A diagnostic for a formula that never shows (#303): what the chapter
@@ -102,6 +108,7 @@ Future<ExportPayload> exportNoteEpub({
         body: chapter.body,
         fontFaces: chapter.fontFaces,
         hasSvg: chapter.hasSvg,
+        hasBoard: chapter.hasBoard,
       );
     } finally {
       await book.close();

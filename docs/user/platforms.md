@@ -16,7 +16,9 @@ surface: columns side by side from a tablet's width up, one column at a
 time under tabs on a phone, where a card moves from a sheet instead of
 being dragged across columns (#1154). A touch screen on a desktop moves a
 card with its menu or the keys; a finger's drag there would take the
-column's scroll.
+column's scroll. A board exports as a board on every platform (#1170): a
+wide one prints on A4 landscape through Edge or Chromium, Android's
+WebView and WebKit alike, and through the drawn fallback.
 
 Slide notes ([slides](slides.md)) present on every platform, the screen
 kept on while they do: Android through the window's keep-screen-on flag,

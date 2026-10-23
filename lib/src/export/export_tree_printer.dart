@@ -19,14 +19,23 @@ import 'package:path/path.dart' as p;
 /// thread, so an export stood still until something was clicked. The UI
 /// isolate's call is the one a single note's export makes.
 final class TreeExportPrint {
-  /// Asks for [htmlPath] printed into [pdfPath], answered on [reply].
-  const new(this.htmlPath, this.pdfPath, this.reply);
+  /// Asks for [htmlPath] printed into [pdfPath] on [paper], answered on
+  /// [reply].
+  const new(
+    this.htmlPath,
+    this.pdfPath,
+    this.reply, {
+    this.paper = PdfPaper.a4,
+  });
 
   /// The page.
   final String htmlPath;
 
   /// Where the PDF goes.
   final String pdfPath;
+
+  /// The sheet it is printed on: a board's is not a note's (#1170).
+  final PdfPaper paper;
 
   /// Where the outcome goes back to.
   final SendPort reply;
@@ -49,7 +58,9 @@ final class _RelayPdfPrinter implements PdfPrinter {
   }) async {
     final reply = ReceivePort();
     try {
-      _parent.send(TreeExportPrint(htmlPath, pdfPath, reply.sendPort));
+      _parent.send(
+        TreeExportPrint(htmlPath, pdfPath, reply.sendPort, paper: paper),
+      );
       return await reply.first as PdfOutcome;
     } finally {
       reply.close();
@@ -69,8 +80,8 @@ final class TreeExportNoEngine implements Exception {
 
 /// One page at a time, through the machine's printer.
 abstract final class ExportTreePrinter {
-  /// Prints [page] with the machine's printer and adds the PDF to [encoder]
-  /// as `<stem>.pdf`.
+  /// Prints [page] on [paper] with the machine's printer and adds the PDF
+  /// to [encoder] as `<stem>.pdf`.
   ///
   /// [engine] is the desktop browser (Edge, Chromium); null where the
   /// system WebView prints (Android, a Mac's WebKit). It is the caller's
@@ -87,6 +98,7 @@ abstract final class ExportTreePrinter {
     String page,
     String stem, {
     required SendPort parent,
+    PdfPaper paper = PdfPaper.a4,
   }) async {
     final htmlPath = p.join(scratch.path, 'page.html');
     final pdfPath = p.join(scratch.path, 'page.pdf');
@@ -101,7 +113,7 @@ abstract final class ExportTreePrinter {
     final printer = engine == null
         ? _RelayPdfPrinter(parent)
         : ProcessPdfPrinter(engine: engine, run: runner ?? runEngine);
-    final outcome = await printer.print(htmlPath, pdfPath);
+    final outcome = await printer.print(htmlPath, pdfPath, paper: paper);
     switch (outcome) {
       case PdfPrinted():
         await encoder.addFile(File(pdfPath), '$stem.pdf');

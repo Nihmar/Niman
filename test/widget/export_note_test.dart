@@ -56,6 +56,7 @@ void main() {
           required language,
           linkSource,
           isCancelled,
+          kanban = false,
         }) async => (
           name: 'note.epub',
           bytes: Uint8List(0),
@@ -280,6 +281,7 @@ void main() {
           required language,
           linkSource,
           isCancelled,
+          kanban = false,
         }) async {
           await release.future;
           return (
@@ -313,6 +315,7 @@ void main() {
           required language,
           linkSource,
           isCancelled,
+          kanban = false,
         }) async {
           await release.future;
           if (isCancelled?.call() ?? false) throw const EpubExportCancelled();

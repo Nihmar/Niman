@@ -13,6 +13,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/language.dart';
+import 'package:niman/src/core/settings/library_features.dart';
 import 'package:niman/src/core/text_scale.dart';
 import 'package:niman/src/export/epub_note.dart';
 import 'package:niman/src/export/export_files.dart';
@@ -92,6 +93,9 @@ final class ShellExportFlow {
 
   /// The note on screen, or null.
   final String? Function() shownNote;
+
+  /// Whether the Kanban feature is on (#1170): a board is exported as one.
+  bool get _kanban => controller.features.value.isOn(LibraryFeature.kindKanban);
 
   /// Exports the note at [path] as a file (#24): asks which format, reads
   /// the note (the buffer's edits first) and asks where to save it.
@@ -201,6 +205,7 @@ final class ShellExportFlow {
             slides: slidesPdf
                 ? [for (final slide in splitSlides(text)) slide.markdown]
                 : null,
+            kanban: _kanban,
           );
           payload = printed.payload;
           selectable = printed.selectable;
@@ -242,6 +247,7 @@ final class ShellExportFlow {
             language: AppLanguages.resolved.id,
             linkSource: linkSource(),
             isCancelled: () => cancelled,
+            kanban: _kanban,
           );
         } on EpubExportCancelled {
           // The dialog closed itself; a cancel says nothing.
@@ -262,6 +268,7 @@ final class ShellExportFlow {
               ? ExportFileFormat.markdown
               : ExportFileFormat.html,
           linkSource: linkSource(),
+          kanban: _kanban,
         );
       }
       final String? place;
@@ -391,6 +398,7 @@ final class ShellExportFlow {
         format: format,
         language: AppLanguages.resolved.id,
         engine: engine,
+        kanban: _kanban,
       );
     } on Object catch (error) {
       if (context.mounted) {

@@ -9,8 +9,9 @@
   /// The page is already HTML: an offscreen `WKWebView` lays it out and
   /// WebKit's print operation, saving to the file with no panel, paginates
   /// it — real text, which selects and searches. `createPDF` would give one
-  /// endless page instead. A4 with an 18 mm margin, or a 16:9 sheet a slide
-  /// with none (#534).
+  /// endless page instead. A4 with an 18 mm margin, A4 landscape with the same
+  /// one for a wide kanban board (#1170), or a 16:9 sheet a slide with none
+  /// (#534).
   ///
   /// One print at a time: a second call while one runs is refused
   /// (`print-busy`) rather than raced, and a watchdog answers a page whose
@@ -22,8 +23,22 @@
     /// A4, in points.
     static let a4 = NSSize(width: 595.28, height: 841.89)
 
+    /// A4 on its side, in points: a wide kanban board's sheet (#1170).
+    static let a4Landscape = NSSize(width: 841.89, height: 595.28)
+
     /// A slide's sheet: 10 × 5.625 in, 16:9.
     static let slide = NSSize(width: 720, height: 405)
+
+    /// The sheet the channel's `paper` names, and the margin it prints with:
+    /// a slide edge to edge, any other sheet with the note's margin. A name
+    /// this side does not know is A4, as a channel older than it was.
+    static func sheet(_ paper: String) -> (size: NSSize, margin: CGFloat) {
+      switch paper {
+      case "slides": return (slide, 0)
+      case "a4Landscape": return (a4Landscape, margin)
+      default: return (a4, margin)
+      }
+    }
 
     /// Longer than a slow note takes to lay out, shorter than the Dart
     /// side's own timeout.
@@ -34,7 +49,7 @@
     private var pending: FlutterResult?
     private var watchdog: DispatchWorkItem?
     private var pdfPath = ""
-    private var slides = false
+    private var paper = "a4"
 
     func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
       switch call.method {
@@ -50,7 +65,7 @@
           result(FlutterError(code: "print-busy", message: "another page is being printed", details: nil))
           return
         }
-        print(htmlPath: htmlPath, pdfPath: pdfPath, slides: args["paper"] as? String == "slides", result: result)
+        print(htmlPath: htmlPath, pdfPath: pdfPath, paper: args["paper"] as? String ?? "a4", result: result)
       case "cancel":
         // The export was cancelled: the waiting print is answered now, not
         // when the watchdog would.
@@ -61,17 +76,18 @@
       }
     }
 
-    private func print(htmlPath: String, pdfPath: String, slides: Bool, result: @escaping FlutterResult) {
+    private func print(htmlPath: String, pdfPath: String, paper: String, result: @escaping FlutterResult) {
       pending = result
       self.pdfPath = pdfPath
-      self.slides = slides
+      self.paper = paper
       let timer = DispatchWorkItem { [weak self] in
         self?.answer(FlutterError(code: "print-timeout", message: "the page did not finish", details: nil))
       }
       watchdog = timer
       DispatchQueue.main.asyncAfter(deadline: .now() + Self.watchdogSeconds, execute: timer)
 
-      let width = (slides ? Self.slide.width : Self.a4.width - 2 * Self.margin)
+      let sheet = Self.sheet(paper)
+      let width = sheet.size.width - 2 * sheet.margin
       let frame = NSRect(x: 0, y: 0, width: width, height: 1000)
       let view = WKWebView(frame: frame)
       view.navigationDelegate = self
@@ -92,8 +108,9 @@
       guard webView === self.webView, let window else { return }
       let info = NSPrintInfo(dictionary: [.jobSavingURL: URL(fileURLWithPath: pdfPath)])
       info.jobDisposition = .save
-      info.paperSize = slides ? Self.slide : Self.a4
-      let margin = slides ? 0 : Self.margin
+      let sheet = Self.sheet(paper)
+      info.paperSize = sheet.size
+      let margin = sheet.margin
       info.topMargin = margin
       info.bottomMargin = margin
       info.leftMargin = margin

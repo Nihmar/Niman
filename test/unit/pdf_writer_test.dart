@@ -169,4 +169,21 @@ void main() {
     // The page is the one that was asked for, in the writer's own unit.
     expect(latin1.decode(pdf), contains('/MediaBox [0 0 200 200]'));
   });
+
+  test('a landscape A4 sheet is 842 by 595 points (#1170)', () {
+    final page = PdfPageImage(width: 2, height: 2, rgb: Uint8List(12));
+    final pdf = writePdf(
+      <PdfPageImage>[page],
+      // A4 on its side: the long edge is the width.
+      pageWidth: a4Height,
+      pageHeight: a4Width,
+      margin: 51,
+    );
+    expect(latin1.decode(pdf), contains('/MediaBox [0 0 841.89 595.28]'));
+    // The portrait sheet is untouched by it.
+    expect(
+      latin1.decode(writePdf(<PdfPageImage>[page])),
+      contains('/MediaBox [0 0 595.28 841.89]'),
+    );
+  });
 }

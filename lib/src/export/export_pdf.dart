@@ -12,6 +12,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/export/export_board.dart';
 import 'package:niman/src/export/export_note.dart';
 import 'package:niman/src/export/export_sources.dart';
 import 'package:niman/src/export/pdf_printer.dart';
@@ -59,7 +60,8 @@ typedef PdfProgressListener = void Function(PdfExportProgress progress);
 /// [PdfExportCancelled] rather than a file.
 ///
 /// [slides], a slides note's slides as Markdown (#534), prints them one
-/// 16:9 sheet each instead of the note on A4.
+/// 16:9 sheet each instead of the note on A4. [kanban] says the Kanban
+/// feature is on (#1170): a board is then drawn as one.
 Future<PdfExport> exportNotePdf({
   required String text,
   required String title,
@@ -74,6 +76,7 @@ Future<PdfExport> exportNotePdf({
   PdfProgressListener? onProgress,
   bool Function()? isCancelled,
   List<String>? slides,
+  bool kanban = false,
 }) async {
   final chosen = printer ?? ProcessPdfPrinter();
   // Nothing to print with: the note is drawn, and its page — the reads,
@@ -90,6 +93,7 @@ Future<PdfExport> exportNotePdf({
       onProgress: onProgress,
       isCancelled: isCancelled,
       slides: slides,
+      kanban: kanban,
     );
   }
   final source = await ExportSources.forPrint(
@@ -98,21 +102,27 @@ Future<PdfExport> exportNotePdf({
     notePath: p.join(root, path),
     root: root,
     linkSource: linkSource,
+    kanban: kanban,
   );
+  // The sheet follows the page: slides on their own, a board on the sheet
+  // its columns fit, any other note on A4 (#1170).
   final page = slides == null
-      ? await ExportSources.page(source, language: language)
-      : await ExportSources.slidesPage(source, slides, language: language);
+      ? await ExportSources.printable(source, language: language)
+      : (
+          html: await ExportSources.slidesPage(
+            source,
+            slides,
+            language: language,
+          ),
+          paper: PdfPaper.slides,
+        );
   final dir = scratch ?? await Directory.systemTemp.createTemp('niman-pdf-');
   try {
     final htmlPath = p.join(dir.path, 'page.html');
     final pdfPath = p.join(dir.path, 'page.pdf');
-    await File(htmlPath).writeAsString(page);
+    await File(htmlPath).writeAsString(page.html);
     onProgress?.call(const PdfExportProgress(stage: PdfExportStage.printing));
-    final outcome = await chosen.print(
-      htmlPath,
-      pdfPath,
-      paper: slides == null ? PdfPaper.a4 : PdfPaper.slides,
-    );
+    final outcome = await chosen.print(htmlPath, pdfPath, paper: page.paper);
     // A cancel during the print cannot stop a running engine, but its
     // answer is not the user's: nothing is written.
     if (isCancelled?.call() ?? false) throw const PdfExportCancelled();
@@ -136,6 +146,7 @@ Future<PdfExport> exportNotePdf({
           onProgress: onProgress,
           isCancelled: isCancelled,
           slides: slides,
+          kanban: kanban,
         );
       case PdfFailed(:final message):
         _log.warning('the PDF engine failed ($message): drawing the note');
@@ -154,6 +165,7 @@ Future<PdfExport> exportNotePdf({
           onProgress: onProgress,
           isCancelled: isCancelled,
           slides: slides,
+          kanban: kanban,
         );
     }
   } finally {
@@ -181,6 +193,7 @@ Future<PdfExport> _draw({
   PdfProgressListener? onProgress,
   bool Function()? isCancelled,
   List<String>? slides,
+  bool kanban = false,
 }) async {
   if (theme == null || mathCache == null) throw const NoPdfEngine();
   // The pictures are read here, off the UI isolate, and drawn by the
@@ -210,6 +223,7 @@ Future<PdfExport> _draw({
           images: images,
           onProgress: drawn(onProgress),
           isCancelled: isCancelled,
+          board: exportedBoard(text, kanban: kanban),
         )
       : await rasterSlidesPdf(
           slides: slides,

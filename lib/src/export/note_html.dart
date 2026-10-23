@@ -10,9 +10,14 @@
 /// export points elsewhere.
 library;
 
+import 'package:niman/src/export/export_board.dart';
 import 'package:niman/src/export/export_hooks.dart';
+import 'package:niman/src/export/kanban_html.dart';
+import 'package:niman/src/export/kanban_sheet.dart';
 import 'package:niman/src/export/math_svg.dart';
 import 'package:niman/src/export/note_html_source.dart';
+import 'package:niman/src/kanban/kanban_board.dart';
+import 'package:niman/src/markdown/html/html_hooks.dart';
 import 'package:niman/src/markdown/html/tree_html.dart';
 
 /// Builds one page's body.
@@ -28,8 +33,31 @@ final class NoteHtml {
   final MathSvg _math;
   late final ExportHooks _hooks;
 
+  /// The board the note is, or null for any other note (#1170): a
+  /// `type: kanban` note with the Kanban feature on. Read once.
+  late final KanbanBoard? _board = exportedBoard(
+    source.text,
+    kanban: source.kanban,
+  );
+
   /// The note's body as HTML.
-  String body() => TreeHtml(source.text, hooks: _hooks).render();
+  String body() => _render(_hooks);
+
+  /// The sheet a printed page of this note wants, or null when it is no
+  /// board, or a board with no column: the plain A4 page (#1170).
+  KanbanSheet? get boardSheet {
+    final columns = _board?.columns.length ?? 0;
+    return columns == 0 ? null : kanbanSheetFor(columns);
+  }
+
+  /// [source] written with [hooks]: a board by [KanbanHtml], any other note
+  /// by the writer alone.
+  String _render(HtmlHooks hooks) {
+    final board = _board;
+    return board == null
+        ? TreeHtml(source.text, hooks: hooks).render()
+        : KanbanHtml(board, hooks).render();
+  }
 
   /// The `@font-face` rules the body's formulas need, or null.
   String? get fontFaces => _math.fontFaces;
@@ -43,7 +71,7 @@ final class NoteHtml {
   /// page is built (#24). Nothing is typeset for it.
   ({List<String> images, List<String> embeds}) pictureTargets() {
     final targets = PictureTargets();
-    TreeHtml(source.text, hooks: targets).render();
+    _render(targets);
     return (images: targets.images, embeds: targets.embeds);
   }
 }
