@@ -173,53 +173,46 @@ void main() {
       }
     });
 
-    test('prints a board on a landscape sheet', () async {
-      final engine = await findPdfEngine();
-      if (engine == null) {
-        markTestSkipped('no browser engine on this machine');
-        return;
-      }
-      final dir = await Directory.systemTemp.createTemp('niman_kanban_live_');
-      addTearDown(() async {
-        try {
-          await dir.delete(recursive: true);
-        } on FileSystemException {
-          // An engine that is still winding down holds its profile.
+    // A real engine, named by its path: what a machine has on it is not a
+    // test's to guess, and a runner's browser may not print at all.
+    final engine = Platform.environment['NIMAN_PDF_ENGINE'];
+    test(
+      'live: prints a board on a landscape sheet',
+      skip: engine == null ? 'NIMAN_PDF_ENGINE is not set' : false,
+      () async {
+        final dir = await Directory.systemTemp.createTemp('niman_kanban_live_');
+        addTearDown(() => dir.delete(recursive: true));
+        var run = 0;
+        Future<(double, double)?> boxOf(String text) async {
+          run++;
+          final htmlPath = p.join(dir.path, 'page$run.html');
+          final pdfPath = p.join(dir.path, 'page$run.pdf');
+          final out = await ExportSources.printable(
+            NoteHtmlSource(text: text, title: 't', kanban: true),
+            language: 'en',
+          );
+          await File(htmlPath).writeAsString(out.html);
+          final outcome = await ProcessPdfPrinter(engine: engine)
+              .print(htmlPath, pdfPath, paper: out.paper);
+          // The engine has written the whole file by the time it exits.
+          expect(
+            outcome,
+            isA<PdfPrinted>(),
+            reason: outcome is PdfFailed ? outcome.message : null,
+          );
+          return _mediaBox(await File(pdfPath).readAsBytes());
         }
-      });
-      var run = 0;
-      Future<(double, double)?> boxOf(String text) async {
-        run++;
-        final htmlPath = p.join(dir.path, 'page$run.html');
-        final pdfPath = p.join(dir.path, 'page$run.pdf');
-        final out = await ExportSources.printable(
-          NoteHtmlSource(text: text, title: 't', kanban: true),
-          language: 'en',
-        );
-        await File(htmlPath).writeAsString(out.html);
-        final outcome = await ProcessPdfPrinter(engine: engine)
-            .print(htmlPath, pdfPath, paper: out.paper);
-        // Edge on Windows hands its work to a process that outlives the
-        // one launched: the file lands a moment after the launcher exits.
-        for (var wait = 0; wait < 100; wait++) {
-          if (outcome is PdfPrinted || (await fileSize(pdfPath) ?? 0) > 0) {
-            break;
-          }
-          await Future<void>.delayed(const Duration(milliseconds: 200));
-        }
-        // Whole, not half written.
-        await Future<void>.delayed(const Duration(milliseconds: 500));
-        return _mediaBox(await File(pdfPath).readAsBytes());
-      }
 
-      final landscape = await boxOf(_columns(4));
-      expect(landscape, isNotNull);
-      expect(landscape!.$1, closeTo(842, 2));
-      expect(landscape.$2, closeTo(595, 2));
-      final portrait = await boxOf(_columns(5));
-      expect(portrait!.$1, closeTo(595, 2));
-      expect(portrait.$2, closeTo(842, 2));
-    }, timeout: const Timeout(Duration(minutes: 3)));
+        final landscape = await boxOf(_columns(4));
+        expect(landscape, isNotNull);
+        expect(landscape!.$1, closeTo(842, 2));
+        expect(landscape.$2, closeTo(595, 2));
+        final portrait = await boxOf(_columns(5));
+        expect(portrait!.$1, closeTo(595, 2));
+        expect(portrait.$2, closeTo(842, 2));
+      },
+      timeout: const Timeout(Duration(minutes: 3)),
+    );
   });
 
   group('the system WebView', () {
