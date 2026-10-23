@@ -1,5 +1,6 @@
 import 'package:flutter/painting.dart';
 import 'package:highlight/highlight.dart' show Node, highlight;
+import 'package:niman/src/preview/app_grammars.dart';
 
 /// A run of a code line's text and how it is coloured, its offsets the
 /// line's own.
@@ -23,6 +24,7 @@ final class CodeHighlighter {
 
   /// [code] as one span of coloured runs.
   TextSpan format(String code) {
+    ensureAppGrammars();
     final trimmed = code.replaceAll(RegExp(r'\n$'), '');
     final language = this.language.toLowerCase();
     final nodes = language.isEmpty
