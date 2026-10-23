@@ -32,6 +32,7 @@ comments (`docs/records/<name>.md`).
 | [web-capture.md](web-capture.md) | Capturing a web page or a selection as Markdown, with a Dart port of Readability (#531) |
 | [flashcards.md](flashcards.md) | Decks of flashcards in notes, reviewed with SM-2, the review state in `.niman/review.json` (#533) |
 | [calendar-txt.md](calendar-txt.md) | Reading and writing `calendar.txt` beside `todo.txt`: the journal's events, the line-wise sync merge, reminders on an event (#730) |
+| [todo-note-links.md](todo-note-links.md) | Tasks and notes linked both ways: a wikilink in a task, a note's tasks in its panel, a `todo` query block, Move to tasks (#1152) — not built |
 | [note-columns.md](note-columns.md) | Columns of blocks side by side with Pandoc's fenced divs, editable in `live` (#729) |
 | [library-features.md](library-features.md) | A per-library switchboard for the macro features: the model, the gating seam, the introduction, the phases (#1109) — not built |
 | [apple-platforms.md](apple-platforms.md) | The plan for macOS and iOS: storage grants, the Mac desktop, widgets, signing, CI, phases and the owner's decisions — not built |

@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Move to tasks, menu and dialog</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;family=Literata:opsz,wght@7..72,400;7..72,600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#7CA0E6}a:hover{color:#A9C0F0}
+.ico{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.fill{fill:currentColor;stroke:none}
+.sub{font-size:13px;color:#A6A29A}
+.lab{font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#A6A29A}
+.pj{color:#C08CD8}.cx{color:#7CA0E6}.tg{color:#6FB8CC}.kv{color:#7FD1C4}.tm{color:#D8A56B}.as{color:#6B7079;font-style:italic}
+.mono{font-family:'IBM Plex Mono',monospace}
+.tree{display:flex;align-items:center;gap:8px;height:32px;padding:0 10px;border-radius:8px;font-size:13.5px;color:#D9D4CB;white-space:nowrap}
+.tree.sel{background:#363B44;color:#F2EDE5}
+.tab{display:flex;align-items:center;gap:8px;height:30px;padding:0 10px 0 13px;border-radius:7px;font-size:13px;color:#C8C3BA}
+.tab.on{background:#383D46;color:#F2EDE5}
+.railbtn{width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#A6A29A}
+.railbtn.on{background:#363B44;color:#587CD3}
+.ibtn{width:32px;height:32px;border-radius:8px;border:0;background:transparent;color:#A6A29A;display:flex;align-items:center;justify-content:center;padding:0;flex:none}
+.ibtn.on{background:#363B44;color:#F2EDE5}
+.obtn{height:32px;padding:0 12px;border-radius:16px;border:1px solid #4A4F59;background:transparent;color:#F2EDE5;font:500 13px 'IBM Plex Sans',sans-serif;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.tbtn{height:32px;padding:0 10px;border-radius:16px;border:0;background:transparent;color:#A9C0F0;font:500 13px 'IBM Plex Sans',sans-serif;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.fbtn{height:32px;padding:0 16px;border-radius:16px;border:0;background:#587CD3;color:#F2EDE5;font:500 13px 'IBM Plex Sans',sans-serif;display:inline-flex;align-items:center;gap:6px}
+.cb{width:18px;height:18px;flex:none}
+.pr{width:18px;height:18px;border-radius:5px;flex:none;display:inline-flex;align-items:center;justify-content:center;vertical-align:-4px;margin-right:6px;font:600 11px 'IBM Plex Sans',sans-serif}
+.pr.A{color:#E0687A;background:rgba(224,104,122,.16)}.pr.B{color:#D8A56B;background:rgba(216,165,107,.16)}.pr.C{color:#7CA0E6;background:rgba(124,160,230,.16)}
+.dd{font-size:12px;color:#A6A29A;white-space:nowrap;font-variant-numeric:tabular-nums}
+.dd.od{color:#E0687A;font-weight:500}.dd.td{color:#D8A56B;font-weight:500}
+.lk{display:inline-flex;align-items:center;gap:4px;height:20px;padding:0 8px 0 5px;border-radius:10px;background:#2F3A55;color:#A9C0F0;font-size:12px;white-space:nowrap;vertical-align:middle}
+.lk .ico{width:12px;height:12px}
+.lk.hot{background:#3A4A6E;color:#F2EDE5}
+.lk.dead{background:transparent;color:#6B7079;box-shadow:inset 0 0 0 1px #3A3F49;padding:0 8px}
+.hd{color:#6B7079}
+.sec{display:flex;align-items:center;gap:6px;height:34px;font-size:12.5px;font-weight:600;color:#D9D4CB}
+.sec .n{font-weight:400;color:#A6A29A}
+.wl{color:#587CD3;text-decoration:underline;text-decoration-color:rgba(88,124,211,.5)}
+.sb{height:32px;flex:none;display:flex;align-items:center;gap:14px;padding:0 14px;border-top:1px solid #2C3037;font-size:12.5px;color:#A6A29A}
+.note{font-family:Literata,serif;color:#E8E3DA}
+.note h1{font:600 26px Literata,serif;margin:0 0 16px;color:#F2EDE5}
+.note h2{font:600 19px Literata,serif;margin:22px 0 10px;color:#F2EDE5}
+.note p{font-size:16px;line-height:1.75;margin:0 0 14px}
+.note .li{display:flex;align-items:center;gap:10px;font-size:16px;line-height:1.75;margin:0 0 0 4px}
+.note .li.on span.t{color:#A6A29A;text-decoration:line-through;text-decoration-color:#6B7079}
+.caret{display:inline-block;width:1.5px;height:19px;background:#587CD3;vertical-align:-4px;margin:0 -0.75px}
+.sect{display:flex;align-items:center;gap:6px;height:36px;font-size:13.5px;color:#D9D4CB;border-top:1px solid #2C3037}
+.sect .n{color:#A6A29A}
+
+</style>
+</head>
+<body>
+<div style="width:1280px;height:800px;display:flex;flex-direction:column;background:#1B1D21;color:#F2EDE5;font-family:'IBM Plex Sans',sans-serif;font-size:14px;overflow:hidden;position:relative">
+  <div style="height:40px;flex:none;background:#2C3037;display:flex;align-items:center;gap:6px;padding:0 0 0 4px">
+    <button class="ibtn" style="width:40px;height:40px;color:#A6A29A" aria-label="Show the tree"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px;" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16" stroke-width="2.6"/></svg></button>
+    <div class="tab on">Repairs <svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px;color:#A6A29A" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></div><div class="tab">Budget 2026</div>
+    <div style="flex:1"></div>
+    <button class="ibtn" aria-label="Side panel"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px;" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M15 4v16"/></svg></button>
+    <div style="width:12px"></div>
+    <button class="ibtn" style="width:46px;height:40px;border-radius:0" aria-label="Minimize"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px;" aria-hidden="true"><path d="M6 12h12"/></svg></button>
+    <button class="ibtn" style="width:46px;height:40px;border-radius:0" aria-label="Maximize"><svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px;" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="1"/></svg></button>
+    <button class="ibtn" style="width:46px;height:40px;border-radius:0" aria-label="Close"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px;" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  </div>
+  <div style="flex:1;min-height:0;display:flex">
+    <nav style="width:48px;flex:none;background:#2C3037;display:flex;flex-direction:column;align-items:center;padding:6px 0;gap:2px">
+      <div class="railbtn on" title="Files"><svg class="ico" viewBox="0 0 24 24" style="width:20px;height:20px;" aria-hidden="true"><path d="M3 6h6l2 2h10v11H3z"/></svg></div><div class="railbtn" title="Todo"><svg class="ico" viewBox="0 0 24 24" style="width:20px;height:20px;" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2.5"/><path d="M8 12l3 3 5-6"/></svg></div><div class="railbtn" title="Search"><svg class="ico" viewBox="0 0 24 24" style="width:20px;height:20px;" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg></div><div class="railbtn" title="Home"><svg class="ico" viewBox="0 0 24 24" style="width:20px;height:20px;" aria-hidden="true"><path d="M4 11l8-7 8 7v9h-5v-6h-6v6H4z"/></svg></div><div class="railbtn" title="Quick note"><svg class="ico" viewBox="0 0 24 24" style="width:20px;height:20px;" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg></div>
+      <div style="flex:1"></div>
+      <div class="railbtn" title="Settings"><svg class="ico" viewBox="0 0 24 24" style="width:20px;height:20px;" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/></svg></div>
+    </nav>
+    <main style="flex:1;min-width:0;display:flex;flex-direction:column;background:#1B1D21;position:relative">
+      <div style="height:46px;flex:none;display:flex;align-items:center;justify-content:flex-end;gap:2px;padding:0 12px;color:#A6A29A">
+        <span style="margin-right:auto;font-size:12px;font-weight:600;color:#A9C0F0;background:#2F3A55;border-radius:10px;padding:3px 10px">1 · Right-click the line</span><button class="ibtn" aria-label="More"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px;" aria-hidden="true"><circle class="fill" cx="12" cy="5" r="1.6"/><circle class="fill" cx="12" cy="12" r="1.6"/><circle class="fill" cx="12" cy="19" r="1.6"/></svg></button>
+      </div>
+      <div style="flex:1;display:flex;justify-content:center;padding:4px 32px 0;overflow:hidden;position:relative">
+        <div class="note" style="width:100%;max-width:560px">
+          <h1>Repairs</h1>
+          <p>The bathroom tap has been loose since August. The plumber says it is the cartridge, not the tap.</p>
+          <h2>To do</h2>
+          <div style="position:relative">
+          <div class="li" style="background:#23262B;border-radius:6px;margin-left:0;padding-left:4px"><span class="mono" style="font-size:13px;color:#6B7079">- [ ]</span><span class="t">Replace the bathroom tap</span></div>
+          <div class="li"><svg class="ico cb" viewBox="0 0 24 24" style="width:18px;height:18px;color:#A6A29A" aria-hidden="true"><rect x="5" y="5" width="14" height="14" rx="2"/></svg><span class="t">Buy sealant for the window</span></div>
+          <div class="li"><svg class="ico cb" viewBox="0 0 24 24" style="width:18px;height:18px;color:#A6A29A" aria-hidden="true"><rect x="5" y="5" width="14" height="14" rx="2"/></svg><span class="t">Call Marco about the roof tiles</span></div>
+          <div class="li"><svg class="ico cb" viewBox="0 0 24 24" style="width:18px;height:18px;color:#A6A29A" aria-hidden="true"><rect x="5" y="5" width="14" height="14" rx="2"/></svg><span class="t">Check the loft insulation</span></div>
+          <div style="position:absolute;left:150px;top:30px;width:244px;background:#2C3037;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.45);padding:4px 0;z-index:5;font-family:'IBM Plex Sans',sans-serif;">
+            <div style="height:32px;display:flex;align-items:center;gap:10px;padding:0 12px;font-size:13px;"><span style="width:16px"></span><span style="flex:1">Cut</span><span class="sub" style="font-size:12px">Ctrl+X</span></div><div style="height:32px;display:flex;align-items:center;gap:10px;padding:0 12px;font-size:13px;"><span style="width:16px"></span><span style="flex:1">Copy</span><span class="sub" style="font-size:12px">Ctrl+C</span></div><div style="height:32px;display:flex;align-items:center;gap:10px;padding:0 12px;font-size:13px;"><span style="width:16px"></span><span style="flex:1">Paste</span><span class="sub" style="font-size:12px">Ctrl+V</span></div><div style="height:32px;display:flex;align-items:center;gap:10px;padding:0 12px;font-size:13px;"><span style="width:16px"></span><span style="flex:1">Paste as Markdown</span><span class="sub" style="font-size:12px"></span></div><div style="height:1px;background:#3A3F49;margin:4px 0"></div><div style="height:32px;display:flex;align-items:center;gap:10px;padding:0 12px;font-size:13px;"><span style="width:16px"></span><span style="flex:1">Select all</span><span class="sub" style="font-size:12px">Ctrl+A</span></div><div style="height:1px;background:#3A3F49;margin:4px 0"></div><div style="height:32px;display:flex;align-items:center;gap:10px;padding:0 12px;font-size:13px;background:#3A4A6E;"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px;color:#D9D4CB" aria-hidden="true"><rect x="3.5" y="4" width="11" height="11" rx="2"/><path d="M6.5 9.5l2 2 3-4M13 18.5h7.5M17.5 15l3.5 3.5-3.5 3.5"/></svg><span style="flex:1">Move to tasks</span><span class="sub" style="font-size:12px"></span></div></div>
+          </div>
+
+        </div>
+      </div>
+      <div class="sb"><span>Live</span><span style="flex:1"></span><span>112 words</span><span>Saved</span></div>
+    </main>
+<aside style="width:470px;flex:none;background:#23262B;border-left:1px solid #2C3037;padding:0 20px 20px;overflow:hidden"><div style="height:46px;display:flex;align-items:center"><div style="margin:0"><span style="font-size:12px;font-weight:600;color:#A9C0F0;background:#2F3A55;border-radius:10px;padding:3px 10px">2 · Move to tasks opens the task dialog</span></div></div><div style="background:#2C3037;border-radius:16px;padding:18px 18px 14px;display:flex;flex-direction:column;gap:12px;box-shadow:0 12px 32px rgba(0,0,0,.4)">
+        <div style="display:flex;align-items:center;gap:8px"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px;color:#587CD3" aria-hidden="true"><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h8"/><path d="M8 12l3 3 4-5M19 3v6M16 6h6"/></svg><div style="font-weight:500;flex:1;font-size:15px">New task</div><div class="sub" style="font-size:12.5px">from Repairs.md</div></div>
+        <div style="min-height:58px;padding:10px 12px;border:1px solid #587CD3;border-radius:8px;background:#23262B;font-size:14px;line-height:22px">Replace the bathroom tap <span style="background:#2F3A55;color:#A9C0F0;border-radius:4px;padding:1px 4px;text-decoration:underline;text-decoration-color:rgba(169,192,240,.5)">[[Repairs]]</span><span class="caret" style="height:17px;vertical-align:-3px"></span></div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">
+          <span style="height:26px;padding:0 10px;border-radius:8px;border:1px solid #4A4F59;display:inline-flex;align-items:center;font-size:12.5px;color:#D9D4CB">+ Project</span>
+          <span style="height:26px;padding:0 10px;border-radius:8px;border:1px solid #4A4F59;display:inline-flex;align-items:center;font-size:12.5px;color:#D9D4CB">@ Context</span>
+          <span style="height:26px;padding:0 10px;border-radius:8px;border:1px solid #4A4F59;display:inline-flex;align-items:center;font-size:12.5px;color:#D9D4CB"># Tag</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;height:32px"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px;color:#A6A29A" aria-hidden="true"><path d="M5 20V10M12 20V4M19 20v-7"/></svg><div style="flex:1;font-size:13.5px">Priority</div><div style="height:30px;padding:0 8px 0 10px;border:1px solid #4A4F59;border-radius:8px;display:flex;align-items:center;gap:8px;font-size:13px"><span class="pr B" style="margin:0">B</span><svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px;color:#A6A29A" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></div></div>
+        <div style="display:flex;align-items:center;gap:8px;height:32px"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px;color:#A6A29A" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M8 3v4M16 3v4"/></svg><div style="flex:1;font-size:13.5px">Due date</div><div style="height:30px;padding:0 6px 0 10px;border:1px solid #4A4F59;border-radius:8px;display:flex;align-items:center;gap:6px;font-size:13px">Sat 31 Oct 2026<span class="ibtn" style="width:22px;height:22px"><svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px;" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></span></div></div>
+        <div style="display:flex;align-items:center;gap:8px;height:32px"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px;color:#A6A29A" aria-hidden="true"><path d="M6 16v-5a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg><div style="flex:1;font-size:13.5px">Remind me</div><div style="height:30px;padding:0 10px;border:1px solid #4A4F59;border-radius:8px;display:flex;align-items:center;font-size:13px">Fri 30 Oct, 09:00</div><span style="width:36px;height:20px;border-radius:10px;background:#587CD3;position:relative;flex:none"><i style="position:absolute;right:3px;top:3px;width:14px;height:14px;border-radius:7px;background:#F2EDE5"></i></span></div>
+        <div>
+          <div class="sub" style="font-size:11.5px;margin-bottom:4px">The line, as it will be written in todo.txt</div>
+          <div class="mono" style="background:#23262B;border-radius:8px;padding:8px 10px;font-size:11.5px;line-height:1.6;color:#D9D4CB;word-break:break-word"><span class="tm">(B)</span> <span style="color:#9A968E">2026-10-22</span> Replace the bathroom tap <span style="color:#A9C0F0;text-decoration:underline;text-decoration-color:rgba(169,192,240,.5)">[[Repairs]]</span> <span class="kv">due:2026-10-31</span> <span class="kv">rem:2026-10-30T09:00</span></div>
+        </div>
+        <div class="sub" style="font-size:12px;line-height:1.5;display:flex;gap:8px"><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px;color:#A6A29A;margin-top:1px" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 11v5M12 8v.5"/></svg><span>The task is written to todo.txt first, then the item leaves Repairs.md. Undo is in the snackbar.</span></div>
+        <div style="display:flex;justify-content:flex-end;gap:6px"><button class="tbtn">Cancel</button><button class="fbtn">Add task</button></div>
+      </div></aside>  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phone, a note's menu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;family=Literata:opsz,wght@7..72,400;7..72,600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+.ico{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.fill{fill:currentColor;stroke:none}
+.sub{font-size:13px;color:#A6A29A}
+.lab{font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#A6A29A}
+.pj{color:#C08CD8}.cx{color:#7CA0E6}.tg{color:#6FB8CC}.kv{color:#7FD1C4}.tm{color:#D8A56B}.as{color:#6B7079;font-style:italic}
+.mono{font-family:'IBM Plex Mono',monospace}
+button{font-family:inherit}
+.ibtn{width:44px;height:44px;border-radius:22px;border:0;background:transparent;color:#D9D4CB;display:flex;align-items:center;justify-content:center;padding:0;flex:none}
+.obtn{height:40px;padding:0 16px;border-radius:20px;border:1px solid #4A4F59;background:transparent;color:#F2EDE5;font:500 14px 'IBM Plex Sans',sans-serif;display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
+.fbtn{height:40px;padding:0 18px;border-radius:20px;border:0;background:#587CD3;color:#F2EDE5;font:500 14px 'IBM Plex Sans',sans-serif;display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
+.tbtn{height:40px;padding:0 12px;border-radius:20px;border:0;background:transparent;color:#A9C0F0;font:500 14px 'IBM Plex Sans',sans-serif;display:inline-flex;align-items:center;gap:8px}
+.chip{height:32px;padding:0 12px;border-radius:8px;border:1px solid #4A4F59;display:inline-flex;align-items:center;gap:6px;font-size:13.5px;color:#D9D4CB}
+.chip.on{background:#3A4A6E;border-color:#3A4A6E;color:#F2EDE5}
+/* the screens */
+.ph{width:390px;height:844px;background:#23262B;color:#F2EDE5;font-family:'IBM Plex Sans',sans-serif;font-size:15px;overflow:hidden;display:flex;flex-direction:column;position:relative}
+.bar{height:56px;display:flex;align-items:center;gap:2px;padding:0 4px;flex:none}
+.bar .ttl{flex:1;min-width:0;font-size:19px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-left:4px}
+.scrim{position:absolute;inset:0;background:rgba(10,11,13,.55)}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:#2C3037;border-radius:28px 28px 0 0;padding:10px 0 14px;display:flex;flex-direction:column}
+.grab{width:36px;height:4px;border-radius:2px;background:#4A4F59;align-self:center;margin-bottom:12px;flex:none}
+/* a note, read */
+.doc{font-size:15px;line-height:24px;color:#E8E3DA;padding:4px 16px 0}
+.doc p{margin:0 0 12px}
+.doc h1{font-size:27px;line-height:34px;font-weight:600;margin:6px 0 12px}
+.doc h2{font-size:20px;line-height:28px;font-weight:600;margin:16px 0 6px}
+.doc ul{list-style:none;margin:0 0 12px;padding:0}
+.doc li{display:flex;align-items:center;gap:10px;min-height:32px}
+.wl{color:#7CA0E6;text-decoration:underline;text-decoration-color:rgba(124,160,230,.5);text-underline-offset:3px}
+.bx{width:18px;height:18px;border:2px solid #9AA0A8;border-radius:4px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;flex:none}
+.bx.on{background:#587CD3;border-color:#587CD3;color:#F2EDE5}
+/* the headers under a note */
+.sec{display:flex;align-items:center;gap:10px;height:48px;padding:0 16px;border-top:1px solid #2C3037;font-size:14px;color:#D9D4CB;flex:none}
+.sec .n{min-width:22px;height:22px;padding:0 6px;box-sizing:border-box;border-radius:11px;background:#363B44;color:#D9D4CB;font-size:12px;line-height:22px;text-align:center}
+.sec .sp{flex:1}
+.stat{height:44px;flex:none;display:flex;align-items:center;padding:0 8px;font-size:12px;color:#A6A29A;border-top:1px solid #2C3037;gap:2px}
+/* a task, as the Todo tab draws it */
+.trow{display:flex;gap:4px;padding:8px 16px 8px 4px;align-items:flex-start;box-sizing:border-box}
+.trow .cb{width:44px;height:44px;margin:-11px 0 -11px;display:flex;align-items:center;justify-content:center;flex:none}
+.trow .tb{flex:1;min-width:0}
+.tt{font-size:15.5px;line-height:22px}
+.ts{font-size:13px;line-height:20px;color:#A6A29A;display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:3px}
+.ts>span{display:inline-flex;align-items:center;gap:4px}
+.du.od{color:#E0687A}.du.td{color:#A9C0F0}
+.pr{width:18px;height:18px;border-radius:4px;background:rgba(216,165,107,.2);color:#D8A56B;font-size:11px;font-weight:600;justify-content:center}
+.trow.done .tt{color:#6B7079;text-decoration:line-through}
+.trow.done .ts{color:#6B7079}
+/* a link in a task */
+.lk{height:24px;padding:0 9px 0 7px;border-radius:12px;background:rgba(124,160,230,.14);color:#A9C0F0;font-size:12.5px;display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+.lk.dead{background:transparent;border:1px dashed #4A4F59;color:#6B7079;padding:0 8px 0 6px;height:24px;box-sizing:border-box}
+.lk.press{background:rgba(124,160,230,.34);box-shadow:0 0 0 5px rgba(124,160,230,.14)}
+.addrow{display:flex;align-items:center;gap:14px;height:52px;padding:0 20px 0 14px;color:#A9C0F0;font-weight:500;font-size:15px;flex:none}
+.donerow{display:flex;align-items:center;gap:8px;height:52px;padding:0 20px 0 14px;border-top:1px solid #363B44;color:#C8C3BA;font-size:14px;flex:none}
+.donerow .n{margin-left:auto;color:#A6A29A}
+/* menus */
+.pop{position:absolute;background:#363B44;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.5);padding:8px 0}
+.mi{display:flex;align-items:center;gap:16px;height:48px;padding:0 20px 0 16px;font-size:15.5px;color:#F2EDE5;white-space:nowrap}
+.mi .ico{color:#A6A29A}
+.sheetmi{display:flex;align-items:center;gap:16px;height:52px;padding:0 24px;font-size:15.5px;color:#F2EDE5}
+.sheetmi .ico{color:#A6A29A}
+.sheetmi .go{margin-left:auto;color:#A6A29A}
+.sel{background:rgba(88,124,211,.22)}
+/* a todo block in a note */
+.blk{margin:4px 0 14px;border:1px solid #363B44;border-radius:12px;background:#262A30;overflow:hidden}
+.bh{display:flex;gap:8px;align-items:flex-start;padding:11px 14px;font-size:12.5px;line-height:18px;color:#A6A29A;border-bottom:1px solid #363B44}
+.bh b{color:#F2EDE5;font-weight:600}
+.bf{display:flex;align-items:center;gap:12px;height:46px;padding:0 14px;color:#A9C0F0;font-weight:500;font-size:14.5px;border-top:1px solid #363B44}
+.blk .trow+.trow{border-top:1px solid #2F343B}
+/* wide */
+.wide{background:#1B1D21;color:#F2EDE5;font-family:'IBM Plex Sans',sans-serif;font-size:14px;overflow:hidden;position:relative;display:flex;flex-direction:column}
+.trow.w{padding-left:2px}
+.tabrow{height:52px;flex:none;background:#2C3037;display:flex;align-items:center;gap:4px;padding:0 4px}
+.wtab{display:flex;align-items:center;gap:8px;height:38px;padding:0 14px;border-radius:10px;font-size:14px;color:#C8C3BA;white-space:nowrap}
+.wtab.on{background:#383D46;color:#F2EDE5}
+.rail{width:64px;flex:none;background:#2C3037;display:flex;flex-direction:column;align-items:center;padding:8px 0;gap:6px}
+.rb{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;color:#C8C3BA}
+.rb.on{background:#363B44;color:#F2EDE5}
+.wt{display:flex;align-items:center;gap:10px;height:44px;padding:0 12px;border-radius:10px;font-size:14.5px;color:#D9D4CB;white-space:nowrap}
+.wt.sel{background:#363B44;color:#F2EDE5}
+.dock{background:#23262B;border-left:1px solid #2C3037;display:flex;flex-direction:column;flex:none}
+.dtabs{height:44px;display:flex;align-items:center;padding:0 6px;gap:2px;border-bottom:1px solid #2C3037;flex:none}
+.dt{width:44px;height:36px;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#A6A29A}
+.dt.on{background:#363B44;color:#A9C0F0}
+</style>
+</head>
+<body>
+<div class="ph"><div class="bar"><button class="ibtn" aria-label="Back" style=""><svg class="ico" viewBox="0 0 24 24" style="width:22px;height:22px;" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></button><div class="ttl">Repairs</div><button class="ibtn" aria-label="Edit" style=""><svg class="ico" viewBox="0 0 24 24" style="width:22px;height:22px;" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg></button><button class="ibtn" aria-label="Note actions" style=""><svg class="ico" viewBox="0 0 24 24" style="width:22px;height:22px;" aria-hidden="true"><circle class="fill" cx="12" cy="5" r="1.6"/><circle class="fill" cx="12" cy="12" r="1.6"/><circle class="fill" cx="12" cy="19" r="1.6"/></svg></button></div><div style="flex:1;min-height:0;overflow:hidden"><div class="doc"><h1>Repairs</h1><p>The flat needs a few jobs done before winter. What they cost goes in <span class="wl">Budget 2026</span>.</p><h2>Boiler</h2><p>The boiler loses pressure every week or so. The plumber thinks the expansion vessel needs checking, and the filter cartridges are due.</p><h2>Small jobs</h2><ul><li><i class="bx"></i>Replace the bathroom tap</li><li><i class="bx"></i>Re-seal the kitchen window</li><li><i class="bx on"><svg class="ico" viewBox="0 0 24 24" style="width:13px;height:13px;stroke-width:2.4" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg></i>Fix the hallway light</li></ul></div></div><div class="sec"><svg class="ico" viewBox="0 0 24 24" style="width:20px;height:20px;color:#A6A29A" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg><span>Links to this note</span><span class="n">2</span><span class="sp"></span><svg class="ico" viewBox="0 0 24 24" style="width:20px;height:20px;color:#A6A29A" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></div><div class="sec"><svg class="ico" viewBox="0 0 24 24" style="width:20px;height:20px;color:#A6A29A" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2.5"/><path d="M8 12l3 3 5-6"/></svg><span>Tasks for this note</span><span class="n">3</span><span class="sp"></span><svg class="ico" viewBox="0 0 24 24" style="width:20px;height:20px;color:#A6A29A" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></div><div class="stat"><button class="ibtn" aria-label="Outline" style="width:40px;height:40px;color:#A6A29A"><svg class="ico" viewBox="0 0 24 24" style="width:20px;height:20px;" aria-hidden="true"><path d="M4 7h12M4 12h12M4 17h8M19 7h1M19 12h1"/></svg></button><button class="ibtn" aria-label="Find" style="width:40px;height:40px;color:#A6A29A"><svg class="ico" viewBox="0 0 24 24" style="width:20px;height:20px;" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg></button><span style="flex:1"></span><span>86 words</span><span style="width:10px"></span><span>Saved</span></div><div class="pop" style="right:8px;top:50px;width:276px"><div class="mi"><svg class="ico" viewBox="0 0 24 24" style="width:22px;height:22px;" aria-hidden="true"><path d="M4 7h12M4 12h12M4 17h8M19 7h1M19 12h1"/></svg><span>Outline</span></div><div class="mi"><svg class="ico" viewBox="0 0 24 24" style="width:22px;height:22px;" aria-hidden="true"><path d="M3 4h8l9 9-8 8-9-9z"/><path d="M7.5 8.5h.01"/></svg><span>Tags</span></div><div class="mi"><svg class="ico" viewBox="0 0 24 24" style="width:22px;height:22px;" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg><span>Links to this note</span></div><div class="mi"><svg class="ico" viewBox="0 0 24 24" style="width:22px;height:22px;" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2.5"/><path d="M8 12l3 3 5-6"/></svg><span>Tasks for this note</span></div><div class="mi"><svg class="ico" viewBox="0 0 24 24" style="width:22px;height:22px;" aria-hidden="true"><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h8"/><path d="M8 12l3 3 4-5M19 3v6M16 6h6"/></svg><span>New task</span></div><div class="mi"><svg class="ico" viewBox="0 0 24 24" style="width:22px;height:22px;" aria-hidden="true"><path d="M3.5 6.5l1.5 1.5 3-3M3.5 14.5l1.5 1.5 3-3M12 7h9M12 15h9"/></svg><span>Checklist</span></div><div class="mi"><svg class="ico" viewBox="0 0 24 24" style="width:22px;height:22px;" aria-hidden="true"><path d="M12 3v5M9 5l3 3 3-3M12 21v-5M9 19l3-3 3 3M4 12h16"/></svg><span>Turn typewriter mode on</span></div><div class="mi"><svg class="ico" viewBox="0 0 24 24" style="width:22px;height:22px;" aria-hidden="true"><path d="M13 3L5 13h6l-1 8 8-10h-6z"/></svg><span>Command palette</span></div><div class="mi"><svg class="ico" viewBox="0 0 24 24" style="width:22px;height:22px;" aria-hidden="true"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6.5 6.5l2 2M15.5 15.5l2 2M17.5 6.5l-2 2M8.5 15.5l-2 2"/></svg><span>Tidy the Markdown</span></div><div class="mi"><svg class="ico" viewBox="0 0 24 24" style="width:22px;height:22px;" aria-hidden="true"><path d="M12 4v11M8 11l4 4 4-4M5 19h14"/></svg><span>Export</span></div><div class="mi"><svg class="ico" viewBox="0 0 24 24" style="width:22px;height:22px;" aria-hidden="true"><path d="M4 12a8 8 0 1 0 3-6.2M4 4v4h4M12 8v4l3 2"/></svg><span>History</span></div><div class="mi"><svg class="ico" viewBox="0 0 24 24" style="width:22px;height:22px;" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg><span>Rename</span></div><div class="mi"><svg class="ico" viewBox="0 0 24 24" style="width:22px;height:22px;" aria-hidden="true"><path d="M3 6h6l2 2h10v11H3z"/><path d="M12 17v-6M9.5 13.5L12 11l2.5 2.5"/></svg><span>Move</span></div><div class="mi"><svg class="ico" viewBox="0 0 24 24" style="width:22px;height:22px;" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg><span>Delete</span></div></div></div>
+</body>
+</html>

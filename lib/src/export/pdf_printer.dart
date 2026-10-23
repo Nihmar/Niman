@@ -292,7 +292,7 @@ final class ProcessPdfPrinter implements PdfPrinter {
   new({
     this.engine,
     this.findEngine,
-    this.run = runProcess,
+    this.run = runEngine,
     this.size = fileSize,
     this.timeout = const Duration(minutes: 2),
   });
