@@ -148,6 +148,48 @@ the editor, the selection (on one line, its white space collapsed) is the
 description, and the link follows it: select "Order the filter cartridges" and
 choose *New task* to get `Order the filter cartridges [[Repairs]]`.
 
+## Move to tasks
+
+A checkbox item in a note can become a task. **Move to tasks** turns the
+item into a line of `todo.txt`, links it to the note, and takes it out of the
+note. It is for the list you wrote as notes and now want in the Todo tab, with
+a date, a priority or a reminder.
+
+Put the caret on a `- [ ]` or `- [x]` line (any list marker, any indent) and
+choose **Move to tasks**:
+
+- in the editor's right-click menu on a desktop (near its top, below the link
+  and spelling entries), or in the bar a long press opens on a phone, where it
+  is the first entry;
+- in the toolbar's **Tools** sheet, on every platform;
+- in the command palette — *Move to tasks*.
+
+**One item opens the task dialog**, titled *Move to tasks* and saved with
+**Move**. The description is the item's text as written — bold, code and links
+kept — followed by `[[Note]]`, so you can give it a date, a priority or a
+reminder before it is saved. Cancel changes nothing, in the note or in the
+files. The task carries today's creation date, as every task the dialog adds
+does.
+
+**Several items are moved at once**, with no dialog: select the lines and
+choose the same command. Each becomes `text [[Note]]` with today's creation
+date. A ticked item (`- [x]`) goes to `done.txt`, completed today:
+`x 2026-10-23 2026-10-23 Fix the hallway light [[Repairs]]`.
+
+The tasks are written to `todo.txt` and `done.txt` **first**, and the lines
+leave the note only once both files took them, as one undoable edit of the
+note, saved like any other. If anything fails in between, the item is in the
+note and in the task file — never in neither. A snackbar says *Moved 3 to
+tasks* with **Undo**, which puts the lines back where they were (at the nearest
+place if you have edited the note since) and takes the tasks out of the files.
+
+An item that has **sub-items** (or a paragraph or a code block of its own under
+it) is not moved: *Move to tasks* is greyed on it, with *Has sub-items — move
+them first* as its reason, and a selection of several items moves the others
+and skips it; the snackbar counts what moved. Items inside a quote, and
+anything inside a code block, are not checkbox items and are left alone. The
+command is part of the Todo feature: with Todo off in the library, it is gone.
+
 ## Editing and deleting
 
 On a phone, tap a task to edit it; the trash icon in the dialog's title

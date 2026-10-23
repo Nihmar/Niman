@@ -136,6 +136,18 @@ words on the task's line, and nothing about it is stored anywhere else.
 18. **An item with sub-items is not moved** in this round: the command is
     disabled on it, with the reason as its tooltip.
 
+**As built (2026-10-23).** Where the plan left room: a checkbox item is read off
+the editor's block scan (`editor/task_items.dart`), so code, front matter and
+quotes never count, and an item "has sub-items" when a deeper item or a held
+paragraph or code block follows it. The note's lines go in one edit of the open
+editor's buffer, and Undo puts them back by looking for the lines around where
+they stood (`editor/task_items_edit.dart`), not by replaying the editor's
+history, since the note may have changed since. Undo restores the note first
+and removes the tasks second, for the same reason as the move's order. The
+entry is in the Tools sheet as well as the menus, which is the phone toolbar's
+overflow; with no checkbox item at the caret the context menu leaves it out,
+and the Tools sheet and the palette say what is needed.
+
 ### What the Todo tab gains
 
 19. A link in a task is drawn as a chip with the note's name; a tap opens

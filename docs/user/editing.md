@@ -604,6 +604,12 @@ Obsidian's is:
 - **Open link** and **Copy link** when the click lands on a Markdown
   link whose target leaves the library (`https://…`, `mailto:…`): the
   same URL Ctrl+click opens, and the URL on the clipboard;
+- **Move to tasks** on a checkbox line (`- [ ]` / `- [x]`), or on a selection
+  of them — the item becomes a task and leaves the note (see
+  [Move to tasks](tasks.md#move-to-tasks)). On a phone it is the first
+  entry of the bar; where the item has sub-items it is greyed, with the
+  reason as its tooltip on a desktop and as a message when tapped on a phone,
+  and on a line that is no checkbox item it is not there;
 - the spelling's suggestions for a misspelled word, and a table's
   **Row ›**, **Column ›** and sorts on a table's cell, next;
 - **Paste as Markdown**: what was copied from a web page, as Markdown
@@ -982,6 +988,15 @@ for `- ` or `- [ ] `.
   selected together move together, and an item selected with its own children
   keeps its shape. Inside a quote or a callout the rule is the same, behind the
   `>`.
+
+### Move to tasks
+
+Turns the checkbox items under the cursor or the selection into tasks of the
+Todo tab and takes them out of the note. It is also on the context menu and in
+the command palette, and is described with the tasks:
+[Move to tasks](tasks.md#move-to-tasks). Listed greyed with the reason where
+the cursor is on an item with sub-items or on no checkbox item, and not
+listed while the library has Todo off.
 
 ### Count a list
 
