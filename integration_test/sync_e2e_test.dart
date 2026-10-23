@@ -15,6 +15,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:ui' show ViewPadding;
 
 import 'package:drift/drift.dart' show driftRuntimeOptions;
 import 'package:drift/native.dart';
@@ -100,6 +101,34 @@ void main() {
     }
   }
 
+  /// Prints the window's metrics beside any overflow, then reports it as
+  /// the test would.
+  ///
+  /// An iPhone simulator run once failed on the Files tab's bottom bar
+  /// overflowing by 15167 px (#1162), and the log could not say which
+  /// metric did it; eight runs on a Mac never showed it again. The next
+  /// one says what the window reported in that frame.
+  void printMetricsOnOverflow(WidgetTester tester) {
+    final report = FlutterError.onError;
+    FlutterError.onError = (details) {
+      if ('${details.exception}'.contains('overflowed')) {
+        // ViewPadding has no toString of its own.
+        String sides(ViewPadding pad) =>
+            'LTRB ${pad.left}, ${pad.top}, ${pad.right}, ${pad.bottom}';
+        final view = tester.view;
+        debugPrint(
+          '[overflow] size ${view.physicalSize} '
+          'dpr ${view.devicePixelRatio} padding ${sides(view.padding)} '
+          'viewPadding ${sides(view.viewPadding)} '
+          'viewInsets ${sides(view.viewInsets)} '
+          'sync ${controller.sync?.status.stage}',
+        );
+      }
+      report?.call(details);
+    };
+    addTearDown(() => FlutterError.onError = report);
+  }
+
   /// Pumps real frames until [probe] holds.
   Future<void> waitUntil(
     WidgetTester tester,
@@ -131,6 +160,7 @@ void main() {
         ..devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
     }
+    printMetricsOnOverflow(tester);
 
     // The first-run deck (#266) reads the real app database, not the
     // session this test hands the app: on a fresh machine — a CI runner,
