@@ -4419,4 +4419,8 @@ final class GermanStrings extends Strings {
   String get kanbanEditCard => 'Karte bearbeiten';
   @override
   String taskLinkOpenTooltip(String path) => '$path öffnen';
+  @override
+  String get tasksForNoteTitle => 'Aufgaben zu dieser Notiz';
+  @override
+  String get tasksForNoteEmpty => 'Keine Aufgabe verlinkt auf diese Notiz';
 }

@@ -4271,4 +4271,8 @@ final class EstonianStrings extends Strings {
   String get kanbanEditCard => 'Muuda kaarti';
   @override
   String taskLinkOpenTooltip(String path) => 'Ava $path';
+  @override
+  String get tasksForNoteTitle => 'Selle märke ülesanded';
+  @override
+  String get tasksForNoteEmpty => 'Ükski ülesanne ei viita sellele märkele';
 }

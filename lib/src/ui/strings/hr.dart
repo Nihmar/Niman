@@ -4347,4 +4347,8 @@ final class CroatianStrings extends Strings {
   String get kanbanEditCard => 'Uredi karticu';
   @override
   String taskLinkOpenTooltip(String path) => 'Otvori $path';
+  @override
+  String get tasksForNoteTitle => 'Zadaće za ovu napomenu';
+  @override
+  String get tasksForNoteEmpty => 'Nijedna zadaća ne vodi na ovu napomenu';
 }

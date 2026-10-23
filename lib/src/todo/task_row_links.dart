@@ -60,10 +60,19 @@ final class TaskRowLink {
 @immutable
 final class TaskRowLinks {
   /// [chips] drawn, and the [text] of the task without them.
-  const new({required this.chips, required this.text});
+  const new({
+    required this.chips,
+    required this.text,
+    this.anchors = const <String>[],
+  });
 
   /// The links, in the order they are written.
   final List<TaskRowLink> chips;
+
+  /// The heading or block each link to the hidden note names (see
+  /// [taskRowLinksOf]'s `hiding`), as `Boiler` or `^b7`, in the order they are
+  /// written; empty without `hiding`, and for a link to the note itself.
+  final List<String> anchors;
 
   /// The task's display text (`taskDisplayText`) with the links that are
   /// chips taken out of it: no link is drawn twice.
@@ -75,7 +84,12 @@ final class TaskRowLinks {
 /// A task the map has not answered for yet (its words are new) is read here,
 /// from its text: its links are chips from the first frame, never raw
 /// `[[…]]`, and the answer changes the chip's state, not its size.
-TaskRowLinks taskRowLinksOf(TodoTask task, {TaskLinkMap? map}) {
+///
+/// With `hiding`, the library-relative path of a note, the links that name
+/// that note are no chips and are taken out of the text all the same: a
+/// note's own task list is about it, and says it once. A heading or block the
+/// link names is kept in [TaskRowLinks.anchors].
+TaskRowLinks taskRowLinksOf(TodoTask task, {TaskLinkMap? map, String? hiding}) {
   final description = task.description;
   if (!description.contains('[')) {
     return TaskRowLinks(chips: const [], text: taskDisplayText(description));
@@ -90,9 +104,19 @@ TaskRowLinks taskRowLinksOf(TodoTask task, {TaskLinkMap? map}) {
   for (final link in links.reversed) {
     text = text.replaceRange(link.link.start, link.link.end, ' ');
   }
+  final shown = [
+    for (final link in links)
+      if (hiding == null || link.notePath != hiding) link,
+  ];
   return TaskRowLinks(
-    chips: [for (final link in links) _chip(link, description, pending)],
+    chips: [for (final link in shown) _chip(link, description, pending)],
     text: taskDisplayText(text),
+    anchors: [
+      for (final link in links)
+        if (hiding != null && link.notePath == hiding)
+          if (link.anchor case final anchor? when anchor.isNotEmpty)
+            link.alias ?? headingPathOf(anchor).join(taskLinkLevels),
+    ],
   );
 }
 

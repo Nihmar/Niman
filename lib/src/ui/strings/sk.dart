@@ -4329,4 +4329,8 @@ final class SlovakStrings extends Strings {
   String get kanbanEditCard => 'Upraviť kartu';
   @override
   String taskLinkOpenTooltip(String path) => 'Otvoriť $path';
+  @override
+  String get tasksForNoteTitle => 'Úlohy k tejto poznámke';
+  @override
+  String get tasksForNoteEmpty => 'Žiadna úloha na túto poznámku neodkazuje';
 }

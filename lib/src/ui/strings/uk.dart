@@ -4362,4 +4362,8 @@ final class UkrainianStrings extends Strings {
   String get kanbanEditCard => 'Редагувати картку';
   @override
   String taskLinkOpenTooltip(String path) => 'Відкрити $path';
+  @override
+  String get tasksForNoteTitle => 'Завдання до цієї нотатки';
+  @override
+  String get tasksForNoteEmpty => 'Жодне завдання не посилається на цю нотатку';
 }

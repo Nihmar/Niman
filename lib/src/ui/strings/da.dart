@@ -4304,4 +4304,8 @@ final class DanishStrings extends Strings {
   String get kanbanEditCard => 'Rediger kort';
   @override
   String taskLinkOpenTooltip(String path) => 'Åbn $path';
+  @override
+  String get tasksForNoteTitle => 'Opgaver til denne note';
+  @override
+  String get tasksForNoteEmpty => 'Ingen opgave linker til denne note';
 }

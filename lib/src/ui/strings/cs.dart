@@ -4315,4 +4315,8 @@ final class CzechStrings extends Strings {
   String get kanbanEditCard => 'Upravit kartu';
   @override
   String taskLinkOpenTooltip(String path) => 'Otevřít $path';
+  @override
+  String get tasksForNoteTitle => 'Úkoly k této poznámce';
+  @override
+  String get tasksForNoteEmpty => 'Žádný úkol na tuto poznámku neodkazuje';
 }

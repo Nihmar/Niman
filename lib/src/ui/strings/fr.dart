@@ -4453,4 +4453,8 @@ final class FrenchStrings extends Strings {
   String get kanbanEditCard => 'Modifier la carte';
   @override
   String taskLinkOpenTooltip(String path) => 'Ouvrir $path';
+  @override
+  String get tasksForNoteTitle => 'Tâches de cette note';
+  @override
+  String get tasksForNoteEmpty => 'Aucune tâche ne renvoie à cette note';
 }

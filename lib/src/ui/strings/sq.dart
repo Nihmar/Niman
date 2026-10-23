@@ -4356,4 +4356,8 @@ final class AlbanianStrings extends Strings {
   String get kanbanEditCard => 'Redakto kartën';
   @override
   String taskLinkOpenTooltip(String path) => 'Hap $path';
+  @override
+  String get tasksForNoteTitle => 'Detyrat e këtij shënimi';
+  @override
+  String get tasksForNoteEmpty => 'Asnjë detyrë nuk lidhet me këtë shënim';
 }

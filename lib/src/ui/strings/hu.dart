@@ -4347,4 +4347,8 @@ final class HungarianStrings extends Strings {
   String get kanbanEditCard => 'Kártya szerkesztése';
   @override
   String taskLinkOpenTooltip(String path) => '$path megnyitása';
+  @override
+  String get tasksForNoteTitle => 'A jegyzet feladatai';
+  @override
+  String get tasksForNoteEmpty => 'Egy feladat sem hivatkozik erre a jegyzetre';
 }

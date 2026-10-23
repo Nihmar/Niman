@@ -4309,4 +4309,8 @@ final class NorwegianStrings extends Strings {
   String get kanbanEditCard => 'Rediger kort';
   @override
   String taskLinkOpenTooltip(String path) => 'Åpne $path';
+  @override
+  String get tasksForNoteTitle => 'Oppgaver for dette notatet';
+  @override
+  String get tasksForNoteEmpty => 'Ingen oppgaver lenker til dette notatet';
 }

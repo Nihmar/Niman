@@ -4392,4 +4392,8 @@ final class SpanishStrings extends Strings {
   String get kanbanEditCard => 'Editar tarjeta';
   @override
   String taskLinkOpenTooltip(String path) => 'Abrir $path';
+  @override
+  String get tasksForNoteTitle => 'Tareas de esta nota';
+  @override
+  String get tasksForNoteEmpty => 'Ninguna tarea enlaza con esta nota';
 }

@@ -4287,4 +4287,8 @@ final class TurkishStrings extends Strings {
   String get kanbanEditCard => 'Kartı düzenle';
   @override
   String taskLinkOpenTooltip(String path) => '$path dosyasını aç';
+  @override
+  String get tasksForNoteTitle => 'Bu notun görevleri';
+  @override
+  String get tasksForNoteEmpty => 'Hiçbir görev bu nota bağlanmıyor';
 }

@@ -4374,4 +4374,8 @@ final class DutchStrings extends Strings {
   String get kanbanEditCard => 'Kaart bewerken';
   @override
   String taskLinkOpenTooltip(String path) => '$path openen';
+  @override
+  String get tasksForNoteTitle => 'Taken voor deze notitie';
+  @override
+  String get tasksForNoteEmpty => 'Geen taak verwijst naar deze notitie';
 }

@@ -4344,4 +4344,8 @@ final class SlovenianStrings extends Strings {
   String get kanbanEditCard => 'Uredi kartico';
   @override
   String taskLinkOpenTooltip(String path) => 'Odpri $path';
+  @override
+  String get tasksForNoteTitle => 'Naloge za to opombo';
+  @override
+  String get tasksForNoteEmpty => 'Nobena naloga ne povezuje na to opombo';
 }

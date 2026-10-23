@@ -4271,4 +4271,8 @@ final class EnglishStrings extends Strings {
   String get kanbanEditCard => 'Edit card';
   @override
   String taskLinkOpenTooltip(String path) => 'Open $path';
+  @override
+  String get tasksForNoteTitle => 'Tasks for this note';
+  @override
+  String get tasksForNoteEmpty => 'No task links to this note';
 }

@@ -4460,4 +4460,9 @@ final class GreekStrings extends Strings {
   String get kanbanEditCard => 'Επεξεργασία κάρτας';
   @override
   String taskLinkOpenTooltip(String path) => 'Άνοιγμα $path';
+  @override
+  String get tasksForNoteTitle => 'Καθήκοντα για αυτή τη σημείωση';
+  @override
+  String get tasksForNoteEmpty =>
+      'Κανένα καθήκον δεν παραπέμπει σε αυτή τη σημείωση';
 }

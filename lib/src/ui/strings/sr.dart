@@ -4343,4 +4343,8 @@ final class SerbianStrings extends Strings {
   String get kanbanEditCard => 'Уреди картицу';
   @override
   String taskLinkOpenTooltip(String path) => 'Отвори $path';
+  @override
+  String get tasksForNoteTitle => 'Задаци за ову белешку';
+  @override
+  String get tasksForNoteEmpty => 'Ниједан задатак не води ка овој белешци';
 }

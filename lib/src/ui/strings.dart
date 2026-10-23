@@ -2192,4 +2192,6 @@ final class AppStrings {
   static String get kanbanEditCard => _s.kanbanEditCard;
   static String taskLinkOpenTooltip(String path) =>
       _s.taskLinkOpenTooltip(path);
+  static String get tasksForNoteTitle => _s.tasksForNoteTitle;
+  static String get tasksForNoteEmpty => _s.tasksForNoteEmpty;
 }

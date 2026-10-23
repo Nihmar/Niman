@@ -3972,4 +3972,8 @@ final class JapaneseStrings extends Strings {
   String get kanbanEditCard => 'カードを編集';
   @override
   String taskLinkOpenTooltip(String path) => '$path を開く';
+  @override
+  String get tasksForNoteTitle => 'このノートのタスク';
+  @override
+  String get tasksForNoteEmpty => 'このノートにリンクしているタスクはありません';
 }

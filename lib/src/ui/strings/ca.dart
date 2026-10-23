@@ -4401,4 +4401,8 @@ final class CatalanStrings extends Strings {
   String get kanbanEditCard => 'Edita la targeta';
   @override
   String taskLinkOpenTooltip(String path) => 'Obre $path';
+  @override
+  String get tasksForNoteTitle => "Tasques d'aquesta nota";
+  @override
+  String get tasksForNoteEmpty => 'Cap tasca enllaça amb aquesta nota';
 }

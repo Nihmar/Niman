@@ -4348,4 +4348,8 @@ final class BosnianStrings extends Strings {
   String get kanbanEditCard => 'Uredi karticu';
   @override
   String taskLinkOpenTooltip(String path) => 'Otvori $path';
+  @override
+  String get tasksForNoteTitle => 'Zadaci za ovu bilješku';
+  @override
+  String get tasksForNoteEmpty => 'Nijedan zadatak ne vodi na ovu bilješku';
 }

@@ -4357,4 +4357,9 @@ final class FinnishStrings extends Strings {
   String get kanbanEditCard => 'Muokkaa korttia';
   @override
   String taskLinkOpenTooltip(String path) => 'Avaa $path';
+  @override
+  String get tasksForNoteTitle => 'Tämän muistiinpanon tehtävät';
+  @override
+  String get tasksForNoteEmpty =>
+      'Mikään tehtävä ei linkitä tähän muistiinpanoon';
 }

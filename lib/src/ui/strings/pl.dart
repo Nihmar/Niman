@@ -4381,4 +4381,8 @@ final class PolishStrings extends Strings {
   String get kanbanEditCard => 'Edytuj kartę';
   @override
   String taskLinkOpenTooltip(String path) => 'Otwórz $path';
+  @override
+  String get tasksForNoteTitle => 'Zadania do tej notatki';
+  @override
+  String get tasksForNoteEmpty => 'Żadne zadanie nie prowadzi do tej notatki';
 }

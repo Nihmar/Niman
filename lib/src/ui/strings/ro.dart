@@ -4393,4 +4393,8 @@ final class RomanianStrings extends Strings {
   String get kanbanEditCard => 'Editează cardul';
   @override
   String taskLinkOpenTooltip(String path) => 'Deschide $path';
+  @override
+  String get tasksForNoteTitle => 'Sarcinile acestei note';
+  @override
+  String get tasksForNoteEmpty => 'Nicio sarcină nu trimite la această notă';
 }

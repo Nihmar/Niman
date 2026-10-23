@@ -4326,4 +4326,8 @@ final class IcelandicStrings extends Strings {
   String get kanbanEditCard => 'Breyta spjaldi';
   @override
   String taskLinkOpenTooltip(String path) => 'Opna $path';
+  @override
+  String get tasksForNoteTitle => 'Verkefni fyrir þennan minnispunkt';
+  @override
+  String get tasksForNoteEmpty => 'Ekkert verkefni vísar á þennan minnispunkt';
 }

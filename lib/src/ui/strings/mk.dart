@@ -4357,4 +4357,8 @@ final class MacedonianStrings extends Strings {
   String get kanbanEditCard => 'Уреди картичка';
   @override
   String taskLinkOpenTooltip(String path) => 'Отвори $path';
+  @override
+  String get tasksForNoteTitle => 'Задачи за оваа белешка';
+  @override
+  String get tasksForNoteEmpty => 'Ниедна задача не води до оваа белешка';
 }

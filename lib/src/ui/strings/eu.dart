@@ -4381,4 +4381,9 @@ final class BasqueStrings extends Strings {
   String get kanbanEditCard => 'Editatu txartela';
   @override
   String taskLinkOpenTooltip(String path) => 'Ireki $path';
+  @override
+  String get tasksForNoteTitle => 'Ohar honetako zereginak';
+  @override
+  String get tasksForNoteEmpty =>
+      'Ez dago ohar honetara estekatzen duen zereginik';
 }

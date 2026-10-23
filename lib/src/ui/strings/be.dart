@@ -4365,4 +4365,9 @@ final class BelarusianStrings extends Strings {
   String get kanbanEditCard => 'Змяніць картку';
   @override
   String taskLinkOpenTooltip(String path) => 'Адкрыць $path';
+  @override
+  String get tasksForNoteTitle => 'Заданні для гэтай нататкі';
+  @override
+  String get tasksForNoteEmpty =>
+      'Ніводнае заданне не спасылаецца на гэту нататку';
 }

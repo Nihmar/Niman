@@ -4351,4 +4351,8 @@ final class BulgarianStrings extends Strings {
   String get kanbanEditCard => 'Редактиране на карта';
   @override
   String taskLinkOpenTooltip(String path) => 'Отвори $path';
+  @override
+  String get tasksForNoteTitle => 'Задачи за тази бележка';
+  @override
+  String get tasksForNoteEmpty => 'Никоя задача не води към тази бележка';
 }

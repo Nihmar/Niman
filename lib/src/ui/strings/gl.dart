@@ -4359,4 +4359,8 @@ final class GalicianStrings extends Strings {
   String get kanbanEditCard => 'Editar a tarxeta';
   @override
   String taskLinkOpenTooltip(String path) => 'Abrir $path';
+  @override
+  String get tasksForNoteTitle => 'Tarefas desta nota';
+  @override
+  String get tasksForNoteEmpty => 'Ningunha tarefa liga con esta nota';
 }

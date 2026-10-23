@@ -4271,4 +4271,8 @@ final class HindiStrings extends Strings {
   String get kanbanEditCard => 'कार्ड संपादित करें';
   @override
   String taskLinkOpenTooltip(String path) => '$path खोलें';
+  @override
+  String get tasksForNoteTitle => 'इस नोट के कार्य';
+  @override
+  String get tasksForNoteEmpty => 'कोई कार्य इस नोट से लिंक नहीं है';
 }

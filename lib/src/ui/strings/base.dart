@@ -2298,4 +2298,6 @@ abstract base class Strings {
   String get kanbanEditCard;
 
   String taskLinkOpenTooltip(String path);
+  String get tasksForNoteTitle;
+  String get tasksForNoteEmpty;
 }

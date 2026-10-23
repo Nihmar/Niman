@@ -26,7 +26,6 @@ import 'package:flutter/material.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/todo/parser.dart';
-import 'package:niman/src/todo/reminder_health.dart';
 import 'package:niman/src/todo/reminders.dart';
 import 'package:niman/src/todo/todo_controller.dart';
 import 'package:niman/src/todo/todo_filter.dart';
@@ -38,13 +37,13 @@ import 'package:niman/src/ui/device_shape.dart';
 import 'package:niman/src/ui/pointer_density.dart';
 import 'package:niman/src/ui/reminder_health_banner.dart';
 import 'package:niman/src/ui/strings.dart';
-import 'package:niman/src/ui/todo_edit_dialog.dart';
 import 'package:niman/src/ui/todo_filter_strip.dart';
 import 'package:niman/src/ui/todo_link_host.dart';
 import 'package:niman/src/ui/todo_list_actions.dart';
 import 'package:niman/src/ui/todo_phone_list.dart';
 import 'package:niman/src/ui/todo_pointer_list.dart';
 import 'package:niman/src/ui/todo_quick_add.dart';
+import 'package:niman/src/ui/todo_task_edit.dart';
 import 'package:niman/src/ui/todo_toolbar.dart';
 
 /// The Todo tab body.
@@ -332,22 +331,16 @@ final class _TodoTabState extends State<TodoTab> {
   }
 
   /// Opens the edit dialog and applies the result to [row]'s file.
-  Future<void> _edit(TodoRowItem row) async {
-    final reminders = widget.reminders;
-    final line = await showTodoTaskDialog(
+  Future<void> _edit(TodoRowItem row) {
+    return editTodoTask(
       context,
-      initial: row.entry.task,
+      controller: widget.controller,
+      entry: row.entry,
+      done: row.done,
       today: _today,
-      knownTokens: _knownTokens(),
-      linkSuggester: widget.links?.suggester,
-      onDelete: () => unawaited(_delete(row)),
-      health: reminders?.health.value ?? ReminderHealth.ok,
-      onOpenReminderSettings: reminders?.openHealthSettings,
+      links: widget.links,
+      reminders: widget.reminders,
     );
-    if (line == null || !mounted) {
-      return;
-    }
-    await _rewrite(row, line);
   }
 
   /// The completion pool for the edit dialog: every token in both

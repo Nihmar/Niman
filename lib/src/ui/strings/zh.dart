@@ -3875,4 +3875,8 @@ final class ChineseStrings extends Strings {
   String get kanbanEditCard => '编辑卡片';
   @override
   String taskLinkOpenTooltip(String path) => '打开 $path';
+  @override
+  String get tasksForNoteTitle => '本笔记的任务';
+  @override
+  String get tasksForNoteEmpty => '没有任务链接到本笔记';
 }

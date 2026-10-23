@@ -4363,4 +4363,8 @@ final class LithuanianStrings extends Strings {
   String get kanbanEditCard => 'Redaguoti kortelę';
   @override
   String taskLinkOpenTooltip(String path) => 'Atidaryti $path';
+  @override
+  String get tasksForNoteTitle => 'Šios pastabos užduotys';
+  @override
+  String get tasksForNoteEmpty => 'Jokia užduotis nenurodo į šią pastabą';
 }

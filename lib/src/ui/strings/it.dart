@@ -4360,4 +4360,8 @@ final class ItalianStrings extends Strings {
   String get kanbanEditCard => 'Modifica scheda';
   @override
   String taskLinkOpenTooltip(String path) => 'Apri $path';
+  @override
+  String get tasksForNoteTitle => 'Attività di questa nota';
+  @override
+  String get tasksForNoteEmpty => 'Nessuna attività rimanda a questa nota';
 }
