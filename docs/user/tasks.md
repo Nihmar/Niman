@@ -190,6 +190,112 @@ and skips it; the snackbar counts what moved. Items inside a quote, and
 anything inside a code block, are not checkbox items and are left alone. The
 command is part of the Todo feature: with Todo off in the library, it is gone.
 
+## A list of tasks in a note
+
+A fenced block whose language is `todo` draws a live list of tasks, from
+`todo.txt` and `done.txt`, where you write it. The block holds the question,
+never the answers: on disk it is a few lines of text, and another Markdown
+tool shows a code block. (It is `todo`, not `tasks`, because Obsidian's Tasks
+plugin owns that name with a query language of its own.)
+
+    ```todo
+    link: any
+    project: house
+    due: <=+7d
+    ```
+
+With the caret outside the block, the list is drawn in the read view and in
+live mode alike, on a desktop, a tablet and a phone. Its head says what it
+lists and how many (*Tasks · project house · due within 7 days · 2*). A row is
+a task as *Tasks for this note* draws it: a checkbox that ticks it, a tap that
+opens the task dialog, a chip for each link; a ticked task goes to `done.txt`,
+and the list follows. **Add task** at its foot opens the dialog written out
+from the block (below). With the caret inside the block, or after a tap on its
+head, you see the source again, coloured: the keys the block knows, the values,
+and a key it does not know in the red of a deletion. Drawing the list never
+changes the note; the block is rewritten only when you type in it. With the
+Todo feature off (Settings → Features), or for a note outside a library, the
+block is just a code block.
+
+### The lines
+
+One `key: value` to a line; blank lines and the spaces round a line do not
+matter, and keys may be written in any case. **Every line must match**: a task
+is listed only if it passes all of them. A key left out asks for nothing,
+except `link`, `done` and `sort`, which have defaults.
+
+| Key | Value | Meaning |
+|---|---|---|
+| `link` | `this` (default), `[[Note]]`, `any` | Whose tasks: the ones that link this note; the ones that link another note; every task. |
+| `project` | a name, with or without the `+` | A task with that `+project`. May be given again: the task must have all of them. |
+| `context` | a name, with or without the `@` | A task with that `@context`. May repeat. |
+| `tag` | a name, with or without the `#` | A task with that `#tag`. May repeat. |
+| `due` | `today`, `overdue`, `<=+7d`, `2026-11-02`, `2026-11-01..2026-11-07` | Tasks due then. `<=+7d` is today, the next seven days **and everything overdue**. A task with no due date matches none of them. |
+| `priority` | `A`, `A-C` | Tasks with that priority, or one in that range. |
+| `done` | `no` (default), `yes`, `all` | The open tasks of `todo.txt`; the completed ones of `done.txt`; both, the open ones first. |
+| `sort` | `due` (default), `priority`, `file` | The soonest due first, undated last; `(A)` first; or the file's own order. As in the Todo tab, ties are broken by priority and creation date. |
+
+**An empty block is the tasks that link this note**, the list *Tasks for this
+note* has. `link` stays `this` whatever else the block filters by, so a block
+never widens by itself: to list tasks that do not link the note, say
+`link: any`. A block of one line,
+
+    ```todo
+    due: overdue
+    ```
+
+lists only the overdue tasks among the ones that link the note; and a
+dashboard over the whole list, in a note of its own, is
+
+    ```todo
+    link: any
+    due: <=+7d
+    sort: priority
+    ```
+
+`link: [[Repairs]]` lists the tasks that link *Repairs*, resolved as a wikilink
+in this note is. A link to a heading or a block of the note counts, as in
+*Tasks for this note*. A row in a `link: this` or `link: [[Note]]` list leaves
+out the link to that note, as that list does; a `link: any` list shows every
+link as a chip.
+
+### Add task
+
+**Add task** opens the task dialog with what the block's lines would give a new
+task, so that it shows up in the list. For `link: this` that is ` [[Note]]` — a
+space, then the shortest link that names this note, the caret before it, as
+*Tasks for this note* writes it — and then the `+project`, `@context` and
+`#tag` the block filters by (` [[Note]] +house @phone`). For `link: [[Repairs]]`
+the link is to *Repairs*; for `link: any` there is no link, only the tokens.
+Dates and priorities are not filled in.
+
+### Mistakes
+
+A line the block cannot read — a key it does not know, a value the key does
+not take, a key with no value, a line with no colon, a key that takes one value
+given twice — is a **row in the block saying so**, with the line it is on, and
+a block with any such row **lists no tasks** until it is fixed: a half-read
+filter would show a list that looks right. The rows replace the list; Add task
+is still there. A mistyped key names the nearest one (*Unknown key prio — did
+you mean priority?*), and a wrong value lists what the key takes. A
+`link: [[Note]]` that names no note, or a name several notes share, is a row in
+the same way. In live mode a tap on a row puts the caret on its line.
+
+A block that is fine and finds nothing says *No tasks match* in one line.
+
+### Exporting, and other tools
+
+HTML, PDF and EPUB print the list **as it is when you export**: the head, then
+each task after a box — ☐ open, ☑ done — its links shown by their labels, its
+priority before it and its due date after (*Due 2026-11-02*). The block's
+source is not printed, and a block with errors prints its error lines.
+Exporting a folder or the library prints the block as the code it is on disk,
+since a page of a zip is not made where the tasks are.
+
+Another Markdown tool, a sync client or GitHub shows the block as a code block
+with the lines you wrote, and nothing else; `todo.txt` is read by the same tools
+as ever.
+
 ## Editing and deleting
 
 On a phone, tap a task to edit it; the trash icon in the dialog's title

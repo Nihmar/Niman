@@ -49,6 +49,14 @@ A slides note has one more entry in its ⋮: **Export slides as PDF**, one
 16:9 page per slide and no speaker notes, printed the same way as the PDF
 above (see [slide notes](slides.md#export)).
 
+A `todo` block (see
+[a list of tasks in a note](tasks.md#a-list-of-tasks-in-a-note)) is printed as
+the list it is **at the moment of the export** — ☐ and ☑ and the words of each
+task, links by their labels — in the HTML, the PDF (printed or drawn) and the
+EPUB, not as its source; a block with an error prints its error lines. A
+folder's or the library's export has no tasks at hand and prints the block as
+the code it is on disk.
+
 A link to another note becomes the text it shows on a page exported on
 its own — a wikilink highlighted, a Markdown link its own words — since
 one page has nothing to point at; a link to a website stays a link.

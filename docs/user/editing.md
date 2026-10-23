@@ -956,6 +956,15 @@ outermost item becomes the root; several get a root to hang from. A
 paragraph or a code block an item holds joins that item's words, and the
 cursor may stand in one. The **Tools** section below lists the sheet.
 
+### Lists of tasks
+
+A fenced block whose language is `todo` is drawn as a live list of tasks from
+`todo.txt` and `done.txt` — the tasks that link the note, or any filter of the
+whole list — in the read view and in live mode, and printed as it is in an
+export. With the caret in the block it shows its source, coloured. The lines it
+takes, its errors and its Add task are described with the tasks:
+[A list of tasks in a note](tasks.md#a-list-of-tasks-in-a-note).
+
 ## Tools
 
 The toolbar's **Tools** button opens the editor's extra tools. They are

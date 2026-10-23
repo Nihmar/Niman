@@ -148,6 +148,30 @@ entry is in the Tools sheet as well as the menus, which is the phone toolbar's
 overflow; with no checkbox item at the caret the context menu leaves it out,
 and the Tools sheet and the palette say what is needed.
 
+**As built (2026-10-23), B.** The renderer knows the fence and nothing of
+tasks: a `TodoBlockScope` (`markdown/render/todo_block_scope.dart`) hands the
+read view and `live` a builder, which the note view fills in when the Todo
+feature is on and the note is in a library — without it the fence is the code
+it is, so a card's text or a link preview never draws a list. `live` draws the
+fence through the Mermaid seam (`LiveDiagram` gained a `todo` flag); a fence
+the note has not closed is not drawn, since its body would be the rest of the
+note, and an empty closed one is (it is the question "what links here"). The
+head and a tap on an error row put the caret in the block. A `link:
+[[Note]]` is resolved with the block's note as the place it is written, and
+asked again with the task map; one that names no note, or several, is a row
+like an error (the block lists nothing), and Add task for such a block links
+the note the list is about. Colours come from a `todo` grammar registered in
+the one highlighter (`preview/app_grammars.dart`), so the read view, `live`
+and the export agree; the highlighter tests a mode's `begin` on the text it
+matched alone, so the grammar cannot look ahead for the colon: the first word
+of a line that is not a known key is coloured as unknown, with or without a
+colon. The export is asked before the page is built: the shell evaluates the
+note's fences on the UI isolate (`ui/export_todo_blocks.dart`) and hands plain
+strings (`PrintedTodoBlock`) to the HTML, PDF (printed or drawn) and EPUB
+builders, found by the fence's source with its indent and blank lines taken
+off. A folder's or the library's export, built in an isolate from the files,
+prints the fence as code: it has no snapshot or link map there.
+
 ### What the Todo tab gains
 
 19. A link in a task is drawn as a chip with the note's name; a tap opens
