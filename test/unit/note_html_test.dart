@@ -116,10 +116,26 @@ void main() {
     expect(gone, contains('<span class="embed">![[200]]</span>'));
   });
 
-  test("a task's box shows its state and cannot be ticked", () {
+  test("a task's box is the item's mark: the bullet is off (#1186)", () {
     final html = body('- [x] done\n- [ ] open\n');
-    expect(html, contains('<input type="checkbox" checked="" disabled="" />'));
-    expect(html, contains('<input type="checkbox" disabled="" />'));
+    expect(
+      html,
+      contains(
+        '<li class="task-list-item"><input type="checkbox" checked="" '
+        'disabled="" /> done</li>',
+      ),
+    );
+    expect(
+      html,
+      contains(
+        '<li class="task-list-item"><input type="checkbox" disabled="" /> '
+        'open</li>',
+      ),
+    );
+    // Another item is not marked as one: its bullet stays.
+    final plain = body('- plain\n');
+    expect(plain, contains('<li>plain</li>'));
+    expect(plain, isNot(contains('task-list-item')));
   });
 
   test('a tag and a highlight', () {

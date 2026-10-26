@@ -55,7 +55,7 @@ final class NoteHtml {
   String _render(HtmlHooks hooks) {
     final board = _board;
     return board == null
-        ? TreeHtml(source.text, hooks: hooks).render()
+        ? TreeHtml(source.text, hooks: hooks, taskItemClasses: true).render()
         : KanbanHtml(board, hooks).render();
   }
 

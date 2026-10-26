@@ -37,11 +37,17 @@ final class TreeHtml {
   /// filled by [collect] over every piece first), its citations are counted
   /// across the pieces, and the footnotes' section is not written here:
   /// the caller writes it once, after the last piece.
+  ///
+  /// [taskItemClasses] gives a task item's `<li>` the `task-list-item`
+  /// class, as GitHub's pages do: the export's style takes the bullet off
+  /// with it, the box standing as the item's mark (#1186). Off by default,
+  /// the specifications' expected HTML carrying no class.
   new(
     this.source, {
     this.extensions = true,
     this.appSyntax = true,
     this.hooks = const HtmlHooks(),
+    this.taskItemClasses = false,
     HtmlDefinitions? shared,
   }) : _body = _withoutLastBreak(source),
        _lines = _withoutLastBreak(source).split('\n'),
@@ -56,6 +62,10 @@ final class TreeHtml {
 
   /// Whether the app's own block syntax is read.
   final bool appSyntax;
+
+  /// Whether a task item's `<li>` says so with GFM's `task-list-item`
+  /// class, which the export's style needs to take the bullet off.
+  final bool taskItemClasses;
 
   /// What a page draws its own way.
   final HtmlHooks hooks;
@@ -292,19 +302,22 @@ final class TreeHtml {
 
   void _item(ItemNode item, {required bool tight}) {
     _cr();
-    _write('<li>');
     final first = item.children.isEmpty ? null : item.children.first;
-    if (first is LeafNode && first.kind == BlockKind.paragraph) {
-      final text = _paragraphs[first] ?? '';
-      final task = TaskBox.of(text);
-      if (task != null) {
-        _write(
-          task.checked
-              ? '<input type="checkbox" checked="" disabled="" /> '
-              : '<input type="checkbox" disabled="" /> ',
-        );
-        _paragraphs[first] = text.substring(task.length);
-      }
+    final paragraph = first is LeafNode && first.kind == BlockKind.paragraph
+        ? first
+        : null;
+    final text = paragraph == null ? '' : _paragraphs[paragraph] ?? '';
+    final task = paragraph == null ? null : TaskBox.of(text);
+    _write(
+      task != null && taskItemClasses ? '<li class="task-list-item">' : '<li>',
+    );
+    if (paragraph != null && task != null) {
+      _write(
+        task.checked
+            ? '<input type="checkbox" checked="" disabled="" /> '
+            : '<input type="checkbox" disabled="" /> ',
+      );
+      _paragraphs[paragraph] = text.substring(task.length);
     }
     _blocks(item.children, tight: tight);
     _write('</li>\n');

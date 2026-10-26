@@ -70,10 +70,16 @@ String _columns(int columns) {
   return '---\ntype: kanban\n---\n${cards.join('\n')}';
 }
 
-/// What a note's body was before boards: the writer with the page's hooks.
+/// What a note's body was before boards: the writer with the page's hooks,
+/// in the export's own form — a task item's `<li>` carrying the class the
+/// page takes its bullet off by (#1186).
 String _before(String text) {
   final source = NoteHtmlSource(text: text, title: 't');
-  return TreeHtml(text, hooks: ExportHooks(source, MathSvg())).render();
+  return TreeHtml(
+    text,
+    hooks: ExportHooks(source, MathSvg()),
+    taskItemClasses: true,
+  ).render();
 }
 
 void main() {
