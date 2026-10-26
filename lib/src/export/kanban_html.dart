@@ -133,7 +133,14 @@ final class KanbanHtml {
   /// [markdown], a piece of the note, as the writer writes it with the
   /// note's definitions; on the first pass it only reads them.
   String _piece(String markdown) {
-    final writer = TreeHtml(markdown, hooks: hooks, shared: _defs);
+    final writer = TreeHtml(
+      markdown,
+      hooks: hooks,
+      shared: _defs,
+      // A piece is the exported page like any other: a task item in a
+      // column's prose or in a card's body is its box, not a bullet (#1186).
+      taskItemClasses: true,
+    );
     if (!_collecting) return writer.render();
     writer.collect();
     return '';

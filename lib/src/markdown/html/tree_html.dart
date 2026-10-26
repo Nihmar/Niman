@@ -37,11 +37,17 @@ final class TreeHtml {
   /// filled by [collect] over every piece first), its citations are counted
   /// across the pieces, and the footnotes' section is not written here:
   /// the caller writes it once, after the last piece.
+  ///
+  /// [taskItemClasses] gives a task item's `<li>` the `task-list-item`
+  /// class, as GitHub's pages do: the export's style takes the bullet off
+  /// with it, the box standing as the item's mark (#1186). Off by default,
+  /// the specifications' expected HTML carrying no class.
   new(
     this.source, {
     this.extensions = true,
     this.appSyntax = true,
     this.hooks = const HtmlHooks(),
+    this.taskItemClasses = false,
     HtmlDefinitions? shared,
   }) : _body = _withoutLastBreak(source),
        _lines = _withoutLastBreak(source).split('\n'),
@@ -56,6 +62,10 @@ final class TreeHtml {
 
   /// Whether the app's own block syntax is read.
   final bool appSyntax;
+
+  /// Whether a task item's `<li>` says so with GFM's `task-list-item`
+  /// class, which the export's style needs to take the bullet off.
+  final bool taskItemClasses;
 
   /// What a page draws its own way.
   final HtmlHooks hooks;
@@ -292,22 +302,37 @@ final class TreeHtml {
 
   void _item(ItemNode item, {required bool tight}) {
     _cr();
-    _write('<li>');
-    final first = item.children.isEmpty ? null : item.children.first;
-    if (first is LeafNode && first.kind == BlockKind.paragraph) {
-      final text = _paragraphs[first] ?? '';
-      final task = TaskBox.of(text);
-      if (task != null) {
-        _write(
-          task.checked
-              ? '<input type="checkbox" checked="" disabled="" /> '
-              : '<input type="checkbox" disabled="" /> ',
-        );
-        _paragraphs[first] = text.substring(task.length);
-      }
+    final task = _taskOf(item);
+    _write(
+      task != null && taskItemClasses ? '<li class="task-list-item">' : '<li>',
+    );
+    if (task != null) {
+      _write(
+        task.checked
+            ? '<input type="checkbox" checked="" disabled="" /> '
+            : '<input type="checkbox" disabled="" /> ',
+      );
+      _paragraphs[task.paragraph] = task.text;
     }
     _blocks(item.children, tight: tight);
     _write('</li>\n');
+  }
+
+  /// The task box [item] starts with, if it does: the paragraph holding it,
+  /// whether it is ticked, and the paragraph without it, the box taken off.
+  /// Null for a box-less item.
+  ({LeafNode paragraph, bool checked, String text})? _taskOf(ItemNode item) {
+    if (item.children.isEmpty) return null;
+    final first = item.children.first;
+    if (first is! LeafNode || first.kind != BlockKind.paragraph) return null;
+    final text = _paragraphs[first] ?? '';
+    final box = TaskBox.of(text);
+    if (box == null) return null;
+    return (
+      paragraph: first,
+      checked: box.checked,
+      text: text.substring(box.length),
+    );
   }
 
   /// Whether [list] is tight: no blank line between its items, nor between

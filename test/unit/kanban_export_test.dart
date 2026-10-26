@@ -70,10 +70,19 @@ String _columns(int columns) {
   return '---\ntype: kanban\n---\n${cards.join('\n')}';
 }
 
-/// What a note's body was before boards: the writer with the page's hooks.
+/// What a note's body was before boards: the writer with the page's hooks,
+/// in the export's own form — a task item's `<li>` carrying the class the
+/// page takes its bullet off by (#1186). Built from the writer rather than
+/// from [NoteHtml] on purpose: it is the control the board is compared
+/// against, so it may not share the code under test — only the form the
+/// export settles on, which is why the flag is repeated here.
 String _before(String text) {
   final source = NoteHtmlSource(text: text, title: 't');
-  return TreeHtml(text, hooks: ExportHooks(source, MathSvg())).render();
+  return TreeHtml(
+    text,
+    hooks: ExportHooks(source, MathSvg()),
+    taskItemClasses: true,
+  ).render();
 }
 
 void main() {
@@ -127,6 +136,50 @@ void main() {
           'checked="" disabled="" /> Pick the date',
         ),
       );
+    });
+
+    test('a task in a column is its box too, not a bullet (#1186)', () {
+      final html = _html(
+        '---\ntype: kanban\n---\n'
+        '- [ ] before the board\n'
+        '\n## Todo\n- [ ] card\n'
+        '  - [x] in the body\n',
+      ).body();
+      expect(
+        html,
+        contains(
+          '<li class="task-list-item"><input type="checkbox" disabled="" /> '
+          'before the board</li>',
+        ),
+      );
+      expect(
+        html,
+        contains(
+          '<li class="task-list-item"><input type="checkbox" checked="" '
+          'disabled="" /> in the body</li>',
+        ),
+      );
+    });
+
+    test("a card's title keeps its inlines with the box in front", () {
+      final html = _html(
+        '---\ntype: kanban\n---\n'
+        '## Todo\n- [ ] Read [[Other]] and *that*\n',
+        links: {'Other': 'other.html'},
+      ).body();
+      // The title is the writer's one-item list unwrapped: the box, then
+      // what the title says, drawn — not escaped (#1186).
+      expect(
+        html,
+        contains(
+          '<div class="kanban-card-title"><input type="checkbox" '
+          'disabled="" /> Read '
+          '<a class="wikilink" href="other.html">Other</a> and '
+          '<em>that</em></div>',
+        ),
+      );
+      // The wrapper's own class does not leak into the card.
+      expect(html, isNot(contains('task-list-item')));
     });
 
     test('shows tags and the due date as chips, out of the title', () {

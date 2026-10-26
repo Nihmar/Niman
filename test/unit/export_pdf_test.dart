@@ -143,4 +143,38 @@ void main() {
     expect(page, contains('@page { size: 254.000mm 142.875mm; margin: 0; }'));
     expect(page, isNot(contains('ignored')));
   });
+
+  test('a task item prints as its box, without the bullet (#1186)', () async {
+    final printer = _Prints();
+    await exportNotePdf(
+      text: '- [ ] open\n- [x] done\n',
+      title: 'Tasks',
+      path: 'Notes/Tasks.md',
+      root: root.path,
+      language: 'en',
+      printer: printer,
+    );
+    final page = printer.page!;
+    // The page's style takes the bullet off a task item by this class. The
+    // rule is matched as a rule, so reformatting it is no test failure.
+    expect(
+      RegExp(r'li\.task-list-item\s*\{[^}]*list-style:\s*none').hasMatch(page),
+      isTrue,
+      reason: "the page carries no rule taking a task item's bullet off",
+    );
+    expect(
+      page,
+      contains(
+        '<li class="task-list-item"><input type="checkbox" disabled="" /> '
+        'open</li>',
+      ),
+    );
+    expect(
+      page,
+      contains(
+        '<li class="task-list-item"><input type="checkbox" checked="" '
+        'disabled="" /> done</li>',
+      ),
+    );
+  });
 }

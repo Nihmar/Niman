@@ -6,8 +6,13 @@ import 'package:niman/src/kanban/card_text.dart';
 import 'package:niman/src/kanban/kanban_card.dart';
 
 /// The `<ul><li>` the writer wraps a one-item list in, around the item's
-/// own HTML.
-final RegExp _item = RegExp(r'^<ul>\n<li>(.*)</li>\n</ul>\n?$', dotAll: true);
+/// own HTML. The `<li>` may carry a class — a task item's does, the page's
+/// export writing it that way (#1186) — so what is read is the item's HTML
+/// between the tag and `</li>`, whatever else the tag says.
+final RegExp _item = RegExp(
+  r'^<ul>\n<li(?: [^>]*)?>(.*)</li>\n</ul>\n?$',
+  dotAll: true,
+);
 
 /// Writes a card as a list item of the board's `kanban-cards` list.
 ///

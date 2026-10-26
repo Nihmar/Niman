@@ -45,6 +45,10 @@ one file:
   opens on. A wikilink out has nothing to point at, exactly as on a
   single HTML page.
 
+A task item prints as the box that marks it, the bullet off, so a
+checklist reads as one in the HTML, the PDF and the EPUB — inside a kanban
+board's columns and cards too.
+
 A slides note has one more entry in its ⋮: **Export slides as PDF**, one
 16:9 page per slide and no speaker notes, printed the same way as the PDF
 above (see [slide notes](slides.md#export)).
