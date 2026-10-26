@@ -217,7 +217,18 @@ HighlightColour? _highlightIn(String fragment) {
   }
   final passage = <String>[];
   for (var line = start; line < end; line = lineEndAt(line)) {
-    if (line == linkLine) continue;
+    if (line == linkLine) {
+      // A link the tidying folded into its quote (`> passage — [[…]]`,
+      // #1183): the passage is what the line holds before the link, the
+      // separator `Annotation.toMarkdown` puts there taken off.
+      final before = text
+          .substring(line, at)
+          .replaceFirst(_quoteLine, '')
+          .trimRight();
+      final quoted = before.replaceFirst(_linkBackSeparator, '').trim();
+      if (quoted.isNotEmpty) passage.add(quoted);
+      continue;
+    }
     final content = text
         .substring(line, lineEndAt(line))
         .replaceFirst(_quoteLine, '')
@@ -233,6 +244,10 @@ HighlightColour? _highlightIn(String fragment) {
 
 /// A block quote's line, and the marker it opens with.
 final RegExp _quoteLine = RegExp('^ {0,3}> ?');
+
+/// The `—` that sets an annotation's link apart from the passage it quotes,
+/// as the tidying leaves it when it folds the two onto one line (#1183).
+final RegExp _linkBackSeparator = RegExp(r'\s*—\s*$');
 
 /// A Markdown escape: a backslash before a punctuation mark.
 final RegExp _escaped = RegExp(r'\\([!-/:-@\[-`{-~])');

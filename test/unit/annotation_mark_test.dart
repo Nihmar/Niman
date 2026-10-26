@@ -113,6 +113,19 @@ void main() {
       expect(pink.quote, isEmpty);
     });
 
+    test('a tidied link folded into its quote keeps the quote (#1183)', () {
+      const merged =
+          '> The spice must flow. — '
+          '[[Books/Dune.pdf#page=34&chars=0-20&highlight=green|Dune, p. 34]]\n';
+      final green = annotationLinksIn(merged).single;
+      expect(green.quote, 'The spice must flow.');
+      expect(green.highlight, HighlightColour.green);
+      expect(green.offset, 0);
+      expect(green.end, merged.length);
+      // The whole line is the quote: what removing it takes away.
+      expect(merged.substring(green.offset, green.end), merged);
+    });
+
     test('an annotation has no colour, no end, no quote', () {
       final first = annotationLinksIn(highlights).first;
       expect(first.end, isNull);
