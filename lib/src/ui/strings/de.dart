@@ -3332,6 +3332,9 @@ final class GermanStrings extends Strings {
   String get commandInsertEisenhower => 'Eisenhower-Matrix einfügen';
 
   @override
+  String get eisenhowerMatrix => 'Eisenhower-Matrix';
+
+  @override
   String get commandInsertMindMap => 'Mindmap einfügen';
 
   @override
@@ -3346,14 +3349,21 @@ final class GermanStrings extends Strings {
   @override
   String get toolEisenhowerSubtitle =>
       'Ein Raster aus dringenden und wichtigen Aufgaben';
+
   @override
   String get eisenhowerUrgent => 'Dringend';
+
   @override
   String get eisenhowerNotUrgent => 'Nicht dringend';
+
   @override
   String get eisenhowerImportant => 'Wichtig';
+
   @override
   String get eisenhowerNotImportant => 'Nicht wichtig';
+
+  @override
+  String get toolNeedsEditor => 'Die Notiz ist nicht im Editor geöffnet';
 
   @override
   String ocrEngineName(String version) => 'Tesseract $version';

@@ -3310,6 +3310,9 @@ final class CatalanStrings extends Strings {
   String get commandInsertEisenhower => 'Insereix la matriu d’Eisenhower';
 
   @override
+  String get eisenhowerMatrix => 'Matriu d’Eisenhower';
+
+  @override
   String get commandInsertMindMap => 'Insereix mapa mental';
 
   @override
@@ -3325,14 +3328,21 @@ final class CatalanStrings extends Strings {
   @override
   String get toolEisenhowerSubtitle =>
       'Una graella de tasques urgents i importants';
+
   @override
   String get eisenhowerUrgent => 'Urgent';
+
   @override
   String get eisenhowerNotUrgent => 'No urgent';
+
   @override
   String get eisenhowerImportant => 'Important';
+
   @override
   String get eisenhowerNotImportant => 'No important';
+
+  @override
+  String get toolNeedsEditor => 'La nota no està oberta a l’editor';
 
   @override
   String ocrEngineName(String version) => 'Tesseract $version';

@@ -2966,6 +2966,9 @@ final class JapaneseStrings extends Strings {
   String get commandInsertEisenhower => 'アイゼンハワーマトリクスを挿入';
 
   @override
+  String get eisenhowerMatrix => 'アイゼンハワーマトリクス';
+
+  @override
   String get commandInsertMindMap => 'マインドマップを挿入';
 
   @override
@@ -2978,14 +2981,21 @@ final class JapaneseStrings extends Strings {
 
   @override
   String get toolEisenhowerSubtitle => '緊急で重要なタスクのグリッド';
+
   @override
   String get eisenhowerUrgent => '緊急';
+
   @override
   String get eisenhowerNotUrgent => '緊急でない';
+
   @override
   String get eisenhowerImportant => '重要';
+
   @override
   String get eisenhowerNotImportant => '重要でない';
+
+  @override
+  String get toolNeedsEditor => 'ノートがエディターで開かれていません';
 
   @override
   String ocrEngineName(String version) => 'Tesseract $version';

@@ -586,11 +586,13 @@ final class AppStrings {
   static String get eisenhowerNotUrgent => _s.eisenhowerNotUrgent;
   static String get eisenhowerImportant => _s.eisenhowerImportant;
   static String get eisenhowerNotImportant => _s.eisenhowerNotImportant;
+  static String get toolNeedsEditor => _s.toolNeedsEditor;
   static String get diagramTitle => _s.diagramTitle;
   static String get fullScreen => _s.fullScreen;
   static String get commandInsertDiagram => _s.commandInsertDiagram;
   static String get commandInsertColumns => _s.commandInsertColumns;
   static String get commandInsertEisenhower => _s.commandInsertEisenhower;
+  static String get eisenhowerMatrix => _s.eisenhowerMatrix;
   static String get commandInsertMindMap => _s.commandInsertMindMap;
   static String get commandConvertListToMindMap =>
       _s.commandConvertListToMindMap;

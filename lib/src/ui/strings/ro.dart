@@ -3312,6 +3312,9 @@ final class RomanianStrings extends Strings {
   String get commandInsertEisenhower => 'Inserează matricea Eisenhower';
 
   @override
+  String get eisenhowerMatrix => 'Matricea Eisenhower';
+
+  @override
   String get commandInsertMindMap => 'Inserează hartă mentală';
 
   @override
@@ -3326,14 +3329,21 @@ final class RomanianStrings extends Strings {
   @override
   String get toolEisenhowerSubtitle =>
       'O grilă de sarcini urgente și importante';
+
   @override
   String get eisenhowerUrgent => 'Urgent';
+
   @override
   String get eisenhowerNotUrgent => 'Nu e urgent';
+
   @override
   String get eisenhowerImportant => 'Important';
+
   @override
   String get eisenhowerNotImportant => 'Nu e important';
+
+  @override
+  String get toolNeedsEditor => 'Nota nu este deschisă în editor';
 
   @override
   String ocrEngineName(String version) => 'Tesseract $version';

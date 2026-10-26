@@ -115,6 +115,9 @@ void main() {
             .enabled,
         isFalse,
       );
+      // With no editor to write in, it says so rather than repeating what
+      // the tool does.
+      expect(find.text(AppStrings.toolNeedsEditor), findsOneWidget);
       // The list tools still keep their place beside it.
       expect(find.byKey(const Key('editor-tool-countList')), findsOneWidget);
       expect(find.byKey(const Key('editor-tool-mindMap')), findsOneWidget);

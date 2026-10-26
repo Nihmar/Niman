@@ -3241,6 +3241,9 @@ final class NorwegianStrings extends Strings {
   String get commandInsertEisenhower => 'Sett inn Eisenhower-matrise';
 
   @override
+  String get eisenhowerMatrix => 'Eisenhower-matrise';
+
+  @override
   String get commandInsertMindMap => 'Sett inn tankekart';
 
   @override
@@ -3255,14 +3258,21 @@ final class NorwegianStrings extends Strings {
   @override
   String get toolEisenhowerSubtitle =>
       'Et rutenett av haster og viktige oppgaver';
+
   @override
   String get eisenhowerUrgent => 'Haster';
+
   @override
   String get eisenhowerNotUrgent => 'Haster ikke';
+
   @override
   String get eisenhowerImportant => 'Viktig';
+
   @override
   String get eisenhowerNotImportant => 'Ikke viktig';
+
+  @override
+  String get toolNeedsEditor => 'Notatet er ikke åpnet i editoren';
 
   @override
   String ocrEngineName(String version) => 'Tesseract $version';

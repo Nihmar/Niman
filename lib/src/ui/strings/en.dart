@@ -3209,6 +3209,9 @@ final class EnglishStrings extends Strings {
   String get commandInsertEisenhower => 'Insert Eisenhower matrix';
 
   @override
+  String get eisenhowerMatrix => 'Eisenhower matrix';
+
+  @override
   String get commandInsertMindMap => 'Insert mind map';
 
   @override
@@ -3222,14 +3225,21 @@ final class EnglishStrings extends Strings {
 
   @override
   String get toolEisenhowerSubtitle => 'A grid of urgent and important tasks';
+
   @override
   String get eisenhowerUrgent => 'Urgent';
+
   @override
   String get eisenhowerNotUrgent => 'Not urgent';
+
   @override
   String get eisenhowerImportant => 'Important';
+
   @override
   String get eisenhowerNotImportant => 'Not important';
+
+  @override
+  String get toolNeedsEditor => 'The note is not open in the editor';
 
   @override
   String ocrEngineName(String version) => 'Tesseract $version';

@@ -3280,6 +3280,9 @@ final class AlbanianStrings extends Strings {
   String get commandInsertEisenhower => 'Fut matricën e Eisenhower';
 
   @override
+  String get eisenhowerMatrix => 'Matrica e Eisenhower';
+
+  @override
   String get commandInsertMindMap => 'Fut hartë mendore';
 
   @override
@@ -3294,14 +3297,21 @@ final class AlbanianStrings extends Strings {
   @override
   String get toolEisenhowerSubtitle =>
       'Një rrjet detyrash urgjente dhe të rëndësishme';
+
   @override
   String get eisenhowerUrgent => 'Urgjente';
+
   @override
   String get eisenhowerNotUrgent => 'Jo urgjente';
+
   @override
   String get eisenhowerImportant => 'E rëndësishme';
+
   @override
   String get eisenhowerNotImportant => 'Jo e rëndësishme';
+
+  @override
+  String get toolNeedsEditor => 'Shënimi nuk është i hapur në redaktues';
 
   @override
   String ocrEngineName(String version) => 'Tesseract $version';

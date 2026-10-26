@@ -3279,6 +3279,9 @@ final class FinnishStrings extends Strings {
   String get commandInsertEisenhower => 'Lisää Eisenhower-matriisi';
 
   @override
+  String get eisenhowerMatrix => 'Eisenhower-matriisi';
+
+  @override
   String get commandInsertMindMap => 'Lisää miellekartta';
 
   @override
@@ -3293,14 +3296,21 @@ final class FinnishStrings extends Strings {
   @override
   String get toolEisenhowerSubtitle =>
       'Ruudukko kiireellisistä ja tärkeistä tehtävistä';
+
   @override
   String get eisenhowerUrgent => 'Kiireellinen';
+
   @override
   String get eisenhowerNotUrgent => 'Ei kiireellinen';
+
   @override
   String get eisenhowerImportant => 'Tärkeä';
+
   @override
   String get eisenhowerNotImportant => 'Ei tärkeä';
+
+  @override
+  String get toolNeedsEditor => 'Muistiinpano ei ole auki editorissa';
 
   @override
   String ocrEngineName(String version) => 'Tesseract $version';

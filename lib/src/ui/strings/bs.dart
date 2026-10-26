@@ -3284,6 +3284,9 @@ final class BosnianStrings extends Strings {
   String get commandInsertEisenhower => 'Umetni Eisenhowerovu matricu';
 
   @override
+  String get eisenhowerMatrix => 'Eisenhowerova matrica';
+
+  @override
   String get commandInsertMindMap => 'Umetni mentalnu mapu';
 
   @override
@@ -3297,14 +3300,21 @@ final class BosnianStrings extends Strings {
 
   @override
   String get toolEisenhowerSubtitle => 'Mreža hitnih i važnih zadataka';
+
   @override
   String get eisenhowerUrgent => 'Hitno';
+
   @override
   String get eisenhowerNotUrgent => 'Nije hitno';
+
   @override
   String get eisenhowerImportant => 'Važno';
+
   @override
   String get eisenhowerNotImportant => 'Nije važno';
+
+  @override
+  String get toolNeedsEditor => 'Bilješka nije otvorena u uređivaču';
 
   @override
   String ocrEngineName(String version) => 'Tesseract $version';

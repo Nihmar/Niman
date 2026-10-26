@@ -3297,6 +3297,9 @@ final class UkrainianStrings extends Strings {
   String get commandInsertEisenhower => 'Вставити матрицю Ейзенхауера';
 
   @override
+  String get eisenhowerMatrix => 'Матриця Ейзенхауера';
+
+  @override
   String get commandInsertMindMap => 'Вставити карту думок';
 
   @override
@@ -3310,14 +3313,21 @@ final class UkrainianStrings extends Strings {
 
   @override
   String get toolEisenhowerSubtitle => 'Сітка з нагальних і важливих завдань';
+
   @override
   String get eisenhowerUrgent => 'Терміново';
+
   @override
   String get eisenhowerNotUrgent => 'Не терміново';
+
   @override
   String get eisenhowerImportant => 'Важливо';
+
   @override
   String get eisenhowerNotImportant => 'Не важливо';
+
+  @override
+  String get toolNeedsEditor => 'Нотатка не відкрита в редакторі';
 
   @override
   String ocrEngineName(String version) => 'Tesseract $version';

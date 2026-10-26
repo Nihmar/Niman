@@ -3363,6 +3363,9 @@ final class GreekStrings extends Strings {
   String get commandInsertEisenhower => 'Εισαγωγή πίνακα Eisenhower';
 
   @override
+  String get eisenhowerMatrix => 'Πίνακας Eisenhower';
+
+  @override
   String get commandInsertMindMap => 'Εισαγωγή νοητικού χάρτη';
 
   @override
@@ -3377,14 +3380,21 @@ final class GreekStrings extends Strings {
   @override
   String get toolEisenhowerSubtitle =>
       'Πλέγμα από επείγουσες και σημαντικές εργασίες';
+
   @override
   String get eisenhowerUrgent => 'Επείγον';
+
   @override
   String get eisenhowerNotUrgent => 'Μη επείγον';
+
   @override
   String get eisenhowerImportant => 'Σημαντικό';
+
   @override
   String get eisenhowerNotImportant => 'Μη σημαντικό';
+
+  @override
+  String get toolNeedsEditor => 'Η σημείωση δεν είναι ανοιχτή στον επεξεργαστή';
 
   @override
   String ocrEngineName(String version) => 'Tesseract $version';

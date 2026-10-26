@@ -3281,6 +3281,9 @@ final class MacedonianStrings extends Strings {
   String get commandInsertEisenhower => 'Вметни матрица на Ајзенхауер';
 
   @override
+  String get eisenhowerMatrix => 'Матрица на Ајзенхауер';
+
+  @override
   String get commandInsertMindMap => 'Вметни ментална мапа';
 
   @override
@@ -3294,14 +3297,21 @@ final class MacedonianStrings extends Strings {
 
   @override
   String get toolEisenhowerSubtitle => 'Мрежа на итни и важни задачи';
+
   @override
   String get eisenhowerUrgent => 'Итно';
+
   @override
   String get eisenhowerNotUrgent => 'Не е итно';
+
   @override
   String get eisenhowerImportant => 'Важно';
+
   @override
   String get eisenhowerNotImportant => 'Не е важно';
+
+  @override
+  String get toolNeedsEditor => 'Белешката не е отворена во уредувачот';
 
   @override
   String ocrEngineName(String version) => 'Tesseract $version';

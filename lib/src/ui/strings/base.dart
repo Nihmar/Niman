@@ -444,6 +444,10 @@ abstract base class Strings {
   String get eisenhowerImportant;
   String get eisenhowerNotImportant;
 
+  /// Why the tools cannot run at all: the note is not open in the editor,
+  /// which is all the Eisenhower matrix asks (#1139).
+  String get toolNeedsEditor;
+
   // Diagrams (#530): the full-screen view and the window that holds it.
   String get diagramTitle;
   String get fullScreen;
@@ -454,6 +458,10 @@ abstract base class Strings {
 
   /// The palette's Insert Eisenhower matrix (#1139).
   String get commandInsertEisenhower;
+
+  /// The editor menu's entry for the matrix, beside Table and Columns
+  /// (#1139): the Insert group already says Insert.
+  String get eisenhowerMatrix;
   String get commandInsertMindMap;
   String get commandConvertListToMindMap;
   String get tallySourceLabel;

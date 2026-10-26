@@ -271,7 +271,7 @@ ContextMenuPart editorMenu({
             ),
             command(
               'eisenhower',
-              AppStrings.commandInsertEisenhower,
+              AppStrings.eisenhowerMatrix,
               Icons.grid_view_outlined,
               (text, selection) => insertEisenhowerMatrix(
                 text: text,

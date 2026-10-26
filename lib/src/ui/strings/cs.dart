@@ -3252,6 +3252,9 @@ final class CzechStrings extends Strings {
   String get commandInsertEisenhower => 'Vložit Eisenhowerovu matici';
 
   @override
+  String get eisenhowerMatrix => 'Eisenhowerova matice';
+
+  @override
   String get commandInsertMindMap => 'Vložit myšlenkovou mapu';
 
   @override
@@ -3266,14 +3269,21 @@ final class CzechStrings extends Strings {
 
   @override
   String get toolEisenhowerSubtitle => 'Mřížka naléhavých a důležitých úkolů';
+
   @override
   String get eisenhowerUrgent => 'Naléhavé';
+
   @override
   String get eisenhowerNotUrgent => 'Nenaléhavé';
+
   @override
   String get eisenhowerImportant => 'Důležité';
+
   @override
   String get eisenhowerNotImportant => 'Nedůležité';
+
+  @override
+  String get toolNeedsEditor => 'Poznámka není otevřená v editoru';
 
   @override
   String ocrEngineName(String version) => 'Tesseract $version';
