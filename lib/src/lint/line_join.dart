@@ -8,6 +8,8 @@
 /// included: their lines are a heading's, not a paragraph's), a fence, a
 /// table, math, HTML, frontmatter and a link reference definition are
 /// never joined, and neither is a line that starts a block of its own.
+/// An annotation's line back to the passage it quotes is its own line too,
+/// and no line joins onto it (`_opensLinkBack`, #1183).
 /// Only a soft line break is: a line ending in a hard break keeps it.
 library;
 
@@ -29,7 +31,9 @@ String joinWrappedLines(
   required bool outside,
 }) {
   if (!inItems && !outside) return source;
-  // The line each joining line's text starts at, by line.
+  // Where each paragraph line's text starts, by line, and which of the
+  // lines go on with the one above.
+  final starts = <int, int>{};
   final joins = <int, int>{};
   void walk(List<BlockNode> nodes, {required bool inItem}) {
     for (final node in nodes) {
@@ -47,9 +51,12 @@ String joinWrappedLines(
         case LeafNode(:final kind, :final lines, :final definition):
           if (kind != BlockKind.paragraph || definition) continue;
           if (!(inItem ? inItems : outside)) continue;
-          for (final span in lines.skip(1)) {
+          for (final span in lines) {
+            starts[span.line] = span.start;
             joins[span.line] = span.start;
           }
+          // A paragraph's first line has nothing above it to join.
+          joins.remove(lines.first.line);
       }
     }
   }
@@ -57,25 +64,58 @@ String joinWrappedLines(
   walk(BlockTree.of(source), inItem: false);
   if (joins.isEmpty) return source;
   final lines = source.split('\n');
+
+  // Whether the paragraph line at [at] opens an annotation's line back to
+  // its quote: no line joins onto it either, or the quote reads empty
+  // (#1183).
+  bool opensLinkBack(int at) {
+    final start = starts[at];
+    return start != null && _opensLinkBack(_contentOf(lines[at], start));
+  }
+
   final out = <String>[];
+  // The line last written opens an annotation's link back: the line below
+  // is its own, not a continuation of it (#1183).
+  var afterLinkBack = false;
   for (var at = 0; at < lines.length; at++) {
     final start = joins[at];
     final line = lines[at];
-    if (start == null || out.isEmpty || _breaks(out.last)) {
+    if (start == null || out.isEmpty) {
       out.add(line);
+      afterLinkBack = opensLinkBack(at);
       continue;
     }
     final cr = line.endsWith('\r') ? '\r' : '';
     // Its trailing spaces stay: a hard break at its end is the next
     // line's to keep.
-    final text = line
-        .substring(0, line.length - cr.length)
-        .substring(start)
-        .trimLeft();
+    final text = _contentOf(line, start);
+    if (_opensLinkBack(text) || afterLinkBack || _breaks(out.last)) {
+      out.add(line);
+      afterLinkBack = _opensLinkBack(text);
+      continue;
+    }
     out.last = '${out.last.trimRight()} $text$cr';
+    afterLinkBack = false;
   }
   return out.join('\n');
 }
+
+/// [line]'s text past [start]: its `\r` and its leading white space off.
+String _contentOf(String line, int start) => line
+    .substring(0, line.length - (line.endsWith('\r') ? 1 : 0))
+    .substring(start)
+    .trimLeft();
+
+/// The `— [[…]]` an annotation's line back to its place opens with.
+final RegExp _linkBack = RegExp(r'^—\s*\[{1,2}');
+
+/// Whether [text], past the container marks it was written with, opens an
+/// annotation's line back to the place it quotes:
+/// `— [[Books/Dune.pdf#page=34]]`, or the Markdown link a library writes
+/// instead (`Annotation.toMarkdown`).
+/// The line is the annotation's, not a continuation of the quote above it:
+/// joined, the quote loses its passage and the companion its mark (#1183).
+bool _opensLinkBack(String text) => _linkBack.hasMatch(text);
 
 /// Whether [line] ends in a hard break: two spaces, or a backslash that
 /// escapes none.

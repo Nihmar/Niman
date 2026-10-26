@@ -123,6 +123,30 @@ void main() {
     kept('> one\n>\n> two\n');
   });
 
+  test("an annotation's link back to its place stays its own line (#1183)", () {
+    // As `Annotation.toMarkdown` writes it: a quote, then the link back.
+    kept(
+      '> The spice must flow.\n'
+      '> — [[Books/Dune.pdf#page=34|Dune, p. 34]]\n',
+    );
+    // A wrapped quote is still joined; only the link line is not.
+    expect(
+      tidy(
+        '> one\n> two\n'
+        '> — [Dune, p. 3](Books/Dune.pdf#page=3&highlight=green)\n',
+      ),
+      '> one two\n'
+      '> — [Dune, p. 3](Books/Dune.pdf#page=3&highlight=green)\n',
+    );
+    // Nor is a line pulled onto the link back: the quote would read empty.
+    kept(
+      '> — [[Books/Dune.pdf#page=34|Dune, p. 34]]\n'
+      '> The spice must flow.\n',
+    );
+    // A quote captured from a page ends the same way (`capture_quote.dart`).
+    kept('> Words worth keeping.\n> — [Dune](<https://example.com/dune>)\n');
+  });
+
   test("a footnote's paragraph is joined", () {
     expect(tidy('[^1]: foot\n    more foot\n'), '[^1]: foot more foot\n');
   });

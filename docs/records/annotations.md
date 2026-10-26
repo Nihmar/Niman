@@ -118,12 +118,17 @@ annotation with a colour and nothing to say, kept in the same companion:
   before is an annotation still. `annotationLinksIn` gives a highlight's
   link its quote (the run of `>` lines around it, start and end, the
   passage unescaped) instead of the heading above it, and every link its
-  label. `CompanionNotes` removes a highlight (its quote and the blank line
-  keeping it apart), recolours it in its link, and turns it into an
-  annotation in place (`annotateHighlight`: the heading added above the
-  quote, the comment below, the colour taken off the link) — each after
-  reading the note again and finding the highlight where the mark says,
-  refusing otherwise, a CRLF note kept CRLF.
+  label. A link the tidying folded onto the end of its quote
+  (`> passage — [[…]]`, #1183) is read the same way, its passage the
+  line's text before the link. The tidying leaves an annotation's link
+  back on a line of its own (`lint/line_join.dart`), so a companion note
+  stays the shape `Annotation.toMarkdown` writes. `CompanionNotes` removes
+  a highlight (its quote and the blank line keeping it apart), recolours it
+  in its link, and turns it into an annotation in place
+  (`annotateHighlight`: the heading added above the quote, the comment
+  below, the colour taken off the link) — each after reading the note
+  again and finding the highlight where the mark says, refusing otherwise,
+  a CRLF note kept CRLF.
 - **The colour last chosen** is the library's `highlightColour` setting.
 - **Drawing.** A book's `MarkedBlock` layers one `RangeHighlight` per
   colour, the annotations innermost so they paint last, in yellow with a

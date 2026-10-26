@@ -12,6 +12,7 @@ import 'package:niman/src/core/settings/library_config_repo.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/db/indexer.dart';
+import 'package:niman/src/editor/markdown_format.dart';
 import 'package:niman/src/frontmatter/fields.dart';
 import 'package:niman/src/library/note_ops.dart';
 import 'package:niman/src/links/resolver.dart';
@@ -321,6 +322,134 @@ void main() {
       final again = (await companions.marksOf('Books/Dune.pdf')).single;
       expect(again.highlight, HighlightColour.blue);
       expect(again.quote, 'Passage 4.');
+    });
+
+    test('a tidied companion keeps its marks and quotes (#1183)', () async {
+      await write(highlight(4, HighlightColour.green));
+      await write(on('Books/Dune.pdf', 5, 'A comment.'));
+      final path = (await companions.of('Books/Dune.pdf')).single;
+      final file = File(p.join(root.path, path));
+      final tidied = formatMarkdown(file.readAsStringSync());
+      file.writeAsStringSync(tidied);
+      await Indexer(db).fullScan(root.path);
+
+      final marks = await companions.marksOf('Books/Dune.pdf');
+      expect(
+        [for (final m in marks) m.highlight],
+        [HighlightColour.green, null],
+      );
+      expect(marks.first.quote, 'Passage 4.');
+      // The link stayed on the line of its own, as it was written.
+      expect(
+        tidied,
+        contains(
+          '> Passage 4.\n'
+          '> — [[Books/Dune.pdf#page=4&chars=0-9&highlight=green|p. 4]]\n',
+        ),
+      );
+      await companions.recolour(marks.first, HighlightColour.blue);
+      expect(
+        (await companions.marksOf('Books/Dune.pdf')).first.highlight,
+        HighlightColour.blue,
+      );
+    });
+
+    test(
+      'a quote an older tidy folded the link into is read (#1183)',
+      () async {
+        await write(highlight(4, HighlightColour.green));
+        final path = (await companions.of('Books/Dune.pdf')).single;
+        final file = File(p.join(root.path, path));
+        file.writeAsStringSync(
+          file.readAsStringSync().replaceFirst(
+            '> Passage 4.\n> — ',
+            '> Passage 4. — ',
+          ),
+        );
+        await Indexer(db).fullScan(root.path);
+
+        final mark = (await companions.marksOf('Books/Dune.pdf')).single;
+        expect(mark.quote, 'Passage 4.');
+        await companions.removeHighlight(mark);
+        expect(file.readAsStringSync(), isNot(contains('Passage 4.')));
+      },
+    );
+
+    test(
+      'a folded link under a wrapped quote keeps its passage (#1183)',
+      () async {
+        await write(highlight(4, HighlightColour.green));
+        final path = (await companions.of('Books/Dune.pdf')).single;
+        final file = File(p.join(root.path, path));
+        file.writeAsStringSync(
+          file.readAsStringSync().replaceFirst(
+            '> Passage 4.\n> — ',
+            '> Passage\n> 4. — ',
+          ),
+        );
+        await Indexer(db).fullScan(root.path);
+
+        final mark = (await companions.marksOf('Books/Dune.pdf')).single;
+        expect(mark.quote, 'Passage 4.');
+        await companions.recolour(mark, HighlightColour.blue);
+        expect(
+          (await companions.marksOf('Books/Dune.pdf')).single.quote,
+          'Passage 4.',
+        );
+      },
+    );
+
+    test(
+      "an older tidy's fold keeps a quote's recolour and annotate (#1183)",
+      () async {
+        await write(highlight(4, HighlightColour.green));
+        final path = (await companions.of('Books/Dune.pdf')).single;
+        final file = File(p.join(root.path, path));
+        file.writeAsStringSync(
+          file.readAsStringSync().replaceFirst(
+            '> Passage 4.\n> — ',
+            '> Passage 4. — ',
+          ),
+        );
+        await Indexer(db).fullScan(root.path);
+
+        final folded = (await companions.marksOf('Books/Dune.pdf')).single;
+        await companions.recolour(folded, HighlightColour.blue);
+        final blue = (await companions.marksOf('Books/Dune.pdf')).single;
+        expect(blue.highlight, HighlightColour.blue);
+        expect(blue.quote, 'Passage 4.');
+
+        await companions.annotateHighlight(
+          blue,
+          label: blue.label!,
+          comment: 'Worth a second look.',
+        );
+        final annotated = (await companions.marksOf('Books/Dune.pdf')).single;
+        expect(annotated.highlight, isNull);
+        expect(annotated.title, 'p. 4');
+        expect(read(path), contains('## p. 4\n\n> Passage 4. — '));
+        expect(read(path), contains('\nWorth a second look.\n'));
+      },
+    );
+
+    test('a folded link in a CRLF note is read too (#1183)', () async {
+      await write(highlight(4, HighlightColour.green));
+      final path = (await companions.of('Books/Dune.pdf')).single;
+      final file = File(p.join(root.path, path));
+      file.writeAsStringSync(
+        file
+            .readAsStringSync()
+            .replaceFirst('> Passage 4.\n> — ', '> Passage 4. — ')
+            .replaceAll('\n', '\r\n'),
+      );
+      await Indexer(db).fullScan(root.path);
+
+      final mark = (await companions.marksOf('Books/Dune.pdf')).single;
+      expect(mark.quote, 'Passage 4.');
+      await companions.removeHighlight(mark);
+      final text = file.readAsStringSync();
+      expect(text, isNot(contains('Passage 4.')));
+      expect(text.replaceAll('\r\n', ''), isNot(contains('\n')));
     });
 
     test('annotated, it becomes an annotation where it is', () async {
