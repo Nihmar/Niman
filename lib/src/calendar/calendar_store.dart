@@ -16,7 +16,9 @@ import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
+import 'package:niman/src/calendar/calendar_entry.dart';
 import 'package:niman/src/calendar/calendar_file.dart';
+import 'package:niman/src/calendar/calendar_occurrences.dart';
 import 'package:niman/src/calendar/calendar_source.dart';
 import 'package:niman/src/calendar/calendar_writer.dart';
 import 'package:niman/src/calendar/parser.dart';
@@ -24,6 +26,8 @@ import 'package:niman/src/calendar/weekdays.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:path/path.dart' as p;
+
+export 'package:niman/src/calendar/calendar_entry.dart';
 
 /// The calendar file at the library root.
 const String calendarFileName = 'calendar.txt';
@@ -65,56 +69,11 @@ final class CalendarFileProbe {
       'CalendarFileProbe(exists: $exists, size: $size, modified: $modified)';
 }
 
-/// One parsed line with its 0-based index in the file.
-@immutable
-final class CalendarEntry {
-  /// Creates an entry for [line] at file line [lineIndex].
-  const new({required this.lineIndex, required this.line});
-
-  /// The 0-based line index in `calendar.txt`.
-  final int lineIndex;
-
-  /// The parsed line.
-  final CalendarLine line;
-
-  @override
-  String toString() => 'CalendarEntry($lineIndex, $line)';
-}
-
-/// One event with the line it sits on: what the journal's Events section
-/// shows and what a tap opens the file at.
-@immutable
-final class CalendarEntryEvent {
-  /// Creates an event of [line] at file line [lineIndex].
-  const new({required this.lineIndex, required this.line, required this.event});
-
-  /// The 0-based line index in `calendar.txt`.
-  final int lineIndex;
-
-  /// The line the event sits on.
-  final CalendarLine line;
-
-  /// The event itself.
-  final CalendarEvent event;
-
-  /// The minutes the event starts at, for ordering; an event with no time
-  /// written comes last.
-  int get startMinutes => event.time?.first?.minutes ?? _untimed;
-
-  static const int _untimed = 24 * 60;
-
-  /// Whether the event carries no time at all.
-  bool get untimed => event.time?.first == null;
-
-  @override
-  String toString() => 'CalendarEntryEvent($lineIndex, $event)';
-}
-
 /// The parsed contents of `calendar.txt`.
 final class CalendarSnapshot {
   /// Creates a snapshot of [file]'s [entries] (its lines, in order).
   new({required this.file, required this.entries})
-    : daysWithEvents = _daysWithEvents(entries);
+    : _occurrences = CalendarOccurrences.of(entries);
 
   /// The file as it is on disk: the raw lines with their own endings, which
   /// a write splices into and [offsetOfLine] measures.
@@ -144,9 +103,18 @@ final class CalendarSnapshot {
     return at;
   }
 
-  /// The days with at least one event, for the calendar's second dot —
-  /// computed once with the snapshot, not per build.
-  final Set<DateTime> daysWithEvents;
+  /// The events by day, and the rules among them expanded on demand.
+  final CalendarOccurrences _occurrences;
+
+  /// The days the file writes an event on. A rule event's later
+  /// occurrences are not here: ask [eventDaysIn] for a range.
+  Set<DateTime> get daysWithEvents => _occurrences.writtenDays;
+
+  /// The days from [from] to [to] (inclusive) with at least one event, the
+  /// occurrences of every `rec:` event among them (#1190): the calendar's
+  /// second dot for the month on screen.
+  Set<DateTime> eventDaysIn(DateTime from, DateTime to) =>
+      _occurrences.daysIn(from, to);
 
   /// The parsed lines, in order.
   List<CalendarLine> get lines => [for (final entry in entries) entry.line];
@@ -158,32 +126,11 @@ final class CalendarSnapshot {
   /// Every event on [date], from every line that carries one (a hand edit
   /// or another tool's merge can leave two), in time order — an event with
   /// no time written last, in the order the line writes them.
-  List<CalendarEntryEvent> eventsFor(DateTime date) {
-    final events = <CalendarEntryEvent>[];
-    for (final entry in entries) {
-      if (entry.line.kind != CalendarLineKind.day) continue;
-      if (!sameCalendarDay(entry.line.date, date)) continue;
-      for (final event in entry.line.events) {
-        events.add(
-          CalendarEntryEvent(
-            lineIndex: entry.lineIndex,
-            line: entry.line,
-            event: event,
-          ),
-        );
-      }
-    }
-    events.sort((a, b) {
-      final order = a.startMinutes.compareTo(b.startMinutes);
-      if (order != 0) return order;
-      // Same time (or no time at all): the file's own order decides, so
-      // the list never jumps between two builds.
-      final line = a.lineIndex.compareTo(b.lineIndex);
-      if (line != 0) return line;
-      return a.event.start.compareTo(b.event.start);
-    });
-    return events;
-  }
+  ///
+  /// An event with a `rec:` is here on every day its rule reaches (#1190):
+  /// each one is the same event on the same line, shown on that day.
+  List<CalendarEntryEvent> eventsFor(DateTime date) =>
+      _occurrences.eventsOn(date);
 
   /// The goals that apply to [date], in the order the journal shows them:
   /// the week's, the month's, the year's.
@@ -192,8 +139,8 @@ final class CalendarSnapshot {
     return [for (final line in calendarGoalsFor(lines, date)) ?byLine[line]];
   }
 
-  /// Whether [date] has any event at all.
-  bool hasEventsOn(DateTime date) => daysWithEvents.contains(_dayOf(date));
+  /// Whether [date] has any event at all, a rule's occurrence included.
+  bool hasEventsOn(DateTime date) => eventsFor(date).isNotEmpty;
 }
 
 /// Parses [file] into a snapshot: the store's own parse, and what an
@@ -358,22 +305,6 @@ CalendarFileProbe _fileProbe(int size, int mtimeUs) {
     modified: DateTime.fromMicrosecondsSinceEpoch(mtimeUs),
   );
 }
-
-/// The days that carry at least one event.
-Set<DateTime> _daysWithEvents(List<CalendarEntry> entries) {
-  final days = <DateTime>{};
-  for (final entry in entries) {
-    if (entry.line.kind != CalendarLineKind.day) continue;
-    if (entry.line.events.isEmpty) continue;
-    final date = entry.line.date;
-    if (date == null) continue;
-    days.add(_dayOf(date));
-  }
-  return days;
-}
-
-/// [date] at midnight: the key the calendar's days are compared by.
-DateTime _dayOf(DateTime date) => DateTime(date.year, date.month, date.day);
 
 /// The `+`/`@`/`#` tokens the file carries, sigil included and `key:value`
 /// tags among them: what the Add event form suggests (#730).
