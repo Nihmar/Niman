@@ -86,6 +86,7 @@ final class TodoController extends ChangeNotifier {
   ({TodoFileProbe todo, TodoFileProbe done})? _probes;
   String? _error;
   StreamSubscription<int>? _events;
+  StreamSubscription<void>? _fired;
   Timer? _refreshTimer;
   int _generation = 0;
   bool _disposed = false;
@@ -102,6 +103,9 @@ final class TodoController extends ChangeNotifier {
   Future<void> open() async {
     _log.info('todo open: root=${session.root}');
     _events ??= session.events.listen((_) => _scheduleRefresh());
+    // A reminder the app showed itself: the window of a repeating event's
+    // next occurrences moves on (#1192).
+    _fired ??= reminders?.fired.listen((_) => unawaited(resyncReminders()));
     _follower.start();
     await _refreshReminderSettings();
     await _reload();
@@ -412,6 +416,7 @@ final class TodoController extends ChangeNotifier {
     _follower.dispose();
     _refreshTimer?.cancel();
     unawaited(_events?.cancel());
+    unawaited(_fired?.cancel());
     super.dispose();
   }
 
