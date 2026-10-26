@@ -4420,4 +4420,67 @@ final class LatvianStrings extends Strings {
   @override
   String todoBlockSeveralNotes(String name) =>
       'Vairākas piezīmes atbilst $name';
+
+  // Recurring tasks (#1189): a rule in words, and the Repeat row.
+  @override
+  String recurDays(int n) => n == 1
+      ? 'katru dienu'
+      : (n % 10 == 1 && n % 100 != 11)
+      ? 'ik pēc $n dienas'
+      : 'ik pēc $n dienām';
+  @override
+  String recurWeeks(int n) => n == 1
+      ? 'katru nedēļu'
+      : (n % 10 == 1 && n % 100 != 11)
+      ? 'ik pēc $n nedēļas'
+      : 'ik pēc $n nedēļām';
+  @override
+  String recurMonths(int n) => n == 1
+      ? 'katru mēnesi'
+      : (n % 10 == 1 && n % 100 != 11)
+      ? 'ik pēc $n mēneša'
+      : 'ik pēc $n mēnešiem';
+  @override
+  String recurYears(int n) => n == 1
+      ? 'katru gadu'
+      : (n % 10 == 1 && n % 100 != 11)
+      ? 'ik pēc $n gada'
+      : 'ik pēc $n gadiem';
+  @override
+  String recurBusinessDays(int n) => n == 1
+      ? 'katru darbdienu'
+      : (n % 10 == 1 && n % 100 != 11)
+      ? 'ik pēc $n darbdienas'
+      : 'ik pēc $n darbdienām';
+  @override
+  String recurOnWeekdays(String rule, String days) => '$rule: $days';
+  @override
+  String recurNthWeekday(String rule, int nth, int weekday) {
+    final i = nth == -1 ? 4 : nth - 1;
+    final ord = const ['1.', '2.', '3.', '4.', 'pēdējā'][i];
+    return '$rule, $ord ${weekdayNames[weekday - 1]}';
+  }
+
+  @override
+  String recurFromDue(String rule) => '$rule, no termiņa';
+  @override
+  String get todoRepeat => 'Atkārtot';
+  @override
+  String get todoRepeatNever => 'Nekad';
+  @override
+  String get todoRepeatCustom => 'Pielāgots…';
+  @override
+  String get recurEvery => 'Ik';
+  @override
+  String get recurUnitDays => 'Dienas';
+  @override
+  String get recurUnitWeeks => 'Nedēļas';
+  @override
+  String get recurUnitMonths => 'Mēneši';
+  @override
+  String get recurUnitYears => 'Gadi';
+  @override
+  String get recurFromDueDate => 'No termiņa';
+  @override
+  String get recurFromCompletion => 'No pabeigšanas';
 }

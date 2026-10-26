@@ -4524,4 +4524,48 @@ final class GermanStrings extends Strings {
   @override
   String todoBlockSeveralNotes(String name) =>
       'Mehrere Notizen passen zu $name';
+
+  // Recurring tasks (#1189): a rule in words, and the Repeat row.
+  @override
+  String recurDays(int n) => n == 1 ? 'jeden Tag' : 'alle $n Tage';
+  @override
+  String recurWeeks(int n) => n == 1 ? 'jede Woche' : 'alle $n Wochen';
+  @override
+  String recurMonths(int n) => n == 1 ? 'jeden Monat' : 'alle $n Monate';
+  @override
+  String recurYears(int n) => n == 1 ? 'jedes Jahr' : 'alle $n Jahre';
+  @override
+  String recurBusinessDays(int n) =>
+      n == 1 ? 'jeden Werktag' : 'alle $n Werktage';
+  @override
+  String recurOnWeekdays(String rule, String days) => '$rule am $days';
+  @override
+  String recurNthWeekday(String rule, int nth, int weekday) {
+    final i = nth == -1 ? 4 : nth - 1;
+    final ord = const ['1.', '2.', '3.', '4.', 'letzten'][i];
+    return '$rule am $ord ${weekdayNames[weekday - 1]}';
+  }
+
+  @override
+  String recurFromDue(String rule) => '$rule ab Fälligkeitsdatum';
+  @override
+  String get todoRepeat => 'Wiederholen';
+  @override
+  String get todoRepeatNever => 'Nie';
+  @override
+  String get todoRepeatCustom => 'Benutzerdefiniert…';
+  @override
+  String get recurEvery => 'Alle';
+  @override
+  String get recurUnitDays => 'Tage';
+  @override
+  String get recurUnitWeeks => 'Wochen';
+  @override
+  String get recurUnitMonths => 'Monate';
+  @override
+  String get recurUnitYears => 'Jahre';
+  @override
+  String get recurFromDueDate => 'Ab Fälligkeitsdatum';
+  @override
+  String get recurFromCompletion => 'Ab Erledigung';
 }

@@ -4567,4 +4567,50 @@ final class GreekStrings extends Strings {
   @override
   String todoBlockSeveralNotes(String name) =>
       'Πολλές σημειώσεις ταιριάζουν με $name';
+
+  // Recurring tasks (#1189): a rule in words, and the Repeat row.
+  @override
+  String recurDays(int n) => n == 1 ? 'κάθε μέρα' : 'κάθε $n ημέρες';
+  @override
+  String recurWeeks(int n) => n == 1 ? 'κάθε εβδομάδα' : 'κάθε $n εβδομάδες';
+  @override
+  String recurMonths(int n) => n == 1 ? 'κάθε μήνα' : 'κάθε $n μήνες';
+  @override
+  String recurYears(int n) => n == 1 ? 'κάθε χρόνο' : 'κάθε $n χρόνια';
+  @override
+  String recurBusinessDays(int n) =>
+      n == 1 ? 'κάθε εργάσιμη' : 'κάθε $n εργάσιμες';
+  @override
+  String recurOnWeekdays(String rule, String days) => '$rule: $days';
+  @override
+  String recurNthWeekday(String rule, int nth, int weekday) {
+    final i = nth == -1 ? 4 : nth - 1;
+    final ord = (const <int>{1, 2, 3, 4, 5, 7}.contains(weekday)
+        ? const ['1η', '2η', '3η', '4η', 'τελευταία']
+        : const ['1ο', '2ο', '3ο', '4ο', 'τελευταίο'])[i];
+    return '$rule, $ord ${weekdayNames[weekday - 1]}';
+  }
+
+  @override
+  String recurFromDue(String rule) => '$rule, από την προθεσμία';
+  @override
+  String get todoRepeat => 'Επανάληψη';
+  @override
+  String get todoRepeatNever => 'Ποτέ';
+  @override
+  String get todoRepeatCustom => 'Προσαρμογή…';
+  @override
+  String get recurEvery => 'Κάθε';
+  @override
+  String get recurUnitDays => 'Ημέρες';
+  @override
+  String get recurUnitWeeks => 'Εβδομάδες';
+  @override
+  String get recurUnitMonths => 'Μήνες';
+  @override
+  String get recurUnitYears => 'Χρόνια';
+  @override
+  String get recurFromDueDate => 'Από την προθεσμία';
+  @override
+  String get recurFromCompletion => 'Από την ολοκλήρωση';
 }

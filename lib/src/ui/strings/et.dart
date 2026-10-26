@@ -4374,4 +4374,47 @@ final class EstonianStrings extends Strings {
   @override
   String todoBlockSeveralNotes(String name) =>
       'Mitu märget vastab nimele $name';
+
+  // Recurring tasks (#1189): a rule in words, and the Repeat row.
+  @override
+  String recurDays(int n) => n == 1 ? 'iga päev' : 'iga $n. päev';
+  @override
+  String recurWeeks(int n) => n == 1 ? 'iga nädal' : 'iga $n. nädal';
+  @override
+  String recurMonths(int n) => n == 1 ? 'iga kuu' : 'iga $n. kuu';
+  @override
+  String recurYears(int n) => n == 1 ? 'iga aasta' : 'iga $n. aasta';
+  @override
+  String recurBusinessDays(int n) => n == 1 ? 'iga tööpäev' : 'iga $n. tööpäev';
+  @override
+  String recurOnWeekdays(String rule, String days) => '$rule: $days';
+  @override
+  String recurNthWeekday(String rule, int nth, int weekday) {
+    final i = nth == -1 ? 4 : nth - 1;
+    final ord = const ['1.', '2.', '3.', '4.', 'viimane'][i];
+    return '$rule, $ord ${weekdayNames[weekday - 1]}';
+  }
+
+  @override
+  String recurFromDue(String rule) => '$rule, tähtajast';
+  @override
+  String get todoRepeat => 'Kordus';
+  @override
+  String get todoRepeatNever => 'Mitte kunagi';
+  @override
+  String get todoRepeatCustom => 'Kohandatud…';
+  @override
+  String get recurEvery => 'Iga';
+  @override
+  String get recurUnitDays => 'Päevad';
+  @override
+  String get recurUnitWeeks => 'Nädalad';
+  @override
+  String get recurUnitMonths => 'Kuud';
+  @override
+  String get recurUnitYears => 'Aastad';
+  @override
+  String get recurFromDueDate => 'Tähtajast';
+  @override
+  String get recurFromCompletion => 'Lõpetamisest';
 }

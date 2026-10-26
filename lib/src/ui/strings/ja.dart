@@ -4070,4 +4070,47 @@ final class JapaneseStrings extends Strings {
   String todoBlockNoNote(String name) => '$name に一致するノートがありません';
   @override
   String todoBlockSeveralNotes(String name) => '$name に一致するノートが複数あります';
+
+  // Recurring tasks (#1189): a rule in words, and the Repeat row.
+  @override
+  String recurDays(int n) => n == 1 ? '毎日' : '$n日ごと';
+  @override
+  String recurWeeks(int n) => n == 1 ? '毎週' : '$n週間ごと';
+  @override
+  String recurMonths(int n) => n == 1 ? '毎月' : '$nか月ごと';
+  @override
+  String recurYears(int n) => n == 1 ? '毎年' : '$n年ごと';
+  @override
+  String recurBusinessDays(int n) => n == 1 ? '平日' : '$n営業日ごと';
+  @override
+  String recurOnWeekdays(String rule, String days) => '$rule（$days）';
+  @override
+  String recurNthWeekday(String rule, int nth, int weekday) {
+    final i = nth == -1 ? 4 : nth - 1;
+    final ord = const ['第1', '第2', '第3', '第4', '最終'][i];
+    return '$rule $ord${weekdayNames[weekday - 1]}';
+  }
+
+  @override
+  String recurFromDue(String rule) => '$rule（期限日から）';
+  @override
+  String get todoRepeat => '繰り返し';
+  @override
+  String get todoRepeatNever => 'なし';
+  @override
+  String get todoRepeatCustom => 'カスタム…';
+  @override
+  String get recurEvery => '間隔';
+  @override
+  String get recurUnitDays => '日';
+  @override
+  String get recurUnitWeeks => '週';
+  @override
+  String get recurUnitMonths => 'か月';
+  @override
+  String get recurUnitYears => '年';
+  @override
+  String get recurFromDueDate => '期限日から';
+  @override
+  String get recurFromCompletion => '完了日から';
 }

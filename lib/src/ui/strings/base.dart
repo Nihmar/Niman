@@ -2353,4 +2353,24 @@ abstract base class Strings {
   String todoBlockLine(int n);
   String todoBlockNoNote(String name);
   String todoBlockSeveralNotes(String name);
+
+  // Recurring tasks (#1189): a rule in words, and the Repeat row.
+  String recurDays(int n);
+  String recurWeeks(int n);
+  String recurMonths(int n);
+  String recurYears(int n);
+  String recurBusinessDays(int n);
+  String recurOnWeekdays(String rule, String days);
+  String recurNthWeekday(String rule, int nth, int weekday);
+  String recurFromDue(String rule);
+  String get todoRepeat;
+  String get todoRepeatNever;
+  String get todoRepeatCustom;
+  String get recurEvery;
+  String get recurUnitDays;
+  String get recurUnitWeeks;
+  String get recurUnitMonths;
+  String get recurUnitYears;
+  String get recurFromDueDate;
+  String get recurFromCompletion;
 }

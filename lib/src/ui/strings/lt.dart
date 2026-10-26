@@ -4466,4 +4466,77 @@ final class LithuanianStrings extends Strings {
   String todoBlockNoNote(String name) => 'Jokia pastaba neatitinka $name';
   @override
   String todoBlockSeveralNotes(String name) => 'Kelios pastabos atitinka $name';
+
+  // Recurring tasks (#1189): a rule in words, and the Repeat row.
+  @override
+  String recurDays(int n) => n == 1
+      ? 'kiekvieną dieną'
+      : (n % 10 == 1 && n % 100 != 11)
+      ? 'kas $n dieną'
+      : (n % 10 >= 2 && !(n % 100 >= 11 && n % 100 <= 19))
+      ? 'kas $n dienas'
+      : 'kas $n dienų';
+  @override
+  String recurWeeks(int n) => n == 1
+      ? 'kiekvieną savaitę'
+      : (n % 10 == 1 && n % 100 != 11)
+      ? 'kas $n savaitę'
+      : (n % 10 >= 2 && !(n % 100 >= 11 && n % 100 <= 19))
+      ? 'kas $n savaites'
+      : 'kas $n savaičių';
+  @override
+  String recurMonths(int n) => n == 1
+      ? 'kiekvieną mėnesį'
+      : (n % 10 == 1 && n % 100 != 11)
+      ? 'kas $n mėnesį'
+      : (n % 10 >= 2 && !(n % 100 >= 11 && n % 100 <= 19))
+      ? 'kas $n mėnesius'
+      : 'kas $n mėnesių';
+  @override
+  String recurYears(int n) => n == 1
+      ? 'kiekvienais metais'
+      : (n % 10 == 1 && n % 100 != 11)
+      ? 'kas $n metus'
+      : (n % 10 >= 2 && !(n % 100 >= 11 && n % 100 <= 19))
+      ? 'kas $n metus'
+      : 'kas $n metų';
+  @override
+  String recurBusinessDays(int n) => n == 1
+      ? 'kiekvieną darbo dieną'
+      : (n % 10 == 1 && n % 100 != 11)
+      ? 'kas $n darbo dieną'
+      : (n % 10 >= 2 && !(n % 100 >= 11 && n % 100 <= 19))
+      ? 'kas $n darbo dienas'
+      : 'kas $n darbo dienų';
+  @override
+  String recurOnWeekdays(String rule, String days) => '$rule: $days';
+  @override
+  String recurNthWeekday(String rule, int nth, int weekday) {
+    final i = nth == -1 ? 4 : nth - 1;
+    final ord = const ['1-as', '2-as', '3-ias', '4-as', 'paskutinis'][i];
+    return '$rule, $ord ${weekdayNames[weekday - 1]}';
+  }
+
+  @override
+  String recurFromDue(String rule) => '$rule, nuo termino';
+  @override
+  String get todoRepeat => 'Kartoti';
+  @override
+  String get todoRepeatNever => 'Niekada';
+  @override
+  String get todoRepeatCustom => 'Pasirinktinis…';
+  @override
+  String get recurEvery => 'Kas';
+  @override
+  String get recurUnitDays => 'Dienos';
+  @override
+  String get recurUnitWeeks => 'Savaitės';
+  @override
+  String get recurUnitMonths => 'Mėnesiai';
+  @override
+  String get recurUnitYears => 'Metai';
+  @override
+  String get recurFromDueDate => 'Nuo termino';
+  @override
+  String get recurFromCompletion => 'Nuo atlikimo';
 }

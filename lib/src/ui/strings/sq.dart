@@ -4458,4 +4458,54 @@ final class AlbanianStrings extends Strings {
   @override
   String todoBlockSeveralNotes(String name) =>
       'Disa shënime përputhen me $name';
+
+  // Recurring tasks (#1189): a rule in words, and the Repeat row.
+  @override
+  String recurDays(int n) => n == 1 ? 'çdo ditë' : 'çdo $n ditë';
+  @override
+  String recurWeeks(int n) => n == 1 ? 'çdo javë' : 'çdo $n javë';
+  @override
+  String recurMonths(int n) => n == 1 ? 'çdo muaj' : 'çdo $n muaj';
+  @override
+  String recurYears(int n) => n == 1 ? 'çdo vit' : 'çdo $n vite';
+  @override
+  String recurBusinessDays(int n) =>
+      n == 1 ? 'çdo ditë pune' : 'çdo $n ditë pune';
+  @override
+  String recurOnWeekdays(String rule, String days) => '$rule: $days';
+  @override
+  String recurNthWeekday(String rule, int nth, int weekday) {
+    final i = nth == -1 ? 4 : nth - 1;
+    final ord = const [
+      'e para',
+      'e dyta',
+      'e treta',
+      'e katërta',
+      'e fundit',
+    ][i];
+    return '$rule, $ord ${weekdayNames[weekday - 1]}';
+  }
+
+  @override
+  String recurFromDue(String rule) => '$rule, nga afati';
+  @override
+  String get todoRepeat => 'Përsërit';
+  @override
+  String get todoRepeatNever => 'Kurrë';
+  @override
+  String get todoRepeatCustom => 'E personalizuar…';
+  @override
+  String get recurEvery => 'Çdo';
+  @override
+  String get recurUnitDays => 'Ditë';
+  @override
+  String get recurUnitWeeks => 'Javë';
+  @override
+  String get recurUnitMonths => 'Muaj';
+  @override
+  String get recurUnitYears => 'Vite';
+  @override
+  String get recurFromDueDate => 'Nga afati';
+  @override
+  String get recurFromCompletion => 'Nga përfundimi';
 }

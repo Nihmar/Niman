@@ -4445,4 +4445,50 @@ final class SwedishStrings extends Strings {
   @override
   String todoBlockSeveralNotes(String name) =>
       'Flera anteckningar matchar $name';
+
+  // Recurring tasks (#1189): a rule in words, and the Repeat row.
+  @override
+  String recurDays(int n) => n == 1 ? 'varje dag' : 'med $n dagars mellanrum';
+  @override
+  String recurWeeks(int n) =>
+      n == 1 ? 'varje vecka' : 'med $n veckors mellanrum';
+  @override
+  String recurMonths(int n) =>
+      n == 1 ? 'varje månad' : 'med $n månaders mellanrum';
+  @override
+  String recurYears(int n) => n == 1 ? 'varje år' : 'med $n års mellanrum';
+  @override
+  String recurBusinessDays(int n) =>
+      n == 1 ? 'varje vardag' : 'med $n vardagars mellanrum';
+  @override
+  String recurOnWeekdays(String rule, String days) => '$rule på $days';
+  @override
+  String recurNthWeekday(String rule, int nth, int weekday) {
+    final i = nth == -1 ? 4 : nth - 1;
+    final ord = const ['1:a', '2:a', '3:e', '4:e', 'sista'][i];
+    return '$rule, $ord ${weekdayNames[weekday - 1]}';
+  }
+
+  @override
+  String recurFromDue(String rule) => '$rule, från förfallodatum';
+  @override
+  String get todoRepeat => 'Upprepa';
+  @override
+  String get todoRepeatNever => 'Aldrig';
+  @override
+  String get todoRepeatCustom => 'Anpassad…';
+  @override
+  String get recurEvery => 'Var';
+  @override
+  String get recurUnitDays => 'Dagar';
+  @override
+  String get recurUnitWeeks => 'Veckor';
+  @override
+  String get recurUnitMonths => 'Månader';
+  @override
+  String get recurUnitYears => 'År';
+  @override
+  String get recurFromDueDate => 'Från förfallodatum';
+  @override
+  String get recurFromCompletion => 'Från slutförande';
 }

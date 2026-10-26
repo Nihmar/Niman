@@ -4448,4 +4448,48 @@ final class HungarianStrings extends Strings {
   String todoBlockNoNote(String name) => 'Egy jegyzet sem egyezik: $name';
   @override
   String todoBlockSeveralNotes(String name) => 'Több jegyzet is egyezik: $name';
+
+  // Recurring tasks (#1189): a rule in words, and the Repeat row.
+  @override
+  String recurDays(int n) => n == 1 ? 'naponta' : '$n naponta';
+  @override
+  String recurWeeks(int n) => n == 1 ? 'hetente' : '$n hetente';
+  @override
+  String recurMonths(int n) => n == 1 ? 'havonta' : '$n havonta';
+  @override
+  String recurYears(int n) => n == 1 ? 'évente' : '$n évente';
+  @override
+  String recurBusinessDays(int n) =>
+      n == 1 ? 'munkanaponta' : '$n munkanaponta';
+  @override
+  String recurOnWeekdays(String rule, String days) => '$rule: $days';
+  @override
+  String recurNthWeekday(String rule, int nth, int weekday) {
+    final i = nth == -1 ? 4 : nth - 1;
+    final ord = const ['1.', '2.', '3.', '4.', 'utolsó'][i];
+    return '$rule, $ord ${weekdayNames[weekday - 1]}';
+  }
+
+  @override
+  String recurFromDue(String rule) => '$rule, a határidőtől';
+  @override
+  String get todoRepeat => 'Ismétlés';
+  @override
+  String get todoRepeatNever => 'Soha';
+  @override
+  String get todoRepeatCustom => 'Egyéni…';
+  @override
+  String get recurEvery => 'Minden';
+  @override
+  String get recurUnitDays => 'Napok';
+  @override
+  String get recurUnitWeeks => 'Hetek';
+  @override
+  String get recurUnitMonths => 'Hónapok';
+  @override
+  String get recurUnitYears => 'Évek';
+  @override
+  String get recurFromDueDate => 'A határidőtől';
+  @override
+  String get recurFromCompletion => 'A teljesítéstől';
 }

@@ -4485,4 +4485,48 @@ final class BasqueStrings extends Strings {
   @override
   String todoBlockSeveralNotes(String name) =>
       'Ohar batzuk bat datoz $name izenarekin';
+
+  // Recurring tasks (#1189): a rule in words, and the Repeat row.
+  @override
+  String recurDays(int n) => n == 1 ? 'egunero' : '$n egunean behin';
+  @override
+  String recurWeeks(int n) => n == 1 ? 'astero' : '$n astean behin';
+  @override
+  String recurMonths(int n) => n == 1 ? 'hilabete oro' : '$n hilabetean behin';
+  @override
+  String recurYears(int n) => n == 1 ? 'urtero' : '$n urtean behin';
+  @override
+  String recurBusinessDays(int n) =>
+      n == 1 ? 'lanegun oro' : '$n lanegunean behin';
+  @override
+  String recurOnWeekdays(String rule, String days) => '$rule: $days';
+  @override
+  String recurNthWeekday(String rule, int nth, int weekday) {
+    final i = nth == -1 ? 4 : nth - 1;
+    final ord = const ['1.', '2.', '3.', '4.', 'azken'][i];
+    return '$rule, $ord ${weekdayNames[weekday - 1]}';
+  }
+
+  @override
+  String recurFromDue(String rule) => '$rule, epemugatik hasita';
+  @override
+  String get todoRepeat => 'Errepikatu';
+  @override
+  String get todoRepeatNever => 'Inoiz ez';
+  @override
+  String get todoRepeatCustom => 'Pertsonalizatua…';
+  @override
+  String get recurEvery => 'Tartea';
+  @override
+  String get recurUnitDays => 'Egunak';
+  @override
+  String get recurUnitWeeks => 'Asteak';
+  @override
+  String get recurUnitMonths => 'Hilabeteak';
+  @override
+  String get recurUnitYears => 'Urteak';
+  @override
+  String get recurFromDueDate => 'Epemugatik';
+  @override
+  String get recurFromCompletion => 'Amaitzetik';
 }

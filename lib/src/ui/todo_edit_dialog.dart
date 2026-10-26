@@ -5,7 +5,9 @@
 /// chips, and three add buttons start a new token even on a fresh task)
 /// plus three managed fields — priority, due date and reminder —
 /// that rewrite only their own slot ([withKeyValueTag] for `due:`/`rem:`),
-/// so unknown tags (`rec:`, `foo:bar`, …) survive verbatim. A picker the
+/// so unknown tags (`foo:bar`, …) survive verbatim. The Repeat row under the
+/// reminder reads and writes the `rec:` tag in the text itself, so a `rec:`
+/// typed there and the row are one thing (#1189). A picker the
 /// user never touches leaves its text exactly as typed. Resolves to the
 /// new raw line, or null on cancel. An edit can also delete the task:
 /// tap is how a row is opened on every platform, so the dialog is where
@@ -27,9 +29,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/core/recurrence/recurrence_rule.dart';
+import 'package:niman/src/core/recurrence/recurrence_unit.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/links/suggester.dart';
 import 'package:niman/src/todo/parser.dart';
+import 'package:niman/src/todo/recurring_line.dart';
 import 'package:niman/src/todo/reminder_health.dart';
 import 'package:niman/src/ui/os_pickers.dart';
 import 'package:niman/src/ui/reminder_health_message.dart';
@@ -38,6 +43,8 @@ import 'package:niman/src/ui/todo_date_panel.dart';
 import 'package:niman/src/ui/todo_link_options.dart';
 import 'package:niman/src/ui/todo_link_suggestions.dart';
 import 'package:niman/src/ui/todo_priority_chips.dart';
+import 'package:niman/src/ui/todo_repeat_custom.dart';
+import 'package:niman/src/ui/todo_repeat_row.dart';
 import 'package:niman/src/ui/todo_token_completion.dart';
 
 /// Shows the add ([initial] null) or edit dialog.
@@ -337,6 +344,29 @@ final class _TodoTaskDialogState extends State<_TodoTaskDialog> {
     });
   }
 
+  /// Writes [rule] as the line's `rec:` (removes it when null): the field
+  /// text is where the tag lives, so the row and a typed `rec:` agree.
+  void _setRule(RecurrenceRule? rule) {
+    _log.debug('todo dialog repeat: ${rule?.token}');
+    final text = withKeyValueTag(_field.text, 'rec', rule?.token);
+    _field.value = TextEditingValue(
+      text: text,
+      selection: TextSelection.collapsed(offset: text.length),
+    );
+    setState(() {
+      if (rule == null && _open == _DatePanel.repeat) _open = null;
+    });
+  }
+
+  /// Opens the custom editor under the Repeat row, or closes it. A task
+  /// with no rule yet starts at every day, so the editor shows what is set.
+  void _toggleRepeat(RecurrenceRule? current) {
+    if (_open != _DatePanel.repeat && current == null) {
+      _setRule(RecurrenceRule(unit: RecurrenceUnit.day));
+    }
+    _toggle(_DatePanel.repeat);
+  }
+
   /// Builds the result line from the field text and the managed fields.
   String _result(String text) {
     var description = text;
@@ -599,9 +629,36 @@ final class _TodoTaskDialogState extends State<_TodoTaskDialog> {
               health: widget.health,
               onOpenSettings: widget.onOpenReminderSettings,
             ),
+          ..._repeat(),
         ],
       ),
     );
+  }
+
+  /// The Repeat row, and the custom editor under it when it is open.
+  List<Widget> _repeat() {
+    final task = parseTodoLine(_field.text);
+    final rule = recurrenceRuleOf(task);
+    final value = recurrenceValueOf(task);
+    final anchor = _due ?? _day(widget.today);
+    return [
+      TodoRepeatRow(
+        rule: rule,
+        unreadable: rule == null ? value : null,
+        anchor: anchor,
+        onChanged: _setRule,
+        onCustomInPlace: () => _toggleRepeat(rule),
+      ),
+      if (_open == _DatePanel.repeat)
+        TodoPanelFrame(
+          key: _panelKey,
+          child: TodoRepeatCustom(
+            initial: rule,
+            anchor: anchor,
+            onChanged: _setRule,
+          ),
+        ),
+    ];
   }
 
   /// The known tokens completing the word under the caret, capped so a huge
@@ -716,6 +773,9 @@ enum _DatePanel {
 
   /// The reminder's calendar and time.
   reminder,
+
+  /// The custom repeat editor.
+  repeat,
 }
 
 /// A warning under the reminder row: a reminder is set while a

@@ -4493,4 +4493,48 @@ final class SpanishStrings extends Strings {
   @override
   String todoBlockSeveralNotes(String name) =>
       'Varias notas coinciden con $name';
+
+  // Recurring tasks (#1189): a rule in words, and the Repeat row.
+  @override
+  String recurDays(int n) => n == 1 ? 'cada día' : 'cada $n días';
+  @override
+  String recurWeeks(int n) => n == 1 ? 'cada semana' : 'cada $n semanas';
+  @override
+  String recurMonths(int n) => n == 1 ? 'cada mes' : 'cada $n meses';
+  @override
+  String recurYears(int n) => n == 1 ? 'cada año' : 'cada $n años';
+  @override
+  String recurBusinessDays(int n) =>
+      n == 1 ? 'cada día laborable' : 'cada $n días laborables';
+  @override
+  String recurOnWeekdays(String rule, String days) => '$rule el $days';
+  @override
+  String recurNthWeekday(String rule, int nth, int weekday) {
+    final i = nth == -1 ? 4 : nth - 1;
+    final ord = const ['1.º', '2.º', '3.º', '4.º', 'último'][i];
+    return '$rule, $ord ${weekdayNames[weekday - 1]}';
+  }
+
+  @override
+  String recurFromDue(String rule) => '$rule, desde el vencimiento';
+  @override
+  String get todoRepeat => 'Repetir';
+  @override
+  String get todoRepeatNever => 'Nunca';
+  @override
+  String get todoRepeatCustom => 'Personalizado…';
+  @override
+  String get recurEvery => 'Cada';
+  @override
+  String get recurUnitDays => 'Días';
+  @override
+  String get recurUnitWeeks => 'Semanas';
+  @override
+  String get recurUnitMonths => 'Meses';
+  @override
+  String get recurUnitYears => 'Años';
+  @override
+  String get recurFromDueDate => 'Desde el vencimiento';
+  @override
+  String get recurFromCompletion => 'Desde la finalización';
 }

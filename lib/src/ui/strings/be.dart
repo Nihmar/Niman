@@ -4467,4 +4467,69 @@ final class BelarusianStrings extends Strings {
   @override
   String todoBlockSeveralNotes(String name) =>
       'Некалькі нататак адпавядаюць $name';
+
+  // Recurring tasks (#1189): a rule in words, and the Repeat row.
+  @override
+  String recurDays(int n) => n == 1
+      ? 'кожны дзень'
+      : (n % 10 >= 2 && n % 10 <= 4 && !(n % 100 >= 12 && n % 100 <= 14))
+      ? 'кожныя $n дні'
+      : 'кожныя $n дзён';
+  @override
+  String recurWeeks(int n) => n == 1
+      ? 'кожны тыдзень'
+      : (n % 10 >= 2 && n % 10 <= 4 && !(n % 100 >= 12 && n % 100 <= 14))
+      ? 'кожныя $n тыдні'
+      : 'кожныя $n тыдняў';
+  @override
+  String recurMonths(int n) => n == 1
+      ? 'кожны месяц'
+      : (n % 10 >= 2 && n % 10 <= 4 && !(n % 100 >= 12 && n % 100 <= 14))
+      ? 'кожныя $n месяцы'
+      : 'кожныя $n месяцаў';
+  @override
+  String recurYears(int n) => n == 1
+      ? 'кожны год'
+      : (n % 10 >= 2 && n % 10 <= 4 && !(n % 100 >= 12 && n % 100 <= 14))
+      ? 'кожныя $n гады'
+      : 'кожныя $n гадоў';
+  @override
+  String recurBusinessDays(int n) => n == 1
+      ? 'кожны працоўны дзень'
+      : (n % 10 >= 2 && n % 10 <= 4 && !(n % 100 >= 12 && n % 100 <= 14))
+      ? 'кожныя $n працоўныя дні'
+      : 'кожныя $n працоўных дзён';
+  @override
+  String recurOnWeekdays(String rule, String days) => '$rule: $days';
+  @override
+  String recurNthWeekday(String rule, int nth, int weekday) {
+    final i = nth == -1 ? 4 : nth - 1;
+    final ord = (const <int>{3, 5, 6, 7}.contains(weekday)
+        ? const ['1-я', '2-я', '3-я', '4-я', 'апошняя']
+        : const ['1-ы', '2-і', '3-і', '4-ы', 'апошні'])[i];
+    return '$rule, $ord ${weekdayNames[weekday - 1]}';
+  }
+
+  @override
+  String recurFromDue(String rule) => '$rule, ад тэрміну';
+  @override
+  String get todoRepeat => 'Паўтор';
+  @override
+  String get todoRepeatNever => 'Ніколі';
+  @override
+  String get todoRepeatCustom => 'Іншае…';
+  @override
+  String get recurEvery => 'Кожныя';
+  @override
+  String get recurUnitDays => 'Дні';
+  @override
+  String get recurUnitWeeks => 'Тыдні';
+  @override
+  String get recurUnitMonths => 'Месяцы';
+  @override
+  String get recurUnitYears => 'Гады';
+  @override
+  String get recurFromDueDate => 'Ад тэрміну';
+  @override
+  String get recurFromCompletion => 'Ад выканання';
 }

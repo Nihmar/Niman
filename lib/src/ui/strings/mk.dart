@@ -4460,4 +4460,50 @@ final class MacedonianStrings extends Strings {
   @override
   String todoBlockSeveralNotes(String name) =>
       'Повеќе белешки се совпаѓаат со $name';
+
+  // Recurring tasks (#1189): a rule in words, and the Repeat row.
+  @override
+  String recurDays(int n) => n == 1 ? 'секој ден' : 'на секои $n дена';
+  @override
+  String recurWeeks(int n) => n == 1 ? 'секоја недела' : 'на секои $n недели';
+  @override
+  String recurMonths(int n) => n == 1 ? 'секој месец' : 'на секои $n месеци';
+  @override
+  String recurYears(int n) => n == 1 ? 'секоја година' : 'на секои $n години';
+  @override
+  String recurBusinessDays(int n) =>
+      n == 1 ? 'секој работен ден' : 'на секои $n работни дена';
+  @override
+  String recurOnWeekdays(String rule, String days) => '$rule: $days';
+  @override
+  String recurNthWeekday(String rule, int nth, int weekday) {
+    final i = nth == -1 ? 4 : nth - 1;
+    final ord = (const <int>{3, 6, 7}.contains(weekday)
+        ? const ['1-ва', '2-ра', '3-та', '4-та', 'последна']
+        : const ['1-ви', '2-ри', '3-ти', '4-ти', 'последен'])[i];
+    return '$rule, $ord ${weekdayNames[weekday - 1]}';
+  }
+
+  @override
+  String recurFromDue(String rule) => '$rule, од рокот';
+  @override
+  String get todoRepeat => 'Повторување';
+  @override
+  String get todoRepeatNever => 'Никогаш';
+  @override
+  String get todoRepeatCustom => 'Прилагодено…';
+  @override
+  String get recurEvery => 'На секои';
+  @override
+  String get recurUnitDays => 'Денови';
+  @override
+  String get recurUnitWeeks => 'Недели';
+  @override
+  String get recurUnitMonths => 'Месеци';
+  @override
+  String get recurUnitYears => 'Години';
+  @override
+  String get recurFromDueDate => 'Од рокот';
+  @override
+  String get recurFromCompletion => 'Од завршувањето';
 }

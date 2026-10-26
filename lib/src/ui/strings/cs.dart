@@ -4415,4 +4415,67 @@ final class CzechStrings extends Strings {
   String todoBlockNoNote(String name) => 'Žádná poznámka neodpovídá $name';
   @override
   String todoBlockSeveralNotes(String name) => 'Více poznámek odpovídá $name';
+
+  // Recurring tasks (#1189): a rule in words, and the Repeat row.
+  @override
+  String recurDays(int n) => n == 1
+      ? 'každý den'
+      : (n <= 4)
+      ? 'každé $n dny'
+      : 'každých $n dní';
+  @override
+  String recurWeeks(int n) => n == 1
+      ? 'každý týden'
+      : (n <= 4)
+      ? 'každé $n týdny'
+      : 'každých $n týdnů';
+  @override
+  String recurMonths(int n) => n == 1
+      ? 'každý měsíc'
+      : (n <= 4)
+      ? 'každé $n měsíce'
+      : 'každých $n měsíců';
+  @override
+  String recurYears(int n) => n == 1
+      ? 'každý rok'
+      : (n <= 4)
+      ? 'každé $n roky'
+      : 'každých $n let';
+  @override
+  String recurBusinessDays(int n) => n == 1
+      ? 'každý pracovní den'
+      : (n <= 4)
+      ? 'každé $n pracovní dny'
+      : 'každých $n pracovních dní';
+  @override
+  String recurOnWeekdays(String rule, String days) => '$rule: $days';
+  @override
+  String recurNthWeekday(String rule, int nth, int weekday) {
+    final i = nth == -1 ? 4 : nth - 1;
+    final ord = const ['1.', '2.', '3.', '4.', 'poslední'][i];
+    return '$rule, $ord ${weekdayNames[weekday - 1]}';
+  }
+
+  @override
+  String recurFromDue(String rule) => '$rule, od termínu';
+  @override
+  String get todoRepeat => 'Opakování';
+  @override
+  String get todoRepeatNever => 'Nikdy';
+  @override
+  String get todoRepeatCustom => 'Vlastní…';
+  @override
+  String get recurEvery => 'Každé';
+  @override
+  String get recurUnitDays => 'Dny';
+  @override
+  String get recurUnitWeeks => 'Týdny';
+  @override
+  String get recurUnitMonths => 'Měsíce';
+  @override
+  String get recurUnitYears => 'Roky';
+  @override
+  String get recurFromDueDate => 'Od termínu';
+  @override
+  String get recurFromCompletion => 'Od dokončení';
 }

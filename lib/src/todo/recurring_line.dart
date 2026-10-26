@@ -15,14 +15,21 @@ import 'package:niman/src/core/recurrence/recurrence_dates.dart';
 import 'package:niman/src/core/recurrence/recurrence_rule.dart';
 import 'package:niman/src/todo/parser.dart';
 
+/// What the first `rec:` tag of [task] says after the colon, or null when it
+/// has none.
+String? recurrenceValueOf(TodoTask task) {
+  for (final tag in task.keyValues) {
+    if (tag.key == 'rec') return tag.value;
+  }
+  return null;
+}
+
 /// The rule a task repeats by: its first `rec:` tag read as a
 /// [RecurrenceRule], or null for a task with no `rec:` or one this grammar
 /// does not read (which stays an unknown tag, as before).
 RecurrenceRule? recurrenceRuleOf(TodoTask task) {
-  for (final tag in task.keyValues) {
-    if (tag.key == 'rec') return RecurrenceRule.parse(tag.value);
-  }
-  return null;
+  final value = recurrenceValueOf(task);
+  return value == null ? null : RecurrenceRule.parse(value);
 }
 
 /// The next copy of the open task on [line], completed on [today], or null
