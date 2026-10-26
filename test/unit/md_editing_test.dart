@@ -3,6 +3,7 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/editor/md_editing.dart';
+import 'package:niman/src/markdown/table/markdown_table.dart';
 
 TextSelection _sel(int start, [int? end]) => end == null
     ? TextSelection.collapsed(offset: start)
@@ -196,6 +197,93 @@ void main() {
         '|    |    |    |',
         '|    |    |    |',
       ]);
+    });
+  });
+
+  group('insertEisenhowerMatrix (#1139)', () {
+    const matrix =
+        '|  | Urgent | Not urgent |\n'
+        '| --- | --- | --- |\n'
+        '| **Important** |  |  |\n'
+        '| **Not important** |  |  |';
+
+    MarkdownEdit insert(
+      String text,
+      int caret, {
+      String urgent = 'Urgent',
+      String notUrgent = 'Not urgent',
+      String important = 'Important',
+      String notImportant = 'Not important',
+    }) => insertEisenhowerMatrix(
+      text: text,
+      selection: _sel(caret),
+      urgent: urgent,
+      notUrgent: notUrgent,
+      important: important,
+      notImportant: notImportant,
+    );
+
+    test('an empty note becomes the grid, the caret in its first quadrant', () {
+      final edit = insert('', 0);
+      expect(edit.text, matrix);
+      // The second cell of the first body row: where the tasks go.
+      final caret = edit.selection.extentOffset;
+      expect(edit.text.substring(0, caret), endsWith('| **Important** | '));
+      expect(edit.selection.isCollapsed, isTrue);
+    });
+
+    test('the labels are the ones handed in, in that language', () {
+      final edit = insert(
+        '',
+        0,
+        urgent: 'Urgente',
+        notUrgent: 'Non urgente',
+        important: 'Importante',
+        notImportant: 'Non importante',
+      );
+      expect(
+        edit.text,
+        [
+          '|  | Urgente | Non urgente |',
+          '| --- | --- | --- |',
+          '| **Importante** |  |  |',
+          '| **Non importante** |  |  |',
+        ].join('\n'),
+      );
+      expect(
+        edit.text.substring(0, edit.selection.extentOffset),
+        endsWith('| **Importante** | '),
+      );
+    });
+
+    test('a blank line replaces it, and a blank line keeps it from prose', () {
+      final edit = insert('prima\ndopo', 3);
+      expect(edit.text, 'prima\n\n$matrix\n\ndopo');
+      // The caret is the first quadrant's, not after the table.
+      final at = edit.selection.extentOffset;
+      final lineStart = edit.text.lastIndexOf('\n', at) + 1;
+      expect(
+        edit.text.substring(lineStart, edit.text.indexOf('\n', at)),
+        '| **Important** |  |  |',
+      );
+      expect(at - lineStart, '| **Important** | '.length);
+    });
+
+    test('it is a real table: three columns, an empty corner', () {
+      final table = MarkdownTable.parse(insert('', 0).text.split('\n'))!;
+      expect(table.columns, 3);
+      expect(table.header, ['', 'Urgent', 'Not urgent']);
+      expect(table.rows, [
+        ['**Important**', '', ''],
+        ['**Not important**', '', ''],
+      ]);
+    });
+
+    test('a label with a pipe in it is escaped, not split', () {
+      final edit = insert('', 0, urgent: 'A|B', important: 'C|D');
+      expect(edit.text.split('\n')[0], r'|  | A\|B | Not urgent |');
+      expect(edit.text.split('\n')[2], r'| **C\|D** |  |  |');
+      expect(MarkdownTable.parse(edit.text.split('\n'))!.columns, 3);
     });
   });
 

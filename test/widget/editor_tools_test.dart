@@ -81,6 +81,45 @@ void main() {
       expect(picked, isNull);
     });
 
+    testWidgets('Insert Eisenhower matrix is a tool, always offered (#1139)', (
+      tester,
+    ) async {
+      EditorTool? picked;
+      await _pumpOpener<EditorTool>(
+        tester,
+        (context) => showEditorToolsSheet(
+          context,
+          available: const <EditorTool>{EditorTool.eisenhower},
+        ),
+        (value) => picked = value,
+      );
+      final row = find.byKey(const Key('editor-tool-eisenhower'));
+      expect(row, findsOneWidget);
+      expect(tester.widget<ListTile>(row).enabled, isTrue);
+      expect(find.text(AppStrings.toolEisenhowerSubtitle), findsOneWidget);
+
+      await tester.tap(row);
+      await settle(tester);
+      expect(picked, EditorTool.eisenhower);
+
+      // It asks nothing: with nothing else available, it is still the one
+      // row that runs.
+      await _pumpOpener<EditorTool>(
+        tester,
+        (context) => showEditorToolsSheet(context, available: const {}),
+        (_) {},
+      );
+      expect(
+        tester
+            .widget<ListTile>(find.byKey(const Key('editor-tool-eisenhower')))
+            .enabled,
+        isFalse,
+      );
+      // The list tools still keep their place beside it.
+      expect(find.byKey(const Key('editor-tool-countList')), findsOneWidget);
+      expect(find.byKey(const Key('editor-tool-mindMap')), findsOneWidget);
+    });
+
     testWidgets('Move to tasks is a tool, with a reason of its own (#1152)', (
       tester,
     ) async {

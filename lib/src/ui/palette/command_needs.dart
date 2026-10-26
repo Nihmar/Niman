@@ -78,6 +78,7 @@ Set<CommandNeed> commandNeeds(AppCommand command) => switch (command) {
   AppCommand.insertDiagram ||
   AppCommand.insertMindMap ||
   AppCommand.insertColumns ||
+  AppCommand.insertEisenhower ||
   AppCommand.convertListToMindMap ||
   AppCommand.pasteAsMarkdown ||
   AppCommand.exportNote ||

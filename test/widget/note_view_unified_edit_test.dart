@@ -14,6 +14,7 @@ import 'package:niman/src/ui/cheatsheet/cheatsheet_entries.dart';
 import 'package:niman/src/ui/cheatsheet/cheatsheet_screen.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/note_view_handle.dart';
+import 'package:niman/src/ui/strings.dart';
 
 import '../fakes/fake_embedder.dart';
 
@@ -23,7 +24,9 @@ NoteView _view({
   required List<String> writes,
   int reloadToken = 0,
   bool showWysiwyg = false,
+  Key? key,
 }) => NoteView(
+  key: key,
   path: '/notes/a.md',
   showLineNumbers: false,
   autofocusEditor: false,
@@ -494,4 +497,75 @@ void main() {
       expect(writes.last, text);
     });
   }
+
+  for (final live in <bool>[false, true]) {
+    testWidgets('the tools insert an Eisenhower matrix '
+        '(${live ? 'live' : 'source'})', (tester) async {
+      // #1139: the matrix goes through the same insertion whichever
+      // unified mode draws the note, in the app's language, the caret in
+      // the first quadrant — and it is what the note saves.
+      final writes = <String>[];
+      await _pump(
+        tester,
+        _view(
+          readNote: (_) async => 'una nota\n',
+          writes: writes,
+          showWysiwyg: live,
+        ),
+      );
+      _surface(tester).placeCaret(9);
+      await tester.pump();
+      await tester.tap(find.byKey(const Key('toolbar-tools')));
+      await tester.pumpAndSettle();
+      final tool = find.byKey(const Key('editor-tool-eisenhower'));
+      expect(tester.widget<ListTile>(tool).enabled, isTrue);
+      await tester.tap(tool);
+      await tester.pumpAndSettle();
+
+      final surface = _surface(tester);
+      final text = surface.widget.buffer.text;
+      expect(
+        text,
+        'una nota\n\n'
+        '|  | ${AppStrings.eisenhowerUrgent} | '
+        '${AppStrings.eisenhowerNotUrgent} |\n'
+        '| --- | --- | --- |\n'
+        '| **${AppStrings.eisenhowerImportant}** |  |  |\n'
+        '| **${AppStrings.eisenhowerNotImportant}** |  |  |',
+      );
+      // The caret is in the first quadrant, ready to type a task.
+      expect(
+        text.substring(0, surface.selection.extent),
+        endsWith('| **${AppStrings.eisenhowerImportant}** | '),
+      );
+      await _settleSave(tester);
+      expect(writes.last, text);
+    });
+  }
+
+  testWidgets("the palette's command inserts the same matrix (#1139)", (
+    tester,
+  ) async {
+    // What `AppCommand.insertEisenhower` runs: the shell hands the note the
+    // command, and the note writes it through its editor as one edit.
+    final writes = <String>[];
+    final key = GlobalKey<State<NoteView>>();
+    await _pump(
+      tester,
+      _view(key: key, readNote: (_) async => 'una nota', writes: writes),
+    );
+    (key.currentState! as NoteViewHandle).insertEisenhower();
+    await tester.pumpAndSettle();
+    final text = _surface(tester).widget.buffer.text;
+    // A caret at the head of a line puts the block above it, a blank line
+    // between the grid and the prose.
+    expect(text, startsWith('|  | ${AppStrings.eisenhowerUrgent} | '));
+    expect(text, endsWith('\n\nuna nota'));
+    expect(
+      text,
+      contains('| **${AppStrings.eisenhowerNotImportant}** |  |  |'),
+    );
+    await _settleSave(tester);
+    expect(writes.last, text);
+  });
 }

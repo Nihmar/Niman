@@ -616,6 +616,12 @@ final class _NoteViewState extends State<NoteView>
   }
 
   @override
+  void insertEisenhower() {
+    if (!canInsert) return;
+    _commands.insertEisenhowerMatrixAtCaret();
+  }
+
+  @override
   PastedText? pasteText(String text) {
     final surface = _surface;
     if (!canInsert || surface == null) return null;

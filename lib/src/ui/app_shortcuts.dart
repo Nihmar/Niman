@@ -114,6 +114,9 @@ enum AppCommand {
   /// Insert two columns at the caret (#729).
   insertColumns,
 
+  /// Insert an Eisenhower matrix at the caret (#1139).
+  insertEisenhower,
+
   /// Turn the list at the caret into a mind map (#530).
   convertListToMindMap,
 
@@ -476,6 +479,7 @@ String appCommandLabel(AppCommand command) => switch (command) {
   AppCommand.insertDiagram => AppStrings.commandInsertDiagram,
   AppCommand.insertMindMap => AppStrings.commandInsertMindMap,
   AppCommand.insertColumns => AppStrings.commandInsertColumns,
+  AppCommand.insertEisenhower => AppStrings.commandInsertEisenhower,
   AppCommand.convertListToMindMap => AppStrings.commandConvertListToMindMap,
   AppCommand.moveToTasks => AppStrings.moveToTasks,
   AppCommand.pasteAsMarkdown => AppStrings.pasteAsMarkdown,

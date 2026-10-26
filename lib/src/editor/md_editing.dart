@@ -266,6 +266,44 @@ MarkdownEdit insertColumns({
   );
 }
 
+/// Inserts an Eisenhower matrix (#1139): a table whose first row is the
+/// urgency axis and whose first column is the importance axis, the four
+/// quadrants left empty and the caret in the first of them.
+///
+/// The labels are the app's strings in the language active now, escaped
+/// for a cell. A note is plain Markdown: a matrix written today keeps its
+/// words when the app language changes. The row labels are bold, being
+/// the row's name rather than the first of its cells.
+MarkdownEdit insertEisenhowerMatrix({
+  required String text,
+  required TextSelection selection,
+  required String urgent,
+  required String notUrgent,
+  required String important,
+  required String notImportant,
+}) {
+  final urgentCell = _tableCell(urgent);
+  final notUrgentCell = _tableCell(notUrgent);
+  final importantCell = '**${_tableCell(important)}**';
+  final notImportantCell = '**${_tableCell(notImportant)}**';
+  return insertBlock(
+    text: text,
+    selection: selection,
+    block: <String>[
+      '|  | $urgentCell | $notUrgentCell |',
+      '| --- | --- | --- |',
+      '| $importantCell |  |  |',
+      '| $notImportantCell |  |  |',
+    ],
+    // The first quadrant: the second cell of the first body row.
+    caret: (line: 2, column: '| $importantCell | '.length),
+  );
+}
+
+/// [label] as a table cell's text: a pipe in it is escaped, so it stays
+/// the cell's rather than ending it.
+String _tableCell(String label) => label.replaceAll('|', r'\|');
+
 /// Inserts [block]'s lines on lines of their own, the caret at [caret] in
 /// them — at the end of the last one without it.
 ///

@@ -63,6 +63,7 @@ LibraryFeature? featureOf(AppCommand command) => switch (command) {
   AppCommand.insertDiagram ||
   AppCommand.insertMindMap ||
   AppCommand.insertColumns ||
+  AppCommand.insertEisenhower ||
   AppCommand.convertListToMindMap ||
   AppCommand.exportNote ||
   AppCommand.exportLibrary ||

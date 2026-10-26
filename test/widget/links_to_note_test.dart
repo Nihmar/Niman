@@ -50,6 +50,9 @@ final class _Note implements NoteViewHandle {
   void insertColumns() {}
 
   @override
+  void insertEisenhower() {}
+
+  @override
   void convertListToMindMap() {}
 
   @override

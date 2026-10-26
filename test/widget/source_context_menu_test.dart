@@ -17,6 +17,7 @@ import 'package:niman/src/markdown/surface.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/spellcheck/spell_checker.dart';
 import 'package:niman/src/ui/note_view.dart';
+import 'package:niman/src/ui/strings.dart';
 
 const MarkdownTheme _theme = MarkdownTheme(
   body: TextStyle(fontSize: 14, height: 1.5, fontFamily: 'monospace'),
@@ -564,6 +565,32 @@ void main() {
         '::: column\nRight column\n:::\n::::',
       );
       expect(state.selectedText, 'Left column');
+    }, variant: _desktop);
+
+    both('Insert › Eisenhower matrix writes the grid (#1139)', (
+      tester,
+      mode,
+    ) async {
+      final state = await open(tester, mode, 'riga', caret: 4);
+      await tester.tap(find.byKey(const Key('menu-insert')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('menu-eisenhower')));
+      await tester.pumpAndSettle();
+      final text = state.widget.buffer.text;
+      expect(
+        text,
+        'riga\n\n'
+        '|  | ${AppStrings.eisenhowerUrgent} | '
+        '${AppStrings.eisenhowerNotUrgent} |\n'
+        '| --- | --- | --- |\n'
+        '| **${AppStrings.eisenhowerImportant}** |  |  |\n'
+        '| **${AppStrings.eisenhowerNotImportant}** |  |  |',
+      );
+      // The caret waits in the first quadrant.
+      expect(
+        text.substring(0, state.selection.extent),
+        endsWith('| **${AppStrings.eisenhowerImportant}** | '),
+      );
     }, variant: _desktop);
 
     testWidgets('on a phone the Insert sheet has Columns (#729)', (
