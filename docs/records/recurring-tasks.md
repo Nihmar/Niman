@@ -110,8 +110,6 @@ called by `TodoStore` in the same write as the archive.
 - **The creation date changes on the copy**, so a filter on it sees every
   copy as new. That is what the other tools do.
 - **37 locale files** for the presets and the rule in words.
-</content>
-</invoke>
 
 ## As built (#1189)
 
