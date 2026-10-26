@@ -115,18 +115,26 @@ CalendarFileContent addCalendarEvent(
 ///
 /// The event is taken out and written back in time order, so an edited
 /// time moves it where the line keeps its events: an edit touches its own
-/// line, and nothing else.
+/// line, and nothing else. With [moveTo] a day other than the event's own,
+/// the event leaves its line and is written on that day's, made when it is
+/// missing (#1191): two lines change, and no other.
 CalendarFileContent? updateCalendarEvent(
   CalendarFileContent file,
   CalendarEventRef ref,
-  CalendarEventDraft draft,
-) {
+  CalendarEventDraft draft, {
+  DateTime? moveTo,
+}) {
   final body = calendarEventAsText(draft);
   if (body.isEmpty) {
     throw ArgumentError('an event needs a text or a time');
   }
   final found = findCalendarEvent(file, ref);
   if (found == null) return null;
+  if (moveTo != null && !sameCalendarDay(moveTo, ref.day)) {
+    final removed = deleteCalendarEvent(file, ref);
+    if (removed == null) return null;
+    return addCalendarEvent(removed, moveTo, draft: draft);
+  }
   final lines = [...file.lines];
   final without = withoutCalendarEventIn(lines[found.index].text, found.event);
   final line = parseCalendarLine(without, weekdays: calendarWeekdays);

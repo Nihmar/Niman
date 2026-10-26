@@ -269,6 +269,7 @@ final class AppStrings {
   static String get calendarScopeThis => _s.calendarScopeThis;
   static String get calendarScopeFollowing => _s.calendarScopeFollowing;
   static String get calendarScopeAll => _s.calendarScopeAll;
+  static String get calendarEventDay => _s.calendarEventDay;
   static String get journalCalendarTitle => _s.journalCalendarTitle;
   static String get journalEventTimesTitle => _s.journalEventTimesTitle;
   static String get journalEventTimesSubtitle => _s.journalEventTimesSubtitle;

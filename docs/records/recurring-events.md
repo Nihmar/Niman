@@ -144,9 +144,18 @@ file.
   readable `except:` of the event as the sorted union with the new day, or
   closes the event with a new token when it has none; an `except:` it cannot
   read is left as written.
-- **Edit this one** writes the plain event on the occurrence's own day. The
-  writer takes a target day (`moveTo`), tested, but the form has no date field
-  yet, so a move to another day is not offered on screen: only the change.
+- **Edit this one** writes the plain event on the day the form's Day row
+  says: the occurrence's own by default, or another day, which is the move.
+- **The Day row** is the task dialog's due-date pattern: the calendar in place
+  on a window with the room, the system's date picker elsewhere. The draft
+  carries the day (`CalendarEventDraft.day`, null when the form did not say),
+  and the writer reads it: an added event goes there, a plain event that is
+  edited leaves its line for that day's (two lines change, the new one made
+  in date order when missing), and one occurrence is `except:`ed and written
+  there. For *This and following* and *All events* the row is shown and off,
+  and the draft carries no day: a series moves by changing its rule. An event
+  that does not repeat is edited with no scope (nothing to ask), so its row is
+  on. The preview shows every line the write changes, not only the day's.
 - **Edit this and following from the rule's first day** is the same as All
   events (`until:` the day before would end the rule before it began), and so
   is a Delete of this and following, which deletes the event instead.

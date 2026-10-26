@@ -7,6 +7,10 @@
 /// dock's journal pane on a window and a sheet on a phone: a dialog does
 /// not go over a calendar (#712).
 ///
+/// A Day row (#1191) moves the event to another day — an added event is
+/// written there, an edited one leaves its line for that day's — unless it
+/// is part of a series, which moves by changing its rule.
+///
 /// A Repeat row and an Ends row (#1191) make the event a rule: `rec:` and,
 /// when it ends, `until:`. The days the rule skips (`except:`) are not on
 /// the form, and travel through it untouched.
@@ -20,10 +24,10 @@ import 'package:niman/src/core/recurrence/recurrence_bounds.dart';
 import 'package:niman/src/core/recurrence/recurrence_rule.dart';
 import 'package:niman/src/core/recurrence/recurrence_unit.dart';
 import 'package:niman/src/ui/app_switch.dart';
+import 'package:niman/src/ui/calendar_event_day.dart';
 import 'package:niman/src/ui/calendar_event_preview.dart';
 import 'package:niman/src/ui/calendar_event_repeat.dart';
 import 'package:niman/src/ui/calendar_event_times.dart';
-import 'package:niman/src/ui/journal/journal_flow.dart' show journalDayLabel;
 import 'package:niman/src/ui/menu_choice_button.dart';
 import 'package:niman/src/ui/strings.dart';
 
@@ -103,6 +107,14 @@ final class _CalendarEventFormState extends State<CalendarEventForm> {
   };
   bool _customOpen = false;
 
+  /// The day the event is written on, and whether its calendar is open.
+  late DateTime _day = widget.day;
+  bool _dayOpen = false;
+
+  /// Whether the event can move to another day: one that is added, one that
+  /// stands alone, or one occurrence. A series moves by changing its rule.
+  bool get _dayEditable => widget.scope == null || _only;
+
   /// Whether this edits one occurrence only, which then stands alone.
   bool get _only => widget.scope == CalendarOccurrenceScope.thisOne;
 
@@ -142,6 +154,7 @@ final class _CalendarEventFormState extends State<CalendarEventForm> {
       // A lead that would land on the day before is not written: a
       // calendar line's `rem:` is a clock time on its own day.
       reminderMinutes: reminder == null || reminder < 0 ? null : reminder,
+      day: _dayEditable ? _day : null,
       recurrence: _rule == null
           ? null
           : CalendarRecurrence(
@@ -221,18 +234,17 @@ final class _CalendarEventFormState extends State<CalendarEventForm> {
                       : AppStrings.todoEditAction,
                   style: theme.textTheme.titleSmall,
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    journalDayLabel(widget.day),
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: scheme.onSurfaceVariant,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
               ],
+            ),
+            CalendarEventDay(
+              day: _day,
+              enabled: _dayEditable,
+              open: _dayOpen,
+              onToggle: () => setState(() => _dayOpen = !_dayOpen),
+              onPicked: (day) => setState(() {
+                _day = day;
+                _dayOpen = false;
+              }),
             ),
             const SizedBox(height: 6),
             CalendarEventTimes(
@@ -292,7 +304,7 @@ final class _CalendarEventFormState extends State<CalendarEventForm> {
               ],
             ),
             CalendarEventRepeat(
-              day: widget.day,
+              day: _day,
               rule: _rule,
               until: _until,
               enabled: !_only,

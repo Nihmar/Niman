@@ -316,6 +316,8 @@ final class ChineseStrings extends Strings {
   @override
   String get calendarScopeAll => '所有事件';
   @override
+  String get calendarEventDay => '日期';
+  @override
   String get journalCalendarTitle => '日历';
   @override
   String get journalEventTimesTitle => '事件时间';

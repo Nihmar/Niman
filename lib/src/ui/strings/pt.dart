@@ -341,6 +341,8 @@ final class PortugueseStrings extends Strings {
   @override
   String get calendarScopeAll => 'Todos os eventos';
   @override
+  String get calendarEventDay => 'Dia';
+  @override
   String get journalCalendarTitle => 'Calendário';
   @override
   String get journalEventTimesTitle => 'Horas dos eventos';

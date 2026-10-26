@@ -342,6 +342,8 @@ final class SwedishStrings extends Strings {
   @override
   String get calendarScopeAll => 'Alla händelser';
   @override
+  String get calendarEventDay => 'Dag';
+  @override
   String get journalCalendarTitle => 'Kalender';
   @override
   String get journalEventTimesTitle => 'Händelsetider';

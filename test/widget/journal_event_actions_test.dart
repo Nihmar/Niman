@@ -26,12 +26,14 @@ void main() {
   final skipped = <CalendarEntryEvent>[];
   final deleted = <(CalendarEntryEvent, CalendarOccurrenceScope)>[];
   final opened = <CalendarEntryEvent>[];
+  final added = <(DateTime, CalendarEventDraft)>[];
 
   setUp(() {
     edited.clear();
     skipped.clear();
     deleted.clear();
     opened.clear();
+    added.clear();
   });
 
   Future<void> pump(
@@ -63,7 +65,7 @@ void main() {
             eventDaysIn: snapshot.eventDaysIn,
             calendarFile: snapshot.file,
             onOpenEvent: opened.add,
-            onAddEvent: (day, event) {},
+            onAddEvent: (day, event) => added.add((day, event)),
             onEditEvent: (entry, event, scope) =>
                 edited.add((entry, event, scope)),
             onSkipEvent: skipped.add,
@@ -280,6 +282,170 @@ void main() {
       expect(opened.single.lineIndex, 0);
       expect(opened.single.day, DateTime(2026, 10, 12));
     });
+  });
+
+  group('moving, from the form', () {
+    /// The text of the preview box: the lines the write would make.
+    String preview(WidgetTester tester) => tester
+        .widget<Text>(
+          find
+              .descendant(
+                of: key('calendar-event-preview'),
+                matching: find.byType(Text),
+              )
+              .first,
+        )
+        .textSpan!
+        .toPlainText();
+
+    /// Picks [day] of October in the form's own calendar: in place on a
+    /// window, in the system's dialog on a phone.
+    Future<void> pickDay(
+      WidgetTester tester,
+      int day, {
+      required bool phone,
+    }) async {
+      await tester.tap(key('calendar-event-day'));
+      await tester.pumpAndSettle();
+      if (phone) {
+        await tester.tap(
+          find.descendant(of: find.byType(Dialog), matching: find.text('$day')),
+        );
+        await tester.tap(find.text('OK'));
+      } else {
+        await tester.tap(
+          find.descendant(
+            of: key('calendar-event-day-panel'),
+            matching: find.text('$day'),
+          ),
+        );
+      }
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('a window moves a plain event, the preview shows both lines', (
+      tester,
+    ) async {
+      await pump(tester, phone: false, focus: DateTime(2026, 10, 8));
+      await rightClick(tester, 'dinner');
+      await tester.tap(key('journal-event-edit'));
+      await tester.pumpAndSettle();
+      // Nothing to ask: there is one of it.
+      expect(key('journal-event-scope'), findsNothing);
+      expect(
+        tester.widget<TextButton>(key('calendar-event-day')).onPressed,
+        isNotNull,
+      );
+
+      await pickDay(tester, 9, phone: false);
+      expect(
+        preview(tester),
+        '2026-10-08 w41 Thu\n2026-10-09 w41 Fri  18 dinner.',
+        reason: 'the day it leaves, and the day it goes to',
+      );
+
+      await tester.tap(key('calendar-event-save'));
+      await tester.pumpAndSettle();
+      expect(edited.single.$2.day, DateTime(2026, 10, 9));
+      expect(edited.single.$3, CalendarOccurrenceScope.all);
+      expect(edited.single.$1.line.date, DateTime(2026, 10, 8));
+    });
+
+    testWidgets('a phone moves a plain event with the system date picker', (
+      tester,
+    ) async {
+      await pump(tester, phone: true);
+      await openSheet(tester, 8, 'dinner');
+      await tester.tap(key('journal-event-edit'));
+      await tester.pumpAndSettle();
+      expect(key('journal-event-scope'), findsNothing);
+
+      await pickDay(tester, 9, phone: true);
+      expect(find.textContaining('Friday 9 October'), findsWidgets);
+      await tester.tap(key('calendar-event-save'));
+      await tester.pumpAndSettle();
+
+      expect(edited.single.$2.day, DateTime(2026, 10, 9));
+    });
+
+    testWidgets('a window moves one occurrence: its day is skipped', (
+      tester,
+    ) async {
+      await pump(tester, phone: false);
+      await rightClick(tester, 'Standup');
+      await tester.tap(key('journal-event-edit'));
+      await tester.pumpAndSettle();
+      await tester.tap(key('journal-event-scope-this'));
+      await tester.pumpAndSettle();
+
+      await pickDay(tester, 14, phone: false);
+      expect(
+        preview(tester),
+        '2026-10-05 w41 Mon  9-9:30 Standup @work rec:1w except:2026-10-12.\n'
+        '2026-10-14 w42 Wed  9-9:30 Standup @work.',
+      );
+      await tester.tap(key('calendar-event-save'));
+      await tester.pumpAndSettle();
+
+      expect(edited.single.$3, CalendarOccurrenceScope.thisOne);
+      expect(edited.single.$2.day, DateTime(2026, 10, 14));
+      expect(edited.single.$2.recurrence, isNull);
+    });
+
+    testWidgets('a phone moves one occurrence the same way', (tester) async {
+      await pump(tester, phone: true);
+      await openSheet(tester, 19, 'Standup');
+      await tester.tap(key('journal-event-edit'));
+      await tester.pumpAndSettle();
+      await tester.tap(key('journal-event-scope-this'));
+      await tester.pumpAndSettle();
+
+      await pickDay(tester, 21, phone: true);
+      await tester.tap(key('calendar-event-save'));
+      await tester.pumpAndSettle();
+
+      expect(edited.single.$3, CalendarOccurrenceScope.thisOne);
+      expect(edited.single.$2.day, DateTime(2026, 10, 21));
+      expect(edited.single.$1.day, DateTime(2026, 10, 19));
+    });
+
+    testWidgets('a series keeps its Day row, off', (tester) async {
+      for (final scope in ['all', 'following']) {
+        await pump(tester, phone: false);
+        await rightClick(tester, 'Standup');
+        await tester.tap(key('journal-event-edit'));
+        await tester.pumpAndSettle();
+        await tester.tap(key('journal-event-scope-$scope'));
+        await tester.pumpAndSettle();
+
+        expect(key('calendar-event-day'), findsOne, reason: scope);
+        expect(
+          tester.widget<TextButton>(key('calendar-event-day')).onPressed,
+          isNull,
+          reason: scope,
+        );
+        await tester.tap(key('calendar-event-save'));
+        await tester.pumpAndSettle();
+        expect(edited.last.$2.day, isNull, reason: scope);
+      }
+    });
+
+    testWidgets(
+      'an added event is written on the day the form was changed to',
+      (tester) async {
+        await pump(tester, phone: false);
+        await tester.tap(key('journal-add-event'));
+        await tester.pumpAndSettle();
+        await pickDay(tester, 15, phone: false);
+        await tester.enterText(key('calendar-event-text'), 'lunch');
+        await tester.pump();
+        await tester.tap(key('calendar-event-save'));
+        await tester.pumpAndSettle();
+
+        expect(added.single.$1, DateTime(2026, 10, 15));
+        expect(added.single.$2.day, DateTime(2026, 10, 15));
+      },
+    );
   });
 
   group('the phone, with a thumb', () {

@@ -346,6 +346,8 @@ final class BulgarianStrings extends Strings {
   @override
   String get calendarScopeAll => 'Всички събития';
   @override
+  String get calendarEventDay => 'Ден';
+  @override
   String get journalCalendarTitle => 'Календар';
   @override
   String get journalEventTimesTitle => 'Часове на събитията';

@@ -344,6 +344,8 @@ final class SlovenianStrings extends Strings {
   @override
   String get calendarScopeAll => 'Vsi dogodki';
   @override
+  String get calendarEventDay => 'Dan';
+  @override
   String get journalCalendarTitle => 'Koledar';
   @override
   String get journalEventTimesTitle => 'Časi dogodkov';

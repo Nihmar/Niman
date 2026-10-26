@@ -345,6 +345,8 @@ final class SpanishStrings extends Strings {
   @override
   String get calendarScopeAll => 'Todos los eventos';
   @override
+  String get calendarEventDay => 'Día';
+  @override
   String get journalCalendarTitle => 'Calendario';
   @override
   String get journalEventTimesTitle => 'Horas de los eventos';

@@ -343,6 +343,8 @@ final class MacedonianStrings extends Strings {
   @override
   String get calendarScopeAll => 'Сите настани';
   @override
+  String get calendarEventDay => 'Ден';
+  @override
   String get journalCalendarTitle => 'Календар';
   @override
   String get journalEventTimesTitle => 'Времиња на настани';

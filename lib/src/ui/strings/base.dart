@@ -186,6 +186,10 @@ abstract base class Strings {
   String get calendarScopeFollowing;
   String get calendarScopeAll;
 
+  /// The event form's Day row (#1191): the label of the button that moves
+  /// an event to another day, `Day`.
+  String get calendarEventDay;
+
   /// Settings › Journal's calendar heading and its one setting (#730):
   /// the times as written, or as a clock in the reader's own zone.
   String get journalCalendarTitle;

@@ -343,6 +343,8 @@ final class GalicianStrings extends Strings {
   @override
   String get calendarScopeAll => 'Todos os eventos';
   @override
+  String get calendarEventDay => 'Día';
+  @override
   String get journalCalendarTitle => 'Calendario';
   @override
   String get journalEventTimesTitle => 'Horas dos eventos';

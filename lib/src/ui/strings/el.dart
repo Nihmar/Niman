@@ -347,6 +347,8 @@ final class GreekStrings extends Strings {
   @override
   String get calendarScopeAll => 'Όλα τα συμβάντα';
   @override
+  String get calendarEventDay => 'Ημέρα';
+  @override
   String get journalCalendarTitle => 'Ημερολόγιο';
   @override
   String get journalEventTimesTitle => 'Ώρες συμβάντων';

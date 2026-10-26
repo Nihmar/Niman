@@ -338,6 +338,8 @@ final class BasqueStrings extends Strings {
   @override
   String get calendarScopeAll => 'Gertaera guztiak';
   @override
+  String get calendarEventDay => 'Eguna';
+  @override
   String get journalCalendarTitle => 'Egutegia';
   @override
   String get journalEventTimesTitle => 'Gertaeren orduak';

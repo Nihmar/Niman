@@ -20,6 +20,7 @@ final class CalendarEventDraft {
     this.endMinutes,
     this.reminderMinutes,
     this.recurrence,
+    this.day,
   });
 
   /// The event's text as typed: its `+`/`@`/`#`/`key:value` tokens
@@ -41,6 +42,11 @@ final class CalendarEventDraft {
   /// (#1191), or null for an event that happens once.
   final CalendarRecurrence? recurrence;
 
+  /// The day the form wrote the event on (#1191), or null when it did not
+  /// say: where an event is, or the day it is added on. A day other than an
+  /// edited event's own moves it there.
+  final DateTime? day;
+
   /// This draft with [recurrence] in place of its own (null: a plain
   /// event).
   CalendarEventDraft withRecurrence(CalendarRecurrence? recurrence) =>
@@ -50,6 +56,7 @@ final class CalendarEventDraft {
         endMinutes: endMinutes,
         reminderMinutes: reminderMinutes,
         recurrence: recurrence,
+        day: day,
       );
 }
 

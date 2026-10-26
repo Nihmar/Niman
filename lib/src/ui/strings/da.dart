@@ -342,6 +342,8 @@ final class DanishStrings extends Strings {
   @override
   String get calendarScopeAll => 'Alle begivenheder';
   @override
+  String get calendarEventDay => 'Dag';
+  @override
   String get journalCalendarTitle => 'Kalender';
   @override
   String get journalEventTimesTitle => 'Begivenhedstider';

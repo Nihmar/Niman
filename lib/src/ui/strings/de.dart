@@ -345,6 +345,8 @@ final class GermanStrings extends Strings {
   @override
   String get calendarScopeAll => 'Alle Termine';
   @override
+  String get calendarEventDay => 'Tag';
+  @override
   String get journalCalendarTitle => 'Kalender';
   @override
   String get journalEventTimesTitle => 'Terminzeiten';

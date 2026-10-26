@@ -337,6 +337,8 @@ final class EstonianStrings extends Strings {
   @override
   String get calendarScopeAll => 'Kõik sündmused';
   @override
+  String get calendarEventDay => 'Päev';
+  @override
   String get journalCalendarTitle => 'Kalender';
   @override
   String get journalEventTimesTitle => 'Sündmuste ajad';

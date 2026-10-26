@@ -339,6 +339,8 @@ final class IcelandicStrings extends Strings {
   @override
   String get calendarScopeAll => 'Allir viðburðir';
   @override
+  String get calendarEventDay => 'Dagur';
+  @override
   String get journalCalendarTitle => 'Dagatal';
   @override
   String get journalEventTimesTitle => 'Tímar viðburða';

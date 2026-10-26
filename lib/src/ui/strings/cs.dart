@@ -341,6 +341,8 @@ final class CzechStrings extends Strings {
   @override
   String get calendarScopeAll => 'Všechny události';
   @override
+  String get calendarEventDay => 'Den';
+  @override
   String get journalCalendarTitle => 'Kalendář';
   @override
   String get journalEventTimesTitle => 'Časy událostí';

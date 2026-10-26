@@ -337,6 +337,8 @@ final class LatvianStrings extends Strings {
   @override
   String get calendarScopeAll => 'Visi notikumi';
   @override
+  String get calendarEventDay => 'Diena';
+  @override
   String get journalCalendarTitle => 'Kalendārs';
   @override
   String get journalEventTimesTitle => 'Notikumu laiki';

@@ -339,6 +339,8 @@ final class EnglishStrings extends Strings {
   @override
   String get calendarScopeAll => 'All events';
   @override
+  String get calendarEventDay => 'Day';
+  @override
   String get journalCalendarTitle => 'Calendar';
   @override
   String get journalEventTimesTitle => 'Event times';

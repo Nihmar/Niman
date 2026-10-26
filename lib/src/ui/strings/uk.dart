@@ -341,6 +341,8 @@ final class UkrainianStrings extends Strings {
   @override
   String get calendarScopeAll => 'Усі події';
   @override
+  String get calendarEventDay => 'День';
+  @override
   String get journalCalendarTitle => 'Календар';
   @override
   String get journalEventTimesTitle => 'Час подій';

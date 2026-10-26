@@ -339,6 +339,8 @@ final class HungarianStrings extends Strings {
   @override
   String get calendarScopeAll => 'Minden esemény';
   @override
+  String get calendarEventDay => 'Nap';
+  @override
   String get journalCalendarTitle => 'Naptár';
   @override
   String get journalEventTimesTitle => 'Eseményidők';

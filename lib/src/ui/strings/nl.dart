@@ -342,6 +342,8 @@ final class DutchStrings extends Strings {
   @override
   String get calendarScopeAll => 'Alle gebeurtenissen';
   @override
+  String get calendarEventDay => 'Dag';
+  @override
   String get journalCalendarTitle => 'Kalender';
   @override
   String get journalEventTimesTitle => 'Gebeurtenistijden';

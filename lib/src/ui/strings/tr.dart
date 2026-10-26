@@ -334,6 +334,8 @@ final class TurkishStrings extends Strings {
   @override
   String get calendarScopeAll => 'Tüm etkinlikler';
   @override
+  String get calendarEventDay => 'Gün';
+  @override
   String get journalCalendarTitle => 'Takvim';
   @override
   String get journalEventTimesTitle => 'Etkinlik saatleri';

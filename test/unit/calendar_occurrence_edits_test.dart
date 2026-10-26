@@ -469,6 +469,112 @@ void main() {
     });
   });
 
+  group('moving to another day', () {
+    final dinner = CalendarEventRef(
+      line: 2,
+      day: DateTime(2026, 10, 8),
+      start: 20,
+    );
+
+    test('a plain event leaves its line for the day it is moved to', () {
+      final before = file();
+      final after = updateCalendarOccurrence(
+        before,
+        dinner,
+        DateTime(2026, 10, 8),
+        CalendarEventDraft(
+          text: 'dinner',
+          startMinutes: 19 * 60,
+          day: DateTime(2026, 10, 13),
+        ),
+        CalendarOccurrenceScope.all,
+      )!;
+      expect(after.lines[2].text, '2026-10-08 w41 Thu');
+      expect(after.lines[4].text, '2026-10-13 w42 Tue  10 seminar. 19 dinner.');
+      expect(changedLines(before, after), [2, 4]);
+      expect(after.lines[2].ending, '\r\n');
+    });
+
+    test('to a day with no line, one is made in date order', () {
+      final before = file();
+      final after = updateCalendarOccurrence(
+        before,
+        dinner,
+        DateTime(2026, 10, 8),
+        CalendarEventDraft(text: 'dinner', day: DateTime(2026, 10, 9)),
+        CalendarOccurrenceScope.all,
+      )!;
+      expect(after.lines.length, before.lines.length + 1);
+      expect(after.lines[3].text, '2026-10-09 w41 Fri  dinner.');
+      expect(after.lines[2].text, '2026-10-08 w41 Thu');
+    });
+
+    test('the same day, or none, is an edit in place', () {
+      for (final day in [null, DateTime(2026, 10, 8)]) {
+        final before = file();
+        final after = updateCalendarOccurrence(
+          before,
+          dinner,
+          DateTime(2026, 10, 8),
+          CalendarEventDraft(text: 'dinner at 7', day: day),
+          CalendarOccurrenceScope.all,
+        )!;
+        expect(after.lines[2].text, '2026-10-08 w41 Thu  dinner at 7.');
+        expect(changedLines(before, after), [2]);
+      }
+    });
+
+    test('one occurrence is skipped and written on the day it is moved to', () {
+      final before = file();
+      final after = updateCalendarOccurrence(
+        before,
+        rule,
+        DateTime(2026, 10, 12),
+        CalendarEventDraft(
+          text: 'Standup @work',
+          startMinutes: 10 * 60,
+          day: DateTime(2026, 10, 13),
+        ),
+        CalendarOccurrenceScope.thisOne,
+      )!;
+      expect(after.lines[1].text, contains('rec:1w except:2026-10-12.'));
+      expect(
+        after.lines[4].text,
+        '2026-10-13 w42 Tue  10 seminar. 10 Standup @work.',
+      );
+      expect(daysOf(after, 'Standup').take(3), [
+        '2026-10-05',
+        '2026-10-13',
+        '2026-10-19',
+      ]);
+    });
+
+    test('a series does not move: the day is ignored', () {
+      final draft = calendarDraftOf(firstEvent(_lines[1].text));
+      for (final scope in [
+        CalendarOccurrenceScope.all,
+        CalendarOccurrenceScope.thisAndFollowing,
+      ]) {
+        final moved = CalendarEventDraft(
+          text: draft.text,
+          startMinutes: draft.startMinutes,
+          endMinutes: draft.endMinutes,
+          recurrence: draft.recurrence,
+          day: DateTime(2026, 10, 20),
+        );
+        final after = updateCalendarOccurrence(
+          file(),
+          rule,
+          DateTime(2026, 10, 5),
+          moved,
+          scope,
+        )!;
+        expect(after.lines[1].text, contains('Standup @work rec:1w'));
+        expect(after.lines.length, _lines.length);
+      }
+    });
+  });
+
   group('delete', () {
     test('this one is a skip', () {
       final a = deleteCalendarOccurrence(

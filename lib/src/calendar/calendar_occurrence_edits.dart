@@ -113,7 +113,11 @@ CalendarFileContent? updateCalendarOccurrence(
 }) {
   final found = findCalendarEvent(file, ref);
   if (found == null) return null;
-  if (found.event.recurrence == null || scope == CalendarOccurrenceScope.all) {
+  if (found.event.recurrence == null) {
+    // One event, and its own: it may go to another day.
+    return updateCalendarEvent(file, ref, draft, moveTo: moveTo ?? draft.day);
+  }
+  if (scope == CalendarOccurrenceScope.all) {
     return updateCalendarEvent(file, ref, draft);
   }
   if (!_occursOn(found.event, ref.day, occurrence)) return null;
@@ -123,7 +127,7 @@ CalendarFileContent? updateCalendarOccurrence(
       if (skipped == null) return null;
       return addCalendarEvent(
         skipped,
-        moveTo ?? occurrence,
+        moveTo ?? draft.day ?? occurrence,
         draft: draft.withRecurrence(null),
         style: style,
       );

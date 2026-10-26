@@ -342,6 +342,8 @@ final class CroatianStrings extends Strings {
   @override
   String get calendarScopeAll => 'Svi događaji';
   @override
+  String get calendarEventDay => 'Dan';
+  @override
   String get journalCalendarTitle => 'Kalendar';
   @override
   String get journalEventTimesTitle => 'Vremena događaja';

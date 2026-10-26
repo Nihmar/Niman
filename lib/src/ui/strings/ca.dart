@@ -344,6 +344,8 @@ final class CatalanStrings extends Strings {
   @override
   String get calendarScopeAll => 'Tots els esdeveniments';
   @override
+  String get calendarEventDay => 'Dia';
+  @override
   String get journalCalendarTitle => 'Calendari';
   @override
   String get journalEventTimesTitle => 'Hores dels esdeveniments';

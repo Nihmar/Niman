@@ -341,6 +341,8 @@ final class LithuanianStrings extends Strings {
   @override
   String get calendarScopeAll => 'Visi įvykiai';
   @override
+  String get calendarEventDay => 'Diena';
+  @override
   String get journalCalendarTitle => 'Kalendorius';
   @override
   String get journalEventTimesTitle => 'Įvykių laikai';

@@ -346,6 +346,8 @@ final class RomanianStrings extends Strings {
   @override
   String get calendarScopeAll => 'Toate evenimentele';
   @override
+  String get calendarEventDay => 'Ziua';
+  @override
   String get journalCalendarTitle => 'Calendar';
   @override
   String get journalEventTimesTitle => 'Orele evenimentelor';

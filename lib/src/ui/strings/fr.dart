@@ -348,6 +348,8 @@ final class FrenchStrings extends Strings {
   @override
   String get calendarScopeAll => 'Tous les événements';
   @override
+  String get calendarEventDay => 'Jour';
+  @override
   String get journalCalendarTitle => 'Calendrier';
   @override
   String get journalEventTimesTitle => 'Heures des événements';

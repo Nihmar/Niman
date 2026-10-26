@@ -339,6 +339,8 @@ final class FinnishStrings extends Strings {
   @override
   String get calendarScopeAll => 'Kaikki tapahtumat';
   @override
+  String get calendarEventDay => 'Päivä';
+  @override
   String get journalCalendarTitle => 'Kalenteri';
   @override
   String get journalEventTimesTitle => 'Tapahtumien ajat';

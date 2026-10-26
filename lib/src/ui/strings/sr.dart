@@ -343,6 +343,8 @@ final class SerbianStrings extends Strings {
   @override
   String get calendarScopeAll => 'Сви догађаји';
   @override
+  String get calendarEventDay => 'Дан';
+  @override
   String get journalCalendarTitle => 'Календар';
   @override
   String get journalEventTimesTitle => 'Времена догађаја';

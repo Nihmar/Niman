@@ -329,6 +329,8 @@ final class HindiStrings extends Strings {
   @override
   String get calendarScopeAll => 'सभी ईवेंट';
   @override
+  String get calendarEventDay => 'दिन';
+  @override
   String get journalCalendarTitle => 'कैलेंडर';
   @override
   String get journalEventTimesTitle => 'ईवेंट के समय';

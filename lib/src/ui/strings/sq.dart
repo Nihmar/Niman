@@ -338,6 +338,8 @@ final class AlbanianStrings extends Strings {
   @override
   String get calendarScopeAll => 'Të gjitha ngjarjet';
   @override
+  String get calendarEventDay => 'Dita';
+  @override
   String get journalCalendarTitle => 'Kalendari';
   @override
   String get journalEventTimesTitle => 'Oret e ngjarjeve';

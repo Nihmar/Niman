@@ -346,6 +346,8 @@ final class ItalianStrings extends Strings {
   @override
   String get calendarScopeAll => 'Tutti gli eventi';
   @override
+  String get calendarEventDay => 'Giorno';
+  @override
   String get journalCalendarTitle => 'Calendario';
   @override
   String get journalEventTimesTitle => 'Orari degli eventi';

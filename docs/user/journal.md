@@ -158,6 +158,20 @@ file opens at the rule's line, on a phone the sheet opens. A lone `+project`
 or `@context` in the search lists the rule's line once, with the rule in
 words ([search](search.md#tasks-and-events)).
 
+### Moving an event to another day
+
+The event form's **Day** row is the day the event is written on. On an added
+event it is the day you started from, and changing it writes the event there.
+On an edit of an event that does not repeat it moves the event: it leaves its
+line and is written on the new day's, which is made when the day has none, and
+the two lines are the only ones that change. On an edit of *This event* of a
+repeating one it moves that one occurrence: its day is added to the rule's
+`except:` and a plain event goes on the day you picked. A desktop opens the
+calendar in place under the row, a phone the system's date picker. On *This
+and following* and *All events* the row is shown and off, since a series
+moves by changing its rule (Repeat). The preview shows the exact line, or the
+two lines, the write will make.
+
 ### Making an event repeat
 
 The event form has two more rows under the text: **Repeat** — Never, every
@@ -186,7 +200,7 @@ on a phone and a small menu on a desktop. What each writes into `calendar.txt`:
 | You choose | The file gets |
 | --- | --- |
 | Skip, or Delete → this event | the day added to the rule's `except:` |
-| Edit → this event | the day in `except:`, and a plain event with your change on that day (no `rec:`) |
+| Edit → this event | the day in `except:`, and a plain event with your change on the Day you chose, this one by default (no `rec:`) |
 | Edit → this and following | `until:` the day before on the rule, and a new rule event with your change on this day's line |
 | Delete → this and following | `until:` the day before on the rule (from its first day on, the event is deleted) |
 | Edit, Delete → all events | the rule's own event, changed or deleted |

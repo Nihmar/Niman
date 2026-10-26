@@ -340,6 +340,8 @@ final class NorwegianStrings extends Strings {
   @override
   String get calendarScopeAll => 'Alle hendelser';
   @override
+  String get calendarEventDay => 'Dag';
+  @override
   String get journalCalendarTitle => 'Kalender';
   @override
   String get journalEventTimesTitle => 'Hendelsestider';

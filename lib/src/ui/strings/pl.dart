@@ -344,6 +344,8 @@ final class PolishStrings extends Strings {
   @override
   String get calendarScopeAll => 'Wszystkie wydarzenia';
   @override
+  String get calendarEventDay => 'Dzień';
+  @override
   String get journalCalendarTitle => 'Kalendarz';
   @override
   String get journalEventTimesTitle => 'Godziny wydarzeń';

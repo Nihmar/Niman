@@ -318,6 +318,8 @@ final class JapaneseStrings extends Strings {
   @override
   String get calendarScopeAll => 'すべての予定';
   @override
+  String get calendarEventDay => '日';
+  @override
   String get journalCalendarTitle => 'カレンダー';
   @override
   String get journalEventTimesTitle => '予定の時刻';

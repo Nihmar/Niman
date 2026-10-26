@@ -340,6 +340,8 @@ final class BelarusianStrings extends Strings {
   @override
   String get calendarScopeAll => 'Усе падзеі';
   @override
+  String get calendarEventDay => 'Дзень';
+  @override
   String get journalCalendarTitle => 'Каляндар';
   @override
   String get journalEventTimesTitle => 'Час падзей';

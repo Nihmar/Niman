@@ -614,7 +614,12 @@ final class _JournalBrowserState extends State<JournalBrowser> {
           anchor: anchor,
         );
         if (scope == null || !mounted) return;
-        _openForm(day: _dayOfEntry(entry), editing: entry, scope: scope);
+        // An event that does not repeat has no scope: its form moves it.
+        _openForm(
+          day: _dayOfEntry(entry),
+          editing: entry,
+          scope: entry.repeats ? scope : null,
+        );
       case JournalEventAction.skip:
         widget.onSkipEvent?.call(entry);
       case JournalEventAction.delete:
@@ -840,7 +845,7 @@ final class _JournalBrowserState extends State<JournalBrowser> {
             scope ?? CalendarOccurrenceScope.all,
           );
         } else {
-          widget.onAddEvent?.call(day, draft);
+          widget.onAddEvent?.call(draft.day ?? day, draft);
         }
         if (widget.large) {
           Navigator.of(context).maybePop();
@@ -851,8 +856,9 @@ final class _JournalBrowserState extends State<JournalBrowser> {
     );
   }
 
-  /// The day's line as an added or edited [draft] would leave it, from the
-  /// file as the shell last read it: the writer's own answer, so the preview
+  /// The lines an added or edited [draft] would write — the day's, or two
+  /// when the event moves or one occurrence leaves its rule — from the file
+  /// as the shell last read it: the writer's own answer, so the preview
   /// promises exactly what the write does.
   String _previewLine(
     DateTime day,
@@ -864,7 +870,7 @@ final class _JournalBrowserState extends State<JournalBrowser> {
         widget.calendarFile ??
         const CalendarFileContent(lines: <CalendarRawLine>[]);
     final next = editing == null
-        ? addCalendarEvent(file, day, draft: draft)
+        ? addCalendarEvent(file, draft.day ?? day, draft: draft)
         : updateCalendarOccurrence(
                 file,
                 CalendarEventRef(
@@ -877,11 +883,11 @@ final class _JournalBrowserState extends State<JournalBrowser> {
                 scope ?? CalendarOccurrenceScope.all,
               ) ??
               file;
-    final body = calendarEventAsText(draft);
-    for (final line in next.lines) {
-      if (line.text.contains(body)) return line.text;
-    }
-    return '';
+    final before = {for (final line in file.lines) line.text};
+    return [
+      for (final line in next.lines)
+        if (!before.contains(line.text)) line.text,
+    ].join('\n');
   }
 }
 

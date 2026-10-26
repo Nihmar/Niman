@@ -342,6 +342,8 @@ final class SlovakStrings extends Strings {
   @override
   String get calendarScopeAll => 'Všetky udalosti';
   @override
+  String get calendarEventDay => 'Deň';
+  @override
   String get journalCalendarTitle => 'Kalendár';
   @override
   String get journalEventTimesTitle => 'Časy udalostí';
