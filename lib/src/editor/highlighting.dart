@@ -120,8 +120,9 @@ enum TokenKind {
   /// A task's `key:value` tag — `due:`, `rem:` and the rest.
   todoKeyValue,
 
-  /// A `rec:` tag the recurrence grammar does not read (#1189): the text
-  /// keeps [todoKeyValue]'s colour and wears the wavy flag the calendar's
+  /// A `rec:` tag — or, in calendar.txt, an `until:` or `except:` — the
+  /// recurrence grammar does not read (#1189, #1190): the text keeps
+  /// [todoKeyValue]'s colour and wears the wavy flag the calendar's
   /// mismatches wear. It does nothing, as any unknown tag does.
   todoUnreadableRule,
 
