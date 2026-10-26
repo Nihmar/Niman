@@ -114,6 +114,57 @@ read.
 The **Events today** tile on the Home shows today's goals over its
 events, and opens the journal on that day.
 
+## Recurring events
+
+An event repeats when its line says so, with the same `rec:` a task uses:
+
+```text
+2026-10-21 w43 Wed  9-9:30 Standup @work rec:1w until:2026-12-31 except:2026-11-04. 17-18 jogging
+```
+
+The event is written once, on the day line of its first day, and Niman shows
+it on every day the rule reaches from there on. It never writes those days
+out. `rec:` takes the same values as on a task (the table is in
+[tasks](tasks.md#recurring-tasks)): `rec:1d` every day, `rec:2w` every two
+weeks, `rec:1m` every month, `rec:1y` every year, `rec:3b` every three
+business days, `rec:1w;mo,we,fr` on those weekdays, `rec:1m;2tu` on the
+second Tuesday of the month. Two things differ from a task:
+
+- an event is never completed, so there is no completion day to count
+  from: the rule is counted from the event's own first day, and `rec:+1w`
+  means the same as `rec:1w`;
+- the days are the first day plus whole steps, not each from the one
+  before, so an event on the 31st with `rec:1m` falls on the last day of a
+  shorter month and is back on the 31st after it.
+
+Two more tags, written on the same event, bound the rule:
+
+- `until:2026-12-31` is the last day an occurrence may fall on, that day
+  included;
+- `except:2026-11-04,2026-11-18` lists days the event does not happen on, a
+  comma-separated list of dates (more than one `except:` on an event add
+  up). Listing the event's own first day hides it there too.
+
+An `until:` or `except:` whose date cannot be read is ignored, and, like a
+`rec:` that cannot be read, is flagged in the editor with a wavy underline;
+the event then shows only on the day it is written.
+
+Where it shows: every occurrence is listed wherever an event is — the day
+card, the dock's journal pane, the **Events today** tile on the Home — and
+the days it falls on carry the events dot in the month. Each one has the
+repeat icon and the rule in words (`every 2 weeks`), as a task's row has.
+Tapping an occurrence does what tapping the event does: on a desktop the
+file opens at the rule's line, on a phone the sheet opens. On a phone, a
+later occurrence's sheet offers **Open in calendar.txt** only; **Edit** and
+**Delete** are there on the event's own first day, and they change the rule's
+line, which is every occurrence. A lone `+project` or `@context` in the
+search lists the rule's line once, with the rule in words
+([search](search.md#tasks-and-events)).
+
+Another tool that reads `calendar.txt` sees the event only on its first
+day, with one more word in it: that is the price of keeping the file as
+you wrote it, and `grep` finds the rule on that day.
+
 ## The strip over an entry
 
 Any note that is an entry — wherever it was opened from — wears a strip

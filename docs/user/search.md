@@ -58,7 +58,9 @@ also answers from `todo.txt` and the library's `calendar.txt`, in a
 **Tasks and events** group above the notes:
 
 - the events whose line carries the token, with their time as written and
-the day they are on;
+the day they are on; an event that repeats
+([journal](journal.md#recurring-events)) is one row, on the day it is
+written, with its rule in words (`every 2 weeks`);
 - the week, month and year goals that carry it — `Week 42 goal`,
 `October goal`;
 - the open tasks that carry it, with their due date (`Due today`, `No
