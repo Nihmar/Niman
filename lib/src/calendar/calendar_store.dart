@@ -18,6 +18,7 @@ import 'dart:typed_data';
 import 'package:meta/meta.dart';
 import 'package:niman/src/calendar/calendar_entry.dart';
 import 'package:niman/src/calendar/calendar_file.dart';
+import 'package:niman/src/calendar/calendar_occurrence_edits.dart';
 import 'package:niman/src/calendar/calendar_occurrences.dart';
 import 'package:niman/src/calendar/calendar_source.dart';
 import 'package:niman/src/calendar/calendar_writer.dart';
@@ -236,6 +237,47 @@ final class CalendarStore implements CalendarSource {
     return _splice(
       'delete@${ref.line}:${ref.start}',
       (file) => deleteCalendarEvent(file, ref),
+    );
+  }
+
+  /// Skips [occurrence] of the repeating event [ref] names (#1191).
+  @override
+  Future<CalendarSnapshot> skipOccurrence(
+    CalendarEventRef ref,
+    DateTime occurrence,
+  ) {
+    return _splice(
+      'skip@${ref.line}:${ref.start}:${_dayText(occurrence)}',
+      (file) => skipCalendarOccurrence(file, ref, occurrence),
+    );
+  }
+
+  /// Changes [occurrence] of the repeating event [ref] names, as [scope]
+  /// says (#1191).
+  @override
+  Future<CalendarSnapshot> updateOccurrence(
+    CalendarEventRef ref,
+    DateTime occurrence,
+    CalendarEventDraft event,
+    CalendarOccurrenceScope scope,
+  ) {
+    return _splice(
+      'edit@${ref.line}:${ref.start}:${_dayText(occurrence)}:${scope.name}',
+      (file) => updateCalendarOccurrence(file, ref, occurrence, event, scope),
+    );
+  }
+
+  /// Deletes [occurrence] of the repeating event [ref] names, as [scope]
+  /// says (#1191).
+  @override
+  Future<CalendarSnapshot> deleteOccurrence(
+    CalendarEventRef ref,
+    DateTime occurrence,
+    CalendarOccurrenceScope scope,
+  ) {
+    return _splice(
+      'delete@${ref.line}:${ref.start}:${_dayText(occurrence)}:${scope.name}',
+      (file) => deleteCalendarOccurrence(file, ref, occurrence, scope),
     );
   }
 
