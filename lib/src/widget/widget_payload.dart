@@ -79,7 +79,7 @@ const String todoWidgetErrorTone = 'error';
 /// open-task count rides in `total`), `tone` is `error` for the overdue
 /// header. A row is
 /// `{text, due, priority, projects, contexts, tags, line, section,
-/// showDue}`:
+/// showDue, repeat?}`:
 ///
 /// - `text` is the prose ([taskDisplayText], so `due:`/`rem:` slots and
 ///   `+`/`@`/`#` markers do not eat widget width);
@@ -87,6 +87,8 @@ const String todoWidgetErrorTone = 'error';
 ///   line repeats it (false under Today, which already says it);
 /// - `projects`/`contexts`/`tags` the `+project`/`@context`/`#tag`
 ///   markers for the meta line;
+/// - `repeat` the rule the task repeats by, in words (#1189), present only
+///   for a task that does, as [repeatOf] words it;
 /// - `line` the file line the tap toggles;
 /// - `section` the id of the section the row sits under.
 ///
@@ -99,17 +101,20 @@ const String todoWidgetErrorTone = 'error';
 /// not trusted past the cap (see above). [theme] wears the app theme
 /// and [language] is the app language id the labels were written in (the
 /// background toggle re-pushes in it; absent in old callers: the widget
-/// renders its defaults).
+/// renders its defaults). [repeatOf] words the rule of a recurring task, in
+/// that language, or null for a task that does not repeat; the payload
+/// itself knows no words.
 String todoWidgetPayload(
   List<WidgetTodoSection> sections, {
   required String libraryPath,
   int? total,
   WidgetTheme? theme,
   String? language,
+  String? Function(TodoTask task)? repeatOf,
   int maxChars = widgetPayloadMaxChars,
 }) {
   var items = <Map<String, Object?>>[
-    for (final section in sections) ..._items(section),
+    for (final section in sections) ..._items(section, repeatOf),
   ];
   var truncated = false;
   String encode() => _encode(
@@ -165,7 +170,10 @@ List<Map<String, Object?>> _recounted(List<Map<String, Object?>> items) {
 }
 
 /// The header item of [section] followed by its rows.
-List<Map<String, Object?>> _items(WidgetTodoSection section) {
+List<Map<String, Object?>> _items(
+  WidgetTodoSection section,
+  String? Function(TodoTask task)? repeatOf,
+) {
   return [
     {
       'kind': todoWidgetSectionKind,
@@ -174,13 +182,18 @@ List<Map<String, Object?>> _items(WidgetTodoSection section) {
       'count': section.count,
       if (section.id == todoDueOverdueSectionId) 'tone': todoWidgetErrorTone,
     },
-    for (final entry in section.entries) _row(entry, section.id),
+    for (final entry in section.entries) _row(entry, section.id, repeatOf),
   ];
 }
 
 /// One payload row for [entry] under the section [sectionId].
-Map<String, Object?> _row(TodoEntry entry, String sectionId) {
+Map<String, Object?> _row(
+  TodoEntry entry,
+  String sectionId,
+  String? Function(TodoTask task)? repeatOf,
+) {
   final task = entry.task;
+  final repeat = repeatOf?.call(task);
   return {
     'text': taskPlainText(task.description),
     'due': task.due == null ? null : formatTodoDate(task.due!),
@@ -192,6 +205,7 @@ Map<String, Object?> _row(TodoEntry entry, String sectionId) {
     'section': sectionId,
     // The Today section already says "today": its rows drop the date.
     'showDue': sectionId != todoDueTodaySectionId,
+    'repeat': ?repeat,
   };
 }
 

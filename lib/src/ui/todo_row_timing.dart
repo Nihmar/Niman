@@ -5,7 +5,10 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:niman/src/core/recurrence/recurrence_rule.dart';
 import 'package:niman/src/todo/parser.dart';
+import 'package:niman/src/todo/recurring_line.dart';
+import 'package:niman/src/ui/recurrence_words.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// The due-date state driving the subtitle styling (overdue and today
@@ -34,8 +37,9 @@ TodoDueState? todoDueState(DateTime? due, DateTime today) {
   return day == now ? TodoDueState.today : TodoDueState.upcoming;
 }
 
-/// What a row says about when: the due label and the reminder, or for a
-/// [done] row when it was completed. Empty when the task has none.
+/// What a row says about when: the due label, the reminder and the rule it
+/// repeats by (#1189), or for a [done] row when it was completed. Empty when
+/// the task has none.
 List<Widget> todoRowTiming(
   TodoTask task,
   DateTime today, {
@@ -51,6 +55,7 @@ List<Widget> todoRowTiming(
     if (task.due != null) TodoDueLabel(due: task.due!, today: today),
     if (task.reminder != null)
       _ReminderChip(stamp: task.reminder!, today: today),
+    if (recurrenceRuleOf(task) case final rule?) TodoRepeatLabel(rule: rule),
   ];
 }
 
@@ -86,6 +91,36 @@ final class TodoDueLabel extends StatelessWidget {
     };
     final style = Theme.of(context).textTheme.bodySmall?.copyWith(color: color);
     return Text(label, style: style);
+  }
+}
+
+/// The repeat part of a row (#1189): the outline repeat icon and the rule in
+/// words, "every 2 weeks", beside the due date.
+final class TodoRepeatLabel extends StatelessWidget {
+  /// The label of a task that repeats by [rule].
+  const new({required this.rule, super.key});
+
+  /// The rule the task repeats by.
+  final RecurrenceRule rule;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Row(
+      key: const Key('todo-row-repeat'),
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(Icons.repeat, size: 14, color: scheme.onSurfaceVariant),
+        const SizedBox(width: 2),
+        Flexible(
+          child: Text(
+            recurrenceWords(rule.description),
+            style: Theme.of(context).textTheme.bodySmall
+                ?.copyWith(color: scheme.onSurfaceVariant),
+          ),
+        ),
+      ],
+    );
   }
 }
 
