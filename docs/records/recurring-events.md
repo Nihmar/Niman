@@ -123,8 +123,6 @@ pairing. The reminder horizon extends the calendar half of
   its `except:` dates before that day no longer matter.
 - **37 locale files** for the presets, the rule in words and the three-way
   choice.
-</content>
-</invoke>
 
 ## As built: skip, move, this and following, merge (#1191, 2026-10-26)
 
@@ -191,3 +189,41 @@ file.
   as later than any. A side that left the event as the base had it gives the
   other's text to the character. Everything else stays the set merge: a
   different text, time or rule is a different event and both are kept.
+
+## As built: reminders (#1192, 2026-10-26)
+
+What the code does where the plan left a choice.
+
+- **The window is the occurrence's day, today to today + 13** (fourteen days,
+  today included), then the soonest four whose reminder is not more than
+  `reminderGrace` behind. The first day itself is an occurrence like the
+  others, and behaves as a plain event does.
+- **Ids.** The rule's first day keeps the id the event always had
+  (`calendarReminderId(day, text)`), so an event that gains a `rec:` does not
+  re-arm its first alarm; the later occurrences are salted with the series'
+  first day and their own date (`calendarOccurrenceReminderId`). The text the
+  id comes from is the event's without `until:` and `except:`: a skip or an
+  end rewrites those words, and the alarms that remain must keep their ids,
+  or a skip would cancel and re-arm every one instead of cancelling one. (An
+  event with neither word has exactly the old id.)
+- **A full `rem:` date-time on an event is read** — it was ignored before,
+  for any event. A plain event fires at that stamp; a rule's keeps its
+  distance in calendar days from the first day. A distance after the
+  occurrence widens the window backwards by as many days, so a reminder still
+  ahead is not lost when its occurrence is behind. The notification opens the
+  journal on the occurrence's day.
+- **The horizon moves forward from the triggers that already exist.**
+  Reconciliation runs at app start (the shell opens the controller), on every
+  return to the foreground, and on every change of `todo.txt` or
+  `calendar.txt`, and each computes the window from the clock. A notification
+  tap that starts the app is an app start, and one while it runs returns it to
+  the foreground. What was missing was a desktop left running: its timers
+  fire in the process and nothing else touches it, so the window would run dry
+  after a few days. The backends gain a `fired` stream — the desktop's
+  emits after a notification is shown, the OS-alarm backends never do — and
+  the todo controller reconciles on it. No timer, no background job. On
+  Android and Apple, with the app closed, nothing runs: the user guide says to
+  open the app every two weeks.
+- **Android's limit is 400**, `androidPendingAlarmLimit`, below the 500
+  concurrent alarms per app. Only `PluginReminderBackend` (Android) reports
+  it; iOS keeps 64 and the desktops none.

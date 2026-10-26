@@ -102,7 +102,8 @@ deleting the event moves or deletes it, and it feeds the same alarms a
 task's `rem:` does ([tasks](tasks.md)) — tapping the notification opens
 the journal on that day. It is a clock time on the line's own day: an
 event at `0600Z` with `rem:0530` reminds at half past five where the
-phone is, whatever the `Z` says.
+phone is, whatever the `Z` says. On an event that repeats it fires on every
+occurrence — see [Recurring events](#recurring-events) below.
 
 The file is otherwise yours: `calendar.txt` opens in the source editor,
 coloured, and a write touches only the line an event was written to —
@@ -217,6 +218,14 @@ Two devices that skip different days of the same event, or one that ends
 it while another skips a day, merge into one event on the line, with both
 skips and the earlier end: nothing is asked. A rule edited in its text on
 one device and its skips on another is two edits, and both events are kept.
+
+A reminder (`rem:`) on an event that repeats goes off on each occurrence, at
+the same time of day (`rem:16:30`) or, for a full `rem:2026-10-20T08:00`, the
+same number of days before or after it. Niman schedules the next two weeks of
+them — at most four occurrences of each event — and renews them every time the
+app runs, so open it at least once every two weeks for them to go on. A
+skipped day (`except:`) has no reminder. How it works is in
+[tasks](tasks.md#reminders).
 
 Another tool that reads `calendar.txt` sees the event only on its first
 day, with one more word in it: that is the price of keeping the file as

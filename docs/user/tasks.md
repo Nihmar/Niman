@@ -368,6 +368,23 @@ over both files, so completing or deleting either takes its reminder
 with it. Tapping an event's notification opens the journal on that day;
 tapping a task's opens the task list.
 
+A repeating event's reminder fires on **every occurrence**
+([recurring events](journal.md#recurring-events)): a clock `rem:16:30` is
+that time on each occurrence's day, and a full `rem:` date-time keeps its
+distance from the event's first day — written the day before, it reminds the
+day before every time. The system only holds so many alarms (Android 500 per
+app, iOS 64), and a rule never ends, so Niman keeps **the next two weeks**
+scheduled — at most the next four occurrences of each event — and works that
+window out again whenever the app runs: at start, on every return to it, when
+a file changes and, on a desktop, each time a reminder is shown. Skipping an
+occurrence cancels its alarm alone, and an event with an `until:` stops
+reminding after it. **Open Niman at least once every two weeks** for a
+repeating event's reminders to go on: on Android and Apple the alarms already
+scheduled still fire with the app closed, but the ones after the window are
+only scheduled when it next runs. Where the system's limit is reached — a
+library with a great many repeating events — the soonest alarms are the ones
+scheduled, and the rest follow as they fire.
+
 ## Recurring tasks
 
 Add `rec:` to a task and completing it does not end it: the task goes to
