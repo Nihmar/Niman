@@ -7,7 +7,7 @@ beside [performance-audit.md](performance-audit.md) ("Memory": a million
 notes cost the open 2 MB) and [huge-notes.md](huge-notes.md) (the 246 MB
 note), and does not repeat them.
 
-Nothing here is implemented; each fix has an issue of its own.
+Nothing here is implemented; each fix has an issue of its own (#1193–#1202).
 
 ## How it was measured
 
@@ -309,16 +309,16 @@ an issue.
 
 | # | Fix | Platforms | Measured by |
 |---|---|---|---|
-| M1 | A memory probe: a `test/perf/` file that prints retained bytes per structure (scanner, buffer, tree page, task), plus a script that takes a VM-service heap snapshot of a profile beta build at the log's points. It attributes the 270 MB floor, the 40 MB a library close leaves, and Windows' 60 MB rescan | all | itself |
-| 1 | Decode pictures at their drawn size (`ResizeImage`); the attachment viewer decodes again at its zoom | all | a widget test: a 4000×3000 picture drawn 400 wide decodes to ≤ 800×600 at a ratio of 2 |
-| 2 | One registry of rebuildable caches, emptied on memory pressure and on `paused` | all (pressure: Android) | a unit test that each registered cache is empty after the signal |
-| 3 | Typed-array blocks and interned line states in `BlockScanner` | all | the probe: bytes per block, from 98 to ~20 |
-| 4 | No whole-note join for a buffer-backed note: tags from the scan, callers on slices | all | the probe: retained bytes after an edit plus a pause, on the 1 M-line fixture |
-| 5 | `ReadParser` keeps only the blocks around the viewport | all | a test: scroll through 100 k blocks, cache size stays near the visible count |
-| 6 | One scanner per note whichever pane scans first | all | a test: preview-first then source holds one `BlockScanner` |
-| 7 | Windowed tree pages and no flattened row list | all | `tree_queries_perf_test`: retained bytes after paging through a folder of 1 M |
-| 8 | A root resync that diffs a directory at a time | all | `index_scale_test`: retained bytes of a root resync at 1 M |
-| 9 | Spelling switched off releases its engines and verdicts; the writer forgets a save the reindex took; the old note is released before the next loads | all | unit tests per item |
+| M1 (#1193) | A memory probe: a `test/perf/` file that prints retained bytes per structure (scanner, buffer, tree page, task), plus a script that takes a VM-service heap snapshot of a profile beta build at the log's points. It attributes the 270 MB floor, the 40 MB a library close leaves, and Windows' 60 MB rescan | all | itself |
+| 1 (#1194) | Decode pictures at their drawn size (`ResizeImage`); the attachment viewer decodes again at its zoom | all | a widget test: a 4000×3000 picture drawn 400 wide decodes to ≤ 800×600 at a ratio of 2 |
+| 2 (#1195) | One registry of rebuildable caches, emptied on memory pressure and on `paused` | all (pressure: Android) | a unit test that each registered cache is empty after the signal |
+| 3 (#1196) | Typed-array blocks and interned line states in `BlockScanner` | all | the probe: bytes per block, from 98 to ~20 |
+| 4 (#1197) | No whole-note join for a buffer-backed note: tags from the scan, callers on slices | all | the probe: retained bytes after an edit plus a pause, on the 1 M-line fixture |
+| 5 (#1198) | `ReadParser` keeps only the blocks around the viewport | all | a test: scroll through 100 k blocks, cache size stays near the visible count |
+| 6 (#1199) | One scanner per note whichever pane scans first | all | a test: preview-first then source holds one `BlockScanner` |
+| 7 (#1200) | Windowed tree pages and no flattened row list | all | `tree_queries_perf_test`: retained bytes after paging through a folder of 1 M |
+| 8 (#1201) | A root resync that diffs a directory at a time | all | `index_scale_test`: retained bytes of a root resync at 1 M |
+| 9 (#1202) | Spelling switched off releases its engines and verdicts; the writer forgets a save the reindex took; the old note is released before the next loads | all | unit tests per item |
 
 Every fix lands on Android, Linux and Windows together. None of them
 changes what a user sees.
