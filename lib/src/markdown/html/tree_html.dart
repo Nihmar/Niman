@@ -302,25 +302,37 @@ final class TreeHtml {
 
   void _item(ItemNode item, {required bool tight}) {
     _cr();
-    final first = item.children.isEmpty ? null : item.children.first;
-    final paragraph = first is LeafNode && first.kind == BlockKind.paragraph
-        ? first
-        : null;
-    final text = paragraph == null ? '' : _paragraphs[paragraph] ?? '';
-    final task = paragraph == null ? null : TaskBox.of(text);
+    final task = _taskOf(item);
     _write(
       task != null && taskItemClasses ? '<li class="task-list-item">' : '<li>',
     );
-    if (paragraph != null && task != null) {
+    if (task != null) {
       _write(
         task.checked
             ? '<input type="checkbox" checked="" disabled="" /> '
             : '<input type="checkbox" disabled="" /> ',
       );
-      _paragraphs[paragraph] = text.substring(task.length);
+      _paragraphs[task.paragraph] = task.text;
     }
     _blocks(item.children, tight: tight);
     _write('</li>\n');
+  }
+
+  /// The task box [item] starts with, if it does: the paragraph holding it,
+  /// whether it is ticked, and the paragraph without it, the box taken off.
+  /// Null for a box-less item.
+  ({LeafNode paragraph, bool checked, String text})? _taskOf(ItemNode item) {
+    if (item.children.isEmpty) return null;
+    final first = item.children.first;
+    if (first is! LeafNode || first.kind != BlockKind.paragraph) return null;
+    final text = _paragraphs[first] ?? '';
+    final box = TaskBox.of(text);
+    if (box == null) return null;
+    return (
+      paragraph: first,
+      checked: box.checked,
+      text: text.substring(box.length),
+    );
   }
 
   /// Whether [list] is tight: no blank line between its items, nor between

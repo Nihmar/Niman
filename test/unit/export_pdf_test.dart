@@ -155,8 +155,13 @@ void main() {
       printer: printer,
     );
     final page = printer.page!;
-    // The page's style takes the bullet off a task item by this class.
-    expect(page, contains('li.task-list-item { list-style: none; }'));
+    // The page's style takes the bullet off a task item by this class. The
+    // rule is matched as a rule, so reformatting it is no test failure.
+    expect(
+      RegExp(r'li\.task-list-item\s*\{[^}]*list-style:\s*none').hasMatch(page),
+      isTrue,
+      reason: "the page carries no rule taking a task item's bullet off",
+    );
     expect(
       page,
       contains(
