@@ -9,8 +9,6 @@
 /// rest still get the message and the button.
 library;
 
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:niman/src/annotations/annotation.dart';
 import 'package:niman/src/annotations/annotation_mark_source.dart';
@@ -20,7 +18,7 @@ import 'package:niman/src/core/settings/library_settings.dart' show LinkType;
 import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/reading/reading_positions.dart';
 import 'package:niman/src/ui/attachment_bar.dart';
-import 'package:niman/src/ui/attachment_unreadable.dart';
+import 'package:niman/src/ui/attachment_picture.dart';
 import 'package:niman/src/ui/epub_pane.dart';
 import 'package:niman/src/ui/file_tree_context.dart';
 import 'package:niman/src/ui/ocr/ocr_file_actions.dart';
@@ -195,16 +193,5 @@ final class AttachmentView extends StatelessWidget {
 
   /// A picture at the size the pane allows, a pinch or a wheel away from
   /// its pixels.
-  Widget _picture(BuildContext context) => InteractiveViewer(
-    key: const Key('attachment-picture'),
-    minScale: 0.5,
-    maxScale: 16,
-    child: Center(
-      child: Image.file(
-        File(path),
-        fit: BoxFit.contain,
-        errorBuilder: (context, error, stack) => const AttachmentUnreadable(),
-      ),
-    ),
-  );
+  Widget _picture(BuildContext context) => AttachmentPicture(path: path);
 }
