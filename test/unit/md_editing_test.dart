@@ -285,6 +285,38 @@ void main() {
       expect(edit.text.split('\n')[2], r'| **C\|D** |  |  |');
       expect(MarkdownTable.parse(edit.text.split('\n'))!.columns, 3);
     });
+
+    test(
+      'run again where the caret is left, the matrix goes under the grid',
+      () {
+        // The caret is in the first quadrant, so the second run starts inside
+        // the table just written: it must not split it in two (#1139).
+        final first = insert('', 0);
+        final second = insert(first.text, first.selection.extentOffset);
+        expect(second.text, '${first.text}\n\n$matrix');
+        // The first grid is still one table, both body rows in it.
+        expect(
+          MarkdownTable.parse(second.text.split('\n').take(4).toList())!.rows,
+          [
+            ['**Important**', '', ''],
+            ['**Not important**', '', ''],
+          ],
+        );
+        // And the caret waits in the second grid's first quadrant.
+        expect(
+          second.text.substring(0, second.selection.extentOffset),
+          endsWith('| **Important** | '),
+        );
+      },
+    );
+
+    test('run from a cell in the middle of the grid, it goes under it too', () {
+      final first = insert('', 0);
+      // Inside the header's second cell.
+      final at = first.text.indexOf('Urgent') + 2;
+      final second = insert(first.text, at);
+      expect(second.text, '${first.text}\n\n$matrix');
+    });
   });
 
   group('insertSnippet (#265)', () {

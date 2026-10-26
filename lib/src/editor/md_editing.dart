@@ -286,9 +286,13 @@ MarkdownEdit insertEisenhowerMatrix({
   final notUrgentCell = _tableCell(notUrgent);
   final importantCell = '**${_tableCell(important)}**';
   final notImportantCell = '**${_tableCell(notImportant)}**';
+  // The caret is left in this matrix's first quadrant, so running the tool
+  // again lands inside the table just written: the second one goes under
+  // it rather than splitting it in two (#1139).
+  final caret = _afterTable(text, selection.extentOffset);
   return insertBlock(
     text: text,
-    selection: selection,
+    selection: TextSelection.collapsed(offset: caret),
     block: <String>[
       '|  | $urgentCell | $notUrgentCell |',
       '| --- | --- | --- |',
@@ -303,6 +307,39 @@ MarkdownEdit insertEisenhowerMatrix({
 /// [label] as a table cell's text: a pipe in it is escaped, so it stays
 /// the cell's rather than ending it.
 String _tableCell(String label) => label.replaceAll('|', r'\|');
+
+/// [offset] moved past the table its line belongs to, when it is one: the
+/// end of the table's last row, so a block inserted there goes under the
+/// table rather than through it. [offset] itself when its line is no
+/// table's.
+///
+/// A table is taken to be the run of lines starting with a pipe whose
+/// second line is the delimiter row: the shape [insertTable] and this
+/// writer leave, which is the one a second run meets.
+int _afterTable(String text, int offset) {
+  final lines = text.split('\n');
+  final at = _lineIndexOf(text, offset);
+  if (!_startsTableRow(lines[at])) return offset;
+  var first = at;
+  while (first > 0 && _startsTableRow(lines[first - 1])) {
+    first--;
+  }
+  if (first + 1 >= lines.length || !_delimiterRow.hasMatch(lines[first + 1])) {
+    return offset;
+  }
+  var last = at;
+  while (last < lines.length - 1 && _startsTableRow(lines[last + 1])) {
+    last++;
+  }
+  return _lineStart(text, last) + lines[last].length;
+}
+
+/// Whether [line] looks like one of a table's rows: it starts with a pipe.
+bool _startsTableRow(String line) => line.trimLeft().startsWith('|');
+
+/// A table's delimiter row: cells of dashes with optional alignment colons,
+/// between outer pipes.
+final RegExp _delimiterRow = RegExp(r'^\s*\|(\s*:?-+:?\s*\|)+\s*$');
 
 /// Inserts [block]'s lines on lines of their own, the caret at [caret] in
 /// them — at the end of the last one without it.
