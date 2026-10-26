@@ -3291,6 +3291,9 @@ final class LithuanianStrings extends Strings {
   String get commandInsertColumns => 'Įterpti stulpelius';
 
   @override
+  String get commandInsertEisenhower => 'Įterpti Eisenhowerio matricą';
+
+  @override
   String get commandInsertMindMap => 'Įterpti minčių žemėlapį';
 
   @override
@@ -3302,6 +3305,18 @@ final class LithuanianStrings extends Strings {
 
   @override
   String get toolMindMapNeedsList => 'Žymeklis nėra sąraše';
+
+  @override
+  String get toolEisenhowerSubtitle =>
+      'Tinklelis su skubiais ir svarbiais darbais';
+  @override
+  String get eisenhowerUrgent => 'Skubu';
+  @override
+  String get eisenhowerNotUrgent => 'Neskubu';
+  @override
+  String get eisenhowerImportant => 'Svarbu';
+  @override
+  String get eisenhowerNotImportant => 'Nesvarbu';
 
   @override
   String ocrEngineName(String version) => 'Tesseract $version';

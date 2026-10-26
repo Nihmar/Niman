@@ -3203,6 +3203,9 @@ final class HindiStrings extends Strings {
   String get commandInsertColumns => 'स्तंभ डालें';
 
   @override
+  String get commandInsertEisenhower => 'आइज़नहावर मैट्रिक्स डालें';
+
+  @override
   String get commandInsertMindMap => 'माइंड मैप डालें';
 
   @override
@@ -3212,6 +3215,18 @@ final class HindiStrings extends Strings {
 
   @override
   String get toolMindMapNeedsList => 'कर्सर किसी सूची में नहीं है';
+
+  @override
+  String get toolEisenhowerSubtitle =>
+      'अत्यावश्यक और महत्वपूर्ण कार्यों का ग्रिड';
+  @override
+  String get eisenhowerUrgent => 'अत्यावश्यक';
+  @override
+  String get eisenhowerNotUrgent => 'अत्यावश्यक नहीं';
+  @override
+  String get eisenhowerImportant => 'महत्वपूर्ण';
+  @override
+  String get eisenhowerNotImportant => 'महत्वपूर्ण नहीं';
 
   @override
   String ocrEngineName(String version) => 'Tesseract $version';

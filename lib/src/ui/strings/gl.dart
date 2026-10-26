@@ -3272,6 +3272,9 @@ final class GalicianStrings extends Strings {
   String get commandInsertColumns => 'Inserir columnas';
 
   @override
+  String get commandInsertEisenhower => 'Inserir matriz de Eisenhower';
+
+  @override
   String get commandInsertMindMap => 'Inserir mapa mental';
 
   @override
@@ -3282,6 +3285,18 @@ final class GalicianStrings extends Strings {
 
   @override
   String get toolMindMapNeedsList => 'O cursor non está nunha lista';
+
+  @override
+  String get toolEisenhowerSubtitle =>
+      'Unha grella de tarefas urxentes e importantes';
+  @override
+  String get eisenhowerUrgent => 'Urxente';
+  @override
+  String get eisenhowerNotUrgent => 'Non urxente';
+  @override
+  String get eisenhowerImportant => 'Importante';
+  @override
+  String get eisenhowerNotImportant => 'Non importante';
 
   @override
   String ocrEngineName(String version) => 'Tesseract $version';

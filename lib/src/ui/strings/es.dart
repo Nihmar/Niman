@@ -3300,6 +3300,9 @@ final class SpanishStrings extends Strings {
   String get commandInsertColumns => 'Insertar columnas';
 
   @override
+  String get commandInsertEisenhower => 'Insertar matriz de Eisenhower';
+
+  @override
   String get commandInsertMindMap => 'Insertar mapa mental';
 
   @override
@@ -3310,6 +3313,18 @@ final class SpanishStrings extends Strings {
 
   @override
   String get toolMindMapNeedsList => 'El cursor no está en una lista';
+
+  @override
+  String get toolEisenhowerSubtitle =>
+      'Una cuadrícula de tareas urgentes e importantes';
+  @override
+  String get eisenhowerUrgent => 'Urgente';
+  @override
+  String get eisenhowerNotUrgent => 'No urgente';
+  @override
+  String get eisenhowerImportant => 'Importante';
+  @override
+  String get eisenhowerNotImportant => 'No importante';
 
   @override
   String ocrEngineName(String version) => 'Tesseract $version';

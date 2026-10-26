@@ -3203,6 +3203,9 @@ final class EstonianStrings extends Strings {
   String get commandInsertColumns => 'Lisa veerud';
 
   @override
+  String get commandInsertEisenhower => 'Lisa Eisenhoweri maatriks';
+
+  @override
   String get commandInsertMindMap => 'Lisa mõttemap';
 
   @override
@@ -3212,6 +3215,18 @@ final class EstonianStrings extends Strings {
 
   @override
   String get toolMindMapNeedsList => 'Kursor ei ole loendis';
+
+  @override
+  String get toolEisenhowerSubtitle =>
+      'Ruudustik kiireloomulistest ja olulistest ülesannetest';
+  @override
+  String get eisenhowerUrgent => 'Kiireloomuline';
+  @override
+  String get eisenhowerNotUrgent => 'Ei ole kiireloomuline';
+  @override
+  String get eisenhowerImportant => 'Oluline';
+  @override
+  String get eisenhowerNotImportant => 'Ei ole oluline';
 
   @override
   String ocrEngineName(String version) => 'Tesseract $version';

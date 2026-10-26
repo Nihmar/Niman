@@ -436,6 +436,14 @@ abstract base class Strings {
   String get toolMindMapSubtitle;
   String get toolMindMapNeedsList;
 
+  // An Eisenhower matrix (#1139): the tool that inserts one and the four
+  // axis labels it writes, in the app's language.
+  String get toolEisenhowerSubtitle;
+  String get eisenhowerUrgent;
+  String get eisenhowerNotUrgent;
+  String get eisenhowerImportant;
+  String get eisenhowerNotImportant;
+
   // Diagrams (#530): the full-screen view and the window that holds it.
   String get diagramTitle;
   String get fullScreen;
@@ -443,6 +451,9 @@ abstract base class Strings {
 
   /// The palette's Insert columns (#729).
   String get commandInsertColumns;
+
+  /// The palette's Insert Eisenhower matrix (#1139).
+  String get commandInsertEisenhower;
   String get commandInsertMindMap;
   String get commandConvertListToMindMap;
   String get tallySourceLabel;

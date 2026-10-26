@@ -3251,6 +3251,9 @@ final class IcelandicStrings extends Strings {
   String get commandInsertColumns => 'Setja inn dálka';
 
   @override
+  String get commandInsertEisenhower => 'Setja inn Eisenhower-fylki';
+
+  @override
   String get commandInsertMindMap => 'Setja inn hugarkort';
 
   @override
@@ -3261,6 +3264,17 @@ final class IcelandicStrings extends Strings {
 
   @override
   String get toolMindMapNeedsList => 'Bendillinn er ekki í lista';
+
+  @override
+  String get toolEisenhowerSubtitle => 'Net af áríðandi og mikilvægum verkum';
+  @override
+  String get eisenhowerUrgent => 'Áríðandi';
+  @override
+  String get eisenhowerNotUrgent => 'Ekki áríðandi';
+  @override
+  String get eisenhowerImportant => 'Mikilvægt';
+  @override
+  String get eisenhowerNotImportant => 'Ekki mikilvægt';
 
   @override
   String ocrEngineName(String version) => 'Tesseract $version';

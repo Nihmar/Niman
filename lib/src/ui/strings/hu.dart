@@ -3263,6 +3263,9 @@ final class HungarianStrings extends Strings {
   String get commandInsertColumns => 'Hasábok beszúrása';
 
   @override
+  String get commandInsertEisenhower => 'Eisenhower-mátrix beszúrása';
+
+  @override
   String get commandInsertMindMap => 'Elmetérkép beszúrása';
 
   @override
@@ -3273,6 +3276,17 @@ final class HungarianStrings extends Strings {
 
   @override
   String get toolMindMapNeedsList => 'A kurzor nincs listában';
+
+  @override
+  String get toolEisenhowerSubtitle => 'Rács a sürgős és fontos feladatokhoz';
+  @override
+  String get eisenhowerUrgent => 'Sürgős';
+  @override
+  String get eisenhowerNotUrgent => 'Nem sürgős';
+  @override
+  String get eisenhowerImportant => 'Fontos';
+  @override
+  String get eisenhowerNotImportant => 'Nem fontos';
 
   @override
   String ocrEngineName(String version) => 'Tesseract $version';

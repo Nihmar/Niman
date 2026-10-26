@@ -2874,6 +2874,9 @@ final class ChineseStrings extends Strings {
   String get commandInsertColumns => '插入分栏';
 
   @override
+  String get commandInsertEisenhower => '插入艾森豪威尔矩阵';
+
+  @override
   String get commandInsertMindMap => '插入思维导图';
 
   @override
@@ -2883,6 +2886,17 @@ final class ChineseStrings extends Strings {
 
   @override
   String get toolMindMapNeedsList => '光标不在列表中';
+
+  @override
+  String get toolEisenhowerSubtitle => '紧急与重要任务的网格';
+  @override
+  String get eisenhowerUrgent => '紧急';
+  @override
+  String get eisenhowerNotUrgent => '不紧急';
+  @override
+  String get eisenhowerImportant => '重要';
+  @override
+  String get eisenhowerNotImportant => '不重要';
 
   @override
   String ocrEngineName(String version) => 'Tesseract $version';

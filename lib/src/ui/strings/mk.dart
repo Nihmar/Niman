@@ -3278,6 +3278,9 @@ final class MacedonianStrings extends Strings {
   String get commandInsertColumns => 'Вметни колони';
 
   @override
+  String get commandInsertEisenhower => 'Вметни матрица на Ајзенхауер';
+
+  @override
   String get commandInsertMindMap => 'Вметни ментална мапа';
 
   @override
@@ -3288,6 +3291,17 @@ final class MacedonianStrings extends Strings {
 
   @override
   String get toolMindMapNeedsList => 'Курсорот не е во листа';
+
+  @override
+  String get toolEisenhowerSubtitle => 'Мрежа на итни и важни задачи';
+  @override
+  String get eisenhowerUrgent => 'Итно';
+  @override
+  String get eisenhowerNotUrgent => 'Не е итно';
+  @override
+  String get eisenhowerImportant => 'Важно';
+  @override
+  String get eisenhowerNotImportant => 'Не е важно';
 
   @override
   String ocrEngineName(String version) => 'Tesseract $version';

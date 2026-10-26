@@ -3262,6 +3262,9 @@ final class SwedishStrings extends Strings {
   String get commandInsertColumns => 'Infoga kolumner';
 
   @override
+  String get commandInsertEisenhower => 'Infoga Eisenhower-matris';
+
+  @override
   String get commandInsertMindMap => 'Infoga tankekarta';
 
   @override
@@ -3272,6 +3275,18 @@ final class SwedishStrings extends Strings {
 
   @override
   String get toolMindMapNeedsList => 'Markören står inte i en lista';
+
+  @override
+  String get toolEisenhowerSubtitle =>
+      'Ett rutnät av brådskande och viktiga uppgifter';
+  @override
+  String get eisenhowerUrgent => 'Brådskande';
+  @override
+  String get eisenhowerNotUrgent => 'Inte brådskande';
+  @override
+  String get eisenhowerImportant => 'Viktigt';
+  @override
+  String get eisenhowerNotImportant => 'Inte viktigt';
 
   @override
   String ocrEngineName(String version) => 'Tesseract $version';
