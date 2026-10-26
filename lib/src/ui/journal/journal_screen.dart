@@ -21,7 +21,7 @@ final class JournalScreen extends StatelessWidget {
     this.revision = 0,
     this.eventsOn,
     this.goalsOn,
-    this.eventDays = const <DateTime>{},
+    this.eventDaysIn,
     this.calendarChanged,
     this.onOpenEvent,
     this.dueOn,
@@ -43,8 +43,8 @@ final class JournalScreen extends StatelessWidget {
   /// See [JournalBrowser.goalsOn].
   final List<CalendarLine> Function(DateTime day)? goalsOn;
 
-  /// See [JournalBrowser.eventDays].
-  final Set<DateTime> eventDays;
+  /// See [JournalBrowser.eventDaysIn].
+  final Set<DateTime> Function(DateTime from, DateTime to)? eventDaysIn;
 
   /// See [JournalBrowser.calendarChanged].
   final Listenable? calendarChanged;
@@ -112,7 +112,7 @@ final class JournalScreen extends StatelessWidget {
         large: true,
         eventsOn: eventsOn,
         goalsOn: goalsOn,
-        eventDays: eventDays,
+        eventDaysIn: eventDaysIn,
         calendarChanged: calendarChanged,
         onOpenEvent: onOpenEvent,
         dueOn: dueOn,

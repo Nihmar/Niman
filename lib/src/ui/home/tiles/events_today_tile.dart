@@ -11,6 +11,7 @@ import 'package:niman/src/ui/home/home_host.dart';
 import 'package:niman/src/ui/home/home_tile_frame.dart';
 import 'package:niman/src/ui/journal/journal_browser.dart';
 import 'package:niman/src/ui/line_runs.dart';
+import 'package:niman/src/ui/repeat_label.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// Today's events.
@@ -91,7 +92,7 @@ final class EventsTodayTile extends StatelessWidget {
                             calendarTimeText(
                               event.event.time,
                               asClock: host.clockEventTimes(),
-                              day: event.line.date,
+                              day: event.day,
                             ),
                             textAlign: TextAlign.end,
                             style: theme.textTheme.bodySmall?.copyWith(
@@ -100,13 +101,28 @@ final class EventsTodayTile extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: 8),
-                        Expanded(
+                        Flexible(
+                          flex: 3,
                           child: Text(
                             event.event.text,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
+                        // A repeating event says by what (#1190).
+                        if (event.recurrence case final recurrence?) ...[
+                          const SizedBox(width: 8),
+                          Flexible(
+                            flex: 2,
+                            child: RepeatLabel(
+                              key: Key(
+                                'home-event-repeat-${event.lineIndex}-'
+                                '${event.event.start}',
+                              ),
+                              rule: recurrence.rule,
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ),

@@ -117,9 +117,7 @@ final class ShellJournalUi {
         unawaited(flow.openDay(context, day, confirmed: confirmed)),
     eventsOn: _showsEvents ? _eventsOn : null,
     goalsOn: _showsEvents ? _goalsOn : null,
-    eventDays: _showsEvents
-        ? calendar.snapshot?.daysWithEvents ?? const <DateTime>{}
-        : const <DateTime>{},
+    eventDaysIn: _showsEvents ? _eventDaysIn : null,
     calendarChanged: _showsEvents ? calendar : null,
     onOpenEvent: _showsEvents ? openEvent : null,
     dueOn: _showsTasks ? _tasksDueOn : null,
@@ -147,6 +145,11 @@ final class ShellJournalUi {
   /// The events of [day] as the calendar file reads them (#730).
   List<CalendarEntryEvent> _eventsOn(DateTime day) =>
       calendar.snapshot?.eventsFor(day) ?? const <CalendarEntryEvent>[];
+
+  /// The days from [from] to [to] with events, the occurrences of the
+  /// repeating ones among them: the dots of the month on screen (#1190).
+  Set<DateTime> _eventDaysIn(DateTime from, DateTime to) =>
+      calendar.snapshot?.eventDaysIn(from, to) ?? const <DateTime>{};
 
   /// The goals that apply to [day]: the week's, the month's, the year's,
   /// shown over its events (#730).
@@ -187,9 +190,7 @@ final class ShellJournalUi {
           revision: controller.revision,
           eventsOn: _showsEvents ? _eventsOn : null,
           goalsOn: _showsEvents ? _goalsOn : null,
-          eventDays: _showsEvents
-              ? calendar.snapshot?.daysWithEvents ?? const <DateTime>{}
-              : const <DateTime>{},
+          eventDaysIn: _showsEvents ? _eventDaysIn : null,
           calendarChanged: _showsEvents ? calendar : null,
           onOpenEvent: _showsEvents
               ? (event) {

@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:niman/src/core/recurrence/recurrence_rule.dart';
 import 'package:niman/src/todo/parser.dart';
 import 'package:niman/src/todo/recurring_line.dart';
-import 'package:niman/src/ui/recurrence_words.dart';
+import 'package:niman/src/ui/repeat_label.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// The due-date state driving the subtitle styling (overdue and today
@@ -104,24 +104,8 @@ final class TodoRepeatLabel extends StatelessWidget {
   final RecurrenceRule rule;
 
   @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return Row(
-      key: const Key('todo-row-repeat'),
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(Icons.repeat, size: 14, color: scheme.onSurfaceVariant),
-        const SizedBox(width: 2),
-        Flexible(
-          child: Text(
-            recurrenceWords(rule.description),
-            style: Theme.of(context).textTheme.bodySmall
-                ?.copyWith(color: scheme.onSurfaceVariant),
-          ),
-        ),
-      ],
-    );
-  }
+  Widget build(BuildContext context) =>
+      RepeatLabel(key: const Key('todo-row-repeat'), rule: rule);
 }
 
 /// The completion part of a done row: `Done 7 Sep`, where an open row has

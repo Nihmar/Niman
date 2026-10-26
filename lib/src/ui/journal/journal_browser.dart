@@ -21,6 +21,7 @@ import 'package:niman/src/ui/calendar_event_form.dart';
 import 'package:niman/src/ui/journal/journal_calendar.dart';
 import 'package:niman/src/ui/journal/journal_flow.dart';
 import 'package:niman/src/ui/line_runs.dart';
+import 'package:niman/src/ui/repeat_label.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// The browser over the journal's entries.
@@ -41,7 +42,7 @@ final class JournalBrowser extends StatefulWidget {
     this.large = false,
     this.eventsOn,
     this.goalsOn,
-    this.eventDays = const <DateTime>{},
+    this.eventDaysIn,
     this.calendarChanged,
     this.onOpenEvent,
     this.onEditEvent,
@@ -71,8 +72,10 @@ final class JournalBrowser extends StatefulWidget {
   /// shown over its events; null shows none.
   final List<CalendarLine> Function(DateTime day)? goalsOn;
 
-  /// The days with at least one event: the calendar's second dot (#730).
-  final Set<DateTime> eventDays;
+  /// The days from the first date to the second (inclusive) with at least
+  /// one event, a repeating event's occurrences among them: the calendar's
+  /// second dot for the month on screen (#730, #1190). Null shows none.
+  final Set<DateTime> Function(DateTime from, DateTime to)? eventDaysIn;
 
   /// Fires when the calendar file changes, so the events follow.
   final Listenable? calendarChanged;
@@ -255,18 +258,26 @@ final class _JournalBrowserState extends State<JournalBrowser> {
       key: const Key('journal-browser'),
       padding: EdgeInsets.all(widget.large ? 18 : 12),
       children: [
-        JournalCalendar(
-          month: _month,
-          entries: entries,
-          daysWithEvents: widget.eventDays,
-          eventColour: Theme.of(context)
-              .extension<SyntaxColors>()
-              ?.calendarTime,
-          today: widget.today,
-          selected: widget.large || _picked ? _selected : null,
-          cell: widget.large ? 44 : 34,
-          onDay: _tap,
-          onMonth: _showMonth,
+        ListenableBuilder(
+          listenable: widget.calendarChanged ?? const _Never(),
+          builder: (context, _) => JournalCalendar(
+            month: _month,
+            entries: entries,
+            daysWithEvents:
+                widget.eventDaysIn?.call(
+                  _month,
+                  DateTime(_month.year, _month.month + 1, 0),
+                ) ??
+                const <DateTime>{},
+            eventColour: Theme.of(context)
+                .extension<SyntaxColors>()
+                ?.calendarTime,
+            today: widget.today,
+            selected: widget.large || _picked ? _selected : null,
+            cell: widget.large ? 44 : 34,
+            onDay: _tap,
+            onMonth: _showMonth,
+          ),
         ),
         const SizedBox(height: 8),
         // A wrap, not a row: the dock's island is narrow and a phone's
@@ -474,7 +485,7 @@ final class _JournalBrowserState extends State<JournalBrowser> {
           calendarTimeText(
             event.time,
             asClock: widget.eventTimesClock,
-            day: entry.line.date,
+            day: entry.day,
           ),
           textAlign: TextAlign.end,
           style: theme.textTheme.bodySmall?.copyWith(
@@ -484,6 +495,15 @@ final class _JournalBrowserState extends State<JournalBrowser> {
         ),
       ),
       title: calendarEventText(context, event),
+      // An event that repeats says by what, on every day it shows (#1190).
+      subtitle: entry.recurrence == null
+          ? null
+          : RepeatLabel(
+              key: Key(
+                'journal-event-repeat-${entry.lineIndex}-${event.start}',
+              ),
+              rule: entry.recurrence!.rule,
+            ),
       trailing: event.reminder == null
           ? null
           : Row(
@@ -524,7 +544,7 @@ final class _JournalBrowserState extends State<JournalBrowser> {
           final theme = Theme.of(sheet);
           final syntax = theme.extension<SyntaxColors>();
           final time = syntax?.calendarTime ?? theme.colorScheme.tertiary;
-          final day = entry.line.date;
+          final day = entry.day;
           return SafeArea(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(20, 10, 20, 8),
@@ -580,6 +600,11 @@ final class _JournalBrowserState extends State<JournalBrowser> {
                                   color: theme.colorScheme.onSurfaceVariant,
                                 ),
                               ),
+                            if (entry.recurrence case final recurrence?)
+                              RepeatLabel(
+                                key: const Key('journal-event-sheet-repeat'),
+                                rule: recurrence.rule,
+                              ),
                             if (event.reminder case final reminder?)
                               Row(
                                 children: [
@@ -603,7 +628,10 @@ final class _JournalBrowserState extends State<JournalBrowser> {
                     ],
                   ),
                   const Divider(height: 24),
-                  if (widget.onEditEvent != null)
+                  // Edit and Delete write the rule's own line, which is every
+                  // occurrence at once: a later copy offers them only when
+                  // it can say which it means (#1191).
+                  if (widget.onEditEvent != null && !entry.isLaterOccurrence)
                     ListTile(
                       key: const Key('journal-event-edit'),
                       leading: const Icon(Icons.edit_outlined),
@@ -613,7 +641,7 @@ final class _JournalBrowserState extends State<JournalBrowser> {
                         _openForm(day: _dayOfEntry(entry), editing: entry);
                       },
                     ),
-                  if (widget.onDeleteEvent != null)
+                  if (widget.onDeleteEvent != null && !entry.isLaterOccurrence)
                     ListTile(
                       key: const Key('journal-event-delete'),
                       leading: Icon(
