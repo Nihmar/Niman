@@ -112,3 +112,25 @@ called by `TodoStore` in the same write as the archive.
 - **37 locale files** for the presets and the rule in words.
 </content>
 </invoke>
+
+## As built (#1189)
+
+- The copy is `nextRecurringLine` in `lib/src/todo/recurring_line.dart`,
+  called by `TodoStore.checkAt` (the one path the list, a note's tasks, the
+  Home tile and the Android widget all complete through) and by Move to
+  tasks for a ticked item that repeats. A task with no `due:` counts its
+  `t:` and `rem:` shift from the completion day.
+- The words are `recurrenceWords` (`lib/src/ui/recurrence_words.dart`), one
+  sentence shape per language in `ui/strings/` (`recurDays`, `recurNthWeekday`
+  and the rest), event-agnostic.
+- The Repeat row reads and writes the `rec:` tag in the dialog's text, so
+  there is no second copy of the rule to keep in step. The presets: daily
+  and weekdays count from completion; weekly is `1w;<weekday>`; monthly and
+  yearly are strict (`+1m`, `+1y`), which is what "on this day" means when
+  the task is done late.
+- The rule shows through `todoRowTiming` (rows, pointer rows, a note's
+  tasks) and in the widget payload's `repeat`. The Home tile and the search
+  list draw only the due date and do not show it.
+- The editor flags an unreadable `rec:` with `TokenKind.todoUnreadableRule`
+  (the wavy underline of the calendar's mismatches) in todo.txt; the calendar
+  half takes the same flag when events repeat.

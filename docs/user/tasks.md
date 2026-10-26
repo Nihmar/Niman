@@ -51,7 +51,8 @@ four icons in a pane too narrow for the pills.
 - `+project`, `@context`, `#tag` tokens carry filing meaning and power
   the filter chips.
 - `key:value` tags are annotations. Known: `due:YYYY-MM-DD` (badge,
-  filter) and `rem:YYYY-MM-DDTHH:MM` (schedules a reminder).
+  filter), `rem:YYYY-MM-DDTHH:MM` (schedules a reminder) and `rec:` (the
+  task repeats, see *Recurring tasks* below).
 - `[[Note]]` is a link to a note (see *Links to notes* below); inside
   the brackets a `+`, `@`, `#` or `key:` is part of the link, not a
   token.
@@ -332,8 +333,10 @@ finished task, check it instead.
 
 `todo.txt` and `done.txt` also open in the editor, as text, coloured as a
 task list: the priority, the dates at the head of a task, `+projects`,
-`@contexts`, `#tags` and `key:value` tags (`due:`, `rem:`) each in their
-own color, and a completed task struck through. They open in the source
+`@contexts`, `#tags` and `key:value` tags (`due:`, `rem:`, `rec:`) each in
+their own color, and a completed task struck through. A `rec:` that Niman
+cannot read — `rec:often`, `rec:0d` — keeps its color and gets a wavy
+underline, and does nothing. They open in the source
 editor only — the preview and the WYSIWYG editor read Markdown, and would
 run the lines together — so their switches stay in place, off. The colors
 are the theme's, under **Task lists (todo.txt)** in the theme editor
@@ -365,6 +368,71 @@ over both files, so completing or deleting either takes its reminder
 with it. Tapping an event's notification opens the journal on that day;
 tapping a task's opens the task list.
 
+## Recurring tasks
+
+Add `rec:` to a task and completing it does not end it: the task goes to
+`done.txt` as always, and the next one is added to `todo.txt` with its due
+date moved on. The line is the whole of it — there is no hidden setting — so
+a task repeats the same way on every device, and another todo.txt tool
+sees one more tag.
+
+| Write | The next one is due |
+|-------|---------------------|
+| `rec:1d` | one day after you complete it |
+| `rec:2w` | two weeks after you complete it |
+| `rec:1m` / `rec:1y` | one month / one year after you complete it |
+| `rec:+1w` | one week after its **due date**, however late you were (the `+` is *strict*) |
+| `rec:3b` | three business days on (Monday to Friday) |
+| `rec:1w;mo,we,fr` | the next of those weekdays after today (`mo` `tu` `we` `th` `fr` `sa` `su`, in every language) |
+| `rec:1m;2tu` | the second Tuesday of next month; `rec:1m;-1fr` is the last Friday |
+
+`d`, `w`, `m`, `y` and `b` are days, weeks, months, years and business
+days; the number is how many. The two last rows are Niman's own
+additions to the common syntax (the one Simpletask, topydo and sleek
+share): another tool reads them as a tag it does not know, so the task
+does not repeat there, and nothing else about the line changes.
+
+**What completing does.** The completed line goes to `done.txt` with its
+`rec:` kept. The next copy is appended to `todo.txt`:
+
+- `due:` moves to the next date, counted from the due date for a strict
+  `rec:+…` and from the day you completed it otherwise. A task with no
+  `due:` gets one, counted from the day you completed it;
+- `t:` (the threshold date other tools write) and `rem:` move by the same
+  number of days as `due:`, and a reminder keeps its time of day; so
+  completing a task takes its reminder and schedules the copy's;
+- the priority, the text, the links to notes and every other tag stay as
+  they were, and a creation date becomes the day you completed it.
+
+This is the same wherever the task is completed: the Todo tab, a note's
+tasks, a task list in a note, the Home tile and the home-screen widget.
+
+**Month ends.** A step of months or years that lands past the end of a
+shorter month takes its last day: 31 January plus one month is 28 (or 29)
+February. A task that repeats from its due date and was moved by that
+clamp stays on the day it landed on — the line holds only its current due
+date — so a strict `rec:+1m` from the 31st can drift to the 28th and not
+come back. Count from the completion when that matters.
+
+**Late tasks.** A task that is three periods overdue moves one period when
+you complete it, as it does in every other tool; completing the copy moves
+it again. Each completion is one line in `done.txt`, so the history is what
+you did.
+
+**Undo.** Unchecking a done task puts that line back in `todo.txt` as it
+was; it does not remove the copy, which is a task of its own by then.
+Delete whichever you do not want.
+
+**Two devices.** The copy is worked out from the line and the day alone, so
+two devices that complete the same task on the same day write the same
+lines, and sync keeps each once. Two that complete it on different days
+keep both copies, which is a real disagreement left for you to see.
+
+Rows show the rule beside the due date, with a repeat icon: `every 2 weeks`,
+`every weekday`, `every month on the 2nd Tuesday`. The task dialog's
+**Repeat** row sets it (see *The task dialog*); a `rec:` typed in the text
+is the same thing.
+
 ## Home-screen widget
 
 Android: the **Niman Todos** widget shows the tab's open tasks in the
@@ -383,6 +451,17 @@ journal opens the same dialog with that day already set as the due date
 the field grows downward, a few lines at most, then scrolls; it is still
 one line of `todo.txt`, so Enter saves and a pasted line break becomes a
 space. On a wide window the dialog is wider.
+
+The **Repeat** row under the reminder sets how the task repeats — **Never**,
+**Every day**, **Every weekday**, **Every week on** the due date's weekday,
+**Every month** and **Every year** from the due date, or **Custom**: every N
+days, weeks, months or years, on which weekdays for weeks, on the same date
+or on the Nth (or last) weekday of the month, counted **from the due date**
+or **from completion**. It writes the `rec:` tag in the text, and a `rec:`
+typed there shows in the row (a rule Niman cannot read shows as written,
+in the error color). On a desktop window with the room Custom opens under
+the row and applies as you change it; on Android it is a sheet, applied with
+**OK**. See *Recurring tasks*.
 
 On a desktop window with the room, the due date and the reminder are
 picked inside the dialog: the calendar opens under its row, and for a
