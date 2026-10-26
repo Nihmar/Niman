@@ -971,9 +971,10 @@ takes, its errors and its Add task are described with the tasks:
 
 The toolbar's **Tools** button opens the editor's extra tools. They are
 not formats: each one reads the note, or a part of it, and writes
-something back. Both editors offer the same tools, and a tool that has
-nothing to work on in this note is listed greyed with the reason rather
-than hidden.
+something back. The Eisenhower matrix is the exception, an insertion
+that reads nothing. Both editors offer the same tools, and a tool that
+has nothing to work on in this note is listed greyed with the reason
+rather than hidden.
 
 ### Indenting a list item
 
@@ -1066,7 +1067,8 @@ with the four quadrants to put tasks in:
 It is also **Insert › Eisenhower matrix** in the editor's menu (the Insert
 sheet on a phone), and **Insert Eisenhower matrix** in the command
 palette. It needs no list and asks nothing: run it again and a second
-matrix is written.
+matrix is written under the first, since the caret it leaves is in the
+first one.
 
 The labels are the app's language at the moment the tool runs, so in
 Italian the same insertion reads `Urgente`, `Non urgente`, `Importante`
