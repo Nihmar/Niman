@@ -6,6 +6,29 @@ This file ships inside the build and feeds the in-app changelog (the
 launch dialog after an update and the screen under Settings → Diagnostics
 and info). Update it in the release commit, before the tag.
 
+## [0.3.1] - 2026-10-26
+
+An Eisenhower matrix is one command, an annotation keeps its passage
+through a tidy, and a task item prints as its box wherever it is.
+
+The Tools sheet writes an Eisenhower matrix: urgent against important,
+as a real Markdown table whose labels are the app's language, so the
+table tools work on it and every export reads it. Tidying a note no
+longer folds an annotation's link back onto its quote, so a highlight
+keeps the passage it marks, and the notes an older tidy already broke
+are read too. A task item on a board or in a card's body prints as its
+box rather than a box and a bullet, as a task on a note's page does.
+
+### Added
+- **Editor**: Insert Eisenhower matrix from the Tools sheet, the Insert menu and sheet, the palette and the app menu, written as a GFM table in the active language (#1139)
+
+### Changed
+- **Tools sheet**: a greyed tool says why it cannot run, the matrix's being that the note is not open in the editor (#1139)
+
+### Fixed
+- **Tidy**: an annotation's link back stays on its own line, and a quote an older tidy folded it onto is read again (#1183)
+- **Export**: a task item prints as its box on a board and in a card's body too, without the bullet (#1186)
+
 ## [0.3.0] - 2026-10-23
 
 Niman comes to the Mac and the iPhone, a note can be a kanban board, and
