@@ -225,8 +225,8 @@ HighlightColour? _highlightIn(String fragment) {
           .substring(line, at)
           .replaceFirst(_quoteLine, '')
           .trimRight();
-      final quoted = before.replaceFirst(_linkBackSeparator, '').trim();
-      if (quoted.isNotEmpty) passage.add(quoted);
+      final passageText = before.replaceFirst(_linkBackSeparator, '').trim();
+      if (passageText.isNotEmpty) passage.add(passageText);
       continue;
     }
     final content = text

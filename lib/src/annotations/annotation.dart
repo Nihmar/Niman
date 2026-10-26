@@ -84,7 +84,9 @@ final class Annotation {
   );
 
   /// The annotation as its note holds it, links written as [linkType]
-  /// says, ending in a newline.
+  /// says, ending in a newline. The `— ` line back is the shape
+  /// `annotationLinksIn` reads and the tidying keeps on a line of its own
+  /// (#1183).
   String toMarkdown({required LinkType linkType}) {
     final link = placeLink(
       path: path,

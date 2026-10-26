@@ -513,8 +513,8 @@ changing what it says:
   keeps it, a blank line still ends the paragraph, and a line that
   starts something else — a heading, a list item, a quote, a rule, a
   fence, a table — stays on its own line. So does an annotation's line
-  back to the passage it quotes, `— [[…]]`, so a companion note tidied
-  keeps annotating its file (#1183). Headings (an underlined one
+  back to the passage it quotes, `— [[…]]`: a companion note tidied keeps
+  annotating its file (#1183). Headings (an underlined one
   included), code, tables, math, HTML, frontmatter and link definitions
   keep their lines. This is the **Join wrapped paragraphs** rule: turn it
   off in **Markdown rules** to keep your paragraphs wrapped as you wrote

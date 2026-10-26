@@ -138,6 +138,13 @@ void main() {
       '> one two\n'
       '> — [Dune, p. 3](Books/Dune.pdf#page=3&highlight=green)\n',
     );
+    // Nor is a line pulled onto the link back: the quote would read empty.
+    kept(
+      '> — [[Books/Dune.pdf#page=34|Dune, p. 34]]\n'
+      '> The spice must flow.\n',
+    );
+    // A quote captured from a page ends the same way (`capture_quote.dart`).
+    kept('> Words worth keeping.\n> — [Dune](<https://example.com/dune>)\n');
   });
 
   test("a footnote's paragraph is joined", () {
