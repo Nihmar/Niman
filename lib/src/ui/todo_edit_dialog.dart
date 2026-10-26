@@ -38,13 +38,14 @@ import 'package:niman/src/todo/recurring_line.dart';
 import 'package:niman/src/todo/reminder_health.dart';
 import 'package:niman/src/ui/os_pickers.dart';
 import 'package:niman/src/ui/reminder_health_message.dart';
+import 'package:niman/src/ui/repeat_custom.dart';
+import 'package:niman/src/ui/repeat_row.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/todo_date_panel.dart';
 import 'package:niman/src/ui/todo_link_options.dart';
 import 'package:niman/src/ui/todo_link_suggestions.dart';
 import 'package:niman/src/ui/todo_priority_chips.dart';
-import 'package:niman/src/ui/todo_repeat_custom.dart';
-import 'package:niman/src/ui/todo_repeat_row.dart';
+import 'package:niman/src/ui/todo_repeat_presets.dart';
 import 'package:niman/src/ui/todo_token_completion.dart';
 
 /// Shows the add ([initial] null) or edit dialog.
@@ -642,17 +643,18 @@ final class _TodoTaskDialogState extends State<_TodoTaskDialog> {
     final value = recurrenceValueOf(task);
     final anchor = _due ?? _day(widget.today);
     return [
-      TodoRepeatRow(
+      RepeatRow(
         rule: rule,
         unreadable: rule == null ? value : null,
         anchor: anchor,
+        presets: todoRepeatPresets(anchor),
         onChanged: _setRule,
         onCustomInPlace: () => _toggleRepeat(rule),
       ),
       if (_open == _DatePanel.repeat)
         TodoPanelFrame(
           key: _panelKey,
-          child: TodoRepeatCustom(
+          child: RepeatCustom(
             initial: rule,
             anchor: anchor,
             onChanged: _setRule,

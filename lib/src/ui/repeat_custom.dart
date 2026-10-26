@@ -1,10 +1,11 @@
-/// The custom repeat editor of the task dialog (#1189): every N days, weeks,
-/// months or years, on which weekdays, on the Nth weekday of the month, and
-/// counted from the due date or from the completion.
+/// The custom repeat editor (#1189, #1191): every N days, weeks, months or
+/// years, on which weekdays, on the Nth weekday of the month, and — for a
+/// task — counted from the due date or from the completion.
 ///
-/// Every change is answered at once through [TodoRepeatCustom.onChanged]: the
-/// dialog writes it into the line as it goes (in place on a desktop), and the
-/// phone's sheet keeps the last one for its button.
+/// Every change is answered at once through [RepeatCustom.onChanged]: the
+/// task dialog writes it into the line as it goes (in place on a desktop),
+/// the event form keeps it, and the phone's sheet keeps the last one for its
+/// button.
 library;
 
 import 'package:flutter/material.dart';
@@ -26,14 +27,18 @@ const List<RecurrenceUnit> _units = <RecurrenceUnit>[
 
 /// The editor: interval and unit, the weekdays of a weekly rule, the Nth
 /// weekday of a monthly one, and what the next copy counts from.
-final class TodoRepeatCustom extends StatefulWidget {
+final class RepeatCustom extends StatefulWidget {
   /// An editor opened on [initial] (every day when null); [anchor] is the
-  /// task's due date, or today, which a monthly rule's Nth weekday is taken
-  /// from.
+  /// task's due date, or today, or the event's day, which a monthly rule's
+  /// Nth weekday is taken from. [keyPrefix] names its keys, and [countsFrom]
+  /// offers the choice of counting from the due date or the completion: a
+  /// task's, not an event's.
   const new({
     required this.initial,
     required this.anchor,
     required this.onChanged,
+    this.keyPrefix = 'todo',
+    this.countsFrom = true,
     super.key,
   });
 
@@ -46,11 +51,17 @@ final class TodoRepeatCustom extends StatefulWidget {
   /// Called with the rule after every change.
   final ValueChanged<RecurrenceRule> onChanged;
 
+  /// The prefix of the editor's keys.
+  final String keyPrefix;
+
+  /// Whether the editor offers the due date and the completion to count from.
+  final bool countsFrom;
+
   @override
-  State<TodoRepeatCustom> createState() => _TodoRepeatCustomState();
+  State<RepeatCustom> createState() => _RepeatCustomState();
 }
 
-final class _TodoRepeatCustomState extends State<TodoRepeatCustom> {
+final class _RepeatCustomState extends State<RepeatCustom> {
   late RecurrenceUnit _unit = _startUnit;
   late int _interval = widget.initial?.interval ?? 1;
   late Set<int> _weekdays = <int>{...?widget.initial?.weekdays};
@@ -143,7 +154,7 @@ final class _TodoRepeatCustomState extends State<TodoRepeatCustom> {
               SizedBox(
                 width: 72,
                 child: TextField(
-                  key: const Key('todo-repeat-interval'),
+                  key: Key('${widget.keyPrefix}-repeat-interval'),
                   controller: _count,
                   keyboardType: TextInputType.number,
                   inputFormatters: [
@@ -163,7 +174,7 @@ final class _TodoRepeatCustomState extends State<TodoRepeatCustom> {
             children: [
               for (final unit in _units)
                 ChoiceChip(
-                  key: Key('todo-repeat-unit-${unit.name}'),
+                  key: Key('${widget.keyPrefix}-repeat-unit-${unit.name}'),
                   label: Text(_unitLabel(unit)),
                   selected: _unit == unit,
                   showCheckmark: false,
@@ -180,7 +191,7 @@ final class _TodoRepeatCustomState extends State<TodoRepeatCustom> {
               children: [
                 for (final weekday in _weekOrder)
                   FilterChip(
-                    key: Key('todo-repeat-weekday-$weekday'),
+                    key: Key('${widget.keyPrefix}-repeat-weekday-$weekday'),
                     label: Text(names[weekday - 1]),
                     selected: _weekdays.contains(weekday),
                     showCheckmark: false,
@@ -202,7 +213,10 @@ final class _TodoRepeatCustomState extends State<TodoRepeatCustom> {
               children: [
                 for (final nth in _nthOptions)
                   ChoiceChip(
-                    key: Key('todo-repeat-month-${nth?.token ?? 'date'}'),
+                    key: Key(
+                      '${widget.keyPrefix}-repeat-month-'
+                      '${nth?.token ?? 'date'}',
+                    ),
                     label: Text(_monthLabel(nth)),
                     selected: _nth == nth,
                     showCheckmark: false,
@@ -212,33 +226,37 @@ final class _TodoRepeatCustomState extends State<TodoRepeatCustom> {
               ],
             ),
           ],
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 4,
-            runSpacing: 4,
-            children: [
-              ChoiceChip(
-                key: const Key('todo-repeat-from-due'),
-                label: Text(AppStrings.recurFromDueDate),
-                selected: _strict,
-                showCheckmark: false,
-                visualDensity: VisualDensity.compact,
-                onSelected: (_) => _changed(() => _strict = true),
-              ),
-              ChoiceChip(
-                key: const Key('todo-repeat-from-completion'),
-                label: Text(AppStrings.recurFromCompletion),
-                selected: !_strict,
-                showCheckmark: false,
-                visualDensity: VisualDensity.compact,
-                onSelected: (_) => _changed(() => _strict = false),
-              ),
-            ],
-          ),
+          if (widget.countsFrom) ...[
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 4,
+              runSpacing: 4,
+              children: [
+                ChoiceChip(
+                  key: Key('${widget.keyPrefix}-repeat-from-due'),
+                  label: Text(AppStrings.recurFromDueDate),
+                  selected: _strict,
+                  showCheckmark: false,
+                  visualDensity: VisualDensity.compact,
+                  onSelected: (_) => _changed(() => _strict = true),
+                ),
+                ChoiceChip(
+                  key: Key('${widget.keyPrefix}-repeat-from-completion'),
+                  label: Text(AppStrings.recurFromCompletion),
+                  selected: !_strict,
+                  showCheckmark: false,
+                  visualDensity: VisualDensity.compact,
+                  onSelected: (_) => _changed(() => _strict = false),
+                ),
+              ],
+            ),
+          ],
           const SizedBox(height: 8),
           Text(
-            key: const Key('todo-repeat-summary'),
-            sentenceCase(recurrenceWords(_rule.description, fromDue: true)),
+            key: Key('${widget.keyPrefix}-repeat-summary'),
+            sentenceCase(
+              recurrenceWords(_rule.description, fromDue: widget.countsFrom),
+            ),
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],
