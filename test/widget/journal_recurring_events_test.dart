@@ -41,8 +41,8 @@ void main() {
             eventsOn: at.eventsFor,
             eventDaysIn: at.eventDaysIn,
             onOpenEvent: opened.add,
-            onEditEvent: withSheet ? (entry, event) {} : null,
-            onDeleteEvent: withSheet ? (entry) {} : null,
+            onEditEvent: withSheet ? (entry, event, scope) {} : null,
+            onDeleteEvent: withSheet ? (entry, scope) {} : null,
           ),
         ),
       ),
@@ -154,10 +154,10 @@ void main() {
       findsWidgets,
       reason: 'the occurrence day, not the rule line day',
     );
-    // A later copy cannot say which of the series an edit means yet: it
-    // offers the rule's line, not a write.
-    expect(find.byKey(const Key('journal-event-edit')), findsNothing);
-    expect(find.byKey(const Key('journal-event-delete')), findsNothing);
+    // A later copy edits and deletes by asking which of the series it
+    // means (#1191), and still goes to the rule's line.
+    expect(find.byKey(const Key('journal-event-edit')), findsOne);
+    expect(find.byKey(const Key('journal-event-delete')), findsOne);
     expect(find.byKey(const Key('journal-event-open')), findsOne);
   });
 

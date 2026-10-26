@@ -329,6 +329,18 @@ final class CzechStrings extends Strings {
   @override
   String calendarEndsOn(String date) => 'Končí $date';
   @override
+  String get calendarSkipAction => 'Přeskočit';
+  @override
+  String get calendarScopeEditTitle => 'Upravit opakovanou událost';
+  @override
+  String get calendarScopeDeleteTitle => 'Smazat opakovanou událost';
+  @override
+  String get calendarScopeThis => 'Tato událost';
+  @override
+  String get calendarScopeFollowing => 'Tato a následující události';
+  @override
+  String get calendarScopeAll => 'Všechny události';
+  @override
   String get journalCalendarTitle => 'Kalendář';
   @override
   String get journalEventTimesTitle => 'Časy událostí';

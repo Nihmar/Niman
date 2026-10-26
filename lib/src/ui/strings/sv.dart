@@ -330,6 +330,18 @@ final class SwedishStrings extends Strings {
   @override
   String calendarEndsOn(String date) => 'Slutar den $date';
   @override
+  String get calendarSkipAction => 'Hoppa över';
+  @override
+  String get calendarScopeEditTitle => 'Redigera återkommande händelse';
+  @override
+  String get calendarScopeDeleteTitle => 'Ta bort återkommande händelse';
+  @override
+  String get calendarScopeThis => 'Denna händelse';
+  @override
+  String get calendarScopeFollowing => 'Denna och följande händelser';
+  @override
+  String get calendarScopeAll => 'Alla händelser';
+  @override
   String get journalCalendarTitle => 'Kalender';
   @override
   String get journalEventTimesTitle => 'Händelsetider';

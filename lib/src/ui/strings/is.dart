@@ -327,6 +327,18 @@ final class IcelandicStrings extends Strings {
   @override
   String calendarEndsOn(String date) => 'Endar $date';
   @override
+  String get calendarSkipAction => 'Sleppa';
+  @override
+  String get calendarScopeEditTitle => 'Breyta endurteknum viðburði';
+  @override
+  String get calendarScopeDeleteTitle => 'Eyða endurteknum viðburði';
+  @override
+  String get calendarScopeThis => 'Þessi viðburður';
+  @override
+  String get calendarScopeFollowing => 'Þessi og næstu viðburðir';
+  @override
+  String get calendarScopeAll => 'Allir viðburðir';
+  @override
   String get journalCalendarTitle => 'Dagatal';
   @override
   String get journalEventTimesTitle => 'Tímar viðburða';

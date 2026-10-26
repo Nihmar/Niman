@@ -173,6 +173,19 @@ abstract base class Strings {
   /// The Ends row with an end, `Ends on 2026-12-31`.
   String calendarEndsOn(String date);
 
+  /// The row of an event's menu that leaves one occurrence out, `Skip`.
+  String get calendarSkipAction;
+
+  /// The heading over the three choices an Edit and a Delete of a
+  /// repeating event ask, `Edit repeating event`, `Delete repeating event`.
+  String get calendarScopeEditTitle;
+  String get calendarScopeDeleteTitle;
+
+  /// The three choices: this occurrence, it and every later one, all.
+  String get calendarScopeThis;
+  String get calendarScopeFollowing;
+  String get calendarScopeAll;
+
   /// Settings › Journal's calendar heading and its one setting (#730):
   /// the times as written, or as a clock in the reader's own zone.
   String get journalCalendarTitle;

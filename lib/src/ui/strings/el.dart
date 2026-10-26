@@ -334,6 +334,19 @@ final class GreekStrings extends Strings {
   @override
   String calendarEndsOn(String date) => 'Τελειώνει στις $date';
   @override
+  String get calendarSkipAction => 'Παράλειψη';
+  @override
+  String get calendarScopeEditTitle =>
+      'Επεξεργασία επαναλαμβανόμενου συμβάντος';
+  @override
+  String get calendarScopeDeleteTitle => 'Διαγραφή επαναλαμβανόμενου συμβάντος';
+  @override
+  String get calendarScopeThis => 'Αυτό το συμβάν';
+  @override
+  String get calendarScopeFollowing => 'Αυτό και τα επόμενα';
+  @override
+  String get calendarScopeAll => 'Όλα τα συμβάντα';
+  @override
   String get journalCalendarTitle => 'Ημερολόγιο';
   @override
   String get journalEventTimesTitle => 'Ώρες συμβάντων';

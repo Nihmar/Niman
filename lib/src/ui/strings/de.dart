@@ -333,6 +333,18 @@ final class GermanStrings extends Strings {
   @override
   String calendarEndsOn(String date) => 'Endet am $date';
   @override
+  String get calendarSkipAction => 'Überspringen';
+  @override
+  String get calendarScopeEditTitle => 'Wiederkehrenden Termin bearbeiten';
+  @override
+  String get calendarScopeDeleteTitle => 'Wiederkehrenden Termin löschen';
+  @override
+  String get calendarScopeThis => 'Dieser Termin';
+  @override
+  String get calendarScopeFollowing => 'Dieser und alle folgenden Termine';
+  @override
+  String get calendarScopeAll => 'Alle Termine';
+  @override
   String get journalCalendarTitle => 'Kalender';
   @override
   String get journalEventTimesTitle => 'Terminzeiten';

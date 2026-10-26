@@ -4,6 +4,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/calendar/calendar_file.dart';
+import 'package:niman/src/calendar/calendar_occurrence_edits.dart';
 import 'package:niman/src/calendar/calendar_store.dart';
 import 'package:niman/src/calendar/calendar_writer.dart';
 import 'package:niman/src/calendar/parser.dart';
@@ -33,6 +34,7 @@ final class JournalScreen extends StatelessWidget {
     this.onAddEvent,
     this.onAddTask,
     this.onEditEvent,
+    this.onSkipEvent,
     this.onDeleteEvent,
     super.key,
   });
@@ -77,11 +79,19 @@ final class JournalScreen extends StatelessWidget {
   final void Function(DateTime day)? onAddTask;
 
   /// See [JournalBrowser.onEditEvent].
-  final void Function(CalendarEntryEvent entry, CalendarEventDraft event)?
+  final void Function(
+    CalendarEntryEvent entry,
+    CalendarEventDraft event,
+    CalendarOccurrenceScope scope,
+  )?
   onEditEvent;
 
+  /// See [JournalBrowser.onSkipEvent].
+  final void Function(CalendarEntryEvent entry)? onSkipEvent;
+
   /// See [JournalBrowser.onDeleteEvent].
-  final void Function(CalendarEntryEvent entry)? onDeleteEvent;
+  final void Function(CalendarEntryEvent entry, CalendarOccurrenceScope scope)?
+  onDeleteEvent;
 
   /// See [JournalBrowser.today].
   final DateTime today;
@@ -124,6 +134,7 @@ final class JournalScreen extends StatelessWidget {
         onAddEvent: onAddEvent,
         onAddTask: onAddTask,
         onEditEvent: onEditEvent,
+        onSkipEvent: onSkipEvent,
         onDeleteEvent: onDeleteEvent,
       ),
     );

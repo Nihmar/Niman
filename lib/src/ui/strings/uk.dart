@@ -329,6 +329,18 @@ final class UkrainianStrings extends Strings {
   @override
   String calendarEndsOn(String date) => 'Завершується $date';
   @override
+  String get calendarSkipAction => 'Пропустити';
+  @override
+  String get calendarScopeEditTitle => 'Редагувати подію, що повторюється';
+  @override
+  String get calendarScopeDeleteTitle => 'Видалити подію, що повторюється';
+  @override
+  String get calendarScopeThis => 'Ця подія';
+  @override
+  String get calendarScopeFollowing => 'Ця й наступні події';
+  @override
+  String get calendarScopeAll => 'Усі події';
+  @override
   String get journalCalendarTitle => 'Календар';
   @override
   String get journalEventTimesTitle => 'Час подій';

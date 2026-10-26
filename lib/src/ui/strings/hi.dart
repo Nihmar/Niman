@@ -317,6 +317,18 @@ final class HindiStrings extends Strings {
   @override
   String calendarEndsOn(String date) => '$date को समाप्त होता है';
   @override
+  String get calendarSkipAction => 'छोड़ें';
+  @override
+  String get calendarScopeEditTitle => 'दोहराए जाने वाले ईवेंट को संपादित करें';
+  @override
+  String get calendarScopeDeleteTitle => 'दोहराए जाने वाले ईवेंट को हटाएँ';
+  @override
+  String get calendarScopeThis => 'यह ईवेंट';
+  @override
+  String get calendarScopeFollowing => 'यह और आगे के सभी ईवेंट';
+  @override
+  String get calendarScopeAll => 'सभी ईवेंट';
+  @override
   String get journalCalendarTitle => 'कैलेंडर';
   @override
   String get journalEventTimesTitle => 'ईवेंट के समय';

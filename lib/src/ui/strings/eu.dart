@@ -326,6 +326,18 @@ final class BasqueStrings extends Strings {
   @override
   String calendarEndsOn(String date) => '$date egunean amaitzen da';
   @override
+  String get calendarSkipAction => 'Saltatu';
+  @override
+  String get calendarScopeEditTitle => 'Editatu gertaera errepikakorra';
+  @override
+  String get calendarScopeDeleteTitle => 'Ezabatu gertaera errepikakorra';
+  @override
+  String get calendarScopeThis => 'Gertaera hau';
+  @override
+  String get calendarScopeFollowing => 'Hau eta hurrengoak';
+  @override
+  String get calendarScopeAll => 'Gertaera guztiak';
+  @override
   String get journalCalendarTitle => 'Egutegia';
   @override
   String get journalEventTimesTitle => 'Gertaeren orduak';

@@ -327,6 +327,18 @@ final class EnglishStrings extends Strings {
   @override
   String calendarEndsOn(String date) => 'Ends on $date';
   @override
+  String get calendarSkipAction => 'Skip';
+  @override
+  String get calendarScopeEditTitle => 'Edit repeating event';
+  @override
+  String get calendarScopeDeleteTitle => 'Delete repeating event';
+  @override
+  String get calendarScopeThis => 'This event';
+  @override
+  String get calendarScopeFollowing => 'This and following events';
+  @override
+  String get calendarScopeAll => 'All events';
+  @override
   String get journalCalendarTitle => 'Calendar';
   @override
   String get journalEventTimesTitle => 'Event times';

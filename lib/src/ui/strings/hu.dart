@@ -327,6 +327,18 @@ final class HungarianStrings extends Strings {
   @override
   String calendarEndsOn(String date) => '$date napon ér véget';
   @override
+  String get calendarSkipAction => 'Kihagyás';
+  @override
+  String get calendarScopeEditTitle => 'Ismétlődő esemény szerkesztése';
+  @override
+  String get calendarScopeDeleteTitle => 'Ismétlődő esemény törlése';
+  @override
+  String get calendarScopeThis => 'Ez az esemény';
+  @override
+  String get calendarScopeFollowing => 'Ez és a következő események';
+  @override
+  String get calendarScopeAll => 'Minden esemény';
+  @override
   String get journalCalendarTitle => 'Naptár';
   @override
   String get journalEventTimesTitle => 'Eseményidők';

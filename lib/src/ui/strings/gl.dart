@@ -331,6 +331,18 @@ final class GalicianStrings extends Strings {
   @override
   String calendarEndsOn(String date) => 'Remata o $date';
   @override
+  String get calendarSkipAction => 'Omitir';
+  @override
+  String get calendarScopeEditTitle => 'Editar evento recorrente';
+  @override
+  String get calendarScopeDeleteTitle => 'Borrar evento recorrente';
+  @override
+  String get calendarScopeThis => 'Este evento';
+  @override
+  String get calendarScopeFollowing => 'Este e os seguintes';
+  @override
+  String get calendarScopeAll => 'Todos os eventos';
+  @override
   String get journalCalendarTitle => 'Calendario';
   @override
   String get journalEventTimesTitle => 'Horas dos eventos';

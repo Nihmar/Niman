@@ -332,6 +332,18 @@ final class CatalanStrings extends Strings {
   @override
   String calendarEndsOn(String date) => 'Acaba el $date';
   @override
+  String get calendarSkipAction => 'Omet';
+  @override
+  String get calendarScopeEditTitle => "Edita l'esdeveniment repetit";
+  @override
+  String get calendarScopeDeleteTitle => "Esborra l'esdeveniment repetit";
+  @override
+  String get calendarScopeThis => 'Aquest esdeveniment';
+  @override
+  String get calendarScopeFollowing => 'Aquest i els següents';
+  @override
+  String get calendarScopeAll => 'Tots els esdeveniments';
+  @override
   String get journalCalendarTitle => 'Calendari';
   @override
   String get journalEventTimesTitle => 'Hores dels esdeveniments';

@@ -329,6 +329,18 @@ final class PortugueseStrings extends Strings {
   @override
   String calendarEndsOn(String date) => 'Termina em $date';
   @override
+  String get calendarSkipAction => 'Ignorar';
+  @override
+  String get calendarScopeEditTitle => 'Editar evento recorrente';
+  @override
+  String get calendarScopeDeleteTitle => 'Excluir evento recorrente';
+  @override
+  String get calendarScopeThis => 'Este evento';
+  @override
+  String get calendarScopeFollowing => 'Este e os seguintes';
+  @override
+  String get calendarScopeAll => 'Todos os eventos';
+  @override
   String get journalCalendarTitle => 'Calendário';
   @override
   String get journalEventTimesTitle => 'Horas dos eventos';

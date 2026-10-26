@@ -332,6 +332,18 @@ final class SlovenianStrings extends Strings {
   @override
   String calendarEndsOn(String date) => 'Konča se $date';
   @override
+  String get calendarSkipAction => 'Preskoči';
+  @override
+  String get calendarScopeEditTitle => 'Uredi ponavljajoči se dogodek';
+  @override
+  String get calendarScopeDeleteTitle => 'Izbriši ponavljajoči se dogodek';
+  @override
+  String get calendarScopeThis => 'Ta dogodek';
+  @override
+  String get calendarScopeFollowing => 'Ta in naslednji dogodki';
+  @override
+  String get calendarScopeAll => 'Vsi dogodki';
+  @override
   String get journalCalendarTitle => 'Koledar';
   @override
   String get journalEventTimesTitle => 'Časi dogodkov';

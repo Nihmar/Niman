@@ -328,6 +328,18 @@ final class NorwegianStrings extends Strings {
   @override
   String calendarEndsOn(String date) => 'Slutter $date';
   @override
+  String get calendarSkipAction => 'Hopp over';
+  @override
+  String get calendarScopeEditTitle => 'Rediger gjentakende hendelse';
+  @override
+  String get calendarScopeDeleteTitle => 'Slett gjentakende hendelse';
+  @override
+  String get calendarScopeThis => 'Denne hendelsen';
+  @override
+  String get calendarScopeFollowing => 'Denne og følgende hendelser';
+  @override
+  String get calendarScopeAll => 'Alle hendelser';
+  @override
   String get journalCalendarTitle => 'Kalender';
   @override
   String get journalEventTimesTitle => 'Hendelsestider';

@@ -9,6 +9,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/calendar/calendar_file.dart';
+import 'package:niman/src/calendar/calendar_occurrence_edits.dart';
 import 'package:niman/src/calendar/calendar_store.dart';
 import 'package:niman/src/calendar/calendar_writer.dart';
 import 'package:niman/src/calendar/parser.dart';
@@ -17,8 +18,11 @@ import 'package:niman/src/core/theme_tokens.dart';
 import 'package:niman/src/core/weeks.dart';
 import 'package:niman/src/journal/journal_summary.dart';
 import 'package:niman/src/templates/engine.dart';
+import 'package:niman/src/ui/action_sheet.dart';
 import 'package:niman/src/ui/calendar_event_form.dart';
 import 'package:niman/src/ui/journal/journal_calendar.dart';
+import 'package:niman/src/ui/journal/journal_event_actions.dart';
+import 'package:niman/src/ui/journal/journal_event_sheet.dart';
 import 'package:niman/src/ui/journal/journal_flow.dart';
 import 'package:niman/src/ui/line_runs.dart';
 import 'package:niman/src/ui/repeat_label.dart';
@@ -46,6 +50,7 @@ final class JournalBrowser extends StatefulWidget {
     this.calendarChanged,
     this.onOpenEvent,
     this.onEditEvent,
+    this.onSkipEvent,
     this.onDeleteEvent,
     this.dueOn,
     this.tasksChanged,
@@ -84,13 +89,23 @@ final class JournalBrowser extends StatefulWidget {
   final void Function(CalendarEntryEvent event)? onOpenEvent;
 
   /// Replaces an entry's event with the draft the form handed over
-  /// (#730): the phone's sheet is where an event is edited without
-  /// leaving the journal.
-  final void Function(CalendarEntryEvent entry, CalendarEventDraft event)?
+  /// (#730), for the occurrences of a repeating event the scope names
+  /// (#1191): the form is where an event is edited without leaving the
+  /// journal.
+  final void Function(
+    CalendarEntryEvent entry,
+    CalendarEventDraft event,
+    CalendarOccurrenceScope scope,
+  )?
   onEditEvent;
 
-  /// Takes an entry's event out of the file (#730).
-  final void Function(CalendarEntryEvent entry)? onDeleteEvent;
+  /// Leaves the occurrence an entry shows out of its rule (#1191).
+  final void Function(CalendarEntryEvent entry)? onSkipEvent;
+
+  /// Takes an entry's event out of the file (#730), the occurrences of a
+  /// repeating one the scope names (#1191).
+  final void Function(CalendarEntryEvent entry, CalendarOccurrenceScope scope)?
+  onDeleteEvent;
 
   /// The open tasks due on a day, as they read in the task list; null
   /// shows no tasks at all.
@@ -163,6 +178,9 @@ final class _JournalBrowserState extends State<JournalBrowser> {
 
   /// The event the open form is editing, or null when it is adding one.
   CalendarEntryEvent? _editingEvent;
+
+  /// The occurrences the open edit covers, when the event repeats.
+  CalendarOccurrenceScope? _editingScope;
 
   List<DateTime> _days = const [];
   Map<DateTime, String> _summaries = const {};
@@ -311,7 +329,7 @@ final class _JournalBrowserState extends State<JournalBrowser> {
           // go over the very thing the day was picked on (#712).
           if (_addingEvent case final day?) ...[
             const SizedBox(height: 12),
-            _eventForm(context, day, _editingEvent),
+            _eventForm(context, day, _editingEvent, _editingScope),
           ],
         ],
         if (widget.eventsOn case final eventsOn?)
@@ -475,7 +493,7 @@ final class _JournalBrowserState extends State<JournalBrowser> {
     final theme = Theme.of(context);
     final syntax = theme.extension<SyntaxColors>();
     final event = entry.event;
-    return ListTile(
+    final tile = ListTile(
       key: Key('journal-event-${entry.lineIndex}-${event.start}'),
       dense: true,
       contentPadding: EdgeInsets.zero,
@@ -527,160 +545,96 @@ final class _JournalBrowserState extends State<JournalBrowser> {
                 ? null
                 : () => widget.onOpenEvent!(entry)),
     );
-  }
-
-  /// Whether the event sheet has anything to offer.
-  bool get _sheetOffered =>
-      widget.onEditEvent != null || widget.onDeleteEvent != null;
-
-  /// The phone's sheet for one event (#730): what it is, its day, its
-  /// reminder, and the three things to do with it.
-  void _showEventSheet(CalendarEntryEvent entry) {
-    final event = entry.event;
-    unawaited(
-      showModalBottomSheet<void>(
-        context: context,
-        builder: (sheet) {
-          final theme = Theme.of(sheet);
-          final syntax = theme.extension<SyntaxColors>();
-          final time = syntax?.calendarTime ?? theme.colorScheme.tertiary;
-          final day = entry.day;
-          return SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 10, 20, 8),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Center(
-                    child: Container(
-                      key: const Key('journal-event-sheet-grab'),
-                      width: 36,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.outline,
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Icon(Icons.event_outlined, size: 22, color: time),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            DefaultTextStyle(
-                              style:
-                                  theme.textTheme.titleMedium ??
-                                  const TextStyle(),
-                              child: Row(
-                                children: [
-                                  if (event.time != null) ...[
-                                    Text(
-                                      event.time!.raw,
-                                      style: theme.textTheme.titleMedium
-                                          ?.copyWith(color: time),
-                                    ),
-                                    const SizedBox(width: 8),
-                                  ],
-                                  Expanded(
-                                    child: calendarEventText(sheet, event),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            if (day != null)
-                              Text(
-                                journalDayLabel(day),
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: theme.colorScheme.onSurfaceVariant,
-                                ),
-                              ),
-                            if (entry.recurrence case final recurrence?)
-                              RepeatLabel(
-                                key: const Key('journal-event-sheet-repeat'),
-                                rule: recurrence.rule,
-                              ),
-                            if (event.reminder case final reminder?)
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.notifications_outlined,
-                                    size: 16,
-                                    color: theme.colorScheme.onSurfaceVariant,
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    AppStrings.calendarReminderAt(reminder),
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      color: theme.colorScheme.onSurfaceVariant,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const Divider(height: 24),
-                  // Edit and Delete write the rule's own line, which is every
-                  // occurrence at once: a later copy offers them only when
-                  // it can say which it means (#1191).
-                  if (widget.onEditEvent != null && !entry.isLaterOccurrence)
-                    ListTile(
-                      key: const Key('journal-event-edit'),
-                      leading: const Icon(Icons.edit_outlined),
-                      title: Text(AppStrings.todoEditAction),
-                      onTap: () {
-                        Navigator.of(sheet).pop();
-                        _openForm(day: _dayOfEntry(entry), editing: entry);
-                      },
-                    ),
-                  if (widget.onDeleteEvent != null && !entry.isLaterOccurrence)
-                    ListTile(
-                      key: const Key('journal-event-delete'),
-                      leading: Icon(
-                        Icons.delete_outline,
-                        color: theme.colorScheme.error,
-                      ),
-                      title: Text(
-                        AppStrings.todoDeleteAction,
-                        style: TextStyle(color: theme.colorScheme.error),
-                      ),
-                      onTap: () {
-                        Navigator.of(sheet).pop();
-                        widget.onDeleteEvent!(entry);
-                      },
-                    ),
-                  if (widget.onOpenEvent != null)
-                    ListTile(
-                      key: const Key('journal-event-open'),
-                      leading: const Icon(Icons.description_outlined),
-                      title: Text(AppStrings.calendarOpenInFile),
-                      onTap: () {
-                        Navigator.of(sheet).pop();
-                        widget.onOpenEvent!(entry);
-                      },
-                    ),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
+    // The dock has no sheet: a right click, or a long press on a touch
+    // screen that has the dock, opens the event's menu (#1191).
+    if (widget.large || !_offered.any) return tile;
+    return GestureDetector(
+      onSecondaryTapUp: (details) =>
+          unawaited(_showEventMenu(entry, details.globalPosition)),
+      onLongPressStart: (details) =>
+          unawaited(_showEventMenu(entry, details.globalPosition)),
+      child: tile,
     );
   }
 
-  /// The day an entry's line heads, for a write that needs one: the
-  /// line's own date, else the day the pane speaks for.
+  /// The actions this browser can carry out: the shell gives the ways to
+  /// write, and a button never promises one it has not.
+  JournalEventActions get _offered => JournalEventActions(
+    edit: widget.onEditEvent != null,
+    skip: widget.onSkipEvent != null,
+    delete: widget.onDeleteEvent != null,
+    open: widget.onOpenEvent != null,
+  );
+
+  /// Whether the phone's event sheet has anything to write with.
+  bool get _sheetOffered {
+    final offered = _offered;
+    return offered.edit || offered.skip || offered.delete;
+  }
+
+  /// The phone's sheet for one event (#730): what it is, its day, its rule
+  /// and its reminder, and what to do with it.
+  Future<void> _showEventSheet(CalendarEntryEvent entry) async {
+    final action = await showJournalEventSheet(
+      context,
+      entry: entry,
+      offered: _offered,
+    );
+    if (action == null || !mounted) return;
+    await _runEventAction(action, entry);
+  }
+
+  /// The dock's context menu of an event, at a right click (#1191).
+  Future<void> _showEventMenu(CalendarEntryEvent entry, Offset position) async {
+    if (!_offered.any) return;
+    final action = await showJournalEventMenu(
+      context,
+      entry: entry,
+      offered: _offered,
+      position: position,
+    );
+    if (action == null || !mounted) return;
+    await _runEventAction(action, entry, anchor: menuAnchorAt(position));
+  }
+
+  /// Carries out [action] on [entry]. Edit and Delete of an event that
+  /// repeats first ask which occurrences they mean (#1191); [anchor] is
+  /// where a window's question opens.
+  Future<void> _runEventAction(
+    JournalEventAction action,
+    CalendarEntryEvent entry, {
+    Rect? anchor,
+  }) async {
+    switch (action) {
+      case JournalEventAction.edit:
+        final scope = await askOccurrenceScope(
+          context,
+          entry: entry,
+          deleting: false,
+          anchor: anchor,
+        );
+        if (scope == null || !mounted) return;
+        _openForm(day: _dayOfEntry(entry), editing: entry, scope: scope);
+      case JournalEventAction.skip:
+        widget.onSkipEvent?.call(entry);
+      case JournalEventAction.delete:
+        final scope = await askOccurrenceScope(
+          context,
+          entry: entry,
+          deleting: true,
+          anchor: anchor,
+        );
+        if (scope == null || !mounted) return;
+        widget.onDeleteEvent?.call(entry, scope);
+      case JournalEventAction.open:
+        widget.onOpenEvent?.call(entry);
+    }
+  }
+
+  /// The day an entry is the event of, for a write that needs one: the
+  /// occurrence's own day (#1191), else the day the pane speaks for.
   DateTime _dayOfEntry(CalendarEntryEvent entry) =>
-      entry.line.date ??
-      (widget.large ? _selected : widget.focusDay ?? widget.today);
+      entry.day ?? (widget.large ? _selected : widget.focusDay ?? widget.today);
 
   /// The dock's offer for the empty day it picked (#712): the phone's
   /// card and dialog in one row, under the calendar they belong to.
@@ -812,14 +766,19 @@ final class _JournalBrowserState extends State<JournalBrowser> {
     ];
   }
 
-  /// Opens the Add event form for [day] — or the edit form for [editing]
-  /// — inline in the dock, where the calendar is; a sheet on a phone,
-  /// where the card is small (#730).
-  void _openForm({required DateTime day, CalendarEntryEvent? editing}) {
+  /// Opens the Add event form for [day] — or the edit form for [editing],
+  /// for the occurrences [scope] names — inline in the dock, where the
+  /// calendar is; a sheet on a phone, where the card is small (#730).
+  void _openForm({
+    required DateTime day,
+    CalendarEntryEvent? editing,
+    CalendarOccurrenceScope? scope,
+  }) {
     if (!widget.large) {
       setState(() {
         _addingEvent = day;
         _editingEvent = editing;
+        _editingScope = scope;
       });
       return;
     }
@@ -837,96 +796,85 @@ final class _JournalBrowserState extends State<JournalBrowser> {
             right: 12,
             bottom: MediaQuery.viewInsetsOf(sheet).bottom + 12,
           ),
-          child: SingleChildScrollView(child: _eventForm(sheet, day, editing)),
+          child: SingleChildScrollView(
+            child: _eventForm(sheet, day, editing, scope),
+          ),
         ),
       ),
     );
   }
+
+  /// Closes the dock's inline form.
+  void _closeInlineForm() => setState(() {
+    _addingEvent = null;
+    _editingEvent = null;
+    _editingScope = null;
+  });
 
   /// The form itself, writing when it is told to and closing either way.
   Widget _eventForm(
     BuildContext context,
     DateTime day,
     CalendarEntryEvent? editing,
+    CalendarOccurrenceScope? scope,
   ) {
     return CalendarEventForm(
       day: day,
       knownTokens: widget.knownTokens,
-      draft: editing == null ? null : _draftOf(editing.event),
-      preview: (draft) => _previewLine(day, draft, editing: editing),
+      draft: editing == null ? null : calendarDraftOf(editing.event),
+      scope: scope,
+      preview: (draft) =>
+          _previewLine(day, draft, editing: editing, scope: scope),
       onCancel: () {
         if (widget.large) {
           Navigator.of(context).maybePop();
         } else {
-          setState(() {
-            _addingEvent = null;
-            _editingEvent = null;
-          });
+          _closeInlineForm();
         }
       },
       onSave: (draft) {
         if (editing != null) {
-          widget.onEditEvent?.call(editing, draft);
+          widget.onEditEvent?.call(
+            editing,
+            draft,
+            scope ?? CalendarOccurrenceScope.all,
+          );
         } else {
           widget.onAddEvent?.call(day, draft);
         }
         if (widget.large) {
           Navigator.of(context).maybePop();
         } else {
-          setState(() {
-            _addingEvent = null;
-            _editingEvent = null;
-          });
+          _closeInlineForm();
         }
       },
     );
   }
 
-  /// An event as the form fills itself from it: its text, its times and
-  /// its reminder.
-  CalendarEventDraft _draftOf(CalendarEvent event) {
-    final start = event.time?.first;
-    final end = event.time?.isRange == true ? event.time?.end : null;
-    return CalendarEventDraft(
-      text: event.text,
-      startMinutes: start?.minutes,
-      endMinutes: end?.minutes,
-      reminderMinutes: _reminderMinutes(event.reminder),
-    );
-  }
-
-  /// `HH:MM` as minutes from midnight, or null.
-  static int? _reminderMinutes(String? reminder) {
-    if (reminder == null) return null;
-    final parts = reminder.split(':');
-    if (parts.length != 2) return null;
-    final hour = int.tryParse(parts[0]);
-    final minute = int.tryParse(parts[1]);
-    if (hour == null || minute == null) return null;
-    return hour * 60 + minute;
-  }
-
-  /// The day's line as an added [draft] would leave it, from the file as
-  /// the shell last read it: the writer's own answer, so the preview
+  /// The day's line as an added or edited [draft] would leave it, from the
+  /// file as the shell last read it: the writer's own answer, so the preview
   /// promises exactly what the write does.
   String _previewLine(
     DateTime day,
     CalendarEventDraft draft, {
     CalendarEntryEvent? editing,
+    CalendarOccurrenceScope? scope,
   }) {
     final file =
         widget.calendarFile ??
         const CalendarFileContent(lines: <CalendarRawLine>[]);
     final next = editing == null
         ? addCalendarEvent(file, day, draft: draft)
-        : updateCalendarEvent(
+        : updateCalendarOccurrence(
                 file,
                 CalendarEventRef(
                   line: editing.lineIndex,
-                  day: day,
+                  day: editing.line.date ?? day,
                   start: editing.event.start,
                 ),
+                day,
                 draft,
+                scope ?? CalendarOccurrenceScope.all,
               ) ??
               file;
     final body = calendarEventAsText(draft);

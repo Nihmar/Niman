@@ -326,6 +326,18 @@ final class AlbanianStrings extends Strings {
   @override
   String calendarEndsOn(String date) => 'Mbaron më $date';
   @override
+  String get calendarSkipAction => 'Kapërce';
+  @override
+  String get calendarScopeEditTitle => 'Ndrysho ngjarjen që përsëritet';
+  @override
+  String get calendarScopeDeleteTitle => 'Fshi ngjarjen që përsëritet';
+  @override
+  String get calendarScopeThis => 'Kjo ngjarje';
+  @override
+  String get calendarScopeFollowing => 'Kjo dhe të tjerat pas saj';
+  @override
+  String get calendarScopeAll => 'Të gjitha ngjarjet';
+  @override
   String get journalCalendarTitle => 'Kalendari';
   @override
   String get journalEventTimesTitle => 'Oret e ngjarjeve';

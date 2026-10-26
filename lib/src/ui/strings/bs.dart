@@ -332,6 +332,18 @@ final class BosnianStrings extends Strings {
   @override
   String calendarEndsOn(String date) => 'Završava $date';
   @override
+  String get calendarSkipAction => 'Preskoči';
+  @override
+  String get calendarScopeEditTitle => 'Uredi događaj koji se ponavlja';
+  @override
+  String get calendarScopeDeleteTitle => 'Obriši događaj koji se ponavlja';
+  @override
+  String get calendarScopeThis => 'Ovaj događaj';
+  @override
+  String get calendarScopeFollowing => 'Ovaj i sljedeći događaji';
+  @override
+  String get calendarScopeAll => 'Svi događaji';
+  @override
   String get journalCalendarTitle => 'Kalendar';
   @override
   String get journalEventTimesTitle => 'Vremena događaja';

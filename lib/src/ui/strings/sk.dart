@@ -330,6 +330,18 @@ final class SlovakStrings extends Strings {
   @override
   String calendarEndsOn(String date) => 'Končí $date';
   @override
+  String get calendarSkipAction => 'Preskočiť';
+  @override
+  String get calendarScopeEditTitle => 'Upraviť opakovanú udalosť';
+  @override
+  String get calendarScopeDeleteTitle => 'Vymazať opakovanú udalosť';
+  @override
+  String get calendarScopeThis => 'Táto udalosť';
+  @override
+  String get calendarScopeFollowing => 'Táto a nasledujúce udalosti';
+  @override
+  String get calendarScopeAll => 'Všetky udalosti';
+  @override
   String get journalCalendarTitle => 'Kalendár';
   @override
   String get journalEventTimesTitle => 'Časy udalostí';

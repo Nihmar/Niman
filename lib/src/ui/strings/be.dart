@@ -328,6 +328,18 @@ final class BelarusianStrings extends Strings {
   @override
   String calendarEndsOn(String date) => 'Заканчваецца $date';
   @override
+  String get calendarSkipAction => 'Прапусціць';
+  @override
+  String get calendarScopeEditTitle => 'Рэдагаваць падзею, якая паўтараецца';
+  @override
+  String get calendarScopeDeleteTitle => 'Выдаліць падзею, якая паўтараецца';
+  @override
+  String get calendarScopeThis => 'Гэта падзея';
+  @override
+  String get calendarScopeFollowing => 'Гэта і наступныя падзеі';
+  @override
+  String get calendarScopeAll => 'Усе падзеі';
+  @override
   String get journalCalendarTitle => 'Каляндар';
   @override
   String get journalEventTimesTitle => 'Час падзей';

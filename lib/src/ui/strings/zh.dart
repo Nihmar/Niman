@@ -304,6 +304,18 @@ final class ChineseStrings extends Strings {
   @override
   String calendarEndsOn(String date) => '于 $date 结束';
   @override
+  String get calendarSkipAction => '跳过';
+  @override
+  String get calendarScopeEditTitle => '编辑重复事件';
+  @override
+  String get calendarScopeDeleteTitle => '删除重复事件';
+  @override
+  String get calendarScopeThis => '仅此事件';
+  @override
+  String get calendarScopeFollowing => '此事件及之后的所有事件';
+  @override
+  String get calendarScopeAll => '所有事件';
+  @override
   String get journalCalendarTitle => '日历';
   @override
   String get journalEventTimesTitle => '事件时间';

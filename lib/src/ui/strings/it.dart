@@ -334,6 +334,18 @@ final class ItalianStrings extends Strings {
   @override
   String calendarEndsOn(String date) => 'Termina il $date';
   @override
+  String get calendarSkipAction => 'Salta';
+  @override
+  String get calendarScopeEditTitle => 'Modifica evento ripetuto';
+  @override
+  String get calendarScopeDeleteTitle => 'Elimina evento ripetuto';
+  @override
+  String get calendarScopeThis => 'Solo questo evento';
+  @override
+  String get calendarScopeFollowing => 'Questo e i successivi';
+  @override
+  String get calendarScopeAll => 'Tutti gli eventi';
+  @override
   String get journalCalendarTitle => 'Calendario';
   @override
   String get journalEventTimesTitle => 'Orari degli eventi';

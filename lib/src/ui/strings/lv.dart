@@ -325,6 +325,18 @@ final class LatvianStrings extends Strings {
   @override
   String calendarEndsOn(String date) => 'Beidzas $date';
   @override
+  String get calendarSkipAction => 'Izlaist';
+  @override
+  String get calendarScopeEditTitle => 'Rediģēt atkārtotu notikumu';
+  @override
+  String get calendarScopeDeleteTitle => 'Dzēst atkārtotu notikumu';
+  @override
+  String get calendarScopeThis => 'Šis notikums';
+  @override
+  String get calendarScopeFollowing => 'Šis un nākamie notikumi';
+  @override
+  String get calendarScopeAll => 'Visi notikumi';
+  @override
   String get journalCalendarTitle => 'Kalendārs';
   @override
   String get journalEventTimesTitle => 'Notikumu laiki';

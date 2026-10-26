@@ -322,6 +322,18 @@ final class TurkishStrings extends Strings {
   @override
   String calendarEndsOn(String date) => '$date tarihinde biter';
   @override
+  String get calendarSkipAction => 'Atla';
+  @override
+  String get calendarScopeEditTitle => 'Yinelenen etkinliği düzenle';
+  @override
+  String get calendarScopeDeleteTitle => 'Yinelenen etkinliği sil';
+  @override
+  String get calendarScopeThis => 'Bu etkinlik';
+  @override
+  String get calendarScopeFollowing => 'Bu ve sonraki etkinlikler';
+  @override
+  String get calendarScopeAll => 'Tüm etkinlikler';
+  @override
   String get journalCalendarTitle => 'Takvim';
   @override
   String get journalEventTimesTitle => 'Etkinlik saatleri';

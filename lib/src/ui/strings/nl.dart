@@ -330,6 +330,18 @@ final class DutchStrings extends Strings {
   @override
   String calendarEndsOn(String date) => 'Eindigt op $date';
   @override
+  String get calendarSkipAction => 'Overslaan';
+  @override
+  String get calendarScopeEditTitle => 'Terugkerende gebeurtenis bewerken';
+  @override
+  String get calendarScopeDeleteTitle => 'Terugkerende gebeurtenis verwijderen';
+  @override
+  String get calendarScopeThis => 'Deze gebeurtenis';
+  @override
+  String get calendarScopeFollowing => 'Deze en volgende gebeurtenissen';
+  @override
+  String get calendarScopeAll => 'Alle gebeurtenissen';
+  @override
   String get journalCalendarTitle => 'Kalender';
   @override
   String get journalEventTimesTitle => 'Gebeurtenistijden';

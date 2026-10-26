@@ -332,6 +332,18 @@ final class PolishStrings extends Strings {
   @override
   String calendarEndsOn(String date) => 'Kończy się $date';
   @override
+  String get calendarSkipAction => 'Pomiń';
+  @override
+  String get calendarScopeEditTitle => 'Edytuj wydarzenie cykliczne';
+  @override
+  String get calendarScopeDeleteTitle => 'Usuń wydarzenie cykliczne';
+  @override
+  String get calendarScopeThis => 'To wydarzenie';
+  @override
+  String get calendarScopeFollowing => 'To i następne wydarzenia';
+  @override
+  String get calendarScopeAll => 'Wszystkie wydarzenia';
+  @override
   String get journalCalendarTitle => 'Kalendarz';
   @override
   String get journalEventTimesTitle => 'Godziny wydarzeń';

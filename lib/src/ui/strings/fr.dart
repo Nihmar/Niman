@@ -336,6 +336,18 @@ final class FrenchStrings extends Strings {
   @override
   String calendarEndsOn(String date) => 'Se termine le $date';
   @override
+  String get calendarSkipAction => 'Ignorer';
+  @override
+  String get calendarScopeEditTitle => 'Modifier l’événement récurrent';
+  @override
+  String get calendarScopeDeleteTitle => 'Supprimer l’événement récurrent';
+  @override
+  String get calendarScopeThis => 'Cet événement';
+  @override
+  String get calendarScopeFollowing => 'Cet événement et les suivants';
+  @override
+  String get calendarScopeAll => 'Tous les événements';
+  @override
   String get journalCalendarTitle => 'Calendrier';
   @override
   String get journalEventTimesTitle => 'Heures des événements';

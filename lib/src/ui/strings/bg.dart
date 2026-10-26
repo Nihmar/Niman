@@ -334,6 +334,18 @@ final class BulgarianStrings extends Strings {
   @override
   String calendarEndsOn(String date) => 'Свършва на $date';
   @override
+  String get calendarSkipAction => 'Пропусни';
+  @override
+  String get calendarScopeEditTitle => 'Редактирай повтарящо се събитие';
+  @override
+  String get calendarScopeDeleteTitle => 'Изтрий повтарящо се събитие';
+  @override
+  String get calendarScopeThis => 'Това събитие';
+  @override
+  String get calendarScopeFollowing => 'Това и следващите събития';
+  @override
+  String get calendarScopeAll => 'Всички събития';
+  @override
   String get journalCalendarTitle => 'Календар';
   @override
   String get journalEventTimesTitle => 'Часове на събитията';

@@ -329,6 +329,18 @@ final class LithuanianStrings extends Strings {
   @override
   String calendarEndsOn(String date) => 'Baigiasi $date';
   @override
+  String get calendarSkipAction => 'Praleisti';
+  @override
+  String get calendarScopeEditTitle => 'Redaguoti pasikartojantį įvykį';
+  @override
+  String get calendarScopeDeleteTitle => 'Ištrinti pasikartojantį įvykį';
+  @override
+  String get calendarScopeThis => 'Šis įvykis';
+  @override
+  String get calendarScopeFollowing => 'Šis ir tolesni įvykiai';
+  @override
+  String get calendarScopeAll => 'Visi įvykiai';
+  @override
   String get journalCalendarTitle => 'Kalendorius';
   @override
   String get journalEventTimesTitle => 'Įvykių laikai';

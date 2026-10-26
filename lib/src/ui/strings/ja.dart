@@ -306,6 +306,18 @@ final class JapaneseStrings extends Strings {
   @override
   String calendarEndsOn(String date) => '$date に終了';
   @override
+  String get calendarSkipAction => 'スキップ';
+  @override
+  String get calendarScopeEditTitle => '繰り返す予定を編集';
+  @override
+  String get calendarScopeDeleteTitle => '繰り返す予定を削除';
+  @override
+  String get calendarScopeThis => 'この予定のみ';
+  @override
+  String get calendarScopeFollowing => 'この予定以降すべて';
+  @override
+  String get calendarScopeAll => 'すべての予定';
+  @override
   String get journalCalendarTitle => 'カレンダー';
   @override
   String get journalEventTimesTitle => '予定の時刻';

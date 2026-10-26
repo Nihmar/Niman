@@ -334,6 +334,18 @@ final class RomanianStrings extends Strings {
   @override
   String calendarEndsOn(String date) => 'Se termină la $date';
   @override
+  String get calendarSkipAction => 'Omite';
+  @override
+  String get calendarScopeEditTitle => 'Editează evenimentul repetitiv';
+  @override
+  String get calendarScopeDeleteTitle => 'Șterge evenimentul repetitiv';
+  @override
+  String get calendarScopeThis => 'Acest eveniment';
+  @override
+  String get calendarScopeFollowing => 'Acest eveniment și următoarele';
+  @override
+  String get calendarScopeAll => 'Toate evenimentele';
+  @override
   String get journalCalendarTitle => 'Calendar';
   @override
   String get journalEventTimesTitle => 'Orele evenimentelor';

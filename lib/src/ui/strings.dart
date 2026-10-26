@@ -263,6 +263,12 @@ final class AppStrings {
   static String calendarReminderAt(String time) => _s.calendarReminderAt(time);
   static String get calendarEndsNever => _s.calendarEndsNever;
   static String calendarEndsOn(String date) => _s.calendarEndsOn(date);
+  static String get calendarSkipAction => _s.calendarSkipAction;
+  static String get calendarScopeEditTitle => _s.calendarScopeEditTitle;
+  static String get calendarScopeDeleteTitle => _s.calendarScopeDeleteTitle;
+  static String get calendarScopeThis => _s.calendarScopeThis;
+  static String get calendarScopeFollowing => _s.calendarScopeFollowing;
+  static String get calendarScopeAll => _s.calendarScopeAll;
   static String get journalCalendarTitle => _s.journalCalendarTitle;
   static String get journalEventTimesTitle => _s.journalEventTimesTitle;
   static String get journalEventTimesSubtitle => _s.journalEventTimesSubtitle;

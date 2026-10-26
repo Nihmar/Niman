@@ -333,6 +333,18 @@ final class SpanishStrings extends Strings {
   @override
   String calendarEndsOn(String date) => 'Termina el $date';
   @override
+  String get calendarSkipAction => 'Omitir';
+  @override
+  String get calendarScopeEditTitle => 'Editar evento recurrente';
+  @override
+  String get calendarScopeDeleteTitle => 'Eliminar evento recurrente';
+  @override
+  String get calendarScopeThis => 'Este evento';
+  @override
+  String get calendarScopeFollowing => 'Este y los siguientes';
+  @override
+  String get calendarScopeAll => 'Todos los eventos';
+  @override
   String get journalCalendarTitle => 'Calendario';
   @override
   String get journalEventTimesTitle => 'Horas de los eventos';

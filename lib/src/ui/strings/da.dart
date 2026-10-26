@@ -330,6 +330,18 @@ final class DanishStrings extends Strings {
   @override
   String calendarEndsOn(String date) => 'Slutter den $date';
   @override
+  String get calendarSkipAction => 'Spring over';
+  @override
+  String get calendarScopeEditTitle => 'Rediger tilbagevendende begivenhed';
+  @override
+  String get calendarScopeDeleteTitle => 'Slet tilbagevendende begivenhed';
+  @override
+  String get calendarScopeThis => 'Denne begivenhed';
+  @override
+  String get calendarScopeFollowing => 'Denne og følgende begivenheder';
+  @override
+  String get calendarScopeAll => 'Alle begivenheder';
+  @override
   String get journalCalendarTitle => 'Kalender';
   @override
   String get journalEventTimesTitle => 'Begivenhedstider';

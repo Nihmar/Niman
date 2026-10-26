@@ -331,6 +331,18 @@ final class SerbianStrings extends Strings {
   @override
   String calendarEndsOn(String date) => 'Завршава се $date';
   @override
+  String get calendarSkipAction => 'Прескочи';
+  @override
+  String get calendarScopeEditTitle => 'Уреди догађај који се понавља';
+  @override
+  String get calendarScopeDeleteTitle => 'Обриши догађај који се понавља';
+  @override
+  String get calendarScopeThis => 'Овај догађај';
+  @override
+  String get calendarScopeFollowing => 'Овај и следећи догађаји';
+  @override
+  String get calendarScopeAll => 'Сви догађаји';
+  @override
   String get journalCalendarTitle => 'Календар';
   @override
   String get journalEventTimesTitle => 'Времена догађаја';

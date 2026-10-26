@@ -325,6 +325,18 @@ final class EstonianStrings extends Strings {
   @override
   String calendarEndsOn(String date) => 'Lõpeb $date';
   @override
+  String get calendarSkipAction => 'Jäta vahele';
+  @override
+  String get calendarScopeEditTitle => 'Muuda korduvat sündmust';
+  @override
+  String get calendarScopeDeleteTitle => 'Kustuta korduv sündmus';
+  @override
+  String get calendarScopeThis => 'See sündmus';
+  @override
+  String get calendarScopeFollowing => 'See ja järgmised sündmused';
+  @override
+  String get calendarScopeAll => 'Kõik sündmused';
+  @override
   String get journalCalendarTitle => 'Kalender';
   @override
   String get journalEventTimesTitle => 'Sündmuste ajad';

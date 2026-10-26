@@ -66,8 +66,8 @@ void main() {
           onAddEvent: (day, event) => added.add((day, event)),
           onAddTask: addedTasks.add,
           onOpenEvent: opened.add,
-          onEditEvent: (entry, event) => edited.add((entry, event)),
-          onDeleteEvent: deleted.add,
+          onEditEvent: (entry, event, scope) => edited.add((entry, event)),
+          onDeleteEvent: (entry, scope) => deleted.add(entry),
         ),
       ),
     );
