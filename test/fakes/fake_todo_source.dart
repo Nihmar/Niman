@@ -1,4 +1,5 @@
 import 'package:niman/src/todo/parser.dart';
+import 'package:niman/src/todo/recurring_line.dart';
 import 'package:niman/src/todo/task_line_edit.dart';
 import 'package:niman/src/todo/task_link.dart' show TaskFile;
 import 'package:niman/src/todo/todo_source.dart';
@@ -97,6 +98,8 @@ final class FakeTodoSource implements TodoSource {
     _version++;
     final raw = _todo.removeAt(lineIndex);
     _done.add(completeTodoLine(raw, today));
+    final next = nextRecurringLine(raw, today);
+    if (next != null) _todo.add(next);
     return _snapshot();
   }
 

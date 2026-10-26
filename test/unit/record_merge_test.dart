@@ -1,5 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/diff/record_merge.dart';
+import 'package:niman/src/todo/parser.dart';
+import 'package:niman/src/todo/recurring_line.dart';
 
 String lines(List<String> l) => '${l.join('\n')}\n';
 
@@ -76,5 +78,43 @@ void main() {
 
   test('both sides emptied is empty', () {
     expect(mergeRecords(lines(['a']), '', ''), '');
+  });
+
+  group('a recurring task completed on two devices', () {
+    const open = '2026-10-01 water rec:1w due:2026-10-20';
+    final day = DateTime(2026, 10, 26);
+
+    test('the same day leaves the done line and the copy once', () {
+      final done = completeTodoLine(open, day);
+      final copy = nextRecurringLine(open, day)!;
+      // Each device removes the task and adds the same copy to todo.txt...
+      expect(
+        mergeRecords(
+          lines([open, 'other']),
+          lines(['other', copy]),
+          lines(['other', copy]),
+        ),
+        lines(['other', copy]),
+      );
+      // ...and the same done line to done.txt.
+      expect(
+        mergeRecords(
+          lines(['x 2026-10-01 old']),
+          lines(['x 2026-10-01 old', done]),
+          lines(['x 2026-10-01 old', done]),
+        ),
+        lines(['x 2026-10-01 old', done]),
+      );
+    });
+
+    test('different days keep both copies: a disagreement, not a loss', () {
+      final mine = nextRecurringLine(open, day)!;
+      final theirs = nextRecurringLine(open, DateTime(2026, 10, 27))!;
+      expect(mine, isNot(theirs));
+      expect(
+        mergeRecords(lines([open]), lines([mine]), lines([theirs])),
+        lines([mine, theirs]),
+      );
+    });
   });
 }
