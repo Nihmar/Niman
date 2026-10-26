@@ -325,6 +325,10 @@ final class LithuanianStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Priminimas $time';
   @override
+  String get calendarEndsNever => 'Niekada nesibaigia';
+  @override
+  String calendarEndsOn(String date) => 'Baigiasi $date';
+  @override
   String get journalCalendarTitle => 'Kalendorius';
   @override
   String get journalEventTimesTitle => 'Įvykių laikai';

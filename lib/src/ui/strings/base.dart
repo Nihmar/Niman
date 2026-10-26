@@ -167,6 +167,12 @@ abstract base class Strings {
   /// The reminder's own clock time, `Reminder at 15:15`.
   String calendarReminderAt(String time);
 
+  /// Repeating events (#1191): the form's Ends row with no end, `Never ends`.
+  String get calendarEndsNever;
+
+  /// The Ends row with an end, `Ends on 2026-12-31`.
+  String calendarEndsOn(String date);
+
   /// Settings › Journal's calendar heading and its one setting (#730):
   /// the times as written, or as a clock in the reader's own zone.
   String get journalCalendarTitle;

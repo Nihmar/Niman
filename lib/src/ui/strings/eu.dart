@@ -322,6 +322,10 @@ final class BasqueStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Gogorarazpena $time';
   @override
+  String get calendarEndsNever => 'Ez da inoiz amaitzen';
+  @override
+  String calendarEndsOn(String date) => '$date egunean amaitzen da';
+  @override
   String get journalCalendarTitle => 'Egutegia';
   @override
   String get journalEventTimesTitle => 'Gertaeren orduak';

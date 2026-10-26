@@ -324,6 +324,10 @@ final class BelarusianStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Напамін у $time';
   @override
+  String get calendarEndsNever => 'Ніколі не заканчваецца';
+  @override
+  String calendarEndsOn(String date) => 'Заканчваецца $date';
+  @override
   String get journalCalendarTitle => 'Каляндар';
   @override
   String get journalEventTimesTitle => 'Час падзей';

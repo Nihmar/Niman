@@ -330,6 +330,10 @@ final class GreekStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Υπενθύμιση στις $time';
   @override
+  String get calendarEndsNever => 'Δεν τελειώνει ποτέ';
+  @override
+  String calendarEndsOn(String date) => 'Τελειώνει στις $date';
+  @override
   String get journalCalendarTitle => 'Ημερολόγιο';
   @override
   String get journalEventTimesTitle => 'Ώρες συμβάντων';

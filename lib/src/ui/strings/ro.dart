@@ -330,6 +330,10 @@ final class RomanianStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Memento la $time';
   @override
+  String get calendarEndsNever => 'Nu se termină niciodată';
+  @override
+  String calendarEndsOn(String date) => 'Se termină la $date';
+  @override
   String get journalCalendarTitle => 'Calendar';
   @override
   String get journalEventTimesTitle => 'Orele evenimentelor';

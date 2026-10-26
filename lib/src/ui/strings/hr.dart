@@ -326,6 +326,10 @@ final class CroatianStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Podsjetnik u $time';
   @override
+  String get calendarEndsNever => 'Nikad ne završava';
+  @override
+  String calendarEndsOn(String date) => 'Završava $date';
+  @override
   String get journalCalendarTitle => 'Kalendar';
   @override
   String get journalEventTimesTitle => 'Vremena događaja';

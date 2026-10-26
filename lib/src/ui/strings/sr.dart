@@ -327,6 +327,10 @@ final class SerbianStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Подсетник у $time';
   @override
+  String get calendarEndsNever => 'Никад не завршава';
+  @override
+  String calendarEndsOn(String date) => 'Завршава се $date';
+  @override
   String get journalCalendarTitle => 'Календар';
   @override
   String get journalEventTimesTitle => 'Времена догађаја';

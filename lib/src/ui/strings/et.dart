@@ -321,6 +321,10 @@ final class EstonianStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Meeldetuletus kell $time';
   @override
+  String get calendarEndsNever => 'Ei lõpe kunagi';
+  @override
+  String calendarEndsOn(String date) => 'Lõpeb $date';
+  @override
   String get journalCalendarTitle => 'Kalender';
   @override
   String get journalEventTimesTitle => 'Sündmuste ajad';

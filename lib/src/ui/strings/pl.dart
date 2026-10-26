@@ -328,6 +328,10 @@ final class PolishStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Przypomnienie o $time';
   @override
+  String get calendarEndsNever => 'Nigdy się nie kończy';
+  @override
+  String calendarEndsOn(String date) => 'Kończy się $date';
+  @override
   String get journalCalendarTitle => 'Kalendarz';
   @override
   String get journalEventTimesTitle => 'Godziny wydarzeń';

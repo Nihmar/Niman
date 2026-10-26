@@ -325,6 +325,10 @@ final class CzechStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Připomenutí v $time';
   @override
+  String get calendarEndsNever => 'Nikdy nekončí';
+  @override
+  String calendarEndsOn(String date) => 'Končí $date';
+  @override
   String get journalCalendarTitle => 'Kalendář';
   @override
   String get journalEventTimesTitle => 'Časy událostí';

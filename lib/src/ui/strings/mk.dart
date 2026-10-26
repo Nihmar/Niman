@@ -327,6 +327,10 @@ final class MacedonianStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Потсетник во $time';
   @override
+  String get calendarEndsNever => 'Никогаш не завршува';
+  @override
+  String calendarEndsOn(String date) => 'Завршува на $date';
+  @override
   String get journalCalendarTitle => 'Календар';
   @override
   String get journalEventTimesTitle => 'Времиња на настани';

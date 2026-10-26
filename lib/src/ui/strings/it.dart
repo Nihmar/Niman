@@ -330,6 +330,10 @@ final class ItalianStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Promemoria alle $time';
   @override
+  String get calendarEndsNever => 'Non finisce mai';
+  @override
+  String calendarEndsOn(String date) => 'Termina il $date';
+  @override
   String get journalCalendarTitle => 'Calendario';
   @override
   String get journalEventTimesTitle => 'Orari degli eventi';

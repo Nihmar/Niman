@@ -313,6 +313,10 @@ final class HindiStrings extends Strings {
   @override
   String calendarReminderAt(String time) => '$time पर रिमाइंडर';
   @override
+  String get calendarEndsNever => 'कभी समाप्त नहीं होता';
+  @override
+  String calendarEndsOn(String date) => '$date को समाप्त होता है';
+  @override
   String get journalCalendarTitle => 'कैलेंडर';
   @override
   String get journalEventTimesTitle => 'ईवेंट के समय';

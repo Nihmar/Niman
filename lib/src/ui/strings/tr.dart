@@ -318,6 +318,10 @@ final class TurkishStrings extends Strings {
   @override
   String calendarReminderAt(String time) => '$time hatırlatması';
   @override
+  String get calendarEndsNever => 'Hiç bitmez';
+  @override
+  String calendarEndsOn(String date) => '$date tarihinde biter';
+  @override
   String get journalCalendarTitle => 'Takvim';
   @override
   String get journalEventTimesTitle => 'Etkinlik saatleri';

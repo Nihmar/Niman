@@ -300,6 +300,10 @@ final class ChineseStrings extends Strings {
   @override
   String calendarReminderAt(String time) => '$time 提醒';
   @override
+  String get calendarEndsNever => '永不结束';
+  @override
+  String calendarEndsOn(String date) => '于 $date 结束';
+  @override
   String get journalCalendarTitle => '日历';
   @override
   String get journalEventTimesTitle => '事件时间';

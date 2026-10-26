@@ -324,6 +324,10 @@ final class NorwegianStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Påminnelse kl. $time';
   @override
+  String get calendarEndsNever => 'Slutter aldri';
+  @override
+  String calendarEndsOn(String date) => 'Slutter $date';
+  @override
   String get journalCalendarTitle => 'Kalender';
   @override
   String get journalEventTimesTitle => 'Hendelsestider';

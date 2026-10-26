@@ -323,6 +323,10 @@ final class IcelandicStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Áminning kl. $time';
   @override
+  String get calendarEndsNever => 'Endar aldrei';
+  @override
+  String calendarEndsOn(String date) => 'Endar $date';
+  @override
   String get journalCalendarTitle => 'Dagatal';
   @override
   String get journalEventTimesTitle => 'Tímar viðburða';

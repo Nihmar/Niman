@@ -332,6 +332,10 @@ final class FrenchStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Rappel à $time';
   @override
+  String get calendarEndsNever => 'Ne se termine jamais';
+  @override
+  String calendarEndsOn(String date) => 'Se termine le $date';
+  @override
   String get journalCalendarTitle => 'Calendrier';
   @override
   String get journalEventTimesTitle => 'Heures des événements';

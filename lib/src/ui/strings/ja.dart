@@ -302,6 +302,10 @@ final class JapaneseStrings extends Strings {
   @override
   String calendarReminderAt(String time) => '$time にリマインド';
   @override
+  String get calendarEndsNever => '終了しない';
+  @override
+  String calendarEndsOn(String date) => '$date に終了';
+  @override
   String get journalCalendarTitle => 'カレンダー';
   @override
   String get journalEventTimesTitle => '予定の時刻';

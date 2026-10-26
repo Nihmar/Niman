@@ -323,6 +323,10 @@ final class HungarianStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Emlékeztető $time-kor';
   @override
+  String get calendarEndsNever => 'Soha nem ér véget';
+  @override
+  String calendarEndsOn(String date) => '$date napon ér véget';
+  @override
   String get journalCalendarTitle => 'Naptár';
   @override
   String get journalEventTimesTitle => 'Eseményidők';

@@ -326,6 +326,10 @@ final class SlovakStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Pripomienka o $time';
   @override
+  String get calendarEndsNever => 'Nikdy sa nekončí';
+  @override
+  String calendarEndsOn(String date) => 'Končí $date';
+  @override
   String get journalCalendarTitle => 'Kalendár';
   @override
   String get journalEventTimesTitle => 'Časy udalostí';

@@ -329,6 +329,10 @@ final class SpanishStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Recordatorio a las $time';
   @override
+  String get calendarEndsNever => 'No termina nunca';
+  @override
+  String calendarEndsOn(String date) => 'Termina el $date';
+  @override
   String get journalCalendarTitle => 'Calendario';
   @override
   String get journalEventTimesTitle => 'Horas de los eventos';

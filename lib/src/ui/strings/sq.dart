@@ -322,6 +322,10 @@ final class AlbanianStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Kujtesë në $time';
   @override
+  String get calendarEndsNever => 'Nuk mbaron kurrë';
+  @override
+  String calendarEndsOn(String date) => 'Mbaron më $date';
+  @override
   String get journalCalendarTitle => 'Kalendari';
   @override
   String get journalEventTimesTitle => 'Oret e ngjarjeve';

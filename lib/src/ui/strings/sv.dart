@@ -326,6 +326,10 @@ final class SwedishStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Påminnelse kl. $time';
   @override
+  String get calendarEndsNever => 'Slutar aldrig';
+  @override
+  String calendarEndsOn(String date) => 'Slutar den $date';
+  @override
   String get journalCalendarTitle => 'Kalender';
   @override
   String get journalEventTimesTitle => 'Händelsetider';

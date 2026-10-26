@@ -323,6 +323,10 @@ final class FinnishStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Muistutus klo $time';
   @override
+  String get calendarEndsNever => 'Ei pääty koskaan';
+  @override
+  String calendarEndsOn(String date) => 'Päättyy $date';
+  @override
   String get journalCalendarTitle => 'Kalenteri';
   @override
   String get journalEventTimesTitle => 'Tapahtumien ajat';

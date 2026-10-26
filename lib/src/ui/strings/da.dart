@@ -326,6 +326,10 @@ final class DanishStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Påmindelse kl. $time';
   @override
+  String get calendarEndsNever => 'Slutter aldrig';
+  @override
+  String calendarEndsOn(String date) => 'Slutter den $date';
+  @override
   String get journalCalendarTitle => 'Kalender';
   @override
   String get journalEventTimesTitle => 'Begivenhedstider';

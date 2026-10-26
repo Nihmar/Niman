@@ -321,6 +321,10 @@ final class LatvianStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Atgādinājums plkst. $time';
   @override
+  String get calendarEndsNever => 'Nekad nebeidzas';
+  @override
+  String calendarEndsOn(String date) => 'Beidzas $date';
+  @override
   String get journalCalendarTitle => 'Kalendārs';
   @override
   String get journalEventTimesTitle => 'Notikumu laiki';

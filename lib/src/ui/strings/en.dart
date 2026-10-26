@@ -323,6 +323,10 @@ final class EnglishStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Reminder at $time';
   @override
+  String get calendarEndsNever => 'Never ends';
+  @override
+  String calendarEndsOn(String date) => 'Ends on $date';
+  @override
   String get journalCalendarTitle => 'Calendar';
   @override
   String get journalEventTimesTitle => 'Event times';

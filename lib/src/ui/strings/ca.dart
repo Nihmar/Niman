@@ -328,6 +328,10 @@ final class CatalanStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Recordatori a les $time';
   @override
+  String get calendarEndsNever => 'No acaba mai';
+  @override
+  String calendarEndsOn(String date) => 'Acaba el $date';
+  @override
   String get journalCalendarTitle => 'Calendari';
   @override
   String get journalEventTimesTitle => 'Hores dels esdeveniments';

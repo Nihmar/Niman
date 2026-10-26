@@ -327,6 +327,10 @@ final class GalicianStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Lembrete ás $time';
   @override
+  String get calendarEndsNever => 'Nunca remata';
+  @override
+  String calendarEndsOn(String date) => 'Remata o $date';
+  @override
   String get journalCalendarTitle => 'Calendario';
   @override
   String get journalEventTimesTitle => 'Horas dos eventos';

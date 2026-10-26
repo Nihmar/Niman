@@ -325,6 +325,10 @@ final class UkrainianStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Нагадування о $time';
   @override
+  String get calendarEndsNever => 'Ніколи не завершується';
+  @override
+  String calendarEndsOn(String date) => 'Завершується $date';
+  @override
   String get journalCalendarTitle => 'Календар';
   @override
   String get journalEventTimesTitle => 'Час подій';

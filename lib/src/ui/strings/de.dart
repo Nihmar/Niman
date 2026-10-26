@@ -329,6 +329,10 @@ final class GermanStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Erinnerung um $time';
   @override
+  String get calendarEndsNever => 'Endet nie';
+  @override
+  String calendarEndsOn(String date) => 'Endet am $date';
+  @override
   String get journalCalendarTitle => 'Kalender';
   @override
   String get journalEventTimesTitle => 'Terminzeiten';

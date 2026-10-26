@@ -328,6 +328,10 @@ final class SlovenianStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Opomnik ob $time';
   @override
+  String get calendarEndsNever => 'Se nikoli ne konča';
+  @override
+  String calendarEndsOn(String date) => 'Konča se $date';
+  @override
   String get journalCalendarTitle => 'Koledar';
   @override
   String get journalEventTimesTitle => 'Časi dogodkov';

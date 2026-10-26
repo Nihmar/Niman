@@ -326,6 +326,10 @@ final class DutchStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Herinnering om $time';
   @override
+  String get calendarEndsNever => 'Eindigt nooit';
+  @override
+  String calendarEndsOn(String date) => 'Eindigt op $date';
+  @override
   String get journalCalendarTitle => 'Kalender';
   @override
   String get journalEventTimesTitle => 'Gebeurtenistijden';

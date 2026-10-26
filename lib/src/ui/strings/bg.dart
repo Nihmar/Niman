@@ -330,6 +330,10 @@ final class BulgarianStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Напомняне в $time';
   @override
+  String get calendarEndsNever => 'Никога не свършва';
+  @override
+  String calendarEndsOn(String date) => 'Свършва на $date';
+  @override
   String get journalCalendarTitle => 'Календар';
   @override
   String get journalEventTimesTitle => 'Часове на събитията';
