@@ -144,6 +144,35 @@ void main() {
     );
   });
 
+  test('matching with a kind asks the test of that kind alone', () {
+    final plain = blocks(5000);
+    final list = BlockList(plain)..shiftFrom(1500, 3);
+    // Moved as the list is, so that its blocks are not where they were stored.
+    for (var at = 1500; at < plain.length; at++) {
+      plain[at] = plain[at].shifted(3);
+    }
+    final asked = <BlockKind>{};
+    bool even(Block block) {
+      asked.add(block.kind);
+      return block.listOrdinal.isEven;
+    }
+
+    final found = list.matching(even, kind: BlockKind.heading).toList();
+    expect(asked, {BlockKind.heading});
+    expect(found.length, greaterThan(100));
+    expect(
+      found.map(_describe).toList(),
+      plain
+          .where((block) => block.kind == BlockKind.heading && even(block))
+          .map(_describe)
+          .toList(),
+    );
+    expect(
+      list.matching((block) => true, kind: BlockKind.div).length,
+      plain.where((block) => block.kind == BlockKind.div).length,
+    );
+  });
+
   test('is a list nobody else can write to', () {
     final list = BlockList(blocks(3));
     expect(() => list[0] = _block(0, 1, 0), throwsUnsupportedError);
