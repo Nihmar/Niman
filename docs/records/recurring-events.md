@@ -125,3 +125,60 @@ pairing. The reminder horizon extends the calendar half of
   choice.
 </content>
 </invoke>
+
+## As built: skip, move, this and following, merge (#1191, 2026-10-26)
+
+What the code does where the plan left a choice, or where the plan met the
+file.
+
+- **The actions are pure line transformations**
+  (`lib/src/calendar/calendar_occurrence_edits.dart`), one per action and
+  scope, over the file's lines with their own endings; `calendar_rule_tokens.dart`
+  rewrites one `until:` or `except:` in an event in place (or closes the event
+  with a new one), and `calendar_splice.dart` holds the line-level helpers
+  both writers share. Each answers null — a no-op, nothing written — when the
+  file no longer holds the event, or when the rule does not reach the day it
+  was asked about (a skip of a day already skipped, say), so a double tap or a
+  file moved under the screen never edits the wrong thing.
+- **`except:` is sorted and kept in one token.** A skip rewrites the first
+  readable `except:` of the event as the sorted union with the new day, or
+  closes the event with a new token when it has none; an `except:` it cannot
+  read is left as written.
+- **Edit this one** writes the plain event on the occurrence's own day. The
+  writer takes a target day (`moveTo`), tested, but the form has no date field
+  yet, so a move to another day is not offered on screen: only the change.
+- **Edit this and following from the rule's first day** is the same as All
+  events (`until:` the day before would end the rule before it began), and so
+  is a Delete of this and following, which deletes the event instead.
+- **The draft carries the rule.** `CalendarEventDraft` has a `recurrence`
+  (rule, end, skipped days); an edit reads an event into a draft *without* its
+  `rec:`, `until:`, `except:` and clock `rem:` in the text, the form shows and
+  changes them apart, and the writer puts them back after the text. That also
+  ends a bug of the old edit, which left a `rem:` in the text and wrote a
+  second one from the reminder.
+- **Ask first, then the form.** Edit and Delete ask the scope before anything
+  else, so the form's preview is the writer's own answer for that scope. For
+  *this event* the form's Repeat and Ends rows are off and say Never — the
+  event becomes a plain one. Ends is off while there is no rule to end;
+  neither row is ever hidden.
+- **The three-way question is the app's list of choices**
+  (`showActionSheet`): a sheet on a phone and a small menu at the pointer on
+  a window, as every other list of choices is, not a dialog over the calendar
+  (#712). The dock's context menu is the same: right click an event, or long
+  press it on a touch screen that has the dock, whose tap still opens the file.
+- **Skip is on every event's menu and off for one that does not repeat**, so
+  the rows do not move with the event shown.
+- **The presets of an event** are Daily, Weekdays, Weekly on the day, Monthly
+  on the date, Monthly on the Nth weekday (the last, when the day is a
+  fifth), Yearly — none strict, and the custom editor has no "from the due
+  date or the completion" choice: it is the task's row, with those two
+  options turned off.
+- **The merge pairs by the event without `until:` and `except:`** (spaces
+  normalised), and only when every `until:` and `except:` of both copies can
+  be read. `except:` is a three-way set merge — a day either side added is in,
+  and a day the base had is out when either side took it away — which is the
+  plan's union whenever nobody un-skips. `until:` follows the side that changed
+  it; when both did, or there is no base, the earlier wins and no end counts
+  as later than any. A side that left the event as the base had it gives the
+  other's text to the character. Everything else stays the set merge: a
+  different text, time or rule is a different event and both are kept.

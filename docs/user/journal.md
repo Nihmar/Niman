@@ -154,12 +154,55 @@ card, the dock's journal pane, the **Events today** tile on the Home — and
 the days it falls on carry the events dot in the month. Each one has the
 repeat icon and the rule in words (`every 2 weeks`), as a task's row has.
 Tapping an occurrence does what tapping the event does: on a desktop the
-file opens at the rule's line, on a phone the sheet opens. On a phone, a
-later occurrence's sheet offers **Open in calendar.txt** only; **Edit** and
-**Delete** are there on the event's own first day, and they change the rule's
-line, which is every occurrence. A lone `+project` or `@context` in the
-search lists the rule's line once, with the rule in words
-([search](search.md#tasks-and-events)).
+file opens at the rule's line, on a phone the sheet opens. A lone `+project`
+or `@context` in the search lists the rule's line once, with the rule in
+words ([search](search.md#tasks-and-events)).
+
+### Making an event repeat
+
+The event form has two more rows under the text: **Repeat** — Never, every
+day, every weekday, every week on this day, every month on this date, every
+month on the 2nd (or whichever) weekday, every year, or **Custom** — and
+**Ends**, which is *Never ends* or a date. Custom opens in place under the row
+on a desktop and in a sheet on a phone: every N days, weeks, months or years,
+on which weekdays, on the Nth weekday of the month. The date an Ends row asks
+for is the last day an occurrence may fall on, and cannot be before the
+event's first day. The row's choices write `rec:` and `until:` on the event;
+the days it skips (`except:`) are not on the form and are never lost by it.
+Ends is off until there is a rule to end.
+
+### One occurrence, or the rest
+
+Right-click an event in the dock's journal pane on a desktop (long-press it
+on a touch screen that has the dock), or tap it on a phone for its sheet: **Edit**, **Skip**, **Delete** and **Open in
+calendar.txt**. **Open in calendar.txt** goes to the rule's line, whichever
+occurrence you opened it on. **Skip** leaves that one occurrence out; it is
+there for every event and only works on one that repeats.
+
+**Edit** and **Delete** on an event that repeats ask first which events they
+mean — *This event*, *This and following events* or *All events* — in a sheet
+on a phone and a small menu on a desktop. What each writes into `calendar.txt`:
+
+| You choose | The file gets |
+| --- | --- |
+| Skip, or Delete → this event | the day added to the rule's `except:` |
+| Edit → this event | the day in `except:`, and a plain event with your change on that day (no `rec:`) |
+| Edit → this and following | `until:` the day before on the rule, and a new rule event with your change on this day's line |
+| Delete → this and following | `until:` the day before on the rule (from its first day on, the event is deleted) |
+| Edit, Delete → all events | the rule's own event, changed or deleted |
+
+On an edit of this event only, Repeat and Ends are off: it becomes an
+ordinary event. On this and following, the days the old rule skipped before
+this one stay with it; the ones after come along to the new rule, and so
+does its end. An `except:` grows by a date for every skip, and a rule that
+has run for years with many of them is best ended and started again with
+*This and following*. Each action changes only the lines it must: every other
+line of the file is as it was, byte for byte.
+
+Two devices that skip different days of the same event, or one that ends
+it while another skips a day, merge into one event on the line, with both
+skips and the earlier end: nothing is asked. A rule edited in its text on
+one device and its skips on another is two edits, and both events are kept.
 
 Another tool that reads `calendar.txt` sees the event only on its first
 day, with one more word in it: that is the price of keeping the file as
