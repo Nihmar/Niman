@@ -630,6 +630,52 @@ void main() {
       expect(state.widget.buffer.text, contains(':::: columns\n::: column\n'));
     }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
+    testWidgets(
+      'on a phone the Insert sheet has the Eisenhower matrix (#1139)',
+      (tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: NoteView(
+                path: '/n/a.md',
+                showLineNumbers: false,
+                autofocusEditor: true,
+                toolbarTop: true,
+                showWysiwyg: true,
+                readNote: (_) async => 'hello world',
+                writeNote: (_, _) async {},
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        final state = tester.state<MarkdownSourceViewState>(
+          find.byType(MarkdownSourceView),
+        );
+        await tester.longPressAt(
+          tester.getTopLeft(find.byType(MarkdownSurface)) +
+              const Offset(30, 18),
+        );
+        await tester.pumpAndSettle();
+        if (find.byKey(const Key('menu-insert')).evaluate().isEmpty) {
+          await tester.tap(find.byIcon(Icons.more_vert).last);
+          await tester.pumpAndSettle();
+        }
+        await tester.tap(find.byKey(const Key('menu-insert')));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const Key('menu-eisenhower')));
+        await tester.pumpAndSettle();
+        expect(
+          state.widget.buffer.text,
+          contains(
+            '|  | ${AppStrings.eisenhowerUrgent} | '
+            '${AppStrings.eisenhowerNotUrgent} |',
+          ),
+        );
+      },
+      variant: TargetPlatformVariant.only(TargetPlatform.android),
+    );
+
     testWidgets('on a phone the groups open as sheets', (tester) async {
       await tester.pumpWidget(
         MaterialApp(

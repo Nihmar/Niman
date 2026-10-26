@@ -543,11 +543,11 @@ void main() {
     });
   }
 
-  testWidgets("the palette's command inserts the same matrix (#1139)", (
-    tester,
-  ) async {
-    // What `AppCommand.insertEisenhower` runs: the shell hands the note the
-    // command, and the note writes it through its editor as one edit.
+  testWidgets("the handle the palette's command calls writes the matrix "
+      '(#1139)', (tester) async {
+    // What `AppCommand.insertEisenhower` runs: the shell hands the note
+    // `insertEisenhower`, and the note writes it through its editor as one
+    // edit.
     final writes = <String>[];
     final key = GlobalKey<State<NoteView>>();
     await _pump(
