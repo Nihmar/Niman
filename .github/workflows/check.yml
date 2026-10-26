@@ -167,12 +167,14 @@ jobs:
       # output goes to a file, and a failure prints its tail and the
       # simulator's own log. The tool can lose the app at launch and wait
       # for it forever; the script gives that wait a limit and launches
-      # again (#1162).
+      # again (#1162). The ceilings sit above the slowest green runs:
+      # app_boot builds the simulator app first and took up to 20 minutes
+      # in October 2026, sync_e2e reuses that build and took up to 8.
       - name: App boot (iPhone simulator)
         timeout-minutes: 25
         run: ./scripts/ios-sim-test.sh integration_test/app_boot_test.dart "$SIMULATOR" "$RUNNER_TEMP/app_boot.log"
       - name: WebDAV sync end to end (iPhone simulator)
-        timeout-minutes: 25
+        timeout-minutes: 12
         run: ./scripts/ios-sim-test.sh integration_test/sync_e2e_test.dart "$SIMULATOR" "$RUNNER_TEMP/sync_e2e.log"
       - name: What the simulator runs said
         if: failure()
