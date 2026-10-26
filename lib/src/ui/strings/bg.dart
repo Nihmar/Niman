@@ -3265,6 +3265,12 @@ final class BulgarianStrings extends Strings {
   String get commandInsertColumns => 'Вмъкни колони';
 
   @override
+  String get commandInsertEisenhower => 'Вмъкни матрица на Айзенхауер';
+
+  @override
+  String get eisenhowerMatrix => 'Матрица на Айзенхауер';
+
+  @override
   String get commandInsertMindMap => 'Вмъкни интелектуална карта';
 
   @override
@@ -3276,6 +3282,24 @@ final class BulgarianStrings extends Strings {
 
   @override
   String get toolMindMapNeedsList => 'Курсорът не е в списък';
+
+  @override
+  String get toolEisenhowerSubtitle => 'Мрежа от спешни и важни задачи';
+
+  @override
+  String get eisenhowerUrgent => 'Спешно';
+
+  @override
+  String get eisenhowerNotUrgent => 'Не е спешно';
+
+  @override
+  String get eisenhowerImportant => 'Важно';
+
+  @override
+  String get eisenhowerNotImportant => 'Не е важно';
+
+  @override
+  String get toolNeedsEditor => 'Бележката не е отворена в редактора';
 
   @override
   String ocrEngineName(String version) => 'Tesseract $version';

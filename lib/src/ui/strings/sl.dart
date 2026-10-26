@@ -3274,6 +3274,12 @@ final class SlovenianStrings extends Strings {
   String get commandInsertColumns => 'Vstavi stolpce';
 
   @override
+  String get commandInsertEisenhower => 'Vstavi Eisenhowerjevo matriko';
+
+  @override
+  String get eisenhowerMatrix => 'Eisenhowerjeva matrika';
+
+  @override
   String get commandInsertMindMap => 'Vstavi miselni vzorec';
 
   @override
@@ -3284,6 +3290,24 @@ final class SlovenianStrings extends Strings {
 
   @override
   String get toolMindMapNeedsList => 'Kazalka ni na seznamu';
+
+  @override
+  String get toolEisenhowerSubtitle => 'Mreža nujnih in pomembnih opravil';
+
+  @override
+  String get eisenhowerUrgent => 'Nujno';
+
+  @override
+  String get eisenhowerNotUrgent => 'Ni nujno';
+
+  @override
+  String get eisenhowerImportant => 'Pomembno';
+
+  @override
+  String get eisenhowerNotImportant => 'Ni pomembno';
+
+  @override
+  String get toolNeedsEditor => 'Opomba ni odprta v urejevalniku';
 
   @override
   String ocrEngineName(String version) => 'Tesseract $version';

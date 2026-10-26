@@ -25,7 +25,10 @@ enum EditorTool {
 
   /// Turn the checkbox items under the selection into todo.txt tasks
   /// (#1152).
-  moveToTasks(Icons.assignment_return_outlined);
+  moveToTasks(Icons.assignment_return_outlined),
+
+  /// Insert an Eisenhower matrix at the caret (#1139).
+  eisenhower(Icons.grid_view_outlined);
 
   new(this.icon);
 
@@ -41,6 +44,7 @@ enum EditorTool {
     EditorTool.countList => AppStrings.toolCountListTitle,
     EditorTool.mindMap => AppStrings.commandConvertListToMindMap,
     EditorTool.moveToTasks => AppStrings.moveToTasks,
+    EditorTool.eisenhower => AppStrings.commandInsertEisenhower,
   };
 
   /// What the tool does, under its name.
@@ -48,17 +52,20 @@ enum EditorTool {
     EditorTool.countList => AppStrings.toolCountListSubtitle,
     EditorTool.mindMap => AppStrings.toolMindMapSubtitle,
     EditorTool.moveToTasks => AppStrings.moveToTasksSubtitle,
+    EditorTool.eisenhower => AppStrings.toolEisenhowerSubtitle,
   };
 
-  /// Why the tool cannot run on this note right now.
+  /// Why the tool cannot run on this note right now, or null when it can
+  /// run wherever the editor takes an insertion.
   ///
   /// The sheet shows the row greyed with this under it rather than
   /// dropping it: a tool that is sometimes missing is a tool nobody
   /// learns is there (`docs/dev/conventions.md`, the keep-its-place
   /// rule).
-  String get unavailableReason => switch (this) {
+  String? get unavailableReason => switch (this) {
     EditorTool.countList => AppStrings.toolCountListNeedsList,
     EditorTool.mindMap => AppStrings.toolMindMapNeedsList,
     EditorTool.moveToTasks => AppStrings.moveToTasksNeedsItem,
+    EditorTool.eisenhower => null,
   };
 }

@@ -3277,6 +3277,12 @@ final class SerbianStrings extends Strings {
   String get commandInsertColumns => 'Убаци колоне';
 
   @override
+  String get commandInsertEisenhower => 'Уметни Ајзенхауерову матрицу';
+
+  @override
+  String get eisenhowerMatrix => 'Ајзенхауерова матрица';
+
+  @override
   String get commandInsertMindMap => 'Убаци мапу ума';
 
   @override
@@ -3286,6 +3292,24 @@ final class SerbianStrings extends Strings {
 
   @override
   String get toolMindMapNeedsList => 'Курзор није у листи';
+
+  @override
+  String get toolEisenhowerSubtitle => 'Мрежа хитних и важних задатака';
+
+  @override
+  String get eisenhowerUrgent => 'Хитно';
+
+  @override
+  String get eisenhowerNotUrgent => 'Није хитно';
+
+  @override
+  String get eisenhowerImportant => 'Важно';
+
+  @override
+  String get eisenhowerNotImportant => 'Није важно';
+
+  @override
+  String get toolNeedsEditor => 'Белешка није отворена у уређивачу';
 
   @override
   String ocrEngineName(String version) => 'Tesseract $version';

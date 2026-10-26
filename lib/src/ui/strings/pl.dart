@@ -3304,6 +3304,12 @@ final class PolishStrings extends Strings {
   String get commandInsertColumns => 'Wstaw kolumny';
 
   @override
+  String get commandInsertEisenhower => 'Wstaw macierz Eisenhowera';
+
+  @override
+  String get eisenhowerMatrix => 'Macierz Eisenhowera';
+
+  @override
   String get commandInsertMindMap => 'Wstaw mapę myśli';
 
   @override
@@ -3313,6 +3319,24 @@ final class PolishStrings extends Strings {
 
   @override
   String get toolMindMapNeedsList => 'Kursor nie znajduje się na liście';
+
+  @override
+  String get toolEisenhowerSubtitle => 'Siatka pilnych i ważnych zadań';
+
+  @override
+  String get eisenhowerUrgent => 'Pilne';
+
+  @override
+  String get eisenhowerNotUrgent => 'Niepilne';
+
+  @override
+  String get eisenhowerImportant => 'Ważne';
+
+  @override
+  String get eisenhowerNotImportant => 'Nieważne';
+
+  @override
+  String get toolNeedsEditor => 'Notatka nie jest otwarta w edytorze';
 
   @override
   String ocrEngineName(String version) => 'Tesseract $version';

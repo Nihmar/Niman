@@ -3292,6 +3292,12 @@ final class BelarusianStrings extends Strings {
   String get commandInsertColumns => 'Уставіць слупкі';
 
   @override
+  String get commandInsertEisenhower => 'Уставіць матрыцу Эйзенхаўэра';
+
+  @override
+  String get eisenhowerMatrix => 'Матрыца Эйзенхаўэра';
+
+  @override
   String get commandInsertMindMap => 'Уставіць карту думак';
 
   @override
@@ -3301,6 +3307,24 @@ final class BelarusianStrings extends Strings {
 
   @override
   String get toolMindMapNeedsList => 'Курсор не ў спісе';
+
+  @override
+  String get toolEisenhowerSubtitle => 'Сетка з тэрміновых і важных задач';
+
+  @override
+  String get eisenhowerUrgent => 'Тэрмінова';
+
+  @override
+  String get eisenhowerNotUrgent => 'Не тэрмінова';
+
+  @override
+  String get eisenhowerImportant => 'Важна';
+
+  @override
+  String get eisenhowerNotImportant => 'Не важна';
+
+  @override
+  String get toolNeedsEditor => 'Нататка не адкрыта ў рэдактары';
 
   @override
   String ocrEngineName(String version) => 'Tesseract $version';

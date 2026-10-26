@@ -3290,6 +3290,12 @@ final class DutchStrings extends Strings {
   String get commandInsertColumns => 'Kolommen invoegen';
 
   @override
+  String get commandInsertEisenhower => 'Eisenhower-matrix invoegen';
+
+  @override
+  String get eisenhowerMatrix => 'Eisenhower-matrix';
+
+  @override
   String get commandInsertMindMap => 'Mindmap invoegen';
 
   @override
@@ -3300,6 +3306,25 @@ final class DutchStrings extends Strings {
 
   @override
   String get toolMindMapNeedsList => 'De cursor staat niet in een lijst';
+
+  @override
+  String get toolEisenhowerSubtitle =>
+      'Een raster van dringende en belangrijke taken';
+
+  @override
+  String get eisenhowerUrgent => 'Dringend';
+
+  @override
+  String get eisenhowerNotUrgent => 'Niet dringend';
+
+  @override
+  String get eisenhowerImportant => 'Belangrijk';
+
+  @override
+  String get eisenhowerNotImportant => 'Niet belangrijk';
+
+  @override
+  String get toolNeedsEditor => 'De notitie is niet geopend in de editor';
 
   @override
   String ocrEngineName(String version) => 'Tesseract $version';

@@ -621,8 +621,8 @@ Obsidian's is:
 - **Format ›** — bold, italic, strikethrough, highlight, underline, superscript,
   subscript, code — **Paragraph ›** — headings 1 to 6, **Body** (the
   heading taken off), bulleted, numbered and checkbox lists, quote — and
-  **Insert ›** — footnote, table, columns, horizontal rule, code block,
-  math block, image;
+  **Insert ›** — footnote, table, Eisenhower matrix, columns, horizontal
+  rule, code block, math block, image;
 - the clipboard last: Cut, Copy, Paste, Select all. What cannot run now
   (Cut with nothing selected) stays in its place, greyed out, so nothing
   moves under the pointer.
@@ -970,9 +970,11 @@ takes, its errors and its Add task are described with the tasks:
 ## Tools
 
 The toolbar's **Tools** button opens the editor's extra tools. They are
-not formats: each one reads the note and writes something back. Both
-editors offer the same tools, and a tool that has nothing to work on in
-this note is listed greyed with the reason rather than hidden.
+not formats: each one reads the note, or a part of it, and writes
+something back. The Eisenhower matrix is the exception, an insertion
+that reads nothing. Both editors offer the same tools, and a tool that
+has nothing to work on in this note is listed greyed with the reason
+rather than hidden.
 
 ### Indenting a list item
 
@@ -1051,6 +1053,33 @@ will write a new one under the list.
 It counts strings, not ideas: `tramezzino`, `tramezzino cip` and
 `tramezzino olive` are three totals, not three of one. Grouping them is
 yours to do.
+
+### Eisenhower matrix
+
+**Insert Eisenhower matrix** writes a grid of urgent against important,
+with the four quadrants to put tasks in:
+
+|  | Urgent | Not urgent |
+| --- | --- | --- |
+| **Important** |  |  |
+| **Not important** |  |  |
+
+It is also **Insert › Eisenhower matrix** in the editor's menu (the Insert
+sheet on a phone), and **Insert Eisenhower matrix** in the command
+palette. It needs no list and asks nothing: run it again and a second
+matrix is written under the first, since the caret it leaves is in the
+first one.
+
+The labels are the app's language at the moment the tool runs, so in
+Italian the same insertion reads `Urgente`, `Non urgente`, `Importante`
+and `Non importante`. Changing the app language later does not rewrite a
+matrix already in a note: it is plain Markdown, written once.
+
+The grid is an ordinary GFM table, so GitHub, Obsidian and every export
+read it, and the table tools work on it — Tab from cell to cell, **Row ›**
+and **Column ›** to add and remove. It goes on lines of its own, a blank
+line kept from the text around it, as one undo step, and the caret lands
+in the first quadrant, ready to write a task.
 
 ## Preview
 

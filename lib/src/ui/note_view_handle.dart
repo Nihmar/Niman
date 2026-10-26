@@ -87,6 +87,10 @@ abstract interface class NoteViewHandle {
   /// the first column's text selected (#729).
   void insertColumns();
 
+  /// Puts an Eisenhower matrix at the caret, on lines of its own, one undo
+  /// step, the caret in its first quadrant (#1139).
+  void insertEisenhower();
+
   /// Puts [text] in place of the selection, as a paste does, one undo
   /// step; what the note stored, and where, or null when the note takes
   /// no text there ([canInsert]).

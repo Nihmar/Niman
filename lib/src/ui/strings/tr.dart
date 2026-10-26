@@ -3210,6 +3210,12 @@ final class TurkishStrings extends Strings {
   String get commandInsertColumns => 'Sütun ekle';
 
   @override
+  String get commandInsertEisenhower => 'Eisenhower matrisi ekle';
+
+  @override
+  String get eisenhowerMatrix => 'Eisenhower matrisi';
+
+  @override
   String get commandInsertMindMap => 'Zihin haritası ekle';
 
   @override
@@ -3220,6 +3226,25 @@ final class TurkishStrings extends Strings {
 
   @override
   String get toolMindMapNeedsList => 'İmleç bir listede değil';
+
+  @override
+  String get toolEisenhowerSubtitle =>
+      'Acil ve önemli görevlerden oluşan bir ızgara';
+
+  @override
+  String get eisenhowerUrgent => 'Acil';
+
+  @override
+  String get eisenhowerNotUrgent => 'Acil değil';
+
+  @override
+  String get eisenhowerImportant => 'Önemli';
+
+  @override
+  String get eisenhowerNotImportant => 'Önemli değil';
+
+  @override
+  String get toolNeedsEditor => 'Not düzenleyicide açık değil';
 
   @override
   String ocrEngineName(String version) => 'Tesseract $version';

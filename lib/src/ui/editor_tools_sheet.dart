@@ -40,7 +40,9 @@ Future<EditorTool?> showEditorToolsSheet(
             subtitle: Text(
               available.contains(tool)
                   ? tool.description
-                  : reasons[tool] ?? tool.unavailableReason,
+                  : reasons[tool] ??
+                        tool.unavailableReason ??
+                        AppStrings.toolNeedsEditor,
             ),
             onTap: available.contains(tool)
                 ? () => Navigator.of(context).pop(tool)

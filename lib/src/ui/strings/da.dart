@@ -3233,6 +3233,12 @@ final class DanishStrings extends Strings {
   String get commandInsertColumns => 'Indsæt kolonner';
 
   @override
+  String get commandInsertEisenhower => 'Indsæt Eisenhower-matrix';
+
+  @override
+  String get eisenhowerMatrix => 'Eisenhower-matrix';
+
+  @override
   String get commandInsertMindMap => 'Indsæt mindmap';
 
   @override
@@ -3243,6 +3249,25 @@ final class DanishStrings extends Strings {
 
   @override
   String get toolMindMapNeedsList => 'Markøren er ikke i en liste';
+
+  @override
+  String get toolEisenhowerSubtitle =>
+      'Et gitter af hastende og vigtige opgaver';
+
+  @override
+  String get eisenhowerUrgent => 'Haster';
+
+  @override
+  String get eisenhowerNotUrgent => 'Haster ikke';
+
+  @override
+  String get eisenhowerImportant => 'Vigtig';
+
+  @override
+  String get eisenhowerNotImportant => 'Ikke vigtig';
+
+  @override
+  String get toolNeedsEditor => 'Noten er ikke åben i editoren';
 
   @override
   String ocrEngineName(String version) => 'Tesseract $version';

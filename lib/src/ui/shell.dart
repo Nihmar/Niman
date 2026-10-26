@@ -4674,6 +4674,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       AppCommand.insertMindMap: () =>
           _panelNote?.insertAtCaret(mermaidMindMapTemplate),
       AppCommand.insertColumns: () => _panelNote?.insertColumns(),
+      AppCommand.insertEisenhower: () => _panelNote?.insertEisenhower(),
       AppCommand.convertListToMindMap: () => _panelNote?.convertListToMindMap(),
       AppCommand.moveToTasks: () {
         if (_panelNote case final note?) _moveToTasks(note);

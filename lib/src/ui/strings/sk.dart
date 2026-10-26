@@ -3260,6 +3260,12 @@ final class SlovakStrings extends Strings {
   String get commandInsertColumns => 'Vložiť stĺpce';
 
   @override
+  String get commandInsertEisenhower => 'Vložiť Eisenhowerovu maticu';
+
+  @override
+  String get eisenhowerMatrix => 'Eisenhowerova matica';
+
+  @override
   String get commandInsertMindMap => 'Vložiť myšlienkovú mapu';
 
   @override
@@ -3271,6 +3277,24 @@ final class SlovakStrings extends Strings {
 
   @override
   String get toolMindMapNeedsList => 'Kurzor nie je v zozname';
+
+  @override
+  String get toolEisenhowerSubtitle => 'Mriežka naliehavých a dôležitých úloh';
+
+  @override
+  String get eisenhowerUrgent => 'Naliehavé';
+
+  @override
+  String get eisenhowerNotUrgent => 'Nenaliehavé';
+
+  @override
+  String get eisenhowerImportant => 'Dôležité';
+
+  @override
+  String get eisenhowerNotImportant => 'Nedôležité';
+
+  @override
+  String get toolNeedsEditor => 'Poznámka nie je otvorená v editore';
 
   @override
   String ocrEngineName(String version) => 'Tesseract $version';

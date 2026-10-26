@@ -3247,6 +3247,12 @@ final class LatvianStrings extends Strings {
   String get commandInsertColumns => 'Ievietot kolonnas';
 
   @override
+  String get commandInsertEisenhower => 'Ievietot Eisengauera matricu';
+
+  @override
+  String get eisenhowerMatrix => 'Eisengauera matrica';
+
+  @override
   String get commandInsertMindMap => 'Ievietot prāta karti';
 
   @override
@@ -3257,6 +3263,25 @@ final class LatvianStrings extends Strings {
 
   @override
   String get toolMindMapNeedsList => 'Kursors nav sarakstā';
+
+  @override
+  String get toolEisenhowerSubtitle =>
+      'Režģis ar steidzamiem un svarīgiem uzdevumiem';
+
+  @override
+  String get eisenhowerUrgent => 'Steidzami';
+
+  @override
+  String get eisenhowerNotUrgent => 'Nav steidzami';
+
+  @override
+  String get eisenhowerImportant => 'Svarīgi';
+
+  @override
+  String get eisenhowerNotImportant => 'Nav svarīgi';
+
+  @override
+  String get toolNeedsEditor => 'Piezīme nav atvērta redaktorā';
 
   @override
   String ocrEngineName(String version) => 'Tesseract $version';

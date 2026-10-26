@@ -190,6 +190,22 @@ final class NoteEditCommands {
     context: 1,
   );
 
+  /// An Eisenhower matrix at the caret, in the app's language, the caret
+  /// in its first quadrant (#1139): the Tools sheet's Insert Eisenhower
+  /// matrix, the Insert menu's and the palette's.
+  void insertEisenhowerMatrixAtCaret() => run(
+    (text, selection) => insertEisenhowerMatrix(
+      text: text,
+      selection: selection,
+      urgent: AppStrings.eisenhowerUrgent,
+      notUrgent: AppStrings.eisenhowerNotUrgent,
+      important: AppStrings.eisenhowerImportant,
+      notImportant: AppStrings.eisenhowerNotImportant,
+    ),
+    // The lines either side: the table keeps a blank line from them.
+    context: 1,
+  );
+
   /// The toolbar buttons that open a menu, run with the button's place on
   /// screen so a pointer's menu grows from it (#780). A key runs the same
   /// command through [toolbarActions], with no button to grow from.
@@ -391,6 +407,7 @@ final class NoteEditCommands {
         if (_hasListToCount) EditorTool.countList,
         if (_hasListAtCaret) EditorTool.mindMap,
         if (moves == MoveAvailability.ready) EditorTool.moveToTasks,
+        if (canInsert()) EditorTool.eisenhower,
       },
       reasons: {
         if (moves == MoveAvailability.blocked)
@@ -407,6 +424,8 @@ final class NoteEditCommands {
         convertListToMindMap();
       case EditorTool.moveToTasks:
         move?.call();
+      case EditorTool.eisenhower:
+        insertEisenhowerMatrixAtCaret();
     }
   }
 

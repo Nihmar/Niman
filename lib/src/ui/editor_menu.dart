@@ -270,6 +270,20 @@ ContextMenuPart editorMenu({
               context: 1,
             ),
             command(
+              'eisenhower',
+              AppStrings.eisenhowerMatrix,
+              Icons.grid_view_outlined,
+              (text, selection) => insertEisenhowerMatrix(
+                text: text,
+                selection: selection,
+                urgent: AppStrings.eisenhowerUrgent,
+                notUrgent: AppStrings.eisenhowerNotUrgent,
+                important: AppStrings.eisenhowerImportant,
+                notImportant: AppStrings.eisenhowerNotImportant,
+              ),
+              context: 1,
+            ),
+            command(
               'columns',
               AppStrings.toolbarColumns,
               Icons.view_column_outlined,

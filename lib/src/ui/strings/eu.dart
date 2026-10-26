@@ -3288,6 +3288,12 @@ final class BasqueStrings extends Strings {
   String get commandInsertColumns => 'Txertatu zutabeak';
 
   @override
+  String get commandInsertEisenhower => 'Txertatu Eisenhower matrizea';
+
+  @override
+  String get eisenhowerMatrix => 'Eisenhower matrizea';
+
+  @override
   String get commandInsertMindMap => 'Txertatu mapa mentala';
 
   @override
@@ -3298,6 +3304,25 @@ final class BasqueStrings extends Strings {
 
   @override
   String get toolMindMapNeedsList => 'Kurtsorea ez dago zerrenda batean';
+
+  @override
+  String get toolEisenhowerSubtitle =>
+      'Premiazko eta garrantzizko zereginen sareta';
+
+  @override
+  String get eisenhowerUrgent => 'Premiazkoa';
+
+  @override
+  String get eisenhowerNotUrgent => 'Ez premiazkoa';
+
+  @override
+  String get eisenhowerImportant => 'Garrantzitsua';
+
+  @override
+  String get eisenhowerNotImportant => 'Ez garrantzitsua';
+
+  @override
+  String get toolNeedsEditor => 'Oharra ez dago editorean irekita';
 
   @override
   String ocrEngineName(String version) => 'Tesseract $version';
