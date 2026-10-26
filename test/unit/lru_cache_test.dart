@@ -1,6 +1,9 @@
 // The one bounded cache the lazy readers share: least recently used goes.
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/lru_cache.dart';
+import 'package:niman/src/core/memory_reclaim.dart';
 
 void main() {
   test('holds at most its capacity, the oldest entry going', () {
@@ -69,5 +72,30 @@ void main() {
     expect(cache.length, 1);
     cache.clear();
     expect(cache.isEmpty, isTrue);
+  });
+
+  test('reclaim lets go of everything and the next ask reads again', () {
+    final cache = LruCache<int, String>(3);
+    cache[1] = 'a';
+    cache[2] = 'b';
+
+    MemoryReclaim.reclaimAll();
+
+    expect(cache.isEmpty, isTrue);
+    expect(cache[1], isNull);
+    cache[1] = 'a';
+    expect(cache[1], 'a', reason: 'it keeps working after it was emptied');
+  });
+
+  test('a read under way still answers after the cache let go of it', () async {
+    final cache = LruCache<int, Future<String>>(3);
+    final reading = Completer<String>();
+    cache[1] = reading.future;
+
+    cache.reclaim();
+    reading.complete('read');
+
+    expect(cache.isEmpty, isTrue);
+    expect(await reading.future, 'read');
   });
 }

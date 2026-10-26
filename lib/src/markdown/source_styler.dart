@@ -29,6 +29,8 @@ import 'dart:collection';
 import 'dart:isolate';
 
 import 'package:meta/meta.dart';
+import 'package:niman/src/core/memory_reclaim.dart';
+import 'package:niman/src/core/reclaimable.dart';
 import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/editor/outline.dart';
 import 'package:niman/src/markdown/background_scan.dart';
@@ -46,7 +48,7 @@ import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/markdown/source_edit.dart';
 
 /// A note's lines, coloured by the engine's reading of them.
-final class SourceStyler {
+final class SourceStyler implements Reclaimable {
   /// Reads [buffer] here, now: all of its blocks, or its first [firstLines]
   /// lines' when given, the rest owed — read as far as a line asks
   /// ([blockOf]), and carried on by [advance] — as after an edit that
@@ -63,6 +65,7 @@ final class SourceStyler {
     _definers.addAll(holdings.lines);
     _opensBody.addAll(holdings.running);
     _scope = DocumentScope.ofLines(buffer, buffer.revision, _definers);
+    MemoryReclaim.track(this);
   }
 
   new _adopt(
@@ -74,6 +77,7 @@ final class SourceStyler {
   ) {
     _definers.addAll(definers);
     _opensBody.addAll(opensBody);
+    MemoryReclaim.track(this);
   }
 
   /// Reads [buffer] in an isolate: the scan is O(note), 2 s on a 246 MB one.
@@ -181,6 +185,13 @@ final class SourceStyler {
   /// [_parseCacheSize]: the parse a block has wherever it moved to.
   final LinkedHashMap<String, _Parsed> _parses =
       LinkedHashMap<String, _Parsed>();
+
+  /// Lets go of the parses kept by content: the ones a block that moved is
+  /// found by. A miss reads the block again, which is all a miss ever costs
+  /// ([_parsedOf]); the parses of the lines on screen ([_byStart]) stay, so
+  /// the next frame draws as the last did.
+  @override
+  void reclaim() => _parses.clear();
 
   /// Parses by block start line, for the current revision only: the lookup a
   /// frame does per line, without joining the block's text to find it.

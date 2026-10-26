@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:katex/katex.dart' show boxSizePx;
 import 'package:katex_dart/katex_dart.dart';
+import 'package:niman/src/core/memory_reclaim.dart';
 import 'package:niman/src/preview/math_raster.dart';
 
 BoxNode _box(String tex) =>
@@ -73,4 +74,33 @@ void main() {
     draw('x + y');
     expect(MathRaster.cached, 1, reason: 'a formula of glyphs is drawn as is');
   });
+
+  testWidgets(
+    'a reclaim lets the images go, and a formula draws its own again',
+    (tester) async {
+      MathRaster.enabledOverride = true;
+      final matrix = _box(r'\begin{pmatrix}1\\2\\3\end{pmatrix}');
+      void draw() {
+        final recorder = ui.PictureRecorder();
+        paintMath(
+          Canvas(recorder),
+          boxSizePx(matrix, 17),
+          matrix,
+          fontSize: 17,
+          color: const Color(0xFF000000),
+          devicePixelRatio: 1,
+        );
+        recorder.endRecording().dispose();
+      }
+
+      draw();
+      expect(MathRaster.cached, 1);
+
+      MemoryReclaim.reclaimAll();
+      expect(MathRaster.cached, 0);
+
+      draw();
+      expect(MathRaster.cached, 1);
+    },
+  );
 }
