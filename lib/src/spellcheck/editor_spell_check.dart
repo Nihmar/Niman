@@ -203,6 +203,18 @@ final class EditorSpellCheck extends ChangeNotifier implements Reclaimable {
       }
       return;
     }
+    if (!_enabled) {
+      // Switched off while it loaded: the load still says whether spelling
+      // is offered on this machine — the row that switches it back on is
+      // built on that — and then lets go of its handles, as switching off
+      // does (#1202).
+      if (engines.any((engine) => engine.available)) _offered = true;
+      for (final engine in engines) {
+        engine.dispose();
+      }
+      if (!_disposed) notifyListeners();
+      return;
+    }
     _engines = _multi(engines);
     _checker = _wrapped(_engines!);
     if (_engines!.available) _offered = true;
@@ -302,10 +314,24 @@ final class EditorSpellCheck extends ChangeNotifier implements Reclaimable {
   }
 
   /// Turns underlining on/off (a settings toggle).
+  ///
+  /// Off, nothing is checked, so nothing of it is kept (#1202): the engines
+  /// are released — a hunspell dictionary is its whole word list in native
+  /// memory, a few MB a language — and the verdicts and suggestions with
+  /// them. On loads them again, as a change of dictionaries does.
   void setEnabled({required bool enabled}) {
     if (_enabled == enabled) return;
     _enabled = enabled;
-    if (!enabled) _lines.clear();
+    if (enabled) {
+      if (_checker == null) _startEngines();
+    } else {
+      _checker?.dispose();
+      _checker = null;
+      _engines = null;
+      _lines.clear();
+      _words.clear();
+      _suggestions.clear();
+    }
     notifyListeners();
   }
 

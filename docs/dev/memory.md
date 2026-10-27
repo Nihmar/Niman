@@ -36,10 +36,34 @@ The VM service also breaks the Dart heap down by class
 (`getAllocationProfile`), which is where the open note buffers, undo history
 and parsed spans show up.
 
-The issue's own flags for the frame-side measurement
-(`FLUTTER_ENGINE_SWITCHES=2`, `…vm-service-port=8181`,
-`…disable-service-auth-codes`) are for the timeline, not memory; for memory
-the DevTools Memory view over the same VM service is enough.
+The same engine switches that open the timeline open the memory too
+(`FLUTTER_ENGINE_SWITCHES=2`, `FLUTTER_ENGINE_SWITCH_1=vm-service-port=8181`,
+`FLUTTER_ENGINE_SWITCH_2=disable-service-auth-codes`, set before the
+profile build's executable starts). With them, `tool/memory_report.dart`
+prints at the moment it runs what the app's resident set is made of (#1193):
+
+```
+dart run --packages=.dart_tool/package_config.json tool/memory_report.dart --label "library open"
+```
+
+- **The process, as the VM attributes it** (`getProcessMemoryUsage`): the Dart
+  VM with each isolate group's heap, then every mapping the process holds,
+  the largest first — the engine's library, the GPU driver, the system's.
+  What the VM cannot name is in those mappings and in the difference from
+  the resident set the log prints.
+- **Each isolate group's heap after a collection**: the UI isolate with the
+  `Isolate.run`s it spawned, and each drift connection's isolate. An isolate
+  group shares one heap, so it is one figure per group.
+- **The classes holding most of each heap**, as `--top` says (15 by default).
+
+A test reads the same heap for one structure: `test/perf/heap_meter.dart`
+answers how many bytes an object holds, after a collection, when the run has
+the VM service (`flutter test --enable-vmservice`), and falls back to the
+resident set — a bound, and a poor one — when it has not.
+`test/perf/memory_retention_test.dart` prints what an open note's buffer, a
+page of the tree and a list of tasks hold that way. Exact on 2026-10-27:
+21 B a line, 697 B a row, 775 B a task, where the resident set had read 7
+B a line and 193 B a task.
 
 ## Owners
 

@@ -207,6 +207,22 @@ void main() {
       expect(await indexedTags('a.md'), ['mine']);
     });
 
+    // #1202: the tags and links were the reindex's alone; the stamp and the
+    // digest are the next save's, for its check of whose the file is.
+    test('the reindex takes the tags and links, the stamp stays', () async {
+      const kept = NoteReferences(tags: ['from-the-editor'], links: []);
+      await waiting.save('a.md', 'first');
+      await waiting.indexed;
+      await waiting.save('a.md', 'the #text', references: kept);
+      expect(waiting.writtenOf('a.md')?.references, same(kept));
+
+      await waiting.indexed;
+      final written = waiting.writtenOf('a.md');
+      expect(written?.references, isNull);
+      expect(written?.sha256, shaOf('a.md'));
+      expect(await indexedTags('a.md'), ['from-the-editor']);
+    });
+
     test('the watcher leaves a note to its writer meanwhile', () async {
       // The watcher reports the app's own writes too, and read the 247 MB
       // stress note at once after a pin — 13.5 s — then the writer read it
