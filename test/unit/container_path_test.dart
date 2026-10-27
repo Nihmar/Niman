@@ -10,7 +10,7 @@ import 'package:niman/src/ui/library_picker_blocking.dart';
 import 'package:path/path.dart' as p;
 
 void main() {
-  final old = p.join(
+  final old = p.posix.join(
     '/private',
     'var',
     'mobile',
@@ -20,7 +20,7 @@ void main() {
     'OLD-UUID',
     'Documents',
   );
-  final today = p.join(
+  final today = p.posix.join(
     '/private',
     'var',
     'mobile',
@@ -33,19 +33,19 @@ void main() {
 
   test("a library in an earlier container is today's at the same place", () {
     expect(
-      rebaseContainerPath(p.join(old, 'Notes', 'Work'), today),
-      p.join(today, 'Notes', 'Work'),
+      rebaseContainerPath(p.posix.join(old, 'Notes', 'Work'), today),
+      p.posix.join(today, 'Notes', 'Work'),
     );
-    expect(containerRelative(p.join(old, 'Notes')), 'Notes');
+    expect(containerRelative(p.posix.join(old, 'Notes')), 'Notes');
     expect(containerRelative(old), '');
   });
 
   test("a path in today's container, or in none, stays as it is", () {
     expect(
-      rebaseContainerPath(p.join(today, 'Notes'), today),
-      p.join(today, 'Notes'),
+      rebaseContainerPath(p.posix.join(today, 'Notes'), today),
+      p.posix.join(today, 'Notes'),
     );
-    final elsewhere = p.join('/Users', 'me', 'Documents', 'Notes');
+    final elsewhere = p.posix.join('/Users', 'me', 'Documents', 'Notes');
     expect(containerRelative(elsewhere), isNull);
     expect(rebaseContainerPath(elsewhere, today), elsewhere);
   });
