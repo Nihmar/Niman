@@ -317,8 +317,9 @@ page says of Android's screens holds there.
 - **Reminders** for `todo.txt` and `calendar.txt` are scheduled with the
   system, so they arrive with Niman closed, as on Android; iOS asks for
   permission the first time one is set. iOS holds at most 64 at a time:
-  Niman schedules the 64 soonest, and the later ones each time it runs
-  after some of those have fired.
+  Niman schedules the 64 soonest of all of them, repeating events' days
+  included, and the later ones each time it runs after some of those have
+  fired — nothing runs while Niman is closed.
 - **Quick actions:** press and hold the icon (see
   [shortcuts](shortcuts.md)).
 - **Opening a `.md` from Files** or another app's *Share* or *Open in*

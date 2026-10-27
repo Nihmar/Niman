@@ -368,8 +368,8 @@ on Android.
 
 - **iOS keeps the 64 most recently scheduled notifications.** A library
   with more future reminders than that schedules the **next 64 by time**
-  and tops the list up whenever the app is opened or refreshed in the
-  background. A phone not opened for a long time can therefore miss the
+  (repeating events' occurrences included, #1228) and tops the list up
+  whenever the app is opened (there is no background refresh). A phone not opened for a long time can therefore miss the
   65th reminder onwards; `docs/user/platforms.md` says so. macOS documents
   no such limit.
 - The Android health checks (`niman/reminders`, battery optimisation) have

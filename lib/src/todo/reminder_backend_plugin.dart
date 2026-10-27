@@ -219,10 +219,13 @@ final class PluginReminderBackend implements ReminderBackend {
 
   /// Below Android's cap of 500 concurrent alarms per app (from Android 12
   /// `AlarmManager` refuses the 501st with an exception), so a library with
-  /// more reminders than that — many repeating events, each holding up to
-  /// four — schedules the soonest ones and a later reconcile tops the window
-  /// up as they fire (#1192). The margin leaves room for alarms the system
-  /// or the plugin keeps of their own.
+  /// more reminders than that — many repeating events, each holding every
+  /// occurrence of the next two weeks (#1228) — schedules the soonest ones.
+  /// The rest are scheduled by a later reconcile, and on Android nothing
+  /// runs between app starts: no alarm firing triggers one (`fired` never
+  /// emits here), so an app left closed past the last scheduled alarm stops
+  /// reminding until it is opened again. The margin leaves room for alarms
+  /// the system or the plugin keeps of their own.
   @override
   int? get pendingLimit => androidPendingAlarmLimit;
 
