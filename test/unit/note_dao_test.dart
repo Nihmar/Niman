@@ -73,10 +73,6 @@ void main() {
     expect(await paths(), ['a.md', 'a0', 'a0/y.md', 'ab', 'ab/z.md']);
   });
 
-  test('an empty path means every row', () async {
-    expect(await dao.subtreeRows(''), hasLength(7));
-  });
-
   test('the folder list is the directories, by path', () async {
     expect((await dao.folders()).map((n) => n.path), ['a', 'a0', 'ab']);
   });

@@ -244,6 +244,14 @@ million notes.
 - **Fix.** Diff a directory at a time, as `fullScan` already does
   (index-reconcile.md: bounded memory). Or give the root the scan itself,
   which is what a root resync is.
+- **Corrected while fixing it (2026-10-27, #1201).** The branch is not
+  reached. `IndexTree.safeRel` drops the library itself from every event
+  batch and every resync, so the watcher never asks for the root as a
+  subtree. This finding came from reading the branch, not from following
+  its callers. What #1201 did: `syncDirSubtree` hands an empty path to
+  `syncDirLevel`, `subtreeRows` no longer reads the library for one, and
+  `allRows` is for the tests. Nothing was measured, because there was
+  nothing to measure.
 
 ### 9. Smaller holders, each growing with use
 

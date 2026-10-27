@@ -268,6 +268,25 @@ void main() {
     },
   );
 
+  // #1201: the library itself has no row, and an event on it, taken for a
+  // folder new to the index, would have synced the whole library as one
+  // subtree — every row read into a map. The event is dropped before that
+  // (`safeRel`), and the subtree sync no longer reads the library whole.
+  test('an event on the library itself reads no table whole', () async {
+    await indexer.fullScan(root.path);
+    final before = (await dao.allRows()).map((n) => n.path).toSet();
+    counter.reset();
+
+    await indexer.applyEvents(root.path, [root.path]);
+    await indexer.resync(root.path, root.path);
+
+    final whole = counter.selects.where(
+      (sql) => RegExp(r'^SELECT \* FROM "notes";?$').hasMatch(sql.trim()),
+    );
+    expect(whole, isEmpty, reason: 'the whole table was read');
+    expect((await dao.allRows()).map((n) => n.path).toSet(), before);
+  });
+
   // #751: the index says whether a write can have moved the tree's rows. A
   // save writes the note's size and time and nothing a name-ordered tree
   // draws; a create, a rename or a pin moves rows.
