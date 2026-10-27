@@ -261,6 +261,54 @@ void main() {
     expect(saved!.recurrence!.rule.token, '2w');
   });
 
+  testWidgets('a preset picked with the editor open is what the chips show '
+      '(#1220)', (tester) async {
+    await open(tester);
+    await type(tester, 'standup');
+    await pick(tester, const Key('calendar-event-repeat-custom'));
+    // The editor opened on every day; Monthly on the date is picked from the
+    // menu under it.
+    await tester.enterText(
+      find.byKey(const Key('calendar-event-repeat-interval')),
+      '2',
+    );
+    await tester.tap(find.byKey(const Key('calendar-event-repeat-unit-week')));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('calendar-event-repeat-weekday-1')));
+    await tester.pump();
+    await pick(tester, const Key('calendar-event-repeat-preset-3'));
+
+    expect(
+      tester
+          .widget<ChoiceChip>(
+            find.byKey(const Key('calendar-event-repeat-unit-month')),
+          )
+          .selected,
+      isTrue,
+      reason: 'the chips follow the menu',
+    );
+    expect(
+      tester
+          .widget<TextField>(
+            find.byKey(const Key('calendar-event-repeat-interval')),
+          )
+          .controller!
+          .text,
+      '1',
+    );
+    expect(
+      find.byKey(const Key('calendar-event-repeat-weekday-1')),
+      findsNothing,
+      reason: 'a monthly rule has no weekday chips',
+    );
+
+    // A chip tap builds on the menu's choice, not on the stale chips.
+    await tester.tap(find.byKey(const Key('calendar-event-repeat-month--1mo')));
+    await tester.pump();
+    await save(tester);
+    expect(saved!.recurrence!.rule.token, '1m;-1mo');
+  });
+
   testWidgets('Custom is a sheet on a phone, and OK answers with its rule', (
     tester,
   ) async {

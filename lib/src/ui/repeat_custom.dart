@@ -71,9 +71,31 @@ final class _RepeatCustomState extends State<RepeatCustom> {
     text: '$_interval',
   );
 
-  RecurrenceUnit get _startUnit {
-    final unit = widget.initial?.unit ?? RecurrenceUnit.day;
+  RecurrenceUnit get _startUnit => _unitOf(widget.initial);
+
+  /// The unit the editor shows for [rule]: business days are the menu's
+  /// Weekdays, and the editor has no chip for them.
+  static RecurrenceUnit _unitOf(RecurrenceRule? rule) {
+    final unit = rule?.unit ?? RecurrenceUnit.day;
     return unit == RecurrenceUnit.businessDay ? RecurrenceUnit.day : unit;
+  }
+
+  /// A rule picked somewhere else while the editor is open (the Repeat menu
+  /// of the event form or the task dialog) is the rule the chips show and
+  /// the next tap builds on (#1220). The editor's own answer comes back as
+  /// `initial` too, and that one is already what the chips say: it is left
+  /// alone, so a half-typed interval is not rewritten under the cursor.
+  @override
+  void didUpdateWidget(RepeatCustom oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final rule = widget.initial;
+    if (rule == oldWidget.initial || rule == _rule) return;
+    _unit = _unitOf(rule);
+    _interval = rule?.interval ?? 1;
+    _weekdays = <int>{...?rule?.weekdays};
+    _nth = rule?.nthWeekday;
+    _strict = rule?.strict ?? false;
+    _count.text = '$_interval';
   }
 
   @override
