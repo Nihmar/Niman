@@ -13,8 +13,12 @@
 //
 // Same shape as the other benchmarks (AGENTS.md): the numbers are printed;
 // what is not a timing — the pages and rows held — gates on any host; the
-// heap and the timings assert a backstop, and the design's bar only under
-// `NIMAN_PERF=1`, where the heap is read exact:
+// timings assert a backstop, and the design's bar only under `NIMAN_PERF=1`.
+// The heap gates only where it is read exact, with the VM service: the
+// resident set it falls back to read from -62 MB to +46 MB for the same
+// scroll, and in a full suite it counts what the other files allocate, so it
+// says nothing about this one — the pages and rows held are what show the
+// window there. The exact run:
 // `NIMAN_PERF=1 flutter test --enable-vmservice
 // test/perf/tree_window_memory_test.dart`.
 //
@@ -132,9 +136,7 @@ void main() {
     const windowBytes = _windowPages * pageSize * _bytesPerRow;
     // The design's bar: the pages the window holds at ~700 B a row, and the
     // model with the folders' facts, a few hundred kilobytes at most.
-    final bar = _referenceHost && meter.exact
-        ? windowBytes + (256 << 10)
-        : scrolledBytes ~/ 2;
+    final bar = _referenceHost ? windowBytes + (256 << 10) : scrolledBytes ~/ 2;
 
     print(
       'scrolled $_files rows in ${scroll.steps} steps '
@@ -177,7 +179,7 @@ void main() {
     expect(scroll.peakPages, lessThanOrEqualTo(_windowPages));
     expect(scroll.peakRows, lessThanOrEqualTo(_windowPages * pageSize));
     expect(scroll.pages.pageCount, lessThanOrEqualTo(3));
-    expect(held, lessThan(bar));
+    if (meter.exact) expect(held, lessThan(bar));
     expect(_median(scroll.pageMs), lessThan(_bar(200)));
   });
 
