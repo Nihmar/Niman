@@ -10,7 +10,8 @@ import 'package:niman/src/core/reclaimable.dart';
 final class _Owner implements Reclaimable {
   new({this.fails = false});
 
-  final bool fails;
+  /// Whether it throws when asked; a test that arms it disarms it after.
+  bool fails;
   int reclaimed = 0;
 
   @override
@@ -67,6 +68,10 @@ void main() {
       tester,
     ) async {
       final broken = _Owner(fails: true);
+      // The registry is the process's, and holds the owner until it is
+      // collected — which a later test cannot count on: disarmed, it is an
+      // owner like any other to the tests after this one.
+      addTearDown(() => broken.fails = false);
       final fine = _Owner();
       MemoryReclaim.track(broken);
       MemoryReclaim.track(fine);
