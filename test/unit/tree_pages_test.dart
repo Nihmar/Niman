@@ -248,6 +248,30 @@ void main() {
       expect(pages.rowAt(0, _pageSize)?.path, desc[_pageSize].path);
     });
 
+    test('a read that fails leaves the page unloaded, and nothing '
+        'unhandled (#1233)', () async {
+      final uncaught = <Object>[];
+      await runZonedGuarded(() async {
+        session.pageError = Exception('connection closed');
+        // Both ways a page is read: by position, and by a neighbour.
+        expect(await pages.load(session, 0, 1, TreeSort.nameAsc), isFalse);
+        session.pageError = null;
+        expect(await pages.load(session, 0, 2, TreeSort.nameAsc), isTrue);
+        session.pageError = Exception('connection closed');
+        expect(await pages.load(session, 0, 3, TreeSort.nameAsc), isFalse);
+        // Let a rejection nobody handles reach the zone, if there is one.
+        await Future<void>.delayed(Duration.zero);
+      }, (error, _) => uncaught.add(error));
+
+      expect(uncaught, isEmpty);
+      expect(pages.hasPage((0, 1)), isFalse);
+      expect(pages.hasPage((0, 3)), isFalse);
+      // A later ask reads it afresh.
+      session.pageError = null;
+      expect(await pages.load(session, 0, 1, TreeSort.nameAsc), isTrue);
+      expect(await pages.load(session, 0, 3, TreeSort.nameAsc), isTrue);
+    });
+
     test('adds nothing when the order changed on its way', () async {
       await pages.load(session, 0, 0, TreeSort.nameAsc);
       session.treeGate = Completer<void>();

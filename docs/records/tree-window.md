@@ -268,6 +268,13 @@ What the widget does that the sections above leave open:
   `_revealPath`) read through `load` with that sort: before, one of them
   landing after the order flipped wiped the new order's counts and pages, put
   the old order back as the current one, and cached a page in the wrong order.
+- **A failed read is a page not loaded.** `TreePages.load` answers false when
+  the read throws (the connection closing under it as the library does), as
+  it does for a page that came back empty, so none of its callers, which do
+  not wait for it (`_askPages` after a frame, the key handlers), can see an
+  unhandled error, and the next ask reads the page again (#1233). The range
+  marking of Shift+click handles the failure of its own reads, and does
+  nothing once the tree is gone.
 
 ## Measured (phase 5)
 

@@ -3,10 +3,13 @@
 // and back, jumped in with the keyboard, searched by name, marked across pages,
 // renamed far down and written into, and at every step the tree holds the
 // window's pages and every row keeps its height.
+import 'dart:async';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/ui/tree.dart';
 import 'package:niman/src/ui/tree_pages.dart';
 import 'package:niman/src/ui/tree_row_metrics.dart';
@@ -234,6 +237,51 @@ void main() {
       for (var i = 0; i <= 120; i++) _name(i),
     });
     expect(pages.pageCount, lessThanOrEqualTo(window));
+  });
+
+  testWidgets('a Shift+click whose cursor lookup outlives the tree marks '
+      'nothing and throws nothing (#1233)', (tester) async {
+    await seed();
+    await pump(tester);
+    await tester.tap(noteRow(_name(0)));
+    await tester.pumpAndSettle();
+    position(tester).jumpTo(120 * rowHeight(tester));
+    await tester.pumpAndSettle();
+    expect(pages.hasPage((VisibleTree.rootId, 0)), isFalse);
+
+    // The cursor's page is read before the range is marked; hold that read.
+    session.atGate = Completer<void>();
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+    await tester.tap(noteRow(_name(120)));
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+    await tester.pump();
+    // The page between lands meanwhile, so that every row of the range is
+    // held once the cursor's page is, and nothing is left to read.
+    await tester.runAsync(
+      () => pages.load(session, VisibleTree.rootId, 1, TreeSort.nameAsc),
+    );
+    // The tree goes away while the index is still being asked.
+    await tester.pumpWidget(const SizedBox());
+    session.atGate!.complete();
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('a page read that fails draws blank rows, and the next ask '
+      'reads it (#1233)', (tester) async {
+    await seed();
+    await pump(tester);
+    session.pageError = Exception('connection closed');
+    position(tester).jumpTo(1000 * rowHeight(tester));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    expect(noteRow(_name(1000)), findsNothing);
+
+    session.pageError = null;
+    position(tester).jumpTo(1010 * rowHeight(tester));
+    await tester.pumpAndSettle();
+    expect(noteRow(_name(1010)), findsOneWidget);
   });
 
   testWidgets('a rename far down brings its row into view', (tester) async {

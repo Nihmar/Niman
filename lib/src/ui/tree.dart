@@ -984,6 +984,8 @@ final class _NoteTreeState extends State<NoteTree> {
   /// own when nothing was marked yet. The rows are read a page at a time
   /// when they are not all loaded.
   void _markRange(int from, int to) {
+    // Asked after the cursor was found, which may have waited on the index.
+    if (!mounted) return;
     final listing = _current?.listing;
     if (listing == null) return;
     final pinned = _pinnedWalked;
@@ -999,8 +1001,14 @@ final class _NoteTreeState extends State<NoteTree> {
     unawaited(
       reader.paths(first, last).then((paths) {
         if (mounted) setState(() => _marked.addAll(paths));
-      }),
+      }, onError: _logReadFailure),
     );
+  }
+
+  /// A read of the index that failed under a gesture that did not wait for
+  /// it: the marks are simply not made, and the gesture can be made again.
+  void _logReadFailure(Object error) {
+    const AppLogger(name: 'tree.ui').debug('read failed ($error)');
   }
 
   /// A right click on [note]: on one of several marked rows, their menu;
@@ -1068,7 +1076,12 @@ final class _NoteTreeState extends State<NoteTree> {
         _markRange(from, to);
       } else {
         // Asked before the cursor is moved to this row.
-        unawaited(_cursorAtAsync().then((from) => _markRange(from, to)));
+        unawaited(
+          _cursorAtAsync().then(
+            (from) => _markRange(from, to),
+            onError: _logReadFailure,
+          ),
+        );
       }
       setState(() {
         _cursorPath = note.path;

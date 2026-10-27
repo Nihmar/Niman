@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/library/session.dart';
@@ -216,7 +217,7 @@ final class TreePages {
     if (hasPage(key)) return Future<bool>.value(false);
     final running = _loading[key];
     if (running != null) return running;
-    final read = _read(session, parent, page, sort);
+    final read = _readOrNothing(session, parent, page, sort);
     _loading[key] = read;
     unawaited(
       read.whenComplete(() {
@@ -227,6 +228,29 @@ final class TreePages {
       }),
     );
     return read;
+  }
+
+  /// [_read], except that a read that fails answers false, as a page that
+  /// came back empty does: the page is simply not loaded, and asking for it
+  /// again reads it afresh (#1233).
+  ///
+  /// The reads are started by callers that do not wait for them — the list
+  /// asking after a frame, a key handler — and a failure that reached none
+  /// of them (the connection closing while the library does) was an
+  /// unhandled error in the zone.
+  Future<bool> _readOrNothing(
+    LibrarySession session,
+    int parent,
+    int page,
+    TreeSort sort,
+  ) async {
+    try {
+      return await _read(session, parent, page, sort);
+    } on Object catch (error) {
+      const AppLogger(name: 'tree.pages')
+          .debug('page $page of folder $parent not read ($error)');
+      return false;
+    }
   }
 
   Future<bool> _read(

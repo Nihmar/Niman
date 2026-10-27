@@ -954,6 +954,7 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     assert(after == null || before == null, 'a page is after or before a row');
     treeCalls++;
     pageCalls++;
+    if (pageError case final error?) throw error;
     _treeOutstanding++;
     if (_treeOutstanding > treePeak) treePeak = _treeOutstanding;
     try {
@@ -982,6 +983,14 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
 
   /// How many times [childCount] was asked.
   int countCalls = 0;
+
+  /// While set, [childrenAt] waits for it before answering: a read by
+  /// position that is held back, as [treeGate] holds a keyset one.
+  Completer<void>? atGate;
+
+  /// While set, [childrenPage] and [childrenAt] throw it: a read that fails,
+  /// as one does when the connection closes under it.
+  Exception? pageError;
 
   /// While set, [childCount] waits for it before answering: the read of the
   /// tree's model that outlasts the changes arriving behind it (#1200), as
@@ -1030,6 +1039,8 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     TreeSort sort = TreeSort.nameAsc,
   }) async {
     atCalls++;
+    await atGate?.future;
+    if (pageError case final error?) throw error;
     return _kidsOf(
       parentId,
       sort,
