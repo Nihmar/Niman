@@ -482,6 +482,52 @@ void main() {
       expect(scan.issues.map((issue) => issue.word), ['wrold']);
     });
 
+    // #1202: off, nothing is checked, so nothing of it is kept.
+    test('switched off, the engines and verdicts are let go', () async {
+      final engines = <_FakeChecker>[];
+      final check = EditorSpellCheck(
+        createChecker: (_) {
+          final engine = _FakeChecker({'wrold'});
+          engines.add(engine);
+          return engine;
+        },
+      );
+      addTearDown(check.dispose);
+      const skip = <TextRange>[];
+      expect(check.rangesFor(0, 'wrold', skip: skip), isNotEmpty);
+
+      check.setEnabled(enabled: false);
+      expect(engines.single.disposed, isTrue);
+      expect(check.available, isFalse);
+      expect(check.offered, isTrue, reason: 'the row to switch it back on');
+
+      check.setEnabled(enabled: true);
+      expect(engines, hasLength(2), reason: 'on loads the engines again');
+      expect(engines.last.disposed, isFalse);
+      expect(check.rangesFor(0, 'wrold', skip: skip), [
+        const TextRange(start: 0, end: 5),
+      ]);
+    });
+
+    test(
+      'switched off while it loads, the load says it is offered and goes',
+      () async {
+        final load = Completer<List<SpellChecker>>();
+        final check = EditorSpellCheck(loadCheckers: (_) => load.future);
+        addTearDown(check.dispose);
+        check.setEnabled(enabled: false);
+
+        final engine = _FakeChecker({'wrold'});
+        load.complete([engine]);
+        await check.engineReady;
+        await pumpEventQueue();
+
+        expect(check.offered, isTrue);
+        expect(engine.disposed, isTrue);
+        expect(check.available, isFalse);
+      },
+    );
+
     test('reset forgets the cached lines', () {
       final check = EditorSpellCheck(
         createChecker: (_) => _FakeChecker({'wrold'}),
