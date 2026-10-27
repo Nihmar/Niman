@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/library/session.dart';
@@ -20,10 +21,11 @@ typedef TreePageKey = (int parent, int page);
 /// widget works the window out with [pagesFor] and hands it to [keepOnly].
 ///
 /// Everything is read from one [LibrarySession] in the `sort` the reads are
-/// given. Ranks and pages are positions in an order, so a read in another
-/// order than the last one [clear]s what was held. A revision that moved rows
-/// [forget]s the folders it names, and a read that lands after the revision
-/// outdated it adds nothing (see [TreeReadGuard]).
+/// given. Ranks and pages are positions in an order, so a [visible] model in
+/// another order than the last one [clear]s what was held, and a [load] in
+/// an order that is no longer the current one reads nothing. A revision that
+/// moved rows [forget]s the folders it names, and a read that lands after the
+/// revision outdated it adds nothing (see [TreeReadGuard]).
 final class TreePages {
   /// Pages of [pageSize] rows.
   new({required this.pageSize}) : assert(pageSize > 0, 'a page has rows');
@@ -132,6 +134,23 @@ final class TreePages {
     return tree;
   }
 
+  /// The pinned notes of this revision: the ones held, else read from
+  /// [session]'s fields.
+  ///
+  /// The read is stamped like a page's. A [clear] or a [forget] while it is
+  /// out outdates it (a pin changed, or an indexing burst moved the rows), so
+  /// it is answered to the flatten that asked but not held: the next flatten
+  /// reads again (#1231).
+  Future<List<Note>> pinnedNotes(LibrarySession session) async {
+    final held = pinned;
+    if (held != null) return held;
+    final stamp = _guard.stamp();
+    final fields = await session.fieldSource;
+    final read = await fields?.pinnedNotes() ?? const <Note>[];
+    if (_guard.untouched(stamp)) pinned = read;
+    return read;
+  }
+
   /// The paths of [expandedPaths] whose ancestors are all expanded too: a
   /// folder under a closed one is not in the list, so it is not read.
   Iterable<String> _reachable(Set<String> expandedPaths) sync* {
@@ -193,12 +212,12 @@ final class TreePages {
     int page,
     TreeSort sort,
   ) {
-    _adopt(sort);
+    if (!_isCurrent(sort)) return Future<bool>.value(false);
     final key = (parent, page);
     if (hasPage(key)) return Future<bool>.value(false);
     final running = _loading[key];
     if (running != null) return running;
-    final read = _read(session, parent, page, sort);
+    final read = _readOrNothing(session, parent, page, sort);
     _loading[key] = read;
     unawaited(
       read.whenComplete(() {
@@ -209,6 +228,29 @@ final class TreePages {
       }),
     );
     return read;
+  }
+
+  /// [_read], except that a read that fails answers false, as a page that
+  /// came back empty does: the page is simply not loaded, and asking for it
+  /// again reads it afresh (#1233).
+  ///
+  /// The reads are started by callers that do not wait for them — the list
+  /// asking after a frame, a key handler — and a failure that reached none
+  /// of them (the connection closing while the library does) was an
+  /// unhandled error in the zone.
+  Future<bool> _readOrNothing(
+    LibrarySession session,
+    int parent,
+    int page,
+    TreeSort sort,
+  ) async {
+    try {
+      return await _read(session, parent, page, sort);
+    } on Object catch (error) {
+      const AppLogger(name: 'tree.pages')
+          .debug('page $page of folder $parent not read ($error)');
+      return false;
+    }
   }
 
   Future<bool> _read(
@@ -309,13 +351,15 @@ final class TreePages {
   }
 
   /// Forgets everything: the index moved, or the order changed.
+  ///
+  /// The order itself is kept: only [visible] changes it, and a read of the
+  /// old one landing after a clear must not take it back (#1232).
   void clear() {
     _guard.clear();
     _pages.clear();
     _loading.clear();
     _facts.clear();
     _folders = const <int, Note>{};
-    _sort = null;
     pinned = null;
   }
 
@@ -332,9 +376,23 @@ final class TreePages {
     pinned = null;
   }
 
-  /// Starts afresh when [sort] is not the order what is held is in.
+  /// Starts afresh when [sort] is not the order what is held is in: the
+  /// widget's new read of the tree, [visible], is what changes the order.
   void _adopt(TreeSort sort) {
     if (_sort != null && _sort != sort) clear();
     _sort = sort;
+  }
+
+  /// Whether a read in [sort] belongs with what is held: it is in the order
+  /// the model was last built in, or nothing is held yet to be in an order.
+  ///
+  /// A read carries the sort of the `TreeListing` that asked, and a listing
+  /// outlives the order it was made for: a keyboard move or a jump still
+  /// under way when the order flips asks with the old one. It must not
+  /// clear the new order's counts and pages, or leave a page of the old
+  /// order in their cache (#1232), so it reads nothing.
+  bool _isCurrent(TreeSort sort) {
+    _sort ??= sort;
+    return _sort == sort;
   }
 }

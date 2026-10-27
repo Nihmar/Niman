@@ -239,6 +239,47 @@ What the widget does that the sections above leave open:
 - **A name that a sidecar answers** is found in the order of the names, where
   the row is drawn under its file: when the index answers, a sidecar can be
   found before the file it is drawn under.
+- **The first page and the offset reads split at `is_dir`.** The index is
+  `(parent, is_dir DESC, name_key, name)`, so `ORDER BY is_dir DESC, name_key
+  DESC, name DESC` is not a scan of it in either direction, and SQLite sorted
+  the whole folder (`USE TEMP B-TREE`) for a first page and for every jump by
+  offset in a descending name order (#1229). `TreePager._nameWindow` reads the
+  folders and then the files, each group alone, as `_nameRead` does for the
+  cursor reads; the files' offset is what is left once the folders are counted.
+  `test/unit/tree_pager_plan_test.dart` holds both directions to a plan with no
+  temp B-tree.
+- **The warm-up is the first read.** The first page of a folder, with no
+  neighbour loaded, is read by position (`childrenAt` at offset 0), and
+  `NoteDao.warmUpTree` calls that same method for one row when a library
+  opens, so the statement it prepares is the one the first flatten runs
+  (#1230). It was `childrenPage(limit: 1)`, which is another statement
+  (`LIMIT ?` against `LIMIT ? OFFSET ?`) once the tree read through offsets.
+  `tree_pager_plan_test.dart` holds the warm-up's SQL to the first page's in
+  every order, and `tree_pages_test.dart` holds `TreePages` to `childrenAt`.
+- **The pinned notes are read under the guard.** `TreePages.pinnedNotes`
+  stamps the read, and holds its answer only when no `clear` or `forget`
+  happened while it was out (#1231): the flatten that asked is given its read,
+  the next one reads again. Held unconditionally, an old read landed after a
+  revision had emptied the slot, and the block stayed wrong until the next one.
+- **Only the model changes the order.** `TreePages.visible` in a new sort
+  clears what was held; a `load` carrying another sort than the current one is
+  a no-op (#1232). The listing a flatten made outlives the order it was made
+  for, and its async keyboard moves (`_walkRowAsync`, `_jumpTo`,
+  `_revealPath`) read through `load` with that sort: before, one of them
+  landing after the order flipped wiped the new order's counts and pages, put
+  the old order back as the current one, and cached a page in the wrong order.
+- **A failed read is a page not loaded.** `TreePages.load` answers false when
+  the read throws (the connection closing under it as the library does), as
+  it does for a page that came back empty, so none of its callers, which do
+  not wait for it (`_askPages` after a frame, the key handlers), can see an
+  unhandled error, and the next ask reads the page again (#1233). The range
+  marking of Shift+click handles the failure of its own reads, and does
+  nothing once the tree is gone.
+- **A drag copies the marks when it starts.** A row that is one of several
+  marked carries `LazyDragPaths`, which lists the marks the first time a drag
+  (or its drop, or its feedback) looks at them. Shift+click can mark a whole
+  folder, and each marked row on screen used to copy all of them as it was
+  built (#1234).
 
 ## Measured (phase 5)
 

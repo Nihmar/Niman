@@ -31,6 +31,11 @@ final class TreeReadGuard {
   bool holds(ReadStamp stamp, int parentId) =>
       stamp.epoch == _epoch && (_forgottenAt[parentId] ?? 0) <= stamp.sequence;
 
+  /// Whether nothing at all was cleared or forgotten since [stamp]: for a
+  /// read that depends on no one folder, which any revision outdates.
+  bool untouched(ReadStamp stamp) =>
+      stamp.epoch == _epoch && stamp.sequence == _sequence;
+
   /// Voids every read begun so far: the index moved, or the order changed.
   void clear() {
     _epoch++;

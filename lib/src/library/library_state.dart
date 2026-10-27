@@ -1961,8 +1961,8 @@ final class LibraryController implements LibrarySession {
   }
 
   /// Prepares the tree's first query off the critical path: the root's
-  /// first page in the library's order, the very statement the first
-  /// flatten runs (its `LIMIT` is bound).
+  /// first page in the library's order, through [NoteDao.warmUpTree], which
+  /// runs the very read the first flatten does (its `LIMIT` is bound).
   ///
   /// Not the root's every row, which is what it read until the tree began
   /// to page (#1064) and went on reading after: 850 ms for a root of 200 000
@@ -1970,7 +1970,7 @@ final class LibraryController implements LibrarySession {
   /// ran (#1135).
   Future<void> _warmUpTree(NoteDao dao, TreeSort sort) async {
     try {
-      await dao.childrenPage(0, limit: 1, sort: sort);
+      await dao.warmUpTree(sort: sort);
     } on Object catch (error) {
       _log.debug('tree warm-up failed ($error)');
     }

@@ -5,6 +5,8 @@ import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
+import 'package:niman/src/db/index_database.dart';
+import 'package:niman/src/frontmatter/fields.dart';
 import 'package:niman/src/ui/tree_pages.dart';
 import 'package:niman/src/ui/visible_tree.dart';
 
@@ -31,6 +33,24 @@ Future<List<TreeSlot>> flatten(
     }
   }
   return out;
+}
+
+/// A field source whose pinned-notes reads answer what a test scripted, when
+/// the test lets them land.
+final class _ScriptedFields implements FieldSource {
+  /// One entry per read: the answer it is given, and what holds it back.
+  final reads = <({List<Note> answer, Completer<void> land})>[];
+  var _next = 0;
+
+  @override
+  Future<List<Note>> pinnedNotes() async {
+    final read = reads[_next++];
+    await read.land.future;
+    return read.answer;
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 /// Loads every page of [keys] that is not held, one after the other.
@@ -154,6 +174,12 @@ void main() {
   group('load', () {
     setUp(() => session.seedNotes(35));
 
+    test('reads the first page of a folder by position, which is what the '
+        'library warms up (#1230)', () async {
+      expect(await pages.load(session, 0, 0, TreeSort.nameAsc), isTrue);
+      expect((session.atCalls, session.pageCalls), (1, 0));
+    });
+
     test('reads by the neighbour it has, else by position', () async {
       const sort = TreeSort.nameAsc;
       expect(await pages.load(session, 0, 2, sort), isTrue);
@@ -194,6 +220,75 @@ void main() {
       expect(pages.pageCount, 1);
     });
 
+    test('a read in an order that is no longer current reads nothing '
+        '(#1232)', () async {
+      // The listing of the old order is still asking when the order flips.
+      await pages.visible(session, const {}, TreeSort.nameAsc);
+      await pages.load(session, 0, 0, TreeSort.nameAsc);
+      await pages.visible(session, const {}, TreeSort.nameDesc);
+      expect(pages.pageCount, 0, reason: 'the new order starts afresh');
+      final counts = session.countCalls;
+      final epoch = pages.epoch;
+      final reads = session.atCalls + session.pageCalls;
+
+      expect(await pages.load(session, 0, 1, TreeSort.nameAsc), isFalse);
+
+      expect(pages.pageCount, 0, reason: 'no page of the old order');
+      expect(
+        session.atCalls + session.pageCalls,
+        reads,
+        reason: 'read nothing',
+      );
+      expect(pages.epoch, epoch, reason: 'the new order was not cleared');
+      await pages.visible(session, const {}, TreeSort.nameDesc);
+      expect(session.countCalls, counts, reason: 'its counts were kept');
+      // The new order still reads, in its own order.
+      expect(await pages.load(session, 0, 1, TreeSort.nameDesc), isTrue);
+      final desc = await session.children(0, sort: TreeSort.nameDesc);
+      expect(pages.rowAt(0, _pageSize)?.path, desc[_pageSize].path);
+    });
+
+    test('a clear keeps the order: an old-order read after it still reads '
+        'nothing (#1232)', () async {
+      await pages.visible(session, const {}, TreeSort.nameAsc);
+      await pages.visible(session, const {}, TreeSort.nameDesc);
+      // A revision that moved rows somewhere it does not say.
+      pages.clear();
+      final reads = session.atCalls + session.pageCalls;
+
+      expect(await pages.load(session, 0, 1, TreeSort.nameAsc), isFalse);
+      expect(
+        session.atCalls + session.pageCalls,
+        reads,
+        reason: 'the old order did not take the place over',
+      );
+      expect(await pages.load(session, 0, 1, TreeSort.nameDesc), isTrue);
+    });
+
+    test('a read that fails leaves the page unloaded, and nothing '
+        'unhandled (#1233)', () async {
+      final uncaught = <Object>[];
+      await runZonedGuarded(() async {
+        session.pageError = Exception('connection closed');
+        // Both ways a page is read: by position, and by a neighbour.
+        expect(await pages.load(session, 0, 1, TreeSort.nameAsc), isFalse);
+        session.pageError = null;
+        expect(await pages.load(session, 0, 2, TreeSort.nameAsc), isTrue);
+        session.pageError = Exception('connection closed');
+        expect(await pages.load(session, 0, 3, TreeSort.nameAsc), isFalse);
+        // Let a rejection nobody handles reach the zone, if there is one.
+        await Future<void>.delayed(Duration.zero);
+      }, (error, _) => uncaught.add(error));
+
+      expect(uncaught, isEmpty);
+      expect(pages.hasPage((0, 1)), isFalse);
+      expect(pages.hasPage((0, 3)), isFalse);
+      // A later ask reads it afresh.
+      session.pageError = null;
+      expect(await pages.load(session, 0, 1, TreeSort.nameAsc), isTrue);
+      expect(await pages.load(session, 0, 3, TreeSort.nameAsc), isTrue);
+    });
+
     test('adds nothing when the order changed on its way', () async {
       await pages.load(session, 0, 0, TreeSort.nameAsc);
       session.treeGate = Completer<void>();
@@ -224,6 +319,63 @@ void main() {
       session.treeGate!.complete();
       expect(await late, isTrue);
       expect(pages.pageCount, 2);
+    });
+  });
+
+  group('pinned', () {
+    test('a read a revision outdated is not held (#1231)', () async {
+      final scripted = FakeLibrarySession();
+      addTearDown(() async {
+        await scripted.close();
+        await scripted.dispose();
+      });
+      await scripted.open('/lib', create: false);
+      final fields = _ScriptedFields();
+      scripted.fieldSourceOverride = fields;
+      await scripted.createNote(parentPath: '', name: 'old');
+      await scripted.createNote(parentPath: '', name: 'new');
+      final old = (await scripted.find('old.md'))!;
+      final fresh = (await scripted.find('new.md'))!;
+      final first = Completer<void>();
+      final second = Completer<void>()..complete();
+      fields.reads
+        ..add((answer: [old], land: first))
+        ..add((answer: [fresh], land: second));
+
+      final asked = pages.pinnedNotes(scripted);
+      await Future<void>.delayed(Duration.zero);
+      pages.forget([0]); // The revision lands while the read is out.
+      first.complete();
+
+      expect(await asked, [
+        old,
+      ], reason: 'the flatten that asked gets its read');
+      expect(pages.pinned, isNull, reason: 'but the revision outdated it');
+      expect(await pages.pinnedNotes(scripted), [fresh]);
+      expect(pages.pinned, [fresh], reason: 'the next read stands');
+      expect(await pages.pinnedNotes(scripted), [fresh]);
+      expect(fields._next, 2, reason: 'a held list is not read');
+    });
+
+    test('a clear while the read is out outdates it too (#1231)', () async {
+      final scripted = FakeLibrarySession();
+      addTearDown(() async {
+        await scripted.close();
+        await scripted.dispose();
+      });
+      await scripted.open('/lib', create: false);
+      final fields = _ScriptedFields();
+      scripted.fieldSourceOverride = fields;
+      final land = Completer<void>();
+      fields.reads.add((answer: const [], land: land));
+
+      final asked = pages.pinnedNotes(scripted);
+      await Future<void>.delayed(Duration.zero);
+      pages.clear();
+      land.complete();
+      await asked;
+
+      expect(pages.pinned, isNull);
     });
   });
 

@@ -5,6 +5,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/ui/lazy_drag_paths.dart';
 import 'package:niman/src/ui/tree.dart';
 import 'package:niman/src/ui/tree_drag.dart';
 
@@ -200,6 +201,30 @@ void main() {
       'bravo.md -> other',
       'charlie.md -> other',
     ]);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.linux));
+
+  testWidgets('the marks are copied for a drag, not for each row built '
+      '(#1234)', (tester) async {
+    await pump(tester, marked: true, extraNotes: ['alpha', 'bravo', 'charlie']);
+    await tester.tap(find.text('alpha.md'));
+    await tester.pumpAndSettle();
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+    await tester.tap(find.text('charlie.md'));
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+    await tester.pumpAndSettle();
+
+    final carried = [
+      for (final drag in tester.widgetList<TreeRowDrag>(
+        find.byType(TreeRowDrag),
+      ))
+        if (drag.paths is LazyDragPaths) drag.paths! as LazyDragPaths,
+    ];
+    expect(carried, hasLength(3), reason: 'one per marked row');
+    expect(carried.any((paths) => paths.isResolved), isFalse);
+
+    await dragMouse(tester, 'alpha.md', tester.getCenter(find.text('other')));
+
+    expect(carried.where((paths) => paths.isResolved), hasLength(1));
   }, variant: TargetPlatformVariant.only(TargetPlatform.linux));
 
   testWidgets('a marked folder carries its marked child, once (#996)', (
