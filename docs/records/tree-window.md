@@ -239,6 +239,15 @@ What the widget does that the sections above leave open:
 - **A name that a sidecar answers** is found in the order of the names, where
   the row is drawn under its file: when the index answers, a sidecar can be
   found before the file it is drawn under.
+- **The first page and the offset reads split at `is_dir`.** The index is
+  `(parent, is_dir DESC, name_key, name)`, so `ORDER BY is_dir DESC, name_key
+  DESC, name DESC` is not a scan of it in either direction, and SQLite sorted
+  the whole folder (`USE TEMP B-TREE`) for a first page and for every jump by
+  offset in a descending name order (#1229). `TreePager._nameWindow` reads the
+  folders and then the files, each group alone, as `_nameRead` does for the
+  cursor reads; the files' offset is what is left once the folders are counted.
+  `test/unit/tree_pager_plan_test.dart` holds both directions to a plan with no
+  temp B-tree.
 
 ## Measured (phase 5)
 
