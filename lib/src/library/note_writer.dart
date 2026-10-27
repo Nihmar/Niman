@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:isolate';
 
+import 'package:meta/meta.dart';
 import 'package:niman/src/core/creation_time.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/isolate_gauge.dart';
@@ -76,7 +77,15 @@ final class NoteWriter {
 
   /// What the last write of each note left, by path: handed to its reindex,
   /// which takes it while the file is still that one ([KnownContent]).
+  ///
+  /// The stamp and the digest stay after it, a few hundred bytes a note:
+  /// the next save of the note asks them whether the file on disk is this
+  /// writer's own (#1055). Its tags and links go once the reindex has them.
   final Map<String, KnownContent> _written = <String, KnownContent>{};
+
+  /// What this writer remembers of the last write of [path], for the tests.
+  @visibleForTesting
+  KnownContent? writtenOf(String path) => _written[path];
 
   /// A writer's record of what a note's last write left, as the stamp a
   /// save's external check compares against (`SnapshotRequest.lastWritten`);
@@ -418,12 +427,28 @@ final class NoteWriter {
   }) {
     final abs = p.join(root, path);
     if (created) return indexer.applyEvents(root, [abs]).then((_) => true);
-    return indexer.rescanFiles(
-      root,
-      [abs],
-      known: {path: ?_written[path]},
-      cancel: cancel,
-    );
+    final known = _written[path];
+    return indexer
+        .rescanFiles(root, [abs], known: {path: ?known}, cancel: cancel)
+        .then((read) {
+          // The tags and links were the reindex's, now taken (#1202): a
+          // long note's are lists the size of its links, kept for every note
+          // saved in the session. The stamp and the digest stay, for the
+          // next save's check of whose the file is (#1055). A dropped read
+          // keeps them for the one that follows, and a newer save's entry
+          // is not this read's to change.
+          if (read &&
+              known?.references != null &&
+              identical(_written[path], known)) {
+            _written[path] = (
+              sha256: known!.sha256,
+              size: known.size,
+              modified: known.modified,
+              references: null,
+            );
+          }
+          return read;
+        });
   }
 }
 

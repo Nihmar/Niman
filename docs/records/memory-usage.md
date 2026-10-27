@@ -271,6 +271,13 @@ million notes.
   note, so small. But it grows with the number of saves and serves no
   purpose once the index has the save.
   - Fix: the reindex takes the entry out (`remove`, not a lookup).
+  - **Corrected while fixing it (2026-10-27, #1202).** The entry does
+    serve a purpose after the reindex. The next save of the note asks it
+    whether the file on disk is this writer's own (`lastWritten`, #1055),
+    and removing it would turn the app's own write into somebody else's.
+    Only the references are the reindex's alone, and they are the large
+    part for a long note. The reindex now takes them and leaves the stamp
+    and the digest.
 - **The note that is leaving.** `NoteView._load` (`ui/note_view.dart:1416`)
   keeps the old surface until the new note has been read: the buffer,
   the scanner, the undo history, `_unifiedTextCache` and the preview's
@@ -278,6 +285,13 @@ million notes.
   the peak.
   - Fix: once the save has been handed off, release the old surface
     before the read starts.
+  - **Found while fixing it (#1202).** `NoteStatsController._revisionOf`
+    kept the old surface as well: it remembers which surface its count is
+    of, and it now holds that surface weakly. A retaining path taken over
+    the VM service (`flutter test --enable-vmservice`, `getRetainingPath`)
+    then ends in Flutter itself. `SliverMultiBoxAdaptorElement` keeps a
+    stale `_currentBeforeChild` into the unmounted pane until that list
+    lays out again. That is the framework's, and short-lived.
 
 ## Ruled out
 
