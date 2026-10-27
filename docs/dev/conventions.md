@@ -21,6 +21,12 @@
   - R8 strips the reminder icon unless pinned via `tools:keep` in
     `android/app/src/main/res/raw/dev_niman_niman_keep.xml` — update the
     keep file when renaming the drawable.
+- **A cache that can be rebuilt gives itself back:** one kept only to save a
+  re-read of the note, the index or a pure computation implements
+  `Reclaimable` and calls `MemoryReclaim.track(this)`, so the system's call
+  for memory and the app going to the background empty it
+  ([memory](memory.md#giving-memory-back)). Not a cache of user data or of
+  what is on screen.
 - **Interface rules:**
   - Icons are outline. A filled icon says a state is on: the selected
     tab, a pinned note, the current library, the note in use as the

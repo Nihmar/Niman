@@ -10,10 +10,21 @@ library;
 
 import 'dart:collection';
 
+import 'package:niman/src/core/memory_reclaim.dart';
+import 'package:niman/src/core/reclaimable.dart';
+
 /// A least-recently-used cache of at most [capacity] entries.
-final class LruCache<K, V> {
+///
+/// Every entry is a copy of something on disk or in the index, so the cache
+/// gives all of it back when the app is asked for memory ([reclaim]). An
+/// entry that is a pending `Future` is only dropped from the map: whoever
+/// awaits it still gets its answer, and the next ask reads again.
+final class LruCache<K, V> implements Reclaimable {
   /// An empty cache that holds [capacity] entries (at least one).
-  new(this.capacity) : assert(capacity > 0, 'a cache holds at least one entry');
+  new(this.capacity)
+    : assert(capacity > 0, 'a cache holds at least one entry') {
+    MemoryReclaim.track(this);
+  }
 
   /// How many entries are kept at most.
   final int capacity;
@@ -53,4 +64,7 @@ final class LruCache<K, V> {
 
   /// Lets go of everything.
   void clear() => _entries.clear();
+
+  @override
+  void reclaim() => clear();
 }

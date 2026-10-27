@@ -3,6 +3,8 @@
 /// (`docs/dev/block-tree.md`, phase 5).
 library;
 
+import 'package:niman/src/core/memory_reclaim.dart';
+import 'package:niman/src/core/reclaimable.dart';
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_node.dart';
 import 'package:niman/src/markdown/block_parser.dart';
@@ -25,9 +27,11 @@ import 'package:niman/src/markdown/task_box.dart';
 /// Holds one reading per block, dropped as soon as the buffer's revision
 /// moves: a block is read when it is drawn, and kept only while it is
 /// still true.
-final class ReadParser {
+final class ReadParser implements Reclaimable {
   /// Creates a parser over its own cache.
-  new();
+  new() {
+    MemoryReclaim.track(this);
+  }
 
   final Map<int, ReadBlock> _cache = <int, ReadBlock>{};
   SourceBuffer? _source;
@@ -67,6 +71,21 @@ final class ReadParser {
     final cached = _cache[key];
     if (cached != null) return cached;
     return _cache[key] = read(block, buffer);
+  }
+
+  /// Lets go of every block read, and of the buffer they were read from
+  /// as far as the cache goes.
+  ///
+  /// A block is a function of its buffer's text: the next [of] finds nothing
+  /// kept (the buffer is not the one remembered), reads again and starts a
+  /// cache anew. [scope] and the footnote numbers stay: the first is often
+  /// handed in from a background scan, and scanning it again is the cost of
+  /// the whole note, not of a block.
+  @override
+  void reclaim() {
+    _cache.clear();
+    _source = null;
+    _revision = -1;
   }
 
   /// [block] of [buffer], read without consulting the cache, with

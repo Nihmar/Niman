@@ -135,6 +135,50 @@ duration of a job (the note exists in the caller's heap and in the
 isolate's). The index and search connections' isolates are long-lived and
 idle-cheap after warm-up (`_warmIndex`).
 
+## Giving memory back
+
+Flutter empties its own image cache when the system asks for memory; the
+caches the app keeps are its own to empty (#1195). A cache that is **rebuilt
+on demand** — from the note on disk, a row of the index, or as a pure
+function of its input — implements `Reclaimable` (`core/reclaimable.dart`)
+and hands itself to `MemoryReclaim.track(this)` where it is made
+(`core/memory_reclaim.dart`). The registry holds its owners by weak
+reference, so a cache made per note or per widget state needs no unregister
+and is never kept alive by it.
+
+`MemoryReclaimObserver` (`core/memory_reclaim_observer.dart`, installed once
+in `main`) calls `MemoryReclaim.reclaimAll()` on:
+
+- `didHaveMemoryPressure` — Android's `onTrimMemory` and iOS's memory
+  warning (the Linux and Windows embedders send none);
+- `AppLifecycleState.paused` — the app went to the background. On a phone
+  this is what Android weighs when it picks a backgrounded process to kill.
+  `inactive` and `hidden` do not count: they also come with a dialog or a
+  covered window while the user is looking at the app.
+
+Each reclaim logs one `memory` debug line with how many owners it asked and
+the resident size before and after (the heap itself is only collected
+later).
+
+A `reclaim()` lets go of what is kept and **nothing else**: it notifies
+nobody, so the editor does not rescan and the views do not rebuild under
+memory pressure, and a result still being computed completes as it would
+have. The next ask rebuilds what was let go.
+
+| Owner | What is let go |
+|---|---|
+| `LruCache` | Every entry — the mentions of `MentionReader`, the previews of `PreviewReader`, the lists of `RevisionCache` |
+| `ReadParser` | The blocks read, and the buffer remembered for them |
+| `SourceStyler` | The parses kept by block content (the lines on screen keep theirs) |
+| `MathCache` | Typeset boxes and remembered failures; renders under way land as usual. A formula view that is rebuilt after that asks for its render again |
+| `MathRaster` | The images of formulas with path shapes, disposed as an eviction does |
+| `diagramCache` | Every laid-out diagram |
+| `EditorSpellCheck` | The per-word verdicts and suggestions; not the per-line answers |
+
+Not here, on purpose: the tree's loaded folders (they are what is on screen;
+#1200 windows them), open notes and their undo history (user data), and
+anything whose loss shows as a reload.
+
 ## Scale rule (1M notes, novel-length files)
 
 Read from the code, the hot paths hold a **window**, not the library or the

@@ -113,6 +113,19 @@ class _InlineMathViewState extends State<InlineMathView> {
     );
   }
 
+  /// Asks for the render again when the cache has let go of the box this
+  /// view was drawn with (`MathCache.reclaim`): it is neither pending nor
+  /// failed, so nothing else would ever ask, and the view would stay its
+  /// placeholder.
+  void _renderIfLetGo({required bool displayMode}) {
+    final cache = widget.cache;
+    if (cache.isPending(widget.tex, displayMode: displayMode) ||
+        cache.isError(widget.tex, displayMode: displayMode)) {
+      return;
+    }
+    _request();
+  }
+
   @override
   Widget build(BuildContext context) {
     final box = widget.cache.boxFor(widget.tex, displayMode: false);
@@ -130,6 +143,7 @@ class _InlineMathViewState extends State<InlineMathView> {
         textDirection: TextDirection.ltr,
       );
     }
+    _renderIfLetGo(displayMode: false);
     if (widget.cache.isError(widget.tex, displayMode: false)) {
       return Text.rich(
         TextSpan(
@@ -280,12 +294,26 @@ class _BlockMathViewState extends State<BlockMathView> {
     );
   }
 
+  /// Asks for the render again when the cache has let go of the box this
+  /// view was drawn with (`MathCache.reclaim`): it is neither pending nor
+  /// failed, so nothing else would ever ask, and the view would stay its
+  /// placeholder.
+  void _renderIfLetGo({required bool displayMode}) {
+    final cache = widget.cache;
+    if (cache.isPending(widget.tex, displayMode: displayMode) ||
+        cache.isError(widget.tex, displayMode: displayMode)) {
+      return;
+    }
+    _request();
+  }
+
   @override
   Widget build(BuildContext context) {
     final box = widget.cache.boxFor(widget.tex, displayMode: true);
     if (box != null) {
       return _fitted(context, box);
     }
+    _renderIfLetGo(displayMode: true);
     if (widget.cache.isError(widget.tex, displayMode: true)) {
       return Text(widget.tex, style: const TextStyle(color: Color(0xFFCC0000)));
     }

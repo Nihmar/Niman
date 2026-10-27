@@ -3,6 +3,8 @@ import 'dart:collection';
 import 'package:flutter/foundation.dart';
 import 'package:katex_dart/katex_dart.dart'
     show BoxNode, KatexOptions, renderToBox;
+import 'package:niman/src/core/memory_reclaim.dart';
+import 'package:niman/src/core/reclaimable.dart';
 
 /// The math render cache (design.md): built output keyed by the exact math
 /// string, bounded LRU. The default render is synchronous: one span takes
@@ -16,13 +18,15 @@ import 'package:katex_dart/katex_dart.dart'
 /// note reuses the cached boxes for unchanged spans (the T-M2-05 AC).
 /// Errors are remembered but never cached: an errored tex keeps rendering
 /// its red fallback instead of poisoning the cache.
-final class MathCache extends ChangeNotifier {
+final class MathCache extends ChangeNotifier implements Reclaimable {
   /// Creates a cache with [capacity] entries.
   ///
   /// [renderer] (synchronous seam) and [asyncRenderer] (future seam) replace
   /// the render path for tests; the default renders synchronously with
   /// `katex_dart`.
-  new({this.capacity = defaultCapacity, this.renderer, this.asyncRenderer});
+  new({this.capacity = defaultCapacity, this.renderer, this.asyncRenderer}) {
+    MemoryReclaim.track(this);
+  }
 
   /// The sync render seam; null = [asyncRenderer] or the default render.
   final BoxNode Function(String tex, {required bool displayMode})? renderer;
@@ -136,6 +140,21 @@ final class MathCache extends ChangeNotifier {
       () async =>
           renderToBox(tex, options: KatexOptions(displayMode: displayMode)),
     );
+  }
+
+  /// Lets go of every typeset box and remembered failure.
+  ///
+  /// Both are rebuilt by the next [ensure]: a formula is a pure function of
+  /// its source. The renders under way are left alone and land in the cache
+  /// as they finish, and nobody is notified — a view that drew its box keeps
+  /// it until it is rebuilt, and then asks again (`math_widget.dart`), so
+  /// emptying the cache does not make the visible formulas typeset twice
+  /// over.
+  @override
+  void reclaim() {
+    if (_disposed) return;
+    _boxes.clear();
+    _errors.clear();
   }
 
   @override

@@ -17,6 +17,7 @@ import 'package:niman/src/core/launch_args.dart';
 import 'package:niman/src/core/launch_requests.dart';
 import 'package:niman/src/core/log_file.dart';
 import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/core/memory_reclaim_observer.dart';
 import 'package:niman/src/core/shortcuts.dart';
 import 'package:niman/src/core/single_instance.dart';
 import 'package:niman/src/widget/widget_toggle.dart';
@@ -30,6 +31,9 @@ Future<void> main(List<String> args) async {
   // every dialog unless told not to look for one.
   if (Platform.isMacOS) await FilePicker.skipEntitlementsChecks();
   CrashReporter.install();
+  // Before anything keeps a cache: the system's call for memory and the
+  // app going to the background empty the ones that can be rebuilt (#1195).
+  MemoryReclaimObserver.install();
   unawaited(_attachLogFile());
   unawaited(_registerWidgetToggle());
   _reportSlowFrames();
