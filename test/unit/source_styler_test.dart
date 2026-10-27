@@ -5,6 +5,7 @@
 import 'dart:math';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/memory_reclaim.dart';
 import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/markdown/background_scan.dart';
 import 'package:niman/src/markdown/block.dart';
@@ -509,6 +510,33 @@ void main() {
         styler.tokensOf(at);
       }
       expect(styler.parses - before, lessThanOrEqualTo(2));
+    });
+
+    test('reclaim lets go of the parses, a block is read again (#1195)', () {
+      final lines = [
+        for (var at = 0; at < 200; at++) 'Paragraph $at with **bold**.\n',
+      ];
+      final buffer = SourceBuffer.fromText(lines.join('\n'));
+      final styler = SourceStyler(buffer);
+      for (var at = 0; at < 60; at++) {
+        styler.tokensOf(at);
+      }
+      final first = styler.parses;
+      // Moved down by a line, the blocks on screen are found by their text.
+      styler.edited(buffer.replaceRange(0, 0, 'new\n'));
+      for (var at = 0; at < 61; at++) {
+        styler.tokensOf(at);
+      }
+      expect(styler.parses - first, lessThanOrEqualTo(2), reason: 'kept');
+
+      MemoryReclaim.reclaimAll();
+      final second = styler.parses;
+      styler.edited(buffer.replaceRange(0, 0, 'more\n'));
+      for (var at = 0; at < 62; at++) {
+        styler.tokensOf(at);
+      }
+
+      expect(styler.parses - second, greaterThan(25), reason: 'read again');
     });
 
     test('the frame after an Enter re-joins no block it read (#362)', () {

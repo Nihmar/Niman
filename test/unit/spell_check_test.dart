@@ -6,6 +6,7 @@ import 'dart:io';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/memory_reclaim.dart';
 import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
@@ -186,6 +187,33 @@ void main() {
         check.rangesFor(index, '$long$index', skip: const []);
       }
       expect(check.linesHeld, lessThan(8));
+    });
+
+    test('reclaim lets the word verdicts go, the next ask recomputes them', () {
+      final engine = _FakeChecker({'wrold'});
+      final check = EditorSpellCheck(createChecker: (_) => engine);
+      expect(check.isMisspelled('wrold'), isTrue);
+      expect(check.isMisspelled('wrold'), isTrue);
+      expect(engine.verdicts, 1, reason: 'the second ask was a lookup');
+      var notified = 0;
+      check.addListener(() => notified++);
+
+      MemoryReclaim.reclaimAll();
+
+      expect(check.isMisspelled('wrold'), isTrue, reason: 'the same verdict');
+      expect(engine.verdicts, 2, reason: 'asked of the engine again');
+      expect(notified, 0, reason: 'the editor is not told to scan again');
+    });
+
+    test('reclaim keeps the lines checked', () {
+      final engine = _FakeChecker({'wrold'});
+      final check = EditorSpellCheck(createChecker: (_) => engine);
+      final before = check.rangesFor(0, 'hello wrold', skip: const []);
+
+      MemoryReclaim.reclaimAll();
+
+      expect(check.rangesFor(0, 'hello wrold', skip: const []), before);
+      expect(check.linesChecked, 1, reason: 'a lookup, not a check');
     });
 
     test('a line pushed down by an edit is still answered (#1052)', () {
@@ -779,11 +807,15 @@ final class _FakeChecker implements SpellChecker {
   /// then calls every word correct.
   bool disposed = false;
 
+  /// How many verdicts the engine was asked for.
+  int verdicts = 0;
+
   @override
   bool get available => true;
 
   @override
   bool isCorrect(String word) {
+    verdicts++;
     if (disposed) return true;
     if (cost > 0) {
       final clock = Stopwatch()..start();

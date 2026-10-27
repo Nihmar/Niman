@@ -20,6 +20,8 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/core/memory_reclaim.dart';
+import 'package:niman/src/core/reclaimable.dart';
 import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/spellcheck/checked_lines.dart';
 import 'package:niman/src/spellcheck/hunspell_spell_checker.dart';
@@ -63,7 +65,7 @@ const Set<TokenKind> _skipKinds = <TokenKind>{
 typedef SpellLine = ({String text, List<TextRange> skip});
 
 /// The document-level spelling state the editor's span builder consults.
-final class EditorSpellCheck extends ChangeNotifier {
+final class EditorSpellCheck extends ChangeNotifier implements Reclaimable {
   /// Creates the state over [createChecker] (the system engine by default).
   ///
   /// [dictionaries] are the user's chosen dictionary names; an empty list
@@ -84,6 +86,7 @@ final class EditorSpellCheck extends ChangeNotifier {
        _dictionary = dictionary {
     dictionary?.addListener(_onDictionaryChanged);
     _startEngines();
+    MemoryReclaim.track(this);
   }
 
   final SpellChecker Function(String? dictionary)? _override;
@@ -115,6 +118,19 @@ final class EditorSpellCheck extends ChangeNotifier {
   /// The active dictionary names, in selection order (empty = the
   /// machine's locale).
   List<String> get dictionaries => List.unmodifiable(_dictionaries);
+
+  /// Lets go of the verdicts and suggestions kept per word.
+  ///
+  /// Each is asked of the engine again the next time its word is checked.
+  /// The answers kept per line ([_lines]) stay and nobody is notified:
+  /// the underlines on screen are what they were, and telling the editor
+  /// would have it scan the whole note while the system is short of memory.
+  @override
+  void reclaim() {
+    if (_disposed) return;
+    _words.clear();
+    _suggestions.clear();
+  }
 
   /// Changes the dictionaries: the current engines are dropped, their word
   /// verdicts and line ranges forgotten, and the new ones load in the

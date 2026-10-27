@@ -6,6 +6,8 @@ library;
 import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
+import 'package:niman/src/core/memory_reclaim.dart';
+import 'package:niman/src/core/reclaimable.dart';
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_node.dart';
 import 'package:niman/src/markdown/block_parser.dart';
@@ -35,9 +37,11 @@ import 'package:niman/src/markdown/task_box.dart';
 /// scrolled away is let go with its widget. Held strongly, the cache kept a
 /// reading for every block ever drawn until the next edit: reading a 2 M
 /// block note from end to end kept all of them, more than the blocks.
-final class ReadParser {
+final class ReadParser implements Reclaimable {
   /// Creates a parser over its own cache.
-  new();
+  new() {
+    MemoryReclaim.track(this);
+  }
 
   /// The cache is never swept below this many entries: a short list is not
   /// worth a pass.
@@ -103,6 +107,22 @@ final class ReadParser {
   /// swept out yet included: what the sweep keeps near the blocks drawn.
   @visibleForTesting
   int get cachedEntries => _cache.length;
+
+  /// Lets go of every block read, and of the buffer they were read from
+  /// as far as the cache goes.
+  ///
+  /// A block is a function of its buffer's text: the next [of] finds nothing
+  /// kept (the buffer is not the one remembered), reads again and starts a
+  /// cache anew. [scope] and the footnote numbers stay: the first is often
+  /// handed in from a background scan, and scanning it again is the cost of
+  /// the whole note, not of a block.
+  @override
+  void reclaim() {
+    _cache.clear();
+    _sweepAt = _minimumSweep;
+    _source = null;
+    _revision = -1;
+  }
 
   /// [block] of [buffer], read without consulting the cache, with
   /// [scope]'s definitions — given by a reader that keeps them current
