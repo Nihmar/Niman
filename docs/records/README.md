@@ -22,7 +22,7 @@ comments (`docs/records/<name>.md`).
 | [desktop-performance.md](desktop-performance.md) | The desktop audit (#62): the cold-start and integration-test baseline, the animation inventory and the proposed policy |
 | [performance-audit.md](performance-audit.md) | The performance baseline (#1135): the scenarios, Android's numbers from the device logs, the Linux perf suite, a million notes, the APK's libraries, and the prioritized list |
 | [memory-usage.md](memory-usage.md) | Where the running app's RAM goes: the log's resident set, a retention probe, nine holders ranked with their fixes, and what was ruled out (#511, #1144) |
-| [tree-window.md](tree-window.md) | The note tree bounded by what is on screen: a model of the visible rows from counts, pages around the viewport, the flows that read the whole list today (#1200) — not built |
+| [tree-window.md](tree-window.md) | The note tree bounded by what is on screen: a model of the visible rows from counts, pages around the viewport, the flows that read the whole list, measured over a million rows (#1200) |
 | [workspace.md](workspace.md) | The open-note model — tabs and panes (#23) |
 | [epub-reader.md](epub-reader.md) | Reading an EPUB into Markdown (#280) |
 | [annotations.md](annotations.md) | Annotating a PDF or a book in a companion note (#284) |

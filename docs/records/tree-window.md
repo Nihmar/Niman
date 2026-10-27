@@ -1,13 +1,14 @@
 # The tree, by what is on screen (#1200)
 
 The design for bounding the note tree's memory by the rows on screen, not by
-the rows ever scrolled past. It was written before any code; phases 1 to 4
+the rows ever scrolled past. It was written before any code. Phases 1 to 4
 are built (the index reads, `VisibleTree`, `TreePages`, and `NoteTree` on
-them), and phase 5 measured them (see "Measured (phase 5)"). It
-answers finding 7 of [memory-usage.md](memory-usage.md); #1200 was deferred because the fix is a
-redesign of how the tree reads and indexes its rows, not a local change.
+them), and phase 5 measured them (see "Measured (phase 5)"); phase 6 was
+not needed. It answers finding 7 of [memory-usage.md](memory-usage.md);
+#1200 was deferred because the fix is a redesign of how the tree reads and
+indexes its rows, not a local change.
 
-## What the tree does now
+## What the tree did before
 
 `lib/src/ui/tree.dart` (~1 500 lines) and `lib/src/ui/tree_child_cache.dart`.
 
@@ -200,7 +201,9 @@ each.
 5. **The measurement:** `tree_queries_perf_test` and the retention test
    page through a folder of a million notes and print the heap retained,
    held to a bar of a few pages under `NIMAN_PERF`.
-6. **Optional:** slimmer rows (§5), only if phase 5 says so.
+6. **Optional:** slimmer rows (§5), only if phase 5 says so. It did not:
+   after a million-row scroll the window retains 3.6 MB, so the rows are
+   not the tree's largest holder any more.
 
 Manual checks before the PR, on Windows and on the Android tablet:
 
