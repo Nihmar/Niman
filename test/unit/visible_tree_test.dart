@@ -167,6 +167,27 @@ void main() {
       expect(tree.length, 3);
     });
 
+    test('a folder knows the index of its own row', () {
+      // [0] r0, [1] folder 10 (3 children), [2..4] its rows, [5] r2.
+      final tree = VisibleTree(rootCount: 3, expanded: [folder(10, 0, 1, 3)]);
+      expect(tree.rowIndexOf(10), 1);
+      expect(tree.rowIndexOf(0), isNull, reason: 'the root has no row');
+      expect(tree.rowIndexOf(99), isNull);
+    });
+
+    test('a run ends at an expanded child or at the last child', () {
+      // [0] r0, [1] folder 10, [2..4] its rows, [5] r2, [6] r3, [7] r4.
+      final tree = VisibleTree(rootCount: 5, expanded: [folder(10, 0, 1, 3)]);
+      expect(tree.runEnd(0, 0), 1);
+      expect(tree.runEnd(0, 1), 1);
+      expect(tree.runEnd(0, 2), 4);
+      expect(tree.runEnd(0, 4), 4);
+      expect(tree.runEnd(10, 0), 2);
+      expect(tree.runEnd(0, 5), isNull);
+      expect(tree.runEnd(0, -1), isNull);
+      expect(tree.runEnd(99, 0), isNull);
+    });
+
     test('indexOf answers null for a position the folder does not have', () {
       final tree = VisibleTree(rootCount: 2);
       expect(tree.indexOf(0, -1), isNull);
@@ -300,6 +321,33 @@ void _checkRandomTree(Random random, int round) {
   );
 
   expect(tree.length, flat.length, reason: 'round $round: length');
+  // A folder's own row is the one before its first child, and a run of a
+  // folder's children ends at the first expanded one from where it starts.
+  for (final id in expanded) {
+    if (!tree.isVisibleFolder(id)) {
+      expect(tree.rowIndexOf(id), isNull, reason: 'round $round: row of $id');
+      continue;
+    }
+    expect(flat[tree.rowIndexOf(id)!], (
+      parent: parentOf[id]!,
+      position: positionOf[id]!,
+      depth: tree.childDepth(id)! - 1,
+    ), reason: 'round $round: row of $id');
+  }
+  for (final parent in [0, ...expanded.where(tree.isVisibleFolder)]) {
+    final children = childrenOf[parent] ?? const <int>[];
+    for (var from = 0; from < children.length; from++) {
+      var end = from;
+      while (end < children.length - 1 && !expanded.contains(children[end])) {
+        end++;
+      }
+      expect(
+        tree.runEnd(parent, from),
+        end,
+        reason: 'round $round: run of $parent from $from',
+      );
+    }
+  }
   for (var i = 0; i < flat.length; i++) {
     expect(tree.slotAt(i), flat[i], reason: 'round $round: slotAt($i)');
     expect(

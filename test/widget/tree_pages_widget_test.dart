@@ -1,6 +1,14 @@
 // #1064: the tree reads each folder once per revision, and in pages. Opening
 // a folder reads that folder, closing one reads nothing, and a big folder
 // reads a page until the list scrolls to the end of it.
+//
+// #1200: the pages are the tree's `TreePages` now, which replaced
+// `TreeChildCache`, and the claims are held over the rows read, whether by
+// keyset (`pageCalls`) or by position (`atCalls`). What changed on purpose:
+// a folder closed lets go of its pages, so opening it again reads one page
+// where it read none (the counts, which are small, are still held); and a
+// page left behind by the scroll is dropped, so a list scrolled to its end
+// holds the window and not the pages passed.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/ui/tree.dart';
@@ -19,6 +27,9 @@ void main() {
     await controller.close();
     await controller.dispose();
   });
+
+  /// How many pages of rows were read, by keyset or by position.
+  int rowReads() => controller.pageCalls + controller.atCalls;
 
   /// A tree whose open folders are [expanded], and whose pages are
   /// [pageSize] children.
@@ -51,28 +62,31 @@ void main() {
     addTearDown(expanded.dispose);
     await tester.pumpWidget(tree(expanded));
     await tester.pumpAndSettle();
-    expect(controller.pageCalls, 1, reason: 'the root');
+    expect(rowReads(), 1, reason: 'the root');
 
     expanded.value = {'docs'};
     await tester.pumpAndSettle();
     expect(find.text('inside.md'), findsOneWidget);
-    expect(controller.pageCalls, 2, reason: 'docs alone, not the root again');
+    expect(rowReads(), 2, reason: 'docs alone, not the root again');
 
     expanded.value = {'docs', 'other'};
     await tester.pumpAndSettle();
     expect(find.text('beside.md'), findsOneWidget);
-    expect(controller.pageCalls, 3, reason: 'other alone');
+    expect(rowReads(), 3, reason: 'other alone');
 
     expanded.value = {'other'};
     await tester.pumpAndSettle();
     expect(find.text('inside.md'), findsNothing);
-    expect(controller.pageCalls, 3, reason: 'closing reads nothing');
+    expect(rowReads(), 3, reason: 'closing reads nothing');
 
-    // Opened again: it is still read, from the cache.
+    // Opened again: its page was let go when it closed, so it is read again —
+    // one page, and not its count, which was held.
+    final counted = controller.countCalls;
     expanded.value = {'docs', 'other'};
     await tester.pumpAndSettle();
     expect(find.text('inside.md'), findsOneWidget);
-    expect(controller.pageCalls, 3);
+    expect(rowReads(), 4, reason: "docs's page, once");
+    expect(controller.countCalls, counted, reason: 'the counts were held');
   });
 
   testWidgets('a change reads the open folders again, once', (tester) async {
@@ -82,13 +96,13 @@ void main() {
     addTearDown(expanded.dispose);
     await tester.pumpWidget(tree(expanded));
     await tester.pumpAndSettle();
-    final before = controller.pageCalls;
+    final before = rowReads();
 
     await controller.createNote(parentPath: 'docs', name: 'fresh');
     await tester.pumpAndSettle();
 
     expect(find.text('fresh.md'), findsOneWidget);
-    expect(controller.pageCalls - before, 2, reason: 'the root and docs');
+    expect(rowReads() - before, 2, reason: 'the root and docs');
   });
 
   testWidgets('a note saved in place reads its own folder again, alone', (
@@ -104,7 +118,7 @@ void main() {
     addTearDown(expanded.dispose);
     await tester.pumpWidget(tree(expanded));
     await tester.pumpAndSettle();
-    final before = controller.pageCalls;
+    final before = rowReads();
 
     await controller.saveNote(
       'docs/inside.md',
@@ -114,7 +128,7 @@ void main() {
 
     expect(find.text('Renamed by its title'), findsOneWidget);
     expect(find.text('beside.md'), findsOneWidget);
-    expect(controller.pageCalls - before, 1, reason: 'docs alone');
+    expect(rowReads() - before, 1, reason: 'docs alone');
   });
 
   testWidgets('a big folder is read a page at a time as the list scrolls', (
@@ -134,7 +148,7 @@ void main() {
     await tester.pumpWidget(tree(expanded, pageSize: 20));
     await tester.pumpAndSettle();
 
-    expect(controller.pageCalls, 1, reason: 'one page of twenty');
+    expect(rowReads(), 1, reason: 'one page of twenty');
     expect(find.text('n000.md'), findsOneWidget);
 
     // Scroll to the end of what is loaded, and then of what comes.
@@ -145,6 +159,6 @@ void main() {
     }
 
     expect(find.text('n099.md'), findsOneWidget);
-    expect(controller.pageCalls, 5, reason: 'five pages of twenty, no more');
+    expect(rowReads(), 5, reason: 'five pages of twenty, no more');
   });
 }

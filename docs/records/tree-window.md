@@ -1,8 +1,9 @@
 # The tree, by what is on screen (#1200)
 
 The design for bounding the note tree's memory by the rows on screen, not by
-the rows ever scrolled past. It was written before any code, and nothing in it
-is built yet. It answers finding 7 of
+the rows ever scrolled past. It was written before any code; phases 1 to 4
+are built (the index reads, `VisibleTree`, `TreePages`, and `NoteTree` on
+them), and the measurement of phase 5 is not. It answers finding 7 of
 [memory-usage.md](memory-usage.md); #1200 was deferred because the fix is a
 redesign of how the tree reads and indexes its rows, not a local change.
 
@@ -211,6 +212,30 @@ Manual checks before the PR, on Windows and on the Android tablet:
 - rename a row far down;
 - create a note in a long folder;
 - open and close folders while scrolled.
+
+## As built (phase 4)
+
+What the widget does that the sections above leave open:
+
+- **The list** is a `CustomScrollView` with a `SliverList` for the pinned
+  block and a `SliverFixedExtentList` for the tree rows: a varied-extent list
+  walks every item to lay out, which a million rows cannot pay. The system's
+  insets are put around the slivers the way a `ListView` does.
+- **The window** the pages are matched to is what the list laid out
+  (`TreeRowsDelegate.didFinishLayout`), so the pages held and the rows drawn
+  cannot disagree. The first read of a revision works the window out from the
+  scroll position and the screen's height, and reads those pages before the
+  rows land, so a change blanks nothing; the rows on screen meanwhile are
+  drawn from the pages they held (`TreeListing.freeze`).
+- **Keys** answer from the rows in memory, as they always did; only a cursor
+  or a target in a page that is not loaded waits for the page, and a typed
+  name that the rows in memory cannot answer waits for the index.
+- **The row being made** is a virtual row of the list under its folder's row
+  (a folder's row found in a loaded page, else by rank). At the root it stays
+  above the list, as it was.
+- **A name that a sidecar answers** is found in the order of the names, where
+  the row is drawn under its file: when the index answers, a sidecar can be
+  found before the file it is drawn under.
 
 ## Open questions
 

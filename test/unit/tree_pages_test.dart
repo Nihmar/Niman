@@ -314,6 +314,25 @@ void main() {
       expect(pages.pagesFor(tree, 0, 0), {(0, 0)});
     });
 
+    test('drawnPages is the pages drawn, without the neighbours', () {
+      final tree = VisibleTree(rootCount: 25);
+      expect(pages.drawnPages(tree, 12, 14), {(0, 1)});
+      expect(pages.drawnPages(tree, 8, 12), {(0, 0), (0, 1)});
+      expect(pages.drawnPages(tree, -5, 99), {(0, 0), (0, 1), (0, 2)});
+      expect(pages.drawnPages(VisibleTree(rootCount: 0), 0, 9), isEmpty);
+    });
+
+    test('held is a copy of the pages that is not changed by them', () async {
+      await session.seedNotes(35);
+      await loadAll(pages, session, [(0, 0), (0, 1)]);
+      final held = pages.held();
+      expect(held.keys.toSet(), {(0, 0), (0, 1)});
+      expect(held[(0, 1)], pages.pageRows(0, 1));
+      pages.keepOnly(const []);
+      expect(pages.pageCount, 0);
+      expect(held, hasLength(2), reason: 'the copy kept its pages');
+    });
+
     test('keepOnly drops the pages outside the window', () async {
       await session.seedNotes(35);
       await loadAll(pages, session, [(0, 0), (0, 1), (0, 2), (0, 3)]);

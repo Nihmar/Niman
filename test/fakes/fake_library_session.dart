@@ -983,9 +983,26 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   /// How many times [childCount] was asked.
   int countCalls = 0;
 
+  /// While set, [childCount] waits for it before answering: the read of the
+  /// tree's model that outlasts the changes arriving behind it (#1200), as
+  /// [treeGate] holds a page.
+  Completer<void>? countGate;
+
+  /// The most [childCount] reads that were outstanding at once.
+  int countPeak = 0;
+  int _countOutstanding = 0;
+
   @override
   Future<int> childCount(int parentId) async {
     countCalls++;
+    _countOutstanding++;
+    if (_countOutstanding > countPeak) countPeak = _countOutstanding;
+    try {
+      final gate = countGate;
+      if (gate != null) await gate.future;
+    } finally {
+      _countOutstanding--;
+    }
     return _kidsOf(parentId, TreeSort.nameAsc).length;
   }
 

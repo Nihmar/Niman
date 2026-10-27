@@ -203,6 +203,43 @@ final class VisibleTree {
     }
   }
 
+  /// The index of the row of the visible folder [folderId] itself, which its
+  /// children follow; or null for the root, which has no row, and for a
+  /// folder [isVisibleFolder] says no to.
+  int? rowIndexOf(int folderId) {
+    if (folderId == rootId) return null;
+    final first = _firstChild[folderId];
+    return first == null ? null : first - 1;
+  }
+
+  /// The position of the last row of the run of [parentId]'s children that
+  /// starts at [position]: the rows that follow one another in the list with
+  /// nothing opened between them. A run ends at an expanded child, whose own
+  /// row is the last of it, or at the folder's last child.
+  ///
+  /// Null when [parentId] is not a visible folder (see [isVisibleFolder]) or
+  /// [position] is not one of its children. What searches the list by name
+  /// uses it to ask the index for a whole run at once.
+  int? runEnd(int parentId, int position) {
+    final count = _childCount[parentId];
+    if (count == null || position < 0 || position >= count) return null;
+    final opened = _opened[parentId];
+    if (opened == null) return count - 1;
+    // The first expanded child at or after the position.
+    final ranks = opened.ranks;
+    var low = 0;
+    var high = ranks.length;
+    while (low < high) {
+      final middle = (low + high) >> 1;
+      if (ranks[middle] < position) {
+        low = middle + 1;
+      } else {
+        high = middle;
+      }
+    }
+    return low < ranks.length ? ranks[low] : count - 1;
+  }
+
   /// The index of the row at [position] among the children of [parentId],
   /// the inverse of [slotAt]; or null when [parentId] is not a visible folder
   /// (see [isVisibleFolder]) or [position] is not one of its children.

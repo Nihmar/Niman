@@ -264,12 +264,7 @@ final class TreePages {
   /// The range is clamped to the list, and walked row by row: it is a screen
   /// of them.
   Set<TreePageKey> pagesFor(VisibleTree tree, int firstIndex, int lastIndex) {
-    final drawn = <TreePageKey>{};
-    final last = lastIndex < tree.length ? lastIndex : tree.length - 1;
-    for (var i = firstIndex < 0 ? 0 : firstIndex; i <= last; i++) {
-      final slot = tree.slotAt(i);
-      drawn.add((slot.parent, slot.position ~/ pageSize));
-    }
+    final drawn = drawnPages(tree, firstIndex, lastIndex);
     final window = {...drawn};
     for (final (parent, page) in drawn) {
       if (page > 0) window.add((parent, page - 1));
@@ -279,6 +274,29 @@ final class TreePages {
     }
     return window;
   }
+
+  /// The pages the rows from index [firstIndex] to [lastIndex] of [tree],
+  /// both included, are in — the ones to read, where [pagesFor] adds the
+  /// neighbours to keep.
+  Set<TreePageKey> drawnPages(VisibleTree tree, int firstIndex, int lastIndex) {
+    final drawn = <TreePageKey>{};
+    final last = lastIndex < tree.length ? lastIndex : tree.length - 1;
+    for (var i = firstIndex < 0 ? 0 : firstIndex; i <= last; i++) {
+      final slot = tree.slotAt(i);
+      drawn.add((slot.parent, slot.position ~/ pageSize));
+    }
+    return drawn;
+  }
+
+  /// The pages held, by key, with their rows: a copy, so that what a caller
+  /// keeps of it is not changed when a page is dropped or lands. The widget
+  /// draws the last rows it had from one while a newer read is out, and
+  /// looks a row up by its path in one.
+  Map<TreePageKey, List<Note>> held() => {
+    for (final MapEntry(key: parent, value: pages) in _pages.entries)
+      for (final MapEntry(key: page, value: rows) in pages.entries)
+        (parent, page): rows,
+  };
 
   /// Drops every loaded page that is not in [wanted]: call it with
   /// [pagesFor] when the window moves or a page lands.
