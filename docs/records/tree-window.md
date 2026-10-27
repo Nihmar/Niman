@@ -275,6 +275,11 @@ What the widget does that the sections above leave open:
   unhandled error, and the next ask reads the page again (#1233). The range
   marking of Shift+click handles the failure of its own reads, and does
   nothing once the tree is gone.
+- **A drag copies the marks when it starts.** A row that is one of several
+  marked carries `LazyDragPaths`, which lists the marks the first time a drag
+  (or its drop, or its feedback) looks at them. Shift+click can mark a whole
+  folder, and each marked row on screen used to copy all of them as it was
+  built (#1234).
 
 ## Measured (phase 5)
 

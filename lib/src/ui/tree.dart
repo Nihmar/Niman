@@ -13,6 +13,7 @@ import 'package:niman/src/editor/toolbar.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ocr/ocr_queue.dart';
 import 'package:niman/src/ui/action_sheet.dart';
+import 'package:niman/src/ui/lazy_drag_paths.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/tree_create_row.dart';
 import 'package:niman/src/ui/tree_drag.dart';
@@ -286,9 +287,15 @@ final class _NoteTreeState extends State<NoteTree> {
   final Set<String> _marked = {};
 
   /// The paths a drag started on [path] carries (#996): every marked row's
-  /// when [path] is one of several marked rows, else the row's own.
-  List<String> _dragPaths(String path) =>
-      _marked.length > 1 && _marked.contains(path) ? _marked.toList() : [path];
+  /// when [path] is one of several marked rows, else null, the row's own.
+  ///
+  /// The marks are copied when a drag looks at them, not when the row is
+  /// built (#1234): a range can mark a million rows, and every marked row on
+  /// screen is built with these.
+  List<String>? _dragPaths(String path) =>
+      _marked.length > 1 && _marked.contains(path)
+      ? LazyDragPaths(_marked.toList)
+      : null;
 
   /// What has been typed to jump to a row by its name, and when the last
   /// letter came: a pause starts a new name (#712).
