@@ -348,6 +348,82 @@ void main() {
     });
   });
 
+  group('the form opens on the series, or on the occurrence (#1221)', () {
+    Future<void> openEdit(WidgetTester tester, String scope) async {
+      await pump(tester, phone: false);
+      await rightClick(tester, 'Standup');
+      await tester.tap(key('journal-event-edit'));
+      await tester.pumpAndSettle();
+      await tester.tap(key('journal-event-scope-$scope'));
+      await tester.pumpAndSettle();
+    }
+
+    String dayLabel(WidgetTester tester) => tester
+        .widget<Text>(
+          find.descendant(
+            of: key('calendar-event-day'),
+            matching: find.byType(Text),
+          ),
+        )
+        .data!;
+
+    Future<void> endOn(WidgetTester tester, int day) async {
+      await tester.tap(key('calendar-event-ends'));
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.descendant(of: find.byType(Dialog), matching: find.text('$day')),
+      );
+      await tester.tap(find.text('OK'));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('Edit all is on the day the series began', (tester) async {
+      await openEdit(tester, 'all');
+      // Tapped on Mon 12 October; the series began on Mon 5 October.
+      expect(dayLabel(tester), contains('5'));
+      expect(dayLabel(tester), isNot(contains('12')));
+
+      // The series can be ended as early as its first day, not only from the
+      // occurrence that was tapped.
+      await endOn(tester, 7);
+      await tester.tap(key('calendar-event-save'));
+      await tester.pumpAndSettle();
+
+      expect(edited.single.$3, CalendarOccurrenceScope.all);
+      expect(edited.single.$2.day, DateTime(2026, 10, 5));
+      expect(edited.single.$2.recurrence!.bounds.until, DateTime(2026, 10, 7));
+    });
+
+    testWidgets('this and following is on the occurrence', (tester) async {
+      await openEdit(tester, 'following');
+      expect(dayLabel(tester), contains('12'));
+      await tester.tap(key('calendar-event-save'));
+      await tester.pumpAndSettle();
+      expect(edited.single.$2.day, DateTime(2026, 10, 12));
+    });
+
+    testWidgets('the preview of Edit all is the rule line, not a new one', (
+      tester,
+    ) async {
+      await openEdit(tester, 'all');
+      await tester.enterText(key('calendar-event-text'), 'Standup moved');
+      await tester.pump();
+      final lines = tester
+          .widget<Text>(
+            find
+                .descendant(
+                  of: key('calendar-event-preview'),
+                  matching: find.byType(Text),
+                )
+                .first,
+          )
+          .textSpan!
+          .toPlainText();
+      expect(lines, startsWith('2026-10-05'));
+      expect(lines, isNot(contains('2026-10-12')));
+    });
+  });
+
   group('moving, from the form', () {
     /// The text of the preview box: the lines the write would make.
     String preview(WidgetTester tester) => tester

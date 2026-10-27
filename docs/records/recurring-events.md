@@ -276,3 +276,11 @@ What the review of the first release of the editor changed.
   made of the event's line, its start, the occurrence's day and the scope, so
   a new target is a new form. Without it, Edit on a second event kept the
   first one's fields and saved them over the second.
+- **The form opens on the day it writes (#1221).** *Edit all* writes the rule
+  event on its own line, so its form opens on the series' first day: the Ends
+  row can end the series as early as that day, and the weekly and Nth-weekday
+  presets are taken from the day the rule began, not from the occurrence that
+  happened to be tapped. *This one* and *This and following* open on the
+  occurrence, the day the changed event or the new series starts on. The
+  form's preview is given the occurrence apart from the form's day, so it is
+  the writer's answer for the scope in both cases.
