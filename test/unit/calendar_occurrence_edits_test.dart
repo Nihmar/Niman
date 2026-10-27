@@ -700,6 +700,115 @@ void main() {
     });
   });
 
+  group('the reminder an edit carries (#1226)', () {
+    /// The standup with a full-stamp reminder the evening before.
+    const stamped =
+        '2026-10-05 w41 Mon  9 Standup rec:1w rem:2026-10-04T18:00. 17 jog.';
+
+    CalendarFileContent stampedFile() =>
+        file([const CalendarRawLine(stamped, '\n')]);
+
+    final stampedRef = CalendarEventRef(
+      line: 0,
+      day: DateTime(2026, 10, 5),
+      start: 20,
+    );
+
+    /// The `rem:` values the line of [day] holds in [after].
+    List<String> remindersOn(CalendarFileContent after, String day) => [
+      for (final line in after.lines)
+        if (line.text.startsWith(day))
+          for (final event in parseCalendarLine(
+            line.text,
+            weekdays: calendarWeekdays,
+          ).events)
+            ?event.reminder,
+    ];
+
+    test('an untimed event keeps its clock reminder through an edit', () {
+      final before = file([
+        const CalendarRawLine('2026-10-05 w41 Mon  Standup rem:09:00.', '\n'),
+      ]);
+      final draft = calendarDraftOf(firstEvent(before.lines.single.text));
+      final after = updateCalendarOccurrence(
+        before,
+        CalendarEventRef(line: 0, day: DateTime(2026, 10, 5), start: 20),
+        DateTime(2026, 10, 5),
+        draft,
+        CalendarOccurrenceScope.all,
+      )!;
+      expect(after.lines.single.text, before.lines.single.text);
+    });
+
+    test('this one: the stamp keeps its distance from the new event', () {
+      final after = updateCalendarOccurrence(
+        stampedFile(),
+        stampedRef,
+        DateTime(2026, 10, 12),
+        calendarDraftOf(firstEvent(stamped)).withRecurrence(null),
+        CalendarOccurrenceScope.thisOne,
+      )!;
+      expect(remindersOn(after, '2026-10-12'), ['2026-10-11T18:00']);
+    });
+
+    test('this one, moved: the distance holds from the day it goes to', () {
+      final after = updateCalendarOccurrence(
+        stampedFile(),
+        stampedRef,
+        DateTime(2026, 10, 12),
+        CalendarEventDraft(
+          text: calendarDraftOf(firstEvent(stamped)).text,
+          startMinutes: 9 * 60,
+          day: DateTime(2026, 10, 14),
+        ),
+        CalendarOccurrenceScope.thisOne,
+      )!;
+      expect(remindersOn(after, '2026-10-14'), ['2026-10-13T18:00']);
+    });
+
+    test('this and following: the new anchor has its own distance', () {
+      final after = updateCalendarOccurrence(
+        stampedFile(),
+        stampedRef,
+        DateTime(2026, 10, 19),
+        calendarDraftOf(firstEvent(stamped)),
+        CalendarOccurrenceScope.thisAndFollowing,
+      )!;
+      expect(remindersOn(after, '2026-10-05'), ['2026-10-04T18:00']);
+      expect(remindersOn(after, '2026-10-19'), ['2026-10-18T18:00']);
+    });
+
+    test('edit all with a new day moves the stamp with the anchor', () {
+      final after = updateCalendarOccurrence(
+        stampedFile(),
+        stampedRef,
+        DateTime(2026, 10, 12),
+        CalendarEventDraft(
+          text: calendarDraftOf(firstEvent(stamped)).text,
+          startMinutes: 9 * 60,
+          recurrence: calendarDraftOf(firstEvent(stamped)).recurrence,
+          day: DateTime(2026, 10, 7),
+        ),
+        CalendarOccurrenceScope.all,
+      )!;
+      expect(remindersOn(after, '2026-10-07'), ['2026-10-06T18:00']);
+    });
+
+    test('a stamp the user wrote in the form is not moved again', () {
+      final after = updateCalendarOccurrence(
+        stampedFile(),
+        stampedRef,
+        DateTime(2026, 10, 12),
+        const CalendarEventDraft(
+          text: 'Standup rem:2026-10-11T07:30',
+          startMinutes: 9 * 60,
+        ),
+        CalendarOccurrenceScope.thisOne,
+      )!;
+      expect(remindersOn(after, '2026-10-12'), ['2026-10-11T07:30']);
+    });
+  });
+
   group('delete', () {
     test('this one is a skip', () {
       final a = deleteCalendarOccurrence(

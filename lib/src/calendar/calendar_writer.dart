@@ -21,6 +21,7 @@ library;
 
 import 'package:niman/src/calendar/calendar_event_draft.dart';
 import 'package:niman/src/calendar/calendar_file.dart';
+import 'package:niman/src/calendar/calendar_reminder_stamp.dart';
 import 'package:niman/src/calendar/calendar_rule_tokens.dart';
 import 'package:niman/src/calendar/calendar_splice.dart';
 import 'package:niman/src/calendar/day_style.dart';
@@ -140,7 +141,16 @@ CalendarFileContent? updateCalendarEvent(
   if (moveTo != null && !sameCalendarDay(moveTo, ref.day)) {
     final removed = deleteCalendarEvent(file, ref);
     if (removed == null) return null;
-    return addCalendarEvent(removed, moveTo, draft: draft);
+    return addCalendarEvent(
+      removed,
+      moveTo,
+      draft: calendarDraftOnDay(
+        draft,
+        stamp: found.event.reminder,
+        from: ref.day,
+        to: moveTo,
+      ),
+    );
   }
   final lines = [...file.lines];
   final without = withoutCalendarEventIn(lines[found.index].text, found.event);

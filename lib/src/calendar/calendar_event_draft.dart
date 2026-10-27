@@ -47,6 +47,16 @@ final class CalendarEventDraft {
   /// edited event's own moves it there.
   final DateTime? day;
 
+  /// This draft with [text] in place of its own.
+  CalendarEventDraft withText(String text) => CalendarEventDraft(
+    text: text,
+    startMinutes: startMinutes,
+    endMinutes: endMinutes,
+    reminderMinutes: reminderMinutes,
+    recurrence: recurrence,
+    day: day,
+  );
+
   /// This draft with [recurrence] in place of its own (null: a plain
   /// event).
   CalendarEventDraft withRecurrence(CalendarRecurrence? recurrence) =>
@@ -84,12 +94,17 @@ final class CalendarEventRef {
 
 /// The draft an edit of [event] starts from: its text without the tokens
 /// the form holds apart — the rule's three, when it has a readable `rec:`,
-/// and a clock `rem:` — its times, its reminder and its recurrence.
+/// and the clock `rem:` of an event that has a start to count the lead from
+/// — its times, its reminder and its recurrence.
+///
+/// A `rem:` the form cannot show as a lead stays in the text as written, to
+/// be written back: the clock reminder of an event with no time (#1226), and
+/// a full stamp, which names its own day.
 CalendarEventDraft calendarDraftOf(CalendarEvent event) {
   final recurrence = event.recurrence;
   final start = event.time?.first;
   final end = event.time?.isRange == true ? event.time?.end : null;
-  final reminder = _clockMinutes(event.reminder);
+  final reminder = start == null ? null : _clockMinutes(event.reminder);
   final held = <CalendarToken>[
     if (recurrence != null)
       for (final token in event.tokens)

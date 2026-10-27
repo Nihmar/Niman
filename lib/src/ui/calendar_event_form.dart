@@ -136,6 +136,22 @@ final class _CalendarEventFormState extends State<CalendarEventForm> {
     return start - reminder;
   }
 
+  /// The lead the reminder is written with (#1226): the chosen one, or —
+  /// when the start is too early for it — the longest offered one that still
+  /// lands on the event's own day, since a calendar line's `rem:` is a clock
+  /// time on that day; null with no start, or at midnight, where no lead
+  /// fits. The menu shows this one, so what it says is what is written.
+  int? get _fittingLead {
+    final start = _start;
+    if (start == null || start <= 0) return null;
+    if (_lead <= start) return _lead;
+    final fits = [
+      for (final lead in calendarReminderLeads)
+        if (lead <= start) lead,
+    ];
+    return fits.isEmpty ? start : fits.last;
+  }
+
   /// What the form holds, as the writer takes it: null with nothing to
   /// write at all.
   CalendarEventDraft? _draft() {
@@ -144,14 +160,15 @@ final class _CalendarEventFormState extends State<CalendarEventForm> {
     // line is for.
     if (text.isEmpty) return null;
     final start = _start;
-    final reminder = _remind && start != null ? start - _lead : null;
+    final lead = _fittingLead;
+    final reminder = _remind && start != null && lead != null
+        ? start - lead
+        : null;
     return CalendarEventDraft(
       text: text,
       startMinutes: start,
       endMinutes: _end,
-      // A lead that would land on the day before is not written: a
-      // calendar line's `rem:` is a clock time on its own day.
-      reminderMinutes: reminder == null || reminder < 0 ? null : reminder,
+      reminderMinutes: reminder,
       day: _day,
       recurrence: _rule == null
           ? null
@@ -318,23 +335,29 @@ final class _CalendarEventFormState extends State<CalendarEventForm> {
                     style: theme.textTheme.bodyMedium,
                   ),
                 ),
-                if (_remind && _start != null)
+                if (_remind && _fittingLead != null)
                   MenuChoiceButton<int>(
                     key: const Key('calendar-event-lead'),
-                    value: _lead,
+                    value: _fittingLead!,
                     options: [
                       // The event's own lead too, when it is not one of
                       // the offered ones: editing must not quietly move a
-                      // reminder that was set elsewhere.
-                      for (final lead in {...calendarReminderLeads, _lead})
+                      // reminder that was set elsewhere. A lead that would
+                      // land on the day before is not offered.
+                      for (final lead in {
+                        ...calendarReminderLeads.where(
+                          (lead) => lead <= _start!,
+                        ),
+                        _fittingLead!,
+                      })
                         (lead, AppStrings.calendarRemindBefore(lead)),
                     ],
                     onChanged: (lead) => setState(() => _lead = lead),
                   ),
                 AppSwitch(
                   key: const Key('calendar-event-remind'),
-                  value: _remind,
-                  onChanged: _start == null
+                  value: _remind && _fittingLead != null,
+                  onChanged: _fittingLead == null
                       ? null
                       : (value) => setState(() => _remind = value),
                 ),

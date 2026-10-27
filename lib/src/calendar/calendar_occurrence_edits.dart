@@ -24,6 +24,7 @@ library;
 
 import 'package:niman/src/calendar/calendar_file.dart';
 import 'package:niman/src/calendar/calendar_recurrence.dart';
+import 'package:niman/src/calendar/calendar_reminder_stamp.dart';
 import 'package:niman/src/calendar/calendar_rule_tokens.dart';
 import 'package:niman/src/calendar/calendar_splice.dart';
 import 'package:niman/src/calendar/calendar_writer.dart';
@@ -131,10 +132,11 @@ CalendarFileContent? updateCalendarOccurrence(
     case CalendarOccurrenceScope.thisOne:
       final skipped = skipCalendarOccurrence(file, ref, occurrence);
       if (skipped == null) return null;
+      final day = picked ?? occurrence;
       return addCalendarEvent(
         skipped,
-        picked ?? occurrence,
-        draft: draft.withRecurrence(null),
+        day,
+        draft: _onDay(draft.withRecurrence(null), found.event, ref.day, day),
         style: style,
       );
     case CalendarOccurrenceScope.thisAndFollowing:
@@ -146,7 +148,7 @@ CalendarFileContent? updateCalendarOccurrence(
       return addCalendarEvent(
         ended,
         start,
-        draft: _fromDay(draft, start),
+        draft: _fromDay(_onDay(draft, found.event, ref.day, start), start),
         style: style,
       );
     case CalendarOccurrenceScope.all:
@@ -168,6 +170,15 @@ CalendarFileContent _endedBefore(
   )!;
   return withCalendarLineText(file, index, text);
 }
+
+/// [draft] for a copy of [event], whose first day is [anchor], written on
+/// [day]: a full-stamp reminder keeps its distance from the event (#1226).
+CalendarEventDraft _onDay(
+  CalendarEventDraft draft,
+  CalendarEvent event,
+  DateTime anchor,
+  DateTime day,
+) => calendarDraftOnDay(draft, stamp: event.reminder, from: anchor, to: day);
 
 /// [draft] as the rule event that starts on [day]: the days it skips before
 /// [day] are the old rule's, and are dropped.

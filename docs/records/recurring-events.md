@@ -245,3 +245,15 @@ What the review of the first release of the editor changed.
   wrote (and the event ran for ever); a second `rec:` or `until:` typed by
   hand is replaced, not kept beside the form's. A draft with no rule leaves
   the text as it is: a `rec:` nobody can read is kept and flagged.
+- **A reminder survives an edit (#1226).** A clock `rem:` is read out of the
+  text and shown as a lead only when the event has a start to count it from;
+  on an event with no time it stays in the text, as written, and is written
+  back (it used to be cut, and an edit then dropped it while the switch still
+  read on). A full-stamp `rem:` names its own day, so a copy of the event on
+  another day takes the stamp with the same distance from it: *This one* and
+  *This and following* re-base it from the rule's first day onto the day
+  written, and an event that moves, a plain one or the rule event, takes it
+  along. A stamp the user typed into the form is theirs and is not moved.
+  The form's lead never lands on the day before: the offered leads are the
+  ones that fit, a lead that no longer fits after the start moved earlier
+  becomes the longest that does, and at midnight the switch is off.
