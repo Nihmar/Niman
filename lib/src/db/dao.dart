@@ -378,7 +378,10 @@ final class NoteDao {
     return [for (final row in rows) row.read(_db.notes.path)!];
   }
 
-  /// Every indexed row, for full-scan reconciliation.
+  /// Every indexed row: O(the library) in memory, a few hundred MB at a
+  /// million notes. For the tests, which check what the index holds; the
+  /// app reads rows a directory or a page at a time (#1201).
+  @visibleForTesting
   Future<List<Note>> allRows() {
     return _db.select(_db.notes).get();
   }
@@ -512,10 +515,11 @@ final class NoteDao {
     });
   }
 
-  /// The row at `path` and every descendant row (the directory subtree),
-  /// or every row when [path] is empty.
+  /// The row at `path` and every descendant row (the directory subtree).
+  ///
+  /// Never the library's: [path] is not empty (#1201).
   Future<List<Note>> subtreeRows(String path) async {
-    if (path.isEmpty) return await allRows();
+    assert(path.isNotEmpty, 'the library is not read whole as a subtree');
     final range = subtreePathRange(path);
     return await (_db.select(_db.notes)..where(
           (t) =>

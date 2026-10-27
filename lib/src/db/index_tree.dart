@@ -569,17 +569,22 @@ final class IndexTree {
   /// and applies the diff — inserts, updates and deletes — so every row
   /// whose path survives keeps its id. `removed` is the top-level paths
   /// the resync pruned.
+  ///
+  /// The subtree's rows and its walk are held whole, which is what a folder
+  /// new to the index costs anyway. Not the library's (#1201): the library
+  /// itself is synced a level at a time ([syncDirLevel]) like any folder the
+  /// index holds, and resynced whole only by the full scan, a directory at a
+  /// time with bounded memory (`docs/records/index-reconcile.md`).
   Future<({bool wrote, Set<String> removed})> syncDirSubtree(
     String root,
     String abs,
   ) async {
     final rel = relPath(abs, root);
+    if (rel.isEmpty) return await syncDirLevel(root, abs);
     final entries = await walk(root, abs);
     _log.debug('syncDirSubtree "$rel": ${entries.length} entr(ies)');
     final old = <String, Note>{
-      for (final row
-          in rel.isEmpty ? await _dao.allRows() : await _dao.subtreeRows(rel))
-        row.path: row,
+      for (final row in await _dao.subtreeRows(rel)) row.path: row,
     };
     return await _applyScope(root, rel, entries, old);
   }
