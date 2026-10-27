@@ -69,6 +69,7 @@ final class MarkdownReadView extends StatefulWidget {
     this.linkPreview,
     this.embedResolver,
     this.knownScan,
+    this.sharedScan,
     this.onToggleTask,
     this.marks = const [],
     this.onTapMark,
@@ -140,6 +141,17 @@ final class MarkdownReadView extends StatefulWidget {
   /// an isolate, and handing the note to the isolate held the frame that
   /// opened the pane (252 ms, device log 2026-09-23).
   final DocumentScan? Function(SourceBuffer buffer)? knownScan;
+
+  /// The blocks and definitions of the buffer's lines once another reader
+  /// that is scanning them has them — the editor, mounted behind this pane
+  /// and reading the same note in its own isolate — or null when there is
+  /// none, or they no longer match (#1199).
+  ///
+  /// Asked when [knownScan] has nothing yet, before the pane scans for
+  /// itself: a long note opened straight in the read view mounts both panes
+  /// at once, and each scanned it, so the note's blocks were held twice for
+  /// as long as the tab was open — ~270 MB more on the stress note.
+  final Future<DocumentScan?> Function(SourceBuffer buffer)? sharedScan;
 
   @override
   State<MarkdownReadView> createState() => MarkdownReadViewState();
@@ -470,6 +482,15 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
     }
   }
 
+  /// The scan of [buffer]: the one the editor behind this pane is making of
+  /// the same lines when it has one ([MarkdownReadView.sharedScan]), else
+  /// this pane's own, in an isolate.
+  Future<DocumentScan> _scanOf(SourceBuffer buffer) async {
+    final shared = await widget.sharedScan?.call(buffer);
+    if (shared != null && shared.revision == buffer.revision) return shared;
+    return await scanInBackground(buffer);
+  }
+
   /// Rebuilds the block list and the height map for the current text.
   ///
   /// The scan is O(document) by nature — its incrementality is for edits, not
@@ -520,7 +541,7 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
       );
     }
     unawaited(
-      scanInBackground(buffer).then((result) {
+      _scanOf(buffer).then((result) {
         if (!mounted || scan != _scans) return;
         if (!identical(widget.buffer, buffer) ||
             buffer.revision != result.revision) {

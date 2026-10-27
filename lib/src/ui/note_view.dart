@@ -2004,6 +2004,7 @@ final class _NoteViewState extends State<NoteView>
         linkPreview: _preview.hooks(context),
         column: widget.noteColumn,
         knownScan: _editorScanOf,
+        sharedScan: _editorScanLater,
         onToggleTask: _toggleTaskFromRead,
       ),
     ),
@@ -2221,6 +2222,18 @@ final class _NoteViewState extends State<NoteView>
       revision: buffer.revision,
       changes: scan.changes,
     );
+  }
+
+  /// [_editorScanOf], once the editor's reading of the note under way has
+  /// landed: the read pane of a note opened in it waits for the scan the
+  /// editor mounted behind it is making, rather than making a second one
+  /// (#1199). Null when there is no editor, or the note moved on meanwhile.
+  Future<DocumentScan?> _editorScanLater(SourceBuffer buffer) async {
+    final editor = _sourceViewKey.currentState;
+    if (editor == null) return null;
+    await editor.readingLanded;
+    if (!mounted) return null;
+    return _editorScanOf(buffer);
   }
 
   /// Resolves an `![[…]]` embed through the shared rule (#24): library
