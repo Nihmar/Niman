@@ -1,9 +1,12 @@
 // #1192: a repeating event's reminders in the wanted set — the occurrences
-// of the next fourteen days, at most four a rule, each its own alarm.
+// of the next fourteen days, every one of them, each its own alarm (#1228).
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/calendar/calendar_file.dart';
 import 'package:niman/src/calendar/calendar_store.dart';
+import 'package:niman/src/todo/reminder_backend_plugin.dart';
 import 'package:niman/src/todo/reminders.dart';
+
+import '../fakes/fake_reminder_backend.dart';
 
 CalendarSnapshot snapshot(List<String> lines) => calendarSnapshotOf(
   CalendarFileContent(
@@ -23,12 +26,13 @@ void main() {
       calendarWantedReminders(snapshot(lines), now);
 
   group('the horizon', () {
-    test('a daily event holds its next four occurrences', () {
+    test('a daily event holds every day of the fourteen', () {
       final wanted = wantedOf(const [
         '2026-10-20 w43 Tue  16 Standup rec:1d rem:15:30.',
       ]);
+      // 26 October to 8 November, today included.
       expect(momentsOf(wanted), [
-        for (var day = 26; day <= 29; day++) DateTime(2026, 10, day, 15, 30),
+        for (var day = 0; day < 14; day++) DateTime(2026, 10, 26 + day, 15, 30),
       ]);
     });
 
@@ -63,12 +67,12 @@ void main() {
       );
     });
 
-    test('the cap is per rule', () {
+    test('no count is kept per rule: each holds the whole horizon', () {
       const day = '2026-10-20 w43 Tue';
       final wanted = wantedOf(const [
         '$day  16 Standup rec:1d rem:15:30. 17 Gym rec:1d rem:16:30.',
       ]);
-      expect(wanted, hasLength(8));
+      expect(wanted, hasLength(28));
     });
 
     test('occurrences already past are not scheduled', () {
@@ -80,7 +84,8 @@ void main() {
         DateTime(2026, 10, 27, 9),
         reason: "today's 09:00 is more than the grace behind",
       );
-      expect(wanted, hasLength(4));
+      // 27 October to 8 November.
+      expect(wanted, hasLength(13));
     });
 
     test('a reminder just due is kept, as for any event', () {
@@ -96,13 +101,13 @@ void main() {
       final tomorrow = calendarWantedReminders(file, now);
       final later = calendarWantedReminders(
         file,
-        now.add(const Duration(days: 10)),
+        now.add(const Duration(days: 20)),
       );
-      expect(momentsOf(later).first, DateTime(2026, 11, 5, 15, 30));
+      expect(momentsOf(later).first, DateTime(2026, 11, 15, 15, 30));
       expect(
         later.keys.toSet().intersection(tomorrow.keys.toSet()),
         isEmpty,
-        reason: 'ten days on, none of the alarms is the same one',
+        reason: 'twenty days on, none of the alarms is the same one',
       );
     });
 
@@ -111,7 +116,8 @@ void main() {
         '2026-10-29 w44 Thu  16 Standup rec:1d rem:15:30.',
       ]);
       expect(momentsOf(wanted).first, DateTime(2026, 10, 29, 15, 30));
-      expect(wanted, hasLength(4));
+      // 29 October to 8 November.
+      expect(wanted, hasLength(11));
     });
   });
 
@@ -132,9 +138,8 @@ void main() {
       ]);
       expect(momentsOf(wanted), [
         DateTime(2026, 10, 26, 15, 30),
-        DateTime(2026, 10, 28, 15, 30),
-        DateTime(2026, 10, 29, 15, 30),
-        DateTime(2026, 10, 30, 15, 30),
+        for (var day = 28; day <= 31; day++) DateTime(2026, 10, day, 15, 30),
+        for (var day = 1; day <= 8; day++) DateTime(2026, 11, day, 15, 30),
       ]);
     });
 
@@ -192,12 +197,16 @@ void main() {
         DateTime(2026, 10, 29, 18),
         DateTime(2026, 10, 31, 18),
         DateTime(2026, 11, 2, 18),
+        DateTime(2026, 11, 4, 18),
+        DateTime(2026, 11, 6, 18),
       ]);
       expect(before.values.map((r) => r.payload).toSet(), {
         'journal:2026-10-28',
         'journal:2026-10-30',
         'journal:2026-11-01',
         'journal:2026-11-03',
+        'journal:2026-11-05',
+        'journal:2026-11-07',
       });
     });
 
@@ -207,8 +216,10 @@ void main() {
       final wanted = wantedOf(const [
         '2026-10-24 w43 Sat  16 Follow up rec:1d rem:2026-10-25T18:00.',
       ]);
+      // The occurrences of 25 October to 8 November, each reminded the day
+      // after: 26 October to 9 November.
       expect(momentsOf(wanted), [
-        for (var day = 26; day <= 29; day++) DateTime(2026, 10, day, 18),
+        for (var day = 0; day < 15; day++) DateTime(2026, 10, 26 + day, 18),
       ]);
     });
 
@@ -256,7 +267,7 @@ void main() {
       final wanted = wantedOf(const [
         '2026-10-20 w43 Tue  16 Standup rec:1d rem:15:30.',
       ]);
-      expect(wanted.keys.toSet(), hasLength(4));
+      expect(wanted.keys.toSet(), hasLength(14));
       expect(
         wanted.keys,
         everyElement(
@@ -285,7 +296,7 @@ void main() {
         '2026-10-20 w43 Tue  16 Standup rec:1d rem:15:30.',
         '2026-10-21 w43 Wed  16 Standup rec:1d rem:15:30.',
       ]);
-      expect(wanted, hasLength(8));
+      expect(wanted, hasLength(28));
     });
 
     test('occurrence ids are salted apart from the tasks', () {
@@ -300,5 +311,82 @@ void main() {
         calendarReminderId(anchor, 'Standup'),
       );
     });
+  });
+  group('the platform cap (#1228)', () {
+    // Eight events a day on every one of the fourteen days is 112 alarms;
+    // enough rules to pass Android's limit make the cap bite.
+    List<String> manyRules(int count) => [
+      for (var i = 0; i < count; i++)
+        '2026-10-20 w43 Tue  16 Rule$i rec:1d rem:${15 + i % 8}:30.',
+    ];
+
+    test('a daily rule holds every day when the cap allows', () async {
+      final backend = FakeReminderBackend(
+        pendingLimit: PluginReminderBackend().pendingLimit,
+      );
+      final service = LocalReminderService(backend: backend, clock: () => now);
+      await service.reconcile(
+        wantedOf(const ['2026-10-20 w43 Tue  16 Standup rec:1d rem:15:30.']),
+      );
+      expect(backend.scheduled, hasLength(14));
+      await service.dispose();
+    });
+
+    test('over the cap the soonest of all the rules win', () async {
+      final limit = PluginReminderBackend().pendingLimit!;
+      final all = wantedOf(manyRules(60)); // 60 rules x 14 days = 840
+      expect(all.length, greaterThan(limit));
+      final backend = FakeReminderBackend(pendingLimit: limit);
+      final service = LocalReminderService(backend: backend, clock: () => now);
+      await service.reconcile(all);
+
+      expect(backend.scheduled, hasLength(limit), reason: 'the cap holds');
+      final kept = backend.scheduled.map((r) => r.when).toList();
+      final dropped = [
+        for (final r in all.values)
+          if (!backend.scheduled.any((s) => s.id == r.id)) r.when,
+      ];
+      expect(dropped, hasLength(all.length - limit));
+      kept.sort();
+      dropped.sort();
+      expect(
+        !kept.last.isAfter(dropped.first),
+        isTrue,
+        reason: 'nothing kept is later than anything left out',
+      );
+      // The cut falls across days, not within one rule: no rule is starved.
+      final rulesKept = backend.scheduled.map((r) => r.title).toSet();
+      expect(rulesKept, hasLength(60));
+      await service.dispose();
+    });
+
+    test(
+      'plain reminders share the cap with the rules, soonest first',
+      () async {
+        final limit = PluginReminderBackend().pendingLimit!;
+        final wanted = <int, TodoReminder>{
+          ...wantedOf(manyRules(60)),
+          for (var i = 1; i <= 3; i++)
+            -i: TodoReminder(
+              id: -i,
+              title: 'soon',
+              body: '',
+              when: now.add(Duration(minutes: i)),
+            ),
+        };
+        final backend = FakeReminderBackend(pendingLimit: limit);
+        final service = LocalReminderService(
+          backend: backend,
+          clock: () => now,
+        );
+        await service.reconcile(wanted);
+        expect(backend.scheduled, hasLength(limit));
+        expect(
+          backend.scheduled.map((r) => r.id),
+          containsAll(<int>[-1, -2, -3]),
+        );
+        await service.dispose();
+      },
+    );
   });
 }

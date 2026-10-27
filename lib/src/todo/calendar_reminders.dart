@@ -4,13 +4,18 @@
 /// An event's `rem:` is a clock time on the day its line heads
 /// (`17-18 jogging @park rem:16:30.`), or a full stamp
 /// (`rem:2026-10-12T16:30`) that names its own day. An event with a `rec:`
-/// repeats, and so does its reminder — but an OS keeps a bounded number of
-/// alarms (Android 500 per app, iOS 64), and a rule is endless. So a repeating
-/// event does not schedule the series: it schedules the occurrences of the
-/// next [recurringReminderHorizonDays] days, at most
-/// [recurringRemindersPerRule] of them, and every reconciliation works that
-/// window out again from the clock — which is what moves it forward while the
-/// file is left alone.
+/// repeats, and so does its reminder — but a rule is endless. So a repeating
+/// event does not schedule the series: it schedules every occurrence of the
+/// next [recurringReminderHorizonDays] days, and every reconciliation works
+/// that window out again from the clock — which is what moves it forward while
+/// the file is left alone.
+///
+/// No count is kept per rule. An OS keeps a bounded number of alarms (Android
+/// 400 here, below its 500; iOS 64), and that cap is one for the whole app:
+/// the reminder service cuts the whole wanted set — tasks, events, every
+/// rule's occurrences — to its soonest `pendingLimit` (#1228). A daily event
+/// among a few reminders holds all fourteen days; among hundreds, the days
+/// that fit, soonest first, and the rest wait for a reconcile.
 library;
 
 import 'package:niman/src/calendar/calendar_recurrence.dart';
@@ -27,21 +32,17 @@ import 'package:niman/src/ui/strings.dart';
 /// included.
 const int recurringReminderHorizonDays = 14;
 
-/// The most reminders one repeating event keeps scheduled: its soonest.
-const int recurringRemindersPerRule = 4;
-
 /// The schedulable reminders of the calendar: every event of [snapshot]
 /// whose line carries a readable `rem:`. A `Z` in the event's own time never
 /// moves it — the reminder is the clock time that was written next to it.
 ///
 /// An event with no rule fires on its own day. An event with a rule fires on
-/// the occurrences that fall in the next [recurringReminderHorizonDays] days
-/// from today, the soonest [recurringRemindersPerRule] of them, each with an
-/// id of its own ([calendarOccurrenceReminderId]); one the rule skips
-/// (`except:`) or has ended before (`until:`) is not among them. A clock
-/// `rem:` is that time on each occurrence's day; a full one keeps its
-/// distance in calendar days from the first day, so a reminder written the day
-/// before stays the day before every time.
+/// every occurrence that falls in the next [recurringReminderHorizonDays] days
+/// from today, each with an id of its own ([calendarOccurrenceReminderId]); one
+/// the rule skips (`except:`) or has ended before (`until:`) is not among
+/// them. A clock `rem:` is that time on each occurrence's day; a full one keeps
+/// its distance in calendar days from the first day, so a reminder written the
+/// day before stays the day before every time.
 ///
 /// A missing snapshot is no calendar file, and nothing wanted from it.
 Map<int, TodoReminder> calendarWantedReminders(
@@ -73,12 +74,9 @@ Map<int, TodoReminder> calendarWantedReminders(
       final title = showTokens
           ? withoutKeyValueTags(event.text)
           : taskDisplayText(event.text);
-      var kept = 0;
       for (final day in days) {
         final when = time.on(day, anchor);
         if (when.isBefore(earliest)) continue;
-        if (recurrence != null && kept == recurringRemindersPerRule) break;
-        kept++;
         final id = calendarOccurrenceReminderId(anchor, day, identity);
         wanted[id] = TodoReminder(
           id: id,

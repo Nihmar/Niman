@@ -374,16 +374,19 @@ that time on each occurrence's day, and a full `rem:` date-time keeps its
 distance from the event's first day — written the day before, it reminds the
 day before every time. The system only holds so many alarms (Android 500 per
 app, iOS 64), and a rule never ends, so Niman keeps **the next two weeks**
-scheduled — at most the next four occurrences of each event — and works that
-window out again whenever the app runs: at start, on every return to it, when
+scheduled — every occurrence of each event in those fourteen days — and works
+that window out again whenever the app runs: at start, on every return to it, when
 a file changes and, on a desktop, each time a reminder is shown. Skipping an
 occurrence cancels its alarm alone, and an event with an `until:` stops
 reminding after it. **Open Niman at least once every two weeks** for a
 repeating event's reminders to go on: on Android and Apple the alarms already
 scheduled still fire with the app closed, but the ones after the window are
-only scheduled when it next runs. Where the system's limit is reached — a
-library with a great many repeating events — the soonest alarms are the ones
-scheduled, and the rest follow as they fire.
+only scheduled when it next runs. The limit is one for all your reminders together (Android 400, iOS 64): when
+it is reached — a library with a great many repeating events — Niman schedules
+the soonest alarms of all of them and leaves the later days out. On Android
+and Apple the days left out are only scheduled the next time Niman runs, so
+with that many repeating events the alarms can run out before two weeks are
+over: open Niman more often. On a desktop there is no limit.
 
 ## Recurring tasks
 

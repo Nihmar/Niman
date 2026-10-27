@@ -64,8 +64,8 @@ abstract interface class ReminderService {
   /// timer); never on Android and Apple, where the OS delivers it.
   ///
   /// The signal to recompute the wanted set: a repeating event schedules
-  /// only its next few occurrences (#1192), and the ones after those come
-  /// into the window as these are delivered.
+  /// only the next two weeks of occurrences (#1192), and the days after those
+  /// come into the window as these are delivered.
   Stream<void> get fired;
 
   /// Whether the OS-side preconditions for reminders hold.
@@ -298,13 +298,20 @@ final class LocalReminderService implements ReminderService {
   }
 
   /// [all], or its soonest [ReminderBackend.pendingLimit] where the system
-  /// keeps no more pending (iOS): the rest would be dropped without a word,
-  /// so they wait for a later reconcile instead, as the soonest fire.
+  /// keeps no more pending (iOS, Android): the rest would be dropped or
+  /// refused, so they wait for a later reconcile instead. The cut is over the
+  /// whole set at once — tasks, events, every occurrence of every rule — so
+  /// what is kept is the soonest of all of them (#1228).
   Map<int, TodoReminder> _withinLimit(Map<int, TodoReminder> all) {
     final limit = _backend.pendingLimit;
     if (limit == null || all.length <= limit) return all;
     final soonest = all.entries.toList()
-      ..sort((a, b) => a.value.when.compareTo(b.value.when));
+      ..sort((a, b) {
+        final byMoment = a.value.when.compareTo(b.value.when);
+        // Equal moments cut the same way every time, so a reconcile does not
+        // swap which of two simultaneous alarms is the one left out.
+        return byMoment != 0 ? byMoment : a.key.compareTo(b.key);
+      });
     _log.info(
       'todo reminders: ${all.length} wanted, the system keeps $limit: '
       'the soonest $limit are scheduled',
