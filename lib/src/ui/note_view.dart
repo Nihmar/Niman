@@ -71,6 +71,7 @@ import 'package:niman/src/ui/note_links.dart';
 import 'package:niman/src/ui/note_load_error.dart';
 import 'package:niman/src/ui/note_save_pipeline.dart';
 import 'package:niman/src/ui/note_stats.dart';
+import 'package:niman/src/ui/note_tags.dart';
 import 'package:niman/src/ui/note_task_items.dart';
 import 'package:niman/src/ui/note_tasks_host.dart';
 import 'package:niman/src/ui/note_tasks_section.dart';
@@ -560,6 +561,18 @@ final class _NoteViewState extends State<NoteView>
   String get currentText => _unifiedText;
 
   @override
+  Future<List<String>> currentTags() {
+    final buffer = _unifiedSurfaceBuffer;
+    if (buffer == null) return Future.value(noteTagsOf(_unifiedText));
+    // A long note's scan keeps its tags block by block for the save to
+    // hand the index: the same answer, with nothing of the note read again.
+    return noteTagsOfBuffer(
+      buffer,
+      references: _sourceViewKey.currentState?.references(),
+    );
+  }
+
+  @override
   String get selectedText {
     final surface = _surface;
     if (!canInsert || surface == null) return '';
@@ -588,10 +601,12 @@ final class _NoteViewState extends State<NoteView>
 
   @override
   void setNoteKind(String? type) {
+    // Once: a long note's text is joined for each ask (see [_unifiedText]).
+    final current = _unifiedText;
     final text = type == null
-        ? removeFrontmatterKey(_unifiedText, 'type')
-        : setFrontmatterKey(_unifiedText, 'type', type);
-    if (text == _unifiedText) return;
+        ? removeFrontmatterKey(current, 'type')
+        : setFrontmatterKey(current, 'type', type);
+    if (text == current) return;
     _applyKindEdit(text);
   }
 
@@ -845,16 +860,36 @@ final class _NoteViewState extends State<NoteView>
   /// Joined from the surface's buffer when it is asked for, once per revision:
   /// the surface reports an edit without its text, because joining the note on
   /// every keystroke is O(n) for a text only the save debounce needs.
+  ///
+  /// A long note's join is not kept (#1197). The text it was read from stays
+  /// alive anyway — every line not yet written is a view of it — so a kept
+  /// join was a second whole copy of the note, 247 MB of the stress note,
+  /// held until the next keystroke. A long note is the one the editor scans
+  /// in the background ([MarkdownSourceViewState.readsInBackground]), whose
+  /// panels read what the scan keeps rather than the text; what still asks for
+  /// the whole note (a kind's edit, a comparison with the disk) joins it for
+  /// that call alone. A short one keeps its join: a kind's view asks for it
+  /// on every build.
   String get _unifiedText {
     final buffer = _unifiedSurfaceBuffer;
     if (buffer == null) return _unifiedTextCache;
-    if (!identical(buffer, _unifiedTextBuffer) ||
-        buffer.revision != _unifiedTextRevision) {
-      _unifiedTextCache = buffer.text;
-      _unifiedTextBuffer = buffer;
-      _unifiedTextRevision = buffer.revision;
+    if (identical(buffer, _unifiedTextBuffer) &&
+        buffer.revision == _unifiedTextRevision) {
+      return _unifiedTextCache;
     }
-    return _unifiedTextCache;
+    final text = buffer.text;
+    if (MarkdownSourceViewState.readsInBackground(buffer)) {
+      // The text the note was loaded from, which the seed kept, is let go
+      // with the rest: the lines still reading it keep it, and no more.
+      _unifiedTextCache = '';
+      _unifiedTextBuffer = null;
+      _unifiedTextRevision = -1;
+      return text;
+    }
+    _unifiedTextCache = text;
+    _unifiedTextBuffer = buffer;
+    _unifiedTextRevision = buffer.revision;
+    return text;
   }
 
   /// The first [maxChars] units of [_unifiedText], read from the buffer's

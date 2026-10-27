@@ -323,6 +323,24 @@ final class EnglishStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Reminder at $time';
   @override
+  String get calendarEndsNever => 'Never ends';
+  @override
+  String calendarEndsOn(String date) => 'Ends on $date';
+  @override
+  String get calendarSkipAction => 'Skip';
+  @override
+  String get calendarScopeEditTitle => 'Edit repeating event';
+  @override
+  String get calendarScopeDeleteTitle => 'Delete repeating event';
+  @override
+  String get calendarScopeThis => 'This event';
+  @override
+  String get calendarScopeFollowing => 'This and following events';
+  @override
+  String get calendarScopeAll => 'All events';
+  @override
+  String get calendarEventDay => 'Day';
+  @override
   String get journalCalendarTitle => 'Calendar';
   @override
   String get journalEventTimesTitle => 'Event times';
@@ -4371,4 +4389,48 @@ final class EnglishStrings extends Strings {
   String todoBlockNoNote(String name) => 'No note matches $name';
   @override
   String todoBlockSeveralNotes(String name) => 'Several notes match $name';
+
+  // Recurring tasks (#1189): a rule in words, and the Repeat row.
+  @override
+  String recurDays(int n) => n == 1 ? 'every day' : 'every $n days';
+  @override
+  String recurWeeks(int n) => n == 1 ? 'every week' : 'every $n weeks';
+  @override
+  String recurMonths(int n) => n == 1 ? 'every month' : 'every $n months';
+  @override
+  String recurYears(int n) => n == 1 ? 'every year' : 'every $n years';
+  @override
+  String recurBusinessDays(int n) =>
+      n == 1 ? 'every weekday' : 'every $n business days';
+  @override
+  String recurOnWeekdays(String rule, String days) => '$rule on $days';
+  @override
+  String recurNthWeekday(String rule, int nth, int weekday) {
+    final i = nth == -1 ? 4 : nth - 1;
+    final ord = const ['1st', '2nd', '3rd', '4th', 'last'][i];
+    return '$rule on the $ord ${weekdayNames[weekday - 1]}';
+  }
+
+  @override
+  String recurFromDue(String rule) => '$rule from the due date';
+  @override
+  String get todoRepeat => 'Repeat';
+  @override
+  String get todoRepeatNever => 'Never';
+  @override
+  String get todoRepeatCustom => 'Custom…';
+  @override
+  String get recurEvery => 'Every';
+  @override
+  String get recurUnitDays => 'Days';
+  @override
+  String get recurUnitWeeks => 'Weeks';
+  @override
+  String get recurUnitMonths => 'Months';
+  @override
+  String get recurUnitYears => 'Years';
+  @override
+  String get recurFromDueDate => 'From the due date';
+  @override
+  String get recurFromCompletion => 'From completion';
 }

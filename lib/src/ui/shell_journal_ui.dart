@@ -10,6 +10,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:niman/src/calendar/calendar_controller.dart';
 import 'package:niman/src/calendar/calendar_file.dart';
+import 'package:niman/src/calendar/calendar_occurrence_edits.dart';
 import 'package:niman/src/calendar/calendar_store.dart';
 import 'package:niman/src/calendar/calendar_writer.dart';
 import 'package:niman/src/calendar/parser.dart';
@@ -37,6 +38,7 @@ final class ShellJournalUi {
     required this.openEvent,
     required this.writeEvent,
     required this.editEvent,
+    required this.skipEvent,
     required this.deleteEvent,
     required this.addTask,
     required this.knownTokens,
@@ -70,13 +72,22 @@ final class ShellJournalUi {
   /// through.
   final void Function(DateTime day, CalendarEventDraft event) writeEvent;
 
-  /// Replaces an event with the draft the phone's sheet handed over
-  /// (#730).
-  final void Function(CalendarEntryEvent entry, CalendarEventDraft event)
+  /// Replaces an event with the draft the form handed over, the
+  /// occurrences of a repeating one the scope names (#730, #1191).
+  final void Function(
+    CalendarEntryEvent entry,
+    CalendarEventDraft event,
+    CalendarOccurrenceScope scope,
+  )
   editEvent;
 
-  /// Takes an event out of the file (#730).
-  final void Function(CalendarEntryEvent entry) deleteEvent;
+  /// Leaves an occurrence of a repeating event out (#1191).
+  final void Function(CalendarEntryEvent entry) skipEvent;
+
+  /// Takes an event out of the file, the occurrences of a repeating one the
+  /// scope names (#730, #1191).
+  final void Function(CalendarEntryEvent entry, CalendarOccurrenceScope scope)
+  deleteEvent;
 
   /// Opens the todo add with a day as its due date (#730).
   final void Function(DateTime day) addTask;
@@ -117,9 +128,7 @@ final class ShellJournalUi {
         unawaited(flow.openDay(context, day, confirmed: confirmed)),
     eventsOn: _showsEvents ? _eventsOn : null,
     goalsOn: _showsEvents ? _goalsOn : null,
-    eventDays: _showsEvents
-        ? calendar.snapshot?.daysWithEvents ?? const <DateTime>{}
-        : const <DateTime>{},
+    eventDaysIn: _showsEvents ? _eventDaysIn : null,
     calendarChanged: _showsEvents ? calendar : null,
     onOpenEvent: _showsEvents ? openEvent : null,
     dueOn: _showsTasks ? _tasksDueOn : null,
@@ -131,6 +140,7 @@ final class ShellJournalUi {
     onAddEvent: _showsEvents ? writeEvent : null,
     onAddTask: _showsTasks ? addTask : null,
     onEditEvent: _showsEvents ? editEvent : null,
+    onSkipEvent: _showsEvents ? skipEvent : null,
     onDeleteEvent: _showsEvents ? deleteEvent : null,
     focusDay: focusDay,
     onEntryMenu: (day, position) => unawaited(_entryMenuAt(day, position)),
@@ -147,6 +157,11 @@ final class ShellJournalUi {
   /// The events of [day] as the calendar file reads them (#730).
   List<CalendarEntryEvent> _eventsOn(DateTime day) =>
       calendar.snapshot?.eventsFor(day) ?? const <CalendarEntryEvent>[];
+
+  /// The days from [from] to [to] with events, the occurrences of the
+  /// repeating ones among them: the dots of the month on screen (#1190).
+  Set<DateTime> _eventDaysIn(DateTime from, DateTime to) =>
+      calendar.snapshot?.eventDaysIn(from, to) ?? const <DateTime>{};
 
   /// The goals that apply to [day]: the week's, the month's, the year's,
   /// shown over its events (#730).
@@ -187,9 +202,7 @@ final class ShellJournalUi {
           revision: controller.revision,
           eventsOn: _showsEvents ? _eventsOn : null,
           goalsOn: _showsEvents ? _goalsOn : null,
-          eventDays: _showsEvents
-              ? calendar.snapshot?.daysWithEvents ?? const <DateTime>{}
-              : const <DateTime>{},
+          eventDaysIn: _showsEvents ? _eventDaysIn : null,
           calendarChanged: _showsEvents ? calendar : null,
           onOpenEvent: _showsEvents
               ? (event) {
@@ -212,6 +225,7 @@ final class ShellJournalUi {
           onAddEvent: _showsEvents ? writeEvent : null,
           onAddTask: _showsTasks ? addTask : null,
           onEditEvent: _showsEvents ? editEvent : null,
+          onSkipEvent: _showsEvents ? skipEvent : null,
           onDeleteEvent: _showsEvents ? deleteEvent : null,
           onOpenDay: (day, {confirmed = false}) {
             // The screen goes first: the entry opens in the shell.

@@ -326,6 +326,24 @@ final class DutchStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Herinnering om $time';
   @override
+  String get calendarEndsNever => 'Eindigt nooit';
+  @override
+  String calendarEndsOn(String date) => 'Eindigt op $date';
+  @override
+  String get calendarSkipAction => 'Overslaan';
+  @override
+  String get calendarScopeEditTitle => 'Terugkerende gebeurtenis bewerken';
+  @override
+  String get calendarScopeDeleteTitle => 'Terugkerende gebeurtenis verwijderen';
+  @override
+  String get calendarScopeThis => 'Deze gebeurtenis';
+  @override
+  String get calendarScopeFollowing => 'Deze en volgende gebeurtenissen';
+  @override
+  String get calendarScopeAll => 'Alle gebeurtenissen';
+  @override
+  String get calendarEventDay => 'Dag';
+  @override
   String get journalCalendarTitle => 'Kalender';
   @override
   String get journalEventTimesTitle => 'Gebeurtenistijden';
@@ -4477,4 +4495,48 @@ final class DutchStrings extends Strings {
   @override
   String todoBlockSeveralNotes(String name) =>
       'Meerdere notities komen overeen met $name';
+
+  // Recurring tasks (#1189): a rule in words, and the Repeat row.
+  @override
+  String recurDays(int n) => n == 1 ? 'elke dag' : 'elke $n dagen';
+  @override
+  String recurWeeks(int n) => n == 1 ? 'elke week' : 'elke $n weken';
+  @override
+  String recurMonths(int n) => n == 1 ? 'elke maand' : 'elke $n maanden';
+  @override
+  String recurYears(int n) => n == 1 ? 'elk jaar' : 'elke $n jaar';
+  @override
+  String recurBusinessDays(int n) =>
+      n == 1 ? 'elke werkdag' : 'elke $n werkdagen';
+  @override
+  String recurOnWeekdays(String rule, String days) => '$rule op $days';
+  @override
+  String recurNthWeekday(String rule, int nth, int weekday) {
+    final i = nth == -1 ? 4 : nth - 1;
+    final ord = const ['1e', '2e', '3e', '4e', 'laatste'][i];
+    return '$rule op de $ord ${weekdayNames[weekday - 1]}';
+  }
+
+  @override
+  String recurFromDue(String rule) => '$rule vanaf de vervaldatum';
+  @override
+  String get todoRepeat => 'Herhalen';
+  @override
+  String get todoRepeatNever => 'Nooit';
+  @override
+  String get todoRepeatCustom => 'Aangepast…';
+  @override
+  String get recurEvery => 'Elke';
+  @override
+  String get recurUnitDays => 'Dagen';
+  @override
+  String get recurUnitWeeks => 'Weken';
+  @override
+  String get recurUnitMonths => 'Maanden';
+  @override
+  String get recurUnitYears => 'Jaren';
+  @override
+  String get recurFromDueDate => 'Vanaf de vervaldatum';
+  @override
+  String get recurFromCompletion => 'Vanaf voltooiing';
 }

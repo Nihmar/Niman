@@ -271,6 +271,50 @@ void main() {
     });
   });
 
+  group('a rule in the draft (#1191)', () {
+    const line =
+        '2026-10-05 w41 Mon  9 Standup @work rec:1w until:2026-12-31 '
+        'except:2026-10-12 rem:8:45. 17 jog.';
+
+    test('an event is read into text, times, reminder and recurrence', () {
+      final draft = calendarDraftOf(eventOf(line, 0));
+      expect(draft.text, 'Standup @work');
+      expect(draft.startMinutes, 9 * 60);
+      expect(draft.reminderMinutes, 8 * 60 + 45);
+      expect(draft.recurrence!.rule.token, '1w');
+      expect(draft.recurrence!.bounds.untilToken, 'until:2026-12-31');
+      expect(draft.recurrence!.bounds.exceptToken, 'except:2026-10-12');
+    });
+
+    test('and written back as the event it came from', () {
+      final draft = calendarDraftOf(eventOf(line, 0));
+      expect(
+        calendarEventAsText(draft),
+        '9 Standup @work rec:1w until:2026-12-31 except:2026-10-12 '
+        'rem:08:45',
+      );
+    });
+
+    test('a rule that cannot be read stays in the text, as written', () {
+      final draft = calendarDraftOf(
+        eventOf('2026-10-05 w41 Mon  9 Standup rec:often until:soon.', 0),
+      );
+      expect(draft.recurrence, isNull);
+      expect(draft.text, 'Standup rec:often until:soon');
+    });
+
+    test('an edit of a rule event rewrites that event and no other', () {
+      final before = file(['2026-10-05 w41 Mon  9 Standup rec:1w. 17 jog.']);
+      final after = updateCalendarEvent(
+        before,
+        CalendarEventRef(line: 0, day: DateTime(2026, 10, 5), start: 20),
+        calendarDraftOf(eventOf(before.lines.single.text, 0))
+            .withRecurrence(null),
+      )!;
+      expect(after.lines.single.text, '2026-10-05 w41 Mon  9 Standup. 17 jog.');
+    });
+  });
+
   group('update', () {
     test('an edit touches its own line, and only the event', () {
       final before = file(_lines);

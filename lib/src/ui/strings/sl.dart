@@ -328,6 +328,24 @@ final class SlovenianStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Opomnik ob $time';
   @override
+  String get calendarEndsNever => 'Se nikoli ne konča';
+  @override
+  String calendarEndsOn(String date) => 'Konča se $date';
+  @override
+  String get calendarSkipAction => 'Preskoči';
+  @override
+  String get calendarScopeEditTitle => 'Uredi ponavljajoči se dogodek';
+  @override
+  String get calendarScopeDeleteTitle => 'Izbriši ponavljajoči se dogodek';
+  @override
+  String get calendarScopeThis => 'Ta dogodek';
+  @override
+  String get calendarScopeFollowing => 'Ta in naslednji dogodki';
+  @override
+  String get calendarScopeAll => 'Vsi dogodki';
+  @override
+  String get calendarEventDay => 'Dan';
+  @override
   String get journalCalendarTitle => 'Koledar';
   @override
   String get journalEventTimesTitle => 'Časi dogodkov';
@@ -4446,4 +4464,79 @@ final class SlovenianStrings extends Strings {
   String todoBlockNoNote(String name) => 'Nobena beležka ne ustreza $name';
   @override
   String todoBlockSeveralNotes(String name) => 'Več beležk ustreza $name';
+
+  // Recurring tasks (#1189): a rule in words, and the Repeat row.
+  @override
+  String recurDays(int n) => n == 1
+      ? 'vsak dan'
+      : (n % 100 == 2)
+      ? 'vsaka $n dneva'
+      : (n % 100 == 3 || n % 100 == 4)
+      ? 'vsake $n dni'
+      : 'vsakih $n dni';
+  @override
+  String recurWeeks(int n) => n == 1
+      ? 'vsak teden'
+      : (n % 100 == 2)
+      ? 'vsaka $n tedna'
+      : (n % 100 == 3 || n % 100 == 4)
+      ? 'vsake $n tedne'
+      : 'vsakih $n tednov';
+  @override
+  String recurMonths(int n) => n == 1
+      ? 'vsak mesec'
+      : (n % 100 == 2)
+      ? 'vsaka $n meseca'
+      : (n % 100 == 3 || n % 100 == 4)
+      ? 'vsake $n mesece'
+      : 'vsakih $n mesecev';
+  @override
+  String recurYears(int n) => n == 1
+      ? 'vsako leto'
+      : (n % 100 == 2)
+      ? 'vsaki $n leti'
+      : (n % 100 == 3 || n % 100 == 4)
+      ? 'vsaka $n leta'
+      : 'vsakih $n let';
+  @override
+  String recurBusinessDays(int n) => n == 1
+      ? 'vsak delovni dan'
+      : (n % 100 == 2)
+      ? 'vsaka $n delovna dneva'
+      : (n % 100 == 3 || n % 100 == 4)
+      ? 'vsake $n delovne dni'
+      : 'vsakih $n delovnih dni';
+  @override
+  String recurOnWeekdays(String rule, String days) => '$rule: $days';
+  @override
+  String recurNthWeekday(String rule, int nth, int weekday) {
+    final i = nth == -1 ? 4 : nth - 1;
+    final ord = (const <int>{3, 6, 7}.contains(weekday)
+        ? const ['1.', '2.', '3.', '4.', 'zadnja']
+        : const ['1.', '2.', '3.', '4.', 'zadnji'])[i];
+    return '$rule, $ord ${weekdayNames[weekday - 1]}';
+  }
+
+  @override
+  String recurFromDue(String rule) => '$rule, od roka';
+  @override
+  String get todoRepeat => 'Ponavljanje';
+  @override
+  String get todoRepeatNever => 'Nikoli';
+  @override
+  String get todoRepeatCustom => 'Po meri…';
+  @override
+  String get recurEvery => 'Vsakih';
+  @override
+  String get recurUnitDays => 'Dnevi';
+  @override
+  String get recurUnitWeeks => 'Tedni';
+  @override
+  String get recurUnitMonths => 'Meseci';
+  @override
+  String get recurUnitYears => 'Leta';
+  @override
+  String get recurFromDueDate => 'Od roka';
+  @override
+  String get recurFromCompletion => 'Od dokončanja';
 }

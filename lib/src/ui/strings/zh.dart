@@ -300,6 +300,24 @@ final class ChineseStrings extends Strings {
   @override
   String calendarReminderAt(String time) => '$time 提醒';
   @override
+  String get calendarEndsNever => '永不结束';
+  @override
+  String calendarEndsOn(String date) => '于 $date 结束';
+  @override
+  String get calendarSkipAction => '跳过';
+  @override
+  String get calendarScopeEditTitle => '编辑重复事件';
+  @override
+  String get calendarScopeDeleteTitle => '删除重复事件';
+  @override
+  String get calendarScopeThis => '仅此事件';
+  @override
+  String get calendarScopeFollowing => '此事件及之后的所有事件';
+  @override
+  String get calendarScopeAll => '所有事件';
+  @override
+  String get calendarEventDay => '日期';
+  @override
   String get journalCalendarTitle => '日历';
   @override
   String get journalEventTimesTitle => '事件时间';
@@ -3973,4 +3991,47 @@ final class ChineseStrings extends Strings {
   String todoBlockNoNote(String name) => '没有笔记与 $name 匹配';
   @override
   String todoBlockSeveralNotes(String name) => '有多篇笔记与 $name 匹配';
+
+  // Recurring tasks (#1189): a rule in words, and the Repeat row.
+  @override
+  String recurDays(int n) => n == 1 ? '每天' : '每$n天';
+  @override
+  String recurWeeks(int n) => n == 1 ? '每周' : '每$n周';
+  @override
+  String recurMonths(int n) => n == 1 ? '每月' : '每$n个月';
+  @override
+  String recurYears(int n) => n == 1 ? '每年' : '每$n年';
+  @override
+  String recurBusinessDays(int n) => n == 1 ? '每个工作日' : '每$n个工作日';
+  @override
+  String recurOnWeekdays(String rule, String days) => '$rule（$days）';
+  @override
+  String recurNthWeekday(String rule, int nth, int weekday) {
+    final i = nth == -1 ? 4 : nth - 1;
+    final ord = const ['第1个', '第2个', '第3个', '第4个', '最后一个'][i];
+    return '$rule$ord${weekdayNames[weekday - 1]}';
+  }
+
+  @override
+  String recurFromDue(String rule) => '$rule（从截止日起）';
+  @override
+  String get todoRepeat => '重复';
+  @override
+  String get todoRepeatNever => '从不';
+  @override
+  String get todoRepeatCustom => '自定义…';
+  @override
+  String get recurEvery => '每隔';
+  @override
+  String get recurUnitDays => '天';
+  @override
+  String get recurUnitWeeks => '周';
+  @override
+  String get recurUnitMonths => '个月';
+  @override
+  String get recurUnitYears => '年';
+  @override
+  String get recurFromDueDate => '从截止日起';
+  @override
+  String get recurFromCompletion => '从完成日起';
 }

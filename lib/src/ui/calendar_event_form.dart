@@ -6,15 +6,29 @@
 /// never promise something the file would not hold. It is inline in the
 /// dock's journal pane on a window and a sheet on a phone: a dialog does
 /// not go over a calendar (#712).
+///
+/// A Day row (#1191) moves the event to another day — an added event is
+/// written there, an edited one leaves its line for that day's — unless it
+/// is part of a series, which moves by changing its rule.
+///
+/// A Repeat row and an Ends row (#1191) make the event a rule: `rec:` and,
+/// when it ends, `until:`. The days the rule skips (`except:`) are not on
+/// the form, and travel through it untouched.
 library;
 
 import 'package:flutter/material.dart';
+import 'package:niman/src/calendar/calendar_occurrence_edits.dart';
+import 'package:niman/src/calendar/calendar_recurrence.dart';
 import 'package:niman/src/calendar/calendar_writer.dart';
-import 'package:niman/src/core/theme_tokens.dart';
+import 'package:niman/src/core/recurrence/recurrence_bounds.dart';
+import 'package:niman/src/core/recurrence/recurrence_rule.dart';
+import 'package:niman/src/core/recurrence/recurrence_unit.dart';
 import 'package:niman/src/ui/app_switch.dart';
-import 'package:niman/src/ui/journal/journal_flow.dart' show journalDayLabel;
+import 'package:niman/src/ui/calendar_event_day.dart';
+import 'package:niman/src/ui/calendar_event_preview.dart';
+import 'package:niman/src/ui/calendar_event_repeat.dart';
+import 'package:niman/src/ui/calendar_event_times.dart';
 import 'package:niman/src/ui/menu_choice_button.dart';
-import 'package:niman/src/ui/os_pickers.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// The lead times the reminder offers, in minutes before the event.
@@ -27,7 +41,9 @@ final class CalendarEventForm extends StatefulWidget {
   ///
   /// [knownTokens] are the `+`/`@`/`#` tokens the two files already use;
   /// [preview] answers the line the writer would write for a draft;
-  /// [draft] prefills an edit.
+  /// [draft] prefills an edit; [scope] says which occurrences of a repeating
+  /// event it edits — for this one only, the event becomes a plain one and
+  /// its Repeat and Ends rows are off.
   const new({
     required this.day,
     required this.knownTokens,
@@ -35,10 +51,11 @@ final class CalendarEventForm extends StatefulWidget {
     required this.onCancel,
     required this.onSave,
     this.draft,
+    this.scope,
     super.key,
   });
 
-  /// The day the event is written onto.
+  /// The day the event is written onto: for an occurrence, its own day.
   final DateTime day;
 
   /// The tokens both files already use, sigil included.
@@ -55,6 +72,10 @@ final class CalendarEventForm extends StatefulWidget {
 
   /// The event being edited, or null when one is added.
   final CalendarEventDraft? draft;
+
+  /// The occurrences an edit covers, or null for an event added or one that
+  /// does not repeat.
+  final CalendarOccurrenceScope? scope;
 
   @override
   State<CalendarEventForm> createState() => _CalendarEventFormState();
@@ -77,6 +98,25 @@ final class _CalendarEventFormState extends State<CalendarEventForm> {
   late int? _end = widget.draft?.endMinutes;
   late bool _remind = widget.draft?.reminderMinutes != null;
   late int _lead = _leadOf(widget.draft);
+
+  /// The rule and its end; what the rule skips is kept as it came.
+  late RecurrenceRule? _rule = _only ? null : widget.draft?.recurrence?.rule;
+  late DateTime? _until = _only ? null : widget.draft?.recurrence?.bounds.until;
+  late final Set<DateTime> _except = {
+    ...?widget.draft?.recurrence?.bounds.except,
+  };
+  bool _customOpen = false;
+
+  /// The day the event is written on, and whether its calendar is open.
+  late DateTime _day = widget.day;
+  bool _dayOpen = false;
+
+  /// Whether the event can move to another day: one that is added, one that
+  /// stands alone, or one occurrence. A series moves by changing its rule.
+  bool get _dayEditable => widget.scope == null || _only;
+
+  /// Whether this edits one occurrence only, which then stands alone.
+  bool get _only => widget.scope == CalendarOccurrenceScope.thisOne;
 
   @override
   void dispose() {
@@ -114,30 +154,34 @@ final class _CalendarEventFormState extends State<CalendarEventForm> {
       // A lead that would land on the day before is not written: a
       // calendar line's `rem:` is a clock time on its own day.
       reminderMinutes: reminder == null || reminder < 0 ? null : reminder,
+      day: _dayEditable ? _day : null,
+      recurrence: _rule == null
+          ? null
+          : CalendarRecurrence(
+              rule: _rule!,
+              bounds: RecurrenceBounds(until: _until, except: _except),
+            ),
     );
   }
 
-  Future<void> _pickStart() async {
-    final time = await showClockPicker(
-      context,
-      initialTime: _timeOf(_start) ?? TimeOfDay.now(),
-    );
-    if (time == null || !mounted) return;
-    setState(() => _start = time.hour * 60 + time.minute);
+  void _setRule(RecurrenceRule? rule) {
+    setState(() {
+      _rule = rule;
+      if (rule == null) {
+        _until = null;
+        _customOpen = false;
+      }
+    });
   }
 
-  Future<void> _pickEnd() async {
-    final time = await showClockPicker(
-      context,
-      initialTime: _timeOf(_end ?? _start) ?? TimeOfDay.now(),
-    );
-    if (time == null || !mounted) return;
-    setState(() => _end = time.hour * 60 + time.minute);
+  /// Opens the custom editor under the Repeat row, or closes it. An event
+  /// with no rule yet starts at every day, so the editor shows what is set.
+  void _toggleCustom() {
+    if (!_customOpen && _rule == null) {
+      _rule = RecurrenceRule(unit: RecurrenceUnit.day);
+    }
+    setState(() => _customOpen = !_customOpen);
   }
-
-  static TimeOfDay? _timeOf(int? minutes) => minutes == null
-      ? null
-      : TimeOfDay(hour: minutes ~/ 60, minute: minutes % 60);
 
   /// Inserts [token] at the end of the text, spaced, and keeps the caret
   /// there so typing continues after it.
@@ -168,7 +212,6 @@ final class _CalendarEventFormState extends State<CalendarEventForm> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final syntax = theme.extension<SyntaxColors>();
     final draft = _draft();
     final suggestions = _suggestionsFor();
     return Card.filled(
@@ -191,51 +234,27 @@ final class _CalendarEventFormState extends State<CalendarEventForm> {
                       : AppStrings.todoEditAction,
                   style: theme.textTheme.titleSmall,
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    journalDayLabel(widget.day),
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: scheme.onSurfaceVariant,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
               ],
             ),
+            CalendarEventDay(
+              day: _day,
+              enabled: _dayEditable,
+              open: _dayOpen,
+              onToggle: () => setState(() => _dayOpen = !_dayOpen),
+              onPicked: (day) => setState(() {
+                _day = day;
+                _dayOpen = false;
+              }),
+            ),
             const SizedBox(height: 6),
-            // Wrapped, not stretched: the dock's island and a phone's
-            // sheet are both narrow, and the two clocks are the row.
-            Wrap(
-              spacing: 6,
-              runSpacing: 4,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [
-                _timeButton(
-                  name: 'start',
-                  // A time nobody set reads as an empty clock, and
-                  // nothing else: there is no string in an `--:--`.
-                  label: _start == null ? '--:--' : _clockText(_start!),
-                  onPressed: _pickStart,
-                  onClear: _start == null
-                      ? null
-                      : () => setState(() {
-                          _start = null;
-                          _remind = false;
-                        }),
-                ),
-                _timeButton(
-                  name: 'end',
-                  label: _end == null
-                      ? AppStrings.calendarEndOptional
-                      : _clockText(_end!),
-                  onPressed: _pickEnd,
-                  onClear: _end == null
-                      ? null
-                      : () => setState(() => _end = null),
-                ),
-              ],
+            CalendarEventTimes(
+              start: _start,
+              end: _end,
+              onStart: (start) => setState(() {
+                _start = start;
+                if (start == null) _remind = false;
+              }),
+              onEnd: (end) => setState(() => _end = end),
             ),
             const SizedBox(height: 6),
             TextField(
@@ -284,6 +303,16 @@ final class _CalendarEventFormState extends State<CalendarEventForm> {
                 ),
               ],
             ),
+            CalendarEventRepeat(
+              day: _day,
+              rule: _rule,
+              until: _until,
+              enabled: !_only,
+              customOpen: _customOpen,
+              onRule: _setRule,
+              onUntil: (until) => setState(() => _until = until),
+              onToggleCustom: _toggleCustom,
+            ),
             Row(
               children: [
                 Expanded(
@@ -325,7 +354,10 @@ final class _CalendarEventFormState extends State<CalendarEventForm> {
                 ),
               ),
               const SizedBox(height: 4),
-              _preview(theme, scheme, syntax, draft),
+              CalendarEventPreview(
+                line: widget.preview(draft),
+                body: calendarEventAsText(draft),
+              ),
             ],
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -358,80 +390,6 @@ final class _CalendarEventFormState extends State<CalendarEventForm> {
     if (draft == null) return;
     widget.onSave(draft);
   }
-
-  /// One of the two time fields: the time, and a way to take it back.
-  Widget _timeButton({
-    required String name,
-    required String label,
-    required VoidCallback onPressed,
-    VoidCallback? onClear,
-  }) {
-    return OutlinedButton(
-      key: Key('calendar-event-$name'),
-      onPressed: onPressed,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(Icons.schedule, size: 16),
-          const SizedBox(width: 6),
-          Text(label, maxLines: 1, overflow: TextOverflow.ellipsis),
-          if (onClear != null)
-            IconButton(
-              key: Key('calendar-event-$name-clear'),
-              icon: const Icon(Icons.close, size: 16),
-              visualDensity: VisualDensity.compact,
-              onPressed: onClear,
-            ),
-        ],
-      ),
-    );
-  }
-
-  /// The line as it will be written, the new event picked out.
-  Widget _preview(
-    ThemeData theme,
-    ColorScheme scheme,
-    SyntaxColors? syntax,
-    CalendarEventDraft draft,
-  ) {
-    final line = widget.preview(draft);
-    final body = calendarEventAsText(draft);
-    final style = theme.textTheme.bodySmall?.copyWith(
-      fontFamily: 'monospace',
-      fontSize: 11.5,
-      color: scheme.onSurface,
-    );
-    final at = body.isEmpty ? -1 : line.indexOf(body);
-    return Container(
-      key: const Key('calendar-event-preview'),
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-      decoration: BoxDecoration(
-        color: scheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: at < 0
-          ? Text(line, style: style)
-          : Text.rich(
-              TextSpan(
-                children: [
-                  TextSpan(text: line.substring(0, at), style: style),
-                  TextSpan(
-                    text: body,
-                    style: style?.copyWith(
-                      color: syntax?.calendarGoal ?? scheme.primary,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  TextSpan(
-                    text: line.substring(at + body.length),
-                    style: style,
-                  ),
-                ],
-              ),
-            ),
-    );
-  }
 }
 
 /// The `+`/`@`/`#` tokens in [text], sigil included — what the form leaves
@@ -440,8 +398,3 @@ Set<String> parseTokens(String text) => {
   for (final match in RegExp(r'(?:^|\s)([+@#]\S+)').allMatches(text))
     ?match.group(1),
 };
-
-/// A clock time as a field shows it: `15:00`, `9:30`.
-String _clockText(int minutes) =>
-    '${(minutes ~/ 60).toString().padLeft(2, '0')}:'
-    '${(minutes % 60).toString().padLeft(2, '0')}';

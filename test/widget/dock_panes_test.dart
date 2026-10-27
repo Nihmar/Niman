@@ -15,6 +15,7 @@ import 'package:niman/src/search/tag_repo.dart';
 import 'package:niman/src/ui/dock/history_dock_pane.dart';
 import 'package:niman/src/ui/dock/outline_dock_pane.dart';
 import 'package:niman/src/ui/dock/tags_dock_pane.dart';
+import 'package:niman/src/ui/note_tags.dart';
 import 'package:niman/src/ui/note_view_handle.dart';
 
 import '../fakes/fake_library_session.dart';
@@ -24,6 +25,9 @@ final class _Note implements NoteViewHandle {
 
   @override
   String currentText;
+
+  @override
+  Future<List<String>> currentTags() async => noteTagsOf(currentText);
 
   final jumps = <int>[];
 

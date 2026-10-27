@@ -18,6 +18,7 @@ library;
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:niman/src/calendar/calendar_occurrence_edits.dart';
 import 'package:niman/src/calendar/calendar_source.dart';
 import 'package:niman/src/calendar/calendar_store.dart';
 import 'package:niman/src/calendar/calendar_writer.dart';
@@ -144,6 +145,52 @@ final class CalendarController extends ChangeNotifier {
       'delete@${entry.lineIndex}:${entry.event.start}',
       (store) => store.deleteEvent(_refOf(entry)),
     );
+  }
+
+  /// Skips the occurrence [entry] shows: its day joins the rule's `except:`
+  /// (#1191).
+  Future<void> skipOccurrence(CalendarEntryEvent entry) {
+    final day = _occurrenceOf(entry);
+    return _apply(
+      'skip@${entry.lineIndex}:${entry.event.start}',
+      (store) => store.skipOccurrence(_refOf(entry), day),
+    );
+  }
+
+  /// Changes the occurrence [entry] shows to [event], for the occurrences
+  /// [scope] names (#1191).
+  Future<void> updateOccurrence(
+    CalendarEntryEvent entry,
+    CalendarEventDraft event,
+    CalendarOccurrenceScope scope,
+  ) {
+    final day = _occurrenceOf(entry);
+    return _apply(
+      'edit@${entry.lineIndex}:${entry.event.start}:${scope.name}',
+      (store) => store.updateOccurrence(_refOf(entry), day, event, scope),
+    );
+  }
+
+  /// Deletes the occurrence [entry] shows, and the ones [scope] names
+  /// with it (#1191).
+  Future<void> deleteOccurrence(
+    CalendarEntryEvent entry,
+    CalendarOccurrenceScope scope,
+  ) {
+    final day = _occurrenceOf(entry);
+    return _apply(
+      'delete@${entry.lineIndex}:${entry.event.start}:${scope.name}',
+      (store) => store.deleteOccurrence(_refOf(entry), day, scope),
+    );
+  }
+
+  /// The day [entry] is the occurrence of.
+  static DateTime _occurrenceOf(CalendarEntryEvent entry) {
+    final day = entry.day;
+    if (day == null) {
+      throw ArgumentError('an event off a day line: $entry');
+    }
+    return day;
   }
 
   /// Where [entry]'s event is, for a write that re-reads the file first.

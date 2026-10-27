@@ -7,8 +7,10 @@
 library;
 
 import 'package:niman/src/core/language.dart';
+import 'package:niman/src/todo/recurring_line.dart';
 import 'package:niman/src/todo/todo_store.dart';
 import 'package:niman/src/todo/widget_todos.dart';
+import 'package:niman/src/ui/recurrence_words.dart';
 import 'package:niman/src/ui/todo_section_label.dart';
 import 'package:niman/src/widget/widget_payload.dart';
 import 'package:niman/src/widget/widget_theme.dart';
@@ -36,6 +38,10 @@ String buildTodoWidgetPayload(
     total: widgetTodoTotal(snapshot),
     theme: theme,
     language: AppLanguages.resolved.id,
+    repeatOf: (task) => switch (recurrenceRuleOf(task)) {
+      final rule? => recurrenceWords(rule.description),
+      null => null,
+    },
   );
 }
 

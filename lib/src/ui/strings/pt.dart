@@ -325,6 +325,24 @@ final class PortugueseStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Lembrete às $time';
   @override
+  String get calendarEndsNever => 'Nunca termina';
+  @override
+  String calendarEndsOn(String date) => 'Termina em $date';
+  @override
+  String get calendarSkipAction => 'Ignorar';
+  @override
+  String get calendarScopeEditTitle => 'Editar evento recorrente';
+  @override
+  String get calendarScopeDeleteTitle => 'Excluir evento recorrente';
+  @override
+  String get calendarScopeThis => 'Este evento';
+  @override
+  String get calendarScopeFollowing => 'Este e os seguintes';
+  @override
+  String get calendarScopeAll => 'Todos os eventos';
+  @override
+  String get calendarEventDay => 'Dia';
+  @override
   String get journalCalendarTitle => 'Calendário';
   @override
   String get journalEventTimesTitle => 'Horas dos eventos';
@@ -4454,4 +4472,50 @@ final class PortugueseStrings extends Strings {
   @override
   String todoBlockSeveralNotes(String name) =>
       'Várias notas correspondem a $name';
+
+  // Recurring tasks (#1189): a rule in words, and the Repeat row.
+  @override
+  String recurDays(int n) => n == 1 ? 'todos os dias' : 'a cada $n dias';
+  @override
+  String recurWeeks(int n) => n == 1 ? 'toda semana' : 'a cada $n semanas';
+  @override
+  String recurMonths(int n) => n == 1 ? 'todo mês' : 'a cada $n meses';
+  @override
+  String recurYears(int n) => n == 1 ? 'todo ano' : 'a cada $n anos';
+  @override
+  String recurBusinessDays(int n) =>
+      n == 1 ? 'todo dia útil' : 'a cada $n dias úteis';
+  @override
+  String recurOnWeekdays(String rule, String days) => '$rule: $days';
+  @override
+  String recurNthWeekday(String rule, int nth, int weekday) {
+    final i = nth == -1 ? 4 : nth - 1;
+    final ord = (const <int>{1, 2, 3, 4, 5}.contains(weekday)
+        ? const ['1.ª', '2.ª', '3.ª', '4.ª', 'última']
+        : const ['1.º', '2.º', '3.º', '4.º', 'último'])[i];
+    return '$rule, $ord ${weekdayNames[weekday - 1]}';
+  }
+
+  @override
+  String recurFromDue(String rule) => '$rule, a partir do vencimento';
+  @override
+  String get todoRepeat => 'Repetir';
+  @override
+  String get todoRepeatNever => 'Nunca';
+  @override
+  String get todoRepeatCustom => 'Personalizado…';
+  @override
+  String get recurEvery => 'A cada';
+  @override
+  String get recurUnitDays => 'Dias';
+  @override
+  String get recurUnitWeeks => 'Semanas';
+  @override
+  String get recurUnitMonths => 'Meses';
+  @override
+  String get recurUnitYears => 'Anos';
+  @override
+  String get recurFromDueDate => 'A partir do vencimento';
+  @override
+  String get recurFromCompletion => 'A partir da conclusão';
 }

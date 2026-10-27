@@ -318,6 +318,24 @@ final class TurkishStrings extends Strings {
   @override
   String calendarReminderAt(String time) => '$time hatırlatması';
   @override
+  String get calendarEndsNever => 'Hiç bitmez';
+  @override
+  String calendarEndsOn(String date) => '$date tarihinde biter';
+  @override
+  String get calendarSkipAction => 'Atla';
+  @override
+  String get calendarScopeEditTitle => 'Yinelenen etkinliği düzenle';
+  @override
+  String get calendarScopeDeleteTitle => 'Yinelenen etkinliği sil';
+  @override
+  String get calendarScopeThis => 'Bu etkinlik';
+  @override
+  String get calendarScopeFollowing => 'Bu ve sonraki etkinlikler';
+  @override
+  String get calendarScopeAll => 'Tüm etkinlikler';
+  @override
+  String get calendarEventDay => 'Gün';
+  @override
   String get journalCalendarTitle => 'Takvim';
   @override
   String get journalEventTimesTitle => 'Etkinlik saatleri';
@@ -4389,4 +4407,48 @@ final class TurkishStrings extends Strings {
   @override
   String todoBlockSeveralNotes(String name) =>
       '$name ile birden çok not eşleşiyor';
+
+  // Recurring tasks (#1189): a rule in words, and the Repeat row.
+  @override
+  String recurDays(int n) => n == 1 ? 'her gün' : '$n günde bir';
+  @override
+  String recurWeeks(int n) => n == 1 ? 'her hafta' : '$n haftada bir';
+  @override
+  String recurMonths(int n) => n == 1 ? 'her ay' : '$n ayda bir';
+  @override
+  String recurYears(int n) => n == 1 ? 'her yıl' : '$n yılda bir';
+  @override
+  String recurBusinessDays(int n) =>
+      n == 1 ? 'her iş günü' : '$n iş gününde bir';
+  @override
+  String recurOnWeekdays(String rule, String days) => '$rule: $days';
+  @override
+  String recurNthWeekday(String rule, int nth, int weekday) {
+    final i = nth == -1 ? 4 : nth - 1;
+    final ord = const ['1.', '2.', '3.', '4.', 'son'][i];
+    return '$rule, $ord ${weekdayNames[weekday - 1]}';
+  }
+
+  @override
+  String recurFromDue(String rule) => '$rule, bitiş tarihinden';
+  @override
+  String get todoRepeat => 'Tekrarla';
+  @override
+  String get todoRepeatNever => 'Asla';
+  @override
+  String get todoRepeatCustom => 'Özel…';
+  @override
+  String get recurEvery => 'Her';
+  @override
+  String get recurUnitDays => 'Gün';
+  @override
+  String get recurUnitWeeks => 'Hafta';
+  @override
+  String get recurUnitMonths => 'Ay';
+  @override
+  String get recurUnitYears => 'Yıl';
+  @override
+  String get recurFromDueDate => 'Bitiş tarihinden';
+  @override
+  String get recurFromCompletion => 'Tamamlanma tarihinden';
 }

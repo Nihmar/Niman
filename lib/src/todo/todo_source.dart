@@ -31,7 +31,9 @@ abstract interface class TodoSource {
   /// missing.
   Future<TodoSnapshot> add(String line);
 
-  /// Checks the `todo.txt` line at [lineIndex] on [today].
+  /// Checks the `todo.txt` line at [lineIndex] on [today]: the done line goes
+  /// to `done.txt`, and a task with a readable `rec:` also gets its next
+  /// copy appended to `todo.txt` in the same write.
   Future<TodoSnapshot> checkAt(int lineIndex, DateTime today);
 
   /// Reopens the `done.txt` line at [lineIndex] back into `todo.txt`.

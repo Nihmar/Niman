@@ -3625,6 +3625,13 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   @visibleForTesting
   static int backgroundLines = 50000;
 
+  /// Whether [buffer] is a long note: one whose colours are read in the
+  /// background ([backgroundLines]), and whose scan keeps its tags and links
+  /// block by block ([references]) — so what follows it as it is edited
+  /// reads those rather than its text.
+  static bool readsInBackground(SourceBuffer buffer) =>
+      buffer.lineCount >= backgroundLines;
+
   /// From how many lines on a note read in place reads the blocks of its top
   /// alone before its first frame, and the rest a slice at a time after it
   /// ([_carryScanOn]).
@@ -3655,7 +3662,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     // on, and found the old one gone when it ran.
     _scanSlice?.cancel();
     _scanSlice = null;
-    if (buffer.lineCount < backgroundLines) {
+    if (!readsInBackground(buffer)) {
       _reading = null;
       final progressive = buffer.lineCount >= progressiveLines;
       _styler = SourceStyler(

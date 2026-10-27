@@ -33,6 +33,7 @@ object TodoWidgetItems {
     private const val KIND_ROW = "row"
     private const val TONE_ERROR = "error"
     private const val SEPARATOR = " · "
+    private const val REPEAT_GLYPH = "↻"
 
     /**
      * The items of [array] in order; entries that are not objects are
@@ -92,7 +93,8 @@ object TodoWidgetItems {
     fun isErrorTone(item: JSONObject): Boolean = string(item, "tone") == TONE_ERROR
 
     /**
-     * The meta line of a task row: priority, due date and the
+     * The meta line of a task row: priority, due date, the rule it repeats
+     * by (`repeat`, already in words, after a repeat glyph) and the
      * `+project` / `@context` / `#tag` markers, joined by a middle dot.
      * Empty when the row has none, so the row hides the line and its
      * text aligns with the others.
@@ -111,6 +113,7 @@ object TodoWidgetItems {
         return listOfNotNull(
             string(row, "priority").takeIf { it.isNotEmpty() }?.let { "($it)" },
             due.takeIf { it.isNotEmpty() },
+            string(row, "repeat").takeIf { it.isNotEmpty() }?.let { "$REPEAT_GLYPH $it" },
             tokens.joinToString(" ").takeIf { it.isNotEmpty() },
         ).joinToString(SEPARATOR)
     }

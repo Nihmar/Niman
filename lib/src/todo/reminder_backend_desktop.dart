@@ -38,6 +38,8 @@ final class DesktopReminderBackend implements ReminderBackend {
 
   final StreamController<String?> _taps = StreamController<String?>.broadcast();
 
+  final StreamController<void> _fired = StreamController<void>.broadcast();
+
   static const AppLogger _log = AppLogger(name: 'todo');
 
   bool _ready = false;
@@ -127,6 +129,7 @@ final class DesktopReminderBackend implements ReminderBackend {
       await _notifier.show(reminder);
       settle(DateTime.now());
       _log.info('todo reminders: fired ${reminder.id} ${reminder.title}');
+      if (!_fired.isClosed) _fired.add(null);
     } on Object catch (error) {
       settle(null);
       _log.warning(
@@ -175,6 +178,11 @@ final class DesktopReminderBackend implements ReminderBackend {
   @override
   Stream<String?> get taps => _taps.stream;
 
+  /// After each reminder shown: a repeating event's next occurrences come
+  /// into the window then, whether or not the app was touched (#1192).
+  @override
+  Stream<void> get fired => _fired.stream;
+
   @override
   Future<void> dispose() async {
     for (final timer in _armed.values) {
@@ -182,5 +190,6 @@ final class DesktopReminderBackend implements ReminderBackend {
     }
     _armed.clear();
     await _taps.close();
+    await _fired.close();
   }
 }

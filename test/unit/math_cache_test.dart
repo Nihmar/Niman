@@ -5,6 +5,7 @@ import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:katex_dart/katex_dart.dart'
     show BoxNode, KatexOptions, renderToBox;
+import 'package:niman/src/core/memory_reclaim.dart';
 import 'package:niman/src/preview/math_cache.dart';
 
 BoxNode _realRender(String tex, {required bool displayMode}) =>
@@ -81,5 +82,55 @@ void main() {
     expect(box, isNotNull);
     expect(box!.width, greaterThan(0));
     cache.dispose();
+  });
+
+  test('reclaim lets go of boxes and failures, the next ask renders', () async {
+    var renders = 0;
+    final cache = MathCache(
+      renderer: (tex, {required displayMode}) {
+        renders++;
+        if (tex == 'bad') throw const FormatException('bad');
+        return _realRender(tex, displayMode: displayMode);
+      },
+    );
+    await cache.ensure('a', displayMode: false);
+    await cache.ensure('bad', displayMode: false);
+    expect(cache.boxFor('a', displayMode: false), isNotNull);
+    expect(cache.isError('bad', displayMode: false), isTrue);
+
+    MemoryReclaim.reclaimAll();
+
+    expect(cache.boxFor('a', displayMode: false), isNull);
+    expect(cache.isError('bad', displayMode: false), isFalse);
+    expect(renders, 2);
+    final again = await cache.ensure('a', displayMode: false);
+    expect(again, isNotNull, reason: 'a miss renders, it is not left blank');
+    expect(renders, 3);
+    cache.dispose();
+  });
+
+  test('a render under way lands in the cache after a reclaim', () async {
+    final release = Completer<void>();
+    final cache = MathCache(
+      asyncRenderer: (tex, {required displayMode}) async {
+        await release.future;
+        return _realRender(tex, displayMode: displayMode);
+      },
+    );
+    final pending = cache.ensure('a', displayMode: false);
+
+    MemoryReclaim.reclaimAll();
+    expect(cache.isPending('a', displayMode: false), isTrue);
+    release.complete();
+
+    expect(await pending, isNotNull);
+    expect(cache.boxFor('a', displayMode: false), isNotNull);
+    cache.dispose();
+  });
+
+  test('a disposed cache ignores a reclaim', () {
+    MathCache(renderer: _realRender).dispose();
+
+    expect(MemoryReclaim.reclaimAll, returnsNormally);
   });
 }

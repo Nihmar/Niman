@@ -12,6 +12,11 @@
 /// time order, and the line the local side wrote is kept verbatim when
 /// nothing about it changed.
 ///
+/// The one exception to "an event is its text" is a repeating event
+/// (#1191): its copies are paired by the text without `until:` and
+/// `except:`, and a pair merges into one event whose skipped days are the
+/// union and whose end is the earlier one (`calendar_rule_merge.dart`).
+///
 /// A **goal** is not a set of items: its line says one thing, in prose.
 /// Two different texts for one head are two edits, and the record rule
 /// keeps both rather than choosing one and losing the other — as a task
@@ -31,8 +36,10 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:niman/src/calendar/calendar_file.dart';
+import 'package:niman/src/calendar/calendar_rule_tokens.dart';
 import 'package:niman/src/calendar/parser.dart';
 import 'package:niman/src/calendar/weekdays.dart';
+import 'package:niman/src/diff/calendar_rule_merge.dart';
 import 'package:niman/src/diff/three_way.dart';
 
 /// Merges what [local] and [remote] each did to the calendar file [base]
@@ -144,17 +151,29 @@ CalendarRawLine? _mergeDay({
   final baseTexts = {for (final event in baseEvents) event.raw};
   final localTexts = {for (final event in localEvents) event.raw};
   final remoteTexts = {for (final event in remoteEvents) event.raw};
+  // A repeating event both sides still have, changed differently, is one
+  // event: its copies merge (#1191).
+  final pairs = _pairedRules(
+    local: localEvents,
+    remote: remoteEvents,
+    base: baseEvents,
+  );
   final merged = <String>[];
   void keep(String text) {
     if (!merged.contains(text)) merged.add(text);
   }
 
   for (final event in localEvents) {
-    if (!baseTexts.contains(event.raw) || remoteTexts.contains(event.raw)) {
+    final pair = pairs[calendarRuleKey(event)];
+    if (pair != null) {
+      keep(pair);
+    } else if (!baseTexts.contains(event.raw) ||
+        remoteTexts.contains(event.raw)) {
       keep(event.raw);
     }
   }
   for (final event in remoteEvents) {
+    if (pairs.containsKey(calendarRuleKey(event))) continue;
     if (!baseTexts.contains(event.raw) && !localTexts.contains(event.raw)) {
       keep(event.raw);
     }
@@ -168,9 +187,33 @@ CalendarRawLine? _mergeDay({
       ...localEvents,
       ...remoteEvents,
       ...baseEvents,
+      for (final text in merged) ...parseCalendarEvents(text, from: 0),
     ]),
     endings.endingOf(local.first),
   );
+}
+
+/// The merged event of every rule event both sides have with differing
+/// text, by its [calendarRuleKey].
+Map<String, String> _pairedRules({
+  required List<CalendarEvent> local,
+  required List<CalendarEvent> remote,
+  required List<CalendarEvent> base,
+}) {
+  final mine = calendarRuleEventsByKey(local);
+  final theirs = calendarRuleEventsByKey(remote);
+  final original = calendarRuleEventsByKey(base);
+  final pairs = <String, String>{};
+  for (final MapEntry(:key, value: event) in mine.entries) {
+    final other = theirs[key];
+    if (other == null || other.raw == event.raw) continue;
+    pairs[key] = mergeRuleEvents(
+      local: event,
+      remote: other,
+      base: original[key],
+    );
+  }
+  return pairs;
 }
 
 List<CalendarEvent> _events(List<String> lines) => [

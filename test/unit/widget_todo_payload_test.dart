@@ -85,6 +85,35 @@ void main() {
       expect(overdue['count'], 2);
     });
 
+    test('a recurring task carries its rule in words, in the language', () {
+      final lines = snapshot(['water rec:2w due:2026-10-20', 'plain']);
+      Map<String, Object?> row(Map<String, Object?> payload, int line) => [
+        for (final item in payload['rows']! as List<Object?>)
+          if ((item! as Map)['kind'] != 'section')
+            (item as Map).cast<String, Object?>(),
+      ].firstWhere((item) => item['line'] == line);
+
+      var payload = decode(
+        buildTodoWidgetPayload(
+          lines,
+          libraryPath: '/lib',
+          today: DateTime(2026, 10, 16),
+        ),
+      );
+      expect(row(payload, 0)['repeat'], 'every 2 weeks');
+      expect(row(payload, 1).containsKey('repeat'), isFalse);
+
+      AppLanguages.choice = AppLanguage.italian;
+      payload = decode(
+        buildTodoWidgetPayload(
+          lines,
+          libraryPath: '/lib',
+          today: DateTime(2026, 10, 16),
+        ),
+      );
+      expect(row(payload, 0)['repeat'], 'ogni 2 settimane');
+    });
+
     test('stamps the language in use and wears the given theme', () {
       AppLanguages.choice = AppLanguage.italian;
       const theme = (

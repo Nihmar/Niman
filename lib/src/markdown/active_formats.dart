@@ -84,6 +84,7 @@ Set<ToolbarItem> activeFormatsOf({
           TokenKind.todoProject ||
           TokenKind.todoContext ||
           TokenKind.todoKeyValue ||
+          TokenKind.todoUnreadableRule ||
           TokenKind.todoDone:
       // The calendar's own runs (#730), which no toolbar button makes
       // either.

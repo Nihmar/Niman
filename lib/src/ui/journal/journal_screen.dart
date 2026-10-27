@@ -4,6 +4,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/calendar/calendar_file.dart';
+import 'package:niman/src/calendar/calendar_occurrence_edits.dart';
 import 'package:niman/src/calendar/calendar_store.dart';
 import 'package:niman/src/calendar/calendar_writer.dart';
 import 'package:niman/src/calendar/parser.dart';
@@ -21,7 +22,7 @@ final class JournalScreen extends StatelessWidget {
     this.revision = 0,
     this.eventsOn,
     this.goalsOn,
-    this.eventDays = const <DateTime>{},
+    this.eventDaysIn,
     this.calendarChanged,
     this.onOpenEvent,
     this.dueOn,
@@ -33,6 +34,7 @@ final class JournalScreen extends StatelessWidget {
     this.onAddEvent,
     this.onAddTask,
     this.onEditEvent,
+    this.onSkipEvent,
     this.onDeleteEvent,
     super.key,
   });
@@ -43,8 +45,8 @@ final class JournalScreen extends StatelessWidget {
   /// See [JournalBrowser.goalsOn].
   final List<CalendarLine> Function(DateTime day)? goalsOn;
 
-  /// See [JournalBrowser.eventDays].
-  final Set<DateTime> eventDays;
+  /// See [JournalBrowser.eventDaysIn].
+  final Set<DateTime> Function(DateTime from, DateTime to)? eventDaysIn;
 
   /// See [JournalBrowser.calendarChanged].
   final Listenable? calendarChanged;
@@ -77,11 +79,19 @@ final class JournalScreen extends StatelessWidget {
   final void Function(DateTime day)? onAddTask;
 
   /// See [JournalBrowser.onEditEvent].
-  final void Function(CalendarEntryEvent entry, CalendarEventDraft event)?
+  final void Function(
+    CalendarEntryEvent entry,
+    CalendarEventDraft event,
+    CalendarOccurrenceScope scope,
+  )?
   onEditEvent;
 
+  /// See [JournalBrowser.onSkipEvent].
+  final void Function(CalendarEntryEvent entry)? onSkipEvent;
+
   /// See [JournalBrowser.onDeleteEvent].
-  final void Function(CalendarEntryEvent entry)? onDeleteEvent;
+  final void Function(CalendarEntryEvent entry, CalendarOccurrenceScope scope)?
+  onDeleteEvent;
 
   /// See [JournalBrowser.today].
   final DateTime today;
@@ -112,7 +122,7 @@ final class JournalScreen extends StatelessWidget {
         large: true,
         eventsOn: eventsOn,
         goalsOn: goalsOn,
-        eventDays: eventDays,
+        eventDaysIn: eventDaysIn,
         calendarChanged: calendarChanged,
         onOpenEvent: onOpenEvent,
         dueOn: dueOn,
@@ -124,6 +134,7 @@ final class JournalScreen extends StatelessWidget {
         onAddEvent: onAddEvent,
         onAddTask: onAddTask,
         onEditEvent: onEditEvent,
+        onSkipEvent: onSkipEvent,
         onDeleteEvent: onDeleteEvent,
       ),
     );

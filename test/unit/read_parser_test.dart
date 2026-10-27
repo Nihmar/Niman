@@ -2,6 +2,7 @@
 // leaf's inline text read by our own parser (docs/dev/block-tree.md,
 // phase 5).
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/memory_reclaim.dart';
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_node.dart';
 import 'package:niman/src/markdown/block_scanner.dart';
@@ -186,5 +187,22 @@ void main() {
     buffer.replaceRange(0, 1, 'c');
     parser.of(blocks.first, buffer);
     expect(parser.parseCount, 2);
+  });
+
+  test('reclaim lets go of the blocks and the next ask reads them again', () {
+    final buffer = SourceBuffer.fromText('a\n\nb');
+    final parser = ReadParser();
+    final blocks = BlockScanner(buffer).index.blocks;
+    final first = parser.of(blocks.first, buffer);
+    expect(parser.of(blocks.first, buffer), same(first));
+    expect(parser.parseCount, 1);
+
+    MemoryReclaim.reclaimAll();
+    final again = parser.of(blocks.first, buffer);
+
+    expect(parser.parseCount, 2, reason: 'nothing was kept to answer from');
+    expect(again, isNot(same(first)));
+    expect(parser.of(blocks.first, buffer), same(again));
+    expect(parser.parseCount, 2, reason: 'and it caches again');
   });
 }

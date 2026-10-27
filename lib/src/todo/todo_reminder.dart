@@ -13,13 +13,12 @@
 library;
 
 import 'package:meta/meta.dart';
-import 'package:niman/src/calendar/calendar_store.dart';
-import 'package:niman/src/calendar/parser.dart';
-import 'package:niman/src/templates/engine.dart';
 import 'package:niman/src/todo/parser.dart';
 import 'package:niman/src/todo/task_link_label.dart';
 import 'package:niman/src/todo/todo_store.dart';
 import 'package:niman/src/ui/strings.dart';
+
+export 'package:niman/src/todo/calendar_reminders.dart';
 
 /// The notification payload routing taps to the Todo tab.
 const String todoReminderPayload = 'todo';
@@ -129,6 +128,29 @@ int calendarReminderId(DateTime day, String text) {
   return todoReminderId('calendar ${formatTodoDate(day)} $text');
 }
 
+/// A stable notification id for the occurrence on [occurrence] of the
+/// repeating event first written on [anchor] (#1192).
+///
+/// The event's own id, salted once more with the occurrence's date, so each
+/// occurrence is an alarm of its own and skipping one (`except:`) cancels
+/// that alarm alone. The occurrence on the anchor itself is the one an event
+/// without a rule has always had: [calendarReminderId], so an event that
+/// gains a `rec:` keeps the alarm it already had on its first day. The
+/// anchor is part of the salt, so two series of one text do not share ids.
+int calendarOccurrenceReminderId(
+  DateTime anchor,
+  DateTime occurrence,
+  String text,
+) {
+  if (formatTodoDate(anchor) == formatTodoDate(occurrence)) {
+    return calendarReminderId(anchor, text);
+  }
+  return todoReminderId(
+    'calendar ${formatTodoDate(anchor)} $text '
+    'on ${formatTodoDate(occurrence)}',
+  );
+}
+
 /// How long a reminder stays wanted after its own moment (T-RL-03).
 ///
 /// The wanted set is a full replace: anything outside it has its pending
@@ -144,73 +166,6 @@ int calendarReminderId(DateTime day, String text) {
 /// that already fired is no longer pending, so the sweep skips it, and
 /// one the user completes or edits leaves the set on its own merits.
 const reminderGrace = Duration(hours: 1);
-
-/// The schedulable reminders of the calendar (#730): every event of
-/// [snapshot] whose line carries a `rem:HH:MM`, as a clock time on the day
-/// that line heads. A `Z` in the event's own time never moves it — the
-/// reminder is the clock time that was written next to it.
-///
-/// A missing snapshot is no calendar file, and nothing wanted from it.
-Map<int, TodoReminder> calendarWantedReminders(
-  CalendarSnapshot? snapshot,
-  DateTime now, {
-  bool showTokens = false,
-}) {
-  final wanted = <int, TodoReminder>{};
-  if (snapshot == null) return wanted;
-  for (final entry in snapshot.entries) {
-    final line = entry.line;
-    final day = line.date;
-    if (day == null || line.kind != CalendarLineKind.day) continue;
-    for (final event in line.events) {
-      final when = _eventReminderStamp(day, event.reminder);
-      if (when == null || when.isBefore(now.subtract(reminderGrace))) {
-        continue;
-      }
-      final id = calendarReminderId(day, event.text);
-      // The same two readings a task's title gets: the managed `rem:` (and
-      // any other `key:value`) is never shown, the `+`/`@`/`#` markers are
-      // the user's call.
-      final title = showTokens
-          ? withoutKeyValueTags(event.text)
-          : taskDisplayText(event.text);
-      wanted[id] = TodoReminder(
-        id: id,
-        title: title.isEmpty ? AppStrings.todoReminderFallbackTitle : title,
-        body: _eventReminderBody(day, event),
-        when: when,
-        payload: journalReminderPayload(day),
-      );
-    }
-  }
-  return wanted;
-}
-
-/// The day the event sits on, and the time it says, as one line — what a
-/// notification reads under the event's own text.
-String _eventReminderBody(DateTime day, CalendarEvent event) {
-  final label = formatDateTime(day, 'ddd D MMM');
-  final time = event.time?.raw;
-  return time == null || time.isEmpty ? label : '$label · $time';
-}
-
-/// A `rem:` value on [day] as a local stamp, or null when it is not a
-/// time at all. The format's own readings are accepted (`0530`, `5:30`,
-/// `5`), and a `Z` is the instant it names, not a clock time.
-DateTime? _eventReminderStamp(DateTime day, String? reminder) {
-  final moment = reminder == null ? null : parseCalendarMoment(reminder);
-  if (moment == null) return null;
-  if (!moment.utc) {
-    return DateTime(day.year, day.month, day.day, moment.hour, moment.minute);
-  }
-  return DateTime.utc(
-    day.year,
-    day.month,
-    day.day,
-    moment.hour,
-    moment.minute,
-  ).toLocal();
-}
 
 /// The schedulable reminders of [snapshot]: open (`todo.txt`) tasks with
 /// a `rem:` no more than [reminderGrace] before [now]. Completed tasks

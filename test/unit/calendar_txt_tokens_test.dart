@@ -134,6 +134,35 @@ void main() {
     expect(calendarTxtTokens(''), isEmpty);
   });
 
+  test('rec:, until: and except: are coloured as rem: is (#1190)', () {
+    const line =
+        '2026-10-21 w43 Wed  9 Standup rec:1w until:2026-12-31 '
+        'except:2026-11-04,2026-11-18 rem:8:45.';
+    for (final text in [
+      'rec:1w',
+      'until:2026-12-31',
+      'except:2026-11-04,2026-11-18',
+      'rem:8:45',
+    ]) {
+      expect(kindOf(line, text), TokenKind.todoKeyValue, reason: text);
+    }
+    expectRunsDisjoint(const [line]);
+  });
+
+  test('a rec:, until: or except: it cannot read wears the flag (#1190)', () {
+    const line =
+        '2026-10-21 w43 Wed  9 Standup rec:often until:2026-13-45 '
+        'except:2026-11-04,soon rem:8:45.';
+    expect(kindOf(line, 'rec:often'), TokenKind.todoUnreadableRule);
+    expect(kindOf(line, 'until:2026-13-45'), TokenKind.todoUnreadableRule);
+    expect(
+      kindOf(line, 'except:2026-11-04,soon'),
+      TokenKind.todoUnreadableRule,
+    );
+    expect(kindOf(line, 'rem:8:45'), TokenKind.todoKeyValue);
+    expectRunsDisjoint(const [line]);
+  });
+
   test('every line keeps its runs disjoint and in order', () {
     // Two events, a reminder, an aside and a tag, on one line.
     const busy =

@@ -30,8 +30,13 @@ final class FakeReminderService implements ReminderService {
 
   final StreamController<String?> _taps = StreamController<String?>.broadcast();
 
+  final StreamController<void> _fired = StreamController<void>.broadcast();
+
   /// Simulates a notification tap with [payload].
   void tap(String? payload) => _taps.add(payload);
+
+  /// Simulates a reminder the app has just shown (the desktops).
+  void fire() => _fired.add(null);
 
   @override
   Future<void> reconcile(Map<int, TodoReminder> wanted) async {
@@ -63,11 +68,15 @@ final class FakeReminderService implements ReminderService {
   Stream<String?> get taps => _taps.stream;
 
   @override
+  Stream<void> get fired => _fired.stream;
+
+  @override
   Future<String?> consumeLaunchPayload() async => launchPayload;
 
   @override
   Future<void> dispose() async {
     healthState.dispose();
     await _taps.close();
+    await _fired.close();
   }
 }

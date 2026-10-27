@@ -18,6 +18,7 @@ import 'package:niman/src/todo/todo_store.dart';
 import 'package:niman/src/ui/journal/journal_browser.dart'
     show journalGoalLabel;
 import 'package:niman/src/ui/line_runs.dart';
+import 'package:niman/src/ui/repeat_label.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/todo_row_timing.dart' show TodoDueLabel;
 
@@ -165,11 +166,27 @@ Widget _subtitle(BuildContext context, TaskEventHit hit, DateTime today) {
       : calendarFileName;
   switch (hit.kind) {
     case TaskEventKind.event:
-      return Text(
+      final text = Text(
         '${formatDateTime(hit.day ?? today, 'ddd D MMM')} · $source',
         style: style,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
+      );
+      // A rule is one line of the file, listed once, by what it repeats
+      // by (#1190).
+      final recurrence = hit.event?.recurrence;
+      if (recurrence == null) return text;
+      return Row(
+        children: [
+          Flexible(child: text),
+          const SizedBox(width: 8),
+          Flexible(
+            child: RepeatLabel(
+              key: Key('search-task-event-repeat-${hit.lineIndex}'),
+              rule: recurrence.rule,
+            ),
+          ),
+        ],
       );
     case TaskEventKind.goal:
       final scope = hit.goal == null ? '' : journalGoalLabel(hit.goal!);

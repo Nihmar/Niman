@@ -326,6 +326,24 @@ final class DanishStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Påmindelse kl. $time';
   @override
+  String get calendarEndsNever => 'Slutter aldrig';
+  @override
+  String calendarEndsOn(String date) => 'Slutter den $date';
+  @override
+  String get calendarSkipAction => 'Spring over';
+  @override
+  String get calendarScopeEditTitle => 'Rediger tilbagevendende begivenhed';
+  @override
+  String get calendarScopeDeleteTitle => 'Slet tilbagevendende begivenhed';
+  @override
+  String get calendarScopeThis => 'Denne begivenhed';
+  @override
+  String get calendarScopeFollowing => 'Denne og følgende begivenheder';
+  @override
+  String get calendarScopeAll => 'Alle begivenheder';
+  @override
+  String get calendarEventDay => 'Dag';
+  @override
   String get journalCalendarTitle => 'Kalender';
   @override
   String get journalEventTimesTitle => 'Begivenhedstider';
@@ -4406,4 +4424,48 @@ final class DanishStrings extends Strings {
   String todoBlockNoNote(String name) => 'Ingen note passer til $name';
   @override
   String todoBlockSeveralNotes(String name) => 'Flere noter passer til $name';
+
+  // Recurring tasks (#1189): a rule in words, and the Repeat row.
+  @override
+  String recurDays(int n) => n == 1 ? 'hver dag' : 'hver $n. dag';
+  @override
+  String recurWeeks(int n) => n == 1 ? 'hver uge' : 'hver $n. uge';
+  @override
+  String recurMonths(int n) => n == 1 ? 'hver måned' : 'hver $n. måned';
+  @override
+  String recurYears(int n) => n == 1 ? 'hvert år' : 'hvert $n. år';
+  @override
+  String recurBusinessDays(int n) =>
+      n == 1 ? 'hver hverdag' : 'hver $n. hverdag';
+  @override
+  String recurOnWeekdays(String rule, String days) => '$rule på $days';
+  @override
+  String recurNthWeekday(String rule, int nth, int weekday) {
+    final i = nth == -1 ? 4 : nth - 1;
+    final ord = const ['1.', '2.', '3.', '4.', 'sidste'][i];
+    return '$rule på den $ord ${weekdayNames[weekday - 1]}';
+  }
+
+  @override
+  String recurFromDue(String rule) => '$rule fra forfaldsdatoen';
+  @override
+  String get todoRepeat => 'Gentag';
+  @override
+  String get todoRepeatNever => 'Aldrig';
+  @override
+  String get todoRepeatCustom => 'Tilpasset…';
+  @override
+  String get recurEvery => 'Hver';
+  @override
+  String get recurUnitDays => 'Dage';
+  @override
+  String get recurUnitWeeks => 'Uger';
+  @override
+  String get recurUnitMonths => 'Måneder';
+  @override
+  String get recurUnitYears => 'År';
+  @override
+  String get recurFromDueDate => 'Fra forfaldsdatoen';
+  @override
+  String get recurFromCompletion => 'Fra afslutning';
 }

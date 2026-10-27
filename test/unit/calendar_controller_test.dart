@@ -5,6 +5,7 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/calendar/calendar_controller.dart';
+import 'package:niman/src/calendar/calendar_occurrence_edits.dart';
 import 'package:niman/src/calendar/calendar_source.dart';
 import 'package:niman/src/calendar/calendar_store.dart';
 import 'package:niman/src/calendar/calendar_writer.dart';
@@ -158,6 +159,52 @@ void main() {
       expect(controller.snapshot!.eventsFor(DateTime(2026, 10, 12)), isEmpty);
     });
 
+    test('an occurrence is skipped, edited and ended by its own day', () async {
+      write('2026-10-05 w41 Mon  9 standup rec:1w.\n');
+      await controller.open();
+      final monday = DateTime(2026, 10, 12);
+      final shown = controller.snapshot!.eventsFor(monday).single;
+      expect(shown.isLaterOccurrence, isTrue);
+
+      await controller.skipOccurrence(shown);
+      expect(controller.snapshot!.eventsFor(monday), isEmpty);
+      expect(
+        controller.snapshot!.eventsFor(DateTime(2026, 10, 19)),
+        hasLength(1),
+      );
+
+      final next = controller.snapshot!
+          .eventsFor(DateTime(2026, 10, 19))
+          .single;
+      await controller.updateOccurrence(
+        next,
+        const CalendarEventDraft(text: 'planning', startMinutes: 10 * 60),
+        CalendarOccurrenceScope.thisOne,
+      );
+      expect(
+        controller.snapshot!
+            .eventsFor(DateTime(2026, 10, 19))
+            .single
+            .event
+            .text,
+        'planning',
+      );
+
+      final later = controller.snapshot!
+          .eventsFor(DateTime(2026, 10, 26))
+          .single;
+      await controller.deleteOccurrence(
+        later,
+        CalendarOccurrenceScope.thisAndFollowing,
+      );
+      expect(controller.snapshot!.eventsFor(DateTime(2026, 10, 26)), isEmpty);
+      expect(controller.snapshot!.eventsFor(DateTime(2026, 11, 2)), isEmpty);
+      expect(
+        controller.snapshot!.eventsFor(DateTime(2026, 10, 5)),
+        hasLength(1),
+      );
+    });
+
     test('a write on a closed library is dropped', () async {
       await controller.open();
       await session.close();
@@ -198,4 +245,25 @@ final class _FailingSource implements CalendarSource {
   @override
   Future<CalendarSnapshot> deleteEvent(CalendarEventRef ref) async =>
       throw StateError('no disk today');
+
+  @override
+  Future<CalendarSnapshot> skipOccurrence(
+    CalendarEventRef ref,
+    DateTime occurrence,
+  ) async => throw StateError('no disk today');
+
+  @override
+  Future<CalendarSnapshot> updateOccurrence(
+    CalendarEventRef ref,
+    DateTime occurrence,
+    CalendarEventDraft event,
+    CalendarOccurrenceScope scope,
+  ) async => throw StateError('no disk today');
+
+  @override
+  Future<CalendarSnapshot> deleteOccurrence(
+    CalendarEventRef ref,
+    DateTime occurrence,
+    CalendarOccurrenceScope scope,
+  ) async => throw StateError('no disk today');
 }

@@ -8,6 +8,7 @@
 library;
 
 import 'package:niman/src/calendar/calendar_file.dart';
+import 'package:niman/src/calendar/calendar_occurrence_edits.dart';
 import 'package:niman/src/calendar/calendar_source.dart';
 import 'package:niman/src/calendar/calendar_store.dart';
 import 'package:niman/src/calendar/calendar_writer.dart';
@@ -62,6 +63,37 @@ final class FakeCalendarSource implements CalendarSource {
   @override
   Future<CalendarSnapshot> deleteEvent(CalendarEventRef ref) async {
     return _adopt(deleteCalendarEvent(_file, ref) ?? _file);
+  }
+
+  @override
+  Future<CalendarSnapshot> skipOccurrence(
+    CalendarEventRef ref,
+    DateTime occurrence,
+  ) async {
+    return _adopt(skipCalendarOccurrence(_file, ref, occurrence) ?? _file);
+  }
+
+  @override
+  Future<CalendarSnapshot> updateOccurrence(
+    CalendarEventRef ref,
+    DateTime occurrence,
+    CalendarEventDraft event,
+    CalendarOccurrenceScope scope,
+  ) async {
+    return _adopt(
+      updateCalendarOccurrence(_file, ref, occurrence, event, scope) ?? _file,
+    );
+  }
+
+  @override
+  Future<CalendarSnapshot> deleteOccurrence(
+    CalendarEventRef ref,
+    DateTime occurrence,
+    CalendarOccurrenceScope scope,
+  ) async {
+    return _adopt(
+      deleteCalendarOccurrence(_file, ref, occurrence, scope) ?? _file,
+    );
   }
 
   /// The fake's file as the writer sees it.

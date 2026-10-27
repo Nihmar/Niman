@@ -7,11 +7,13 @@
 library;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:niman/src/calendar/calendar_occurrence_edits.dart';
 import 'package:niman/src/calendar/calendar_store.dart';
 import 'package:niman/src/calendar/calendar_writer.dart';
 
 /// What the calendar UI layer needs from `calendar.txt`: the file, and
-/// the three writes an event is added, edited and deleted with (#730).
+/// the writes an event is added, edited and deleted with (#730), and an
+/// occurrence of a repeating one skipped, edited and deleted (#1191).
 abstract interface class CalendarSource {
   /// Loads and parses the file (a missing file reads as empty).
   Future<CalendarSnapshot> load();
@@ -33,6 +35,30 @@ abstract interface class CalendarSource {
   /// Takes the event [ref] names out; a file that no longer holds it is
   /// left as it is.
   Future<CalendarSnapshot> deleteEvent(CalendarEventRef ref);
+
+  /// Skips [occurrence] of the repeating event [ref] names (#1191): the
+  /// day joins its `except:`.
+  Future<CalendarSnapshot> skipOccurrence(
+    CalendarEventRef ref,
+    DateTime occurrence,
+  );
+
+  /// Changes [occurrence] of the repeating event [ref] names to [event] as
+  /// [scope] says (#1191).
+  Future<CalendarSnapshot> updateOccurrence(
+    CalendarEventRef ref,
+    DateTime occurrence,
+    CalendarEventDraft event,
+    CalendarOccurrenceScope scope,
+  );
+
+  /// Deletes [occurrence] of the repeating event [ref] names as [scope]
+  /// says (#1191).
+  Future<CalendarSnapshot> deleteOccurrence(
+    CalendarEventRef ref,
+    DateTime occurrence,
+    CalendarOccurrenceScope scope,
+  );
 }
 
 /// Builds the calendar file source per library root.

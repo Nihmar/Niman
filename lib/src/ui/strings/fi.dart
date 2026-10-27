@@ -323,6 +323,24 @@ final class FinnishStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Muistutus klo $time';
   @override
+  String get calendarEndsNever => 'Ei pääty koskaan';
+  @override
+  String calendarEndsOn(String date) => 'Päättyy $date';
+  @override
+  String get calendarSkipAction => 'Ohita';
+  @override
+  String get calendarScopeEditTitle => 'Muokkaa toistuvaa tapahtumaa';
+  @override
+  String get calendarScopeDeleteTitle => 'Poista toistuva tapahtuma';
+  @override
+  String get calendarScopeThis => 'Tämä tapahtuma';
+  @override
+  String get calendarScopeFollowing => 'Tämä ja seuraavat tapahtumat';
+  @override
+  String get calendarScopeAll => 'Kaikki tapahtumat';
+  @override
+  String get calendarEventDay => 'Päivä';
+  @override
   String get journalCalendarTitle => 'Kalenteri';
   @override
   String get journalEventTimesTitle => 'Tapahtumien ajat';
@@ -4462,4 +4480,48 @@ final class FinnishStrings extends Strings {
   @override
   String todoBlockSeveralNotes(String name) =>
       'Useampi muistiinpano vastaa nimeä $name';
+
+  // Recurring tasks (#1189): a rule in words, and the Repeat row.
+  @override
+  String recurDays(int n) => n == 1 ? 'joka päivä' : '$n päivän välein';
+  @override
+  String recurWeeks(int n) => n == 1 ? 'joka viikko' : '$n viikon välein';
+  @override
+  String recurMonths(int n) => n == 1 ? 'joka kuukausi' : '$n kuukauden välein';
+  @override
+  String recurYears(int n) => n == 1 ? 'joka vuosi' : '$n vuoden välein';
+  @override
+  String recurBusinessDays(int n) =>
+      n == 1 ? 'joka arkipäivä' : '$n arkipäivän välein';
+  @override
+  String recurOnWeekdays(String rule, String days) => '$rule: $days';
+  @override
+  String recurNthWeekday(String rule, int nth, int weekday) {
+    final i = nth == -1 ? 4 : nth - 1;
+    final ord = const ['1.', '2.', '3.', '4.', 'viimeinen'][i];
+    return '$rule, $ord ${weekdayNames[weekday - 1]}';
+  }
+
+  @override
+  String recurFromDue(String rule) => '$rule, eräpäivästä';
+  @override
+  String get todoRepeat => 'Toista';
+  @override
+  String get todoRepeatNever => 'Ei koskaan';
+  @override
+  String get todoRepeatCustom => 'Mukautettu…';
+  @override
+  String get recurEvery => 'Joka';
+  @override
+  String get recurUnitDays => 'Päivät';
+  @override
+  String get recurUnitWeeks => 'Viikot';
+  @override
+  String get recurUnitMonths => 'Kuukaudet';
+  @override
+  String get recurUnitYears => 'Vuodet';
+  @override
+  String get recurFromDueDate => 'Eräpäivästä';
+  @override
+  String get recurFromCompletion => 'Valmistumisesta';
 }

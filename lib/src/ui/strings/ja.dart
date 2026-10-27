@@ -302,6 +302,24 @@ final class JapaneseStrings extends Strings {
   @override
   String calendarReminderAt(String time) => '$time にリマインド';
   @override
+  String get calendarEndsNever => '終了しない';
+  @override
+  String calendarEndsOn(String date) => '$date に終了';
+  @override
+  String get calendarSkipAction => 'スキップ';
+  @override
+  String get calendarScopeEditTitle => '繰り返す予定を編集';
+  @override
+  String get calendarScopeDeleteTitle => '繰り返す予定を削除';
+  @override
+  String get calendarScopeThis => 'この予定のみ';
+  @override
+  String get calendarScopeFollowing => 'この予定以降すべて';
+  @override
+  String get calendarScopeAll => 'すべての予定';
+  @override
+  String get calendarEventDay => '日';
+  @override
   String get journalCalendarTitle => 'カレンダー';
   @override
   String get journalEventTimesTitle => '予定の時刻';
@@ -4070,4 +4088,47 @@ final class JapaneseStrings extends Strings {
   String todoBlockNoNote(String name) => '$name に一致するノートがありません';
   @override
   String todoBlockSeveralNotes(String name) => '$name に一致するノートが複数あります';
+
+  // Recurring tasks (#1189): a rule in words, and the Repeat row.
+  @override
+  String recurDays(int n) => n == 1 ? '毎日' : '$n日ごと';
+  @override
+  String recurWeeks(int n) => n == 1 ? '毎週' : '$n週間ごと';
+  @override
+  String recurMonths(int n) => n == 1 ? '毎月' : '$nか月ごと';
+  @override
+  String recurYears(int n) => n == 1 ? '毎年' : '$n年ごと';
+  @override
+  String recurBusinessDays(int n) => n == 1 ? '平日' : '$n営業日ごと';
+  @override
+  String recurOnWeekdays(String rule, String days) => '$rule（$days）';
+  @override
+  String recurNthWeekday(String rule, int nth, int weekday) {
+    final i = nth == -1 ? 4 : nth - 1;
+    final ord = const ['第1', '第2', '第3', '第4', '最終'][i];
+    return '$rule $ord${weekdayNames[weekday - 1]}';
+  }
+
+  @override
+  String recurFromDue(String rule) => '$rule（期限日から）';
+  @override
+  String get todoRepeat => '繰り返し';
+  @override
+  String get todoRepeatNever => 'なし';
+  @override
+  String get todoRepeatCustom => 'カスタム…';
+  @override
+  String get recurEvery => '間隔';
+  @override
+  String get recurUnitDays => '日';
+  @override
+  String get recurUnitWeeks => '週';
+  @override
+  String get recurUnitMonths => 'か月';
+  @override
+  String get recurUnitYears => '年';
+  @override
+  String get recurFromDueDate => '期限日から';
+  @override
+  String get recurFromCompletion => '完了日から';
 }

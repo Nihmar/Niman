@@ -328,6 +328,24 @@ final class PolishStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Przypomnienie o $time';
   @override
+  String get calendarEndsNever => 'Nigdy się nie kończy';
+  @override
+  String calendarEndsOn(String date) => 'Kończy się $date';
+  @override
+  String get calendarSkipAction => 'Pomiń';
+  @override
+  String get calendarScopeEditTitle => 'Edytuj wydarzenie cykliczne';
+  @override
+  String get calendarScopeDeleteTitle => 'Usuń wydarzenie cykliczne';
+  @override
+  String get calendarScopeThis => 'To wydarzenie';
+  @override
+  String get calendarScopeFollowing => 'To i następne wydarzenia';
+  @override
+  String get calendarScopeAll => 'Wszystkie wydarzenia';
+  @override
+  String get calendarEventDay => 'Dzień';
+  @override
   String get journalCalendarTitle => 'Kalendarz';
   @override
   String get journalEventTimesTitle => 'Godziny wydarzeń';
@@ -4481,4 +4499,65 @@ final class PolishStrings extends Strings {
   String todoBlockNoNote(String name) => 'Żadna notatka nie pasuje do $name';
   @override
   String todoBlockSeveralNotes(String name) => 'Kilka notatek pasuje do $name';
+
+  // Recurring tasks (#1189): a rule in words, and the Repeat row.
+  @override
+  String recurDays(int n) => n == 1 ? 'codziennie' : 'co $n dni';
+  @override
+  String recurWeeks(int n) => n == 1
+      ? 'co tydzień'
+      : (n % 10 >= 2 && n % 10 <= 4 && !(n % 100 >= 12 && n % 100 <= 14))
+      ? 'co $n tygodnie'
+      : 'co $n tygodni';
+  @override
+  String recurMonths(int n) => n == 1
+      ? 'co miesiąc'
+      : (n % 10 >= 2 && n % 10 <= 4 && !(n % 100 >= 12 && n % 100 <= 14))
+      ? 'co $n miesiące'
+      : 'co $n miesięcy';
+  @override
+  String recurYears(int n) => n == 1
+      ? 'co rok'
+      : (n % 10 >= 2 && n % 10 <= 4 && !(n % 100 >= 12 && n % 100 <= 14))
+      ? 'co $n lata'
+      : 'co $n lat';
+  @override
+  String recurBusinessDays(int n) => n == 1
+      ? 'w każdy dzień roboczy'
+      : (n % 10 >= 2 && n % 10 <= 4 && !(n % 100 >= 12 && n % 100 <= 14))
+      ? 'co $n dni robocze'
+      : 'co $n dni roboczych';
+  @override
+  String recurOnWeekdays(String rule, String days) => '$rule: $days';
+  @override
+  String recurNthWeekday(String rule, int nth, int weekday) {
+    final i = nth == -1 ? 4 : nth - 1;
+    final ord = (const <int>{3, 6, 7}.contains(weekday)
+        ? const ['1.', '2.', '3.', '4.', 'ostatnia']
+        : const ['1.', '2.', '3.', '4.', 'ostatni'])[i];
+    return '$rule, $ord ${weekdayNames[weekday - 1]}';
+  }
+
+  @override
+  String recurFromDue(String rule) => '$rule, od terminu';
+  @override
+  String get todoRepeat => 'Powtarzaj';
+  @override
+  String get todoRepeatNever => 'Nigdy';
+  @override
+  String get todoRepeatCustom => 'Własne…';
+  @override
+  String get recurEvery => 'Co';
+  @override
+  String get recurUnitDays => 'Dni';
+  @override
+  String get recurUnitWeeks => 'Tygodnie';
+  @override
+  String get recurUnitMonths => 'Miesiące';
+  @override
+  String get recurUnitYears => 'Lata';
+  @override
+  String get recurFromDueDate => 'Od terminu';
+  @override
+  String get recurFromCompletion => 'Od wykonania';
 }

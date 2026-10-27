@@ -11,6 +11,7 @@ import 'package:niman/src/todo/parser.dart';
 import 'package:niman/src/todo/todo_store.dart';
 import 'package:niman/src/ui/search_screen.dart';
 import 'package:niman/src/ui/search_task_events.dart';
+import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/theme/niman.dart';
 
 import '../fakes/fake_library_session.dart';
@@ -156,6 +157,43 @@ void main() {
     expect(find.text('9-12'), findsOne);
     expect(find.textContaining('thesis chapter 3'), findsOne);
     expect(find.text('Mon 12 Oct · calendar.txt'), findsOne);
+  });
+
+  testWidgets('a rule is one row, with the rule in words (#1190)', (
+    tester,
+  ) async {
+    // Three events carry +work: two plain, and a standup that repeats.
+    final rows = taskEventHits(
+      '+work',
+      tasks: const [],
+      calendar: [
+        CalendarEntry(
+          lineIndex: 0,
+          line: parseCalendarLine(
+            '2026-10-21 w43 Wed  9-9:30 Standup +work rec:2w until:2026-12-31.',
+          ),
+        ),
+        CalendarEntry(
+          lineIndex: 1,
+          line: parseCalendarLine('2026-10-22 w43 Thu  10 Review +work.'),
+        ),
+      ],
+    );
+    await tester.pumpWidget(buildApp(rows: rows));
+    await tester.pump();
+
+    await search(tester, '+work');
+
+    expect(find.text('TASKS AND EVENTS · 2'), findsOne);
+    expect(find.textContaining('Standup'), findsOne);
+    expect(
+      find.byKey(const Key('search-task-event-repeat-0')),
+      findsOne,
+      reason: 'the rule shows once, on its own line',
+    );
+    expect(find.text(AppStrings.recurWeeks(2)), findsOne);
+    expect(find.byKey(const Key('search-task-event-repeat-1')), findsNothing);
+    expect(find.text('Wed 21 Oct · calendar.txt'), findsOne);
   });
 
   testWidgets("a goal row's flag wears the palette's goal colour", (

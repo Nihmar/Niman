@@ -9,6 +9,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:katex/katex.dart' show KatexBoxPainter;
 import 'package:katex_dart/katex_dart.dart';
+import 'package:niman/src/core/memory_reclaim.dart';
+import 'package:niman/src/core/reclaimable.dart';
 
 /// Paints [box] at [fontSize] into [size] at the canvas's origin, as
 /// [KatexBoxPainter] does — through [MathRaster] when the formula holds a
@@ -80,8 +82,18 @@ abstract final class MathRaster {
 
   static final Expando<bool> _shapes = Expando<bool>('math shapes');
 
-  static final LinkedHashMap<_Key, ui.Image> _images =
-      LinkedHashMap<_Key, ui.Image>();
+  // The first use of the map tracks its owner: the images are native memory
+  // the Dart heap does not count, so they are among what a call for memory
+  // gives back. A static field, so the registry's weak reference never
+  // lapses.
+  static final _RasterReclaim _reclaim = _RasterReclaim();
+
+  static final LinkedHashMap<_Key, ui.Image> _images = _newImages();
+
+  static LinkedHashMap<_Key, ui.Image> _newImages() {
+    MemoryReclaim.track(_reclaim);
+    return LinkedHashMap<_Key, ui.Image>();
+  }
 
   /// Whether [box] holds a path (a stretched delimiter, a root, a brace)
   /// or an enclosure's strokes: the shapes a renderer may draw jagged.
@@ -135,7 +147,9 @@ abstract final class MathRaster {
   @visibleForTesting
   static int get cached => _images.length;
 
-  /// Lets every image go: a test's, or a theme's change of colours.
+  /// Lets every image go, each disposed as an eviction does: a test's, or
+  /// what [_RasterReclaim] gives back. A formula still drawn makes its
+  /// image again on the next paint.
   @visibleForTesting
   static void clear() {
     for (final image in _images.values) {
@@ -225,4 +239,10 @@ final class _Key {
     inkPadEm,
     size,
   );
+}
+
+/// [MathRaster]'s images, as something the app can ask to give them back.
+final class _RasterReclaim implements Reclaimable {
+  @override
+  void reclaim() => MathRaster.clear();
 }

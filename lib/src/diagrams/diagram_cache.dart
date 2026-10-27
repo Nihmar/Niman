@@ -10,6 +10,9 @@ library;
 
 import 'dart:collection';
 
+import 'package:flutter/foundation.dart' show visibleForTesting;
+import 'package:niman/src/core/memory_reclaim.dart';
+import 'package:niman/src/core/reclaimable.dart';
 import 'package:niman/src/diagrams/diagram_result.dart';
 import 'package:niman/src/diagrams/diagram_style.dart';
 
@@ -17,9 +20,11 @@ import 'package:niman/src/diagrams/diagram_style.dart';
 final DiagramCache diagramCache = DiagramCache();
 
 /// A bounded LRU of resolved diagrams.
-final class DiagramCache {
+final class DiagramCache implements Reclaimable {
   /// Creates a cache of at most [capacity] drawings.
-  new({this.capacity = 64});
+  new({this.capacity = 64}) {
+    MemoryReclaim.track(this);
+  }
 
   /// How many drawings are kept before the oldest is dropped.
   final int capacity;
@@ -43,4 +48,12 @@ final class DiagramCache {
     }
     return result;
   }
+
+  /// How many drawings are kept.
+  @visibleForTesting
+  int get length => _results.length;
+
+  /// Lets go of every drawing: the next [resolve] lays it out again.
+  @override
+  void reclaim() => _results.clear();
 }

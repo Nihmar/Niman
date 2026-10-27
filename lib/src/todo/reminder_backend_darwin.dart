@@ -177,6 +177,10 @@ final class DarwinReminderBackend implements ReminderBackend {
   @override
   Stream<String?> get taps => _taps.stream;
 
+  /// Never: the OS delivers the alarm, with the app closed or not.
+  @override
+  Stream<void> get fired => const Stream<void>.empty();
+
   @override
   Future<String?> launchPayload() async {
     if (_launchConsumed) {

@@ -2,6 +2,7 @@
 // style, the least recently used dropped past its capacity.
 import 'package:flutter/material.dart' show Brightness;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/memory_reclaim.dart';
 import 'package:niman/src/diagrams/diagram_cache.dart';
 import 'package:niman/src/diagrams/diagram_style.dart';
 
@@ -29,5 +30,19 @@ void main() {
     cache.resolve(_c, style);
     expect(cache.resolve(_a, style), same(a));
     expect(cache.resolve(_b, style), isNot(same(b)));
+  });
+
+  test('reclaim lets every drawing go, and the next ask lays it out again', () {
+    final cache = DiagramCache();
+    const style = DiagramStyle();
+    final first = cache.resolve(_a, style);
+    cache.resolve(_b, style);
+    expect(cache.length, 2);
+
+    MemoryReclaim.reclaimAll();
+
+    expect(cache.length, 0);
+    expect(cache.resolve(_a, style), isNot(same(first)));
+    expect(cache.length, 1);
   });
 }
