@@ -8,8 +8,10 @@
 /// not go over a calendar (#712).
 ///
 /// A Day row (#1191) moves the event to another day — an added event is
-/// written there, an edited one leaves its line for that day's — unless it
-/// is part of a series, which moves by changing its rule.
+/// written there, an edited one leaves its line for that day's. What moves
+/// depends on what is edited (#1225): one occurrence goes there on its own,
+/// a series from this occurrence on starts there, and a whole series moves
+/// its first day.
 ///
 /// A Repeat row and an Ends row (#1191) make the event a rule: `rec:` and,
 /// when it ends, `until:`. The days the rule skips (`except:`) are not on
@@ -111,10 +113,6 @@ final class _CalendarEventFormState extends State<CalendarEventForm> {
   late DateTime _day = widget.day;
   bool _dayOpen = false;
 
-  /// Whether the event can move to another day: one that is added, one that
-  /// stands alone, or one occurrence. A series moves by changing its rule.
-  bool get _dayEditable => widget.scope == null || _only;
-
   /// Whether this edits one occurrence only, which then stands alone.
   bool get _only => widget.scope == CalendarOccurrenceScope.thisOne;
 
@@ -154,7 +152,7 @@ final class _CalendarEventFormState extends State<CalendarEventForm> {
       // A lead that would land on the day before is not written: a
       // calendar line's `rem:` is a clock time on its own day.
       reminderMinutes: reminder == null || reminder < 0 ? null : reminder,
-      day: _dayEditable ? _day : null,
+      day: _day,
       recurrence: _rule == null
           ? null
           : CalendarRecurrence(
@@ -238,7 +236,6 @@ final class _CalendarEventFormState extends State<CalendarEventForm> {
             ),
             CalendarEventDay(
               day: _day,
-              enabled: _dayEditable,
               open: _dayOpen,
               onToggle: () => setState(() => _dayOpen = !_dayOpen),
               onPicked: (day) => setState(() {

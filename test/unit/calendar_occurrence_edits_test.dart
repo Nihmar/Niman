@@ -629,29 +629,74 @@ void main() {
       ]);
     });
 
-    test('a series does not move: the day is ignored', () {
+    test('edit all moves the rule event: the first day is the new one', () {
+      final before = file();
       final draft = calendarDraftOf(firstEvent(_lines[1].text));
-      for (final scope in [
-        CalendarOccurrenceScope.all,
-        CalendarOccurrenceScope.thisAndFollowing,
-      ]) {
-        final moved = CalendarEventDraft(
+      final after = updateCalendarOccurrence(
+        before,
+        rule,
+        DateTime(2026, 10, 19),
+        CalendarEventDraft(
           text: draft.text,
           startMinutes: draft.startMinutes,
           endMinutes: draft.endMinutes,
           recurrence: draft.recurrence,
-          day: DateTime(2026, 10, 20),
-        );
-        final after = updateCalendarOccurrence(
-          file(),
-          rule,
-          DateTime(2026, 10, 5),
-          moved,
-          scope,
-        )!;
-        expect(after.lines[1].text, contains('Standup @work rec:1w'));
-        expect(after.lines.length, _lines.length);
-      }
+          day: DateTime(2026, 10, 14),
+        ),
+        CalendarOccurrenceScope.all,
+      )!;
+      expect(after.lines[1].text, '2026-10-05 w41 Mon  17 jog.');
+      expect(
+        after.lines.map((line) => line.text),
+        contains(startsWith('2026-10-14 w42 Wed  9-9:30 Standup @work rec:1w')),
+      );
+      expect(daysOf(after, 'Standup').take(3), [
+        '2026-10-14',
+        '2026-10-21',
+        '2026-10-28',
+      ]);
+    });
+
+    test('this and following starts the new series on the new day', () {
+      final before = file();
+      final draft = calendarDraftOf(firstEvent(_lines[1].text));
+      final after = updateCalendarOccurrence(
+        before,
+        rule,
+        DateTime(2026, 10, 12),
+        CalendarEventDraft(
+          text: draft.text,
+          startMinutes: draft.startMinutes,
+          endMinutes: draft.endMinutes,
+          recurrence: draft.recurrence,
+          day: DateTime(2026, 10, 14),
+        ),
+        CalendarOccurrenceScope.thisAndFollowing,
+      )!;
+      expect(after.lines[1].text, contains('rec:1w until:2026-10-11.'));
+      expect(daysOf(after, 'Standup').take(4), [
+        '2026-10-05',
+        '2026-10-14',
+        '2026-10-21',
+        '2026-10-28',
+      ]);
+    });
+
+    test('this and following from the first day moves the whole rule', () {
+      final draft = calendarDraftOf(firstEvent(_lines[1].text));
+      final after = updateCalendarOccurrence(
+        file(),
+        rule,
+        DateTime(2026, 10, 5),
+        CalendarEventDraft(
+          text: draft.text,
+          startMinutes: draft.startMinutes,
+          recurrence: draft.recurrence,
+          day: DateTime(2026, 10, 7),
+        ),
+        CalendarOccurrenceScope.thisAndFollowing,
+      )!;
+      expect(daysOf(after, 'Standup').take(2), ['2026-10-07', '2026-10-14']);
     });
   });
 

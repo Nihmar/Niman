@@ -150,10 +150,15 @@ file.
   and the writer reads it: an added event goes there, a plain event that is
   edited leaves its line for that day's (two lines change, the new one made
   in date order when missing), and one occurrence is `except:`ed and written
-  there. For *This and following* and *All events* the row is shown and off,
-  and the draft carries no day: a series moves by changing its rule. An event
-  that does not repeat is edited with no scope (nothing to ask), so its row is
-  on. The preview shows every line the write changes, not only the day's.
+  there. An event that does not repeat is edited with no scope (nothing to
+  ask). The preview shows every line the write changes, not only the day's.
+  The row is on for every scope and what it moves is the scope's (#1225): the
+  one occurrence, written as a plain event on the new day; the new rule event
+  of *This and following*, which starts there while the old rule still ends
+  the day before the occurrence; the rule event of *All events*, whose first
+  day, and so every occurrence, moves. What was picked is what is written: the
+  day was once honoured only for one occurrence, and a series saved with
+  another day lost it without a word.
 - **Edit this and following from the rule's first day** is the same as All
   events (`until:` the day before would end the rule before it began), and so
   is a Delete of this and following, which deletes the event instead.

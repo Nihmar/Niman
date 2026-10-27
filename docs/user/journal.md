@@ -167,11 +167,12 @@ On an edit of an event that does not repeat it moves the event: it leaves its
 line and is written on the new day's, which is made when the day has none, and
 the two lines are the only ones that change. On an edit of *This event* of a
 repeating one it moves that one occurrence: its day is added to the rule's
-`except:` and a plain event goes on the day you picked. A desktop opens the
-calendar in place under the row, a phone the system's date picker. On *This
-and following* and *All events* the row is shown and off, since a series
-moves by changing its rule (Repeat). The preview shows the exact line, or the
-two lines, the write will make.
+`except:` and a plain event goes on the day you picked. On *This and following*
+the new series starts on the day you picked, and the old one still ends the day
+before the occurrence you opened. On *All events* the series' first day moves,
+and every occurrence with it. A desktop opens the calendar in place under the
+row, a phone the system's date picker. The preview shows the exact line, or
+the two lines, the write will make.
 
 ### Making an event repeat
 

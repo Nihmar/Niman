@@ -7,10 +7,12 @@
 /// - Edit this one: the day is `except:`ed, and a plain event with the
 ///   change goes on the target day's line.
 /// - Edit this and following: the rule gets `until:` the day before, and a
-///   new rule event, changed, goes on the occurrence's day line.
+///   new rule event, changed, goes on the day the form says (the
+///   occurrence's own by default).
 /// - Delete this and following: the rule gets `until:` the day before (or,
 ///   from its first day on, the event goes).
-/// - Edit or delete all: the rule's event itself.
+/// - Edit or delete all: the rule's event itself, which moves with the day
+///   the form says.
 ///
 /// Each is a pure transformation of [CalendarFileContent]: only the lines it
 /// must change change, and every other keeps its bytes and its ending. Each
@@ -97,11 +99,16 @@ CalendarFileContent? deleteCalendarOccurrence(
 /// [scope] says; null when the file no longer holds it.
 ///
 /// [draft] is what the form held: its recurrence is the new rule, its end
-/// and the days it skips. For this one only the draft is written as a plain
-/// event, on [moveTo] when given and on the occurrence's own day otherwise.
-/// For this and following the draft's `except:` loses the days before the
-/// occurrence — they belong to the rule that ended — and the new rule event
-/// goes on the occurrence's day line.
+/// and the days it skips, and its day (or [moveTo], when given) the day the
+/// user picked (#1225). Whatever the scope, that is the day written:
+///
+/// - this one: the draft is written as a plain event there, on the
+///   occurrence's own day when none was picked;
+/// - this and following: the new rule event starts there, on the
+///   occurrence's own day when none was picked, and its `except:` loses the
+///   days before it — they belong to the rule that ended;
+/// - all: the rule event itself moves there, which moves the rule's first
+///   day and with it every occurrence.
 CalendarFileContent? updateCalendarOccurrence(
   CalendarFileContent file,
   CalendarEventRef ref,
@@ -113,12 +120,11 @@ CalendarFileContent? updateCalendarOccurrence(
 }) {
   final found = findCalendarEvent(file, ref);
   if (found == null) return null;
-  if (found.event.recurrence == null) {
-    // One event, and its own: it may go to another day.
-    return updateCalendarEvent(file, ref, draft, moveTo: moveTo ?? draft.day);
-  }
-  if (scope == CalendarOccurrenceScope.all) {
-    return updateCalendarEvent(file, ref, draft);
+  final picked = moveTo ?? draft.day;
+  if (found.event.recurrence == null || scope == CalendarOccurrenceScope.all) {
+    // One event, and its own, or the rule event itself: it may go to
+    // another day.
+    return updateCalendarEvent(file, ref, draft, moveTo: picked);
   }
   if (!_occursOn(found.event, ref.day, occurrence)) return null;
   switch (scope) {
@@ -127,23 +133,24 @@ CalendarFileContent? updateCalendarOccurrence(
       if (skipped == null) return null;
       return addCalendarEvent(
         skipped,
-        moveTo ?? draft.day ?? occurrence,
+        picked ?? occurrence,
         draft: draft.withRecurrence(null),
         style: style,
       );
     case CalendarOccurrenceScope.thisAndFollowing:
       if (!_isAfter(occurrence, ref.day)) {
-        return updateCalendarEvent(file, ref, draft);
+        return updateCalendarEvent(file, ref, draft, moveTo: picked);
       }
       final ended = _endedBefore(file, found.index, found.event, occurrence);
+      final start = picked ?? occurrence;
       return addCalendarEvent(
         ended,
-        occurrence,
-        draft: _fromDay(draft, occurrence),
+        start,
+        draft: _fromDay(draft, start),
         style: style,
       );
     case CalendarOccurrenceScope.all:
-      return updateCalendarEvent(file, ref, draft);
+      return updateCalendarEvent(file, ref, draft, moveTo: picked);
   }
 }
 

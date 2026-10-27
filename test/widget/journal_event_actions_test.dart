@@ -409,25 +409,27 @@ void main() {
       expect(edited.single.$1.day, DateTime(2026, 10, 19));
     });
 
-    testWidgets('a series keeps its Day row, off', (tester) async {
-      for (final scope in ['all', 'following']) {
-        await pump(tester, phone: false);
-        await rightClick(tester, 'Standup');
-        await tester.tap(key('journal-event-edit'));
-        await tester.pumpAndSettle();
-        await tester.tap(key('journal-event-scope-$scope'));
-        await tester.pumpAndSettle();
+    testWidgets('this and following moves: the draft carries the new day', (
+      tester,
+    ) async {
+      await pump(tester, phone: false);
+      await rightClick(tester, 'Standup');
+      await tester.tap(key('journal-event-edit'));
+      await tester.pumpAndSettle();
+      await tester.tap(key('journal-event-scope-following'));
+      await tester.pumpAndSettle();
 
-        expect(key('calendar-event-day'), findsOne, reason: scope);
-        expect(
-          tester.widget<TextButton>(key('calendar-event-day')).onPressed,
-          isNull,
-          reason: scope,
-        );
-        await tester.tap(key('calendar-event-save'));
-        await tester.pumpAndSettle();
-        expect(edited.last.$2.day, isNull, reason: scope);
-      }
+      expect(
+        tester.widget<TextButton>(key('calendar-event-day')).onPressed,
+        isNotNull,
+      );
+      await pickDay(tester, 14, phone: false);
+      await tester.tap(key('calendar-event-save'));
+      await tester.pumpAndSettle();
+
+      expect(edited.single.$3, CalendarOccurrenceScope.thisAndFollowing);
+      expect(edited.single.$2.day, DateTime(2026, 10, 14));
+      expect(edited.single.$1.day, DateTime(2026, 10, 12));
     });
 
     testWidgets(
