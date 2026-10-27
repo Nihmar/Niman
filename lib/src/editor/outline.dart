@@ -90,10 +90,10 @@ List<OutlineEntry> outlineOfBlocks(
       block.headingLevel > 0 &&
       block.lineCount == 1;
   final blocks = index.blocks;
-  // A scanner's list moves its blocks a chunk at a time, and reading each
-  // one where it is makes a block: only the headings are asked for there.
+  // A scanner's list packs its blocks, and reading one makes a block: only
+  // the headings are asked for there.
   final headings = blocks is BlockList
-      ? blocks.matching(isHeading)
+      ? blocks.matching(isHeading, kind: BlockKind.heading)
       : blocks.where(isHeading);
   for (final block in headings) {
     final text = line(block.startLine);

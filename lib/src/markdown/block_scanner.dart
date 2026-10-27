@@ -17,6 +17,8 @@
 /// change, and `index` for the answer.
 library;
 
+import 'dart:collection';
+
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_builder.dart';
 import 'package:niman/src/markdown/block_changes.dart';
@@ -81,6 +83,7 @@ final class BlockScanner {
       appSyntax = scanned.appSyntax,
       _blocks = BlockList.sharing((scanned..settle())._blocks) {
     _entering.addAll(scanned._entering);
+    _states.addAll(scanned._states);
     _lineCount = scanned._lineCount;
   }
 
@@ -96,6 +99,15 @@ final class BlockScanner {
 
   /// The state entering each scanned line.
   final List<LineState> _entering = <LineState>[];
+
+  /// One instance of each state [_entering] holds (#1196).
+  ///
+  /// The rules make a new state for every line inside a list, a quote or a
+  /// fence, and a note of lists held one per line — 571 279 objects for 5
+  /// distinct states over a million lines, 222 B a line all told. A state is
+  /// immutable and compared by value, so equal ones are kept as one: a line
+  /// costs its slot, and the states cost what is distinct about them.
+  final HashMap<LineState, LineState> _states = HashMap<LineState, LineState>();
 
   /// What a tab left over before each line, for a container's content.
   final List<int> _leftOver;
@@ -703,7 +715,7 @@ final class BlockScanner {
     while (_entering.length <= line) {
       _entering.add(LineState.initial);
     }
-    _entering[line] = state;
+    _entering[line] = _states.putIfAbsent(state, () => state);
   }
 
   /// Whether a block can end at [line]: the state is top level and the line
