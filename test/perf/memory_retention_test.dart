@@ -33,6 +33,14 @@ final bool _referenceHost = Platform.environment['NIMAN_PERF'] == '1';
 double _bar(HeapMeter meter, {required double design, required double stop}) =>
     _referenceHost && meter.exact ? design : stop;
 
+/// How many items of a small structure a reading is taken over: [exact] when
+/// the heap is read to the byte, else enough to come to some 70 MB. The
+/// resident set strays by tens of MB between runs (a collection that did or
+/// did not happen), which over 2000 rows is 16 KB a row — a CI run read
+/// 16 800 B where the heap says 697 — and over 100 000 a few hundred bytes.
+int _count(HeapMeter meter, {required int exact}) =>
+    meter.exact ? exact : 100000;
+
 void main() {
   late HeapMeter meter;
   setUpAll(() async => meter = await HeapMeter.open());
@@ -60,7 +68,7 @@ void main() {
 
   test('a page of the tree: its rows', () async {
     // What `TreeChildCache` keeps of a folder for each page read (#1200).
-    const rows = 2000;
+    final rows = _count(meter, exact: 2000);
     final modified = DateTime(2026, 10, 27);
     final held = await meter.held(
       () => [
@@ -93,7 +101,7 @@ void main() {
 
   test('a list of tasks: each parsed', () async {
     // What the todo controller keeps of `todo.txt` while a library is open.
-    const tasks = 10000;
+    final tasks = _count(meter, exact: 10000);
     final lines = List<String>.generate(
       tasks,
       (at) =>
