@@ -512,7 +512,7 @@ CalendarEvent _parseEvent(String raw, int at) {
     textStart = end;
   }
   final body = raw.substring(textStart, end);
-  final asides = _asides(body, textStart);
+  final asides = calendarAsides(body, textStart);
   final tokens = calendarTokens(raw, from: textStart, to: end, asides: asides);
   final reminder = _reminderToken(tokens);
   return CalendarEvent(
@@ -737,7 +737,7 @@ RegExpMatch? _firstTerminator(String raw, int at) {
 }
 
 /// The aside spans of an event body, relative to the whole line.
-List<CalendarAside> _asides(String body, int from) {
+List<CalendarAside> calendarAsides(String body, int from) {
   final asides = <CalendarAside>[];
   for (final match in _aside.allMatches(body)) {
     asides.add(CalendarAside(start: from + match.start, end: from + match.end));

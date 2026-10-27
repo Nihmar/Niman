@@ -6,10 +6,14 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/calendar/calendar_file.dart';
 import 'package:niman/src/calendar/calendar_occurrence_edits.dart';
+import 'package:niman/src/calendar/calendar_recurrence.dart';
 import 'package:niman/src/calendar/calendar_store.dart';
 import 'package:niman/src/calendar/calendar_writer.dart';
 import 'package:niman/src/calendar/parser.dart';
 import 'package:niman/src/calendar/weekdays.dart';
+import 'package:niman/src/core/recurrence/recurrence_bounds.dart';
+import 'package:niman/src/core/recurrence/recurrence_rule.dart';
+import 'package:niman/src/core/recurrence/recurrence_unit.dart';
 
 /// The standup, every Monday from the 5th; mixed endings, so a line that
 /// moved when it should not shows in the bytes.
@@ -428,6 +432,82 @@ void main() {
   });
 
   group('edit all', () {
+    test('an end replaces an until: the grammar cannot read (#1227)', () {
+      final before = file([
+        const CalendarRawLine(
+          '2026-10-05 w41 Mon  9 Standup rec:1w until:2026-1-31.',
+          '\n',
+        ),
+      ]);
+      final draft = calendarDraftOf(firstEvent(before.lines.single.text));
+      expect(draft.recurrence!.bounds.until, isNull);
+      final after = updateCalendarOccurrence(
+        before,
+        CalendarEventRef(line: 0, day: DateTime(2026, 10, 5), start: 20),
+        DateTime(2026, 10, 19),
+        draft.withRecurrence(
+          CalendarRecurrence(
+            rule: draft.recurrence!.rule,
+            bounds: RecurrenceBounds(until: DateTime(2026, 12, 31)),
+          ),
+        ),
+        CalendarOccurrenceScope.all,
+      )!;
+      expect(
+        after.lines.single.text,
+        '2026-10-05 w41 Mon  9 Standup rec:1w until:2026-12-31.',
+      );
+      expect(
+        firstEvent(after.lines.single.text).recurrence!.bounds.until,
+        DateTime(2026, 12, 31),
+      );
+    });
+
+    test(
+      'a second rec: and until: in the text give way to the form (#1227)',
+      () {
+        final before = file([
+          const CalendarRawLine(
+            '2026-10-05 w41 Mon  9 Standup rec:1w until:2026-11-30 '
+                'rec:2w until:2026-12-31.',
+            '\n',
+          ),
+        ]);
+        final after = updateCalendarOccurrence(
+          before,
+          CalendarEventRef(line: 0, day: DateTime(2026, 10, 5), start: 20),
+          DateTime(2026, 10, 19),
+          calendarDraftOf(firstEvent(before.lines.single.text)),
+          CalendarOccurrenceScope.all,
+        )!;
+        expect(
+          after.lines.single.text,
+          '2026-10-05 w41 Mon  9 Standup rec:1w until:2026-11-30.',
+        );
+      },
+    );
+
+    test('a rule added to an event with a rec: it cannot read replaces it', () {
+      final before = file([
+        const CalendarRawLine('2026-10-05 w41 Mon  9 Standup rec:often.', '\n'),
+      ]);
+      final draft = calendarDraftOf(firstEvent(before.lines.single.text));
+      expect(draft.recurrence, isNull);
+      final after = updateCalendarOccurrence(
+        before,
+        CalendarEventRef(line: 0, day: DateTime(2026, 10, 5), start: 20),
+        DateTime(2026, 10, 5),
+        draft.withRecurrence(
+          CalendarRecurrence(
+            rule: RecurrenceRule(unit: RecurrenceUnit.week),
+            bounds: RecurrenceBounds(),
+          ),
+        ),
+        CalendarOccurrenceScope.all,
+      )!;
+      expect(after.lines.single.text, '2026-10-05 w41 Mon  9 Standup rec:1w.');
+    });
+
     test('rewrites the rule event itself, rule and all', () {
       final before = file();
       final draft = calendarDraftOf(firstEvent(_lines[1].text));

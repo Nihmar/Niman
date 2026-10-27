@@ -227,3 +227,16 @@ What the code does where the plan left a choice.
 - **Android's limit is 400**, `androidPendingAlarmLimit`, below the 500
   concurrent alarms per app. Only `PluginReminderBackend` (Android) reports
   it; iOS keeps 64 and the desktops none.
+
+## As built: review fixes (#1218-#1227, 2026-10-27)
+
+What the review of the first release of the editor changed.
+
+- **The form's rule is the only rule in the line (#1227).** A draft that
+  carries a rule writes its `rec:`, `until:` and `except:` and takes every
+  such token out of its text first, readable or not. The first `rec:` and
+  the first `until:` of an event are the ones read, so an `until:2026-1-31`
+  the grammar cannot read, left in the text, used to win over the end the form
+  wrote (and the event ran for ever); a second `rec:` or `until:` typed by
+  hand is replaced, not kept beside the form's. A draft with no rule leaves
+  the text as it is: a `rec:` nobody can read is kept and flagged.

@@ -21,6 +21,7 @@ library;
 
 import 'package:niman/src/calendar/calendar_event_draft.dart';
 import 'package:niman/src/calendar/calendar_file.dart';
+import 'package:niman/src/calendar/calendar_rule_tokens.dart';
 import 'package:niman/src/calendar/calendar_splice.dart';
 import 'package:niman/src/calendar/day_style.dart';
 import 'package:niman/src/calendar/parser.dart';
@@ -36,7 +37,13 @@ String calendarEventAsText(CalendarEventDraft draft) {
   final recurrence = draft.recurrence;
   return [
     ?time,
-    cleanCalendarEventText(draft.text),
+    // A draft that carries a rule is the only one that writes it: any
+    // `rec:`, `until:` or `except:` left in its text would be read first.
+    cleanCalendarEventText(
+      recurrence == null
+          ? draft.text
+          : calendarTextWithoutRuleTokens(draft.text),
+    ),
     if (recurrence != null) ...[
       'rec:${recurrence.rule.token}',
       ?recurrence.bounds.untilToken,
