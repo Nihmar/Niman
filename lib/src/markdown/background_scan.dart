@@ -14,6 +14,8 @@ library;
 
 import 'dart:isolate';
 
+import 'package:meta/meta.dart';
+
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_changes.dart';
 import 'package:niman/src/markdown/block_parser.dart';
@@ -93,12 +95,19 @@ final class DocumentScan {
   final ScanChanges? changes;
 }
 
+/// How many notes [scanInBackground] has scanned: what the test of a note
+/// opened in the read view counts, to prove its read pane took the editor's
+/// scan rather than making a second one (#1199).
+@visibleForTesting
+int backgroundScans = 0;
+
 /// Scans [buffer] as it is now in an isolate, and answers with the scope's
 /// source set to [buffer] itself rather than the isolate's copy of it.
 ///
 /// The copy is taken by the call: an edit made while the scan runs is not in
 /// the answer, whose [DocumentScan.revision] says which one is.
 Future<DocumentScan> scanInBackground(SourceBuffer buffer) async {
+  backgroundScans++;
   final scan = await Isolate.run(() => DocumentScan.of(buffer));
   return DocumentScan(
     blocks: scan.blocks,

@@ -3,6 +3,8 @@
 // of blocks *built* has to stay near the number a viewport can show — and must
 // grow when the viewport moves, or the windowing would just be a way of not
 // rendering.
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -686,6 +688,68 @@ void main() {
         ),
       ),
     );
+
+    // #1199: a long note opened straight in the read view mounts the editor
+    // behind it too, and each pane scanned the note: the blocks held twice.
+    testWidgets('waits for the scan another reader is making', (tester) async {
+      final buffer = SourceBuffer.fromText(_note(20));
+      final shared = Completer<DocumentScan?>();
+      final scansBefore = backgroundScans;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: MarkdownReadView(
+              buffer: buffer,
+              parser: ReadParser(),
+              mathCache: _syncCache(),
+              sharedScan: (_) => shared.future,
+            ),
+          ),
+        ),
+      );
+      final state = tester.state<MarkdownReadViewState>(
+        find.byType(MarkdownReadView),
+      );
+      expect(state.scanning, isTrue);
+      expect(find.textContaining('Paragraph 0', findRichText: true), findsOne);
+
+      shared.complete(DocumentScan.of(buffer));
+      await settle(tester);
+
+      expect(state.scanning, isFalse);
+      expect(state.blockCount, greaterThan(20));
+      expect(
+        backgroundScans,
+        scansBefore,
+        reason: 'the pane scanned the lines the other reader was scanning',
+      );
+    });
+
+    testWidgets('scans for itself when the other reader has nothing', (
+      tester,
+    ) async {
+      final buffer = SourceBuffer.fromText(_note(20));
+      final scansBefore = backgroundScans;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: MarkdownReadView(
+              buffer: buffer,
+              parser: ReadParser(),
+              mathCache: _syncCache(),
+              sharedScan: (_) async => null,
+            ),
+          ),
+        ),
+      );
+      await settle(tester);
+
+      final state = tester.state<MarkdownReadViewState>(
+        find.byType(MarkdownReadView),
+      );
+      expect(state.blockCount, greaterThan(20));
+      expect(backgroundScans, scansBefore + 1);
+    });
 
     testWidgets('the first look draws the top, then the whole note', (
       tester,

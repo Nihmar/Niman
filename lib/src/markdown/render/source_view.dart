@@ -3663,6 +3663,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     _scanSlice?.cancel();
     _scanSlice = null;
     if (!readsInBackground(buffer)) {
+      _reading = null;
       final progressive = buffer.lineCount >= progressiveLines;
       _styler = SourceStyler(
         buffer,
@@ -3672,27 +3673,39 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       return;
     }
     _styler = null;
-    unawaited(
-      SourceStyler.inBackground(buffer).then((styler) {
-        if (!mounted || reading != _stylings) return;
-        if (!identical(widget.buffer, buffer)) return;
-        if (styler.revision != buffer.revision) {
-          _restyle();
-          return;
-        }
-        setState(() => _styler = styler);
-        // The colours landing is also the formats landing: until they are
-        // read, the caret's line has no tokens and the toolbar would show
-        // every button dark on a note whose syntax the writer is inside.
-        _publishActive(_caretSpot.value);
-        // And it is the caret's line landing: a heading, or a formula, is
-        // drawn at another height than the plain line the caret was measured
-        // over. The reading came in outside any edit, so nothing else asks
-        // for the caret to be measured again.
-        _measureCaretAfterFrame();
-      }),
-    );
+    // The landing itself is what [readingLanded] answers: a reader waiting
+    // on it finds the styler in place when it resumes.
+    final landing = SourceStyler.inBackground(buffer).then((styler) {
+      if (!mounted || reading != _stylings) return;
+      if (!identical(widget.buffer, buffer)) return;
+      if (styler.revision != buffer.revision) {
+        _restyle();
+        return;
+      }
+      setState(() => _styler = styler);
+      // The colours landing is also the formats landing: until they are
+      // read, the caret's line has no tokens and the toolbar would show
+      // every button dark on a note whose syntax the writer is inside.
+      _publishActive(_caretSpot.value);
+      // And it is the caret's line landing: a heading, or a formula, is
+      // drawn at another height than the plain line the caret was measured
+      // over. The reading came in outside any edit, so nothing else asks
+      // for the caret to be measured again.
+      _measureCaretAfterFrame();
+    });
+    _reading = landing;
+    unawaited(landing);
   }
+
+  /// The last reading of a long note, from the call that started it to the
+  /// styler in place — complete once it has landed; null for a note read in
+  /// place.
+  Future<void>? _reading;
+
+  /// Completes when the reading of the note under way has landed — at once
+  /// when none is: what a reader of the same lines waits for rather than
+  /// reading them again (#1199), and then asks [handOver] for.
+  Future<void> get readingLanded => _reading ?? Future<void>.value();
 
   /// The display formula line [index] is part of, for `live` mode to draw
   /// in its lines' place: its lines and its TeX. Null for any other line.
