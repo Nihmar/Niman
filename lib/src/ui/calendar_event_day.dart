@@ -80,7 +80,8 @@ final class CalendarEventDay extends StatelessWidget {
       firstDate: todoFirstDate,
       lastDate: todoLastDate,
     );
-    if (picked == null) return;
+    // The form may be gone while the picker was up (#1222).
+    if (picked == null || !context.mounted) return;
     onPicked(DateTime(picked.year, picked.month, picked.day));
   }
 }
