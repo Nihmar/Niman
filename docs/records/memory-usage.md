@@ -66,6 +66,55 @@ Three things follow from this table.
   8 MB that 2 000 notes cost on Linux (performance-audit.md). The
   difference is on Windows and unexplained, and M1 attributes it too.
 
+## The floor, attributed (2026-10-27, #1193)
+
+Measured with `tool/memory_report.dart` (`docs/dev/memory.md`, "How to
+measure"). The build was a **profile** beta of `c50f0283` on this host's
+Windows 11 machine, an Intel integrated GPU. It reopened its last library
+(Notes4, 118 entries) and was read twice: 10 s after the start, with the
+rescan done, and a minute later. The two readings agree to within 2 MB.
+
+| Owner | Size | Whose |
+|---|---:|---|
+| The GPU driver: `igc64.dll` (Intel's shader compiler) and the `igd*` libraries D3D loads | ~105 MB | the engine's choice of renderer and the machine's driver |
+| The Dart VM: the main isolate group (the UI isolate, its `Isolate.run`s and the two drift isolates) | 67–69 MB | ours: ~45 MB of it is the program (`Code`, `InstructionsSection`, `Function`, `CodeSourceMap`), ~20 MB the app's objects (strings 12 MB, lists 7 MB) |
+| The Dart VM: the VM service's isolate group | 54 MB | profile only: a release build has none |
+| The system's font cache, mapped | 24 MB | Windows |
+| `flutter_windows.dll` | 21 MB | the engine |
+| Windows' spelling dictionaries, `MsSp7en-US.lex` and `MsSp7it.lex` | 19 MB | ours to load: the two languages chosen |
+| The other system libraries, ~120 mappings | ~60 MB | Windows |
+| **The process** | **378–386 MB** | |
+
+What this says about the 270 MB a release build reads at the same moment
+(the log's table above):
+
+- **About 110 MB of the profile build is the profile itself**: the VM
+  service's 54 MB, and the program metadata a profile keeps for its tools.
+  Take those away and what is left is the release floor, within the
+  readings' spread.
+- **A good half of that floor is not the app's code.** The GPU driver alone
+  is ~105 MB, about 40 % of it. That is what the engine's renderer brings
+  (D3D through ANGLE here); another driver or a GPU of its own would read
+  differently. It is the largest single owner, and no fix in this record
+  reaches it.
+- **The app's own objects are ~20 MB at a small library.** Findings 1–9 are
+  about what makes that figure grow: pictures, long notes, a huge folder.
+  They do not move the floor, as the section above already said.
+- **Spelling is the one owner of the floor the app chooses**: 19 MB for two
+  languages, mapped by Windows' checker as long as the engines live. Since
+  #1202, switching spelling off releases the engines.
+- **The log's figure and the process's are not the same reading.** The log
+  printed `rss 470 MB` at the note's first frame and 475 after the rescan.
+  At about those moments the working set read 378 MB (`Get-Process`), the
+  private bytes 365 and this report 378–386. What Dart's
+  `ProcessInfo.currentRss` reads on Windows is to be checked before a log
+  line is compared with this table. Until then, compare log lines only with
+  each other.
+
+Not measured in this pass: what a library close leaves, and what a rescan
+costs on Windows (the other two bullets above). Both need the app driven
+through a switch while the tool reads.
+
 ## The findings, ranked
 
 The ranking weighs two things: how much a finding holds, and how many
@@ -278,7 +327,10 @@ an issue.
 
 - **Todo and calendar.** The probe measured 193 B retained per parsed
   task (200 000 tasks: 36.8 MB), so a list of 10 000 tasks costs about
-  2 MB. The controllers open eagerly with the library
+  2 MB. *Corrected (2026-10-27, #1193):* the heap after a collection says
+  775 B a task (`test/perf/memory_retention_test.dart` with the VM
+  service), because the resident set had read a quarter of it. 10 000
+  tasks are 7.6 MB, still no issue of their own. The controllers open eagerly with the library
   (`ui/shell.dart:2697`), on purpose, because reminders are reconciled
   from them. Gating them behind the library's features is #1109's job,
   not a memory fix. `TodoModelCache` holds pointers to the same entries,
