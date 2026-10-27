@@ -2,6 +2,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/ui/journal/journal_strip.dart';
+import 'package:niman/src/ui/unsaved_notes.dart';
+
+import '../fakes/detail_pane_harness.dart';
 
 void main() {
   final today = DateTime(2026, 9, 23);
@@ -67,5 +70,44 @@ void main() {
     await pump(tester, day: DateTime(2026, 9, 14));
     expect(find.text('Sun 13'), findsOne);
     expect(find.text('Tue 15'), findsOne);
+  });
+
+  // #1217: Zen is the note and nothing else, the strip included.
+  group('over a note in the detail pane', () {
+    Future<void> open(WidgetTester tester, {required bool zen}) async {
+      paneNotes['a.md'] = 'an entry';
+      final tracker = UnsavedTracker();
+      addTearDown(tracker.dispose);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: detailPane(
+              'a.md',
+              tracker: tracker,
+              paths: const ['a.md'],
+              zen: zen,
+              header: (_) => JournalStrip(
+                day: today,
+                today: today,
+                entryDays: () async => const [],
+                onPrevious: () {},
+                onNext: () {},
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('out of Zen the entry has its strip', (tester) async {
+      await open(tester, zen: false);
+      expect(find.byType(JournalStrip), findsOne);
+    });
+
+    testWidgets('in Zen it has none', (tester) async {
+      await open(tester, zen: true);
+      expect(find.byType(JournalStrip), findsNothing);
+    });
   });
 }

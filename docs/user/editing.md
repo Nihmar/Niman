@@ -263,8 +263,9 @@ count.
 
 On Linux and Windows, `F11` (or *View: Enter Zen mode* in the command
 palette) leaves the note and nothing else: the rail, the tree, the
-tabs, the side panel, the note's toolbar row, its status row and the
-row numbers all go, and the note fills the window edge to edge, its
+tabs, the side panel, the note's toolbar row, its status row, the
+row numbers and a journal entry's day strip all go, and the note fills
+the window edge to edge, its
 island's margin and rounded corners with them. A thin bar at the top
 keeps the note's name, the
 button that leaves Zen, and the window's own buttons, so the window can
