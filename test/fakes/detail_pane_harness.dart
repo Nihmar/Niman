@@ -35,10 +35,14 @@ Widget detailPane(
   bool focused = true,
   Map<String, String> movedFrom = const {},
   bool showPreview = false,
+  bool zen = false,
+  Widget? Function(String path)? header,
 }) => ShellDetailPane(
   launcher: const SizedBox.shrink(),
   root: paneRoot,
   shellFocus: shellFocus,
+  zen: zen,
+  header: header,
   tabs: [
     for (final path in paths)
       DetailTab(

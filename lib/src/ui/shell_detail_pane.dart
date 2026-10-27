@@ -333,7 +333,8 @@ final class ShellDetailPane extends StatelessWidget {
 
   Widget _note(String root, DetailTab tab) {
     final view = _view(root, tab);
-    final above = header?.call(tab.path);
+    // Zen is the note and nothing else: no strip over a journal entry.
+    final above = zen ? null : header?.call(tab.path);
     if (above == null) return view;
     return Column(
       children: [

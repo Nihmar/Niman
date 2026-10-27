@@ -1767,7 +1767,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// The phone full-screen note body.
   Widget _fullNoteView(LibrarySession controller, String selectedPath) {
     final view = _phoneNoteView(controller, selectedPath);
-    final above = _journalUi.header(context, selectedPath, compact: true);
+    final above = _inZen
+        ? null
+        : _journalUi.header(context, selectedPath, compact: true);
     final queue = widget.ocrQueue;
     if (above == null && queue == null) return view;
     return Column(
