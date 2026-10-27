@@ -54,13 +54,27 @@ final class DecodeWidthProbe extends SingleChildRenderObjectWidget {
 /// The render half of [DecodeWidthProbe].
 final class RenderDecodeWidthProbe extends RenderProxyBox {
   /// A probe reporting to [onWidth].
-  new({required this.ratio, required this.fallback, required this.onWidth});
+  new({required this._ratio, required this._fallback, required this.onWidth});
 
-  /// [DecodeWidthProbe.ratio].
-  double ratio;
+  /// [DecodeWidthProbe.ratio]. A change lays out again: the bound is
+  /// reported from layout, and new constraints are not the only thing it
+  /// depends on (a window moved to a denser screen, #1237).
+  double get ratio => _ratio;
+  double _ratio;
+  set ratio(double value) {
+    if (value == _ratio) return;
+    _ratio = value;
+    markNeedsLayout();
+  }
 
-  /// [DecodeWidthProbe.fallback].
-  double fallback;
+  /// [DecodeWidthProbe.fallback]; a change lays out again like [ratio].
+  double get fallback => _fallback;
+  double _fallback;
+  set fallback(double value) {
+    if (value == _fallback) return;
+    _fallback = value;
+    markNeedsLayout();
+  }
 
   /// [DecodeWidthProbe.onWidth].
   ValueChanged<int> onWidth;
