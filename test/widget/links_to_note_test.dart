@@ -29,6 +29,9 @@ final class _Note implements NoteViewHandle {
   String get currentText => '';
 
   @override
+  Future<List<String>> currentTags() async => const [];
+
+  @override
   final ValueNotifier<List<OutlineEntry>> outline = ValueNotifier(const []);
 
   @override

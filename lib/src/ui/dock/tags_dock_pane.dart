@@ -1,18 +1,9 @@
 import 'dart:async';
-import 'dart:isolate';
 
 import 'package:flutter/material.dart';
-import 'package:niman/src/frontmatter/parser.dart';
 import 'package:niman/src/search/tag_repo.dart';
 import 'package:niman/src/ui/note_view_handle.dart';
 import 'package:niman/src/ui/strings.dart';
-
-/// The tags of [text]: its frontmatter's, then its inline `#tags`, each
-/// once and normalized — what the index keeps for the note.
-List<String> noteTagsOf(String text) {
-  final front = parseFrontmatter(text)?.tags ?? const <String>[];
-  return {...front.map(normalizeTag), ...inlineTags(text)}.toList();
-}
 
 /// The dock's tags (#175): the note's own, each opening onto the other
 /// notes that carry it. They follow the note as it is edited.
@@ -43,9 +34,6 @@ final class _TagsDockPaneState extends State<TagsDockPane> {
   String? _open;
   List<String>? _notes;
   int _revision = 0;
-
-  /// Past this, reading the tags tokenizes the note on an isolate.
-  static const int _syncLimit = 64 * 1024;
 
   @override
   void initState() {
@@ -82,10 +70,7 @@ final class _TagsDockPaneState extends State<TagsDockPane> {
     final note = widget.note;
     if (note == null) return;
     final revision = ++_revision;
-    final text = note.currentText;
-    final tags = text.length > _syncLimit
-        ? await Isolate.run(() => noteTagsOf(text))
-        : noteTagsOf(text);
+    final tags = await note.currentTags();
     if (!mounted || revision != _revision) return;
     setState(() => _tags = tags);
   }

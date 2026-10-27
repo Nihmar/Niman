@@ -31,6 +31,9 @@ final class _Note implements NoteViewHandle {
   String get currentText => '';
 
   @override
+  Future<List<String>> currentTags() async => const [];
+
+  @override
   String get notePath => '/fake/Celestia.md';
 
   @override
