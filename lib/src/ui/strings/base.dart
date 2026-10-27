@@ -167,6 +167,29 @@ abstract base class Strings {
   /// The reminder's own clock time, `Reminder at 15:15`.
   String calendarReminderAt(String time);
 
+  /// Repeating events (#1191): the form's Ends row with no end, `Never ends`.
+  String get calendarEndsNever;
+
+  /// The Ends row with an end, `Ends on 2026-12-31`.
+  String calendarEndsOn(String date);
+
+  /// The row of an event's menu that leaves one occurrence out, `Skip`.
+  String get calendarSkipAction;
+
+  /// The heading over the three choices an Edit and a Delete of a
+  /// repeating event ask, `Edit repeating event`, `Delete repeating event`.
+  String get calendarScopeEditTitle;
+  String get calendarScopeDeleteTitle;
+
+  /// The three choices: this occurrence, it and every later one, all.
+  String get calendarScopeThis;
+  String get calendarScopeFollowing;
+  String get calendarScopeAll;
+
+  /// The event form's Day row (#1191): the label of the button that moves
+  /// an event to another day, `Day`.
+  String get calendarEventDay;
+
   /// Settings › Journal's calendar heading and its one setting (#730):
   /// the times as written, or as a clock in the reader's own zone.
   String get journalCalendarTitle;
@@ -2353,4 +2376,24 @@ abstract base class Strings {
   String todoBlockLine(int n);
   String todoBlockNoNote(String name);
   String todoBlockSeveralNotes(String name);
+
+  // Recurring tasks (#1189): a rule in words, and the Repeat row.
+  String recurDays(int n);
+  String recurWeeks(int n);
+  String recurMonths(int n);
+  String recurYears(int n);
+  String recurBusinessDays(int n);
+  String recurOnWeekdays(String rule, String days);
+  String recurNthWeekday(String rule, int nth, int weekday);
+  String recurFromDue(String rule);
+  String get todoRepeat;
+  String get todoRepeatNever;
+  String get todoRepeatCustom;
+  String get recurEvery;
+  String get recurUnitDays;
+  String get recurUnitWeeks;
+  String get recurUnitMonths;
+  String get recurUnitYears;
+  String get recurFromDueDate;
+  String get recurFromCompletion;
 }

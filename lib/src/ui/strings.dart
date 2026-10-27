@@ -261,6 +261,15 @@ final class AppStrings {
   static String get calendarAddEvent => _s.calendarAddEvent;
   static String get calendarOpenInFile => _s.calendarOpenInFile;
   static String calendarReminderAt(String time) => _s.calendarReminderAt(time);
+  static String get calendarEndsNever => _s.calendarEndsNever;
+  static String calendarEndsOn(String date) => _s.calendarEndsOn(date);
+  static String get calendarSkipAction => _s.calendarSkipAction;
+  static String get calendarScopeEditTitle => _s.calendarScopeEditTitle;
+  static String get calendarScopeDeleteTitle => _s.calendarScopeDeleteTitle;
+  static String get calendarScopeThis => _s.calendarScopeThis;
+  static String get calendarScopeFollowing => _s.calendarScopeFollowing;
+  static String get calendarScopeAll => _s.calendarScopeAll;
+  static String get calendarEventDay => _s.calendarEventDay;
   static String get journalCalendarTitle => _s.journalCalendarTitle;
   static String get journalEventTimesTitle => _s.journalEventTimesTitle;
   static String get journalEventTimesSubtitle => _s.journalEventTimesSubtitle;
@@ -2242,4 +2251,25 @@ final class AppStrings {
   static String todoBlockNoNote(String name) => _s.todoBlockNoNote(name);
   static String todoBlockSeveralNotes(String name) =>
       _s.todoBlockSeveralNotes(name);
+
+  static String recurDays(int n) => _s.recurDays(n);
+  static String recurWeeks(int n) => _s.recurWeeks(n);
+  static String recurMonths(int n) => _s.recurMonths(n);
+  static String recurYears(int n) => _s.recurYears(n);
+  static String recurBusinessDays(int n) => _s.recurBusinessDays(n);
+  static String recurOnWeekdays(String rule, String days) =>
+      _s.recurOnWeekdays(rule, days);
+  static String recurNthWeekday(String rule, int nth, int weekday) =>
+      _s.recurNthWeekday(rule, nth, weekday);
+  static String recurFromDue(String rule) => _s.recurFromDue(rule);
+  static String get todoRepeat => _s.todoRepeat;
+  static String get todoRepeatNever => _s.todoRepeatNever;
+  static String get todoRepeatCustom => _s.todoRepeatCustom;
+  static String get recurEvery => _s.recurEvery;
+  static String get recurUnitDays => _s.recurUnitDays;
+  static String get recurUnitWeeks => _s.recurUnitWeeks;
+  static String get recurUnitMonths => _s.recurUnitMonths;
+  static String get recurUnitYears => _s.recurUnitYears;
+  static String get recurFromDueDate => _s.recurFromDueDate;
+  static String get recurFromCompletion => _s.recurFromCompletion;
 }

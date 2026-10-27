@@ -98,6 +98,15 @@ abstract interface class ReminderBackend {
   /// Payloads of notification taps while the app runs.
   Stream<String?> get taps;
 
+  /// Emits each time the backend itself has just delivered a reminder.
+  ///
+  /// Only a backend that shows its reminders from inside the process has
+  /// one to report — the desktop timer. An OS alarm fires with the app
+  /// closed and tells nobody, so those backends never emit. It is the hook
+  /// that lets the wanted set move on while the app runs untouched, which
+  /// the next occurrences of a repeating event rely on (#1192).
+  Stream<void> get fired;
+
   /// What an overdue [reminder]'s state means here, for the log (#42):
   /// [pending] is whether [pendingIds] still lists it, and [exact] and
   /// [batteryExempt] are the settings that could have deferred it.

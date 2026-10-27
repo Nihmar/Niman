@@ -330,6 +330,24 @@ final class ItalianStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Promemoria alle $time';
   @override
+  String get calendarEndsNever => 'Non finisce mai';
+  @override
+  String calendarEndsOn(String date) => 'Termina il $date';
+  @override
+  String get calendarSkipAction => 'Salta';
+  @override
+  String get calendarScopeEditTitle => 'Modifica evento ripetuto';
+  @override
+  String get calendarScopeDeleteTitle => 'Elimina evento ripetuto';
+  @override
+  String get calendarScopeThis => 'Solo questo evento';
+  @override
+  String get calendarScopeFollowing => 'Questo e i successivi';
+  @override
+  String get calendarScopeAll => 'Tutti gli eventi';
+  @override
+  String get calendarEventDay => 'Giorno';
+  @override
   String get journalCalendarTitle => 'Calendario';
   @override
   String get journalEventTimesTitle => 'Orari degli eventi';
@@ -4462,4 +4480,50 @@ final class ItalianStrings extends Strings {
   String todoBlockNoNote(String name) => 'Nessuna nota corrisponde a $name';
   @override
   String todoBlockSeveralNotes(String name) => 'Più note corrispondono a $name';
+
+  // Recurring tasks (#1189): a rule in words, and the Repeat row.
+  @override
+  String recurDays(int n) => n == 1 ? 'ogni giorno' : 'ogni $n giorni';
+  @override
+  String recurWeeks(int n) => n == 1 ? 'ogni settimana' : 'ogni $n settimane';
+  @override
+  String recurMonths(int n) => n == 1 ? 'ogni mese' : 'ogni $n mesi';
+  @override
+  String recurYears(int n) => n == 1 ? 'ogni anno' : 'ogni $n anni';
+  @override
+  String recurBusinessDays(int n) =>
+      n == 1 ? 'ogni giorno feriale' : 'ogni $n giorni feriali';
+  @override
+  String recurOnWeekdays(String rule, String days) => '$rule: $days';
+  @override
+  String recurNthWeekday(String rule, int nth, int weekday) {
+    final i = nth == -1 ? 4 : nth - 1;
+    final ord = (const <int>{7}.contains(weekday)
+        ? const ['1ª', '2ª', '3ª', '4ª', 'ultima']
+        : const ['1º', '2º', '3º', '4º', 'ultimo'])[i];
+    return '$rule, $ord ${weekdayNames[weekday - 1]}';
+  }
+
+  @override
+  String recurFromDue(String rule) => '$rule, dalla scadenza';
+  @override
+  String get todoRepeat => 'Ripeti';
+  @override
+  String get todoRepeatNever => 'Mai';
+  @override
+  String get todoRepeatCustom => 'Personalizzata…';
+  @override
+  String get recurEvery => 'Ogni';
+  @override
+  String get recurUnitDays => 'Giorni';
+  @override
+  String get recurUnitWeeks => 'Settimane';
+  @override
+  String get recurUnitMonths => 'Mesi';
+  @override
+  String get recurUnitYears => 'Anni';
+  @override
+  String get recurFromDueDate => 'Dalla scadenza';
+  @override
+  String get recurFromCompletion => 'Dal completamento';
 }

@@ -25,6 +25,7 @@ import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/frontmatter/parser.dart';
 import 'package:niman/src/todo/parser.dart';
+import 'package:niman/src/todo/recurring_line.dart';
 import 'package:niman/src/todo/task_line_edit.dart';
 import 'package:niman/src/todo/task_link.dart' show TaskFile;
 import 'package:niman/src/todo/todo_file_names.dart';
@@ -311,7 +312,9 @@ final class TodoStore implements TodoSource {
   /// Checks the `todo.txt` line at [lineIndex] on [today]: removes it
   /// from `todo.txt` and appends the completed line to the end of
   /// `done.txt` ([completeTodoLine], so priority and the creation date
-  /// are kept). Either file is created empty when missing. Returns the
+  /// are kept). Either file is created empty when missing. A task with a
+  /// readable `rec:` also gets its next copy appended to `todo.txt`
+  /// ([nextRecurringLine]), in the same write as the archive. Returns the
   /// fresh snapshot.
   ///
   /// Checking an already-completed line still archives it to `done.txt`.
@@ -325,6 +328,8 @@ final class TodoStore implements TodoSource {
       apply: (todo, done) {
         final raw = todo.removeAt(lineIndex);
         done.add(completeTodoLine(raw, today));
+        final next = nextRecurringLine(raw, today);
+        if (next != null) todo.add(next);
       },
     );
   }

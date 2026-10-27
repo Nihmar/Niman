@@ -137,6 +137,13 @@ TextStyle? markdownTokenStyle(
     TokenKind.todoProject => TextStyle(color: syntax.todoProject),
     TokenKind.todoContext => TextStyle(color: syntax.todoContext),
     TokenKind.todoKeyValue => TextStyle(color: syntax.todoKeyValue),
+    // Keeps the tag's colour; the flag is the wavy line under it (#1189).
+    TokenKind.todoUnreadableRule => TextStyle(
+      color: syntax.todoKeyValue,
+      decoration: TextDecoration.underline,
+      decorationStyle: TextDecorationStyle.wavy,
+      decorationColor: syntax.calendarMismatch,
+    ),
     TokenKind.todoDone => TextStyle(
       color: syntax.todoDone,
       decoration: TextDecoration.lineThrough,

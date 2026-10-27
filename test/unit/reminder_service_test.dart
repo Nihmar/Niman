@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/todo/reminder_backend_desktop.dart';
+import 'package:niman/src/todo/reminder_backend_plugin.dart';
 import 'package:niman/src/todo/reminder_health.dart';
 import 'package:niman/src/todo/reminder_settings.dart';
 import 'package:niman/src/todo/reminders.dart';
@@ -107,6 +108,30 @@ void main() {
         wanted([reminderAt(1, hours: 5), reminderAt(3, hours: 3)]),
       );
       expect(backend.pending.toList()..sort(), <int>[1, 3]);
+      await service.dispose();
+    });
+
+    test("Android's backend keeps fewer alarms than the system allows", () {
+      // 500 concurrent alarms per app (#1192): the cut has to apply there.
+      final limit = PluginReminderBackend().pendingLimit;
+      expect(limit, isNotNull);
+      expect(limit, lessThan(500));
+      expect(limit, greaterThan(0));
+    });
+
+    test('over that limit the soonest alarms are scheduled', () async {
+      final limit = PluginReminderBackend().pendingLimit!;
+      backend = FakeReminderBackend(pendingLimit: limit);
+      final service = serviceOf();
+      await service.reconcile(
+        wanted([for (var i = 1; i <= limit + 50; i++) reminderAt(i, hours: i)]),
+      );
+      expect(backend.scheduled, hasLength(limit));
+      expect(
+        backend.scheduled.map((r) => r.id).reduce((a, b) => a > b ? a : b),
+        limit,
+        reason: 'the soonest ones, not the first listed',
+      );
       await service.dispose();
     });
 

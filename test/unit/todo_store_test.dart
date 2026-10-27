@@ -175,6 +175,33 @@ void main() {
       expect(readRaw('todo.txt'), isEmpty);
     });
 
+    test('checking a recurring task also appends its next copy', () async {
+      writeRaw(
+        'todo.txt',
+        'first\n2026-10-01 water rec:1w due:2026-10-20 +home\nlast\n',
+      );
+      writeRaw('done.txt', 'x 2026-09-01 old\n');
+      final snapshot = await store.checkAt(1, DateTime(2026, 10, 26, 9));
+      expect(
+        readRaw('todo.txt'),
+        'first\nlast\n2026-10-26 water rec:1w due:2026-11-02 +home\n',
+      );
+      expect(
+        readRaw('done.txt'),
+        'x 2026-09-01 old\n'
+        'x 2026-10-26 2026-10-01 water rec:1w due:2026-10-20 +home\n',
+      );
+      expect(snapshot.todo, hasLength(3));
+      expect(snapshot.todo.last.task.due, DateTime(2026, 11, 2));
+    });
+
+    test('a recurring task with no done.txt yet creates it', () async {
+      writeRaw('todo.txt', 'water rec:1d');
+      await store.checkAt(0, DateTime(2026, 10, 26));
+      expect(readRaw('todo.txt'), 'water rec:1d due:2026-10-27');
+      expect(readRaw('done.txt'), 'x 2026-10-26 water rec:1d');
+    });
+
     test('unchecking appends the reopened line to todo.txt', () async {
       writeRaw('todo.txt', 'open\n');
       writeRaw(

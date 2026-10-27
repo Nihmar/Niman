@@ -313,6 +313,24 @@ final class HindiStrings extends Strings {
   @override
   String calendarReminderAt(String time) => '$time पर रिमाइंडर';
   @override
+  String get calendarEndsNever => 'कभी समाप्त नहीं होता';
+  @override
+  String calendarEndsOn(String date) => '$date को समाप्त होता है';
+  @override
+  String get calendarSkipAction => 'छोड़ें';
+  @override
+  String get calendarScopeEditTitle => 'दोहराए जाने वाले ईवेंट को संपादित करें';
+  @override
+  String get calendarScopeDeleteTitle => 'दोहराए जाने वाले ईवेंट को हटाएँ';
+  @override
+  String get calendarScopeThis => 'यह ईवेंट';
+  @override
+  String get calendarScopeFollowing => 'यह और आगे के सभी ईवेंट';
+  @override
+  String get calendarScopeAll => 'सभी ईवेंट';
+  @override
+  String get calendarEventDay => 'दिन';
+  @override
   String get journalCalendarTitle => 'कैलेंडर';
   @override
   String get journalEventTimesTitle => 'ईवेंट के समय';
@@ -4372,4 +4390,48 @@ final class HindiStrings extends Strings {
   String todoBlockNoNote(String name) => '$name से कोई नोट मेल नहीं खाता';
   @override
   String todoBlockSeveralNotes(String name) => '$name से कई नोट मेल खाते हैं';
+
+  // Recurring tasks (#1189): a rule in words, and the Repeat row.
+  @override
+  String recurDays(int n) => n == 1 ? 'हर दिन' : 'हर $n दिन';
+  @override
+  String recurWeeks(int n) => n == 1 ? 'हर सप्ताह' : 'हर $n सप्ताह';
+  @override
+  String recurMonths(int n) => n == 1 ? 'हर महीने' : 'हर $n महीने';
+  @override
+  String recurYears(int n) => n == 1 ? 'हर साल' : 'हर $n साल';
+  @override
+  String recurBusinessDays(int n) =>
+      n == 1 ? 'हर कार्यदिवस' : 'हर $n कार्यदिवस';
+  @override
+  String recurOnWeekdays(String rule, String days) => '$rule: $days';
+  @override
+  String recurNthWeekday(String rule, int nth, int weekday) {
+    final i = nth == -1 ? 4 : nth - 1;
+    final ord = const ['पहला', 'दूसरा', 'तीसरा', 'चौथा', 'आखिरी'][i];
+    return '$rule, $ord ${weekdayNames[weekday - 1]}';
+  }
+
+  @override
+  String recurFromDue(String rule) => '$rule, नियत तिथि से';
+  @override
+  String get todoRepeat => 'दोहराएँ';
+  @override
+  String get todoRepeatNever => 'कभी नहीं';
+  @override
+  String get todoRepeatCustom => 'कस्टम…';
+  @override
+  String get recurEvery => 'हर';
+  @override
+  String get recurUnitDays => 'दिन';
+  @override
+  String get recurUnitWeeks => 'सप्ताह';
+  @override
+  String get recurUnitMonths => 'महीने';
+  @override
+  String get recurUnitYears => 'साल';
+  @override
+  String get recurFromDueDate => 'नियत तिथि से';
+  @override
+  String get recurFromCompletion => 'पूरा होने से';
 }

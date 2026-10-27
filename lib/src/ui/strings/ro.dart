@@ -330,6 +330,24 @@ final class RomanianStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Memento la $time';
   @override
+  String get calendarEndsNever => 'Nu se termină niciodată';
+  @override
+  String calendarEndsOn(String date) => 'Se termină la $date';
+  @override
+  String get calendarSkipAction => 'Omite';
+  @override
+  String get calendarScopeEditTitle => 'Editează evenimentul repetitiv';
+  @override
+  String get calendarScopeDeleteTitle => 'Șterge evenimentul repetitiv';
+  @override
+  String get calendarScopeThis => 'Acest eveniment';
+  @override
+  String get calendarScopeFollowing => 'Acest eveniment și următoarele';
+  @override
+  String get calendarScopeAll => 'Toate evenimentele';
+  @override
+  String get calendarEventDay => 'Ziua';
+  @override
   String get journalCalendarTitle => 'Calendar';
   @override
   String get journalEventTimesTitle => 'Orele evenimentelor';
@@ -4495,4 +4513,57 @@ final class RomanianStrings extends Strings {
   @override
   String todoBlockSeveralNotes(String name) =>
       'Mai multe note se potrivesc cu $name';
+
+  // Recurring tasks (#1189): a rule in words, and the Repeat row.
+  @override
+  String recurDays(int n) =>
+      n == 1 ? 'în fiecare zi' : 'la fiecare $n ${_de(n)}zile';
+  @override
+  String recurWeeks(int n) =>
+      n == 1 ? 'în fiecare săptămână' : 'la fiecare $n ${_de(n)}săptămâni';
+  @override
+  String recurMonths(int n) =>
+      n == 1 ? 'în fiecare lună' : 'la fiecare $n ${_de(n)}luni';
+  @override
+  String recurYears(int n) =>
+      n == 1 ? 'în fiecare an' : 'la fiecare $n ${_de(n)}ani';
+  @override
+  String recurBusinessDays(int n) => n == 1
+      ? 'în fiecare zi lucrătoare'
+      : 'la fiecare $n ${_de(n)}zile lucrătoare';
+  @override
+  String recurOnWeekdays(String rule, String days) => '$rule: $days';
+  @override
+  String recurNthWeekday(String rule, int nth, int weekday) {
+    final i = nth == -1 ? 4 : nth - 1;
+    final ord = const ['prima', 'a doua', 'a treia', 'a patra', 'ultima'][i];
+    return '$rule, $ord ${weekdayNames[weekday - 1]}';
+  }
+
+  @override
+  String recurFromDue(String rule) => '$rule, de la termen';
+  @override
+  String get todoRepeat => 'Repetă';
+  @override
+  String get todoRepeatNever => 'Niciodată';
+  @override
+  String get todoRepeatCustom => 'Personalizat…';
+  @override
+  String get recurEvery => 'La fiecare';
+  @override
+  String get recurUnitDays => 'Zile';
+  @override
+  String get recurUnitWeeks => 'Săptămâni';
+  @override
+  String get recurUnitMonths => 'Luni';
+  @override
+  String get recurUnitYears => 'Ani';
+  @override
+  String get recurFromDueDate => 'De la termen';
+  @override
+  String get recurFromCompletion => 'De la finalizare';
 }
+
+/// The "de" Romanian puts between a number from 20 up and what it counts:
+/// 2 zile, 19 zile, 20 de zile.
+String _de(int n) => n % 100 == 0 || n % 100 >= 20 ? 'de ' : '';

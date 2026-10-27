@@ -328,6 +328,24 @@ final class CatalanStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Recordatori a les $time';
   @override
+  String get calendarEndsNever => 'No acaba mai';
+  @override
+  String calendarEndsOn(String date) => 'Acaba el $date';
+  @override
+  String get calendarSkipAction => 'Omet';
+  @override
+  String get calendarScopeEditTitle => "Edita l'esdeveniment repetit";
+  @override
+  String get calendarScopeDeleteTitle => "Esborra l'esdeveniment repetit";
+  @override
+  String get calendarScopeThis => 'Aquest esdeveniment';
+  @override
+  String get calendarScopeFollowing => 'Aquest i els següents';
+  @override
+  String get calendarScopeAll => 'Tots els esdeveniments';
+  @override
+  String get calendarEventDay => 'Dia';
+  @override
   String get journalCalendarTitle => 'Calendari';
   @override
   String get journalEventTimesTitle => 'Hores dels esdeveniments';
@@ -4502,4 +4520,48 @@ final class CatalanStrings extends Strings {
   @override
   String todoBlockSeveralNotes(String name) =>
       'Diverses notes coincideixen amb $name';
+
+  // Recurring tasks (#1189): a rule in words, and the Repeat row.
+  @override
+  String recurDays(int n) => n == 1 ? 'cada dia' : 'cada $n dies';
+  @override
+  String recurWeeks(int n) => n == 1 ? 'cada setmana' : 'cada $n setmanes';
+  @override
+  String recurMonths(int n) => n == 1 ? 'cada mes' : 'cada $n mesos';
+  @override
+  String recurYears(int n) => n == 1 ? 'cada any' : 'cada $n anys';
+  @override
+  String recurBusinessDays(int n) =>
+      n == 1 ? 'cada dia laborable' : 'cada $n dies laborables';
+  @override
+  String recurOnWeekdays(String rule, String days) => '$rule: $days';
+  @override
+  String recurNthWeekday(String rule, int nth, int weekday) {
+    final i = nth == -1 ? 4 : nth - 1;
+    final ord = const ['1r', '2n', '3r', '4t', 'últim'][i];
+    return '$rule, $ord ${weekdayNames[weekday - 1]}';
+  }
+
+  @override
+  String recurFromDue(String rule) => '$rule, des del venciment';
+  @override
+  String get todoRepeat => 'Repeteix';
+  @override
+  String get todoRepeatNever => 'Mai';
+  @override
+  String get todoRepeatCustom => 'Personalitzat…';
+  @override
+  String get recurEvery => 'Cada';
+  @override
+  String get recurUnitDays => 'Dies';
+  @override
+  String get recurUnitWeeks => 'Setmanes';
+  @override
+  String get recurUnitMonths => 'Mesos';
+  @override
+  String get recurUnitYears => 'Anys';
+  @override
+  String get recurFromDueDate => 'Des del venciment';
+  @override
+  String get recurFromCompletion => 'Des de la finalització';
 }

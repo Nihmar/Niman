@@ -1,7 +1,7 @@
 /// The colours of a `calendar.txt` line in the editor (#730): where its
 /// date, its week and weekday, its event times, its asides, its tokens and
 /// its `rem:` are, and the wavy flag a head that does not match its date
-/// wears.
+/// wears — and so does a `rec:`, `until:` or `except:` that is not read.
 ///
 /// Read from the same parse the journal reads with ([parseCalendarLine]),
 /// so the editor and the list never disagree about what a line says. The
@@ -10,6 +10,7 @@
 /// reads both files together.
 library;
 
+import 'package:niman/src/calendar/calendar_recurrence.dart';
 import 'package:niman/src/calendar/parser.dart';
 import 'package:niman/src/editor/highlighting.dart';
 
@@ -71,8 +72,19 @@ List<Token> calendarTxtTokens(String line) {
 
   // Every `+`/`@`/`#`/`key:value` run, the events' and a goal's own, in
   // the roles todo.txt uses for them.
-  for (final token in [...parsed.tokens, ..._eventTokens(parsed)]) {
+  for (final token in parsed.tokens) {
     add(_tokenKind(token.kind), token.start, token.end);
+  }
+  // An event's own tokens: the `rec:`, `until:` and `except:` the grammar
+  // cannot read keep the tag's colour and wear the wavy flag (#1190).
+  for (final token in _eventTokens(parsed)) {
+    add(
+      isUnreadableRuleToken(token)
+          ? TokenKind.todoUnreadableRule
+          : _tokenKind(token.kind),
+      token.start,
+      token.end,
+    );
   }
 
   tokens.sort((a, b) => a.start.compareTo(b.start));

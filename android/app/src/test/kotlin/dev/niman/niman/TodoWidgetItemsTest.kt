@@ -148,6 +148,17 @@ class TodoWidgetItemsTest {
     }
 
     @Test
+    fun `a recurring row says its rule after the due date`() {
+        val item = row("water", "due.next7", due = "2026-10-20", priority = "A")
+            .put("repeat", "every 2 weeks")
+            .put("projects", JSONArray().put("home"))
+        assertEquals("(A) · 2026-10-20 · ↻ every 2 weeks · +home", TodoWidgetItems.metaLine(item))
+        // Under Today the date goes and the rule stays.
+        item.put("showDue", false)
+        assertEquals("(A) · ↻ every 2 weeks · +home", TodoWidgetItems.metaLine(item))
+    }
+
+    @Test
     fun `a row with nothing to say has an empty meta line`() {
         assertEquals("", TodoWidgetItems.metaLine(row("plain", "due.none")))
     }

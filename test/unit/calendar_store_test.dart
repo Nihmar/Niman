@@ -5,6 +5,7 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/calendar/calendar_occurrence_edits.dart';
 import 'package:niman/src/calendar/calendar_store.dart';
 import 'package:niman/src/calendar/calendar_writer.dart';
 import 'package:path/path.dart' as p;
@@ -237,6 +238,60 @@ void main() {
       expect(onDisk(), '2026-10-12 w42 Mon  13 lunch.\n');
       expect(snapshot.eventsFor(DateTime(2026, 10, 12)), hasLength(1));
     });
+
+    test('a skip, an edit of one and an end write the rule line', () async {
+      write('2026-10-05 w41 Mon  9 standup rec:1w.\n13 lunch\n');
+      final at = await store();
+      final rule = CalendarEventRef(
+        line: 0,
+        day: DateTime(2026, 10, 5),
+        start: 20,
+      );
+      await at.skipOccurrence(rule, DateTime(2026, 10, 12));
+      expect(
+        onDisk(),
+        '2026-10-05 w41 Mon  9 standup rec:1w except:2026-10-12.\n13 lunch\n',
+      );
+
+      final snapshot = await at.updateOccurrence(
+        rule,
+        DateTime(2026, 10, 19),
+        const CalendarEventDraft(text: 'planning', startMinutes: 10 * 60),
+        CalendarOccurrenceScope.thisOne,
+      );
+      expect(onDisk(), contains('2026-10-19 w43 Mon  10 planning.'));
+      expect(
+        snapshot.eventsFor(DateTime(2026, 10, 19)).single.repeats,
+        isFalse,
+      );
+
+      await at.deleteOccurrence(
+        rule,
+        DateTime(2026, 10, 26),
+        CalendarOccurrenceScope.thisAndFollowing,
+      );
+      expect(
+        onDisk(),
+        startsWith(
+          '2026-10-05 w41 Mon  9 standup rec:1w except:2026-10-12,2026-10-19 '
+          'until:2026-10-25.\n',
+        ),
+      );
+    });
+
+    test(
+      'an occurrence the rule does not reach leaves the file alone',
+      () async {
+        write('2026-10-05 w41 Mon  9 standup rec:1w.\n');
+        final before = onDisk();
+        final at = await store();
+        await at.skipOccurrence(
+          CalendarEventRef(line: 0, day: DateTime(2026, 10, 5), start: 20),
+          DateTime(2026, 10, 7),
+        );
+        expect(onDisk(), before);
+      },
+    );
 
     test('an event the file no longer holds is left alone', () async {
       write('2026-10-12 w42 Mon  9-12 thesis.\n');

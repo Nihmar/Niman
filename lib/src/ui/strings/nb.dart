@@ -324,6 +324,24 @@ final class NorwegianStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Påminnelse kl. $time';
   @override
+  String get calendarEndsNever => 'Slutter aldri';
+  @override
+  String calendarEndsOn(String date) => 'Slutter $date';
+  @override
+  String get calendarSkipAction => 'Hopp over';
+  @override
+  String get calendarScopeEditTitle => 'Rediger gjentakende hendelse';
+  @override
+  String get calendarScopeDeleteTitle => 'Slett gjentakende hendelse';
+  @override
+  String get calendarScopeThis => 'Denne hendelsen';
+  @override
+  String get calendarScopeFollowing => 'Denne og følgende hendelser';
+  @override
+  String get calendarScopeAll => 'Alle hendelser';
+  @override
+  String get calendarEventDay => 'Dag';
+  @override
   String get journalCalendarTitle => 'Kalender';
   @override
   String get journalEventTimesTitle => 'Hendelsestider';
@@ -4412,4 +4430,47 @@ final class NorwegianStrings extends Strings {
   String todoBlockNoNote(String name) => 'Ingen notater passer til $name';
   @override
   String todoBlockSeveralNotes(String name) => 'Flere notater passer til $name';
+
+  // Recurring tasks (#1189): a rule in words, and the Repeat row.
+  @override
+  String recurDays(int n) => n == 1 ? 'hver dag' : 'hver $n. dag';
+  @override
+  String recurWeeks(int n) => n == 1 ? 'hver uke' : 'hver $n. uke';
+  @override
+  String recurMonths(int n) => n == 1 ? 'hver måned' : 'hver $n. måned';
+  @override
+  String recurYears(int n) => n == 1 ? 'hvert år' : 'hvert $n. år';
+  @override
+  String recurBusinessDays(int n) => n == 1 ? 'hver ukedag' : 'hver $n. ukedag';
+  @override
+  String recurOnWeekdays(String rule, String days) => '$rule på $days';
+  @override
+  String recurNthWeekday(String rule, int nth, int weekday) {
+    final i = nth == -1 ? 4 : nth - 1;
+    final ord = const ['1.', '2.', '3.', '4.', 'siste'][i];
+    return '$rule, $ord ${weekdayNames[weekday - 1]}';
+  }
+
+  @override
+  String recurFromDue(String rule) => '$rule fra fristen';
+  @override
+  String get todoRepeat => 'Gjenta';
+  @override
+  String get todoRepeatNever => 'Aldri';
+  @override
+  String get todoRepeatCustom => 'Egendefinert…';
+  @override
+  String get recurEvery => 'Hver';
+  @override
+  String get recurUnitDays => 'Dager';
+  @override
+  String get recurUnitWeeks => 'Uker';
+  @override
+  String get recurUnitMonths => 'Måneder';
+  @override
+  String get recurUnitYears => 'År';
+  @override
+  String get recurFromDueDate => 'Fra fristen';
+  @override
+  String get recurFromCompletion => 'Fra fullføring';
 }

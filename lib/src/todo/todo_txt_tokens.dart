@@ -8,6 +8,7 @@
 /// ([TokenKind.wikilink]), and nothing inside it is a token (#1152).
 library;
 
+import 'package:niman/src/core/recurrence/recurrence_rule.dart';
 import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/todo/parser.dart';
 
@@ -64,8 +65,18 @@ TokenKind? _kindOf(String word) {
     '+' => TokenKind.todoProject,
     '@' => TokenKind.todoContext,
     '#' => TokenKind.tag,
-    _ => _keyValue.hasMatch(word) ? TokenKind.todoKeyValue : null,
+    _ => _keyValue.hasMatch(word) ? _tagKind(word) : null,
   };
+}
+
+/// The run of the `key:value` tag [word]: a `rec:` the grammar cannot read
+/// is flagged (#1189), every other tag is a plain tag.
+TokenKind _tagKind(String word) {
+  if (word.startsWith('rec:') &&
+      RecurrenceRule.parse(word.substring(4)) == null) {
+    return TokenKind.todoUnreadableRule;
+  }
+  return TokenKind.todoKeyValue;
 }
 
 int _blankFrom(String line, int from) {

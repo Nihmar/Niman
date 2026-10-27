@@ -317,5 +317,15 @@ void main() {
       await waitFor(() => reminders.reconciled.length == 3);
       expect(reminders.reconciled.last, hasLength(1));
     });
+
+    test('a reminder the app just showed reconciles again', () async {
+      // The next occurrences of a repeating event come into the window as
+      // these are delivered, with nothing else touching the app (#1192).
+      await reminded.open();
+      await waitFor(() => reminders.reconciled.isNotEmpty);
+      final before = reminders.reconciled.length;
+      reminders.fire();
+      await waitFor(() => reminders.reconciled.length > before);
+    });
   });
 }

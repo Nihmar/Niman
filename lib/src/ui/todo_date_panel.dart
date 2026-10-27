@@ -48,7 +48,7 @@ final class TodoDatePanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _Frame(
+    return TodoPanelFrame(
       child: CalendarDatePicker(
         initialDate: initial,
         firstDate: todoFirstDate,
@@ -119,7 +119,7 @@ final class _TodoReminderPanelState extends State<TodoReminderPanel> {
   Widget build(BuildContext context) {
     final words = MaterialLocalizations.of(context);
     final valid = _typed != null;
-    return _Frame(
+    return TodoPanelFrame(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -173,9 +173,11 @@ final class _TodoReminderPanelState extends State<TodoReminderPanel> {
 }
 
 /// The outline a panel sits in, so it reads as part of its row.
-final class _Frame extends StatelessWidget {
-  const new({required this.child});
+final class TodoPanelFrame extends StatelessWidget {
+  /// Frames [child].
+  const new({required this.child, super.key});
 
+  /// What sits in the outline.
   final Widget child;
 
   @override

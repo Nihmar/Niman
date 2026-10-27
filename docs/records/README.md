@@ -33,6 +33,8 @@ comments (`docs/records/<name>.md`).
 | [web-capture.md](web-capture.md) | Capturing a web page or a selection as Markdown, with a Dart port of Readability (#531) |
 | [flashcards.md](flashcards.md) | Decks of flashcards in notes, reviewed with SM-2, the review state in `.niman/review.json` (#533) |
 | [calendar-txt.md](calendar-txt.md) | Reading and writing `calendar.txt` beside `todo.txt`: the journal's events, the line-wise sync merge, reminders on an event (#730) |
+| [recurring-tasks.md](recurring-tasks.md) | Recurring tasks: the `rec:` grammar shared with events, the copy completing one makes, its reminder and the sync merge (#1153) — not built |
+| [recurring-events.md](recurring-events.md) | Recurring events in `calendar.txt`: a rule on the event read virtually, `except:`/`until:`, the reminder horizon, the merge's rule pairing (#1153) — not built |
 | [todo-note-links.md](todo-note-links.md) | Tasks and notes linked both ways: a wikilink in a task, a note's tasks in its panel, a `todo` query block, Move to tasks (#1152) — not built |
 | [note-columns.md](note-columns.md) | Columns of blocks side by side with Pandoc's fenced divs, editable in `live` (#729) |
 | [library-features.md](library-features.md) | A per-library switchboard for the macro features: the model, the gating seam, the introduction, the phases (#1109) — not built |

@@ -58,7 +58,7 @@ void main() {
             goalsOn: (day) => [
               for (final entry in at.goalsFor(day)) entry.line,
             ],
-            eventDays: at.daysWithEvents,
+            eventDaysIn: at.eventDaysIn,
             onOpenEvent: opened.add,
           ),
         ),

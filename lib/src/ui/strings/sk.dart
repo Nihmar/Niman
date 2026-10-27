@@ -326,6 +326,24 @@ final class SlovakStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Pripomienka o $time';
   @override
+  String get calendarEndsNever => 'Nikdy sa nekončí';
+  @override
+  String calendarEndsOn(String date) => 'Končí $date';
+  @override
+  String get calendarSkipAction => 'Preskočiť';
+  @override
+  String get calendarScopeEditTitle => 'Upraviť opakovanú udalosť';
+  @override
+  String get calendarScopeDeleteTitle => 'Vymazať opakovanú udalosť';
+  @override
+  String get calendarScopeThis => 'Táto udalosť';
+  @override
+  String get calendarScopeFollowing => 'Táto a nasledujúce udalosti';
+  @override
+  String get calendarScopeAll => 'Všetky udalosti';
+  @override
+  String get calendarEventDay => 'Deň';
+  @override
   String get journalCalendarTitle => 'Kalendár';
   @override
   String get journalEventTimesTitle => 'Časy udalostí';
@@ -4430,4 +4448,69 @@ final class SlovakStrings extends Strings {
   @override
   String todoBlockSeveralNotes(String name) =>
       'Viaceré poznámky zodpovedajú $name';
+
+  // Recurring tasks (#1189): a rule in words, and the Repeat row.
+  @override
+  String recurDays(int n) => n == 1
+      ? 'každý deň'
+      : (n <= 4)
+      ? 'každé $n dni'
+      : 'každých $n dní';
+  @override
+  String recurWeeks(int n) => n == 1
+      ? 'každý týždeň'
+      : (n <= 4)
+      ? 'každé $n týždne'
+      : 'každých $n týždňov';
+  @override
+  String recurMonths(int n) => n == 1
+      ? 'každý mesiac'
+      : (n <= 4)
+      ? 'každé $n mesiace'
+      : 'každých $n mesiacov';
+  @override
+  String recurYears(int n) => n == 1
+      ? 'každý rok'
+      : (n <= 4)
+      ? 'každé $n roky'
+      : 'každých $n rokov';
+  @override
+  String recurBusinessDays(int n) => n == 1
+      ? 'každý pracovný deň'
+      : (n <= 4)
+      ? 'každé $n pracovné dni'
+      : 'každých $n pracovných dní';
+  @override
+  String recurOnWeekdays(String rule, String days) => '$rule: $days';
+  @override
+  String recurNthWeekday(String rule, int nth, int weekday) {
+    final i = nth == -1 ? 4 : nth - 1;
+    final ord = (const <int>{3, 6, 7}.contains(weekday)
+        ? const ['1.', '2.', '3.', '4.', 'posledná']
+        : const ['1.', '2.', '3.', '4.', 'posledný'])[i];
+    return '$rule, $ord ${weekdayNames[weekday - 1]}';
+  }
+
+  @override
+  String recurFromDue(String rule) => '$rule, od termínu';
+  @override
+  String get todoRepeat => 'Opakovanie';
+  @override
+  String get todoRepeatNever => 'Nikdy';
+  @override
+  String get todoRepeatCustom => 'Vlastné…';
+  @override
+  String get recurEvery => 'Každé';
+  @override
+  String get recurUnitDays => 'Dni';
+  @override
+  String get recurUnitWeeks => 'Týždne';
+  @override
+  String get recurUnitMonths => 'Mesiace';
+  @override
+  String get recurUnitYears => 'Roky';
+  @override
+  String get recurFromDueDate => 'Od termínu';
+  @override
+  String get recurFromCompletion => 'Od dokončenia';
 }

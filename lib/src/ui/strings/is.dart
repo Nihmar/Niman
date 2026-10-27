@@ -323,6 +323,24 @@ final class IcelandicStrings extends Strings {
   @override
   String calendarReminderAt(String time) => 'Áminning kl. $time';
   @override
+  String get calendarEndsNever => 'Endar aldrei';
+  @override
+  String calendarEndsOn(String date) => 'Endar $date';
+  @override
+  String get calendarSkipAction => 'Sleppa';
+  @override
+  String get calendarScopeEditTitle => 'Breyta endurteknum viðburði';
+  @override
+  String get calendarScopeDeleteTitle => 'Eyða endurteknum viðburði';
+  @override
+  String get calendarScopeThis => 'Þessi viðburður';
+  @override
+  String get calendarScopeFollowing => 'Þessi og næstu viðburðir';
+  @override
+  String get calendarScopeAll => 'Allir viðburðir';
+  @override
+  String get calendarEventDay => 'Dagur';
+  @override
   String get journalCalendarTitle => 'Dagatal';
   @override
   String get journalEventTimesTitle => 'Tímar viðburða';
@@ -4427,4 +4445,48 @@ final class IcelandicStrings extends Strings {
   @override
   String todoBlockSeveralNotes(String name) =>
       'Margir minnispunktar passa við $name';
+
+  // Recurring tasks (#1189): a rule in words, and the Repeat row.
+  @override
+  String recurDays(int n) => n == 1 ? 'daglega' : 'á $n daga fresti';
+  @override
+  String recurWeeks(int n) => n == 1 ? 'vikulega' : 'á $n vikna fresti';
+  @override
+  String recurMonths(int n) => n == 1 ? 'mánaðarlega' : 'á $n mánaða fresti';
+  @override
+  String recurYears(int n) => n == 1 ? 'árlega' : 'á $n ára fresti';
+  @override
+  String recurBusinessDays(int n) =>
+      n == 1 ? 'á virkum dögum' : 'á $n virkra daga fresti';
+  @override
+  String recurOnWeekdays(String rule, String days) => '$rule: $days';
+  @override
+  String recurNthWeekday(String rule, int nth, int weekday) {
+    final i = nth == -1 ? 4 : nth - 1;
+    final ord = const ['1.', '2.', '3.', '4.', 'síðasti'][i];
+    return '$rule, $ord ${weekdayNames[weekday - 1]}';
+  }
+
+  @override
+  String recurFromDue(String rule) => '$rule, frá skiladegi';
+  @override
+  String get todoRepeat => 'Endurtaka';
+  @override
+  String get todoRepeatNever => 'Aldrei';
+  @override
+  String get todoRepeatCustom => 'Sérsniðið…';
+  @override
+  String get recurEvery => 'Á';
+  @override
+  String get recurUnitDays => 'Dagar';
+  @override
+  String get recurUnitWeeks => 'Vikur';
+  @override
+  String get recurUnitMonths => 'Mánuðir';
+  @override
+  String get recurUnitYears => 'Ár';
+  @override
+  String get recurFromDueDate => 'Frá skiladegi';
+  @override
+  String get recurFromCompletion => 'Frá lokum';
 }

@@ -30,12 +30,14 @@ short setup dialog: pick the library from the ones you have open
   time zone changes and after a restart. It is an inexact system alarm,
   so it can land a few minutes after midnight, and it only runs while a
   Todos widget is placed.
-- **Meta line:** each row names its priority, due date and
+- **Meta line:** each row names its priority, due date, the rule it repeats
+  by (`↻ every 2 weeks`, see [tasks](tasks.md)) and
   `+project` / `@context` / `#tag` markers; rows without any of them
   hide the line so the text stays aligned. The section already says what
   it says, so a row under *Today* does not repeat its date; an *Overdue*
   row keeps it.
-- **Tap a row:** toggles the task; works with the app closed.
+- **Tap a row:** toggles the task; works with the app closed. A task that
+  repeats leaves its next copy in the list, as it does in the app.
 - **Tap the header:** opens the app on that library.
 - **"+":** opens the app with the task add field focused.
 

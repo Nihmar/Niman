@@ -35,6 +35,27 @@ void main() {
     );
   });
 
+  test(
+    'rec: is coloured as due: and rem: are; one nothing reads is flagged',
+    () {
+      expect(_runs('Water due:2026-09-30 rec:+1w;mo,we rec:1m;-1fr'), [
+        'todoKeyValue due:2026-09-30',
+        'todoKeyValue rec:+1w;mo,we',
+        'todoKeyValue rec:1m;-1fr',
+      ]);
+      expect(_runs('Water rec:often rec:0d rec:1w;xx'), [
+        'todoUnreadableRule rec:often',
+        'todoUnreadableRule rec:0d',
+        'todoUnreadableRule rec:1w;xx',
+      ]);
+      // A tag of another key is never flagged, and nothing in a link is.
+      expect(_runs('Plan [[A rec:often]] recx:often'), [
+        'wikilink [[A rec:often]]',
+        'todoKeyValue recx:often',
+      ]);
+    },
+  );
+
   test('a completed task is one run, the whole line', () {
     const line = 'x 2026-09-24 2026-09-20 Paid +Home';
     expect(todoTxtTokens(line), [

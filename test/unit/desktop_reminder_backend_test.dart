@@ -45,6 +45,16 @@ void main() {
     },
   );
 
+  test('each reminder shown is announced once it has been shown', () async {
+    final signals = <int>[];
+    final sub = backend.fired.listen((_) => signals.add(notifier.shown.length));
+    final r = reminder(const Duration(milliseconds: 20));
+    await backend.schedule(r, exact: true);
+    await Future<void>.delayed(const Duration(milliseconds: 90));
+    await sub.cancel();
+    expect(signals, [1], reason: 'after the notification, not before');
+  });
+
   // #42: the overdue line has to read true on a desktop, where no OS
   // keeps the alarm: not armed is not the same as fired.
   group('an overdue reminder reads as what happened here', () {

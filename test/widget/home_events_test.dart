@@ -110,6 +110,67 @@ void main() {
     );
   });
 
+  testWidgets("a rule's occurrence shows today, its rule beside it (#1190)", (
+    tester,
+  ) async {
+    // The standup began two weeks ago and repeats every week: today is
+    // one of its occurrences, and the file has nothing written on today.
+    final began = today.subtract(const Duration(days: 14));
+    calendar = FakeCalendarSource(
+      lines: [
+        '${iso(began)} w42  Writing week',
+        '${iso(began)} w42 Mon  9-9:30 Standup @work rec:1w.',
+      ],
+    );
+    await openHome(tester);
+    final tile = find.byKey(const Key('home-tile-eventsToday'));
+
+    expect(
+      find.descendant(of: tile, matching: find.textContaining('Standup')),
+      findsOne,
+    );
+    expect(
+      find.descendant(
+        of: tile,
+        matching: find.byKey(const Key('home-event-repeat-1-20')),
+      ),
+      findsOne,
+    );
+    expect(
+      find.descendant(of: tile, matching: find.text(AppStrings.recurWeeks(1))),
+      findsOne,
+    );
+  });
+
+  testWidgets("an occurrence opens the rule's own line (#1190)", (
+    tester,
+  ) async {
+    final began = today.subtract(const Duration(days: 7));
+    calendar = FakeCalendarSource(
+      lines: [
+        '${iso(began)} w42  Writing week',
+        '${iso(began)} w42 Mon  9-9:30 Standup @work rec:1w.',
+      ],
+    );
+    await openHome(tester);
+    final event = find.descendant(
+      of: find.byKey(const Key('home-tile-eventsToday')),
+      matching: find.textContaining('Standup'),
+    );
+    await tester.ensureVisible(event);
+    await settle(tester);
+    await tester.tap(event);
+    await settle(tester);
+
+    final view = tester.widget<NoteView>(
+      find.byWidgetPredicate(
+        (w) => w is NoteView && w.path.endsWith('calendar.txt'),
+        skipOffstage: false,
+      ),
+    );
+    expect(view.initialCaretOffset, calendar.lines[0].length + 1);
+  });
+
   testWidgets('a day with nothing on it says so', (tester) async {
     calendar = FakeCalendarSource();
     await openHome(tester);

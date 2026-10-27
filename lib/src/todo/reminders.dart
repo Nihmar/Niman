@@ -60,6 +60,14 @@ abstract interface class ReminderService {
   /// The launch payload when a tap started the app (once, then null).
   Future<String?> consumeLaunchPayload();
 
+  /// Emits after a reminder was shown by the app itself (the desktops'
+  /// timer); never on Android and Apple, where the OS delivers it.
+  ///
+  /// The signal to recompute the wanted set: a repeating event schedules
+  /// only its next few occurrences (#1192), and the ones after those come
+  /// into the window as these are delivered.
+  Stream<void> get fired;
+
   /// Whether the OS-side preconditions for reminders hold.
   ///
   /// Refreshed on every [reconcile], so the resume-driven resync picks up
@@ -531,6 +539,9 @@ final class LocalReminderService implements ReminderService {
   Stream<String?> get taps => _backend.taps;
 
   @override
+  Stream<void> get fired => _backend.fired;
+
+  @override
   Future<String?> consumeLaunchPayload() async {
     try {
       await _ensureReady();
@@ -559,6 +570,9 @@ final class NoopReminderService implements ReminderService {
 
   @override
   Stream<String?> get taps => const Stream<String?>.empty();
+
+  @override
+  Stream<void> get fired => const Stream<void>.empty();
 
   @override
   Future<String?> consumeLaunchPayload() async => null;
