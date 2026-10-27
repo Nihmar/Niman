@@ -20,10 +20,11 @@ typedef TreePageKey = (int parent, int page);
 /// widget works the window out with [pagesFor] and hands it to [keepOnly].
 ///
 /// Everything is read from one [LibrarySession] in the `sort` the reads are
-/// given. Ranks and pages are positions in an order, so a read in another
-/// order than the last one [clear]s what was held. A revision that moved rows
-/// [forget]s the folders it names, and a read that lands after the revision
-/// outdated it adds nothing (see [TreeReadGuard]).
+/// given. Ranks and pages are positions in an order, so a [visible] model in
+/// another order than the last one [clear]s what was held, and a [load] in
+/// an order that is no longer the current one reads nothing. A revision that
+/// moved rows [forget]s the folders it names, and a read that lands after the
+/// revision outdated it adds nothing (see [TreeReadGuard]).
 final class TreePages {
   /// Pages of [pageSize] rows.
   new({required this.pageSize}) : assert(pageSize > 0, 'a page has rows');
@@ -210,7 +211,7 @@ final class TreePages {
     int page,
     TreeSort sort,
   ) {
-    _adopt(sort);
+    if (!_isCurrent(sort)) return Future<bool>.value(false);
     final key = (parent, page);
     if (hasPage(key)) return Future<bool>.value(false);
     final running = _loading[key];
@@ -349,9 +350,23 @@ final class TreePages {
     pinned = null;
   }
 
-  /// Starts afresh when [sort] is not the order what is held is in.
+  /// Starts afresh when [sort] is not the order what is held is in: the
+  /// widget's new read of the tree, [visible], is what changes the order.
   void _adopt(TreeSort sort) {
     if (_sort != null && _sort != sort) clear();
     _sort = sort;
+  }
+
+  /// Whether a read in [sort] belongs with what is held: it is in the order
+  /// the model was last built in, or nothing is held yet to be in an order.
+  ///
+  /// A read carries the sort of the `TreeListing` that asked, and a listing
+  /// outlives the order it was made for: a keyboard move or a jump still
+  /// under way when the order flips asks with the old one. It must not
+  /// clear the new order's counts and pages, or leave a page of the old
+  /// order in their cache (#1232), so it reads nothing.
+  bool _isCurrent(TreeSort sort) {
+    _sort ??= sort;
+    return _sort == sort;
   }
 }

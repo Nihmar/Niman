@@ -261,6 +261,13 @@ What the widget does that the sections above leave open:
   happened while it was out (#1231): the flatten that asked is given its read,
   the next one reads again. Held unconditionally, an old read landed after a
   revision had emptied the slot, and the block stayed wrong until the next one.
+- **Only the model changes the order.** `TreePages.visible` in a new sort
+  clears what was held; a `load` carrying another sort than the current one is
+  a no-op (#1232). The listing a flatten made outlives the order it was made
+  for, and its async keyboard moves (`_walkRowAsync`, `_jumpTo`,
+  `_revealPath`) read through `load` with that sort: before, one of them
+  landing after the order flipped wiped the new order's counts and pages, put
+  the old order back as the current one, and cached a page in the wrong order.
 
 ## Measured (phase 5)
 

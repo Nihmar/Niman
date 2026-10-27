@@ -220,6 +220,34 @@ void main() {
       expect(pages.pageCount, 1);
     });
 
+    test('a read in an order that is no longer current reads nothing '
+        '(#1232)', () async {
+      // The listing of the old order is still asking when the order flips.
+      await pages.visible(session, const {}, TreeSort.nameAsc);
+      await pages.load(session, 0, 0, TreeSort.nameAsc);
+      await pages.visible(session, const {}, TreeSort.nameDesc);
+      expect(pages.pageCount, 0, reason: 'the new order starts afresh');
+      final counts = session.countCalls;
+      final epoch = pages.epoch;
+      final reads = session.atCalls + session.pageCalls;
+
+      expect(await pages.load(session, 0, 1, TreeSort.nameAsc), isFalse);
+
+      expect(pages.pageCount, 0, reason: 'no page of the old order');
+      expect(
+        session.atCalls + session.pageCalls,
+        reads,
+        reason: 'read nothing',
+      );
+      expect(pages.epoch, epoch, reason: 'the new order was not cleared');
+      await pages.visible(session, const {}, TreeSort.nameDesc);
+      expect(session.countCalls, counts, reason: 'its counts were kept');
+      // The new order still reads, in its own order.
+      expect(await pages.load(session, 0, 1, TreeSort.nameDesc), isTrue);
+      final desc = await session.children(0, sort: TreeSort.nameDesc);
+      expect(pages.rowAt(0, _pageSize)?.path, desc[_pageSize].path);
+    });
+
     test('adds nothing when the order changed on its way', () async {
       await pages.load(session, 0, 0, TreeSort.nameAsc);
       session.treeGate = Completer<void>();
