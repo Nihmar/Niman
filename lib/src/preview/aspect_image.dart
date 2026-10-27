@@ -8,6 +8,8 @@
 // the block's height stable, so the mapping stays put.
 
 import 'package:flutter/material.dart';
+import 'package:niman/src/preview/decode_bound.dart';
+import 'package:niman/src/preview/decode_width_probe.dart';
 
 /// An [Image] that holds its aspect ratio from the first decoded frame on.
 ///
@@ -15,6 +17,12 @@ import 'package:flutter/material.dart';
 /// never nothing, so the blocks below it move by at most the difference
 /// between the placeholder and the real box, and only once. A provider
 /// that fails renders [errorBuilder]'s widget (an empty box by default).
+///
+/// The picture is decoded at the size it is drawn at, not the file's
+/// (#1194): the box is bounded by the width it is given and by the height
+/// cap, so [provider] is wrapped in a `ResizeImage` fitting both (see
+/// [decodeBound]), and decoded again only when a bound moves past a
+/// [decodeStep].
 final class AspectImage extends StatefulWidget {
   /// Creates the image over [provider].
   const new({
@@ -44,6 +52,87 @@ final class AspectImage extends StatefulWidget {
 }
 
 final class _AspectImageState extends State<AspectImage> {
+  /// The width the image was last laid out in, in decode steps' worth of
+  /// physical pixels ([decodeBound]); null before its first layout.
+  int? _widthBound;
+
+  /// The layout's width, from [DecodeWidthProbe]: a new bound rebuilds
+  /// after the frame, since layout is no place to build.
+  void _onWidth(int bound) {
+    if (bound == _widthBound) return;
+    _widthBound = bound;
+    // The first layout is the placeholder's: the decode starts right after
+    // the frame that laid it out.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cap = widget.maxHeight ?? heightCapFor(context);
+    final ratio = MediaQuery.devicePixelRatioOf(context);
+    final width = _widthBound;
+    return DecodeWidthProbe(
+      ratio: ratio,
+      // An unbounded width (a horizontal scroller) is drawn no wider than
+      // the window.
+      fallback: MediaQuery.sizeOf(context).width,
+      onWidth: _onWidth,
+      child: _AspectImageBody(
+        provider: widget.provider,
+        // `fit` keeps the picture's ratio inside both bounds, which are the
+        // box [_AspectImageBodyState.build] draws it in, so the decoded
+        // picture has the ratio of the file. Nothing is decoded before the
+        // width is known: a guess would be a decode thrown away.
+        resized: width == null
+            ? null
+            : ResizeImage(
+                widget.provider,
+                width: width,
+                height: decodeBound(cap, ratio),
+                policy: ResizeImagePolicy.fit,
+              ),
+        fit: widget.fit,
+        errorBuilder: widget.errorBuilder,
+        heightCap: cap,
+      ),
+    );
+  }
+}
+
+/// What [AspectImage] draws: it resolves the picture, learns its ratio and
+/// holds it.
+final class _AspectImageBody extends StatefulWidget {
+  const new({
+    required this.provider,
+    required this.resized,
+    required this.fit,
+    required this.errorBuilder,
+    required this.heightCap,
+  });
+
+  /// The picture as the caller gave it: what says it is another picture.
+  final ImageProvider provider;
+
+  /// [provider] bounded to the size it is drawn at: what is decoded. Null
+  /// until the width is known.
+  final ImageProvider? resized;
+
+  /// [AspectImage.fit].
+  final BoxFit fit;
+
+  /// [AspectImage.errorBuilder].
+  final ImageErrorWidgetBuilder? errorBuilder;
+
+  /// The tallest the box may be.
+  final double heightCap;
+
+  @override
+  State<_AspectImageBody> createState() => _AspectImageBodyState();
+}
+
+final class _AspectImageBodyState extends State<_AspectImageBody> {
   ImageStream? _stream;
   ImageStreamListener? _listener;
   double? _aspectRatio;
@@ -56,7 +145,7 @@ final class _AspectImageState extends State<AspectImage> {
   }
 
   @override
-  void didUpdateWidget(AspectImage oldWidget) {
+  void didUpdateWidget(_AspectImageBody oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.provider != widget.provider) {
       _detach();
@@ -67,6 +156,12 @@ final class _AspectImageState extends State<AspectImage> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) _resolve();
       });
+    } else if (oldWidget.resized != widget.resized) {
+      // The same picture, decoded at another size: the ratio and the
+      // failure stand (the block keeps its height, and the picture keeps
+      // drawing from the frame it has until the new one lands), and only
+      // the stream followed moves.
+      _resolve();
     }
   }
 
@@ -85,13 +180,16 @@ final class _AspectImageState extends State<AspectImage> {
 
   void _resolve() {
     _detach();
-    final stream = widget.provider.resolve(
-      createLocalImageConfiguration(context),
-    );
+    final resized = widget.resized;
+    if (resized == null) return;
+    final stream = resized.resolve(createLocalImageConfiguration(context));
     final listener = ImageStreamListener(
       (info, _) {
         final height = info.image.height.toDouble();
-        if (!mounted || height <= 0) return;
+        // The ratio of the first decode stands for this picture: a smaller
+        // decode rounds its sides, and would move the box by a fraction of
+        // a pixel — and with it the height the scroll map was told.
+        if (!mounted || height <= 0 || _aspectRatio != null) return;
         setState(() => _aspectRatio = info.image.width.toDouble() / height);
       },
       onError: (error, stackTrace) {
@@ -109,9 +207,15 @@ final class _AspectImageState extends State<AspectImage> {
       return widget.errorBuilder?.call(context, 'image failed', null) ??
           const SizedBox.shrink();
     }
+    final resized = widget.resized;
+    // Before the first layout says how wide the picture is drawn, the
+    // placeholder's box stands alone.
+    if (resized == null) return const SizedBox(height: 96);
     final image = Image(
-      image: widget.provider,
+      image: resized,
       fit: widget.fit,
+      // A new decode size keeps the old frame up until the new one lands.
+      gaplessPlayback: true,
       errorBuilder: widget.errorBuilder,
     );
     final ratio = _aspectRatio;
@@ -132,9 +236,7 @@ final class _AspectImageState extends State<AspectImage> {
       // block around it is exactly as tall as what it draws.
       heightFactor: 1,
       child: ConstrainedBox(
-        constraints: BoxConstraints(
-          maxHeight: widget.maxHeight ?? heightCapFor(context),
-        ),
+        constraints: BoxConstraints(maxHeight: widget.heightCap),
         child: AspectRatio(aspectRatio: ratio, child: image),
       ),
     );

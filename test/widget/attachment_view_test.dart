@@ -8,6 +8,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/ui/attachment_picture.dart';
 import 'package:niman/src/ui/attachment_view.dart';
 import 'package:path/path.dart' as p;
 
@@ -61,6 +62,100 @@ void main() {
     expect(find.text('photo.png'), findsOneWidget);
     expect(find.byKey(const Key('attachment-unreadable')), findsNothing);
     await unmount(tester);
+  });
+
+  // #1194: the viewer decoded the file at its own size, however small the
+  // pane, and kept every pixel of it for as long as the note was open.
+  group('decodes at the size it is seen at', () {
+    /// An 800 x 600 logical window at a pixel ratio of 1.
+    void window(WidgetTester tester) {
+      tester.view.devicePixelRatio = 1;
+      tester.view.physicalSize = const Size(800, 600);
+      addTearDown(tester.view.reset);
+    }
+
+    Future<File> picture(WidgetTester tester) async {
+      final bytes = await tester.runAsync(() async {
+        final image = await createTestImage(width: 4000, height: 3000);
+        final data = await image.toByteData(format: ui.ImageByteFormat.png);
+        image.dispose();
+        return data!.buffer.asUint8List();
+      });
+      return File(p.join(dir.path, 'big.png'))..writeAsBytesSync(bytes!);
+    }
+
+    /// Lets the decode that is under way land: pumps in real time until
+    /// the picture [reaches] a width past [above].
+    Future<void> settle(WidgetTester tester, {int above = 0}) async {
+      for (var i = 0; i < 100; i++) {
+        await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 50)),
+        );
+        await tester.pump();
+        final raw = find.byType(RawImage);
+        if (raw.evaluate().isEmpty) continue;
+        final image = tester.widget<RawImage>(raw).image;
+        if (image != null && image.width > above) return;
+      }
+    }
+
+    int decodedWidth(WidgetTester tester) =>
+        tester.widget<RawImage>(find.byType(RawImage)).image!.width;
+
+    testWidgets('the viewport at first, the zoom it settles on after', (
+      tester,
+    ) async {
+      window(tester);
+      final file = await picture(tester);
+      await pump(tester, file.path);
+      await settle(tester);
+
+      // 800 px wide, and the bar under it takes some of the 600: the
+      // bound is the 1024 x 768 step, a quarter of the file's width.
+      final first = decodedWidth(tester);
+      expect(first, lessThanOrEqualTo(1024));
+      expect(first, greaterThanOrEqualTo(700));
+
+      // A pinch that spreads two fingers x3.8 apart settles the zoom at 4:
+      // four times the pixels.
+      final center = tester.getCenter(
+        find.byKey(const Key('attachment-picture')),
+      );
+      final left = await tester.startGesture(
+        center - const Offset(50, 0),
+        pointer: 1,
+      );
+      final right = await tester.startGesture(
+        center + const Offset(50, 0),
+        pointer: 2,
+      );
+      await left.moveTo(center - const Offset(190, 0));
+      await right.moveTo(center + const Offset(190, 0));
+      await left.up();
+      await right.up();
+      await tester.pump();
+      await settle(tester, above: first);
+
+      final zoomed = decodedWidth(tester);
+      expect(zoomed, greaterThan(2 * first));
+      expect(zoomed, lessThanOrEqualTo(3328));
+      // Never beyond the file's own pixels.
+      expect(zoomed, lessThanOrEqualTo(4000));
+      await unmount(tester);
+    });
+
+    test('a zoom decodes at the next power of two, up to the limit', () {
+      expect(zoomDecodeScale(0.5), 1);
+      expect(zoomDecodeScale(1), 1);
+      expect(zoomDecodeScale(1.01), 2);
+      expect(zoomDecodeScale(2), 2);
+      expect(zoomDecodeScale(3.86), 4);
+      expect(zoomDecodeScale(4), 4);
+      expect(zoomDecodeScale(5), 8);
+      expect(zoomDecodeScale(16), 16);
+      expect(zoomDecodeScale(100), 16);
+      expect(zoomDecodeScale(double.nan), 1);
+    });
   });
 
   testWidgets('a picture that does not decode says so', (tester) async {
