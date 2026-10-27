@@ -484,9 +484,15 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
 
   /// The scan of [buffer]: the one the editor behind this pane is making of
   /// the same lines when it has one ([MarkdownReadView.sharedScan]), else
-  /// this pane's own, in an isolate.
+  /// this pane's own, in an isolate — also when the editor's fails: its
+  /// styling is not what this pane waits for (#1236).
   Future<DocumentScan> _scanOf(SourceBuffer buffer) async {
-    final shared = await widget.sharedScan?.call(buffer);
+    DocumentScan? shared;
+    try {
+      shared = await widget.sharedScan?.call(buffer);
+    } on Object catch (error) {
+      _log.warning("the editor's scan failed ($error); scanning here");
+    }
     if (shared != null && shared.revision == buffer.revision) return shared;
     return await scanInBackground(buffer);
   }

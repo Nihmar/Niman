@@ -751,6 +751,33 @@ void main() {
       expect(backgroundScans, scansBefore + 1);
     });
 
+    // #1236: the editor's styling failed, and the pane stayed on the top of
+    // the note, with the error unhandled.
+    testWidgets('scans for itself when the other reader fails', (tester) async {
+      final buffer = SourceBuffer.fromText(_note(20));
+      final scansBefore = backgroundScans;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: MarkdownReadView(
+              buffer: buffer,
+              parser: ReadParser(),
+              mathCache: _syncCache(),
+              sharedScan: (_) async => throw StateError('styling failed'),
+            ),
+          ),
+        ),
+      );
+      await settle(tester);
+
+      final state = tester.state<MarkdownReadViewState>(
+        find.byType(MarkdownReadView),
+      );
+      expect(state.scanning, isFalse);
+      expect(state.blockCount, greaterThan(20));
+      expect(backgroundScans, scansBefore + 1);
+    });
+
     testWidgets('the first look draws the top, then the whole note', (
       tester,
     ) async {
