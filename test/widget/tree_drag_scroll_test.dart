@@ -100,7 +100,9 @@ void main() {
   ) async {
     await pump(tester, notes: 60);
     expect(offset(tester), 0);
-    final bottom = tester.getBottomLeft(find.byType(ListView));
+    final bottom = tester.getBottomLeft(
+      find.byKey(const Key('note-tree-list')),
+    );
     final mouse = await grab(tester, 'docs', bottom + const Offset(60, -8));
     expect(TreeRowDrag.active.value, isTrue);
     await dwell(tester, const Duration(seconds: 1));
@@ -115,7 +117,7 @@ void main() {
     await dwell(tester, const Duration(milliseconds: 300));
     expect(offset(tester), stopped);
     // And near the top it comes back.
-    final top = tester.getTopLeft(find.byType(ListView));
+    final top = tester.getTopLeft(find.byKey(const Key('note-tree-list')));
     await mouse.moveTo(top + const Offset(60, 6));
     await tester.pump();
     await dwell(tester, const Duration(seconds: 1));
@@ -129,7 +131,7 @@ void main() {
     tester,
   ) async {
     await pump(tester, notes: 60);
-    final middle = tester.getCenter(find.byType(ListView));
+    final middle = tester.getCenter(find.byKey(const Key('note-tree-list')));
     final mouse = await grab(tester, 'docs', middle);
     await dwell(tester, const Duration(seconds: 1));
     expect(offset(tester), 0);

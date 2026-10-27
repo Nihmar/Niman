@@ -392,11 +392,58 @@ final class LibraryController implements LibrarySession {
     required int limit,
     TreeSort sort = TreeSort.nameAsc,
     Note? after,
+    Note? before,
+  }) async {
+    final db = _indexDb;
+    if (db == null) return const [];
+    return await NoteDao(db).childrenPage(
+      parentId,
+      limit: limit,
+      sort: sort,
+      after: after,
+      before: before,
+    );
+  }
+
+  @override
+  Future<int> childCount(int parentId) async {
+    final db = _indexDb;
+    if (db == null) return 0;
+    return await NoteDao(db).childCount(parentId);
+  }
+
+  @override
+  Future<int> rankOf(Note note, {TreeSort sort = TreeSort.nameAsc}) async {
+    final db = _indexDb;
+    if (db == null) return 0;
+    return await NoteDao(db).rankOf(note, sort: sort);
+  }
+
+  @override
+  Future<List<Note>> childrenAt(
+    int parentId, {
+    required int offset,
+    required int limit,
+    TreeSort sort = TreeSort.nameAsc,
   }) async {
     final db = _indexDb;
     if (db == null) return const [];
     return await NoteDao(db)
-        .childrenPage(parentId, limit: limit, sort: sort, after: after);
+        .childrenAt(parentId, offset: offset, limit: limit, sort: sort);
+  }
+
+  @override
+  Future<Note?> firstChildStartingWith(
+    int parentId,
+    String foldedPrefix, {
+    TreeSort sort = TreeSort.nameAsc,
+    Note? after,
+  }) async {
+    final db = _indexDb;
+    if (db == null) return null;
+    return await NoteDao(
+      db,
+    ).firstChildStartingWith(parentId, foldedPrefix, sort: sort, after: after);
   }
 
   @override

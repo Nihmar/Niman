@@ -8,6 +8,7 @@
 // (`ProcessInfo.currentRss`), which counts what the collector has not freed
 // yet and what the heap already had: a bound, read as the median of a few
 // runs (`test/perf/block_memory_test.dart` says how far it strays).
+import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
 import 'dart:isolate' as isolates;
@@ -39,12 +40,13 @@ final class HeapMeter {
   String get unit => exact ? 'heap after a collection' : 'resident set, median';
 
   /// How many bytes the object [build] makes holds: the heap with it minus
-  /// the heap without it. [runs] readings over the resident set, the median
-  /// kept; one over the heap, which needs no more.
-  Future<int> held(Object Function() build, {int runs = 5}) async {
+  /// the heap without it; [build] may be asynchronous (a scroll). [runs]
+  /// readings over the resident set, the median kept; one over the heap,
+  /// which needs no more.
+  Future<int> held(FutureOr<Object> Function() build, {int runs = 5}) async {
     if (exact) {
       final before = await _heap();
-      final kept = build();
+      final kept = await build();
       final after = await _heap();
       // Read after the second collection: what is measured stays alive.
       if (identical(kept, _sink)) return 0;
@@ -54,7 +56,7 @@ final class HeapMeter {
     for (var run = 0; run < runs; run++) {
       _churn();
       final before = ProcessInfo.currentRss;
-      final kept = build();
+      final kept = await build();
       _churn();
       readings.add(ProcessInfo.currentRss - before);
       if (identical(kept, _sink)) return 0;

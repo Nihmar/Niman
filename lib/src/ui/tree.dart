@@ -1,8 +1,9 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:flutter/gestures.dart' show kMiddleMouseButton;
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart'
+    show RenderAbstractViewport, ScrollCacheExtent;
 import 'package:flutter/services.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/name_sort_key.dart';
@@ -12,48 +13,33 @@ import 'package:niman/src/editor/toolbar.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ocr/ocr_queue.dart';
 import 'package:niman/src/ui/action_sheet.dart';
-import 'package:niman/src/ui/file_icon.dart';
-import 'package:niman/src/ui/marquee_text.dart';
-import 'package:niman/src/ui/ocr/ocr_file_actions.dart';
-import 'package:niman/src/ui/ocr/ocr_tree_order.dart';
-import 'package:niman/src/ui/ocr/ocr_tree_ring.dart';
 import 'package:niman/src/ui/strings.dart';
-import 'package:niman/src/ui/tree_child_cache.dart';
+import 'package:niman/src/ui/tree_create_row.dart';
 import 'package:niman/src/ui/tree_drag.dart';
 import 'package:niman/src/ui/tree_drag_scroll.dart';
-import 'package:niman/src/ui/tree_rename_field.dart';
+import 'package:niman/src/ui/tree_listing.dart';
+import 'package:niman/src/ui/tree_name_search.dart';
+import 'package:niman/src/ui/tree_pages.dart';
+import 'package:niman/src/ui/tree_range_reader.dart';
 import 'package:niman/src/ui/tree_row_metrics.dart';
+import 'package:niman/src/ui/tree_row_tile.dart';
+import 'package:niman/src/ui/tree_rows_delegate.dart';
 import 'package:niman/src/ui/tree_spring_load.dart';
 
-/// One row of the flattened tree (note/folder + its depth).
-final class _Row {
-  const new({
-    required this.note,
-    required this.depth,
-    this.sidecar = false,
-    this.moreOf,
-  });
-
-  final Note note;
-  final int depth;
-
-  /// The id of the folder this row is the last loaded child of, when that
-  /// folder has more children to read: drawing the row asks for the next
-  /// page (#1064).
-  final int? moreOf;
-
-  /// A text recognition sidecar shown under its file (#595).
-  final bool sidecar;
-}
+export 'package:niman/src/ui/tree_create_row.dart' show TreeCreate;
+export 'package:niman/src/ui/tree_row_tile.dart'
+    show TreeRename, displayNameOf, isoDate;
 
 /// What the tree renders: the pinned notes, then the folder tree.
 final class _Rows {
-  const new({required this.pinned, required this.tree});
+  const new({required this.pinned, required this.listing});
 
   final List<Note> pinned;
-  final List<_Row> tree;
 
-  bool get isEmpty => pinned.isEmpty && tree.isEmpty;
+  /// The folder tree's rows, by index (#1200).
+  final TreeListing listing;
+
+  bool get isEmpty => pinned.isEmpty && listing.modelLength == 0;
 }
 
 /// One row the tree's keyboard walks (#727): the note it draws, where the
@@ -66,29 +52,55 @@ final class _WalkRow {
     required this.depth,
     required this.top,
     required this.height,
+    required this.index,
+    this.sidecar = false,
   });
 
   final Note note;
   final String path;
 
+  /// The row's place in the walk: the pinned notes first, then the tree's
+  /// own rows.
+  final int index;
+
   /// The pinned block's copy of the note, rather than its own row in the
   /// tree: a pinned note is drawn twice, and the cursor is on one of them.
   final bool pinned;
 
-  /// How deep the row sits, for the left arrow's walk out to its parent.
-  /// A pinned row is drawn at the root: its depth means nothing there.
+  /// How deep the row sits, for the right arrow's step into the rows under
+  /// it. A pinned row is drawn at the root: its depth means nothing there.
   final int depth;
+
+  /// Whether the row is a text recognition sidecar, whose left arrow goes to
+  /// the file it is drawn under.
+  final bool sidecar;
 
   /// Where the list draws the row, and how tall it is.
   final double top;
   final double height;
 }
 
+/// The keyboard's cursor in the walk: its place, and the row it is on.
+typedef _Cursor = ({int at, _WalkRow row});
+
+/// What looking for a name through the rows loaded found.
+enum _Held {
+  /// A row has it, and the cursor moved there.
+  found,
+
+  /// Every row has been looked at and none has it.
+  none,
+
+  /// A row in a page that is not loaded was reached: the index has to say.
+  unsure,
+}
+
 /// Lazy tree of the library's folders/notes.
 ///
-/// Rows are flattened from per-level `NoteDao.children` queries and rendered
-/// in a single [ListView.builder], so a 10k-note library only materializes
-/// the visible rows (T-M1-04).
+/// The list is a model of the rows (counts and ranks, `VisibleTree`) and the
+/// pages of rows around the viewport (`TreePages`), drawn by index in a
+/// fixed-extent sliver, so a library of a million notes holds the rows on
+/// screen and not the rows ever scrolled past (T-M1-04, #1200).
 final class NoteTree extends StatefulWidget {
   /// Creates the note tree.
   const new({
@@ -113,11 +125,19 @@ final class NoteTree extends StatefulWidget {
     this.ocrQueue,
     this.renaming,
     this.pageSize = defaultPageSize,
+    this.pages,
     super.key,
   });
 
-  /// How many children of a folder are read at a time; the rest follow as
-  /// the list scrolls to the end of the ones loaded (#1064).
+  /// The pages the tree reads its rows into (#1200); null makes the tree's
+  /// own, [pageSize] rows to a page. A test gives its own to look at what is
+  /// held as the list scrolls; its page size is the tree's.
+  @visibleForTesting
+  final TreePages? pages;
+
+  /// How many children of a folder one page holds: the pages around the
+  /// viewport are read, and the rest are read as the list scrolls to them
+  /// (#1064, #1200).
   final int pageSize;
 
   /// The page a folder is read in.
@@ -213,8 +233,8 @@ final class NoteTree extends StatefulWidget {
 final class _NoteTreeState extends State<NoteTree> {
   /// The rows currently being shown, and the inputs they were built from.
   ///
-  /// The flatten runs one `children` query per expanded level, so it must
-  /// not be restarted by every rebuild: selecting a note, toggling a
+  /// The read runs a few counts per expanded folder and a page of rows, so it
+  /// must not be restarted by every rebuild: selecting a note, toggling a
   /// button — any `setState` above this widget — used to re-query the
   /// whole visible tree, over a hundred queries a second on a real
   /// library. Reusing the same future also keeps [FutureBuilder] from
@@ -228,10 +248,10 @@ final class _NoteTreeState extends State<NoteTree> {
   bool _rowsFollowContents = false;
   Set<String> _rowsExpanded = const <String>{};
 
-  /// The sort direction the cached rows were flattened with. It decides the
-  /// order `_flatten` asks the index for, so a change of direction alone
-  /// must rebuild the rows — a revision bump does not necessarily follow,
-  /// and never does when the settings write that would have caused it fails.
+  /// The sort direction the cached rows were read with. It decides the
+  /// order the index is asked for, so a change of direction alone must
+  /// rebuild the rows — a revision bump does not necessarily follow, and
+  /// never does when the settings write that would have caused it fails.
   TreeSort _rowsSort = TreeSort.nameAsc;
 
   /// Whether the pinned section is rolled up, once the library has been
@@ -275,6 +295,12 @@ final class _NoteTreeState extends State<NoteTree> {
   String _typed = '';
   DateTime _typedAt = DateTime(0);
 
+  /// The letters typed that the index is answering, one after the other: the
+  /// next one starts from where the one before landed. [_typingPending]
+  /// counts the ones still out.
+  Future<void> _typing = Future<void>.value();
+  int _typingPending = 0;
+
   /// The row the keyboard's cursor is on, by path, and whether that is the
   /// pinned block's copy of the note. Held by path rather than by place:
   /// the walk follows the row while the tree grows and shrinks around it.
@@ -285,98 +311,135 @@ final class _NoteTreeState extends State<NoteTree> {
   /// pointer takes it away — as on a grid tile (#727).
   bool _keyboardFocus = false;
 
+  /// What the tree has read: the pages of rows around the viewport and the
+  /// counts that say how many rows there are (#1200).
+  late final TreePages _pages =
+      widget.pages ?? TreePages(pageSize: widget.pageSize);
+
   /// The rows of the last build, the height each pinned item takes and the
   /// height of a row: what the keyboard walks (#727). The walk itself is
   /// built when a key is pressed, not on every frame.
   _Rows? _current;
   List<double> _pinnedHeights = const <double>[];
+  double _pinnedTotal = 0;
   double _rowHeight = 0;
+
+  /// The row height and the screen's height the next read works the window
+  /// out with, before the list has been laid out to say: the pages it reads
+  /// are the ones the first frame draws.
+  double _rowHeightHint = 0;
+  double _viewportHint = 0;
+
+  /// The pages the build asked for since the last frame, to read after it.
+  final Set<TreePageKey> _wanted = <TreePageKey>{};
+  bool _askScheduled = false;
+
+  /// The first and the last index the list laid out last, and whether the
+  /// pages are to be matched to them after this frame.
+  (int, int)? _laidOut;
+  bool _syncScheduled = false;
+
+  /// The listing and the folder the row being made is being placed for, so
+  /// that one lookup is asked for each.
+  TreeListing? _placingListing;
+  String? _placingFolder;
 
   /// The room the divider that closes the pinned block takes: its hairline
   /// and the breathing space under it.
   static const double _pinnedDividerHeight = 9;
 
   /// Brings the row being renamed into view: a row the list has not built
-  /// has no field to show. Rows are [height] tall, near enough for the
-  /// pinned block above them; the field puts itself fully in view once
-  /// it is built.
-  void _revealRenamed(_Rows rows, int header, double height) {
+  /// has no field to show. The field puts itself fully in view once it is
+  /// built.
+  void _revealRenamed() {
     final path = widget.renaming?.path;
     if (path == _revealed) return;
     _revealed = path;
     if (path == null) return;
-    final index = rows.tree.indexWhere((row) => row.note.path == path);
-    if (index < 0) return;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || !_scroll.hasClients) return;
-      final position = _scroll.position;
-      final top = (header + index) * height;
-      if (top >= position.pixels &&
-          top + height <= position.pixels + position.viewportDimension) {
-        return;
-      }
-      _scroll.jumpTo(
-        (top - position.viewportDimension / 2).clamp(
-          position.minScrollExtent,
-          position.maxScrollExtent,
-        ),
-      );
-    });
+    unawaited(_revealPath(path));
+  }
+
+  /// Scrolls to the row at [path], wherever it is in the tree: its index is
+  /// worked out from its rank, and the list builds the page it lands on.
+  Future<void> _revealPath(String path) async {
+    final listing = _current?.listing;
+    if (listing == null) return;
+    final index = await listing.modelIndexOfPath(path);
+    if (index == null || !mounted || !_scroll.hasClients || _revealed != path) {
+      return;
+    }
+    final top = _treeTop(listing.listIndexOf(index));
+    final position = _scroll.position;
+    if (top >= position.pixels &&
+        top + _rowHeight <= position.pixels + position.viewportDimension) {
+      return;
+    }
+    _scroll.jumpTo(
+      (top - position.viewportDimension / 2).clamp(
+        position.minScrollExtent,
+        position.maxScrollExtent,
+      ),
+    );
   }
 
   /// The heights of the pinned block's items, in the order the list draws
   /// them: the heading, the notes (none when it is rolled up) and the
   /// divider that closes it off. Empty when nothing is pinned.
-  List<double> _pinnedHeightsOf(_Rows rows, double rowHeight) {
-    if (rows.pinned.isEmpty) return const <double>[];
+  List<double> _pinnedHeightsOf(List<Note> pinned, double rowHeight) {
+    if (pinned.isEmpty) return const <double>[];
     return [
       editorToolbarHeight,
       if (!_collapsed)
-        for (final _ in rows.pinned) rowHeight,
+        for (final _ in pinned) rowHeight,
       _pinnedDividerHeight,
     ];
   }
 
-  /// What the keyboard walks at the list's [index] (#727): the item's place
-  /// and height, and the row it draws — null for the pinned heading and its
-  /// divider, which are not rows. Reads the rows of the last build.
-  _WalkRow? _walkAt(int index) {
+  /// Where the list draws the tree's row at list index [listIndex]: below
+  /// the pinned block, a row's height each.
+  double _treeTop(int listIndex) => _pinnedTotal + listIndex * _rowHeight;
+
+  /// What the keyboard walks at the pinned block's [index] item (#727): the
+  /// item's place and height, and the row it draws — null for the pinned
+  /// heading and its divider, which are not rows. Reads the rows of the last
+  /// build.
+  _WalkRow? _pinnedWalkAt(int index) {
     final rows = _current;
-    if (rows == null) return null;
     final header = _pinnedHeights.length;
+    if (rows == null || index <= 0 || index >= header - 1) return null;
     var top = 0.0;
-    if (index < header) {
-      final note = index > 0 && index < header - 1
-          ? rows.pinned[index - 1]
-          : null;
-      if (note == null) return null;
-      for (var at = 0; at < index; at++) {
-        top += _pinnedHeights[at];
-      }
-      return _WalkRow(
-        note: note,
-        path: note.path,
-        pinned: true,
-        // The pinned block draws every note at the root: its own depth
-        // would say nothing there.
-        depth: 0,
-        top: top,
-        height: _pinnedHeights[index],
-      );
+    for (var at = 0; at < index; at++) {
+      top += _pinnedHeights[at];
     }
-    final at = index - header;
-    if (at >= rows.tree.length) return null;
-    for (final height in _pinnedHeights) {
-      top += height;
-    }
-    final row = rows.tree[at];
+    final note = rows.pinned[index - 1];
     return _WalkRow(
-      note: row.note,
-      path: row.note.path,
+      note: note,
+      path: note.path,
+      pinned: true,
+      // The pinned block draws every note at the root: its own depth
+      // would say nothing there.
+      depth: 0,
+      top: top,
+      height: _pinnedHeights[index],
+      index: index - 1,
+    );
+  }
+
+  /// The tree's own row at model index [modelIndex] as the walk sees it, from
+  /// what the listing draws there; null while its page is not loaded.
+  _WalkRow? _treeWalkRow(int modelIndex, TreeEntry entry) {
+    final note = entry.note;
+    final rows = _current;
+    if (note == null || rows == null) return null;
+    return _WalkRow(
+      note: note,
+      path: note.path,
       pinned: false,
-      depth: row.depth,
-      top: top + at * _rowHeight,
+      depth: entry.depth,
+      sidecar: entry.sidecar,
+      top: _treeTop(rows.listing.listIndexOf(modelIndex)),
       height: _rowHeight,
+      index: _pinnedWalked + modelIndex,
     );
   }
 
@@ -386,46 +449,119 @@ final class _NoteTreeState extends State<NoteTree> {
       _pinnedHeights.isEmpty ? 0 : _pinnedHeights.length - 2;
 
   /// How many rows the keyboard walks, in the order the list draws them:
-  /// the pinned notes first, then the tree's own rows (#727).
+  /// the pinned notes first, then the tree's own rows (#727). The row being
+  /// made is not among them.
   int get _walkLength {
     final rows = _current;
-    return rows == null ? 0 : _pinnedWalked + rows.tree.length;
+    return rows == null ? 0 : _pinnedWalked + rows.listing.modelLength;
   }
 
-  /// The walk's row at [index]: the list's item it is, read as
-  /// [_walkAt] reads it. Only the rows a key reaches are made — a tree of
-  /// a million rows is not copied for each key press.
-  _WalkRow _walkRow(int index) {
+  /// The walk's row at [index]: the list's item it is. Only the rows a key
+  /// reaches are made — a tree of a million rows is not copied for each key
+  /// press. Null while the row's page is not loaded; see [_walkRowAsync].
+  _WalkRow? _walkRow(int index) {
     final pinned = _pinnedWalked;
-    return _walkAt(
-      index < pinned ? index + 1 : _pinnedHeights.length + index - pinned,
-    )!;
+    if (index < pinned) return _pinnedWalkAt(index + 1);
+    final rows = _current;
+    final at = index - pinned;
+    if (rows == null || at >= rows.listing.modelLength) return null;
+    return _treeWalkRow(at, rows.listing.modelEntryAt(at));
   }
 
-  /// The cursor's place in the walk: the row it is on, or the selected
-  /// row — a walk begun with the keyboard starts where the tree already
-  /// is — or the first row.
-  int _cursorAt() {
+  /// The walk's row at [index], its page read first when it is not loaded.
+  Future<_WalkRow?> _walkRowAsync(int index) async {
+    final held = _walkRow(index);
+    if (held != null) return held;
+    final listing = _current?.listing;
+    final at = index - _pinnedWalked;
+    if (listing == null || at < 0 || at >= listing.modelLength) return null;
+    await listing.ensureRow(at);
+    return mounted && identical(_current?.listing, listing)
+        ? _walkRow(index)
+        : null;
+  }
+
+  /// Runs [then] with the walk's row at [index]: at once when it is loaded,
+  /// else when its page has landed.
+  void _whenRow(int index, void Function(_WalkRow row) then) {
+    final row = _walkRow(index);
+    if (row != null) {
+      then(row);
+      return;
+    }
+    unawaited(
+      _walkRowAsync(index).then((row) {
+        if (row != null && mounted) then(row);
+      }),
+    );
+  }
+
+  /// The walk index of the row at [path], from the rows loaded: the pinned
+  /// copy, the tree's row, or both searched. Null when none of them is.
+  int? _findSync(String path, {bool? inPinned}) {
     final rows = _current!;
     final pinned = _pinnedWalked;
-    int? find(String path, {bool? inPinned}) {
-      if (inPinned != false) {
-        for (var at = 0; at < pinned; at++) {
-          if (rows.pinned[at].path == path) return at;
-        }
+    if (inPinned != false) {
+      for (var at = 0; at < pinned; at++) {
+        if (rows.pinned[at].path == path) return at;
       }
-      if (inPinned != true) {
-        final at = rows.tree.indexWhere((row) => row.note.path == path);
-        if (at >= 0) return pinned + at;
-      }
-      return null;
     }
+    if (inPinned != true) {
+      final at = rows.listing.modelIndexOfLoaded(path);
+      if (at != null) return pinned + at;
+    }
+    return null;
+  }
 
+  /// As [_findSync], asking the index for a tree row whose page is not
+  /// loaded.
+  Future<int?> _findAsync(String path, {bool? inPinned}) async {
+    final held = _findSync(path, inPinned: inPinned);
+    if (held != null || inPinned == true) return held;
+    final listing = _current?.listing;
+    if (listing == null) return null;
+    final at = await listing.modelIndexOfPath(path);
+    return at == null ? null : _pinnedWalked + at;
+  }
+
+  /// The cursor's place in the walk from the rows loaded: the row it is on,
+  /// or the selected row — a walk begun with the keyboard starts where the
+  /// tree already is — or the first row. Null when the row it is on is not
+  /// in a page that is loaded: see [_cursorAtAsync].
+  int? _cursorAtSync() {
+    final path = _cursorPath;
+    if (path != null) return _findSync(path, inPinned: _cursorPinned);
+    final selected = widget.selectedPath;
+    return selected == null ? 0 : _findSync(selected);
+  }
+
+  /// The cursor's place in the walk, asking the index for a row whose page
+  /// is not loaded.
+  Future<int> _cursorAtAsync() async {
+    final held = _cursorAtSync();
+    if (held != null) return held;
     final path = _cursorPath;
     final selected = widget.selectedPath;
-    return (path == null ? null : find(path, inPinned: _cursorPinned)) ??
-        (selected == null ? null : find(selected)) ??
-        0;
+    final cursor = path == null
+        ? null
+        : await _findAsync(path, inPinned: _cursorPinned);
+    if (cursor != null) return cursor;
+    final chosen = selected == null ? null : await _findAsync(selected);
+    return chosen ?? 0;
+  }
+
+  /// The cursor and the row it is on, when both are loaded.
+  _Cursor? _cursorHere() {
+    final at = _cursorAtSync();
+    final row = at == null ? null : _walkRow(at);
+    return at == null || row == null ? null : (at: at, row: row);
+  }
+
+  /// The cursor and the row it is on, loading the page it is in.
+  Future<_Cursor?> _cursorResolved() async {
+    final at = await _cursorAtAsync();
+    final row = await _walkRowAsync(at);
+    return row == null ? null : (at: at, row: row);
   }
 
   /// Whether the keyboard's ring is on [row] (#727): the cursor's own look,
@@ -438,10 +574,63 @@ final class _NoteTreeState extends State<NoteTree> {
       row.path == _cursorPath &&
       row.pinned == _cursorPinned;
 
+  /// The keys the walk may take, whatever the rows: a superset of what it
+  /// does take, so that a key that is not one of them is left to the app
+  /// before the cursor's row is looked for.
+  static final Set<LogicalKeyboardKey> _walkKeys = {
+    LogicalKeyboardKey.arrowUp,
+    LogicalKeyboardKey.arrowDown,
+    LogicalKeyboardKey.arrowLeft,
+    LogicalKeyboardKey.arrowRight,
+    LogicalKeyboardKey.home,
+    LogicalKeyboardKey.end,
+    LogicalKeyboardKey.pageUp,
+    LogicalKeyboardKey.pageDown,
+    LogicalKeyboardKey.enter,
+    LogicalKeyboardKey.numpadEnter,
+    LogicalKeyboardKey.space,
+    LogicalKeyboardKey.escape,
+    LogicalKeyboardKey.delete,
+    LogicalKeyboardKey.f2,
+    LogicalKeyboardKey.f10,
+    LogicalKeyboardKey.contextMenu,
+  };
+
+  /// Whether the walk may take [event], by the key and the modifiers alone.
+  bool _ownsKey(KeyEvent event) {
+    final keys = HardwareKeyboard.instance;
+    final key = event.logicalKey;
+    if (keys.isAltPressed) return false;
+    if (keys.isControlPressed || keys.isMetaPressed) {
+      return key == LogicalKeyboardKey.enter ||
+          key == LogicalKeyboardKey.numpadEnter;
+    }
+    if (_walkKeys.contains(key)) return true;
+    return !keys.isShiftPressed && _typedLetter(event) != null;
+  }
+
+  /// The character [event] types, when it is a letter or a mark to jump to
+  /// a name by; null for a space, a control character or no character.
+  static String? _typedLetter(KeyEvent event) {
+    final typed = event.character;
+    if (typed != null &&
+        typed.length == 1 &&
+        typed.trim().isNotEmpty &&
+        typed.codeUnitAt(0) >= 0x20 &&
+        typed.codeUnitAt(0) != 0x7f) {
+      return typed;
+    }
+    return null;
+  }
+
   /// The keyboard (#727): the arrows walk the rows, `Home`/`End` and
   /// `PgUp`/`PgDn` jump, `Enter` opens a note or expands a folder, the left
   /// and right arrows close and open folders, and `F2` and `Delete` act on
   /// the cursor — the grid's own walk, in the tree's shape.
+  ///
+  /// The cursor's row is looked up in the pages loaded; when it is in one
+  /// that is not, the key waits for the page, and is answered `handled` at
+  /// once, as the keys have to be synchronous.
   KeyEventResult _onKey(FocusNode node, KeyEvent event) {
     if (!widget.active) return KeyEventResult.ignored;
     // Ancestor of the rows' own rename field too: keys reach here from it,
@@ -450,21 +639,31 @@ final class _NoteTreeState extends State<NoteTree> {
     if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
       return KeyEventResult.ignored;
     }
-    if (_walkLength > 0) {
-      final marking = _markKey(event);
-      if (marking != null) return marking;
-    }
+    if (_walkLength == 0 || !_ownsKey(event)) return KeyEventResult.ignored;
+    final here = _cursorHere();
+    if (here != null) return _keyAt(event, here);
+    unawaited(
+      _cursorResolved().then((here) {
+        if (here != null && mounted) _keyAt(event, here);
+      }),
+    );
+    return KeyEventResult.handled;
+  }
+
+  /// [event] with the keyboard's cursor on [cursor].
+  KeyEventResult _keyAt(KeyEvent event, _Cursor cursor) {
+    final marking = _markKey(event, cursor);
+    if (marking != null) return marking;
     final keys = HardwareKeyboard.instance;
     // The menu key and `Shift`+`F10` open the cursor row's menu (#1072), as
     // the editor's do: the only way to the row's actions without a pointer.
-    if (_walkLength > 0 &&
-        !keys.isControlPressed &&
+    if (!keys.isControlPressed &&
         !keys.isAltPressed &&
         !keys.isMetaPressed &&
         (event.logicalKey == LogicalKeyboardKey.contextMenu ||
             (event.logicalKey == LogicalKeyboardKey.f10 &&
                 keys.isShiftPressed))) {
-      return _openRowMenu(_walkRow(_cursorAt()));
+      return _openRowMenu(cursor.row);
     }
     // A modified key belongs to the app's accelerators (#23): Alt+Left and
     // Alt+Right walk the notes' history, Ctrl+Shift+PageUp/Down the
@@ -475,8 +674,7 @@ final class _NoteTreeState extends State<NoteTree> {
         keys.isShiftPressed) {
       return KeyEventResult.ignored;
     }
-    if (_walkLength == 0) return KeyEventResult.ignored;
-    final handled = _walkKey(_cursorAt(), event.logicalKey);
+    final handled = _walkKey(cursor, event.logicalKey);
     // The keyboard is in use: the ring comes back if a pointer had put it
     // away — and stays off for a key the walk does not own.
     if (handled == KeyEventResult.handled && !_keyboardFocus) {
@@ -510,10 +708,10 @@ final class _NoteTreeState extends State<NoteTree> {
     return KeyEventResult.handled;
   }
 
-  /// One key of the walk: [at] is the cursor's place in it, and what the
+  /// One key of the walk: [cursor] is the cursor's place in it, and what the
   /// key does is decided here.
-  KeyEventResult _walkKey(int at, LogicalKeyboardKey key) {
-    final row = _walkRow(at);
+  KeyEventResult _walkKey(_Cursor cursor, LogicalKeyboardKey key) {
+    final (:at, :row) = cursor;
     final length = _walkLength;
     if (key == LogicalKeyboardKey.arrowUp) return _move(at - 1);
     if (key == LogicalKeyboardKey.arrowDown) return _move(at + 1);
@@ -539,10 +737,10 @@ final class _NoteTreeState extends State<NoteTree> {
         widget.onToggle(row.path);
         return KeyEventResult.handled;
       }
-      if (!row.pinned &&
-          at + 1 < length &&
-          _walkRow(at + 1).depth > row.depth) {
-        return _move(at + 1);
+      if (!row.pinned && at + 1 < length) {
+        _whenRow(at + 1, (next) {
+          if (next.depth > row.depth) _move(at + 1);
+        });
       }
       return KeyEventResult.handled;
     }
@@ -553,15 +751,7 @@ final class _NoteTreeState extends State<NoteTree> {
         widget.onToggle(row.path);
         return KeyEventResult.handled;
       }
-      if (!row.pinned) {
-        // The tree's own rows only: the pinned block above them is no
-        // folder of theirs.
-        final rows = _current!.tree;
-        final pinned = _pinnedWalked;
-        for (var i = at - pinned - 1; i >= 0; i--) {
-          if (rows[i].depth < row.depth) return _move(pinned + i);
-        }
-      }
+      if (!row.pinned) _stepOut(at, row);
       return KeyEventResult.handled;
     }
     if (key == LogicalKeyboardKey.f2) {
@@ -579,16 +769,38 @@ final class _NoteTreeState extends State<NoteTree> {
     return KeyEventResult.ignored;
   }
 
+  /// The left arrow on a tree row that is not an open folder: to the file a
+  /// sidecar is drawn under, else to the folder row that holds the row — the
+  /// model knows where it is without any row loaded. The tree's own rows
+  /// only: the pinned block above them is no folder of theirs.
+  void _stepOut(int at, _WalkRow row) {
+    final pinned = _pinnedWalked;
+    if (row.sidecar) {
+      // Nested within the page, right under its file: the nearest row above
+      // that is not a sidecar.
+      for (var up = at - 1; up >= pinned; up--) {
+        final above = _walkRow(up);
+        if (above == null) return;
+        if (!above.sidecar) {
+          _move(up);
+          return;
+        }
+      }
+      return;
+    }
+    final folder = _current?.listing.model.rowIndexOf(row.note.parent);
+    if (folder != null) _move(pinned + folder);
+  }
+
   /// The keys of several rows and of a name (#712): `Shift`+`↑`/`↓` marks
   /// on, `Space` marks or unmarks the cursor's row, `Esc` lets the marks
   /// go, `Delete` deletes the marked rows, `Ctrl`+`Enter` opens the note
   /// in a new tab, and letters jump to the next row whose name starts with
   /// them. Null for a key that is not one of these.
-  KeyEventResult? _markKey(KeyEvent event) {
+  KeyEventResult? _markKey(KeyEvent event, _Cursor cursor) {
     final keys = HardwareKeyboard.instance;
     final key = event.logicalKey;
-    final at = _cursorAt();
-    final row = _walkRow(at);
+    final (:at, :row) = cursor;
     final ctrl = keys.isControlPressed || keys.isMetaPressed;
     final marks = widget.onMarkedMenu != null;
     if (ctrl &&
@@ -635,64 +847,160 @@ final class _NoteTreeState extends State<NoteTree> {
       }
       setState(_marked.clear);
     }
-    final typed = event.character;
-    if (typed != null &&
-        typed.length == 1 &&
-        typed.trim().isNotEmpty &&
-        typed.codeUnitAt(0) >= 0x20 &&
-        typed.codeUnitAt(0) != 0x7f) {
-      return _typeAhead(typed, at);
-    }
-    return null;
+    final typed = _typedLetter(event);
+    return typed == null ? null : _typeAhead(typed, at);
   }
 
   /// Jumps to the next row, from the cursor's, whose name starts with what
   /// has been typed: a second letter within a second narrows the name, the
   /// same letter again moves to the next row that starts with it, and a
   /// letter that narrows it to nothing starts a name of its own.
+  ///
+  /// The rows in memory answer when they can, at once. When the walk comes to
+  /// a page that is not loaded it is the index that answers, and the jump
+  /// lands when it does; the letters typed meanwhile wait their turn.
   KeyEventResult _typeAhead(String letter, int at) {
     final now = DateTime.now();
     final fresh = now.difference(_typedAt) > const Duration(seconds: 1);
     _typedAt = now;
-    final repeat = !fresh && _typed == letter;
-    if (!fresh && !repeat && _jumpTo('$_typed$letter', at, from: 0)) {
-      _typed += letter;
+    if (_typingPending == 0 && _typeHeld(letter, at, fresh: fresh)) {
       return KeyEventResult.handled;
     }
-    _typed = letter;
-    // A letter on its own looks past the cursor's row.
-    _jumpTo(letter, at, from: 1);
+    _typingPending++;
+    _typing = _typing.then((_) => _typeOne(letter, fresh: fresh)).whenComplete(
+      () {
+        _typingPending--;
+      },
+    );
     return KeyEventResult.handled;
   }
 
+  /// [_typeAhead] over the rows loaded alone: false, with nothing changed,
+  /// when a row it needs to look at is in a page that is not.
+  bool _typeHeld(String letter, int at, {required bool fresh}) {
+    final repeat = !fresh && _typed == letter;
+    if (!fresh && !repeat) {
+      final narrowed = _jumpHeld('$_typed$letter', at, from: 0);
+      if (narrowed == _Held.unsure) return false;
+      if (narrowed == _Held.found) {
+        _typed += letter;
+        return true;
+      }
+    }
+    // A letter on its own looks past the cursor's row.
+    if (_jumpHeld(letter, at, from: 1) == _Held.unsure) return false;
+    _typed = letter;
+    return true;
+  }
+
+  /// One letter of [_typeAhead], answered by the index, once the ones before
+  /// it are done.
+  Future<void> _typeOne(String letter, {required bool fresh}) async {
+    try {
+      final repeat = !fresh && _typed == letter;
+      if (!fresh && !repeat && await _jumpTo('$_typed$letter', from: 0)) {
+        _typed += letter;
+        return;
+      }
+      _typed = letter;
+      // A letter on its own looks past the cursor's row.
+      await _jumpTo(letter, from: 1);
+    } on Object catch (error) {
+      // A library closed under the question has no row to jump to.
+      const AppLogger(name: 'tree.ui').warning('type-ahead: $error');
+    }
+  }
+
+  /// The name of the walk's row at [index], or null while its page is not
+  /// loaded.
+  String? _heldName(int index) {
+    final rows = _current!;
+    final pinned = _pinnedWalked;
+    if (index < pinned) return rows.pinned[index].name;
+    return rows.listing.modelEntryAt(index - pinned).note?.name;
+  }
+
   /// Moves to the first row from [at] + [from] on, wrapping, whose name
-  /// starts with [name]; false when none does.
-  bool _jumpTo(String name, int at, {required int from}) {
+  /// starts with [name], looking at the rows loaded alone.
+  _Held _jumpHeld(String name, int at, {required int from}) {
     // The tree's own comparison of names (#1070): case and marks do not
     // count, so the letter typed finds the row the order puts it in.
     final wanted = foldName(name);
     final length = _walkLength;
     for (var step = from; step < length + from; step++) {
       final index = (at + step) % length;
-      if (foldName(_walkRow(index).note.name).startsWith(wanted)) {
+      final held = _heldName(index);
+      if (held == null) return _Held.unsure;
+      if (foldName(held).startsWith(wanted)) {
         _move(index);
-        return true;
+        return _Held.found;
       }
     }
-    return false;
+    return _Held.none;
+  }
+
+  /// Moves to the first row from the cursor's + [from] on, wrapping, whose
+  /// name starts with [name]; false when none does.
+  ///
+  /// The pinned notes are looked through here, and the tree's rows are asked
+  /// of the index, segment by segment in the order they are drawn (see
+  /// [TreeNameSearch]).
+  Future<bool> _jumpTo(String name, {required int from}) async {
+    // The tree's own comparison of names (#1070): case and marks do not
+    // count, so the letter typed finds the row the order puts it in.
+    final wanted = foldName(name);
+    final listing = _current?.listing;
+    if (listing == null) return false;
+    final length = _walkLength;
+    if (length == 0) return false;
+    final start = (await _cursorAtAsync() + from) % length;
+    if (!mounted || !identical(_current?.listing, listing)) return false;
+    final pinned = _pinnedWalked;
+    final search = TreeNameSearch(listing);
+
+    // The first walk index from [first] up to [end] that has the name.
+    Future<int?> within(int first, int end) async {
+      final notes = _current!.pinned;
+      for (var at = first; at < math.min(end, pinned); at++) {
+        if (foldName(notes[at].name).startsWith(wanted)) return at;
+      }
+      final treeFirst = math.max(first, pinned) - pinned;
+      if (treeFirst >= end - pinned) return null;
+      final found = await search.firstIn(wanted, treeFirst, end - pinned);
+      if (found == null) return null;
+      final at = await listing.modelIndexOfNote(found);
+      return at == null ? null : pinned + at;
+    }
+
+    final index = await within(start, length) ?? await within(0, start);
+    if (index == null || !mounted || !identical(_current?.listing, listing)) {
+      return false;
+    }
+    _move(index);
+    return true;
   }
 
   /// Marks every tree row from [from] to [to] in the walk, and [from]'s
-  /// own when nothing was marked yet.
+  /// own when nothing was marked yet. The rows are read a page at a time
+  /// when they are not all loaded.
   void _markRange(int from, int to) {
-    final lo = math.min(from, to);
-    final hi = math.max(from, to);
-    setState(() {
-      for (var i = lo; i <= hi; i++) {
-        final row = _walkRow(i);
-        if (!row.pinned) _marked.add(row.path);
-      }
-    });
+    final listing = _current?.listing;
+    if (listing == null) return;
+    final pinned = _pinnedWalked;
+    final first = math.max(math.min(from, to), pinned) - pinned;
+    final last = math.max(from, to) - pinned;
+    if (last < first) return;
+    final reader = TreeRangeReader(listing);
+    final held = reader.heldPaths(first, last);
+    if (held != null) {
+      setState(() => _marked.addAll(held));
+      return;
+    }
+    unawaited(
+      reader.paths(first, last).then((paths) {
+        if (mounted) setState(() => _marked.addAll(paths));
+      }),
+    );
   }
 
   /// A right click on [note]: on one of several marked rows, their menu;
@@ -708,16 +1016,37 @@ final class _NoteTreeState extends State<NoteTree> {
   }
 
   /// Puts the cursor on the row at [index], clamped to the rows there are,
-  /// and brings it into view.
+  /// and brings it into view. A row whose page is not loaded is scrolled to
+  /// first, so that the list asks for the page, and the cursor lands when
+  /// the page has.
   KeyEventResult _move(int index) {
-    final row = _walkRow(index.clamp(0, _walkLength - 1));
+    final to = index.clamp(0, _walkLength - 1);
+    final row = _walkRow(to);
+    if (row != null) {
+      _land(row);
+      return KeyEventResult.handled;
+    }
+    final rows = _current;
+    final at = to - _pinnedWalked;
+    if (rows != null && at >= 0 && _scroll.hasClients) {
+      _scrollTo(_treeTop(rows.listing.listIndexOf(at)), _rowHeight);
+    }
+    unawaited(
+      _walkRowAsync(to).then((row) {
+        if (row != null && mounted) _land(row);
+      }),
+    );
+    return KeyEventResult.handled;
+  }
+
+  /// The cursor on [row].
+  void _land(_WalkRow row) {
     setState(() {
       _cursorPath = row.path;
       _cursorPinned = row.pinned;
       _keyboardFocus = true;
     });
     _ensureCursorVisible(row);
-    return KeyEventResult.handled;
   }
 
   /// A row's own click: the cursor follows it — the arrows go on from where
@@ -733,17 +1062,20 @@ final class _NoteTreeState extends State<NoteTree> {
         row != null &&
         !row.pinned &&
         _walkLength > 0) {
-      final rows = _current!.tree;
-      final to = rows.indexWhere((r) => r.note.path == note.path);
-      if (to >= 0) {
-        _markRange(_cursorAt(), _pinnedWalked + to);
-        setState(() {
-          _cursorPath = note.path;
-          _cursorPinned = false;
-        });
-        _focus.requestFocus();
-        return;
+      final to = row.index;
+      final from = _cursorAtSync();
+      if (from != null) {
+        _markRange(from, to);
+      } else {
+        // Asked before the cursor is moved to this row.
+        unawaited(_cursorAtAsync().then((from) => _markRange(from, to)));
       }
+      setState(() {
+        _cursorPath = note.path;
+        _cursorPinned = false;
+      });
+      _focus.requestFocus();
+      return;
     }
     setState(() {
       _marked.clear();
@@ -777,19 +1109,28 @@ final class _NoteTreeState extends State<NoteTree> {
               position.pixels + position.viewportDimension) {
         return;
       }
-      _scroll.jumpTo(
-        (row.top - position.viewportDimension / 2).clamp(
-          position.minScrollExtent,
-          position.maxScrollExtent,
-        ),
-      );
+      _scrollTo(row.top, row.height);
     });
+  }
+
+  /// Scrolls the item at [top], [height] tall, to the middle of the list.
+  void _scrollTo(double top, double height) {
+    final position = _scroll.position;
+    if (top >= position.pixels &&
+        top + height <= position.pixels + position.viewportDimension) {
+      return;
+    }
+    _scroll.jumpTo(
+      (top - position.viewportDimension / 2).clamp(
+        position.minScrollExtent,
+        position.maxScrollExtent,
+      ),
+    );
   }
 
   @override
   void initState() {
     super.initState();
-    _children = TreeChildCache(pageSize: widget.pageSize);
     _focus.addListener(_onFocusChanged);
     const AppLogger(name: 'tree.ui').debug('mount');
   }
@@ -817,7 +1158,8 @@ final class _NoteTreeState extends State<NoteTree> {
       // pinned section's roll-up — asked once per library, so it has to be
       // asked again rather than carried over.
       _rows = null;
-      _children.clear();
+      _current = null;
+      _pages.clear();
       _pinnedCollapsed = null;
     }
     // Hidden under the grid the pane lets the keyboard go: the rows it
@@ -825,10 +1167,10 @@ final class _NoteTreeState extends State<NoteTree> {
     if (!widget.active && oldWidget.active) _focus.unfocus();
   }
 
-  /// The flattened rows for [revision], recomputed only when the index
-  /// revision, the sort direction or the set of expanded folders changed.
+  /// The rows for [revision], recomputed only when the index revision, the
+  /// sort direction or the set of expanded folders changed.
   ///
-  /// The direction is part of the key: `_flatten` feeds it to the query, so
+  /// The direction is part of the key: the read feeds it to the index, so
   /// reusing rows across a direction change would show the old order — the
   /// chevron flips and the list stays put.
   ///
@@ -844,6 +1186,10 @@ final class _NoteTreeState extends State<NoteTree> {
         _setEquals(_rowsExpanded, widget.expanded)) {
       return cached;
     }
+    // The rows on screen are drawn from pages that are about to be forgotten
+    // or dropped: they keep the ones they have until the new rows land, or
+    // the tree would blank for each change.
+    _current?.listing.freeze();
     // A new order makes what was read of the folders stale, and so does a
     // revision — of the folders it moved rows in, when it says which: a
     // note's new title re-reads its own folder, not every open one (#1132).
@@ -851,15 +1197,15 @@ final class _NoteTreeState extends State<NoteTree> {
     // closing one reads nothing (#1064).
     final since = _rowsRevision;
     if (_rowsFollowContents != followsContents || _rowsSort != widget.sort) {
-      _children.clear();
+      _pages.clear();
     } else if (since != revision) {
       final moved = since == null
           ? null
           : widget.controller.foldersMovedSince(since, tree: !followsContents);
       if (moved == null) {
-        _children.clear();
+        _pages.clear();
       } else {
-        _children.forget(moved);
+        _pages.forget(moved);
       }
     }
     _rowsRevision = revision;
@@ -902,8 +1248,9 @@ final class _NoteTreeState extends State<NoteTree> {
     });
   }
 
-  /// Flattens the visible tree from the index, and reads the pinned notes
-  /// alongside it — one revision, one build, so the two never disagree.
+  /// Reads the model of the visible tree from the index and the pages the
+  /// first frame draws, and the pinned notes alongside — one revision, one
+  /// build, so the three never disagree.
   ///
   /// The three waits are timed apart (#315): the first read after a library
   /// opens is where a cold index connection's open used to land, and the
@@ -911,107 +1258,202 @@ final class _NoteTreeState extends State<NoteTree> {
   /// settings file that a frame waited for.
   Future<_Rows> _flatten() async {
     final started = DateTime.now();
-    final cache = _children;
     final sort = widget.sort;
-    final expanded = widget.expanded;
-    // The folders to show, level by level: each level's missing folders are
-    // read together, and only they — a folder opened is one read, one closed
-    // is none (#1064).
-    var level = <int>[0];
-    var reads = 0;
-    while (level.isNotEmpty) {
-      final missing = [
-        for (final id in level)
-          if (cache[id] == null) id,
-      ];
-      reads += missing.length;
-      await cache.ensure(widget.controller, missing, sort);
-      final next = <int>[];
-      for (final id in level) {
-        for (final note in cache[id]?.rows ?? const <Note>[]) {
-          if (note.isDir && expanded.contains(note.path)) next.add(note.id);
-        }
-      }
-      level = next;
-    }
+    final session = widget.controller;
+    final model = await _pages.visible(session, widget.expanded, sort);
     final treeMs = DateTime.now().difference(started).inMilliseconds;
     final pinnedAt = DateTime.now();
-    var pinned = cache.pinned;
+    var pinned = _pages.pinned;
     if (pinned == null) {
-      final fields = await widget.controller.fieldSource;
+      final fields = await session.fieldSource;
       pinned = await fields?.pinnedNotes() ?? const <Note>[];
-      cache.pinned = pinned;
+      _pages.pinned = pinned;
     }
     final pinnedMs = DateTime.now().difference(pinnedAt).inMilliseconds;
     // Asked once per session, not per flatten: after the first answer the
     // state lives here, so a toggle repaints instead of round-tripping
     // through the settings file.
     final settingsAt = DateTime.now();
-    _pinnedCollapsed ??= await widget.controller.pinnedCollapsed;
+    _pinnedCollapsed ??= await session.pinnedCollapsed;
     final settingsMs = DateTime.now().difference(settingsAt).inMilliseconds;
 
-    final out = <_Row>[];
-    _walkSync(0, 0, cache, out);
-    _dropMarksOutside(out);
+    final listing = TreeListing(
+      session: session,
+      model: model,
+      pages: _pages,
+      sort: sort,
+    );
+    final pagesAt = DateTime.now();
+    final header = _pinnedHeightsOf(
+      pinned,
+      _rowHeightHint,
+    ).fold<double>(0, (total, height) => total + height);
+    await _loadWindow(listing, header);
+    final pagesMs = DateTime.now().difference(pagesAt).inMilliseconds;
+    await _dropMarksOutside();
 
     const AppLogger(name: 'tree.ui').debug(
       'flatten: ${DateTime.now().difference(started).inMilliseconds}ms '
-      '(${out.length} rows, ${pinned.length} pinned, $reads folder read(s)) '
-      '[tree $treeMs, pinned $pinnedMs, settings $settingsMs]',
+      '(${model.length} rows, ${pinned.length} pinned) '
+      '[tree $treeMs, pinned $pinnedMs, settings $settingsMs, '
+      'pages $pagesMs]',
     );
-    return _Rows(pinned: pinned, tree: out);
+    return _Rows(pinned: pinned, listing: listing);
   }
 
-  /// Lets go of the marks on rows that are no longer in [rows] — deleted,
+  /// Reads the pages the list will draw first for [listing] — the ones under
+  /// the viewport and the list's own cache extent as it is scrolled now, or
+  /// from the top before it has been laid out — so that the rows land with
+  /// their notes, and lets go of the pages that are no longer wanted.
+  /// [header] is the height of the pinned block above the tree.
+  Future<void> _loadWindow(TreeListing listing, double header) async {
+    final model = listing.model;
+    if (model.length == 0 || _rowHeightHint <= 0) return;
+    const cache = RenderAbstractViewport.defaultCacheExtent;
+    final scrolled = _scroll.hasClients ? _scroll.position.pixels : 0.0;
+    // The screen is as tall as the list can be, until it has been laid out.
+    final extent = _scroll.hasClients
+        ? _scroll.position.viewportDimension
+        : _viewportHint;
+    final last = model.length - 1;
+    final first = ((scrolled - cache - header) / _rowHeightHint).floor().clamp(
+      0,
+      last,
+    );
+    final end = ((scrolled + extent + cache - header) / _rowHeightHint)
+        .ceil()
+        .clamp(first, last);
+    await Future.wait([
+      for (final (parent, page) in _pages.drawnPages(model, first, end))
+        _pages.load(widget.controller, parent, page, listing.sort),
+    ]);
+    _pages.keepOnly(_pages.pagesFor(model, first, end));
+  }
+
+  /// Lets go of the marks on rows that are no longer in the tree — deleted,
   /// moved, renamed or folded away — so a `Delete` never goes to paths that
-  /// are not on screen (#979). Once per flatten, not per frame.
-  void _dropMarksOutside(List<_Row> rows) {
+  /// are not on screen (#979). Once per read, not per frame.
+  ///
+  /// A row is folded away when a folder above it is not expanded; one that
+  /// is gone is asked of the index, whatever page it was in.
+  Future<void> _dropMarksOutside() async {
     if (_marked.isEmpty) return;
-    final present = {for (final row in rows) row.note.path};
-    _marked.removeWhere((path) => !present.contains(path));
+    final expanded = widget.expanded;
+    _marked.removeWhere((path) => !_isUnderOpenFolders(path, expanded));
+    if (_marked.isEmpty) return;
+    final gone = await widget.controller.missingPaths(_marked.toList());
+    _marked.removeWhere(gone.contains);
   }
 
-  void _walkSync(
-    int parentId,
-    int depth,
-    TreeChildCache cache,
-    List<_Row> out,
-  ) {
-    final loaded = cache[parentId];
-    final children = loaded?.rows ?? const <Note>[];
-    // The last child of a folder with more to read asks for them when it is
-    // drawn (#1064).
-    final last = loaded != null && loaded.more && children.isNotEmpty
-        ? children.last
-        : null;
-    for (final (note, sidecar) in nestOcrSidecars(children, (n) => n.name)) {
-      out.add(
-        _Row(
-          note: note,
-          depth: sidecar ? depth + 1 : depth,
-          sidecar: sidecar,
-          moreOf: identical(note, last) ? parentId : null,
-        ),
+  /// Whether every folder above [path] is in [expanded].
+  static bool _isUnderOpenFolders(String path, Set<String> expanded) {
+    for (var cut = path.lastIndexOf('/'); cut > 0;) {
+      if (!expanded.contains(path.substring(0, cut))) return false;
+      cut = path.lastIndexOf('/', cut - 1);
+    }
+    return true;
+  }
+
+  /// Asks for the page of a row the build found empty, after the frame:
+  /// the page read adds rows, which a build must not ask for.
+  void _wantPage(TreePageKey key) {
+    _wanted.add(key);
+    if (_askScheduled) return;
+    _askScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) => _askPages());
+  }
+
+  /// Reads the pages the last build asked for, and draws the rows again as
+  /// each lands (#1200).
+  void _askPages() {
+    _askScheduled = false;
+    final keys = _wanted.toList();
+    _wanted.clear();
+    final listing = _current?.listing;
+    if (!mounted || listing == null || listing.isFrozen) return;
+    for (final (parent, page) in keys) {
+      unawaited(
+        _pages.load(widget.controller, parent, page, listing.sort).then((
+          added,
+        ) {
+          if (!added || !mounted) return;
+          _syncWindow();
+          setState(() {});
+        }),
       );
-      if (note.isDir && widget.expanded.contains(note.path)) {
-        _walkSync(note.id, depth + 1, cache, out);
-      }
     }
   }
 
-  /// What has been read of each folder.
-  late TreeChildCache _children;
+  /// The list laid out the rows from [first] to [last]: the pages held are
+  /// matched to them after the frame.
+  void _onLaidOut(int first, int last) {
+    if (last < first || _laidOut == (first, last)) return;
+    _laidOut = (first, last);
+    if (_syncScheduled) return;
+    _syncScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _syncScheduled = false;
+      _syncWindow();
+    });
+  }
 
-  /// Reads the page after what is loaded of the folder with id [parentId],
-  /// and draws the rows again with it (#1064).
-  void _loadMore(int parentId) {
-    final cache = _children;
+  /// Keeps the pages the rows last laid out are drawn from, and the page
+  /// either side of each, and lets go of the others.
+  void _syncWindow() {
+    final range = _laidOut;
+    final listing = _current?.listing;
+    if (!mounted || range == null || listing == null || listing.isFrozen) {
+      return;
+    }
+    final last = listing.modelLength - 1;
+    if (last < 0) return;
+    // The row being made is no row of the model: the range is cut to it.
+    final first = (listing.modelIndexOf(range.$1) ?? range.$1).clamp(0, last);
+    final end = (listing.modelIndexOf(range.$2) ?? range.$2 - 1).clamp(
+      first,
+      last,
+    );
+    _pages.keepOnly(_pages.pagesFor(listing.model, first, end));
+    listing.prune();
+  }
+
+  /// Puts the row being made in [listing], one under its folder's row. The
+  /// folder is usually on screen, its row in a loaded page; when it is not,
+  /// its place is asked of the index and the row shows when it answers.
+  void _placeCreating(TreeListing listing) {
+    final creating = widget.creating;
+    if (creating == null || creating.folder.isEmpty) {
+      // At the root the row being made tops the tree, outside the list.
+      listing.placeCreating(null);
+      return;
+    }
+    final folder = creating.folder;
+    void place(int at) => listing.placeCreating(
+      at,
+      // One in from the folder's row.
+      depth: listing.model.slotAt(at).depth + 1,
+    );
+    final held = listing.modelIndexOfLoaded(folder);
+    if (held != null) {
+      place(held);
+      return;
+    }
+    listing.placeCreating(null);
+    if (listing.isFrozen ||
+        (identical(_placingListing, listing) && _placingFolder == folder)) {
+      return;
+    }
+    _placingListing = listing;
+    _placingFolder = folder;
     unawaited(
-      cache.loadMore(widget.controller, parentId, widget.sort).then((added) {
-        if (!added || !mounted || !identical(cache, _children)) return;
-        setState(() {
-          _rows = _flattenOnce();
-        });
+      listing.modelIndexOfPath(folder).then((at) {
+        if (at == null ||
+            !mounted ||
+            !identical(_current?.listing, listing) ||
+            widget.creating?.folder != folder) {
+          return;
+        }
+        setState(() => place(at));
       }),
     );
   }
@@ -1049,6 +1491,8 @@ final class _NoteTreeState extends State<NoteTree> {
       stream: followsContents ? controller.events : controller.treeEvents,
       initialData: revision,
       builder: (context, snapshot) {
+        _rowHeightHint = TreeRowMetrics.of(context).height;
+        _viewportHint = MediaQuery.sizeOf(context).height;
         return FutureBuilder<_Rows>(
           future: _rowsFor(
             snapshot.data ?? revision,
@@ -1069,70 +1513,70 @@ final class _NoteTreeState extends State<NoteTree> {
             // is wanted. Rolled up, the heading and the divider stay: the
             // count is still worth seeing, and the tree keeps the room.
             final rowHeight = TreeRowMetrics.of(context).height;
+            final listing = rows.listing;
             _current = rows;
-            _pinnedHeights = _pinnedHeightsOf(rows, rowHeight);
+            _pinnedHeights = _pinnedHeightsOf(rows.pinned, rowHeight);
+            _pinnedTotal = _pinnedHeights.fold<double>(
+              0,
+              (total, height) => total + height,
+            );
             _rowHeight = rowHeight;
+            _placeCreating(listing);
+            _revealRenamed();
             final header = _pinnedHeights.length;
-            _revealRenamed(rows, header, rowHeight);
-            final list = ListView.builder(
+            // What a list does for the system's insets when it is given no
+            // padding of its own: the main axis's go around the slivers, and
+            // the rows below see the cross axis's alone.
+            final media = MediaQuery.of(context);
+            final list = CustomScrollView(
               key: const Key('note-tree-list'),
               controller: _scroll,
-              itemCount: header + rows.tree.length,
-              itemBuilder: (context, index) {
-                // What the keyboard walks on this item: its place, and the
-                // row a key on it acts upon (#727).
-                final walked = _walkAt(index);
-                if (index < header) {
-                  return _pinnedItem(rows.pinned, index, walked);
-                }
-                final row = rows.tree[index - header];
-                final more = row.moreOf;
-                if (more != null) {
-                  // After the frame: the page read adds rows, which a
-                  // build must not ask for.
-                  WidgetsBinding.instance.addPostFrameCallback(
-                    (_) => _loadMore(more),
-                  );
-                }
-                final tile = _RowTile(
-                  note: row.note,
-                  depth: row.depth,
-                  sidecar: row.sidecar,
-                  ocrQueue: widget.ocrQueue,
-                  isExpanded: widget.expanded.contains(row.note.path),
-                  selected:
-                      row.note.path == widget.selectedPath ||
-                      _marked.contains(row.note.path),
-                  focused: _isCursor(walked),
-                  onSelect: (note) => _rowActivated(note, walked),
-                  onToggle: (path) => _rowToggled(path, pinned: false),
-                  onLongPress: widget.onLongPress,
-                  onSecondaryTapDown: widget.onSecondaryTapDown == null
-                      ? null
-                      : _secondaryTap,
-                  onMiddleClick: widget.onOpenInNewTab,
-                  onMove: widget.onMove,
-                  spring: _spring,
-                  dragPaths: _dragPaths(row.note.path),
-                  renaming: widget.renaming?.path == row.note.path
-                      ? widget.renaming
-                      : null,
-                );
-                // A row being made sits under its folder's (#712).
-                final creating = widget.creating;
-                if (creating == null ||
-                    !row.note.isDir ||
-                    creating.folder != row.note.path) {
-                  return tile;
-                }
-                return Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    tile,
-                    _CreateRow(creating: creating, depth: row.depth + 1),
-                  ],
-                );
-              },
+              // The cache extent the pages are read for, named: the list and
+              // the window of rows kept agree on it.
+              scrollCacheExtent: const ScrollCacheExtent.pixels(
+                RenderAbstractViewport.defaultCacheExtent,
+              ),
+              semanticChildCount: header + listing.length,
+              slivers: [
+                SliverPadding(
+                  padding: media.padding.copyWith(left: 0, right: 0),
+                  sliver: MediaQuery(
+                    data: media.copyWith(
+                      padding: media.padding.copyWith(top: 0, bottom: 0),
+                    ),
+                    child: SliverMainAxisGroup(
+                      slivers: [
+                        if (header > 0)
+                          SliverList(
+                            delegate: SliverChildBuilderDelegate(
+                              // What the keyboard walks on this item: its
+                              // place, and the row a key on it acts upon
+                              // (#727).
+                              (context, index) => _pinnedItem(
+                                rows.pinned,
+                                index,
+                                _pinnedWalkAt(index),
+                              ),
+                              childCount: header,
+                            ),
+                          ),
+                        // Every row of the tree is the same height, so the
+                        // list lays out and jumps by arithmetic, however
+                        // many rows there are.
+                        SliverFixedExtentList(
+                          itemExtent: rowHeight,
+                          delegate: TreeRowsDelegate(
+                            (context, index) =>
+                                _treeItem(listing, index, rowHeight),
+                            childCount: listing.length,
+                            onLaidOut: _onLaidOut,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             );
             final move = widget.onMove;
             final creating = widget.creating;
@@ -1140,7 +1584,7 @@ final class _NoteTreeState extends State<NoteTree> {
             final listed = creating != null && creating.folder.isEmpty
                 ? Column(
                     children: [
-                      _CreateRow(creating: creating, depth: 0),
+                      TreeCreateRow(creating: creating, depth: 0),
                       Expanded(child: list),
                     ],
                   )
@@ -1156,6 +1600,46 @@ final class _NoteTreeState extends State<NoteTree> {
           },
         );
       },
+    );
+  }
+
+  /// The tree's row at list index [index]: a tile, the row being made, or —
+  /// while its page is not loaded — an empty row of the same height, whose
+  /// page is asked for after the frame.
+  Widget _treeItem(TreeListing listing, int index, double rowHeight) {
+    final entry = listing.entryAt(index);
+    if (entry.creating) {
+      final creating = widget.creating;
+      return creating == null
+          ? SizedBox(height: rowHeight)
+          : TreeCreateRow(creating: creating, depth: entry.depth);
+    }
+    final note = entry.note;
+    if (note == null) {
+      final page = entry.page;
+      if (page != null && !listing.isFrozen) _wantPage(page);
+      return SizedBox(height: rowHeight);
+    }
+    final walked = _treeWalkRow(listing.modelIndexOf(index)!, entry);
+    return TreeRowTile(
+      note: note,
+      depth: entry.depth,
+      sidecar: entry.sidecar,
+      ocrQueue: widget.ocrQueue,
+      isExpanded: widget.expanded.contains(note.path),
+      selected: note.path == widget.selectedPath || _marked.contains(note.path),
+      focused: _isCursor(walked),
+      onSelect: (note) => _rowActivated(note, walked),
+      onToggle: (path) => _rowToggled(path, pinned: false),
+      onLongPress: widget.onLongPress,
+      onSecondaryTapDown: widget.onSecondaryTapDown == null
+          ? null
+          : _secondaryTap,
+      onMiddleClick: widget.onOpenInNewTab,
+      onMove: widget.onMove,
+      spring: _spring,
+      dragPaths: _dragPaths(note.path),
+      renaming: widget.renaming?.path == note.path ? widget.renaming : null,
     );
   }
 
@@ -1176,7 +1660,7 @@ final class _NoteTreeState extends State<NoteTree> {
       );
     }
     final note = pinned[index - 1];
-    return _RowTile(
+    return TreeRowTile(
       key: Key('pinned-${note.path}'),
       note: note,
       // No indentation and no chevron: a pinned note is shown regardless
@@ -1250,279 +1734,4 @@ bool _setEquals(Set<String> a, Set<String> b) {
     if (!b.contains(e)) return false;
   }
   return true;
-}
-
-/// A row being made in the tree (#712): a note or a folder in `folder`
-/// ('' the root), its name typed where it will be, `initial` proposed;
-/// `submit` and `cancel` as a rename's.
-typedef TreeCreate = ({
-  String folder,
-  bool isDir,
-  String initial,
-  Future<String?> Function(String name) submit,
-  VoidCallback cancel,
-});
-
-/// One row tile: chevron (folders) or doc icon (files), then the name —
-/// the name column is shared, per the mockup.
-/// A rename in place (#707): the row at `path` shows a field, which
-/// renames through `submit` — null once done, or why the name cannot be —
-/// or gives up through `cancel`.
-typedef TreeRename = ({
-  String path,
-  Future<String?> Function(String name) submit,
-  VoidCallback cancel,
-});
-
-/// The row of a note or a folder being made (#712): its icon, and its
-/// name in a field, at the [depth] it will sit.
-final class _CreateRow extends StatelessWidget {
-  const new({required this.creating, required this.depth});
-
-  final TreeCreate creating;
-  final int depth;
-
-  @override
-  Widget build(BuildContext context) {
-    final metrics = TreeRowMetrics.of(context);
-    final theme = Theme.of(context);
-    return Container(
-      key: const Key('tree-create-row'),
-      constraints: BoxConstraints(minHeight: metrics.height),
-      padding: EdgeInsets.only(left: depth * metrics.indent + 8),
-      child: Row(
-        children: [
-          SizedBox(
-            width: metrics.leading,
-            child: Icon(
-              creating.isDir
-                  ? Icons.create_new_folder_outlined
-                  : Icons.note_add_outlined,
-              size: 16,
-            ),
-          ),
-          Expanded(
-            child: TreeRenameField(
-              name: creating.initial,
-              isDir: creating.isDir,
-              keepsUnchanged: true,
-              style: theme.textTheme.bodyMedium,
-              onSubmit: creating.submit,
-              onCancel: creating.cancel,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-final class _RowTile extends StatelessWidget {
-  const new({
-    required this.note,
-    required this.depth,
-    required this.isExpanded,
-    required this.selected,
-    required this.onSelect,
-    required this.onToggle,
-    this.focused = false,
-    this.onLongPress,
-    this.onSecondaryTapDown,
-    this.onMiddleClick,
-    this.onMove,
-    this.spring,
-    this.dragPaths,
-    this.icon,
-    this.sidecar = false,
-    this.ocrQueue,
-    this.renaming,
-    super.key,
-  });
-
-  /// The rename under way on this row, or null.
-  final TreeRename? renaming;
-
-  /// Whether the keyboard's cursor is on this row (#727): a ring of its
-  /// own, apart from the selection's fill, as a grid tile's is.
-  final bool focused;
-
-  /// Moves this row by dragging it, and takes drops (#567).
-  final TreeMove? onMove;
-
-  /// Opens this row, if a closed folder, when a drag dwells on it (#1071).
-  final TreeSpringLoad? spring;
-
-  /// The paths this row's drag carries when it is dragged (#996): the
-  /// marked rows' when this row is one of several, else null — the row's
-  /// own path alone.
-  final List<String>? dragPaths;
-
-  /// A text recognition sidecar under its file: dimmed, with the scan's
-  /// icon (#595).
-  final bool sidecar;
-
-  /// The recognition jobs, for the ring on a file being read.
-  final OcrQueue? ocrQueue;
-
-  final Note note;
-  final int depth;
-  final bool isExpanded;
-  final bool selected;
-  final void Function(Note note) onSelect;
-  final ValueChanged<String> onToggle;
-  final void Function(Note note, Rect? anchor)? onLongPress;
-  final void Function(Note note, TapDownDetails details)? onSecondaryTapDown;
-
-  /// A middle click on a note's row (not a folder's).
-  final void Function(Note note)? onMiddleClick;
-
-  /// Replaces the file-type icon; the pinned block uses it to say why the
-  /// row is there.
-  final IconData? icon;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final metrics = TreeRowMetrics.of(context);
-    final middle = onMiddleClick;
-    final move = onMove;
-    final longPress = onLongPress == null
-        ? null
-        : () => onLongPress!(note, menuAnchorOf(context));
-    // By touch the hold drags the row, and a hold that does not move is the
-    // long press: the drag gives it back.
-    final held = move != null && TreeRowDrag.holdToDrag;
-    Widget row = InkWell(
-      // The walk owns the keyboard here (#727): a row that took the focus
-      // itself would leave the arrows to nobody — a key pressed with the
-      // scope focused lands on the first focusable descendant, and that
-      // would be a row rather than the pane's own node.
-      canRequestFocus: false,
-      onTap: () => onSelect(note),
-      onLongPress: held ? null : longPress,
-      onSecondaryTapDown: onSecondaryTapDown == null
-          ? null
-          : (details) => onSecondaryTapDown!(note, details),
-      child: Container(
-        // A field with something to say under it takes the room it needs.
-        constraints: renaming == null
-            ? BoxConstraints.tightFor(height: metrics.height)
-            : BoxConstraints(minHeight: metrics.height),
-        color: selected ? theme.highlightColor.withValues(alpha: 0.4) : null,
-        // Over the child, and no part of its size: the rows keep the
-        // height the list and the walk measured them at (#727).
-        foregroundDecoration: focused
-            ? BoxDecoration(
-                border: Border.all(color: theme.colorScheme.primary, width: 2),
-              )
-            : null,
-        padding: EdgeInsets.only(left: depth * metrics.indent + 8),
-        child: Row(
-          children: [
-            if (note.isDir)
-              IconButton(
-                // The chevron fills its slot and no more: the button's own
-                // 48 px minimum, and its padded tap target, would widen a
-                // pointer's row back out.
-                constraints: BoxConstraints.tightFor(
-                  width: metrics.leading,
-                  height: metrics.height,
-                ),
-                padding: EdgeInsets.zero,
-                style: IconButton.styleFrom(
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-                icon: Icon(
-                  isExpanded ? Icons.expand_more : Icons.chevron_right,
-                  size: metrics.chevronSize,
-                ),
-                onPressed: () => onToggle(note.path),
-              )
-            else
-              SizedBox(
-                width: metrics.leading,
-                child: Icon(
-                  icon ??
-                      (sidecar
-                          ? Icons.document_scanner_outlined
-                          : fileIconFor(note.name)),
-                  size: sidecar ? 14 : 16,
-                  color: sidecar ? theme.colorScheme.onSurfaceVariant : null,
-                ),
-              ),
-            Expanded(
-              child: renaming != null
-                  ? TreeRenameField(
-                      // On disk: the file is what is renamed, whatever the
-                      // row shows for its title.
-                      name: note.name,
-                      isDir: note.isDir,
-                      style: theme.textTheme.bodyMedium,
-                      onSubmit: renaming!.submit,
-                      onCancel: renaming!.cancel,
-                    )
-                  : MarqueeText(
-                      text: displayNameOf(note),
-                      style: sidecar
-                          ? theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.onSurfaceVariant,
-                            )
-                          : theme.textTheme.bodyMedium,
-                    ),
-            ),
-            if (ocrQueue case final queue?
-                when !note.isDir && isRecognizableFile(note.name))
-              OcrTreeRing(queue: queue, path: note.path),
-            if (note.date case final DateTime date)
-              Padding(
-                padding: const EdgeInsets.only(left: 8, right: 12),
-                child: Text(
-                  isoDate(date),
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-    // A row being renamed is not dragged: a drag in its field selects text.
-    if (move != null && renaming == null) {
-      row = TreeRowDrag(
-        note: note,
-        paths: dragPaths,
-        onMove: move,
-        spring: spring,
-        onLongPress: longPress,
-        child: row,
-      );
-    }
-    if (middle == null || note.isDir) return row;
-    return Listener(
-      onPointerDown: (event) {
-        if (event.buttons == kMiddleMouseButton) middle(note);
-      },
-      child: row,
-    );
-  }
-}
-
-/// What a note is called on screen: its frontmatter `title:` when it has
-/// one, else its filename (T-M4-02).
-///
-/// The title is the note's own name for itself, so it wins wherever the
-/// note is listed. The filename still decides the file on disk and still
-/// resolves `[[links]]` — this changes what is shown, not what anything
-/// points at.
-String displayNameOf(Note note) {
-  final title = note.title;
-  return (title == null || title.isEmpty) ? note.name : title;
-}
-
-/// A frontmatter date as `YYYY-MM-DD` — the form it is written in.
-String isoDate(DateTime date) {
-  final month = date.month.toString().padLeft(2, '0');
-  final day = date.day.toString().padLeft(2, '0');
-  return '${date.year}-$month-$day';
 }

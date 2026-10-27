@@ -152,7 +152,8 @@ void main() {
     final other = tester.getCenter(find.text('other'));
     final inner = tester.getCenter(find.text('inner.md'));
     final below =
-        tester.getBottomLeft(find.byType(ListView)) + const Offset(40, -10);
+        tester.getBottomLeft(find.byKey(const Key('note-tree-list'))) +
+        const Offset(40, -10);
     await dragMouse(tester, 'nota.md', other);
     await dragMouse(tester, 'nota.md', inner);
     await dragMouse(tester, 'inner.md', below);

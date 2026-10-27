@@ -79,23 +79,37 @@ lines or when responsibilities mix.
   outside the folder, a dead Markdown or `../` link) are read again. A move
   the index cannot carry (a destination that is already indexed, a disk that
   does not show it) goes through `applyEvents` as an external change does.
-- **Tree rows:** the tree reads a folder's children a page at a time
-  (`NoteDao.childrenPage`, a keyset in the sort's own terms, 2000 rows) into
-  `TreeChildCache` (`ui/tree_child_cache.dart`, #1064). A folder is read once
-  per index revision: opening one reads that folder alone, closing one reads
-  nothing, and a new order empties the cache. A new revision empties what it
-  moved: a reindex of a note in place or a pin names the note's folder
-  (`Indexer.changedFolders`), the session keeps what each recent revision
-  moved (`TreeMoves`, `foldersMovedSince`), and the tree and the folder grid
-  re-read those folders and the pinned notes alone (#1132); any other change
-  empties the cache. The last loaded row
-  of a folder with more asks for the next page when it is drawn, so a
-  folder of a hundred thousand notes is a page until the list scrolls to the
-  end of it. In a name order a page walks the `notes_tree` index (`(parent,
-  is_dir DESC, name_key, name)`; `name_key` is `nameSortKey`: case and
-  accents folded, digit runs by value, #1070) and sorts nothing. One flatten
-  runs at a time with one waiting behind it; the pinned notes come from the
-  `notes_pinned` partial index (#1065) and are read once per revision.
+- **Tree rows:** the tree holds the rows its list can draw, not the rows it
+  has scrolled past (#1200, `docs/records/tree-window.md`). `VisibleTree`
+  (`ui/visible_tree.dart`) is the list without its rows: the root's child
+  count and, for each expanded folder, its rank among its siblings and its
+  child count (`NoteDao.childCount`, `rankOf`), from which an index maps to a
+  `(folder, position)` and back. `TreePages` (`ui/tree_pages.dart`) keeps the
+  pages of rows around the viewport, each a run of 2000 positions of one
+  folder: read by keyset from a neighbour held (`childrenPage`, `after:` or
+  `before:`) or, with none, by position (`childrenAt`), and let go when the
+  list's own layout leaves them (`TreeRowsDelegate` tells the widget what it
+  built). `NoteTree` draws them in a `SliverFixedExtentList`: a row whose page
+  is not loaded is an empty row of the same height, its page asked for after
+  the frame. A text recognition sidecar is nested within its page
+  (`TreeListing`), and the row being made is one virtual row under its folder's
+  (`ui/tree_listing.dart`). The keyboard's walk, the cursor and the marks hold
+  paths, and find a path's index by its rank; a typed name is asked of the
+  index run by run (`TreeNameSearch`, `firstChildStartingWith`) when the rows
+  in memory do not answer, and a Shift+click range is read a page at a time
+  (`TreeRangeReader`). Closing a folder drops its pages and keeps its count.
+  A new revision forgets what it moved: a reindex of a note in place or a pin
+  names the note's folder (`Indexer.changedFolders`), the session keeps what
+  each recent revision moved (`TreeMoves`, `foldersMovedSince`), and the tree
+  and the folder grid re-read those folders and the pinned notes alone
+  (#1132); any other change, or a new order, forgets everything. While a newer
+  read is out the rows on screen are drawn from the pages they had, so a
+  change does not blank the tree. In a name order a page walks the
+  `notes_tree` index (`(parent, is_dir DESC, name_key, name)`; `name_key` is
+  `nameSortKey`: case and accents folded, digit runs by value, #1070) and
+  sorts nothing. One read of the model runs at a time with one waiting behind
+  it; the pinned notes come from the `notes_pinned` partial index (#1065) and
+  are read once per revision.
 - **Edit:** `NoteOps.saveNote` → history snapshot and atomic write
   (temp + rename) in one isolate pass → the note is rescanned into the
   index, never beside a write of it: a reindex due while the note's saves

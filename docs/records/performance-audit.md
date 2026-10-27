@@ -56,7 +56,7 @@ numbers below.
 | 1 | Open a note (6 KB, 1.5 MB, 21 MB) | `NIMAN_PERF=1 flutter test test/perf/note_open_frames_test.dart`, `note_open_large_test.dart`, `source_edit_timing_test.dart` | `[editor] note open first frame` |
 | 2 | Open the read pane beside it | `note_open_frames_test.dart`, `read_view_timing_test.dart` | `[preview] read pane first frame`, `read pane open` window |
 | 3 | Type, save, reindex | `save_reindex_quiet_test.dart`, `source_keystroke_path_test.dart`, `edit_history_timing_test.dart` | `[save] saved`, `[save] reindexed`, `[history] snapshot`, `[indexer] rescan` |
-| 4 | Tree: flatten, page, refresh | `tree_queries_perf_test.dart`, `test/widget/tree_child_cache_test.dart` | `[tree.ui] flatten` |
+| 4 | Tree: flatten, page, refresh | `tree_queries_perf_test.dart`, `test/widget/tree_pages_widget_test.dart` | `[tree.ui] flatten` |
 | 5 | Library open, first index, rescan | `index_scale_test.dart` (`NIMAN_SCALE=1000000` for the million) | `[session] open`, `[indexer] fullScan`, `first index` |
 | 6 | Tab switch | — | `[shell] tab … first frame`, `tab … frames` window |
 | 7 | Search | `index_scale_test.dart` (word search) | `[search.ui] results first frame` |

@@ -1,6 +1,11 @@
 // #751: a save reindexes a note — its size and its time — and nothing a
 // name-ordered tree draws: that tree must not read its rows again for it.
 // The field orders read size and times, so for them every change is rows.
+//
+// #1200: the tree reads a model first (the root's child count, and each open
+// folder's) and its rows after it, a page at a time. "The tree read again" is
+// now a count asked again, and "a folder read again" a page read again: the
+// claims are the same, over the reads the tree has now.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -45,12 +50,12 @@ void main() {
     tester,
   ) async {
     await open(tester);
-    final reads = controller.treeCalls;
+    final reads = controller.countCalls;
     expect(reads, greaterThan(0), reason: 'the tree was flattened once');
     controller.bumpContents();
     await settle(tester);
     expect(
-      controller.treeCalls,
+      controller.countCalls,
       reads,
       reason: 'a save moved nothing the tree draws',
     );
@@ -63,24 +68,28 @@ void main() {
     tester,
   ) async {
     await open(tester);
-    final reads = controller.treeCalls;
-    final pages = controller.pageCalls;
+    final reads = controller.countCalls;
+    final pages = controller.pageCalls + controller.atCalls;
     expect(find.byType(NoteView), findsNothing);
     await tester.tap(find.text('alpha.md'));
     await settle(tester);
     expect(find.byType(NoteView), findsOneWidget, reason: 'the note opened');
-    expect(controller.treeCalls, reads, reason: 'no flatten for an open');
-    expect(controller.pageCalls, pages, reason: 'no folder read again');
+    expect(controller.countCalls, reads, reason: 'no flatten for an open');
+    expect(
+      controller.pageCalls + controller.atCalls,
+      pages,
+      reason: 'no folder read again',
+    );
   });
 
   testWidgets('a save flattens a tree the field order reads', (tester) async {
     await controller.setTreeSort(TreeSort.modifiedDesc);
     await open(tester);
-    final reads = controller.treeCalls;
+    final reads = controller.countCalls;
     controller.bumpContents();
     await settle(tester);
     expect(
-      controller.treeCalls,
+      controller.countCalls,
       greaterThan(reads),
       reason: 'the order reads the time a save wrote',
     );

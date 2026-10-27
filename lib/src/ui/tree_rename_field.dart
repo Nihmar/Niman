@@ -22,8 +22,14 @@ final class TreeRenameField extends StatefulWidget {
     required this.onCancel,
     this.style,
     this.keepsUnchanged = false,
+    this.floatingError = false,
     super.key,
   });
+
+  /// Whether a name that cannot be used is said in a bubble under the field,
+  /// over what is below it, instead of under the field in the room it makes.
+  /// A row of a list of fixed row height has no room to make (#1200).
+  final bool floatingError;
 
   /// Whether the name as it came is a name to submit: a new row's
   /// proposed name is one (#712), a renamed row's own is not.
@@ -64,6 +70,10 @@ final class _TreeRenameFieldState extends State<TreeRenameField> {
   /// Whether a rename is on its way, or the field is done.
   bool _busy = false;
   bool _done = false;
+
+  /// Where a floating error hangs from, and the layer it is drawn in.
+  final LayerLink _link = LayerLink();
+  final OverlayPortalController _bubble = OverlayPortalController();
 
   /// Where the name's stem ends: before a file's extension, the whole of a
   /// folder's name or of a file that has none.
@@ -127,6 +137,7 @@ final class _TreeRenameFieldState extends State<TreeRenameField> {
       return;
     }
     setState(() => _error = error);
+    if (widget.floatingError) _bubble.show();
     _focus.requestFocus();
   }
 
@@ -137,24 +148,74 @@ final class _TreeRenameFieldState extends State<TreeRenameField> {
   }
 
   @override
-  Widget build(BuildContext context) => CallbackShortcuts(
-    bindings: {const SingleActivator(LogicalKeyboardKey.escape): _cancel},
-    child: TextField(
-      key: const Key('tree-rename-field'),
-      controller: _text,
-      focusNode: _focus,
-      style: widget.style,
-      onSubmitted: (_) => unawaited(_commit()),
-      onChanged: (_) {
-        if (_error != null) setState(() => _error = null);
-      },
-      decoration: InputDecoration(
-        isDense: true,
-        errorText: _error,
-        errorMaxLines: 3,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-        border: const OutlineInputBorder(),
+  Widget build(BuildContext context) {
+    final error = Theme.of(context).colorScheme.error;
+    final floating = widget.floatingError;
+    final field = CallbackShortcuts(
+      bindings: {const SingleActivator(LogicalKeyboardKey.escape): _cancel},
+      child: TextField(
+        key: const Key('tree-rename-field'),
+        controller: _text,
+        focusNode: _focus,
+        style: widget.style,
+        onSubmitted: (_) => unawaited(_commit()),
+        onChanged: (_) {
+          if (_error == null) return;
+          setState(() => _error = null);
+          if (floating) _bubble.hide();
+        },
+        decoration: InputDecoration(
+          isDense: true,
+          errorText: floating ? null : _error,
+          errorMaxLines: 3,
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 4,
+            vertical: 4,
+          ),
+          border: const OutlineInputBorder(),
+          // The error's red, where there is no text under the field to bring
+          // it.
+          enabledBorder: floating && _error != null
+              ? OutlineInputBorder(borderSide: BorderSide(color: error))
+              : null,
+          focusedBorder: floating && _error != null
+              ? OutlineInputBorder(
+                  borderSide: BorderSide(color: error, width: 2),
+                )
+              : null,
+        ),
       ),
-    ),
-  );
+    );
+    if (!floating) return field;
+    return CompositedTransformTarget(
+      link: _link,
+      child: OverlayPortal(
+        controller: _bubble,
+        overlayChildBuilder: (context) => CompositedTransformFollower(
+          link: _link,
+          targetAnchor: Alignment.bottomLeft,
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: Material(
+              color: error,
+              borderRadius: BorderRadius.circular(4),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 320),
+                  child: Text(
+                    _error ?? '',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onError,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+        child: field,
+      ),
+    );
+  }
 }
