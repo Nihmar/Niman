@@ -180,13 +180,49 @@ void main() {
     final buffer = SourceBuffer.fromText('a\n\nb');
     final parser = ReadParser();
     final blocks = BlockScanner(buffer).index.blocks;
-    parser
-      ..of(blocks.first, buffer)
-      ..of(blocks.first, buffer);
+    // Held, as the view that draws it holds it: the cache keeps a reading
+    // only while something does.
+    final first = parser.of(blocks.first, buffer);
+    expect(identical(parser.of(blocks.first, buffer), first), isTrue);
     expect(parser.parseCount, 1);
     buffer.replaceRange(0, 1, 'c');
     parser.of(blocks.first, buffer);
     expect(parser.parseCount, 2);
+  });
+
+  // #1198: a reading is kept only while something holds it — the view that
+  // draws its block — so reading a long note end to end does not keep one
+  // reading per block until the next edit.
+  test('a reading nothing holds is let go, a held one kept', () {
+    final buffer = SourceBuffer.fromText(
+      List<String>.generate(3000, (at) => 'paragraph $at').join('\n\n'),
+    );
+    final parser = ReadParser();
+    final blocks = BlockScanner(buffer).index.blocks.toList();
+    final held = parser.of(blocks.first, buffer);
+    final gone = WeakReference(parser.of(blocks[2], buffer));
+    // Made with the reading and held by nothing: once it is collected, the
+    // collector has run over the reading too, and only a holder kept it.
+    final control = WeakReference(Object());
+    for (final block in blocks.skip(3)) {
+      parser.of(block, buffer);
+    }
+    if (!_collected(control)) {
+      markTestSkipped('the collector did not run');
+      return;
+    }
+    expect(gone.target, isNull, reason: 'the cache held the reading');
+
+    final reads = parser.parseCount;
+    expect(identical(parser.of(blocks.first, buffer), held), isTrue);
+    expect(parser.parseCount, reads);
+    parser.of(blocks[2], buffer);
+    expect(parser.parseCount, reads + 1);
+    // The next growth sweeps the entries whose readings are gone.
+    for (final block in blocks.skip(3)) {
+      parser.of(block, buffer);
+    }
+    expect(parser.cachedEntries, lessThan(blocks.length));
   });
 
   test('reclaim lets go of the blocks and the next ask reads them again', () {
@@ -205,4 +241,13 @@ void main() {
     expect(parser.of(blocks.first, buffer), same(again));
     expect(parser.parseCount, 2, reason: 'and it caches again');
   });
+}
+
+/// Allocates until [reference]'s target is collected, or gives up: there is
+/// no call that runs the collector, but filling the young space runs it.
+bool _collected(WeakReference<Object> reference) {
+  for (var round = 0; round < 400 && reference.target != null; round++) {
+    List<List<int>>.generate(256, (_) => List<int>.filled(1024, 0));
+  }
+  return reference.target == null;
 }

@@ -3,6 +3,9 @@
 /// (`docs/dev/block-tree.md`, phase 5).
 library;
 
+import 'dart:math' as math;
+
+import 'package:meta/meta.dart';
 import 'package:niman/src/core/memory_reclaim.dart';
 import 'package:niman/src/core/reclaimable.dart';
 import 'package:niman/src/markdown/block.dart';
@@ -27,13 +30,32 @@ import 'package:niman/src/markdown/task_box.dart';
 /// Holds one reading per block, dropped as soon as the buffer's revision
 /// moves: a block is read when it is drawn, and kept only while it is
 /// still true.
+///
+/// And only while it is drawn (#1198). The cache holds a reading weakly: the
+/// view that draws a block holds its reading, so a block on screen — or in
+/// the list's cache extent — is found again on a rebuild, and a block
+/// scrolled away is let go with its widget. Held strongly, the cache kept a
+/// reading for every block ever drawn until the next edit: reading a 2 M
+/// block note from end to end kept all of them, more than the blocks.
 final class ReadParser implements Reclaimable {
   /// Creates a parser over its own cache.
   new() {
     MemoryReclaim.track(this);
   }
 
-  final Map<int, ReadBlock> _cache = <int, ReadBlock>{};
+  /// The cache is never swept below this many entries: a short list is not
+  /// worth a pass.
+  static const int _minimumSweep = 256;
+
+  final Map<int, WeakReference<ReadBlock>> _cache =
+      <int, WeakReference<ReadBlock>>{};
+
+  // The size at which the next read sweeps out the entries whose reading is
+  // gone: doubling it after each sweep makes the sweep amortized O(1) a read,
+  // and keeps the entries themselves — a key and a reference each — from
+  // growing with every block scrolled past.
+  int _sweepAt = _minimumSweep;
+
   SourceBuffer? _source;
   int _revision = -1;
   int _reads = 0;
@@ -60,18 +82,31 @@ final class ReadParser implements Reclaimable {
   /// the point of the cache is that this stays near the visible count.
   int get parseCount => _reads;
 
-  /// [block] of [buffer], read; cached until the buffer changes.
+  /// [block] of [buffer], read; cached until the buffer changes, for as long
+  /// as something holds the reading.
   ReadBlock of(Block block, SourceBuffer buffer) {
     if (!identical(_source, buffer) || _revision != buffer.revision) {
       _cache.clear();
+      _sweepAt = _minimumSweep;
       _source = buffer;
       _revision = buffer.revision;
     }
     final key = Object.hash(block.startLine, block.endLine, block.kind);
-    final cached = _cache[key];
+    final cached = _cache[key]?.target;
     if (cached != null) return cached;
-    return _cache[key] = read(block, buffer);
+    if (_cache.length >= _sweepAt) {
+      _cache.removeWhere((_, reading) => reading.target == null);
+      _sweepAt = math.max(_minimumSweep, _cache.length * 2);
+    }
+    final reading = read(block, buffer);
+    _cache[key] = WeakReference<ReadBlock>(reading);
+    return reading;
   }
+
+  /// How many readings the cache has an entry for, the ones let go but not
+  /// swept out yet included: what the sweep keeps near the blocks drawn.
+  @visibleForTesting
+  int get cachedEntries => _cache.length;
 
   /// Lets go of every block read, and of the buffer they were read from
   /// as far as the cache goes.
@@ -84,6 +119,7 @@ final class ReadParser implements Reclaimable {
   @override
   void reclaim() {
     _cache.clear();
+    _sweepAt = _minimumSweep;
     _source = null;
     _revision = -1;
   }
