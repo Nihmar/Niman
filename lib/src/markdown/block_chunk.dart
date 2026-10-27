@@ -75,9 +75,13 @@ final class BlockChunk {
       final fits = _fits(block);
       _Extra? extra;
       if (!fits || block.fenceInfo != null) {
-        // The same string and nothing wide as the extra just made: the run of
-        // fences of one language, which is most of them, is not hashed.
-        if (fits && last != null && last.fenceInfo == block.fenceInfo) {
+        // The same string and nothing wide as the extra just made (a wide one
+        // belongs to its own block only): the run of fences of one language,
+        // which is most of them, is not hashed.
+        if (fits &&
+            last != null &&
+            last.wide == null &&
+            last.fenceInfo == block.fenceInfo) {
           extra = last;
         } else {
           final made = (
