@@ -248,6 +248,23 @@ void main() {
       expect(pages.rowAt(0, _pageSize)?.path, desc[_pageSize].path);
     });
 
+    test('a clear keeps the order: an old-order read after it still reads '
+        'nothing (#1232)', () async {
+      await pages.visible(session, const {}, TreeSort.nameAsc);
+      await pages.visible(session, const {}, TreeSort.nameDesc);
+      // A revision that moved rows somewhere it does not say.
+      pages.clear();
+      final reads = session.atCalls + session.pageCalls;
+
+      expect(await pages.load(session, 0, 1, TreeSort.nameAsc), isFalse);
+      expect(
+        session.atCalls + session.pageCalls,
+        reads,
+        reason: 'the old order did not take the place over',
+      );
+      expect(await pages.load(session, 0, 1, TreeSort.nameDesc), isTrue);
+    });
+
     test('a read that fails leaves the page unloaded, and nothing '
         'unhandled (#1233)', () async {
       final uncaught = <Object>[];

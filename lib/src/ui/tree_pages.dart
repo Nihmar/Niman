@@ -351,13 +351,15 @@ final class TreePages {
   }
 
   /// Forgets everything: the index moved, or the order changed.
+  ///
+  /// The order itself is kept: only [visible] changes it, and a read of the
+  /// old one landing after a clear must not take it back (#1232).
   void clear() {
     _guard.clear();
     _pages.clear();
     _loading.clear();
     _facts.clear();
     _folders = const <int, Note>{};
-    _sort = null;
     pinned = null;
   }
 
