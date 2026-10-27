@@ -42,6 +42,7 @@ final class TreePager {
   /// consistent with [page] by construction. [note] needs only the fields
   /// the order reads, not to be in the index still.
   Future<int> rankOf(Note note, {TreeSort sort = TreeSort.nameAsc}) async {
+    if (sort.order == TreeOrder.name) return await _nameRank(note, sort);
     final variables = <Variable<Object>>[Variable<int>(note.parent)];
     final where = StringBuffer('parent = ?');
     _cursor(_keysetOf(sort), note, before: true, into: where, bind: variables);
@@ -165,6 +166,17 @@ final class TreePager {
     List<String> extra = const [],
     List<Variable<Object>> extraVariables = const [],
   }) async {
+    if (cursor != null && offset == null && sort.order == TreeOrder.name) {
+      return await _namePage(
+        parentId,
+        sort: sort,
+        limit: limit,
+        cursor: cursor,
+        before: before,
+        extra: extra,
+        extraVariables: extraVariables,
+      );
+    }
     final keys = _keysetOf(sort);
     final variables = <Variable<Object>>[Variable<int>(parentId)];
     final where = StringBuffer('parent = ?');
@@ -194,6 +206,134 @@ final class TreePager {
         .get();
     final notes = [for (final row in rows) _db.notes.map(row.data)];
     return before ? notes.reversed.toList() : notes;
+  }
+
+  /// [_select] after or before [cursor] in a name order, as seeks on
+  /// `notes_tree` (#1200).
+  ///
+  /// The cursor of [_cursor] is a chain of `OR`s, which SQLite cannot turn
+  /// into a range of the index: it walked the folder from its first entry,
+  /// and a page a million rows down cost 98 ms where the first cost 28
+  /// (`docs/records/tree-window.md`, "Measured"). So the read is split where
+  /// the order splits, at `is_dir`. In the cursor's own group the rest of
+  /// the order is one row value, `(name_key, name)`, compared in one
+  /// direction — a range of `notes_tree (parent, is_dir DESC, name_key,
+  /// name)`, read from the cursor on. When that group runs out before the
+  /// page is full, the read goes on into the next group from its own end:
+  /// the files after the last folder, or the folders before the first file.
+  Future<List<Note>> _namePage(
+    int parentId, {
+    required TreeSort sort,
+    required int limit,
+    required Note cursor,
+    required bool before,
+    required List<String> extra,
+    required List<Variable<Object>> extraVariables,
+  }) async {
+    // The name terms run in the sort's direction; reading before the cursor
+    // runs them the other way, and the answer is turned back below.
+    final descending = sort.descending != before;
+    final direction = descending ? 'DESC' : 'ASC';
+    final rows = await _nameRead(
+      parentId,
+      isDir: cursor.isDir,
+      bound: '(name_key, name) ${descending ? '<' : '>'} (?, ?)',
+      boundVariables: [
+        Variable<String>(cursor.nameKey),
+        Variable<String>(cursor.name),
+      ],
+      direction: direction,
+      limit: limit,
+      extra: extra,
+      extraVariables: extraVariables,
+    );
+    // Folders come first: after a folder come the files, before a file the
+    // folders; after a file, or before a folder, there is no other group.
+    final otherGroup = before ? !cursor.isDir : cursor.isDir;
+    if (rows.length < limit && otherGroup) {
+      rows.addAll(
+        await _nameRead(
+          parentId,
+          isDir: !cursor.isDir,
+          direction: direction,
+          limit: limit - rows.length,
+          extra: extra,
+          extraVariables: extraVariables,
+        ),
+      );
+    }
+    return before ? rows.reversed.toList() : rows;
+  }
+
+  /// The children of [parentId] in one `is_dir` group, by `(name_key,
+  /// name)` in [direction], from [bound] on when given: one range of
+  /// `notes_tree`.
+  Future<List<Note>> _nameRead(
+    int parentId, {
+    required bool isDir,
+    required String direction,
+    required int limit,
+    required List<String> extra,
+    required List<Variable<Object>> extraVariables,
+    String? bound,
+    List<Variable<Object>> boundVariables = const [],
+  }) async {
+    final where = StringBuffer('parent = ? AND is_dir = ?');
+    final variables = <Variable<Object>>[
+      Variable<int>(parentId),
+      Variable<bool>(isDir),
+    ];
+    if (bound != null) {
+      where.write(' AND $bound');
+      variables.addAll(boundVariables);
+    }
+    for (final condition in extra) {
+      where.write(' AND $condition');
+    }
+    variables
+      ..addAll(extraVariables)
+      ..add(Variable<int>(limit));
+    final rows = await _db
+        .customSelect(
+          'SELECT * FROM notes WHERE $where '
+          'ORDER BY name_key $direction, name $direction LIMIT ?',
+          variables: variables,
+          readsFrom: {_db.notes},
+        )
+        .get();
+    return [for (final row in rows) _db.notes.map(row.data)];
+  }
+
+  /// [rankOf] in a name order: the rows before [note] in its own `is_dir`
+  /// group, one range of `notes_tree` counted, and for a file every folder
+  /// as well, since the folders come first. The same split as [_namePage].
+  Future<int> _nameRank(Note note, TreeSort sort) async {
+    final before = sort.descending ? '>' : '<';
+    final rows = await _db
+        .customSelect(
+          'SELECT COUNT(*) AS c FROM notes WHERE parent = ? AND is_dir = ? '
+          'AND (name_key, name) $before (?, ?)',
+          variables: [
+            Variable<int>(note.parent),
+            Variable<bool>(note.isDir),
+            Variable<String>(note.nameKey),
+            Variable<String>(note.name),
+          ],
+          readsFrom: {_db.notes},
+        )
+        .get();
+    var rank = rows.first.read<int>('c');
+    if (!note.isDir) {
+      final folders = await _db
+          .customSelect(
+            'SELECT COUNT(*) AS c FROM notes WHERE parent = ? AND is_dir = 1',
+            variables: [Variable<int>(note.parent)],
+            readsFrom: {_db.notes},
+          )
+          .get();
+      rank += folders.first.read<int>('c');
+    }
+    return rank;
   }
 
   /// Writes onto [into] the condition "strictly after [row]" in [keys]'s

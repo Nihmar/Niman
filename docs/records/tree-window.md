@@ -302,7 +302,18 @@ Windows 11, 2026-10-27, both runs passing:
   `childrenPage(after:)`, which a 200 000-row test passed because its bar is
   a backstop; it is now the cost of every page of a long scroll, and the
   reason a keyset read is slower than an OFFSET read from the middle of a
-  million rows on. This phase does not fix it; see the first open question.
+  million rows on.
+  - **Fixed, measured again.** In a name order `TreePager` now reads
+    the cursor's own `is_dir` group as one row value, `(name_key, name) >
+    (?, ?)` (`<` in a descending order, and turned round before the cursor),
+    which is a range of `notes_tree`. When that group runs out before the
+    page is full, the read goes on into the next group from its own end. A
+    name order's rank is counted the same way. At a million rows a page now
+    costs 24 ms at the top and 24 ms in the last tenth (median 24, max 40,
+    against 63 and 118 before), and the scroll from top to end takes 12.8 s
+    instead of 32. The 24 ms left is building the 2 000 `Note`s. The field
+    orders keep the `OR` cursor: they have no index to seek, and every page
+    of theirs is a sort of the folder whatever the predicate.
 - **A model costs one count.** `visible()` over the million-file folder is
   23 ms the first time, and 21 ms when a revision made it count again, on the
   test's own isolate (in the app the read is off the UI isolate). With the
@@ -317,8 +328,8 @@ Windows 11, 2026-10-27, both runs passing:
   desktop. **Still open on a phone:** the tablet's flash may make the walk of
   a million index entries slower, and it was not measured there. What the
   measurement found instead is the keyset read's cost growing with depth (see
-  "Measured (phase 5)"): its cursor needs a seek bound, a follow-up to the
-  index reads of phase 1.
+  "Measured (phase 5)"). That is fixed now for the name orders, flat at
+  24 ms a page.
 - **The count after each revision of a huge folder.** If the count is the
   slow part of a save in a million-child folder, materialize it (§"What it
   costs"). Answered for the desktop: 21 ms at a million children, so it is
