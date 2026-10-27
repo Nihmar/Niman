@@ -221,6 +221,30 @@ void main() {
     );
   });
 
+  test('a fence that fits does not take the extra of a wide one (#1235)', () {
+    Block fence(int at, {int quoteDepth = 0, int reach = 0}) => Block(
+      kind: BlockKind.fencedCode,
+      startLine: at * 2,
+      endLine: at * 2 + 1,
+      quoteDepth: quoteDepth,
+      reach: reach,
+      fenceInfo: 'dart',
+    );
+    // 300 quote levels do not fit the six bits of the word.
+    final blocks = [
+      fence(0, quoteDepth: 300, reach: 7),
+      fence(1),
+      fence(2, quoteDepth: 300, reach: 7),
+      fence(3, quoteDepth: 2),
+    ];
+    final chunk = BlockChunk.of(blocks);
+    for (var at = 0; at < blocks.length; at++) {
+      expect(_all(chunk.blockAt(at, 0)), _all(blocks[at]), reason: '@$at');
+    }
+    expect(chunk.blockAt(1, 0).quoteDepth, 0);
+    expect(chunk.blockAt(1, 0).reach, 0);
+  });
+
   test('the kinds and roles fit the bits the word gives them', () {
     expect(BlockKind.values.length, lessThanOrEqualTo(16));
     expect(DivRole.values.length, lessThanOrEqualTo(7));

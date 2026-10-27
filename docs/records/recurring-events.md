@@ -71,7 +71,7 @@ writes only the line it was asked to change.**
    (outline) and the rule in words. The lone-token search lists the rule's
    line once, with the rule in words — it is one line in the file.
 6. **Reminders keep a short horizon.** A rule event with `rem:` schedules
-   its occurrences that fall in the next 14 days, at most 4 per rule, and
+   every occurrence that falls in the next 14 days, and
    every reconciliation (app start, file change, a fired reminder handled)
    recomputes that set — so the alarms run on for days without the app
    being opened. A clock `rem:16:30` is that time on each occurrence's
@@ -200,8 +200,10 @@ file.
 What the code does where the plan left a choice.
 
 - **The window is the occurrence's day, today to today + 13** (fourteen days,
-  today included), then the soonest four whose reminder is not more than
-  `reminderGrace` behind. The first day itself is an occurrence like the
+  today included), minus the occurrences whose reminder is more than
+  `reminderGrace` behind. Every one of them is wanted: there is no count per
+  rule (#1228; #1192 first kept the soonest four, which left a daily event
+  with four days of alarms on Android and Apple, not the fourteen promised). The first day itself is an occurrence like the
   others, and behaves as a plain event does.
 - **Ids.** The rule's first day keeps the id the event always had
   (`calendarReminderId(day, text)`), so an event that gains a `rec:` does not
@@ -232,6 +234,24 @@ What the code does where the plan left a choice.
 - **Android's limit is 400**, `androidPendingAlarmLimit`, below the 500
   concurrent alarms per app. Only `PluginReminderBackend` (Android) reports
   it; iOS keeps 64 and the desktops none.
+- **The cap is one for the whole app (#1228).** `LocalReminderService`
+  cuts the one wanted set — tasks, plain events and every occurrence of every
+  rule — to its soonest `pendingLimit` by moment (ties by id, so the cut is
+  the same every time). So a library under the cap holds all fourteen days of
+  every rule, and one over it keeps the days that fit, soonest first, across
+  all the rules: a rule is never starved to give another its full window, and
+  the days cut are always the furthest ones. The rest are not scheduled at
+  all until a later reconcile brings them under the cap.
+- **What happens when the cap is reached, per platform.** The desktops have
+  no cap (in-process timers; the `fired` stream reconciles as each one is
+  shown, which moves the window on). Android and Apple deliver with the app
+  closed but nothing reconciles as an alarm fires — `fired` never emits
+  there — so the days cut stay unscheduled until the app next starts, resumes
+  or sees a file change. A library that crosses the cap (about 28 daily events
+  on Android, 4 on iOS) therefore runs dry sooner than two weeks after the
+  last open: when the soonest alarms have all fired. The user guide says so.
+  Topping the window up from the background (WorkManager on Android, a
+  background refresh on iOS) is not built.
 
 ## As built: review fixes (#1218-#1227, 2026-10-27)
 
@@ -271,8 +291,8 @@ What the review of the first release of the editor changed.
   other case anchors the new series on the occurrence, as before, and so
   does an edit that picks another day: the user's day is the new first day.
 - **The dock's form is keyed on what it edits (#1218).** The form reads its
-  draft once, when its state is made, so the inline form of the dock â€” which
-  stays on screen while another Edit or Add event arrives â€” is given a key
+  draft once, when its state is made, so the inline form of the dock — which
+  stays on screen while another Edit or Add event arrives — is given a key
   made of the event's line, its start, the occurrence's day and the scope, so
   a new target is a new form. Without it, Edit on a second event kept the
   first one's fields and saved them over the second.

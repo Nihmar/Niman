@@ -77,8 +77,10 @@ abstract interface class ReminderBackend {
   /// How many notifications the system keeps pending, or null for no
   /// limit. iOS keeps the 64 most recently scheduled and drops the rest
   /// without a word, so the service hands such a backend only the soonest
-  /// that many; the next reconcile — every resume and reload makes one —
-  /// tops the window up as they fire.
+  /// that many; the next reconcile — every start, resume and reload makes
+  /// one — tops the window up. Only the desktops reconcile as reminders fire
+  /// ([fired]); on Android and Apple the alarms past the limit wait for the
+  /// app to run again.
   int? get pendingLimit;
 
   /// Whether [schedule] posts a reminder whose moment has already passed.

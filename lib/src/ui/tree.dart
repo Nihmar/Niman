@@ -13,6 +13,7 @@ import 'package:niman/src/editor/toolbar.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ocr/ocr_queue.dart';
 import 'package:niman/src/ui/action_sheet.dart';
+import 'package:niman/src/ui/lazy_drag_paths.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/tree_create_row.dart';
 import 'package:niman/src/ui/tree_drag.dart';
@@ -286,9 +287,15 @@ final class _NoteTreeState extends State<NoteTree> {
   final Set<String> _marked = {};
 
   /// The paths a drag started on [path] carries (#996): every marked row's
-  /// when [path] is one of several marked rows, else the row's own.
-  List<String> _dragPaths(String path) =>
-      _marked.length > 1 && _marked.contains(path) ? _marked.toList() : [path];
+  /// when [path] is one of several marked rows, else null, the row's own.
+  ///
+  /// The marks are copied when a drag looks at them, not when the row is
+  /// built (#1234): a range can mark a million rows, and every marked row on
+  /// screen is built with these.
+  List<String>? _dragPaths(String path) =>
+      _marked.length > 1 && _marked.contains(path)
+      ? LazyDragPaths(_marked.toList)
+      : null;
 
   /// What has been typed to jump to a row by its name, and when the last
   /// letter came: a pause starts a new name (#712).
@@ -984,6 +991,8 @@ final class _NoteTreeState extends State<NoteTree> {
   /// own when nothing was marked yet. The rows are read a page at a time
   /// when they are not all loaded.
   void _markRange(int from, int to) {
+    // Asked after the cursor was found, which may have waited on the index.
+    if (!mounted) return;
     final listing = _current?.listing;
     if (listing == null) return;
     final pinned = _pinnedWalked;
@@ -999,8 +1008,14 @@ final class _NoteTreeState extends State<NoteTree> {
     unawaited(
       reader.paths(first, last).then((paths) {
         if (mounted) setState(() => _marked.addAll(paths));
-      }),
+      }, onError: _logReadFailure),
     );
+  }
+
+  /// A read of the index that failed under a gesture that did not wait for
+  /// it: the marks are simply not made, and the gesture can be made again.
+  void _logReadFailure(Object error) {
+    const AppLogger(name: 'tree.ui').debug('read failed ($error)');
   }
 
   /// A right click on [note]: on one of several marked rows, their menu;
@@ -1068,7 +1083,12 @@ final class _NoteTreeState extends State<NoteTree> {
         _markRange(from, to);
       } else {
         // Asked before the cursor is moved to this row.
-        unawaited(_cursorAtAsync().then((from) => _markRange(from, to)));
+        unawaited(
+          _cursorAtAsync().then(
+            (from) => _markRange(from, to),
+            onError: _logReadFailure,
+          ),
+        );
       }
       setState(() {
         _cursorPath = note.path;
@@ -1263,12 +1283,7 @@ final class _NoteTreeState extends State<NoteTree> {
     final model = await _pages.visible(session, widget.expanded, sort);
     final treeMs = DateTime.now().difference(started).inMilliseconds;
     final pinnedAt = DateTime.now();
-    var pinned = _pages.pinned;
-    if (pinned == null) {
-      final fields = await session.fieldSource;
-      pinned = await fields?.pinnedNotes() ?? const <Note>[];
-      _pages.pinned = pinned;
-    }
+    final pinned = await _pages.pinnedNotes(session);
     final pinnedMs = DateTime.now().difference(pinnedAt).inMilliseconds;
     // Asked once per session, not per flatten: after the first answer the
     // state lives here, so a toggle repaints instead of round-tripping

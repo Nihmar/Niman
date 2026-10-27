@@ -177,6 +177,14 @@ final class TreePager {
         extraVariables: extraVariables,
       );
     }
+    if (cursor == null && extra.isEmpty && sort.order == TreeOrder.name) {
+      return await _nameWindow(
+        parentId,
+        sort: sort,
+        limit: limit,
+        offset: offset ?? 0,
+      );
+    }
     final keys = _keysetOf(sort);
     final variables = <Variable<Object>>[Variable<int>(parentId)];
     final where = StringBuffer('parent = ?');
@@ -265,6 +273,63 @@ final class TreePager {
     return before ? rows.reversed.toList() : rows;
   }
 
+  /// [_select] with no cursor in a name order: the first rows, or those from
+  /// [offset] on, as seeks on `notes_tree` (#1229).
+  ///
+  /// The index is `(parent, is_dir DESC, name_key, name)`. Read in a
+  /// descending order, `is_dir DESC, name_key DESC, name DESC` is not a scan
+  /// of it in either direction (the first term runs one way, the other two
+  /// the other), so SQLite sorted the whole folder for a first page and for
+  /// every jump by offset. The order splits at `is_dir` as [_namePage]'s
+  /// does: each group is read alone, in the index's own order or backwards.
+  /// The folders come first; the files are read when the folders run out, from
+  /// the offset that is left once the folders are counted.
+  Future<List<Note>> _nameWindow(
+    int parentId, {
+    required TreeSort sort,
+    required int limit,
+    required int offset,
+  }) async {
+    final direction = sort.descending ? 'DESC' : 'ASC';
+    final rows = await _nameRead(
+      parentId,
+      isDir: true,
+      direction: direction,
+      limit: limit,
+      offset: offset,
+      extra: const [],
+      extraVariables: const [],
+    );
+    if (rows.length >= limit) return rows;
+    // The folders ran out. How many offset rows they absorbed: all the
+    // offset when it was past the end (the read above is then empty), so
+    // the files start `folders` rows less in. A short page that started
+    // inside the folders absorbed no more than it returned.
+    var filesOffset = 0;
+    if (rows.isEmpty && offset > 0) {
+      final folders = await _db
+          .customSelect(
+            'SELECT COUNT(*) AS c FROM notes WHERE parent = ? AND is_dir = 1',
+            variables: [Variable<int>(parentId)],
+            readsFrom: {_db.notes},
+          )
+          .get();
+      filesOffset = offset - folders.first.read<int>('c');
+    }
+    rows.addAll(
+      await _nameRead(
+        parentId,
+        isDir: false,
+        direction: direction,
+        limit: limit - rows.length,
+        offset: filesOffset > 0 ? filesOffset : 0,
+        extra: const [],
+        extraVariables: const [],
+      ),
+    );
+    return rows;
+  }
+
   /// The children of [parentId] in one `is_dir` group, by `(name_key,
   /// name)` in [direction], from [bound] on when given: one range of
   /// `notes_tree`.
@@ -275,6 +340,7 @@ final class TreePager {
     required int limit,
     required List<String> extra,
     required List<Variable<Object>> extraVariables,
+    int offset = 0,
     String? bound,
     List<Variable<Object>> boundVariables = const [],
   }) async {
@@ -293,10 +359,12 @@ final class TreePager {
     variables
       ..addAll(extraVariables)
       ..add(Variable<int>(limit));
+    if (offset > 0) variables.add(Variable<int>(offset));
     final rows = await _db
         .customSelect(
           'SELECT * FROM notes WHERE $where '
-          'ORDER BY name_key $direction, name $direction LIMIT ?',
+          'ORDER BY name_key $direction, name $direction LIMIT ?'
+          '${offset > 0 ? ' OFFSET ?' : ''}',
           variables: variables,
           readsFrom: {_db.notes},
         )
