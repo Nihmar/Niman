@@ -3,8 +3,8 @@
 The design for bounding the note tree's memory by the rows on screen, not by
 the rows ever scrolled past. It was written before any code; phases 1 to 4
 are built (the index reads, `VisibleTree`, `TreePages`, and `NoteTree` on
-them), and the measurement of phase 5 is not. It answers finding 7 of
-[memory-usage.md](memory-usage.md); #1200 was deferred because the fix is a
+them), and phase 5 measured them (see "Measured (phase 5)"). It
+answers finding 7 of [memory-usage.md](memory-usage.md); #1200 was deferred because the fix is a
 redesign of how the tree reads and indexes its rows, not a local change.
 
 ## What the tree does now
@@ -237,11 +237,89 @@ What the widget does that the sections above leave open:
   the row is drawn under its file: when the index answers, a sidecar can be
   found before the file it is drawn under.
 
+## Measured (phase 5)
+
+`test/perf/tree_window_memory_test.dart` writes one folder of N files into an
+in-memory `IndexDatabase` and drives a `TreePages` the way `NoteTree` does: a
+window of 60 rows (a screen and the list's cache extent at a 24-px row)
+stepped down 40 rows at a time, from the top to the end; each step loads the
+pages the window is drawn from and keeps `pagesFor`. Then it jumps to the
+middle and to the end of the folder (the OFFSET path), and times `visible()`.
+N is 100 000 in a normal run and a million under `NIMAN_PERF=1` (or
+`NIMAN_SCALE=<n>`). What is held, in pages and rows, is not a timing and gates
+on every host; the heap and the timings assert a backstop, and the design's
+bar (the window's four pages at 697 B a row plus 256 KB for the model) only
+under `NIMAN_PERF=1` with an exact heap reading. Run:
+
+```
+flutter test test/perf/tree_window_memory_test.dart
+NIMAN_PERF=1 flutter test --enable-vmservice test/perf/tree_window_memory_test.dart
+```
+
+Windows 11, 2026-10-27, both runs passing:
+
+| | 100 000 files, default run | 1 000 000 files, `NIMAN_PERF=1`, exact heap |
+|---|---|---|
+| Seeding the index | 0.3 s | 2.5 s |
+| Scroll, top to end | 2 501 steps, 1.4 s | 25 001 steps, 32 s |
+| Pages / rows held at the peak | 3 / 6 000 | 3 / 6 000 |
+| Pages / rows held at the end | 2 / 4 000 | 2 / 4 000 |
+| Heap retained by the `TreePages` after the scroll | not readable (the resident set read -62 MB) | **3.59 MB** (bar 5.57 MB) |
+| What the old design held (computed: rows x 697 B) | 66.5 MB | **664.7 MB** |
+| A keyset page of 2 000 rows (median / max) | 28 / 39 ms | 63 / 118 ms |
+| Same, first tenth of the folder / last tenth (median) | 25 / 31 ms | 28 / 98 ms |
+| OFFSET page at the middle | 28 ms | 43 ms |
+| OFFSET page at the end | 25 ms | 53 ms |
+| `visible()`, first call (find, rank, both counts) | 2.9 ms | 23 ms |
+| `visible()` after a revision of the folder (its count again, median) | 2.1 ms | 21 ms |
+| `visible()` with the facts held | 0.1 ms | 0.2 ms |
+
+- **The window holds.** Scrolling a million rows ends with two pages
+  (4 000 rows) and peaks at three: 3.59 MB where the old design held about
+  665 MB, 0.5% of it. That is about 900 B a held row, above the 613 to 618 B
+  a row a page costs once read (the exact reading of a bare `childrenAt` of
+  2 000 rows), because the reading also takes the model, the facts and the
+  heap's fragmentation after a long scroll. A first read on a connection
+  adds about 1.2 MB of statements and code to the heap for good, which the
+  test warms up before it reads the baseline; a figure from a cold connection
+  would blame the scroll for it.
+- **The resident set cannot hold the bar.** Without `--enable-vmservice` the
+  heap line is the process's resident set, and it read -62 MB and -10 MB on
+  two runs of the same scroll. Only its backstop (half of what the old design
+  would hold) gates there.
+- **The keyset read is not flat in depth at a million rows.** A page read
+  after a row costs 28 ms in the first tenth of the folder and 98 ms in the
+  last, and the same shape reads straight off the DAO (27 ms at row 10 000,
+  96 ms at row 950 000, in either order of asking). `EXPLAIN QUERY PLAN` of
+  the query `TreePager._cursor` builds says `SEARCH notes USING INDEX
+  notes_tree (parent=?)`: the cursor is an `OR` of the order's terms, which
+  SQLite cannot seek on, so it walks the folder's index entries from the
+  first and discards those before the cursor. Adding the seek bound a files
+  cursor allows (`is_dir = ? AND name_key >= ?`, and `name_key <=` for a
+  descending order) makes the plan `(parent=? AND is_dir=? AND name_key>?)`
+  and took the same page from 69 ms to 4.6 ms at row 750 000 (raw rows,
+  without building the `Note`s). The read was like this since #1064's
+  `childrenPage(after:)`, which a 200 000-row test passed because its bar is
+  a backstop; it is now the cost of every page of a long scroll, and the
+  reason a keyset read is slower than an OFFSET read from the middle of a
+  million rows on. This phase does not fix it; see the first open question.
+- **A model costs one count.** `visible()` over the million-file folder is
+  23 ms the first time, and 21 ms when a revision made it count again, on the
+  test's own isolate (in the app the read is off the UI isolate). With the
+  facts held it answers in 0.2 ms.
+
 ## Open questions
 
-- **The OFFSET read on a phone.** Walking a million index entries is fast on
-  the desktop. The tablet's flash may make a scrollbar jump visible: to be
-  measured in phase 5, and answered by an index on position only if needed.
+- **The OFFSET read.** Answered for the desktop in phase 5: a read by
+  position costs 43 ms at the middle of a million-file folder and 53 ms at its
+  end, three frames of blank rows at most for a scrollbar jump, and it is no
+  slower than a keyset read from there. No index on position is needed on the
+  desktop. **Still open on a phone:** the tablet's flash may make the walk of
+  a million index entries slower, and it was not measured there. What the
+  measurement found instead is the keyset read's cost growing with depth (see
+  "Measured (phase 5)"): its cursor needs a seek bound, a follow-up to the
+  index reads of phase 1.
 - **The count after each revision of a huge folder.** If the count is the
   slow part of a save in a million-child folder, materialize it (§"What it
-  costs").
+  costs"). Answered for the desktop: 21 ms at a million children, so it is
+  not materialized. Open on a phone, with the OFFSET read.
