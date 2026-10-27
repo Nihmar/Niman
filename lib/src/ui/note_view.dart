@@ -1424,6 +1424,16 @@ final class _NoteViewState extends State<NoteView>
     // The links of the note that went are not this one's.
     _deadLinks.clear();
     _preview.close();
+    // Nor is its text, which goes now, before the next note is read (#1202):
+    // kept until the new one landed, a switch between two long notes held
+    // both at its peak — the buffer, its undo, the joined text and the
+    // preview's copy. The panes holding them unmount with the load.
+    _surface = null;
+    _unifiedText = '';
+    _unifiedBuffer = null;
+    _bufferIsSnapshot = false;
+    _snapshotFrom = null;
+    _previewOf = null;
     setState(() {
       _loading = true;
       _ready = false;

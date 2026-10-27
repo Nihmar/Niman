@@ -69,7 +69,11 @@ final class NoteStatsController extends ChangeNotifier {
 
   /// The surface [_revision] is of: every note opens at revision 0, so the
   /// revision alone took a note just opened for the one before it.
-  MarkdownSurfaceController? _revisionOf;
+  ///
+  /// Held weakly: which surface it was is all it says, and held strongly it
+  /// kept the note a view had left — its buffer, its undo — for as long as
+  /// the next one took to load (#1202).
+  WeakReference<MarkdownSurfaceController>? _revisionOf;
 
   Timer? _timer;
   bool _disposed = false;
@@ -98,7 +102,7 @@ final class NoteStatsController extends ChangeNotifier {
       // count is not there yet (a big one, counted in the background) keeps
       // the count it has and takes the next refresh's.
       final revision = surface.revision;
-      if (identical(surface, _revisionOf) &&
+      if (identical(surface, _revisionOf?.target) &&
           revision == _revision &&
           surface.words.isCounted) {
         return;
@@ -119,7 +123,7 @@ final class NoteStatsController extends ChangeNotifier {
         if (source != null) schedule();
       } else if (source?.scanSettled ?? true) {
         _revision = revision;
-        _revisionOf = surface;
+        _revisionOf = WeakReference(surface);
       } else {
         schedule();
       }
