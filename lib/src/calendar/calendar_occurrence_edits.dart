@@ -26,6 +26,7 @@ import 'package:niman/src/calendar/calendar_file.dart';
 import 'package:niman/src/calendar/calendar_recurrence.dart';
 import 'package:niman/src/calendar/calendar_reminder_stamp.dart';
 import 'package:niman/src/calendar/calendar_rule_tokens.dart';
+import 'package:niman/src/calendar/calendar_series_day.dart';
 import 'package:niman/src/calendar/calendar_splice.dart';
 import 'package:niman/src/calendar/calendar_writer.dart';
 import 'package:niman/src/calendar/day_style.dart';
@@ -144,7 +145,14 @@ CalendarFileContent? updateCalendarOccurrence(
         return updateCalendarEvent(file, ref, draft, moveTo: picked);
       }
       final ended = _endedBefore(file, found.index, found.event, occurrence);
-      final start = picked ?? occurrence;
+      final moved = picked != null && !sameCalendarDay(picked, occurrence);
+      final split = moved
+          ? null
+          : _splitAt(found.event, ref.day, occurrence, draft);
+      if (split != null) {
+        return _addSplit(ended, split, found.event, ref.day, draft, style);
+      }
+      final start = moved ? picked : occurrence;
       return addCalendarEvent(
         ended,
         start,
@@ -169,6 +177,55 @@ CalendarFileContent _endedBefore(
     addCalendarDays(dateOnly(occurrence), -1),
   )!;
   return withCalendarLineText(file, index, text);
+}
+
+/// How the rule [event] (first day [anchor]) is split at [occurrence] into
+/// [draft], when the series has a day of month the occurrence is not on
+/// (#1224); null when the new series can begin on the occurrence.
+CalendarSeriesSplit? _splitAt(
+  CalendarEvent event,
+  DateTime anchor,
+  DateTime occurrence,
+  CalendarEventDraft draft,
+) {
+  final old = event.recurrence;
+  final recurrence = draft.recurrence;
+  if (old == null || recurrence == null) return null;
+  return calendarSeriesSplit(
+    oldRule: old.rule,
+    oldAnchor: anchor,
+    occurrence: occurrence,
+    recurrence: recurrence,
+  );
+}
+
+/// [file] with [split] written: each day it names alone as a plain event of
+/// [draft], then the new series from its anchor.
+CalendarFileContent _addSplit(
+  CalendarFileContent file,
+  CalendarSeriesSplit split,
+  CalendarEvent event,
+  DateTime anchor,
+  CalendarEventDraft draft,
+  CalendarDayStyle? style,
+) {
+  var out = file;
+  for (final day in split.alone) {
+    out = addCalendarEvent(
+      out,
+      day,
+      draft: _onDay(draft.withRecurrence(null), event, anchor, day),
+      style: style,
+    );
+  }
+  final start = split.anchor;
+  if (start == null) return out;
+  return addCalendarEvent(
+    out,
+    start,
+    draft: _fromDay(_onDay(draft, event, anchor, start), start),
+    style: style,
+  );
 }
 
 /// [draft] for a copy of [event], whose first day is [anchor], written on

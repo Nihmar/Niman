@@ -257,3 +257,16 @@ What the review of the first release of the editor changed.
   The form's lead never lands on the day before: the offered leads are the
   ones that fit, a lead that no longer fits after the start moved earlier
   becomes the longest that does, and at midnight the switch is off.
+- **This and following keeps the series' day (#1224).** A monthly rule on the
+  date and a yearly one have no day of their own in the token: `rec:1m` is
+  the first day plus k months, each clamped, so the 31st is the 30th in April
+  and the 31st again in May. A new series anchored on the clamped occurrence
+  would take the 30th for good (and a series begun on 29 February would never
+  reach it again), and `rec:` has no syntax to say "the 31st" apart from the
+  first day. So when the edit leaves such a rule of the same kind and the
+  occurrence is not on the first day's own day, the new series begins on the
+  first occurrence that is (31 May; 29 February 2032), and the clamped
+  occurrences before it, the one edited included, are written as the plain
+  events *This event* writes: the edited event, once each, on its day. Every
+  other case anchors the new series on the occurrence, as before, and so
+  does an edit that picks another day: the user's day is the new first day.

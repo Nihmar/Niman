@@ -700,6 +700,119 @@ void main() {
     });
   });
 
+  group('this and following on a clamped day (#1224)', () {
+    /// The days from [from] to [to] on which [file] shows [text].
+    List<String> shown(
+      CalendarFileContent file,
+      String text,
+      DateTime from,
+      DateTime to,
+    ) {
+      final snapshot = calendarSnapshotOf(file);
+      return [
+        for (
+          var day = from;
+          !day.isAfter(to);
+          day = DateTime(day.year, day.month, day.day + 1)
+        )
+          if (snapshot.eventsFor(day).any((e) => e.event.text.contains(text)))
+            _iso(day),
+      ];
+    }
+
+    CalendarFileContent split(
+      String line,
+      DateTime anchor,
+      DateTime occurrence,
+    ) {
+      final before = file([CalendarRawLine(line, '\n')]);
+      final event = firstEvent(line);
+      final draft = calendarDraftOf(event);
+      return updateCalendarOccurrence(
+        before,
+        CalendarEventRef(line: 0, day: anchor, start: event.start),
+        occurrence,
+        CalendarEventDraft(
+          text: 'Review moved',
+          startMinutes: 10 * 60,
+          recurrence: draft.recurrence,
+        ),
+        CalendarOccurrenceScope.thisAndFollowing,
+      )!;
+    }
+
+    test('a monthly rule keeps its 31st: the new series is on May 31', () {
+      final after = split(
+        '2026-01-31 w05 Sat  9 Review rec:1m.',
+        DateTime(2026, 1, 31),
+        DateTime(2026, 4, 30),
+      );
+      expect(after.lines.first.text, contains('rec:1m until:2026-04-29'));
+      expect(
+        shown(after, 'Review moved', DateTime(2026, 4), DateTime(2026, 8, 31)),
+        ['2026-04-30', '2026-05-31', '2026-06-30', '2026-07-31', '2026-08-31'],
+      );
+      expect(shown(after, 'Review', DateTime(2026), DateTime(2026, 4, 29)), [
+        '2026-01-31',
+        '2026-02-28',
+        '2026-03-31',
+      ]);
+    });
+
+    test('a yearly rule keeps February 29', () {
+      final after = split(
+        '2028-02-29 w09 Tue  9 Review rec:1y.',
+        DateTime(2028, 2, 29),
+        DateTime(2029, 2, 28),
+      );
+      expect(
+        shown(after, 'Review moved', DateTime(2029), DateTime(2036, 12, 31)),
+        [
+          '2029-02-28',
+          '2030-02-28',
+          '2031-02-28',
+          '2032-02-29',
+          '2033-02-28',
+          '2034-02-28',
+          '2035-02-28',
+          '2036-02-29',
+        ],
+        reason:
+            'the clamped years stand alone; the series begins on the '
+            'leap year, and is back on February 29 in 2036',
+      );
+    });
+
+    test('an occurrence on the series day starts the series there', () {
+      final after = split(
+        '2026-01-31 w05 Sat  9 Review rec:1m.',
+        DateTime(2026, 1, 31),
+        DateTime(2026, 3, 31),
+      );
+      expect(
+        shown(after, 'Review moved', DateTime(2026, 3), DateTime(2026, 5, 31)),
+        ['2026-03-31', '2026-04-30', '2026-05-31'],
+      );
+      expect(
+        after.lines.where((line) => line.text.contains('rec:1m')),
+        hasLength(2),
+        reason: 'the old rule ended, one new rule — no plain events',
+      );
+    });
+
+    test('a series that ends before a day that keeps its date is plain', () {
+      final after = split(
+        '2026-01-31 w05 Sat  9 Review rec:1m until:2026-05-15.',
+        DateTime(2026, 1, 31),
+        DateTime(2026, 4, 30),
+      );
+      expect(
+        shown(after, 'Review moved', DateTime(2026, 4), DateTime(2026, 8, 31)),
+        ['2026-04-30'],
+      );
+    });
+  });
+
   group('the reminder an edit carries (#1226)', () {
     /// The standup with a full-stamp reminder the evening before.
     const stamped =
