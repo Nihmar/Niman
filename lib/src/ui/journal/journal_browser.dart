@@ -824,6 +824,16 @@ final class _JournalBrowserState extends State<JournalBrowser> {
     CalendarOccurrenceScope? scope,
   ) {
     return CalendarEventForm(
+      // The form's fields are read once, from its draft: a form for another
+      // event, day or scope, or for an added event after an edit, is another
+      // state, not the open one with its fields (#1218).
+      key: ValueKey((
+        editing?.lineIndex,
+        editing?.event.start,
+        editing?.day,
+        scope,
+        day,
+      )),
       day: day,
       knownTokens: widget.knownTokens,
       draft: editing == null ? null : calendarDraftOf(editing.event),

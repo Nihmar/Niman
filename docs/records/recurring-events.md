@@ -270,3 +270,9 @@ What the review of the first release of the editor changed.
   events *This event* writes: the edited event, once each, on its day. Every
   other case anchors the new series on the occurrence, as before, and so
   does an edit that picks another day: the user's day is the new first day.
+- **The dock's form is keyed on what it edits (#1218).** The form reads its
+  draft once, when its state is made, so the inline form of the dock â€” which
+  stays on screen while another Edit or Add event arrives â€” is given a key
+  made of the event's line, its start, the occurrence's day and the scope, so
+  a new target is a new form. Without it, Edit on a second event kept the
+  first one's fields and saved them over the second.

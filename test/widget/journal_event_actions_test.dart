@@ -40,8 +40,9 @@ void main() {
     WidgetTester tester, {
     required bool phone,
     DateTime? focus,
+    List<String> lines = file,
   }) async {
-    final snapshot = calendarSnapshotOf(calendarFileOf(file));
+    final snapshot = calendarSnapshotOf(calendarFileOf(lines));
     tester.view.physicalSize = phone
         ? const Size(420, 1000)
         : const Size(900, 1400);
@@ -281,6 +282,69 @@ void main() {
 
       expect(opened.single.lineIndex, 0);
       expect(opened.single.day, DateTime(2026, 10, 12));
+    });
+  });
+
+  group('the dock form is the event it edits (#1218)', () {
+    String typed(WidgetTester tester) =>
+        tester.widget<TextField>(key('calendar-event-text')).controller!.text;
+
+    Future<void> editFromMenu(WidgetTester tester, String text) async {
+      await rightClick(tester, text);
+      await tester.tap(key('journal-event-edit'));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('Edit on another event while one is open starts from it', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        phone: false,
+        lines: const [
+          '2026-10-12 w42 Mon  8 gym.',
+          '2026-10-12 w42 Mon  12 lunch with Marta.',
+        ],
+      );
+      await editFromMenu(tester, 'gym');
+      expect(typed(tester), 'gym');
+      await tester.enterText(key('calendar-event-text'), 'gym, typed over');
+      await tester.pump();
+
+      await editFromMenu(tester, 'lunch');
+      expect(typed(tester), 'lunch with Marta');
+      await tester.tap(key('calendar-event-save'));
+      await tester.pumpAndSettle();
+
+      expect(edited.single.$1.event.text, 'lunch with Marta');
+      expect(edited.single.$2.text, 'lunch with Marta');
+      expect(edited.single.$2.startMinutes, 12 * 60);
+    });
+
+    testWidgets('Add event while an edit is open starts empty', (tester) async {
+      await pump(
+        tester,
+        phone: false,
+        lines: const ['2026-10-12 w42 Mon  8 gym.'],
+      );
+      await editFromMenu(tester, 'gym');
+      expect(typed(tester), 'gym');
+
+      await tester.scrollUntilVisible(
+        key('journal-add-event'),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.tap(key('journal-add-event'));
+      await tester.pumpAndSettle();
+
+      expect(typed(tester), isEmpty);
+      await tester.enterText(key('calendar-event-text'), 'new');
+      await tester.pump();
+      await tester.tap(key('calendar-event-save'));
+      await tester.pumpAndSettle();
+      expect(added.single.$2.text, 'new');
+      expect(edited, isEmpty);
     });
   });
 
