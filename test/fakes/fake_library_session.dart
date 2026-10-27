@@ -1167,8 +1167,13 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   /// Answered from the fake's own rows rather than a canned fake: the
   /// content is right there, so pinned notes and `key = value` filters
   /// behave the way they will against a real index.
+  /// A field source that replaces the fake's own, so a test can script the
+  /// answers and when they land.
+  FieldSource? fieldSourceOverride;
+
   @override
-  Future<FieldSource?> get fieldSource async => _FakeFieldSource(this);
+  Future<FieldSource?> get fieldSource async =>
+      fieldSourceOverride ?? _FakeFieldSource(this);
 
   /// The link source the fake answers with: its own live notes, so a
   /// companion's `annotates: "[[file]]"` resolves the way it will against

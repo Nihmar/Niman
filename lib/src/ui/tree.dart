@@ -1263,12 +1263,7 @@ final class _NoteTreeState extends State<NoteTree> {
     final model = await _pages.visible(session, widget.expanded, sort);
     final treeMs = DateTime.now().difference(started).inMilliseconds;
     final pinnedAt = DateTime.now();
-    var pinned = _pages.pinned;
-    if (pinned == null) {
-      final fields = await session.fieldSource;
-      pinned = await fields?.pinnedNotes() ?? const <Note>[];
-      _pages.pinned = pinned;
-    }
+    final pinned = await _pages.pinnedNotes(session);
     final pinnedMs = DateTime.now().difference(pinnedAt).inMilliseconds;
     // Asked once per session, not per flatten: after the first answer the
     // state lives here, so a toggle repaints instead of round-tripping

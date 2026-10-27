@@ -132,6 +132,23 @@ final class TreePages {
     return tree;
   }
 
+  /// The pinned notes of this revision: the ones held, else read from
+  /// [session]'s fields.
+  ///
+  /// The read is stamped like a page's. A [clear] or a [forget] while it is
+  /// out outdates it (a pin changed, or an indexing burst moved the rows), so
+  /// it is answered to the flatten that asked but not held: the next flatten
+  /// reads again (#1231).
+  Future<List<Note>> pinnedNotes(LibrarySession session) async {
+    final held = pinned;
+    if (held != null) return held;
+    final stamp = _guard.stamp();
+    final fields = await session.fieldSource;
+    final read = await fields?.pinnedNotes() ?? const <Note>[];
+    if (_guard.untouched(stamp)) pinned = read;
+    return read;
+  }
+
   /// The paths of [expandedPaths] whose ancestors are all expanded too: a
   /// folder under a closed one is not in the list, so it is not read.
   Iterable<String> _reachable(Set<String> expandedPaths) sync* {

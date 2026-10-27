@@ -256,6 +256,11 @@ What the widget does that the sections above leave open:
   (`LIMIT ?` against `LIMIT ? OFFSET ?`) once the tree read through offsets.
   `tree_pager_plan_test.dart` holds the warm-up's SQL to the first page's in
   every order, and `tree_pages_test.dart` holds `TreePages` to `childrenAt`.
+- **The pinned notes are read under the guard.** `TreePages.pinnedNotes`
+  stamps the read, and holds its answer only when no `clear` or `forget`
+  happened while it was out (#1231): the flatten that asked is given its read,
+  the next one reads again. Held unconditionally, an old read landed after a
+  revision had emptied the slot, and the block stayed wrong until the next one.
 
 ## Measured (phase 5)
 

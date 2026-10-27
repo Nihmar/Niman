@@ -5,6 +5,8 @@ import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
+import 'package:niman/src/db/index_database.dart';
+import 'package:niman/src/frontmatter/fields.dart';
 import 'package:niman/src/ui/tree_pages.dart';
 import 'package:niman/src/ui/visible_tree.dart';
 
@@ -31,6 +33,24 @@ Future<List<TreeSlot>> flatten(
     }
   }
   return out;
+}
+
+/// A field source whose pinned-notes reads answer what a test scripted, when
+/// the test lets them land.
+final class _ScriptedFields implements FieldSource {
+  /// One entry per read: the answer it is given, and what holds it back.
+  final reads = <({List<Note> answer, Completer<void> land})>[];
+  var _next = 0;
+
+  @override
+  Future<List<Note>> pinnedNotes() async {
+    final read = reads[_next++];
+    await read.land.future;
+    return read.answer;
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 /// Loads every page of [keys] that is not held, one after the other.
@@ -230,6 +250,63 @@ void main() {
       session.treeGate!.complete();
       expect(await late, isTrue);
       expect(pages.pageCount, 2);
+    });
+  });
+
+  group('pinned', () {
+    test('a read a revision outdated is not held (#1231)', () async {
+      final scripted = FakeLibrarySession();
+      addTearDown(() async {
+        await scripted.close();
+        await scripted.dispose();
+      });
+      await scripted.open('/lib', create: false);
+      final fields = _ScriptedFields();
+      scripted.fieldSourceOverride = fields;
+      await scripted.createNote(parentPath: '', name: 'old');
+      await scripted.createNote(parentPath: '', name: 'new');
+      final old = (await scripted.find('old.md'))!;
+      final fresh = (await scripted.find('new.md'))!;
+      final first = Completer<void>();
+      final second = Completer<void>()..complete();
+      fields.reads
+        ..add((answer: [old], land: first))
+        ..add((answer: [fresh], land: second));
+
+      final asked = pages.pinnedNotes(scripted);
+      await Future<void>.delayed(Duration.zero);
+      pages.forget([0]); // The revision lands while the read is out.
+      first.complete();
+
+      expect(await asked, [
+        old,
+      ], reason: 'the flatten that asked gets its read');
+      expect(pages.pinned, isNull, reason: 'but the revision outdated it');
+      expect(await pages.pinnedNotes(scripted), [fresh]);
+      expect(pages.pinned, [fresh], reason: 'the next read stands');
+      expect(await pages.pinnedNotes(scripted), [fresh]);
+      expect(fields._next, 2, reason: 'a held list is not read');
+    });
+
+    test('a clear while the read is out outdates it too (#1231)', () async {
+      final scripted = FakeLibrarySession();
+      addTearDown(() async {
+        await scripted.close();
+        await scripted.dispose();
+      });
+      await scripted.open('/lib', create: false);
+      final fields = _ScriptedFields();
+      scripted.fieldSourceOverride = fields;
+      final land = Completer<void>();
+      fields.reads.add((answer: const [], land: land));
+
+      final asked = pages.pinnedNotes(scripted);
+      await Future<void>.delayed(Duration.zero);
+      pages.clear();
+      land.complete();
+      await asked;
+
+      expect(pages.pinned, isNull);
     });
   });
 
