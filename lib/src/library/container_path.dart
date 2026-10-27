@@ -13,6 +13,10 @@ import 'dart:io';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
+/// A container path is always POSIX, whatever host reads it: the host's own
+/// context would turn its `/` into `\` on Windows.
+final p.Context _posix = p.posix;
+
 /// Where an iPhone's libraries live: the app's Documents, which the Files
 /// app shows. Null off iOS.
 Future<String?> containerDocuments() async =>
@@ -22,22 +26,22 @@ Future<String?> containerDocuments() async =>
 /// container's Documents — this one's, or one an earlier run had — and
 /// [path] as it is otherwise.
 String rebaseContainerPath(String path, String documents) {
-  final normal = p.normalize(path);
-  if (p.isWithin(documents, normal) || p.equals(documents, normal)) {
+  final normal = _posix.normalize(path);
+  if (_posix.isWithin(documents, normal) || _posix.equals(documents, normal)) {
     return normal;
   }
   final inside = containerRelative(normal);
-  return inside == null ? normal : p.join(documents, inside);
+  return inside == null ? normal : _posix.join(documents, inside);
 }
 
 /// [path] relative to its app container's Documents, or null when it is
 /// in none: `<anything>/Application/<UUID>/Documents/<rest>` gives `<rest>`.
 String? containerRelative(String path) {
-  final parts = p.split(p.normalize(path));
+  final parts = _posix.split(_posix.normalize(path));
   for (var i = parts.length - 1; i >= 2; i--) {
     if (parts[i] == 'Documents' && parts[i - 2] == 'Application') {
       final rest = parts.sublist(i + 1);
-      return rest.isEmpty ? '' : p.joinAll(rest);
+      return rest.isEmpty ? '' : _posix.joinAll(rest);
     }
   }
   return null;
@@ -46,8 +50,8 @@ String? containerRelative(String path) {
 /// What names [libraryPath]'s index: on iOS its path inside Documents,
 /// which outlives the container's; elsewhere the path itself.
 String libraryIndexKey(String libraryPath) {
-  final normal = p.normalize(libraryPath);
-  if (!Platform.isIOS) return normal;
+  if (!Platform.isIOS) return p.normalize(libraryPath);
+  final normal = _posix.normalize(libraryPath);
   final inside = containerRelative(normal);
   return inside == null ? normal : 'ios-documents:$inside';
 }
