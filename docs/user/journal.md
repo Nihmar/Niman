@@ -185,7 +185,11 @@ on which weekdays, on the Nth weekday of the month. The date an Ends row asks
 for is the last day an occurrence may fall on, and cannot be before the
 event's first day. The row's choices write `rec:` and `until:` on the event;
 the days it skips (`except:`) are not on the form and are never lost by it.
-Ends is off until there is a rule to end.
+Ends is off until there is a rule to end. Changing the **Day** afterwards
+keeps the rows true to it: an end before the new day is dropped (it would
+leave an event that never shows), and *every week on this day* or *every month
+on the 2nd Monday* becomes the same choice for the new day. A Custom rule you
+built stays as it is.
 
 ### One occurrence, or the rest
 

@@ -284,3 +284,12 @@ What the review of the first release of the editor changed.
   occurrence, the day the changed event or the new series starts on. The
   form's preview is given the occurrence apart from the form's day, so it is
   the writer's answer for the scope in both cases.
+- **Moving the Day follows through the rows (#1219).** The Ends picker is
+  bounded by the day when it opens, and a preset is a rule worked out from the
+  day, so a Day changed afterwards left both stale: an `until:` before the new
+  first day made `occurrences` yield nothing, and the event stayed in the file
+  and never showed; a weekly preset stayed on the old weekday. The form now
+  drops an end that falls before the new day (the Ends row says *Never ends*),
+  and a rule that is one of the presets of the old day becomes the same
+  preset of the new one (`eventRuleOnDay`); a rule that no preset says is the
+  user's own and stays. The open custom editor follows the rule (#1220).

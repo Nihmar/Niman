@@ -30,6 +30,7 @@ import 'package:niman/src/ui/calendar_event_day.dart';
 import 'package:niman/src/ui/calendar_event_preview.dart';
 import 'package:niman/src/ui/calendar_event_repeat.dart';
 import 'package:niman/src/ui/calendar_event_times.dart';
+import 'package:niman/src/ui/event_repeat_presets.dart';
 import 'package:niman/src/ui/menu_choice_button.dart';
 import 'package:niman/src/ui/strings.dart';
 
@@ -179,6 +180,25 @@ final class _CalendarEventFormState extends State<CalendarEventForm> {
     );
   }
 
+  /// Moves the event to [day]. What the rule and its end were worked out
+  /// from the old day has to follow (#1219): an end before the new first day
+  /// would write an event that never shows, so it goes (the Ends row says
+  /// so); a preset tied to the day, weekly on its weekday or monthly on its
+  /// Nth weekday, becomes the same preset of the new day; a rule the user
+  /// built stays.
+  void _moveDay(DateTime day) {
+    setState(() {
+      final rule = _rule;
+      if (rule != null) {
+        _rule = eventRuleOnDay(rule, from: _day, to: day);
+      }
+      final until = _until;
+      if (until != null && until.isBefore(day)) _until = null;
+      _day = day;
+      _dayOpen = false;
+    });
+  }
+
   void _setRule(RecurrenceRule? rule) {
     setState(() {
       _rule = rule;
@@ -255,10 +275,7 @@ final class _CalendarEventFormState extends State<CalendarEventForm> {
               day: _day,
               open: _dayOpen,
               onToggle: () => setState(() => _dayOpen = !_dayOpen),
-              onPicked: (day) => setState(() {
-                _day = day;
-                _dayOpen = false;
-              }),
+              onPicked: _moveDay,
             ),
             const SizedBox(height: 6),
             CalendarEventTimes(
