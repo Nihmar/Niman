@@ -30,6 +30,16 @@ void main() {
       expect(tree.isVisibleFolder(0), isTrue);
     });
 
+    test('says how many children a visible folder has', () {
+      final tree = VisibleTree(
+        rootCount: 3,
+        expanded: [folder(10, 0, 0, 2), folder(11, 99, 0, 5)],
+      );
+      expect(tree.childCount(0), 3);
+      expect(tree.childCount(10), 2);
+      expect(tree.childCount(11), isNull, reason: 'under a folder not open');
+    });
+
     test('a root alone is its children at depth 0', () {
       final tree = VisibleTree(rootCount: 3);
       expect(slots(tree), [slot(0, 0, 0), slot(0, 1, 0), slot(0, 2, 0)]);

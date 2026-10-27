@@ -144,6 +144,10 @@ final class VisibleTree {
   /// through expanded folders: the folders whose children are in the list.
   bool isVisibleFolder(int folderId) => _childCount.containsKey(folderId);
 
+  /// How many children the visible folder [folderId] has, as the model was
+  /// given it, or null when [isVisibleFolder] says no.
+  int? childCount(int folderId) => _childCount[folderId];
+
   /// The depth of the rows that are [folderId]'s children, or null when
   /// [isVisibleFolder] says no. The root's children are at depth 0.
   int? childDepth(int folderId) => _depth[folderId];
