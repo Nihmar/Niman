@@ -152,6 +152,11 @@ dev_dependencies:
   # Strict lint set for the whole project.
   very_good_analysis: ^11.0.0
 
+  # The VM service client: the heap a test retains (`test/perf/heap_meter.dart`)
+  # and the memory report of a running profile build
+  # (`tool/memory_report.dart`), #1193.
+  vm_service: ^15.4.0
+
 # whisper_ggml's FFmpeg, without its iOS and macOS frameworks: the Apple
 # builds decode other formats with AVFoundation instead
 # (packages/ffmpeg_kit_flutter_new_min/README.md). Android is unchanged.
