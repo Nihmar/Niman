@@ -154,6 +154,12 @@ void main() {
   group('load', () {
     setUp(() => session.seedNotes(35));
 
+    test('reads the first page of a folder by position, which is what the '
+        'library warms up (#1230)', () async {
+      expect(await pages.load(session, 0, 0, TreeSort.nameAsc), isTrue);
+      expect((session.atCalls, session.pageCalls), (1, 0));
+    });
+
     test('reads by the neighbour it has, else by position', () async {
       const sort = TreeSort.nameAsc;
       expect(await pages.load(session, 0, 2, sort), isTrue);

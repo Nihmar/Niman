@@ -248,6 +248,14 @@ What the widget does that the sections above leave open:
   cursor reads; the files' offset is what is left once the folders are counted.
   `test/unit/tree_pager_plan_test.dart` holds both directions to a plan with no
   temp B-tree.
+- **The warm-up is the first read.** The first page of a folder, with no
+  neighbour loaded, is read by position (`childrenAt` at offset 0), and
+  `NoteDao.warmUpTree` calls that same method for one row when a library
+  opens, so the statement it prepares is the one the first flatten runs
+  (#1230). It was `childrenPage(limit: 1)`, which is another statement
+  (`LIMIT ?` against `LIMIT ? OFFSET ?`) once the tree read through offsets.
+  `tree_pager_plan_test.dart` holds the warm-up's SQL to the first page's in
+  every order, and `tree_pages_test.dart` holds `TreePages` to `childrenAt`.
 
 ## Measured (phase 5)
 

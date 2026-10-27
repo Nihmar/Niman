@@ -94,6 +94,17 @@ final class NoteDao {
     TreeSort sort = TreeSort.nameAsc,
   }) => _pager.at(parentId, offset: offset, limit: limit, sort: sort);
 
+  /// Prepares the read the tree's first page runs, off the critical path
+  /// (#315, #1135): one row of the root in [sort]'s order, through
+  /// [childrenAt] at offset 0, which is how `TreePages` reads a page that has
+  /// no loaded neighbour, the first one of every folder. It is that call and
+  /// not a copy of its statement, so the two cannot drift apart
+  /// (`note_dao_window_test.dart` holds them to the same SQL, and
+  /// `tree_pages_test.dart` holds `TreePages` to `childrenAt`).
+  Future<void> warmUpTree({TreeSort sort = TreeSort.nameAsc}) async {
+    await childrenAt(0, offset: 0, limit: 1, sort: sort);
+  }
+
   /// The first child of [parentId], in [sort]'s order and after [after] when
   /// given, whose name starts with [foldedPrefix] as `foldName` folds names
   /// (#1200): the tree's type-ahead, asked of the index.

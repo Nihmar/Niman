@@ -109,4 +109,21 @@ void main() {
       expect([for (final n in first) n.path], whole);
     });
   }
+
+  test(
+    'the warm-up prepares the statements the first page runs (#1230)',
+    () async {
+      for (final sort in TreeSort.values) {
+        log.plans.clear();
+        await dao.warmUpTree(sort: sort);
+        final warmed = [for (final plan in log.plans) plan.sql];
+        log.plans.clear();
+        await dao.childrenAt(0, offset: 0, limit: 2000, sort: sort);
+        final first = {for (final plan in log.plans) plan.sql};
+
+        expect(warmed, isNotEmpty, reason: sort.name);
+        expect(first.containsAll(warmed), isTrue, reason: sort.name);
+      }
+    },
+  );
 }
