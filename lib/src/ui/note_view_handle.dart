@@ -39,7 +39,16 @@ abstract interface class NoteViewHandle {
   ValueListenable<List<OutlineEntry>> get outline;
 
   /// The note's text as it is in the editor now, saved or not.
+  ///
+  /// The note joined into one string: O(the note) to make, and a copy of
+  /// it. A panel that follows the note as it is edited asks for what it
+  /// shows instead ([currentTags]).
   String get currentText;
+
+  /// The note's tags as it is in the editor now: the frontmatter's, then
+  /// its inline `#tags` as the index reads them — read off the editor's
+  /// lines, without joining the note (#1197).
+  Future<List<String>> currentTags();
 
   /// The text selected in the editor now, or an empty string when nothing is
   /// selected or the note takes no text there ([canInsert]): what New task
