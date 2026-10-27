@@ -888,11 +888,40 @@ abstract interface class LibrarySession {
   Future<List<Note>> children(int parentId, {TreeSort sort = TreeSort.nameAsc});
 
   /// One page of the children of [parentId] in [sort]'s order: at most
-  /// [limit] rows, those after [after], a row of the previous page (#1064).
-  /// A page shorter than [limit] is the last one.
+  /// [limit] rows, those after [after], a row of the previous page (#1064),
+  /// or the [limit] rows immediately before [before], in the tree's order
+  /// (#1200). Giving both is an error. A page after a row that is shorter
+  /// than [limit] is the last one.
   Future<List<Note>> childrenPage(
     int parentId, {
     required int limit,
+    TreeSort sort = TreeSort.nameAsc,
+    Note? after,
+    Note? before,
+  });
+
+  /// How many children the row with id [parentId] has (#1200).
+  Future<int> childCount(int parentId);
+
+  /// How many siblings of [note] sort before it in [sort]'s order: its
+  /// position among its parent's children (#1200).
+  Future<int> rankOf(Note note, {TreeSort sort = TreeSort.nameAsc});
+
+  /// [limit] children of [parentId] from position [offset] on in [sort]'s
+  /// order (#1200): a page with no loaded neighbour to read from.
+  Future<List<Note>> childrenAt(
+    int parentId, {
+    required int offset,
+    required int limit,
+    TreeSort sort = TreeSort.nameAsc,
+  });
+
+  /// The first child of [parentId], in [sort]'s order and after [after] when
+  /// given, whose name starts with [foldedPrefix] as `foldName` folds names
+  /// (#1200); null when none does.
+  Future<Note?> firstChildStartingWith(
+    int parentId,
+    String foldedPrefix, {
     TreeSort sort = TreeSort.nameAsc,
     Note? after,
   });

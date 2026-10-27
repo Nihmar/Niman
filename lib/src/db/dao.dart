@@ -3,6 +3,7 @@ import 'package:meta/meta.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/db/referrer_dao.dart';
+import 'package:niman/src/db/tree_pager.dart';
 
 /// Paths per `WHERE path IN (…)` statement: SQLite binds 999 variables by
 /// default (32766 since 3.32), so a whole candidate set is looked up in
@@ -44,10 +45,15 @@ final class NoteDao {
         .get();
   }
 
+  /// The reads by position in the tree's order: pages, ranks, counts.
+  late final TreePager _pager = TreePager(_db);
+
   /// One page of the children of [parentId], in [sort]'s order: at most
   /// [limit] rows, the ones after [after] (a row of the previous page) — a
   /// keyset, not an offset, so the page after the hundred-thousandth row
-  /// is as cheap as the first (#1064).
+  /// is as cheap as the first (#1064). With [before] instead, the [limit]
+  /// rows immediately before it, still in the tree's order (#1200); giving
+  /// both is an error.
   ///
   /// The cursor compares the sort's terms one after the other, in their own
   /// directions: folders first, then the field, then the name key and the
@@ -58,81 +64,50 @@ final class NoteDao {
     required int limit,
     TreeSort sort = TreeSort.nameAsc,
     Note? after,
-  }) async {
-    final keys = _keysetOf(sort);
-    final variables = <Variable<Object>>[Variable<int>(parentId)];
-    final where = StringBuffer('parent = ?');
-    if (after != null) {
-      final branches = <String>[];
-      for (var i = 0; i < keys.length; i++) {
-        final equal = [
-          for (var j = 0; j < i; j++) '${keys[j].column} = ?',
-          '${keys[i].column} ${keys[i].descending ? '<' : '>'} ?',
-        ];
-        branches.add('(${equal.join(' AND ')})');
-        for (var j = 0; j <= i; j++) {
-          variables.add(keys[j].value(after));
-        }
-      }
-      where.write(' AND (${branches.join(' OR ')})');
-    }
-    final order = [
-      for (final key in keys)
-        '${key.column} ${key.descending ? 'DESC' : 'ASC'}',
-    ].join(', ');
-    variables.add(Variable<int>(limit));
-    final rows = await _db
-        .customSelect(
-          'SELECT * FROM notes WHERE $where ORDER BY $order LIMIT ?',
-          variables: variables,
-          readsFrom: {_db.notes},
-        )
-        .get();
-    return [for (final row in rows) _db.notes.map(row.data)];
+    Note? before,
+  }) {
+    return _pager.page(
+      parentId,
+      limit: limit,
+      sort: sort,
+      after: after,
+      before: before,
+    );
   }
 
-  /// The terms [sort] orders by, with the column each reads and the value
-  /// of a row for it: what a keyset cursor compares.
-  static List<
-    ({String column, bool descending, Variable<Object> Function(Note) value})
-  >
-  _keysetOf(TreeSort sort) {
-    final direction = sort.descending;
-    final isDir = (
-      column: 'is_dir',
-      descending: true,
-      value: (Note n) => Variable<bool>(n.isDir) as Variable<Object>,
-    );
-    final key = (
-      column: 'name_key',
-      descending: sort.order == TreeOrder.name && direction,
-      value: (Note n) => Variable<String>(n.nameKey) as Variable<Object>,
-    );
-    final name = (
-      column: 'name',
-      descending: sort.order == TreeOrder.name && direction,
-      value: (Note n) => Variable<String>(n.name) as Variable<Object>,
-    );
-    if (sort.order == TreeOrder.name) return [isDir, key, name];
-    final field = switch (sort.order) {
-      TreeOrder.modified => (
-        column: 'modified',
-        descending: direction,
-        value: (Note n) => Variable<DateTime>(n.modified) as Variable<Object>,
-      ),
-      TreeOrder.created => (
-        column: 'created',
-        descending: direction,
-        value: (Note n) => Variable<DateTime>(n.created) as Variable<Object>,
-      ),
-      _ => (
-        column: 'size',
-        descending: direction,
-        value: (Note n) => Variable<int>(n.size) as Variable<Object>,
-      ),
-    };
-    return [isDir, field, key, name];
-  }
+  /// How many children the row with id [parentId] has (#1200).
+  Future<int> childCount(int parentId) => _pager.childCount(parentId);
+
+  /// How many siblings of [note] sort before it in [sort]'s order: its
+  /// position among its parent's children (#1200). The same comparison
+  /// [childrenPage] pages by, counted.
+  Future<int> rankOf(Note note, {TreeSort sort = TreeSort.nameAsc}) =>
+      _pager.rankOf(note, sort: sort);
+
+  /// [limit] children of [parentId] from position [offset] on in [sort]'s
+  /// order (#1200): for a page with no loaded neighbour to page from, an
+  /// O(offset) walk of the index.
+  Future<List<Note>> childrenAt(
+    int parentId, {
+    required int offset,
+    required int limit,
+    TreeSort sort = TreeSort.nameAsc,
+  }) => _pager.at(parentId, offset: offset, limit: limit, sort: sort);
+
+  /// The first child of [parentId], in [sort]'s order and after [after] when
+  /// given, whose name starts with [foldedPrefix] as `foldName` folds names
+  /// (#1200): the tree's type-ahead, asked of the index.
+  Future<Note?> firstChildStartingWith(
+    int parentId,
+    String foldedPrefix, {
+    TreeSort sort = TreeSort.nameAsc,
+    Note? after,
+  }) => _pager.firstChildStartingWith(
+    parentId,
+    foldedPrefix,
+    sort: sort,
+    after: after,
+  );
 
   /// Every note that belongs to the root or to one of the [expandedPaths],
   /// in tree order — [sort]'s order the same way [children] reads it.

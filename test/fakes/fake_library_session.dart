@@ -936,13 +936,22 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     return kids.map(_toNote).toList();
   }
 
+  /// The live children of [parentId] in [sort]'s order, as the fake reads
+  /// them: what every positional read below slices.
+  List<_Row> _kidsOf(int parentId, TreeSort sort) => <_Row>[
+    for (final row in _rows)
+      if (!row.trashed && _parentIdOf(row.path) == parentId) row,
+  ]..sort((a, b) => _byTreeSort(a, b, sort));
+
   @override
   Future<List<Note>> childrenPage(
     int parentId, {
     required int limit,
     TreeSort sort = TreeSort.nameAsc,
     Note? after,
+    Note? before,
   }) async {
+    assert(after == null || before == null, 'a page is after or before a row');
     treeCalls++;
     pageCalls++;
     _treeOutstanding++;
@@ -953,16 +962,84 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     } finally {
       _treeOutstanding--;
     }
-    final kids = <_Row>[
-      for (final row in _rows)
-        if (!row.trashed && _parentIdOf(row.path) == parentId) row,
-    ]..sort((a, b) => _byTreeSort(a, b, sort));
+    final kids = _kidsOf(parentId, sort);
+    if (before != null) {
+      // A row the fake does not hold has nothing before it.
+      final at = kids.indexWhere((row) => row.path == before.path);
+      final end = at == -1 ? 0 : at;
+      return kids
+          .sublist(end < limit ? 0 : end - limit, end)
+          .map(_toNote)
+          .toList();
+    }
     var start = 0;
     if (after != null) {
       final at = kids.indexWhere((row) => row.path == after.path);
       start = at == -1 ? kids.length : at + 1;
     }
     return kids.skip(start).take(limit).map(_toNote).toList();
+  }
+
+  /// How many times [childCount] was asked.
+  int countCalls = 0;
+
+  @override
+  Future<int> childCount(int parentId) async {
+    countCalls++;
+    return _kidsOf(parentId, TreeSort.nameAsc).length;
+  }
+
+  /// How many times [rankOf] was asked.
+  int rankCalls = 0;
+
+  /// A row the fake does not hold ranks after all of its siblings, as
+  /// [childrenPage] reads nothing after it.
+  @override
+  Future<int> rankOf(Note note, {TreeSort sort = TreeSort.nameAsc}) async {
+    rankCalls++;
+    final kids = _kidsOf(note.parent, sort);
+    final at = kids.indexWhere((row) => row.path == note.path);
+    return at == -1 ? kids.length : at;
+  }
+
+  /// How many times [childrenAt] was asked.
+  int atCalls = 0;
+
+  @override
+  Future<List<Note>> childrenAt(
+    int parentId, {
+    required int offset,
+    required int limit,
+    TreeSort sort = TreeSort.nameAsc,
+  }) async {
+    atCalls++;
+    return _kidsOf(
+      parentId,
+      sort,
+    ).skip(offset).take(limit).map(_toNote).toList();
+  }
+
+  /// How many times [firstChildStartingWith] was asked.
+  int startingWithCalls = 0;
+
+  @override
+  Future<Note?> firstChildStartingWith(
+    int parentId,
+    String foldedPrefix, {
+    TreeSort sort = TreeSort.nameAsc,
+    Note? after,
+  }) async {
+    startingWithCalls++;
+    final kids = _kidsOf(parentId, sort);
+    var start = 0;
+    if (after != null) {
+      final at = kids.indexWhere((row) => row.path == after.path);
+      start = at == -1 ? kids.length : at + 1;
+    }
+    for (final row in kids.skip(start)) {
+      if (foldName(row.name).startsWith(foldedPrefix)) return _toNote(row);
+    }
+    return null;
   }
 
   /// How many pages of children were read, by [childrenPage].
