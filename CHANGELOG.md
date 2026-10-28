@@ -6,6 +6,53 @@ This file ships inside the build and feeds the in-app changelog (the
 launch dialog after an update and the screen under Settings → Diagnostics
 and info). Update it in the release commit, before the tag.
 
+## [0.3.2] - 2026-10-28
+
+Tasks and events repeat, and the tree holds only the rows on screen.
+
+A task that carries a `rec:` rule no longer ends when it is ticked: its
+line goes to `done.txt` and the next copy joins `todo.txt` with its due
+date, threshold and reminder moved on, from the Todo tab, a note's task,
+the Home tile or the home-screen widget. A calendar event written with the
+same rule shows on every day the rule reaches, in the day card, the dock,
+the month's dot and search, without writing those days out; **Skip**
+leaves one occurrence out, and **Edit** and **Delete** ask whether they
+mean this event, this and the following ones or all of them, writing
+`except:` and `until:` into `calendar.txt` rather than a hidden state. The
+rule shows in words on a task's row and on every occurrence, and a rule
+Niman cannot read is underlined instead of doing nothing.
+
+The tree reads and draws a window of rows around the viewport instead of
+every row ever scrolled past: a folder of a million notes held 3.6 MB
+after a scroll to its end, against some 700 MB before. A note's scan keeps
+only the blocks that are drawn, a picture is decoded at the size it is
+drawn, and the caches that can be rebuilt are emptied when the system asks
+for memory or the app goes to the background.
+
+### Added
+- **Tasks**: a `rec:` rule — every N days, weeks, months, years or business days, on chosen weekdays, or on the Nth or last weekday of the month — and completing the task leaves its next copy, counted from the due date for a strict `rec:+…` and from the completion day otherwise (#1153, #1188, #1189)
+- **Tasks**: a **Repeat** row in the task dialog with a Custom editor, the rule in words beside the due date and in the home-screen widget, and a wavy underline under a `rec:` that cannot be read (#1189)
+- **Journal**: a repeating event shows on every occurrence — the day card, the dock, **Events today** and the month's dot — and search lists its line once with the rule in words (#1190)
+- **Journal**: **Repeat** and **Ends** rows on the event form, a **Day** row that moves the event or one occurrence, and **Skip**, **Edit** and **Delete** for this event, this and following, or all events (#1191)
+- **Editor**: a `rec:`, `until:` or `except:` that cannot be read gets a wavy underline (#1189, #1190)
+
+### Changed
+- **Reminders**: a repeating event's reminders cover the next two weeks and are renewed at every run; Android keeps fewer pending alarms than the system's cap, so the soonest ones are the ones scheduled (#1192, #1228)
+- **Performance**: the note tree draws the rows around the viewport and reads a name-ordered page as a seek, so a folder of a million notes costs megabytes instead of hundreds (#1200, #1229, #1230)
+- **Performance**: a note's scan keeps only what is drawn, a long note keeps no whole-note join, the scanner packs its blocks in typed arrays, the read view scans once, a picture is decoded at the size it is drawn, and the rebuildable caches are emptied on memory pressure and in the background (#1194–#1200, #1202)
+- **iOS**: container paths are read as POSIX on every host (#1216)
+
+### Fixed
+- **Journal**: the event form keeps the end and the presets true when its Day moves, follows a rule picked from the menu, opens Edit all on the series' first day, keeps the series' day of month on this and following, moves the series with a new day, keeps an event's reminder, replaces every `rec:`/`until:` token, is keyed on what it edits, and drops a picker's answer once it is gone (#1218–#1222, #1224–#1227)
+- **Journal**: no journal strip in Zen (#1217)
+- **Tasks**: Move to tasks leaves the next copy of a ticked recurring item (#1223)
+- **Tree**: the order survives a clear, a stale or failed page read does not pull the tree back or reach the zone, and a drag copies its marks when it starts (#1231–#1234)
+- **Markdown**: a wide block's extra is not handed to a fence that fits (#1235)
+- **Read view**: the pane scans when the editor's shared scan fails (#1236)
+- **Preview**: the decode width probe is laid out again when its ratio or fallback changes (#1237)
+- **Spell check**: switching it off releases the engines and the verdicts (#1202)
+- **Library**: the reindex keeps the tags and links the writer kept (#1202)
+
 ## [0.3.1] - 2026-10-26
 
 An Eisenhower matrix is one command, an annotation keeps its passage
