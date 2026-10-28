@@ -427,7 +427,13 @@ on Android.
     Gatekeeper refuses an app that is not notarised, and since macOS 15 the
     right-click *Open* no longer gets past it — the user allows it in
     System Settings → Privacy & Security → *Open Anyway*. The secure
-    storage falls back to the legacy keychain, which needs no entitlement.
+    storage falls back to the legacy keychain, which needs no entitlement:
+    the data protection keychain refuses an ad-hoc build's writes with
+    `errSecMissingEntitlement` (`-34018`), and `SecureSyncSecretStore`
+    reads that code as "not this keychain" and switches (#1244). The cost
+    of the unsigned `.dmg` is one Keychain prompt — *Niman wants to use
+    your confidential information* — the first time a build reads an entry
+    another one wrote, since each ad-hoc signature is a new identity.
   - **iOS without it** does not exist: no TestFlight, no App Store, no App
     Group, and a personal build on one's own iPhone expires after seven
     days.

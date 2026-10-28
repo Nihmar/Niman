@@ -214,6 +214,14 @@ The password lives only in `flutter_secure_storage`
 library deletes the row, its `sync_items`, its `sync_ops` and the
 secret (a keychain failure is logged and does not block forgetting).
 
+On macOS the entry lives in the data protection keychain, which needs the
+`keychain-access-groups` entitlement of a signed build. An ad-hoc signed
+build — every local one, without a Developer ID (#1244) — has its writes
+refused with `errSecMissingEntitlement` (`-34018`), and the store keeps the
+entry in the login keychain instead, which needs no entitlement, reading
+from whichever of the two holds it. Any other keychain error is the
+caller's.
+
 Saving the destination with another URL or user clears the library's
 `sync_items` and capabilities: they describe a different remote, so the
 next sync is a first sync, which never deletes. The queue stays, since
