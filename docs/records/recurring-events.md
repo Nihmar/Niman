@@ -150,10 +150,15 @@ file.
   and the writer reads it: an added event goes there, a plain event that is
   edited leaves its line for that day's (two lines change, the new one made
   in date order when missing), and one occurrence is `except:`ed and written
-  there. For *This and following* and *All events* the row is shown and off,
-  and the draft carries no day: a series moves by changing its rule. An event
-  that does not repeat is edited with no scope (nothing to ask), so its row is
-  on. The preview shows every line the write changes, not only the day's.
+  there. An event that does not repeat is edited with no scope (nothing to
+  ask). The preview shows every line the write changes, not only the day's.
+  The row is on for every scope and what it moves is the scope's (#1225): the
+  one occurrence, written as a plain event on the new day; the new rule event
+  of *This and following*, which starts there while the old rule still ends
+  the day before the occurrence; the rule event of *All events*, whose first
+  day, and so every occurrence, moves. What was picked is what is written: the
+  day was once honoured only for one occurrence, and a series saved with
+  another day lost it without a word.
 - **Edit this and following from the rule's first day** is the same as All
   events (`until:` the day before would end the rule before it began), and so
   is a Delete of this and following, which deletes the event instead.
@@ -247,3 +252,64 @@ What the code does where the plan left a choice.
   last open: when the soonest alarms have all fired. The user guide says so.
   Topping the window up from the background (WorkManager on Android, a
   background refresh on iOS) is not built.
+
+## As built: review fixes (#1218-#1227, 2026-10-27)
+
+What the review of the first release of the editor changed.
+
+- **The form's rule is the only rule in the line (#1227).** A draft that
+  carries a rule writes its `rec:`, `until:` and `except:` and takes every
+  such token out of its text first, readable or not. The first `rec:` and
+  the first `until:` of an event are the ones read, so an `until:2026-1-31`
+  the grammar cannot read, left in the text, used to win over the end the form
+  wrote (and the event ran for ever); a second `rec:` or `until:` typed by
+  hand is replaced, not kept beside the form's. A draft with no rule leaves
+  the text as it is: a `rec:` nobody can read is kept and flagged.
+- **A reminder survives an edit (#1226).** A clock `rem:` is read out of the
+  text and shown as a lead only when the event has a start to count it from;
+  on an event with no time it stays in the text, as written, and is written
+  back (it used to be cut, and an edit then dropped it while the switch still
+  read on). A full-stamp `rem:` names its own day, so a copy of the event on
+  another day takes the stamp with the same distance from it: *This one* and
+  *This and following* re-base it from the rule's first day onto the day
+  written, and an event that moves, a plain one or the rule event, takes it
+  along. A stamp the user typed into the form is theirs and is not moved.
+  The form's lead never lands on the day before: the offered leads are the
+  ones that fit, a lead that no longer fits after the start moved earlier
+  becomes the longest that does, and at midnight the switch is off.
+- **This and following keeps the series' day (#1224).** A monthly rule on the
+  date and a yearly one have no day of their own in the token: `rec:1m` is
+  the first day plus k months, each clamped, so the 31st is the 30th in April
+  and the 31st again in May. A new series anchored on the clamped occurrence
+  would take the 30th for good (and a series begun on 29 February would never
+  reach it again), and `rec:` has no syntax to say "the 31st" apart from the
+  first day. So when the edit leaves such a rule of the same kind and the
+  occurrence is not on the first day's own day, the new series begins on the
+  first occurrence that is (31 May; 29 February 2032), and the clamped
+  occurrences before it, the one edited included, are written as the plain
+  events *This event* writes: the edited event, once each, on its day. Every
+  other case anchors the new series on the occurrence, as before, and so
+  does an edit that picks another day: the user's day is the new first day.
+- **The dock's form is keyed on what it edits (#1218).** The form reads its
+  draft once, when its state is made, so the inline form of the dock — which
+  stays on screen while another Edit or Add event arrives — is given a key
+  made of the event's line, its start, the occurrence's day and the scope, so
+  a new target is a new form. Without it, Edit on a second event kept the
+  first one's fields and saved them over the second.
+- **The form opens on the day it writes (#1221).** *Edit all* writes the rule
+  event on its own line, so its form opens on the series' first day: the Ends
+  row can end the series as early as that day, and the weekly and Nth-weekday
+  presets are taken from the day the rule began, not from the occurrence that
+  happened to be tapped. *This one* and *This and following* open on the
+  occurrence, the day the changed event or the new series starts on. The
+  form's preview is given the occurrence apart from the form's day, so it is
+  the writer's answer for the scope in both cases.
+- **Moving the Day follows through the rows (#1219).** The Ends picker is
+  bounded by the day when it opens, and a preset is a rule worked out from the
+  day, so a Day changed afterwards left both stale: an `until:` before the new
+  first day made `occurrences` yield nothing, and the event stayed in the file
+  and never showed; a weekly preset stayed on the old weekday. The form now
+  drops an end that falls before the new day (the Ends row says *Never ends*),
+  and a rule that is one of the presets of the old day becomes the same
+  preset of the new one (`eventRuleOnDay`); a rule that no preset says is the
+  user's own and stays. The open custom editor follows the rule (#1220).

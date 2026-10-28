@@ -6,10 +6,14 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/calendar/calendar_file.dart';
 import 'package:niman/src/calendar/calendar_occurrence_edits.dart';
+import 'package:niman/src/calendar/calendar_recurrence.dart';
 import 'package:niman/src/calendar/calendar_store.dart';
 import 'package:niman/src/calendar/calendar_writer.dart';
 import 'package:niman/src/calendar/parser.dart';
 import 'package:niman/src/calendar/weekdays.dart';
+import 'package:niman/src/core/recurrence/recurrence_bounds.dart';
+import 'package:niman/src/core/recurrence/recurrence_rule.dart';
+import 'package:niman/src/core/recurrence/recurrence_unit.dart';
 
 /// The standup, every Monday from the 5th; mixed endings, so a line that
 /// moved when it should not shows in the bytes.
@@ -428,6 +432,82 @@ void main() {
   });
 
   group('edit all', () {
+    test('an end replaces an until: the grammar cannot read (#1227)', () {
+      final before = file([
+        const CalendarRawLine(
+          '2026-10-05 w41 Mon  9 Standup rec:1w until:2026-1-31.',
+          '\n',
+        ),
+      ]);
+      final draft = calendarDraftOf(firstEvent(before.lines.single.text));
+      expect(draft.recurrence!.bounds.until, isNull);
+      final after = updateCalendarOccurrence(
+        before,
+        CalendarEventRef(line: 0, day: DateTime(2026, 10, 5), start: 20),
+        DateTime(2026, 10, 19),
+        draft.withRecurrence(
+          CalendarRecurrence(
+            rule: draft.recurrence!.rule,
+            bounds: RecurrenceBounds(until: DateTime(2026, 12, 31)),
+          ),
+        ),
+        CalendarOccurrenceScope.all,
+      )!;
+      expect(
+        after.lines.single.text,
+        '2026-10-05 w41 Mon  9 Standup rec:1w until:2026-12-31.',
+      );
+      expect(
+        firstEvent(after.lines.single.text).recurrence!.bounds.until,
+        DateTime(2026, 12, 31),
+      );
+    });
+
+    test(
+      'a second rec: and until: in the text give way to the form (#1227)',
+      () {
+        final before = file([
+          const CalendarRawLine(
+            '2026-10-05 w41 Mon  9 Standup rec:1w until:2026-11-30 '
+                'rec:2w until:2026-12-31.',
+            '\n',
+          ),
+        ]);
+        final after = updateCalendarOccurrence(
+          before,
+          CalendarEventRef(line: 0, day: DateTime(2026, 10, 5), start: 20),
+          DateTime(2026, 10, 19),
+          calendarDraftOf(firstEvent(before.lines.single.text)),
+          CalendarOccurrenceScope.all,
+        )!;
+        expect(
+          after.lines.single.text,
+          '2026-10-05 w41 Mon  9 Standup rec:1w until:2026-11-30.',
+        );
+      },
+    );
+
+    test('a rule added to an event with a rec: it cannot read replaces it', () {
+      final before = file([
+        const CalendarRawLine('2026-10-05 w41 Mon  9 Standup rec:often.', '\n'),
+      ]);
+      final draft = calendarDraftOf(firstEvent(before.lines.single.text));
+      expect(draft.recurrence, isNull);
+      final after = updateCalendarOccurrence(
+        before,
+        CalendarEventRef(line: 0, day: DateTime(2026, 10, 5), start: 20),
+        DateTime(2026, 10, 5),
+        draft.withRecurrence(
+          CalendarRecurrence(
+            rule: RecurrenceRule(unit: RecurrenceUnit.week),
+            bounds: RecurrenceBounds(),
+          ),
+        ),
+        CalendarOccurrenceScope.all,
+      )!;
+      expect(after.lines.single.text, '2026-10-05 w41 Mon  9 Standup rec:1w.');
+    });
+
     test('rewrites the rule event itself, rule and all', () {
       final before = file();
       final draft = calendarDraftOf(firstEvent(_lines[1].text));
@@ -549,29 +629,296 @@ void main() {
       ]);
     });
 
-    test('a series does not move: the day is ignored', () {
+    test('edit all moves the rule event: the first day is the new one', () {
+      final before = file();
       final draft = calendarDraftOf(firstEvent(_lines[1].text));
-      for (final scope in [
-        CalendarOccurrenceScope.all,
-        CalendarOccurrenceScope.thisAndFollowing,
-      ]) {
-        final moved = CalendarEventDraft(
+      final after = updateCalendarOccurrence(
+        before,
+        rule,
+        DateTime(2026, 10, 19),
+        CalendarEventDraft(
           text: draft.text,
           startMinutes: draft.startMinutes,
           endMinutes: draft.endMinutes,
           recurrence: draft.recurrence,
-          day: DateTime(2026, 10, 20),
-        );
-        final after = updateCalendarOccurrence(
-          file(),
-          rule,
-          DateTime(2026, 10, 5),
-          moved,
-          scope,
-        )!;
-        expect(after.lines[1].text, contains('Standup @work rec:1w'));
-        expect(after.lines.length, _lines.length);
-      }
+          day: DateTime(2026, 10, 14),
+        ),
+        CalendarOccurrenceScope.all,
+      )!;
+      expect(after.lines[1].text, '2026-10-05 w41 Mon  17 jog.');
+      expect(
+        after.lines.map((line) => line.text),
+        contains(startsWith('2026-10-14 w42 Wed  9-9:30 Standup @work rec:1w')),
+      );
+      expect(daysOf(after, 'Standup').take(3), [
+        '2026-10-14',
+        '2026-10-21',
+        '2026-10-28',
+      ]);
+    });
+
+    test('this and following starts the new series on the new day', () {
+      final before = file();
+      final draft = calendarDraftOf(firstEvent(_lines[1].text));
+      final after = updateCalendarOccurrence(
+        before,
+        rule,
+        DateTime(2026, 10, 12),
+        CalendarEventDraft(
+          text: draft.text,
+          startMinutes: draft.startMinutes,
+          endMinutes: draft.endMinutes,
+          recurrence: draft.recurrence,
+          day: DateTime(2026, 10, 14),
+        ),
+        CalendarOccurrenceScope.thisAndFollowing,
+      )!;
+      expect(after.lines[1].text, contains('rec:1w until:2026-10-11.'));
+      expect(daysOf(after, 'Standup').take(4), [
+        '2026-10-05',
+        '2026-10-14',
+        '2026-10-21',
+        '2026-10-28',
+      ]);
+    });
+
+    test('this and following from the first day moves the whole rule', () {
+      final draft = calendarDraftOf(firstEvent(_lines[1].text));
+      final after = updateCalendarOccurrence(
+        file(),
+        rule,
+        DateTime(2026, 10, 5),
+        CalendarEventDraft(
+          text: draft.text,
+          startMinutes: draft.startMinutes,
+          recurrence: draft.recurrence,
+          day: DateTime(2026, 10, 7),
+        ),
+        CalendarOccurrenceScope.thisAndFollowing,
+      )!;
+      expect(daysOf(after, 'Standup').take(2), ['2026-10-07', '2026-10-14']);
+    });
+  });
+
+  group('this and following on a clamped day (#1224)', () {
+    /// The days from [from] to [to] on which [file] shows [text].
+    List<String> shown(
+      CalendarFileContent file,
+      String text,
+      DateTime from,
+      DateTime to,
+    ) {
+      final snapshot = calendarSnapshotOf(file);
+      return [
+        for (
+          var day = from;
+          !day.isAfter(to);
+          day = DateTime(day.year, day.month, day.day + 1)
+        )
+          if (snapshot.eventsFor(day).any((e) => e.event.text.contains(text)))
+            _iso(day),
+      ];
+    }
+
+    CalendarFileContent split(
+      String line,
+      DateTime anchor,
+      DateTime occurrence,
+    ) {
+      final before = file([CalendarRawLine(line, '\n')]);
+      final event = firstEvent(line);
+      final draft = calendarDraftOf(event);
+      return updateCalendarOccurrence(
+        before,
+        CalendarEventRef(line: 0, day: anchor, start: event.start),
+        occurrence,
+        CalendarEventDraft(
+          text: 'Review moved',
+          startMinutes: 10 * 60,
+          recurrence: draft.recurrence,
+        ),
+        CalendarOccurrenceScope.thisAndFollowing,
+      )!;
+    }
+
+    test('a monthly rule keeps its 31st: the new series is on May 31', () {
+      final after = split(
+        '2026-01-31 w05 Sat  9 Review rec:1m.',
+        DateTime(2026, 1, 31),
+        DateTime(2026, 4, 30),
+      );
+      expect(after.lines.first.text, contains('rec:1m until:2026-04-29'));
+      expect(
+        shown(after, 'Review moved', DateTime(2026, 4), DateTime(2026, 8, 31)),
+        ['2026-04-30', '2026-05-31', '2026-06-30', '2026-07-31', '2026-08-31'],
+      );
+      expect(shown(after, 'Review', DateTime(2026), DateTime(2026, 4, 29)), [
+        '2026-01-31',
+        '2026-02-28',
+        '2026-03-31',
+      ]);
+    });
+
+    test('a yearly rule keeps February 29', () {
+      final after = split(
+        '2028-02-29 w09 Tue  9 Review rec:1y.',
+        DateTime(2028, 2, 29),
+        DateTime(2029, 2, 28),
+      );
+      expect(
+        shown(after, 'Review moved', DateTime(2029), DateTime(2036, 12, 31)),
+        [
+          '2029-02-28',
+          '2030-02-28',
+          '2031-02-28',
+          '2032-02-29',
+          '2033-02-28',
+          '2034-02-28',
+          '2035-02-28',
+          '2036-02-29',
+        ],
+        reason:
+            'the clamped years stand alone; the series begins on the '
+            'leap year, and is back on February 29 in 2036',
+      );
+    });
+
+    test('an occurrence on the series day starts the series there', () {
+      final after = split(
+        '2026-01-31 w05 Sat  9 Review rec:1m.',
+        DateTime(2026, 1, 31),
+        DateTime(2026, 3, 31),
+      );
+      expect(
+        shown(after, 'Review moved', DateTime(2026, 3), DateTime(2026, 5, 31)),
+        ['2026-03-31', '2026-04-30', '2026-05-31'],
+      );
+      expect(
+        after.lines.where((line) => line.text.contains('rec:1m')),
+        hasLength(2),
+        reason: 'the old rule ended, one new rule — no plain events',
+      );
+    });
+
+    test('a series that ends before a day that keeps its date is plain', () {
+      final after = split(
+        '2026-01-31 w05 Sat  9 Review rec:1m until:2026-05-15.',
+        DateTime(2026, 1, 31),
+        DateTime(2026, 4, 30),
+      );
+      expect(
+        shown(after, 'Review moved', DateTime(2026, 4), DateTime(2026, 8, 31)),
+        ['2026-04-30'],
+      );
+    });
+  });
+
+  group('the reminder an edit carries (#1226)', () {
+    /// The standup with a full-stamp reminder the evening before.
+    const stamped =
+        '2026-10-05 w41 Mon  9 Standup rec:1w rem:2026-10-04T18:00. 17 jog.';
+
+    CalendarFileContent stampedFile() =>
+        file([const CalendarRawLine(stamped, '\n')]);
+
+    final stampedRef = CalendarEventRef(
+      line: 0,
+      day: DateTime(2026, 10, 5),
+      start: 20,
+    );
+
+    /// The `rem:` values the line of [day] holds in [after].
+    List<String> remindersOn(CalendarFileContent after, String day) => [
+      for (final line in after.lines)
+        if (line.text.startsWith(day))
+          for (final event in parseCalendarLine(
+            line.text,
+            weekdays: calendarWeekdays,
+          ).events)
+            ?event.reminder,
+    ];
+
+    test('an untimed event keeps its clock reminder through an edit', () {
+      final before = file([
+        const CalendarRawLine('2026-10-05 w41 Mon  Standup rem:09:00.', '\n'),
+      ]);
+      final draft = calendarDraftOf(firstEvent(before.lines.single.text));
+      final after = updateCalendarOccurrence(
+        before,
+        CalendarEventRef(line: 0, day: DateTime(2026, 10, 5), start: 20),
+        DateTime(2026, 10, 5),
+        draft,
+        CalendarOccurrenceScope.all,
+      )!;
+      expect(after.lines.single.text, before.lines.single.text);
+    });
+
+    test('this one: the stamp keeps its distance from the new event', () {
+      final after = updateCalendarOccurrence(
+        stampedFile(),
+        stampedRef,
+        DateTime(2026, 10, 12),
+        calendarDraftOf(firstEvent(stamped)).withRecurrence(null),
+        CalendarOccurrenceScope.thisOne,
+      )!;
+      expect(remindersOn(after, '2026-10-12'), ['2026-10-11T18:00']);
+    });
+
+    test('this one, moved: the distance holds from the day it goes to', () {
+      final after = updateCalendarOccurrence(
+        stampedFile(),
+        stampedRef,
+        DateTime(2026, 10, 12),
+        CalendarEventDraft(
+          text: calendarDraftOf(firstEvent(stamped)).text,
+          startMinutes: 9 * 60,
+          day: DateTime(2026, 10, 14),
+        ),
+        CalendarOccurrenceScope.thisOne,
+      )!;
+      expect(remindersOn(after, '2026-10-14'), ['2026-10-13T18:00']);
+    });
+
+    test('this and following: the new anchor has its own distance', () {
+      final after = updateCalendarOccurrence(
+        stampedFile(),
+        stampedRef,
+        DateTime(2026, 10, 19),
+        calendarDraftOf(firstEvent(stamped)),
+        CalendarOccurrenceScope.thisAndFollowing,
+      )!;
+      expect(remindersOn(after, '2026-10-05'), ['2026-10-04T18:00']);
+      expect(remindersOn(after, '2026-10-19'), ['2026-10-18T18:00']);
+    });
+
+    test('edit all with a new day moves the stamp with the anchor', () {
+      final after = updateCalendarOccurrence(
+        stampedFile(),
+        stampedRef,
+        DateTime(2026, 10, 12),
+        CalendarEventDraft(
+          text: calendarDraftOf(firstEvent(stamped)).text,
+          startMinutes: 9 * 60,
+          recurrence: calendarDraftOf(firstEvent(stamped)).recurrence,
+          day: DateTime(2026, 10, 7),
+        ),
+        CalendarOccurrenceScope.all,
+      )!;
+      expect(remindersOn(after, '2026-10-07'), ['2026-10-06T18:00']);
+    });
+
+    test('a stamp the user wrote in the form is not moved again', () {
+      final after = updateCalendarOccurrence(
+        stampedFile(),
+        stampedRef,
+        DateTime(2026, 10, 12),
+        const CalendarEventDraft(
+          text: 'Standup rem:2026-10-11T07:30',
+          startMinutes: 9 * 60,
+        ),
+        CalendarOccurrenceScope.thisOne,
+      )!;
+      expect(remindersOn(after, '2026-10-12'), ['2026-10-11T07:30']);
     });
   });
 

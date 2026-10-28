@@ -167,11 +167,12 @@ On an edit of an event that does not repeat it moves the event: it leaves its
 line and is written on the new day's, which is made when the day has none, and
 the two lines are the only ones that change. On an edit of *This event* of a
 repeating one it moves that one occurrence: its day is added to the rule's
-`except:` and a plain event goes on the day you picked. A desktop opens the
-calendar in place under the row, a phone the system's date picker. On *This
-and following* and *All events* the row is shown and off, since a series
-moves by changing its rule (Repeat). The preview shows the exact line, or the
-two lines, the write will make.
+`except:` and a plain event goes on the day you picked. On *This and following*
+the new series starts on the day you picked, and the old one still ends the day
+before the occurrence you opened. On *All events* the series' first day moves,
+and every occurrence with it. A desktop opens the calendar in place under the
+row, a phone the system's date picker. The preview shows the exact line, or
+the two lines, the write will make.
 
 ### Making an event repeat
 
@@ -184,7 +185,11 @@ on which weekdays, on the Nth weekday of the month. The date an Ends row asks
 for is the last day an occurrence may fall on, and cannot be before the
 event's first day. The row's choices write `rec:` and `until:` on the event;
 the days it skips (`except:`) are not on the form and are never lost by it.
-Ends is off until there is a rule to end.
+Ends is off until there is a rule to end. Changing the **Day** afterwards
+keeps the rows true to it: an end before the new day is dropped (it would
+leave an event that never shows), and *every week on this day* or *every month
+on the 2nd Monday* becomes the same choice for the new day. A Custom rule you
+built stays as it is.
 
 ### One occurrence, or the rest
 

@@ -40,8 +40,9 @@ void main() {
     WidgetTester tester, {
     required bool phone,
     DateTime? focus,
+    List<String> lines = file,
   }) async {
-    final snapshot = calendarSnapshotOf(calendarFileOf(file));
+    final snapshot = calendarSnapshotOf(calendarFileOf(lines));
     tester.view.physicalSize = phone
         ? const Size(420, 1000)
         : const Size(900, 1400);
@@ -284,6 +285,145 @@ void main() {
     });
   });
 
+  group('the dock form is the event it edits (#1218)', () {
+    String typed(WidgetTester tester) =>
+        tester.widget<TextField>(key('calendar-event-text')).controller!.text;
+
+    Future<void> editFromMenu(WidgetTester tester, String text) async {
+      await rightClick(tester, text);
+      await tester.tap(key('journal-event-edit'));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('Edit on another event while one is open starts from it', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        phone: false,
+        lines: const [
+          '2026-10-12 w42 Mon  8 gym.',
+          '2026-10-12 w42 Mon  12 lunch with Marta.',
+        ],
+      );
+      await editFromMenu(tester, 'gym');
+      expect(typed(tester), 'gym');
+      await tester.enterText(key('calendar-event-text'), 'gym, typed over');
+      await tester.pump();
+
+      await editFromMenu(tester, 'lunch');
+      expect(typed(tester), 'lunch with Marta');
+      await tester.tap(key('calendar-event-save'));
+      await tester.pumpAndSettle();
+
+      expect(edited.single.$1.event.text, 'lunch with Marta');
+      expect(edited.single.$2.text, 'lunch with Marta');
+      expect(edited.single.$2.startMinutes, 12 * 60);
+    });
+
+    testWidgets('Add event while an edit is open starts empty', (tester) async {
+      await pump(
+        tester,
+        phone: false,
+        lines: const ['2026-10-12 w42 Mon  8 gym.'],
+      );
+      await editFromMenu(tester, 'gym');
+      expect(typed(tester), 'gym');
+
+      await tester.scrollUntilVisible(
+        key('journal-add-event'),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.tap(key('journal-add-event'));
+      await tester.pumpAndSettle();
+
+      expect(typed(tester), isEmpty);
+      await tester.enterText(key('calendar-event-text'), 'new');
+      await tester.pump();
+      await tester.tap(key('calendar-event-save'));
+      await tester.pumpAndSettle();
+      expect(added.single.$2.text, 'new');
+      expect(edited, isEmpty);
+    });
+  });
+
+  group('the form opens on the series, or on the occurrence (#1221)', () {
+    Future<void> openEdit(WidgetTester tester, String scope) async {
+      await pump(tester, phone: false);
+      await rightClick(tester, 'Standup');
+      await tester.tap(key('journal-event-edit'));
+      await tester.pumpAndSettle();
+      await tester.tap(key('journal-event-scope-$scope'));
+      await tester.pumpAndSettle();
+    }
+
+    String dayLabel(WidgetTester tester) => tester
+        .widget<Text>(
+          find.descendant(
+            of: key('calendar-event-day'),
+            matching: find.byType(Text),
+          ),
+        )
+        .data!;
+
+    Future<void> endOn(WidgetTester tester, int day) async {
+      await tester.tap(key('calendar-event-ends'));
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.descendant(of: find.byType(Dialog), matching: find.text('$day')),
+      );
+      await tester.tap(find.text('OK'));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('Edit all is on the day the series began', (tester) async {
+      await openEdit(tester, 'all');
+      // Tapped on Mon 12 October; the series began on Mon 5 October.
+      expect(dayLabel(tester), contains('5'));
+      expect(dayLabel(tester), isNot(contains('12')));
+
+      // The series can be ended as early as its first day, not only from the
+      // occurrence that was tapped.
+      await endOn(tester, 7);
+      await tester.tap(key('calendar-event-save'));
+      await tester.pumpAndSettle();
+
+      expect(edited.single.$3, CalendarOccurrenceScope.all);
+      expect(edited.single.$2.day, DateTime(2026, 10, 5));
+      expect(edited.single.$2.recurrence!.bounds.until, DateTime(2026, 10, 7));
+    });
+
+    testWidgets('this and following is on the occurrence', (tester) async {
+      await openEdit(tester, 'following');
+      expect(dayLabel(tester), contains('12'));
+      await tester.tap(key('calendar-event-save'));
+      await tester.pumpAndSettle();
+      expect(edited.single.$2.day, DateTime(2026, 10, 12));
+    });
+
+    testWidgets('the preview of Edit all is the rule line, not a new one', (
+      tester,
+    ) async {
+      await openEdit(tester, 'all');
+      await tester.enterText(key('calendar-event-text'), 'Standup moved');
+      await tester.pump();
+      final lines = tester
+          .widget<Text>(
+            find
+                .descendant(
+                  of: key('calendar-event-preview'),
+                  matching: find.byType(Text),
+                )
+                .first,
+          )
+          .textSpan!
+          .toPlainText();
+      expect(lines, startsWith('2026-10-05'));
+      expect(lines, isNot(contains('2026-10-12')));
+    });
+  });
+
   group('moving, from the form', () {
     /// The text of the preview box: the lines the write would make.
     String preview(WidgetTester tester) => tester
@@ -409,25 +549,27 @@ void main() {
       expect(edited.single.$1.day, DateTime(2026, 10, 19));
     });
 
-    testWidgets('a series keeps its Day row, off', (tester) async {
-      for (final scope in ['all', 'following']) {
-        await pump(tester, phone: false);
-        await rightClick(tester, 'Standup');
-        await tester.tap(key('journal-event-edit'));
-        await tester.pumpAndSettle();
-        await tester.tap(key('journal-event-scope-$scope'));
-        await tester.pumpAndSettle();
+    testWidgets('this and following moves: the draft carries the new day', (
+      tester,
+    ) async {
+      await pump(tester, phone: false);
+      await rightClick(tester, 'Standup');
+      await tester.tap(key('journal-event-edit'));
+      await tester.pumpAndSettle();
+      await tester.tap(key('journal-event-scope-following'));
+      await tester.pumpAndSettle();
 
-        expect(key('calendar-event-day'), findsOne, reason: scope);
-        expect(
-          tester.widget<TextButton>(key('calendar-event-day')).onPressed,
-          isNull,
-          reason: scope,
-        );
-        await tester.tap(key('calendar-event-save'));
-        await tester.pumpAndSettle();
-        expect(edited.last.$2.day, isNull, reason: scope);
-      }
+      expect(
+        tester.widget<TextButton>(key('calendar-event-day')).onPressed,
+        isNotNull,
+      );
+      await pickDay(tester, 14, phone: false);
+      await tester.tap(key('calendar-event-save'));
+      await tester.pumpAndSettle();
+
+      expect(edited.single.$3, CalendarOccurrenceScope.thisAndFollowing);
+      expect(edited.single.$2.day, DateTime(2026, 10, 14));
+      expect(edited.single.$1.day, DateTime(2026, 10, 12));
     });
 
     testWidgets(

@@ -295,6 +295,17 @@ void main() {
       );
     });
 
+    test('the clock reminder of an event with no time stays in its text', () {
+      // No start to count a lead from: the form could not show it, and
+      // would write nothing back (#1226).
+      final draft = calendarDraftOf(
+        eventOf('2026-10-05 w41 Mon  Standup rem:09:00.', 0),
+      );
+      expect(draft.reminderMinutes, isNull);
+      expect(draft.text, 'Standup rem:09:00');
+      expect(calendarEventAsText(draft), 'Standup rem:09:00');
+    });
+
     test('a rule that cannot be read stays in the text, as written', () {
       final draft = calendarDraftOf(
         eventOf('2026-10-05 w41 Mon  9 Standup rec:often until:soon.', 0),

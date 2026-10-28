@@ -132,6 +132,8 @@ final class CalendarEventRepeat extends StatelessWidget {
       firstDate: first,
       lastDate: todoLastDate.isAfter(initial) ? todoLastDate : initial,
     );
-    if (picked != null) onUntil(dateOnly(picked));
+    // The form may be gone while the picker was up (#1222).
+    if (picked == null || !context.mounted) return;
+    onUntil(dateOnly(picked));
   }
 }

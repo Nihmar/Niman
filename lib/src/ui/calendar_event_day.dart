@@ -3,8 +3,8 @@
 ///
 /// It uses the task dialog's due-date pattern: a window with the room opens
 /// the calendar in place under the row, a touch screen the system's date
-/// picker. A row that cannot move the event — a series moves by changing its
-/// rule — stays where it is, disabled.
+/// picker. The row moves whatever is being edited (#1225): the form says what
+/// that is.
 library;
 
 import 'package:flutter/material.dart';
@@ -18,7 +18,6 @@ final class CalendarEventDay extends StatelessWidget {
   /// A row showing [day]; a day picked is answered through [onPicked].
   const new({
     required this.day,
-    required this.enabled,
     required this.open,
     required this.onToggle,
     required this.onPicked,
@@ -27,9 +26,6 @@ final class CalendarEventDay extends StatelessWidget {
 
   /// The day the event is written on.
   final DateTime day;
-
-  /// Whether the day can be changed at all.
-  final bool enabled;
 
   /// Whether the calendar is open under the row.
   final bool open;
@@ -54,7 +50,7 @@ final class CalendarEventDay extends StatelessWidget {
                 message: AppStrings.calendarEventDay,
                 child: TextButton(
                   key: const Key('calendar-event-day'),
-                  onPressed: enabled ? () => _tap(context) : null,
+                  onPressed: () => _tap(context),
                   style: TextButton.styleFrom(alignment: Alignment.centerLeft),
                   child: Text(
                     journalDayLabel(day),
@@ -66,7 +62,7 @@ final class CalendarEventDay extends StatelessWidget {
             ),
           ],
         ),
-        if (open && enabled)
+        if (open)
           TodoDatePanel(
             key: const Key('calendar-event-day-panel'),
             initial: day,
@@ -84,7 +80,8 @@ final class CalendarEventDay extends StatelessWidget {
       firstDate: todoFirstDate,
       lastDate: todoLastDate,
     );
-    if (picked == null) return;
+    // The form may be gone while the picker was up (#1222).
+    if (picked == null || !context.mounted) return;
     onPicked(DateTime(picked.year, picked.month, picked.day));
   }
 }

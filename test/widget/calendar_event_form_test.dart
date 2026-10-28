@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/calendar/calendar_writer.dart';
+import 'package:niman/src/ui/app_switch.dart';
 import 'package:niman/src/ui/calendar_event_form.dart';
 
 void main() {
@@ -37,6 +38,7 @@ void main() {
   }
 
   Finder saveButton() => find.byKey(const Key('calendar-event-save'));
+  Finder remindSwitch() => find.byKey(const Key('calendar-event-remind'));
 
   testWidgets('nothing to write keeps Add out of reach', (tester) async {
     await tester.pumpWidget(buildApp());
@@ -149,6 +151,34 @@ void main() {
 
     expect(saved!.startMinutes, 9 * 60);
     expect(saved!.reminderMinutes, 9 * 60 - 15);
+  });
+
+  testWidgets('a lead that would land before midnight is shortened (#1226)', (
+    tester,
+  ) async {
+    // Ten minutes past midnight: the default fifteen would be yesterday's,
+    // which a calendar line's clock `rem:` cannot say. The form says what it
+    // writes instead of switching the reminder on and dropping it.
+    await tester.pumpWidget(
+      buildApp(draft: const CalendarEventDraft(text: 'a', startMinutes: 10)),
+    );
+    await tester.tap(find.byKey(const Key('calendar-event-remind')));
+    await tester.pump();
+    expect(tester.widget<AppSwitch>(remindSwitch()).value, isTrue);
+    await tester.tap(saveButton());
+
+    expect(saved!.reminderMinutes, 0, reason: 'ten minutes before, at most');
+  });
+
+  testWidgets('at midnight no reminder can be set (#1226)', (tester) async {
+    await tester.pumpWidget(
+      buildApp(draft: const CalendarEventDraft(text: 'a', startMinutes: 0)),
+    );
+    final remind = tester.widget<AppSwitch>(remindSwitch());
+    expect(remind.onChanged, isNull);
+    expect(remind.value, isFalse);
+    await tester.tap(saveButton());
+    expect(saved!.reminderMinutes, isNull);
   });
 
   testWidgets('an edit starts from the event it edits', (tester) async {

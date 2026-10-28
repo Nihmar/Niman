@@ -5,6 +5,21 @@ import 'package:niman/src/core/recurrence/recurrence_rule.dart';
 import 'package:niman/src/core/recurrence/recurrence_unit.dart';
 import 'package:niman/src/core/recurrence/recurrence_weekday.dart';
 
+/// [rule], for an event that was on [from] and is now on [to] (#1219).
+///
+/// A preset is tied to its day: the weekday of the weekly one, the Nth
+/// weekday of the monthly one. When [rule] is one of the presets of [from] it
+/// becomes the same preset of [to]; a rule the user built, which no preset
+/// says, stays as it is.
+RecurrenceRule eventRuleOnDay(
+  RecurrenceRule rule, {
+  required DateTime from,
+  required DateTime to,
+}) {
+  final index = eventRepeatPresets(from).indexOf(rule);
+  return index < 0 ? rule : eventRepeatPresets(to)[index];
+}
+
 /// Daily, weekdays, weekly, monthly (on the date and on the Nth weekday) and
 /// yearly, counted from [anchor], the event's own day.
 ///

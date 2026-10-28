@@ -176,7 +176,9 @@ does.
 **Several items are moved at once**, with no dialog: select the lines and
 choose the same command. Each becomes `text [[Note]]` with today's creation
 date. A ticked item (`- [x]`) goes to `done.txt`, completed today:
-`x 2026-10-23 2026-10-23 Fix the hallway light [[Repairs]]`.
+`x 2026-10-23 2026-10-23 Fix the hallway light [[Repairs]]`. A ticked item that
+repeats (it carries a `rec:`) leaves its next copy in `todo.txt`, as ticking
+the task does, whether one item is moved or several.
 
 The tasks are written to `todo.txt` and `done.txt` **first**, and the lines
 leave the note only once both files took them, as one undoable edit of the

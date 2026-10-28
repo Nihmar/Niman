@@ -615,10 +615,11 @@ final class _JournalBrowserState extends State<JournalBrowser> {
         );
         if (scope == null || !mounted) return;
         // An event that does not repeat has no scope: its form moves it.
+        final scoped = entry.repeats ? scope : null;
         _openForm(
-          day: _dayOfEntry(entry),
+          day: _formDayOf(entry, scoped),
           editing: entry,
-          scope: entry.repeats ? scope : null,
+          scope: scoped,
         );
       case JournalEventAction.skip:
         widget.onSkipEvent?.call(entry);
@@ -640,6 +641,18 @@ final class _JournalBrowserState extends State<JournalBrowser> {
   /// occurrence's own day (#1191), else the day the pane speaks for.
   DateTime _dayOfEntry(CalendarEntryEvent entry) =>
       entry.day ?? (widget.large ? _selected : widget.focusDay ?? widget.today);
+
+  /// The day an edit's form opens on (#1221): the day the form writes the
+  /// event on, which its Ends row counts from and its Repeat presets are
+  /// taken from. For all the events of a series it is the series' first day,
+  /// where the rule event is written; for the rest the occurrence's own — the
+  /// one that is changed, or the one the new series starts on.
+  DateTime _formDayOf(
+    CalendarEntryEvent entry,
+    CalendarOccurrenceScope? scope,
+  ) => scope == CalendarOccurrenceScope.all
+      ? entry.line.date ?? _dayOfEntry(entry)
+      : _dayOfEntry(entry);
 
   /// The dock's offer for the empty day it picked (#712): the phone's
   /// card and dialog in one row, under the calendar they belong to.
@@ -824,6 +837,16 @@ final class _JournalBrowserState extends State<JournalBrowser> {
     CalendarOccurrenceScope? scope,
   ) {
     return CalendarEventForm(
+      // The form's fields are read once, from its draft: a form for another
+      // event, day or scope, or for an added event after an edit, is another
+      // state, not the open one with its fields (#1218).
+      key: ValueKey((
+        editing?.lineIndex,
+        editing?.event.start,
+        editing?.day,
+        scope,
+        day,
+      )),
       day: day,
       knownTokens: widget.knownTokens,
       draft: editing == null ? null : calendarDraftOf(editing.event),
@@ -878,7 +901,8 @@ final class _JournalBrowserState extends State<JournalBrowser> {
                   day: editing.line.date ?? day,
                   start: editing.event.start,
                 ),
-                day,
+                // The occurrence, whichever day the form is on.
+                editing.day ?? day,
                 draft,
                 scope ?? CalendarOccurrenceScope.all,
               ) ??

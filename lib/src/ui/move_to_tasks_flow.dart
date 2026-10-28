@@ -15,8 +15,6 @@ import 'package:flutter/material.dart';
 import 'package:niman/src/editor/task_items.dart';
 import 'package:niman/src/editor/task_items_edit.dart';
 import 'package:niman/src/todo/moved_task_lines.dart';
-import 'package:niman/src/todo/parser.dart';
-import 'package:niman/src/todo/recurring_line.dart';
 import 'package:niman/src/todo/reminder_health.dart';
 import 'package:niman/src/todo/todo_filter.dart';
 import 'package:niman/src/ui/note_tasks_host.dart';
@@ -113,10 +111,7 @@ final class MoveToTasksFlow {
       onOpenReminderSettings: reminders?.openHealthSettings,
     );
     if (line == null) return null;
-    if (!item.checked) return MovedTaskLines(todo: [line], done: const []);
-    // A ticked item that repeats leaves its next copy, as completing does.
-    final next = nextRecurringLine(line, today);
-    return MovedTaskLines(todo: [?next], done: [completeTodoLine(line, today)]);
+    return movedTaskLineFiles(line, checked: item.checked, today: today);
   }
 
   void _offerUndo(

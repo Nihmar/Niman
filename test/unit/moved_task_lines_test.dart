@@ -25,6 +25,39 @@ void main() {
     expect(lines.done, ['x 2026-10-23 2026-10-23 Fix the light [[Repairs]]']);
   });
 
+  test(
+    'a ticked item that repeats leaves its next copy, as one does (#1223)',
+    () {
+      final lines = movedTaskLines(
+        items: [
+          (text: 'Water plants rec:1w due:2026-10-20', checked: true),
+          (text: 'Fix the light', checked: true),
+        ],
+        link: '[[N]]',
+        today: today,
+      );
+      expect(lines.done, [
+        'x 2026-10-23 2026-10-23 Water plants rec:1w due:2026-10-20 [[N]]',
+        'x 2026-10-23 2026-10-23 Fix the light [[N]]',
+      ]);
+      expect(lines.todo, [
+        '2026-10-23 Water plants rec:1w due:2026-10-30 [[N]]',
+      ]);
+    },
+  );
+
+  test('one item and several make the same lines of the same item', () {
+    const line = '2026-10-23 Water plants rec:1w due:2026-10-20 [[N]]';
+    final one = movedTaskLineFiles(line, checked: true, today: today);
+    final many = movedTaskLines(
+      items: [(text: 'Water plants rec:1w due:2026-10-20', checked: true)],
+      link: '[[N]]',
+      today: today,
+    );
+    expect(one.todo, many.todo);
+    expect(one.done, many.done);
+  });
+
   test('the items keep their order within each file', () {
     final lines = movedTaskLines(
       items: [

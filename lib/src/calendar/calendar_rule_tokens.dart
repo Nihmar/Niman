@@ -142,3 +142,27 @@ List<CalendarToken> _boundTokens(CalendarEvent event) => [
 
 bool _hasUnreadableBound(CalendarEvent event) =>
     _boundTokens(event).any(isUnreadableRuleToken);
+
+/// [text] without any `rec:`, `until:` or `except:` token, readable or not,
+/// and the spaces that followed each (#1227).
+///
+/// What the writer does to a draft that carries a rule: the form's rule,
+/// end and skipped days are the only ones the line is left with. A token the
+/// grammar cannot read, or a second copy of one, would otherwise stay in the
+/// text and — the first `until:` and the first `rec:` counting — win over
+/// the ones the form writes.
+String calendarTextWithoutRuleTokens(String text) {
+  final tokens = [
+    for (final token in calendarTokens(text, asides: calendarAsides(text, 0)))
+      if (ruleKeyOf(token) != null) token,
+  ];
+  var out = text;
+  for (final token in tokens.reversed) {
+    var cut = token.end;
+    while (cut < out.length && out[cut] == ' ') {
+      cut++;
+    }
+    out = out.substring(0, token.start) + out.substring(cut);
+  }
+  return out.trim();
+}

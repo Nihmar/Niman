@@ -7,10 +7,12 @@
 /// - Edit this one: the day is `except:`ed, and a plain event with the
 ///   change goes on the target day's line.
 /// - Edit this and following: the rule gets `until:` the day before, and a
-///   new rule event, changed, goes on the occurrence's day line.
+///   new rule event, changed, goes on the day the form says (the
+///   occurrence's own by default).
 /// - Delete this and following: the rule gets `until:` the day before (or,
 ///   from its first day on, the event goes).
-/// - Edit or delete all: the rule's event itself.
+/// - Edit or delete all: the rule's event itself, which moves with the day
+///   the form says.
 ///
 /// Each is a pure transformation of [CalendarFileContent]: only the lines it
 /// must change change, and every other keeps its bytes and its ending. Each
@@ -22,7 +24,9 @@ library;
 
 import 'package:niman/src/calendar/calendar_file.dart';
 import 'package:niman/src/calendar/calendar_recurrence.dart';
+import 'package:niman/src/calendar/calendar_reminder_stamp.dart';
 import 'package:niman/src/calendar/calendar_rule_tokens.dart';
+import 'package:niman/src/calendar/calendar_series_day.dart';
 import 'package:niman/src/calendar/calendar_splice.dart';
 import 'package:niman/src/calendar/calendar_writer.dart';
 import 'package:niman/src/calendar/day_style.dart';
@@ -97,11 +101,16 @@ CalendarFileContent? deleteCalendarOccurrence(
 /// [scope] says; null when the file no longer holds it.
 ///
 /// [draft] is what the form held: its recurrence is the new rule, its end
-/// and the days it skips. For this one only the draft is written as a plain
-/// event, on [moveTo] when given and on the occurrence's own day otherwise.
-/// For this and following the draft's `except:` loses the days before the
-/// occurrence — they belong to the rule that ended — and the new rule event
-/// goes on the occurrence's day line.
+/// and the days it skips, and its day (or [moveTo], when given) the day the
+/// user picked (#1225). Whatever the scope, that is the day written:
+///
+/// - this one: the draft is written as a plain event there, on the
+///   occurrence's own day when none was picked;
+/// - this and following: the new rule event starts there, on the
+///   occurrence's own day when none was picked, and its `except:` loses the
+///   days before it — they belong to the rule that ended;
+/// - all: the rule event itself moves there, which moves the rule's first
+///   day and with it every occurrence.
 CalendarFileContent? updateCalendarOccurrence(
   CalendarFileContent file,
   CalendarEventRef ref,
@@ -113,37 +122,45 @@ CalendarFileContent? updateCalendarOccurrence(
 }) {
   final found = findCalendarEvent(file, ref);
   if (found == null) return null;
-  if (found.event.recurrence == null) {
-    // One event, and its own: it may go to another day.
-    return updateCalendarEvent(file, ref, draft, moveTo: moveTo ?? draft.day);
-  }
-  if (scope == CalendarOccurrenceScope.all) {
-    return updateCalendarEvent(file, ref, draft);
+  final picked = moveTo ?? draft.day;
+  if (found.event.recurrence == null || scope == CalendarOccurrenceScope.all) {
+    // One event, and its own, or the rule event itself: it may go to
+    // another day.
+    return updateCalendarEvent(file, ref, draft, moveTo: picked);
   }
   if (!_occursOn(found.event, ref.day, occurrence)) return null;
   switch (scope) {
     case CalendarOccurrenceScope.thisOne:
       final skipped = skipCalendarOccurrence(file, ref, occurrence);
       if (skipped == null) return null;
+      final day = picked ?? occurrence;
       return addCalendarEvent(
         skipped,
-        moveTo ?? draft.day ?? occurrence,
-        draft: draft.withRecurrence(null),
+        day,
+        draft: _onDay(draft.withRecurrence(null), found.event, ref.day, day),
         style: style,
       );
     case CalendarOccurrenceScope.thisAndFollowing:
       if (!_isAfter(occurrence, ref.day)) {
-        return updateCalendarEvent(file, ref, draft);
+        return updateCalendarEvent(file, ref, draft, moveTo: picked);
       }
       final ended = _endedBefore(file, found.index, found.event, occurrence);
+      final moved = picked != null && !sameCalendarDay(picked, occurrence);
+      final split = moved
+          ? null
+          : _splitAt(found.event, ref.day, occurrence, draft);
+      if (split != null) {
+        return _addSplit(ended, split, found.event, ref.day, draft, style);
+      }
+      final start = moved ? picked : occurrence;
       return addCalendarEvent(
         ended,
-        occurrence,
-        draft: _fromDay(draft, occurrence),
+        start,
+        draft: _fromDay(_onDay(draft, found.event, ref.day, start), start),
         style: style,
       );
     case CalendarOccurrenceScope.all:
-      return updateCalendarEvent(file, ref, draft);
+      return updateCalendarEvent(file, ref, draft, moveTo: picked);
   }
 }
 
@@ -161,6 +178,64 @@ CalendarFileContent _endedBefore(
   )!;
   return withCalendarLineText(file, index, text);
 }
+
+/// How the rule [event] (first day [anchor]) is split at [occurrence] into
+/// [draft], when the series has a day of month the occurrence is not on
+/// (#1224); null when the new series can begin on the occurrence.
+CalendarSeriesSplit? _splitAt(
+  CalendarEvent event,
+  DateTime anchor,
+  DateTime occurrence,
+  CalendarEventDraft draft,
+) {
+  final old = event.recurrence;
+  final recurrence = draft.recurrence;
+  if (old == null || recurrence == null) return null;
+  return calendarSeriesSplit(
+    oldRule: old.rule,
+    oldAnchor: anchor,
+    occurrence: occurrence,
+    recurrence: recurrence,
+  );
+}
+
+/// [file] with [split] written: each day it names alone as a plain event of
+/// [draft], then the new series from its anchor.
+CalendarFileContent _addSplit(
+  CalendarFileContent file,
+  CalendarSeriesSplit split,
+  CalendarEvent event,
+  DateTime anchor,
+  CalendarEventDraft draft,
+  CalendarDayStyle? style,
+) {
+  var out = file;
+  for (final day in split.alone) {
+    out = addCalendarEvent(
+      out,
+      day,
+      draft: _onDay(draft.withRecurrence(null), event, anchor, day),
+      style: style,
+    );
+  }
+  final start = split.anchor;
+  if (start == null) return out;
+  return addCalendarEvent(
+    out,
+    start,
+    draft: _fromDay(_onDay(draft, event, anchor, start), start),
+    style: style,
+  );
+}
+
+/// [draft] for a copy of [event], whose first day is [anchor], written on
+/// [day]: a full-stamp reminder keeps its distance from the event (#1226).
+CalendarEventDraft _onDay(
+  CalendarEventDraft draft,
+  CalendarEvent event,
+  DateTime anchor,
+  DateTime day,
+) => calendarDraftOnDay(draft, stamp: event.reminder, from: anchor, to: day);
 
 /// [draft] as the rule event that starts on [day]: the days it skips before
 /// [day] are the old rule's, and are dropped.

@@ -152,7 +152,9 @@ final class RepeatRow extends StatelessWidget {
           keyPrefix: keyPrefix,
           countsFrom: countsFrom,
         );
-        if (picked != null) onChanged(picked);
+        // The row may be gone while the sheet was up (#1222).
+        if (picked == null || !context.mounted) return;
+        onChanged(picked);
     }
   }
 
