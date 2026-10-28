@@ -2674,6 +2674,9 @@ final class BelarusianStrings extends Strings {
   @override
   String get syncTestFailed => 'Праверка не ўдалася';
   @override
+  String get syncSaveFailed =>
+      'Налады не захаваны: пароль не ўдалося захаваць тут.';
+  @override
   String get syncTestCertificate => 'Сертыфікат не лічыцца давераным';
   @override
   String get syncTestCertificateHint =>

@@ -2653,6 +2653,9 @@ final class NorwegianStrings extends Strings {
   @override
   String get syncTestFailed => 'Testen mislyktes';
   @override
+  String get syncSaveFailed =>
+      'Innstillingene ble ikke lagret: passordet kunne ikke lagres her.';
+  @override
   String get syncTestCertificate => 'Sertifikatet er ikke betrodd';
   @override
   String get syncTestCertificateHint =>

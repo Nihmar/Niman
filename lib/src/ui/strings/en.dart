@@ -2636,6 +2636,9 @@ final class EnglishStrings extends Strings {
   @override
   String get syncTestFailed => 'The test did not work';
   @override
+  String get syncSaveFailed =>
+      'The settings were not saved: the password could not be stored here.';
+  @override
   String get syncTestCertificate => 'The certificate is not trusted';
   @override
   String get syncTestCertificateHint =>

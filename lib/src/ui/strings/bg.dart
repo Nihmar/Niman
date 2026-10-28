@@ -2682,6 +2682,9 @@ final class BulgarianStrings extends Strings {
   @override
   String get syncTestFailed => 'Тестът не успя';
   @override
+  String get syncSaveFailed =>
+      'Настройките не са запазени: паролата не можа да се съхрани тук.';
+  @override
   String get syncTestCertificate => 'Сертификатът не е доверен';
   @override
   String get syncTestCertificateHint =>

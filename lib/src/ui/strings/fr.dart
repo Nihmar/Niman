@@ -2745,6 +2745,10 @@ final class FrenchStrings extends Strings {
   @override
   String get syncTestFailed => 'Le test n’a pas abouti';
   @override
+  String get syncSaveFailed =>
+      'Les réglages n’ont pas été enregistrés : le mot de passe n’a pas pu '
+      'être conservé ici.';
+  @override
   String get syncTestCertificate => 'Le certificat n’est pas approuvé';
   @override
   String get syncTestCertificateHint =>

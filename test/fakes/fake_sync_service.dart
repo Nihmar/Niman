@@ -75,6 +75,10 @@ final class FakeSyncService extends ChangeNotifier implements SyncService {
   /// The password of the last [save] (null = kept).
   String? savedPassword;
 
+  /// What the next [save] calls throw, one each, before any succeeds — the
+  /// secure storage refusing the password, for instance (#1244).
+  final List<Exception> saveFailures = [];
+
   @override
   Future<void> load() async {}
 
@@ -105,6 +109,7 @@ final class FakeSyncService extends ChangeNotifier implements SyncService {
     String? trustedFingerprint,
   }) async {
     calls.add('save $url');
+    if (saveFailures.isNotEmpty) throw saveFailures.removeAt(0);
     savedPassword = password;
     savedFingerprint = trustedFingerprint;
     status = SyncStatus(

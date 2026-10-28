@@ -2695,6 +2695,10 @@ final class DutchStrings extends Strings {
   @override
   String get syncTestFailed => 'De test is mislukt';
   @override
+  String get syncSaveFailed =>
+      'De instellingen zijn niet opgeslagen: het wachtwoord kon hier niet '
+      'worden bewaard.';
+  @override
   String get syncTestCertificate => 'Het certificaat is niet vertrouwd';
   @override
   String get syncTestCertificateHint =>

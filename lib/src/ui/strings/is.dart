@@ -2661,6 +2661,9 @@ final class IcelandicStrings extends Strings {
   @override
   String get syncTestFailed => 'Prófunin tókst ekki';
   @override
+  String get syncSaveFailed =>
+      'Stillingar voru ekki vistaðar: ekki tókst að geyma lykilorðið hér.';
+  @override
   String get syncTestCertificate => 'Vottorðinu er ekki treyst';
   @override
   String get syncTestCertificateHint =>

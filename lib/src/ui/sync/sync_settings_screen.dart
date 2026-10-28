@@ -202,7 +202,12 @@ final class _SyncSettingsScreenState extends State<SyncSettingsScreen> {
       );
     } on Object catch (e) {
       _log.error('settings: save failed: $e');
-      if (mounted) setState(() => _saving = false);
+      if (!mounted) return;
+      setState(() => _saving = false);
+      // Nothing was stored: the form stays, and the failure is said out
+      // loud instead of leaving "Save" to be pressed over and over (#1244).
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(AppStrings.syncSaveFailed)));
       return;
     }
     if (!mounted) return;

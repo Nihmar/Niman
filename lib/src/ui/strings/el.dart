@@ -2751,6 +2751,10 @@ final class GreekStrings extends Strings {
   @override
   String get syncTestFailed => 'Η δοκιμή δεν πέτυχε';
   @override
+  String get syncSaveFailed =>
+      'Οι ρυθμίσεις δεν αποθηκεύτηκαν: ο κωδικός πρόσβασης δεν μπόρεσε να '
+      'αποθηκευτεί εδώ.';
+  @override
   String get syncTestCertificate => 'Το πιστοποιητικό δεν είναι αξιόπιστο';
   @override
   String get syncTestCertificateHint =>

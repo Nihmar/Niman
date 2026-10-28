@@ -2676,6 +2676,9 @@ final class SwedishStrings extends Strings {
   @override
   String get syncTestFailed => 'Testet fungerade inte';
   @override
+  String get syncSaveFailed =>
+      'Inställningarna sparades inte: lösenordet kunde inte sparas här.';
+  @override
   String get syncTestCertificate => 'Certifikatet är inte betrott';
   @override
   String get syncTestCertificateHint =>

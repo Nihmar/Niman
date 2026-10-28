@@ -2722,6 +2722,10 @@ final class GermanStrings extends Strings {
   @override
   String get syncTestFailed => 'Der Test hat nicht funktioniert';
   @override
+  String get syncSaveFailed =>
+      'Die Einstellungen wurden nicht gespeichert: Das Passwort konnte hier '
+      'nicht abgelegt werden.';
+  @override
   String get syncTestCertificate => 'Dem Zertifikat wird nicht vertraut';
   @override
   String get syncTestCertificateHint =>

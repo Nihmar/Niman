@@ -1416,6 +1416,10 @@ abstract base class Strings {
   String get syncTestUnsupported;
   String get syncTestUnsupportedHint;
   String get syncTestFailed;
+
+  /// The destination could not be stored: the secure storage refused the
+  /// password (issue #1244).
+  String get syncSaveFailed;
   // A self-signed destination, trusted once by fingerprint (#454).
   String get syncTestCertificate;
   String get syncTestCertificateHint;

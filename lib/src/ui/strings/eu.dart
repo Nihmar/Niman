@@ -2686,6 +2686,9 @@ final class BasqueStrings extends Strings {
   @override
   String get syncTestFailed => 'Probak ez du funtzionatu';
   @override
+  String get syncSaveFailed =>
+      'Ezarpenak ez dira gorde: pasahitza ezin izan da hemen gorde.';
+  @override
   String get syncTestCertificate => 'Ziurtagiria ez da fidagarria';
   @override
   String get syncTestCertificateHint =>

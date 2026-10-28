@@ -1606,6 +1606,7 @@ final class AppStrings {
   static String get syncTestUnsupported => _s.syncTestUnsupported;
   static String get syncTestUnsupportedHint => _s.syncTestUnsupportedHint;
   static String get syncTestFailed => _s.syncTestFailed;
+  static String get syncSaveFailed => _s.syncSaveFailed;
   static String get syncTestCertificate => _s.syncTestCertificate;
   static String get syncTestCertificateHint => _s.syncTestCertificateHint;
   static String get syncCertTrustTitle => _s.syncCertTrustTitle;

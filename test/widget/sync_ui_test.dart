@@ -3,6 +3,7 @@
 // settings entry points.
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show PlatformException;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/app.dart';
@@ -117,6 +118,30 @@ void main() {
       expect(sync.confirmed, isTrue);
       // Now configured: the overview replaces the form.
       expect(find.byKey(const Key('sync-overview-card')), findsOneWidget);
+    });
+
+    // #1244: the password is what a save can lose (a keychain that refuses
+    // it), and a form that swallowed that left "Save" to be pressed over and
+    // over with nothing to show for it.
+    testWidgets('a save that fails says so and keeps the form', (tester) async {
+      sync.saveFailures.add(PlatformException(code: '-34018'));
+      await pumpScreen(tester);
+      await type(tester, 'sync-url', 'https://nas.local/dav/');
+      await tester.tap(find.byKey(const Key('sync-test')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('sync-save')));
+      await tester.pumpAndSettle();
+
+      expect(find.text(AppStrings.syncSaveFailed), findsOneWidget);
+      expect(sync.savedPassword, isNull);
+      // The form is still there, its test still good: pressing again works.
+      expect(
+        tester
+            .widget<FilledButton>(find.byKey(const Key('sync-save')))
+            .onPressed,
+        isNotNull,
+      );
+      expect(find.byKey(const Key('sync-first-dialog')), findsNothing);
     });
 
     testWidgets('a failed test explains itself and offers no save', (

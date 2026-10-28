@@ -636,6 +636,18 @@ final class LibrarySyncService extends ChangeNotifier implements SyncService {
     final uri = parseUrl(url).url;
     if (uri == null) throw ArgumentError('Not a usable address');
     final previous = _status.destination;
+    // The password first: the secure storage is the step that can refuse on
+    // its own (a keyring that is locked, a build not signed for the
+    // Keychain), and a destination stored without its password is a sync
+    // paused on every trigger until it is typed again (#1244). Failing here
+    // leaves the destination as it was.
+    if (password != null) {
+      if (password.isEmpty) {
+        await secrets.delete(root);
+      } else {
+        await secrets.write(root, password);
+      }
+    }
     await store.saveDestination(
       libraryPath: root,
       url: uri,
@@ -650,13 +662,6 @@ final class LibrarySyncService extends ChangeNotifier implements SyncService {
     // certificate confirmed for the address being saved now (#454).
     if (trustedFingerprint != null) {
       await store.setTrustedFingerprint(root, trustedFingerprint);
-    }
-    if (password != null) {
-      if (password.isEmpty) {
-        await secrets.delete(root);
-      } else {
-        await secrets.write(root, password);
-      }
     }
     if (capabilities != null) await store.setCapabilities(root, capabilities);
     scheduler.clearPause();

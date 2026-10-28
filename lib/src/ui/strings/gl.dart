@@ -2681,6 +2681,9 @@ final class GalicianStrings extends Strings {
   @override
   String get syncTestFailed => 'A proba non funcionou';
   @override
+  String get syncSaveFailed =>
+      'A configuración non se gardou: aquí non se puido gardar o contrasinal.';
+  @override
   String get syncTestCertificate => 'O certificado non é de confianza';
   @override
   String get syncTestCertificateHint =>

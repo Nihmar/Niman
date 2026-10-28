@@ -2672,6 +2672,9 @@ final class SerbianStrings extends Strings {
   @override
   String get syncTestFailed => 'Тест није успео';
   @override
+  String get syncSaveFailed =>
+      'Подешавања нису сачувана: лозинка није могла бити сачувана овде.';
+  @override
   String get syncTestCertificate => 'Сертификат није поуздан';
   @override
   String get syncTestCertificateHint =>

@@ -222,6 +222,11 @@ entry in the login keychain instead, which needs no entitlement, reading
 from whichever of the two holds it. Any other keychain error is the
 caller's.
 
+A save writes the password before the destination: the secure storage is
+the step that can refuse on its own, and a destination stored without its
+password is a sync paused on every trigger. A save that fails says so on
+the screen and changes nothing.
+
 Saving the destination with another URL or user clears the library's
 `sync_items` and capabilities: they describe a different remote, so the
 next sync is a first sync, which never deletes. The queue stays, since

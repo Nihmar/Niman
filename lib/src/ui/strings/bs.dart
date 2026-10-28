@@ -2673,6 +2673,9 @@ final class BosnianStrings extends Strings {
   @override
   String get syncTestFailed => 'Test nije uspio';
   @override
+  String get syncSaveFailed =>
+      'Postavke nisu sačuvane: lozinku ovdje nije bilo moguće spremiti.';
+  @override
   String get syncTestCertificate => 'Certifikat nije pouzdan';
   @override
   String get syncTestCertificateHint =>

@@ -2683,6 +2683,9 @@ final class HungarianStrings extends Strings {
   @override
   String get syncTestFailed => 'A teszt nem sikerült';
   @override
+  String get syncSaveFailed =>
+      'A beállítások nem mentődtek el: a jelszót nem sikerült itt tárolni.';
+  @override
   String get syncTestCertificate => 'A tanúsítvány nem megbízható';
   @override
   String get syncTestCertificateHint =>
