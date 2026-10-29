@@ -2472,6 +2472,8 @@ final class JapaneseStrings extends Strings {
   @override
   String get syncTestFailed => 'テストに失敗しました';
   @override
+  String get syncSaveFailed => '設定は保存されませんでした：パスワードをここに保存できませんでした。';
+  @override
   String get syncTestCertificate => '証明書は信頼されていません';
   @override
   String get syncTestCertificateHint =>

@@ -2684,6 +2684,9 @@ final class MacedonianStrings extends Strings {
   @override
   String get syncTestFailed => 'Тестот не успеа';
   @override
+  String get syncSaveFailed =>
+      'Поставките не се зачувани: лозинката не можеше да се зачува тука.';
+  @override
   String get syncTestCertificate => 'Сертификатот не е доверлив';
   @override
   String get syncTestCertificateHint =>

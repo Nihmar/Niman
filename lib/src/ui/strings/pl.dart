@@ -2693,6 +2693,9 @@ final class PolishStrings extends Strings {
   @override
   String get syncTestFailed => 'Test się nie powiódł';
   @override
+  String get syncSaveFailed =>
+      'Nie udało się zapisać ustawień: hasła nie można było tutaj zachować.';
+  @override
   String get syncTestCertificate => 'Certyfikat nie jest zaufany';
   @override
   String get syncTestCertificateHint =>

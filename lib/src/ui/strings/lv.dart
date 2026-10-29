@@ -2659,6 +2659,9 @@ final class LatvianStrings extends Strings {
   @override
   String get syncTestFailed => 'Pārbaude neizdevās';
   @override
+  String get syncSaveFailed =>
+      'Iestatījumi netika saglabāti: paroli šeit neizdevās saglabāt.';
+  @override
   String get syncTestCertificate => 'Sertifikātam neuzticas';
   @override
   String get syncTestCertificateHint =>

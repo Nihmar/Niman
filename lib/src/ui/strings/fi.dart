@@ -2680,6 +2680,9 @@ final class FinnishStrings extends Strings {
   @override
   String get syncTestFailed => 'Testi epäonnistui';
   @override
+  String get syncSaveFailed =>
+      'Asetuksia ei tallennettu: salasanaa ei voitu tallentaa tänne.';
+  @override
   String get syncTestCertificate => 'Varmennetta ei luoteta';
   @override
   String get syncTestCertificateHint =>

@@ -2670,6 +2670,9 @@ final class CroatianStrings extends Strings {
   @override
   String get syncTestFailed => 'Test nije uspio';
   @override
+  String get syncSaveFailed =>
+      'Postavke nisu spremljene: lozinku ovdje nije bilo moguće spremiti.';
+  @override
   String get syncTestCertificate => 'Certifikat nije pouzdan';
   @override
   String get syncTestCertificateHint =>

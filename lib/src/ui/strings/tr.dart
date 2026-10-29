@@ -2638,6 +2638,9 @@ final class TurkishStrings extends Strings {
   @override
   String get syncTestFailed => 'Test başarısız oldu';
   @override
+  String get syncSaveFailed =>
+      'Ayarlar kaydedilmedi: parola burada saklanamadı.';
+  @override
   String get syncTestCertificate => 'Sertifikaya güvenilmiyor';
   @override
   String get syncTestCertificateHint =>

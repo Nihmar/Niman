@@ -2689,6 +2689,10 @@ final class ItalianStrings extends Strings {
   @override
   String get syncTestFailed => 'Prova non riuscita';
   @override
+  String get syncSaveFailed =>
+      'Le impostazioni non sono state salvate: qui non è stato possibile '
+      'conservare la password.';
+  @override
   String get syncTestCertificate => 'Il certificato non è attendibile';
   @override
   String get syncTestCertificateHint =>

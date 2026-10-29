@@ -2652,6 +2652,9 @@ final class CzechStrings extends Strings {
   @override
   String get syncTestFailed => 'Test se nezdařil';
   @override
+  String get syncSaveFailed =>
+      'Nastavení nebylo uloženo: heslo se sem nepodařilo uložit.';
+  @override
   String get syncTestCertificate => 'Certifikátu se nedá věřit';
   @override
   String get syncTestCertificateHint =>

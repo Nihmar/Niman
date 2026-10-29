@@ -2661,6 +2661,9 @@ final class SlovenianStrings extends Strings {
   @override
   String get syncTestFailed => 'Preizkus ni uspel';
   @override
+  String get syncSaveFailed =>
+      'Nastavitve niso bile shranjene: gesla tukaj ni bilo mogoče shraniti.';
+  @override
   String get syncTestCertificate => 'Certifikatu ni za zaupati';
   @override
   String get syncTestCertificateHint =>

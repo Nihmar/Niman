@@ -2680,6 +2680,10 @@ final class PortugueseStrings extends Strings {
   @override
   String get syncTestFailed => 'O teste não funcionou';
   @override
+  String get syncSaveFailed =>
+      'As definições não foram guardadas: não foi possível guardar a '
+      'palavra-passe aqui.';
+  @override
   String get syncTestCertificate => 'O certificado não é de confiança';
   @override
   String get syncTestCertificateHint =>

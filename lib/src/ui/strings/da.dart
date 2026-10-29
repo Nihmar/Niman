@@ -2653,6 +2653,9 @@ final class DanishStrings extends Strings {
   @override
   String get syncTestFailed => 'Testen virkede ikke';
   @override
+  String get syncSaveFailed =>
+      'Indstillingerne blev ikke gemt: adgangskoden kunne ikke gemmes her.';
+  @override
   String get syncTestCertificate => 'Certifikatet er ikke betroet';
   @override
   String get syncTestCertificateHint =>

@@ -2676,6 +2676,9 @@ final class UkrainianStrings extends Strings {
   @override
   String get syncTestFailed => 'Перевірка не вдалася';
   @override
+  String get syncSaveFailed =>
+      'Налаштування не збережено: пароль не вдалося зберегти тут.';
+  @override
   String get syncTestCertificate => 'Сертифікат не є довіреним';
   @override
   String get syncTestCertificateHint =>

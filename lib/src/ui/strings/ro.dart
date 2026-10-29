@@ -2701,6 +2701,9 @@ final class RomanianStrings extends Strings {
   @override
   String get syncTestFailed => 'Testul nu a reușit';
   @override
+  String get syncSaveFailed =>
+      'Setările nu au fost salvate: parola nu a putut fi păstrată aici.';
+  @override
   String get syncTestCertificate => 'Certificatul nu este de încredere';
   @override
   String get syncTestCertificateHint =>

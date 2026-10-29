@@ -2686,6 +2686,9 @@ final class AlbanianStrings extends Strings {
   @override
   String get syncTestFailed => 'Testi nuk funksionoi';
   @override
+  String get syncSaveFailed =>
+      'Cilësimet nuk u ruajtën: fjalëkalimi nuk mund të ruhej këtu.';
+  @override
   String get syncTestCertificate => 'Certifikata nuk është e besuar';
   @override
   String get syncTestCertificateHint =>

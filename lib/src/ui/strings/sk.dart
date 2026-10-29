@@ -2661,6 +2661,9 @@ final class SlovakStrings extends Strings {
   @override
   String get syncTestFailed => 'Test sa nepodaril';
   @override
+  String get syncSaveFailed =>
+      'Nastavenia sa nepodarilo uložiť: heslo sa sem nepodarilo uložiť.';
+  @override
   String get syncTestCertificate => 'Certifikátu sa nedá dôverovať';
   @override
   String get syncTestCertificateHint =>

@@ -2414,6 +2414,8 @@ final class ChineseStrings extends Strings {
   @override
   String get syncTestFailed => '测试失败';
   @override
+  String get syncSaveFailed => '设置未保存：密码无法保存在此设备上。';
+  @override
   String get syncTestCertificate => '该证书不受信任';
   @override
   String get syncTestCertificateHint => '无法验证该证书。仅当其指纹与服务器显示的一致时才信任它。';

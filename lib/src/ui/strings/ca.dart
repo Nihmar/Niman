@@ -2710,6 +2710,10 @@ final class CatalanStrings extends Strings {
   @override
   String get syncTestFailed => 'La prova no ha funcionat';
   @override
+  String get syncSaveFailed =>
+      'La configuració no s’ha desat: aquí no s’ha pogut guardar la '
+      'contrasenya.';
+  @override
   String get syncTestCertificate => 'El certificat no és de confiança';
   @override
   String get syncTestCertificateHint =>

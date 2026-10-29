@@ -2669,6 +2669,9 @@ final class LithuanianStrings extends Strings {
   @override
   String get syncTestFailed => 'Patikrinti nepavyko';
   @override
+  String get syncSaveFailed =>
+      'Nustatymai neišsaugoti: slaptažodžio čia įrašyti nepavyko.';
+  @override
   String get syncTestCertificate => 'Sertifikatu nepasitikima';
   @override
   String get syncTestCertificateHint =>

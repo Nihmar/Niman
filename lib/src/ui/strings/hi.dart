@@ -2629,6 +2629,9 @@ final class HindiStrings extends Strings {
   @override
   String get syncTestFailed => 'जाँच सफल नहीं हुई';
   @override
+  String get syncSaveFailed =>
+      'सेटिंग्स सहेजी नहीं गईं: पासवर्ड यहाँ संग्रहीत नहीं हो सका।';
+  @override
   String get syncTestCertificate => 'प्रमाणपत्र पर भरोसा नहीं है';
   @override
   String get syncTestCertificateHint =>

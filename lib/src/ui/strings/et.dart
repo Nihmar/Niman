@@ -2633,6 +2633,9 @@ final class EstonianStrings extends Strings {
   @override
   String get syncTestFailed => 'Test ei õnnestunud';
   @override
+  String get syncSaveFailed =>
+      'Seaded ei salvestunud: parooli ei õnnestunud siia salvestada.';
+  @override
   String get syncTestCertificate => 'Sertifikaat ei ole usaldusväärne';
   @override
   String get syncTestCertificateHint =>

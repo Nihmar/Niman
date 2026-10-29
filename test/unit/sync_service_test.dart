@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:drift/native.dart';
+import 'package:flutter/services.dart' show PlatformException;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/settings/library_config_repo.dart';
@@ -211,6 +212,29 @@ void main() {
     final row = (await store.destination(path))!;
     expect(row.trustedCertFingerprint, isNull);
     expect(row.url, '${server.url}');
+  });
+
+  // #1244: the keychain is what a save can lose on its own, and a
+  // destination stored without its password is a sync paused on every
+  // trigger. A refused password changes nothing.
+  test('a password the keychain refuses leaves the destination as it was '
+      '(#1244)', () async {
+    await service.save(url: '${server.url}', username: 'ale', password: 'pw');
+    expect((await store.destination(path))!.username, 'ale');
+
+    secrets.writeFailure = PlatformException(code: '-34018');
+    await expectLater(
+      service.save(
+        url: 'https://other.example/dav/',
+        username: 'other',
+        password: 'other-pw',
+      ),
+      throwsA(isA<PlatformException>()),
+    );
+    final row = (await store.destination(path))!;
+    expect(row.url, '${server.url}');
+    expect(row.username, 'ale');
+    expect(await secrets.read(path), 'pw');
   });
 
   test('save, sync, resolve and disconnect move the status along', () async {

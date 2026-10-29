@@ -2704,6 +2704,10 @@ final class SpanishStrings extends Strings {
   @override
   String get syncTestFailed => 'La prueba no funcionó';
   @override
+  String get syncSaveFailed =>
+      'La configuración no se ha guardado: aquí no se ha podido guardar la '
+      'contraseña.';
+  @override
   String get syncTestCertificate => 'El certificado no es de confianza';
   @override
   String get syncTestCertificateHint =>
