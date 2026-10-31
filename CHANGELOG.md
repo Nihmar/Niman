@@ -6,6 +6,24 @@ This file ships inside the build and feeds the in-app changelog (the
 launch dialog after an update and the screen under Settings → Diagnostics
 and info). Update it in the release commit, before the tag.
 
+## [0.3.3] - 2026-10-31
+
+A journal entry filed under a folder spelled otherwise is found, and a Mac
+sync keeps its password.
+
+The journal's folder is taken as the library spells it: with the setting
+saying `Journal/` and the library holding `journal/`, the entry that
+exists is the one the Home's tile, the journal flow, the strip and the
+calendar read, instead of a "nothing written" beside a file that is
+there. On a Mac a build signed ad hoc has no keychain entitlement, and the
+password now stays in the login keychain instead of failing every save; a
+save that still cannot store it leaves the destination untouched and says
+so.
+
+### Fixed
+- **Journal**: an entry is read where the folder's spelling put it — the Home's tile, the journal flow, the strip, the calendar and the settings screen find it under the spelling the library holds, instead of reporting it missing and filing a second one (#1246)
+- **Sync**: on a Mac without the keychain entitlement the password is kept in the login keychain, and a password that cannot be stored leaves the destination as it was and reports the failure (#1244)
+
 ## [0.3.2] - 2026-10-28
 
 Tasks and events repeat, and the tree holds only the rows on screen.
