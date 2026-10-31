@@ -29,6 +29,7 @@ import 'package:niman/src/frontmatter/parser.dart';
 import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/home/home_layout.dart';
 import 'package:niman/src/journal/journal_settings.dart';
+import 'package:niman/src/library/folder_spelling.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/library/note_ops.dart';
@@ -1285,7 +1286,28 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   JournalSettings _journal = const JournalSettings();
 
   @override
-  Future<JournalSettings> get journal async => _journal;
+  Future<JournalSettings> get journal async =>
+      await _journal.resolveFolder(_folderHeldByLibrary);
+
+  /// The journal's settings as [setJournal] last stored them: [journal]
+  /// resolves the folder they name, this is the spelling kept (#1246).
+  @visibleForTesting
+  JournalSettings get storedJournal => _journal;
+
+  /// [folder] as the fake library holds it, segment by segment (#1246),
+  /// through the same walk the real ops uses.
+  Future<String> _folderHeldByLibrary(String folder) =>
+      resolveFolderSpelling<String>(
+        folder,
+        exact: (path) async {
+          final row = _findRow(path);
+          return row != null && row.isDir ? path : null;
+        },
+        child: (parent, segment) async {
+          final held = _findDirIgnoringCase(resolvePath(parent ?? '', segment));
+          return held == null ? null : (name: held.name, token: held.path);
+        },
+      );
 
   @override
   Future<void> setJournal(JournalSettings settings) async {
@@ -1945,9 +1967,9 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   _Row? _findDirIgnoringCase(String path) {
     final exact = _findRow(path);
     if (exact != null && exact.isDir) return exact;
-    final lower = path.toLowerCase();
+    final lower = _asciiLowerCase(path);
     for (final row in _rows) {
-      if (!row.trashed && row.isDir && row.path.toLowerCase() == lower) {
+      if (!row.trashed && row.isDir && _asciiLowerCase(row.path) == lower) {
         return row;
       }
     }
@@ -2469,4 +2491,17 @@ final class _FakeWorkspaceSlot implements WorkspaceSlot {
       ..workspace = workspace
       ..workspacesByRoot[_root] = workspace;
   }
+}
+
+/// [text] lowercased the way SQLite's `NOCASE` collation and `lower()`
+/// fold it — A–Z only, everything else as it is — so a case-insensitive
+/// lookup here answers exactly where the index would (#1246). Dart's own
+/// `toLowerCase` is Unicode, which would let a test pass on a pairing the
+/// real library does not fold.
+String _asciiLowerCase(String text) {
+  final units = List<int>.generate(text.length, (i) {
+    final unit = text.codeUnitAt(i);
+    return unit >= 0x41 && unit <= 0x5A ? unit + 0x20 : unit;
+  }, growable: false);
+  return String.fromCharCodes(units);
 }

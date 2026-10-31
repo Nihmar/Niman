@@ -12,7 +12,9 @@ travel with it (see [settings](settings.md)). The entry name shows today's
 entry as you type it, and a name that cannot make one entry per day is
 not saved:
 
-- **Folder** (`journalFolder`, default `Journal`).
+- **Folder** (`journalFolder`, default `Journal`). The folder is taken
+  as the library spells it: a library that holds `journal/` while the
+  setting says `Journal/` files its entries in the one that is there.
 - **Entry name** (`journalEntryName`, default `YYYY/MM/YYYY-MM-DD`):
   `YYYY`, `MM` / `M` and `DD` / `D` are the day's year, month and day; a
   `/` makes a folder; text in `'quotes'` is kept as it is. Numbers only,

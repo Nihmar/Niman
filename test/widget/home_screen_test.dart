@@ -1,5 +1,7 @@
 // #535: the Home in the shell — its destination, its tiles on the desktop
 // grid and in the phone's column, what they read, and where they lead.
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -13,6 +15,7 @@ import 'package:niman/src/todo/todo_source.dart';
 import 'package:niman/src/ui/home/home_screen.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/todo_tab.dart';
+import 'package:path/path.dart' as p;
 
 import '../fakes/fake_library_session.dart';
 import '../fakes/fake_sync_service.dart';
@@ -37,7 +40,11 @@ void main() {
     );
   });
 
-  Future<void> open(WidgetTester tester, Size size) async {
+  Future<void> open(
+    WidgetTester tester,
+    Size size, {
+    String parent = '/fake',
+  }) async {
     setSurfaceSize(tester, size);
     await tester.pumpWidget(
       ProviderScope(
@@ -49,7 +56,7 @@ void main() {
       ),
     );
     await tester.pump();
-    await openLibrary(tester, filePicker);
+    await openLibrary(tester, filePicker, parent: parent);
   }
 
   Future<void> goHome(WidgetTester tester, {bool wide = false}) async {
@@ -222,6 +229,48 @@ void main() {
     final journal = await controller.journal;
     final entry = journal.entryPath(journal.today(DateTime.now()));
     expect(await controller.find(entry), isNotNull);
+  });
+
+  testWidgets('a journal entry filed under other capitals is shown (#1246)', (
+    tester,
+  ) async {
+    final dir = Directory.systemTemp.createTempSync('niman_home_journal_');
+    addTearDown(() {
+      if (dir.existsSync()) dir.deleteSync(recursive: true);
+    });
+    await open(tester, _phone, parent: dir.path);
+    await goHome(tester);
+    expect(find.byKey(const Key('home-journal-write')), findsOne);
+
+    // The library holds `journal/`, the settings spell `Journal/`: the
+    // entry is filed where the write put it, and the tile must find it
+    // there (#1246).
+    final journal = await controller.journal;
+    final configured = journal.entryPath(journal.today(DateTime.now()));
+    final entry = configured.replaceFirst('Journal/', 'journal/');
+    final folder = p.dirname(entry);
+    final _ = await controller.ensureFolder(folder);
+    await controller.createNote(
+      parentPath: folder,
+      name: p.basenameWithoutExtension(entry),
+      content: '# Today\n\nSome words.',
+    );
+    // The fake keeps its rows in memory; the tile's preview reads the file,
+    // so the entry is written where the library would hold it.
+    final file = File(p.join(controller.root!, entry));
+    file.parent.createSync(recursive: true);
+    file.writeAsStringSync('# Today\n\nSome words.');
+
+    await settle(tester);
+    // The preview is read on an isolate, which the fake clock does not run.
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 100)),
+    );
+    await tester.pump();
+
+    expect(find.byKey(const Key('home-journal-open')), findsOne);
+    expect(find.text('Some words.'), findsOne);
+    expect(find.byKey(const Key('home-journal-write')), findsNothing);
   });
 
   testWidgets('the add task button asks for the task', (tester) async {

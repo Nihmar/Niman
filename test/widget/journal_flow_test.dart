@@ -91,6 +91,22 @@ void main() {
     expect(await session.find('Journal'), isNull);
   });
 
+  testWidgets("today's entry filed in a folder held under other capitals is "
+      'opened, not made again (#1246)', (tester) async {
+    final _ = await session.ensureFolder('journal/2026/09');
+    await session.createNote(
+      parentPath: 'journal/2026/09',
+      name: '2026-09-23',
+      content: '# Wednesday 23 September 2026\n\n',
+    );
+    final context = await pump(tester);
+
+    await flow.openToday(context);
+
+    expect(opened, ['journal/2026/09/2026-09-23.md']);
+    expect(created, isEmpty, reason: 'no second entry for the day');
+  });
+
   testWidgets('another day asks first, and a no makes nothing', (tester) async {
     final context = await pump(tester);
     final asked = flow.openDay(context, DateTime(2026, 9, 20));

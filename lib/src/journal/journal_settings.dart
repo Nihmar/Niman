@@ -100,6 +100,19 @@ final class JournalSettings {
   /// The parsed [entryName].
   JournalPattern get pattern => JournalPattern.orDefault(entryName);
 
+  /// These settings with [folder] spelled as the library holds it, asked
+  /// through [spell] (#1246): an entry is where the write put it, which is
+  /// not always where the setting spells its folder. A folder the library
+  /// does not hold comes back as written, cleaned of empty and `.`/`..`
+  /// segments.
+  Future<JournalSettings> resolveFolder(
+    Future<String> Function(String folder) spell,
+  ) async {
+    if (folder.isEmpty) return this;
+    final held = await spell(folder);
+    return held == folder ? this : copyWith(folder: held);
+  }
+
   /// The library-relative path of [day]'s entry.
   String entryPath(DateTime day) {
     final name = '${pattern.format(day)}.md';

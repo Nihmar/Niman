@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import 'package:meta/meta.dart';
+import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/db/referrer_dao.dart';
@@ -217,6 +218,44 @@ final class NoteDao {
           'SELECT * FROM notes WHERE is_dir = 1 AND path = ? COLLATE NOCASE '
           'ORDER BY path LIMIT 1',
           variables: [Variable.withString(path)],
+          readsFrom: {_db.notes},
+        )
+        .get();
+    return rows.isEmpty ? null : _db.notes.map(rows.first.data);
+  }
+
+  /// The folder [parent] holds named [name] — one path segment — as the
+  /// library spells it, or null when it holds none (#1246).
+  ///
+  /// The exact spelling wins (#857) and is a point lookup on the unique
+  /// `path`; otherwise the first folder whose name differs only in case is
+  /// taken, by path, from the parent's children in `notes_tree` — where
+  /// [folderIgnoringCase] would walk every folder row.
+  ///
+  /// Case folds as SQLite's `lower()` does, ASCII only, the way
+  /// `COLLATE NOCASE` folds there: a capital outside A–Z is another name.
+  Future<Note?> folderChild(Note? parent, String name) async {
+    assert(!name.contains('/'), 'folderChild takes one segment: "$name"');
+    final parentPath = parent?.path ?? '';
+    final exact =
+        await (_db.select(_db.notes)..where(
+              (t) =>
+                  t.path.equals(resolvePath(parentPath, name)) &
+                  t.isDir.equals(true),
+            ))
+            .getSingleOrNull();
+    if (exact != null) return exact;
+    // `lower()` is SQLite's, ASCII only, matching `COLLATE NOCASE` above;
+    // `name_key` cannot answer "the same name": it also folds accents and
+    // zero-strips digit runs, so `2` and `02` share one.
+    final rows = await _db
+        .customSelect(
+          'SELECT * FROM notes WHERE parent = ? AND is_dir = 1 '
+          'AND lower(name) = lower(?) ORDER BY path LIMIT 1',
+          variables: [
+            Variable.withInt(parent?.id ?? 0),
+            Variable.withString(name),
+          ],
           readsFrom: {_db.notes},
         )
         .get();
