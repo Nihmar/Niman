@@ -298,7 +298,8 @@ abstract interface class NoteOperations {
   /// Sets (or clears, with null) the user-chosen quick note.
   Future<void> setQuickNotePath({required String? path});
 
-  /// The journal's settings (#7).
+  /// The journal's settings (#7), its folder spelled as the library holds
+  /// it (#1246).
   Future<JournalSettings> get journal;
 
   /// Keeps [settings] as the journal's.

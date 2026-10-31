@@ -326,7 +326,31 @@ final class NoteOps implements NoteOperations {
   );
 
   @override
-  Future<JournalSettings> get journal async => (await config.config).journal;
+  Future<JournalSettings> get journal async {
+    final settings = (await config.config).journal;
+    return await settings.resolveFolder(_folderSpelling);
+  }
+
+  /// [folder] as the library spells it, segment by segment (#1246): a
+  /// segment the index holds under other capitals is that segment, and a
+  /// segment it does not hold leaves the rest as written. Nothing is made.
+  Future<String> _folderSpelling(String folder) async {
+    final clean = cleanFolderPath(folder, '');
+    if (clean.isEmpty) return '';
+    final parts = clean.split('/');
+    final segments = <String>[];
+    Note? parent;
+    for (var i = 0; i < parts.length; i++) {
+      final held = await _dao.folderChild(parent, parts[i]);
+      if (held == null) {
+        segments.addAll(parts.skip(i));
+        break;
+      }
+      segments.add(held.name);
+      parent = held;
+    }
+    return segments.join('/');
+  }
 
   @override
   Future<void> setJournal(JournalSettings settings) =>

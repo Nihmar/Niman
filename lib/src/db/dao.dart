@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import 'package:meta/meta.dart';
+import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/db/referrer_dao.dart';
@@ -217,6 +218,38 @@ final class NoteDao {
           'SELECT * FROM notes WHERE is_dir = 1 AND path = ? COLLATE NOCASE '
           'ORDER BY path LIMIT 1',
           variables: [Variable.withString(path)],
+          readsFrom: {_db.notes},
+        )
+        .get();
+    return rows.isEmpty ? null : _db.notes.map(rows.first.data);
+  }
+
+  /// The folder [parent] holds named [name], as the library spells it, or
+  /// null when it holds none (#1246).
+  ///
+  /// The exact spelling wins (#857); otherwise the first folder whose name
+  /// differs only in case is taken, by path. Read off the parent's folder
+  /// children — the `notes_tree` index — so a journal folder the library
+  /// holds under other capitals is a point lookup, not the walk of every
+  /// folder [folderIgnoringCase] falls back to.
+  Future<Note?> folderChild(Note? parent, String name) async {
+    final parentPath = parent?.path ?? '';
+    final exact =
+        await (_db.select(_db.notes)..where(
+              (t) =>
+                  t.path.equals(resolvePath(parentPath, name)) &
+                  t.isDir.equals(true),
+            ))
+            .getSingleOrNull();
+    if (exact != null) return exact;
+    final rows = await _db
+        .customSelect(
+          'SELECT * FROM notes WHERE parent = ? AND is_dir = 1 '
+          'AND lower(name) = lower(?) ORDER BY path LIMIT 1',
+          variables: [
+            Variable.withInt(parent?.id ?? 0),
+            Variable.withString(name),
+          ],
           readsFrom: {_db.notes},
         )
         .get();

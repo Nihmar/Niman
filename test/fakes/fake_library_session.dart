@@ -1285,7 +1285,27 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   JournalSettings _journal = const JournalSettings();
 
   @override
-  Future<JournalSettings> get journal async => _journal;
+  Future<JournalSettings> get journal async =>
+      await _journal.resolveFolder(_folderHeldByLibrary);
+
+  /// [folder] as the fake library holds it, segment by segment (#1246).
+  Future<String> _folderHeldByLibrary(String folder) async {
+    final clean = cleanFolderPath(folder, '');
+    if (clean.isEmpty) return '';
+    final parts = clean.split('/');
+    final segments = <String>[];
+    for (var i = 0; i < parts.length; i++) {
+      final held = _findDirIgnoringCase(
+        resolvePath(segments.join('/'), parts[i]),
+      );
+      if (held == null) {
+        segments.addAll(parts.skip(i));
+        break;
+      }
+      segments.add(held.name);
+    }
+    return segments.join('/');
+  }
 
   @override
   Future<void> setJournal(JournalSettings settings) async {

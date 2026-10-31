@@ -219,6 +219,37 @@ void main() {
     });
   });
 
+  group('the journal folder (#1246)', () {
+    test('is read as the library spells it, so its entry is found', () async {
+      final _ = await ops.ensureFolder('journal/2026');
+      await ops.setJournal(
+        const JournalSettings(folder: 'Journal/2026', entryName: 'YYYY-MM-DD'),
+      );
+
+      final journal = await ops.journal;
+      final day = DateTime(2026, 9, 23);
+      expect(journal.folder, 'journal/2026');
+      expect(journal.entryPath(day), 'journal/2026/2026-09-23.md');
+
+      final row = await ops.createNote(
+        parentPath: 'journal/2026',
+        name: '2026-09-23',
+      );
+      expect(await ops.find(journal.entryPath(day)), row);
+    });
+
+    test('a segment the library does not hold keeps its spelling, and '
+        'nothing is made', () async {
+      await ops.setJournal(
+        const JournalSettings(folder: 'Journal/2026/October'),
+      );
+
+      expect((await ops.journal).folder, 'Journal/2026/October');
+      expect(Directory(p.join(root.path, 'Journal')).existsSync(), isFalse);
+      expect(await dao.find('Journal'), isNull);
+    });
+  });
+
   group('appendToNote', () {
     test('a missing note is created with the content', () async {
       final row = await ops.appendToNote('Log.md', '- one\n');
