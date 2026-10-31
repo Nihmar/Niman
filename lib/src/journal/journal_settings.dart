@@ -103,7 +103,8 @@ final class JournalSettings {
   /// These settings with [folder] spelled as the library holds it, asked
   /// through [spell] (#1246): an entry is where the write put it, which is
   /// not always where the setting spells its folder. A folder the library
-  /// does not hold comes back as written.
+  /// does not hold comes back as written, cleaned of empty and `.`/`..`
+  /// segments.
   Future<JournalSettings> resolveFolder(
     Future<String> Function(String folder) spell,
   ) async {

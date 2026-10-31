@@ -5,6 +5,7 @@ import 'package:crypto/crypto.dart';
 import 'package:drift/drift.dart' show Variable;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/name_sort_key.dart';
 import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/core/settings/library_config_repo.dart';
 import 'package:niman/src/db/dao.dart';
@@ -247,6 +248,48 @@ void main() {
       expect((await ops.journal).folder, 'Journal/2026/October');
       expect(Directory(p.join(root.path, 'Journal')).existsSync(), isFalse);
       expect(await dao.find('Journal'), isNull);
+    });
+
+    test(
+      'a folder held under other capitals at any depth is that folder',
+      () async {
+        final _ = await ops.ensureFolder('journal/2026/October');
+        await ops.setJournal(
+          const JournalSettings(
+            folder: 'JOURNAL/2026/october',
+            entryName: 'YYYY-MM-DD',
+          ),
+        );
+
+        expect((await ops.journal).folder, 'journal/2026/October');
+      },
+    );
+
+    test('the exact spelling wins, segment by segment', () async {
+      // Only a case-sensitive disk can hold both; the index holds both rows
+      // all the same, and `Journal` sorts before `journal`, so a lookup that
+      // fell back would answer `Journal/2026` to either setting.
+      for (final path in ['Journal', 'journal']) {
+        await db
+            .into(db.notes)
+            .insert(
+              NotesCompanion.insert(
+                path: path,
+                parent: 0,
+                name: path,
+                nameKey: nameSortKey(path),
+                isDir: true,
+                size: 0,
+                modified: DateTime(2026),
+                created: DateTime(2026),
+              ),
+            );
+      }
+
+      await ops.setJournal(const JournalSettings(folder: 'Journal/2026'));
+      expect((await ops.journal).folder, 'Journal/2026');
+      await ops.setJournal(const JournalSettings(folder: 'journal/2026'));
+      expect((await ops.journal).folder, 'journal/2026');
     });
   });
 

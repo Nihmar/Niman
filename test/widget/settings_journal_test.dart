@@ -63,6 +63,33 @@ void main() {
     expect((await session.journal).entryName, 'YYYY-MM-DD');
   });
 
+  testWidgets('a folder held under other capitals is the one saved', (
+    tester,
+  ) async {
+    final _ = await session.ensureFolder('journal');
+    await pump(tester);
+    // The setting says `Journal`; the library holds `journal/`, so that is
+    // the entry the screen names and the folder an edit keeps (#1246).
+    expect(find.text("Today's entry: journal/2026/09/2026-09-23.md"), findsOne);
+
+    await tester.tap(find.text('YYYY/MM/YYYY-MM-DD'));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const Key('journal-entry-name-field')),
+      'YYYY-MM-DD',
+    );
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('journal-entry-name-save')));
+    await tester.pumpAndSettle();
+
+    expect(session.storedJournal.entryName, 'YYYY-MM-DD');
+    expect(
+      session.storedJournal.folder,
+      'journal',
+      reason: 'an edit keeps the spelling the library holds',
+    );
+  });
+
   testWidgets('the template is picked from the templates, or none', (
     tester,
   ) async {

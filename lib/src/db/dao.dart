@@ -224,15 +224,18 @@ final class NoteDao {
     return rows.isEmpty ? null : _db.notes.map(rows.first.data);
   }
 
-  /// The folder [parent] holds named [name], as the library spells it, or
-  /// null when it holds none (#1246).
+  /// The folder [parent] holds named [name] — one path segment — as the
+  /// library spells it, or null when it holds none (#1246).
   ///
-  /// The exact spelling wins (#857); otherwise the first folder whose name
-  /// differs only in case is taken, by path. Read off the parent's folder
-  /// children — the `notes_tree` index — so a journal folder the library
-  /// holds under other capitals is a point lookup, not the walk of every
-  /// folder [folderIgnoringCase] falls back to.
+  /// The exact spelling wins (#857) and is a point lookup on the unique
+  /// `path`; otherwise the first folder whose name differs only in case is
+  /// taken, by path, from the parent's children in `notes_tree` — where
+  /// [folderIgnoringCase] would walk every folder row.
+  ///
+  /// Case folds as SQLite's `lower()` does, ASCII only, the way
+  /// `COLLATE NOCASE` folds there: a capital outside A–Z is another name.
   Future<Note?> folderChild(Note? parent, String name) async {
+    assert(!name.contains('/'), 'folderChild takes one segment: "$name"');
     final parentPath = parent?.path ?? '';
     final exact =
         await (_db.select(_db.notes)..where(
@@ -242,6 +245,9 @@ final class NoteDao {
             ))
             .getSingleOrNull();
     if (exact != null) return exact;
+    // `lower()` is SQLite's, ASCII only, matching `COLLATE NOCASE` above;
+    // `name_key` cannot answer "the same name": it also folds accents and
+    // zero-strips digit runs, so `2` and `02` share one.
     final rows = await _db
         .customSelect(
           'SELECT * FROM notes WHERE parent = ? AND is_dir = 1 '

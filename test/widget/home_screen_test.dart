@@ -248,14 +248,15 @@ void main() {
     final journal = await controller.journal;
     final configured = journal.entryPath(journal.today(DateTime.now()));
     final entry = configured.replaceFirst('Journal/', 'journal/');
-    final slash = entry.lastIndexOf('/');
-    final folder = entry.substring(0, slash);
+    final folder = p.dirname(entry);
     final _ = await controller.ensureFolder(folder);
     await controller.createNote(
       parentPath: folder,
-      name: entry.substring(slash + 1, entry.length - '.md'.length),
+      name: p.basenameWithoutExtension(entry),
       content: '# Today\n\nSome words.',
     );
+    // The fake keeps its rows in memory; the tile's preview reads the file,
+    // so the entry is written where the library would hold it.
     final file = File(p.join(controller.root!, entry));
     file.parent.createSync(recursive: true);
     file.writeAsStringSync('# Today\n\nSome words.');

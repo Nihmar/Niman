@@ -22,6 +22,7 @@ import 'package:niman/src/history/note_history.dart';
 import 'package:niman/src/home/home_file.dart';
 import 'package:niman/src/home/home_layout.dart';
 import 'package:niman/src/journal/journal_settings.dart';
+import 'package:niman/src/library/folder_spelling.dart';
 import 'package:niman/src/library/note_op_seams.dart';
 import 'package:niman/src/library/note_ops_blocking.dart';
 import 'package:niman/src/library/note_relocation.dart';
@@ -328,29 +329,31 @@ final class NoteOps implements NoteOperations {
   @override
   Future<JournalSettings> get journal async {
     final settings = (await config.config).journal;
-    return await settings.resolveFolder(_folderSpelling);
+    try {
+      return await settings.resolveFolder(_folderSpelling);
+    } on Object catch (error) {
+      // The spelling is a convenience, not the setting: an index that cannot
+      // be asked leaves the settings as written rather than failing a read,
+      // and the write path still canonicalizes on its own (#1246).
+      const AppLogger(name: 'journal')
+          .warning('folder spelling unresolved ($error)');
+      return settings;
+    }
   }
 
-  /// [folder] as the library spells it, segment by segment (#1246): a
-  /// segment the index holds under other capitals is that segment, and a
-  /// segment it does not hold leaves the rest as written. Nothing is made.
-  Future<String> _folderSpelling(String folder) async {
-    final clean = cleanFolderPath(folder, '');
-    if (clean.isEmpty) return '';
-    final parts = clean.split('/');
-    final segments = <String>[];
-    Note? parent;
-    for (var i = 0; i < parts.length; i++) {
-      final held = await _dao.folderChild(parent, parts[i]);
-      if (held == null) {
-        segments.addAll(parts.skip(i));
-        break;
-      }
-      segments.add(held.name);
-      parent = held;
-    }
-    return segments.join('/');
-  }
+  /// [folder] as the library spells it, segment by segment (#1246): nothing
+  /// is made, and a folder the library does not hold keeps its spelling.
+  Future<String> _folderSpelling(String folder) => resolveFolderSpelling<Note>(
+    folder,
+    exact: (path) async {
+      final row = await _dao.find(path);
+      return row != null && row.isDir ? row : null;
+    },
+    child: (parent, segment) async {
+      final held = await _dao.folderChild(parent, segment);
+      return held == null ? null : (name: held.name, token: held);
+    },
+  );
 
   @override
   Future<void> setJournal(JournalSettings settings) =>
