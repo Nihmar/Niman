@@ -27,6 +27,7 @@ import 'package:niman/src/ui/tree_row_tile.dart';
 import 'package:niman/src/ui/tree_rows.dart';
 import 'package:niman/src/ui/tree_rows_delegate.dart';
 import 'package:niman/src/ui/tree_spring_load.dart';
+import 'package:niman/src/ui/tree_walk.dart';
 import 'package:niman/src/ui/tree_walk_row.dart';
 
 export 'package:niman/src/ui/tree_create_row.dart' show TreeCreate;
@@ -272,13 +273,8 @@ final class _NoteTreeState extends State<NoteTree> {
   late final TreePages _pages =
       widget.pages ?? TreePages(pageSize: widget.pageSize);
 
-  /// The rows of the last build, the height each pinned item takes and the
-  /// height of a row: what the keyboard walks (#727). The walk itself is
-  /// built when a key is pressed, not on every frame.
-  TreeRows? _current;
-  List<double> _pinnedHeights = const <double>[];
-  double _pinnedTotal = 0;
-  double _rowHeight = 0;
+  /// The rows of the last build as the keyboard walks them (#727).
+  final TreeWalk _walk = TreeWalk();
 
   /// The row height and the screen's height the next read works the window
   /// out with, before the list has been laid out to say: the pages it reads
@@ -300,10 +296,6 @@ final class _NoteTreeState extends State<NoteTree> {
   TreeListing? _placingListing;
   String? _placingFolder;
 
-  /// The room the divider that closes the pinned block takes: its hairline
-  /// and the breathing space under it.
-  static const double _pinnedDividerHeight = 9;
-
   /// Brings the row being renamed into view: a row the list has not built
   /// has no field to show. The field puts itself fully in view once it is
   /// built.
@@ -318,16 +310,16 @@ final class _NoteTreeState extends State<NoteTree> {
   /// Scrolls to the row at [path], wherever it is in the tree: its index is
   /// worked out from its rank, and the list builds the page it lands on.
   Future<void> _revealPath(String path) async {
-    final listing = _current?.listing;
+    final listing = _walk.rows?.listing;
     if (listing == null) return;
     final index = await listing.modelIndexOfPath(path);
     if (index == null || !mounted || !_scroll.hasClients || _revealed != path) {
       return;
     }
-    final top = _treeTop(listing.listIndexOf(index));
+    final top = _walk.treeTop(listing.listIndexOf(index));
     final position = _scroll.position;
     if (top >= position.pixels &&
-        top + _rowHeight <= position.pixels + position.viewportDimension) {
+        top + _walk.rowHeight <= position.pixels + position.viewportDimension) {
       return;
     }
     _scroll.jumpTo(
@@ -338,146 +330,19 @@ final class _NoteTreeState extends State<NoteTree> {
     );
   }
 
-  /// The heights of the pinned block's items, in the order the list draws
-  /// them: the heading, the notes (none when it is rolled up) and the
-  /// divider that closes it off. Empty when nothing is pinned.
-  List<double> _pinnedHeightsOf(List<Note> pinned, double rowHeight) {
-    if (pinned.isEmpty) return const <double>[];
-    return [
-      editorToolbarHeight,
-      if (!_collapsed)
-        for (final _ in pinned) rowHeight,
-      _pinnedDividerHeight,
-    ];
-  }
-
-  /// Where the list draws the tree's row at list index [listIndex]: below
-  /// the pinned block, a row's height each.
-  double _treeTop(int listIndex) => _pinnedTotal + listIndex * _rowHeight;
-
-  /// What the keyboard walks at the pinned block's [index] item (#727): the
-  /// item's place and height, and the row it draws — null for the pinned
-  /// heading and its divider, which are not rows. Reads the rows of the last
-  /// build.
-  TreeWalkRow? _pinnedWalkAt(int index) {
-    final rows = _current;
-    final header = _pinnedHeights.length;
-    if (rows == null || index <= 0 || index >= header - 1) return null;
-    var top = 0.0;
-    for (var at = 0; at < index; at++) {
-      top += _pinnedHeights[at];
-    }
-    final note = rows.pinned[index - 1];
-    return TreeWalkRow(
-      note: note,
-      path: note.path,
-      pinned: true,
-      // The pinned block draws every note at the root: its own depth
-      // would say nothing there.
-      depth: 0,
-      top: top,
-      height: _pinnedHeights[index],
-      index: index - 1,
-    );
-  }
-
-  /// The tree's own row at model index [modelIndex] as the walk sees it, from
-  /// what the listing draws there; null while its page is not loaded.
-  TreeWalkRow? _treeWalkRow(int modelIndex, TreeEntry entry) {
-    final note = entry.note;
-    final rows = _current;
-    if (note == null || rows == null) return null;
-    return TreeWalkRow(
-      note: note,
-      path: note.path,
-      pinned: false,
-      depth: entry.depth,
-      sidecar: entry.sidecar,
-      top: _treeTop(rows.listing.listIndexOf(modelIndex)),
-      height: _rowHeight,
-      index: _pinnedWalked + modelIndex,
-    );
-  }
-
-  /// How many of the pinned block's items are rows the keyboard walks: its
-  /// notes, without the heading and the divider — none while rolled up.
-  int get _pinnedWalked =>
-      _pinnedHeights.isEmpty ? 0 : _pinnedHeights.length - 2;
-
-  /// How many rows the keyboard walks, in the order the list draws them:
-  /// the pinned notes first, then the tree's own rows (#727). The row being
-  /// made is not among them.
-  int get _walkLength {
-    final rows = _current;
-    return rows == null ? 0 : _pinnedWalked + rows.listing.modelLength;
-  }
-
-  /// The walk's row at [index]: the list's item it is. Only the rows a key
-  /// reaches are made — a tree of a million rows is not copied for each key
-  /// press. Null while the row's page is not loaded; see [_walkRowAsync].
-  TreeWalkRow? _walkRow(int index) {
-    final pinned = _pinnedWalked;
-    if (index < pinned) return _pinnedWalkAt(index + 1);
-    final rows = _current;
-    final at = index - pinned;
-    if (rows == null || at >= rows.listing.modelLength) return null;
-    return _treeWalkRow(at, rows.listing.modelEntryAt(at));
-  }
-
-  /// The walk's row at [index], its page read first when it is not loaded.
-  Future<TreeWalkRow?> _walkRowAsync(int index) async {
-    final held = _walkRow(index);
-    if (held != null) return held;
-    final listing = _current?.listing;
-    final at = index - _pinnedWalked;
-    if (listing == null || at < 0 || at >= listing.modelLength) return null;
-    await listing.ensureRow(at);
-    return mounted && identical(_current?.listing, listing)
-        ? _walkRow(index)
-        : null;
-  }
-
   /// Runs [then] with the walk's row at [index]: at once when it is loaded,
   /// else when its page has landed.
   void _whenRow(int index, void Function(TreeWalkRow row) then) {
-    final row = _walkRow(index);
+    final row = _walk.rowAt(index);
     if (row != null) {
       then(row);
       return;
     }
     unawaited(
-      _walkRowAsync(index).then((row) {
+      _walk.rowAtAsync(index).then((row) {
         if (row != null && mounted) then(row);
       }),
     );
-  }
-
-  /// The walk index of the row at [path], from the rows loaded: the pinned
-  /// copy, the tree's row, or both searched. Null when none of them is.
-  int? _findSync(String path, {bool? inPinned}) {
-    final rows = _current!;
-    final pinned = _pinnedWalked;
-    if (inPinned != false) {
-      for (var at = 0; at < pinned; at++) {
-        if (rows.pinned[at].path == path) return at;
-      }
-    }
-    if (inPinned != true) {
-      final at = rows.listing.modelIndexOfLoaded(path);
-      if (at != null) return pinned + at;
-    }
-    return null;
-  }
-
-  /// As [_findSync], asking the index for a tree row whose page is not
-  /// loaded.
-  Future<int?> _findAsync(String path, {bool? inPinned}) async {
-    final held = _findSync(path, inPinned: inPinned);
-    if (held != null || inPinned == true) return held;
-    final listing = _current?.listing;
-    if (listing == null) return null;
-    final at = await listing.modelIndexOfPath(path);
-    return at == null ? null : _pinnedWalked + at;
   }
 
   /// The cursor's place in the walk from the rows loaded: the row it is on,
@@ -486,9 +351,9 @@ final class _NoteTreeState extends State<NoteTree> {
   /// in a page that is loaded: see [_cursorAtAsync].
   int? _cursorAtSync() {
     final path = _cursorPath;
-    if (path != null) return _findSync(path, inPinned: _cursorPinned);
+    if (path != null) return _walk.find(path, inPinned: _cursorPinned);
     final selected = widget.selectedPath;
-    return selected == null ? 0 : _findSync(selected);
+    return selected == null ? 0 : _walk.find(selected);
   }
 
   /// The cursor's place in the walk, asking the index for a row whose page
@@ -500,23 +365,23 @@ final class _NoteTreeState extends State<NoteTree> {
     final selected = widget.selectedPath;
     final cursor = path == null
         ? null
-        : await _findAsync(path, inPinned: _cursorPinned);
+        : await _walk.findAsync(path, inPinned: _cursorPinned);
     if (cursor != null) return cursor;
-    final chosen = selected == null ? null : await _findAsync(selected);
+    final chosen = selected == null ? null : await _walk.findAsync(selected);
     return chosen ?? 0;
   }
 
   /// The cursor and the row it is on, when both are loaded.
   TreeWalkCursor? _cursorHere() {
     final at = _cursorAtSync();
-    final row = at == null ? null : _walkRow(at);
+    final row = at == null ? null : _walk.rowAt(at);
     return at == null || row == null ? null : (at: at, row: row);
   }
 
   /// The cursor and the row it is on, loading the page it is in.
   Future<TreeWalkCursor?> _cursorResolved() async {
     final at = await _cursorAtAsync();
-    final row = await _walkRowAsync(at);
+    final row = await _walk.rowAtAsync(at);
     return row == null ? null : (at: at, row: row);
   }
 
@@ -595,7 +460,7 @@ final class _NoteTreeState extends State<NoteTree> {
     if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
       return KeyEventResult.ignored;
     }
-    if (_walkLength == 0 || !_ownsKey(event)) return KeyEventResult.ignored;
+    if (_walk.length == 0 || !_ownsKey(event)) return KeyEventResult.ignored;
     final here = _cursorHere();
     if (here != null) return _keyAt(event, here);
     unawaited(
@@ -668,7 +533,7 @@ final class _NoteTreeState extends State<NoteTree> {
   /// key does is decided here.
   KeyEventResult _walkKey(TreeWalkCursor cursor, LogicalKeyboardKey key) {
     final (:at, :row) = cursor;
-    final length = _walkLength;
+    final length = _walk.length;
     if (key == LogicalKeyboardKey.arrowUp) return _move(at - 1);
     if (key == LogicalKeyboardKey.arrowDown) return _move(at + 1);
     if (key == LogicalKeyboardKey.home) return _move(0);
@@ -730,12 +595,12 @@ final class _NoteTreeState extends State<NoteTree> {
   /// model knows where it is without any row loaded. The tree's own rows
   /// only: the pinned block above them is no folder of theirs.
   void _stepOut(int at, TreeWalkRow row) {
-    final pinned = _pinnedWalked;
+    final pinned = _walk.pinnedWalked;
     if (row.sidecar) {
       // Nested within the page, right under its file: the nearest row above
       // that is not a sidecar.
       for (var up = at - 1; up >= pinned; up--) {
-        final above = _walkRow(up);
+        final above = _walk.rowAt(up);
         if (above == null) return;
         if (!above.sidecar) {
           _move(up);
@@ -744,7 +609,7 @@ final class _NoteTreeState extends State<NoteTree> {
       }
       return;
     }
-    final folder = _current?.listing.model.rowIndexOf(row.note.parent);
+    final folder = _walk.rows?.listing.model.rowIndexOf(row.note.parent);
     if (folder != null) _move(pinned + folder);
   }
 
@@ -774,7 +639,7 @@ final class _NoteTreeState extends State<NoteTree> {
             key == LogicalKeyboardKey.arrowDown)) {
       final to = (at + (key == LogicalKeyboardKey.arrowUp ? -1 : 1)).clamp(
         0,
-        _walkLength - 1,
+        _walk.length - 1,
       );
       _markRange(at, to);
       return _move(to);
@@ -867,25 +732,16 @@ final class _NoteTreeState extends State<NoteTree> {
     }
   }
 
-  /// The name of the walk's row at [index], or null while its page is not
-  /// loaded.
-  String? _heldName(int index) {
-    final rows = _current!;
-    final pinned = _pinnedWalked;
-    if (index < pinned) return rows.pinned[index].name;
-    return rows.listing.modelEntryAt(index - pinned).note?.name;
-  }
-
   /// Moves to the first row from [at] + [from] on, wrapping, whose name
   /// starts with [name], looking at the rows loaded alone.
   _Held _jumpHeld(String name, int at, {required int from}) {
     // The tree's own comparison of names (#1070): case and marks do not
     // count, so the letter typed finds the row the order puts it in.
     final wanted = foldName(name);
-    final length = _walkLength;
+    final length = _walk.length;
     for (var step = from; step < length + from; step++) {
       final index = (at + step) % length;
-      final held = _heldName(index);
+      final held = _walk.nameAt(index);
       if (held == null) return _Held.unsure;
       if (foldName(held).startsWith(wanted)) {
         _move(index);
@@ -905,18 +761,18 @@ final class _NoteTreeState extends State<NoteTree> {
     // The tree's own comparison of names (#1070): case and marks do not
     // count, so the letter typed finds the row the order puts it in.
     final wanted = foldName(name);
-    final listing = _current?.listing;
+    final listing = _walk.rows?.listing;
     if (listing == null) return false;
-    final length = _walkLength;
+    final length = _walk.length;
     if (length == 0) return false;
     final start = (await _cursorAtAsync() + from) % length;
-    if (!mounted || !identical(_current?.listing, listing)) return false;
-    final pinned = _pinnedWalked;
+    if (!mounted || !identical(_walk.rows?.listing, listing)) return false;
+    final pinned = _walk.pinnedWalked;
     final search = TreeNameSearch(listing);
 
     // The first walk index from [first] up to [end] that has the name.
     Future<int?> within(int first, int end) async {
-      final notes = _current!.pinned;
+      final notes = _walk.rows!.pinned;
       for (var at = first; at < math.min(end, pinned); at++) {
         if (foldName(notes[at].name).startsWith(wanted)) return at;
       }
@@ -929,7 +785,7 @@ final class _NoteTreeState extends State<NoteTree> {
     }
 
     final index = await within(start, length) ?? await within(0, start);
-    if (index == null || !mounted || !identical(_current?.listing, listing)) {
+    if (index == null || !mounted || !identical(_walk.rows?.listing, listing)) {
       return false;
     }
     _move(index);
@@ -942,9 +798,9 @@ final class _NoteTreeState extends State<NoteTree> {
   void _markRange(int from, int to) {
     // Asked after the cursor was found, which may have waited on the index.
     if (!mounted) return;
-    final listing = _current?.listing;
+    final listing = _walk.rows?.listing;
     if (listing == null) return;
-    final pinned = _pinnedWalked;
+    final pinned = _walk.pinnedWalked;
     final first = math.max(math.min(from, to), pinned) - pinned;
     final last = math.max(from, to) - pinned;
     if (last < first) return;
@@ -984,19 +840,19 @@ final class _NoteTreeState extends State<NoteTree> {
   /// first, so that the list asks for the page, and the cursor lands when
   /// the page has.
   KeyEventResult _move(int index) {
-    final to = index.clamp(0, _walkLength - 1);
-    final row = _walkRow(to);
+    final to = index.clamp(0, _walk.length - 1);
+    final row = _walk.rowAt(to);
     if (row != null) {
       _land(row);
       return KeyEventResult.handled;
     }
-    final rows = _current;
-    final at = to - _pinnedWalked;
+    final rows = _walk.rows;
+    final at = to - _walk.pinnedWalked;
     if (rows != null && at >= 0 && _scroll.hasClients) {
-      _scrollTo(_treeTop(rows.listing.listIndexOf(at)), _rowHeight);
+      _scrollTo(_walk.treeTop(rows.listing.listIndexOf(at)), _walk.rowHeight);
     }
     unawaited(
-      _walkRowAsync(to).then((row) {
+      _walk.rowAtAsync(to).then((row) {
         if (row != null && mounted) _land(row);
       }),
     );
@@ -1025,7 +881,7 @@ final class _NoteTreeState extends State<NoteTree> {
         HardwareKeyboard.instance.isShiftPressed &&
         row != null &&
         !row.pinned &&
-        _walkLength > 0) {
+        _walk.length > 0) {
       final to = row.index;
       final from = _cursorAtSync();
       if (from != null) {
@@ -1127,7 +983,7 @@ final class _NoteTreeState extends State<NoteTree> {
       // pinned section's roll-up — asked once per library, so it has to be
       // asked again rather than carried over.
       _rows = null;
-      _current = null;
+      _walk.clear();
       _pages.clear();
       _pinnedCollapsed = null;
     }
@@ -1158,7 +1014,7 @@ final class _NoteTreeState extends State<NoteTree> {
     // The rows on screen are drawn from pages that are about to be forgotten
     // or dropped: they keep the ones they have until the new rows land, or
     // the tree would blank for each change.
-    _current?.listing.freeze();
+    _walk.rows?.listing.freeze();
     // A new order makes what was read of the folders stale, and so does a
     // revision — of the folders it moved rows in, when it says which: a
     // note's new title re-reads its own folder, not every open one (#1132).
@@ -1248,9 +1104,10 @@ final class _NoteTreeState extends State<NoteTree> {
       sort: sort,
     );
     final pagesAt = DateTime.now();
-    final header = _pinnedHeightsOf(
+    final header = TreeWalk.pinnedHeightsOf(
       pinned,
       _rowHeightHint,
+      collapsed: _collapsed,
     ).fold<double>(0, (total, height) => total + height);
     await _loadWindow(listing, header);
     final pagesMs = DateTime.now().difference(pagesAt).inMilliseconds;
@@ -1333,7 +1190,7 @@ final class _NoteTreeState extends State<NoteTree> {
     _askScheduled = false;
     final keys = _wanted.toList();
     _wanted.clear();
-    final listing = _current?.listing;
+    final listing = _walk.rows?.listing;
     if (!mounted || listing == null || listing.isFrozen) return;
     for (final (parent, page) in keys) {
       unawaited(
@@ -1365,7 +1222,7 @@ final class _NoteTreeState extends State<NoteTree> {
   /// either side of each, and lets go of the others.
   void _syncWindow() {
     final range = _laidOut;
-    final listing = _current?.listing;
+    final listing = _walk.rows?.listing;
     if (!mounted || range == null || listing == null || listing.isFrozen) {
       return;
     }
@@ -1413,7 +1270,7 @@ final class _NoteTreeState extends State<NoteTree> {
       listing.modelIndexOfPath(folder).then((at) {
         if (at == null ||
             !mounted ||
-            !identical(_current?.listing, listing) ||
+            !identical(_walk.rows?.listing, listing) ||
             widget.creating?.folder != folder) {
           return;
         }
@@ -1468,7 +1325,7 @@ final class _NoteTreeState extends State<NoteTree> {
             }
             final rows = snap.data!;
             if (rows.isEmpty) {
-              _current = null;
+              _walk.clear();
               return Center(child: Text(AppStrings.treeEmpty));
             }
             // The pinned notes sit above the tree with a heading of their
@@ -1478,16 +1335,10 @@ final class _NoteTreeState extends State<NoteTree> {
             // count is still worth seeing, and the tree keeps the room.
             final rowHeight = TreeRowMetrics.of(context).height;
             final listing = rows.listing;
-            _current = rows;
-            _pinnedHeights = _pinnedHeightsOf(rows.pinned, rowHeight);
-            _pinnedTotal = _pinnedHeights.fold<double>(
-              0,
-              (total, height) => total + height,
-            );
-            _rowHeight = rowHeight;
+            _walk.layout(rows, rowHeight: rowHeight, collapsed: _collapsed);
             _placeCreating(listing);
             _revealRenamed();
-            final header = _pinnedHeights.length;
+            final header = _walk.pinnedHeights.length;
             // What a list does for the system's insets when it is given no
             // padding of its own: the main axis's go around the slivers, and
             // the rows below see the cross axis's alone.
@@ -1519,7 +1370,7 @@ final class _NoteTreeState extends State<NoteTree> {
                               (context, index) => _pinnedItem(
                                 rows.pinned,
                                 index,
-                                _pinnedWalkAt(index),
+                                _walk.pinnedAt(index),
                               ),
                               childCount: header,
                             ),
@@ -1584,7 +1435,7 @@ final class _NoteTreeState extends State<NoteTree> {
       if (page != null && !listing.isFrozen) _wantPage(page);
       return SizedBox(height: rowHeight);
     }
-    final walked = _treeWalkRow(listing.modelIndexOf(index)!, entry);
+    final walked = _walk.treeRow(listing.modelIndexOf(index)!, entry);
     return TreeRowTile(
       note: note,
       depth: entry.depth,
