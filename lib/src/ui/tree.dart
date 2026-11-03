@@ -6,7 +6,6 @@ import 'package:flutter/rendering.dart'
     show RenderAbstractViewport, ScrollCacheExtent;
 import 'package:flutter/services.dart';
 import 'package:niman/src/core/logging.dart';
-import 'package:niman/src/core/name_sort_key.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/editor/toolbar.dart';
@@ -19,7 +18,6 @@ import 'package:niman/src/ui/tree_create_row.dart';
 import 'package:niman/src/ui/tree_drag.dart';
 import 'package:niman/src/ui/tree_drag_scroll.dart';
 import 'package:niman/src/ui/tree_listing.dart';
-import 'package:niman/src/ui/tree_name_search.dart';
 import 'package:niman/src/ui/tree_pages.dart';
 import 'package:niman/src/ui/tree_range_reader.dart';
 import 'package:niman/src/ui/tree_row_metrics.dart';
@@ -27,24 +25,13 @@ import 'package:niman/src/ui/tree_row_tile.dart';
 import 'package:niman/src/ui/tree_rows.dart';
 import 'package:niman/src/ui/tree_rows_delegate.dart';
 import 'package:niman/src/ui/tree_spring_load.dart';
+import 'package:niman/src/ui/tree_type_ahead.dart';
 import 'package:niman/src/ui/tree_walk.dart';
 import 'package:niman/src/ui/tree_walk_row.dart';
 
 export 'package:niman/src/ui/tree_create_row.dart' show TreeCreate;
 export 'package:niman/src/ui/tree_row_tile.dart'
     show TreeRename, displayNameOf, isoDate;
-
-/// What looking for a name through the rows loaded found.
-enum _Held {
-  /// A row has it, and the cursor moved there.
-  found,
-
-  /// Every row has been looked at and none has it.
-  none,
-
-  /// A row in a page that is not loaded was reached: the index has to say.
-  unsure,
-}
 
 /// Lazy tree of the library's folders/notes.
 ///
@@ -247,16 +234,13 @@ final class _NoteTreeState extends State<NoteTree> {
       ? LazyDragPaths(_marked.toList)
       : null;
 
-  /// What has been typed to jump to a row by its name, and when the last
-  /// letter came: a pause starts a new name (#712).
-  String _typed = '';
-  DateTime _typedAt = DateTime(0);
-
-  /// The letters typed that the index is answering, one after the other: the
-  /// next one starts from where the one before landed. [_typingPending]
-  /// counts the ones still out.
-  Future<void> _typing = Future<void>.value();
-  int _typingPending = 0;
+  /// The jump to a row by the name typed (#712).
+  late final TreeTypeAhead _letters = TreeTypeAhead(
+    walk: _walk,
+    move: _move,
+    cursorAt: _cursorAtAsync,
+    mounted: () => mounted,
+  );
 
   /// The row the keyboard's cursor is on, by path, and whether that is the
   /// pinned block's copy of the note. Held by path rather than by place:
@@ -427,21 +411,7 @@ final class _NoteTreeState extends State<NoteTree> {
           key == LogicalKeyboardKey.numpadEnter;
     }
     if (_walkKeys.contains(key)) return true;
-    return !keys.isShiftPressed && _typedLetter(event) != null;
-  }
-
-  /// The character [event] types, when it is a letter or a mark to jump to
-  /// a name by; null for a space, a control character or no character.
-  static String? _typedLetter(KeyEvent event) {
-    final typed = event.character;
-    if (typed != null &&
-        typed.length == 1 &&
-        typed.trim().isNotEmpty &&
-        typed.codeUnitAt(0) >= 0x20 &&
-        typed.codeUnitAt(0) != 0x7f) {
-      return typed;
-    }
-    return null;
+    return !keys.isShiftPressed && TreeTypeAhead.letterOf(event) != null;
   }
 
   /// The keyboard (#727): the arrows walk the rows, `Home`/`End` and
@@ -668,128 +638,8 @@ final class _NoteTreeState extends State<NoteTree> {
       }
       setState(_marked.clear);
     }
-    final typed = _typedLetter(event);
-    return typed == null ? null : _typeAhead(typed, at);
-  }
-
-  /// Jumps to the next row, from the cursor's, whose name starts with what
-  /// has been typed: a second letter within a second narrows the name, the
-  /// same letter again moves to the next row that starts with it, and a
-  /// letter that narrows it to nothing starts a name of its own.
-  ///
-  /// The rows in memory answer when they can, at once. When the walk comes to
-  /// a page that is not loaded it is the index that answers, and the jump
-  /// lands when it does; the letters typed meanwhile wait their turn.
-  KeyEventResult _typeAhead(String letter, int at) {
-    final now = DateTime.now();
-    final fresh = now.difference(_typedAt) > const Duration(seconds: 1);
-    _typedAt = now;
-    if (_typingPending == 0 && _typeHeld(letter, at, fresh: fresh)) {
-      return KeyEventResult.handled;
-    }
-    _typingPending++;
-    _typing = _typing.then((_) => _typeOne(letter, fresh: fresh)).whenComplete(
-      () {
-        _typingPending--;
-      },
-    );
-    return KeyEventResult.handled;
-  }
-
-  /// [_typeAhead] over the rows loaded alone: false, with nothing changed,
-  /// when a row it needs to look at is in a page that is not.
-  bool _typeHeld(String letter, int at, {required bool fresh}) {
-    final repeat = !fresh && _typed == letter;
-    if (!fresh && !repeat) {
-      final narrowed = _jumpHeld('$_typed$letter', at, from: 0);
-      if (narrowed == _Held.unsure) return false;
-      if (narrowed == _Held.found) {
-        _typed += letter;
-        return true;
-      }
-    }
-    // A letter on its own looks past the cursor's row.
-    if (_jumpHeld(letter, at, from: 1) == _Held.unsure) return false;
-    _typed = letter;
-    return true;
-  }
-
-  /// One letter of [_typeAhead], answered by the index, once the ones before
-  /// it are done.
-  Future<void> _typeOne(String letter, {required bool fresh}) async {
-    try {
-      final repeat = !fresh && _typed == letter;
-      if (!fresh && !repeat && await _jumpTo('$_typed$letter', from: 0)) {
-        _typed += letter;
-        return;
-      }
-      _typed = letter;
-      // A letter on its own looks past the cursor's row.
-      await _jumpTo(letter, from: 1);
-    } on Object catch (error) {
-      // A library closed under the question has no row to jump to.
-      const AppLogger(name: 'tree.ui').warning('type-ahead: $error');
-    }
-  }
-
-  /// Moves to the first row from [at] + [from] on, wrapping, whose name
-  /// starts with [name], looking at the rows loaded alone.
-  _Held _jumpHeld(String name, int at, {required int from}) {
-    // The tree's own comparison of names (#1070): case and marks do not
-    // count, so the letter typed finds the row the order puts it in.
-    final wanted = foldName(name);
-    final length = _walk.length;
-    for (var step = from; step < length + from; step++) {
-      final index = (at + step) % length;
-      final held = _walk.nameAt(index);
-      if (held == null) return _Held.unsure;
-      if (foldName(held).startsWith(wanted)) {
-        _move(index);
-        return _Held.found;
-      }
-    }
-    return _Held.none;
-  }
-
-  /// Moves to the first row from the cursor's + [from] on, wrapping, whose
-  /// name starts with [name]; false when none does.
-  ///
-  /// The pinned notes are looked through here, and the tree's rows are asked
-  /// of the index, segment by segment in the order they are drawn (see
-  /// [TreeNameSearch]).
-  Future<bool> _jumpTo(String name, {required int from}) async {
-    // The tree's own comparison of names (#1070): case and marks do not
-    // count, so the letter typed finds the row the order puts it in.
-    final wanted = foldName(name);
-    final listing = _walk.rows?.listing;
-    if (listing == null) return false;
-    final length = _walk.length;
-    if (length == 0) return false;
-    final start = (await _cursorAtAsync() + from) % length;
-    if (!mounted || !identical(_walk.rows?.listing, listing)) return false;
-    final pinned = _walk.pinnedWalked;
-    final search = TreeNameSearch(listing);
-
-    // The first walk index from [first] up to [end] that has the name.
-    Future<int?> within(int first, int end) async {
-      final notes = _walk.rows!.pinned;
-      for (var at = first; at < math.min(end, pinned); at++) {
-        if (foldName(notes[at].name).startsWith(wanted)) return at;
-      }
-      final treeFirst = math.max(first, pinned) - pinned;
-      if (treeFirst >= end - pinned) return null;
-      final found = await search.firstIn(wanted, treeFirst, end - pinned);
-      if (found == null) return null;
-      final at = await listing.modelIndexOfNote(found);
-      return at == null ? null : pinned + at;
-    }
-
-    final index = await within(start, length) ?? await within(0, start);
-    if (index == null || !mounted || !identical(_walk.rows?.listing, listing)) {
-      return false;
-    }
-    _move(index);
-    return true;
+    final typed = TreeTypeAhead.letterOf(event);
+    return typed == null ? null : _letters.type(typed, at);
   }
 
   /// Marks every tree row from [from] to [to] in the walk, and [from]'s
