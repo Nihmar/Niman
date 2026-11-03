@@ -10,88 +10,26 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/settings/library_features.dart';
 import 'package:niman/src/home/home_action.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/home/home_icons.dart';
 import 'package:niman/src/ui/keyboard_presence.dart';
+import 'package:niman/src/ui/palette/palette_action_line.dart';
+import 'package:niman/src/ui/palette/palette_choice.dart';
 import 'package:niman/src/ui/palette/palette_command.dart';
+import 'package:niman/src/ui/palette/palette_command_line.dart';
 import 'package:niman/src/ui/palette/palette_feature_line.dart';
+import 'package:niman/src/ui/palette/palette_heading.dart';
 import 'package:niman/src/ui/palette/palette_match.dart';
+import 'package:niman/src/ui/palette/palette_note_line.dart';
+import 'package:niman/src/ui/palette/palette_off_command.dart';
 import 'package:niman/src/ui/palette/palette_reveal.dart';
+import 'package:niman/src/ui/palette/palette_row.dart';
+import 'package:niman/src/ui/palette/palette_setting.dart';
+import 'package:niman/src/ui/palette/palette_setting_line.dart';
 import 'package:niman/src/ui/palette/pinned_commands.dart';
-import 'package:niman/src/ui/settings_areas.dart';
 import 'package:niman/src/ui/strings.dart';
-import 'package:path/path.dart' as p;
-
-/// What was picked.
-sealed class PaletteChoice {
-  const new();
-}
-
-/// A command, to run.
-final class PaletteCommandChoice extends PaletteChoice {
-  /// Picked [command].
-  const new(this.command);
-
-  /// The command.
-  final AppCommand command;
-}
-
-/// A note, to open.
-final class PaletteNoteChoice extends PaletteChoice {
-  /// Picked the note at library-relative [path].
-  const new(this.path);
-
-  /// The note.
-  final String path;
-}
-
-/// A settings row, to open the settings at (#229).
-final class PaletteSettingChoice extends PaletteChoice {
-  /// Picked [setting].
-  const new(this.setting);
-
-  /// Which row.
-  final PaletteSetting setting;
-}
-
-/// A Home action, to run (#535).
-final class PaletteActionChoice extends PaletteChoice {
-  /// Picked [action].
-  const new(this.action);
-
-  /// The action.
-  final HomeAction action;
-}
-
-/// The link of the quiet line: Settings → Features (#1109).
-final class PaletteFeaturesChoice extends PaletteChoice {
-  /// Picked the link to Features.
-  const new();
-}
-
-/// A command the palette would offer but for its `feature` being off
-/// (#1109): kept to say why a query found nothing.
-typedef PaletteOffCommand = ({PaletteCommand command, LibraryFeature feature});
-
-/// One settings row as the palette lists it (#229): its title, the area
-/// it lives in, and where to open.
-@immutable
-final class PaletteSetting {
-  /// A row titled [title] of [area], at [target].
-  const new({required this.title, required this.area, required this.target});
-
-  /// The row's own title, as the settings screen reads it.
-  final String title;
-
-  /// Where it lives, for the line under it.
-  final String area;
-
-  /// The area and row the settings open at.
-  final SettingsTarget target;
-}
 
 /// Shows the palette and resolves to what was picked, or null.
 ///
@@ -469,7 +407,7 @@ final class _CommandPaletteState extends State<CommandPalette> {
     var index = 0;
     Widget row(Widget child) {
       final at = index++;
-      return _PaletteRow(
+      return PaletteRow(
         key: Key('palette-item-$at'),
         selected: at == _selected,
         anchor: at == _selected ? _selectedRow : null,
@@ -539,10 +477,10 @@ final class _CommandPaletteState extends State<CommandPalette> {
                             padding: const EdgeInsets.symmetric(vertical: 6),
                             children: [
                               if (pinned > 0)
-                                _Heading(AppStrings.palettePinned),
+                                PaletteHeading(AppStrings.palettePinned),
                               for (final command in _commands.take(pinned))
                                 row(
-                                  _CommandLine(
+                                  PaletteCommandLine(
                                     command: command,
                                     pin: pin,
                                     keys: keys,
@@ -550,20 +488,20 @@ final class _CommandPaletteState extends State<CommandPalette> {
                                 ),
                               if (_commands.length > pinned &&
                                   (pinned > 0 || _notes.isNotEmpty))
-                                _Heading(AppStrings.paletteCommands),
+                                PaletteHeading(AppStrings.paletteCommands),
                               for (final command in _commands.skip(pinned))
                                 row(
-                                  _CommandLine(
+                                  PaletteCommandLine(
                                     command: command,
                                     pin: pin,
                                     keys: keys,
                                   ),
                                 ),
                               if (_actions.isNotEmpty)
-                                _Heading(AppStrings.tabHome),
+                                PaletteHeading(AppStrings.tabHome),
                               for (final action in _actions)
                                 row(
-                                  _ActionLine(
+                                  PaletteActionLine(
                                     action: action,
                                     name: _actionName(action),
                                   ),
@@ -571,20 +509,20 @@ final class _CommandPaletteState extends State<CommandPalette> {
                               if ((_commands.isNotEmpty ||
                                       _actions.isNotEmpty) &&
                                   _notes.isNotEmpty)
-                                _Heading(AppStrings.paletteNotes),
+                                PaletteHeading(AppStrings.paletteNotes),
                               for (final path in _notes)
                                 row(
                                   // Dimmed while the search for the typed
                                   // text is out: they are not its hits yet.
                                   Opacity(
                                     opacity: _pending ? 0.5 : 1,
-                                    child: _NoteLine(path: path),
+                                    child: PaletteNoteLine(path: path),
                                   ),
                                 ),
                               if (_settings.isNotEmpty)
-                                _Heading(AppStrings.tabSettings),
+                                PaletteHeading(AppStrings.tabSettings),
                               for (final setting in _settings)
-                                row(_SettingLine(setting: setting)),
+                                row(PaletteSettingLine(setting: setting)),
                             ],
                           ),
                   ),
@@ -631,257 +569,6 @@ final class _CommandPaletteState extends State<CommandPalette> {
           ),
         ),
       ),
-    );
-  }
-}
-
-final class _Heading extends StatelessWidget {
-  const new(this.text);
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(14, 8, 14, 4),
-      child: Text(
-        text.toUpperCase(),
-        style: theme.textTheme.labelSmall?.copyWith(
-          color: theme.colorScheme.onSurfaceVariant,
-          letterSpacing: 0.6,
-        ),
-      ),
-    );
-  }
-}
-
-final class _PaletteRow extends StatelessWidget {
-  const new({
-    required this.selected,
-    required this.onTap,
-    required this.onHover,
-    required this.child,
-    this.anchor,
-    super.key,
-  });
-
-  final bool selected;
-
-  /// The key the selected row carries, for the list to scroll to it.
-  final GlobalKey? anchor;
-  final VoidCallback onTap;
-
-  /// The pointer came onto this row.
-  final VoidCallback onHover;
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return Padding(
-      key: anchor,
-      padding: const EdgeInsets.symmetric(horizontal: 6),
-      child: Material(
-        color: selected ? scheme.surfaceContainerHighest : Colors.transparent,
-        borderRadius: BorderRadius.circular(6),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(6),
-          // The field keeps the keyboard: a row that took the focus left
-          // the arrows and Alt+P doing nothing until Tab put it back.
-          canRequestFocus: false,
-          onHover: (over) {
-            if (over) onHover();
-          },
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-            child: child,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-final class _CommandLine extends StatelessWidget {
-  const new({required this.command, this.pin, this.keys = true});
-
-  final PaletteCommand command;
-
-  /// Whether to show the command's key: there has to be a keyboard to
-  /// press it on (#230).
-  final bool keys;
-
-  /// Pins or unpins this row's command (#208); null leaves the pin out.
-  final void Function(AppCommand command)? pin;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final binding = command.binding;
-    return Row(
-      children: [
-        Expanded(
-          child: Text(
-            command.name,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: theme.textTheme.bodyMedium,
-          ),
-        ),
-        if (binding != null && keys)
-          Text(
-            describeActivator(binding),
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-              fontFamily: 'monospace',
-            ),
-          ),
-        if (pin case final pin?) ...[
-          const SizedBox(width: 6),
-          _PinButton(command: command.command, onPressed: pin),
-        ],
-      ],
-    );
-  }
-}
-
-final class _NoteLine extends StatelessWidget {
-  const new({required this.path});
-
-  final String path;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final name = p.posix.basename(path);
-    final folder = p.posix.dirname(path);
-    return Row(
-      children: [
-        Icon(
-          Icons.description_outlined,
-          size: 18,
-          color: theme.colorScheme.onSurfaceVariant,
-        ),
-        const SizedBox(width: 10),
-        Flexible(
-          child: Text(
-            isMarkdownNote(name) ? name.substring(0, name.length - 3) : name,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: theme.textTheme.bodyMedium,
-          ),
-        ),
-        if (folder != '.') ...[
-          const SizedBox(width: 10),
-          Flexible(
-            child: Text(
-              folder,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ),
-        ],
-      ],
-    );
-  }
-}
-
-/// The pin on a command's row: filled while it is pinned.
-final class _PinButton extends StatelessWidget {
-  const new({required this.command, required this.onPressed});
-
-  final AppCommand command;
-  final void Function(AppCommand command) onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    final pinned = PinnedCommands.isPinned(command);
-    final scheme = Theme.of(context).colorScheme;
-    return IconButton(
-      key: Key('palette-pin-${command.name}'),
-      tooltip: pinned ? AppStrings.paletteUnpin : AppStrings.palettePin,
-      iconSize: 16,
-      visualDensity: VisualDensity.compact,
-      padding: EdgeInsets.zero,
-      constraints: const BoxConstraints.tightFor(width: 28, height: 28),
-      color: pinned ? scheme.primary : scheme.onSurfaceVariant,
-      icon: Icon(pinned ? Icons.push_pin : Icons.push_pin_outlined),
-      onPressed: () => onPressed(command),
-    );
-  }
-}
-
-/// One Home action in the palette (#535): its icon and its name.
-final class _ActionLine extends StatelessWidget {
-  const new({required this.action, required this.name});
-
-  final HomeAction action;
-  final String name;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Row(
-      key: Key('palette-action-${action.id}'),
-      children: [
-        Icon(
-          homeActionIcon(action),
-          size: 18,
-          color: theme.colorScheme.onSurfaceVariant,
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Text(
-            name,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: theme.textTheme.bodyMedium,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-/// One settings row in the palette: its title, and where it lives.
-final class _SettingLine extends StatelessWidget {
-  const new({required this.setting});
-
-  final PaletteSetting setting;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Row(
-      children: [
-        Icon(Icons.tune, size: 18, color: theme.colorScheme.onSurfaceVariant),
-        const SizedBox(width: 10),
-        Flexible(
-          child: Text(
-            setting.title,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: theme.textTheme.bodyMedium,
-          ),
-        ),
-        const SizedBox(width: 10),
-        Flexible(
-          child: Text(
-            setting.area,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

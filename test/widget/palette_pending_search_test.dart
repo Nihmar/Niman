@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/ui/palette/command_palette.dart';
+import 'package:niman/src/ui/palette/palette_choice.dart';
 
 void main() {
   late Completer<List<String>> search;
