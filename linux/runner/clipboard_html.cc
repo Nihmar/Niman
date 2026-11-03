@@ -148,8 +148,54 @@ static void file_targets_received(GtkClipboard* clipboard, GdkAtom* atoms,
   gtk_clipboard_request_contents(clipboard, target, files_received, call);
 }
 
+// A picture on the clipboard with no text beside it (a screenshot, an image
+// a browser copied): its PNG, which Dart keeps as a file to attach
+// (lib/src/capture/paste/clipboard_picture.dart). With text, the paste is
+// the text's: a spreadsheet's cells come with a picture of themselves.
+static void image_received(GtkClipboard* clipboard, GdkPixbuf* pixbuf,
+                           gpointer user_data) {
+  FlMethodCall* call = FL_METHOD_CALL(user_data);
+  gchar* buffer = nullptr;
+  gsize size = 0;
+  g_autoptr(GError) error = nullptr;
+  if (pixbuf != nullptr &&
+      gdk_pixbuf_save_to_buffer(pixbuf, &buffer, &size, "png", &error,
+                                nullptr) &&
+      size > 0) {
+    g_autoptr(FlValue) png = fl_value_new_uint8_list(
+        reinterpret_cast<const uint8_t*>(buffer), size);
+    fl_method_call_respond_success(call, png, nullptr);
+  } else {
+    g_autoptr(FlValue) none = fl_value_new_null();
+    fl_method_call_respond_success(call, none, nullptr);
+  }
+  g_free(buffer);
+  g_object_unref(call);
+}
+
+static void image_targets_received(GtkClipboard* clipboard, GdkAtom* atoms,
+                                   gint n_atoms, gpointer user_data) {
+  FlMethodCall* call = FL_METHOD_CALL(user_data);
+  // The targets are a list of names: asking them reads no picture, so a
+  // text paste is not held up by this.
+  if (atoms == nullptr || gtk_targets_include_text(atoms, n_atoms) ||
+      !gtk_targets_include_image(atoms, n_atoms, FALSE)) {
+    g_autoptr(FlValue) none = fl_value_new_null();
+    fl_method_call_respond_success(call, none, nullptr);
+    g_object_unref(call);
+    return;
+  }
+  gtk_clipboard_request_image(clipboard, image_received, call);
+}
+
 static void clipboard_method_call(FlMethodChannel* channel,
                                   FlMethodCall* call, gpointer user_data) {
+  if (strcmp(fl_method_call_get_name(call), "readImage") == 0) {
+    gtk_clipboard_request_targets(gtk_clipboard_get(GDK_SELECTION_CLIPBOARD),
+                                  image_targets_received,
+                                  g_object_ref(call));
+    return;
+  }
   if (strcmp(fl_method_call_get_name(call), "readFiles") == 0) {
     // Asynchronous, as readHtml is: the call is kept until GTK answers.
     gtk_clipboard_request_targets(gtk_clipboard_get(GDK_SELECTION_CLIPBOARD),

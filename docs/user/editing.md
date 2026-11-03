@@ -370,6 +370,14 @@ is. A file that cannot be copied in is named in a message. On Android and
 iOS, where an app hands over its content rather than a path, Niman copies
 it first and then attaches it the same way.
 
+A **picture** on the clipboard — a screenshot copied by the Snipping Tool,
+`⌘+Ctrl+Shift+4` or a Linux screenshot tool, an image a browser's *Copy
+image* copied — is attached the same way, as a PNG named for when it was
+pasted (`pasted-image-2026-11-03-170509.png`). Only when the clipboard
+holds no text beside it: cells copied from a spreadsheet come with a
+picture of themselves, and they paste as the table above. On every
+platform.
+
 ### Undo and redo
 
 Undo goes back one step at a time, and a step is what a writer would call

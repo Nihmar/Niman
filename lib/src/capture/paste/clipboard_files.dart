@@ -4,6 +4,9 @@
 /// Every platform answers with paths on this device. Windows reads
 /// `CF_HDROP` itself (`windows_clipboard_files.dart`); Linux, Android,
 /// macOS and iOS ask their runner over `niman/clipboard` (`readFiles`).
+/// With no files, a picture alone on the clipboard — a screenshot — is
+/// one, kept in a file of its own (`clipboard_picture.dart`): Windows
+/// reads it itself, Linux and macOS answer `readImage`.
 /// Linux answers with the raw bytes of the target the file manager wrote —
 /// `x-special/gnome-copied-files` or `text/uri-list` — read here, where it
 /// is tested; Android and iOS copy what a `content://` URI or an item
@@ -14,6 +17,7 @@ library;
 import 'dart:convert';
 
 import 'package:flutter/services.dart';
+import 'package:niman/src/capture/paste/clipboard_picture.dart';
 import 'package:niman/src/core/logging.dart';
 
 /// Reads the files on the clipboard.
@@ -51,7 +55,25 @@ final class ChannelClipboardFiles implements ClipboardFilesReader {
       _log.warning('files: the clipboard could not be read ($error)');
       return const [];
     }
-    return clipboardFilesFrom(answer);
+    final files = clipboardFilesFrom(answer);
+    if (files.isNotEmpty) return files;
+    final picture = await _picture();
+    return picture == null ? const [] : [await keepClipboardPicture(picture)];
+  }
+
+  /// The PNG of the picture on the clipboard when it holds one and no text
+  /// (`readImage`: Linux and macOS; Android and iOS hand a copied picture
+  /// over as a file already).
+  Future<Uint8List?> _picture() async {
+    try {
+      final png = await _channel.invokeMethod<Uint8List>('readImage');
+      return png == null || png.isEmpty ? null : png;
+    } on MissingPluginException {
+      return null;
+    } on PlatformException catch (error) {
+      _log.warning('picture: the clipboard could not be read ($error)');
+      return null;
+    }
   }
 }
 

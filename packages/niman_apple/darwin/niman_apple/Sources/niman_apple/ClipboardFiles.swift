@@ -11,6 +11,9 @@ import UniformTypeIdentifiers
 
 /// The files on the pasteboard (#1249, lib/src/capture/paste/clipboard_files.dart):
 /// `readFiles` answers their paths, an empty list when it holds none.
+/// `readImage` answers the PNG of a picture on a Mac's pasteboard — a
+/// screenshot, an image a browser copied — when it holds no text and no
+/// file, else null (lib/src/capture/paste/clipboard_picture.dart).
 ///
 /// On a Mac, Finder's Copy writes file URLs, and the paths are the files'
 /// own. On iOS, the Files app and Photos write item providers whose data
@@ -28,6 +31,31 @@ enum ClipboardFiles {
       result(urls.filter { $0.isFileURL }.map { $0.path })
     #endif
   }
+
+  static func readImage(result: @escaping FlutterResult) {
+    #if os(iOS)
+      // A copied picture is an item provider's file, which readFiles takes.
+      result(nil)
+    #else
+      result(macPicture(NSPasteboard.general).map { FlutterStandardTypedData(bytes: $0) })
+    #endif
+  }
+
+  #if os(macOS)
+    /// The pasteboard's picture as a PNG: its PNG as it is, or its TIFF —
+    /// what a screenshot to the clipboard writes — made one. Nil when it
+    /// holds text, whose paste it is (a spreadsheet's cells come with a
+    /// picture of themselves), or files, which readFiles took.
+    static func macPicture(_ board: NSPasteboard) -> Data? {
+      let types = board.types ?? []
+      if types.contains(.string) || types.contains(.fileURL) { return nil }
+      if let png = board.data(forType: .png) { return png }
+      guard let tiff = board.data(forType: .tiff),
+        let image = NSBitmapImageRep(data: tiff)
+      else { return nil }
+      return image.representation(using: .png, properties: [:])
+    }
+  #endif
 
   #if os(iOS)
     /// The type a provider's file is read as: the first it registers that

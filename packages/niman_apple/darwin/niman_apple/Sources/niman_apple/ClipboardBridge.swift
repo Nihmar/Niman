@@ -27,6 +27,10 @@ enum ClipboardBridge {
       ClipboardFiles.read(result: result)
       return
     }
+    if call.method == "readImage" {
+      ClipboardFiles.readImage(result: result)
+      return
+    }
     guard call.method == "readHtml" else {
       result(FlutterMethodNotImplemented)
       return
