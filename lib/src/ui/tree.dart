@@ -24,65 +24,14 @@ import 'package:niman/src/ui/tree_pages.dart';
 import 'package:niman/src/ui/tree_range_reader.dart';
 import 'package:niman/src/ui/tree_row_metrics.dart';
 import 'package:niman/src/ui/tree_row_tile.dart';
+import 'package:niman/src/ui/tree_rows.dart';
 import 'package:niman/src/ui/tree_rows_delegate.dart';
 import 'package:niman/src/ui/tree_spring_load.dart';
+import 'package:niman/src/ui/tree_walk_row.dart';
 
 export 'package:niman/src/ui/tree_create_row.dart' show TreeCreate;
 export 'package:niman/src/ui/tree_row_tile.dart'
     show TreeRename, displayNameOf, isoDate;
-
-/// What the tree renders: the pinned notes, then the folder tree.
-final class _Rows {
-  const new({required this.pinned, required this.listing});
-
-  final List<Note> pinned;
-
-  /// The folder tree's rows, by index (#1200).
-  final TreeListing listing;
-
-  bool get isEmpty => pinned.isEmpty && listing.modelLength == 0;
-}
-
-/// One row the tree's keyboard walks (#727): the note it draws, where the
-/// list puts it, and what a key on it acts on.
-final class _WalkRow {
-  const new({
-    required this.note,
-    required this.path,
-    required this.pinned,
-    required this.depth,
-    required this.top,
-    required this.height,
-    required this.index,
-    this.sidecar = false,
-  });
-
-  final Note note;
-  final String path;
-
-  /// The row's place in the walk: the pinned notes first, then the tree's
-  /// own rows.
-  final int index;
-
-  /// The pinned block's copy of the note, rather than its own row in the
-  /// tree: a pinned note is drawn twice, and the cursor is on one of them.
-  final bool pinned;
-
-  /// How deep the row sits, for the right arrow's step into the rows under
-  /// it. A pinned row is drawn at the root: its depth means nothing there.
-  final int depth;
-
-  /// Whether the row is a text recognition sidecar, whose left arrow goes to
-  /// the file it is drawn under.
-  final bool sidecar;
-
-  /// Where the list draws the row, and how tall it is.
-  final double top;
-  final double height;
-}
-
-/// The keyboard's cursor in the walk: its place, and the row it is on.
-typedef _Cursor = ({int at, _WalkRow row});
 
 /// What looking for a name through the rows loaded found.
 enum _Held {
@@ -240,7 +189,7 @@ final class _NoteTreeState extends State<NoteTree> {
   /// whole visible tree, over a hundred queries a second on a real
   /// library. Reusing the same future also keeps [FutureBuilder] from
   /// flashing its spinner between rebuilds.
-  Future<_Rows>? _rows;
+  Future<TreeRows>? _rows;
   int? _rowsRevision;
 
   /// Which counter [_rowsRevision] came from: the library's revision when
@@ -326,7 +275,7 @@ final class _NoteTreeState extends State<NoteTree> {
   /// The rows of the last build, the height each pinned item takes and the
   /// height of a row: what the keyboard walks (#727). The walk itself is
   /// built when a key is pressed, not on every frame.
-  _Rows? _current;
+  TreeRows? _current;
   List<double> _pinnedHeights = const <double>[];
   double _pinnedTotal = 0;
   double _rowHeight = 0;
@@ -410,7 +359,7 @@ final class _NoteTreeState extends State<NoteTree> {
   /// item's place and height, and the row it draws — null for the pinned
   /// heading and its divider, which are not rows. Reads the rows of the last
   /// build.
-  _WalkRow? _pinnedWalkAt(int index) {
+  TreeWalkRow? _pinnedWalkAt(int index) {
     final rows = _current;
     final header = _pinnedHeights.length;
     if (rows == null || index <= 0 || index >= header - 1) return null;
@@ -419,7 +368,7 @@ final class _NoteTreeState extends State<NoteTree> {
       top += _pinnedHeights[at];
     }
     final note = rows.pinned[index - 1];
-    return _WalkRow(
+    return TreeWalkRow(
       note: note,
       path: note.path,
       pinned: true,
@@ -434,11 +383,11 @@ final class _NoteTreeState extends State<NoteTree> {
 
   /// The tree's own row at model index [modelIndex] as the walk sees it, from
   /// what the listing draws there; null while its page is not loaded.
-  _WalkRow? _treeWalkRow(int modelIndex, TreeEntry entry) {
+  TreeWalkRow? _treeWalkRow(int modelIndex, TreeEntry entry) {
     final note = entry.note;
     final rows = _current;
     if (note == null || rows == null) return null;
-    return _WalkRow(
+    return TreeWalkRow(
       note: note,
       path: note.path,
       pinned: false,
@@ -466,7 +415,7 @@ final class _NoteTreeState extends State<NoteTree> {
   /// The walk's row at [index]: the list's item it is. Only the rows a key
   /// reaches are made — a tree of a million rows is not copied for each key
   /// press. Null while the row's page is not loaded; see [_walkRowAsync].
-  _WalkRow? _walkRow(int index) {
+  TreeWalkRow? _walkRow(int index) {
     final pinned = _pinnedWalked;
     if (index < pinned) return _pinnedWalkAt(index + 1);
     final rows = _current;
@@ -476,7 +425,7 @@ final class _NoteTreeState extends State<NoteTree> {
   }
 
   /// The walk's row at [index], its page read first when it is not loaded.
-  Future<_WalkRow?> _walkRowAsync(int index) async {
+  Future<TreeWalkRow?> _walkRowAsync(int index) async {
     final held = _walkRow(index);
     if (held != null) return held;
     final listing = _current?.listing;
@@ -490,7 +439,7 @@ final class _NoteTreeState extends State<NoteTree> {
 
   /// Runs [then] with the walk's row at [index]: at once when it is loaded,
   /// else when its page has landed.
-  void _whenRow(int index, void Function(_WalkRow row) then) {
+  void _whenRow(int index, void Function(TreeWalkRow row) then) {
     final row = _walkRow(index);
     if (row != null) {
       then(row);
@@ -558,14 +507,14 @@ final class _NoteTreeState extends State<NoteTree> {
   }
 
   /// The cursor and the row it is on, when both are loaded.
-  _Cursor? _cursorHere() {
+  TreeWalkCursor? _cursorHere() {
     final at = _cursorAtSync();
     final row = at == null ? null : _walkRow(at);
     return at == null || row == null ? null : (at: at, row: row);
   }
 
   /// The cursor and the row it is on, loading the page it is in.
-  Future<_Cursor?> _cursorResolved() async {
+  Future<TreeWalkCursor?> _cursorResolved() async {
     final at = await _cursorAtAsync();
     final row = await _walkRowAsync(at);
     return row == null ? null : (at: at, row: row);
@@ -574,7 +523,7 @@ final class _NoteTreeState extends State<NoteTree> {
   /// Whether the keyboard's ring is on [row] (#727): the cursor's own look,
   /// apart from the selection's fill, so the two are told apart and can be
   /// worn together.
-  bool _isCursor(_WalkRow? row) =>
+  bool _isCursor(TreeWalkRow? row) =>
       row != null &&
       _keyboardFocus &&
       _focus.hasPrimaryFocus &&
@@ -658,7 +607,7 @@ final class _NoteTreeState extends State<NoteTree> {
   }
 
   /// [event] with the keyboard's cursor on [cursor].
-  KeyEventResult _keyAt(KeyEvent event, _Cursor cursor) {
+  KeyEventResult _keyAt(KeyEvent event, TreeWalkCursor cursor) {
     final marking = _markKey(event, cursor);
     if (marking != null) return marking;
     final keys = HardwareKeyboard.instance;
@@ -693,7 +642,7 @@ final class _NoteTreeState extends State<NoteTree> {
   /// The menu of [row] from the keyboard (#1072), anchored at the row
   /// itself: the marked rows' menu when the row is one of several marked,
   /// the row's own otherwise — a right click's two answers.
-  KeyEventResult _openRowMenu(_WalkRow row) {
+  KeyEventResult _openRowMenu(TreeWalkRow row) {
     final box = context.findRenderObject();
     if (box is! RenderBox || !box.attached) return KeyEventResult.ignored;
     final scrolled = _scroll.hasClients ? _scroll.position.pixels : 0.0;
@@ -717,7 +666,7 @@ final class _NoteTreeState extends State<NoteTree> {
 
   /// One key of the walk: [cursor] is the cursor's place in it, and what the
   /// key does is decided here.
-  KeyEventResult _walkKey(_Cursor cursor, LogicalKeyboardKey key) {
+  KeyEventResult _walkKey(TreeWalkCursor cursor, LogicalKeyboardKey key) {
     final (:at, :row) = cursor;
     final length = _walkLength;
     if (key == LogicalKeyboardKey.arrowUp) return _move(at - 1);
@@ -780,7 +729,7 @@ final class _NoteTreeState extends State<NoteTree> {
   /// sidecar is drawn under, else to the folder row that holds the row — the
   /// model knows where it is without any row loaded. The tree's own rows
   /// only: the pinned block above them is no folder of theirs.
-  void _stepOut(int at, _WalkRow row) {
+  void _stepOut(int at, TreeWalkRow row) {
     final pinned = _pinnedWalked;
     if (row.sidecar) {
       // Nested within the page, right under its file: the nearest row above
@@ -804,7 +753,7 @@ final class _NoteTreeState extends State<NoteTree> {
   /// go, `Delete` deletes the marked rows, `Ctrl`+`Enter` opens the note
   /// in a new tab, and letters jump to the next row whose name starts with
   /// them. Null for a key that is not one of these.
-  KeyEventResult? _markKey(KeyEvent event, _Cursor cursor) {
+  KeyEventResult? _markKey(KeyEvent event, TreeWalkCursor cursor) {
     final keys = HardwareKeyboard.instance;
     final key = event.logicalKey;
     final (:at, :row) = cursor;
@@ -1055,7 +1004,7 @@ final class _NoteTreeState extends State<NoteTree> {
   }
 
   /// The cursor on [row].
-  void _land(_WalkRow row) {
+  void _land(TreeWalkRow row) {
     setState(() {
       _cursorPath = row.path;
       _cursorPinned = row.pinned;
@@ -1069,7 +1018,7 @@ final class _NoteTreeState extends State<NoteTree> {
   /// does not: it opens for writing, and the shell gives the caret to it
   /// (#727) — taking the keys here would leave the note unable to be typed
   /// into.
-  void _rowActivated(Note note, _WalkRow? row) {
+  void _rowActivated(Note note, TreeWalkRow? row) {
     // `Shift`+click marks the rows from the cursor's to this one (#712),
     // and opens nothing.
     if (widget.onMarkedMenu != null &&
@@ -1120,7 +1069,7 @@ final class _NoteTreeState extends State<NoteTree> {
   }
 
   /// Scrolls [row] into view, as the grid's walk does.
-  void _ensureCursorVisible(_WalkRow row) {
+  void _ensureCursorVisible(TreeWalkRow row) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || !_scroll.hasClients) return;
       final position = _scroll.position;
@@ -1197,7 +1146,7 @@ final class _NoteTreeState extends State<NoteTree> {
   /// So is the counter [revision] was read from ([followsContents]): a
   /// save bumps one and not the other, so a number from each can match
   /// while the index between them moved (#760).
-  Future<_Rows> _rowsFor(int revision, {required bool followsContents}) {
+  Future<TreeRows> _rowsFor(int revision, {required bool followsContents}) {
     final cached = _rows;
     if (cached != null &&
         _rowsRevision == revision &&
@@ -1236,24 +1185,24 @@ final class _NoteTreeState extends State<NoteTree> {
   }
 
   /// The flatten running now, if any.
-  Future<_Rows>? _flattening;
+  Future<TreeRows>? _flattening;
 
   /// The one flatten waiting behind it (#1064).
-  Completer<_Rows>? _flattenNext;
+  Completer<TreeRows>? _flattenNext;
 
   /// [_flatten], with at most one in flight and one waiting: the changes that
   /// arrive while the rows are being read share one more read, which starts
   /// when the first ends and takes the expanded folders and the order as they
   /// are then. Each caller gets the rows of the read that answers it, so a
   /// burst of tree changes is two reads, not one per change.
-  Future<_Rows> _flattenOnce() {
+  Future<TreeRows> _flattenOnce() {
     if (_flattening != null) {
-      return (_flattenNext ??= Completer<_Rows>()).future;
+      return (_flattenNext ??= Completer<TreeRows>()).future;
     }
     return _flattenNow();
   }
 
-  Future<_Rows> _flattenNow() {
+  Future<TreeRows> _flattenNow() {
     final running = _flatten();
     _flattening = running;
     return running.whenComplete(() {
@@ -1276,7 +1225,7 @@ final class _NoteTreeState extends State<NoteTree> {
   /// opens is where a cold index connection's open used to land, and the
   /// line has to say whether it is the query, the pinned read or the
   /// settings file that a frame waited for.
-  Future<_Rows> _flatten() async {
+  Future<TreeRows> _flatten() async {
     final started = DateTime.now();
     final sort = widget.sort;
     final session = widget.controller;
@@ -1313,7 +1262,7 @@ final class _NoteTreeState extends State<NoteTree> {
       '[tree $treeMs, pinned $pinnedMs, settings $settingsMs, '
       'pages $pagesMs]',
     );
-    return _Rows(pinned: pinned, listing: listing);
+    return TreeRows(pinned: pinned, listing: listing);
   }
 
   /// Reads the pages the list will draw first for [listing] — the ones under
@@ -1508,7 +1457,7 @@ final class _NoteTreeState extends State<NoteTree> {
       builder: (context, snapshot) {
         _rowHeightHint = TreeRowMetrics.of(context).height;
         _viewportHint = MediaQuery.sizeOf(context).height;
-        return FutureBuilder<_Rows>(
+        return FutureBuilder<TreeRows>(
           future: _rowsFor(
             snapshot.data ?? revision,
             followsContents: followsContents,
@@ -1661,7 +1610,7 @@ final class _NoteTreeState extends State<NoteTree> {
   /// One item of the pinned block: the heading, a pinned note, or the
   /// divider that closes it off from the tree. [walked] is what the
   /// keyboard walks on it, for the row's ring and its cursor (#727).
-  Widget _pinnedItem(List<Note> pinned, int index, _WalkRow? walked) {
+  Widget _pinnedItem(List<Note> pinned, int index, TreeWalkRow? walked) {
     if (index == 0) return _pinnedHeading(pinned.length);
     if (index == (_collapsed ? 1 : pinned.length + 1)) {
       // The hairline sits directly under the heading — aligned with the
