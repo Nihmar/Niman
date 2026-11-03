@@ -430,7 +430,8 @@ on Android.
     storage falls back to the legacy keychain, which needs no entitlement:
     the data protection keychain refuses an ad-hoc build's writes with
     `errSecMissingEntitlement` (`-34018`), and `SecureSyncSecretStore`
-    reads that code as "not this keychain" and switches (#1244). The cost
+    reads that status (the `details` of the plugin's error, not its code)
+    as "not this keychain" and switches (#1244). The cost
     of the unsigned `.dmg` is one Keychain prompt — *Niman wants to use
     your confidential information* — the first time a build reads an entry
     another one wrote, since each ad-hoc signature is a new identity.
