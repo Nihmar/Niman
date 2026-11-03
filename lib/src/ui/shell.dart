@@ -124,6 +124,7 @@ import 'package:niman/src/ui/palette/command_features.dart';
 import 'package:niman/src/ui/palette/command_needs.dart';
 import 'package:niman/src/ui/pane_launcher.dart';
 import 'package:niman/src/ui/pane_split.dart';
+import 'package:niman/src/ui/pinned_tab_chip.dart';
 import 'package:niman/src/ui/pointer_density.dart';
 import 'package:niman/src/ui/quick_note_tab.dart';
 import 'package:niman/src/ui/resize_divider.dart';
@@ -1698,56 +1699,24 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   /// and the version's day, a click shows it again, the ✕ closes it.
   Widget _compareChip(int pane) {
     final compare = _compare!;
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    final selected = _compareIn(pane);
     final w = _workspace.value;
-    final colour = selected ? scheme.onSurface : scheme.onSurfaceVariant;
-    return Padding(
-      padding: const EdgeInsetsDirectional.only(start: 6, end: 4),
-      child: TabSurface(
-        key: const Key('compare-tab'),
-        selected: selected,
-        focused: !w.isSplit || w.focused == pane,
-        onTap: () {
-          // A study in this pane lets go of it, as it does for a note tab
-          // (#976): the page would be drawn under the study otherwise.
-          if (pane == _reviewPaneShown) _reviewTab.show(on: false);
-          setState(() => _compareShows = true);
-        },
-        builder: (context, {required hover}) => Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(width: 12),
-            Icon(Icons.history, size: 15, color: colour),
-            const SizedBox(width: 6),
-            Flexible(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 240),
-                child: Text(
-                  '${p.basename(compare.path)} — '
-                  '${historyWhen(compare.version.savedAt, DateTime.now())}',
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodySmall?.copyWith(color: colour),
-                ),
-              ),
-            ),
-            const SizedBox(width: 6),
-            SizedBox.square(
-              dimension: TabSurface.closeFor(touch: thumbDense(theme)),
-              child: IconButton(
-                key: const Key('compare-tab-close'),
-                tooltip: AppStrings.closeTabTooltip,
-                padding: EdgeInsets.zero,
-                iconSize: 14,
-                icon: const Icon(Icons.close),
-                onPressed: _closeCompare,
-              ),
-            ),
-            const SizedBox(width: 6),
-          ],
-        ),
-      ),
+    return PinnedTabChip(
+      tabKey: const Key('compare-tab'),
+      closeKey: const Key('compare-tab-close'),
+      icon: Icons.history,
+      label:
+          '${p.basename(compare.path)} — '
+          '${historyWhen(compare.version.savedAt, DateTime.now())}',
+      maxLabelWidth: 240,
+      selected: _compareIn(pane),
+      focused: !w.isSplit || w.focused == pane,
+      onTap: () {
+        // A study in this pane lets go of it, as it does for a note tab
+        // (#976): the page would be drawn under the study otherwise.
+        if (pane == _reviewPaneShown) _reviewTab.show(on: false);
+        setState(() => _compareShows = true);
+      },
+      onClose: _closeCompare,
     );
   }
 
@@ -2035,54 +2004,17 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   /// The pinned content tab's chip (#712), at the end of [pane]'s row: the
   /// rectangle the note tabs wear, a click shows it again, the ✕ closes it.
   Widget _contentTabChip(ShellTab tab, int pane) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    final selected = _tab == tab;
     final w = _workspace.value;
-    final focused = !w.isSplit || w.focused == pane;
     final home = tab == ShellTab.home;
-    return Padding(
-      padding: const EdgeInsetsDirectional.only(start: 6, end: 4),
-      child: TabSurface(
-        key: Key('content-tab-${tab.name}'),
-        selected: selected,
-        focused: focused,
-        onTap: () => _showContentTab(tab, pane),
-        builder: (context, {required hover}) => Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(width: 12),
-            Icon(
-              home ? Icons.home_outlined : Icons.check_box_outlined,
-              size: 15,
-              color: selected ? scheme.onSurface : scheme.onSurfaceVariant,
-            ),
-            const SizedBox(width: 6),
-            Flexible(
-              child: Text(
-                home ? AppStrings.tabHome : AppStrings.todoTitle,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: selected ? scheme.onSurface : scheme.onSurfaceVariant,
-                ),
-              ),
-            ),
-            const SizedBox(width: 6),
-            SizedBox.square(
-              dimension: TabSurface.closeFor(touch: thumbDense(theme)),
-              child: IconButton(
-                key: Key('content-tab-close-${tab.name}'),
-                tooltip: AppStrings.closeTabTooltip,
-                padding: EdgeInsets.zero,
-                iconSize: 14,
-                icon: const Icon(Icons.close),
-                onPressed: _closeContentTab,
-              ),
-            ),
-            const SizedBox(width: 6),
-          ],
-        ),
-      ),
+    return PinnedTabChip(
+      tabKey: Key('content-tab-${tab.name}'),
+      closeKey: Key('content-tab-close-${tab.name}'),
+      icon: home ? Icons.home_outlined : Icons.check_box_outlined,
+      label: home ? AppStrings.tabHome : AppStrings.todoTitle,
+      selected: _tab == tab,
+      focused: !w.isSplit || w.focused == pane,
+      onTap: () => _showContentTab(tab, pane),
+      onClose: _closeContentTab,
     );
   }
 
