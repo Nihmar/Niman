@@ -3712,6 +3712,15 @@ final class BelarusianStrings extends Strings {
   String get pasteAsMarkdown => 'Уставіць як Markdown';
 
   @override
+  String get pastedAsTable => 'Устаўлена як табліца';
+
+  @override
+  String get pasteAsText => 'Уставіць як тэкст';
+
+  @override
+  String attachFailed(String name) => 'Не ўдалося далучыць $name';
+
+  @override
   String get pastedAsMarkdown => 'Устаўлена як Markdown';
 
   @override

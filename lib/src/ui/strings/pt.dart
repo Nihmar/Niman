@@ -3696,6 +3696,15 @@ final class PortugueseStrings extends Strings {
   String get pasteAsMarkdown => 'Colar como Markdown';
 
   @override
+  String get pastedAsTable => 'Colado como tabela';
+
+  @override
+  String get pasteAsText => 'Colar como texto';
+
+  @override
+  String attachFailed(String name) => 'Não foi possível anexar $name';
+
+  @override
   String get pastedAsMarkdown => 'Colado como Markdown';
 
   @override

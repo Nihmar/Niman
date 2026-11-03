@@ -3694,6 +3694,15 @@ final class SlovenianStrings extends Strings {
   String get pasteAsMarkdown => 'Prilepi kot Markdown';
 
   @override
+  String get pastedAsTable => 'Prilepljeno kot tabela';
+
+  @override
+  String get pasteAsText => 'Prilepi kot besedilo';
+
+  @override
+  String attachFailed(String name) => '$name ni bilo mogoče pripeti';
+
+  @override
   String get pastedAsMarkdown => 'Prilepljeno kot Markdown';
 
   @override

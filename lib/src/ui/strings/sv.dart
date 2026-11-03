@@ -3686,6 +3686,15 @@ final class SwedishStrings extends Strings {
   String get pasteAsMarkdown => 'Klistra in som Markdown';
 
   @override
+  String get pastedAsTable => 'Inklistrat som tabell';
+
+  @override
+  String get pasteAsText => 'Klistra in som text';
+
+  @override
+  String attachFailed(String name) => 'Det gick inte att bifoga $name';
+
+  @override
   String get pastedAsMarkdown => 'Inklistrat som Markdown';
 
   @override

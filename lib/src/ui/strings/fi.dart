@@ -3699,6 +3699,15 @@ final class FinnishStrings extends Strings {
   String get pasteAsMarkdown => 'Liitä Markdownina';
 
   @override
+  String get pastedAsTable => 'Liitetty taulukkona';
+
+  @override
+  String get pasteAsText => 'Liitä tekstinä';
+
+  @override
+  String attachFailed(String name) => 'Tiedostoa $name ei voitu liittää';
+
+  @override
   String get pastedAsMarkdown => 'Liitetty Markdownina';
 
   @override

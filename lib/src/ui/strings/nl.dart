@@ -3716,6 +3716,15 @@ final class DutchStrings extends Strings {
   String get pasteAsMarkdown => 'Plakken als Markdown';
 
   @override
+  String get pastedAsTable => 'Geplakt als tabel';
+
+  @override
+  String get pasteAsText => 'Plakken als tekst';
+
+  @override
+  String attachFailed(String name) => '$name kon niet worden bijgevoegd';
+
+  @override
   String get pastedAsMarkdown => 'Geplakt als Markdown';
 
   @override

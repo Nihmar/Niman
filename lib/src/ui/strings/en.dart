@@ -3626,6 +3626,15 @@ final class EnglishStrings extends Strings {
   String get pasteAsMarkdown => 'Paste as Markdown';
 
   @override
+  String get pastedAsTable => 'Pasted as a table';
+
+  @override
+  String get pasteAsText => 'Paste as text';
+
+  @override
+  String attachFailed(String name) => "Couldn't attach $name";
+
+  @override
   String get pastedAsMarkdown => 'Pasted as Markdown';
 
   @override

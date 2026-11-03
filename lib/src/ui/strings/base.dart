@@ -2058,6 +2058,17 @@ abstract base class Strings {
   /// The same, when the paste links to the page at [host].
   String pastedAsMarkdownWithLink(String host);
 
+  /// Spreadsheet cells, or a CSV file's lines, pasted as a Markdown table
+  /// (issue #1248).
+  String get pastedAsTable;
+
+  /// The action that puts the clipboard's text back in place of the table.
+  String get pasteAsText;
+
+  /// A pasted or dropped file could not be copied into the attachments
+  /// folder (issues #1249, #1250).
+  String attachFailed(String name);
+
   /// Settings → Navigation (#536): the area, its intro, the two homes of
   /// the layout, and what the locked destination says.
   String get settingsAreaNavigation;

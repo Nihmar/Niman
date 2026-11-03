@@ -3713,6 +3713,15 @@ final class UkrainianStrings extends Strings {
   String get pasteAsMarkdown => 'Вставити як Markdown';
 
   @override
+  String get pastedAsTable => 'Вставлено як таблицю';
+
+  @override
+  String get pasteAsText => 'Вставити як текст';
+
+  @override
+  String attachFailed(String name) => 'Не вдалося долучити $name';
+
+  @override
   String get pastedAsMarkdown => 'Вставлено як Markdown';
 
   @override

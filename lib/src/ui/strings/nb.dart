@@ -3661,6 +3661,15 @@ final class NorwegianStrings extends Strings {
   String get pasteAsMarkdown => 'Lim inn som Markdown';
 
   @override
+  String get pastedAsTable => 'Limt inn som tabell';
+
+  @override
+  String get pasteAsText => 'Lim inn som tekst';
+
+  @override
+  String attachFailed(String name) => 'Kunne ikke legge ved $name';
+
+  @override
   String get pastedAsMarkdown => 'Limt inn som Markdown';
 
   @override

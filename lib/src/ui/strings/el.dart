@@ -3794,6 +3794,15 @@ final class GreekStrings extends Strings {
   String get pasteAsMarkdown => 'Επικόλληση ως Markdown';
 
   @override
+  String get pastedAsTable => 'Επικολλήθηκε ως πίνακας';
+
+  @override
+  String get pasteAsText => 'Επικόλληση ως κείμενο';
+
+  @override
+  String attachFailed(String name) => 'Δεν ήταν δυνατή η επισύναψη του $name';
+
+  @override
   String get pastedAsMarkdown => 'Επικολλήθηκε ως Markdown';
 
   @override

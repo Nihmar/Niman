@@ -3700,6 +3700,15 @@ final class MacedonianStrings extends Strings {
   String get pasteAsMarkdown => 'Залепи како Markdown';
 
   @override
+  String get pastedAsTable => 'Залепено како табела';
+
+  @override
+  String get pasteAsText => 'Залепи како текст';
+
+  @override
+  String attachFailed(String name) => '$name не може да се прикачи';
+
+  @override
   String get pastedAsMarkdown => 'Залепено како Markdown';
 
   @override

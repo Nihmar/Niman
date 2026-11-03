@@ -3633,6 +3633,15 @@ final class TurkishStrings extends Strings {
   String get pasteAsMarkdown => 'Markdown olarak yapıştır';
 
   @override
+  String get pastedAsTable => 'Tablo olarak yapıştırıldı';
+
+  @override
+  String get pasteAsText => 'Metin olarak yapıştır';
+
+  @override
+  String attachFailed(String name) => '$name eklenemedi';
+
+  @override
   String get pastedAsMarkdown => 'Markdown olarak yapıştırıldı';
 
   @override

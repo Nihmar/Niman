@@ -3670,6 +3670,15 @@ final class IcelandicStrings extends Strings {
   String get pasteAsMarkdown => 'Líma sem Markdown';
 
   @override
+  String get pastedAsTable => 'Límt sem tafla';
+
+  @override
+  String get pasteAsText => 'Líma sem texta';
+
+  @override
+  String attachFailed(String name) => 'Ekki tókst að hengja $name við';
+
+  @override
   String get pastedAsMarkdown => 'Límt sem Markdown';
 
   @override

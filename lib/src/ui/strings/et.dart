@@ -3619,6 +3619,15 @@ final class EstonianStrings extends Strings {
   String get pasteAsMarkdown => 'Kleebi Markdownina';
 
   @override
+  String get pastedAsTable => 'Kleebiti tabelina';
+
+  @override
+  String get pasteAsText => 'Kleebi tekstina';
+
+  @override
+  String attachFailed(String name) => 'Faili $name ei õnnestunud lisada';
+
+  @override
   String get pastedAsMarkdown => 'Kleebitud Markdownina';
 
   @override

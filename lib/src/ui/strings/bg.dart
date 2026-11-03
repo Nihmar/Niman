@@ -3688,6 +3688,15 @@ final class BulgarianStrings extends Strings {
   String get pasteAsMarkdown => 'Поставяне като Markdown';
 
   @override
+  String get pastedAsTable => 'Поставено като таблица';
+
+  @override
+  String get pasteAsText => 'Постави като текст';
+
+  @override
+  String attachFailed(String name) => 'Неуспешно прикачване на $name';
+
+  @override
   String get pastedAsMarkdown => 'Поставено като Markdown';
 
   @override

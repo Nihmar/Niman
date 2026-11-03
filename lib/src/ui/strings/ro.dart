@@ -3734,6 +3734,15 @@ final class RomanianStrings extends Strings {
   String get pasteAsMarkdown => 'Lipește ca Markdown';
 
   @override
+  String get pastedAsTable => 'Lipit ca tabel';
+
+  @override
+  String get pasteAsText => 'Lipește ca text';
+
+  @override
+  String attachFailed(String name) => '$name nu a putut fi atașat';
+
+  @override
   String get pastedAsMarkdown => 'Lipit ca Markdown';
 
   @override

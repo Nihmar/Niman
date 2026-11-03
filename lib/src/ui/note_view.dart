@@ -58,6 +58,8 @@ import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/templates/check_state.dart';
 import 'package:niman/src/ui/action_sheet.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
+import 'package:niman/src/ui/capture/paste_markdown_flow.dart'
+    show readPlainClipboard;
 import 'package:niman/src/ui/dead_link_watcher.dart';
 import 'package:niman/src/ui/dropped_link.dart';
 import 'package:niman/src/ui/frontmatter_fields.dart';
@@ -69,6 +71,7 @@ import 'package:niman/src/ui/note_edit_commands.dart';
 import 'package:niman/src/ui/note_frontmatter_head.dart';
 import 'package:niman/src/ui/note_links.dart';
 import 'package:niman/src/ui/note_load_error.dart';
+import 'package:niman/src/ui/note_paste.dart';
 import 'package:niman/src/ui/note_save_pipeline.dart';
 import 'package:niman/src/ui/note_stats.dart';
 import 'package:niman/src/ui/note_tags.dart';
@@ -634,6 +637,32 @@ final class _NoteViewState extends State<NoteView>
   void insertEisenhower() {
     if (!canInsert) return;
     _commands.insertEisenhowerMatrixAtCaret();
+  }
+
+  /// The editor's paste, before it is plain text: spreadsheet cells
+  /// become a table (#1248).
+  late final NotePaste _paste = NotePaste(
+    canInsert: () => canInsert,
+    caretInCode: () => _sourceViewKey.currentState?.caretInCode ?? false,
+    surroundings: _selectionSurroundings,
+    plainText: readPlainClipboard,
+    pasteText: pasteText,
+    replacePasted: replacePasted,
+    messenger: () => mounted ? ScaffoldMessenger.maybeOf(context) : null,
+  );
+
+  SelectionSurroundings? _selectionSurroundings() {
+    final surface = _surface;
+    if (surface == null) return null;
+    final buffer = surface.buffer;
+    final at = surface.selection.clampTo(buffer.length);
+    return (
+      before: buffer.substring(at.start < 2 ? 0 : at.start - 2, at.start),
+      after: buffer.substring(
+        at.end,
+        at.end + 2 > buffer.length ? buffer.length : at.end + 2,
+      ),
+    );
   }
 
   @override
@@ -1861,6 +1890,7 @@ final class _NoteViewState extends State<NoteView>
         wikilinkSuggester: widget.wikilinkSuggester,
         deadLinks: _deadLinks,
         onLinkHover: _preview.editorHover,
+        onPaste: _paste.paste,
         notePath: _pathInLibrary,
         blockAnchors: _blockAnchors,
         // The shell's own focus node: the phone toolbar, the format keys,

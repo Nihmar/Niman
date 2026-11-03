@@ -3668,6 +3668,15 @@ final class CzechStrings extends Strings {
   String get pasteAsMarkdown => 'Vložit jako Markdown';
 
   @override
+  String get pastedAsTable => 'Vloženo jako tabulka';
+
+  @override
+  String get pasteAsText => 'Vložit jako text';
+
+  @override
+  String attachFailed(String name) => 'Soubor $name se nepodařilo připojit';
+
+  @override
   String get pastedAsMarkdown => 'Vloženo jako Markdown';
 
   @override

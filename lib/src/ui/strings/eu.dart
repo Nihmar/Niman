@@ -3713,6 +3713,15 @@ final class BasqueStrings extends Strings {
   String get pasteAsMarkdown => 'Itsatsi Markdown gisa';
 
   @override
+  String get pastedAsTable => 'Taula gisa itsatsi da';
+
+  @override
+  String get pasteAsText => 'Itsatsi testu gisa';
+
+  @override
+  String attachFailed(String name) => 'Ezin izan da $name erantsi';
+
+  @override
   String get pastedAsMarkdown => 'Markdown gisa itsatsita';
 
   @override

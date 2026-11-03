@@ -3740,6 +3740,15 @@ final class CatalanStrings extends Strings {
   String get pasteAsMarkdown => 'Enganxa com a Markdown';
 
   @override
+  String get pastedAsTable => 'Enganxat com a taula';
+
+  @override
+  String get pasteAsText => 'Enganxa com a text';
+
+  @override
+  String attachFailed(String name) => "No s'ha pogut adjuntar $name";
+
+  @override
   String get pastedAsMarkdown => 'Enganxat com a Markdown';
 
   @override

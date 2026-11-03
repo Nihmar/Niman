@@ -351,6 +351,14 @@ the HTML is used when the clipboard carries it. In the source editor,
 browser's copy into Markdown, linked to the page it came from (see
 [web capture](web-capture.md#paste-as-markdown)).
 
+Cells copied from a spreadsheet (Excel, LibreOffice Calc, Numbers, Google
+Sheets) paste as a **Markdown table**, on lines of their own, the first
+row its header. So do the lines of a CSV file, separated by commas or
+semicolons, when every line has the same number of cells. A snackbar says
+so, and its **Paste as text** puts the clipboard's text in place of the
+table. Text that is not a clean table, a single row, and a paste into a
+code block stay text. On every platform.
+
 ### Undo and redo
 
 Undo goes back one step at a time, and a step is what a writer would call
