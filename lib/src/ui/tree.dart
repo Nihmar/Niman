@@ -19,6 +19,7 @@ import 'package:niman/src/ui/tree_marks.dart';
 import 'package:niman/src/ui/tree_pages.dart';
 import 'package:niman/src/ui/tree_pinned_heading.dart';
 import 'package:niman/src/ui/tree_range_reader.dart';
+import 'package:niman/src/ui/tree_reveal.dart';
 import 'package:niman/src/ui/tree_row_list.dart';
 import 'package:niman/src/ui/tree_row_metrics.dart';
 import 'package:niman/src/ui/tree_row_tile.dart';
@@ -191,9 +192,6 @@ final class _NoteTreeState extends State<NoteTree> {
     toggle: (path) => widget.onToggle(path),
   );
 
-  /// The row a rename has scrolled to, so it is scrolled to once.
-  String? _revealed;
-
   /// The keyboard's own focus (#727): the pane takes it when a row is
   /// clicked, and the arrows walk the rows while it holds it.
   late final FocusNode _focus =
@@ -219,44 +217,17 @@ final class _NoteTreeState extends State<NoteTree> {
   /// The rows of the last build as the keyboard walks them (#727).
   final TreeWalk _walk = TreeWalk();
 
+  /// Brings the row being renamed and the keyboard's cursor into view.
+  late final TreeReveal _reveal = TreeReveal(
+    walk: _walk,
+    scroll: _scroll,
+    mounted: () => mounted,
+  );
+
   /// The listing and the folder the row being made is being placed for, so
   /// that one lookup is asked for each.
   TreeListing? _placingListing;
   String? _placingFolder;
-
-  /// Brings the row being renamed into view: a row the list has not built
-  /// has no field to show. The field puts itself fully in view once it is
-  /// built.
-  void _revealRenamed() {
-    final path = widget.renaming?.path;
-    if (path == _revealed) return;
-    _revealed = path;
-    if (path == null) return;
-    unawaited(_revealPath(path));
-  }
-
-  /// Scrolls to the row at [path], wherever it is in the tree: its index is
-  /// worked out from its rank, and the list builds the page it lands on.
-  Future<void> _revealPath(String path) async {
-    final listing = _walk.rows?.listing;
-    if (listing == null) return;
-    final index = await listing.modelIndexOfPath(path);
-    if (index == null || !mounted || !_scroll.hasClients || _revealed != path) {
-      return;
-    }
-    final top = _walk.treeTop(listing.listIndexOf(index));
-    final position = _scroll.position;
-    if (top >= position.pixels &&
-        top + _walk.rowHeight <= position.pixels + position.viewportDimension) {
-      return;
-    }
-    _scroll.jumpTo(
-      (top - position.viewportDimension / 2).clamp(
-        position.minScrollExtent,
-        position.maxScrollExtent,
-      ),
-    );
-  }
 
   /// Runs [then] with the walk's row at [index]: at once when it is loaded,
   /// else when its page has landed.
@@ -588,7 +559,10 @@ final class _NoteTreeState extends State<NoteTree> {
     final rows = _walk.rows;
     final at = to - _walk.pinnedWalked;
     if (rows != null && at >= 0 && _scroll.hasClients) {
-      _scrollTo(_walk.treeTop(rows.listing.listIndexOf(at)), _walk.rowHeight);
+      _reveal.scrollTo(
+        _walk.treeTop(rows.listing.listIndexOf(at)),
+        _walk.rowHeight,
+      );
     }
     unawaited(
       _walk.rowAtAsync(to).then((row) {
@@ -601,7 +575,7 @@ final class _NoteTreeState extends State<NoteTree> {
   /// The cursor on [row].
   void _land(TreeWalkRow row) {
     setState(() => _cursor.moveTo(row.path, pinned: row.pinned, ring: true));
-    _ensureCursorVisible(row);
+    _reveal.ensureVisible(row);
   }
 
   /// A row's own click: the cursor follows it — the arrows go on from where
@@ -652,35 +626,6 @@ final class _NoteTreeState extends State<NoteTree> {
     setState(() => _cursor.moveTo(path, pinned: pinned, ring: false));
     _focus.requestFocus();
     widget.onToggle(path);
-  }
-
-  /// Scrolls [row] into view, as the grid's walk does.
-  void _ensureCursorVisible(TreeWalkRow row) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || !_scroll.hasClients) return;
-      final position = _scroll.position;
-      if (row.top >= position.pixels &&
-          row.top + row.height <=
-              position.pixels + position.viewportDimension) {
-        return;
-      }
-      _scrollTo(row.top, row.height);
-    });
-  }
-
-  /// Scrolls the item at [top], [height] tall, to the middle of the list.
-  void _scrollTo(double top, double height) {
-    final position = _scroll.position;
-    if (top >= position.pixels &&
-        top + height <= position.pixels + position.viewportDimension) {
-      return;
-    }
-    _scroll.jumpTo(
-      (top - position.viewportDimension / 2).clamp(
-        position.minScrollExtent,
-        position.maxScrollExtent,
-      ),
-    );
   }
 
   @override
@@ -825,7 +770,7 @@ final class _NoteTreeState extends State<NoteTree> {
               collapsed: _reader.collapsed,
             );
             _placeCreating(listing);
-            _revealRenamed();
+            _reveal.renamed(widget.renaming?.path);
             final header = _walk.pinnedHeights.length;
             final list = TreeRowList(
               controller: _scroll,
