@@ -3665,6 +3665,15 @@ final class LatvianStrings extends Strings {
   String get pasteAsMarkdown => 'Ielīmēt kā Markdown';
 
   @override
+  String get pastedAsTable => 'Ielīmēts kā tabula';
+
+  @override
+  String get pasteAsText => 'Ielīmēt kā tekstu';
+
+  @override
+  String attachFailed(String name) => 'Neizdevās pievienot $name';
+
+  @override
   String get pastedAsMarkdown => 'Ielīmēts kā Markdown';
 
   @override

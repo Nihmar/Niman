@@ -65,9 +65,25 @@ final class SecureSyncSecretStore implements SyncSecretStore {
 
   /// `errSecMissingEntitlement`: the app is not signed for the keychain it
   /// asked, so no request of this build is ever answered by it.
-  static bool _missingEntitlement(Object error) =>
-      error is PlatformException &&
-      (error.code == '-34018' || error.code == 'errSecMissingEntitlement');
+  static const _errSecMissingEntitlement = -34018;
+
+  /// Whether [error] is [_errSecMissingEntitlement] as the plugin reports
+  /// it: every Keychain status comes back under the one code
+  /// `Unexpected security result code`, the `OSStatus` in `details` and
+  /// `Code: <status>, Message: …` in the message. The code alone never
+  /// names it: the first fix for #1244 (0.3.3) read it there, never
+  /// matched what the plugin throws, and kept the Mac without a password.
+  static bool _missingEntitlement(Object error) {
+    if (error is! PlatformException) return false;
+    final details = error.details;
+    final status = details is num
+        ? details.toInt()
+        : int.tryParse('${details ?? ''}'.trim());
+    return status == _errSecMissingEntitlement ||
+        error.code == '$_errSecMissingEntitlement' ||
+        error.code == 'errSecMissingEntitlement' ||
+        (error.message ?? '').contains('Code: $_errSecMissingEntitlement,');
+  }
 
   @override
   Future<String?> read(String libraryPath) async {
@@ -83,7 +99,16 @@ final class SecureSyncSecretStore implements SyncSecretStore {
     if (login == null || _onLoginKeychain) {
       return await (login ?? _storage).read(key: key);
     }
-    final value = await _storage.read(key: key);
+    final String? value;
+    try {
+      value = await _storage.read(key: key);
+    } on PlatformException catch (e) {
+      if (!_missingEntitlement(e)) rethrow;
+      // A read is usually answered "not found" there; one refused outright
+      // says the same as a refused write: this build is not signed for it.
+      _onLoginKeychain = true;
+      return await login.read(key: key);
+    }
     if (value != null) return value;
     // Written by a build without the entitlement, or on this Mac before
     // there was one signed for the data protection keychain: the entry

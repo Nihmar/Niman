@@ -3713,6 +3713,15 @@ final class LithuanianStrings extends Strings {
   String get pasteAsMarkdown => 'Įklijuoti kaip Markdown';
 
   @override
+  String get pastedAsTable => 'Įklijuota kaip lentelė';
+
+  @override
+  String get pasteAsText => 'Įklijuoti kaip tekstą';
+
+  @override
+  String attachFailed(String name) => 'Nepavyko pridėti $name';
+
+  @override
   String get pastedAsMarkdown => 'Įklijuota kaip Markdown';
 
   @override

@@ -170,6 +170,7 @@ final class MarkdownSourceView extends StatefulWidget {
     this.blockAnchors,
     this.deadLinks,
     this.onLinkHover,
+    this.onPaste,
     super.key,
   });
 
@@ -345,6 +346,12 @@ final class MarkdownSourceView extends StatefulWidget {
   /// up: what the link preview opens its card from (#846). Null (the
   /// default, and every touch screen) reports nothing.
   final void Function(SourceLinkHover? hover)? onLinkHover;
+
+  /// Asked first by every paste — Ctrl/⌘+V, the context menu's Paste, the
+  /// accessibility action: true when it took the clipboard itself (files to
+  /// attach, cells that become a table, #1248, #1249), false to let the view
+  /// paste the clipboard's text as it is. Null pastes text.
+  final Future<bool> Function()? onPaste;
 
   @override
   State<MarkdownSourceView> createState() => MarkdownSourceViewState();
@@ -1683,8 +1690,12 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     _replaceRange(selection.start, selection.end, '');
   }
 
-  /// Inserts the clipboard's text at the caret, replacing the selection.
+  /// Inserts the clipboard's text at the caret, replacing the selection —
+  /// unless [MarkdownSourceView.onPaste] takes the clipboard first.
   Future<void> paste() async {
+    final hook = widget.onPaste;
+    if (hook != null && await hook()) return;
+    if (!mounted) return;
     final data = await Clipboard.getData(Clipboard.kTextPlain);
     final text = data?.text;
     if (text == null || text.isEmpty) return;
@@ -1955,6 +1966,15 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       }
     }
     return true;
+  }
+
+  /// Whether the caret is in code ([_inCodeAt]): a fenced or indented
+  /// block, display maths, an inline span — where a paste stays text.
+  bool get caretInCode {
+    final buffer = widget.buffer;
+    final at = _selection.extent.clamp(0, buffer.length);
+    final line = buffer.lineOf(at);
+    return _inCodeAt(line, at - buffer.offsetOfLine(line));
   }
 
   /// Whether the character at [local] of line [index] is code: a line of a

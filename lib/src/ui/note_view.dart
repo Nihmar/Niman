@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:niman/src/capture/paste/clipboard_files.dart';
+import 'package:niman/src/capture/paste/platform_clipboard_files.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/frame_log.dart';
 import 'package:niman/src/core/logging.dart';
@@ -58,17 +60,21 @@ import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/templates/check_state.dart';
 import 'package:niman/src/ui/action_sheet.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
+import 'package:niman/src/ui/capture/paste_markdown_flow.dart'
+    show readPlainClipboard;
 import 'package:niman/src/ui/dead_link_watcher.dart';
 import 'package:niman/src/ui/dropped_link.dart';
 import 'package:niman/src/ui/frontmatter_fields.dart';
 import 'package:niman/src/ui/hidden_slot.dart';
 import 'package:niman/src/ui/link_preview/note_link_preview.dart';
 import 'package:niman/src/ui/links_to_note_section.dart';
+import 'package:niman/src/ui/note_attach.dart';
 import 'package:niman/src/ui/note_dead_links.dart';
 import 'package:niman/src/ui/note_edit_commands.dart';
 import 'package:niman/src/ui/note_frontmatter_head.dart';
 import 'package:niman/src/ui/note_links.dart';
 import 'package:niman/src/ui/note_load_error.dart';
+import 'package:niman/src/ui/note_paste.dart';
 import 'package:niman/src/ui/note_save_pipeline.dart';
 import 'package:niman/src/ui/note_stats.dart';
 import 'package:niman/src/ui/note_tags.dart';
@@ -131,6 +137,7 @@ final class NoteView extends StatefulWidget {
     this.libraryRoot,
     this.pickImagePath,
     this.importImage,
+    this.readClipboardFiles,
     this.readNote,
     this.writeNote,
     this.saveNote,
@@ -273,6 +280,10 @@ final class NoteView extends StatefulWidget {
   /// which FakeAsync cannot drive).
   final Future<String> Function(String libraryRoot, String sourcePath)?
   importImage;
+
+  /// Reads the paths of the files on the clipboard, which a paste attaches
+  /// (#1249); the default is the platform's reader. Tests inject a seam.
+  final Future<List<String>> Function()? readClipboardFiles;
 
   /// Reads a note's content. Defaults to an off-isolate file read.
   final Future<String> Function(String path)? readNote;
@@ -634,6 +645,76 @@ final class _NoteViewState extends State<NoteView>
   void insertEisenhower() {
     if (!canInsert) return;
     _commands.insertEisenhowerMatrixAtCaret();
+  }
+
+  /// The editor's paste, before it is plain text: spreadsheet cells
+  /// become a table (#1248).
+  /// Files pasted or dropped on the note, copied into the attachments
+  /// folder and linked at the caret (#1249, #1250).
+  late final NoteAttach _attach = NoteAttach(
+    libraryRoot: () => widget.libraryRoot,
+    notePath: () => widget.path,
+    linkType: () => widget.linkType,
+    // Without the suggester, the file's name: a note's without `.md`, as a
+    // wikilink names it, anything else's with its extension.
+    wikiTarget: (path) async =>
+        await widget.wikilinkSuggester?.targetOf(path) ??
+        (p.extension(path).toLowerCase() == '.md'
+            ? p.basenameWithoutExtension(path)
+            : p.basename(path)),
+    importFile: (root, source) =>
+        widget.importImage?.call(root, source) ??
+        importImageToLibrary(
+          libraryRoot: root,
+          sourcePath: source,
+          attachmentsFolder: widget.attachmentsFolder,
+        ),
+    insert: _insertAttachmentLinks,
+    messenger: () => mounted ? ScaffoldMessenger.maybeOf(context) : null,
+  );
+
+  /// The platform's reader of the files on the clipboard (#1249).
+  late final ClipboardFilesReader _clipboardFiles = platformClipboardFiles();
+
+  bool _insertAttachmentLinks(String text) {
+    final surface = _surface;
+    if (!mounted || !canInsert || surface == null) return false;
+    surface.replaceSelection(text);
+    _focus.requestFocus();
+    _stats.refresh();
+    _refreshPreview();
+    return true;
+  }
+
+  @override
+  Future<bool> attachFiles(List<String> paths) =>
+      canInsert ? _attach.attach(paths) : Future.value(false);
+
+  late final NotePaste _paste = NotePaste(
+    canInsert: () => canInsert,
+    clipboardFiles: () =>
+        widget.readClipboardFiles?.call() ?? _clipboardFiles.read(),
+    attach: _attach.attach,
+    caretInCode: () => _sourceViewKey.currentState?.caretInCode ?? false,
+    surroundings: _selectionSurroundings,
+    plainText: readPlainClipboard,
+    pasteText: pasteText,
+    replacePasted: replacePasted,
+    messenger: () => mounted ? ScaffoldMessenger.maybeOf(context) : null,
+  );
+
+  SelectionSurroundings? _selectionSurroundings() {
+    final surface = _surface;
+    if (surface == null) return null;
+    final buffer = surface.buffer;
+    final at = surface.selection.clampTo(buffer.length);
+    return (
+      before: buffer.substring(at.start < 2 ? 0 : at.start - 2, at.start),
+      after: buffer.substring(
+        at.end,
+        at.end + 2 > buffer.length ? buffer.length : at.end + 2,
+      ),
+    );
   }
 
   @override
@@ -1861,6 +1942,7 @@ final class _NoteViewState extends State<NoteView>
         wikilinkSuggester: widget.wikilinkSuggester,
         deadLinks: _deadLinks,
         onLinkHover: _preview.editorHover,
+        onPaste: _paste.paste,
         notePath: _pathInLibrary,
         blockAnchors: _blockAnchors,
         // The shell's own focus node: the phone toolbar, the format keys,

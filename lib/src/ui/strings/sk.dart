@@ -3681,6 +3681,15 @@ final class SlovakStrings extends Strings {
   String get pasteAsMarkdown => 'Vložiť ako Markdown';
 
   @override
+  String get pastedAsTable => 'Vložené ako tabuľka';
+
+  @override
+  String get pasteAsText => 'Vložiť ako text';
+
+  @override
+  String attachFailed(String name) => 'Súbor $name sa nepodarilo pripojiť';
+
+  @override
   String get pastedAsMarkdown => 'Vložené ako Markdown';
 
   @override

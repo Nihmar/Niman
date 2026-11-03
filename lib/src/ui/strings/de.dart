@@ -3758,6 +3758,15 @@ final class GermanStrings extends Strings {
   String get pasteAsMarkdown => 'Als Markdown einfügen';
 
   @override
+  String get pastedAsTable => 'Als Tabelle eingefügt';
+
+  @override
+  String get pasteAsText => 'Als Text einfügen';
+
+  @override
+  String attachFailed(String name) => '$name konnte nicht angehängt werden';
+
+  @override
   String get pastedAsMarkdown => 'Als Markdown eingefügt';
 
   @override

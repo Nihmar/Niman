@@ -64,10 +64,10 @@ implements, or a feature that stays off:
 | `niman/storage` | All-files access (Android) | Folder grant (bookmark) | Folder grant (bookmark) |
 | `niman/reminders` | Battery-optimisation health (Android) | — (not needed) | — (not needed) |
 | `niman/screen` | Keep screen on (Android, Linux; Windows by FFI) | `IOPMAssertion` | `isIdleTimerDisabled` |
-| `niman/clipboard` | HTML + source URL (Android, Linux; Windows by FFI) | `NSPasteboard` | `UIPasteboard` |
+| `niman/clipboard` | HTML + source URL, and the copied files (#1249) (Android, Linux; Windows by FFI) | `NSPasteboard` (file URLs) | `UIPasteboard` (item providers, copied to `tmp/`) |
 | `niman/pdf` | WebView print (Android) | WebKit print | WebKit print |
 | `niman/page_reader` | Hidden WebView (Android) | Hidden `WKWebView` | Hidden `WKWebView` |
-| `niman/drop` | GDK drop, OLE `IDropTarget` | `NSDraggingDestination` | — (no window drop) |
+| `niman/drop` | GDK drop, OLE `IDropTarget`; Android `View.OnDragListener` (#1250) | `NSDraggingDestination` | `UIDropInteraction` on the scene's view (#1250) |
 | `niman/window` | Snap Layouts hit test (Windows) | — (native traffic lights) | — |
 | `niman/share` | Share intents (Android) | Services menu, *Open With* | Share extension |
 | `niman/shortcuts` | Launcher shortcuts (Android) | Dock menu | Home-screen quick actions |
@@ -430,7 +430,8 @@ on Android.
     storage falls back to the legacy keychain, which needs no entitlement:
     the data protection keychain refuses an ad-hoc build's writes with
     `errSecMissingEntitlement` (`-34018`), and `SecureSyncSecretStore`
-    reads that code as "not this keychain" and switches (#1244). The cost
+    reads that status (the `details` of the plugin's error, not its code)
+    as "not this keychain" and switches (#1244). The cost
     of the unsigned `.dmg` is one Keychain prompt — *Niman wants to use
     your confidential information* — the first time a build reads an entry
     another one wrote, since each ad-hoc signature is a new identity.

@@ -3654,6 +3654,15 @@ final class DanishStrings extends Strings {
   String get pasteAsMarkdown => 'Indsæt som Markdown';
 
   @override
+  String get pastedAsTable => 'Indsat som tabel';
+
+  @override
+  String get pasteAsText => 'Indsæt som tekst';
+
+  @override
+  String attachFailed(String name) => 'Kunne ikke vedhæfte $name';
+
+  @override
   String get pastedAsMarkdown => 'Indsat som Markdown';
 
   @override

@@ -158,4 +158,64 @@ void main() {
       expect(source, contains('"${dartChannelName()}"'));
     });
   });
+
+  // #1250: Android and iPadOS take a drag from another app beside Niman,
+  // copy each file it hands over into the cache, and report it as the
+  // desktops do.
+  group('the Android activity', () {
+    final kotlin = [
+      'android',
+      'app',
+      'src',
+      'main',
+      'kotlin',
+      'dev',
+      'niman',
+      'niman',
+    ];
+
+    test('listens on the Flutter view, and reports over the channel', () {
+      final bridge = codeOnly(runnerSource([...kotlin, 'DropBridge.kt']));
+      expect(bridge, contains('"${dartChannelName()}"'));
+      expect(bridge, contains('"drop"'));
+      expect(bridge, contains('"dragEntered"'));
+      expect(bridge, contains('"dragExited"'));
+      expect(
+        bridge,
+        contains('requestDragAndDropPermissions'),
+        reason: "another app's URIs are readable only while it is held",
+      );
+      expect(bridge, contains('ContentFiles.copyToCache('));
+      expect(bridge, contains('release()'));
+      final activity = codeOnly(runnerSource([...kotlin, 'MainActivity.kt']));
+      expect(activity, contains('FLUTTER_VIEW_ID'));
+      expect(activity, contains('drops.attach('));
+      expect(activity, contains('drops.detach()'));
+    });
+  });
+
+  group('the iPad scene', () {
+    final sources = [
+      'packages',
+      'niman_apple',
+      'darwin',
+      'niman_apple',
+      'Sources',
+      'niman_apple',
+    ];
+
+    test('puts a drop interaction on the view, reported over the channel', () {
+      final bridge = codeOnly(
+        runnerSource([...sources, 'DropBridgeIOS.swift']),
+      );
+      expect(bridge, contains('UIDropInteraction(delegate: self)'));
+      expect(bridge, contains('"drop"'));
+      expect(bridge, contains('ClipboardFiles.copy('));
+      final plugin = codeOnly(
+        runnerSource([...sources, 'NimanApplePlugin.swift']),
+      );
+      expect(plugin, contains('"${dartChannelName()}"'));
+      expect(plugin, contains('addSceneDelegate(dropBridge)'));
+    });
+  });
 }

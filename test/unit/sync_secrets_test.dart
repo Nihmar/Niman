@@ -26,11 +26,19 @@ final class _Keychain extends FlutterSecureStoragePlatform {
   static bool _dataProtection(Map<String, String> options) =>
       options['usesDataProtectionKeychain'] == 'true';
 
+  /// The error exactly as `flutter_secure_storage_darwin` throws it, and
+  /// as the 2026-10-28 log printed it: the status is in `details` and the
+  /// message, never in `code` — a fake that put it there let the first fix
+  /// pass while the real refusal went unrecognized.
   static Never _refuse() => throw PlatformException(
-    code: '-34018',
-    message: 'A required entitlement is not present.',
+    code: 'Unexpected security result code',
+    message: 'Code: -34018, Message: A required entitlement is not present.',
     details: -34018,
   );
+
+  /// When set, a read of the data protection keychain is refused too
+  /// rather than answered "not found".
+  bool refuseReads = false;
 
   void _check(Map<String, String> options) {
     final failure = this.failure;
@@ -58,7 +66,7 @@ final class _Keychain extends FlutterSecureStoragePlatform {
     if (failure != null) throw failure;
     // What the log of a Mac without the entitlement reads: "none", not an
     // error (a query that finds nothing needs no entitlement to run).
-    if (_dataProtection(options)) return null;
+    if (_dataProtection(options)) return refuseReads ? _refuse() : null;
     return values[key];
   }
 
@@ -187,16 +195,28 @@ void main() {
     test('another keychain failure is not taken for the missing '
         'entitlement', () async {
       keychain.failure = PlatformException(
-        code: '-25308',
-        message: 'User interaction is not allowed.',
+        code: 'Unexpected security result code',
+        message: 'Code: -25308, Message: User interaction is not allowed.',
+        details: -25308,
       );
       await expectLater(
         SecureSyncSecretStore().write(work, 'pw'),
         throwsA(
-          isA<PlatformException>().having((e) => e.code, 'code', '-25308'),
+          isA<PlatformException>().having((e) => e.details, 'details', -25308),
         ),
       );
       expect(keychain.values, isEmpty);
+    });
+
+    test('a refused read falls back to the login keychain', () async {
+      keychain
+        ..refuseReads = true
+        ..values[key] = 'stored';
+      final store = SecureSyncSecretStore();
+      expect(await store.read(work), 'stored');
+      await store.write(work, 'changed');
+      expect(keychain.values[key], 'changed');
+      expect(keychain.dataProtectionWrites, 0);
     });
   });
 }

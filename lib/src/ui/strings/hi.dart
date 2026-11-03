@@ -3622,6 +3622,15 @@ final class HindiStrings extends Strings {
   String get pasteAsMarkdown => 'Markdown के रूप में चिपकाएँ';
 
   @override
+  String get pastedAsTable => 'तालिका के रूप में चिपकाया गया';
+
+  @override
+  String get pasteAsText => 'पाठ के रूप में चिपकाएँ';
+
+  @override
+  String attachFailed(String name) => '$name संलग्न नहीं किया जा सका';
+
+  @override
   String get pastedAsMarkdown => 'Markdown के रूप में चिपकाया गया';
 
   @override

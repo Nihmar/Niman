@@ -1922,6 +1922,9 @@ final class AppStrings {
   static String get highlightCopy => _s.highlightCopy;
   static String get pasteAsMarkdown => _s.pasteAsMarkdown;
   static String get pastedAsMarkdown => _s.pastedAsMarkdown;
+  static String get pastedAsTable => _s.pastedAsTable;
+  static String get pasteAsText => _s.pasteAsText;
+  static String attachFailed(String name) => _s.attachFailed(name);
   static String pastedAsMarkdownWithLink(String host) =>
       _s.pastedAsMarkdownWithLink(host);
   static String get settingsAreaNavigation => _s.settingsAreaNavigation;

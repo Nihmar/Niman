@@ -3704,6 +3704,15 @@ final class ItalianStrings extends Strings {
   String get pasteAsMarkdown => 'Incolla come Markdown';
 
   @override
+  String get pastedAsTable => 'Incollato come tabella';
+
+  @override
+  String get pasteAsText => 'Incolla come testo';
+
+  @override
+  String attachFailed(String name) => 'Impossibile allegare $name';
+
+  @override
   String get pastedAsMarkdown => 'Incollato come Markdown';
 
   @override

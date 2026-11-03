@@ -3724,6 +3724,15 @@ final class PolishStrings extends Strings {
   String get pasteAsMarkdown => 'Wklej jako Markdown';
 
   @override
+  String get pastedAsTable => 'Wklejono jako tabelę';
+
+  @override
+  String get pasteAsText => 'Wklej jako tekst';
+
+  @override
+  String attachFailed(String name) => 'Nie udało się dołączyć $name';
+
+  @override
   String get pastedAsMarkdown => 'Wklejono jako Markdown';
 
   @override

@@ -3698,6 +3698,15 @@ final class GalicianStrings extends Strings {
   String get pasteAsMarkdown => 'Pegar como Markdown';
 
   @override
+  String get pastedAsTable => 'Pegado como táboa';
+
+  @override
+  String get pasteAsText => 'Pegar como texto';
+
+  @override
+  String attachFailed(String name) => 'Non se puido anexar $name';
+
+  @override
   String get pastedAsMarkdown => 'Pegado como Markdown';
 
   @override

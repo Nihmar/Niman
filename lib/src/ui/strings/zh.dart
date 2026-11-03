@@ -3269,6 +3269,15 @@ final class ChineseStrings extends Strings {
   String get pasteAsMarkdown => '粘贴为 Markdown';
 
   @override
+  String get pastedAsTable => '已粘贴为表格';
+
+  @override
+  String get pasteAsText => '粘贴为文本';
+
+  @override
+  String attachFailed(String name) => '无法附加 $name';
+
+  @override
   String get pastedAsMarkdown => '已粘贴为 Markdown';
 
   @override

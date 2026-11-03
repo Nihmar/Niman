@@ -20,7 +20,9 @@ not saved:
   `/` makes a folder; text in `'quotes'` is kept as it is. Numbers only,
   so an entry has the same name on every device whatever the app's
   language. The default files 23 September 2026 as
-  `Journal/2026/09/2026-09-23.md`.
+  `Journal/2026/09/2026-09-23.md`. A day whose entry is already there
+  under other capitals of a folder in the name is opened, never made a
+  second time beside itself.
 - **Template** (`journalTemplate`): the template an entry is made from.
   None set, an entry starts with a heading holding its date.
 - **A new day starts at** (`journalDayStart`, 0 to 6): for late nights,

@@ -222,6 +222,23 @@ final class JournalFlow {
         ? await templates.clipboardText()
         : '';
     await guard(() async {
+      // The folder as the library spells it: one held under other
+      // capitals is the one to file in (#904).
+      final folder = parent.isEmpty
+          ? parent
+          : (await ops.ensureFolder(parent)).path;
+      // The day's entry may be there already, under that spelling, while
+      // the path asked for missed it — a folder in the entry's name held
+      // under other capitals (#1246). It is the day's entry: opened, never
+      // made again beside itself as `_1`.
+      final held = await ops.find(
+        folder.isEmpty ? '$name.md' : '$folder/$name.md',
+      );
+      if (held != null) {
+        _log.info('journal: open ${journalDayLabel(day)} (${held.path})');
+        onOpen(held.path);
+        return;
+      }
       // Per-creation counters (#52, #359), reserved on disk under the guard
       // that reports a file that cannot be read or written.
       final reserved = await CounterStore.reserve(
@@ -240,11 +257,6 @@ final class JournalFlow {
       // The numbers are on disk before the entry exists: one that could not
       // be made gives them back rather than leaving a gap.
       final row = await CounterStore.whileCreating(counters, () async {
-        // The folder as the library spells it: one held under other
-        // capitals is the one to file in (#904).
-        final folder = parent.isEmpty
-            ? parent
-            : (await ops.ensureFolder(parent)).path;
         return await ops.createNote(
           parentPath: folder,
           name: name,

@@ -3362,6 +3362,15 @@ final class JapaneseStrings extends Strings {
   String get pasteAsMarkdown => 'Markdown として貼り付け';
 
   @override
+  String get pastedAsTable => '表として貼り付けました';
+
+  @override
+  String get pasteAsText => 'テキストとして貼り付け';
+
+  @override
+  String attachFailed(String name) => '$name を添付できませんでした';
+
+  @override
   String get pastedAsMarkdown => 'Markdown として貼り付けました';
 
   @override

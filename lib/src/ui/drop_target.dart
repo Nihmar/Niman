@@ -6,8 +6,9 @@
 /// to the same requests a launch makes (#41). A Markdown file opens the
 /// way Open file opens one (#77): as its note inside the open library, on
 /// its own anywhere else. A folder is offered for import into the library,
-/// or, with no library open, opens as one. Anything else is named and left
-/// alone.
+/// or, with no library open, opens as one. Anything else — a PDF, a
+/// picture — is attached to the note on screen (#1250), or, with no note
+/// to take it, named and left alone.
 ///
 /// While something is dragged over the window a frame and a line say what
 /// a drop would do. The desktops do not tell the app what is being
@@ -78,16 +79,18 @@ SortedDrop sortDrop(
   return (files: files, folders: folders, rejected: rejected);
 }
 
-/// Hands a sorted drop to [requests], and names what it left alone
-/// through [messenger].
-void deliverDrop(
+/// Hands a sorted drop to [requests]: what nothing opens goes to the note
+/// on screen as attachments (#1250), and is named through [messenger] when
+/// there is no note to take it.
+Future<void> deliverDrop(
   SortedDrop drop,
   LaunchRequests requests,
   ScaffoldMessengerState? messenger,
-) {
+) async {
   drop.files.forEach(requests.openFile);
   drop.folders.forEach(requests.openFolder);
   if (drop.rejected.isEmpty) return;
+  if (await requests.attachFiles(drop.rejected)) return;
   messenger?.showSnackBar(
     SnackBar(
       content: Text(
@@ -181,7 +184,7 @@ final class _AppDropTargetState extends State<AppDropTarget> {
       '${sorted.folders.length} folder(s), '
       '${sorted.rejected.length} left alone',
     );
-    deliverDrop(sorted, widget.requests, messenger);
+    await deliverDrop(sorted, widget.requests, messenger);
   }
 
   @override

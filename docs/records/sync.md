@@ -219,8 +219,12 @@ On macOS the entry lives in the data protection keychain, which needs the
 build — every local one, without a Developer ID (#1244) — has its writes
 refused with `errSecMissingEntitlement` (`-34018`), and the store keeps the
 entry in the login keychain instead, which needs no entitlement, reading
-from whichever of the two holds it. Any other keychain error is the
-caller's.
+from whichever of the two holds it. The plugin reports every Keychain
+status under one code, `Unexpected security result code`, with the
+`OSStatus` in `details` and in the message: the store reads the status
+there — 0.3.3 read the code, never matched, and left the Mac without a
+password. A read the data protection keychain refuses outright switches
+the same way. Any other keychain error is the caller's.
 
 A save writes the password before the destination: the secure storage is
 the step that can refuse on its own, and a destination stored without its

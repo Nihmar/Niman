@@ -108,6 +108,7 @@ final class MarkdownSurface extends StatelessWidget {
     this.blockAnchors,
     this.deadLinks,
     this.onLinkHover,
+    this.onPaste,
     super.key,
   });
 
@@ -132,6 +133,9 @@ final class MarkdownSurface extends StatelessWidget {
 
   /// See [MarkdownSourceView.onLinkHover].
   final void Function(SourceLinkHover? hover)? onLinkHover;
+
+  /// See [MarkdownSourceView.onPaste].
+  final Future<bool> Function()? onPaste;
 
   /// The note.
   final SourceBuffer buffer;
@@ -292,5 +296,6 @@ final class MarkdownSurface extends StatelessWidget {
     blockAnchors: blockAnchors,
     deadLinks: deadLinks,
     onLinkHover: onLinkHover,
+    onPaste: onPaste,
   );
 }

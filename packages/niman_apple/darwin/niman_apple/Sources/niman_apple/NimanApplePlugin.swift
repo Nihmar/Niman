@@ -57,6 +57,11 @@ public class NimanApplePlugin: NSObject, FlutterPlugin {
       let background = FlutterMethodChannel(name: "niman/background", binaryMessenger: messenger)
       background.setMethodCallHandler(backgroundBridge.handle)
       registrar.addSceneDelegate(backgroundBridge)
+      // Files dragged in from another app on an iPad (#1250); a Mac's window
+      // takes its drops in the runner (macos/Runner/MainFlutterWindow.swift).
+      let drop = FlutterMethodChannel(name: "niman/drop", binaryMessenger: messenger)
+      dropBridge.channel = drop
+      registrar.addSceneDelegate(dropBridge)
     #endif
   }
 
@@ -70,6 +75,7 @@ public class NimanApplePlugin: NSObject, FlutterPlugin {
   #if os(iOS)
     private static let sceneBridge = SceneBridge()
     private static let backgroundBridge = BackgroundBridge()
+    private static let dropBridge = DropBridgeIOS()
   #endif
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {

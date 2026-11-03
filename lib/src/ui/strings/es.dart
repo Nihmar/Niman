@@ -3729,6 +3729,15 @@ final class SpanishStrings extends Strings {
   String get pasteAsMarkdown => 'Pegar como Markdown';
 
   @override
+  String get pastedAsTable => 'Pegado como tabla';
+
+  @override
+  String get pasteAsText => 'Pegar como texto';
+
+  @override
+  String attachFailed(String name) => 'No se pudo adjuntar $name';
+
+  @override
   String get pastedAsMarkdown => 'Pegado como Markdown';
 
   @override

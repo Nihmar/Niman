@@ -3700,6 +3700,15 @@ final class AlbanianStrings extends Strings {
   String get pasteAsMarkdown => 'Ngjit si Markdown';
 
   @override
+  String get pastedAsTable => 'U ngjit si tabelë';
+
+  @override
+  String get pasteAsText => 'Ngjite si tekst';
+
+  @override
+  String attachFailed(String name) => '$name nuk mund të bashkëngjitej';
+
+  @override
   String get pastedAsMarkdown => 'U ngjit si Markdown';
 
   @override

@@ -3697,6 +3697,15 @@ final class CroatianStrings extends Strings {
   String get pasteAsMarkdown => 'Zalijepi kao Markdown';
 
   @override
+  String get pastedAsTable => 'Zalijepljeno kao tablica';
+
+  @override
+  String get pasteAsText => 'Zalijepi kao tekst';
+
+  @override
+  String attachFailed(String name) => 'Nije moguće priložiti $name';
+
+  @override
   String get pastedAsMarkdown => 'Zalijepljeno kao Markdown';
 
   @override

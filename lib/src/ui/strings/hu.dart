@@ -3686,6 +3686,15 @@ final class HungarianStrings extends Strings {
   String get pasteAsMarkdown => 'Beillesztés Markdownként';
 
   @override
+  String get pastedAsTable => 'Táblázatként beillesztve';
+
+  @override
+  String get pasteAsText => 'Beillesztés szövegként';
+
+  @override
+  String attachFailed(String name) => 'A(z) $name nem csatolható';
+
+  @override
   String get pastedAsMarkdown => 'Beillesztve Markdownként';
 
   @override

@@ -3692,6 +3692,15 @@ final class SerbianStrings extends Strings {
   String get pasteAsMarkdown => 'Налепи као Markdown';
 
   @override
+  String get pastedAsTable => 'Налепљено као табела';
+
+  @override
+  String get pasteAsText => 'Налепи као текст';
+
+  @override
+  String attachFailed(String name) => '$name није могуће приложити';
+
+  @override
   String get pastedAsMarkdown => 'Налепљено као Markdown';
 
   @override

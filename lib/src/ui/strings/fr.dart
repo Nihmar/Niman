@@ -3787,6 +3787,15 @@ final class FrenchStrings extends Strings {
   String get pasteAsMarkdown => 'Coller en Markdown';
 
   @override
+  String get pastedAsTable => 'Collé sous forme de tableau';
+
+  @override
+  String get pasteAsText => 'Coller comme texte';
+
+  @override
+  String attachFailed(String name) => 'Impossible de joindre $name';
+
+  @override
   String get pastedAsMarkdown => 'Collé en Markdown';
 
   @override

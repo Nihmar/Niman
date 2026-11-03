@@ -91,7 +91,7 @@ List<String> dropPathsFrom(Object? payload) {
 
 /// What the window's own drop target reports, to whoever draws it.
 ///
-/// Implemented by [PlatformDropTargetService] (the desktops) and
+/// Implemented by [PlatformDropTargetService] (the runners' targets) and
 /// [NoopDropTargetService] (elsewhere), plus a fake in widget tests.
 abstract interface class DropTargetService {
   /// The drags and drops the window's target sees, in the order they
@@ -102,14 +102,15 @@ abstract interface class DropTargetService {
   Future<void> dispose();
 }
 
-/// Creates the platform service: the runner's channel on the desktop, a
-/// no-op elsewhere (the phone has nothing to drag from, and the runner
-/// gives it no drop target).
+/// Creates the platform service: the runner's channel wherever the runner
+/// has a drop target — the desktops' windows, and Android and iPadOS, which
+/// take a drag from another app beside Niman (split screen, DeX, ChromeOS,
+/// Stage Manager; #1250) — and a no-op elsewhere.
 ///
-/// [isDesktop] overrides the host platform so a plain test can cover the
+/// [hasTarget] overrides the host platform so a plain test can cover the
 /// branch that does not run here.
-DropTargetService createDropTargetService({bool? isDesktop}) {
-  if (isDesktop ?? HostPlatform.isDesktop) {
+DropTargetService createDropTargetService({bool? hasTarget}) {
+  if (hasTarget ?? (HostPlatform.isDesktop || HostPlatform.isMobile)) {
     return PlatformDropTargetService();
   }
   return const NoopDropTargetService();
@@ -122,7 +123,7 @@ final dropTargetServiceProvider = Provider<DropTargetService>((ref) {
   return service;
 });
 
-/// The desktop runners' drop target, over the `niman/drop` channel.
+/// The runners' drop target, over the `niman/drop` channel.
 final class PlatformDropTargetService implements DropTargetService {
   /// Creates the service; [channel] is injected in tests.
   new({MethodChannel? channel})
