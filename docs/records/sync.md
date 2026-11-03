@@ -724,7 +724,7 @@ rest of its state.
 
 ### UI (`lib/src/ui/sync/`, mockups S1–S11)
 
-`LibrarySyncService` (`lib/src/sync/sync_service.dart`) is what the UI
+`LibrarySyncService` (`lib/src/sync/library_sync_service.dart`) is what the UI
 drives, exposed as `LibrarySession.sync` for every open library. It
 holds a `SyncStatus` (destination, capabilities, running stage and
 count, the session's last `SyncReport`), notifies on every change, and
