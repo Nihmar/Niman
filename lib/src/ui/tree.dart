@@ -2,13 +2,10 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart'
-    show RenderAbstractViewport, ScrollCacheExtent;
 import 'package:flutter/services.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/db/index_database.dart';
-import 'package:niman/src/editor/toolbar.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ocr/ocr_queue.dart';
 import 'package:niman/src/ui/action_sheet.dart';
@@ -19,11 +16,12 @@ import 'package:niman/src/ui/tree_drag.dart';
 import 'package:niman/src/ui/tree_drag_scroll.dart';
 import 'package:niman/src/ui/tree_listing.dart';
 import 'package:niman/src/ui/tree_pages.dart';
+import 'package:niman/src/ui/tree_pinned_heading.dart';
 import 'package:niman/src/ui/tree_range_reader.dart';
+import 'package:niman/src/ui/tree_row_list.dart';
 import 'package:niman/src/ui/tree_row_metrics.dart';
 import 'package:niman/src/ui/tree_row_tile.dart';
 import 'package:niman/src/ui/tree_rows.dart';
-import 'package:niman/src/ui/tree_rows_delegate.dart';
 import 'package:niman/src/ui/tree_rows_reader.dart';
 import 'package:niman/src/ui/tree_spring_load.dart';
 import 'package:niman/src/ui/tree_type_ahead.dart';
@@ -934,59 +932,17 @@ final class _NoteTreeState extends State<NoteTree> {
             _placeCreating(listing);
             _revealRenamed();
             final header = _walk.pinnedHeights.length;
-            // What a list does for the system's insets when it is given no
-            // padding of its own: the main axis's go around the slivers, and
-            // the rows below see the cross axis's alone.
-            final media = MediaQuery.of(context);
-            final list = CustomScrollView(
-              key: const Key('note-tree-list'),
+            final list = TreeRowList(
               controller: _scroll,
-              // The cache extent the pages are read for, named: the list and
-              // the window of rows kept agree on it.
-              scrollCacheExtent: const ScrollCacheExtent.pixels(
-                RenderAbstractViewport.defaultCacheExtent,
-              ),
-              semanticChildCount: header + listing.length,
-              slivers: [
-                SliverPadding(
-                  padding: media.padding.copyWith(left: 0, right: 0),
-                  sliver: MediaQuery(
-                    data: media.copyWith(
-                      padding: media.padding.copyWith(top: 0, bottom: 0),
-                    ),
-                    child: SliverMainAxisGroup(
-                      slivers: [
-                        if (header > 0)
-                          SliverList(
-                            delegate: SliverChildBuilderDelegate(
-                              // What the keyboard walks on this item: its
-                              // place, and the row a key on it acts upon
-                              // (#727).
-                              (context, index) => _pinnedItem(
-                                rows.pinned,
-                                index,
-                                _walk.pinnedAt(index),
-                              ),
-                              childCount: header,
-                            ),
-                          ),
-                        // Every row of the tree is the same height, so the
-                        // list lays out and jumps by arithmetic, however
-                        // many rows there are.
-                        SliverFixedExtentList(
-                          itemExtent: rowHeight,
-                          delegate: TreeRowsDelegate(
-                            (context, index) =>
-                                _treeItem(listing, index, rowHeight),
-                            childCount: listing.length,
-                            onLaidOut: _reader.onLaidOut,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
+              pinnedCount: header,
+              // What the keyboard walks on this item: its place, and the row
+              // a key on it acts upon (#727).
+              pinnedItem: (context, index) =>
+                  _pinnedItem(rows.pinned, index, _walk.pinnedAt(index)),
+              rowCount: listing.length,
+              rowHeight: rowHeight,
+              row: (context, index) => _treeItem(listing, index, rowHeight),
+              onLaidOut: _reader.onLaidOut,
             );
             final move = widget.onMove;
             final creating = widget.creating;
@@ -1057,7 +1013,13 @@ final class _NoteTreeState extends State<NoteTree> {
   /// divider that closes it off from the tree. [walked] is what the
   /// keyboard walks on it, for the row's ring and its cursor (#727).
   Widget _pinnedItem(List<Note> pinned, int index, TreeWalkRow? walked) {
-    if (index == 0) return _pinnedHeading(pinned.length);
+    if (index == 0) {
+      return TreePinnedHeading(
+        count: pinned.length,
+        collapsed: _reader.collapsed,
+        onToggle: () => _togglePinned(collapsed: !_reader.collapsed),
+      );
+    }
     if (index == (_reader.collapsed ? 1 : pinned.length + 1)) {
       // The hairline sits directly under the heading — aligned with the
       // editor toolbar's divider across the pane boundary — with the
@@ -1087,46 +1049,6 @@ final class _NoteTreeState extends State<NoteTree> {
       // A drop here goes into the note's folder, as on its tree row (#574).
       onMove: widget.onMove,
       icon: Icons.push_pin_outlined,
-    );
-  }
-
-  /// The pinned section's heading: a chevron, the word, and how many are
-  /// in there. Tapping it rolls the section up or down.
-  ///
-  /// The count is what makes rolling it up bearable — closed, the heading
-  /// still says how much is behind it, so the section is a thing you put
-  /// away rather than a thing you lose.
-  ///
-  /// The row is exactly [editorToolbarHeight] tall, matching the editor
-  /// toolbar across the pane boundary so the rows below start together
-  /// (user, 2026-09-09).
-  Widget _pinnedHeading(int count) {
-    final theme = Theme.of(context);
-    final style = theme.textTheme.labelMedium?.copyWith(
-      color: theme.colorScheme.onSurfaceVariant,
-    );
-    return TreeDropShield(
-      child: SizedBox(
-        height: editorToolbarHeight,
-        child: InkWell(
-          key: const Key('pinned-heading'),
-          onTap: () => _togglePinned(collapsed: !_reader.collapsed),
-          child: Padding(
-            padding: const EdgeInsets.only(left: 12, right: 16),
-            child: Row(
-              children: [
-                Icon(
-                  _reader.collapsed ? Icons.chevron_right : Icons.expand_more,
-                  size: 16,
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-                const SizedBox(width: 4),
-                Text(AppStrings.pinnedSectionCount(count), style: style),
-              ],
-            ),
-          ),
-        ),
-      ),
     );
   }
 
