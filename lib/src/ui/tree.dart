@@ -10,6 +10,7 @@ import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ocr/ocr_queue.dart';
 import 'package:niman/src/ui/action_sheet.dart';
 import 'package:niman/src/ui/strings.dart';
+import 'package:niman/src/ui/tree_create_placement.dart';
 import 'package:niman/src/ui/tree_create_row.dart';
 import 'package:niman/src/ui/tree_cursor.dart';
 import 'package:niman/src/ui/tree_drag.dart';
@@ -224,10 +225,13 @@ final class _NoteTreeState extends State<NoteTree> {
     mounted: () => mounted,
   );
 
-  /// The listing and the folder the row being made is being placed for, so
-  /// that one lookup is asked for each.
-  TreeListing? _placingListing;
-  String? _placingFolder;
+  /// Where the row being made goes in the listing (#712).
+  late final TreeCreatePlacement _placement = TreeCreatePlacement(
+    walk: _walk,
+    creating: () => widget.creating,
+    mounted: () => mounted,
+    update: setState,
+  );
 
   /// Runs [then] with the walk's row at [index]: at once when it is loaded,
   /// else when its page has landed.
@@ -666,47 +670,6 @@ final class _NoteTreeState extends State<NoteTree> {
     if (!widget.active && oldWidget.active) _focus.unfocus();
   }
 
-  /// Puts the row being made in [listing], one under its folder's row. The
-  /// folder is usually on screen, its row in a loaded page; when it is not,
-  /// its place is asked of the index and the row shows when it answers.
-  void _placeCreating(TreeListing listing) {
-    final creating = widget.creating;
-    if (creating == null || creating.folder.isEmpty) {
-      // At the root the row being made tops the tree, outside the list.
-      listing.placeCreating(null);
-      return;
-    }
-    final folder = creating.folder;
-    void place(int at) => listing.placeCreating(
-      at,
-      // One in from the folder's row.
-      depth: listing.model.slotAt(at).depth + 1,
-    );
-    final held = listing.modelIndexOfLoaded(folder);
-    if (held != null) {
-      place(held);
-      return;
-    }
-    listing.placeCreating(null);
-    if (listing.isFrozen ||
-        (identical(_placingListing, listing) && _placingFolder == folder)) {
-      return;
-    }
-    _placingListing = listing;
-    _placingFolder = folder;
-    unawaited(
-      listing.modelIndexOfPath(folder).then((at) {
-        if (at == null ||
-            !mounted ||
-            !identical(_walk.rows?.listing, listing) ||
-            widget.creating?.folder != folder) {
-          return;
-        }
-        setState(() => place(at));
-      }),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final background = widget.onBackgroundSecondaryTapUp;
@@ -769,7 +732,7 @@ final class _NoteTreeState extends State<NoteTree> {
               rowHeight: rowHeight,
               collapsed: _reader.collapsed,
             );
-            _placeCreating(listing);
+            _placement.place(listing);
             _reveal.renamed(widget.renaming?.path);
             final header = _walk.pinnedHeights.length;
             final list = TreeRowList(
