@@ -9,12 +9,13 @@ import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ocr/ocr_queue.dart';
 import 'package:niman/src/ui/action_sheet.dart';
-import 'package:niman/src/ui/lazy_drag_paths.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/tree_create_row.dart';
+import 'package:niman/src/ui/tree_cursor.dart';
 import 'package:niman/src/ui/tree_drag.dart';
 import 'package:niman/src/ui/tree_drag_scroll.dart';
 import 'package:niman/src/ui/tree_listing.dart';
+import 'package:niman/src/ui/tree_marks.dart';
 import 'package:niman/src/ui/tree_pages.dart';
 import 'package:niman/src/ui/tree_pinned_heading.dart';
 import 'package:niman/src/ui/tree_range_reader.dart';
@@ -177,7 +178,7 @@ final class _NoteTreeState extends State<NoteTree> {
     session: () => widget.controller,
     expanded: () => widget.expanded,
     sort: () => widget.sort,
-    dropMarks: _dropMarksOutside,
+    dropMarks: () => _marks.dropOutside(widget.expanded, widget.controller),
     onPageLanded: () => setState(() {}),
   );
 
@@ -198,40 +199,22 @@ final class _NoteTreeState extends State<NoteTree> {
   late final FocusNode _focus =
       widget.focusNode ?? FocusNode(debugLabel: 'note-tree');
 
-  /// The rows marked together (#712), by path: `Shift`+click, `Shift`+the
-  /// arrows and `Space` mark, a plain click or `Esc` lets go; so does a row
-  /// leaving the tree (#979). The tree's own rows only, not the pinned
-  /// block's copies.
-  final Set<String> _marked = {};
-
-  /// The paths a drag started on [path] carries (#996): every marked row's
-  /// when [path] is one of several marked rows, else null, the row's own.
-  ///
-  /// The marks are copied when a drag looks at them, not when the row is
-  /// built (#1234): a range can mark a million rows, and every marked row on
-  /// screen is built with these.
-  List<String>? _dragPaths(String path) =>
-      _marked.length > 1 && _marked.contains(path)
-      ? LazyDragPaths(_marked.toList)
-      : null;
+  /// The rows marked together (#712).
+  final TreeMarks _marks = TreeMarks();
 
   /// The jump to a row by the name typed (#712).
   late final TreeTypeAhead _letters = TreeTypeAhead(
     walk: _walk,
     move: _move,
-    cursorAt: _cursorAtAsync,
+    cursorAt: _cursor.atAsync,
     mounted: () => mounted,
   );
 
-  /// The row the keyboard's cursor is on, by path, and whether that is the
-  /// pinned block's copy of the note. Held by path rather than by place:
-  /// the walk follows the row while the tree grows and shrinks around it.
-  String? _cursorPath;
-  bool _cursorPinned = false;
-
-  /// Whether the ring is on the cursor — the keyboard put it there, a
-  /// pointer takes it away — as on a grid tile (#727).
-  bool _keyboardFocus = false;
+  /// The keyboard's cursor and its ring (#727).
+  late final TreeCursor _cursor = TreeCursor(
+    walk: _walk,
+    selectedPath: () => widget.selectedPath,
+  );
 
   /// The rows of the last build as the keyboard walks them (#727).
   final TreeWalk _walk = TreeWalk();
@@ -290,56 +273,6 @@ final class _NoteTreeState extends State<NoteTree> {
     );
   }
 
-  /// The cursor's place in the walk from the rows loaded: the row it is on,
-  /// or the selected row — a walk begun with the keyboard starts where the
-  /// tree already is — or the first row. Null when the row it is on is not
-  /// in a page that is loaded: see [_cursorAtAsync].
-  int? _cursorAtSync() {
-    final path = _cursorPath;
-    if (path != null) return _walk.find(path, inPinned: _cursorPinned);
-    final selected = widget.selectedPath;
-    return selected == null ? 0 : _walk.find(selected);
-  }
-
-  /// The cursor's place in the walk, asking the index for a row whose page
-  /// is not loaded.
-  Future<int> _cursorAtAsync() async {
-    final held = _cursorAtSync();
-    if (held != null) return held;
-    final path = _cursorPath;
-    final selected = widget.selectedPath;
-    final cursor = path == null
-        ? null
-        : await _walk.findAsync(path, inPinned: _cursorPinned);
-    if (cursor != null) return cursor;
-    final chosen = selected == null ? null : await _walk.findAsync(selected);
-    return chosen ?? 0;
-  }
-
-  /// The cursor and the row it is on, when both are loaded.
-  TreeWalkCursor? _cursorHere() {
-    final at = _cursorAtSync();
-    final row = at == null ? null : _walk.rowAt(at);
-    return at == null || row == null ? null : (at: at, row: row);
-  }
-
-  /// The cursor and the row it is on, loading the page it is in.
-  Future<TreeWalkCursor?> _cursorResolved() async {
-    final at = await _cursorAtAsync();
-    final row = await _walk.rowAtAsync(at);
-    return row == null ? null : (at: at, row: row);
-  }
-
-  /// Whether the keyboard's ring is on [row] (#727): the cursor's own look,
-  /// apart from the selection's fill, so the two are told apart and can be
-  /// worn together.
-  bool _isCursor(TreeWalkRow? row) =>
-      row != null &&
-      _keyboardFocus &&
-      _focus.hasPrimaryFocus &&
-      row.path == _cursorPath &&
-      row.pinned == _cursorPinned;
-
   /// The keys the walk may take, whatever the rows: a superset of what it
   /// does take, so that a key that is not one of them is left to the app
   /// before the cursor's row is looked for.
@@ -392,10 +325,10 @@ final class _NoteTreeState extends State<NoteTree> {
       return KeyEventResult.ignored;
     }
     if (_walk.length == 0 || !_ownsKey(event)) return KeyEventResult.ignored;
-    final here = _cursorHere();
+    final here = _cursor.here();
     if (here != null) return _keyAt(event, here);
     unawaited(
-      _cursorResolved().then((here) {
+      _cursor.resolved().then((here) {
         if (here != null && mounted) _keyAt(event, here);
       }),
     );
@@ -429,8 +362,8 @@ final class _NoteTreeState extends State<NoteTree> {
     final handled = _walkKey(cursor, event.logicalKey);
     // The keyboard is in use: the ring comes back if a pointer had put it
     // away — and stays off for a key the walk does not own.
-    if (handled == KeyEventResult.handled && !_keyboardFocus) {
-      setState(() => _keyboardFocus = true);
+    if (handled == KeyEventResult.handled && !_cursor.ring) {
+      setState(() => _cursor.ring = true);
     }
     return handled;
   }
@@ -444,18 +377,15 @@ final class _NoteTreeState extends State<NoteTree> {
     final scrolled = _scroll.hasClients ? _scroll.position.pixels : 0.0;
     final origin = box.localToGlobal(Offset(0, row.top - scrolled));
     final anchor = origin & Size(box.size.width, row.height);
-    if (!_keyboardFocus) setState(() => _keyboardFocus = true);
+    if (!_cursor.ring) setState(() => _cursor.ring = true);
     final marked = widget.onMarkedMenu;
-    if (marked != null &&
-        _marked.length > 1 &&
-        !row.pinned &&
-        _marked.contains(row.path)) {
-      marked(_marked.toList(), anchor);
+    if (marked != null && !row.pinned && _marks.isAmongSeveral(row.path)) {
+      marked(_marks.toList(), anchor);
       return KeyEventResult.handled;
     }
     final menu = widget.onLongPress;
     if (menu == null) return KeyEventResult.ignored;
-    if (_marked.isNotEmpty) setState(_marked.clear);
+    if (_marks.isNotEmpty) setState(_marks.clear);
     menu(row.note, anchor);
     return KeyEventResult.handled;
   }
@@ -577,27 +507,25 @@ final class _NoteTreeState extends State<NoteTree> {
     }
     if (keys.isShiftPressed) return null;
     if (marks && key == LogicalKeyboardKey.space && !row.pinned) {
-      setState(() {
-        if (!_marked.remove(row.path)) _marked.add(row.path);
-      });
+      setState(() => _marks.toggle(row.path));
       return KeyEventResult.handled;
     }
-    if (key == LogicalKeyboardKey.escape && _marked.isNotEmpty) {
-      setState(_marked.clear);
+    if (key == LogicalKeyboardKey.escape && _marks.isNotEmpty) {
+      setState(_marks.clear);
       return KeyEventResult.handled;
     }
-    if (key == LogicalKeyboardKey.delete && _marked.isNotEmpty) {
+    if (key == LogicalKeyboardKey.delete && _marks.isNotEmpty) {
       // As a right click does (#979): on a marked row, `Delete` is the
       // marks'; on any other it is that row's alone, and the marks let go
       // rather than wait to be deleted by a later key.
-      if (_marked.length > 1 && !row.pinned && _marked.contains(row.path)) {
+      if (!row.pinned && _marks.isAmongSeveral(row.path)) {
         final delete = widget.onDeleteMarked;
         if (delete == null) return KeyEventResult.ignored;
-        delete(_marked.toList());
-        setState(_marked.clear);
+        delete(_marks.toList());
+        setState(_marks.clear);
         return KeyEventResult.handled;
       }
-      setState(_marked.clear);
+      setState(_marks.clear);
     }
     final typed = TreeTypeAhead.letterOf(event);
     return typed == null ? null : _letters.type(typed, at);
@@ -618,12 +546,12 @@ final class _NoteTreeState extends State<NoteTree> {
     final reader = TreeRangeReader(listing);
     final held = reader.heldPaths(first, last);
     if (held != null) {
-      setState(() => _marked.addAll(held));
+      setState(() => _marks.addAll(held));
       return;
     }
     unawaited(
       reader.paths(first, last).then((paths) {
-        if (mounted) setState(() => _marked.addAll(paths));
+        if (mounted) setState(() => _marks.addAll(paths));
       }, onError: _logReadFailure),
     );
   }
@@ -638,11 +566,11 @@ final class _NoteTreeState extends State<NoteTree> {
   /// on any other row, its own, the marks let go.
   void _secondaryTap(Note note, TapDownDetails details) {
     final marked = widget.onMarkedMenu;
-    if (marked != null && _marked.length > 1 && _marked.contains(note.path)) {
-      marked(_marked.toList(), menuAnchorAt(details.globalPosition));
+    if (marked != null && _marks.isAmongSeveral(note.path)) {
+      marked(_marks.toList(), menuAnchorAt(details.globalPosition));
       return;
     }
-    if (_marked.isNotEmpty) setState(_marked.clear);
+    if (_marks.isNotEmpty) setState(_marks.clear);
     widget.onSecondaryTapDown?.call(note, details);
   }
 
@@ -672,11 +600,7 @@ final class _NoteTreeState extends State<NoteTree> {
 
   /// The cursor on [row].
   void _land(TreeWalkRow row) {
-    setState(() {
-      _cursorPath = row.path;
-      _cursorPinned = row.pinned;
-      _keyboardFocus = true;
-    });
+    setState(() => _cursor.moveTo(row.path, pinned: row.pinned, ring: true));
     _ensureCursorVisible(row);
   }
 
@@ -694,30 +618,29 @@ final class _NoteTreeState extends State<NoteTree> {
         !row.pinned &&
         _walk.length > 0) {
       final to = row.index;
-      final from = _cursorAtSync();
+      final from = _cursor.at();
       if (from != null) {
         _markRange(from, to);
       } else {
         // Asked before the cursor is moved to this row.
         unawaited(
-          _cursorAtAsync().then(
+          _cursor.atAsync().then(
             (from) => _markRange(from, to),
             onError: _logReadFailure,
           ),
         );
       }
-      setState(() {
-        _cursorPath = note.path;
-        _cursorPinned = false;
-      });
+      setState(() => _cursor.moveTo(note.path, pinned: false));
       _focus.requestFocus();
       return;
     }
     setState(() {
-      _marked.clear();
-      _cursorPath = row?.path ?? note.path;
-      _cursorPinned = row?.pinned ?? false;
-      _keyboardFocus = false;
+      _marks.clear();
+      _cursor.moveTo(
+        row?.path ?? note.path,
+        pinned: row?.pinned ?? false,
+        ring: false,
+      );
     });
     if (note.isDir) _focus.requestFocus();
     widget.onSelect(note);
@@ -726,11 +649,7 @@ final class _NoteTreeState extends State<NoteTree> {
   /// A folder's chevron: the cursor follows the folder that was opened or
   /// closed, and the pane takes the keyboard.
   void _rowToggled(String path, {required bool pinned}) {
-    setState(() {
-      _cursorPath = path;
-      _cursorPinned = pinned;
-      _keyboardFocus = false;
-    });
+    setState(() => _cursor.moveTo(path, pinned: pinned, ring: false));
     _focus.requestFocus();
     widget.onToggle(path);
   }
@@ -800,30 +719,6 @@ final class _NoteTreeState extends State<NoteTree> {
     // Hidden under the grid the pane lets the keyboard go: the rows it
     // would walk are not the ones on screen (#727).
     if (!widget.active && oldWidget.active) _focus.unfocus();
-  }
-
-  /// Lets go of the marks on rows that are no longer in the tree — deleted,
-  /// moved, renamed or folded away — so a `Delete` never goes to paths that
-  /// are not on screen (#979). Once per read, not per frame.
-  ///
-  /// A row is folded away when a folder above it is not expanded; one that
-  /// is gone is asked of the index, whatever page it was in.
-  Future<void> _dropMarksOutside() async {
-    if (_marked.isEmpty) return;
-    final expanded = widget.expanded;
-    _marked.removeWhere((path) => !_isUnderOpenFolders(path, expanded));
-    if (_marked.isEmpty) return;
-    final gone = await widget.controller.missingPaths(_marked.toList());
-    _marked.removeWhere(gone.contains);
-  }
-
-  /// Whether every folder above [path] is in [expanded].
-  static bool _isUnderOpenFolders(String path, Set<String> expanded) {
-    for (var cut = path.lastIndexOf('/'); cut > 0;) {
-      if (!expanded.contains(path.substring(0, cut))) return false;
-      cut = path.lastIndexOf('/', cut - 1);
-    }
-    return true;
   }
 
   /// Puts the row being made in [listing], one under its folder's row. The
@@ -993,8 +888,8 @@ final class _NoteTreeState extends State<NoteTree> {
       sidecar: entry.sidecar,
       ocrQueue: widget.ocrQueue,
       isExpanded: widget.expanded.contains(note.path),
-      selected: note.path == widget.selectedPath || _marked.contains(note.path),
-      focused: _isCursor(walked),
+      selected: note.path == widget.selectedPath || _marks.contains(note.path),
+      focused: _cursor.isOn(walked, focused: _focus.hasPrimaryFocus),
       onSelect: (note) => _rowActivated(note, walked),
       onToggle: (path) => _rowToggled(path, pinned: false),
       onLongPress: widget.onLongPress,
@@ -1004,7 +899,7 @@ final class _NoteTreeState extends State<NoteTree> {
       onMiddleClick: widget.onOpenInNewTab,
       onMove: widget.onMove,
       spring: _spring,
-      dragPaths: _dragPaths(note.path),
+      dragPaths: _marks.dragPaths(note.path),
       renaming: widget.renaming?.path == note.path ? widget.renaming : null,
     );
   }
@@ -1040,7 +935,7 @@ final class _NoteTreeState extends State<NoteTree> {
       depth: 0,
       isExpanded: false,
       selected: note.path == widget.selectedPath,
-      focused: _isCursor(walked),
+      focused: _cursor.isOn(walked, focused: _focus.hasPrimaryFocus),
       onSelect: (note) => _rowActivated(note, walked),
       onToggle: (path) => _rowToggled(path, pinned: true),
       onLongPress: widget.onLongPress,
