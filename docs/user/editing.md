@@ -359,6 +359,17 @@ so, and its **Paste as text** puts the clipboard's text in place of the
 table. Text that is not a clean table, a single row, and a paste into a
 code block stay text. On every platform.
 
+Files copied in a file manager — Finder, Explorer, Nautilus, Dolphin, the
+Files app — and pasted into a note are **attached**: each is copied into
+the library's [attachments folder](settings.md) and linked where the
+caret is, one undo step, in the library's link format. A picture or an
+audio file is embedded, anything else linked, and the link reads as the
+file's own name (the copy is named by its content, so the same file is
+never stored twice). A file already in the library is linked where it
+is. A file that cannot be copied in is named in a message. On Android and
+iOS, where an app hands over its content rather than a path, Niman copies
+it first and then attaches it the same way.
+
 ### Undo and redo
 
 Undo goes back one step at a time, and a step is what a writer would call

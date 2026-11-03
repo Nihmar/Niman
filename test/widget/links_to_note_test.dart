@@ -71,6 +71,9 @@ final class _Note implements NoteViewHandle {
   PastedText? pasteText(String text) => null;
 
   @override
+  Future<bool> attachFiles(List<String> paths) async => false;
+
+  @override
   void replacePasted(PastedText pasted, String text) {}
 
   @override

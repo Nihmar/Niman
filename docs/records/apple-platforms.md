@@ -64,7 +64,7 @@ implements, or a feature that stays off:
 | `niman/storage` | All-files access (Android) | Folder grant (bookmark) | Folder grant (bookmark) |
 | `niman/reminders` | Battery-optimisation health (Android) | — (not needed) | — (not needed) |
 | `niman/screen` | Keep screen on (Android, Linux; Windows by FFI) | `IOPMAssertion` | `isIdleTimerDisabled` |
-| `niman/clipboard` | HTML + source URL (Android, Linux; Windows by FFI) | `NSPasteboard` | `UIPasteboard` |
+| `niman/clipboard` | HTML + source URL, and the copied files (#1249) (Android, Linux; Windows by FFI) | `NSPasteboard` (file URLs) | `UIPasteboard` (item providers, copied to `tmp/`) |
 | `niman/pdf` | WebView print (Android) | WebKit print | WebKit print |
 | `niman/page_reader` | Hidden WebView (Android) | Hidden `WKWebView` | Hidden `WKWebView` |
 | `niman/drop` | GDK drop, OLE `IDropTarget` | `NSDraggingDestination` | — (no window drop) |

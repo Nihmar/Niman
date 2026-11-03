@@ -23,6 +23,10 @@ enum ClipboardBridge {
   static let webArchive = "com.apple.webarchive"
 
   static func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+    if call.method == "readFiles" {
+      ClipboardFiles.read(result: result)
+      return
+    }
     guard call.method == "readHtml" else {
       result(FlutterMethodNotImplemented)
       return

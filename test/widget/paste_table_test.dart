@@ -47,6 +47,9 @@ void main() {
             toolbarTop: true,
             readNote: (_) async => note,
             writeNote: (_, _) async {},
+            // No files on the clipboard: the platform's reader is a channel
+            // whose answer the fake clock never brings (#1249).
+            readClipboardFiles: () async => const [],
           ),
         ),
       ),

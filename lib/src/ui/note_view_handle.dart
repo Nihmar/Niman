@@ -105,6 +105,13 @@ abstract interface class NoteViewHandle {
   /// no text there ([canInsert]).
   PastedText? pasteText(String text);
 
+  /// Copies the files at [paths] into the library's attachments folder (a
+  /// file already in the library stays where it is) and links them at the
+  /// caret, one undo step (#1249, #1250). True when there were files to
+  /// attach; false when the note takes none — no library, no text there
+  /// ([canInsert]) — or [paths] names no file.
+  Future<bool> attachFiles(List<String> paths);
+
   /// Puts [text] in place of what [pasted] put in, while the note still
   /// says it there: Paste as Markdown's Undo, which leaves the plain text
   /// (#531). Does nothing once that part of the note has changed.

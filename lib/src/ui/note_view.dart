@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:niman/src/capture/paste/clipboard_files.dart';
+import 'package:niman/src/capture/paste/platform_clipboard_files.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/frame_log.dart';
 import 'package:niman/src/core/logging.dart';
@@ -66,6 +68,7 @@ import 'package:niman/src/ui/frontmatter_fields.dart';
 import 'package:niman/src/ui/hidden_slot.dart';
 import 'package:niman/src/ui/link_preview/note_link_preview.dart';
 import 'package:niman/src/ui/links_to_note_section.dart';
+import 'package:niman/src/ui/note_attach.dart';
 import 'package:niman/src/ui/note_dead_links.dart';
 import 'package:niman/src/ui/note_edit_commands.dart';
 import 'package:niman/src/ui/note_frontmatter_head.dart';
@@ -134,6 +137,7 @@ final class NoteView extends StatefulWidget {
     this.libraryRoot,
     this.pickImagePath,
     this.importImage,
+    this.readClipboardFiles,
     this.readNote,
     this.writeNote,
     this.saveNote,
@@ -276,6 +280,10 @@ final class NoteView extends StatefulWidget {
   /// which FakeAsync cannot drive).
   final Future<String> Function(String libraryRoot, String sourcePath)?
   importImage;
+
+  /// Reads the paths of the files on the clipboard, which a paste attaches
+  /// (#1249); the default is the platform's reader. Tests inject a seam.
+  final Future<List<String>> Function()? readClipboardFiles;
 
   /// Reads a note's content. Defaults to an off-isolate file read.
   final Future<String> Function(String path)? readNote;
@@ -641,8 +649,52 @@ final class _NoteViewState extends State<NoteView>
 
   /// The editor's paste, before it is plain text: spreadsheet cells
   /// become a table (#1248).
+  /// Files pasted or dropped on the note, copied into the attachments
+  /// folder and linked at the caret (#1249, #1250).
+  late final NoteAttach _attach = NoteAttach(
+    libraryRoot: () => widget.libraryRoot,
+    notePath: () => widget.path,
+    linkType: () => widget.linkType,
+    // Without the suggester, the file's name: a note's without `.md`, as a
+    // wikilink names it, anything else's with its extension.
+    wikiTarget: (path) async =>
+        await widget.wikilinkSuggester?.targetOf(path) ??
+        (p.extension(path).toLowerCase() == '.md'
+            ? p.basenameWithoutExtension(path)
+            : p.basename(path)),
+    importFile: (root, source) =>
+        widget.importImage?.call(root, source) ??
+        importImageToLibrary(
+          libraryRoot: root,
+          sourcePath: source,
+          attachmentsFolder: widget.attachmentsFolder,
+        ),
+    insert: _insertAttachmentLinks,
+    messenger: () => mounted ? ScaffoldMessenger.maybeOf(context) : null,
+  );
+
+  /// The platform's reader of the files on the clipboard (#1249).
+  late final ClipboardFilesReader _clipboardFiles = platformClipboardFiles();
+
+  bool _insertAttachmentLinks(String text) {
+    final surface = _surface;
+    if (!mounted || !canInsert || surface == null) return false;
+    surface.replaceSelection(text);
+    _focus.requestFocus();
+    _stats.refresh();
+    _refreshPreview();
+    return true;
+  }
+
+  @override
+  Future<bool> attachFiles(List<String> paths) =>
+      canInsert ? _attach.attach(paths) : Future.value(false);
+
   late final NotePaste _paste = NotePaste(
     canInsert: () => canInsert,
+    clipboardFiles: () =>
+        widget.readClipboardFiles?.call() ?? _clipboardFiles.read(),
+    attach: _attach.attach,
     caretInCode: () => _sourceViewKey.currentState?.caretInCode ?? false,
     surroundings: _selectionSurroundings,
     plainText: readPlainClipboard,
