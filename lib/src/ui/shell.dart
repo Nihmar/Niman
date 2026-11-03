@@ -50,7 +50,6 @@ import 'package:niman/src/ocr/ocr_queue.dart';
 import 'package:niman/src/reading/reading_positions.dart';
 import 'package:niman/src/search/task_events.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
-import 'package:niman/src/spellcheck/personal_dictionary.dart';
 import 'package:niman/src/todo/reminders.dart';
 import 'package:niman/src/todo/task_link_rewriter.dart';
 import 'package:niman/src/todo/task_links.dart';
@@ -156,6 +155,7 @@ import 'package:niman/src/ui/shell_note_history.dart';
 import 'package:niman/src/ui/shell_note_io.dart';
 import 'package:niman/src/ui/shell_ocr_flow.dart';
 import 'package:niman/src/ui/shell_palette.dart';
+import 'package:niman/src/ui/shell_personal_dictionary.dart';
 import 'package:niman/src/ui/shell_preview_actions.dart';
 import 'package:niman/src/ui/shell_row_actions.dart';
 import 'package:niman/src/ui/shell_row_menu.dart';
@@ -593,18 +593,12 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     });
   }
 
-  /// The open library's personal dictionary (issue #60), attached to the
-  /// spell state: loaded once per root, the old one disposed and swapped
-  /// when the library changes, detached on close.
-  PersonalDictionary? _personalDictionary;
-
-  /// Where that dictionary lives, library-relative: the path a sync names
-  /// when it brought words from another device.
-  static const _personalDictionaryPath = '.niman/dictionary.txt';
-
-  /// The root a personal-dictionary open is in flight for: the repeated
-  /// [_refreshEditorSettings] calls must not open the same file again.
-  String? _personalDictionaryOpening;
+  /// The open library's personal dictionary (issue #60).
+  late final ShellPersonalDictionary _personalDictionary =
+      ShellPersonalDictionary(
+        spellCheck: widget.spellCheck,
+        mounted: () => mounted,
+      );
 
   /// Shows the todo list, wherever this layout keeps it.
   ///
@@ -2511,9 +2505,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     // re-read (its buffer was saved before the sync started).
     _inbound.listen(widget.controller.sync?.localChanges, (paths) {
       // Words added on another device count as soon as they arrive.
-      if (paths.contains(_personalDictionaryPath)) {
-        unawaited(_personalDictionary?.reload());
-      }
+      _personalDictionary.synced(paths);
       final open = _selected;
       if (!mounted || open == null || _selectedIsDir) return;
       if (paths.contains(open)) setState(() => _noteReloadToken++);
@@ -2638,7 +2630,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     _todoController.dispose();
     _todoView.dispose();
     _calendarController.dispose();
-    _personalDictionary?.dispose();
+    _personalDictionary.dispose();
     _fab.dispose();
     _shellFocus.dispose();
     _tabListenable.dispose();
@@ -2841,7 +2833,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
 
   Future<void> _refreshEditorSettings() async {
     final controller = widget.controller;
-    _syncPersonalDictionary(controller);
+    _personalDictionary.follow(controller);
     final settings = await ShellEditorSettings.read(controller);
     // The spell checker follows the library's dictionaries (T-PP-09,
     // revised); it notifies the open editor itself, so it stays out of
@@ -2867,45 +2859,6 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     if (quickNote != _quickNotePath) {
       setState(() => _quickNotePath = quickNote);
     }
-  }
-
-  /// Attaches the open library's personal dictionary to the spell state
-  /// (issue #60): loaded once per root; a library switch disposes the old
-  /// one and loads the new root's words; a closed library detaches.
-  void _syncPersonalDictionary(LibrarySession controller) {
-    final root = controller.root;
-    final expected = root == null
-        ? null
-        : p.join(root, '.niman', 'dictionary.txt');
-    if (_personalDictionary?.path == expected) return;
-    if (root == null) {
-      _personalDictionaryOpening = null;
-      _personalDictionary?.dispose();
-      _personalDictionary = null;
-      widget.spellCheck.setPersonalDictionary(null);
-      return;
-    }
-    if (_personalDictionaryOpening == root) return;
-    _personalDictionaryOpening = root;
-    unawaited(_openPersonalDictionary(controller, root));
-  }
-
-  /// Opens [root]'s dictionary file; on completion the words attach, the
-  /// old dictionary disposes, and the spell state re-scans the open note.
-  /// A library switched away before completion disposes the words instead.
-  Future<void> _openPersonalDictionary(
-    LibrarySession controller,
-    String root,
-  ) async {
-    final dictionary = await PersonalDictionary.open(root);
-    if (!mounted || controller.root != root) {
-      dictionary.dispose();
-      return;
-    }
-    _personalDictionaryOpening = null;
-    _personalDictionary?.dispose();
-    _personalDictionary = dictionary;
-    widget.spellCheck.setPersonalDictionary(dictionary);
   }
 
   /// Flips the tree sort direction and persists it (T-UI-03).
