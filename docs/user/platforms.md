@@ -144,7 +144,7 @@ the two agree.
 - **Dropping files and folders on the window** is the window's own GDK
   drop destination, which takes the `text/uri-list` a file manager
   offers. The frame around the window says a drag is over it, and the
-  drop opens or imports what it names
+  drop opens, imports or attaches what it names
   ([organization](organization.md#dropping-files-on-the-window)). The
   portal's file-transfer target is not taken: it carries a one-time key
   to resolve over D-Bus rather than paths, and preferring it is what left
@@ -546,11 +546,15 @@ maximized for it; if the window manager declines, Zen still hides
 everything but the note.
 
 **Dropping files and folders on the window** (see
-[organization](organization.md#dropping-files-on-the-window)) is Linux
-and Windows only: a phone has nothing to drag from. The window draws a
-frame while a drag is over it, on Linux and on Windows alike, where the
-window's drop target is OLE's (#531). A link dropped the same way is a
-[web capture](web-capture.md); on a phone, the browser's Share does it.
+[organization](organization.md#dropping-files-on-the-window)) works on
+every platform. On Linux, Windows and macOS the window takes files and
+folders from the file manager, and draws a frame while a drag is over
+it — on Windows the window's drop target is OLE's (#531). On Android and
+iPadOS a drag comes from another app beside Niman (split screen, DeX,
+ChromeOS, Stage Manager): there the drop takes files, which it attaches
+to the note on screen (#1250), not folders or text. A link dropped on a
+desktop window is a [web capture](web-capture.md); on a phone, the
+browser's Share does it.
 
 **Opening a file outside any library** (`Ctrl+Shift+O`, see
 [organization](organization.md#opening-a-file-outside-any-library)) is

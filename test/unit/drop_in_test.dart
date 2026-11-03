@@ -142,12 +142,13 @@ void main() {
   });
 
   group('the service factory', () {
-    test('a desktop gets the platform service, elsewhere the no-op', () async {
-      final desktop = createDropTargetService(isDesktop: true);
+    test('a runner with a target gets the platform service, elsewhere the '
+        'no-op', () async {
+      final desktop = createDropTargetService(hasTarget: true);
       expect(desktop, isA<PlatformDropTargetService>());
       await desktop.dispose();
 
-      final phone = createDropTargetService(isDesktop: false);
+      final phone = createDropTargetService(hasTarget: false);
       expect(phone, isA<NoopDropTargetService>());
       final seen = <WindowDrop>[];
       final subscription = phone.events.listen(seen.add);

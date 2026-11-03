@@ -65,20 +65,32 @@ enum ClipboardFiles {
         result([String]())
         return
       }
-      let folder = FileManager.default.temporaryDirectory
-        .appendingPathComponent("clipboard", isDirectory: true)
-        .appendingPathComponent(UUID().uuidString, isDirectory: true)
+      copy(board.itemProviders, into: "clipboard") { result($0) }
+    }
+
+    /// Copies the file each of [providers] holds into `tmp/<folder>/`,
+    /// under the name it carries, and answers the copies' paths, in order,
+    /// on the main queue. The folder is emptied first: the files of the
+    /// last paste or drop have been copied on into the library by then.
+    static func copy(
+      _ providers: [NSItemProvider], into folder: String,
+      done: @escaping ([String]) -> Void
+    ) {
+      let base = FileManager.default.temporaryDirectory
+        .appendingPathComponent(folder, isDirectory: true)
+      try? FileManager.default.removeItem(at: base)
+      let batch = base.appendingPathComponent(UUID().uuidString, isDirectory: true)
       let group = DispatchGroup()
       let lock = NSLock()
       var paths = [Int: String]()
-      for (index, provider) in board.itemProviders.enumerated() {
+      for (index, provider) in providers.enumerated() {
         guard let type = fileType(provider.registeredTypeIdentifiers) else { continue }
         group.enter()
         provider.loadFileRepresentation(forTypeIdentifier: type) { url, _ in
           defer { group.leave() }
           guard let url else { return }
           let name = fileName(suggested: provider.suggestedName, file: url, type: type)
-          let target = folder.appendingPathComponent(index.description, isDirectory: true)
+          let target = batch.appendingPathComponent(index.description, isDirectory: true)
             .appendingPathComponent(name)
           do {
             try FileManager.default.createDirectory(
@@ -89,12 +101,12 @@ enum ClipboardFiles {
             paths[index] = target.path
             lock.unlock()
           } catch {
-            NSLog("niman: clipboard file not copied: \(error)")
+            NSLog("niman: %@ file not copied: %@", folder, "\(error)")
           }
         }
       }
       group.notify(queue: .main) {
-        result(paths.keys.sorted().compactMap { paths[$0] })
+        done(paths.keys.sorted().compactMap { paths[$0] })
       }
     }
   #endif

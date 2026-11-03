@@ -62,6 +62,17 @@ final class LaunchRequests {
   /// Asks for the page at [url] to be captured.
   void capturePage(Uri url) => _pages.add(url);
 
+  /// Who takes the dropped files nothing opens or imports — a PDF, a
+  /// picture, an archive — to attach them to the note on screen (#1250):
+  /// the library's shell, while it is up. It answers whether a note took
+  /// them.
+  Future<bool> Function(List<String> paths)? attachHandler;
+
+  /// Asks for the files at [paths] to be attached to the note on screen:
+  /// false when there is none to take them.
+  Future<bool> attachFiles(List<String> paths) async =>
+      await attachHandler?.call(paths) ?? false;
+
   /// Stops taking requests.
   Future<void> dispose() async {
     await _laterFiles.cancel();

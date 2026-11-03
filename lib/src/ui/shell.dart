@@ -2808,6 +2808,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       (path) => unawaited(_openFolder(path)),
       request: true,
     );
+    // Files dropped on the window that nothing opens: attached to the note
+    // on screen (#1250).
+    widget.launchRequests.attachHandler = _attachDropped;
     // Links dropped on the window (#531).
     _inbound.listen(widget.launchRequests.pages, (url) {
       if (mounted) unawaited(_captureFlow.capture(context, url: url));
@@ -2872,6 +2875,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     _noteHideTimer?.cancel();
     unawaited(_homeWidgets.dispose());
     unawaited(_inbound.cancel());
+    if (widget.launchRequests.attachHandler == _attachDropped) {
+      widget.launchRequests.attachHandler = null;
+    }
     _todoController.removeListener(_homeWidgets.pushTodos);
     _calendarController.removeListener(_pushCalendarReminders);
     _todoLinks.dispose();
@@ -4898,6 +4904,15 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// Moves the checkbox items under [note]'s selection to the tasks (#1152).
   void _moveToTasks(NoteViewHandle note) =>
       unawaited(MoveToTasksFlow(_noteTasks).run(context, note));
+
+  /// Attaches files dropped on the window to the note on screen (#1250):
+  /// false when there is none that takes text — no note open, a kind's view
+  /// in front of it, a note outside the library.
+  Future<bool> _attachDropped(List<String> paths) async {
+    final note = _panelNote;
+    if (note == null || !note.canInsert) return false;
+    return await note.attachFiles(paths);
+  }
 
   /// Pastes the clipboard's HTML into [note] as Markdown (#531).
   void _pasteAsMarkdown(NoteViewHandle note) => unawaited(

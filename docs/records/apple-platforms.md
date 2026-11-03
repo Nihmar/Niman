@@ -67,7 +67,7 @@ implements, or a feature that stays off:
 | `niman/clipboard` | HTML + source URL, and the copied files (#1249) (Android, Linux; Windows by FFI) | `NSPasteboard` (file URLs) | `UIPasteboard` (item providers, copied to `tmp/`) |
 | `niman/pdf` | WebView print (Android) | WebKit print | WebKit print |
 | `niman/page_reader` | Hidden WebView (Android) | Hidden `WKWebView` | Hidden `WKWebView` |
-| `niman/drop` | GDK drop, OLE `IDropTarget` | `NSDraggingDestination` | — (no window drop) |
+| `niman/drop` | GDK drop, OLE `IDropTarget`; Android `View.OnDragListener` (#1250) | `NSDraggingDestination` | `UIDropInteraction` on the scene's view (#1250) |
 | `niman/window` | Snap Layouts hit test (Windows) | — (native traffic lights) | — |
 | `niman/share` | Share intents (Android) | Services menu, *Open With* | Share extension |
 | `niman/shortcuts` | Launcher shortcuts (Android) | Dock menu | Home-screen quick actions |

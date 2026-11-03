@@ -31,6 +31,7 @@ class MainActivity : FlutterActivity() {
     private val pageReader = PageReaderBridge(this)
     private val shares = ShareBridge(this)
     private val clipboard = ClipboardBridge(this)
+    private val drops = DropBridge(this)
     private val openFile = OpenFileBridge(this)
 
     /** The launching intent, handled once (#721). */
@@ -41,6 +42,9 @@ class MainActivity : FlutterActivity() {
         // with it configureFlutterEngine (#721).
         launch.restore(savedInstanceState?.getBoolean(STATE_LAUNCH_HANDLED) == true)
         super.onCreate(savedInstanceState)
+        // Files dragged in from another app (#1250): the Flutter view is
+        // where they land.
+        findViewById<android.view.View>(FLUTTER_VIEW_ID)?.let(drops::listen)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -56,6 +60,7 @@ class MainActivity : FlutterActivity() {
         pageReader.attach(flutterEngine.dartExecutor.binaryMessenger)
         shares.attach(flutterEngine.dartExecutor.binaryMessenger)
         clipboard.attach(flutterEngine.dartExecutor.binaryMessenger)
+        drops.attach(flutterEngine.dartExecutor.binaryMessenger)
         openFile.attach(flutterEngine.dartExecutor.binaryMessenger)
         // Cold start: this runs while Dart is still booting, so the
         // launching intent's action waits until Dart asks for it.
@@ -172,6 +177,7 @@ class MainActivity : FlutterActivity() {
         pageReader.detach()
         shares.detach()
         clipboard.detach()
+        drops.detach()
         super.cleanUpFlutterEngine(flutterEngine)
     }
 

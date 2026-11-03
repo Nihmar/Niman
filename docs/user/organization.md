@@ -661,8 +661,9 @@ this is not offered there yet.
 
 ## Dropping files on the window
 
-On Linux and Windows, files and folders dragged from the file manager
-onto Niman's window are taken in, over whichever screen is showing. On
+On Linux, Windows and macOS, files and folders dragged from the file
+manager onto Niman's window are taken in, over whichever screen is
+showing. On
 Linux a frame around the window says so while you drag; on Windows the
 drop lands without it, for the reason
 [platforms](platforms.md#windows) gives.
@@ -686,7 +687,17 @@ drop lands without it, for the reason
   library open, a message says one is needed.
 - **With no library open**, a dropped folder opens as the library, the
   way *Open existing* would open it.
-- **Anything else** is left alone, and a message names it.
+- **Anything else** — a PDF, a picture, an archive — is **attached to
+  the note on screen**: copied into the library's attachments folder and
+  linked where the note's caret is, as a [pasted file](editing.md#copy-and-paste)
+  is. With no note open to take it (or a note outside the library), it
+  is left alone, and a message names it.
+
+On Android (split screen, a freeform window, Samsung DeX, ChromeOS) and
+on an iPad (Split View, Slide Over, Stage Manager), files dragged from
+another app onto Niman are taken the same way: copied first, since the
+other app hands over their content rather than a path, then attached to
+the note on screen. A drag that carries only text is not taken there.
 
 ## Converting a book into notes
 
