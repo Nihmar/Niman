@@ -158,3 +158,7 @@ app.*.symbols
 
 # Golden failure images the comparator writes beside a failing test.
 test/**/failures/
+
+# Swift Package Manager's build folder, written when Xcode or SourceKit
+# opens a package (6013e124 committed 3246 of its files).
+**/.build/
