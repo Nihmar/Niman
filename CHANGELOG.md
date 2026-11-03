@@ -6,6 +6,37 @@ This file ships inside the build and feeds the in-app changelog (the
 launch dialog after an update and the screen under Settings → Diagnostics
 and info). Update it in the release commit, before the tag.
 
+## [0.3.4] - 2026-11-03
+
+Spreadsheet cells paste as a table, a file pasted or dropped on a note is
+attached at the caret, and the Mac keeps its sync password for real.
+
+Cells copied from a spreadsheet — or text that reads as CSV or TSV — paste
+into a note as a Markdown table, with a **Paste as text** action that puts
+back what was copied. A file copied in a file manager and pasted into a
+note, or dropped on the window while a note is open, is copied into the
+library's attachments folder under its content's hash and linked where the
+caret was, in the library's link format: a picture or a recording embedded,
+anything else linked under the name it came with. A file already in the
+library is linked where it is. This works on Android, Linux, Windows, macOS
+and iOS, iPad drag and drop included.
+
+The keychain fix of 0.3.3 looked for the refusal's code where the plugin
+does not put it, so a Mac build without the entitlement still lost its
+password; the refusal is now recognized, on reads as well as writes, and
+the password goes to the login keychain. A journal entry already filed under
+a folder the date pattern names is opened instead of being made again as
+`_1`.
+
+### Added
+- **Editor**: cells copied from a spreadsheet, or CSV and TSV text, paste as a Markdown table, with **Paste as text** to undo the conversion; inside a code block the text pastes as it is (#1248)
+- **Editor**: a file pasted into a note is copied into the attachments folder and linked at the caret, on every platform (#1249)
+- **Editor**: a file dropped on the window with a note open is attached and linked at the caret, while a note dropped beside it still opens; Android and iPad now take drops too (#1250)
+
+### Fixed
+- **Sync**: on a Mac without the keychain entitlement the refusal is recognized where the plugin reports it, so the password is kept in the login keychain instead of failing every save, and a refused read falls back there too (#1244)
+- **Journal**: an entry already filed under a folder named by the date pattern is opened, not created again as `_1` (#1246)
+
 ## [0.3.3] - 2026-10-31
 
 A journal entry filed under a folder spelled otherwise is found, and a Mac
