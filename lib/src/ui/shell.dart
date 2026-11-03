@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart' show defaultTargetPlatform;
@@ -11,7 +10,6 @@ import 'package:niman/src/annotations/annotation.dart';
 import 'package:niman/src/calendar/calendar_controller.dart';
 import 'package:niman/src/calendar/calendar_source.dart';
 import 'package:niman/src/calendar/calendar_store.dart';
-import 'package:niman/src/capture/shared_page.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/frame_cost.dart';
 import 'package:niman/src/core/frame_log.dart';
@@ -32,7 +30,6 @@ import 'package:niman/src/editor/diagram_templates.dart';
 import 'package:niman/src/editor/editor_only.dart';
 import 'package:niman/src/editor/markdown_format.dart';
 import 'package:niman/src/editor/plain_text.dart';
-import 'package:niman/src/epub/epub_archive.dart';
 import 'package:niman/src/export/export_files.dart';
 import 'package:niman/src/export/pdf_printer.dart';
 import 'package:niman/src/export/printed_todo_block.dart';
@@ -42,15 +39,12 @@ import 'package:niman/src/frontmatter/note_kind.dart';
 import 'package:niman/src/frontmatter/parser.dart';
 import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/home/home_action.dart';
-import 'package:niman/src/import/notion.dart';
 import 'package:niman/src/journal/journal_settings.dart';
-import 'package:niman/src/library/markdown_import.dart';
 import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/library/note_relocation.dart' show linkRewriteBatch;
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/links/library_links.dart';
 import 'package:niman/src/links/suggester.dart';
-import 'package:niman/src/markdown/note_bytes.dart';
 import 'package:niman/src/ocr/ocr_installation.dart';
 import 'package:niman/src/ocr/ocr_queue.dart';
 import 'package:niman/src/reading/reading_positions.dart';
@@ -151,6 +145,7 @@ import 'package:niman/src/ui/shell_export_flow.dart';
 import 'package:niman/src/ui/shell_fab.dart';
 import 'package:niman/src/ui/shell_features_intro.dart';
 import 'package:niman/src/ui/shell_home_widgets.dart';
+import 'package:niman/src/ui/shell_import_flow.dart';
 import 'package:niman/src/ui/shell_inbound.dart';
 import 'package:niman/src/ui/shell_intent_gate.dart';
 import 'package:niman/src/ui/shell_journal_ui.dart';
@@ -967,6 +962,18 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   );
 
   void _convertBook(String path) => unawaited(_epubConvert.run(context, path));
+
+  /// Shares, Notion exports, books and folders brought in from outside.
+  late final ShellImportFlow _imports = ShellImportFlow(
+    controller: widget.controller,
+    guard: _guard,
+    capture: _captureFlow,
+    epubConvert: _epubConvert,
+    shareText: _shareText,
+    newItemFolder: () => _newItemRule.folder,
+    reveal: _revealFolder,
+    openNote: (path) => _openNoteFromLink(path, null),
+  );
 
   /// The palette's conversion: the book on screen, else the book selected
   /// in the tree, else one picked.
@@ -2519,7 +2526,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     // What other apps share in while the shell is up (#40).
     _inbound.listen(
       widget.shareIn.requests,
-      (request) => unawaited(_handleShare(request)),
+      (request) => unawaited(_imports.share(context, request)),
       request: true,
     );
     _inbound.listen(
@@ -2551,7 +2558,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     // Folders dropped on the window (#75).
     _inbound.listen(
       widget.launchRequests.folders,
-      (path) => unawaited(_openFolder(path)),
+      (path) => unawaited(_imports.openFolder(context, path)),
       request: true,
     );
     // Files dropped on the window that nothing opens: attached to the note
@@ -2744,7 +2751,8 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     final request = await widget.shareIn.consumeLaunchRequest();
     if (request == null) return;
     _featuresIntro.requested();
-    await _handleShare(request);
+    if (!mounted) return;
+    await _imports.share(context, request);
   }
 
   /// Where a capture's notification leads (#531): the note it made, its
@@ -2762,35 +2770,6 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
         widget.capture.background.cancel(id);
     }
     return true;
-  }
-
-  /// Runs a share: a web page or a quote from one into the capture sheet
-  /// (#531), other text into the quick note, a file into the library
-  /// (#40). With Web capture off a page is plain text, and with Quick note
-  /// off text is imported as a note of its own (#1109).
-  Future<void> _handleShare(ShareRequest request) async {
-    switch (request) {
-      case SharedText(:final text, :final subject):
-        final web = classifyShare(text, subject: subject);
-        switch (sharedTextRoute(
-          isWebPage: web != null,
-          features: widget.controller.features.value,
-        )) {
-          case SharedTextRoute.capture:
-            if (mounted) await _captureFlow.captureShared(context, web!);
-          case SharedTextRoute.quickNote:
-            await _shareText(text);
-          case SharedTextRoute.importAsNote:
-            // No quick note to put it in (#1109): the text is the point of
-            // the share, so it is imported as a note of its own.
-            await _createImportedNote(
-              name: sharedTextNoteName(text, subject: subject),
-              text: text,
-            );
-        }
-      case SharedFile(:final path, :final name):
-        await _importSharedFile(path: path, name: name);
-    }
   }
 
   /// Inserts [text] at the end of the quick note and opens it.
@@ -2812,111 +2791,6 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     await _openQuickNote(path);
   }
 
-  /// Imports the file a share copied into the library and opens it (#40).
-  ///
-  /// Android hands a `content://` URI, not a file: the platform side read
-  /// the bytes and wrote its own copy at [path], which is imported here
-  /// and deleted. The note lands at the library root under the name it
-  /// came with, uniquified like any new note; a `.markdown` and a `.txt`
-  /// alike become one, because what is imported is its text. A `.zip` is
-  /// a Notion export instead (#25): its pages land in a folder of their
-  /// own, see [_importNotionArchive].
-  Future<void> _importSharedFile({
-    required String path,
-    required String name,
-  }) async {
-    final ops = widget.controller.ops;
-    if (ops == null || !mounted) return;
-    final source = File(path);
-    if (!await source.exists()) return;
-    // A shared book is converted into notes (#1138), never decoded as a
-    // note's text: its cache copy goes once it is.
-    // Told by its name, or — a provider that names it `msf:1234` — by the
-    // `mimetype` the format opens on.
-    if (isBook(name) || await looksLikeEpub(path)) {
-      if (mounted) {
-        await _epubConvert.run(context, path, name: name, consume: true);
-      }
-      return;
-    }
-    if (p.extension(name).toLowerCase() == '.zip') {
-      await _importNotionArchive(source, name, consume: true);
-      return;
-    }
-    var text = decodeNoteText(await source.readAsBytes());
-    // A BOM is the platform's encoding marker, not part of the note.
-    if (text.isNotEmpty && text.codeUnitAt(0) == 0xFEFF) {
-      text = text.substring(1);
-    }
-    try {
-      // The copy has done its job whatever the import decides next.
-      await source.delete();
-    } on FileSystemException {
-      // A cache file that outlives us costs disk, not the import.
-    }
-    await _createImportedNote(
-      name: p.basenameWithoutExtension(name),
-      text: text,
-    );
-  }
-
-  /// Makes a note named [name] of [text] where the library's rule puts a new
-  /// note (#850) — a share that arrives with no note open lands at the
-  /// root — and opens it: what a shared file becomes, and shared text when
-  /// there is no quick note to take it (#1109).
-  Future<void> _createImportedNote({
-    required String name,
-    required String text,
-  }) async {
-    final ops = widget.controller.ops;
-    if (ops == null || !mounted) return;
-    await _guard(() async {
-      final folder = _newItemRule.folder;
-      final imported = await ops.createNote(
-        parentPath: folder,
-        name: name,
-        content: text,
-      );
-      if (!mounted) return;
-      _revealFolder(folder);
-      _openNoteFromLink(imported.path, null);
-    });
-  }
-
-  /// Imports the Notion export [source] (a `.zip`) into a new folder of
-  /// the library (#25), revealing it, and says where it landed.
-  ///
-  /// [consume] deletes the archive first — a share's copy in the app
-  /// cache has no other owner; a file the user dropped is theirs and
-  /// stays where it is.
-  Future<void> _importNotionArchive(
-    File source,
-    String name, {
-    bool consume = false,
-  }) async {
-    final root = widget.controller.root;
-    if (root == null || !mounted) return;
-    await _guard(() async {
-      final imported = await importNotionZip(
-        source: source.path,
-        libraryRoot: root,
-      );
-      if (consume) {
-        try {
-          await source.delete();
-        } on FileSystemException {
-          // A cache file that outlives us costs disk, not the import.
-        }
-      }
-      if (!mounted) return;
-      // Asked for now rather than waiting for the watcher: the tree is
-      // where the user looks next, and the notes have just been written.
-      if (imported != null) await widget.controller.rescanNow();
-      if (!mounted) return;
-      _showImported(imported?.folder, name);
-    });
-  }
-
   /// Says how far the rewrite of the links to a note that moved has come
   /// (#1041), in one snack bar that is replaced as it goes and leaves when it
   /// is done: a rewrite of a thousand notes runs after the move has returned,
@@ -2931,22 +2805,6 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
         content: Text(AppStrings.linksUpdating(done, total)),
         duration: const Duration(seconds: 30),
       ),
-    );
-  }
-
-  /// Says how an import of [name] went: nothing to bring in when
-  /// [folder] is null, else the folder it landed in, shown in the tree.
-  void _showImported(String? folder, String name) {
-    final messenger = ScaffoldMessenger.of(context);
-    if (folder == null) {
-      messenger.showSnackBar(
-        SnackBar(content: Text(AppStrings.importFolderEmpty(name))),
-      );
-      return;
-    }
-    _revealFolder(folder);
-    messenger.showSnackBar(
-      SnackBar(content: Text(AppStrings.importFolderDone(folder))),
     );
   }
 
@@ -4527,65 +4385,6 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       widget.outsideFiles,
       EditorOnlyDocument(path),
     );
-  }
-
-  /// A folder dropped on the window (#75). One of this library's own is
-  /// shown in the tree; any other is offered for import — its Markdown
-  /// copied into a new folder here — and shown once it is in. A Notion
-  /// export (a `.zip`, #25) goes through the import instead.
-  Future<void> _openFolder(String path) async {
-    if (p.extension(path).toLowerCase() == '.zip') {
-      await _importNotionArchive(File(path), p.basename(path));
-      return;
-    }
-    // A book: into notes (#1138), or a word that a library is needed.
-    if (isBook(path)) {
-      await _epubConvert.run(context, path);
-      return;
-    }
-    final root = widget.controller.root;
-    if (root == null || !mounted) return;
-    if (p.equals(root, path) || p.isWithin(root, path)) {
-      _revealFolder(p.equals(root, path) ? '' : relPath(path, root));
-      return;
-    }
-    final name = p.basename(p.normalize(path));
-    // The walk is a FUSE round trip per folder on Android: it runs off the
-    // UI isolate, so the count is awaited rather than read inline (#382).
-    final count = (await markdownFilesIn(path)).length;
-    if (!mounted) return;
-    if (count == 0) return _showImported(null, name);
-    final go = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        key: const Key('import-folder'),
-        title: Text(AppStrings.importFolderTitle(name)),
-        content: Text(AppStrings.importFolderBody(count)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(AppStrings.actionCancel),
-          ),
-          FilledButton(
-            key: const Key('import-folder-yes'),
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text(AppStrings.importFolderAction),
-          ),
-        ],
-      ),
-    );
-    if (go != true || !mounted) return;
-    await _guard(() async {
-      final imported = await importMarkdownFolder(
-        source: path,
-        libraryRoot: root,
-      );
-      if (imported == null || !mounted) return;
-      // The walk and the copy are off the UI isolate now (#382), and the
-      // watcher finds what landed on its own: a rescan here would only block
-      // the frame the reveal is drawn in, so it is left to converge.
-      _showImported(imported.folder, name);
-    });
   }
 
   /// Shows the library folder [folder] (relative; '' is the root) in the
