@@ -33,8 +33,6 @@ import 'package:niman/src/editor/plain_text.dart';
 import 'package:niman/src/export/export_files.dart';
 import 'package:niman/src/export/pdf_printer.dart';
 import 'package:niman/src/export/printed_todo_block.dart';
-import 'package:niman/src/flashcards/deck_catalog_controller.dart';
-import 'package:niman/src/flashcards/library_decks.dart';
 import 'package:niman/src/frontmatter/note_kind.dart';
 import 'package:niman/src/frontmatter/parser.dart';
 import 'package:niman/src/history/history_manifest.dart';
@@ -104,9 +102,7 @@ import 'package:niman/src/ui/kinds/flashcards/deck_menu_flow.dart';
 import 'package:niman/src/ui/kinds/flashcards/deck_review_source.dart';
 import 'package:niman/src/ui/kinds/flashcards/deck_study.dart';
 import 'package:niman/src/ui/kinds/flashcards/make_flashcards.dart';
-import 'package:niman/src/ui/kinds/flashcards/review_run.dart';
 import 'package:niman/src/ui/kinds/flashcards/review_tab.dart';
-import 'package:niman/src/ui/kinds/flashcards/review_view.dart';
 import 'package:niman/src/ui/kinds/slides/slides_present.dart';
 import 'package:niman/src/ui/link_update_dialog.dart';
 import 'package:niman/src/ui/mac_menu_bar.dart';
@@ -160,6 +156,7 @@ import 'package:niman/src/ui/shell_preview_actions.dart';
 import 'package:niman/src/ui/shell_row_actions.dart';
 import 'package:niman/src/ui/shell_row_menu.dart';
 import 'package:niman/src/ui/shell_search_slot.dart';
+import 'package:niman/src/ui/shell_study.dart';
 import 'package:niman/src/ui/shell_sync_actions.dart';
 import 'package:niman/src/ui/shell_template_flow.dart';
 import 'package:niman/src/ui/shell_tree_footer.dart';
@@ -167,7 +164,6 @@ import 'package:niman/src/ui/shell_windows.dart';
 import 'package:niman/src/ui/shell_workspace.dart';
 import 'package:niman/src/ui/shell_zen.dart';
 import 'package:niman/src/ui/strings.dart';
-import 'package:niman/src/ui/study/study_view.dart';
 import 'package:niman/src/ui/sync/sync_status.dart';
 import 'package:niman/src/ui/tab_body_stack.dart';
 import 'package:niman/src/ui/tab_drag.dart';
@@ -635,7 +631,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     updater: widget.widgetUpdater,
     host: widget.widgetHost,
     todoSnapshot: () => _todoController.snapshot,
-    decks: () async => switch (_decks) {
+    decks: () async => switch (_study.decks) {
       final catalog? when catalog.loaded => catalog.summaries,
       _ => null,
     },
@@ -1830,93 +1826,21 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     }
   }
 
-  Widget _reviewChip(int pane) {
-    final w = _workspace.value;
-    return ReviewTabChip(
-      title: _reviewTab.run!.title,
-      selected: _reviewIn(pane),
-      focused: !w.isSplit || w.focused == pane,
-      onTap: () {
-        FocusManager.instance.primaryFocus?.unfocus();
-        _reviewTab.show();
-      },
-      onClose: _reviewTab.close,
-    );
-  }
+  /// The decks, the Study tree and the study beside the deck (#533).
+  ShellStudy get _study => _studyMade ??= ShellStudy(
+    controller: widget.controller,
+    reviewTab: _reviewTab,
+    workspace: _workspace,
+    read: ref.read,
+    onCounted: () => _homeWidgets.pushStudy(),
+    showNote: _showNote,
+    openDeck: (path) =>
+        _wide ? _showFromTree(path, newTab: false) : _showNote(path),
+    newDeck: () => unawaited(_createFlow.createFlashcards(context)),
+    mounted: () => mounted,
+  );
 
-  Widget _reviewPage() {
-    final run = _reviewTab.run!;
-    return ReviewView(
-      key: ObjectKey(run),
-      run: run,
-      onClose: _reviewTab.close,
-      onNextDeck: (path) => unawaited(_studyNextDeck(path)),
-    );
-  }
-
-  /// **Next deck** (#533): the deck at library-relative [path] opens where
-  /// the last one was, and its study takes the last one's place.
-  Future<void> _studyNextDeck(String path) async {
-    final root = widget.controller.root;
-    if (root == null) return;
-    final run = await loadReviewRun(
-      session: widget.controller,
-      reviews: ref.read(deckReviewSourceProvider),
-      paths: [p.join(root, path)],
-    );
-    if (!mounted || run == null) return;
-    final pane = _reviewTab.pane;
-    final w = _workspace.value;
-    // Beside the study, the deck shows; over it, it would cover the study.
-    if (w.isSplit && pane != null) {
-      _workspace.focus(1 - pane);
-      _showNote(path);
-    }
-    _reviewTab.open(run, pane: pane);
-  }
-
-  /// The decks of the library, counted (#533): read on Study's first
-  /// visit, kept while the shell lives.
-  DeckCatalogController? _deckCatalog;
-
-  DeckCatalogController? get _decks {
-    if (_deckCatalog case final catalog?) return catalog;
-    final catalog = deckCatalogOf(widget.controller);
-    if (catalog != null) {
-      // Every count reaches the Study widgets, the first one included.
-      catalog.addListener(_homeWidgets.pushStudy);
-      unawaited(catalog.refresh());
-    }
-    return _deckCatalog = catalog;
-  }
-
-  /// Studies the decks at [paths], library-relative, under [title] (#533).
-  void _studyPaths(List<String> paths, String title) {
-    final root = widget.controller.root;
-    if (root == null) return;
-    unawaited(
-      studyDecks(context, ref.read, [
-        for (final path in paths) p.join(root, path),
-      ], title: title),
-    );
-  }
-
-  /// The Study tree (#533): the left island's on a wide window, the
-  /// destination's body on a phone. One view, built where it shows.
-  Widget _studyView() {
-    final catalog = _decks;
-    if (catalog == null) return const SizedBox.shrink();
-    return StudyView(
-      key: const Key('study-view'),
-      controller: catalog,
-      // A deck opens as a note of the tree does: in place of the tab's,
-      // in a tab of its own on a double click.
-      onOpenDeck: (path) =>
-          _wide ? _showFromTree(path, newTab: false) : _showNote(path),
-      onStudy: _studyPaths,
-      onNewDeck: () => unawaited(_createFlow.createFlashcards(context)),
-    );
-  }
+  ShellStudy? _studyMade;
 
   /// Back and forward through the notes shown (#700).
   late final NoteHistoryNavigator _noteHistory = NoteHistoryNavigator(
@@ -2072,7 +1996,10 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  if (hasReview) Flexible(child: _reviewChip(pane)),
+                  if (hasReview)
+                    Flexible(
+                      child: _study.chip(pane, selected: _reviewIn(pane)),
+                    ),
                   if (hasCompare) Flexible(child: _compareChip(pane)),
                   if (hasContent)
                     Flexible(child: _contentTabChip(content, pane)),
@@ -2587,7 +2514,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
 
   @override
   void dispose() {
-    _deckCatalog?.dispose();
+    _studyMade?.dispose();
     // A library closed or switched from a floating window: the window
     // goes with the shell it was over (#202, #203). Off the teardown, which
     // must not change the navigator it runs under.
@@ -2677,7 +2604,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     // The day may have turned while the app was away: the decks are
     // counted for the study day it is now, and Study and its widgets
     // follow (#533).
-    unawaited(_deckCatalog?.refreshStates());
+    _studyMade?.refreshStates();
     if (_selected != null && !_selectedIsDir) {
       setState(() => _noteReloadToken++);
     }
@@ -4779,7 +4706,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
                   if (_visitedTabs.contains(ShellTab.study))
                     Offstage(
                       offstage: !_sidebarShowsStudy,
-                      child: _studyView(),
+                      child: _study.view(context),
                     ),
                 ],
               ),
@@ -5061,7 +4988,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
               // keeps its notes as they were.
               if (compare) _comparePage(controller),
               // A study beside the deck (#533): over the pane's notes too.
-              if (review) _reviewPage(),
+              if (review) _study.page(),
             ],
           ),
         ),
@@ -5259,7 +5186,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
         host: _homeHost(controller),
         tab: _tabListenable,
       ),
-      ShellTab.study => _studyView(),
+      ShellTab.study => _study.view(context),
       ShellTab.settings => SettingsTab(
         // A palette pick opens the tab where it points, once (#229).
         key: ValueKey(_settingsTarget),
@@ -5377,8 +5304,8 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     runAction: (action) => unawaited(
       _homeActions.run(context, action.under(widget.controller.features.value)),
     ),
-    decks: () => _decks,
-    study: _studyPaths,
+    decks: () => _study.decks,
+    study: (paths, title) => _study.studyPaths(context, paths, title),
   );
 
   /// Runs the Home's actions through the shell's own flows (#535).
