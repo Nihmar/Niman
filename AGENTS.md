@@ -106,6 +106,17 @@ Pending work is tracked in [GitHub Issues](https://github.com/Nihmar/Niman/issue
 - **Interface**: icons are outline — a filled one says a state is on (selected tab, pinned note, current library). A control that shows in only some states keeps its place: disable it, or put it on the side the row grows from, so nothing on screen moves under a thumb already on it.
 - **Layout**: `lib/src/<module>/` — core, library, db, editor, preview, links, search, frontmatter, templates, sync, ui.
 - **No god classes**: one class per file, split at ~300 lines or when responsibilities mix.
+  - **The gate**: `test/unit/source_file_size_test.dart` fails a file in `lib/`
+    over 600 code lines (blank and comment-only lines do not count). The files
+    already over it are listed at their size and cannot grow: a change that
+    would add to one moves a piece out first, and a split lowers its number in
+    the same commit (#100). `shell.dart` grew from 1371 to 4491 code lines in
+    seven weeks under the ~300 rule alone.
+  - **A feature does not land in the shell or the note view**: its commands,
+    panes, dialogs and flows go in a collaborator of their own
+    (`ui/shell_<feature>.dart`, `ui/note_<feature>.dart`) from its first
+    commit, taking explicit arguments rather than reaching into the `State`;
+    `shell.dart` and `note_view.dart` only wire them in.
 
 ## Documentation
 - When a feature is added, modified, or removed, update the corresponding documentation in `docs/` in the same PR.

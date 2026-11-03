@@ -5,7 +5,12 @@
 - **One logical change per commit;** never bundle unrelated changes.
 - **No god classes:** one class per file, split at ~300 lines or when
   responsibilities mix. Layout: `lib/src/<module>/` (see
-  [architecture](architecture.md)).
+  [architecture](architecture.md)). `test/unit/source_file_size_test.dart`
+  holds every file in `lib/` to 600 code lines (blank and comment-only lines
+  do not count); the few already over it are listed at their size and can
+  only shrink. A new feature's commands, panes and flows go in a file of
+  their own (`ui/shell_<feature>.dart`, `ui/note_<feature>.dart`), never into
+  `shell.dart` or `note_view.dart`, which only wire them in (#100).
 - **Vocabulary:** Library, note, folder, tag, template, wikilink, trash,
   history. Not vault/canvas/daily note/backlinks.
 - **Design rules:**
