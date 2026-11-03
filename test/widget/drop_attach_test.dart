@@ -134,6 +134,32 @@ void main() {
     );
   });
 
+  // A drop of two pictures from Explorer (device report, 2026-11-03): both
+  // are copied in, and both links land at the caret, one line each.
+  testWidgets('two pictures dropped together are both linked', (tester) async {
+    await pumpApp(tester);
+    await controller.createNote(parentPath: '', name: 'trip');
+    File(p.join(controller.root!, 'trip.md'))
+      ..createSync(recursive: true)
+      ..writeAsStringSync('');
+    await settle(tester);
+    await tester.tap(noteRow('trip.md'));
+    await until(tester, () => noteText(tester) != null);
+    await settle(tester);
+    final first = p.join(sandbox.path, 'First.png');
+    final second = p.join(sandbox.path, 'Second.png');
+    File(first).writeAsBytesSync([1, 2, 3]);
+    File(second).writeAsBytesSync([4, 5, 6]);
+
+    await dropped(tester, [first, second]);
+    await until(tester, () => noteText(tester)?.isNotEmpty ?? false);
+    await settle(tester);
+
+    final text = noteText(tester)!;
+    expect(text, contains('${sha256.convert([1, 2, 3])}.png'));
+    expect(text, contains('${sha256.convert([4, 5, 6])}.png'));
+  });
+
   testWidgets('with no note open, the PDF is named and left alone', (
     tester,
   ) async {
