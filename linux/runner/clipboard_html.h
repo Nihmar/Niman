@@ -7,6 +7,8 @@
 // `readHtml` answers null, or the bytes of the clipboard's text/html and of
 // the page the browser says it was copied from. `readFiles` (#1249)
 // answers null, or the bytes of the URI list a file manager copied.
+// `readImage` answers null, or the PNG of a picture on the clipboard that
+// holds no text.
 FlMethodChannel* clipboard_html_channel_new(FlBinaryMessenger* messenger);
 
 #endif  // RUNNER_CLIPBOARD_HTML_H_

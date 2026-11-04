@@ -5,6 +5,7 @@
 /// index and a sync never see half a file under its final one.
 library;
 
+import 'dart:async';
 import 'dart:io';
 import 'dart:isolate';
 
@@ -39,8 +40,11 @@ Future<String> importImageToLibrary({
   String attachmentsFolder = defaultAttachmentsFolder,
 }) async {
   final clock = Stopwatch()..start();
-  final result = await Isolate.run(
-    () => _copyIntoLibrary(libraryRoot, sourcePath, attachmentsFolder),
+  final result = await _inTurn(
+    p.join(libraryRoot, attachmentsFolder),
+    () => Isolate.run(
+      () => _copyIntoLibrary(libraryRoot, sourcePath, attachmentsFolder),
+    ),
   );
   _log.info(
     'import ${result.relative}: ${result.bytes} b, hash ${result.hashMs} ms, '
@@ -65,17 +69,44 @@ Future<String> storeAttachmentBytes({
 }) async {
   final digest = sha256.convert(bytes).toString();
   final assets = Directory(p.join(libraryRoot, attachmentsFolder));
-  await assets.create(recursive: true);
-  final target = File(p.join(assets.path, '$digest$extension'));
   final relative = '$attachmentsFolder/$digest$extension';
-  if (await target.exists()) return relative;
-  final temp = File(_tempName(assets.path, digest, extension));
-  await temp.writeAsBytes(bytes, flush: true);
-  // Not a bare rename: on Windows one can go in and never come out
-  // (#103), and a capture's four downloads all stopped on theirs, the
-  // pictures whole under their temp names and the app hung behind them.
-  await swapFileIn(target.path, temp.path);
-  return relative;
+  return await _inTurn(assets.path, () async {
+    await assets.create(recursive: true);
+    final target = File(p.join(assets.path, '$digest$extension'));
+    if (await target.exists()) return relative;
+    final temp = File(_tempName(assets.path, digest, extension));
+    await temp.writeAsBytes(bytes, flush: true);
+    // Not a bare rename: on Windows one can go in and never come out
+    // (#103), and a capture's four downloads all stopped on theirs, the
+    // pictures whole under their temp names and the app hung behind them.
+    await swapFileIn(target.path, temp.path);
+    return relative;
+  });
+}
+
+/// The last write queued into each attachments folder, by its path.
+final Map<String, Future<void>> _queued = {};
+
+/// Runs [write] into the attachments [folder] once the writes queued before
+/// it there are done.
+///
+/// Two writes of the same content at once — a picture dropped again while
+/// its last drop is still copying — would each find no file under the name,
+/// copy, and rename onto the one name: on Windows a rename onto a file the
+/// antivirus is still reading waits for it (device log, 2026-11-03: 6 s for
+/// 53 KB). In turn, the later one finds the file there and keeps it.
+Future<T> _inTurn<T>(String folder, Future<T> Function() write) async {
+  final key = p.normalize(folder);
+  final before = _queued[key];
+  final turn = Completer<void>();
+  _queued[key] = turn.future;
+  try {
+    if (before != null) await before;
+    return await write();
+  } finally {
+    turn.complete();
+    if (identical(_queued[key], turn.future)) unawaited(_queued.remove(key));
+  }
 }
 
 /// A hidden name in [folder] for a file on its way to `<digest><extension>`.
