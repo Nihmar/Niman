@@ -106,6 +106,7 @@ import 'package:niman/src/markdown/render/sliver_segments.dart';
 import 'package:niman/src/markdown/render/source_context_menu.dart';
 import 'package:niman/src/markdown/render/source_folds.dart';
 import 'package:niman/src/markdown/render/source_line.dart';
+import 'package:niman/src/markdown/render/source_sections.dart';
 import 'package:niman/src/markdown/render/source_template_hint.dart';
 import 'package:niman/src/markdown/render/source_touch.dart';
 import 'package:niman/src/markdown/render/todo_block_scope.dart';
@@ -451,10 +452,13 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// The folded heading sections; the rows are the lines they leave.
   final SourceFolds _folds = SourceFolds();
 
-  /// Where each heading's section ends, as far as it has been asked, for the
-  /// buffer revision [_sectionEndsRevision].
-  final Map<int, int?> _sectionEnds = <int, int?>{};
-  int _sectionEndsRevision = -1;
+  /// Where the sections those folds hide end, kept for the buffer's
+  /// revision: the tokenizer's question, as far as it has been asked.
+  late final SourceSections _sections = SourceSections(
+    buffer: () => widget.buffer,
+    blockOf: (line) => blockAt?.call(line),
+    tokensOf: (line) => _lineAt(line).tokens,
+  );
 
   /// A press on a control `live` draws over the note — a fold arrow, a
   /// diagram and its buttons — so the pointer going down under it places no
@@ -2109,7 +2113,8 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     if (!_folds.isEmpty) {
       // The folds follow the edit; when what they hide changed shape, the
       // rows are measured again rather than spliced.
-      final reshaped = edit == null || _folds.edited(edit, lines, _sectionEnd);
+      final reshaped =
+          edit == null || _folds.edited(edit, lines, _sections.endOf);
       if (edit == null) _folds.clear();
       if (reshaped) {
         _heights = _map();
@@ -2441,7 +2446,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
         return true;
       });
     } else {
-      final end = _foldableEnd(line);
+      final end = _sections.foldableEnd(line);
       if (end == null) return;
       _reshapeRows(() {
         _folds.fold(line, end);
@@ -2511,89 +2516,11 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     if (revealed && mounted) setState(() {});
   }
 
-  /// The heading level of line [line], or null when it is not a heading.
-  int? _headingLevel(int line) {
-    if (!widget.buffer.lineAt(line).startsWith('#')) return null;
-    final tokens = _lineAt(line).tokens;
-    if (tokens.isEmpty ||
-        tokens.first.kind != TokenKind.headingMarker ||
-        tokens.first.start != 0) {
-      return null;
-    }
-    // The outline's own rule (`outline.dart`): the marker's length.
-    return tokens.first.end - tokens.first.start;
-  }
-
-  /// Where the section under the heading on [line] ends — the next heading
-  /// of its level or above, or the note's end — or null when [line] is not a
-  /// heading.
-  int? _sectionEnd(int line) {
-    final revision = widget.buffer.revision;
-    if (revision != _sectionEndsRevision) {
-      _sectionEnds.clear();
-      _sectionEndsRevision = revision;
-    }
-    if (_sectionEnds.containsKey(line)) return _sectionEnds[line];
-    final block = blockAt?.call(line);
-    if (block?.divRole == DivRole.opensColumns) {
-      return _sectionEnds[line] = _columnsEnd(line, block!.divDepth);
-    }
-    final level = _headingLevel(line);
-    int? end;
-    if (level != null) {
-      final count = widget.buffer.lineCount;
-      // A heading in a column folds its section inside the column (#729):
-      // a block in fewer divs ends it, and a heading in more does not.
-      final depth = block?.divDepth ?? 0;
-      end = count;
-      for (var at = line + 1; at < count; at++) {
-        final within = blockAt?.call(at)?.divDepth ?? 0;
-        if (within < depth) {
-          end = at;
-          break;
-        }
-        final other = _headingLevel(at);
-        if (other != null && other <= level && within == depth) {
-          end = at;
-          break;
-        }
-      }
-    }
-    return _sectionEnds[line] = end;
-  }
-
-  /// Where the `columns` block opened on [line], [depth] divs in, ends
-  /// (#729): past its closer, or at the first line outside it when its
-  /// container ends it.
-  int _columnsEnd(int line, int depth) {
-    final count = widget.buffer.lineCount;
-    var at = line + 1;
-    while (at < count) {
-      final block = blockAt?.call(at);
-      if (block == null) break;
-      if (block.divDepth <= depth) {
-        return block.divRole == DivRole.closesColumns && block.divDepth == depth
-            ? block.endLine
-            : block.startLine;
-      }
-      at = block.endLine;
-    }
-    return count;
-  }
-
-  /// Where the heading on [line] would fold to, when it has a section worth
-  /// folding: two lines or more under it, the legacy editor's rule.
-  int? _foldableEnd(int line) {
-    final end = _sectionEnd(line);
-    if (end == null || end - line - 1 < 2) return null;
-    return end;
-  }
-
   /// What the gutter shows beside line [line].
   SourceFoldMark _foldMarkOf(int line) {
     if (!_foldingEnabled) return SourceFoldMark.none;
     if (_folds.isFolded(line)) return SourceFoldMark.closed;
-    return _foldableEnd(line) == null
+    return _sections.foldableEnd(line) == null
         ? SourceFoldMark.none
         : SourceFoldMark.open;
   }
