@@ -46,6 +46,7 @@ import 'package:niman/src/library/session.dart';
 import 'package:niman/src/library/session_events.dart';
 import 'package:niman/src/library/session_themes.dart';
 import 'package:niman/src/library/session_update_checks.dart';
+import 'package:niman/src/library/watch_batch_applier.dart';
 import 'package:niman/src/library/watch_batch_queue.dart';
 import 'package:niman/src/links/library_links.dart';
 import 'package:niman/src/links/suggester.dart';
@@ -234,6 +235,16 @@ final class LibraryController implements LibrarySession {
 
   /// The watcher's batches of the open library, run one at a time.
   WatchBatchQueue? _batches;
+
+  /// What each of those batches does to the index, the editors and the sync.
+  late final WatchBatchApplier _watchBatches = WatchBatchApplier(
+    indexer: () => _indexer,
+    root: () => _root,
+    ready: () => phase == LibraryPhase.ready,
+    walkWhole: _safeRescan,
+    events: _changes,
+    sync: () => _sync,
+  );
 
   /// The full walks of the open library: one at a time, paced by how long
   /// the last took (#1067). Null while no library is open.
@@ -613,7 +624,7 @@ final class LibraryController implements LibrarySession {
       source: watchSource,
     );
     // One batch in flight, the ones that arrive meanwhile merged (#1062).
-    final batches = WatchBatchQueue(_onWatchBatch);
+    final batches = WatchBatchQueue(_watchBatches.apply);
     _batches = batches;
     watcher.events.listen((batch) => unawaited(batches.add(batch)));
     await watcher.start();
@@ -1526,48 +1537,6 @@ final class LibraryController implements LibrarySession {
     _indexDb = null;
     await searchDb?.close();
     await indexDb?.close();
-  }
-
-  Future<void> _onWatchBatch(WatchBatch batch) async {
-    _log.debug(
-      'watch batch: ${batch.paths.length} path(s), '
-      '${batch.resyncDirs.length} resync dir(s)',
-    );
-    final indexer = _indexer;
-    final root = _root;
-    if (indexer == null || root == null || phase != LibraryPhase.ready) {
-      return;
-    }
-    if (batch.missedChanges) {
-      // The watch was down for a while: what changed meanwhile left no
-      // event, and waiting for the periodic rescan leaves a note saved
-      // then out of the index for minutes. The root itself cannot be
-      // resynced (`Indexer.resync` passes over it), so it is walked whole.
-      _log.info('watch batch: the watch restarted, walking the library');
-      await _safeRescan(root);
-      if (phase != LibraryPhase.ready) return;
-    }
-    try {
-      for (final dir in batch.resyncDirs) {
-        await indexer.resync(root, dir);
-      }
-      if (batch.paths.isNotEmpty) {
-        await indexer.applyEvents(root, batch.paths);
-      }
-      // The editors that hold those notes open (#1055), before the sync's
-      // probe below: they have no reason to wait for it.
-      if (batch.paths.isNotEmpty) {
-        _changes.externalChanged(batch.paths.toSet());
-      }
-      // What changed behind the ops' back (another app, a background
-      // isolate, a hand edit) reaches the sync queue this way. Awaited, so
-      // the batch queue runs the probes one batch at a time: left to race,
-      // an older batch's answer could be queued after a newer one's.
-      await _sync?.watched(batch.paths, batch.resyncDirs);
-    } on Object catch (error) {
-      // Transient watcher errors are covered by the periodic rescan.
-      _log.warning('watch batch failed: $error');
-    }
   }
 
   /// Reads the notes of a library whose first index wrote the tree alone
