@@ -18,6 +18,7 @@ import 'package:niman/src/ui/search_field_pager.dart';
 import 'package:niman/src/ui/search_hint.dart';
 import 'package:niman/src/ui/search_hit_menu.dart';
 import 'package:niman/src/ui/search_hit_row.dart';
+import 'package:niman/src/ui/search_pages.dart';
 import 'package:niman/src/ui/search_query_bar.dart';
 import 'package:niman/src/ui/search_query_rules.dart';
 import 'package:niman/src/ui/search_replace_flow.dart';
@@ -140,7 +141,6 @@ final class SearchScreen extends StatefulWidget {
 }
 
 final class _SearchScreenState extends State<SearchScreen> {
-  static const int _pageSize = 50;
   static const Duration _debounce = Duration(milliseconds: 150);
   static const Duration _stepScroll = Duration(milliseconds: 150);
 
@@ -189,13 +189,10 @@ final class _SearchScreenState extends State<SearchScreen> {
   Timer? _replaceRefresh;
   bool _contains = false;
   bool _searched = false;
-  List<SearchHit> _hits = const [];
-  int _shown = 0;
 
-  /// The pages of the `key = value` filter [_hits] came from (#1037), or
-  /// null for a text search: the notes past the page read are in the index
-  /// and not in [_hits].
-  FieldPager? _fieldPager;
+  /// The note hits held, and how many of them are listed.
+  final SearchPages _pages = SearchPages();
+  List<SearchHit> get _hits => _pages.hits;
 
   /// How far a contains scan has got, while it runs (#1038); null when no
   /// scan is running.
@@ -203,9 +200,6 @@ final class _SearchScreenState extends State<SearchScreen> {
 
   /// The words the hits on screen matched: what a hit opens at (#1045).
   List<String> _hitTerms = const [];
-
-  /// Whether the next page of the filter is being read.
-  bool _readingMore = false;
 
   /// True from the moment a runnable query is typed until its results land
   /// (#1038): the list on screen is the previous query's, and is shown as
@@ -331,8 +325,7 @@ final class _SearchScreenState extends State<SearchScreen> {
         _stale = false;
         _scan = null;
         _searched = false;
-        _hits = const [];
-        _shown = 0;
+        _pages.clear();
         _taskEventToken = null;
       });
       return;
@@ -359,8 +352,7 @@ final class _SearchScreenState extends State<SearchScreen> {
       _source?.begin();
       setState(() {
         _searched = false;
-        _hits = const [];
-        _shown = 0;
+        _pages.clear();
         _taskEventToken = null;
       });
       return;
@@ -372,8 +364,7 @@ final class _SearchScreenState extends State<SearchScreen> {
     _query.clear();
     setState(() {
       _searched = false;
-      _hits = const [];
-      _shown = 0;
+      _pages.clear();
       _taskEventToken = null;
     });
   }
@@ -480,12 +471,7 @@ final class _SearchScreenState extends State<SearchScreen> {
           : contains
           ? [text]
           : wordTermsOf(text);
-      _fieldPager = pager;
-      _hits = results;
-      final page = _pageSize < results.length ? _pageSize : results.length;
-      // A scan adding hits keeps the pages the reader has opened.
-      final kept = _shown < results.length ? _shown : results.length;
-      _shown = fresh || kept < page ? page : kept;
+      _pages.land(results, pager: pager, fresh: fresh);
       if (fresh) _excerpts.clear();
       _excerptWords = !field && !contains ? text : null;
       _taskEventToken = mode == 'words' ? taskEventQuery(text) : null;
@@ -535,7 +521,7 @@ final class _SearchScreenState extends State<SearchScreen> {
   void _markHit(int index) {
     setState(() {
       _currentHit = _hits[index].path;
-      if (index >= _shown) _shown = index + 1;
+      _pages.showThrough(index);
     });
     unawaited(_revealHit(index));
   }
@@ -616,40 +602,22 @@ final class _SearchScreenState extends State<SearchScreen> {
       );
       return (
         index: index + lead,
-        rows: lead + _shown + (_hasMoreRows ? 1 : 0),
+        rows: lead + _pages.shown + (_pages.hasMore ? 1 : 0),
       );
     },
   );
 
+  /// Show more: the next page of the hits held, and the filter's next
+  /// page read once they run out (#1037).
   void _loadMore() {
-    final next = _shown + _pageSize;
-    if (next >= _hits.length && (_fieldPager?.hasMore ?? false)) {
-      unawaited(_loadMoreFromFilter());
-    }
-    setState(() => _shown = next < _hits.length ? next : _hits.length);
+    var read = false;
+    setState(() => read = _pages.showMore());
+    if (read) unawaited(_readMore());
   }
 
-  /// Reads the filter's next page and lists it after the notes shown
-  /// (#1037); a page that lands for a filter since replaced is dropped.
-  Future<void> _loadMoreFromFilter() async {
-    final pager = _fieldPager;
-    if (pager == null || _readingMore) return;
-    setState(() => _readingMore = true);
-    final more = await pager.next();
-    if (!mounted || !identical(pager, _fieldPager)) return;
-    setState(() {
-      _readingMore = false;
-      _hits = [..._hits, ...more];
-      _shown = _shown + _pageSize < _hits.length
-          ? _shown + _pageSize
-          : _hits.length;
-    });
+  Future<void> _readMore() async {
+    if (await _pages.readMore() && mounted) setState(() {});
   }
-
-  /// Whether the list ends in its Show more row: notes held and not shown,
-  /// or a filter with pages left to read.
-  bool get _hasMoreRows =>
-      _shown < _hits.length || (_fieldPager?.hasMore ?? false);
 
   @override
   Widget build(BuildContext context) {
@@ -759,9 +727,9 @@ final class _SearchScreenState extends State<SearchScreen> {
     return SearchResultsList(
       group: _taskEventRows(),
       hitCount: _hits.length,
-      shown: _shown,
-      hasMore: _hasMoreRows,
-      pager: _fieldPager,
+      shown: _pages.shown,
+      hasMore: _pages.hasMore,
+      pager: _pages.pager,
       scanning: _scan != null,
       scroll: _resultsScroll,
       eventTimesClock: widget.eventTimesClock,
