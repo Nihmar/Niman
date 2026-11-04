@@ -13,10 +13,10 @@ import 'package:niman/src/search/search_excerpt.dart' show wordTermsOf;
 import 'package:niman/src/search/search_repo.dart';
 import 'package:niman/src/search/task_events.dart';
 import 'package:niman/src/ui/action_sheet.dart';
-import 'package:niman/src/ui/app_switch.dart';
 import 'package:niman/src/ui/indexing_notice.dart';
 import 'package:niman/src/ui/pointer_density.dart';
 import 'package:niman/src/ui/search_field_pager.dart';
+import 'package:niman/src/ui/search_replace_panel.dart';
 import 'package:niman/src/ui/search_replace_preview.dart';
 import 'package:niman/src/ui/search_request.dart';
 import 'package:niman/src/ui/search_task_events.dart';
@@ -813,7 +813,21 @@ final class _SearchScreenState extends State<SearchScreen> {
                         ),
                     ],
                   ),
-                  if (_replaceMode) _replacePanel(theme),
+                  if (_replaceMode)
+                    SearchReplacePanel(
+                      term: _query.text.trim(),
+                      onlyPath: _replaceOnly,
+                      notes: _replacePreview,
+                      busy: _previewBusy,
+                      replacement: _replacement,
+                      caseSensitive: _replaceCase,
+                      onCaseChanged: (value) async {
+                        setState(() => _replaceCase = value);
+                        await _refreshPreview();
+                      },
+                      onClose: _leaveReplaceMode,
+                      onConfirm: _runReplace,
+                    ),
                 ],
               ),
             ),
@@ -1302,112 +1316,6 @@ final class _SearchScreenState extends State<SearchScreen> {
     if (!mounted) return;
     ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text(message)));
-  }
-
-  /// The inline replace panel under the query box: replacement text, the
-  /// case toggle, the scope/occurrence summary, and the confirm action.
-  Widget _replacePanel(ThemeData theme) {
-    final only = _replaceOnly;
-    final term = _query.text.trim();
-    final notes = _replacePreview;
-    final occurrences = notes.fold<int>(
-      0,
-      (sum, note) => sum + note.occurrences,
-    );
-    final hasMatches = notes.isNotEmpty;
-    final noteCount = notes.length;
-    final String scope;
-    if (only != null) {
-      scope = AppStrings.replaceScopeNote(only);
-    } else if (noteCount == 0) {
-      scope = AppStrings.replaceScopeWholeLibrary;
-    } else {
-      scope = AppStrings.replaceScopeNotes(noteCount);
-    }
-    final confirmLabel = only != null
-        ? AppStrings.replaceInThisNote
-        : '${AppStrings.replaceConfirm} '
-              '(${hasMatches ? '$occurrences' : '…'})';
-    return Container(
-      key: const Key('replace-panel'),
-      margin: const EdgeInsets.only(top: 8),
-      padding: const EdgeInsets.fromLTRB(12, 8, 8, 8),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(
-                Icons.find_replace,
-                size: 20,
-                color: theme.colorScheme.primary,
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: TextField(
-                  key: const Key('replace-with'),
-                  controller: _replacement,
-                  decoration: InputDecoration(
-                    labelText: AppStrings.replaceWithLabel,
-                    hintText: term,
-                    border: const OutlineInputBorder(),
-                    isDense: true,
-                  ),
-                ),
-              ),
-              IconButton(
-                key: const Key('replace-close'),
-                tooltip: AppStrings.replaceCancel,
-                icon: const Icon(Icons.close),
-                onPressed: _leaveReplaceMode,
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Row(
-            children: [
-              Text(
-                AppStrings.replaceCaseSensitive,
-                style: theme.textTheme.bodySmall,
-              ),
-              AppSwitch(
-                key: const Key('replace-case'),
-                value: _replaceCase,
-                onChanged: (value) async {
-                  setState(() => _replaceCase = value);
-                  await _refreshPreview();
-                },
-              ),
-              const Spacer(),
-              if (_previewBusy)
-                const Padding(
-                  padding: EdgeInsets.only(right: 8),
-                  child: SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  ),
-                ),
-              FilledButton(
-                key: const Key('replace-confirm'),
-                onPressed: _previewBusy || !hasMatches ? null : _runReplace,
-                child: Text(confirmLabel),
-              ),
-            ],
-          ),
-          Text(
-            '$scope — ${AppStrings.replaceWholeWordsHint}',
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ],
-      ),
-    );
   }
 
   /// The pre-search hint: the empty state, the too-short state (the box
