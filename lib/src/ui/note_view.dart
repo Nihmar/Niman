@@ -81,6 +81,7 @@ import 'package:niman/src/ui/note_tags.dart';
 import 'package:niman/src/ui/note_task_items.dart';
 import 'package:niman/src/ui/note_tasks_host.dart';
 import 'package:niman/src/ui/note_tasks_section.dart';
+import 'package:niman/src/ui/note_text_cache.dart';
 import 'package:niman/src/ui/note_todo_blocks.dart';
 import 'package:niman/src/ui/note_top_bar.dart';
 import 'package:niman/src/ui/note_view_adapters.dart';
@@ -569,12 +570,12 @@ final class _NoteViewState extends State<NoteView>
   ValueListenable<List<OutlineEntry>> get outline => _stats.outline;
 
   @override
-  String get currentText => _unifiedText;
+  String get currentText => _text.text;
 
   @override
   Future<List<String>> currentTags() {
     final buffer = _unifiedSurfaceBuffer;
-    if (buffer == null) return Future.value(noteTagsOf(_unifiedText));
+    if (buffer == null) return Future.value(noteTagsOf(_text.text));
     // A long note's scan keeps its tags block by block for the save to
     // hand the index: the same answer, with nothing of the note read again.
     return noteTagsOfBuffer(
@@ -612,8 +613,8 @@ final class _NoteViewState extends State<NoteView>
 
   @override
   void setNoteKind(String? type) {
-    // Once: a long note's text is joined for each ask (see [_unifiedText]).
-    final current = _unifiedText;
+    // Once: a long note's text is joined for each ask (see [NoteTextCache]).
+    final current = _text.text;
     final text = type == null
         ? removeFrontmatterKey(current, 'type')
         : setFrontmatterKey(current, 'type', type);
@@ -804,7 +805,7 @@ final class _NoteViewState extends State<NoteView>
     context: () => context,
     mounted: () => mounted,
     canInsert: () => canInsert,
-    text: () => _unifiedText,
+    text: () => _text.text,
     sourceView: () => _sourceViewKey.currentState,
     readView: () => _readViewKey.currentState,
     activeFormats: _activeFormats,
@@ -934,69 +935,10 @@ final class _NoteViewState extends State<NoteView>
   SourceBuffer? _snapshotFrom;
   int _snapshotRevision = -1;
 
-  /// The note's text as the unified source surface has it, which is where
-  /// saving, the preview and the statistics all get their text from — so
-  /// this pane reaches every one of them through one door.
-  ///
-  /// Joined from the surface's buffer when it is asked for, once per revision:
-  /// the surface reports an edit without its text, because joining the note on
-  /// every keystroke is O(n) for a text only the save debounce needs.
-  ///
-  /// A long note's join is not kept (#1197). The text it was read from stays
-  /// alive anyway — every line not yet written is a view of it — so a kept
-  /// join was a second whole copy of the note, 247 MB of the stress note,
-  /// held until the next keystroke. A long note is the one the editor scans
-  /// in the background ([MarkdownSourceViewState.readsInBackground]), whose
-  /// panels read what the scan keeps rather than the text; what still asks for
-  /// the whole note (a kind's edit, a comparison with the disk) joins it for
-  /// that call alone. A short one keeps its join: a kind's view asks for it
-  /// on every build.
-  String get _unifiedText {
-    final buffer = _unifiedSurfaceBuffer;
-    if (buffer == null) return _unifiedTextCache;
-    if (identical(buffer, _unifiedTextBuffer) &&
-        buffer.revision == _unifiedTextRevision) {
-      return _unifiedTextCache;
-    }
-    final text = buffer.text;
-    if (MarkdownSourceViewState.readsInBackground(buffer)) {
-      // The text the note was loaded from, which the seed kept, is let go
-      // with the rest: the lines still reading it keep it, and no more.
-      _unifiedTextCache = '';
-      _unifiedTextBuffer = null;
-      _unifiedTextRevision = -1;
-      return text;
-    }
-    _unifiedTextCache = text;
-    _unifiedTextBuffer = buffer;
-    _unifiedTextRevision = buffer.revision;
-    return text;
-  }
-
-  /// The first [maxChars] units of [_unifiedText], read from the buffer's
-  /// own lines: O(the head), not O(the note).
-  String _unifiedHead(int maxChars) {
-    final buffer = _unifiedSurfaceBuffer;
-    if (buffer == null) {
-      final text = _unifiedTextCache;
-      return text.length <= maxChars ? text : text.substring(0, maxChars);
-    }
-    return buffer.substring(
-      0,
-      buffer.length < maxChars ? buffer.length : maxChars,
-    );
-  }
-
-  /// Seeds [_unifiedText] with the text [_unifiedSurfaceBuffer] was read from.
-  set _unifiedText(String text) {
-    _unifiedTextCache = text;
-    _unifiedTextBuffer = _unifiedSurfaceBuffer;
-    _unifiedTextRevision = _unifiedSurfaceBuffer?.revision ?? -1;
-  }
-
-  String _unifiedTextCache = '';
-  SourceBuffer? _unifiedTextBuffer;
-  int _unifiedTextRevision = -1;
+  /// The note's text as the unified source surface has it (see
+  /// [NoteTextCache]): where saving, the preview and the statistics all get
+  /// their text from.
+  late final NoteTextCache _text = NoteTextCache(() => _unifiedSurfaceBuffer);
 
   /// Whether the preview's text is behind the note because the preview was
   /// not on screen when the note changed (see [_refreshPreview]).
@@ -1125,8 +1067,8 @@ final class _NoteViewState extends State<NoteView>
     revision: () => _saves.revision,
     lastSavedRevision: () => _saves.lastSavedRevision,
     saveForClose: _saves.saveForClose,
-    bufferText: () => _unifiedText,
-    bufferHead: _unifiedHead,
+    bufferText: () => _text.text,
+    bufferHead: _text.head,
   );
 
   /// How the note reaches the disk: its revisions, the debounce after an
@@ -1134,7 +1076,7 @@ final class _NoteViewState extends State<NoteView>
   late final NoteSavePipeline _saves = NoteSavePipeline(
     notePath: () => widget.path,
     ready: () => _ready,
-    text: () => _unifiedText,
+    text: () => _text.text,
     buffer: () => _unifiedSurfaceBuffer,
     references: () => _sourceViewKey.currentState?.references(),
     framing: () => _framing,
@@ -1201,7 +1143,7 @@ final class _NoteViewState extends State<NoteView>
     // The formatting keys, while this editor is the focused one (#205).
     _formatKeys.attach();
     _kindHost = NoteKindHostAdapter(
-      noteText: () => _unifiedText,
+      noteText: () => _text.text,
       applyNoteEdit: _applyKindEdit,
       noteFilePath: () => widget.path,
       rootDirectory: () => widget.libraryRoot,
@@ -1545,7 +1487,7 @@ final class _NoteViewState extends State<NoteView>
     // both at its peak — the buffer, its undo, the joined text and the
     // preview's copy. The panes holding them unmount with the load.
     _surface = null;
-    _unifiedText = '';
+    _text.text = '';
     _unifiedBuffer = null;
     _bufferIsSnapshot = false;
     _snapshotFrom = null;
@@ -1602,7 +1544,7 @@ final class _NoteViewState extends State<NoteView>
           ready?.framing ??
           NoteFraming(lineEnding: LineEnding.dominantOf(content));
       _surfaceCaretLine = null;
-      _unifiedText = text;
+      _text.text = text;
       // A template `{{cursor}}` landing (#53): the surface was given the
       // caret with its buffer, above, and a memento must not take it back
       // (a note created at a path that had one lost its `{{cursor}}`).
@@ -1776,7 +1718,7 @@ final class _NoteViewState extends State<NoteView>
     _diskStamp = stamp;
     _framing =
         framing ?? NoteFraming(lineEnding: LineEnding.dominantOf(content));
-    if (text == _unifiedText) return;
+    if (text == _text.text) return;
     // Mute the programmatic change like _load does: the listener returns
     // before the revision bump and the save schedule.
     _loading = true;
@@ -1918,9 +1860,9 @@ final class _NoteViewState extends State<NoteView>
   Widget _unifiedSurfacePane() {
     var surface = _surface;
     if (surface == null) {
-      final text = _unifiedText;
+      final text = _text.text;
       surface = _surface = _surfaceFor(text);
-      _unifiedText = text;
+      _text.text = text;
     }
     final buffer = surface.buffer;
     // The fields panel, when the note has a block for it: the same widget the
@@ -2585,7 +2527,7 @@ final class _NoteViewState extends State<NoteView>
   /// note is saved immediately.
   void _applyKindEdit(String newText) {
     final surface = _surface;
-    if (surface != null && newText != _unifiedText) {
+    if (surface != null && newText != _text.text) {
       // The kind GUI stands in front of the surface, so there may be no view:
       // the controller edits the buffer itself, and it is that buffer the save
       // below writes.
