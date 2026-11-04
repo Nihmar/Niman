@@ -30,10 +30,8 @@ import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_index.dart';
 import 'package:niman/src/markdown/read_parser.dart';
 import 'package:niman/src/markdown/render/block_height_map.dart';
-import 'package:niman/src/markdown/render/block_heights.dart';
 import 'package:niman/src/markdown/render/block_view.dart';
 import 'package:niman/src/markdown/render/code_piece_view.dart';
-import 'package:niman/src/markdown/render/columns_run.dart';
 import 'package:niman/src/markdown/render/content_clamp_physics.dart';
 import 'package:niman/src/markdown/render/footnote_list.dart';
 import 'package:niman/src/markdown/render/inline_spans.dart'
@@ -45,11 +43,10 @@ import 'package:niman/src/markdown/render/note_margins.dart';
 import 'package:niman/src/markdown/render/range_highlight.dart';
 import 'package:niman/src/markdown/render/read_code_pieces.dart';
 import 'package:niman/src/markdown/render/read_entries.dart';
+import 'package:niman/src/markdown/render/read_segments.dart';
 import 'package:niman/src/markdown/render/read_selection.dart';
 import 'package:niman/src/markdown/render/read_view_keys.dart';
 import 'package:niman/src/markdown/render/scroll_anchor.dart';
-import 'package:niman/src/markdown/render/sliver_columns.dart';
-import 'package:niman/src/markdown/render/sliver_segments.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/preview/math_cache.dart';
 
@@ -729,7 +726,14 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
                       childCount: heights.length,
                     ),
                   )
-                : _segments(heights, availableWidth),
+                : readSegments(
+                    heights: heights,
+                    hosts: _entries.hosts,
+                    width: availableWidth,
+                    gap: _entries.gap,
+                    listIndent: _entries.theme.listIndentPerLevel,
+                    blockAt: _blockAt,
+                  ),
           ),
           // The top of the note is all there is yet: said where the reader
           // runs out of it, rather than a page that just ends.
@@ -761,80 +765,6 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
           ),
         ],
       ),
-    );
-  }
-
-  /// The note cut at its side-by-side `columns` blocks (#729): a sliver for
-  /// each run of blocks between two of them, placed by its part of the
-  /// note's map, and a [SliverColumns] for each of them.
-  Widget _segments(BlockHeightMap heights, double width) {
-    final slivers = <Widget>[];
-    final starts = <int>[];
-    void run(int start, int end) {
-      if (end <= start) return;
-      starts.add(start);
-      slivers.add(
-        SliverMarkdownBlocks(
-          key: ValueKey<String>('blocks-$start'),
-          heights: BlockHeightRange(heights, start, end),
-          segment: true,
-          delegate: SliverChildBuilderDelegate(
-            (context, index) => _blockAt(context, start + index, width),
-            childCount: end - start,
-          ),
-        ),
-      );
-    }
-
-    var from = 0;
-    for (final columns in _entries.hosts.sideBySide) {
-      run(from, columns.start);
-      starts.add(columns.start);
-      slivers.add(_columns(heights, columns, width));
-      from = columns.end;
-    }
-    run(from, heights.length);
-    return SliverSegments(heights: heights, starts: starts, slivers: slivers);
-  }
-
-  /// [run], its columns side by side in [width].
-  Widget _columns(BlockHeightMap heights, ColumnsRun run, double width) {
-    final layout = _entries.hosts.layoutOf(run);
-    final theme = _entries.theme;
-    return SliverColumns(
-      key: ValueKey<String>('columns-${run.start}'),
-      heights: heights,
-      index: run.start,
-      gap: _entries.gap,
-      indent: run.items * theme.listIndentPerLevel,
-      opener: (context) =>
-          _blockAt(context, run.start, width, outerItems: run.items),
-      closer: run.closed
-          ? (context) =>
-                _blockAt(context, run.end - 1, width, outerItems: run.items)
-          : null,
-      rows: [
-        for (final row in layout.rows)
-          [
-            for (final at in row)
-              (
-                share: layout.shares[at],
-                sliver: SliverMarkdownBlocks(
-                  heights: layout.maps[at],
-                  segment: true,
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) => _blockAt(
-                      context,
-                      run.columns[at].blocks[index],
-                      layout.widths[at],
-                      outerItems: run.items,
-                    ),
-                    childCount: run.columns[at].blocks.length,
-                  ),
-                ),
-              ),
-          ],
-      ],
     );
   }
 
