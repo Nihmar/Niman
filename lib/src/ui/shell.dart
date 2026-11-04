@@ -151,6 +151,7 @@ import 'package:niman/src/ui/shell_ocr_flow.dart';
 import 'package:niman/src/ui/shell_outside_routes.dart';
 import 'package:niman/src/ui/shell_palette.dart';
 import 'package:niman/src/ui/shell_personal_dictionary.dart';
+import 'package:niman/src/ui/shell_phone_chrome.dart';
 import 'package:niman/src/ui/shell_preview_actions.dart';
 import 'package:niman/src/ui/shell_row_actions.dart';
 import 'package:niman/src/ui/shell_search_slot.dart';
@@ -171,7 +172,6 @@ import 'package:niman/src/ui/tab_row_lead.dart';
 import 'package:niman/src/ui/text_zoom_pinch.dart';
 import 'package:niman/src/ui/todo_edit_dialog.dart';
 import 'package:niman/src/ui/todo_link_host.dart';
-import 'package:niman/src/ui/todo_list_buttons.dart';
 import 'package:niman/src/ui/todo_tab.dart';
 import 'package:niman/src/ui/tour/tour_host.dart';
 import 'package:niman/src/ui/tour/tour_steps.dart';
@@ -2870,7 +2870,8 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       onCloseFullScreenNote: _closeFullScreenNote,
       isQuickNote: _selected != null && _selected == _quickNotePath,
       noteBarActions: _noteBarActions(),
-      buildTabShell: () => _tabShell(
+      buildTabShell: () => _phoneChrome.scaffold(
+        context,
         controller: controller,
         bodies: _tabBodyChildren(controller),
       ),
@@ -3133,63 +3134,25 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     return HiddenSlot(hidden: !visible, child: slot);
   }
 
-  /// The current tab's FAB, or null for the tabs that have none.
-  ///
-  /// Files and Todo both put a `+` in the same corner, so scaling one out
-  /// and the next one in reads as a flicker on a button that never moved
-  /// (2026-09-08 user feedback). `Scaffold` decides whether to animate by
-  /// comparing the old and new FAB's key, so one shared key here is the
-  /// whole fix: the slot rebuilds in place between those two tabs and
-  /// still animates on the way to a tab that has no FAB, which is right —
-  /// there the button really is leaving.
-  ///
-  /// The inner keys stay as they were: they identify which `+` this is,
-  /// to the tests and to `Scaffold`'s hero.
-  Widget? _tabFab() {
-    final fab = switch (_tab) {
-      ShellTab.files => _newItemFab(),
-      ShellTab.todo => _todoAddFab(),
-      ShellTab.search ||
-      ShellTab.quickNote ||
-      ShellTab.settings ||
-      ShellTab.home ||
-      ShellTab.study => null,
-    };
-    if (fab == null) return null;
-    return KeyedSubtree(key: const Key('shell-tab-fab'), child: fab);
-  }
-
-  /// The Todo tab's add FAB (2026-09-07 user feedback: the app-bar `+`
-  /// moved to the standard add position).
-  Widget _todoAddFab() {
-    return FloatingActionButton(
-      key: const Key('todo-add'),
-      heroTag: 'todo-add',
-      tooltip: AppStrings.todoAddTooltip,
-      onPressed: _addTodo,
-      child: const Icon(Icons.add),
-    );
-  }
-
-  /// The expandable "+" FAB (bottom-right, above the bottom nav):
-  /// reveals New note / New folder mini FABs; each creates in the
-  /// selected folder, root if none (T-UI-05).
-  Widget _newItemFab() => TourTarget(
-    id: TourTargets.create,
-    child: _fab.button(
-      onNewNote: () => unawaited(_createFlow.createNote(context)),
-      onJournalToday: () => unawaited(_journalFlow.openToday(context)),
-      onNewListNote: () => unawaited(_createFlow.createListNote(context)),
-      onNewAudioNote: () => unawaited(_createFlow.createAudioNote(context)),
-      onNewSlides: () => unawaited(_createFlow.createSlidesNote(context)),
-      onNewFlashcards: () => unawaited(_createFlow.createFlashcards(context)),
-      onNewKanban: () => unawaited(_createFlow.createKanban(context)),
-      onNewFromTemplate: () =>
-          unawaited(_templateFlow.createFromTemplate(context)),
-      onNewFolder: () => unawaited(_createFlow.createFolder(context)),
-      onCaptureWebPage: () => unawaited(_captureFlow.capture(context)),
-      features: _features,
-    ),
+  /// The phone's tab chrome: the tab's app bar and FAB, the bottom tab
+  /// bar, the bodies' stack (issue #100 moved it into [ShellPhoneChrome]).
+  late final ShellPhoneChrome _phoneChrome = ShellPhoneChrome(
+    nav: _nav,
+    onDestinationSelected: _onDestinationSelected,
+    onLeaveHiddenTab: _leaveHiddenTab,
+    fab: _fab,
+    menus: _treeMenus,
+    addTodo: _addTodo,
+    todo: _todoController,
+    todoView: _todoView,
+    palette: _palette,
+    journalUi: _journalUi,
+    syncActions: _syncActions,
+    workspace: _workspace,
+    openNotesButton: _openNotesButton,
+    sortToggle: _sortToggle,
+    features: () => _features,
+    ocrQueue: widget.ocrQueue,
   );
 
   /// The tree's sort control (T-UI-03, #726): the mockup's `unfold_more`
@@ -3210,32 +3173,6 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   void _openTrash(LibrarySession controller) =>
       unawaited(openTrash(context, controller));
 
-  /// Trash/sort actions of the Files-tab app bar (per mockup: trash +  /// sort chevrons; the settings gear moved to the Settings tab).
-  List<Widget> _filesAppBarActions(LibrarySession controller) {
-    return [
-      // Leftmost: it comes and goes, and the row grows from the left, so
-      // the buttons a thumb already knows stay where they were.
-      if (_workspace.value.tabs.isNotEmpty) _openNotesButton(),
-      // The journal's calendar is the command's too, and goes with its
-      // feature (#1109): a setting, not a state, so the row closes up.
-      if (commandFeatureOn(AppCommand.journalCalendar, _features))
-        IconButton(
-          key: const Key('open-journal'),
-          tooltip: AppStrings.paletteGroupJournal,
-          icon: const Icon(Icons.calendar_today_outlined),
-          onPressed: () => _journalUi.showCalendar(context),
-        ),
-      _syncActions.button(context, controller),
-      IconButton(
-        key: const Key('open-trash'),
-        tooltip: AppStrings.trashTitle,
-        icon: const Icon(Icons.delete_outline),
-        onPressed: () => unawaited(openTrash(context, controller)),
-      ),
-      _sortToggle(withView: true),
-    ];
-  }
-
   /// Closes the full-screen note: returns to the tab it was opened from,
   /// with its tree/body visible (the note stays highlighted). A book read
   /// in full screen (#621) only leaves full screen: Back steps out of it
@@ -3252,123 +3189,6 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       _noteFade.closed();
     });
     logNextFrame('shell', 'note close first frame');
-  }
-
-  /// The app bar's title on each tab: the tab's own name, matching the
-  /// label under the icon that got you there. The Files tab used to say
-  /// "Niman", which named the app on a screen that is about the tree.
-  String get _tabTitle => switch (_tab) {
-    ShellTab.files => AppStrings.tabFiles,
-    ShellTab.todo => AppStrings.todoTitle,
-    ShellTab.search => AppStrings.tabSearch,
-    ShellTab.quickNote => AppStrings.quickNoteTitle,
-    ShellTab.settings => AppStrings.tabSettings,
-    ShellTab.home => AppStrings.tabHome,
-    ShellTab.study => AppStrings.tabStudy,
-  };
-
-  /// The narrow shell: app bar for the tab + the bottom navigation bar.
-  ///
-  /// The `_tab`-dependent chrome (title, Files actions, FAB, nav-bar
-  /// selection, and the stack's visible index) rebuilds through a
-  /// [ValueListenableBuilder] on [ShellNavigationState.tabListenable], so a
-  /// plain switch refreshes it without a shell-wide `setState` (#46).
-  /// [bodies] are built once by the caller and reused by identity: the
-  /// kept-alive bodies do not depend on the current tab, so a switch keeps
-  /// their instances and their subtrees are skipped.
-  Widget _tabShell({
-    required LibrarySession controller,
-    required List<Widget> bodies,
-  }) {
-    return ValueListenableBuilder<ShellTab>(
-      valueListenable: _nav.tabListenable,
-      builder: (context, tab, _) => Scaffold(
-        appBar: AppBar(
-          // A hidden tab opened anyway is a page, not a tab (#536): back
-          // instead of a bar with nothing to select.
-          leading: _nav.shown(tab)
-              ? null
-              : BackButton(
-                  key: const Key('hidden-tab-back'),
-                  onPressed: _leaveHiddenTab,
-                ),
-          title: Text(_tabTitle),
-          actions: switch (tab) {
-            ShellTab.files => _filesAppBarActions(controller),
-            // The palette is not the library's search (#206): its own
-            // way in, on the bar of the tab whose results it used to
-            // sit above.
-            ShellTab.search => [
-              IconButton(
-                key: const Key('search-open-palette'),
-                tooltip: AppStrings.commandPaletteTitle,
-                icon: const Icon(Icons.bolt_outlined),
-                onPressed: () => unawaited(_palette.open(context)),
-              ),
-            ],
-            ShellTab.todo => [
-              TodoAppBarActions(controller: _todoController, view: _todoView),
-            ],
-            _ => const [],
-          },
-        ),
-        // Bodies stay mounted once visited (see TabBodyStack): the switch
-        // only flips visibility and fades the incoming body in, instead of
-        // rebuilding two transparency layers mid-animation. The stack itself
-        // stays the direct body child on every tab: wrapping it in anything
-        // conditional (like the FAB scrim was) reparents the whole subtree
-        // and remounts every body, defeating the keep-alive. Only its
-        // currentIndex changes here; [bodies] are the same instances across
-        // a switch, so no body re-inflates.
-        body: _fab.measuring(switch (widget.ocrQueue) {
-          final queue? => Column(
-            children: [
-              OcrJobStatus(queue: queue),
-              Expanded(
-                child: TabBodyStack(
-                  currentIndex: tab.index,
-                  retainLayout: <int>{ShellTab.search.index},
-                  children: bodies,
-                ),
-              ),
-            ],
-          ),
-          null => TabBodyStack(
-            currentIndex: tab.index,
-            retainLayout: <int>{ShellTab.search.index},
-            children: bodies,
-          ),
-        }),
-        floatingActionButton: _tabFab(),
-        bottomNavigationBar: switch (controller.sync) {
-          _ when !_nav.shown(tab) => null,
-          final sync? when tab == ShellTab.files => Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SyncProgressStrip(sync: sync),
-              _shellTabs(),
-            ],
-          ),
-          _ => _shellTabs(),
-        },
-      ),
-    );
-  }
-
-  /// The bottom tab bar.
-  ///
-  /// Shown by the tab shell *and* by an open note: the tabs are how the
-  /// app is navigated, so having them vanish behind a note meant going
-  /// back before going anywhere.
-  Widget _shellTabs() {
-    return TourTarget(
-      id: TourTargets.nav,
-      child: ShellTabBar(
-        destinations: _nav.destinations,
-        current: _tab,
-        onDestinationSelected: _onDestinationSelected,
-      ),
-    );
   }
 
   void _onDestinationSelected(ShellTab tab) {
@@ -4568,11 +4388,11 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   /// fade only covers the incoming body — no cross-fade of two transparency
   /// layers, and no re-inflate mid-animation.
   ///
-  /// Built once per shell build and handed to [_tabShell] by identity, so a
-  /// plain tab switch reuses the instances instead of rebuilding every body
-  /// (#46). Only the search slot retains layout while hidden (T-TS-10): it
-  /// is the one whose show-layout costs frames; the plain lists relayout
-  /// cheaply.
+  /// Built once per shell build and handed to [ShellPhoneChrome.scaffold]
+  /// by identity, so a plain tab switch reuses the instances instead of
+  /// rebuilding every body (#46). Only the search slot retains layout
+  /// while hidden (T-TS-10): it is the one whose show-layout costs frames;
+  /// the plain lists relayout cheaply.
   List<Widget> _tabBodyChildren(LibrarySession controller) => [
     for (final tab in ShellTab.values) _tabBodyFor(tab, controller),
   ];
