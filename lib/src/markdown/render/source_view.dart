@@ -81,6 +81,7 @@ import 'package:niman/src/markdown/render/source_code_copies.dart';
 import 'package:niman/src/markdown/render/source_context_menu.dart';
 import 'package:niman/src/markdown/render/source_folds.dart';
 import 'package:niman/src/markdown/render/source_geometry.dart';
+import 'package:niman/src/markdown/render/source_hit_test.dart';
 import 'package:niman/src/markdown/render/source_line.dart';
 import 'package:niman/src/markdown/render/source_line_marks.dart';
 import 'package:niman/src/markdown/render/source_live_lines.dart';
@@ -573,6 +574,19 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// a wrapped table row: what a tap asks where an offset is, and the caret
   /// asks for its rectangle.
   final SourceParagraphs _paragraphs = SourceParagraphs();
+
+  /// Where a point over the note lands in it: asked of the drawn lines,
+  /// and of the height map for a point no drawn line is under.
+  late final SourceHitTest _hits = SourceHitTest(
+    buffer: () => widget.buffer,
+    hosts: _hosts,
+    noteBox: () => _noteBox,
+    scroll: () => _scroll,
+    heights: () => _heights,
+    paragraphs: _paragraphs,
+    pieces: _pieces,
+    geometry: _geometry,
+  );
 
   /// What the last frame laid the note out with — the pane's width, the
   /// text's scale, the gutter, the text's width — and the lengths counted
@@ -1157,77 +1171,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
 
   /// The offset a tap at [global] lands on, or null when it lands outside a
   /// line.
-  int? offsetAt(Offset global) =>
-      _paintedOffsetAt(global) ?? _mappedOffsetAt(global);
-
-  /// The offset under [global] on a line a frame has drawn, asked of the lines
-  /// themselves — their paragraphs know where they were painted, so no map
-  /// has to agree with them — or null when no drawn line is under it.
-  int? _paintedOffsetAt(Offset global) {
-    final x = _hosts.layouts.isEmpty
-        ? null
-        : _noteBox?.globalToLocal(global).dx;
-    for (final line in _paragraphs.lines) {
-      if (line >= widget.buffer.lineCount) continue;
-      // Side by side, two columns' lines hold the same height: a line of a
-      // column holds a point only across its column (#729).
-      if (x != null && !_geometry.inColumnOf(line, x)) continue;
-      final pieces = _pieces.of(line);
-      if (pieces.length == 1) {
-        final object = SourceParagraphs.renderOf(pieces.first.key);
-        if (object == null) continue;
-        final local = object.globalToLocal(global);
-        if (local.dy < 0 || local.dy >= object.size.height) continue;
-        return widget.buffer.offsetOfLine(line) +
-            pieces.first.start +
-            object.getPositionForOffset(local).offset;
-      }
-      // A wrapped table row: the piece the point is in, which of the row's
-      // several paragraphs it is. A point in none of them — the room
-      // between the columns, or below the row — is not this line's: the
-      // next one is asked, and the height map answers for a point no drawn
-      // line holds at all.
-      final hit = SourceParagraphs.pieceAt(pieces, global);
-      if (hit == null) continue;
-      return widget.buffer.offsetOfLine(line) +
-          hit.piece.start +
-          hit.paragraph.getPositionForOffset(hit.local).offset;
-    }
-    return null;
-  }
-
-  /// The offset under [global] as the height map places the lines: for a
-  /// point no drawn line is under — above the first, below the last.
-  int? _mappedOffsetAt(Offset global) {
-    final box = _noteBox;
-    if (box == null || _heights.length == 0) return null;
-    // The map says which line a y falls in — above the first line is the
-    // first, below the last is the last, so a tap under a short note puts the
-    // caret at its end rather than nowhere.
-    final point = box.globalToLocal(global);
-    final line = _geometry.lineAtY(point.dy + _scroll.offset, point.dx);
-    final pieces = _pieces.of(line);
-    // The point in the *paragraph's own* coordinates, from its own transform:
-    // the insets, the gutter and a live-mode indent are all in that transform,
-    // so none of them has to be subtracted by hand. (Doing it by hand
-    // subtracted the gutter twice, and the caret landed a gutter's width left
-    // of the finger.)
-    if (pieces.length > 1) {
-      final hit = SourceParagraphs.pieceUnder(pieces, global);
-      if (hit == null) return null;
-      return widget.buffer.offsetOfLine(line) +
-          hit.piece.start +
-          hit.paragraph.getPositionForOffset(hit.local).offset;
-    }
-    final paragraph = SourceParagraphs.renderOf(pieces.first.key);
-    if (paragraph == null || !paragraph.attached) return null;
-    final position = paragraph.getPositionForOffset(
-      paragraph.globalToLocal(global),
-    );
-    return widget.buffer.offsetOfLine(line) +
-        pieces.first.start +
-        position.offset;
-  }
+  int? offsetAt(Offset global) => _hits.offsetAt(global);
 
   /// Scrolls so [line] is at the top, as far as the map knows.
   void jumpToLine(int line) {
@@ -1347,8 +1291,8 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     scroll: () => _scroll,
     caretRect: () => caretRect,
     caretLine: () => _caretLineIndex,
-    paintedOffsetAt: _paintedOffsetAt,
-    mappedOffsetAt: _mappedOffsetAt,
+    paintedOffsetAt: _hits.paintedOffsetAt,
+    mappedOffsetAt: _hits.mappedOffsetAt,
     paragraphAt: _paragraphs.paragraphAt,
     band: () => _metrics.band,
     gap: () => _metrics.gap,
