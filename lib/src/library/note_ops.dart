@@ -23,9 +23,11 @@ import 'package:niman/src/home/home_layout.dart';
 import 'package:niman/src/journal/journal_settings.dart';
 import 'package:niman/src/library/folder_spelling.dart';
 import 'package:niman/src/library/note_creation.dart';
+import 'package:niman/src/library/note_link_questions.dart';
 import 'package:niman/src/library/note_op_seams.dart';
 import 'package:niman/src/library/note_ops_blocking.dart';
 import 'package:niman/src/library/note_relocation.dart';
+import 'package:niman/src/library/note_renamer.dart';
 import 'package:niman/src/library/note_save_result.dart';
 import 'package:niman/src/library/note_sync_writes.dart';
 import 'package:niman/src/library/note_trash.dart';
@@ -476,6 +478,19 @@ final class NoteOps implements NoteOperations {
     required String name,
   }) => _creation.createFolder(parentPath: parentPath, name: name);
 
+  /// Picks the path a renamed or moved note takes and has it moved there.
+  late final NoteRenamer _renamer = NoteRenamer(
+    root: root,
+    relocator: _relocator,
+    serialize: _synchronized,
+    find: _mustFind,
+  );
+
+  /// The link rewrites a rename or a move left, asked about after it.
+  late final NoteLinkQuestions _links = NoteLinkQuestions(
+    serialize: _synchronized,
+  );
+
   /// Renames the note or folder at [path] to [newName].
   ///
   /// Notes are always stored as `<name>.md`; a trailing `.md` in [newName]
@@ -493,57 +508,10 @@ final class NoteOps implements NoteOperations {
   }) async {
     final done = await _released(
       path,
-      () => _rename(path, newName, flushOpen, taskLinks),
+      () => _renamer.rename(path, newName, flushOpen, taskLinks),
     );
-    _askLinks(done, confirmLinks, onLinksRewritten, onLinksProgress);
+    _links.ask(done, confirmLinks, onLinksRewritten, onLinksProgress);
     return done.row;
-  }
-
-  Future<Relocated> _rename(
-    String path,
-    String newName,
-    FlushOpenNotes? flushOpen,
-    TaskLinkRewrites? taskLinks,
-  ) {
-    return _synchronized(() async {
-      final row = await _mustFind(path);
-      final parent = parentOf(path);
-      final parentDir = Directory(_abs(parent));
-      // A file keeps its extension: a note its `.md`, a picture or a book
-      // its own — a PDF renamed is still a PDF, not `book.pdf.md`. Typed
-      // again at the end of the new name, it is not doubled.
-      final ext = row.isDir
-          ? ''
-          : path.toLowerCase().endsWith('.md')
-          ? '.md'
-          : p.extension(path);
-      var base = newName;
-      if (ext.isNotEmpty && base.toLowerCase().endsWith(ext.toLowerCase())) {
-        base = base.substring(0, base.length - ext.length);
-      }
-      String target;
-      if (row.isDir) {
-        final clean = sanitizeName(base, fallback: defaultFolderName);
-        target = await uniqueFolderName(parentDir, clean, exclude: _abs(path));
-      } else {
-        final clean = sanitizeName(base, fallback: defaultNoteName);
-        target = await uniqueFileName(
-          parentDir,
-          clean,
-          ext,
-          exclude: _abs(path),
-        );
-      }
-      final newRel = resolvePath(parent, target);
-      if (newRel == path) return (row: row, pending: null);
-      return await _relocator.relocate(
-        row,
-        path,
-        newRel,
-        flushOpen: flushOpen,
-        taskLinks: taskLinks,
-      );
-    });
   }
 
   /// Moves the note or folder at [path] into [targetParent], keeping its
@@ -563,112 +531,16 @@ final class NoteOps implements NoteOperations {
   }) async {
     final done = await _released(
       path,
-      () => _move(path, targetParent, flushOpen, taskLinks),
+      () => _renamer.move(path, targetParent, flushOpen, taskLinks),
     );
-    _askLinks(done, confirmLinks, onLinksRewritten, onLinksProgress);
+    _links.ask(done, confirmLinks, onLinksRewritten, onLinksProgress);
     return done.row;
-  }
-
-  Future<Relocated> _move(
-    String path,
-    String targetParent,
-    FlushOpenNotes? flushOpen,
-    TaskLinkRewrites? taskLinks,
-  ) {
-    return _synchronized(() async {
-      final row = await _mustFind(path);
-      if (resolvePath(targetParent, p.basename(path)) == path) {
-        return (row: row, pending: null);
-      }
-      if (targetParent == path || isUnder(path, targetParent)) {
-        throw ArgumentError(
-          'Cannot move "$path" into itself or its own subtree',
-        );
-      }
-      final name = p.basename(path);
-      final targetDir = Directory(_abs(targetParent));
-      String target;
-      if (row.isDir) {
-        target = await uniqueFolderName(targetDir, name);
-      } else {
-        final parts = splitFileName(name);
-        target = await uniqueFileName(targetDir, parts.base, parts.ext);
-      }
-      final newRel = resolvePath(targetParent, target);
-      return await _relocator.relocate(
-        row,
-        path,
-        newRel,
-        flushOpen: flushOpen,
-        taskLinks: taskLinks,
-      );
-    });
   }
 
   /// The question about the links [rename] and [move] left, still open or
   /// answered and carried out (#859); completes without error whatever
   /// became of it. What a test awaits to see the links rewritten.
-  Future<void> get linkQuestion =>
-      Future.wait<void>([_linkQuestion, _linkRewrites]);
-  Future<void> _linkQuestion = Future<void>.value();
-
-  /// The automatic rewrites of links, one after the other (#1041).
-  Future<void> _linkRewrites = Future<void>.value();
-
-  /// Asks [confirm] about the link rewrite [done] left pending (#848), once
-  /// the move is over and returned to its caller: the caller follows the
-  /// moved note at once, whatever the user takes to answer or whatever
-  /// moves the note meanwhile (#859). A dialog the user leaves open must
-  /// not hold up every other op and every sync write either, so on a yes
-  /// the rewrite runs in a turn of its own, and reads each note again: an
-  /// edit made while the question was open is kept. [onRewritten] tells the
-  /// caller the notes changed on disk. A failure here is logged, not
-  /// thrown: the move is done, and nobody awaits this.
-  /// Without a [confirm] to ask, the links stay as written: a note is never
-  /// written unasked.
-  ///
-  /// Under the automatic setting there is nothing to ask: the rewrite runs
-  /// at once, in the same turn of its own, a batch of referrers to a turn of
-  /// the op chain (#1041), telling [onProgress] as it goes.
-  void _askLinks(
-    Relocated done,
-    LinkUpdateConfirm? confirm,
-    void Function()? onRewritten,
-    LinkRewriteProgress? onProgress,
-  ) {
-    final pending = done.pending;
-    if (pending == null) return;
-    const log = AppLogger(name: 'links');
-    if (pending.automatic) {
-      _linkRewrites = _linkRewrites.then((_) async {
-        try {
-          await pending.apply(_synchronized, progress: onProgress);
-          onRewritten?.call();
-        } on Object catch (error) {
-          log.warning('could not update links to "${done.row.path}": $error');
-        }
-      });
-      return;
-    }
-    if (confirm == null) {
-      log.info('links to "${done.row.path}" left as written: no prompt');
-      return;
-    }
-    _linkQuestion = () async {
-      try {
-        // Counted here, off the op chain (#866): a hub note's thousand
-        // referrers are read without holding up any other op or sync write.
-        final notes = await pending.count();
-        if (notes == 0 || !await confirm(notes)) return;
-        // The rewrite flushes the open notes itself, right before reading
-        // each referrer (#913).
-        await pending.apply(_synchronized, progress: onProgress);
-        onRewritten?.call();
-      } on Object catch (error) {
-        log.warning('could not update links to "${done.row.path}": $error');
-      }
-    }();
-  }
+  Future<void> get linkQuestion => _links.settled;
 
   /// The text of the note at [path], decoded leniently (a note with a
   /// broken byte is still a note) and without its BOM.
