@@ -144,6 +144,7 @@ import 'package:niman/src/ui/shell_journal_ui.dart';
 import 'package:niman/src/ui/shell_layout.dart';
 import 'package:niman/src/ui/shell_marked_actions.dart';
 import 'package:niman/src/ui/shell_navigation.dart';
+import 'package:niman/src/ui/shell_navigation_state.dart';
 import 'package:niman/src/ui/shell_note_fade.dart';
 import 'package:niman/src/ui/shell_note_history.dart';
 import 'package:niman/src/ui/shell_note_io.dart';
@@ -347,81 +348,24 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   /// set (see [FrameCost]).
   final FrameCost _frameCost = shellFrameCost();
 
-  /// The currently selected bottom tab (narrow layout).
-  ///
-  /// A [ValueNotifier] rather than a plain field so a plain tab switch can
-  /// refresh the chrome and the visible slot through a
-  /// [ValueListenableBuilder] *without* a shell-wide `setState`: the
-  /// kept-alive bodies do not depend on which tab is current, so rebuilding
-  /// all of them on every switch was 12-24 ms of wasted `build` (device log,
-  /// #46). Read and written through [_tab], so every existing call site is
-  /// unchanged; the full-`setState` paths still fire where the switch also
-  /// changes state the bodies do read.
-  final ValueNotifier<ShellTab> _tabListenable = ValueNotifier(ShellTab.files);
-  ShellTab get _tab => _tabListenable.value;
-  set _tab(ShellTab value) {
-    _tabRequested = true;
-    // Every way into a hidden tab passes here, so this is where the way
-    // back out of it is remembered (#536).
-    if (_shown(_tabListenable.value) && !_shown(value)) {
-      _hiddenTabReturn = _tabListenable.value;
-    }
-    _tabListenable.value = value;
-  }
+  /// Where the shell is: the tab on screen, the tabs placed, the ones
+  /// visited, where Back goes, the content tab pinned in a pane (issue
+  /// #100 moved it into [ShellNavigationState]).
+  late final ShellNavigationState _nav = ShellNavigationState(
+    features: () => _features,
+  );
 
-  /// The library's navigation on this device (#536), read with the
-  /// editor settings; null until the first read.
-  NavigationLayout? _navigation;
+  /// The tab on screen ([ShellNavigationState.tab]): a plain switch moves
+  /// only its notifier (#46).
+  ShellTab get _tab => _nav.tab;
+  set _tab(ShellTab value) => _nav.tab = value;
 
   /// The library's features (#1109): every surface of the shell asks this,
   /// and none keeps a boolean of its own.
   Features get _features => widget.controller.features.value;
 
-  /// The tabs the bar and the rail show, in order: placed once per
-  /// layout and per change of features, not on every frame and every tab
-  /// switch that asks.
-  late List<ShellTab> _shownTabs = [
-    for (final d in visibleDestinations(
-      const NavigationLayout(),
-      features: _features,
-    ))
-      d.tab,
-  ];
-
-  /// The destinations the bar and the rail show.
-  List<ShellDestination> get _destinations {
-    final all = {for (final d in shellDestinations()) d.tab: d};
-    return [for (final tab in _shownTabs) all[tab]!];
-  }
-
-  /// Whether [tab] has a place in the bar and the rail.
-  bool _shown(ShellTab tab) => _shownTabs.contains(tab);
-
-  /// Whether something chose the tab before the layout was read: a
-  /// widget, a notification, a shared item, a reminder, the palette. What
-  /// a request names wins over the start destination (#706).
-  bool _tabRequested = false;
-
-  /// The tab the shell opens on and falls back to (#706): the layout's
-  /// start destination ([startDestination]), or [_homeTab] when the
-  /// layout leaves none.
-  ShellTab get _startTab => switch (_navigation) {
-    final layout? => startDestination(layout, features: _features) ?? _homeTab,
-    null => _homeTab,
-  };
-
-  /// The last fallback: the first shown that is a place of its own — not
-  /// the quick note, a note rather than a place, nor Settings on a wide
-  /// window, where it floats (#202). Files when there is none, which a
-  /// wide window shows with nothing selected.
-  ShellTab get _homeTab {
-    for (final tab in _shownTabs) {
-      if (tab == ShellTab.quickNote) continue;
-      if (tab == ShellTab.settings && _wide) continue;
-      return tab;
-    }
-    return ShellTab.files;
-  }
+  /// The tab the shell opens on and falls back to (#706).
+  ShellTab get _startTab => _nav.startTab(wide: _wide);
 
   /// Takes [layout] as the navigation (#536). The first one read opens
   /// the shell on its start destination ([_openOnStart]). A tab it hides
@@ -429,20 +373,15 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   /// it — gives way to [_startTab]; a note on screen stays, and its back
   /// lands there. A hidden tab opened on purpose stays.
   void _setNavigation(NavigationLayout layout) {
-    final first = _navigation == null;
-    final wasShown = _shown(_tab);
-    setState(() {
-      _navigation = layout;
-      _shownTabs = [
-        for (final d in visibleDestinations(layout, features: _features)) d.tab,
-      ];
-    });
-    if (first && !_tabRequested) return _openOnStart();
-    if (!wasShown || _shown(_tab)) return;
+    final first = _nav.layout == null;
+    final wasShown = _nav.shown(_tab);
+    setState(() => _nav.place(layout));
+    if (first && !_nav.requested) return _openOnStart();
+    if (!wasShown || _nav.shown(_tab)) return;
     final home = _startTab;
-    _hiddenTabReturn = home;
+    _nav.hiddenReturn = home;
     if (!_treeVisible) {
-      if (!_shown(_noteFromTab)) _noteFromTab = home;
+      if (!_nav.shown(_nav.noteFrom)) _nav.noteFrom = home;
       return;
     }
     _selectShellTab(home);
@@ -454,16 +393,8 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   /// again.
   void _onFeaturesChanged() {
     if (!mounted) return;
-    if (_navigation case final layout?) return _setNavigation(layout);
-    setState(() {
-      _shownTabs = [
-        for (final d in visibleDestinations(
-          const NavigationLayout(),
-          features: _features,
-        ))
-          d.tab,
-      ];
-    });
+    if (_nav.layout case final layout?) return _setNavigation(layout);
+    setState(() => _nav.place());
   }
 
   /// Opens the shell on the layout's start destination (#706), where a
@@ -472,45 +403,22 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   /// a wide window keeps it on Files, a phone's back lands on the start.
   void _openOnStart() {
     final start = _startTab;
-    _hiddenTabReturn = start;
+    _nav.hiddenReturn = start;
     if (!_treeVisible) {
-      if (!_wide) _noteFromTab = start;
+      if (!_wide) _nav.noteFrom = start;
       return;
     }
     _selectShellTab(start);
   }
-
-  /// The tab a hidden one was opened from (the palette, a widget, a
-  /// reminder): its back arrow returns there.
-  ShellTab _hiddenTabReturn = ShellTab.files;
 
   /// Leaves the hidden tab on screen for the one it was opened from, or
   /// the start destination when that one has been hidden since: as a tap
   /// on it, so the quick note comes back as a note, not as its empty tab.
   void _leaveHiddenTab() {
     _onDestinationSelected(
-      _shown(_hiddenTabReturn) ? _hiddenTabReturn : _startTab,
+      _nav.shown(_nav.hiddenReturn) ? _nav.hiddenReturn : _startTab,
     );
   }
-
-  /// Every tab visited so far: bodies mount on first visit and stay
-  /// mounted afterwards, so a switch only flips visibility instead of
-  /// disposing one state and inflating another mid-animation (the
-  /// 2026-09-08 device log put that inflate at 14-17 ms of frame build).
-  /// Query, results, and scroll therefore survive a switch, by choice.
-  final Set<ShellTab> _visitedTabs = <ShellTab>{ShellTab.files};
-
-  /// The tab active when the full-screen note opened (back returns there).
-  ShellTab _noteFromTab = ShellTab.files;
-
-  /// The content destination pinned in a pane (#712): Home or Todo on a
-  /// wide window, shown in [_contentPane] with the tree, the panes and
-  /// the dock beside it. Null when none is open; a phone keeps both as
-  /// full-screen destinations.
-  ShellTab? _contentTab;
-
-  /// Which pane holds [_contentTab]: the focused one when it opened.
-  int _contentPane = 0;
 
   /// Whether a note opened now would land in a pane the user can see:
   /// the panes are the files slot, and no content tab paints over them
@@ -519,11 +427,12 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
 
   /// Whether a content tab (Home or Todo) is what the panes show (#712).
   bool get _contentTabShows =>
-      _wide && _contentTab != null && _tab == _contentTab;
+      _wide && _nav.contentTab != null && _tab == _nav.contentTab;
 
-  /// Which pane draws [_contentTab]: the one it opened in, or pane 0 when
-  /// the window is not split and that pane is not on screen.
-  int get _contentPaneShown => _workspace.value.isSplit ? _contentPane : 0;
+  /// Which pane draws [ShellNavigationState.contentTab]: the one it opened
+  /// in, or pane 0 when the window is not split and that pane is not on
+  /// screen.
+  int get _contentPaneShown => _workspace.value.isSplit ? _nav.contentPane : 0;
 
   /// Shows [tab] in the focused pane (#712), where it is already open or
   /// not; the tree and dock stay put.
@@ -533,10 +442,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     _reviewTab.show(on: false);
     setState(() {
       _compare.hide();
-      _tab = tab;
-      _visitedTabs.add(tab);
-      _contentTab = tab;
-      _contentPane = pane;
+      _nav.pin(tab, pane);
       _workspace.focus(pane);
       _noteFade.closed();
     });
@@ -581,12 +487,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
 
   /// Closes the pinned content tab (#712): the tree keeps the rail.
   void _closeContentTab() {
-    setState(() {
-      _contentTab = null;
-      if (_tab == ShellTab.home || _tab == ShellTab.todo) {
-        _tab = ShellTab.files;
-      }
-    });
+    setState(_nav.closeContent);
   }
 
   /// The open library's personal dictionary (issue #60).
@@ -690,24 +591,20 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
         // The page it shows covers the compare tab's: that tab stays on
         // its chip (#906).
         _compare.hide();
-        _tab = tab;
-        _visitedTabs.add(tab);
-        _contentTab = tab;
-        _contentPane = _workspace.value.focused;
+        _nav.pin(tab, _workspace.value.focused);
         _noteFade.closed();
       });
     } else if (narrow &&
         _treeVisible &&
         !_fab.expanded &&
-        _visitedTabs.contains(tab) &&
-        _shown(_tab) &&
-        _shown(tab)) {
+        _nav.visited.contains(tab) &&
+        _nav.shown(_tab) &&
+        _nav.shown(tab)) {
       _noteFade.closed();
       _tab = tab;
     } else {
       setState(() {
-        _tab = tab;
-        _visitedTabs.add(tab);
+        _nav.visit(tab);
         _treeVisible = true;
         _fab.collapse();
         // A sidebar view has no island of its own: picking Search shows
@@ -1213,10 +1110,9 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       _selected = path;
       _selectedIsDir = false;
       _treeVisible = false;
-      _noteFromTab = _tab;
+      _nav.noteFrom = _tab;
       if (wide && !_panesShowNotes) {
-        _tab = ShellTab.files;
-        _visitedTabs.add(ShellTab.files);
+        _nav.visit(ShellTab.files);
       }
       _pendingAnchor = anchor;
       _pendingCaretOffset = caret;
@@ -1267,9 +1163,9 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   /// the panes would show neither it nor the notes.
   void _becameWide() {
     if ((_tab == ShellTab.home || _tab == ShellTab.todo) &&
-        _contentTab != _tab) {
-      _contentTab = _tab;
-      _contentPane = _workspace.value.focused;
+        _nav.contentTab != _tab) {
+      _nav.contentTab = _tab;
+      _nav.contentPane = _workspace.value.focused;
     }
   }
 
@@ -1716,7 +1612,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       onTabAction: (index, action, anchor) =>
           unawaited(_tabAction(tabs.tabs[index].path, action, anchor)),
     );
-    final content = _contentTab;
+    final content = _nav.contentTab;
     final hasContent = content != null && pane == _contentPaneShown;
     final hasCompare = _compare.heldIn(pane);
     final hasReview = _reviewTab.run != null && pane == _reviewPaneShown;
@@ -2252,7 +2148,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     _personalDictionary.dispose();
     _fab.dispose();
     _shellFocus.dispose();
-    _tabListenable.dispose();
+    _nav.dispose();
     super.dispose();
   }
 
@@ -2466,7 +2362,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     if (navigation != null) {
       final layout =
           navigation.device ?? navigation.library ?? const NavigationLayout();
-      if (layout != _navigation) _setNavigation(layout);
+      if (layout != _nav.layout) _setNavigation(layout);
     }
     if (journal != null && journal != _journal) {
       setState(() => _journal = journal);
@@ -2527,7 +2423,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       _selected = note.path;
       _selectedIsDir = note.isDir;
       _treeVisible = note.isDir;
-      _noteFromTab = _tab;
+      _nav.noteFrom = _tab;
       _pendingAnchor = null;
       _pendingCaretOffset = null;
       _pendingFind = null;
@@ -2564,8 +2460,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     // sight, as a note opened from the search is brought forward.
     if (_wide && !_panesShowNotes) {
       setState(() {
-        _tab = ShellTab.files;
-        _visitedTabs.add(ShellTab.files);
+        _nav.visit(ShellTab.files);
       });
     }
     final keys = HardwareKeyboard.instance;
@@ -2655,14 +2550,13 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       // Read the origin before the switch below: the chooser flow arrives
       // here from the quick note tab itself, and the home tab is its home;
       // a hidden tab is a page, not a place to come back to (#536).
-      final fromTab = _tab == ShellTab.quickNote || !_shown(_tab)
+      final fromTab = _tab == ShellTab.quickNote || !_nav.shown(_tab)
           ? _startTab
           : _tab;
       setState(() {
-        _tab = ShellTab.quickNote;
-        _visitedTabs.add(ShellTab.quickNote);
+        _nav.visit(ShellTab.quickNote);
         _showQuickNoteChooser = false;
-        _noteFromTab = fromTab;
+        _nav.noteFrom = fromTab;
         _selected = note.path;
         _selectedIsDir = false;
         _treeVisible = false;
@@ -2704,8 +2598,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
         !_showQuickNoteChooser) {
       if (_tab != ShellTab.quickNote) {
         setState(() {
-          _tab = ShellTab.quickNote;
-          _visitedTabs.add(ShellTab.quickNote);
+          _nav.visit(ShellTab.quickNote);
         });
       }
       return;
@@ -3107,9 +3000,9 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       onToggleSidebar: _toggleSidebar,
       shellFocus: _shellFocus,
       tab: _tab,
-      destinations: _destinations,
+      destinations: _nav.destinations,
       onDestinationSelected: _onDestinationSelected,
-      hiddenTab: !_shown(_tab),
+      hiddenTab: !_nav.shown(_tab),
       onLeaveHiddenTab: _leaveHiddenTab,
       // Back walks up one folder before it leaves the Files tab, while the
       // grid is inside one (#727).
@@ -3463,8 +3356,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       return;
     }
     setState(() {
-      _tab = _noteFromTab;
-      _visitedTabs.add(_noteFromTab);
+      _nav.visit(_nav.noteFrom);
       _treeVisible = true;
       _kind.reset();
       _noteFade.closed();
@@ -3489,22 +3381,22 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   ///
   /// The `_tab`-dependent chrome (title, Files actions, FAB, nav-bar
   /// selection, and the stack's visible index) rebuilds through a
-  /// [ValueListenableBuilder] on [_tabListenable], so a plain switch
-  /// refreshes it without a shell-wide `setState` (#46). [bodies] are built
-  /// once by the caller and reused by identity: the kept-alive bodies do not
-  /// depend on the current tab, so a switch keeps their instances and their
-  /// subtrees are skipped.
+  /// [ValueListenableBuilder] on [ShellNavigationState.tabListenable], so a
+  /// plain switch refreshes it without a shell-wide `setState` (#46).
+  /// [bodies] are built once by the caller and reused by identity: the
+  /// kept-alive bodies do not depend on the current tab, so a switch keeps
+  /// their instances and their subtrees are skipped.
   Widget _tabShell({
     required LibrarySession controller,
     required List<Widget> bodies,
   }) {
     return ValueListenableBuilder<ShellTab>(
-      valueListenable: _tabListenable,
+      valueListenable: _nav.tabListenable,
       builder: (context, tab, _) => Scaffold(
         appBar: AppBar(
           // A hidden tab opened anyway is a page, not a tab (#536): back
           // instead of a bar with nothing to select.
-          leading: _shown(tab)
+          leading: _nav.shown(tab)
               ? null
               : BackButton(
                   key: const Key('hidden-tab-back'),
@@ -3559,7 +3451,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
         }),
         floatingActionButton: _tabFab(),
         bottomNavigationBar: switch (controller.sync) {
-          _ when !_shown(tab) => null,
+          _ when !_nav.shown(tab) => null,
           final sync? when tab == ShellTab.files => Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -3582,7 +3474,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     return TourTarget(
       id: TourTargets.nav,
       child: ShellTabBar(
-        destinations: _destinations,
+        destinations: _nav.destinations,
         current: _tab,
         onDestinationSelected: _onDestinationSelected,
       ),
@@ -4328,7 +4220,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
                   // Built on the first visit, as its slot was: the
                   // search source (a background connection) is not
                   // opened for a library no one searched in.
-                  if (_visitedTabs.contains(ShellTab.search))
+                  if (_nav.visited.contains(ShellTab.search))
                     Visibility(
                       visible: _sidebarShowsSearch,
                       maintainState: true,
@@ -4337,7 +4229,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
                       child: _searchSlot(controller, tree: true),
                     ),
                   // The decks (#533): built on the first visit too.
-                  if (_visitedTabs.contains(ShellTab.study))
+                  if (_nav.visited.contains(ShellTab.study))
                     Offstage(
                       offstage: !_sidebarShowsStudy,
                       child: _study.view(context),
@@ -4501,7 +4393,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     final compare = _compare.shownIn(pane) && !review;
     final content =
         _contentTabShows && pane == _contentPaneShown && !compare && !review
-        ? _contentTab
+        ? _nav.contentTab
         : null;
     final listener = Listener(
       behavior: HitTestBehavior.translucent,
@@ -4609,7 +4501,8 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
               // The content tab stays mounted while a note shows: its
               // filter, its scroll and its place are kept, as a note
               // tab's are.
-              if (_contentTab case final tab? when pane == _contentPaneShown)
+              if (_nav.contentTab case final tab?
+                  when pane == _contentPaneShown)
                 HiddenSlot(
                   key: Key('content-pane-${tab.name}'),
                   hidden: content == null || review,
@@ -4797,7 +4690,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   /// The body for [tab], or a placeholder until its first visit (lazy so
   /// opening a library does not inflate all five tabs up front).
   Widget _tabBodyFor(ShellTab tab, LibrarySession controller) {
-    if (!_visitedTabs.contains(tab)) return const SizedBox.shrink();
+    if (!_nav.visited.contains(tab)) return const SizedBox.shrink();
     return switch (tab) {
       // Always scrim-wrapped (never toggled): see [ShellFab.withScrim].
       ShellTab.files => _fab.withScrim(_treePane(controller)),
@@ -4822,7 +4715,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
             : const SizedBox.shrink(),
       ShellTab.home => HomeScreen(
         host: _homeHost(controller),
-        tab: _tabListenable,
+        tab: _nav.tabListenable,
       ),
       ShellTab.study => _study.view(context),
       ShellTab.settings => SettingsTab(
@@ -4899,7 +4792,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   void _stepSearchHits(int direction) {
     // Nothing to step: the sidebar keeps the last results, but only while
     // it is the one showing.
-    if (_tab != ShellTab.search || !_visitedTabs.contains(ShellTab.search)) {
+    if (_tab != ShellTab.search || !_nav.visited.contains(ShellTab.search)) {
       return;
     }
     _searchCommands.stepBy(direction);
