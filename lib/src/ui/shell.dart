@@ -35,7 +35,6 @@ import 'package:niman/src/export/pdf_printer.dart';
 import 'package:niman/src/export/printed_todo_block.dart';
 import 'package:niman/src/frontmatter/note_kind.dart';
 import 'package:niman/src/frontmatter/parser.dart';
-import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/home/home_action.dart';
 import 'package:niman/src/journal/journal_settings.dart';
 import 'package:niman/src/library/new_item_folder.dart';
@@ -87,8 +86,6 @@ import 'package:niman/src/ui/features_link.dart';
 import 'package:niman/src/ui/folder_grid.dart';
 import 'package:niman/src/ui/hidden_slot.dart';
 import 'package:niman/src/ui/history/history_flow.dart';
-import 'package:niman/src/ui/history/history_labels.dart';
-import 'package:niman/src/ui/history/note_version_screen.dart';
 import 'package:niman/src/ui/home/action_runner.dart';
 import 'package:niman/src/ui/home/home_host.dart';
 import 'package:niman/src/ui/home/home_note_action.dart';
@@ -132,6 +129,7 @@ import 'package:niman/src/ui/search_task_events.dart';
 import 'package:niman/src/ui/settings_areas.dart';
 import 'package:niman/src/ui/settings_tab.dart';
 import 'package:niman/src/ui/shell_annotation_flow.dart';
+import 'package:niman/src/ui/shell_compare_tab.dart';
 import 'package:niman/src/ui/shell_create_flow.dart';
 import 'package:niman/src/ui/shell_detail_pane.dart';
 import 'package:niman/src/ui/shell_dock.dart';
@@ -533,7 +531,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     // (#1074), which lets go of the editor's keys (#770).
     _reviewTab.show(on: false);
     setState(() {
-      _compareShows = false;
+      _compare.hide();
       _tab = tab;
       _visitedTabs.add(tab);
       _contentTab = tab;
@@ -547,7 +545,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   /// the notes of [pane]: the chip, not a note tab, is what it shows.
   bool _chipCovers(int pane) =>
       (_contentTabShows && pane == _contentPaneShown) ||
-      _compareIn(pane) ||
+      _compare.shownIn(pane) ||
       _reviewIn(pane);
 
   /// Ctrl+W: closes the tab the focused pane shows (#1078) — the pinned chip
@@ -556,8 +554,8 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     final pane = _workspace.value.focused;
     if (_reviewIn(pane)) {
       _reviewTab.close();
-    } else if (_compareIn(pane)) {
-      _closeCompare();
+    } else if (_compare.shownIn(pane)) {
+      _compare.close();
     } else if (_contentTabShows && pane == _contentPaneShown) {
       _closeContentTab();
     } else {
@@ -690,7 +688,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       setState(() {
         // The page it shows covers the compare tab's: that tab stays on
         // its chip (#906).
-        _compareShows = false;
+        _compare.hide();
         _tab = tab;
         _visitedTabs.add(tab);
         _contentTab = tab;
@@ -1630,106 +1628,26 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     // All versions: the page, whatever the window.
     onOpenHistory: (path) => unawaited(_openHistoryPage(path)),
     onOpenNoteFromLink: (path) => _openNoteFromLink(path, null),
-    onOpenVersion: (path, version) => unawaited(_openCompare(path, version)),
+    onOpenVersion: (path, version) => unawaited(_compare.open(path, version)),
     onChanged: () {
       if (mounted) setState(() {});
     },
   );
 
-  /// A version of a note compared with the note, as a tab of a pane
-  /// (#712): the history's compare on a desktop, beside the dock that
-  /// lists it.
-  ({String path, HistoryVersion version, int pane})? _compare;
-
-  /// Whether [_compare] is what its pane shows, rather than a note tab.
-  bool _compareShows = false;
-
-  /// Which pane draws [_compare]: the one it opened in, or pane 0 when the
-  /// window is not split any more.
-  int get _comparePaneShown =>
-      _workspace.value.isSplit ? _compare?.pane ?? 0 : 0;
-
-  /// Whether [pane] shows the compare tab now.
-  bool _compareIn(int pane) =>
-      _compareShows && _compare != null && pane == _comparePaneShown;
-
-  /// Opens [version] of the note at [path] compared with it, in the
-  /// focused pane, the open notes saved first so the note is what is on
-  /// screen.
-  Future<void> _openCompare(String path, HistoryVersion version) async {
-    try {
-      await widget.unsavedTracker.saveAll();
-    } on Object catch (e) {
-      const AppLogger(name: 'history')
-          .warning('compare "$path": saving open notes failed: $e');
-    }
-    if (!mounted) return;
-    FocusManager.instance.primaryFocus?.unfocus();
-    _reviewTab.show(on: false);
-    setState(() {
-      _compare = (path: path, version: version, pane: _workspace.value.focused);
-      _compareShows = true;
-    });
-  }
-
-  /// The compare tab's chip, at the end of [pane]'s row (#712): the note
-  /// and the version's day, a click shows it again, the ✕ closes it.
-  Widget _compareChip(int pane) {
-    final compare = _compare!;
-    final w = _workspace.value;
-    return PinnedTabChip(
-      tabKey: const Key('compare-tab'),
-      closeKey: const Key('compare-tab-close'),
-      icon: Icons.history,
-      label:
-          '${p.basename(compare.path)} — '
-          '${historyWhen(compare.version.savedAt, DateTime.now())}',
-      maxLabelWidth: 240,
-      selected: _compareIn(pane),
-      focused: !w.isSplit || w.focused == pane,
-      onTap: () {
-        // A study in this pane lets go of it, as it does for a note tab
-        // (#976): the page would be drawn under the study otherwise.
-        if (pane == _reviewPaneShown) _reviewTab.show(on: false);
-        setState(() => _compareShows = true);
-      },
-      onClose: _closeCompare,
-    );
-  }
-
-  void _closeCompare() => setState(() {
-    _compare = null;
-    _compareShows = false;
-  });
-
-  /// The compare tab's page, in its pane, over the notes.
-  Widget _comparePage(LibrarySession controller) {
-    final compare = _compare!;
-    final ops = controller.ops;
-    if (ops == null) return const SizedBox.shrink();
-    return NoteVersionScreen(
-      key: ValueKey(('compare', compare.path, compare.version.number)),
-      ops: ops,
-      path: compare.path,
-      version: compare.version,
-      onRestored: () {
-        _closeCompare();
-        offerRestoreUndo(
-          context,
-          ops: ops,
-          path: compare.path,
-          restored: compare.version,
-          onRestored: () {
-            if (mounted) setState(() => _noteReloadToken++);
-          },
-        );
-      },
-    );
-  }
-
   /// The study beside the deck (#533, decision 9): a tab of the pane
   /// [_placeReview] picks, its chip at the end of that pane's row.
   late final ReviewTab _reviewTab = ref.read(reviewTabProvider);
+
+  /// A version of a note compared with the note, as a tab of a pane
+  /// (#712; issue #100 moved it into [ShellCompareTab]).
+  late final ShellCompareTab _compare = ShellCompareTab(
+    workspace: _workspace,
+    unsaved: widget.unsavedTracker,
+    reviewTab: _reviewTab,
+    reviewPane: () => _reviewPaneShown,
+    update: setState,
+    mounted: () => mounted,
+  );
 
   /// Which pane draws the study: the one it opened in, or pane 0 when the
   /// window is not split any more.
@@ -1746,7 +1664,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     if (_reviewTab.shows) {
       FocusManager.instance.primaryFocus?.unfocus();
       // A study opened over the compare tab's pane covers it.
-      if (_comparePaneShown == _reviewPaneShown) _compareShows = false;
+      if (_compare.paneShown == _reviewPaneShown) _compare.hide();
     }
     setState(() {});
   }
@@ -1919,7 +1837,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     );
     final content = _contentTab;
     final hasContent = content != null && pane == _contentPaneShown;
-    final hasCompare = _compare != null && pane == _comparePaneShown;
+    final hasCompare = _compare.heldIn(pane);
     final hasReview = _reviewTab.run != null && pane == _reviewPaneShown;
     if (!hasContent && !hasCompare && !hasReview) return bar;
     // At the row's far end, where it comes and goes without moving a note
@@ -1946,7 +1864,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
                     Flexible(
                       child: _study.chip(pane, selected: _reviewIn(pane)),
                     ),
-                  if (hasCompare) Flexible(child: _compareChip(pane)),
+                  if (hasCompare) Flexible(child: _compare.chip(pane)),
                   if (hasContent)
                     Flexible(child: _contentTabChip(content, pane)),
                 ],
@@ -2052,11 +1970,8 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   /// The showing tab when [_onWorkspaceChanged] last looked.
   String? _lastShown;
 
-  /// The pane that draws the compare tab and the note it shows, when
-  /// [_onWorkspaceChanged] last looked (#906).
-  ({int pane, String? path})? _lastComparePane;
-
-  /// The same for the study beside the deck (#533).
+  /// The pane that draws the study beside the deck and the note it shows,
+  /// when [_onWorkspaceChanged] last looked (#533).
   ({int pane, String? path})? _lastReviewPane;
 
   /// The workspace moved (#23): a tab shown, closed, renamed. On a wide
@@ -2068,22 +1983,9 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     final changed = shown != _lastShown;
     _lastShown = shown;
     // A note shown in the pane the compare tab covers takes the pane back
-    // (#906), whichever way it was opened: the tree, the search, a link.
-    // A note shown in the other pane of a split leaves it alone.
+    // (#906); the same for the study beside the deck (#533).
+    final compareCovered = _compare.coveredByWorkspace();
     final panes = _workspace.value.panes;
-    final comparePane = _comparePaneShown;
-    final comparePanePath = comparePane < panes.length
-        ? panes[comparePane].activeTab?.path
-        : null;
-    final comparePaneNow = (pane: comparePane, path: comparePanePath);
-    // A split opening or closing moves the compare tab to another pane,
-    // which is no note opened over it.
-    final compareCovered =
-        _compareShows &&
-        _lastComparePane?.pane == comparePane &&
-        _lastComparePane?.path != comparePanePath;
-    _lastComparePane = comparePaneNow;
-    // The same for the study beside the deck (#533).
     final reviewPane = _reviewPaneShown;
     final reviewPaneNow = (
       pane: reviewPane,
@@ -2104,7 +2006,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     if (!changed && !compareCovered && shape == _lastShape) return;
     _lastShape = shape;
     setState(() {
-      if (compareCovered) _compareShows = false;
+      if (compareCovered) _compare.hide();
       if (!_wide) return;
       if (changed) _resetNoteKind();
       if (shown != null) {
@@ -2132,7 +2034,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   void _takePane(int pane) {
     // Only the pane that shows the compare page gives it up: a version
     // stays open beside the note being edited in the other one (#975).
-    if (_compareIn(pane)) setState(() => _compareShows = false);
+    if (_compare.shownIn(pane)) setState(_compare.hide);
     if (pane == _reviewPaneShown) _reviewTab.show(on: false);
     if (_tab != ShellTab.files && !_sidebarShowsView) {
       _onDestinationSelected(ShellTab.files);
@@ -4722,7 +4624,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   /// blank.
   Widget _detailPane(LibrarySession controller, int pane) {
     final review = _reviewIn(pane);
-    final compare = _compareIn(pane) && !review;
+    final compare = _compare.shownIn(pane) && !review;
     final content =
         _contentTabShows && pane == _contentPaneShown && !compare && !review
         ? _contentTab
@@ -4844,7 +4746,14 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
                 ),
               // A version beside the note (#712): over the deck, which
               // keeps its notes as they were.
-              if (compare) _comparePage(controller),
+              if (compare)
+                _compare.page(
+                  context,
+                  controller,
+                  onRestored: () {
+                    if (mounted) setState(() => _noteReloadToken++);
+                  },
+                ),
               // A study beside the deck (#533): over the pane's notes too.
               if (review) _study.page(),
             ],
@@ -5355,7 +5264,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       (_dock.overlayShown ||
           _contentTabShows ||
           _sidebarShowsView ||
-          _compareShows && _compare != null ||
+          _compare.shows ||
           _reviewTab.shows ||
           !_workspace.value.focusedPane.isEmpty ||
           _gridCanStepUp);
@@ -5372,9 +5281,9 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       _immersive.fullScreen.value = null;
     } else if (_reviewTab.shows) {
       _reviewTab.close();
-    } else if (_compareShows && _compare != null) {
+    } else if (_compare.shows) {
       // The compare page covers the note: it goes before the note (#906).
-      _closeCompare();
+      _compare.close();
     } else if (_contentTabShows) {
       _closeContentTab();
     } else if (_sidebarShowsView) {
