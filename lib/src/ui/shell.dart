@@ -152,6 +152,7 @@ import 'package:niman/src/ui/shell_phone_chrome.dart';
 import 'package:niman/src/ui/shell_preview_actions.dart';
 import 'package:niman/src/ui/shell_row_actions.dart';
 import 'package:niman/src/ui/shell_search_slot.dart';
+import 'package:niman/src/ui/shell_selection.dart';
 import 'package:niman/src/ui/shell_study.dart';
 import 'package:niman/src/ui/shell_sync_actions.dart';
 import 'package:niman/src/ui/shell_tab_rows.dart';
@@ -322,16 +323,31 @@ final class LibraryShell extends ConsumerStatefulWidget {
 
 final class _LibraryShellState extends ConsumerState<LibraryShell>
     with WidgetsBindingObserver {
-  String? _selected;
-  bool _selectedIsDir = false;
   final ExpandedFolders _expanded = ExpandedFolders();
   bool _busy = false;
 
-  /// External-change reload requests for the open note (home-screen
-  /// widget toggles edit the file in a background isolate): bumped when
-  /// the already-open note is reopened and on app resume, so the
-  /// mounted NoteView re-reads the file when its buffer is clean.
-  int _noteReloadToken = 0;
+  /// What is selected and what shows, and what the note about to open is
+  /// asked (#1256): every transition between screens goes through it, and
+  /// the shell follows what it says changed.
+  late final ShellSelection _selection = ShellSelection(
+    nav: _nav,
+    expanded: _expanded,
+  )..addListener(_onSelectionChanged);
+
+  /// The selection moved: a note opened is asked its kind afresh and fades
+  /// in over the phone's tabs; one left gives the tabs back at once.
+  void _onSelectionChanged() {
+    switch (_selection.shift) {
+      case NoteShift.opened:
+        _kind.reset();
+        _noteFade.opened();
+      case NoteShift.closed:
+        _kind.reset();
+        _noteFade.closed();
+      case NoteShift.none:
+    }
+    if (mounted) setState(() {});
+  }
 
   /// What a frame the shell draws costs it (#324): the region above the two
   /// panes — the title bar, the tabs, the rail, the tree, the settings page.
@@ -374,7 +390,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     if (!wasShown || _nav.shown(_tab)) return;
     final home = _startTab;
     _nav.hiddenReturn = home;
-    if (!_treeVisible) {
+    if (!_selection.treeVisible) {
       if (!_nav.shown(_nav.noteFrom)) _nav.noteFrom = home;
       return;
     }
@@ -398,7 +414,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   void _openOnStart() {
     final start = _startTab;
     _nav.hiddenReturn = start;
-    if (!_treeVisible) {
+    if (!_selection.treeVisible) {
       if (!_wide) _nav.noteFrom = start;
       return;
     }
@@ -611,7 +627,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
         _noteFade.closed();
       });
     } else if (narrow &&
-        _treeVisible &&
+        _selection.treeVisible &&
         !_fab.expanded &&
         _nav.visited.contains(tab) &&
         _nav.shown(_tab) &&
@@ -621,12 +637,12 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     } else {
       setState(() {
         _nav.visit(tab);
-        _treeVisible = true;
+        _selection.showTree();
         _fab.collapse();
         // A sidebar view has no island of its own: picking Search shows
         // the sidebar island it lives in (#712).
         if (!narrow && (tab == ShellTab.search || tab == ShellTab.study)) {
-          _sidebarVisible = true;
+          _selection.showSidebar();
         }
         // Leaving any open note: the tabs show at once (issue #4).
         _noteFade.closed();
@@ -664,10 +680,6 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   /// subscription needed.
   ShellEditorSettings _editorSettings = ShellEditorSettings.defaults;
 
-  /// Whether the wide layout's tree pane shows (the title bar's toggle;
-  /// the rail always stays, T-PP-22).
-  bool _sidebarVisible = true;
-
   /// The library's quick note (library-relative path, or none): the
   /// note page's app bar labels it, now that the tabs no longer do
   /// (issue #73, item 1). Refreshed with the editor settings.
@@ -695,10 +707,6 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     if (!(ModalRoute.of(context)?.isCurrent ?? true)) return;
     _shellFocus.requestFocus();
   }
-
-  /// Phone mode (a window that is not [isWideShell]): which pane is visible.
-  /// `false` = the selected note is open full-screen.
-  bool _treeVisible = true;
 
   /// Whether the Search tab shows the Tags screen (T-M3-06) instead of
   /// the search box; the tabs button flips it and back.
@@ -759,7 +767,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     paneOnScreen: () =>
         _desktop &&
         _wide &&
-        _sidebarVisible &&
+        _selection.sidebarVisible &&
         _filesSlotVisible &&
         !_sidebarShowsView,
     gridFolder: () => _files.gridOn ? _files.gridStart : null,
@@ -776,7 +784,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     // save and its re-read, as shared text does in the quick note (#635).
     saveOpen: () => widget.unsavedTracker.saveAll(),
     onAppended: () {
-      if (mounted) setState(() => _noteReloadToken++);
+      if (mounted) _selection.reload();
     },
     attachmentsFolder: () => _editorSettings.attachmentsFolder,
     linkType: () => _editorSettings.linkType,
@@ -790,10 +798,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   void _onItemCreated(CreatedItem item) {
     if (!mounted) return;
     if (!item.isDir) return _showNote(item.path);
-    setState(() {
-      _selected = item.path;
-      _selectedIsDir = true;
-    });
+    _selection.selectFolder(item.path, expand: false);
   }
 
   /// The exports: a note, a folder, the library (#24).
@@ -847,7 +852,10 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   /// in the tree, else one picked.
   Future<void> _convertEpubCommand() async {
     final root = widget.controller.root;
-    final book = [_shownNote, _selected].nonNulls.where(isBook).firstOrNull;
+    final book = [
+      _shownNote,
+      _selection.path,
+    ].nonNulls.where(isBook).firstOrNull;
     if (root != null && book != null) {
       return await _epubConvert.run(context, p.join(root, book));
     }
@@ -880,7 +888,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
         mounted && await askLinkUpdate(context, notes),
     // The rewrite lands after the move's own reload (#859).
     onLinksRewritten: () {
-      if (mounted) setState(() => _noteReloadToken++);
+      if (mounted) _selection.reload();
     },
     onLinksProgress: _showLinksProgress,
     // The links in the tasks follow the move too (#1152).
@@ -893,7 +901,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     saveOpen: () => widget.unsavedTracker.saveAll(),
     creates: _createFlow,
     templates: _templateFlow,
-    selectedPath: () => _selected,
+    selectedPath: () => _selection.path,
     onMoved: (from, to) {
       // The open notes' editors follow the rename, and are told where they
       // came from for the frame that shows them under the new name (#1076).
@@ -901,46 +909,25 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       _kind.moved(from, to);
       WidgetsBinding.instance.addPostFrameCallback((_) => _noteKeys.settle());
       _workspace.moved(from, to);
-      // The folders open under a renamed or moved folder stay open under
-      // its new name (#1069).
-      setState(() => _expanded.moved(from, to));
-      // The move rewrote the links other notes hold to it, on disk (#507):
-      // an open one re-reads its file, which a clean buffer adopts — and
-      // every buffer is clean, the move having saved them first.
-      setState(() => _noteReloadToken++);
+      // The folders open under it stay open under its new name (#1069),
+      // and the selection follows a rename that is about it. The move
+      // rewrote the links other notes hold to it, on disk (#507): an open
+      // one re-reads its file, which a clean buffer adopts — and every
+      // buffer is clean, the move having saved them first.
+      _selection
+        ..moved(from, to)
+        ..reload();
       // The grid's own folder follows a rename or a move of it, or of a
       // folder above it (#727): F2 with no tile under the cursor renames
       // the selection, which is the folder shown.
       _files.moved(from, to);
-      // The selection follows only a rename that is about it: the note
-      // itself, or a folder it sits in. Renaming another row — a folder
-      // above nothing selected — used to select that row while the shell
-      // still took it for a note, and opened the folder as one.
-      final selected = _selected;
-      if (selected == null) return;
-      if (selected == from || selected.startsWith('$from/')) {
-        setState(() => _selected = to + selected.substring(from.length));
-      }
     },
     onDeleted: (path) {
       _workspace.deleted(path);
-      setState(() => _expanded.deleted(path));
-      if (_wide) {
-        // The workspace moved the showing tab on already; the tree only
-        // lets go of a selected folder that went with it.
-        final selected = _selected;
-        if (selected != null &&
-            _selectedIsDir &&
-            (selected == path || selected.startsWith('$path/'))) {
-          setState(() => _selected = null);
-        }
-        return;
-      }
-      setState(() {
-        _selected = null;
-        // Deleting the open note closes it: the tabs show at once.
-        _noteFade.closed();
-      });
+      final wide = _wide;
+      // Deleting the open note closes it: the tabs show at once.
+      if (!wide) _noteFade.closed();
+      _selection.deleted(path, wide: wide);
     },
     onOpenInNewTab: (path) => _workspace.show(path, newTab: true),
     onOpenBeside: (path) => _workspace.openBeside(path, SplitAxis.right),
@@ -995,23 +982,6 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   late final FeaturesHost _featuresHost = FeaturesHost(
     featureReconcile: () => _todoController.featureReconcile,
   );
-
-  /// A heading anchor to land on after the next note opens (T-M3-07).
-  String? _pendingAnchor;
-
-  /// Counts the links followed: a PDF or a book goes back to a link's
-  /// place when it moves (#282). Not [_noteReloadToken], which also moves
-  /// on a resume or a sync, when a file must stay where it is read.
-  int _linksFollowed = 0;
-
-  /// A template `{{cursor}}` offset to land the caret on after the created
-  /// note opens (#53). Fresh notes only: appended text joins an existing
-  /// file whose length the creation flow does not know.
-  int? _pendingCaretOffset;
-
-  /// The words a search result matched, for the note being opened to show
-  /// (#1045).
-  List<String>? _pendingFind;
 
   /// The open notes' kinds as their views report them, and the raw editor
   /// shown in place of a kind's GUI (T-TK-02, T-TK-05; issue #100 moved
@@ -1113,28 +1083,13 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     // target and must go before the transition, or its resize lands
     // mid-fade.
     if (_notePreview) FocusManager.instance.primaryFocus?.unfocus();
-    // Reopening the already-open note (a widget header tap after a row
-    // toggle): the path does not change, so the NoteView would keep its
-    // buffer — ask it to re-read the file instead.
-    final sameNote = _selected == path && !_selectedIsDir;
-    final wide = _wide;
-    setState(() {
-      if (preview) _opensInPreview = path;
-      _selected = path;
-      _selectedIsDir = false;
-      _treeVisible = false;
-      _nav.noteFrom = _tab;
-      if (wide && !_panesShowNotes) {
-        _nav.visit(ShellTab.files);
-      }
-      _pendingAnchor = anchor;
-      _pendingCaretOffset = caret;
-      _pendingFind = find;
-      if (followsLink) _linksFollowed++;
-      _kind.reset();
-      if (sameNote) _noteReloadToken++;
-      _noteFade.opened();
-    });
+    _selection.open(
+      path,
+      request: OpenRequest(anchor: anchor, caret: caret, find: find),
+      preview: preview,
+      followsLink: followsLink,
+      bringFiles: _wide && !_panesShowNotes,
+    );
   }
 
   /// Reads back what was left open in the library, and the tree as it was:
@@ -1185,8 +1140,9 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   /// The note on screen: on a wide window the showing tab, whatever the
   /// tree has selected (a folder leaves the tabs alone); on a phone the
   /// selection.
-  String? get _shownNote =>
-      _wide ? _workspace.value.activePath : (_selectedIsDir ? null : _selected);
+  String? get _shownNote => _wide
+      ? _workspace.value.activePath
+      : (_selection.isDir ? null : _selection.path);
 
   /// Whether the note on screen is a picture, a PDF or a book: shown by
   /// the pane rather than edited, so none of the editor's controls apply.
@@ -1256,7 +1212,8 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   /// The phone's full-screen note fading in over the tabs (issue #4;
   /// issue #100 moved it into [ShellNoteFade]).
   late final ShellNoteFade _noteFade = ShellNoteFade(
-    noteOnScreen: () => _selected != null && !_selectedIsDir && !_treeVisible,
+    noteOnScreen: () =>
+        _selection.path != null && !_selection.isDir && !_selection.treeVisible,
     update: setState,
     mounted: () => mounted,
   );
@@ -1307,8 +1264,8 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
             final root? => ReadingPositions(root),
             null => null,
           },
-          anchor: _pendingAnchor,
-          reloadToken: _linksFollowed,
+          anchor: _selection.request.anchor,
+          reloadToken: _selection.linksFollowed,
           linkType: _editorSettings.linkType,
           onAnnotate: _annotating ? _annotate : null,
           onConvertBook: _convertBook,
@@ -1345,7 +1302,9 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
           noteColumn: _editorSettings.noteColumn,
           autofocusEditor: _editorSettings.autofocusEditor,
           // The Files pane opened this note (#727): the caret goes in it.
-          caretRequest: selectedPath == _caretPath ? _caretRequest : 0,
+          caretRequest: selectedPath == _selection.caretPath
+              ? _selection.caretRequest
+              : 0,
           linkType: _editorSettings.linkType,
           newItemLocation: _editorSettings.newItemLocation,
           attachmentsFolder: _editorSettings.attachmentsFolder,
@@ -1365,9 +1324,9 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
           wikilinkSuggester: _wikilinkSuggester,
           tasks: _noteTasks,
           onOpenNote: _openNoteFromLink,
-          initialAnchor: _pendingAnchor,
-          initialCaretOffset: _pendingCaretOffset,
-          initialFind: _pendingFind,
+          initialAnchor: _selection.request.anchor,
+          initialCaretOffset: _selection.request.caret,
+          initialFind: _selection.request.find,
           kindMode: !_kind.raw,
           features: controller.features,
           onNoteKindChanged: _kind.reported,
@@ -1376,7 +1335,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
           onMoveToTasks: _moveToTasksOffer,
           unsavedTracker: widget.unsavedTracker,
           spellCheck: widget.spellCheck,
-          reloadToken: _noteReloadToken,
+          reloadToken: _selection.reloadToken,
           saveNote: noteSaverFor(controller),
           saveNoteStream: noteStreamSaverFor(controller),
           createMissingNote: missingNoteCreatorFor(controller),
@@ -1529,7 +1488,9 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   /// edge, past the base and the tree's island.
   double get _tabsStart =>
       ShellRail.panelStart +
-      (_sidebarVisible ? _editorSettings.treeWidth + ResizeDivider.width : 0);
+      (_selection.sidebarVisible
+          ? _editorSettings.treeWidth + ResizeDivider.width
+          : 0);
 
   /// The pinned chips at the end of [pane]'s row (#712), in their order:
   /// the study, the version, the content tab.
@@ -1554,8 +1515,8 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     takePane: _takePane,
     onTabAction: (path, action, anchor) =>
         unawaited(_tabAction(path, action, anchor)),
-    sidebarVisible: () => _sidebarVisible,
-    onToggleSidebar: _toggleSidebar,
+    sidebarVisible: () => _selection.sidebarVisible,
+    onToggleSidebar: _selection.toggleSidebar,
     dockToggle: _dockToggle,
   );
 
@@ -1667,14 +1628,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       if (compareCovered) _compare.hide();
       if (!_wide) return;
       if (changed) _kind.reset();
-      if (shown != null) {
-        if (_selected != shown || _selectedIsDir) {
-          _selected = shown;
-          _selectedIsDir = false;
-        }
-      } else if (!_selectedIsDir) {
-        _selected = null;
-      }
+      _selection.follow(shown);
     });
   }
 
@@ -1729,7 +1683,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   void _markOpenNote(String? root, String? selected) {
     final notes = widget.openNotes;
     if (notes == null) return;
-    final path = root == null || selected == null || _selectedIsDir
+    final path = root == null || selected == null || _selection.isDir
         ? null
         : p.join(root, selected);
     if (path == _openNote) return;
@@ -1817,9 +1771,9 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     _templateFlow = ShellTemplateFlow(
       controller: widget.controller,
       origin: () => (
-        selected: _selected,
-        isDir: _selectedIsDir,
-        treeVisible: _treeVisible,
+        selected: _selection.path,
+        isDir: _selection.isDir,
+        treeVisible: _selection.treeVisible,
       ),
       newItemRule: _newItemRule,
       guard: _guard,
@@ -1895,9 +1849,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     _inbound.listen(widget.controller.sync?.localChanges, (paths) {
       // Words added on another device count as soon as they arrive.
       _personalDictionary.synced(paths);
-      final open = _selected;
-      if (!mounted || open == null || _selectedIsDir) return;
-      if (paths.contains(open)) setState(() => _noteReloadToken++);
+      if (mounted) _selection.reloadOpen(paths);
     });
     _inbound.listen(
       widget.shortcuts.actions,
@@ -2003,6 +1955,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     _immersive.removeListener(_onImmersiveChanged);
     _immersive.dispose();
     _tabsListenable.dispose();
+    _selection.dispose();
     _expanded.dispose();
     _workspace.dispose();
     WidgetsBinding.instance.removeObserver(this);
@@ -2035,11 +1988,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     calendar: _calendarController,
     study: () => _studyMade,
     homeWidgets: _homeWidgets,
-    reloadOpenNote: () {
-      if (_selected != null && !_selectedIsDir) {
-        setState(() => _noteReloadToken++);
-      }
-    },
+    reloadOpenNote: () => _selection.reloadOpen(),
   );
 
   @override
@@ -2160,31 +2109,11 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     if (_wide) {
       if (note.isDir) {
         // A folder leaves the tabs alone: the note stays on screen.
-        setState(() {
-          _selected = note.path;
-          _selectedIsDir = true;
-          _expanded.add(note.path);
-        });
-        return;
+        return _selection.selectFolder(note.path);
       }
       _showFromTree(note.path, newTab: newTab);
     }
-    setState(() {
-      _selected = note.path;
-      _selectedIsDir = note.isDir;
-      _treeVisible = note.isDir;
-      _nav.noteFrom = _tab;
-      _pendingAnchor = null;
-      _pendingCaretOffset = null;
-      _pendingFind = null;
-      _kind.reset();
-      if (note.isDir) {
-        _noteFade.closed();
-        _expanded.add(note.path);
-      } else {
-        _noteFade.opened();
-      }
-    });
+    _selection.pick(note.path, isDir: note.isDir);
   }
 
   /// The tree's last plain click on a note, for telling a double click:
@@ -2294,7 +2223,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       if (pending != null) {
         await widget.unsavedTracker.saveAll();
         await ops.appendToNote(note.path, pending);
-        reload = _selected == note.path && !_selectedIsDir;
+        reload = _selection.selects(note.path);
       }
       if (!mounted) return;
       // Read the origin before the switch below: the chooser flow arrives
@@ -2303,19 +2232,10 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       final fromTab = _tab == ShellTab.quickNote || !_nav.shown(_tab)
           ? _startTab
           : _tab;
-      setState(() {
-        _nav.visit(ShellTab.quickNote);
-        _showQuickNoteChooser = false;
-        _nav.noteFrom = fromTab;
-        _selected = note.path;
-        _selectedIsDir = false;
-        _treeVisible = false;
-        // Already open: its buffer predates the appended text, so it
-        // re-reads the file instead of keeping what it had.
-        if (reload) _noteReloadToken++;
-        _kind.reset();
-        _noteFade.opened();
-      });
+      _showQuickNoteChooser = false;
+      // Already open: its buffer predates the appended text, so it
+      // re-reads the file instead of keeping what it had.
+      _selection.openQuickNote(note.path, from: fromTab, reload: reload);
       logNextFrame('shell', 'quick note open first frame');
     });
   }
@@ -2341,11 +2261,8 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     // an empty body by design — so the shortcut showed nothing at all.
     // The tree being up is what says the note is closed.
     final narrow = !isWideShell(context);
-    final onScreen = !narrow || !_treeVisible;
-    if (onScreen &&
-        _selected == path &&
-        !_selectedIsDir &&
-        !_showQuickNoteChooser) {
+    final onScreen = !narrow || !_selection.treeVisible;
+    if (onScreen && _selection.selects(path) && !_showQuickNoteChooser) {
       if (_tab != ShellTab.quickNote) {
         setState(() {
           _nav.visit(ShellTab.quickNote);
@@ -2364,16 +2281,6 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   void _openQuickNoteChooser() {
     setState(() => _showQuickNoteChooser = true);
     _selectShellTab(ShellTab.quickNote);
-  }
-
-  void _toggle(String path) {
-    setState(() {
-      if (_expanded.contains(path)) {
-        _expanded.remove(path);
-      } else {
-        _expanded.add(path);
-      }
-    });
   }
 
   Future<void> _guard(Future<void> Function() action) async {
@@ -2397,13 +2304,6 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     }
   }
 
-  /// A note a template asked to open in preview (#51).
-  ///
-  /// The flag belongs to the note's tab, and that tab is made by this
-  /// build's follow — one microtask after the flow asks. The request
-  /// waits here instead of being written into a tab that is not there.
-  String? _opensInPreview;
-
   /// Annotates a place of a book or a PDF in its companion note, over the
   /// file (#284).
   late final ShellAnnotationFlow _annotations = ShellAnnotationFlow(
@@ -2413,7 +2313,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     // The companion may be the note on screen, or in the tree.
     onWritten: () {
       widget.controller.notify();
-      if (mounted) setState(() => _noteReloadToken++);
+      if (mounted) _selection.reload();
     },
     onOpen: (path, offset) =>
         _onTemplateNoteFiled(path: path, preview: false, caret: offset),
@@ -2437,7 +2337,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       // The sidecar may be the note on screen, or in the tree.
       onWritten: () {
         widget.controller.notify();
-        if (mounted) setState(() => _noteReloadToken++);
+        if (mounted) _selection.reload();
       },
       onOpen: _openRecognizedText,
     ),
@@ -2548,8 +2448,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     path: path,
     window: widget.window,
     onRestored: () {
-      if (!mounted || _selected != path) return;
-      setState(() => _noteReloadToken++);
+      if (mounted && _selection.path == path) _selection.reload();
     },
   );
 
@@ -2564,7 +2463,9 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     // An audio note's body is the clip document, not prose (#840).
     tidy: _kind.type != 'audio',
     recognize:
-        _offersOcr && _shownIsAttachment && isRecognizableFile(_selected ?? ''),
+        _offersOcr &&
+        _shownIsAttachment &&
+        isRecognizableFile(_selection.path ?? ''),
     // A touch device has no key for the palette (#206), the phone's and
     // the tablet's alike (#849); a desktop window has.
     palette: _paletteByTouch,
@@ -2584,7 +2485,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       _ => null,
     },
     onSelected: (action) {
-      final path = _selected;
+      final path = _selection.path;
       if (path == null) return;
       final anchor = menuAnchorOf(button);
       unawaited(switch (action) {
@@ -2700,35 +2601,30 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   Widget build(BuildContext context) {
     DeviceShapeScope.debugCheck(context);
     final controller = widget.controller;
-    final selectedPath = _selected;
+    final selectedPath = _selection.path;
     final narrow = !isWideShell(context);
     _markOpenNote(controller.root, _shownNote);
     // Notes stay open until they are closed: a folder selected, or the
     // phone back on its tree, closes none (#23). On the phone a note
     // opened joins the ones already open, for the switcher to reach.
-    _workspace.follow(
-      _selectedIsDir ? null : selectedPath,
-      keepOnNone: true,
-      alongside: !_wide,
-    );
+    _workspace.follow(_selection.note, keepOnNone: true, alongside: !_wide);
     // A template's `open: preview` (#51) belongs to the tab the follow
     // above is about to make, so it is asked for once that has landed.
-    if (_opensInPreview case final path?) {
-      _opensInPreview = null;
+    if (_selection.takePreview() case final path?) {
       _workspace.showPreviewWhenOpen(path);
     }
     _leaveZenIfEmpty();
     final props = ShellLayoutProps(
       controller: controller,
       selectedPath: selectedPath,
-      selectedIsDir: _selectedIsDir,
-      treeVisible: _treeVisible,
+      selectedIsDir: _selection.isDir,
+      treeVisible: _selection.treeVisible,
       previewToggleVisible: _previewToggleVisible,
       noteHidingTabs: _noteFade.hidingTabs,
       noteFade: ShellNoteFade.duration,
       shortcutBindings: _appShortcutBindings(),
       onCloseFullScreenNote: _closeFullScreenNote,
-      isQuickNote: _selected != null && _selected == _quickNotePath,
+      isQuickNote: selectedPath != null && selectedPath == _quickNotePath,
       noteBarActions: _noteBarActions(),
       buildTabShell: () => _phoneChrome.scaffold(
         context,
@@ -2747,8 +2643,8 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
               handlers: _commandHandlers,
               features: () => _features,
             ),
-      sidebarVisible: _sidebarVisible,
-      onToggleSidebar: _toggleSidebar,
+      sidebarVisible: _selection.sidebarVisible,
+      onToggleSidebar: _selection.toggleSidebar,
       shellFocus: _shellFocus,
       tab: _tab,
       destinations: _nav.destinations,
@@ -2760,7 +2656,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       backStepAvailable:
           narrow &&
           _tab == ShellTab.files &&
-          _treeVisible &&
+          _selection.treeVisible &&
           _files.gridInFolder,
       onBackStep: _files.gridUp,
       onSwitchLibrary: () => _windows.switchLibrary(context),
@@ -2853,8 +2749,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   );
 
   /// The note on the phone's screen, if one is.
-  String? get _phoneNote =>
-      _selected != null && !_selectedIsDir && !_treeVisible ? _selected : null;
+  String? get _phoneNote => _selection.noteOnScreen;
 
   /// The phone's open-notes switcher: every note left open, the one on
   /// screen marked, each with its unsaved dot and a close.
@@ -2869,7 +2764,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     onCloseAll: () {
       _workspace.controller.update((w) => w.closeAll());
       if (_phoneNote != null) _closeFullScreenNote();
-      setState(() => _selected = null);
+      _selection.clear();
     },
     // A phone opens every note alongside the others: the new one joins
     // them once it is named, and a cancel leaves nothing behind (#1133).
@@ -2887,7 +2782,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       return;
     }
     if (wasShown) _closeFullScreenNote();
-    if (_selected == path) setState(() => _selected = null);
+    _selection.clearIf(path);
   }
 
   /// The open notes holding unsaved edits, library-relative.
@@ -3044,12 +2939,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       _immersive.fullScreen.value = null;
       return;
     }
-    setState(() {
-      _nav.visit(_nav.noteFrom);
-      _treeVisible = true;
-      _kind.reset();
-      _noteFade.closed();
-    });
+    _selection.close();
     logNextFrame('shell', 'note close first frame');
   }
 
@@ -3067,7 +2957,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     }
     // Tapping the tab a note was opened from closes the note: the tab is
     // already selected, so nothing else would happen.
-    if (tab == _tab && !_treeVisible) {
+    if (tab == _tab && !_selection.treeVisible) {
       _closeFullScreenNote();
       return;
     }
@@ -3076,16 +2966,12 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
 
   /// The title bar's text: the app, and the open note when there is one.
   String get _windowTitle {
-    final path = _selected;
-    if (path == null || _selectedIsDir) return AppStrings.appTitle;
+    final path = _selection.note;
+    if (path == null) return AppStrings.appTitle;
     return '${AppStrings.appTitle} — ${p.basename(path)}';
   }
 
   /// Shows/hides the wide tree pane; the rail stays (T-PP-22).
-  void _toggleSidebar() {
-    setState(() => _sidebarVisible = !_sidebarVisible);
-  }
-
   /// The app accelerators (T-PP-10), built from the shared registry so the
   /// installed keys and the in-app reference cannot drift.
   Map<ShortcutActivator, VoidCallback> _appShortcutBindings() =>
@@ -3282,7 +3168,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       AppCommand.markdownCheatsheet: () => unawaited(_openCheatsheet()),
       AppCommand.welcomeTour: () => unawaited(resumeTour(context, ref)),
       AppCommand.welcomeDeck: () => unawaited(showWelcomeDeck(context)),
-      AppCommand.toggleSidebar: _toggleSidebar,
+      AppCommand.toggleSidebar: _selection.toggleSidebar,
       // The tabs are the wide layout's (#23); a phone has one note.
       AppCommand.closeTab: _closeShownTab,
       AppCommand.nextTab: () => _cycleTab(1),
@@ -3314,7 +3200,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       AppCommand.focusSearch: _focusSearchField,
       AppCommand.revealInTree: _revealActiveInTree,
       AppCommand.renameNote: () =>
-          unawaited(_rowActions.rename(context, _selected ?? note)),
+          unawaited(_rowActions.rename(context, _selection.path ?? note)),
       AppCommand.moveNote: () => unawaited(_rowActions.move(context, note)),
       AppCommand.deleteNote: () => unawaited(_rowActions.delete(context, note)),
       AppCommand.noteHistory: () => unawaited(_openHistory(note!)),
@@ -3367,17 +3253,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   /// Shows the library folder [folder] (relative; '' is the root) in the
   /// tree: the Files tab, the tree open, the folder and every folder
   /// above it expanded, and it selected.
-  void _revealFolder(String folder) {
-    setState(() {
-      _tab = ShellTab.files;
-      _sidebarVisible = true;
-      if (folder.isEmpty) return;
-      _expanded.addWithAncestors(folder);
-      _selected = folder;
-      _selectedIsDir = true;
-      _treeVisible = true;
-    });
-  }
+  void _revealFolder(String folder) => _selection.revealFolder(folder);
 
   /// Tidies the open note's Markdown (#227).
   ///
@@ -3470,7 +3346,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       }
       await ops.saveNote(path, tidied);
       if (!mounted) return;
-      setState(() => _noteReloadToken++);
+      _selection.reload();
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(AppStrings.formatNoteDone)));
     });
@@ -3496,7 +3372,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
           .tidyNote(rel, rules: _editorSettings.lintRules)
           .then(
             (changed) {
-              if (changed && mounted) setState(() => _noteReloadToken++);
+              if (changed && mounted) _selection.reload();
             },
             onError: (Object error) {
               const AppLogger(name: 'shell').warning('tidy of $rel: $error');
@@ -3665,7 +3541,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     tabRows: _tabRows,
     settings: () => _editorSettings,
     inZen: () => _inZen,
-    sidebarVisible: () => _sidebarVisible,
+    sidebarVisible: () => _selection.sidebarVisible,
     dockWidth: () => _dockWidth,
     customTitleBar: () => widget.window.customTitleBar,
     libraryName: () => _libraryName,
@@ -3833,8 +3709,8 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
                     autofocusEditor: _editorSettings.autofocusEditor,
                     // The Files pane opened a note (#727): that tab's own
                     // view is asked for the caret, and no other.
-                    caretPath: _caretPath,
-                    caretRequest: _caretRequest,
+                    caretPath: _selection.caretPath,
+                    caretRequest: _selection.caretRequest,
                     linkType: _editorSettings.linkType,
                     newItemLocation: _editorSettings.newItemLocation,
                     attachmentsFolder: _editorSettings.attachmentsFolder,
@@ -3861,8 +3737,8 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
                     onMoveToTasks: _moveToTasksOffer,
                     unsavedTracker: widget.unsavedTracker,
                     spellCheck: widget.spellCheck,
-                    reloadToken: _noteReloadToken,
-                    linksFollowed: _linksFollowed,
+                    reloadToken: _selection.reloadToken,
+                    linksFollowed: _selection.linksFollowed,
                     onAnnotate: _annotating ? _annotate : null,
                     onConvertBook: _convertBook,
                     ocr: _ocrActions,
@@ -3900,7 +3776,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
                   context,
                   controller,
                   onRestored: () {
-                    if (mounted) setState(() => _noteReloadToken++);
+                    if (mounted) _selection.reload();
                   },
                 ),
               // A study beside the deck (#533): over the pane's notes too.
@@ -3981,14 +3857,18 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
               memento: tab.memento,
               showWysiwyg: editor == EditorKind.wysiwyg,
               showPreview: tab.memento.preview ?? false,
-              anchor: focused && tab.path == showing ? _pendingAnchor : null,
+              anchor: focused && tab.path == showing
+                  ? _selection.request.anchor
+                  : null,
               // The wide deck's own door for it: the phone's single note
               // view took it, and the tabs never did, so a template's
               // `{{cursor}}` landed nowhere on the desktop.
               caret: focused && tab.path == showing
-                  ? _pendingCaretOffset
+                  ? _selection.request.caret
                   : null,
-              find: focused && tab.path == showing ? _pendingFind : null,
+              find: focused && tab.path == showing
+                  ? _selection.request.find
+                  : null,
             );
           }(),
     ];
@@ -4157,14 +4037,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
 
   /// Shows the note at [path] (library-relative) as the tree's selected
   /// row (#712): the Files view in the sidebar, every folder above it open.
-  void _revealInTree(String path) {
-    _revealFolder(parentOf(path));
-    setState(() {
-      _selected = path;
-      _selectedIsDir = false;
-      _treeVisible = true;
-    });
-  }
+  void _revealInTree(String path) => _selection.revealNote(path);
 
   /// What the shell asks Search to do besides showing (#712): the field's
   /// focus and the step through the hits.
@@ -4184,7 +4057,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   /// the sidebar first on a wide window.
   void _focusSearchField() {
     _selectShellTab(ShellTab.search);
-    if (_wide && !_sidebarVisible) setState(() => _sidebarVisible = true);
+    if (_wide) _selection.showSidebar();
     // The screen may mount in this frame: ask once it has.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _searchCommands.focus();
@@ -4285,7 +4158,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   late final ShellFilesPane _files = ShellFilesPane(
     ocrQueue: widget.ocrQueue,
     settings: () => _editorSettings,
-    selected: () => _selected,
+    selected: () => _selection.path,
     treeFolder: () => _treeFolder,
     expanded: _expanded,
     focusNode: _treeFocus,
@@ -4295,23 +4168,12 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     rows: _rowActions,
     marked: _markedActions,
     editing: _treeEditing,
-    onToggle: _toggle,
+    onToggle: _selection.toggleFolder,
     onSelect: _selectFromPane,
     onOpenInNewTab: (note) => _select(note, newTab: true),
-    selectFolder: (path) {
-      _selected = path.isEmpty ? null : path;
-      _selectedIsDir = path.isNotEmpty;
-      if (path.isNotEmpty) _expanded.add(path);
-    },
+    selectFolder: _selection.selectFolder,
     update: setState,
   );
-
-  /// The note the Files pane last opened, and how many times it has asked
-  /// for the caret in it (#727): the note view takes the caret when the
-  /// number changes for its own path, so another pane's editor, or a tab
-  /// kept alive behind, is left where it is.
-  String? _caretPath;
-  int _caretRequest = 0;
 
   /// Whether this is a desktop: the keyboard is always there, and a click
   /// on a note can put the caret in it (#727). On a phone the tap that
@@ -4326,11 +4188,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
 
   /// The folder the tree is on: the selected folder, or the selected
   /// note's folder, or the root.
-  String get _treeFolder {
-    final selected = _selected;
-    if (selected == null) return '';
-    return _selectedIsDir ? selected : parentOf(selected);
-  }
+  String get _treeFolder => _selection.folder;
 
   /// Switches the Files pane between the tree and the grid (#727), and
   /// persists the choice for this device. The grid starts in the tree's
@@ -4359,16 +4217,8 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   /// not where the keyboard should end up: the row's own click leaves the
   /// keys where they are for a note, and this is what puts them in it.
   void _selectFromPane(Note note) {
-    if (!note.isDir && _desktop) _requestCaret(note.path);
+    if (!note.isDir && _desktop) _selection.requestCaret(note.path);
     _select(note);
-  }
-
-  /// Asks the note at [path] for the caret: the Files pane opened it.
-  void _requestCaret(String path) {
-    setState(() {
-      _caretPath = path;
-      _caretRequest++;
-    });
   }
 
   /// Whether the palette is reached by touch (#206, #849): on a window
