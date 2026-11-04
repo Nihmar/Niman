@@ -69,7 +69,6 @@ import 'package:niman/src/ui/capture/capture_services.dart';
 import 'package:niman/src/ui/capture/paste_markdown_flow.dart';
 import 'package:niman/src/ui/cheatsheet/cheatsheet_screen.dart';
 import 'package:niman/src/ui/close_to_tray.dart';
-import 'package:niman/src/ui/create_kinds.dart';
 import 'package:niman/src/ui/deferred_listenable.dart';
 import 'package:niman/src/ui/device_shape.dart';
 import 'package:niman/src/ui/dismiss_chain.dart';
@@ -155,12 +154,12 @@ import 'package:niman/src/ui/shell_palette.dart';
 import 'package:niman/src/ui/shell_personal_dictionary.dart';
 import 'package:niman/src/ui/shell_preview_actions.dart';
 import 'package:niman/src/ui/shell_row_actions.dart';
-import 'package:niman/src/ui/shell_row_menu.dart';
 import 'package:niman/src/ui/shell_search_slot.dart';
 import 'package:niman/src/ui/shell_study.dart';
 import 'package:niman/src/ui/shell_sync_actions.dart';
 import 'package:niman/src/ui/shell_template_flow.dart';
 import 'package:niman/src/ui/shell_tree_footer.dart';
+import 'package:niman/src/ui/shell_tree_menus.dart';
 import 'package:niman/src/ui/shell_windows.dart';
 import 'package:niman/src/ui/shell_workspace.dart';
 import 'package:niman/src/ui/shell_zen.dart';
@@ -982,6 +981,18 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   /// What several marked tree rows do together (#712).
   late final ShellMarkedActions _markedActions = ShellMarkedActions(
     _rowActions,
+  );
+
+  /// The tree's and the grid's menus: a row's, the empty space's, and the
+  /// footer's New menu (issue #100 moved them into [ShellTreeMenus]).
+  late final ShellTreeMenus _treeMenus = ShellTreeMenus(
+    rows: _rowActions,
+    exports: _exportFlow,
+    journal: _journalFlow,
+    capture: _captureFlow,
+    features: () => _features,
+    offersOcr: () => _offersOcr,
+    wide: () => _wide,
   );
 
   late final ShellRowActions _rowActions = ShellRowActions(
@@ -3122,58 +3133,6 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     return _noteTasks.add(path, selection: _panelNote?.selectedText ?? '');
   }
 
-  /// Long-press context menu on a tree row (T-UI-05): the note actions,
-  /// scoped to the pressed row. New note/folder target the row's folder
-  /// (issue #100 moved the menu itself into `shell_row_menu.dart`).
-  /// A pointer's menu grows from [anchor], the row held.
-  Future<void> _showRowMenu(Note note, Rect? anchor) async {
-    final here = note.isDir ? note.path : parentOf(note.path);
-    final isQuickNote = await widget.controller.ops?.quickNotePath == note.path;
-    if (!mounted) return;
-    final action = await showRowMenuSheet(
-      context,
-      note: note,
-      isQuickNote: isQuickNote,
-      offersRecognize: _offersOcr,
-      features: _features,
-      anchor: anchor,
-    );
-    if (!mounted) return;
-    await _rowActions.run(context, action, note, here, anchor: anchor);
-  }
-
-  /// The tree's right-click menus, which one opened and when: a row's and
-  /// the background's were both seen on one click (0.0.9 test round).
-  static const AppLogger _treeMenuLog = AppLogger(name: 'tree.menu');
-
-  /// Right-click context menu on a tree row (T-PP-20): the same actions
-  /// at the cursor instead of in the phone's bottom sheet.
-  Future<void> _showRowMenuAt(Note note, Offset position) async {
-    _treeMenuLog.debug('row menu asked: "${note.path}"');
-    final here = note.isDir ? note.path : parentOf(note.path);
-    final isQuickNote = await widget.controller.ops?.quickNotePath == note.path;
-    if (!mounted) return;
-    final action = await showRowMenuAt(
-      context,
-      note: note,
-      isQuickNote: isQuickNote,
-      position: position,
-      offersNewTab: _wide,
-      offersRecognize: _offersOcr,
-      features: _features,
-    );
-    _treeMenuLog.debug('row menu closed: "${note.path}" -> $action');
-    if (!mounted) return;
-    await _rowActions.run(
-      context,
-      action,
-      note,
-      here,
-      anchor: menuAnchorAt(position),
-    );
-    _treeMenuLog.debug('row menu action done: "${note.path}" $action');
-  }
-
   /// Opens the history of the note at [path]; a restore reloads the open
   /// note when it is that one.
   /// The history of the note at [path]: on a desktop with the dock, the
@@ -4426,7 +4385,8 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       (w) => w.withDock(open: true, pane: DockPane.journal),
     ),
     openTasks: _openTodo,
-    showRowMenuAt: _showRowMenuAt,
+    showRowMenuAt: (note, position) =>
+        _treeMenus.rowMenuAt(context, note, position),
   );
 
   /// The floating windows over the shell: Settings, the libraries.
@@ -5288,7 +5248,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       id: TourTargets.create,
       child: TreeFooterBar(
         controller: controller,
-        onNewItem: _onNewItem,
+        onNewItem: (item) => _treeMenus.newItem(context, item),
         syncButton: _syncActions.button(context, controller),
         viewToggle: TreeViewToggle(
           view: _editorSettings.treeView,
@@ -5461,71 +5421,6 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     }
   }
 
-  /// The right-click menu on the grid's empty space: a note, a note from
-  /// a template or a folder in the folder shown, and that folder's export
-  /// (the library's at the root).
-  Future<void> _showGridBackgroundMenuAt(String folder, Offset position) async {
-    final here = folder.isEmpty ? null : folder;
-    final action = await showTreeBackgroundMenuAt(
-      context,
-      position: position,
-      here: here,
-      features: _features,
-    );
-    if (!mounted) return;
-    switch (action) {
-      case 'note':
-        await _createFlow.createNote(context, parent: folder);
-      case 'template':
-        await _templateFlow.createFromTemplate(context, parent: folder);
-      case 'folder':
-        await _createFlow.createFolder(context, parent: folder);
-      case 'exportfolder':
-        await _exportFlow.runFolderExport(
-          context,
-          folder,
-          library: false,
-          anchor: menuAnchorAt(position),
-        );
-      case 'exportlibrary':
-        await _exportFlow.runFolderExport(
-          context,
-          '',
-          library: true,
-          anchor: menuAnchorAt(position),
-        );
-      default:
-        // The kinds a folder creates in place: one table (#1013).
-        await createKindFromMenu(action, _createFlow, context, parent: folder);
-    }
-  }
-
-  /// Runs the create flow behind a tree-footer menu entry.
-  void _onNewItem(NewShellItem item) {
-    switch (item) {
-      case NewShellItem.journal:
-        unawaited(_journalFlow.openToday(context));
-      case NewShellItem.note:
-        unawaited(_createFlow.createNote(context));
-      case NewShellItem.listNote:
-        unawaited(_createFlow.createListNote(context));
-      case NewShellItem.audioNote:
-        unawaited(_createFlow.createAudioNote(context));
-      case NewShellItem.slides:
-        unawaited(_createFlow.createSlidesNote(context));
-      case NewShellItem.flashcards:
-        unawaited(_createFlow.createFlashcards(context));
-      case NewShellItem.kanban:
-        unawaited(_createFlow.createKanban(context));
-      case NewShellItem.template:
-        unawaited(_templateFlow.createFromTemplate(context));
-      case NewShellItem.captureWebPage:
-        unawaited(_captureFlow.capture(context));
-      case NewShellItem.folder:
-        unawaited(_createFlow.createFolder(context));
-    }
-  }
-
   /// The tree pane: the action bar and the note tree — the whole body on
   /// phones, the left column on wide screens. Switched to the grid (#727),
   /// it is the same pane: the breadcrumb and the folder's tiles.
@@ -5562,11 +5457,13 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
               onToggle: _toggle,
               onSelect: _selectFromPane,
               onOpenInNewTab: (note) => _select(note, newTab: true),
-              onLongPress: _showRowMenu,
+              onLongPress: (note, anchor) =>
+                  _treeMenus.rowMenu(context, note, anchor),
               onSecondaryTapDown: (note, details) =>
-                  _showRowMenuAt(note, details.globalPosition),
-              onBackgroundSecondaryTapUp: (details) =>
-                  unawaited(_showTreeBackgroundMenuAt(details.globalPosition)),
+                  _treeMenus.rowMenuAt(context, note, details.globalPosition),
+              onBackgroundSecondaryTapUp: (details) => unawaited(
+                _treeMenus.treeBackgroundAt(context, details.globalPosition),
+              ),
               onMove: (paths, folder) =>
                   unawaited(_markedActions.moveTo(context, paths, folder)),
               onRename: (path) => unawaited(_rowActions.rename(context, path)),
@@ -5597,12 +5494,13 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
                 onGoTo: _gridGoTo,
                 onUp: _gridUp,
                 onFolderResolved: (path) => setState(() => _gridFolder = path),
-                onLongPress: _showRowMenu,
+                onLongPress: (note, anchor) =>
+                    _treeMenus.rowMenu(context, note, anchor),
                 onSecondaryTapDown: (note, details) =>
-                    _showRowMenuAt(note, details.globalPosition),
+                    _treeMenus.rowMenuAt(context, note, details.globalPosition),
                 onOpenInNewTab: (note) => _select(note, newTab: true),
-                onBackgroundSecondaryTapUp: (folder, details) =>
-                    _showGridBackgroundMenuAt(folder, details.globalPosition),
+                onBackgroundSecondaryTapUp: (folder, details) => _treeMenus
+                    .gridBackgroundAt(context, folder, details.globalPosition),
                 onMove: (paths, folder) =>
                     unawaited(_markedActions.moveTo(context, paths, folder)),
                 onRename: (path) =>
@@ -5669,35 +5567,4 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     ),
     null => null,
   };
-
-  /// The right-click menu on the tree's empty space: a note, a note from a
-  /// template or a folder, at the library's root.
-  Future<void> _showTreeBackgroundMenuAt(Offset position) async {
-    _treeMenuLog.debug('background menu asked');
-    final action = await showTreeBackgroundMenuAt(
-      context,
-      position: position,
-      features: _features,
-    );
-    _treeMenuLog.debug('background menu closed -> $action');
-    if (!mounted) return;
-    switch (action) {
-      case 'note':
-        await _createFlow.createNote(context, parent: '');
-      case 'template':
-        await _templateFlow.createFromTemplate(context, parent: '');
-      case 'folder':
-        await _createFlow.createFolder(context, parent: '');
-      case 'exportlibrary':
-        await _exportFlow.runFolderExport(
-          context,
-          '',
-          library: true,
-          anchor: menuAnchorAt(position),
-        );
-      default:
-        // The kinds a folder creates in place: one table (#1013).
-        await createKindFromMenu(action, _createFlow, context, parent: '');
-    }
-  }
 }
