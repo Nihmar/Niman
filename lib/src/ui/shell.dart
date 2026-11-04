@@ -80,7 +80,6 @@ import 'package:niman/src/ui/export_todo_blocks.dart';
 import 'package:niman/src/ui/feature_off.dart';
 import 'package:niman/src/ui/features/features_host.dart';
 import 'package:niman/src/ui/features_link.dart';
-import 'package:niman/src/ui/folder_grid.dart';
 import 'package:niman/src/ui/hidden_slot.dart';
 import 'package:niman/src/ui/history/history_flow.dart';
 import 'package:niman/src/ui/home/action_runner.dart';
@@ -132,6 +131,7 @@ import 'package:niman/src/ui/shell_editor_settings.dart';
 import 'package:niman/src/ui/shell_export_flow.dart';
 import 'package:niman/src/ui/shell_fab.dart';
 import 'package:niman/src/ui/shell_features_intro.dart';
+import 'package:niman/src/ui/shell_files_pane.dart';
 import 'package:niman/src/ui/shell_home_widgets.dart';
 import 'package:niman/src/ui/shell_import_flow.dart';
 import 'package:niman/src/ui/shell_inbound.dart';
@@ -176,7 +176,6 @@ import 'package:niman/src/ui/tour/tour_host.dart';
 import 'package:niman/src/ui/tour/tour_steps.dart';
 import 'package:niman/src/ui/tour/tour_targets.dart';
 import 'package:niman/src/ui/trash.dart';
-import 'package:niman/src/ui/tree.dart';
 import 'package:niman/src/ui/tree_click_clock.dart';
 import 'package:niman/src/ui/tree_header.dart';
 import 'package:niman/src/ui/tree_view_toggle.dart';
@@ -766,7 +765,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
         _sidebarVisible &&
         _filesSlotVisible &&
         !_sidebarShowsView,
-    gridFolder: () => _gridOn ? _gridStart : null,
+    gridFolder: () => _files.gridOn ? _files.gridStart : null,
     renameTo: (path, name) => _rowActions.renameTo(path, name),
     update: setState,
     mounted: () => mounted,
@@ -915,10 +914,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       // The grid's own folder follows a rename or a move of it, or of a
       // folder above it (#727): F2 with no tile under the cursor renames
       // the selection, which is the folder shown.
-      final grid = _gridFolder;
-      if (grid != null && (grid == from || grid.startsWith('$from/'))) {
-        setState(() => _gridFolder = to + grid.substring(from.length));
-      }
+      _files.moved(from, to);
       // The selection follows only a rename that is about it: the note
       // itself, or a folder it sits in. Renaming another row — a folder
       // above nothing selected — used to select that row while the shell
@@ -2768,9 +2764,8 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
           narrow &&
           _tab == ShellTab.files &&
           _treeVisible &&
-          _gridOn &&
-          _gridStart.isNotEmpty,
-      onBackStep: _gridUp,
+          _files.gridInFolder,
+      onBackStep: _files.gridUp,
       onSwitchLibrary: () => _windows.switchLibrary(context),
       // The touch way into the palette (#206); the desktop has a key.
       onOpenPalette: _paletteByTouch
@@ -3787,7 +3782,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
                           ),
                           const Divider(height: 1),
                         ],
-                        Expanded(child: _treePane(controller)),
+                        Expanded(child: _files.build(context, controller)),
                         if (controller.sync case final sync?)
                           SyncProgressStrip(sync: sync),
                         _treeFooter(controller),
@@ -4270,7 +4265,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     if (!_nav.visited.contains(tab)) return const SizedBox.shrink();
     return switch (tab) {
       // Always scrim-wrapped (never toggled): see [ShellFab.withScrim].
-      ShellTab.files => _fab.withScrim(_treePane(controller)),
+      ShellTab.files => _fab.withScrim(_files.build(context, controller)),
       ShellTab.todo => TodoTab(
         controller: _todoController,
         view: _todoView,
@@ -4475,14 +4470,31 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     );
   }
 
-  /// The folder the grid shows (#727): library-relative, `''` the root.
-  ///
-  /// In memory only, like the tree's expanded set: only the view itself
-  /// (list or grid) is remembered. Written through to the tree whenever
-  /// it moves — entered folders are selected and expanded there — and
-  /// taken from the tree again on every switch to the grid, so the two
-  /// never drift apart while the pane is switched.
-  String? _gridFolder;
+  /// The Files pane: the tree, or the grid in its place, and the folder
+  /// the grid shows (#727; issue #100 moved it into [ShellFilesPane]).
+  late final ShellFilesPane _files = ShellFilesPane(
+    ocrQueue: widget.ocrQueue,
+    settings: () => _editorSettings,
+    selected: () => _selected,
+    treeFolder: () => _treeFolder,
+    expanded: _expanded,
+    focusNode: _treeFocus,
+    treeActive: () => !_sidebarShowsView,
+    desktop: () => _desktop,
+    menus: _treeMenus,
+    rows: _rowActions,
+    marked: _markedActions,
+    editing: _treeEditing,
+    onToggle: _toggle,
+    onSelect: _selectFromPane,
+    onOpenInNewTab: (note) => _select(note, newTab: true),
+    selectFolder: (path) {
+      _selected = path.isEmpty ? null : path;
+      _selectedIsDir = path.isNotEmpty;
+      if (path.isNotEmpty) _expanded.add(path);
+    },
+    update: setState,
+  );
 
   /// The note the Files pane last opened, and how many times it has asked
   /// for the caret in it (#727): the note view takes the caret when the
@@ -4502,14 +4514,6 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     _ => false,
   };
 
-  /// Whether the Files pane shows the grid rather than the tree.
-  bool get _gridOn => _editorSettings.treeView == TreeView.grid;
-
-  /// The folder the grid shows: where the grid last went, or — before the
-  /// pane has been built in the grid, which pins it — the tree's own
-  /// folder.
-  String get _gridStart => _gridFolder ?? _treeFolder;
-
   /// The folder the tree is on: the selected folder, or the selected
   /// note's folder, or the root.
   String get _treeFolder {
@@ -4527,7 +4531,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   Future<void> _setTreeView(TreeView next) async {
     if (next == _editorSettings.treeView) return;
     setState(() {
-      if (next == TreeView.grid) _gridFolder = _treeFolder;
+      if (next == TreeView.grid) _files.gridFromTree();
       _editorSettings = _editorSettings.copyWith(treeView: next);
     });
     try {
@@ -4537,29 +4541,6 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       return;
     }
     widget.controller.notify();
-  }
-
-  /// Moves the grid to [path], writing the move through to the tree: the
-  /// folder is selected and expanded there, so switching back to the list
-  /// finds it open (#727).
-  ///
-  /// The root has no row to select: going there clears the selection
-  /// rather than selecting the path `''`, which every command reading the
-  /// selection — F2's rename first — would take for a row of its own.
-  void _gridGoTo(String path) {
-    setState(() {
-      _gridFolder = path;
-      _selected = path.isEmpty ? null : path;
-      _selectedIsDir = path.isNotEmpty;
-      if (path.isNotEmpty) _expanded.add(path);
-    });
-  }
-
-  /// Activates a tile: a folder is entered, a note opens as a tree row
-  /// does — and takes the caret (#727).
-  void _gridOpen(Note note) {
-    if (note.isDir) setState(() => _gridFolder = note.path);
-    _selectFromPane(note);
   }
 
   /// A row or a tile activated in the Files pane (#727): the note opens as
@@ -4580,14 +4561,6 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     });
   }
 
-  /// The grid's Up, and the phone's Back inside a folder: up one level,
-  /// or nothing at the root.
-  void _gridUp() {
-    final at = _gridStart;
-    if (at.isEmpty) return;
-    _gridGoTo(parentOf(at));
-  }
-
   /// Whether the palette is reached by touch (#206, #849): on a window
   /// that is not the wide shell, and on any touch device's wide one. A
   /// desktop's wide window has a key.
@@ -4595,8 +4568,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
 
   /// Whether the Files pane shows the grid inside a folder, which Back
   /// steps out of (#727).
-  bool get _gridCanStepUp =>
-      _tab == ShellTab.files && _gridOn && _gridStart.isNotEmpty;
+  bool get _gridCanStepUp => _tab == ShellTab.files && _files.gridInFolder;
 
   /// Whether the system Back has a step to take in the wide shell (#849):
   /// what the phone's Back does in its layout, in the wide one's terms.
@@ -4633,105 +4605,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       // A new tab too: it goes as a note's tab does.
       _workspace.closeActive();
     } else if (_gridCanStepUp) {
-      _gridUp();
+      _files.gridUp();
     }
   }
-
-  /// The tree pane: the action bar and the note tree — the whole body on
-  /// phones, the left column on wide screens. Switched to the grid (#727),
-  /// it is the same pane: the breadcrumb and the folder's tiles.
-  ///
-  /// Both stay mounted across a switch, like the search beside them
-  /// (#712): the tree keeps its expanded rows and its scroll, the grid its
-  /// folder and its scroll. The grid is built on its first visit — a
-  /// library no one switched to the grid pays no queries for one.
-  Widget _treePane(LibrarySession controller) {
-    final showGrid = _gridOn || _gridVisited;
-    if (_gridOn) {
-      _gridVisited = true;
-      // A library opened in the grid starts it in the tree's selection, as
-      // a switch does — once: from then on a note opened from the search,
-      // a tab or the palette does not move it.
-      _gridFolder ??= _treeFolder;
-    }
-    return TourTarget(
-      id: TourTargets.tree,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          Offstage(
-            offstage: _gridOn,
-            child: NoteTree(
-              ocrQueue: widget.ocrQueue,
-              controller: controller,
-              sort: _editorSettings.treeSort,
-              selectedPath: _selected,
-              expanded: _expanded.folders,
-              // The keyboard's walk (#727) lets go while the grid holds the
-              // pane, and while the search holds the sidebar's slot.
-              active: !_gridOn && !_sidebarShowsView,
-              onToggle: _toggle,
-              onSelect: _selectFromPane,
-              onOpenInNewTab: (note) => _select(note, newTab: true),
-              onLongPress: (note, anchor) =>
-                  _treeMenus.rowMenu(context, note, anchor),
-              onSecondaryTapDown: (note, details) =>
-                  _treeMenus.rowMenuAt(context, note, details.globalPosition),
-              onBackgroundSecondaryTapUp: (details) => unawaited(
-                _treeMenus.treeBackgroundAt(context, details.globalPosition),
-              ),
-              onMove: (paths, folder) =>
-                  unawaited(_markedActions.moveTo(context, paths, folder)),
-              onRename: (path) => unawaited(_rowActions.rename(context, path)),
-              onDelete: (path) => unawaited(_rowActions.delete(context, path)),
-              // Several rows at once (#712): a pointer's, with keys.
-              onMarkedMenu: _desktop
-                  ? (paths, anchor) =>
-                        unawaited(_markedActions.menu(context, paths, anchor))
-                  : null,
-              onDeleteMarked: (paths) =>
-                  unawaited(_markedActions.delete(context, paths)),
-              focusNode: _treeFocus,
-              renaming: _treeEditing.renaming,
-              creating: _treeEditing.creating,
-            ),
-          ),
-          if (showGrid)
-            Offstage(
-              offstage: !_gridOn,
-              child: FolderGrid(
-                ocrQueue: widget.ocrQueue,
-                controller: controller,
-                folder: _gridStart,
-                active: _gridOn,
-                sort: _editorSettings.treeSort,
-                selectedPath: _selected,
-                onOpen: _gridOpen,
-                onGoTo: _gridGoTo,
-                onUp: _gridUp,
-                onFolderResolved: (path) => setState(() => _gridFolder = path),
-                onLongPress: (note, anchor) =>
-                    _treeMenus.rowMenu(context, note, anchor),
-                onSecondaryTapDown: (note, details) =>
-                    _treeMenus.rowMenuAt(context, note, details.globalPosition),
-                onOpenInNewTab: (note) => _select(note, newTab: true),
-                onBackgroundSecondaryTapUp: (folder, details) => _treeMenus
-                    .gridBackgroundAt(context, folder, details.globalPosition),
-                onMove: (paths, folder) =>
-                    unawaited(_markedActions.moveTo(context, paths, folder)),
-                onRename: (path) =>
-                    unawaited(_rowActions.rename(context, path)),
-                onDelete: (path) =>
-                    unawaited(_rowActions.delete(context, path)),
-                renaming: _treeEditing.renaming,
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  /// Whether the grid has been shown once for this library (#727): only
-  /// from then on is it kept mounted under the tree.
-  bool _gridVisited = false;
 }
