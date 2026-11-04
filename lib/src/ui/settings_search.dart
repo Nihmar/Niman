@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/app_channel.dart';
-import 'package:niman/src/core/settings/library_features.dart';
-import 'package:niman/src/core/settings/navigation_layout.dart';
 import 'package:niman/src/editor/toolbar_item.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ocr/ocr_installation.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/transcription/transcription_models.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
-import 'package:niman/src/ui/feature_names.dart';
 import 'package:niman/src/ui/key_map.dart';
 import 'package:niman/src/ui/keyboard_shortcuts.dart';
 import 'package:niman/src/ui/ocr/ocr_settings_section.dart';
@@ -19,12 +16,11 @@ import 'package:niman/src/ui/settings_keys.dart';
 import 'package:niman/src/ui/settings_search_appearance.dart';
 import 'package:niman/src/ui/settings_search_editor.dart';
 import 'package:niman/src/ui/settings_search_entry.dart';
+import 'package:niman/src/ui/settings_search_library.dart';
 import 'package:niman/src/ui/settings_search_scope.dart';
-import 'package:niman/src/ui/shell_navigation.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/sync/sync_labels.dart';
 import 'package:niman/src/ui/transcription/transcription_settings_section.dart';
-import 'package:niman/src/ui/trash.dart';
 
 export 'package:niman/src/ui/settings_search_entry.dart';
 export 'package:niman/src/ui/settings_search_match.dart';
@@ -48,11 +44,6 @@ List<SettingsSearchEntry> settingsSearchEntries({
   void push(Widget screen) =>
       Navigator.of(context)
           .push(MaterialPageRoute<void>(builder: (context) => screen));
-  void pushFolders(Key row) => openArea(SettingsAreaId.folders, row);
-  void pushJournal(Key row) => openArea(SettingsAreaId.journal, row);
-  void pushTrash(Key row) => openArea(SettingsAreaId.trashHistory, row);
-  void pushStudy(Key row) => openArea(SettingsAreaId.study, row);
-  void pushNavigation(Key row) => openArea(SettingsAreaId.navigation, row);
   void pushUpdates(Key row) => openArea(SettingsAreaId.updates, row);
   void pushDiagnostics(Key row) => openArea(SettingsAreaId.diagnostics, row);
 
@@ -62,13 +53,6 @@ List<SettingsSearchEntry> settingsSearchEntries({
       on ? AppStrings.settingsToggleOn : AppStrings.settingsToggleOff;
   Future<String?> noValue() async => null;
 
-  final ops = controller.ops;
-  final folders = libraryArea(AppStrings.settingsAreaFolders);
-  final journal = libraryArea(AppStrings.paletteGroupJournal);
-  final trashHistory = libraryArea(AppStrings.settingsAreaTrashHistory);
-  final study = libraryArea(AppStrings.tabStudy);
-  final navigation = libraryArea(AppStrings.settingsAreaNavigation);
-  final featuresArea = libraryArea(AppStrings.featuresTitle);
   final maintenance = AppStrings.settingsGroupMaintenance;
   final scope = SettingsSearchScope(
     controller: controller,
@@ -80,208 +64,7 @@ List<SettingsSearchEntry> settingsSearchEntries({
   final entries = <SettingsSearchEntry>[
     ...appearanceSearchEntries(scope),
     ...editorSearchEntries(scope),
-    SettingsSearchEntry(
-      title: AppStrings.listFolderTitle,
-      area: folders,
-      rowKey: SettingsKeys.listFolder,
-      value: () async => ops == null ? null : await ops.listNoteFolder,
-      areaId: SettingsAreaId.folders,
-      open: () => pushFolders(SettingsKeys.listFolder),
-    ),
-    SettingsSearchEntry(
-      title: AppStrings.templateFolderTitle,
-      area: folders,
-      rowKey: SettingsKeys.templateFolder,
-      value: () async => ops == null ? null : await ops.templateFolder,
-      areaId: SettingsAreaId.folders,
-      open: () => pushFolders(SettingsKeys.templateFolder),
-    ),
-    SettingsSearchEntry(
-      title: AppStrings.templateHelpTitle,
-      area: folders,
-      rowKey: SettingsKeys.templateHelp,
-      value: noValue,
-      areaId: SettingsAreaId.folders,
-      open: () => pushFolders(SettingsKeys.templateHelp),
-    ),
-    SettingsSearchEntry(
-      title: AppStrings.attachmentsFolderTitle,
-      area: folders,
-      rowKey: SettingsKeys.attachmentsFolder,
-      value: () async => ops == null ? null : await ops.attachmentsFolder,
-      areaId: SettingsAreaId.folders,
-      open: () => pushFolders(SettingsKeys.attachmentsFolder),
-    ),
-    SettingsSearchEntry(
-      title: AppStrings.annotationsFolderTitle,
-      area: folders,
-      rowKey: SettingsKeys.annotationsFolder,
-      value: () async => ops == null ? null : await ops.annotationsFolder,
-      areaId: SettingsAreaId.folders,
-      open: () => pushFolders(SettingsKeys.annotationsFolder),
-    ),
-    SettingsSearchEntry(
-      title: AppStrings.captureFolderTitle,
-      area: folders,
-      rowKey: SettingsKeys.captureFolder,
-      value: () async => ops == null ? null : await ops.captureFolder,
-      areaId: SettingsAreaId.folders,
-      open: () => pushFolders(SettingsKeys.captureFolder),
-    ),
-    SettingsSearchEntry(
-      title: AppStrings.quickNoteTitle,
-      area: folders,
-      rowKey: SettingsKeys.quickNote,
-      value: () async => ops == null
-          ? null
-          : (await ops.quickNotePath) ?? AppStrings.quickNoteUnset,
-      areaId: SettingsAreaId.folders,
-      open: () => pushFolders(SettingsKeys.quickNote),
-    ),
-    SettingsSearchEntry(
-      title: AppStrings.navigationScopeDevice,
-      area: navigation,
-      rowKey: SettingsKeys.navigationScope,
-      value: () async =>
-          ops == null ? null : onOff(on: (await ops.navigation).device != null),
-      areaId: SettingsAreaId.navigation,
-      open: () => pushNavigation(SettingsKeys.navigationScope),
-    ),
-    SettingsSearchEntry(
-      title: AppStrings.navigationStart,
-      area: navigation,
-      rowKey: SettingsKeys.navigationStart,
-      value: () async {
-        if (ops == null) return null;
-        final navigation = await ops.navigation;
-        return startLabel(
-          navigation.device ?? navigation.library ?? const NavigationLayout(),
-        );
-      },
-      areaId: SettingsAreaId.navigation,
-      open: () => pushNavigation(SettingsKeys.navigationStart),
-    ),
-    // The switches of Features (#1109): found by their names, and opened
-    // with their row flashed. The value is what the library does, so a
-    // child whose parent is off reads Off.
-    for (final feature in LibraryFeature.values)
-      SettingsSearchEntry(
-        title: featureName(feature),
-        area: featuresArea,
-        rowKey: SettingsKeys.featureRow(feature),
-        value: () async => onOff(on: controller.features.value.isOn(feature)),
-        areaId: SettingsAreaId.features,
-        open: () =>
-            openArea(SettingsAreaId.features, SettingsKeys.featureRow(feature)),
-      ),
-    SettingsSearchEntry(
-      title: AppStrings.journalFolderTitle,
-      area: journal,
-      rowKey: SettingsKeys.journalFolder,
-      value: () async => ops == null ? null : (await ops.journal).folder,
-      areaId: SettingsAreaId.journal,
-      open: () => pushJournal(SettingsKeys.journalFolder),
-    ),
-    SettingsSearchEntry(
-      title: AppStrings.journalEntryNameTitle,
-      area: journal,
-      rowKey: SettingsKeys.journalEntryName,
-      value: () async => ops == null ? null : (await ops.journal).entryName,
-      areaId: SettingsAreaId.journal,
-      open: () => pushJournal(SettingsKeys.journalEntryName),
-    ),
-    SettingsSearchEntry(
-      title: AppStrings.journalTemplateTitle,
-      area: journal,
-      rowKey: SettingsKeys.journalTemplate,
-      value: () async => ops == null
-          ? null
-          : (await ops.journal).template ?? AppStrings.journalTemplateNone,
-      areaId: SettingsAreaId.journal,
-      open: () => pushJournal(SettingsKeys.journalTemplate),
-    ),
-    SettingsSearchEntry(
-      title: AppStrings.journalDayStartTitle,
-      area: journal,
-      rowKey: SettingsKeys.journalDayStart,
-      value: noValue,
-      areaId: SettingsAreaId.journal,
-      open: () => pushJournal(SettingsKeys.journalDayStart),
-    ),
-    SettingsSearchEntry(
-      title: AppStrings.journalEventTimesTitle,
-      area: journal,
-      rowKey: SettingsKeys.journalEventTimes,
-      value: () async => ops == null
-          ? null
-          : (await ops.journal).clockTimes
-          ? AppStrings.journalEventTimesClock
-          : AppStrings.journalEventTimesWritten,
-      areaId: SettingsAreaId.journal,
-      open: () => pushJournal(SettingsKeys.journalEventTimes),
-    ),
-    SettingsSearchEntry(
-      title: AppStrings.trashTitle,
-      area: trashHistory,
-      rowKey: SettingsKeys.trash,
-      value: () async => ops == null ? null : onOff(on: await ops.trashEnabled),
-      areaId: SettingsAreaId.trashHistory,
-      open: () => pushTrash(SettingsKeys.trash),
-    ),
-    SettingsSearchEntry(
-      title: AppStrings.trashAutoEmptyTitle,
-      area: trashHistory,
-      rowKey: SettingsKeys.trashAutoEmpty,
-      value: () async =>
-          AppStrings.trashAutoEmptyValue(await controller.trashAutoEmptyDays),
-      areaId: SettingsAreaId.trashHistory,
-      open: () => pushTrash(SettingsKeys.trashAutoEmpty),
-    ),
-    SettingsSearchEntry(
-      title: AppStrings.settingsNewCardsPerDay,
-      area: study,
-      rowKey: SettingsKeys.newCardsPerDay,
-      value: () async => '${await controller.newCardsPerDay}',
-      areaId: SettingsAreaId.study,
-      open: () => pushStudy(SettingsKeys.newCardsPerDay),
-    ),
-    SettingsSearchEntry(
-      title: AppStrings.settingsResetAllReviews,
-      area: study,
-      rowKey: SettingsKeys.resetAllReviews,
-      value: noValue,
-      areaId: SettingsAreaId.study,
-      open: () => pushStudy(SettingsKeys.resetAllReviews),
-    ),
-    SettingsSearchEntry(
-      title: AppStrings.historyVersionsTitle,
-      area: trashHistory,
-      rowKey: SettingsKeys.historyVersions,
-      value: () async =>
-          AppStrings.historyVersionsValue(await controller.historyVersions),
-      areaId: SettingsAreaId.trashHistory,
-      open: () => pushTrash(SettingsKeys.historyVersions),
-    ),
-    SettingsSearchEntry(
-      title: AppStrings.historyIntervalTitle,
-      area: trashHistory,
-      rowKey: SettingsKeys.historyInterval,
-      value: () async => AppStrings.historyIntervalValue(
-        await controller.historyIntervalMinutes,
-      ),
-      open: () => pushTrash(SettingsKeys.historyInterval),
-    ),
-    // What empties the trash for good lands on the screen that
-    // holds it.
-    SettingsSearchEntry(
-      title: AppStrings.trashDeletePermanently,
-      area: trashHistory,
-      // Its own key: the trash toggle's would make two results in one
-      // list share an identity, and this one opens a different screen.
-      rowKey: SettingsKeys.trashEmptyAction,
-      value: noValue,
-      open: () => push(TrashScreen(controller: controller)),
-    ),
+    ...librarySearchEntries(scope),
     if (appUpdatesItself) ...[
       SettingsSearchEntry(
         title: AppStrings.autoUpdateTitle,
