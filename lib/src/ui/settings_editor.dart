@@ -7,15 +7,14 @@ import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
-import 'package:niman/src/ui/pointer_density.dart';
 import 'package:niman/src/ui/settings_area.dart';
+import 'package:niman/src/ui/settings_editor_column.dart';
 import 'package:niman/src/ui/settings_editor_links.dart';
 import 'package:niman/src/ui/settings_editor_spelling.dart';
 import 'package:niman/src/ui/settings_editor_text.dart';
 import 'package:niman/src/ui/settings_editor_tidy.dart';
 import 'package:niman/src/ui/settings_keys.dart';
 import 'package:niman/src/ui/settings_rows.dart';
-import 'package:niman/src/ui/settings_slider_row.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/toolbar_settings.dart';
 
@@ -66,14 +65,6 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
   SourceFont _sourceFont = defaultSourceFont;
   int _indentWidth = 2;
   List<String> _spellDictionaries = const <String>[];
-
-  /// Steps of 5% of the default column between the narrowest and the
-  /// widest: the bounds are whole multiples of it, so every stop reads as
-  /// a round percentage.
-  static final int _columnWidthSteps =
-      ((maxNoteColumnWidth - minNoteColumnWidth) /
-              (defaultNoteColumnWidth * 0.05))
-          .round();
 
   @override
   void initState() {
@@ -199,24 +190,6 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
     await widget.controller.setLintRulesOff(off);
     widget.controller.notify();
     if (mounted) setState(() => _lintRulesOff = off);
-  }
-
-  /// Asks how wide the note column is.
-  Future<void> _chooseNoteColumnWidth() async {
-    final width = await showSettingsSlider(
-      context,
-      dialogKey: const Key('note-column-width-dialog'),
-      sliderKey: const Key('note-column-width-slider'),
-      title: AppStrings.noteColumnWidthTitle,
-      subtitle: AppStrings.noteColumnWidthSubtitle,
-      current: _noteColumnWidth,
-      min: minNoteColumnWidth,
-      max: maxNoteColumnWidth,
-      divisions: _columnWidthSteps,
-      format: AppStrings.noteColumnWidthValue,
-    );
-    if (width == null) return;
-    await _setNoteColumnWidth(width);
   }
 
   Future<void> _setNoteColumnWidth(double width) async {
@@ -391,40 +364,12 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
               onChanged: _toggleLineNumbers,
             ),
           ),
-          // Every platform has it (#171): a phone is narrower than any
-          // column, so there it only starts to count on a tablet or in
-          // landscape — which is the reason not to hide it.
-          HighlightRow(
-            key: SettingsKeys.readableLineLength,
-            child: SettingsSwitchRow(
-              title: AppStrings.readableLineLengthTitle,
-              description: AppStrings.readableLineLengthSubtitle,
-              value: _readableLineLength,
-              onChanged: (value) => unawaited(_toggleReadableLineLength(value)),
-            ),
-          ),
-          HighlightRow(
-            key: SettingsKeys.noteColumnWidth,
-            child: pointerDense(Theme.of(context))
-                ? SettingsSliderRow(
-                    sliderKey: const Key('note-column-width-slider'),
-                    title: AppStrings.noteColumnWidthTitle,
-                    subtitle: AppStrings.noteColumnWidthSubtitle,
-                    value: _noteColumnWidth,
-                    min: minNoteColumnWidth,
-                    max: maxNoteColumnWidth,
-                    divisions: _columnWidthSteps,
-                    format: AppStrings.noteColumnWidthValue,
-                    enabled: _readableLineLength,
-                    onChanged: (width) => unawaited(_setNoteColumnWidth(width)),
-                  )
-                : SettingsValueRow(
-                    title: AppStrings.noteColumnWidthTitle,
-                    subtitle: AppStrings.noteColumnWidthSubtitle,
-                    value: AppStrings.noteColumnWidthValue(_noteColumnWidth),
-                    enabled: _readableLineLength,
-                    onTap: () => unawaited(_chooseNoteColumnWidth()),
-                  ),
+          SettingsEditorColumn(
+            readableLineLength: _readableLineLength,
+            noteColumnWidth: _noteColumnWidth,
+            onReadableLineLength: (value) =>
+                unawaited(_toggleReadableLineLength(value)),
+            onNoteColumnWidth: (width) => unawaited(_setNoteColumnWidth(width)),
           ),
           HighlightRow(
             key: SettingsKeys.typewriter,
