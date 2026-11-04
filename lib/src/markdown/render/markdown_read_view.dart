@@ -33,10 +33,8 @@ import 'package:niman/src/markdown/render/block_height_map.dart';
 import 'package:niman/src/markdown/render/block_view.dart';
 import 'package:niman/src/markdown/render/code_piece_view.dart';
 import 'package:niman/src/markdown/render/content_clamp_physics.dart';
-import 'package:niman/src/markdown/render/footnote_list.dart';
 import 'package:niman/src/markdown/render/inline_spans.dart'
     show LinkPreviewHooks;
-import 'package:niman/src/markdown/render/markdown_blocks_sliver.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/render/marked_block.dart';
 import 'package:niman/src/markdown/render/note_margins.dart';
@@ -45,8 +43,8 @@ import 'package:niman/src/markdown/render/read_block_marks.dart';
 import 'package:niman/src/markdown/render/read_code_pieces.dart';
 import 'package:niman/src/markdown/render/read_entries.dart';
 import 'package:niman/src/markdown/render/read_jumps.dart';
-import 'package:niman/src/markdown/render/read_segments.dart';
 import 'package:niman/src/markdown/render/read_selection.dart';
+import 'package:niman/src/markdown/render/read_slivers.dart';
 import 'package:niman/src/markdown/render/read_view_keys.dart';
 import 'package:niman/src/markdown/render/scroll_anchor.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
@@ -619,73 +617,19 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
       () => CustomScrollView(
         controller: _scroll,
         physics: const ContentClampPhysics(),
-        slivers: <Widget>[
-          SliverPadding(
-            padding: padding,
-            // A sliver that places its children from the height map and
-            // measures the ones it lays out: `SliverVariedExtentList` forced
-            // every extent and clipped what was taller than its estimate
-            // (#250), and `SliverList` measured them all and made a far jump
-            // cost the note (#251).
-            sliver: _entries.hosts.isEmpty
-                ? SliverMarkdownBlocks(
-                    heights: heights,
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) =>
-                          _blockAt(context, index, availableWidth),
-                      childCount: heights.length,
-                    ),
-                  )
-                : readSegments(
-                    heights: heights,
-                    hosts: _entries.hosts,
-                    width: availableWidth,
-                    gap: _entries.gap,
-                    listIndent: _entries.theme.listIndentPerLevel,
-                    blockAt: _blockAt,
-                  ),
-          ),
-          // The top of the note is all there is yet: said where the reader
-          // runs out of it, rather than a page that just ends.
-          if (_head)
-            SliverPadding(
-              padding: padding + const EdgeInsets.symmetric(vertical: 16),
-              sliver: const SliverToBoxAdapter(
-                child: LinearProgressIndicator(
-                  key: Key('read-view-reading-rest'),
-                ),
-              ),
-            ),
-          // The definitions a note ends with. They are not blocks — no block
-          // can draw them, because the definitions never reach the block that
-          // cites them — so the section is appended, and through a *lazy* list
-          // for the same reason the note itself is: a section that lays out
-          // every footnote at the top of the frame costs the frame. Measured:
-          // appending it whole took first content from 76 ms to 112 ms on the
-          // geometry note and the jump from 9 ms to 56.
-          //
-          // Keyed by the text it was read from: a list kept across a new text
-          // kept its children and where they were laid out, and a far offset
-          // had it asking the viewport for corrections that never agreed — a
-          // layout loop (`read_view_geometry_test`, the fixtures in a row).
-          SliverPadding(
-            key: ObjectKey(_entries.shown),
-            padding: padding,
-            sliver: _footnoteSliver(),
-          ),
-        ],
+        slivers: readSlivers(
+          entries: _entries,
+          heights: heights,
+          padding: padding,
+          width: availableWidth,
+          head: _head,
+          parser: widget.parser,
+          mathCache: widget.mathCache,
+          blockAt: _blockAt,
+        ),
       ),
     );
   }
-
-  /// The footnotes, one row per sliver child.
-  Widget _footnoteSliver() => footnoteSliver(
-    footnotes: widget.parser.footnotesOf(_entries.shown!),
-    theme: _entries.theme,
-    parser: widget.parser,
-    mathCache: widget.mathCache,
-    scope: widget.parser.scope,
-  );
 
   /// Draws block [index], parsing it for the first time if need be.
   ///
