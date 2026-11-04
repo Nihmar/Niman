@@ -11,6 +11,7 @@ import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/sync/sync_flow.dart';
 import 'package:niman/src/ui/sync/sync_labels.dart';
 import 'package:niman/src/ui/sync/sync_overview_card.dart';
+import 'package:niman/src/ui/sync/sync_server_form.dart';
 import 'package:niman/src/ui/sync/sync_settings_dialogs.dart';
 import 'package:niman/src/ui/sync/sync_test_result_card.dart';
 import 'package:niman/src/ui/unsaved_notes.dart';
@@ -337,7 +338,7 @@ final class _SyncSettingsScreenState extends State<SyncSettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final body = _formShown ? _form(theme) : _overview(theme);
+    final body = _formShown ? _form() : _overview(theme);
     if (widget.embedded) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -374,155 +375,29 @@ final class _SyncSettingsScreenState extends State<SyncSettingsScreen> {
     );
   }
 
-  Widget _hint(ThemeData theme, IconData icon, String text, {Color? color}) {
-    final tint = color ?? theme.colorScheme.onSurfaceVariant;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(28, 4, 16, 0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, size: 14, color: tint),
-          const SizedBox(width: 6),
-          Expanded(
-            child: Text(
-              text,
-              style: theme.textTheme.bodySmall?.copyWith(color: tint),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _form(ThemeData theme) {
-    final insecure = _url.text.trim().toLowerCase().startsWith('http://');
+  Widget _form() {
     final result = _result;
-    return ListView(
-      padding: const EdgeInsets.only(top: 16, bottom: 24),
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: TextField(
-            key: const Key('sync-url'),
-            controller: _url,
-            keyboardType: TextInputType.url,
-            autocorrect: false,
-            enableSuggestions: false,
-            decoration: InputDecoration(
-              labelText: AppStrings.syncUrlLabel,
-              hintText: 'https://nas.local/webdav/Notes/',
-              errorText: _urlError,
-              border: const OutlineInputBorder(),
+    return SyncServerForm(
+      url: _url,
+      user: _user,
+      password: _password,
+      urlError: _urlError,
+      editing: _editing,
+      configured: _configured,
+      showPassword: _showPassword,
+      onToggleShowPassword: () =>
+          setState(() => _showPassword = !_showPassword),
+      testing: _testing,
+      saving: _saving,
+      onTest: _test,
+      onSave: _canSave ? _save : null,
+      resultCard: result == null
+          ? null
+          : SyncTestResultCard(
+              result: result,
+              current: _tested == _fields,
+              onTrust: _testing ? null : () => _trustCertificate(result),
             ),
-            style: const TextStyle(fontFamily: 'monospace', fontSize: 14),
-          ),
-        ),
-        if (insecure)
-          _hint(
-            theme,
-            Icons.lock_open,
-            AppStrings.syncHttpWarning,
-            color: theme.colorScheme.tertiary,
-          ),
-        _hint(theme, Icons.info_outline, AppStrings.syncUrlHint),
-        if (_editing)
-          _hint(theme, Icons.restart_alt, AppStrings.syncRetargetWarning),
-        const SizedBox(height: 16),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: TextField(
-            key: const Key('sync-user'),
-            controller: _user,
-            autocorrect: false,
-            enableSuggestions: false,
-            decoration: InputDecoration(
-              labelText: AppStrings.syncUserLabel,
-              border: const OutlineInputBorder(),
-            ),
-          ),
-        ),
-        _hint(theme, Icons.info_outline, AppStrings.syncUserHint),
-        const SizedBox(height: 16),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: TextField(
-            key: const Key('sync-password'),
-            controller: _password,
-            obscureText: !_showPassword,
-            autocorrect: false,
-            enableSuggestions: false,
-            decoration: InputDecoration(
-              labelText: AppStrings.syncPasswordLabel,
-              border: const OutlineInputBorder(),
-              suffixIcon: IconButton(
-                tooltip: _showPassword
-                    ? AppStrings.syncHidePassword
-                    : AppStrings.syncShowPassword,
-                icon: Icon(
-                  _showPassword ? Icons.visibility_off : Icons.visibility,
-                ),
-                onPressed: () => setState(() => _showPassword = !_showPassword),
-              ),
-            ),
-          ),
-        ),
-        _hint(
-          theme,
-          Icons.key,
-          _configured
-              ? AppStrings.syncPasswordKeepHint
-              : AppStrings.syncPasswordHint,
-        ),
-        // Test and Save ride side by side in the form (issue #131):
-        // the bottom full-width Save existed nowhere else, and both
-        // buttons opened greyed with no reason in sight. Test stays
-        // enabled and complains at the field; Save unlocks for the
-        // tested address, next to the result card that says why.
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
-          child: Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  key: const Key('sync-test'),
-                  onPressed: _testing ? null : _test,
-                  icon: _testing
-                      ? const SizedBox.square(
-                          dimension: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.network_check),
-                  label: Text(
-                    _testing
-                        ? AppStrings.syncTesting
-                        : AppStrings.syncTestAction,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: FilledButton.icon(
-                  key: const Key('sync-save'),
-                  onPressed: _canSave ? _save : null,
-                  icon: _saving
-                      ? const SizedBox.square(
-                          dimension: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.save_outlined),
-                  label: Text(AppStrings.actionSave),
-                ),
-              ),
-            ],
-          ),
-        ),
-        if (result != null)
-          SyncTestResultCard(
-            result: result,
-            current: _tested == _fields,
-            onTrust: _testing ? null : () => _trustCertificate(result),
-          ),
-      ],
     );
   }
 
