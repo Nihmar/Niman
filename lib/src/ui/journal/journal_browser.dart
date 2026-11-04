@@ -18,9 +18,9 @@ import 'package:niman/src/core/theme_tokens.dart';
 import 'package:niman/src/journal/journal_summary.dart';
 import 'package:niman/src/templates/engine.dart';
 import 'package:niman/src/ui/action_sheet.dart';
-import 'package:niman/src/ui/calendar_event_form.dart';
 import 'package:niman/src/ui/journal/journal_calendar.dart';
 import 'package:niman/src/ui/journal/journal_event_actions.dart';
+import 'package:niman/src/ui/journal/journal_event_editor.dart';
 import 'package:niman/src/ui/journal/journal_event_sheet.dart';
 import 'package:niman/src/ui/journal/journal_flow.dart';
 import 'package:niman/src/ui/journal/journal_goal_label.dart';
@@ -830,47 +830,23 @@ final class _JournalBrowserState extends State<JournalBrowser> {
     _editingScope = null;
   });
 
-  /// The form itself, writing when it is told to and closing either way.
+  /// The form itself, writing when it is told to and closing either way:
+  /// the sheet's pop on a phone, the inline form's end in the dock.
   Widget _eventForm(
     BuildContext context,
     DateTime day,
     CalendarEntryEvent? editing,
     CalendarOccurrenceScope? scope,
   ) {
-    return CalendarEventForm(
-      // The form's fields are read once, from its draft: a form for another
-      // event, day or scope, or for an added event after an edit, is another
-      // state, not the open one with its fields (#1218).
-      key: ValueKey((
-        editing?.lineIndex,
-        editing?.event.start,
-        editing?.day,
-        scope,
-        day,
-      )),
+    return JournalEventEditor(
       day: day,
-      knownTokens: widget.knownTokens,
-      draft: editing == null ? null : calendarDraftOf(editing.event),
+      editing: editing,
       scope: scope,
-      preview: (draft) =>
-          _previewLine(day, draft, editing: editing, scope: scope),
-      onCancel: () {
-        if (widget.large) {
-          Navigator.of(context).maybePop();
-        } else {
-          _closeInlineForm();
-        }
-      },
-      onSave: (draft) {
-        if (editing != null) {
-          widget.onEditEvent?.call(
-            editing,
-            draft,
-            scope ?? CalendarOccurrenceScope.all,
-          );
-        } else {
-          widget.onAddEvent?.call(draft.day ?? day, draft);
-        }
+      knownTokens: widget.knownTokens,
+      calendarFile: widget.calendarFile,
+      onAddEvent: widget.onAddEvent,
+      onEditEvent: widget.onEditEvent,
+      onClose: () {
         if (widget.large) {
           Navigator.of(context).maybePop();
         } else {
@@ -878,40 +854,5 @@ final class _JournalBrowserState extends State<JournalBrowser> {
         }
       },
     );
-  }
-
-  /// The lines an added or edited [draft] would write — the day's, or two
-  /// when the event moves or one occurrence leaves its rule — from the file
-  /// as the shell last read it: the writer's own answer, so the preview
-  /// promises exactly what the write does.
-  String _previewLine(
-    DateTime day,
-    CalendarEventDraft draft, {
-    CalendarEntryEvent? editing,
-    CalendarOccurrenceScope? scope,
-  }) {
-    final file =
-        widget.calendarFile ??
-        const CalendarFileContent(lines: <CalendarRawLine>[]);
-    final next = editing == null
-        ? addCalendarEvent(file, draft.day ?? day, draft: draft)
-        : updateCalendarOccurrence(
-                file,
-                CalendarEventRef(
-                  line: editing.lineIndex,
-                  day: editing.line.date ?? day,
-                  start: editing.event.start,
-                ),
-                // The occurrence, whichever day the form is on.
-                editing.day ?? day,
-                draft,
-                scope ?? CalendarOccurrenceScope.all,
-              ) ??
-              file;
-    final before = {for (final line in file.lines) line.text};
-    return [
-      for (final line in next.lines)
-        if (!before.contains(line.text)) line.text,
-    ].join('\n');
   }
 }
