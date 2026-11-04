@@ -9,6 +9,7 @@ import 'package:niman/src/library/session.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/ui/settings_area.dart';
 import 'package:niman/src/ui/settings_editor_column.dart';
+import 'package:niman/src/ui/settings_editor_kinds.dart';
 import 'package:niman/src/ui/settings_editor_links.dart';
 import 'package:niman/src/ui/settings_editor_spelling.dart';
 import 'package:niman/src/ui/settings_editor_text.dart';
@@ -322,35 +323,10 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
           // Which editors the library offers: both, or one alone. The
           // last one on cannot be switched off (its switch disables
           // itself), so the choice never resolves to no editor.
-          HighlightRow(
-            key: SettingsKeys.editorSource,
-            child: SettingsSwitchRow(
-              title: AppStrings.editorKindSource,
-              description: AppStrings.editorKindSourceSubtitle,
-              value: _enabledEditors.contains(EditorKind.source),
-              onChanged:
-                  _enabledEditors.length < 2 &&
-                      _enabledEditors.contains(EditorKind.source)
-                  ? null
-                  : (value) => unawaited(
-                      _toggleEditorEnabled(EditorKind.source, value),
-                    ),
-            ),
-          ),
-          HighlightRow(
-            key: SettingsKeys.editorWysiwyg,
-            child: SettingsSwitchRow(
-              title: AppStrings.editorKindWysiwyg,
-              description: AppStrings.editorKindWysiwygSubtitle,
-              value: _enabledEditors.contains(EditorKind.wysiwyg),
-              onChanged:
-                  _enabledEditors.length < 2 &&
-                      _enabledEditors.contains(EditorKind.wysiwyg)
-                  ? null
-                  : (value) => unawaited(
-                      _toggleEditorEnabled(EditorKind.wysiwyg, value),
-                    ),
-            ),
+          SettingsEditorKinds(
+            enabledEditors: _enabledEditors,
+            onToggle: (kind, {required enabled}) =>
+                unawaited(_toggleEditorEnabled(kind, enabled)),
           ),
           // Switches keep their subtitle: a switch has no dialog to move
           // the explanation into, and "off = on first tap" is exactly
