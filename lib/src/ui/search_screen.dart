@@ -17,6 +17,7 @@ import 'package:niman/src/ui/app_switch.dart';
 import 'package:niman/src/ui/indexing_notice.dart';
 import 'package:niman/src/ui/pointer_density.dart';
 import 'package:niman/src/ui/search_field_pager.dart';
+import 'package:niman/src/ui/search_replace_preview.dart';
 import 'package:niman/src/ui/search_request.dart';
 import 'package:niman/src/ui/search_task_events.dart';
 import 'package:niman/src/ui/strings.dart';
@@ -825,7 +826,13 @@ final class _SearchScreenState extends State<SearchScreen> {
               ),
             Expanded(
               child: _replaceMode
-                  ? _replacePreviewList(theme)
+                  ? SearchReplacePreview(
+                      notes: _replacePreview,
+                      busy: _previewBusy,
+                      term: _query.text.trim(),
+                      onlyPath: _replaceOnly,
+                      replacement: _replacement.text,
+                    )
                   : Opacity(
                       opacity: _stale && _hits.isNotEmpty ? 0.5 : 1,
                       child: _resultsWithEvents(theme),
@@ -1397,105 +1404,6 @@ final class _SearchScreenState extends State<SearchScreen> {
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// The preview list shown in replace mode: one row per matching note
-  /// with its occurrence count and the before → after samples.
-  Widget _replacePreviewList(ThemeData theme) {
-    if (_previewBusy && _replacePreview.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
-    }
-    final notes = _replacePreview;
-    if (notes.isEmpty) {
-      return Center(
-        child: Text(
-          AppStrings.replacePreviewEmpty(_query.text.trim(), _replaceOnly),
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
-        ),
-      );
-    }
-    return ListView.builder(
-      key: const Key('replace-preview'),
-      itemCount: notes.length,
-      itemBuilder: (context, index) {
-        final note = notes[index];
-        return Padding(
-          key: Key('replace-note-${note.path}'),
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      note.path,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ),
-                  Text(
-                    '${note.occurrences} '
-                    'occurrence${note.occurrences == 1 ? '' : 's'}',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-              for (final sample in note.samples) _samplePreview(theme, sample),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  /// One sample's before → after lines: the context with the matched term
-  /// highlighted, then the same context with the replacement text.
-  Widget _samplePreview(ThemeData theme, ReplaceSample sample) {
-    final body = theme.textTheme.bodySmall ?? const TextStyle();
-    final matchStyle = body.copyWith(
-      color: theme.colorScheme.primary,
-      fontWeight: FontWeight.bold,
-    );
-    TextSpan context(String matchText) => TextSpan(
-      style: body,
-      children: [
-        TextSpan(text: sample.before),
-        TextSpan(text: matchText, style: matchStyle),
-        TextSpan(text: sample.after),
-      ],
-    );
-    final replacement = _replacement.text;
-    return Padding(
-      padding: const EdgeInsets.only(top: 2),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text.rich(
-            context(sample.match),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          Text.rich(
-            TextSpan(
-              children: [
-                TextSpan(text: '→ ', style: matchStyle),
-                context(replacement.isEmpty ? ' ' : replacement),
-              ],
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
