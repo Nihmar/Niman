@@ -139,6 +139,7 @@ import 'package:niman/src/ui/shell_inbound.dart';
 import 'package:niman/src/ui/shell_intent_gate.dart';
 import 'package:niman/src/ui/shell_journal_ui.dart';
 import 'package:niman/src/ui/shell_layout.dart';
+import 'package:niman/src/ui/shell_lifecycle.dart';
 import 'package:niman/src/ui/shell_marked_actions.dart';
 import 'package:niman/src/ui/shell_navigation.dart';
 import 'package:niman/src/ui/shell_navigation_state.dart';
@@ -2165,54 +2166,26 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     super.dispose();
   }
 
-  /// Re-reconciles reminders on return to the app: the exact-alarm and
-  /// notification grants live in system settings, so coming back from
-  /// there must reschedule without waiting for the next file change.
+  /// What the shell does as the app comes and goes from the foreground
+  /// (issue #100 moved it into [ShellLifecycle]).
+  late final ShellLifecycle _lifecycle = ShellLifecycle(
+    controller: widget.controller,
+    workspace: _workspace,
+    todo: _todoController,
+    calendar: _calendarController,
+    study: () => _studyMade,
+    homeWidgets: _homeWidgets,
+    reloadOpenNote: () {
+      if (_selected != null && !_selectedIsDir) {
+        setState(() => _noteReloadToken++);
+      }
+    },
+  );
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
-    // Unfocused is still on screen (a desktop window beside another, a
-    // phone's shade pulled down); paused and hidden are not, and a library
-    // nobody sees is not walked on a timer (#1067).
-    widget.controller.appVisibilityChanged(
-      visible:
-          state == AppLifecycleState.resumed ||
-          state == AppLifecycleState.inactive,
-    );
-    if (state == AppLifecycleState.paused) {
-      // The queued changes go now: the process may not come back.
-      widget.controller.sync?.appBackgrounded();
-    }
-    if (state != AppLifecycleState.resumed) {
-      // Leaving the foreground may be the last thing this process does
-      // (a swipe away, an OEM battery kill): get the buffered log on
-      // disk while there is still a chance to — and where each note was
-      // left, once the editors have handed it in (their mementos land
-      // in microtasks; this runs after them).
-      unawaited(AppLog.flush());
-      unawaited(Future(_workspace.controller.flush));
-      return;
-    }
-    unawaited(_todoController.resyncReminders());
-    // Changes made on other devices while the app was away.
-    widget.controller.sync?.appResumed();
-    // A home-screen widget toggle edits todo.txt / the note file in a
-    // background isolate while the app is away (the Android watcher is
-    // unreliable, so no session event may arrive): re-read both surfaces
-    // when clean instead of showing the pre-toggle state.
-    unawaited(_todoController.open());
-    unawaited(_calendarController.open());
-    // The day may have turned while the app was away: the decks are
-    // counted for the study day it is now, and Study and its widgets
-    // follow (#533).
-    _studyMade?.refreshStates();
-    if (_selected != null && !_selectedIsDir) {
-      setState(() => _noteReloadToken++);
-    }
-    // Pushes the home-screen widgets: the todo resync above skips its
-    // notification when the files did not move, and a widget placed
-    // while the app was away has no trigger of its own at all.
-    _homeWidgets.pushAll();
+    _lifecycle.changed(state);
   }
 
   /// Hands the calendar file to the task controller, whose reminder set
