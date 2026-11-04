@@ -13,8 +13,6 @@ import 'package:niman/src/core/settings/navigation_layout.dart';
 import 'package:niman/src/db/dao.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/db/indexer.dart';
-import 'package:niman/src/frontmatter/edit_in_file.dart';
-import 'package:niman/src/frontmatter/parser.dart';
 import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/history/note_history.dart';
 import 'package:niman/src/home/home_layout.dart';
@@ -25,6 +23,7 @@ import 'package:niman/src/library/note_creation.dart';
 import 'package:niman/src/library/note_link_questions.dart';
 import 'package:niman/src/library/note_op_seams.dart';
 import 'package:niman/src/library/note_ops_blocking.dart';
+import 'package:niman/src/library/note_pins.dart';
 import 'package:niman/src/library/note_reads.dart';
 import 'package:niman/src/library/note_relocation.dart';
 import 'package:niman/src/library/note_renamer.dart';
@@ -538,49 +537,21 @@ final class NoteOps implements NoteOperations {
   Future<SpotSlice> noteLinkSpotSlice(String path, SpotCursor from) =>
       _reads.noteLinkSpotSlice(path, from);
 
-  /// Pins or unpins the note at [path] by editing its frontmatter.
-  ///
-  /// Unpinning removes the key rather than writing `pinned: false`: the
-  /// file goes back to what it looked like before, instead of collecting
-  /// a line that says nothing.
-  ///
-  /// The index records the new frontmatter at once, from the head the edit
-  /// wrote ([Indexer.applyFrontmatter]); the note itself is read back later,
-  /// as a save's is ([NoteWriter.reindexWhenQuiet]). Read back before the
-  /// pin was answered, the 247 MB stress note kept the pin on screen for
-  /// the 15 to 34 s a phone takes to read it — or for good, when the app
-  /// was closed first (device log, 2026-09-24).
+  /// Pins and unpins notes through their frontmatter.
+  late final NotePins _pins = NotePins(
+    root: root,
+    indexer: indexer,
+    writer: writer,
+    serialize: _synchronized,
+    hint: _hint,
+    find: _mustFind,
+  );
+
+  /// Pins or unpins the note at [path] by editing its frontmatter
+  /// ([NotePins.setPinned]).
   @override
-  Future<Note> setPinned(String path, {required bool pinned}) {
-    return _synchronized(() async {
-      final row = await _mustFind(path);
-      // The pin lives in the note's frontmatter, so only a note can carry
-      // one. Pinning a `todo.txt` wrote a YAML block into a file that has
-      // no such thing, and every todo.txt reader — this app's included —
-      // then read the three lines as tasks. Unpinning stays allowed
-      // whatever the file is, so a block already written can be taken
-      // back out.
-      if (row.isDir || (pinned && !isMarkdownNote(row.name))) {
-        throw ArgumentError('Only Markdown notes can be pinned, not "$path"');
-      }
-      final file = File(_abs(path));
-      // The head of the note, not the note: off the UI isolate, the rest
-      // of the file copied behind the edited frontmatter as it is.
-      final head = await editFrontmatterKeyOnIsolate(
-        file.path,
-        'pinned',
-        pinned ? 'true' : null,
-      );
-      if (head == null) return row;
-      _hint(path, SyncOpKind.changed);
-      // Scheduled first: from here the watcher's report of this very write
-      // leaves the note to the writer, and the pin below may wait behind a
-      // scan already running.
-      writer.reindexWhenQuiet(path, bytes: row.size);
-      await indexer.applyFrontmatter(path, parseFrontmatter(head));
-      return await _mustFind(path);
-    });
-  }
+  Future<Note> setPinned(String path, {required bool pinned}) =>
+      _pins.setPinned(path, pinned: pinned);
 
   @override
   Future<NoteSaveResult?> saveNote(
