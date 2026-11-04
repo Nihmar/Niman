@@ -109,6 +109,7 @@ import 'package:niman/src/markdown/render/source_paragraphs.dart';
 import 'package:niman/src/markdown/render/source_sections.dart';
 import 'package:niman/src/markdown/render/source_styling.dart';
 import 'package:niman/src/markdown/render/source_table_keys.dart';
+import 'package:niman/src/markdown/render/source_task_boxes.dart';
 import 'package:niman/src/markdown/render/source_template_hint.dart';
 import 'package:niman/src/markdown/render/source_touch.dart';
 import 'package:niman/src/markdown/render/todo_block_scope.dart';
@@ -117,7 +118,6 @@ import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/markdown/source_edit.dart';
 import 'package:niman/src/markdown/source_styler.dart';
 import 'package:niman/src/markdown/surface_controller.dart';
-import 'package:niman/src/markdown/task_cascade.dart';
 import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/templates/check_state.dart';
@@ -413,6 +413,24 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// A quote's content read again as blocks, so `live` draws a quote's lines
   /// as the blocks they are inside it, as the read view does.
   final LiveQuoteContent _quotes = LiveQuoteContent();
+
+  /// The task boxes `live` draws: the one under a point, and its tick.
+  late final SourceTaskBoxes _taskBoxes = SourceTaskBoxes(
+    buffer: () => widget.buffer,
+    live: () => widget.hideMarkers,
+    caretLine: () => _caretSpot.value.line,
+    paragraphs: _paragraphs,
+    lineAt: _lineAt,
+    blockOf: (line) => _styler?.blockOf(line),
+    blocks: () => _styler?.blocks,
+    quotes: _quotes,
+    theme: () => widget.theme,
+    cascade: () => widget.cascadeChecklist,
+    selection: () => _selection,
+    seal: () => _history.seal(),
+    replace: (start, end, text, caret) =>
+        _replaceRange(start, end, text, caret: caret, follow: false),
+  );
 
   /// The note's tables, laid out as the read view lays them out.
   final LiveTables _tables = LiveTables();
@@ -2544,102 +2562,6 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     }
   }
 
-  /// The `[ ]` or `[x]` of the task box `live` draws under [global] — its
-  /// source range, and whether it is ticked — or null when no box is there.
-  ///
-  /// Only a box that is drawn: on the caret's line the markers are the
-  /// source, written out, and a click there is a click in the text. The box
-  /// is where the painter puts it ([liveItemSlot]), asked of the same
-  /// paragraph, so the two agree by construction.
-  ({int line, int start, int end, bool ticked})? _taskBoxAt(Offset global) {
-    if (!widget.hideMarkers) return null;
-    final caretLine = _caretSpot.value.line;
-    for (final index in _paragraphs.lines) {
-      if (index == caretLine || index >= widget.buffer.lineCount) continue;
-      final hit = _taskBoxSlotAt(index, global);
-      if (hit == null) continue;
-      for (final token in _lineAt(index).tokens) {
-        if (token.kind != TokenKind.taskBox) continue;
-        final start = widget.buffer.offsetOfLine(index) + token.start;
-        return (
-          line: index,
-          start: start,
-          end: start + token.end - token.start,
-          ticked: hit,
-        );
-      }
-    }
-    return null;
-  }
-
-  /// Whether line [index] draws a task box under [global], and whether it is
-  /// ticked — or null when the line draws no box or the point is off it.
-  ///
-  /// The one place the box's hit region is asked for, so the cursor (#505)
-  /// and the click ([_taskBoxAt]) can never disagree: both read the same
-  /// [liveItemSlot] of the same paragraph.
-  bool? _taskBoxSlotAt(int index, Offset global) {
-    final paragraph = _paragraphs.paragraphAt(index);
-    if (paragraph == null || !paragraph.attached || !paragraph.hasSize) {
-      return null;
-    }
-    final styled = _lineAt(index);
-    final block = _styler?.blockOf(index);
-    final shape = LineShape.of(
-      styled,
-      block,
-      index,
-      quoted: _quotes.of(index, block, widget.buffer),
-    );
-    final ticked = shape.task;
-    if (shape.marker == null || ticked == null) return null;
-    final slot = liveItemSlot(paragraph, shape, widget.theme);
-    return slot.contains(paragraph.globalToLocal(global)) ? ticked : null;
-  }
-
-  /// Ticks or unticks the task box under [global], and answers whether
-  /// there was one: one edit and one undo step, the `x` written or taken out
-  /// inside the brackets, the caret and the view left where they were.
-  bool _toggleTaskAt(Offset global) {
-    final box = _taskBoxAt(global);
-    if (box == null) return false;
-    // Ticking a parent takes its branch with it (#326); clearing one does
-    // not, and neither does a library that turned the sweep off.
-    if (!box.ticked && widget.cascadeChecklist) {
-      final blocks = _styler?.blocks;
-      final edit = blocks == null
-          ? null
-          : checklistTickEdit(
-              buffer: widget.buffer,
-              blocks: blocks,
-              line: box.line,
-              ticked: true,
-            );
-      if (edit != null) {
-        _history.seal();
-        _replaceRange(
-          edit.start,
-          edit.end,
-          edit.text,
-          caret: _selection,
-          follow: false,
-        );
-        _history.seal();
-        return true;
-      }
-    }
-    _history.seal();
-    _replaceRange(
-      box.start + 1,
-      box.start + 2,
-      box.ticked ? ' ' : 'x',
-      caret: _selection,
-      follow: false,
-    );
-    _history.seal();
-    return true;
-  }
-
   /// Selects `[start, end)` by a click or a jump: the note rebuilt, and the
   /// wikilink panel left as it is.
   void _select(int start, int end) => _applySelection(
@@ -2736,7 +2658,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       if (event.buttons != kPrimaryMouseButton) return;
       // A press on a task box ticks it when it is let go (`_tapUp`): it
       // neither places a caret nor starts a selection.
-      if (_taskBoxAt(event.position) != null) return;
+      if (_taskBoxes.at(event.position) != null) return;
       final offset = _pressOffset = offsetAt(event.position);
       if (offset == null) return;
       if (_openLinkAt(offset)) {
@@ -3793,7 +3715,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                   // A task box is ticked where it is drawn, and a tick is
                   // neither a caret nor a reason to raise the keyboard; nor
                   // the first of a double click.
-                  if (_toggleTaskAt(details.globalPosition)) {
+                  if (_taskBoxes.toggleAt(details.globalPosition)) {
                     _lastClick = null;
                     return;
                   }
@@ -4247,7 +4169,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// [offset] is the offset under the pointer, computed once by the hover
   /// handler and shared with [_hoverTableAt].
   void _hoverCursorAt(int? offset, Offset global) {
-    final cursor = _overTaskBox(offset, global) || _overLink(offset)
+    final cursor = _taskBoxes.over(offset, global) || _overLink(offset)
         ? SystemMouseCursors.click
         : SystemMouseCursors.text;
     if (_hoverCursor.value != cursor) _hoverCursor.value = cursor;
@@ -4284,19 +4206,6 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     if (offset == null || widget.onOpenLink == null) return false;
     if (!_linkModifier()) return false;
     return linkAt(offset) != null;
-  }
-
-  /// Whether a drawn task box is under [global]. Reads the one line the point
-  /// is on, not the note, so a hover costs no scan of the note; the box is
-  /// where the painter puts it ([liveItemSlot]), so the cursor and the click
-  /// agree. [offset] is the offset under the pointer, from the hover handler.
-  bool _overTaskBox(int? offset, Offset global) {
-    if (!widget.hideMarkers || offset == null) return false;
-    final index = widget.buffer.lineOf(offset);
-    // On the caret's line the markers are drawn as written: a click is a
-    // caret, not a tick.
-    if (index == _caretSpot.value.line) return false;
-    return _taskBoxSlotAt(index, global) != null;
   }
 
   /// The mouse is off the table: its handles go, unless it is on them.
