@@ -3,98 +3,23 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:crypto/crypto.dart';
-import 'package:meta/meta.dart';
 import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/sync/webdav/webdav_body_copy.dart';
 import 'package:niman/src/sync/webdav/webdav_client_config.dart';
+import 'package:niman/src/sync/webdav/webdav_download.dart';
 import 'package:niman/src/sync/webdav/webdav_failure.dart';
+import 'package:niman/src/sync/webdav/webdav_file_body.dart';
 import 'package:niman/src/sync/webdav/webdav_multistatus.dart';
+import 'package:niman/src/sync/webdav/webdav_paths.dart';
+import 'package:niman/src/sync/webdav/webdav_response_failure.dart';
+import 'package:niman/src/sync/webdav/webdav_server_info.dart';
+import 'package:niman/src/sync/webdav/webdav_transport.dart';
+import 'package:niman/src/sync/webdav/webdav_upload.dart';
 
-/// What `OPTIONS` said about the destination folder.
-@immutable
-final class WebDavServerInfo {
-  /// Describes a server advertising [davClasses] and [allowedMethods].
-  const new({required this.davClasses, required this.allowedMethods});
-
-  /// The `DAV:` header's compliance classes, lowercased (`1`, `2`, `3`,
-  /// `access-control`, …); empty when the header is missing.
-  final Set<String> davClasses;
-
-  /// The `Allow:` header's methods, uppercased; empty when missing.
-  final Set<String> allowedMethods;
-
-  /// Whether the server claims WebDAV class 1.
-  bool get isWebDav => davClasses.contains('1');
-
-  /// Whether [method] is allowed — assumed when the server lists nothing.
-  bool allows(String method) =>
-      allowedMethods.isEmpty || allowedMethods.contains(method.toUpperCase());
-}
-
-/// What a finished `GET` delivered.
-@immutable
-final class WebDavDownload {
-  /// A download of [bytes] bytes hashing to [sha256].
-  const new({
-    required this.bytes,
-    required this.sha256,
-    this.etag,
-    this.modified,
-  });
-
-  /// Bytes received (and checked against `Content-Length` when sent).
-  final int bytes;
-
-  /// Lowercase hex sha256 of those bytes, computed while streaming.
-  final String sha256;
-
-  /// The response's `ETag`, or null.
-  final String? etag;
-
-  /// The response's `Last-Modified` (UTC), or null.
-  final DateTime? modified;
-}
-
-/// What a finished `PUT` reported.
-@immutable
-final class WebDavUpload {
-  /// An upload that [created] the item (or replaced it).
-  const new({
-    required this.created,
-    this.etag,
-    this.mtimeAccepted = false,
-    this.sha256,
-  });
-
-  /// 201: the item did not exist before.
-  final bool created;
-
-  /// The new `ETag` (or `OC-ETag`) when the server returned one; many
-  /// servers do not, and the caller PROPFINDs instead.
-  final String? etag;
-
-  /// Whether the server kept the `X-OC-Mtime` sent with the upload.
-  final bool mtimeAccepted;
-
-  /// The sha256 of the bytes sent, when the caller streamed a file
-  /// ([WebDavClient.uploadFile]): what the row records, and what a plan
-  /// compares its own hash against to tell whether the write it planned is
-  /// the write the server got (#723).
-  final String? sha256;
-}
-
-/// Takes the one digest a chunked hash makes when it is closed.
-final class _TakeDigest implements Sink<Digest> {
-  new(this._take);
-
-  final void Function(Digest digest) _take;
-
-  @override
-  void add(Digest data) => _take(data);
-
-  @override
-  void close() {}
-}
+export 'package:niman/src/sync/webdav/webdav_download.dart';
+export 'package:niman/src/sync/webdav/webdav_fingerprint.dart';
+export 'package:niman/src/sync/webdav/webdav_server_info.dart';
+export 'package:niman/src/sync/webdav/webdav_upload.dart';
 
 /// A WebDAV client for one destination folder (docs/records/sync.md, "The
 /// client").
@@ -124,12 +49,15 @@ final class WebDavClient {
     String password = '',
     String? trustedCertificateFingerprint,
     HttpClient? httpClient,
-    this.timeout = const Duration(seconds: 30),
-  }) : baseUrl = _normalizeBase(url),
-       _authorization = username.isEmpty
-           ? null
-           : 'Basic ${base64.encode(utf8.encode('$username:$password'))}',
-       _trustedFingerprint = _fingerprintKey(trustedCertificateFingerprint),
+    Duration timeout = const Duration(seconds: 30),
+  }) : _transport = WebDavTransport(
+         url: url,
+         username: username,
+         password: password,
+         trustedCertificateFingerprint: trustedCertificateFingerprint,
+         httpClient: httpClient,
+         timeout: timeout,
+       ),
        config = httpClient != null
            ? null
            : WebDavClientConfig(
@@ -138,30 +66,15 @@ final class WebDavClient {
                password: password,
                trustedCertificateFingerprint: trustedCertificateFingerprint,
                timeoutMs: timeout.inMilliseconds,
-             ),
-       _ownsHttp = httpClient == null,
-       _http = httpClient ?? HttpClient() {
-    _http
-      ..connectionTimeout = timeout
-      ..idleTimeout = const Duration(seconds: 15)
-      ..autoUncompress = false
-      ..userAgent = 'Niman';
-    // The device refused the server's certificate: the user may have
-    // confirmed this exact one for this destination (#454). Accepting
-    // anything else — any other certificate, whatever host — is not what
-    // this does: the callback answers true only for the confirmed
-    // fingerprint, for the destination's own host, and false for
-    // everything else, which leaves the failure #366 already described.
-    _http.badCertificateCallback = _onBadCertificate;
-    _baseSegments = [
-      for (final segment in baseUrl.pathSegments)
-        if (segment.isNotEmpty) segment,
-    ];
-  }
+             );
+
+  /// How the requests reach the destination: the connection, the
+  /// credentials, the redirects, the timeouts and the certificate trust.
+  final WebDavTransport _transport;
 
   /// The destination folder, always ending with `/`, with no query,
   /// fragment or user info.
-  final Uri baseUrl;
+  Uri get baseUrl => _transport.baseUrl;
 
   /// What builds this client again in another isolate (#1107), or null for
   /// a client over an injected `HttpClient`: a transport that cannot cross
@@ -173,30 +86,14 @@ final class WebDavClient {
   ///
   /// The last one is what stops a server that sent its headers and then
   /// went quiet from holding a sync run open for the rest of the session
-  /// (#348). It bounds a silence, not a whole transfer ([_unlessStalled]).
-  final Duration timeout;
-
-  final String? _authorization;
-  final bool _ownsHttp;
-  final HttpClient _http;
-
-  /// The only certificate fingerprint this client accepts when the device
-  /// cannot verify it (hex digits only, uppercased), or null when it
-  /// accepts none (#454).
-  final String? _trustedFingerprint;
-
-  /// The last certificate the callback refused, with the host and port
-  /// that presented it, so the failure can name what it refused — and
-  /// where — even where the exception does not.
-  ({String host, int port, String fingerprint})? _refused;
-
-  late final List<String> _baseSegments;
-  DateTime? _serverDate;
+  /// (#348). It bounds a silence, not a whole transfer
+  /// ([WebDavTransport.unlessStalled]).
+  Duration get timeout => _transport.timeout;
 
   /// The server's clock (`Date` header, UTC) on the latest response, or
   /// null before one carried it. The sync compares remote mtimes with it,
   /// never with this device's clock, which can be minutes off.
-  DateTime? get serverDate => _serverDate;
+  DateTime? get serverDate => _transport.serverDate;
 
   int _bytesSent = 0;
   int _bytesReceived = 0;
@@ -216,87 +113,22 @@ final class WebDavClient {
   /// whether it changed, apart from the notes the run really fetched.
   int get bytesHashed => _bytesHashed;
 
-  static const _maxRedirects = 5;
-
-  /// How many bytes the download gathers before the hash and the sink see
-  /// them: the response arrives in socket-sized pieces, and hashing and
-  /// handing on every one of them costs more than the bytes (#1107).
-  static const int _downloadChunk = 64 * 1024;
   static const _log = AppLogger(name: 'webdav');
-
-  static Uri _normalizeBase(Uri url) {
-    if (url.scheme != 'http' && url.scheme != 'https') {
-      throw ArgumentError.value(
-        url.scheme,
-        'url',
-        'WebDAV needs an http or https URL',
-      );
-    }
-    if (url.userInfo.isNotEmpty) {
-      throw ArgumentError(
-        'Credentials belong in username/password, not in the URL',
-      );
-    }
-    if (url.host.isEmpty) {
-      throw ArgumentError('The URL has no host');
-    }
-    final path = url.path.endsWith('/') ? url.path : '${url.path}/';
-    return Uri(
-      scheme: url.scheme,
-      host: url.host,
-      port: url.hasPort ? url.port : null,
-      path: path,
-    );
-  }
-
-  /// Whether the device may proceed with a certificate it could not verify:
-  /// true only for the one fingerprint the user confirmed for this
-  /// destination, presented by the destination's own host, and false for
-  /// everything else (#454), which leaves the failure [WebDavFailure] #366
-  /// already described. Called by `dart:io` only when verification failed.
-  bool _onBadCertificate(X509Certificate certificate, String host, int port) {
-    final fingerprint = sha256Fingerprint(certificate.der);
-    final trusted = _trustedFingerprint;
-    if (trusted != null &&
-        _isDestinationHost(host) &&
-        _fingerprintKey(fingerprint) == trusted) {
-      return true;
-    }
-    _refused = (host: host, port: port, fingerprint: fingerprint);
-    return false;
-  }
-
-  /// Whether [host] is the destination's own — the only host whose
-  /// certificate the user can be asked to trust (#454).
-  bool _isDestinationHost(String host) =>
-      host.toLowerCase() == baseUrl.host.toLowerCase();
 
   /// The absolute URL of [path]; [collection] adds the trailing slash
   /// folders need on most servers.
-  Uri urlFor(String path, {bool collection = false}) {
-    final segments = [..._baseSegments];
-    for (final segment in path.split('/')) {
-      if (segment.isEmpty) continue;
-      if (segment == '.' || segment == '..') {
-        throw ArgumentError.value(path, 'path', 'no . or .. segments');
-      }
-      segments.add(segment);
-    }
-    final folder = collection || segments.length == _baseSegments.length;
-    return baseUrl.replace(pathSegments: [...segments, if (folder) '']);
-  }
+  Uri urlFor(String path, {bool collection = false}) =>
+      _transport.urlFor(path, collection: collection);
 
   /// Closes the connections (only those of a client this one created).
-  void close() {
-    if (_ownsHttp) _http.close(force: true);
-  }
+  void close() => _transport.close();
 
   /// `OPTIONS` on the destination folder.
   Future<WebDavServerInfo> options() async {
     final clock = Stopwatch()..start();
-    final response = await _send('OPTIONS', '', collection: true);
+    final response = await _transport.send('OPTIONS', '', collection: true);
     if (response.statusCode >= 300) {
-      throw await _fail('OPTIONS', '', response, clock);
+      throw await webDavResponseFailure('OPTIONS', '', response, clock);
     }
     await response.drain<void>();
     final dav = {
@@ -328,7 +160,7 @@ final class WebDavClient {
     }
     final clock = Stopwatch()..start();
     final body = utf8.encode(propfindBody);
-    final response = await _send(
+    final response = await _transport.send(
       'PROPFIND',
       path,
       collection: collection,
@@ -341,7 +173,7 @@ final class WebDavClient {
       compressed: true,
     );
     if (response.statusCode != 207) {
-      throw await _fail('PROPFIND', path, response, clock);
+      throw await webDavResponseFailure('PROPFIND', path, response, clock);
     }
     final String text;
     try {
@@ -351,16 +183,18 @@ final class WebDavClient {
       final raw = encoding == 'gzip' ? gzip.decoder.bind(response) : response;
       text = await const Utf8Decoder(allowMalformed: true).bind(raw).join();
     } on IOException catch (e) {
-      throw _transportFailure('PROPFIND', path, e);
+      throw _transport.transportFailure('PROPFIND', path, e);
     } on FormatException catch (e) {
-      throw WebDavProtocolFailure('PROPFIND ${_show(path)}: ${e.message}');
+      throw WebDavProtocolFailure(
+        'PROPFIND ${webDavShowPath(path)}: ${e.message}',
+      );
     }
     final resources = parseMultistatus(
       text,
       baseUrl,
       onSkipped: (href) => _log.warning(
-        'PROPFIND ${_show(path)}: skipped an item outside the destination '
-        '($href)',
+        'PROPFIND ${webDavShowPath(path)}: skipped an item outside the '
+        'destination ($href)',
       ),
     );
     _done(
@@ -376,7 +210,7 @@ final class WebDavClient {
   /// The children of [folder] (`PROPFIND Depth: 1`, the folder itself
   /// left out).
   Future<List<WebDavResource>> list(String folder) async {
-    final self = _clean(folder);
+    final self = webDavCleanPath(folder);
     final items = await propfind(folder, depth: 1, collection: true);
     return [
       for (final item in items)
@@ -395,7 +229,7 @@ final class WebDavClient {
   Future<WebDavResource?> stat(String path, {bool collection = false}) async {
     try {
       final items = await propfind(path, depth: 0, collection: collection);
-      final self = _clean(path);
+      final self = webDavCleanPath(path);
       final exact = items.where((item) => item.path == self).firstOrNull;
       if (exact != null) return exact;
       final only = items.length == 1 ? items.single : null;
@@ -421,112 +255,43 @@ final class WebDavClient {
     final clock = Stopwatch()..start();
     final HttpClientResponse response;
     try {
-      response = await _send('GET', path);
+      response = await _transport.send('GET', path);
     } on Object {
-      await _closeQuietly(into);
+      await closeWebDavSinkQuietly(into);
       rethrow;
     }
     if (response.statusCode != 200) {
-      await _closeQuietly(into);
-      throw await _fail('GET', path, response, clock);
+      await closeWebDavSinkQuietly(into);
+      throw await webDavResponseFailure('GET', path, response, clock);
     }
-    final digest = _DigestSink();
-    final hasher = sha256.startChunkedConversion(digest);
-    var bytes = 0;
-    // The body is copied through a subscription this client owns, into a
-    // stream it can end: giving up on the transfer cancels the copy and
-    // closes that stream, which releases the sink for its caller to close.
-    // Handing the response straight to `pipe` left the sink bound to a
-    // copy that may never finish — the socket cannot always be detached —
-    // and `IOSink.close()` on a bound sink throws where no caller can
-    // catch it, so a `StateError` replaced the transfer's own failure
-    // (#495).
-    final body = StreamController<List<int>>();
-    StreamSubscription<List<int>>? source;
-    // The sink's own backpressure reaches the connection, so a slow disk
-    // does not read the whole body into memory.
-    void pause() => source?.pause();
-    void resume() => source?.resume();
-    body
-      ..onPause = pause
-      ..onResume = resume;
-    // Stops the copy into [into]: once it returns, the pipe is done and
-    // the sink is no longer bound.
-    Future<void> endCopy() async {
-      await source?.cancel();
-      await body.close();
-    }
-
-    try {
-      // The response arrives in socket-sized pieces (a few KB each over a
-      // phone link); gathering them keeps the hash and the sink from
-      // paying per piece. The stall timer still sees every piece, so a
-      // silent server is caught as before (#1107).
-      final gathered = BytesBuilder(copy: false);
-      void flush() {
-        if (gathered.isEmpty) return;
-        final chunk = gathered.takeBytes();
-        hasher.add(chunk);
-        body.add(chunk);
-      }
-
-      await _unlessStalled((progress) {
-        source = response.listen(
-          (chunk) {
-            progress();
-            bytes += chunk.length;
-            if (hashOnly) {
-              _bytesHashed += chunk.length;
-            } else {
-              _bytesReceived += chunk.length;
-            }
-            gathered.add(chunk);
-            if (gathered.length >= _downloadChunk) flush();
-          },
-          onError: body.addError,
-          onDone: () {
-            flush();
-            unawaited(body.close());
-          },
-        );
-        return body.stream.pipe(into);
-      });
-    } on TimeoutException {
-      await endCopy();
-      // Dropping the connection is what makes the server stop. Best
-      // effort: the stall fails as the retryable kind the caller already
-      // backs off on either way (#348).
-      await _dropQuietly(response);
-      await _closeQuietly(into);
-      throw _timedOut('GET', path, 'the body stalled');
-    } on IOException catch (e) {
-      await endCopy();
-      await _closeQuietly(into);
-      throw _transportFailure('GET', path, e);
-    } on Object {
-      // Whatever else the sink threw: the copy is ours, so it ends here
-      // too, or it keeps reading and buffering a body nobody wants.
-      await endCopy();
-      await _closeQuietly(into);
-      rethrow;
-    }
-    hasher.close();
+    final (:bytes, sha256: sha) = await copyWebDavBody(
+      response,
+      into,
+      path: path,
+      transport: _transport,
+      onBytes: (count) {
+        if (hashOnly) {
+          _bytesHashed += count;
+        } else {
+          _bytesReceived += count;
+        }
+      },
+    );
     final expected = response.contentLength;
     if (expected >= 0 && bytes != expected) {
       _log.warning(
-        'GET ${_show(path)}: received $bytes of $expected bytes, '
+        'GET ${webDavShowPath(path)}: received $bytes of $expected bytes, '
         '${clock.elapsedMilliseconds} ms',
       );
       throw WebDavRetryable(
-        'GET ${_show(path)}: received $bytes of $expected bytes',
+        'GET ${webDavShowPath(path)}: received $bytes of $expected bytes',
         status: 200,
       );
     }
     final etag = response.headers.value(HttpHeaders.etagHeader);
-    final modified = _httpDate(
+    final modified = webDavHttpDate(
       response.headers.value(HttpHeaders.lastModifiedHeader),
     );
-    final sha = digest.value.toString();
     _done(
       'GET',
       path,
@@ -573,7 +338,7 @@ final class WebDavClient {
     // [WebDavResource.guardEtag] never hands one over); dropped rather than
     // sent, it would fail every write with 412.
     final guard = ifMatchGuard(ifMatch);
-    final response = await _send(
+    final response = await _transport.send(
       'PUT',
       path,
       headers: {
@@ -591,7 +356,7 @@ final class WebDavClient {
     );
     final status = response.statusCode;
     if (status != 200 && status != 201 && status != 204) {
-      throw await _fail('PUT', path, response, clock);
+      throw await webDavResponseFailure('PUT', path, response, clock);
     }
     await response.drain<void>();
     final etag =
@@ -649,7 +414,7 @@ final class WebDavClient {
       String? sent;
       final result = await upload(
         path,
-        open: () => _handleBody(handle, (sha) => sent = sha),
+        open: () => webDavFileBody(handle, (sha) => sent = sha),
         length: length,
         ifMatch: ifMatch,
         ifNoneMatch: ifNoneMatch,
@@ -666,36 +431,11 @@ final class WebDavClient {
     }
   }
 
-  /// [handle]'s bytes from its start, chunk by chunk, with their digest
-  /// handed to [sent] once the file has gone: one subscription reads the
-  /// file again, for a body a redirect hop sends twice. A body the client
-  /// stopped early still hands its digest over — the caller must see it
-  /// did not send the whole file.
-  static Stream<List<int>> _handleBody(
-    RandomAccessFile handle,
-    void Function(String sha) sent,
-  ) async* {
-    final digest = sha256.startChunkedConversion(
-      _TakeDigest((value) => sent(value.toString())),
-    );
-    try {
-      await handle.setPosition(0);
-      while (true) {
-        final chunk = await handle.read(64 << 10);
-        if (chunk.isEmpty) break;
-        digest.add(chunk);
-        yield chunk;
-      }
-    } finally {
-      digest.close();
-    }
-  }
-
   /// `MKCOL` [folder]: true when it was created, false when it already
   /// existed (405). A missing parent fails as [WebDavNotFound].
   Future<bool> createFolder(String folder) async {
     final clock = Stopwatch()..start();
-    final response = await _send('MKCOL', folder, collection: true);
+    final response = await _transport.send('MKCOL', folder, collection: true);
     final status = response.statusCode;
     if (status == 405) {
       await response.drain<void>();
@@ -703,7 +443,7 @@ final class WebDavClient {
       return false;
     }
     if (status != 201 && status != 200 && status != 204) {
-      throw await _fail('MKCOL', folder, response, clock);
+      throw await webDavResponseFailure('MKCOL', folder, response, clock);
     }
     await response.drain<void>();
     _done('MKCOL', folder, status, clock);
@@ -714,7 +454,7 @@ final class WebDavClient {
   /// first and walks up only on a missing parent, so the common case
   /// (parents exist) is one request.
   Future<void> createFolders(String folder) async {
-    final clean = _clean(folder);
+    final clean = webDavCleanPath(folder);
     if (clean.isEmpty) return;
     try {
       await createFolder(clean);
@@ -738,7 +478,7 @@ final class WebDavClient {
   }) async {
     final clock = Stopwatch()..start();
     final guard = ifMatchGuard(ifMatch);
-    final response = await _send(
+    final response = await _transport.send(
       'DELETE',
       path,
       collection: collection,
@@ -752,7 +492,7 @@ final class WebDavClient {
     }
     // 207 means part of a folder could not be deleted.
     if (status != 200 && status != 202 && status != 204) {
-      throw await _fail('DELETE', path, response, clock);
+      throw await webDavResponseFailure('DELETE', path, response, clock);
     }
     await response.drain<void>();
     _done('DELETE', path, status, clock);
@@ -769,7 +509,7 @@ final class WebDavClient {
     bool collection = false,
   }) async {
     final clock = Stopwatch()..start();
-    final response = await _send(
+    final response = await _transport.send(
       'MOVE',
       from,
       collection: collection,
@@ -780,264 +520,10 @@ final class WebDavClient {
     );
     final status = response.statusCode;
     if (status != 201 && status != 204) {
-      throw await _fail('MOVE', from, response, clock);
+      throw await webDavResponseFailure('MOVE', from, response, clock);
     }
     await response.drain<void>();
-    _done('MOVE', from, status, clock, extra: ' to ${_show(to)}');
-  }
-
-  // --- transport -----------------------------------------------------------
-
-  Future<HttpClientResponse> _send(
-    String method,
-    String path, {
-    bool collection = false,
-    Map<String, String> headers = const {},
-    Stream<List<int>> Function()? body,
-    int length = 0,
-    bool compressed = false,
-  }) async {
-    var uri = urlFor(path, collection: collection);
-    var verb = method;
-    var sendBody = body;
-    var sendAuth = true;
-    for (var hop = 0; ; hop++) {
-      final HttpClientResponse response;
-      try {
-        // One attempt, one certificate: the callback may have caught a
-        // refusal on an earlier hop, and that fingerprint is not this one.
-        _refused = null;
-        final request = await _http.openUrl(verb, uri).timeout(timeout);
-        request
-          ..followRedirects = false
-          ..persistentConnection = true;
-        if (!compressed) {
-          request.headers.removeAll(HttpHeaders.acceptEncodingHeader);
-        }
-        final authorization = _authorization;
-        if (sendAuth && authorization != null) {
-          request.headers.set(HttpHeaders.authorizationHeader, authorization);
-        }
-        headers.forEach(request.headers.set);
-        final bodyNow = sendBody;
-        if (bodyNow == null) {
-          request.contentLength = 0;
-        } else {
-          request.contentLength = length;
-          try {
-            await _unlessStalled(
-              (progress) => request.addStream(
-                bodyNow().map((chunk) {
-                  progress();
-                  return chunk;
-                }),
-              ),
-            );
-          } on TimeoutException {
-            // A server that takes the headers and reads nothing leaves
-            // the write waiting forever; abort it rather than hang the
-            // run that owns the lock (#348).
-            request.abort();
-            throw _timedOut(method, path, 'sending the body stalled');
-          }
-        }
-        response = await request.close().timeout(timeout);
-      } on TimeoutException {
-        throw _timedOut(method, path, 'no answer');
-      } on IOException catch (e) {
-        throw _transportFailure(method, path, e, at: uri);
-      }
-      final status = response.statusCode;
-      final date = response.headers.date;
-      if (date != null) _serverDate = date.toUtc();
-      if (!const {301, 302, 303, 307, 308}.contains(status)) return response;
-      final location = response.headers.value(HttpHeaders.locationHeader);
-      await response.drain<void>().catchError((Object _) {});
-      if (location == null) {
-        throw WebDavProtocolFailure(
-          '$method ${_show(path)}: redirect without a Location',
-          status: status,
-        );
-      }
-      if (hop >= _maxRedirects) {
-        _log.warning(
-          '$method ${_show(path)}: more than $_maxRedirects redirects',
-        );
-        throw WebDavProtocolFailure(
-          '$method ${_show(path)}: more than $_maxRedirects redirects',
-          status: status,
-        );
-      }
-      final Uri next;
-      try {
-        next = uri.resolve(location);
-      } on FormatException {
-        throw WebDavProtocolFailure(
-          '$method ${_show(path)}: unparsable redirect',
-          status: status,
-        );
-      }
-      if (next.scheme != 'http' && next.scheme != 'https') {
-        throw WebDavProtocolFailure(
-          '$method ${_show(path)}: redirect to a ${next.scheme} URL',
-          status: status,
-        );
-      }
-      // Credentials follow a redirect only while the origin stays the
-      // same: the same host and the same port a URL spells (a port
-      // neither spells is the scheme's default, so an `http://nas/dav`
-      // -> `https://nas/dav` upgrade keeps it, which is the setup the
-      // docs invite). A downgrade to plain http is another origin — the
-      // credentials would travel in the clear — and another host or port
-      // is too; once dropped they stay dropped.
-      final sameOrigin =
-          next.host == uri.host &&
-          _spelledPort(next) == _spelledPort(uri) &&
-          !(uri.scheme == 'https' && next.scheme == 'http');
-      if (!sameOrigin) sendAuth = false;
-      if (status == 303) {
-        verb = 'GET';
-        sendBody = null;
-      }
-      _log.info(
-        '$method ${_show(path)} -> $status redirect'
-        '${sameOrigin ? '' : ' to another origin, credentials not sent'}',
-      );
-      uri = next;
-    }
-  }
-
-  /// [at] is the URL the request went to, when a redirect may have taken
-  /// it off the destination.
-  WebDavFailure _transportFailure(
-    String method,
-    String path,
-    IOException e, {
-    Uri? at,
-  }) {
-    final detail = switch (e) {
-      TlsException(:final message) => 'TLS: $message',
-      SocketException(:final osError, :final message) =>
-        osError?.message ?? message,
-      HttpException(:final message) => message,
-      FileSystemException(:final message) => 'local file: $message',
-      _ => e.runtimeType.toString(),
-    };
-    _log.warning('$method ${_show(path)}: $detail');
-    final text = '$method ${_show(path)}: $detail';
-    if (e is TlsException) {
-      // A certificate the device refuses is its own outcome, with a
-      // message that names the destination so the user can act on it
-      // (#366). Any other TLS trouble stays a protocol failure, as it
-      // was.
-      return _certificateFailure(method, path, e, at: at) ??
-          WebDavProtocolFailure(text);
-    }
-    return WebDavRetryable(text);
-  }
-
-  /// The failure for a refused certificate, or null when [e] is TLS
-  /// trouble of another kind (a version mismatch, a dropped handshake).
-  ///
-  /// A fingerprint the callback caught is the certificate itself and is
-  /// preferred over one guessed out of the exception's text; when the
-  /// callback never ran (an injected client in tests), the text is all
-  /// there is.
-  ///
-  /// [at] is the URL the refused request went to (the destination when
-  /// null): a redirect can lead to another host, whose certificate is not
-  /// the destination's. That one is named as its own host's and carries
-  /// no fingerprint — trust is offered for the destination's host only,
-  /// and a fingerprint confirmed under the destination's name for another
-  /// host's certificate would never be accepted there.
-  WebDavCertificateFailure? _certificateFailure(
-    String method,
-    String path,
-    TlsException e, {
-    Uri? at,
-  }) {
-    final refused = _refused;
-    if (refused == null && !_certificateRefused(e)) return null;
-    final where = at ?? baseUrl;
-    final presenter = refused?.host ?? where.host;
-    if (!_isDestinationHost(presenter)) {
-      final port = refused?.port ?? where.port;
-      return WebDavCertificateFailure(
-        '$method ${_show(path)}: the certificate for $presenter:$port, '
-        'a redirect target, is not trusted',
-        host: presenter,
-      );
-    }
-    final fingerprint = refused?.fingerprint ?? _fingerprintIn(e);
-    final host = baseUrl.host;
-    final authority = baseUrl.hasPort ? '$host:${baseUrl.port}' : host;
-    final digest = fingerprint == null ? '' : ', fingerprint $fingerprint';
-    return WebDavCertificateFailure(
-      '$method ${_show(path)}: the certificate for $authority is not '
-      'trusted$digest',
-      host: host,
-      fingerprint: fingerprint,
-    );
-  }
-
-  /// Whether [e] is the device refusing the server's certificate, rather
-  /// than any other TLS failure.
-  ///
-  /// The Dart VM raises [HandshakeException] from BoringSSL, whose text
-  /// carries `CERTIFICATE_VERIFY_FAILED`; the named cases below cover a
-  /// platform that words it differently.
-  static bool _certificateRefused(TlsException e) {
-    final text = '${e.message} ${e.osError?.message ?? ''}'.toLowerCase();
-    return text.contains('certificate_verify_failed') ||
-        (text.contains('certificate') &&
-            (text.contains('self signed') ||
-                text.contains('self-signed') ||
-                text.contains('selfsigned') ||
-                text.contains('untrusted') ||
-                text.contains('not trusted') ||
-                text.contains('verify failed')));
-  }
-
-  /// The certificate's fingerprint, when [e]'s text carries a digest.
-  ///
-  /// [TlsException] has no certificate field: the Dart VM's does not
-  /// expose one, so this is null unless the platform put a digest in the
-  /// message. A fingerprint is a long chain of hex bytes, which is what
-  /// the pattern looks for.
-  static String? _fingerprintIn(TlsException e) {
-    final text = '${e.message} ${e.osError?.message ?? ''}';
-    final match = RegExp(
-      // A digest starts at a boundary: the `56` of a `SHA256:` label is
-      // hex too, and must not be taken for the first byte.
-      '(?<![0-9a-f])[0-9a-f]{2}(?::[0-9a-f]{2}){15,}'
-      '|(?<![0-9a-f])[0-9a-f]{40,}',
-      caseSensitive: false,
-    ).firstMatch(text);
-    return match?.group(0)?.toUpperCase();
-  }
-
-  Future<WebDavFailure> _fail(
-    String method,
-    String path,
-    HttpClientResponse response,
-    Stopwatch clock,
-  ) async {
-    await response.drain<void>().catchError((Object _) {});
-    final status = response.statusCode;
-    final text = '$method ${_show(path)}: $status ${response.reasonPhrase}';
-    _log.warning('$text, ${clock.elapsedMilliseconds} ms');
-    return switch (status) {
-      401 || 403 => WebDavAuthFailure(text, status: status),
-      404 || 409 || 410 => WebDavNotFound(text, status: status),
-      412 => WebDavPrecondition(text, status: status),
-      408 || 423 || 425 || 429 || 500 || 502 || 503 || 504 => WebDavRetryable(
-        text,
-        status: status,
-        retryAfter: _retryAfter(response),
-      ),
-      405 || 501 => WebDavUnsupported(text, status: status),
-      _ => WebDavProtocolFailure(text, status: status),
-    };
+    _done('MOVE', from, status, clock, extra: ' to ${webDavShowPath(to)}');
   }
 
   void _done(
@@ -1050,79 +536,11 @@ final class WebDavClient {
     String extra = '',
   }) {
     _log.info(
-      '$method ${_show(path)} -> $status'
+      '$method ${webDavShowPath(path)} -> $status'
       '${etag == null ? '' : ', etag ${_shortEtag(etag)}'}'
       '${bytes == null ? '' : ', $bytes b'}'
       '$extra, ${clock.elapsedMilliseconds} ms',
     );
-  }
-
-  /// [transfer] run to its end, or a [TimeoutException] once [timeout]
-  /// passes with no chunk moving.
-  ///
-  /// [transfer] calls the `progress` it is handed for every chunk that
-  /// goes through, and each call starts the wait over. The bound is on the
-  /// silence, not on the whole transfer: a body that stops arriving (or a
-  /// server that stops reading one) fails within [timeout] (#348), while a
-  /// large file on a slow link, which keeps moving, takes as long as it
-  /// takes — a limit on the whole transfer failed every run for a file
-  /// that needs longer than [timeout] to cross, so it never synced.
-  Future<void> _unlessStalled(
-    Future<void> Function(void Function() progress) transfer,
-  ) async {
-    final stalled = Completer<void>();
-    Timer? wait;
-    void progress() {
-      wait?.cancel();
-      wait = Timer(timeout, () {
-        if (!stalled.isCompleted) {
-          stalled.completeError(TimeoutException('no data moved', timeout));
-        }
-      });
-    }
-
-    progress();
-    try {
-      await Future.any([transfer(progress), stalled.future]);
-    } finally {
-      wait?.cancel();
-    }
-  }
-
-  /// The retryable failure of an attempt that outlived [timeout], with
-  /// [what] saying what never came through — the answer, the body.
-  ///
-  /// One failure for every wait: a slow connection, a response that never
-  /// starts and a body that never arrives are all the same kind of bad
-  /// luck to the caller, and all worth retrying (#348).
-  WebDavRetryable _timedOut(String method, String path, String what) {
-    final text = '$method ${_show(path)}: $what in ${_describe(timeout)}';
-    _log.warning(text);
-    return WebDavRetryable(text);
-  }
-
-  /// [duration] the way a log line wants it: whole seconds, or the
-  /// milliseconds a shorter timeout really is.
-  static String _describe(Duration duration) => duration.inSeconds >= 1
-      ? '${duration.inSeconds} s'
-      : '${duration.inMilliseconds} ms';
-
-  static Future<void> _closeQuietly(StreamConsumer<List<int>> into) async {
-    try {
-      await into.close();
-    } on Object catch (_) {
-      // The transfer's own failure is the one to report.
-    }
-  }
-
-  /// Ends a response that is not going to finish, so the connection is
-  /// not left open with a body nobody will read.
-  static Future<void> _dropQuietly(HttpClientResponse response) async {
-    try {
-      (await response.detachSocket()).destroy();
-    } on Object catch (_) {
-      // Already gone: nothing to drop.
-    }
   }
 
   /// The comma-separated tokens of every [name] header, trimmed.
@@ -1134,78 +552,10 @@ final class WebDavClient {
       .map((token) => token.trim())
       .where((token) => token.isNotEmpty);
 
-  static Duration? _retryAfter(HttpClientResponse response) {
-    final value = response.headers.value(HttpHeaders.retryAfterHeader);
-    if (value == null) return null;
-    final seconds = int.tryParse(value.trim());
-    if (seconds != null) return Duration(seconds: seconds < 0 ? 0 : seconds);
-    final date = _httpDate(value);
-    if (date == null) return null;
-    final wait = date.difference(DateTime.now().toUtc());
-    return wait.isNegative ? Duration.zero : wait;
-  }
-
-  static DateTime? _httpDate(String? value) {
-    if (value == null) return null;
-    try {
-      return HttpDate.parse(value);
-    } on HttpException {
-      return null;
-    }
-  }
-
-  static String _clean(String path) =>
-      path.split('/').where((s) => s.isNotEmpty).join('/');
-
-  static String _show(String path) {
-    final clean = _clean(path);
-    return clean.isEmpty ? '/' : clean;
-  }
-
   static String _shortEtag(String etag) {
     final bare = etag.replaceFirst('W/', '').replaceAll('"', '');
     return bare.length <= 12 ? bare : bare.substring(0, 12);
   }
-
-  /// The comparison form of a certificate fingerprint: the hex digits
-  /// alone, uppercased, so a stored `AB:CD:…` matches one written without
-  /// the separators. An empty or separator-only string is no fingerprint.
-  static String? _fingerprintKey(String? fingerprint) {
-    if (fingerprint == null) return null;
-    final digits = fingerprint.replaceAll(RegExp('[^0-9A-Fa-f]'), '');
-    return digits.isEmpty ? null : digits.toUpperCase();
-  }
-
-  /// The port [uri] spells, or null when it leaves it to the scheme's
-  /// default (`80`/`443`): `http://nas/dav` and `https://nas/dav` then
-  /// have the same spelled port, as a scheme upgrade must keep its
-  /// credentials.
-  static int? _spelledPort(Uri uri) =>
-      uri.port == (uri.scheme == 'https' ? 443 : 80) ? null : uri.port;
-}
-
-/// The SHA-256 fingerprint of a DER-encoded certificate: uppercase hex
-/// bytes joined with `:`, the way `openssl x509 -fingerprint -sha256`
-/// prints it. This is the value a destination stores and compares against
-/// (#454), so it is computed from the certificate's own bytes rather than
-/// from anything a message says.
-String sha256Fingerprint(List<int> der) =>
-    _formatFingerprint(sha256.convert(der).bytes);
-
-/// [digest] as uppercase hex bytes joined with `:`.
-String _formatFingerprint(List<int> digest) => [
-  for (final byte in digest)
-    byte.toRadixString(16).padLeft(2, '0').toUpperCase(),
-].join(':');
-
-final class _DigestSink implements Sink<Digest> {
-  late Digest value;
-
-  @override
-  void add(Digest data) => value = data;
-
-  @override
-  void close() {}
 }
 
 final class _BytesConsumer implements StreamConsumer<List<int>> {

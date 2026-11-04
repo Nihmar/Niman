@@ -17,312 +17,18 @@
 /// worst case (an edit before an unclosed fence) the rest of the file.
 library;
 
-import 'package:meta/meta.dart';
+import 'package:niman/src/editor/block_state.dart';
+import 'package:niman/src/editor/code_fence.dart';
+import 'package:niman/src/editor/line_tokenizer.dart';
 import 'package:niman/src/editor/math_rule.dart';
-
-/// The kind of a styled run within a line.
-enum TokenKind {
-  /// Plain text. Not emitted as a token: any offset not covered by a token
-  /// is plain.
-  plain,
-
-  /// The `#` markers of a heading line.
-  headingMarker,
-
-  /// Bold (`**…**` or `__…__`).
-  bold,
-
-  /// Italic (`*…*` or `_…_`).
-  italic,
-
-  /// Strikethrough (`~~…~~`).
-  strike,
-
-  /// Highlighted (`==…==`, #279).
-  highlight,
-
-  /// `<u>…</u>`. Made by the surface's styler only: this tokenizer reads
-  /// HTML tags as text.
-  underline,
-
-  /// `<sup>…</sup>`, the unified engine's only.
-  superscript,
-
-  /// `<sub>…</sub>`, the unified engine's only.
-  subscript,
-
-  /// An inline code span (`` `…` ``).
-  codeInline,
-
-  /// A line of a fenced code block (fence lines and content), or, from the
-  /// unified engine, a fence line alone: the syntax around a code block.
-  codeFence,
-
-  /// A line of a code block's content — fenced or indented — from the
-  /// unified engine: the code itself, drawn in every mode. It is told apart
-  /// from its fences because `live` hides the fences and showed nothing of
-  /// a block whose code was a fence's.
-  codeBlock,
-
-  /// The language info on a fence-opening line.
-  codeLanguage,
-
-  /// A link (`[text](url)`).
-  link,
-
-  /// An image (`![alt](url)`).
-  image,
-
-  /// A wikilink (`[[target]]`, `[[target|alias]]`, `[[target#heading]]`).
-  wikilink,
-
-  /// A list marker (`-`, `*`, `+`, `1.`, `1)`).
-  listMarker,
-
-  /// A task-list checkbox (`[ ]` or `[x]`).
-  taskBox,
-
-  /// A blockquote marker (`>`).
-  blockquote,
-
-  /// A horizontal rule line.
-  horizontalRule,
-
-  /// Inline math (`$…$`).
-  mathInline,
-
-  /// A display-math line (a `$$` block line, or single-line `$$…$$`).
-  mathBlock,
-
-  /// An inline tag (`#tag`).
-  tag,
-
-  /// A line of the leading frontmatter block.
-  frontmatter,
-
-  /// A template command (`{{date:YYYY-MM-DD}}`, `{{cursor}}`…): a
-  /// placeholder the template engine answers, laid over whatever the line
-  /// holds there (`templates/template_commands.dart`).
-  templateCommand,
-
-  /// A task's priority, `(A)`, in a task list (`todo_txt_tokens.dart`).
-  todoPriority,
-
-  /// A task's creation or completion date, at the head of its line.
-  todoDate,
-
-  /// A task's `+project`.
-  todoProject,
-
-  /// A task's `@context`.
-  todoContext,
-
-  /// A task's `key:value` tag — `due:`, `rem:` and the rest.
-  todoKeyValue,
-
-  /// A `rec:` tag — or, in calendar.txt, an `until:` or `except:` — the
-  /// recurrence grammar does not read (#1189, #1190): the text keeps
-  /// [todoKeyValue]'s colour and wears the wavy flag the calendar's
-  /// mismatches wear. It does nothing, as any unknown tag does.
-  todoUnreadableRule,
-
-  /// A completed task, the whole line.
-  todoDone,
-
-  /// The date at a calendar.txt head (`2026-10-12`, `2026-10`, `2026`).
-  calendarDate,
-
-  /// The week and the weekday of a calendar.txt head (`w42 Mon`).
-  calendarHead,
-
-  /// A goal's head in calendar.txt (`2026`, `2026-10`, `2026-10-05
-  /// w41`).
-  calendarGoal,
-
-  /// An event's time (`9-12`, `0600Z`).
-  calendarTime,
-
-  /// A `( … )` aside in a calendar.txt event, shown dimmed.
-  calendarAside,
-
-  /// A week number or a weekday that does not match the line's date: the
-  /// text keeps [calendarHead]'s colour and wears a wavy flag.
-  calendarMismatch,
-}
-
-/// One styled run of a line; offsets are relative to [StyledLine.text].
-///
-/// A line's tokens are disjoint and sorted by [start]; the region after a
-/// [TokenKind.headingMarker] token up to end-of-line is styled as heading
-/// text by the painter.
-@immutable
-final class Token {
-  /// Creates a token of [kind] covering [start]..[end).
-  const new(
-    this.kind,
-    this.start,
-    this.end, {
-    this.marker = false,
-    this.outer = const <TokenKind>[],
-  });
-
-  /// The style of the run.
-  final TokenKind kind;
-
-  /// The inline constructs the run sits inside, outermost first: the
-  /// underline around `**x**` in `<u>**x**</u>`. A line's tokens are disjoint,
-  /// so a stretch is one token of the innermost construct over it, and this
-  /// is what keeps the ones around it — without it the underline was lost.
-  /// Only the unified surface's styler fills it.
-  final List<TokenKind> outer;
-
-  /// Whether the run is the syntax of a construct rather than its text: the
-  /// `**` of a bold run, a link's `](href)`. What `live` mode hides. Only the
-  /// unified surface's styler tells them apart; this tokenizer never does.
-  final bool marker;
-
-  /// Offset of the first character of the run.
-  final int start;
-
-  /// Offset one past the last character of the run.
-  final int end;
-
-  /// `kind[start,end)="text"`; for tests and logs.
-  String describe(String line) =>
-      '$kind[$start,$end)="${line.substring(start, end)}"';
-
-  @override
-  bool operator ==(Object other) =>
-      other is Token &&
-      other.kind == kind &&
-      other.start == start &&
-      other.end == end &&
-      other.marker == marker &&
-      _sameKinds(other.outer, outer);
-
-  @override
-  int get hashCode =>
-      Object.hash(kind, start, end, marker, Object.hashAll(outer));
-
-  static bool _sameKinds(List<TokenKind> a, List<TokenKind> b) {
-    if (a.length != b.length) return false;
-    for (var at = 0; at < a.length; at++) {
-      if (a[at] != b[at]) return false;
-    }
-    return true;
-  }
-}
-
-/// [tokens], a line's, disjoint and sorted, with [ranges] of the line —
-/// disjoint and in order — laid over them as runs of [kind]: what a token
-/// covered inside a range gives way to it, and what it covered outside
-/// stays, cut where the range begins and ends. A template command
-/// (`{{date}}`) is laid over the Markdown around it this way.
-List<Token> overlayTokens(
-  List<Token> tokens,
-  List<(int, int)> ranges,
-  TokenKind kind,
-) {
-  if (ranges.isEmpty) return tokens;
-  Token piece(Token token, int start, int end) =>
-      Token(token.kind, start, end, marker: token.marker, outer: token.outer);
-  final out = <Token>[
-    for (final (start, end) in ranges) Token(kind, start, end),
-  ];
-  for (final token in tokens) {
-    var at = token.start;
-    for (final (start, end) in ranges) {
-      if (end <= at || start >= token.end) continue;
-      if (start > at) out.add(piece(token, at, start));
-      if (end > at) at = end;
-      if (at >= token.end) break;
-    }
-    if (at < token.end) out.add(piece(token, at, token.end));
-  }
-  return out..sort((a, b) => a.start.compareTo(b.start));
-}
-
-/// One line of the display text with its tokens; anything not covered by a
-/// token is [TokenKind.plain].
-final class StyledLine {
-  /// Creates a styled line.
-  const new(this.text, this.tokens);
-
-  /// The line text (without newline).
-  final String text;
-
-  /// The line's tokens, sorted by [Token.start]; disjoint.
-  final List<Token> tokens;
-}
-
-/// A math span in absolute text offsets, markers included (`$…$` / `$$…$$`).
-final class MathSpan {
-  /// Creates a math span covering [start]..[end).
-  const new(this.start, this.end, {required this.block});
-
-  /// Offset of the opening marker.
-  final int start;
-
-  /// Offset one past the closing marker.
-  final int end;
-
-  /// True for `$$…$$` spans; false for `$…$`.
-  final bool block;
-}
-
-/// The fence a line is inside.
-@immutable
-final class _Fence {
-  const new(this.char, this.len);
-
-  /// Code unit of the fence char (backtick or tilde).
-  final int char;
-
-  /// Length of the opening run.
-  final int len;
-
-  @override
-  bool operator ==(Object other) =>
-      other is _Fence && other.char == char && other.len == len;
-
-  @override
-  int get hashCode => Object.hash(char, len);
-}
-
-/// The carried block state.
-@immutable
-final class _State {
-  const new({this.fence, this.inMath = false, this.inFrontmatter = false});
-
-  final _Fence? fence;
-  final bool inMath;
-  final bool inFrontmatter;
-
-  static const _State initial = _State();
-
-  @override
-  bool operator ==(Object other) {
-    if (other is! _State) return false;
-    final f = fence;
-    final o = other.fence;
-    return (f == null
-            ? o == null
-            : o != null && o.char == f.char && o.len == f.len) &&
-        inMath == other.inMath &&
-        inFrontmatter == other.inFrontmatter;
-  }
-
-  @override
-  int get hashCode {
-    final f = fence;
-    return Object.hash(
-      f == null ? -1 : f.char,
-      f == null ? -2 : f.len,
-      inMath,
-      inFrontmatter,
-    );
-  }
-}
+import 'package:niman/src/editor/math_span.dart';
+import 'package:niman/src/editor/styled_line.dart';
+import 'package:niman/src/editor/token.dart';
+
+export 'package:niman/src/editor/math_span.dart';
+export 'package:niman/src/editor/styled_line.dart';
+export 'package:niman/src/editor/token.dart';
+export 'package:niman/src/editor/token_kind.dart';
 
 final class _Line {
   new(this.text);
@@ -332,8 +38,8 @@ final class _Line {
   /// Carried block state / tokens, null until the line is materialized
   /// (see [HighlightDocument] — tokenization is lazy so opening a 1M-char
   /// note costs only the visible lines, not the whole file).
-  _State? entering;
-  _State? exit;
+  BlockState? entering;
+  BlockState? exit;
   List<Token>? tokens;
 
   /// Whether [tokens] were made for the note's first line, which alone can
@@ -352,7 +58,7 @@ final class ProseLineWalker {
   /// A walker at the top of a note.
   new();
 
-  _State _state = _State.initial;
+  BlockState _state = BlockState.initial;
 
   /// Whether the line [text] at [lineIndex] is prose — not a fence or its
   /// code, display maths or the frontmatter. Lines are given in order from
@@ -437,7 +143,11 @@ final class HighlightDocument {
     final tokens = line.tokens;
     if (tokens != null && line.tokensAtZero == (index == 0)) return tokens;
     line.tokensAtZero = index == 0;
-    return line.tokens = _lineTokens(line.text, line.entering!, index);
+    return line.tokens = LineTokenizer.lineTokens(
+      line.text,
+      line.entering!,
+      index,
+    );
   }
 
   /// The styled lines (all of them; O(lineCount) — materializes the whole
@@ -471,7 +181,7 @@ final class HighlightDocument {
     var i = _materializedUntil;
     while (i <= upTo) {
       final line = _lines[i];
-      final entering = i == 0 ? _State.initial : _lines[i - 1].exit!;
+      final entering = i == 0 ? BlockState.initial : _lines[i - 1].exit!;
       if (line.entering != entering) line.tokens = null;
       line
         ..entering = entering
@@ -581,10 +291,10 @@ final class HighlightDocument {
   }
 
   static void _tokenizeAt(List<_Line> lines, int index, _Line line) {
-    final entering = index == 0 ? _State.initial : lines[index - 1].exit!;
+    final entering = index == 0 ? BlockState.initial : lines[index - 1].exit!;
     line.entering = entering;
     line.exit = _stateAfter(line.text, entering, index);
-    line.tokens = _lineTokens(line.text, entering, index);
+    line.tokens = LineTokenizer.lineTokens(line.text, entering, index);
     line.tokensAtZero = index == 0;
   }
 
@@ -619,78 +329,37 @@ final class HighlightDocument {
   }
 
   /// The state after [text], given the state entering the line.
-  static _State _stateAfter(String text, _State inState, int lineIndex) {
+  static BlockState _stateAfter(
+    String text,
+    BlockState inState,
+    int lineIndex,
+  ) {
     final fence = inState.fence;
     if (fence != null) {
-      return _isFenceClose(text, fence) ? _State.initial : inState;
+      return CodeFence.closes(text, fence) ? BlockState.initial : inState;
     }
     if (inState.inMath) {
-      return text.trim().startsWith(r'$$') ? _State.initial : inState;
+      return text.trim().startsWith(r'$$') ? BlockState.initial : inState;
     }
     if (inState.inFrontmatter) {
       final t = text.trim();
-      return t == '---' || t == '...' ? _State.initial : inState;
+      return t == '---' || t == '...' ? BlockState.initial : inState;
     }
     if (lineIndex == 0 && text.trim() == '---') {
-      return const _State(inFrontmatter: true);
+      return const BlockState(inFrontmatter: true);
     }
-    final fenceOpen = _fenceOpen(text);
+    final fenceOpen = CodeFence.openedBy(text);
     if (fenceOpen != null) {
-      return _State(fence: fenceOpen);
+      return BlockState(fence: fenceOpen);
     }
     final t = text.trim();
     if (t.startsWith(r'$$') && !_isSingleLineMath(t)) {
-      return const _State(inMath: true);
+      return const BlockState(inMath: true);
     }
-    return _State.initial;
+    return BlockState.initial;
   }
 
   static bool _isSingleLineMath(String trimmed) => isSingleLineDisplay(trimmed);
-
-  /// The number of `#` opening a heading on [text], or 0: one to six of
-  /// them at offset zero, followed by whitespace or the end of the line.
-  ///
-  /// Block context is the caller's to rule out first. [_lineTokens] and
-  /// [_headingIn] share this, so the highlight and the outline cannot
-  /// disagree about what counts as a heading.
-  /// Where the `#`s of an ATX heading on [text] start and how many there
-  /// are, or null: up to three spaces in, as CommonMark and the block
-  /// scanner read it (`LineSyntax.headingMarkerOf`).
-  static (int, int)? _headingHashes(String text) {
-    var at = 0;
-    while (at < 3 && at < text.length && _isSpaceChar(text.codeUnitAt(at))) {
-      at++;
-    }
-    var hashes = 0;
-    while (at + hashes < text.length && text.codeUnitAt(at + hashes) == 0x23) {
-      hashes++;
-    }
-    if (hashes >= 1 &&
-        hashes <= 6 &&
-        (at + hashes == text.length ||
-            _isSpaceChar(text.codeUnitAt(at + hashes)))) {
-      return (at, hashes);
-    }
-    return null;
-  }
-
-  /// The heading on [text] entered in [inState] — where its `#`s start and
-  /// how many — or null.
-  ///
-  /// Mirrors the order of [_lineTokens]'s early returns — fence content, a
-  /// fence line, math, frontmatter, a horizontal rule — because a line that
-  /// stops there never reaches the heading branch there either.
-  static (int, int)? _headingIn(String text, _State inState, int lineIndex) {
-    if (inState.fence != null) return null;
-    if (_fenceOpen(text) != null) return null;
-    final trimmed = text.trim();
-    if (inState.inMath || trimmed.startsWith(r'$$')) return null;
-    if (inState.inFrontmatter || (lineIndex == 0 && trimmed == '---')) {
-      return null;
-    }
-    if (_hr.hasMatch(text)) return null;
-    return _headingHashes(text);
-  }
 
   /// Calls [onHeading] for each heading line of [text], in line order, with
   /// the line index, the level, and the heading's text (markers stripped).
@@ -705,10 +374,10 @@ final class HighlightDocument {
     void Function(int line, int level, String heading) onHeading,
   ) {
     final raw = text.isEmpty ? const <String>[''] : text.split('\n');
-    var state = _State.initial;
+    var state = BlockState.initial;
     for (var i = 0; i < raw.length; i++) {
       final line = raw[i];
-      final heading = _headingIn(line, state, i);
+      final heading = LineTokenizer.headingIn(line, state, i);
       if (heading != null) {
         final (start, level) = heading;
         onHeading(i, level, line.substring(start + level).trim());
@@ -728,436 +397,10 @@ final class HighlightDocument {
         state.fence == null &&
         !state.inMath &&
         !state.inFrontmatter &&
-        _fenceOpen(text) == null &&
+        CodeFence.openedBy(text) == null &&
         !text.trim().startsWith(r'$$') &&
         !(lineIndex == 0 && text.trim() == '---');
     walker._state = _stateAfter(text, state, lineIndex);
     return prose;
   }
-
-  static _Fence? _fenceOpen(String text) {
-    final info = _fenceOpenInfo(text);
-    return info == null ? null : _Fence(info.$1, info.$2);
-  }
-
-  static bool _isFenceClose(String text, _Fence fence) =>
-      _isFenceCloseInfo(text, fence.char, fence.len);
-
-  static List<Token> _lineTokens(String text, _State inState, int lineIndex) {
-    final tokens = <Token>[];
-    final fence = inState.fence;
-    final trimmed = text.trim();
-    if (fence != null) {
-      // Fence content or the closing fence line.
-      tokens.add(Token(TokenKind.codeFence, 0, text.length));
-      return tokens;
-    }
-    final fenceOpen = _fenceOpen(text);
-    if (fenceOpen != null) {
-      tokens.add(Token(TokenKind.codeFence, 0, text.length));
-      final indent = text.length - text.trimLeft().length;
-      var run = 0;
-      while (indent + run < text.length &&
-          text.codeUnitAt(indent + run) == fenceOpen.char) {
-        run++;
-      }
-      var infoStart = indent + run;
-      while (infoStart < text.length &&
-          (text.codeUnitAt(infoStart) == 0x20 ||
-              text.codeUnitAt(infoStart) == 0x09)) {
-        infoStart++;
-      }
-      final info = text.substring(infoStart).trim();
-      if (info.isNotEmpty) {
-        tokens.add(
-          Token(TokenKind.codeLanguage, infoStart, infoStart + info.length),
-        );
-      }
-      return tokens;
-    }
-    if (inState.inMath || trimmed.startsWith(r'$$')) {
-      // Math block content, a closing line, or single-line `$$…$$`.
-      tokens.add(Token(TokenKind.mathBlock, 0, text.length));
-      return tokens;
-    }
-    if (inState.inFrontmatter || (lineIndex == 0 && trimmed == '---')) {
-      tokens.add(Token(TokenKind.frontmatter, 0, text.length));
-      return tokens;
-    }
-    if (_hr.hasMatch(text)) {
-      return <Token>[Token(TokenKind.horizontalRule, 0, text.length)];
-    }
-
-    // Heading: `#`..`######` followed by whitespace or end of line.
-    final heading = _headingHashes(text);
-    if (heading != null) {
-      final (start, hashes) = heading;
-      tokens.add(Token(TokenKind.headingMarker, start, start + hashes));
-      _InlineScanner.scan(tokens, text, start + hashes);
-      return tokens;
-    }
-
-    // Blockquote: up to three spaces, then one or more `>` (whitespace or
-    // end of line after).
-    var q = 0;
-    while (q < 3 && q < text.length && _isSpaceChar(text.codeUnitAt(q))) {
-      q++;
-    }
-    if (q < text.length && text.codeUnitAt(q) == 0x3E) {
-      var qEnd = q;
-      while (qEnd < text.length && text.codeUnitAt(qEnd) == 0x3E) {
-        qEnd++;
-      }
-      final afterQuote = qEnd < text.length ? text.codeUnitAt(qEnd) : -1;
-      if (afterQuote == -1 || _isSpaceChar(afterQuote)) {
-        tokens.add(Token(TokenKind.blockquote, q, qEnd));
-        _InlineScanner.scan(tokens, text, qEnd);
-        return tokens;
-      }
-    }
-
-    // List item: indent, then a `-`/`*`/`+` or digit(s) plus `.`/`)` marker,
-    // with whitespace or end of line after the marker.
-    var m = 0;
-    while (m < text.length && _isSpaceChar(text.codeUnitAt(m))) {
-      m++;
-    }
-    var mEnd = -1;
-    if (m < text.length) {
-      final c = text.codeUnitAt(m);
-      if (c == 0x2D || c == 0x2A || c == 0x2B) {
-        mEnd = m + 1;
-      } else if (c >= 0x30 && c <= 0x39) {
-        var d = m;
-        while (d < text.length &&
-            d - m < 9 &&
-            text.codeUnitAt(d) >= 0x30 &&
-            text.codeUnitAt(d) <= 0x39) {
-          d++;
-        }
-        if (d < text.length &&
-            (text.codeUnitAt(d) == 0x2E || text.codeUnitAt(d) == 0x29)) {
-          mEnd = d + 1;
-        }
-      }
-    }
-    if (mEnd > 0) {
-      final afterMarker = mEnd < text.length ? text.codeUnitAt(mEnd) : -1;
-      if (afterMarker == -1 || _isSpaceChar(afterMarker)) {
-        tokens.add(Token(TokenKind.listMarker, m, mEnd));
-        var from = mEnd;
-        while (from < text.length && _isSpaceChar(text.codeUnitAt(from))) {
-          from++;
-        }
-        if (from + 3 <= text.length &&
-            text.codeUnitAt(from) == 0x5B &&
-            (text.codeUnitAt(from + 1) == 0x20 ||
-                text.codeUnitAt(from + 1) == 0x78 ||
-                text.codeUnitAt(from + 1) == 0x58) &&
-            text.codeUnitAt(from + 2) == 0x5D) {
-          final afterBox = from + 3 < text.length
-              ? text.codeUnitAt(from + 3)
-              : -1;
-          if (afterBox == -1 || _isSpaceChar(afterBox)) {
-            tokens.add(Token(TokenKind.taskBox, from, from + 3));
-            from += 3;
-            if (from < text.length && _isSpaceChar(text.codeUnitAt(from))) {
-              from++;
-            }
-          }
-        }
-        _InlineScanner.scan(tokens, text, from);
-        return tokens;
-      }
-    }
-
-    _InlineScanner.scan(tokens, text, 0);
-    return tokens;
-  }
-
-  static final RegExp _hr = RegExp(
-    r'^\s{0,3}((?:-{3,})|(?:\*{3,})|(?:_{3,}))\s*$',
-  );
-}
-
-/// All math spans in [text], absolute offsets, markers included.
-///
-/// `$$…$$` (single-line or multi-line) spans are [MathSpan.block]; `$…$`
-/// spans are inline. Rules: inline math opens at a `$` whose next char is
-/// not whitespace or `$`, closes at a `$` whose previous char is not
-/// whitespace, is not `\$`, and is not followed by a digit; a display block
-/// opens at a line starting with `$$` (unless the line ends with `$$` again)
-/// and closes at the next such line; an unterminated block spans to EOF.
-List<MathSpan> mathSpansIn(String text) {
-  final lines = text.isEmpty ? <String>[''] : text.split('\n');
-  final spans = <MathSpan>[];
-  var fenceChar = 0;
-  var fenceLen = 0;
-  var inFence = false;
-  var inFm = false;
-  var inMath = false;
-  var mathStart = 0;
-  var offset = 0;
-  for (var i = 0; i < lines.length; i++) {
-    final line = lines[i];
-    final trimmed = line.trim();
-    final lineStart = offset;
-    offset = lineStart + line.length + 1;
-    final lineEnd = lineStart + line.length;
-    if (inFence) {
-      if (_isFenceCloseInfo(line, fenceChar, fenceLen)) inFence = false;
-      continue;
-    }
-    final fenceOpen = _fenceOpenInfo(line);
-    if (fenceOpen != null) {
-      inFence = true;
-      fenceChar = fenceOpen.$1;
-      fenceLen = fenceOpen.$2;
-      continue;
-    }
-    if (inFm) {
-      if (trimmed == '---' || trimmed == '...') inFm = false;
-      continue;
-    }
-    if (i == 0 && trimmed == '---') {
-      inFm = true;
-      continue;
-    }
-    if (inMath) {
-      if (trimmed.startsWith(r'$$')) {
-        final indent = line.length - line.trimLeft().length;
-        spans.add(MathSpan(mathStart, lineStart + indent + 2, block: true));
-        inMath = false;
-      } else if (i == lines.length - 1) {
-        spans.add(MathSpan(mathStart, lineEnd, block: true));
-        inMath = false;
-      }
-      continue;
-    }
-    if (trimmed.startsWith(r'$$')) {
-      if (isSingleLineDisplay(trimmed)) {
-        final indent = line.length - line.trimLeft().length;
-        spans.add(
-          MathSpan(
-            lineStart + indent,
-            lineStart + indent + trimmed.length,
-            block: true,
-          ),
-        );
-      } else {
-        inMath = true;
-        mathStart = lineStart + (line.length - line.trimLeft().length);
-      }
-      continue;
-    }
-    for (final (s, e) in allInlineMath(line)) {
-      spans.add(MathSpan(lineStart + s, lineStart + e, block: false));
-    }
-  }
-  spans.sort((a, b) => a.start.compareTo(b.start));
-  return spans;
-}
-
-bool _isSpaceChar(int c) =>
-    c == 0x20 || c == 0x09 || c == 0x0A || c == 0x0B || c == 0x0C || c == 0x0D;
-
-/// The fence-opening run at the start of [text] (at least three backticks
-/// or tildes, nothing but whitespace/language after) or null.
-(int, int)? _fenceOpenInfo(String text) {
-  final t = text.trimLeft();
-  if (t.length < 3) return null;
-  final c0 = t.codeUnitAt(0);
-  if (c0 != 0x60 && c0 != 0x7E) return null;
-  var len = 0;
-  while (len < t.length && t.codeUnitAt(len) == c0) {
-    len++;
-  }
-  if (len < 3) return null;
-  final rest = t.substring(len);
-  if (rest.startsWith('`') || rest.startsWith('~')) return null;
-  return (c0, len);
-}
-
-/// Whether [text] closes a fence opened with [fenceChar]/[fenceLen]: the
-/// line is exactly a run of the same char, at least as long.
-bool _isFenceCloseInfo(String text, int fenceChar, int fenceLen) {
-  final t = text.trim();
-  if (t.isEmpty) return false;
-  var len = 0;
-  while (len < t.length && t.codeUnitAt(len) == fenceChar) {
-    len++;
-  }
-  return len >= fenceLen && t.length == len;
-}
-
-final class _InlineScanner {
-  // A destination holds no parentheses; a title after it may be one in
-  // parentheses, `[x](a.md (Title))`.
-  static final RegExp _image = RegExp(
-    r'!\[[^\]\n]*\]\([^()\n]*(?:[ \t]\([^()\n]*\))?\)',
-  );
-  static final RegExp _link = RegExp(
-    r'\[[^\[\]\n]*\]\([^()\n]*(?:[ \t]\([^()\n]*\))?\)',
-  );
-  static final RegExp _wiki = RegExp(r'\[\[[^\[\]\n]*\]\]');
-  static final RegExp _boldStar = RegExp(r'\*\*[^*\n]+\*\*');
-  static final RegExp _boldUnder = RegExp('__(?:[^_]|_(?:[^_]))+__');
-  static final RegExp _strike = RegExp(r'~~[^~\n]+~~');
-  static final RegExp _highlight = RegExp(r'==[^\s=](?:[^=\n]*[^\s=])?==');
-  static final RegExp _italicStar = RegExp(r'\*[^*\n]+\*');
-  static final RegExp _italicUnder = RegExp('_(?:[^_]|_(?:[^_]))+_');
-
-  /// `#tag`: unicode letters and digits plus the `_`, `/` and `-` a tag has
-  /// always allowed — the same class `AppSyntax` reads, so `#città`
-  /// is one tag here and one tag in the index.
-  static final RegExp _tag = RegExp(r'#([\p{L}\p{N}_/-]+)', unicode: true);
-
-  /// The first match of [re] in [line] at/after [pos] (or null).
-  static RegExpMatch? _first(RegExp re, String line, int pos) {
-    final it = re.allMatches(line, pos).iterator;
-    return it.moveNext() ? it.current : null;
-  }
-
-  static void scan(List<Token> out, String line, int from) {
-    var pos = from;
-    while (pos < line.length) {
-      var bestKind = TokenKind.plain;
-      var bestStart = -1;
-      var bestEnd = -1;
-      void consider(TokenKind kind, int start, int end) {
-        if (start < pos || end <= start) return;
-        if (bestStart == -1 || start < bestStart) {
-          bestKind = kind;
-          bestStart = start;
-          bestEnd = end;
-        }
-      }
-
-      final code = _findCode(line, pos);
-      if (code != null) {
-        consider(TokenKind.codeInline, code.$1, code.$2);
-      }
-      final math = findInlineMath(line, pos);
-      if (math != null) {
-        consider(TokenKind.mathInline, math.$1, math.$2);
-      }
-      final image = _first(_image, line, pos);
-      if (image != null) {
-        consider(TokenKind.image, image.start, image.end);
-      }
-      final wiki = _first(_wiki, line, pos);
-      if (wiki != null) {
-        consider(TokenKind.wikilink, wiki.start, wiki.end);
-      }
-      final link = _first(_link, line, pos);
-      if (link != null) {
-        consider(TokenKind.link, link.start, link.end);
-      }
-      final boldStar = _first(_boldStar, line, pos);
-      if (boldStar != null) {
-        consider(TokenKind.bold, boldStar.start, boldStar.end);
-      }
-      final boldUnder = _first(_boldUnder, line, pos);
-      if (boldUnder != null) {
-        consider(TokenKind.bold, boldUnder.start, boldUnder.end);
-      }
-      final strike = _first(_strike, line, pos);
-      if (strike != null) {
-        consider(TokenKind.strike, strike.start, strike.end);
-      }
-      final highlight = _first(_highlight, line, pos);
-      if (highlight != null) {
-        consider(TokenKind.highlight, highlight.start, highlight.end);
-      }
-      final italicStar = _findItalicStar(line, pos);
-      if (italicStar != null) {
-        consider(TokenKind.italic, italicStar.$1, italicStar.$2);
-      }
-      final italicUnder = _findItalicUnder(line, pos);
-      if (italicUnder != null) {
-        consider(TokenKind.italic, italicUnder.$1, italicUnder.$2);
-      }
-      final tag = _first(_tag, line, pos);
-      if (tag != null) {
-        final precededBySpace =
-            tag.start == 0 || _isSpaceChar(line.codeUnitAt(tag.start - 1));
-        if (precededBySpace) {
-          consider(TokenKind.tag, tag.start, tag.end);
-        }
-      }
-
-      if (bestStart == -1) break;
-      out.add(Token(bestKind, bestStart, bestEnd));
-      pos = bestEnd;
-    }
-  }
-
-  /// `` `code` `` at/after [from]: the backtick run must close with a run of
-  /// the same length (a maximal run). Returns (start, end) or null.
-  static (int, int)? _findCode(String line, int from) {
-    var i = from;
-    while (i < line.length && line.codeUnitAt(i) != 0x60) {
-      i++;
-    }
-    if (i >= line.length) return null;
-    final runStart = i;
-    var run = 0;
-    while (i < line.length && line.codeUnitAt(i) == 0x60) {
-      run++;
-      i++;
-    }
-    var k = i;
-    while (k < line.length) {
-      final next = line.indexOf('`', k);
-      if (next == -1) return null;
-      var len2 = 0;
-      var m = next;
-      while (m < line.length && line.codeUnitAt(m) == 0x60) {
-        len2++;
-        m++;
-      }
-      if (len2 == run) {
-        return (runStart, m);
-      }
-      k = m;
-    }
-    return null;
-  }
-
-  /// `*…*` not part of `**`; validated because Dart regex has no lookbehind.
-  static (int, int)? _findItalicStar(String line, int from) {
-    var pos = from;
-    while (pos < line.length) {
-      final m = _first(_italicStar, line, pos);
-      if (m == null) return null;
-      final okBefore = m.start == 0 || line.codeUnitAt(m.start - 1) != 0x2A;
-      final okAfter = m.end >= line.length || line.codeUnitAt(m.end) != 0x2A;
-      if (okBefore && okAfter) return (m.start, m.end);
-      pos = m.start + 1;
-    }
-    return null;
-  }
-
-  /// `_…_` not intra-word.
-  static (int, int)? _findItalicUnder(String line, int from) {
-    var pos = from;
-    while (pos < line.length) {
-      final m = _first(_italicUnder, line, pos);
-      if (m == null) return null;
-      final okBefore =
-          m.start == 0 ||
-          !(_isWord(line.codeUnitAt(m.start - 1)) ||
-              line.codeUnitAt(m.start - 1) == 0x5F);
-      final afterCh = m.end < line.length ? line.codeUnitAt(m.end) : -1;
-      final okAfter = afterCh == -1 || (!_isWord(afterCh) && afterCh != 0x5F);
-      if (okBefore && okAfter) return (m.start, m.end);
-      pos = m.start + 1;
-    }
-    return null;
-  }
-
-  static bool _isWord(int c) =>
-      (c >= 0x41 && c <= 0x5A) ||
-      (c >= 0x61 && c <= 0x7A) ||
-      (c >= 0x30 && c <= 0x39);
 }

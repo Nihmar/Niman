@@ -32,113 +32,18 @@ import 'package:flutter/painting.dart';
 import 'package:meta/meta.dart';
 import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/markdown/block.dart';
+import 'package:niman/src/markdown/render/live_table_counts.dart';
+import 'package:niman/src/markdown/render/live_table_layout.dart';
+import 'package:niman/src/markdown/render/live_table_metrics.dart';
+import 'package:niman/src/markdown/render/live_table_row.dart';
+import 'package:niman/src/markdown/render/live_table_row_work.dart';
+import 'package:niman/src/markdown/render/live_table_spans.dart';
+import 'package:niman/src/markdown/render/live_table_state.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
-import 'package:niman/src/markdown/render/table_fit.dart';
-import 'package:niman/src/markdown/render/table_measure.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/markdown/table/markdown_table.dart';
 
-/// A stretch of a row's source drawn as nothing `width` wide: the pipes and
-/// the spaces between two cells' text.
-typedef LiveTableGap = ({int start, int end, double width});
-
-/// One cell's text on one visual line of a row laid out in fitted columns:
-/// the stretch of the row's source it holds, and where its left edge stands
-/// from the row's text's left edge.
-typedef LiveTablePiece = ({int start, int end, double x});
-
-/// One visual line of a row laid out in fitted columns: the cells' pieces on
-/// it, left to right, and how tall it is.
-typedef LiveTableLine = ({List<LiveTablePiece> pieces, double height});
-
-/// One line of a table, as `live` lays it out.
-final class LiveTableRow {
-  /// Creates a row; [_wrapped] is worked out the first time a frame asks for
-  /// its pieces, so a row no frame draws is never measured.
-  new(
-    this._wrapped, {
-    required this.edges,
-    required this.gaps,
-    required this.header,
-    required this.delimiter,
-    required this.last,
-  });
-
-  /// Where each column starts, from the text's left edge, and where the
-  /// table ends: one more than there are columns.
-  final List<double> edges;
-
-  /// The stretches of the line drawn as nothing, and how wide.
-  final List<LiveTableGap> gaps;
-
-  final List<LiveTableLine> Function() _wrapped;
-  List<LiveTableLine>? _wrappedValue;
-
-  /// The line's visual lines when the table was too wide for the pane and
-  /// its columns were fitted to it: one entry a visual line, top to bottom.
-  /// Empty for a line drawn as one paragraph — a table that fits, or the
-  /// delimiter row, which takes no room either way.
-  ///
-  /// Worked out the first time a frame draws the row: a row scrolled out of
-  /// view, whose pieces no frame needs, is not measured at all (#494).
-  List<LiveTableLine> get wrapped => _wrappedValue ??= _wrapped();
-
-  /// Whether the line is the table's header, set as the read view sets it.
-  final bool header;
-
-  /// Whether the line is the delimiter row, which takes no room.
-  final bool delimiter;
-
-  /// Whether the line is the table's last: the grid's bottom is under it.
-  final bool last;
-}
-
-/// A cell's text as it is drawn: how wide its glyphs are, how wide its widest
-/// unbreakable run is (the floor a fitted column keeps), how many characters
-/// of hidden marks it has, and how many of them come before its first glyph.
-typedef _Measured = ({double visible, double least, int hidden, int lead});
-
-/// One line of a table as measured: its cells, and each one's width.
-///
-/// A line's measurements are a function of its text and of what the tables
-/// are measured with (the theme, the scaler, the tokenizer), so they are kept
-/// under the text and outlive the revision that measured them: an edit
-/// somewhere else in the note, or in one cell, finds every other row already
-/// measured (#494). Only a row at rest is shared — the caret's row shows a
-/// run's marks and is measured on its own.
-final class _RowWork {
-  new(this.cells, this.widths, {required this.delimiter});
-
-  /// The cells' text ranges, trimmed as `cellsOf` trims them.
-  final List<(int, int)> cells;
-
-  /// Whether the line is the delimiter row.
-  final bool delimiter;
-
-  /// Per cell, how wide its text draws.
-  final List<_Measured> widths;
-}
-
-/// One table's lines and their measurements, read once per revision.
-///
-/// The measurements outlive a reveal change: the caret's run shows marks on
-/// the caret's own row and on no other, so a move measures that row again —
-/// and the one it left — and keeps the rest (#494).
-final class _Metrics {
-  new(this.lines, this.rows);
-
-  /// The table's lines, top to bottom, without their terminators.
-  final List<String> lines;
-
-  /// Each line's measurements.
-  final List<_RowWork> rows;
-
-  /// The line the reveal stood on when the table's cells were last measured —
-  /// null for a table measured at rest — and the reveal itself: together they
-  /// tell the next move which row to measure again.
-  int? revealedLine;
-  Object? revealedWith;
-}
+export 'package:niman/src/markdown/render/live_table_row.dart';
 
 /// The tables of a note, laid out a table at a time.
 ///
@@ -149,7 +54,7 @@ final class _Metrics {
 /// scrolled out of view is not laid out at all (#494).
 final class LiveTables {
   /// Each table's measurements and rows, by its first line.
-  final Map<int, _Table> _tables = <int, _Table>{};
+  final Map<int, LiveTableState> _tables = <int, LiveTableState>{};
 
   SourceBuffer? _buffer;
   int _revision = -1;
@@ -161,21 +66,27 @@ final class LiveTables {
   /// text — the ones a frame asked for since the buffer last changed — and
   /// the ones the revision before it kept, which a row still standing is
   /// taken back from. A row no revision asks for is forgotten after one more.
-  Map<(bool, String), _RowWork> _kept = <(bool, String), _RowWork>{};
-  Map<(bool, String), _RowWork> _prior = <(bool, String), _RowWork>{};
+  Map<(bool, String), LiveTableRowWork> _kept =
+      <(bool, String), LiveTableRowWork>{};
+  Map<(bool, String), LiveTableRowWork> _prior =
+      <(bool, String), LiveTableRowWork>{};
 
   /// How many times a cell's text has been laid out for a table, for the test
   /// that holds a revision and a caret move to the work they may do (#494):
   /// a table that fits is measured one painter a cell, a fitted one one
   /// painter a word, and a wrapped row only when a frame draws its pieces.
   @visibleForTesting
-  static int measurements = 0;
+  static int get measurements => LiveTableCounts.measurements;
+  @visibleForTesting
+  static set measurements(int value) => LiveTableCounts.measurements = value;
 
   /// How many rows have been laid out — their gaps worked out, their pieces
   /// made ready — for the test that holds a caret move to the rows it touched
   /// (#494).
   @visibleForTesting
-  static int rowsLaid = 0;
+  static int get rowsLaid => LiveTableCounts.rowsLaid;
+  @visibleForTesting
+  static set rowsLaid(int value) => LiveTableCounts.rowsLaid = value;
 
   /// How line [line] of [buffer] is laid out, [block] being its block; null
   /// for a line of no table. [tokensOf] gives a line's tokens, of which the
@@ -224,8 +135,8 @@ final class LiveTables {
       _tables.clear();
       // What the measurements are made with stands: a revision moves the text
       // and nothing else, and a row of the same text measures the same.
-      _prior = same ? _kept : <(bool, String), _RowWork>{};
-      _kept = <(bool, String), _RowWork>{};
+      _prior = same ? _kept : <(bool, String), LiveTableRowWork>{};
+      _kept = <(bool, String), LiveTableRowWork>{};
       _buffer = buffer;
       _revision = buffer.revision;
       _theme = theme;
@@ -234,7 +145,10 @@ final class LiveTables {
     }
     final at = line - block.startLine;
     if (at < 0 || at >= block.endLine - block.startLine) return null;
-    final table = _tables.putIfAbsent(block.startLine, () => _Table(block));
+    final table = _tables.putIfAbsent(
+      block.startLine,
+      () => LiveTableState(block),
+    );
     final metrics = _metricsFor(
       table,
       buffer,
@@ -250,7 +164,7 @@ final class LiveTables {
         table.reveal != reveal ||
         table.budget != budget) {
       table
-        ..rows = _layOut(
+        ..rows = LiveTableLayout.layOut(
           table,
           metrics,
           tokensOf,
@@ -269,8 +183,8 @@ final class LiveTables {
 
   /// The table's measurements: read at once, then only touched where a reveal
   /// moved — its own row, and the row it left.
-  _Metrics _metricsFor(
-    _Table table,
+  LiveTableMetrics _metricsFor(
+    LiveTableState table,
     SourceBuffer buffer,
     List<Token> Function(int line) tokensOf,
     bool Function(int line, Token token) hidden,
@@ -340,7 +254,7 @@ final class LiveTables {
   /// Reads [block]'s lines and measures every cell of it, [reveal] being the
   /// run the line [shown] of the table shows — null for a table measured at
   /// rest. A row already measured under its text is not measured again.
-  _Metrics _read(
+  LiveTableMetrics _read(
     Block block,
     SourceBuffer buffer,
     List<Token> Function(int line) tokensOf,
@@ -355,7 +269,7 @@ final class LiveTables {
       for (var line = block.startLine; line < block.endLine; line++)
         buffer.lineAt(line),
     ];
-    final rows = <_RowWork>[
+    final rows = <LiveTableRowWork>[
       for (var row = 0; row < lines.length; row++)
         _work(
           block,
@@ -369,7 +283,7 @@ final class LiveTables {
           scaler,
         ),
     ];
-    return _Metrics(lines, rows)
+    return LiveTableMetrics(lines, rows)
       ..revealedLine = shown
       ..revealedWith = reveal;
   }
@@ -378,8 +292,8 @@ final class LiveTables {
   /// ([revealed]) shows a run's marks, and the row it left shows them as they
   /// stand at rest.
   void _measureRow(
-    _Table table,
-    _Metrics metrics,
+    LiveTableState table,
+    LiveTableMetrics metrics,
     int row,
     bool revealed,
     List<Token> Function(int line) tokensOf,
@@ -405,7 +319,7 @@ final class LiveTables {
   /// Row [row]'s measurements: the ones kept under its text when it is at
   /// rest, measured otherwise. The row that shows a run's marks ([revealed])
   /// is measured as it is drawn and shared with no other.
-  _RowWork _work(
+  LiveTableRowWork _work(
     Block block,
     int row,
     String text,
@@ -423,7 +337,7 @@ final class LiveTables {
     }
     final delimiter = _isDelimiter(text);
     final cells = delimiter ? const <(int, int)>[] : cellsOf(text);
-    final work = _RowWork(
+    final work = LiveTableRowWork(
       cells,
       _measureCells(
         block,
@@ -443,7 +357,7 @@ final class LiveTables {
   }
 
   /// Every cell of row [row] measured: how wide its text draws.
-  static List<_Measured> _measureCells(
+  static List<LiveTableMeasured> _measureCells(
     Block block,
     int row,
     String text,
@@ -456,9 +370,9 @@ final class LiveTables {
   ) {
     final line = block.startLine + row;
     final style = row == 0 ? theme.tableHeader : theme.tableCell;
-    return <_Measured>[
+    return <LiveTableMeasured>[
       for (final (start, end) in cells)
-        _measure(
+        LiveTableSpans.measure(
           text,
           tokensOf(line),
           start,
@@ -470,398 +384,6 @@ final class LiveTables {
         ),
     ];
   }
-
-  /// Lays [table]'s block out from [metrics]: its columns measured from every
-  /// row's cells, fitted to [budget] when they want more room than it, and
-  /// each line's gaps or wrapped pieces worked out.
-  ///
-  /// A row's wrapped pieces are laid out only when a frame first asks for
-  /// them — so a table that fits its pane lays no piece out, and a fitted
-  /// table lays out the pieces of its *visible* rows alone (#494). Its
-  /// columns' floors cost nothing: each cell's measure gives its widest
-  /// unbreakable run with its width.
-  List<LiveTableRow> _layOut(
-    _Table table,
-    _Metrics metrics,
-    List<Token> Function(int line) tokensOf,
-    bool Function(int line, Token token) hidden,
-    TextStyle? Function(Token token) styleOf,
-    MarkdownTheme theme,
-    TextScaler scaler,
-    double budget,
-  ) {
-    final block = table.block;
-    final pad = theme.tableCellPadding.left;
-    final lines = metrics.lines;
-    final rows = metrics.rows;
-    final cells = <List<(int, int)>>[for (final row in rows) row.cells];
-    final widths = <List<_Measured>>[for (final row in rows) row.widths];
-    final delimiters = <bool>[for (final row in rows) row.delimiter];
-    // A column as wide as its widest cell, with the padding either side.
-    final columns = widths.fold<int>(0, (most, row) {
-      return row.length > most ? row.length : most;
-    });
-    final column = List<double>.filled(columns, 0);
-    for (final row in widths) {
-      for (var at = 0; at < row.length; at++) {
-        if (row[at].visible > column[at]) column[at] = row[at].visible;
-      }
-    }
-    // The table as it wants to be, and — when that is wider than the pane —
-    // the same table fitted to it.
-    final natural = <double>[0];
-    for (final width in column) {
-      natural.add(natural.last + width + 2 * pad);
-    }
-    final fits = natural.last <= budget;
-    // The widest unbreakable run of each column: the room a fitted column
-    // keeps, so a word is not broken where the read view would keep it
-    // whole. Measured with the cell, in the one layout that measures it.
-    var least = const <double>[];
-    if (!fits) {
-      least = List<double>.filled(columns, 0);
-      for (final row in widths) {
-        for (var at = 0; at < row.length; at++) {
-          if (row[at].least > least[at]) least[at] = row[at].least;
-        }
-      }
-    }
-    final fitted = fits
-        ? column
-        : fitTableColumns(
-            natural: column,
-            least: least,
-            pad: pad,
-            budget: budget,
-          );
-    final edges = <double>[0];
-    for (final width in fitted) {
-      edges.add(edges.last + width + 2 * pad);
-    }
-    // A move of the reveal leaves the columns where they were unless the
-    // caret's row is wider for its marks. When it does, the rows it did not
-    // touch are the rows they were, and only the ones it did are laid out
-    // again.
-    final before = table.rows;
-    final kept =
-        before != null &&
-            before.isNotEmpty &&
-            table.fits == fits &&
-            _sameEdges(before.first.edges, edges)
-        ? before
-        : null;
-    table.fits = fits;
-    late final tiny = _tinyAdvance(scaler);
-    // A space's advance in a row's face, measured once a face: the spaces a
-    // cell is written with are drawn as wide as a space where the room lets
-    // them (`_gaps`).
-    final spaces = <TextStyle, double>{};
-    double spaceOf(TextStyle style) =>
-        spaces.putIfAbsent(style, () => _spaceAdvance(style, scaler));
-    // The columns' alignments, from the delimiter row: a right-aligned
-    // column's text stands at its right edge, as the read view sets it.
-    final aligns = lines.length > 1
-        ? MarkdownTable.alignsOf(lines[1])
-        : const <TableAlign>[];
-    LiveTableRow build(int row) {
-      rowsLaid++;
-      final style = row == 0 ? theme.tableHeader : theme.tableCell;
-      return LiveTableRow(
-        // The row's pieces are worked out the first time a frame draws it:
-        // a row scrolled out of view is drawn by no frame, and is measured
-        // by none (#494).
-        () => fits || delimiters[row]
-            ? const <LiveTableLine>[]
-            : _wrappedRow(
-                lines[row],
-                tokensOf(block.startLine + row),
-                cells[row],
-                fitted,
-                edges,
-                pad,
-                aligns,
-                style,
-                scaler,
-                (token) => hidden(block.startLine + row, token),
-                styleOf,
-              ),
-        edges: edges,
-        gaps: fits || delimiters[row]
-            ? _gaps(
-                lines[row],
-                cells[row],
-                widths[row],
-                edges,
-                pad,
-                tiny,
-                style.letterSpacing ?? 0,
-                spaceOf(style),
-                aligns,
-              )
-            : const <LiveTableGap>[],
-        header: row == 0,
-        delimiter: delimiters[row],
-        last: row == lines.length - 1,
-      );
-    }
-
-    return <LiveTableRow>[
-      for (var row = 0; row < lines.length; row++)
-        if (kept != null && !table.touched.contains(row))
-          kept[row]
-        else
-          build(row),
-    ];
-  }
-
-  static bool _sameEdges(List<double> a, List<double> b) {
-    if (a.length != b.length) return false;
-    for (var at = 0; at < a.length; at++) {
-      if (a[at] != b[at]) return false;
-    }
-    return true;
-  }
-
-  /// The visual lines of a row laid out in [fitted] columns: each cell's
-  /// text wrapped inside its column — measured with the same spans it is
-  /// drawn with, so a piece's range is exactly the source it shows — and
-  /// placed on the line its piece falls on, at its column's own [edges].
-  static List<LiveTableLine> _wrappedRow(
-    String text,
-    List<Token> tokens,
-    List<(int, int)> cells,
-    List<double> fitted,
-    List<double> edges,
-    double pad,
-    List<TableAlign> aligns,
-    TextStyle style,
-    TextScaler scaler,
-    bool Function(Token token) hiddenAtRest,
-    TextStyle? Function(Token token) styleOf,
-  ) {
-    final lines = <List<LiveTablePiece>>[];
-    final heights = <double>[];
-    final fallback = _lineHeight(style, scaler);
-    for (var at = 0; at < cells.length; at++) {
-      final (start, end) = cells[at];
-      final width = at < fitted.length ? fitted[at] : fitted.last;
-      final spans = _spans(text, tokens, start, end, hiddenAtRest, styleOf);
-      measurements++;
-      final painter = TextPainter(
-        text: TextSpan(children: spans, style: style),
-        strutStyle: StrutStyle.fromTextStyle(style),
-        textDirection: TextDirection.ltr,
-        textScaler: scaler,
-      )..layout(maxWidth: width);
-      final metrics = painter.computeLineMetrics();
-      final ranges = <(int, int)>[];
-      if (metrics.isEmpty) {
-        ranges.add((start, end));
-      } else {
-        // The painter measures the cell as it is drawn, its hidden marks
-        // left out: a line boundary comes back as an offset of that drawn
-        // text, and is read back into the source through the stretches it
-        // was made of (`_sourceOf`) — adding the cell's start would put
-        // every break short of its word by the marks before it.
-        final shown = _shownOf(tokens, start, end, hiddenAtRest);
-        var from = start;
-        var drawn = 0;
-        for (var line = 0; line < metrics.length; line++) {
-          // The last visual line takes the cell's own end: the ranges are
-          // contiguous, so they cut the cell's source into what each line
-          // shows and nothing falls between them.
-          var to = end;
-          if (line < metrics.length - 1) {
-            drawn = painter.getLineBoundary(TextPosition(offset: drawn)).end;
-            to = _sourceOf(shown, start, drawn);
-          }
-          if (to < from || to > end) to = to < from ? from : end;
-          ranges.add((from, to));
-          from = to;
-        }
-      }
-      final left = edges[at] + pad;
-      final align = at < aligns.length ? aligns[at] : TableAlign.none;
-      for (var line = 0; line < ranges.length; line++) {
-        while (lines.length <= line) {
-          lines.add(<LiveTablePiece>[]);
-          heights.add(0);
-        }
-        final (from, to) = ranges[line];
-        final pieceWidth = line < metrics.length
-            ? metrics[line].width
-            : _textWidth(text.substring(from, to), style, scaler);
-        // A right- or centred column sets each of its visual lines off its
-        // own left edge, as the read view aligns every one of them.
-        final room = width - pieceWidth;
-        final shift = switch (align) {
-          TableAlign.right when room > 0 => room,
-          TableAlign.center when room > 0 => room / 2,
-          _ => 0.0,
-        };
-        lines[line].add((start: from, end: to, x: left + shift));
-        final pieceHeight = line < metrics.length
-            ? metrics[line].height
-            : fallback;
-        if (pieceHeight > heights[line]) heights[line] = pieceHeight;
-      }
-      painter.dispose();
-    }
-    return <LiveTableLine>[
-      for (var at = 0; at < lines.length; at++)
-        (pieces: lines[at], height: heights[at] <= 0 ? fallback : heights[at]),
-    ];
-  }
-
-  /// How wide [text] is set in [style], no room to wrap into: a piece's own
-  /// width, for a column that sets its pieces off its right or centre.
-  static double _textWidth(String text, TextStyle style, TextScaler scaler) {
-    measurements++;
-    final painter = TextPainter(
-      text: TextSpan(text: text, style: style),
-      textDirection: TextDirection.ltr,
-      textScaler: scaler,
-    )..layout();
-    final width = painter.width;
-    painter.dispose();
-    return width;
-  }
-
-  /// How tall a line of [style] is at [scaler]: a cell of no text at all is
-  /// still a line of the row.
-  static double _lineHeight(TextStyle style, TextScaler scaler) {
-    final painter = TextPainter(
-      text: TextSpan(text: 'x', style: style),
-      strutStyle: StrutStyle.fromTextStyle(style),
-      textDirection: TextDirection.ltr,
-      textScaler: scaler,
-    )..layout();
-    final height = painter.height;
-    painter.dispose();
-    return height;
-  }
-
-  /// The gaps of a line whose cells' text is [cells], [widths] wide: before
-  /// the first cell's text a padding, between two cells' what is left of
-  /// the first cell's column and the next one's padding, and after the last
-  /// what is left of its column. A gap of no characters cannot be given a
-  /// width, and is left out.
-  ///
-  /// The spaces a cell is written with — the writer's own, at either end of
-  /// the gap between two cells' text — stand [space] wide where the gap has
-  /// room for them, so a space typed at the end of a cell's text moves the
-  /// caret by one space and not by its share of the whole column (#1160).
-  /// What is left of the gap is the room the next cell's column takes, and
-  /// it is the pipes' and the gap's middle's: the cells' text stays where
-  /// the read view sets it, whichever side of a pipe it is on. A row written
-  /// without its closing pipe has no pipe to take what is left: its last
-  /// cell's spaces keep their width, and the room ends the line.
-  ///
-  /// A line's first glyph is set half its spacing in: a cell of the read
-  /// view, a paragraph of its own, half the [ambient] spacing; here, when
-  /// a gap opens the line, half the gap's. The first gap is spaced so that
-  /// the first cell's text lands where the read view's does, and is left
-  /// whole for it.
-  static List<LiveTableGap> _gaps(
-    String text,
-    List<(int, int)> cells,
-    List<_Measured> widths,
-    List<double> edges,
-    double pad,
-    double tiny,
-    double ambient,
-    double space,
-    List<TableAlign> aligns,
-  ) {
-    final gaps = <LiveTableGap>[];
-
-    // [start, end) drawn [width] wide, its characters spaced evenly.
-    void add(int start, int end, double width) {
-      final count = end - start;
-      if (count <= 0) return;
-      // Each character keeps a hundredth of its size: the spacing is what
-      // is left of the width.
-      final spacing = start == 0
-          ? (width + ambient / 2 - count * tiny) / (count + 0.5)
-          : (width - count * tiny) / count;
-      gaps.add((start: start, end: end, width: spacing * count));
-    }
-
-    void gap(int start, int end, double width) {
-      if (end <= start) return;
-      if (start > 0) {
-        final count = end - start;
-        // The spaces at the gap's ends are the writer's: the ones after the
-        // cell on its left, and the ones before the cell on its right.
-        var head = 0;
-        while (head < count && _isGapSpace(text.codeUnitAt(start + head))) {
-          head++;
-        }
-        var tail = 0;
-        while (tail < count - head &&
-            _isGapSpace(text.codeUnitAt(end - 1 - tail))) {
-          tail++;
-        }
-        final middle = count - head - tail;
-        final kept = (head + tail) * space;
-        // What is left over is the room, and it needs a character to take
-        // it: the pipe between the cells. A gap too narrow to give its own
-        // spaces their width is spread evenly as it always was.
-        if (middle > 0 && kept < width) {
-          add(start, start + head, head * space);
-          add(start + head, end - tail, width - kept);
-          add(end - tail, end, tail * space);
-          return;
-        }
-        // A row written without its closing pipe has no pipe to take the
-        // room: its last cell's spaces keep their own width, and the room
-        // ends the line, past the row's last character.
-        if (middle == 0 && end == text.length && kept < width) {
-          add(start, end, kept);
-          return;
-        }
-      }
-      add(start, end, width);
-    }
-
-    // A cell's hidden marks take a hundredth of their size each: its text
-    // starts past the ones before it, so its range starts that much short
-    // of its column, and ends that much past its text.
-    var from = 0;
-    var x = 0.0;
-    for (var at = 0; at < cells.length; at++) {
-      final (start, end) = cells[at];
-      final cell = widths[at];
-      final lead = cell.lead * tiny;
-      // The room its column leaves beside its text: before it for a
-      // right-aligned column, half of it for a centred one.
-      final room = edges[at + 1] - edges[at] - 2 * pad - cell.visible;
-      // The read view's paragraph measures its text with the trailing half
-      // of its last glyph's spacing, and sets the first half before it: a
-      // text moved off its column's start stands half a spacing short of
-      // the room it was given.
-      final shift = at >= aligns.length || room <= 0
-          ? 0.0
-          : switch (aligns[at]) {
-              TableAlign.right => room - ambient / 2,
-              TableAlign.center => room / 2 - ambient / 2,
-              TableAlign.none || TableAlign.left => 0.0,
-            };
-      gap(from, start, edges[at] + pad + shift - lead - x);
-      from = end;
-      x = edges[at] + pad + shift - lead + cell.visible + cell.hidden * tiny;
-    }
-    if (cells.isNotEmpty) {
-      final last = cells.length;
-      gap(from, text.length, edges[last] - x);
-    }
-    return gaps;
-  }
-
-  /// Whether [char] is a space a gap's room is kept off: the whitespace
-  /// `String.trim` takes off a cell's text, which is what puts it in the gap
-  /// — the space and the tab above all.
-  static bool _isGapSpace(int char) => String.fromCharCode(char).trim().isEmpty;
 
   /// Where the caret goes from [column] of table row [text]: [column]
   /// itself when it is in a cell's text, and otherwise — the pipes and the
@@ -926,154 +448,6 @@ final class LiveTables {
     return trimmed.contains('-') && RegExp(r'^[|\s:-]+$').hasMatch(trimmed);
   }
 
-  /// How wide `[start, end)` of [text] is drawn, its marks left out, the
-  /// rest in its tokens' styles over [style]; and how many characters of
-  /// marks it has, and how many of them come before its first glyph.
-  static _Measured _measure(
-    String text,
-    List<Token> tokens,
-    int start,
-    int end,
-    TextStyle style,
-    TextScaler scaler,
-    bool Function(Token token) hiddenAtRest,
-    TextStyle? Function(Token token) styleOf,
-  ) {
-    if (end <= start) return (visible: 0, least: 0, hidden: 0, lead: 0);
-    final spans = _spans(text, tokens, start, end, hiddenAtRest, styleOf);
-    var hidden = 0;
-    int? lead;
-    var at = start;
-    for (final token in tokens) {
-      if (token.end <= at || token.start >= end) continue;
-      final from = token.start < at ? at : token.start;
-      final to = token.end > end ? end : token.end;
-      if (from > at) lead ??= hidden;
-      if (hiddenAtRest(token)) {
-        hidden += to - from;
-      } else {
-        lead ??= hidden;
-      }
-      at = to;
-    }
-    if (at < end) lead ??= hidden;
-    measurements++;
-    final widths = measureTableCell(
-      TextSpan(children: spans, style: style),
-      scaler,
-    );
-    return (
-      visible: widths.natural,
-      least: widths.least,
-      hidden: hidden,
-      lead: lead ?? hidden,
-    );
-  }
-
-  /// The spans `[start, end)` of [text] is drawn in: its tokens' styles, and
-  /// the ones [hiddenAtRest] says are marks left out — the same spans
-  /// [_measure] measures, so a cell's measured width and its wrapped pieces
-  /// are the same text.
-  static List<InlineSpan> _spans(
-    String text,
-    List<Token> tokens,
-    int start,
-    int end,
-    bool Function(Token token) hiddenAtRest,
-    TextStyle? Function(Token token) styleOf,
-  ) {
-    return <InlineSpan>[
-      for (final (from, to, token) in _segments(tokens, start, end))
-        if (token == null)
-          TextSpan(text: text.substring(from, to))
-        else if (!hiddenAtRest(token))
-          TextSpan(text: text.substring(from, to), style: styleOf(token)),
-    ];
-  }
-
-  /// The stretches of source `[start, end)` is drawn from, in order: what
-  /// [_spans] draws of it, its hidden marks left out.
-  static List<(int, int)> _shownOf(
-    List<Token> tokens,
-    int start,
-    int end,
-    bool Function(Token token) hiddenAtRest,
-  ) => <(int, int)>[
-    for (final (from, to, token) in _segments(tokens, start, end))
-      if (token == null || !hiddenAtRest(token)) (from, to),
-  ];
-
-  /// The source offset the drawn text's offset [drawn] stands for, [shown]
-  /// being the stretches of source that text is made of, from [start]: the
-  /// [drawn]-th character of them laid end to end. An offset between two
-  /// stretches, where hidden marks sit, is the earlier one's end — a line
-  /// broken there ends on its text, and the marks open the next line, with
-  /// the word they belong to.
-  static int _sourceOf(List<(int, int)> shown, int start, int drawn) {
-    var left = drawn;
-    for (final (from, to) in shown) {
-      if (left <= to - from) return from + left;
-      left -= to - from;
-    }
-    return shown.isEmpty ? start : shown.last.$2;
-  }
-
-  /// `[start, end)` cut at [tokens]' edges: each token's stretch, clipped to
-  /// it, and the stretches between them, which have no token.
-  static List<(int, int, Token?)> _segments(
-    List<Token> tokens,
-    int start,
-    int end,
-  ) {
-    if (end <= start) return const <(int, int, Token?)>[];
-    final segments = <(int, int, Token?)>[];
-    var at = start;
-    for (final token in tokens) {
-      if (token.end <= at || token.start >= end) continue;
-      final from = token.start < at ? at : token.start;
-      final to = token.end > end ? end : token.end;
-      if (from > at) segments.add((at, from, null));
-      segments.add((from, to, token));
-      at = to;
-    }
-    if (at < end) segments.add((at, end, null));
-    return segments;
-  }
-
-  /// How wide a space is set in [style] at [scaler]: the width a gap's own
-  /// spaces keep where the room lets them — what a space typed at a cell's
-  /// edge moves the caret by (#1160).
-  ///
-  /// Measured between two glyphs, where the engine counts it: a paragraph's
-  /// own width may leave its trailing spaces out.
-  static double _spaceAdvance(TextStyle style, TextScaler scaler) {
-    double width(String text) {
-      final painter = TextPainter(
-        text: TextSpan(text: text, style: style),
-        textDirection: TextDirection.ltr,
-        textScaler: scaler,
-      )..layout();
-      final answer = painter.width;
-      painter.dispose();
-      return answer;
-    }
-
-    return width('x x') - width('xx');
-  }
-
-  /// How wide one character of a gap is before its spacing: a hundredth of
-  /// its size.
-  static double _tinyAdvance(TextScaler scaler) {
-    final painter = TextPainter(
-      text: TextSpan(text: 'xxxxxxxxxx', style: gapStyle(0)),
-      textDirection: TextDirection.ltr,
-      textScaler: scaler,
-    )..layout();
-    final width = painter.width / 10;
-    painter.dispose();
-    return width;
-  }
-
   /// The style of a gap's characters, each given [spacing]: invisible, and
   /// no taller than nothing.
   static TextStyle gapStyle(double spacing) => TextStyle(
@@ -1083,34 +457,4 @@ final class LiveTables {
     letterSpacing: spacing,
     wordSpacing: 0,
   );
-}
-
-/// One table's kept work: the lines it measured ([_Metrics]), and the rows it
-/// laid out with the reveal and the pane's width those came from.
-///
-/// The measurements stand across a reveal change; the rows are laid out again
-/// when the reveal or the pane's width moves, which is where the caret's
-/// row's columns widen.
-final class _Table {
-  new(this.block);
-
-  /// The block the table covers.
-  final Block block;
-
-  /// The table's measurements, or null before the first read.
-  _Metrics? metrics;
-
-  /// The rows laid out for [reveal] and [budget], or null before the first
-  /// lay-out.
-  List<LiveTableRow>? rows;
-  Object? reveal;
-  double? budget;
-
-  /// Whether the columns fitted the pane when [rows] were laid out.
-  bool? fits;
-
-  /// The rows measured again since [rows] were laid out: the ones a reveal
-  /// moved onto or off, which are the only ones a lay-out over columns that
-  /// stood has to make again.
-  final Set<int> touched = <int>{};
 }
