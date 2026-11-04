@@ -27,7 +27,6 @@ library;
 
 import 'dart:async';
 import 'dart:math' as math;
-import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -89,7 +88,9 @@ import 'package:niman/src/markdown/render/scroll_anchor.dart';
 import 'package:niman/src/markdown/render/scrollbar_strip.dart';
 import 'package:niman/src/markdown/render/sliver_columns.dart';
 import 'package:niman/src/markdown/render/sliver_segments.dart';
+import 'package:niman/src/markdown/render/source_caret_blink.dart';
 import 'package:niman/src/markdown/render/source_caret_motion.dart';
+import 'package:niman/src/markdown/render/source_caret_rect.dart';
 import 'package:niman/src/markdown/render/source_caret_reveal.dart';
 import 'package:niman/src/markdown/render/source_code_copies.dart';
 import 'package:niman/src/markdown/render/source_context_menu.dart';
@@ -622,9 +623,11 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     const CaretSpot(0, 0, 0),
   );
 
-  /// Whether the caret is drawn (it blinks).
-  final ValueNotifier<bool> _caretOn = ValueNotifier<bool>(true);
-  Timer? _blink;
+  /// Whether the caret is drawn, and the blink that turns it on and off:
+  /// only the focused note's, in a window someone can see (#512).
+  late final SourceCaretBlink _blink = SourceCaretBlink(
+    focused: () => _focus.hasFocus,
+  );
 
   /// The selection by touch (#291): its handles, its toolbar, and the
   /// gestures that bring them. Listened to from [initState]: the note
@@ -1049,7 +1052,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     if (_ownsFocus) _focus.dispose();
     WindowVisibility.shown.removeListener(_onWindowShown);
     _focusReturn.dispose();
-    _blink?.cancel();
+    _blink.dispose();
     _styling.dispose();
     _typewriter.dispose();
     _semanticsTick.dispose();
@@ -1057,7 +1060,6 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     _caretShift.dispose();
     _footnoteMath.dispose();
     _caretSpot.dispose();
-    _caretOn.dispose();
     _touch
       ..removeListener(_onTouchChanged)
       ..dispose();
@@ -1885,28 +1887,12 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     final last = (end > start ? end - 1 : start).clamp(lineStart, lineEnd);
     final (piece, paragraph) = _fragmentAt(line, last - lineStart);
     if (piece == null || paragraph == null) return null;
-    final length = paragraph.text.toPlainText().length;
-    final from = (start - lineStart - piece.start).clamp(0, length);
-    final to = (end.clamp(lineStart, lineEnd) - lineStart - piece.start).clamp(
-      from,
-      length,
+    return sourcePieceSpanRect(
+      piece,
+      paragraph,
+      start - lineStart,
+      end.clamp(lineStart, lineEnd) - lineStart,
     );
-    final boxes = paragraph.getBoxesForSelection(
-      TextSelection(baseOffset: from, extentOffset: to),
-    );
-    if (boxes.isEmpty) return null;
-    var left = boxes.first.left;
-    var right = boxes.first.right;
-    for (final box in boxes) {
-      if (box.left < left) left = box.left;
-      if (box.right > right) right = box.right;
-    }
-    return Rect.fromLTRB(
-      left,
-      boxes.first.top,
-      right,
-      boxes.first.bottom,
-    ).shift(paragraph.localToGlobal(Offset.zero));
   }
 
   /// The find bar's matches on line [index], as offsets local to it.
@@ -2216,7 +2202,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     // The caret moved: the hint follows it off the problems as they stand.
     _hints.refresh();
     _revealCaret();
-    _restartBlink();
+    _blink.restart();
     _followCaret();
     // Measured *now*, from the layout the last frame left, and again after the
     // next frame: a caret that moved because of a tap or a key is on screen
@@ -2250,28 +2236,9 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     return true;
   }
 
-  /// Shows the caret and starts its blink over.
-  ///
-  /// Every move does this, the way every text field does: a caret that moved
-  /// during the half of the blink it spends hidden stays invisible for up to
-  /// 550 ms, which reads as a tap that took that long to land.
-  void _restartBlink() {
-    _caretOn.value = true;
-    _blink?.cancel();
-    // A window in the tray is nobody's to see, and a note the keys are not
-    // going to is not being typed in: in either, the blink would repaint at
-    // its own pace and nothing else would ever stop it (#512). The caret
-    // stays drawn, steady.
-    _blink = WindowVisibility.shown.value && _focus.hasFocus
-        ? Timer.periodic(const Duration(milliseconds: 550), (_) {
-            _caretOn.value = !_caretOn.value;
-          })
-        : null;
-  }
-
   /// The window was hidden or shown again: the blink stops drawing while it
   /// is hidden and starts over when it is back (#512).
-  void _onWindowShown() => _restartBlink();
+  void _onWindowShown() => _blink.restart();
 
   /// The keys given back to the note when its window comes back to the
   /// front (#539).
@@ -2293,7 +2260,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// Whether the caret is blinking right now, for the test that holds the
   /// blink to the window's visibility (#512).
   @visibleForTesting
-  bool get caretBlinking => _blink != null;
+  bool get caretBlinking => _blink.blinking;
 
   /// Measures the caret again once the next frame has laid its line out:
   /// the caret stayed where it was while its line was laid out anew, in
@@ -2342,67 +2309,13 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     final position = TextPosition(
       offset: (local - piece.start).clamp(0, length),
     );
-    _caretRect.value = _caretRectIn(paragraph, position, length);
-    _sendGeometry();
-  }
-
-  /// The caret's rectangle in [paragraph] at [position], in the paragraph's
-  /// own coordinates.
-  ///
-  /// The horizontal offset is the painter's, over the run the caret is really
-  /// over. Its *row* — the top and the height — comes from the paragraph's own
-  /// line metrics, not from the glyph the caret stands by: the space at the
-  /// end of a line is measured from a fallback face and answers a shorter box
-  /// than the line, so the caret shrank and the typewriter light over it
-  /// shrank with it (#509). An empty paragraph has no line metrics, and the
-  /// glyph's own height is all there is there.
-  Rect _caretRectIn(
-    RenderParagraph paragraph,
-    TextPosition position,
-    int length,
-  ) {
-    final at = paragraph.getOffsetForCaret(
+    _caretRect.value = sourceCaretRectIn(
+      paragraph,
       position,
-      Rect.fromLTWH(0, 0, _caretWidth, 0),
-    );
-    // The line the caret stands on, as the paragraph bounds it: a box as tall
-    // as the tallest run on its visual line ([ui.BoxHeightStyle.max]). Only
-    // the characters either side of the caret are asked for, so a paragraph
-    // the length of a chapter costs the same as a word; at a soft wrap the two
-    // sit on different lines, and the one the caret's own offset is on wins.
-    // That row is what makes a normal glyph and the trailing fallback space
-    // answer alike, where the glyph's own box is shorter.
-    final offset = position.offset;
-    final boxes = paragraph.getBoxesForSelection(
-      TextSelection(
-        baseOffset: math.max(0, offset - 1),
-        extentOffset: math.min(length, offset + 1),
-      ),
-      boxHeightStyle: ui.BoxHeightStyle.max,
-    );
-    // The row whose top is nearest the caret's, not the one that contains
-    // it: at a text size off 100 % the rows' edges are fractions, and the
-    // caret at a soft wrap came back a hair above the next row's top — so
-    // it was drawn on the row before, and Down from there landed on the
-    // same offset again, for ever (#620).
-    Rect? nearest;
-    for (final box in boxes) {
-      final row = box.toRect();
-      if (nearest == null ||
-          (row.top - at.dy).abs() < (nearest.top - at.dy).abs()) {
-        nearest = row;
-      }
-    }
-    if (nearest != null) {
-      return Rect.fromLTWH(at.dx, nearest.top, _caretWidth, nearest.height);
-    }
-    // An empty paragraph bounds no line: the glyph's own height is all there.
-    return Rect.fromLTWH(
-      at.dx,
-      at.dy,
+      length,
       _caretWidth,
-      paragraph.getFullHeightForCaret(position),
     );
+    _sendGeometry();
   }
 
   /// How wide the caret is drawn.
@@ -2449,7 +2362,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
           _focusReturn.focusChanged(hasFocus: hasFocus);
           // Only the focused note blinks (#512): an editor the keys are not
           // going to keeps its caret, steady, and draws no frame for it.
-          _restartBlink();
+          _blink.restart();
           if (hasFocus) {
             _input.attach(viewId: View.of(context).viewId);
           } else {
@@ -2719,7 +2632,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       index: index,
       spot: _caretSpot,
       caret: _caretRect,
-      caretOn: _caretOn,
+      caretOn: _blink.on,
       rowColor: widget.typewriter ? typewriterLineColor(context) : null,
       fence: _fenceOf(index, block),
       outerIndent: outerIndent,
@@ -3016,21 +2929,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     final lineStart = buffer.offsetOfLine(line);
     final (piece, paragraph) = _fragmentAt(line, offset - lineStart);
     if (piece == null || paragraph == null) return null;
-    final local = (offset - lineStart - piece.start).clamp(
-      0,
-      paragraph.text.toPlainText().length,
-    );
-    final position = TextPosition(offset: local);
-    final at = paragraph.getOffsetForCaret(
-      position,
-      const Rect.fromLTWH(0, 0, 1.5, 0),
-    );
-    return Rect.fromLTWH(
-      at.dx,
-      at.dy,
-      1.5,
-      paragraph.getFullHeightForCaret(position),
-    ).shift(paragraph.localToGlobal(Offset.zero));
+    return sourcePieceCaretRect(piece, paragraph, offset - lineStart);
   }
 
   /// What the surface's own keys do ([sourceShortcuts]).
