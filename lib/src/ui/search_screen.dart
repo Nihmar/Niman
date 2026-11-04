@@ -19,6 +19,7 @@ import 'package:niman/src/ui/search_hint.dart';
 import 'package:niman/src/ui/search_hit_menu.dart';
 import 'package:niman/src/ui/search_hit_row.dart';
 import 'package:niman/src/ui/search_query_bar.dart';
+import 'package:niman/src/ui/search_query_rules.dart';
 import 'package:niman/src/ui/search_replace_flow.dart';
 import 'package:niman/src/ui/search_replace_panel.dart';
 import 'package:niman/src/ui/search_replace_preview.dart';
@@ -493,13 +494,9 @@ final class _SearchScreenState extends State<SearchScreen> {
     if (open) _openMarkedOrFirst();
   }
 
-  /// The `key = value` filter [text] asks for, or null when it is a text
-  /// search.
-  ///
-  /// Only in Words mode: Contains is a literal scan of the note bodies,
-  /// and someone who typed `x = y` there meant to find that string.
+  /// The `key = value` filter [text] asks for ([searchFieldFilter]).
   ({String key, String value})? _fieldFilter(String text) =>
-      _contains ? null : fieldQuery(text);
+      searchFieldFilter(text, contains: _contains);
 
   /// Whether the box currently holds a `key = value` filter.
   bool get _inFieldMode => _fieldFilter(_query.text.trim()) != null;
@@ -871,20 +868,6 @@ final class _SearchScreenState extends State<SearchScreen> {
         .showSnackBar(SnackBar(content: Text(message)));
   }
 
-  /// Whether [text] is a search worth running. A one-character FTS prefix
-  /// (words mode) expands to every term starting with that letter — a
-  /// multi-second MATCH on a real library, with every query typed after it
-  /// queueing behind it (T-M3-09 device report: `"e"*`/`"p"*` took 9–18 s
-  /// and the follow-up queries "returned nothing"). Two characters is the
-  /// floor for both modes; in words mode the last (growing) token must be
-  /// two characters too, whatever came before it.
-  bool _canSearch(String text) {
-    if (text.length < 2) return false;
-    // A `key = value` filter is an indexed lookup, so the prefix-expansion
-    // problem the floor exists for does not apply: `x = 1` runs.
-    if (_fieldFilter(text) != null) return true;
-    if (_contains) return true;
-    final last = text.split(RegExp(r'\s+')).last;
-    return last.length >= 2;
-  }
+  /// Whether [text] is a search worth running ([canSearchQuery]).
+  bool _canSearch(String text) => canSearchQuery(text, contains: _contains);
 }
