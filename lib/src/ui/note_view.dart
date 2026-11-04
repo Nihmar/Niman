@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:niman/src/capture/paste/clipboard_files.dart';
 import 'package:niman/src/capture/paste/platform_clipboard_files.dart';
 import 'package:niman/src/core/files.dart';
@@ -50,7 +49,6 @@ import 'package:niman/src/markdown/surface_controller.dart';
 import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/templates/check_state.dart';
-import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/capture/paste_markdown_flow.dart'
     show readPlainClipboard;
 import 'package:niman/src/ui/dead_link_watcher.dart';
@@ -61,6 +59,7 @@ import 'package:niman/src/ui/note_attach.dart';
 import 'package:niman/src/ui/note_dead_links.dart';
 import 'package:niman/src/ui/note_disk.dart';
 import 'package:niman/src/ui/note_edit_commands.dart';
+import 'package:niman/src/ui/note_find_keys.dart';
 import 'package:niman/src/ui/note_frontmatter_panel.dart';
 import 'package:niman/src/ui/note_link_actions.dart';
 import 'package:niman/src/ui/note_links.dart';
@@ -1720,7 +1719,7 @@ final class _NoteViewState extends State<NoteView>
     return Focus(
       canRequestFocus: false,
       skipTraversal: true,
-      onKeyEvent: _sourceFindKey,
+      onKeyEvent: _findKeys.onKey,
       child: Column(
         children: <Widget>[
           ListenableBuilder(
@@ -1748,45 +1747,11 @@ final class _NoteViewState extends State<NoteView>
     );
   }
 
-  /// The find keys, for the note and its bar: Ctrl+F finds, Ctrl+H and
-  /// Ctrl+Alt+F replace, F3 and Shift+F3 walk the matches, Escape closes the
-  /// bar.
-  ///
-  /// The chords come from [findInNoteKey] and its neighbours, which the
-  /// shortcut reference reads too, so the row and the handler agree off
-  /// the Control platforms (issue #381).
-  ///
-  /// A key handler rather than shortcuts, so that a key it has nothing to do
-  /// with — Escape with the bar closed — goes on to the shell.
-  KeyEventResult _sourceFindKey(FocusNode node, KeyEvent event) {
-    if (event is! KeyDownEvent) return KeyEventResult.ignored;
-    final keyboard = HardwareKeyboard.instance;
-    bool pressed(SingleActivator key) => key.accepts(event, keyboard);
-    final replace = replaceInNoteKey();
-    final ctrlH = ctrlHReplaceKey();
-    if (pressed(replace) || (ctrlH != null && pressed(ctrlH))) {
-      openFind(replace: true);
-      return KeyEventResult.handled;
-    }
-    if (pressed(findInNoteKey())) {
-      openFind();
-      return KeyEventResult.handled;
-    }
-    if (!_sourceFind.visible) return KeyEventResult.ignored;
-    if (pressed(const SingleActivator(LogicalKeyboardKey.f3))) {
-      _sourceFind.nextMatch();
-      return KeyEventResult.handled;
-    }
-    if (pressed(const SingleActivator(LogicalKeyboardKey.f3, shift: true))) {
-      _sourceFind.previousMatch();
-      return KeyEventResult.handled;
-    }
-    if (pressed(const SingleActivator(LogicalKeyboardKey.escape))) {
-      _sourceFind.close();
-      return KeyEventResult.handled;
-    }
-    return KeyEventResult.ignored;
-  }
+  /// The find keys, for the note and its bar ([NoteFindKeys]).
+  late final NoteFindKeys _findKeys = NoteFindKeys(
+    find: _sourceFind,
+    openFind: openFind,
+  );
 
   @override
   void openFind({bool replace = false}) {
