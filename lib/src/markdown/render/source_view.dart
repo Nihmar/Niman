@@ -91,6 +91,7 @@ import 'package:niman/src/markdown/render/source_folds.dart';
 import 'package:niman/src/markdown/render/source_geometry.dart';
 import 'package:niman/src/markdown/render/source_line.dart';
 import 'package:niman/src/markdown/render/source_live_lines.dart';
+import 'package:niman/src/markdown/render/source_overlays.dart';
 import 'package:niman/src/markdown/render/source_paragraphs.dart';
 import 'package:niman/src/markdown/render/source_pointer.dart';
 import 'package:niman/src/markdown/render/source_row_slivers.dart';
@@ -2516,53 +2517,17 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       onPaste: paste,
       child: note,
     );
-    final content = OverlayPortal(
-      controller: _menu.overlay,
-      overlayChildBuilder: _menu.buildOverlay,
-      child: OverlayPortal(
-        controller: _touch.overlay,
-        overlayChildBuilder: (context) => ListenableBuilder(
-          listenable: Listenable.merge([_scroll, _touch.tick]),
-          builder: (context, _) => _touch.buildOverlay(),
-        ),
-        child: OverlayPortal(
-          controller: _handles.overlay,
-          overlayChildBuilder: (context) => ListenableBuilder(
-            listenable: Listenable.merge([
-              _scroll,
-              _handles.hover,
-              _caretSpot,
-              _handles.settled,
-            ]),
-            builder: (context, _) => _handles.buildHandles(context),
-          ),
-          child: OverlayPortal(
-            // The checker's hint draws nearest the note — over the text it
-            // points at, under the handles, the toolbar and the menu.
-            controller: _hints.overlay,
-            overlayChildBuilder: (context) => ListenableBuilder(
-              listenable: _scroll,
-              builder: (context, _) => _hints.buildOverlay(context),
-            ),
-            child: OverlayPortal(
-              controller: _suggest.overlay,
-              overlayChildBuilder: _suggest.buildOverlay,
-              child: OverlayPortal(
-                // The code blocks' copy buttons ride the scroll, under all
-                // of the above.
-                controller: _codeCopies.overlay,
-                overlayChildBuilder: (context) => ListenableBuilder(
-                  listenable: Listenable.merge([_scroll, _caretSpot]),
-                  builder: (context, _) => _codeCopies.build(context),
-                ),
-                child: note,
-              ),
-            ),
-          ),
-        ),
-      ),
+    return SourceOverlays(
+      scroll: _scroll,
+      caretSpot: _caretSpot,
+      menu: _menu,
+      touch: _touch,
+      tables: _handles,
+      hints: _hints,
+      suggest: _suggest,
+      codeCopies: _codeCopies,
+      child: note,
     );
-    return content;
   }
 
   /// Line [index] drawn [width] wide: a row of the note, or a line of a
