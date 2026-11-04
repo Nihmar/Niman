@@ -10,12 +10,12 @@ import 'package:niman/src/ui/keyboard_shortcuts.dart';
 import 'package:niman/src/ui/settings_area_features.dart';
 import 'package:niman/src/ui/settings_areas.dart';
 import 'package:niman/src/ui/settings_commands.dart';
-import 'package:niman/src/ui/settings_keys.dart';
 import 'package:niman/src/ui/settings_search_appearance.dart';
 import 'package:niman/src/ui/settings_search_diagnostics.dart';
 import 'package:niman/src/ui/settings_search_editor.dart';
 import 'package:niman/src/ui/settings_search_entry.dart';
 import 'package:niman/src/ui/settings_search_library.dart';
+import 'package:niman/src/ui/settings_search_maintenance.dart';
 import 'package:niman/src/ui/settings_search_scope.dart';
 import 'package:niman/src/ui/settings_search_services.dart';
 import 'package:niman/src/ui/strings.dart';
@@ -45,7 +45,6 @@ List<SettingsSearchEntry> settingsSearchEntries({
 
   Future<String?> noValue() async => null;
 
-  final maintenance = AppStrings.settingsGroupMaintenance;
   final scope = SettingsSearchScope(
     controller: controller,
     libraryName: libraryName,
@@ -59,58 +58,7 @@ List<SettingsSearchEntry> settingsSearchEntries({
     ...librarySearchEntries(scope),
     ...diagnosticsSearchEntries(scope),
     ...serviceSearchEntries(scope, ocr: ocr, transcription: transcription),
-    // Maintenance lives on the home itself: opening one means clearing
-    // the search and flashing the row in place.
-    SettingsSearchEntry(
-      title: AppStrings.reindexTitle,
-      area: maintenance,
-      rowKey: SettingsKeys.reindex,
-      value: noValue,
-      open: () => flashHome(SettingsKeys.reindex),
-      onHome: true,
-    ),
-    SettingsSearchEntry(
-      title: AppStrings.rebuildIndexTitle,
-      area: maintenance,
-      rowKey: SettingsKeys.rebuildIndex,
-      value: noValue,
-      open: () => flashHome(SettingsKeys.rebuildIndex),
-      onHome: true,
-    ),
-    SettingsSearchEntry(
-      title: AppStrings.notionImportTitle,
-      area: maintenance,
-      rowKey: SettingsKeys.notionImport,
-      value: noValue,
-      open: () => flashHome(SettingsKeys.notionImport),
-      onHome: true,
-    ),
-    SettingsSearchEntry(
-      title: AppStrings.epubConvertSettingsTitle,
-      area: maintenance,
-      rowKey: SettingsKeys.epubConvert,
-      value: noValue,
-      open: () => flashHome(SettingsKeys.epubConvert),
-      onHome: true,
-    ),
-    if (libraryRows) ...[
-      SettingsSearchEntry(
-        title: AppStrings.switchLibraryTitle,
-        area: maintenance,
-        rowKey: SettingsKeys.switchLibrary,
-        value: noValue,
-        open: () => flashHome(SettingsKeys.switchLibrary),
-        onHome: true,
-      ),
-      SettingsSearchEntry(
-        title: AppStrings.closeLibraryTitle,
-        area: maintenance,
-        rowKey: SettingsKeys.closeLibrary,
-        value: noValue,
-        open: () => flashHome(SettingsKeys.closeLibrary),
-        onHome: true,
-      ),
-    ],
+    ...maintenanceSearchEntries(scope, libraryRows: libraryRows),
   ];
   // Every command's own row on the keyboard screen: searching "zen" lands
   // on Zen mode's keys, not only on the screen's title (0.0.8 test round).
