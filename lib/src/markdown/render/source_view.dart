@@ -108,6 +108,7 @@ import 'package:niman/src/markdown/render/source_live_lines.dart';
 import 'package:niman/src/markdown/render/source_paragraphs.dart';
 import 'package:niman/src/markdown/render/source_sections.dart';
 import 'package:niman/src/markdown/render/source_styling.dart';
+import 'package:niman/src/markdown/render/source_table_keys.dart';
 import 'package:niman/src/markdown/render/source_template_hint.dart';
 import 'package:niman/src/markdown/render/source_touch.dart';
 import 'package:niman/src/markdown/render/todo_block_scope.dart';
@@ -617,7 +618,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     spellingItems: (dismiss) => _menu.spellingItems(dismiss),
     formats: _menuFormats,
     structure: () => widget.editorMenu?.call(),
-    table: () => _tableCommands()?.menu(),
+    table: () => _tableKeys.commands()?.menu(),
   );
 
   /// The touch selection's handles or toolbar came or went.
@@ -655,7 +656,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     spellCheck: () => widget.spellCheck,
     spellRanges: _spellRanges,
     formats: _menuFormats,
-    table: () => _tableCommands()?.menu(),
+    table: () => _tableKeys.commands()?.menu(),
     structure: () => widget.editorMenu?.call(),
   );
 
@@ -1913,7 +1914,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     // behind the link (#475).
     if (_suggest.takeSwallowedBreak()) return true;
     // In a table in `live`: the cell below, or out of it.
-    if (_tableEnter()) return true;
+    if (_tableKeys.enter()) return true;
     if (start != end) return false;
     final buffer = widget.buffer;
     if (!_isPlainLine(buffer.lineOf(start))) return false;
@@ -4590,133 +4591,18 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     showContextMenu(global);
   }
 
-  /// Tab and Shift+Tab: the next cell or the one before in a table in
-  /// `live`, its text selected so what is typed replaces it; past the last
-  /// cell a new row, as a spreadsheet goes on. Anywhere else the line's
-  /// indent, as before.
-  void _tab({required bool forward}) {
-    final commands = _tableCommands();
-    if (commands == null) {
-      forward ? indent() : outdent();
-      return;
-    }
-    final buffer = widget.buffer;
-    final rows = _tableRows(commands.block);
-    final cell = commands.cell;
-    var row = cell.row;
-    var column = cell.column + (forward ? 1 : -1);
-    List<(int, int)> cellsOf(int row) =>
-        LiveTables.cellsOf(buffer.lineAt(rows[row]));
-    if (column >= cellsOf(row).length) {
-      row++;
-      column = 0;
-    } else if (column < 0) {
-      row--;
-      if (row < 0) return;
-      column = cellsOf(row).length - 1;
-    }
-    if (row >= rows.length) {
-      commands.addRowAtEnd();
-      return;
-    }
-    final cells = cellsOf(row);
-    if (cells.isEmpty) return;
-    final (start, end) = cells[column.clamp(0, cells.length - 1)];
-    final lineStart = buffer.offsetOfLine(rows[row]);
-    _applySelection(
-      SelectionModel(anchor: lineStart + start, extent: lineStart + end),
-      reveal: true,
-    );
-  }
-
-  /// The lines of table [block] that are rows: all of them but the
-  /// delimiter row.
-  static List<int> _tableRows(Block block) => <int>[
-    for (var line = block.startLine; line < block.endLine; line++)
-      if (line != block.startLine + 1) line,
-  ];
-
-  /// Enter in a table in `live`: the caret to the end of the cell below,
-  /// in the same column, and from the last row out of the table. Answers
-  /// whether the caret was in one. A line break typed into a row split it,
-  /// and the table with it.
-  bool _tableEnter() {
-    final commands = _tableCommands();
-    if (commands == null) return false;
-    final buffer = widget.buffer;
-    final rows = _tableRows(commands.block);
-    final below = commands.cell.row + 1;
-    if (below >= rows.length) {
-      _caretOutOfTable(commands.block);
-      return true;
-    }
-    final cells = LiveTables.cellsOf(buffer.lineAt(rows[below]));
-    if (cells.isEmpty) {
-      _caretOutOfTable(commands.block);
-      return true;
-    }
-    final (_, end) = cells[commands.cell.column.clamp(0, cells.length - 1)];
-    _applySelection(
-      SelectionModel.at(buffer.offsetOfLine(rows[below]) + end),
-      reveal: true,
-    );
-    return true;
-  }
-
-  /// Shift+Enter or Ctrl+Enter in a table in `live`: out of it, from any
-  /// row. Answers whether the caret was in one.
-  bool _tableExit() {
-    final commands = _tableCommands();
-    if (commands == null) return false;
-    _caretOutOfTable(commands.block);
-    return true;
-  }
-
-  /// Down from a table's last row in `live`, when the note ends with it:
-  /// a line to go to, rather than a caret that cannot leave. Answers
-  /// whether it was that.
-  bool _downOutOfTable() {
-    final commands = _tableCommands();
-    if (commands == null) return false;
-    final block = commands.block;
-    final rows = _tableRows(block);
-    if (commands.cell.row != rows.length - 1) return false;
-    if (block.endLine < widget.buffer.lineCount) return false;
-    _caretOutOfTable(block);
-    return true;
-  }
-
-  /// The caret to the start of the line after table [block] — an empty one
-  /// added when the note ends with the table, so there is always one.
-  void _caretOutOfTable(Block block) {
-    final buffer = widget.buffer;
-    if (block.endLine < buffer.lineCount) {
-      _applySelection(
-        SelectionModel.at(buffer.offsetOfLine(block.endLine)),
-        reveal: true,
-      );
-      return;
-    }
-    final last = block.endLine - 1;
-    final end = buffer.offsetOfLine(last) + buffer.lineLengthAt(last);
-    _replaceRange(end, end, '\n');
-  }
-
-  /// The table the caret is in and what can be done to it, in `live`; null
-  /// anywhere else (#261). A menu reads it as it opens, so it is the
-  /// caret's cell now.
-  LiveTableCommands? _tableCommands() {
-    if (!widget.hideMarkers) return null;
-    final buffer = widget.buffer;
-    final offset = _selection.extent.clamp(0, buffer.length);
-    return LiveTableCommands.at(
-      buffer,
-      _styler?.blockOf(buffer.lineOf(offset)),
-      offset,
-      replace: (start, end, text, caret) =>
-          replaceText(start, end, text, caret: SelectionModel.at(caret)),
-    );
-  }
+  /// The keys in a table `live` draws, and the commands on the caret's
+  /// table its menus offer (#261).
+  late final SourceTableKeys _tableKeys = SourceTableKeys(
+    buffer: () => widget.buffer,
+    selection: () => _selection,
+    live: () => widget.hideMarkers,
+    blockOf: (line) => _styler?.blockOf(line),
+    select: (next) => _applySelection(next, reveal: true),
+    replace: (start, end, text, caret) =>
+        _replaceRange(start, end, text, caret: caret),
+    indent: ({required outdent}) => outdent ? this.outdent() : indent(),
+  );
 
   /// Opens the context menu at [global], or at the caret without one (the
   /// menu key, Shift+F10).
@@ -4772,7 +4658,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     if ((key == LogicalKeyboardKey.enter ||
             key == LogicalKeyboardKey.numpadEnter) &&
         (shift || control) &&
-        _tableExit()) {
+        _tableKeys.exit()) {
       return KeyEventResult.handled;
     }
     if (key == LogicalKeyboardKey.contextMenu ||
@@ -4833,9 +4719,9 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   late final SourceKeyActions _keyActions = SourceKeyActions(
     moveVertically: moveCaretVertically,
     moveBy: moveCaretBy,
-    downOutOfTable: _downOutOfTable,
+    downOutOfTable: _tableKeys.downOut,
     page: _page,
-    tab: _tab,
+    tab: _tableKeys.tab,
     copy: copySelection,
     cut: cutSelection,
     paste: paste,
