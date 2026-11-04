@@ -64,8 +64,6 @@ import 'package:niman/src/markdown/live_inlines.dart';
 import 'package:niman/src/markdown/note_references.dart';
 import 'package:niman/src/markdown/read_parser.dart';
 import 'package:niman/src/markdown/render/block_height_map.dart';
-import 'package:niman/src/markdown/render/block_heights.dart';
-import 'package:niman/src/markdown/render/callout_style.dart';
 import 'package:niman/src/markdown/render/content_clamp_physics.dart';
 import 'package:niman/src/markdown/render/dead_link_ranges.dart';
 import 'package:niman/src/markdown/render/fence_band_painter.dart';
@@ -79,13 +77,10 @@ import 'package:niman/src/markdown/render/live_hosts.dart';
 import 'package:niman/src/markdown/render/live_quote_content.dart';
 import 'package:niman/src/markdown/render/live_run.dart';
 import 'package:niman/src/markdown/render/live_tables.dart';
-import 'package:niman/src/markdown/render/markdown_blocks_sliver.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/render/note_margins.dart';
 import 'package:niman/src/markdown/render/scroll_anchor.dart';
 import 'package:niman/src/markdown/render/scrollbar_strip.dart';
-import 'package:niman/src/markdown/render/sliver_columns.dart';
-import 'package:niman/src/markdown/render/sliver_segments.dart';
 import 'package:niman/src/markdown/render/source_caret_blink.dart';
 import 'package:niman/src/markdown/render/source_caret_motion.dart';
 import 'package:niman/src/markdown/render/source_caret_rect.dart';
@@ -98,6 +93,7 @@ import 'package:niman/src/markdown/render/source_line.dart';
 import 'package:niman/src/markdown/render/source_live_lines.dart';
 import 'package:niman/src/markdown/render/source_paragraphs.dart';
 import 'package:niman/src/markdown/render/source_pointer.dart';
+import 'package:niman/src/markdown/render/source_row_slivers.dart';
 import 'package:niman/src/markdown/render/source_rows.dart';
 import 'package:niman/src/markdown/render/source_sections.dart';
 import 'package:niman/src/markdown/render/source_semantics.dart';
@@ -1557,10 +1553,6 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// gap between columns are counted in.
   double get _em => _textScaler.scale(widget.theme.body.fontSize ?? 14);
 
-  /// How far from the text the bracket beside a side-by-side block stands,
-  /// in the gutter.
-  static const double _bracketInset = 6;
-
   /// The room between two columns, and between two rows of them.
   double get _gap => ColumnLayout.gapEms * _em;
 
@@ -2461,7 +2453,22 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                                   widget.padding.bottom +
                                   (footnotes.isEmpty ? slack : 0),
                             ),
-                            sliver: _rowSlivers(context, available),
+                            sliver: sourceRowSlivers(
+                              width: available,
+                              heights: _heights,
+                              folds: _folds,
+                              hosts: _hosts,
+                              look: (
+                                gutter: _gutter,
+                                gap: _gap,
+                                band: _band,
+                                textWidth: _textWidth,
+                                numbered: widget.showLineNumbers,
+                                theme: widget.theme,
+                                itemsIndent: _itemsIndent,
+                              ),
+                              line: _lineWidget,
+                            ),
                           ),
                           if (footnotes.isNotEmpty)
                             SliverPadding(
@@ -2648,122 +2655,6 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       fence: _fenceOf(index, block),
       outerIndent: outerIndent,
       outerQuotes: outerQuotes,
-    );
-  }
-
-  /// The note's rows (#729): one sliver over all of them, or — with
-  /// side-by-side `columns` blocks — a sliver for each run of rows between
-  /// two, placed by its part of the note's map, and a [SliverColumns] for
-  /// each block, in its host row.
-  Widget _rowSlivers(BuildContext context, double width) {
-    Widget rows(int start, int end) => SliverMarkdownBlocks(
-      key: start == 0 ? null : ValueKey<String>('rows-$start'),
-      heights: start == 0 && end == _heights.length
-          ? _heights
-          : BlockHeightRange(_heights, start, end),
-      segment: _hosts.layouts.isNotEmpty,
-      delegate: SliverChildBuilderDelegate(
-        // A row is a line nobody folded away.
-        (context, row) =>
-            _lineWidget(context, _folds.lineOf(start + row), width: width),
-        childCount: end - start,
-      ),
-    );
-    final layouts = _hosts.layouts;
-    if (layouts.isEmpty) return rows(0, _heights.length);
-    final slivers = <Widget>[];
-    final starts = <int>[];
-    var from = 0;
-    for (final layout in layouts) {
-      final host = _folds.rowOf(layout.run.start);
-      if (host > from) {
-        starts.add(from);
-        slivers.add(rows(from, host));
-      }
-      starts.add(host);
-      slivers.add(_columnsSliver(context, layout, host));
-      from = host + 1;
-    }
-    if (from < _heights.length) {
-      starts.add(from);
-      slivers.add(rows(from, _heights.length));
-    }
-    return SliverSegments(heights: _heights, starts: starts, slivers: slivers);
-  }
-
-  /// [layout]'s block, its columns side by side, in row [host].
-  Widget _columnsSliver(BuildContext context, LiveLayout layout, int host) {
-    final run = layout.run;
-    return SliverColumns(
-      key: ValueKey<String>('columns-${run.start}'),
-      heights: _heights,
-      index: host,
-      gap: _gap,
-      indent: _gutter + _itemsIndent(run),
-      // A block in a quote or a callout: their bars, and a callout's box,
-      // down the block's whole height, as its rows draw them.
-      quote: run.quoteDepth == 0
-          ? null
-          : (
-              left: _gutter,
-              depth: run.quoteDepth,
-              bar: widget.theme.quoteBar,
-              barWidth: widget.theme.quoteBarWidth,
-              indent: widget.theme.quoteIndentPerLevel,
-              callout: run.callout == null
-                  ? null
-                  : calloutStyleOf(run.callout!.type).color,
-            ),
-      // One gutter and several columns: the columns' lines are not
-      // numbered, and a bracket down the gutter spans the block between
-      // its outer fences, which are.
-      bracket: widget.showLineNumbers && _gutter > _bracketInset
-          ? (
-              x: _gutter - _bracketInset,
-              top: _band,
-              bottom: run.closed ? _band : 0,
-              color: widget.theme.markerDim,
-            )
-          : null,
-      // Its outer fences are rows of its quote: the block draws the quote.
-      opener: (context) => _lineWidget(
-        context,
-        run.start,
-        width: _textWidth,
-        outerQuotes: run.quoteDepth,
-      ),
-      closer: run.closed
-          ? (context) => _lineWidget(
-              context,
-              run.end - 1,
-              width: _textWidth,
-              outerQuotes: run.quoteDepth,
-            )
-          : null,
-      rows: [
-        for (final row in layout.rows)
-          [
-            for (final at in row)
-              (
-                share: layout.shares[at],
-                sliver: SliverMarkdownBlocks(
-                  heights: layout.maps[at],
-                  segment: true,
-                  delegate: SliverChildBuilderDelegate(
-                    (context, line) => _lineWidget(
-                      context,
-                      run.columns[at].start + line,
-                      width: layout.widths[at],
-                      inColumn: true,
-                      outerIndent: _itemsIndent(run),
-                      outerQuotes: run.quoteDepth,
-                    ),
-                    childCount: layout.maps[at].length,
-                  ),
-                ),
-              ),
-          ],
-      ],
     );
   }
 
