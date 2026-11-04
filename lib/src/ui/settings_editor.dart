@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/settings/library_config.dart';
@@ -14,6 +13,7 @@ import 'package:niman/src/ui/settings_editor_links.dart';
 import 'package:niman/src/ui/settings_editor_spelling.dart';
 import 'package:niman/src/ui/settings_editor_text.dart';
 import 'package:niman/src/ui/settings_editor_tidy.dart';
+import 'package:niman/src/ui/settings_editor_writing.dart';
 import 'package:niman/src/ui/settings_keys.dart';
 import 'package:niman/src/ui/settings_rows.dart';
 import 'package:niman/src/ui/strings.dart';
@@ -347,52 +347,20 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
                 unawaited(_toggleReadableLineLength(value)),
             onNoteColumnWidth: (width) => unawaited(_setNoteColumnWidth(width)),
           ),
-          HighlightRow(
-            key: SettingsKeys.typewriter,
-            child: SettingsSwitchRow(
-              title: AppStrings.typewriterTitle,
-              description: AppStrings.typewriterSubtitle,
-              value: _typewriter,
-              onChanged: (value) => unawaited(_toggleTypewriter(value)),
-            ),
+          SettingsEditorWriting(
+            typewriter: _typewriter,
+            cascadeChecklist: _cascadeChecklist,
+            linkPreview: _linkPreview,
+            frontmatterPanel: _frontmatterPanel,
+            autofocusEditor: _autofocusEditor,
+            onTypewriter: (value) => unawaited(_toggleTypewriter(value)),
+            onCascadeChecklist: (value) =>
+                unawaited(_toggleCascadeChecklist(value)),
+            onLinkPreview: (value) => unawaited(_toggleLinkPreview(value)),
+            onFrontmatterPanel: (value) =>
+                unawaited(_toggleFrontmatterPanel(value)),
+            onAutofocusEditor: _toggleAutofocusEditor,
           ),
-          HighlightRow(
-            key: SettingsKeys.cascadeChecklist,
-            child: SettingsSwitchRow(
-              title: AppStrings.cascadeChecklistTitle,
-              description: AppStrings.cascadeChecklistSubtitle,
-              value: _cascadeChecklist,
-              onChanged: (value) => unawaited(_toggleCascadeChecklist(value)),
-            ),
-          ),
-          HighlightRow(
-            key: SettingsKeys.linkPreview,
-            child: SettingsSwitchRow(
-              title: AppStrings.linkPreviewTitle,
-              description: AppStrings.linkPreviewSubtitle,
-              value: _linkPreview,
-              onChanged: (value) => unawaited(_toggleLinkPreview(value)),
-            ),
-          ),
-          HighlightRow(
-            key: SettingsKeys.frontmatterPanel,
-            child: SettingsSwitchRow(
-              title: AppStrings.frontmatterPanelTitle,
-              description: AppStrings.frontmatterPanelSubtitle,
-              value: _frontmatterPanel,
-              onChanged: (value) => unawaited(_toggleFrontmatterPanel(value)),
-            ),
-          ),
-          // Phones and tablets only: there is no on-screen keyboard to
-          // show on desktop, so the row would toggle a no-op (user,
-          // 2026-09-09).
-          if (Platform.isAndroid || Platform.isIOS)
-            SettingsSwitchRow(
-              title: AppStrings.keyboardOnOpenTitle,
-              description: AppStrings.keyboardOnOpenSubtitle,
-              value: _autofocusEditor ?? false,
-              onChanged: _toggleAutofocusEditor,
-            ),
           SettingsEditorLinks(
             linkType: _linkType,
             linkUpdate: _linkUpdate,
