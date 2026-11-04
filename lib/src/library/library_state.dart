@@ -35,6 +35,7 @@ import 'package:niman/src/library/indexing_status.dart';
 import 'package:niman/src/library/library_databases.dart';
 import 'package:niman/src/library/library_index_files.dart';
 import 'package:niman/src/library/library_open_chores.dart';
+import 'package:niman/src/library/library_records.dart';
 import 'package:niman/src/library/library_registry.dart';
 import 'package:niman/src/library/library_sources.dart';
 import 'package:niman/src/library/library_widgets.dart';
@@ -62,7 +63,6 @@ import 'package:niman/src/templates/repo.dart';
 import 'package:niman/src/update/update_check.dart';
 import 'package:niman/src/widget/widget_configs.dart';
 import 'package:niman/src/workspace/workspace_slot.dart';
-import 'package:niman/src/workspace/workspace_store.dart';
 import 'package:path/path.dart' as p;
 
 export 'package:niman/src/library/library_databases.dart';
@@ -151,6 +151,12 @@ final class LibraryController implements LibrarySession {
   late final LibraryIndexFiles _indexFiles = LibraryIndexFiles(
     openDb: indexDbFactory,
     locate: indexFileOf,
+  );
+
+  /// The libraries this device knows and its records of each.
+  late final LibraryRecords _known = LibraryRecords(
+    appDatabase: () => appDatabase,
+    syncSecrets: syncSecrets,
   );
 
   /// The home-screen widgets' records and the native library mirror.
@@ -729,19 +735,7 @@ final class LibraryController implements LibrarySession {
 
   /// The libraries the app knows about, most recently opened first.
   @override
-  Future<List<KnownLibrary>> knownLibraries() async {
-    final known = await LibraryRegistry(await appDatabase).all();
-    final documents = await containerDocuments();
-    if (documents == null) return known;
-    // On iPhone a library remembered before the container moved is the one
-    // at the same place in today's Documents; listed once, by its newest.
-    final seen = <String>{};
-    return [
-      for (final library in known)
-        if (seen.add(rebaseContainerPath(library.path, documents)))
-          library.copyWith(path: rebaseContainerPath(library.path, documents)),
-    ];
-  }
+  Future<List<KnownLibrary>> knownLibraries() => _known.all();
 
   /// The home-screen widget instances reading [libraryPath] (issue 6).
   @override
@@ -799,26 +793,7 @@ final class LibraryController implements LibrarySession {
     }
     _log.info('forget library: $libraryPath');
     final db = await appDatabase;
-    await LibraryRegistry(db).forget(libraryPath);
-    // Widgets pointing at it would open a library the home screen no
-    // longer lists; their rows go with the entry (issue 6).
-    await WidgetConfigStore(db).removeForLibrary(libraryPath);
-    // Its sync state describes a library the app no longer knows; opened
-    // again, it starts unconfigured (docs/records/sync.md, "Configuration").
-    await SyncStore(db).removeLibrary(libraryPath);
-    // What was left open in it goes too (#23): opened again, it starts
-    // with nothing open, like a library the app has never seen.
-    await WorkspaceStore(db).remove(libraryPath);
-    // So do the settings it kept on this device: opened again, it takes
-    // them from its settings file, like a library opened for the first time.
-    await DbDeviceSettingsStore(db).remove(libraryPath);
-    try {
-      await syncSecrets.delete(libraryPath);
-    } on Exception catch (e) {
-      // A missing keychain must not block forgetting; the entry is inert
-      // without its destination row.
-      _log.warning('forget library: sync password not deleted: $e');
-    }
+    await _known.forget(db, libraryPath);
     // The mirror would otherwise keep offering a forgotten library.
     unawaited(_widgets.saveLibraryMirror(db));
     // The index is derived data and the entry that named it is gone, so
