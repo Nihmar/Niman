@@ -14,7 +14,6 @@ import 'package:niman/src/core/settings/library_features.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/core/text_scale.dart';
 import 'package:niman/src/editor/editor_shortcuts.dart';
-import 'package:niman/src/editor/find_bar.dart';
 import 'package:niman/src/editor/md_editing.dart';
 import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/editor/outline.dart';
@@ -58,6 +57,7 @@ import 'package:niman/src/ui/note_attach.dart';
 import 'package:niman/src/ui/note_dead_links.dart';
 import 'package:niman/src/ui/note_disk.dart';
 import 'package:niman/src/ui/note_edit_commands.dart';
+import 'package:niman/src/ui/note_editor_frame.dart';
 import 'package:niman/src/ui/note_find_keys.dart';
 import 'package:niman/src/ui/note_footer.dart';
 import 'package:niman/src/ui/note_frontmatter_panel.dart';
@@ -1677,34 +1677,12 @@ final class _NoteViewState extends State<NoteView>
       onDrop: (path) => unawaited(_links.insertDroppedLink(path)),
       child: note,
     );
-    return Focus(
-      canRequestFocus: false,
-      skipTraversal: true,
-      onKeyEvent: _findKeys.onKey,
-      child: Column(
-        children: <Widget>[
-          ListenableBuilder(
-            listenable: _sourceFind,
-            builder: (context, _) => FindBar(
-              controller: _sourceFind,
-              column: widget.noteColumn,
-              keyPrefix: 'source',
-            ),
-          ),
-          // The fields panel, above the note's first line, in the same place
-          // the read view shows it: the note itself is still the source, and
-          // its frontmatter lines are still text below this (#157). The inset
-          // is the note's own: a box with an edge of its own does not run to
-          // the pane's edge when there is no column to align to.
-          if (frontmatter != null)
-            NoteColumnPadding(
-              column: widget.noteColumn,
-              minInset: NoteColumn.textInset,
-              child: frontmatter,
-            ),
-          Expanded(child: dropping),
-        ],
-      ),
+    return NoteEditorFrame(
+      find: _sourceFind,
+      column: widget.noteColumn,
+      frontmatter: frontmatter,
+      onKey: _findKeys.onKey,
+      child: dropping,
     );
   }
 
