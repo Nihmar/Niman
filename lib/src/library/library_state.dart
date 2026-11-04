@@ -8,7 +8,6 @@ import 'package:niman/src/core/custom_theme.dart';
 import 'package:niman/src/core/frame_log.dart';
 import 'package:niman/src/core/language.dart';
 import 'package:niman/src/core/logging.dart';
-import 'package:niman/src/core/settings/custom_theme_repo.dart';
 import 'package:niman/src/core/settings/device_settings_store.dart';
 import 'package:niman/src/core/settings/features.dart';
 import 'package:niman/src/core/settings/features_introduction.dart';
@@ -44,6 +43,7 @@ import 'package:niman/src/library/note_ops.dart';
 import 'package:niman/src/library/rescan_scheduler.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/library/session_events.dart';
+import 'package:niman/src/library/session_themes.dart';
 import 'package:niman/src/library/session_update_checks.dart';
 import 'package:niman/src/library/watch_batch_queue.dart';
 import 'package:niman/src/links/library_links.dart';
@@ -196,6 +196,12 @@ final class LibraryController implements LibrarySession {
 
   /// The upkeep an open library gets behind its ready bump.
   static const _chores = LibraryOpenChores();
+
+  /// The app's theme, the custom themes and the books' look on screen.
+  late final SessionThemes _themes = SessionThemes(
+    appDatabase: () => appDatabase,
+    onCustomThemesChanged: _republishEpubLook,
+  );
   LibraryPhase _phase = LibraryPhase.none;
   String? _root;
   String? _lastError;
@@ -649,7 +655,7 @@ final class LibraryController implements LibrarySession {
     final settings = await config.config;
     AppTextScales.apply(ui: settings.uiTextScale, note: settings.noteTextScale);
     AppWeekStart.choice = settings.weekStart;
-    await _publishEpubLook(settings.epubLook);
+    await _themes.publishEpubLook(settings.epubLook);
     _phase = LibraryPhase.ready;
     currentRootPath = abs;
     // Warm the tree's first query while the caller still shows its
@@ -1374,31 +1380,14 @@ final class LibraryController implements LibrarySession {
       '${look.font.name} at ${look.textScale}',
     );
     await _editLibrary((c) => c.copyWith(epubLook: look));
-    await _publishEpubLook(look);
-  }
-
-  /// Puts [look] on screen with the theme it names: a shipped palette, or
-  /// a custom theme of this device's — none, the app's, when that is gone.
-  Future<void> _publishEpubLook(EpubLook look) async {
-    final id = look.theme;
-    AppTheme? theme;
-    if (id != null) {
-      final customId = AppTheme.customIdIn(id);
-      if (customId == null) {
-        theme = themeFromId(id);
-      } else {
-        final custom = await CustomThemeRepo(await appDatabase).byId(customId);
-        if (custom != null) theme = themeFromId(id, custom: custom);
-      }
-    }
-    EpubLooks.apply(look, theme: theme);
+    await _themes.publishEpubLook(look);
   }
 
   /// Publishes the books' look again: a custom theme it may name was
   /// changed or deleted.
   Future<void> _republishEpubLook() async {
     if (_phase != LibraryPhase.ready) return;
-    await _publishEpubLook(await epubLook);
+    await _themes.publishEpubLook(await epubLook);
   }
 
   /// The UI language.
@@ -1446,73 +1435,42 @@ final class LibraryController implements LibrarySession {
     await AppSettingsRepo(await appDatabase).setThemeBrightness(brightness);
   }
 
-  /// The theme the app wears.
-  ///
-  /// A setting that points at a custom theme this installation no longer
-  /// holds is repaired here, to Niman's own colors: there is always
-  /// something to wear (issue #269).
+  /// The theme the app wears ([SessionThemes.theme]).
   @override
-  Future<AppTheme> get theme async {
-    final settings = AppSettingsRepo(await appDatabase);
-    final id = await settings.themeId();
-    final customId = AppTheme.customIdIn(id);
-    if (customId == null) return themeFromId(id);
-    final custom = await CustomThemeRepo(await appDatabase).byId(customId);
-    if (custom != null) return themeFromId(id, custom: custom);
-    _log.warning('theme $id is gone; wearing Niman instead');
-    await settings.setThemeId(AppPalette.niman.id);
-    return const BuiltinAppTheme(AppPalette.niman);
-  }
+  Future<AppTheme> get theme => _themes.theme;
 
   /// Sets (and persists) the theme, by its id.
   @override
-  Future<void> setTheme(AppTheme theme) async {
-    _log.info('theme set to ${theme.id}');
-    await AppSettingsRepo(await appDatabase).setThemeId(theme.id);
-  }
+  Future<void> setTheme(AppTheme theme) => _themes.setTheme(theme);
 
   /// The custom themes this installation holds, by name (issue #269).
   @override
-  Future<List<CustomTheme>> customThemes() async =>
-      await CustomThemeRepo(await appDatabase).list();
+  Future<List<CustomTheme>> customThemes() => _themes.customThemes();
 
   /// The custom theme with [id], or null.
   @override
-  Future<CustomTheme?> customTheme(String id) async =>
-      await CustomThemeRepo(await appDatabase).byId(id);
+  Future<CustomTheme?> customTheme(String id) => _themes.customTheme(id);
 
   /// Stores [theme]: the row with its id, or a new one.
   @override
-  Future<void> saveCustomTheme(CustomTheme theme) async {
-    _log.info('custom theme ${theme.id} saved as "${theme.name}"');
-    await CustomThemeRepo(await appDatabase).save(theme);
-    await _republishEpubLook();
-  }
+  Future<void> saveCustomTheme(CustomTheme theme) =>
+      _themes.saveCustomTheme(theme);
 
   /// Renames the custom theme with [id].
   @override
-  Future<void> renameCustomTheme(String id, String name) async {
-    _log.info('custom theme $id renamed to "$name"');
-    await CustomThemeRepo(await appDatabase).rename(id, name);
-  }
+  Future<void> renameCustomTheme(String id, String name) =>
+      _themes.renameCustomTheme(id, name);
 
   /// Deletes the custom theme with [id], and returns the theme in force
-  /// afterwards: deleting the one being worn falls back to the app's own
-  /// colors.
+  /// afterwards ([SessionThemes.deleteCustomTheme]).
   @override
-  Future<AppTheme> deleteCustomTheme(String id) async {
-    _log.info('custom theme $id deleted');
-    await CustomThemeRepo(await appDatabase).delete(id);
-    await _republishEpubLook();
-    // Reading it back repairs a setting that pointed at the deleted
-    // theme, so what comes out is what the app wears from here on.
-    return await theme;
-  }
+  Future<AppTheme> deleteCustomTheme(String id) =>
+      _themes.deleteCustomTheme(id);
 
   /// Whether [name] is a custom theme's name already.
   @override
-  Future<bool> customThemeNameTaken(String name) async =>
-      await CustomThemeRepo(await appDatabase).nameTaken(name);
+  Future<bool> customThemeNameTaken(String name) =>
+      _themes.customThemeNameTaken(name);
 
   /// Notifies listeners that state changed without an index mutation
   /// (e.g. a settings change the tree UI should react to).
