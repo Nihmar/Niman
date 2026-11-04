@@ -47,7 +47,6 @@ import 'package:niman/src/markdown/note_read_failure.dart';
 import 'package:niman/src/markdown/read_parser.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
-import 'package:niman/src/markdown/render/scroll_anchor.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/markdown/render/todo_block_scope.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
@@ -74,6 +73,7 @@ import 'package:niman/src/ui/note_frontmatter_head.dart';
 import 'package:niman/src/ui/note_links.dart';
 import 'package:niman/src/ui/note_load_error.dart';
 import 'package:niman/src/ui/note_paste.dart';
+import 'package:niman/src/ui/note_place.dart';
 import 'package:niman/src/ui/note_read_snapshot.dart';
 import 'package:niman/src/ui/note_read_tasks.dart';
 import 'package:niman/src/ui/note_save_pipeline.dart';
@@ -88,7 +88,6 @@ import 'package:niman/src/ui/note_top_bar.dart';
 import 'package:niman/src/ui/note_view_adapters.dart';
 import 'package:niman/src/ui/note_view_chrome.dart';
 import 'package:niman/src/ui/note_view_handle.dart';
-import 'package:niman/src/ui/note_view_memento.dart';
 import 'package:niman/src/ui/outline_panel.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/tree_link_drop.dart';
@@ -499,13 +498,21 @@ final class _NoteViewState extends State<NoteView>
   /// OS instead.
   bool _notText = false;
 
-  /// Hands in where the note is, a moment after the reader stops (#23):
-  /// a window closed with nothing to save goes without asking the app,
-  /// so the memento cannot wait for the view to go away.
-  Timer? _mementoTimer;
-
-  /// How long after the last move, scroll or edit the memento goes in.
-  static const _mementoDelay = Duration(seconds: 1);
+  /// Where the note is read: the memento it hands in as it is left, and the
+  /// place it is put back at (#23).
+  late final NotePlace _place = NotePlace(
+    path: () => widget.path,
+    surface: () => _surface,
+    readView: () => _readViewKey.currentState,
+    sourceView: () => _sourceViewKey.currentState,
+    reading: () => _previewIn(widget),
+    active: () => widget.active,
+    ready: () => _ready,
+    mounted: () => mounted,
+    receiver: () => widget.onMemento,
+    wysiwyg: () => widget.showWysiwyg,
+    preview: () => widget.showPreview,
+  );
 
   /// The note's word count, outline and frontmatter error (T-M2-07),
   /// refreshed a pause after the last edit; the view repaints on each
@@ -974,30 +981,15 @@ final class _NoteViewState extends State<NoteView>
   }
 
   /// Keeps the note where it was read when it moves between `source`,
-  /// `live` and the read view: the line at the top of the pane going away,
-  /// shown at the top of the one taking over once it has drawn. Pixels are
-  /// no measure across them — a heading is taller in `live`, a definition
-  /// takes no room in the read view — and a pane that kept its own offset
-  /// showed wherever it had last been, the top of the note when it had not.
+  /// `live` and the read view ([NotePlace.keepAcrossModes]).
   void _keepPlaceAcrossModes(NoteView oldWidget) {
     if (!_ready) return;
     if (oldWidget.path != widget.path) return;
-    final wasRead = _previewIn(oldWidget);
-    final read = _previewIn(widget);
-    final modeChanged = _wysiwygIn(oldWidget) != _wysiwygIn(widget);
-    if (wasRead == read && (read || !modeChanged)) return;
-    final anchor = wasRead
-        ? _readViewKey.currentState?.topAnchor
-        : _sourceViewKey.currentState?.topAnchor;
-    if (anchor == null) return;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      if (_previewIn(widget)) {
-        _readViewKey.currentState?.showAnchor(anchor);
-      } else {
-        _sourceViewKey.currentState?.showAnchor(anchor);
-      }
-    });
+    _place.keepAcrossModes(
+      wasRead: _previewIn(oldWidget),
+      read: _previewIn(widget),
+      modeChanged: _wysiwygIn(oldWidget) != _wysiwygIn(widget),
+    );
   }
 
   /// The mode the unified surface is built in: the WYSIWYG pane is `live`, the
@@ -1119,11 +1111,11 @@ final class _NoteViewState extends State<NoteView>
     widget.spellCheck?.addListener(_onSpellCheckChanged);
     // The WYSIWYG publishes the formats at its caret on every selection
     // change: the same moment its memento moves.
-    _activeFormats.addListener(_scheduleMemento);
+    _activeFormats.addListener(_place.schedule);
     // And the scroll of either pane: where the note is read is where it is
     // left (#1077).
-    _previewScroll.addListener(_scheduleMemento);
-    _sourceScroll.addListener(_scheduleMemento);
+    _previewScroll.addListener(_place.schedule);
+    _sourceScroll.addListener(_place.schedule);
     _stats.addListener(_onStatsChanged);
     _saves.failure.addListener(_onSaveFailureChanged);
     _diskChanges = _unsaved?.diskChanges.listen((paths) {
@@ -1175,9 +1167,9 @@ final class _NoteViewState extends State<NoteView>
         if (AppLog.file != null) FrameProbe.watch('preview', 'read pane open');
       }
     }
-    if (oldWidget.active && !widget.active) _handMemento(oldWidget.path);
-    if (!oldWidget.active && widget.active && _anchorToLand != null) {
-      _scheduleLanding();
+    if (oldWidget.active && !widget.active) _place.hand(oldWidget.path);
+    if (!oldWidget.active && widget.active && _place.landing) {
+      _place.scheduleLanding();
     }
     if (!oldWidget.active && widget.active && _ready) {
       // Back on screen: the shell asks the showing note what kind it is.
@@ -1187,7 +1179,7 @@ final class _NoteViewState extends State<NoteView>
     if (moved) {
       _followMove();
     } else if (oldWidget.path != widget.path) {
-      _handMemento(oldWidget.path);
+      _place.hand(oldWidget.path);
       // Persist the outgoing note under its own path before the buffer is
       // replaced by the incoming one: the _load below resets it.
       _closed(oldWidget.path, _saves.saveOutgoing(oldWidget.path));
@@ -1255,11 +1247,12 @@ final class _NoteViewState extends State<NoteView>
   @override
   void dispose() {
     widget.features?.removeListener(_featuresChanged);
-    _handMemento(widget.path);
-    _mementoTimer?.cancel();
-    _activeFormats.removeListener(_scheduleMemento);
-    _previewScroll.removeListener(_scheduleMemento);
-    _sourceScroll.removeListener(_scheduleMemento);
+    _place
+      ..hand(widget.path)
+      ..dispose();
+    _activeFormats.removeListener(_place.schedule);
+    _previewScroll.removeListener(_place.schedule);
+    _sourceScroll.removeListener(_place.schedule);
     _templateCheck.dispose();
     _saves.cancel();
     _previewTimer?.cancel();
@@ -1305,129 +1298,17 @@ final class _NoteViewState extends State<NoteView>
     );
   }
 
-  /// Hands where the note at [path] was left to [NoteView.onMemento]:
-  /// only a loaded note has a place to have been left at.
-  void _handMemento(String path) {
-    final receive = widget.onMemento;
-    if (receive == null || !_ready) return;
-    final surface = _surface;
-    if (surface != null) {
-      // Source offsets either way: `live` draws the same text, so an offset
-      // means what it means in `source`, and a tab switch between the two
-      // panes keeps the caret. The *editor kind* is the pane's, so the switch
-      // comes back to the mode the note was left in.
-      final selection = surface.selection;
-      // The line at the top of the pane on stage, or, once the panes are
-      // gone with the tab, the one it had as it went (#1077).
-      final anchor = _stageAnchor() ?? _leavingAnchor;
-      receive(
-        path,
-        NoteMemento(
-          selectionBase: selection.anchor,
-          selectionExtent: selection.extent,
-          scrollLine: anchor?.line,
-          scrollFraction: anchor?.fraction,
-          editorKind: widget.showWysiwyg ? wysiwygEditorKind : sourceEditorKind,
-          preview: widget.showPreview,
-        ),
-      );
-      return;
-    }
-  }
-
-  /// Puts the note back where [NoteView.initialMemento] left it: the
-  /// selection only in the editor it was taken in (their offsets count
-  /// different things), the scroll either way.
-  void _restoreMemento() {
-    final memento = widget.initialMemento;
-    if (memento == null || memento.isEmpty) return;
-    final wysiwyg = _wysiwygIn(widget);
-    final sameEditor =
-        memento.editorKind == (wysiwyg ? wysiwygEditorKind : sourceEditorKind);
-    // One surface, two modes, the same text and the same offsets: the
-    // selection is restored whenever the memento was taken in this pane, and
-    // the scroll either way. The buffer is already built (the load made it).
-    final line = memento.scrollLine;
-    _surface?.restore(
-      base: sameEditor ? memento.selectionBase : null,
-      extent: sameEditor ? memento.selectionExtent : null,
-      // A memento written before the anchor held pixels: the editor still
-      // takes them.
-      scroll: line == null ? memento.scrollOffset : null,
-    );
-    if (line != null) {
-      _landAnchor((line: line, fraction: memento.scrollFraction ?? 0.0));
-    }
-  }
-
-  /// The source line at the top of the pane on stage, or null while none is
-  /// drawn.
-  ScrollAnchor? _stageAnchor() => _previewIn(widget)
-      ? _readViewKey.currentState?.topAnchor
-      : _sourceViewKey.currentState?.topAnchor;
-
-  /// The stage anchor taken as the view was leaving the tree: its panes are
-  /// gone by the time it is disposed, and the memento is handed in then.
-  ScrollAnchor? _leavingAnchor;
-
   @override
   void deactivate() {
-    _leavingAnchor = _stageAnchor();
+    _place.leaving();
     super.deactivate();
   }
 
   @override
   void activate() {
     super.activate();
-    _leavingAnchor = null;
+    _place.back();
   }
-
-  /// A place to show once the pane on stage has the note drawn, and how
-  /// many frames it has waited.
-  ScrollAnchor? _anchorToLand;
-  int _anchorFrames = 0;
-  bool _landingScheduled = false;
-
-  /// Shows [anchor] at the top of the pane on stage as soon as it can: the
-  /// note's panes are built a frame or more after its text arrives, the
-  /// preview later still, and a tab behind waits for its turn.
-  void _landAnchor(ScrollAnchor anchor) {
-    _anchorToLand = anchor;
-    _anchorFrames = 0;
-    _scheduleLanding();
-  }
-
-  void _scheduleLanding() {
-    if (_landingScheduled) return;
-    _landingScheduled = true;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _landingScheduled = false;
-      if (mounted) _tryLanding();
-    });
-  }
-
-  void _tryLanding() {
-    final anchor = _anchorToLand;
-    // A tab behind is not drawn: it lands when it comes back.
-    if (anchor == null || !widget.active) return;
-    final read = _previewIn(widget);
-    final landed = read
-        ? _readViewKey.currentState?.acceptsAnchor ?? false
-        : _sourceViewKey.currentState?.acceptsAnchor ?? false;
-    if (landed) {
-      _anchorToLand = null;
-      if (read) {
-        _readViewKey.currentState!.showAnchor(anchor);
-      } else {
-        _sourceViewKey.currentState!.showAnchor(anchor);
-      }
-      return;
-    }
-    if (++_anchorFrames < _maxLandingFrames) _scheduleLanding();
-  }
-
-  /// How many frames a place waits for its pane before it is given up.
-  static const int _maxLandingFrames = 240;
 
   Future<void> _load() async {
     final path = widget.path;
@@ -1504,7 +1385,7 @@ final class _NoteViewState extends State<NoteView>
       // caret with its buffer, above, and a memento must not take it back
       // (a note created at a path that had one lost its `{{cursor}}`).
       if (widget.initialCaretOffset == null && widget.initialAnchor == null) {
-        _restoreMemento();
+        _place.restore(widget.initialMemento, inWysiwyg: _wysiwygIn(widget));
       }
       // The spell cache is keyed by line index + text; a different note can
       // reuse the same indices, so forget the previous file's answers.
@@ -2366,18 +2247,8 @@ final class _NoteViewState extends State<NoteView>
     }
     // Leaving the foreground may be the last thing this process does.
     if (state != AppLifecycleState.resumed && widget.active) {
-      _mementoTimer?.cancel();
-      _handMemento(widget.path);
+      _place.handNow();
     }
-  }
-
-  /// Restarts the countdown to handing in the showing note's memento.
-  void _scheduleMemento() {
-    if (widget.onMemento == null || !widget.active || !_ready) return;
-    _mementoTimer?.cancel();
-    _mementoTimer = Timer(_mementoDelay, () {
-      if (mounted) _handMemento(widget.path);
-    });
   }
 
   /// The statistics were refreshed: the status row and the fields panel are
