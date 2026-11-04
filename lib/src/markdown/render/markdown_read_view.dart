@@ -28,7 +28,6 @@ import 'package:niman/src/links/dead_links.dart';
 import 'package:niman/src/markdown/background_scan.dart';
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_index.dart';
-import 'package:niman/src/markdown/column_layout.dart';
 import 'package:niman/src/markdown/read_parser.dart';
 import 'package:niman/src/markdown/render/block_height_map.dart';
 import 'package:niman/src/markdown/render/block_heights.dart';
@@ -45,7 +44,7 @@ import 'package:niman/src/markdown/render/marked_block.dart';
 import 'package:niman/src/markdown/render/note_margins.dart';
 import 'package:niman/src/markdown/render/range_highlight.dart';
 import 'package:niman/src/markdown/render/read_code_pieces.dart';
-import 'package:niman/src/markdown/render/read_column_hosts.dart';
+import 'package:niman/src/markdown/render/read_entries.dart';
 import 'package:niman/src/markdown/render/read_selection.dart';
 import 'package:niman/src/markdown/render/read_view_keys.dart';
 import 'package:niman/src/markdown/render/scroll_anchor.dart';
@@ -164,12 +163,8 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
   /// logger so a device log says which of the two was slow.
   static const AppLogger _log = AppLogger(name: 'read');
 
-  List<Block> _blocks = const <Block>[];
-
-  /// The buffer [_blocks] were scanned from: the widget's, or — while a
-  /// long note's next revision is scanned in the background — the one
-  /// before it, drawn until the scan comes back.
-  SourceBuffer? _shown;
+  /// The blocks the pane shows, and the height map over them.
+  final ReadEntries _entries = ReadEntries();
 
   /// Whether the pane has a revision worth keeping on screen while the next
   /// one is scanned: it has none before its first scan, and an *empty page* —
@@ -178,7 +173,10 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
   /// on a huge note bring up a blank pane (#432): the pane had drawn the empty
   /// page, so a revision "was" on screen, and the top of the note did not take
   /// its place until the whole scan landed.
-  bool get _nothingToKeep => _shown == null || _shown!.length == 0;
+  bool get _nothingToKeep {
+    final shown = _entries.shown;
+    return shown == null || shown.length == 0;
+  }
 
   /// Counts the scans started, so an answer that a later one overtook is
   /// dropped.
@@ -205,32 +203,34 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
   @visibleForTesting
   static int headLines = 5000;
 
-  /// Whether [_blocks] are the top of the note alone, drawn while the whole
-  /// of it is scanned.
+  /// Whether the blocks shown are the top of the note alone, drawn while the
+  /// whole of it is scanned.
   bool _head = false;
 
   /// Whether [line] is past what the pane has blocks for yet: a jump there
   /// waits for the scan.
-  bool _notYet(int line) =>
-      _scanning && (_blocks.isEmpty || (_head && line >= _blocks.last.endLine));
-  BlockHeightMap? _heights;
-  int _built = 0;
+  bool _notYet(int line) {
+    final blocks = _entries.blocks;
+    return _scanning &&
+        (blocks.isEmpty || (_head && line >= blocks.last.endLine));
+  }
 
   /// How many blocks have been built and drawn.
   ///
   /// The windowing's evidence: it is what a test reads to prove that opening a
   /// long note did not lay the whole of it out.
-  int get builtBlocks => _built;
+  int get builtBlocks => _entries.built;
 
   /// How many blocks the note has.
-  int get blockCount => _blocks.length;
+  int get blockCount => _entries.blocks.length;
 
   /// The blocks this pane scanned for the page, or null before the first
   /// scan lands.
   ///
   /// What the shell asks when it needs something the scan already found —
   /// a list to count, so far — rather than reading the note for it.
-  List<Block>? get blocks => _shown == null || _head ? null : _blocks;
+  List<Block>? get blocks =>
+      _entries.shown == null || _head ? null : _entries.blocks;
 
   /// The note's headings, read off the blocks this pane already scanned for
   /// the page, or null before the first scan lands.
@@ -238,22 +238,23 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
   /// The note view's outline: a heading is a block, and these are the blocks
   /// on screen — no second walk of the text (see [outlineOfBlocks]).
   List<OutlineEntry>? get headings {
-    final shown = _shown;
-    if (shown == null || _head || _blocks.isEmpty) return null;
+    final shown = _entries.shown;
+    final blocks = _entries.blocks;
+    if (shown == null || _head || blocks.isEmpty) return null;
     return outlineOfBlocks(
-      BlockIndex(blocks: _blocks, revision: shown.revision),
+      BlockIndex(blocks: blocks, revision: shown.revision),
       shown.lineAt,
     );
   }
 
   /// The document's height: what a frame has drawn for real, plus an estimate
   /// for the part no frame has reached. Null before the first layout.
-  double? get totalExtent => _heights?.totalExtent;
+  double? get totalExtent => _entries.heights?.totalExtent;
 
   /// How many blocks a frame has laid out and measured.
   ///
   /// The estimator's evidence, as [builtBlocks] is the windowing's.
-  int get measuredBlocks => _heights?.measuredCount ?? 0;
+  int get measuredBlocks => _entries.heights?.measuredCount ?? 0;
 
   /// Scrolls so the block holding source [line] is at the top (#256).
   ///
@@ -274,11 +275,11 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
       _pendingJump = line;
       return;
     }
-    final index = _blockIndexAt(line);
+    final index = _entries.indexAt(line);
     if (index == null) return;
     // A block of a side-by-side `columns` block is drawn in it: the jump
     // lands on the block's top.
-    _jumpToIndex(_hosts.entryOf(index), attempt: 0);
+    _jumpToIndex(_entries.hosts.entryOf(index), attempt: 0);
   }
 
   /// How many frames a line jump may take to settle.
@@ -296,7 +297,7 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
   /// One pass of [jumpToLine]: jump to where the map says [index] starts, then
   /// look again after the frame that landed.
   void _jumpToIndex(int index, {required int attempt}) {
-    final heights = _heights;
+    final heights = _entries.heights;
     final controller = _scroll;
     if (heights == null || !controller.hasClients) return;
     final offset = heights
@@ -316,28 +317,6 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
     });
   }
 
-  /// The index of the block holding source [line], or null when the note has
-  /// none that early.
-  ///
-  /// The blocks tile the note and are ordered by line, so this is the last one
-  /// that starts at or before [line]: a line inside a wrapped paragraph, or the
-  /// blank line under it, belongs to a block either way.
-  int? _blockIndexAt(int line) {
-    if (_blocks.isEmpty) return null;
-    var low = 0;
-    var high = _blocks.length - 1;
-    if (_blocks[low].startLine > line) return null;
-    while (low < high) {
-      final middle = (low + high + 1) >> 1;
-      if (_blocks[middle].startLine <= line) {
-        low = middle;
-      } else {
-        high = middle - 1;
-      }
-    }
-    return low;
-  }
-
   /// Where the blocks report the part of them selected.
   final ReadSelectionScope _selection = ReadSelectionScope();
 
@@ -347,10 +326,10 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
   /// The block holding source [line]: its first line and its text
   /// (`ReadBlock.plainText`); null when there is none there, or none drawn yet.
   ({int line, String text})? blockTextAt(int line) {
-    final shown = _shown;
-    final index = _blockIndexAt(line);
+    final shown = _entries.shown;
+    final index = _entries.indexAt(line);
     if (shown == null || index == null) return null;
-    final block = _blocks[index];
+    final block = _entries.blocks[index];
     return (
       line: block.startLine,
       text: widget.parser.of(block, shown).plainText,
@@ -374,17 +353,18 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
   /// that line and a code block of forty is cut in forty. Null while there
   /// is nothing drawn to ask.
   ScrollAnchor? get topAnchor {
-    final heights = _heights;
+    final heights = _entries.heights;
+    final blocks = _entries.blocks;
     final scroll = _scroll;
-    if (heights == null || _blocks.isEmpty || !scroll.hasClients) return null;
+    if (heights == null || blocks.isEmpty || !scroll.hasClients) return null;
     final y = scroll.offset - widget.padding.top;
     if (y <= 0) return (line: 0, fraction: 0.0);
     final index = heights.indexAt(y);
     if (index == null) {
       // Past the blocks, in the footnotes: the note's last line, whole.
-      return (line: _blocks.last.endLine - 1, fraction: 1.0);
+      return (line: blocks.last.endLine - 1, fraction: 1.0);
     }
-    final block = _blocks[index];
+    final block = blocks[index];
     final extent = heights.extentFor(index);
     final lines = block.endLine - block.startLine;
     final into = extent > 0 ? (y - heights.offsetOf(index)) / extent : 0.0;
@@ -397,7 +377,7 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
   /// ([showAnchor]): it is laid out, and holds blocks or is still reading
   /// them in.
   bool get acceptsAnchor =>
-      _scroll.hasClients && (_blocks.isNotEmpty || _scanning);
+      _scroll.hasClients && (_entries.blocks.isNotEmpty || _scanning);
 
   /// Scrolls the view so [anchor]'s line is at its top, as far into it as
   /// the anchor says — and again after each frame that measured the blocks
@@ -415,13 +395,13 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
   ScrollAnchor? _pendingAnchor;
 
   void _showAnchor(ScrollAnchor anchor, {required int attempt}) {
-    final heights = _heights;
+    final heights = _entries.heights;
     final scroll = _scroll;
     if (heights == null || !scroll.hasClients) return;
-    final found = _blockIndexAt(anchor.line);
+    final found = _entries.indexAt(anchor.line);
     if (found == null) return;
-    final index = _hosts.entryOf(found);
-    final block = _blocks[index];
+    final index = _entries.hosts.entryOf(found);
+    final block = _entries.blocks[index];
     final lines = block.endLine - block.startLine;
     final into = index != found
         ? 0.0
@@ -520,8 +500,8 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
       _scanning = false;
       _show(buffer, known);
       _log.debug(
-        'scan: ${_blocks.length} blocks, ${buffer.lineCount} lines taken as '
-        'they were in ${clock.elapsedMilliseconds}ms',
+        'scan: ${_entries.blocks.length} blocks, ${buffer.lineCount} lines '
+        'taken as they were in ${clock.elapsedMilliseconds}ms',
       );
       return;
     }
@@ -529,13 +509,13 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
       _scanning = false;
       _show(buffer, DocumentScan.of(buffer));
       _log.debug(
-        'scan: ${_blocks.length} blocks, ${buffer.lineCount} lines in '
+        'scan: ${_entries.blocks.length} blocks, ${buffer.lineCount} lines in '
         '${clock.elapsedMilliseconds}ms',
       );
       return;
     }
     _scanning = true;
-    if (identical(_shown, buffer)) _clear();
+    if (identical(_entries.shown, buffer)) _clear();
     if (_nothingToKeep) {
       // Nothing to draw for the wait, which on a phone was 22 s of an empty
       // pane for the 247 MB note (device log, 2026-09-24): the top of the
@@ -543,7 +523,7 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
       _show(buffer, DocumentScan.head(buffer, headLines));
       _head = true;
       _log.debug(
-        'scan: the top shown, ${_blocks.length} blocks, '
+        'scan: the top shown, ${_entries.blocks.length} blocks, '
         'in ${clock.elapsedMilliseconds}ms; the rest in the background',
       );
     }
@@ -597,104 +577,19 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
   /// unchanged saved nothing, since the new one was already read, and missed
   /// a footnote cited mid-sentence: the citations are the footnotes' order.
   void _show(SourceBuffer buffer, DocumentScan scan) {
-    _shown = buffer;
     widget.parser.scope = scan.scope;
-    final changes = scan.changes;
-    if (!_follow(changes, scan.blocks)) {
-      _blocks = _pieces.pieced(scan.blocks);
-      // A new map assumes no block side by side, until a layout says.
-      _hosts.flags = null;
-      _hostsStale = true;
-      // A block's estimate when a frame first comes near it: every block of
-      // the 246 MB stress note, 2.4 M, was most of the frame that showed it.
-      _heights = BlockHeightMap.lazy(
-        count: _blocks.length,
-        estimate: _estimateOf,
-        estimateSpan: _estimateSpanOf,
-      );
-      _built = 0;
-    }
-    _handed = changes?.token;
-  }
-
-  /// The mark of the editor's hand-over the pane shows, or null when what it
-  /// shows was scanned from the text.
-  Object? _handed;
-
-  /// Takes [blocks] by replaying [changes] over the heights the pane has,
-  /// when they follow the hand-over it shows: the blocks the edits did not
-  /// touch keep the height a frame measured, and only the new ones are
-  /// estimated — O(the changes), where a new map was O(blocks), 100–200 ms
-  /// on a note of 2 M of them, and forgot every measurement.
-  ///
-  /// False, with nothing changed, when they do not follow it, were not
-  /// worth keeping, or a long code block is involved: the pane lays those
-  /// out in pieces that are entries of their own, and the changes count
-  /// blocks.
-  bool _follow(ScanChanges? changes, List<Block> blocks) {
-    final heights = _heights;
-    final stretches = changes?.stretches;
-    if (changes == null ||
-        stretches == null ||
-        heights == null ||
-        changes.since == null ||
-        !identical(changes.since, _handed) ||
-        _pieces.isNotEmpty) {
-      return false;
-    }
-    var length = heights.length;
-    for (final stretch in stretches) {
-      length += stretch.inserted - stretch.removed;
-      for (
-        var at = stretch.start;
-        at < stretch.start + stretch.inserted;
-        at++
-      ) {
-        if (ReadCodePieces.isLongCode(blocks[at])) return false;
-      }
-    }
-    if (length != blocks.length) return false;
-    // The estimates are asked with the new indices, of the new list.
-    _blocks = blocks;
-    for (final stretch in stretches) {
-      // The side-by-side flags move with the entries; the new ones are
-      // ordinary until the next layout says otherwise.
-      _hosts.flags = _hosts.spliced(
-        stretch.start,
-        stretch.removed,
-        stretch.inserted,
-      );
-      heights.splice(
-        stretch.start,
-        stretch.removed,
-        stretch.inserted,
-        _estimateOf,
-      );
-    }
-    _hostsStale = true;
-    return true;
+    _entries.show(buffer, scan);
   }
 
   /// Draws nothing until the next scan lands.
   void _clear() {
     _head = false;
-    _shown = null;
-    _blocks = const <Block>[];
-    _pieces.clear();
-    _heights = null;
-    _built = 0;
-    _handed = null;
-    _hosts.flags = null;
-    _hostsStale = true;
+    _entries.clear();
   }
 
   /// The lines a code block is drawn in pieces of, past twice as many
   /// ([ReadCodePieces.pieceLines]).
   static const int pieceLines = ReadCodePieces.pieceLines;
-
-  /// Which entries of the block list are pieces of a longer code block, and
-  /// where in it.
-  final ReadCodePieces _pieces = ReadCodePieces();
 
   /// Logs the frame that first put content on screen: how many blocks the scan
   /// found, how many that frame built, and how long the whole open took.
@@ -705,12 +600,13 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
   /// sliver runs during layout, so the callback lands at the end of the frame
   /// that drew these blocks.
   void _traceFirstContent() {
-    if (_traced || _built == 0) return;
+    if (_traced || _entries.built == 0) return;
     _traced = true;
     final elapsed = _opened.elapsedMilliseconds;
     SchedulerBinding.instance.addPostFrameCallback((_) {
       _log.info(
-        'first content: ${_blocks.length} blocks, $_built built, '
+        'first content: ${_entries.blocks.length} blocks, '
+        '${_entries.built} built, '
         '${elapsed}ms after the view was created',
       );
     });
@@ -721,146 +617,6 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
 
   /// Whether the first content was logged (once per view, not once per frame).
   bool _traced = false;
-
-  /// Block [index]'s height before it has ever been drawn.
-  ///
-  /// Per kind rather than one global "pixels per line", because the kinds
-  /// differ by more than their line count: a heading is set larger, a
-  /// formula taller, and the frontmatter takes no room at all. A code block
-  /// is its lines' rows, its fences' rows its padding.
-  /// A wrong estimate only costs a jump that lands slightly off before the
-  /// block is measured.
-  double _estimateOf(int index) {
-    switch (_hosts.flagOf(index)) {
-      case ReadColumnHosts.hosted:
-        // Drawn in its `columns` block, whose entry is the whole height.
-        return 0;
-      case ReadColumnHosts.host:
-        final theme = _theme ?? _fallbackTheme;
-        final run = _hosts.runAt(index)!;
-        final band = _textScaler.scale(theme.divBand);
-        return _hosts.estimateOf(run, _gap, run.closed ? 2 * band : band);
-    }
-    return _rawEstimateOf(index);
-  }
-
-  /// Block [index]'s height as a block of its own, drawn in the note's
-  /// run of blocks or in a column's.
-  double _rawEstimateOf(int index) {
-    final block = _blocks[index];
-    final theme = _theme ?? _fallbackTheme;
-    // A line at the size the text is read at: the theme's is the text's own.
-    final line = _textScaler.scale(theme.lineHeight);
-    // A footnote definition is drawn with the footnotes ([BlockView]).
-    if (block.footnote != 0 && block.kind != BlockKind.blank) return 0;
-    return switch (block.kind) {
-      BlockKind.frontmatter => 0,
-      BlockKind.thematicBreak => line,
-      BlockKind.heading => line * 1.3,
-      BlockKind.math => block.lineCount * line * 1.6,
-      BlockKind.div => _textScaler.scale(theme.divBand),
-      BlockKind.fencedCode ||
-      BlockKind.indentedCode ||
-      BlockKind.blank ||
-      BlockKind.table ||
-      BlockKind.html ||
-      BlockKind.listItem ||
-      BlockKind.paragraph ||
-      BlockKind.quote => block.lineCount * line,
-    };
-  }
-
-  /// Blocks `[first, end)`'s height before they are asked one by one: a line
-  /// each of their lines, O(1) — the lines they span are where the first
-  /// starts and the next begins. What [_estimateOf] adds by kind (a
-  /// heading's size, a formula's height) comes in as the blocks are asked.
-  double _estimateSpanOf(int first, int end) {
-    final from = _blocks[first].startLine;
-    final to = end < _blocks.length
-        ? _blocks[end].startLine
-        : _blocks[end - 1].endLine;
-    final theme = _theme ?? _fallbackTheme;
-    return (to - from) * _textScaler.scale(theme.lineHeight);
-  }
-
-  MarkdownTheme? _theme;
-
-  /// The note's side-by-side `columns` blocks (#729).
-  final ReadColumnHosts _hosts = ReadColumnHosts();
-
-  /// Whether the blocks changed since [_hosts] last laid them out.
-  bool _hostsStale = true;
-
-  /// The width [_hosts] last laid the blocks out in.
-  double? _hostWidth;
-
-  /// An em of the note's text, as read: what a column's minimum and the
-  /// gap between columns are counted in.
-  double get _em =>
-      _textScaler.scale((_theme ?? _fallbackTheme).body.fontSize ?? 14);
-
-  /// The room between two columns, and between two rows of them.
-  double get _gap => ColumnLayout.gapEms * _em;
-
-  /// Lays the `columns` blocks out in [width], when it or the blocks
-  /// changed: the entries whose drawing changed — into a side-by-side
-  /// block or out of one — are estimated again.
-  void _layOutHosts(double width) {
-    if (!_hostsStale && _hostWidth == width) return;
-    final heights = _heights;
-    final shown = _shown;
-    if (heights == null || shown == null) return;
-    _hostsStale = false;
-    _hostWidth = width;
-    final theme = _theme ?? _fallbackTheme;
-    final changed = _hosts.layOut(
-      _blocks,
-      shown.lineAt,
-      width: width,
-      em: _em,
-      listIndent: theme.listIndentPerLevel,
-      enabled: widget.selectionActions == null,
-      rawEstimate: _rawEstimateOf,
-      previous: _hosts.flags,
-    );
-    for (final index in changed) {
-      heights.reestimate(index, _estimateOf(index));
-    }
-  }
-
-  /// The scaler the note's text is read at, as of the last build.
-  TextScaler _textScaler = TextScaler.noScaling;
-  static const MarkdownTheme _fallbackTheme = MarkdownTheme(
-    body: TextStyle(fontSize: 14, height: 1.5),
-    heading1: TextStyle(fontSize: 25),
-    heading2: TextStyle(fontSize: 21),
-    heading3: TextStyle(fontSize: 18),
-    heading4: TextStyle(fontSize: 16),
-    heading5: TextStyle(fontSize: 14),
-    heading6: TextStyle(fontSize: 13),
-    code: TextStyle(fontSize: 14, fontFamily: 'monospace'),
-    quote: TextStyle(fontSize: 14),
-    tableCell: TextStyle(fontSize: 14),
-    tableHeader: TextStyle(fontSize: 14),
-    link: TextStyle(fontSize: 14),
-    wikilink: TextStyle(fontSize: 14),
-    tag: TextStyle(fontSize: 14),
-    marker: TextStyle(fontSize: 14),
-    rule: Color(0xFF888888),
-    codeHighlight: <String, TextStyle>{},
-    codeBackground: Color(0xFFEEEEEE),
-    quoteBar: Color(0xFFCCCCCC),
-    tableBorder: Color(0xFFCCCCCC),
-    markerDim: Color(0xFF999999),
-    blockSpacing: 10,
-    listIndentPerLevel: 22,
-    quoteIndentPerLevel: 12,
-    codePadding: 8,
-    quoteBarWidth: 3,
-    ruleThickness: 1,
-    tableCellPadding: EdgeInsets.all(4),
-    lineHeight: 21,
-  );
 
   /// What a frame this pane draws costs it (#316).
   ///
@@ -877,10 +633,11 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
 
   @override
   Widget build(BuildContext context) {
-    _theme = markdownThemeOf(context);
-    _textScaler = MediaQuery.textScalerOf(context);
-    final heights = _heights;
-    if (heights == null || _blocks.isEmpty || _shown == null) {
+    _entries
+      ..theme = markdownThemeOf(context)
+      ..textScaler = MediaQuery.textScalerOf(context);
+    final heights = _entries.heights;
+    if (heights == null || _entries.blocks.isEmpty || _entries.shown == null) {
       if (_scanning) {
         return const Align(
           alignment: Alignment.topCenter,
@@ -901,8 +658,7 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
       onKeyEvent: (node, event) => readViewKey(
         event,
         _scroll,
-        row: MediaQuery.textScalerOf(context)
-            .scale((_theme ?? _fallbackTheme).lineHeight),
+        row: MediaQuery.textScalerOf(context).scale(_entries.theme.lineHeight),
         toEnd: _toEnd,
       ),
       // A selectable view takes the keyboard itself, where it is clicked:
@@ -948,7 +704,10 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
   /// [pane] wide.
   Widget _scrollView(BlockHeightMap heights, EdgeInsets padding, double pane) {
     final availableWidth = pane - padding.horizontal;
-    _layOutHosts(availableWidth);
+    _entries.layOutHosts(
+      availableWidth,
+      enabled: widget.selectionActions == null,
+    );
     return _cost.timed(
       () => CustomScrollView(
         controller: _scroll,
@@ -961,7 +720,7 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
             // every extent and clipped what was taller than its estimate
             // (#250), and `SliverList` measured them all and made a far jump
             // cost the note (#251).
-            sliver: _hosts.isEmpty
+            sliver: _entries.hosts.isEmpty
                 ? SliverMarkdownBlocks(
                     heights: heights,
                     delegate: SliverChildBuilderDelegate(
@@ -996,7 +755,7 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
           // had it asking the viewport for corrections that never agreed — a
           // layout loop (`read_view_geometry_test`, the fixtures in a row).
           SliverPadding(
-            key: ObjectKey(_shown),
+            key: ObjectKey(_entries.shown),
             padding: padding,
             sliver: _footnoteSliver(),
           ),
@@ -1028,7 +787,7 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
     }
 
     var from = 0;
-    for (final columns in _hosts.sideBySide) {
+    for (final columns in _entries.hosts.sideBySide) {
       run(from, columns.start);
       starts.add(columns.start);
       slivers.add(_columns(heights, columns, width));
@@ -1040,13 +799,13 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
 
   /// [run], its columns side by side in [width].
   Widget _columns(BlockHeightMap heights, ColumnsRun run, double width) {
-    final layout = _hosts.layoutOf(run);
-    final theme = _theme ?? _fallbackTheme;
+    final layout = _entries.hosts.layoutOf(run);
+    final theme = _entries.theme;
     return SliverColumns(
       key: ValueKey<String>('columns-${run.start}'),
       heights: heights,
       index: run.start,
-      gap: _gap,
+      gap: _entries.gap,
       indent: run.items * theme.listIndentPerLevel,
       opener: (context) =>
           _blockAt(context, run.start, width, outerItems: run.items),
@@ -1081,8 +840,8 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
 
   /// The footnotes, one row per sliver child.
   Widget _footnoteSliver() => footnoteSliver(
-    footnotes: widget.parser.footnotesOf(_shown!),
-    theme: _theme ?? _fallbackTheme,
+    footnotes: widget.parser.footnotesOf(_entries.shown!),
+    theme: _entries.theme,
     parser: widget.parser,
     mathCache: widget.mathCache,
     scope: widget.parser.scope,
@@ -1101,23 +860,24 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
     double availableWidth, {
     int outerItems = 0,
   }) {
-    final block = _blocks[index];
-    _built++;
+    final entries = _entries;
+    final block = entries.blocks[index];
+    entries.built++;
     _traceFirstContent();
-    final piece = _pieces[index];
+    final piece = entries.pieces[index];
     if (piece != null) {
       return CodePieceView(
-        buffer: _shown!,
+        buffer: entries.shown!,
         block: block,
         first: piece.first,
         last: piece.last,
-        theme: _theme ?? _fallbackTheme,
+        theme: entries.theme,
         whole: (start: piece.start, end: piece.end),
       );
     }
     final view = BlockView(
-      read: widget.parser.of(block, _shown!),
-      theme: _theme ?? _fallbackTheme,
+      read: widget.parser.of(block, entries.shown!),
+      theme: entries.theme,
       mathCache: widget.mathCache,
       availableWidth: availableWidth,
       onTapLink: widget.onTapLink,
