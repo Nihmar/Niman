@@ -87,9 +87,6 @@ import 'package:niman/src/markdown/render/live_hosts.dart';
 import 'package:niman/src/markdown/render/live_quote_content.dart';
 import 'package:niman/src/markdown/render/live_quote_runs.dart';
 import 'package:niman/src/markdown/render/live_run.dart';
-import 'package:niman/src/markdown/render/live_table_commands.dart';
-import 'package:niman/src/markdown/render/live_table_grid_tracker.dart';
-import 'package:niman/src/markdown/render/live_table_handles.dart';
 import 'package:niman/src/markdown/render/live_tables.dart';
 import 'package:niman/src/markdown/render/markdown_blocks_sliver.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
@@ -108,6 +105,7 @@ import 'package:niman/src/markdown/render/source_paragraphs.dart';
 import 'package:niman/src/markdown/render/source_pointer.dart';
 import 'package:niman/src/markdown/render/source_sections.dart';
 import 'package:niman/src/markdown/render/source_styling.dart';
+import 'package:niman/src/markdown/render/source_table_hover.dart';
 import 'package:niman/src/markdown/render/source_table_keys.dart';
 import 'package:niman/src/markdown/render/source_task_boxes.dart';
 import 'package:niman/src/markdown/render/source_template_hint.dart';
@@ -122,7 +120,6 @@ import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/templates/check_state.dart';
 import 'package:niman/src/templates/template_commands.dart';
-import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/window_visibility.dart';
 
 export 'package:niman/src/markdown/render/source_pointer.dart'
@@ -634,8 +631,8 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     touch: _touch,
     offsetAt: offsetAt,
     onScrollbar: _onScrollbar,
-    hoverTable: _hoverTableAt,
-    leaveTable: _leaveTable,
+    hoverTable: _handles.hoverAt,
+    leaveTable: _handles.leave,
     taskBoxAt: (global) => _taskBoxes.at(global) != null,
     overTaskBox: _taskBoxes.over,
     toggleTaskAt: _taskBoxes.toggleAt,
@@ -694,30 +691,25 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
 
   /// The `+` handles of the table in play (#261): the one under the mouse
   /// on the desktop, the caret's on a phone.
-  final OverlayPortalController _tableOverlay = OverlayPortalController();
+  late final SourceTableHover _handles = SourceTableHover(
+    buffer: () => widget.buffer,
+    live: () => widget.hideMarkers,
+    mounted: () => mounted,
+    blockOf: (line) => _styler?.blockOf(line),
+    caretSpot: _caretSpot,
+    noteBox: () => _noteBox,
+    scroll: () => _scroll,
+    tableRowAt: (line, block, at) => _tableRowAt(context, line, block, at),
+    piecesOf: _piecesOf,
+    lineBox: _lineBox,
+    drawnHeightOf: _drawnHeightOf,
+    theme: () => widget.theme,
+    replace: (start, end, text, caret) =>
+        replaceText(start, end, text, caret: SelectionModel.at(caret)),
+  );
 
   /// The copy buttons of the code blocks on screen in `live` (#541).
   final OverlayPortalController _codeOverlay = OverlayPortalController();
-
-  /// The first line of the table under the mouse, or null.
-  final ValueNotifier<int?> _tableHover = ValueNotifier<int?>(null);
-
-  /// Settles the grid the handles are built on against the frame that drew
-  /// the table.
-  late final LiveTableGridTracker _tableGridSettled = LiveTableGridTracker(
-    drawn: () {
-      final block = _tableInPlay;
-      return block == null ? null : _drawnTableGrid(block);
-    },
-  );
-
-  /// Whether the mouse is on one of the handles, off the table itself.
-  bool _overTableHandles = false;
-
-  /// Lets the handles go a moment after the mouse left the table: the move
-  /// from the table onto a handle leaves the note before it reaches the
-  /// handle, and letting go at once took the handle from under it.
-  Timer? _tableHoverClear;
 
   /// The template checker (T-TPL-09): the check run and armed on the note,
   /// the problems on a line, and the hint under the span the caret is on.
@@ -766,7 +758,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     // Always up: they draw nothing while nothing is in play (#261).
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      _tableOverlay.show();
+      _handles.overlay.show();
       _hints.overlay.show();
       // The copy buttons ride the note's paint: off stage the pane hides,
       // and they go with it rather than drawing over the pane that is on.
@@ -1009,9 +1001,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
 
   @override
   void dispose() {
-    _tableHoverClear?.cancel();
-    _tableHover.dispose();
-    _tableGridSettled.dispose();
+    _handles.dispose();
     _pointer.dispose();
     widget.surface?.detachView(this);
     widget.spellCheck?.removeListener(_onSpellingChanged);
@@ -3550,15 +3540,15 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
           builder: (context, _) => _touch.buildOverlay(),
         ),
         child: OverlayPortal(
-          controller: _tableOverlay,
+          controller: _handles.overlay,
           overlayChildBuilder: (context) => ListenableBuilder(
             listenable: Listenable.merge([
               _scroll,
-              _tableHover,
+              _handles.hover,
               _caretSpot,
-              _tableGridSettled,
+              _handles.settled,
             ]),
-            builder: (context, _) => _tableHandles(context),
+            builder: (context, _) => _handles.buildHandles(context),
           ),
           child: OverlayPortal(
             // The checker's hint draws nearest the note — over the text it
@@ -3800,145 +3790,6 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
 
   // ---------------------------------------------------------- table handles
 
-  /// Whether this platform's tables show their handles where the caret is,
-  /// having no pointer to hover with.
-  static bool get _touchTables =>
-      defaultTargetPlatform == TargetPlatform.android ||
-      defaultTargetPlatform == TargetPlatform.iOS;
-
-  /// The table whose handles show: under the mouse, or the caret's on a
-  /// phone. Null in `source`, where a table is text.
-  Block? get _tableInPlay {
-    if (!widget.hideMarkers) return null;
-    final styler = _styler;
-    if (styler == null) return null;
-    final hovered = _tableHover.value;
-    final line = hovered ?? (_touchTables ? _caretSpot.value.line : null);
-    if (line == null || line < 0 || line >= lineCount) return null;
-    final block = styler.blockOf(line);
-    return block?.kind == BlockKind.table ? block : null;
-  }
-
-  /// Follows the mouse over the note: the table it is on, or — while it is
-  /// on the handles' side of the table it was on — that one still.
-  ///
-  /// [offset] is the offset under the pointer, computed once by the hover
-  /// handler and shared with the cursor's.
-  void _hoverTableAt(int? offset, Offset global) {
-    if (!widget.hideMarkers || _touchTables) return;
-    int? table;
-    if (offset != null) {
-      final line = widget.buffer.lineOf(offset);
-      final block = _styler?.blockOf(line);
-      if (block?.kind == BlockKind.table) table = block!.startLine;
-    }
-    final current = _tableHover.value;
-    if (table == null && current != null) {
-      final block = _styler?.blockOf(current);
-      final grid = block == null ? null : _tableGrid(block);
-      const reach = LiveTableHandles.thickness + 8;
-      if (grid != null &&
-          Rect.fromLTRB(
-            grid.left,
-            grid.top,
-            grid.right + reach,
-            grid.bottom + reach,
-          ).contains(global)) {
-        table = current;
-      }
-    }
-    if (table == null) {
-      _leaveTable();
-      return;
-    }
-    _tableHoverClear?.cancel();
-    _tableHover.value = table;
-    _tableOverlay.show();
-  }
-
-  /// The mouse is off the table: its handles go, unless it is on them.
-  void _leaveTable() {
-    if (_tableHover.value == null) return;
-    _tableHoverClear?.cancel();
-    _tableHoverClear = Timer(const Duration(milliseconds: 200), () {
-      if (mounted && !_overTableHandles) _tableHover.value = null;
-    });
-  }
-
-  /// [block]'s grid, globally: from its first row's top to its last row's
-  /// foot, as wide as its columns — or null while no row of it is drawn.
-  ///
-  /// Its height is worked out from the map the note is laid out by
-  /// ([_lineBox]) at the scroll offset the note has *now*, not read off the
-  /// drawn rows: a scroll notifies before the frame that moves them, and
-  /// what a row's paragraph says is the last frame's. [_tableGridSettled]
-  /// checks it against the rows once a frame has drawn them.
-  ///
-  /// Only the left edge is read from a drawn row — a row laid out in fitted
-  /// columns stands away from its box's left, which the grid painter draws
-  /// from — and a scroll does not move it.
-  Rect? _tableGrid(Block block) {
-    final note = _noteBox;
-    if (note == null || !_scroll.hasClients) return null;
-    final row = _tableRowAt(context, block.startLine, block, _caretSpot.value);
-    if (row == null) return null;
-    double? left;
-    for (var line = block.startLine; line < block.endLine; line++) {
-      final piece = _piecesOf(line).firstOrNull;
-      final render = piece == null
-          ? null
-          : SourceParagraphs.renderOf(piece.key);
-      if (piece == null || render == null) continue;
-      left = render.localToGlobal(Offset(-piece.x, 0)).dx;
-      break;
-    }
-    if (left == null) return null;
-    final top = _lineBox(block.startLine).top;
-    final foot = _lineBox(block.endLine - 1);
-    final origin = note.localToGlobal(Offset(0, -_scroll.offset));
-    return Rect.fromLTRB(
-      left,
-      origin.dy + top,
-      left + row.edges.last,
-      origin.dy + foot.top + foot.height,
-    );
-  }
-
-  /// [block]'s grid as the rows are drawn, globally: each row's own
-  /// paragraph says where it stands. That is the last frame's layout, so it
-  /// is for checking [_tableGrid] against once a frame has drawn
-  /// ([LiveTableGridTracker]), never to build on.
-  ///
-  /// A row laid out in fitted columns is as tall as its wrapped pieces, and
-  /// its pieces stand away from its left edge: the grid reaches its foot,
-  /// not the height of its first paragraph.
-  Rect? _drawnTableGrid(Block block) {
-    final firstLine = block.startLine;
-    final lastLine = block.endLine - 1;
-    final row = _tableRowAt(context, firstLine, block, _caretSpot.value);
-    if (row == null) return null;
-    final firstPiece = _piecesOf(firstLine).firstOrNull;
-    final lastPiece = _piecesOf(lastLine).firstOrNull;
-    if (firstPiece == null || lastPiece == null) return null;
-    final first = SourceParagraphs.renderOf(firstPiece.key);
-    final last = SourceParagraphs.renderOf(lastPiece.key);
-    if (first == null || last == null) return null;
-    final pad = widget.theme.tableCellPadding;
-    final wrapped = row.wrapped.isNotEmpty;
-    final top = first.localToGlobal(
-      Offset(-firstPiece.x, -(wrapped ? firstPiece.y : pad.top)),
-    );
-    final bottom = wrapped
-        ? last.localToGlobal(Offset(-lastPiece.x, -lastPiece.y)).dy +
-              _drawnHeightOf(lastLine) +
-              pad.top +
-              pad.bottom
-        : last.localToGlobal(Offset.zero).dy +
-              _drawnHeightOf(lastLine) +
-              pad.bottom;
-    return Rect.fromLTRB(top.dx, top.dy, top.dx + row.edges.last, bottom);
-  }
-
   /// The handles of the table in play, in the overlay's coordinates.
   /// The copy buttons of the fenced code blocks on screen in `live` (#541):
   /// each at the top right of its block's part in view, so a block taller
@@ -4033,55 +3884,6 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       line = math.max(block.endLine, line + 1);
     }
     return Stack(children: buttons);
-  }
-
-  Widget _tableHandles(BuildContext overlayContext) {
-    final block = _tableInPlay;
-    final grid = _tableGridSettled.settle(
-      block == null ? null : _tableGrid(block),
-    );
-    final note = _noteBox;
-    final overlay = Overlay.of(overlayContext).context.findRenderObject();
-    if (block == null ||
-        grid == null ||
-        note == null ||
-        overlay is! RenderBox ||
-        !overlay.hasSize) {
-      return const SizedBox.shrink();
-    }
-    Rect local(Rect rect) => Rect.fromPoints(
-      overlay.globalToLocal(rect.topLeft),
-      overlay.globalToLocal(rect.bottomRight),
-    );
-    final box = note.localToGlobal(Offset.zero) & note.size;
-    LiveTableCommands? commands() {
-      final buffer = widget.buffer;
-      return LiveTableCommands.at(
-        buffer,
-        block,
-        buffer.offsetOfLine(block.startLine),
-        replace: (start, end, text, caret) =>
-            replaceText(start, end, text, caret: SelectionModel.at(caret)),
-      );
-    }
-
-    return LiveTableHandles(
-      grid: local(grid),
-      clip: local(box),
-      color: widget.theme.markerDim,
-      addRowLabel: AppStrings.tableAddRow,
-      addColumnLabel: AppStrings.tableAddColumn,
-      onAddRow: () => commands()?.addRowAtEnd(),
-      onAddColumn: () => commands()?.addColumnAtEnd(),
-      onHover: (over) {
-        _overTableHandles = over;
-        if (over) {
-          _tableHoverClear?.cancel();
-        } else {
-          _leaveTable();
-        }
-      },
-    );
   }
 
   // ------------------------------------------------------------- semantics
