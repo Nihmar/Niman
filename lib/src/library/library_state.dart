@@ -2,9 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:home_widget/home_widget.dart';
 import 'package:niman/src/core/app_channel.dart';
 import 'package:niman/src/core/app_theme.dart';
 import 'package:niman/src/core/custom_theme.dart';
@@ -43,6 +41,7 @@ import 'package:niman/src/library/library_databases.dart';
 import 'package:niman/src/library/library_index_files.dart';
 import 'package:niman/src/library/library_registry.dart';
 import 'package:niman/src/library/library_sources.dart';
+import 'package:niman/src/library/library_widgets.dart';
 import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/library/note_ops.dart';
 import 'package:niman/src/library/rescan_scheduler.dart';
@@ -67,7 +66,6 @@ import 'package:niman/src/update/update_check.dart';
 import 'package:niman/src/update/update_scheduler.dart';
 import 'package:niman/src/update/update_service.dart';
 import 'package:niman/src/widget/widget_configs.dart';
-import 'package:niman/src/widget/widget_libraries.dart';
 import 'package:niman/src/workspace/workspace_slot.dart';
 import 'package:niman/src/workspace/workspace_store.dart';
 import 'package:path/path.dart' as p;
@@ -158,6 +156,12 @@ final class LibraryController implements LibrarySession {
   late final LibraryIndexFiles _indexFiles = LibraryIndexFiles(
     openDb: indexDbFactory,
     locate: indexFileOf,
+  );
+
+  /// The home-screen widgets' records and the native library mirror.
+  late final LibraryWidgets _widgets = LibraryWidgets(
+    appDatabase: () => appDatabase,
+    locateIndex: indexFileOf ?? libraryIndexFile,
   );
 
   /// The search connection; defaults to [indexDbFactory] (tests), the app
@@ -713,7 +717,7 @@ final class LibraryController implements LibrarySession {
     await LibraryRegistry(appDb).touch(abs);
     // The native widget config activity cannot read the registry (no
     // Dart engine at placement), so it reads this mirror instead.
-    unawaited(_saveWidgetLibraryMirror(appDb));
+    unawaited(_widgets.saveLibraryMirror(appDb));
     // Opening is when the trash empties itself, if the library asked
     // it to (issue #79) — behind the ready bump, because a folder full
     // of old deletions must not hold the library shut.
@@ -788,32 +792,25 @@ final class LibraryController implements LibrarySession {
 
   /// The home-screen widget instances reading [libraryPath] (issue 6).
   @override
-  Future<List<WidgetConfig>> widgetConfigsFor(String libraryPath) async {
-    return await WidgetConfigStore(await appDatabase).forLibrary(libraryPath);
-  }
+  Future<List<WidgetConfig>> widgetConfigsFor(String libraryPath) =>
+      _widgets.configsFor(libraryPath);
 
   /// Records a placed todo widget for [libraryPath] (issue 6).
   @override
   Future<void> adoptTodoWidget(int androidWidgetId, String libraryPath) =>
-      _adoptLibraryWidget(androidWidgetId, libraryPath, WidgetProvider.todo);
+      _widgets.adoptLibraryWidget(
+        androidWidgetId,
+        libraryPath,
+        WidgetProvider.todo,
+      );
 
   @override
   Future<void> adoptStudyWidget(int androidWidgetId, String libraryPath) =>
-      _adoptLibraryWidget(androidWidgetId, libraryPath, WidgetProvider.study);
-
-  Future<void> _adoptLibraryWidget(
-    int androidWidgetId,
-    String libraryPath,
-    WidgetProvider provider,
-  ) async {
-    final store = WidgetConfigStore(await appDatabase);
-    if (await store.find(androidWidgetId) != null) return;
-    await store.upsert(
-      androidWidgetId: androidWidgetId,
-      provider: provider,
-      libraryPath: libraryPath,
-    );
-  }
+      _widgets.adoptLibraryWidget(
+        androidWidgetId,
+        libraryPath,
+        WidgetProvider.study,
+      );
 
   /// Records a placed note widget for [notePath] (issue 6).
   @override
@@ -821,37 +818,20 @@ final class LibraryController implements LibrarySession {
     int androidWidgetId,
     String libraryPath,
     String notePath,
-  ) async {
-    final store = WidgetConfigStore(await appDatabase);
-    if (await store.find(androidWidgetId) != null) return;
-    await store.upsert(
-      androidWidgetId: androidWidgetId,
-      provider: WidgetProvider.note,
-      libraryPath: libraryPath,
-      notePath: notePath,
-    );
-  }
+  ) => _widgets.adoptNoteWidget(androidWidgetId, libraryPath, notePath);
 
   /// Drops [libraryPath]'s [provider] widget configurations whose
-  /// instance is no longer placed (issue 6); the refresh calls this,
-  /// since the native `onDeleted` cannot reach the database.
+  /// instance is no longer placed (issue 6).
   @override
   Future<void> pruneWidgetConfigs({
     required String libraryPath,
     required WidgetProvider provider,
     required Set<int> placedIds,
-  }) async {
-    final store = WidgetConfigStore(await appDatabase);
-    final stale = {
-      for (final config in await store.forLibrary(libraryPath))
-        if (config.provider == provider.name &&
-            !placedIds.contains(config.androidWidgetId))
-          config.androidWidgetId,
-    };
-    for (final id in stale) {
-      await store.remove(id);
-    }
-  }
+  }) => _widgets.prune(
+    libraryPath: libraryPath,
+    provider: provider,
+    placedIds: placedIds,
+  );
 
   /// Drops [libraryPath] from the known list; the folder is untouched.
   ///
@@ -887,36 +867,11 @@ final class LibraryController implements LibrarySession {
       _log.warning('forget library: sync password not deleted: $e');
     }
     // The mirror would otherwise keep offering a forgotten library.
-    unawaited(_saveWidgetLibraryMirror(db));
+    unawaited(_widgets.saveLibraryMirror(db));
     // The index is derived data and the entry that named it is gone, so
     // the file would sit there forever with nothing pointing at it.
     await _indexFiles.delete(libraryPath);
     _bump();
-  }
-
-  /// Mirrors the known libraries for the native widget config activity
-  /// (round 2, R1): path, display name and index file per library.
-  ///
-  /// Best effort and Android-only: the activity treats the mirror as a
-  /// cache, and a failure here must never break an open or a forget.
-  Future<void> _saveWidgetLibraryMirror(AppDatabase appDb) async {
-    if (!Platform.isAndroid) return;
-    try {
-      final libraries = await LibraryRegistry(appDb).all();
-      final locate = indexFileOf ?? libraryIndexFile;
-      final indexByPath = <String, String>{};
-      for (final lib in libraries) {
-        indexByPath[lib.path] = (await locate(lib.path)).path;
-      }
-      await HomeWidget.saveWidgetData<String>(
-        widgetLibrariesKey,
-        encodeLibraryMirror(libraries, indexByPath),
-      );
-    } on MissingPluginException {
-      // No host handler (tests, desktops).
-    } on PlatformException catch (error) {
-      _log.warning('widget library mirror not saved ($error)');
-    }
   }
 
   /// Triggers a full rescan immediately (explicit re-index).
