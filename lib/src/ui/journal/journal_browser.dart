@@ -15,7 +15,6 @@ import 'package:niman/src/calendar/calendar_writer.dart';
 import 'package:niman/src/calendar/parser.dart';
 import 'package:niman/src/calendar/time_display.dart';
 import 'package:niman/src/core/theme_tokens.dart';
-import 'package:niman/src/core/weeks.dart';
 import 'package:niman/src/journal/journal_summary.dart';
 import 'package:niman/src/templates/engine.dart';
 import 'package:niman/src/ui/action_sheet.dart';
@@ -24,6 +23,7 @@ import 'package:niman/src/ui/journal/journal_calendar.dart';
 import 'package:niman/src/ui/journal/journal_event_actions.dart';
 import 'package:niman/src/ui/journal/journal_event_sheet.dart';
 import 'package:niman/src/ui/journal/journal_flow.dart';
+import 'package:niman/src/ui/journal/journal_goal_label.dart';
 import 'package:niman/src/ui/journal/journal_never_listenable.dart';
 import 'package:niman/src/ui/line_runs.dart';
 import 'package:niman/src/ui/repeat_label.dart';
@@ -914,19 +914,4 @@ final class _JournalBrowserState extends State<JournalBrowser> {
         if (!before.contains(line.text)) line.text,
     ].join('\n');
   }
-}
-
-/// What a goal covers: the week's number, the month's name, the year
-/// (#730). Shared with the Home's events tile, so both name a goal alike.
-String journalGoalLabel(CalendarLine goal) {
-  final date = goal.date;
-  if (date == null) return '';
-  return switch (goal.kind) {
-    CalendarLineKind.weekGoal => AppStrings.journalWeek(
-      goal.week ?? isoWeekOf(date),
-    ),
-    CalendarLineKind.monthGoal => AppStrings.monthNames[date.month - 1],
-    CalendarLineKind.yearGoal => '${date.year}',
-    _ => '',
-  };
 }

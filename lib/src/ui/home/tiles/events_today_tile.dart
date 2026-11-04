@@ -9,7 +9,7 @@ import 'package:niman/src/calendar/time_display.dart';
 import 'package:niman/src/core/theme_tokens.dart';
 import 'package:niman/src/ui/home/home_host.dart';
 import 'package:niman/src/ui/home/home_tile_frame.dart';
-import 'package:niman/src/ui/journal/journal_browser.dart';
+import 'package:niman/src/ui/journal/journal_goal_label.dart';
 import 'package:niman/src/ui/line_runs.dart';
 import 'package:niman/src/ui/repeat_label.dart';
 import 'package:niman/src/ui/strings.dart';

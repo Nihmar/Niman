@@ -15,8 +15,7 @@ import 'package:niman/src/core/theme_tokens.dart';
 import 'package:niman/src/search/task_events.dart';
 import 'package:niman/src/templates/engine.dart';
 import 'package:niman/src/todo/todo_store.dart';
-import 'package:niman/src/ui/journal/journal_browser.dart'
-    show journalGoalLabel;
+import 'package:niman/src/ui/journal/journal_goal_label.dart';
 import 'package:niman/src/ui/line_runs.dart';
 import 'package:niman/src/ui/repeat_label.dart';
 import 'package:niman/src/ui/strings.dart';
