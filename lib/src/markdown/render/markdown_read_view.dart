@@ -44,6 +44,7 @@ import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/render/marked_block.dart';
 import 'package:niman/src/markdown/render/note_margins.dart';
 import 'package:niman/src/markdown/render/range_highlight.dart';
+import 'package:niman/src/markdown/render/read_code_pieces.dart';
 import 'package:niman/src/markdown/render/read_column_hosts.dart';
 import 'package:niman/src/markdown/render/read_selection.dart';
 import 'package:niman/src/markdown/render/read_view_keys.dart';
@@ -600,7 +601,7 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
     widget.parser.scope = scan.scope;
     final changes = scan.changes;
     if (!_follow(changes, scan.blocks)) {
-      _blocks = _pieced(scan.blocks);
+      _blocks = _pieces.pieced(scan.blocks);
       // A new map assumes no block side by side, until a layout says.
       _hosts.flags = null;
       _hostsStale = true;
@@ -649,7 +650,7 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
         at < stretch.start + stretch.inserted;
         at++
       ) {
-        if (_isLongCode(blocks[at])) return false;
+        if (ReadCodePieces.isLongCode(blocks[at])) return false;
       }
     }
     if (length != blocks.length) return false;
@@ -687,65 +688,13 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
     _hostsStale = true;
   }
 
-  /// The lines a code block is drawn in pieces of, past twice as many.
-  ///
-  /// A block is the sliver's unit of layout, and a code block is one
-  /// paragraph: a fence of 12 000 lines — a log pasted in, or a note whose
-  /// fence never closes — was laid out whole the moment any of it scrolled
-  /// into view, and one such frame took 74 s (0.0.9 stress test). Pieces of
-  /// this many lines are laid out as the viewport reaches them, like any
-  /// other block.
-  static const int pieceLines = 200;
+  /// The lines a code block is drawn in pieces of, past twice as many
+  /// ([ReadCodePieces.pieceLines]).
+  static const int pieceLines = ReadCodePieces.pieceLines;
 
   /// Which entries of the block list are pieces of a longer code block, and
-  /// where in it: the first carries the opening fence, the last the closing
-  /// one; and the whole block's lines, which each piece's copy button
-  /// copies (#541).
-  final Map<int, ({bool first, bool last, int start, int end})> _pieces =
-      <int, ({bool first, bool last, int start, int end})>{};
-
-  /// [blocks] with every code block longer than twice [pieceLines] cut into
-  /// pieces of that many lines, each an entry of its own.
-  List<Block> _pieced(List<Block> blocks) {
-    _pieces.clear();
-    if (!blocks.any(_isLongCode)) return blocks;
-    final out = <Block>[];
-    for (final block in blocks) {
-      if (!_isLongCode(block)) {
-        out.add(block);
-        continue;
-      }
-      for (var at = block.startLine; at < block.endLine; at += pieceLines) {
-        final end = at + pieceLines < block.endLine
-            ? at + pieceLines
-            : block.endLine;
-        _pieces[out.length] = (
-          first: at == block.startLine,
-          last: end == block.endLine,
-          start: block.startLine,
-          end: block.endLine,
-        );
-        out.add(
-          Block(
-            kind: block.kind,
-            startLine: at,
-            endLine: end,
-            quoteDepth: block.quoteDepth,
-            listDepth: block.listDepth,
-            fenceInfo: block.fenceInfo,
-            footnote: block.footnote,
-            divDepth: block.divDepth,
-          ),
-        );
-      }
-    }
-    return out;
-  }
-
-  static bool _isLongCode(Block block) =>
-      (block.kind == BlockKind.fencedCode ||
-          block.kind == BlockKind.indentedCode) &&
-      block.lineCount > 2 * pieceLines;
+  /// where in it.
+  final ReadCodePieces _pieces = ReadCodePieces();
 
   /// Logs the frame that first put content on screen: how many blocks the scan
   /// found, how many that frame built, and how long the whole open took.
