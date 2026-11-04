@@ -342,7 +342,7 @@ final class SourceStyler implements Reclaimable {
   ///
   /// Null while the scan still owes the note, the rule [headings] and
   /// [handOver] hold: the reader is a tap on a task box
-  /// (`MarkdownSourceViewState._toggleTaskAt`), which asks for the blocks to
+  /// (`SourceTaskBoxes.toggleAt`), which asks for the blocks to
   /// decide whether ticking the box carries down its branch, and settling
   /// here would put the rest of the note — the work an edit that changed what
   /// follows was spared — on the tap's frame. The tap falls back to ticking

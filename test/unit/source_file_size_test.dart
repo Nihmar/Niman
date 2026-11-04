@@ -24,13 +24,10 @@ const int _slack = 50;
 /// The files over [_ceiling] when the gate came in (2026-11-03), each held at
 /// its size then or since lowered by a split.
 const Map<String, int> _oversized = {
-  'ui/shell.dart': 4010,
-  'markdown/render/source_view.dart': 3618,
-  'ui/note_view.dart': 1806,
-  'library/library_state.dart': 1502,
-  'ui/search_screen.dart': 1239,
-  'markdown/render/source_line.dart': 1068,
-  'core/settings/library_config.dart': 908,
+  'ui/shell.dart': 3099,
+  'markdown/render/source_view.dart': 1442,
+  'ui/note_view.dart': 1324,
+  'library/library_state.dart': 1036,
 };
 
 /// Tables that are long by nature, not by mixed responsibilities, and why:

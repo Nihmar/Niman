@@ -1,43 +1,23 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
-import 'package:crypto/crypto.dart';
-import 'package:drift/native.dart';
-// A connection on its own isolate reports what failed over there wrapped in
-// DriftRemoteException; the sqlite error behind it is how a damaged index is
-// told apart from a transient failure (#368).
-// ignore: experimental_member_use
-import 'package:drift/remote.dart' show DriftRemoteException;
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:home_widget/home_widget.dart';
-import 'package:niman/src/core/app_channel.dart';
 import 'package:niman/src/core/app_theme.dart';
 import 'package:niman/src/core/custom_theme.dart';
 import 'package:niman/src/core/frame_log.dart';
-import 'package:niman/src/core/isolate_gauge.dart';
 import 'package:niman/src/core/language.dart';
 import 'package:niman/src/core/logging.dart';
-import 'package:niman/src/core/settings/custom_theme_repo.dart';
-import 'package:niman/src/core/settings/device_settings_store.dart';
 import 'package:niman/src/core/settings/features.dart';
 import 'package:niman/src/core/settings/features_introduction.dart';
-import 'package:niman/src/core/settings/legacy_library_settings.dart';
 import 'package:niman/src/core/settings/library_config.dart';
-import 'package:niman/src/core/settings/library_config_repo.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
-import 'package:niman/src/core/temp_sweep_blocking.dart'
-    show sweepStaleTempFiles;
 import 'package:niman/src/core/text_scale.dart';
 import 'package:niman/src/core/theme.dart';
 import 'package:niman/src/core/week_start.dart';
 import 'package:niman/src/core/welcome.dart';
 import 'package:niman/src/db/app_database.dart';
-import 'package:niman/src/db/app_database_recovery.dart';
 import 'package:niman/src/db/dao.dart';
-import 'package:niman/src/db/index_change.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/db/index_scan.dart';
 import 'package:niman/src/db/indexer.dart';
@@ -45,17 +25,26 @@ import 'package:niman/src/epub/epub_look.dart';
 import 'package:niman/src/epub/epub_looks.dart';
 import 'package:niman/src/flashcards/review_store.dart';
 import 'package:niman/src/frontmatter/fields.dart';
-import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/library/container_path.dart';
 import 'package:niman/src/library/file_watcher.dart';
+import 'package:niman/src/library/index_progress_throttle.dart';
 import 'package:niman/src/library/indexing_status.dart';
+import 'package:niman/src/library/library_databases.dart';
+import 'package:niman/src/library/library_index_files.dart';
+import 'package:niman/src/library/library_open_chores.dart';
+import 'package:niman/src/library/library_records.dart';
 import 'package:niman/src/library/library_registry.dart';
+import 'package:niman/src/library/library_sources.dart';
+import 'package:niman/src/library/library_widgets.dart';
 import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/library/note_ops.dart';
+import 'package:niman/src/library/open_library_settings.dart';
 import 'package:niman/src/library/rescan_scheduler.dart';
 import 'package:niman/src/library/session.dart';
-import 'package:niman/src/library/trash_cleaner.dart';
-import 'package:niman/src/library/tree_moves.dart';
+import 'package:niman/src/library/session_events.dart';
+import 'package:niman/src/library/session_themes.dart';
+import 'package:niman/src/library/session_update_checks.dart';
+import 'package:niman/src/library/watch_batch_applier.dart';
 import 'package:niman/src/library/watch_batch_queue.dart';
 import 'package:niman/src/links/library_links.dart';
 import 'package:niman/src/links/suggester.dart';
@@ -71,13 +60,11 @@ import 'package:niman/src/sync/sync_service.dart';
 import 'package:niman/src/sync/sync_store.dart';
 import 'package:niman/src/templates/repo.dart';
 import 'package:niman/src/update/update_check.dart';
-import 'package:niman/src/update/update_scheduler.dart';
-import 'package:niman/src/update/update_service.dart';
 import 'package:niman/src/widget/widget_configs.dart';
-import 'package:niman/src/widget/widget_libraries.dart';
 import 'package:niman/src/workspace/workspace_slot.dart';
-import 'package:niman/src/workspace/workspace_store.dart';
 import 'package:path/path.dart' as p;
+
+export 'package:niman/src/library/library_databases.dart';
 
 /// Coarse lifecycle of a library session.
 enum LibraryPhase {
@@ -159,6 +146,24 @@ final class LibraryController implements LibrarySession {
   /// else — the index is derived data.
   final Future<File> Function(String libraryPath)? indexFileOf;
 
+  /// Opens, repairs and deletes the libraries' index files.
+  late final LibraryIndexFiles _indexFiles = LibraryIndexFiles(
+    openDb: indexDbFactory,
+    locate: indexFileOf,
+  );
+
+  /// The libraries this device knows and its records of each.
+  late final LibraryRecords _known = LibraryRecords(
+    appDatabase: () => appDatabase,
+    syncSecrets: syncSecrets,
+  );
+
+  /// The home-screen widgets' records and the native library mirror.
+  late final LibraryWidgets _widgets = LibraryWidgets(
+    appDatabase: () => appDatabase,
+    locateIndex: indexFileOf ?? libraryIndexFile,
+  );
+
   /// The search connection; defaults to [indexDbFactory] (tests), the app
   /// injects the background-isolate connection.
   final Future<IndexDatabase> Function(String libraryPath) _searchDbFactory;
@@ -190,31 +195,18 @@ final class LibraryController implements LibrarySession {
   /// the background-isolate probe. Tests inject one to hold an answer back.
   final ExistenceProbe? syncProbe;
 
-  final StreamController<int> _events = StreamController<int>.broadcast();
-
-  /// Fires on an index write only ([_onIndexChanged]), not on the session's
-  /// own bumps (a setting, a phase, a progress report): what the links
-  /// re-resolve on (#867).
-  final StreamController<void> _indexEvents =
-      StreamController<void>.broadcast();
-
-  /// Fires when the tree's rows may have moved ([IndexChange.tree]).
-  final StreamController<int> _treeEvents = StreamController<int>.broadcast();
-
-  /// Fires with the paths a re-index pruned ([Indexer.onRemoved]); what
-  /// the shell holds open on them closes.
-  final StreamController<Set<String>> _removals =
-      StreamController<Set<String>>.broadcast();
-
-  /// The paths the watcher reported ([externalChanges]).
-  final StreamController<Set<String>> _externalChanges =
-      StreamController<Set<String>>.broadcast();
+  /// The revisions and the streams that announce them.
+  final SessionEvents _changes = SessionEvents();
   final AppLogger _log = const AppLogger(name: 'session');
-  int _revision = 0;
-  int _treeRevision = 0;
 
-  /// What the recent revisions moved in the tree ([foldersMovedSince]).
-  final TreeMoves _moves = TreeMoves();
+  /// The upkeep an open library gets behind its ready bump.
+  static const _chores = LibraryOpenChores();
+
+  /// The app's theme, the custom themes and the books' look on screen.
+  late final SessionThemes _themes = SessionThemes(
+    appDatabase: () => appDatabase,
+    onCustomThemesChanged: _republishEpubLook,
+  );
   LibraryPhase _phase = LibraryPhase.none;
   String? _root;
   String? _lastError;
@@ -225,15 +217,9 @@ final class LibraryController implements LibrarySession {
   /// different file for each library (T-ML-03).
   IndexDatabase? _indexDb;
 
-  /// The open library's `.niman/settings.json`; null while none is open,
-  /// and then every setting reads and writes app-wide.
-  LibraryConfigRepo? _configRepo;
-
-  final ValueNotifier<Features> _features = ValueNotifier(const Features());
-
-  /// Whether the open that made this session was of a folder with no
-  /// settings file: a library being created (#1109).
-  bool _createdLibrary = false;
+  /// The open library's `.niman/settings.json` and the features it switches
+  /// on; the shipped defaults while none is open.
+  final OpenLibrarySettings _settings = OpenLibrarySettings();
   Indexer? _indexer;
   NoteOps? _ops;
   LibrarySyncService? _sync;
@@ -241,6 +227,16 @@ final class LibraryController implements LibrarySession {
 
   /// The watcher's batches of the open library, run one at a time.
   WatchBatchQueue? _batches;
+
+  /// What each of those batches does to the index, the editors and the sync.
+  late final WatchBatchApplier _watchBatches = WatchBatchApplier(
+    indexer: () => _indexer,
+    root: () => _root,
+    ready: () => phase == LibraryPhase.ready,
+    walkWhole: _safeRescan,
+    events: _changes,
+    sync: () => _sync,
+  );
 
   /// The full walks of the open library: one at a time, paced by how long
   /// the last took (#1067). Null while no library is open.
@@ -255,41 +251,12 @@ final class LibraryController implements LibrarySession {
 
   /// How far the first index has got, or null when no scan is running.
   @override
-  IndexProgress? get indexProgress => _indexProgress;
+  IndexProgress? get indexProgress => _progress.progress;
 
-  IndexProgress? _indexProgress;
-  DateTime? _progressShown;
-
-  /// Records a scan's progress, and lets the UI see it at a readable rate.
-  ///
-  /// The reports arrive one per note, which on a large library is far
-  /// faster than a frame; rebuilding on each would spend the scan drawing
-  /// instead of reading. Twenty a second already reads as a blur, which
-  /// is the point of showing them.
-  void _onIndexProgress(IndexProgress progress) {
-    _indexProgress = progress;
-    final now = DateTime.now();
-    final last = _progressShown;
-    if (last != null && now.difference(last) < _progressInterval) return;
-    _progressShown = now;
-    // The tree is asked to read its rows again only now and then: titles and
-    // pins reach it as the notes are read (#1068), but a flatten per report
-    // would spend the pass drawing a tree that has barely moved.
-    final treeAt = _progressTreeBump;
-    final tree =
-        treeAt == null || now.difference(treeAt) >= _progressTreeInterval;
-    if (tree) _progressTreeBump = now;
-    _bump(tree: tree);
-  }
-
-  DateTime? _progressTreeBump;
-
-  /// How often a running content pass lets the tree read the rows it has
-  /// changed so far.
-  static const _progressTreeInterval = Duration(seconds: 2);
-
-  /// How often a running scan redraws the name it is showing.
-  static const _progressInterval = Duration(milliseconds: 50);
+  /// The first index's progress, shown at a readable rate.
+  late final IndexProgressThrottle _progress = IndexProgressThrottle(
+    show: _bump,
+  );
 
   /// Current phase.
   @override
@@ -305,37 +272,37 @@ final class LibraryController implements LibrarySession {
 
   /// Bumped after every index change.
   @override
-  int get revision => _revision;
+  int get revision => _changes.revision;
 
   /// Bumped after an index change that can move the tree's rows: a row
   /// added, removed or reshaped, a pin, a folder synced — not a save's new
   /// size and time, which only the field orders draw (#751).
   @override
-  int get treeRevision => _treeRevision;
+  int get treeRevision => _changes.treeRevision;
 
   /// Fires with the new [revision] after every index change.
   @override
-  Stream<int> get events => _events.stream;
+  Stream<int> get events => _changes.events;
 
   @override
   Set<int>? foldersMovedSince(int since, {required bool tree}) =>
-      _moves.since(since, tree: tree);
+      _changes.foldersMovedSince(since, tree: tree);
 
   /// The open library's features (#1109); every one on while none is open.
   @override
-  ValueListenable<Features> get features => _features;
+  ValueListenable<Features> get features => _settings.features;
 
   /// Fires with the new [treeRevision] after a change that may move the
   /// tree's rows (#751).
   @override
-  Stream<int> get treeEvents => _treeEvents.stream;
+  Stream<int> get treeEvents => _changes.treeEvents;
 
   /// Fires with the library-relative paths a re-index pruned from the tree.
   @override
-  Stream<Set<String>> get removals => _removals.stream;
+  Stream<Set<String>> get removals => _changes.removals;
 
   @override
-  Stream<Set<String>> get externalChanges => _externalChanges.stream;
+  Stream<Set<String>> get externalChanges => _changes.externalChanges;
 
   /// The app's settings database, opened once per session.
   ///
@@ -355,13 +322,15 @@ final class LibraryController implements LibrarySession {
   /// Whether [dispose] has run.
   bool _disposed = false;
 
-  /// The cached search source; the background-isolate worker connection is
-  /// created once per open library and reused (see [searchSource]).
-  SearchSource? _searchSource;
-
-  /// The search connection when it is a distinct database from the index
-  /// one; closed with the library, since it is that library's file.
-  IndexDatabase? _searchDb;
+  /// The search, the links and the other read surfaces of the open library.
+  late final LibrarySources _sources = LibrarySources(
+    root: () => _root,
+    indexDb: () => _indexDb,
+    indexer: () => _indexer,
+    ops: () => _ops,
+    searchDbFactory: _searchDbFactory,
+    indexChanges: _changes.indexChanges,
+  );
 
   /// CRUD ops for the open library, or null while closed.
   @override
@@ -472,150 +441,26 @@ final class LibraryController implements LibrarySession {
   }
 
   @override
-  Future<SearchSource?> get searchSource async {
-    // The search connection is background-isolate backed: the MATCH work
-    // for large result sets never runs on the UI isolate. One connection
-    // per open library, created
-    // once: a fresh connection per call leaked one worker isolate per
-    // SearchScreen mount (drift keeps the worker alive until closed) and
-    // left nothing to recover when its startup failed. It is dropped with
-    // the library, since it is a connection to that library's own file.
-    final root = _root;
-    final indexDb = _indexDb;
-    if (root == null || indexDb == null) return null;
-    var source = _searchSource;
-    if (source == null) {
-      final db = await _searchDbFactory(root);
-      _searchDb = identical(db, indexDb) ? null : db;
-      source = SearchRepo(db, root: root);
-      _searchSource = source;
-    }
-    return source;
-  }
+  Future<SearchSource?> get searchSource => _sources.searchSource;
 
   @override
-  Future<ReplaceSource?> get replaceSource async {
-    // Bound to the current root + indexer: rewritten notes are re-indexed
-    // through applyEvents as each write batch lands, so search reflects a
-    // replace without waiting on the (Android-unreliable) watcher or the
-    // periodic rescan.
-    final root = _root;
-    final indexer = _indexer;
-    final db = _indexDb;
-    if (root == null || indexer == null || db == null) return null;
-    final history = _ops?.history;
-    return ReplaceRunner(
-      db,
-      root,
-      onNotesReindexed: (paths) => indexer.rescanFiles(root, paths),
-      historyRequest: history == null
-          ? null
-          : () => history.requestFor('', forced: HistoryReason.replace),
-    );
-  }
+  Future<ReplaceSource?> get replaceSource => _sources.replaceSource;
 
   @override
-  Future<TagSource?> get tagSource async {
-    final db = _indexDb;
-    if (db == null) return null;
-    return TagRepo(db);
-  }
+  Future<TagSource?> get tagSource => _sources.tagSource;
 
   @override
-  Future<FieldSource?> get fieldSource async {
-    final db = _indexDb;
-    if (db == null) return null;
-    return FieldRepo(db);
-  }
+  Future<FieldSource?> get fieldSource => _sources.fieldSource;
 
   @override
-  Future<TemplateSource?> get templateSource async {
-    final indexer = _indexer;
-    final ops = this.ops;
-    if (indexer == null || ops == null) return null;
-    return TemplateRepo(indexer.dao, ops);
-  }
-
-  /// The open library's links, built once for the library and the files it
-  /// reads: every surface that asks gets the object whose caches the others
-  /// fill (#842, #846, #847).
-  LibraryLinks? _links;
-  IndexDatabase? _linksDb;
-  NoteOps? _linksOps;
+  Future<TemplateSource?> get templateSource => _sources.templateSource;
 
   @override
-  Future<LibraryLinks?> get linkSource async {
-    final db = _indexDb;
-    if (db == null) return null;
-    final reader = _ops;
-    final kept = _links;
-    if (kept != null &&
-        identical(_linksDb, db) &&
-        identical(_linksOps, reader)) {
-      return kept;
-    }
-    _linksDb = db;
-    _linksOps = reader;
-    return _links = IndexLibraryLinks(
-      db,
-      // The library announces every index change; a note on screen resolves
-      // its dead links again when one lands (#847).
-      changes: _indexEvents.stream,
-      // What the notes that link to a note say about it, and the beginning of
-      // one for a preview card, are read off their files on a background
-      // isolate, a row at a time (#842, #846).
-      readPreview: reader == null
-          ? null
-          : (path) async {
-              try {
-                return await reader.notePreview(path);
-              } on Object {
-                return null;
-              }
-            },
-      readSpots: reader == null
-          ? null
-          : (path, from) async {
-              try {
-                return await reader.noteLinkSpotSlice(path, from);
-              } on Object {
-                return null;
-              }
-            },
-    );
-  }
+  Future<LibraryLinks?> get linkSource => _sources.linkSource;
 
   @override
-  Future<WikilinkSuggester?> get wikilinkSuggester async {
-    final db = _indexDb;
-    if (db == null) return null;
-    final reader = _ops;
-    return IndexWikilinkSuggester(
-      db,
-      attachmentsFolder: reader == null ? null : () => reader.attachmentsFolder,
-      // A named note's headings are read off the note itself, on a
-      // background isolate (a novel's read and outline is seconds of work);
-      // a note gone since the panel named it answers null rather than
-      // throwing.
-      readHeadings: (path) async {
-        if (reader == null) return null;
-        try {
-          return await reader.noteHeadings(path);
-        } on Object {
-          return null;
-        }
-      },
-      // The same for a note's block ids (#844).
-      readBlocks: (path) async {
-        if (reader == null) return null;
-        try {
-          return await reader.noteBlocks(path);
-        } on Object {
-          return null;
-        }
-      },
-    );
-  }
+  Future<WikilinkSuggester?> get wikilinkSuggester =>
+      _sources.wikilinkSuggester;
 
   /// Resumes the last opened library (if it still exists). Best effort:
   /// safe to call repeatedly, no-op when no library has been opened yet.
@@ -697,53 +542,27 @@ final class LibraryController implements LibrarySession {
   Future<void> _startSession(String abs) async {
     // This library's own index file (T-ML-03). Opening a second library
     // no longer scans over the first one's rows, so coming back to it
-    // costs a reconciliation rather than a full walk. [_openIndex] also
-    // warms the connection's first query — sqlite, the schema and its FTS
-    // table, on the connection's own isolate — so a cold index does not pay
-    // for it inside the tree's first flatten (`flatten: 105ms … [tree
-    // 103]`, #315), and it rebuilds a file sqlite reports as damaged
-    // rather than leaving the library shut (#368).
-    final indexDb = await _openIndex(abs);
+    // costs a reconciliation rather than a full walk.
+    // [LibraryIndexFiles.open] also warms the connection's first query —
+    // sqlite, the schema and its FTS table, on the connection's own
+    // isolate — so a cold index does not pay for it inside the tree's first
+    // flatten (`flatten: 105ms … [tree 103]`, #315), and it rebuilds a file
+    // sqlite reports as damaged rather than leaving the library shut (#368).
+    final indexDb = await _indexFiles.open(abs);
     _indexDb = indexDb;
     final appDb = await appDatabase;
     AppLog.enabled = await AppSettingsRepo(appDb).debugLogsEnabled();
-    _startUpdateChecks(appDb);
-    // Whether this open is a library being created: a folder with no
-    // settings file, asked before the seed below can write one (#1109). A
-    // rebuild of the index is not an open and says nothing about it.
-    final opening = _phase == LibraryPhase.opening;
-    final hadSettings = !opening || await _hasSettingsFile(abs);
-    // Before anything reads the settings: a library upgraded from the
-    // `library_settings` table gets its `.niman/settings.json` here,
-    // now that the folder is known to be reachable (T-ML-02).
-    await LegacyLibrarySettings(appDb).seed(abs);
-    if (opening) {
-      _createdLibrary = !hadSettings && !await _hasSettingsFile(abs);
-    }
+    _updates.start(appDb);
+    final config = await _settings.attach(
+      abs,
+      appDb,
+      opening: _phase == LibraryPhase.opening,
+    );
     final indexer = Indexer(indexDb);
     indexer
       ..onChanged = ((change) =>
-          _onIndexChanged(change, folders: indexer.changedFolders))
+          _changes.indexChanged(change, folders: indexer.changedFolders))
       ..onRemoved = (removed) => _onRemoved(abs, removed);
-    // One reader of `.niman/settings.json` per session: the four
-    // per-library settings and the overrides (T-ML-10) share its cache.
-    // The welcome's answer (#266) seeds the editors of every library
-    // this device has never stored settings for — not only the first.
-    // A failure to read it is not a reason to fail the open.
-    Map<String, Object?>? welcomeDefaults;
-    try {
-      welcomeDefaults = await DbWelcomeStore(AppSettingsRepo(appDb))
-          .firstLibraryEditorKeys();
-    } on Object catch (error) {
-      _log.warning('welcome editor defaults unavailable ($error)');
-    }
-    final config = LibraryConfigRepo(
-      abs,
-      device: DbDeviceSettingsStore(appDb),
-      welcomeDefaults: welcomeDefaults,
-      features: _features,
-    );
-    _configRepo = config;
     final ops = NoteOps(
       root: abs,
       db: indexDb,
@@ -759,10 +578,10 @@ final class LibraryController implements LibrarySession {
     // in as they are read.
     //
     // Blocking or not: an index with no rows — a library never indexed
-    // on this device, or one [_openIndex] just rebuilt because sqlite
-    // reported it damaged (#368) — has no last state for a fast resume to
-    // show, and opening on it showed an empty library until the delayed
-    // reconciliation. On an index that has rows this is one query and
+    // on this device, or one [LibraryIndexFiles.open] just rebuilt because
+    // sqlite reported it damaged (#368) — has no last state for a fast
+    // resume to show, and opening on it showed an empty library until the
+    // delayed reconciliation. On an index that has rows this is one query and
     // writes nothing.
     final contentOwed = await indexer.indexTreeFirst(abs);
     final watcher = FileWatcher(
@@ -771,7 +590,7 @@ final class LibraryController implements LibrarySession {
       source: watchSource,
     );
     // One batch in flight, the ones that arrive meanwhile merged (#1062).
-    final batches = WatchBatchQueue(_onWatchBatch);
+    final batches = WatchBatchQueue(_watchBatches.apply);
     _batches = batches;
     watcher.events.listen((batch) => unawaited(batches.add(batch)));
     await watcher.start();
@@ -819,14 +638,14 @@ final class LibraryController implements LibrarySession {
     final settings = await config.config;
     AppTextScales.apply(ui: settings.uiTextScale, note: settings.noteTextScale);
     AppWeekStart.choice = settings.weekStart;
-    await _publishEpubLook(settings.epubLook);
+    await _themes.publishEpubLook(settings.epubLook);
     _phase = LibraryPhase.ready;
     currentRootPath = abs;
     // Warm the tree's first query while the caller still shows its
     // opening state: the first flatten otherwise paid drift's statement
     // preparation and SQLite's page cache right as the shell built
     // (78-118 ms in the log, T-PP-22).
-    unawaited(_warmUpTree(indexer.dao, settings.treeSort));
+    unawaited(_chores.warmUpTree(indexer.dao, settings.treeSort));
     await AppSettingsRepo(appDb).setLastLibraryPath(abs);
     // The list the home screen shows (T-ML-04). Opening is what puts a
     // folder on it, so a library the app has never seen needs no
@@ -834,15 +653,15 @@ final class LibraryController implements LibrarySession {
     await LibraryRegistry(appDb).touch(abs);
     // The native widget config activity cannot read the registry (no
     // Dart engine at placement), so it reads this mirror instead.
-    unawaited(_saveWidgetLibraryMirror(appDb));
+    unawaited(_widgets.saveLibraryMirror(appDb));
     // Opening is when the trash empties itself, if the library asked
     // it to (issue #79) — behind the ready bump, because a folder full
     // of old deletions must not hold the library shut.
-    unawaited(_autoEmptyTrash(ops, settings.trashAutoEmptyDays));
+    unawaited(_chores.autoEmptyTrash(ops, settings.trashAutoEmptyDays));
     // And, like the trash empty, behind the ready bump: the temp files a
     // killed write left (issue #379) are swept on a background isolate so
     // a folder full of them never holds the library shut.
-    unawaited(_sweepStaleTempFiles(abs));
+    unawaited(_chores.sweepStaleTemps(abs));
     // The history's upkeep (#1148) too: an old `.history/` moved in, the
     // versions packed into deltas, what no log names collected.
     unawaited(ops.history.maintain());
@@ -850,7 +669,7 @@ final class LibraryController implements LibrarySession {
     // What a file from before the Home lacks (#671, #692) is built here,
     // with the reconciliation and behind the tree, not on open.
     _reconcileTimer = Timer(resumeReconcileDelay, () async {
-      await _ensureRecentIndex(indexDb);
+      await _indexFiles.ensureDerived(indexDb);
       // A first index is a full walk already, running behind the tree.
       if (!contentOwed) await _safeRescan(abs);
     });
@@ -893,48 +712,29 @@ final class LibraryController implements LibrarySession {
 
   /// The libraries the app knows about, most recently opened first.
   @override
-  Future<List<KnownLibrary>> knownLibraries() async {
-    final known = await LibraryRegistry(await appDatabase).all();
-    final documents = await containerDocuments();
-    if (documents == null) return known;
-    // On iPhone a library remembered before the container moved is the one
-    // at the same place in today's Documents; listed once, by its newest.
-    final seen = <String>{};
-    return [
-      for (final library in known)
-        if (seen.add(rebaseContainerPath(library.path, documents)))
-          library.copyWith(path: rebaseContainerPath(library.path, documents)),
-    ];
-  }
+  Future<List<KnownLibrary>> knownLibraries() => _known.all();
 
   /// The home-screen widget instances reading [libraryPath] (issue 6).
   @override
-  Future<List<WidgetConfig>> widgetConfigsFor(String libraryPath) async {
-    return await WidgetConfigStore(await appDatabase).forLibrary(libraryPath);
-  }
+  Future<List<WidgetConfig>> widgetConfigsFor(String libraryPath) =>
+      _widgets.configsFor(libraryPath);
 
   /// Records a placed todo widget for [libraryPath] (issue 6).
   @override
   Future<void> adoptTodoWidget(int androidWidgetId, String libraryPath) =>
-      _adoptLibraryWidget(androidWidgetId, libraryPath, WidgetProvider.todo);
+      _widgets.adoptLibraryWidget(
+        androidWidgetId,
+        libraryPath,
+        WidgetProvider.todo,
+      );
 
   @override
   Future<void> adoptStudyWidget(int androidWidgetId, String libraryPath) =>
-      _adoptLibraryWidget(androidWidgetId, libraryPath, WidgetProvider.study);
-
-  Future<void> _adoptLibraryWidget(
-    int androidWidgetId,
-    String libraryPath,
-    WidgetProvider provider,
-  ) async {
-    final store = WidgetConfigStore(await appDatabase);
-    if (await store.find(androidWidgetId) != null) return;
-    await store.upsert(
-      androidWidgetId: androidWidgetId,
-      provider: provider,
-      libraryPath: libraryPath,
-    );
-  }
+      _widgets.adoptLibraryWidget(
+        androidWidgetId,
+        libraryPath,
+        WidgetProvider.study,
+      );
 
   /// Records a placed note widget for [notePath] (issue 6).
   @override
@@ -942,37 +742,20 @@ final class LibraryController implements LibrarySession {
     int androidWidgetId,
     String libraryPath,
     String notePath,
-  ) async {
-    final store = WidgetConfigStore(await appDatabase);
-    if (await store.find(androidWidgetId) != null) return;
-    await store.upsert(
-      androidWidgetId: androidWidgetId,
-      provider: WidgetProvider.note,
-      libraryPath: libraryPath,
-      notePath: notePath,
-    );
-  }
+  ) => _widgets.adoptNoteWidget(androidWidgetId, libraryPath, notePath);
 
   /// Drops [libraryPath]'s [provider] widget configurations whose
-  /// instance is no longer placed (issue 6); the refresh calls this,
-  /// since the native `onDeleted` cannot reach the database.
+  /// instance is no longer placed (issue 6).
   @override
   Future<void> pruneWidgetConfigs({
     required String libraryPath,
     required WidgetProvider provider,
     required Set<int> placedIds,
-  }) async {
-    final store = WidgetConfigStore(await appDatabase);
-    final stale = {
-      for (final config in await store.forLibrary(libraryPath))
-        if (config.provider == provider.name &&
-            !placedIds.contains(config.androidWidgetId))
-          config.androidWidgetId,
-    };
-    for (final id in stale) {
-      await store.remove(id);
-    }
-  }
+  }) => _widgets.prune(
+    libraryPath: libraryPath,
+    provider: provider,
+    placedIds: placedIds,
+  );
 
   /// Drops [libraryPath] from the known list; the folder is untouched.
   ///
@@ -987,79 +770,13 @@ final class LibraryController implements LibrarySession {
     }
     _log.info('forget library: $libraryPath');
     final db = await appDatabase;
-    await LibraryRegistry(db).forget(libraryPath);
-    // Widgets pointing at it would open a library the home screen no
-    // longer lists; their rows go with the entry (issue 6).
-    await WidgetConfigStore(db).removeForLibrary(libraryPath);
-    // Its sync state describes a library the app no longer knows; opened
-    // again, it starts unconfigured (docs/records/sync.md, "Configuration").
-    await SyncStore(db).removeLibrary(libraryPath);
-    // What was left open in it goes too (#23): opened again, it starts
-    // with nothing open, like a library the app has never seen.
-    await WorkspaceStore(db).remove(libraryPath);
-    // So do the settings it kept on this device: opened again, it takes
-    // them from its settings file, like a library opened for the first time.
-    await DbDeviceSettingsStore(db).remove(libraryPath);
-    try {
-      await syncSecrets.delete(libraryPath);
-    } on Exception catch (e) {
-      // A missing keychain must not block forgetting; the entry is inert
-      // without its destination row.
-      _log.warning('forget library: sync password not deleted: $e');
-    }
+    await _known.forget(db, libraryPath);
     // The mirror would otherwise keep offering a forgotten library.
-    unawaited(_saveWidgetLibraryMirror(db));
+    unawaited(_widgets.saveLibraryMirror(db));
     // The index is derived data and the entry that named it is gone, so
     // the file would sit there forever with nothing pointing at it.
-    await _deleteIndexOf(libraryPath);
+    await _indexFiles.delete(libraryPath);
     _bump();
-  }
-
-  /// Mirrors the known libraries for the native widget config activity
-  /// (round 2, R1): path, display name and index file per library.
-  ///
-  /// Best effort and Android-only: the activity treats the mirror as a
-  /// cache, and a failure here must never break an open or a forget.
-  Future<void> _saveWidgetLibraryMirror(AppDatabase appDb) async {
-    if (!Platform.isAndroid) return;
-    try {
-      final libraries = await LibraryRegistry(appDb).all();
-      final locate = indexFileOf ?? libraryIndexFile;
-      final indexByPath = <String, String>{};
-      for (final lib in libraries) {
-        indexByPath[lib.path] = (await locate(lib.path)).path;
-      }
-      await HomeWidget.saveWidgetData<String>(
-        widgetLibrariesKey,
-        encodeLibraryMirror(libraries, indexByPath),
-      );
-    } on MissingPluginException {
-      // No host handler (tests, desktops).
-    } on PlatformException catch (error) {
-      _log.warning('widget library mirror not saved ($error)');
-    }
-  }
-
-  /// Deletes the index file of a library, if it can be found.
-  ///
-  /// The file and the write-ahead log beside it go together: a rebuilt index
-  /// must not open on a stale journal. Best effort — a failure here costs
-  /// disk space, not correctness, and must not turn "forget this library" or
-  /// "rebuild its index" into an error.
-  Future<void> _deleteIndexOf(String libraryPath) async {
-    try {
-      final locate = indexFileOf;
-      if (locate == null) return;
-      final file = await locate(libraryPath);
-      for (final sidecar in const ['', '-wal', '-shm']) {
-        final part = File('${file.path}$sidecar');
-        if (await part.exists()) {
-          await part.delete();
-        }
-      }
-    } on Object catch (error) {
-      _log.warning('index file not removed ($error)');
-    }
   }
 
   /// Triggers a full rescan immediately (explicit re-index).
@@ -1110,7 +827,7 @@ final class LibraryController implements LibrarySession {
     _log.info('rebuild index requested: $root');
     _lastError = null;
     await _teardown();
-    await _deleteIndexOf(root);
+    await _indexFiles.delete(root);
     try {
       await _startSession(root);
       _log.info('rebuild index complete: ready root=$root');
@@ -1164,82 +881,33 @@ final class LibraryController implements LibrarySession {
         .setAutoUpdateEnabled(enabled: enabled);
   }
 
-  UpdateScheduler? _updateScheduler;
+  /// The launch + six-hourly update checks, started once per controller.
+  late final SessionUpdateChecks _updates = SessionUpdateChecks(
+    onUpdate: notify,
+  );
 
   /// The latest available update the scheduler found, if any (issue #81).
   ///
   /// Read by the shell banner and the settings row; both rebuild on
-  /// session events, which [UpdateScheduler.onUpdate] bumps.
+  /// session events, which [SessionUpdateChecks.onUpdate] bumps.
   @override
-  UpdateAvailable? get pendingUpdate => _pendingUpdate;
-  UpdateAvailable? _pendingUpdate;
+  UpdateAvailable? get pendingUpdate => _updates.pending;
 
   /// Drops the pending update (the banner's dismiss action).
   @override
   void clearPendingUpdate() {
-    _pendingUpdate = null;
+    _updates.clear();
     notify();
   }
 
-  /// Starts the launch + six-hourly update checks, once per controller.
-  ///
-  /// The scheduler only reads the settings store and GitHub; drift writes
-  /// stay on the main isolate, in its callbacks.
-  void _startUpdateChecks(AppDatabase appDb) {
-    // Testing builds check no release channel (issue #106), and iOS is the
-    // App Store's to update: the stored toggle is irrelevant, nothing
-    // polls and no banner can appear.
-    if (!appUpdatesItself) return;
-    if (_updateScheduler != null) return;
-    // What an earlier update left in Android's updates folder has done its
-    // work, or was not wanted: the next one is fetched afresh (#900). Once,
-    // at launch — never under a download this run started.
-    unawaited(clearUpdateDownloads());
-    final repo = AppSettingsRepo(appDb);
-    _updateScheduler = UpdateScheduler(
-      isEnabled: repo.autoUpdateEnabled,
-      runCheck: () async {
-        try {
-          final current = await currentAppVersion();
-          final update = await checkNow(current: current);
-          _log.debug(
-            'update check: current $current -> '
-            '${update == null ? 'up to date' : 'available ${update.version}'}',
-          );
-          return update;
-        } on Object catch (error) {
-          _log.warning('update check failed: $error');
-          return null;
-        }
-      },
-      noteChecked: repo.setLastUpdateCheck,
-      onUpdate: (update) {
-        _pendingUpdate = update;
-        notify();
-      },
-    )..start();
-  }
-
   /// The open library's settings, or the shipped defaults while none is
-  /// open (T-ML-10).
-  ///
-  /// The settings screen only exists inside an open library, so the
-  /// defaults branch is what a startup read sees before the first open,
-  /// not a state a user can edit from.
-  Future<LibraryConfig> get _library async =>
-      await _configRepo?.config ?? LibraryConfig.defaults;
-
-  /// Whether the library at [abs] has a `.niman/settings.json`.
-  Future<bool> _hasSettingsFile(String abs) =>
-      File(p.join(abs, '.niman', 'settings.json')).exists();
+  /// open ([OpenLibrarySettings.config]).
+  Future<LibraryConfig> get _library => _settings.config;
 
   /// Applies [change] to the open library's settings; a no-op with none
-  /// open, since there is nothing to write it to.
-  Future<void> _editLibrary(
-    LibraryConfig Function(LibraryConfig) change,
-  ) async {
-    await _configRepo?.update(change);
-  }
+  /// open.
+  Future<void> _editLibrary(LibraryConfig Function(LibraryConfig) change) =>
+      _settings.edit(change);
 
   @override
   WorkspaceSlot get workspaceSlot {
@@ -1414,12 +1082,8 @@ final class LibraryController implements LibrarySession {
       _editLibrary((c) => c.copyWith(features: features));
 
   @override
-  Future<FeaturesIntroduction> get featuresIntroduction async {
-    if ((await _library).featuresReviewed) return FeaturesIntroduction.none;
-    return _createdLibrary
-        ? FeaturesIntroduction.created
-        : FeaturesIntroduction.existing;
-  }
+  Future<FeaturesIntroduction> get featuresIntroduction =>
+      _settings.featuresIntroduction;
 
   @override
   Future<void> markFeaturesReviewed() =>
@@ -1652,31 +1316,14 @@ final class LibraryController implements LibrarySession {
       '${look.font.name} at ${look.textScale}',
     );
     await _editLibrary((c) => c.copyWith(epubLook: look));
-    await _publishEpubLook(look);
-  }
-
-  /// Puts [look] on screen with the theme it names: a shipped palette, or
-  /// a custom theme of this device's — none, the app's, when that is gone.
-  Future<void> _publishEpubLook(EpubLook look) async {
-    final id = look.theme;
-    AppTheme? theme;
-    if (id != null) {
-      final customId = AppTheme.customIdIn(id);
-      if (customId == null) {
-        theme = themeFromId(id);
-      } else {
-        final custom = await CustomThemeRepo(await appDatabase).byId(customId);
-        if (custom != null) theme = themeFromId(id, custom: custom);
-      }
-    }
-    EpubLooks.apply(look, theme: theme);
+    await _themes.publishEpubLook(look);
   }
 
   /// Publishes the books' look again: a custom theme it may name was
   /// changed or deleted.
   Future<void> _republishEpubLook() async {
     if (_phase != LibraryPhase.ready) return;
-    await _publishEpubLook(await epubLook);
+    await _themes.publishEpubLook(await epubLook);
   }
 
   /// The UI language.
@@ -1724,73 +1371,42 @@ final class LibraryController implements LibrarySession {
     await AppSettingsRepo(await appDatabase).setThemeBrightness(brightness);
   }
 
-  /// The theme the app wears.
-  ///
-  /// A setting that points at a custom theme this installation no longer
-  /// holds is repaired here, to Niman's own colors: there is always
-  /// something to wear (issue #269).
+  /// The theme the app wears ([SessionThemes.theme]).
   @override
-  Future<AppTheme> get theme async {
-    final settings = AppSettingsRepo(await appDatabase);
-    final id = await settings.themeId();
-    final customId = AppTheme.customIdIn(id);
-    if (customId == null) return themeFromId(id);
-    final custom = await CustomThemeRepo(await appDatabase).byId(customId);
-    if (custom != null) return themeFromId(id, custom: custom);
-    _log.warning('theme $id is gone; wearing Niman instead');
-    await settings.setThemeId(AppPalette.niman.id);
-    return const BuiltinAppTheme(AppPalette.niman);
-  }
+  Future<AppTheme> get theme => _themes.theme;
 
   /// Sets (and persists) the theme, by its id.
   @override
-  Future<void> setTheme(AppTheme theme) async {
-    _log.info('theme set to ${theme.id}');
-    await AppSettingsRepo(await appDatabase).setThemeId(theme.id);
-  }
+  Future<void> setTheme(AppTheme theme) => _themes.setTheme(theme);
 
   /// The custom themes this installation holds, by name (issue #269).
   @override
-  Future<List<CustomTheme>> customThemes() async =>
-      await CustomThemeRepo(await appDatabase).list();
+  Future<List<CustomTheme>> customThemes() => _themes.customThemes();
 
   /// The custom theme with [id], or null.
   @override
-  Future<CustomTheme?> customTheme(String id) async =>
-      await CustomThemeRepo(await appDatabase).byId(id);
+  Future<CustomTheme?> customTheme(String id) => _themes.customTheme(id);
 
   /// Stores [theme]: the row with its id, or a new one.
   @override
-  Future<void> saveCustomTheme(CustomTheme theme) async {
-    _log.info('custom theme ${theme.id} saved as "${theme.name}"');
-    await CustomThemeRepo(await appDatabase).save(theme);
-    await _republishEpubLook();
-  }
+  Future<void> saveCustomTheme(CustomTheme theme) =>
+      _themes.saveCustomTheme(theme);
 
   /// Renames the custom theme with [id].
   @override
-  Future<void> renameCustomTheme(String id, String name) async {
-    _log.info('custom theme $id renamed to "$name"');
-    await CustomThemeRepo(await appDatabase).rename(id, name);
-  }
+  Future<void> renameCustomTheme(String id, String name) =>
+      _themes.renameCustomTheme(id, name);
 
   /// Deletes the custom theme with [id], and returns the theme in force
-  /// afterwards: deleting the one being worn falls back to the app's own
-  /// colors.
+  /// afterwards ([SessionThemes.deleteCustomTheme]).
   @override
-  Future<AppTheme> deleteCustomTheme(String id) async {
-    _log.info('custom theme $id deleted');
-    await CustomThemeRepo(await appDatabase).delete(id);
-    await _republishEpubLook();
-    // Reading it back repairs a setting that pointed at the deleted
-    // theme, so what comes out is what the app wears from here on.
-    return await theme;
-  }
+  Future<AppTheme> deleteCustomTheme(String id) =>
+      _themes.deleteCustomTheme(id);
 
   /// Whether [name] is a custom theme's name already.
   @override
-  Future<bool> customThemeNameTaken(String name) async =>
-      await CustomThemeRepo(await appDatabase).nameTaken(name);
+  Future<bool> customThemeNameTaken(String name) =>
+      _themes.customThemeNameTaken(name);
 
   /// Notifies listeners that state changed without an index mutation
   /// (e.g. a settings change the tree UI should react to).
@@ -1803,25 +1419,10 @@ final class LibraryController implements LibrarySession {
   /// app settings database, which outlives every library.
   @override
   Future<void> dispose() async {
-    _updateScheduler?.stop();
-    _updateScheduler = null;
+    _updates.stop();
     await close();
     _disposed = true;
-    if (!_events.isClosed) {
-      await _events.close();
-    }
-    if (!_indexEvents.isClosed) {
-      await _indexEvents.close();
-    }
-    if (!_treeEvents.isClosed) {
-      await _treeEvents.close();
-    }
-    if (!_removals.isClosed) {
-      await _removals.close();
-    }
-    if (!_externalChanges.isClosed) {
-      await _externalChanges.close();
-    }
+    await _changes.close();
     final appDb = _appDatabase;
     _appDatabase = null;
     if (appDb != null) {
@@ -1833,41 +1434,15 @@ final class LibraryController implements LibrarySession {
 
   /// A new revision — and a new tree revision when [tree] — which moved rows
   /// in [folders] alone, or anywhere when null ([foldersMovedSince]).
-  void _bump({bool tree = true, Set<int>? folders}) {
-    _revision++;
-    if (tree) _treeRevision++;
-    _moves.record(
-      revision: _revision,
-      treeRevision: tree ? _treeRevision : null,
-      folders: folders,
-    );
-    if (!_events.isClosed) {
-      _events.add(_revision);
-    }
-    if (!tree) return;
-    if (!_treeEvents.isClosed) {
-      _treeEvents.add(_treeRevision);
-    }
-  }
-
-  /// An index write landed: everything that reads the index hears of it,
-  /// and — when the rows' shape moved, and not for a save's new size and
-  /// time (#751) — the tree hears that it has rows to read again. Every
-  /// other bump is the session's own (the phase, a progress report, a
-  /// setting): all of them may move what the tree draws. [folders] are the
-  /// ones the write moved rows in, when the indexer says
-  /// ([Indexer.changedFolders]).
-  void _onIndexChanged(IndexChange change, {Set<int>? folders}) {
-    _bump(tree: change == IndexChange.tree, folders: folders);
-    if (!_indexEvents.isClosed) _indexEvents.add(null);
-  }
+  void _bump({bool tree = true, Set<int>? folders}) =>
+      _changes.bump(tree: tree, folders: folders);
 
   /// Fires with the paths a re-index pruned, and drops their reading
   /// positions and review states: those files are ones the library saw
   /// leave (#492, #533).
   void _onRemoved(String root, Set<String> removed) {
-    if (removed.isEmpty || _removals.isClosed) return;
-    _removals.add(removed);
+    if (removed.isEmpty || _changes.isClosed) return;
+    _changes.removed(removed);
     unawaited(ReadingPositions(root).removed(removed));
     unawaited(ReviewStore(root).removed(removed));
   }
@@ -1890,13 +1465,8 @@ final class LibraryController implements LibrarySession {
     _indexer = null;
     _ops?.history.dispose();
     _ops = null;
-    _links = null;
-    _linksDb = null;
-    _linksOps = null;
-    _configRepo = null;
-    // Nothing is open: every feature reads as on until a library says
-    // otherwise, so the next open never starts from the last one's.
-    _features.value = const Features();
+    _sources.forgetLinks();
+    _settings.detach();
     final sync = _sync;
     _sync = null;
     // A sync going now writes through the index about to close: its
@@ -1909,108 +1479,11 @@ final class LibraryController implements LibrarySession {
     EpubLooks.reset();
     // Nulled before the awaits: a caller that races us must not find a
     // half-closed database.
-    final searchDb = _searchDb;
+    final searchDb = _sources.releaseSearch();
     final indexDb = _indexDb;
-    _searchSource = null;
-    _searchDb = null;
     _indexDb = null;
     await searchDb?.close();
     await indexDb?.close();
-  }
-
-  Future<void> _onWatchBatch(WatchBatch batch) async {
-    _log.debug(
-      'watch batch: ${batch.paths.length} path(s), '
-      '${batch.resyncDirs.length} resync dir(s)',
-    );
-    final indexer = _indexer;
-    final root = _root;
-    if (indexer == null || root == null || phase != LibraryPhase.ready) {
-      return;
-    }
-    if (batch.missedChanges) {
-      // The watch was down for a while: what changed meanwhile left no
-      // event, and waiting for the periodic rescan leaves a note saved
-      // then out of the index for minutes. The root itself cannot be
-      // resynced (`Indexer.resync` passes over it), so it is walked whole.
-      _log.info('watch batch: the watch restarted, walking the library');
-      await _safeRescan(root);
-      if (phase != LibraryPhase.ready) return;
-    }
-    try {
-      for (final dir in batch.resyncDirs) {
-        await indexer.resync(root, dir);
-      }
-      if (batch.paths.isNotEmpty) {
-        await indexer.applyEvents(root, batch.paths);
-      }
-      // The editors that hold those notes open (#1055), before the sync's
-      // probe below: they have no reason to wait for it.
-      if (batch.paths.isNotEmpty && !_externalChanges.isClosed) {
-        _externalChanges.add(batch.paths.toSet());
-      }
-      // What changed behind the ops' back (another app, a background
-      // isolate, a hand edit) reaches the sync queue this way. Awaited, so
-      // the batch queue runs the probes one batch at a time: left to race,
-      // an older batch's answer could be queued after a newer one's.
-      await _sync?.watched(batch.paths, batch.resyncDirs);
-    } on Object catch (error) {
-      // Transient watcher errors are covered by the periodic rescan.
-      _log.warning('watch batch failed: $error');
-    }
-  }
-
-  /// Prepares the tree's first query off the critical path: the root's
-  /// first page in the library's order, through [NoteDao.warmUpTree], which
-  /// runs the very read the first flatten does (its `LIMIT` is bound).
-  ///
-  /// Not the root's every row, which is what it read until the tree began
-  /// to page (#1064) and went on reading after: 850 ms for a root of 200 000
-  /// notes, each row of it sent to this isolate to warm a statement nothing
-  /// ran (#1135).
-  Future<void> _warmUpTree(NoteDao dao, TreeSort sort) async {
-    try {
-      await dao.warmUpTree(sort: sort);
-    } on Object catch (error) {
-      _log.debug('tree warm-up failed ($error)');
-    }
-  }
-
-  /// Runs the automatic trash empty for a library that asked for one,
-  /// and swallows whatever it runs into: the library is open and usable
-  /// either way, and a trash that could not be emptied is not a reason to
-  /// fail the open behind the user's back.
-  Future<void> _autoEmptyTrash(NoteOperations ops, int days) async {
-    if (days <= 0) return;
-    try {
-      await autoEmptyTrash(ops, maxAgeDays: days);
-    } on Object catch (error) {
-      _log.error('auto-empty failed: $error');
-    }
-  }
-
-  /// Sweeps the stray `.niman-tmp-*` files a killed write left in the open
-  /// library (issue #379).
-  ///
-  /// Runs once per open, on a background isolate like the index walk: the
-  /// rename onto a target is the only thing that removes a write's temp, so
-  /// a process killed between the two leaves the temp behind, and nothing
-  /// else notices it — the walk and the sync both skip dot names. The age
-  /// guard in [sweepStaleTempFiles] keeps a write still in flight safe.
-  /// Whatever it runs into is logged and swallowed: the library is open and
-  /// usable either way.
-  Future<void> _sweepStaleTempFiles(String abs) async {
-    try {
-      final removed = await IsolateGauge.run(
-        () => sweepStaleTempFiles(abs),
-        'sweep temps "$abs"',
-      );
-      if (removed > 0) {
-        _log.info('swept $removed stale temp file(s) in $abs');
-      }
-    } on Object catch (error) {
-      _log.warning('temp sweep failed for $abs: $error');
-    }
   }
 
   /// Reads the notes of a library whose first index wrote the tree alone
@@ -2022,130 +1495,20 @@ final class LibraryController implements LibrarySession {
       _log.info('first index: reading the notes of $abs');
       // Reported while it runs: the walk is long enough to be worth
       // watching, and reporting costs a message per note.
-      indexer.onProgress = _onIndexProgress;
+      indexer.onProgress = _progress.report;
       IndexingStatus.contentOwed.value = true;
       try {
         await _rescans?.run();
       } finally {
         IndexingStatus.contentOwed.value = false;
         indexer.onProgress = null;
-        _indexProgress = null;
-        _progressTreeBump = null;
+        _progress.end();
         _bump();
       }
       _log.info('first index complete');
     } on Object catch (error) {
       // The periodic rescan finds what is still missing and reads it.
       _log.error('first index failed: $error');
-    }
-  }
-
-  /// Opens the index of the library at [libraryPath] and reads it once,
-  /// rebuilding the file in place when sqlite reports it damaged (#368).
-  ///
-  /// The index is derived data and the documented way to repair it is to
-  /// delete the file and re-index (`AGENTS.md`, `IndexDatabase`), but the
-  /// only code that deleted one was `forgetLibrary`, which also drops the
-  /// registry row, the workspace, the device settings and the sync
-  /// destination — so a disk that filled or a killed migration left a
-  /// library that would not open and no way out but losing its entry. A
-  /// file sqlite answers with `SQLITE_CORRUPT` or `SQLITE_NOTADB` is
-  /// deleted and opened again — empty, at its schema — and the caller's
-  /// scan refills it from the notes on disk.
-  ///
-  /// The first query is also the connection's warm-up (#315): it is what
-  /// opens the file, so the tree's first flatten is never the query that
-  /// pays for the sqlite open, the schema and its FTS table.
-  Future<IndexDatabase> _openIndex(String libraryPath) async {
-    final db = await indexDbFactory(libraryPath);
-    try {
-      await _warmIndex(db);
-      return db;
-    } on Object catch (error) {
-      final damaged = _sqliteCause(error);
-      if (damaged == null || !_isDamagedIndex(damaged)) {
-        await _closeIndex(db);
-        rethrow;
-      }
-      _log.warning('index of $libraryPath is damaged; rebuilding: $damaged');
-      await _closeIndex(db);
-      await _deleteIndexOf(libraryPath);
-      final fresh = await indexDbFactory(libraryPath);
-      try {
-        await _warmIndex(fresh);
-      } on Object {
-        await _closeIndex(fresh);
-        rethrow;
-      }
-      return fresh;
-    }
-  }
-
-  /// The sqlite error behind [error], or null when it holds none.
-  ///
-  /// A connection on its own isolate (`defaultIndexDatabase`) reports what
-  /// failed over there as drift's remote exception, with the sqlite error
-  /// itself as its cause.
-  static SqliteException? _sqliteCause(Object error) => switch (error) {
-    final SqliteException sqlite => sqlite,
-    final DriftRemoteException remote
-        when remote.remoteCause is SqliteException =>
-      remote.remoteCause as SqliteException,
-    _ => null,
-  };
-
-  /// Whether [error] says the file is unreadable: sqlite's `SQLITE_CORRUPT`
-  /// and `SQLITE_NOTADB` (sqlite.org/rescode.html).
-  ///
-  /// What a disk that ran out of room or a killed migration leaves behind,
-  /// as against a transient I/O error, which is waited out by the rescan
-  /// instead of costing a full re-index.
-  static bool _isDamagedIndex(SqliteException error) =>
-      error.resultCode == 11 || error.resultCode == 26;
-
-  /// Closes a connection whose open failed, so the file behind it can be
-  /// deleted (Windows will not delete an open file).
-  Future<void> _closeIndex(IndexDatabase db) async {
-    try {
-      await db.close();
-    } on Object catch (error) {
-      _log.debug('damaged index connection not closed cleanly ($error)');
-    }
-  }
-
-  /// Reads the index connection's file once, opening it (#315): the
-  /// isolate's boot, the sqlite open, the schema and the FTS table.
-  ///
-  /// Throws when the file cannot be read; [_openIndex] takes that as the
-  /// signal that the index is damaged and rebuilds it (#368). A connection
-  /// that failed this way rethrows to every reader after, so the throw is
-  /// the answer, not an accident.
-  Future<void> _warmIndex(IndexDatabase db) async {
-    final clock = Stopwatch()..start();
-    await db.customSelect('SELECT 1').get();
-    _log.debug('index warm-up: ${clock.elapsedMilliseconds} ms');
-  }
-
-  /// [IndexDatabase.ensureRecentIndex], [IndexDatabase.ensurePinnedIndex],
-  /// [IndexDatabase.ensureTagCounts] and
-  /// [IndexDatabase.ensureStemTrigrams],
-  /// logged rather than thrown: their readers answer without them, only
-  /// slower.
-  Future<void> _ensureRecentIndex(IndexDatabase db) async {
-    final clock = Stopwatch()..start();
-    try {
-      await db.ensureRecentIndex();
-      await db.ensurePinnedIndex();
-      await db.ensureTagCounts();
-      await db.ensureStemTrigrams();
-      _log.debug(
-        'notes_recent, tag counts and name trigrams ready in '
-        '${clock.elapsedMilliseconds} ms',
-      );
-    } on Object catch (error) {
-      _log.warning(
-        'notes_recent, tag counts or name trigrams not built: $error',
-      );
     }
   }
 
@@ -2181,99 +1544,6 @@ final class LibraryController implements LibrarySession {
     _foreground = visible;
     _rescans?.setForeground(foreground: visible);
   }
-}
-
-/// The app settings database FILE in the platform application-support
-/// directory.
-///
-/// It has held that name since M1, when it was the index too; T-ML-03
-/// moved the index into [libraryIndexFile] and left the settings here.
-Future<File> defaultAppDbFile() async {
-  final dir = await appSupportDirectory();
-  return File(p.join(dir.path, 'niman.db'));
-}
-
-/// The index FILE for the library at [libraryPath].
-///
-/// One per library, named by a digest of the absolute path: two libraries
-/// never share a file, and a library that moves simply rebuilds under its
-/// new name. The digest is truncated — it names a file in the app's own
-/// folder, so a collision would need two libraries whose paths collide in
-/// 64 bits, and the registry keeps the mapping readable (T-ML-04).
-///
-/// It lives OUTSIDE the library folder: the index is a cache, the files
-/// on disk are the source of truth, and `.niman/` is for what the user
-/// would want to keep.
-Future<File> libraryIndexFile(String libraryPath) async {
-  final dir = Directory(p.join((await appSupportDirectory()).path, 'indexes'));
-  await dir.create(recursive: true);
-  // On iOS the key is the path inside the app's Documents, which outlives
-  // the container's own path (container_path.dart).
-  final digest = sha256.convert(utf8.encode(libraryIndexKey(libraryPath)));
-  return File(p.join(dir.path, '${digest.toString().substring(0, 16)}.db'));
-}
-
-/// The one connection to the app settings database, shared by everything
-/// that reads it (#312).
-///
-/// Not one per caller: the welcome gate, the update notice and the session
-/// each opened their own, and on the first launch after an update all of
-/// them upgraded the same file at once — two migrations interleaved, and
-/// the one that lost came out of its `ALTER` with `duplicate column name`
-/// (the crash in #312). One connection, one migrator; the migration itself
-/// takes the file's write lock as well (see [AppDatabase.migration]).
-Future<AppDatabase>? _appDatabase;
-
-/// The app settings database in the application-support directory.
-///
-/// Every caller shares the connection this hands out, so nobody opens a
-/// second one; [forgetDefaultAppDatabase] drops it once it is closed.
-Future<AppDatabase> defaultAppDatabase() =>
-    _appDatabase ??= _openDefaultAppDatabase();
-
-Future<AppDatabase> _openDefaultAppDatabase() async {
-  final file = await defaultAppDbFile();
-  return await openAppDatabaseRecovering(file);
-}
-
-/// Forgets the connection [defaultAppDatabase] handed out, when [db] is
-/// that connection, so the next call opens a fresh one: a closed drift
-/// database cannot be reopened.
-Future<void> forgetDefaultAppDatabase(AppDatabase db) async {
-  final open = _appDatabase;
-  if (open != null && identical(await open, db)) {
-    _appDatabase = null;
-  }
-}
-
-/// Opens the index of the library at [libraryPath], on drift's background
-/// isolate.
-///
-/// Every write of the index — a saved note's text into the full-text table,
-/// its tags, stems and links — ran on the UI isolate: sqlite is synchronous,
-/// and a 100 MB note held the frame for seconds while its body went in, the
-/// tree's menu waiting behind it (0.0.9 stress test). The search connection
-/// was moved off first (T-M3-09); the index follows it.
-Future<IndexDatabase> defaultIndexDatabase(String libraryPath) async {
-  return IndexDatabase(
-    NativeDatabase.createInBackground(
-      await libraryIndexFile(libraryPath),
-      setup: indexDatabaseSetup,
-    ),
-  );
-}
-
-/// The search connection over the same library's index file, with drift's
-/// background-isolate executor: `MATCH` over large result sets runs off the
-/// UI isolate (T-M3-09 fix: many results with novel-length bodies stalled
-/// every frame).
-Future<IndexDatabase> defaultSearchDatabase(String libraryPath) async {
-  return IndexDatabase(
-    NativeDatabase.createInBackground(
-      await libraryIndexFile(libraryPath),
-      setup: indexDatabaseSetup,
-    ),
-  );
 }
 
 /// The single library session for the app session.
