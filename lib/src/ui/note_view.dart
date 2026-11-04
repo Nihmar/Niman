@@ -61,6 +61,7 @@ import 'package:niman/src/ui/note_disk.dart';
 import 'package:niman/src/ui/note_edit_commands.dart';
 import 'package:niman/src/ui/note_find_keys.dart';
 import 'package:niman/src/ui/note_frontmatter_panel.dart';
+import 'package:niman/src/ui/note_inserts.dart';
 import 'package:niman/src/ui/note_link_actions.dart';
 import 'package:niman/src/ui/note_links.dart';
 import 'package:niman/src/ui/note_load_error.dart';
@@ -584,12 +585,7 @@ final class _NoteViewState extends State<NoteView>
   }
 
   @override
-  String get selectedText {
-    final surface = _surface;
-    if (!canInsert || surface == null) return '';
-    final at = surface.selection.clampTo(surface.buffer.length);
-    return at.isCollapsed ? '' : surface.buffer.substring(at.start, at.end);
-  }
+  String get selectedText => _inserts.selectedText;
 
   @override
   String get notePath => widget.path;
@@ -647,8 +643,19 @@ final class _NoteViewState extends State<NoteView>
     _commands.insertEisenhowerMatrixAtCaret();
   }
 
-  /// The editor's paste, before it is plain text: spreadsheet cells
-  /// become a table (#1248).
+  /// What goes into the note from outside the editor's own keys: a paste,
+  /// the links of attached files, and what the selection holds.
+  late final NoteInserts _inserts = NoteInserts(
+    surface: () => _surface,
+    canInsert: () => canInsert,
+    mounted: () => mounted,
+    focus: _focus.requestFocus,
+    onInserted: () {
+      _stats.refresh();
+      _refreshPreview();
+    },
+  );
+
   /// Files pasted or dropped on the note, copied into the attachments
   /// folder and linked at the caret (#1249, #1250).
   late final NoteAttach _attach = NoteAttach(
@@ -669,83 +676,38 @@ final class _NoteViewState extends State<NoteView>
           sourcePath: source,
           attachmentsFolder: widget.attachmentsFolder,
         ),
-    insert: _insertAttachmentLinks,
+    insert: _inserts.insertAttachmentLinks,
     messenger: () => mounted ? ScaffoldMessenger.maybeOf(context) : null,
   );
 
   /// The platform's reader of the files on the clipboard (#1249).
   late final ClipboardFilesReader _clipboardFiles = platformClipboardFiles();
 
-  bool _insertAttachmentLinks(String text) {
-    final surface = _surface;
-    if (!mounted || !canInsert || surface == null) return false;
-    surface.replaceSelection(text);
-    _focus.requestFocus();
-    _stats.refresh();
-    _refreshPreview();
-    return true;
-  }
-
   @override
   Future<bool> attachFiles(List<String> paths) =>
       canInsert ? _attach.attach(paths) : Future.value(false);
 
+  /// The editor's paste, before it is plain text: spreadsheet cells
+  /// become a table (#1248).
   late final NotePaste _paste = NotePaste(
     canInsert: () => canInsert,
     clipboardFiles: () =>
         widget.readClipboardFiles?.call() ?? _clipboardFiles.read(),
     attach: _attach.attach,
     caretInCode: () => _sourceViewKey.currentState?.caretInCode ?? false,
-    surroundings: _selectionSurroundings,
+    surroundings: _inserts.surroundings,
     plainText: readPlainClipboard,
     pasteText: pasteText,
     replacePasted: replacePasted,
     messenger: () => mounted ? ScaffoldMessenger.maybeOf(context) : null,
   );
 
-  SelectionSurroundings? _selectionSurroundings() {
-    final surface = _surface;
-    if (surface == null) return null;
-    final buffer = surface.buffer;
-    final at = surface.selection.clampTo(buffer.length);
-    return (
-      before: buffer.substring(at.start < 2 ? 0 : at.start - 2, at.start),
-      after: buffer.substring(
-        at.end,
-        at.end + 2 > buffer.length ? buffer.length : at.end + 2,
-      ),
-    );
-  }
+  @override
+  PastedText? pasteText(String text) => _inserts.pasteText(text);
 
   @override
-  PastedText? pasteText(String text) {
-    final surface = _surface;
-    if (!canInsert || surface == null) return null;
-    final buffer = surface.buffer;
-    final at = surface.selection.clampTo(buffer.length);
-    final before = buffer.length;
-    surface.replaceSelection(text);
-    // What the note stored, which a Windows clipboard's `\r\n` pasted into
-    // an LF note is shorter than.
-    final stored = buffer.length - before + (at.end - at.start);
-    _focus.requestFocus();
-    return (
-      start: at.start,
-      text: buffer.substring(at.start, at.start + stored),
-    );
-  }
-
-  @override
-  void replacePasted(PastedText pasted, String text) {
-    final surface = _surface;
-    if (surface == null) return;
-    final buffer = surface.buffer;
-    final end = pasted.start + pasted.text.length;
-    if (end > buffer.length) return;
-    if (buffer.substring(pasted.start, end) != pasted.text) return;
-    surface.replaceRange(pasted.start, end, text);
-    _focus.requestFocus();
-  }
+  void replacePasted(PastedText pasted, String text) =>
+      _inserts.replacePasted(pasted, text);
 
   @override
   void convertListToMindMap() => _commands.convertListToMindMap();
