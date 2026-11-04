@@ -30,7 +30,6 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
@@ -106,6 +105,7 @@ import 'package:niman/src/markdown/render/source_folds.dart';
 import 'package:niman/src/markdown/render/source_line.dart';
 import 'package:niman/src/markdown/render/source_live_lines.dart';
 import 'package:niman/src/markdown/render/source_paragraphs.dart';
+import 'package:niman/src/markdown/render/source_pointer.dart';
 import 'package:niman/src/markdown/render/source_sections.dart';
 import 'package:niman/src/markdown/render/source_styling.dart';
 import 'package:niman/src/markdown/render/source_table_keys.dart';
@@ -124,6 +124,9 @@ import 'package:niman/src/templates/check_state.dart';
 import 'package:niman/src/templates/template_commands.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/window_visibility.dart';
+
+export 'package:niman/src/markdown/render/source_pointer.dart'
+    show SourceLinkHover;
 
 /// A link the writer Ctrl+clicked: its token's kind (a wikilink or a Markdown
 /// link), its text as written, brackets and all, and — for a Markdown link —
@@ -359,17 +362,6 @@ final class MarkdownSourceView extends StatefulWidget {
   State<MarkdownSourceView> createState() => MarkdownSourceViewState();
 }
 
-/// A link the pointer is on with the opening modifier held (#846): its kind
-/// (a wikilink or a Markdown link), as written (`[[…]]`, `[…](…)`), the target
-/// a reference link resolved to when its source spells none, and where the
-/// pointer is (global).
-typedef SourceLinkHover = ({
-  TokenKind kind,
-  String raw,
-  String? href,
-  Offset position,
-});
-
 /// The source view's state, so a caller can ask where the caret is.
 final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// The colours: read in place or in the background, moved along by
@@ -467,17 +459,6 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     blockOf: (line) => blockAt?.call(line),
     tokensOf: (line) => _lineAt(line).tokens,
   );
-
-  /// A press on a control `live` draws over the note — a fold arrow, a
-  /// diagram and its buttons — so the pointer going down under it places no
-  /// caret: the control answers the tap itself.
-  bool _controlPress = false;
-
-  /// The mouse press that went down opened a link ([_openLinkAt]), so the
-  /// click it ends as is spent: placing the caret where it was let go would
-  /// take the caret, and the view, back from wherever the link led — an
-  /// anchor in the same note is lines away.
-  bool _pressOpenedLink = false;
 
   /// The keyboard, wired to the buffer this view draws.
   late SourceInput _input;
@@ -631,7 +612,8 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     offsetAt: offsetAt,
     requestKeyboard: _requestKeyboard,
     caretRectAt: _caretRectAt,
-    followsLastClick: (global) => _followsLastClick(global, DateTime.now()),
+    followsLastClick: (global) =>
+        _pointer.followsLastClick(global, DateTime.now()),
     clipboardItems: (dismiss) => _menu.clipboardItems(dismiss, touch: true),
     spellingItems: (dismiss) => _menu.spellingItems(dismiss),
     formats: _menuFormats,
@@ -642,9 +624,32 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// The touch selection's handles or toolbar came or went.
   void _onTouchChanged() => setState(() {});
 
-  /// The kind of the pointer that last went down: a long press or a tap by a
-  /// finger is a touch gesture, by a mouse it is not.
-  PointerDeviceKind? _lastPointerKind;
+  /// The mouse's press, drag and hover over the note, the taps a click
+  /// counts, and the cursor it shows.
+  late final SourcePointer _pointer = SourcePointer(
+    buffer: () => widget.buffer,
+    selection: () => _selection,
+    live: () => widget.hideMarkers,
+    mounted: () => mounted,
+    touch: _touch,
+    offsetAt: offsetAt,
+    onScrollbar: _onScrollbar,
+    hoverTable: _hoverTableAt,
+    leaveTable: _leaveTable,
+    taskBoxAt: (global) => _taskBoxes.at(global) != null,
+    overTaskBox: _taskBoxes.over,
+    toggleTaskAt: _taskBoxes.toggleAt,
+    linkAt: linkAt,
+    openLink: () => widget.onOpenLink,
+    linkHover: () => widget.onLinkHover,
+    requestKeyboard: _requestKeyboard,
+    secondaryClick: _secondaryClick,
+    placeCaret: placeCaret,
+    extendTo: (offset) => _moveCaretTo(offset, extend: true),
+    select: _select,
+    inCell: (offset) => _inCell(offset, 0),
+    holdSync: ({required hold}) => _input.holdSync = hold,
+  );
 
   /// Ticks on every caret move, so the note's semantics — its text around the
   /// caret, and the selection in it — follow without rebuilding the note.
@@ -705,17 +710,6 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       return block == null ? null : _drawnTableGrid(block);
     },
   );
-
-  /// The pointer over the note: the text's, or the hand's over a task box a
-  /// click ticks (#505). A notifier, not state, so crossing a box repaints the
-  /// pointer alone and never rebuilds the note.
-  final ValueNotifier<MouseCursor> _hoverCursor = ValueNotifier<MouseCursor>(
-    SystemMouseCursors.text,
-  );
-
-  /// Where the mouse last was over the note, or null when it left: the
-  /// opening modifier going down re-asks the cursor about it (#725).
-  Offset? _hoverPosition;
 
   /// Whether the mouse is on one of the handles, off the table itself.
   bool _overTableHandles = false;
@@ -804,7 +798,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     widget.mathCache?.addListener(_onMathTypeset);
     // The hand over a Ctrl-clickable link appears when the modifier goes
     // down, and goes when it comes up, without waiting for a move (#725).
-    HardwareKeyboard.instance.addHandler(_modifierChanged);
+    HardwareKeyboard.instance.addHandler(_pointer.modifierChanged);
     // A window hidden to the tray draws nothing (#512): the caret blink is
     // its own frame source and stops while it is off screen.
     WindowVisibility.shown.addListener(_onWindowShown);
@@ -1018,7 +1012,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     _tableHoverClear?.cancel();
     _tableHover.dispose();
     _tableGridSettled.dispose();
-    _hoverCursor.dispose();
+    _pointer.dispose();
     widget.surface?.detachView(this);
     widget.spellCheck?.removeListener(_onSpellingChanged);
     widget.templateCheck?.removeListener(_onSpellingChanged);
@@ -1048,7 +1042,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     _menu
       ..removeListener(_onMenuChanged)
       ..dispose();
-    HardwareKeyboard.instance.removeHandler(_modifierChanged);
+    HardwareKeyboard.instance.removeHandler(_pointer.modifierChanged);
     if (_ownsScroll) _scroll.dispose();
     super.dispose();
   }
@@ -2490,78 +2484,6 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     widget.onChanged?.call(edit);
   }
 
-  /// How many taps have landed inside [_clickWindow], and when and where the
-  /// last did.
-  int _clicks = 0;
-  DateTime? _lastClick;
-  Offset? _lastClickAt;
-
-  /// How long two taps may be apart and still be one gesture.
-  static const Duration _clickWindow = Duration(milliseconds: 400);
-
-  /// Whether a tap at [position], at [now], is the next of the last one's
-  /// gesture: near it in time *and* in place. Two quick taps on different
-  /// words are two carets, not a double click — counting time alone selected
-  /// a word under the second tap and the next keystroke replaced it.
-  bool _followsLastClick(Offset position, DateTime now) {
-    final last = _lastClick;
-    final lastAt = _lastClickAt;
-    return last != null &&
-        lastAt != null &&
-        now.difference(last) <= _clickWindow &&
-        (position - lastAt).distance <= kDoubleTapSlop;
-  }
-
-  /// A tap: one places the caret, two take the word under it, three take the
-  /// line.
-  ///
-  /// The two- and three-tap selections come up with the touch handles and
-  /// menu, as a long press does: on a phone a word the finger selected is a
-  /// selection the finger can act on, whatever picked it (#291). A mouse's
-  /// second click is a double click and keeps its menu for the right button,
-  /// so the overlay is the finger's alone.
-  ///
-  /// Counted here rather than with `onDoubleTap`, because a triple click is a
-  /// *third* tap and not a second double one, and because the count has to
-  /// survive
-  /// the caret moving between taps — which is exactly what happens.
-  void _tapUp(Offset position) {
-    final finger = _lastPointerKind != PointerDeviceKind.mouse;
-    final offset = (finger ? null : _pressOffset) ?? offsetAt(position);
-    _pressOffset = null;
-    if (offset == null) return;
-    final now = DateTime.now();
-    _clicks = _followsLastClick(position, now) ? _clicks + 1 : 1;
-    _lastClick = now;
-    _lastClickAt = position;
-    switch (_clicks) {
-      case 1:
-        // A Shift+click extended the selection as it went down.
-        if (!finger && HardwareKeyboard.instance.isShiftPressed) break;
-        // A click on a table's room puts the caret in the nearer cell.
-        placeCaret(_inCell(offset, 0));
-      case 2:
-        // A word never crosses a line: the line's text, not the note's.
-        final line = widget.buffer.lineOf(offset);
-        final lineStart = widget.buffer.offsetOfLine(line);
-        final text = widget.buffer.lineAt(line);
-        final (start, end) = wordRangeAt(text, offset - lineStart);
-        _select(
-          lineStart + math.min(start, text.length),
-          lineStart + math.min(end, text.length),
-        );
-        if (finger) _touch.show(toolbar: true);
-      default:
-        final line = widget.buffer.lineOf(offset);
-        _select(
-          widget.buffer.offsetOfLine(line),
-          widget.buffer.offsetOfLine(line) + widget.buffer.lineLengthAt(line),
-        );
-        _clicks = 0;
-        if (finger) _touch.show(toolbar: true);
-    }
-  }
-
   /// Selects `[start, end)` by a click or a jump: the note rebuilt, and the
   /// wikilink panel left as it is.
   void _select(int start, int end) => _applySelection(
@@ -2573,20 +2495,6 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// Selects everything.
   void selectAll() => _select(0, widget.buffer.length);
 
-  /// The offset a mouse drag started from, or null when no drag is running.
-  int? _dragAnchor;
-
-  /// Where a mouse press put the caret, for the click it ends as to keep:
-  /// typewriter mode scrolls the caret's row to the middle as the button
-  /// goes down, and the release, read again where the pointer is, landed
-  /// a row further on (#544).
-  int? _pressOffset;
-
-  /// Whether the mouse went down on the scrollbar's strip (#1106): the drag
-  /// belongs to the scrollbar, so the note takes no caret and no selection
-  /// from it.
-  bool _pressOnScrollbar = false;
-
   /// Whether [global], a position in the window, is on the scrollbar's track
   /// (#1106): a mouse there belongs to the scrollbar, not to the text. Asked
   /// of the bar itself ([pointerOnScrollbar]), so there is no strip when the
@@ -2596,133 +2504,6 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     metrics: _scroll.hasClients ? _scroll.position : null,
     global: global,
   );
-
-  /// [child] with mouse dragging selecting text.
-  ///
-  /// Mouse only, deliberately: on a phone a vertical drag on the text *scrolls*
-  /// the note, and stealing that gesture to select would break the way people
-  /// read. Selection by touch belongs to the platform's own handles, which is a
-  /// separate piece of work.
-  Widget _mouseSelection(Widget child) => Listener(
-    onPointerHover: (event) {
-      // The scrollbar's strip belongs to the scrollbar: the pointer keeps the
-      // arrow there, and neither the table nor the cursor is asked (#1106).
-      if (_onScrollbar(event.position)) {
-        _hoverPosition = null;
-        _leaveTable();
-        _reportLinkHover(null, Offset.zero);
-        if (_hoverCursor.value != SystemMouseCursors.basic) {
-          _hoverCursor.value = SystemMouseCursors.basic;
-        }
-        return;
-      }
-      // The offset under the pointer is one question, asked once and shared:
-      // both the table and the cursor read it (#505). Outside `live` there is
-      // no box and no table, and neither the offset nor the note is touched —
-      // unless the opening modifier is down, when the cursor asks about the
-      // link under the pointer (#725).
-      _hoverPosition = event.position;
-      final offset = widget.hideMarkers || _linkModifier()
-          ? offsetAt(event.position)
-          : null;
-      _hoverTableAt(offset, event.position);
-      _hoverCursorAt(offset, event.position);
-    },
-    onPointerDown: (event) {
-      _lastPointerKind = event.kind;
-      _pressOffset = null;
-      _pressOpenedLink = false;
-      if (event.kind == PointerDeviceKind.mouse &&
-          _onScrollbar(event.position)) {
-        // The scrollbar takes the drag; the note takes nothing (#1106).
-        _pressOnScrollbar = true;
-        _hoverPosition = null;
-        return;
-      }
-      _pressOnScrollbar = false;
-      _trackMouse(event);
-      // A mouse asks for the keyboard as it goes down, which is where a click
-      // starts a drag; a finger asks on the tap (`onTapUp`), so a finger that
-      // only scrolls the note does not bring the keyboard up.
-      if (event.kind != PointerDeviceKind.mouse) return;
-      _touch.hide();
-      _requestKeyboard();
-      if (_controlPress) {
-        _controlPress = false;
-        return;
-      }
-      if (event.buttons == kSecondaryMouseButton) {
-        _secondaryClick(event.position);
-        return;
-      }
-      if (event.buttons != kPrimaryMouseButton) return;
-      // A press on a task box ticks it when it is let go (`_tapUp`): it
-      // neither places a caret nor starts a selection.
-      if (_taskBoxes.at(event.position) != null) return;
-      final offset = _pressOffset = offsetAt(event.position);
-      if (offset == null) return;
-      if (_openLinkAt(offset)) {
-        _pressOpenedLink = true;
-        return;
-      }
-      // Shift+click extends the selection from its anchor to the click, and
-      // a drag from there goes on extending it (#546).
-      if (HardwareKeyboard.instance.isShiftPressed) {
-        _dragAnchor = _selection.anchor;
-        _moveCaretTo(offset, extend: true);
-      } else {
-        _dragAnchor = offset;
-        placeCaret(offset);
-      }
-      // The platform needs the selection the drag ends with, not every one on
-      // the way: a whole note per mouse move is what a drag must not cost.
-      _input.holdSync = true;
-    },
-    onPointerMove: (event) {
-      if (_pressOnScrollbar) return;
-      _trackMouse(event);
-      final anchor = _dragAnchor;
-      if (anchor == null) return;
-      if (event.kind != PointerDeviceKind.mouse) return;
-      final offset = offsetAt(event.position);
-      if (offset == null) return;
-      _select(anchor, offset);
-    },
-    onPointerUp: (event) {
-      if (_pressOnScrollbar) {
-        _pressOnScrollbar = false;
-        return;
-      }
-      _trackMouse(event);
-      _endDrag();
-    },
-    onPointerCancel: (_) {
-      _pressOnScrollbar = false;
-      _endDrag();
-    },
-    child: child,
-  );
-
-  /// Keeps [_hoverPosition] where the mouse is while a button is down too:
-  /// a press and a drag send no hover, and the modifier going down after a
-  /// drag asked the cursor about where the drag began — the hand over plain
-  /// text, where a click opens nothing (#787).
-  void _trackMouse(PointerEvent event) {
-    if (event.kind == PointerDeviceKind.mouse) _hoverPosition = event.position;
-  }
-
-  /// A Ctrl+click (Cmd on a Mac) on a link at [offset]: the caret goes there
-  /// and the link opens, the legacy editor's T-M3-07. True when it did.
-  bool _openLinkAt(int offset) {
-    final open = widget.onOpenLink;
-    if (open == null) return false;
-    if (!_linkModifier()) return false;
-    final link = linkAt(offset);
-    if (link == null) return false;
-    placeCaret(offset);
-    open(link.$1, link.$2, link.$3);
-    return true;
-  }
 
   /// The wikilink or Markdown link under [offset] — its kind, its text as
   /// written, and a Markdown link's resolved target — or null. An offset on
@@ -2752,22 +2533,6 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       }
     }
     return null;
-  }
-
-  void _endDrag() {
-    _dragAnchor = null;
-    _input.holdSync = false;
-  }
-
-  /// A pointer went down on a diagram `live` draws (#530). A mouse's
-  /// primary button would place the caret under it as it goes down — in the
-  /// block, revealing its source and taking the diagram, and the button the
-  /// pointer is on, away before it is let go; the diagram answers the click
-  /// instead.
-  void _diagramDown(PointerDownEvent event) {
-    if (event.kind != PointerDeviceKind.mouse) return;
-    if (event.buttons != kPrimaryMouseButton) return;
-    _controlPress = true;
   }
 
   /// A tap on a diagram `live` draws, or on its parse error: the caret on
@@ -3698,69 +3463,25 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
             final footnotes = widget.hideMarkers
                 ? _styler?.footnotes ?? const <Footnote>[]
                 : const <Footnote>[];
-            return _mouseSelection(
+            return _pointer.listen(
               GestureDetector(
                 behavior: HitTestBehavior.opaque,
-                // The keyboard is asked for on the *tap*: a drag the scroll
-                // view wins is someone reading, not someone about to type.
-                onTapUp: (details) {
-                  // A mouse tap on the scrollbar's strip is the scrollbar's,
-                  // not the text's: no caret, no keyboard. A finger is the
-                  // text's anywhere (#1106).
-                  if (details.kind == PointerDeviceKind.mouse &&
-                      _onScrollbar(details.globalPosition)) {
-                    _lastClick = null;
-                    return;
-                  }
-                  // A task box is ticked where it is drawn, and a tick is
-                  // neither a caret nor a reason to raise the keyboard; nor
-                  // the first of a double click.
-                  if (_taskBoxes.toggleAt(details.globalPosition)) {
-                    _lastClick = null;
-                    return;
-                  }
-                  // The press opened a link: it placed the caret it meant to,
-                  // and the link may have moved it since.
-                  if (_pressOpenedLink) {
-                    _pressOpenedLink = false;
-                    _pressOffset = null;
-                    _lastClick = null;
-                    return;
-                  }
-                  _requestKeyboard();
-                  if (details.kind != PointerDeviceKind.mouse &&
-                      _touch.tap(details.globalPosition)) {
-                    return;
-                  }
-                  _tapUp(details.globalPosition);
-                },
+                onTapUp: _pointer.tapUp,
                 // Selecting by touch: a long press takes the word under the
                 // finger, moving it extends by words, and letting go brings
                 // the toolbar up. A mouse has its drag instead.
-                onLongPressStart: (details) {
-                  if (_lastPointerKind == PointerDeviceKind.mouse) return;
-                  _touch.longPressAt(details.globalPosition, start: true);
-                },
-                onLongPressMoveUpdate: (details) {
-                  if (_lastPointerKind == PointerDeviceKind.mouse) return;
-                  _touch.longPressAt(details.globalPosition, start: false);
-                },
-                onLongPressEnd: (details) {
-                  if (_lastPointerKind == PointerDeviceKind.mouse) return;
-                  _touch.show(toolbar: true);
-                },
+                onLongPressStart: (details) =>
+                    _pointer.longPressAt(details.globalPosition, start: true),
+                onLongPressMoveUpdate: (details) =>
+                    _pointer.longPressAt(details.globalPosition, start: false),
+                onLongPressEnd: (_) => _pointer.longPressEnd(),
                 // The text's own pointer over the note; the gutter keeps the
                 // arrow (`_Line`), and a drawn task box the hand (#505).
                 child: ValueListenableBuilder<MouseCursor>(
-                  valueListenable: _hoverCursor,
+                  valueListenable: _pointer.cursor,
                   builder: (context, cursor, child) => MouseRegion(
                     cursor: cursor,
-                    onExit: (_) {
-                      _leaveTable();
-                      _hoverPosition = null;
-                      _hoverCursor.value = SystemMouseCursors.text;
-                      _reportLinkHover(null, Offset.zero);
-                    },
+                    onExit: (_) => _pointer.exit(),
                     child: child,
                   ),
                   child: NotificationListener<ScrollMetricsNotification>(
@@ -3887,8 +3608,8 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       key: ValueKey<int>(index),
       fold: inColumn ? SourceFoldMark.none : _foldMarkOf(index),
       onFold: () => toggleFold(index),
-      onFoldDown: () => _controlPress = true,
-      onDiagramDown: _diagramDown,
+      onFoldDown: _pointer.controlPressed,
+      onDiagramDown: _pointer.diagramDown,
       onDiagramLine: _openDiagramLine,
       paragraphKey: _paragraphs.keyFor(index),
       styled: styled,
@@ -4102,7 +3823,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// on the handles' side of the table it was on — that one still.
   ///
   /// [offset] is the offset under the pointer, computed once by the hover
-  /// handler and shared with [_hoverCursorAt].
+  /// handler and shared with the cursor's.
   void _hoverTableAt(int? offset, Offset global) {
     if (!widget.hideMarkers || _touchTables) return;
     int? table;
@@ -4133,79 +3854,6 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     _tableHoverClear?.cancel();
     _tableHover.value = table;
     _tableOverlay.show();
-  }
-
-  /// Whether the opening modifier is held: Control, or Command on a Mac.
-  static bool _linkModifier() {
-    final keyboard = HardwareKeyboard.instance;
-    return defaultTargetPlatform == TargetPlatform.macOS
-        ? keyboard.isMetaPressed
-        : keyboard.isControlPressed;
-  }
-
-  /// The modifier went down or up while the pointer sat still: the cursor
-  /// answers it where it is, without a move to wait for (#725).
-  bool _modifierChanged(KeyEvent event) {
-    if (event.logicalKey != LogicalKeyboardKey.controlLeft &&
-        event.logicalKey != LogicalKeyboardKey.controlRight &&
-        event.logicalKey != LogicalKeyboardKey.metaLeft &&
-        event.logicalKey != LogicalKeyboardKey.metaRight) {
-      return false;
-    }
-    final point = _hoverPosition;
-    if (point != null && mounted) {
-      final offset = widget.hideMarkers || _linkModifier()
-          ? offsetAt(point)
-          : null;
-      _hoverCursorAt(offset, point);
-    }
-    return false;
-  }
-
-  /// Points the mouse's cursor at what is under it: the hand over a drawn task
-  /// box, which a click ticks, or over a link the opening modifier would open
-  /// (#505, #725), the text's everywhere else.
-  ///
-  /// [offset] is the offset under the pointer, computed once by the hover
-  /// handler and shared with [_hoverTableAt].
-  void _hoverCursorAt(int? offset, Offset global) {
-    final cursor = _taskBoxes.over(offset, global) || _overLink(offset)
-        ? SystemMouseCursors.click
-        : SystemMouseCursors.text;
-    if (_hoverCursor.value != cursor) _hoverCursor.value = cursor;
-    _reportLinkHover(offset, global);
-  }
-
-  /// The link the pointer is on with the opening modifier held, as last told
-  /// to [MarkdownSourceView.onLinkHover]: a pointer moving along one link
-  /// tells once.
-  String? _hoveredLink;
-
-  /// Tells [MarkdownSourceView.onLinkHover] which link the pointer is on —
-  /// only with the modifier down, which is the intent to open it — or that it
-  /// is on none. Asked of the same line [_overLink] reads, so a hover costs no
-  /// scan of the note.
-  void _reportLinkHover(int? offset, Offset global) {
-    final report = widget.onLinkHover;
-    if (report == null) return;
-    final link = offset != null && _linkModifier() ? linkAt(offset) : null;
-    final key = link == null ? null : '${link.$1.name}|${link.$2}';
-    if (key == _hoveredLink) return;
-    _hoveredLink = key;
-    report(
-      link == null
-          ? null
-          : (kind: link.$1, raw: link.$2, href: link.$3, position: global),
-    );
-  }
-
-  /// Whether the opening modifier over [offset] would open a link: the very
-  /// predicate the Ctrl+click runs ([_openLinkAt]), so the hand and the click
-  /// cannot disagree (#725). [linkAt] reads the one line the offset is on.
-  bool _overLink(int? offset) {
-    if (offset == null || widget.onOpenLink == null) return false;
-    if (!_linkModifier()) return false;
-    return linkAt(offset) != null;
   }
 
   /// The mouse is off the table: its handles go, unless it is on them.
