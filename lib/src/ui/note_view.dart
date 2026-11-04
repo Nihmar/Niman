@@ -36,8 +36,6 @@ import 'package:niman/src/links/parser.dart';
 import 'package:niman/src/links/suggester.dart';
 import 'package:niman/src/markdown/background_scan.dart';
 import 'package:niman/src/markdown/edit/source_find.dart';
-import 'package:niman/src/markdown/line_ending.dart';
-import 'package:niman/src/markdown/note_framing.dart';
 import 'package:niman/src/markdown/note_load.dart';
 import 'package:niman/src/markdown/note_read_failure.dart';
 import 'package:niman/src/markdown/read_parser.dart';
@@ -61,6 +59,7 @@ import 'package:niman/src/ui/link_preview/note_link_preview.dart';
 import 'package:niman/src/ui/links_to_note_section.dart';
 import 'package:niman/src/ui/note_attach.dart';
 import 'package:niman/src/ui/note_dead_links.dart';
+import 'package:niman/src/ui/note_disk.dart';
 import 'package:niman/src/ui/note_edit_commands.dart';
 import 'package:niman/src/ui/note_frontmatter_panel.dart';
 import 'package:niman/src/ui/note_link_actions.dart';
@@ -845,25 +844,9 @@ final class _NoteViewState extends State<NoteView>
   @override
   SpellReview? get spellReview => _commands.spellReview(edited: _stats);
 
-  /// What the note's file looked like when it was last read or written.
-  ///
-  /// A reload is asked for by a watcher, and a watcher is not a promise: a
-  /// touch, a rescan, or a change to a file that was already saved all arrive
-  /// as "the note changed". Knowing the file's size and time is O(1), and it
-  /// is what tells a real change from an event — the read, the normalize and
-  /// the comparison against the pane's text are what cost on a 246 MB note
-  /// (208 ms to join the pane's text, 734 ms to normalize a fresh read, 44 ms
-  /// to compare; measured 2026-09-22).
-  ///
-  /// Never stat'ed here (#1060): a read brings the stamp of the file from
-  /// before it was read, a save brings the one of the file it left, and a
-  /// look at the file asks the I/O threads ([DiskStamp.ofAsync]).
-  DiskStamp? _diskStamp;
-
-  /// The line ending and byte order mark the note's file has (#1056). The
-  /// buffer holds `\n` lines and no mark whatever the file had; a save writes
-  /// these back.
-  NoteFraming _framing = NoteFraming.plain;
+  /// The note's file: reading it off the UI isolate, and what it looked like
+  /// when it was last read or written — its stamp and its framing.
+  late final NoteDisk _disk = NoteDisk(readNote: () => widget.readNote);
 
   /// The read pane's refresh (T-M2-08), after a pause in the typing.
   Timer? _previewTimer;
@@ -1023,19 +1006,19 @@ final class _NoteViewState extends State<NoteView>
     text: () => _text.text,
     buffer: () => _unifiedSurfaceBuffer,
     references: () => _sourceViewKey.currentState?.references(),
-    framing: () => _framing,
+    framing: () => _disk.framing,
     saveNote: () => widget.saveNote,
     writeNote: () => widget.writeNote,
     saveNoteStream: () => widget.saveNoteStream,
     onSaved: (path, stamp) {
-      _diskStamp = stamp;
+      _disk.stamp = stamp;
       _unsaved?.noteChanged();
     },
     onSettled: () {
       if (mounted) setState(() {});
     },
     hold: widget.unsavedTracker?.hold,
-    diskStamp: () => _diskStamp,
+    diskStamp: () => _disk.stamp,
     onExternalKept: (_) {
       if (!mounted) return;
       ScaffoldMessenger.maybeOf(context)
@@ -1330,19 +1313,11 @@ final class _NoteViewState extends State<NoteView>
     });
     final clock = Stopwatch()..start();
     try {
-      final String content;
+      final opened = await _disk.open(path);
+      final content = opened.content;
       // The note made ready off the UI isolate — its buffer with its text —
       // for the unified surface, which is what it draws.
-      LoadedNote? ready;
-      if (widget.readNote != null) {
-        // The test seam: content per the injected reader.
-        content = await widget.readNote!(path);
-      } else {
-        final loaded = await loadNote(path);
-        if (loaded is NoteReadFailure) throw loaded;
-        ready = loaded as LoadedNote;
-        content = ready.text;
-      }
+      final ready = opened.ready;
       if (!mounted || generation != _loadGeneration) return;
       // The buffer uses LF: normalize line endings on load.
       final onDisk = ready?.text ?? normalizedLineEndings(content);
@@ -1366,12 +1341,7 @@ final class _NoteViewState extends State<NoteView>
         caret: (widget.initialCaretOffset ?? 0).clamp(0, text.length),
         ready: restored ? null : ready,
       );
-      // The test seam reads nothing, so it has no stamp to keep.
-      _diskStamp = ready?.stamp;
-      // The seam's content is text already: whatever mark it holds is in it.
-      _framing =
-          ready?.framing ??
-          NoteFraming(lineEnding: LineEnding.dominantOf(content));
+      _disk.adoptOpened(opened);
       _surfaceCaretLine = null;
       _text.text = text;
       // A template `{{cursor}}` landing (#53): the surface was given the
@@ -1459,13 +1429,7 @@ final class _NoteViewState extends State<NoteView>
       setState(() {
         _loading = false;
         _notText = notText;
-        _error = switch (reason) {
-          NoteReadReason.notText => AppStrings.noteNotText,
-          NoteReadReason.missing => AppStrings.noteLoadMissing,
-          NoteReadReason.denied => AppStrings.noteLoadDenied,
-          NoteReadReason.locked => AppStrings.noteLoadLocked,
-          NoteReadReason.other => AppStrings.noteLoadFailed,
-        };
+        _error = NoteDisk.failureMessage(reason);
       });
       _log.error('note load failed: $path ($error)');
     }
@@ -1508,30 +1472,15 @@ final class _NoteViewState extends State<NoteView>
     // read: O(1) against 250 ms of joining and comparing, and O(1) against
     // the read itself. The test seam reads nothing, so it has no stamp to
     // check and reads on.
-    if (widget.readNote == null && await _unchangedOnDisk(path)) {
+    if (widget.readNote == null && await _disk.unchanged(path)) {
       _log.debug('reload skipped (the file did not change): $path');
       return;
     }
     // The reader may have typed, or moved on, while the file was asked.
     if (!mounted || generation != _loadGeneration) return;
     if (_loading || _saves.busy || _saves.dirty) return;
-    final String content;
-    DiskStamp? stamp;
-    NoteFraming? framing;
-    try {
-      if (widget.readNote != null) {
-        content = await widget.readNote!(path);
-      } else {
-        final loaded = await readNoteText(path);
-        if (loaded is! NoteTextRead) return;
-        content = loaded.text;
-        stamp = loaded.stamp;
-        framing = loaded.framing;
-      }
-    } on Object catch (error) {
-      _log.warning('reload read failed: $path ($error)');
-      return;
-    }
+    final read = await _disk.reread(path);
+    if (read == null) return;
     if (!mounted || widget.path != path || generation != _loadGeneration) {
       return;
     }
@@ -1540,13 +1489,11 @@ final class _NoteViewState extends State<NoteView>
     if (_loading || _saves.busy || _saves.dirty) {
       return;
     }
-    final text = normalizedLineEndings(content);
+    final text = normalizedLineEndings(read.content);
     // The file is what the pane has, or is about to be: either way this is
     // the file that was looked at, so the next look can stop at the stamp
     // instead of reading it again (#1060).
-    _diskStamp = stamp;
-    _framing =
-        framing ?? NoteFraming(lineEnding: LineEnding.dominantOf(content));
+    _disk.adoptReread(read);
     if (text == _text.text) return;
     // Mute the programmatic change like _load does: the listener returns
     // before the revision bump and the save schedule.
@@ -1973,13 +1920,6 @@ final class _NoteViewState extends State<NoteView>
       _refreshPreview();
     },
   );
-
-  /// Whether the file at [path] is the one [_diskStamp] recorded.
-  ///
-  /// A file that cannot be stat'ed, or one nothing recorded, is read: the
-  /// fallback is the comparison this stands in front of.
-  Future<bool> _unchangedOnDisk(String path) async =>
-      await _diskStamp?.matchesAsync(path) ?? false;
 
   void _onFocusChanged() {
     if (!_focus.hasFocus) _saves.saveInBackground();
