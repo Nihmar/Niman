@@ -15,7 +15,6 @@ import 'package:niman/src/calendar/calendar_writer.dart';
 import 'package:niman/src/calendar/parser.dart';
 import 'package:niman/src/core/theme_tokens.dart';
 import 'package:niman/src/journal/journal_summary.dart';
-import 'package:niman/src/ui/action_sheet.dart';
 import 'package:niman/src/ui/journal/journal_calendar.dart';
 import 'package:niman/src/ui/journal/journal_day_card.dart';
 import 'package:niman/src/ui/journal/journal_day_events.dart';
@@ -23,7 +22,7 @@ import 'package:niman/src/ui/journal/journal_dock_create_row.dart';
 import 'package:niman/src/ui/journal/journal_due_tasks.dart';
 import 'package:niman/src/ui/journal/journal_event_actions.dart';
 import 'package:niman/src/ui/journal/journal_event_editor.dart';
-import 'package:niman/src/ui/journal/journal_event_sheet.dart';
+import 'package:niman/src/ui/journal/journal_event_runner.dart';
 import 'package:niman/src/ui/journal/journal_never_listenable.dart';
 import 'package:niman/src/ui/journal/journal_recent_entry.dart';
 import 'package:niman/src/ui/strings.dart';
@@ -359,13 +358,15 @@ final class _JournalBrowserState extends State<JournalBrowser> {
                 // file); a window goes straight to the file, which is where
                 // it is edited (#730).
                 onTapEvent: widget.large && _sheetOffered
-                    ? (entry) => unawaited(_showEventSheet(entry))
+                    ? (entry) =>
+                          unawaited(_eventRunner.showSheet(this.context, entry))
                     : widget.onOpenEvent,
                 // The dock has no sheet: its events have a menu (#1191).
                 onEventMenu: widget.large || !_offered.any
                     ? null
-                    : (entry, position) =>
-                          unawaited(_showEventMenu(entry, position)),
+                    : (entry, position) => unawaited(
+                        _eventRunner.showMenu(this.context, entry, position),
+                      ),
               );
             },
           ),
@@ -420,87 +421,17 @@ final class _JournalBrowserState extends State<JournalBrowser> {
     return offered.edit || offered.skip || offered.delete;
   }
 
-  /// The phone's sheet for one event (#730): what it is, its day, its rule
-  /// and its reminder, and what to do with it.
-  Future<void> _showEventSheet(CalendarEntryEvent entry) async {
-    final action = await showJournalEventSheet(
-      context,
-      entry: entry,
-      offered: _offered,
-    );
-    if (action == null || !mounted) return;
-    await _runEventAction(action, entry);
-  }
-
-  /// The dock's context menu of an event, at a right click (#1191).
-  Future<void> _showEventMenu(CalendarEntryEvent entry, Offset position) async {
-    if (!_offered.any) return;
-    final action = await showJournalEventMenu(
-      context,
-      entry: entry,
-      offered: _offered,
-      position: position,
-    );
-    if (action == null || !mounted) return;
-    await _runEventAction(action, entry, anchor: menuAnchorAt(position));
-  }
-
-  /// Carries out [action] on [entry]. Edit and Delete of an event that
-  /// repeats first ask which occurrences they mean (#1191); [anchor] is
-  /// where a window's question opens.
-  Future<void> _runEventAction(
-    JournalEventAction action,
-    CalendarEntryEvent entry, {
-    Rect? anchor,
-  }) async {
-    switch (action) {
-      case JournalEventAction.edit:
-        final scope = await askOccurrenceScope(
-          context,
-          entry: entry,
-          deleting: false,
-          anchor: anchor,
-        );
-        if (scope == null || !mounted) return;
-        // An event that does not repeat has no scope: its form moves it.
-        final scoped = entry.repeats ? scope : null;
-        _openForm(
-          day: _formDayOf(entry, scoped),
-          editing: entry,
-          scope: scoped,
-        );
-      case JournalEventAction.skip:
-        widget.onSkipEvent?.call(entry);
-      case JournalEventAction.delete:
-        final scope = await askOccurrenceScope(
-          context,
-          entry: entry,
-          deleting: true,
-          anchor: anchor,
-        );
-        if (scope == null || !mounted) return;
-        widget.onDeleteEvent?.call(entry, scope);
-      case JournalEventAction.open:
-        widget.onOpenEvent?.call(entry);
-    }
-  }
-
-  /// The day an entry is the event of, for a write that needs one: the
-  /// occurrence's own day (#1191), else the day the pane speaks for.
-  DateTime _dayOfEntry(CalendarEntryEvent entry) =>
-      entry.day ?? (widget.large ? _selected : widget.focusDay ?? widget.today);
-
-  /// The day an edit's form opens on (#1221): the day the form writes the
-  /// event on, which its Ends row counts from and its Repeat presets are
-  /// taken from. For all the events of a series it is the series' first day,
-  /// where the rule event is written; for the rest the occurrence's own — the
-  /// one that is changed, or the one the new series starts on.
-  DateTime _formDayOf(
-    CalendarEntryEvent entry,
-    CalendarOccurrenceScope? scope,
-  ) => scope == CalendarOccurrenceScope.all
-      ? entry.line.date ?? _dayOfEntry(entry)
-      : _dayOfEntry(entry);
+  /// What a tap or a right click on an event leads to: the shell's writes,
+  /// read from the widget when the action is carried out.
+  JournalEventRunner get _eventRunner => JournalEventRunner(
+    offered: _offered,
+    paneDay: () => widget.large ? _selected : widget.focusDay ?? widget.today,
+    onEdit: (day, entry, scope) =>
+        _openForm(day: day, editing: entry, scope: scope),
+    onSkip: (entry) => widget.onSkipEvent?.call(entry),
+    onDelete: (entry, scope) => widget.onDeleteEvent?.call(entry, scope),
+    onOpen: (entry) => widget.onOpenEvent?.call(entry),
+  );
 
   /// New journal, Add event and Add task for the picked day (#730), each
   /// only when the shell gave the way to write it: the buttons never
