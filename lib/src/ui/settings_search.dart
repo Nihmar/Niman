@@ -7,7 +7,6 @@ import 'package:niman/src/transcription/transcription_models.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/key_map.dart';
 import 'package:niman/src/ui/keyboard_shortcuts.dart';
-import 'package:niman/src/ui/ocr/ocr_settings_section.dart';
 import 'package:niman/src/ui/settings_area_features.dart';
 import 'package:niman/src/ui/settings_areas.dart';
 import 'package:niman/src/ui/settings_commands.dart';
@@ -18,9 +17,8 @@ import 'package:niman/src/ui/settings_search_editor.dart';
 import 'package:niman/src/ui/settings_search_entry.dart';
 import 'package:niman/src/ui/settings_search_library.dart';
 import 'package:niman/src/ui/settings_search_scope.dart';
+import 'package:niman/src/ui/settings_search_services.dart';
 import 'package:niman/src/ui/strings.dart';
-import 'package:niman/src/ui/sync/sync_labels.dart';
-import 'package:niman/src/ui/transcription/transcription_settings_section.dart';
 
 export 'package:niman/src/ui/settings_search_entry.dart';
 export 'package:niman/src/ui/settings_search_match.dart';
@@ -45,10 +43,6 @@ List<SettingsSearchEntry> settingsSearchEntries({
       Navigator.of(context)
           .push(MaterialPageRoute<void>(builder: (context) => screen));
 
-  String libraryArea(String area) =>
-      '${AppStrings.settingsGroupLibrary(libraryName)} › $area';
-  String onOff({required bool on}) =>
-      on ? AppStrings.settingsToggleOn : AppStrings.settingsToggleOff;
   Future<String?> noValue() async => null;
 
   final maintenance = AppStrings.settingsGroupMaintenance;
@@ -64,84 +58,7 @@ List<SettingsSearchEntry> settingsSearchEntries({
     ...editorSearchEntries(scope),
     ...librarySearchEntries(scope),
     ...diagnosticsSearchEntries(scope),
-    SettingsSearchEntry(
-      title: AppStrings.reminderShowTokensTitle,
-      area: libraryArea(AppStrings.settingsSectionReminders),
-      rowKey: SettingsKeys.reminderShowTokens,
-      value: () async => onOff(on: await controller.reminderShowTokens),
-      areaId: SettingsAreaId.reminders,
-      open: () =>
-          openArea(SettingsAreaId.reminders, SettingsKeys.reminderShowTokens),
-    ),
-    if (ocr case final ocr?) ...[
-      SettingsSearchEntry(
-        title: AppStrings.ocrQualityTitle,
-        area: AppStrings.settingsSectionTextRecognition,
-        rowKey: SettingsKeys.ocrQuality,
-        value: () async => ocrQualityLabel(ocr.settings.quality),
-        areaId: SettingsAreaId.textRecognition,
-        open: () =>
-            openArea(SettingsAreaId.textRecognition, SettingsKeys.ocrQuality),
-      ),
-      SettingsSearchEntry(
-        title: AppStrings.ocrLanguageTitle,
-        area: AppStrings.settingsSectionTextRecognition,
-        rowKey: SettingsKeys.ocrLanguage,
-        value: () async => ocr.defaultLanguage().native,
-        areaId: SettingsAreaId.textRecognition,
-        open: () =>
-            openArea(SettingsAreaId.textRecognition, SettingsKeys.ocrLanguage),
-      ),
-      SettingsSearchEntry(
-        title: AppStrings.ocrAlsoTitle,
-        area: AppStrings.settingsSectionTextRecognition,
-        rowKey: SettingsKeys.ocrAlso,
-        value: () async => ocr.alsoLanguage()?.native ?? AppStrings.ocrAlsoNone,
-        areaId: SettingsAreaId.textRecognition,
-        open: () =>
-            openArea(SettingsAreaId.textRecognition, SettingsKeys.ocrAlso),
-      ),
-    ],
-    if (transcription case final models?) ...[
-      SettingsSearchEntry(
-        title: AppStrings.transcriptionModelTitle,
-        area: libraryArea(AppStrings.settingsSectionTranscription),
-        rowKey: SettingsKeys.transcriptionModel,
-        value: () async {
-          final model = models.defaultModel;
-          return model == null
-              ? AppStrings.transcriptionModelNone
-              : AppStrings.transcriptionModelName(model);
-        },
-        areaId: SettingsAreaId.transcription,
-        open: () => openArea(
-          SettingsAreaId.transcription,
-          SettingsKeys.transcriptionModel,
-        ),
-      ),
-      SettingsSearchEntry(
-        title: AppStrings.transcriptionLanguageTitle,
-        area: libraryArea(AppStrings.settingsSectionTranscription),
-        rowKey: SettingsKeys.transcriptionLanguage,
-        value: () async => TranscriptionSettingsSection.languageLabel(
-          models.settings.language,
-        ),
-        open: () => openArea(
-          SettingsAreaId.transcription,
-          SettingsKeys.transcriptionLanguage,
-        ),
-      ),
-    ],
-    if (controller.sync case final sync?)
-      SettingsSearchEntry(
-        title: AppStrings.settingsSectionSync,
-        area: libraryArea(AppStrings.settingsSectionSync),
-        rowKey: const Key('settings-area-sync'),
-        value: () async => syncStatusLine(sync.status, DateTime.now()),
-        areaId: SettingsAreaId.sync,
-        open: () =>
-            openArea(SettingsAreaId.sync, const Key('settings-area-sync')),
-      ),
+    ...serviceSearchEntries(scope, ocr: ocr, transcription: transcription),
     // Maintenance lives on the home itself: opening one means clearing
     // the search and flashing the row in place.
     SettingsSearchEntry(
