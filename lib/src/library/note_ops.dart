@@ -6,7 +6,6 @@ import 'dart:typed_data';
 import 'package:meta/meta.dart';
 import 'package:niman/src/core/file_holds.dart';
 import 'package:niman/src/core/files.dart';
-import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/core/settings/library_config_repo.dart';
 import 'package:niman/src/core/settings/navigation_layout.dart';
@@ -17,7 +16,7 @@ import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/history/note_history.dart';
 import 'package:niman/src/home/home_layout.dart';
 import 'package:niman/src/journal/journal_settings.dart';
-import 'package:niman/src/library/folder_spelling.dart';
+import 'package:niman/src/library/library_journal.dart';
 import 'package:niman/src/library/library_layouts.dart';
 import 'package:niman/src/library/note_creation.dart';
 import 'package:niman/src/library/note_link_questions.dart';
@@ -326,38 +325,18 @@ final class NoteOps implements NoteOperations {
     (c) => c.copyWith(quickNotePath: path, clearQuickNotePath: path == null),
   );
 
-  @override
-  Future<JournalSettings> get journal async {
-    final settings = (await config.config).journal;
-    try {
-      return await settings.resolveFolder(_folderSpelling);
-    } on Object catch (error) {
-      // The spelling is a convenience, not the setting: an index that cannot
-      // be asked leaves the settings as written rather than failing a read,
-      // and the write path still canonicalizes on its own (#1246).
-      const AppLogger(name: 'journal')
-          .warning('folder spelling unresolved ($error)');
-      return settings;
-    }
-  }
-
-  /// [folder] as the library spells it, segment by segment (#1246): nothing
-  /// is made, and a folder the library does not hold keeps its spelling.
-  Future<String> _folderSpelling(String folder) => resolveFolderSpelling<Note>(
-    folder,
-    exact: (path) async {
-      final row = await _dao.find(path);
-      return row != null && row.isDir ? row : null;
-    },
-    child: (parent, segment) async {
-      final held = await _dao.folderChild(parent, segment);
-      return held == null ? null : (name: held.name, token: held);
-    },
+  /// The journal settings, their folder spelled as the library spells it.
+  late final LibraryJournal _journal = LibraryJournal(
+    config: config,
+    dao: _dao,
   );
 
   @override
+  Future<JournalSettings> get journal => _journal.journal;
+
+  @override
   Future<void> setJournal(JournalSettings settings) =>
-      config.update((c) => c.copyWith(journal: settings));
+      _journal.setJournal(settings);
 
   /// The navigation and the Home, the library's and this device's.
   late final LibraryLayouts _layouts = LibraryLayouts(
