@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 import 'dart:typed_data';
@@ -23,6 +22,7 @@ import 'package:niman/src/home/home_file.dart';
 import 'package:niman/src/home/home_layout.dart';
 import 'package:niman/src/journal/journal_settings.dart';
 import 'package:niman/src/library/folder_spelling.dart';
+import 'package:niman/src/library/note_creation.dart';
 import 'package:niman/src/library/note_op_seams.dart';
 import 'package:niman/src/library/note_ops_blocking.dart';
 import 'package:niman/src/library/note_relocation.dart';
@@ -429,6 +429,16 @@ final class NoteOps implements NoteOperations {
   Future<List<String>> notePathsUnder(String folder) =>
       _dao.filePathsUnder(folder);
 
+  /// Makes notes and folders, copies of files and additions to notes.
+  late final NoteCreation _creation = NoteCreation(
+    root: root,
+    dao: _dao,
+    indexer: indexer,
+    serialize: _synchronized,
+    hint: _hint,
+    find: _mustFind,
+  );
+
   /// Creates a `<name>.md` note in [parentPath] with [content] as its
   /// initial content, uniquifying the name. Returns the indexed row.
   @override
@@ -436,133 +446,35 @@ final class NoteOps implements NoteOperations {
     required String parentPath,
     required String name,
     String content = '',
-  }) {
-    return _synchronized(() async {
-      final clean = sanitizeName(name, fallback: defaultNoteName);
-      final dir = Directory(_abs(parentPath));
-      final unique = await uniqueFileName(dir, clean, '.md');
-      final file = File(_abs(resolvePath(parentPath, unique)));
-      await writeFileAtomically(file, utf8.encode(content));
-      _hint(resolvePath(parentPath, unique), SyncOpKind.changed);
-      await indexer.applyEvents(root, [file.path]);
-      return await _mustFind(resolvePath(parentPath, unique));
-    });
-  }
+  }) => _creation.createNote(
+    parentPath: parentPath,
+    name: name,
+    content: content,
+  );
 
   /// Copies the file at [path] beside itself, under a unique name
   /// (`note.md` → `note_1.md`), and returns the indexed row (#1100).
-  ///
-  /// The bytes are copied as they are, so a picture, a PDF or an audio file
-  /// duplicates whole rather than being re-encoded. Only a file: a folder
-  /// holds a tree of its own, and no menu offers the action for one.
   @override
-  Future<Note> duplicate(String path) {
-    return _synchronized(() async {
-      final row = await _mustFind(path);
-      if (row.isDir) {
-        throw ArgumentError('duplicate was given a folder: "$path"');
-      }
-      final parent = parentOf(path);
-      final name = p.basename(path);
-      final ext = p.extension(name);
-      final base = ext.isEmpty
-          ? name
-          : name.substring(0, name.length - ext.length);
-      final dir = Directory(_abs(parent));
-      final unique = await uniqueFileName(dir, base, ext);
-      final rel = resolvePath(parent, unique);
-      final copy = File(_abs(rel));
-      await writeFileAtomically(copy, await File(_abs(path)).readAsBytes());
-      _hint(rel, SyncOpKind.changed);
-      await indexer.applyEvents(root, [copy.path]);
-      return await _mustFind(rel);
-    });
-  }
+  Future<Note> duplicate(String path) => _creation.duplicate(path);
 
-  /// The folder at [path], created with its parents if missing.
-  ///
-  /// No uniquifying: the caller named a folder, not a wish for one. A folder
-  /// the library already holds under another spelling is that folder, unless
-  /// the exact spelling is there too, which wins (#857) —
-  /// `[[Projects/Three laws]]` lands in the `projects` that is there, as
-  /// `[[Note]]` opens `note.md` — and the path is canonicalized segment by
-  /// segment, so a folder made below a reused one sits inside the spelled
-  /// one (#847).
+  /// The folder at [path], created with its parents if missing
+  /// ([NoteCreation.ensureFolder]).
   @override
   @useResult
-  Future<Note> ensureFolder(String path) {
-    return _synchronized(() async {
-      final clean = cleanFolderPath(path, '');
-      if (clean.isEmpty) {
-        // The root is not a row, and "make sure the root exists" is not
-        // a thing a caller can mean.
-        throw ArgumentError('ensureFolder was given no folder: "$path"');
-      }
-      final segments = <String>[];
-      for (final segment in clean.split('/')) {
-        final existing = await _dao.folderIgnoringCase(
-          resolvePath(segments.join('/'), segment),
-        );
-        segments.add(existing?.name ?? segment);
-      }
-      final canonical = segments.join('/');
-      final dir = Directory(_abs(canonical));
-      // The async form runs off the UI isolate (#875).
-      if (!await dir.exists()) {
-        await dir.create(recursive: true);
-        // Every folder on the way is new too, so the index hears about
-        // the whole chain rather than only its last link.
-        final made = <String>[
-          for (var i = 1; i <= segments.length; i++)
-            _abs(segments.take(i).join('/')),
-        ];
-        await indexer.applyEvents(root, made);
-      }
-      return await _mustFind(canonical);
-    });
-  }
+  Future<Note> ensureFolder(String path) => _creation.ensureFolder(path);
 
   /// Adds [content] to the end of the note at [path], creating it when it
   /// is not there.
   @override
-  Future<Note> appendToNote(String path, String content) {
-    return _synchronized(() async {
-      final file = File(_abs(path));
-      final existing = await file.exists() ? await file.readAsString() : '';
-      final joined = existing.isEmpty
-          ? content
-          : '${_endingInABlankLine(existing)}$content';
-      await writeFileAtomically(file, utf8.encode(joined));
-      _hint(path, SyncOpKind.changed);
-      await indexer.applyEvents(root, [file.path]);
-      return await _mustFind(path);
-    });
-  }
-
-  /// [text] with exactly one blank line at its end, so what follows
-  /// starts a paragraph of its own.
-  static String _endingInABlankLine(String text) {
-    final eol = text.contains('\r\n') ? '\r\n' : '\n';
-    final trimmed = text.replaceFirst(RegExp(r'\s+$'), '');
-    return '$trimmed$eol$eol';
-  }
+  Future<Note> appendToNote(String path, String content) =>
+      _creation.appendToNote(path, content);
 
   /// Creates a folder in [parentPath], uniquifying the name.
   @override
   Future<Note> createFolder({
     required String parentPath,
     required String name,
-  }) {
-    return _synchronized(() async {
-      final clean = sanitizeName(name, fallback: defaultFolderName);
-      final dir = Directory(_abs(parentPath));
-      final unique = await uniqueFolderName(dir, clean);
-      final newDir = Directory(_abs(resolvePath(parentPath, unique)));
-      await newDir.create(recursive: true);
-      await indexer.applyEvents(root, [newDir.path]);
-      return await _mustFind(resolvePath(parentPath, unique));
-    });
-  }
+  }) => _creation.createFolder(parentPath: parentPath, name: name);
 
   /// Renames the note or folder at [path] to [newName].
   ///
