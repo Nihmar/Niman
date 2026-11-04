@@ -33,6 +33,7 @@ import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/db/index_note_content.dart';
 import 'package:niman/src/db/index_scan.dart';
 import 'package:niman/src/db/index_tree.dart';
+import 'package:niman/src/db/index_tree_first.dart';
 import 'package:niman/src/db/pending_link_queue.dart';
 import 'package:niman/src/db/scan_late_pairing.dart';
 import 'package:niman/src/db/scan_orphans.dart';
@@ -57,6 +58,9 @@ final class IndexReconciler {
   final IndexContentStore _store;
 
   final AppLogger _log;
+
+  /// The first index of an empty library, the tree alone.
+  late final IndexTreeFirst _treeFirst = IndexTreeFirst(_db, _dao, _tree);
 
   /// The link edges the walk defers to its end.
   late final PendingLinkQueue _links = PendingLinkQueue(_db, _store);
@@ -248,65 +252,7 @@ final class IndexReconciler {
   Future<bool> treeFirst(
     String root, {
     void Function(IndexChange change)? onChanged,
-  }) async {
-    if (await _dao.hasRows()) return false;
-    var wrote = false;
-    var entries = 0;
-    final walk = await DirWalker.start(root);
-    Object? failure;
-    try {
-      for (
-        var listing = await walk.next();
-        listing != null;
-        listing = await walk.next()
-      ) {
-        listing.logs.forEach(_log.debug);
-        if (listing.failed) continue;
-        entries += listing.entries.length;
-        final dirRel = listing.rel;
-        final dirRow = dirRel.isEmpty ? null : await _dao.find(dirRel);
-        final old = <String, Note>{dirRel: ?dirRow};
-        final listingEntries = <DiskEntry>[
-          if (dirRow != null)
-            DiskEntry(
-              rel: dirRel,
-              name: listing.name,
-              isDir: true,
-              size: 0,
-              modified: listing.modified,
-              created: listing.created,
-            ),
-          ...listing.entries,
-        ];
-        await _db.transaction(() async {
-          final result = await _tree.applyDiff(
-            entries: listingEntries,
-            old: old,
-            shas: const <String, String>{},
-            contents: const <String, NoteContent>{},
-            scope: dirRel,
-            scopeParentId: dirRow?.parent ?? 0,
-          );
-          wrote |= result.wrote;
-        });
-      }
-    } catch (error) {
-      failure = error;
-      rethrow;
-    } finally {
-      await walk.close(error: failure);
-    }
-    if (entries == 0) return false;
-    _log.info(
-      'first index $root: the tree first, $entries entr(ies); '
-      'the notes after it',
-    );
-    if (wrote) {
-      final cb = onChanged;
-      if (cb != null) cb(IndexChange.tree);
-    }
-    return wrote;
-  }
+  }) => _treeFirst.run(root, onChanged: onChanged);
 
   /// Reconciles one directory listing against the index rows of that
   /// directory. Answers whether it wrote and how many notes it read.
