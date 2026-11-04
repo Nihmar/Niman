@@ -94,6 +94,7 @@ import 'package:niman/src/markdown/render/source_caret_reveal.dart';
 import 'package:niman/src/markdown/render/source_code_copies.dart';
 import 'package:niman/src/markdown/render/source_context_menu.dart';
 import 'package:niman/src/markdown/render/source_folds.dart';
+import 'package:niman/src/markdown/render/source_geometry.dart';
 import 'package:niman/src/markdown/render/source_line.dart';
 import 'package:niman/src/markdown/render/source_live_lines.dart';
 import 'package:niman/src/markdown/render/source_paragraphs.dart';
@@ -499,7 +500,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     caretLine: () => _caretLineIndex,
     anchorLine: () => widget.buffer.lineOf(_selection.anchor),
     rowOf: _folds.rowOf,
-    lineBounds: _lineBounds,
+    lineBounds: _geometry.lineBounds,
     bottomInsetNow: () => View.of(context).viewInsets.bottom,
     typing: () => _focus.hasFocus && _input.isAttached,
   );
@@ -727,7 +728,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     scroll: () => _scroll,
     tableRowAt: (line, block, at) => _tableRowAt(context, line, block, at),
     piecesOf: _piecesOf,
-    lineBox: _lineBox,
+    lineBox: _geometry.lineBox,
     drawnHeightOf: _drawnHeightOf,
     theme: () => widget.theme,
     replace: (start, end, text, caret) =>
@@ -745,8 +746,8 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     heights: () => _heights,
     folds: _folds,
     padding: () => widget.padding,
-    lineBox: _lineBox,
-    columnOfLine: _columnOfLine,
+    lineBox: _geometry.lineBox,
+    columnOfLine: _geometry.columnOfLine,
     rightInset: () => _rightInset,
     columnsLeft: _columnsLeft,
     gap: () => _gap,
@@ -1174,7 +1175,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       if (line >= widget.buffer.lineCount) continue;
       // Side by side, two columns' lines hold the same height: a line of a
       // column holds a point only across its column (#729).
-      if (x != null && !_inColumnOf(line, x)) continue;
+      if (x != null && !_geometry.inColumnOf(line, x)) continue;
       final pieces = _piecesOf(line);
       if (pieces.length == 1) {
         final object = SourceParagraphs.renderOf(pieces.first.key);
@@ -1199,27 +1200,6 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     return null;
   }
 
-  /// Whether [x], the note box's, is across the column line [line] is
-  /// drawn in, when it is a side-by-side column's: the gap between two
-  /// columns is split between them, and a row's first and last columns
-  /// reach its edges.
-  bool _inColumnOf(int line, double x) {
-    final host = _folds.hostOf(line);
-    final layout = host == null ? null : _hosts.openedOn(host);
-    if (layout == null) return true;
-    final column = layout.run.columnOf(line);
-    if (column < 0) return true;
-    final row = layout.rows.firstWhere((row) => row.contains(column));
-    final left = _columnsLeft(layout) + LiveHosts.leftOf(layout, column, _gap);
-    final from = column == row.first
-        ? double.negativeInfinity
-        : left - _gap / 2;
-    final to = column == row.last
-        ? double.infinity
-        : left + layout.widths[column] + _gap / 2;
-    return x >= from && x < to;
-  }
-
   /// The offset under [global] as the height map places the lines: for a
   /// point no drawn line is under — above the first, below the last.
   int? _mappedOffsetAt(Offset global) {
@@ -1229,7 +1209,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     // first, below the last is the last, so a tap under a short note puts the
     // caret at its end rather than nowhere.
     final point = box.globalToLocal(global);
-    final line = _lineAtY(point.dy + _scroll.offset, point.dx);
+    final line = _geometry.lineAtY(point.dy + _scroll.offset, point.dx);
     final pieces = _piecesOf(line);
     // The point in the *paragraph's own* coordinates, from its own transform:
     // the insets, the gutter and a live-mode indent are all in that transform,
@@ -1258,7 +1238,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     if (line < 0 || line >= lineCount || !_scroll.hasClients) return;
     _rows.reshape(() => _folds.reveal(line));
     _scroll.jumpTo(
-      (_lineBox(line).top - widget.padding.top).clamp(
+      (_geometry.lineBox(line).top - widget.padding.top).clamp(
         0.0,
         _scroll.position.maxScrollExtent,
       ),
@@ -1396,8 +1376,8 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     if (!_scroll.hasClients || _heights.length == 0) return null;
     final y = _scroll.offset - widget.padding.top;
     if (y <= 0) return (line: 0, fraction: 0.0);
-    final line = _lineAtY(_scroll.offset);
-    final box = _lineBox(line);
+    final line = _geometry.lineAtY(_scroll.offset);
+    final box = _geometry.lineBox(line);
     final into = box.height > 0 ? (_scroll.offset - box.top) / box.height : 0.0;
     return (line: line, fraction: into.clamp(0.0, 1.0));
   }
@@ -1412,7 +1392,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// again after each frame that measured them, as long as that moves it.
   void showAnchor(ScrollAnchor anchor, {int attempt = 0}) {
     if (!_scroll.hasClients || lineCount == 0) return;
-    final box = _lineBox(anchor.line.clamp(0, lineCount - 1));
+    final box = _geometry.lineBox(anchor.line.clamp(0, lineCount - 1));
     final atTop = anchor.line == 0 && anchor.fraction == 0;
     final offset = atTop
         ? 0.0
@@ -1560,6 +1540,18 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// The blocks drawn side by side at the pane's width (#729).
   final LiveHosts _hosts = LiveHosts();
 
+  /// Where the lines are drawn, in the scroll view's coordinates, and which
+  /// line a point is on, off the height map and the side-by-side layouts.
+  late final SourceGeometry _geometry = SourceGeometry(
+    heights: () => _heights,
+    folds: _folds,
+    hosts: _hosts,
+    padding: () => widget.padding,
+    band: () => _band,
+    gap: () => _gap,
+    columnsLeft: _columnsLeft,
+  );
+
   /// An em of the note's text, as drawn: what a column's minimum and the
   /// gap between columns are counted in.
   double get _em => _textScaler.scale(widget.theme.body.fontSize ?? 14);
@@ -1584,45 +1576,6 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// the indent of the list items the block stands in.
   double _columnsLeft(LiveLayout layout) =>
       _leftInset + _gutter + _itemsIndent(layout.run);
-
-  /// Where line [line] is drawn, in the scroll view's coordinates: its top
-  /// and its height (#729). A row's, from the note's map; a line of a
-  /// side-by-side column's, from its host row, its row of columns and its
-  /// column's own map.
-  ({double top, double height}) _lineBox(int line) {
-    final host = _folds.hostOf(line);
-    final layout = host == null ? null : _hosts.openedOn(host);
-    if (host == null || layout == null) {
-      final row = _folds.rowOf(line);
-      return (
-        top: widget.padding.top + _heights.offsetOf(row),
-        height: _heights.extentFor(row),
-      );
-    }
-    final hostRow = _folds.rowOf(host);
-    final top = widget.padding.top + _heights.offsetOf(hostRow);
-    final run = layout.run;
-    final column = run.columnOf(line);
-    if (column < 0) {
-      // The closer is the block's bottom band; a blank line between two
-      // columns is drawn nowhere, and stands at the block's top.
-      final closing = run.closed && line == run.end - 1;
-      final extent = _heights.extentFor(hostRow);
-      return closing
-          ? (top: top + extent - _band, height: _band)
-          : (top: top, height: 0);
-    }
-    final map = layout.maps[column];
-    final local = line - run.columns[column].start;
-    return (
-      top:
-          top +
-          _band +
-          LiveHosts.topOf(layout, column, _gap) +
-          map.offsetOf(local),
-      height: map.extentFor(local),
-    );
-  }
 
   /// The note's offsets the platform's input window may reach around a
   /// caret at [caret]: a side-by-side column's lines past its fences, when
@@ -1649,18 +1602,9 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// The width line [line] is drawn at: its side-by-side column's, or the
   /// text's.
   double _widthOf(int line) {
-    final placed = _columnOfLine(line);
+    final placed = _geometry.columnOfLine(line);
     if (placed == null) return _textWidth;
     return placed.layout.widths[placed.column];
-  }
-
-  /// The side-by-side block and column line [line] is drawn in, or null.
-  ({LiveLayout layout, int column})? _columnOfLine(int line) {
-    final host = _folds.hostOf(line);
-    final layout = host == null ? null : _hosts.openedOn(host);
-    if (layout == null) return null;
-    final column = layout.run.columnOf(line);
-    return column < 0 ? null : (layout: layout, column: column);
   }
 
   /// What line [index], in [block], draws as a fence line in `live`, or
@@ -1859,72 +1803,6 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// Puts the caret at [offset], tells the platform, and keeps it on screen.
   void placeCaret(int offset) =>
       _applySelection(_selection.collapsedTo(offset), reveal: true);
-
-  /// Line [line] as the scroll view sees it: its top and its bottom, in the
-  /// view's coordinates ([_lineBox]) — the map starts below the top
-  /// padding, and the last row takes the bottom padding with it. A line of
-  /// a side-by-side column is its own line, not its block's row, which can
-  /// be taller than the screen.
-  ({double top, double bottom}) _lineBounds(int line) {
-    final box = _lineBox(line);
-    final last =
-        _folds.hostOf(line) == null &&
-        _folds.rowOf(line) == _heights.length - 1;
-    return (
-      top: box.top,
-      bottom: box.top + box.height + (last ? widget.padding.bottom : 0),
-    );
-  }
-
-  /// The line drawn at [y], in the scroll view's coordinates, and at [x],
-  /// the note box's, when a side-by-side block is there: its column's line
-  /// at that height, the first column's when [x] is null.
-  int _lineAtY(double y, [double? x]) {
-    final local = y - widget.padding.top;
-    final row = local < 0
-        ? 0
-        : _heights.indexAt(local) ?? math.max(0, _heights.length - 1);
-    final line = _folds.lineOf(row);
-    final layout = _folds.isHost(line) ? _hosts.openedOn(line) : null;
-    if (layout == null) return line;
-    final run = layout.run;
-    final inside = local - _heights.offsetOf(row) - _band;
-    if (inside < 0) return run.start;
-    // The row of columns at that height, and the column nearest [x].
-    var top = 0.0;
-    for (final columns in layout.rows) {
-      var tallest = 0.0;
-      for (final at in columns) {
-        tallest = math.max(tallest, layout.maps[at].totalExtent);
-      }
-      if (inside < top + tallest + _gap) {
-        final column = _columnNearest(layout, columns, x);
-        final map = layout.maps[column];
-        final at = map.indexAt(inside - top) ?? math.max(0, map.length - 1);
-        return run.columns[column].start + at;
-      }
-      top += tallest + _gap;
-    }
-    return run.closed ? run.end - 1 : run.columns.last.end - 1;
-  }
-
-  /// Which column of [columns], a row of [layout]'s, [x] — the note box's —
-  /// is nearest; the first when [x] is null. The gap between two is split
-  /// between them.
-  int _columnNearest(LiveLayout layout, List<int> columns, double? x) {
-    if (x == null) return columns.first;
-    final left = _columnsLeft(layout);
-    for (var at = 0; at < columns.length; at++) {
-      final column = columns[at];
-      final right =
-          left +
-          LiveHosts.leftOf(layout, column, _gap) +
-          layout.widths[column] +
-          _gap / 2;
-      if (x < right) return column;
-    }
-    return columns.last;
-  }
 
   /// Line [index] as the view draws it: the **buffer's** text, with the
   /// tokenizer's runs when the two agree about that line.
