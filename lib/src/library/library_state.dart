@@ -1,12 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:drift/native.dart';
-// A connection on its own isolate reports what failed over there wrapped in
-// DriftRemoteException; the sqlite error behind it is how a damaged index is
-// told apart from a transient failure (#368).
-// ignore: experimental_member_use
-import 'package:drift/remote.dart' show DriftRemoteException;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -47,6 +41,7 @@ import 'package:niman/src/library/container_path.dart';
 import 'package:niman/src/library/file_watcher.dart';
 import 'package:niman/src/library/indexing_status.dart';
 import 'package:niman/src/library/library_databases.dart';
+import 'package:niman/src/library/library_index_files.dart';
 import 'package:niman/src/library/library_registry.dart';
 import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/library/note_ops.dart';
@@ -158,6 +153,12 @@ final class LibraryController implements LibrarySession {
   /// Null leaves the file behind, which costs disk space and nothing
   /// else — the index is derived data.
   final Future<File> Function(String libraryPath)? indexFileOf;
+
+  /// Opens, repairs and deletes the libraries' index files.
+  late final LibraryIndexFiles _indexFiles = LibraryIndexFiles(
+    openDb: indexDbFactory,
+    locate: indexFileOf,
+  );
 
   /// The search connection; defaults to [indexDbFactory] (tests), the app
   /// injects the background-isolate connection.
@@ -697,13 +698,13 @@ final class LibraryController implements LibrarySession {
   Future<void> _startSession(String abs) async {
     // This library's own index file (T-ML-03). Opening a second library
     // no longer scans over the first one's rows, so coming back to it
-    // costs a reconciliation rather than a full walk. [_openIndex] also
-    // warms the connection's first query — sqlite, the schema and its FTS
-    // table, on the connection's own isolate — so a cold index does not pay
-    // for it inside the tree's first flatten (`flatten: 105ms … [tree
-    // 103]`, #315), and it rebuilds a file sqlite reports as damaged
-    // rather than leaving the library shut (#368).
-    final indexDb = await _openIndex(abs);
+    // costs a reconciliation rather than a full walk.
+    // [LibraryIndexFiles.open] also warms the connection's first query —
+    // sqlite, the schema and its FTS table, on the connection's own
+    // isolate — so a cold index does not pay for it inside the tree's first
+    // flatten (`flatten: 105ms … [tree 103]`, #315), and it rebuilds a file
+    // sqlite reports as damaged rather than leaving the library shut (#368).
+    final indexDb = await _indexFiles.open(abs);
     _indexDb = indexDb;
     final appDb = await appDatabase;
     AppLog.enabled = await AppSettingsRepo(appDb).debugLogsEnabled();
@@ -759,10 +760,10 @@ final class LibraryController implements LibrarySession {
     // in as they are read.
     //
     // Blocking or not: an index with no rows — a library never indexed
-    // on this device, or one [_openIndex] just rebuilt because sqlite
-    // reported it damaged (#368) — has no last state for a fast resume to
-    // show, and opening on it showed an empty library until the delayed
-    // reconciliation. On an index that has rows this is one query and
+    // on this device, or one [LibraryIndexFiles.open] just rebuilt because
+    // sqlite reported it damaged (#368) — has no last state for a fast
+    // resume to show, and opening on it showed an empty library until the
+    // delayed reconciliation. On an index that has rows this is one query and
     // writes nothing.
     final contentOwed = await indexer.indexTreeFirst(abs);
     final watcher = FileWatcher(
@@ -850,7 +851,7 @@ final class LibraryController implements LibrarySession {
     // What a file from before the Home lacks (#671, #692) is built here,
     // with the reconciliation and behind the tree, not on open.
     _reconcileTimer = Timer(resumeReconcileDelay, () async {
-      await _ensureRecentIndex(indexDb);
+      await _indexFiles.ensureDerived(indexDb);
       // A first index is a full walk already, running behind the tree.
       if (!contentOwed) await _safeRescan(abs);
     });
@@ -1011,7 +1012,7 @@ final class LibraryController implements LibrarySession {
     unawaited(_saveWidgetLibraryMirror(db));
     // The index is derived data and the entry that named it is gone, so
     // the file would sit there forever with nothing pointing at it.
-    await _deleteIndexOf(libraryPath);
+    await _indexFiles.delete(libraryPath);
     _bump();
   }
 
@@ -1037,28 +1038,6 @@ final class LibraryController implements LibrarySession {
       // No host handler (tests, desktops).
     } on PlatformException catch (error) {
       _log.warning('widget library mirror not saved ($error)');
-    }
-  }
-
-  /// Deletes the index file of a library, if it can be found.
-  ///
-  /// The file and the write-ahead log beside it go together: a rebuilt index
-  /// must not open on a stale journal. Best effort — a failure here costs
-  /// disk space, not correctness, and must not turn "forget this library" or
-  /// "rebuild its index" into an error.
-  Future<void> _deleteIndexOf(String libraryPath) async {
-    try {
-      final locate = indexFileOf;
-      if (locate == null) return;
-      final file = await locate(libraryPath);
-      for (final sidecar in const ['', '-wal', '-shm']) {
-        final part = File('${file.path}$sidecar');
-        if (await part.exists()) {
-          await part.delete();
-        }
-      }
-    } on Object catch (error) {
-      _log.warning('index file not removed ($error)');
     }
   }
 
@@ -1110,7 +1089,7 @@ final class LibraryController implements LibrarySession {
     _log.info('rebuild index requested: $root');
     _lastError = null;
     await _teardown();
-    await _deleteIndexOf(root);
+    await _indexFiles.delete(root);
     try {
       await _startSession(root);
       _log.info('rebuild index complete: ready root=$root');
@@ -2037,115 +2016,6 @@ final class LibraryController implements LibrarySession {
     } on Object catch (error) {
       // The periodic rescan finds what is still missing and reads it.
       _log.error('first index failed: $error');
-    }
-  }
-
-  /// Opens the index of the library at [libraryPath] and reads it once,
-  /// rebuilding the file in place when sqlite reports it damaged (#368).
-  ///
-  /// The index is derived data and the documented way to repair it is to
-  /// delete the file and re-index (`AGENTS.md`, `IndexDatabase`), but the
-  /// only code that deleted one was `forgetLibrary`, which also drops the
-  /// registry row, the workspace, the device settings and the sync
-  /// destination — so a disk that filled or a killed migration left a
-  /// library that would not open and no way out but losing its entry. A
-  /// file sqlite answers with `SQLITE_CORRUPT` or `SQLITE_NOTADB` is
-  /// deleted and opened again — empty, at its schema — and the caller's
-  /// scan refills it from the notes on disk.
-  ///
-  /// The first query is also the connection's warm-up (#315): it is what
-  /// opens the file, so the tree's first flatten is never the query that
-  /// pays for the sqlite open, the schema and its FTS table.
-  Future<IndexDatabase> _openIndex(String libraryPath) async {
-    final db = await indexDbFactory(libraryPath);
-    try {
-      await _warmIndex(db);
-      return db;
-    } on Object catch (error) {
-      final damaged = _sqliteCause(error);
-      if (damaged == null || !_isDamagedIndex(damaged)) {
-        await _closeIndex(db);
-        rethrow;
-      }
-      _log.warning('index of $libraryPath is damaged; rebuilding: $damaged');
-      await _closeIndex(db);
-      await _deleteIndexOf(libraryPath);
-      final fresh = await indexDbFactory(libraryPath);
-      try {
-        await _warmIndex(fresh);
-      } on Object {
-        await _closeIndex(fresh);
-        rethrow;
-      }
-      return fresh;
-    }
-  }
-
-  /// The sqlite error behind [error], or null when it holds none.
-  ///
-  /// A connection on its own isolate (`defaultIndexDatabase`) reports what
-  /// failed over there as drift's remote exception, with the sqlite error
-  /// itself as its cause.
-  static SqliteException? _sqliteCause(Object error) => switch (error) {
-    final SqliteException sqlite => sqlite,
-    final DriftRemoteException remote
-        when remote.remoteCause is SqliteException =>
-      remote.remoteCause as SqliteException,
-    _ => null,
-  };
-
-  /// Whether [error] says the file is unreadable: sqlite's `SQLITE_CORRUPT`
-  /// and `SQLITE_NOTADB` (sqlite.org/rescode.html).
-  ///
-  /// What a disk that ran out of room or a killed migration leaves behind,
-  /// as against a transient I/O error, which is waited out by the rescan
-  /// instead of costing a full re-index.
-  static bool _isDamagedIndex(SqliteException error) =>
-      error.resultCode == 11 || error.resultCode == 26;
-
-  /// Closes a connection whose open failed, so the file behind it can be
-  /// deleted (Windows will not delete an open file).
-  Future<void> _closeIndex(IndexDatabase db) async {
-    try {
-      await db.close();
-    } on Object catch (error) {
-      _log.debug('damaged index connection not closed cleanly ($error)');
-    }
-  }
-
-  /// Reads the index connection's file once, opening it (#315): the
-  /// isolate's boot, the sqlite open, the schema and the FTS table.
-  ///
-  /// Throws when the file cannot be read; [_openIndex] takes that as the
-  /// signal that the index is damaged and rebuilds it (#368). A connection
-  /// that failed this way rethrows to every reader after, so the throw is
-  /// the answer, not an accident.
-  Future<void> _warmIndex(IndexDatabase db) async {
-    final clock = Stopwatch()..start();
-    await db.customSelect('SELECT 1').get();
-    _log.debug('index warm-up: ${clock.elapsedMilliseconds} ms');
-  }
-
-  /// [IndexDatabase.ensureRecentIndex], [IndexDatabase.ensurePinnedIndex],
-  /// [IndexDatabase.ensureTagCounts] and
-  /// [IndexDatabase.ensureStemTrigrams],
-  /// logged rather than thrown: their readers answer without them, only
-  /// slower.
-  Future<void> _ensureRecentIndex(IndexDatabase db) async {
-    final clock = Stopwatch()..start();
-    try {
-      await db.ensureRecentIndex();
-      await db.ensurePinnedIndex();
-      await db.ensureTagCounts();
-      await db.ensureStemTrigrams();
-      _log.debug(
-        'notes_recent, tag counts and name trigrams ready in '
-        '${clock.elapsedMilliseconds} ms',
-      );
-    } on Object catch (error) {
-      _log.warning(
-        'notes_recent, tag counts or name trigrams not built: $error',
-      );
     }
   }
 
