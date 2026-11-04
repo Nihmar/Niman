@@ -34,6 +34,7 @@ import 'package:niman/src/flashcards/review_store.dart';
 import 'package:niman/src/frontmatter/fields.dart';
 import 'package:niman/src/library/container_path.dart';
 import 'package:niman/src/library/file_watcher.dart';
+import 'package:niman/src/library/index_progress_throttle.dart';
 import 'package:niman/src/library/indexing_status.dart';
 import 'package:niman/src/library/library_databases.dart';
 import 'package:niman/src/library/library_index_files.dart';
@@ -235,41 +236,12 @@ final class LibraryController implements LibrarySession {
 
   /// How far the first index has got, or null when no scan is running.
   @override
-  IndexProgress? get indexProgress => _indexProgress;
+  IndexProgress? get indexProgress => _progress.progress;
 
-  IndexProgress? _indexProgress;
-  DateTime? _progressShown;
-
-  /// Records a scan's progress, and lets the UI see it at a readable rate.
-  ///
-  /// The reports arrive one per note, which on a large library is far
-  /// faster than a frame; rebuilding on each would spend the scan drawing
-  /// instead of reading. Twenty a second already reads as a blur, which
-  /// is the point of showing them.
-  void _onIndexProgress(IndexProgress progress) {
-    _indexProgress = progress;
-    final now = DateTime.now();
-    final last = _progressShown;
-    if (last != null && now.difference(last) < _progressInterval) return;
-    _progressShown = now;
-    // The tree is asked to read its rows again only now and then: titles and
-    // pins reach it as the notes are read (#1068), but a flatten per report
-    // would spend the pass drawing a tree that has barely moved.
-    final treeAt = _progressTreeBump;
-    final tree =
-        treeAt == null || now.difference(treeAt) >= _progressTreeInterval;
-    if (tree) _progressTreeBump = now;
-    _bump(tree: tree);
-  }
-
-  DateTime? _progressTreeBump;
-
-  /// How often a running content pass lets the tree read the rows it has
-  /// changed so far.
-  static const _progressTreeInterval = Duration(seconds: 2);
-
-  /// How often a running scan redraws the name it is showing.
-  static const _progressInterval = Duration(milliseconds: 50);
+  /// The first index's progress, shown at a readable rate.
+  late final IndexProgressThrottle _progress = IndexProgressThrottle(
+    show: _bump,
+  );
 
   /// Current phase.
   @override
@@ -1727,15 +1699,14 @@ final class LibraryController implements LibrarySession {
       _log.info('first index: reading the notes of $abs');
       // Reported while it runs: the walk is long enough to be worth
       // watching, and reporting costs a message per note.
-      indexer.onProgress = _onIndexProgress;
+      indexer.onProgress = _progress.report;
       IndexingStatus.contentOwed.value = true;
       try {
         await _rescans?.run();
       } finally {
         IndexingStatus.contentOwed.value = false;
         indexer.onProgress = null;
-        _indexProgress = null;
-        _progressTreeBump = null;
+        _progress.end();
         _bump();
       }
       _log.info('first index complete');
