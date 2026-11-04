@@ -2,16 +2,15 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/logging.dart';
-import 'package:niman/src/sync/sync_report.dart';
 import 'package:niman/src/sync/sync_service.dart';
 import 'package:niman/src/ui/floating_window.dart';
 import 'package:niman/src/ui/history/history_labels.dart';
 import 'package:niman/src/ui/pointer_density.dart';
 import 'package:niman/src/ui/settings_rows.dart';
 import 'package:niman/src/ui/strings.dart';
-import 'package:niman/src/ui/sync/spinning_sync_icon.dart';
 import 'package:niman/src/ui/sync/sync_flow.dart';
 import 'package:niman/src/ui/sync/sync_labels.dart';
+import 'package:niman/src/ui/sync/sync_overview_card.dart';
 import 'package:niman/src/ui/sync/sync_test_result_card.dart';
 import 'package:niman/src/ui/unsaved_notes.dart';
 
@@ -581,98 +580,12 @@ final class _SyncSettingsScreenState extends State<SyncSettingsScreen> {
   Widget _overview(ThemeData theme) {
     final status = _sync.status;
     final destination = status.destination!;
-    final scheme = theme.colorScheme;
     final now = DateTime.now();
     final caps = status.capabilities;
-    final url = Uri.tryParse(destination.url);
-    final shortUrl = url == null
-        ? destination.url
-        : '${url.host}${url.hasPort ? ':${url.port}' : ''}${url.path}';
     return ListView(
       padding: const EdgeInsets.only(bottom: 24),
       children: [
-        Card.filled(
-          key: const Key('sync-overview-card'),
-          margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Row(
-                  children: [
-                    // A run in flight turns, here as everywhere else: a
-                    // still glyph over "comparing with the server…" reads
-                    // as a sync that stopped.
-                    if (status.running)
-                      SpinningSyncIcon(color: syncStatusColor(status, scheme))
-                    else
-                      Icon(
-                        syncStatusIcon(status),
-                        color: syncStatusColor(status, scheme),
-                      ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            syncStatusLine(status, now),
-                            key: const Key('sync-status-line'),
-                            style: theme.textTheme.titleSmall,
-                          ),
-                          Text(
-                            shortUrl,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: scheme.onSurfaceVariant,
-                              fontFamily: 'monospace',
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                if (syncQueueLine(status, now) case final queue?) ...[
-                  const SizedBox(height: 8),
-                  Text(
-                    queue,
-                    key: const Key('sync-overview-queue'),
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: scheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-                if (status.aborted != null &&
-                    status.aborted != SyncAbort.notConfirmed) ...[
-                  const SizedBox(height: 8),
-                  Text(
-                    AppStrings.syncAbortNothingTouched,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: scheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-                const SizedBox(height: 12),
-                FilledButton.icon(
-                  key: const Key('sync-now'),
-                  onPressed: status.running ? null : _syncNow,
-                  icon: status.running
-                      ? SpinningSyncIcon(
-                          color: scheme.onSurface.withValues(alpha: 0.38),
-                        )
-                      : const Icon(Icons.sync),
-                  label: Text(
-                    status.running
-                        ? AppStrings.syncRunning
-                        : AppStrings.syncNowAction,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
+        SyncOverviewCard(status: status, now: now, onSyncNow: _syncNow),
         SettingsSection(AppStrings.syncSectionWhen),
         SettingsSwitchRow(
           key: const Key('sync-auto'),
