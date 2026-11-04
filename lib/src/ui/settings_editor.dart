@@ -1,19 +1,21 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/library/session.dart';
-import 'package:niman/src/lint/lint_rule.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
-import 'package:niman/src/spellcheck/hunspell_spell_checker.dart';
-import 'package:niman/src/ui/pointer_density.dart';
 import 'package:niman/src/ui/settings_area.dart';
+import 'package:niman/src/ui/settings_editor_column.dart';
+import 'package:niman/src/ui/settings_editor_kinds.dart';
+import 'package:niman/src/ui/settings_editor_links.dart';
+import 'package:niman/src/ui/settings_editor_spelling.dart';
+import 'package:niman/src/ui/settings_editor_text.dart';
+import 'package:niman/src/ui/settings_editor_tidy.dart';
+import 'package:niman/src/ui/settings_editor_writing.dart';
 import 'package:niman/src/ui/settings_keys.dart';
 import 'package:niman/src/ui/settings_rows.dart';
-import 'package:niman/src/ui/settings_slider_row.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/toolbar_settings.dart';
 
@@ -64,19 +66,6 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
   SourceFont _sourceFont = defaultSourceFont;
   int _indentWidth = 2;
   List<String> _spellDictionaries = const <String>[];
-
-  /// Steps of 5% between [minTextScale] and [maxTextScale]: fine enough
-  /// to land on a size that fits, coarse enough to be hit on a phone.
-  static final int _textScaleSteps = ((maxTextScale - minTextScale) * 20)
-      .round();
-
-  /// Steps of 5% of the default column between the narrowest and the
-  /// widest: the bounds are whole multiples of it, so every stop reads as
-  /// a round percentage.
-  static final int _columnWidthSteps =
-      ((maxNoteColumnWidth - minNoteColumnWidth) /
-              (defaultNoteColumnWidth * 0.05))
-          .round();
 
   @override
   void initState() {
@@ -196,99 +185,12 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
     if (mounted) setState(() => _tidyOnClose = value);
   }
 
-  /// The rules a tidy applies (#72). The dialog edits the *off* set, the
-  /// way the settings file stores it: a rule added in a later build then
-  /// runs with no migration.
-  Future<void> _chooseLintRules() async {
-    final off = <String>{..._lintRulesOff};
-    final choice = await showDialog<Set<String>>(
-      context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
-          key: const Key('lint-rules-dialog'),
-          scrollable: true,
-          title: Text(AppStrings.lintRulesTitle),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                AppStrings.lintRulesSubtitle,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(height: 8),
-              for (final rule in LintRule.values)
-                CheckboxListTile(
-                  key: Key('lint-rule-${rule.id}'),
-                  dense: true,
-                  contentPadding: EdgeInsets.zero,
-                  title: Text(_lintRuleLabel(rule)),
-                  value: !off.contains(rule.id),
-                  onChanged: (value) => setDialogState(() {
-                    if (value ?? false) {
-                      off.remove(rule.id);
-                    } else {
-                      off.add(rule.id);
-                    }
-                  }),
-                ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              key: const Key('lint-rules-reset'),
-              onPressed: () => setDialogState(off.clear),
-              child: Text(AppStrings.lintRulesReset),
-            ),
-            TextButton(
-              key: const Key('lint-rules-cancel'),
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(AppStrings.actionCancel),
-            ),
-            FilledButton(
-              key: const Key('lint-rules-save'),
-              onPressed: () => Navigator.of(context).pop(off),
-              child: Text(AppStrings.actionSave),
-            ),
-          ],
-        ),
-      ),
-    );
-    if (choice == null) return;
-    await widget.controller.setLintRulesOff(choice);
+  /// Persists the rules a tidy skips (#72); the shell picks them up
+  /// through its refresh.
+  Future<void> _setLintRulesOff(Set<String> off) async {
+    await widget.controller.setLintRulesOff(off);
     widget.controller.notify();
-    if (mounted) setState(() => _lintRulesOff = choice);
-  }
-
-  /// The settings row's name for [rule].
-  static String _lintRuleLabel(LintRule rule) => switch (rule) {
-    LintRule.tightLists => AppStrings.lintRuleTightLists,
-    LintRule.taskMarker => AppStrings.lintRuleTaskMarker,
-    LintRule.listSpacing => AppStrings.lintRuleListSpacing,
-    LintRule.closingFence => AppStrings.lintRuleClosingFence,
-    LintRule.fenceLanguage => AppStrings.lintRuleFenceLanguage,
-    LintRule.joinWrappedItems => AppStrings.lintRuleJoinWrappedItems,
-    LintRule.joinParagraphLines => AppStrings.lintRuleJoinParagraphLines,
-  };
-
-  /// Asks how wide the note column is.
-  Future<void> _chooseNoteColumnWidth() async {
-    final width = await showSettingsSlider(
-      context,
-      dialogKey: const Key('note-column-width-dialog'),
-      sliderKey: const Key('note-column-width-slider'),
-      title: AppStrings.noteColumnWidthTitle,
-      subtitle: AppStrings.noteColumnWidthSubtitle,
-      current: _noteColumnWidth,
-      min: minNoteColumnWidth,
-      max: maxNoteColumnWidth,
-      divisions: _columnWidthSteps,
-      format: AppStrings.noteColumnWidthValue,
-    );
-    if (width == null) return;
-    await _setNoteColumnWidth(width);
+    if (mounted) setState(() => _lintRulesOff = off);
   }
 
   Future<void> _setNoteColumnWidth(double width) async {
@@ -345,121 +247,18 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
     }
   }
 
-  /// Asks how large the note text should be, in both panes.
-  Future<void> _chooseNoteTextScale() async {
-    final scale = await showSettingsSlider(
-      context,
-      dialogKey: const Key('note-text-scale-dialog'),
-      sliderKey: const Key('note-text-scale-slider'),
-      title: AppStrings.noteTextScaleTitle,
-      subtitle: AppStrings.noteTextScaleSubtitle,
-      current: _noteTextScale,
-      min: minTextScale,
-      max: maxTextScale,
-      divisions: _textScaleSteps,
-      format: AppStrings.textScaleValue,
-    );
-    if (scale == null) return;
-    await _setNoteTextScale(scale);
-  }
-
   Future<void> _setNoteTextScale(double scale) async {
     await widget.controller.setNoteTextScale(scale);
     if (mounted) setState(() => _noteTextScale = scale);
   }
 
-  /// Asks which face the source editor is set in (issue #259). The read
-  /// view and `live` keep the note's own whatever this says.
-  Future<void> _chooseSourceFont() async {
-    final font = await showSettingsChoice<SourceFont>(
-      context,
-      dialogKey: const Key('source-font-dialog'),
-      title: AppStrings.sourceFontTitle,
-      subtitle: AppStrings.sourceFontSubtitle,
-      current: _sourceFont,
-      options: [
-        SettingsOption(SourceFont.monospace, AppStrings.sourceFontMonospace),
-        SettingsOption(SourceFont.sansSerif, AppStrings.sourceFontSansSerif),
-        SettingsOption(SourceFont.serif, AppStrings.sourceFontSerif),
-      ],
-    );
-    if (font == null) return;
+  /// Persists the source editor's face (issue #259).
+  Future<void> _setSourceFont(SourceFont font) async {
     await widget.controller.setSourceFont(font);
     // Notify so the shell re-reads the value and an open source pane takes
     // the new face without the note being reopened.
     widget.controller.notify();
     if (mounted) setState(() => _sourceFont = font);
-  }
-
-  /// Asks for the link format the editor's link button inserts.
-  Future<void> _chooseLinkType() async {
-    final type = await showSettingsChoice<LinkType>(
-      context,
-      dialogKey: const Key('link-type-dialog'),
-      title: AppStrings.linkTypeTitle,
-      subtitle: AppStrings.linkTypeSubtitle,
-      current: _linkType,
-      options: [
-        SettingsOption(LinkType.wikilink, AppStrings.linkTypeWikilink),
-        SettingsOption(LinkType.markdown, AppStrings.linkTypeMarkdown),
-      ],
-    );
-    if (type != null) await _setLinkType(type);
-  }
-
-  /// Asks what a rename or a move does to the links pointing at what
-  /// moved (#848).
-  Future<void> _chooseLinkUpdate() async {
-    final mode = await showSettingsChoice<LinkUpdate>(
-      context,
-      dialogKey: const Key('link-update-dialog'),
-      title: AppStrings.linkUpdateTitle,
-      subtitle: AppStrings.linkUpdateSubtitle,
-      current: _linkUpdate,
-      options: [
-        SettingsOption(LinkUpdate.automatic, AppStrings.linkUpdateAutomatic),
-        SettingsOption(LinkUpdate.ask, AppStrings.linkUpdateAsk),
-        SettingsOption(LinkUpdate.never, AppStrings.linkUpdateNever),
-      ],
-    );
-    if (mode != null) await _setLinkUpdate(mode);
-  }
-
-  /// Asks where new notes and folders go (#850).
-  Future<void> _chooseNewItemLocation() async {
-    final location = await showSettingsChoice<NewItemLocation>(
-      context,
-      dialogKey: const Key('new-item-location-dialog'),
-      title: AppStrings.newItemLocationTitle,
-      current: _newItemLocation,
-      options: [
-        SettingsOption(
-          NewItemLocation.libraryRoot,
-          AppStrings.newItemLocationRoot,
-        ),
-        SettingsOption(
-          NewItemLocation.openNoteFolder,
-          AppStrings.newItemLocationOpenNote,
-        ),
-      ],
-    );
-    if (location != null) await _setNewItemLocation(location);
-  }
-
-  /// Asks for the spaces added per indent level.
-  Future<void> _chooseIndentWidth() async {
-    final width = await showSettingsChoice<int>(
-      context,
-      dialogKey: const Key('indent-width-dialog'),
-      title: AppStrings.indentWidthTitle,
-      subtitle: AppStrings.indentWidthSubtitle,
-      current: _indentWidth,
-      options: [
-        for (final spaces in const [2, 4, 6, 8])
-          SettingsOption(spaces, AppStrings.indentWidthValue(spaces)),
-      ],
-    );
-    if (width != null) await _setIndentWidth(width);
   }
 
   /// Enables or disables one of the library's editors (T-WYS-03).
@@ -483,73 +282,12 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
     if (mounted) setState(() => _enabledEditors = next);
   }
 
-  /// Asks which dictionaries the editor should use (T-PP-09, revised): every
-  /// one found on the machine — Windows's languages there — any number of
-  /// them at once.
+  /// Asks which dictionaries the editor should use (T-PP-09, revised).
   /// Choosing none means the locale default.
   Future<void> _chooseSpellDictionaries(EditorSpellCheck spell) async {
-    final names = await availableSpellDictionaries();
-    if (!mounted) return;
-    final selected = _spellDictionaries.toSet();
-    final choice = await showDialog<List<String>>(
-      context: context,
-      builder: (context) => AlertDialog(
-        key: const Key('spell-dictionary-dialog'),
-        scrollable: true,
-        title: Text(AppStrings.spellCheckDictionaryChoiceTitle),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              AppStrings.spellCheckDictionaryChoiceSubtitle,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: 8),
-            if (names.isEmpty)
-              Text(AppStrings.spellCheckNoDictionaries)
-            else
-              StatefulBuilder(
-                builder: (context, setDialogState) => Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    for (final name in names)
-                      CheckboxListTile(
-                        key: Key('spell-dictionary-$name'),
-                        dense: true,
-                        contentPadding: EdgeInsets.zero,
-                        title: Text(name),
-                        value: selected.contains(name),
-                        onChanged: (value) => setDialogState(() {
-                          if (value ?? false) {
-                            selected.add(name);
-                          } else {
-                            selected.remove(name);
-                          }
-                        }),
-                      ),
-                  ],
-                ),
-              ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            key: const Key('spell-dictionary-cancel'),
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(AppStrings.actionCancel),
-          ),
-          FilledButton(
-            key: const Key('spell-dictionary-save'),
-            onPressed: () =>
-                Navigator.of(context)
-                    .pop(names.where(selected.contains).toList()),
-            child: Text(AppStrings.actionSave),
-          ),
-        ],
-      ),
+    final choice = await showSpellDictionariesDialog(
+      context,
+      _spellDictionaries,
     );
     if (choice == null) return;
     await widget.controller.setSpellDictionaries(choice);
@@ -585,35 +323,10 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
           // Which editors the library offers: both, or one alone. The
           // last one on cannot be switched off (its switch disables
           // itself), so the choice never resolves to no editor.
-          HighlightRow(
-            key: SettingsKeys.editorSource,
-            child: SettingsSwitchRow(
-              title: AppStrings.editorKindSource,
-              description: AppStrings.editorKindSourceSubtitle,
-              value: _enabledEditors.contains(EditorKind.source),
-              onChanged:
-                  _enabledEditors.length < 2 &&
-                      _enabledEditors.contains(EditorKind.source)
-                  ? null
-                  : (value) => unawaited(
-                      _toggleEditorEnabled(EditorKind.source, value),
-                    ),
-            ),
-          ),
-          HighlightRow(
-            key: SettingsKeys.editorWysiwyg,
-            child: SettingsSwitchRow(
-              title: AppStrings.editorKindWysiwyg,
-              description: AppStrings.editorKindWysiwygSubtitle,
-              value: _enabledEditors.contains(EditorKind.wysiwyg),
-              onChanged:
-                  _enabledEditors.length < 2 &&
-                      _enabledEditors.contains(EditorKind.wysiwyg)
-                  ? null
-                  : (value) => unawaited(
-                      _toggleEditorEnabled(EditorKind.wysiwyg, value),
-                    ),
-            ),
+          SettingsEditorKinds(
+            enabledEditors: _enabledEditors,
+            onToggle: (kind, {required enabled}) =>
+                unawaited(_toggleEditorEnabled(kind, enabled)),
           ),
           // Switches keep their subtitle: a switch has no dialog to move
           // the explanation into, and "off = on first tap" is exactly
@@ -627,231 +340,60 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
               onChanged: _toggleLineNumbers,
             ),
           ),
-          // Every platform has it (#171): a phone is narrower than any
-          // column, so there it only starts to count on a tablet or in
-          // landscape — which is the reason not to hide it.
-          HighlightRow(
-            key: SettingsKeys.readableLineLength,
-            child: SettingsSwitchRow(
-              title: AppStrings.readableLineLengthTitle,
-              description: AppStrings.readableLineLengthSubtitle,
-              value: _readableLineLength,
-              onChanged: (value) => unawaited(_toggleReadableLineLength(value)),
-            ),
+          SettingsEditorColumn(
+            readableLineLength: _readableLineLength,
+            noteColumnWidth: _noteColumnWidth,
+            onReadableLineLength: (value) =>
+                unawaited(_toggleReadableLineLength(value)),
+            onNoteColumnWidth: (width) => unawaited(_setNoteColumnWidth(width)),
           ),
-          HighlightRow(
-            key: SettingsKeys.noteColumnWidth,
-            child: pointerDense(Theme.of(context))
-                ? SettingsSliderRow(
-                    sliderKey: const Key('note-column-width-slider'),
-                    title: AppStrings.noteColumnWidthTitle,
-                    subtitle: AppStrings.noteColumnWidthSubtitle,
-                    value: _noteColumnWidth,
-                    min: minNoteColumnWidth,
-                    max: maxNoteColumnWidth,
-                    divisions: _columnWidthSteps,
-                    format: AppStrings.noteColumnWidthValue,
-                    enabled: _readableLineLength,
-                    onChanged: (width) => unawaited(_setNoteColumnWidth(width)),
-                  )
-                : SettingsValueRow(
-                    title: AppStrings.noteColumnWidthTitle,
-                    subtitle: AppStrings.noteColumnWidthSubtitle,
-                    value: AppStrings.noteColumnWidthValue(_noteColumnWidth),
-                    enabled: _readableLineLength,
-                    onTap: () => unawaited(_chooseNoteColumnWidth()),
-                  ),
+          SettingsEditorWriting(
+            typewriter: _typewriter,
+            cascadeChecklist: _cascadeChecklist,
+            linkPreview: _linkPreview,
+            frontmatterPanel: _frontmatterPanel,
+            autofocusEditor: _autofocusEditor,
+            onTypewriter: (value) => unawaited(_toggleTypewriter(value)),
+            onCascadeChecklist: (value) =>
+                unawaited(_toggleCascadeChecklist(value)),
+            onLinkPreview: (value) => unawaited(_toggleLinkPreview(value)),
+            onFrontmatterPanel: (value) =>
+                unawaited(_toggleFrontmatterPanel(value)),
+            onAutofocusEditor: _toggleAutofocusEditor,
           ),
-          HighlightRow(
-            key: SettingsKeys.typewriter,
-            child: SettingsSwitchRow(
-              title: AppStrings.typewriterTitle,
-              description: AppStrings.typewriterSubtitle,
-              value: _typewriter,
-              onChanged: (value) => unawaited(_toggleTypewriter(value)),
-            ),
+          SettingsEditorLinks(
+            linkType: _linkType,
+            linkUpdate: _linkUpdate,
+            newItemLocation: _newItemLocation,
+            onLinkType: (type) => unawaited(_setLinkType(type)),
+            onLinkUpdate: (mode) => unawaited(_setLinkUpdate(mode)),
+            onNewItemLocation: (location) =>
+                unawaited(_setNewItemLocation(location)),
           ),
-          HighlightRow(
-            key: SettingsKeys.cascadeChecklist,
-            child: SettingsSwitchRow(
-              title: AppStrings.cascadeChecklistTitle,
-              description: AppStrings.cascadeChecklistSubtitle,
-              value: _cascadeChecklist,
-              onChanged: (value) => unawaited(_toggleCascadeChecklist(value)),
-            ),
-          ),
-          HighlightRow(
-            key: SettingsKeys.linkPreview,
-            child: SettingsSwitchRow(
-              title: AppStrings.linkPreviewTitle,
-              description: AppStrings.linkPreviewSubtitle,
-              value: _linkPreview,
-              onChanged: (value) => unawaited(_toggleLinkPreview(value)),
-            ),
-          ),
-          HighlightRow(
-            key: SettingsKeys.frontmatterPanel,
-            child: SettingsSwitchRow(
-              title: AppStrings.frontmatterPanelTitle,
-              description: AppStrings.frontmatterPanelSubtitle,
-              value: _frontmatterPanel,
-              onChanged: (value) => unawaited(_toggleFrontmatterPanel(value)),
-            ),
-          ),
-          // Phones and tablets only: there is no on-screen keyboard to
-          // show on desktop, so the row would toggle a no-op (user,
-          // 2026-09-09).
-          if (Platform.isAndroid || Platform.isIOS)
-            SettingsSwitchRow(
-              title: AppStrings.keyboardOnOpenTitle,
-              description: AppStrings.keyboardOnOpenSubtitle,
-              value: _autofocusEditor ?? false,
-              onChanged: _toggleAutofocusEditor,
-            ),
-          HighlightRow(
-            key: SettingsKeys.linkType,
-            child: SettingsValueRow(
-              title: AppStrings.linkTypeTitle,
-              subtitle: AppStrings.linkTypeSubtitle,
-              value: switch (_linkType) {
-                LinkType.wikilink => AppStrings.linkTypeWikilink,
-                LinkType.markdown => AppStrings.linkTypeMarkdown,
-              },
-              onTap: () => unawaited(_chooseLinkType()),
-            ),
-          ),
-          // Next to the link format: they decide what a link does — what
-          // it inserts, what happens to it when its target moves (#848),
-          // where a new note lands (#850).
-          HighlightRow(
-            key: SettingsKeys.linkUpdate,
-            child: SettingsValueRow(
-              title: AppStrings.linkUpdateTitle,
-              subtitle: AppStrings.linkUpdateSubtitle,
-              value: switch (_linkUpdate) {
-                LinkUpdate.automatic => AppStrings.linkUpdateAutomatic,
-                LinkUpdate.ask => AppStrings.linkUpdateAsk,
-                LinkUpdate.never => AppStrings.linkUpdateNever,
-              },
-              onTap: () => unawaited(_chooseLinkUpdate()),
-            ),
-          ),
-          // The one rule for where every new note and folder lands (#850),
-          // the note a dead link creates (issue #78) among them.
-          HighlightRow(
-            key: SettingsKeys.newItemLocation,
-            child: SettingsValueRow(
-              title: AppStrings.newItemLocationTitle,
-              value: switch (_newItemLocation) {
-                NewItemLocation.libraryRoot => AppStrings.newItemLocationRoot,
-                NewItemLocation.openNoteFolder =>
-                  AppStrings.newItemLocationOpenNote,
-              },
-              onTap: () => unawaited(_chooseNewItemLocation()),
-            ),
-          ),
-          HighlightRow(
-            key: SettingsKeys.noteTextScale,
-            // A desktop's slider sits in the row (#712).
-            child: pointerDense(Theme.of(context))
-                ? SettingsSliderRow(
-                    sliderKey: const Key('note-text-scale-slider'),
-                    title: AppStrings.noteTextScaleTitle,
-                    subtitle: AppStrings.noteTextScaleSubtitle,
-                    value: _noteTextScale,
-                    min: minTextScale,
-                    max: maxTextScale,
-                    divisions: _textScaleSteps,
-                    format: AppStrings.textScaleValue,
-                    onChanged: (scale) => unawaited(_setNoteTextScale(scale)),
-                  )
-                : SettingsValueRow(
-                    title: AppStrings.noteTextScaleTitle,
-                    subtitle: AppStrings.noteTextScaleSubtitle,
-                    value: AppStrings.textScaleValue(_noteTextScale),
-                    onTap: () => unawaited(_chooseNoteTextScale()),
-                  ),
-          ),
-          // Beside the note text size: both decide how the note reads in the
-          // editor, and this one only the source pane (#259).
-          HighlightRow(
-            key: SettingsKeys.sourceFont,
-            child: SettingsValueRow(
-              title: AppStrings.sourceFontTitle,
-              subtitle: AppStrings.sourceFontSubtitle,
-              value: switch (_sourceFont) {
-                SourceFont.monospace => AppStrings.sourceFontMonospace,
-                SourceFont.sansSerif => AppStrings.sourceFontSansSerif,
-                SourceFont.serif => AppStrings.sourceFontSerif,
-              },
-              onTap: () => unawaited(_chooseSourceFont()),
-            ),
-          ),
-          HighlightRow(
-            key: SettingsKeys.indentWidth,
-            child: SettingsValueRow(
-              title: AppStrings.indentWidthTitle,
-              subtitle: AppStrings.indentWidthSubtitle,
-              value: AppStrings.indentWidthValue(_indentWidth),
-              onTap: () => unawaited(_chooseIndentWidth()),
-            ),
+          SettingsEditorText(
+            noteTextScale: _noteTextScale,
+            sourceFont: _sourceFont,
+            indentWidth: _indentWidth,
+            onNoteTextScale: (scale) => unawaited(_setNoteTextScale(scale)),
+            onSourceFont: (font) => unawaited(_setSourceFont(font)),
+            onIndentWidth: (width) => unawaited(_setIndentWidth(width)),
           ),
           // Next to the indentation: both decide how the library's
           // Markdown is written out.
-          HighlightRow(
-            key: SettingsKeys.tidyOnClose,
-            child: SettingsSwitchRow(
-              title: AppStrings.tidyOnCloseTitle,
-              description: AppStrings.tidyOnCloseSubtitle,
-              value: _tidyOnClose,
-              onChanged: (value) => unawaited(_toggleTidyOnClose(value)),
-            ),
-          ),
-          // The rules that tidy applies (#72): the switch above is the
-          // master, this chooses what it settles.
-          HighlightRow(
-            key: SettingsKeys.lintRules,
-            child: SettingsValueRow(
-              title: AppStrings.lintRulesTitle,
-              subtitle: AppStrings.lintRulesSubtitle,
-              value: AppStrings.lintRulesValue(
-                LintRule.values.length - _lintRulesOff.length,
-                LintRule.values.length,
-              ),
-              onTap: () => unawaited(_chooseLintRules()),
-            ),
+          SettingsEditorTidy(
+            tidyOnClose: _tidyOnClose,
+            lintRulesOff: _lintRulesOff,
+            onTidyOnClose: (value) => unawaited(_toggleTidyOnClose(value)),
+            onLintRulesOff: (off) => unawaited(_setLintRulesOff(off)),
           ),
           if (spell != null)
-            ListenableBuilder(
-              listenable: spell,
-              // The rows are the spell state's, not this build's: keyed on
-              // `offered` they survive the reload a dictionary pick starts
-              // (and the switch that turns checking off) instead of
-              // vanishing with `available` (#493).
-              builder: (context, _) => !spell.offered
-                  ? const SizedBox.shrink()
-                  : Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        SettingsSwitchRow(
-                          key: const Key('spell-check-setting'),
-                          title: AppStrings.settingsSpellCheckTitle,
-                          description: AppStrings.settingsSpellCheckSubtitle,
-                          value: spell.enabled,
-                          onChanged: (value) =>
-                              setState(() => spell.setEnabled(enabled: value)),
-                        ),
-                        SettingsValueRow(
-                          key: const Key('spell-dictionary-setting'),
-                          title: AppStrings.spellCheckDictionaryTitle,
-                          value: _spellDictionaries.isEmpty
-                              ? AppStrings.spellCheckDictionarySystem
-                              : _spellDictionaries.join(', '),
-                          onTap: () =>
-                              unawaited(_chooseSpellDictionaries(spell)),
-                        ),
-                      ],
-                    ),
+            SettingsEditorSpelling(
+              spell: spell,
+              dictionaries: _spellDictionaries,
+              onEnabled: (value) =>
+                  setState(() => spell.setEnabled(enabled: value)),
+              onChooseDictionaries: () =>
+                  unawaited(_chooseSpellDictionaries(spell)),
             ),
         ],
       ),

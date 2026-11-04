@@ -13,19 +13,18 @@ import 'package:niman/src/calendar/calendar_occurrence_edits.dart';
 import 'package:niman/src/calendar/calendar_store.dart';
 import 'package:niman/src/calendar/calendar_writer.dart';
 import 'package:niman/src/calendar/parser.dart';
-import 'package:niman/src/calendar/time_display.dart';
 import 'package:niman/src/core/theme_tokens.dart';
-import 'package:niman/src/core/weeks.dart';
 import 'package:niman/src/journal/journal_summary.dart';
-import 'package:niman/src/templates/engine.dart';
-import 'package:niman/src/ui/action_sheet.dart';
-import 'package:niman/src/ui/calendar_event_form.dart';
 import 'package:niman/src/ui/journal/journal_calendar.dart';
+import 'package:niman/src/ui/journal/journal_day_card.dart';
+import 'package:niman/src/ui/journal/journal_day_events.dart';
+import 'package:niman/src/ui/journal/journal_dock_create_row.dart';
+import 'package:niman/src/ui/journal/journal_due_tasks.dart';
 import 'package:niman/src/ui/journal/journal_event_actions.dart';
-import 'package:niman/src/ui/journal/journal_event_sheet.dart';
-import 'package:niman/src/ui/journal/journal_flow.dart';
-import 'package:niman/src/ui/line_runs.dart';
-import 'package:niman/src/ui/repeat_label.dart';
+import 'package:niman/src/ui/journal/journal_event_editor.dart';
+import 'package:niman/src/ui/journal/journal_event_runner.dart';
+import 'package:niman/src/ui/journal/journal_never_listenable.dart';
+import 'package:niman/src/ui/journal/journal_recent_entry.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// The browser over the journal's entries.
@@ -277,7 +276,7 @@ final class _JournalBrowserState extends State<JournalBrowser> {
       padding: EdgeInsets.all(widget.large ? 18 : 12),
       children: [
         ListenableBuilder(
-          listenable: widget.calendarChanged ?? const _Never(),
+          listenable: widget.calendarChanged ?? const NeverListenable(),
           builder: (context, _) => JournalCalendar(
             month: _month,
             entries: entries,
@@ -319,11 +318,22 @@ final class _JournalBrowserState extends State<JournalBrowser> {
         ),
         if (widget.large) ...[
           const SizedBox(height: 14),
-          _dayCard(context, entries.contains(_selected)),
+          JournalDayCard(
+            day: _selected,
+            hasEntry: entries.contains(_selected),
+            onOpen: () => widget.onOpenDay(_selected, confirmed: true),
+            actions: _dayActions(
+              context,
+              hasEntry: entries.contains(_selected),
+            ),
+          ),
         ] else ...[
           if (_picked && !entries.contains(_selected)) ...[
             const SizedBox(height: 12),
-            _dockCreateRow(context),
+            JournalDockCreateRow(
+              day: _selected,
+              onCreate: () => widget.onOpenDay(_selected, confirmed: true),
+            ),
           ],
           // The form sits where the calendar is, under it: a dialog would
           // go over the very thing the day was picked on (#712).
@@ -334,67 +344,44 @@ final class _JournalBrowserState extends State<JournalBrowser> {
         ],
         if (widget.eventsOn case final eventsOn?)
           ListenableBuilder(
-            listenable: widget.calendarChanged ?? const _Never(),
+            listenable: widget.calendarChanged ?? const NeverListenable(),
             builder: (context, _) {
               final day = widget.large
                   ? _selected
                   : widget.focusDay ?? widget.today;
-              final goals = widget.goalsOn?.call(day) ?? const <CalendarLine>[];
-              final events = eventsOn(day);
-              if (goals.isEmpty && events.isEmpty) {
-                return const SizedBox.shrink();
-              }
-              return Column(
-                key: const Key('journal-events'),
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const SizedBox(height: 12),
-                  for (final goal in goals) _goalRow(context, goal, heading),
-                  if (events.isNotEmpty) ...[
-                    const SizedBox(height: 8),
-                    Text(
-                      AppStrings.journalEvents.toUpperCase(),
-                      style: heading,
-                    ),
-                    for (final event in events)
-                      _eventRow(context, event, heading),
-                  ],
-                ],
+              return JournalDayEvents(
+                goals: widget.goalsOn?.call(day) ?? const <CalendarLine>[],
+                events: eventsOn(day),
+                heading: heading,
+                eventTimesClock: widget.eventTimesClock,
+                // A phone taps through to the sheet (Edit, Delete, the
+                // file); a window goes straight to the file, which is where
+                // it is edited (#730).
+                onTapEvent: widget.large && _sheetOffered
+                    ? (entry) =>
+                          unawaited(_eventRunner.showSheet(this.context, entry))
+                    : widget.onOpenEvent,
+                // The dock has no sheet: its events have a menu (#1191).
+                onEventMenu: widget.large || !_offered.any
+                    ? null
+                    : (entry, position) => unawaited(
+                        _eventRunner.showMenu(this.context, entry, position),
+                      ),
               );
             },
           ),
         if (widget.dueOn case final dueOn?)
           ListenableBuilder(
-            listenable: widget.tasksChanged ?? const _Never(),
+            listenable: widget.tasksChanged ?? const NeverListenable(),
             builder: (context, _) {
               final day = widget.large
                   ? _selected
                   : widget.focusDay ?? widget.today;
-              final tasks = dueOn(day);
-              if (tasks.isEmpty) return const SizedBox.shrink();
-              return Column(
-                key: const Key('journal-due'),
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const SizedBox(height: 16),
-                  Text(
-                    AppStrings.journalDueOn(formatDateTime(day, 'ddd D'))
-                        .toUpperCase(),
-                    style: heading,
-                  ),
-                  for (final task in tasks)
-                    ListTile(
-                      dense: true,
-                      contentPadding: EdgeInsets.zero,
-                      leading: Icon(
-                        Icons.check_box_outline_blank,
-                        size: 18,
-                        color: scheme.onSurfaceVariant,
-                      ),
-                      title: Text(task),
-                      onTap: widget.onOpenTasks,
-                    ),
-                ],
+              return JournalDueTasks(
+                day: day,
+                tasks: dueOn(day),
+                heading: heading,
+                onOpenTasks: widget.onOpenTasks,
               );
             },
           ),
@@ -403,157 +390,19 @@ final class _JournalBrowserState extends State<JournalBrowser> {
           Text(AppStrings.journalRecent.toUpperCase(), style: heading),
           const SizedBox(height: 4),
           for (final day in latest)
-            GestureDetector(
-              onSecondaryTapUp: switch (widget.onEntryMenu) {
-                final menu? => (details) => menu(day, details.globalPosition),
+            JournalRecentEntry(
+              day: day,
+              summary: _summaries[day],
+              heading: heading,
+              dense: !widget.large,
+              onOpen: () => _open(day),
+              onMenu: switch (widget.onEntryMenu) {
+                final menu? => (position) => menu(day, position),
                 null => null,
               },
-              child: ListTile(
-                key: Key('journal-recent-${formatDateTime(day, 'YYYY-MM-DD')}'),
-                dense: !widget.large,
-                contentPadding: EdgeInsets.zero,
-                leading: SizedBox(
-                  width: 48,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        formatDateTime(day, 'ddd').toUpperCase(),
-                        style: heading,
-                      ),
-                      Text(
-                        '${day.day}',
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                title: Text(
-                  _summaries[day]?.isNotEmpty ?? false
-                      ? _summaries[day]!
-                      : formatDateTime(day, 'D MMMM YYYY'),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                onTap: () => _open(day),
-              ),
             ),
         ],
       ],
-    );
-  }
-
-  /// One of the day's goals (#730): what it covers, and what it says. The
-  /// goal's own tokens wear the editor's colours, so a line reads the same
-  /// in both places.
-  Widget _goalRow(BuildContext context, CalendarLine goal, TextStyle? style) {
-    final text = goal.goalText;
-    if (text == null) return const SizedBox.shrink();
-    final theme = Theme.of(context);
-    final goalStyle = style?.copyWith(
-      color:
-          theme.extension<SyntaxColors>()?.calendarGoal ??
-          theme.colorScheme.tertiary,
-    );
-    return Padding(
-      key: Key('journal-goal-${goal.key}'),
-      padding: const EdgeInsets.only(bottom: 2),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 64,
-            child: Text(
-              _goalLabel(goal),
-              style: goalStyle,
-              textAlign: TextAlign.end,
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: lineText(context, text, calendarLineRuns(goal.tokens)),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// What a goal covers: the week's number, the month's name, the year.
-  String _goalLabel(CalendarLine goal) => journalGoalLabel(goal);
-
-  /// An event's row (#730): its time as written, then its text with the
-  /// tokens coloured and an aside dimmed, and a bell for its reminder.
-  Widget _eventRow(
-    BuildContext context,
-    CalendarEntryEvent entry,
-    TextStyle? heading,
-  ) {
-    final theme = Theme.of(context);
-    final syntax = theme.extension<SyntaxColors>();
-    final event = entry.event;
-    final tile = ListTile(
-      key: Key('journal-event-${entry.lineIndex}-${event.start}'),
-      dense: true,
-      contentPadding: EdgeInsets.zero,
-      leading: SizedBox(
-        width: 56,
-        child: Text(
-          calendarTimeText(
-            event.time,
-            asClock: widget.eventTimesClock,
-            day: entry.day,
-          ),
-          textAlign: TextAlign.end,
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: syntax?.calendarTime ?? theme.colorScheme.tertiary,
-            fontFeatures: const [FontFeature.tabularFigures()],
-          ),
-        ),
-      ),
-      title: calendarEventText(context, event),
-      // An event that repeats says by what, on every day it shows (#1190).
-      subtitle: entry.recurrence == null
-          ? null
-          : RepeatLabel(
-              key: Key(
-                'journal-event-repeat-${entry.lineIndex}-${event.start}',
-              ),
-              rule: entry.recurrence!.rule,
-            ),
-      trailing: event.reminder == null
-          ? null
-          : Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.notifications_outlined,
-                  size: 14,
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-                const SizedBox(width: 2),
-                Text(event.reminder!, style: theme.textTheme.bodySmall),
-              ],
-            ),
-      // A phone taps through to the sheet (Edit, Delete, the file); a
-      // window goes straight to the file, which is where it is edited
-      // (#730).
-      onTap: widget.large && _sheetOffered
-          ? () => _showEventSheet(entry)
-          : (widget.onOpenEvent == null
-                ? null
-                : () => widget.onOpenEvent!(entry)),
-    );
-    // The dock has no sheet: a right click, or a long press on a touch
-    // screen that has the dock, opens the event's menu (#1191).
-    if (widget.large || !_offered.any) return tile;
-    return GestureDetector(
-      onSecondaryTapUp: (details) =>
-          unawaited(_showEventMenu(entry, details.globalPosition)),
-      onLongPressStart: (details) =>
-          unawaited(_showEventMenu(entry, details.globalPosition)),
-      child: tile,
     );
   }
 
@@ -572,186 +421,17 @@ final class _JournalBrowserState extends State<JournalBrowser> {
     return offered.edit || offered.skip || offered.delete;
   }
 
-  /// The phone's sheet for one event (#730): what it is, its day, its rule
-  /// and its reminder, and what to do with it.
-  Future<void> _showEventSheet(CalendarEntryEvent entry) async {
-    final action = await showJournalEventSheet(
-      context,
-      entry: entry,
-      offered: _offered,
-    );
-    if (action == null || !mounted) return;
-    await _runEventAction(action, entry);
-  }
-
-  /// The dock's context menu of an event, at a right click (#1191).
-  Future<void> _showEventMenu(CalendarEntryEvent entry, Offset position) async {
-    if (!_offered.any) return;
-    final action = await showJournalEventMenu(
-      context,
-      entry: entry,
-      offered: _offered,
-      position: position,
-    );
-    if (action == null || !mounted) return;
-    await _runEventAction(action, entry, anchor: menuAnchorAt(position));
-  }
-
-  /// Carries out [action] on [entry]. Edit and Delete of an event that
-  /// repeats first ask which occurrences they mean (#1191); [anchor] is
-  /// where a window's question opens.
-  Future<void> _runEventAction(
-    JournalEventAction action,
-    CalendarEntryEvent entry, {
-    Rect? anchor,
-  }) async {
-    switch (action) {
-      case JournalEventAction.edit:
-        final scope = await askOccurrenceScope(
-          context,
-          entry: entry,
-          deleting: false,
-          anchor: anchor,
-        );
-        if (scope == null || !mounted) return;
-        // An event that does not repeat has no scope: its form moves it.
-        final scoped = entry.repeats ? scope : null;
-        _openForm(
-          day: _formDayOf(entry, scoped),
-          editing: entry,
-          scope: scoped,
-        );
-      case JournalEventAction.skip:
-        widget.onSkipEvent?.call(entry);
-      case JournalEventAction.delete:
-        final scope = await askOccurrenceScope(
-          context,
-          entry: entry,
-          deleting: true,
-          anchor: anchor,
-        );
-        if (scope == null || !mounted) return;
-        widget.onDeleteEvent?.call(entry, scope);
-      case JournalEventAction.open:
-        widget.onOpenEvent?.call(entry);
-    }
-  }
-
-  /// The day an entry is the event of, for a write that needs one: the
-  /// occurrence's own day (#1191), else the day the pane speaks for.
-  DateTime _dayOfEntry(CalendarEntryEvent entry) =>
-      entry.day ?? (widget.large ? _selected : widget.focusDay ?? widget.today);
-
-  /// The day an edit's form opens on (#1221): the day the form writes the
-  /// event on, which its Ends row counts from and its Repeat presets are
-  /// taken from. For all the events of a series it is the series' first day,
-  /// where the rule event is written; for the rest the occurrence's own — the
-  /// one that is changed, or the one the new series starts on.
-  DateTime _formDayOf(
-    CalendarEntryEvent entry,
-    CalendarOccurrenceScope? scope,
-  ) => scope == CalendarOccurrenceScope.all
-      ? entry.line.date ?? _dayOfEntry(entry)
-      : _dayOfEntry(entry);
-
-  /// The dock's offer for the empty day it picked (#712): the phone's
-  /// card and dialog in one row, under the calendar they belong to.
-  Widget _dockCreateRow(BuildContext context) {
-    final theme = Theme.of(context);
-    return Card.filled(
-      key: const Key('journal-dock-create'),
-      margin: EdgeInsets.zero,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    journalDayLabel(_selected),
-                    style: theme.textTheme.titleSmall,
-                  ),
-                  Text(
-                    AppStrings.journalNoEntry,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            FilledButton.icon(
-              key: const Key('journal-dock-create-button'),
-              onPressed: () => widget.onOpenDay(_selected, confirmed: true),
-              icon: const Icon(Icons.add, size: 18),
-              label: Text(AppStrings.actionCreate),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// The phone's card for the picked day: open its entry, or make one.
-  Widget _dayCard(BuildContext context, bool hasEntry) {
-    final theme = Theme.of(context);
-    return Card.filled(
-      key: const Key('journal-day-card'),
-      margin: EdgeInsets.zero,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 12, 12, 12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // The first row keeps its height whether the day has an entry
-            // or not, so nothing moves under a thumb already on it (#730).
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        journalDayLabel(_selected),
-                        style: theme.textTheme.titleSmall,
-                      ),
-                      if (!hasEntry)
-                        Text(
-                          AppStrings.journalNoEntry,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-                FilledButton.icon(
-                  key: const Key('journal-day-open'),
-                  onPressed: () => widget.onOpenDay(_selected, confirmed: true),
-                  icon: Icon(
-                    hasEntry ? Icons.arrow_forward : Icons.add,
-                    size: 18,
-                  ),
-                  label: Text(
-                    hasEntry
-                        ? AppStrings.journalOpenEntry
-                        : AppStrings.actionCreate,
-                  ),
-                ),
-              ],
-            ),
-            if (_dayActions(context, hasEntry: hasEntry).isNotEmpty)
-              Wrap(
-                spacing: 4,
-                children: _dayActions(context, hasEntry: hasEntry),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
+  /// What a tap or a right click on an event leads to: the shell's writes,
+  /// read from the widget when the action is carried out.
+  JournalEventRunner get _eventRunner => JournalEventRunner(
+    offered: _offered,
+    paneDay: () => widget.large ? _selected : widget.focusDay ?? widget.today,
+    onEdit: (day, entry, scope) =>
+        _openForm(day: day, editing: entry, scope: scope),
+    onSkip: (entry) => widget.onSkipEvent?.call(entry),
+    onDelete: (entry, scope) => widget.onDeleteEvent?.call(entry, scope),
+    onOpen: (entry) => widget.onOpenEvent?.call(entry),
+  );
 
   /// New journal, Add event and Add task for the picked day (#730), each
   /// only when the shell gave the way to write it: the buttons never
@@ -829,47 +509,23 @@ final class _JournalBrowserState extends State<JournalBrowser> {
     _editingScope = null;
   });
 
-  /// The form itself, writing when it is told to and closing either way.
+  /// The form itself, writing when it is told to and closing either way:
+  /// the sheet's pop on a phone, the inline form's end in the dock.
   Widget _eventForm(
     BuildContext context,
     DateTime day,
     CalendarEntryEvent? editing,
     CalendarOccurrenceScope? scope,
   ) {
-    return CalendarEventForm(
-      // The form's fields are read once, from its draft: a form for another
-      // event, day or scope, or for an added event after an edit, is another
-      // state, not the open one with its fields (#1218).
-      key: ValueKey((
-        editing?.lineIndex,
-        editing?.event.start,
-        editing?.day,
-        scope,
-        day,
-      )),
+    return JournalEventEditor(
       day: day,
-      knownTokens: widget.knownTokens,
-      draft: editing == null ? null : calendarDraftOf(editing.event),
+      editing: editing,
       scope: scope,
-      preview: (draft) =>
-          _previewLine(day, draft, editing: editing, scope: scope),
-      onCancel: () {
-        if (widget.large) {
-          Navigator.of(context).maybePop();
-        } else {
-          _closeInlineForm();
-        }
-      },
-      onSave: (draft) {
-        if (editing != null) {
-          widget.onEditEvent?.call(
-            editing,
-            draft,
-            scope ?? CalendarOccurrenceScope.all,
-          );
-        } else {
-          widget.onAddEvent?.call(draft.day ?? day, draft);
-        }
+      knownTokens: widget.knownTokens,
+      calendarFile: widget.calendarFile,
+      onAddEvent: widget.onAddEvent,
+      onEditEvent: widget.onEditEvent,
+      onClose: () {
         if (widget.large) {
           Navigator.of(context).maybePop();
         } else {
@@ -878,65 +534,4 @@ final class _JournalBrowserState extends State<JournalBrowser> {
       },
     );
   }
-
-  /// The lines an added or edited [draft] would write — the day's, or two
-  /// when the event moves or one occurrence leaves its rule — from the file
-  /// as the shell last read it: the writer's own answer, so the preview
-  /// promises exactly what the write does.
-  String _previewLine(
-    DateTime day,
-    CalendarEventDraft draft, {
-    CalendarEntryEvent? editing,
-    CalendarOccurrenceScope? scope,
-  }) {
-    final file =
-        widget.calendarFile ??
-        const CalendarFileContent(lines: <CalendarRawLine>[]);
-    final next = editing == null
-        ? addCalendarEvent(file, draft.day ?? day, draft: draft)
-        : updateCalendarOccurrence(
-                file,
-                CalendarEventRef(
-                  line: editing.lineIndex,
-                  day: editing.line.date ?? day,
-                  start: editing.event.start,
-                ),
-                // The occurrence, whichever day the form is on.
-                editing.day ?? day,
-                draft,
-                scope ?? CalendarOccurrenceScope.all,
-              ) ??
-              file;
-    final before = {for (final line in file.lines) line.text};
-    return [
-      for (final line in next.lines)
-        if (!before.contains(line.text)) line.text,
-    ].join('\n');
-  }
-}
-
-/// A listenable that never fires, for a browser with no tasks to follow.
-final class _Never implements Listenable {
-  const new();
-
-  @override
-  void addListener(VoidCallback listener) {}
-
-  @override
-  void removeListener(VoidCallback listener) {}
-}
-
-/// What a goal covers: the week's number, the month's name, the year
-/// (#730). Shared with the Home's events tile, so both name a goal alike.
-String journalGoalLabel(CalendarLine goal) {
-  final date = goal.date;
-  if (date == null) return '';
-  return switch (goal.kind) {
-    CalendarLineKind.weekGoal => AppStrings.journalWeek(
-      goal.week ?? isoWeekOf(date),
-    ),
-    CalendarLineKind.monthGoal => AppStrings.monthNames[date.month - 1],
-    CalendarLineKind.yearGoal => '${date.year}',
-    _ => '',
-  };
 }

@@ -28,13 +28,6 @@ const Map<String, int> _oversized = {
   'markdown/render/source_view.dart': 1442,
   'ui/note_view.dart': 1324,
   'library/library_state.dart': 1036,
-  'markdown/render/markdown_read_view.dart': 814,
-  'ui/sync/sync_settings_screen.dart': 804,
-  'ui/settings_search.dart': 777,
-  'ui/journal/journal_browser.dart': 743,
-  'ui/settings_editor.dart': 734,
-  'library/note_ops.dart': 694,
-  'db/index_reconcile.dart': 643,
 };
 
 /// Tables that are long by nature, not by mixed responsibilities, and why:

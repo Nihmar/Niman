@@ -2,16 +2,17 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/logging.dart';
-import 'package:niman/src/sync/sync_report.dart';
 import 'package:niman/src/sync/sync_service.dart';
 import 'package:niman/src/ui/floating_window.dart';
-import 'package:niman/src/ui/history/history_labels.dart';
 import 'package:niman/src/ui/pointer_density.dart';
-import 'package:niman/src/ui/settings_rows.dart';
 import 'package:niman/src/ui/strings.dart';
-import 'package:niman/src/ui/sync/spinning_sync_icon.dart';
 import 'package:niman/src/ui/sync/sync_flow.dart';
 import 'package:niman/src/ui/sync/sync_labels.dart';
+import 'package:niman/src/ui/sync/sync_overview.dart';
+import 'package:niman/src/ui/sync/sync_server_form.dart';
+import 'package:niman/src/ui/sync/sync_settings_dialogs.dart';
+import 'package:niman/src/ui/sync/sync_settings_frame.dart';
+import 'package:niman/src/ui/sync/sync_test_result_card.dart';
 import 'package:niman/src/ui/unsaved_notes.dart';
 
 const _log = AppLogger(name: 'sync');
@@ -268,26 +269,12 @@ final class _SyncSettingsScreenState extends State<SyncSettingsScreen> {
   Future<void> _trustCertificate(SyncTestResult result) async {
     final fingerprint = result.fingerprint;
     if (fingerprint == null) return;
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        key: const Key('sync-trust-dialog'),
-        title: Text(AppStrings.syncCertTrustTitle),
-        content: Text(AppStrings.syncCertTrustBody(result.host, fingerprint)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(AppStrings.actionCancel),
-          ),
-          TextButton(
-            key: const Key('sync-trust-confirm'),
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(AppStrings.syncCertTrustAction),
-          ),
-        ],
-      ),
+    final confirmed = await confirmSyncCertificateTrust(
+      context,
+      host: result.host,
+      fingerprint: fingerprint,
     );
-    if (confirmed != true || !mounted) return;
+    if (!confirmed || !mounted) return;
     setState(() => _trustedFingerprint = fingerprint);
     await _test();
   }
@@ -298,84 +285,13 @@ final class _SyncSettingsScreenState extends State<SyncSettingsScreen> {
   Future<void> _forgetCertificate() async {
     final fingerprint = _sync.status.destination?.trustedCertFingerprint;
     if (fingerprint == null) return;
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        key: const Key('sync-forget-certificate-dialog'),
-        title: Text(AppStrings.syncCertForgetTitle),
-        content: Text(AppStrings.syncCertForgetBody),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(AppStrings.actionCancel),
-          ),
-          TextButton(
-            key: const Key('sync-forget-certificate-confirm'),
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(AppStrings.syncCertForgetAction),
-          ),
-        ],
-      ),
-    );
-    if (confirmed != true) return;
+    if (!await confirmSyncCertificateForget(context)) return;
     await _sync.forgetCertificate();
     if (mounted) setState(() => _trustedFingerprint = null);
   }
 
-  Future<void> _setTriggers({
-    bool? autoSync,
-    int? intervalSeconds,
-    bool? wifiOnly,
-  }) async {
-    try {
-      await _sync.setTriggers(
-        autoSync: autoSync,
-        intervalSeconds: intervalSeconds,
-        wifiOnly: wifiOnly,
-      );
-    } on Object catch (e) {
-      _log.error('settings: trigger options not saved: $e');
-    }
-  }
-
-  Future<void> _chooseInterval() async {
-    final destination = _sync.status.destination;
-    if (destination == null) return;
-    final seconds = await showSettingsChoice<int>(
-      context,
-      dialogKey: const Key('sync-interval-dialog'),
-      title: AppStrings.syncIntervalTitle,
-      subtitle: AppStrings.syncIntervalDialogBody,
-      current: destination.intervalSeconds,
-      options: [
-        for (final choice in syncIntervalChoices)
-          SettingsOption(choice, syncIntervalLabel(choice)),
-      ],
-    );
-    if (seconds != null) await _setTriggers(intervalSeconds: seconds);
-  }
-
   Future<void> _disconnect() async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        key: const Key('sync-disconnect-dialog'),
-        title: Text(AppStrings.syncDisconnectConfirmTitle),
-        content: Text(AppStrings.syncDisconnectConfirmBody),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(AppStrings.actionCancel),
-          ),
-          TextButton(
-            key: const Key('sync-disconnect-confirm'),
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(AppStrings.syncDisconnectConfirm),
-          ),
-        ],
-      ),
-    );
-    if (confirmed != true) return;
+    if (!await confirmSyncDisconnect(context)) return;
     await _sync.disconnect();
     if (mounted) {
       setState(() {
@@ -386,484 +302,45 @@ final class _SyncSettingsScreenState extends State<SyncSettingsScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final body = _formShown ? _form(theme) : _overview(theme);
-    if (widget.embedded) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-            child: Text(
-              AppStrings.syncScreenSubtitle(widget.libraryName),
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
+  Widget build(BuildContext context) => SyncSettingsFrame(
+    libraryName: widget.libraryName,
+    embedded: widget.embedded,
+    body: _formShown
+        ? _form()
+        : SyncOverview(
+            sync: _sync,
+            testing: _testing,
+            onSyncNow: _syncNow,
+            onEditServer: _startEditing,
+            onRetest: _retest,
+            onForgetCertificate: _forgetCertificate,
+            onDisconnect: _disconnect,
           ),
-          Expanded(child: body),
-        ],
-      );
-    }
-    return Scaffold(
-      appBar: AppBar(
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(AppStrings.syncWebDavTitle),
-            Text(
-              AppStrings.syncScreenSubtitle(widget.libraryName),
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ],
-        ),
-      ),
-      body: body,
-    );
-  }
+  );
 
-  Widget _hint(ThemeData theme, IconData icon, String text, {Color? color}) {
-    final tint = color ?? theme.colorScheme.onSurfaceVariant;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(28, 4, 16, 0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, size: 14, color: tint),
-          const SizedBox(width: 6),
-          Expanded(
-            child: Text(
-              text,
-              style: theme.textTheme.bodySmall?.copyWith(color: tint),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _form(ThemeData theme) {
-    final insecure = _url.text.trim().toLowerCase().startsWith('http://');
+  Widget _form() {
     final result = _result;
-    return ListView(
-      padding: const EdgeInsets.only(top: 16, bottom: 24),
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: TextField(
-            key: const Key('sync-url'),
-            controller: _url,
-            keyboardType: TextInputType.url,
-            autocorrect: false,
-            enableSuggestions: false,
-            decoration: InputDecoration(
-              labelText: AppStrings.syncUrlLabel,
-              hintText: 'https://nas.local/webdav/Notes/',
-              errorText: _urlError,
-              border: const OutlineInputBorder(),
+    return SyncServerForm(
+      url: _url,
+      user: _user,
+      password: _password,
+      urlError: _urlError,
+      editing: _editing,
+      configured: _configured,
+      showPassword: _showPassword,
+      onToggleShowPassword: () =>
+          setState(() => _showPassword = !_showPassword),
+      testing: _testing,
+      saving: _saving,
+      onTest: _test,
+      onSave: _canSave ? _save : null,
+      resultCard: result == null
+          ? null
+          : SyncTestResultCard(
+              result: result,
+              current: _tested == _fields,
+              onTrust: _testing ? null : () => _trustCertificate(result),
             ),
-            style: const TextStyle(fontFamily: 'monospace', fontSize: 14),
-          ),
-        ),
-        if (insecure)
-          _hint(
-            theme,
-            Icons.lock_open,
-            AppStrings.syncHttpWarning,
-            color: theme.colorScheme.tertiary,
-          ),
-        _hint(theme, Icons.info_outline, AppStrings.syncUrlHint),
-        if (_editing)
-          _hint(theme, Icons.restart_alt, AppStrings.syncRetargetWarning),
-        const SizedBox(height: 16),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: TextField(
-            key: const Key('sync-user'),
-            controller: _user,
-            autocorrect: false,
-            enableSuggestions: false,
-            decoration: InputDecoration(
-              labelText: AppStrings.syncUserLabel,
-              border: const OutlineInputBorder(),
-            ),
-          ),
-        ),
-        _hint(theme, Icons.info_outline, AppStrings.syncUserHint),
-        const SizedBox(height: 16),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: TextField(
-            key: const Key('sync-password'),
-            controller: _password,
-            obscureText: !_showPassword,
-            autocorrect: false,
-            enableSuggestions: false,
-            decoration: InputDecoration(
-              labelText: AppStrings.syncPasswordLabel,
-              border: const OutlineInputBorder(),
-              suffixIcon: IconButton(
-                tooltip: _showPassword
-                    ? AppStrings.syncHidePassword
-                    : AppStrings.syncShowPassword,
-                icon: Icon(
-                  _showPassword ? Icons.visibility_off : Icons.visibility,
-                ),
-                onPressed: () => setState(() => _showPassword = !_showPassword),
-              ),
-            ),
-          ),
-        ),
-        _hint(
-          theme,
-          Icons.key,
-          _configured
-              ? AppStrings.syncPasswordKeepHint
-              : AppStrings.syncPasswordHint,
-        ),
-        // Test and Save ride side by side in the form (issue #131):
-        // the bottom full-width Save existed nowhere else, and both
-        // buttons opened greyed with no reason in sight. Test stays
-        // enabled and complains at the field; Save unlocks for the
-        // tested address, next to the result card that says why.
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
-          child: Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  key: const Key('sync-test'),
-                  onPressed: _testing ? null : _test,
-                  icon: _testing
-                      ? const SizedBox.square(
-                          dimension: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.network_check),
-                  label: Text(
-                    _testing
-                        ? AppStrings.syncTesting
-                        : AppStrings.syncTestAction,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: FilledButton.icon(
-                  key: const Key('sync-save'),
-                  onPressed: _canSave ? _save : null,
-                  icon: _saving
-                      ? const SizedBox.square(
-                          dimension: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.save_outlined),
-                  label: Text(AppStrings.actionSave),
-                ),
-              ),
-            ],
-          ),
-        ),
-        if (result != null) _resultCard(theme, result),
-      ],
-    );
-  }
-
-  Widget _resultCard(ThemeData theme, SyncTestResult result) {
-    final scheme = theme.colorScheme;
-    final muted = theme.textTheme.bodySmall?.copyWith(
-      color: scheme.onSurfaceVariant,
-    );
-    final caps = result.capabilities;
-    if (!result.ok || caps == null) {
-      final failure = syncTestFailure(result.outcome);
-      final fingerprint = result.fingerprint;
-      // The fingerprint belongs to the address this result was measured
-      // against. A result left over from another one still says what went
-      // wrong there, but it is not offered for trust: what would be stored
-      // is the certificate of an address the form no longer holds (#454).
-      final trustable = fingerprint != null && _tested == _fields;
-      return Card.filled(
-        key: const Key('sync-test-result'),
-        margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-        child: ListTile(
-          leading: Icon(failure.icon, color: scheme.error),
-          title: Text(failure.title),
-          subtitle: failure.hint.isEmpty && !trustable
-              ? null
-              : Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (failure.hint.isNotEmpty) Text(failure.hint),
-                    // The certificate the user may trust, by its
-                    // fingerprint, for this one destination (#454).
-                    if (trustable) ...[
-                      const SizedBox(height: 6),
-                      SelectableText(
-                        fingerprint,
-                        key: const Key('sync-test-fingerprint'),
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          fontFamily: 'monospace',
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Align(
-                        alignment: AlignmentDirectional.centerStart,
-                        child: FilledButton.icon(
-                          key: const Key('sync-trust-certificate'),
-                          onPressed: _testing
-                              ? null
-                              : () => _trustCertificate(result),
-                          icon: const Icon(Icons.verified_user_outlined),
-                          label: Text(AppStrings.syncCertTrustAction),
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-        ),
-      );
-    }
-    final compatible = syncIsCompatibleMode(caps);
-    return Card.filled(
-      key: const Key('sync-test-result'),
-      margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(Icons.check_circle, color: scheme.primary),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        AppStrings.syncTestOk,
-                        style: theme.textTheme.titleSmall,
-                      ),
-                      Text(
-                        AppStrings.syncTestOkSubtitle(
-                          compatible
-                              ? AppStrings.syncModeCompatible
-                              : AppStrings.syncModeFull,
-                          result.elapsedMs,
-                        ),
-                        style: muted,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            for (final line in syncCapabilityLines(caps))
-              Padding(
-                padding: const EdgeInsets.only(top: 6),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Icon(
-                      line.has ? Icons.check : Icons.remove,
-                      size: 18,
-                      color: line.has
-                          ? scheme.primary
-                          : scheme.onSurfaceVariant,
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(line.label),
-                          if (line.detail != null)
-                            Text(line.detail!, style: muted),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            if (compatible) ...[
-              const SizedBox(height: 10),
-              Text(AppStrings.syncCompatibleNote, style: muted),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _overview(ThemeData theme) {
-    final status = _sync.status;
-    final destination = status.destination!;
-    final scheme = theme.colorScheme;
-    final now = DateTime.now();
-    final caps = status.capabilities;
-    final url = Uri.tryParse(destination.url);
-    final shortUrl = url == null
-        ? destination.url
-        : '${url.host}${url.hasPort ? ':${url.port}' : ''}${url.path}';
-    return ListView(
-      padding: const EdgeInsets.only(bottom: 24),
-      children: [
-        Card.filled(
-          key: const Key('sync-overview-card'),
-          margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Row(
-                  children: [
-                    // A run in flight turns, here as everywhere else: a
-                    // still glyph over "comparing with the server…" reads
-                    // as a sync that stopped.
-                    if (status.running)
-                      SpinningSyncIcon(color: syncStatusColor(status, scheme))
-                    else
-                      Icon(
-                        syncStatusIcon(status),
-                        color: syncStatusColor(status, scheme),
-                      ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            syncStatusLine(status, now),
-                            key: const Key('sync-status-line'),
-                            style: theme.textTheme.titleSmall,
-                          ),
-                          Text(
-                            shortUrl,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: scheme.onSurfaceVariant,
-                              fontFamily: 'monospace',
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                if (syncQueueLine(status, now) case final queue?) ...[
-                  const SizedBox(height: 8),
-                  Text(
-                    queue,
-                    key: const Key('sync-overview-queue'),
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: scheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-                if (status.aborted != null &&
-                    status.aborted != SyncAbort.notConfirmed) ...[
-                  const SizedBox(height: 8),
-                  Text(
-                    AppStrings.syncAbortNothingTouched,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: scheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-                const SizedBox(height: 12),
-                FilledButton.icon(
-                  key: const Key('sync-now'),
-                  onPressed: status.running ? null : _syncNow,
-                  icon: status.running
-                      ? SpinningSyncIcon(
-                          color: scheme.onSurface.withValues(alpha: 0.38),
-                        )
-                      : const Icon(Icons.sync),
-                  label: Text(
-                    status.running
-                        ? AppStrings.syncRunning
-                        : AppStrings.syncNowAction,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        SettingsSection(AppStrings.syncSectionWhen),
-        SettingsSwitchRow(
-          key: const Key('sync-auto'),
-          title: AppStrings.syncAutoTitle,
-          description: AppStrings.syncAutoSubtitle,
-          value: destination.autoSync,
-          onChanged: (on) => _setTriggers(autoSync: on),
-        ),
-        SettingsValueRow(
-          key: const Key('sync-interval'),
-          title: AppStrings.syncIntervalTitle,
-          subtitle: AppStrings.syncIntervalSubtitle,
-          value: syncIntervalLabel(destination.intervalSeconds),
-          enabled: destination.autoSync,
-          onTap: _chooseInterval,
-        ),
-        if (_sync.offersWifiOnly)
-          SettingsSwitchRow(
-            key: const Key('sync-wifi-only'),
-            title: AppStrings.syncWifiOnlyTitle,
-            description: AppStrings.syncWifiOnlySubtitle,
-            value: destination.wifiOnly,
-            onChanged: destination.autoSync
-                ? (on) => _setTriggers(wifiOnly: on)
-                : null,
-          ),
-        SettingsSection(AppStrings.syncSectionServer),
-        SettingsValueRow(
-          key: const Key('sync-edit-server'),
-          title: AppStrings.syncServerRow,
-          subtitle: [
-            if (destination.username.isNotEmpty) destination.username,
-            if (caps != null && syncIsCompatibleMode(caps))
-              AppStrings.syncModeCompatible
-            else if (caps != null)
-              AppStrings.syncModeFull,
-          ].join(' · '),
-          onTap: status.running ? () {} : _startEditing,
-        ),
-        SettingsActionRow(
-          key: const Key('sync-retest'),
-          enabled: !status.running,
-          busy: _testing,
-          title: AppStrings.syncRetestTitle,
-          description: caps == null
-              ? null
-              : AppStrings.syncProbedAgo(historyWhen(caps.probedAt, now)),
-          onTap: _retest,
-        ),
-        // The one certificate this destination may present, and the way
-        // back out of trusting it (#454).
-        if (destination.trustedCertFingerprint case final fingerprint?)
-          SettingsActionRow(
-            key: const Key('sync-forget-certificate'),
-            enabled: !status.running,
-            title: AppStrings.syncCertTrustedTitle,
-            description: AppStrings.syncCertTrustedSubtitle(fingerprint),
-            onTap: _forgetCertificate,
-          ),
-        const Divider(height: 24),
-        SettingsActionRow(
-          key: const Key('sync-disconnect'),
-          enabled: !status.running,
-          destructive: true,
-          title: AppStrings.syncDisconnectTitle,
-          description: AppStrings.syncDisconnectSubtitle,
-          onTap: _disconnect,
-        ),
-      ],
     );
   }
 }

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 import 'dart:typed_data';
@@ -7,25 +6,26 @@ import 'dart:typed_data';
 import 'package:meta/meta.dart';
 import 'package:niman/src/core/file_holds.dart';
 import 'package:niman/src/core/files.dart';
-import 'package:niman/src/core/isolate_gauge.dart';
-import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/core/settings/library_config_repo.dart';
 import 'package:niman/src/core/settings/navigation_layout.dart';
 import 'package:niman/src/db/dao.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/db/indexer.dart';
-import 'package:niman/src/frontmatter/edit_in_file.dart';
-import 'package:niman/src/frontmatter/parser.dart';
 import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/history/note_history.dart';
-import 'package:niman/src/home/home_file.dart';
 import 'package:niman/src/home/home_layout.dart';
 import 'package:niman/src/journal/journal_settings.dart';
-import 'package:niman/src/library/folder_spelling.dart';
+import 'package:niman/src/library/library_journal.dart';
+import 'package:niman/src/library/library_layouts.dart';
+import 'package:niman/src/library/note_creation.dart';
+import 'package:niman/src/library/note_link_questions.dart';
 import 'package:niman/src/library/note_op_seams.dart';
 import 'package:niman/src/library/note_ops_blocking.dart';
+import 'package:niman/src/library/note_pins.dart';
+import 'package:niman/src/library/note_reads.dart';
 import 'package:niman/src/library/note_relocation.dart';
+import 'package:niman/src/library/note_renamer.dart';
 import 'package:niman/src/library/note_save_result.dart';
 import 'package:niman/src/library/note_sync_writes.dart';
 import 'package:niman/src/library/note_trash.dart';
@@ -38,7 +38,6 @@ import 'package:niman/src/links/link_spot_slices.dart';
 import 'package:niman/src/links/note_finder.dart';
 import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/lint/lint_rule.dart';
-import 'package:niman/src/markdown/note_bytes.dart';
 import 'package:niman/src/markdown/note_references.dart';
 import 'package:niman/src/sync/sync_store.dart';
 import 'package:niman/src/todo/task_link_rewrites.dart';
@@ -326,108 +325,66 @@ final class NoteOps implements NoteOperations {
     (c) => c.copyWith(quickNotePath: path, clearQuickNotePath: path == null),
   );
 
-  @override
-  Future<JournalSettings> get journal async {
-    final settings = (await config.config).journal;
-    try {
-      return await settings.resolveFolder(_folderSpelling);
-    } on Object catch (error) {
-      // The spelling is a convenience, not the setting: an index that cannot
-      // be asked leaves the settings as written rather than failing a read,
-      // and the write path still canonicalizes on its own (#1246).
-      const AppLogger(name: 'journal')
-          .warning('folder spelling unresolved ($error)');
-      return settings;
-    }
-  }
-
-  /// [folder] as the library spells it, segment by segment (#1246): nothing
-  /// is made, and a folder the library does not hold keeps its spelling.
-  Future<String> _folderSpelling(String folder) => resolveFolderSpelling<Note>(
-    folder,
-    exact: (path) async {
-      final row = await _dao.find(path);
-      return row != null && row.isDir ? row : null;
-    },
-    child: (parent, segment) async {
-      final held = await _dao.folderChild(parent, segment);
-      return held == null ? null : (name: held.name, token: held);
-    },
+  /// The journal settings, their folder spelled as the library spells it.
+  late final LibraryJournal _journal = LibraryJournal(
+    config: config,
+    dao: _dao,
   );
 
   @override
+  Future<JournalSettings> get journal => _journal.journal;
+
+  @override
   Future<void> setJournal(JournalSettings settings) =>
-      config.update((c) => c.copyWith(journal: settings));
+      _journal.setJournal(settings);
+
+  /// The navigation and the Home, the library's and this device's.
+  late final LibraryLayouts _layouts = LibraryLayouts(
+    root: root,
+    config: config,
+    hint: _hint,
+  );
 
   @override
   Future<({NavigationLayout? library, NavigationLayout? device})>
-  get navigation async {
-    final c = await config.config;
-    return (library: c.navigation, device: c.deviceNavigation);
-  }
+  get navigation => _layouts.navigation;
 
   @override
   Future<void> setNavigation(
     NavigationLayout layout, {
     required bool onDevice,
-  }) => config.update(
-    (c) => onDevice
-        ? c.copyWith(deviceNavigation: layout)
-        : c.copyWith(navigation: layout, clearDeviceNavigation: true),
-  );
+  }) => _layouts.setNavigation(layout, onDevice: onDevice);
 
   @override
-  Future<({HomeLayout? library, HomeLayout? device})> get home async {
-    final device = (await config.config).deviceHome;
-    return (
-      library: await HomeFile(root).read(),
-      device: device == null ? null : HomeLayout.fromJson(device),
-    );
-  }
+  Future<({HomeLayout? library, HomeLayout? device})> get home => _layouts.home;
 
   @override
-  Future<void> setHome(HomeLayout layout, {required bool onDevice}) async {
-    if (onDevice) {
-      await config.update((c) => c.copyWith(deviceHome: layout.toJson()));
-      return;
-    }
-    await HomeFile(root).write(layout);
-    _hint(HomeFile.filePath, SyncOpKind.changed);
-    await clearDeviceHome();
-  }
+  Future<void> setHome(HomeLayout layout, {required bool onDevice}) =>
+      _layouts.setHome(layout, onDevice: onDevice);
 
   @override
   Future<HomeLayout> editHome({
     required HomeLayout from,
     required HomeLayout to,
     required bool onDevice,
-  }) async {
-    if (onDevice) {
-      var edited = to;
-      await config.update((c) {
-        final current = switch (c.deviceHome) {
-          final json? => HomeLayout.fromJson(json),
-          null => null,
-        };
-        edited = (current ?? from).withEdit(from: from, to: to);
-        return c.copyWith(deviceHome: edited.toJson());
-      });
-      return edited;
-    }
-    final edited = await HomeFile(root)
-        .update((current) => current.withEdit(from: from, to: to));
-    _hint(HomeFile.filePath, SyncOpKind.changed);
-    await clearDeviceHome();
-    return edited;
-  }
+  }) => _layouts.editHome(from: from, to: to, onDevice: onDevice);
 
   @override
-  Future<void> clearDeviceHome() =>
-      config.update((c) => c.copyWith(clearDeviceHome: true));
+  Future<void> clearDeviceHome() => _layouts.clearDeviceHome();
 
   @override
   Future<List<String>> notePathsUnder(String folder) =>
       _dao.filePathsUnder(folder);
+
+  /// Makes notes and folders, copies of files and additions to notes.
+  late final NoteCreation _creation = NoteCreation(
+    root: root,
+    dao: _dao,
+    indexer: indexer,
+    serialize: _synchronized,
+    hint: _hint,
+    find: _mustFind,
+  );
 
   /// Creates a `<name>.md` note in [parentPath] with [content] as its
   /// initial content, uniquifying the name. Returns the indexed row.
@@ -436,133 +393,48 @@ final class NoteOps implements NoteOperations {
     required String parentPath,
     required String name,
     String content = '',
-  }) {
-    return _synchronized(() async {
-      final clean = sanitizeName(name, fallback: defaultNoteName);
-      final dir = Directory(_abs(parentPath));
-      final unique = await uniqueFileName(dir, clean, '.md');
-      final file = File(_abs(resolvePath(parentPath, unique)));
-      await writeFileAtomically(file, utf8.encode(content));
-      _hint(resolvePath(parentPath, unique), SyncOpKind.changed);
-      await indexer.applyEvents(root, [file.path]);
-      return await _mustFind(resolvePath(parentPath, unique));
-    });
-  }
+  }) => _creation.createNote(
+    parentPath: parentPath,
+    name: name,
+    content: content,
+  );
 
   /// Copies the file at [path] beside itself, under a unique name
   /// (`note.md` → `note_1.md`), and returns the indexed row (#1100).
-  ///
-  /// The bytes are copied as they are, so a picture, a PDF or an audio file
-  /// duplicates whole rather than being re-encoded. Only a file: a folder
-  /// holds a tree of its own, and no menu offers the action for one.
   @override
-  Future<Note> duplicate(String path) {
-    return _synchronized(() async {
-      final row = await _mustFind(path);
-      if (row.isDir) {
-        throw ArgumentError('duplicate was given a folder: "$path"');
-      }
-      final parent = parentOf(path);
-      final name = p.basename(path);
-      final ext = p.extension(name);
-      final base = ext.isEmpty
-          ? name
-          : name.substring(0, name.length - ext.length);
-      final dir = Directory(_abs(parent));
-      final unique = await uniqueFileName(dir, base, ext);
-      final rel = resolvePath(parent, unique);
-      final copy = File(_abs(rel));
-      await writeFileAtomically(copy, await File(_abs(path)).readAsBytes());
-      _hint(rel, SyncOpKind.changed);
-      await indexer.applyEvents(root, [copy.path]);
-      return await _mustFind(rel);
-    });
-  }
+  Future<Note> duplicate(String path) => _creation.duplicate(path);
 
-  /// The folder at [path], created with its parents if missing.
-  ///
-  /// No uniquifying: the caller named a folder, not a wish for one. A folder
-  /// the library already holds under another spelling is that folder, unless
-  /// the exact spelling is there too, which wins (#857) —
-  /// `[[Projects/Three laws]]` lands in the `projects` that is there, as
-  /// `[[Note]]` opens `note.md` — and the path is canonicalized segment by
-  /// segment, so a folder made below a reused one sits inside the spelled
-  /// one (#847).
+  /// The folder at [path], created with its parents if missing
+  /// ([NoteCreation.ensureFolder]).
   @override
   @useResult
-  Future<Note> ensureFolder(String path) {
-    return _synchronized(() async {
-      final clean = cleanFolderPath(path, '');
-      if (clean.isEmpty) {
-        // The root is not a row, and "make sure the root exists" is not
-        // a thing a caller can mean.
-        throw ArgumentError('ensureFolder was given no folder: "$path"');
-      }
-      final segments = <String>[];
-      for (final segment in clean.split('/')) {
-        final existing = await _dao.folderIgnoringCase(
-          resolvePath(segments.join('/'), segment),
-        );
-        segments.add(existing?.name ?? segment);
-      }
-      final canonical = segments.join('/');
-      final dir = Directory(_abs(canonical));
-      // The async form runs off the UI isolate (#875).
-      if (!await dir.exists()) {
-        await dir.create(recursive: true);
-        // Every folder on the way is new too, so the index hears about
-        // the whole chain rather than only its last link.
-        final made = <String>[
-          for (var i = 1; i <= segments.length; i++)
-            _abs(segments.take(i).join('/')),
-        ];
-        await indexer.applyEvents(root, made);
-      }
-      return await _mustFind(canonical);
-    });
-  }
+  Future<Note> ensureFolder(String path) => _creation.ensureFolder(path);
 
   /// Adds [content] to the end of the note at [path], creating it when it
   /// is not there.
   @override
-  Future<Note> appendToNote(String path, String content) {
-    return _synchronized(() async {
-      final file = File(_abs(path));
-      final existing = await file.exists() ? await file.readAsString() : '';
-      final joined = existing.isEmpty
-          ? content
-          : '${_endingInABlankLine(existing)}$content';
-      await writeFileAtomically(file, utf8.encode(joined));
-      _hint(path, SyncOpKind.changed);
-      await indexer.applyEvents(root, [file.path]);
-      return await _mustFind(path);
-    });
-  }
-
-  /// [text] with exactly one blank line at its end, so what follows
-  /// starts a paragraph of its own.
-  static String _endingInABlankLine(String text) {
-    final eol = text.contains('\r\n') ? '\r\n' : '\n';
-    final trimmed = text.replaceFirst(RegExp(r'\s+$'), '');
-    return '$trimmed$eol$eol';
-  }
+  Future<Note> appendToNote(String path, String content) =>
+      _creation.appendToNote(path, content);
 
   /// Creates a folder in [parentPath], uniquifying the name.
   @override
   Future<Note> createFolder({
     required String parentPath,
     required String name,
-  }) {
-    return _synchronized(() async {
-      final clean = sanitizeName(name, fallback: defaultFolderName);
-      final dir = Directory(_abs(parentPath));
-      final unique = await uniqueFolderName(dir, clean);
-      final newDir = Directory(_abs(resolvePath(parentPath, unique)));
-      await newDir.create(recursive: true);
-      await indexer.applyEvents(root, [newDir.path]);
-      return await _mustFind(resolvePath(parentPath, unique));
-    });
-  }
+  }) => _creation.createFolder(parentPath: parentPath, name: name);
+
+  /// Picks the path a renamed or moved note takes and has it moved there.
+  late final NoteRenamer _renamer = NoteRenamer(
+    root: root,
+    relocator: _relocator,
+    serialize: _synchronized,
+    find: _mustFind,
+  );
+
+  /// The link rewrites a rename or a move left, asked about after it.
+  late final NoteLinkQuestions _links = NoteLinkQuestions(
+    serialize: _synchronized,
+  );
 
   /// Renames the note or folder at [path] to [newName].
   ///
@@ -581,57 +453,10 @@ final class NoteOps implements NoteOperations {
   }) async {
     final done = await _released(
       path,
-      () => _rename(path, newName, flushOpen, taskLinks),
+      () => _renamer.rename(path, newName, flushOpen, taskLinks),
     );
-    _askLinks(done, confirmLinks, onLinksRewritten, onLinksProgress);
+    _links.ask(done, confirmLinks, onLinksRewritten, onLinksProgress);
     return done.row;
-  }
-
-  Future<Relocated> _rename(
-    String path,
-    String newName,
-    FlushOpenNotes? flushOpen,
-    TaskLinkRewrites? taskLinks,
-  ) {
-    return _synchronized(() async {
-      final row = await _mustFind(path);
-      final parent = parentOf(path);
-      final parentDir = Directory(_abs(parent));
-      // A file keeps its extension: a note its `.md`, a picture or a book
-      // its own — a PDF renamed is still a PDF, not `book.pdf.md`. Typed
-      // again at the end of the new name, it is not doubled.
-      final ext = row.isDir
-          ? ''
-          : path.toLowerCase().endsWith('.md')
-          ? '.md'
-          : p.extension(path);
-      var base = newName;
-      if (ext.isNotEmpty && base.toLowerCase().endsWith(ext.toLowerCase())) {
-        base = base.substring(0, base.length - ext.length);
-      }
-      String target;
-      if (row.isDir) {
-        final clean = sanitizeName(base, fallback: defaultFolderName);
-        target = await uniqueFolderName(parentDir, clean, exclude: _abs(path));
-      } else {
-        final clean = sanitizeName(base, fallback: defaultNoteName);
-        target = await uniqueFileName(
-          parentDir,
-          clean,
-          ext,
-          exclude: _abs(path),
-        );
-      }
-      final newRel = resolvePath(parent, target);
-      if (newRel == path) return (row: row, pending: null);
-      return await _relocator.relocate(
-        row,
-        path,
-        newRel,
-        flushOpen: flushOpen,
-        taskLinks: taskLinks,
-      );
-    });
   }
 
   /// Moves the note or folder at [path] into [targetParent], keeping its
@@ -651,229 +476,61 @@ final class NoteOps implements NoteOperations {
   }) async {
     final done = await _released(
       path,
-      () => _move(path, targetParent, flushOpen, taskLinks),
+      () => _renamer.move(path, targetParent, flushOpen, taskLinks),
     );
-    _askLinks(done, confirmLinks, onLinksRewritten, onLinksProgress);
+    _links.ask(done, confirmLinks, onLinksRewritten, onLinksProgress);
     return done.row;
-  }
-
-  Future<Relocated> _move(
-    String path,
-    String targetParent,
-    FlushOpenNotes? flushOpen,
-    TaskLinkRewrites? taskLinks,
-  ) {
-    return _synchronized(() async {
-      final row = await _mustFind(path);
-      if (resolvePath(targetParent, p.basename(path)) == path) {
-        return (row: row, pending: null);
-      }
-      if (targetParent == path || isUnder(path, targetParent)) {
-        throw ArgumentError(
-          'Cannot move "$path" into itself or its own subtree',
-        );
-      }
-      final name = p.basename(path);
-      final targetDir = Directory(_abs(targetParent));
-      String target;
-      if (row.isDir) {
-        target = await uniqueFolderName(targetDir, name);
-      } else {
-        final parts = splitFileName(name);
-        target = await uniqueFileName(targetDir, parts.base, parts.ext);
-      }
-      final newRel = resolvePath(targetParent, target);
-      return await _relocator.relocate(
-        row,
-        path,
-        newRel,
-        flushOpen: flushOpen,
-        taskLinks: taskLinks,
-      );
-    });
   }
 
   /// The question about the links [rename] and [move] left, still open or
   /// answered and carried out (#859); completes without error whatever
   /// became of it. What a test awaits to see the links rewritten.
-  Future<void> get linkQuestion =>
-      Future.wait<void>([_linkQuestion, _linkRewrites]);
-  Future<void> _linkQuestion = Future<void>.value();
+  Future<void> get linkQuestion => _links.settled;
 
-  /// The automatic rewrites of links, one after the other (#1041).
-  Future<void> _linkRewrites = Future<void>.value();
-
-  /// Asks [confirm] about the link rewrite [done] left pending (#848), once
-  /// the move is over and returned to its caller: the caller follows the
-  /// moved note at once, whatever the user takes to answer or whatever
-  /// moves the note meanwhile (#859). A dialog the user leaves open must
-  /// not hold up every other op and every sync write either, so on a yes
-  /// the rewrite runs in a turn of its own, and reads each note again: an
-  /// edit made while the question was open is kept. [onRewritten] tells the
-  /// caller the notes changed on disk. A failure here is logged, not
-  /// thrown: the move is done, and nobody awaits this.
-  /// Without a [confirm] to ask, the links stay as written: a note is never
-  /// written unasked.
-  ///
-  /// Under the automatic setting there is nothing to ask: the rewrite runs
-  /// at once, in the same turn of its own, a batch of referrers to a turn of
-  /// the op chain (#1041), telling [onProgress] as it goes.
-  void _askLinks(
-    Relocated done,
-    LinkUpdateConfirm? confirm,
-    void Function()? onRewritten,
-    LinkRewriteProgress? onProgress,
-  ) {
-    final pending = done.pending;
-    if (pending == null) return;
-    const log = AppLogger(name: 'links');
-    if (pending.automatic) {
-      _linkRewrites = _linkRewrites.then((_) async {
-        try {
-          await pending.apply(_synchronized, progress: onProgress);
-          onRewritten?.call();
-        } on Object catch (error) {
-          log.warning('could not update links to "${done.row.path}": $error');
-        }
-      });
-      return;
-    }
-    if (confirm == null) {
-      log.info('links to "${done.row.path}" left as written: no prompt');
-      return;
-    }
-    _linkQuestion = () async {
-      try {
-        // Counted here, off the op chain (#866): a hub note's thousand
-        // referrers are read without holding up any other op or sync write.
-        final notes = await pending.count();
-        if (notes == 0 || !await confirm(notes)) return;
-        // The rewrite flushes the open notes itself, right before reading
-        // each referrer (#913).
-        await pending.apply(_synchronized, progress: onProgress);
-        onRewritten?.call();
-      } on Object catch (error) {
-        log.warning('could not update links to "${done.row.path}": $error');
-      }
-    }();
-  }
+  /// Reads the notes, whole or the parts a panel or a card shows.
+  late final NoteReads _reads = NoteReads(root: root, find: _mustFind);
 
   /// The text of the note at [path], decoded leniently (a note with a
   /// broken byte is still a note) and without its BOM.
   @override
-  Future<String> readNote(String path) async {
-    final bytes = await readNoteBytes(path);
-    final text = decodeNoteText(bytes);
-    return text.isNotEmpty && text.codeUnitAt(0) == 0xFEFF
-        ? text.substring(1)
-        : text;
-  }
+  Future<String> readNote(String path) => _reads.readNote(path);
 
   /// The note's bytes as the file holds them.
   @override
-  Future<Uint8List> readNoteBytes(String path) async {
-    await _mustFind(path);
-    return await File(_abs(path)).readAsBytes();
-  }
+  Future<Uint8List> readNoteBytes(String path) => _reads.readNoteBytes(path);
 
   /// The headings of the note at [path], read and outlined where the note
   /// lies — off the UI isolate (#491).
-  ///
-  /// The wikilink panel's rows after `#` are the note's whole outline, and
-  /// getting them means reading, decoding and walking the file: seconds on
-  /// a novel-length note, per keystroke if the panel paid it on the UI
-  /// isolate. The panel keeps the answer per revision, so this runs once
-  /// per target and not once per key.
-  Future<List<String>> noteHeadings(String path) async {
-    await _mustFind(path);
-    final abs = _abs(path);
-    return await IsolateGauge.run(
-      () => headingsOfNoteFile(abs),
-      'headings "$path"',
-    );
-  }
+  Future<List<String>> noteHeadings(String path) => _reads.noteHeadings(path);
 
   /// The block anchors of the note at [path] — its blocks that end with a
-  /// ` ^id` (#844) — read and walked where the note lies, off the UI isolate,
-  /// as [noteHeadings] reads the headings.
-  Future<List<BlockAnchor>> noteBlocks(String path) async {
-    await _mustFind(path);
-    final abs = _abs(path);
-    return await IsolateGauge.run(
-      () => blocksOfNoteFile(abs),
-      'blocks "$path"',
-    );
-  }
+  /// ` ^id` (#844) — read off the UI isolate.
+  Future<List<BlockAnchor>> noteBlocks(String path) => _reads.noteBlocks(path);
 
-  /// The beginning of the note at [path] for a preview card (#846): its first
-  /// [PreviewLimits.bytes] bytes, read and decoded where the note lies, off
-  /// the UI isolate. A novel-length note is not read whole to show a card.
-  Future<NotePreviewText> notePreview(String path) async {
-    await _mustFind(path);
-    final abs = _abs(path);
-    return await IsolateGauge.run(
-      () => previewTextOfNoteFile(abs),
-      'preview "$path"',
-    );
-  }
+  /// The beginning of the note at [path] for a preview card (#846), read
+  /// off the UI isolate.
+  Future<NotePreviewText> notePreview(String path) => _reads.notePreview(path);
 
   /// The links and embeds of the slice of the note at [path] that starts at
-  /// [from] — what a list of the notes that link to another reads a mention
-  /// from (#842) — read, decoded and parsed where the note lies, off the UI
-  /// isolate. A slice at a time, so the first mention costs a slice and not
-  /// the note (#1040).
-  Future<SpotSlice> noteLinkSpotSlice(String path, SpotCursor from) async {
-    await _mustFind(path);
-    final abs = _abs(path);
-    return await IsolateGauge.run(
-      () => linkSpotSliceOfFile(abs, from),
-      'link spots "$path"',
-    );
-  }
+  /// [from] (#842, #1040), read off the UI isolate.
+  Future<SpotSlice> noteLinkSpotSlice(String path, SpotCursor from) =>
+      _reads.noteLinkSpotSlice(path, from);
 
-  /// Pins or unpins the note at [path] by editing its frontmatter.
-  ///
-  /// Unpinning removes the key rather than writing `pinned: false`: the
-  /// file goes back to what it looked like before, instead of collecting
-  /// a line that says nothing.
-  ///
-  /// The index records the new frontmatter at once, from the head the edit
-  /// wrote ([Indexer.applyFrontmatter]); the note itself is read back later,
-  /// as a save's is ([NoteWriter.reindexWhenQuiet]). Read back before the
-  /// pin was answered, the 247 MB stress note kept the pin on screen for
-  /// the 15 to 34 s a phone takes to read it — or for good, when the app
-  /// was closed first (device log, 2026-09-24).
+  /// Pins and unpins notes through their frontmatter.
+  late final NotePins _pins = NotePins(
+    root: root,
+    indexer: indexer,
+    writer: writer,
+    serialize: _synchronized,
+    hint: _hint,
+    find: _mustFind,
+  );
+
+  /// Pins or unpins the note at [path] by editing its frontmatter
+  /// ([NotePins.setPinned]).
   @override
-  Future<Note> setPinned(String path, {required bool pinned}) {
-    return _synchronized(() async {
-      final row = await _mustFind(path);
-      // The pin lives in the note's frontmatter, so only a note can carry
-      // one. Pinning a `todo.txt` wrote a YAML block into a file that has
-      // no such thing, and every todo.txt reader — this app's included —
-      // then read the three lines as tasks. Unpinning stays allowed
-      // whatever the file is, so a block already written can be taken
-      // back out.
-      if (row.isDir || (pinned && !isMarkdownNote(row.name))) {
-        throw ArgumentError('Only Markdown notes can be pinned, not "$path"');
-      }
-      final file = File(_abs(path));
-      // The head of the note, not the note: off the UI isolate, the rest
-      // of the file copied behind the edited frontmatter as it is.
-      final head = await editFrontmatterKeyOnIsolate(
-        file.path,
-        'pinned',
-        pinned ? 'true' : null,
-      );
-      if (head == null) return row;
-      _hint(path, SyncOpKind.changed);
-      // Scheduled first: from here the watcher's report of this very write
-      // leaves the note to the writer, and the pin below may wait behind a
-      // scan already running.
-      writer.reindexWhenQuiet(path, bytes: row.size);
-      await indexer.applyFrontmatter(path, parseFrontmatter(head));
-      return await _mustFind(path);
-    });
-  }
+  Future<Note> setPinned(String path, {required bool pinned}) =>
+      _pins.setPinned(path, pinned: pinned);
 
   @override
   Future<NoteSaveResult?> saveNote(
