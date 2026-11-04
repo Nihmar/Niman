@@ -27,6 +27,7 @@ import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/render/note_margins.dart';
 import 'package:niman/src/markdown/render/source_line_layout.dart';
 import 'package:niman/src/markdown/render/source_line_spans.dart';
+import 'package:niman/src/markdown/render/source_line_squiggles.dart';
 import 'package:niman/src/markdown/render/squiggle_painter.dart';
 import 'package:niman/src/preview/code_highlight.dart';
 import 'package:niman/src/preview/math_cache.dart';
@@ -485,7 +486,7 @@ final class SourceLine extends StatelessWidget {
     }
     final line = Padding(
       padding: EdgeInsets.only(left: indent),
-      child: _withSquiggles(paragraph),
+      child: withSquiggles(paragraph),
     );
     if (table != null) {
       // A cell's padding above and below its text, and the grid behind.
@@ -788,7 +789,7 @@ final class SourceLine extends StatelessWidget {
             child: paragraph,
           );
         }
-        final squiggles = _misspelledInPiece(piece.start, piece.end);
+        final squiggles = misspelledInPiece(piece.start, piece.end);
         if (squiggles.isNotEmpty) {
           paragraph = CustomPaint(
             foregroundPainter: SquigglePainter(
@@ -799,7 +800,7 @@ final class SourceLine extends StatelessWidget {
             child: paragraph,
           );
         }
-        final problems = _templateProblemsInPiece(piece.start, piece.end);
+        final problems = templateProblemsInPiece(piece.start, piece.end);
         if (problems.isNotEmpty) {
           paragraph = CustomPaint(
             foregroundPainter: SquigglePainter(
@@ -831,28 +832,6 @@ final class SourceLine extends StatelessWidget {
     );
   }
 
-  /// The words of [start, end) of the line the spelling flags, as offsets
-  /// from the piece's own start: the line's ranges, clipped to the piece.
-  List<TextRange> _misspelledInPiece(int start, int end) => <TextRange>[
-    for (final range in _unjudged())
-      if (range.end > start && range.start < end)
-        TextRange(
-          start: range.start < start ? 0 : range.start - start,
-          end: range.end > end ? end - start : range.end - start,
-        ),
-  ];
-
-  /// The template problems of `[start, end)` of the line, as offsets from the
-  /// piece's own start: the line's ranges, clipped to the piece.
-  List<TextRange> _templateProblemsInPiece(int start, int end) => <TextRange>[
-    for (final range in templateProblems)
-      if (range.end > start && range.start < end)
-        TextRange(
-          start: range.start < start ? 0 : range.start - start,
-          end: range.end > end ? end - start : range.end - start,
-        ),
-  ];
-
   /// Whether [token]'s marker is hidden rather than drawn.
   ///
   /// Policy A of `docs/records/unified-surface.md` §8.6.2 — the markers are hidden
@@ -880,50 +859,6 @@ final class SourceLine extends StatelessWidget {
     if (isSourceMarker(token.kind)) return !revealed;
     if (run == null) return true;
     return token.start < run.$1 || token.end > run.$2;
-  }
-
-  /// The misspelled words to underline: all of them but the one being
-  /// composed, which is not judged yet — its underline is the IME's.
-  List<TextRange> _unjudged() {
-    final typing = composing;
-    if (typing == null) return misspelled;
-    return <TextRange>[
-      for (final word in misspelled)
-        if (word.end <= typing.$1 || word.start >= typing.$2) word,
-    ];
-  }
-
-  /// The paragraph with the wavy marks painted over it rather than written
-  /// into its runs: a style has one decoration, and a wavy underline there
-  /// took a struck word's strike.
-  ///
-  /// The template checker's problems and the spelling's words are two layers
-  /// of the same shape, so a line that has both shows both — the checker's
-  /// mark is not lost under the spelling's, nor the other way round
-  /// (T-TPL-09).
-  Widget _withSquiggles(Widget paragraph) {
-    var marked = paragraph;
-    if (templateProblems.isNotEmpty) {
-      marked = CustomPaint(
-        foregroundPainter: SquigglePainter(
-          paragraph: paragraphKey,
-          ranges: templateProblems,
-          color: misspelledColor,
-        ),
-        child: marked,
-      );
-    }
-    if (misspelled.isNotEmpty) {
-      marked = CustomPaint(
-        foregroundPainter: SquigglePainter(
-          paragraph: paragraphKey,
-          ranges: _unjudged(),
-          color: misspelledColor,
-        ),
-        child: marked,
-      );
-    }
-    return marked;
   }
 }
 
