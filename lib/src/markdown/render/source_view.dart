@@ -90,6 +90,7 @@ import 'package:niman/src/markdown/render/scroll_anchor.dart';
 import 'package:niman/src/markdown/render/scrollbar_strip.dart';
 import 'package:niman/src/markdown/render/sliver_columns.dart';
 import 'package:niman/src/markdown/render/sliver_segments.dart';
+import 'package:niman/src/markdown/render/source_caret_motion.dart';
 import 'package:niman/src/markdown/render/source_caret_reveal.dart';
 import 'package:niman/src/markdown/render/source_code_copies.dart';
 import 'package:niman/src/markdown/render/source_context_menu.dart';
@@ -638,9 +639,9 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     requestKeyboard: _requestKeyboard,
     secondaryClick: _secondaryClick,
     placeCaret: placeCaret,
-    extendTo: (offset) => _moveCaretTo(offset, extend: true),
+    extendTo: (offset) => _motion.moveTo(offset, extend: true),
     select: _select,
-    inCell: (offset) => _inCell(offset, 0),
+    inCell: (offset) => _motion.inCell(offset, 0),
     holdSync: ({required hold}) => _input.holdSync = hold,
   );
 
@@ -1326,97 +1327,39 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// syntax of its own (#579). O(log blocks) a line.
   int? _verbatimQuotes(int line) => verbatimQuotesOf(blockAt?.call(line));
 
+  /// Where the caret goes when the keys move it: by a logical motion, by
+  /// visual rows, by a page.
+  late final SourceCaretMotion _motion = SourceCaretMotion(
+    buffer: () => widget.buffer,
+    selection: () => _selection,
+    live: () => widget.hideMarkers,
+    mounted: () => mounted,
+    blockOf: (line) => _styler?.blockOf(line),
+    fenceOf: _fenceOf,
+    folds: _folds,
+    hosts: _hosts,
+    noteBox: () => _noteBox,
+    scroll: () => _scroll,
+    caretRect: () => caretRect,
+    caretLine: () => _caretLineIndex,
+    paintedOffsetAt: _paintedOffsetAt,
+    mappedOffsetAt: _mappedOffsetAt,
+    paragraphAt: _paragraphs.paragraphAt,
+    band: () => _band,
+    gap: () => _gap,
+    rowHeight: () => _rowHeight,
+    verbatimQuotes: _verbatimQuotes,
+    apply: _applySelection,
+  );
+
   /// Moves the caret by [motion], the logical motions the key table calls.
-  void moveCaretBy(CaretMotion motion, {bool extend = false}) {
-    var next = moveCaret(
-      _selection,
-      motion,
-      buffer: widget.buffer,
-      extend: extend,
-      verbatimQuotes: _verbatimQuotes,
-    );
-    final into = switch (motion) {
-      CaretMotion.characterLeft || CaretMotion.wordLeft => -1,
-      CaretMotion.characterRight || CaretMotion.wordRight => 1,
-      // Home goes to the row's first cell, End to its last one.
-      CaretMotion.lineStart || CaretMotion.lineTextStart => 1,
-      CaretMotion.lineEnd => -1,
-      CaretMotion.documentStart => 1,
-      CaretMotion.documentEnd => -1,
-    };
-    final line =
-        motion == CaretMotion.lineStart ||
-        motion == CaretMotion.lineTextStart ||
-        motion == CaretMotion.lineEnd;
-    var extent = _inCell(next.extent, into, keepLine: line);
-    // A fence out of the caret's reach is no stop (#729): the caret steps
-    // over it, in the direction it travels — Right at a column's last
-    // character goes to the next column's first. Home at the start of a
-    // column's first line steps onto the column's opener, the keyboard's
-    // way to its width.
-    if (!line &&
-        motion != CaretMotion.documentStart &&
-        motion != CaretMotion.documentEnd) {
-      extent = _overFences(_selection.extent, extent, into);
-    } else if (motion == CaretMotion.lineStart ||
-        motion == CaretMotion.lineTextStart) {
-      extent = _homeOntoOpener(_selection.extent, extent);
-    }
-    if (extent != next.extent) {
-      next = extend
-          ? SelectionModel(anchor: next.anchor, extent: extent)
-          : SelectionModel.at(extent);
-    }
-    _applySelection(next, reveal: true);
-  }
+  void moveCaretBy(CaretMotion motion, {bool extend = false}) =>
+      _motion.moveBy(motion, extend: extend);
 
-  /// Whether line [line] is one `live` draws as nothing to stop on (#729):
-  /// a fence line's band, or a blank line between two side-by-side
-  /// columns, which no column draws.
-  bool _passedOver(int line) {
-    if (!widget.hideMarkers || line < 0 || line >= lineCount) return false;
-    final block = _styler?.blockOf(line);
-    if (block == null) return false;
-    if (_fenceOf(line, block) != null) return true;
-    final host = _folds.hostOf(line);
-    final layout = host == null ? null : _hosts.openedOn(host);
-    return layout != null && layout.run.columnOf(line) < 0;
-  }
-
-  /// Where a caret going [direction]-wards from [from] to [to] lands: [to],
-  /// unless that is on a line [_passedOver] the caret was not on, and then
-  /// the first character past the run of such lines that way.
-  int _overFences(int from, int to, int direction) {
-    if (!widget.hideMarkers || direction == 0) return to;
-    final buffer = widget.buffer;
-    final start = buffer.lineOf(from);
-    var line = buffer.lineOf(to);
-    if (line == start || !_passedOver(line)) return to;
-    while (_passedOver(line) && line != start) {
-      final next = line + (direction > 0 ? 1 : -1);
-      if (next < 0 || next >= lineCount) return to;
-      line = next;
-    }
-    return direction > 0
-        ? buffer.offsetOfLine(line)
-        : buffer.offsetOfLine(line) + buffer.lineLengthAt(line);
-  }
-
-  /// Where Home from [from] lands, when [to] is where it would: the end of
-  /// a column's opener, revealed, when the caret is already at the start
-  /// of the column's first line (#729).
-  int _homeOntoOpener(int from, int to) {
-    if (!widget.hideMarkers) return to;
-    final buffer = widget.buffer;
-    final line = buffer.lineOf(from);
-    if (line == 0 || from != buffer.offsetOfLine(line)) return to;
-    final above = _styler?.blockOf(line - 1);
-    if (above?.divRole != DivRole.opensColumn ||
-        _fenceOf(line - 1, above) == null) {
-      return to;
-    }
-    return buffer.offsetOfLine(line - 1) + buffer.lineLengthAt(line - 1);
-  }
+  /// Moves the caret [rows] visual rows up (negative) or down, keeping its
+  /// horizontal place ([SourceCaretMotion.moveVertically]).
+  void moveCaretVertically(int rows, {bool extend = false}) =>
+      _motion.moveVertically(rows, extend: extend);
 
   /// The source line at the top of the view, and how far into its rows
   /// ([ScrollAnchor]). Null while there is nothing drawn to ask.
@@ -1457,199 +1400,6 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) showAnchor(anchor, attempt: attempt + 1);
     });
-  }
-
-  /// Moves the caret [rows] visual rows up (negative) or down, keeping its
-  /// horizontal place.
-  ///
-  /// This is the motion that needs the *layout* and not the note: a wrapped
-  /// paragraph is one source line and many screen rows, and which row a press
-  /// of
-  /// the down key lands on depends on where every character was drawn. So the
-  /// answer comes from the same two questions the caret itself does — where the
-  /// caret is (`getOffsetForCaret`) and which offset a point lands on
-  /// (`getPositionForOffset`) — asked of the paragraphs that drew the rows,
-  /// with
-  /// the height map saying which line a y falls in.
-  void moveCaretVertically(int rows, {bool extend = false}) {
-    final caret = caretRect;
-    if (caret == null || rows == 0) return;
-    // The caret's own row is the row height — its line's, at the scale it is
-    // drawn at — and the point is the middle of the row [rows] away, so a
-    // boundary never decides which row it is.
-    var point = Offset(caret.center.dx, caret.center.dy + rows * caret.height);
-    final caretLine = _caretLineIndex;
-    // At a side-by-side column's edge the motion follows the source: on
-    // to the next column, or out of the block (#729).
-    final edge = _acrossColumns(caretLine, point, rows, caret);
-    if (edge != null) {
-      _moveCaretTo(edge, extend: extend);
-      return;
-    }
-    var offset = _paintedOffsetAt(point);
-    // A fence's band is no row to stop on: the point goes on past it.
-    for (
-      var step = 0;
-      step < 4 &&
-          offset != null &&
-          widget.buffer.lineOf(offset) != caretLine &&
-          _passedOver(widget.buffer.lineOf(offset));
-      step++
-    ) {
-      point = point.translate(0, rows.sign * _band);
-      offset = _paintedOffsetAt(point);
-    }
-    if (offset != null) {
-      _moveCaretTo(offset, extend: extend);
-      return;
-    }
-    // The row is not drawn: move the note under the caret by as much, and ask
-    // the line that is there once the frame has built it.
-    if (!_scroll.hasClients) return;
-    final from = _scroll.offset;
-    final to = (from + rows * caret.height).clamp(
-      0.0,
-      _scroll.position.maxScrollExtent,
-    );
-    if (to == from) {
-      // Nothing further in that direction: the caret goes to the note's end.
-      moveCaretBy(
-        rows < 0 ? CaretMotion.documentStart : CaretMotion.documentEnd,
-        extend: extend,
-      );
-      return;
-    }
-    _scroll.jumpTo(to);
-    final shifted = point - Offset(0, to - from);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      final landed = _paintedOffsetAt(shifted) ?? _mappedOffsetAt(shifted);
-      if (landed != null) _moveCaretTo(landed, extend: extend);
-    });
-    WidgetsBinding.instance.scheduleFrame();
-  }
-
-  /// Where Up or Down — [rows] rows, the point it asks being [point] —
-  /// takes a caret on [line], in [caret], when that line is in a
-  /// side-by-side column and the point is past the column's own lines: the
-  /// next column's first line going down, the previous one's last going
-  /// up, at the same distance from the column's left edge; past the last
-  /// column the line after the block, past the first the line before it.
-  /// Null when the motion stays in the column, or the line is in none.
-  int? _acrossColumns(int line, Offset point, int rows, Rect caret) {
-    final host = line < 0 ? null : _folds.hostOf(line);
-    final layout = host == null ? null : _hosts.openedOn(host);
-    final box = _noteBox;
-    if (layout == null || box == null) return null;
-    final run = layout.run;
-    final column = run.columnOf(line);
-    if (column < 0) return null;
-    final landed = _paintedOffsetAt(point);
-    if (landed != null) {
-      final at = widget.buffer.lineOf(landed);
-      if (run.columnOf(at) == column && !_passedOver(at)) return null;
-    } else {
-      // Not drawn: past the column's lines only if its first or last
-      // line is the caret's.
-      final lines = run.columns[column];
-      final first = _firstOf(lines, forward: true);
-      final last = _firstOf(lines, forward: false);
-      if (rows > 0 ? line != last : line != first) return null;
-    }
-    final down = rows > 0;
-    final next = column + (down ? 1 : -1);
-    final int target;
-    double? x;
-    if (next < 0 || next >= run.columns.length) {
-      target = down ? run.end : run.start - 1;
-      if (target < 0 || target >= lineCount) return null;
-      x = box.globalToLocal(caret.center).dx;
-    } else {
-      target = _firstOf(run.columns[next], forward: down);
-      final from = LiveHosts.leftOf(layout, column, _gap);
-      final to = LiveHosts.leftOf(layout, next, _gap);
-      x = box.globalToLocal(caret.center).dx - from + to;
-    }
-    return _offsetOnLine(target, x, top: down);
-  }
-
-  /// The first line of [column] a caret stops on, going [forward], or its
-  /// last going back: past its fences.
-  int _firstOf(LiveColumn column, {required bool forward}) {
-    if (forward) {
-      var line = column.start;
-      while (line < column.end - 1 && _passedOver(line)) {
-        line++;
-      }
-      return line;
-    }
-    var line = column.end - 1;
-    while (line > column.start && _passedOver(line)) {
-      line--;
-    }
-    return line;
-  }
-
-  /// The offset on [line] at [x], the note box's, on its first visual row
-  /// ([top]) or its last; the line's start or end when it is not drawn.
-  int _offsetOnLine(int line, double x, {required bool top}) {
-    final buffer = widget.buffer;
-    final paragraph = _paragraphs.paragraphAt(line);
-    final box = _noteBox;
-    if (paragraph == null || !paragraph.attached || box == null) {
-      return top
-          ? buffer.offsetOfLine(line)
-          : buffer.offsetOfLine(line) + buffer.lineLengthAt(line);
-    }
-    final global = box.localToGlobal(Offset(x, 0));
-    final local = paragraph.globalToLocal(global);
-    final y = top ? 1.0 : paragraph.size.height - 1;
-    return buffer.offsetOfLine(line) +
-        paragraph.getPositionForOffset(Offset(local.dx, y)).offset;
-  }
-
-  /// Where the caret goes from [offset] in `live`: [offset] itself, unless
-  /// it is in a table's room — the pipes and spaces round the cells, or the
-  /// delimiter row, which are drawn as nothing — and then the nearest
-  /// cell's text [direction]-wards (`LiveTables.cellColumn`): past the
-  /// row's end onto the next line going forward, back onto the previous
-  /// one going back, unless [keepLine] keeps it on its row.
-  int _inCell(int offset, int direction, {bool keepLine = false}) {
-    if (!widget.hideMarkers) return offset;
-    final buffer = widget.buffer;
-    var at = offset;
-    while (true) {
-      final line = buffer.lineOf(at);
-      if (line < 0 || line >= buffer.lineCount) return offset;
-      if (_styler?.blockOf(line)?.kind != BlockKind.table) return at;
-      final start = buffer.offsetOfLine(line);
-      final column = LiveTables.cellColumn(
-        buffer.lineAt(line),
-        at - start,
-        direction,
-      );
-      if (column != null) return start + column;
-      if (direction == 0 || keepLine) return at;
-      if (direction > 0) {
-        if (line + 1 >= buffer.lineCount) return at;
-        at = buffer.offsetOfLine(line + 1);
-      } else {
-        if (line == 0) return at;
-        at = buffer.offsetOfLine(line - 1) + buffer.lineLengthAt(line - 1);
-      }
-    }
-  }
-
-  /// Puts the caret at [offset] — extending the selection with [extend] — and
-  /// tells everyone who needs to know.
-  void _moveCaretTo(int offset, {bool extend = false}) {
-    final to = _inCell(offset, 0);
-    _applySelection(
-      extend
-          ? SelectionModel(anchor: _selection.anchor, extent: to)
-          : SelectionModel.at(to),
-      reveal: true,
-    );
   }
 
   /// Replaces `[start, end)` with [text] because the *app* asked, not the
@@ -1775,47 +1525,6 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// Deletes the selection, or what is after the caret.
   void deleteForward({bool word = false}) =>
       _typing.delete(word ? CaretMotion.wordRight : CaretMotion.characterRight);
-
-  /// PageUp and PageDown: the note moves a viewport, and the caret moves with
-  /// it by as many rows, the way every editor pages.
-  void _page(int direction, {bool extend = false}) {
-    if (!_scroll.hasClients) return;
-    final viewport = _scroll.position.viewportDimension;
-    final rows = (viewport / _rowHeight).floor() - 1;
-    if (rows <= 0) return;
-    final from = _scroll.offset;
-    final to = (from + direction * rows * _rowHeight).clamp(
-      0.0,
-      _scroll.position.maxScrollExtent,
-    );
-    if (to == from) {
-      // Nothing left to page through: the caret goes to that end of the note.
-      moveCaretBy(
-        direction < 0 ? CaretMotion.documentStart : CaretMotion.documentEnd,
-        extend: extend,
-      );
-      return;
-    }
-    // The caret keeps its place *on the screen* while the note moves under
-    // it, and that place is asked of whatever line is there after the jump —
-    // the caret's own line may no longer be built at all.
-    final box = _noteBox;
-    final point =
-        caretRect?.center ??
-        box?.localToGlobal(Offset(0, viewport / 2)) ??
-        Offset.zero;
-    _scroll.jumpTo(to);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      final offset = offsetAt(point);
-      if (offset == null) return;
-      final next = extend
-          ? SelectionModel(anchor: _selection.anchor, extent: offset)
-          : SelectionModel.at(offset);
-      _applySelection(next);
-    });
-    WidgetsBinding.instance.scheduleFrame();
-  }
 
   /// Keeps the tokenizer and the height map at the buffer's line count, after
   /// [edit].
@@ -2067,10 +1776,10 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     final layout = host == null ? null : _hosts.openedOn(host);
     if (layout == null) return whole;
     final column = layout.run.columnOf(line);
-    if (column < 0 || _passedOver(line)) return whole;
+    if (column < 0 || _motion.passedOver(line)) return whole;
     final lines = layout.run.columns[column];
-    final first = _firstOf(lines, forward: true);
-    final last = _firstOf(lines, forward: false);
+    final first = _motion.firstOf(lines, forward: true);
+    final last = _motion.firstOf(lines, forward: false);
     return (
       buffer.offsetOfLine(first),
       buffer.offsetOfLine(last) + buffer.lineLengthAt(last),
@@ -3595,7 +3304,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
         offset >= selection.start &&
         offset <= selection.end;
     // On a table's room, the menu is the nearer cell's (#261).
-    if (offset != null && !onSelection) placeCaret(_inCell(offset, 0));
+    if (offset != null && !onSelection) placeCaret(_motion.inCell(offset, 0));
     showContextMenu(global);
   }
 
@@ -3728,7 +3437,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     moveVertically: moveCaretVertically,
     moveBy: moveCaretBy,
     downOutOfTable: _tableKeys.downOut,
-    page: _page,
+    page: _motion.page,
     tab: _tableKeys.tab,
     copy: copySelection,
     cut: cutSelection,
