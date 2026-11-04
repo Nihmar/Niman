@@ -16,6 +16,7 @@ import 'package:niman/src/ui/action_sheet.dart';
 import 'package:niman/src/ui/indexing_notice.dart';
 import 'package:niman/src/ui/pointer_density.dart';
 import 'package:niman/src/ui/search_field_pager.dart';
+import 'package:niman/src/ui/search_hit_row.dart';
 import 'package:niman/src/ui/search_replace_panel.dart';
 import 'package:niman/src/ui/search_replace_preview.dart';
 import 'package:niman/src/ui/search_request.dart';
@@ -996,65 +997,28 @@ final class _SearchScreenState extends State<SearchScreen> {
         final current = hit.path == _currentHit;
         return KeyedSubtree(
           key: current ? _currentHitKey : null,
-          child: _hitGestures(
-            at,
-            ListTile(
-              key: Key('search-hit-${hit.path}'),
-              selected: current,
-              selectedTileColor: theme.colorScheme.secondaryContainer,
-              title: Text(
-                hit.title,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              subtitle: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    hit.path,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  if (hit.snippet.isNotEmpty)
-                    _snippet(theme, hit.snippet)
-                  else if ((_excerptWords, _source) case (
-                    final words?,
-                    final source?,
-                  ))
-                    FutureBuilder<String>(
-                      future: _excerpts.putIfAbsent(
-                        hit.path,
-                        () => source.excerpt(hit, words),
-                      ),
-                      builder: (context, excerpt) => _excerptSlot(
-                        theme,
-                        excerpt.data ?? '',
-                        loading:
-                            excerpt.connectionState != ConnectionState.done,
-                      ),
-                    ),
-                ],
-              ),
-              onTap: () => _tapHit(at),
-              onLongPress: () => _showNoteActions(at),
-            ),
+          child: SearchHitRow(
+            hit: hit,
+            current: current,
+            excerpt: hit.snippet.isEmpty ? _excerptOf(hit) : null,
+            onTap: () => _tapHit(at),
+            onLongPress: () => _showNoteActions(at),
+            onMenu: (anchor) => _showNoteActions(at, anchor: anchor),
+            onNewTab: () => _newTabHit(at),
           ),
         );
       },
     );
   }
 
-  /// A hit's pointer ways in (#712): a right click opens its menu at the
-  /// pointer, a middle click opens it in a new tab.
-  Widget _hitGestures(int at, Widget row) => GestureDetector(
-    onSecondaryTapUp: (details) =>
-        _showNoteActions(at, anchor: menuAnchorAt(details.globalPosition)),
-    onTertiaryTapUp: (_) => _newTabHit(at),
-    child: row,
-  );
+  /// The excerpt of a word hit without a snippet, read from its note once
+  /// for [_hits]; null for results that carry their own.
+  Future<String>? _excerptOf(SearchHit hit) {
+    if ((_excerptWords, _source) case (final words?, final source?)) {
+      return _excerpts.putIfAbsent(hit.path, () => source.excerpt(hit, words));
+    }
+    return null;
+  }
 
   /// A tap on a hit opens it; with `Ctrl` held, in a new tab (#712).
   void _tapHit(int at) {
@@ -1071,43 +1035,6 @@ final class _SearchScreenState extends State<SearchScreen> {
     opens.newTab(_hits[at].path);
     return true;
   }
-
-  /// The room for a word hit's excerpt, two lines whether it has arrived
-  /// or not (#1044): the row is its final height from the first frame, so
-  /// nothing slides under the pointer while the excerpts load. While it is
-  /// on its way a faint bar holds the line.
-  Widget _excerptSlot(
-    ThemeData theme,
-    String excerpt, {
-    required bool loading,
-  }) => Stack(
-    children: [
-      // Two lines of the snippet's own style, drawn as nothing.
-      const Opacity(opacity: 0, child: Text('\n', maxLines: 2)),
-      if (excerpt.isNotEmpty)
-        _snippet(theme, excerpt)
-      else if (loading)
-        Positioned(
-          left: 0,
-          top: 5,
-          width: 140,
-          height: 8,
-          child: DecoratedBox(
-            key: const Key('search-excerpt-skeleton'),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(4),
-            ),
-          ),
-        ),
-    ],
-  );
-
-  Widget _snippet(ThemeData theme, String snippet) => Text.rich(
-    _highlight(theme, snippet),
-    maxLines: 2,
-    overflow: TextOverflow.ellipsis,
-  );
 
   /// Words/contains as a toggle in the query field, where a pointer aims
   /// (#712): selected means contains, unselected means whole words.
@@ -1368,47 +1295,5 @@ final class _SearchScreenState extends State<SearchScreen> {
     if (_contains) return true;
     final last = text.split(RegExp(r'\s+')).last;
     return last.length >= 2;
-  }
-
-  /// Renders a `snippet()`/excerpt string: `<mark>…</mark>` spans get the
-  /// accent color + bold, everything else is plain body text.
-  TextSpan _highlight(ThemeData theme, String snippet) {
-    final style = theme.textTheme.bodyMedium ?? const TextStyle();
-    final markStyle = style.copyWith(
-      color: theme.colorScheme.primary,
-      fontWeight: FontWeight.bold,
-    );
-    final spans = <TextSpan>[];
-    var pos = 0;
-    const open = '<mark>';
-    const close = '</mark>';
-    while (pos < snippet.length) {
-      final start = snippet.indexOf(open, pos);
-      if (start < 0) {
-        spans.add(TextSpan(text: snippet.substring(pos), style: style));
-        break;
-      }
-      if (start > pos) {
-        spans.add(TextSpan(text: snippet.substring(pos, start), style: style));
-      }
-      final end = snippet.indexOf(close, start + open.length);
-      if (end < 0) {
-        spans.add(
-          TextSpan(
-            text: snippet.substring(start + open.length),
-            style: markStyle,
-          ),
-        );
-        break;
-      }
-      spans.add(
-        TextSpan(
-          text: snippet.substring(start + open.length, end),
-          style: markStyle,
-        ),
-      );
-      pos = end + close.length;
-    }
-    return TextSpan(children: spans);
   }
 }
