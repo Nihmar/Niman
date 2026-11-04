@@ -15,7 +15,6 @@ import 'package:niman/src/calendar/calendar_writer.dart';
 import 'package:niman/src/calendar/parser.dart';
 import 'package:niman/src/core/theme_tokens.dart';
 import 'package:niman/src/journal/journal_summary.dart';
-import 'package:niman/src/templates/engine.dart';
 import 'package:niman/src/ui/action_sheet.dart';
 import 'package:niman/src/ui/journal/journal_calendar.dart';
 import 'package:niman/src/ui/journal/journal_day_card.dart';
@@ -26,6 +25,7 @@ import 'package:niman/src/ui/journal/journal_event_actions.dart';
 import 'package:niman/src/ui/journal/journal_event_editor.dart';
 import 'package:niman/src/ui/journal/journal_event_sheet.dart';
 import 'package:niman/src/ui/journal/journal_never_listenable.dart';
+import 'package:niman/src/ui/journal/journal_recent_entry.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// The browser over the journal's entries.
@@ -389,42 +389,16 @@ final class _JournalBrowserState extends State<JournalBrowser> {
           Text(AppStrings.journalRecent.toUpperCase(), style: heading),
           const SizedBox(height: 4),
           for (final day in latest)
-            GestureDetector(
-              onSecondaryTapUp: switch (widget.onEntryMenu) {
-                final menu? => (details) => menu(day, details.globalPosition),
+            JournalRecentEntry(
+              day: day,
+              summary: _summaries[day],
+              heading: heading,
+              dense: !widget.large,
+              onOpen: () => _open(day),
+              onMenu: switch (widget.onEntryMenu) {
+                final menu? => (position) => menu(day, position),
                 null => null,
               },
-              child: ListTile(
-                key: Key('journal-recent-${formatDateTime(day, 'YYYY-MM-DD')}'),
-                dense: !widget.large,
-                contentPadding: EdgeInsets.zero,
-                leading: SizedBox(
-                  width: 48,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        formatDateTime(day, 'ddd').toUpperCase(),
-                        style: heading,
-                      ),
-                      Text(
-                        '${day.day}',
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                title: Text(
-                  _summaries[day]?.isNotEmpty ?? false
-                      ? _summaries[day]!
-                      : formatDateTime(day, 'D MMMM YYYY'),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                onTap: () => _open(day),
-              ),
             ),
         ],
       ],
