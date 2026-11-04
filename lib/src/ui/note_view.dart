@@ -16,7 +16,6 @@ import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/core/text_scale.dart';
 import 'package:niman/src/editor/editor_shortcuts.dart';
 import 'package:niman/src/editor/find_bar.dart';
-import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/editor/md_editing.dart';
 import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/editor/outline.dart';
@@ -31,14 +30,11 @@ import 'package:niman/src/frontmatter/note_kind.dart';
 import 'package:niman/src/frontmatter/parser.dart';
 import 'package:niman/src/library/attachment_store.dart';
 import 'package:niman/src/library/new_item_folder.dart';
-import 'package:niman/src/links/block_anchors.dart';
-import 'package:niman/src/links/embed_path.dart';
 import 'package:niman/src/links/library_links.dart';
 import 'package:niman/src/links/link_preview.dart' show PreviewLimits;
 import 'package:niman/src/links/parser.dart';
 import 'package:niman/src/links/suggester.dart';
 import 'package:niman/src/markdown/background_scan.dart';
-import 'package:niman/src/markdown/buffer_block_anchors.dart';
 import 'package:niman/src/markdown/edit/source_find.dart';
 import 'package:niman/src/markdown/line_ending.dart';
 import 'package:niman/src/markdown/note_framing.dart';
@@ -56,12 +52,10 @@ import 'package:niman/src/markdown/surface_controller.dart';
 import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/templates/check_state.dart';
-import 'package:niman/src/ui/action_sheet.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/capture/paste_markdown_flow.dart'
     show readPlainClipboard;
 import 'package:niman/src/ui/dead_link_watcher.dart';
-import 'package:niman/src/ui/dropped_link.dart';
 import 'package:niman/src/ui/hidden_slot.dart';
 import 'package:niman/src/ui/link_preview/note_link_preview.dart';
 import 'package:niman/src/ui/links_to_note_section.dart';
@@ -69,6 +63,7 @@ import 'package:niman/src/ui/note_attach.dart';
 import 'package:niman/src/ui/note_dead_links.dart';
 import 'package:niman/src/ui/note_edit_commands.dart';
 import 'package:niman/src/ui/note_frontmatter_panel.dart';
+import 'package:niman/src/ui/note_link_actions.dart';
 import 'package:niman/src/ui/note_links.dart';
 import 'package:niman/src/ui/note_load_error.dart';
 import 'package:niman/src/ui/note_paste.dart';
@@ -87,7 +82,6 @@ import 'package:niman/src/ui/note_top_bar.dart';
 import 'package:niman/src/ui/note_view_adapters.dart';
 import 'package:niman/src/ui/note_view_chrome.dart';
 import 'package:niman/src/ui/note_view_handle.dart';
-import 'package:niman/src/ui/outline_panel.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/tree_link_drop.dart';
 import 'package:niman/src/ui/unsaved_notes.dart';
@@ -547,7 +541,7 @@ final class _NoteViewState extends State<NoteView>
     enabled: () => widget.linkPreview,
     unsavedText: _unsavedTextOf,
     mathCache: _mathCache,
-    targets: _linkTargets,
+    targets: _links.targets,
   );
 
   /// The unsaved buffer text of the note at library-relative [path], when it
@@ -606,10 +600,10 @@ final class _NoteViewState extends State<NoteView>
   String? get notePathInLibrary => _pathInLibrary;
 
   @override
-  Future<String?> resolveEmbed(String target) => _resolveEmbed(target);
+  Future<String?> resolveEmbed(String target) => _links.resolveEmbed(target);
 
   @override
-  void jumpToHeading(int line) => _jumpToHeading(line);
+  void jumpToHeading(int line) => _links.jumpToHeading(line);
 
   @override
   bool get canInsert {
@@ -1099,11 +1093,11 @@ final class _NoteViewState extends State<NoteView>
       rootDirectory: () => widget.libraryRoot,
       attachmentsFolderOf: () => widget.attachmentsFolder,
       linkTypeOf: () => widget.linkType,
-      embedResolver: _resolveEmbed,
+      embedResolver: _links.resolveEmbed,
       linkOpener: (context, href) =>
-          unawaited(openHref(context, href, _linkTargets())),
+          unawaited(openHref(context, href, _links.targets())),
       wikiLinkOpener: (context, inner) =>
-          unawaited(openWiki(context, parseWikiRef(inner), _linkTargets())),
+          unawaited(openWiki(context, parseWikiRef(inner), _links.targets())),
       markdownShower: () => widget.onKindMarkdown,
     );
     _unsaved = widget.unsavedTracker;
@@ -1444,7 +1438,7 @@ final class _NoteViewState extends State<NoteView>
       }
       final anchor = widget.initialAnchor;
       if (anchor != null && mounted) {
-        unawaited(jumpToAnchor(context, anchor, _linkTargets()));
+        unawaited(jumpToAnchor(context, anchor, _links.targets()));
       }
       widget.onLoaded?.call(path, text.length);
       _log.info(
@@ -1716,7 +1710,7 @@ final class _NoteViewState extends State<NoteView>
         onLinkHover: _preview.editorHover,
         onPaste: _paste.paste,
         notePath: _pathInLibrary,
-        blockAnchors: _blockAnchors,
+        blockAnchors: _links.blockAnchors,
         // The shell's own focus node: the phone toolbar, the format keys,
         // save-on-blur and the refocus when the preview goes all ask *it*
         // whether the editor has the focus.
@@ -1752,10 +1746,10 @@ final class _NoteViewState extends State<NoteView>
         // What `live` draws in place of the source it hides: the formulas
         // and pictures the read view draws, from the same cache and disk.
         mathCache: _mathCache,
-        embedResolver: _resolveEmbed,
+        embedResolver: _links.resolveEmbed,
         findMatches: _sourceFind,
         onOpenLink: (kind, raw, href) =>
-            unawaited(_openLinkToken(kind, raw, href)),
+            unawaited(_links.openLinkToken(kind, raw, href)),
         onChanged: (edit) {
           _sourceFind.noteEdited();
           _noteChanged(caretLine: _surfaceCaretLine ?? _caretLine, edit: edit);
@@ -1773,7 +1767,7 @@ final class _NoteViewState extends State<NoteView>
     // where the pointer let it go (#704).
     final dropping = TreeLinkDrop(
       viewKey: _sourceViewKey,
-      onDrop: (path) => unawaited(_insertDroppedLink(path)),
+      onDrop: (path) => unawaited(_links.insertDroppedLink(path)),
       child: note,
     );
     return Focus(
@@ -1891,14 +1885,14 @@ final class _NoteViewState extends State<NoteView>
         mathCache: _mathCache,
         controller: _previewScroll,
         onTapLink: (text, href) =>
-            unawaited(openHref(context, href ?? '', _linkTargets())),
+            unawaited(openHref(context, href ?? '', _links.targets())),
         onTapWikiLink: (inner) => unawaited(
           // The same rule the parser and the preview use, so a wikilink means
           // one thing however it is drawn. `inner` is the `[[…]]` content, and
           // `parseWikiRef` reads it (#477 needs the target it names).
-          openWiki(context, parseWikiRef(inner), _linkTargets()),
+          openWiki(context, parseWikiRef(inner), _links.targets()),
         ),
-        embedResolver: _resolveEmbed,
+        embedResolver: _links.resolveEmbed,
         deadLinks: _deadLinks,
         linkPreview: _preview.hooks(context),
         column: widget.noteColumn,
@@ -1955,78 +1949,30 @@ final class _NoteViewState extends State<NoteView>
     return _editorScanOf(buffer);
   }
 
-  /// Resolves an `![[…]]` embed through the shared rule (#24): library
-  /// root first, then the note's own folder, then the link index.
-  Future<String?> _resolveEmbed(String target) {
-    final root = widget.libraryRoot;
-    if (root == null) return Future<String?>.value();
-    return resolveEmbedPath(target, widget.path, root, widget.linkSource);
-  }
-
-  /// Opens the file the embed [ref] names, found by the shared embed rule
-  /// ([_resolveEmbed]); false when the disk has no such file, and the caller
-  /// goes on to the index and the dead-link flow.
-  Future<bool> _openEmbedOnDisk(WikiRef ref) async {
-    final root = widget.libraryRoot;
-    final open = widget.onOpenNote;
-    if (root == null || open == null || ref.target.isEmpty) return false;
-    final found = await _resolveEmbed(ref.target);
-    if (found == null || !mounted) return false;
-    final rel = pathInLibrary(root, found);
-    if (rel == null) return false;
-    // The note itself is the one target that stays here: the index flow
-    // jumps locally for it.
-    if (rel == _pathInLibrary) return false;
-    open(rel, ref.fragment);
-    return true;
-  }
-
-  /// Opens a link token's target: [raw] is the token as written — `[[…]]` for
-  /// a wikilink, `![[…]]` for an embed, `[…](…)` for a Markdown link; [href]
-  /// is the target its parse resolved, when the tap carried one — a reference
-  /// link has no `](href)` in [raw] to read it from.
-  ///
-  /// The editor surface only follows a link on a Ctrl/Cmd+click, so the
-  /// targets carry the modifier: a dead link is created on the spot (#477).
-  Future<void> _openLinkToken(TokenKind kind, String raw, String? href) async {
-    if (kind == TokenKind.wikilink) {
-      // An embed's run carries its own `!` (#994): the wikilink inside it
-      // starts one character later.
-      final embed = raw.startsWith('!');
-      final wiki = embed ? raw.substring(1) : raw;
-      final ref = parseWikiRef(wiki.substring(2, wiki.length - 2));
-      // The read view draws an embed from the disk first (#24); the click
-      // follows the file by that same rule, so a target the index has not
-      // caught up with yet is opened, not offered for creation (#1010).
-      if (embed && await _openEmbedOnDisk(ref)) return;
-      if (!mounted) return;
-      await openWiki(context, ref, _linkTargets(modifier: true));
-    } else {
-      final close = raw.indexOf(']');
-      final inline = close < 0 ? '' : raw.substring(close + 2, raw.length - 1);
-      await openHref(context, href ?? inline, _linkTargets(modifier: true));
-    }
-  }
-
-  /// Writes a link to the library file at [path], dropped from the tree,
-  /// at the caret the drop left (#704): one edit, one undo step.
-  Future<void> _insertDroppedLink(String path) async {
-    final root = widget.libraryRoot;
-    if (root == null) return;
-    final suggester = widget.wikilinkSuggester;
-    final text = await droppedLink(
-      path: path,
-      note: relPath(widget.path, root),
-      linkType: widget.linkType,
-      wikiTarget: (path) async =>
-          await suggester?.targetOf(path) ?? p.basenameWithoutExtension(path),
-    );
-    if (!mounted) return;
-    _surface?.replaceSelection(text);
-    _focus.requestFocus();
-    _stats.refresh();
-    _refreshPreview();
-  }
+  /// The note's links: following them from either pane, the embeds they
+  /// name, a link dropped from the tree, and the jumps to a heading.
+  late final NoteLinkActions _links = NoteLinkActions(
+    notePath: () => widget.path,
+    notePathInLibrary: () => _pathInLibrary,
+    libraryRoot: () => widget.libraryRoot,
+    linkSource: () => widget.linkSource,
+    linkType: () => widget.linkType,
+    newItemLocation: () => widget.newItemLocation,
+    wikilinkSuggester: () => widget.wikilinkSuggester,
+    onOpenNote: () => widget.onOpenNote,
+    createMissingNote: () => widget.createMissingNote,
+    outline: () => _stats.outline.value,
+    surface: () => _surface,
+    readView: () => _readViewKey.currentState,
+    reading: () => _previewIn(widget),
+    context: () => context,
+    mounted: () => mounted,
+    onDropped: () {
+      _focus.requestFocus();
+      _stats.refresh();
+      _refreshPreview();
+    },
+  );
 
   /// Whether the file at [path] is the one [_diskStamp] recorded.
   ///
@@ -2034,83 +1980,6 @@ final class _NoteViewState extends State<NoteView>
   /// fallback is the comparison this stands in front of.
   Future<bool> _unchangedOnDisk(String path) async =>
       await _diskStamp?.matchesAsync(path) ?? false;
-
-  /// Opens the outline sheet and jumps to whatever was picked; a pointer's
-  /// menu grows from [anchor], the outline button.
-  Future<void> _openOutline(Rect? anchor) async {
-    final line = await showOutlineSheet(
-      context,
-      entries: _stats.outline.value,
-      anchor: anchor,
-    );
-    if (line == null || !mounted) return;
-    _jumpToHeading(line);
-  }
-
-  /// The outline jump: caret to the heading line, then bring it into view.
-  ///
-  /// When the preview is visible (phone switch mode) the editor caret is
-  /// off-screen — the preview is brought to the heading's block as well,
-  /// so the jump is visible in every layout.
-  void _jumpToHeading(int line) {
-    const AppLogger(name: 'links').debug('jump to source line $line');
-    _surface?.jumpToLine(line);
-    _syncPreviewToLine(line);
-  }
-
-  /// Scrolls the read pane so the block starting at source [line] is in
-  /// view (no-op when the read pane is hidden or not built yet).
-  void _syncPreviewToLine(int line) {
-    if (!_previewIn(widget) || !mounted) return;
-    const log = AppLogger(name: 'links');
-    // The read mode's own answer: the line resolves to a block and the
-    // block to its offset in the height map, measured where a frame has
-    // drawn and estimated where none has (#256).
-    final state = _readViewKey.currentState;
-    if (state == null) {
-      log.debug('anchor jump: the read view is not built yet — skipped');
-      return;
-    }
-    log.debug('anchor jump: read mode, source line $line');
-    state.jumpToLine(line);
-  }
-
-  /// What following a link from this note needs (issue #100 moved the
-  /// following itself into `note_links.dart`).
-  ///
-  /// [modifier] marks a tap the editor surface carried with the platform's
-  /// link modifier (Ctrl, Cmd on macOS): its own way to follow a link,
-  /// where a dead one is created on the spot rather than offered (#477).
-  /// The preview follows links on a plain tap, so it keeps the offer.
-  NoteLinkTargets _linkTargets({bool modifier = false}) => NoteLinkTargets(
-    source: widget.linkSource,
-    notePath: widget.path,
-    libraryRoot: widget.libraryRoot,
-    newItemLocation: widget.newItemLocation,
-    outline: _stats.outline.value,
-    jumpToHeading: _jumpToHeading,
-    blocks: _blocks,
-    onOpenNote: widget.onOpenNote,
-    createMissingNote: widget.createMissingNote,
-    modifier: modifier,
-    anchor: switch (_pointerDownAt) {
-      final at? => menuAnchorAt(at),
-      null => null,
-    },
-  );
-
-  /// Where the pointer last went down on the note, for the questions a
-  /// link asks there (#712).
-  Offset? _pointerDownAt;
-
-  /// The note's block anchors (#844), read off its buffer when a block link
-  /// is followed; the source view's `[[#^` panel reads the same (#869).
-  late final BufferBlockAnchors _blockAnchors = BufferBlockAnchors(
-    () => _surface!.buffer,
-  );
-
-  Future<List<BlockAnchor>> _blocks() async =>
-      _surface == null ? const <BlockAnchor>[] : await _blockAnchors.read();
 
   void _onFocusChanged() {
     if (!_focus.hasFocus) _saves.saveInBackground();
@@ -2251,7 +2120,7 @@ final class _NoteViewState extends State<NoteView>
           ),
         Expanded(
           child: Listener(
-            onPointerDown: (event) => _pointerDownAt = event.position,
+            onPointerDown: (event) => _links.pointerDownAt = event.position,
             // The preview card of a hovered link goes over the note (#846).
             child: _preview.host(
               closeOn: _scrolls,
@@ -2359,7 +2228,7 @@ final class _NoteViewState extends State<NoteView>
                           ? null
                           : _saves.saveInBackground,
                       statusActions: widget.statusActions,
-                      onOutline: _openOutline,
+                      onOutline: _links.openOutline,
                       onFind: () => _sourceFind.open(),
                       onSpellCheck: _commands.openSpellCheck,
                       onToggleEditorKind: _toggleEditorKind,
