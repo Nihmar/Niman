@@ -24,6 +24,7 @@ import 'package:niman/src/ui/journal/journal_calendar.dart';
 import 'package:niman/src/ui/journal/journal_event_actions.dart';
 import 'package:niman/src/ui/journal/journal_event_sheet.dart';
 import 'package:niman/src/ui/journal/journal_flow.dart';
+import 'package:niman/src/ui/journal/journal_never_listenable.dart';
 import 'package:niman/src/ui/line_runs.dart';
 import 'package:niman/src/ui/repeat_label.dart';
 import 'package:niman/src/ui/strings.dart';
@@ -277,7 +278,7 @@ final class _JournalBrowserState extends State<JournalBrowser> {
       padding: EdgeInsets.all(widget.large ? 18 : 12),
       children: [
         ListenableBuilder(
-          listenable: widget.calendarChanged ?? const _Never(),
+          listenable: widget.calendarChanged ?? const NeverListenable(),
           builder: (context, _) => JournalCalendar(
             month: _month,
             entries: entries,
@@ -334,7 +335,7 @@ final class _JournalBrowserState extends State<JournalBrowser> {
         ],
         if (widget.eventsOn case final eventsOn?)
           ListenableBuilder(
-            listenable: widget.calendarChanged ?? const _Never(),
+            listenable: widget.calendarChanged ?? const NeverListenable(),
             builder: (context, _) {
               final day = widget.large
                   ? _selected
@@ -365,7 +366,7 @@ final class _JournalBrowserState extends State<JournalBrowser> {
           ),
         if (widget.dueOn case final dueOn?)
           ListenableBuilder(
-            listenable: widget.tasksChanged ?? const _Never(),
+            listenable: widget.tasksChanged ?? const NeverListenable(),
             builder: (context, _) {
               final day = widget.large
                   ? _selected
@@ -913,17 +914,6 @@ final class _JournalBrowserState extends State<JournalBrowser> {
         if (!before.contains(line.text)) line.text,
     ].join('\n');
   }
-}
-
-/// A listenable that never fires, for a browser with no tasks to follow.
-final class _Never implements Listenable {
-  const new();
-
-  @override
-  void addListener(VoidCallback listener) {}
-
-  @override
-  void removeListener(VoidCallback listener) {}
 }
 
 /// What a goal covers: the week's number, the month's name, the year
