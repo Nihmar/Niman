@@ -41,7 +41,6 @@ import 'package:niman/src/editor/context_menu_items.dart';
 import 'package:niman/src/editor/editor_context_menu.dart';
 import 'package:niman/src/editor/highlight_style.dart';
 import 'package:niman/src/editor/highlighting.dart';
-import 'package:niman/src/editor/list_row.dart';
 import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/editor/outline.dart';
 import 'package:niman/src/editor/toolbar_item.dart';
@@ -55,13 +54,10 @@ import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/block_scanner.dart';
 import 'package:niman/src/markdown/buffer_block_anchors.dart';
 import 'package:niman/src/markdown/column_layout.dart';
-import 'package:niman/src/markdown/edit/bracket_pairs.dart';
 import 'package:niman/src/markdown/edit/caret_motion.dart';
 import 'package:niman/src/markdown/edit/caret_spot.dart';
 import 'package:niman/src/markdown/edit/edit_history.dart';
-import 'package:niman/src/markdown/edit/enter_edit.dart';
 import 'package:niman/src/markdown/edit/line_prefix.dart';
-import 'package:niman/src/markdown/edit/list_indent_edit.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/edit/source_find.dart';
 import 'package:niman/src/markdown/edit/source_input.dart';
@@ -109,6 +105,7 @@ import 'package:niman/src/markdown/render/source_table_keys.dart';
 import 'package:niman/src/markdown/render/source_task_boxes.dart';
 import 'package:niman/src/markdown/render/source_template_hint.dart';
 import 'package:niman/src/markdown/render/source_touch.dart';
+import 'package:niman/src/markdown/render/source_typing.dart';
 import 'package:niman/src/markdown/render/todo_block_scope.dart';
 import 'package:niman/src/markdown/render/wikilink_suggest.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
@@ -744,7 +741,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     selection: () => _selection,
     suggester: () => widget.wikilinkSuggester,
     lineRead: (line) => _tokensAt(line) != null,
-    inCodeAt: _inCodeAt,
+    inCodeAt: _typing.inCodeAt,
     headings: () => headings,
     blocks: () => _blockAnchors.read(),
     notePath: () => widget.notePath,
@@ -823,8 +820,8 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     buffer: widget.buffer,
     reach: _inputReach,
     onRecord: _history.record,
-    onNewline: _newline,
-    onTyped: _typed,
+    onNewline: _typing.newline,
+    onTyped: _typing.typed,
     onTokenizer: (edit, buffer) {
       // The edit path's clock: opened here and closed by `onEdited`, the
       // two ends of the same `_replace` (#316) — and only when a profiling
@@ -952,7 +949,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       _ownSelection =
           widget.surface?.initialSelection ?? const SelectionModel.at(0);
       _input = _makeInput();
-      _brackets.clear();
+      _typing.brackets.clear();
       _styling.restyle();
       _folds.clear();
       _heights = _map();
@@ -1655,44 +1652,6 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     );
   }
 
-  /// The selected text, or null when the selection is a caret.
-  String? get selectedText {
-    final selection = _selection;
-    if (selection.isCollapsed) return null;
-    return widget.buffer.substring(selection.start, selection.end);
-  }
-
-  /// Copies the selection to the platform's clipboard.
-  Future<void> copySelection() async {
-    final text = selectedText;
-    if (text == null) return;
-    await Clipboard.setData(ClipboardData(text: text));
-  }
-
-  /// Copies the selection and removes it, in one undo step with the removal.
-  Future<void> cutSelection() async {
-    final text = selectedText;
-    if (text == null) return;
-    await Clipboard.setData(ClipboardData(text: text));
-    final selection = _selection;
-    _replaceRange(selection.start, selection.end, '');
-  }
-
-  /// Inserts the clipboard's text at the caret, replacing the selection —
-  /// unless [MarkdownSourceView.onPaste] takes the clipboard first.
-  Future<void> paste() async {
-    final hook = widget.onPaste;
-    if (hook != null && await hook()) return;
-    if (!mounted) return;
-    final data = await Clipboard.getData(Clipboard.kTextPlain);
-    final text = data?.text;
-    if (text == null || text.isEmpty) return;
-    final selection = _selection;
-    // The caret goes after what the note *stored*: a Windows clipboard's
-    // `\r\n` pasted into an LF note is shorter than the text that was copied.
-    _replaceRange(selection.start, selection.end, text);
-  }
-
   /// Replaces `[start, end)` with [text] because the *app* asked, not the
   /// platform: the history records it, the tokenizer follows it, and the
   /// platform is told where the caret went — [caret], or after what the note
@@ -1749,6 +1708,59 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     _suggest.refresh(typed: follow);
   }
 
+  /// What typing means beyond the characters typed: a bracket's pair, a
+  /// list carried on by Enter, Tab's indent, the surface's own deletions
+  /// and the clipboard.
+  late final SourceTyping _typing = SourceTyping(
+    buffer: () => widget.buffer,
+    selection: () => _selection,
+    live: () => widget.hideMarkers,
+    mounted: () => mounted,
+    indentWidth: () => widget.indentWidth,
+    blockOf: (line) => _styler?.blockOf(line),
+    tokensOf: (line) => _lineAt(line).tokens,
+    verbatimQuotes: _verbatimQuotes,
+    replace: _replaceRange,
+    // Past a closing character the writer typed over: the typing goes on
+    // in the undo step that wrote the pair (#1053).
+    stepTo: (offset) {
+      _applySelection(
+        _selection.collapsedTo(offset),
+        reveal: true,
+        endStep: false,
+      );
+      _history.stepOver(offset);
+    },
+    swallowedBreak: () => _suggest.takeSwallowedBreak(),
+    tableEnter: () => _tableKeys.enter(),
+    onPaste: () => widget.onPaste,
+  );
+
+  /// The selected text, or null when the selection is a caret.
+  String? get selectedText => _typing.selectedText;
+
+  /// Copies the selection to the platform's clipboard.
+  Future<void> copySelection() => _typing.copySelection();
+
+  /// Copies the selection and removes it, in one undo step with the removal.
+  Future<void> cutSelection() => _typing.cutSelection();
+
+  /// Inserts the clipboard's text at the caret, replacing the selection —
+  /// unless [MarkdownSourceView.onPaste] takes the clipboard first.
+  Future<void> paste() => _typing.paste();
+
+  /// Whether the caret is in code: a fenced or indented block, display
+  /// maths, an inline span — where a paste stays text.
+  bool get caretInCode => _typing.caretInCode;
+
+  /// Tab: the lines the selection touches moved in, or spaces at a plain
+  /// line's caret ([SourceTyping.indent]).
+  void indent() => _typing.indent();
+
+  /// Shift+Tab: the lines the selection touches moved out
+  /// ([SourceTyping.outdent]).
+  void outdent() => _typing.outdent();
+
   /// Deletes the selection, or what is before the caret: one character, or a
   /// word with [word].
   ///
@@ -1758,282 +1770,11 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// therefore this surface's. An IME's own delete key still arrives as a
   /// deletion delta.
   void deleteBackward({bool word = false}) =>
-      _delete(word ? CaretMotion.wordLeft : CaretMotion.characterLeft);
+      _typing.delete(word ? CaretMotion.wordLeft : CaretMotion.characterLeft);
 
   /// Deletes the selection, or what is after the caret.
   void deleteForward({bool word = false}) =>
-      _delete(word ? CaretMotion.wordRight : CaretMotion.characterRight);
-
-  void _delete(CaretMotion motion) {
-    final selection = _selection.clampTo(widget.buffer.length);
-    if (!selection.isCollapsed) {
-      _replaceRange(selection.start, selection.end, '');
-      return;
-    }
-    if (motion == CaretMotion.characterLeft &&
-        _applyBracket(_brackets.backspace(widget.buffer, selection.extent))) {
-      return;
-    }
-    final other = _withinCell(
-      selection.extent,
-      moveCaret(
-        selection,
-        motion,
-        buffer: widget.buffer,
-        verbatimQuotes: _verbatimQuotes,
-      ).extent,
-    );
-    if (other == selection.extent) return;
-    final start = math.min(other, selection.extent);
-    final end = math.max(other, selection.extent);
-    _replaceRange(start, end, '');
-  }
-
-  /// [other] kept inside the table cell [caret] is in, in `live`: a
-  /// deletion from a cell stops at its edges, as Obsidian's does, rather
-  /// than taking the pipes that make the table.
-  int _withinCell(int caret, int other) {
-    if (!widget.hideMarkers) return other;
-    final buffer = widget.buffer;
-    final line = buffer.lineOf(caret);
-    if (_styler?.blockOf(line)?.kind != BlockKind.table) return other;
-    final start = buffer.offsetOfLine(line);
-    final cell = LiveTables.cellAround(buffer.lineAt(line), caret - start);
-    if (cell == null) return other;
-    return other.clamp(start + cell.$1, start + cell.$2);
-  }
-
-  /// The brackets typed in pairs, and the closing ones they wrote.
-  final BracketPairs _brackets = BracketPairs();
-
-  /// [inserted] typed over `[start, end)` by the platform, outside a
-  /// composition: a bracket's pair written, a closing bracket stepped over,
-  /// or — the soft keyboard's delete, one character before the caret — an
-  /// empty pair taken whole. Answers whether it did one of them.
-  bool _typed(int start, int end, String inserted) {
-    if (inserted.isEmpty) {
-      final caret = _selection;
-      if (end - start != 1 || !caret.isCollapsed || caret.extent != end) {
-        return false;
-      }
-      return _applyBracket(_brackets.backspace(widget.buffer, end));
-    }
-    if (inserted.length != 1) return false;
-    return _applyBracket(
-      _brackets.typed(
-        widget.buffer,
-        start,
-        end,
-        inserted,
-        verbatimAt: _caretInCode,
-      ),
-    );
-  }
-
-  /// Whether a caret at [offset] stands in code or maths: on a line of a
-  /// fenced or indented code block or of a `$$` block, or inside an inline
-  /// code or maths span — between its delimiters, not before the opening one
-  /// nor after the closing one.
-  ///
-  /// Answered by the scan behind the colours — the line's block, O(log
-  /// blocks), and that one line's runs — so a keystroke never reads the note
-  /// again. The block answers for an empty line of a fence, which has no
-  /// runs; the runs answer while there is no block scan.
-  bool _caretInCode(int offset) {
-    final buffer = widget.buffer;
-    final line = buffer.lineOf(offset);
-    final block = _styler?.blockOf(line)?.kind;
-    if (block == BlockKind.fencedCode ||
-        block == BlockKind.indentedCode ||
-        block == BlockKind.math) {
-      return true;
-    }
-    final local = offset - buffer.offsetOfLine(line);
-    TokenKind? before;
-    TokenKind? at;
-    for (final token in _lineAt(line).tokens) {
-      final kind = token.kind;
-      if (kind == TokenKind.codeFence ||
-          kind == TokenKind.codeBlock ||
-          kind == TokenKind.mathBlock) {
-        return true;
-      }
-      if (kind != TokenKind.codeInline && kind != TokenKind.mathInline) {
-        continue;
-      }
-      if (local - 1 >= token.start && local - 1 < token.end) before = kind;
-      if (local >= token.start && local < token.end) at = kind;
-    }
-    // A span's delimiters are runs of its own kind: a caret with the span on
-    // both sides of it is inside, one with a delimiter on one side only is
-    // at its edge, outside.
-    return before != null && before == at;
-  }
-
-  /// Makes [edit], when there is one; answers whether there was.
-  bool _applyBracket(BracketEdit? edit) {
-    if (edit == null) return false;
-    final caret = SelectionModel(anchor: edit.anchor, extent: edit.extent);
-    if (edit.text.isEmpty && edit.start == edit.end) {
-      _stepOverCloser(edit.extent);
-    } else {
-      // A pair written at the caret: the characters after the caret are
-      // closers, which the typing inside the pair is one undo step with.
-      final closing = edit.start == edit.end
-          ? edit.start + edit.text.length - edit.extent
-          : 0;
-      _replaceRange(
-        edit.start,
-        edit.end,
-        edit.text,
-        caret: caret,
-        closing: closing,
-      );
-    }
-    return true;
-  }
-
-  /// Puts the caret at [offset], past a closing character the writer typed
-  /// over: the typing goes on in the undo step that wrote the pair (#1053).
-  void _stepOverCloser(int offset) {
-    _applySelection(
-      _selection.collapsedTo(offset),
-      reveal: true,
-      endStep: false,
-    );
-    _history.stepOver(offset);
-  }
-
-  /// A line break typed over `[start, end)`, when it means more than a line
-  /// break: inside a list item it carries the list on, and on an empty item it
-  /// ends the list (#142, the legacy editor's `applyNewLine`); inside a quote
-  /// or a callout it carries the quote on (#1049). Answers whether it did any
-  /// of them; otherwise the platform's line break is applied as typed.
-  ///
-  /// It hangs off the *line break arriving*, not off the Enter key, because
-  /// that is the one place every embedder meets: an IME commits the break as
-  /// text and the desktop embedders insert it themselves, so there is no key
-  /// to bind that all of them send.
-  bool _newline(int start, int end) {
-    // The line break a completed link's `Enter` sent after the key: already
-    // taken as the panel's `Enter`, so it is swallowed rather than written
-    // behind the link (#475).
-    if (_suggest.takeSwallowedBreak()) return true;
-    // In a table in `live`: the cell below, or out of it.
-    if (_tableKeys.enter()) return true;
-    if (start != end) return false;
-    final buffer = widget.buffer;
-    if (!_isPlainLine(buffer.lineOf(start))) return false;
-    // The rule is `enterEdit`'s: a list item behind its quote marks is
-    // carried on, a quote line starts the next with its marks, an empty
-    // nested item goes back a level (#1049).
-    final edit = enterEdit(buffer, start, indentWidth: widget.indentWidth);
-    if (edit == null) return false;
-    _replaceRange(
-      edit.start,
-      edit.end,
-      edit.text,
-      caret: edit.caret,
-      verbatim: edit.verbatim,
-    );
-    return true;
-  }
-
-  /// Whether line [index] is ordinary Markdown — not fenced code, display
-  /// maths or frontmatter, where a dash starts nothing. Answered by the
-  /// colours the view already keeps, so the two cannot disagree about what a
-  /// list is.
-  bool _isPlainLine(int index) {
-    if (index < 0 || index >= lineCount) return true;
-    for (final token in _lineAt(index).tokens) {
-      if (token.kind == TokenKind.codeFence ||
-          token.kind == TokenKind.codeBlock ||
-          token.kind == TokenKind.mathBlock ||
-          token.kind == TokenKind.frontmatter) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  /// Whether the caret is in code ([_inCodeAt]): a fenced or indented
-  /// block, display maths, an inline span — where a paste stays text.
-  bool get caretInCode {
-    final buffer = widget.buffer;
-    final at = _selection.extent.clamp(0, buffer.length);
-    final line = buffer.lineOf(at);
-    return _inCodeAt(line, at - buffer.offsetOfLine(line));
-  }
-
-  /// Whether the character at [local] of line [index] is code: a line of a
-  /// fenced or indented code block, a line of display maths, or an inline code
-  /// or maths span over the character.
-  ///
-  /// Answered by the colours the view already keeps, as [_isPlainLine] is, so
-  /// the two cannot disagree about what the note reads as code. A span is
-  /// drawn as several runs — its delimiters, its text — and they are disjoint,
-  /// so the character the offset stands on is the one to ask about: a caret
-  /// past a span's last delimiter is prose again, and a link typed there is
-  /// not the code's.
-  bool _inCodeAt(int index, int local) {
-    for (final token in _lineAt(index).tokens) {
-      final kind = token.kind;
-      if (kind == TokenKind.codeFence ||
-          kind == TokenKind.codeBlock ||
-          kind == TokenKind.mathBlock) {
-        return true;
-      }
-      final inline =
-          kind == TokenKind.codeInline || kind == TokenKind.mathInline;
-      if (inline && local >= token.start && local < token.end) return true;
-    }
-    return false;
-  }
-
-  /// Tab: moves the lines the selection touches in — a list item to where its
-  /// list says (under the item above it), any other line by `indentWidth`
-  /// spaces — or, on a plain line with a collapsed caret, inserts them at the
-  /// caret. The rule is the toolbar's indent (`indentLines`).
-  ///
-  /// The surface's own key: left to the app, Tab moves the focus to the next
-  /// widget and takes the keyboard away from the note.
-  void indent() {
-    final selection = _selection.clampTo(widget.buffer.length);
-    final line = widget.buffer.lineOf(selection.start);
-    if (selection.isCollapsed &&
-        ListRow(widget.buffer.lineAt(line)).head == null) {
-      final pad = ' ' * widget.indentWidth;
-      _replaceRange(selection.start, selection.end, pad);
-      return;
-    }
-    _indentLines(selection, outdent: false);
-  }
-
-  /// Shift+Tab: the inverse — a list item goes back to its parent's indent,
-  /// any other line out by up to `indentWidth` spaces, never taking anything
-  /// but spaces.
-  void outdent() {
-    _indentLines(_selection.clampTo(widget.buffer.length), outdent: true);
-  }
-
-  /// Indents or outdents the lines [selection] touches, as one edit
-  /// ([listIndentEdit]).
-  void _indentLines(SelectionModel selection, {required bool outdent}) {
-    final edit = listIndentEdit(
-      widget.buffer,
-      selection,
-      width: widget.indentWidth,
-      outdent: outdent,
-    );
-    if (edit == null) return;
-    _replaceRange(
-      edit.start,
-      edit.end,
-      edit.text,
-      caret: edit.caret,
-      verbatim: true,
-    );
-  }
+      _typing.delete(word ? CaretMotion.wordRight : CaretMotion.characterRight);
 
   /// PageUp and PageDown: the note moves a viewport, and the caret moves with
   /// it by as many rows, the way every editor pages.
@@ -2575,7 +2316,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     final clamped = next.clampTo(widget.buffer.length);
     // A caret the writer moved ends the typing step: what is typed next is
     // undone on its own. Not so a caret that steps over a closer the step
-    // wrote ([_stepOverCloser]).
+    // wrote (`SourceTyping`).
     if (endStep) _history.seal();
     final wasRange = !_selection.isCollapsed;
     _ownSelection = clamped;
@@ -3269,7 +3010,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     final spot = _spotOf();
     _caretSpot.value = spot;
     // A closing bracket a pair wrote is stepped over only on its own line.
-    _brackets.caretOnLine(line);
+    _typing.brackets.caretOnLine(line);
     _publishActive(spot);
     if (line < 0) {
       _caretRect.value = null;
