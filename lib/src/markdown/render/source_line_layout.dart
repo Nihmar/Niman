@@ -71,7 +71,7 @@ extension SourceLineLayout on SourceLine {
   /// A list item's text is set one column in per level, as the read view
   /// sets it, and a quote's a step in past each bar. The line's prefix —
   /// the written indent, the quote marks, the marker, the box and the
-  /// spaces between them — is hidden whole (`_span`), so the text lands on
+  /// spaces between them — is hidden whole (`lineSpan`), so the text lands on
   /// the column and a wrapped item's next row starts under it, where it
   /// hung out to the left by the prefix's width. Live nested by the spaces
   /// the note was written with before: a sublist sat a few pixels in. A
