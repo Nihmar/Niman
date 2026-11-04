@@ -55,9 +55,7 @@ import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/block_scanner.dart';
 import 'package:niman/src/markdown/buffer_block_anchors.dart';
-import 'package:niman/src/markdown/callout.dart';
 import 'package:niman/src/markdown/column_layout.dart';
-import 'package:niman/src/markdown/div_syntax.dart';
 import 'package:niman/src/markdown/edit/bracket_pairs.dart';
 import 'package:niman/src/markdown/edit/caret_motion.dart';
 import 'package:niman/src/markdown/edit/caret_spot.dart';
@@ -96,7 +94,6 @@ import 'package:niman/src/markdown/render/live_table_handles.dart';
 import 'package:niman/src/markdown/render/live_tables.dart';
 import 'package:niman/src/markdown/render/markdown_blocks_sliver.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
-import 'package:niman/src/markdown/render/math_text.dart';
 import 'package:niman/src/markdown/render/note_margins.dart';
 import 'package:niman/src/markdown/render/note_semantics.dart';
 import 'package:niman/src/markdown/render/scroll_anchor.dart';
@@ -106,6 +103,7 @@ import 'package:niman/src/markdown/render/sliver_segments.dart';
 import 'package:niman/src/markdown/render/source_context_menu.dart';
 import 'package:niman/src/markdown/render/source_folds.dart';
 import 'package:niman/src/markdown/render/source_line.dart';
+import 'package:niman/src/markdown/render/source_live_lines.dart';
 import 'package:niman/src/markdown/render/source_sections.dart';
 import 'package:niman/src/markdown/render/source_template_hint.dart';
 import 'package:niman/src/markdown/render/source_touch.dart';
@@ -392,37 +390,6 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// A quote's content read again as blocks, so `live` draws a quote's lines
   /// as the blocks they are inside it, as the read view does.
   final LiveQuoteContent _quotes = LiveQuoteContent();
-
-  /// What line [index] is in its callout, when [block] — its quote — is one
-  /// (#279): the callout's style, and on the title line where its mark is.
-  LiveCallout? _calloutLine(int index, Block? block) {
-    final callout = _quotes.calloutOf(block, widget.buffer);
-    if (callout == null) return null;
-    final title = index == block!.startLine;
-    var markStart = 0;
-    var markEnd = 0;
-    String? label;
-    if (title) {
-      final text = widget.buffer.lineAt(index);
-      final prefix = BlockParser.quotePrefixLength(
-        text,
-        block.quoteDepth,
-        BlockParser.itemPrefixLength(block, text),
-      );
-      final rest = text.substring(prefix);
-      markStart = prefix + rest.length - rest.trimLeft().length;
-      markEnd = prefix + Callout.markLength(rest);
-      // No title written: the type's, drawn after the icon.
-      if (text.substring(markEnd).trim().isEmpty) label = callout.title;
-    }
-    return (
-      style: calloutStyleOf(callout.type),
-      title: title,
-      markStart: markStart,
-      markEnd: markEnd,
-      label: label,
-    );
-  }
 
   /// The note's tables, laid out as the read view lays them out.
   final LiveTables _tables = LiveTables();
@@ -2370,55 +2337,16 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   }
 
   /// What line [index], in [block], draws as a fence line in `live`, or
-  /// null: a column's fence and a `columns` block's are bands, an unknown
-  /// div's are the text they are.
-  LiveFence? _fenceOf(int index, Block? block) {
-    if (!widget.hideMarkers || block == null) return null;
-    final DivRole role;
-    final LiveRun? run;
-    if (block.kind == BlockKind.div) {
-      role = block.divRole!;
-      if (!role.laysOut) return null;
-      run = LiveRun.holding(_liveRuns, index);
-    } else if (block.kind == BlockKind.quote) {
-      // A fence in a quote is no block of the note's: its block's content,
-      // read again, says what it does.
-      run = LiveRun.holding(_liveRuns, index);
-      final quoted = run?.fences?[index];
-      if (quoted == null) return null;
-      role = quoted;
-    } else {
-      return null;
-    }
-    if (run == null) return null;
-    final chip = switch (role) {
-      DivRole.opensColumns => 'columns',
-      DivRole.opensColumn => _columnChip(index),
-      _ => null,
-    };
-    final hosted = _folds.isHost(run.start);
-    final outer = index == run.start || (run.closed && index == run.end - 1);
-    return (
-      start: run.start,
-      end: run.end,
-      chip: chip,
-      chipLeft: role == DivRole.opensColumns,
-      hairline: role == DivRole.opensColumn,
-      numbered: hosted && outer,
-      numberUp: index != run.start,
-    );
-  }
-
-  /// The chip a column's opener on [line] draws: `column`, and its width.
-  String _columnChip(int line) {
-    final width = DivSyntax.opening(widget.buffer.lineAt(line).trimLeft())
-        ?.width;
-    if (width == null) return 'column';
-    final share = width == width.roundToDouble()
-        ? width.round().toString()
-        : width.toString();
-    return 'column · $share%';
-  }
+  /// null ([liveFenceOf]).
+  LiveFence? _fenceOf(int index, Block? block) => widget.hideMarkers
+      ? liveFenceOf(
+          index,
+          block,
+          widget.buffer,
+          runs: () => _liveRuns,
+          isHost: _folds.isHost,
+        )
+      : null;
 
   // --------------------------------------------------------------- folding
 
@@ -3654,84 +3582,16 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// reading them again (#1199), and then asks [handOver] for.
   Future<void> get readingLanded => _reading ?? Future<void>.value();
 
-  /// The display formula line [index] is part of, for `live` mode to draw
-  /// in its lines' place: its lines and its TeX. Null for any other line.
-  LiveFormula? _formulaOf(int index) {
-    final block = _styler?.blockOf(index);
-    if (block == null || block.kind != BlockKind.math) return null;
-    final tex = displayTexOf(BlockParser.blockText(block, widget.buffer));
-    if (tex.isEmpty) return null;
-    return (start: block.startLine, end: block.endLine, tex: tex);
-  }
-
-  /// The Mermaid block line [index] is part of, for `live` mode to draw in
-  /// its lines' place: its fence's lines, and on the first of them — the
-  /// one the diagram is drawn under — the source between them. Null for any
-  /// other line, and for a `mermaid` fence with no code. A closed `todo` fence
-  /// is one too where the note's tasks are at hand ([TodoBlockScope]): drawn
-  /// as the list it asks for, empty or not (#1152).
-  ///
-  /// Every line of the block asks, every build: the block's text is read
-  /// for its first line alone, where reading it for each made a diagram of
-  /// k lines cost k² of them. The others only ask whether there is code,
-  /// which the first line of it answers.
-  LiveDiagram? _diagramOf(int index) {
-    final block = _styler?.blockOf(index);
-    if (block == null || block.kind != BlockKind.fencedCode) return null;
-    final info = block.fenceInfo?.toLowerCase();
-    if (info == 'todo' && TodoBlockScope.of(context) != null) {
-      return _todoBlockOf(index, block);
-    }
-    if (info != 'mermaid') return null;
-    if (index != block.startLine) {
-      final lineAt = widget.buffer.lineAt;
-      if (!fenceHasCode(lineAt, block.startLine, block.endLine)) return null;
-      return (
-        start: block.startLine,
-        end: block.endLine,
-        source: null,
-        todo: false,
-      );
-    }
-    final lines = BlockParser.blockText(block, widget.buffer).split('\n');
-    // The code as the read view and the export read it.
-    final code = fenceBody(lines)?.code;
-    if (code == null || code.trim().isEmpty) return null;
-    return (
-      start: block.startLine,
-      end: block.endLine,
-      source: code,
-      todo: false,
-    );
-  }
-
-  /// The `todo` fence [block], line [index] of it, as [_diagramOf] answers for
-  /// a diagram: null for a fence the note has not closed, whose body would be
-  /// the rest of the note.
-  LiveDiagram? _todoBlockOf(int index, Block block) {
-    final lineAt = widget.buffer.lineAt;
-    final last = block.endLine - 1;
-    if (last <= block.startLine ||
-        fenceBody(<String>[lineAt(block.startLine), lineAt(last)])?.closed !=
-            true) {
-      return null;
-    }
-    if (index != block.startLine) {
-      return (
-        start: block.startLine,
-        end: block.endLine,
-        source: null,
-        todo: true,
-      );
-    }
-    final lines = BlockParser.blockText(block, widget.buffer).split('\n');
-    return (
-      start: block.startLine,
-      end: block.endLine,
-      source: fenceBody(lines)?.code ?? '',
-      todo: true,
-    );
-  }
+  /// The Mermaid block — or, where the note's tasks are at hand
+  /// ([TodoBlockScope], asked of this view), the `todo` fence — line
+  /// [index] is part of, for `live` to draw in its lines' place
+  /// ([liveDiagramOf]).
+  LiveDiagram? _diagramOf(int index) => liveDiagramOf(
+    index,
+    _styler?.blockOf(index),
+    widget.buffer,
+    drawsTodo: () => TodoBlockScope.of(context) != null,
+  );
 
   /// Moves the colours along [edit], already made to the buffer.
   void _styleEdited(SourceEdit edit) {
@@ -4474,7 +4334,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
               block,
               index,
               quoted: quoted,
-              callout: _calloutLine(index, block),
+              callout: liveCalloutLine(index, block, widget.buffer, _quotes),
             )
           : LineShape.none,
       pictures: widget.hideMarkers && widget.embedResolver != null
@@ -4482,7 +4342,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
           : const <LinePicture>[],
       embedResolver: widget.embedResolver,
       formula: widget.hideMarkers && widget.mathCache != null
-          ? _formulaOf(index)
+          ? liveFormulaOf(_styler?.blockOf(index), widget.buffer)
           : null,
       mathCache: widget.mathCache,
       diagram: widget.hideMarkers ? _diagramOf(index) : null,
