@@ -4,13 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/sync/sync_service.dart';
 import 'package:niman/src/ui/floating_window.dart';
-import 'package:niman/src/ui/history/history_labels.dart';
 import 'package:niman/src/ui/pointer_density.dart';
-import 'package:niman/src/ui/settings_rows.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/sync/sync_flow.dart';
 import 'package:niman/src/ui/sync/sync_labels.dart';
-import 'package:niman/src/ui/sync/sync_overview_card.dart';
+import 'package:niman/src/ui/sync/sync_overview.dart';
 import 'package:niman/src/ui/sync/sync_server_form.dart';
 import 'package:niman/src/ui/sync/sync_settings_dialogs.dart';
 import 'package:niman/src/ui/sync/sync_test_result_card.dart';
@@ -291,39 +289,6 @@ final class _SyncSettingsScreenState extends State<SyncSettingsScreen> {
     if (mounted) setState(() => _trustedFingerprint = null);
   }
 
-  Future<void> _setTriggers({
-    bool? autoSync,
-    int? intervalSeconds,
-    bool? wifiOnly,
-  }) async {
-    try {
-      await _sync.setTriggers(
-        autoSync: autoSync,
-        intervalSeconds: intervalSeconds,
-        wifiOnly: wifiOnly,
-      );
-    } on Object catch (e) {
-      _log.error('settings: trigger options not saved: $e');
-    }
-  }
-
-  Future<void> _chooseInterval() async {
-    final destination = _sync.status.destination;
-    if (destination == null) return;
-    final seconds = await showSettingsChoice<int>(
-      context,
-      dialogKey: const Key('sync-interval-dialog'),
-      title: AppStrings.syncIntervalTitle,
-      subtitle: AppStrings.syncIntervalDialogBody,
-      current: destination.intervalSeconds,
-      options: [
-        for (final choice in syncIntervalChoices)
-          SettingsOption(choice, syncIntervalLabel(choice)),
-      ],
-    );
-    if (seconds != null) await _setTriggers(intervalSeconds: seconds);
-  }
-
   Future<void> _disconnect() async {
     if (!await confirmSyncDisconnect(context)) return;
     await _sync.disconnect();
@@ -338,7 +303,17 @@ final class _SyncSettingsScreenState extends State<SyncSettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final body = _formShown ? _form() : _overview(theme);
+    final body = _formShown
+        ? _form()
+        : SyncOverview(
+            sync: _sync,
+            testing: _testing,
+            onSyncNow: _syncNow,
+            onEditServer: _startEditing,
+            onRetest: _retest,
+            onForgetCertificate: _forgetCertificate,
+            onDisconnect: _disconnect,
+          );
     if (widget.embedded) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -398,87 +373,6 @@ final class _SyncSettingsScreenState extends State<SyncSettingsScreen> {
               current: _tested == _fields,
               onTrust: _testing ? null : () => _trustCertificate(result),
             ),
-    );
-  }
-
-  Widget _overview(ThemeData theme) {
-    final status = _sync.status;
-    final destination = status.destination!;
-    final now = DateTime.now();
-    final caps = status.capabilities;
-    return ListView(
-      padding: const EdgeInsets.only(bottom: 24),
-      children: [
-        SyncOverviewCard(status: status, now: now, onSyncNow: _syncNow),
-        SettingsSection(AppStrings.syncSectionWhen),
-        SettingsSwitchRow(
-          key: const Key('sync-auto'),
-          title: AppStrings.syncAutoTitle,
-          description: AppStrings.syncAutoSubtitle,
-          value: destination.autoSync,
-          onChanged: (on) => _setTriggers(autoSync: on),
-        ),
-        SettingsValueRow(
-          key: const Key('sync-interval'),
-          title: AppStrings.syncIntervalTitle,
-          subtitle: AppStrings.syncIntervalSubtitle,
-          value: syncIntervalLabel(destination.intervalSeconds),
-          enabled: destination.autoSync,
-          onTap: _chooseInterval,
-        ),
-        if (_sync.offersWifiOnly)
-          SettingsSwitchRow(
-            key: const Key('sync-wifi-only'),
-            title: AppStrings.syncWifiOnlyTitle,
-            description: AppStrings.syncWifiOnlySubtitle,
-            value: destination.wifiOnly,
-            onChanged: destination.autoSync
-                ? (on) => _setTriggers(wifiOnly: on)
-                : null,
-          ),
-        SettingsSection(AppStrings.syncSectionServer),
-        SettingsValueRow(
-          key: const Key('sync-edit-server'),
-          title: AppStrings.syncServerRow,
-          subtitle: [
-            if (destination.username.isNotEmpty) destination.username,
-            if (caps != null && syncIsCompatibleMode(caps))
-              AppStrings.syncModeCompatible
-            else if (caps != null)
-              AppStrings.syncModeFull,
-          ].join(' · '),
-          onTap: status.running ? () {} : _startEditing,
-        ),
-        SettingsActionRow(
-          key: const Key('sync-retest'),
-          enabled: !status.running,
-          busy: _testing,
-          title: AppStrings.syncRetestTitle,
-          description: caps == null
-              ? null
-              : AppStrings.syncProbedAgo(historyWhen(caps.probedAt, now)),
-          onTap: _retest,
-        ),
-        // The one certificate this destination may present, and the way
-        // back out of trusting it (#454).
-        if (destination.trustedCertFingerprint case final fingerprint?)
-          SettingsActionRow(
-            key: const Key('sync-forget-certificate'),
-            enabled: !status.running,
-            title: AppStrings.syncCertTrustedTitle,
-            description: AppStrings.syncCertTrustedSubtitle(fingerprint),
-            onTap: _forgetCertificate,
-          ),
-        const Divider(height: 24),
-        SettingsActionRow(
-          key: const Key('sync-disconnect'),
-          enabled: !status.running,
-          destructive: true,
-          title: AppStrings.syncDisconnectTitle,
-          description: AppStrings.syncDisconnectSubtitle,
-          onTap: _disconnect,
-        ),
-      ],
     );
   }
 }
