@@ -164,6 +164,7 @@ import 'package:niman/src/ui/shell_tree_open.dart';
 import 'package:niman/src/ui/shell_wide_body.dart';
 import 'package:niman/src/ui/shell_windows.dart';
 import 'package:niman/src/ui/shell_workspace.dart';
+import 'package:niman/src/ui/shell_workspace_follow.dart';
 import 'package:niman/src/ui/shell_zen.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/tab_body_stack.dart';
@@ -1417,74 +1418,20 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     Listenable.merge([_workspace.controller, widget.unsavedTracker]),
   );
 
-  /// [_workspaceShape] when [_onWorkspaceChanged] last rebuilt.
-  String? _lastShape;
-
-  /// What of [w] the shell draws from, as one comparable value.
-  static String _workspaceShape(Workspace w) => [
-    w.dockOpen,
-    w.dockPane.name,
-    w.focused,
-    w.axis.name,
-    w.isSplit,
-    w.fraction,
-    for (final pane in w.panes) ...[
-      pane.active,
-      for (final tab in pane.tabs)
-        [
-          tab.path,
-          tab.memento.editorKind,
-          tab.memento.preview,
-          tab.missing,
-        ].join('|'),
-    ],
-  ].join('\n');
-
-  /// The showing tab when [_onWorkspaceChanged] last looked.
-  String? _lastShown;
-
-  /// The pane that draws the study beside the deck and the note it shows,
-  /// when [_onWorkspaceChanged] last looked (#533).
-  ({int pane, String? path})? _lastReviewPane;
-
-  /// The workspace moved (#23): a tab shown, closed, renamed. On a wide
-  /// window the tree follows the showing tab, and a newly shown note is
-  /// asked its kind afresh.
-  void _onWorkspaceChanged() {
-    if (!mounted) return;
-    final shown = _workspace.value.activePath;
-    final changed = shown != _lastShown;
-    _lastShown = shown;
-    // A note shown in the pane the compare tab covers takes the pane back
-    // (#906); the same for the study beside the deck (#533).
-    final compareCovered = _compare.coveredByWorkspace();
-    final panes = _workspace.value.panes;
-    final reviewPane = _reviewPaneShown;
-    final reviewPaneNow = (
-      pane: reviewPane,
-      path: reviewPane < panes.length
-          ? panes[reviewPane].activeTab?.path
-          : null,
-    );
-    if (_reviewTab.shows &&
-        _lastReviewPane?.pane == reviewPane &&
-        _lastReviewPane?.path != reviewPaneNow.path) {
-      _reviewTab.show(on: false);
-    }
-    _lastReviewPane = reviewPaneNow;
-    // A caret or a scroll handed in changes nothing drawn here: only the
-    // tabs, which listen for themselves. The shell rebuilds for what it
-    // draws — tabs, panes, and how each tab shows its note.
-    final shape = _workspaceShape(_workspace.value);
-    if (!changed && !compareCovered && shape == _lastShape) return;
-    _lastShape = shape;
-    setState(() {
-      if (compareCovered) _compare.hide();
-      if (!_wide) return;
-      if (changed) _kind.reset();
-      _selection.follow(shown);
-    });
-  }
+  /// The workspace moved (#23): the selection follows the showing tab, a
+  /// page covering the pane gives way (issue #1256 moved it into
+  /// [ShellWorkspaceFollow]).
+  late final ShellWorkspaceFollow _workspaceFollow = ShellWorkspaceFollow(
+    workspace: _workspace,
+    selection: _selection,
+    compare: _compare,
+    reviewTab: _reviewTab,
+    reviewPane: () => _reviewPaneShown,
+    kind: _kind,
+    wide: () => _wide,
+    update: setState,
+    mounted: () => mounted,
+  );
 
   /// Shows the tab at [index], and the Files tab it lives in. A sidebar
   /// view (the search, the tags tree in it) is left alone on a wide
@@ -1672,7 +1619,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     _homeWidgets
       ..start()
       ..pushStudy();
-    _workspace.controller.addListener(_onWorkspaceChanged);
+    _workspaceFollow.attach();
     _workspace.unsavedPaths = _unsavedRelPaths;
     widget.controller.features.addListener(_tabs.featuresChanged);
     AppKeyMap.current.addListener(_onKeyMapChanged);
@@ -1791,7 +1738,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     _searchRequests.dispose();
     _searchCommands.dispose();
     _treeFocus.dispose();
-    _workspace.controller.removeListener(_onWorkspaceChanged);
+    _workspaceFollow.detach();
     widget.controller.features.removeListener(_tabs.featuresChanged);
     // The study is the library's: the tab is app-wide, and a run left in it
     // would show in the next library's panes and grade into this one's
