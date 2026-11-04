@@ -11,6 +11,7 @@ import 'package:niman/src/ui/sync/sync_labels.dart';
 import 'package:niman/src/ui/sync/sync_overview.dart';
 import 'package:niman/src/ui/sync/sync_server_form.dart';
 import 'package:niman/src/ui/sync/sync_settings_dialogs.dart';
+import 'package:niman/src/ui/sync/sync_settings_frame.dart';
 import 'package:niman/src/ui/sync/sync_test_result_card.dart';
 import 'package:niman/src/ui/unsaved_notes.dart';
 
@@ -301,9 +302,10 @@ final class _SyncSettingsScreenState extends State<SyncSettingsScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final body = _formShown
+  Widget build(BuildContext context) => SyncSettingsFrame(
+    libraryName: widget.libraryName,
+    embedded: widget.embedded,
+    body: _formShown
         ? _form()
         : SyncOverview(
             sync: _sync,
@@ -313,42 +315,8 @@ final class _SyncSettingsScreenState extends State<SyncSettingsScreen> {
             onRetest: _retest,
             onForgetCertificate: _forgetCertificate,
             onDisconnect: _disconnect,
-          );
-    if (widget.embedded) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-            child: Text(
-              AppStrings.syncScreenSubtitle(widget.libraryName),
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
           ),
-          Expanded(child: body),
-        ],
-      );
-    }
-    return Scaffold(
-      appBar: AppBar(
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(AppStrings.syncWebDavTitle),
-            Text(
-              AppStrings.syncScreenSubtitle(widget.libraryName),
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ],
-        ),
-      ),
-      body: body,
-    );
-  }
+  );
 
   Widget _form() {
     final result = _result;
