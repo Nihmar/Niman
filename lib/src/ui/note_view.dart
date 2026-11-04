@@ -54,7 +54,6 @@ import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/markdown/source_edit.dart';
 import 'package:niman/src/markdown/surface.dart';
 import 'package:niman/src/markdown/surface_controller.dart';
-import 'package:niman/src/markdown/task_cascade.dart';
 import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/templates/check_state.dart';
@@ -76,6 +75,7 @@ import 'package:niman/src/ui/note_links.dart';
 import 'package:niman/src/ui/note_load_error.dart';
 import 'package:niman/src/ui/note_paste.dart';
 import 'package:niman/src/ui/note_read_snapshot.dart';
+import 'package:niman/src/ui/note_read_tasks.dart';
 import 'package:niman/src/ui/note_save_pipeline.dart';
 import 'package:niman/src/ui/note_stats.dart';
 import 'package:niman/src/ui/note_tags.dart';
@@ -2024,7 +2024,7 @@ final class _NoteViewState extends State<NoteView>
         column: widget.noteColumn,
         knownScan: _editorScanOf,
         sharedScan: _editorScanLater,
-        onToggleTask: _toggleTaskFromRead,
+        onToggleTask: _readTasks.toggle,
       ),
     ),
   );
@@ -2157,57 +2157,17 @@ final class _NoteViewState extends State<NoteView>
     _stats.refresh();
   }
 
-  /// Ticks or unticks the task item on [line] of the note the read pane is
-  /// showing: an edit to the note itself, through the editor's own door —
-  /// one undo step, saved like any other — and the pane shown the note as
-  /// it now is at once, rather than when the preview's debounce comes round.
-  ///
-  /// Only when the pane shows the editor's note as it is: its lines are a
-  /// snapshot, and a line number of an older one is not this note's.
-  void _toggleTaskFromRead(int line) {
-    final surface = _surface;
-    final from = surface == null ? null : _readSnapshot.current(surface.buffer);
-    if (surface == null || from == null || line >= from.lineCount) {
-      return;
-    }
-    final text = from.lineAt(line);
-    final box = taskBoxOffset(text);
-    if (box == null) return;
-    final ticked = text.codeUnitAt(box) != 0x20;
-    if (!ticked && widget.cascadeChecklist) {
-      // The pane on screen has the note scanned; with neither scan in
-      // hand the sweep waits and the one box still toggles.
-      final blocks =
-          _sourceViewKey.currentState?.blocks ??
-          _readViewKey.currentState?.blocks;
-      final edit = blocks == null
-          ? null
-          : checklistTickEdit(
-              buffer: from,
-              blocks: blocks,
-              line: line,
-              ticked: true,
-            );
-      if (edit != null) {
-        surface.replaceRange(
-          edit.start,
-          edit.end,
-          edit.text,
-          caret: surface.selection,
-        );
-        _refreshPreview();
-        return;
-      }
-    }
-    final at = from.offsetOfLine(line) + box;
-    surface.replaceRange(
-      at,
-      at + 1,
-      ticked ? ' ' : 'x',
-      caret: surface.selection,
-    );
-    _refreshPreview();
-  }
+  /// The read pane's task items, ticked through the editor's own door.
+  late final NoteReadTasks _readTasks = NoteReadTasks(
+    surface: () => _surface,
+    snapshot: _readSnapshot,
+    // The pane on screen has the note scanned.
+    blocks: () =>
+        _sourceViewKey.currentState?.blocks ??
+        _readViewKey.currentState?.blocks,
+    cascade: () => widget.cascadeChecklist,
+    onEdited: _refreshPreview,
+  );
 
   /// The blocks and definitions of [buffer] as the source pane already holds
   /// them (see [NoteReadSnapshot.editorScanOf]), or null.
