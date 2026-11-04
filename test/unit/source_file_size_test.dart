@@ -26,7 +26,7 @@ const int _slack = 50;
 const Map<String, int> _oversized = {
   'ui/shell.dart': 2754,
   'markdown/render/source_view.dart': 1442,
-  'ui/note_view.dart': 1324,
+  'ui/note_view.dart': 1221,
   'library/library_state.dart': 1036,
 };
 

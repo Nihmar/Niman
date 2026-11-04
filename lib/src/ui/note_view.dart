@@ -22,10 +22,8 @@ import 'package:niman/src/editor/task_items.dart';
 import 'package:niman/src/editor/task_items_edit.dart';
 import 'package:niman/src/editor/toolbar_item.dart';
 import 'package:niman/src/editor/toolbar_layout.dart';
-import 'package:niman/src/editor/word_count_index.dart';
 import 'package:niman/src/frontmatter/edit.dart';
 import 'package:niman/src/frontmatter/note_kind.dart';
-import 'package:niman/src/frontmatter/parser.dart';
 import 'package:niman/src/library/attachment_store.dart';
 import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/links/library_links.dart';
@@ -34,8 +32,6 @@ import 'package:niman/src/links/parser.dart';
 import 'package:niman/src/links/suggester.dart';
 import 'package:niman/src/markdown/background_scan.dart';
 import 'package:niman/src/markdown/edit/source_find.dart';
-import 'package:niman/src/markdown/note_load.dart';
-import 'package:niman/src/markdown/note_read_failure.dart';
 import 'package:niman/src/markdown/read_parser.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
@@ -70,6 +66,7 @@ import 'package:niman/src/ui/note_place.dart';
 import 'package:niman/src/ui/note_read_snapshot.dart';
 import 'package:niman/src/ui/note_read_tasks.dart';
 import 'package:niman/src/ui/note_save_pipeline.dart';
+import 'package:niman/src/ui/note_session.dart';
 import 'package:niman/src/ui/note_stats.dart';
 import 'package:niman/src/ui/note_tags.dart';
 import 'package:niman/src/ui/note_task_items.dart';
@@ -466,39 +463,42 @@ final class _NoteViewState extends State<NoteView>
   /// and a focus asked for before that goes nowhere.
   bool _caretPending = false;
 
-  /// The unified source pane's find & replace, over [_surface]'s buffer.
+  /// The unified source pane's find & replace, over the note's surface.
   late final SourceFindController _sourceFind = SourceFindController(
-    surface: () => _surface,
+    surface: () => _session.surface,
     onClose: _focus.requestFocus,
   );
 
-  bool _loading = true;
-  bool _ready = false;
+  /// The open note's lifecycle (#1257): its load, its reload, loading /
+  /// ready / failed, its kind and its surface. The view follows what it
+  /// says changed ([_onSession]).
+  late final NoteSession _session = NoteSession(
+    disk: _disk,
+    saves: _saves,
+    text: _text,
+    newSurface: (buffer, caret) =>
+        MarkdownSurfaceController(buffer, caret: caret)
+          ..onChanged = (edit) => _noteChanged(
+            caretLine: _surfaceCaretLine ?? _caretLine,
+            edit: edit,
+          ),
+    takeOver: (path) => widget.unsavedTracker?.takeOver(path),
+    alive: () => mounted,
+  )..addListener(_onSession);
 
-  /// Which load is the current one (#1059): counted up as each starts, and
-  /// compared after every await, so a load the reader has moved on from —
-  /// another note, the same note asked for again — changes nothing when it
-  /// ends, whether it ends well or not.
-  int _loadGeneration = 0;
-
-  /// Why the note could not be opened, in the user's words; the raw error
-  /// goes to the log only (issue #156).
-  String? _error;
-
-  /// The failed file is not text at all: the error pane offers it to the
-  /// OS instead.
-  bool _notText = false;
+  /// When the load in flight started: what the log says it cost.
+  final Stopwatch _loadClock = Stopwatch();
 
   /// Where the note is read: the memento it hands in as it is left, and the
   /// place it is put back at (#23).
   late final NotePlace _place = NotePlace(
     path: () => widget.path,
-    surface: () => _surface,
+    surface: () => _session.surface,
     readView: () => _readViewKey.currentState,
     sourceView: () => _sourceViewKey.currentState,
     reading: () => _previewIn(widget),
     active: () => widget.active,
-    ready: () => _ready,
+    ready: () => _session.ready,
     mounted: () => mounted,
     receiver: () => widget.onMemento,
     wysiwyg: () => widget.showWysiwyg,
@@ -509,8 +509,8 @@ final class _NoteViewState extends State<NoteView>
   /// refreshed a pause after the last edit; the view repaints on each
   /// refresh.
   late final NoteStatsController _stats = NoteStatsController(
-    surface: () => _surface,
-    loading: () => _loading,
+    surface: () => _session.surface,
+    loading: () => _session.loading,
     sourceView: () => _sourceViewKey.currentState,
     readView: () => _readViewKey.currentState,
   );
@@ -526,7 +526,7 @@ final class _NoteViewState extends State<NoteView>
   /// the library's index moves; the editor and the read view draw the answer.
   late final DeadLinkWatcher _deadLinks = openNoteDeadLinks(
     source: () => widget.linkSource,
-    buffer: () => _loading ? null : _surface?.buffer,
+    buffer: () => _session.loading ? null : _session.surface?.buffer,
     kept: () => _sourceViewKey.currentState?.references(),
     notePath: () => _pathInLibrary,
     delay: () => _stats.settleDelay,
@@ -600,8 +600,8 @@ final class _NoteViewState extends State<NoteView>
 
   @override
   bool get canInsert {
-    if (!_ready) return false;
-    final kind = NoteKinds.forType(_noteKind, _features);
+    if (!_session.ready) return false;
+    final kind = NoteKinds.forType(_session.kind, _features);
     return !(widget.kindMode && kind != null);
   }
 
@@ -645,7 +645,7 @@ final class _NoteViewState extends State<NoteView>
   /// What goes into the note from outside the editor's own keys: a paste,
   /// the links of attached files, and what the selection holds.
   late final NoteInserts _inserts = NoteInserts(
-    surface: () => _surface,
+    surface: () => _session.surface,
     canInsert: () => canInsert,
     mounted: () => mounted,
     focus: _focus.requestFocus,
@@ -713,7 +713,7 @@ final class _NoteViewState extends State<NoteView>
 
   /// The checkbox items Move to tasks (#1152) reads and takes out.
   late final NoteTaskItems _taskItems = NoteTaskItems(
-    surface: () => _surface,
+    surface: () => _session.surface,
     sourceView: () => _sourceViewKey.currentState,
     canInsert: () => canInsert,
     focus: _refocus,
@@ -745,7 +745,7 @@ final class _NoteViewState extends State<NoteView>
   @override
   void takeFocus() {
     if (!mounted) return;
-    if (!_ready) {
+    if (!_session.ready) {
       // The load puts the caret in once the editor is up.
       _caretPending = true;
       return;
@@ -760,7 +760,7 @@ final class _NoteViewState extends State<NoteView>
   /// The note's editing commands: the toolbar's, the format keys', the
   /// context menu's, the Tools sheet's and the spelling review's.
   late final NoteEditCommands _commands = NoteEditCommands(
-    surface: () => _surface,
+    surface: () => _session.surface,
     focus: _refocus,
     context: () => context,
     mounted: () => mounted,
@@ -829,7 +829,7 @@ final class _NoteViewState extends State<NoteView>
   /// in whichever pane is on stage, and the field edits it makes.
   late final NoteFrontmatterPanel _frontmatter = NoteFrontmatterPanel(
     enabled: () => widget.frontmatterPanel,
-    surface: () => _surface,
+    surface: () => _session.surface,
     reading: () => _previewIn(widget),
     typewriter: () => widget.typewriter,
     caretLine: () => _surfaceCaretLine,
@@ -869,58 +869,16 @@ final class _NoteViewState extends State<NoteView>
   /// their text from.
   late final NoteTextCache _text = NoteTextCache(() => _unifiedSurfaceBuffer);
 
-  /// The note on the unified source surface: its buffer, its undo history and
-  /// the door every command comes in through (the toolbar, an image, a
-  /// spelling fix, a reload). One per open note, so the history survives the
-  /// pane being rebuilt.
-  MarkdownSurfaceController? _surface;
-
   /// The buffer the unified source surface edits. Its own, not the read pane's:
   /// the read pane's is rebuilt from the preview text on a debounce, and a pane
   /// cannot edit an object that another part of the shell replaces underneath
   /// it.
-  SourceBuffer? get _unifiedSurfaceBuffer => _surface?.buffer;
-
-  /// A controller over [text], reporting its edits the way the surface does:
-  /// over [ready]'s buffer when the note came made ready, which the UI
-  /// isolate then does not split.
-  MarkdownSurfaceController _surfaceFor(
-    String text, {
-    int caret = 0,
-    LoadedNote? ready,
-  }) {
-    final surface =
-        MarkdownSurfaceController(
-            ready?.buffer ?? SourceBuffer.fromText(text),
-            caret: caret,
-          )
-          ..onChanged = (edit) => _noteChanged(
-            caretLine: _surfaceCaretLine ?? _caretLine,
-            edit: edit,
-          );
-    _adoptWords(surface);
-    return surface;
-  }
-
-  /// Gives [surface] its word count, here for a note small enough to walk
-  /// and in the background for one that is not (see [WordCount]).
-  ///
-  /// It has to be there before the first edit: the count follows the lines
-  /// an edit touched, and one that is not built yet has no lines to follow.
-  void _adoptWords(MarkdownSurfaceController surface) {
-    if (surface.words.isCounted) return;
-    final buffer = surface.buffer;
-    if (buffer.length > NoteStatsController.syncWorkLimit) {
-      unawaited(surface.buildWords());
-      return;
-    }
-    surface.words.adopt(buffer);
-  }
+  SourceBuffer? get _unifiedSurfaceBuffer => _session.surface?.buffer;
 
   /// Keeps the note where it was read when it moves between `source`,
   /// `live` and the read view ([NotePlace.keepAcrossModes]).
   void _keepPlaceAcrossModes(NoteView oldWidget) {
-    if (!_ready) return;
+    if (!_session.ready) return;
     if (oldWidget.path != widget.path) return;
     _place.keepAcrossModes(
       wasRead: _previewIn(oldWidget),
@@ -935,10 +893,6 @@ final class _NoteViewState extends State<NoteView>
       ? MarkdownSurfaceMode.live
       : MarkdownSurfaceMode.source;
 
-  /// Whether the note on screen was edited since it was opened: what makes
-  /// its closing worth reporting ([NoteView.onEditedNoteClosed]).
-  bool _edited = false;
-
   /// The app-level unsaved registry this editor reports into (T-PP-11),
   /// or null when the owner does not track.
   late final UnsavedTracker? _unsaved;
@@ -950,7 +904,7 @@ final class _NoteViewState extends State<NoteView>
   /// revision pair live, so it cannot hold stale text.
   late final UnsavedNoteAdapter _unsavedNote = UnsavedNoteAdapter(
     notePath: () => widget.path,
-    loading: () => _loading,
+    loading: () => _session.loading,
     revision: () => _saves.revision,
     lastSavedRevision: () => _saves.lastSavedRevision,
     saveForClose: _saves.saveForClose,
@@ -962,7 +916,7 @@ final class _NoteViewState extends State<NoteView>
   /// edit and the saves themselves.
   late final NoteSavePipeline _saves = NoteSavePipeline(
     notePath: () => widget.path,
-    ready: () => _ready,
+    ready: () => _session.ready,
     text: () => _text.text,
     buffer: () => _unifiedSurfaceBuffer,
     references: () => _sourceViewKey.currentState?.references(),
@@ -1004,10 +958,6 @@ final class _NoteViewState extends State<NoteView>
   void _featuresChanged() {
     if (mounted) setState(() {});
   }
-
-  /// The loaded note's kind (the frontmatter `type` value, null = plain
-  /// note); null again while a load is in flight.
-  String? _noteKind;
 
   /// The kind GUIs' window onto the note (T-TK-02).
   late final NoteKindHostAdapter _kindHost;
@@ -1088,7 +1038,7 @@ final class _NoteViewState extends State<NoteView>
       if (widget.showPreview && _readSnapshot.stale) {
         _readSnapshot
           ..stale = false
-          ..show(_surface?.buffer);
+          ..show(_session.surface?.buffer);
       }
       if (widget.showPreview) {
         // What the flip costs to reach the pixels, and what the frames after
@@ -1107,9 +1057,9 @@ final class _NoteViewState extends State<NoteView>
     if (!oldWidget.active && widget.active && _place.landing) {
       _place.scheduleLanding();
     }
-    if (!oldWidget.active && widget.active && _ready) {
+    if (!oldWidget.active && widget.active && _session.ready) {
       // Back on screen: the shell asks the showing note what kind it is.
-      widget.onNoteKindChanged?.call(_noteKind);
+      widget.onNoteKindChanged?.call(_session.kind);
       _dismissKeyboardForPreview();
     }
     if (moved) {
@@ -1161,9 +1111,7 @@ final class _NoteViewState extends State<NoteView>
   bool _followsMove(NoteView oldWidget) =>
       oldWidget.path != widget.path &&
       widget.movedFrom == oldWidget.path &&
-      _ready &&
-      !_loading &&
-      _surface != null;
+      _session.holdsNote;
 
   /// The note's file is at a new path and its editor stays as it is: the
   /// text, the undo, the place. What was keyed on the old path starts over.
@@ -1172,7 +1120,7 @@ final class _NoteViewState extends State<NoteView>
     // The edits from here on are saved under the new name, as a new
     // session. The disk stamp is the old file's, which the move kept, so a
     // rewrite of this note's links by the move still reads as a change.
-    _saves.newSession();
+    _session.moved(widget.path);
     _unsaved?.noteChanged();
     // Its links resolve from where it is now.
     _deadLinks
@@ -1194,6 +1142,9 @@ final class _NoteViewState extends State<NoteView>
     _previewTimer?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     _closed(widget.path, _saves.close());
+    _session
+      ..removeListener(_onSession)
+      ..dispose();
     _unsaved?.unregister(_unsavedNote);
     widget.spellCheck?.removeListener(_onSpellCheckChanged);
     _sourceFind.dispose();
@@ -1219,8 +1170,7 @@ final class _NoteViewState extends State<NoteView>
   /// disk, [NoteView.onEditedNoteClosed] hears of it, if it was edited
   /// while it was open.
   void _closed(String path, Future<void> saved) {
-    final edited = _edited;
-    _edited = false;
+    final edited = _session.takeEdited();
     final report = widget.onEditedNoteClosed;
     if (!edited || report == null) return;
     unawaited(
@@ -1246,238 +1196,125 @@ final class _NoteViewState extends State<NoteView>
     _place.back();
   }
 
-  Future<void> _load() async {
-    final path = widget.path;
-    final generation = ++_loadGeneration;
-    // The buffer stops being any note's text here: the outgoing note's
-    // save already left with its own path and text (didUpdateWidget), and
-    // the incoming one is not read yet. Nothing in it is owed to the disk,
-    // so the close guard has nothing to wait for (#156).
-    _saves.markClean();
-    // The links of the note that went are not this one's.
-    _deadLinks.clear();
-    _preview.close();
-    // Nor is its text, which goes now, before the next note is read (#1202):
-    // kept until the new one landed, a switch between two long notes held
-    // both at its peak — the buffer, its undo, the joined text and the
-    // preview's copy. The panes holding them unmount with the load.
-    _surface = null;
-    _text.text = '';
-    _readSnapshot.clear();
-    setState(() {
-      _loading = true;
-      _ready = false;
-      _error = null;
-      _notText = false;
-      _noteKind = null;
-    });
-    final clock = Stopwatch()..start();
-    try {
-      final opened = await _disk.open(path);
-      final content = opened.content;
-      // The note made ready off the UI isolate — its buffer with its text —
-      // for the unified surface, which is what it draws.
-      final ready = opened.ready;
-      if (!mounted || generation != _loadGeneration) return;
-      // The buffer uses LF: normalize line endings on load.
-      final onDisk = ready?.text ?? normalizedLineEndings(content);
-      // Text the app still owes this note's file — an earlier write of it the
-      // disk would not take — is the note's text, ahead of the file's
-      // (#1054). It is taken only here, once this load is the one that
-      // lands, so a load the reader moved on from does not carry it off. It
-      // is edits of this session the disk does not have: the buffer starts
-      // from it and is unsaved, so its own pipeline writes it.
-      final held = widget.unsavedTracker?.takeOver(path);
-      final text = held ?? onDisk;
-      final restored = held != null && held != onDisk;
-      // The note kind (T-TK-02): the frontmatter `type` decides the body
-      // (kind GUI or plain editor); detection scans the leading block
-      // only, never the whole text.
-      _noteKind = frontmatterTypeOf(text);
-      // What the bar found was in the note that went.
-      _sourceFind.close(refocus: false);
-      _surface = _surfaceFor(
-        text,
-        caret: (widget.initialCaretOffset ?? 0).clamp(0, text.length),
-        ready: restored ? null : ready,
-      );
-      _disk.adoptOpened(opened);
-      _surfaceCaretLine = null;
-      _text.text = text;
-      // A template `{{cursor}}` landing (#53): the surface was given the
-      // caret with its buffer, above, and a memento must not take it back
-      // (a note created at a path that had one lost its `{{cursor}}`).
-      if (widget.initialCaretOffset == null && widget.initialAnchor == null) {
-        _place.restore(widget.initialMemento, inWysiwyg: _wysiwygIn(widget));
-      }
-      // The spell cache is keyed by line index + text; a different note can
-      // reuse the same indices, so forget the previous file's answers.
-      widget.spellCheck?.reset();
-      _saves.markClean();
-      final session = _saves.newSession();
-      _log.debug('edit session $session: $path');
-      if (restored) {
-        _log.info('note opened with its unsaved text back: $path');
-        _edited = true;
-        _saves.edited();
-      }
-      _unsaved?.noteChanged();
-      setState(() {
-        _loading = false;
-        _ready = true;
-        _error = null;
-      });
-      // Opened straight into the preview: the IME has no target here.
-      _dismissKeyboardForPreview();
-      // A template `{{cursor}}` landing takes the keyboard (#53), and so
-      // does a note the Files pane opened (#727), and asks for it: the
-      // surface's `autofocus` gives way to whatever its scope already
-      // focused — the tree, the button the template was picked from — and
-      // the caret was drawn where no key went. Once the frame has put the
-      // surface under its focus node.
-      if (widget.initialCaretOffset != null || _caretPending) {
-        _caretPending = false;
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted && widget.path == path) _focus.requestFocus();
-        });
-      }
-      widget.onNoteKindChanged?.call(_noteKind);
-      // Word count + outline: asked for only now, with the note already on
-      // screen, because computing them costs an order of magnitude more
-      // than reading the note (see PreviewWork's `read`). Small notes
-      // answer synchronously inside this call; big ones go to an isolate
-      // and land a moment later.
-      _stats.refresh();
-      // The links that name nothing, resolved against the index with the
-      // note already on screen, and drawn muted when they arrive (#847).
-      _deadLinks.refresh();
-      // The editor gets this frame: the preview's parse and first layout
-      // start right after the text is on screen, so a large note shows it
-      // before the preview works (T-PP-22). The outline is asked for again
-      // then too: a big note's comes off a pane's scan, and the panes drew
-      // the note before this one until this frame built them for it.
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
+  /// Opens the note on screen: the session reads it, and the view follows.
+  Future<void> _load() {
+    _loadClock
+      ..reset()
+      ..start();
+    return _session.open(widget.path, caret: widget.initialCaretOffset ?? 0);
+  }
+
+  /// Opens the note again after a load that failed (#1059).
+  void _retryLoad() => _session.retry(widget.path);
+
+  /// Adopts the disk text when it changed under a clean note
+  /// ([NoteSession.reload]). The test seam reads nothing, so it has no
+  /// stamp to check and reads on.
+  Future<void> _reloadIfChanged() =>
+      _session.reload(widget.path, checkStamp: widget.readNote == null);
+
+  /// The session moved: the view follows what it says changed.
+  void _onSession() {
+    switch (_session.event) {
+      case NoteEvent.loading:
+        // The links and the card of the note that went are not this
+        // one's, nor is the read pane's copy of its text (#1202).
+        _deadLinks.clear();
+        _preview.close();
+        _readSnapshot.clear();
+        setState(() {});
+      case NoteEvent.surfaced:
+        // What the bar found was in the note that went.
+        _sourceFind.close(refocus: false);
+        _surfaceCaretLine = null;
+        // A template `{{cursor}}` landing (#53): the surface was given the
+        // caret with its buffer, and a memento must not take it back (a note
+        // created at a path that had one lost its `{{cursor}}`).
+        if (widget.initialCaretOffset == null && widget.initialAnchor == null) {
+          _place.restore(widget.initialMemento, inWysiwyg: _wysiwygIn(widget));
+        }
+        // The spell cache is keyed by line index + text; a different note
+        // can reuse the same indices, so forget the previous file's answers.
+        widget.spellCheck?.reset();
+        _unsaved?.noteChanged();
+      case NoteEvent.opened:
+        _opened();
+      case NoteEvent.failed:
+        setState(() {});
+      case NoteEvent.reread:
+        widget.spellCheck?.reset();
+        _unsaved?.noteChanged();
+        widget.onNoteKindChanged?.call(_session.kind);
+        _stats.refresh();
+        _deadLinks.refresh();
         _refreshPreview();
-        if (widget.path == path) _stats.refresh();
-      });
-      if (widget.initialFind case final terms? when terms.isNotEmpty) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted && widget.path == path) _sourceFind.openFinding(terms);
-        });
-      }
-      final anchor = widget.initialAnchor;
-      if (anchor != null && mounted) {
-        unawaited(jumpToAnchor(context, anchor, _links.targets()));
-      }
-      widget.onLoaded?.call(path, text.length);
-      _log.info(
-        'note loaded: $path (${text.length} chars, '
-        '${clock.elapsedMilliseconds} ms)',
-      );
-      // The read time above is what the disk/isolate cost; this is what the
-      // user waited for — load plus the frame that paints the loaded note.
-      logNextFrame('editor', 'note open first frame (${text.length} chars)');
-    } on Object catch (error) {
-      // A load the reader moved on from reports nothing: its failure is not
-      // this note's (#1059).
-      if (!mounted || generation != _loadGeneration) return;
-      // A file that is not text is an attachment, not a broken note: it
-      // says so, and nothing about it is ever reported saved (#156).
-      final reason = NoteReadReason.of(error);
-      final notText = reason == NoteReadReason.notText;
-      setState(() {
-        _loading = false;
-        _notText = notText;
-        _error = NoteDisk.failureMessage(reason);
-      });
-      _log.error('note load failed: $path ($error)');
+        if (mounted) setState(() {});
+      case NoteEvent.kindChanged:
+        setState(() {});
+        widget.onNoteKindChanged?.call(_session.kind);
+      case null:
+        setState(() {});
     }
   }
 
-  /// Opens the note again after a load that failed: the error pane's Retry,
-  /// and the next reload trigger while the pane is up (#1059).
-  void _retryLoad() {
-    if (_loading) return;
-    unawaited(_load());
-  }
-
-  /// Adopts the disk text when it changed under the open note (a
-  /// home-screen widget toggle edits the file in a background isolate,
-  /// like any other external edit).
-  ///
-  /// Only when the buffer is clean: a save in flight, a pending save, or
-  /// unsaved edits keep the user's text — the disk converges on the next
-  /// save instead. Identical content is a no-op, so a resume without an
-  /// external edit never disturbs the caret. The WYSIWYG surface owns a
-  /// live document the buffer cannot replace, so it never auto-reloads.
-  Future<void> _reloadIfChanged() async {
-    // A note that failed to open has nothing on screen to protect: the next
-    // trigger — a resume, a sync that touched it — is a new try (#1059).
-    if (_error != null && !_notText) {
-      _retryLoad();
-      return;
-    }
-    if (_loading || _saves.busy) {
-      _log.debug('reload skipped (busy): ${widget.path}');
-      return;
-    }
-    if (_saves.dirty) {
-      _log.debug('reload skipped (unsaved edits): ${widget.path}');
-      return;
-    }
+  /// The note landed on screen: the keyboard, the caret, the shell's word
+  /// of its kind, its statistics, its links, its preview and the place
+  /// asked for.
+  void _opened() {
     final path = widget.path;
-    final generation = _loadGeneration;
-    // What the file looked like when it was last read or written, before the
-    // read: O(1) against 250 ms of joining and comparing, and O(1) against
-    // the read itself. The test seam reads nothing, so it has no stamp to
-    // check and reads on.
-    if (widget.readNote == null && await _disk.unchanged(path)) {
-      _log.debug('reload skipped (the file did not change): $path');
-      return;
+    final length = _text.text.length;
+    setState(() {});
+    // Opened straight into the preview: the IME has no target here.
+    _dismissKeyboardForPreview();
+    // A template `{{cursor}}` landing takes the keyboard (#53), and so
+    // does a note the Files pane opened (#727), and asks for it: the
+    // surface's `autofocus` gives way to whatever its scope already
+    // focused — the tree, the button the template was picked from — and
+    // the caret was drawn where no key went. Once the frame has put the
+    // surface under its focus node.
+    if (widget.initialCaretOffset != null || _caretPending) {
+      _caretPending = false;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && widget.path == path) _focus.requestFocus();
+      });
     }
-    // The reader may have typed, or moved on, while the file was asked.
-    if (!mounted || generation != _loadGeneration) return;
-    if (_loading || _saves.busy || _saves.dirty) return;
-    final read = await _disk.reread(path);
-    if (read == null) return;
-    if (!mounted || widget.path != path || generation != _loadGeneration) {
-      return;
-    }
-    // The user may have typed during the read: re-check clean before
-    // adopting anything.
-    if (_loading || _saves.busy || _saves.dirty) {
-      return;
-    }
-    final text = normalizedLineEndings(read.content);
-    // The file is what the pane has, or is about to be: either way this is
-    // the file that was looked at, so the next look can stop at the stamp
-    // instead of reading it again (#1060).
-    _disk.adoptReread(read);
-    if (text == _text.text) return;
-    // Mute the programmatic change like _load does: the listener returns
-    // before the revision bump and the save schedule.
-    _loading = true;
-    // The buffer adopts the disk's text, and the word count is built again
-    // for it.
-    if (_surface case final surface?) {
-      surface.replaceAll(text);
-      _adoptWords(surface);
-    }
-    _saves.markClean();
-    // Text taken from disk again: edits from here on are a new session.
-    final session = _saves.newSession();
-    _log.debug('edit session $session: $path (adopted disk text)');
-    _noteKind = frontmatterTypeOf(text);
-    widget.spellCheck?.reset();
-    _loading = false;
-    _unsaved?.noteChanged();
-    widget.onNoteKindChanged?.call(_noteKind);
+    widget.onNoteKindChanged?.call(_session.kind);
+    // Word count + outline: asked for only now, with the note already on
+    // screen, because computing them costs an order of magnitude more
+    // than reading the note (see PreviewWork's `read`). Small notes
+    // answer synchronously inside this call; big ones go to an isolate
+    // and land a moment later.
     _stats.refresh();
+    // The links that name nothing, resolved against the index with the
+    // note already on screen, and drawn muted when they arrive (#847).
     _deadLinks.refresh();
-    _refreshPreview();
-    if (mounted) setState(() {});
-    _log.info('note reloaded: $path (external change, ${text.length} chars)');
+    // The editor gets this frame: the preview's parse and first layout
+    // start right after the text is on screen, so a large note shows it
+    // before the preview works (T-PP-22). The outline is asked for again
+    // then too: a big note's comes off a pane's scan, and the panes drew
+    // the note before this one until this frame built them for it.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _refreshPreview();
+      if (widget.path == path) _stats.refresh();
+    });
+    if (widget.initialFind case final terms? when terms.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && widget.path == path) _sourceFind.openFinding(terms);
+      });
+    }
+    final anchor = widget.initialAnchor;
+    if (anchor != null && mounted) {
+      unawaited(jumpToAnchor(context, anchor, _links.targets()));
+    }
+    widget.onLoaded?.call(path, length);
+    _log.info(
+      'note loaded: $path ($length chars, '
+      '${_loadClock.elapsedMilliseconds} ms)',
+    );
+    // The read time above is what the disk/isolate cost; this is what the
+    // user waited for — load plus the frame that paints the loaded note.
+    logNextFrame('editor', 'note open first frame ($length chars)');
   }
 
   /// The note changed, from either source pane: the text, and where the caret
@@ -1488,11 +1325,11 @@ final class _NoteViewState extends State<NoteView>
   /// everything downstream — the save debounce, the unsaved marker, the
   /// statistics, the preview text — is one code path for every mode.
   void _noteChanged({required int caretLine, SourceEdit? edit}) {
-    _edited = true;
+    _session.markEdited();
     if (edit != null) {
       // Before the revision moves: the count follows the edit's own lines,
       // which is the whole point of keeping it per line.
-      _surface?.words.edited(edit, _surface!.buffer);
+      _session.surface?.words.edited(edit, _session.surface!.buffer);
     }
     _saves.edited();
     _unsaved?.noteChanged();
@@ -1508,7 +1345,7 @@ final class _NoteViewState extends State<NoteView>
   int _caretLine = 0;
 
   void _refreshPreview() {
-    if (!mounted || _loading) return;
+    if (!mounted || _session.loading) return;
     if (!_previewIn(widget)) {
       // The read pane is off stage behind the source pane, and bringing it up
       // to date means re-reading and re-parsing the whole note: done when it
@@ -1516,7 +1353,7 @@ final class _NoteViewState extends State<NoteView>
       _readSnapshot.stale = true;
       return;
     }
-    final live = _surface?.buffer;
+    final live = _session.surface?.buffer;
     if (live == null) return;
     // The editor's own lines, by revision: no text joined, no text compared.
     if (_readSnapshot.shows(live)) return;
@@ -1589,12 +1426,7 @@ final class _NoteViewState extends State<NoteView>
   /// [_noteChanged] — so saving, the preview and the statistics do not know
   /// which mode is on screen.
   Widget _unifiedSurfacePane() {
-    var surface = _surface;
-    if (surface == null) {
-      final text = _text.text;
-      surface = _surface = _surfaceFor(text);
-      _text.text = text;
-    }
+    final surface = _session.ensureSurface();
     final buffer = surface.buffer;
     // The fields panel, when the note has a block for it: the same widget the
     // read pane puts above its note, above this one too, so the two surfaces
@@ -1694,7 +1526,7 @@ final class _NoteViewState extends State<NoteView>
 
   @override
   void openFind({bool replace = false}) {
-    if (_previewOnly || !_ready) return;
+    if (_previewOnly || !_session.ready) return;
     _sourceFind.open(replace: replace);
   }
 
@@ -1773,7 +1605,7 @@ final class _NoteViewState extends State<NoteView>
 
   /// The read pane's task items, ticked through the editor's own door.
   late final NoteReadTasks _readTasks = NoteReadTasks(
-    surface: () => _surface,
+    surface: () => _session.surface,
     snapshot: _readSnapshot,
     // The pane on screen has the note scanned.
     blocks: () =>
@@ -1813,7 +1645,7 @@ final class _NoteViewState extends State<NoteView>
     onOpenNote: () => widget.onOpenNote,
     createMissingNote: () => widget.createMissingNote,
     outline: () => _stats.outline.value,
-    surface: () => _surface,
+    surface: () => _session.surface,
     readView: () => _readViewKey.currentState,
     reading: () => _previewIn(widget),
     context: () => context,
@@ -1865,8 +1697,8 @@ final class _NoteViewState extends State<NoteView>
   }
 
   String get _status {
-    if (_error != null) return AppStrings.noteStatusError;
-    if (_loading) return AppStrings.noteStatusLoading;
+    if (_session.error != null) return AppStrings.noteStatusError;
+    if (_session.loading) return AppStrings.noteStatusLoading;
     if (_saves.failure.value != null && !_saves.saving) {
       return AppStrings.noteStatusSaveFailed;
     }
@@ -1879,7 +1711,7 @@ final class _NoteViewState extends State<NoteView>
   /// highlighter, stats and preview follow it as with any edit) and the
   /// note is saved immediately.
   void _applyKindEdit(String newText) {
-    final surface = _surface;
+    final surface = _session.surface;
     if (surface != null && newText != _text.text) {
       // The kind GUI stands in front of the surface, so there may be no view:
       // the controller edits the buffer itself, and it is that buffer the save
@@ -1893,11 +1725,8 @@ final class _NoteViewState extends State<NoteView>
     }
     // An edit that changes the note's `type` (Make flashcards, #533) turns
     // the view to the kind it names, as a note opened with it would be.
-    final kind = frontmatterTypeOf(newText);
-    final kindChanged = kind != _noteKind;
-    setState(() => _noteKind = kind);
+    _session.kindEdited(newText);
     _saves.saveInBackground();
-    if (kindChanged) widget.onNoteKindChanged?.call(kind);
   }
 
   /// The formatting keys (#205), applied through the toolbar's own
@@ -1915,7 +1744,7 @@ final class _NoteViewState extends State<NoteView>
 
   @override
   Widget build(BuildContext context) {
-    final error = _error;
+    final error = _session.error;
     final showPreview = _previewIn(widget);
     // The head the fields panel follows, measured for the pane about to be
     // built (#157): the panel reads it on every scroll tick, and building a
@@ -1936,7 +1765,7 @@ final class _NoteViewState extends State<NoteView>
     // Kind mode (T-TK-02): a known `type` swaps the body for the kind GUI
     // and hides the editor chrome (outline, status row, toolbar) — the
     // note is a list, not a document, on screen.
-    final kindGui = NoteKinds.forType(_noteKind, _features);
+    final kindGui = NoteKinds.forType(_session.kind, _features);
     final kindBody = widget.kindMode && kindGui != null;
     // A list or a voice note keeps to the note column like text does
     // (0.0.8 test round): the column is the app's shape, not the editor's.
@@ -1957,7 +1786,8 @@ final class _NoteViewState extends State<NoteView>
         if (widget.toolbarTop && !widget.zen)
           NoteTopBar(
             column: widget.noteColumn,
-            toolbar: showToolbar && !kindBody && !_loading && error == null
+            toolbar:
+                showToolbar && !kindBody && !_session.loading && error == null
                 ? _toolbar(context, dense: true)
                 : null,
             actions: widget.barActions,
@@ -1969,7 +1799,7 @@ final class _NoteViewState extends State<NoteView>
             child: _preview.host(
               closeOn: _scrolls,
               child: error == null
-                  ? (!_ready || _loading
+                  ? (!_session.ready || _session.loading
                         ? const Center(child: CircularProgressIndicator())
                         : kindBody
                         ? kindChild!
@@ -2006,8 +1836,8 @@ final class _NoteViewState extends State<NoteView>
                   : NoteLoadError(
                       message: error,
                       path: widget.path,
-                      offerDefaultApp: _notText,
-                      onRetry: _notText ? null : _retryLoad,
+                      offerDefaultApp: _session.notText,
+                      onRetry: _session.notText ? null : _retryLoad,
                     ),
             ),
           ),
@@ -2015,8 +1845,8 @@ final class _NoteViewState extends State<NoteView>
         if (!kindBody && !widget.zen)
           NoteFooter(
             column: widget.noteColumn,
-            loading: _loading,
-            ready: _ready,
+            loading: _session.loading,
+            ready: _session.ready,
             frontmatterError: _stats.frontmatterError,
             showRelated: !widget.relatedInDock,
             linkSource: widget.linkSource,
@@ -2027,7 +1857,7 @@ final class _NoteViewState extends State<NoteView>
             statusRow: ListenableBuilder(
               listenable: _templateCheck,
               builder: (context, _) => NoteStatusRow(
-                loading: _loading,
+                loading: _session.loading,
                 showOutline: !widget.outlineInDock,
                 showPreview: showPreview,
                 showWysiwyg: _wysiwygIn(widget),
@@ -2057,7 +1887,7 @@ final class _NoteViewState extends State<NoteView>
                 onToggleTypewriter: widget.onToggleTypewriter,
               ),
             ),
-            toolbarBelow: !widget.toolbarTop && !_loading,
+            toolbarBelow: !widget.toolbarTop && !_session.loading,
             showToolbar: showToolbar,
             toolbar: _toolbar,
           ),
