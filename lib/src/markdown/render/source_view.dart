@@ -30,7 +30,6 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:niman/src/core/frame_cost.dart';
 import 'package:niman/src/core/logging.dart';
@@ -45,7 +44,6 @@ import 'package:niman/src/editor/toolbar_item.dart';
 import 'package:niman/src/editor/typewriter_scroll.dart';
 import 'package:niman/src/links/dead_links.dart';
 import 'package:niman/src/links/suggester.dart';
-import 'package:niman/src/markdown/active_formats.dart';
 import 'package:niman/src/markdown/background_scan.dart';
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_parser.dart';
@@ -80,6 +78,7 @@ import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/render/note_margins.dart';
 import 'package:niman/src/markdown/render/scroll_anchor.dart';
 import 'package:niman/src/markdown/render/scrollbar_strip.dart';
+import 'package:niman/src/markdown/render/source_caret.dart';
 import 'package:niman/src/markdown/render/source_caret_blink.dart';
 import 'package:niman/src/markdown/render/source_caret_motion.dart';
 import 'package:niman/src/markdown/render/source_caret_rect.dart';
@@ -369,7 +368,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       // The colours landing is also the formats landing: until they are
       // read, the caret's line has no tokens and the toolbar would show
       // every button dark on a note whose syntax the writer is inside.
-      _publishActive(_caretSpot.value);
+      _caret.publishActive(_caret.spot.value);
       // And it is the caret's line landing: a heading, or a formula, is
       // drawn at another height than the plain line the caret was measured
       // over. The reading came in outside any edit, so nothing else asks
@@ -432,7 +431,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   late final SourceTaskBoxes _taskBoxes = SourceTaskBoxes(
     buffer: () => widget.buffer,
     live: () => widget.hideMarkers,
-    caretLine: () => _caretSpot.value.line,
+    caretLine: () => _caret.spot.value.line,
     paragraphs: _paragraphs,
     lineAt: _lineAt,
     blockOf: (line) => _styler?.blockOf(line),
@@ -595,13 +594,6 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     findMatches: () => widget.findMatches,
   );
 
-  /// Where the caret's fragment sits in the line's box, beyond the indent
-  /// the painter knows about: a wrapped table row draws its cells away from
-  /// the line's left edge and below its first visual line, so the caret
-  /// rectangle — measured in the fragment's own paragraph — is shifted by
-  /// this before it is painted.
-  final ValueNotifier<Offset> _caretShift = ValueNotifier<Offset>(Offset.zero);
-
   /// The width the lines' text has, from the last frame that laid it out:
   /// what a table wider than it is fitted to.
   double _textWidth = 0;
@@ -615,23 +607,22 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   TextScaler _scaler = TextScaler.noScaling;
   SyntaxColors? _syntax;
 
-  /// The caret rectangle in the caret line's coordinates, recomputed after the
-  /// frame that laid that line out. A notifier rather than `setState`: neither
-  /// the blink nor the measurement may rebuild the note.
-  final ValueNotifier<Rect?> _caretRect = ValueNotifier<Rect?>(null);
-
-  /// Where the caret is, as the lines that draw it care: which line holds it,
-  /// and the run of non-whitespace it sits in on that line.
-  ///
-  /// One value rather than two notifiers, so a caret move that crosses a word
-  /// boundary repaints the two lines involved at once and a move *inside* a
-  /// run repaints nothing: a `ValueNotifier` whose new value compares equal
-  /// does not notify, and a run's own coordinates do not change while the
-  /// caret stays in it. That is what keeps the per-word reveal off the frame
-  /// budget — a keystroke inside a word tells no line anything.
-  final ValueNotifier<CaretSpot> _caretSpot = ValueNotifier<CaretSpot>(
-    const CaretSpot(0, 0, 0),
+  /// The caret as the lines and the toolbar are told it: its spot, its
+  /// rectangle and its piece's shift, measured off its line's layout.
+  late final SourceCaret _caret = SourceCaret(
+    buffer: () => widget.buffer,
+    selection: () => _selection,
+    mounted: () => mounted,
+    fragmentAt: _fragmentAt,
+    width: () => _caretWidth,
+    caretOnLine: (line) => _typing.brackets.caretOnLine(line),
+    activeItems: () => widget.activeItems,
+    tokensOf: tokensOf,
+    measured: _sendGeometry,
   );
+
+  /// The line the caret sits on, or -1.
+  int get _caretLineIndex => _caret.line;
 
   /// Whether the caret is drawn, and the blink that turns it on and off:
   /// only the focused note's, in a window someone can see (#512).
@@ -736,7 +727,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     live: () => widget.hideMarkers,
     mounted: () => mounted,
     blockOf: (line) => _styler?.blockOf(line),
-    caretSpot: _caretSpot,
+    caretSpot: _caret.spot,
     noteBox: () => _noteBox,
     scroll: () => _scroll,
     tableRowAt: (line, block, at) => _tableRowAt(context, line, block, at),
@@ -794,7 +785,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     ensureCaretVisible: _reveal.ensureCaretVisible,
     caretRect: () => _caretRectAt(_selection.extent) ?? caretRect,
     noteBox: () => _noteBox,
-    caretMoves: () => Listenable.merge([_scroll, _caretRect]),
+    caretMoves: () => Listenable.merge([_scroll, _caret.rect]),
   );
 
   /// The note's block anchors, for a `[[#^` link to the note being edited
@@ -1066,10 +1057,8 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     _styling.dispose();
     _typewriter.dispose();
     _semanticsTick.dispose();
-    _caretRect.dispose();
-    _caretShift.dispose();
+    _caret.dispose();
     _footnoteMath.dispose();
-    _caretSpot.dispose();
     _touch
       ..removeListener(_onTouchChanged)
       ..dispose();
@@ -1151,7 +1140,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// The caret's rectangle in the note's own coordinates, or null before the
   /// frame that measured it.
   Rect? get caretRect {
-    final rect = _caretRect.value;
+    final rect = _caret.rect.value;
     final line = _caretLineIndex;
     if (rect == null || line < 0) return null;
     final local = _selection.extent - widget.buffer.offsetOfLine(line);
@@ -1767,7 +1756,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   ///
   /// Only what changed is repainted: a caret that stays collapsed moves no
   /// text, so the two lines involved — the one that lost it and the one that
-  /// gained it — repaint through [_caretSpot] and nothing else does, while a
+  /// gained it — repaint through [_caret] and nothing else does, while a
   /// move that creates or clears a *range* rebuilds the note, a range being
   /// a background on the runs it covers. [rebuild] rebuilds it whatever
   /// moved.
@@ -1789,7 +1778,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     final wasRange = !_selection.isCollapsed;
     _ownSelection = clamped;
     if (rebuild || !clamped.isCollapsed || wasRange) setState(() {});
-    _caretSpot.value = _spotOf(clamped.extent);
+    _caret.spot.value = _caret.spotOf(clamped.extent);
     if (suggest) _suggest.refresh();
     widget.onSelection?.call(clamped);
     _input.sendSelection();
@@ -1872,7 +1861,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     final single = <SourcePiece>[one(0, length)];
     final block = _styler?.blockOf(line);
     if (block == null || block.kind != BlockKind.table) return single;
-    final row = _tableRowAt(context, line, block, _caretSpot.value);
+    final row = _tableRowAt(context, line, block, _caret.spot.value);
     final wrapped = row?.wrapped;
     if (wrapped == null || wrapped.isEmpty) return single;
     final pad = widget.theme.tableCellPadding.top;
@@ -1909,7 +1898,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   double _drawnHeightOf(int line) {
     final block = _styler?.blockOf(line);
     if (block != null && block.kind == BlockKind.table) {
-      final row = _tableRowAt(context, line, block, _caretSpot.value);
+      final row = _tableRowAt(context, line, block, _caret.spot.value);
       final wrapped = row?.wrapped;
       if (wrapped != null && wrapped.isNotEmpty) {
         return wrapped.fold<double>(0, (sum, one) => sum + one.height);
@@ -1918,79 +1907,11 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     return _paragraphs.paragraphAt(line)?.size.height ?? 0;
   }
 
-  /// The line the caret sits on, or -1.
-  int get _caretLineIndex {
-    final line = widget.buffer.lineOf(_selection.extent);
-    return line < 0 || line >= lineCount ? -1 : line;
-  }
-
-  /// The caret's line and the run of non-whitespace it is in on that line, as
-  /// the lines are told it ([CaretSpot]).
-  ///
-  /// [offset] is the caret asked about, defaulting to the selection's own end.
-  /// It is passed explicitly where the caller already knows where the caret is
-  /// going — a move publishes the *destination*, and the widget's own
-  /// selection may still be the old one until the shell that owns it rebuilds.
-  ///
-  /// The run is read from the line's own text rather than off the styled
-  /// tokens: the reveal compares a *marker* against it, and the markers belong
-  /// to the run (`runAround`), so the two agree by construction.
-  CaretSpot _spotOf([int? offset]) {
-    final at = offset ?? _selection.extent;
-    final line = widget.buffer.lineOf(at);
-    if (line < 0 || line >= lineCount) return const CaretSpot(-1, 0, 0);
-    final text = widget.buffer.lineAt(line);
-    final column = (at - widget.buffer.offsetOfLine(line)).clamp(
-      0,
-      text.length,
-    );
-    final (from, to) = runAround(text, column);
-    return CaretSpot(line, from, to);
-  }
-
   /// The caret's spot, exposed so a test can hold that a move inside a run
   /// tells no line anything. Exposed as a listenable rather than as a value
   /// because *not* notifying is the property.
   @visibleForTesting
-  ValueListenable<CaretSpot> get caretSpot => _caretSpot;
-
-  /// Publishes the formats on at [spot] to the shell's toolbar (#246).
-  ///
-  /// The answer is read off the caret's line — the same tokens the colours are
-  /// drawn from — and written into the shell's notifier, which is the shape the
-  /// legacy WYSIWYG published through, so the toolbar reads one thing whichever
-  /// engine draws the pane (`active_formats.dart`).
-  ///
-  /// Deferred out of a build: the toolbar is not a descendant of this surface,
-  /// so notifying it while the framework is building is a `markNeedsBuild` it
-  /// refuses. The answer is the same one frame later, and the caret's own value
-  /// is read again then rather than carried.
-  void _publishActive(CaretSpot spot) {
-    if (SchedulerBinding.instance.schedulerPhase ==
-        SchedulerPhase.persistentCallbacks) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) _publishActiveNow(_caretSpot.value);
-      });
-      return;
-    }
-    _publishActiveNow(spot);
-  }
-
-  void _publishActiveNow(CaretSpot spot) {
-    final notifier = widget.activeItems;
-    if (notifier == null) return;
-    final active = spot.line < 0 || spot.line >= lineCount
-        ? const <ToolbarItem>{}
-        : activeFormatsOf(
-            text: widget.buffer.lineAt(spot.line),
-            tokens: tokensOf(spot.line),
-            run: (spot.runStart, spot.runEnd),
-          );
-    // Equal sets are not a change: the toolbar is not told to rebuild when the
-    // caret moves inside a run whose formats are the same.
-    if (setEquals(active, notifier.value)) return;
-    notifier.value = active;
-  }
+  ValueListenable<CaretSpot> get caretSpot => _caret.spot;
 
   /// From how many lines on a note's colours are read in the background.
   ///
@@ -2156,9 +2077,9 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     // Waiting only for the post-frame callback makes the caret a frame late,
     // which
     // is how a cursor feels slow when it is doing nothing slow.
-    _measureCaret();
+    _caret.measure();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _measureCaret();
+      if (mounted) _caret.measure();
     });
   }
 
@@ -2213,56 +2134,14 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// another mode or at another width.
   void _measureCaretAfterFrame() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _measureCaret();
+      if (mounted) _caret.measure();
     });
   }
 
   /// How many times the caret was measured, for the test that holds a
   /// rebuild with a theme of the same values to measuring nothing (#789).
   @visibleForTesting
-  int get caretMeasures => _caretMeasures;
-  int _caretMeasures = 0;
-
-  /// Where the caret is, from the caret line's own layout.
-  void _measureCaret() {
-    _caretMeasures++;
-    final line = _caretLineIndex;
-    // Every selection change comes through here, so this is the one place the
-    // lines hear which of them holds the caret and which of its words, and the
-    // toolbar hears which formats are on at it.
-    final spot = _spotOf();
-    _caretSpot.value = spot;
-    // A closing bracket a pair wrote is stepped over only on its own line.
-    _typing.brackets.caretOnLine(line);
-    _publishActive(spot);
-    if (line < 0) {
-      _caretRect.value = null;
-      _caretShift.value = Offset.zero;
-      return;
-    }
-    final local = _selection.extent - widget.buffer.offsetOfLine(line);
-    // A table row laid out in fitted columns is drawn as one paragraph per
-    // piece: the caret is measured in — and drawn at — the piece it is in,
-    // and the painter is told how far that piece stands from the line's box.
-    final (piece, paragraph) = _fragmentAt(line, local);
-    if (paragraph == null || piece == null) {
-      _caretRect.value = null;
-      _caretShift.value = Offset.zero;
-      return;
-    }
-    _caretShift.value = Offset(piece.x, piece.y);
-    final length = paragraph.text.toPlainText().length;
-    final position = TextPosition(
-      offset: (local - piece.start).clamp(0, length),
-    );
-    _caretRect.value = sourceCaretRectIn(
-      paragraph,
-      position,
-      length,
-      _caretWidth,
-    );
-    _sendGeometry();
-  }
+  int get caretMeasures => _caret.measures;
 
   /// How wide the caret is drawn.
   double get _caretWidth => widget.caretWidth ?? 1.5;
@@ -2473,7 +2352,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     );
     return SourceOverlays(
       scroll: _scroll,
-      caretSpot: _caretSpot,
+      caretSpot: _caret.spot,
       menu: _menu,
       touch: _touch,
       tables: _handles,
@@ -2533,7 +2412,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       pieceKey: block?.kind == BlockKind.table
           ? (at) => _paragraphs.fragmentKey(index, at)
           : null,
-      pieceShift: _caretShift,
+      pieceShift: _caret.shift,
       definition: widget.hideMarkers && block != null
           ? _styler?.definitionRunOf(block)
           : null,
@@ -2567,8 +2446,8 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       misspelledColor: Theme.of(context).colorScheme.error,
       width: width,
       index: index,
-      spot: _caretSpot,
-      caret: _caretRect,
+      spot: _caret.spot,
+      caret: _caret.rect,
       caretOn: _blink.on,
       rowColor: widget.typewriter ? typewriterLineColor(context) : null,
       fence: _fenceOf(index, block),
