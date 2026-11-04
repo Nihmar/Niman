@@ -2,6 +2,7 @@ import 'package:meta/meta.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/settings/device_settings_store.dart';
 import 'package:niman/src/core/settings/features.dart';
+import 'package:niman/src/core/settings/json_equality.dart';
 import 'package:niman/src/core/settings/library_config_json.dart';
 import 'package:niman/src/core/settings/library_config_values.dart';
 import 'package:niman/src/core/settings/library_settings.dart'
@@ -558,45 +559,6 @@ final class LibraryConfig {
   /// of by the caller's care.
   Map<String, Object?> toJsonMap() => libraryConfigToJsonMap(this);
 
-  /// Deep-compares two (small) JSON values, recursing into maps and lists.
-  bool _deepEquals(Object? a, Object? b) {
-    if (identical(a, b)) return true;
-    if (a is Map<String, Object?> && b is Map<String, Object?>) {
-      if (a.length != b.length) return false;
-      for (final entry in a.entries) {
-        if (!b.containsKey(entry.key) ||
-            !_deepEquals(b[entry.key], entry.value)) {
-          return false;
-        }
-      }
-      return true;
-    }
-    if (a is List && b is List) {
-      if (a.length != b.length) return false;
-      for (var i = 0; i < a.length; i++) {
-        if (!_deepEquals(a[i], b[i])) return false;
-      }
-      return true;
-    }
-    return a == b;
-  }
-
-  /// A stable hash for a (possibly nested) JSON value.
-  int _stableHash(Object? v) {
-    if (v is Map<String, Object?>) {
-      final keys = v.keys.toList()..sort();
-      final parts = <Object?>[];
-      for (final key in keys) {
-        parts
-          ..add(key)
-          ..add(_stableHash(v[key]));
-      }
-      return Object.hashAll(parts);
-    }
-    if (v is List) return Object.hashAll(v);
-    return v.hashCode;
-  }
-
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
@@ -641,7 +603,7 @@ final class LibraryConfig {
         sourceFont == other.sourceFont &&
         treeWidth == other.treeWidth &&
         dockWidth == other.dockWidth &&
-        _deepEquals(spellDictionaries, other.spellDictionaries) &&
+        jsonDeepEquals(spellDictionaries, other.spellDictionaries) &&
         editorKind == other.editorKind &&
         enabledEditors.length == other.enabledEditors.length &&
         enabledEditors.containsAll(other.enabledEditors) &&
@@ -649,10 +611,10 @@ final class LibraryConfig {
         epubLook == other.epubLook &&
         navigation == other.navigation &&
         deviceNavigation == other.deviceNavigation &&
-        _deepEquals(deviceHome, other.deviceHome) &&
+        jsonDeepEquals(deviceHome, other.deviceHome) &&
         features == other.features &&
         featuresReviewed == other.featuresReviewed &&
-        _deepEquals(extra, other.extra);
+        jsonDeepEquals(extra, other.extra);
   }
 
   /// Hashed over [toJsonMap], which is the same filtered view `==`
@@ -660,5 +622,5 @@ final class LibraryConfig {
   /// known key in [extra] displaced the typed field it duplicates, so two
   /// configs that compare equal could hash differently.
   @override
-  int get hashCode => _stableHash(toJsonMap());
+  int get hashCode => jsonStableHash(toJsonMap());
 }
