@@ -9,6 +9,7 @@ import 'package:niman/src/library/session.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/ui/pointer_density.dart';
 import 'package:niman/src/ui/settings_area.dart';
+import 'package:niman/src/ui/settings_editor_links.dart';
 import 'package:niman/src/ui/settings_editor_spelling.dart';
 import 'package:niman/src/ui/settings_editor_tidy.dart';
 import 'package:niman/src/ui/settings_keys.dart';
@@ -322,61 +323,6 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
     if (mounted) setState(() => _sourceFont = font);
   }
 
-  /// Asks for the link format the editor's link button inserts.
-  Future<void> _chooseLinkType() async {
-    final type = await showSettingsChoice<LinkType>(
-      context,
-      dialogKey: const Key('link-type-dialog'),
-      title: AppStrings.linkTypeTitle,
-      subtitle: AppStrings.linkTypeSubtitle,
-      current: _linkType,
-      options: [
-        SettingsOption(LinkType.wikilink, AppStrings.linkTypeWikilink),
-        SettingsOption(LinkType.markdown, AppStrings.linkTypeMarkdown),
-      ],
-    );
-    if (type != null) await _setLinkType(type);
-  }
-
-  /// Asks what a rename or a move does to the links pointing at what
-  /// moved (#848).
-  Future<void> _chooseLinkUpdate() async {
-    final mode = await showSettingsChoice<LinkUpdate>(
-      context,
-      dialogKey: const Key('link-update-dialog'),
-      title: AppStrings.linkUpdateTitle,
-      subtitle: AppStrings.linkUpdateSubtitle,
-      current: _linkUpdate,
-      options: [
-        SettingsOption(LinkUpdate.automatic, AppStrings.linkUpdateAutomatic),
-        SettingsOption(LinkUpdate.ask, AppStrings.linkUpdateAsk),
-        SettingsOption(LinkUpdate.never, AppStrings.linkUpdateNever),
-      ],
-    );
-    if (mode != null) await _setLinkUpdate(mode);
-  }
-
-  /// Asks where new notes and folders go (#850).
-  Future<void> _chooseNewItemLocation() async {
-    final location = await showSettingsChoice<NewItemLocation>(
-      context,
-      dialogKey: const Key('new-item-location-dialog'),
-      title: AppStrings.newItemLocationTitle,
-      current: _newItemLocation,
-      options: [
-        SettingsOption(
-          NewItemLocation.libraryRoot,
-          AppStrings.newItemLocationRoot,
-        ),
-        SettingsOption(
-          NewItemLocation.openNoteFolder,
-          AppStrings.newItemLocationOpenNote,
-        ),
-      ],
-    );
-    if (location != null) await _setNewItemLocation(location);
-  }
-
   /// Asks for the spaces added per indent level.
   Future<void> _chooseIndentWidth() async {
     final width = await showSettingsChoice<int>(
@@ -578,47 +524,14 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
               value: _autofocusEditor ?? false,
               onChanged: _toggleAutofocusEditor,
             ),
-          HighlightRow(
-            key: SettingsKeys.linkType,
-            child: SettingsValueRow(
-              title: AppStrings.linkTypeTitle,
-              subtitle: AppStrings.linkTypeSubtitle,
-              value: switch (_linkType) {
-                LinkType.wikilink => AppStrings.linkTypeWikilink,
-                LinkType.markdown => AppStrings.linkTypeMarkdown,
-              },
-              onTap: () => unawaited(_chooseLinkType()),
-            ),
-          ),
-          // Next to the link format: they decide what a link does — what
-          // it inserts, what happens to it when its target moves (#848),
-          // where a new note lands (#850).
-          HighlightRow(
-            key: SettingsKeys.linkUpdate,
-            child: SettingsValueRow(
-              title: AppStrings.linkUpdateTitle,
-              subtitle: AppStrings.linkUpdateSubtitle,
-              value: switch (_linkUpdate) {
-                LinkUpdate.automatic => AppStrings.linkUpdateAutomatic,
-                LinkUpdate.ask => AppStrings.linkUpdateAsk,
-                LinkUpdate.never => AppStrings.linkUpdateNever,
-              },
-              onTap: () => unawaited(_chooseLinkUpdate()),
-            ),
-          ),
-          // The one rule for where every new note and folder lands (#850),
-          // the note a dead link creates (issue #78) among them.
-          HighlightRow(
-            key: SettingsKeys.newItemLocation,
-            child: SettingsValueRow(
-              title: AppStrings.newItemLocationTitle,
-              value: switch (_newItemLocation) {
-                NewItemLocation.libraryRoot => AppStrings.newItemLocationRoot,
-                NewItemLocation.openNoteFolder =>
-                  AppStrings.newItemLocationOpenNote,
-              },
-              onTap: () => unawaited(_chooseNewItemLocation()),
-            ),
+          SettingsEditorLinks(
+            linkType: _linkType,
+            linkUpdate: _linkUpdate,
+            newItemLocation: _newItemLocation,
+            onLinkType: (type) => unawaited(_setLinkType(type)),
+            onLinkUpdate: (mode) => unawaited(_setLinkUpdate(mode)),
+            onNewItemLocation: (location) =>
+                unawaited(_setNewItemLocation(location)),
           ),
           HighlightRow(
             key: SettingsKeys.noteTextScale,
