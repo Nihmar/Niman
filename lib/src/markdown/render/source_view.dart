@@ -65,7 +65,6 @@ import 'package:niman/src/markdown/note_references.dart';
 import 'package:niman/src/markdown/read_parser.dart';
 import 'package:niman/src/markdown/render/block_height_map.dart';
 import 'package:niman/src/markdown/render/content_clamp_physics.dart';
-import 'package:niman/src/markdown/render/dead_link_ranges.dart';
 import 'package:niman/src/markdown/render/fence_band_painter.dart';
 import 'package:niman/src/markdown/render/focus_return.dart';
 import 'package:niman/src/markdown/render/footnote_list.dart';
@@ -90,6 +89,7 @@ import 'package:niman/src/markdown/render/source_context_menu.dart';
 import 'package:niman/src/markdown/render/source_folds.dart';
 import 'package:niman/src/markdown/render/source_geometry.dart';
 import 'package:niman/src/markdown/render/source_line.dart';
+import 'package:niman/src/markdown/render/source_line_marks.dart';
 import 'package:niman/src/markdown/render/source_live_lines.dart';
 import 'package:niman/src/markdown/render/source_menu_keys.dart';
 import 'package:niman/src/markdown/render/source_overlays.dart';
@@ -582,6 +582,19 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// asks for its rectangle.
   final SourceParagraphs _paragraphs = SourceParagraphs();
 
+  /// What a line is marked with beyond its colours: the selection, the
+  /// composing range, the spelling, the dead links, the find bar's matches.
+  late final SourceLineMarks _marks = SourceLineMarks(
+    buffer: () => widget.buffer,
+    selection: () => _selection,
+    composing: () => _input.composing,
+    spellCheck: () => widget.spellCheck,
+    tokensAt: _tokensAt,
+    deadLinks: () => widget.deadLinks,
+    linkHrefAt: (index, start) => _styler?.linkHrefAt(index, start),
+    findMatches: () => widget.findMatches,
+  );
+
   /// Where the caret's fragment sits in the line's box, beyond the indent
   /// the painter knows about: a wrapped table row draws its cells away from
   /// the line's left edge and below its first visual line, so the caret
@@ -701,7 +714,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     selectAll: selectAll,
     replace: _replaceRange,
     spellCheck: () => widget.spellCheck,
-    spellRanges: _spellRanges,
+    spellRanges: _marks.spellRanges,
     formats: _menuFormats,
     table: () => _tableKeys.commands()?.menu(),
     structure: () => widget.editorMenu?.call(),
@@ -1085,17 +1098,6 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// again, in the colours the answer gives them.
   void _onDeadLinksChanged() {
     if (mounted) setState(() {});
-  }
-
-  /// The links of line [index] that name nothing, local to the line.
-  List<TextRange> _deadLinksIn(int index, StyledLine styled) {
-    final dead = widget.deadLinks?.value;
-    if (dead == null || dead.isEmpty) return const <TextRange>[];
-    return deadLinkRanges(
-      styled,
-      dead,
-      hrefOf: (start) => _styler?.linkHrefAt(index, start),
-    );
   }
 
   /// A formula was typeset, or failed to be: the lines that concealed their
@@ -1836,35 +1838,6 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
         : overlayTokens(tokens, commands, TokenKind.templateCommand);
   }
 
-  /// The part of the selection that falls inside line [index], as offsets local
-  /// to that line, or null when none of it does.
-  ///
-  /// The selection is painted as a *background on the runs it covers* rather
-  /// than
-  /// as rectangles over them: the runs already know how to wrap, and a
-  /// rectangle
-  /// would have to be recomputed from the layout on every frame that moved
-  /// anything.
-  (int, int)? _selectionIn(int index) {
-    final selection = _selection;
-    if (selection.isCollapsed) return null;
-    return _rangeIn(index, selection.start, selection.end);
-  }
-
-  /// The part of the IME's composing range inside line [index], underlined
-  /// the way every text field shows the word being composed.
-  (int, int)? _composingIn(int index) {
-    final composing = _input.composing;
-    if (!composing.isValid || composing.isCollapsed) return null;
-    return _rangeIn(index, composing.start, composing.end);
-  }
-
-  /// The words the checker flags on line [index], as offsets local to it.
-  List<TextRange> _misspelledIn(int index) {
-    if (widget.spellCheck == null) return const <TextRange>[];
-    return _spellRanges(index, widget.buffer.lineAt(index));
-  }
-
   /// The rectangle a problem's span covers, in global coordinates, or null
   /// while the piece that holds it is not built.
   ///
@@ -1886,26 +1859,6 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       start - lineStart,
       end.clamp(lineStart, lineEnd) - lineStart,
     );
-  }
-
-  /// The find bar's matches on line [index], as offsets local to it.
-  List<(int, int, bool)> _foundIn(int index) {
-    final matches = widget.findMatches;
-    if (matches == null) return const <(int, int, bool)>[];
-    final start = widget.buffer.offsetOfLine(index);
-    return matches
-        .within(start, start + widget.buffer.lineLengthAt(index))
-        .toList();
-  }
-
-  /// `[from, to)` of the note, as offsets local to line [index], or null.
-  (int, int)? _rangeIn(int index, int from, int to) {
-    final start = widget.buffer.offsetOfLine(index);
-    final end = start + widget.buffer.lineLengthAt(index);
-    final a = from < start ? start : from;
-    final b = to > end ? end : to;
-    if (a >= b) return null;
-    return (a - start, b - start);
   }
 
   /// The paragraphs line [line] is drawn in: the line's own, or a table row
@@ -2605,11 +2558,11 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       syntax: _syntax ?? SyntaxColors.of(context),
       dark: widget.dark,
       hideMarkers: widget.hideMarkers,
-      selected: _selectionIn(index),
-      composing: _composingIn(index),
-      misspelled: _misspelledIn(index),
-      deadLinks: _deadLinksIn(index, styled),
-      found: _foundIn(index),
+      selected: _marks.selectionIn(index),
+      composing: _marks.composingIn(index),
+      misspelled: _marks.misspelledIn(index),
+      deadLinks: _marks.deadLinksIn(index, styled),
+      found: _marks.foundIn(index),
       templateProblems: _hints.problemsIn(index),
       misspelledColor: Theme.of(context).colorScheme.error,
       width: width,
@@ -2667,23 +2620,6 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
 
   /// Whether the suggester panel is up, for the shell's tour and the tests.
   bool get isSuggesterShown => _suggest.isShown;
-
-  /// The misspelled ranges of line [index], whose text is [text]: the ranges
-  /// the checker finds outside what the tokenizer says is not prose (code,
-  /// maths, links, markers).
-  ///
-  /// A line whose tokens are not known yet is not judged at all, and nothing
-  /// is cached for it: judged, its skip set would be empty and the whole line
-  /// — code, links and maths included — would come back underlined, and on a
-  /// long note that first judgement is what the styler's reading lands on
-  /// (#373). It is judged on the frame the tokens arrive.
-  List<TextRange> _spellRanges(int index, String text) {
-    final spell = widget.spellCheck;
-    if (spell == null) return const <TextRange>[];
-    final tokens = _tokensAt(index);
-    if (tokens == null) return const <TextRange>[];
-    return spell.rangesFor(index, text, skip: spellSkipRanges(tokens));
-  }
 
   /// The caret rectangle at [offset] in global coordinates, from the piece of
   /// its line the offset is drawn in — or null when that line is not built.
