@@ -26,7 +26,6 @@
 library;
 
 import 'dart:async';
-import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -83,7 +82,6 @@ import 'package:niman/src/markdown/render/live_tables.dart';
 import 'package:niman/src/markdown/render/markdown_blocks_sliver.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/render/note_margins.dart';
-import 'package:niman/src/markdown/render/note_semantics.dart';
 import 'package:niman/src/markdown/render/scroll_anchor.dart';
 import 'package:niman/src/markdown/render/scrollbar_strip.dart';
 import 'package:niman/src/markdown/render/sliver_columns.dart';
@@ -102,6 +100,7 @@ import 'package:niman/src/markdown/render/source_paragraphs.dart';
 import 'package:niman/src/markdown/render/source_pointer.dart';
 import 'package:niman/src/markdown/render/source_rows.dart';
 import 'package:niman/src/markdown/render/source_sections.dart';
+import 'package:niman/src/markdown/render/source_semantics.dart';
 import 'package:niman/src/markdown/render/source_styling.dart';
 import 'package:niman/src/markdown/render/source_table_hover.dart';
 import 'package:niman/src/markdown/render/source_table_keys.dart';
@@ -2497,7 +2496,19 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     // The touch selection draws above everything, handles and toolbar alike,
     // and follows the note as it scrolls; the desktop's menu stays where the
     // click was.
-    note = _semantics(note);
+    note = SourceSemantics(
+      tick: _semanticsTick,
+      buffer: widget.buffer,
+      selection: () => _selection,
+      focused: () => _focus.hasFocus,
+      onTap: _requestKeyboard,
+      onSelect: select,
+      onMove: moveCaretBy,
+      onCopy: copySelection,
+      onCut: cutSelection,
+      onPaste: paste,
+      child: note,
+    );
     final content = OverlayPortal(
       controller: _menu.overlay,
       overlayChildBuilder: _menu.buildOverlay,
@@ -2755,54 +2766,6 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       ],
     );
   }
-
-  // ---------------------------------------------------------- table handles
-
-  // ------------------------------------------------------------- semantics
-
-  /// How much of the note, around the caret, a screen reader is given: the
-  /// note itself can be megabytes, and the semantics tree is sent whole to
-  /// the platform on every change.
-  static const int _semanticsReach = 4000;
-
-  /// [child] as the platform's accessibility sees it: one multiline text
-  /// field, whose value is the note around the caret and whose selection is
-  /// the note's, with the moves and the clipboard a screen reader asks for.
-  ///
-  /// The lines under it are excluded: each is a `Text`, and a reader would
-  /// otherwise read the note twice — as a field, and as the lines inside it.
-  Widget _semantics(Widget child) => ValueListenableBuilder<int>(
-    valueListenable: _semanticsTick,
-    child: ExcludeSemantics(child: child),
-    builder: (context, _, child) {
-      if (!SemanticsBinding.instance.semanticsEnabled) return child!;
-      final buffer = widget.buffer;
-      final selection = _selection.clampTo(buffer.length);
-      final start = math.max(0, selection.start - _semanticsReach);
-      final end = math.min(buffer.length, selection.end + _semanticsReach);
-      int local(int offset) => (offset - start).clamp(0, end - start);
-      return NoteSemantics(
-        value: buffer.substring(start, end),
-        selection: TextSelection(
-          baseOffset: local(selection.anchor),
-          extentOffset: local(selection.extent),
-        ),
-        focused: _focus.hasFocus,
-        onTap: _requestKeyboard,
-        onSetSelection: (next) => select(
-          SelectionModel(
-            anchor: start + next.baseOffset,
-            extent: start + next.extentOffset,
-          ),
-        ),
-        onMove: moveCaretBy,
-        onCopy: selection.isCollapsed ? null : () => unawaited(copySelection()),
-        onCut: selection.isCollapsed ? null : () => unawaited(cutSelection()),
-        onPaste: () => unawaited(paste()),
-        child: child,
-      );
-    },
-  );
 
   // ---------------------------------------------------------- context menu
 
