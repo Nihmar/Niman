@@ -29,14 +29,12 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:niman/src/core/frame_cost.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/theme_tokens.dart';
 import 'package:niman/src/editor/context_menu_items.dart';
 import 'package:niman/src/editor/editor_context_menu.dart';
-import 'package:niman/src/editor/highlight_style.dart';
 import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/editor/outline.dart';
@@ -73,7 +71,6 @@ import 'package:niman/src/markdown/render/live_decorations.dart';
 import 'package:niman/src/markdown/render/live_hosts.dart';
 import 'package:niman/src/markdown/render/live_quote_content.dart';
 import 'package:niman/src/markdown/render/live_run.dart';
-import 'package:niman/src/markdown/render/live_tables.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/render/note_margins.dart';
 import 'package:niman/src/markdown/render/scroll_anchor.dart';
@@ -93,6 +90,7 @@ import 'package:niman/src/markdown/render/source_live_lines.dart';
 import 'package:niman/src/markdown/render/source_menu_keys.dart';
 import 'package:niman/src/markdown/render/source_overlays.dart';
 import 'package:niman/src/markdown/render/source_paragraphs.dart';
+import 'package:niman/src/markdown/render/source_pieces.dart';
 import 'package:niman/src/markdown/render/source_pointer.dart';
 import 'package:niman/src/markdown/render/source_row_slivers.dart';
 import 'package:niman/src/markdown/render/source_rows.dart';
@@ -445,9 +443,6 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
         _replaceRange(start, end, text, caret: caret, follow: false),
   );
 
-  /// The note's tables, laid out as the read view lays them out.
-  final LiveTables _tables = LiveTables();
-
   /// What the footnotes `live` ends the note with are parsed with.
   final ReadParser _footnoteParser = ReadParser();
 
@@ -581,6 +576,22 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// asks for its rectangle.
   final SourceParagraphs _paragraphs = SourceParagraphs();
 
+  /// The pieces a line is drawn in, and a table's rows as `live` lays them
+  /// out: what the caret, a tap and the table's grid ask.
+  late final SourcePieces _pieces = SourcePieces(
+    buffer: () => widget.buffer,
+    live: () => widget.hideMarkers,
+    styler: () => _styler,
+    caretSpot: () => _caret.spot.value,
+    paragraphs: _paragraphs,
+    tokensOf: (line) => _lineAt(line).tokens,
+    syntax: () => _syntax,
+    dark: () => widget.dark,
+    theme: () => widget.theme,
+    scaler: () => _scaler,
+    widthOf: _widthOf,
+  );
+
   /// What a line is marked with beyond its colours: the selection, the
   /// composing range, the spelling, the dead links, the find bar's matches.
   late final SourceLineMarks _marks = SourceLineMarks(
@@ -613,7 +624,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     buffer: () => widget.buffer,
     selection: () => _selection,
     mounted: () => mounted,
-    fragmentAt: _fragmentAt,
+    fragmentAt: (line, local) => _pieces.fragmentAt(line, local),
     width: () => _caretWidth,
     caretOnLine: (line) => _typing.brackets.caretOnLine(line),
     activeItems: () => widget.activeItems,
@@ -730,10 +741,10 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     caretSpot: _caret.spot,
     noteBox: () => _noteBox,
     scroll: () => _scroll,
-    tableRowAt: (line, block, at) => _tableRowAt(context, line, block, at),
-    piecesOf: _piecesOf,
+    tableRowAt: (line, block, at) => _pieces.tableRowAt(line, block, at),
+    piecesOf: _pieces.of,
     lineBox: _geometry.lineBox,
-    drawnHeightOf: _drawnHeightOf,
+    drawnHeightOf: _pieces.drawnHeightOf,
     theme: () => widget.theme,
     replace: (start, end, text, caret) =>
         replaceText(start, end, text, caret: SelectionModel.at(caret)),
@@ -1144,7 +1155,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     final line = _caretLineIndex;
     if (rect == null || line < 0) return null;
     final local = _selection.extent - widget.buffer.offsetOfLine(line);
-    final (_, paragraph) = _fragmentAt(line, local);
+    final (_, paragraph) = _pieces.fragmentAt(line, local);
     if (paragraph == null || !paragraph.attached) return null;
     return rect.shift(paragraph.localToGlobal(Offset.zero));
   }
@@ -1166,7 +1177,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       // Side by side, two columns' lines hold the same height: a line of a
       // column holds a point only across its column (#729).
       if (x != null && !_geometry.inColumnOf(line, x)) continue;
-      final pieces = _piecesOf(line);
+      final pieces = _pieces.of(line);
       if (pieces.length == 1) {
         final object = SourceParagraphs.renderOf(pieces.first.key);
         if (object == null) continue;
@@ -1200,7 +1211,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     // caret at its end rather than nowhere.
     final point = box.globalToLocal(global);
     final line = _geometry.lineAtY(point.dy + _scroll.offset, point.dx);
-    final pieces = _piecesOf(line);
+    final pieces = _pieces.of(line);
     // The point in the *paragraph's own* coordinates, from its own transform:
     // the insets, the gutter and a live-mode indent are all in that transform,
     // so none of them has to be subtracted by hand. (Doing it by hand
@@ -1840,7 +1851,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     final lineStart = buffer.offsetOfLine(line);
     final lineEnd = lineStart + buffer.lineLengthAt(line);
     final last = (end > start ? end - 1 : start).clamp(lineStart, lineEnd);
-    final (piece, paragraph) = _fragmentAt(line, last - lineStart);
+    final (piece, paragraph) = _pieces.fragmentAt(line, last - lineStart);
     if (piece == null || paragraph == null) return null;
     return sourcePieceSpanRect(
       piece,
@@ -1848,63 +1859,6 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       start - lineStart,
       end.clamp(lineStart, lineEnd) - lineStart,
     );
-  }
-
-  /// The paragraphs line [line] is drawn in: the line's own, or a table row
-  /// laid out in fitted columns. Each says where its source starts on the
-  /// line and where it stands in the line's box — below the table's cell
-  /// padding for a wrapped row, so the caret's shift and the grid agree.
-  List<SourcePiece> _piecesOf(int line) {
-    SourcePiece one(int start, int end, [double x = 0, double y = 0]) =>
-        (key: _paragraphs.keyFor(line), start: start, end: end, x: x, y: y);
-    final length = widget.buffer.lineLengthAt(line);
-    final single = <SourcePiece>[one(0, length)];
-    final block = _styler?.blockOf(line);
-    if (block == null || block.kind != BlockKind.table) return single;
-    final row = _tableRowAt(context, line, block, _caret.spot.value);
-    final wrapped = row?.wrapped;
-    if (wrapped == null || wrapped.isEmpty) return single;
-    final pad = widget.theme.tableCellPadding.top;
-    final pieces = <SourcePiece>[];
-    var y = pad;
-    for (final visualLine in wrapped) {
-      for (final piece in visualLine.pieces) {
-        pieces.add((
-          key: _paragraphs.fragmentKey(line, pieces.length),
-          start: piece.start,
-          end: piece.end,
-          x: piece.x,
-          y: y,
-        ));
-      }
-      y += visualLine.height;
-    }
-    return pieces.isEmpty ? single : pieces;
-  }
-
-  /// The fragment of line [line] a caret at [local] of the line is drawn in,
-  /// and its paragraph when a frame has built it.
-  (SourcePiece?, RenderParagraph?) _fragmentAt(int line, int local) {
-    final piece = SourceParagraphs.pieceHolding(
-      _piecesOf(line),
-      () => widget.buffer.lineAt(line),
-      local,
-    );
-    return (piece, piece == null ? null : SourceParagraphs.renderOf(piece.key));
-  }
-
-  /// How tall the line [line] is drawn: its paragraph's height, or the sum
-  /// of a wrapped table row's visual lines.
-  double _drawnHeightOf(int line) {
-    final block = _styler?.blockOf(line);
-    if (block != null && block.kind == BlockKind.table) {
-      final row = _tableRowAt(context, line, block, _caret.spot.value);
-      final wrapped = row?.wrapped;
-      if (wrapped != null && wrapped.isNotEmpty) {
-        return wrapped.fold<double>(0, (sum, one) => sum + one.height);
-      }
-    }
-    return _paragraphs.paragraphAt(line)?.size.height ?? 0;
   }
 
   /// The caret's spot, exposed so a test can hold that a move inside a run
@@ -1953,49 +1907,6 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     widget.buffer,
     drawsTodo: () => TodoBlockScope.of(context) != null,
   );
-
-  /// How line [index] of table [block] is laid out with the caret at [at]:
-  /// as every line of it is at rest, but for the run the caret is in, whose
-  /// marks show as a paragraph's word does — and widen its column.
-  ///
-  /// Null outside `live`: source draws a table's line as the one paragraph
-  /// it is, so the caret, a tap and the grid are not to look for pieces of a
-  /// fitted row there.
-  LiveTableRow? _tableRowAt(
-    BuildContext context,
-    int index,
-    Block block,
-    CaretSpot at,
-  ) {
-    if (!widget.hideMarkers) return null;
-    final inside = at.line >= block.startLine && at.line < block.endLine;
-    return _tables.rowOf(
-      index,
-      block,
-      widget.buffer,
-      tokensOf: (line) => _lineAt(line).tokens,
-      hidden: (line, token) {
-        if (!token.marker && !isSourceMarker(token.kind)) return false;
-        if (isSourceMarker(token.kind) || line != at.line) return true;
-        return token.start < at.runStart || token.end > at.runEnd;
-      },
-      styleOf: (token) => nestedTokenStyle(
-        token,
-        _syntax ??
-            (widget.dark
-                ? SyntaxColors.fallbackDark
-                : SyntaxColors.fallbackLight),
-        dark: widget.dark,
-      ),
-      theme: widget.theme,
-      scaler: _scaler,
-      // A table in a side-by-side column is fitted to the column (#729).
-      budget: _widthOf(index),
-      reveal: inside ? at : null,
-      revealLine: inside ? at.line : null,
-      tokensFrom: _styler,
-    );
-  }
 
   /// Roughly how many monospace characters fit a line at this width and size.
   ///
@@ -2406,7 +2317,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       mathCache: widget.mathCache,
       diagram: widget.hideMarkers ? _diagramOf(index) : null,
       tableRow: widget.hideMarkers && block?.kind == BlockKind.table
-          ? (at) => _tableRowAt(context, index, block!, at)
+          ? (at) => _pieces.tableRowAt(index, block!, at)
           : null,
       tableHeader: block?.kind == BlockKind.table && index == block!.startLine,
       pieceKey: block?.kind == BlockKind.table
@@ -2510,7 +2421,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     final buffer = widget.buffer;
     final line = buffer.lineOf(offset.clamp(0, buffer.length));
     final lineStart = buffer.offsetOfLine(line);
-    final (piece, paragraph) = _fragmentAt(line, offset - lineStart);
+    final (piece, paragraph) = _pieces.fragmentAt(line, offset - lineStart);
     if (piece == null || paragraph == null) return null;
     return sourcePieceCaretRect(piece, paragraph, offset - lineStart);
   }
