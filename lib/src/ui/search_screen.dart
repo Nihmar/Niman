@@ -17,6 +17,7 @@ import 'package:niman/src/ui/indexing_notice.dart';
 import 'package:niman/src/ui/pointer_density.dart';
 import 'package:niman/src/ui/search_field_pager.dart';
 import 'package:niman/src/ui/search_hit_row.dart';
+import 'package:niman/src/ui/search_query_bar.dart';
 import 'package:niman/src/ui/search_replace_panel.dart';
 import 'package:niman/src/ui/search_replace_preview.dart';
 import 'package:niman/src/ui/search_request.dart';
@@ -715,107 +716,21 @@ final class _SearchScreenState extends State<SearchScreen> {
         final child = Column(
           children: [
             const IndexingNotice(),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
-              child: Column(
-                children: [
-                  TextField(
-                    key: const Key('search-query'),
-                    controller: _query,
-                    focusNode: _queryFocus,
-                    textInputAction: TextInputAction.search,
-                    // The search action of a touch keyboard (a hardware
-                    // Enter is [_queryKey]'s).
-                    onSubmitted: (_) => _openMarkedOrFirst(),
-                    decoration: InputDecoration(
-                      hintText: AppStrings.searchHint,
-                      // The icon says which of the two the box is doing, so a
-                      // filter that matched is visible before the results are.
-                      prefixIcon: Icon(
-                        _inFieldMode ? Icons.filter_alt_outlined : Icons.search,
-                      ),
-                      suffixIcon: dense || _query.text.isNotEmpty
-                          ? Row(
-                              mainAxisSize: MainAxisSize.min,
-                              // The row is anchored at the field's end and
-                              // grows leftwards: Clear, which comes and
-                              // goes, sits on that side, so the toggle at
-                              // the end never moves under a pointer on it
-                              // (#782). Beside the toggle it is as compact
-                              // as the toggle, or the field would grow
-                              // taller and shift the toggle down.
-                              children: [
-                                if (_query.text.isNotEmpty)
-                                  IconButton(
-                                    key: const Key('search-clear'),
-                                    icon: const Icon(Icons.close),
-                                    visualDensity: dense
-                                        ? VisualDensity.compact
-                                        : null,
-                                    onPressed: _clearQuery,
-                                  ),
-                                if (dense) _modeToggle(),
-                              ],
-                            )
-                          : null,
-                      border: const OutlineInputBorder(),
-                      isDense: true,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      // Words or contains is a toggle inside the field where a
-                      // pointer aims (#712); a phone keeps the segmented row.
-                      if (!dense)
-                        SegmentedButton<bool>(
-                          key: const Key('search-mode'),
-                          segments: [
-                            ButtonSegment(
-                              value: false,
-                              label: Text(AppStrings.searchModeWords),
-                            ),
-                            ButtonSegment(
-                              value: true,
-                              label: Text(AppStrings.searchModeContains),
-                            ),
-                          ],
-                          selected: {_contains},
-                          onSelectionChanged: (selection) =>
-                              _setContains(selection.single),
-                          showSelectedIcon: false,
-                          style: const ButtonStyle(
-                            visualDensity: VisualDensity.compact,
-                          ),
-                        ),
-                      const Spacer(),
-                      // Compact so the row stays inside a phone's width with
-                      // the replace button showing: at standard density it
-                      // overflows by a few pixels at 390 px.
-                      if (!_contains && !_inFieldMode && _hits.isNotEmpty)
-                        IconButton(
-                          key: const Key('search-replace'),
-                          tooltip: AppStrings.replaceTooltip,
-                          icon: const Icon(Icons.find_replace),
-                          style: const ButtonStyle(
-                            visualDensity: VisualDensity.compact,
-                          ),
-                          onPressed: _openReplaceAll,
-                        ),
-                      if (widget.onOpenTags != null)
-                        IconButton(
-                          key: const Key('open-tags'),
-                          tooltip: AppStrings.openTagsTooltip,
-                          icon: const Icon(Icons.sell_outlined),
-                          style: const ButtonStyle(
-                            visualDensity: VisualDensity.compact,
-                          ),
-                          onPressed: widget.onOpenTags,
-                        ),
-                    ],
-                  ),
-                  if (_replaceMode)
-                    SearchReplacePanel(
+            SearchQueryBar(
+              query: _query,
+              focusNode: _queryFocus,
+              dense: dense,
+              contains: _contains,
+              fieldMode: _inFieldMode,
+              canReplace: !_contains && !_inFieldMode && _hits.isNotEmpty,
+              onSubmitted: _openMarkedOrFirst,
+              onClear: _clearQuery,
+              onContainsChanged: _setContains,
+              onReplace: _openReplaceAll,
+              onOpenTags: widget.onOpenTags,
+              panel: !_replaceMode
+                  ? null
+                  : SearchReplacePanel(
                       term: _query.text.trim(),
                       onlyPath: _replaceOnly,
                       notes: _replacePreview,
@@ -829,8 +744,6 @@ final class _SearchScreenState extends State<SearchScreen> {
                       onClose: _leaveReplaceMode,
                       onConfirm: _runReplace,
                     ),
-                ],
-              ),
             ),
             if (_scan case final scan? when !_replaceMode)
               _scanBar(Theme.of(context), scan),
@@ -1035,19 +948,6 @@ final class _SearchScreenState extends State<SearchScreen> {
     opens.newTab(_hits[at].path);
     return true;
   }
-
-  /// Words/contains as a toggle in the query field, where a pointer aims
-  /// (#712): selected means contains, unselected means whole words.
-  Widget _modeToggle() => IconButton(
-    key: const Key('search-mode-toggle'),
-    tooltip: _contains
-        ? AppStrings.searchModeContains
-        : AppStrings.searchModeWords,
-    isSelected: _contains,
-    visualDensity: VisualDensity.compact,
-    icon: const Icon(Icons.abc),
-    onPressed: () => _setContains(!_contains),
-  );
 
   /// A result row's menu: the single-note replace (T-M3-10) and, where
   /// the shell has them, the other ways to open it (#712). A long press
