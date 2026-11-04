@@ -16,11 +16,13 @@ import 'package:niman/src/ui/action_sheet.dart';
 import 'package:niman/src/ui/indexing_notice.dart';
 import 'package:niman/src/ui/pointer_density.dart';
 import 'package:niman/src/ui/search_field_pager.dart';
+import 'package:niman/src/ui/search_hint.dart';
 import 'package:niman/src/ui/search_hit_row.dart';
 import 'package:niman/src/ui/search_query_bar.dart';
 import 'package:niman/src/ui/search_replace_panel.dart';
 import 'package:niman/src/ui/search_replace_preview.dart';
 import 'package:niman/src/ui/search_request.dart';
+import 'package:niman/src/ui/search_scan_bar.dart';
 import 'package:niman/src/ui/search_task_events.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/unsaved_notes.dart';
@@ -746,7 +748,7 @@ final class _SearchScreenState extends State<SearchScreen> {
                     ),
             ),
             if (_scan case final scan? when !_replaceMode)
-              _scanBar(Theme.of(context), scan),
+              SearchScanBar(scan: scan, onStop: _stopScan),
             if (_stale && !_replaceMode)
               const LinearProgressIndicator(
                 key: Key('search-busy'),
@@ -802,38 +804,6 @@ final class _SearchScreenState extends State<SearchScreen> {
   int _groupLead(List<TaskEventHit> group) =>
       group.isEmpty ? 0 : 1 + group.length + (_hits.isEmpty ? 0 : 1);
 
-  /// The progress of a contains scan and the way to end it (#1038).
-  Widget _scanBar(ThemeData theme, ContainsProgress scan) => Column(
-    key: const Key('search-scan'),
-    children: [
-      LinearProgressIndicator(
-        value: scan.total > 0 ? scan.scanned / scan.total : null,
-        minHeight: 2,
-      ),
-      Padding(
-        padding: const EdgeInsets.fromLTRB(12, 0, 4, 0),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                AppStrings.searchScanning(scan.scanned, scan.total),
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            TextButton(
-              key: const Key('search-stop'),
-              onPressed: _stopScan,
-              child: Text(AppStrings.searchStop),
-            ),
-          ],
-        ),
-      ),
-    ],
-  );
-
   /// Ends the contains scan with the hits it has found so far (#1038): the
   /// source is told the query is over, and its stream ends.
   void _stopScan() {
@@ -842,7 +812,10 @@ final class _SearchScreenState extends State<SearchScreen> {
   }
 
   Widget _results(ThemeData theme) {
-    if (!_searched) return _hint(theme);
+    if (!_searched) {
+      final text = _query.text.trim();
+      return SearchHint(query: text, searchable: _canSearch(text));
+    }
     final group = _taskEventRows();
     // No match is only known once the scan is done (#1038).
     if (_hits.isEmpty && group.isEmpty && _scan != null) {
@@ -1143,41 +1116,6 @@ final class _SearchScreenState extends State<SearchScreen> {
     if (!mounted) return;
     ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text(message)));
-  }
-
-  /// The pre-search hint: the empty state, the too-short state (the box
-  /// holds text that cannot be searched yet), or nothing while a runnable
-  /// query waits out the debounce.
-  Widget _hint(ThemeData theme) {
-    final text = _query.text.trim();
-    final String message;
-    if (text.isEmpty) {
-      message = AppStrings.searchEmptyHint;
-    } else if (!_canSearch(text)) {
-      message = AppStrings.searchTooShortHint;
-    } else {
-      return const SizedBox.shrink();
-    }
-    // Padded and centered, and width-capped: a bare Text under a Center
-    // still takes the full width, so the hint wrapped ragged-right against
-    // both screen edges (device report, 2026-09-11). The cap keeps the two
-    // lines a readable measure instead of one edge-to-edge line on a wide
-    // window.
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 320),
-          child: Text(
-            message,
-            textAlign: TextAlign.center,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ),
-      ),
-    );
   }
 
   /// Whether [text] is a search worth running. A one-character FTS prefix
