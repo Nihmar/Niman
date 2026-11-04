@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:niman/src/core/app_channel.dart';
 import 'package:niman/src/core/app_theme.dart';
 import 'package:niman/src/core/custom_theme.dart';
 import 'package:niman/src/core/frame_log.dart';
@@ -46,6 +45,7 @@ import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/library/note_ops.dart';
 import 'package:niman/src/library/rescan_scheduler.dart';
 import 'package:niman/src/library/session.dart';
+import 'package:niman/src/library/session_update_checks.dart';
 import 'package:niman/src/library/trash_cleaner.dart';
 import 'package:niman/src/library/tree_moves.dart';
 import 'package:niman/src/library/watch_batch_queue.dart';
@@ -63,8 +63,6 @@ import 'package:niman/src/sync/sync_service.dart';
 import 'package:niman/src/sync/sync_store.dart';
 import 'package:niman/src/templates/repo.dart';
 import 'package:niman/src/update/update_check.dart';
-import 'package:niman/src/update/update_scheduler.dart';
-import 'package:niman/src/update/update_service.dart';
 import 'package:niman/src/widget/widget_configs.dart';
 import 'package:niman/src/workspace/workspace_slot.dart';
 import 'package:niman/src/workspace/workspace_store.dart';
@@ -590,7 +588,7 @@ final class LibraryController implements LibrarySession {
     _indexDb = indexDb;
     final appDb = await appDatabase;
     AppLog.enabled = await AppSettingsRepo(appDb).debugLogsEnabled();
-    _startUpdateChecks(appDb);
+    _updates.start(appDb);
     // Whether this open is a library being created: a folder with no
     // settings file, asked before the seed below can write one (#1109). A
     // rebuild of the index is not an open and says nothing about it.
@@ -976,60 +974,23 @@ final class LibraryController implements LibrarySession {
         .setAutoUpdateEnabled(enabled: enabled);
   }
 
-  UpdateScheduler? _updateScheduler;
+  /// The launch + six-hourly update checks, started once per controller.
+  late final SessionUpdateChecks _updates = SessionUpdateChecks(
+    onUpdate: notify,
+  );
 
   /// The latest available update the scheduler found, if any (issue #81).
   ///
   /// Read by the shell banner and the settings row; both rebuild on
-  /// session events, which [UpdateScheduler.onUpdate] bumps.
+  /// session events, which [SessionUpdateChecks.onUpdate] bumps.
   @override
-  UpdateAvailable? get pendingUpdate => _pendingUpdate;
-  UpdateAvailable? _pendingUpdate;
+  UpdateAvailable? get pendingUpdate => _updates.pending;
 
   /// Drops the pending update (the banner's dismiss action).
   @override
   void clearPendingUpdate() {
-    _pendingUpdate = null;
+    _updates.clear();
     notify();
-  }
-
-  /// Starts the launch + six-hourly update checks, once per controller.
-  ///
-  /// The scheduler only reads the settings store and GitHub; drift writes
-  /// stay on the main isolate, in its callbacks.
-  void _startUpdateChecks(AppDatabase appDb) {
-    // Testing builds check no release channel (issue #106), and iOS is the
-    // App Store's to update: the stored toggle is irrelevant, nothing
-    // polls and no banner can appear.
-    if (!appUpdatesItself) return;
-    if (_updateScheduler != null) return;
-    // What an earlier update left in Android's updates folder has done its
-    // work, or was not wanted: the next one is fetched afresh (#900). Once,
-    // at launch — never under a download this run started.
-    unawaited(clearUpdateDownloads());
-    final repo = AppSettingsRepo(appDb);
-    _updateScheduler = UpdateScheduler(
-      isEnabled: repo.autoUpdateEnabled,
-      runCheck: () async {
-        try {
-          final current = await currentAppVersion();
-          final update = await checkNow(current: current);
-          _log.debug(
-            'update check: current $current -> '
-            '${update == null ? 'up to date' : 'available ${update.version}'}',
-          );
-          return update;
-        } on Object catch (error) {
-          _log.warning('update check failed: $error');
-          return null;
-        }
-      },
-      noteChecked: repo.setLastUpdateCheck,
-      onUpdate: (update) {
-        _pendingUpdate = update;
-        notify();
-      },
-    )..start();
   }
 
   /// The open library's settings, or the shipped defaults while none is
@@ -1615,8 +1576,7 @@ final class LibraryController implements LibrarySession {
   /// app settings database, which outlives every library.
   @override
   Future<void> dispose() async {
-    _updateScheduler?.stop();
-    _updateScheduler = null;
+    _updates.stop();
     await close();
     _disposed = true;
     if (!_events.isClosed) {
