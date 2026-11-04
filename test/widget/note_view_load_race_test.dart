@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/markdown/note_read_failure.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
+import 'package:niman/src/ui/note_editor_options.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/strings.dart';
 
@@ -19,8 +20,10 @@ NoteView _view(
   int reloadToken = 0,
 }) => NoteView(
   path: path,
-  showLineNumbers: false,
-  autofocusEditor: false,
+  options: const NoteEditorOptions(
+    showLineNumbers: false,
+    autofocusEditor: false,
+  ),
   readNote: readNote,
   writeNote: (_, _) async {},
   reloadToken: reloadToken,

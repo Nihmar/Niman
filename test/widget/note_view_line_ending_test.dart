@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
+import 'package:niman/src/ui/note_editor_options.dart';
 import 'package:niman/src/ui/note_view.dart';
 
 Widget _app(NoteView view) => MaterialApp(home: Scaffold(body: view));
@@ -18,8 +19,10 @@ void main() {
       _app(
         NoteView(
           path: '/notes/a.md',
-          showLineNumbers: false,
-          autofocusEditor: false,
+          options: const NoteEditorOptions(
+            showLineNumbers: false,
+            autofocusEditor: false,
+          ),
           readNote: (_) async => onDisk,
           writeNote: (_, text) async => writes.add(text),
           reloadToken: reloadToken,
@@ -52,8 +55,10 @@ void main() {
     Widget app(int token) => _app(
       NoteView(
         path: '/notes/a.md',
-        showLineNumbers: false,
-        autofocusEditor: false,
+        options: const NoteEditorOptions(
+          showLineNumbers: false,
+          autofocusEditor: false,
+        ),
         readNote: (_) async => disk,
         writeNote: (_, text) async => writes.add(text),
         reloadToken: token,

@@ -14,6 +14,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
+import 'package:niman/src/ui/note_editor_options.dart';
 import 'package:niman/src/ui/note_view.dart';
 
 /// Whether this run is the one that holds the design's ceilings.
@@ -34,8 +35,10 @@ void main() {
         home: Scaffold(
           body: NoteView(
             path: '/notes/a.md',
-            showLineNumbers: true,
-            autofocusEditor: false,
+            options: const NoteEditorOptions(
+              showLineNumbers: true,
+              autofocusEditor: false,
+            ),
             toolbarTop: true,
             readNote: (_) async => text,
             writeNote: (_, _) async {},

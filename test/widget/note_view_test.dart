@@ -9,6 +9,7 @@ import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/markdown/surface.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/spellcheck/spell_checker.dart';
+import 'package:niman/src/ui/note_editor_options.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/strings.dart';
 
@@ -48,8 +49,10 @@ NoteView _view({
   outlineInDock: outlineInDock,
   spellCheckInDock: spellCheckInDock,
   spellCheck: spellCheck,
-  showLineNumbers: showLineNumbers,
-  autofocusEditor: autofocusEditor,
+  options: NoteEditorOptions(
+    showLineNumbers: showLineNumbers,
+    autofocusEditor: autofocusEditor,
+  ),
   showPreview: showPreview,
   onEditorKindChanged: onEditorKindChanged,
   path: path,
@@ -233,8 +236,10 @@ void main() {
       var seamWrites = 0;
       Widget view(String path) => _app(
         NoteView(
-          showLineNumbers: true,
-          autofocusEditor: false,
+          options: const NoteEditorOptions(
+            showLineNumbers: true,
+            autofocusEditor: false,
+          ),
           path: path,
           readNote: (_) async => 'start',
           writeNote: (_, _) async => seamWrites++,
@@ -427,8 +432,10 @@ void main() {
                 flip = setState;
                 return NoteView(
                   path: '/notes/a.md',
-                  showLineNumbers: false,
-                  autofocusEditor: true,
+                  options: const NoteEditorOptions(
+                    showLineNumbers: false,
+                    autofocusEditor: true,
+                  ),
                   showPreview: showPreview,
                   readNote: (_) async => 'hello',
                 );
@@ -478,8 +485,10 @@ void main() {
                 Expanded(
                   child: NoteView(
                     path: '/notes/a.md',
-                    showLineNumbers: false,
-                    autofocusEditor: false,
+                    options: const NoteEditorOptions(
+                      showLineNumbers: false,
+                      autofocusEditor: false,
+                    ),
                     showPreview: true,
                     readNote: (_) => gate.future,
                   ),

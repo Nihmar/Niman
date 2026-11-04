@@ -63,7 +63,7 @@ void main() {
   }
 
   bool noteTypewriter(WidgetTester tester) =>
-      tester.widget<NoteView>(find.byType(NoteView)).typewriter;
+      tester.widget<NoteView>(find.byType(NoteView)).options.typewriter;
 
   testWidgets('Ctrl+Shift+T and the note’s switch turn it for the library', (
     tester,

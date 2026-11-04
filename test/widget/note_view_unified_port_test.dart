@@ -19,6 +19,7 @@ import 'package:niman/src/markdown/render/markdown_read_view.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/key_map.dart';
+import 'package:niman/src/ui/note_editor_options.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/note_view_handle.dart';
 import 'package:niman/src/ui/unsaved_notes.dart';
@@ -62,8 +63,12 @@ NoteView _note({
 }) => NoteView(
   key: key,
   path: path,
-  showLineNumbers: true,
-  autofocusEditor: autofocus,
+  options: NoteEditorOptions(
+    showLineNumbers: true,
+    autofocusEditor: autofocus,
+    noteColumn: column,
+    linkPreview: linkPreview,
+  ),
   toolbarTop: toolbarTop,
   reloadToken: reloadToken,
   unsavedTracker: tracker,
@@ -80,11 +85,9 @@ NoteView _note({
   showWysiwyg: live,
   pickImagePath: pickImagePath,
   importImage: importImage,
-  noteColumn: column,
   readNote: readNote ?? (_) async => text,
   writeNote: (_, content) async => writes?.add(content),
   createMissingNote: createMissingNote,
-  linkPreview: linkPreview,
 );
 
 /// Lets a chain of real `dart:io` probes finish: each one completes outside

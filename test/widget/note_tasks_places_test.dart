@@ -9,6 +9,7 @@ import 'package:niman/src/core/settings/features.dart';
 import 'package:niman/src/core/settings/library_features.dart';
 import 'package:niman/src/ui/dock/right_dock.dart';
 import 'package:niman/src/ui/dock/tasks_dock_pane.dart';
+import 'package:niman/src/ui/note_editor_options.dart';
 import 'package:niman/src/ui/note_menu.dart';
 import 'package:niman/src/ui/note_tasks_host.dart';
 import 'package:niman/src/ui/note_tasks_section.dart';
@@ -70,8 +71,10 @@ void main() {
           home: Scaffold(
             body: NoteView(
               path: path,
-              showLineNumbers: false,
-              autofocusEditor: false,
+              options: const NoteEditorOptions(
+                showLineNumbers: false,
+                autofocusEditor: false,
+              ),
               libraryRoot: libraryRoot,
               linkSource: linked ? fixture.links : null,
               features: ValueNotifier(features),

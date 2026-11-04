@@ -11,6 +11,7 @@ import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/markdown/surface.dart';
 import 'package:niman/src/ui/move_to_tasks_flow.dart';
+import 'package:niman/src/ui/note_editor_options.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/note_view_handle.dart';
 import 'package:niman/src/ui/strings.dart';
@@ -52,8 +53,10 @@ void main() {
               key: key,
               path: _path,
               libraryRoot: '/fake',
-              showLineNumbers: false,
-              autofocusEditor: false,
+              options: const NoteEditorOptions(
+                showLineNumbers: false,
+                autofocusEditor: false,
+              ),
               toolbarTop: true,
               readNote: (_) async => note,
               writeNote: (_, _) async {},

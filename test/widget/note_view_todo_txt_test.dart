@@ -6,14 +6,17 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
+import 'package:niman/src/ui/note_editor_options.dart';
 import 'package:niman/src/ui/note_view.dart';
 
 Widget _app(String path) => MaterialApp(
   home: Scaffold(
     body: NoteView(
       path: path,
-      showLineNumbers: false,
-      autofocusEditor: false,
+      options: const NoteEditorOptions(
+        showLineNumbers: false,
+        autofocusEditor: false,
+      ),
       showPreview: true,
       showWysiwyg: true,
       onEditorKindChanged: (_) {},

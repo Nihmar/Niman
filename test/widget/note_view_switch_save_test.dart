@@ -9,6 +9,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
+import 'package:niman/src/ui/note_editor_options.dart';
 import 'package:niman/src/ui/note_view.dart';
 
 void main() {
@@ -33,8 +34,10 @@ void main() {
 
     NoteView view(String path) => NoteView(
       path: path,
-      showLineNumbers: false,
-      autofocusEditor: false,
+      options: const NoteEditorOptions(
+        showLineNumbers: false,
+        autofocusEditor: false,
+      ),
       readNote: (path) async => disk[path] ?? '',
       writeNote: (path, text) async {
         events.add('start $text');
@@ -85,8 +88,10 @@ void main() {
 
     NoteView view(String path) => NoteView(
       path: path,
-      showLineNumbers: false,
-      autofocusEditor: false,
+      options: const NoteEditorOptions(
+        showLineNumbers: false,
+        autofocusEditor: false,
+      ),
       readNote: (path) async => disk[path] ?? '',
       writeNote: (_, text) async => fallbacks.add(text),
       saveNoteStream:

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
+import 'package:niman/src/ui/note_editor_options.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/unsaved_notes.dart';
 import 'package:path/path.dart' as p;
@@ -20,8 +21,10 @@ NoteView _view({
   int reloadToken = 0,
 }) => NoteView(
   path: path,
-  showLineNumbers: true,
-  autofocusEditor: false,
+  options: const NoteEditorOptions(
+    showLineNumbers: true,
+    autofocusEditor: false,
+  ),
   readNote: readNote,
   writeNote: writeNote,
   reloadToken: reloadToken,
@@ -55,7 +58,13 @@ void main() {
       File(path).writeAsStringSync('one two three');
       await tester.pumpWidget(
         _app(
-          NoteView(path: path, showLineNumbers: false, autofocusEditor: false),
+          NoteView(
+            path: path,
+            options: const NoteEditorOptions(
+              showLineNumbers: false,
+              autofocusEditor: false,
+            ),
+          ),
         ),
       );
       // The real read is an isolate: give it its turn.
@@ -80,8 +89,10 @@ void main() {
         _app(
           NoteView(
             path: path,
-            showLineNumbers: false,
-            autofocusEditor: false,
+            options: const NoteEditorOptions(
+              showLineNumbers: false,
+              autofocusEditor: false,
+            ),
             reloadToken: 1,
           ),
         ),
@@ -104,8 +115,10 @@ void main() {
       Widget app({int token = 0}) => _app(
         NoteView(
           path: path,
-          showLineNumbers: false,
-          autofocusEditor: false,
+          options: const NoteEditorOptions(
+            showLineNumbers: false,
+            autofocusEditor: false,
+          ),
           reloadToken: token,
         ),
       );
@@ -149,7 +162,13 @@ void main() {
       File(path).writeAsStringSync('one two three');
       await tester.pumpWidget(
         _app(
-          NoteView(path: path, showLineNumbers: false, autofocusEditor: false),
+          NoteView(
+            path: path,
+            options: const NoteEditorOptions(
+              showLineNumbers: false,
+              autofocusEditor: false,
+            ),
+          ),
         ),
       );
       await tester.runAsync(
@@ -165,8 +184,10 @@ void main() {
         _app(
           NoteView(
             path: path,
-            showLineNumbers: false,
-            autofocusEditor: false,
+            options: const NoteEditorOptions(
+              showLineNumbers: false,
+              autofocusEditor: false,
+            ),
             reloadToken: 1,
           ),
         ),
@@ -195,8 +216,10 @@ void main() {
       Widget note(String path) => _app(
         NoteView(
           path: path,
-          showLineNumbers: false,
-          autofocusEditor: false,
+          options: const NoteEditorOptions(
+            showLineNumbers: false,
+            autofocusEditor: false,
+          ),
           unsavedTracker: tracker,
           readNote: (_) async => disk,
           writeNote: (_, _) async {},

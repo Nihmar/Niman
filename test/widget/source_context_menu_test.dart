@@ -16,6 +16,7 @@ import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/markdown/surface.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/spellcheck/spell_checker.dart';
+import 'package:niman/src/ui/note_editor_options.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/strings.dart';
 
@@ -325,8 +326,10 @@ void main() {
         home: Scaffold(
           body: NoteView(
             path: '/n/a.md',
-            showLineNumbers: false,
-            autofocusEditor: true,
+            options: const NoteEditorOptions(
+              showLineNumbers: false,
+              autofocusEditor: true,
+            ),
             toolbarTop: true,
             // The WYSIWYG pane: the same menu over the `live` surface.
             showWysiwyg: mode == _Mode.live,
@@ -369,8 +372,10 @@ void main() {
           home: Scaffold(
             body: NoteView(
               path: '/n/a.md',
-              showLineNumbers: false,
-              autofocusEditor: true,
+              options: const NoteEditorOptions(
+                showLineNumbers: false,
+                autofocusEditor: true,
+              ),
               toolbarTop: true,
               showWysiwyg: mode == _Mode.live,
               readNote: (_) async => text,
@@ -601,8 +606,10 @@ void main() {
           home: Scaffold(
             body: NoteView(
               path: '/n/a.md',
-              showLineNumbers: false,
-              autofocusEditor: true,
+              options: const NoteEditorOptions(
+                showLineNumbers: false,
+                autofocusEditor: true,
+              ),
               toolbarTop: true,
               showWysiwyg: true,
               readNote: (_) async => 'hello world',
@@ -638,8 +645,10 @@ void main() {
             home: Scaffold(
               body: NoteView(
                 path: '/n/a.md',
-                showLineNumbers: false,
-                autofocusEditor: true,
+                options: const NoteEditorOptions(
+                  showLineNumbers: false,
+                  autofocusEditor: true,
+                ),
                 toolbarTop: true,
                 showWysiwyg: true,
                 readNote: (_) async => 'hello world',
@@ -682,8 +691,10 @@ void main() {
           home: Scaffold(
             body: NoteView(
               path: '/n/a.md',
-              showLineNumbers: false,
-              autofocusEditor: true,
+              options: const NoteEditorOptions(
+                showLineNumbers: false,
+                autofocusEditor: true,
+              ),
               toolbarTop: true,
               showWysiwyg: true,
               readNote: (_) async => 'hello world',

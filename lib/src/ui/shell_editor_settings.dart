@@ -17,6 +17,7 @@ import 'package:niman/src/editor/toolbar_layout.dart';
 import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/lint/lint_rule.dart';
+import 'package:niman/src/ui/note_editor_options.dart';
 
 /// What the shell needs to know about the open library to draw it.
 @immutable
@@ -123,6 +124,24 @@ final class ShellEditorSettings {
   /// The #72 rules turned off, by id; see [lintRules] for the ones that
   /// run.
   final Set<String> lintRulesOff;
+
+  /// What of these the note views take (#1257).
+  NoteEditorOptions get noteOptions => NoteEditorOptions(
+    showLineNumbers: lineNumbers,
+    autofocusEditor: autofocusEditor,
+    noteColumn: noteColumn,
+    linkType: linkType,
+    newItemLocation: newItemLocation,
+    attachmentsFolder: attachmentsFolder,
+    templateFolder: templateFolder,
+    indentWidth: indentWidth,
+    sourceFont: sourceFont,
+    toolbarLayout: toolbarLayout,
+    typewriter: typewriter,
+    cascadeChecklist: cascadeChecklist,
+    frontmatterPanel: frontmatterPanel,
+    linkPreview: linkPreview,
+  );
 
   /// The rules a tidy applies: every rule but the ones turned off.
   Set<LintRule> get lintRules => <LintRule>{

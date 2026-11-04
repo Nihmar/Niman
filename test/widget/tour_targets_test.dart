@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/app.dart';
 import 'package:niman/src/core/welcome.dart';
 import 'package:niman/src/library/library_state.dart';
+import 'package:niman/src/ui/note_editor_options.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/tour/tour_steps.dart';
 import 'package:niman/src/ui/tour/tour_targets.dart';
@@ -67,8 +68,10 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: NoteView(
-            showLineNumbers: true,
-            autofocusEditor: false,
+            options: const NoteEditorOptions(
+              showLineNumbers: true,
+              autofocusEditor: false,
+            ),
             // The desktop shape: the toolbar sits above the note rather
             // than riding a keyboard that a bare test does not raise.
             toolbarTop: true,

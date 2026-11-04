@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/markdown/note_references.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
+import 'package:niman/src/ui/note_editor_options.dart';
 import 'package:niman/src/ui/note_view.dart';
 
 void main() {
@@ -19,8 +20,10 @@ void main() {
         home: Scaffold(
           body: NoteView(
             path: '/notes/long.md',
-            showLineNumbers: false,
-            autofocusEditor: false,
+            options: const NoteEditorOptions(
+              showLineNumbers: false,
+              autofocusEditor: false,
+            ),
             readNote: (_) async => 'One #first line.\n\nA [[Link]] here.\n',
             writeNote: (_, _) async {},
             saveNoteStream:

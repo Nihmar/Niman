@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
+import 'package:niman/src/ui/note_editor_options.dart';
 import 'package:niman/src/ui/note_view.dart';
 
 /// The runs painted with a background other than the selection's: the
@@ -41,8 +42,10 @@ Future<MarkdownSourceViewState> _open(
       home: Scaffold(
         body: NoteView(
           path: '/n/find.md',
-          showLineNumbers: false,
-          autofocusEditor: true,
+          options: const NoteEditorOptions(
+            showLineNumbers: false,
+            autofocusEditor: true,
+          ),
           // The same tests in both unified modes: `source` is the pane as
           // written, `live` the pane with the markers hidden and the caret's
           // own shown. The shell around them does not change.

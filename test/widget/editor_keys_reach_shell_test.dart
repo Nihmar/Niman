@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
+import 'package:niman/src/ui/note_editor_options.dart';
 import 'package:niman/src/ui/note_view.dart';
 
 void main() {
@@ -42,8 +43,10 @@ void main() {
               },
               child: NoteView(
                 path: '/n/a.md',
-                showLineNumbers: true,
-                autofocusEditor: true,
+                options: const NoteEditorOptions(
+                  showLineNumbers: true,
+                  autofocusEditor: true,
+                ),
                 showWysiwyg: wysiwyg,
                 toolbarTop: true,
                 readNote: (_) async => 'hello',

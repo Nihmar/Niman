@@ -8,6 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/markdown/edit/touch_selection.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
+import 'package:niman/src/ui/note_editor_options.dart';
 import 'package:niman/src/ui/note_view.dart';
 
 Widget _app(double height) => MaterialApp(
@@ -19,10 +20,12 @@ Widget _app(double height) => MaterialApp(
         height: height,
         child: NoteView(
           path: '/n/a.md',
-          showLineNumbers: false,
-          autofocusEditor: false,
-          // On, as the app has it (#171): the LayoutBuilder that rebuilds.
-          noteColumn: const NoteColumn(),
+          options: const NoteEditorOptions(
+            showLineNumbers: false,
+            autofocusEditor: false,
+            // On, as the app has it (#171): the LayoutBuilder that rebuilds.
+            noteColumn: NoteColumn(),
+          ),
           readNote: (_) async => 'first words here\n\nand more words below',
           writeNote: (_, _) async {},
         ),

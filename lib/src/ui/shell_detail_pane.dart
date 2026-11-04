@@ -8,15 +8,13 @@ import 'package:niman/src/annotations/annotation.dart';
 import 'package:niman/src/annotations/annotation_mark_source.dart';
 import 'package:niman/src/core/settings/features.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
-import 'package:niman/src/editor/note_column.dart';
-import 'package:niman/src/editor/toolbar_layout.dart';
-import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/links/library_links.dart';
 import 'package:niman/src/links/suggester.dart';
 import 'package:niman/src/reading/reading_positions.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/ui/attachment_view.dart';
 import 'package:niman/src/ui/detail_deck.dart';
+import 'package:niman/src/ui/note_editor_options.dart';
 import 'package:niman/src/ui/note_tasks_host.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/note_view_handle.dart';
@@ -32,15 +30,8 @@ final class ShellDetailPane extends StatelessWidget {
   const new({
     required this.root,
     required this.tabs,
-    required this.showLineNumbers,
-    required this.noteColumn,
+    required this.options,
     required this.barActions,
-    required this.autofocusEditor,
-    required this.linkType,
-    required this.newItemLocation,
-    required this.attachmentsFolder,
-    required this.indentWidth,
-    required this.toolbarLayout,
     required this.onEditorKindChanged,
     required this.linkSource,
     required this.wikilinkSuggester,
@@ -58,21 +49,15 @@ final class ShellDetailPane extends StatelessWidget {
     this.onPasteAsMarkdown,
     this.onMoveToTasks,
     this.reloadToken = 0,
-    this.templateFolder,
     this.linksFollowed = 0,
     this.onAnnotate,
     this.onConvertBook,
     this.ocr,
     this.marks,
     this.zen = false,
-    this.linkPreview = true,
     this.outlineInDock = false,
     this.spellCheckInDock = false,
     this.relatedInDock = false,
-    this.typewriter = false,
-    this.sourceFont = SourceFont.monospace,
-    this.cascadeChecklist = true,
-    this.frontmatterPanel = true,
     this.onToggleTypewriter,
     this.onMemento,
     this.onLoaded,
@@ -145,17 +130,11 @@ final class ShellDetailPane extends StatelessWidget {
   /// See [readNote].
   final Future<void> Function(String path, String content)? writeNote;
 
-  /// Editor setting forwards.
-  final bool showLineNumbers;
-
-  /// Where the note's text sits across the pane (issue #171).
-  final NoteColumn noteColumn;
+  /// How the library's settings say the note is edited (#1257).
+  final NoteEditorOptions options;
 
   /// The note's own controls at the end of its top row (#173).
   final List<Widget> barActions;
-
-  /// Whether the editor takes focus on open.
-  final bool autofocusEditor;
 
   /// The note the Files pane last opened (#727): only that tab's note view
   /// is asked, so a tab kept alive behind, or the other pane, is left
@@ -164,25 +143,6 @@ final class ShellDetailPane extends StatelessWidget {
 
   /// How many times the pane has asked that note for the caret.
   final int caretRequest;
-
-  /// The link format the link button inserts.
-  final LinkType linkType;
-
-  /// Where a dead link's new note lands (settings, issue #78).
-  final NewItemLocation newItemLocation;
-
-  /// The folder (library-relative) picked images are copied into.
-  final String attachmentsFolder;
-
-  /// The library's template folder: its notes have their template
-  /// commands coloured in the source.
-  final String? templateFolder;
-
-  /// The indent/outdent width in spaces.
-  final int indentWidth;
-
-  /// The arranged formatting toolbar.
-  final ToolbarLayout toolbarLayout;
 
   /// The status row's editor switch (T-WYS-12); null hides it, which is
   /// what a library with a single enabled editor passes.
@@ -236,23 +196,7 @@ final class ShellDetailPane extends StatelessWidget {
   /// Zen mode (#69): the notes without their chrome.
   final bool zen;
 
-  /// Typewriter mode (#70), and the status row's switch for it.
-  final bool typewriter;
-
-  /// The face the source pane is set in (issue #259).
-  final SourceFont sourceFont;
-
-  /// Whether ticking a checklist item ticks the tasks nested under it
-  /// (#326).
-  final bool cascadeChecklist;
-
-  /// Whether a note's properties panel shows above it (#157).
-  final bool frontmatterPanel;
-
-  /// Whether hovering a link previews the note it points at (#846).
-  final bool linkPreview;
-
-  /// See [typewriter].
+  /// Flips [NoteEditorOptions.typewriter].
   final VoidCallback? onToggleTypewriter;
 
   /// External-change reload requests for the open note (home-screen
@@ -350,13 +294,13 @@ final class ShellDetailPane extends StatelessWidget {
       ? AttachmentView(
           key: tab.key,
           path: p.join(root, tab.path),
-          column: noteColumn,
+          column: options.noteColumn,
           onEditEpubLook: onEditEpubLook,
           onEpubTextScale: onEpubTextScale,
           positions: ReadingPositions(root),
           anchor: tab.anchor,
           reloadToken: linksFollowed,
-          linkType: linkType,
+          linkType: options.linkType,
           onAnnotate: onAnnotate,
           onConvertBook: onConvertBook,
           ocr: ocr,
@@ -380,27 +324,14 @@ final class ShellDetailPane extends StatelessWidget {
         ? null
         : (_, length) => onLoaded!(tab.path, length),
     onEditedNoteClosed: onEditedNoteClosed,
-    showLineNumbers: showLineNumbers,
-    noteColumn: noteColumn,
+    options: options,
     barActions: barActions,
-    autofocusEditor: autofocusEditor,
     caretRequest: tab.path == caretPath ? caretRequest : 0,
-    linkType: linkType,
-    newItemLocation: newItemLocation,
-    attachmentsFolder: attachmentsFolder,
-    templateFolder: templateFolder,
-    indentWidth: indentWidth,
-    sourceFont: sourceFont,
-    toolbarLayout: toolbarLayout,
     // Wide only: the formatting toolbar sits above the editor (desktop
     // chrome); the phone keeps it under the editor, extending the
     // keyboard.
     toolbarTop: true,
     zen: zen,
-    typewriter: typewriter,
-    cascadeChecklist: cascadeChecklist,
-    frontmatterPanel: frontmatterPanel,
-    linkPreview: linkPreview,
     onToggleTypewriter: onToggleTypewriter,
     showPreview: tab.showPreview,
     showWysiwyg: tab.showWysiwyg,

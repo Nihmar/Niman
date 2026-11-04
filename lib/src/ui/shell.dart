@@ -1147,26 +1147,13 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
             if (root != null) _workspace.remember(relPath(path, root), memento);
           },
           onEditedNoteClosed: _tidyClosedNote,
-          showLineNumbers: _editorSettings.lineNumbers,
-          typewriter: _editorSettings.typewriter,
-          cascadeChecklist: _editorSettings.cascadeChecklist,
-          frontmatterPanel: _editorSettings.frontmatterPanel,
-          linkPreview: _editorSettings.linkPreview,
-          // No switch in the phone's status row: it has no room left for one.
-          // Settings and the Search tab's commands reach it there.
-          noteColumn: _editorSettings.noteColumn,
-          autofocusEditor: _editorSettings.autofocusEditor,
+          // No typewriter switch in the phone's status row: it has no room
+          // left for one. Settings and the Search tab's commands reach it.
+          options: _editorSettings.noteOptions,
           // The Files pane opened this note (#727): the caret goes in it.
           caretRequest: selectedPath == _selection.caretPath
               ? _selection.caretRequest
               : 0,
-          linkType: _editorSettings.linkType,
-          newItemLocation: _editorSettings.newItemLocation,
-          attachmentsFolder: _editorSettings.attachmentsFolder,
-          templateFolder: _editorSettings.templateFolder,
-          indentWidth: _editorSettings.indentWidth,
-          sourceFont: _editorSettings.sourceFont,
-          toolbarLayout: _editorSettings.toolbarLayout,
           showPreview: _notePreview,
           showWysiwyg: _editorSettings.editorKind == EditorKind.wysiwyg,
           // A single enabled editor has nowhere to switch to: the note hides
@@ -3277,15 +3264,10 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
                     outlineInDock: _wide && !_inZen,
                     spellCheckInDock: _wide && !_inZen,
                     relatedInDock: _wide && !_inZen && _dockShown,
-                    typewriter: _editorSettings.typewriter,
-                    cascadeChecklist: _editorSettings.cascadeChecklist,
-                    frontmatterPanel: _editorSettings.frontmatterPanel,
-                    linkPreview: _editorSettings.linkPreview,
+                    options: _editorSettings.noteOptions,
                     onToggleTypewriter: _toggleTypewriter,
                     onLoaded: _workspace.noteLoaded,
                     onEditedNoteClosed: _tidyClosedNote,
-                    showLineNumbers: _editorSettings.lineNumbers,
-                    noteColumn: _editorSettings.noteColumn,
                     // The kind toggles and ⋮ sit at the end of the note's
                     // one row of chrome (#173); there is no header above.
                     // Where the panes head their own tab row, the dock's
@@ -3295,18 +3277,10 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
                       if (widget.window.customTitleBar) _dockToggle(),
                       _noteMenu(),
                     ],
-                    autofocusEditor: _editorSettings.autofocusEditor,
                     // The Files pane opened a note (#727): that tab's own
                     // view is asked for the caret, and no other.
                     caretPath: _selection.caretPath,
                     caretRequest: _selection.caretRequest,
-                    linkType: _editorSettings.linkType,
-                    newItemLocation: _editorSettings.newItemLocation,
-                    attachmentsFolder: _editorSettings.attachmentsFolder,
-                    templateFolder: _editorSettings.templateFolder,
-                    indentWidth: _editorSettings.indentWidth,
-                    sourceFont: _editorSettings.sourceFont,
-                    toolbarLayout: _editorSettings.toolbarLayout,
                     // A single enabled editor has nowhere to switch to:
                     // the note hides its switch instead of offering a
                     // dead toggle.

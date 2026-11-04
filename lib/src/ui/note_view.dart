@@ -8,8 +8,6 @@ import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/frame_log.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/settings/features.dart';
-import 'package:niman/src/core/settings/library_config.dart'
-    show defaultSourceFont;
 import 'package:niman/src/core/settings/library_features.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/core/text_scale.dart';
@@ -21,11 +19,9 @@ import 'package:niman/src/editor/plain_text.dart';
 import 'package:niman/src/editor/task_items.dart';
 import 'package:niman/src/editor/task_items_edit.dart';
 import 'package:niman/src/editor/toolbar_item.dart';
-import 'package:niman/src/editor/toolbar_layout.dart';
 import 'package:niman/src/frontmatter/edit.dart';
 import 'package:niman/src/frontmatter/note_kind.dart';
 import 'package:niman/src/library/attachment_store.dart';
-import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/links/library_links.dart';
 import 'package:niman/src/links/link_preview.dart' show PreviewLimits;
 import 'package:niman/src/links/parser.dart';
@@ -54,6 +50,7 @@ import 'package:niman/src/ui/note_dead_links.dart';
 import 'package:niman/src/ui/note_disk.dart';
 import 'package:niman/src/ui/note_edit_commands.dart';
 import 'package:niman/src/ui/note_editor_frame.dart';
+import 'package:niman/src/ui/note_editor_options.dart';
 import 'package:niman/src/ui/note_find_keys.dart';
 import 'package:niman/src/ui/note_footer.dart';
 import 'package:niman/src/ui/note_frontmatter_panel.dart';
@@ -101,24 +98,15 @@ const double zenCaretWidth = 3;
 /// dominant ending is remembered with the note, and every save writes the
 /// text back with it (#1056) — a CRLF note stays CRLF.
 ///
-/// [showLineNumbers] and [autofocusEditor] are the settings toggles,
+/// [options] are the settings toggles,
 /// passed through to the editor. The note is one pane: [showPreview] says
 /// which of the two it holds — the editor or the read surface.
 final class NoteView extends StatefulWidget {
   /// Opens the note at [path].
   const new({
     required this.path,
-    required this.showLineNumbers,
-    required this.autofocusEditor,
-    this.noteColumn = NoteColumn.off,
+    required this.options,
     this.barActions = const [],
-    this.linkType = LinkType.wikilink,
-    this.newItemLocation = NewItemLocation.openNoteFolder,
-    this.attachmentsFolder = defaultAttachmentsFolder,
-    this.templateFolder,
-    this.indentWidth = 2,
-    this.sourceFont = defaultSourceFont,
-    this.toolbarLayout = ToolbarLayout.defaults,
     this.showPreview = false,
     this.showWysiwyg = false,
     this.onWysiwygChanged,
@@ -156,10 +144,6 @@ final class NoteView extends StatefulWidget {
     this.onMoveToTasks,
     this.toolbarTop = false,
     this.zen = false,
-    this.typewriter = false,
-    this.cascadeChecklist = true,
-    this.frontmatterPanel = true,
-    this.linkPreview = true,
     this.onToggleTypewriter,
     this.unsavedTracker,
     this.statusActions = const <Widget>[],
@@ -172,11 +156,8 @@ final class NoteView extends StatefulWidget {
   /// Absolute path of the note file.
   final String path;
 
-  /// Whether the editor shows the row-number column (settings toggle).
-  final bool showLineNumbers;
-
-  /// Whether the editor shows the keyboard on open (settings toggle).
-  final bool autofocusEditor;
+  /// How the library's settings say the note is edited (#1257).
+  final NoteEditorOptions options;
 
   /// A counter the shell bumps when the note was opened from the Files pane
   /// — a click on a row or a tile, or the pane's `Enter` — and the caret
@@ -187,20 +168,6 @@ final class NoteView extends StatefulWidget {
   /// here. A click on a note is an invitation to write in it, so the shell
   /// asks for the caret; 0 is "nobody asked".
   final int caretRequest;
-
-  /// Whether the note's frontmatter is drawn as the properties panel above it
-  /// (settings toggle, #157). Off, the note is its own text in both surfaces.
-  final bool frontmatterPanel;
-
-  /// Whether hovering a link — with Ctrl (⌘) held in the editor — or pressing
-  /// and holding it in the read view on a touch screen previews the note it
-  /// points at (settings, #846).
-  final bool linkPreview;
-
-  /// Where the note's text sits across the pane (issue #171): both
-  /// editors, the preview, the toolbar, the find bars and the status row
-  /// keep to it.
-  final NoteColumn noteColumn;
 
   /// How long a note waits after the last edit before its word count and
   /// outline are refreshed, or null to wait for nothing.
@@ -216,28 +183,6 @@ final class NoteView extends StatefulWidget {
   /// The note's own controls at the right end of the desktop's top row
   /// (#173): the kind toggles and the ⋮ menu the shell builds.
   final List<Widget> barActions;
-
-  /// The link format the link button inserts (settings).
-  final LinkType linkType;
-
-  /// The folder (library-relative) picked images are copied into
-  /// (settings, issue #56).
-  final String attachmentsFolder;
-
-  /// The folder (library-relative) of the library's templates (settings):
-  /// a note in it has its template commands coloured in the source. Null
-  /// colours none.
-  final String? templateFolder;
-
-  /// The indent/outdent width in spaces (settings).
-  final int indentWidth;
-
-  /// The face the source pane is set in (settings, issue #259).
-  final SourceFont sourceFont;
-
-  /// The toolbar the user arranged (settings, T-TB-04): which buttons
-  /// show and in what order.
-  final ToolbarLayout toolbarLayout;
 
   /// Preview visibility (T-UI-06): the shared app bar owns the switch
   /// and passes the state down; NoteView just follows it.
@@ -310,10 +255,6 @@ final class NoteView extends StatefulWidget {
   /// Opens a note by library-relative path, then (optionally) jumps to a
   /// heading; the shell implements it (T-M3-07).
   final void Function(String path, String? anchor)? onOpenNote;
-
-  /// Where a note created from a dead link lands (settings, issue #78);
-  /// the offer itself is disabled when [createMissingNote] is null.
-  final NewItemLocation newItemLocation;
 
   /// The note-creation path for dead links (issue #78): creates an empty
   /// note at library-relative [path] and returns its library-relative
@@ -413,15 +354,6 @@ final class NoteView extends StatefulWidget {
   /// its row numbers go, and the caret thickens a little, since the
   /// chrome that framed it has gone.
   final bool zen;
-
-  /// Typewriter mode (#70): the caret's row keeps to the middle of the
-  /// editor, in both editors. Independent of [zen]: either may be on
-  /// without the other.
-  final bool typewriter;
-
-  /// Whether ticking a checklist item ticks the tasks nested under it
-  /// (#326), in the live editor and in the read view alike.
-  final bool cascadeChecklist;
 
   /// The status row's typewriter switch; null leaves it out.
   final VoidCallback? onToggleTypewriter;
@@ -536,7 +468,7 @@ final class _NoteViewState extends State<NoteView>
   late final NoteLinkPreview _preview = NoteLinkPreview(
     source: () => widget.linkSource,
     notePath: () => _pathInLibrary,
-    enabled: () => widget.linkPreview,
+    enabled: () => widget.options.linkPreview,
     unsavedText: _unsavedTextOf,
     mathCache: _mathCache,
     targets: _links.targets,
@@ -660,7 +592,7 @@ final class _NoteViewState extends State<NoteView>
   late final NoteAttach _attach = NoteAttach(
     libraryRoot: () => widget.libraryRoot,
     notePath: () => widget.path,
-    linkType: () => widget.linkType,
+    linkType: () => widget.options.linkType,
     // Without the suggester, the file's name: a note's without `.md`, as a
     // wikilink names it, anything else's with its extension.
     wikiTarget: (path) async =>
@@ -673,7 +605,7 @@ final class _NoteViewState extends State<NoteView>
         importImageToLibrary(
           libraryRoot: root,
           sourcePath: source,
-          attachmentsFolder: widget.attachmentsFolder,
+          attachmentsFolder: widget.options.attachmentsFolder,
         ),
     insert: _inserts.insertAttachmentLinks,
     messenger: () => mounted ? ScaffoldMessenger.maybeOf(context) : null,
@@ -769,9 +701,9 @@ final class _NoteViewState extends State<NoteView>
     sourceView: () => _sourceViewKey.currentState,
     readView: () => _readViewKey.currentState,
     activeFormats: _activeFormats,
-    linkType: () => widget.linkType,
-    indentWidth: () => widget.indentWidth,
-    toolbarLayout: () => widget.toolbarLayout,
+    linkType: () => widget.options.linkType,
+    indentWidth: () => widget.options.indentWidth,
+    toolbarLayout: () => widget.options.toolbarLayout,
     pasteAsMarkdown: () => switch (widget.onPasteAsMarkdown) {
       final paste? => () => paste(this),
       null => null,
@@ -789,7 +721,7 @@ final class _NoteViewState extends State<NoteView>
         importImageToLibrary(
           libraryRoot: root,
           sourcePath: source,
-          attachmentsFolder: widget.attachmentsFolder,
+          attachmentsFolder: widget.options.attachmentsFolder,
         ),
     onInserted: () {
       _stats.refresh();
@@ -828,10 +760,10 @@ final class _NoteViewState extends State<NoteView>
   /// The frontmatter fields panel over the note (#157): how much of it shows,
   /// in whichever pane is on stage, and the field edits it makes.
   late final NoteFrontmatterPanel _frontmatter = NoteFrontmatterPanel(
-    enabled: () => widget.frontmatterPanel,
+    enabled: () => widget.options.frontmatterPanel,
     surface: () => _session.surface,
     reading: () => _previewIn(widget),
-    typewriter: () => widget.typewriter,
+    typewriter: () => widget.options.typewriter,
     caretLine: () => _surfaceCaretLine,
     previewScroll: _previewScroll,
     sourceScroll: _sourceScroll,
@@ -984,8 +916,8 @@ final class _NoteViewState extends State<NoteView>
       applyNoteEdit: _applyKindEdit,
       noteFilePath: () => widget.path,
       rootDirectory: () => widget.libraryRoot,
-      attachmentsFolderOf: () => widget.attachmentsFolder,
-      linkTypeOf: () => widget.linkType,
+      attachmentsFolderOf: () => widget.options.attachmentsFolder,
+      linkTypeOf: () => widget.options.linkType,
       embedResolver: _links.resolveEmbed,
       linkOpener: (context, href) =>
           unawaited(openHref(context, href, _links.targets())),
@@ -1085,7 +1017,7 @@ final class _NoteViewState extends State<NoteView>
     // mounted below), so the source editor's autofocus no longer fires on
     // its own — request it like a fresh mount did.
     if (_previewIn(oldWidget) && !_previewIn(widget)) {
-      if (widget.autofocusEditor) _focus.requestFocus();
+      if (widget.options.autofocusEditor) _focus.requestFocus();
     }
     // The preview has no editable: a note opening in it, or the switch
     // flipping to it, dismisses the keyboard instead of leaving it up.
@@ -1388,7 +1320,7 @@ final class _NoteViewState extends State<NoteView>
   /// folder, whose `{{…}}` commands the source colours.
   static bool _templateIn(NoteView view) {
     final root = view.libraryRoot;
-    final folder = view.templateFolder;
+    final folder = view.options.templateFolder;
     if (root == null || folder == null || folder.isEmpty) return false;
     if (!p.isWithin(root, view.path)) return false;
     return isUnder(folder, relPath(view.path, root));
@@ -1461,20 +1393,21 @@ final class _NoteViewState extends State<NoteView>
         // Its metrics at the note's size: this context is above the scaler
         // set just around the surface.
         theme: markdownThemeOf(context, scaler: noteTextScalerOf(context)),
-        showLineNumbers: widget.showLineNumbers && !widget.zen,
+        showLineNumbers: widget.options.showLineNumbers && !widget.zen,
         // The live pane's overlay children (the code blocks' copy
         // buttons) draw over the whole app: only the pane on stage keeps
         // them.
         onStage: widget.active && !_previewIn(widget),
         caretWidth: widget.zen ? zenCaretWidth : null,
-        typewriter: widget.typewriter,
-        cascadeChecklist: widget.cascadeChecklist,
+        typewriter: widget.options.typewriter,
+        cascadeChecklist: widget.options.cascadeChecklist,
         // The keyboard-on-open setting, and a template `{{cursor}}` landing,
         // which always takes the focus (#53).
-        autofocus: widget.autofocusEditor || widget.initialCaretOffset != null,
-        indentWidth: widget.indentWidth,
-        sourceFont: widget.sourceFont,
-        column: widget.noteColumn,
+        autofocus:
+            widget.options.autofocusEditor || widget.initialCaretOffset != null,
+        indentWidth: widget.options.indentWidth,
+        sourceFont: widget.options.sourceFont,
+        column: widget.options.noteColumn,
         formatMenu: _commands.formatMenu,
         editorMenu: _commands.contextMenu,
         spellCheck: widget.spellCheck,
@@ -1497,7 +1430,7 @@ final class _NoteViewState extends State<NoteView>
           _surfaceCaretLine = buffer.lineOf(selection.extent) + 1;
           // In typewriter mode the fields panel rides the caret, not the
           // scroll the follow drives (#522).
-          if (widget.typewriter) _frontmatter.scrolled();
+          if (widget.options.typewriter) _frontmatter.scrolled();
         },
       ),
     );
@@ -1511,7 +1444,7 @@ final class _NoteViewState extends State<NoteView>
     );
     return NoteEditorFrame(
       find: _sourceFind,
-      column: widget.noteColumn,
+      column: widget.options.noteColumn,
       frontmatter: frontmatter,
       onKey: _findKeys.onKey,
       child: dropping,
@@ -1578,7 +1511,7 @@ final class _NoteViewState extends State<NoteView>
         embedResolver: _links.resolveEmbed,
         deadLinks: _deadLinks,
         linkPreview: _preview.hooks(context),
-        column: widget.noteColumn,
+        column: widget.options.noteColumn,
         knownScan: _editorScanOf,
         sharedScan: _editorScanLater,
         onToggleTask: _readTasks.toggle,
@@ -1594,7 +1527,7 @@ final class _NoteViewState extends State<NoteView>
     return Column(
       children: [
         NoteColumnPadding(
-          column: widget.noteColumn,
+          column: widget.options.noteColumn,
           minInset: NoteColumn.textInset,
           child: panel,
         ),
@@ -1611,7 +1544,7 @@ final class _NoteViewState extends State<NoteView>
     blocks: () =>
         _sourceViewKey.currentState?.blocks ??
         _readViewKey.currentState?.blocks,
-    cascade: () => widget.cascadeChecklist,
+    cascade: () => widget.options.cascadeChecklist,
     onEdited: _refreshPreview,
   );
 
@@ -1639,8 +1572,8 @@ final class _NoteViewState extends State<NoteView>
     notePathInLibrary: () => _pathInLibrary,
     libraryRoot: () => widget.libraryRoot,
     linkSource: () => widget.linkSource,
-    linkType: () => widget.linkType,
-    newItemLocation: () => widget.newItemLocation,
+    linkType: () => widget.options.linkType,
+    newItemLocation: () => widget.options.newItemLocation,
     wikilinkSuggester: () => widget.wikilinkSuggester,
     onOpenNote: () => widget.onOpenNote,
     createMissingNote: () => widget.createMissingNote,
@@ -1761,7 +1694,7 @@ final class _NoteViewState extends State<NoteView>
         !showPreview &&
         !_plainTextIn(widget) &&
         (widget.toolbarTop || _keyboardUp) &&
-        widget.toolbarLayout.visible.isNotEmpty;
+        widget.options.toolbarLayout.visible.isNotEmpty;
     // Kind mode (T-TK-02): a known `type` swaps the body for the kind GUI
     // and hides the editor chrome (outline, status row, toolbar) — the
     // note is a list, not a document, on screen.
@@ -1771,7 +1704,7 @@ final class _NoteViewState extends State<NoteView>
     // (0.0.8 test round): the column is the app's shape, not the editor's.
     final kindChild = kindBody
         ? NoteColumnPadding(
-            column: widget.noteColumn,
+            column: widget.options.noteColumn,
             child: kindGui.buildBody(context, _kindHost),
           )
         : null;
@@ -1785,7 +1718,7 @@ final class _NoteViewState extends State<NoteView>
         // below (see the bottom slot).
         if (widget.toolbarTop && !widget.zen)
           NoteTopBar(
-            column: widget.noteColumn,
+            column: widget.options.noteColumn,
             toolbar:
                 showToolbar && !kindBody && !_session.loading && error == null
                 ? _toolbar(context, dense: true)
@@ -1844,7 +1777,7 @@ final class _NoteViewState extends State<NoteView>
         ),
         if (!kindBody && !widget.zen)
           NoteFooter(
-            column: widget.noteColumn,
+            column: widget.options.noteColumn,
             loading: _session.loading,
             ready: _session.ready,
             frontmatterError: _stats.frontmatterError,
@@ -1883,7 +1816,7 @@ final class _NoteViewState extends State<NoteView>
                 onFind: () => _sourceFind.open(),
                 onSpellCheck: _commands.openSpellCheck,
                 onToggleEditorKind: _toggleEditorKind,
-                typewriter: widget.typewriter,
+                typewriter: widget.options.typewriter,
                 onToggleTypewriter: widget.onToggleTypewriter,
               ),
             ),
@@ -1906,7 +1839,7 @@ final class _NoteViewState extends State<NoteView>
       actions: actions,
       menus: menus,
       active: active,
-      layout: widget.toolbarLayout,
+      layout: widget.options.toolbarLayout,
     );
     // The surface publishes the formats at the caret into one notifier, read
     // off the caret's line, so a pressed button stays pressed until it is

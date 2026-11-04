@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
+import 'package:niman/src/ui/note_editor_options.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/strings.dart';
 
@@ -42,8 +43,10 @@ void main() {
         home: Scaffold(
           body: NoteView(
             path: '/notes/stock.md',
-            showLineNumbers: false,
-            autofocusEditor: true,
+            options: const NoteEditorOptions(
+              showLineNumbers: false,
+              autofocusEditor: true,
+            ),
             toolbarTop: true,
             readNote: (_) async => note,
             writeNote: (_, _) async {},

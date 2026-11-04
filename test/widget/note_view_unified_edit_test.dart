@@ -12,6 +12,7 @@ import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/ui/cheatsheet/cheatsheet_entries.dart';
 import 'package:niman/src/ui/cheatsheet/cheatsheet_screen.dart';
+import 'package:niman/src/ui/note_editor_options.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/note_view_handle.dart';
 import 'package:niman/src/ui/strings.dart';
@@ -28,8 +29,10 @@ NoteView _view({
 }) => NoteView(
   key: key,
   path: '/notes/a.md',
-  showLineNumbers: false,
-  autofocusEditor: false,
+  options: const NoteEditorOptions(
+    showLineNumbers: false,
+    autofocusEditor: false,
+  ),
   toolbarTop: true,
   showWysiwyg: showWysiwyg,
   readNote: readNote,
@@ -287,8 +290,10 @@ void main() {
       NoteView(
         key: key,
         path: '/notes/a.md',
-        showLineNumbers: false,
-        autofocusEditor: false,
+        options: const NoteEditorOptions(
+          showLineNumbers: false,
+          autofocusEditor: false,
+        ),
         showWysiwyg: true,
         readNote: (_) async => 'una riga\n',
         writeNote: (_, text) async => writes.add(text),
@@ -320,8 +325,10 @@ void main() {
           body: NoteView(
             key: key,
             path: '/notes/a.md',
-            showLineNumbers: false,
-            autofocusEditor: true,
+            options: const NoteEditorOptions(
+              showLineNumbers: false,
+              autofocusEditor: true,
+            ),
             readNote: (_) async => 'una riga\n',
             writeNote: (_, _) async {},
           ),

@@ -6,6 +6,7 @@ import 'package:niman/src/markdown/render/code_copy.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/markdown/surface.dart';
+import 'package:niman/src/ui/note_editor_options.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/note_view_handle.dart';
 
@@ -32,8 +33,10 @@ Widget _app({bool showPreview = true}) => MaterialApp(
   home: Scaffold(
     body: NoteView(
       path: '/tmp/niman-unified-test.md',
-      showLineNumbers: true,
-      autofocusEditor: false,
+      options: const NoteEditorOptions(
+        showLineNumbers: true,
+        autofocusEditor: false,
+      ),
       showPreview: showPreview,
       readNote: (_) async => _note,
       writeNote: (_, _) async {},
@@ -70,8 +73,10 @@ void main() {
           body: NoteView(
             key: key,
             path: '/tmp/niman-anchor-test.md',
-            showLineNumbers: true,
-            autofocusEditor: false,
+            options: const NoteEditorOptions(
+              showLineNumbers: true,
+              autofocusEditor: false,
+            ),
             showPreview: true,
             readNote: (_) async => note.toString(),
             writeNote: (_, _) async {},
@@ -152,8 +157,10 @@ void main() {
       home: Scaffold(
         body: NoteView(
           path: '/tmp/niman-copy-buttons-test.md',
-          showLineNumbers: true,
-          autofocusEditor: false,
+          options: const NoteEditorOptions(
+            showLineNumbers: true,
+            autofocusEditor: false,
+          ),
           showWysiwyg: true,
           showPreview: showPreview,
           readNote: (_) async => note,
@@ -190,8 +197,10 @@ void main() {
       home: Scaffold(
         body: NoteView(
           path: '/tmp/niman-handover-test.md',
-          showLineNumbers: true,
-          autofocusEditor: false,
+          options: const NoteEditorOptions(
+            showLineNumbers: true,
+            autofocusEditor: false,
+          ),
           showPreview: showPreview,
           readNote: (_) async => note.toString(),
           writeNote: (_, _) async {},
@@ -231,8 +240,10 @@ void main() {
         home: Scaffold(
           body: NoteView(
             path: '/tmp/niman-read-task-test.md',
-            showLineNumbers: true,
-            autofocusEditor: false,
+            options: const NoteEditorOptions(
+              showLineNumbers: true,
+              autofocusEditor: false,
+            ),
             showPreview: true,
             readNote: (_) async => note,
             writeNote: (_, _) async {},
@@ -283,8 +294,10 @@ void main() {
         home: Scaffold(
           body: NoteView(
             path: '/tmp/niman-read-quoted-task-test.md',
-            showLineNumbers: true,
-            autofocusEditor: false,
+            options: const NoteEditorOptions(
+              showLineNumbers: true,
+              autofocusEditor: false,
+            ),
             showPreview: true,
             readNote: (_) async => note,
             writeNote: (_, _) async {},
@@ -322,8 +335,10 @@ void main() {
         home: Scaffold(
           body: NoteView(
             path: '/tmp/niman-read-cascade-test.md',
-            showLineNumbers: true,
-            autofocusEditor: false,
+            options: const NoteEditorOptions(
+              showLineNumbers: true,
+              autofocusEditor: false,
+            ),
             showPreview: true,
             readNote: (_) async => note,
             writeNote: (_, _) async {},

@@ -11,6 +11,7 @@ import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/markdown/render/block_view.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
 import 'package:niman/src/markdown/surface.dart';
+import 'package:niman/src/ui/note_editor_options.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/settings.dart';
 import 'package:niman/src/ui/tree.dart';
@@ -185,8 +186,10 @@ void main() {
           home: Scaffold(
             body: NoteView(
               path: '/notes/a.md',
-              showLineNumbers: true,
-              autofocusEditor: false,
+              options: const NoteEditorOptions(
+                showLineNumbers: true,
+                autofocusEditor: false,
+              ),
               showPreview: preview,
               readNote: (_) async => '# Hello\n\n- item',
             ),

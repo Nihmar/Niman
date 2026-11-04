@@ -12,6 +12,7 @@ import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/markdown/surface.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/capture/paste_markdown_flow.dart';
+import 'package:niman/src/ui/note_editor_options.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/note_view_handle.dart';
 import 'package:niman/src/ui/strings.dart';
@@ -71,8 +72,10 @@ void main() {
               child: NoteView(
                 key: key,
                 path: '/notes/sync.md',
-                showLineNumbers: false,
-                autofocusEditor: true,
+                options: const NoteEditorOptions(
+                  showLineNumbers: false,
+                  autofocusEditor: true,
+                ),
                 toolbarTop: true,
                 readNote: (_) async => note,
                 writeNote: (_, _) async {},
