@@ -1,11 +1,8 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/app_channel.dart';
 import 'package:niman/src/core/settings/library_features.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/core/settings/navigation_layout.dart';
-import 'package:niman/src/core/theme.dart';
 import 'package:niman/src/editor/toolbar_item.dart';
 import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/library/session.dart';
@@ -14,7 +11,6 @@ import 'package:niman/src/ocr/ocr_installation.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/transcription/transcription_models.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
-import 'package:niman/src/ui/epub_look_sheet.dart';
 import 'package:niman/src/ui/feature_names.dart';
 import 'package:niman/src/ui/key_map.dart';
 import 'package:niman/src/ui/keyboard_shortcuts.dart';
@@ -23,11 +19,12 @@ import 'package:niman/src/ui/settings_area_features.dart';
 import 'package:niman/src/ui/settings_areas.dart';
 import 'package:niman/src/ui/settings_commands.dart';
 import 'package:niman/src/ui/settings_keys.dart';
+import 'package:niman/src/ui/settings_search_appearance.dart';
 import 'package:niman/src/ui/settings_search_entry.dart';
+import 'package:niman/src/ui/settings_search_scope.dart';
 import 'package:niman/src/ui/shell_navigation.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/sync/sync_labels.dart';
-import 'package:niman/src/ui/theme/theme_row.dart';
 import 'package:niman/src/ui/transcription/transcription_settings_section.dart';
 import 'package:niman/src/ui/trash.dart';
 
@@ -53,8 +50,6 @@ List<SettingsSearchEntry> settingsSearchEntries({
   void push(Widget screen) =>
       Navigator.of(context)
           .push(MaterialPageRoute<void>(builder: (context) => screen));
-  void pushAppearance(Key row) => openArea(SettingsAreaId.appearance, row);
-  void pushThemes(Key row) => openArea(SettingsAreaId.themes, row);
   void pushEditor(Key row) => openArea(SettingsAreaId.editor, row);
   void pushFolders(Key row) => openArea(SettingsAreaId.folders, row);
   void pushJournal(Key row) => openArea(SettingsAreaId.journal, row);
@@ -71,8 +66,6 @@ List<SettingsSearchEntry> settingsSearchEntries({
   Future<String?> noValue() async => null;
 
   final ops = controller.ops;
-  final appearance = AppStrings.settingsSectionAppearance;
-  final themes = AppStrings.settingsSectionThemes;
   final editor = AppStrings.settingsSectionEditor;
   final folders = libraryArea(AppStrings.settingsAreaFolders);
   final journal = libraryArea(AppStrings.paletteGroupJournal);
@@ -81,70 +74,15 @@ List<SettingsSearchEntry> settingsSearchEntries({
   final navigation = libraryArea(AppStrings.settingsAreaNavigation);
   final featuresArea = libraryArea(AppStrings.featuresTitle);
   final maintenance = AppStrings.settingsGroupMaintenance;
+  final scope = SettingsSearchScope(
+    controller: controller,
+    libraryName: libraryName,
+    push: push,
+    flashHome: flashHome,
+    openArea: openArea,
+  );
   final entries = <SettingsSearchEntry>[
-    SettingsSearchEntry(
-      title: AppStrings.languageTitle,
-      area: appearance,
-      rowKey: SettingsKeys.language,
-      value: () async => AppStrings.languageName(await controller.language),
-      areaId: SettingsAreaId.appearance,
-      open: () => pushAppearance(SettingsKeys.language),
-    ),
-    SettingsSearchEntry(
-      title: AppStrings.weekStartTitle,
-      area: appearance,
-      rowKey: SettingsKeys.weekStart,
-      value: () async => AppStrings.weekStartName(await controller.weekStart),
-      areaId: SettingsAreaId.appearance,
-      open: () => pushAppearance(SettingsKeys.weekStart),
-    ),
-    SettingsSearchEntry(
-      title: AppStrings.themeBrightnessTitle,
-      area: themes,
-      rowKey: SettingsKeys.brightness,
-      value: () async => switch (await controller.themeBrightness) {
-        AppBrightness.system => AppStrings.themeBrightnessSystem,
-        AppBrightness.day => AppStrings.themeBrightnessDay,
-        AppBrightness.night => AppStrings.themeBrightnessNight,
-      },
-      areaId: SettingsAreaId.themes,
-      open: () => pushThemes(SettingsKeys.brightness),
-    ),
-    SettingsSearchEntry(
-      title: AppStrings.themeTitle,
-      area: themes,
-      rowKey: SettingsKeys.theme,
-      value: () async => themeLabel(await controller.theme),
-      areaId: SettingsAreaId.themes,
-      open: () => pushThemes(SettingsKeys.theme),
-    ),
-    SettingsSearchEntry(
-      title: AppStrings.uiTextScaleTitle,
-      area: appearance,
-      rowKey: SettingsKeys.uiTextScale,
-      value: () async =>
-          AppStrings.textScaleValue(await controller.uiTextScale),
-      areaId: SettingsAreaId.appearance,
-      open: () => pushAppearance(SettingsKeys.uiTextScale),
-    ),
-    SettingsSearchEntry(
-      title: AppStrings.epubLookTitle,
-      area: appearance,
-      rowKey: SettingsKeys.epubLook,
-      value: () async => epubLookSummary(await controller.epubLook),
-      areaId: SettingsAreaId.appearance,
-      open: () => pushAppearance(SettingsKeys.epubLook),
-    ),
-    // The desktops only (#209): elsewhere there is no tray to close into.
-    if (Platform.isLinux || Platform.isWindows)
-      SettingsSearchEntry(
-        title: AppStrings.closeToTrayTitle,
-        area: appearance,
-        rowKey: SettingsKeys.closeToTray,
-        value: () async => onOff(on: await controller.closeToTray),
-        areaId: SettingsAreaId.appearance,
-        open: () => pushAppearance(SettingsKeys.closeToTray),
-      ),
+    ...appearanceSearchEntries(scope),
     SettingsSearchEntry(
       title: AppStrings.toolbarSettingsTitle,
       area: editor,
