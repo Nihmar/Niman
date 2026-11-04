@@ -11,6 +11,7 @@ import 'package:niman/src/ui/pointer_density.dart';
 import 'package:niman/src/ui/settings_area.dart';
 import 'package:niman/src/ui/settings_editor_links.dart';
 import 'package:niman/src/ui/settings_editor_spelling.dart';
+import 'package:niman/src/ui/settings_editor_text.dart';
 import 'package:niman/src/ui/settings_editor_tidy.dart';
 import 'package:niman/src/ui/settings_keys.dart';
 import 'package:niman/src/ui/settings_rows.dart';
@@ -65,11 +66,6 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
   SourceFont _sourceFont = defaultSourceFont;
   int _indentWidth = 2;
   List<String> _spellDictionaries = const <String>[];
-
-  /// Steps of 5% between [minTextScale] and [maxTextScale]: fine enough
-  /// to land on a size that fits, coarse enough to be hit on a phone.
-  static final int _textScaleSteps = ((maxTextScale - minTextScale) * 20)
-      .round();
 
   /// Steps of 5% of the default column between the narrowest and the
   /// widest: the bounds are whole multiples of it, so every stop reads as
@@ -277,66 +273,18 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
     }
   }
 
-  /// Asks how large the note text should be, in both panes.
-  Future<void> _chooseNoteTextScale() async {
-    final scale = await showSettingsSlider(
-      context,
-      dialogKey: const Key('note-text-scale-dialog'),
-      sliderKey: const Key('note-text-scale-slider'),
-      title: AppStrings.noteTextScaleTitle,
-      subtitle: AppStrings.noteTextScaleSubtitle,
-      current: _noteTextScale,
-      min: minTextScale,
-      max: maxTextScale,
-      divisions: _textScaleSteps,
-      format: AppStrings.textScaleValue,
-    );
-    if (scale == null) return;
-    await _setNoteTextScale(scale);
-  }
-
   Future<void> _setNoteTextScale(double scale) async {
     await widget.controller.setNoteTextScale(scale);
     if (mounted) setState(() => _noteTextScale = scale);
   }
 
-  /// Asks which face the source editor is set in (issue #259). The read
-  /// view and `live` keep the note's own whatever this says.
-  Future<void> _chooseSourceFont() async {
-    final font = await showSettingsChoice<SourceFont>(
-      context,
-      dialogKey: const Key('source-font-dialog'),
-      title: AppStrings.sourceFontTitle,
-      subtitle: AppStrings.sourceFontSubtitle,
-      current: _sourceFont,
-      options: [
-        SettingsOption(SourceFont.monospace, AppStrings.sourceFontMonospace),
-        SettingsOption(SourceFont.sansSerif, AppStrings.sourceFontSansSerif),
-        SettingsOption(SourceFont.serif, AppStrings.sourceFontSerif),
-      ],
-    );
-    if (font == null) return;
+  /// Persists the source editor's face (issue #259).
+  Future<void> _setSourceFont(SourceFont font) async {
     await widget.controller.setSourceFont(font);
     // Notify so the shell re-reads the value and an open source pane takes
     // the new face without the note being reopened.
     widget.controller.notify();
     if (mounted) setState(() => _sourceFont = font);
-  }
-
-  /// Asks for the spaces added per indent level.
-  Future<void> _chooseIndentWidth() async {
-    final width = await showSettingsChoice<int>(
-      context,
-      dialogKey: const Key('indent-width-dialog'),
-      title: AppStrings.indentWidthTitle,
-      subtitle: AppStrings.indentWidthSubtitle,
-      current: _indentWidth,
-      options: [
-        for (final spaces in const [2, 4, 6, 8])
-          SettingsOption(spaces, AppStrings.indentWidthValue(spaces)),
-      ],
-    );
-    if (width != null) await _setIndentWidth(width);
   }
 
   /// Enables or disables one of the library's editors (T-WYS-03).
@@ -533,51 +481,13 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
             onNewItemLocation: (location) =>
                 unawaited(_setNewItemLocation(location)),
           ),
-          HighlightRow(
-            key: SettingsKeys.noteTextScale,
-            // A desktop's slider sits in the row (#712).
-            child: pointerDense(Theme.of(context))
-                ? SettingsSliderRow(
-                    sliderKey: const Key('note-text-scale-slider'),
-                    title: AppStrings.noteTextScaleTitle,
-                    subtitle: AppStrings.noteTextScaleSubtitle,
-                    value: _noteTextScale,
-                    min: minTextScale,
-                    max: maxTextScale,
-                    divisions: _textScaleSteps,
-                    format: AppStrings.textScaleValue,
-                    onChanged: (scale) => unawaited(_setNoteTextScale(scale)),
-                  )
-                : SettingsValueRow(
-                    title: AppStrings.noteTextScaleTitle,
-                    subtitle: AppStrings.noteTextScaleSubtitle,
-                    value: AppStrings.textScaleValue(_noteTextScale),
-                    onTap: () => unawaited(_chooseNoteTextScale()),
-                  ),
-          ),
-          // Beside the note text size: both decide how the note reads in the
-          // editor, and this one only the source pane (#259).
-          HighlightRow(
-            key: SettingsKeys.sourceFont,
-            child: SettingsValueRow(
-              title: AppStrings.sourceFontTitle,
-              subtitle: AppStrings.sourceFontSubtitle,
-              value: switch (_sourceFont) {
-                SourceFont.monospace => AppStrings.sourceFontMonospace,
-                SourceFont.sansSerif => AppStrings.sourceFontSansSerif,
-                SourceFont.serif => AppStrings.sourceFontSerif,
-              },
-              onTap: () => unawaited(_chooseSourceFont()),
-            ),
-          ),
-          HighlightRow(
-            key: SettingsKeys.indentWidth,
-            child: SettingsValueRow(
-              title: AppStrings.indentWidthTitle,
-              subtitle: AppStrings.indentWidthSubtitle,
-              value: AppStrings.indentWidthValue(_indentWidth),
-              onTap: () => unawaited(_chooseIndentWidth()),
-            ),
+          SettingsEditorText(
+            noteTextScale: _noteTextScale,
+            sourceFont: _sourceFont,
+            indentWidth: _indentWidth,
+            onNoteTextScale: (scale) => unawaited(_setNoteTextScale(scale)),
+            onSourceFont: (font) => unawaited(_setSourceFont(font)),
+            onIndentWidth: (width) => unawaited(_setIndentWidth(width)),
           ),
           // Next to the indentation: both decide how the library's
           // Markdown is written out.
