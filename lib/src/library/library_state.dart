@@ -8,12 +8,9 @@ import 'package:niman/src/core/custom_theme.dart';
 import 'package:niman/src/core/frame_log.dart';
 import 'package:niman/src/core/language.dart';
 import 'package:niman/src/core/logging.dart';
-import 'package:niman/src/core/settings/device_settings_store.dart';
 import 'package:niman/src/core/settings/features.dart';
 import 'package:niman/src/core/settings/features_introduction.dart';
-import 'package:niman/src/core/settings/legacy_library_settings.dart';
 import 'package:niman/src/core/settings/library_config.dart';
-import 'package:niman/src/core/settings/library_config_repo.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/core/text_scale.dart';
 import 'package:niman/src/core/theme.dart';
@@ -41,6 +38,7 @@ import 'package:niman/src/library/library_sources.dart';
 import 'package:niman/src/library/library_widgets.dart';
 import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/library/note_ops.dart';
+import 'package:niman/src/library/open_library_settings.dart';
 import 'package:niman/src/library/rescan_scheduler.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/library/session_events.dart';
@@ -219,15 +217,9 @@ final class LibraryController implements LibrarySession {
   /// different file for each library (T-ML-03).
   IndexDatabase? _indexDb;
 
-  /// The open library's `.niman/settings.json`; null while none is open,
-  /// and then every setting reads and writes app-wide.
-  LibraryConfigRepo? _configRepo;
-
-  final ValueNotifier<Features> _features = ValueNotifier(const Features());
-
-  /// Whether the open that made this session was of a folder with no
-  /// settings file: a library being created (#1109).
-  bool _createdLibrary = false;
+  /// The open library's `.niman/settings.json` and the features it switches
+  /// on; the shipped defaults while none is open.
+  final OpenLibrarySettings _settings = OpenLibrarySettings();
   Indexer? _indexer;
   NoteOps? _ops;
   LibrarySyncService? _sync;
@@ -298,7 +290,7 @@ final class LibraryController implements LibrarySession {
 
   /// The open library's features (#1109); every one on while none is open.
   @override
-  ValueListenable<Features> get features => _features;
+  ValueListenable<Features> get features => _settings.features;
 
   /// Fires with the new [treeRevision] after a change that may move the
   /// tree's rows (#751).
@@ -561,42 +553,16 @@ final class LibraryController implements LibrarySession {
     final appDb = await appDatabase;
     AppLog.enabled = await AppSettingsRepo(appDb).debugLogsEnabled();
     _updates.start(appDb);
-    // Whether this open is a library being created: a folder with no
-    // settings file, asked before the seed below can write one (#1109). A
-    // rebuild of the index is not an open and says nothing about it.
-    final opening = _phase == LibraryPhase.opening;
-    final hadSettings = !opening || await _hasSettingsFile(abs);
-    // Before anything reads the settings: a library upgraded from the
-    // `library_settings` table gets its `.niman/settings.json` here,
-    // now that the folder is known to be reachable (T-ML-02).
-    await LegacyLibrarySettings(appDb).seed(abs);
-    if (opening) {
-      _createdLibrary = !hadSettings && !await _hasSettingsFile(abs);
-    }
+    final config = await _settings.attach(
+      abs,
+      appDb,
+      opening: _phase == LibraryPhase.opening,
+    );
     final indexer = Indexer(indexDb);
     indexer
       ..onChanged = ((change) =>
           _changes.indexChanged(change, folders: indexer.changedFolders))
       ..onRemoved = (removed) => _onRemoved(abs, removed);
-    // One reader of `.niman/settings.json` per session: the four
-    // per-library settings and the overrides (T-ML-10) share its cache.
-    // The welcome's answer (#266) seeds the editors of every library
-    // this device has never stored settings for — not only the first.
-    // A failure to read it is not a reason to fail the open.
-    Map<String, Object?>? welcomeDefaults;
-    try {
-      welcomeDefaults = await DbWelcomeStore(AppSettingsRepo(appDb))
-          .firstLibraryEditorKeys();
-    } on Object catch (error) {
-      _log.warning('welcome editor defaults unavailable ($error)');
-    }
-    final config = LibraryConfigRepo(
-      abs,
-      device: DbDeviceSettingsStore(appDb),
-      welcomeDefaults: welcomeDefaults,
-      features: _features,
-    );
-    _configRepo = config;
     final ops = NoteOps(
       root: abs,
       db: indexDb,
@@ -935,25 +901,13 @@ final class LibraryController implements LibrarySession {
   }
 
   /// The open library's settings, or the shipped defaults while none is
-  /// open (T-ML-10).
-  ///
-  /// The settings screen only exists inside an open library, so the
-  /// defaults branch is what a startup read sees before the first open,
-  /// not a state a user can edit from.
-  Future<LibraryConfig> get _library async =>
-      await _configRepo?.config ?? LibraryConfig.defaults;
-
-  /// Whether the library at [abs] has a `.niman/settings.json`.
-  Future<bool> _hasSettingsFile(String abs) =>
-      File(p.join(abs, '.niman', 'settings.json')).exists();
+  /// open ([OpenLibrarySettings.config]).
+  Future<LibraryConfig> get _library => _settings.config;
 
   /// Applies [change] to the open library's settings; a no-op with none
-  /// open, since there is nothing to write it to.
-  Future<void> _editLibrary(
-    LibraryConfig Function(LibraryConfig) change,
-  ) async {
-    await _configRepo?.update(change);
-  }
+  /// open.
+  Future<void> _editLibrary(LibraryConfig Function(LibraryConfig) change) =>
+      _settings.edit(change);
 
   @override
   WorkspaceSlot get workspaceSlot {
@@ -1128,12 +1082,8 @@ final class LibraryController implements LibrarySession {
       _editLibrary((c) => c.copyWith(features: features));
 
   @override
-  Future<FeaturesIntroduction> get featuresIntroduction async {
-    if ((await _library).featuresReviewed) return FeaturesIntroduction.none;
-    return _createdLibrary
-        ? FeaturesIntroduction.created
-        : FeaturesIntroduction.existing;
-  }
+  Future<FeaturesIntroduction> get featuresIntroduction =>
+      _settings.featuresIntroduction;
 
   @override
   Future<void> markFeaturesReviewed() =>
@@ -1516,10 +1466,7 @@ final class LibraryController implements LibrarySession {
     _ops?.history.dispose();
     _ops = null;
     _sources.forgetLinks();
-    _configRepo = null;
-    // Nothing is open: every feature reads as on until a library says
-    // otherwise, so the next open never starts from the last one's.
-    _features.value = const Features();
+    _settings.detach();
     final sync = _sync;
     _sync = null;
     // A sync going now writes through the index about to close: its
