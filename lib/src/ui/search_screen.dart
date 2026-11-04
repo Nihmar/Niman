@@ -25,6 +25,7 @@ import 'package:niman/src/ui/search_replace_preview.dart';
 import 'package:niman/src/ui/search_request.dart';
 import 'package:niman/src/ui/search_results_list.dart';
 import 'package:niman/src/ui/search_scan_bar.dart';
+import 'package:niman/src/ui/search_sources.dart';
 import 'package:niman/src/ui/search_task_events.dart';
 import 'package:niman/src/ui/unsaved_notes.dart';
 
@@ -174,8 +175,14 @@ final class _SearchScreenState extends State<SearchScreen> {
     onReplaced: _replaced,
   );
 
+  /// Where the screen reads from, the overrides first.
+  late final SearchSources _sources = SearchSources(
+    session: () => widget.controller,
+    searchOverride: () => widget.source,
+    fieldOverride: () => widget.fieldSource,
+  );
+
   SearchSource? _source;
-  FieldSource? _fields;
   Timer? _debounceTimer;
   Timer? _replaceRefresh;
   bool _contains = false;
@@ -283,7 +290,7 @@ final class _SearchScreenState extends State<SearchScreen> {
   /// and [_runSearch] retries on the next query — a transient startup
   /// failure must not wedge the box into issuing queries that go nowhere.
   Future<void> _loadSource({DateTime? since}) async {
-    final source = await _acquireSource();
+    final source = await _sources.search(cached: _source);
     if (since != null) {
       // Near zero means the session had it already (the shell warms it
       // after a library opens); anything larger is this tab paying for
@@ -308,40 +315,6 @@ final class _SearchScreenState extends State<SearchScreen> {
     }
     logNextFrame('search.ui', 'source applied first frame');
     if (_query.text.trim().isNotEmpty) unawaited(_runSearch());
-  }
-
-  /// The frontmatter-field source, resolved on first use.
-  ///
-  /// Unlike the search source it needs no warming: it runs on the UI
-  /// connection, and a `key = value` filter is an indexed lookup, not a
-  /// MATCH over every body in the library.
-  Future<FieldSource?> _acquireFields() async {
-    final own = widget.fieldSource;
-    if (own != null) return own;
-    final cached = _fields;
-    if (cached != null) return cached;
-    try {
-      return _fields = await widget.controller.fieldSource;
-    } on Object catch (e) {
-      const AppLogger(name: 'search.ui').warning('field source failed: $e');
-      return null;
-    }
-  }
-
-  Future<SearchSource?> _acquireSource() async {
-    final own = widget.source;
-    if (own != null) return own;
-    final cached = _source;
-    if (cached != null) return cached;
-    try {
-      return await widget.controller.searchSource;
-    } on Object catch (e) {
-      // The session owns one cached background connection, so a failure
-      // here is a real (rare) startup problem; the next query retries.
-      const AppLogger(name: 'search.ui')
-          .warning('search source unavailable: $e');
-      return null;
-    }
   }
 
   void _onQueryChanged() {
@@ -409,7 +382,7 @@ final class _SearchScreenState extends State<SearchScreen> {
     if (!_stale) setState(() => _stale = true);
     var source = _source;
     if (source == null) {
-      source = await _acquireSource();
+      source = await _sources.search(cached: _source);
       if (source == null || !mounted) {
         if (mounted) setState(() => _stale = false);
         return;
@@ -445,7 +418,7 @@ final class _SearchScreenState extends State<SearchScreen> {
       }
       return;
     }
-    final pager = field == null ? null : await _openFieldPager(field);
+    final pager = field == null ? null : await _sources.fieldPager(field);
     final results = pager != null
         ? await pager.first()
         : field != null
@@ -529,15 +502,6 @@ final class _SearchScreenState extends State<SearchScreen> {
 
   /// Whether the box currently holds a `key = value` filter.
   bool get _inFieldMode => _fieldFilter(_query.text.trim()) != null;
-
-  /// The pages of the `key = value` filter [f], or null where there is no
-  /// field source. Its notes are shaped like search hits, so the results
-  /// list stays one list; there is no snippet: the match is the field, not
-  /// a place in the text.
-  Future<FieldPager?> _openFieldPager(({String key, String value}) f) async {
-    final fields = await _acquireFields();
-    return fields == null ? null : FieldPager(fields, f.key, f.value);
-  }
 
   /// The shell's `F4`/`Shift+F4` and `Ctrl+Shift+F` land here (#712): the
   /// screen owns the hits and the field, so it acts on the ask.
