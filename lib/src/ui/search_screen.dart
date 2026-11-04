@@ -23,9 +23,9 @@ import 'package:niman/src/ui/search_replace_flow.dart';
 import 'package:niman/src/ui/search_replace_panel.dart';
 import 'package:niman/src/ui/search_replace_preview.dart';
 import 'package:niman/src/ui/search_request.dart';
+import 'package:niman/src/ui/search_results_list.dart';
 import 'package:niman/src/ui/search_scan_bar.dart';
 import 'package:niman/src/ui/search_task_events.dart';
-import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/unsaved_notes.dart';
 
 /// The other ways a hit opens, where the shell has them (#712): in a new
@@ -662,7 +662,10 @@ final class _SearchScreenState extends State<SearchScreen> {
       final position = _resultsScroll.position;
       // The group's rows sit above the notes: the estimate counts them,
       // or a step would land short by exactly their number.
-      final lead = _groupLead(_taskEventRows());
+      final lead = searchGroupLead(
+        _taskEventRows().length,
+        hasNotes: _hits.isNotEmpty,
+      );
       final rows = lead + _shown + (_hasMoreRows ? 1 : 0);
       final length = position.maxScrollExtent + position.viewportDimension;
       final offset =
@@ -767,7 +770,7 @@ final class _SearchScreenState extends State<SearchScreen> {
                     )
                   : Opacity(
                       opacity: _stale && _hits.isNotEmpty ? 0.5 : 1,
-                      child: _resultsWithEvents(theme),
+                      child: _resultsWithEvents(),
                     ),
             ),
           ],
@@ -782,12 +785,12 @@ final class _SearchScreenState extends State<SearchScreen> {
 
   /// The results, re-read whenever the tasks or the calendar move: the
   /// group is what is in memory, not what a query landed with (#730).
-  Widget _resultsWithEvents(ThemeData theme) {
+  Widget _resultsWithEvents() {
     final events = widget.taskEvents;
-    if (events == null) return _results(theme);
+    if (events == null) return _results();
     return ListenableBuilder(
       listenable: events.changes,
-      builder: (context, _) => _results(theme),
+      builder: (context, _) => _results(),
     );
   }
 
@@ -801,11 +804,6 @@ final class _SearchScreenState extends State<SearchScreen> {
     return events.hits(token);
   }
 
-  /// How many rows the group takes in the list before the notes: its
-  /// heading, its own rows, and the Notes heading when both sections show.
-  int _groupLead(List<TaskEventHit> group) =>
-      group.isEmpty ? 0 : 1 + group.length + (_hits.isEmpty ? 0 : 1);
-
   /// Ends the contains scan with the hits it has found so far (#1038): the
   /// source is told the query is over, and its stream ends.
   void _stopScan() {
@@ -813,89 +811,42 @@ final class _SearchScreenState extends State<SearchScreen> {
     setState(() => _scan = null);
   }
 
-  Widget _results(ThemeData theme) {
+  Widget _results() {
     if (!_searched) {
       final text = _query.text.trim();
       return SearchHint(query: text, searchable: _canSearch(text));
     }
-    final group = _taskEventRows();
-    // No match is only known once the scan is done (#1038).
-    if (_hits.isEmpty && group.isEmpty && _scan != null) {
-      return const SizedBox.shrink();
-    }
-    if (_hits.isEmpty && group.isEmpty) {
-      return Center(
-        child: Text(
-          AppStrings.searchNoMatches,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
-        ),
-      );
-    }
-    final lead = _groupLead(group);
-    return ListView.builder(
-      key: const Key('search-results'),
-      controller: _resultsScroll,
-      itemCount: lead + _shown + (_hasMoreRows ? 1 : 0),
-      itemBuilder: (context, index) {
-        if (index < lead) {
-          if (index == 0) {
-            return searchSectionHeader(
-              context,
-              AppStrings.searchTasksAndEvents(group.length),
-              key: const Key('search-group-tasks-events'),
-            );
-          }
-          if (index <= group.length) {
-            final hit = group[index - 1];
-            return searchTaskEventRow(
-              context,
-              hit,
-              today: DateTime.now(),
-              asClock: widget.eventTimesClock,
-              onTap: widget.onOpenTaskEvent == null
-                  ? null
-                  : () => widget.onOpenTaskEvent!(hit),
-            );
-          }
-          return searchSectionHeader(
-            context,
-            AppStrings.searchNotes(_hits.length),
-            key: const Key('search-group-notes'),
-          );
-        }
-        final at = index - lead;
-        if (at >= _shown) {
-          return ListTile(
-            key: const Key('search-load-more'),
-            leading: const Icon(Icons.expand_more),
-            title: Text(AppStrings.searchLoadMore),
-            // A filter that holds more notes than it lists says how many.
-            subtitle: switch (_fieldPager) {
-              final pager? when pager.hasMore || _shown >= _hits.length => Text(
-                AppStrings.searchShowingFirst(_hits.length, pager.total),
-              ),
-              _ => null,
-            },
-            onTap: _loadMore,
-          );
-        }
-        final hit = _hits[at];
-        final current = hit.path == _currentHit;
-        return KeyedSubtree(
-          key: current ? _currentHitKey : null,
-          child: SearchHitRow(
-            hit: hit,
-            current: current,
-            excerpt: hit.snippet.isEmpty ? _excerptOf(hit) : null,
-            onTap: () => _tapHit(at),
-            onLongPress: () => _showNoteActions(at),
-            onMenu: (anchor) => _showNoteActions(at, anchor: anchor),
-            onNewTab: () => _newTabHit(at),
-          ),
-        );
-      },
+    return SearchResultsList(
+      group: _taskEventRows(),
+      hitCount: _hits.length,
+      shown: _shown,
+      hasMore: _hasMoreRows,
+      pager: _fieldPager,
+      scanning: _scan != null,
+      scroll: _resultsScroll,
+      eventTimesClock: widget.eventTimesClock,
+      onOpenTaskEvent: widget.onOpenTaskEvent,
+      onLoadMore: _loadMore,
+      hitRow: _hitRow,
+    );
+  }
+
+  /// The row of the note hit at [at], keyed for the reveal when it is the
+  /// current one.
+  Widget _hitRow(int at) {
+    final hit = _hits[at];
+    final current = hit.path == _currentHit;
+    return KeyedSubtree(
+      key: current ? _currentHitKey : null,
+      child: SearchHitRow(
+        hit: hit,
+        current: current,
+        excerpt: hit.snippet.isEmpty ? _excerptOf(hit) : null,
+        onTap: () => _tapHit(at),
+        onLongPress: () => _showNoteActions(at),
+        onMenu: (anchor) => _showNoteActions(at, anchor: anchor),
+        onNewTab: () => _newTabHit(at),
+      ),
     );
   }
 
