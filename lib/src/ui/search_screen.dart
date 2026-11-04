@@ -24,6 +24,7 @@ import 'package:niman/src/ui/search_replace_panel.dart';
 import 'package:niman/src/ui/search_replace_preview.dart';
 import 'package:niman/src/ui/search_request.dart';
 import 'package:niman/src/ui/search_results_list.dart';
+import 'package:niman/src/ui/search_row_reveal.dart';
 import 'package:niman/src/ui/search_scan_bar.dart';
 import 'package:niman/src/ui/search_sources.dart';
 import 'package:niman/src/ui/search_task_events.dart';
@@ -598,52 +599,30 @@ final class _SearchScreenState extends State<SearchScreen> {
     _openHit(at < 0 ? 0 : at);
   }
 
-  /// Brings the hit at [index] into view (#768). A row outside the
-  /// list's built range has no context to reveal, so the list first jumps
-  /// to where the index is estimated to sit — the list's own estimate of
-  /// its length, shared out by row — and the row, built there or near it,
-  /// is then scrolled to. Each jump lays out real rows around the target,
-  /// which sharpens the estimate, so the target is built within a few.
-  Future<void> _revealHit(int index) async {
-    for (var jump = 0; jump < _revealJumps; jump++) {
-      await WidgetsBinding.instance.endOfFrame;
+  /// Brings the hit at [index] into view (#768), by [revealSearchRow].
+  Future<void> _revealHit(int index) => revealSearchRow(
+    rowKey: _currentHitKey,
+    scroll: _resultsScroll,
+    duration: _stepScroll,
+    target: () {
       // Another step or a new search since: that one reveals its own.
       if (!mounted ||
           index >= _hits.length ||
           _currentHit != _hits[index].path) {
-        return;
+        return null;
       }
-      if (_currentHitKey.currentContext case final row?) {
-        if (!row.mounted) return;
-        await Scrollable.ensureVisible(
-          row,
-          alignment: 0.5,
-          duration: _stepScroll,
-        );
-        return;
-      }
-      if (!_resultsScroll.hasClients) return;
-      final position = _resultsScroll.position;
       // The group's rows sit above the notes: the estimate counts them,
       // or a step would land short by exactly their number.
       final lead = searchGroupLead(
         _taskEventRows().length,
         hasNotes: _hits.isNotEmpty,
       );
-      final rows = lead + _shown + (_hasMoreRows ? 1 : 0);
-      final length = position.maxScrollExtent + position.viewportDimension;
-      final offset =
-          length * (index + lead) / rows - position.viewportDimension / 2;
-      position.jumpTo(
-        offset.clamp(position.minScrollExtent, position.maxScrollExtent),
+      return (
+        index: index + lead,
+        rows: lead + _shown + (_hasMoreRows ? 1 : 0),
       );
-    }
-  }
-
-  /// How many jumps [_revealHit] makes at most: the estimate converges
-  /// in one or two, and a bound keeps a list that keeps changing under it
-  /// from holding the reveal open.
-  static const int _revealJumps = 8;
+    },
+  );
 
   void _loadMore() {
     final next = _shown + _pageSize;
