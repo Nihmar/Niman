@@ -18,12 +18,12 @@ import 'package:niman/src/journal/journal_summary.dart';
 import 'package:niman/src/templates/engine.dart';
 import 'package:niman/src/ui/action_sheet.dart';
 import 'package:niman/src/ui/journal/journal_calendar.dart';
+import 'package:niman/src/ui/journal/journal_day_card.dart';
 import 'package:niman/src/ui/journal/journal_day_events.dart';
 import 'package:niman/src/ui/journal/journal_dock_create_row.dart';
 import 'package:niman/src/ui/journal/journal_event_actions.dart';
 import 'package:niman/src/ui/journal/journal_event_editor.dart';
 import 'package:niman/src/ui/journal/journal_event_sheet.dart';
-import 'package:niman/src/ui/journal/journal_flow.dart';
 import 'package:niman/src/ui/journal/journal_never_listenable.dart';
 import 'package:niman/src/ui/strings.dart';
 
@@ -318,7 +318,15 @@ final class _JournalBrowserState extends State<JournalBrowser> {
         ),
         if (widget.large) ...[
           const SizedBox(height: 14),
-          _dayCard(context, entries.contains(_selected)),
+          JournalDayCard(
+            day: _selected,
+            hasEntry: entries.contains(_selected),
+            onOpen: () => widget.onOpenDay(_selected, confirmed: true),
+            actions: _dayActions(
+              context,
+              hasEntry: entries.contains(_selected),
+            ),
+          ),
         ] else ...[
           if (_picked && !entries.contains(_selected)) ...[
             const SizedBox(height: 12),
@@ -538,65 +546,6 @@ final class _JournalBrowserState extends State<JournalBrowser> {
   ) => scope == CalendarOccurrenceScope.all
       ? entry.line.date ?? _dayOfEntry(entry)
       : _dayOfEntry(entry);
-
-  /// The phone's card for the picked day: open its entry, or make one.
-  Widget _dayCard(BuildContext context, bool hasEntry) {
-    final theme = Theme.of(context);
-    return Card.filled(
-      key: const Key('journal-day-card'),
-      margin: EdgeInsets.zero,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 12, 12, 12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // The first row keeps its height whether the day has an entry
-            // or not, so nothing moves under a thumb already on it (#730).
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        journalDayLabel(_selected),
-                        style: theme.textTheme.titleSmall,
-                      ),
-                      if (!hasEntry)
-                        Text(
-                          AppStrings.journalNoEntry,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-                FilledButton.icon(
-                  key: const Key('journal-day-open'),
-                  onPressed: () => widget.onOpenDay(_selected, confirmed: true),
-                  icon: Icon(
-                    hasEntry ? Icons.arrow_forward : Icons.add,
-                    size: 18,
-                  ),
-                  label: Text(
-                    hasEntry
-                        ? AppStrings.journalOpenEntry
-                        : AppStrings.actionCreate,
-                  ),
-                ),
-              ],
-            ),
-            if (_dayActions(context, hasEntry: hasEntry).isNotEmpty)
-              Wrap(
-                spacing: 4,
-                children: _dayActions(context, hasEntry: hasEntry),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
 
   /// New journal, Add event and Add task for the picked day (#730), each
   /// only when the shell gave the way to write it: the buttons never
