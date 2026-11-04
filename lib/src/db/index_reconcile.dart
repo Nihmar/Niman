@@ -37,6 +37,7 @@ import 'package:niman/src/db/index_note_content.dart';
 import 'package:niman/src/db/index_scan.dart';
 import 'package:niman/src/db/index_tree.dart';
 import 'package:niman/src/db/pending_link_queue.dart';
+import 'package:niman/src/db/scan_orphans.dart';
 import 'package:niman/src/db/scan_touches.dart';
 import 'package:niman/src/links/link_path.dart';
 
@@ -67,21 +68,11 @@ final class IndexReconciler {
   /// mass move never becomes a list in memory.
   static const _pairPage = 200;
 
-  /// How many gone paths the prune deletes per query, for the same reason.
-  static const _prunePage = 200;
-
-  /// Highest row id before the walk: every row above it was inserted by
-  /// this scan, which is how the second pairing pass finds the fresh rows
-  /// a rename may have left behind.
-  int _baseline = 0;
-
-  /// Whether these scan's orphan tables exist — the index had rows when it
-  /// started. A library with none cannot have a note that moved away from
-  /// it, so the pairing is skipped and its tables never made.
-  bool _pairing = false;
-
   /// What writes outside the scan touched while it ran (#697).
   final ScanTouches touches = ScanTouches();
+
+  /// The notes the walk found gone, kept for the rename pairing.
+  late final ScanOrphans _orphans = ScanOrphans(_db, _dao, touches);
 
   /// A directory that takes this long is logged with its numbers (#698).
   static const _slowDirMs = 500;
@@ -113,7 +104,7 @@ final class IndexReconciler {
       final progressTotal = _tree.onProgress == null
           ? 0
           : await _dao.noteCount();
-      await _openScanTables(hadRows);
+      await _orphans.open(hadRows: hadRows);
       touches.begin();
       return (
         contentOwed: contentOwed,
@@ -191,7 +182,7 @@ final class IndexReconciler {
           reads += paired.read;
           wrote |= paired.wrote;
         }
-        final pruned = await _pruneGone();
+        final pruned = await _orphans.pruneGone();
         wrote |= pruned.wrote;
         removed.addAll(pruned.removed);
         await _links.writePending();
@@ -202,7 +193,7 @@ final class IndexReconciler {
     } finally {
       await step(() async {
         touches.end();
-        await _closeScanTables();
+        await _orphans.close();
       });
     }
     _log.info(
@@ -424,11 +415,11 @@ final class IndexReconciler {
         scope: dirRel,
         scopeParentId: dirRow?.parent ?? 0,
         deferDeletes: true,
-        orphanLookup: _lookupOrphan,
+        orphanLookup: _orphans.lookup,
       );
       wrote |= result.wrote;
       paired = result.pairedRels;
-      await _registerGone(old, result.goneLeft);
+      await _orphans.registerGone(old, result.goneLeft);
     });
     // Content rows (FTS, tags, stems) for the notes whose content was
     // read; a paired rename keeps the rows it already had. Link edges are
@@ -446,94 +437,21 @@ final class IndexReconciler {
     return (wrote: wrote, read: read.contents.length);
   }
 
-  /// A content-preserving rename candidate among the notes an earlier
-  /// directory of this scan found gone. Asked only when the listing itself
-  /// has no candidate; the answer is consumed, so one row pairs once.
-  ///
-  /// None or several matches pair nothing, exactly as [IndexTree.applyDiff]
-  /// treats its local candidates: two identical orphans and one new note
-  /// make the move ambiguous, and guessing would repoint the wrong id.
-  Future<Note?> _lookupOrphan(DiskEntry e, String sha) async {
-    if (!_pairing) return null;
-    final rows = await _db
-        .customSelect(
-          'SELECT path FROM scan_orphans '
-          'WHERE sha256 = ? AND size = ? AND modified = ?',
-          variables: [
-            Variable<String>(sha),
-            Variable<int>(e.size),
-            Variable<int>(_seconds(e.modified)),
-          ],
-        )
-        .get();
-    if (rows.length != 1) return null;
-    final path = rows.single.read<String>('path');
-    if (touches.shields(path)) return null;
-    final row = await _dao.find(path);
-    if (row == null) return null;
-    await _db.customStatement('DELETE FROM scan_orphans WHERE path = ?', [
-      path,
-    ]);
-    _log.debug('pair: "$path" -> "${e.rel}" (content unchanged)');
-    return row;
-  }
-
-  /// Keeps the vanished entries of one listing for the rest of the scan.
-  ///
-  /// A gone note with a digest becomes a rename candidate; the notes under
-  /// a gone folder become candidates too — moving a folder is a rename of
-  /// each note in it — while the folder's own path goes to `scan_gone`, so
-  /// whatever no pairing claimed is pruned at the end. The rows themselves
-  /// stay in `notes` until then: pairing repoints them, it cannot resurrect
-  /// a row whose FTS, tags and links were already wiped.
-  Future<void> _registerGone(
-    Map<String, Note> old,
-    Set<String> goneLeft,
-  ) async {
-    for (final rel in goneLeft) {
-      final row = old[rel];
-      if (row == null) continue;
-      if (row.isDir) {
-        final range = subtreePathRange(rel);
-        await _db.customStatement(
-          'INSERT OR IGNORE INTO scan_orphans '
-          '(id, path, sha256, size, modified) '
-          'SELECT id, path, sha256, size, modified FROM notes '
-          'WHERE is_dir = 0 AND sha256 IS NOT NULL '
-          'AND path >= ? AND path < ?',
-          [range.from, range.to],
-        );
-      } else if (row.sha256 case final String sha) {
-        await _db.customStatement(
-          'INSERT OR IGNORE INTO scan_orphans '
-          '(id, path, sha256, size, modified) VALUES (?, ?, ?, ?, ?)',
-          [row.id, row.path, sha, row.size, _seconds(row.modified)],
-        );
-      }
-      await _db.customStatement(
-        'INSERT OR IGNORE INTO scan_gone (path) VALUES (?)',
-        [rel],
-      );
-    }
-  }
-
   /// Pairs the new notes the walk met before their old homes with the
   /// orphans of the directories it had already passed, and prunes nothing
-  /// yet: [_pruneGone] takes what is left. Runs only when the scan found
-  /// orphans, and pages the new rows so a mass move stays bounded.
+  /// yet: [ScanOrphans.pruneGone] takes what is left. Runs only when the
+  /// scan found orphans, and pages the new rows so a mass move stays
+  /// bounded.
   Future<({bool wrote, int read})> _pairOrphans(
     String root, {
     required bool contentOwed,
     required int progressTotal,
     required int readsDone,
   }) async {
-    final count = await _db
-        .customSelect('SELECT count(*) AS c FROM scan_orphans')
-        .getSingle();
-    if (count.read<int>('c') == 0) return (wrote: false, read: 0);
+    if (await _orphans.count() == 0) return (wrote: false, read: 0);
     _log.info('scan: pairing notes that moved into an earlier folder');
     var wrote = false;
-    var after = _baseline;
+    var after = _orphans.baseline;
     final reread = <String>[];
     while (true) {
       final page = await _db
@@ -547,19 +465,12 @@ final class IndexReconciler {
       if (page.isEmpty) break;
       after = page.last.read<int>('id');
       for (final row in page) {
-        final matches = await _db
-            .customSelect(
-              'SELECT path FROM scan_orphans '
-              'WHERE sha256 = ? AND size = ? AND modified = ?',
-              variables: [
-                Variable<String>(row.read<String>('sha256')),
-                Variable<int>(row.read<int>('size')),
-                Variable<int>(_seconds(row.read<DateTime>('modified'))),
-              ],
-            )
-            .get();
-        if (matches.length != 1) continue;
-        final orphanPath = matches.single.read<String>('path');
+        final orphanPath = await _orphans.soleMatch(
+          row.read<String>('sha256'),
+          row.read<int>('size'),
+          row.read<DateTime>('modified'),
+        );
+        if (orphanPath == null) continue;
         if (touches.shields(orphanPath) ||
             touches.shields(row.read<String>('path'))) {
           continue;
@@ -573,9 +484,7 @@ final class IndexReconciler {
           newPath: newPath,
           newName: row.read<String>('name'),
         );
-        await _db.customStatement('DELETE FROM scan_orphans WHERE path = ?', [
-          orphanPath,
-        ]);
+        await _orphans.consume(orphanPath);
         if (contentOwed || orphan.title == null) reread.add(newPath);
         wrote = true;
       }
@@ -675,69 +584,6 @@ final class IndexReconciler {
       [orphan.id, fresh.id],
     );
   }
-
-  /// Deletes every path the walk found gone and no pairing claimed, one
-  /// page at a time, reporting the top-level ones. `scan_gone` holds only
-  /// the entries of a present directory's listing, so no path here is
-  /// inside another.
-  Future<({bool wrote, Set<String> removed})> _pruneGone() async {
-    var wrote = false;
-    final removed = <String>{};
-    if (!_pairing) return (wrote: wrote, removed: removed);
-    while (true) {
-      final rows = await _db
-          .customSelect(
-            'SELECT path FROM scan_gone ORDER BY path LIMIT $_prunePage',
-          )
-          .get();
-      if (rows.isEmpty) break;
-      for (final row in rows) {
-        final path = row.read<String>('path');
-        // Made again, or written inside, since the scan saw it gone.
-        final deleted = touches.shields(path)
-            ? 0
-            : await _dao.deleteSubtree(path);
-        await _db.customStatement('DELETE FROM scan_gone WHERE path = ?', [
-          path,
-        ]);
-        if (deleted > 0) {
-          wrote = true;
-          removed.add(path);
-        }
-      }
-    }
-    return (wrote: wrote, removed: removed);
-  }
-
-  /// Creates the scan's temp tables, and captures the row id the walk
-  /// starts from. A library with no rows has no orphans to pair: the tables
-  /// stay away, and a fresh index of a million notes pays nothing for a
-  /// pairing it cannot need.
-  Future<void> _openScanTables(bool hadRows) async {
-    await _closeScanTables();
-    _pairing = hadRows;
-    if (!hadRows) return;
-    _baseline = await _dao.maxId();
-    await _db.customStatement(
-      'CREATE TEMP TABLE scan_orphans '
-      '(id INTEGER PRIMARY KEY, path TEXT UNIQUE NOT NULL, '
-      'sha256 TEXT NOT NULL, size INTEGER NOT NULL, modified INTEGER NOT NULL)',
-    );
-    await _db.customStatement(
-      'CREATE INDEX scan_orphans_key ON scan_orphans (sha256, size, modified)',
-    );
-    await _db.customStatement(
-      'CREATE TEMP TABLE scan_gone (path TEXT PRIMARY KEY)',
-    );
-  }
-
-  Future<void> _closeScanTables() async {
-    _pairing = false;
-    await _db.customStatement('DROP TABLE IF EXISTS scan_orphans');
-    await _db.customStatement('DROP TABLE IF EXISTS scan_gone');
-  }
-
-  static int _seconds(DateTime dt) => dt.millisecondsSinceEpoch ~/ 1000;
 }
 
 /// A directory's notes as read before its step: their parsed content, and
