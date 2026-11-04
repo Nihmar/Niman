@@ -69,8 +69,6 @@ import 'package:niman/src/ui/deferred_listenable.dart';
 import 'package:niman/src/ui/device_shape.dart';
 import 'package:niman/src/ui/dismiss_chain.dart';
 import 'package:niman/src/ui/dock/close_overlay_action.dart';
-import 'package:niman/src/ui/dock/dock_overlay.dart';
-import 'package:niman/src/ui/dock/dock_toggles.dart';
 import 'package:niman/src/ui/dock/right_dock.dart';
 import 'package:niman/src/ui/epub_convert_flow.dart';
 import 'package:niman/src/ui/epub_look_sheet.dart';
@@ -161,11 +159,11 @@ import 'package:niman/src/ui/shell_template_flow.dart';
 import 'package:niman/src/ui/shell_tree_editing.dart';
 import 'package:niman/src/ui/shell_tree_footer.dart';
 import 'package:niman/src/ui/shell_tree_menus.dart';
+import 'package:niman/src/ui/shell_wide_body.dart';
 import 'package:niman/src/ui/shell_windows.dart';
 import 'package:niman/src/ui/shell_workspace.dart';
 import 'package:niman/src/ui/shell_zen.dart';
 import 'package:niman/src/ui/strings.dart';
-import 'package:niman/src/ui/sync/sync_status.dart';
 import 'package:niman/src/ui/tab_body_stack.dart';
 import 'package:niman/src/ui/tab_drag.dart';
 import 'package:niman/src/ui/text_zoom_pinch.dart';
@@ -177,7 +175,6 @@ import 'package:niman/src/ui/tour/tour_steps.dart';
 import 'package:niman/src/ui/tour/tour_targets.dart';
 import 'package:niman/src/ui/trash.dart';
 import 'package:niman/src/ui/tree_click_clock.dart';
-import 'package:niman/src/ui/tree_header.dart';
 import 'package:niman/src/ui/tree_view_toggle.dart';
 import 'package:niman/src/ui/unsaved_notes.dart';
 import 'package:niman/src/ui/welcome/welcome_gate.dart';
@@ -2915,7 +2912,10 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   /// flattens, 28 ms Search and 62 ms Settings first builds, every switch.
   List<Widget> _wideSlots(LibrarySession controller) {
     return [
-      _wideSlot(visible: _filesSlotVisible, child: _wideBody(controller)),
+      _wideSlot(
+        visible: _filesSlotVisible,
+        child: _wideBody.build(context, controller),
+      ),
       // One slot per remaining tab, in tab order so a slot's identity
       // never moves. Unvisited tabs build the empty placeholder
       // `_tabBodyFor` returns. Search has no slot on a wide window: it
@@ -3657,218 +3657,31 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     _ => null,
   };
 
-  /// The wide-layout body: the tree pane and the split detail pane.
-  ///
-  /// The tree keeps its own controls at the base (T-PP-22), and an open
-  /// note gets a header inside the detail pane carrying its name and the
-  /// note controls the window app bar used to hold. Hiding the tree (the
-  /// title bar's toggle) gives its width to the detail pane.
-  ///
-  /// Each of the three is an [Island] on the chrome's base, [Island.gap]
-  /// from the window's edges and from each other, with the title bar
-  /// sitting on them — no band above (#749); the dividers are the
-  /// base between them. The gaps never change while the tree or the dock
-  /// comes and goes, so nothing on screen moves but the edge that has to.
-  /// Zen drops the base: the note takes the window edge to edge.
-  Widget _wideBody(LibrarySession controller) {
-    final zen = _inZen;
-    final touch = thumbDense(Theme.of(context));
-    _dock.settle();
-    // A stack always, the overlay or not: the islands below keep their
-    // place in the tree, and so their editors their state.
-    return Stack(
-      key: _wideBodyKey,
-      fit: StackFit.expand,
-      children: [
-        _wideIslands(controller, zen: zen, touch: touch),
-        // A window without room for the dock beside the note lays it over
-        // the note instead, under the title bar and the rail — and under
-        // the note's row, whose button stays in reach to shut it again.
-        if (_dock.overlayShown && !zen)
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            top: _dock.toggles.rowBottom(
-              within: _wideBodyKey.currentContext?.findRenderObject(),
-            ),
-            child: DockOverlay(
-              width: _editorSettings.dockWidth,
-              onDismiss: _dock.closeOverlay,
-              dock: _dock.build(context, overlay: true),
-            ),
-          ),
-      ],
-    );
-  }
-
-  /// The wide body, to measure the note row against.
-  final GlobalKey _wideBodyKey = GlobalKey(debugLabel: 'wide body');
-
-  /// The wide body's islands and the dividers over their gaps.
-  Widget _wideIslands(
-    LibrarySession controller, {
-    required bool zen,
-    required bool touch,
-  }) {
-    return Padding(
-      padding: EdgeInsets.fromLTRB(
-        zen ? 0 : Island.gap,
-        0,
-        zen ? 0 : Island.gap,
-        zen ? 0 : Island.gap,
-      ),
-      // The dividers' grab strips lie over the row rather than in it: each
-      // is wider than the gap it sits in, over the islands' edges either
-      // side (#786), and only on top of them does it take the pointer there.
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          _wideRow(controller, zen: zen),
-          if (_sidebarVisible && !zen)
-            Positioned(
-              left:
-                  _editorSettings.treeWidth -
-                  ResizeDivider.overhangFor(touch: touch),
-              top: 0,
-              bottom: 0,
-              child: _treeDivider(touch: touch),
-            ),
-          if (_dockShown && !zen)
-            Positioned(
-              right: _dockWidth - ResizeDivider.overhangFor(touch: touch),
-              top: 0,
-              bottom: 0,
-              child: _dockDivider(touch: touch),
-            ),
-        ],
-      ),
-    );
-  }
-
-  /// The wide body's row: the islands, [Island.gap] apart, the gaps where
-  /// the dividers lie.
-  Widget _wideRow(LibrarySession controller, {required bool zen}) {
-    return Row(
-      children: [
-        if (_sidebarVisible && !zen) ...[
-          SizedBox(
-            width: _editorSettings.treeWidth,
-            child: Island(
-              key: const Key('tree-island'),
-              // Both stay mounted across a sidebar switch (#712): the
-              // search keeps its query and results, and the tree its
-              // expansion and scroll, as they did when each had a slot
-              // of its own. The search keeps its layout too — it is the
-              // one whose show-layout costs frames (T-TS-10).
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  Offstage(
-                    offstage: _sidebarShowsView,
-                    child: Column(
-                      children: [
-                        // Without a title bar of the app's own, nothing
-                        // else says which library this is (#1134).
-                        if (!widget.window.customTitleBar) ...[
-                          TreeHeader(
-                            library: _libraryName,
-                            folder: _treeFolder,
-                            height: NoteTabBar.rowHeight(
-                              touch: thumbDense(Theme.of(context)),
-                            ),
-                            onSwitchLibrary: () =>
-                                _windows.switchLibrary(context),
-                          ),
-                          const Divider(height: 1),
-                        ],
-                        Expanded(child: _files.build(context, controller)),
-                        if (controller.sync case final sync?)
-                          SyncProgressStrip(sync: sync),
-                        _treeFooter(controller),
-                      ],
-                    ),
-                  ),
-                  // Built on the first visit, as its slot was: the
-                  // search source (a background connection) is not
-                  // opened for a library no one searched in.
-                  if (_nav.visited.contains(ShellTab.search))
-                    Visibility(
-                      visible: _sidebarShowsSearch,
-                      maintainState: true,
-                      maintainAnimation: true,
-                      maintainSize: true,
-                      child: _searchSlot(controller, tree: true),
-                    ),
-                  // The decks (#533): built on the first visit too.
-                  if (_nav.visited.contains(ShellTab.study))
-                    Offstage(
-                      offstage: !_sidebarShowsStudy,
-                      child: _study.view(context),
-                    ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(width: ResizeDivider.width),
-        ],
-        Expanded(
-          // Keyed: the tree and the dock come and go on either side of
-          // it (Zen takes both at once), and the panes must stay where
-          // they are.
-          key: const ValueKey('wide-panes'),
-          // One island for the panes, split or not: the split's divider
-          // stays a line inside it, as the title bar's tabs divide at
-          // that same x — two islands would part the panes by a gap the
-          // tabs above them do not have.
-          child: Island(
-            key: const Key('panes-island'),
-            floating: !zen,
-            child: Column(
-              children: [
-                // Without a title bar of the app's own (an Android
-                // tablet, a phone in landscape) the tabs head the panes
-                // instead: the same row, at the same x as the panes
-                // below it.
-                if (!widget.window.customTitleBar) ...[
-                  SizedBox(
-                    key: paneTabRowKey,
-                    height: NoteTabBar.rowHeight(
-                      touch: thumbDense(Theme.of(context)),
-                    ),
-                    child: LayoutBuilder(
-                      builder: (context, constraints) => _tabRows.row(
-                        const SizedBox.shrink(),
-                        panesWidth: constraints.maxWidth,
-                        chrome: true,
-                      ),
-                    ),
-                  ),
-                  const Divider(height: 1),
-                ],
-                Expanded(
-                  child: zen ? _zenPanes(controller) : _panes(controller),
-                ),
-              ],
-            ),
-          ),
-        ),
-        if (_dockShown && !zen) ...[
-          const SizedBox(width: ResizeDivider.width),
-          TourTarget(
-            id: TourTargets.dock,
-            child: SizedBox(
-              width: _dockWidth,
-              child: Island(
-                key: const Key('dock-island'),
-                child: _rightDock(controller),
-              ),
-            ),
-          ),
-        ],
-      ],
-    );
-  }
+  /// The wide shell's body: the islands, their dividers and the dock's
+  /// overlay (issue #100 moved it into [ShellWideBody]).
+  late final ShellWideBody _wideBody = ShellWideBody(
+    dock: _dock,
+    files: _files,
+    tabRows: _tabRows,
+    settings: () => _editorSettings,
+    inZen: () => _inZen,
+    sidebarVisible: () => _sidebarVisible,
+    dockWidth: () => _dockWidth,
+    customTitleBar: () => widget.window.customTitleBar,
+    libraryName: () => _libraryName,
+    treeFolder: () => _treeFolder,
+    onSwitchLibrary: () => _windows.switchLibrary(context),
+    treeFooter: _treeFooter,
+    nav: _nav,
+    sidebarShowsSearch: () => _sidebarShowsSearch,
+    sidebarShowsStudy: () => _sidebarShowsStudy,
+    searchSlot: (controller) => _searchSlot(controller, tree: true),
+    study: () => _study,
+    panes: _panes,
+    zenPanes: _zenPanes,
+    treeDivider: _treeDivider,
+    dockDivider: _dockDivider,
+  );
 
   /// Whether the window has room for the right dock beside a note (#175):
   /// a desktop, a tablet, a phone in landscape — on the same rule.
@@ -3886,9 +3699,6 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     final Object? state = key?.currentState;
     return state is NoteViewHandle ? state : null;
   }
-
-  /// The right dock: the focused pane's note's outline, tags or history.
-  Widget _rightDock(LibrarySession controller) => _dock.build(context);
 
   /// Shows or hides the dock (the note row's button, Ctrl+Shift+B).
   void _toggleDock() => _dock.toggleOpen();
