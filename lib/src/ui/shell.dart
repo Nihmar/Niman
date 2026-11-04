@@ -158,6 +158,7 @@ import 'package:niman/src/ui/shell_search_slot.dart';
 import 'package:niman/src/ui/shell_study.dart';
 import 'package:niman/src/ui/shell_sync_actions.dart';
 import 'package:niman/src/ui/shell_template_flow.dart';
+import 'package:niman/src/ui/shell_tree_editing.dart';
 import 'package:niman/src/ui/shell_tree_footer.dart';
 import 'package:niman/src/ui/shell_tree_menus.dart';
 import 'package:niman/src/ui/shell_windows.dart';
@@ -836,59 +837,24 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     newItemRule: _newItemRule,
     guard: _guard,
     onCreated: _onItemCreated,
-    nameInPlace: _nameInPlace,
+    nameInPlace: _treeEditing.nameInPlace,
   );
 
-  /// The row being made in the tree, and the name it waits for (#712).
-  ({String folder, bool isDir, String initial, Completer<String?> name})?
-  _creating;
-
-  /// Asks for a new item's name in a row of the tree, under [folder], as
-  /// a rename in place does: on Linux and Windows, with the tree on screen
-  /// (#712). Null leaves it to the dialog.
-  Future<String?>? _nameInPlace({
-    required String folder,
-    required bool isDir,
-    required String initial,
-  }) {
-    if (!_desktop ||
-        !_wide ||
-        !_sidebarVisible ||
-        !_filesSlotVisible ||
-        _sidebarShowsView ||
-        _gridOn) {
-      return null;
-    }
-    _creating?.name.complete(null);
-    final name = Completer<String?>();
-    setState(() {
-      _expanded.addWithAncestors(folder);
-      _creating = (folder: folder, isDir: isDir, initial: initial, name: name);
-    });
-    return name.future;
-  }
-
-  /// What the made row's field does: the name typed, or none.
-  TreeCreate? get _treeCreate => switch (_creating) {
-    final creating? => (
-      folder: creating.folder,
-      isDir: creating.isDir,
-      initial: creating.initial,
-      submit: (typed) async {
-        _endCreating(typed);
-        return null;
-      },
-      cancel: () => _endCreating(null),
-    ),
-    null => null,
-  };
-
-  void _endCreating(String? name) {
-    final creating = _creating;
-    if (creating == null) return;
-    if (mounted) setState(() => _creating = null);
-    if (!creating.name.isCompleted) creating.name.complete(name);
-  }
+  /// The rows renamed and made in place in the Files pane (#707, #712;
+  /// issue #100 moved them into [ShellTreeEditing]).
+  late final ShellTreeEditing _treeEditing = ShellTreeEditing(
+    expanded: _expanded,
+    paneOnScreen: () =>
+        _desktop &&
+        _wide &&
+        _sidebarVisible &&
+        _filesSlotVisible &&
+        !_sidebarShowsView,
+    gridFolder: () => _gridOn ? _gridStart : null,
+    renameTo: (path, name) => _rowActions.renameTo(path, name),
+    update: setState,
+    mounted: () => mounted,
+  );
 
   /// Web pages captured as notes (#531).
   late final CaptureFlow _captureFlow = CaptureFlow(
@@ -996,7 +962,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   );
 
   late final ShellRowActions _rowActions = ShellRowActions(
-    renameInPlace: _startRenameInPlace,
+    renameInPlace: _treeEditing.startRename,
     // Under "ask", the question is the shell's to put (#848).
     confirmLinks: (notes) async =>
         mounted && await askLinkUpdate(context, notes),
@@ -2299,7 +2265,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       guard: _guard,
       opensPreviewOnly: () => _notePreview,
       onNoteFiled: _onTemplateNoteFiled,
-      nameInPlace: _nameInPlace,
+      nameInPlace: _treeEditing.nameInPlace,
     );
     _journalFlow = JournalFlow(
       controller: widget.controller,
@@ -5476,8 +5442,8 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
               onDeleteMarked: (paths) =>
                   unawaited(_markedActions.delete(context, paths)),
               focusNode: _treeFocus,
-              renaming: _treeRename,
-              creating: _treeCreate,
+              renaming: _treeEditing.renaming,
+              creating: _treeEditing.creating,
             ),
           ),
           if (showGrid)
@@ -5507,7 +5473,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
                     unawaited(_rowActions.rename(context, path)),
                 onDelete: (path) =>
                     unawaited(_rowActions.delete(context, path)),
-                renaming: _treeRename,
+                renaming: _treeEditing.renaming,
               ),
             ),
         ],
@@ -5518,53 +5484,4 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   /// Whether the grid has been shown once for this library (#727): only
   /// from then on is it kept mounted under the tree.
   bool _gridVisited = false;
-
-  /// The row being renamed in place in the tree (#707), or null.
-  String? _renaming;
-
-  /// Starts renaming [path] in its tree or grid row (#707): on Linux and
-  /// Windows, with the pane on screen. The row is revealed — every folder
-  /// above it opened — and its name becomes a field. False leaves the
-  /// rename to a dialog: a phone, a desktop with the pane hidden, or a
-  /// grid tile outside the folder the grid shows.
-  bool _startRenameInPlace(String path) {
-    final desktop = _desktop;
-    // Renaming happens in the pane's own row: the sidebar has to be
-    // showing it, not the search view it may hold instead (#712).
-    if (!desktop ||
-        !_wide ||
-        !_sidebarVisible ||
-        !_filesSlotVisible ||
-        _sidebarShowsView) {
-      return false;
-    }
-    if (_gridOn) {
-      // The tile has to be in the folder shown; the folder itself has no
-      // tile, so renaming it stays a dialog (#727).
-      if (parentOf(path) != _gridStart) return false;
-      setState(() => _renaming = path);
-      return true;
-    }
-    setState(() {
-      _expanded.addWithAncestors(parentOf(path));
-      _renaming = path;
-    });
-    return true;
-  }
-
-  /// What the renamed row's field does.
-  TreeRename? get _treeRename => switch (_renaming) {
-    final path? => (
-      path: path,
-      submit: (name) async {
-        final problem = await _rowActions.renameTo(path, name);
-        if (problem == null && mounted) setState(() => _renaming = null);
-        return problem;
-      },
-      cancel: () {
-        if (mounted) setState(() => _renaming = null);
-      },
-    ),
-    null => null,
-  };
 }
