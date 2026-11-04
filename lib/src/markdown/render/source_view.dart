@@ -100,6 +100,7 @@ import 'package:niman/src/markdown/render/scroll_anchor.dart';
 import 'package:niman/src/markdown/render/scrollbar_strip.dart';
 import 'package:niman/src/markdown/render/sliver_columns.dart';
 import 'package:niman/src/markdown/render/sliver_segments.dart';
+import 'package:niman/src/markdown/render/source_caret_reveal.dart';
 import 'package:niman/src/markdown/render/source_context_menu.dart';
 import 'package:niman/src/markdown/render/source_folds.dart';
 import 'package:niman/src/markdown/render/source_line.dart';
@@ -446,23 +447,18 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   late FocusNode _focus;
   bool _ownsFocus = false;
 
-  /// The viewport height the last metrics change left: a smaller one, with
-  /// the bottom inset grown, is the keyboard opening over the note (#728).
-  double? _viewportHeight;
-
-  /// The view's bottom inset at the last metrics change, in physical pixels:
-  /// a viewport that shrank without it growing is the window made shorter
-  /// or turned, not the keyboard (#765).
-  double _bottomInset = 0;
-
-  /// Whether the writer took the scroll while the keyboard was coming up:
-  /// the reveal is theirs to call off, until the keyboard is asked for again
-  /// or goes down (#728).
-  bool _insetRevealOff = false;
-
-  /// Moves on when the writer starts a drag: a reveal still checking itself
-  /// over the frames after its jump stops there.
-  int _revealEpoch = 0;
+  /// The caret kept in view: after an edit or a jump, and when the
+  /// keyboard comes up over it (#728).
+  late final SourceCaretReveal _reveal = SourceCaretReveal(
+    scroll: () => _scroll,
+    mounted: () => mounted,
+    caretLine: () => _caretLineIndex,
+    anchorLine: () => widget.buffer.lineOf(_selection.anchor),
+    rowOf: _folds.rowOf,
+    lineBounds: _lineBounds,
+    bottomInsetNow: () => View.of(context).viewInsets.bottom,
+    typing: () => _focus.hasFocus && _input.isAttached,
+  );
 
   /// The edits that made the note what it is, and the way back.
   late EditHistory _history;
@@ -714,7 +710,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     notePath: () => widget.notePath,
     replace: (start, end, text, caret) =>
         _replaceRange(start, end, text, caret: caret),
-    ensureCaretVisible: _ensureCaretVisible,
+    ensureCaretVisible: _reveal.ensureCaretVisible,
     caretRect: () => _caretRectAt(_selection.extent) ?? caretRect,
     noteBox: () => _noteBox,
     caretMoves: () => Listenable.merge([_scroll, _caretRect]),
@@ -811,7 +807,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
         _ownSelection = _ownSelection.clampTo(widget.buffer.length);
       });
       _scheduleCaret();
-      _ensureCaretVisible();
+      _reveal.ensureCaretVisible();
       _notifyChanged(edit);
       _cost.endEdit();
       _suggest.refresh(typed: true);
@@ -1292,7 +1288,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     widget.onSelection?.call(_ownSelection);
     _input.sendSelection();
     _scheduleCaret();
-    _ensureCaretVisible();
+    _reveal.ensureCaretVisible();
     // An undo is an edit no keystroke made: the panel is read again off the
     // text it left — it follows a link still there and closes on one gone
     // (#494).
@@ -1715,7 +1711,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     widget.onSelection?.call(next);
     _input.sendSelection();
     _scheduleCaret();
-    if (follow) _ensureCaretVisible();
+    if (follow) _reveal.ensureCaretVisible();
     // The shell saves and counts what it is told about: a cut, a paste or a
     // backspace is as much an edit as a keystroke, and the edit says which
     // lines moved so the word count pays for those and not for the note.
@@ -2842,7 +2838,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// Takes the focus, or — when the surface has it — opens the connection
   /// again if the platform closed it, and asks for the keyboard either way.
   void _requestKeyboard() {
-    _insetRevealOff = false;
+    _reveal.keyboardAsked();
     if (!_focus.hasFocus) {
       // The focus change attaches (see `onFocusChange`).
       _focus.requestFocus();
@@ -2886,148 +2882,12 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     widget.onSelection?.call(clamped);
     _input.sendSelection();
     _scheduleCaret();
-    if (reveal) _ensureCaretVisible();
+    if (reveal) _reveal.ensureCaretVisible();
   }
 
   /// Puts the caret at [offset], tells the platform, and keeps it on screen.
   void placeCaret(int offset) =>
       _applySelection(_selection.collapsedTo(offset), reveal: true);
-
-  /// A metrics change: when it is the keyboard this editor asked for coming
-  /// up over the note, the caret is brought back into view (#728).
-  ///
-  /// The keyboard, and only it (#765): the viewport shrank *and* the view's
-  /// bottom inset grew — a window made shorter or a phone turned shrinks the
-  /// viewport alone — while this editor has the focus and the platform's
-  /// connection, so a keyboard raised for another field (a rename, the find
-  /// bar, a dialog) moves nothing here.
-  ///
-  /// Each step of the keyboard's animation lays the pane out anew and lands
-  /// here, after that layout, with the viewport it left: the reveal runs at
-  /// every step against the viewport as it stands, as `EditableText` does,
-  /// and the last step is the keyboard at rest — no guess at how long the
-  /// animation takes.
-  bool _onScrollMetrics(ScrollMetricsNotification notification) {
-    final height = notification.metrics.viewportDimension;
-    final last = _viewportHeight;
-    _viewportHeight = height;
-    final inset = View.of(context).viewInsets.bottom;
-    final lastInset = _bottomInset;
-    _bottomInset = inset;
-    // The keyboard going down ends what the writer called off.
-    if (inset < lastInset) _insetRevealOff = false;
-    if (last == null || height >= last || inset <= lastInset) return false;
-    if (!_focus.hasFocus || !_input.isAttached || _insetRevealOff) {
-      return false;
-    }
-    _ensureCaretVisible(wholeSelection: true);
-    return false;
-  }
-
-  /// The writer took the scroll: the reveal of a keyboard coming up is
-  /// theirs to call off, and nothing is moved under their finger (#728).
-  bool _onScroll(ScrollNotification notification) {
-    if (notification.depth != 0) return false;
-    if (notification is ScrollStartNotification &&
-        notification.dragDetails != null) {
-      _insetRevealOff = true;
-      // A reveal still settling over the next frames is called off too.
-      _revealEpoch++;
-    }
-    return false;
-  }
-
-  /// Scrolls the caret's line into view when an edit or a jump left it out.
-  ///
-  /// The plan is made on the height map, and the map is only as good as the
-  /// last layout: a row an edit just changed — a line that wrapped onto new
-  /// rows, one that became a heading, one added at the bottom — is as the
-  /// frame before measured it (or estimated), and the note's extent, which
-  /// the plan clamps to, is the one it had. Far from the viewport it is
-  /// estimates throughout. So the plan is checked again against the layout
-  /// that follows it, whether or not it moved anything: a line that fit the
-  /// old measure and does not fit the new one is brought in with the rest of
-  /// its box (Ctrl+End left the last line half under the pane's edge until
-  /// the wheel went the rest of the way; typing into the last row left its
-  /// new rows below the pane). A check that still has to move is followed by
-  /// another — [settle] of them at most.
-  ///
-  /// [wholeSelection] keeps the whole selection in view when it fits, not
-  /// only the caret: what the keyboard opening asks for (#728). A caret move
-  /// does not — with the anchor just off the screen, every Shift+Down pulled
-  /// the view back to it (#764).
-  void _ensureCaretVisible({int settle = 3, bool wholeSelection = false}) {
-    if (!_scroll.hasClients) return;
-    _revealPlanned(wholeSelection: wholeSelection);
-    _checkRevealAfterLayout(settle, wholeSelection);
-  }
-
-  /// Plans the reveal again after the next frame, which lays out what the
-  /// edit or the jump changed. That frame is asked for here, so the check
-  /// never waits for one the writer's next scroll brings (and takes the view
-  /// back from them).
-  void _checkRevealAfterLayout(int settle, bool wholeSelection) {
-    if (settle <= 0) return;
-    final epoch = _revealEpoch;
-    WidgetsBinding.instance
-      ..addPostFrameCallback((_) {
-        if (!mounted || epoch != _revealEpoch || !_scroll.hasClients) return;
-        // Only a check that moved the view has a frame coming to follow it.
-        if (_revealPlanned(wholeSelection: wholeSelection)) {
-          _checkRevealAfterLayout(settle - 1, wholeSelection);
-        }
-      })
-      ..scheduleFrame();
-  }
-
-  /// Plans the reveal on the height map as it stands and scrolls to it;
-  /// whether the view moved.
-  bool _revealPlanned({required bool wholeSelection}) {
-    final line = _caretLineIndex;
-    if (line < 0) return false;
-    // In the scroll view's coordinates: the map starts below the top padding,
-    // and the last line takes the bottom padding with it. Without them every
-    // jump down stopped the padding short, the caret's row cut by it.
-    final row = _folds.rowOf(line);
-    final extent = _lineBounds(line);
-    final viewport = _scroll.position.viewportDimension;
-    // A selection is kept whole when it is asked for and fits the viewport;
-    // otherwise its active end is — a selection longer than the screen
-    // cannot be shown whole, and the writer's next keystroke lands at the
-    // caret (#728).
-    var firstRow = row;
-    var edgeTop = extent.top;
-    var edgeBottom = extent.bottom;
-    if (wholeSelection) {
-      final anchorLine = widget.buffer.lineOf(_selection.anchor);
-      final anchorRow = _folds.rowOf(anchorLine);
-      final anchor = _lineBounds(anchorLine);
-      final top = math.min(anchor.top, extent.top);
-      final bottom = math.max(anchor.bottom, extent.bottom);
-      if (bottom - top <= viewport) {
-        firstRow = math.min(anchorRow, row);
-        edgeTop = top;
-        edgeBottom = bottom;
-      }
-    }
-    final double target;
-    if (edgeTop < _scroll.offset) {
-      // The first row takes the top padding with it. Only the row actually
-      // kept says so: a too-long selection that starts at the note's top
-      // keeps its caret, not the top of the note (#764).
-      target = firstRow == 0 ? 0 : edgeTop;
-    } else if (edgeBottom > _scroll.offset + viewport) {
-      target = (edgeBottom - viewport).clamp(
-        0.0,
-        _scroll.position.maxScrollExtent,
-      );
-    } else {
-      return false;
-    }
-    if (target == _scroll.offset) return false;
-    _scroll.jumpTo(target);
-    return true;
-  }
 
   /// Line [line] as the scroll view sees it: its top and its bottom, in the
   /// view's coordinates ([_lineBox]) — the map starts below the top
@@ -4057,9 +3917,9 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                     child: child,
                   ),
                   child: NotificationListener<ScrollMetricsNotification>(
-                    onNotification: _onScrollMetrics,
+                    onNotification: _reveal.onScrollMetrics,
                     child: NotificationListener<ScrollNotification>(
-                      onNotification: _onScroll,
+                      onNotification: _reveal.onScroll,
                       child: CustomScrollView(
                         key: _scrollKey,
                         controller: _scroll,
