@@ -54,12 +54,12 @@ import 'package:niman/src/ui/capture/paste_markdown_flow.dart'
 import 'package:niman/src/ui/dead_link_watcher.dart';
 import 'package:niman/src/ui/hidden_slot.dart';
 import 'package:niman/src/ui/link_preview/note_link_preview.dart';
-import 'package:niman/src/ui/links_to_note_section.dart';
 import 'package:niman/src/ui/note_attach.dart';
 import 'package:niman/src/ui/note_dead_links.dart';
 import 'package:niman/src/ui/note_disk.dart';
 import 'package:niman/src/ui/note_edit_commands.dart';
 import 'package:niman/src/ui/note_find_keys.dart';
+import 'package:niman/src/ui/note_footer.dart';
 import 'package:niman/src/ui/note_frontmatter_panel.dart';
 import 'package:niman/src/ui/note_inserts.dart';
 import 'package:niman/src/ui/note_link_actions.dart';
@@ -74,7 +74,6 @@ import 'package:niman/src/ui/note_stats.dart';
 import 'package:niman/src/ui/note_tags.dart';
 import 'package:niman/src/ui/note_task_items.dart';
 import 'package:niman/src/ui/note_tasks_host.dart';
-import 'package:niman/src/ui/note_tasks_section.dart';
 import 'package:niman/src/ui/note_text_cache.dart';
 import 'package:niman/src/ui/note_todo_blocks.dart';
 import 'package:niman/src/ui/note_top_bar.dart';
@@ -2035,106 +2034,59 @@ final class _NoteViewState extends State<NoteView>
             ),
           ),
         ),
-        if (!kindBody && !widget.zen) ...[
-          SafeArea(
-            // The bottom chrome only: top stays false so the status-bar
-            // inset is never inserted between the preview and this row
-            // (issue #3: that gap read as empty space above the toolbar).
-            top: false,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (!_loading && _stats.frontmatterError != null)
-                  FrontmatterWarningBanner(message: _stats.frontmatterError!),
-                // The notes that link to this one (#842), under the note.
-                if (!_loading && _ready && !widget.relatedInDock)
-                  NoteColumnPadding(
-                    column: widget.noteColumn,
-                    child: LinksToNoteSection(
-                      source: widget.linkSource,
-                      path: _pathInLibrary,
-                      onOpenNote: (path) => widget.onOpenNote?.call(path, null),
-                    ),
-                  ),
-                // The tasks that link it (#1152), under the links.
-                if (!_loading &&
-                    _ready &&
-                    !widget.relatedInDock &&
-                    _features.isOn(LibraryFeature.todo))
-                  NoteColumnPadding(
-                    column: widget.noteColumn,
-                    child: NoteTasksSection(
-                      host: widget.tasks,
-                      path: _pathInLibrary,
-                    ),
-                  ),
-                NoteColumnPadding(
-                  column: widget.noteColumn,
-                  child: ListenableBuilder(
-                    listenable: _templateCheck,
-                    builder: (context, _) => NoteStatusRow(
-                      loading: _loading,
-                      showOutline: !widget.outlineInDock,
-                      showPreview: showPreview,
-                      showWysiwyg: _wysiwygIn(widget),
-                      showSpellCheck:
-                          !widget.spellCheckInDock &&
-                          widget.spellCheck != null &&
-                          widget.spellCheck!.available,
-                      // In its place, and off: a todo.txt has one pane.
-                      canSwitchEditorKind: widget.onEditorKindChanged != null,
-                      editorKindLocked: _plainTextIn(widget),
-                      wordCount: _stats.wordCount,
-                      // Only a template is counted; elsewhere the checker
-                      // never ran and stays at nothing (T-TPL-09).
-                      templateProblems: _templateIn(widget)
-                          ? _templateCheck.problemCount
-                          : 0,
-                      statusText: _status,
-                      onStatusTap: _saves.failure.value == null
-                          ? null
-                          : _saves.saveInBackground,
-                      statusActions: widget.statusActions,
-                      onOutline: _links.openOutline,
-                      onFind: () => _sourceFind.open(),
-                      onSpellCheck: _commands.openSpellCheck,
-                      onToggleEditorKind: _toggleEditorKind,
-                      typewriter: widget.typewriter,
-                      onToggleTypewriter: widget.onToggleTypewriter,
-                    ),
-                  ),
-                ),
-                // The toolbar fades + sizes in and out (hidden in preview
-                // mode). It is only mounted once loaded, so it appears
-                // immediately on load and animates only when preview mode
-                // toggles. Phone only: on desktop it lives above the
-                // editor (the top slot).
-                if (!widget.toolbarTop && !_loading)
-                  AnimatedSize(
-                    duration: const Duration(milliseconds: 200),
-                    curve: Curves.easeOutCubic,
-                    alignment: Alignment.topCenter,
-                    child: showToolbar
-                        ? NoteColumnPadding(
-                            column: widget.noteColumn,
-                            child: _toolbar(context),
-                          )
-                        : const SizedBox(width: double.infinity),
-                  ),
-              ],
+        if (!kindBody && !widget.zen)
+          NoteFooter(
+            column: widget.noteColumn,
+            loading: _loading,
+            ready: _ready,
+            frontmatterError: _stats.frontmatterError,
+            showRelated: !widget.relatedInDock,
+            linkSource: widget.linkSource,
+            notePath: _pathInLibrary,
+            onOpenNote: (path) => widget.onOpenNote?.call(path, null),
+            showTasks: _features.isOn(LibraryFeature.todo),
+            tasks: widget.tasks,
+            statusRow: ListenableBuilder(
+              listenable: _templateCheck,
+              builder: (context, _) => NoteStatusRow(
+                loading: _loading,
+                showOutline: !widget.outlineInDock,
+                showPreview: showPreview,
+                showWysiwyg: _wysiwygIn(widget),
+                showSpellCheck:
+                    !widget.spellCheckInDock &&
+                    widget.spellCheck != null &&
+                    widget.spellCheck!.available,
+                // In its place, and off: a todo.txt has one pane.
+                canSwitchEditorKind: widget.onEditorKindChanged != null,
+                editorKindLocked: _plainTextIn(widget),
+                wordCount: _stats.wordCount,
+                // Only a template is counted; elsewhere the checker
+                // never ran and stays at nothing (T-TPL-09).
+                templateProblems: _templateIn(widget)
+                    ? _templateCheck.problemCount
+                    : 0,
+                statusText: _status,
+                onStatusTap: _saves.failure.value == null
+                    ? null
+                    : _saves.saveInBackground,
+                statusActions: widget.statusActions,
+                onOutline: _links.openOutline,
+                onFind: () => _sourceFind.open(),
+                onSpellCheck: _commands.openSpellCheck,
+                onToggleEditorKind: _toggleEditorKind,
+                typewriter: widget.typewriter,
+                onToggleTypewriter: widget.onToggleTypewriter,
+              ),
             ),
+            toolbarBelow: !widget.toolbarTop && !_loading,
+            showToolbar: showToolbar,
+            toolbar: _toolbar,
           ),
-        ],
       ],
     );
   }
 
-  /// The malformed-frontmatter line (T-M4-01).
-  ///
-  /// A block that does not parse is indexed as if it were not there —
-  /// no title, no tags, no fields — and nothing else in the app would say
-  /// so. This does, with the parser's own message, while the note is open
-  /// and the mistake is still in front of the person who made it.
   /// The formatting toolbar (T-UI-08): pure markdown commands applied
   /// through the surface; the image button keeps the file-picker flow
   /// (T-M2-09) it already had in the status row.
