@@ -104,6 +104,7 @@ import 'package:niman/src/markdown/render/source_context_menu.dart';
 import 'package:niman/src/markdown/render/source_folds.dart';
 import 'package:niman/src/markdown/render/source_line.dart';
 import 'package:niman/src/markdown/render/source_live_lines.dart';
+import 'package:niman/src/markdown/render/source_paragraphs.dart';
 import 'package:niman/src/markdown/render/source_sections.dart';
 import 'package:niman/src/markdown/render/source_template_hint.dart';
 import 'package:niman/src/markdown/render/source_touch.dart';
@@ -113,7 +114,6 @@ import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/markdown/source_edit.dart';
 import 'package:niman/src/markdown/source_styler.dart';
 import 'package:niman/src/markdown/surface_controller.dart';
-import 'package:niman/src/markdown/table/markdown_table.dart';
 import 'package:niman/src/markdown/task_cascade.dart';
 import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
@@ -538,16 +538,10 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// the read pane takes instead of scanning the note again.
   DocumentScan? handOver() => _styler?.handOver();
 
-  /// The paragraph of each line a frame has built, so a tap can ask the line it
-  /// landed on where an offset is, and the caret can ask its own line for the
-  /// rectangle. Only mounted lines keep a key: a long scroll forgets the lines
-  /// it left, which is what keeps this from growing with the note.
-  final Map<int, GlobalKey> _lineKeys = <int, GlobalKey>{};
-
-  /// The keys of a wrapped table row's fragments past its first, by line and
-  /// fragment: a row laid out in fitted columns is several paragraphs, and
-  /// the caret and a tap have to find the one they are in.
-  final Map<(int, int), GlobalKey> _fragmentKeys = <(int, int), GlobalKey>{};
+  /// The paragraph of each line a frame has built, and of each fragment of
+  /// a wrapped table row: what a tap asks where an offset is, and the caret
+  /// asks for its rectangle.
+  final SourceParagraphs _paragraphs = SourceParagraphs();
 
   /// Where the caret's fragment sits in the line's box, beyond the indent
   /// the painter knows about: a wrapped table row draws its cells away from
@@ -1125,15 +1119,14 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     final x = _hosts.layouts.isEmpty
         ? null
         : _noteBox?.globalToLocal(global).dx;
-    for (final entry in _lineKeys.entries) {
-      final line = entry.key;
+    for (final line in _paragraphs.lines) {
       if (line >= widget.buffer.lineCount) continue;
       // Side by side, two columns' lines hold the same height: a line of a
       // column holds a point only across its column (#729).
       if (x != null && !_inColumnOf(line, x)) continue;
       final pieces = _piecesOf(line);
       if (pieces.length == 1) {
-        final object = _renderOf(pieces.first.key);
+        final object = SourceParagraphs.renderOf(pieces.first.key);
         if (object == null) continue;
         final local = object.globalToLocal(global);
         if (local.dy < 0 || local.dy >= object.size.height) continue;
@@ -1146,7 +1139,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       // between the columns, or below the row — is not this line's: the
       // next one is asked, and the height map answers for a point no drawn
       // line holds at all.
-      final hit = _pieceAt(pieces, global);
+      final hit = SourceParagraphs.pieceAt(pieces, global);
       if (hit == null) continue;
       return widget.buffer.offsetOfLine(line) +
           hit.piece.start +
@@ -1193,13 +1186,13 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     // subtracted the gutter twice, and the caret landed a gutter's width left
     // of the finger.)
     if (pieces.length > 1) {
-      final hit = _pieceUnder(pieces, global);
+      final hit = SourceParagraphs.pieceUnder(pieces, global);
       if (hit == null) return null;
       return widget.buffer.offsetOfLine(line) +
           hit.piece.start +
           hit.paragraph.getPositionForOffset(hit.local).offset;
     }
-    final paragraph = _renderOf(pieces.first.key);
+    final paragraph = SourceParagraphs.renderOf(pieces.first.key);
     if (paragraph == null || !paragraph.attached) return null;
     final position = paragraph.getPositionForOffset(
       paragraph.globalToLocal(global),
@@ -1580,7 +1573,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// ([top]) or its last; the line's start or end when it is not drawn.
   int _offsetOnLine(int line, double x, {required bool top}) {
     final buffer = widget.buffer;
-    final paragraph = _paragraphAt(line);
+    final paragraph = _paragraphs.paragraphAt(line);
     final box = _noteBox;
     if (paragraph == null || !paragraph.attached || box == null) {
       return top
@@ -2543,8 +2536,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   ({int line, int start, int end, bool ticked})? _taskBoxAt(Offset global) {
     if (!widget.hideMarkers) return null;
     final caretLine = _caretSpot.value.line;
-    for (final entry in _lineKeys.entries) {
-      final index = entry.key;
+    for (final index in _paragraphs.lines) {
       if (index == caretLine || index >= widget.buffer.lineCount) continue;
       final hit = _taskBoxSlotAt(index, global);
       if (hit == null) continue;
@@ -2569,10 +2561,8 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// and the click ([_taskBoxAt]) can never disagree: both read the same
   /// [liveItemSlot] of the same paragraph.
   bool? _taskBoxSlotAt(int index, Offset global) {
-    final paragraph = _lineKeys[index]?.currentContext?.findRenderObject();
-    if (paragraph is! RenderParagraph ||
-        !paragraph.attached ||
-        !paragraph.hasSize) {
+    final paragraph = _paragraphs.paragraphAt(index);
+    if (paragraph == null || !paragraph.attached || !paragraph.hasSize) {
       return null;
     }
     final styled = _lineAt(index);
@@ -3229,48 +3219,13 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     return (a - start, b - start);
   }
 
-  /// The paragraph of line [line], when a frame has built it.
-  RenderParagraph? _paragraphAt(int line) {
-    final object = _lineKeys[line]?.currentContext?.findRenderObject();
-    return object is RenderParagraph ? object : null;
-  }
-
-  /// The key of line `index`'s paragraph, created on first use.
-  GlobalKey _keyFor(int index) {
-    final key = _lineKeys.putIfAbsent(index, GlobalKey.new);
-    if (_lineKeys.length > 512) {
-      _lineKeys.removeWhere((_, key) => key.currentContext == null);
-    }
-    return key;
-  }
-
-  /// The key of fragment [at] of line [line] — the line's own paragraph for
-  /// its first, and one per fragment of a table row laid out in fitted
-  /// columns — created on first use.
-  GlobalKey _fragmentKey(int line, int at) {
-    if (at == 0) return _keyFor(line);
-    final key = _fragmentKeys.putIfAbsent((line, at), GlobalKey.new);
-    if (_fragmentKeys.length > 512) {
-      _fragmentKeys.removeWhere((_, key) => key.currentContext == null);
-    }
-    return key;
-  }
-
-  /// The paragraph [key] draws, when a frame has laid it out.
-  RenderParagraph? _renderOf(GlobalKey key) {
-    final object = key.currentContext?.findRenderObject();
-    return object is RenderParagraph && object.attached && object.hasSize
-        ? object
-        : null;
-  }
-
   /// The paragraphs line [line] is drawn in: the line's own, or a table row
   /// laid out in fitted columns. Each says where its source starts on the
   /// line and where it stands in the line's box — below the table's cell
   /// padding for a wrapped row, so the caret's shift and the grid agree.
   List<SourcePiece> _piecesOf(int line) {
     SourcePiece one(int start, int end, [double x = 0, double y = 0]) =>
-        (key: _keyFor(line), start: start, end: end, x: x, y: y);
+        (key: _paragraphs.keyFor(line), start: start, end: end, x: x, y: y);
     final length = widget.buffer.lineLengthAt(line);
     final single = <SourcePiece>[one(0, length)];
     final block = _styler?.blockOf(line);
@@ -3284,7 +3239,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     for (final visualLine in wrapped) {
       for (final piece in visualLine.pieces) {
         pieces.add((
-          key: _fragmentKey(line, pieces.length),
+          key: _paragraphs.fragmentKey(line, pieces.length),
           start: piece.start,
           end: piece.end,
           x: piece.x,
@@ -3299,110 +3254,12 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// The fragment of line [line] a caret at [local] of the line is drawn in,
   /// and its paragraph when a frame has built it.
   (SourcePiece?, RenderParagraph?) _fragmentAt(int line, int local) {
-    final piece = _pieceHolding(_piecesOf(line), line, local);
-    return (piece, piece == null ? null : _renderOf(piece.key));
-  }
-
-  /// The piece of line [line] a caret at [local] is drawn in: the one whose
-  /// source holds it. A wrapped row's pieces hold only its cells' text, so
-  /// an offset in the room round them — a pipe, the spaces by it — is its
-  /// cell's, on its side of the pipe (`MarkdownTable.cellRangesOf`), and
-  /// drawn at that cell's nearer edge: the room before a pipe at the end of
-  /// the cell on its left, the room after it at the start of the one on its
-  /// right. That is the side an unwrapped row draws it on, the room's
-  /// characters spread evenly between the two cells' text.
-  SourcePiece? _pieceHolding(List<SourcePiece> pieces, int line, int local) {
-    for (final piece in pieces) {
-      if (local >= piece.start && local <= piece.end) return piece;
-    }
-    if (pieces.isEmpty) return null;
-    final cells = MarkdownTable.cellRangesOf(widget.buffer.lineAt(line));
-    var (from, to) = local < cells.first.$1 ? cells.first : cells.last;
-    for (final (start, end) in cells) {
-      if (local >= start && local <= end) {
-        (from, to) = (start, end);
-        break;
-      }
-    }
-    // The cell's pieces are contiguous and none holds [local]: it is before
-    // all of them or past all of them.
-    SourcePiece? before;
-    SourcePiece? after;
-    for (final piece in pieces) {
-      if (piece.start < from || piece.end > to) continue;
-      if (piece.end < local && (before == null || piece.end > before.end)) {
-        before = piece;
-      }
-      if (piece.start > local && (after == null || piece.start < after.start)) {
-        after = piece;
-      }
-    }
-    return before ?? after ?? pieces.first;
-  }
-
-  /// The piece of a wrapped row [global] is *in*, and where in it the point
-  /// lands, or null when it is in none of them: the room between two columns
-  /// is nobody's, and a point outside the row belongs to a line the caller
-  /// has not asked yet.
-  ({SourcePiece piece, RenderParagraph paragraph, Offset local})? _pieceAt(
-    List<SourcePiece> pieces,
-    Offset global,
-  ) {
-    for (final piece in pieces) {
-      final paragraph = _renderOf(piece.key);
-      if (paragraph == null) continue;
-      final local = paragraph.globalToLocal(global);
-      if (local.dx < 0 ||
-          local.dx >= paragraph.size.width ||
-          local.dy < 0 ||
-          local.dy >= paragraph.size.height) {
-        continue;
-      }
-      return (piece: piece, paragraph: paragraph, local: local);
-    }
-    return null;
-  }
-
-  /// The fragment of a wrapped row under [global], and where in it the point
-  /// lands: the piece whose box holds it, or — under none, in the padding
-  /// between two columns or below the last line — the nearest one, the
-  /// vertical distance weighing more than the horizontal.
-  ({SourcePiece piece, RenderParagraph paragraph, Offset local})? _pieceUnder(
-    List<SourcePiece> pieces,
-    Offset global,
-  ) {
-    ({SourcePiece piece, RenderParagraph paragraph, Offset local})? best;
-    var bestDistance = double.infinity;
-    for (final piece in pieces) {
-      final paragraph = _renderOf(piece.key);
-      if (paragraph == null) continue;
-      final local = paragraph.globalToLocal(global);
-      final dx = local.dx < 0
-          ? -local.dx
-          : (local.dx > paragraph.size.width
-                ? local.dx - paragraph.size.width
-                : 0.0);
-      final dy = local.dy < 0
-          ? -local.dy
-          : (local.dy > paragraph.size.height
-                ? local.dy - paragraph.size.height
-                : 0.0);
-      if (dx == 0 && dy == 0) {
-        return (piece: piece, paragraph: paragraph, local: local);
-      }
-      final distance = dx + dy * 8;
-      if (distance >= bestDistance) continue;
-      bestDistance = distance;
-      best = (
-        piece: piece,
-        paragraph: paragraph,
-        local: Offset(
-          local.dx.clamp(0, paragraph.size.width),
-          local.dy.clamp(0, paragraph.size.height),
-        ),
-      );
-    }
-    return best;
+    final piece = SourceParagraphs.pieceHolding(
+      _piecesOf(line),
+      () => widget.buffer.lineAt(line),
+      local,
+    );
+    return (piece, piece == null ? null : SourceParagraphs.renderOf(piece.key));
   }
 
   /// How tall the line [line] is drawn: its paragraph's height, or the sum
@@ -3416,7 +3273,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
         return wrapped.fold<double>(0, (sum, one) => sum + one.height);
       }
     }
-    return _paragraphAt(line)?.size.height ?? 0;
+    return _paragraphs.paragraphAt(line)?.size.height ?? 0;
   }
 
   /// The line the caret sits on, or -1.
@@ -4326,7 +4183,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       onFoldDown: () => _controlPress = true,
       onDiagramDown: _diagramDown,
       onDiagramLine: _openDiagramLine,
-      paragraphKey: _keyFor(index),
+      paragraphKey: _paragraphs.keyFor(index),
       styled: styled,
       shape: widget.hideMarkers
           ? LineShape.of(
@@ -4351,7 +4208,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
           : null,
       tableHeader: block?.kind == BlockKind.table && index == block!.startLine,
       pieceKey: block?.kind == BlockKind.table
-          ? (at) => at == 0 ? _keyFor(index) : _fragmentKey(index, at)
+          ? (at) => _paragraphs.fragmentKey(index, at)
           : null,
       pieceShift: _caretShift,
       definition: widget.hideMarkers && block != null
@@ -4686,7 +4543,9 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     double? left;
     for (var line = block.startLine; line < block.endLine; line++) {
       final piece = _piecesOf(line).firstOrNull;
-      final render = piece == null ? null : _renderOf(piece.key);
+      final render = piece == null
+          ? null
+          : SourceParagraphs.renderOf(piece.key);
       if (piece == null || render == null) continue;
       left = render.localToGlobal(Offset(-piece.x, 0)).dx;
       break;
@@ -4719,8 +4578,8 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     final firstPiece = _piecesOf(firstLine).firstOrNull;
     final lastPiece = _piecesOf(lastLine).firstOrNull;
     if (firstPiece == null || lastPiece == null) return null;
-    final first = _renderOf(firstPiece.key);
-    final last = _renderOf(lastPiece.key);
+    final first = SourceParagraphs.renderOf(firstPiece.key);
+    final last = SourceParagraphs.renderOf(lastPiece.key);
     if (first == null || last == null) return null;
     final pad = widget.theme.tableCellPadding;
     final wrapped = row.wrapped.isNotEmpty;
