@@ -107,6 +107,7 @@ import 'package:niman/src/markdown/render/source_line.dart';
 import 'package:niman/src/markdown/render/source_live_lines.dart';
 import 'package:niman/src/markdown/render/source_paragraphs.dart';
 import 'package:niman/src/markdown/render/source_sections.dart';
+import 'package:niman/src/markdown/render/source_styling.dart';
 import 'package:niman/src/markdown/render/source_template_hint.dart';
 import 'package:niman/src/markdown/render/source_touch.dart';
 import 'package:niman/src/markdown/render/todo_block_scope.dart';
@@ -370,15 +371,35 @@ typedef SourceLinkHover = ({
 
 /// The source view's state, so a caller can ask where the caret is.
 final class MarkdownSourceViewState extends State<MarkdownSourceView> {
-  /// The colours: the read view's engine put on the source lines, kept
-  /// across rebuilds and moved along by every edit — O(change).
-  ///
-  /// Null while a long note is read in the background ([_restyle]): the
-  /// lines are drawn plain until it lands.
-  SourceStyler? _styler;
+  /// The colours: read in place or in the background, moved along by
+  /// every edit, and their scan carried on when an edit left it owed.
+  late final SourceStyling _styling = SourceStyling(
+    buffer: () => widget.buffer,
+    mounted: () => mounted,
+    readsInBackground: readsInBackground,
+    progressiveLines: () => progressiveLines,
+    landed: () {
+      setState(() {});
+      // The colours landing is also the formats landing: until they are
+      // read, the caret's line has no tokens and the toolbar would show
+      // every button dark on a note whose syntax the writer is inside.
+      _publishActive(_caretSpot.value);
+      // And it is the caret's line landing: a heading, or a formula, is
+      // drawn at another height than the plain line the caret was measured
+      // over. The reading came in outside any edit, so nothing else asks
+      // for the caret to be measured again.
+      _measureCaretAfterFrame();
+    },
+    settled: () {
+      // A layout that found the scan owed drew the `columns` blocks
+      // stacked (#729): settled, it lays them out side by side.
+      if (_runsOwed) setState(() {});
+    },
+  );
 
-  /// Counts the readings started, so one a later one overtook is dropped.
-  int _stylings = 0;
+  /// The colours ([SourceStyling.styler]): null while a long note is read
+  /// in the background, its lines drawn plain until it lands.
+  SourceStyler? get _styler => _styling.styler;
 
   /// The heights the sliver places the rows with: one per line nobody has
   /// folded away.
@@ -492,7 +513,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
 
   /// The note's headings, as the scan behind the colours has them, or null
   /// while there is no scan yet (a long note reads in the background, see
-  /// [_restyle]).
+  /// [SourceStyling.restyle]).
   ///
   /// The outline the note view publishes, from an answer it already holds.
   List<OutlineEntry>? get headings => _styler?.headings;
@@ -743,7 +764,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
         ..refresh()
         ..run();
     });
-    _restyle();
+    _styling.restyle();
     _suggest.addListener(_onSuggestChanged);
     _touch.addListener(_onTouchChanged);
     _menu.addListener(_onMenuChanged);
@@ -791,7 +812,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       // round asked for the frame's parts (#362): a release build reads no
       // clock on the path it would be measuring.
       _cost.startEdit();
-      _styleEdited(edit);
+      _styling.edited(edit);
     },
     selection: () => _selection,
     onSelection: (next) {
@@ -923,7 +944,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
           widget.surface?.initialSelection ?? const SelectionModel.at(0);
       _input = _makeInput();
       _brackets.clear();
-      _restyle();
+      _styling.restyle();
       _folds.clear();
       _heights = _map();
       _seenRevision = widget.buffer.revision;
@@ -940,7 +961,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       // is clamped into whatever replaced it — and its offsets are the ones
       // read from the text that went, so the panel goes with them (#494).
       _suggest.dropInUpdate();
-      _restyle();
+      _styling.restyle();
       _folds.clear();
       _heights = _map();
       _seenRevision = widget.buffer.revision;
@@ -994,7 +1015,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     WindowVisibility.shown.removeListener(_onWindowShown);
     _focusReturn.dispose();
     _blink?.cancel();
-    _scanSlice?.cancel();
+    _styling.dispose();
     _typewriter.dispose();
     _semanticsTick.dispose();
     _caretRect.dispose();
@@ -1242,7 +1263,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     _history.clear();
     // The panel holds offsets into the text that went (#494).
     _suggest.close();
-    _restyle();
+    _styling.restyle();
     _folds.clear();
     _heights = _map();
     _seenRevision = buffer.revision;
@@ -1271,9 +1292,9 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     // touched, and the tokenizer and the map follow those lines.
     final edit = _history.lastEdit;
     if (edit != null) {
-      _styleEdited(edit);
+      _styling.edited(edit);
     } else {
-      _restyle();
+      _styling.restyle();
     }
     _syncLines(edit);
     // The word count follows the same edit; the undo record is the one it
@@ -1702,7 +1723,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       ),
       closing: closing,
     );
-    _styleEdited(edit);
+    _styling.edited(edit);
     final next = (caret ?? SelectionModel.at(start + stored)).clampTo(
       buffer.length,
     );
@@ -2101,7 +2122,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
 
   /// Whether a layout asked for [_liveRuns] while the scan owed part of the
   /// note, and drew the blocks past what it had read stacked: the scan
-  /// settling owes it a layout ([_carryScanOn]).
+  /// settling owes it a layout (`SourceStyling`).
   bool _runsOwed = false;
 
   /// The outermost `columns` blocks `live` draws, read off the scan's fence
@@ -2971,7 +2992,8 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   );
 
   /// Line [index]'s tokens, or null while they are **not known**: the line of
-  /// a long note, before the background reading lands ([_restyle]).
+  /// a long note, before the background reading lands
+  /// ([SourceStyling.restyle]).
   ///
   /// A null is not "this line has no tokens" — it is "nobody has read it
   /// yet", and the two must not be confused by a reader that takes tokens as
@@ -3226,7 +3248,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
 
   /// From how many lines on a note read in place reads the blocks of its top
   /// alone before its first frame, and the rest a slice at a time after it
-  /// ([_carryScanOn]).
+  /// (`SourceStyling`).
   ///
   /// The whole scan of a 16 000-line note was most of the 20 ms frame that
   /// opened it on a tablet (device log, 2026-10-20), for a frame that draws
@@ -3235,69 +3257,10 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   @visibleForTesting
   static int progressiveLines = BlockScanner.defaultBudget;
 
-  /// How many lines of such a note are read before its first frame: a
-  /// screen and more. A frame placed further down — a note reopened where
-  /// it was read — reads on as far as its lines ([SourceStyler.blockOf]).
-  static const int _firstScanLines = 512;
-
-  /// Reads the note's colours again, from the top.
-  ///
-  /// A long note is read in an isolate ([SourceStyler.inBackground]): the
-  /// block scan of a 246 MB note is 2 s of a frozen window. Its lines are
-  /// drawn plain until the reading lands, and one that lands on a note that
-  /// moved on meanwhile is started again.
-  void _restyle() {
-    final buffer = widget.buffer;
-    final reading = ++_stylings;
-    // The scan a slice was waiting to carry on is the styler's this one
-    // replaces: left waiting, it kept the new styler's from being carried
-    // on, and found the old one gone when it ran.
-    _scanSlice?.cancel();
-    _scanSlice = null;
-    if (!readsInBackground(buffer)) {
-      _reading = null;
-      final progressive = buffer.lineCount >= progressiveLines;
-      _styler = SourceStyler(
-        buffer,
-        firstLines: progressive ? _firstScanLines : null,
-      );
-      if (progressive) _carryScanOn();
-      return;
-    }
-    _styler = null;
-    // The landing itself is what [readingLanded] answers: a reader waiting
-    // on it finds the styler in place when it resumes.
-    final landing = SourceStyler.inBackground(buffer).then((styler) {
-      if (!mounted || reading != _stylings) return;
-      if (!identical(widget.buffer, buffer)) return;
-      if (styler.revision != buffer.revision) {
-        _restyle();
-        return;
-      }
-      setState(() => _styler = styler);
-      // The colours landing is also the formats landing: until they are
-      // read, the caret's line has no tokens and the toolbar would show
-      // every button dark on a note whose syntax the writer is inside.
-      _publishActive(_caretSpot.value);
-      // And it is the caret's line landing: a heading, or a formula, is
-      // drawn at another height than the plain line the caret was measured
-      // over. The reading came in outside any edit, so nothing else asks
-      // for the caret to be measured again.
-      _measureCaretAfterFrame();
-    });
-    _reading = landing;
-    unawaited(landing);
-  }
-
-  /// The last reading of a long note, from the call that started it to the
-  /// styler in place — complete once it has landed; null for a note read in
-  /// place.
-  Future<void>? _reading;
-
   /// Completes when the reading of the note under way has landed — at once
   /// when none is: what a reader of the same lines waits for rather than
   /// reading them again (#1199), and then asks [handOver] for.
-  Future<void> get readingLanded => _reading ?? Future<void>.value();
+  Future<void> get readingLanded => _styling.readingLanded;
 
   /// The Mermaid block — or, where the note's tasks are at hand
   /// ([TodoBlockScope], asked of this view), the `todo` fence — line
@@ -3309,45 +3272,6 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     widget.buffer,
     drawsTodo: () => TodoBlockScope.of(context) != null,
   );
-
-  /// Moves the colours along [edit], already made to the buffer.
-  void _styleEdited(SourceEdit edit) {
-    _styler?.edited(edit);
-    _carryScanOn();
-  }
-
-  /// The next slice of a scan an edit left owed, when one is waiting.
-  Timer? _scanSlice;
-
-  /// Carries on, a slice at a time, the scan an edit left owed
-  /// (`docs/records/huge-notes.md` item 3).
-  ///
-  /// An edit that changes what the rest of the note is — a `$$` opened at 50 %
-  /// of a 246 MB note — scans its budget of lines and stops, and the lines on
-  /// screen catch it up as far as they need. Nothing drawn waits for the rest,
-  /// so nothing here repaints; what finishing it gives back is the whole
-  /// note's answers — the outline, the blocks — to the readers that ask for
-  /// all of it.
-  ///
-  /// Each slice is a timer of its own, so a frame or a key between two slices
-  /// waits for one slice at most. Not an idle-priority scheduler task: those
-  /// are refused while any animation runs, and a refused task asks the event
-  /// loop again at once — a core spinning for as long as a spinner turns.
-  void _carryScanOn() {
-    final styler = _styler;
-    if (_scanSlice != null || styler == null || styler.settled) return;
-    _scanSlice = Timer(Duration.zero, () {
-      _scanSlice = null;
-      if (!mounted || !identical(_styler, styler)) return;
-      styler.advance();
-      // A layout that found the scan owed drew the `columns` blocks
-      // stacked (#729): settled, it lays them out side by side.
-      if (styler.settled && _runsOwed) {
-        setState(() {});
-      }
-      _carryScanOn();
-    });
-  }
 
   BlockHeightMap _map() {
     // Read once for the whole map, not once a row: a map is built over every
