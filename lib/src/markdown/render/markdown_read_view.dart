@@ -43,6 +43,7 @@ import 'package:niman/src/markdown/render/note_margins.dart';
 import 'package:niman/src/markdown/render/range_highlight.dart';
 import 'package:niman/src/markdown/render/read_code_pieces.dart';
 import 'package:niman/src/markdown/render/read_entries.dart';
+import 'package:niman/src/markdown/render/read_jumps.dart';
 import 'package:niman/src/markdown/render/read_segments.dart';
 import 'package:niman/src/markdown/render/read_selection.dart';
 import 'package:niman/src/markdown/render/read_view_keys.dart';
@@ -276,43 +277,17 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
     if (index == null) return;
     // A block of a side-by-side `columns` block is drawn in it: the jump
     // lands on the block's top.
-    _jumpToIndex(_entries.hosts.entryOf(index), attempt: 0);
+    _jumps.toEntry(_entries.hosts.entryOf(index));
   }
 
-  /// How many frames a line jump may take to settle.
-  ///
-  /// Each pass lands where the map says the target is, the frame that lands
-  /// measures the blocks around it, and the target's own offset then moves by
-  /// what those measurements were wrong by — a paragraph estimated at one
-  /// visual line and drawn at three pushes it down, three times further than
-  /// the map thought. That converges geometrically — every pass covers the
-  /// ground the last one got wrong — and this bounds it. Measured on an anchor
-  /// jump into a note of thirty-word paragraphs: three passes, and the last one
-  /// moves nothing.
-  static const int _maxJumpAttempts = 12;
-
-  /// One pass of [jumpToLine]: jump to where the map says [index] starts, then
-  /// look again after the frame that landed.
-  void _jumpToIndex(int index, {required int attempt}) {
-    final heights = _entries.heights;
-    final controller = _scroll;
-    if (heights == null || !controller.hasClients) return;
-    final offset = heights
-        .offsetOf(index)
-        .clamp(0.0, controller.position.maxScrollExtent);
-    final moved = (controller.position.pixels - offset).abs() > 0.5;
-    if (moved) {
-      controller.jumpTo(offset);
-    } else if (attempt > 0) {
-      // The map agrees with where we are: nothing left to correct.
-      return;
-    }
-    if (attempt >= _maxJumpAttempts) return;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      _jumpToIndex(index, attempt: attempt + 1);
-    });
-  }
+  /// The view's moves to a place in the note, each settling over the
+  /// frames that measure where it landed.
+  late final ReadJumps _jumps = ReadJumps(
+    entries: _entries,
+    scroll: () => _scroll,
+    mounted: () => mounted,
+    top: () => widget.padding.top,
+  );
 
   /// Where the blocks report the part of them selected.
   final ReadSelectionScope _selection = ReadSelectionScope();
@@ -349,26 +324,7 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
   /// block's lines share its height evenly, so a paragraph of one line is
   /// that line and a code block of forty is cut in forty. Null while there
   /// is nothing drawn to ask.
-  ScrollAnchor? get topAnchor {
-    final heights = _entries.heights;
-    final blocks = _entries.blocks;
-    final scroll = _scroll;
-    if (heights == null || blocks.isEmpty || !scroll.hasClients) return null;
-    final y = scroll.offset - widget.padding.top;
-    if (y <= 0) return (line: 0, fraction: 0.0);
-    final index = heights.indexAt(y);
-    if (index == null) {
-      // Past the blocks, in the footnotes: the note's last line, whole.
-      return (line: blocks.last.endLine - 1, fraction: 1.0);
-    }
-    final block = blocks[index];
-    final extent = heights.extentFor(index);
-    final lines = block.endLine - block.startLine;
-    final into = extent > 0 ? (y - heights.offsetOf(index)) / extent : 0.0;
-    final exact = into.clamp(0.0, 1.0) * lines;
-    final line = exact.floor().clamp(0, lines - 1);
-    return (line: block.startLine + line, fraction: exact - line);
-  }
+  ScrollAnchor? get topAnchor => _jumps.topAnchor;
 
   /// Whether the view has the note drawn to show an anchor in
   /// ([showAnchor]): it is laid out, and holds blocks or is still reading
@@ -385,58 +341,11 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
       _pendingAnchor = anchor;
       return;
     }
-    _showAnchor(anchor, attempt: 0);
+    _jumps.toAnchor(anchor);
   }
 
   /// An anchor asked for while there were no blocks to show it in.
   ScrollAnchor? _pendingAnchor;
-
-  void _showAnchor(ScrollAnchor anchor, {required int attempt}) {
-    final heights = _entries.heights;
-    final scroll = _scroll;
-    if (heights == null || !scroll.hasClients) return;
-    final found = _entries.indexAt(anchor.line);
-    if (found == null) return;
-    final index = _entries.hosts.entryOf(found);
-    final block = _entries.blocks[index];
-    final lines = block.endLine - block.startLine;
-    final into = index != found
-        ? 0.0
-        : lines > 0
-        ? ((anchor.line - block.startLine) + anchor.fraction) / lines
-        : 0.0;
-    final atTop = anchor.line == 0 && anchor.fraction == 0;
-    final offset = atTop
-        ? 0.0
-        : (widget.padding.top +
-                  heights.offsetOf(index) +
-                  into * heights.extentFor(index))
-              .clamp(0.0, scroll.position.maxScrollExtent);
-    final moved = (scroll.position.pixels - offset).abs() > 0.5;
-    if (moved) {
-      scroll.jumpTo(offset);
-    } else if (attempt > 0) {
-      return;
-    }
-    if (attempt >= _maxJumpAttempts) return;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _showAnchor(anchor, attempt: attempt + 1);
-    });
-  }
-
-  /// Goes to the note's end, and again after each frame that measured the
-  /// rows it landed on and moved the end — as long as it moves.
-  void _toEnd({int attempt = 0}) {
-    final scroll = _scroll;
-    if (!scroll.hasClients) return;
-    final end = scroll.position.maxScrollExtent;
-    if ((scroll.position.pixels - end).abs() <= 0.5 && attempt > 0) return;
-    scroll.jumpTo(end);
-    if (attempt >= _maxJumpAttempts) return;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _toEnd(attempt: attempt + 1);
-    });
-  }
 
   @override
   void initState() {
@@ -656,7 +565,7 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
         event,
         _scroll,
         row: MediaQuery.textScalerOf(context).scale(_entries.theme.lineHeight),
-        toEnd: _toEnd,
+        toEnd: _jumps.toEnd,
       ),
       // A selectable view takes the keyboard itself, where it is clicked:
       // taken back on each click, a selection would be dropped.
