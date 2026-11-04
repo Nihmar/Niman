@@ -145,6 +145,7 @@ import 'package:niman/src/ui/shell_journal_ui.dart';
 import 'package:niman/src/ui/shell_layout.dart';
 import 'package:niman/src/ui/shell_marked_actions.dart';
 import 'package:niman/src/ui/shell_navigation.dart';
+import 'package:niman/src/ui/shell_note_fade.dart';
 import 'package:niman/src/ui/shell_note_history.dart';
 import 'package:niman/src/ui/shell_note_io.dart';
 import 'package:niman/src/ui/shell_ocr_flow.dart';
@@ -537,7 +538,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       _contentTab = tab;
       _contentPane = pane;
       _workspace.focus(pane);
-      _noteClosed();
+      _noteFade.closed();
     });
   }
 
@@ -693,7 +694,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
         _visitedTabs.add(tab);
         _contentTab = tab;
         _contentPane = _workspace.value.focused;
-        _noteClosed();
+        _noteFade.closed();
       });
     } else if (narrow &&
         _treeVisible &&
@@ -701,7 +702,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
         _visitedTabs.contains(tab) &&
         _shown(_tab) &&
         _shown(tab)) {
-      _noteClosed();
+      _noteFade.closed();
       _tab = tab;
     } else {
       setState(() {
@@ -715,7 +716,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
           _sidebarVisible = true;
         }
         // Leaving any open note: the tabs show at once (issue #4).
-        _noteClosed();
+        _noteFade.closed();
       });
     }
     // Time-to-visible of the switch itself: the 'tap tab' line above is the
@@ -1035,7 +1036,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       setState(() {
         _selected = null;
         // Deleting the open note closes it: the tabs show at once.
-        _noteClosed();
+        _noteFade.closed();
       });
     },
     onOpenInNewTab: (path) => _workspace.show(path, newTab: true),
@@ -1306,7 +1307,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       if (followsLink) _linksFollowed++;
       _resetNoteKind();
       if (sameNote) _noteReloadToken++;
-      _noteOpened();
+      _noteFade.opened();
     });
   }
 
@@ -1426,44 +1427,13 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     _updateShownTab((m) => m.copyWith(preview: show));
   }
 
-  /// Records a note open: the tabs stay painted under the fading note
-  /// (issue #4, see [_noteHidingTabs]) and hide once it has covered them.
-  /// A no-op when they are already hidden (opening another note while one
-  /// is open swaps the content opaquely — no fade, nothing to cover).
-  void _noteOpened() {
-    if (_noteHidingTabs) return;
-    _noteHidingTabs = false;
-    _noteHideTimer?.cancel();
-    final token = ++_noteHideRevision;
-    _noteHideTimer = Timer(
-      _fullNoteFade + const Duration(milliseconds: 40),
-      () {
-        _noteHideTimer = null;
-        if (!mounted || token != _noteHideRevision) return;
-        if (_selected == null || _selectedIsDir || _treeVisible) return;
-        setState(() => _noteHidingTabs = true);
-      },
-    );
-  }
-
-  /// Records a note close: the tabs show at once so the fading note
-  /// cross-fades over them instead of over the window background.
-  void _noteClosed() {
-    _noteHideTimer?.cancel();
-    _noteHideTimer = null;
-    _noteHideRevision++;
-    _noteHidingTabs = false;
-  }
-
-  /// The full-note open fade (matches the AnimatedSwitcher below).
-  static const _fullNoteFade = Duration(milliseconds: 220);
-
-  /// Whether the tab shell stays hidden under the open note. It flips on
-  /// only once the open fade has covered it (issue #4): hiding the shell
-  /// in the same frame as the open exposes the window background through
-  /// the fading note — a black frame in dark mode. Tickers stop at once;
-  /// layout and paint follow the fade.
-  bool _noteHidingTabs = false;
+  /// The phone's full-screen note fading in over the tabs (issue #4;
+  /// issue #100 moved it into [ShellNoteFade]).
+  late final ShellNoteFade _noteFade = ShellNoteFade(
+    noteOnScreen: () => _selected != null && !_selectedIsDir && !_treeVisible,
+    update: setState,
+    mounted: () => mounted,
+  );
 
   /// Whether the Quick note tab body is the choose/create screen.
   ///
@@ -1476,12 +1446,6 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   /// Text shared into Niman (#40) with no quick note to put it in yet: it
   /// is appended to whatever note the chooser opens next.
   String? _pendingSharedText;
-
-  /// The pending tab-hide after a note open (canceled on close).
-  Timer? _noteHideTimer;
-
-  /// Guards the pending hide against a rapid close/reopen.
-  int _noteHideRevision = 0;
 
   /// The phone full-screen note body.
   Widget _fullNoteView(LibrarySession controller, String selectedPath) {
@@ -2355,7 +2319,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     _expanded.dispose();
     _workspace.dispose();
     WidgetsBinding.instance.removeObserver(this);
-    _noteHideTimer?.cancel();
+    _noteFade.dispose();
     unawaited(_homeWidgets.dispose());
     unawaited(_inbound.cancel());
     if (widget.launchRequests.attachHandler == _attachDropped) {
@@ -2652,10 +2616,10 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       _pendingFind = null;
       _resetNoteKind();
       if (note.isDir) {
-        _noteClosed();
+        _noteFade.closed();
         _expanded.add(note.path);
       } else {
-        _noteOpened();
+        _noteFade.opened();
       }
     });
   }
@@ -2789,7 +2753,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
         // re-reads the file instead of keeping what it had.
         if (reload) _noteReloadToken++;
         _resetNoteKind();
-        _noteOpened();
+        _noteFade.opened();
       });
       logNextFrame('shell', 'quick note open first frame');
     });
@@ -3207,8 +3171,8 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       selectedIsDir: _selectedIsDir,
       treeVisible: _treeVisible,
       previewToggleVisible: _previewToggleVisible,
-      noteHidingTabs: _noteHidingTabs,
-      noteFade: _fullNoteFade,
+      noteHidingTabs: _noteFade.hidingTabs,
+      noteFade: ShellNoteFade.duration,
       shortcutBindings: _appShortcutBindings(),
       onCloseFullScreenNote: _closeFullScreenNote,
       isQuickNote: _selected != null && _selected == _quickNotePath,
@@ -3593,7 +3557,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       _visitedTabs.add(_noteFromTab);
       _treeVisible = true;
       _resetNoteKind();
-      _noteClosed();
+      _noteFade.closed();
     });
     logNextFrame('shell', 'note close first frame');
   }
