@@ -10,6 +10,7 @@ import 'package:niman/src/core/files.dart';
 import 'package:niman/src/library/note_save_result.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/ui/note_editor_options.dart';
+import 'package:niman/src/ui/note_services.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/unsaved_notes.dart';
@@ -57,8 +58,7 @@ void main() {
           showLineNumbers: false,
           autofocusEditor: false,
         ),
-        unsavedTracker: tracker,
-        saveNote: saveNote,
+        services: NoteServices(unsavedTracker: tracker, saveNote: saveNote),
       );
 
   Widget app(List<NoteView> views) => MaterialApp(

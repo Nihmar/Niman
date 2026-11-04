@@ -12,6 +12,7 @@ import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/markdown/surface.dart';
 import 'package:niman/src/ui/note_editor_options.dart';
+import 'package:niman/src/ui/note_services.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/settings.dart';
 import 'package:niman/src/ui/settings_keys.dart';
@@ -133,7 +134,7 @@ void main() {
                 autofocusEditor: false,
                 sourceFont: SourceFont.serif,
               ),
-              readNote: (_) async => '# Note',
+              services: NoteServices(readNote: (_) async => '# Note'),
             ),
           ),
         ),

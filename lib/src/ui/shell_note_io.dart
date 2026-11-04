@@ -36,7 +36,7 @@ NoteSaver? noteSaverFor(LibrarySession controller) {
 }
 
 /// The same write path for a note handed over in slices
-/// ([NoteView.saveNoteStream]): the joined twin above, without the join.
+/// (`NoteServices.saveNoteStream`): the joined twin above, without the join.
 ///
 /// Null for a note outside the library root as well, which is the one
 /// case the streaming write does not cover — [NoteView] then joins the

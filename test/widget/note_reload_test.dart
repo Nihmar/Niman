@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/ui/note_editor_options.dart';
+import 'package:niman/src/ui/note_services.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/unsaved_notes.dart';
 import 'package:path/path.dart' as p;
@@ -25,8 +26,7 @@ NoteView _view({
     showLineNumbers: true,
     autofocusEditor: false,
   ),
-  readNote: readNote,
-  writeNote: writeNote,
+  services: NoteServices(readNote: readNote, writeNote: writeNote),
   reloadToken: reloadToken,
 );
 
@@ -220,9 +220,11 @@ void main() {
             showLineNumbers: false,
             autofocusEditor: false,
           ),
-          unsavedTracker: tracker,
-          readNote: (_) async => disk,
-          writeNote: (_, _) async {},
+          services: NoteServices(
+            unsavedTracker: tracker,
+            readNote: (_) async => disk,
+            writeNote: (_, _) async {},
+          ),
         ),
       );
       await tester.pumpWidget(note('/notes/a.md'));

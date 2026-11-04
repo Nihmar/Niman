@@ -2,25 +2,20 @@
 /// launcher while no note shows (#1134). Pure props in, [NoteView] out.
 library;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:niman/src/annotations/annotation.dart';
 import 'package:niman/src/annotations/annotation_mark_source.dart';
 import 'package:niman/src/core/settings/features.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
-import 'package:niman/src/links/library_links.dart';
-import 'package:niman/src/links/suggester.dart';
 import 'package:niman/src/reading/reading_positions.dart';
-import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/ui/attachment_view.dart';
 import 'package:niman/src/ui/detail_deck.dart';
 import 'package:niman/src/ui/note_editor_options.dart';
-import 'package:niman/src/ui/note_tasks_host.dart';
+import 'package:niman/src/ui/note_services.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/note_view_handle.dart';
 import 'package:niman/src/ui/ocr/ocr_file_actions.dart';
 import 'package:niman/src/ui/strings.dart';
-import 'package:niman/src/ui/unsaved_notes.dart';
 import 'package:niman/src/workspace/note_memento.dart';
 import 'package:path/path.dart' as p;
 
@@ -33,17 +28,11 @@ final class ShellDetailPane extends StatelessWidget {
     required this.options,
     required this.barActions,
     required this.onEditorKindChanged,
-    required this.linkSource,
-    required this.wikilinkSuggester,
-    required this.onOpenNote,
     required this.kindMode,
     required this.onNoteKindChanged,
-    required this.unsavedTracker,
     required this.statusActions,
-    required this.spellCheck,
     required this.launcher,
-    this.features,
-    this.tasks,
+    this.services = const NoteServices(),
     this.caretPath,
     this.caretRequest = 0,
     this.onPasteAsMarkdown,
@@ -62,11 +51,6 @@ final class ShellDetailPane extends StatelessWidget {
     this.onMemento,
     this.onLoaded,
     this.onEditedNoteClosed,
-    this.readNote,
-    this.writeNote,
-    this.saveNote,
-    this.saveNoteStream,
-    this.createMissingNote,
     this.header,
     this.shellFocus,
     this.onTabKind,
@@ -100,9 +84,8 @@ final class ShellDetailPane extends StatelessWidget {
   /// Which book is read in full screen (#621).
   final ValueNotifier<Object?>? epubFullScreen;
 
-  /// The library's features (#1109), forwarded to every [NoteView]: a note
-  /// of a kind that is off opens in the plain editor.
-  final ValueListenable<Features>? features;
+  /// What the open library lends the note (#1257).
+  final NoteServices services;
 
   /// Absolute library root; null until the session is ready.
   final String? root;
@@ -123,13 +106,6 @@ final class ShellDetailPane extends StatelessWidget {
   /// link followed in a tab closes the note it left.
   final void Function(String path)? onEditedNoteClosed;
 
-  /// Test seams, handed to every [NoteView]: a widget test's library is
-  /// not on disk.
-  final Future<String> Function(String path)? readNote;
-
-  /// See [readNote].
-  final Future<void> Function(String path, String content)? writeNote;
-
   /// How the library's settings say the note is edited (#1257).
   final NoteEditorOptions options;
 
@@ -147,18 +123,6 @@ final class ShellDetailPane extends StatelessWidget {
   /// The status row's editor switch (T-WYS-12); null hides it, which is
   /// what a library with a single enabled editor passes.
   final ValueChanged<EditorKind>? onEditorKindChanged;
-
-  /// Link navigation (T-M3-07).
-  final LibraryLinks? linkSource;
-
-  /// The library the wikilink suggester panel reads (#475).
-  final WikilinkSuggester? wikilinkSuggester;
-
-  /// The tasks that link a note (#1152), for the section under it.
-  final NoteTasksHost? tasks;
-
-  /// Opens a note from a link, landing on a heading anchor when given.
-  final void Function(String path, String? anchor) onOpenNote;
 
   /// Note kind mode (T-TK-02).
   final bool kindMode;
@@ -183,15 +147,8 @@ final class ShellDetailPane extends StatelessWidget {
   /// Forwarded to every [NoteView] ([NoteView.onMoveToTasks]).
   final ValueChanged<NoteViewHandle>? onMoveToTasks;
 
-  /// The open notes' unsaved edits (T-PP-11): the detail editor reports
-  /// its dirty state here for the window's close guard.
-  final UnsavedTracker unsavedTracker;
-
   /// The view controls forwarded into the note's status row (T-PP-22).
   final List<Widget> statusActions;
-
-  /// The editor's spelling state (T-PP-09).
-  final EditorSpellCheck spellCheck;
 
   /// Zen mode (#69): the notes without their chrome.
   final bool zen;
@@ -218,18 +175,6 @@ final class ShellDetailPane extends StatelessWidget {
 
   /// Where the library's books and PDFs were annotated (#285).
   final AnnotationMarkSource? marks;
-
-  /// The library's note write path, forwarded to the NoteView; null (no
-  /// open library) lets the editor write directly.
-  final NoteSaver? saveNote;
-
-  /// See [NoteView.saveNoteStream]: the save a note too long to join goes
-  /// through.
-  final NoteStreamSaver? saveNoteStream;
-
-  /// The dead-link note-creation path (issue #78); null (no open
-  /// library) keeps the dead-link snackbar instead of the offer.
-  final Future<String> Function(String path)? createMissingNote;
 
   /// What the pane shows while no note does: a new tab, or nothing open.
   final Widget launcher;
@@ -289,7 +234,7 @@ final class ShellDetailPane extends StatelessWidget {
   }
 
   Widget _view(String root, DetailTab tab) =>
-      isShownAttachment(tab.path, features?.value ?? const Features())
+      isShownAttachment(tab.path, services.features?.value ?? const Features())
       // A picture, a PDF or a book, shown rather than read as a note.
       ? AttachmentView(
           key: tab.key,
@@ -336,16 +281,11 @@ final class ShellDetailPane extends StatelessWidget {
     showPreview: tab.showPreview,
     showWysiwyg: tab.showWysiwyg,
     onEditorKindChanged: onEditorKindChanged,
-    libraryRoot: root,
-    linkSource: linkSource,
-    wikilinkSuggester: wikilinkSuggester,
-    tasks: tasks,
-    onOpenNote: onOpenNote,
+    services: services,
     initialAnchor: tab.anchor,
     initialCaretOffset: tab.caret,
     initialFind: tab.find,
     kindMode: kindMode,
-    features: features,
     outlineInDock: outlineInDock,
     spellCheckInDock: spellCheckInDock,
     relatedInDock: relatedInDock,
@@ -357,15 +297,8 @@ final class ShellDetailPane extends StatelessWidget {
     },
     onPasteAsMarkdown: onPasteAsMarkdown,
     onMoveToTasks: onMoveToTasks,
-    unsavedTracker: unsavedTracker,
     statusActions: statusActions,
-    spellCheck: spellCheck,
     reloadToken: reloadToken,
-    saveNote: saveNote,
-    saveNoteStream: saveNoteStream,
-    createMissingNote: createMissingNote,
-    readNote: readNote,
-    writeNote: writeNote,
   );
 }
 

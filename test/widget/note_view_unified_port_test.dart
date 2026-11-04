@@ -20,6 +20,7 @@ import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/key_map.dart';
 import 'package:niman/src/ui/note_editor_options.dart';
+import 'package:niman/src/ui/note_services.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/note_view_handle.dart';
 import 'package:niman/src/ui/unsaved_notes.dart';
@@ -71,23 +72,25 @@ NoteView _note({
   ),
   toolbarTop: toolbarTop,
   reloadToken: reloadToken,
-  unsavedTracker: tracker,
+  services: NoteServices(
+    unsavedTracker: tracker,
+    libraryRoot: libraryRoot,
+    linkSource: links,
+    onOpenNote: (path, anchor) => opened?.add('$path|$anchor'),
+    pickImagePath: pickImagePath,
+    importImage: importImage,
+    readNote: readNote ?? (_) async => text,
+    writeNote: (_, content) async => writes?.add(content),
+    createMissingNote: createMissingNote,
+  ),
   active: active,
   initialMemento: memento,
   onMemento: onMemento,
-  libraryRoot: libraryRoot,
-  linkSource: links,
-  onOpenNote: (path, anchor) => opened?.add('$path|$anchor'),
   initialAnchor: initialAnchor,
   initialCaretOffset: initialCaret,
   initialFind: initialFind,
   showPreview: showPreview,
   showWysiwyg: live,
-  pickImagePath: pickImagePath,
-  importImage: importImage,
-  readNote: readNote ?? (_) async => text,
-  writeNote: (_, content) async => writes?.add(content),
-  createMissingNote: createMissingNote,
 );
 
 /// Lets a chain of real `dart:io` probes finish: each one completes outside

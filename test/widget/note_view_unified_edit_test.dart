@@ -13,6 +13,7 @@ import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/ui/cheatsheet/cheatsheet_entries.dart';
 import 'package:niman/src/ui/cheatsheet/cheatsheet_screen.dart';
 import 'package:niman/src/ui/note_editor_options.dart';
+import 'package:niman/src/ui/note_services.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/note_view_handle.dart';
 import 'package:niman/src/ui/strings.dart';
@@ -35,8 +36,10 @@ NoteView _view({
   ),
   toolbarTop: true,
   showWysiwyg: showWysiwyg,
-  readNote: readNote,
-  writeNote: (_, text) async => writes.add(text),
+  services: NoteServices(
+    readNote: readNote,
+    writeNote: (_, text) async => writes.add(text),
+  ),
   reloadToken: reloadToken,
 );
 
@@ -295,8 +298,10 @@ void main() {
           autofocusEditor: false,
         ),
         showWysiwyg: true,
-        readNote: (_) async => 'una riga\n',
-        writeNote: (_, text) async => writes.add(text),
+        services: NoteServices(
+          readNote: (_) async => 'una riga\n',
+          writeNote: (_, text) async => writes.add(text),
+        ),
       ),
     );
     final handle = key.currentState! as NoteViewHandle;
@@ -329,8 +334,10 @@ void main() {
               showLineNumbers: false,
               autofocusEditor: true,
             ),
-            readNote: (_) async => 'una riga\n',
-            writeNote: (_, _) async {},
+            services: NoteServices(
+              readNote: (_) async => 'una riga\n',
+              writeNote: (_, _) async {},
+            ),
           ),
         ),
       ),

@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/ui/note_editor_options.dart';
+import 'package:niman/src/ui/note_services.dart';
 import 'package:niman/src/ui/note_view.dart';
 
 Widget _app(NoteView view) => MaterialApp(home: Scaffold(body: view));
@@ -14,8 +15,10 @@ NoteView _view({String content = 'plain note body'}) => NoteView(
     autofocusEditor: false,
   ),
   path: '/notes/a.md',
-  readNote: (_) async => content,
-  writeNote: (_, _) async {},
+  services: NoteServices(
+    readNote: (_) async => content,
+    writeNote: (_, _) async {},
+  ),
 );
 
 void main() {
@@ -97,8 +100,10 @@ void main() {
           ),
           path: '/notes/a.md',
           showPreview: true,
-          readNote: (_) async => 'plain',
-          writeNote: (_, _) async {},
+          services: NoteServices(
+            readNote: (_) async => 'plain',
+            writeNote: (_, _) async {},
+          ),
         ),
       ),
     );

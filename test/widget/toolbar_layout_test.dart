@@ -7,6 +7,7 @@ import 'package:niman/src/editor/toolbar_item.dart';
 import 'package:niman/src/editor/toolbar_layout.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/ui/note_editor_options.dart';
+import 'package:niman/src/ui/note_services.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/toolbar_settings.dart';
@@ -39,8 +40,10 @@ Future<void> _pumpEditor(
         ),
         toolbarTop: toolbarTop,
         showPreview: showPreview,
-        readNote: (_) async => _doc,
-        writeNote: (path, content) async {},
+        services: NoteServices(
+          readNote: (_) async => _doc,
+          writeNote: (path, content) async {},
+        ),
       ),
     ),
   );

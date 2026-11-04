@@ -12,6 +12,7 @@ import 'package:niman/src/markdown/render/block_view.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
 import 'package:niman/src/markdown/surface.dart';
 import 'package:niman/src/ui/note_editor_options.dart';
+import 'package:niman/src/ui/note_services.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/settings.dart';
 import 'package:niman/src/ui/tree.dart';
@@ -191,7 +192,9 @@ void main() {
                 autofocusEditor: false,
               ),
               showPreview: preview,
-              readNote: (_) async => '# Hello\n\n- item',
+              services: NoteServices(
+                readNote: (_) async => '# Hello\n\n- item',
+              ),
             ),
           ),
         ),

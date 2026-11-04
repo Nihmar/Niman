@@ -9,6 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/markdown/note_read_failure.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/ui/note_editor_options.dart';
+import 'package:niman/src/ui/note_services.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/strings.dart';
 
@@ -24,8 +25,7 @@ NoteView _view(
     showLineNumbers: false,
     autofocusEditor: false,
   ),
-  readNote: readNote,
-  writeNote: (_, _) async {},
+  services: NoteServices(readNote: readNote, writeNote: (_, _) async {}),
   reloadToken: reloadToken,
 );
 

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/ui/note_editor_options.dart';
+import 'package:niman/src/ui/note_services.dart';
 import 'package:niman/src/ui/note_view.dart';
 
 void main() {
@@ -19,11 +20,13 @@ void main() {
           showLineNumbers: false,
           autofocusEditor: false,
         ),
-        readNote: (path) async => disk[path] ?? '',
-        writeNote: (path, text) async {
-          events.add('saved $path');
-          disk[path] = text;
-        },
+        services: NoteServices(
+          readNote: (path) async => disk[path] ?? '',
+          writeNote: (path, text) async {
+            events.add('saved $path');
+            disk[path] = text;
+          },
+        ),
         onEditedNoteClosed: (path) => events.add('closed $path'),
       ),
     ),

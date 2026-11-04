@@ -13,6 +13,7 @@ import 'package:niman/src/editor/outline.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/ui/heading_level_sheet.dart';
 import 'package:niman/src/ui/note_editor_options.dart';
+import 'package:niman/src/ui/note_services.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/outline_panel.dart';
 import 'package:niman/src/ui/shell_row_menu.dart';
@@ -167,8 +168,10 @@ void main() {
             showLineNumbers: true,
             autofocusEditor: false,
           ),
-          readNote: (_) async => note,
-          writeNote: (_, _) async {},
+          services: NoteServices(
+            readNote: (_) async => note,
+            writeNote: (_, _) async {},
+          ),
         ),
       ),
     );

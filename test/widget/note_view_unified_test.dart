@@ -7,6 +7,7 @@ import 'package:niman/src/markdown/render/markdown_read_view.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/markdown/surface.dart';
 import 'package:niman/src/ui/note_editor_options.dart';
+import 'package:niman/src/ui/note_services.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/note_view_handle.dart';
 
@@ -38,8 +39,10 @@ Widget _app({bool showPreview = true}) => MaterialApp(
         autofocusEditor: false,
       ),
       showPreview: showPreview,
-      readNote: (_) async => _note,
-      writeNote: (_, _) async {},
+      services: NoteServices(
+        readNote: (_) async => _note,
+        writeNote: (_, _) async {},
+      ),
     ),
   ),
 );
@@ -78,8 +81,10 @@ void main() {
               autofocusEditor: false,
             ),
             showPreview: true,
-            readNote: (_) async => note.toString(),
-            writeNote: (_, _) async {},
+            services: NoteServices(
+              readNote: (_) async => note.toString(),
+              writeNote: (_, _) async {},
+            ),
           ),
         ),
       ),
@@ -163,8 +168,10 @@ void main() {
           ),
           showWysiwyg: true,
           showPreview: showPreview,
-          readNote: (_) async => note,
-          writeNote: (_, _) async {},
+          services: NoteServices(
+            readNote: (_) async => note,
+            writeNote: (_, _) async {},
+          ),
         ),
       ),
     );
@@ -202,8 +209,10 @@ void main() {
             autofocusEditor: false,
           ),
           showPreview: showPreview,
-          readNote: (_) async => note.toString(),
-          writeNote: (_, _) async {},
+          services: NoteServices(
+            readNote: (_) async => note.toString(),
+            writeNote: (_, _) async {},
+          ),
         ),
       ),
     );
@@ -245,8 +254,10 @@ void main() {
               autofocusEditor: false,
             ),
             showPreview: true,
-            readNote: (_) async => note,
-            writeNote: (_, _) async {},
+            services: NoteServices(
+              readNote: (_) async => note,
+              writeNote: (_, _) async {},
+            ),
           ),
         ),
       ),
@@ -299,8 +310,10 @@ void main() {
               autofocusEditor: false,
             ),
             showPreview: true,
-            readNote: (_) async => note,
-            writeNote: (_, _) async {},
+            services: NoteServices(
+              readNote: (_) async => note,
+              writeNote: (_, _) async {},
+            ),
           ),
         ),
       ),
@@ -340,8 +353,10 @@ void main() {
               autofocusEditor: false,
             ),
             showPreview: true,
-            readNote: (_) async => note,
-            writeNote: (_, _) async {},
+            services: NoteServices(
+              readNote: (_) async => note,
+              writeNote: (_, _) async {},
+            ),
           ),
         ),
       ),

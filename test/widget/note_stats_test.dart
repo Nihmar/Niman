@@ -8,6 +8,7 @@ import 'package:niman/src/editor/word_count_index.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/ui/note_editor_options.dart';
+import 'package:niman/src/ui/note_services.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/note_view_handle.dart';
 
@@ -39,7 +40,7 @@ void main() {
             showLineNumbers: false,
             autofocusEditor: false,
           ),
-          readNote: (_) async => _note,
+          services: NoteServices(readNote: (_) async => _note),
         ),
       ),
     );
@@ -84,7 +85,7 @@ void main() {
             showLineNumbers: false,
             autofocusEditor: false,
           ),
-          readNote: (_) async => _note,
+          services: NoteServices(readNote: (_) async => _note),
         ),
       ),
     );
@@ -127,7 +128,7 @@ void main() {
               showLineNumbers: false,
               autofocusEditor: false,
             ),
-            readNote: (_) async => text,
+            services: NoteServices(readNote: (_) async => text),
           ),
         ),
       );
@@ -173,7 +174,7 @@ void main() {
             autofocusEditor: false,
           ),
           showPreview: preview,
-          readNote: (path) async => notes[path]!,
+          services: NoteServices(readNote: (path) async => notes[path]!),
         ),
       );
       await tester.pumpWidget(at('/notes/plain.md'));
@@ -210,7 +211,7 @@ void main() {
           showLineNumbers: false,
           autofocusEditor: false,
         ),
-        readNote: (path) async => notes[path]!,
+        services: NoteServices(readNote: (path) async => notes[path]!),
       ),
     );
     await tester.pumpWidget(at('/notes/one.md'));

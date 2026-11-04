@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/ui/note_editor_options.dart';
+import 'package:niman/src/ui/note_services.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/unsaved_notes.dart';
@@ -31,11 +32,13 @@ void main() {
               showLineNumbers: false,
               autofocusEditor: false,
             ),
-            readNote: (_) async => 'a',
-            writeNote: (_, text) async {
-              if (failing) throw StateError('disk full');
-              writes.add(text);
-            },
+            services: NoteServices(
+              readNote: (_) async => 'a',
+              writeNote: (_, text) async {
+                if (failing) throw StateError('disk full');
+                writes.add(text);
+              },
+            ),
           ),
         ),
       );
@@ -71,12 +74,14 @@ void main() {
         showLineNumbers: false,
         autofocusEditor: false,
       ),
-      unsavedTracker: tracker,
-      readNote: (_) async => 'a',
-      writeNote: (path, text) async {
-        if (failing) throw StateError('card removed');
-        writes[path] = text;
-      },
+      services: NoteServices(
+        unsavedTracker: tracker,
+        readNote: (_) async => 'a',
+        writeNote: (path, text) async {
+          if (failing) throw StateError('card removed');
+          writes[path] = text;
+        },
+      ),
     );
 
     await tester.pumpWidget(_app(view('/notes/a.md')));
@@ -107,13 +112,15 @@ void main() {
         showLineNumbers: false,
         autofocusEditor: false,
       ),
-      unsavedTracker: tracker,
-      readNote: (path) async => disk[path]!,
-      writeNote: (path, text) async {
-        if (failing) throw StateError('card removed');
-        writes.add(text);
-        disk[path] = text;
-      },
+      services: NoteServices(
+        unsavedTracker: tracker,
+        readNote: (path) async => disk[path]!,
+        writeNote: (path, text) async {
+          if (failing) throw StateError('card removed');
+          writes.add(text);
+          disk[path] = text;
+        },
+      ),
     );
 
     await tester.pumpWidget(_app(view('/notes/a.md')));

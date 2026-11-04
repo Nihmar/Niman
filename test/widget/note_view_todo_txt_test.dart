@@ -7,6 +7,7 @@ import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/ui/note_editor_options.dart';
+import 'package:niman/src/ui/note_services.dart';
 import 'package:niman/src/ui/note_view.dart';
 
 Widget _app(String path) => MaterialApp(
@@ -20,8 +21,10 @@ Widget _app(String path) => MaterialApp(
       showPreview: true,
       showWysiwyg: true,
       onEditorKindChanged: (_) {},
-      readNote: (_) async => '(A) Call +Home @phone\nx done task\n',
-      writeNote: (_, _) async {},
+      services: NoteServices(
+        readNote: (_) async => '(A) Call +Home @phone\nx done task\n',
+        writeNote: (_, _) async {},
+      ),
     ),
   ),
 );

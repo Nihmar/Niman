@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/ui/note_editor_options.dart';
+import 'package:niman/src/ui/note_services.dart';
 import 'package:niman/src/ui/note_view.dart';
 
 void main() {
@@ -38,16 +39,18 @@ void main() {
         showLineNumbers: false,
         autofocusEditor: false,
       ),
-      readNote: (path) async => disk[path] ?? '',
-      writeNote: (path, text) async {
-        events.add('start $text');
-        if (!held) {
-          held = true;
-          await firstSave.future;
-        }
-        disk[path] = text;
-        events.add('end $text');
-      },
+      services: NoteServices(
+        readNote: (path) async => disk[path] ?? '',
+        writeNote: (path, text) async {
+          events.add('start $text');
+          if (!held) {
+            held = true;
+            await firstSave.future;
+          }
+          disk[path] = text;
+          events.add('end $text');
+        },
+      ),
     );
 
     await tester.pumpWidget(app(view('/notes/a.md')));
@@ -92,26 +95,34 @@ void main() {
         showLineNumbers: false,
         autofocusEditor: false,
       ),
-      readNote: (path) async => disk[path] ?? '',
-      writeNote: (_, text) async => fallbacks.add(text),
-      saveNoteStream:
-          (path, content, {required editSession, references, expected}) async {
-            final text = StringBuffer();
-            for (var index = 0; ; index++) {
-              final slice = await content(index);
-              if (slice == null) break;
-              text.write(utf8.decode(slice));
-            }
-            final saved = text.toString();
-            started.add('$path: $saved');
-            if (!held) {
-              held = true;
-              await firstSave.future;
-            }
-            disk[path] = saved;
-            done.add('$path: $saved');
-            return null;
-          },
+      services: NoteServices(
+        readNote: (path) async => disk[path] ?? '',
+        writeNote: (_, text) async => fallbacks.add(text),
+        saveNoteStream:
+            (
+              path,
+              content, {
+              required editSession,
+              references,
+              expected,
+            }) async {
+              final text = StringBuffer();
+              for (var index = 0; ; index++) {
+                final slice = await content(index);
+                if (slice == null) break;
+                text.write(utf8.decode(slice));
+              }
+              final saved = text.toString();
+              started.add('$path: $saved');
+              if (!held) {
+                held = true;
+                await firstSave.future;
+              }
+              disk[path] = saved;
+              done.add('$path: $saved');
+              return null;
+            },
+      ),
     );
 
     await tester.pumpWidget(app(view('/notes/a.md')));

@@ -9,6 +9,7 @@ import 'package:niman/src/editor/toolbar_item.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/ui/note_editor_options.dart';
+import 'package:niman/src/ui/note_services.dart';
 import 'package:niman/src/ui/note_view.dart';
 
 /// Whether the menu's Bold row reads as on.
@@ -44,8 +45,10 @@ void main() {
               ),
               toolbarTop: true,
               showWysiwyg: live,
-              readNote: (_) async => 'hello world',
-              writeNote: (_, _) async {},
+              services: NoteServices(
+                readNote: (_) async => 'hello world',
+                writeNote: (_, _) async {},
+              ),
             ),
           ),
         ),

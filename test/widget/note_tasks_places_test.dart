@@ -11,6 +11,7 @@ import 'package:niman/src/ui/dock/right_dock.dart';
 import 'package:niman/src/ui/dock/tasks_dock_pane.dart';
 import 'package:niman/src/ui/note_editor_options.dart';
 import 'package:niman/src/ui/note_menu.dart';
+import 'package:niman/src/ui/note_services.dart';
 import 'package:niman/src/ui/note_tasks_host.dart';
 import 'package:niman/src/ui/note_tasks_section.dart';
 import 'package:niman/src/ui/note_view.dart';
@@ -75,12 +76,14 @@ void main() {
                 showLineNumbers: false,
                 autofocusEditor: false,
               ),
-              libraryRoot: libraryRoot,
-              linkSource: linked ? fixture.links : null,
-              features: ValueNotifier(features),
-              tasks: tasks ?? fixture.host,
-              readNote: (_) async => 'the note\n',
-              writeNote: (_, _) async {},
+              services: NoteServices(
+                libraryRoot: libraryRoot,
+                linkSource: linked ? fixture.links : null,
+                features: ValueNotifier(features),
+                tasks: tasks ?? fixture.host,
+                readNote: (_) async => 'the note\n',
+                writeNote: (_, _) async {},
+              ),
             ),
           ),
         ),

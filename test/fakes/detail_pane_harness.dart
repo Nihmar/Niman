@@ -6,6 +6,7 @@ import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/spellcheck/spell_checker.dart';
 import 'package:niman/src/ui/note_editor_options.dart';
+import 'package:niman/src/ui/note_services.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/shell_detail_pane.dart';
 import 'package:niman/src/ui/unsaved_notes.dart';
@@ -54,22 +55,22 @@ Widget detailPane(
       ),
   ],
   onMemento: onMemento,
-  readNote: (path) async => paneNotes[p.relative(path, from: paneRoot)] ?? '',
-  writeNote: (_, _) async {},
+  services: NoteServices(
+    readNote: (path) async => paneNotes[p.relative(path, from: paneRoot)] ?? '',
+    writeNote: (_, _) async {},
+    onOpenNote: (_, _) {},
+    unsavedTracker: tracker,
+    spellCheck: EditorSpellCheck(createChecker: (_) => const NoSpelling()),
+  ),
   options: const NoteEditorOptions(
     showLineNumbers: true,
     autofocusEditor: false,
   ),
   barActions: const [],
   onEditorKindChanged: null,
-  linkSource: null,
-  wikilinkSuggester: null,
-  onOpenNote: (_, _) {},
   kindMode: true,
   onNoteKindChanged: (_) {},
-  unsavedTracker: tracker,
   statusActions: const [],
-  spellCheck: EditorSpellCheck(createChecker: (_) => const NoSpelling()),
 );
 
 /// The editor of the note at [path], mounted or behind.

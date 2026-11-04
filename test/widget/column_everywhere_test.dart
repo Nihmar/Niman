@@ -7,6 +7,7 @@ import 'package:niman/src/todo/todo_controller.dart';
 import 'package:niman/src/todo/todo_list_view.dart';
 import 'package:niman/src/ui/kinds/list_note.dart';
 import 'package:niman/src/ui/note_editor_options.dart';
+import 'package:niman/src/ui/note_services.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/todo_tab.dart';
 import 'package:niman/src/ui/todo_toolbar.dart';
@@ -33,8 +34,10 @@ void main() {
               autofocusEditor: false,
               noteColumn: NoteColumn(),
             ),
-            readNote: (_) async => '---\ntype: list\n---\n- [ ] milk\n',
-            writeNote: (_, _) async {},
+            services: NoteServices(
+              readNote: (_) async => '---\ntype: list\n---\n- [ ] milk\n',
+              writeNote: (_, _) async {},
+            ),
           ),
         ),
       ),
