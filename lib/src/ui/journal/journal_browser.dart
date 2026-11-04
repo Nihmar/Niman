@@ -21,6 +21,7 @@ import 'package:niman/src/ui/journal/journal_calendar.dart';
 import 'package:niman/src/ui/journal/journal_day_card.dart';
 import 'package:niman/src/ui/journal/journal_day_events.dart';
 import 'package:niman/src/ui/journal/journal_dock_create_row.dart';
+import 'package:niman/src/ui/journal/journal_due_tasks.dart';
 import 'package:niman/src/ui/journal/journal_event_actions.dart';
 import 'package:niman/src/ui/journal/journal_event_editor.dart';
 import 'package:niman/src/ui/journal/journal_event_sheet.dart';
@@ -375,31 +376,11 @@ final class _JournalBrowserState extends State<JournalBrowser> {
               final day = widget.large
                   ? _selected
                   : widget.focusDay ?? widget.today;
-              final tasks = dueOn(day);
-              if (tasks.isEmpty) return const SizedBox.shrink();
-              return Column(
-                key: const Key('journal-due'),
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const SizedBox(height: 16),
-                  Text(
-                    AppStrings.journalDueOn(formatDateTime(day, 'ddd D'))
-                        .toUpperCase(),
-                    style: heading,
-                  ),
-                  for (final task in tasks)
-                    ListTile(
-                      dense: true,
-                      contentPadding: EdgeInsets.zero,
-                      leading: Icon(
-                        Icons.check_box_outline_blank,
-                        size: 18,
-                        color: scheme.onSurfaceVariant,
-                      ),
-                      title: Text(task),
-                      onTap: widget.onOpenTasks,
-                    ),
-                ],
+              return JournalDueTasks(
+                day: day,
+                tasks: dueOn(day),
+                heading: heading,
+                onOpenTasks: widget.onOpenTasks,
               );
             },
           ),
