@@ -36,13 +36,13 @@ import 'package:niman/src/epub/epub_look.dart';
 import 'package:niman/src/epub/epub_looks.dart';
 import 'package:niman/src/flashcards/review_store.dart';
 import 'package:niman/src/frontmatter/fields.dart';
-import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/library/container_path.dart';
 import 'package:niman/src/library/file_watcher.dart';
 import 'package:niman/src/library/indexing_status.dart';
 import 'package:niman/src/library/library_databases.dart';
 import 'package:niman/src/library/library_index_files.dart';
 import 'package:niman/src/library/library_registry.dart';
+import 'package:niman/src/library/library_sources.dart';
 import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/library/note_ops.dart';
 import 'package:niman/src/library/rescan_scheduler.dart';
@@ -356,13 +356,15 @@ final class LibraryController implements LibrarySession {
   /// Whether [dispose] has run.
   bool _disposed = false;
 
-  /// The cached search source; the background-isolate worker connection is
-  /// created once per open library and reused (see [searchSource]).
-  SearchSource? _searchSource;
-
-  /// The search connection when it is a distinct database from the index
-  /// one; closed with the library, since it is that library's file.
-  IndexDatabase? _searchDb;
+  /// The search, the links and the other read surfaces of the open library.
+  late final LibrarySources _sources = LibrarySources(
+    root: () => _root,
+    indexDb: () => _indexDb,
+    indexer: () => _indexer,
+    ops: () => _ops,
+    searchDbFactory: _searchDbFactory,
+    indexChanges: _indexEvents.stream,
+  );
 
   /// CRUD ops for the open library, or null while closed.
   @override
@@ -473,150 +475,26 @@ final class LibraryController implements LibrarySession {
   }
 
   @override
-  Future<SearchSource?> get searchSource async {
-    // The search connection is background-isolate backed: the MATCH work
-    // for large result sets never runs on the UI isolate. One connection
-    // per open library, created
-    // once: a fresh connection per call leaked one worker isolate per
-    // SearchScreen mount (drift keeps the worker alive until closed) and
-    // left nothing to recover when its startup failed. It is dropped with
-    // the library, since it is a connection to that library's own file.
-    final root = _root;
-    final indexDb = _indexDb;
-    if (root == null || indexDb == null) return null;
-    var source = _searchSource;
-    if (source == null) {
-      final db = await _searchDbFactory(root);
-      _searchDb = identical(db, indexDb) ? null : db;
-      source = SearchRepo(db, root: root);
-      _searchSource = source;
-    }
-    return source;
-  }
+  Future<SearchSource?> get searchSource => _sources.searchSource;
 
   @override
-  Future<ReplaceSource?> get replaceSource async {
-    // Bound to the current root + indexer: rewritten notes are re-indexed
-    // through applyEvents as each write batch lands, so search reflects a
-    // replace without waiting on the (Android-unreliable) watcher or the
-    // periodic rescan.
-    final root = _root;
-    final indexer = _indexer;
-    final db = _indexDb;
-    if (root == null || indexer == null || db == null) return null;
-    final history = _ops?.history;
-    return ReplaceRunner(
-      db,
-      root,
-      onNotesReindexed: (paths) => indexer.rescanFiles(root, paths),
-      historyRequest: history == null
-          ? null
-          : () => history.requestFor('', forced: HistoryReason.replace),
-    );
-  }
+  Future<ReplaceSource?> get replaceSource => _sources.replaceSource;
 
   @override
-  Future<TagSource?> get tagSource async {
-    final db = _indexDb;
-    if (db == null) return null;
-    return TagRepo(db);
-  }
+  Future<TagSource?> get tagSource => _sources.tagSource;
 
   @override
-  Future<FieldSource?> get fieldSource async {
-    final db = _indexDb;
-    if (db == null) return null;
-    return FieldRepo(db);
-  }
+  Future<FieldSource?> get fieldSource => _sources.fieldSource;
 
   @override
-  Future<TemplateSource?> get templateSource async {
-    final indexer = _indexer;
-    final ops = this.ops;
-    if (indexer == null || ops == null) return null;
-    return TemplateRepo(indexer.dao, ops);
-  }
-
-  /// The open library's links, built once for the library and the files it
-  /// reads: every surface that asks gets the object whose caches the others
-  /// fill (#842, #846, #847).
-  LibraryLinks? _links;
-  IndexDatabase? _linksDb;
-  NoteOps? _linksOps;
+  Future<TemplateSource?> get templateSource => _sources.templateSource;
 
   @override
-  Future<LibraryLinks?> get linkSource async {
-    final db = _indexDb;
-    if (db == null) return null;
-    final reader = _ops;
-    final kept = _links;
-    if (kept != null &&
-        identical(_linksDb, db) &&
-        identical(_linksOps, reader)) {
-      return kept;
-    }
-    _linksDb = db;
-    _linksOps = reader;
-    return _links = IndexLibraryLinks(
-      db,
-      // The library announces every index change; a note on screen resolves
-      // its dead links again when one lands (#847).
-      changes: _indexEvents.stream,
-      // What the notes that link to a note say about it, and the beginning of
-      // one for a preview card, are read off their files on a background
-      // isolate, a row at a time (#842, #846).
-      readPreview: reader == null
-          ? null
-          : (path) async {
-              try {
-                return await reader.notePreview(path);
-              } on Object {
-                return null;
-              }
-            },
-      readSpots: reader == null
-          ? null
-          : (path, from) async {
-              try {
-                return await reader.noteLinkSpotSlice(path, from);
-              } on Object {
-                return null;
-              }
-            },
-    );
-  }
+  Future<LibraryLinks?> get linkSource => _sources.linkSource;
 
   @override
-  Future<WikilinkSuggester?> get wikilinkSuggester async {
-    final db = _indexDb;
-    if (db == null) return null;
-    final reader = _ops;
-    return IndexWikilinkSuggester(
-      db,
-      attachmentsFolder: reader == null ? null : () => reader.attachmentsFolder,
-      // A named note's headings are read off the note itself, on a
-      // background isolate (a novel's read and outline is seconds of work);
-      // a note gone since the panel named it answers null rather than
-      // throwing.
-      readHeadings: (path) async {
-        if (reader == null) return null;
-        try {
-          return await reader.noteHeadings(path);
-        } on Object {
-          return null;
-        }
-      },
-      // The same for a note's block ids (#844).
-      readBlocks: (path) async {
-        if (reader == null) return null;
-        try {
-          return await reader.noteBlocks(path);
-        } on Object {
-          return null;
-        }
-      },
-    );
-  }
+  Future<WikilinkSuggester?> get wikilinkSuggester =>
+      _sources.wikilinkSuggester;
 
   /// Resumes the last opened library (if it still exists). Best effort:
   /// safe to call repeatedly, no-op when no library has been opened yet.
@@ -1869,9 +1747,7 @@ final class LibraryController implements LibrarySession {
     _indexer = null;
     _ops?.history.dispose();
     _ops = null;
-    _links = null;
-    _linksDb = null;
-    _linksOps = null;
+    _sources.forgetLinks();
     _configRepo = null;
     // Nothing is open: every feature reads as on until a library says
     // otherwise, so the next open never starts from the last one's.
@@ -1888,10 +1764,8 @@ final class LibraryController implements LibrarySession {
     EpubLooks.reset();
     // Nulled before the awaits: a caller that races us must not find a
     // half-closed database.
-    final searchDb = _searchDb;
+    final searchDb = _sources.releaseSearch();
     final indexDb = _indexDb;
-    _searchSource = null;
-    _searchDb = null;
     _indexDb = null;
     await searchDb?.close();
     await indexDb?.close();
