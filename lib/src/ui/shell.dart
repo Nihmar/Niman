@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/gestures.dart' show kDoubleTapTimeout;
@@ -157,6 +156,7 @@ import 'package:niman/src/ui/shell_row_actions.dart';
 import 'package:niman/src/ui/shell_search_slot.dart';
 import 'package:niman/src/ui/shell_study.dart';
 import 'package:niman/src/ui/shell_sync_actions.dart';
+import 'package:niman/src/ui/shell_tab_rows.dart';
 import 'package:niman/src/ui/shell_template_flow.dart';
 import 'package:niman/src/ui/shell_tree_editing.dart';
 import 'package:niman/src/ui/shell_tree_footer.dart';
@@ -168,7 +168,6 @@ import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/sync/sync_status.dart';
 import 'package:niman/src/ui/tab_body_stack.dart';
 import 'package:niman/src/ui/tab_drag.dart';
-import 'package:niman/src/ui/tab_row_lead.dart';
 import 'package:niman/src/ui/text_zoom_pinch.dart';
 import 'package:niman/src/ui/todo_edit_dialog.dart';
 import 'package:niman/src/ui/todo_link_host.dart';
@@ -1526,71 +1525,10 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     // The panes end where the dock begins, when it shows (#175), and
     // short of the window's edge by the base around the islands.
     final dock = _dockShown ? _dockWidth + ResizeDivider.width : 0;
-    return _tabRow(
+    return _tabRows.row(
       dragArea,
       panesWidth:
           MediaQuery.sizeOf(context).width - _tabsStart - dock - Island.gap,
-    );
-  }
-
-  /// The open notes' tabs over panes [panesWidth] wide, with [filler]
-  /// past them. Split right, the row divides at the same x as the panes
-  /// do, so nothing moves when the window splits (the Split mockup). With
-  /// [chrome] — the panes heading their own row — it carries the panels'
-  /// toggles and the history's arrows too (#1134).
-  Widget _tabRow(
-    Widget filler, {
-    required double panesWidth,
-    bool chrome = false,
-  }) => ListenableBuilder(
-    listenable: _tabsListenable,
-    builder: (context, _) {
-      final w = _workspace.value;
-      if (!w.isSplit || w.axis == SplitAxis.down) {
-        return _paneTabs(0, filler, chrome: chrome);
-      }
-      final detail = panesWidth - PaneSplit.dividerWidth;
-      return Row(
-        children: [
-          SizedBox(
-            width: detail * w.fraction + PaneSplit.dividerWidth,
-            child: _paneTabs(0, filler, chrome: chrome),
-          ),
-          Expanded(child: _paneTabs(1, filler, chrome: chrome)),
-        ],
-      );
-    },
-  );
-
-  /// [pane]'s tab row, headed — with [chrome] — by the sidebar's toggle
-  /// and the history's arrows on the first pane, and ended by the dock's
-  /// toggle on the row's last pane (#1134): where Obsidian has them, and
-  /// where a thumb finds them with a note open or not.
-  Widget _paneTabs(int pane, Widget filler, {bool chrome = false}) {
-    final tabs = _paneTabsOnly(pane, filler);
-    if (!chrome) return tabs;
-    final w = _workspace.value;
-    final history = _workspace.history;
-    final last = w.isSplit && w.axis == SplitAxis.right ? 1 : 0;
-    return LayoutBuilder(
-      builder: (context, constraints) => Row(
-        children: [
-          if (pane == 0)
-            TabRowLead(
-              sidebarVisible: _sidebarVisible,
-              onToggleSidebar: _toggleSidebar,
-              arrows: constraints.maxWidth >= TabRowLead.arrowsRoom,
-              onBack: _noteHistory.backTarget == null
-                  ? null
-                  : () => unawaited(_noteHistory.back()),
-              onForward: history.next == null
-                  ? null
-                  : () => unawaited(_noteHistory.forward()),
-            ),
-          Expanded(child: tabs),
-          if (pane == last) _dockToggle(),
-        ],
-      ),
     );
   }
 
@@ -1600,79 +1538,33 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       ShellRail.panelStart +
       (_sidebarVisible ? _editorSettings.treeWidth + ResizeDivider.width : 0);
 
-  /// [pane]'s tabs, with the pinned content tab's chip (#712) at their
-  /// end when that pane holds one.
-  Widget _paneTabsOnly(int pane, Widget filler) {
-    final w = _workspace.value;
-    final tabs = w.panes[pane];
-    final bar = NoteTabBar(
-      key: ValueKey('pane-tabs-$pane'),
-      tabs: tabs.tabs,
-      // A note tab does not read as selected while the content tab shows:
-      // the chip is what the pane is showing.
-      active: _chipCovers(pane) ? -1 : tabs.active,
-      focused: !w.isSplit || w.focused == pane,
-      unsaved: _unsavedRelPaths(),
-      onActivate: (index) => _activateTab(pane, index),
-      onClose: (index) => _workspace.close(pane, index),
-      onNew: () {
-        _takePane(pane);
-        _workspace
-          ..focus(pane)
-          ..newTab();
-      },
-      onSplit: w.isSplit
-          ? null
-          : (index, axis) => _workspace.splitWith(pane, index, axis),
-      onMoveToOtherPane: w.isSplit
-          ? (index) => _workspace.moveToOtherPane(pane, index)
-          : null,
-      pane: pane,
-      onDrop: (drag, at) => _dropTab(drag, pane, at),
-      filler: filler,
-      onTabAction: (index, action, anchor) =>
-          unawaited(_tabAction(tabs.tabs[index].path, action, anchor)),
-    );
-    final content = _nav.contentTab;
-    final hasContent = content != null && pane == _contentPaneShown;
-    final hasCompare = _compare.heldIn(pane);
-    final hasReview = _reviewTab.run != null && pane == _reviewPaneShown;
-    if (!hasContent && !hasCompare && !hasReview) return bar;
-    // At the row's far end, where it comes and goes without moving a note
-    // tab under the pointer (#770). The chips take what the tab bar's own
-    // buttons leave, no more: a narrow pane (a tablet's, beside the tree
-    // and the dock) cuts the chips' names rather than squeeze the bar
-    // below its buttons (#927).
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final chipsRoom = math.max<double>(
-          0,
-          constraints.maxWidth -
-              NoteTabBar.minWidth(touch: thumbDense(Theme.of(context))),
-        );
-        return Row(
-          children: [
-            Expanded(child: bar),
-            ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: chipsRoom),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (hasReview)
-                    Flexible(
-                      child: _study.chip(pane, selected: _reviewIn(pane)),
-                    ),
-                  if (hasCompare) Flexible(child: _compare.chip(pane)),
-                  if (hasContent)
-                    Flexible(child: _contentTabChip(content, pane)),
-                ],
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
+  /// The pinned chips at the end of [pane]'s row (#712), in their order:
+  /// the study, the version, the content tab.
+  List<Widget> _pinnedChips(int pane) => [
+    if (_reviewTab.run != null && pane == _reviewPaneShown)
+      _study.chip(pane, selected: _reviewIn(pane)),
+    if (_compare.heldIn(pane)) _compare.chip(pane),
+    if (_nav.contentTab case final content? when pane == _contentPaneShown)
+      _contentTabChip(content, pane),
+  ];
+
+  /// The rows of note tabs, in the title bar or heading the panes (issue
+  /// #100 moved them into [ShellTabRows]).
+  late final ShellTabRows _tabRows = ShellTabRows(
+    workspace: _workspace,
+    changes: _tabsListenable,
+    history: _noteHistory,
+    unsaved: _unsavedRelPaths,
+    chipCovers: _chipCovers,
+    chips: _pinnedChips,
+    activate: _activateTab,
+    takePane: _takePane,
+    onTabAction: (path, action, anchor) =>
+        unawaited(_tabAction(path, action, anchor)),
+    sidebarVisible: () => _sidebarVisible,
+    onToggleSidebar: _toggleSidebar,
+    dockToggle: _dockToggle,
+  );
 
   /// Runs a tab menu's note action on the note at [path] (#712).
   Future<void> _tabAction(
@@ -1709,31 +1601,6 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       onTap: () => _showContentTab(tab, pane),
       onClose: _closeContentTab,
     );
-  }
-
-  /// A tab dropped in [pane]'s row, at [at] (#204): dragged along its own
-  /// row it is reordered, dragged from the other pane it moves here — and
-  /// lands where it was dropped, not at the end.
-  void _dropTab(TabDrag drag, int pane, int at) {
-    if (drag.pane == pane) {
-      // The place is read in the row as it is now, and removing the tab
-      // shifts everything after it one to the left.
-      _workspace.reorder(pane, drag.index, at > drag.index ? at - 1 : at);
-      return;
-    }
-    _workspace.moveTabHere(drag.pane, drag.index, pane, at);
-  }
-
-  /// A tab dropped on [pane]'s body (#204): into the pane, or a split
-  /// with it when the drop was near the edge of an unsplit window.
-  void _dropTabOnPane(TabDrag drag, int pane, TabDropKind kind) {
-    final axis = tabDropAxis(kind);
-    if (axis == null) {
-      if (drag.pane == pane) return;
-      _workspace.moveTabHere(drag.pane, drag.index, pane, null);
-      return;
-    }
-    _workspace.splitWith(drag.pane, drag.index, axis);
   }
 
   /// What the tabs redraw on: the workspace, and — moved out of any build
@@ -3975,7 +3842,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
                       touch: thumbDense(Theme.of(context)),
                     ),
                     child: LayoutBuilder(
-                      builder: (context, constraints) => _tabRow(
+                      builder: (context, constraints) => _tabRows.row(
                         const SizedBox.shrink(),
                         panesWidth: constraints.maxWidth,
                         chrome: true,
@@ -4064,7 +3931,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
                   height: NoteTabBar.rowHeight(
                     touch: thumbDense(Theme.of(context)),
                   ),
-                  child: _paneTabs(1, const SizedBox.shrink()),
+                  child: _tabRows.pane(1, const SizedBox.shrink()),
                 ),
                 const Divider(height: 1),
                 Expanded(child: _detailPane(controller, 1)),
@@ -4111,7 +3978,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       child: TabDropZone(
         pane: pane,
         isSplit: _workspace.value.isSplit,
-        onDrop: (drag, kind) => _dropTabOnPane(drag, pane, kind),
+        onDrop: (drag, kind) => _tabRows.dropOnPane(drag, pane, kind),
         child: _pinchToZoom(
           enabled: !isBook(_workspace.value.panes[pane].activeTab?.path ?? ''),
           // A pinned content tab (#712) paints over the deck, which stays
