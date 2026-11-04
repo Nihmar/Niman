@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:niman/src/core/app_channel.dart';
 import 'package:niman/src/editor/toolbar_item.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ocr/ocr_installation.dart';
@@ -14,6 +13,7 @@ import 'package:niman/src/ui/settings_areas.dart';
 import 'package:niman/src/ui/settings_commands.dart';
 import 'package:niman/src/ui/settings_keys.dart';
 import 'package:niman/src/ui/settings_search_appearance.dart';
+import 'package:niman/src/ui/settings_search_diagnostics.dart';
 import 'package:niman/src/ui/settings_search_editor.dart';
 import 'package:niman/src/ui/settings_search_entry.dart';
 import 'package:niman/src/ui/settings_search_library.dart';
@@ -44,8 +44,6 @@ List<SettingsSearchEntry> settingsSearchEntries({
   void push(Widget screen) =>
       Navigator.of(context)
           .push(MaterialPageRoute<void>(builder: (context) => screen));
-  void pushUpdates(Key row) => openArea(SettingsAreaId.updates, row);
-  void pushDiagnostics(Key row) => openArea(SettingsAreaId.diagnostics, row);
 
   String libraryArea(String area) =>
       '${AppStrings.settingsGroupLibrary(libraryName)} › $area';
@@ -65,72 +63,7 @@ List<SettingsSearchEntry> settingsSearchEntries({
     ...appearanceSearchEntries(scope),
     ...editorSearchEntries(scope),
     ...librarySearchEntries(scope),
-    if (appUpdatesItself) ...[
-      SettingsSearchEntry(
-        title: AppStrings.autoUpdateTitle,
-        area: AppStrings.settingsSectionUpdates,
-        rowKey: SettingsKeys.autoUpdate,
-        value: () async => onOff(on: await controller.autoUpdateEnabled),
-        areaId: SettingsAreaId.updates,
-        open: () => pushUpdates(SettingsKeys.autoUpdate),
-      ),
-      SettingsSearchEntry(
-        title: AppStrings.checkForUpdatesTitle,
-        area: AppStrings.settingsSectionUpdates,
-        rowKey: SettingsKeys.checkUpdates,
-        value: noValue,
-        areaId: SettingsAreaId.updates,
-        open: () => pushUpdates(SettingsKeys.checkUpdates),
-      ),
-    ],
-    SettingsSearchEntry(
-      title: AppStrings.debugLogsTitle,
-      area: AppStrings.settingsAreaDiagnostics,
-      rowKey: SettingsKeys.debugLogs,
-      value: () async => onOff(on: await controller.debugLogsEnabled),
-      areaId: SettingsAreaId.diagnostics,
-      open: () => pushDiagnostics(SettingsKeys.debugLogs),
-    ),
-    SettingsSearchEntry(
-      title: AppStrings.exportLogTitle,
-      area: AppStrings.settingsAreaDiagnostics,
-      rowKey: SettingsKeys.exportLog,
-      value: noValue,
-      areaId: SettingsAreaId.diagnostics,
-      open: () => pushDiagnostics(SettingsKeys.exportLog),
-    ),
-    SettingsSearchEntry(
-      title: AppStrings.changelogTitle,
-      area: AppStrings.settingsAreaDiagnostics,
-      rowKey: SettingsKeys.changelog,
-      value: noValue,
-      areaId: SettingsAreaId.diagnostics,
-      open: () => pushDiagnostics(SettingsKeys.changelog),
-    ),
-    SettingsSearchEntry(
-      title: AppStrings.cheatsheetTitle,
-      area: AppStrings.settingsAreaDiagnostics,
-      rowKey: SettingsKeys.cheatsheet,
-      value: noValue,
-      areaId: SettingsAreaId.diagnostics,
-      open: () => pushDiagnostics(SettingsKeys.cheatsheet),
-    ),
-    SettingsSearchEntry(
-      title: AppStrings.welcomeDeckCommand,
-      area: AppStrings.settingsAreaDiagnostics,
-      rowKey: SettingsKeys.welcomeDeck,
-      value: noValue,
-      areaId: SettingsAreaId.diagnostics,
-      open: () => pushDiagnostics(SettingsKeys.welcomeDeck),
-    ),
-    SettingsSearchEntry(
-      title: AppStrings.welcomeTourCommand,
-      area: AppStrings.settingsAreaDiagnostics,
-      rowKey: SettingsKeys.welcomeTour,
-      value: noValue,
-      areaId: SettingsAreaId.diagnostics,
-      open: () => pushDiagnostics(SettingsKeys.welcomeTour),
-    ),
+    ...diagnosticsSearchEntries(scope),
     SettingsSearchEntry(
       title: AppStrings.reminderShowTokensTitle,
       area: libraryArea(AppStrings.settingsSectionReminders),
