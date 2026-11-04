@@ -33,7 +33,6 @@ import 'package:niman/src/editor/plain_text.dart';
 import 'package:niman/src/export/export_files.dart';
 import 'package:niman/src/export/pdf_printer.dart';
 import 'package:niman/src/export/printed_todo_block.dart';
-import 'package:niman/src/frontmatter/note_kind.dart';
 import 'package:niman/src/frontmatter/parser.dart';
 import 'package:niman/src/home/home_action.dart';
 import 'package:niman/src/journal/journal_settings.dart';
@@ -148,6 +147,7 @@ import 'package:niman/src/ui/shell_navigation.dart';
 import 'package:niman/src/ui/shell_note_fade.dart';
 import 'package:niman/src/ui/shell_note_history.dart';
 import 'package:niman/src/ui/shell_note_io.dart';
+import 'package:niman/src/ui/shell_note_kind.dart';
 import 'package:niman/src/ui/shell_ocr_flow.dart';
 import 'package:niman/src/ui/shell_palette.dart';
 import 'package:niman/src/ui/shell_personal_dictionary.dart';
@@ -985,14 +985,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       // The open notes' editors follow the rename, and are told where they
       // came from for the frame that shows them under the new name (#1076).
       _noteKeys.moved(from, to);
-      for (final entry in [..._tabKinds.entries]) {
-        final path = entry.key;
-        if (path == from || path.startsWith('$from/')) {
-          _tabKinds
-            ..remove(path)
-            ..[to + path.substring(from.length)] = entry.value;
-        }
-      }
+      _kind.moved(from, to);
       WidgetsBinding.instance.addPostFrameCallback((_) => _noteKeys.settle());
       _workspace.moved(from, to);
       // The folders open under a renamed or moved folder stay open under
@@ -1110,117 +1103,41 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   /// (#1045).
   List<String>? _pendingFind;
 
-  /// The open note's kind (the frontmatter `type`, null = plain note or
-  /// no note); reported by the open NoteView (T-TK-02).
-  String? _noteKind;
-
-  /// Whether the open note shows the raw editor instead of its kind GUI
-  /// (the app-bar pencil toggle, T-TK-05).
-  bool _kindRawMode = false;
-
-  /// The open NoteView reports the note's kind; the app bar shows the
-  /// kind toggle for known kinds.
-  void _onNoteKindChanged(String? type) {
-    if (!mounted) return;
-    setState(() => _noteKind = type);
-  }
-
-  /// Each open note's kind as its view last reported it, by path (#1081): a
-  /// pane's own controls are decided by its own note, not by the focused
-  /// pane's.
-  final Map<String, String?> _tabKinds = {};
-
-  void _onTabKind(String path, String? kind) {
-    if (!mounted) return;
-    if (_tabKinds.containsKey(path) && _tabKinds[path] == kind) return;
-    setState(() => _tabKinds[path] = kind);
-  }
-
-  /// The GUI behind the open note's kind (T-TK-02): null for a plain
-  /// note, no note, a `type` without a registered GUI (a `type: list`
-  /// note is a list, everything else is a document) or one whose feature
-  /// is off (#1109).
-  NoteKindGUI? get _kindGui => NoteKinds.forType(_noteKind, _features);
-
-  /// The kind the open note is shown as: [_noteKind], when its view is on.
-  String? get _shownKind => _kindGui?.type;
+  /// The open notes' kinds as their views report them, and the raw editor
+  /// shown in place of a kind's GUI (T-TK-02, T-TK-05; issue #100 moved
+  /// them into [ShellNoteKind]).
+  late final ShellNoteKind _kind = ShellNoteKind(
+    features: () => _features,
+    update: setState,
+    mounted: () => mounted,
+  );
 
   /// Whether the app bar shows the editor/preview eye action: hidden in
   /// kind mode (the note is a list, not a document) unless the user is
   /// in raw-edit mode, and on an attachment, which has no editor to flip
   /// from.
   bool get _previewToggleVisible =>
-      !_shownIsAttachment && (_kindGui == null || _kindRawMode);
+      !_shownIsAttachment && (_kind.gui == null || _kind.raw);
 
-  /// The kind toggle actions (T-TK-05): a note whose kind has a GUI offers
-  /// the raw editor (pencil); in raw mode the kind GUI is offered back.
-  /// Empty when the open note has no kind GUI (including unknown `type`s).
-  List<Widget> get _kindActions {
-    if (_kindGui == null) return const [];
-    final icon = switch (_noteKind) {
-      'audio' => Icons.mic_outlined,
-      'slides' => Icons.slideshow_outlined,
-      'flashcard' => Icons.style_outlined,
-      'kanban' => Icons.view_kanban_outlined,
-      'shopping-list' => Icons.shopping_cart_outlined,
-      _ => Icons.checklist,
-    };
-    return [
-      // The phone presents from the button under its slides, or by
-      // turning: its bar keeps to the pencil and the ⋮.
-      if (_showsSlides && _wide)
-        IconButton(
-          key: const Key('slides-present-action'),
-          tooltip: switch (AppKeyMap.current.value.bindingOf(
-            AppCommand.presentSlides,
-          )) {
-            final keys? =>
-              '${AppStrings.slidesPresent} (${describeActivator(keys)})',
-            null => AppStrings.slidesPresent,
-          },
-          icon: const Icon(Icons.present_to_all_outlined),
-          onPressed: () => unawaited(_presentSlides()),
-        ),
-      if (_kindRawMode)
-        IconButton(
-          key: const Key('kind-show-list'),
-          tooltip: switch (_noteKind) {
-            'audio' => AppStrings.showAudioTooltip,
-            'slides' => AppStrings.showSlidesTooltip,
-            'flashcard' => AppStrings.showFlashcardsTooltip,
-            'kanban' => AppStrings.showKanbanTooltip,
-            _ => AppStrings.showListTooltip,
-          },
-          icon: Icon(icon),
-          onPressed: () => setState(() => _kindRawMode = false),
-        )
-      else
-        IconButton(
-          key: const Key('kind-edit-raw'),
-          tooltip: AppStrings.editRawTooltip,
-          icon: const Icon(Icons.edit_outlined),
-          onPressed: _editKindRaw,
-        ),
-    ];
-  }
+  /// The kind toggle actions (T-TK-05), for the open note.
+  List<Widget> get _kindActions => _kind.actions(
+    wide: _wide,
+    onPresent: () => unawaited(_presentSlides()),
+    onEditRaw: _editKindRaw,
+  );
 
   /// The pencil: the note's raw editor, never the preview the ⋮'s
   /// Markdown preview left on for the note.
   void _editKindRaw() {
-    setState(() => _kindRawMode = true);
+    setState(() => _kind.raw = true);
     if (_notePreview) _togglePreview();
   }
 
   /// Leaves the kind's view for the note's Markdown preview (#534): the
   /// raw mode with the eye on, the preview every note has.
   void _showKindMarkdown() {
-    setState(() => _kindRawMode = true);
+    setState(() => _kind.raw = true);
     if (!_notePreview) _togglePreview();
-  }
-
-  void _resetNoteKind() {
-    _noteKind = null;
-    _kindRawMode = false;
   }
 
   Future<void> _loadLinkSource() async {
@@ -1305,7 +1222,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       _pendingCaretOffset = caret;
       _pendingFind = find;
       if (followsLink) _linksFollowed++;
-      _resetNoteKind();
+      _kind.reset();
       if (sameNote) _noteReloadToken++;
       _noteFade.opened();
     });
@@ -1542,9 +1459,9 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
           initialAnchor: _pendingAnchor,
           initialCaretOffset: _pendingCaretOffset,
           initialFind: _pendingFind,
-          kindMode: !_kindRawMode,
+          kindMode: !_kind.raw,
           features: controller.features,
-          onNoteKindChanged: _onNoteKindChanged,
+          onNoteKindChanged: _kind.reported,
           onKindMarkdown: _showKindMarkdown,
           onPasteAsMarkdown: _pasteAsMarkdownOffer,
           onMoveToTasks: _moveToTasksOffer,
@@ -1972,7 +1889,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     setState(() {
       if (compareCovered) _compare.hide();
       if (!_wide) return;
-      if (changed) _resetNoteKind();
+      if (changed) _kind.reset();
       if (shown != null) {
         if (_selected != shown || _selectedIsDir) {
           _selected = shown;
@@ -2614,7 +2531,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       _pendingAnchor = null;
       _pendingCaretOffset = null;
       _pendingFind = null;
-      _resetNoteKind();
+      _kind.reset();
       if (note.isDir) {
         _noteFade.closed();
         _expanded.add(note.path);
@@ -2752,7 +2669,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
         // Already open: its buffer predates the appended text, so it
         // re-reads the file instead of keeping what it had.
         if (reload) _noteReloadToken++;
-        _resetNoteKind();
+        _kind.reset();
         _noteFade.opened();
       });
       logNextFrame('shell', 'quick note open first frame');
@@ -3002,22 +2919,22 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     typewriter: _editorSettings.typewriter,
     textNote: !_shownIsAttachment,
     // An audio note's body is the clip document, not prose (#840).
-    tidy: _noteKind != 'audio',
+    tidy: _kind.type != 'audio',
     recognize:
         _offersOcr && _shownIsAttachment && isRecognizableFile(_selected ?? ''),
     // A touch device has no key for the palette (#206), the phone's and
     // the tablet's alike (#849); a desktop window has.
     palette: _paletteByTouch,
-    slides: _showsSlides,
+    slides: _kind.showsSlides,
     presenterView: _wide,
-    deck: _showsDeck,
+    deck: _kind.showsDeck,
     studyEnabled: ref.read(deckStudyStarterProvider) != null,
     makeFlashcards:
         _plainNote && commandFeatureOn(AppCommand.makeFlashcards, _features),
     tasks: _features.isOn(LibraryFeature.todo),
     // Shopping needs Lists and its own switch: with it off a list has no
     // second view to swap to (#1109).
-    kindSwitch: switch (_shownKind) {
+    kindSwitch: switch (_kind.shown) {
       'list' when _features.isOn(LibraryFeature.kindShopping) =>
         NoteKindSwitch.toShoppingList,
       'shopping-list' => NoteKindSwitch.toChecklist,
@@ -3067,13 +2984,6 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     },
   );
 
-  /// Whether the note on screen is a deck shown as its slides (#534).
-  bool get _showsSlides => _shownKind == 'slides' && !_kindRawMode;
-
-  /// Whether the note on screen is a flashcard deck shown as its cards
-  /// (#533).
-  bool get _showsDeck => _shownKind == 'flashcard' && !_kindRawMode;
-
   /// What the deck's ⋮ entries do beyond its view (#533).
   late final DeckMenuFlow _deckFlow = DeckMenuFlow(
     ref.read(deckReviewSourceProvider),
@@ -3084,14 +2994,14 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   Future<void> _studyDeck() async {
     final note = _panelNote;
     final starter = ref.read(deckStudyStarterProvider);
-    if (note == null || starter == null || !_showsDeck) return;
+    if (note == null || starter == null || !_kind.showsDeck) return;
     await starter(context, note.notePath);
   }
 
   /// Whether the note on screen is a plain one, text of no `type`: what
   /// **Make flashcards** turns into a deck (#533).
   bool get _plainNote =>
-      _shownNote != null && !_shownIsAttachment && _noteKind == null;
+      _shownNote != null && !_shownIsAttachment && _kind.type == null;
 
   /// **Make flashcards** of the note on screen (#533).
   Future<void> _makeFlashcards() async {
@@ -3102,13 +3012,13 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
 
   Future<void> _chooseDeckColumns() async {
     final note = _panelNote;
-    if (note == null || !_showsDeck) return;
+    if (note == null || !_kind.showsDeck) return;
     await _deckFlow.chooseColumns(context, note);
   }
 
   Future<void> _resetDeckReview() async {
     final note = _panelNote;
-    if (note == null || !_showsDeck) return;
+    if (note == null || !_kind.showsDeck) return;
     await _deckFlow.resetReview(
       context,
       root: widget.controller.root,
@@ -3120,7 +3030,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   /// shows; [presenter] opens on the presenter view.
   Future<void> _presentSlides({bool presenter = false}) async {
     final note = _panelNote;
-    if (note == null || _shownKind != 'slides') return;
+    if (note == null || _kind.shown != 'slides') return;
     await presentSlides(
       context,
       text: note.currentText,
@@ -3140,7 +3050,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   void _switchNoteKind() {
     final note = _panelNote;
     if (note == null) return;
-    note.setNoteKind(_shownKind == 'list' ? 'shopping-list' : 'list');
+    note.setNoteKind(_kind.shown == 'list' ? 'shopping-list' : 'list');
   }
 
   @override
@@ -3556,7 +3466,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       _tab = _noteFromTab;
       _visitedTabs.add(_noteFromTab);
       _treeVisible = true;
-      _resetNoteKind();
+      _kind.reset();
       _noteFade.closed();
     });
     logNextFrame('shell', 'note close first frame');
@@ -3813,11 +3723,11 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     CommandNeed.previewToggle => _previewToggleVisible,
     // The raw kind: an audio note's body is a clip document even with its
     // view off, and a tidy of it is refused all the same (#840).
-    CommandNeed.proseNote => _noteKind != 'audio',
+    CommandNeed.proseNote => _kind.type != 'audio',
     CommandNeed.twoEditors => _editorSettings.editorsEnabled.length > 1,
     CommandNeed.journalEntry => _shownJournalDay != null,
-    CommandNeed.slidesNote => _shownKind == 'slides',
-    CommandNeed.flashcardNote => _showsDeck,
+    CommandNeed.slidesNote => _kind.shown == 'slides',
+    CommandNeed.flashcardNote => _kind.showsDeck,
     CommandNeed.plainNote => _plainNote,
     CommandNeed.ocrFile =>
       _ocrFlow != null &&
@@ -4076,7 +3986,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     // proseNote need keeps them off it). This remains for a direct call,
     // and the frontmatter check below for a kind the bar still lags on:
     // no write, and nothing to say about a tidy that never was one.
-    if (_noteKind == 'audio') return;
+    if (_kind.type == 'audio') return;
     await _guard(() async {
       // The buffer's own edits land first: what is tidied is the note as
       // it stands, not the note as it was last written.
@@ -4669,10 +4579,10 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
                     wikilinkSuggester: _wikilinkSuggester,
                     tasks: _noteTasks,
                     onOpenNote: _openNoteFromLink,
-                    kindMode: !_kindRawMode,
+                    kindMode: !_kind.raw,
                     features: controller.features,
-                    onNoteKindChanged: _onNoteKindChanged,
-                    onTabKind: _onTabKind,
+                    onNoteKindChanged: _kind.reported,
+                    onTabKind: _kind.tabReported,
                     onPasteAsMarkdown: _pasteAsMarkdownOffer,
                     onMoveToTasks: _moveToTasksOffer,
                     unsavedTracker: widget.unsavedTracker,
@@ -4747,10 +4657,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
         ? _previewToggleVisible
         : previewToggleOffered(
             path: tab.path,
-            kindGui: NoteKinds.forType(
-              _tabKinds[tab.path],
-              widget.controller.features.value,
-            ),
+            kindGui: _kind.guiOf(tab.path),
             features: widget.controller.features.value,
           );
     if (!offered) return const [];
@@ -4784,7 +4691,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     final showing = w.panes[pane].activeTab?.path;
     final focused = pane == w.focused;
     _noteKeys.keepOnly(mounted);
-    _tabKinds.removeWhere((path, _) => !mounted.contains(path));
+    _kind.keepOnly(mounted);
     return [
       for (final tab in w.panes[pane].tabs)
         if (mounted.contains(tab.path))
