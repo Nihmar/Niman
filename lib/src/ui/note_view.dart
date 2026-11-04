@@ -75,6 +75,7 @@ import 'package:niman/src/ui/note_frontmatter_head.dart';
 import 'package:niman/src/ui/note_links.dart';
 import 'package:niman/src/ui/note_load_error.dart';
 import 'package:niman/src/ui/note_paste.dart';
+import 'package:niman/src/ui/note_read_snapshot.dart';
 import 'package:niman/src/ui/note_save_pipeline.dart';
 import 'package:niman/src/ui/note_stats.dart';
 import 'package:niman/src/ui/note_tags.dart';
@@ -915,34 +916,14 @@ final class _NoteViewState extends State<NoteView>
   /// cache survives a rebuild and invalidates itself when the text changes.
   final ReadParser _unifiedParser = ReadParser();
 
-  /// The unified engine's buffer, rebuilt only when the text changes.
-  ///
-  /// A `SourceBuffer` is a line array with a prefix index: building one per
-  /// frame would cost 1.2 ms of `text` and a 7 ms scan on a 930 KB note, which
-  /// is exactly what the windowed read view exists to avoid. The preview
-  /// refreshes on a 500 ms debounce, so this is rebuilt at that cadence.
-  SourceBuffer? _unifiedBuffer;
-
-  /// The editor's buffer and its revision the read pane should show, while
-  /// the source pane is the unified surface: the pane is given a snapshot of
-  /// that buffer's lines ([SourceBuffer.snapshot]) rather than a buffer read
-  /// again from the note's joined text.
-  SourceBuffer? _previewOf;
-  int _previewRevision = -1;
-
-  /// Whether [_unifiedBuffer] is such a snapshot, and of which revision.
-  bool _bufferIsSnapshot = false;
-  SourceBuffer? _snapshotFrom;
-  int _snapshotRevision = -1;
+  /// What the read pane draws of the note: a snapshot of the editor's
+  /// buffer, taken once per revision shown.
+  final NoteReadSnapshot _readSnapshot = NoteReadSnapshot();
 
   /// The note's text as the unified source surface has it (see
   /// [NoteTextCache]): where saving, the preview and the statistics all get
   /// their text from.
   late final NoteTextCache _text = NoteTextCache(() => _unifiedSurfaceBuffer);
-
-  /// Whether the preview's text is behind the note because the preview was
-  /// not on screen when the note changed (see [_refreshPreview]).
-  bool _previewStale = false;
 
   /// The note on the unified source surface: its buffer, its undo history and
   /// the door every command comes in through (the toolbar, an image, a
@@ -1024,29 +1005,6 @@ final class _NoteViewState extends State<NoteView>
   MarkdownSurfaceMode get _unifiedMode => _wysiwygIn(widget)
       ? MarkdownSurfaceMode.live
       : MarkdownSurfaceMode.source;
-
-  /// The buffer the unified engine draws, built once per text change.
-  SourceBuffer get _unifiedSource {
-    final live = _previewOf;
-    if (live != null) {
-      if (_unifiedBuffer == null ||
-          !_bufferIsSnapshot ||
-          !identical(_snapshotFrom, live) ||
-          _snapshotRevision != _previewRevision) {
-        _unifiedBuffer = live.snapshot();
-        _bufferIsSnapshot = true;
-        _snapshotFrom = live;
-        _snapshotRevision = _previewRevision;
-      }
-      return _unifiedBuffer!;
-    }
-    // No note yet: an empty page.
-    if (_unifiedBuffer == null || _bufferIsSnapshot) {
-      _unifiedBuffer = SourceBuffer.fromText('');
-      _bufferIsSnapshot = false;
-    }
-    return _unifiedBuffer!;
-  }
 
   /// Whether the note on screen was edited since it was opened: what makes
   /// its closing worth reporting ([NoteView.onEditedNoteClosed]).
@@ -1199,10 +1157,10 @@ final class _NoteViewState extends State<NoteView>
       _frontmatterAtHead = true;
     }
     if (oldWidget.showPreview != widget.showPreview) {
-      if (widget.showPreview && _previewStale) {
-        _previewStale = false;
-        _previewOf = _surface?.buffer;
-        _previewRevision = _previewOf?.revision ?? -1;
+      if (widget.showPreview && _readSnapshot.stale) {
+        _readSnapshot
+          ..stale = false
+          ..show(_surface?.buffer);
       }
       if (widget.showPreview) {
         // What the flip costs to reach the pixels, and what the frames after
@@ -1488,10 +1446,7 @@ final class _NoteViewState extends State<NoteView>
     // preview's copy. The panes holding them unmount with the load.
     _surface = null;
     _text.text = '';
-    _unifiedBuffer = null;
-    _bufferIsSnapshot = false;
-    _snapshotFrom = null;
-    _previewOf = null;
+    _readSnapshot.clear();
     setState(() {
       _loading = true;
       _ready = false;
@@ -1777,19 +1732,14 @@ final class _NoteViewState extends State<NoteView>
       // The read pane is off stage behind the source pane, and bringing it up
       // to date means re-reading and re-parsing the whole note: done when it
       // is shown, not every time the writer pauses.
-      _previewStale = true;
+      _readSnapshot.stale = true;
       return;
     }
     final live = _surface?.buffer;
     if (live == null) return;
     // The editor's own lines, by revision: no text joined, no text compared.
-    if (identical(live, _previewOf) && live.revision == _previewRevision) {
-      return;
-    }
-    setState(() {
-      _previewOf = live;
-      _previewRevision = live.revision;
-    });
+    if (_readSnapshot.shows(live)) return;
+    setState(() => _readSnapshot.show(live));
   }
 
   /// Flips between the source editor and the WYSIWYG surface (T-WYS-12);
@@ -2056,7 +2006,7 @@ final class _NoteViewState extends State<NoteView>
           .copyWith(textScaler: noteTextScalerOf(context)),
       child: MarkdownReadView(
         key: _readViewKey,
-        buffer: _unifiedSource,
+        buffer: _readSnapshot.buffer,
         parser: _unifiedParser,
         mathCache: _mathCache,
         controller: _previewScroll,
@@ -2216,12 +2166,8 @@ final class _NoteViewState extends State<NoteView>
   /// snapshot, and a line number of an older one is not this note's.
   void _toggleTaskFromRead(int line) {
     final surface = _surface;
-    final from = _snapshotFrom;
-    if (surface == null ||
-        from == null ||
-        !identical(from, surface.buffer) ||
-        from.revision != _snapshotRevision ||
-        line >= from.lineCount) {
+    final from = surface == null ? null : _readSnapshot.current(surface.buffer);
+    if (surface == null || from == null || line >= from.lineCount) {
       return;
     }
     final text = from.lineAt(line);
@@ -2264,34 +2210,9 @@ final class _NoteViewState extends State<NoteView>
   }
 
   /// The blocks and definitions of [buffer] as the source pane already holds
-  /// them, when [buffer] is the snapshot of its note at the revision the pane
-  /// has read — or null, and the read pane scans for itself.
-  ///
-  /// One reading of the note for both panes: the editor keeps its own current
-  /// edit by edit, and scanning the snapshot again was 3.3 s in an isolate on
-  /// a 246 MB note, after holding the frame that opened the pane to hand the
-  /// note over.
-  DocumentScan? _editorScanOf(SourceBuffer buffer) {
-    final from = _snapshotFrom;
-    if (!_bufferIsSnapshot ||
-        !identical(buffer, _unifiedBuffer) ||
-        from == null ||
-        from.revision != _snapshotRevision) {
-      return null;
-    }
-    final editor = _sourceViewKey.currentState;
-    if (editor == null || !identical(editor.widget.buffer, from)) return null;
-    final scan = editor.handOver();
-    if (scan == null || scan.revision != from.revision) return null;
-    // The same lines, in a buffer of their own: the definitions are read
-    // against it from now on.
-    return DocumentScan(
-      blocks: scan.blocks,
-      scope: scan.scope.on(buffer, buffer.revision),
-      revision: buffer.revision,
-      changes: scan.changes,
-    );
-  }
+  /// them (see [NoteReadSnapshot.editorScanOf]), or null.
+  DocumentScan? _editorScanOf(SourceBuffer buffer) =>
+      _readSnapshot.editorScanOf(buffer, _sourceViewKey.currentState);
 
   /// [_editorScanOf], once the editor's reading of the note under way has
   /// landed: the read pane of a note opened in it waits for the scan the
