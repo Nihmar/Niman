@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart' show defaultTargetPlatform;
-import 'package:flutter/gestures.dart' show kDoubleTapTimeout;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -24,7 +23,6 @@ import 'package:niman/src/core/share_in.dart';
 import 'package:niman/src/core/shortcuts.dart';
 import 'package:niman/src/core/text_scale.dart';
 import 'package:niman/src/core/tray.dart';
-import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/editor/diagram_templates.dart';
 import 'package:niman/src/editor/editor_only.dart';
 import 'package:niman/src/editor/markdown_format.dart';
@@ -150,6 +148,7 @@ import 'package:niman/src/ui/shell_palette.dart';
 import 'package:niman/src/ui/shell_personal_dictionary.dart';
 import 'package:niman/src/ui/shell_phone_chrome.dart';
 import 'package:niman/src/ui/shell_preview_actions.dart';
+import 'package:niman/src/ui/shell_quick_note.dart';
 import 'package:niman/src/ui/shell_row_actions.dart';
 import 'package:niman/src/ui/shell_search_slot.dart';
 import 'package:niman/src/ui/shell_selection.dart';
@@ -161,6 +160,7 @@ import 'package:niman/src/ui/shell_template_flow.dart';
 import 'package:niman/src/ui/shell_tree_editing.dart';
 import 'package:niman/src/ui/shell_tree_footer.dart';
 import 'package:niman/src/ui/shell_tree_menus.dart';
+import 'package:niman/src/ui/shell_tree_open.dart';
 import 'package:niman/src/ui/shell_wide_body.dart';
 import 'package:niman/src/ui/shell_windows.dart';
 import 'package:niman/src/ui/shell_workspace.dart';
@@ -383,10 +383,37 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     fullScreen: _immersive.fullScreen,
     shellFocus: _shellFocus,
     wide: () => _wide,
-    openQuickNote: _openQuickNoteFromTile,
+    openQuickNote: () => _quickNote.openFromTile(),
     openSettings: () => unawaited(_windows.openSettings(context)),
     update: setState,
     mounted: () => mounted,
+  );
+
+  /// The quick note's tile, tab and chooser, and the text shared into
+  /// Niman waiting for it (#1256).
+  late final ShellQuickNote _quickNote = ShellQuickNote(
+    controller: widget.controller,
+    unsaved: widget.unsavedTracker,
+    selection: _selection,
+    nav: _nav,
+    tabs: _tabs,
+    guard: _guard,
+    wide: () => _wide,
+    update: setState,
+    mounted: () => mounted,
+  );
+
+  /// The tree's rows and the Files pane's tiles opened (#1256).
+  late final ShellTreeOpen _treeOpen = ShellTreeOpen(
+    selection: _selection,
+    workspace: _workspace,
+    nav: _nav,
+    clock: () => ref.read(treeClickClockProvider)(),
+    wide: () => _wide,
+    desktop: () => _desktop,
+    panesShowNotes: () => _panesShowNotes,
+    notePreview: () => _notePreview,
+    update: setState,
   );
 
   /// The library's features (#1109): every surface of the shell asks this,
@@ -485,7 +512,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     journalUi: _journalUi,
     openTodo: _openTodo,
     addTodo: _addTodo,
-    openQuickNote: _openQuickNoteFromTile,
+    openQuickNote: _quickNote.openFromTile,
     openRecognizedText: _openRecognizedText,
     openNote: (path) => _openNoteFromLink(path, null),
     revealFolder: _revealFolder,
@@ -693,7 +720,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     guard: _guard,
     capture: _captureFlow,
     epubConvert: _epubConvert,
-    shareText: _shareText,
+    shareText: _quickNote.share,
     newItemFolder: () => _newItemRule.folder,
     reveal: _revealFolder,
     openNote: (path) => _openNoteFromLink(path, null),
@@ -1057,18 +1084,6 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     mounted: () => mounted,
   );
 
-  /// Whether the Quick note tab body is the choose/create screen.
-  ///
-  /// It is only ever wanted when no quick note is set. With one set, the
-  /// tab is a way of opening that note, and the tab shell stays painted
-  /// under the opening note for the length of the fade — long enough for
-  /// the chooser to flash behind a note the user had already chosen.
-  bool _showQuickNoteChooser = false;
-
-  /// Text shared into Niman (#40) with no quick note to put it in yet: it
-  /// is appended to whatever note the chooser opens next.
-  String? _pendingSharedText;
-
   /// The phone full-screen note body.
   Widget _fullNoteView(LibrarySession controller, String selectedPath) {
     final view = _phoneNoteView(controller, selectedPath);
@@ -1287,7 +1302,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     onCounted: () => _homeWidgets.pushStudy(),
     showNote: _showNote,
     openDeck: (path) =>
-        _wide ? _showFromTree(path, newTab: false) : _showNote(path),
+        _wide ? _treeOpen.show(path, newTab: false) : _showNote(path),
     newDeck: () => unawaited(_createFlow.createFlashcards(context)),
     mounted: () => mounted,
   );
@@ -1842,25 +1857,6 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     _todoController.calendar = _calendarController.snapshot;
   }
 
-  /// Inserts [text] at the end of the quick note and opens it.
-  ///
-  /// With no quick note set the choose/create screen opens instead, and
-  /// the text waits: [_openQuickNote] inserts it into whatever note the
-  /// choice lands on — the text is the point of the share, so it cannot
-  /// be dropped just because the target is not configured yet.
-  Future<void> _shareText(String text) async {
-    final ops = widget.controller.ops;
-    if (ops == null || !mounted) return;
-    _pendingSharedText = text;
-    final path = await ops.quickNotePath;
-    if (!mounted) return;
-    if (path == null || path.isEmpty) {
-      _openQuickNoteChooser();
-      return;
-    }
-    await _openQuickNote(path);
-  }
-
   /// Says how far the rewrite of the links to a note that moved has come
   /// (#1041), in one snack bar that is replaced as it goes and leaves when it
   /// is done: a rewrite of a thousand notes runs after the move has returned,
@@ -1941,75 +1937,6 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     activeNote: () => _shownNote,
   );
 
-  void _select(Note note, {bool newTab = false}) {
-    // A note opening in preview-only has no editable for the IME.
-    final previewOnly = !note.isDir && _notePreview;
-    if (previewOnly) FocusManager.instance.primaryFocus?.unfocus();
-    if (_wide) {
-      if (note.isDir) {
-        // A folder leaves the tabs alone: the note stays on screen.
-        return _selection.selectFolder(note.path);
-      }
-      _showFromTree(note.path, newTab: newTab);
-    }
-    _selection.pick(note.path, isDir: note.isDir);
-  }
-
-  /// The tree's last plain click on a note, for telling a double click:
-  /// the note, when, and what the tab showed before it.
-  ({String path, DateTime at, String? replaced})? _lastTreeClick;
-
-  /// Shows the note at [path] from the tree, on the wide layout (#23 and
-  /// the 0.0.8 test round).
-  ///
-  /// - A click shows it in place of the tab's note.
-  /// - Ctrl+click, a middle click ([newTab]) or a double click opens it
-  ///   in a tab of its own. A double click starts as a click, so its
-  ///   second half puts back what the first replaced, then opens the note
-  ///   beside it. Waiting to tell the two apart instead would make every
-  ///   single click late.
-  ///
-  /// The 300 ms window is real time, so it comes from
-  /// [treeClickClockProvider]: a test that scripts the two clicks decides
-  /// the gap between them rather than racing the machine (#437).
-  void _showFromTree(String path, {required bool newTab}) {
-    // A note shows in the panes on a wide window: a content tab painting
-    // over them (#712) or another destination would leave it out of
-    // sight, as a note opened from the search is brought forward.
-    if (_wide && !_panesShowNotes) {
-      setState(() {
-        _nav.visit(ShellTab.files);
-      });
-    }
-    final keys = HardwareKeyboard.instance;
-    final now = ref.read(treeClickClockProvider)();
-    final last = _lastTreeClick;
-    _lastTreeClick = null;
-    if (newTab || keys.isControlPressed || keys.isMetaPressed) {
-      _workspace.show(path, newTab: true);
-      return;
-    }
-    if (last != null &&
-        last.path == path &&
-        now.difference(last.at) <= kDoubleTapTimeout) {
-      // The first click already showed the note, in a tab of its own; the
-      // tab it replaced comes back beside it, and nothing else is shown or
-      // recreated (#1076).
-      if (last.replaced case final replaced?) {
-        _workspace.reopenBeforeShowing(replaced);
-      }
-      _workspace.show(path, newTab: true);
-      return;
-    }
-    final before = _workspace.value.activePath;
-    _workspace.show(path);
-    _lastTreeClick = (
-      path: path,
-      at: now,
-      replaced: before == path ? null : before,
-    );
-  }
-
   /// Opens a search result at [path] (library-relative): phone — the
   /// note takes the screen, back returns to the search tab; wide — the
   /// rail flips to Files and the detail pane shows it alongside the tree
@@ -2025,101 +1952,6 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   void _openSearchHit(String path, List<String> terms) {
     _showNote(path, find: terms);
     logNextFrame('shell', 'search result open first frame');
-  }
-
-  /// Opens the quick note at [path]; back returns to the tab it was
-  /// opened from: the tile sits in every tab, not in Files (issue #73,
-  /// item 1). The chooser flow arrives here from the quick note tab
-  /// itself, and the home tab is its home. A stale setting (the note was
-  /// moved, renamed, or deleted) is cleared so the tab returns to its
-  /// empty state.
-  Future<void> _openQuickNote(String path) async {
-    // Closes the keyboard before the transition (issue #4): opening the
-    // overlay over a live IME rips focus mid-fade while adjustResize
-    // reshapes the window, which flashes on device. Tab switches already
-    // do this in [ShellTabSwitch.select].
-    FocusManager.instance.primaryFocus?.unfocus();
-    await _guard(() async {
-      final ops = widget.controller.ops;
-      if (ops == null) return;
-      final note = await ops.find(path);
-      if (note == null || note.isDir) {
-        // The note it pointed at is gone: forget it and ask again, rather
-        // than leaving the tap with nothing to show for itself.
-        await ops.setQuickNotePath(path: null);
-        widget.controller.notify();
-        if (mounted) _openQuickNoteChooser();
-        return;
-      }
-      // Text shared into Niman (#40) waits here for the note it goes in:
-      // appended before the note is opened, so the first read of the file
-      // already carries it. What is on screen is saved first — the append
-      // reads the file, and a buffer written after it would take the
-      // shared text back out.
-      final pending = _pendingSharedText;
-      _pendingSharedText = null;
-      var reload = false;
-      if (pending != null) {
-        await widget.unsavedTracker.saveAll();
-        await ops.appendToNote(note.path, pending);
-        reload = _selection.selects(note.path);
-      }
-      if (!mounted) return;
-      // Read the origin before the switch below: the chooser flow arrives
-      // here from the quick note tab itself, and the home tab is its home;
-      // a hidden tab is a page, not a place to come back to (#536).
-      final fromTab = _tab == ShellTab.quickNote || !_nav.shown(_tab)
-          ? _tabs.startTab
-          : _tab;
-      _showQuickNoteChooser = false;
-      // Already open: its buffer predates the appended text, so it
-      // re-reads the file instead of keeping what it had.
-      _selection.openQuickNote(note.path, from: fromTab, reload: reload);
-      logNextFrame('shell', 'quick note open first frame');
-    });
-  }
-
-  /// The bottom-nav tile: once a quick note is set it opens directly;
-  /// otherwise switch to the tab (the choose/create screen).
-  Future<void> _openQuickNoteFromTile() async {
-    final ops = widget.controller.ops;
-    if (ops == null) return;
-    final path = await ops.quickNotePath;
-    if (!mounted) return;
-    if (path == null || path.isEmpty) {
-      _openQuickNoteChooser();
-      return;
-    }
-    // Already on screen: just land on the tab. Reopening would unfocus
-    // the editor, reset the kind view and restart the hide timer for
-    // identical content — on wide, where both tabs share the detail pane,
-    // that reads as a close/reopen flash.
-    //
-    // On screen, not merely selected (2026-09-10 device report): closing
-    // the note leaves it selected, and on a phone the tab it lands on has
-    // an empty body by design — so the shortcut showed nothing at all.
-    // The tree being up is what says the note is closed.
-    final narrow = !isWideShell(context);
-    final onScreen = !narrow || !_selection.treeVisible;
-    if (onScreen && _selection.selects(path) && !_showQuickNoteChooser) {
-      if (_tab != ShellTab.quickNote) {
-        setState(() {
-          _nav.visit(ShellTab.quickNote);
-        });
-      }
-      return;
-    }
-    await _openQuickNote(path);
-  }
-
-  /// Shows the choose/create screen, wherever this layout keeps it.
-  ///
-  /// Every layout shows it inline in the Quick note tab body (the rail on
-  /// wide, the bottom bar on narrow), so the tab chrome always persists —
-  /// opening it over the shell used to hide the rail on wide.
-  void _openQuickNoteChooser() {
-    setState(() => _showQuickNoteChooser = true);
-    _tabs.select(ShellTab.quickNote);
   }
 
   Future<void> _guard(Future<void> Function() action) async {
@@ -2671,7 +2503,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       // The quick-note chooser: empty while its note is open in the slot
       // above, the choose/create screen otherwise.
       _wideSlot(
-        visible: _tab == ShellTab.quickNote && _showQuickNoteChooser,
+        visible: _tab == ShellTab.quickNote && _quickNote.choosing,
         child: _islandSlot(_tabBodyFor(ShellTab.quickNote, controller)),
       ),
     ];
@@ -2686,7 +2518,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       (_wide && _tab == ShellTab.search) ||
       _sidebarShowsStudy ||
       _tabs.contentTabShows ||
-      (_tab == ShellTab.quickNote && !_showQuickNoteChooser);
+      (_tab == ShellTab.quickNote && !_quickNote.choosing);
 
   /// Whether the left island shows the search in place of the tree
   /// (#712): Search is a sidebar view on a wide window, so the panes and
@@ -2934,7 +2766,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
         unawaited(_addTodo());
       },
       AppCommand.newTaskForNote: () => unawaited(_newTaskForNote()),
-      AppCommand.quickNote: () => unawaited(_openQuickNoteFromTile()),
+      AppCommand.quickNote: () => unawaited(_quickNote.openFromTile()),
       AppCommand.journalToday: () => unawaited(_journalFlow.openToday(context)),
       AppCommand.journalPrevious: () =>
           unawaited(_journalFlow.openPrevious(context, _shownJournalDay!)),
@@ -3778,11 +3610,11 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       // Empty unless the shell actually sent the user here to choose: an
       // open quick note leaves this body painted under the opening note.
       ShellTab.quickNote =>
-        _showQuickNoteChooser
+        _quickNote.choosing
             ? QuickNoteTab(
                 controller: controller,
                 newItemRule: _newItemRule,
-                onOpen: _openQuickNote,
+                onOpen: _quickNote.open,
               )
             : const SizedBox.shrink(),
       ShellTab.home => HomeScreen(
@@ -3979,8 +3811,8 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     marked: _markedActions,
     editing: _treeEditing,
     onToggle: _selection.toggleFolder,
-    onSelect: _selectFromPane,
-    onOpenInNewTab: (note) => _select(note, newTab: true),
+    onSelect: _treeOpen.fromPane,
+    onOpenInNewTab: (note) => _treeOpen.pick(note, newTab: true),
     selectFolder: _selection.selectFolder,
     update: setState,
   );
@@ -4019,16 +3851,6 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       return;
     }
     widget.controller.notify();
-  }
-
-  /// A row or a tile activated in the Files pane (#727): the note opens as
-  /// it does from anywhere else, and on a desktop it also takes the caret.
-  /// A click on a note is an invitation to write in it, and the pane is
-  /// not where the keyboard should end up: the row's own click leaves the
-  /// keys where they are for a note, and this is what puts them in it.
-  void _selectFromPane(Note note) {
-    if (!note.isDir && _desktop) _selection.requestCaret(note.path);
-    _select(note);
   }
 
   /// Whether the palette is reached by touch (#206, #849): on a window
