@@ -11,6 +11,7 @@ import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/sync/sync_flow.dart';
 import 'package:niman/src/ui/sync/sync_labels.dart';
 import 'package:niman/src/ui/sync/sync_overview_card.dart';
+import 'package:niman/src/ui/sync/sync_settings_dialogs.dart';
 import 'package:niman/src/ui/sync/sync_test_result_card.dart';
 import 'package:niman/src/ui/unsaved_notes.dart';
 
@@ -268,26 +269,12 @@ final class _SyncSettingsScreenState extends State<SyncSettingsScreen> {
   Future<void> _trustCertificate(SyncTestResult result) async {
     final fingerprint = result.fingerprint;
     if (fingerprint == null) return;
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        key: const Key('sync-trust-dialog'),
-        title: Text(AppStrings.syncCertTrustTitle),
-        content: Text(AppStrings.syncCertTrustBody(result.host, fingerprint)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(AppStrings.actionCancel),
-          ),
-          TextButton(
-            key: const Key('sync-trust-confirm'),
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(AppStrings.syncCertTrustAction),
-          ),
-        ],
-      ),
+    final confirmed = await confirmSyncCertificateTrust(
+      context,
+      host: result.host,
+      fingerprint: fingerprint,
     );
-    if (confirmed != true || !mounted) return;
+    if (!confirmed || !mounted) return;
     setState(() => _trustedFingerprint = fingerprint);
     await _test();
   }
@@ -298,26 +285,7 @@ final class _SyncSettingsScreenState extends State<SyncSettingsScreen> {
   Future<void> _forgetCertificate() async {
     final fingerprint = _sync.status.destination?.trustedCertFingerprint;
     if (fingerprint == null) return;
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        key: const Key('sync-forget-certificate-dialog'),
-        title: Text(AppStrings.syncCertForgetTitle),
-        content: Text(AppStrings.syncCertForgetBody),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(AppStrings.actionCancel),
-          ),
-          TextButton(
-            key: const Key('sync-forget-certificate-confirm'),
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(AppStrings.syncCertForgetAction),
-          ),
-        ],
-      ),
-    );
-    if (confirmed != true) return;
+    if (!await confirmSyncCertificateForget(context)) return;
     await _sync.forgetCertificate();
     if (mounted) setState(() => _trustedFingerprint = null);
   }
@@ -356,26 +324,7 @@ final class _SyncSettingsScreenState extends State<SyncSettingsScreen> {
   }
 
   Future<void> _disconnect() async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        key: const Key('sync-disconnect-dialog'),
-        title: Text(AppStrings.syncDisconnectConfirmTitle),
-        content: Text(AppStrings.syncDisconnectConfirmBody),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(AppStrings.actionCancel),
-          ),
-          TextButton(
-            key: const Key('sync-disconnect-confirm'),
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(AppStrings.syncDisconnectConfirm),
-          ),
-        ],
-      ),
-    );
-    if (confirmed != true) return;
+    if (!await confirmSyncDisconnect(context)) return;
     await _sync.disconnect();
     if (mounted) {
       setState(() {
