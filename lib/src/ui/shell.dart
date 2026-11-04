@@ -62,7 +62,6 @@ import 'package:niman/src/ui/app_menu.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/attachment_view.dart';
 import 'package:niman/src/ui/capture/capture_flow.dart';
-import 'package:niman/src/ui/capture/capture_routes.dart';
 import 'package:niman/src/ui/capture/capture_services.dart';
 import 'package:niman/src/ui/capture/paste_markdown_flow.dart';
 import 'package:niman/src/ui/cheatsheet/cheatsheet_screen.dart';
@@ -89,7 +88,6 @@ import 'package:niman/src/ui/home/action_runner.dart';
 import 'package:niman/src/ui/home/home_host.dart';
 import 'package:niman/src/ui/home/home_note_action.dart';
 import 'package:niman/src/ui/home/home_screen.dart';
-import 'package:niman/src/ui/intent_features.dart';
 import 'package:niman/src/ui/island.dart';
 import 'package:niman/src/ui/journal/journal_flow.dart';
 import 'package:niman/src/ui/key_map.dart';
@@ -112,7 +110,6 @@ import 'package:niman/src/ui/note_view_handle.dart';
 import 'package:niman/src/ui/note_view_memento.dart';
 import 'package:niman/src/ui/ocr/ocr_file_actions.dart';
 import 'package:niman/src/ui/ocr/ocr_job_status.dart';
-import 'package:niman/src/ui/ocr/ocr_notifier.dart';
 import 'package:niman/src/ui/open_notes_sheet.dart';
 import 'package:niman/src/ui/outside_files.dart';
 import 'package:niman/src/ui/palette/command_features.dart';
@@ -150,6 +147,7 @@ import 'package:niman/src/ui/shell_note_history.dart';
 import 'package:niman/src/ui/shell_note_io.dart';
 import 'package:niman/src/ui/shell_note_kind.dart';
 import 'package:niman/src/ui/shell_ocr_flow.dart';
+import 'package:niman/src/ui/shell_outside_routes.dart';
 import 'package:niman/src/ui/shell_palette.dart';
 import 'package:niman/src/ui/shell_personal_dictionary.dart';
 import 'package:niman/src/ui/shell_preview_actions.dart';
@@ -522,6 +520,28 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       if (!mounted) return;
       showFeatureOff(context, feature, openFeatures: _openFeaturesFromWidget);
     },
+  );
+
+  /// Where a notification, a launcher action or a share leads, tapped
+  /// while the shell is up or carried by a cold start (issue #100 moved
+  /// them into [ShellOutsideRoutes]).
+  late final ShellOutsideRoutes _outside = ShellOutsideRoutes(
+    reminders: widget.reminders,
+    shortcuts: widget.shortcuts,
+    shareIn: widget.shareIn,
+    capture: widget.capture,
+    intents: _intents,
+    featuresIntro: _featuresIntro,
+    imports: _imports,
+    creates: _createFlow,
+    journal: _journalFlow,
+    journalUi: _journalUi,
+    openTodo: _openTodo,
+    addTodo: _addTodo,
+    openQuickNote: _openQuickNoteFromTile,
+    openRecognizedText: _openRecognizedText,
+    openNote: (path) => _openNoteFromLink(path, null),
+    revealFolder: _revealFolder,
   );
 
   /// The home-screen widgets of this library: pushes out, taps back in
@@ -1962,19 +1982,12 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     unawaited(_calendarController.open());
     // Notification taps while running: a todo tap opens the Todo tab, a
     // recognition's opens its text.
-    _inbound.listen(widget.reminders.taps, (payload) {
-      if (_followCaptureRoute(payload)) return;
-      if (payload == todoReminderPayload && mounted) {
-        const AppLogger(name: 'todo').debug('todo tap: opening the todo list');
-        if (_intents.allows(featureOfReminderPayload(payload))) _openTodo();
-      } else if (journalReminderDayOf(payload) != null) {
-        unawaited(_openReminderPayload(payload!));
-      } else if (payload != null &&
-          payload.startsWith(ocrNotificationPrefix) &&
-          mounted) {
-        _openRecognizedText(payload.substring(ocrNotificationPrefix.length));
-      }
-    }, request: true);
+    _inbound.listen(
+      widget.reminders.taps,
+      (payload) =>
+          unawaited(_outside.notification(context, payload, tap: true)),
+      request: true,
+    );
     // Recognitions as they finish (#594).
     _inbound.listen(widget.ocrQueue?.finished, (job) {
       if (!mounted) return;
@@ -2027,7 +2040,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     });
     _inbound.listen(
       widget.shortcuts.actions,
-      (action) => unawaited(_runShortcut(action)),
+      (action) => unawaited(_outside.runShortcut(context, action)),
       request: true,
     );
     // What other apps share in while the shell is up (#40).
@@ -2038,7 +2051,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     );
     _inbound.listen(
       widget.tray.actions,
-      (action) => unawaited(_runShortcut(action)),
+      (action) => unawaited(_outside.runShortcut(context, action)),
       request: true,
     );
     _inbound.listen(
@@ -2087,9 +2100,9 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     // introduction (#1109) waits for all of them, and for the welcome's
     // offer of the tour, and is shown only when none was found.
     final launches = [
-      _applyReminderLaunch(),
-      _applyShortcutLaunch(),
-      _applyShareLaunch(),
+      _outside.reminderLaunch(context),
+      _outside.shortcutLaunch(context),
+      _outside.shareLaunch(context),
       _homeWidgets.applyLaunchTarget(),
       // The welcome's "show me around" (#266): asked once a library is
       // open, because the tour points at the shell.
@@ -2208,77 +2221,6 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     _todoController.calendar = _calendarController.snapshot;
   }
 
-  /// A reminder's own destination: the journal on its day for an event
-  /// (#730), the Todo tab for a task.
-  Future<void> _openReminderPayload(String payload) async {
-    final day = journalReminderDayOf(payload);
-    if (day == null || !mounted) return;
-    // A reminder the calendar's switch outlived says so (#1109).
-    if (!_intents.allows(featureOfReminderPayload(payload))) return;
-    const AppLogger(name: 'calendar').debug('event reminder tap: $payload');
-    _journalUi.showCalendar(context);
-    await _journalFlow.openDay(context, day);
-  }
-
-  /// A notification tap that started the app lands on the Todo tab.
-  Future<void> _applyReminderLaunch() async {
-    final payload = await widget.reminders.consumeLaunchPayload();
-    if (payload != null) _featuresIntro.requested();
-    if (_followCaptureRoute(payload)) return;
-    if (payload == todoReminderPayload && mounted) {
-      if (_intents.allows(featureOfReminderPayload(payload))) _openTodo();
-    } else if (journalReminderDayOf(payload) != null) {
-      await _openReminderPayload(payload!);
-    } else if (payload != null &&
-        payload.startsWith(ocrNotificationPrefix) &&
-        mounted) {
-      _openRecognizedText(payload.substring(ocrNotificationPrefix.length));
-    }
-  }
-
-  /// A launcher quick action that started the app (T-SC-03, cold start).
-  ///
-  /// Asked for here rather than at app start because the action needs an
-  /// open library: the shell mounts once the library is ready, so a first
-  /// run that has to pick a library first still runs the action after.
-  Future<void> _applyShortcutLaunch() async {
-    final action = await widget.shortcuts.consumeLaunchAction();
-    if (action == null) return;
-    _featuresIntro.requested();
-    await _runShortcut(action);
-  }
-
-  /// A share that started the app (#40, cold start).
-  ///
-  /// Asked for here for the same reason as the launcher actions: every
-  /// share needs a library — text goes into one, a file is imported into
-  /// one. Shares that arrive while there is no shell wait in the service
-  /// and are delivered once one mounts.
-  Future<void> _applyShareLaunch() async {
-    final request = await widget.shareIn.consumeLaunchRequest();
-    if (request == null) return;
-    _featuresIntro.requested();
-    if (!mounted) return;
-    await _imports.share(context, request);
-  }
-
-  /// Where a capture's notification leads (#531): the note it made, its
-  /// folder in the tree, or the capture's end. False when [route] is not
-  /// a capture's.
-  bool _followCaptureRoute(String? route) {
-    final capture = captureRouteOf(route);
-    if (capture == null || !mounted) return false;
-    switch (capture) {
-      case CaptureOpenNote(:final path):
-        _openNoteFromLink(path, null);
-      case CaptureShowFolder(:final folder):
-        _revealFolder(folder);
-      case CaptureCancel(:final id):
-        widget.capture.background.cancel(id);
-    }
-    return true;
-  }
-
   /// Inserts [text] at the end of the quick note and opens it.
   ///
   /// With no quick note set the choose/create screen opens instead, and
@@ -2313,31 +2255,6 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
         duration: const Duration(seconds: 30),
       ),
     );
-  }
-
-  /// Runs [action]'s in-app flow: the same one the equivalent control
-  /// uses, so a shortcut cannot drift from the button it mirrors.
-  Future<void> _runShortcut(ShortcutAction action) async {
-    if (!mounted) return;
-    const AppLogger(name: 'shortcuts').debug('running ${action.id}');
-    // Published for the app, not for a library: one whose feature this
-    // library has off says so instead (#1109).
-    if (!_intents.allows(featureOfShortcut(action))) return;
-    switch (action) {
-      case ShortcutAction.quickNote:
-        await _openQuickNoteFromTile();
-      case ShortcutAction.journalToday:
-        await _journalFlow.openToday(context);
-      case ShortcutAction.newTodo:
-        _openTodo();
-        await _addTodo();
-      case ShortcutAction.newNote:
-        await _createFlow.createNote(context);
-      case ShortcutAction.newList:
-        await _createFlow.createListNote(context);
-      case ShortcutAction.newVoice:
-        await _createFlow.createAudioNote(context);
-    }
   }
 
   @override
