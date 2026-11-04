@@ -41,6 +41,7 @@ import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/render/marked_block.dart';
 import 'package:niman/src/markdown/render/note_margins.dart';
 import 'package:niman/src/markdown/render/range_highlight.dart';
+import 'package:niman/src/markdown/render/read_block_marks.dart';
 import 'package:niman/src/markdown/render/read_code_pieces.dart';
 import 'package:niman/src/markdown/render/read_entries.dart';
 import 'package:niman/src/markdown/render/read_jumps.dart';
@@ -727,7 +728,7 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
       onToggleTask: widget.onToggleTask,
       outerItems: outerItems,
     );
-    final marks = _marksIn(block);
+    final marks = marksIn(widget.marks, block);
     final tapMark = widget.onTapMark;
     Widget drawn = marks.isEmpty
         ? view
@@ -747,26 +748,5 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
       );
     }
     return drawn;
-  }
-
-  /// The marks falling in [block].
-  List<BlockMark> _marksIn(Block block) {
-    final marks = widget.marks;
-    if (marks.isEmpty) return const [];
-    // The first mark at or after the block's start.
-    var low = 0;
-    var high = marks.length;
-    while (low < high) {
-      final middle = (low + high) >> 1;
-      if (marks[middle].line < block.startLine) {
-        low = middle + 1;
-      } else {
-        high = middle;
-      }
-    }
-    return [
-      for (var i = low; i < marks.length && marks[i].line < block.endLine; i++)
-        marks[i],
-    ];
   }
 }
