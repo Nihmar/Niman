@@ -17,10 +17,10 @@ import 'package:niman/src/frontmatter/edit_in_file.dart';
 import 'package:niman/src/frontmatter/parser.dart';
 import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/history/note_history.dart';
-import 'package:niman/src/home/home_file.dart';
 import 'package:niman/src/home/home_layout.dart';
 import 'package:niman/src/journal/journal_settings.dart';
 import 'package:niman/src/library/folder_spelling.dart';
+import 'package:niman/src/library/library_layouts.dart';
 import 'package:niman/src/library/note_creation.dart';
 import 'package:niman/src/library/note_link_questions.dart';
 import 'package:niman/src/library/note_op_seams.dart';
@@ -360,71 +360,39 @@ final class NoteOps implements NoteOperations {
   Future<void> setJournal(JournalSettings settings) =>
       config.update((c) => c.copyWith(journal: settings));
 
+  /// The navigation and the Home, the library's and this device's.
+  late final LibraryLayouts _layouts = LibraryLayouts(
+    root: root,
+    config: config,
+    hint: _hint,
+  );
+
   @override
   Future<({NavigationLayout? library, NavigationLayout? device})>
-  get navigation async {
-    final c = await config.config;
-    return (library: c.navigation, device: c.deviceNavigation);
-  }
+  get navigation => _layouts.navigation;
 
   @override
   Future<void> setNavigation(
     NavigationLayout layout, {
     required bool onDevice,
-  }) => config.update(
-    (c) => onDevice
-        ? c.copyWith(deviceNavigation: layout)
-        : c.copyWith(navigation: layout, clearDeviceNavigation: true),
-  );
+  }) => _layouts.setNavigation(layout, onDevice: onDevice);
 
   @override
-  Future<({HomeLayout? library, HomeLayout? device})> get home async {
-    final device = (await config.config).deviceHome;
-    return (
-      library: await HomeFile(root).read(),
-      device: device == null ? null : HomeLayout.fromJson(device),
-    );
-  }
+  Future<({HomeLayout? library, HomeLayout? device})> get home => _layouts.home;
 
   @override
-  Future<void> setHome(HomeLayout layout, {required bool onDevice}) async {
-    if (onDevice) {
-      await config.update((c) => c.copyWith(deviceHome: layout.toJson()));
-      return;
-    }
-    await HomeFile(root).write(layout);
-    _hint(HomeFile.filePath, SyncOpKind.changed);
-    await clearDeviceHome();
-  }
+  Future<void> setHome(HomeLayout layout, {required bool onDevice}) =>
+      _layouts.setHome(layout, onDevice: onDevice);
 
   @override
   Future<HomeLayout> editHome({
     required HomeLayout from,
     required HomeLayout to,
     required bool onDevice,
-  }) async {
-    if (onDevice) {
-      var edited = to;
-      await config.update((c) {
-        final current = switch (c.deviceHome) {
-          final json? => HomeLayout.fromJson(json),
-          null => null,
-        };
-        edited = (current ?? from).withEdit(from: from, to: to);
-        return c.copyWith(deviceHome: edited.toJson());
-      });
-      return edited;
-    }
-    final edited = await HomeFile(root)
-        .update((current) => current.withEdit(from: from, to: to));
-    _hint(HomeFile.filePath, SyncOpKind.changed);
-    await clearDeviceHome();
-    return edited;
-  }
+  }) => _layouts.editHome(from: from, to: to, onDevice: onDevice);
 
   @override
-  Future<void> clearDeviceHome() =>
-      config.update((c) => c.copyWith(clearDeviceHome: true));
+  Future<void> clearDeviceHome() => _layouts.clearDeviceHome();
 
   @override
   Future<List<String>> notePathsUnder(String folder) =>
