@@ -91,6 +91,7 @@ import 'package:niman/src/markdown/render/source_folds.dart';
 import 'package:niman/src/markdown/render/source_geometry.dart';
 import 'package:niman/src/markdown/render/source_line.dart';
 import 'package:niman/src/markdown/render/source_live_lines.dart';
+import 'package:niman/src/markdown/render/source_menu_keys.dart';
 import 'package:niman/src/markdown/render/source_overlays.dart';
 import 'package:niman/src/markdown/render/source_paragraphs.dart';
 import 'package:niman/src/markdown/render/source_pointer.dart';
@@ -2349,7 +2350,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       Focus(
         focusNode: _focus,
         autofocus: widget.autofocus,
-        onKeyEvent: _menuKey,
+        onKeyEvent: _menuKeys.handle,
         onFocusChange: (hasFocus) {
           _focusReturn.focusChanged(hasFocus: hasFocus);
           // Only the focused note blinks (#512): an editor the keys are not
@@ -2667,58 +2668,6 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// Whether the suggester panel is up, for the shell's tour and the tests.
   bool get isSuggesterShown => _suggest.isShown;
 
-  /// The keys the menu answers while the note has the focus: Escape closes
-  /// it (or the touch selection, or collapses a selection), and the menu key
-  /// or Shift+F10 opens it at the caret. Everything else
-  /// goes on to the note's shortcuts.
-  KeyEventResult _menuKey(FocusNode node, KeyEvent event) {
-    if (event is! KeyDownEvent) return KeyEventResult.ignored;
-    final key = event.logicalKey;
-    final shift = HardwareKeyboard.instance.isShiftPressed;
-    final control = HardwareKeyboard.instance.isControlPressed;
-    final alt = HardwareKeyboard.instance.isAltPressed;
-    final meta = HardwareKeyboard.instance.isMetaPressed;
-    // The wikilink suggester owns its keys while it is open, and only then
-    // (#475); with no panel the keys fall through to the note's own table
-    // exactly as they did.
-    final taken = _suggest.handleKey(
-      key,
-      modified: shift || control || alt || meta,
-    );
-    if (taken != null) return taken;
-    if (key == LogicalKeyboardKey.escape) {
-      if (_menu.isShown) {
-        hideContextMenu();
-        return KeyEventResult.handled;
-      }
-      if (_touch.isUp) {
-        _touch.hide();
-        return KeyEventResult.handled;
-      }
-      // A selection takes the first press, as it did in the legacy editor;
-      // with nothing left to cancel the key goes on to the app (Zen mode).
-      if (!_selection.isCollapsed) {
-        placeCaret(_selection.extent);
-        return KeyEventResult.handled;
-      }
-      return KeyEventResult.ignored;
-    }
-    // Shift+Enter and Ctrl+Enter leave a table in `live`; anywhere else they
-    // go on to the platform and the app, as before.
-    if ((key == LogicalKeyboardKey.enter ||
-            key == LogicalKeyboardKey.numpadEnter) &&
-        (shift || control) &&
-        _tableKeys.exit()) {
-      return KeyEventResult.handled;
-    }
-    if (key == LogicalKeyboardKey.contextMenu ||
-        (key == LogicalKeyboardKey.f10 && shift)) {
-      showContextMenu();
-      return KeyEventResult.handled;
-    }
-    return KeyEventResult.ignored;
-  }
-
   /// The misspelled ranges of line [index], whose text is [text]: the ranges
   /// the checker finds outside what the tokenizer says is not prose (code,
   /// maths, links, markers).
@@ -2750,6 +2699,17 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     if (piece == null || paragraph == null) return null;
     return sourcePieceCaretRect(piece, paragraph, offset - lineStart);
   }
+
+  /// The keys the note answers on its focus, before its shortcuts: the
+  /// wikilink panel's, Escape, the way out of a table, the menu key.
+  late final SourceMenuKeys _menuKeys = SourceMenuKeys(
+    menu: _menu,
+    touch: _touch,
+    suggest: _suggest,
+    selection: () => _selection,
+    placeCaret: placeCaret,
+    tableExit: () => _tableKeys.exit(),
+  );
 
   /// What the surface's own keys do ([sourceShortcuts]).
   late final SourceKeyActions _keyActions = SourceKeyActions(
