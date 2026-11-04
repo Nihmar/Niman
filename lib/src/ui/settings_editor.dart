@@ -7,9 +7,9 @@ import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
-import 'package:niman/src/spellcheck/hunspell_spell_checker.dart';
 import 'package:niman/src/ui/pointer_density.dart';
 import 'package:niman/src/ui/settings_area.dart';
+import 'package:niman/src/ui/settings_editor_spelling.dart';
 import 'package:niman/src/ui/settings_editor_tidy.dart';
 import 'package:niman/src/ui/settings_keys.dart';
 import 'package:niman/src/ui/settings_rows.dart';
@@ -414,73 +414,12 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
     if (mounted) setState(() => _enabledEditors = next);
   }
 
-  /// Asks which dictionaries the editor should use (T-PP-09, revised): every
-  /// one found on the machine — Windows's languages there — any number of
-  /// them at once.
+  /// Asks which dictionaries the editor should use (T-PP-09, revised).
   /// Choosing none means the locale default.
   Future<void> _chooseSpellDictionaries(EditorSpellCheck spell) async {
-    final names = await availableSpellDictionaries();
-    if (!mounted) return;
-    final selected = _spellDictionaries.toSet();
-    final choice = await showDialog<List<String>>(
-      context: context,
-      builder: (context) => AlertDialog(
-        key: const Key('spell-dictionary-dialog'),
-        scrollable: true,
-        title: Text(AppStrings.spellCheckDictionaryChoiceTitle),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              AppStrings.spellCheckDictionaryChoiceSubtitle,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: 8),
-            if (names.isEmpty)
-              Text(AppStrings.spellCheckNoDictionaries)
-            else
-              StatefulBuilder(
-                builder: (context, setDialogState) => Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    for (final name in names)
-                      CheckboxListTile(
-                        key: Key('spell-dictionary-$name'),
-                        dense: true,
-                        contentPadding: EdgeInsets.zero,
-                        title: Text(name),
-                        value: selected.contains(name),
-                        onChanged: (value) => setDialogState(() {
-                          if (value ?? false) {
-                            selected.add(name);
-                          } else {
-                            selected.remove(name);
-                          }
-                        }),
-                      ),
-                  ],
-                ),
-              ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            key: const Key('spell-dictionary-cancel'),
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(AppStrings.actionCancel),
-          ),
-          FilledButton(
-            key: const Key('spell-dictionary-save'),
-            onPressed: () =>
-                Navigator.of(context)
-                    .pop(names.where(selected.contains).toList()),
-            child: Text(AppStrings.actionSave),
-          ),
-        ],
-      ),
+    final choice = await showSpellDictionariesDialog(
+      context,
+      _spellDictionaries,
     );
     if (choice == null) return;
     await widget.controller.setSpellDictionaries(choice);
@@ -736,36 +675,13 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
             onLintRulesOff: (off) => unawaited(_setLintRulesOff(off)),
           ),
           if (spell != null)
-            ListenableBuilder(
-              listenable: spell,
-              // The rows are the spell state's, not this build's: keyed on
-              // `offered` they survive the reload a dictionary pick starts
-              // (and the switch that turns checking off) instead of
-              // vanishing with `available` (#493).
-              builder: (context, _) => !spell.offered
-                  ? const SizedBox.shrink()
-                  : Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        SettingsSwitchRow(
-                          key: const Key('spell-check-setting'),
-                          title: AppStrings.settingsSpellCheckTitle,
-                          description: AppStrings.settingsSpellCheckSubtitle,
-                          value: spell.enabled,
-                          onChanged: (value) =>
-                              setState(() => spell.setEnabled(enabled: value)),
-                        ),
-                        SettingsValueRow(
-                          key: const Key('spell-dictionary-setting'),
-                          title: AppStrings.spellCheckDictionaryTitle,
-                          value: _spellDictionaries.isEmpty
-                              ? AppStrings.spellCheckDictionarySystem
-                              : _spellDictionaries.join(', '),
-                          onTap: () =>
-                              unawaited(_chooseSpellDictionaries(spell)),
-                        ),
-                      ],
-                    ),
+            SettingsEditorSpelling(
+              spell: spell,
+              dictionaries: _spellDictionaries,
+              onEnabled: (value) =>
+                  setState(() => spell.setEnabled(enabled: value)),
+              onChooseDictionaries: () =>
+                  unawaited(_chooseSpellDictionaries(spell)),
             ),
         ],
       ),
