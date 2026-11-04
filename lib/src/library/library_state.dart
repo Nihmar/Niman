@@ -6,7 +6,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:niman/src/core/app_theme.dart';
 import 'package:niman/src/core/custom_theme.dart';
 import 'package:niman/src/core/frame_log.dart';
-import 'package:niman/src/core/isolate_gauge.dart';
 import 'package:niman/src/core/language.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/settings/custom_theme_repo.dart';
@@ -17,8 +16,6 @@ import 'package:niman/src/core/settings/legacy_library_settings.dart';
 import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/core/settings/library_config_repo.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
-import 'package:niman/src/core/temp_sweep_blocking.dart'
-    show sweepStaleTempFiles;
 import 'package:niman/src/core/text_scale.dart';
 import 'package:niman/src/core/theme.dart';
 import 'package:niman/src/core/week_start.dart';
@@ -38,6 +35,7 @@ import 'package:niman/src/library/index_progress_throttle.dart';
 import 'package:niman/src/library/indexing_status.dart';
 import 'package:niman/src/library/library_databases.dart';
 import 'package:niman/src/library/library_index_files.dart';
+import 'package:niman/src/library/library_open_chores.dart';
 import 'package:niman/src/library/library_registry.dart';
 import 'package:niman/src/library/library_sources.dart';
 import 'package:niman/src/library/library_widgets.dart';
@@ -47,7 +45,6 @@ import 'package:niman/src/library/rescan_scheduler.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/library/session_events.dart';
 import 'package:niman/src/library/session_update_checks.dart';
-import 'package:niman/src/library/trash_cleaner.dart';
 import 'package:niman/src/library/watch_batch_queue.dart';
 import 'package:niman/src/links/library_links.dart';
 import 'package:niman/src/links/suggester.dart';
@@ -196,6 +193,9 @@ final class LibraryController implements LibrarySession {
   /// The revisions and the streams that announce them.
   final SessionEvents _changes = SessionEvents();
   final AppLogger _log = const AppLogger(name: 'session');
+
+  /// The upkeep an open library gets behind its ready bump.
+  static const _chores = LibraryOpenChores();
   LibraryPhase _phase = LibraryPhase.none;
   String? _root;
   String? _lastError;
@@ -656,7 +656,7 @@ final class LibraryController implements LibrarySession {
     // opening state: the first flatten otherwise paid drift's statement
     // preparation and SQLite's page cache right as the shell built
     // (78-118 ms in the log, T-PP-22).
-    unawaited(_warmUpTree(indexer.dao, settings.treeSort));
+    unawaited(_chores.warmUpTree(indexer.dao, settings.treeSort));
     await AppSettingsRepo(appDb).setLastLibraryPath(abs);
     // The list the home screen shows (T-ML-04). Opening is what puts a
     // folder on it, so a library the app has never seen needs no
@@ -668,11 +668,11 @@ final class LibraryController implements LibrarySession {
     // Opening is when the trash empties itself, if the library asked
     // it to (issue #79) — behind the ready bump, because a folder full
     // of old deletions must not hold the library shut.
-    unawaited(_autoEmptyTrash(ops, settings.trashAutoEmptyDays));
+    unawaited(_chores.autoEmptyTrash(ops, settings.trashAutoEmptyDays));
     // And, like the trash empty, behind the ready bump: the temp files a
     // killed write left (issue #379) are swept on a background isolate so
     // a folder full of them never holds the library shut.
-    unawaited(_sweepStaleTempFiles(abs));
+    unawaited(_chores.sweepStaleTemps(abs));
     // The history's upkeep (#1148) too: an old `.history/` moved in, the
     // versions packed into deltas, what no log names collected.
     unawaited(ops.history.maintain());
@@ -1634,59 +1634,6 @@ final class LibraryController implements LibrarySession {
     } on Object catch (error) {
       // Transient watcher errors are covered by the periodic rescan.
       _log.warning('watch batch failed: $error');
-    }
-  }
-
-  /// Prepares the tree's first query off the critical path: the root's
-  /// first page in the library's order, through [NoteDao.warmUpTree], which
-  /// runs the very read the first flatten does (its `LIMIT` is bound).
-  ///
-  /// Not the root's every row, which is what it read until the tree began
-  /// to page (#1064) and went on reading after: 850 ms for a root of 200 000
-  /// notes, each row of it sent to this isolate to warm a statement nothing
-  /// ran (#1135).
-  Future<void> _warmUpTree(NoteDao dao, TreeSort sort) async {
-    try {
-      await dao.warmUpTree(sort: sort);
-    } on Object catch (error) {
-      _log.debug('tree warm-up failed ($error)');
-    }
-  }
-
-  /// Runs the automatic trash empty for a library that asked for one,
-  /// and swallows whatever it runs into: the library is open and usable
-  /// either way, and a trash that could not be emptied is not a reason to
-  /// fail the open behind the user's back.
-  Future<void> _autoEmptyTrash(NoteOperations ops, int days) async {
-    if (days <= 0) return;
-    try {
-      await autoEmptyTrash(ops, maxAgeDays: days);
-    } on Object catch (error) {
-      _log.error('auto-empty failed: $error');
-    }
-  }
-
-  /// Sweeps the stray `.niman-tmp-*` files a killed write left in the open
-  /// library (issue #379).
-  ///
-  /// Runs once per open, on a background isolate like the index walk: the
-  /// rename onto a target is the only thing that removes a write's temp, so
-  /// a process killed between the two leaves the temp behind, and nothing
-  /// else notices it — the walk and the sync both skip dot names. The age
-  /// guard in [sweepStaleTempFiles] keeps a write still in flight safe.
-  /// Whatever it runs into is logged and swallowed: the library is open and
-  /// usable either way.
-  Future<void> _sweepStaleTempFiles(String abs) async {
-    try {
-      final removed = await IsolateGauge.run(
-        () => sweepStaleTempFiles(abs),
-        'sweep temps "$abs"',
-      );
-      if (removed > 0) {
-        _log.info('swept $removed stale temp file(s) in $abs');
-      }
-    } on Object catch (error) {
-      _log.warning('temp sweep failed for $abs: $error');
     }
   }
 
