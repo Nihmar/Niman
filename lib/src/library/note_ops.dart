@@ -6,7 +6,6 @@ import 'dart:typed_data';
 import 'package:meta/meta.dart';
 import 'package:niman/src/core/file_holds.dart';
 import 'package:niman/src/core/files.dart';
-import 'package:niman/src/core/isolate_gauge.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/core/settings/library_config_repo.dart';
@@ -26,6 +25,7 @@ import 'package:niman/src/library/note_creation.dart';
 import 'package:niman/src/library/note_link_questions.dart';
 import 'package:niman/src/library/note_op_seams.dart';
 import 'package:niman/src/library/note_ops_blocking.dart';
+import 'package:niman/src/library/note_reads.dart';
 import 'package:niman/src/library/note_relocation.dart';
 import 'package:niman/src/library/note_renamer.dart';
 import 'package:niman/src/library/note_save_result.dart';
@@ -40,7 +40,6 @@ import 'package:niman/src/links/link_spot_slices.dart';
 import 'package:niman/src/links/note_finder.dart';
 import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/lint/lint_rule.dart';
-import 'package:niman/src/markdown/note_bytes.dart';
 import 'package:niman/src/markdown/note_references.dart';
 import 'package:niman/src/sync/sync_store.dart';
 import 'package:niman/src/todo/task_link_rewrites.dart';
@@ -542,78 +541,34 @@ final class NoteOps implements NoteOperations {
   /// became of it. What a test awaits to see the links rewritten.
   Future<void> get linkQuestion => _links.settled;
 
+  /// Reads the notes, whole or the parts a panel or a card shows.
+  late final NoteReads _reads = NoteReads(root: root, find: _mustFind);
+
   /// The text of the note at [path], decoded leniently (a note with a
   /// broken byte is still a note) and without its BOM.
   @override
-  Future<String> readNote(String path) async {
-    final bytes = await readNoteBytes(path);
-    final text = decodeNoteText(bytes);
-    return text.isNotEmpty && text.codeUnitAt(0) == 0xFEFF
-        ? text.substring(1)
-        : text;
-  }
+  Future<String> readNote(String path) => _reads.readNote(path);
 
   /// The note's bytes as the file holds them.
   @override
-  Future<Uint8List> readNoteBytes(String path) async {
-    await _mustFind(path);
-    return await File(_abs(path)).readAsBytes();
-  }
+  Future<Uint8List> readNoteBytes(String path) => _reads.readNoteBytes(path);
 
   /// The headings of the note at [path], read and outlined where the note
   /// lies — off the UI isolate (#491).
-  ///
-  /// The wikilink panel's rows after `#` are the note's whole outline, and
-  /// getting them means reading, decoding and walking the file: seconds on
-  /// a novel-length note, per keystroke if the panel paid it on the UI
-  /// isolate. The panel keeps the answer per revision, so this runs once
-  /// per target and not once per key.
-  Future<List<String>> noteHeadings(String path) async {
-    await _mustFind(path);
-    final abs = _abs(path);
-    return await IsolateGauge.run(
-      () => headingsOfNoteFile(abs),
-      'headings "$path"',
-    );
-  }
+  Future<List<String>> noteHeadings(String path) => _reads.noteHeadings(path);
 
   /// The block anchors of the note at [path] — its blocks that end with a
-  /// ` ^id` (#844) — read and walked where the note lies, off the UI isolate,
-  /// as [noteHeadings] reads the headings.
-  Future<List<BlockAnchor>> noteBlocks(String path) async {
-    await _mustFind(path);
-    final abs = _abs(path);
-    return await IsolateGauge.run(
-      () => blocksOfNoteFile(abs),
-      'blocks "$path"',
-    );
-  }
+  /// ` ^id` (#844) — read off the UI isolate.
+  Future<List<BlockAnchor>> noteBlocks(String path) => _reads.noteBlocks(path);
 
-  /// The beginning of the note at [path] for a preview card (#846): its first
-  /// [PreviewLimits.bytes] bytes, read and decoded where the note lies, off
-  /// the UI isolate. A novel-length note is not read whole to show a card.
-  Future<NotePreviewText> notePreview(String path) async {
-    await _mustFind(path);
-    final abs = _abs(path);
-    return await IsolateGauge.run(
-      () => previewTextOfNoteFile(abs),
-      'preview "$path"',
-    );
-  }
+  /// The beginning of the note at [path] for a preview card (#846), read
+  /// off the UI isolate.
+  Future<NotePreviewText> notePreview(String path) => _reads.notePreview(path);
 
   /// The links and embeds of the slice of the note at [path] that starts at
-  /// [from] — what a list of the notes that link to another reads a mention
-  /// from (#842) — read, decoded and parsed where the note lies, off the UI
-  /// isolate. A slice at a time, so the first mention costs a slice and not
-  /// the note (#1040).
-  Future<SpotSlice> noteLinkSpotSlice(String path, SpotCursor from) async {
-    await _mustFind(path);
-    final abs = _abs(path);
-    return await IsolateGauge.run(
-      () => linkSpotSliceOfFile(abs, from),
-      'link spots "$path"',
-    );
-  }
+  /// [from] (#842, #1040), read off the UI isolate.
+  Future<SpotSlice> noteLinkSpotSlice(String path, SpotCursor from) =>
+      _reads.noteLinkSpotSlice(path, from);
 
   /// Pins or unpins the note at [path] by editing its frontmatter.
   ///
