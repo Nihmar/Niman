@@ -19,6 +19,7 @@ import 'package:niman/src/templates/engine.dart';
 import 'package:niman/src/ui/action_sheet.dart';
 import 'package:niman/src/ui/journal/journal_calendar.dart';
 import 'package:niman/src/ui/journal/journal_day_events.dart';
+import 'package:niman/src/ui/journal/journal_dock_create_row.dart';
 import 'package:niman/src/ui/journal/journal_event_actions.dart';
 import 'package:niman/src/ui/journal/journal_event_editor.dart';
 import 'package:niman/src/ui/journal/journal_event_sheet.dart';
@@ -321,7 +322,10 @@ final class _JournalBrowserState extends State<JournalBrowser> {
         ] else ...[
           if (_picked && !entries.contains(_selected)) ...[
             const SizedBox(height: 12),
-            _dockCreateRow(context),
+            JournalDockCreateRow(
+              day: _selected,
+              onCreate: () => widget.onOpenDay(_selected, confirmed: true),
+            ),
           ],
           // The form sits where the calendar is, under it: a dialog would
           // go over the very thing the day was picked on (#712).
@@ -534,46 +538,6 @@ final class _JournalBrowserState extends State<JournalBrowser> {
   ) => scope == CalendarOccurrenceScope.all
       ? entry.line.date ?? _dayOfEntry(entry)
       : _dayOfEntry(entry);
-
-  /// The dock's offer for the empty day it picked (#712): the phone's
-  /// card and dialog in one row, under the calendar they belong to.
-  Widget _dockCreateRow(BuildContext context) {
-    final theme = Theme.of(context);
-    return Card.filled(
-      key: const Key('journal-dock-create'),
-      margin: EdgeInsets.zero,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    journalDayLabel(_selected),
-                    style: theme.textTheme.titleSmall,
-                  ),
-                  Text(
-                    AppStrings.journalNoEntry,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            FilledButton.icon(
-              key: const Key('journal-dock-create-button'),
-              onPressed: () => widget.onOpenDay(_selected, confirmed: true),
-              icon: const Icon(Icons.add, size: 18),
-              label: Text(AppStrings.actionCreate),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
   /// The phone's card for the picked day: open its entry, or make one.
   Widget _dayCard(BuildContext context, bool hasEntry) {
