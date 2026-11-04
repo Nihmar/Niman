@@ -26,59 +26,40 @@
 library;
 
 import 'dart:async';
-import 'dart:math' as math;
-import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:niman/src/core/frame_cost.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/theme_tokens.dart';
 import 'package:niman/src/editor/context_menu_items.dart';
 import 'package:niman/src/editor/editor_context_menu.dart';
-import 'package:niman/src/editor/highlight_style.dart';
 import 'package:niman/src/editor/highlighting.dart';
-import 'package:niman/src/editor/list_row.dart';
 import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/editor/outline.dart';
 import 'package:niman/src/editor/toolbar_item.dart';
 import 'package:niman/src/editor/typewriter_scroll.dart';
 import 'package:niman/src/links/dead_links.dart';
 import 'package:niman/src/links/suggester.dart';
-import 'package:niman/src/markdown/active_formats.dart';
 import 'package:niman/src/markdown/background_scan.dart';
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/block_scanner.dart';
 import 'package:niman/src/markdown/buffer_block_anchors.dart';
-import 'package:niman/src/markdown/callout.dart';
-import 'package:niman/src/markdown/column_layout.dart';
-import 'package:niman/src/markdown/div_syntax.dart';
-import 'package:niman/src/markdown/edit/bracket_pairs.dart';
 import 'package:niman/src/markdown/edit/caret_motion.dart';
 import 'package:niman/src/markdown/edit/caret_spot.dart';
 import 'package:niman/src/markdown/edit/edit_history.dart';
-import 'package:niman/src/markdown/edit/enter_edit.dart';
 import 'package:niman/src/markdown/edit/line_prefix.dart';
-import 'package:niman/src/markdown/edit/list_indent_edit.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/edit/source_find.dart';
 import 'package:niman/src/markdown/edit/source_input.dart';
 import 'package:niman/src/markdown/edit/source_shortcuts.dart';
-import 'package:niman/src/markdown/fence_body.dart';
 import 'package:niman/src/markdown/live_inlines.dart';
 import 'package:niman/src/markdown/note_references.dart';
 import 'package:niman/src/markdown/read_parser.dart';
 import 'package:niman/src/markdown/render/block_height_map.dart';
-import 'package:niman/src/markdown/render/block_heights.dart';
-import 'package:niman/src/markdown/render/callout_style.dart';
-import 'package:niman/src/markdown/render/code_copy.dart';
 import 'package:niman/src/markdown/render/content_clamp_physics.dart';
-import 'package:niman/src/markdown/render/dead_link_ranges.dart';
 import 'package:niman/src/markdown/render/fence_band_painter.dart';
 import 'package:niman/src/markdown/render/focus_return.dart';
 import 'package:niman/src/markdown/render/footnote_list.dart';
@@ -88,40 +69,53 @@ import 'package:niman/src/markdown/render/live_code_colors.dart';
 import 'package:niman/src/markdown/render/live_decorations.dart';
 import 'package:niman/src/markdown/render/live_hosts.dart';
 import 'package:niman/src/markdown/render/live_quote_content.dart';
-import 'package:niman/src/markdown/render/live_quote_runs.dart';
-import 'package:niman/src/markdown/render/live_run.dart';
-import 'package:niman/src/markdown/render/live_table_commands.dart';
-import 'package:niman/src/markdown/render/live_table_grid_tracker.dart';
-import 'package:niman/src/markdown/render/live_table_handles.dart';
-import 'package:niman/src/markdown/render/live_tables.dart';
-import 'package:niman/src/markdown/render/markdown_blocks_sliver.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
-import 'package:niman/src/markdown/render/math_text.dart';
-import 'package:niman/src/markdown/render/note_margins.dart';
-import 'package:niman/src/markdown/render/note_semantics.dart';
 import 'package:niman/src/markdown/render/scroll_anchor.dart';
 import 'package:niman/src/markdown/render/scrollbar_strip.dart';
-import 'package:niman/src/markdown/render/sliver_columns.dart';
-import 'package:niman/src/markdown/render/sliver_segments.dart';
+import 'package:niman/src/markdown/render/source_caret.dart';
+import 'package:niman/src/markdown/render/source_caret_blink.dart';
+import 'package:niman/src/markdown/render/source_caret_motion.dart';
+import 'package:niman/src/markdown/render/source_caret_rect.dart';
+import 'package:niman/src/markdown/render/source_caret_reveal.dart';
+import 'package:niman/src/markdown/render/source_code_copies.dart';
 import 'package:niman/src/markdown/render/source_context_menu.dart';
 import 'package:niman/src/markdown/render/source_folds.dart';
+import 'package:niman/src/markdown/render/source_geometry.dart';
+import 'package:niman/src/markdown/render/source_hit_test.dart';
 import 'package:niman/src/markdown/render/source_line.dart';
+import 'package:niman/src/markdown/render/source_line_marks.dart';
+import 'package:niman/src/markdown/render/source_live_lines.dart';
+import 'package:niman/src/markdown/render/source_menu_keys.dart';
+import 'package:niman/src/markdown/render/source_metrics.dart';
+import 'package:niman/src/markdown/render/source_overlays.dart';
+import 'package:niman/src/markdown/render/source_paragraphs.dart';
+import 'package:niman/src/markdown/render/source_pieces.dart';
+import 'package:niman/src/markdown/render/source_pointer.dart';
+import 'package:niman/src/markdown/render/source_row_slivers.dart';
+import 'package:niman/src/markdown/render/source_rows.dart';
+import 'package:niman/src/markdown/render/source_sections.dart';
+import 'package:niman/src/markdown/render/source_semantics.dart';
+import 'package:niman/src/markdown/render/source_styling.dart';
+import 'package:niman/src/markdown/render/source_table_hover.dart';
+import 'package:niman/src/markdown/render/source_table_keys.dart';
+import 'package:niman/src/markdown/render/source_task_boxes.dart';
 import 'package:niman/src/markdown/render/source_template_hint.dart';
 import 'package:niman/src/markdown/render/source_touch.dart';
+import 'package:niman/src/markdown/render/source_typing.dart';
 import 'package:niman/src/markdown/render/todo_block_scope.dart';
 import 'package:niman/src/markdown/render/wikilink_suggest.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/markdown/source_edit.dart';
 import 'package:niman/src/markdown/source_styler.dart';
 import 'package:niman/src/markdown/surface_controller.dart';
-import 'package:niman/src/markdown/table/markdown_table.dart';
-import 'package:niman/src/markdown/task_cascade.dart';
 import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/templates/check_state.dart';
 import 'package:niman/src/templates/template_commands.dart';
-import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/window_visibility.dart';
+
+export 'package:niman/src/markdown/render/source_pointer.dart'
+    show SourceLinkHover;
 
 /// A link the writer Ctrl+clicked: its token's kind (a wikilink or a Markdown
 /// link), its text as written, brackets and all, and — for a Markdown link —
@@ -357,32 +351,70 @@ final class MarkdownSourceView extends StatefulWidget {
   State<MarkdownSourceView> createState() => MarkdownSourceViewState();
 }
 
-/// A link the pointer is on with the opening modifier held (#846): its kind
-/// (a wikilink or a Markdown link), as written (`[[…]]`, `[…](…)`), the target
-/// a reference link resolved to when its source spells none, and where the
-/// pointer is (global).
-typedef SourceLinkHover = ({
-  TokenKind kind,
-  String raw,
-  String? href,
-  Offset position,
-});
-
 /// The source view's state, so a caller can ask where the caret is.
 final class MarkdownSourceViewState extends State<MarkdownSourceView> {
-  /// The colours: the read view's engine put on the source lines, kept
-  /// across rebuilds and moved along by every edit — O(change).
-  ///
-  /// Null while a long note is read in the background ([_restyle]): the
-  /// lines are drawn plain until it lands.
-  SourceStyler? _styler;
+  /// The colours: read in place or in the background, moved along by
+  /// every edit, and their scan carried on when an edit left it owed.
+  late final SourceStyling _styling = SourceStyling(
+    buffer: () => widget.buffer,
+    mounted: () => mounted,
+    readsInBackground: readsInBackground,
+    progressiveLines: () => progressiveLines,
+    landed: () {
+      setState(() {});
+      // The colours landing is also the formats landing: until they are
+      // read, the caret's line has no tokens and the toolbar would show
+      // every button dark on a note whose syntax the writer is inside.
+      _caret.publishActive(_caret.spot.value);
+      // And it is the caret's line landing: a heading, or a formula, is
+      // drawn at another height than the plain line the caret was measured
+      // over. The reading came in outside any edit, so nothing else asks
+      // for the caret to be measured again.
+      _measureCaretAfterFrame();
+    },
+    settled: () {
+      // A layout that found the scan owed drew the `columns` blocks
+      // stacked (#729): settled, it lays them out side by side.
+      if (_rows.runsOwed) setState(() {});
+    },
+  );
 
-  /// Counts the readings started, so one a later one overtook is dropped.
-  int _stylings = 0;
+  /// The colours ([SourceStyling.styler]): null while a long note is read
+  /// in the background, its lines drawn plain until it lands.
+  SourceStyler? get _styler => _styling.styler;
 
-  /// The heights the sliver places the rows with: one per line nobody has
-  /// folded away.
-  late BlockHeightMap _heights;
+  /// The rows the note is drawn in and the heights they are placed with:
+  /// the lines nobody folded away, a side-by-side block's in its opener's
+  /// row (#729).
+  late final SourceRows _rows = SourceRows(
+    buffer: () => widget.buffer,
+    live: () => widget.hideMarkers,
+    styler: () => _styler,
+    folds: _folds,
+    hosts: _hosts,
+    sectionEnd: _sections.endOf,
+    em: () => _metrics.em,
+    rowHeight: () => _metrics.rowHeight,
+    gap: () => _metrics.gap,
+    band: () => _metrics.band,
+    columnsPerLine: () => _metrics.columnsPerLine,
+    itemsIndent: _metrics.itemsIndent,
+  );
+
+  /// The heights the sliver places the rows with ([SourceRows.heights]).
+  BlockHeightMap get _heights => _rows.heights;
+
+  /// How many lines the rows' estimates asked about, for the test that holds
+  /// a note with a side-by-side block (#729) to the chunks a frame reaches.
+  @visibleForTesting
+  int get lineEstimates => _rows.lineEstimates;
+
+  /// Keeps the height map at the buffer's line count, after [edit]
+  /// ([SourceRows.sync]), and the revision this view has seen with it.
+  void _syncLines([SourceEdit? edit]) {
+    _seenRevision = widget.buffer.revision;
+    _rows.sync(edit);
+  }
 
   /// The colours of the code blocks `live` draws, highlighted a block at a
   /// time as the read view highlights them.
@@ -392,39 +424,23 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// as the blocks they are inside it, as the read view does.
   final LiveQuoteContent _quotes = LiveQuoteContent();
 
-  /// What line [index] is in its callout, when [block] — its quote — is one
-  /// (#279): the callout's style, and on the title line where its mark is.
-  LiveCallout? _calloutLine(int index, Block? block) {
-    final callout = _quotes.calloutOf(block, widget.buffer);
-    if (callout == null) return null;
-    final title = index == block!.startLine;
-    var markStart = 0;
-    var markEnd = 0;
-    String? label;
-    if (title) {
-      final text = widget.buffer.lineAt(index);
-      final prefix = BlockParser.quotePrefixLength(
-        text,
-        block.quoteDepth,
-        BlockParser.itemPrefixLength(block, text),
-      );
-      final rest = text.substring(prefix);
-      markStart = prefix + rest.length - rest.trimLeft().length;
-      markEnd = prefix + Callout.markLength(rest);
-      // No title written: the type's, drawn after the icon.
-      if (text.substring(markEnd).trim().isEmpty) label = callout.title;
-    }
-    return (
-      style: calloutStyleOf(callout.type),
-      title: title,
-      markStart: markStart,
-      markEnd: markEnd,
-      label: label,
-    );
-  }
-
-  /// The note's tables, laid out as the read view lays them out.
-  final LiveTables _tables = LiveTables();
+  /// The task boxes `live` draws: the one under a point, and its tick.
+  late final SourceTaskBoxes _taskBoxes = SourceTaskBoxes(
+    buffer: () => widget.buffer,
+    live: () => widget.hideMarkers,
+    caretLine: () => _caret.spot.value.line,
+    paragraphs: _paragraphs,
+    lineAt: _lineAt,
+    blockOf: (line) => _styler?.blockOf(line),
+    blocks: () => _styler?.blocks,
+    quotes: _quotes,
+    theme: () => widget.theme,
+    cascade: () => widget.cascadeChecklist,
+    selection: () => _selection,
+    seal: () => _history.seal(),
+    replace: (start, end, text, caret) =>
+        _replaceRange(start, end, text, caret: caret, follow: false),
+  );
 
   /// What the footnotes `live` ends the note with are parsed with.
   final ReadParser _footnoteParser = ReadParser();
@@ -451,21 +467,13 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// The folded heading sections; the rows are the lines they leave.
   final SourceFolds _folds = SourceFolds();
 
-  /// Where each heading's section ends, as far as it has been asked, for the
-  /// buffer revision [_sectionEndsRevision].
-  final Map<int, int?> _sectionEnds = <int, int?>{};
-  int _sectionEndsRevision = -1;
-
-  /// A press on a control `live` draws over the note — a fold arrow, a
-  /// diagram and its buttons — so the pointer going down under it places no
-  /// caret: the control answers the tap itself.
-  bool _controlPress = false;
-
-  /// The mouse press that went down opened a link ([_openLinkAt]), so the
-  /// click it ends as is spent: placing the caret where it was let go would
-  /// take the caret, and the view, back from wherever the link led — an
-  /// anchor in the same note is lines away.
-  bool _pressOpenedLink = false;
+  /// Where the sections those folds hide end, kept for the buffer's
+  /// revision: the tokenizer's question, as far as it has been asked.
+  late final SourceSections _sections = SourceSections(
+    buffer: () => widget.buffer,
+    blockOf: (line) => blockAt?.call(line),
+    tokensOf: (line) => _lineAt(line).tokens,
+  );
 
   /// The keyboard, wired to the buffer this view draws.
   late SourceInput _input;
@@ -475,23 +483,18 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   late FocusNode _focus;
   bool _ownsFocus = false;
 
-  /// The viewport height the last metrics change left: a smaller one, with
-  /// the bottom inset grown, is the keyboard opening over the note (#728).
-  double? _viewportHeight;
-
-  /// The view's bottom inset at the last metrics change, in physical pixels:
-  /// a viewport that shrank without it growing is the window made shorter
-  /// or turned, not the keyboard (#765).
-  double _bottomInset = 0;
-
-  /// Whether the writer took the scroll while the keyboard was coming up:
-  /// the reveal is theirs to call off, until the keyboard is asked for again
-  /// or goes down (#728).
-  bool _insetRevealOff = false;
-
-  /// Moves on when the writer starts a drag: a reveal still checking itself
-  /// over the frames after its jump stops there.
-  int _revealEpoch = 0;
+  /// The caret kept in view: after an edit or a jump, and when the
+  /// keyboard comes up over it (#728).
+  late final SourceCaretReveal _reveal = SourceCaretReveal(
+    scroll: () => _scroll,
+    mounted: () => mounted,
+    caretLine: () => _caretLineIndex,
+    anchorLine: () => widget.buffer.lineOf(_selection.anchor),
+    rowOf: _folds.rowOf,
+    lineBounds: _geometry.lineBounds,
+    bottomInsetNow: () => View.of(context).viewInsets.bottom,
+    typing: () => _focus.hasFocus && _input.isAttached,
+  );
 
   /// The edits that made the note what it is, and the way back.
   late EditHistory _history;
@@ -525,7 +528,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
 
   /// The note's headings, as the scan behind the colours has them, or null
   /// while there is no scan yet (a long note reads in the background, see
-  /// [_restyle]).
+  /// [SourceStyling.restyle]).
   ///
   /// The outline the note view publishes, from an answer it already holds.
   List<OutlineEntry>? get headings => _styler?.headings;
@@ -567,58 +570,85 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// the read pane takes instead of scanning the note again.
   DocumentScan? handOver() => _styler?.handOver();
 
-  /// The paragraph of each line a frame has built, so a tap can ask the line it
-  /// landed on where an offset is, and the caret can ask its own line for the
-  /// rectangle. Only mounted lines keep a key: a long scroll forgets the lines
-  /// it left, which is what keeps this from growing with the note.
-  final Map<int, GlobalKey> _lineKeys = <int, GlobalKey>{};
+  /// The paragraph of each line a frame has built, and of each fragment of
+  /// a wrapped table row: what a tap asks where an offset is, and the caret
+  /// asks for its rectangle.
+  final SourceParagraphs _paragraphs = SourceParagraphs();
 
-  /// The keys of a wrapped table row's fragments past its first, by line and
-  /// fragment: a row laid out in fitted columns is several paragraphs, and
-  /// the caret and a tap have to find the one they are in.
-  final Map<(int, int), GlobalKey> _fragmentKeys = <(int, int), GlobalKey>{};
-
-  /// Where the caret's fragment sits in the line's box, beyond the indent
-  /// the painter knows about: a wrapped table row draws its cells away from
-  /// the line's left edge and below its first visual line, so the caret
-  /// rectangle — measured in the fragment's own paragraph — is shifted by
-  /// this before it is painted.
-  final ValueNotifier<Offset> _caretShift = ValueNotifier<Offset>(Offset.zero);
-
-  /// The width the lines' text has, from the last frame that laid it out:
-  /// what a table wider than it is fitted to.
-  double _textWidth = 0;
-
-  /// The text scaler and the syntax colours of the last frame that laid the
-  /// note out: read in `build`, where the inherited widgets may be asked,
-  /// and reused by the layouts the caret and the gestures ask for outside
-  /// it — a table's pieces are needed before the first frame, when asking
-  /// `MediaQuery` would be an error, and after it this is the same value
-  /// that frame used.
-  TextScaler _scaler = TextScaler.noScaling;
-  SyntaxColors? _syntax;
-
-  /// The caret rectangle in the caret line's coordinates, recomputed after the
-  /// frame that laid that line out. A notifier rather than `setState`: neither
-  /// the blink nor the measurement may rebuild the note.
-  final ValueNotifier<Rect?> _caretRect = ValueNotifier<Rect?>(null);
-
-  /// Where the caret is, as the lines that draw it care: which line holds it,
-  /// and the run of non-whitespace it sits in on that line.
-  ///
-  /// One value rather than two notifiers, so a caret move that crosses a word
-  /// boundary repaints the two lines involved at once and a move *inside* a
-  /// run repaints nothing: a `ValueNotifier` whose new value compares equal
-  /// does not notify, and a run's own coordinates do not change while the
-  /// caret stays in it. That is what keeps the per-word reveal off the frame
-  /// budget — a keystroke inside a word tells no line anything.
-  final ValueNotifier<CaretSpot> _caretSpot = ValueNotifier<CaretSpot>(
-    const CaretSpot(0, 0, 0),
+  /// Where a point over the note lands in it: asked of the drawn lines,
+  /// and of the height map for a point no drawn line is under.
+  late final SourceHitTest _hits = SourceHitTest(
+    buffer: () => widget.buffer,
+    hosts: _hosts,
+    noteBox: () => _noteBox,
+    scroll: () => _scroll,
+    heights: () => _heights,
+    paragraphs: _paragraphs,
+    pieces: _pieces,
+    geometry: _geometry,
   );
 
-  /// Whether the caret is drawn (it blinks).
-  final ValueNotifier<bool> _caretOn = ValueNotifier<bool>(true);
-  Timer? _blink;
+  /// What the last frame laid the note out with — the pane's width, the
+  /// text's scale, the gutter, the text's width — and the lengths counted
+  /// from them.
+  late final SourceMetrics _metrics = SourceMetrics(
+    theme: () => widget.theme,
+    column: () => widget.column,
+    numberedLines: () =>
+        widget.showLineNumbers ? widget.buffer.lineCount : null,
+  );
+
+  /// The pieces a line is drawn in, and a table's rows as `live` lays them
+  /// out: what the caret, a tap and the table's grid ask.
+  late final SourcePieces _pieces = SourcePieces(
+    buffer: () => widget.buffer,
+    live: () => widget.hideMarkers,
+    styler: () => _styler,
+    caretSpot: () => _caret.spot.value,
+    paragraphs: _paragraphs,
+    tokensOf: (line) => _lineAt(line).tokens,
+    syntax: () => _metrics.syntax,
+    dark: () => widget.dark,
+    theme: () => widget.theme,
+    scaler: () => _metrics.scaler,
+    widthOf: _widthOf,
+  );
+
+  /// What a line is marked with beyond its colours: the selection, the
+  /// composing range, the spelling, the dead links, the find bar's matches.
+  late final SourceLineMarks _marks = SourceLineMarks(
+    buffer: () => widget.buffer,
+    selection: () => _selection,
+    composing: () => _input.composing,
+    spellCheck: () => widget.spellCheck,
+    tokensAt: _tokensAt,
+    deadLinks: () => widget.deadLinks,
+    linkHrefAt: (index, start) => _styler?.linkHrefAt(index, start),
+    findMatches: () => widget.findMatches,
+  );
+
+  /// The caret as the lines and the toolbar are told it: its spot, its
+  /// rectangle and its piece's shift, measured off its line's layout.
+  late final SourceCaret _caret = SourceCaret(
+    buffer: () => widget.buffer,
+    selection: () => _selection,
+    mounted: () => mounted,
+    fragmentAt: (line, local) => _pieces.fragmentAt(line, local),
+    width: () => _caretWidth,
+    caretOnLine: (line) => _typing.brackets.caretOnLine(line),
+    activeItems: () => widget.activeItems,
+    tokensOf: tokensOf,
+    measured: _sendGeometry,
+  );
+
+  /// The line the caret sits on, or -1.
+  int get _caretLineIndex => _caret.line;
+
+  /// Whether the caret is drawn, and the blink that turns it on and off:
+  /// only the focused note's, in a window someone can see (#512).
+  late final SourceCaretBlink _blink = SourceCaretBlink(
+    focused: () => _focus.hasFocus,
+  );
 
   /// The selection by touch (#291): its handles, its toolbar, and the
   /// gestures that bring them. Listened to from [initState]: the note
@@ -630,20 +660,44 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     offsetAt: offsetAt,
     requestKeyboard: _requestKeyboard,
     caretRectAt: _caretRectAt,
-    followsLastClick: (global) => _followsLastClick(global, DateTime.now()),
+    followsLastClick: (global) =>
+        _pointer.followsLastClick(global, DateTime.now()),
     clipboardItems: (dismiss) => _menu.clipboardItems(dismiss, touch: true),
     spellingItems: (dismiss) => _menu.spellingItems(dismiss),
     formats: _menuFormats,
     structure: () => widget.editorMenu?.call(),
-    table: () => _tableCommands()?.menu(),
+    table: () => _tableKeys.commands()?.menu(),
   );
 
   /// The touch selection's handles or toolbar came or went.
   void _onTouchChanged() => setState(() {});
 
-  /// The kind of the pointer that last went down: a long press or a tap by a
-  /// finger is a touch gesture, by a mouse it is not.
-  PointerDeviceKind? _lastPointerKind;
+  /// The mouse's press, drag and hover over the note, the taps a click
+  /// counts, and the cursor it shows.
+  late final SourcePointer _pointer = SourcePointer(
+    buffer: () => widget.buffer,
+    selection: () => _selection,
+    live: () => widget.hideMarkers,
+    mounted: () => mounted,
+    touch: _touch,
+    offsetAt: offsetAt,
+    onScrollbar: _onScrollbar,
+    hoverTable: _handles.hoverAt,
+    leaveTable: _handles.leave,
+    taskBoxAt: (global) => _taskBoxes.at(global) != null,
+    overTaskBox: _taskBoxes.over,
+    toggleTaskAt: _taskBoxes.toggleAt,
+    linkAt: linkAt,
+    openLink: () => widget.onOpenLink,
+    linkHover: () => widget.onLinkHover,
+    requestKeyboard: _requestKeyboard,
+    secondaryClick: _secondaryClick,
+    placeCaret: placeCaret,
+    extendTo: (offset) => _motion.moveTo(offset, extend: true),
+    select: _select,
+    inCell: (offset) => _motion.inCell(offset, 0),
+    holdSync: ({required hold}) => _input.holdSync = hold,
+  );
 
   /// Ticks on every caret move, so the note's semantics — its text around the
   /// caret, and the selection in it — follow without rebuilding the note.
@@ -671,9 +725,9 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     selectAll: selectAll,
     replace: _replaceRange,
     spellCheck: () => widget.spellCheck,
-    spellRanges: _spellRanges,
+    spellRanges: _marks.spellRanges,
     formats: _menuFormats,
-    table: () => _tableCommands()?.menu(),
+    table: () => _tableKeys.commands()?.menu(),
     structure: () => widget.editorMenu?.call(),
   );
 
@@ -688,41 +742,40 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
 
   /// The `+` handles of the table in play (#261): the one under the mouse
   /// on the desktop, the caret's on a phone.
-  final OverlayPortalController _tableOverlay = OverlayPortalController();
+  late final SourceTableHover _handles = SourceTableHover(
+    buffer: () => widget.buffer,
+    live: () => widget.hideMarkers,
+    mounted: () => mounted,
+    blockOf: (line) => _styler?.blockOf(line),
+    caretSpot: _caret.spot,
+    noteBox: () => _noteBox,
+    scroll: () => _scroll,
+    tableRowAt: (line, block, at) => _pieces.tableRowAt(line, block, at),
+    piecesOf: _pieces.of,
+    lineBox: _geometry.lineBox,
+    drawnHeightOf: _pieces.drawnHeightOf,
+    theme: () => widget.theme,
+    replace: (start, end, text, caret) =>
+        replaceText(start, end, text, caret: SelectionModel.at(caret)),
+  );
 
   /// The copy buttons of the code blocks on screen in `live` (#541).
-  final OverlayPortalController _codeOverlay = OverlayPortalController();
-
-  /// The first line of the table under the mouse, or null.
-  final ValueNotifier<int?> _tableHover = ValueNotifier<int?>(null);
-
-  /// Settles the grid the handles are built on against the frame that drew
-  /// the table.
-  late final LiveTableGridTracker _tableGridSettled = LiveTableGridTracker(
-    drawn: () {
-      final block = _tableInPlay;
-      return block == null ? null : _drawnTableGrid(block);
-    },
+  late final SourceCodeCopies _codeCopies = SourceCodeCopies(
+    buffer: () => widget.buffer,
+    live: () => widget.hideMarkers,
+    drawsTodo: () => TodoBlockScope.of(context) != null,
+    styler: () => _styler,
+    noteBox: () => _noteBox,
+    scroll: () => _scroll,
+    heights: () => _heights,
+    folds: _folds,
+    padding: () => widget.padding,
+    lineBox: _geometry.lineBox,
+    columnOfLine: _geometry.columnOfLine,
+    rightInset: () => _metrics.rightInset,
+    columnsLeft: _metrics.columnsLeft,
+    gap: () => _metrics.gap,
   );
-
-  /// The pointer over the note: the text's, or the hand's over a task box a
-  /// click ticks (#505). A notifier, not state, so crossing a box repaints the
-  /// pointer alone and never rebuilds the note.
-  final ValueNotifier<MouseCursor> _hoverCursor = ValueNotifier<MouseCursor>(
-    SystemMouseCursors.text,
-  );
-
-  /// Where the mouse last was over the note, or null when it left: the
-  /// opening modifier going down re-asks the cursor about it (#725).
-  Offset? _hoverPosition;
-
-  /// Whether the mouse is on one of the handles, off the table itself.
-  bool _overTableHandles = false;
-
-  /// Lets the handles go a moment after the mouse left the table: the move
-  /// from the table onto a handle leaves the note before it reaches the
-  /// handle, and letting go at once took the handle from under it.
-  Timer? _tableHoverClear;
 
   /// The template checker (T-TPL-09): the check run and armed on the note,
   /// the problems on a line, and the hint under the span the caret is on.
@@ -743,16 +796,16 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     selection: () => _selection,
     suggester: () => widget.wikilinkSuggester,
     lineRead: (line) => _tokensAt(line) != null,
-    inCodeAt: _inCodeAt,
+    inCodeAt: _typing.inCodeAt,
     headings: () => headings,
     blocks: () => _blockAnchors.read(),
     notePath: () => widget.notePath,
     replace: (start, end, text, caret) =>
         _replaceRange(start, end, text, caret: caret),
-    ensureCaretVisible: _ensureCaretVisible,
+    ensureCaretVisible: _reveal.ensureCaretVisible,
     caretRect: () => _caretRectAt(_selection.extent) ?? caretRect,
     noteBox: () => _noteBox,
-    caretMoves: () => Listenable.merge([_scroll, _caretRect]),
+    caretMoves: () => Listenable.merge([_scroll, _caret.rect]),
   );
 
   /// The note's block anchors, for a `[[#^` link to the note being edited
@@ -771,18 +824,18 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     // Always up: they draw nothing while nothing is in play (#261).
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      _tableOverlay.show();
+      _handles.overlay.show();
       _hints.overlay.show();
       // The copy buttons ride the note's paint: off stage the pane hides,
       // and they go with it rather than drawing over the pane that is on.
-      _syncCodeOverlay();
+      _codeCopies.sync(onStage: widget.onStage);
       // The first check, off the build: the problem marks are on the note the
       // frame after it opens, and nothing waited for them (#316).
       _hints
         ..refresh()
         ..run();
     });
-    _restyle();
+    _styling.restyle();
     _suggest.addListener(_onSuggestChanged);
     _touch.addListener(_onTouchChanged);
     _menu.addListener(_onMenuChanged);
@@ -790,7 +843,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     _ownsScroll = widget.controller == null;
     _focus = widget.focusNode ?? FocusNode();
     _ownsFocus = widget.focusNode == null;
-    _heights = _map();
+    _rows.rebuild();
     _history = widget.history ?? widget.surface?.history ?? EditHistory();
     _ownSelection = widget.surface?.initialSelection ?? _ownSelection;
     _seenRevision = widget.buffer.revision;
@@ -803,7 +856,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     widget.mathCache?.addListener(_onMathTypeset);
     // The hand over a Ctrl-clickable link appears when the modifier goes
     // down, and goes when it comes up, without waiting for a move (#725).
-    HardwareKeyboard.instance.addHandler(_modifierChanged);
+    HardwareKeyboard.instance.addHandler(_pointer.modifierChanged);
     // A window hidden to the tray draws nothing (#512): the caret blink is
     // its own frame source and stops while it is off screen.
     WindowVisibility.shown.addListener(_onWindowShown);
@@ -822,15 +875,15 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     buffer: widget.buffer,
     reach: _inputReach,
     onRecord: _history.record,
-    onNewline: _newline,
-    onTyped: _typed,
+    onNewline: _typing.newline,
+    onTyped: _typing.typed,
     onTokenizer: (edit, buffer) {
       // The edit path's clock: opened here and closed by `onEdited`, the
       // two ends of the same `_replace` (#316) — and only when a profiling
       // round asked for the frame's parts (#362): a release build reads no
       // clock on the path it would be measuring.
       _cost.startEdit();
-      _styleEdited(edit);
+      _styling.edited(edit);
     },
     selection: () => _selection,
     onSelection: (next) {
@@ -846,7 +899,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
         _ownSelection = _ownSelection.clampTo(widget.buffer.length);
       });
       _scheduleCaret();
-      _ensureCaretVisible();
+      _reveal.ensureCaretVisible();
       _notifyChanged(edit);
       _cost.endEdit();
       _suggest.refresh(typed: true);
@@ -882,16 +935,6 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// one's could not see it: it is the same object.)
   int _seenRevision = 0;
 
-  /// Shows or hides the code blocks' copy buttons with the pane: they are
-  /// overlay children, so an off stage pane must take them away itself.
-  void _syncCodeOverlay() {
-    if (widget.onStage) {
-      _codeOverlay.show();
-    } else {
-      _codeOverlay.hide();
-    }
-  }
-
   @override
   void didUpdateWidget(MarkdownSourceView oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -899,7 +942,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       // Show and hide are a rebuild of the overlay portal, and the portal
       // refuses one during a build: the pane's frame is enough to wait.
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) _syncCodeOverlay();
+        if (mounted) _codeCopies.sync(onStage: widget.onStage);
       });
     }
     // The note became a template, or stopped being one: its lines are
@@ -961,10 +1004,10 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       _ownSelection =
           widget.surface?.initialSelection ?? const SelectionModel.at(0);
       _input = _makeInput();
-      _brackets.clear();
-      _restyle();
+      _typing.brackets.clear();
+      _styling.restyle();
       _folds.clear();
-      _heights = _map();
+      _rows.rebuild();
       _seenRevision = widget.buffer.revision;
       // Another note to check: the first answer is read off it, not off the
       // one it replaced.
@@ -979,9 +1022,9 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       // is clamped into whatever replaced it — and its offsets are the ones
       // read from the text that went, so the panel goes with them (#494).
       _suggest.dropInUpdate();
-      _restyle();
+      _styling.restyle();
       _folds.clear();
-      _heights = _map();
+      _rows.rebuild();
       _seenRevision = widget.buffer.revision;
       _ownSelection = _ownSelection.clampTo(widget.buffer.length);
       _hints.schedule();
@@ -1014,10 +1057,8 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
 
   @override
   void dispose() {
-    _tableHoverClear?.cancel();
-    _tableHover.dispose();
-    _tableGridSettled.dispose();
-    _hoverCursor.dispose();
+    _handles.dispose();
+    _pointer.dispose();
     widget.surface?.detachView(this);
     widget.spellCheck?.removeListener(_onSpellingChanged);
     widget.templateCheck?.removeListener(_onSpellingChanged);
@@ -1032,22 +1073,19 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     if (_ownsFocus) _focus.dispose();
     WindowVisibility.shown.removeListener(_onWindowShown);
     _focusReturn.dispose();
-    _blink?.cancel();
-    _scanSlice?.cancel();
+    _blink.dispose();
+    _styling.dispose();
     _typewriter.dispose();
     _semanticsTick.dispose();
-    _caretRect.dispose();
-    _caretShift.dispose();
+    _caret.dispose();
     _footnoteMath.dispose();
-    _caretSpot.dispose();
-    _caretOn.dispose();
     _touch
       ..removeListener(_onTouchChanged)
       ..dispose();
     _menu
       ..removeListener(_onMenuChanged)
       ..dispose();
-    HardwareKeyboard.instance.removeHandler(_modifierChanged);
+    HardwareKeyboard.instance.removeHandler(_pointer.modifierChanged);
     if (_ownsScroll) _scroll.dispose();
     super.dispose();
   }
@@ -1069,17 +1107,6 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// again, in the colours the answer gives them.
   void _onDeadLinksChanged() {
     if (mounted) setState(() {});
-  }
-
-  /// The links of line [index] that name nothing, local to the line.
-  List<TextRange> _deadLinksIn(int index, StyledLine styled) {
-    final dead = widget.deadLinks?.value;
-    if (dead == null || dead.isEmpty) return const <TextRange>[];
-    return deadLinkRanges(
-      styled,
-      dead,
-      hrefOf: (start) => _styler?.linkHrefAt(index, start),
-    );
   }
 
   /// A formula was typeset, or failed to be: the lines that concealed their
@@ -1133,117 +1160,25 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// The caret's rectangle in the note's own coordinates, or null before the
   /// frame that measured it.
   Rect? get caretRect {
-    final rect = _caretRect.value;
+    final rect = _caret.rect.value;
     final line = _caretLineIndex;
     if (rect == null || line < 0) return null;
     final local = _selection.extent - widget.buffer.offsetOfLine(line);
-    final (_, paragraph) = _fragmentAt(line, local);
+    final (_, paragraph) = _pieces.fragmentAt(line, local);
     if (paragraph == null || !paragraph.attached) return null;
     return rect.shift(paragraph.localToGlobal(Offset.zero));
   }
 
   /// The offset a tap at [global] lands on, or null when it lands outside a
   /// line.
-  int? offsetAt(Offset global) =>
-      _paintedOffsetAt(global) ?? _mappedOffsetAt(global);
-
-  /// The offset under [global] on a line a frame has drawn, asked of the lines
-  /// themselves — their paragraphs know where they were painted, so no map
-  /// has to agree with them — or null when no drawn line is under it.
-  int? _paintedOffsetAt(Offset global) {
-    final x = _hosts.layouts.isEmpty
-        ? null
-        : _noteBox?.globalToLocal(global).dx;
-    for (final entry in _lineKeys.entries) {
-      final line = entry.key;
-      if (line >= widget.buffer.lineCount) continue;
-      // Side by side, two columns' lines hold the same height: a line of a
-      // column holds a point only across its column (#729).
-      if (x != null && !_inColumnOf(line, x)) continue;
-      final pieces = _piecesOf(line);
-      if (pieces.length == 1) {
-        final object = _renderOf(pieces.first.key);
-        if (object == null) continue;
-        final local = object.globalToLocal(global);
-        if (local.dy < 0 || local.dy >= object.size.height) continue;
-        return widget.buffer.offsetOfLine(line) +
-            pieces.first.start +
-            object.getPositionForOffset(local).offset;
-      }
-      // A wrapped table row: the piece the point is in, which of the row's
-      // several paragraphs it is. A point in none of them — the room
-      // between the columns, or below the row — is not this line's: the
-      // next one is asked, and the height map answers for a point no drawn
-      // line holds at all.
-      final hit = _pieceAt(pieces, global);
-      if (hit == null) continue;
-      return widget.buffer.offsetOfLine(line) +
-          hit.piece.start +
-          hit.paragraph.getPositionForOffset(hit.local).offset;
-    }
-    return null;
-  }
-
-  /// Whether [x], the note box's, is across the column line [line] is
-  /// drawn in, when it is a side-by-side column's: the gap between two
-  /// columns is split between them, and a row's first and last columns
-  /// reach its edges.
-  bool _inColumnOf(int line, double x) {
-    final host = _folds.hostOf(line);
-    final layout = host == null ? null : _hosts.openedOn(host);
-    if (layout == null) return true;
-    final column = layout.run.columnOf(line);
-    if (column < 0) return true;
-    final row = layout.rows.firstWhere((row) => row.contains(column));
-    final left = _columnsLeft(layout) + LiveHosts.leftOf(layout, column, _gap);
-    final from = column == row.first
-        ? double.negativeInfinity
-        : left - _gap / 2;
-    final to = column == row.last
-        ? double.infinity
-        : left + layout.widths[column] + _gap / 2;
-    return x >= from && x < to;
-  }
-
-  /// The offset under [global] as the height map places the lines: for a
-  /// point no drawn line is under — above the first, below the last.
-  int? _mappedOffsetAt(Offset global) {
-    final box = _noteBox;
-    if (box == null || _heights.length == 0) return null;
-    // The map says which line a y falls in — above the first line is the
-    // first, below the last is the last, so a tap under a short note puts the
-    // caret at its end rather than nowhere.
-    final point = box.globalToLocal(global);
-    final line = _lineAtY(point.dy + _scroll.offset, point.dx);
-    final pieces = _piecesOf(line);
-    // The point in the *paragraph's own* coordinates, from its own transform:
-    // the insets, the gutter and a live-mode indent are all in that transform,
-    // so none of them has to be subtracted by hand. (Doing it by hand
-    // subtracted the gutter twice, and the caret landed a gutter's width left
-    // of the finger.)
-    if (pieces.length > 1) {
-      final hit = _pieceUnder(pieces, global);
-      if (hit == null) return null;
-      return widget.buffer.offsetOfLine(line) +
-          hit.piece.start +
-          hit.paragraph.getPositionForOffset(hit.local).offset;
-    }
-    final paragraph = _renderOf(pieces.first.key);
-    if (paragraph == null || !paragraph.attached) return null;
-    final position = paragraph.getPositionForOffset(
-      paragraph.globalToLocal(global),
-    );
-    return widget.buffer.offsetOfLine(line) +
-        pieces.first.start +
-        position.offset;
-  }
+  int? offsetAt(Offset global) => _hits.offsetAt(global);
 
   /// Scrolls so [line] is at the top, as far as the map knows.
   void jumpToLine(int line) {
     if (line < 0 || line >= lineCount || !_scroll.hasClients) return;
-    _reshapeRows(() => _folds.reveal(line));
+    _rows.reshape(() => _folds.reveal(line));
     _scroll.jumpTo(
-      (_lineBox(line).top - widget.padding.top).clamp(
+      (_geometry.lineBox(line).top - widget.padding.top).clamp(
         0.0,
         _scroll.position.maxScrollExtent,
       ),
@@ -1282,9 +1217,9 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     _history.clear();
     // The panel holds offsets into the text that went (#494).
     _suggest.close();
-    _restyle();
+    _styling.restyle();
     _folds.clear();
-    _heights = _map();
+    _rows.rebuild();
     _seenRevision = buffer.revision;
     setState(() => _ownSelection = _ownSelection.clampTo(buffer.length));
     _input.sendSelection();
@@ -1311,9 +1246,9 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     // touched, and the tokenizer and the map follow those lines.
     final edit = _history.lastEdit;
     if (edit != null) {
-      _styleEdited(edit);
+      _styling.edited(edit);
     } else {
-      _restyle();
+      _styling.restyle();
     }
     _syncLines(edit);
     // The word count follows the same edit; the undo record is the one it
@@ -1328,7 +1263,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     widget.onSelection?.call(_ownSelection);
     _input.sendSelection();
     _scheduleCaret();
-    _ensureCaretVisible();
+    _reveal.ensureCaretVisible();
     // An undo is an edit no keystroke made: the panel is read again off the
     // text it left — it follows a link still there and closes on one gone
     // (#494).
@@ -1341,97 +1276,39 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// syntax of its own (#579). O(log blocks) a line.
   int? _verbatimQuotes(int line) => verbatimQuotesOf(blockAt?.call(line));
 
+  /// Where the caret goes when the keys move it: by a logical motion, by
+  /// visual rows, by a page.
+  late final SourceCaretMotion _motion = SourceCaretMotion(
+    buffer: () => widget.buffer,
+    selection: () => _selection,
+    live: () => widget.hideMarkers,
+    mounted: () => mounted,
+    blockOf: (line) => _styler?.blockOf(line),
+    fenceOf: _fenceOf,
+    folds: _folds,
+    hosts: _hosts,
+    noteBox: () => _noteBox,
+    scroll: () => _scroll,
+    caretRect: () => caretRect,
+    caretLine: () => _caretLineIndex,
+    paintedOffsetAt: _hits.paintedOffsetAt,
+    mappedOffsetAt: _hits.mappedOffsetAt,
+    paragraphAt: _paragraphs.paragraphAt,
+    band: () => _metrics.band,
+    gap: () => _metrics.gap,
+    rowHeight: () => _metrics.rowHeight,
+    verbatimQuotes: _verbatimQuotes,
+    apply: _applySelection,
+  );
+
   /// Moves the caret by [motion], the logical motions the key table calls.
-  void moveCaretBy(CaretMotion motion, {bool extend = false}) {
-    var next = moveCaret(
-      _selection,
-      motion,
-      buffer: widget.buffer,
-      extend: extend,
-      verbatimQuotes: _verbatimQuotes,
-    );
-    final into = switch (motion) {
-      CaretMotion.characterLeft || CaretMotion.wordLeft => -1,
-      CaretMotion.characterRight || CaretMotion.wordRight => 1,
-      // Home goes to the row's first cell, End to its last one.
-      CaretMotion.lineStart || CaretMotion.lineTextStart => 1,
-      CaretMotion.lineEnd => -1,
-      CaretMotion.documentStart => 1,
-      CaretMotion.documentEnd => -1,
-    };
-    final line =
-        motion == CaretMotion.lineStart ||
-        motion == CaretMotion.lineTextStart ||
-        motion == CaretMotion.lineEnd;
-    var extent = _inCell(next.extent, into, keepLine: line);
-    // A fence out of the caret's reach is no stop (#729): the caret steps
-    // over it, in the direction it travels — Right at a column's last
-    // character goes to the next column's first. Home at the start of a
-    // column's first line steps onto the column's opener, the keyboard's
-    // way to its width.
-    if (!line &&
-        motion != CaretMotion.documentStart &&
-        motion != CaretMotion.documentEnd) {
-      extent = _overFences(_selection.extent, extent, into);
-    } else if (motion == CaretMotion.lineStart ||
-        motion == CaretMotion.lineTextStart) {
-      extent = _homeOntoOpener(_selection.extent, extent);
-    }
-    if (extent != next.extent) {
-      next = extend
-          ? SelectionModel(anchor: next.anchor, extent: extent)
-          : SelectionModel.at(extent);
-    }
-    _applySelection(next, reveal: true);
-  }
+  void moveCaretBy(CaretMotion motion, {bool extend = false}) =>
+      _motion.moveBy(motion, extend: extend);
 
-  /// Whether line [line] is one `live` draws as nothing to stop on (#729):
-  /// a fence line's band, or a blank line between two side-by-side
-  /// columns, which no column draws.
-  bool _passedOver(int line) {
-    if (!widget.hideMarkers || line < 0 || line >= lineCount) return false;
-    final block = _styler?.blockOf(line);
-    if (block == null) return false;
-    if (_fenceOf(line, block) != null) return true;
-    final host = _folds.hostOf(line);
-    final layout = host == null ? null : _hosts.openedOn(host);
-    return layout != null && layout.run.columnOf(line) < 0;
-  }
-
-  /// Where a caret going [direction]-wards from [from] to [to] lands: [to],
-  /// unless that is on a line [_passedOver] the caret was not on, and then
-  /// the first character past the run of such lines that way.
-  int _overFences(int from, int to, int direction) {
-    if (!widget.hideMarkers || direction == 0) return to;
-    final buffer = widget.buffer;
-    final start = buffer.lineOf(from);
-    var line = buffer.lineOf(to);
-    if (line == start || !_passedOver(line)) return to;
-    while (_passedOver(line) && line != start) {
-      final next = line + (direction > 0 ? 1 : -1);
-      if (next < 0 || next >= lineCount) return to;
-      line = next;
-    }
-    return direction > 0
-        ? buffer.offsetOfLine(line)
-        : buffer.offsetOfLine(line) + buffer.lineLengthAt(line);
-  }
-
-  /// Where Home from [from] lands, when [to] is where it would: the end of
-  /// a column's opener, revealed, when the caret is already at the start
-  /// of the column's first line (#729).
-  int _homeOntoOpener(int from, int to) {
-    if (!widget.hideMarkers) return to;
-    final buffer = widget.buffer;
-    final line = buffer.lineOf(from);
-    if (line == 0 || from != buffer.offsetOfLine(line)) return to;
-    final above = _styler?.blockOf(line - 1);
-    if (above?.divRole != DivRole.opensColumn ||
-        _fenceOf(line - 1, above) == null) {
-      return to;
-    }
-    return buffer.offsetOfLine(line - 1) + buffer.lineLengthAt(line - 1);
-  }
+  /// Moves the caret [rows] visual rows up (negative) or down, keeping its
+  /// horizontal place ([SourceCaretMotion.moveVertically]).
+  void moveCaretVertically(int rows, {bool extend = false}) =>
+      _motion.moveVertically(rows, extend: extend);
 
   /// The source line at the top of the view, and how far into its rows
   /// ([ScrollAnchor]). Null while there is nothing drawn to ask.
@@ -1439,8 +1316,8 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     if (!_scroll.hasClients || _heights.length == 0) return null;
     final y = _scroll.offset - widget.padding.top;
     if (y <= 0) return (line: 0, fraction: 0.0);
-    final line = _lineAtY(_scroll.offset);
-    final box = _lineBox(line);
+    final line = _geometry.lineAtY(_scroll.offset);
+    final box = _geometry.lineBox(line);
     final into = box.height > 0 ? (_scroll.offset - box.top) / box.height : 0.0;
     return (line: line, fraction: into.clamp(0.0, 1.0));
   }
@@ -1455,7 +1332,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// again after each frame that measured them, as long as that moves it.
   void showAnchor(ScrollAnchor anchor, {int attempt = 0}) {
     if (!_scroll.hasClients || lineCount == 0) return;
-    final box = _lineBox(anchor.line.clamp(0, lineCount - 1));
+    final box = _geometry.lineBox(anchor.line.clamp(0, lineCount - 1));
     final atTop = anchor.line == 0 && anchor.fraction == 0;
     final offset = atTop
         ? 0.0
@@ -1472,237 +1349,6 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) showAnchor(anchor, attempt: attempt + 1);
     });
-  }
-
-  /// Moves the caret [rows] visual rows up (negative) or down, keeping its
-  /// horizontal place.
-  ///
-  /// This is the motion that needs the *layout* and not the note: a wrapped
-  /// paragraph is one source line and many screen rows, and which row a press
-  /// of
-  /// the down key lands on depends on where every character was drawn. So the
-  /// answer comes from the same two questions the caret itself does — where the
-  /// caret is (`getOffsetForCaret`) and which offset a point lands on
-  /// (`getPositionForOffset`) — asked of the paragraphs that drew the rows,
-  /// with
-  /// the height map saying which line a y falls in.
-  void moveCaretVertically(int rows, {bool extend = false}) {
-    final caret = caretRect;
-    if (caret == null || rows == 0) return;
-    // The caret's own row is the row height — its line's, at the scale it is
-    // drawn at — and the point is the middle of the row [rows] away, so a
-    // boundary never decides which row it is.
-    var point = Offset(caret.center.dx, caret.center.dy + rows * caret.height);
-    final caretLine = _caretLineIndex;
-    // At a side-by-side column's edge the motion follows the source: on
-    // to the next column, or out of the block (#729).
-    final edge = _acrossColumns(caretLine, point, rows, caret);
-    if (edge != null) {
-      _moveCaretTo(edge, extend: extend);
-      return;
-    }
-    var offset = _paintedOffsetAt(point);
-    // A fence's band is no row to stop on: the point goes on past it.
-    for (
-      var step = 0;
-      step < 4 &&
-          offset != null &&
-          widget.buffer.lineOf(offset) != caretLine &&
-          _passedOver(widget.buffer.lineOf(offset));
-      step++
-    ) {
-      point = point.translate(0, rows.sign * _band);
-      offset = _paintedOffsetAt(point);
-    }
-    if (offset != null) {
-      _moveCaretTo(offset, extend: extend);
-      return;
-    }
-    // The row is not drawn: move the note under the caret by as much, and ask
-    // the line that is there once the frame has built it.
-    if (!_scroll.hasClients) return;
-    final from = _scroll.offset;
-    final to = (from + rows * caret.height).clamp(
-      0.0,
-      _scroll.position.maxScrollExtent,
-    );
-    if (to == from) {
-      // Nothing further in that direction: the caret goes to the note's end.
-      moveCaretBy(
-        rows < 0 ? CaretMotion.documentStart : CaretMotion.documentEnd,
-        extend: extend,
-      );
-      return;
-    }
-    _scroll.jumpTo(to);
-    final shifted = point - Offset(0, to - from);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      final landed = _paintedOffsetAt(shifted) ?? _mappedOffsetAt(shifted);
-      if (landed != null) _moveCaretTo(landed, extend: extend);
-    });
-    WidgetsBinding.instance.scheduleFrame();
-  }
-
-  /// Where Up or Down — [rows] rows, the point it asks being [point] —
-  /// takes a caret on [line], in [caret], when that line is in a
-  /// side-by-side column and the point is past the column's own lines: the
-  /// next column's first line going down, the previous one's last going
-  /// up, at the same distance from the column's left edge; past the last
-  /// column the line after the block, past the first the line before it.
-  /// Null when the motion stays in the column, or the line is in none.
-  int? _acrossColumns(int line, Offset point, int rows, Rect caret) {
-    final host = line < 0 ? null : _folds.hostOf(line);
-    final layout = host == null ? null : _hosts.openedOn(host);
-    final box = _noteBox;
-    if (layout == null || box == null) return null;
-    final run = layout.run;
-    final column = run.columnOf(line);
-    if (column < 0) return null;
-    final landed = _paintedOffsetAt(point);
-    if (landed != null) {
-      final at = widget.buffer.lineOf(landed);
-      if (run.columnOf(at) == column && !_passedOver(at)) return null;
-    } else {
-      // Not drawn: past the column's lines only if its first or last
-      // line is the caret's.
-      final lines = run.columns[column];
-      final first = _firstOf(lines, forward: true);
-      final last = _firstOf(lines, forward: false);
-      if (rows > 0 ? line != last : line != first) return null;
-    }
-    final down = rows > 0;
-    final next = column + (down ? 1 : -1);
-    final int target;
-    double? x;
-    if (next < 0 || next >= run.columns.length) {
-      target = down ? run.end : run.start - 1;
-      if (target < 0 || target >= lineCount) return null;
-      x = box.globalToLocal(caret.center).dx;
-    } else {
-      target = _firstOf(run.columns[next], forward: down);
-      final from = LiveHosts.leftOf(layout, column, _gap);
-      final to = LiveHosts.leftOf(layout, next, _gap);
-      x = box.globalToLocal(caret.center).dx - from + to;
-    }
-    return _offsetOnLine(target, x, top: down);
-  }
-
-  /// The first line of [column] a caret stops on, going [forward], or its
-  /// last going back: past its fences.
-  int _firstOf(LiveColumn column, {required bool forward}) {
-    if (forward) {
-      var line = column.start;
-      while (line < column.end - 1 && _passedOver(line)) {
-        line++;
-      }
-      return line;
-    }
-    var line = column.end - 1;
-    while (line > column.start && _passedOver(line)) {
-      line--;
-    }
-    return line;
-  }
-
-  /// The offset on [line] at [x], the note box's, on its first visual row
-  /// ([top]) or its last; the line's start or end when it is not drawn.
-  int _offsetOnLine(int line, double x, {required bool top}) {
-    final buffer = widget.buffer;
-    final paragraph = _paragraphAt(line);
-    final box = _noteBox;
-    if (paragraph == null || !paragraph.attached || box == null) {
-      return top
-          ? buffer.offsetOfLine(line)
-          : buffer.offsetOfLine(line) + buffer.lineLengthAt(line);
-    }
-    final global = box.localToGlobal(Offset(x, 0));
-    final local = paragraph.globalToLocal(global);
-    final y = top ? 1.0 : paragraph.size.height - 1;
-    return buffer.offsetOfLine(line) +
-        paragraph.getPositionForOffset(Offset(local.dx, y)).offset;
-  }
-
-  /// Where the caret goes from [offset] in `live`: [offset] itself, unless
-  /// it is in a table's room — the pipes and spaces round the cells, or the
-  /// delimiter row, which are drawn as nothing — and then the nearest
-  /// cell's text [direction]-wards (`LiveTables.cellColumn`): past the
-  /// row's end onto the next line going forward, back onto the previous
-  /// one going back, unless [keepLine] keeps it on its row.
-  int _inCell(int offset, int direction, {bool keepLine = false}) {
-    if (!widget.hideMarkers) return offset;
-    final buffer = widget.buffer;
-    var at = offset;
-    while (true) {
-      final line = buffer.lineOf(at);
-      if (line < 0 || line >= buffer.lineCount) return offset;
-      if (_styler?.blockOf(line)?.kind != BlockKind.table) return at;
-      final start = buffer.offsetOfLine(line);
-      final column = LiveTables.cellColumn(
-        buffer.lineAt(line),
-        at - start,
-        direction,
-      );
-      if (column != null) return start + column;
-      if (direction == 0 || keepLine) return at;
-      if (direction > 0) {
-        if (line + 1 >= buffer.lineCount) return at;
-        at = buffer.offsetOfLine(line + 1);
-      } else {
-        if (line == 0) return at;
-        at = buffer.offsetOfLine(line - 1) + buffer.lineLengthAt(line - 1);
-      }
-    }
-  }
-
-  /// Puts the caret at [offset] — extending the selection with [extend] — and
-  /// tells everyone who needs to know.
-  void _moveCaretTo(int offset, {bool extend = false}) {
-    final to = _inCell(offset, 0);
-    _applySelection(
-      extend
-          ? SelectionModel(anchor: _selection.anchor, extent: to)
-          : SelectionModel.at(to),
-      reveal: true,
-    );
-  }
-
-  /// The selected text, or null when the selection is a caret.
-  String? get selectedText {
-    final selection = _selection;
-    if (selection.isCollapsed) return null;
-    return widget.buffer.substring(selection.start, selection.end);
-  }
-
-  /// Copies the selection to the platform's clipboard.
-  Future<void> copySelection() async {
-    final text = selectedText;
-    if (text == null) return;
-    await Clipboard.setData(ClipboardData(text: text));
-  }
-
-  /// Copies the selection and removes it, in one undo step with the removal.
-  Future<void> cutSelection() async {
-    final text = selectedText;
-    if (text == null) return;
-    await Clipboard.setData(ClipboardData(text: text));
-    final selection = _selection;
-    _replaceRange(selection.start, selection.end, '');
-  }
-
-  /// Inserts the clipboard's text at the caret, replacing the selection —
-  /// unless [MarkdownSourceView.onPaste] takes the clipboard first.
-  Future<void> paste() async {
-    final hook = widget.onPaste;
-    if (hook != null && await hook()) return;
-    if (!mounted) return;
-    final data = await Clipboard.getData(Clipboard.kTextPlain);
-    final text = data?.text;
-    if (text == null || text.isEmpty) return;
-    final selection = _selection;
-    // The caret goes after what the note *stored*: a Windows clipboard's
-    // `\r\n` pasted into an LF note is shorter than the text that was copied.
-    _replaceRange(selection.start, selection.end, text);
   }
 
   /// Replaces `[start, end)` with [text] because the *app* asked, not the
@@ -1742,7 +1388,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       ),
       closing: closing,
     );
-    _styleEdited(edit);
+    _styling.edited(edit);
     final next = (caret ?? SelectionModel.at(start + stored)).clampTo(
       buffer.length,
     );
@@ -1751,7 +1397,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     widget.onSelection?.call(next);
     _input.sendSelection();
     _scheduleCaret();
-    if (follow) _ensureCaretVisible();
+    if (follow) _reveal.ensureCaretVisible();
     // The shell saves and counts what it is told about: a cut, a paste or a
     // backspace is as much an edit as a keystroke, and the edit says which
     // lines moved so the word count pays for those and not for the note.
@@ -1760,6 +1406,59 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     // ticked — types no link.
     _suggest.refresh(typed: follow);
   }
+
+  /// What typing means beyond the characters typed: a bracket's pair, a
+  /// list carried on by Enter, Tab's indent, the surface's own deletions
+  /// and the clipboard.
+  late final SourceTyping _typing = SourceTyping(
+    buffer: () => widget.buffer,
+    selection: () => _selection,
+    live: () => widget.hideMarkers,
+    mounted: () => mounted,
+    indentWidth: () => widget.indentWidth,
+    blockOf: (line) => _styler?.blockOf(line),
+    tokensOf: (line) => _lineAt(line).tokens,
+    verbatimQuotes: _verbatimQuotes,
+    replace: _replaceRange,
+    // Past a closing character the writer typed over: the typing goes on
+    // in the undo step that wrote the pair (#1053).
+    stepTo: (offset) {
+      _applySelection(
+        _selection.collapsedTo(offset),
+        reveal: true,
+        endStep: false,
+      );
+      _history.stepOver(offset);
+    },
+    swallowedBreak: () => _suggest.takeSwallowedBreak(),
+    tableEnter: () => _tableKeys.enter(),
+    onPaste: () => widget.onPaste,
+  );
+
+  /// The selected text, or null when the selection is a caret.
+  String? get selectedText => _typing.selectedText;
+
+  /// Copies the selection to the platform's clipboard.
+  Future<void> copySelection() => _typing.copySelection();
+
+  /// Copies the selection and removes it, in one undo step with the removal.
+  Future<void> cutSelection() => _typing.cutSelection();
+
+  /// Inserts the clipboard's text at the caret, replacing the selection —
+  /// unless [MarkdownSourceView.onPaste] takes the clipboard first.
+  Future<void> paste() => _typing.paste();
+
+  /// Whether the caret is in code: a fenced or indented block, display
+  /// maths, an inline span — where a paste stays text.
+  bool get caretInCode => _typing.caretInCode;
+
+  /// Tab: the lines the selection touches moved in, or spaces at a plain
+  /// line's caret ([SourceTyping.indent]).
+  void indent() => _typing.indent();
+
+  /// Shift+Tab: the lines the selection touches moved out
+  /// ([SourceTyping.outdent]).
+  void outdent() => _typing.outdent();
 
   /// Deletes the selection, or what is before the caret: one character, or a
   /// word with [word].
@@ -1770,560 +1469,28 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// therefore this surface's. An IME's own delete key still arrives as a
   /// deletion delta.
   void deleteBackward({bool word = false}) =>
-      _delete(word ? CaretMotion.wordLeft : CaretMotion.characterLeft);
+      _typing.delete(word ? CaretMotion.wordLeft : CaretMotion.characterLeft);
 
   /// Deletes the selection, or what is after the caret.
   void deleteForward({bool word = false}) =>
-      _delete(word ? CaretMotion.wordRight : CaretMotion.characterRight);
-
-  void _delete(CaretMotion motion) {
-    final selection = _selection.clampTo(widget.buffer.length);
-    if (!selection.isCollapsed) {
-      _replaceRange(selection.start, selection.end, '');
-      return;
-    }
-    if (motion == CaretMotion.characterLeft &&
-        _applyBracket(_brackets.backspace(widget.buffer, selection.extent))) {
-      return;
-    }
-    final other = _withinCell(
-      selection.extent,
-      moveCaret(
-        selection,
-        motion,
-        buffer: widget.buffer,
-        verbatimQuotes: _verbatimQuotes,
-      ).extent,
-    );
-    if (other == selection.extent) return;
-    final start = math.min(other, selection.extent);
-    final end = math.max(other, selection.extent);
-    _replaceRange(start, end, '');
-  }
-
-  /// [other] kept inside the table cell [caret] is in, in `live`: a
-  /// deletion from a cell stops at its edges, as Obsidian's does, rather
-  /// than taking the pipes that make the table.
-  int _withinCell(int caret, int other) {
-    if (!widget.hideMarkers) return other;
-    final buffer = widget.buffer;
-    final line = buffer.lineOf(caret);
-    if (_styler?.blockOf(line)?.kind != BlockKind.table) return other;
-    final start = buffer.offsetOfLine(line);
-    final cell = LiveTables.cellAround(buffer.lineAt(line), caret - start);
-    if (cell == null) return other;
-    return other.clamp(start + cell.$1, start + cell.$2);
-  }
-
-  /// The brackets typed in pairs, and the closing ones they wrote.
-  final BracketPairs _brackets = BracketPairs();
-
-  /// [inserted] typed over `[start, end)` by the platform, outside a
-  /// composition: a bracket's pair written, a closing bracket stepped over,
-  /// or — the soft keyboard's delete, one character before the caret — an
-  /// empty pair taken whole. Answers whether it did one of them.
-  bool _typed(int start, int end, String inserted) {
-    if (inserted.isEmpty) {
-      final caret = _selection;
-      if (end - start != 1 || !caret.isCollapsed || caret.extent != end) {
-        return false;
-      }
-      return _applyBracket(_brackets.backspace(widget.buffer, end));
-    }
-    if (inserted.length != 1) return false;
-    return _applyBracket(
-      _brackets.typed(
-        widget.buffer,
-        start,
-        end,
-        inserted,
-        verbatimAt: _caretInCode,
-      ),
-    );
-  }
-
-  /// Whether a caret at [offset] stands in code or maths: on a line of a
-  /// fenced or indented code block or of a `$$` block, or inside an inline
-  /// code or maths span — between its delimiters, not before the opening one
-  /// nor after the closing one.
-  ///
-  /// Answered by the scan behind the colours — the line's block, O(log
-  /// blocks), and that one line's runs — so a keystroke never reads the note
-  /// again. The block answers for an empty line of a fence, which has no
-  /// runs; the runs answer while there is no block scan.
-  bool _caretInCode(int offset) {
-    final buffer = widget.buffer;
-    final line = buffer.lineOf(offset);
-    final block = _styler?.blockOf(line)?.kind;
-    if (block == BlockKind.fencedCode ||
-        block == BlockKind.indentedCode ||
-        block == BlockKind.math) {
-      return true;
-    }
-    final local = offset - buffer.offsetOfLine(line);
-    TokenKind? before;
-    TokenKind? at;
-    for (final token in _lineAt(line).tokens) {
-      final kind = token.kind;
-      if (kind == TokenKind.codeFence ||
-          kind == TokenKind.codeBlock ||
-          kind == TokenKind.mathBlock) {
-        return true;
-      }
-      if (kind != TokenKind.codeInline && kind != TokenKind.mathInline) {
-        continue;
-      }
-      if (local - 1 >= token.start && local - 1 < token.end) before = kind;
-      if (local >= token.start && local < token.end) at = kind;
-    }
-    // A span's delimiters are runs of its own kind: a caret with the span on
-    // both sides of it is inside, one with a delimiter on one side only is
-    // at its edge, outside.
-    return before != null && before == at;
-  }
-
-  /// Makes [edit], when there is one; answers whether there was.
-  bool _applyBracket(BracketEdit? edit) {
-    if (edit == null) return false;
-    final caret = SelectionModel(anchor: edit.anchor, extent: edit.extent);
-    if (edit.text.isEmpty && edit.start == edit.end) {
-      _stepOverCloser(edit.extent);
-    } else {
-      // A pair written at the caret: the characters after the caret are
-      // closers, which the typing inside the pair is one undo step with.
-      final closing = edit.start == edit.end
-          ? edit.start + edit.text.length - edit.extent
-          : 0;
-      _replaceRange(
-        edit.start,
-        edit.end,
-        edit.text,
-        caret: caret,
-        closing: closing,
-      );
-    }
-    return true;
-  }
-
-  /// Puts the caret at [offset], past a closing character the writer typed
-  /// over: the typing goes on in the undo step that wrote the pair (#1053).
-  void _stepOverCloser(int offset) {
-    _applySelection(
-      _selection.collapsedTo(offset),
-      reveal: true,
-      endStep: false,
-    );
-    _history.stepOver(offset);
-  }
-
-  /// A line break typed over `[start, end)`, when it means more than a line
-  /// break: inside a list item it carries the list on, and on an empty item it
-  /// ends the list (#142, the legacy editor's `applyNewLine`); inside a quote
-  /// or a callout it carries the quote on (#1049). Answers whether it did any
-  /// of them; otherwise the platform's line break is applied as typed.
-  ///
-  /// It hangs off the *line break arriving*, not off the Enter key, because
-  /// that is the one place every embedder meets: an IME commits the break as
-  /// text and the desktop embedders insert it themselves, so there is no key
-  /// to bind that all of them send.
-  bool _newline(int start, int end) {
-    // The line break a completed link's `Enter` sent after the key: already
-    // taken as the panel's `Enter`, so it is swallowed rather than written
-    // behind the link (#475).
-    if (_suggest.takeSwallowedBreak()) return true;
-    // In a table in `live`: the cell below, or out of it.
-    if (_tableEnter()) return true;
-    if (start != end) return false;
-    final buffer = widget.buffer;
-    if (!_isPlainLine(buffer.lineOf(start))) return false;
-    // The rule is `enterEdit`'s: a list item behind its quote marks is
-    // carried on, a quote line starts the next with its marks, an empty
-    // nested item goes back a level (#1049).
-    final edit = enterEdit(buffer, start, indentWidth: widget.indentWidth);
-    if (edit == null) return false;
-    _replaceRange(
-      edit.start,
-      edit.end,
-      edit.text,
-      caret: edit.caret,
-      verbatim: edit.verbatim,
-    );
-    return true;
-  }
-
-  /// Whether line [index] is ordinary Markdown — not fenced code, display
-  /// maths or frontmatter, where a dash starts nothing. Answered by the
-  /// colours the view already keeps, so the two cannot disagree about what a
-  /// list is.
-  bool _isPlainLine(int index) {
-    if (index < 0 || index >= lineCount) return true;
-    for (final token in _lineAt(index).tokens) {
-      if (token.kind == TokenKind.codeFence ||
-          token.kind == TokenKind.codeBlock ||
-          token.kind == TokenKind.mathBlock ||
-          token.kind == TokenKind.frontmatter) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  /// Whether the caret is in code ([_inCodeAt]): a fenced or indented
-  /// block, display maths, an inline span — where a paste stays text.
-  bool get caretInCode {
-    final buffer = widget.buffer;
-    final at = _selection.extent.clamp(0, buffer.length);
-    final line = buffer.lineOf(at);
-    return _inCodeAt(line, at - buffer.offsetOfLine(line));
-  }
-
-  /// Whether the character at [local] of line [index] is code: a line of a
-  /// fenced or indented code block, a line of display maths, or an inline code
-  /// or maths span over the character.
-  ///
-  /// Answered by the colours the view already keeps, as [_isPlainLine] is, so
-  /// the two cannot disagree about what the note reads as code. A span is
-  /// drawn as several runs — its delimiters, its text — and they are disjoint,
-  /// so the character the offset stands on is the one to ask about: a caret
-  /// past a span's last delimiter is prose again, and a link typed there is
-  /// not the code's.
-  bool _inCodeAt(int index, int local) {
-    for (final token in _lineAt(index).tokens) {
-      final kind = token.kind;
-      if (kind == TokenKind.codeFence ||
-          kind == TokenKind.codeBlock ||
-          kind == TokenKind.mathBlock) {
-        return true;
-      }
-      final inline =
-          kind == TokenKind.codeInline || kind == TokenKind.mathInline;
-      if (inline && local >= token.start && local < token.end) return true;
-    }
-    return false;
-  }
-
-  /// Tab: moves the lines the selection touches in — a list item to where its
-  /// list says (under the item above it), any other line by `indentWidth`
-  /// spaces — or, on a plain line with a collapsed caret, inserts them at the
-  /// caret. The rule is the toolbar's indent (`indentLines`).
-  ///
-  /// The surface's own key: left to the app, Tab moves the focus to the next
-  /// widget and takes the keyboard away from the note.
-  void indent() {
-    final selection = _selection.clampTo(widget.buffer.length);
-    final line = widget.buffer.lineOf(selection.start);
-    if (selection.isCollapsed &&
-        ListRow(widget.buffer.lineAt(line)).head == null) {
-      final pad = ' ' * widget.indentWidth;
-      _replaceRange(selection.start, selection.end, pad);
-      return;
-    }
-    _indentLines(selection, outdent: false);
-  }
-
-  /// Shift+Tab: the inverse — a list item goes back to its parent's indent,
-  /// any other line out by up to `indentWidth` spaces, never taking anything
-  /// but spaces.
-  void outdent() {
-    _indentLines(_selection.clampTo(widget.buffer.length), outdent: true);
-  }
-
-  /// Indents or outdents the lines [selection] touches, as one edit
-  /// ([listIndentEdit]).
-  void _indentLines(SelectionModel selection, {required bool outdent}) {
-    final edit = listIndentEdit(
-      widget.buffer,
-      selection,
-      width: widget.indentWidth,
-      outdent: outdent,
-    );
-    if (edit == null) return;
-    _replaceRange(
-      edit.start,
-      edit.end,
-      edit.text,
-      caret: edit.caret,
-      verbatim: true,
-    );
-  }
-
-  /// PageUp and PageDown: the note moves a viewport, and the caret moves with
-  /// it by as many rows, the way every editor pages.
-  void _page(int direction, {bool extend = false}) {
-    if (!_scroll.hasClients) return;
-    final viewport = _scroll.position.viewportDimension;
-    final rows = (viewport / _rowHeight).floor() - 1;
-    if (rows <= 0) return;
-    final from = _scroll.offset;
-    final to = (from + direction * rows * _rowHeight).clamp(
-      0.0,
-      _scroll.position.maxScrollExtent,
-    );
-    if (to == from) {
-      // Nothing left to page through: the caret goes to that end of the note.
-      moveCaretBy(
-        direction < 0 ? CaretMotion.documentStart : CaretMotion.documentEnd,
-        extend: extend,
-      );
-      return;
-    }
-    // The caret keeps its place *on the screen* while the note moves under
-    // it, and that place is asked of whatever line is there after the jump —
-    // the caret's own line may no longer be built at all.
-    final box = _noteBox;
-    final point =
-        caretRect?.center ??
-        box?.localToGlobal(Offset(0, viewport / 2)) ??
-        Offset.zero;
-    _scroll.jumpTo(to);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      final offset = offsetAt(point);
-      if (offset == null) return;
-      final next = extend
-          ? SelectionModel(anchor: _selection.anchor, extent: offset)
-          : SelectionModel.at(offset);
-      _applySelection(next);
-    });
-    WidgetsBinding.instance.scheduleFrame();
-  }
-
-  /// Keeps the tokenizer and the height map at the buffer's line count, after
-  /// [edit].
-  ///
-  /// The view draws the buffer's lines and places them with the map, so the
-  /// three have to agree about how many there are. When the count changed the
-  /// map is **spliced** — the lines the edit replaced go, the ones it added
-  /// come in estimated, and every other line keeps the height a frame measured
-  /// — because rebuilding it moved everything on screen on every Enter. A
-  /// keystroke inside a line is corrected by the sliver's own measurement.
-  void _syncLines([SourceEdit? edit]) {
-    _seenRevision = widget.buffer.revision;
-    final lines = widget.buffer.lineCount;
-    // The side-by-side blocks follow the edit: typing in a column splices
-    // its map, and changes no row (#729).
-    if (edit != null) {
-      _hosts.edited(edit, _estimateAt);
-      _quoteRuns.edited(edit);
-    }
-    if (!_folds.isEmpty) {
-      // The folds follow the edit; when what they hide changed shape, the
-      // rows are measured again rather than spliced.
-      final reshaped = edit == null || _folds.edited(edit, lines, _sectionEnd);
-      if (edit == null) _folds.clear();
-      if (reshaped) {
-        _heights = _map();
-        return;
-      }
-    }
-    final rows = _folds.rowCount(lines);
-    if (_heights.length == rows) return;
-    if (edit != null &&
-        _heights.length - edit.removedLines + edit.insertedLines == rows) {
-      _heights.splice(
-        _folds.rowOf(edit.firstLine),
-        edit.removedLines,
-        edit.insertedLines,
-        _estimateRow,
-      );
-    } else {
-      _heights = _map();
-    }
-  }
+      _typing.delete(word ? CaretMotion.wordRight : CaretMotion.characterRight);
 
   // ---------------------------------------------------------------- columns
-
-  /// The note's outermost `columns` blocks, by line (#729), as of
-  /// [_runsRevision]; read again when the buffer moves on.
-  List<LiveRun> _runs = const <LiveRun>[];
-  int _runsRevision = -1;
-
-  /// Whether a layout asked for [_liveRuns] while the scan owed part of the
-  /// note, and drew the blocks past what it had read stacked: the scan
-  /// settling owes it a layout ([_carryScanOn]).
-  bool _runsOwed = false;
-
-  /// The outermost `columns` blocks `live` draws, read off the scan's fence
-  /// lines: none in `source`, and while the scan owes part of the note only
-  /// the ones that open where it has read — its blocks past that are hints.
-  /// That answer is not kept: the scan settles at the same revision.
-  List<LiveRun> get _liveRuns {
-    if (!widget.hideMarkers) return const <LiveRun>[];
-    final revision = widget.buffer.revision;
-    if (revision == _runsRevision) return _runs;
-    final styler = _styler;
-    final fences = styler?.divBlocks;
-    final quotes = styler?.fenceQuoteBlocks;
-    if (styler == null || fences == null || quotes == null) {
-      _runsOwed = styler != null;
-      return const <LiveRun>[];
-    }
-    // The note's own, and the ones in its quotes and callouts, read off
-    // each quote's content. An opener the scan has read is followed to its
-    // closer: the blocks on the way are caught up as they are asked for.
-    final runs = [
-      ...LiveRun.of(fences, styler.blockOf, widget.buffer.lineAt),
-      ..._quoteRuns.of(quotes, widget.buffer),
-    ]..sort((a, b) => a.start.compareTo(b.start));
-    _runsOwed = !styler.settled;
-    if (_runsOwed) return runs;
-    _runs = runs;
-    _runsRevision = revision;
-    return _runs;
-  }
 
   /// The blocks drawn side by side at the pane's width (#729).
   final LiveHosts _hosts = LiveHosts();
 
-  /// The `columns` blocks in the note's quotes, each quote read once until
-  /// an edit touches it.
-  final LiveQuoteRuns _quoteRuns = LiveQuoteRuns();
-
-  /// An em of the note's text, as drawn: what a column's minimum and the
-  /// gap between columns are counted in.
-  double get _em => _textScaler.scale(widget.theme.body.fontSize ?? 14);
-
-  /// How far from the text the bracket beside a side-by-side block stands,
-  /// in the gutter.
-  static const double _bracketInset = 6;
-
-  /// The room between two columns, and between two rows of them.
-  double get _gap => ColumnLayout.gapEms * _em;
-
-  /// A fence line's band, as drawn.
-  double get _band => _textScaler.scale(widget.theme.divBand);
-
-  /// Lays the note's `columns` blocks out in [width], the text's: the ones
-  /// that sit side by side there are hosted, each in its opener's row, and
-  /// the rows are reshaped when that changed which. A block a fold hides or
-  /// holds stays stacked, as do they all in `source`.
-  void _layOutHosts(double width) {
-    _hosts.layOut(
-      _liveRuns,
-      widthOf: (run) => width - _itemsIndent(run),
-      em: _em,
-      estimate: _estimateAt,
-      // Not a block a fold hides, nor one with a fold inside.
-      allowed: (run) =>
-          !_folds.isHidden(run.start) &&
-          !_folds.foldsWithin(run.start, run.end),
-    );
-    final hosts = _hosts.hosts;
-    if (_sameHosts(hosts, _folds.hosts)) return;
-    _reshapeHosts(hosts);
-  }
-
-  /// Makes [hosts] the side-by-side blocks, and splices the rows of each
-  /// block that went into one row or came out of it: every other row keeps
-  /// the height a frame measured, and a map that asks a chunk only when a
-  /// frame reaches it still does — a block hosted on the frame that opens
-  /// the note asks no other row.
-  void _reshapeHosts(Map<int, int> hosts) {
-    final was = Map<int, int>.of(_folds.hosts);
-    // The lines whose rows change: each block hosted before and not now
-    // with the same end, or now and not before, merged where they meet.
-    final changed = <(int, int)>[
-      for (final MapEntry(key: start, value: end) in was.entries)
-        if (hosts[start] != end) (start, end),
-      for (final MapEntry(key: start, value: end) in hosts.entries)
-        if (was[start] != end) (start, end),
-    ]..sort((a, b) => a.$1.compareTo(b.$1));
-    final ranges = <(int, int)>[];
-    for (final (start, end) in changed) {
-      if (ranges.isNotEmpty && start < ranges.last.$2) {
-        if (end > ranges.last.$2) ranges.last = (ranges.last.$1, end);
-      } else {
-        ranges.add((start, end));
-      }
-    }
-    final lines = lineCount;
-    int rowAt(int line) =>
-        line < lines ? _folds.rowOf(line) : _folds.rowCount(lines);
-    // From the top down, a range at a time, the folds saying what the map
-    // holds at each splice — the blocks above as they are now, the ones
-    // below as they were — so a chunk a splice works out, and the rows it
-    // inserts, are read by the rows the map has.
-    for (final (start, end) in ranges) {
-      final from = rowAt(start);
-      final removed = rowAt(end) - from;
-      _folds.setHosts({
-        for (final MapEntry(key: opener, value: close) in hosts.entries)
-          if (opener < end) opener: close,
-        for (final MapEntry(key: opener, value: close) in was.entries)
-          if (opener >= end) opener: close,
-      });
-      _heights.splice(from, removed, rowAt(end) - from, _estimateRow);
-    }
-    _folds.setHosts(hosts);
-    final rows = _folds.rowCount(lines);
-    assert(_heights.length == rows, 'the splices left the rows miscounted');
-    if (_heights.length != rows) _heights = _map();
-  }
-
-  static bool _sameHosts(Map<int, int> a, Map<int, int> b) =>
-      a.length == b.length &&
-      a.entries.every((entry) => b[entry.key] == entry.value);
-
-  /// Line [line]'s height before a frame has drawn it, [width] wide.
-  double _estimateAt(int line, double width) {
-    final advance = _em * 0.6;
-    final columns = advance <= 0 ? 1.0 : width / advance;
-    return _estimateOf(widget.buffer.lineLengthAt(line), columns, _rowHeight);
-  }
-
-  /// [layout]'s block's height before a frame has drawn it.
-  double _hostEstimate(LiveLayout layout) =>
-      LiveHosts.estimateOf(layout, _gap, layout.run.closed ? 2 * _band : _band);
-
-  /// How far the list items and the quote [run] stands in indent its
-  /// columns.
-  double _itemsIndent(LiveRun run) =>
-      run.items * widget.theme.listIndentPerLevel +
-      run.quoteDepth * widget.theme.quoteIndentPerLevel;
-
-  /// The note box's x where [layout]'s columns start: past the gutter, and
-  /// the indent of the list items the block stands in.
-  double _columnsLeft(LiveLayout layout) =>
-      _leftInset + _gutter + _itemsIndent(layout.run);
-
-  /// Where line [line] is drawn, in the scroll view's coordinates: its top
-  /// and its height (#729). A row's, from the note's map; a line of a
-  /// side-by-side column's, from its host row, its row of columns and its
-  /// column's own map.
-  ({double top, double height}) _lineBox(int line) {
-    final host = _folds.hostOf(line);
-    final layout = host == null ? null : _hosts.openedOn(host);
-    if (host == null || layout == null) {
-      final row = _folds.rowOf(line);
-      return (
-        top: widget.padding.top + _heights.offsetOf(row),
-        height: _heights.extentFor(row),
-      );
-    }
-    final hostRow = _folds.rowOf(host);
-    final top = widget.padding.top + _heights.offsetOf(hostRow);
-    final run = layout.run;
-    final column = run.columnOf(line);
-    if (column < 0) {
-      // The closer is the block's bottom band; a blank line between two
-      // columns is drawn nowhere, and stands at the block's top.
-      final closing = run.closed && line == run.end - 1;
-      final extent = _heights.extentFor(hostRow);
-      return closing
-          ? (top: top + extent - _band, height: _band)
-          : (top: top, height: 0);
-    }
-    final map = layout.maps[column];
-    final local = line - run.columns[column].start;
-    return (
-      top:
-          top +
-          _band +
-          LiveHosts.topOf(layout, column, _gap) +
-          map.offsetOf(local),
-      height: map.extentFor(local),
-    );
-  }
+  /// Where the lines are drawn, in the scroll view's coordinates, and which
+  /// line a point is on, off the height map and the side-by-side layouts.
+  late final SourceGeometry _geometry = SourceGeometry(
+    heights: () => _heights,
+    folds: _folds,
+    hosts: _hosts,
+    padding: () => widget.padding,
+    band: () => _metrics.band,
+    gap: () => _metrics.gap,
+    columnsLeft: _metrics.columnsLeft,
+  );
 
   /// The note's offsets the platform's input window may reach around a
   /// caret at [caret]: a side-by-side column's lines past its fences, when
@@ -2337,10 +1504,10 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     final layout = host == null ? null : _hosts.openedOn(host);
     if (layout == null) return whole;
     final column = layout.run.columnOf(line);
-    if (column < 0 || _passedOver(line)) return whole;
+    if (column < 0 || _motion.passedOver(line)) return whole;
     final lines = layout.run.columns[column];
-    final first = _firstOf(lines, forward: true);
-    final last = _firstOf(lines, forward: false);
+    final first = _motion.firstOf(lines, forward: true);
+    final last = _motion.firstOf(lines, forward: false);
     return (
       buffer.offsetOfLine(first),
       buffer.offsetOfLine(last) + buffer.lineLengthAt(last),
@@ -2350,70 +1517,22 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// The width line [line] is drawn at: its side-by-side column's, or the
   /// text's.
   double _widthOf(int line) {
-    final placed = _columnOfLine(line);
-    if (placed == null) return _textWidth;
+    final placed = _geometry.columnOfLine(line);
+    if (placed == null) return _metrics.textWidth;
     return placed.layout.widths[placed.column];
   }
 
-  /// The side-by-side block and column line [line] is drawn in, or null.
-  ({LiveLayout layout, int column})? _columnOfLine(int line) {
-    final host = _folds.hostOf(line);
-    final layout = host == null ? null : _hosts.openedOn(host);
-    if (layout == null) return null;
-    final column = layout.run.columnOf(line);
-    return column < 0 ? null : (layout: layout, column: column);
-  }
-
   /// What line [index], in [block], draws as a fence line in `live`, or
-  /// null: a column's fence and a `columns` block's are bands, an unknown
-  /// div's are the text they are.
-  LiveFence? _fenceOf(int index, Block? block) {
-    if (!widget.hideMarkers || block == null) return null;
-    final DivRole role;
-    final LiveRun? run;
-    if (block.kind == BlockKind.div) {
-      role = block.divRole!;
-      if (!role.laysOut) return null;
-      run = LiveRun.holding(_liveRuns, index);
-    } else if (block.kind == BlockKind.quote) {
-      // A fence in a quote is no block of the note's: its block's content,
-      // read again, says what it does.
-      run = LiveRun.holding(_liveRuns, index);
-      final quoted = run?.fences?[index];
-      if (quoted == null) return null;
-      role = quoted;
-    } else {
-      return null;
-    }
-    if (run == null) return null;
-    final chip = switch (role) {
-      DivRole.opensColumns => 'columns',
-      DivRole.opensColumn => _columnChip(index),
-      _ => null,
-    };
-    final hosted = _folds.isHost(run.start);
-    final outer = index == run.start || (run.closed && index == run.end - 1);
-    return (
-      start: run.start,
-      end: run.end,
-      chip: chip,
-      chipLeft: role == DivRole.opensColumns,
-      hairline: role == DivRole.opensColumn,
-      numbered: hosted && outer,
-      numberUp: index != run.start,
-    );
-  }
-
-  /// The chip a column's opener on [line] draws: `column`, and its width.
-  String _columnChip(int line) {
-    final width = DivSyntax.opening(widget.buffer.lineAt(line).trimLeft())
-        ?.width;
-    if (width == null) return 'column';
-    final share = width == width.roundToDouble()
-        ? width.round().toString()
-        : width.toString();
-    return 'column · $share%';
-  }
+  /// null ([liveFenceOf]).
+  LiveFence? _fenceOf(int index, Block? block) => widget.hideMarkers
+      ? liveFenceOf(
+          index,
+          block,
+          widget.buffer,
+          runs: () => _rows.liveRuns,
+          isHost: _folds.isHost,
+        )
+      : null;
 
   // --------------------------------------------------------------- folding
 
@@ -2436,14 +1555,14 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   void toggleFold(int line) {
     if (line < 0 || line >= widget.buffer.lineCount) return;
     if (_folds.isFolded(line)) {
-      _reshapeRows(() {
+      _rows.reshape(() {
         _folds.unfold(line);
         return true;
       });
     } else {
-      final end = _foldableEnd(line);
+      final end = _sections.foldableEnd(line);
       if (end == null) return;
-      _reshapeRows(() {
+      _rows.reshape(() {
         _folds.fold(line, end);
         return true;
       });
@@ -2457,48 +1576,6 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     setState(() {});
   }
 
-  /// Runs [change] on the folds and, when it says it changed them, gives the
-  /// rows new heights — each line that was drawn before keeps the height it
-  /// was drawn at, so unfolding a section does not move the rest.
-  ///
-  /// Only a drawn row's height is read off the old map: a chunk of it no
-  /// frame reached is worked out when first asked, by the rows as they are
-  /// then, which [change] has already moved.
-  void _reshapeRows(bool Function() change) {
-    final before = _folds.copy();
-    final old = _heights;
-    if (!change()) return;
-    double? drawn(int line) {
-      final was = before.rowOf(line);
-      return old.isMeasured(was) ? old.extentFor(was) : null;
-    }
-
-    _heights = BlockHeightMap(
-      count: _folds.rowCount(lineCount),
-      estimate: (row) {
-        final line = _folds.lineOf(row);
-        // A side-by-side block's row is the block (#729): one drawn as it
-        // was keeps its height, any other row in or out of one is
-        // estimated again.
-        final hosted = _hosts.openedOn(line);
-        if (_folds.isHost(line) && hosted != null) {
-          if (before.isHost(line) && before.hosts[line] == _folds.hosts[line]) {
-            final height = drawn(line);
-            if (height != null) return height;
-          }
-          return _hostEstimate(hosted);
-        }
-        if (!before.isHidden(line) &&
-            !before.isHost(line) &&
-            before.hostOf(line) == null) {
-          final height = drawn(line);
-          if (height != null) return height;
-        }
-        return _estimate(line);
-      },
-    );
-  }
-
   /// Unfolds what hides the caret, when an edit, a find or a motion took it
   /// there.
   void _revealCaret() {
@@ -2507,93 +1584,15 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       _selection.extent.clamp(0, widget.buffer.length),
     );
     var revealed = false;
-    _reshapeRows(() => revealed = _folds.reveal(line));
+    _rows.reshape(() => revealed = _folds.reveal(line));
     if (revealed && mounted) setState(() {});
-  }
-
-  /// The heading level of line [line], or null when it is not a heading.
-  int? _headingLevel(int line) {
-    if (!widget.buffer.lineAt(line).startsWith('#')) return null;
-    final tokens = _lineAt(line).tokens;
-    if (tokens.isEmpty ||
-        tokens.first.kind != TokenKind.headingMarker ||
-        tokens.first.start != 0) {
-      return null;
-    }
-    // The outline's own rule (`outline.dart`): the marker's length.
-    return tokens.first.end - tokens.first.start;
-  }
-
-  /// Where the section under the heading on [line] ends — the next heading
-  /// of its level or above, or the note's end — or null when [line] is not a
-  /// heading.
-  int? _sectionEnd(int line) {
-    final revision = widget.buffer.revision;
-    if (revision != _sectionEndsRevision) {
-      _sectionEnds.clear();
-      _sectionEndsRevision = revision;
-    }
-    if (_sectionEnds.containsKey(line)) return _sectionEnds[line];
-    final block = blockAt?.call(line);
-    if (block?.divRole == DivRole.opensColumns) {
-      return _sectionEnds[line] = _columnsEnd(line, block!.divDepth);
-    }
-    final level = _headingLevel(line);
-    int? end;
-    if (level != null) {
-      final count = widget.buffer.lineCount;
-      // A heading in a column folds its section inside the column (#729):
-      // a block in fewer divs ends it, and a heading in more does not.
-      final depth = block?.divDepth ?? 0;
-      end = count;
-      for (var at = line + 1; at < count; at++) {
-        final within = blockAt?.call(at)?.divDepth ?? 0;
-        if (within < depth) {
-          end = at;
-          break;
-        }
-        final other = _headingLevel(at);
-        if (other != null && other <= level && within == depth) {
-          end = at;
-          break;
-        }
-      }
-    }
-    return _sectionEnds[line] = end;
-  }
-
-  /// Where the `columns` block opened on [line], [depth] divs in, ends
-  /// (#729): past its closer, or at the first line outside it when its
-  /// container ends it.
-  int _columnsEnd(int line, int depth) {
-    final count = widget.buffer.lineCount;
-    var at = line + 1;
-    while (at < count) {
-      final block = blockAt?.call(at);
-      if (block == null) break;
-      if (block.divDepth <= depth) {
-        return block.divRole == DivRole.closesColumns && block.divDepth == depth
-            ? block.endLine
-            : block.startLine;
-      }
-      at = block.endLine;
-    }
-    return count;
-  }
-
-  /// Where the heading on [line] would fold to, when it has a section worth
-  /// folding: two lines or more under it, the legacy editor's rule.
-  int? _foldableEnd(int line) {
-    final end = _sectionEnd(line);
-    if (end == null || end - line - 1 < 2) return null;
-    return end;
   }
 
   /// What the gutter shows beside line [line].
   SourceFoldMark _foldMarkOf(int line) {
     if (!_foldingEnabled) return SourceFoldMark.none;
     if (_folds.isFolded(line)) return SourceFoldMark.closed;
-    return _foldableEnd(line) == null
+    return _sections.foldableEnd(line) == null
         ? SourceFoldMark.none
         : SourceFoldMark.open;
   }
@@ -2604,177 +1603,6 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     // pauses: the keystroke that led here pays for the timer alone (#316).
     _hints.schedule();
     widget.onChanged?.call(edit);
-  }
-
-  /// How many taps have landed inside [_clickWindow], and when and where the
-  /// last did.
-  int _clicks = 0;
-  DateTime? _lastClick;
-  Offset? _lastClickAt;
-
-  /// How long two taps may be apart and still be one gesture.
-  static const Duration _clickWindow = Duration(milliseconds: 400);
-
-  /// Whether a tap at [position], at [now], is the next of the last one's
-  /// gesture: near it in time *and* in place. Two quick taps on different
-  /// words are two carets, not a double click — counting time alone selected
-  /// a word under the second tap and the next keystroke replaced it.
-  bool _followsLastClick(Offset position, DateTime now) {
-    final last = _lastClick;
-    final lastAt = _lastClickAt;
-    return last != null &&
-        lastAt != null &&
-        now.difference(last) <= _clickWindow &&
-        (position - lastAt).distance <= kDoubleTapSlop;
-  }
-
-  /// A tap: one places the caret, two take the word under it, three take the
-  /// line.
-  ///
-  /// The two- and three-tap selections come up with the touch handles and
-  /// menu, as a long press does: on a phone a word the finger selected is a
-  /// selection the finger can act on, whatever picked it (#291). A mouse's
-  /// second click is a double click and keeps its menu for the right button,
-  /// so the overlay is the finger's alone.
-  ///
-  /// Counted here rather than with `onDoubleTap`, because a triple click is a
-  /// *third* tap and not a second double one, and because the count has to
-  /// survive
-  /// the caret moving between taps — which is exactly what happens.
-  void _tapUp(Offset position) {
-    final finger = _lastPointerKind != PointerDeviceKind.mouse;
-    final offset = (finger ? null : _pressOffset) ?? offsetAt(position);
-    _pressOffset = null;
-    if (offset == null) return;
-    final now = DateTime.now();
-    _clicks = _followsLastClick(position, now) ? _clicks + 1 : 1;
-    _lastClick = now;
-    _lastClickAt = position;
-    switch (_clicks) {
-      case 1:
-        // A Shift+click extended the selection as it went down.
-        if (!finger && HardwareKeyboard.instance.isShiftPressed) break;
-        // A click on a table's room puts the caret in the nearer cell.
-        placeCaret(_inCell(offset, 0));
-      case 2:
-        // A word never crosses a line: the line's text, not the note's.
-        final line = widget.buffer.lineOf(offset);
-        final lineStart = widget.buffer.offsetOfLine(line);
-        final text = widget.buffer.lineAt(line);
-        final (start, end) = wordRangeAt(text, offset - lineStart);
-        _select(
-          lineStart + math.min(start, text.length),
-          lineStart + math.min(end, text.length),
-        );
-        if (finger) _touch.show(toolbar: true);
-      default:
-        final line = widget.buffer.lineOf(offset);
-        _select(
-          widget.buffer.offsetOfLine(line),
-          widget.buffer.offsetOfLine(line) + widget.buffer.lineLengthAt(line),
-        );
-        _clicks = 0;
-        if (finger) _touch.show(toolbar: true);
-    }
-  }
-
-  /// The `[ ]` or `[x]` of the task box `live` draws under [global] — its
-  /// source range, and whether it is ticked — or null when no box is there.
-  ///
-  /// Only a box that is drawn: on the caret's line the markers are the
-  /// source, written out, and a click there is a click in the text. The box
-  /// is where the painter puts it ([liveItemSlot]), asked of the same
-  /// paragraph, so the two agree by construction.
-  ({int line, int start, int end, bool ticked})? _taskBoxAt(Offset global) {
-    if (!widget.hideMarkers) return null;
-    final caretLine = _caretSpot.value.line;
-    for (final entry in _lineKeys.entries) {
-      final index = entry.key;
-      if (index == caretLine || index >= widget.buffer.lineCount) continue;
-      final hit = _taskBoxSlotAt(index, global);
-      if (hit == null) continue;
-      for (final token in _lineAt(index).tokens) {
-        if (token.kind != TokenKind.taskBox) continue;
-        final start = widget.buffer.offsetOfLine(index) + token.start;
-        return (
-          line: index,
-          start: start,
-          end: start + token.end - token.start,
-          ticked: hit,
-        );
-      }
-    }
-    return null;
-  }
-
-  /// Whether line [index] draws a task box under [global], and whether it is
-  /// ticked — or null when the line draws no box or the point is off it.
-  ///
-  /// The one place the box's hit region is asked for, so the cursor (#505)
-  /// and the click ([_taskBoxAt]) can never disagree: both read the same
-  /// [liveItemSlot] of the same paragraph.
-  bool? _taskBoxSlotAt(int index, Offset global) {
-    final paragraph = _lineKeys[index]?.currentContext?.findRenderObject();
-    if (paragraph is! RenderParagraph ||
-        !paragraph.attached ||
-        !paragraph.hasSize) {
-      return null;
-    }
-    final styled = _lineAt(index);
-    final block = _styler?.blockOf(index);
-    final shape = LineShape.of(
-      styled,
-      block,
-      index,
-      quoted: _quotes.of(index, block, widget.buffer),
-    );
-    final ticked = shape.task;
-    if (shape.marker == null || ticked == null) return null;
-    final slot = liveItemSlot(paragraph, shape, widget.theme);
-    return slot.contains(paragraph.globalToLocal(global)) ? ticked : null;
-  }
-
-  /// Ticks or unticks the task box under [global], and answers whether
-  /// there was one: one edit and one undo step, the `x` written or taken out
-  /// inside the brackets, the caret and the view left where they were.
-  bool _toggleTaskAt(Offset global) {
-    final box = _taskBoxAt(global);
-    if (box == null) return false;
-    // Ticking a parent takes its branch with it (#326); clearing one does
-    // not, and neither does a library that turned the sweep off.
-    if (!box.ticked && widget.cascadeChecklist) {
-      final blocks = _styler?.blocks;
-      final edit = blocks == null
-          ? null
-          : checklistTickEdit(
-              buffer: widget.buffer,
-              blocks: blocks,
-              line: box.line,
-              ticked: true,
-            );
-      if (edit != null) {
-        _history.seal();
-        _replaceRange(
-          edit.start,
-          edit.end,
-          edit.text,
-          caret: _selection,
-          follow: false,
-        );
-        _history.seal();
-        return true;
-      }
-    }
-    _history.seal();
-    _replaceRange(
-      box.start + 1,
-      box.start + 2,
-      box.ticked ? ' ' : 'x',
-      caret: _selection,
-      follow: false,
-    );
-    _history.seal();
-    return true;
   }
 
   /// Selects `[start, end)` by a click or a jump: the note rebuilt, and the
@@ -2788,20 +1616,6 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// Selects everything.
   void selectAll() => _select(0, widget.buffer.length);
 
-  /// The offset a mouse drag started from, or null when no drag is running.
-  int? _dragAnchor;
-
-  /// Where a mouse press put the caret, for the click it ends as to keep:
-  /// typewriter mode scrolls the caret's row to the middle as the button
-  /// goes down, and the release, read again where the pointer is, landed
-  /// a row further on (#544).
-  int? _pressOffset;
-
-  /// Whether the mouse went down on the scrollbar's strip (#1106): the drag
-  /// belongs to the scrollbar, so the note takes no caret and no selection
-  /// from it.
-  bool _pressOnScrollbar = false;
-
   /// Whether [global], a position in the window, is on the scrollbar's track
   /// (#1106): a mouse there belongs to the scrollbar, not to the text. Asked
   /// of the bar itself ([pointerOnScrollbar]), so there is no strip when the
@@ -2811,133 +1625,6 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     metrics: _scroll.hasClients ? _scroll.position : null,
     global: global,
   );
-
-  /// [child] with mouse dragging selecting text.
-  ///
-  /// Mouse only, deliberately: on a phone a vertical drag on the text *scrolls*
-  /// the note, and stealing that gesture to select would break the way people
-  /// read. Selection by touch belongs to the platform's own handles, which is a
-  /// separate piece of work.
-  Widget _mouseSelection(Widget child) => Listener(
-    onPointerHover: (event) {
-      // The scrollbar's strip belongs to the scrollbar: the pointer keeps the
-      // arrow there, and neither the table nor the cursor is asked (#1106).
-      if (_onScrollbar(event.position)) {
-        _hoverPosition = null;
-        _leaveTable();
-        _reportLinkHover(null, Offset.zero);
-        if (_hoverCursor.value != SystemMouseCursors.basic) {
-          _hoverCursor.value = SystemMouseCursors.basic;
-        }
-        return;
-      }
-      // The offset under the pointer is one question, asked once and shared:
-      // both the table and the cursor read it (#505). Outside `live` there is
-      // no box and no table, and neither the offset nor the note is touched —
-      // unless the opening modifier is down, when the cursor asks about the
-      // link under the pointer (#725).
-      _hoverPosition = event.position;
-      final offset = widget.hideMarkers || _linkModifier()
-          ? offsetAt(event.position)
-          : null;
-      _hoverTableAt(offset, event.position);
-      _hoverCursorAt(offset, event.position);
-    },
-    onPointerDown: (event) {
-      _lastPointerKind = event.kind;
-      _pressOffset = null;
-      _pressOpenedLink = false;
-      if (event.kind == PointerDeviceKind.mouse &&
-          _onScrollbar(event.position)) {
-        // The scrollbar takes the drag; the note takes nothing (#1106).
-        _pressOnScrollbar = true;
-        _hoverPosition = null;
-        return;
-      }
-      _pressOnScrollbar = false;
-      _trackMouse(event);
-      // A mouse asks for the keyboard as it goes down, which is where a click
-      // starts a drag; a finger asks on the tap (`onTapUp`), so a finger that
-      // only scrolls the note does not bring the keyboard up.
-      if (event.kind != PointerDeviceKind.mouse) return;
-      _touch.hide();
-      _requestKeyboard();
-      if (_controlPress) {
-        _controlPress = false;
-        return;
-      }
-      if (event.buttons == kSecondaryMouseButton) {
-        _secondaryClick(event.position);
-        return;
-      }
-      if (event.buttons != kPrimaryMouseButton) return;
-      // A press on a task box ticks it when it is let go (`_tapUp`): it
-      // neither places a caret nor starts a selection.
-      if (_taskBoxAt(event.position) != null) return;
-      final offset = _pressOffset = offsetAt(event.position);
-      if (offset == null) return;
-      if (_openLinkAt(offset)) {
-        _pressOpenedLink = true;
-        return;
-      }
-      // Shift+click extends the selection from its anchor to the click, and
-      // a drag from there goes on extending it (#546).
-      if (HardwareKeyboard.instance.isShiftPressed) {
-        _dragAnchor = _selection.anchor;
-        _moveCaretTo(offset, extend: true);
-      } else {
-        _dragAnchor = offset;
-        placeCaret(offset);
-      }
-      // The platform needs the selection the drag ends with, not every one on
-      // the way: a whole note per mouse move is what a drag must not cost.
-      _input.holdSync = true;
-    },
-    onPointerMove: (event) {
-      if (_pressOnScrollbar) return;
-      _trackMouse(event);
-      final anchor = _dragAnchor;
-      if (anchor == null) return;
-      if (event.kind != PointerDeviceKind.mouse) return;
-      final offset = offsetAt(event.position);
-      if (offset == null) return;
-      _select(anchor, offset);
-    },
-    onPointerUp: (event) {
-      if (_pressOnScrollbar) {
-        _pressOnScrollbar = false;
-        return;
-      }
-      _trackMouse(event);
-      _endDrag();
-    },
-    onPointerCancel: (_) {
-      _pressOnScrollbar = false;
-      _endDrag();
-    },
-    child: child,
-  );
-
-  /// Keeps [_hoverPosition] where the mouse is while a button is down too:
-  /// a press and a drag send no hover, and the modifier going down after a
-  /// drag asked the cursor about where the drag began — the hand over plain
-  /// text, where a click opens nothing (#787).
-  void _trackMouse(PointerEvent event) {
-    if (event.kind == PointerDeviceKind.mouse) _hoverPosition = event.position;
-  }
-
-  /// A Ctrl+click (Cmd on a Mac) on a link at [offset]: the caret goes there
-  /// and the link opens, the legacy editor's T-M3-07. True when it did.
-  bool _openLinkAt(int offset) {
-    final open = widget.onOpenLink;
-    if (open == null) return false;
-    if (!_linkModifier()) return false;
-    final link = linkAt(offset);
-    if (link == null) return false;
-    placeCaret(offset);
-    open(link.$1, link.$2, link.$3);
-    return true;
-  }
 
   /// The wikilink or Markdown link under [offset] — its kind, its text as
   /// written, and a Markdown link's resolved target — or null. An offset on
@@ -2969,22 +1656,6 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     return null;
   }
 
-  void _endDrag() {
-    _dragAnchor = null;
-    _input.holdSync = false;
-  }
-
-  /// A pointer went down on a diagram `live` draws (#530). A mouse's
-  /// primary button would place the caret under it as it goes down — in the
-  /// block, revealing its source and taking the diagram, and the button the
-  /// pointer is on, away before it is let go; the diagram answers the click
-  /// instead.
-  void _diagramDown(PointerDownEvent event) {
-    if (event.kind != PointerDeviceKind.mouse) return;
-    if (event.buttons != kPrimaryMouseButton) return;
-    _controlPress = true;
-  }
-
   /// A tap on a diagram `live` draws, or on its parse error: the caret on
   /// note line [line] — the block's first, or the one the error names — and
   /// the block's source shown again (#530).
@@ -2997,7 +1668,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// Takes the focus, or — when the surface has it — opens the connection
   /// again if the platform closed it, and asks for the keyboard either way.
   void _requestKeyboard() {
-    _insetRevealOff = false;
+    _reveal.keyboardAsked();
     if (!_focus.hasFocus) {
       // The focus change attaches (see `onFocusChange`).
       _focus.requestFocus();
@@ -3014,7 +1685,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   ///
   /// Only what changed is repainted: a caret that stays collapsed moves no
   /// text, so the two lines involved — the one that lost it and the one that
-  /// gained it — repaint through [_caretSpot] and nothing else does, while a
+  /// gained it — repaint through [_caret] and nothing else does, while a
   /// move that creates or clears a *range* rebuilds the note, a range being
   /// a background on the runs it covers. [rebuild] rebuilds it whatever
   /// moved.
@@ -3031,224 +1702,22 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     final clamped = next.clampTo(widget.buffer.length);
     // A caret the writer moved ends the typing step: what is typed next is
     // undone on its own. Not so a caret that steps over a closer the step
-    // wrote ([_stepOverCloser]).
+    // wrote (`SourceTyping`).
     if (endStep) _history.seal();
     final wasRange = !_selection.isCollapsed;
     _ownSelection = clamped;
     if (rebuild || !clamped.isCollapsed || wasRange) setState(() {});
-    _caretSpot.value = _spotOf(clamped.extent);
+    _caret.spot.value = _caret.spotOf(clamped.extent);
     if (suggest) _suggest.refresh();
     widget.onSelection?.call(clamped);
     _input.sendSelection();
     _scheduleCaret();
-    if (reveal) _ensureCaretVisible();
+    if (reveal) _reveal.ensureCaretVisible();
   }
 
   /// Puts the caret at [offset], tells the platform, and keeps it on screen.
   void placeCaret(int offset) =>
       _applySelection(_selection.collapsedTo(offset), reveal: true);
-
-  /// A metrics change: when it is the keyboard this editor asked for coming
-  /// up over the note, the caret is brought back into view (#728).
-  ///
-  /// The keyboard, and only it (#765): the viewport shrank *and* the view's
-  /// bottom inset grew — a window made shorter or a phone turned shrinks the
-  /// viewport alone — while this editor has the focus and the platform's
-  /// connection, so a keyboard raised for another field (a rename, the find
-  /// bar, a dialog) moves nothing here.
-  ///
-  /// Each step of the keyboard's animation lays the pane out anew and lands
-  /// here, after that layout, with the viewport it left: the reveal runs at
-  /// every step against the viewport as it stands, as `EditableText` does,
-  /// and the last step is the keyboard at rest — no guess at how long the
-  /// animation takes.
-  bool _onScrollMetrics(ScrollMetricsNotification notification) {
-    final height = notification.metrics.viewportDimension;
-    final last = _viewportHeight;
-    _viewportHeight = height;
-    final inset = View.of(context).viewInsets.bottom;
-    final lastInset = _bottomInset;
-    _bottomInset = inset;
-    // The keyboard going down ends what the writer called off.
-    if (inset < lastInset) _insetRevealOff = false;
-    if (last == null || height >= last || inset <= lastInset) return false;
-    if (!_focus.hasFocus || !_input.isAttached || _insetRevealOff) {
-      return false;
-    }
-    _ensureCaretVisible(wholeSelection: true);
-    return false;
-  }
-
-  /// The writer took the scroll: the reveal of a keyboard coming up is
-  /// theirs to call off, and nothing is moved under their finger (#728).
-  bool _onScroll(ScrollNotification notification) {
-    if (notification.depth != 0) return false;
-    if (notification is ScrollStartNotification &&
-        notification.dragDetails != null) {
-      _insetRevealOff = true;
-      // A reveal still settling over the next frames is called off too.
-      _revealEpoch++;
-    }
-    return false;
-  }
-
-  /// Scrolls the caret's line into view when an edit or a jump left it out.
-  ///
-  /// The plan is made on the height map, and the map is only as good as the
-  /// last layout: a row an edit just changed — a line that wrapped onto new
-  /// rows, one that became a heading, one added at the bottom — is as the
-  /// frame before measured it (or estimated), and the note's extent, which
-  /// the plan clamps to, is the one it had. Far from the viewport it is
-  /// estimates throughout. So the plan is checked again against the layout
-  /// that follows it, whether or not it moved anything: a line that fit the
-  /// old measure and does not fit the new one is brought in with the rest of
-  /// its box (Ctrl+End left the last line half under the pane's edge until
-  /// the wheel went the rest of the way; typing into the last row left its
-  /// new rows below the pane). A check that still has to move is followed by
-  /// another — [settle] of them at most.
-  ///
-  /// [wholeSelection] keeps the whole selection in view when it fits, not
-  /// only the caret: what the keyboard opening asks for (#728). A caret move
-  /// does not — with the anchor just off the screen, every Shift+Down pulled
-  /// the view back to it (#764).
-  void _ensureCaretVisible({int settle = 3, bool wholeSelection = false}) {
-    if (!_scroll.hasClients) return;
-    _revealPlanned(wholeSelection: wholeSelection);
-    _checkRevealAfterLayout(settle, wholeSelection);
-  }
-
-  /// Plans the reveal again after the next frame, which lays out what the
-  /// edit or the jump changed. That frame is asked for here, so the check
-  /// never waits for one the writer's next scroll brings (and takes the view
-  /// back from them).
-  void _checkRevealAfterLayout(int settle, bool wholeSelection) {
-    if (settle <= 0) return;
-    final epoch = _revealEpoch;
-    WidgetsBinding.instance
-      ..addPostFrameCallback((_) {
-        if (!mounted || epoch != _revealEpoch || !_scroll.hasClients) return;
-        // Only a check that moved the view has a frame coming to follow it.
-        if (_revealPlanned(wholeSelection: wholeSelection)) {
-          _checkRevealAfterLayout(settle - 1, wholeSelection);
-        }
-      })
-      ..scheduleFrame();
-  }
-
-  /// Plans the reveal on the height map as it stands and scrolls to it;
-  /// whether the view moved.
-  bool _revealPlanned({required bool wholeSelection}) {
-    final line = _caretLineIndex;
-    if (line < 0) return false;
-    // In the scroll view's coordinates: the map starts below the top padding,
-    // and the last line takes the bottom padding with it. Without them every
-    // jump down stopped the padding short, the caret's row cut by it.
-    final row = _folds.rowOf(line);
-    final extent = _lineBounds(line);
-    final viewport = _scroll.position.viewportDimension;
-    // A selection is kept whole when it is asked for and fits the viewport;
-    // otherwise its active end is — a selection longer than the screen
-    // cannot be shown whole, and the writer's next keystroke lands at the
-    // caret (#728).
-    var firstRow = row;
-    var edgeTop = extent.top;
-    var edgeBottom = extent.bottom;
-    if (wholeSelection) {
-      final anchorLine = widget.buffer.lineOf(_selection.anchor);
-      final anchorRow = _folds.rowOf(anchorLine);
-      final anchor = _lineBounds(anchorLine);
-      final top = math.min(anchor.top, extent.top);
-      final bottom = math.max(anchor.bottom, extent.bottom);
-      if (bottom - top <= viewport) {
-        firstRow = math.min(anchorRow, row);
-        edgeTop = top;
-        edgeBottom = bottom;
-      }
-    }
-    final double target;
-    if (edgeTop < _scroll.offset) {
-      // The first row takes the top padding with it. Only the row actually
-      // kept says so: a too-long selection that starts at the note's top
-      // keeps its caret, not the top of the note (#764).
-      target = firstRow == 0 ? 0 : edgeTop;
-    } else if (edgeBottom > _scroll.offset + viewport) {
-      target = (edgeBottom - viewport).clamp(
-        0.0,
-        _scroll.position.maxScrollExtent,
-      );
-    } else {
-      return false;
-    }
-    if (target == _scroll.offset) return false;
-    _scroll.jumpTo(target);
-    return true;
-  }
-
-  /// Line [line] as the scroll view sees it: its top and its bottom, in the
-  /// view's coordinates ([_lineBox]) — the map starts below the top
-  /// padding, and the last row takes the bottom padding with it. A line of
-  /// a side-by-side column is its own line, not its block's row, which can
-  /// be taller than the screen.
-  ({double top, double bottom}) _lineBounds(int line) {
-    final box = _lineBox(line);
-    final last =
-        _folds.hostOf(line) == null &&
-        _folds.rowOf(line) == _heights.length - 1;
-    return (
-      top: box.top,
-      bottom: box.top + box.height + (last ? widget.padding.bottom : 0),
-    );
-  }
-
-  /// The line drawn at [y], in the scroll view's coordinates, and at [x],
-  /// the note box's, when a side-by-side block is there: its column's line
-  /// at that height, the first column's when [x] is null.
-  int _lineAtY(double y, [double? x]) {
-    final local = y - widget.padding.top;
-    final row = local < 0
-        ? 0
-        : _heights.indexAt(local) ?? math.max(0, _heights.length - 1);
-    final line = _folds.lineOf(row);
-    final layout = _folds.isHost(line) ? _hosts.openedOn(line) : null;
-    if (layout == null) return line;
-    final run = layout.run;
-    final inside = local - _heights.offsetOf(row) - _band;
-    if (inside < 0) return run.start;
-    // The row of columns at that height, and the column nearest [x].
-    var top = 0.0;
-    for (final columns in layout.rows) {
-      var tallest = 0.0;
-      for (final at in columns) {
-        tallest = math.max(tallest, layout.maps[at].totalExtent);
-      }
-      if (inside < top + tallest + _gap) {
-        final column = _columnNearest(layout, columns, x);
-        final map = layout.maps[column];
-        final at = map.indexAt(inside - top) ?? math.max(0, map.length - 1);
-        return run.columns[column].start + at;
-      }
-      top += tallest + _gap;
-    }
-    return run.closed ? run.end - 1 : run.columns.last.end - 1;
-  }
-
-  /// Which column of [columns], a row of [layout]'s, [x] — the note box's —
-  /// is nearest; the first when [x] is null. The gap between two is split
-  /// between them.
-  int _columnNearest(LiveLayout layout, List<int> columns, double? x) {
-    if (x == null) return columns.first;
-    final left = _columnsLeft(layout);
-    for (var at = 0; at < columns.length; at++) {
-      final column = columns[at];
-      final right =
-          left +
-          LiveHosts.leftOf(layout, column, _gap) +
-          layout.widths[column] +
-          _gap / 2;
-      if (x < right) return column;
-    }
-    return columns.last;
-  }
 
   /// Line [index] as the view draws it: the **buffer's** text, with the
   /// tokenizer's runs when the two agree about that line.
@@ -3266,7 +1735,8 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   );
 
   /// Line [index]'s tokens, or null while they are **not known**: the line of
-  /// a long note, before the background reading lands ([_restyle]).
+  /// a long note, before the background reading lands
+  /// ([SourceStyling.restyle]).
   ///
   /// A null is not "this line has no tokens" — it is "nobody has read it
   /// yet", and the two must not be confused by a reader that takes tokens as
@@ -3286,35 +1756,6 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
         : overlayTokens(tokens, commands, TokenKind.templateCommand);
   }
 
-  /// The part of the selection that falls inside line [index], as offsets local
-  /// to that line, or null when none of it does.
-  ///
-  /// The selection is painted as a *background on the runs it covers* rather
-  /// than
-  /// as rectangles over them: the runs already know how to wrap, and a
-  /// rectangle
-  /// would have to be recomputed from the layout on every frame that moved
-  /// anything.
-  (int, int)? _selectionIn(int index) {
-    final selection = _selection;
-    if (selection.isCollapsed) return null;
-    return _rangeIn(index, selection.start, selection.end);
-  }
-
-  /// The part of the IME's composing range inside line [index], underlined
-  /// the way every text field shows the word being composed.
-  (int, int)? _composingIn(int index) {
-    final composing = _input.composing;
-    if (!composing.isValid || composing.isCollapsed) return null;
-    return _rangeIn(index, composing.start, composing.end);
-  }
-
-  /// The words the checker flags on line [index], as offsets local to it.
-  List<TextRange> _misspelledIn(int index) {
-    if (widget.spellCheck == null) return const <TextRange>[];
-    return _spellRanges(index, widget.buffer.lineAt(index));
-  }
-
   /// The rectangle a problem's span covers, in global coordinates, or null
   /// while the piece that holds it is not built.
   ///
@@ -3328,315 +1769,21 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     final lineStart = buffer.offsetOfLine(line);
     final lineEnd = lineStart + buffer.lineLengthAt(line);
     final last = (end > start ? end - 1 : start).clamp(lineStart, lineEnd);
-    final (piece, paragraph) = _fragmentAt(line, last - lineStart);
+    final (piece, paragraph) = _pieces.fragmentAt(line, last - lineStart);
     if (piece == null || paragraph == null) return null;
-    final length = paragraph.text.toPlainText().length;
-    final from = (start - lineStart - piece.start).clamp(0, length);
-    final to = (end.clamp(lineStart, lineEnd) - lineStart - piece.start).clamp(
-      from,
-      length,
+    return sourcePieceSpanRect(
+      piece,
+      paragraph,
+      start - lineStart,
+      end.clamp(lineStart, lineEnd) - lineStart,
     );
-    final boxes = paragraph.getBoxesForSelection(
-      TextSelection(baseOffset: from, extentOffset: to),
-    );
-    if (boxes.isEmpty) return null;
-    var left = boxes.first.left;
-    var right = boxes.first.right;
-    for (final box in boxes) {
-      if (box.left < left) left = box.left;
-      if (box.right > right) right = box.right;
-    }
-    return Rect.fromLTRB(
-      left,
-      boxes.first.top,
-      right,
-      boxes.first.bottom,
-    ).shift(paragraph.localToGlobal(Offset.zero));
-  }
-
-  /// The find bar's matches on line [index], as offsets local to it.
-  List<(int, int, bool)> _foundIn(int index) {
-    final matches = widget.findMatches;
-    if (matches == null) return const <(int, int, bool)>[];
-    final start = widget.buffer.offsetOfLine(index);
-    return matches
-        .within(start, start + widget.buffer.lineLengthAt(index))
-        .toList();
-  }
-
-  /// `[from, to)` of the note, as offsets local to line [index], or null.
-  (int, int)? _rangeIn(int index, int from, int to) {
-    final start = widget.buffer.offsetOfLine(index);
-    final end = start + widget.buffer.lineLengthAt(index);
-    final a = from < start ? start : from;
-    final b = to > end ? end : to;
-    if (a >= b) return null;
-    return (a - start, b - start);
-  }
-
-  /// The paragraph of line [line], when a frame has built it.
-  RenderParagraph? _paragraphAt(int line) {
-    final object = _lineKeys[line]?.currentContext?.findRenderObject();
-    return object is RenderParagraph ? object : null;
-  }
-
-  /// The key of line `index`'s paragraph, created on first use.
-  GlobalKey _keyFor(int index) {
-    final key = _lineKeys.putIfAbsent(index, GlobalKey.new);
-    if (_lineKeys.length > 512) {
-      _lineKeys.removeWhere((_, key) => key.currentContext == null);
-    }
-    return key;
-  }
-
-  /// The key of fragment [at] of line [line] — the line's own paragraph for
-  /// its first, and one per fragment of a table row laid out in fitted
-  /// columns — created on first use.
-  GlobalKey _fragmentKey(int line, int at) {
-    if (at == 0) return _keyFor(line);
-    final key = _fragmentKeys.putIfAbsent((line, at), GlobalKey.new);
-    if (_fragmentKeys.length > 512) {
-      _fragmentKeys.removeWhere((_, key) => key.currentContext == null);
-    }
-    return key;
-  }
-
-  /// The paragraph [key] draws, when a frame has laid it out.
-  RenderParagraph? _renderOf(GlobalKey key) {
-    final object = key.currentContext?.findRenderObject();
-    return object is RenderParagraph && object.attached && object.hasSize
-        ? object
-        : null;
-  }
-
-  /// The paragraphs line [line] is drawn in: the line's own, or a table row
-  /// laid out in fitted columns. Each says where its source starts on the
-  /// line and where it stands in the line's box — below the table's cell
-  /// padding for a wrapped row, so the caret's shift and the grid agree.
-  List<SourcePiece> _piecesOf(int line) {
-    SourcePiece one(int start, int end, [double x = 0, double y = 0]) =>
-        (key: _keyFor(line), start: start, end: end, x: x, y: y);
-    final length = widget.buffer.lineLengthAt(line);
-    final single = <SourcePiece>[one(0, length)];
-    final block = _styler?.blockOf(line);
-    if (block == null || block.kind != BlockKind.table) return single;
-    final row = _tableRowAt(context, line, block, _caretSpot.value);
-    final wrapped = row?.wrapped;
-    if (wrapped == null || wrapped.isEmpty) return single;
-    final pad = widget.theme.tableCellPadding.top;
-    final pieces = <SourcePiece>[];
-    var y = pad;
-    for (final visualLine in wrapped) {
-      for (final piece in visualLine.pieces) {
-        pieces.add((
-          key: _fragmentKey(line, pieces.length),
-          start: piece.start,
-          end: piece.end,
-          x: piece.x,
-          y: y,
-        ));
-      }
-      y += visualLine.height;
-    }
-    return pieces.isEmpty ? single : pieces;
-  }
-
-  /// The fragment of line [line] a caret at [local] of the line is drawn in,
-  /// and its paragraph when a frame has built it.
-  (SourcePiece?, RenderParagraph?) _fragmentAt(int line, int local) {
-    final piece = _pieceHolding(_piecesOf(line), line, local);
-    return (piece, piece == null ? null : _renderOf(piece.key));
-  }
-
-  /// The piece of line [line] a caret at [local] is drawn in: the one whose
-  /// source holds it. A wrapped row's pieces hold only its cells' text, so
-  /// an offset in the room round them — a pipe, the spaces by it — is its
-  /// cell's, on its side of the pipe (`MarkdownTable.cellRangesOf`), and
-  /// drawn at that cell's nearer edge: the room before a pipe at the end of
-  /// the cell on its left, the room after it at the start of the one on its
-  /// right. That is the side an unwrapped row draws it on, the room's
-  /// characters spread evenly between the two cells' text.
-  SourcePiece? _pieceHolding(List<SourcePiece> pieces, int line, int local) {
-    for (final piece in pieces) {
-      if (local >= piece.start && local <= piece.end) return piece;
-    }
-    if (pieces.isEmpty) return null;
-    final cells = MarkdownTable.cellRangesOf(widget.buffer.lineAt(line));
-    var (from, to) = local < cells.first.$1 ? cells.first : cells.last;
-    for (final (start, end) in cells) {
-      if (local >= start && local <= end) {
-        (from, to) = (start, end);
-        break;
-      }
-    }
-    // The cell's pieces are contiguous and none holds [local]: it is before
-    // all of them or past all of them.
-    SourcePiece? before;
-    SourcePiece? after;
-    for (final piece in pieces) {
-      if (piece.start < from || piece.end > to) continue;
-      if (piece.end < local && (before == null || piece.end > before.end)) {
-        before = piece;
-      }
-      if (piece.start > local && (after == null || piece.start < after.start)) {
-        after = piece;
-      }
-    }
-    return before ?? after ?? pieces.first;
-  }
-
-  /// The piece of a wrapped row [global] is *in*, and where in it the point
-  /// lands, or null when it is in none of them: the room between two columns
-  /// is nobody's, and a point outside the row belongs to a line the caller
-  /// has not asked yet.
-  ({SourcePiece piece, RenderParagraph paragraph, Offset local})? _pieceAt(
-    List<SourcePiece> pieces,
-    Offset global,
-  ) {
-    for (final piece in pieces) {
-      final paragraph = _renderOf(piece.key);
-      if (paragraph == null) continue;
-      final local = paragraph.globalToLocal(global);
-      if (local.dx < 0 ||
-          local.dx >= paragraph.size.width ||
-          local.dy < 0 ||
-          local.dy >= paragraph.size.height) {
-        continue;
-      }
-      return (piece: piece, paragraph: paragraph, local: local);
-    }
-    return null;
-  }
-
-  /// The fragment of a wrapped row under [global], and where in it the point
-  /// lands: the piece whose box holds it, or — under none, in the padding
-  /// between two columns or below the last line — the nearest one, the
-  /// vertical distance weighing more than the horizontal.
-  ({SourcePiece piece, RenderParagraph paragraph, Offset local})? _pieceUnder(
-    List<SourcePiece> pieces,
-    Offset global,
-  ) {
-    ({SourcePiece piece, RenderParagraph paragraph, Offset local})? best;
-    var bestDistance = double.infinity;
-    for (final piece in pieces) {
-      final paragraph = _renderOf(piece.key);
-      if (paragraph == null) continue;
-      final local = paragraph.globalToLocal(global);
-      final dx = local.dx < 0
-          ? -local.dx
-          : (local.dx > paragraph.size.width
-                ? local.dx - paragraph.size.width
-                : 0.0);
-      final dy = local.dy < 0
-          ? -local.dy
-          : (local.dy > paragraph.size.height
-                ? local.dy - paragraph.size.height
-                : 0.0);
-      if (dx == 0 && dy == 0) {
-        return (piece: piece, paragraph: paragraph, local: local);
-      }
-      final distance = dx + dy * 8;
-      if (distance >= bestDistance) continue;
-      bestDistance = distance;
-      best = (
-        piece: piece,
-        paragraph: paragraph,
-        local: Offset(
-          local.dx.clamp(0, paragraph.size.width),
-          local.dy.clamp(0, paragraph.size.height),
-        ),
-      );
-    }
-    return best;
-  }
-
-  /// How tall the line [line] is drawn: its paragraph's height, or the sum
-  /// of a wrapped table row's visual lines.
-  double _drawnHeightOf(int line) {
-    final block = _styler?.blockOf(line);
-    if (block != null && block.kind == BlockKind.table) {
-      final row = _tableRowAt(context, line, block, _caretSpot.value);
-      final wrapped = row?.wrapped;
-      if (wrapped != null && wrapped.isNotEmpty) {
-        return wrapped.fold<double>(0, (sum, one) => sum + one.height);
-      }
-    }
-    return _paragraphAt(line)?.size.height ?? 0;
-  }
-
-  /// The line the caret sits on, or -1.
-  int get _caretLineIndex {
-    final line = widget.buffer.lineOf(_selection.extent);
-    return line < 0 || line >= lineCount ? -1 : line;
-  }
-
-  /// The caret's line and the run of non-whitespace it is in on that line, as
-  /// the lines are told it ([CaretSpot]).
-  ///
-  /// [offset] is the caret asked about, defaulting to the selection's own end.
-  /// It is passed explicitly where the caller already knows where the caret is
-  /// going — a move publishes the *destination*, and the widget's own
-  /// selection may still be the old one until the shell that owns it rebuilds.
-  ///
-  /// The run is read from the line's own text rather than off the styled
-  /// tokens: the reveal compares a *marker* against it, and the markers belong
-  /// to the run (`runAround`), so the two agree by construction.
-  CaretSpot _spotOf([int? offset]) {
-    final at = offset ?? _selection.extent;
-    final line = widget.buffer.lineOf(at);
-    if (line < 0 || line >= lineCount) return const CaretSpot(-1, 0, 0);
-    final text = widget.buffer.lineAt(line);
-    final column = (at - widget.buffer.offsetOfLine(line)).clamp(
-      0,
-      text.length,
-    );
-    final (from, to) = runAround(text, column);
-    return CaretSpot(line, from, to);
   }
 
   /// The caret's spot, exposed so a test can hold that a move inside a run
   /// tells no line anything. Exposed as a listenable rather than as a value
   /// because *not* notifying is the property.
   @visibleForTesting
-  ValueListenable<CaretSpot> get caretSpot => _caretSpot;
-
-  /// Publishes the formats on at [spot] to the shell's toolbar (#246).
-  ///
-  /// The answer is read off the caret's line — the same tokens the colours are
-  /// drawn from — and written into the shell's notifier, which is the shape the
-  /// legacy WYSIWYG published through, so the toolbar reads one thing whichever
-  /// engine draws the pane (`active_formats.dart`).
-  ///
-  /// Deferred out of a build: the toolbar is not a descendant of this surface,
-  /// so notifying it while the framework is building is a `markNeedsBuild` it
-  /// refuses. The answer is the same one frame later, and the caret's own value
-  /// is read again then rather than carried.
-  void _publishActive(CaretSpot spot) {
-    if (SchedulerBinding.instance.schedulerPhase ==
-        SchedulerPhase.persistentCallbacks) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) _publishActiveNow(_caretSpot.value);
-      });
-      return;
-    }
-    _publishActiveNow(spot);
-  }
-
-  void _publishActiveNow(CaretSpot spot) {
-    final notifier = widget.activeItems;
-    if (notifier == null) return;
-    final active = spot.line < 0 || spot.line >= lineCount
-        ? const <ToolbarItem>{}
-        : activeFormatsOf(
-            text: widget.buffer.lineAt(spot.line),
-            tokens: tokensOf(spot.line),
-            run: (spot.runStart, spot.runEnd),
-          );
-    // Equal sets are not a change: the toolbar is not told to rebuild when the
-    // caret moves inside a run whose formats are the same.
-    if (setEquals(active, notifier.value)) return;
-    notifier.value = active;
-  }
+  ValueListenable<CaretSpot> get caretSpot => _caret.spot;
 
   /// From how many lines on a note's colours are read in the background.
   ///
@@ -3654,7 +1801,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
 
   /// From how many lines on a note read in place reads the blocks of its top
   /// alone before its first frame, and the rest a slice at a time after it
-  /// ([_carryScanOn]).
+  /// (`SourceStyling`).
   ///
   /// The whole scan of a 16 000-line note was most of the 20 ms frame that
   /// opened it on a tablet (device log, 2026-10-20), for a frame that draws
@@ -3663,391 +1810,21 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   @visibleForTesting
   static int progressiveLines = BlockScanner.defaultBudget;
 
-  /// How many lines of such a note are read before its first frame: a
-  /// screen and more. A frame placed further down — a note reopened where
-  /// it was read — reads on as far as its lines ([SourceStyler.blockOf]).
-  static const int _firstScanLines = 512;
-
-  /// Reads the note's colours again, from the top.
-  ///
-  /// A long note is read in an isolate ([SourceStyler.inBackground]): the
-  /// block scan of a 246 MB note is 2 s of a frozen window. Its lines are
-  /// drawn plain until the reading lands, and one that lands on a note that
-  /// moved on meanwhile is started again.
-  void _restyle() {
-    final buffer = widget.buffer;
-    final reading = ++_stylings;
-    // The scan a slice was waiting to carry on is the styler's this one
-    // replaces: left waiting, it kept the new styler's from being carried
-    // on, and found the old one gone when it ran.
-    _scanSlice?.cancel();
-    _scanSlice = null;
-    if (!readsInBackground(buffer)) {
-      _reading = null;
-      final progressive = buffer.lineCount >= progressiveLines;
-      _styler = SourceStyler(
-        buffer,
-        firstLines: progressive ? _firstScanLines : null,
-      );
-      if (progressive) _carryScanOn();
-      return;
-    }
-    _styler = null;
-    // The landing itself is what [readingLanded] answers: a reader waiting
-    // on it finds the styler in place when it resumes.
-    final landing = SourceStyler.inBackground(buffer).then((styler) {
-      if (!mounted || reading != _stylings) return;
-      if (!identical(widget.buffer, buffer)) return;
-      if (styler.revision != buffer.revision) {
-        _restyle();
-        return;
-      }
-      setState(() => _styler = styler);
-      // The colours landing is also the formats landing: until they are
-      // read, the caret's line has no tokens and the toolbar would show
-      // every button dark on a note whose syntax the writer is inside.
-      _publishActive(_caretSpot.value);
-      // And it is the caret's line landing: a heading, or a formula, is
-      // drawn at another height than the plain line the caret was measured
-      // over. The reading came in outside any edit, so nothing else asks
-      // for the caret to be measured again.
-      _measureCaretAfterFrame();
-    });
-    _reading = landing;
-    unawaited(landing);
-  }
-
-  /// The last reading of a long note, from the call that started it to the
-  /// styler in place — complete once it has landed; null for a note read in
-  /// place.
-  Future<void>? _reading;
-
   /// Completes when the reading of the note under way has landed — at once
   /// when none is: what a reader of the same lines waits for rather than
   /// reading them again (#1199), and then asks [handOver] for.
-  Future<void> get readingLanded => _reading ?? Future<void>.value();
+  Future<void> get readingLanded => _styling.readingLanded;
 
-  /// The display formula line [index] is part of, for `live` mode to draw
-  /// in its lines' place: its lines and its TeX. Null for any other line.
-  LiveFormula? _formulaOf(int index) {
-    final block = _styler?.blockOf(index);
-    if (block == null || block.kind != BlockKind.math) return null;
-    final tex = displayTexOf(BlockParser.blockText(block, widget.buffer));
-    if (tex.isEmpty) return null;
-    return (start: block.startLine, end: block.endLine, tex: tex);
-  }
-
-  /// The Mermaid block line [index] is part of, for `live` mode to draw in
-  /// its lines' place: its fence's lines, and on the first of them — the
-  /// one the diagram is drawn under — the source between them. Null for any
-  /// other line, and for a `mermaid` fence with no code. A closed `todo` fence
-  /// is one too where the note's tasks are at hand ([TodoBlockScope]): drawn
-  /// as the list it asks for, empty or not (#1152).
-  ///
-  /// Every line of the block asks, every build: the block's text is read
-  /// for its first line alone, where reading it for each made a diagram of
-  /// k lines cost k² of them. The others only ask whether there is code,
-  /// which the first line of it answers.
-  LiveDiagram? _diagramOf(int index) {
-    final block = _styler?.blockOf(index);
-    if (block == null || block.kind != BlockKind.fencedCode) return null;
-    final info = block.fenceInfo?.toLowerCase();
-    if (info == 'todo' && TodoBlockScope.of(context) != null) {
-      return _todoBlockOf(index, block);
-    }
-    if (info != 'mermaid') return null;
-    if (index != block.startLine) {
-      final lineAt = widget.buffer.lineAt;
-      if (!fenceHasCode(lineAt, block.startLine, block.endLine)) return null;
-      return (
-        start: block.startLine,
-        end: block.endLine,
-        source: null,
-        todo: false,
-      );
-    }
-    final lines = BlockParser.blockText(block, widget.buffer).split('\n');
-    // The code as the read view and the export read it.
-    final code = fenceBody(lines)?.code;
-    if (code == null || code.trim().isEmpty) return null;
-    return (
-      start: block.startLine,
-      end: block.endLine,
-      source: code,
-      todo: false,
-    );
-  }
-
-  /// The `todo` fence [block], line [index] of it, as [_diagramOf] answers for
-  /// a diagram: null for a fence the note has not closed, whose body would be
-  /// the rest of the note.
-  LiveDiagram? _todoBlockOf(int index, Block block) {
-    final lineAt = widget.buffer.lineAt;
-    final last = block.endLine - 1;
-    if (last <= block.startLine ||
-        fenceBody(<String>[lineAt(block.startLine), lineAt(last)])?.closed !=
-            true) {
-      return null;
-    }
-    if (index != block.startLine) {
-      return (
-        start: block.startLine,
-        end: block.endLine,
-        source: null,
-        todo: true,
-      );
-    }
-    final lines = BlockParser.blockText(block, widget.buffer).split('\n');
-    return (
-      start: block.startLine,
-      end: block.endLine,
-      source: fenceBody(lines)?.code ?? '',
-      todo: true,
-    );
-  }
-
-  /// Moves the colours along [edit], already made to the buffer.
-  void _styleEdited(SourceEdit edit) {
-    _styler?.edited(edit);
-    _carryScanOn();
-  }
-
-  /// The next slice of a scan an edit left owed, when one is waiting.
-  Timer? _scanSlice;
-
-  /// Carries on, a slice at a time, the scan an edit left owed
-  /// (`docs/records/huge-notes.md` item 3).
-  ///
-  /// An edit that changes what the rest of the note is — a `$$` opened at 50 %
-  /// of a 246 MB note — scans its budget of lines and stops, and the lines on
-  /// screen catch it up as far as they need. Nothing drawn waits for the rest,
-  /// so nothing here repaints; what finishing it gives back is the whole
-  /// note's answers — the outline, the blocks — to the readers that ask for
-  /// all of it.
-  ///
-  /// Each slice is a timer of its own, so a frame or a key between two slices
-  /// waits for one slice at most. Not an idle-priority scheduler task: those
-  /// are refused while any animation runs, and a refused task asks the event
-  /// loop again at once — a core spinning for as long as a spinner turns.
-  void _carryScanOn() {
-    final styler = _styler;
-    if (_scanSlice != null || styler == null || styler.settled) return;
-    _scanSlice = Timer(Duration.zero, () {
-      _scanSlice = null;
-      if (!mounted || !identical(_styler, styler)) return;
-      styler.advance();
-      // A layout that found the scan owed drew the `columns` blocks
-      // stacked (#729): settled, it lays them out side by side.
-      if (styler.settled && _runsOwed) {
-        setState(() {});
-      }
-      _carryScanOn();
-    });
-  }
-
-  BlockHeightMap _map() {
-    // Read once for the whole map, not once a row: a map is built over every
-    // row of the note, 2.76 M on the 246 MB one.
-    final columns = _columnsPerLine;
-    final row = _rowHeight;
-    final buffer = widget.buffer;
-    // A row's estimate when a frame first comes near it, a chunk of rows at
-    // a time: the map is built on the frame that opens the note, and asking
-    // every line was 2.9 M estimates on the 246 MB stress note. A chunk is
-    // asked with the rows as they are then — folds and side-by-side blocks
-    // (#729) may have come since — so with any, a row is read as its line.
-    return BlockHeightMap.lazy(
-      count: _folds.rowCount(lineCount),
-      estimate: (index) => _folds.isEmpty
-          ? _estimateOf(buffer.lineLengthAt(index), columns, row)
-          : _estimateRow(index),
-      estimateSpan: (first, end) => _folds.isEmpty
-          ? _estimateSpanOf(buffer, first, end, columns, row)
-          : _estimateRowSpan(first, end, columns, row),
-    );
-  }
-
-  /// Rows `[first, end)`'s height as best known without asking each: the
-  /// lines they draw, less the ones a fold hides — a side-by-side block's
-  /// counted as its lines one under the other.
-  double _estimateRowSpan(int first, int end, double columns, double row) {
-    if (end <= first) return 0;
-    final from = _folds.lineOf(first);
-    final last = _folds.lineOf(end - 1);
-    final to = _folds.hosts[last] ?? last + 1;
-    var total = 0.0;
-    for (final (start, stop) in _folds.unfoldedSpans(from, to)) {
-      total += _estimateSpanOf(widget.buffer, start, stop, columns, row);
-    }
-    return total;
-  }
-
-  /// Row [row]'s height before a frame has drawn it: its line's, or a
-  /// side-by-side block's.
-  double _estimateRow(int row) {
-    final line = _folds.lineOf(row);
-    final hosted = _folds.isHost(line) ? _hosts.openedOn(line) : null;
-    return hosted == null ? _estimate(line) : _hostEstimate(hosted);
-  }
-
-  /// How line [index] of table [block] is laid out with the caret at [at]:
-  /// as every line of it is at rest, but for the run the caret is in, whose
-  /// marks show as a paragraph's word does — and widen its column.
-  ///
-  /// Null outside `live`: source draws a table's line as the one paragraph
-  /// it is, so the caret, a tap and the grid are not to look for pieces of a
-  /// fitted row there.
-  LiveTableRow? _tableRowAt(
-    BuildContext context,
-    int index,
-    Block block,
-    CaretSpot at,
-  ) {
-    if (!widget.hideMarkers) return null;
-    final inside = at.line >= block.startLine && at.line < block.endLine;
-    return _tables.rowOf(
-      index,
-      block,
-      widget.buffer,
-      tokensOf: (line) => _lineAt(line).tokens,
-      hidden: (line, token) {
-        if (!token.marker && !isSourceMarker(token.kind)) return false;
-        if (isSourceMarker(token.kind) || line != at.line) return true;
-        return token.start < at.runStart || token.end > at.runEnd;
-      },
-      styleOf: (token) => nestedTokenStyle(
-        token,
-        _syntax ??
-            (widget.dark
-                ? SyntaxColors.fallbackDark
-                : SyntaxColors.fallbackLight),
-        dark: widget.dark,
-      ),
-      theme: widget.theme,
-      scaler: _scaler,
-      // A table in a side-by-side column is fitted to the column (#729).
-      budget: _widthOf(index),
-      reveal: inside ? at : null,
-      revealLine: inside ? at.line : null,
-      tokensFrom: _styler,
-    );
-  }
-
-  /// A line's height before a frame has drawn it: its character count over the
-  /// width a line holds, which is the same shape the read view's estimator has
-  /// and is corrected by the sliver's own measurement.
-  /// How many lines [_estimate] was asked about, for the test that holds a
-  /// note with a side-by-side block (#729) to the chunks a frame reaches.
-  @visibleForTesting
-  int lineEstimates = 0;
-
-  double _estimate(int index) {
-    lineEstimates++;
-    return _estimateOf(
-      // The *buffer*, never the tokenizer: `HighlightDocument.lineAt`
-      // materializes the line, so asking it for every line of a 10 000-line
-      // note to fill the height map is a whole-note tokenize on every
-      // keystroke. And the line's length, not the line: a line is cut out of
-      // the text it was read from when it is asked for (`LineChunk`).
-      widget.buffer.lineLengthAt(index),
-      _columnsPerLine,
-      _rowHeight,
-    );
-  }
-
-  /// The height of a line [length] long, [columns] to a row of [row].
-  static double _estimateOf(int length, double columns, double row) =>
-      (length == 0 ? 1 : (length / columns).ceil()) * row;
-
-  /// The height of lines `[first, end)` of [buffer] before they are asked
-  /// one by one: from their characters alone, O(log lines).
-  ///
-  /// A line of `l` characters takes `l / columns` rows rounded up — half a
-  /// row more than the division, on average — and one row at least. So
-  /// lines holding `c` characters between them take about `c / columns +
-  /// lines / 2` rows, and never fewer than one each.
-  static double _estimateSpanOf(
-    SourceBuffer buffer,
-    int first,
-    int end,
-    double columns,
-    double row,
-  ) {
-    final lines = end - first;
-    final to = end < buffer.lineCount
-        ? buffer.offsetOfLine(end)
-        : buffer.length;
-    // The terminators are not text: about one character a line.
-    final text = to - buffer.offsetOfLine(first) - lines;
-    final rows = text / columns + lines / 2;
-    return (rows < lines ? lines : rows) * row;
-  }
-
-  /// Roughly how many monospace characters fit a line at this width and size.
-  ///
-  /// The pane's real width is not known here (the estimator is asked before a
-  /// frame), so this is deliberately a *shape* and not a measurement: the
-  /// sliver
-  /// replaces every estimate with the line's own height as soon as it draws it,
-  /// and only a jump made before that first frame can see the difference.
-  double get _columnsPerLine {
-    final size = _textScaler.scale(widget.theme.body.fontSize ?? 14);
-    final advance = size * 0.6;
-    if (advance <= 0) return 1;
-    // The pane's real width once a frame has measured it; before that a guess,
-    // which the sliver replaces with measured heights as it draws each line.
-    final width = _paneWidth ?? 360;
-    return (width - _gutter) / advance;
-  }
-
-  /// The width the text has, from the last frame that laid it out.
-  double? _paneWidth;
-
-  /// The text scale the lines are drawn at, from the last frame.
-  TextScaler _textScaler = TextScaler.noScaling;
-
-  /// One row's height as the lines are drawn: the theme's, at the note's
-  /// text scale. The theme's own number is the unscaled one, and paging or
-  /// estimating with it put the caret short of where a page ends at any size
-  /// but 100 %.
-  double get _rowHeight => _textScaler.scale(widget.theme.lineHeight);
-
-  /// The space the note column puts on each side of the text.
-  double _sideSpace = 0;
-
-  /// The gutter's width this frame: the numbers, and with a note column the
-  /// legacy `side + 16 - 5`, so the text starts exactly on the column's edge.
-  double _gutter = 0;
-
-  /// The field's inset on the left ([noteFieldInset]).
-  static const double _fieldInset = noteFieldInset;
-
-  /// The field's inset on the right: the column's edge, as the read view's
-  /// ([noteTextInsets]).
-  double get _rightInset => _sideSpace + NoteColumn.textInset;
-
-  /// The field's inset on the left.
-  double get _leftInset => _fieldInset;
-
-  /// How wide the numbers are in the note's own face, plus the gap
-  /// ([lineNumbersWidth]); kept while the digits, the face and the scale are.
-  double _numbersWidth(TextScaler scaler) {
-    if (!widget.showLineNumbers) return 0;
-    final digits = widget.buffer.lineCount.toString().length;
-    final style = widget.theme.body;
-    final cached = _digits;
-    if (cached != null &&
-        cached.digits == digits &&
-        cached.style == style &&
-        cached.scaler == scaler) {
-      return cached.width;
-    }
-    final width = lineNumbersWidth(widget.buffer.lineCount, style, scaler);
-    _digits = (digits: digits, style: style, scaler: scaler, width: width);
-    return width;
-  }
-
-  ({int digits, TextStyle style, TextScaler scaler, double width})? _digits;
+  /// The Mermaid block — or, where the note's tasks are at hand
+  /// ([TodoBlockScope], asked of this view), the `todo` fence — line
+  /// [index] is part of, for `live` to draw in its lines' place
+  /// ([liveDiagramOf]).
+  LiveDiagram? _diagramOf(int index) => liveDiagramOf(
+    index,
+    _styler?.blockOf(index),
+    widget.buffer,
+    drawsTodo: () => TodoBlockScope.of(context) != null,
+  );
 
   /// Measures the caret after the frame that laid its line out.
   void _scheduleCaret() {
@@ -4055,7 +1832,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     // The caret moved: the hint follows it off the problems as they stand.
     _hints.refresh();
     _revealCaret();
-    _restartBlink();
+    _blink.restart();
     _followCaret();
     // Measured *now*, from the layout the last frame left, and again after the
     // next frame: a caret that moved because of a tap or a key is on screen
@@ -4063,9 +1840,9 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     // Waiting only for the post-frame callback makes the caret a frame late,
     // which
     // is how a cursor feels slow when it is doing nothing slow.
-    _measureCaret();
+    _caret.measure();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _measureCaret();
+      if (mounted) _caret.measure();
     });
   }
 
@@ -4089,28 +1866,9 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     return true;
   }
 
-  /// Shows the caret and starts its blink over.
-  ///
-  /// Every move does this, the way every text field does: a caret that moved
-  /// during the half of the blink it spends hidden stays invisible for up to
-  /// 550 ms, which reads as a tap that took that long to land.
-  void _restartBlink() {
-    _caretOn.value = true;
-    _blink?.cancel();
-    // A window in the tray is nobody's to see, and a note the keys are not
-    // going to is not being typed in: in either, the blink would repaint at
-    // its own pace and nothing else would ever stop it (#512). The caret
-    // stays drawn, steady.
-    _blink = WindowVisibility.shown.value && _focus.hasFocus
-        ? Timer.periodic(const Duration(milliseconds: 550), (_) {
-            _caretOn.value = !_caretOn.value;
-          })
-        : null;
-  }
-
   /// The window was hidden or shown again: the blink stops drawing while it
   /// is hidden and starts over when it is back (#512).
-  void _onWindowShown() => _restartBlink();
+  void _onWindowShown() => _blink.restart();
 
   /// The keys given back to the note when its window comes back to the
   /// front (#539).
@@ -4132,117 +1890,21 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// Whether the caret is blinking right now, for the test that holds the
   /// blink to the window's visibility (#512).
   @visibleForTesting
-  bool get caretBlinking => _blink != null;
+  bool get caretBlinking => _blink.blinking;
 
   /// Measures the caret again once the next frame has laid its line out:
   /// the caret stayed where it was while its line was laid out anew, in
   /// another mode or at another width.
   void _measureCaretAfterFrame() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _measureCaret();
+      if (mounted) _caret.measure();
     });
   }
 
   /// How many times the caret was measured, for the test that holds a
   /// rebuild with a theme of the same values to measuring nothing (#789).
   @visibleForTesting
-  int get caretMeasures => _caretMeasures;
-  int _caretMeasures = 0;
-
-  /// Where the caret is, from the caret line's own layout.
-  void _measureCaret() {
-    _caretMeasures++;
-    final line = _caretLineIndex;
-    // Every selection change comes through here, so this is the one place the
-    // lines hear which of them holds the caret and which of its words, and the
-    // toolbar hears which formats are on at it.
-    final spot = _spotOf();
-    _caretSpot.value = spot;
-    // A closing bracket a pair wrote is stepped over only on its own line.
-    _brackets.caretOnLine(line);
-    _publishActive(spot);
-    if (line < 0) {
-      _caretRect.value = null;
-      _caretShift.value = Offset.zero;
-      return;
-    }
-    final local = _selection.extent - widget.buffer.offsetOfLine(line);
-    // A table row laid out in fitted columns is drawn as one paragraph per
-    // piece: the caret is measured in — and drawn at — the piece it is in,
-    // and the painter is told how far that piece stands from the line's box.
-    final (piece, paragraph) = _fragmentAt(line, local);
-    if (paragraph == null || piece == null) {
-      _caretRect.value = null;
-      _caretShift.value = Offset.zero;
-      return;
-    }
-    _caretShift.value = Offset(piece.x, piece.y);
-    final length = paragraph.text.toPlainText().length;
-    final position = TextPosition(
-      offset: (local - piece.start).clamp(0, length),
-    );
-    _caretRect.value = _caretRectIn(paragraph, position, length);
-    _sendGeometry();
-  }
-
-  /// The caret's rectangle in [paragraph] at [position], in the paragraph's
-  /// own coordinates.
-  ///
-  /// The horizontal offset is the painter's, over the run the caret is really
-  /// over. Its *row* — the top and the height — comes from the paragraph's own
-  /// line metrics, not from the glyph the caret stands by: the space at the
-  /// end of a line is measured from a fallback face and answers a shorter box
-  /// than the line, so the caret shrank and the typewriter light over it
-  /// shrank with it (#509). An empty paragraph has no line metrics, and the
-  /// glyph's own height is all there is there.
-  Rect _caretRectIn(
-    RenderParagraph paragraph,
-    TextPosition position,
-    int length,
-  ) {
-    final at = paragraph.getOffsetForCaret(
-      position,
-      Rect.fromLTWH(0, 0, _caretWidth, 0),
-    );
-    // The line the caret stands on, as the paragraph bounds it: a box as tall
-    // as the tallest run on its visual line ([ui.BoxHeightStyle.max]). Only
-    // the characters either side of the caret are asked for, so a paragraph
-    // the length of a chapter costs the same as a word; at a soft wrap the two
-    // sit on different lines, and the one the caret's own offset is on wins.
-    // That row is what makes a normal glyph and the trailing fallback space
-    // answer alike, where the glyph's own box is shorter.
-    final offset = position.offset;
-    final boxes = paragraph.getBoxesForSelection(
-      TextSelection(
-        baseOffset: math.max(0, offset - 1),
-        extentOffset: math.min(length, offset + 1),
-      ),
-      boxHeightStyle: ui.BoxHeightStyle.max,
-    );
-    // The row whose top is nearest the caret's, not the one that contains
-    // it: at a text size off 100 % the rows' edges are fractions, and the
-    // caret at a soft wrap came back a hair above the next row's top — so
-    // it was drawn on the row before, and Down from there landed on the
-    // same offset again, for ever (#620).
-    Rect? nearest;
-    for (final box in boxes) {
-      final row = box.toRect();
-      if (nearest == null ||
-          (row.top - at.dy).abs() < (nearest.top - at.dy).abs()) {
-        nearest = row;
-      }
-    }
-    if (nearest != null) {
-      return Rect.fromLTWH(at.dx, nearest.top, _caretWidth, nearest.height);
-    }
-    // An empty paragraph bounds no line: the glyph's own height is all there.
-    return Rect.fromLTWH(
-      at.dx,
-      at.dy,
-      _caretWidth,
-      paragraph.getFullHeightForCaret(position),
-    );
-  }
+  int get caretMeasures => _caret.measures;
 
   /// How wide the caret is drawn.
   double get _caretWidth => widget.caretWidth ?? 1.5;
@@ -4272,8 +1934,8 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
 
   Widget _buildView(BuildContext context) {
     final syntax = widget.syntax ?? SyntaxColors.of(context);
-    _syntax = syntax;
-    _scaler = MediaQuery.textScalerOf(context);
+    _metrics.syntax = syntax;
+    _metrics.scaler = MediaQuery.textScalerOf(context);
     // The shortcuts wrap the focus, not the other way round: a
     // `CallbackShortcuts`
     // only sees a key that travels through it on the way to the focused node,
@@ -4283,12 +1945,12 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       Focus(
         focusNode: _focus,
         autofocus: widget.autofocus,
-        onKeyEvent: _menuKey,
+        onKeyEvent: _menuKeys.handle,
         onFocusChange: (hasFocus) {
           _focusReturn.focusChanged(hasFocus: hasFocus);
           // Only the focused note blinks (#512): an editor the keys are not
           // going to keeps its caret, steady, and draws no frame for it.
-          _restartBlink();
+          _blink.restart();
           if (hasFocus) {
             _input.attach(viewId: View.of(context).viewId);
           } else {
@@ -4299,43 +1961,16 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
         },
         child: LayoutBuilder(
           builder: (context, constraints) {
-            final scaler = MediaQuery.textScalerOf(context);
             // Another width or text size wraps the caret's line anew.
-            if (_paneWidth != constraints.maxWidth || _textScaler != scaler) {
+            if (_metrics.layOut(
+              constraints.maxWidth,
+              MediaQuery.textScalerOf(context),
+            )) {
               _measureCaretAfterFrame();
             }
-            _paneWidth = constraints.maxWidth;
-            _textScaler = scaler;
-            // The legacy editor's box, to the pixel (`note_editor.dart`):
-            // `side` is the note column's side space, the gutter is
-            // `side + 16 - 5` when there is a column (and never narrower than
-            // the numbers), the field is inset by 5 on the left and by
-            // `side + 16` on the right. The text therefore measures exactly
-            // `column.width` and sits centred — which is what the column means,
-            // and what a gutter eating into it made narrower.
-            _sideSpace = widget.column.sideSpaceIn(constraints.maxWidth);
-            // The gutter is the numbers *or* the column's own indentation: the
-            // legacy editor reserved `side + 16 - 5` even with the numbers
-            // turned
-            // off, which is what keeps a column centred when the gutter is
-            // empty.
-            // The text's left edge is the read view's ([noteTextInsets]): the
-            // column's edge, or past the numbers — with no column too, where
-            // it stood 5 px in and moved at every flip to the read pane.
-            _gutter =
-                noteTextInsets(
-                  side: _sideSpace,
-                  numbers: _numbersWidth(MediaQuery.textScalerOf(context)),
-                ).left -
-                _leftInset;
-            final available =
-                constraints.maxWidth - _leftInset - _rightInset - _gutter;
-            // The pane's text width: what a table wider than it is fitted to.
-            // Kept here so every caller that lays a table out reads the same
-            // number, the gesture path included.
-            _textWidth = available;
+            final available = _metrics.textWidth;
             // The `columns` blocks that sit side by side at this width.
-            _layOutHosts(available);
+            _rows.layOutHosts(available);
             // Typewriter mode: room for the last row to reach the middle,
             // under whatever the note ends with.
             final slack = widget.typewriter
@@ -4347,75 +1982,31 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
             final footnotes = widget.hideMarkers
                 ? _styler?.footnotes ?? const <Footnote>[]
                 : const <Footnote>[];
-            return _mouseSelection(
+            return _pointer.listen(
               GestureDetector(
                 behavior: HitTestBehavior.opaque,
-                // The keyboard is asked for on the *tap*: a drag the scroll
-                // view wins is someone reading, not someone about to type.
-                onTapUp: (details) {
-                  // A mouse tap on the scrollbar's strip is the scrollbar's,
-                  // not the text's: no caret, no keyboard. A finger is the
-                  // text's anywhere (#1106).
-                  if (details.kind == PointerDeviceKind.mouse &&
-                      _onScrollbar(details.globalPosition)) {
-                    _lastClick = null;
-                    return;
-                  }
-                  // A task box is ticked where it is drawn, and a tick is
-                  // neither a caret nor a reason to raise the keyboard; nor
-                  // the first of a double click.
-                  if (_toggleTaskAt(details.globalPosition)) {
-                    _lastClick = null;
-                    return;
-                  }
-                  // The press opened a link: it placed the caret it meant to,
-                  // and the link may have moved it since.
-                  if (_pressOpenedLink) {
-                    _pressOpenedLink = false;
-                    _pressOffset = null;
-                    _lastClick = null;
-                    return;
-                  }
-                  _requestKeyboard();
-                  if (details.kind != PointerDeviceKind.mouse &&
-                      _touch.tap(details.globalPosition)) {
-                    return;
-                  }
-                  _tapUp(details.globalPosition);
-                },
+                onTapUp: _pointer.tapUp,
                 // Selecting by touch: a long press takes the word under the
                 // finger, moving it extends by words, and letting go brings
                 // the toolbar up. A mouse has its drag instead.
-                onLongPressStart: (details) {
-                  if (_lastPointerKind == PointerDeviceKind.mouse) return;
-                  _touch.longPressAt(details.globalPosition, start: true);
-                },
-                onLongPressMoveUpdate: (details) {
-                  if (_lastPointerKind == PointerDeviceKind.mouse) return;
-                  _touch.longPressAt(details.globalPosition, start: false);
-                },
-                onLongPressEnd: (details) {
-                  if (_lastPointerKind == PointerDeviceKind.mouse) return;
-                  _touch.show(toolbar: true);
-                },
+                onLongPressStart: (details) =>
+                    _pointer.longPressAt(details.globalPosition, start: true),
+                onLongPressMoveUpdate: (details) =>
+                    _pointer.longPressAt(details.globalPosition, start: false),
+                onLongPressEnd: (_) => _pointer.longPressEnd(),
                 // The text's own pointer over the note; the gutter keeps the
                 // arrow (`_Line`), and a drawn task box the hand (#505).
                 child: ValueListenableBuilder<MouseCursor>(
-                  valueListenable: _hoverCursor,
+                  valueListenable: _pointer.cursor,
                   builder: (context, cursor, child) => MouseRegion(
                     cursor: cursor,
-                    onExit: (_) {
-                      _leaveTable();
-                      _hoverPosition = null;
-                      _hoverCursor.value = SystemMouseCursors.text;
-                      _reportLinkHover(null, Offset.zero);
-                    },
+                    onExit: (_) => _pointer.exit(),
                     child: child,
                   ),
                   child: NotificationListener<ScrollMetricsNotification>(
-                    onNotification: _onScrollMetrics,
+                    onNotification: _reveal.onScrollMetrics,
                     child: NotificationListener<ScrollNotification>(
-                      onNotification: _onScroll,
+                      onNotification: _reveal.onScroll,
                       child: CustomScrollView(
                         key: _scrollKey,
                         controller: _scroll,
@@ -4423,8 +2014,8 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                         slivers: <Widget>[
                           SliverPadding(
                             padding: EdgeInsets.only(
-                              left: _leftInset,
-                              right: _rightInset,
+                              left: _metrics.leftInset,
+                              right: _metrics.rightInset,
                               top: widget.padding.top,
                               // Typewriter mode: room for the last row to
                               // reach the middle.
@@ -4432,15 +2023,30 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                                   widget.padding.bottom +
                                   (footnotes.isEmpty ? slack : 0),
                             ),
-                            sliver: _rowSlivers(context, available),
+                            sliver: sourceRowSlivers(
+                              width: available,
+                              heights: _heights,
+                              folds: _folds,
+                              hosts: _hosts,
+                              look: (
+                                gutter: _metrics.gutter,
+                                gap: _metrics.gap,
+                                band: _metrics.band,
+                                textWidth: _metrics.textWidth,
+                                numbered: widget.showLineNumbers,
+                                theme: widget.theme,
+                                itemsIndent: _metrics.itemsIndent,
+                              ),
+                              line: _lineWidget,
+                            ),
                           ),
                           if (footnotes.isNotEmpty)
                             SliverPadding(
                               // Where the read view puts its section: past the
                               // note's own padding, the text's edges its edges.
                               padding: EdgeInsets.only(
-                                left: _leftInset + _gutter,
-                                right: _rightInset,
+                                left: _metrics.leftInset + _metrics.gutter,
+                                right: _metrics.rightInset,
                                 top: widget.padding.top,
                                 bottom: widget.padding.bottom + slack,
                               ),
@@ -4467,54 +2073,30 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     // The touch selection draws above everything, handles and toolbar alike,
     // and follows the note as it scrolls; the desktop's menu stays where the
     // click was.
-    note = _semantics(note);
-    final content = OverlayPortal(
-      controller: _menu.overlay,
-      overlayChildBuilder: _menu.buildOverlay,
-      child: OverlayPortal(
-        controller: _touch.overlay,
-        overlayChildBuilder: (context) => ListenableBuilder(
-          listenable: Listenable.merge([_scroll, _touch.tick]),
-          builder: (context, _) => _touch.buildOverlay(),
-        ),
-        child: OverlayPortal(
-          controller: _tableOverlay,
-          overlayChildBuilder: (context) => ListenableBuilder(
-            listenable: Listenable.merge([
-              _scroll,
-              _tableHover,
-              _caretSpot,
-              _tableGridSettled,
-            ]),
-            builder: (context, _) => _tableHandles(context),
-          ),
-          child: OverlayPortal(
-            // The checker's hint draws nearest the note — over the text it
-            // points at, under the handles, the toolbar and the menu.
-            controller: _hints.overlay,
-            overlayChildBuilder: (context) => ListenableBuilder(
-              listenable: _scroll,
-              builder: (context, _) => _hints.buildOverlay(context),
-            ),
-            child: OverlayPortal(
-              controller: _suggest.overlay,
-              overlayChildBuilder: _suggest.buildOverlay,
-              child: OverlayPortal(
-                // The code blocks' copy buttons ride the scroll, under all
-                // of the above.
-                controller: _codeOverlay,
-                overlayChildBuilder: (context) => ListenableBuilder(
-                  listenable: Listenable.merge([_scroll, _caretSpot]),
-                  builder: (context, _) => _codeCopies(context),
-                ),
-                child: note,
-              ),
-            ),
-          ),
-        ),
-      ),
+    note = SourceSemantics(
+      tick: _semanticsTick,
+      buffer: widget.buffer,
+      selection: () => _selection,
+      focused: () => _focus.hasFocus,
+      onTap: _requestKeyboard,
+      onSelect: select,
+      onMove: moveCaretBy,
+      onCopy: copySelection,
+      onCut: cutSelection,
+      onPaste: paste,
+      child: note,
     );
-    return content;
+    return SourceOverlays(
+      scroll: _scroll,
+      caretSpot: _caret.spot,
+      menu: _menu,
+      touch: _touch,
+      tables: _handles,
+      hints: _hints,
+      suggest: _suggest,
+      codeCopies: _codeCopies,
+      child: note,
+    );
   }
 
   /// Line [index] drawn [width] wide: a row of the note, or a line of a
@@ -4536,10 +2118,10 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       key: ValueKey<int>(index),
       fold: inColumn ? SourceFoldMark.none : _foldMarkOf(index),
       onFold: () => toggleFold(index),
-      onFoldDown: () => _controlPress = true,
-      onDiagramDown: _diagramDown,
+      onFoldDown: _pointer.controlPressed,
+      onDiagramDown: _pointer.diagramDown,
       onDiagramLine: _openDiagramLine,
-      paragraphKey: _keyFor(index),
+      paragraphKey: _paragraphs.keyFor(index),
       styled: styled,
       shape: widget.hideMarkers
           ? LineShape.of(
@@ -4547,7 +2129,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
               block,
               index,
               quoted: quoted,
-              callout: _calloutLine(index, block),
+              callout: liveCalloutLine(index, block, widget.buffer, _quotes),
             )
           : LineShape.none,
       pictures: widget.hideMarkers && widget.embedResolver != null
@@ -4555,18 +2137,18 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
           : const <LinePicture>[],
       embedResolver: widget.embedResolver,
       formula: widget.hideMarkers && widget.mathCache != null
-          ? _formulaOf(index)
+          ? liveFormulaOf(_styler?.blockOf(index), widget.buffer)
           : null,
       mathCache: widget.mathCache,
       diagram: widget.hideMarkers ? _diagramOf(index) : null,
       tableRow: widget.hideMarkers && block?.kind == BlockKind.table
-          ? (at) => _tableRowAt(context, index, block!, at)
+          ? (at) => _pieces.tableRowAt(index, block!, at)
           : null,
       tableHeader: block?.kind == BlockKind.table && index == block!.startLine,
       pieceKey: block?.kind == BlockKind.table
-          ? (at) => at == 0 ? _keyFor(index) : _fragmentKey(index, at)
+          ? (at) => _paragraphs.fragmentKey(index, at)
           : null,
-      pieceShift: _caretShift,
+      pieceShift: _caret.shift,
       definition: widget.hideMarkers && block != null
           ? _styler?.definitionRunOf(block)
           : null,
@@ -4586,561 +2168,29 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
               widget.theme.codeHighlight,
             ),
       number: widget.showLineNumbers && !inColumn ? index + 1 : null,
-      gutterWidth: inColumn ? 0 : _gutter,
+      gutterWidth: inColumn ? 0 : _metrics.gutter,
       theme: widget.theme,
-      syntax: _syntax ?? SyntaxColors.of(context),
+      syntax: _metrics.syntax ?? SyntaxColors.of(context),
       dark: widget.dark,
       hideMarkers: widget.hideMarkers,
-      selected: _selectionIn(index),
-      composing: _composingIn(index),
-      misspelled: _misspelledIn(index),
-      deadLinks: _deadLinksIn(index, styled),
-      found: _foundIn(index),
+      selected: _marks.selectionIn(index),
+      composing: _marks.composingIn(index),
+      misspelled: _marks.misspelledIn(index),
+      deadLinks: _marks.deadLinksIn(index, styled),
+      found: _marks.foundIn(index),
       templateProblems: _hints.problemsIn(index),
       misspelledColor: Theme.of(context).colorScheme.error,
       width: width,
       index: index,
-      spot: _caretSpot,
-      caret: _caretRect,
-      caretOn: _caretOn,
+      spot: _caret.spot,
+      caret: _caret.rect,
+      caretOn: _blink.on,
       rowColor: widget.typewriter ? typewriterLineColor(context) : null,
       fence: _fenceOf(index, block),
       outerIndent: outerIndent,
       outerQuotes: outerQuotes,
     );
   }
-
-  /// The note's rows (#729): one sliver over all of them, or — with
-  /// side-by-side `columns` blocks — a sliver for each run of rows between
-  /// two, placed by its part of the note's map, and a [SliverColumns] for
-  /// each block, in its host row.
-  Widget _rowSlivers(BuildContext context, double width) {
-    Widget rows(int start, int end) => SliverMarkdownBlocks(
-      key: start == 0 ? null : ValueKey<String>('rows-$start'),
-      heights: start == 0 && end == _heights.length
-          ? _heights
-          : BlockHeightRange(_heights, start, end),
-      segment: _hosts.layouts.isNotEmpty,
-      delegate: SliverChildBuilderDelegate(
-        // A row is a line nobody folded away.
-        (context, row) =>
-            _lineWidget(context, _folds.lineOf(start + row), width: width),
-        childCount: end - start,
-      ),
-    );
-    final layouts = _hosts.layouts;
-    if (layouts.isEmpty) return rows(0, _heights.length);
-    final slivers = <Widget>[];
-    final starts = <int>[];
-    var from = 0;
-    for (final layout in layouts) {
-      final host = _folds.rowOf(layout.run.start);
-      if (host > from) {
-        starts.add(from);
-        slivers.add(rows(from, host));
-      }
-      starts.add(host);
-      slivers.add(_columnsSliver(context, layout, host));
-      from = host + 1;
-    }
-    if (from < _heights.length) {
-      starts.add(from);
-      slivers.add(rows(from, _heights.length));
-    }
-    return SliverSegments(heights: _heights, starts: starts, slivers: slivers);
-  }
-
-  /// [layout]'s block, its columns side by side, in row [host].
-  Widget _columnsSliver(BuildContext context, LiveLayout layout, int host) {
-    final run = layout.run;
-    return SliverColumns(
-      key: ValueKey<String>('columns-${run.start}'),
-      heights: _heights,
-      index: host,
-      gap: _gap,
-      indent: _gutter + _itemsIndent(run),
-      // A block in a quote or a callout: their bars, and a callout's box,
-      // down the block's whole height, as its rows draw them.
-      quote: run.quoteDepth == 0
-          ? null
-          : (
-              left: _gutter,
-              depth: run.quoteDepth,
-              bar: widget.theme.quoteBar,
-              barWidth: widget.theme.quoteBarWidth,
-              indent: widget.theme.quoteIndentPerLevel,
-              callout: run.callout == null
-                  ? null
-                  : calloutStyleOf(run.callout!.type).color,
-            ),
-      // One gutter and several columns: the columns' lines are not
-      // numbered, and a bracket down the gutter spans the block between
-      // its outer fences, which are.
-      bracket: widget.showLineNumbers && _gutter > _bracketInset
-          ? (
-              x: _gutter - _bracketInset,
-              top: _band,
-              bottom: run.closed ? _band : 0,
-              color: widget.theme.markerDim,
-            )
-          : null,
-      // Its outer fences are rows of its quote: the block draws the quote.
-      opener: (context) => _lineWidget(
-        context,
-        run.start,
-        width: _textWidth,
-        outerQuotes: run.quoteDepth,
-      ),
-      closer: run.closed
-          ? (context) => _lineWidget(
-              context,
-              run.end - 1,
-              width: _textWidth,
-              outerQuotes: run.quoteDepth,
-            )
-          : null,
-      rows: [
-        for (final row in layout.rows)
-          [
-            for (final at in row)
-              (
-                share: layout.shares[at],
-                sliver: SliverMarkdownBlocks(
-                  heights: layout.maps[at],
-                  segment: true,
-                  delegate: SliverChildBuilderDelegate(
-                    (context, line) => _lineWidget(
-                      context,
-                      run.columns[at].start + line,
-                      width: layout.widths[at],
-                      inColumn: true,
-                      outerIndent: _itemsIndent(run),
-                      outerQuotes: run.quoteDepth,
-                    ),
-                    childCount: layout.maps[at].length,
-                  ),
-                ),
-              ),
-          ],
-      ],
-    );
-  }
-
-  // ---------------------------------------------------------- table handles
-
-  /// Whether this platform's tables show their handles where the caret is,
-  /// having no pointer to hover with.
-  static bool get _touchTables =>
-      defaultTargetPlatform == TargetPlatform.android ||
-      defaultTargetPlatform == TargetPlatform.iOS;
-
-  /// The table whose handles show: under the mouse, or the caret's on a
-  /// phone. Null in `source`, where a table is text.
-  Block? get _tableInPlay {
-    if (!widget.hideMarkers) return null;
-    final styler = _styler;
-    if (styler == null) return null;
-    final hovered = _tableHover.value;
-    final line = hovered ?? (_touchTables ? _caretSpot.value.line : null);
-    if (line == null || line < 0 || line >= lineCount) return null;
-    final block = styler.blockOf(line);
-    return block?.kind == BlockKind.table ? block : null;
-  }
-
-  /// Follows the mouse over the note: the table it is on, or — while it is
-  /// on the handles' side of the table it was on — that one still.
-  ///
-  /// [offset] is the offset under the pointer, computed once by the hover
-  /// handler and shared with [_hoverCursorAt].
-  void _hoverTableAt(int? offset, Offset global) {
-    if (!widget.hideMarkers || _touchTables) return;
-    int? table;
-    if (offset != null) {
-      final line = widget.buffer.lineOf(offset);
-      final block = _styler?.blockOf(line);
-      if (block?.kind == BlockKind.table) table = block!.startLine;
-    }
-    final current = _tableHover.value;
-    if (table == null && current != null) {
-      final block = _styler?.blockOf(current);
-      final grid = block == null ? null : _tableGrid(block);
-      const reach = LiveTableHandles.thickness + 8;
-      if (grid != null &&
-          Rect.fromLTRB(
-            grid.left,
-            grid.top,
-            grid.right + reach,
-            grid.bottom + reach,
-          ).contains(global)) {
-        table = current;
-      }
-    }
-    if (table == null) {
-      _leaveTable();
-      return;
-    }
-    _tableHoverClear?.cancel();
-    _tableHover.value = table;
-    _tableOverlay.show();
-  }
-
-  /// Whether the opening modifier is held: Control, or Command on a Mac.
-  static bool _linkModifier() {
-    final keyboard = HardwareKeyboard.instance;
-    return defaultTargetPlatform == TargetPlatform.macOS
-        ? keyboard.isMetaPressed
-        : keyboard.isControlPressed;
-  }
-
-  /// The modifier went down or up while the pointer sat still: the cursor
-  /// answers it where it is, without a move to wait for (#725).
-  bool _modifierChanged(KeyEvent event) {
-    if (event.logicalKey != LogicalKeyboardKey.controlLeft &&
-        event.logicalKey != LogicalKeyboardKey.controlRight &&
-        event.logicalKey != LogicalKeyboardKey.metaLeft &&
-        event.logicalKey != LogicalKeyboardKey.metaRight) {
-      return false;
-    }
-    final point = _hoverPosition;
-    if (point != null && mounted) {
-      final offset = widget.hideMarkers || _linkModifier()
-          ? offsetAt(point)
-          : null;
-      _hoverCursorAt(offset, point);
-    }
-    return false;
-  }
-
-  /// Points the mouse's cursor at what is under it: the hand over a drawn task
-  /// box, which a click ticks, or over a link the opening modifier would open
-  /// (#505, #725), the text's everywhere else.
-  ///
-  /// [offset] is the offset under the pointer, computed once by the hover
-  /// handler and shared with [_hoverTableAt].
-  void _hoverCursorAt(int? offset, Offset global) {
-    final cursor = _overTaskBox(offset, global) || _overLink(offset)
-        ? SystemMouseCursors.click
-        : SystemMouseCursors.text;
-    if (_hoverCursor.value != cursor) _hoverCursor.value = cursor;
-    _reportLinkHover(offset, global);
-  }
-
-  /// The link the pointer is on with the opening modifier held, as last told
-  /// to [MarkdownSourceView.onLinkHover]: a pointer moving along one link
-  /// tells once.
-  String? _hoveredLink;
-
-  /// Tells [MarkdownSourceView.onLinkHover] which link the pointer is on —
-  /// only with the modifier down, which is the intent to open it — or that it
-  /// is on none. Asked of the same line [_overLink] reads, so a hover costs no
-  /// scan of the note.
-  void _reportLinkHover(int? offset, Offset global) {
-    final report = widget.onLinkHover;
-    if (report == null) return;
-    final link = offset != null && _linkModifier() ? linkAt(offset) : null;
-    final key = link == null ? null : '${link.$1.name}|${link.$2}';
-    if (key == _hoveredLink) return;
-    _hoveredLink = key;
-    report(
-      link == null
-          ? null
-          : (kind: link.$1, raw: link.$2, href: link.$3, position: global),
-    );
-  }
-
-  /// Whether the opening modifier over [offset] would open a link: the very
-  /// predicate the Ctrl+click runs ([_openLinkAt]), so the hand and the click
-  /// cannot disagree (#725). [linkAt] reads the one line the offset is on.
-  bool _overLink(int? offset) {
-    if (offset == null || widget.onOpenLink == null) return false;
-    if (!_linkModifier()) return false;
-    return linkAt(offset) != null;
-  }
-
-  /// Whether a drawn task box is under [global]. Reads the one line the point
-  /// is on, not the note, so a hover costs no scan of the note; the box is
-  /// where the painter puts it ([liveItemSlot]), so the cursor and the click
-  /// agree. [offset] is the offset under the pointer, from the hover handler.
-  bool _overTaskBox(int? offset, Offset global) {
-    if (!widget.hideMarkers || offset == null) return false;
-    final index = widget.buffer.lineOf(offset);
-    // On the caret's line the markers are drawn as written: a click is a
-    // caret, not a tick.
-    if (index == _caretSpot.value.line) return false;
-    return _taskBoxSlotAt(index, global) != null;
-  }
-
-  /// The mouse is off the table: its handles go, unless it is on them.
-  void _leaveTable() {
-    if (_tableHover.value == null) return;
-    _tableHoverClear?.cancel();
-    _tableHoverClear = Timer(const Duration(milliseconds: 200), () {
-      if (mounted && !_overTableHandles) _tableHover.value = null;
-    });
-  }
-
-  /// [block]'s grid, globally: from its first row's top to its last row's
-  /// foot, as wide as its columns — or null while no row of it is drawn.
-  ///
-  /// Its height is worked out from the map the note is laid out by
-  /// ([_lineBox]) at the scroll offset the note has *now*, not read off the
-  /// drawn rows: a scroll notifies before the frame that moves them, and
-  /// what a row's paragraph says is the last frame's. [_tableGridSettled]
-  /// checks it against the rows once a frame has drawn them.
-  ///
-  /// Only the left edge is read from a drawn row — a row laid out in fitted
-  /// columns stands away from its box's left, which the grid painter draws
-  /// from — and a scroll does not move it.
-  Rect? _tableGrid(Block block) {
-    final note = _noteBox;
-    if (note == null || !_scroll.hasClients) return null;
-    final row = _tableRowAt(context, block.startLine, block, _caretSpot.value);
-    if (row == null) return null;
-    double? left;
-    for (var line = block.startLine; line < block.endLine; line++) {
-      final piece = _piecesOf(line).firstOrNull;
-      final render = piece == null ? null : _renderOf(piece.key);
-      if (piece == null || render == null) continue;
-      left = render.localToGlobal(Offset(-piece.x, 0)).dx;
-      break;
-    }
-    if (left == null) return null;
-    final top = _lineBox(block.startLine).top;
-    final foot = _lineBox(block.endLine - 1);
-    final origin = note.localToGlobal(Offset(0, -_scroll.offset));
-    return Rect.fromLTRB(
-      left,
-      origin.dy + top,
-      left + row.edges.last,
-      origin.dy + foot.top + foot.height,
-    );
-  }
-
-  /// [block]'s grid as the rows are drawn, globally: each row's own
-  /// paragraph says where it stands. That is the last frame's layout, so it
-  /// is for checking [_tableGrid] against once a frame has drawn
-  /// ([LiveTableGridTracker]), never to build on.
-  ///
-  /// A row laid out in fitted columns is as tall as its wrapped pieces, and
-  /// its pieces stand away from its left edge: the grid reaches its foot,
-  /// not the height of its first paragraph.
-  Rect? _drawnTableGrid(Block block) {
-    final firstLine = block.startLine;
-    final lastLine = block.endLine - 1;
-    final row = _tableRowAt(context, firstLine, block, _caretSpot.value);
-    if (row == null) return null;
-    final firstPiece = _piecesOf(firstLine).firstOrNull;
-    final lastPiece = _piecesOf(lastLine).firstOrNull;
-    if (firstPiece == null || lastPiece == null) return null;
-    final first = _renderOf(firstPiece.key);
-    final last = _renderOf(lastPiece.key);
-    if (first == null || last == null) return null;
-    final pad = widget.theme.tableCellPadding;
-    final wrapped = row.wrapped.isNotEmpty;
-    final top = first.localToGlobal(
-      Offset(-firstPiece.x, -(wrapped ? firstPiece.y : pad.top)),
-    );
-    final bottom = wrapped
-        ? last.localToGlobal(Offset(-lastPiece.x, -lastPiece.y)).dy +
-              _drawnHeightOf(lastLine) +
-              pad.top +
-              pad.bottom
-        : last.localToGlobal(Offset.zero).dy +
-              _drawnHeightOf(lastLine) +
-              pad.bottom;
-    return Rect.fromLTRB(top.dx, top.dy, top.dx + row.edges.last, bottom);
-  }
-
-  /// The handles of the table in play, in the overlay's coordinates.
-  /// The copy buttons of the fenced code blocks on screen in `live` (#541):
-  /// each at the top right of its block's part in view, so a block taller
-  /// than the pane has its button wherever it is scrolled to. A diagram's
-  /// fence has none: it is drawn as the diagram.
-  Widget _codeCopies(BuildContext overlayContext) {
-    const nothing = SizedBox.shrink();
-    // A `todo` fence is drawn as its list, like a diagram, where the tasks are
-    // at hand: no code to copy.
-    final drawsTodo = TodoBlockScope.of(context) != null;
-    final styler = _styler;
-    final note = _noteBox;
-    final overlay = Overlay.of(overlayContext).context.findRenderObject();
-    if (!widget.hideMarkers ||
-        styler == null ||
-        note == null ||
-        overlay is! RenderBox ||
-        !overlay.hasSize ||
-        !_scroll.hasClients ||
-        _heights.length == 0) {
-      return nothing;
-    }
-    // The pane's top and bottom, in the rows' coordinates.
-    final top = _scroll.offset - widget.padding.top;
-    final bottom = top + note.size.height;
-    final row = _heights.indexAt(math.max(0, top));
-    if (row == null) return nothing;
-    final buttons = <Widget>[];
-    for (var line = _folds.lineOf(row); line < lineCount;) {
-      final block = styler.blockOf(line);
-      if (block == null) {
-        line++;
-        continue;
-      }
-      // A block of a side-by-side column is placed by its column (#729):
-      // the columns' blocks are not in the order they stand, so one below
-      // the pane ends nothing.
-      final placed = _columnOfLine(block.startLine);
-      final start = _lineBox(block.startLine).top - widget.padding.top;
-      if (start >= bottom) {
-        if (placed == null) break;
-        line = math.max(block.endLine, line + 1);
-        continue;
-      }
-      final info = block.fenceInfo?.toLowerCase();
-      if (block.kind == BlockKind.fencedCode &&
-          info != 'mermaid' &&
-          !(info == 'todo' && drawsTodo)) {
-        final lastBox = _lineBox(block.endLine - 1);
-        final end = lastBox.top + lastBox.height - widget.padding.top;
-        final y =
-            math.min(
-              math.max(start, top),
-              end - codeCopySize - 2 * codeCopyMargin,
-            ) +
-            codeCopyMargin;
-        if (y >= start && y - top + codeCopySize <= note.size.height) {
-          final at = overlay.globalToLocal(
-            note.localToGlobal(
-              Offset(
-                (placed == null
-                        ? note.size.width - _rightInset
-                        : _columnsLeft(placed.layout) +
-                              LiveHosts.leftOf(
-                                placed.layout,
-                                placed.column,
-                                _gap,
-                              ) +
-                              placed.layout.widths[placed.column]) -
-                    codeCopySize -
-                    codeCopyMargin,
-                y - top,
-              ),
-            ),
-          );
-          buttons.add(
-            Positioned(
-              left: at.dx,
-              top: at.dy,
-              child: CodeCopyButton(
-                key: ValueKey<int>(block.startLine),
-                code: () =>
-                    fenceBody(
-                      BlockParser.blockText(block, widget.buffer).split('\n'),
-                    )?.code ??
-                    '',
-              ),
-            ),
-          );
-        }
-      }
-      line = math.max(block.endLine, line + 1);
-    }
-    return Stack(children: buttons);
-  }
-
-  Widget _tableHandles(BuildContext overlayContext) {
-    final block = _tableInPlay;
-    final grid = _tableGridSettled.settle(
-      block == null ? null : _tableGrid(block),
-    );
-    final note = _noteBox;
-    final overlay = Overlay.of(overlayContext).context.findRenderObject();
-    if (block == null ||
-        grid == null ||
-        note == null ||
-        overlay is! RenderBox ||
-        !overlay.hasSize) {
-      return const SizedBox.shrink();
-    }
-    Rect local(Rect rect) => Rect.fromPoints(
-      overlay.globalToLocal(rect.topLeft),
-      overlay.globalToLocal(rect.bottomRight),
-    );
-    final box = note.localToGlobal(Offset.zero) & note.size;
-    LiveTableCommands? commands() {
-      final buffer = widget.buffer;
-      return LiveTableCommands.at(
-        buffer,
-        block,
-        buffer.offsetOfLine(block.startLine),
-        replace: (start, end, text, caret) =>
-            replaceText(start, end, text, caret: SelectionModel.at(caret)),
-      );
-    }
-
-    return LiveTableHandles(
-      grid: local(grid),
-      clip: local(box),
-      color: widget.theme.markerDim,
-      addRowLabel: AppStrings.tableAddRow,
-      addColumnLabel: AppStrings.tableAddColumn,
-      onAddRow: () => commands()?.addRowAtEnd(),
-      onAddColumn: () => commands()?.addColumnAtEnd(),
-      onHover: (over) {
-        _overTableHandles = over;
-        if (over) {
-          _tableHoverClear?.cancel();
-        } else {
-          _leaveTable();
-        }
-      },
-    );
-  }
-
-  // ------------------------------------------------------------- semantics
-
-  /// How much of the note, around the caret, a screen reader is given: the
-  /// note itself can be megabytes, and the semantics tree is sent whole to
-  /// the platform on every change.
-  static const int _semanticsReach = 4000;
-
-  /// [child] as the platform's accessibility sees it: one multiline text
-  /// field, whose value is the note around the caret and whose selection is
-  /// the note's, with the moves and the clipboard a screen reader asks for.
-  ///
-  /// The lines under it are excluded: each is a `Text`, and a reader would
-  /// otherwise read the note twice — as a field, and as the lines inside it.
-  Widget _semantics(Widget child) => ValueListenableBuilder<int>(
-    valueListenable: _semanticsTick,
-    child: ExcludeSemantics(child: child),
-    builder: (context, _, child) {
-      if (!SemanticsBinding.instance.semanticsEnabled) return child!;
-      final buffer = widget.buffer;
-      final selection = _selection.clampTo(buffer.length);
-      final start = math.max(0, selection.start - _semanticsReach);
-      final end = math.min(buffer.length, selection.end + _semanticsReach);
-      int local(int offset) => (offset - start).clamp(0, end - start);
-      return NoteSemantics(
-        value: buffer.substring(start, end),
-        selection: TextSelection(
-          baseOffset: local(selection.anchor),
-          extentOffset: local(selection.extent),
-        ),
-        focused: _focus.hasFocus,
-        onTap: _requestKeyboard,
-        onSetSelection: (next) => select(
-          SelectionModel(
-            anchor: start + next.baseOffset,
-            extent: start + next.extentOffset,
-          ),
-        ),
-        onMove: moveCaretBy,
-        onCopy: selection.isCollapsed ? null : () => unawaited(copySelection()),
-        onCut: selection.isCollapsed ? null : () => unawaited(cutSelection()),
-        onPaste: () => unawaited(paste()),
-        child: child,
-      );
-    },
-  );
 
   // ---------------------------------------------------------- context menu
 
@@ -5156,137 +2206,22 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
         offset >= selection.start &&
         offset <= selection.end;
     // On a table's room, the menu is the nearer cell's (#261).
-    if (offset != null && !onSelection) placeCaret(_inCell(offset, 0));
+    if (offset != null && !onSelection) placeCaret(_motion.inCell(offset, 0));
     showContextMenu(global);
   }
 
-  /// Tab and Shift+Tab: the next cell or the one before in a table in
-  /// `live`, its text selected so what is typed replaces it; past the last
-  /// cell a new row, as a spreadsheet goes on. Anywhere else the line's
-  /// indent, as before.
-  void _tab({required bool forward}) {
-    final commands = _tableCommands();
-    if (commands == null) {
-      forward ? indent() : outdent();
-      return;
-    }
-    final buffer = widget.buffer;
-    final rows = _tableRows(commands.block);
-    final cell = commands.cell;
-    var row = cell.row;
-    var column = cell.column + (forward ? 1 : -1);
-    List<(int, int)> cellsOf(int row) =>
-        LiveTables.cellsOf(buffer.lineAt(rows[row]));
-    if (column >= cellsOf(row).length) {
-      row++;
-      column = 0;
-    } else if (column < 0) {
-      row--;
-      if (row < 0) return;
-      column = cellsOf(row).length - 1;
-    }
-    if (row >= rows.length) {
-      commands.addRowAtEnd();
-      return;
-    }
-    final cells = cellsOf(row);
-    if (cells.isEmpty) return;
-    final (start, end) = cells[column.clamp(0, cells.length - 1)];
-    final lineStart = buffer.offsetOfLine(rows[row]);
-    _applySelection(
-      SelectionModel(anchor: lineStart + start, extent: lineStart + end),
-      reveal: true,
-    );
-  }
-
-  /// The lines of table [block] that are rows: all of them but the
-  /// delimiter row.
-  static List<int> _tableRows(Block block) => <int>[
-    for (var line = block.startLine; line < block.endLine; line++)
-      if (line != block.startLine + 1) line,
-  ];
-
-  /// Enter in a table in `live`: the caret to the end of the cell below,
-  /// in the same column, and from the last row out of the table. Answers
-  /// whether the caret was in one. A line break typed into a row split it,
-  /// and the table with it.
-  bool _tableEnter() {
-    final commands = _tableCommands();
-    if (commands == null) return false;
-    final buffer = widget.buffer;
-    final rows = _tableRows(commands.block);
-    final below = commands.cell.row + 1;
-    if (below >= rows.length) {
-      _caretOutOfTable(commands.block);
-      return true;
-    }
-    final cells = LiveTables.cellsOf(buffer.lineAt(rows[below]));
-    if (cells.isEmpty) {
-      _caretOutOfTable(commands.block);
-      return true;
-    }
-    final (_, end) = cells[commands.cell.column.clamp(0, cells.length - 1)];
-    _applySelection(
-      SelectionModel.at(buffer.offsetOfLine(rows[below]) + end),
-      reveal: true,
-    );
-    return true;
-  }
-
-  /// Shift+Enter or Ctrl+Enter in a table in `live`: out of it, from any
-  /// row. Answers whether the caret was in one.
-  bool _tableExit() {
-    final commands = _tableCommands();
-    if (commands == null) return false;
-    _caretOutOfTable(commands.block);
-    return true;
-  }
-
-  /// Down from a table's last row in `live`, when the note ends with it:
-  /// a line to go to, rather than a caret that cannot leave. Answers
-  /// whether it was that.
-  bool _downOutOfTable() {
-    final commands = _tableCommands();
-    if (commands == null) return false;
-    final block = commands.block;
-    final rows = _tableRows(block);
-    if (commands.cell.row != rows.length - 1) return false;
-    if (block.endLine < widget.buffer.lineCount) return false;
-    _caretOutOfTable(block);
-    return true;
-  }
-
-  /// The caret to the start of the line after table [block] — an empty one
-  /// added when the note ends with the table, so there is always one.
-  void _caretOutOfTable(Block block) {
-    final buffer = widget.buffer;
-    if (block.endLine < buffer.lineCount) {
-      _applySelection(
-        SelectionModel.at(buffer.offsetOfLine(block.endLine)),
-        reveal: true,
-      );
-      return;
-    }
-    final last = block.endLine - 1;
-    final end = buffer.offsetOfLine(last) + buffer.lineLengthAt(last);
-    _replaceRange(end, end, '\n');
-  }
-
-  /// The table the caret is in and what can be done to it, in `live`; null
-  /// anywhere else (#261). A menu reads it as it opens, so it is the
-  /// caret's cell now.
-  LiveTableCommands? _tableCommands() {
-    if (!widget.hideMarkers) return null;
-    final buffer = widget.buffer;
-    final offset = _selection.extent.clamp(0, buffer.length);
-    return LiveTableCommands.at(
-      buffer,
-      _styler?.blockOf(buffer.lineOf(offset)),
-      offset,
-      replace: (start, end, text, caret) =>
-          replaceText(start, end, text, caret: SelectionModel.at(caret)),
-    );
-  }
+  /// The keys in a table `live` draws, and the commands on the caret's
+  /// table its menus offer (#261).
+  late final SourceTableKeys _tableKeys = SourceTableKeys(
+    buffer: () => widget.buffer,
+    selection: () => _selection,
+    live: () => widget.hideMarkers,
+    blockOf: (line) => _styler?.blockOf(line),
+    select: (next) => _applySelection(next, reveal: true),
+    replace: (start, end, text, caret) =>
+        _replaceRange(start, end, text, caret: caret),
+    indent: ({required outdent}) => outdent ? this.outdent() : indent(),
+  );
 
   /// Opens the context menu at [global], or at the caret without one (the
   /// menu key, Shift+F10).
@@ -5301,75 +2236,6 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// Whether the suggester panel is up, for the shell's tour and the tests.
   bool get isSuggesterShown => _suggest.isShown;
 
-  /// The keys the menu answers while the note has the focus: Escape closes
-  /// it (or the touch selection, or collapses a selection), and the menu key
-  /// or Shift+F10 opens it at the caret. Everything else
-  /// goes on to the note's shortcuts.
-  KeyEventResult _menuKey(FocusNode node, KeyEvent event) {
-    if (event is! KeyDownEvent) return KeyEventResult.ignored;
-    final key = event.logicalKey;
-    final shift = HardwareKeyboard.instance.isShiftPressed;
-    final control = HardwareKeyboard.instance.isControlPressed;
-    final alt = HardwareKeyboard.instance.isAltPressed;
-    final meta = HardwareKeyboard.instance.isMetaPressed;
-    // The wikilink suggester owns its keys while it is open, and only then
-    // (#475); with no panel the keys fall through to the note's own table
-    // exactly as they did.
-    final taken = _suggest.handleKey(
-      key,
-      modified: shift || control || alt || meta,
-    );
-    if (taken != null) return taken;
-    if (key == LogicalKeyboardKey.escape) {
-      if (_menu.isShown) {
-        hideContextMenu();
-        return KeyEventResult.handled;
-      }
-      if (_touch.isUp) {
-        _touch.hide();
-        return KeyEventResult.handled;
-      }
-      // A selection takes the first press, as it did in the legacy editor;
-      // with nothing left to cancel the key goes on to the app (Zen mode).
-      if (!_selection.isCollapsed) {
-        placeCaret(_selection.extent);
-        return KeyEventResult.handled;
-      }
-      return KeyEventResult.ignored;
-    }
-    // Shift+Enter and Ctrl+Enter leave a table in `live`; anywhere else they
-    // go on to the platform and the app, as before.
-    if ((key == LogicalKeyboardKey.enter ||
-            key == LogicalKeyboardKey.numpadEnter) &&
-        (shift || control) &&
-        _tableExit()) {
-      return KeyEventResult.handled;
-    }
-    if (key == LogicalKeyboardKey.contextMenu ||
-        (key == LogicalKeyboardKey.f10 && shift)) {
-      showContextMenu();
-      return KeyEventResult.handled;
-    }
-    return KeyEventResult.ignored;
-  }
-
-  /// The misspelled ranges of line [index], whose text is [text]: the ranges
-  /// the checker finds outside what the tokenizer says is not prose (code,
-  /// maths, links, markers).
-  ///
-  /// A line whose tokens are not known yet is not judged at all, and nothing
-  /// is cached for it: judged, its skip set would be empty and the whole line
-  /// — code, links and maths included — would come back underlined, and on a
-  /// long note that first judgement is what the styler's reading lands on
-  /// (#373). It is judged on the frame the tokens arrive.
-  List<TextRange> _spellRanges(int index, String text) {
-    final spell = widget.spellCheck;
-    if (spell == null) return const <TextRange>[];
-    final tokens = _tokensAt(index);
-    if (tokens == null) return const <TextRange>[];
-    return spell.rangesFor(index, text, skip: spellSkipRanges(tokens));
-  }
-
   /// The caret rectangle at [offset] in global coordinates, from the piece of
   /// its line the offset is drawn in — or null when that line is not built.
   ///
@@ -5380,32 +2246,29 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     final buffer = widget.buffer;
     final line = buffer.lineOf(offset.clamp(0, buffer.length));
     final lineStart = buffer.offsetOfLine(line);
-    final (piece, paragraph) = _fragmentAt(line, offset - lineStart);
+    final (piece, paragraph) = _pieces.fragmentAt(line, offset - lineStart);
     if (piece == null || paragraph == null) return null;
-    final local = (offset - lineStart - piece.start).clamp(
-      0,
-      paragraph.text.toPlainText().length,
-    );
-    final position = TextPosition(offset: local);
-    final at = paragraph.getOffsetForCaret(
-      position,
-      const Rect.fromLTWH(0, 0, 1.5, 0),
-    );
-    return Rect.fromLTWH(
-      at.dx,
-      at.dy,
-      1.5,
-      paragraph.getFullHeightForCaret(position),
-    ).shift(paragraph.localToGlobal(Offset.zero));
+    return sourcePieceCaretRect(piece, paragraph, offset - lineStart);
   }
+
+  /// The keys the note answers on its focus, before its shortcuts: the
+  /// wikilink panel's, Escape, the way out of a table, the menu key.
+  late final SourceMenuKeys _menuKeys = SourceMenuKeys(
+    menu: _menu,
+    touch: _touch,
+    suggest: _suggest,
+    selection: () => _selection,
+    placeCaret: placeCaret,
+    tableExit: () => _tableKeys.exit(),
+  );
 
   /// What the surface's own keys do ([sourceShortcuts]).
   late final SourceKeyActions _keyActions = SourceKeyActions(
     moveVertically: moveCaretVertically,
     moveBy: moveCaretBy,
-    downOutOfTable: _downOutOfTable,
-    page: _page,
-    tab: _tab,
+    downOutOfTable: _tableKeys.downOut,
+    page: _motion.page,
+    tab: _tableKeys.tab,
     copy: copySelection,
     cut: cutSelection,
     paste: paste,

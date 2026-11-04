@@ -9,16 +9,12 @@
 library;
 
 import 'dart:async';
-import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/theme_tokens.dart';
-import 'package:niman/src/editor/highlight_style.dart';
 import 'package:niman/src/editor/highlighting.dart';
-import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/edit/caret_spot.dart';
-import 'package:niman/src/markdown/line_syntax.dart';
 import 'package:niman/src/markdown/live_inlines.dart';
 import 'package:niman/src/markdown/render/caret_painters.dart';
 import 'package:niman/src/markdown/render/fence_band_painter.dart';
@@ -28,8 +24,11 @@ import 'package:niman/src/markdown/render/live_inline_math.dart';
 import 'package:niman/src/markdown/render/live_table_grid.dart';
 import 'package:niman/src/markdown/render/live_tables.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
-import 'package:niman/src/markdown/render/note_margins.dart';
-import 'package:niman/src/markdown/render/squiggle_painter.dart';
+import 'package:niman/src/markdown/render/source_line_gutter.dart';
+import 'package:niman/src/markdown/render/source_line_layout.dart';
+import 'package:niman/src/markdown/render/source_line_spans.dart';
+import 'package:niman/src/markdown/render/source_line_squiggles.dart';
+import 'package:niman/src/markdown/render/source_line_wrapped_row.dart';
 import 'package:niman/src/preview/code_highlight.dart';
 import 'package:niman/src/preview/math_cache.dart';
 
@@ -241,67 +240,10 @@ final class SourceLine extends StatelessWidget {
           // out put the text at the pane's edge while the right side still
           // kept the column's room.
           // The gutter is no text: the arrow, not the text's pointer.
-          if (gutterWidth > 0) _bandGutter(context, _gutter(context)),
+          if (gutterWidth > 0) bandGutter(context, lineGutter(context)),
           Expanded(child: _caretBox(_listeningToFormulas())),
         ],
       ),
-    );
-  }
-
-  /// The gutter: the line's number, and the fold arrow in the gap between
-  /// the numbers and the text, as in the legacy gutter.
-  Widget _gutter(BuildContext context) => SizedBox(
-    width: gutterWidth,
-    child: MouseRegion(
-      cursor: SystemMouseCursors.basic,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Expanded(
-            child: number == null
-                ? const SizedBox.shrink()
-                : ValueListenableBuilder<CaretSpot>(
-                    valueListenable: spot,
-                    builder: (context, at, _) =>
-                        _takesNoRoom(at) ||
-                            (hideMarkers &&
-                                fence != null &&
-                                at.line != index &&
-                                !fence!.numbered)
-                        ? const SizedBox.shrink()
-                        : _number()!,
-                  ),
-          ),
-          SizedBox(width: _gutterGap, child: _foldArrow(context)),
-        ],
-      ),
-    ),
-  );
-
-  /// [gutter], on a fence line's band (#729): as tall as the band, what it
-  /// draws standing out of it — down from an opener, up from a closer —
-  /// into the gutter beside the columns, which has no numbers of its own.
-  Widget _bandGutter(BuildContext context, Widget gutter) {
-    final fence = this.fence;
-    if (!hideMarkers || fence == null) return gutter;
-    return ValueListenableBuilder<CaretSpot>(
-      valueListenable: spot,
-      builder: (context, at, child) => at.line == index
-          ? child!
-          : SizedBox(
-              width: gutterWidth,
-              height: MediaQuery.textScalerOf(context).scale(theme.divBand),
-              child: OverflowBox(
-                alignment: fence.numberUp
-                    ? Alignment.bottomCenter
-                    : Alignment.topCenter,
-                // As short as it is: a gutter of nothing is no height.
-                minHeight: 0,
-                maxHeight: double.infinity,
-                child: child,
-              ),
-            ),
-      child: gutter,
     );
   }
 
@@ -325,31 +267,6 @@ final class SourceLine extends StatelessWidget {
 
   /// The line with the caret at [at]: its text, and in `live` what stands in
   /// for the source it hides.
-  /// Whether the line takes no room with the caret at [at]: a typeset
-  /// formula's lines past its first (the formula is drawn under that one),
-  /// definitions out of the caret's reach, a table's delimiter row. Its
-  /// number takes none either, or the row would stay open around nothing.
-  bool _takesNoRoom(CaretSpot at) {
-    final math = formula;
-    if (math != null &&
-        mathCache != null &&
-        (at.line < math.start || at.line >= math.end) &&
-        index != math.start) {
-      return true;
-    }
-    final drawing = diagram;
-    if (drawing != null &&
-        (at.line < drawing.start || at.line >= drawing.end) &&
-        index != drawing.start) {
-      return true;
-    }
-    final defined = definition;
-    if (defined != null && (at.line < defined.$1 || at.line >= defined.$2)) {
-      return true;
-    }
-    return tableRow?.call(at)?.delimiter ?? false;
-  }
-
   Widget _content(BuildContext context, CaretSpot at) {
     final mine = at.line == index;
     final fence = this.fence;
@@ -383,7 +300,7 @@ final class SourceLine extends StatelessWidget {
         callout != null && callout.title && callout.markEnd > callout.markStart
         ? callout
         : null;
-    final concealed = <_Concealed>[
+    final concealed = <SourceConcealed>[
       if (typeset || drawn || folded)
         (0, styled.text.length, _hiddenMarker, whole: false),
       if (hideMarkers && !mine)
@@ -419,14 +336,14 @@ final class SourceLine extends StatelessWidget {
             whole: true,
           ),
     ];
-    final indent = _indent(context, revealed: revealed);
+    final indent = textIndent(context, revealed: revealed);
     // A table too wide for the pane is drawn as the read view draws one: its
     // columns fitted to the pane, each cell wrapped inside its own, the row
     // taking as many visual lines as its tallest cell does. It is several
     // paragraphs then, one per piece (`_piecesOf`), which is what lets the
     // caret, a tap and the key table find the piece they are in.
     if (table != null && table.wrapped.isNotEmpty) {
-      return _wrappedRow(
+      return wrappedRow(
         context,
         table,
         indent,
@@ -439,16 +356,16 @@ final class SourceLine extends StatelessWidget {
     // definitions out of the caret's reach: the read view does not draw them
     // there, and ends the note with the footnotes, as `live` does.
     final collapsed = typeset || drawn || folded
-        ? _lineStyle(revealed: revealed).copyWith(fontSize: 0.01, height: 1)
+        ? lineStyle(revealed: revealed).copyWith(fontSize: 0.01, height: 1)
         : null;
     Widget paragraph = Text.rich(
-      _span(
+      lineSpan(
         revealed: revealed,
         run: mine ? (at.runStart, at.runEnd) : null,
         concealed: concealed,
       ),
       key: paragraphKey,
-      style: collapsed ?? _lineStyle(revealed: revealed),
+      style: collapsed ?? lineStyle(revealed: revealed),
       // A line that takes no room is held to it by a strut, not by its
       // glyphs alone. An empty one has no glyphs: the engine sizes it from
       // the font's metrics, which are nothing at a hundredth of a pixel, and
@@ -465,7 +382,7 @@ final class SourceLine extends StatelessWidget {
       strutStyle: collapsed != null
           ? StrutStyle.fromTextStyle(collapsed, forceStrutHeight: true)
           : table != null
-          ? StrutStyle.fromTextStyle(_lineStyle(revealed: revealed))
+          ? StrutStyle.fromTextStyle(lineStyle(revealed: revealed))
           : null,
       // A table's row is laid out as the row it is: the cells are put where
       // they belong by the room between them, and a row that soft-wrapped
@@ -487,7 +404,7 @@ final class SourceLine extends StatelessWidget {
     }
     final line = Padding(
       padding: EdgeInsets.only(left: indent),
-      child: _withSquiggles(paragraph),
+      child: withSquiggles(paragraph),
     );
     if (table != null) {
       // A cell's padding above and below its text, and the grid behind.
@@ -553,7 +470,7 @@ final class SourceLine extends StatelessWidget {
         theme: theme,
         paragraph: paragraphKey,
         textLeft: indent,
-        restingLeft: mine ? _indent(context) : indent,
+        restingLeft: mine ? textIndent(context) : indent,
         revealed: mine,
         color: theme.markerDim,
         quotesOutside: outerQuotes,
@@ -635,56 +552,7 @@ final class SourceLine extends StatelessWidget {
             source,
       ],
       cache,
-      _lineStyle(revealed: false),
-    );
-  }
-
-  /// The line's number, dimmed, or nothing.
-  Widget? _number() => number == null
-      ? null
-      : Text(
-          '$number',
-          textAlign: TextAlign.right,
-          // One row, whatever the measurement said: a number
-          // that wraps makes its line two rows tall and every
-          // number below it sits beside the wrong text.
-          softWrap: false,
-          maxLines: 1,
-          overflow: TextOverflow.visible,
-          // The text's own face and size, dimmed: what the
-          // legacy editor's `DefaultCodeLineNumber` does, so the
-          // numbers line up with the characters they count
-          // instead of drifting from them.
-          style: theme.body.copyWith(color: theme.markerDim),
-        );
-
-  /// The fold arrow: pointing down over a section that can fold, right over
-  /// one that is folded, nothing elsewhere.
-  Widget? _foldArrow(BuildContext context) {
-    if (fold == SourceFoldMark.none) return null;
-    final row = MediaQuery.textScalerOf(context).scale(theme.lineHeight);
-    return Listener(
-      onPointerDown: (_) => onFoldDown(),
-      child: MouseRegion(
-        cursor: SystemMouseCursors.click,
-        child: GestureDetector(
-          key: ValueKey<String>('fold-$index'),
-          behavior: HitTestBehavior.opaque,
-          onTap: onFold,
-          child: SizedBox(
-            height: row,
-            child: Center(
-              child: Icon(
-                fold == SourceFoldMark.closed
-                    ? Icons.chevron_right
-                    : Icons.expand_more,
-                size: foldArrowSize,
-                color: theme.markerDim,
-              ),
-            ),
-          ),
-        ),
-      ),
+      lineStyle(revealed: false),
     );
   }
 
@@ -718,7 +586,7 @@ final class SourceLine extends StatelessWidget {
           ? CaretPainter(
               rect: caret,
               on: caretOn,
-              shift: Offset(_indent(context, revealed: true), 0),
+              shift: Offset(textIndent(context, revealed: true), 0),
               pieceShift: pieceShift,
             )
           : null,
@@ -726,568 +594,6 @@ final class SourceLine extends StatelessWidget {
     ),
     child: child,
   );
-
-  /// The style the line is set in.
-  ///
-  /// In live mode a heading is drawn at its own size, which is the difference
-  /// between hiding a hash and *being* a heading; a source view shows the note
-  /// as
-  /// written and keeps one size for everything, so the markers keep their own
-  /// advance there.
-  TextStyle _lineStyle({required bool revealed}) {
-    // The line's own size is the *hiding*'s, not the reveal's: a heading is
-    // drawn as a heading whether its hashes are shown or not, because what the
-    // mode is about is reading the note with the syntax out of the way — and
-    // revealing a marker is not a reason to restyle the line under the caret
-    // (`docs/records/unified-surface.md` §8.6.2, and the test that holds it).
-    if (!hideMarkers) return theme.body;
-    // A table's cells are set as the read view sets them.
-    if (tableRow != null) {
-      return tableHeader ? theme.tableHeader : theme.tableCell;
-    }
-    // Code reads as the read view draws it: in monospace, fences and all.
-    if (shape.code != null) return theme.code;
-    // A callout's title, as the read view sets it (#279) — the caret on it
-    // or not: revealing the mark is no reason to restyle the line.
-    final callout = shape.callout;
-    if (callout != null && callout.title) {
-      return theme.body.copyWith(
-        color: callout.style.color,
-        fontWeight: FontWeight.w600,
-      );
-    }
-    // A heading inside a quote is set at its size, as the read view sets it.
-    if (shape.heading > 0) return theme.heading(shape.heading);
-    // Quoted prose reads as the read view draws it: in the quote's own style.
-    if (shape.quoteDepth > 0) return theme.body.merge(theme.quote);
-    final text = styled.text;
-    var level = 0;
-    while (level < text.length && level < 6 && text[level] == '#') {
-      level++;
-    }
-    if (level == 0 || (level < text.length && text[level] != ' ')) {
-      return theme.body;
-    }
-    return switch (level) {
-      1 => theme.heading1,
-      2 => theme.heading2,
-      3 => theme.heading3,
-      4 => theme.heading4,
-      5 => theme.heading5,
-      _ => theme.heading6,
-    };
-  }
-
-  /// How far the line is indented, in live mode.
-  ///
-  /// A list item's text is set one column in per level, as the read view
-  /// sets it, and a quote's a step in past each bar. The line's prefix —
-  /// the written indent, the quote marks, the marker, the box and the
-  /// spaces between them — is hidden whole ([_span]), so the text lands on
-  /// the column and a wrapped item's next row starts under it, where it
-  /// hung out to the left by the prefix's width. Live nested by the spaces
-  /// the note was written with before: a sublist sat a few pixels in. A
-  /// code block's rows are set a padding into its box, as the read view
-  /// sets its code.
-  ///
-  /// It is pure layout: no offset moves, because the text underneath is
-  /// still the note's own text, character for character.
-  ///
-  /// On the caret's line ([revealed]) the prefix is drawn as written, and
-  /// it is set *into* the indent rather than before it: otherwise the text
-  /// jumped right by the marks' width each time the caret came onto the
-  /// line, and back when it left (device screenshot 2026-09-23, a list
-  /// being typed). Marks wider than the column — a task's `- [ ] `, a
-  /// `10. `, a heading's `# ` over its zero column — move the line right by
-  /// what is left over; they start at the note's left margin, never hung
-  /// out into the field left of the text (#288).
-  double _indent(BuildContext context, {bool revealed = false}) {
-    if (!hideMarkers) return 0;
-    final listed = shape.listed
-        ? (shape.listDepth + 1) * theme.listIndentPerLevel
-        : 0.0;
-    final base = math.max<double>(
-      0,
-      listed +
-          shape.quoteDepth * theme.quoteIndentPerLevel +
-          (shape.code == null ? 0 : theme.codePadding) -
-          outerIndent,
-    );
-    if (base == 0 && _prefixEnd == 0) return 0;
-    final marks =
-        _textStart(context, revealed: revealed) -
-        _glyphLeft(context, const <InlineSpan>[]);
-    return math.max<double>(0, base - marks);
-  }
-
-  /// Whether the line is a heading's: its hashes and the spaces after them
-  /// are its prefix, hidden whole, where the space was left behind and set
-  /// the title a space's width in.
-  bool get _heading =>
-      styled.tokens.any((token) => token.kind == TokenKind.headingMarker);
-
-  /// Where the line's prefix ends: past its leading spaces, its quote
-  /// marks, its list marker, its task box, a heading's hashes and the spaces
-  /// between them. Zero for a line that is none of these, whose leading
-  /// spaces are its own.
-  int get _prefixEnd {
-    if (shape.code != null) {
-      // A code line's prefix is its quote's marks and, in an indented
-      // block, the block's indent: the spaces past them are the code's.
-      final text = styled.text;
-      final marks = shape.quoteDepth > 0
-          ? BlockParser.quotePrefixLength(
-              text,
-              shape.quoteDepth,
-              shape.quoteIndent,
-            )
-          : 0;
-      return shape.codeIndented
-          ? marks + _codeIndentEnd(text.substring(marks))
-          : marks;
-    }
-    if (!shape.listed && shape.quoteDepth == 0 && !_heading) {
-      // A line of a column drawn at its list items' indent already (#729):
-      // the spaces that put it in the items are that indent, hidden.
-      return outerIndent > 0 ? LineSyntax.indentOf(styled.text) : 0;
-    }
-    final text = styled.text;
-    var at = 0;
-    var tokens = 0;
-    while (true) {
-      while (at < text.length &&
-          (text.codeUnitAt(at) == 0x20 || text.codeUnitAt(at) == 0x09)) {
-        at++;
-      }
-      while (tokens < styled.tokens.length &&
-          styled.tokens[tokens].start < at) {
-        tokens++;
-      }
-      if (tokens == styled.tokens.length) return at;
-      final token = styled.tokens[tokens];
-      if (token.start != at ||
-          (token.kind != TokenKind.blockquote &&
-              token.kind != TokenKind.listMarker &&
-              token.kind != TokenKind.taskBox &&
-              token.kind != TokenKind.headingMarker)) {
-        return at;
-      }
-      at = token.end;
-    }
-  }
-
-  /// Where an indented code line's indent ends: four columns in, a tab
-  /// being all four, and no further — the spaces past them are the code's.
-  static int _codeIndentEnd(String text) {
-    var at = 0;
-    var columns = 0;
-    while (at < text.length && columns < 4) {
-      final unit = text.codeUnitAt(at);
-      if (unit == 0x09) {
-        columns = 4;
-      } else if (unit == 0x20) {
-        columns++;
-      } else {
-        break;
-      }
-      at++;
-    }
-    return at;
-  }
-
-  /// Where the line's text is drawn from, past its prefix — hidden whole,
-  /// or on the caret's line as written — in the paragraph's own shaping.
-  ///
-  /// Measured to the first glyph of the text, not to the end of the
-  /// prefix: under an ambient letter spacing a paragraph's first glyph is
-  /// drawn half a spacing in, and one after a hidden mark (which has none)
-  /// is not, so a lazy line's text stood an eighth of a pixel right of its
-  /// item's.
-  double _textStart(BuildContext context, {required bool revealed}) {
-    final end = _prefixEnd;
-    final text = styled.text;
-    final spans = <InlineSpan>[];
-    if (!revealed) {
-      if (end > 0) {
-        spans.add(TextSpan(text: text.substring(0, end), style: _hiddenMarker));
-      }
-      return _glyphLeft(context, spans);
-    }
-    var at = 0;
-    for (final token in styled.tokens) {
-      if (token.start >= end) break;
-      if (token.start > at) {
-        spans.add(TextSpan(text: text.substring(at, token.start)));
-      }
-      spans.add(
-        TextSpan(
-          text: text.substring(token.start, token.end),
-          style: nestedTokenStyle(token, syntax, dark: dark),
-        ),
-      );
-      at = token.end;
-    }
-    if (at < end) spans.add(TextSpan(text: text.substring(at, end)));
-    return _glyphLeft(context, spans);
-  }
-
-  /// Where a glyph set after [spans] is drawn, as the line's paragraph sets
-  /// them: the paragraph's style is the line's over the ambient one, whose
-  /// letter spacing moves a glyph as the paragraph moves it. The glyph is a
-  /// probe — where it starts is the spacing's, not its own shape's.
-  double _glyphLeft(BuildContext context, List<InlineSpan> spans) {
-    final style = DefaultTextStyle.of(context).style
-        .merge(_lineStyle(revealed: false));
-    var length = 0;
-    for (final span in spans) {
-      length += (span as TextSpan).text?.length ?? 0;
-    }
-    final painter = TextPainter(
-      text: TextSpan(
-        children: <InlineSpan>[
-          ...spans,
-          const TextSpan(text: 'x'),
-        ],
-        style: style,
-      ),
-      textDirection: TextDirection.ltr,
-      textScaler: MediaQuery.textScalerOf(context),
-    )..layout();
-    final boxes = painter.getBoxesForSelection(
-      TextSelection(baseOffset: length, extentOffset: length + 1),
-    );
-    painter.dispose();
-    return boxes.isEmpty ? 0 : boxes.first.left;
-  }
-
-  /// A table row too wide for the pane: its columns fitted to it, each cell
-  /// wrapped inside its own, drawn as the read view draws the row — a
-  /// paragraph per piece of every visual line, at its column's edge, behind
-  /// the same grid, so every column shows and nothing is clipped.
-  ///
-  /// The pieces are fixed by the pane's width, so a piece is drawn at rest,
-  /// its marks hidden: a mark that showed would stand the piece wider than
-  /// the column it was fitted into. Editing is unchanged — the caret, a tap
-  /// and the key table all work on the source, and the pieces' keys are what
-  /// they are found through.
-  Widget _wrappedRow(
-    BuildContext context,
-    LiveTableRow row,
-    double indent, {
-    required List<_Concealed> concealed,
-    required List<InlineFormula> formulas,
-  }) {
-    final pad = theme.tableCellPadding;
-    final style = _lineStyle(revealed: false);
-    final strut = StrutStyle.fromTextStyle(style);
-    final ratio = MediaQuery.devicePixelRatioOf(context);
-    final children = <Widget>[];
-    var y = pad.top;
-    var at = 0;
-    for (final visual in row.wrapped) {
-      for (final piece in visual.pieces) {
-        final key = pieceKey?.call(at) ?? GlobalKey();
-        Widget paragraph = Text.rich(
-          _pieceSpan(
-            piece.start,
-            piece.end,
-            concealed: concealed,
-            formulas: formulas,
-          ),
-          key: key,
-          style: style,
-          strutStyle: strut,
-          // The piece is one visual line already: wrapping it again would
-          // carry its remainder under the wrong column, as the row's own
-          // paragraph did before it was fitted.
-          softWrap: false,
-        );
-        final mine = <InlineFormula>[
-          for (final formula in formulas)
-            if (formula.start >= piece.start && formula.end <= piece.end)
-              (
-                start: formula.start - piece.start,
-                end: formula.end - piece.start,
-                box: formula.box,
-                fontSize: formula.fontSize,
-                color: formula.color,
-              ),
-        ];
-        if (mine.isNotEmpty) {
-          paragraph = CustomPaint(
-            foregroundPainter: InlineMathPainter(
-              paragraph: key,
-              formulas: mine,
-              devicePixelRatio: ratio,
-            ),
-            child: paragraph,
-          );
-        }
-        final squiggles = _misspelledInPiece(piece.start, piece.end);
-        if (squiggles.isNotEmpty) {
-          paragraph = CustomPaint(
-            foregroundPainter: SquigglePainter(
-              paragraph: key,
-              ranges: squiggles,
-              color: misspelledColor,
-            ),
-            child: paragraph,
-          );
-        }
-        final problems = _templateProblemsInPiece(piece.start, piece.end);
-        if (problems.isNotEmpty) {
-          paragraph = CustomPaint(
-            foregroundPainter: SquigglePainter(
-              paragraph: key,
-              ranges: problems,
-              color: misspelledColor,
-            ),
-            child: paragraph,
-          );
-        }
-        children.add(
-          Positioned(left: indent + piece.x, top: y, child: paragraph),
-        );
-        at++;
-      }
-      y += visual.height;
-    }
-    return CustomPaint(
-      painter: LiveTableGridPainter(
-        row: row,
-        left: indent,
-        color: theme.tableBorder,
-      ),
-      child: SizedBox(
-        width: double.infinity,
-        height: y + pad.bottom,
-        child: Stack(children: children),
-      ),
-    );
-  }
-
-  /// The words of [start, end) of the line the spelling flags, as offsets
-  /// from the piece's own start: the line's ranges, clipped to the piece.
-  List<TextRange> _misspelledInPiece(int start, int end) => <TextRange>[
-    for (final range in _unjudged())
-      if (range.end > start && range.start < end)
-        TextRange(
-          start: range.start < start ? 0 : range.start - start,
-          end: range.end > end ? end - start : range.end - start,
-        ),
-  ];
-
-  /// The template problems of `[start, end)` of the line, as offsets from the
-  /// piece's own start: the line's ranges, clipped to the piece.
-  List<TextRange> _templateProblemsInPiece(int start, int end) => <TextRange>[
-    for (final range in templateProblems)
-      if (range.end > start && range.start < end)
-        TextRange(
-          start: range.start < start ? 0 : range.start - start,
-          end: range.end > end ? end - start : range.end - start,
-        ),
-  ];
-
-  /// The span of `[start, end)` of the line's source, for one piece of a
-  /// table row laid out in fitted columns: the line's own runs and what is
-  /// drawn in place of them, cut to the piece.
-  TextSpan _pieceSpan(
-    int start,
-    int end, {
-    required List<_Concealed> concealed,
-    required List<InlineFormula> formulas,
-  }) {
-    final spans = <InlineSpan>[];
-    if (end <= start) return TextSpan(children: spans);
-    final marks = <_Concealed>[
-      for (final hidden in concealed)
-        if (hidden.$2 > start && hidden.$1 < end)
-          (
-            hidden.$1 < start ? start : hidden.$1,
-            hidden.$2 > end ? end : hidden.$2,
-            hidden.$3,
-            whole: hidden.whole,
-          ),
-    ];
-    final ink = (
-      start: start,
-      end: end,
-      selected: _clipTo(selected, start, end),
-      composing: _clipTo(composing, start, end),
-      found: <(int, int, bool)>[
-        for (final match in found)
-          if (match.$2 > start && match.$1 < end)
-            (
-              match.$1 < start ? start : match.$1,
-              match.$2 > end ? end : match.$2,
-              match.$3,
-            ),
-      ],
-    );
-    var at = start;
-    for (final token in styled.tokens) {
-      if (token.end <= at || token.start >= end) continue;
-      final from = token.start < at ? at : token.start;
-      final to = token.end > end ? end : token.end;
-      if (from > at) _add(spans, at, from, null, marks, ink);
-      _add(
-        spans,
-        from,
-        to,
-        hidden(token, revealed: false) ? _hiddenMarker : _styleOf(token),
-        marks,
-        ink,
-      );
-      at = to;
-    }
-    if (at < end) _add(spans, at, end, null, marks, ink);
-    return TextSpan(children: spans);
-  }
-
-  /// [range] clipped to `[start, end)`, or null when it falls outside.
-  static (int, int)? _clipTo((int, int)? range, int start, int end) {
-    if (range == null || range.$2 <= start || range.$1 >= end) return null;
-    return (
-      range.$1 < start ? start : range.$1,
-      range.$2 > end ? end : range.$2,
-    );
-  }
-
-  /// The line's tokens as styled runs. A token's override never changes the
-  /// size
-  /// or the height, so a line keeps the surface's metrics whatever it contains
-  /// (`highlight_style.dart`).
-  TextSpan _span({
-    required bool revealed,
-    (int, int)? run,
-    List<_Concealed> concealed = const <_Concealed>[],
-  }) {
-    if (hideMarkers && shape.code != null && shape.quoteDepth > 0) {
-      return _quotedCode(revealed: revealed, concealed: concealed);
-    }
-    final spans = <InlineSpan>[];
-    // A hidden line's prefix is hidden whole, its spaces with its marks: the
-    // text then starts at the indent, where its wrapped rows start too.
-    final prefix = hideMarkers && !revealed ? _prefixEnd : 0;
-    if (prefix > 0) _add(spans, 0, prefix, _hiddenMarker, concealed);
-    var at = prefix;
-    // The runs are the tokenizer's; the selection cuts them where it starts and
-    // ends, so a highlighted range is the same text with a background.
-    for (final token in styled.tokens) {
-      if (token.end <= prefix) continue;
-      if (token.start > at) {
-        _add(spans, at, token.start, null, concealed);
-      }
-      // A token the prefix cuts into — an indented code line's, which is
-      // the whole line — is drawn from where the prefix ends.
-      final from = token.start < at ? at : token.start;
-      // Code, in `live`, is coloured as the read view colours it: by its
-      // block's language, or not at all.
-      if (hideMarkers && token.kind == TokenKind.codeBlock) {
-        final runs = codeRuns;
-        if (runs == null) {
-          _add(spans, from, token.end, null, concealed);
-        } else {
-          var cursor = from;
-          for (final run in runs) {
-            final start = run.start < cursor ? cursor : run.start;
-            final end = run.end > token.end ? token.end : run.end;
-            if (end <= start) continue;
-            if (start > cursor) _add(spans, cursor, start, null, concealed);
-            _add(spans, start, end, run.style, concealed);
-            cursor = end;
-          }
-          if (cursor < token.end) {
-            _add(spans, cursor, token.end, null, concealed);
-          }
-        }
-        at = token.end;
-        continue;
-      }
-      _add(
-        spans,
-        from,
-        token.end,
-        hidden(token, revealed: revealed, run: run)
-            ? _hiddenMarker
-            : _styleOf(token),
-        concealed,
-      );
-      at = token.end;
-    }
-    if (at < styled.text.length) {
-      _add(spans, at, styled.text.length, null, concealed);
-    }
-    return TextSpan(children: spans);
-  }
-
-  /// The style [token] is drawn in: its kind's, and the muted colour of a
-  /// link that is not there yet when it is part of a dead one (#847).
-  TextStyle? _styleOf(Token token) {
-    final style = nestedTokenStyle(token, syntax, dark: dark);
-    if (deadLinks.isEmpty) return style;
-    if (token.kind != TokenKind.wikilink && token.kind != TokenKind.link) {
-      return style;
-    }
-    for (final range in deadLinks) {
-      if (token.start >= range.start && token.end <= range.end) {
-        return (style ?? const TextStyle()).copyWith(color: syntax.deadLink);
-      }
-    }
-    return style;
-  }
-
-  /// A line of a code block inside a quote.
-  ///
-  /// The styler reads a quote's lines as the quote's prose, so their tokens
-  /// say nothing of the code in it: the quote's marks are drawn as its
-  /// marks, and the rest as code — a fence hidden as a fence is, the code
-  /// in its block's colours ([codeRuns], whose offsets start past the
-  /// marks).
-  TextSpan _quotedCode({
-    required bool revealed,
-    required List<_Concealed> concealed,
-  }) {
-    final text = styled.text;
-    final spans = <InlineSpan>[];
-    final marks = BlockParser.quotePrefixLength(
-      text,
-      shape.quoteDepth,
-      shape.quoteIndent,
-    );
-    var at = 0;
-    if (!revealed) {
-      final hidden = shape.codeFence ? text.length : _prefixEnd;
-      _add(spans, 0, hidden, _hiddenMarker, concealed);
-      at = hidden;
-    } else {
-      for (final token in styled.tokens) {
-        if (token.start >= marks) break;
-        if (token.start > at) _add(spans, at, token.start, null, concealed);
-        final end = token.end > marks ? marks : token.end;
-        _add(
-          spans,
-          token.start,
-          end,
-          nestedTokenStyle(token, syntax, dark: dark),
-          concealed,
-        );
-        at = end;
-      }
-      if (at < marks) _add(spans, at, marks, null, concealed);
-      at = marks;
-    }
-    for (final run in codeRuns ?? const <CodeRun>[]) {
-      final start = marks + run.start < at ? at : marks + run.start;
-      final end = marks + run.end > text.length ? text.length : marks + run.end;
-      if (end <= start) continue;
-      if (start > at) _add(spans, at, start, null, concealed);
-      _add(spans, start, end, run.style, concealed);
-      at = end;
-    }
-    if (at < text.length) _add(spans, at, text.length, null, concealed);
-    return TextSpan(children: spans);
-  }
 
   /// Whether [token]'s marker is hidden rather than drawn.
   ///
@@ -1317,143 +623,7 @@ final class SourceLine extends StatelessWidget {
     if (run == null) return true;
     return token.start < run.$1 || token.end > run.$2;
   }
-
-  /// The misspelled words to underline: all of them but the one being
-  /// composed, which is not judged yet — its underline is the IME's.
-  List<TextRange> _unjudged() {
-    final typing = composing;
-    if (typing == null) return misspelled;
-    return <TextRange>[
-      for (final word in misspelled)
-        if (word.end <= typing.$1 || word.start >= typing.$2) word,
-    ];
-  }
-
-  /// The paragraph with the wavy marks painted over it rather than written
-  /// into its runs: a style has one decoration, and a wavy underline there
-  /// took a struck word's strike.
-  ///
-  /// The template checker's problems and the spelling's words are two layers
-  /// of the same shape, so a line that has both shows both — the checker's
-  /// mark is not lost under the spelling's, nor the other way round
-  /// (T-TPL-09).
-  Widget _withSquiggles(Widget paragraph) {
-    var marked = paragraph;
-    if (templateProblems.isNotEmpty) {
-      marked = CustomPaint(
-        foregroundPainter: SquigglePainter(
-          paragraph: paragraphKey,
-          ranges: templateProblems,
-          color: misspelledColor,
-        ),
-        child: marked,
-      );
-    }
-    if (misspelled.isNotEmpty) {
-      marked = CustomPaint(
-        foregroundPainter: SquigglePainter(
-          paragraph: paragraphKey,
-          ranges: _unjudged(),
-          color: misspelledColor,
-        ),
-        child: marked,
-      );
-    }
-    return marked;
-  }
-
-  /// Adds `[start, end)` to [spans], cut at the selection's and the composing
-  /// range's edges: the selected part carries the highlight, the composed part
-  /// the underline, and the rest keeps the run's own style.
-  void _add(
-    List<InlineSpan> spans,
-    int start,
-    int end,
-    TextStyle? style, [
-    List<_Concealed> concealed = const <_Concealed>[],
-    _Ink? ink,
-  ]) {
-    // A piece of a table row laid out in fitted columns draws the line's
-    // selection, its composition and the find bar's matches clipped to the
-    // piece; every other line draws them as they are.
-    final chosen = ink == null ? selected : ink.selected;
-    final written = ink == null ? composing : ink.composing;
-    final matches = ink == null ? found : ink.found;
-    final cuts = <int>{start, end};
-    for (final range in <(int, int)?>[
-      chosen,
-      written,
-      for (final match in matches) (match.$1, match.$2),
-      for (final hidden in concealed) (hidden.$1, hidden.$2),
-    ]) {
-      if (range == null) continue;
-      if (range.$1 > start && range.$1 < end) cuts.add(range.$1);
-      if (range.$2 > start && range.$2 < end) cuts.add(range.$2);
-    }
-    final points = cuts.toList()..sort();
-    for (var at = 0; at < points.length - 1; at++) {
-      final from = points[at];
-      final to = points[at + 1];
-      bool inside((int, int)? range) =>
-          range != null && from >= range.$1 && to <= range.$2;
-      // What `live` draws instead of its source — a picture, a formula — is
-      // hidden as a marker is: there, taking no room.
-      var piece = style;
-      var whole = false;
-      for (final hidden in concealed) {
-        if (inside((hidden.$1, hidden.$2))) {
-          piece = hidden.$3;
-          whole = hidden.whole;
-        }
-      }
-      if (inside(chosen)) {
-        piece = (piece ?? const TextStyle()).copyWith(
-          background: Paint()..color = _selectionColor,
-        );
-      }
-      // A match is drawn over the selection: the current one *is* the
-      // selection, and it has to read as the one the bar is on.
-      for (final match in matches) {
-        if (from >= match.$1 && to <= match.$2) {
-          piece = (piece ?? const TextStyle()).copyWith(
-            background: Paint()
-              ..color = match.$3 ? _currentMatchColor : _matchColor,
-          );
-        }
-      }
-      if (inside(written)) {
-        piece = (piece ?? const TextStyle()).copyWith(
-          decoration: TextDecoration.underline,
-        );
-      }
-      spans.add(
-        TextSpan(
-          text: whole
-              ? unbrokenSource(to - from)
-              : styled.text.substring(from, to),
-          style: piece,
-        ),
-      );
-    }
-  }
 }
-
-/// A stretch of a line `live` draws something else in place of: its range,
-/// the style that hides it, and whether it has to stay on one row — the room
-/// a formula is painted over does.
-
-typedef _Concealed = (int, int, TextStyle, {bool whole});
-
-/// The ranges a piece of a table row laid out in fitted columns draws its
-/// selection, its composition and the find bar's matches in: the line's own,
-/// clipped to the piece's source.
-typedef _Ink = ({
-  int start,
-  int end,
-  (int, int)? selected,
-  (int, int)? composing,
-  List<(int, int, bool)> found,
-});
 
 /// One paragraph a line is drawn in: the key it is built with, where its
 /// source starts on the line, and where it stands in the line's box — away
@@ -1495,14 +665,3 @@ bool isSourceMarker(TokenKind kind) => switch (kind) {
   TokenKind.taskBox => true,
   _ => false,
 };
-
-/// The colour a selected run is painted with.
-const Color _selectionColor = Color(0x553B82F6);
-
-/// The colours the find bar's matches are painted with: every match, and the
-/// one the bar is on.
-const Color _matchColor = Color(0x55FFB300);
-const Color _currentMatchColor = Color(0xAAFF8F00);
-
-/// The gap between the line numbers and the text ([lineNumbersGap]).
-const double _gutterGap = lineNumbersGap;
