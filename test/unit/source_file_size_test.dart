@@ -29,22 +29,15 @@ const Map<String, int> _oversized = {
   'ui/note_view.dart': 1806,
   'library/library_state.dart': 1502,
   'ui/search_screen.dart': 1239,
-  'ui/tree.dart': 1218,
   'markdown/render/source_line.dart': 1068,
   'core/settings/library_config.dart': 908,
-  'sync/webdav/webdav_client.dart': 868,
   'markdown/render/markdown_read_view.dart': 814,
   'ui/sync/sync_settings_screen.dart': 804,
-  'editor/highlighting.dart': 787,
   'ui/settings_search.dart': 777,
-  'markdown/render/live_tables.dart': 775,
   'ui/journal/journal_browser.dart': 743,
   'ui/settings_editor.dart': 734,
-  'ui/palette/command_palette.dart': 699,
   'library/note_ops.dart': 694,
   'db/index_reconcile.dart': 643,
-  'ui/todo_edit_dialog.dart': 636,
-  'sync/sync_service.dart': 621,
 };
 
 /// Tables that are long by nature, not by mixed responsibilities, and why:
