@@ -12,11 +12,11 @@ import 'package:niman/src/search/replace.dart';
 import 'package:niman/src/search/search_excerpt.dart' show wordTermsOf;
 import 'package:niman/src/search/search_repo.dart';
 import 'package:niman/src/search/task_events.dart';
-import 'package:niman/src/ui/action_sheet.dart';
 import 'package:niman/src/ui/indexing_notice.dart';
 import 'package:niman/src/ui/pointer_density.dart';
 import 'package:niman/src/ui/search_field_pager.dart';
 import 'package:niman/src/ui/search_hint.dart';
+import 'package:niman/src/ui/search_hit_menu.dart';
 import 'package:niman/src/ui/search_hit_row.dart';
 import 'package:niman/src/ui/search_query_bar.dart';
 import 'package:niman/src/ui/search_replace_panel.dart';
@@ -922,51 +922,35 @@ final class _SearchScreenState extends State<SearchScreen> {
     return true;
   }
 
-  /// A result row's menu: the single-note replace (T-M3-10) and, where
-  /// the shell has them, the other ways to open it (#712). A long press
-  /// on a phone; a right click, at [anchor], where a pointer aims.
+  /// A result row's menu ([showSearchHitMenu]): a long press on a phone;
+  /// a right click, at [anchor], where a pointer aims.
   Future<void> _showNoteActions(int at, {Rect? anchor}) async {
     if (!mounted) return;
     final hit = _hits[at];
     final opens = widget.hitOpens;
-    Widget row(String value, IconData icon, String label) => ListTile(
-      key: Key('search-hit-action-$value'),
-      leading: Icon(icon),
-      title: Text(label),
-      onTap: () => Navigator.pop(context, value),
-    );
-    final action = await showActionSheet<String>(
+    final action = await showSearchHitMenu(
       context,
+      opens: opens != null,
       anchor: anchor,
-      items: (context) => [
-        if (opens != null) ...[
-          row('open', Icons.open_in_browser_outlined, AppStrings.actionOpen),
-          row('newtab', Icons.tab_outlined, AppStrings.openInNewTab),
-          row('beside', Icons.vertical_split_outlined, AppStrings.openBeside),
-          row('reveal', Icons.account_tree_outlined, AppStrings.revealInTree),
-        ],
-        ListTile(
-          key: const Key('replace-note-action'),
-          leading: const Icon(Icons.find_replace),
-          title: Text(AppStrings.replaceInNoteAction),
-          onTap: () => Navigator.pop(context, 'replace'),
-        ),
-      ],
     );
     if (!mounted || action == null) return;
     // The list may have changed under the menu: the hit is found again.
     final now = _hits.indexWhere((h) => h.path == hit.path);
-    if (now >= 0 && action != 'reveal' && action != 'replace') _markHit(now);
+    if (now >= 0 &&
+        action != SearchHitAction.reveal &&
+        action != SearchHitAction.replace) {
+      _markHit(now);
+    }
     switch (action) {
-      case 'open':
+      case SearchHitAction.open:
         _open(hit.path);
-      case 'newtab':
+      case SearchHitAction.newtab:
         opens?.newTab(hit.path);
-      case 'beside':
+      case SearchHitAction.beside:
         opens?.beside(hit.path);
-      case 'reveal':
+      case SearchHitAction.reveal:
         opens?.reveal(hit.path);
-      case 'replace':
+      case SearchHitAction.replace:
         await _enterReplaceMode(onlyPath: hit.path);
     }
   }
