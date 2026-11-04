@@ -62,14 +62,13 @@ import 'package:niman/src/ui/capture/paste_markdown_flow.dart'
     show readPlainClipboard;
 import 'package:niman/src/ui/dead_link_watcher.dart';
 import 'package:niman/src/ui/dropped_link.dart';
-import 'package:niman/src/ui/frontmatter_fields.dart';
 import 'package:niman/src/ui/hidden_slot.dart';
 import 'package:niman/src/ui/link_preview/note_link_preview.dart';
 import 'package:niman/src/ui/links_to_note_section.dart';
 import 'package:niman/src/ui/note_attach.dart';
 import 'package:niman/src/ui/note_dead_links.dart';
 import 'package:niman/src/ui/note_edit_commands.dart';
-import 'package:niman/src/ui/note_frontmatter_head.dart';
+import 'package:niman/src/ui/note_frontmatter_panel.dart';
 import 'package:niman/src/ui/note_links.dart';
 import 'package:niman/src/ui/note_load_error.dart';
 import 'package:niman/src/ui/note_paste.dart';
@@ -889,22 +888,23 @@ final class _NoteViewState extends State<NoteView>
   /// surface does not own it: it is handed in and the view keeps it.
   final ScrollController _sourceScroll = ScrollController();
 
-  /// Whether the reader opened the fields panel (#157).
-  ///
-  /// Closed until they do: the panel belongs to the note's first lines, and
-  /// what it shows is a tap away rather than in the way of every note opened.
-  bool _frontmatterOpen = false;
-
-  /// Whether the pane on stage still shows the note's head (#157): the panel
-  /// goes away the moment the note is scrolled past it, and comes back with
-  /// the head, as the reader left it.
-  bool _frontmatterAtHead = true;
-
-  /// The note's head in the pane's own pixels (#157): the frontmatter block's
-  /// lines at the row height the editor draws them, and nothing at all over
-  /// the read pane, whose preview gives the block no room
-  /// (`markdown_read_view`) — there the panel above the note *is* the head.
-  double _frontmatterHeadExtent = 0;
+  /// The frontmatter fields panel over the note (#157): how much of it shows,
+  /// in whichever pane is on stage, and the field edits it makes.
+  late final NoteFrontmatterPanel _frontmatter = NoteFrontmatterPanel(
+    enabled: () => widget.frontmatterPanel,
+    surface: () => _surface,
+    reading: () => _previewIn(widget),
+    typewriter: () => widget.typewriter,
+    caretLine: () => _surfaceCaretLine,
+    previewScroll: _previewScroll,
+    sourceScroll: _sourceScroll,
+    mounted: () => mounted,
+    onChanged: () => setState(() {}),
+    onEdited: () {
+      _refreshPreview();
+      _stats.refresh();
+    },
+  );
 
   /// The source pane's state, for its headings: the outline is read off the
   /// blocks the colours are already drawn from.
@@ -1087,9 +1087,9 @@ final class _NoteViewState extends State<NoteView>
     // surface is built this frame, so the caret is asked for after it.
     _caretPending = widget.caretRequest != 0;
     // The fields panel rides the note's head (#157), in whichever pane is on
-    // stage: both scrolls are watched, and [_headInView] reads the one that is.
-    _previewScroll.addListener(_frontmatterScrolled);
-    _sourceScroll.addListener(_frontmatterScrolled);
+    // stage: both scrolls are watched, and the panel reads the one that is.
+    _previewScroll.addListener(_frontmatter.scrolled);
+    _sourceScroll.addListener(_frontmatter.scrolled);
     // The formatting keys, while this editor is the focused one (#205).
     _formatKeys.attach();
     _kindHost = NoteKindHostAdapter(
@@ -1145,8 +1145,7 @@ final class _NoteViewState extends State<NoteView>
     if (oldWidget.path != widget.path && !moved) {
       // Another note's head is not this one's (#157): the panel opens closed
       // again, and the note on screen is taken at its head until it scrolls.
-      _frontmatterOpen = false;
-      _frontmatterAtHead = true;
+      _frontmatter.reset();
     }
     if (oldWidget.showPreview != widget.showPreview) {
       if (widget.showPreview && _readSnapshot.stale) {
@@ -1271,8 +1270,8 @@ final class _NoteViewState extends State<NoteView>
     _activeFormats.dispose();
     _formatKeys.detach();
     _focus.dispose();
-    _previewScroll.removeListener(_frontmatterScrolled);
-    _sourceScroll.removeListener(_frontmatterScrolled);
+    _previewScroll.removeListener(_frontmatter.scrolled);
+    _sourceScroll.removeListener(_frontmatter.scrolled);
     _sourceScroll.dispose();
     _previewScroll.dispose();
     _mathCache.dispose();
@@ -1699,7 +1698,7 @@ final class _NoteViewState extends State<NoteView>
     // The fields panel, when the note has a block for it: the same widget the
     // read pane puts above its note, above this one too, so the two surfaces
     // cannot drift (#157).
-    final frontmatter = _frontmatterFields();
+    final frontmatter = _frontmatter.fields();
     // At the *note* text size, as the preview is (T-M6-12): without this the
     // surface drew the note at the interface size, so the note's size setting
     // did nothing. The find bar above it keeps the interface's.
@@ -1765,7 +1764,7 @@ final class _NoteViewState extends State<NoteView>
           _surfaceCaretLine = buffer.lineOf(selection.extent) + 1;
           // In typewriter mode the fields panel rides the caret, not the
           // scroll the follow drives (#522).
-          if (widget.typewriter) _frontmatterScrolled();
+          if (widget.typewriter) _frontmatter.scrolled();
         },
       ),
     );
@@ -1913,7 +1912,7 @@ final class _NoteViewState extends State<NoteView>
   /// The read pane with the frontmatter fields panel over it (#157), or the
   /// pane alone when the note has no block to show.
   Widget _previewPane(BuildContext context) {
-    final panel = _frontmatterFields();
+    final panel = _frontmatter.fields();
     if (panel == null) return _buildPreview(context);
     return Column(
       children: [
@@ -1925,117 +1924,6 @@ final class _NoteViewState extends State<NoteView>
         Expanded(child: _buildPreview(context)),
       ],
     );
-  }
-
-  /// The frontmatter fields panel, or null when the note has no readable block.
-  ///
-  /// The **one** panel both surfaces show (#157): the read pane puts it above
-  /// its preview, the live editor above its note, and neither keeps a copy of
-  /// the note — both hand the same head to the same widget and read the file
-  /// back through it.
-  ///
-  /// How much of it shows is this view's ([_frontmatterOpen], [_headInView]),
-  /// so the two panes cannot drift: closed on opening a note, open while the
-  /// reader says so, and away while the note is scrolled off its head. The
-  /// library's setting decides whether there is a panel at all
-  /// (`widget.frontmatterPanel`), so a library that wants none gets none.
-  Widget? _frontmatterFields() {
-    if (!widget.frontmatterPanel) return null;
-    final head = frontmatterHeadOf(_surface?.buffer);
-    if (head == null) return null;
-    return FrontmatterFields(
-      note: head,
-      onSet: _applyFieldEdit,
-      onRemove: (key) => _applyFieldEdit(key, null),
-      panel: !_headInView()
-          ? FrontmatterPanel.hidden
-          : _frontmatterOpen
-          ? FrontmatterPanel.open
-          : FrontmatterPanel.closed,
-      onToggle: _toggleFrontmatter,
-    );
-  }
-
-  /// Opens the closed fields panel, or closes the open one (#157).
-  void _toggleFrontmatter() =>
-      setState(() => _frontmatterOpen = !_frontmatterOpen);
-
-  /// Whether the pane on stage still shows the note's head (#157).
-  ///
-  /// A pane that has not been laid out yet — a note just opened — counts as
-  /// showing its head: the panel opens with the note it belongs to.
-  ///
-  /// In typewriter mode the scroll is the caret's, not the reader's, and the
-  /// panel's own height moves the scroll's extent (the editor sits in the
-  /// room the panel leaves). Asking the offset there would make the two
-  /// chase each other: centering pushes the offset past the head, the panel
-  /// hides, the smaller extent clamps the offset back under the head, and
-  /// the panel shows again — once per keystroke on a short note (#522). The
-  /// caret's line does not move with the panel, so it decides instead.
-  bool _headInView() {
-    if (widget.typewriter && !_previewIn(widget)) {
-      return caretInFrontmatterHead(_surface?.buffer, _surfaceCaretLine);
-    }
-    final controller = _previewIn(widget) ? _previewScroll : _sourceScroll;
-    return !controller.hasClients ||
-        controller.offset <= _frontmatterHeadExtent;
-  }
-
-  /// The panel follows the note's head (#157): away once the note is scrolled
-  /// past it, back when the head is on screen again.
-  ///
-  /// The reader's own choice is kept as it was, so coming back to the top of a
-  /// note finds the panel closed or open exactly as they left it.
-  void _frontmatterScrolled() {
-    if (!mounted) return;
-    final atHead = _headInView();
-    if (atHead == _frontmatterAtHead) return;
-    setState(() => _frontmatterAtHead = atHead);
-  }
-
-  /// The note's head in the pane's own pixels (#157), for [_headInView]: the
-  /// frontmatter block's lines at the row height the surface draws them — the
-  /// same `theme.lineHeight`, at the note's own text scale, that the source
-  /// view's rows are measured with. Nothing over the read pane, whose preview
-  /// gives the block no room at all (`markdown_read_view`): there the panel
-  /// is what the head costs, so any scroll past the top is past the head.
-  double _headExtentOf(BuildContext context, {required bool showPreview}) {
-    if (showPreview) return 0;
-    final rows = frontmatterHeadRows(_surface?.buffer);
-    if (rows == 0) return 0;
-    final scaler = noteTextScalerOf(context);
-    final row = scaler.scale(
-      markdownThemeOf(context, scaler: scaler).lineHeight,
-    );
-    return row * rows;
-  }
-
-  /// Writes one frontmatter field through the editor's own door (#157).
-  ///
-  /// The named key's line only, so the rest of the block — its key order, its
-  /// comments, its quoting — does not move; one `.md` file, one undo step,
-  /// saved like any other edit. A null [value] removes the key. The read
-  /// pane and the fields both follow from the surface's buffer, so there is no
-  /// second source of truth to keep in step.
-  void _applyFieldEdit(String key, String? value) {
-    final surface = _surface;
-    if (surface == null) return;
-    final edit = frontmatterFieldEdit(surface.buffer, key, value);
-    if (edit == null) return;
-    // The caret is an offset into the old text: it moves by what the head
-    // grew or shrank by, or stays where it is when it sits in the head
-    // (clamped into the new one). And it is not followed — the edit is made
-    // where the panel is, and the view jumping to a caret in the body would
-    // take the panel off the screen.
-    surface.replaceRange(
-      0,
-      edit.end,
-      edit.text,
-      caret: selectionAfterFieldEdit(surface.selection, edit),
-      follow: false,
-    );
-    _refreshPreview();
-    _stats.refresh();
   }
 
   /// The read pane's task items, ticked through the editor's own door.
@@ -2317,9 +2205,9 @@ final class _NoteViewState extends State<NoteView>
     final error = _error;
     final showPreview = _previewIn(widget);
     // The head the fields panel follows, measured for the pane about to be
-    // built (#157): [_frontmatterScrolled] reads it on every scroll tick, and
-    // building a theme there would cost a frame's worth on each one.
-    _frontmatterHeadExtent = _headExtentOf(context, showPreview: showPreview);
+    // built (#157): the panel reads it on every scroll tick, and building a
+    // theme there would cost a frame's worth on each one.
+    _frontmatter.measure(context, showPreview: showPreview);
     // The toolbar formats the editor: it hides while the preview holds
     // the pane, which has nothing to format. On the phone it also rides
     // the keyboard (it shows only while the keyboard is up); on desktop
