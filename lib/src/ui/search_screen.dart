@@ -19,6 +19,7 @@ import 'package:niman/src/ui/search_hint.dart';
 import 'package:niman/src/ui/search_hit_menu.dart';
 import 'package:niman/src/ui/search_hit_row.dart';
 import 'package:niman/src/ui/search_query_bar.dart';
+import 'package:niman/src/ui/search_replace_flow.dart';
 import 'package:niman/src/ui/search_replace_panel.dart';
 import 'package:niman/src/ui/search_replace_preview.dart';
 import 'package:niman/src/ui/search_request.dart';
@@ -164,12 +165,14 @@ final class _SearchScreenState extends State<SearchScreen> {
 
   /// Replace mode (T-M3-10): the panel under the query box and the match
   /// preview replace the results list while active.
-  final TextEditingController _replacement = TextEditingController();
-  bool _replaceMode = false;
-  bool _replaceCase = false;
-  String? _replaceOnly;
-  bool _previewBusy = false;
-  List<ReplaceMatchNote> _replacePreview = const [];
+  late final SearchReplaceFlow _replace = SearchReplaceFlow(
+    term: () => _query.text.trim(),
+    replaceSource: () => widget.replaceSource,
+    session: () => widget.controller,
+    unsavedTracker: () => widget.unsavedTracker,
+    snack: _snack,
+    onReplaced: _replaced,
+  );
 
   SearchSource? _source;
   FieldSource? _fields;
@@ -246,7 +249,7 @@ final class _SearchScreenState extends State<SearchScreen> {
       }
     }
     _query.addListener(_onQueryChanged);
-    _replacement.addListener(_onReplacementChanged);
+    _replace.addListener(_replaceChanged);
     if (widget.source == null) unawaited(_loadSource(since: started));
     const AppLogger(name: 'search.ui')
         .debug('mount: ${DateTime.now().difference(started).inMilliseconds}ms');
@@ -262,9 +265,10 @@ final class _SearchScreenState extends State<SearchScreen> {
     _replaceRefresh?.cancel();
     widget.requests?.removeListener(_requested);
     _query.removeListener(_onQueryChanged);
-    _replacement.removeListener(_onReplacementChanged);
+    _replace
+      ..removeListener(_replaceChanged)
+      ..dispose();
     _query.dispose();
-    _replacement.dispose();
     super.dispose();
   }
 
@@ -359,21 +363,20 @@ final class _SearchScreenState extends State<SearchScreen> {
       return;
     }
     // Editing the term invalidates the replace preview: leave the mode.
-    _leaveReplaceMode();
+    _replace.leave();
     const AppLogger(name: 'search.ui')
         .debug('debouncing "$text" (${_debounce.inMilliseconds}ms)');
     _debounceTimer = Timer(_debounce, () => unawaited(_runSearch()));
     if (!_stale) setState(() => _stale = true);
   }
 
-  void _onReplacementChanged() {
-    // The preview samples re-render with the new replacement text.
-    if (_replaceMode && mounted) setState(() {});
+  void _replaceChanged() {
+    if (mounted) setState(() {});
   }
 
   void _setContains(bool value) {
     if (_contains == value) return;
-    _leaveReplaceMode();
+    _replace.leave();
     setState(() => _contains = value);
     final text = _query.text.trim();
     if (text.isEmpty) return;
@@ -591,7 +594,7 @@ final class _SearchScreenState extends State<SearchScreen> {
   /// `↓`/`↑` in the query field move through the hits and `Enter` opens
   /// the one marked (#712); the field keeps the cursor.
   KeyEventResult _queryKey(FocusNode node, KeyEvent event) {
-    if (event is KeyUpEvent || _replaceMode || (_hits.isEmpty && !_stale)) {
+    if (event is KeyUpEvent || _replace.active || (_hits.isEmpty && !_stale)) {
       return KeyEventResult.ignored;
     }
     final keys = HardwareKeyboard.instance;
@@ -619,7 +622,7 @@ final class _SearchScreenState extends State<SearchScreen> {
   /// Opens the hit marked, or the first when none is (#1044): Enter after
   /// typing opens the top result, as the palette's does.
   void _openMarkedOrFirst() {
-    if (_replaceMode) return;
+    if (_replace.active) return;
     // The results on screen are the last query's: the open waits for the
     // ones being searched (#1038).
     if (_stale) {
@@ -730,38 +733,37 @@ final class _SearchScreenState extends State<SearchScreen> {
               onContainsChanged: _setContains,
               onReplace: _openReplaceAll,
               onOpenTags: widget.onOpenTags,
-              panel: !_replaceMode
+              panel: !_replace.active
                   ? null
                   : SearchReplacePanel(
                       term: _query.text.trim(),
-                      onlyPath: _replaceOnly,
-                      notes: _replacePreview,
-                      busy: _previewBusy,
-                      replacement: _replacement,
-                      caseSensitive: _replaceCase,
+                      onlyPath: _replace.onlyPath,
+                      notes: _replace.preview,
+                      busy: _replace.busy,
+                      replacement: _replace.replacement,
+                      caseSensitive: _replace.caseSensitive,
                       onCaseChanged: (value) async {
-                        setState(() => _replaceCase = value);
-                        await _refreshPreview();
+                        await _replace.setCaseSensitive(value: value);
                       },
-                      onClose: _leaveReplaceMode,
-                      onConfirm: _runReplace,
+                      onClose: _replace.leave,
+                      onConfirm: _replace.run,
                     ),
             ),
-            if (_scan case final scan? when !_replaceMode)
+            if (_scan case final scan? when !_replace.active)
               SearchScanBar(scan: scan, onStop: _stopScan),
-            if (_stale && !_replaceMode)
+            if (_stale && !_replace.active)
               const LinearProgressIndicator(
                 key: Key('search-busy'),
                 minHeight: 2,
               ),
             Expanded(
-              child: _replaceMode
+              child: _replace.active
                   ? SearchReplacePreview(
-                      notes: _replacePreview,
-                      busy: _previewBusy,
+                      notes: _replace.preview,
+                      busy: _replace.busy,
                       term: _query.text.trim(),
-                      onlyPath: _replaceOnly,
-                      replacement: _replacement.text,
+                      onlyPath: _replace.onlyPath,
+                      replacement: _replace.replacement.text,
                     )
                   : Opacity(
                       opacity: _stale && _hits.isNotEmpty ? 0.5 : 1,
@@ -951,149 +953,22 @@ final class _SearchScreenState extends State<SearchScreen> {
       case SearchHitAction.reveal:
         opens?.reveal(hit.path);
       case SearchHitAction.replace:
-        await _enterReplaceMode(onlyPath: hit.path);
+        await _replace.enter(onlyPath: hit.path);
     }
   }
 
   /// The header Replace action: replace across every matching note.
-  Future<void> _openReplaceAll() => _enterReplaceMode();
+  Future<void> _openReplaceAll() => _replace.enter();
 
-  /// Enters replace mode: the inline panel under the query box plus the
-  /// match preview replace the results list until confirmed or closed.
-  Future<void> _enterReplaceMode({String? onlyPath}) async {
-    final source = await _acquireReplace();
-    if (!mounted) return;
-    if (source == null) {
-      _snack(AppStrings.replaceUnavailable);
-      return;
-    }
-    setState(() {
-      _replaceMode = true;
-      _replaceOnly = onlyPath;
-      _replaceCase = false;
-      _replacement.clear();
-      _replacePreview = const [];
-      _previewBusy = true;
-    });
-    await _refreshPreview();
-  }
-
-  /// Leaves replace mode and restores the results list.
-  void _leaveReplaceMode() {
-    if (!_replaceMode) return;
-    setState(() {
-      _replaceMode = false;
-      _replaceOnly = null;
-      _replacePreview = const [];
-      _previewBusy = false;
-    });
-  }
-
-  /// (Re)scans the candidate notes for whole-word matches and fills the
-  /// preview list.
-  Future<void> _refreshPreview() async {
-    if (!_replaceMode) return;
-    final source = await _acquireReplace();
-    if (!mounted || !_replaceMode || source == null) return;
-    final term = _query.text.trim();
-    final caseSensitive = _replaceCase;
-    final only = _replaceOnly;
-    setState(() => _previewBusy = true);
-    final List<ReplaceMatchNote> notes;
-    try {
-      notes = await source.previewMatches(
-        term,
-        caseSensitive: caseSensitive,
-        onlyPath: only,
-      );
-    } on Object catch (e) {
-      // A failed scan must not leave the panel spinning over an empty list:
-      // clear the busy flag and show the empty preview.
-      if (mounted && _replaceMode) setState(() => _previewBusy = false);
-      const AppLogger(name: 'search.ui').warning('replace preview failed: $e');
-      return;
-    }
-    if (!mounted || !_replaceMode) return;
-    if (term != _query.text.trim() ||
-        caseSensitive != _replaceCase ||
-        only != _replaceOnly) {
-      return; // The mode moved on; a newer scan owns the preview.
-    }
-    setState(() {
-      _replacePreview = notes;
-      _previewBusy = false;
-    });
-  }
-
-  /// Runs the confirmed replace, reports it, and leaves replace mode.
-  Future<void> _runReplace() async {
-    final source = await _acquireReplace();
-    if (!mounted || source == null) return;
-    final term = _query.text.trim();
-    final only = _replaceOnly;
-    setState(() => _previewBusy = true);
-    // The notes open with edits the disk does not have are saved first: the
-    // run rewrites the files, and an editor that still held the old words
-    // would save them over the replacement (#1042). A save that fails stops
-    // the run before it touches anything.
-    final tracker = widget.unsavedTracker;
-    if (tracker != null) {
-      try {
-        await tracker.saveAll();
-      } on Object catch (error) {
-        const AppLogger(name: 'search.ui').warning('replace aborted: $error');
-        if (!mounted) return;
-        setState(() => _previewBusy = false);
-        _snack(AppStrings.noteSaveFailedSnack);
-        return;
-      }
-      if (!mounted) return;
-    }
-    final report = await source.replaceAll(
-      term: term,
-      replacement: _replacement.text,
-      caseSensitive: _replaceCase,
-      only: only == null ? null : {only},
-    );
-    // The open notes the run rewrote adopt their new text (they were saved
-    // before it ran, so none of them holds anything the file does not).
-    tracker?.notifyDiskChanged(const {});
-    if (!mounted) return;
-    // A run that wrote nothing because it could not is not a "no match":
-    // the failed notes make the run report itself instead.
-    final failed = report.failed;
-    final message = report.occurrences == 0 && failed.isEmpty
-        ? AppStrings.replaceNoMatch(term)
-        : AppStrings.replaceDone(report.occurrences, term, report.notesChanged);
-    final skipped = report.skipped.isEmpty
-        ? ''
-        : AppStrings.replaceSkipped(report.skipped.length);
-    final failures = failed.isEmpty
-        ? ''
-        : AppStrings.replaceWriteFailed(failed.length);
-    _snack('$message$skipped$failures');
-    _leaveReplaceMode();
-    // The watcher re-indexes the rewritten files: once it has, re-run the
-    // query so the results reflect the new content.
+  /// The watcher re-indexes the files a replace of [term] rewrote: once
+  /// it has, re-run the query so the results reflect the new content.
+  void _replaced(String term) {
     _replaceRefresh?.cancel();
     _replaceRefresh = Timer(const Duration(milliseconds: 900), () {
       if (mounted && _query.text.trim() == term && !_contains) {
         unawaited(_runSearch());
       }
     });
-  }
-
-  /// Resolves the replace source (seam first, then the session).
-  Future<ReplaceSource?> _acquireReplace() async {
-    final own = widget.replaceSource;
-    if (own != null) return own;
-    try {
-      return await widget.controller.replaceSource;
-    } on Object catch (e) {
-      const AppLogger(name: 'search.ui')
-          .warning('replace source unavailable: $e');
-      return null;
-    }
   }
 
   void _snack(String message) {
