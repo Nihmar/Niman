@@ -25,7 +25,6 @@ import 'package:niman/src/core/week_start.dart';
 import 'package:niman/src/core/welcome.dart';
 import 'package:niman/src/db/app_database.dart';
 import 'package:niman/src/db/dao.dart';
-import 'package:niman/src/db/index_change.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/db/index_scan.dart';
 import 'package:niman/src/db/indexer.dart';
@@ -45,9 +44,9 @@ import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/library/note_ops.dart';
 import 'package:niman/src/library/rescan_scheduler.dart';
 import 'package:niman/src/library/session.dart';
+import 'package:niman/src/library/session_events.dart';
 import 'package:niman/src/library/session_update_checks.dart';
 import 'package:niman/src/library/trash_cleaner.dart';
-import 'package:niman/src/library/tree_moves.dart';
 import 'package:niman/src/library/watch_batch_queue.dart';
 import 'package:niman/src/links/library_links.dart';
 import 'package:niman/src/links/suggester.dart';
@@ -193,31 +192,9 @@ final class LibraryController implements LibrarySession {
   /// the background-isolate probe. Tests inject one to hold an answer back.
   final ExistenceProbe? syncProbe;
 
-  final StreamController<int> _events = StreamController<int>.broadcast();
-
-  /// Fires on an index write only ([_onIndexChanged]), not on the session's
-  /// own bumps (a setting, a phase, a progress report): what the links
-  /// re-resolve on (#867).
-  final StreamController<void> _indexEvents =
-      StreamController<void>.broadcast();
-
-  /// Fires when the tree's rows may have moved ([IndexChange.tree]).
-  final StreamController<int> _treeEvents = StreamController<int>.broadcast();
-
-  /// Fires with the paths a re-index pruned ([Indexer.onRemoved]); what
-  /// the shell holds open on them closes.
-  final StreamController<Set<String>> _removals =
-      StreamController<Set<String>>.broadcast();
-
-  /// The paths the watcher reported ([externalChanges]).
-  final StreamController<Set<String>> _externalChanges =
-      StreamController<Set<String>>.broadcast();
+  /// The revisions and the streams that announce them.
+  final SessionEvents _changes = SessionEvents();
   final AppLogger _log = const AppLogger(name: 'session');
-  int _revision = 0;
-  int _treeRevision = 0;
-
-  /// What the recent revisions moved in the tree ([foldersMovedSince]).
-  final TreeMoves _moves = TreeMoves();
   LibraryPhase _phase = LibraryPhase.none;
   String? _root;
   String? _lastError;
@@ -308,21 +285,21 @@ final class LibraryController implements LibrarySession {
 
   /// Bumped after every index change.
   @override
-  int get revision => _revision;
+  int get revision => _changes.revision;
 
   /// Bumped after an index change that can move the tree's rows: a row
   /// added, removed or reshaped, a pin, a folder synced — not a save's new
   /// size and time, which only the field orders draw (#751).
   @override
-  int get treeRevision => _treeRevision;
+  int get treeRevision => _changes.treeRevision;
 
   /// Fires with the new [revision] after every index change.
   @override
-  Stream<int> get events => _events.stream;
+  Stream<int> get events => _changes.events;
 
   @override
   Set<int>? foldersMovedSince(int since, {required bool tree}) =>
-      _moves.since(since, tree: tree);
+      _changes.foldersMovedSince(since, tree: tree);
 
   /// The open library's features (#1109); every one on while none is open.
   @override
@@ -331,14 +308,14 @@ final class LibraryController implements LibrarySession {
   /// Fires with the new [treeRevision] after a change that may move the
   /// tree's rows (#751).
   @override
-  Stream<int> get treeEvents => _treeEvents.stream;
+  Stream<int> get treeEvents => _changes.treeEvents;
 
   /// Fires with the library-relative paths a re-index pruned from the tree.
   @override
-  Stream<Set<String>> get removals => _removals.stream;
+  Stream<Set<String>> get removals => _changes.removals;
 
   @override
-  Stream<Set<String>> get externalChanges => _externalChanges.stream;
+  Stream<Set<String>> get externalChanges => _changes.externalChanges;
 
   /// The app's settings database, opened once per session.
   ///
@@ -365,7 +342,7 @@ final class LibraryController implements LibrarySession {
     indexer: () => _indexer,
     ops: () => _ops,
     searchDbFactory: _searchDbFactory,
-    indexChanges: _indexEvents.stream,
+    indexChanges: _changes.indexChanges,
   );
 
   /// CRUD ops for the open library, or null while closed.
@@ -604,7 +581,7 @@ final class LibraryController implements LibrarySession {
     final indexer = Indexer(indexDb);
     indexer
       ..onChanged = ((change) =>
-          _onIndexChanged(change, folders: indexer.changedFolders))
+          _changes.indexChanged(change, folders: indexer.changedFolders))
       ..onRemoved = (removed) => _onRemoved(abs, removed);
     // One reader of `.niman/settings.json` per session: the four
     // per-library settings and the overrides (T-ML-10) share its cache.
@@ -1579,21 +1556,7 @@ final class LibraryController implements LibrarySession {
     _updates.stop();
     await close();
     _disposed = true;
-    if (!_events.isClosed) {
-      await _events.close();
-    }
-    if (!_indexEvents.isClosed) {
-      await _indexEvents.close();
-    }
-    if (!_treeEvents.isClosed) {
-      await _treeEvents.close();
-    }
-    if (!_removals.isClosed) {
-      await _removals.close();
-    }
-    if (!_externalChanges.isClosed) {
-      await _externalChanges.close();
-    }
+    await _changes.close();
     final appDb = _appDatabase;
     _appDatabase = null;
     if (appDb != null) {
@@ -1605,41 +1568,15 @@ final class LibraryController implements LibrarySession {
 
   /// A new revision — and a new tree revision when [tree] — which moved rows
   /// in [folders] alone, or anywhere when null ([foldersMovedSince]).
-  void _bump({bool tree = true, Set<int>? folders}) {
-    _revision++;
-    if (tree) _treeRevision++;
-    _moves.record(
-      revision: _revision,
-      treeRevision: tree ? _treeRevision : null,
-      folders: folders,
-    );
-    if (!_events.isClosed) {
-      _events.add(_revision);
-    }
-    if (!tree) return;
-    if (!_treeEvents.isClosed) {
-      _treeEvents.add(_treeRevision);
-    }
-  }
-
-  /// An index write landed: everything that reads the index hears of it,
-  /// and — when the rows' shape moved, and not for a save's new size and
-  /// time (#751) — the tree hears that it has rows to read again. Every
-  /// other bump is the session's own (the phase, a progress report, a
-  /// setting): all of them may move what the tree draws. [folders] are the
-  /// ones the write moved rows in, when the indexer says
-  /// ([Indexer.changedFolders]).
-  void _onIndexChanged(IndexChange change, {Set<int>? folders}) {
-    _bump(tree: change == IndexChange.tree, folders: folders);
-    if (!_indexEvents.isClosed) _indexEvents.add(null);
-  }
+  void _bump({bool tree = true, Set<int>? folders}) =>
+      _changes.bump(tree: tree, folders: folders);
 
   /// Fires with the paths a re-index pruned, and drops their reading
   /// positions and review states: those files are ones the library saw
   /// leave (#492, #533).
   void _onRemoved(String root, Set<String> removed) {
-    if (removed.isEmpty || _removals.isClosed) return;
-    _removals.add(removed);
+    if (removed.isEmpty || _changes.isClosed) return;
+    _changes.removed(removed);
     unawaited(ReadingPositions(root).removed(removed));
     unawaited(ReviewStore(root).removed(removed));
   }
@@ -1714,8 +1651,8 @@ final class LibraryController implements LibrarySession {
       }
       // The editors that hold those notes open (#1055), before the sync's
       // probe below: they have no reason to wait for it.
-      if (batch.paths.isNotEmpty && !_externalChanges.isClosed) {
-        _externalChanges.add(batch.paths.toSet());
+      if (batch.paths.isNotEmpty) {
+        _changes.externalChanged(batch.paths.toSet());
       }
       // What changed behind the ops' back (another app, a background
       // isolate, a hand edit) reaches the sync queue this way. Awaited, so
