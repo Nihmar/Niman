@@ -22,6 +22,8 @@ import 'package:niman/src/editor/toolbar_layout.dart';
 import 'package:niman/src/spellcheck/spell_check_provider.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/device_shape.dart';
+import 'package:niman/src/ui/note_editor_options.dart';
+import 'package:niman/src/ui/note_services.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/note_view_handle.dart';
 import 'package:niman/src/ui/outside_files.dart';
@@ -215,15 +217,23 @@ final class _OutsideFileScreenState extends ConsumerState<OutsideFileScreen> {
     return NoteView(
       key: view.key,
       path: document.filePath,
-      showLineNumbers: true,
-      autofocusEditor: false,
+      options: const NoteEditorOptions(
+        showLineNumbers: true,
+        autofocusEditor: false,
+        toolbarLayout: _outsideToolbar,
+        // A file outside a library links the way the rest of the world
+        // does.
+        linkType: LinkType.markdown,
+      ),
       toolbarTop: wide,
-      toolbarLayout: _outsideToolbar,
-      // A file outside a library links the way the rest of the world
-      // does.
-      linkType: LinkType.markdown,
-      // Its images sit beside it, not under a library root.
-      libraryRoot: document.folder,
+      services: NoteServices(
+        // Its images sit beside it, not under a library root.
+        libraryRoot: document.folder,
+        readNote: (_) => document.read(),
+        writeNote: (_, content) => document.write(content),
+        unsavedTracker: ref.watch(unsavedTrackerProvider),
+        spellCheck: ref.watch(spellCheckProvider),
+      ),
       kindMode: false,
       showPreview: view.preview,
       showWysiwyg: view.wysiwyg,
@@ -236,11 +246,7 @@ final class _OutsideFileScreenState extends ConsumerState<OutsideFileScreen> {
           compact: true,
         ),
       ],
-      readNote: (_) => document.read(),
-      writeNote: (_, content) => document.write(content),
       reloadToken: view.reloadToken,
-      unsavedTracker: ref.watch(unsavedTrackerProvider),
-      spellCheck: ref.watch(spellCheckProvider),
     );
   }
 }

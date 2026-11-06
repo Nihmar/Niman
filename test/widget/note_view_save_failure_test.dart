@@ -4,6 +4,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
+import 'package:niman/src/ui/note_editor_options.dart';
+import 'package:niman/src/ui/note_services.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/unsaved_notes.dart';
@@ -26,13 +28,17 @@ void main() {
         _app(
           NoteView(
             path: '/notes/a.md',
-            showLineNumbers: false,
-            autofocusEditor: false,
-            readNote: (_) async => 'a',
-            writeNote: (_, text) async {
-              if (failing) throw StateError('disk full');
-              writes.add(text);
-            },
+            options: const NoteEditorOptions(
+              showLineNumbers: false,
+              autofocusEditor: false,
+            ),
+            services: NoteServices(
+              readNote: (_) async => 'a',
+              writeNote: (_, text) async {
+                if (failing) throw StateError('disk full');
+                writes.add(text);
+              },
+            ),
           ),
         ),
       );
@@ -64,14 +70,18 @@ void main() {
     final writes = <String, String>{};
     NoteView view(String path) => NoteView(
       path: path,
-      showLineNumbers: false,
-      autofocusEditor: false,
-      unsavedTracker: tracker,
-      readNote: (_) async => 'a',
-      writeNote: (path, text) async {
-        if (failing) throw StateError('card removed');
-        writes[path] = text;
-      },
+      options: const NoteEditorOptions(
+        showLineNumbers: false,
+        autofocusEditor: false,
+      ),
+      services: NoteServices(
+        unsavedTracker: tracker,
+        readNote: (_) async => 'a',
+        writeNote: (path, text) async {
+          if (failing) throw StateError('card removed');
+          writes[path] = text;
+        },
+      ),
     );
 
     await tester.pumpWidget(_app(view('/notes/a.md')));
@@ -98,15 +108,19 @@ void main() {
     final writes = <String>[];
     NoteView view(String path) => NoteView(
       path: path,
-      showLineNumbers: false,
-      autofocusEditor: false,
-      unsavedTracker: tracker,
-      readNote: (path) async => disk[path]!,
-      writeNote: (path, text) async {
-        if (failing) throw StateError('card removed');
-        writes.add(text);
-        disk[path] = text;
-      },
+      options: const NoteEditorOptions(
+        showLineNumbers: false,
+        autofocusEditor: false,
+      ),
+      services: NoteServices(
+        unsavedTracker: tracker,
+        readNote: (path) async => disk[path]!,
+        writeNote: (path, text) async {
+          if (failing) throw StateError('card removed');
+          writes.add(text);
+          disk[path] = text;
+        },
+      ),
     );
 
     await tester.pumpWidget(_app(view('/notes/a.md')));

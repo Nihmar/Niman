@@ -11,16 +11,14 @@
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/db/app_database.dart';
-import 'package:niman/src/editor/note_column.dart';
-import 'package:niman/src/editor/toolbar_layout.dart';
-import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/spellcheck/spell_checker.dart';
 import 'package:niman/src/ui/close_guard.dart';
+import 'package:niman/src/ui/note_editor_options.dart';
+import 'package:niman/src/ui/note_services.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/shell_detail_pane.dart';
 import 'package:niman/src/ui/unsaved_notes.dart';
@@ -58,26 +56,22 @@ Widget _deck(
       ),
   ],
   onMemento: onMemento,
-  readNote: (path) async => _notes[path]!,
-  writeNote: write ?? (_, _) async {},
-  showLineNumbers: true,
-  noteColumn: NoteColumn.off,
+  services: NoteServices(
+    readNote: (path) async => _notes[path]!,
+    writeNote: write ?? (_, _) async {},
+    onOpenNote: (_, _) {},
+    unsavedTracker: tracker,
+    spellCheck: EditorSpellCheck(createChecker: (_) => const _NoSpelling()),
+  ),
+  options: const NoteEditorOptions(
+    showLineNumbers: true,
+    autofocusEditor: false,
+  ),
   barActions: const [],
-  autofocusEditor: false,
-  linkType: LinkType.wikilink,
-  newItemLocation: NewItemLocation.openNoteFolder,
-  attachmentsFolder: 'assets',
-  indentWidth: 2,
-  toolbarLayout: ToolbarLayout.defaults,
   onEditorKindChanged: null,
-  linkSource: null,
-  wikilinkSuggester: null,
-  onOpenNote: (_, _) {},
   kindMode: true,
   onNoteKindChanged: (_) {},
-  unsavedTracker: tracker,
   statusActions: const [],
-  spellCheck: EditorSpellCheck(createChecker: (_) => const _NoSpelling()),
 );
 
 /// The editor of the note at [path], mounted or behind.

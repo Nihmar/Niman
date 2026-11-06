@@ -12,6 +12,8 @@ import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/editor/outline.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/ui/heading_level_sheet.dart';
+import 'package:niman/src/ui/note_editor_options.dart';
+import 'package:niman/src/ui/note_services.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/outline_panel.dart';
 import 'package:niman/src/ui/shell_row_menu.dart';
@@ -162,10 +164,14 @@ void main() {
       home: Scaffold(
         body: NoteView(
           path: '/notes/a.md',
-          showLineNumbers: true,
-          autofocusEditor: false,
-          readNote: (_) async => note,
-          writeNote: (_, _) async {},
+          options: const NoteEditorOptions(
+            showLineNumbers: true,
+            autofocusEditor: false,
+          ),
+          services: NoteServices(
+            readNote: (_) async => note,
+            writeNote: (_, _) async {},
+          ),
         ),
       ),
     );

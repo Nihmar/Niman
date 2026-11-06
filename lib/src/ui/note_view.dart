@@ -2,96 +2,42 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:niman/src/capture/paste/clipboard_files.dart';
-import 'package:niman/src/capture/paste/platform_clipboard_files.dart';
-import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/frame_log.dart';
 import 'package:niman/src/core/logging.dart';
-import 'package:niman/src/core/settings/features.dart';
-import 'package:niman/src/core/settings/library_config.dart'
-    show defaultSourceFont;
 import 'package:niman/src/core/settings/library_features.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
-import 'package:niman/src/core/text_scale.dart';
-import 'package:niman/src/editor/editor_shortcuts.dart';
 import 'package:niman/src/editor/md_editing.dart';
 import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/editor/outline.dart';
-import 'package:niman/src/editor/plain_text.dart';
 import 'package:niman/src/editor/task_items.dart';
 import 'package:niman/src/editor/task_items_edit.dart';
 import 'package:niman/src/editor/toolbar_item.dart';
-import 'package:niman/src/editor/toolbar_layout.dart';
-import 'package:niman/src/editor/word_count_index.dart';
 import 'package:niman/src/frontmatter/edit.dart';
 import 'package:niman/src/frontmatter/note_kind.dart';
-import 'package:niman/src/frontmatter/parser.dart';
-import 'package:niman/src/library/attachment_store.dart';
-import 'package:niman/src/library/new_item_folder.dart';
-import 'package:niman/src/links/library_links.dart';
-import 'package:niman/src/links/link_preview.dart' show PreviewLimits;
 import 'package:niman/src/links/parser.dart';
-import 'package:niman/src/links/suggester.dart';
-import 'package:niman/src/markdown/background_scan.dart';
-import 'package:niman/src/markdown/edit/source_find.dart';
-import 'package:niman/src/markdown/note_load.dart';
-import 'package:niman/src/markdown/note_read_failure.dart';
-import 'package:niman/src/markdown/read_parser.dart';
-import 'package:niman/src/markdown/render/markdown_read_view.dart';
-import 'package:niman/src/markdown/render/markdown_theme.dart';
-import 'package:niman/src/markdown/render/source_view.dart';
-import 'package:niman/src/markdown/render/todo_block_scope.dart';
-import 'package:niman/src/markdown/source_buffer.dart';
-import 'package:niman/src/markdown/source_edit.dart';
-import 'package:niman/src/markdown/surface.dart';
-import 'package:niman/src/markdown/surface_controller.dart';
-import 'package:niman/src/preview/math_cache.dart';
-import 'package:niman/src/spellcheck/editor_spell_check.dart';
-import 'package:niman/src/templates/check_state.dart';
-import 'package:niman/src/ui/capture/paste_markdown_flow.dart'
-    show readPlainClipboard;
-import 'package:niman/src/ui/dead_link_watcher.dart';
 import 'package:niman/src/ui/hidden_slot.dart';
-import 'package:niman/src/ui/link_preview/note_link_preview.dart';
-import 'package:niman/src/ui/note_attach.dart';
-import 'package:niman/src/ui/note_dead_links.dart';
-import 'package:niman/src/ui/note_disk.dart';
-import 'package:niman/src/ui/note_edit_commands.dart';
-import 'package:niman/src/ui/note_editor_frame.dart';
-import 'package:niman/src/ui/note_find_keys.dart';
+import 'package:niman/src/ui/note_editor_options.dart';
 import 'package:niman/src/ui/note_footer.dart';
-import 'package:niman/src/ui/note_frontmatter_panel.dart';
-import 'package:niman/src/ui/note_inserts.dart';
-import 'package:niman/src/ui/note_link_actions.dart';
 import 'package:niman/src/ui/note_links.dart';
 import 'package:niman/src/ui/note_load_error.dart';
-import 'package:niman/src/ui/note_paste.dart';
 import 'package:niman/src/ui/note_place.dart';
-import 'package:niman/src/ui/note_read_snapshot.dart';
-import 'package:niman/src/ui/note_read_tasks.dart';
-import 'package:niman/src/ui/note_save_pipeline.dart';
+import 'package:niman/src/ui/note_read_pane.dart';
+import 'package:niman/src/ui/note_services.dart';
+import 'package:niman/src/ui/note_session.dart';
+import 'package:niman/src/ui/note_source_pane.dart';
 import 'package:niman/src/ui/note_stats.dart';
 import 'package:niman/src/ui/note_tags.dart';
-import 'package:niman/src/ui/note_task_items.dart';
-import 'package:niman/src/ui/note_tasks_host.dart';
-import 'package:niman/src/ui/note_text_cache.dart';
-import 'package:niman/src/ui/note_todo_blocks.dart';
 import 'package:niman/src/ui/note_top_bar.dart';
 import 'package:niman/src/ui/note_view_adapters.dart';
 import 'package:niman/src/ui/note_view_chrome.dart';
 import 'package:niman/src/ui/note_view_handle.dart';
-import 'package:niman/src/ui/strings.dart';
-import 'package:niman/src/ui/tree_link_drop.dart';
-import 'package:niman/src/ui/unsaved_notes.dart';
+import 'package:niman/src/ui/note_view_parts.dart';
 import 'package:niman/src/workspace/note_memento.dart';
 import 'package:path/path.dart' as p;
 
 export 'package:niman/src/ui/note_save_pipeline.dart'
     show NoteSaver, NoteStreamSaver;
-
-/// How wide the caret is in Zen mode (#69): thicker, to be found at a
-/// glance on a page with nothing else on it.
-const double zenCaretWidth = 3;
+export 'package:niman/src/ui/note_source_pane.dart' show zenCaretWidth;
 
 /// Opens a note file in the source editor and keeps disk in sync.
 ///
@@ -104,41 +50,20 @@ const double zenCaretWidth = 3;
 /// dominant ending is remembered with the note, and every save writes the
 /// text back with it (#1056) — a CRLF note stays CRLF.
 ///
-/// [showLineNumbers] and [autofocusEditor] are the settings toggles,
+/// [options] are the settings toggles,
 /// passed through to the editor. The note is one pane: [showPreview] says
 /// which of the two it holds — the editor or the read surface.
 final class NoteView extends StatefulWidget {
   /// Opens the note at [path].
   const new({
     required this.path,
-    required this.showLineNumbers,
-    required this.autofocusEditor,
-    this.noteColumn = NoteColumn.off,
+    required this.options,
     this.barActions = const [],
-    this.linkType = LinkType.wikilink,
-    this.newItemLocation = NewItemLocation.openNoteFolder,
-    this.attachmentsFolder = defaultAttachmentsFolder,
-    this.templateFolder,
-    this.indentWidth = 2,
-    this.sourceFont = defaultSourceFont,
-    this.toolbarLayout = ToolbarLayout.defaults,
     this.showPreview = false,
     this.showWysiwyg = false,
     this.onWysiwygChanged,
     this.onEditorKindChanged,
-    this.libraryRoot,
-    this.pickImagePath,
-    this.importImage,
-    this.readClipboardFiles,
-    this.readNote,
-    this.writeNote,
-    this.saveNote,
-    this.saveNoteStream,
-    this.linkSource,
-    this.wikilinkSuggester,
-    this.tasks,
-    this.onOpenNote,
-    this.createMissingNote,
+    this.services = const NoteServices(),
     this.initialAnchor,
     this.initialCaretOffset,
     this.initialFind,
@@ -149,7 +74,6 @@ final class NoteView extends StatefulWidget {
     this.onEditedNoteClosed,
     this.onLoaded,
     this.kindMode = true,
-    this.features,
     this.outlineInDock = false,
     this.spellCheckInDock = false,
     this.relatedInDock = false,
@@ -159,14 +83,8 @@ final class NoteView extends StatefulWidget {
     this.onMoveToTasks,
     this.toolbarTop = false,
     this.zen = false,
-    this.typewriter = false,
-    this.cascadeChecklist = true,
-    this.frontmatterPanel = true,
-    this.linkPreview = true,
     this.onToggleTypewriter,
-    this.unsavedTracker,
     this.statusActions = const <Widget>[],
-    this.spellCheck,
     this.reloadToken = 0,
     this.caretRequest = 0,
     super.key,
@@ -175,11 +93,8 @@ final class NoteView extends StatefulWidget {
   /// Absolute path of the note file.
   final String path;
 
-  /// Whether the editor shows the row-number column (settings toggle).
-  final bool showLineNumbers;
-
-  /// Whether the editor shows the keyboard on open (settings toggle).
-  final bool autofocusEditor;
+  /// How the library's settings say the note is edited (#1257).
+  final NoteEditorOptions options;
 
   /// A counter the shell bumps when the note was opened from the Files pane
   /// — a click on a row or a tile, or the pane's `Enter` — and the caret
@@ -190,20 +105,6 @@ final class NoteView extends StatefulWidget {
   /// here. A click on a note is an invitation to write in it, so the shell
   /// asks for the caret; 0 is "nobody asked".
   final int caretRequest;
-
-  /// Whether the note's frontmatter is drawn as the properties panel above it
-  /// (settings toggle, #157). Off, the note is its own text in both surfaces.
-  final bool frontmatterPanel;
-
-  /// Whether hovering a link — with Ctrl (⌘) held in the editor — or pressing
-  /// and holding it in the read view on a touch screen previews the note it
-  /// points at (settings, #846).
-  final bool linkPreview;
-
-  /// Where the note's text sits across the pane (issue #171): both
-  /// editors, the preview, the toolbar, the find bars and the status row
-  /// keep to it.
-  final NoteColumn noteColumn;
 
   /// How long a note waits after the last edit before its word count and
   /// outline are refreshed, or null to wait for nothing.
@@ -219,28 +120,6 @@ final class NoteView extends StatefulWidget {
   /// The note's own controls at the right end of the desktop's top row
   /// (#173): the kind toggles and the ⋮ menu the shell builds.
   final List<Widget> barActions;
-
-  /// The link format the link button inserts (settings).
-  final LinkType linkType;
-
-  /// The folder (library-relative) picked images are copied into
-  /// (settings, issue #56).
-  final String attachmentsFolder;
-
-  /// The folder (library-relative) of the library's templates (settings):
-  /// a note in it has its template commands coloured in the source. Null
-  /// colours none.
-  final String? templateFolder;
-
-  /// The indent/outdent width in spaces (settings).
-  final int indentWidth;
-
-  /// The face the source pane is set in (settings, issue #259).
-  final SourceFont sourceFont;
-
-  /// The toolbar the user arranged (settings, T-TB-04): which buttons
-  /// show and in what order.
-  final ToolbarLayout toolbarLayout;
 
   /// Preview visibility (T-UI-06): the shared app bar owns the switch
   /// and passes the state down; NoteView just follows it.
@@ -258,71 +137,8 @@ final class NoteView extends StatefulWidget {
   /// single enabled editor passes.
   final ValueChanged<EditorKind>? onEditorKindChanged;
 
-  /// The library root (T-M2-09): relative image links in the preview
-  /// resolve under it, and inserted images are copied into
-  /// `<root>/assets/`. Null (tests without a library) disables insert.
-  final String? libraryRoot;
-
-  /// Picks an image file (T-M2-09); the default is the platform picker
-  /// (file_picker). Tests inject a seam.
-  final Future<String?> Function()? pickImagePath;
-
-  /// Imports the picked file into the library (default
-  /// [importImageToLibrary]); tests inject a seam (it runs an isolate,
-  /// which FakeAsync cannot drive).
-  final Future<String> Function(String libraryRoot, String sourcePath)?
-  importImage;
-
-  /// Reads the paths of the files on the clipboard, which a paste attaches
-  /// (#1249); the default is the platform's reader. Tests inject a seam.
-  final Future<List<String>> Function()? readClipboardFiles;
-
-  /// Reads a note's content. Defaults to an off-isolate file read.
-  final Future<String> Function(String path)? readNote;
-
-  /// Persists a note's content. Defaults to an atomic file write.
-  ///
-  /// A test seam; production passes [saveNote] instead.
-  final Future<void> Function(String path, String content)? writeNote;
-
-  /// Saves a note's content through the library's write path (`NoteOps`),
-  /// with the editor session the save belongs to. Takes precedence over
-  /// [writeNote]; null (no open library) falls back to a direct write.
-  final NoteSaver? saveNote;
-
-  /// Saves a note whose text is too long to join (a [NoteStreamSaver]):
-  /// the producer it is handed makes the bytes one slice at a time and the
-  /// write takes them as they come. Null — no library, or a note outside
-  /// its root — joins the note and saves it through [saveNote] as before.
-  final NoteStreamSaver? saveNoteStream;
-
-  /// The link-resolution source (wiki targets + markdown hrefs against the
-  /// open index); null (tests without a session) disables link navigation.
-  final LibraryLinks? linkSource;
-
-  /// The library the wikilink suggester panel reads (#475): the notes,
-  /// their aliases and their headings. Null (no open library) draws no
-  /// panel, and the link is typed as it was before.
-  final WikilinkSuggester? wikilinkSuggester;
-
-  /// The tasks that link a note (#1152), for the "Tasks for this note"
-  /// section under it. Null — no library — draws none; the section is also
-  /// left out while the library's Todo feature is off.
-  final NoteTasksHost? tasks;
-
-  /// Opens a note by library-relative path, then (optionally) jumps to a
-  /// heading; the shell implements it (T-M3-07).
-  final void Function(String path, String? anchor)? onOpenNote;
-
-  /// Where a note created from a dead link lands (settings, issue #78);
-  /// the offer itself is disabled when [createMissingNote] is null.
-  final NewItemLocation newItemLocation;
-
-  /// The note-creation path for dead links (issue #78): creates an empty
-  /// note at library-relative [path] and returns its library-relative
-  /// path; null (no open library) keeps the dead-link snackbar instead of
-  /// the offer.
-  final Future<String> Function(String path)? createMissingNote;
+  /// What the open library lends the note (#1257).
+  final NoteServices services;
 
   /// A heading anchor to land on after the note loads (T-M3-07).
   final String? initialAnchor;
@@ -369,10 +185,6 @@ final class NoteView extends StatefulWidget {
   /// the editor. False = always the raw editor.
   final bool kindMode;
 
-  /// The library's features (#1109): a note of a kind that is off opens in
-  /// the plain editor. Null reads every kind as on.
-  final ValueListenable<Features>? features;
-
   /// Whether the window's panel has the outline (#1002): the status row's
   /// own outline button would then be a second way to the same list, and is
   /// left out. True wherever the wide layout shows the panel — docked
@@ -417,32 +229,13 @@ final class NoteView extends StatefulWidget {
   /// chrome that framed it has gone.
   final bool zen;
 
-  /// Typewriter mode (#70): the caret's row keeps to the middle of the
-  /// editor, in both editors. Independent of [zen]: either may be on
-  /// without the other.
-  final bool typewriter;
-
-  /// Whether ticking a checklist item ticks the tasks nested under it
-  /// (#326), in the live editor and in the read view alike.
-  final bool cascadeChecklist;
-
   /// The status row's typewriter switch; null leaves it out.
   final VoidCallback? onToggleTypewriter;
-
-  /// The app-level registry of notes with unsaved edits (T-PP-11), which
-  /// the window's close guard reads; null when the owner does not track
-  /// (most widget tests). The adapter below reports this note's live
-  /// revision pair, so the tracker never holds a copy of the text.
-  final UnsavedTracker? unsavedTracker;
 
   /// Extra controls at the right of the status row (T-PP-22): the desktop
   /// puts the layout/preview actions here, next to the note's own status;
   /// the phone keeps them in its note app bar (empty by default).
   final List<Widget> statusActions;
-
-  /// The editor's spelling state (T-PP-09): underlines misspelled prose.
-  /// Null (most widget tests, and a platform without hunspell) draws none.
-  final EditorSpellCheck? spellCheck;
 
   /// External-change reload requests (home-screen widget toggles): the
   /// shell bumps this when the already-open note may have changed on
@@ -457,172 +250,72 @@ final class NoteView extends StatefulWidget {
 final class _NoteViewState extends State<NoteView>
     with WidgetsBindingObserver
     implements NoteViewHandle {
+  /// The note view's collaborators and how they are wired (#1257).
+  late final NoteViewParts _parts = NoteViewParts(
+    viewOf: () => widget,
+    handle: () => this,
+    context: () => context,
+    mounted: () => mounted,
+    update: setState,
+  );
+
+  @override
+  bool get canInsert => _parts.canInsert;
+
   static const AppLogger _log = AppLogger(name: 'editor');
 
-  late final FocusNode _focus;
-
-  /// Whether the Files pane asked for the caret in this note and it has not
-  /// been given yet (#727): the editor is not up until the note has loaded,
-  /// and a focus asked for before that goes nowhere.
-  bool _caretPending = false;
-
-  /// The unified source pane's find & replace, over [_surface]'s buffer.
-  late final SourceFindController _sourceFind = SourceFindController(
-    surface: () => _surface,
-    onClose: _focus.requestFocus,
-  );
-
-  bool _loading = true;
-  bool _ready = false;
-
-  /// Which load is the current one (#1059): counted up as each starts, and
-  /// compared after every await, so a load the reader has moved on from —
-  /// another note, the same note asked for again — changes nothing when it
-  /// ends, whether it ends well or not.
-  int _loadGeneration = 0;
-
-  /// Why the note could not be opened, in the user's words; the raw error
-  /// goes to the log only (issue #156).
-  String? _error;
-
-  /// The failed file is not text at all: the error pane offers it to the
-  /// OS instead.
-  bool _notText = false;
-
-  /// Where the note is read: the memento it hands in as it is left, and the
-  /// place it is put back at (#23).
-  late final NotePlace _place = NotePlace(
-    path: () => widget.path,
-    surface: () => _surface,
-    readView: () => _readViewKey.currentState,
-    sourceView: () => _sourceViewKey.currentState,
-    reading: () => _previewIn(widget),
-    active: () => widget.active,
-    ready: () => _ready,
-    mounted: () => mounted,
-    receiver: () => widget.onMemento,
-    wysiwyg: () => widget.showWysiwyg,
-    preview: () => widget.showPreview,
-  );
-
-  /// The note's word count, outline and frontmatter error (T-M2-07),
-  /// refreshed a pause after the last edit; the view repaints on each
-  /// refresh.
-  late final NoteStatsController _stats = NoteStatsController(
-    surface: () => _surface,
-    loading: () => _loading,
-    sourceView: () => _sourceViewKey.currentState,
-    readView: () => _readViewKey.currentState,
-  );
-
-  /// The template checker's state (T-TPL-09): the problems of the note when
-  /// it is a template, and nothing when it is not. Owned here, handed to the
-  /// surface — the same seam [NoteView.spellCheck] keeps — so the status row
-  /// can show the count the surface works out.
-  final TemplateCheck _templateCheck = TemplateCheck();
-
-  /// Which of the note's links name nothing (#847): resolved against the
-  /// index apart from the drawing, on load, a pause after an edit, and when
-  /// the library's index moves; the editor and the read view draw the answer.
-  late final DeadLinkWatcher _deadLinks = openNoteDeadLinks(
-    source: () => widget.linkSource,
-    buffer: () => _loading ? null : _surface?.buffer,
-    kept: () => _sourceViewKey.currentState?.references(),
-    notePath: () => _pathInLibrary,
-    delay: () => _stats.settleDelay,
-  );
-
-  /// The link preview (#846): the card a hovered link opens over the note.
-  late final NoteLinkPreview _preview = NoteLinkPreview(
-    source: () => widget.linkSource,
-    notePath: () => _pathInLibrary,
-    enabled: () => widget.linkPreview,
-    unsavedText: _unsavedTextOf,
-    mathCache: _mathCache,
-    targets: _links.targets,
-  );
-
-  /// The unsaved buffer text of the note at library-relative [path], when it
-  /// is open with edits the disk does not have yet (in any pane).
-  String? _unsavedTextOf(String path) {
-    final root = widget.libraryRoot;
-    if (root == null) return null;
-    // One unit past the limit, so a note longer than it still reads as
-    // longer: the preview is cut, and says so, as it is for the whole text.
-    return widget.unsavedTracker?.unsavedTextOf(
-      p.join(root, path),
-      maxChars: PreviewLimits.bytes + 1,
-    );
-  }
-
-  /// The scrolls of both panes: a card closes when the note moves under it.
-  late final Listenable _scrolls = Listenable.merge([
-    _previewScroll,
-    _sourceScroll,
-  ]);
-
-  /// The note's path in the library, slash-separated, or null for a note
-  /// opened from outside one.
-  String? get _pathInLibrary => pathInLibrary(widget.libraryRoot, widget.path);
+  @override
+  ValueListenable<List<OutlineEntry>> get outline => _parts.stats.outline;
 
   @override
-  ValueListenable<List<OutlineEntry>> get outline => _stats.outline;
-
-  @override
-  String get currentText => _text.text;
+  String get currentText => _parts.text.text;
 
   @override
   Future<List<String>> currentTags() {
-    final buffer = _unifiedSurfaceBuffer;
-    if (buffer == null) return Future.value(noteTagsOf(_text.text));
+    final buffer = _parts.unifiedSurfaceBuffer;
+    if (buffer == null) return Future.value(noteTagsOf(_parts.text.text));
     // A long note's scan keeps its tags block by block for the save to
     // hand the index: the same answer, with nothing of the note read again.
     return noteTagsOfBuffer(
       buffer,
-      references: _sourceViewKey.currentState?.references(),
+      references: _parts.sourceViewKey.currentState?.references(),
     );
   }
 
   @override
-  String get selectedText => _inserts.selectedText;
+  String get selectedText => _parts.inserts.selectedText;
 
   @override
   String get notePath => widget.path;
 
   @override
-  String? get notePathInLibrary => _pathInLibrary;
+  String? get notePathInLibrary => _parts.libraryPath;
 
   @override
-  Future<String?> resolveEmbed(String target) => _links.resolveEmbed(target);
+  Future<String?> resolveEmbed(String target) =>
+      _parts.links.resolveEmbed(target);
 
   @override
-  void jumpToHeading(int line) => _links.jumpToHeading(line);
-
-  @override
-  bool get canInsert {
-    if (!_ready) return false;
-    final kind = NoteKinds.forType(_noteKind, _features);
-    return !(widget.kindMode && kind != null);
-  }
+  void jumpToHeading(int line) => _parts.links.jumpToHeading(line);
 
   @override
   void setNoteKind(String? type) {
     // Once: a long note's text is joined for each ask (see [NoteTextCache]).
-    final current = _text.text;
+    final current = _parts.text.text;
     final text = type == null
         ? removeFrontmatterKey(current, 'type')
         : setFrontmatterKey(current, 'type', type);
     if (text == current) return;
-    _applyKindEdit(text);
+    _parts.applyKindEdit(text);
   }
 
   @override
-  void applyKindEdit(String newText) => _applyKindEdit(newText);
+  void applyKindEdit(String newText) => _parts.applyKindEdit(newText);
 
   @override
   void insertAtCaret(String markdown) {
     if (!canInsert) return;
-    _commands.run(
+    _parts.commands.run(
       (text, selection) =>
           insertSnippet(text: text, selection: selection, snippet: markdown),
       // A block keeps a blank line from the lines either side.
@@ -633,381 +326,80 @@ final class _NoteViewState extends State<NoteView>
   @override
   void insertColumns() {
     if (!canInsert) return;
-    _commands.insertColumnsAtCaret();
+    _parts.commands.insertColumnsAtCaret();
   }
 
   @override
   void insertEisenhower() {
     if (!canInsert) return;
-    _commands.insertEisenhowerMatrixAtCaret();
+    _parts.commands.insertEisenhowerMatrixAtCaret();
   }
-
-  /// What goes into the note from outside the editor's own keys: a paste,
-  /// the links of attached files, and what the selection holds.
-  late final NoteInserts _inserts = NoteInserts(
-    surface: () => _surface,
-    canInsert: () => canInsert,
-    mounted: () => mounted,
-    focus: _focus.requestFocus,
-    onInserted: () {
-      _stats.refresh();
-      _refreshPreview();
-    },
-  );
-
-  /// Files pasted or dropped on the note, copied into the attachments
-  /// folder and linked at the caret (#1249, #1250).
-  late final NoteAttach _attach = NoteAttach(
-    libraryRoot: () => widget.libraryRoot,
-    notePath: () => widget.path,
-    linkType: () => widget.linkType,
-    // Without the suggester, the file's name: a note's without `.md`, as a
-    // wikilink names it, anything else's with its extension.
-    wikiTarget: (path) async =>
-        await widget.wikilinkSuggester?.targetOf(path) ??
-        (p.extension(path).toLowerCase() == '.md'
-            ? p.basenameWithoutExtension(path)
-            : p.basename(path)),
-    importFile: (root, source) =>
-        widget.importImage?.call(root, source) ??
-        importImageToLibrary(
-          libraryRoot: root,
-          sourcePath: source,
-          attachmentsFolder: widget.attachmentsFolder,
-        ),
-    insert: _inserts.insertAttachmentLinks,
-    messenger: () => mounted ? ScaffoldMessenger.maybeOf(context) : null,
-  );
-
-  /// The platform's reader of the files on the clipboard (#1249).
-  late final ClipboardFilesReader _clipboardFiles = platformClipboardFiles();
 
   @override
   Future<bool> attachFiles(List<String> paths) =>
-      canInsert ? _attach.attach(paths) : Future.value(false);
-
-  /// The editor's paste, before it is plain text: spreadsheet cells
-  /// become a table (#1248).
-  late final NotePaste _paste = NotePaste(
-    canInsert: () => canInsert,
-    clipboardFiles: () =>
-        widget.readClipboardFiles?.call() ?? _clipboardFiles.read(),
-    attach: _attach.attach,
-    caretInCode: () => _sourceViewKey.currentState?.caretInCode ?? false,
-    surroundings: _inserts.surroundings,
-    plainText: readPlainClipboard,
-    pasteText: pasteText,
-    replacePasted: replacePasted,
-    messenger: () => mounted ? ScaffoldMessenger.maybeOf(context) : null,
-  );
+      canInsert ? _parts.attach.attach(paths) : Future.value(false);
 
   @override
-  PastedText? pasteText(String text) => _inserts.pasteText(text);
+  PastedText? pasteText(String text) => _parts.inserts.pasteText(text);
 
   @override
   void replacePasted(PastedText pasted, String text) =>
-      _inserts.replacePasted(pasted, text);
+      _parts.inserts.replacePasted(pasted, text);
 
   @override
-  void convertListToMindMap() => _commands.convertListToMindMap();
-
-  /// The checkbox items Move to tasks (#1152) reads and takes out.
-  late final NoteTaskItems _taskItems = NoteTaskItems(
-    surface: () => _surface,
-    sourceView: () => _sourceViewKey.currentState,
-    canInsert: () => canInsert,
-    focus: _refocus,
-  );
+  void convertListToMindMap() => _parts.commands.convertListToMindMap();
 
   @override
-  List<TaskItem> get taskItems => _taskItems.selected();
+  List<TaskItem> get taskItems => _parts.taskItems.selected();
 
   @override
   TakenTaskItems? takeOutTaskItems(List<TaskItem> items) =>
-      mounted ? _taskItems.takeOut(items) : null;
+      mounted ? _parts.taskItems.takeOut(items) : null;
 
   @override
   bool putBackTaskItems(TakenTaskItems taken) =>
-      mounted && _taskItems.putBack(taken);
-
-  /// Gives the editor the keyboard back after a command — unless a window
-  /// or a dialog stands over the note (#772). The cheatsheet's window
-  /// inserts while it stays open; Flutter lets a route below take the focus
-  /// when asked, and the window's Esc and the typing would then go to the
-  /// note behind its barrier. When the window closes, its route hands the
-  /// focus back to the one below.
-  void _refocus() {
-    if (!mounted) return;
-    if (!(ModalRoute.of(context)?.isCurrent ?? true)) return;
-    _focus.requestFocus();
-  }
+      mounted && _parts.taskItems.putBack(taken);
 
   @override
   void takeFocus() {
     if (!mounted) return;
-    if (!_ready) {
+    if (!_parts.session.ready) {
       // The load puts the caret in once the editor is up.
-      _caretPending = true;
+      _parts.caretPending = true;
       return;
     }
-    if (_previewOnly) {
-      _readViewKey.currentState?.focus();
+    if (_parts.previewOnly) {
+      _parts.readViewKey.currentState?.focus();
       return;
     }
-    _refocus();
+    _parts.refocus();
   }
-
-  /// The note's editing commands: the toolbar's, the format keys', the
-  /// context menu's, the Tools sheet's and the spelling review's.
-  late final NoteEditCommands _commands = NoteEditCommands(
-    surface: () => _surface,
-    focus: _refocus,
-    context: () => context,
-    mounted: () => mounted,
-    canInsert: () => canInsert,
-    text: () => _text.text,
-    sourceView: () => _sourceViewKey.currentState,
-    readView: () => _readViewKey.currentState,
-    activeFormats: _activeFormats,
-    linkType: () => widget.linkType,
-    indentWidth: () => widget.indentWidth,
-    toolbarLayout: () => widget.toolbarLayout,
-    pasteAsMarkdown: () => switch (widget.onPasteAsMarkdown) {
-      final paste? => () => paste(this),
-      null => null,
-    },
-    taskItems: _taskItems,
-    moveToTasks: () => switch (widget.onMoveToTasks) {
-      final move? => () => move(this),
-      null => null,
-    },
-    libraryRoot: () => widget.libraryRoot,
-    pickImage: () =>
-        widget.pickImagePath?.call() ?? NoteEditCommands.pickImageFile(),
-    importImage: (root, source) =>
-        widget.importImage?.call(root, source) ??
-        importImageToLibrary(
-          libraryRoot: root,
-          sourcePath: source,
-          attachmentsFolder: widget.attachmentsFolder,
-        ),
-    onInserted: () {
-      _stats.refresh();
-      _refreshPreview();
-    },
-    spellCheck: () => widget.spellCheck,
-    onSpellChecked: () {
-      if (mounted) setState(() {});
-    },
-  );
 
   @override
-  SpellReview? get spellReview => _commands.spellReview(edited: _stats);
-
-  /// The note's file: reading it off the UI isolate, and what it looked like
-  /// when it was last read or written — its stamp and its framing.
-  late final NoteDisk _disk = NoteDisk(readNote: () => widget.readNote);
-
-  /// The read pane's refresh (T-M2-08), after a pause in the typing.
-  Timer? _previewTimer;
-
-  /// The formats on at the caret: the toolbar's pressed state.
-  ///
-  /// Written by the surface, which reads them off the caret's line
-  /// (`MarkdownSurface.activeItems`), so the toolbar and the context menu read
-  /// one notifier in every mode (T-WYS-06, #246).
-  final ValueNotifier<Set<ToolbarItem>> _activeFormats =
-      ValueNotifier<Set<ToolbarItem>>(const <ToolbarItem>{});
-  late final ScrollController _previewScroll = ScrollController();
-
-  /// The editor surface's own scroll, so the fields panel can tell when the
-  /// note has been scrolled off its head and put itself away (#157). The
-  /// surface does not own it: it is handed in and the view keeps it.
-  final ScrollController _sourceScroll = ScrollController();
-
-  /// The frontmatter fields panel over the note (#157): how much of it shows,
-  /// in whichever pane is on stage, and the field edits it makes.
-  late final NoteFrontmatterPanel _frontmatter = NoteFrontmatterPanel(
-    enabled: () => widget.frontmatterPanel,
-    surface: () => _surface,
-    reading: () => _previewIn(widget),
-    typewriter: () => widget.typewriter,
-    caretLine: () => _surfaceCaretLine,
-    previewScroll: _previewScroll,
-    sourceScroll: _sourceScroll,
-    mounted: () => mounted,
-    onChanged: () => setState(() {}),
-    onEdited: () {
-      _refreshPreview();
-      _stats.refresh();
-    },
-  );
-
-  /// The source pane's state, for its headings: the outline is read off the
-  /// blocks the colours are already drawn from.
-  final GlobalKey<MarkdownSourceViewState> _sourceViewKey =
-      GlobalKey<MarkdownSourceViewState>();
-
-  /// The read mode's own state, so an anchor jump can ask it for a line: the
-  /// read view knows which block a line belongs to and where that block starts,
-  /// which is what a jump needs and what a line *fraction* of the note cannot
-  /// say (#256).
-  final GlobalKey<MarkdownReadViewState> _readViewKey =
-      GlobalKey<MarkdownReadViewState>();
-  late final MathCache _mathCache = MathCache();
-
-  /// The unified engine's parser: one for the view's life, so its per-block
-  /// cache survives a rebuild and invalidates itself when the text changes.
-  final ReadParser _unifiedParser = ReadParser();
-
-  /// What the read pane draws of the note: a snapshot of the editor's
-  /// buffer, taken once per revision shown.
-  final NoteReadSnapshot _readSnapshot = NoteReadSnapshot();
-
-  /// The note's text as the unified source surface has it (see
-  /// [NoteTextCache]): where saving, the preview and the statistics all get
-  /// their text from.
-  late final NoteTextCache _text = NoteTextCache(() => _unifiedSurfaceBuffer);
-
-  /// The note on the unified source surface: its buffer, its undo history and
-  /// the door every command comes in through (the toolbar, an image, a
-  /// spelling fix, a reload). One per open note, so the history survives the
-  /// pane being rebuilt.
-  MarkdownSurfaceController? _surface;
-
-  /// The buffer the unified source surface edits. Its own, not the read pane's:
-  /// the read pane's is rebuilt from the preview text on a debounce, and a pane
-  /// cannot edit an object that another part of the shell replaces underneath
-  /// it.
-  SourceBuffer? get _unifiedSurfaceBuffer => _surface?.buffer;
-
-  /// A controller over [text], reporting its edits the way the surface does:
-  /// over [ready]'s buffer when the note came made ready, which the UI
-  /// isolate then does not split.
-  MarkdownSurfaceController _surfaceFor(
-    String text, {
-    int caret = 0,
-    LoadedNote? ready,
-  }) {
-    final surface =
-        MarkdownSurfaceController(
-            ready?.buffer ?? SourceBuffer.fromText(text),
-            caret: caret,
-          )
-          ..onChanged = (edit) => _noteChanged(
-            caretLine: _surfaceCaretLine ?? _caretLine,
-            edit: edit,
-          );
-    _adoptWords(surface);
-    return surface;
-  }
-
-  /// Gives [surface] its word count, here for a note small enough to walk
-  /// and in the background for one that is not (see [WordCount]).
-  ///
-  /// It has to be there before the first edit: the count follows the lines
-  /// an edit touched, and one that is not built yet has no lines to follow.
-  void _adoptWords(MarkdownSurfaceController surface) {
-    if (surface.words.isCounted) return;
-    final buffer = surface.buffer;
-    if (buffer.length > NoteStatsController.syncWorkLimit) {
-      unawaited(surface.buildWords());
-      return;
-    }
-    surface.words.adopt(buffer);
-  }
+  SpellReview? get spellReview =>
+      _parts.commands.spellReview(edited: _parts.stats);
 
   /// Keeps the note where it was read when it moves between `source`,
   /// `live` and the read view ([NotePlace.keepAcrossModes]).
   void _keepPlaceAcrossModes(NoteView oldWidget) {
-    if (!_ready) return;
+    if (!_parts.session.ready) return;
     if (oldWidget.path != widget.path) return;
-    _place.keepAcrossModes(
-      wasRead: _previewIn(oldWidget),
-      read: _previewIn(widget),
-      modeChanged: _wysiwygIn(oldWidget) != _wysiwygIn(widget),
+    _parts.place.keepAcrossModes(
+      wasRead: NoteViewParts.previewIn(oldWidget),
+      read: NoteViewParts.previewIn(widget),
+      modeChanged:
+          NoteViewParts.wysiwygIn(oldWidget) != NoteViewParts.wysiwygIn(widget),
     );
   }
 
-  /// The mode the unified surface is built in: the WYSIWYG pane is `live`, the
-  /// source pane is `source` (`docs/records/unified-surface.md` §8.6.3).
-  MarkdownSurfaceMode get _unifiedMode => _wysiwygIn(widget)
-      ? MarkdownSurfaceMode.live
-      : MarkdownSurfaceMode.source;
-
-  /// Whether the note on screen was edited since it was opened: what makes
-  /// its closing worth reporting ([NoteView.onEditedNoteClosed]).
-  bool _edited = false;
-
-  /// The app-level unsaved registry this editor reports into (T-PP-11),
-  /// or null when the owner does not track.
-  late final UnsavedTracker? _unsaved;
-
   /// Files changed on disk under the open notes (#1042): the tracker's word.
   StreamSubscription<Set<String>>? _diskChanges;
-
-  /// The [UnsavedNote] view handed to [_unsaved]; it reads this state's
-  /// revision pair live, so it cannot hold stale text.
-  late final UnsavedNoteAdapter _unsavedNote = UnsavedNoteAdapter(
-    notePath: () => widget.path,
-    loading: () => _loading,
-    revision: () => _saves.revision,
-    lastSavedRevision: () => _saves.lastSavedRevision,
-    saveForClose: _saves.saveForClose,
-    bufferText: () => _text.text,
-    bufferHead: _text.head,
-  );
-
-  /// How the note reaches the disk: its revisions, the debounce after an
-  /// edit and the saves themselves.
-  late final NoteSavePipeline _saves = NoteSavePipeline(
-    notePath: () => widget.path,
-    ready: () => _ready,
-    text: () => _text.text,
-    buffer: () => _unifiedSurfaceBuffer,
-    references: () => _sourceViewKey.currentState?.references(),
-    framing: () => _disk.framing,
-    saveNote: () => widget.saveNote,
-    writeNote: () => widget.writeNote,
-    saveNoteStream: () => widget.saveNoteStream,
-    onSaved: (path, stamp) {
-      _disk.stamp = stamp;
-      _unsaved?.noteChanged();
-    },
-    onSettled: () {
-      if (mounted) setState(() {});
-    },
-    hold: widget.unsavedTracker?.hold,
-    diskStamp: () => _disk.stamp,
-    onExternalKept: (_) {
-      if (!mounted) return;
-      ScaffoldMessenger.maybeOf(context)
-          ?.showSnackBar(SnackBar(content: Text(AppStrings.noteChangedOnDisk)));
-    },
-  );
-
-  /// The first failure of a run of saves is said once, with a snack bar; the
-  /// status row keeps saying it, and offers the retry (#1054).
-  void _onSaveFailureChanged() {
-    if (!mounted) return;
-    final failure = _saves.failure.value;
-    setState(() {});
-    if (failure == null || failure.attempts != 1) return;
-    ScaffoldMessenger.maybeOf(context)
-        ?.showSnackBar(SnackBar(content: Text(AppStrings.noteSaveFailedSnack)));
-  }
-
-  Features get _features => widget.features?.value ?? const Features();
 
   /// A switch was flipped, or a sync brought another device's: the kind the
   /// note shows follows it, and the note's text is not touched (#1109).
   void _featuresChanged() {
     if (mounted) setState(() {});
   }
-
-  /// The loaded note's kind (the frontmatter `type` value, null = plain
-  /// note); null again while a load is in flight.
-  String? _noteKind;
 
   /// The kind GUIs' window onto the note (T-TK-02).
   late final NoteKindHostAdapter _kindHost;
@@ -1016,46 +408,47 @@ final class _NoteViewState extends State<NoteView>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _focus = FocusNode();
-    _focus.addListener(_onFocusChanged);
-    widget.features?.addListener(_featuresChanged);
-    _deadLinks.sourceChanged();
+    _parts.session.addListener(_parts.onSession);
+    _parts.focus.addListener(_onFocusChanged);
+    widget.services.features?.addListener(_featuresChanged);
+    _parts.deadLinks.sourceChanged();
     // The pane opened the note before this editor was mounted (#727): the
     // surface is built this frame, so the caret is asked for after it.
-    _caretPending = widget.caretRequest != 0;
+    _parts.caretPending = widget.caretRequest != 0;
     // The fields panel rides the note's head (#157), in whichever pane is on
     // stage: both scrolls are watched, and the panel reads the one that is.
-    _previewScroll.addListener(_frontmatter.scrolled);
-    _sourceScroll.addListener(_frontmatter.scrolled);
+    _parts.previewScroll.addListener(_parts.frontmatter.scrolled);
+    _parts.sourceScroll.addListener(_parts.frontmatter.scrolled);
     // The formatting keys, while this editor is the focused one (#205).
-    _formatKeys.attach();
+    _parts.formatKeys.attach();
     _kindHost = NoteKindHostAdapter(
-      noteText: () => _text.text,
-      applyNoteEdit: _applyKindEdit,
+      noteText: () => _parts.text.text,
+      applyNoteEdit: _parts.applyKindEdit,
       noteFilePath: () => widget.path,
-      rootDirectory: () => widget.libraryRoot,
-      attachmentsFolderOf: () => widget.attachmentsFolder,
-      linkTypeOf: () => widget.linkType,
-      embedResolver: _links.resolveEmbed,
+      rootDirectory: () => widget.services.libraryRoot,
+      attachmentsFolderOf: () => widget.options.attachmentsFolder,
+      linkTypeOf: () => widget.options.linkType,
+      embedResolver: _parts.links.resolveEmbed,
       linkOpener: (context, href) =>
-          unawaited(openHref(context, href, _links.targets())),
-      wikiLinkOpener: (context, inner) =>
-          unawaited(openWiki(context, parseWikiRef(inner), _links.targets())),
+          unawaited(openHref(context, href, _parts.links.targets())),
+      wikiLinkOpener: (context, inner) => unawaited(
+        openWiki(context, parseWikiRef(inner), _parts.links.targets()),
+      ),
       markdownShower: () => widget.onKindMarkdown,
     );
-    _unsaved = widget.unsavedTracker;
-    _unsaved?.register(_unsavedNote);
-    widget.spellCheck?.addListener(_onSpellCheckChanged);
+    _parts.unsaved = widget.services.unsavedTracker;
+    _parts.unsaved?.register(_parts.unsavedNote);
+    widget.services.spellCheck?.addListener(_onSpellCheckChanged);
     // The WYSIWYG publishes the formats at its caret on every selection
     // change: the same moment its memento moves.
-    _activeFormats.addListener(_place.schedule);
+    _parts.activeFormats.addListener(_parts.place.schedule);
     // And the scroll of either pane: where the note is read is where it is
     // left (#1077).
-    _previewScroll.addListener(_place.schedule);
-    _sourceScroll.addListener(_place.schedule);
-    _stats.addListener(_onStatsChanged);
-    _saves.failure.addListener(_onSaveFailureChanged);
-    _diskChanges = _unsaved?.diskChanges.listen((paths) {
+    _parts.previewScroll.addListener(_parts.place.schedule);
+    _parts.sourceScroll.addListener(_parts.place.schedule);
+    _parts.stats.addListener(_onStatsChanged);
+    _parts.saves.failure.addListener(_parts.onSaveFailureChanged);
+    _diskChanges = _parts.unsaved?.diskChanges.listen((paths) {
       if (paths.isEmpty || paths.any((it) => p.equals(it, widget.path))) {
         unawaited(_reloadIfChanged());
       }
@@ -1066,29 +459,29 @@ final class _NoteViewState extends State<NoteView>
   @override
   void didUpdateWidget(covariant NoteView oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.features != widget.features) {
-      oldWidget.features?.removeListener(_featuresChanged);
-      widget.features?.addListener(_featuresChanged);
+    if (oldWidget.services.features != widget.services.features) {
+      oldWidget.services.features?.removeListener(_featuresChanged);
+      widget.services.features?.addListener(_featuresChanged);
     }
     final moved = _followsMove(oldWidget);
     _keepPlaceAcrossModes(oldWidget);
-    if (!identical(oldWidget.linkSource, widget.linkSource)) {
+    if (!identical(oldWidget.services.linkSource, widget.services.linkSource)) {
       // The library opened under a note that was already on screen: its
       // links are resolved against it now.
-      _deadLinks
+      _parts.deadLinks
         ..sourceChanged()
         ..refresh();
     }
     if (oldWidget.path != widget.path && !moved) {
       // Another note's head is not this one's (#157): the panel opens closed
       // again, and the note on screen is taken at its head until it scrolls.
-      _frontmatter.reset();
+      _parts.frontmatter.reset();
     }
     if (oldWidget.showPreview != widget.showPreview) {
-      if (widget.showPreview && _readSnapshot.stale) {
-        _readSnapshot
+      if (widget.showPreview && _parts.readSnapshot.stale) {
+        _parts.readSnapshot
           ..stale = false
-          ..show(_surface?.buffer);
+          ..show(_parts.session.surface?.buffer);
       }
       if (widget.showPreview) {
         // What the flip costs to reach the pixels, and what the frames after
@@ -1103,26 +496,26 @@ final class _NoteViewState extends State<NoteView>
         if (AppLog.file != null) FrameProbe.watch('preview', 'read pane open');
       }
     }
-    if (oldWidget.active && !widget.active) _place.hand(oldWidget.path);
-    if (!oldWidget.active && widget.active && _place.landing) {
-      _place.scheduleLanding();
+    if (oldWidget.active && !widget.active) _parts.place.hand(oldWidget.path);
+    if (!oldWidget.active && widget.active && _parts.place.landing) {
+      _parts.place.scheduleLanding();
     }
-    if (!oldWidget.active && widget.active && _ready) {
+    if (!oldWidget.active && widget.active && _parts.session.ready) {
       // Back on screen: the shell asks the showing note what kind it is.
-      widget.onNoteKindChanged?.call(_noteKind);
-      _dismissKeyboardForPreview();
+      widget.onNoteKindChanged?.call(_parts.session.kind);
+      _parts.dismissKeyboardForPreview();
     }
     if (moved) {
       _followMove();
     } else if (oldWidget.path != widget.path) {
-      _place.hand(oldWidget.path);
+      _parts.place.hand(oldWidget.path);
       // Persist the outgoing note under its own path before the buffer is
       // replaced by the incoming one: the _load below resets it.
-      _closed(oldWidget.path, _saves.saveOutgoing(oldWidget.path));
+      _closed(oldWidget.path, _parts.saves.saveOutgoing(oldWidget.path));
       // The tracker now sees the incoming path (the adapter reads it
       // live) — re-read the dirty set so the guard does not act on the
       // outgoing note.
-      _unsaved?.noteChanged();
+      _parts.unsaved?.noteChanged();
       unawaited(_load());
     }
     // An external change may have landed while the note stayed open (a
@@ -1134,14 +527,16 @@ final class _NoteViewState extends State<NoteView>
     // Coming back to the editor no longer remounts it (both panes stay
     // mounted below), so the source editor's autofocus no longer fires on
     // its own — request it like a fresh mount did.
-    if (_previewIn(oldWidget) && !_previewIn(widget)) {
-      if (widget.autofocusEditor) _focus.requestFocus();
+    if (NoteViewParts.previewIn(oldWidget) &&
+        !NoteViewParts.previewIn(widget)) {
+      if (widget.options.autofocusEditor) _parts.focus.requestFocus();
     }
     // The preview has no editable: a note opening in it, or the switch
     // flipping to it, dismisses the keyboard instead of leaving it up.
-    final wasPreviewOnly = _previewIn(oldWidget);
-    if (_previewOnly && (widget.path != oldWidget.path || !wasPreviewOnly)) {
-      _dismissKeyboardForPreview();
+    final wasPreviewOnly = NoteViewParts.previewIn(oldWidget);
+    if (_parts.previewOnly &&
+        (widget.path != oldWidget.path || !wasPreviewOnly)) {
+      _parts.dismissKeyboardForPreview();
     }
     // The pane opened the note (#727): the caret goes in it, whatever the
     // editor was showing before. Last, so a note opening in the preview is
@@ -1151,8 +546,8 @@ final class _NoteViewState extends State<NoteView>
     // asks this one for nothing.
     if (widget.caretRequest != 0 &&
         widget.caretRequest != oldWidget.caretRequest) {
-      _caretPending = true;
-      _refocus();
+      _parts.caretPending = true;
+      _parts.refocus();
     }
   }
 
@@ -1161,9 +556,7 @@ final class _NoteViewState extends State<NoteView>
   bool _followsMove(NoteView oldWidget) =>
       oldWidget.path != widget.path &&
       widget.movedFrom == oldWidget.path &&
-      _ready &&
-      !_loading &&
-      _surface != null;
+      _parts.session.holdsNote;
 
   /// The note's file is at a new path and its editor stays as it is: the
   /// text, the undo, the place. What was keyed on the old path starts over.
@@ -1172,46 +565,49 @@ final class _NoteViewState extends State<NoteView>
     // The edits from here on are saved under the new name, as a new
     // session. The disk stamp is the old file's, which the move kept, so a
     // rewrite of this note's links by the move still reads as a change.
-    _saves.newSession();
-    _unsaved?.noteChanged();
+    _parts.session.moved(widget.path);
+    _parts.unsaved?.noteChanged();
     // Its links resolve from where it is now.
-    _deadLinks
+    _parts.deadLinks
       ..sourceChanged()
       ..refresh();
   }
 
   @override
   void dispose() {
-    widget.features?.removeListener(_featuresChanged);
-    _place
+    widget.services.features?.removeListener(_featuresChanged);
+    _parts.place
       ..hand(widget.path)
       ..dispose();
-    _activeFormats.removeListener(_place.schedule);
-    _previewScroll.removeListener(_place.schedule);
-    _sourceScroll.removeListener(_place.schedule);
-    _templateCheck.dispose();
-    _saves.cancel();
-    _previewTimer?.cancel();
+    _parts.activeFormats.removeListener(_parts.place.schedule);
+    _parts.previewScroll.removeListener(_parts.place.schedule);
+    _parts.sourceScroll.removeListener(_parts.place.schedule);
+    _parts.templateCheck.dispose();
+    _parts.saves.cancel();
+    _parts.previewTimer?.cancel();
     WidgetsBinding.instance.removeObserver(this);
-    _closed(widget.path, _saves.close());
-    _unsaved?.unregister(_unsavedNote);
-    widget.spellCheck?.removeListener(_onSpellCheckChanged);
-    _sourceFind.dispose();
-    _saves.failure.removeListener(_onSaveFailureChanged);
+    _closed(widget.path, _parts.saves.close());
+    _parts.session
+      ..removeListener(_parts.onSession)
+      ..dispose();
+    _parts.unsaved?.unregister(_parts.unsavedNote);
+    widget.services.spellCheck?.removeListener(_onSpellCheckChanged);
+    _parts.sourceFind.dispose();
+    _parts.saves.failure.removeListener(_parts.onSaveFailureChanged);
     unawaited(_diskChanges?.cancel());
-    _stats
+    _parts.stats
       ..removeListener(_onStatsChanged)
       ..dispose();
-    _deadLinks.dispose();
-    _preview.dispose();
-    _activeFormats.dispose();
-    _formatKeys.detach();
-    _focus.dispose();
-    _previewScroll.removeListener(_frontmatter.scrolled);
-    _sourceScroll.removeListener(_frontmatter.scrolled);
-    _sourceScroll.dispose();
-    _previewScroll.dispose();
-    _mathCache.dispose();
+    _parts.deadLinks.dispose();
+    _parts.preview.dispose();
+    _parts.activeFormats.dispose();
+    _parts.formatKeys.detach();
+    _parts.focus.dispose();
+    _parts.previewScroll.removeListener(_parts.frontmatter.scrolled);
+    _parts.sourceScroll.removeListener(_parts.frontmatter.scrolled);
+    _parts.sourceScroll.dispose();
+    _parts.previewScroll.dispose();
+    _parts.mathCache.dispose();
     super.dispose();
   }
 
@@ -1219,8 +615,7 @@ final class _NoteViewState extends State<NoteView>
   /// disk, [NoteView.onEditedNoteClosed] hears of it, if it was edited
   /// while it was open.
   void _closed(String path, Future<void> saved) {
-    final edited = _edited;
-    _edited = false;
+    final edited = _parts.session.takeEdited();
     final report = widget.onEditedNoteClosed;
     if (!edited || report == null) return;
     unawaited(
@@ -1236,597 +631,43 @@ final class _NoteViewState extends State<NoteView>
 
   @override
   void deactivate() {
-    _place.leaving();
+    _parts.place.leaving();
     super.deactivate();
   }
 
   @override
   void activate() {
     super.activate();
-    _place.back();
+    _parts.place.back();
   }
 
-  Future<void> _load() async {
-    final path = widget.path;
-    final generation = ++_loadGeneration;
-    // The buffer stops being any note's text here: the outgoing note's
-    // save already left with its own path and text (didUpdateWidget), and
-    // the incoming one is not read yet. Nothing in it is owed to the disk,
-    // so the close guard has nothing to wait for (#156).
-    _saves.markClean();
-    // The links of the note that went are not this one's.
-    _deadLinks.clear();
-    _preview.close();
-    // Nor is its text, which goes now, before the next note is read (#1202):
-    // kept until the new one landed, a switch between two long notes held
-    // both at its peak — the buffer, its undo, the joined text and the
-    // preview's copy. The panes holding them unmount with the load.
-    _surface = null;
-    _text.text = '';
-    _readSnapshot.clear();
-    setState(() {
-      _loading = true;
-      _ready = false;
-      _error = null;
-      _notText = false;
-      _noteKind = null;
-    });
-    final clock = Stopwatch()..start();
-    try {
-      final opened = await _disk.open(path);
-      final content = opened.content;
-      // The note made ready off the UI isolate — its buffer with its text —
-      // for the unified surface, which is what it draws.
-      final ready = opened.ready;
-      if (!mounted || generation != _loadGeneration) return;
-      // The buffer uses LF: normalize line endings on load.
-      final onDisk = ready?.text ?? normalizedLineEndings(content);
-      // Text the app still owes this note's file — an earlier write of it the
-      // disk would not take — is the note's text, ahead of the file's
-      // (#1054). It is taken only here, once this load is the one that
-      // lands, so a load the reader moved on from does not carry it off. It
-      // is edits of this session the disk does not have: the buffer starts
-      // from it and is unsaved, so its own pipeline writes it.
-      final held = widget.unsavedTracker?.takeOver(path);
-      final text = held ?? onDisk;
-      final restored = held != null && held != onDisk;
-      // The note kind (T-TK-02): the frontmatter `type` decides the body
-      // (kind GUI or plain editor); detection scans the leading block
-      // only, never the whole text.
-      _noteKind = frontmatterTypeOf(text);
-      // What the bar found was in the note that went.
-      _sourceFind.close(refocus: false);
-      _surface = _surfaceFor(
-        text,
-        caret: (widget.initialCaretOffset ?? 0).clamp(0, text.length),
-        ready: restored ? null : ready,
-      );
-      _disk.adoptOpened(opened);
-      _surfaceCaretLine = null;
-      _text.text = text;
-      // A template `{{cursor}}` landing (#53): the surface was given the
-      // caret with its buffer, above, and a memento must not take it back
-      // (a note created at a path that had one lost its `{{cursor}}`).
-      if (widget.initialCaretOffset == null && widget.initialAnchor == null) {
-        _place.restore(widget.initialMemento, inWysiwyg: _wysiwygIn(widget));
-      }
-      // The spell cache is keyed by line index + text; a different note can
-      // reuse the same indices, so forget the previous file's answers.
-      widget.spellCheck?.reset();
-      _saves.markClean();
-      final session = _saves.newSession();
-      _log.debug('edit session $session: $path');
-      if (restored) {
-        _log.info('note opened with its unsaved text back: $path');
-        _edited = true;
-        _saves.edited();
-      }
-      _unsaved?.noteChanged();
-      setState(() {
-        _loading = false;
-        _ready = true;
-        _error = null;
-      });
-      // Opened straight into the preview: the IME has no target here.
-      _dismissKeyboardForPreview();
-      // A template `{{cursor}}` landing takes the keyboard (#53), and so
-      // does a note the Files pane opened (#727), and asks for it: the
-      // surface's `autofocus` gives way to whatever its scope already
-      // focused — the tree, the button the template was picked from — and
-      // the caret was drawn where no key went. Once the frame has put the
-      // surface under its focus node.
-      if (widget.initialCaretOffset != null || _caretPending) {
-        _caretPending = false;
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted && widget.path == path) _focus.requestFocus();
-        });
-      }
-      widget.onNoteKindChanged?.call(_noteKind);
-      // Word count + outline: asked for only now, with the note already on
-      // screen, because computing them costs an order of magnitude more
-      // than reading the note (see PreviewWork's `read`). Small notes
-      // answer synchronously inside this call; big ones go to an isolate
-      // and land a moment later.
-      _stats.refresh();
-      // The links that name nothing, resolved against the index with the
-      // note already on screen, and drawn muted when they arrive (#847).
-      _deadLinks.refresh();
-      // The editor gets this frame: the preview's parse and first layout
-      // start right after the text is on screen, so a large note shows it
-      // before the preview works (T-PP-22). The outline is asked for again
-      // then too: a big note's comes off a pane's scan, and the panes drew
-      // the note before this one until this frame built them for it.
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        _refreshPreview();
-        if (widget.path == path) _stats.refresh();
-      });
-      if (widget.initialFind case final terms? when terms.isNotEmpty) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted && widget.path == path) _sourceFind.openFinding(terms);
-        });
-      }
-      final anchor = widget.initialAnchor;
-      if (anchor != null && mounted) {
-        unawaited(jumpToAnchor(context, anchor, _links.targets()));
-      }
-      widget.onLoaded?.call(path, text.length);
-      _log.info(
-        'note loaded: $path (${text.length} chars, '
-        '${clock.elapsedMilliseconds} ms)',
-      );
-      // The read time above is what the disk/isolate cost; this is what the
-      // user waited for — load plus the frame that paints the loaded note.
-      logNextFrame('editor', 'note open first frame (${text.length} chars)');
-    } on Object catch (error) {
-      // A load the reader moved on from reports nothing: its failure is not
-      // this note's (#1059).
-      if (!mounted || generation != _loadGeneration) return;
-      // A file that is not text is an attachment, not a broken note: it
-      // says so, and nothing about it is ever reported saved (#156).
-      final reason = NoteReadReason.of(error);
-      final notText = reason == NoteReadReason.notText;
-      setState(() {
-        _loading = false;
-        _notText = notText;
-        _error = NoteDisk.failureMessage(reason);
-      });
-      _log.error('note load failed: $path ($error)');
-    }
-  }
-
-  /// Opens the note again after a load that failed: the error pane's Retry,
-  /// and the next reload trigger while the pane is up (#1059).
-  void _retryLoad() {
-    if (_loading) return;
-    unawaited(_load());
-  }
-
-  /// Adopts the disk text when it changed under the open note (a
-  /// home-screen widget toggle edits the file in a background isolate,
-  /// like any other external edit).
-  ///
-  /// Only when the buffer is clean: a save in flight, a pending save, or
-  /// unsaved edits keep the user's text — the disk converges on the next
-  /// save instead. Identical content is a no-op, so a resume without an
-  /// external edit never disturbs the caret. The WYSIWYG surface owns a
-  /// live document the buffer cannot replace, so it never auto-reloads.
-  Future<void> _reloadIfChanged() async {
-    // A note that failed to open has nothing on screen to protect: the next
-    // trigger — a resume, a sync that touched it — is a new try (#1059).
-    if (_error != null && !_notText) {
-      _retryLoad();
-      return;
-    }
-    if (_loading || _saves.busy) {
-      _log.debug('reload skipped (busy): ${widget.path}');
-      return;
-    }
-    if (_saves.dirty) {
-      _log.debug('reload skipped (unsaved edits): ${widget.path}');
-      return;
-    }
-    final path = widget.path;
-    final generation = _loadGeneration;
-    // What the file looked like when it was last read or written, before the
-    // read: O(1) against 250 ms of joining and comparing, and O(1) against
-    // the read itself. The test seam reads nothing, so it has no stamp to
-    // check and reads on.
-    if (widget.readNote == null && await _disk.unchanged(path)) {
-      _log.debug('reload skipped (the file did not change): $path');
-      return;
-    }
-    // The reader may have typed, or moved on, while the file was asked.
-    if (!mounted || generation != _loadGeneration) return;
-    if (_loading || _saves.busy || _saves.dirty) return;
-    final read = await _disk.reread(path);
-    if (read == null) return;
-    if (!mounted || widget.path != path || generation != _loadGeneration) {
-      return;
-    }
-    // The user may have typed during the read: re-check clean before
-    // adopting anything.
-    if (_loading || _saves.busy || _saves.dirty) {
-      return;
-    }
-    final text = normalizedLineEndings(read.content);
-    // The file is what the pane has, or is about to be: either way this is
-    // the file that was looked at, so the next look can stop at the stamp
-    // instead of reading it again (#1060).
-    _disk.adoptReread(read);
-    if (text == _text.text) return;
-    // Mute the programmatic change like _load does: the listener returns
-    // before the revision bump and the save schedule.
-    _loading = true;
-    // The buffer adopts the disk's text, and the word count is built again
-    // for it.
-    if (_surface case final surface?) {
-      surface.replaceAll(text);
-      _adoptWords(surface);
-    }
-    _saves.markClean();
-    // Text taken from disk again: edits from here on are a new session.
-    final session = _saves.newSession();
-    _log.debug('edit session $session: $path (adopted disk text)');
-    _noteKind = frontmatterTypeOf(text);
-    widget.spellCheck?.reset();
-    _loading = false;
-    _unsaved?.noteChanged();
-    widget.onNoteKindChanged?.call(_noteKind);
-    _stats.refresh();
-    _deadLinks.refresh();
-    _refreshPreview();
-    if (mounted) setState(() {});
-    _log.info('note reloaded: $path (external change, ${text.length} chars)');
-  }
-
-  /// The note changed, from either source pane: the text, and where the caret
-  /// is
-  /// in it (a line, which is what the preview's sync speaks in).
-  ///
-  /// The surface reports the pair through `onChanged` and `onSelection`, and
-  /// everything downstream — the save debounce, the unsaved marker, the
-  /// statistics, the preview text — is one code path for every mode.
-  void _noteChanged({required int caretLine, SourceEdit? edit}) {
-    _edited = true;
-    if (edit != null) {
-      // Before the revision moves: the count follows the edit's own lines,
-      // which is the whole point of keeping it per line.
-      _surface?.words.edited(edit, _surface!.buffer);
-    }
-    _saves.edited();
-    _unsaved?.noteChanged();
-    _caretLine = caretLine;
-    _stats.schedule();
-    _deadLinks.edited();
-    _preview.close();
-    _previewTimer?.cancel();
-    _previewTimer = Timer(const Duration(milliseconds: 500), _refreshPreview);
-  }
-
-  /// Where the caret is, in the preview's own terms.
-  int _caretLine = 0;
-
-  void _refreshPreview() {
-    if (!mounted || _loading) return;
-    if (!_previewIn(widget)) {
-      // The read pane is off stage behind the source pane, and bringing it up
-      // to date means re-reading and re-parsing the whole note: done when it
-      // is shown, not every time the writer pauses.
-      _readSnapshot.stale = true;
-      return;
-    }
-    final live = _surface?.buffer;
-    if (live == null) return;
-    // The editor's own lines, by revision: no text joined, no text compared.
-    if (_readSnapshot.shows(live)) return;
-    setState(() => _readSnapshot.show(live));
-  }
-
-  /// Flips between the source editor and the WYSIWYG surface (T-WYS-12);
-  /// the owner persists it and refreshes the shell.
-  void _toggleEditorKind() {
-    final next = widget.showWysiwyg ? EditorKind.source : EditorKind.wysiwyg;
-    widget.onEditorKindChanged?.call(next);
-  }
-
-  /// Whether only the preview is on screen (the editor hidden): the IME
-  /// has no editable target, so it must go.
-  bool get _previewOnly => _previewIn(widget);
-
-  /// Whether [view] shows its preview. In Zen (#69) too: a note read
-  /// rather than written is read there in its preview (0.0.8 test round).
-  static bool _previewIn(NoteView view) =>
-      view.showPreview && !_plainTextIn(view);
-
-  /// Whether [view] holds a file of a syntax of its own rather than
-  /// Markdown — the Todo tab's todo.txt and done.txt, and calendar.txt
-  /// (#730) — drawn in the source pane with its own colours and nowhere
-  /// else: the preview and `live` read Markdown, and would run its lines
-  /// together into paragraphs.
-  static bool _plainTextIn(NoteView view) =>
-      isPlainTextFile(p.basename(view.path));
-
-  /// Whether [view] holds a template: a note of the library's template
-  /// folder, whose `{{…}}` commands the source colours.
-  static bool _templateIn(NoteView view) {
-    final root = view.libraryRoot;
-    final folder = view.templateFolder;
-    if (root == null || folder == null || folder.isEmpty) return false;
-    if (!p.isWithin(root, view.path)) return false;
-    return isUnder(folder, relPath(view.path, root));
-  }
-
-  /// Whether [view] shows its note in the WYSIWYG pane.
-  static bool _wysiwygIn(NoteView view) =>
-      view.showWysiwyg && !_plainTextIn(view);
-
-  /// Dismisses the keyboard when the preview is the only pane: a note
-  /// opening in preview, or the switch flipping to it, must not leave
-  /// the IME up over a pane with nothing editable.
-  void _dismissKeyboardForPreview() {
-    if (!_previewOnly) return;
-    FocusManager.instance.primaryFocus?.unfocus();
-    // The read pane takes the keyboard instead, for the keys a page is read
-    // with (the arrows, the page keys, Home and End); a tab behind another
-    // leaves it where it is.
-    if (!widget.active) return;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted && _previewOnly && widget.active) {
-        _readViewKey.currentState?.focus();
-      }
-    });
-  }
-
-  /// The editor pane as the unified surface (#245, #246).
-  ///
-  /// The same widget the read mode's engine is built from, in one of its
-  /// modes:
-  /// `source` is the note as written, `live` is the same note with the
-  /// markers hidden and the caret's own revealed — the WYSIWYG the phase 4
-  /// round is about. Both hold the caret, the motions, the undo history and
-  /// the windowing, and both report the text and the caret line through
-  /// [_noteChanged] — so saving, the preview and the statistics do not know
-  /// which mode is on screen.
-  Widget _unifiedSurfacePane() {
-    var surface = _surface;
-    if (surface == null) {
-      final text = _text.text;
-      surface = _surface = _surfaceFor(text);
-      _text.text = text;
-    }
-    final buffer = surface.buffer;
-    // The fields panel, when the note has a block for it: the same widget the
-    // read pane puts above its note, above this one too, so the two surfaces
-    // cannot drift (#157).
-    final frontmatter = _frontmatter.fields();
-    // At the *note* text size, as the preview is (T-M6-12): without this the
-    // surface drew the note at the interface size, so the note's size setting
-    // did nothing. The find bar above it keeps the interface's.
-    final live = MediaQuery(
-      data: MediaQuery.of(context)
-          .copyWith(textScaler: noteTextScalerOf(context)),
-      child: MarkdownSurface(
-        viewKey: _sourceViewKey,
-        buffer: buffer,
-        surface: surface,
-        lineTokens: plainTextTokensOf(p.basename(widget.path)),
-        templateCommands: _templateIn(widget),
-        wikilinkSuggester: widget.wikilinkSuggester,
-        deadLinks: _deadLinks,
-        onLinkHover: _preview.editorHover,
-        onPaste: _paste.paste,
-        notePath: _pathInLibrary,
-        blockAnchors: _links.blockAnchors,
-        // The shell's own focus node: the phone toolbar, the format keys,
-        // save-on-blur and the refocus when the preview goes all ask *it*
-        // whether the editor has the focus.
-        focusNode: _focus,
-        // The view keeps the scroll, so the fields panel can tell how far the
-        // note has been scrolled from its head (#157).
-        controller: _sourceScroll,
-        mode: _unifiedMode,
-        // Its metrics at the note's size: this context is above the scaler
-        // set just around the surface.
-        theme: markdownThemeOf(context, scaler: noteTextScalerOf(context)),
-        showLineNumbers: widget.showLineNumbers && !widget.zen,
-        // The live pane's overlay children (the code blocks' copy
-        // buttons) draw over the whole app: only the pane on stage keeps
-        // them.
-        onStage: widget.active && !_previewIn(widget),
-        caretWidth: widget.zen ? zenCaretWidth : null,
-        typewriter: widget.typewriter,
-        cascadeChecklist: widget.cascadeChecklist,
-        // The keyboard-on-open setting, and a template `{{cursor}}` landing,
-        // which always takes the focus (#53).
-        autofocus: widget.autofocusEditor || widget.initialCaretOffset != null,
-        indentWidth: widget.indentWidth,
-        sourceFont: widget.sourceFont,
-        column: widget.noteColumn,
-        formatMenu: _commands.formatMenu,
-        editorMenu: _commands.contextMenu,
-        spellCheck: widget.spellCheck,
-        // Only a template is checked: a `{{…}}` in an ordinary note is text
-        // like any other (T-TPL-09).
-        templateCheck: _templateIn(widget) ? _templateCheck : null,
-        activeItems: _activeFormats,
-        // What `live` draws in place of the source it hides: the formulas
-        // and pictures the read view draws, from the same cache and disk.
-        mathCache: _mathCache,
-        embedResolver: _links.resolveEmbed,
-        findMatches: _sourceFind,
-        onOpenLink: (kind, raw, href) =>
-            unawaited(_links.openLinkToken(kind, raw, href)),
-        onChanged: (edit) {
-          _sourceFind.noteEdited();
-          _noteChanged(caretLine: _surfaceCaretLine ?? _caretLine, edit: edit);
-        },
-        onSelection: (selection) {
-          _surfaceCaretLine = buffer.lineOf(selection.extent) + 1;
-          // In typewriter mode the fields panel rides the caret, not the
-          // scroll the follow drives (#522).
-          if (widget.typewriter) _frontmatter.scrolled();
-        },
-      ),
-    );
-    final note = TodoBlockScope(builder: _todoBlocks, child: live);
-    // A row of the tree let go on the note writes a link to its file
-    // where the pointer let it go (#704).
-    final dropping = TreeLinkDrop(
-      viewKey: _sourceViewKey,
-      onDrop: (path) => unawaited(_links.insertDroppedLink(path)),
-      child: note,
-    );
-    return NoteEditorFrame(
-      find: _sourceFind,
-      column: widget.noteColumn,
-      frontmatter: frontmatter,
-      onKey: _findKeys.onKey,
-      child: dropping,
+  /// Opens the note on screen: the session reads it, and the view follows.
+  Future<void> _load() {
+    _parts.loadClock
+      ..reset()
+      ..start();
+    return _parts.session.open(
+      widget.path,
+      caret: widget.initialCaretOffset ?? 0,
     );
   }
 
-  /// The find keys, for the note and its bar ([NoteFindKeys]).
-  late final NoteFindKeys _findKeys = NoteFindKeys(
-    find: _sourceFind,
-    openFind: openFind,
+  /// Opens the note again after a load that failed (#1059).
+  void _retryLoad() => _parts.session.retry(widget.path);
+
+  /// Adopts the disk text when it changed under a clean note
+  /// ([NoteSession.reload]). The test seam reads nothing, so it has no
+  /// stamp to check and reads on.
+  Future<void> _reloadIfChanged() => _parts.session.reload(
+    widget.path,
+    checkStamp: widget.services.readNote == null,
   );
 
   @override
-  void openFind({bool replace = false}) {
-    if (_previewOnly || !_ready) return;
-    _sourceFind.open(replace: replace);
-  }
-
-  /// The line the unified surface's caret is on (1-based), or null before it
-  /// has
-  /// reported one.
-  int? _surfaceCaretLine;
-
-  /// What draws the note's `todo` fences as lists of tasks (#1152), or null
-  /// where there is no list to draw them from: the Todo feature is off, or the
-  /// note is outside a library. The fence is the code it is on disk then.
-  TodoBlockBuilder? get _todoBlocks {
-    final tasks = widget.tasks;
-    final path = _pathInLibrary;
-    if (tasks == null || path == null || !_features.isOn(LibraryFeature.todo)) {
-      return null;
-    }
-    return NoteTodoBlocks(host: tasks, notePath: path);
-  }
-
-  /// The preview, at the *note* text size rather than the interface one
-  /// (T-M6-12).
-  ///
-  /// The app root put the interface scale on every MediaQuery below it;
-  /// here it is replaced, so the same note reads the same size whichever
-  /// pane shows it.
-  ///
-  /// The unified surface's read mode: one engine, the same theme as the editor
-  /// (docs/records/unified-surface.md).
-  Widget _buildPreview(BuildContext context) => TodoBlockScope(
-    builder: _todoBlocks,
-    child: MediaQuery(
-      data: MediaQuery.of(context)
-          .copyWith(textScaler: noteTextScalerOf(context)),
-      child: MarkdownReadView(
-        key: _readViewKey,
-        buffer: _readSnapshot.buffer,
-        parser: _unifiedParser,
-        mathCache: _mathCache,
-        controller: _previewScroll,
-        onTapLink: (text, href) =>
-            unawaited(openHref(context, href ?? '', _links.targets())),
-        onTapWikiLink: (inner) => unawaited(
-          // The same rule the parser and the preview use, so a wikilink means
-          // one thing however it is drawn. `inner` is the `[[…]]` content, and
-          // `parseWikiRef` reads it (#477 needs the target it names).
-          openWiki(context, parseWikiRef(inner), _links.targets()),
-        ),
-        embedResolver: _links.resolveEmbed,
-        deadLinks: _deadLinks,
-        linkPreview: _preview.hooks(context),
-        column: widget.noteColumn,
-        knownScan: _editorScanOf,
-        sharedScan: _editorScanLater,
-        onToggleTask: _readTasks.toggle,
-      ),
-    ),
-  );
-
-  /// The read pane with the frontmatter fields panel over it (#157), or the
-  /// pane alone when the note has no block to show.
-  Widget _previewPane(BuildContext context) {
-    final panel = _frontmatter.fields();
-    if (panel == null) return _buildPreview(context);
-    return Column(
-      children: [
-        NoteColumnPadding(
-          column: widget.noteColumn,
-          minInset: NoteColumn.textInset,
-          child: panel,
-        ),
-        Expanded(child: _buildPreview(context)),
-      ],
-    );
-  }
-
-  /// The read pane's task items, ticked through the editor's own door.
-  late final NoteReadTasks _readTasks = NoteReadTasks(
-    surface: () => _surface,
-    snapshot: _readSnapshot,
-    // The pane on screen has the note scanned.
-    blocks: () =>
-        _sourceViewKey.currentState?.blocks ??
-        _readViewKey.currentState?.blocks,
-    cascade: () => widget.cascadeChecklist,
-    onEdited: _refreshPreview,
-  );
-
-  /// The blocks and definitions of [buffer] as the source pane already holds
-  /// them (see [NoteReadSnapshot.editorScanOf]), or null.
-  DocumentScan? _editorScanOf(SourceBuffer buffer) =>
-      _readSnapshot.editorScanOf(buffer, _sourceViewKey.currentState);
-
-  /// [_editorScanOf], once the editor's reading of the note under way has
-  /// landed: the read pane of a note opened in it waits for the scan the
-  /// editor mounted behind it is making, rather than making a second one
-  /// (#1199). Null when there is no editor, or the note moved on meanwhile.
-  Future<DocumentScan?> _editorScanLater(SourceBuffer buffer) async {
-    final editor = _sourceViewKey.currentState;
-    if (editor == null) return null;
-    await editor.readingLanded;
-    if (!mounted) return null;
-    return _editorScanOf(buffer);
-  }
-
-  /// The note's links: following them from either pane, the embeds they
-  /// name, a link dropped from the tree, and the jumps to a heading.
-  late final NoteLinkActions _links = NoteLinkActions(
-    notePath: () => widget.path,
-    notePathInLibrary: () => _pathInLibrary,
-    libraryRoot: () => widget.libraryRoot,
-    linkSource: () => widget.linkSource,
-    linkType: () => widget.linkType,
-    newItemLocation: () => widget.newItemLocation,
-    wikilinkSuggester: () => widget.wikilinkSuggester,
-    onOpenNote: () => widget.onOpenNote,
-    createMissingNote: () => widget.createMissingNote,
-    outline: () => _stats.outline.value,
-    surface: () => _surface,
-    readView: () => _readViewKey.currentState,
-    reading: () => _previewIn(widget),
-    context: () => context,
-    mounted: () => mounted,
-    onDropped: () {
-      _focus.requestFocus();
-      _stats.refresh();
-      _refreshPreview();
-    },
-  );
+  void openFind({bool replace = false}) => _parts.openFind(replace: replace);
 
   void _onFocusChanged() {
-    if (!_focus.hasFocus) _saves.saveInBackground();
+    if (!_parts.focus.hasFocus) _parts.saves.saveInBackground();
     _onToolbarFocusChanged();
   }
 
@@ -1844,11 +685,11 @@ final class _NoteViewState extends State<NoteView>
     // goes `hidden` and never `paused` (#1057).
     if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.hidden) {
-      _saves.saveInBackground();
+      _parts.saves.saveInBackground();
     }
     // Leaving the foreground may be the last thing this process does.
     if (state != AppLifecycleState.resumed && widget.active) {
-      _place.handNow();
+      _parts.place.handNow();
     }
   }
 
@@ -1864,63 +705,14 @@ final class _NoteViewState extends State<NoteView>
     if (mounted) setState(() {});
   }
 
-  String get _status {
-    if (_error != null) return AppStrings.noteStatusError;
-    if (_loading) return AppStrings.noteStatusLoading;
-    if (_saves.failure.value != null && !_saves.saving) {
-      return AppStrings.noteStatusSaveFailed;
-    }
-    if (_saves.saving) return AppStrings.noteStatusSaving;
-    if (_saves.dirty) return AppStrings.noteStatusUnsaved;
-    return AppStrings.noteStatusSaved;
-  }
-
-  /// A kind GUI's byte-stable edit: the buffer takes the new text (the
-  /// highlighter, stats and preview follow it as with any edit) and the
-  /// note is saved immediately.
-  void _applyKindEdit(String newText) {
-    final surface = _surface;
-    if (surface != null && newText != _text.text) {
-      // The kind GUI stands in front of the surface, so there may be no view:
-      // the controller edits the buffer itself, and it is that buffer the save
-      // below writes.
-      surface.applyEdit(
-        newText,
-        TextSelection.collapsed(
-          offset: surface.selection.extent.clamp(0, newText.length),
-        ),
-      );
-    }
-    // An edit that changes the note's `type` (Make flashcards, #533) turns
-    // the view to the kind it names, as a note opened with it would be.
-    final kind = frontmatterTypeOf(newText);
-    final kindChanged = kind != _noteKind;
-    setState(() => _noteKind = kind);
-    _saves.saveInBackground();
-    if (kindChanged) widget.onNoteKindChanged?.call(kind);
-  }
-
-  /// The formatting keys (#205), applied through the toolbar's own
-  /// actions for whichever surface is showing.
-  late final EditorFormatKeys _formatKeys = EditorFormatKeys(
-    actions: _commands.toolbarActions,
-    active: () => mounted && _keyboardUp,
-  );
-
-  /// Whether the editor on screen holds the focus — the phone's proxy for
-  /// "the keyboard is up": the formatting toolbar shows only while the
-  /// keyboard is up (it is the keyboard's row, and in preview there is
-  /// nothing to format), so it rides this focus.
-  bool get _keyboardUp => _focus.hasFocus;
-
   @override
   Widget build(BuildContext context) {
-    final error = _error;
-    final showPreview = _previewIn(widget);
+    final error = _parts.session.error;
+    final showPreview = NoteViewParts.previewIn(widget);
     // The head the fields panel follows, measured for the pane about to be
     // built (#157): the panel reads it on every scroll tick, and building a
     // theme there would cost a frame's worth on each one.
-    _frontmatter.measure(context, showPreview: showPreview);
+    _parts.frontmatter.measure(context, showPreview: showPreview);
     // The toolbar formats the editor: it hides while the preview holds
     // the pane, which has nothing to format. On the phone it also rides
     // the keyboard (it shows only while the keyboard is up); on desktop
@@ -1930,19 +722,19 @@ final class _NoteViewState extends State<NoteView>
     // A todo.txt has no Markdown to format.
     final showToolbar =
         !showPreview &&
-        !_plainTextIn(widget) &&
-        (widget.toolbarTop || _keyboardUp) &&
-        widget.toolbarLayout.visible.isNotEmpty;
+        !NoteViewParts.plainTextIn(widget) &&
+        (widget.toolbarTop || _parts.keyboardUp) &&
+        widget.options.toolbarLayout.visible.isNotEmpty;
     // Kind mode (T-TK-02): a known `type` swaps the body for the kind GUI
     // and hides the editor chrome (outline, status row, toolbar) — the
     // note is a list, not a document, on screen.
-    final kindGui = NoteKinds.forType(_noteKind, _features);
+    final kindGui = NoteKinds.forType(_parts.session.kind, _parts.features);
     final kindBody = widget.kindMode && kindGui != null;
     // A list or a voice note keeps to the note column like text does
     // (0.0.8 test round): the column is the app's shape, not the editor's.
     final kindChild = kindBody
         ? NoteColumnPadding(
-            column: widget.noteColumn,
+            column: widget.options.noteColumn,
             child: kindGui.buildBody(context, _kindHost),
           )
         : null;
@@ -1956,20 +748,25 @@ final class _NoteViewState extends State<NoteView>
         // below (see the bottom slot).
         if (widget.toolbarTop && !widget.zen)
           NoteTopBar(
-            column: widget.noteColumn,
-            toolbar: showToolbar && !kindBody && !_loading && error == null
+            column: widget.options.noteColumn,
+            toolbar:
+                showToolbar &&
+                    !kindBody &&
+                    !_parts.session.loading &&
+                    error == null
                 ? _toolbar(context, dense: true)
                 : null,
             actions: widget.barActions,
           ),
         Expanded(
           child: Listener(
-            onPointerDown: (event) => _links.pointerDownAt = event.position,
+            onPointerDown: (event) =>
+                _parts.links.pointerDownAt = event.position,
             // The preview card of a hovered link goes over the note (#846).
-            child: _preview.host(
-              closeOn: _scrolls,
+            child: _parts.preview.host(
+              closeOn: _parts.scrolls,
               child: error == null
-                  ? (!_ready || _loading
+                  ? (!_parts.session.ready || _parts.session.loading
                         ? const Center(child: CircularProgressIndicator())
                         : kindBody
                         ? kindChild!
@@ -1987,18 +784,18 @@ final class _NoteViewState extends State<NoteView>
                                 hidden: showPreview,
                                 child: KeyedSubtree(
                                   key: ValueKey(
-                                    _wysiwygIn(widget)
+                                    NoteViewParts.wysiwygIn(widget)
                                         ? 'pane-wysiwyg'
                                         : 'pane-editor',
                                   ),
-                                  child: _unifiedSurfacePane(),
+                                  child: NoteSourcePane(parts: _parts),
                                 ),
                               ),
                               HiddenSlot(
                                 hidden: !showPreview,
                                 child: KeyedSubtree(
                                   key: const ValueKey('pane-preview'),
-                                  child: _previewPane(context),
+                                  child: NoteReadPane(parts: _parts),
                                 ),
                               ),
                             ],
@@ -2006,58 +803,58 @@ final class _NoteViewState extends State<NoteView>
                   : NoteLoadError(
                       message: error,
                       path: widget.path,
-                      offerDefaultApp: _notText,
-                      onRetry: _notText ? null : _retryLoad,
+                      offerDefaultApp: _parts.session.notText,
+                      onRetry: _parts.session.notText ? null : _retryLoad,
                     ),
             ),
           ),
         ),
         if (!kindBody && !widget.zen)
           NoteFooter(
-            column: widget.noteColumn,
-            loading: _loading,
-            ready: _ready,
-            frontmatterError: _stats.frontmatterError,
+            column: widget.options.noteColumn,
+            loading: _parts.session.loading,
+            ready: _parts.session.ready,
+            frontmatterError: _parts.stats.frontmatterError,
             showRelated: !widget.relatedInDock,
-            linkSource: widget.linkSource,
-            notePath: _pathInLibrary,
-            onOpenNote: (path) => widget.onOpenNote?.call(path, null),
-            showTasks: _features.isOn(LibraryFeature.todo),
-            tasks: widget.tasks,
+            linkSource: widget.services.linkSource,
+            notePath: _parts.libraryPath,
+            onOpenNote: (path) => widget.services.onOpenNote?.call(path, null),
+            showTasks: _parts.features.isOn(LibraryFeature.todo),
+            tasks: widget.services.tasks,
             statusRow: ListenableBuilder(
-              listenable: _templateCheck,
+              listenable: _parts.templateCheck,
               builder: (context, _) => NoteStatusRow(
-                loading: _loading,
+                loading: _parts.session.loading,
                 showOutline: !widget.outlineInDock,
                 showPreview: showPreview,
-                showWysiwyg: _wysiwygIn(widget),
+                showWysiwyg: NoteViewParts.wysiwygIn(widget),
                 showSpellCheck:
                     !widget.spellCheckInDock &&
-                    widget.spellCheck != null &&
-                    widget.spellCheck!.available,
+                    widget.services.spellCheck != null &&
+                    widget.services.spellCheck!.available,
                 // In its place, and off: a todo.txt has one pane.
                 canSwitchEditorKind: widget.onEditorKindChanged != null,
-                editorKindLocked: _plainTextIn(widget),
-                wordCount: _stats.wordCount,
+                editorKindLocked: NoteViewParts.plainTextIn(widget),
+                wordCount: _parts.stats.wordCount,
                 // Only a template is counted; elsewhere the checker
                 // never ran and stays at nothing (T-TPL-09).
-                templateProblems: _templateIn(widget)
-                    ? _templateCheck.problemCount
+                templateProblems: NoteViewParts.templateIn(widget)
+                    ? _parts.templateCheck.problemCount
                     : 0,
-                statusText: _status,
-                onStatusTap: _saves.failure.value == null
+                statusText: _parts.status,
+                onStatusTap: _parts.saves.failure.value == null
                     ? null
-                    : _saves.saveInBackground,
+                    : _parts.saves.saveInBackground,
                 statusActions: widget.statusActions,
-                onOutline: _links.openOutline,
-                onFind: () => _sourceFind.open(),
-                onSpellCheck: _commands.openSpellCheck,
-                onToggleEditorKind: _toggleEditorKind,
-                typewriter: widget.typewriter,
+                onOutline: _parts.links.openOutline,
+                onFind: () => _parts.sourceFind.open(),
+                onSpellCheck: _parts.commands.openSpellCheck,
+                onToggleEditorKind: _parts.toggleEditorKind,
+                typewriter: widget.options.typewriter,
                 onToggleTypewriter: widget.onToggleTypewriter,
               ),
             ),
-            toolbarBelow: !widget.toolbarTop && !_loading,
+            toolbarBelow: !widget.toolbarTop && !_parts.session.loading,
             showToolbar: showToolbar,
             toolbar: _toolbar,
           ),
@@ -2069,20 +866,20 @@ final class _NoteViewState extends State<NoteView>
   /// through the surface; the image button keeps the file-picker flow
   /// (T-M2-09) it already had in the status row.
   Widget _toolbar(BuildContext context, {bool dense = false}) {
-    final actions = _commands.toolbarActions();
-    final menus = _commands.toolbarMenus();
+    final actions = _parts.commands.toolbarActions();
+    final menus = _parts.commands.toolbarMenus();
     Widget bar(Set<ToolbarItem> active) => NoteToolbarBar(
       dense: dense,
       actions: actions,
       menus: menus,
       active: active,
-      layout: widget.toolbarLayout,
+      layout: widget.options.toolbarLayout,
     );
     // The surface publishes the formats at the caret into one notifier, read
     // off the caret's line, so a pressed button stays pressed until it is
     // toggled off (T-WYS-06, #246).
     return ValueListenableBuilder<Set<ToolbarItem>>(
-      valueListenable: _activeFormats,
+      valueListenable: _parts.activeFormats,
       builder: (context, active, _) => bar(active),
     );
   }

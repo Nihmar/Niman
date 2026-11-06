@@ -4,6 +4,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/markdown/surface.dart';
+import 'package:niman/src/ui/note_editor_options.dart';
+import 'package:niman/src/ui/note_services.dart';
 import 'package:niman/src/ui/note_top_bar.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/note_view_chrome.dart';
@@ -18,15 +20,19 @@ Widget _app({
   home: Scaffold(
     body: NoteView(
       path: '/n/a.md',
-      showLineNumbers: true,
-      autofocusEditor: false,
+      options: const NoteEditorOptions(
+        showLineNumbers: true,
+        autofocusEditor: false,
+      ),
       toolbarTop: true,
       zen: zen,
       active: active,
       showPreview: showPreview,
       onMemento: onMemento,
-      readNote: (_) async => '# Title\n\nSome text.',
-      writeNote: (_, _) async {},
+      services: NoteServices(
+        readNote: (_) async => '# Title\n\nSome text.',
+        writeNote: (_, _) async {},
+      ),
     ),
   ),
 );

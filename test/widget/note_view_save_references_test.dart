@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/markdown/note_references.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
+import 'package:niman/src/ui/note_editor_options.dart';
+import 'package:niman/src/ui/note_services.dart';
 import 'package:niman/src/ui/note_view.dart';
 
 void main() {
@@ -19,27 +21,31 @@ void main() {
         home: Scaffold(
           body: NoteView(
             path: '/notes/long.md',
-            showLineNumbers: false,
-            autofocusEditor: false,
-            readNote: (_) async => 'One #first line.\n\nA [[Link]] here.\n',
-            writeNote: (_, _) async {},
-            saveNoteStream:
-                (
-                  path,
-                  content, {
-                  required editSession,
-                  references,
-                  expected,
-                }) async {
-                  final text = StringBuffer();
-                  for (var index = 0; ; index++) {
-                    final slice = await content(index);
-                    if (slice == null) break;
-                    text.write(utf8.decode(slice));
-                  }
-                  saves.add((text.toString(), references));
-                  return null;
-                },
+            options: const NoteEditorOptions(
+              showLineNumbers: false,
+              autofocusEditor: false,
+            ),
+            services: NoteServices(
+              readNote: (_) async => 'One #first line.\n\nA [[Link]] here.\n',
+              writeNote: (_, _) async {},
+              saveNoteStream:
+                  (
+                    path,
+                    content, {
+                    required editSession,
+                    references,
+                    expected,
+                  }) async {
+                    final text = StringBuffer();
+                    for (var index = 0; ; index++) {
+                      final slice = await content(index);
+                      if (slice == null) break;
+                      text.write(utf8.decode(slice));
+                    }
+                    saves.add((text.toString(), references));
+                    return null;
+                  },
+            ),
           ),
         ),
       ),

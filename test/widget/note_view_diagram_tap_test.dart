@@ -6,6 +6,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/diagrams/diagram_painter.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
+import 'package:niman/src/ui/note_editor_options.dart';
+import 'package:niman/src/ui/note_services.dart';
 import 'package:niman/src/ui/note_view.dart';
 
 Future<void> _tap(WidgetTester tester, String note, Finder target) async {
@@ -14,11 +16,15 @@ Future<void> _tap(WidgetTester tester, String note, Finder target) async {
       home: Scaffold(
         body: NoteView(
           path: '/tmp/niman-diagram-tap-test.md',
-          showLineNumbers: true,
-          autofocusEditor: false,
+          options: const NoteEditorOptions(
+            showLineNumbers: true,
+            autofocusEditor: false,
+          ),
           showPreview: true,
-          readNote: (_) async => note,
-          writeNote: (_, _) async {},
+          services: NoteServices(
+            readNote: (_) async => note,
+            writeNote: (_, _) async {},
+          ),
         ),
       ),
     ),

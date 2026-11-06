@@ -97,6 +97,7 @@ import 'package:niman/src/ui/move_to_tasks_flow.dart';
 import 'package:niman/src/ui/note_editor_keys.dart';
 import 'package:niman/src/ui/note_link_targets.dart';
 import 'package:niman/src/ui/note_menu.dart';
+import 'package:niman/src/ui/note_services.dart';
 import 'package:niman/src/ui/note_tab_bar.dart';
 import 'package:niman/src/ui/note_tasks_host.dart';
 import 'package:niman/src/ui/note_view.dart';
@@ -1147,26 +1148,13 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
             if (root != null) _workspace.remember(relPath(path, root), memento);
           },
           onEditedNoteClosed: _tidyClosedNote,
-          showLineNumbers: _editorSettings.lineNumbers,
-          typewriter: _editorSettings.typewriter,
-          cascadeChecklist: _editorSettings.cascadeChecklist,
-          frontmatterPanel: _editorSettings.frontmatterPanel,
-          linkPreview: _editorSettings.linkPreview,
-          // No switch in the phone's status row: it has no room left for one.
-          // Settings and the Search tab's commands reach it there.
-          noteColumn: _editorSettings.noteColumn,
-          autofocusEditor: _editorSettings.autofocusEditor,
+          // No typewriter switch in the phone's status row: it has no room
+          // left for one. Settings and the Search tab's commands reach it.
+          options: _editorSettings.noteOptions,
           // The Files pane opened this note (#727): the caret goes in it.
           caretRequest: selectedPath == _selection.caretPath
               ? _selection.caretRequest
               : 0,
-          linkType: _editorSettings.linkType,
-          newItemLocation: _editorSettings.newItemLocation,
-          attachmentsFolder: _editorSettings.attachmentsFolder,
-          templateFolder: _editorSettings.templateFolder,
-          indentWidth: _editorSettings.indentWidth,
-          sourceFont: _editorSettings.sourceFont,
-          toolbarLayout: _editorSettings.toolbarLayout,
           showPreview: _notePreview,
           showWysiwyg: _editorSettings.editorKind == EditorKind.wysiwyg,
           // A single enabled editor has nowhere to switch to: the note hides
@@ -1174,30 +1162,36 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
           onEditorKindChanged: _editorSettings.editorsEnabled.length > 1
               ? _setEditorKind
               : null,
-          libraryRoot: controller.root,
-          linkSource: _linkSource,
-          wikilinkSuggester: _wikilinkSuggester,
-          tasks: _noteTasks,
-          onOpenNote: _openNoteFromLink,
+          services: _noteServices(controller),
           initialAnchor: _selection.request.anchor,
           initialCaretOffset: _selection.request.caret,
           initialFind: _selection.request.find,
           kindMode: !_kind.raw,
-          features: controller.features,
           onNoteKindChanged: _kind.reported,
           onKindMarkdown: _showKindMarkdown,
           onPasteAsMarkdown: _pasteAsMarkdownOffer,
           onMoveToTasks: _moveToTasksOffer,
-          unsavedTracker: widget.unsavedTracker,
-          spellCheck: widget.spellCheck,
           reloadToken: _selection.reloadToken,
-          saveNote: noteSaverFor(controller),
-          saveNoteStream: noteStreamSaverFor(controller),
-          createMissingNote: missingNoteCreatorFor(controller),
         ),
       ),
     );
   }
+
+  /// What the open library lends every note view (#1257): the phone's and
+  /// each pane's alike.
+  NoteServices _noteServices(LibrarySession controller) => NoteServices(
+    libraryRoot: controller.root,
+    linkSource: _linkSource,
+    wikilinkSuggester: _wikilinkSuggester,
+    tasks: _noteTasks,
+    onOpenNote: _openNoteFromLink,
+    features: controller.features,
+    unsavedTracker: widget.unsavedTracker,
+    spellCheck: widget.spellCheck,
+    saveNote: noteSaverFor(controller),
+    saveNoteStream: noteStreamSaverFor(controller),
+    createMissingNote: missingNoteCreatorFor(controller),
+  );
 
   /// [note] with its text zoomed by a pinch (#538): each step shown at
   /// once, and the size kept for the library when the fingers lift. Off
@@ -3277,15 +3271,10 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
                     outlineInDock: _wide && !_inZen,
                     spellCheckInDock: _wide && !_inZen,
                     relatedInDock: _wide && !_inZen && _dockShown,
-                    typewriter: _editorSettings.typewriter,
-                    cascadeChecklist: _editorSettings.cascadeChecklist,
-                    frontmatterPanel: _editorSettings.frontmatterPanel,
-                    linkPreview: _editorSettings.linkPreview,
+                    options: _editorSettings.noteOptions,
                     onToggleTypewriter: _toggleTypewriter,
                     onLoaded: _workspace.noteLoaded,
                     onEditedNoteClosed: _tidyClosedNote,
-                    showLineNumbers: _editorSettings.lineNumbers,
-                    noteColumn: _editorSettings.noteColumn,
                     // The kind toggles and ⋮ sit at the end of the note's
                     // one row of chrome (#173); there is no header above.
                     // Where the panes head their own tab row, the dock's
@@ -3295,18 +3284,10 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
                       if (widget.window.customTitleBar) _dockToggle(),
                       _noteMenu(),
                     ],
-                    autofocusEditor: _editorSettings.autofocusEditor,
                     // The Files pane opened a note (#727): that tab's own
                     // view is asked for the caret, and no other.
                     caretPath: _selection.caretPath,
                     caretRequest: _selection.caretRequest,
-                    linkType: _editorSettings.linkType,
-                    newItemLocation: _editorSettings.newItemLocation,
-                    attachmentsFolder: _editorSettings.attachmentsFolder,
-                    templateFolder: _editorSettings.templateFolder,
-                    indentWidth: _editorSettings.indentWidth,
-                    sourceFont: _editorSettings.sourceFont,
-                    toolbarLayout: _editorSettings.toolbarLayout,
                     // A single enabled editor has nowhere to switch to:
                     // the note hides its switch instead of offering a
                     // dead toggle.
@@ -3314,27 +3295,18 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
                         _editorSettings.editorsEnabled.length > 1
                         ? _setEditorKind
                         : null,
-                    linkSource: _linkSource,
-                    wikilinkSuggester: _wikilinkSuggester,
-                    tasks: _noteTasks,
-                    onOpenNote: _openNoteFromLink,
+                    services: _noteServices(controller),
                     kindMode: !_kind.raw,
-                    features: controller.features,
                     onNoteKindChanged: _kind.reported,
                     onTabKind: _kind.tabReported,
                     onPasteAsMarkdown: _pasteAsMarkdownOffer,
                     onMoveToTasks: _moveToTasksOffer,
-                    unsavedTracker: widget.unsavedTracker,
-                    spellCheck: widget.spellCheck,
                     reloadToken: _selection.reloadToken,
                     linksFollowed: _selection.linksFollowed,
                     onAnnotate: _annotating ? _annotate : null,
                     onConvertBook: _convertBook,
                     ocr: _ocrActions,
                     marks: _annotating ? _annotations : null,
-                    saveNote: noteSaverFor(controller),
-                    saveNoteStream: noteStreamSaverFor(controller),
-                    createMissingNote: missingNoteCreatorFor(controller),
                     statusActions: _statusActionsFor(pane),
                     header: (path) => _journalUi.header(context, path),
                     onEditEpubLook: (anchor) =>

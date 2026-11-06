@@ -8,6 +8,8 @@ import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/frontmatter/parser.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
+import 'package:niman/src/ui/note_editor_options.dart';
+import 'package:niman/src/ui/note_services.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/strings.dart';
 
@@ -28,12 +30,16 @@ Widget _app(String note, {bool panel = true}) => MaterialApp(
   home: Scaffold(
     body: NoteView(
       path: '/tmp/niman-frontmatter-panel-test.md',
-      showLineNumbers: true,
-      autofocusEditor: false,
+      options: NoteEditorOptions(
+        showLineNumbers: true,
+        autofocusEditor: false,
+        frontmatterPanel: panel,
+      ),
       showPreview: true,
-      frontmatterPanel: panel,
-      readNote: (_) async => note,
-      writeNote: (_, _) async {},
+      services: NoteServices(
+        readNote: (_) async => note,
+        writeNote: (_, _) async {},
+      ),
     ),
   ),
 );
@@ -454,11 +460,15 @@ void main() {
         home: Scaffold(
           body: NoteView(
             path: '/tmp/niman-typewriter-frontmatter-test.md',
-            showLineNumbers: false,
-            autofocusEditor: true,
-            typewriter: true,
-            readNote: (_) async => note,
-            writeNote: (_, _) async {},
+            options: const NoteEditorOptions(
+              showLineNumbers: false,
+              autofocusEditor: true,
+              typewriter: true,
+            ),
+            services: NoteServices(
+              readNote: (_) async => note,
+              writeNote: (_, _) async {},
+            ),
           ),
         ),
       ),
@@ -497,11 +507,15 @@ void main() {
         home: Scaffold(
           body: NoteView(
             path: '/tmp/niman-typewriter-fence-test.md',
-            showLineNumbers: false,
-            autofocusEditor: true,
-            typewriter: true,
-            readNote: (_) async => note,
-            writeNote: (_, _) async {},
+            options: const NoteEditorOptions(
+              showLineNumbers: false,
+              autofocusEditor: true,
+              typewriter: true,
+            ),
+            services: NoteServices(
+              readNote: (_) async => note,
+              writeNote: (_, _) async {},
+            ),
           ),
         ),
       ),

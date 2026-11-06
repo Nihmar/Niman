@@ -9,6 +9,8 @@ import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/markdown/surface.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/spellcheck/spell_checker.dart';
+import 'package:niman/src/ui/note_editor_options.dart';
+import 'package:niman/src/ui/note_services.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/strings.dart';
 
@@ -47,14 +49,18 @@ NoteView _view({
 }) => NoteView(
   outlineInDock: outlineInDock,
   spellCheckInDock: spellCheckInDock,
-  spellCheck: spellCheck,
-  showLineNumbers: showLineNumbers,
-  autofocusEditor: autofocusEditor,
+  services: NoteServices(
+    spellCheck: spellCheck,
+    readNote: readNote,
+    writeNote: writeNote,
+  ),
+  options: NoteEditorOptions(
+    showLineNumbers: showLineNumbers,
+    autofocusEditor: autofocusEditor,
+  ),
   showPreview: showPreview,
   onEditorKindChanged: onEditorKindChanged,
   path: path,
-  readNote: readNote,
-  writeNote: writeNote,
   initialCaretOffset: initialCaretOffset,
   caretRequest: caretRequest,
 );
@@ -233,15 +239,19 @@ void main() {
       var seamWrites = 0;
       Widget view(String path) => _app(
         NoteView(
-          showLineNumbers: true,
-          autofocusEditor: false,
+          options: const NoteEditorOptions(
+            showLineNumbers: true,
+            autofocusEditor: false,
+          ),
           path: path,
-          readNote: (_) async => 'start',
-          writeNote: (_, _) async => seamWrites++,
-          saveNote: (path, content, {required editSession, expected}) async {
-            saves.add((path, content, editSession));
-            return null;
-          },
+          services: NoteServices(
+            readNote: (_) async => 'start',
+            writeNote: (_, _) async => seamWrites++,
+            saveNote: (path, content, {required editSession, expected}) async {
+              saves.add((path, content, editSession));
+              return null;
+            },
+          ),
         ),
       );
       await tester.pumpWidget(view('/notes/a.md'));
@@ -427,10 +437,12 @@ void main() {
                 flip = setState;
                 return NoteView(
                   path: '/notes/a.md',
-                  showLineNumbers: false,
-                  autofocusEditor: true,
+                  options: const NoteEditorOptions(
+                    showLineNumbers: false,
+                    autofocusEditor: true,
+                  ),
                   showPreview: showPreview,
-                  readNote: (_) async => 'hello',
+                  services: NoteServices(readNote: (_) async => 'hello'),
                 );
               },
             ),
@@ -478,10 +490,12 @@ void main() {
                 Expanded(
                   child: NoteView(
                     path: '/notes/a.md',
-                    showLineNumbers: false,
-                    autofocusEditor: false,
+                    options: const NoteEditorOptions(
+                      showLineNumbers: false,
+                      autofocusEditor: false,
+                    ),
                     showPreview: true,
-                    readNote: (_) => gate.future,
+                    services: NoteServices(readNote: (_) => gate.future),
                   ),
                 ),
               ],

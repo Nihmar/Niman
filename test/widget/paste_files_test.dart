@@ -11,6 +11,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/settings/library_settings.dart' show LinkType;
 import 'package:niman/src/markdown/render/source_view.dart';
+import 'package:niman/src/ui/note_editor_options.dart';
+import 'package:niman/src/ui/note_services.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:path/path.dart' as p;
@@ -63,14 +65,18 @@ void main() {
         home: Scaffold(
           body: NoteView(
             path: p.join(library, 'Notes', 'trip.md'),
-            libraryRoot: root ?? library,
-            linkType: linkType,
-            showLineNumbers: false,
-            autofocusEditor: true,
+            services: NoteServices(
+              libraryRoot: root ?? library,
+              readNote: (_) async => note,
+              writeNote: (_, _) async {},
+              readClipboardFiles: () async => copied,
+            ),
+            options: NoteEditorOptions(
+              linkType: linkType,
+              showLineNumbers: false,
+              autofocusEditor: true,
+            ),
             toolbarTop: true,
-            readNote: (_) async => note,
-            writeNote: (_, _) async {},
-            readClipboardFiles: () async => copied,
           ),
         ),
       ),

@@ -4,6 +4,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
+import 'package:niman/src/ui/note_editor_options.dart';
+import 'package:niman/src/ui/note_services.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/note_view_handle.dart';
 import 'package:niman/src/ui/strings.dart';
@@ -16,10 +18,14 @@ Future<NoteViewHandle> _open(WidgetTester tester, String note) async {
         body: NoteView(
           key: key,
           path: '/notes/mind.md',
-          showLineNumbers: false,
-          autofocusEditor: false,
-          readNote: (_) async => note,
-          writeNote: (_, _) async {},
+          options: const NoteEditorOptions(
+            showLineNumbers: false,
+            autofocusEditor: false,
+          ),
+          services: NoteServices(
+            readNote: (_) async => note,
+            writeNote: (_, _) async {},
+          ),
         ),
       ),
     ),

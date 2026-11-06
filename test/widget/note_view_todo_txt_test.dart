@@ -6,19 +6,25 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
+import 'package:niman/src/ui/note_editor_options.dart';
+import 'package:niman/src/ui/note_services.dart';
 import 'package:niman/src/ui/note_view.dart';
 
 Widget _app(String path) => MaterialApp(
   home: Scaffold(
     body: NoteView(
       path: path,
-      showLineNumbers: false,
-      autofocusEditor: false,
+      options: const NoteEditorOptions(
+        showLineNumbers: false,
+        autofocusEditor: false,
+      ),
       showPreview: true,
       showWysiwyg: true,
       onEditorKindChanged: (_) {},
-      readNote: (_) async => '(A) Call +Home @phone\nx done task\n',
-      writeNote: (_, _) async {},
+      services: NoteServices(
+        readNote: (_) async => '(A) Call +Home @phone\nx done task\n',
+        writeNote: (_, _) async {},
+      ),
     ),
   ),
 );

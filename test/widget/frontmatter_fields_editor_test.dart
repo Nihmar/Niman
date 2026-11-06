@@ -11,6 +11,8 @@ import 'package:niman/src/frontmatter/parser.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/markdown/surface.dart';
+import 'package:niman/src/ui/note_editor_options.dart';
+import 'package:niman/src/ui/note_services.dart';
 import 'package:niman/src/ui/note_view.dart';
 
 /// The note the editor is handed.
@@ -29,10 +31,14 @@ Widget _app(String note) => MaterialApp(
   home: Scaffold(
     body: NoteView(
       path: '/tmp/niman-frontmatter-editor-test.md',
-      showLineNumbers: true,
-      autofocusEditor: false,
-      readNote: (_) async => note,
-      writeNote: (_, _) async {},
+      options: const NoteEditorOptions(
+        showLineNumbers: true,
+        autofocusEditor: false,
+      ),
+      services: NoteServices(
+        readNote: (_) async => note,
+        writeNote: (_, _) async {},
+      ),
     ),
   ),
 );

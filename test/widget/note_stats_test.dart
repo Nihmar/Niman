@@ -7,6 +7,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/editor/word_count_index.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
+import 'package:niman/src/ui/note_editor_options.dart';
+import 'package:niman/src/ui/note_services.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/note_view_handle.dart';
 
@@ -34,9 +36,11 @@ void main() {
       _app(
         NoteView(
           path: '/notes/stats.md',
-          showLineNumbers: false,
-          autofocusEditor: false,
-          readNote: (_) async => _note,
+          options: const NoteEditorOptions(
+            showLineNumbers: false,
+            autofocusEditor: false,
+          ),
+          services: NoteServices(readNote: (_) async => _note),
         ),
       ),
     );
@@ -77,9 +81,11 @@ void main() {
       _app(
         NoteView(
           path: '/notes/stats.md',
-          showLineNumbers: false,
-          autofocusEditor: false,
-          readNote: (_) async => _note,
+          options: const NoteEditorOptions(
+            showLineNumbers: false,
+            autofocusEditor: false,
+          ),
+          services: NoteServices(readNote: (_) async => _note),
         ),
       ),
     );
@@ -118,9 +124,11 @@ void main() {
           NoteView(
             key: key,
             path: '/notes/big.md',
-            showLineNumbers: false,
-            autofocusEditor: false,
-            readNote: (_) async => text,
+            options: const NoteEditorOptions(
+              showLineNumbers: false,
+              autofocusEditor: false,
+            ),
+            services: NoteServices(readNote: (_) async => text),
           ),
         ),
       );
@@ -161,10 +169,12 @@ void main() {
         NoteView(
           key: key,
           path: path,
-          showLineNumbers: false,
+          options: const NoteEditorOptions(
+            showLineNumbers: false,
+            autofocusEditor: false,
+          ),
           showPreview: preview,
-          autofocusEditor: false,
-          readNote: (path) async => notes[path]!,
+          services: NoteServices(readNote: (path) async => notes[path]!),
         ),
       );
       await tester.pumpWidget(at('/notes/plain.md'));
@@ -197,9 +207,11 @@ void main() {
       NoteView(
         key: key,
         path: path,
-        showLineNumbers: false,
-        autofocusEditor: false,
-        readNote: (path) async => notes[path]!,
+        options: const NoteEditorOptions(
+          showLineNumbers: false,
+          autofocusEditor: false,
+        ),
+        services: NoteServices(readNote: (path) async => notes[path]!),
       ),
     );
     await tester.pumpWidget(at('/notes/one.md'));

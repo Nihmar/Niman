@@ -11,6 +11,8 @@ import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/markdown/surface.dart';
+import 'package:niman/src/ui/note_editor_options.dart';
+import 'package:niman/src/ui/note_services.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/settings.dart';
 import 'package:niman/src/ui/settings_keys.dart';
@@ -127,10 +129,12 @@ void main() {
           home: Scaffold(
             body: NoteView(
               path: '/notes/a.md',
-              showLineNumbers: true,
-              autofocusEditor: false,
-              sourceFont: SourceFont.serif,
-              readNote: (_) async => '# Note',
+              options: const NoteEditorOptions(
+                showLineNumbers: true,
+                autofocusEditor: false,
+                sourceFont: SourceFont.serif,
+              ),
+              services: NoteServices(readNote: (_) async => '# Note'),
             ),
           ),
         ),
