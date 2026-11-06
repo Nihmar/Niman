@@ -1478,8 +1478,8 @@ void main() {
   });
 
   testWidgets('a long note is coloured once its reading lands', (tester) async {
-    MarkdownSourceViewState.backgroundLines = 2;
-    addTearDown(() => MarkdownSourceViewState.backgroundLines = 50000);
+    SourceEditor.backgroundLines = 2;
+    addTearDown(() => SourceEditor.backgroundLines = 50000);
     final state = await pumpMode(
       tester,
       MarkdownSurfaceMode.source,

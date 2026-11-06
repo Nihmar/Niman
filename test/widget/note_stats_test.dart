@@ -109,8 +109,8 @@ void main() {
     (tester) async {
       // Past the size counted in place, and past the lines the pane scans in
       // place: both answers come from an isolate, after the refresh that asked.
-      MarkdownSourceViewState.backgroundLines = 100;
-      addTearDown(() => MarkdownSourceViewState.backgroundLines = 50000);
+      SourceEditor.backgroundLines = 100;
+      addTearDown(() => SourceEditor.backgroundLines = 50000);
       final note = StringBuffer('# Alpha\n\n');
       for (var i = 0; i < 3000; i++) {
         note.writeln('one two three four five six seven eight nine ten');

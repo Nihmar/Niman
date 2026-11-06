@@ -205,8 +205,8 @@ void main() {
     // reading lands no line's tokens are known, and a line judged then would
     // be judged with nothing to skip — its code underlined — and the
     // underline would outlive the reading that says otherwise.
-    MarkdownSourceViewState.backgroundLines = 2;
-    addTearDown(() => MarkdownSourceViewState.backgroundLines = 50000);
+    SourceEditor.backgroundLines = 2;
+    addTearDown(() => SourceEditor.backgroundLines = 50000);
     final check = EditorSpellCheck(createChecker: (_) => const _FakeChecker());
     addTearDown(check.dispose);
     await _pump(tester, 'wrold here\n\nand `wrold` in code\n', check);

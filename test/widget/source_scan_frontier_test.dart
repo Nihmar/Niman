@@ -139,10 +139,7 @@ void main() {
       for (var at = 0; at < 3000; at++) ...['# h$at', 'prose $at', ''],
     ].join('\n');
     final buffer = SourceBuffer.fromText(note);
-    expect(
-      buffer.lineCount,
-      greaterThan(MarkdownSourceViewState.progressiveLines),
-    );
+    expect(buffer.lineCount, greaterThan(SourceEditor.progressiveLines));
     tester.view.physicalSize = const Size(700, 500);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
