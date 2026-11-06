@@ -36,7 +36,6 @@ import 'package:niman/src/ui/app_menu.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/capture/capture_flow.dart';
 import 'package:niman/src/ui/capture/capture_services.dart';
-import 'package:niman/src/ui/close_to_tray.dart';
 import 'package:niman/src/ui/deferred_listenable.dart';
 import 'package:niman/src/ui/device_shape.dart';
 import 'package:niman/src/ui/dismiss_chain.dart';
@@ -70,7 +69,7 @@ import 'package:niman/src/ui/shell_features_intro.dart';
 import 'package:niman/src/ui/shell_files_pane.dart';
 import 'package:niman/src/ui/shell_home_widgets.dart';
 import 'package:niman/src/ui/shell_import_flow.dart';
-import 'package:niman/src/ui/shell_inbound.dart';
+import 'package:niman/src/ui/shell_inbound_routes.dart';
 import 'package:niman/src/ui/shell_intent_gate.dart';
 import 'package:niman/src/ui/shell_journal_ui.dart';
 import 'package:niman/src/ui/shell_layout.dart';
@@ -711,18 +710,36 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   /// Opens and makes journal entries (#7).
   late final JournalFlow _journalFlow;
 
-  /// What reaches the shell from outside while it is up — notification
-  /// taps, finished recognitions, shortcuts, shares, the tray, launches,
-  /// the library's events — each listened to in [initState] and all of
-  /// them cancelled at once in [dispose].
-  late final ShellInbound _inbound = ShellInbound(
-    onRequest: () => _featuresIntro.requested(),
+  /// What reaches the shell from outside while it is up, and where each
+  /// leads (#1256): listened to in [initState], cancelled in [dispose].
+  late final ShellInboundRoutes _inboundRoutes = ShellInboundRoutes(
+    controller: widget.controller,
+    workspace: _workspace,
+    selection: _selection,
+    unsaved: widget.unsavedTracker,
+    personalDictionary: _personalDictionary,
+    homeWidgets: _homeWidgets,
+    reminders: widget.reminders,
+    ocrQueue: widget.ocrQueue,
+    ocrFlow: () => _ocrFlow,
+    shortcuts: widget.shortcuts,
+    shareIn: widget.shareIn,
+    tray: widget.tray,
+    window: widget.window,
+    launchRequests: widget.launchRequests,
+    outside: _outside,
+    imports: _imports,
+    captureFlow: _captureFlow,
+    openPath: _openPath,
+    onRequest: _featuresIntro.requested,
+    context: () => context,
+    mounted: () => mounted,
   );
 
   /// The introduction of Settings → Features (#1109): shown once, on a
   /// normal open of a library that has not been through it. What
-  /// [_inbound] marks as a request from outside, and what a launch carried,
-  /// keeps it away.
+  /// [_inboundRoutes] marks as a request from outside, and what a launch
+  /// carried, keeps it away.
   late final ShellFeaturesIntro _featuresIntro = ShellFeaturesIntro(
     controller: widget.controller,
     open: (introduction) =>
@@ -1264,24 +1281,6 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       onCreated: _openNewJournalEntry,
     );
     _tasks.open();
-    // Notification taps while running: a todo tap opens the Todo tab, a
-    // recognition's opens its text.
-    _inbound.listen(
-      widget.reminders.taps,
-      (payload) =>
-          unawaited(_outside.notification(context, payload, tap: true)),
-      request: true,
-    );
-    // Recognitions as they finish (#594).
-    _inbound.listen(widget.ocrQueue?.finished, (job) {
-      if (!mounted) return;
-      _ocrFlow?.finished(
-        context,
-        job,
-        inFront:
-            WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed,
-      );
-    });
     // The Study widgets have no other first push: the decks are counted
     // for them only when one is placed (#533).
     _homeWidgets
@@ -1296,80 +1295,10 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     HardwareKeyboard.instance.addHandler(_historyKeyUnfocused);
     _immersive.addListener(_rebuild);
     unawaited(_restoreWorkspace());
-    // Library session events (every note op bumps the revision): the
-    // pinned notes follow the files, so each one refreshes the note
-    // widgets (issue 6).
-    _inbound.listen(widget.controller.events, (_) {
-      _homeWidgets.pushNotes();
-      unawaited(_workspace.indexChanged());
-    });
-    // Paths a re-index pruned from the tree: the tabs they hold stay, and
-    // are flagged missing (issues #289, #372).
-    _inbound.listen(widget.controller.removals, _workspace.missing);
-    // Notes rewritten on disk behind the editors' backs (a sync client,
-    // another program): every open note whose buffer is clean adopts the
-    // change, the tabs behind the one on screen included (#1055).
-    _inbound.listen(
-      widget.controller.externalChanges,
-      widget.unsavedTracker.notifyDiskChanged,
-    );
-    // Paths a sync just changed on disk: the open note among them is
-    // re-read (its buffer was saved before the sync started).
-    _inbound.listen(widget.controller.sync?.localChanges, (paths) {
-      // Words added on another device count as soon as they arrive.
-      _personalDictionary.synced(paths);
-      if (mounted) _selection.reloadOpen(paths);
-    });
-    _inbound.listen(
-      widget.shortcuts.actions,
-      (action) => unawaited(_outside.runShortcut(context, action)),
-      request: true,
-    );
-    // What other apps share in while the shell is up (#40).
-    _inbound.listen(
-      widget.shareIn.requests,
-      (request) => unawaited(_imports.share(context, request)),
-      request: true,
-    );
-    _inbound.listen(
-      widget.tray.actions,
-      (action) => unawaited(_outside.runShortcut(context, action)),
-      request: true,
-    );
-    _inbound.listen(
-      widget.tray.activated,
-      (_) => unawaited(widget.window.show()),
-    );
-    // The tray menu's own entries (#209): the way back to a hidden
-    // window, and the way out.
-    _inbound.listen(widget.tray.commands, (command) {
-      switch (command) {
-        case TrayCommand.open:
-          unawaited(widget.window.show());
-        case TrayCommand.quit:
-          CloseToTray.quit();
-      }
-    });
-    // Files a launch asked for (#41): the one the app started with, once
-    // the shell can open it, and every later one.
-    _inbound.listen(
-      widget.launchRequests.files,
-      (path) => unawaited(_openPath(path)),
-      request: true,
-    );
-    // Folders dropped on the window (#75).
-    _inbound.listen(
-      widget.launchRequests.folders,
-      (path) => unawaited(_imports.openFolder(context, path)),
-      request: true,
-    );
+    _inboundRoutes.listen();
     // Files dropped on the window that nothing opens: attached to the note
     // on screen (#1250).
     widget.launchRequests.attachHandler = _noteActions.attachDropped;
-    // Links dropped on the window (#531).
-    _inbound.listen(widget.launchRequests.pages, (url) {
-      if (mounted) unawaited(_captureFlow.capture(context, url: url));
-    }, request: true);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final path = widget.launchRequests.consumeFile();
       if (path != null && mounted) {
@@ -1429,7 +1358,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     WidgetsBinding.instance.removeObserver(this);
     _noteFade.dispose();
     unawaited(_homeWidgets.dispose());
-    unawaited(_inbound.cancel());
+    unawaited(_inboundRoutes.cancel());
     if (widget.launchRequests.attachHandler == _noteActions.attachDropped) {
       widget.launchRequests.attachHandler = null;
     }
