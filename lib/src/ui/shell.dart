@@ -81,7 +81,6 @@ import 'package:niman/src/ui/kinds/slides/slides_present.dart';
 import 'package:niman/src/ui/link_update_dialog.dart';
 import 'package:niman/src/ui/mac_menu_bar.dart';
 import 'package:niman/src/ui/move_to_tasks_flow.dart';
-import 'package:niman/src/ui/note_editor_keys.dart';
 import 'package:niman/src/ui/note_menu.dart';
 import 'package:niman/src/ui/note_services.dart';
 import 'package:niman/src/ui/note_tab_bar.dart';
@@ -138,6 +137,7 @@ import 'package:niman/src/ui/shell_row_actions.dart';
 import 'package:niman/src/ui/shell_search_slot.dart';
 import 'package:niman/src/ui/shell_selection.dart';
 import 'package:niman/src/ui/shell_settings.dart';
+import 'package:niman/src/ui/shell_shown_note.dart';
 import 'package:niman/src/ui/shell_study.dart';
 import 'package:niman/src/ui/shell_sync_actions.dart';
 import 'package:niman/src/ui/shell_tab_rows.dart';
@@ -171,7 +171,6 @@ import 'package:niman/src/ui/zen_mode.dart';
 import 'package:niman/src/widget/widget_host.dart';
 import 'package:niman/src/widget/widget_target.dart';
 import 'package:niman/src/widget/widget_updater.dart';
-import 'package:niman/src/workspace/note_memento.dart';
 import 'package:niman/src/workspace/workspace.dart';
 import 'package:path/path.dart' as p;
 
@@ -398,7 +397,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     wide: () => _wide,
     desktop: () => _desktop,
     panesShowNotes: () => _panesShowNotes,
-    notePreview: () => _notePreview,
+    notePreview: () => _shown.preview,
     update: setState,
   );
 
@@ -648,7 +647,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     linkType: () => _settings.editor.linkType,
     onCaptured: (path) => _openNoteFromLink(path, null),
     // A picture, a PDF or a book on screen is no note to append to (#636).
-    openNote: () => _shownIsAttachment ? null : _shownNote,
+    openNote: () => _shown.isAttachment ? null : _shown.path,
   );
 
   /// Opens what a create just made: a note takes the screen, a folder
@@ -673,7 +672,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     linkSource: () => _settings.linkSource,
     todoBlocks: _tasks.exportBlocks,
     wide: () => _wide,
-    shownNote: () => _shownNote,
+    shownNote: () => _shown.path,
   );
 
   /// Converting a book into notes (#1138): from its row in the reader, the
@@ -703,7 +702,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   Future<void> _convertEpubCommand() async {
     final root = widget.controller.root;
     final book = [
-      _shownNote,
+      _shown.path,
       _selection.path,
     ].nonNulls.where(isBook).firstOrNull;
     if (root != null && book != null) {
@@ -755,9 +754,9 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     onMoved: (from, to) {
       // The open notes' editors follow the rename, and are told where they
       // came from for the frame that shows them under the new name (#1076).
-      _noteKeys.moved(from, to);
+      _shown.keys.moved(from, to);
       _kind.moved(from, to);
-      WidgetsBinding.instance.addPostFrameCallback((_) => _noteKeys.settle());
+      WidgetsBinding.instance.addPostFrameCallback((_) => _shown.keys.settle());
       _workspace.moved(from, to);
       // The folders open under it stay open under its new name (#1069),
       // and the selection follows a rename that is about it. The move
@@ -847,7 +846,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   /// in raw-edit mode, and on an attachment, which has no editor to flip
   /// from.
   bool get _previewToggleVisible =>
-      !_shownIsAttachment && (_kind.gui == null || _kind.raw);
+      !_shown.isAttachment && (_kind.gui == null || _kind.raw);
 
   /// The kind toggle actions (T-TK-05), for the open note.
   List<Widget> get _kindActions => _kind.actions(
@@ -860,14 +859,14 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   /// Markdown preview left on for the note.
   void _editKindRaw() {
     setState(() => _kind.raw = true);
-    if (_notePreview) _togglePreview();
+    if (_shown.preview) _shown.togglePreview();
   }
 
   /// Leaves the kind's view for the note's Markdown preview (#534): the
   /// raw mode with the eye on, the preview every note has.
   void _showKindMarkdown() {
     setState(() => _kind.raw = true);
-    if (!_notePreview) _togglePreview();
+    if (!_shown.preview) _shown.togglePreview();
   }
 
   void _openNoteFromLink(String path, String? anchor) {
@@ -900,7 +899,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     // A note opened right now shows only its preview: the IME has no
     // target and must go before the transition, or its resize lands
     // mid-fade.
-    if (_notePreview) FocusManager.instance.primaryFocus?.unfocus();
+    if (_shown.preview) FocusManager.instance.primaryFocus?.unfocus();
     _selection.open(
       path,
       request: OpenRequest(anchor: anchor, caret: caret, find: find),
@@ -943,77 +942,15 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     _wasWide = wide;
   }
 
-  /// The note on screen: on a wide window the showing tab, whatever the
-  /// tree has selected (a folder leaves the tabs alone); on a phone the
-  /// selection.
-  String? get _shownNote => _wide
-      ? _workspace.value.activePath
-      : (_selection.isDir ? null : _selection.path);
-
-  /// Whether the note on screen is a picture, a PDF or a book: shown by
-  /// the pane rather than edited, so none of the editor's controls apply.
-  bool get _shownIsAttachment => switch (_shownNote) {
-    final path? => isShownAttachment(path, widget.controller.features.value),
-    null => false,
-  };
-
-  /// Which editor [memento]'s tab shows: its own, while the library
-  /// still offers it; otherwise the library's.
-  EditorKind _editorOf(NoteMemento memento) {
-    final kind = switch (memento.editorKind) {
-      wysiwygEditorKind => EditorKind.wysiwyg,
-      sourceEditorKind => EditorKind.source,
-      _ => null,
-    };
-    return kind != null && _settings.editor.editorsEnabled.contains(kind)
-        ? kind
-        : _settings.editor.editorKind;
-  }
-
-  /// The memento of the tab showing, or an empty one.
-  NoteMemento get _shownMemento =>
-      _workspace.value.focusedPane.activeTab?.memento ?? const NoteMemento();
-
-  /// The editor the note on screen shows.
-  EditorKind get _noteEditorKind =>
-      _wide ? _editorOf(_shownMemento) : _settings.editor.editorKind;
-
-  /// The memento of the tab showing [path], or an empty one: a note is
-  /// shown the way it was left (#23).
-  ///
-  /// On a wide window the note on screen is the showing tab, so this is
-  /// [_shownMemento]; on a phone it is the selection, and a note whose
-  /// tab this build's follow has not made yet has no memento to read —
-  /// an empty one answers that frame, not the note before it.
-  NoteMemento _mementoOf(String? path) {
-    if (path == null) return const NoteMemento();
-    final tab = _workspace.value.tabs
-        .where((tab) => tab.path == path)
-        .firstOrNull;
-    return tab?.memento ?? const NoteMemento();
-  }
-
-  /// Whether the note on screen shows its preview: the showing tab's own
-  /// flag, on either layout. One pane holds one of the two, so the flag
-  /// is all there is to know.
-  bool get _notePreview => _mementoOf(_shownNote).preview ?? false;
-
-  /// Changes the showing tab's own way of showing its note (#23).
-  void _updateShownTab(NoteMemento Function(NoteMemento memento) change) {
-    final path = _workspace.value.activePath;
-    if (path == null) return;
-    _workspace.controller.update(
-      (w) => w.withMemento(path, change(_shownMemento)),
-    );
-  }
-
-  void _togglePreview() {
-    // The preview has no editable: flipping to it dismisses the keyboard
-    // instead of leaving the IME up over a read-only pane.
-    if (!_notePreview) FocusManager.instance.primaryFocus?.unfocus();
-    final show = !_notePreview;
-    _updateShownTab((m) => m.copyWith(preview: show));
-  }
+  /// The note on screen: which it is, how its tab shows it, the view that
+  /// edits it (#1256).
+  late final ShellShownNote _shown = ShellShownNote(
+    workspace: _workspace,
+    selection: _selection,
+    settings: _settings,
+    features: () => _features,
+    wide: () => _wide,
+  );
 
   /// The phone's full-screen note fading in over the tabs (issue #4;
   /// issue #100 moved it into [ShellNoteFade]).
@@ -1048,7 +985,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       return TourTarget(
         id: TourTargets.note,
         child: AttachmentView(
-          key: _phoneNoteKey,
+          key: _shown.phoneKey,
           path: p.join(controller.root ?? '', selectedPath),
           column: _settings.editor.noteColumn,
           onEditEpubLook: (anchor) => _editEpubLook(controller, anchor),
@@ -1073,7 +1010,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       id: TourTargets.note,
       child: _pinchToZoom(
         NoteView(
-          key: _phoneNoteKey,
+          key: _shown.phoneKey,
           path: p.join(controller.root ?? '', selectedPath),
           // One editor on the phone: switching notes hands the one going in
           // its memento, and the one going out hands in its own (#23).
@@ -1093,7 +1030,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
           caretRequest: selectedPath == _selection.caretPath
               ? _selection.caretRequest
               : 0,
-          showPreview: _notePreview,
+          showPreview: _shown.preview,
           showWysiwyg: _settings.editor.editorKind == EditorKind.wysiwyg,
           // A single enabled editor has nowhere to switch to: the note hides
           // its switch instead of offering a dead toggle.
@@ -1157,7 +1094,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     controller: widget.controller,
     windowWidth: () => MediaQuery.sizeOf(context).width,
     wide: () => _wide,
-    panelNote: () => _panelNote,
+    panelNote: () => _shown.handle,
     journalBrowser: (context) =>
         _journalUi.browser(context, focusDay: _shownJournalDay),
     tasks: () => _tasks.notes,
@@ -1427,11 +1364,11 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   /// The app-bar eye action: flips the editor/preview pane.
   Widget _previewToggleAction({bool compact = false}) {
     // A plain-text file is read in its editor alone: the eye stays, off.
-    final shown = _shownNote;
+    final shown = _shown.path;
     final plain = shown != null && isPlainTextFile(p.basename(shown));
     return PreviewToggleAction(
-      previewVisible: _notePreview && !plain,
-      onToggle: plain ? null : _togglePreview,
+      previewVisible: _shown.preview && !plain,
+      onToggle: plain ? null : _shown.togglePreview,
       compact: compact,
     );
   }
@@ -1446,7 +1383,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       final name = kind == EditorKind.wysiwyg
           ? wysiwygEditorKind
           : sourceEditorKind;
-      _updateShownTab((m) => m.copyWith(editorKind: name));
+      _shown.updateTab((m) => m.copyWith(editorKind: name));
       return;
     }
     await _settings.setEditorKind(kind);
@@ -1471,7 +1408,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       ),
       newItemRule: _newItemRule,
       guard: _guard,
-      opensPreviewOnly: () => _notePreview,
+      opensPreviewOnly: () => _shown.preview,
       onNoteFiled: _onTemplateNoteFiled,
       nameInPlace: _treeEditing.nameInPlace,
     );
@@ -1708,7 +1645,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   /// read on each creation: its setting, and the note on screen.
   late final NewItemRule _newItemRule = NewItemRule(
     location: () => _settings.editor.newItemLocation,
-    activeNote: () => _shownNote,
+    activeNote: () => _shown.path,
   );
 
   /// Opens a search result at [path] (library-relative): phone — the
@@ -1841,9 +1778,9 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   /// with `[[Note]]` written in, after the text selected in the editor when
   /// there is some.
   Future<void> _newTaskForNote() {
-    final path = _shownNote;
+    final path = _shown.path;
     if (path == null) return Future<void>.value();
-    return _tasks.notes.add(path, selection: _panelNote?.selectedText ?? '');
+    return _tasks.notes.add(path, selection: _shown.handle?.selectedText ?? '');
   }
 
   /// Opens the history of the note at [path]; a restore reloads the open
@@ -1880,12 +1817,12 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
 
   Widget _noteMenuButton(BuildContext button) => NoteMenuButton(
     typewriter: _settings.editor.typewriter,
-    textNote: !_shownIsAttachment,
+    textNote: !_shown.isAttachment,
     // An audio note's body is the clip document, not prose (#840).
     tidy: _kind.type != 'audio',
     recognize:
         _offersOcr &&
-        _shownIsAttachment &&
+        _shown.isAttachment &&
         isRecognizableFile(_selection.path ?? ''),
     // A touch device has no key for the palette (#206), the phone's and
     // the tablet's alike (#849); a desktop window has.
@@ -1959,7 +1896,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   /// Starts a study session of the deck on screen, through the seam the
   /// review fills (`deckStudyStarterProvider`); nothing while there is none.
   Future<void> _studyDeck() async {
-    final note = _panelNote;
+    final note = _shown.handle;
     final starter = ref.read(deckStudyStarterProvider);
     if (note == null || starter == null || !_kind.showsDeck) return;
     await starter(context, note.notePath);
@@ -1968,23 +1905,23 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   /// Whether the note on screen is a plain one, text of no `type`: what
   /// **Make flashcards** turns into a deck (#533).
   bool get _plainNote =>
-      _shownNote != null && !_shownIsAttachment && _kind.type == null;
+      _shown.path != null && !_shown.isAttachment && _kind.type == null;
 
   /// **Make flashcards** of the note on screen (#533).
   Future<void> _makeFlashcards() async {
-    final note = _panelNote;
+    final note = _shown.handle;
     if (note == null || !_plainNote) return;
     await makeFlashcards(context, note: note, session: widget.controller);
   }
 
   Future<void> _chooseDeckColumns() async {
-    final note = _panelNote;
+    final note = _shown.handle;
     if (note == null || !_kind.showsDeck) return;
     await _deckFlow.chooseColumns(context, note);
   }
 
   Future<void> _resetDeckReview() async {
-    final note = _panelNote;
+    final note = _shown.handle;
     if (note == null || !_kind.showsDeck) return;
     await _deckFlow.resetReview(
       context,
@@ -1996,7 +1933,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   /// Presents the slides note on screen (#534), from the slide its view
   /// shows; [presenter] opens on the presenter view.
   Future<void> _presentSlides({bool presenter = false}) async {
-    final note = _panelNote;
+    final note = _shown.handle;
     if (note == null || _kind.shown != 'slides') return;
     await presentSlides(
       context,
@@ -2015,7 +1952,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   /// body swaps as the shell hears the new kind. Nothing else moves: the
   /// name, the folder and the lines stay.
   void _switchNoteKind() {
-    final note = _panelNote;
+    final note = _shown.handle;
     if (note == null) return;
     note.setNoteKind(_kind.shown == 'list' ? 'shopping-list' : 'list');
   }
@@ -2026,7 +1963,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     final controller = widget.controller;
     final selectedPath = _selection.path;
     final narrow = !isWideShell(context);
-    _markOpenNote(controller.root, _shownNote);
+    _markOpenNote(controller.root, _shown.path);
     // Notes stay open until they are closed: a folder selected, or the
     // phone back on its tree, closes none (#23). On the phone a note
     // opened joins the ones already open, for the switcher to reach.
@@ -2094,8 +2031,8 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       zen: _inZen,
       zenTitle: p.basename(_workspace.value.activePath ?? ''),
       onLeaveZen: _immersive.leaveZen,
-      zenPreviewVisible: _notePreview,
-      onZenTogglePreview: _previewToggleVisible ? _togglePreview : null,
+      zenPreviewVisible: _shown.preview,
+      onZenTogglePreview: _previewToggleVisible ? _shown.togglePreview : null,
       leaveZenOnEsc: _leaveZenOnEsc,
     );
     // The region above the two panes, measured so a frame that misses with
@@ -2172,9 +2109,6 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     onPressed: () => unawaited(_showOpenNotes()),
   );
 
-  /// The note on the phone's screen, if one is.
-  String? get _phoneNote => _selection.noteOnScreen;
-
   /// The phone's open-notes switcher: every note left open, the one on
   /// screen marked, each with its unsaved dot and a close.
   Future<void> _showOpenNotes() => showOpenNotesSheet(
@@ -2182,12 +2116,12 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     workspace: () => _workspace.value,
     changes: _tabsListenable,
     unsaved: _unsavedRelPaths,
-    shown: () => _phoneNote,
+    shown: () => _selection.noteOnScreen,
     onOpen: (path) => _openNoteFromLink(path, null),
     onClose: _closeOpenNote,
     onCloseAll: () {
       _workspace.controller.update((w) => w.closeAll());
-      if (_phoneNote != null) _tabs.closeNote();
+      if (_selection.noteOnScreen != null) _tabs.closeNote();
       _selection.clear();
     },
     // A phone opens every note alongside the others: the new one joins
@@ -2198,7 +2132,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   /// Closes [path] from the switcher. The note on screen gives way to the
   /// next one open, or to the tree when it was the last.
   void _closeOpenNote(String path) {
-    final wasShown = _phoneNote == path;
+    final wasShown = _selection.noteOnScreen == path;
     _workspace.controller.update((w) => w.closePath(path));
     final next = _workspace.value.activePath;
     if (wasShown && next != null) {
@@ -2437,8 +2371,8 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   /// Whether [need] holds here and now (#207): with [commandNeeds], what
   /// decides which commands the palette offers and the keys answer to.
   bool _meets(CommandNeed need) => switch (need) {
-    CommandNeed.openNote => _shownNote != null,
-    CommandNeed.textNote => _shownNote != null && !_shownIsAttachment,
+    CommandNeed.openNote => _shown.path != null,
+    CommandNeed.textNote => _shown.path != null && !_shown.isAttachment,
     CommandNeed.wideWindow => _wide,
     CommandNeed.desktop => HostPlatform.isDesktop,
     CommandNeed.notInZen => !_inZen,
@@ -2454,13 +2388,13 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     CommandNeed.plainNote => _plainNote,
     CommandNeed.ocrFile =>
       _ocrFlow != null &&
-          _shownIsAttachment &&
-          isRecognizableFile(_shownNote ?? ''),
+          _shown.isAttachment &&
+          isRecognizableFile(_shown.path ?? ''),
   };
 
   /// The day of the journal entry on screen, or null when the note on
   /// screen is not one (#7).
-  DateTime? get _shownJournalDay => switch (_shownNote) {
+  DateTime? get _shownJournalDay => switch (_shown.path) {
     final path? => _settings.journal.dayOfPath(path),
     null => null,
   };
@@ -2474,7 +2408,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   /// run now. A handler whose command needs an open note runs only with
   /// one on screen.
   Map<AppCommand, VoidCallback> _allCommandHandlers() {
-    final note = _shownNote;
+    final note = _shown.path;
     return {
       AppCommand.openPalette: () => unawaited(_palette.open(context)),
       AppCommand.goToNote: () =>
@@ -2518,22 +2452,23 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       AppCommand.zoomReset: () => unawaited(_zoomNote(0)),
       AppCommand.formatNote: () => unawaited(_formatNote()),
       AppCommand.insertDiagram: () =>
-          _panelNote?.insertAtCaret(mermaidDiagramTemplate),
+          _shown.handle?.insertAtCaret(mermaidDiagramTemplate),
       AppCommand.insertMindMap: () =>
-          _panelNote?.insertAtCaret(mermaidMindMapTemplate),
-      AppCommand.insertColumns: () => _panelNote?.insertColumns(),
-      AppCommand.insertEisenhower: () => _panelNote?.insertEisenhower(),
-      AppCommand.convertListToMindMap: () => _panelNote?.convertListToMindMap(),
+          _shown.handle?.insertAtCaret(mermaidMindMapTemplate),
+      AppCommand.insertColumns: () => _shown.handle?.insertColumns(),
+      AppCommand.insertEisenhower: () => _shown.handle?.insertEisenhower(),
+      AppCommand.convertListToMindMap: () =>
+          _shown.handle?.convertListToMindMap(),
       AppCommand.moveToTasks: () {
-        if (_panelNote case final note?) _moveToTasks(note);
+        if (_shown.handle case final note?) _moveToTasks(note);
       },
       AppCommand.pasteAsMarkdown: () {
-        if (_panelNote case final note?) _pasteAsMarkdown(note);
+        if (_shown.handle case final note?) _pasteAsMarkdown(note);
       },
       AppCommand.exportNote: () =>
           unawaited(_exportFlow.runShownNoteExport(context)),
       AppCommand.recognizeText: () {
-        if (_shownNote case final path?) _recognize(path);
+        if (_shown.path case final path?) _recognize(path);
       },
       AppCommand.convertEpub: () => unawaited(_convertEpubCommand()),
       AppCommand.exportLibrary: () =>
@@ -2560,10 +2495,10 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
           _tabs.destinationSelected(ShellTab.settings),
       AppCommand.tabHome: () => _tabs.destinationSelected(ShellTab.home),
       AppCommand.tabStudy: () => _tabs.destinationSelected(ShellTab.study),
-      AppCommand.togglePreview: _togglePreview,
+      AppCommand.togglePreview: _shown.togglePreview,
       AppCommand.switchEditor: () => unawaited(
         _setEditorKind(
-          _noteEditorKind == EditorKind.wysiwyg
+          _shown.editorKind == EditorKind.wysiwyg
               ? EditorKind.source
               : EditorKind.wysiwyg,
         ),
@@ -2634,7 +2569,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   /// The Markdown cheatsheet (#265); its examples go into the note on
   /// screen when there is one to take them.
   Future<void> _openCheatsheet() {
-    final note = _panelNote;
+    final note = _shown.handle;
     return showMarkdownCheatsheet(
       context,
       onInsert: note == null || !note.canInsert ? null : note.insertAtCaret,
@@ -2647,7 +2582,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   /// A book on screen zooms its own text instead, the books' text size.
   Future<void> _zoomNote(int steps) async {
     final controller = widget.controller;
-    if (isBook(_shownNote ?? '')) {
+    if (isBook(_shown.path ?? '')) {
       EpubTextZoom((scale) => unawaited(keepEpubTextScale(controller, scale)))
           .zoom(steps);
       return;
@@ -2677,7 +2612,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   /// false when there is none that takes text — no note open, a kind's view
   /// in front of it, a note outside the library.
   Future<bool> _attachDropped(List<String> paths) async {
-    final note = _panelNote;
+    final note = _shown.handle;
     if (note == null || !note.canInsert) return false;
     return await note.attachFiles(paths);
   }
@@ -2688,7 +2623,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   );
 
   Future<void> _formatNote() async {
-    final path = _shownNote;
+    final path = _shown.path;
     final ops = widget.controller.ops;
     if (path == null || ops == null) return;
     // An audio note's body is the clip document (#840): the menu does not
@@ -2868,11 +2803,11 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   /// registry: what it would switch to, not a fixed verb.
   String? _paletteLabel(AppCommand command) => switch (command) {
     AppCommand.togglePreview =>
-      _notePreview
+      _shown.preview
           ? AppStrings.showEditorTooltip
           : AppStrings.showPreviewTooltip,
     AppCommand.switchEditor =>
-      _noteEditorKind == EditorKind.wysiwyg
+      _shown.editorKind == EditorKind.wysiwyg
           ? AppStrings.switchToSourceTooltip
           : AppStrings.switchToWysiwygTooltip,
     AppCommand.zenMode =>
@@ -2917,16 +2852,6 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   /// Whether the dock shows: there is room, and it was not closed.
   bool get _dockShown => _dock.shown;
 
-  /// The note the dock and the sheets speak for: the focused pane's on a
-  /// wide window, the one on screen on a phone.
-  NoteViewHandle? get _panelNote {
-    final path = _wide ? _workspace.value.activePath : _phoneNote;
-    if (path == null) return null;
-    final key = _wide ? _noteKeys[path] : _phoneNoteKey;
-    final Object? state = key?.currentState;
-    return state is NoteViewHandle ? state : null;
-  }
-
   /// Shows or hides the dock (the note row's button, Ctrl+Shift+B).
   void _toggleDock() => _dock.toggleOpen();
 
@@ -2938,9 +2863,6 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   /// sheet (the phone's way to the same three, #175).
   Future<void> _showPanel(DockPane pane, {Rect? anchor}) =>
       _dock.showPanel(context, pane, anchor: anchor);
-
-  /// The phone's one note view, so its sheets reach its outline.
-  final GlobalKey _phoneNoteKey = GlobalKey();
 
   /// The panes of the wide layout (#23): one, or two split right or
   /// down, each a deck of its own tabs. A click anywhere in a pane gives
@@ -3148,22 +3070,10 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     return [
       PreviewToggleAction(
         previewVisible: !plain && (tab.memento.preview ?? false),
-        onToggle: plain ? null : () => _togglePreviewOf(tab.path),
+        onToggle: plain ? null : () => _shown.togglePreviewOf(tab.path),
         compact: true,
       ),
     ];
-  }
-
-  /// Flips the preview of the tab showing [path], wherever it is.
-  void _togglePreviewOf(String path) {
-    final tab = _workspace.value.tabs.where((t) => t.path == path).firstOrNull;
-    if (tab == null) return;
-    final show = !(tab.memento.preview ?? false);
-    // The preview has no editable: flipping to it lets the keyboard go.
-    if (show) FocusManager.instance.primaryFocus?.unfocus();
-    _workspace.controller.update(
-      (w) => w.withMemento(path, tab.memento.copyWith(preview: show)),
-    );
   }
 
   /// The notes whose editor is mounted (#23): the showing tab and the
@@ -3173,17 +3083,17 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     final mounted = _workspace.mounted();
     final showing = w.panes[pane].activeTab?.path;
     final focused = pane == w.focused;
-    _noteKeys.keepOnly(mounted);
+    _shown.keys.keepOnly(mounted);
     _kind.keepOnly(mounted);
     return [
       for (final tab in w.panes[pane].tabs)
         if (mounted.contains(tab.path))
           () {
-            final editor = _editorOf(tab.memento);
+            final editor = _shown.editorOf(tab.memento);
             return DetailTab(
-              key: _noteKeys.keyOf(tab.path),
+              key: _shown.keys.keyOf(tab.path),
               path: tab.path,
-              movedFrom: _noteKeys.movedFrom(tab.path),
+              movedFrom: _shown.keys.movedFrom(tab.path),
               active: tab.path == showing,
               focused: focused,
               memento: tab.memento,
@@ -3205,10 +3115,6 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
           }(),
     ];
   }
-
-  /// One key per mounted note: a tab moved to the other pane, or a note
-  /// renamed, takes its editor along — undo and all (#1076).
-  final NoteEditorKeys _noteKeys = NoteEditorKeys();
 
   /// The draggable tree/detail divider (T-PP-21). Moves apply live; the
   /// lift persists the width to the library.
