@@ -19,7 +19,6 @@ import 'package:niman/src/core/settings/library_features.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/core/share_in.dart';
 import 'package:niman/src/core/shortcuts.dart';
-import 'package:niman/src/core/text_scale.dart';
 import 'package:niman/src/core/tray.dart';
 import 'package:niman/src/editor/diagram_templates.dart';
 import 'package:niman/src/editor/editor_only.dart';
@@ -31,7 +30,6 @@ import 'package:niman/src/library/note_relocation.dart' show linkRewriteBatch;
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ocr/ocr_installation.dart';
 import 'package:niman/src/ocr/ocr_queue.dart';
-import 'package:niman/src/reading/reading_positions.dart';
 import 'package:niman/src/search/task_events.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/todo/reminders.dart';
@@ -51,8 +49,6 @@ import 'package:niman/src/ui/dismiss_chain.dart';
 import 'package:niman/src/ui/dock/close_overlay_action.dart';
 import 'package:niman/src/ui/dock/right_dock.dart';
 import 'package:niman/src/ui/epub_convert_flow.dart';
-import 'package:niman/src/ui/epub_look_sheet.dart';
-import 'package:niman/src/ui/epub_text_zoom.dart';
 import 'package:niman/src/ui/expanded_folders.dart';
 import 'package:niman/src/ui/feature_off.dart';
 import 'package:niman/src/ui/features/features_host.dart';
@@ -69,19 +65,14 @@ import 'package:niman/src/ui/key_map.dart';
 import 'package:niman/src/ui/kinds/flashcards/review_tab.dart';
 import 'package:niman/src/ui/link_update_dialog.dart';
 import 'package:niman/src/ui/mac_menu_bar.dart';
-import 'package:niman/src/ui/note_services.dart';
 import 'package:niman/src/ui/note_tab_bar.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/ocr/ocr_file_actions.dart';
-import 'package:niman/src/ui/ocr/ocr_job_status.dart';
 import 'package:niman/src/ui/open_notes_sheet.dart';
 import 'package:niman/src/ui/outside_files.dart';
 import 'package:niman/src/ui/palette/command_features.dart';
 import 'package:niman/src/ui/palette/command_needs.dart';
-import 'package:niman/src/ui/pane_launcher.dart';
-import 'package:niman/src/ui/pane_split.dart';
 import 'package:niman/src/ui/pinned_tab_chip.dart';
-import 'package:niman/src/ui/pointer_density.dart';
 import 'package:niman/src/ui/quick_note_tab.dart';
 import 'package:niman/src/ui/resize_divider.dart';
 import 'package:niman/src/ui/search_request.dart';
@@ -90,7 +81,6 @@ import 'package:niman/src/ui/settings_tab.dart';
 import 'package:niman/src/ui/shell_annotation_flow.dart';
 import 'package:niman/src/ui/shell_compare_tab.dart';
 import 'package:niman/src/ui/shell_create_flow.dart';
-import 'package:niman/src/ui/shell_detail_pane.dart';
 import 'package:niman/src/ui/shell_dock.dart';
 import 'package:niman/src/ui/shell_export_flow.dart';
 import 'package:niman/src/ui/shell_fab.dart';
@@ -109,8 +99,8 @@ import 'package:niman/src/ui/shell_navigation_state.dart';
 import 'package:niman/src/ui/shell_note_actions.dart';
 import 'package:niman/src/ui/shell_note_fade.dart';
 import 'package:niman/src/ui/shell_note_history.dart';
-import 'package:niman/src/ui/shell_note_io.dart';
 import 'package:niman/src/ui/shell_note_kind.dart';
+import 'package:niman/src/ui/shell_note_panes.dart';
 import 'package:niman/src/ui/shell_ocr_flow.dart';
 import 'package:niman/src/ui/shell_outside_routes.dart';
 import 'package:niman/src/ui/shell_palette.dart';
@@ -139,8 +129,6 @@ import 'package:niman/src/ui/shell_workspace_follow.dart';
 import 'package:niman/src/ui/shell_zen.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/tab_body_stack.dart';
-import 'package:niman/src/ui/tab_drag.dart';
-import 'package:niman/src/ui/text_zoom_pinch.dart';
 import 'package:niman/src/ui/todo_tab.dart';
 import 'package:niman/src/ui/tour/tour_host.dart';
 import 'package:niman/src/ui/tour/tour_steps.dart';
@@ -936,6 +924,48 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     mounted: () => mounted,
   );
 
+  /// The note views: the phone's full-screen note, the wide window's
+  /// panes (#1256).
+  late final ShellNotePanes _notePanes = ShellNotePanes(
+    controller: widget.controller,
+    workspace: _workspace,
+    selection: _selection,
+    settings: _settings,
+    shown: _shown,
+    kind: _kind,
+    noteActions: _noteActions,
+    tabs: _tabs,
+    nav: _nav,
+    tabRows: _tabRows,
+    compare: _compare,
+    study: () => _study,
+    reviewIn: _reviewIn,
+    immersive: _immersive,
+    journalUi: _journalUi,
+    annotations: _annotations,
+    annotating: () => _annotating,
+    annotate: _annotate,
+    ocrActions: () => _ocrActions,
+    convertBook: _convertBook,
+    tasks: _tasks,
+    unsaved: widget.unsavedTracker,
+    spellCheck: widget.spellCheck,
+    window: widget.window,
+    ocrQueue: widget.ocrQueue,
+    shellFocus: _shellFocus,
+    dockToggle: _dockToggle,
+    dockShown: () => _dockShown,
+    createFlow: _createFlow,
+    templateFlow: _templateFlow,
+    palette: _palette,
+    openSearchNote: _openSearchNote,
+    openNote: _openNoteFromLink,
+    tabBodyFor: _tabBodyFor,
+    wide: () => _wide,
+    context: () => context,
+    mounted: () => mounted,
+  );
+
   /// The phone's full-screen note fading in over the tabs (issue #4;
   /// issue #100 moved it into [ShellNoteFade]).
   late final ShellNoteFade _noteFade = ShellNoteFade(
@@ -943,129 +973,6 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
         _selection.path != null && !_selection.isDir && !_selection.treeVisible,
     update: setState,
     mounted: () => mounted,
-  );
-
-  /// The phone full-screen note body.
-  Widget _fullNoteView(LibrarySession controller, String selectedPath) {
-    final view = _phoneNoteView(controller, selectedPath);
-    final above = _inZen
-        ? null
-        : _journalUi.header(context, selectedPath, compact: true);
-    final queue = widget.ocrQueue;
-    if (above == null && queue == null) return view;
-    return Column(
-      children: [
-        // A recognition under way, wherever the reader went meanwhile.
-        if (queue != null) OcrJobStatus(queue: queue, except: selectedPath),
-        ?above,
-        Expanded(child: view),
-      ],
-    );
-  }
-
-  Widget _phoneNoteView(LibrarySession controller, String selectedPath) {
-    // A picture, a PDF or a book, shown rather than read as a note.
-    if (isShownAttachment(selectedPath, controller.features.value)) {
-      return TourTarget(
-        id: TourTargets.note,
-        child: AttachmentView(
-          key: _shown.phoneKey,
-          path: p.join(controller.root ?? '', selectedPath),
-          column: _settings.editor.noteColumn,
-          onEditEpubLook: (anchor) => _editEpubLook(controller, anchor),
-          onEpubTextScale: (scale) =>
-              unawaited(keepEpubTextScale(controller, scale)),
-          positions: switch (controller.root) {
-            final root? => ReadingPositions(root),
-            null => null,
-          },
-          anchor: _selection.request.anchor,
-          reloadToken: _selection.linksFollowed,
-          linkType: _settings.editor.linkType,
-          onAnnotate: _annotating ? _annotate : null,
-          onConvertBook: _convertBook,
-          marks: _annotating ? _annotations : null,
-          ocr: _ocrActions,
-          fullScreen: _immersive.fullScreen,
-        ),
-      );
-    }
-    return TourTarget(
-      id: TourTargets.note,
-      child: _pinchToZoom(
-        NoteView(
-          key: _shown.phoneKey,
-          path: p.join(controller.root ?? '', selectedPath),
-          // One editor on the phone: switching notes hands the one going in
-          // its memento, and the one going out hands in its own (#23).
-          initialMemento: _workspace.value.tabs
-              .where((tab) => tab.path == selectedPath)
-              .firstOrNull
-              ?.memento,
-          onMemento: (path, memento) {
-            final root = controller.root;
-            if (root != null) _workspace.remember(relPath(path, root), memento);
-          },
-          onEditedNoteClosed: _noteActions.tidyClosed,
-          // No typewriter switch in the phone's status row: it has no room
-          // left for one. Settings and the Search tab's commands reach it.
-          options: _settings.editor.noteOptions,
-          // The Files pane opened this note (#727): the caret goes in it.
-          caretRequest: selectedPath == _selection.caretPath
-              ? _selection.caretRequest
-              : 0,
-          showPreview: _shown.preview,
-          showWysiwyg: _settings.editor.editorKind == EditorKind.wysiwyg,
-          // A single enabled editor has nowhere to switch to: the note hides
-          // its switch instead of offering a dead toggle.
-          onEditorKindChanged: _settings.editor.editorsEnabled.length > 1
-              ? _noteActions.setEditorKind
-              : null,
-          services: _noteServices(controller),
-          initialAnchor: _selection.request.anchor,
-          initialCaretOffset: _selection.request.caret,
-          initialFind: _selection.request.find,
-          kindMode: !_kind.raw,
-          onNoteKindChanged: _kind.reported,
-          onKindMarkdown: _noteActions.showMarkdown,
-          onPasteAsMarkdown: _noteActions.pasteAsMarkdownOffer,
-          onMoveToTasks: _noteActions.moveToTasksOffer,
-          reloadToken: _selection.reloadToken,
-        ),
-      ),
-    );
-  }
-
-  /// What the open library lends every note view (#1257): the phone's and
-  /// each pane's alike.
-  NoteServices _noteServices(LibrarySession controller) => NoteServices(
-    libraryRoot: controller.root,
-    linkSource: _settings.linkSource,
-    wikilinkSuggester: _settings.wikilinkSuggester,
-    tasks: _tasks.notes,
-    onOpenNote: _openNoteFromLink,
-    features: controller.features,
-    unsavedTracker: widget.unsavedTracker,
-    spellCheck: widget.spellCheck,
-    saveNote: noteSaverFor(controller),
-    saveNoteStream: noteStreamSaverFor(controller),
-    createMissingNote: missingNoteCreatorFor(controller),
-  );
-
-  /// [note] with its text zoomed by a pinch (#538): each step shown at
-  /// once, and the size kept for the library when the fingers lift. Off
-  /// while [enabled] is false: over a book, which zooms its own text.
-  Widget _pinchToZoom(Widget note, {bool enabled = true}) => TextZoomPinch(
-    enabled: enabled,
-    scale: () => AppTextScales.note,
-    onZoom: (scale, {required done}) {
-      if (done) {
-        unawaited(widget.controller.setNoteTextScale(scale));
-      } else {
-        AppTextScales.note = scale;
-      }
-    },
-    child: note,
   );
 
   /// The notes open in this library on this device (issue #23): for now
@@ -1303,25 +1210,6 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     if (_tab != ShellTab.files && !_sidebarShowsView) {
       _tabs.destinationSelected(ShellTab.files);
     }
-  }
-
-  /// [pane]'s launcher (#1134), while it shows no note: each way in takes
-  /// the pane's focus first, so the note it makes or picks lands there.
-  Widget _launcher(int pane) {
-    void inPane(VoidCallback action) {
-      _workspace.focus(pane);
-      action();
-    }
-
-    return PaneLauncher(
-      onNewNote: () => inPane(() => unawaited(_createFlow.createNote(context))),
-      onNewFromTemplate: () =>
-          inPane(() => unawaited(_templateFlow.createFromTemplate(context))),
-      onGoToNote: () =>
-          inPane(() => unawaited(_palette.open(context, notesOnly: true))),
-      recent: _workspace.history.recent(5),
-      onOpen: (path) => inPane(() => _openSearchNote(path)),
-    );
   }
 
   /// The note the shell shows, as registered in [LibraryShell.openNotes].
@@ -1792,7 +1680,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
         controller: controller,
         bodies: _tabBodyChildren(controller),
       ),
-      buildFullNote: (path) => _fullNoteView(controller, path),
+      buildFullNote: (path) => _notePanes.fullNote(controller, path),
       window: widget.window,
       windowTitle: narrow ? _windowTitle : _libraryName,
       buildTabs: narrow ? null : _buildTabs,
@@ -2506,8 +2394,8 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     sidebarShowsStudy: () => _sidebarShowsStudy,
     searchSlot: (controller) => _searchSlot(controller, tree: true),
     study: () => _study,
-    panes: _panes,
-    zenPanes: _zenPanes,
+    panes: _notePanes.panes,
+    zenPanes: _notePanes.zenPanes,
     treeDivider: _treeDivider,
     dockDivider: _dockDivider,
   );
@@ -2530,233 +2418,6 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   /// sheet (the phone's way to the same three, #175).
   Future<void> _showPanel(DockPane pane, {Rect? anchor}) =>
       _dock.showPanel(context, pane, anchor: anchor);
-
-  /// The panes of the wide layout (#23): one, or two split right or
-  /// down, each a deck of its own tabs. A click anywhere in a pane gives
-  /// it the focus, so the tree's next note opens there.
-  Widget _panes(LibrarySession controller) {
-    final w = _workspace.value;
-    if (!w.isSplit) return _detailPane(controller, 0);
-    final down = w.axis == SplitAxis.down;
-    return PaneSplit(
-      axis: w.axis,
-      fraction: w.fraction,
-      onFraction: _workspace.setFraction,
-      first: _detailPane(controller, 0),
-      // Split down, the lower pane's tabs head the pane itself: the title
-      // bar has no x to divide at.
-      second: down
-          ? Column(
-              children: [
-                SizedBox(
-                  height: NoteTabBar.rowHeight(
-                    touch: thumbDense(Theme.of(context)),
-                  ),
-                  child: _tabRows.pane(1, const SizedBox.shrink()),
-                ),
-                const Divider(height: 1),
-                Expanded(child: _detailPane(controller, 1)),
-              ],
-            )
-          : _detailPane(controller, 1),
-    );
-  }
-
-  /// Zen's panes: the focused one alone. The other stays mounted behind
-  /// it, so its notes keep their undo and their place for the way back.
-  Widget _zenPanes(LibrarySession controller) {
-    final w = _workspace.value;
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        for (var pane = 0; pane < w.panes.length; pane++)
-          HiddenSlot(
-            hidden: pane != w.focused,
-            child: TickerMode(
-              enabled: pane == w.focused,
-              child: _detailPane(controller, pane),
-            ),
-          ),
-      ],
-    );
-  }
-
-  /// [pane]'s deck, focusing the pane on any press inside it.
-  ///
-  /// A pane showing a note claims the tour's note target; an empty pane
-  /// claims nothing, so the step is skipped rather than pointing at a
-  /// blank.
-  Widget _detailPane(LibrarySession controller, int pane) {
-    final review = _reviewIn(pane);
-    final compare = _compare.shownIn(pane) && !review;
-    final content =
-        _tabs.contentTabShows &&
-            pane == _tabs.contentPaneShown &&
-            !compare &&
-            !review
-        ? _nav.contentTab
-        : null;
-    final listener = Listener(
-      behavior: HitTestBehavior.translucent,
-      onPointerDown: (_) => _workspace.focus(pane),
-      child: TabDropZone(
-        pane: pane,
-        isSplit: _workspace.value.isSplit,
-        onDrop: (drag, kind) => _tabRows.dropOnPane(drag, pane, kind),
-        child: _pinchToZoom(
-          enabled: !isBook(_workspace.value.panes[pane].activeTab?.path ?? ''),
-          // A pinned content tab (#712) paints over the deck, which stays
-          // mounted and laid out behind it: the notes keep their undo and
-          // their place for the way back.
-          Stack(
-            fit: StackFit.expand,
-            children: [
-              HiddenSlot(
-                hidden: content != null || compare || review,
-                child: TickerMode(
-                  enabled: content == null && !compare && !review,
-                  child: ShellDetailPane(
-                    shellFocus: _shellFocus,
-                    root: controller.root,
-                    tabs: _deck(pane),
-                    launcher: _launcher(pane),
-                    onMemento: _workspace.remember,
-                    zen: _inZen,
-                    // The panel holds the note's outline and spelling
-                    // wherever the wide layout can show it — docked beside
-                    // the note, or over it on a window without room for
-                    // both — so the status row leaves both its buttons
-                    // out (#1002). A phone keeps them: there they open
-                    // their sheets.
-                    outlineInDock: _wide && !_inZen,
-                    spellCheckInDock: _wide && !_inZen,
-                    relatedInDock: _wide && !_inZen && _dockShown,
-                    options: _settings.editor.noteOptions,
-                    onToggleTypewriter: _settings.toggleTypewriter,
-                    onLoaded: _workspace.noteLoaded,
-                    onEditedNoteClosed: _noteActions.tidyClosed,
-                    // The kind toggles and ⋮ sit at the end of the note's
-                    // one row of chrome (#173); there is no header above.
-                    // Where the panes head their own tab row, the dock's
-                    // toggle ends that row instead (#1134).
-                    barActions: [
-                      ..._noteActions.kindActions,
-                      if (widget.window.customTitleBar) _dockToggle(),
-                      _noteActions.menu(),
-                    ],
-                    // The Files pane opened a note (#727): that tab's own
-                    // view is asked for the caret, and no other.
-                    caretPath: _selection.caretPath,
-                    caretRequest: _selection.caretRequest,
-                    // A single enabled editor has nowhere to switch to:
-                    // the note hides its switch instead of offering a
-                    // dead toggle.
-                    onEditorKindChanged:
-                        _settings.editor.editorsEnabled.length > 1
-                        ? _noteActions.setEditorKind
-                        : null,
-                    services: _noteServices(controller),
-                    kindMode: !_kind.raw,
-                    onNoteKindChanged: _kind.reported,
-                    onTabKind: _kind.tabReported,
-                    onPasteAsMarkdown: _noteActions.pasteAsMarkdownOffer,
-                    onMoveToTasks: _noteActions.moveToTasksOffer,
-                    reloadToken: _selection.reloadToken,
-                    linksFollowed: _selection.linksFollowed,
-                    onAnnotate: _annotating ? _annotate : null,
-                    onConvertBook: _convertBook,
-                    ocr: _ocrActions,
-                    marks: _annotating ? _annotations : null,
-                    statusActions: _noteActions.statusActionsFor(pane),
-                    header: (path) => _journalUi.header(context, path),
-                    onEditEpubLook: (anchor) =>
-                        _editEpubLook(controller, anchor),
-                    onEpubTextScale: (scale) =>
-                        unawaited(keepEpubTextScale(controller, scale)),
-                    epubFullScreen: _immersive.fullScreen,
-                  ),
-                ),
-              ),
-              // The content tab stays mounted while a note shows: its
-              // filter, its scroll and its place are kept, as a note
-              // tab's are.
-              if (_nav.contentTab case final tab?
-                  when pane == _tabs.contentPaneShown)
-                HiddenSlot(
-                  key: Key('content-pane-${tab.name}'),
-                  hidden: content == null || review,
-                  child: TickerMode(
-                    enabled: content != null,
-                    child: _tabBodyFor(tab, controller),
-                  ),
-                ),
-              // A version beside the note (#712): over the deck, which
-              // keeps its notes as they were.
-              if (compare)
-                _compare.page(
-                  context,
-                  controller,
-                  onRestored: () {
-                    if (mounted) _selection.reload();
-                  },
-                ),
-              // A study beside the deck (#533): over the pane's notes too.
-              if (review) _study.page(),
-            ],
-          ),
-        ),
-      ),
-    );
-    return _workspace.value.panes[pane].activeTab == null
-        ? listener
-        : TourTarget(id: TourTargets.note, child: listener);
-  }
-
-  /// Opens the sheet that sets how the books look (#280); a pointer's menu
-  /// grows from [anchor], the book's Aa button.
-  void _editEpubLook(LibrarySession controller, Rect? anchor) => unawaited(
-    showEpubLookSheet(context, session: controller, anchor: anchor),
-  );
-
-  /// The notes whose editor is mounted (#23): the showing tab and the
-  /// ones kept alive behind it, each shown its own way.
-  List<DetailTab> _deck(int pane) {
-    final w = _workspace.value;
-    final mounted = _workspace.mounted();
-    final showing = w.panes[pane].activeTab?.path;
-    final focused = pane == w.focused;
-    _shown.keys.keepOnly(mounted);
-    _kind.keepOnly(mounted);
-    return [
-      for (final tab in w.panes[pane].tabs)
-        if (mounted.contains(tab.path))
-          () {
-            final editor = _shown.editorOf(tab.memento);
-            return DetailTab(
-              key: _shown.keys.keyOf(tab.path),
-              path: tab.path,
-              movedFrom: _shown.keys.movedFrom(tab.path),
-              active: tab.path == showing,
-              focused: focused,
-              memento: tab.memento,
-              showWysiwyg: editor == EditorKind.wysiwyg,
-              showPreview: tab.memento.preview ?? false,
-              anchor: focused && tab.path == showing
-                  ? _selection.request.anchor
-                  : null,
-              // The wide deck's own door for it: the phone's single note
-              // view took it, and the tabs never did, so a template's
-              // `{{cursor}}` landed nowhere on the desktop.
-              caret: focused && tab.path == showing
-                  ? _selection.request.caret
-                  : null,
-              find: focused && tab.path == showing
-                  ? _selection.request.find
-                  : null,
-            );
-          }(),
-    ];
-  }
 
   /// The draggable tree/detail divider (T-PP-21). Moves apply live; the
   /// lift persists the width to the library.
