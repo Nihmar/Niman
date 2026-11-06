@@ -13,7 +13,6 @@ import 'package:niman/src/core/host_platform.dart';
 import 'package:niman/src/core/launch_requests.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/settings/features.dart';
-import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/core/settings/library_features.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/core/share_in.dart';
@@ -42,15 +41,12 @@ import 'package:niman/src/ui/deferred_listenable.dart';
 import 'package:niman/src/ui/device_shape.dart';
 import 'package:niman/src/ui/dismiss_chain.dart';
 import 'package:niman/src/ui/dock/close_overlay_action.dart';
-import 'package:niman/src/ui/dock/right_dock.dart';
 import 'package:niman/src/ui/epub_convert_flow.dart';
 import 'package:niman/src/ui/expanded_folders.dart';
 import 'package:niman/src/ui/feature_off.dart';
 import 'package:niman/src/ui/features/features_host.dart';
 import 'package:niman/src/ui/features_link.dart';
-import 'package:niman/src/ui/hidden_slot.dart';
 import 'package:niman/src/ui/history/history_flow.dart';
-import 'package:niman/src/ui/island.dart';
 import 'package:niman/src/ui/journal/journal_flow.dart';
 import 'package:niman/src/ui/key_map.dart';
 import 'package:niman/src/ui/kinds/flashcards/review_tab.dart';
@@ -63,7 +59,6 @@ import 'package:niman/src/ui/open_notes_sheet.dart';
 import 'package:niman/src/ui/outside_files.dart';
 import 'package:niman/src/ui/palette/command_features.dart';
 import 'package:niman/src/ui/pinned_tab_chip.dart';
-import 'package:niman/src/ui/resize_divider.dart';
 import 'package:niman/src/ui/shell_annotation_flow.dart';
 import 'package:niman/src/ui/shell_commands.dart';
 import 'package:niman/src/ui/shell_compare_tab.dart';
@@ -109,12 +104,12 @@ import 'package:niman/src/ui/shell_tree_editing.dart';
 import 'package:niman/src/ui/shell_tree_menus.dart';
 import 'package:niman/src/ui/shell_tree_open.dart';
 import 'package:niman/src/ui/shell_wide_body.dart';
+import 'package:niman/src/ui/shell_wide_layout.dart';
 import 'package:niman/src/ui/shell_windows.dart';
 import 'package:niman/src/ui/shell_workspace.dart';
 import 'package:niman/src/ui/shell_workspace_follow.dart';
 import 'package:niman/src/ui/shell_zen.dart';
 import 'package:niman/src/ui/strings.dart';
-import 'package:niman/src/ui/tab_body_stack.dart';
 import 'package:niman/src/ui/tour/tour_host.dart';
 import 'package:niman/src/ui/trash.dart';
 import 'package:niman/src/ui/tree_click_clock.dart';
@@ -361,7 +356,8 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   /// Whether a note opened now would land in a pane the user can see:
   /// the panes are the files slot, and no content tab paints over them
   /// (#712).
-  bool get _panesShowNotes => _filesSlotVisible && !_tabs.contentTabShows;
+  bool get _panesShowNotes =>
+      _wideLayout.filesSlotVisible && !_tabs.contentTabShows;
 
   /// Whether something pinned — Home or Todo, a version, a study — covers
   /// the notes of [pane]: the chip, not a note tab, is what it shows.
@@ -548,8 +544,8 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
         _desktop &&
         _wide &&
         _selection.sidebarVisible &&
-        _filesSlotVisible &&
-        !_sidebarShowsView,
+        _wideLayout.filesSlotVisible &&
+        !_wideLayout.sidebarShowsView,
     gridFolder: () => _files.gridOn ? _files.gridStart : null,
     renameTo: (path, name) => _rowActions.renameTo(path, name),
     update: setState,
@@ -989,6 +985,26 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     mounted: () => mounted,
   );
 
+  /// The wide window's slots, dividers and widths, and its Back (#1256).
+  late final ShellWideLayout _wideLayout = ShellWideLayout(
+    nav: _nav,
+    tabs: _tabs,
+    quickNote: _quickNote,
+    wideBody: () => _wideBody,
+    bodies: _bodies,
+    settings: _settings,
+    selection: _selection,
+    dock: _dock,
+    immersive: _immersive,
+    reviewTab: _reviewTab,
+    compare: _compare,
+    workspace: _workspace,
+    files: _files,
+    tabRows: _tabRows,
+    wide: () => _wide,
+    context: () => context,
+  );
+
   /// The phone's full-screen note fading in over the tabs (issue #4;
   /// issue #100 moved it into [ShellNoteFade]).
   late final ShellNoteFade _noteFade = ShellNoteFade(
@@ -1020,7 +1036,8 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   );
 
   /// The study beside the deck (#533, decision 9): a tab of the pane
-  /// [_placeReview] picks, its chip at the end of that pane's row.
+  /// [ShellWideLayout.placeReview] picks, its chip at the end of that
+  /// pane's row.
   late final ReviewTab _reviewTab = ref.read(reviewTabProvider);
 
   /// A version of a note compared with the note, as a tab of a pane
@@ -1045,34 +1062,15 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
 
   void _onReviewTab() {
     if (!mounted) return;
-    if (_reviewTab.run != null && _reviewTab.pane == null) _placeReview();
+    if (_reviewTab.run != null && _reviewTab.pane == null) {
+      _wideLayout.placeReview();
+    }
     if (_reviewTab.shows) {
       FocusManager.instance.primaryFocus?.unfocus();
       // A study opened over the compare tab's pane covers it.
       if (_compare.paneShown == _reviewPaneShown) _compare.hide();
     }
     setState(() {});
-  }
-
-  /// Puts a new study beside its deck: in the other pane of a split; in a
-  /// pane split off to the right where the window has room for two; over
-  /// the deck where it has not, as the compare tab opens.
-  void _placeReview() {
-    final w = _workspace.value;
-    final dock = _dockShown ? _dockWidth + ResizeDivider.width : 0;
-    final panes =
-        MediaQuery.sizeOf(context).width - _tabsStart - dock - Island.gap;
-    if (w.isSplit) {
-      _reviewTab.pane = 1 - w.focused;
-    } else if (panes >= 2 * RightDock.minPanesWidth) {
-      // Placed first: the split that follows is no note shown over it.
-      _reviewTab.pane = 1;
-      _workspace.controller.update(
-        (w) => w.split(SplitAxis.right).focus(w.focused),
-      );
-    } else {
-      _reviewTab.pane = w.focused;
-    }
   }
 
   /// The decks, the Study tree and the study beside the deck (#533).
@@ -1106,27 +1104,6 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     final root = widget.controller.root;
     return root == null ? AppStrings.appTitle : p.basename(root);
   }
-
-  /// The tabs in the title bar (#23), with the unsaved dot of every note
-  /// whose editor holds edits the disk does not have yet.
-  Widget _buildTabs(Widget dragArea) {
-    // The panes end where the dock begins, when it shows (#175), and
-    // short of the window's edge by the base around the islands.
-    final dock = _dockShown ? _dockWidth + ResizeDivider.width : 0;
-    return _tabRows.row(
-      dragArea,
-      panesWidth:
-          MediaQuery.sizeOf(context).width - _tabsStart - dock - Island.gap,
-    );
-  }
-
-  /// Where the tabs start in the title bar: the panes' island's left
-  /// edge, past the base and the tree's island.
-  double get _tabsStart =>
-      ShellRail.panelStart +
-      (_selection.sidebarVisible
-          ? _settings.editor.treeWidth + ResizeDivider.width
-          : 0);
 
   /// The pinned chips at the end of [pane]'s row (#712), in their order:
   /// the study, the version, the content tab.
@@ -1230,7 +1207,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     // stays open beside the note being edited in the other one (#975).
     if (_compare.shownIn(pane)) setState(_compare.hide);
     if (pane == _reviewPaneShown) _reviewTab.show(on: false);
-    if (_tab != ShellTab.files && !_sidebarShowsView) {
+    if (_tab != ShellTab.files && !_wideLayout.sidebarShowsView) {
       _tabs.destinationSelected(ShellTab.files);
     }
   }
@@ -1705,8 +1682,8 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       buildFullNote: (path) => _notePanes.fullNote(controller, path),
       window: widget.window,
       windowTitle: narrow ? _windowTitle : _libraryName,
-      buildTabs: narrow ? null : _buildTabs,
-      tabsStart: _tabsStart,
+      buildTabs: narrow ? null : _wideLayout.tabsRow,
+      tabsStart: _wideLayout.tabsStart,
       // A Mac's commands are in the system's menu bar ([MacMenuBar]).
       menu: narrow || systemMenuBar
           ? null
@@ -1735,9 +1712,9 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       onOpenPalette: _paletteByTouch
           ? () => unawaited(_palette.open(context))
           : null,
-      wideBackAvailable: _wideBackAvailable,
-      onWideBack: _wideBack,
-      buildWideSlots: () => _wideSlots(controller),
+      wideBackAvailable: _wideLayout.backAvailable,
+      onWideBack: _wideLayout.back,
+      buildWideSlots: () => _wideLayout.slots(controller),
       zen: _inZen,
       zenTitle: p.basename(_workspace.value.activePath ?? ''),
       onLeaveZen: _immersive.leaveZen,
@@ -1854,102 +1831,6 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     };
   }
 
-  /// The wide layout's tab slots: the tree + detail split for Files (and
-  /// for an open quick note, which lives in the detail pane — its tab
-  /// body is empty by design), then one slot per remaining tab.
-  ///
-  /// Bodies are kept mounted exactly like the narrow stack
-  /// ([TabBodyStack]): the tree/detail pair shares ONE slot across Files
-  /// and the open quick note, so a tab switch never re-runs the tree's
-  /// per-level queries or re-inflates the open editor. The 2026-09-10
-  /// desktop log showed the cost of the old swap-in/swap-out: 6-9 ms tree
-  /// flattens, 28 ms Search and 62 ms Settings first builds, every switch.
-  List<Widget> _wideSlots(LibrarySession controller) {
-    return [
-      _wideSlot(
-        visible: _filesSlotVisible,
-        child: _wideBody.build(context, controller),
-      ),
-      // One slot per remaining tab, in tab order so a slot's identity
-      // never moves. Unvisited tabs build the empty placeholder
-      // [ShellTabBodies.bodyFor] returns. Search has no slot on a wide
-      // window: it lives in the sidebar island (#712).
-      for (final tab in ShellTab.values)
-        if (tab != ShellTab.files &&
-            tab != ShellTab.quickNote &&
-            !(tab == ShellTab.search && _wide) &&
-            // So has Study (#533).
-            !(tab == ShellTab.study && _wide) &&
-            // Home and Todo are content destinations on a wide window
-            // (#712): they live in a pane, not in a slot of their own.
-            !(_wide && (tab == ShellTab.home || tab == ShellTab.todo)))
-          _wideSlot(
-            visible: _tab == tab,
-            retainLayout: tab == ShellTab.search,
-            child: _islandSlot(_bodies.bodyFor(tab, controller)),
-          ),
-      // The quick-note chooser: empty while its note is open in the slot
-      // above, the choose/create screen otherwise.
-      _wideSlot(
-        visible: _tab == ShellTab.quickNote && _quickNote.choosing,
-        child: _islandSlot(_bodies.bodyFor(ShellTab.quickNote, controller)),
-      ),
-    ];
-  }
-
-  /// Whether the wide layout shows the tree and the panes: Files, an open
-  /// quick note, which lives in the panes, or the search sidebar, which
-  /// swaps what the left island shows and leaves the panes in place
-  /// (#712).
-  bool get _filesSlotVisible =>
-      _tab == ShellTab.files ||
-      (_wide && _tab == ShellTab.search) ||
-      _sidebarShowsStudy ||
-      _tabs.contentTabShows ||
-      (_tab == ShellTab.quickNote && !_quickNote.choosing);
-
-  /// Whether the left island shows the search in place of the tree
-  /// (#712): Search is a sidebar view on a wide window, so the panes and
-  /// the dock stay beside it. A phone keeps Search as a destination.
-  bool get _sidebarShowsSearch => _wide && _tab == ShellTab.search;
-
-  /// Whether the left island shows the Study tree in place of the tree
-  /// (#533), as it shows the search.
-  bool get _sidebarShowsStudy => _wide && _tab == ShellTab.study;
-
-  /// Whether a sidebar view holds the left island instead of the tree.
-  bool get _sidebarShowsView => _sidebarShowsSearch || _sidebarShowsStudy;
-
-  /// A tab's screen on the wide layout: one island on the base, as the
-  /// tree, the panes and the dock are on Files. No band above it: the
-  /// title bar sits on the islands, its own room under the tab the 4 px
-  /// the tab row shows there (#749).
-  Widget _islandSlot(Widget body) => Padding(
-    padding: const EdgeInsets.fromLTRB(Island.gap, 0, Island.gap, Island.gap),
-    child: Island(child: body),
-  );
-
-  /// One kept-alive wide-layout slot. Hidden slots skip layout, paint and
-  /// tickers (see [TabBodyStack], [HiddenSlot]); [retainLayout] keeps an
-  /// expensive one laid out, so showing it is paint-only.
-  Widget _wideSlot({
-    required bool visible,
-    required Widget child,
-    bool retainLayout = false,
-  }) {
-    final slot = TickerMode(enabled: visible, child: child);
-    if (retainLayout) {
-      return Visibility(
-        visible: visible,
-        maintainState: true,
-        maintainAnimation: true,
-        maintainSize: true,
-        child: ExcludeFocus(excluding: !visible, child: slot),
-      );
-    }
-    return HiddenSlot(hidden: !visible, child: slot);
-  }
-
   /// The phone's tab chrome: the tab's app bar and FAB, the bottom tab
   /// bar, the bodies' stack (issue #100 moved it into [ShellPhoneChrome]).
   late final ShellPhoneChrome _phoneChrome = ShellPhoneChrome(
@@ -2004,7 +1885,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   bool get _zenPossible =>
       widget.window.customTitleBar &&
       _wide &&
-      _filesSlotVisible &&
+      _wideLayout.filesSlotVisible &&
       _workspace.value.activePath != null;
 
   /// Whether Zen is what is on screen.
@@ -2123,21 +2004,21 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     settings: () => _settings.editor,
     inZen: () => _inZen,
     sidebarVisible: () => _selection.sidebarVisible,
-    dockWidth: () => _dockWidth,
+    dockWidth: () => _wideLayout.dockWidth,
     customTitleBar: () => widget.window.customTitleBar,
     libraryName: () => _libraryName,
     treeFolder: () => _treeFolder,
     onSwitchLibrary: () => _windows.switchLibrary(context),
     treeFooter: _bodies.treeFooter,
     nav: _nav,
-    sidebarShowsSearch: () => _sidebarShowsSearch,
-    sidebarShowsStudy: () => _sidebarShowsStudy,
+    sidebarShowsSearch: () => _wideLayout.sidebarShowsSearch,
+    sidebarShowsStudy: () => _wideLayout.sidebarShowsStudy,
     searchSlot: (controller) => _bodies.searchSlot(controller, tree: true),
     study: () => _study,
     panes: _notePanes.panes,
     zenPanes: _notePanes.zenPanes,
-    treeDivider: _treeDivider,
-    dockDivider: _dockDivider,
+    treeDivider: _wideLayout.treeDivider,
+    dockDivider: _wideLayout.dockDivider,
   );
 
   /// Whether the window has room for the right dock beside a note (#175):
@@ -2156,40 +2037,6 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   Future<void> _showPanel(DockPane pane, {Rect? anchor}) =>
       _dock.showPanel(context, pane, anchor: anchor);
 
-  /// The draggable tree/detail divider (T-PP-21). Moves apply live; the
-  /// lift persists the width to the library.
-  Widget _treeDivider({required bool touch}) => ResizeDivider(
-    touch: touch,
-    key: const Key('tree-divider'),
-    onDrag: (dx) => _settings.setTreeWidth(_settings.editor.treeWidth + dx),
-    onDragEnd: () => unawaited(_settings.keepTreeWidth()),
-  );
-
-  /// The draggable panes/dock divider (#297): the tree's divider on the
-  /// dock's edge, so a move to the left widens the dock.
-  Widget _dockDivider({required bool touch}) => ResizeDivider(
-    touch: touch,
-    key: const Key('dock-divider'),
-    onDrag: (dx) => _settings.setDockWidth(_fitDock(_dockWidth - dx)),
-    onDragEnd: () => unawaited(_settings.keepDockWidth()),
-  );
-
-  /// The dock's width on screen: the library's, shrunk as far as its
-  /// minimum when the window leaves the panes less than their share.
-  double get _dockWidth => _fitDock(_settings.editor.dockWidth);
-
-  /// [width] within the dock's range and within what the window can spare
-  /// beside the tree and [RightDock.minPanesWidth] of panes.
-  double _fitDock(double width) {
-    final room =
-        MediaQuery.sizeOf(context).width -
-        _tabsStart -
-        ResizeDivider.width -
-        Island.gap -
-        RightDock.minPanesWidth;
-    return width.clamp(minDockWidth, room.clamp(minDockWidth, maxDockWidth));
-  }
-
   /// The tree's keyboard focus, which Reveal in tree hands the keyboard
   /// (#712).
   final FocusNode _treeFocus = FocusNode(debugLabel: 'note-tree');
@@ -2207,7 +2054,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     treeFolder: () => _treeFolder,
     expanded: _expanded,
     focusNode: _treeFocus,
-    treeActive: () => !_sidebarShowsView,
+    treeActive: () => !_wideLayout.sidebarShowsView,
     desktop: () => _desktop,
     menus: _treeMenus,
     rows: _rowActions,
@@ -2239,47 +2086,4 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   /// that is not the wide shell, and on any touch device's wide one. A
   /// desktop's wide window has a key.
   bool get _paletteByTouch => !_wide || !_desktop;
-
-  /// Whether the Files pane shows the grid inside a folder, which Back
-  /// steps out of (#727).
-  bool get _gridCanStepUp => _tab == ShellTab.files && _files.gridInFolder;
-
-  /// Whether the system Back has a step to take in the wide shell (#849):
-  /// what the phone's Back does in its layout, in the wide one's terms.
-  bool get _wideBackAvailable =>
-      _wide &&
-      (_dock.overlayShown ||
-          _tabs.contentTabShows ||
-          _sidebarShowsView ||
-          _compare.shows ||
-          _reviewTab.shows ||
-          !_workspace.value.focusedPane.isEmpty ||
-          _gridCanStepUp);
-
-  /// The wide shell's Back (#849): the topmost thing on screen goes
-  /// first — the side panel lying over the note (#977), a book out of full
-  /// screen, a pinned Home or Todo, the search sidebar, the open note —
-  /// and the grid steps up a folder last. With none of them left Back
-  /// leaves the app.
-  void _wideBack() {
-    if (_dock.overlayShown) {
-      _dock.closeOverlay();
-    } else if (_immersive.fullScreen.value != null) {
-      _immersive.fullScreen.value = null;
-    } else if (_reviewTab.shows) {
-      _reviewTab.close();
-    } else if (_compare.shows) {
-      // The compare page covers the note: it goes before the note (#906).
-      _compare.close();
-    } else if (_tabs.contentTabShows) {
-      _tabs.closeContentTab();
-    } else if (_sidebarShowsView) {
-      _tabs.destinationSelected(ShellTab.files);
-    } else if (!_workspace.value.focusedPane.isEmpty) {
-      // A new tab too: it goes as a note's tab does.
-      _workspace.closeActive();
-    } else if (_gridCanStepUp) {
-      _files.gridUp();
-    }
-  }
 }
