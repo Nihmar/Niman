@@ -6,7 +6,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:niman/src/annotations/annotation.dart';
 import 'package:niman/src/calendar/calendar_source.dart';
-import 'package:niman/src/calendar/calendar_store.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/frame_cost.dart';
 import 'package:niman/src/core/frame_log.dart';
@@ -24,13 +23,11 @@ import 'package:niman/src/editor/diagram_templates.dart';
 import 'package:niman/src/editor/editor_only.dart';
 import 'package:niman/src/export/export_files.dart';
 import 'package:niman/src/export/pdf_printer.dart';
-import 'package:niman/src/home/home_action.dart';
 import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/library/note_relocation.dart' show linkRewriteBatch;
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ocr/ocr_installation.dart';
 import 'package:niman/src/ocr/ocr_queue.dart';
-import 'package:niman/src/search/task_events.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/todo/reminders.dart';
 import 'package:niman/src/todo/task_link_rewriter.dart';
@@ -55,10 +52,6 @@ import 'package:niman/src/ui/features/features_host.dart';
 import 'package:niman/src/ui/features_link.dart';
 import 'package:niman/src/ui/hidden_slot.dart';
 import 'package:niman/src/ui/history/history_flow.dart';
-import 'package:niman/src/ui/home/action_runner.dart';
-import 'package:niman/src/ui/home/home_host.dart';
-import 'package:niman/src/ui/home/home_note_action.dart';
-import 'package:niman/src/ui/home/home_screen.dart';
 import 'package:niman/src/ui/island.dart';
 import 'package:niman/src/ui/journal/journal_flow.dart';
 import 'package:niman/src/ui/key_map.dart';
@@ -73,11 +66,7 @@ import 'package:niman/src/ui/outside_files.dart';
 import 'package:niman/src/ui/palette/command_features.dart';
 import 'package:niman/src/ui/palette/command_needs.dart';
 import 'package:niman/src/ui/pinned_tab_chip.dart';
-import 'package:niman/src/ui/quick_note_tab.dart';
 import 'package:niman/src/ui/resize_divider.dart';
-import 'package:niman/src/ui/search_request.dart';
-import 'package:niman/src/ui/settings_areas.dart';
-import 'package:niman/src/ui/settings_tab.dart';
 import 'package:niman/src/ui/shell_annotation_flow.dart';
 import 'package:niman/src/ui/shell_compare_tab.dart';
 import 'package:niman/src/ui/shell_create_flow.dart';
@@ -108,18 +97,17 @@ import 'package:niman/src/ui/shell_personal_dictionary.dart';
 import 'package:niman/src/ui/shell_phone_chrome.dart';
 import 'package:niman/src/ui/shell_quick_note.dart';
 import 'package:niman/src/ui/shell_row_actions.dart';
-import 'package:niman/src/ui/shell_search_slot.dart';
 import 'package:niman/src/ui/shell_selection.dart';
 import 'package:niman/src/ui/shell_settings.dart';
 import 'package:niman/src/ui/shell_shown_note.dart';
 import 'package:niman/src/ui/shell_study.dart';
 import 'package:niman/src/ui/shell_sync_actions.dart';
+import 'package:niman/src/ui/shell_tab_bodies.dart';
 import 'package:niman/src/ui/shell_tab_rows.dart';
 import 'package:niman/src/ui/shell_tab_switch.dart';
 import 'package:niman/src/ui/shell_tasks.dart';
 import 'package:niman/src/ui/shell_template_flow.dart';
 import 'package:niman/src/ui/shell_tree_editing.dart';
-import 'package:niman/src/ui/shell_tree_footer.dart';
 import 'package:niman/src/ui/shell_tree_menus.dart';
 import 'package:niman/src/ui/shell_tree_open.dart';
 import 'package:niman/src/ui/shell_wide_body.dart';
@@ -129,13 +117,9 @@ import 'package:niman/src/ui/shell_workspace_follow.dart';
 import 'package:niman/src/ui/shell_zen.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/tab_body_stack.dart';
-import 'package:niman/src/ui/todo_tab.dart';
 import 'package:niman/src/ui/tour/tour_host.dart';
-import 'package:niman/src/ui/tour/tour_steps.dart';
-import 'package:niman/src/ui/tour/tour_targets.dart';
 import 'package:niman/src/ui/trash.dart';
 import 'package:niman/src/ui/tree_click_clock.dart';
-import 'package:niman/src/ui/tree_view_toggle.dart';
 import 'package:niman/src/ui/unsaved_notes.dart';
 import 'package:niman/src/ui/welcome/welcome_gate.dart';
 import 'package:niman/src/ui/window_controller.dart';
@@ -505,7 +489,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   /// that is off says. Settings → Features, the way the palette's link
   /// opens it: the screen is opened for its own sake, so the introduction's
   /// flag is left as it was.
-  void _openFeaturesFromWidget() => _openSettingsAt(featuresTarget);
+  void _openFeaturesFromWidget() => _bodies.openSettingsAt(featuresTarget);
 
   /// The open library's settings as the shell paints with them: the
   /// editor's, the quick note, the journal, the links (#1256). The shell
@@ -960,9 +944,49 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     palette: _palette,
     openSearchNote: _openSearchNote,
     openNote: _openNoteFromLink,
-    tabBodyFor: _tabBodyFor,
+    tabBodyFor: _bodies.bodyFor,
     wide: () => _wide,
     context: () => context,
+    mounted: () => mounted,
+  );
+
+  /// The tabs' bodies, the tree's footer, and what Home and Search ask of
+  /// the shell (#1256).
+  late final ShellTabBodies _bodies = ShellTabBodies(
+    controller: widget.controller,
+    nav: _nav,
+    tabs: _tabs,
+    selection: _selection,
+    workspace: _workspace,
+    settings: _settings,
+    tasks: _tasks,
+    fab: _fab,
+    files: _files,
+    quickNote: _quickNote,
+    newItemRule: _newItemRule,
+    study: () => _study,
+    journalFlow: _journalFlow,
+    journalUi: () => _journalUi,
+    templateFlow: _templateFlow,
+    captureFlow: _captureFlow,
+    treeMenus: _treeMenus,
+    syncActions: _syncActions,
+    windows: _windows,
+    featuresHost: _featuresHost,
+    unsaved: widget.unsavedTracker,
+    reminders: widget.reminders,
+    spellCheck: widget.spellCheck,
+    transcription: widget.transcription,
+    ocr: widget.ocr,
+    openSearchNote: _openSearchNote,
+    openSearchHit: _openSearchHit,
+    showNote: _showNote,
+    openTodo: _openTodo,
+    revealInTree: _revealInTree,
+    setTreeView: _setTreeView,
+    wide: () => _wide,
+    context: () => context,
+    update: setState,
     mounted: () => mounted,
   );
 
@@ -1403,8 +1427,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     // must not change the navigator it runs under.
     _windows.close();
     _markOpenNote(null, null);
-    _searchRequests.dispose();
-    _searchCommands.dispose();
+    _bodies.dispose();
     _treeFocus.dispose();
     _workspaceFollow.detach();
     widget.controller.features.removeListener(_tabs.featuresChanged);
@@ -1678,7 +1701,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       buildTabShell: () => _phoneChrome.scaffold(
         context,
         controller: controller,
-        bodies: _tabBodyChildren(controller),
+        bodies: _bodies.children(controller),
       ),
       buildFullNote: (path) => _notePanes.fullNote(controller, path),
       window: widget.window,
@@ -1850,8 +1873,8 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       ),
       // One slot per remaining tab, in tab order so a slot's identity
       // never moves. Unvisited tabs build the empty placeholder
-      // `_tabBodyFor` returns. Search has no slot on a wide window: it
-      // lives in the sidebar island (#712).
+      // [ShellTabBodies.bodyFor] returns. Search has no slot on a wide
+      // window: it lives in the sidebar island (#712).
       for (final tab in ShellTab.values)
         if (tab != ShellTab.files &&
             tab != ShellTab.quickNote &&
@@ -1864,13 +1887,13 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
           _wideSlot(
             visible: _tab == tab,
             retainLayout: tab == ShellTab.search,
-            child: _islandSlot(_tabBodyFor(tab, controller)),
+            child: _islandSlot(_bodies.bodyFor(tab, controller)),
           ),
       // The quick-note chooser: empty while its note is open in the slot
       // above, the choose/create screen otherwise.
       _wideSlot(
         visible: _tab == ShellTab.quickNote && _quickNote.choosing,
-        child: _islandSlot(_tabBodyFor(ShellTab.quickNote, controller)),
+        child: _islandSlot(_bodies.bodyFor(ShellTab.quickNote, controller)),
       ),
     ];
   }
@@ -1944,25 +1967,10 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     syncActions: _syncActions,
     workspace: _workspace,
     openNotesButton: _openNotesButton,
-    sortToggle: _sortToggle,
+    sortToggle: _bodies.sortToggle,
     features: () => _features,
     ocrQueue: widget.ocrQueue,
   );
-
-  /// The tree's sort control (T-UI-03, #726): the mockup's `unfold_more`
-  /// chevrons open the menu of orders, the icon saying the direction.
-  ///
-  /// [withView] adds the List | Grid choices at the top of the same menu:
-  /// the phone's app bar has no room for the pair beside the chevron, so
-  /// the switch rides in the menu there (#727).
-  Widget _sortToggle({bool withView = false}) {
-    return TreeSortToggle(
-      sort: _settings.editor.treeSort,
-      onSort: (sort) => unawaited(_settings.setTreeSort(sort)),
-      view: withView ? _settings.editor.treeView : null,
-      onView: withView ? (view) => unawaited(_setTreeView(view)) : null,
-    );
-  }
 
   void _openTrash(LibrarySession controller) =>
       unawaited(openTrash(context, controller));
@@ -2186,9 +2194,9 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       ),
       // The selected row, which F2 renames (#707): on a desktop the note on
       // screen, or the folder clicked last.
-      AppCommand.searchNextHit: () => _stepSearchHits(1),
-      AppCommand.searchPreviousHit: () => _stepSearchHits(-1),
-      AppCommand.focusSearch: _focusSearchField,
+      AppCommand.searchNextHit: () => _bodies.stepSearchHits(1),
+      AppCommand.searchPreviousHit: () => _bodies.stepSearchHits(-1),
+      AppCommand.focusSearch: _bodies.focusSearchField,
       AppCommand.revealInTree: _revealActiveInTree,
       AppCommand.renameNote: () =>
           unawaited(_rowActions.rename(context, _selection.path ?? note)),
@@ -2257,32 +2265,6 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
         await widget.controller.ops?.listNoteFolder ?? defaultListFolder,
   )..addListener(_rebuild);
 
-  /// Opens the event's line in `calendar.txt` (#730), the caret at the
-  /// line's start: the desktop's tap on an event (a phone's sheet, with
-  /// Edit and Delete, comes with the writing phase).
-  void _openCalendarEvent(CalendarEntryEvent event) {
-    _showNote(
-      calendarFileName,
-      caret: _tasks.calendarOffsetOf(event.lineIndex),
-    );
-  }
-
-  /// Opens a row of Search's tasks-and-events group (#730): a task is the
-  /// task list's, an event or a goal is its line in `calendar.txt`.
-  void _openTaskEvent(TaskEventHit hit) {
-    switch (hit.kind) {
-      case TaskEventKind.task:
-        _openTodo();
-      case TaskEventKind.event:
-        _openCalendarEvent(hit.event!);
-      case TaskEventKind.goal:
-        _showNote(
-          calendarFileName,
-          caret: _tasks.calendarOffsetOf(hit.lineIndex),
-        );
-    }
-  }
-
   /// The journal's calendar, strip and recent entries (#7).
   late final ShellJournalUi _journalUi = ShellJournalUi(
     controller: widget.controller,
@@ -2290,7 +2272,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     flow: _journalFlow,
     tasks: _tasks.todo,
     calendar: _tasks.calendar,
-    openEvent: _openCalendarEvent,
+    openEvent: _bodies.openCalendarEvent,
     writeEvent: (day, event) =>
         unawaited(_guard(() => _tasks.calendar.addEvent(day, event))),
     editEvent: (entry, event, scope) => unawaited(
@@ -2335,24 +2317,11 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     recentNotes: () => _workspace.recentNotes,
     wide: () => _wide,
     openNote: (path) => _openNoteFromLink(path, null),
-    openSettingsAt: _openSettingsAt,
-    runHomeAction: (action) => unawaited(_homeActions.run(context, action)),
-    openFeatures: () => _openSettingsAt(featuresTarget),
+    openSettingsAt: _bodies.openSettingsAt,
+    runHomeAction: (action) =>
+        unawaited(_bodies.homeActions.run(context, action)),
+    openFeatures: () => _bodies.openSettingsAt(featuresTarget),
   );
-
-  /// Opens the settings at [target] (#229): the floating window on a
-  /// wide one, the Settings tab on a phone.
-  void _openSettingsAt(SettingsTarget target) {
-    if (_wide) {
-      unawaited(_windows.openSettings(context, target: target));
-      return;
-    }
-    setState(() => _settingsTarget = target);
-    _tabs.destinationSelected(ShellTab.settings);
-  }
-
-  /// Where the Settings tab opens next, once (#229).
-  SettingsTarget? _settingsTarget;
 
   /// A command's name where the state words it better than the
   /// registry: what it would switch to, not a fixed verb.
@@ -2388,11 +2357,11 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     libraryName: () => _libraryName,
     treeFolder: () => _treeFolder,
     onSwitchLibrary: () => _windows.switchLibrary(context),
-    treeFooter: _treeFooter,
+    treeFooter: _bodies.treeFooter,
     nav: _nav,
     sidebarShowsSearch: () => _sidebarShowsSearch,
     sidebarShowsStudy: () => _sidebarShowsStudy,
-    searchSlot: (controller) => _searchSlot(controller, tree: true),
+    searchSlot: (controller) => _bodies.searchSlot(controller, tree: true),
     study: () => _study,
     panes: _notePanes.panes,
     zenPanes: _notePanes.zenPanes,
@@ -2453,92 +2422,6 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     return width.clamp(minDockWidth, room.clamp(minDockWidth, maxDockWidth));
   }
 
-  /// All five tab bodies, in tab order: each mounts on its first visit and
-  /// stays mounted (query, results, and scroll survive a switch), while the
-  /// fade only covers the incoming body — no cross-fade of two transparency
-  /// layers, and no re-inflate mid-animation.
-  ///
-  /// Built once per shell build and handed to [ShellPhoneChrome.scaffold]
-  /// by identity, so a plain tab switch reuses the instances instead of
-  /// rebuilding every body (#46). Only the search slot retains layout
-  /// while hidden (T-TS-10): it is the one whose show-layout costs frames;
-  /// the plain lists relayout cheaply.
-  List<Widget> _tabBodyChildren(LibrarySession controller) => [
-    for (final tab in ShellTab.values) _tabBodyFor(tab, controller),
-  ];
-
-  /// The body for [tab], or a placeholder until its first visit (lazy so
-  /// opening a library does not inflate all five tabs up front).
-  Widget _tabBodyFor(ShellTab tab, LibrarySession controller) {
-    if (!_nav.visited.contains(tab)) return const SizedBox.shrink();
-    return switch (tab) {
-      // Always scrim-wrapped (never toggled): see [ShellFab.withScrim].
-      ShellTab.files => _fab.withScrim(_files.build(context, controller)),
-      ShellTab.todo => TodoTab(
-        controller: _tasks.todo,
-        view: _tasks.view,
-        reminders: widget.reminders,
-        onAddTask: _tasks.add,
-        column: _settings.editor.noteColumn,
-        links: _tasks.todoLinks,
-      ),
-      ShellTab.search => _searchSlot(controller),
-      // Empty unless the shell actually sent the user here to choose: an
-      // open quick note leaves this body painted under the opening note.
-      ShellTab.quickNote =>
-        _quickNote.choosing
-            ? QuickNoteTab(
-                controller: controller,
-                newItemRule: _newItemRule,
-                onOpen: _quickNote.open,
-              )
-            : const SizedBox.shrink(),
-      ShellTab.home => HomeScreen(
-        host: _homeHost(controller),
-        tab: _nav.tabListenable,
-      ),
-      ShellTab.study => _study.view(context),
-      ShellTab.settings => SettingsTab(
-        // A palette pick opens the tab where it points, once (#229).
-        key: ValueKey(_settingsTarget),
-        controller: controller,
-        // The phone's Maintenance rows switch the library themselves:
-        // they save the open notes first (#351).
-        unsaved: widget.unsavedTracker,
-        spellCheck: widget.spellCheck,
-        transcription: widget.transcription,
-        ocr: widget.ocr,
-        target: _settingsTarget,
-        featuresHost: _featuresHost,
-      ),
-    };
-  }
-
-  /// The Search tab's body; the slot owns which of the two shows
-  /// (issue #100 moved it into [SearchSlot]).
-  Widget _searchSlot(LibrarySession controller, {bool tree = false}) {
-    return SearchSlot(
-      controller: controller,
-      unsavedTracker: widget.unsavedTracker,
-      onOpenNote: _openSearchNote,
-      onOpenHit: _openSearchHit,
-      requests: _searchRequests,
-      commands: _searchCommands,
-      tree: tree,
-      taskEvents: _tasks.events,
-      onOpenTaskEvent: _openTaskEvent,
-      eventTimesClock: _settings.journal.clockTimes,
-      // Tabs, panes and the tree beside the list are a wide window's.
-      hitOpens: _wide
-          ? (
-              newTab: (path) => _workspace.show(path, newTab: true),
-              beside: (path) => _workspace.openBeside(path, SplitAxis.right),
-              reveal: _revealInTree,
-            )
-          : null,
-    );
-  }
-
   /// The tree's keyboard focus, for [_revealActiveInTree] (#712).
   final FocusNode _treeFocus = FocusNode(debugLabel: 'note-tree');
 
@@ -2556,111 +2439,6 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   /// Shows the note at [path] (library-relative) as the tree's selected
   /// row (#712): the Files view in the sidebar, every folder above it open.
   void _revealInTree(String path) => _selection.revealNote(path);
-
-  /// What the shell asks Search to do besides showing (#712): the field's
-  /// focus and the step through the hits.
-  final SearchCommands _searchCommands = SearchCommands();
-
-  /// Steps the sidebar's hits (#712), the way `F4` / `Shift+F4` do.
-  void _stepSearchHits(int direction) {
-    // Nothing to step: the sidebar keeps the last results, but only while
-    // it is the one showing.
-    if (_tab != ShellTab.search || !_nav.visited.contains(ShellTab.search)) {
-      return;
-    }
-    _searchCommands.stepBy(direction);
-  }
-
-  /// Puts the cursor in the search field (`Ctrl+Shift+F`, #712), showing
-  /// the sidebar first on a wide window.
-  void _focusSearchField() {
-    _tabs.select(ShellTab.search);
-    if (_wide) _selection.showSidebar();
-    // The screen may mount in this frame: ask once it has.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _searchCommands.focus();
-    });
-  }
-
-  /// What the Home asks Search to show (#535).
-  final ValueNotifier<SearchRequest?> _searchRequests = ValueNotifier(null);
-
-  /// Shows Search with [request]: a query typed in, or a tag's notes.
-  void _showSearch(SearchRequest request) {
-    _searchRequests.value = request;
-    _tabs.select(ShellTab.search);
-  }
-
-  /// The Home's way into the shell (#535). A note opens the way a search
-  /// result does: over the tab on a phone, in the panes on a wide window.
-  HomeHost _homeHost(LibrarySession controller) => HomeHost(
-    controller: controller,
-    todo: _tasks.todo,
-    calendar: _tasks.calendar,
-    journal: _journalFlow,
-    clockEventTimes: () => _settings.journal.clockTimes,
-    openEvent: _openCalendarEvent,
-    openJournal: () => _journalUi.showCalendar(context),
-    openNote: _openSearchNote,
-    openSearch: (query) => _showSearch(SearchRequest.forText(query)),
-    openTag: (tag) => _showSearch(SearchRequest.forTag(tag)),
-    openTodo: _openTodo,
-    runAction: (action) => unawaited(
-      _homeActions.run(context, action.under(widget.controller.features.value)),
-    ),
-    decks: () => _study.decks,
-    study: (paths, title) => _study.studyPaths(context, paths, title),
-  );
-
-  /// Runs the Home's actions through the shell's own flows (#535).
-  late final HomeActionRunner _homeActions = HomeActionRunner(
-    newNote: (context, action) => makeHomeNote(
-      context,
-      action,
-      controller: widget.controller,
-      templates: _templateFlow,
-    ),
-    addTask: _addHomeTask,
-    openNote: _openSearchNote,
-    openJournal: _journalFlow.openToday,
-    capture: (context, action) =>
-        _captureFlow.capture(context, folder: action.folder),
-    missing: widget.controller.missingPaths,
-    tell: (message) =>
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(message))),
-  );
-
-  /// Adds a task from a Home action: its project and context are written
-  /// in, the caret before them.
-  Future<void> _addHomeTask(HomeAction action) => _tasks.add(
-    text: [
-      '',
-      if (action.project case final project? when project.isNotEmpty)
-        '+$project',
-      if (action.context case final where? when where.isNotEmpty) '@$where',
-    ].join(' '),
-  );
-
-  /// The desktop tree's controls at the base of its column (T-PP-22):
-  /// creation, the trash and the sort order — the app-bar actions the
-  /// wide layout used to carry, where the tree is the thing they act on
-  /// (issue #100 moved the bar itself into [TreeFooterBar]).
-  Widget _treeFooter(LibrarySession controller) {
-    return TourTarget(
-      id: TourTargets.create,
-      child: TreeFooterBar(
-        controller: controller,
-        onNewItem: (item) => _treeMenus.newItem(context, item),
-        syncButton: _syncActions.button(context, controller),
-        viewToggle: TreeViewToggle(
-          view: _settings.editor.treeView,
-          onView: (view) => unawaited(_setTreeView(view)),
-        ),
-        sortToggle: _sortToggle(),
-      ),
-    );
-  }
 
   /// The Files pane: the tree, or the grid in its place, and the folder
   /// the grid shows (#727; issue #100 moved it into [ShellFilesPane]).
