@@ -24,7 +24,7 @@ const int _slack = 50;
 /// The files over [_ceiling] when the gate came in (2026-11-03), each held at
 /// its size then or since lowered by a split.
 const Map<String, int> _oversized = {
-  'ui/shell.dart': 2723,
+  'ui/shell.dart': 2622,
   'markdown/render/source_view.dart': 1442,
   'library/library_state.dart': 1036,
 };
