@@ -99,6 +99,13 @@ final class ShellShownNote {
   /// flag, on either layout.
   bool get preview => mementoOf(path).preview ?? false;
 
+  /// The day of the journal entry on screen, or null when the note on
+  /// screen is not one (#7).
+  DateTime? get journalDay => switch (path) {
+    final path? => settings.journal.dayOfPath(path),
+    null => null,
+  };
+
   /// The view of the note on screen, which the dock and the sheets speak
   /// for: the focused pane's on a wide window, the phone's on a phone.
   NoteViewHandle? get handle {

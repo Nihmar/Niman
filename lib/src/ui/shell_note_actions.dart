@@ -107,7 +107,7 @@ final class ShellNoteActions {
   final ShellRowActions rows;
 
   /// The command palette.
-  final ShellPalette palette;
+  final ShellPalette Function() palette;
 
   /// How the actions read their providers.
   final ProviderRead read;
@@ -255,7 +255,7 @@ final class ShellNoteActions {
         NoteMenuAction.typewriter => Future<void>.sync(
           settings.toggleTypewriter,
         ),
-        NoteMenuAction.palette => palette.open(context()),
+        NoteMenuAction.palette => palette().open(context()),
         NoteMenuAction.format => format(),
         NoteMenuAction.export => exports.runNoteExport(
           context(),
