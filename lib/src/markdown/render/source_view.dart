@@ -33,15 +33,10 @@ import 'package:flutter/services.dart';
 import 'package:niman/src/core/frame_cost.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/theme_tokens.dart';
-import 'package:niman/src/editor/context_menu_items.dart';
 import 'package:niman/src/editor/editor_context_menu.dart';
 import 'package:niman/src/editor/highlighting.dart';
-import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/editor/outline.dart';
-import 'package:niman/src/editor/toolbar_item.dart';
 import 'package:niman/src/editor/typewriter_scroll.dart';
-import 'package:niman/src/links/dead_links.dart';
-import 'package:niman/src/links/suggester.dart';
 import 'package:niman/src/markdown/background_scan.dart';
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_parser.dart';
@@ -52,7 +47,6 @@ import 'package:niman/src/markdown/edit/caret_spot.dart';
 import 'package:niman/src/markdown/edit/edit_history.dart';
 import 'package:niman/src/markdown/edit/line_prefix.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
-import 'package:niman/src/markdown/edit/source_find.dart';
 import 'package:niman/src/markdown/edit/source_input.dart';
 import 'package:niman/src/markdown/edit/source_shortcuts.dart';
 import 'package:niman/src/markdown/live_inlines.dart';
@@ -69,7 +63,6 @@ import 'package:niman/src/markdown/render/live_code_colors.dart';
 import 'package:niman/src/markdown/render/live_decorations.dart';
 import 'package:niman/src/markdown/render/live_hosts.dart';
 import 'package:niman/src/markdown/render/live_quote_content.dart';
-import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/render/scroll_anchor.dart';
 import 'package:niman/src/markdown/render/scrollbar_strip.dart';
 import 'package:niman/src/markdown/render/source_caret.dart';
@@ -102,6 +95,7 @@ import 'package:niman/src/markdown/render/source_task_boxes.dart';
 import 'package:niman/src/markdown/render/source_template_hint.dart';
 import 'package:niman/src/markdown/render/source_touch.dart';
 import 'package:niman/src/markdown/render/source_typing.dart';
+import 'package:niman/src/markdown/render/source_view_config.dart';
 import 'package:niman/src/markdown/render/todo_block_scope.dart';
 import 'package:niman/src/markdown/render/wikilink_suggest.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
@@ -109,26 +103,22 @@ import 'package:niman/src/markdown/source_edit.dart';
 import 'package:niman/src/markdown/source_styler.dart';
 import 'package:niman/src/markdown/surface_controller.dart';
 import 'package:niman/src/preview/math_cache.dart';
-import 'package:niman/src/spellcheck/editor_spell_check.dart';
-import 'package:niman/src/templates/check_state.dart';
 import 'package:niman/src/templates/template_commands.dart';
 import 'package:niman/src/ui/window_visibility.dart';
 
 export 'package:niman/src/markdown/render/source_pointer.dart'
     show SourceLinkHover;
-
-/// A link the writer Ctrl+clicked: its token's kind (a wikilink or a Markdown
-/// link), its text as written, brackets and all, and — for a Markdown link —
-/// the target its parse resolved (a reference link's, too), or null for a
-/// wikilink.
-typedef SourceLinkTap = void Function(TokenKind kind, String raw, String? href);
+export 'package:niman/src/markdown/render/source_view_config.dart';
 
 /// The source surface: the note's text, its caret, and where a tap lands.
 final class MarkdownSourceView extends StatefulWidget {
-  /// Shows [buffer] with [selection], styled with [theme].
+  /// Shows [buffer] with [selection], drawn as [look] says.
   const new({
     required this.buffer,
-    required this.theme,
+    required this.look,
+    this.behaviour = const SourceBehaviour(),
+    this.services = const SourceServices(),
+    this.actions = const SourceActions(),
     this.selection,
     this.onSelection,
     this.onChanged,
@@ -136,43 +126,23 @@ final class MarkdownSourceView extends StatefulWidget {
     this.controller,
     this.history,
     this.surface,
-    this.column = NoteColumn.off,
-    this.padding = const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-    this.showLineNumbers = true,
-    this.indentWidth = 2,
-    this.hideMarkers = false,
-    this.onStage = true,
-    this.syntax,
-    this.dark = false,
-    this.formatMenu,
-    this.editorMenu,
-    this.spellCheck,
-    this.templateCheck,
-    this.findMatches,
-    this.onOpenLink,
-    this.activeItems,
-    this.mathCache,
-    this.embedResolver,
-    this.caretWidth,
-    this.typewriter = false,
-    this.cascadeChecklist = true,
-    this.lineTokens,
-    this.templateCommands = false,
-    this.autofocus = false,
-    this.wikilinkSuggester,
-    this.notePath,
-    this.blockAnchors,
-    this.deadLinks,
-    this.onLinkHover,
-    this.onPaste,
     super.key,
   });
 
   /// The text on screen.
   final SourceBuffer buffer;
 
-  /// The typography: the read view's theme, in monospace.
-  final MarkdownTheme theme;
+  /// How the note is drawn: its type, colours, margins and gutter.
+  final SourceLook look;
+
+  /// How the note is edited: Tab, the checklist, typewriter mode, templates.
+  final SourceBehaviour behaviour;
+
+  /// What the note is checked and drawn with: spelling, maths, links.
+  final SourceServices services;
+
+  /// What the note asks of its owner: the menus, a link, a paste.
+  final SourceActions actions;
 
   /// Where the caret is, and what it has selected.
   final SelectionModel? selection;
@@ -196,156 +166,13 @@ final class MarkdownSourceView extends StatefulWidget {
   /// The scroll position, when the caller owns one (an anchor jump does).
   final ScrollController? controller;
 
-  /// Where the note's text sits across the pane.
-  ///
-  /// The shell's note column, the same object the read mode and the legacy
-  /// editor
-  /// use, so switching panes does not move the text sideways — and it is the
-  /// *text* that moves, not the pane: the side space is padding inside the
-  /// scroll
-  /// view, which keeps one coordinate system for the caret and the hit test.
-  final NoteColumn column;
-
   /// The undo history, when the caller owns one (the shell keeps it per note,
-  /// so
-  /// moving a note between tabs does not lose it). Null keeps one here.
+  /// so moving a note between tabs does not lose it). Null keeps one here.
   final EditHistory? history;
 
   /// The shell's hold on the note: its history, the selection to start with,
   /// and the door its commands come in through. Its buffer is [buffer].
   final MarkdownSurfaceController? surface;
-
-  /// The page margins.
-  final EdgeInsets padding;
-
-  /// Whether the gutter shows line numbers.
-  final bool showLineNumbers;
-
-  /// How many spaces Tab indents by (the library's own setting).
-  final int indentWidth;
-
-  /// Whether the structural markers are hidden.
-  ///
-  /// Hidden **by style**, never removed: the runs stay in the layout with their
-  /// advance, so an offset in the text is an offset on the screen and the
-  /// caret,
-  /// the hit test and the selection need to know nothing about what is
-  /// invisible.
-  /// That is the whole reason `live` mode (phase 4) can be this surface with a
-  /// flag rather than a second renderer — the marker's width is paid for, and
-  /// what it buys is that every offset stays true.
-  final bool hideMarkers;
-
-  /// Whether this pane is the one on stage.
-  ///
-  /// Off stage the view keeps everything it has — the parent keeps it
-  /// mounted for that — but its overlay children must not paint: an
-  /// `Offstage` ancestor hides the pane's own painting, not an
-  /// `OverlayPortal`'s child, which lives in the app's overlay and would
-  /// draw the code blocks' copy buttons over the pane that is on stage.
-  final bool onStage;
-
-  /// The token palette; null takes it from the ambient theme.
-  final SyntaxColors? syntax;
-
-  /// Whether bold is drawn a step lighter (the palette's own rule).
-  final bool dark;
-
-  /// The toolbar's formatting actions, for the context menu (#174); null
-  /// offers the clipboard alone.
-  final FormatMenuBuilder? formatMenu;
-
-  /// The context menu grouped by what the writer is doing (#260): the
-  /// links, then Format, Paragraph and Insert. With it the menu shows this
-  /// rather than [formatMenu], and the clipboard last.
-  final ContextMenuPart Function()? editorMenu;
-
-  /// The note's spelling: the words it underlines, and the context menu's
-  /// suggestions and Add to dictionary. Null checks nothing.
-  final EditorSpellCheck? spellCheck;
-
-  /// The note's template syntax check (T-TPL-09): the problems it marks with
-  /// a wavy underline and offers to fix. Only read when [templateCommands] is
-  /// set — a note that is not a template is checked by nothing.
-  final TemplateCheck? templateCheck;
-
-  /// What the find bar found, painted over the lines; null finds nothing.
-  final SourceMatches? findMatches;
-
-  /// Called when a link is Ctrl+clicked (Cmd+clicked on a Mac); null leaves
-  /// the click a click.
-  final SourceLinkTap? onOpenLink;
-
-  /// Which formats are on at the caret, for the toolbar's pressed state
-  /// (#246). The surface owns the answer — it has the tokens — and writes it
-  /// here, so the shell reads one notifier whichever engine draws the pane.
-  final ValueNotifier<Set<ToolbarItem>>? activeItems;
-
-  /// The typeset formulas, for `live` mode's display maths; without it a
-  /// formula stays its source.
-  final MathCache? mathCache;
-
-  /// Where an embed's target is on disk, for `live` mode's pictures; without
-  /// it a picture stays its source.
-  final Future<String?> Function(String target)? embedResolver;
-
-  /// The caret's width; null keeps the surface's own (Zen mode, #69,
-  /// thickens it).
-  final double? caretWidth;
-
-  /// Typewriter mode (#70): the row being written keeps to the middle of the
-  /// pane, lit faintly, and the note leaves room below its last line so that
-  /// row can reach the middle there too.
-  final bool typewriter;
-
-  /// Whether ticking a checklist item ticks the tasks nested under it
-  /// (#326).
-  final bool cascadeChecklist;
-
-  /// The colours of a line of a file that is not Markdown, by its text —
-  /// a todo.txt's (`todoTxtTokens`) — or null for the Markdown engine's.
-  final List<Token> Function(String line)? lineTokens;
-
-  /// Whether the note is a template, whose commands (`{{date}}`) are
-  /// coloured apart from the Markdown they stand in: a note of the
-  /// library's template folder. Elsewhere a `{{…}}` is text like any.
-  final bool templateCommands;
-
-  /// Whether the note takes the focus — and the keyboard — as it opens (the
-  /// keyboard-on-open setting, and a template's `{{cursor}}`).
-  final bool autofocus;
-
-  /// The library the wikilink suggester panel reads (#475): the notes, aliases
-  /// and headings, and the books' place forms. Null (a surface with no
-  /// library) draws no panel.
-  final WikilinkSuggester? wikilinkSuggester;
-
-  /// The note's library-relative path, or null for a note outside a library:
-  /// what the wikilink panel tells the note's own headings and blocks from
-  /// the rest of the library's when it completes a link (#845).
-  final String? notePath;
-
-  /// The note's block anchors (#869), when its owner already reads them for
-  /// the same buffer: the panel then shares that walk instead of making its
-  /// own. Null reads them here.
-  final BufferBlockAnchors? blockAnchors;
-
-  /// The links of the note that name nothing (#847), resolved apart from the
-  /// drawing and handed in as they arrive: drawn in the muted colour of a
-  /// link that is not there yet. Null draws every link as a live one.
-  final ValueListenable<DeadLinks>? deadLinks;
-
-  /// Told when the pointer comes onto a link with the opening modifier held
-  /// (Ctrl, ⌘ on a Mac), and with null when it leaves it or the modifier goes
-  /// up: what the link preview opens its card from (#846). Null (the
-  /// default, and every touch screen) reports nothing.
-  final void Function(SourceLinkHover? hover)? onLinkHover;
-
-  /// Asked first by every paste — Ctrl/⌘+V, the context menu's Paste, the
-  /// accessibility action: true when it took the clipboard itself (files to
-  /// attach, cells that become a table, #1248, #1249), false to let the view
-  /// paste the clipboard's text as it is. Null pastes text.
-  final Future<bool> Function()? onPaste;
 
   @override
   State<MarkdownSourceView> createState() => MarkdownSourceViewState();
@@ -388,7 +215,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// row (#729).
   late final SourceRows _rows = SourceRows(
     buffer: () => widget.buffer,
-    live: () => widget.hideMarkers,
+    live: () => widget.look.hideMarkers,
     styler: () => _styler,
     folds: _folds,
     hosts: _hosts,
@@ -427,15 +254,15 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// The task boxes `live` draws: the one under a point, and its tick.
   late final SourceTaskBoxes _taskBoxes = SourceTaskBoxes(
     buffer: () => widget.buffer,
-    live: () => widget.hideMarkers,
+    live: () => widget.look.hideMarkers,
     caretLine: () => _caret.spot.value.line,
     paragraphs: _paragraphs,
     lineAt: _lineAt,
     blockOf: (line) => _styler?.blockOf(line),
     blocks: () => _styler?.blocks,
     quotes: _quotes,
-    theme: () => widget.theme,
-    cascade: () => widget.cascadeChecklist,
+    theme: () => widget.look.theme,
+    cascade: () => widget.behaviour.cascadeChecklist,
     selection: () => _selection,
     seal: () => _history.seal(),
     replace: (start, end, text, caret) =>
@@ -592,24 +419,24 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// text's scale, the gutter, the text's width — and the lengths counted
   /// from them.
   late final SourceMetrics _metrics = SourceMetrics(
-    theme: () => widget.theme,
-    column: () => widget.column,
+    theme: () => widget.look.theme,
+    column: () => widget.look.column,
     numberedLines: () =>
-        widget.showLineNumbers ? widget.buffer.lineCount : null,
+        widget.look.showLineNumbers ? widget.buffer.lineCount : null,
   );
 
   /// The pieces a line is drawn in, and a table's rows as `live` lays them
   /// out: what the caret, a tap and the table's grid ask.
   late final SourcePieces _pieces = SourcePieces(
     buffer: () => widget.buffer,
-    live: () => widget.hideMarkers,
+    live: () => widget.look.hideMarkers,
     styler: () => _styler,
     caretSpot: () => _caret.spot.value,
     paragraphs: _paragraphs,
     tokensOf: (line) => _lineAt(line).tokens,
     syntax: () => _metrics.syntax,
-    dark: () => widget.dark,
-    theme: () => widget.theme,
+    dark: () => widget.look.dark,
+    theme: () => widget.look.theme,
     scaler: () => _metrics.scaler,
     widthOf: _widthOf,
   );
@@ -620,11 +447,11 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     buffer: () => widget.buffer,
     selection: () => _selection,
     composing: () => _input.composing,
-    spellCheck: () => widget.spellCheck,
+    spellCheck: () => widget.services.spellCheck,
     tokensAt: _tokensAt,
-    deadLinks: () => widget.deadLinks,
+    deadLinks: () => widget.services.deadLinks,
     linkHrefAt: (index, start) => _styler?.linkHrefAt(index, start),
-    findMatches: () => widget.findMatches,
+    findMatches: () => widget.services.findMatches,
   );
 
   /// The caret as the lines and the toolbar are told it: its spot, its
@@ -636,7 +463,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     fragmentAt: (line, local) => _pieces.fragmentAt(line, local),
     width: () => _caretWidth,
     caretOnLine: (line) => _typing.brackets.caretOnLine(line),
-    activeItems: () => widget.activeItems,
+    activeItems: () => widget.services.activeItems,
     tokensOf: tokensOf,
     measured: _sendGeometry,
   );
@@ -665,7 +492,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     clipboardItems: (dismiss) => _menu.clipboardItems(dismiss, touch: true),
     spellingItems: (dismiss) => _menu.spellingItems(dismiss),
     formats: _menuFormats,
-    structure: () => widget.editorMenu?.call(),
+    structure: () => widget.actions.editorMenu?.call(),
     table: () => _tableKeys.commands()?.menu(),
   );
 
@@ -677,7 +504,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   late final SourcePointer _pointer = SourcePointer(
     buffer: () => widget.buffer,
     selection: () => _selection,
-    live: () => widget.hideMarkers,
+    live: () => widget.look.hideMarkers,
     mounted: () => mounted,
     touch: _touch,
     offsetAt: offsetAt,
@@ -688,8 +515,8 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     overTaskBox: _taskBoxes.over,
     toggleTaskAt: _taskBoxes.toggleAt,
     linkAt: linkAt,
-    openLink: () => widget.onOpenLink,
-    linkHover: () => widget.onLinkHover,
+    openLink: () => widget.actions.onOpenLink,
+    linkHover: () => widget.actions.onLinkHover,
     requestKeyboard: _requestKeyboard,
     secondaryClick: _secondaryClick,
     placeCaret: placeCaret,
@@ -712,11 +539,12 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   late final SourceContextMenu _menu = SourceContextMenu(
     buffer: () => widget.buffer,
     selection: () => _selection,
-    grouped: () => widget.editorMenu != null,
+    grouped: () => widget.actions.editorMenu != null,
     caretRect: () => caretRect,
     offsetAt: offsetAt,
     linkAt: linkAt,
-    openLink: (kind, raw, href) => widget.onOpenLink?.call(kind, raw, href),
+    openLink: (kind, raw, href) =>
+        widget.actions.onOpenLink?.call(kind, raw, href),
     hideTouch: () => _touch.hide(),
     showTouch: ({required toolbar}) => _touch.show(toolbar: toolbar),
     cut: cutSelection,
@@ -724,11 +552,11 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     paste: paste,
     selectAll: selectAll,
     replace: _replaceRange,
-    spellCheck: () => widget.spellCheck,
+    spellCheck: () => widget.services.spellCheck,
     spellRanges: _marks.spellRanges,
     formats: _menuFormats,
     table: () => _tableKeys.commands()?.menu(),
-    structure: () => widget.editorMenu?.call(),
+    structure: () => widget.actions.editorMenu?.call(),
   );
 
   /// The context menu opened or closed.
@@ -736,15 +564,15 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
 
   /// The toolbar's formats a menu offers: none when the editor gives it a
   /// grouped menu of its own, which holds them.
-  List<FormatMenuEntry> _menuFormats() => widget.editorMenu != null
+  List<FormatMenuEntry> _menuFormats() => widget.actions.editorMenu != null
       ? const <FormatMenuEntry>[]
-      : widget.formatMenu?.call() ?? const <FormatMenuEntry>[];
+      : widget.actions.formatMenu?.call() ?? const <FormatMenuEntry>[];
 
   /// The `+` handles of the table in play (#261): the one under the mouse
   /// on the desktop, the caret's on a phone.
   late final SourceTableHover _handles = SourceTableHover(
     buffer: () => widget.buffer,
-    live: () => widget.hideMarkers,
+    live: () => widget.look.hideMarkers,
     mounted: () => mounted,
     blockOf: (line) => _styler?.blockOf(line),
     caretSpot: _caret.spot,
@@ -754,7 +582,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     piecesOf: _pieces.of,
     lineBox: _geometry.lineBox,
     drawnHeightOf: _pieces.drawnHeightOf,
-    theme: () => widget.theme,
+    theme: () => widget.look.theme,
     replace: (start, end, text, caret) =>
         replaceText(start, end, text, caret: SelectionModel.at(caret)),
   );
@@ -762,14 +590,14 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// The copy buttons of the code blocks on screen in `live` (#541).
   late final SourceCodeCopies _codeCopies = SourceCodeCopies(
     buffer: () => widget.buffer,
-    live: () => widget.hideMarkers,
+    live: () => widget.look.hideMarkers,
     drawsTodo: () => TodoBlockScope.of(context) != null,
     styler: () => _styler,
     noteBox: () => _noteBox,
     scroll: () => _scroll,
     heights: () => _heights,
     folds: _folds,
-    padding: () => widget.padding,
+    padding: () => widget.look.padding,
     lineBox: _geometry.lineBox,
     columnOfLine: _geometry.columnOfLine,
     rightInset: () => _metrics.rightInset,
@@ -782,8 +610,8 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   late final TemplateHintController _hints = TemplateHintController(
     buffer: () => widget.buffer,
     selection: () => _selection,
-    check: () => widget.templateCheck,
-    isTemplate: () => widget.templateCommands,
+    check: () => widget.services.templateCheck,
+    isTemplate: () => widget.behaviour.templateCommands,
     replace: _replaceRange,
     spanRect: _templateSpanRect,
   );
@@ -794,12 +622,12 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   late final WikilinkSuggestController _suggest = WikilinkSuggestController(
     buffer: () => widget.buffer,
     selection: () => _selection,
-    suggester: () => widget.wikilinkSuggester,
+    suggester: () => widget.services.wikilinkSuggester,
     lineRead: (line) => _tokensAt(line) != null,
     inCodeAt: _typing.inCodeAt,
     headings: () => headings,
     blocks: () => _blockAnchors.read(),
-    notePath: () => widget.notePath,
+    notePath: () => widget.services.notePath,
     replace: (start, end, text, caret) =>
         _replaceRange(start, end, text, caret: caret),
     ensureCaretVisible: _reveal.ensureCaretVisible,
@@ -812,7 +640,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// (#844): walked when the panel asks, kept for the revision — or the
   /// owner's, when it handed in the one it reads (#869).
   late final BufferBlockAnchors _blockAnchors =
-      widget.blockAnchors ?? BufferBlockAnchors(() => widget.buffer);
+      widget.services.blockAnchors ?? BufferBlockAnchors(() => widget.buffer);
 
   /// The suggester's panel opened, closed or changed: the note is built
   /// again, as it always was when the panel moved.
@@ -828,7 +656,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       _hints.overlay.show();
       // The copy buttons ride the note's paint: off stage the pane hides,
       // and they go with it rather than drawing over the pane that is on.
-      _codeCopies.sync(onStage: widget.onStage);
+      _codeCopies.sync(onStage: widget.behaviour.onStage);
       // The first check, off the build: the problem marks are on the note the
       // frame after it opens, and nothing waited for them (#316).
       _hints
@@ -849,11 +677,11 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     _seenRevision = widget.buffer.revision;
     _input = _makeInput();
     widget.surface?.attachView(this);
-    widget.spellCheck?.addListener(_onSpellingChanged);
-    widget.templateCheck?.addListener(_onSpellingChanged);
-    widget.findMatches?.addListener(_onSpellingChanged);
-    widget.deadLinks?.addListener(_onDeadLinksChanged);
-    widget.mathCache?.addListener(_onMathTypeset);
+    widget.services.spellCheck?.addListener(_onSpellingChanged);
+    widget.services.templateCheck?.addListener(_onSpellingChanged);
+    widget.services.findMatches?.addListener(_onSpellingChanged);
+    widget.services.deadLinks?.addListener(_onDeadLinksChanged);
+    widget.services.mathCache?.addListener(_onMathTypeset);
     // The hand over a Ctrl-clickable link appears when the modifier goes
     // down, and goes when it comes up, without waiting for a move (#725).
     HardwareKeyboard.instance.addHandler(_pointer.modifierChanged);
@@ -938,58 +766,15 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   @override
   void didUpdateWidget(MarkdownSourceView oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.onStage != widget.onStage) {
-      // Show and hide are a rebuild of the overlay portal, and the portal
-      // refuses one during a build: the pane's frame is enough to wait.
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) _codeCopies.sync(onStage: widget.onStage);
-      });
-    }
-    // The note became a template, or stopped being one: its lines are
-    // coloured again at the build this update is part of, and a template is
-    // checked off the build (the answer notifies listeners outside this one).
-    if (oldWidget.templateCommands != widget.templateCommands) {
-      setState(() {});
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        _hints
-          ..run()
-          ..refresh();
-      });
+    if (oldWidget.behaviour != widget.behaviour) {
+      _behaviourChanged(oldWidget.behaviour);
     }
     if (!identical(oldWidget.surface, widget.surface)) {
       oldWidget.surface?.detachView(this);
       widget.surface?.attachView(this);
     }
-    if (!identical(oldWidget.spellCheck, widget.spellCheck)) {
-      oldWidget.spellCheck?.removeListener(_onSpellingChanged);
-      widget.spellCheck?.addListener(_onSpellingChanged);
-    }
-    if (!identical(oldWidget.templateCheck, widget.templateCheck)) {
-      oldWidget.templateCheck?.removeListener(_onSpellingChanged);
-      widget.templateCheck?.addListener(_onSpellingChanged);
-      // A check attached now (the note became a template, its folder having
-      // been read): the problems are worked out at once, not on the next
-      // keystroke. Off the build: the answer notifies listeners outside this
-      // view too, and one of them may be the widget now rebuilding it.
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        _hints
-          ..run()
-          ..refresh();
-      });
-    }
-    if (!identical(oldWidget.findMatches, widget.findMatches)) {
-      oldWidget.findMatches?.removeListener(_onSpellingChanged);
-      widget.findMatches?.addListener(_onSpellingChanged);
-    }
-    if (!identical(oldWidget.deadLinks, widget.deadLinks)) {
-      oldWidget.deadLinks?.removeListener(_onDeadLinksChanged);
-      widget.deadLinks?.addListener(_onDeadLinksChanged);
-    }
-    if (!identical(oldWidget.mathCache, widget.mathCache)) {
-      oldWidget.mathCache?.removeListener(_onMathTypeset);
-      widget.mathCache?.addListener(_onMathTypeset);
+    if (oldWidget.services != widget.services) {
+      _servicesChanged(oldWidget.services);
     }
     if (!identical(oldWidget.buffer, widget.buffer)) {
       // Another note: the keyboard, the history and the caret were this one's.
@@ -1032,26 +817,83 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       _input.sendSelection();
     }
     if (oldWidget.selection != widget.selection ||
-        oldWidget.caretWidth != widget.caretWidth) {
+        oldWidget.look.caretWidth != widget.look.caretWidth) {
       _scheduleCaret();
-    } else if (oldWidget.hideMarkers != widget.hideMarkers ||
-        // By value (#789): source mode with a chosen face builds its theme
-        // in every build (`surfaceThemeFor`), and a copy of the same values
-        // moves no caret.
-        oldWidget.theme != widget.theme ||
-        oldWidget.showLineNumbers != widget.showLineNumbers ||
-        oldWidget.column != widget.column ||
-        oldWidget.padding != widget.padding) {
+    } else if (widget.look.redraws(oldWidget.look)) {
+      // By value (#789): source mode with a chosen face builds its theme
+      // in every build (`surfaceThemeFor`), and a copy of the same values
+      // moves no caret.
       // The caret's line is drawn another way — source to live and back
       // above all — and the caret kept the place and the height it had.
       _measureCaretAfterFrame();
     }
     // Switched on while writing: the caret goes to the middle at once.
-    if (widget.typewriter && !oldWidget.typewriter) _followCaret();
+    if (widget.behaviour.typewriter && !oldWidget.behaviour.typewriter) {
+      _followCaret();
+    }
     if (oldWidget.controller != widget.controller) {
       if (_ownsScroll) _scroll.dispose();
       _scroll = widget.controller ?? ScrollController();
       _ownsScroll = widget.controller == null;
+    }
+  }
+
+  /// The behaviour changed: the pane came on or off stage, or the note
+  /// became a template or stopped being one.
+  void _behaviourChanged(SourceBehaviour old) {
+    if (old.onStage != widget.behaviour.onStage) {
+      // Show and hide are a rebuild of the overlay portal, and the portal
+      // refuses one during a build: the pane's frame is enough to wait.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _codeCopies.sync(onStage: widget.behaviour.onStage);
+      });
+    }
+    // The note became a template, or stopped being one: its lines are
+    // coloured again at the build this update is part of, and a template is
+    // checked off the build (the answer notifies listeners outside this one).
+    if (old.templateCommands != widget.behaviour.templateCommands) {
+      setState(() {});
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _hints
+          ..run()
+          ..refresh();
+      });
+    }
+  }
+
+  /// The services changed: each one the view listens to is listened to
+  /// anew.
+  void _servicesChanged(SourceServices old) {
+    if (!identical(old.spellCheck, widget.services.spellCheck)) {
+      old.spellCheck?.removeListener(_onSpellingChanged);
+      widget.services.spellCheck?.addListener(_onSpellingChanged);
+    }
+    if (!identical(old.templateCheck, widget.services.templateCheck)) {
+      old.templateCheck?.removeListener(_onSpellingChanged);
+      widget.services.templateCheck?.addListener(_onSpellingChanged);
+      // A check attached now (the note became a template, its folder having
+      // been read): the problems are worked out at once, not on the next
+      // keystroke. Off the build: the answer notifies listeners outside this
+      // view too, and one of them may be the widget now rebuilding it.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _hints
+          ..run()
+          ..refresh();
+      });
+    }
+    if (!identical(old.findMatches, widget.services.findMatches)) {
+      old.findMatches?.removeListener(_onSpellingChanged);
+      widget.services.findMatches?.addListener(_onSpellingChanged);
+    }
+    if (!identical(old.deadLinks, widget.services.deadLinks)) {
+      old.deadLinks?.removeListener(_onDeadLinksChanged);
+      widget.services.deadLinks?.addListener(_onDeadLinksChanged);
+    }
+    if (!identical(old.mathCache, widget.services.mathCache)) {
+      old.mathCache?.removeListener(_onMathTypeset);
+      widget.services.mathCache?.addListener(_onMathTypeset);
     }
   }
 
@@ -1060,11 +902,11 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     _handles.dispose();
     _pointer.dispose();
     widget.surface?.detachView(this);
-    widget.spellCheck?.removeListener(_onSpellingChanged);
-    widget.templateCheck?.removeListener(_onSpellingChanged);
-    widget.findMatches?.removeListener(_onSpellingChanged);
-    widget.deadLinks?.removeListener(_onDeadLinksChanged);
-    widget.mathCache?.removeListener(_onMathTypeset);
+    widget.services.spellCheck?.removeListener(_onSpellingChanged);
+    widget.services.templateCheck?.removeListener(_onSpellingChanged);
+    widget.services.findMatches?.removeListener(_onSpellingChanged);
+    widget.services.deadLinks?.removeListener(_onDeadLinksChanged);
+    widget.services.mathCache?.removeListener(_onMathTypeset);
     _hints.dispose();
     _suggest
       ..removeListener(_onSuggestChanged)
@@ -1178,7 +1020,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     if (line < 0 || line >= lineCount || !_scroll.hasClients) return;
     _rows.reshape(() => _folds.reveal(line));
     _scroll.jumpTo(
-      (_geometry.lineBox(line).top - widget.padding.top).clamp(
+      (_geometry.lineBox(line).top - widget.look.padding.top).clamp(
         0.0,
         _scroll.position.maxScrollExtent,
       ),
@@ -1281,7 +1123,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   late final SourceCaretMotion _motion = SourceCaretMotion(
     buffer: () => widget.buffer,
     selection: () => _selection,
-    live: () => widget.hideMarkers,
+    live: () => widget.look.hideMarkers,
     mounted: () => mounted,
     blockOf: (line) => _styler?.blockOf(line),
     fenceOf: _fenceOf,
@@ -1314,7 +1156,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// ([ScrollAnchor]). Null while there is nothing drawn to ask.
   ScrollAnchor? get topAnchor {
     if (!_scroll.hasClients || _heights.length == 0) return null;
-    final y = _scroll.offset - widget.padding.top;
+    final y = _scroll.offset - widget.look.padding.top;
     if (y <= 0) return (line: 0, fraction: 0.0);
     final line = _geometry.lineAtY(_scroll.offset);
     final box = _geometry.lineBox(line);
@@ -1413,9 +1255,9 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   late final SourceTyping _typing = SourceTyping(
     buffer: () => widget.buffer,
     selection: () => _selection,
-    live: () => widget.hideMarkers,
+    live: () => widget.look.hideMarkers,
     mounted: () => mounted,
-    indentWidth: () => widget.indentWidth,
+    indentWidth: () => widget.behaviour.indentWidth,
     blockOf: (line) => _styler?.blockOf(line),
     tokensOf: (line) => _lineAt(line).tokens,
     verbatimQuotes: _verbatimQuotes,
@@ -1432,7 +1274,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     },
     swallowedBreak: () => _suggest.takeSwallowedBreak(),
     tableEnter: () => _tableKeys.enter(),
-    onPaste: () => widget.onPaste,
+    onPaste: () => widget.actions.onPaste,
   );
 
   /// The selected text, or null when the selection is a caret.
@@ -1445,7 +1287,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   Future<void> cutSelection() => _typing.cutSelection();
 
   /// Inserts the clipboard's text at the caret, replacing the selection —
-  /// unless [MarkdownSourceView.onPaste] takes the clipboard first.
+  /// unless [SourceActions.onPaste] takes the clipboard first.
   Future<void> paste() => _typing.paste();
 
   /// Whether the caret is in code: a fenced or indented block, display
@@ -1486,7 +1328,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     heights: () => _heights,
     folds: _folds,
     hosts: _hosts,
-    padding: () => widget.padding,
+    padding: () => widget.look.padding,
     band: () => _metrics.band,
     gap: () => _metrics.gap,
     columnsLeft: _metrics.columnsLeft,
@@ -1524,7 +1366,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
 
   /// What line [index], in [block], draws as a fence line in `live`, or
   /// null ([liveFenceOf]).
-  LiveFence? _fenceOf(int index, Block? block) => widget.hideMarkers
+  LiveFence? _fenceOf(int index, Block? block) => widget.look.hideMarkers
       ? liveFenceOf(
           index,
           block,
@@ -1543,7 +1385,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
 
   /// Whether the gutter offers fold arrows.
   bool get _foldingEnabled =>
-      widget.showLineNumbers && widget.buffer.lineCount <= _foldLineLimit;
+      widget.look.showLineNumbers && widget.buffer.lineCount <= _foldLineLimit;
 
   /// Whether the heading on [line] is folded.
   bool isFolded(int line) => _folds.isFolded(line);
@@ -1744,12 +1586,12 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// (#373).
   List<Token>? _tokensAt(int index) {
     final text = widget.buffer.lineAt(index);
-    final own = widget.lineTokens;
+    final own = widget.look.lineTokens;
     if (own != null) return own(text);
     final styler = _styler;
     if (styler == null) return null;
     final tokens = styler.tokensOf(index);
-    if (!widget.templateCommands) return tokens;
+    if (!widget.behaviour.templateCommands) return tokens;
     final commands = templateCommandsIn(text);
     return commands.isEmpty
         ? tokens
@@ -1851,8 +1693,9 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// find bar has the focus — so a note loading, or its place being put back,
   /// stays where it was put.
   void _followCaret() {
-    if (!widget.typewriter) return;
-    if (!_focus.hasFocus && !(widget.findMatches?.visible ?? false)) return;
+    if (!widget.behaviour.typewriter) return;
+    final finding = widget.services.findMatches?.visible ?? false;
+    if (!_focus.hasFocus && !finding) return;
     _typewriter.caretMoved();
   }
 
@@ -1907,7 +1750,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   int get caretMeasures => _caret.measures;
 
   /// How wide the caret is drawn.
-  double get _caretWidth => widget.caretWidth ?? 1.5;
+  double get _caretWidth => widget.look.caretWidth ?? 1.5;
 
   /// Tells the IME where the note is and where the caret is in it, so its
   /// candidate window (and a phone's handles) sit by the text rather than at
@@ -1933,7 +1776,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   Widget build(BuildContext context) => _cost.timed(() => _buildView(context));
 
   Widget _buildView(BuildContext context) {
-    final syntax = widget.syntax ?? SyntaxColors.of(context);
+    final syntax = widget.look.syntax ?? SyntaxColors.of(context);
     _metrics.syntax = syntax;
     _metrics.scaler = MediaQuery.textScalerOf(context);
     // The shortcuts wrap the focus, not the other way round: a
@@ -1944,7 +1787,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     var note = _shortcuts(
       Focus(
         focusNode: _focus,
-        autofocus: widget.autofocus,
+        autofocus: widget.behaviour.autofocus,
         onKeyEvent: _menuKeys.handle,
         onFocusChange: (hasFocus) {
           _focusReturn.focusChanged(hasFocus: hasFocus);
@@ -1973,13 +1816,13 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
             _rows.layOutHosts(available);
             // Typewriter mode: room for the last row to reach the middle,
             // under whatever the note ends with.
-            final slack = widget.typewriter
+            final slack = widget.behaviour.typewriter
                 ? typewriterSlack(constraints.maxHeight)
                 : 0.0;
             // The footnotes the read view ends the note with, which `live`
             // ends it with too: its definitions take no room where they
             // stand.
-            final footnotes = widget.hideMarkers
+            final footnotes = widget.look.hideMarkers
                 ? _styler?.footnotes ?? const <Footnote>[]
                 : const <Footnote>[];
             return _pointer.listen(
@@ -2016,11 +1859,11 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                             padding: EdgeInsets.only(
                               left: _metrics.leftInset,
                               right: _metrics.rightInset,
-                              top: widget.padding.top,
+                              top: widget.look.padding.top,
                               // Typewriter mode: room for the last row to
                               // reach the middle.
                               bottom:
-                                  widget.padding.bottom +
+                                  widget.look.padding.bottom +
                                   (footnotes.isEmpty ? slack : 0),
                             ),
                             sliver: sourceRowSlivers(
@@ -2033,8 +1876,8 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                                 gap: _metrics.gap,
                                 band: _metrics.band,
                                 textWidth: _metrics.textWidth,
-                                numbered: widget.showLineNumbers,
-                                theme: widget.theme,
+                                numbered: widget.look.showLineNumbers,
+                                theme: widget.look.theme,
                                 itemsIndent: _metrics.itemsIndent,
                               ),
                               line: _lineWidget,
@@ -2047,14 +1890,15 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                               padding: EdgeInsets.only(
                                 left: _metrics.leftInset + _metrics.gutter,
                                 right: _metrics.rightInset,
-                                top: widget.padding.top,
-                                bottom: widget.padding.bottom + slack,
+                                top: widget.look.padding.top,
+                                bottom: widget.look.padding.bottom + slack,
                               ),
                               sliver: footnoteSliver(
                                 footnotes: footnotes,
-                                theme: widget.theme,
+                                theme: widget.look.theme,
                                 parser: _footnoteParser,
-                                mathCache: widget.mathCache ?? _footnoteMath,
+                                mathCache:
+                                    widget.services.mathCache ?? _footnoteMath,
                                 scope: _styler?.scope,
                                 onTap: _toDefinition,
                               ),
@@ -2111,7 +1955,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   }) {
     final styled = _lineAt(index);
     final block = _styler?.blockOf(index);
-    final quoted = widget.hideMarkers
+    final quoted = widget.look.hideMarkers
         ? _quotes.of(index, block, widget.buffer)
         : null;
     return SourceLine(
@@ -2123,7 +1967,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       onDiagramLine: _openDiagramLine,
       paragraphKey: _paragraphs.keyFor(index),
       styled: styled,
-      shape: widget.hideMarkers
+      shape: widget.look.hideMarkers
           ? LineShape.of(
               styled,
               block,
@@ -2132,16 +1976,16 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
               callout: liveCalloutLine(index, block, widget.buffer, _quotes),
             )
           : LineShape.none,
-      pictures: widget.hideMarkers && widget.embedResolver != null
+      pictures: widget.look.hideMarkers && widget.services.embedResolver != null
           ? _styler?.picturesOf(index) ?? const <LinePicture>[]
           : const <LinePicture>[],
-      embedResolver: widget.embedResolver,
-      formula: widget.hideMarkers && widget.mathCache != null
+      embedResolver: widget.services.embedResolver,
+      formula: widget.look.hideMarkers && widget.services.mathCache != null
           ? liveFormulaOf(_styler?.blockOf(index), widget.buffer)
           : null,
-      mathCache: widget.mathCache,
-      diagram: widget.hideMarkers ? _diagramOf(index) : null,
-      tableRow: widget.hideMarkers && block?.kind == BlockKind.table
+      mathCache: widget.services.mathCache,
+      diagram: widget.look.hideMarkers ? _diagramOf(index) : null,
+      tableRow: widget.look.hideMarkers && block?.kind == BlockKind.table
           ? (at) => _pieces.tableRowAt(index, block!, at)
           : null,
       tableHeader: block?.kind == BlockKind.table && index == block!.startLine,
@@ -2149,30 +1993,30 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
           ? (at) => _paragraphs.fragmentKey(index, at)
           : null,
       pieceShift: _caret.shift,
-      definition: widget.hideMarkers && block != null
+      definition: widget.look.hideMarkers && block != null
           ? _styler?.definitionRunOf(block)
           : null,
-      codeRuns: !widget.hideMarkers
+      codeRuns: !widget.look.hideMarkers
           ? null
           : quoted != null
           ? _codeColors.ofQuoted(
               quoted,
               block!.startLine,
               widget.buffer,
-              widget.theme.codeHighlight,
+              widget.look.theme.codeHighlight,
             )
           : _codeColors.of(
               index,
               block,
               widget.buffer,
-              widget.theme.codeHighlight,
+              widget.look.theme.codeHighlight,
             ),
-      number: widget.showLineNumbers && !inColumn ? index + 1 : null,
+      number: widget.look.showLineNumbers && !inColumn ? index + 1 : null,
       gutterWidth: inColumn ? 0 : _metrics.gutter,
-      theme: widget.theme,
+      theme: widget.look.theme,
       syntax: _metrics.syntax ?? SyntaxColors.of(context),
-      dark: widget.dark,
-      hideMarkers: widget.hideMarkers,
+      dark: widget.look.dark,
+      hideMarkers: widget.look.hideMarkers,
       selected: _marks.selectionIn(index),
       composing: _marks.composingIn(index),
       misspelled: _marks.misspelledIn(index),
@@ -2185,7 +2029,9 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       spot: _caret.spot,
       caret: _caret.rect,
       caretOn: _blink.on,
-      rowColor: widget.typewriter ? typewriterLineColor(context) : null,
+      rowColor: widget.behaviour.typewriter
+          ? typewriterLineColor(context)
+          : null,
       fence: _fenceOf(index, block),
       outerIndent: outerIndent,
       outerQuotes: outerQuotes,
@@ -2215,7 +2061,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   late final SourceTableKeys _tableKeys = SourceTableKeys(
     buffer: () => widget.buffer,
     selection: () => _selection,
-    live: () => widget.hideMarkers,
+    live: () => widget.look.hideMarkers,
     blockOf: (line) => _styler?.blockOf(line),
     select: (next) => _applySelection(next, reveal: true),
     replace: (start, end, text, caret) =>

@@ -122,13 +122,15 @@ Future<void> _pump(
       home: Scaffold(
         body: MarkdownSourceView(
           buffer: SourceBuffer.fromText(text),
-          theme: _theme,
-          showLineNumbers: false,
-          spellCheck: check,
-          // The same tests in both unified modes (#246): hiding a marker is a
-          // style, and the spelling's skip ranges are read off the tokens, so
-          // the underline must not know which mode drew the line.
-          hideMarkers: live,
+          look: SourceLook(
+            theme: _theme,
+            showLineNumbers: false,
+            // The same tests in both unified modes (#246): hiding a marker is a
+            // style, and the spelling's skip ranges are read off the tokens, so
+            // the underline must not know which mode drew the line.
+            hideMarkers: live,
+          ),
+          services: SourceServices(spellCheck: check),
         ),
       ),
     ),

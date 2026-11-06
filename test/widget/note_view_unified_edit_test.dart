@@ -209,6 +209,7 @@ void main() {
     expect(
       tester
           .widget<MarkdownSourceView>(find.byType(MarkdownSourceView))
+          .look
           .hideMarkers,
       isTrue,
       reason: 'the WYSIWYG pane is live: the markers are hidden',
@@ -487,6 +488,7 @@ void main() {
       expect(
         tester
             .widget<MarkdownSourceView>(find.byType(MarkdownSourceView))
+            .look
             .hideMarkers,
         live,
       );

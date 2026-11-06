@@ -1090,9 +1090,8 @@ void main() {
           home: Scaffold(
             body: MarkdownSourceView(
               buffer: buffer,
-              theme: _theme,
-              showLineNumbers: false,
-              wikilinkSuggester: suggester,
+              look: const SourceLook(theme: _theme, showLineNumbers: false),
+              services: SourceServices(wikilinkSuggester: suggester),
             ),
           ),
         ),
@@ -1308,9 +1307,8 @@ void main() {
         home: Scaffold(
           body: MarkdownSourceView(
             buffer: buffer,
-            theme: _theme,
+            look: const SourceLook(theme: _theme, showLineNumbers: false),
             selection: const SelectionModel.at(0),
-            showLineNumbers: false,
           ),
         ),
       ),
