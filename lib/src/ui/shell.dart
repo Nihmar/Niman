@@ -17,7 +17,6 @@ import 'package:niman/src/core/settings/features.dart';
 import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/core/settings/library_features.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
-import 'package:niman/src/core/settings/navigation_layout.dart';
 import 'package:niman/src/core/share_in.dart';
 import 'package:niman/src/core/shortcuts.dart';
 import 'package:niman/src/core/text_scale.dart';
@@ -30,12 +29,9 @@ import 'package:niman/src/export/export_files.dart';
 import 'package:niman/src/export/pdf_printer.dart';
 import 'package:niman/src/frontmatter/parser.dart';
 import 'package:niman/src/home/home_action.dart';
-import 'package:niman/src/journal/journal_settings.dart';
 import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/library/note_relocation.dart' show linkRewriteBatch;
 import 'package:niman/src/library/session.dart';
-import 'package:niman/src/links/library_links.dart';
-import 'package:niman/src/links/suggester.dart';
 import 'package:niman/src/ocr/ocr_installation.dart';
 import 'package:niman/src/ocr/ocr_queue.dart';
 import 'package:niman/src/reading/reading_positions.dart';
@@ -141,6 +137,7 @@ import 'package:niman/src/ui/shell_quick_note.dart';
 import 'package:niman/src/ui/shell_row_actions.dart';
 import 'package:niman/src/ui/shell_search_slot.dart';
 import 'package:niman/src/ui/shell_selection.dart';
+import 'package:niman/src/ui/shell_settings.dart';
 import 'package:niman/src/ui/shell_study.dart';
 import 'package:niman/src/ui/shell_sync_actions.dart';
 import 'package:niman/src/ui/shell_tab_rows.dart';
@@ -539,22 +536,38 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   /// flag is left as it was.
   void _openFeaturesFromWidget() => _openSettingsAt(featuresTarget);
 
-  /// The editor settings toggles, held here so both NoteView sites get the
-  /// same values and they refresh on session events (the settings screen
-  /// calls `notify()` after a toggle), so an open editor picks them up
-  /// without reopening the note. The shell rebuilds on every session event
-  /// (the LibraryHome StreamBuilder), so a refetch happens there — no
-  /// subscription needed.
-  ShellEditorSettings _editorSettings = ShellEditorSettings.defaults;
+  /// The open library's settings as the shell paints with them: the
+  /// editor's, the quick note, the journal, the links (#1256). The shell
+  /// rebuilds when they change.
+  late final ShellSettings _settings = ShellSettings(
+    controller: widget.controller,
+    spellCheck: widget.spellCheck,
+  )..addListener(_rebuild);
 
-  /// The library's quick note (library-relative path, or none): the
-  /// note page's app bar labels it, now that the tabs no longer do
-  /// (issue #73, item 1). Refreshed with the editor settings.
-  String? _quickNotePath;
+  /// Rebuilds for a change a collaborator reports.
+  void _rebuild() {
+    if (mounted) setState(() {});
+  }
 
-  /// The journal's settings (#7), read with the editor settings: which
-  /// note on screen is an entry, and of which day.
-  JournalSettings _journal = const JournalSettings();
+  /// Reads the library's settings again, and places the navigation it
+  /// lays out.
+  Future<void> _refreshEditorSettings() async {
+    _personalDictionary.follow(widget.controller);
+    final layout = await _settings.refresh();
+    if (mounted && layout != null && layout != _nav.layout) {
+      _tabs.setNavigation(layout);
+    }
+  }
+
+  /// Switches the Files pane between the tree and the grid (#727). The
+  /// grid starts in the tree's selection — the selected folder, or the
+  /// selected note's folder — every time it is switched to, and keeps that
+  /// folder while it is the pane on screen.
+  Future<void> _setTreeView(TreeView next) async {
+    if (next == _settings.editor.treeView) return;
+    if (next == TreeView.grid) _files.gridFromTree();
+    await _settings.setTreeView(next);
+  }
 
   /// Carries focus for the app accelerators (T-PP-10) when nothing else
   /// wants it, so a keyboard-only tab switch is followed by a working next
@@ -578,13 +591,6 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   /// Whether the Search tab shows the Tags screen (T-M3-06) instead of
   /// the search box; the tabs button flips it and back.
 
-  /// The link-resolution source (T-M3-07), resolved from the session.
-  LibraryLinks? _linkSource;
-
-  /// The library the wikilink suggester panel reads (#475), resolved from
-  /// the session.
-  WikilinkSuggester? _wikilinkSuggester;
-
   /// The library's tasks and calendar: the two controllers, the links of
   /// the tasks, the Todo list's view and a note's task list (#1256).
   late final ShellTasks _tasks = ShellTasks(
@@ -592,10 +598,10 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     reminders: widget.reminders,
     todoSourceFactory: widget.todoSourceFactory,
     calendarSourceFactory: widget.calendarSourceFactory,
-    linkSource: () => _linkSource,
-    suggester: () => _wikilinkSuggester,
-    linkPreview: () => _editorSettings.linkPreview,
-    newItemLocation: () => _editorSettings.newItemLocation,
+    linkSource: () => _settings.linkSource,
+    suggester: () => _settings.wikilinkSuggester,
+    linkPreview: () => _settings.editor.linkPreview,
+    newItemLocation: () => _settings.editor.newItemLocation,
     openNote: _openNoteFromLink,
     guard: _guard,
     context: () => context,
@@ -638,8 +644,8 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     onAppended: () {
       if (mounted) _selection.reload();
     },
-    attachmentsFolder: () => _editorSettings.attachmentsFolder,
-    linkType: () => _editorSettings.linkType,
+    attachmentsFolder: () => _settings.editor.attachmentsFolder,
+    linkType: () => _settings.editor.linkType,
     onCaptured: (path) => _openNoteFromLink(path, null),
     // A picture, a PDF or a book on screen is no note to append to (#636).
     openNote: () => _shownIsAttachment ? null : _shownNote,
@@ -664,7 +670,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     pdfEngineLookup: widget.pdfEngineLookup,
     epubMetadataProblem: widget.epubMetadataProblem,
     epubExport: widget.epubExport,
-    linkSource: () => _linkSource,
+    linkSource: () => _settings.linkSource,
     todoBlocks: _tasks.exportBlocks,
     wide: () => _wide,
     shownNote: () => _shownNote,
@@ -864,15 +870,6 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     if (!_notePreview) _togglePreview();
   }
 
-  Future<void> _loadLinkSource() async {
-    final source = await widget.controller.linkSource;
-    if (mounted && source != null) setState(() => _linkSource = source);
-    final suggester = await widget.controller.wikilinkSuggester;
-    if (mounted && suggester != null) {
-      setState(() => _wikilinkSuggester = suggester);
-    }
-  }
-
   void _openNoteFromLink(String path, String? anchor) {
     const AppLogger(name: 'links').debug(
       'shell open request: $path anchor=${anchor == null ? '-' : '"$anchor"'} '
@@ -968,9 +965,9 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       sourceEditorKind => EditorKind.source,
       _ => null,
     };
-    return kind != null && _editorSettings.editorsEnabled.contains(kind)
+    return kind != null && _settings.editor.editorsEnabled.contains(kind)
         ? kind
-        : _editorSettings.editorKind;
+        : _settings.editor.editorKind;
   }
 
   /// The memento of the tab showing, or an empty one.
@@ -979,7 +976,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
 
   /// The editor the note on screen shows.
   EditorKind get _noteEditorKind =>
-      _wide ? _editorOf(_shownMemento) : _editorSettings.editorKind;
+      _wide ? _editorOf(_shownMemento) : _settings.editor.editorKind;
 
   /// The memento of the tab showing [path], or an empty one: a note is
   /// shown the way it was left (#23).
@@ -1053,7 +1050,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
         child: AttachmentView(
           key: _phoneNoteKey,
           path: p.join(controller.root ?? '', selectedPath),
-          column: _editorSettings.noteColumn,
+          column: _settings.editor.noteColumn,
           onEditEpubLook: (anchor) => _editEpubLook(controller, anchor),
           onEpubTextScale: (scale) =>
               unawaited(keepEpubTextScale(controller, scale)),
@@ -1063,7 +1060,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
           },
           anchor: _selection.request.anchor,
           reloadToken: _selection.linksFollowed,
-          linkType: _editorSettings.linkType,
+          linkType: _settings.editor.linkType,
           onAnnotate: _annotating ? _annotate : null,
           onConvertBook: _convertBook,
           marks: _annotating ? _annotations : null,
@@ -1091,16 +1088,16 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
           onEditedNoteClosed: _tidyClosedNote,
           // No typewriter switch in the phone's status row: it has no room
           // left for one. Settings and the Search tab's commands reach it.
-          options: _editorSettings.noteOptions,
+          options: _settings.editor.noteOptions,
           // The Files pane opened this note (#727): the caret goes in it.
           caretRequest: selectedPath == _selection.caretPath
               ? _selection.caretRequest
               : 0,
           showPreview: _notePreview,
-          showWysiwyg: _editorSettings.editorKind == EditorKind.wysiwyg,
+          showWysiwyg: _settings.editor.editorKind == EditorKind.wysiwyg,
           // A single enabled editor has nowhere to switch to: the note hides
           // its switch instead of offering a dead toggle.
-          onEditorKindChanged: _editorSettings.editorsEnabled.length > 1
+          onEditorKindChanged: _settings.editor.editorsEnabled.length > 1
               ? _setEditorKind
               : null,
           services: _noteServices(controller),
@@ -1122,8 +1119,8 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   /// each pane's alike.
   NoteServices _noteServices(LibrarySession controller) => NoteServices(
     libraryRoot: controller.root,
-    linkSource: _linkSource,
-    wikilinkSuggester: _wikilinkSuggester,
+    linkSource: _settings.linkSource,
+    wikilinkSuggester: _settings.wikilinkSuggester,
     tasks: _tasks.notes,
     onOpenNote: _openNoteFromLink,
     features: controller.features,
@@ -1279,7 +1276,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   double get _tabsStart =>
       ShellRail.panelStart +
       (_selection.sidebarVisible
-          ? _editorSettings.treeWidth + ResizeDivider.width
+          ? _settings.editor.treeWidth + ResizeDivider.width
           : 0);
 
   /// The pinned chips at the end of [pane]'s row (#712), in their order:
@@ -1454,15 +1451,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       _updateShownTab((m) => m.copyWith(editorKind: name));
       return;
     }
-    if (kind == _editorSettings.editorKind) return;
-    final controller = widget.controller;
-    await controller.setEditorKind(kind);
-    controller.notify();
-    if (mounted) {
-      setState(
-        () => _editorSettings = _editorSettings.copyWith(editorKind: kind),
-      );
-    }
+    await _settings.setEditorKind(kind);
   }
 
   @override
@@ -1624,7 +1613,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     ];
     unawaited(_featuresIntro.offer(launches));
     unawaited(_refreshEditorSettings());
-    unawaited(_loadLinkSource());
+    unawaited(_settings.loadLinks());
   }
 
   @override
@@ -1672,6 +1661,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     _fab.dispose();
     _shellFocus.dispose();
     _nav.dispose();
+    _settings.dispose();
     super.dispose();
   }
 
@@ -1716,60 +1706,10 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     unawaited(_refreshEditorSettings());
   }
 
-  Future<void> _refreshEditorSettings() async {
-    final controller = widget.controller;
-    _personalDictionary.follow(controller);
-    final settings = await ShellEditorSettings.read(controller);
-    // The spell checker follows the library's dictionaries (T-PP-09,
-    // revised); it notifies the open editor itself, so it stays out of
-    // the settings value and needs no setState of its own.
-    final spellDictionaries = await controller.spellDictionaries;
-    final ops = controller.ops;
-    final quickNote = ops == null ? null : await ops.quickNotePath;
-    final journal = ops == null ? null : await ops.journal;
-    final navigation = ops == null ? null : await ops.navigation;
-    if (!mounted) return;
-    if (navigation != null) {
-      final layout =
-          navigation.device ?? navigation.library ?? const NavigationLayout();
-      if (layout != _nav.layout) _tabs.setNavigation(layout);
-    }
-    if (journal != null && journal != _journal) {
-      setState(() => _journal = journal);
-    }
-    widget.spellCheck.setDictionaries(spellDictionaries);
-    if (settings != _editorSettings) {
-      setState(() => _editorSettings = settings);
-    }
-    if (quickNote != _quickNotePath) {
-      setState(() => _quickNotePath = quickNote);
-    }
-  }
-
-  /// Flips the tree sort direction and persists it (T-UI-03).
-  ///
-  /// The flag flips first, in the [setState] the chevron reads; the tree
-  /// reads the same flag for its order, so the two turn over in one rebuild
-  /// rather than the chevron moving on alone. The write follows, and a
-  /// failure is swallowed rather than thrown: the flag stays flipped with
-  /// the rows it already moved, and no revision bump comes to drag either
-  /// of them back — the two stay consistent whatever the write did.
-  Future<void> _setTreeSort(TreeSort next) async {
-    if (next == _editorSettings.treeSort) return;
-    setState(() => _editorSettings = _editorSettings.copyWith(treeSort: next));
-    try {
-      await widget.controller.setTreeSort(next);
-    } on Object catch (error) {
-      const AppLogger(name: 'shell').debug('tree sort write failed: $error');
-      return;
-    }
-    widget.controller.notify();
-  }
-
   /// The library's one rule for where new notes and folders go (#850),
   /// read on each creation: its setting, and the note on screen.
   late final NewItemRule _newItemRule = NewItemRule(
-    location: () => _editorSettings.newItemLocation,
+    location: () => _settings.editor.newItemLocation,
     activeNote: () => _shownNote,
   );
 
@@ -1816,7 +1756,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   late final ShellAnnotationFlow _annotations = ShellAnnotationFlow(
     controller: widget.controller,
     unsaved: widget.unsavedTracker,
-    linkType: () => _editorSettings.linkType,
+    linkType: () => _settings.editor.linkType,
     // The companion may be the note on screen, or in the tree.
     onWritten: () {
       widget.controller.notify();
@@ -1941,7 +1881,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   Widget _noteMenu() => Builder(builder: _noteMenuButton);
 
   Widget _noteMenuButton(BuildContext button) => NoteMenuButton(
-    typewriter: _editorSettings.typewriter,
+    typewriter: _settings.editor.typewriter,
     textNote: !_shownIsAttachment,
     // An audio note's body is the clip document, not prose (#840).
     tidy: _kind.type != 'audio',
@@ -1977,7 +1917,9 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
         NoteMenuAction.links => _showPanel(DockPane.links),
         NoteMenuAction.tasks => _showPanel(DockPane.tasks),
         NoteMenuAction.newTask => _newTaskForNote(),
-        NoteMenuAction.typewriter => Future<void>.sync(_toggleTypewriter),
+        NoteMenuAction.typewriter => Future<void>.sync(
+          _settings.toggleTypewriter,
+        ),
         NoteMenuAction.palette => _palette.open(context),
         NoteMenuAction.format => _formatNote(),
         NoteMenuAction.export => _exportFlow.runNoteExport(
@@ -2107,7 +2049,8 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       noteFade: ShellNoteFade.duration,
       shortcutBindings: _appShortcutBindings(),
       onCloseFullScreenNote: _tabs.closeNote,
-      isQuickNote: selectedPath != null && selectedPath == _quickNotePath,
+      isQuickNote:
+          selectedPath != null && selectedPath == _settings.quickNotePath,
       noteBarActions: _noteBarActions(),
       buildTabShell: () => _phoneChrome.scaffold(
         context,
@@ -2403,9 +2346,9 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   /// the switch rides in the menu there (#727).
   Widget _sortToggle({bool withView = false}) {
     return TreeSortToggle(
-      sort: _editorSettings.treeSort,
-      onSort: (sort) => unawaited(_setTreeSort(sort)),
-      view: withView ? _editorSettings.treeView : null,
+      sort: _settings.editor.treeSort,
+      onSort: (sort) => unawaited(_settings.setTreeSort(sort)),
+      view: withView ? _settings.editor.treeView : null,
       onView: withView ? (view) => unawaited(_setTreeView(view)) : null,
     );
   }
@@ -2456,18 +2399,6 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   bool get _inZen => _immersive.inZen;
 
   void _toggleZen() => unawaited(_immersive.toggleZen());
-
-  /// Switches typewriter mode (#70) for the library: the note on screen
-  /// follows at once, and the setting keeps it. Zen is left as it is —
-  /// the two are separate states.
-  void _toggleTypewriter() {
-    final on = !_editorSettings.typewriter;
-    setState(() => _editorSettings = _editorSettings.copyWith(typewriter: on));
-    unawaited(() async {
-      await widget.controller.setTypewriter(enabled: on);
-      widget.controller.notify();
-    }());
-  }
 
   /// Repaints on a Zen or full-screen change.
   void _onImmersiveChanged() {
@@ -2523,7 +2454,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     // The raw kind: an audio note's body is a clip document even with its
     // view off, and a tidy of it is refused all the same (#840).
     CommandNeed.proseNote => _kind.type != 'audio',
-    CommandNeed.twoEditors => _editorSettings.editorsEnabled.length > 1,
+    CommandNeed.twoEditors => _settings.editor.editorsEnabled.length > 1,
     CommandNeed.journalEntry => _shownJournalDay != null,
     CommandNeed.slidesNote => _kind.shown == 'slides',
     CommandNeed.flashcardNote => _kind.showsDeck,
@@ -2537,7 +2468,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   /// The day of the journal entry on screen, or null when the note on
   /// screen is not one (#7).
   DateTime? get _shownJournalDay => switch (_shownNote) {
-    final path? => _journal.dayOfPath(path),
+    final path? => _settings.journal.dayOfPath(path),
     null => null,
   };
 
@@ -2588,7 +2519,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       AppCommand.zenMode: _toggleZen,
       // Not among what Zen leaves out: in Zen the status row and its
       // switch are hidden, and this is the way to it (#70).
-      AppCommand.typewriterMode: _toggleTypewriter,
+      AppCommand.typewriterMode: _settings.toggleTypewriter,
       AppCommand.zoomIn: () => unawaited(_zoomNote(1)),
       AppCommand.zoomOut: () => unawaited(_zoomNote(-1)),
       AppCommand.zoomReset: () => unawaited(_zoomNote(0)),
@@ -2787,7 +2718,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       // The shell's kind as the bar last heard it can lag the file; the
       // note's own frontmatter is the authority.
       if (frontmatterTypeOf(text) == 'audio') return;
-      final tidied = formatMarkdown(text, rules: _editorSettings.lintRules);
+      final tidied = formatMarkdown(text, rules: _settings.editor.lintRules);
       if (!mounted) return;
       if (tidied == text) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -2816,11 +2747,11 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     final controller = widget.controller;
     final root = controller.root;
     final ops = controller.ops;
-    if (root == null || ops == null || !_editorSettings.tidyOnClose) return;
+    if (root == null || ops == null || !_settings.editor.tidyOnClose) return;
     final rel = relPath(path, root);
     unawaited(
       ops
-          .tidyNote(rel, rules: _editorSettings.lintRules)
+          .tidyNote(rel, rules: _settings.editor.lintRules)
           .then(
             (changed) {
               if (changed && mounted) _selection.reload();
@@ -2882,7 +2813,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   /// The journal's calendar, strip and recent entries (#7).
   late final ShellJournalUi _journalUi = ShellJournalUi(
     controller: widget.controller,
-    journal: () => _journal,
+    journal: () => _settings.journal,
     flow: _journalFlow,
     tasks: _tasks.todo,
     calendar: _tasks.calendar,
@@ -2964,7 +2895,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     AppCommand.zenMode =>
       _immersive.zen.on ? AppStrings.zenModeLeave : AppStrings.zenModeEnter,
     AppCommand.typewriterMode =>
-      _editorSettings.typewriter
+      _settings.editor.typewriter
           ? AppStrings.typewriterOff
           : AppStrings.typewriterOn,
     _ => null,
@@ -2976,7 +2907,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     dock: _dock,
     files: _files,
     tabRows: _tabRows,
-    settings: () => _editorSettings,
+    settings: () => _settings.editor,
     inZen: () => _inZen,
     sidebarVisible: () => _selection.sidebarVisible,
     dockWidth: () => _dockWidth,
@@ -3128,8 +3059,8 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
                     outlineInDock: _wide && !_inZen,
                     spellCheckInDock: _wide && !_inZen,
                     relatedInDock: _wide && !_inZen && _dockShown,
-                    options: _editorSettings.noteOptions,
-                    onToggleTypewriter: _toggleTypewriter,
+                    options: _settings.editor.noteOptions,
+                    onToggleTypewriter: _settings.toggleTypewriter,
                     onLoaded: _workspace.noteLoaded,
                     onEditedNoteClosed: _tidyClosedNote,
                     // The kind toggles and ⋮ sit at the end of the note's
@@ -3149,7 +3080,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
                     // the note hides its switch instead of offering a
                     // dead toggle.
                     onEditorKindChanged:
-                        _editorSettings.editorsEnabled.length > 1
+                        _settings.editor.editorsEnabled.length > 1
                         ? _setEditorKind
                         : null,
                     services: _noteServices(controller),
@@ -3301,39 +3232,22 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   Widget _treeDivider({required bool touch}) => ResizeDivider(
     touch: touch,
     key: const Key('tree-divider'),
-    onDrag: (dx) => setState(() {
-      _editorSettings = _editorSettings.copyWith(
-        treeWidth: (_editorSettings.treeWidth + dx).clamp(
-          minTreeWidth,
-          maxTreeWidth,
-        ),
-      );
-    }),
-    onDragEnd: () => unawaited(_persistTreeWidth()),
+    onDrag: (dx) => _settings.setTreeWidth(_settings.editor.treeWidth + dx),
+    onDragEnd: () => unawaited(_settings.keepTreeWidth()),
   );
-
-  /// Persists the dragged tree width to the library settings.
-  Future<void> _persistTreeWidth() async {
-    await widget.controller.setTreeWidth(_editorSettings.treeWidth);
-    widget.controller.notify();
-  }
 
   /// The draggable panes/dock divider (#297): the tree's divider on the
   /// dock's edge, so a move to the left widens the dock.
   Widget _dockDivider({required bool touch}) => ResizeDivider(
     touch: touch,
     key: const Key('dock-divider'),
-    onDrag: (dx) => setState(() {
-      _editorSettings = _editorSettings.copyWith(
-        dockWidth: _fitDock(_dockWidth - dx),
-      );
-    }),
-    onDragEnd: () => unawaited(_persistDockWidth()),
+    onDrag: (dx) => _settings.setDockWidth(_fitDock(_dockWidth - dx)),
+    onDragEnd: () => unawaited(_settings.keepDockWidth()),
   );
 
   /// The dock's width on screen: the library's, shrunk as far as its
   /// minimum when the window leaves the panes less than their share.
-  double get _dockWidth => _fitDock(_editorSettings.dockWidth);
+  double get _dockWidth => _fitDock(_settings.editor.dockWidth);
 
   /// [width] within the dock's range and within what the window can spare
   /// beside the tree and [RightDock.minPanesWidth] of panes.
@@ -3345,12 +3259,6 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
         Island.gap -
         RightDock.minPanesWidth;
     return width.clamp(minDockWidth, room.clamp(minDockWidth, maxDockWidth));
-  }
-
-  /// Persists the dragged dock width to the library settings.
-  Future<void> _persistDockWidth() async {
-    await widget.controller.setDockWidth(_editorSettings.dockWidth);
-    widget.controller.notify();
   }
 
   /// All five tab bodies, in tab order: each mounts on its first visit and
@@ -3379,7 +3287,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
         view: _tasks.view,
         reminders: widget.reminders,
         onAddTask: _tasks.add,
-        column: _editorSettings.noteColumn,
+        column: _settings.editor.noteColumn,
         links: _tasks.todoLinks,
       ),
       ShellTab.search => _searchSlot(controller),
@@ -3427,7 +3335,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       tree: tree,
       taskEvents: _tasks.events,
       onOpenTaskEvent: _openTaskEvent,
-      eventTimesClock: _journal.clockTimes,
+      eventTimesClock: _settings.journal.clockTimes,
       // Tabs, panes and the tree beside the list are a wide window's.
       hitOpens: _wide
           ? (
@@ -3498,7 +3406,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     todo: _tasks.todo,
     calendar: _tasks.calendar,
     journal: _journalFlow,
-    clockEventTimes: () => _journal.clockTimes,
+    clockEventTimes: () => _settings.journal.clockTimes,
     openEvent: _openCalendarEvent,
     openJournal: () => _journalUi.showCalendar(context),
     openNote: _openSearchNote,
@@ -3554,7 +3462,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
         onNewItem: (item) => _treeMenus.newItem(context, item),
         syncButton: _syncActions.button(context, controller),
         viewToggle: TreeViewToggle(
-          view: _editorSettings.treeView,
+          view: _settings.editor.treeView,
           onView: (view) => unawaited(_setTreeView(view)),
         ),
         sortToggle: _sortToggle(),
@@ -3566,7 +3474,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   /// the grid shows (#727; issue #100 moved it into [ShellFilesPane]).
   late final ShellFilesPane _files = ShellFilesPane(
     ocrQueue: widget.ocrQueue,
-    settings: () => _editorSettings,
+    settings: () => _settings.editor,
     selected: () => _selection.path,
     treeFolder: () => _treeFolder,
     expanded: _expanded,
@@ -3598,27 +3506,6 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   /// The folder the tree is on: the selected folder, or the selected
   /// note's folder, or the root.
   String get _treeFolder => _selection.folder;
-
-  /// Switches the Files pane between the tree and the grid (#727), and
-  /// persists the choice for this device. The grid starts in the tree's
-  /// selection — the selected folder, or the selected note's folder —
-  /// every time it is switched to, and keeps that folder while it is the
-  /// pane on screen: a note opened from the search, a tab or the palette
-  /// does not move it.
-  Future<void> _setTreeView(TreeView next) async {
-    if (next == _editorSettings.treeView) return;
-    setState(() {
-      if (next == TreeView.grid) _files.gridFromTree();
-      _editorSettings = _editorSettings.copyWith(treeView: next);
-    });
-    try {
-      await widget.controller.setTreeView(next);
-    } on Object catch (error) {
-      const AppLogger(name: 'shell').debug('tree view write failed: $error');
-      return;
-    }
-    widget.controller.notify();
-  }
 
   /// Whether the palette is reached by touch (#206, #849): on a window
   /// that is not the wide shell, and on any touch device's wide one. A
