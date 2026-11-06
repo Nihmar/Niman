@@ -4,7 +4,7 @@
 // The 2026-10-20 device log measured 20.6 ms for the first and 38.7 ms for
 // the second on a tablet, a 1.5 MB note of 16 000 lines. Profiled here, the
 // open's frame was the source pane's block scan of the whole note — done in
-// place below `MarkdownSourceViewState.backgroundLines` — and it now reads
+// place below `SourceEditor.backgroundLines` — and it now reads
 // the top of the note and the rest after the frame. The flip re-parsed the
 // frontmatter panel's YAML at every build.
 //

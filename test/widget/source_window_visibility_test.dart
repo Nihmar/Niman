@@ -52,8 +52,7 @@ void main() {
         home: Scaffold(
           body: MarkdownSourceView(
             buffer: SourceBuffer.fromText('una riga di testo\n'),
-            theme: _theme,
-            showLineNumbers: false,
+            look: const SourceLook(theme: _theme, showLineNumbers: false),
           ),
         ),
       ),

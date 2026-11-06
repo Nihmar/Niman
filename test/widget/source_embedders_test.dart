@@ -82,9 +82,11 @@ final class _Rig {
         home: Scaffold(
           body: MarkdownSourceView(
             buffer: buffer,
-            theme: _theme,
-            showLineNumbers: false,
-            hideMarkers: mode == _Mode.live,
+            look: SourceLook(
+              theme: _theme,
+              showLineNumbers: false,
+              hideMarkers: mode == _Mode.live,
+            ),
             onChanged: (_) => saved.add(buffer.text),
           ),
         ),

@@ -87,8 +87,7 @@ void main() {
           home: Scaffold(
             body: MarkdownSourceView(
               buffer: buffer,
-              theme: _theme,
-              hideMarkers: true,
+              look: const SourceLook(theme: _theme, hideMarkers: true),
               selection: SelectionModel.at(testCase.caret),
             ),
           ),

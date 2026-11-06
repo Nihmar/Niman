@@ -62,6 +62,7 @@ void main() {
     /// The typography the editor is really drawn with.
     MarkdownTheme drawn(WidgetTester tester) => tester
         .widget<MarkdownSourceView>(find.byType(MarkdownSourceView))
+        .look
         .theme;
 
     testWidgets('the note under it is set in its own face', (tester) async {

@@ -557,7 +557,7 @@ void main() {
       tester,
       _at(4, '**one**', 3),
       buffer: buffer,
-      theme: rest.widget.theme,
+      theme: rest.widget.look.theme,
     );
     // The caret's row's two cells, and none of the rows around it.
     expect(LiveTables.measurements, 2, reason: "the caret's row alone");
@@ -753,11 +753,13 @@ void main() {
             body: Builder(
               builder: (context) => MarkdownSourceView(
                 buffer: buffer,
-                theme: markdownThemeOf(context),
-                showLineNumbers: false,
-                hideMarkers: true,
-                templateCommands: true,
-                templateCheck: check,
+                look: SourceLook(
+                  theme: markdownThemeOf(context),
+                  showLineNumbers: false,
+                  hideMarkers: true,
+                ),
+                behaviour: const SourceBehaviour(templateCommands: true),
+                services: SourceServices(templateCheck: check),
                 selection: caret == null ? null : SelectionModel.at(caret),
               ),
             ),

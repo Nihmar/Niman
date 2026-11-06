@@ -32,10 +32,12 @@ Future<(MarkdownSourceViewState, SourceBuffer, FakeEmbedder)> _pump(
         body: Builder(
           builder: (context) => MarkdownSourceView(
             buffer: buffer,
-            theme: markdownThemeOf(context),
-            showLineNumbers: false,
-            hideMarkers: true,
-            autofocus: true,
+            look: SourceLook(
+              theme: markdownThemeOf(context),
+              showLineNumbers: false,
+              hideMarkers: true,
+            ),
+            behaviour: const SourceBehaviour(autofocus: true),
           ),
         ),
       ),

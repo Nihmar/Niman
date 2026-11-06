@@ -74,8 +74,7 @@ Future<double> _perKeystroke(WidgetTester tester, int lines) async {
         body: MarkdownSourceView(
           key: UniqueKey(),
           buffer: buffer,
-          theme: _theme,
-          showLineNumbers: false,
+          look: const SourceLook(theme: _theme, showLineNumbers: false),
           onChanged: (_) {},
         ),
       ),

@@ -102,9 +102,11 @@ Future<void> _live(WidgetTester tester, String text) async {
       home: Scaffold(
         body: MarkdownSourceView(
           buffer: SourceBuffer.fromText(text),
-          theme: _theme,
-          showLineNumbers: false,
-          hideMarkers: true,
+          look: const SourceLook(
+            theme: _theme,
+            showLineNumbers: false,
+            hideMarkers: true,
+          ),
         ),
       ),
     ),
@@ -192,10 +194,12 @@ void main() {
       home: Scaffold(
         body: MarkdownSourceView(
           buffer: SourceBuffer.fromText(_note(3)),
-          theme: _theme,
-          showLineNumbers: false,
-          hideMarkers: true,
-          onStage: onStage,
+          look: const SourceLook(
+            theme: _theme,
+            showLineNumbers: false,
+            hideMarkers: true,
+          ),
+          behaviour: SourceBehaviour(onStage: onStage),
         ),
       ),
     );

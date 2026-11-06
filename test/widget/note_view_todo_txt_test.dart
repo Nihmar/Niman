@@ -39,9 +39,12 @@ void main() {
     final source = tester.widget<MarkdownSourceView>(
       find.byType(MarkdownSourceView),
     );
-    expect(source.hideMarkers, isFalse, reason: 'source, not live');
-    expect(source.lineTokens, isNotNull);
-    expect(source.lineTokens!('(A) Call').first.kind, TokenKind.todoPriority);
+    expect(source.look.hideMarkers, isFalse, reason: 'source, not live');
+    expect(source.look.lineTokens, isNotNull);
+    expect(
+      source.look.lineTokens!('(A) Call').first.kind,
+      TokenKind.todoPriority,
+    );
     // The read view is not the one on stage.
     expect(find.byType(MarkdownReadView), findsNothing);
     // The switch stays in its place, off.
@@ -58,7 +61,7 @@ void main() {
     final source = tester.widget<MarkdownSourceView>(
       find.byType(MarkdownSourceView, skipOffstage: false),
     );
-    expect(source.lineTokens, isNull);
+    expect(source.look.lineTokens, isNull);
     expect(find.byType(MarkdownReadView), findsOneWidget);
   });
 }

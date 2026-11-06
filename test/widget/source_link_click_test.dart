@@ -84,17 +84,21 @@ Future<MarkdownSourceViewState> _pump(
       home: Scaffold(
         body: MarkdownSourceView(
           buffer: SourceBuffer.fromText(text),
-          theme: _theme,
-          showLineNumbers: false,
-          hideMarkers: mode == _Mode.live,
-          onOpenLink: (kind, raw, href) {
-            _opened.add((kind, raw));
-            onOpen?.call(
-              tester.state<MarkdownSourceViewState>(
-                find.byType(MarkdownSourceView),
-              ),
-            );
-          },
+          look: SourceLook(
+            theme: _theme,
+            showLineNumbers: false,
+            hideMarkers: mode == _Mode.live,
+          ),
+          actions: SourceActions(
+            onOpenLink: (kind, raw, href) {
+              _opened.add((kind, raw));
+              onOpen?.call(
+                tester.state<MarkdownSourceViewState>(
+                  find.byType(MarkdownSourceView),
+                ),
+              );
+            },
+          ),
         ),
       ),
     ),

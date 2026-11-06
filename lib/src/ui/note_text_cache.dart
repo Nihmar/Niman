@@ -17,7 +17,7 @@ import 'package:niman/src/markdown/source_buffer.dart';
 /// alive anyway — every line not yet written is a view of it — so a kept
 /// join was a second whole copy of the note, 247 MB of the stress note,
 /// held until the next keystroke. A long note is the one the editor scans
-/// in the background ([MarkdownSourceViewState.readsInBackground]), whose
+/// in the background ([SourceEditor.readsInBackground]), whose
 /// panels read what the scan keeps rather than the text; what still asks for
 /// the whole note (a kind's edit, a comparison with the disk) joins it for
 /// that call alone. A short one keeps its join: a kind's view asks for it
@@ -43,7 +43,7 @@ final class NoteTextCache {
       return _cache;
     }
     final text = buffer.text;
-    if (MarkdownSourceViewState.readsInBackground(buffer)) {
+    if (SourceEditor.readsInBackground(buffer)) {
       // The text the note was loaded from, which the seed kept, is let go
       // with the rest: the lines still reading it keep it, and no more.
       _cache = '';

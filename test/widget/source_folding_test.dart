@@ -62,10 +62,13 @@ Future<MarkdownSourceViewState> _pump(
       home: Scaffold(
         body: MarkdownSourceView(
           buffer: SourceBuffer.fromText(_note),
-          theme: _theme,
-          // Folding draws rows, and the mode only decides whether a marker is
-          // hidden: the section arrows and what they fold are the same in both.
-          hideMarkers: live,
+          look: SourceLook(
+            theme: _theme,
+            // Folding draws rows, and the mode only decides whether a marker
+            // is hidden: the section arrows and what they fold are the same
+            // in both.
+            hideMarkers: live,
+          ),
         ),
       ),
     ),

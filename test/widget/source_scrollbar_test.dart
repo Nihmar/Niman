@@ -66,8 +66,7 @@ Future<MarkdownSourceViewState> _pump(
             data: MediaQuery.of(context).copyWith(padding: padding),
             child: MarkdownSourceView(
               buffer: SourceBuffer.fromText(note ?? _note()),
-              theme: _theme,
-              showLineNumbers: false,
+              look: const SourceLook(theme: _theme, showLineNumbers: false),
             ),
           ),
         ),

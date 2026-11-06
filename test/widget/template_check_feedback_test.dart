@@ -60,10 +60,12 @@ Widget _surface(
     builder: (context) => Scaffold(
       body: MarkdownSourceView(
         buffer: buffer,
-        theme: markdownThemeOf(context),
-        showLineNumbers: false,
-        templateCommands: template,
-        templateCheck: check,
+        look: SourceLook(
+          theme: markdownThemeOf(context),
+          showLineNumbers: false,
+        ),
+        behaviour: SourceBehaviour(templateCommands: template),
+        services: SourceServices(templateCheck: check),
         selection: caret == null ? null : SelectionModel.at(caret),
       ),
     ),
