@@ -333,7 +333,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
         _noteFade.closed();
       case NoteShift.none:
     }
-    if (mounted) setState(() {});
+    _rebuild();
   }
 
   /// What a frame the shell draws costs it (#324): the region above the two
@@ -1165,9 +1165,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     onOpenHistory: (path) => unawaited(_openHistoryPage(path)),
     onOpenNoteFromLink: (path) => _openNoteFromLink(path, null),
     onOpenVersion: (path, version) => unawaited(_compare.open(path, version)),
-    onChanged: () {
-      if (mounted) setState(() {});
-    },
+    onChanged: _rebuild,
   );
 
   /// The study beside the deck (#533, decision 9): a tab of the pane
@@ -1511,11 +1509,11 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     _workspaceFollow.attach();
     _workspace.unsavedPaths = _unsavedRelPaths;
     widget.controller.features.addListener(_tabs.featuresChanged);
-    AppKeyMap.current.addListener(_onKeyMapChanged);
+    AppKeyMap.current.addListener(_rebuild);
     _chosenKeys.attach();
     FocusManager.instance.addListener(_reclaimFocus);
     HardwareKeyboard.instance.addHandler(_historyKeyUnfocused);
-    _immersive.addListener(_onImmersiveChanged);
+    _immersive.addListener(_rebuild);
     unawaited(_restoreWorkspace());
     // Library session events (every note op bumps the revision): the
     // pinned notes follow the files, so each one refreshes the note
@@ -1636,13 +1634,13 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       ..removeListener(_onReviewTab)
       ..close()
       ..hosted = false;
-    AppKeyMap.current.removeListener(_onKeyMapChanged);
+    AppKeyMap.current.removeListener(_rebuild);
     _chosenKeys.detach();
     FocusManager.instance.removeListener(_reclaimFocus);
     HardwareKeyboard.instance.removeHandler(_historyKeyUnfocused);
     // A library switch tears the shell down: the window it maximized goes
     // back as it was.
-    _immersive.removeListener(_onImmersiveChanged);
+    _immersive.removeListener(_rebuild);
     _immersive.dispose();
     _tabsListenable.dispose();
     _selection.dispose();
@@ -2400,11 +2398,6 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
 
   void _toggleZen() => unawaited(_immersive.toggleZen());
 
-  /// Repaints on a Zen or full-screen change.
-  void _onImmersiveChanged() {
-    if (mounted) setState(() {});
-  }
-
   /// Leaves Zen once there is nothing left for it to show — the last tab
   /// closed, another place of the rail chosen, the window narrowed — so
   /// the chrome and the window size come back rather than wait.
@@ -2594,11 +2587,6 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     };
   }
 
-  /// The keys changed on the keyboard screen: the bindings follow.
-  void _onKeyMapChanged() {
-    if (mounted) setState(() {});
-  }
-
   /// The keys the user chose, winning in both editors too (#159); not
   /// under a dialog or another screen.
   late final ChosenKeys _chosenKeys = ChosenKeys(
@@ -2777,12 +2765,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   late final ShellFab _fab = ShellFab(
     listFolder: () async =>
         await widget.controller.ops?.listNoteFolder ?? defaultListFolder,
-  )..addListener(_onFabChanged);
-
-  /// Rebuilds for the FAB menu opening or closing.
-  void _onFabChanged() {
-    if (mounted) setState(() {});
-  }
+  )..addListener(_rebuild);
 
   /// Opens the event's line in `calendar.txt` (#730), the caret at the
   /// line's start: the desktop's tap on an event (a phone's sheet, with
