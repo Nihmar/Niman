@@ -24,20 +24,23 @@ final TargetPlatformVariant tabletPlatform = TargetPlatformVariant.only(
   TargetPlatform.android,
 );
 
-/// Pumps the app at [size] over [controller], opens the library through
-/// [filePicker] and makes `alpha.md` and `beta.md`.
+/// Pumps the app at [size] over [controller], its tasks [todo], opens the
+/// library through [filePicker] and makes `alpha.md` and `beta.md`.
 Future<void> pumpTabletShell(
   WidgetTester tester, {
   required FakeLibrarySession controller,
   required FakeFilePicker filePicker,
   Size size = tabletLandscape,
+  FakeTodoSource? todo,
 }) async {
   setSurfaceSize(tester, size);
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
         librarySessionProvider.overrideWithValue(controller),
-        todoSourceFactoryProvider.overrideWithValue((_) => FakeTodoSource()),
+        todoSourceFactoryProvider.overrideWithValue(
+          (_) => todo ?? FakeTodoSource(),
+        ),
         windowControllerProvider.overrideWithValue(FakeWindowController()),
       ],
       child: const NimanApp(),

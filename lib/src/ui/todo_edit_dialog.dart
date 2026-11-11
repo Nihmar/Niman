@@ -73,7 +73,8 @@ Future<String?> showTodoTaskDialog(
 }) {
   return showDialog<String>(
     context: context,
-    builder: (context) => _TodoTaskDialog(
+    builder: (context) => TodoTaskEditor(
+      onClose: (line) => Navigator.pop(context, line),
       initial: initial,
       text: text,
       due: due,
@@ -91,9 +92,14 @@ Future<String?> showTodoTaskDialog(
 
 /// Description field with token completion, priority dropdown, due and
 /// reminder pickers, Cancel/Save (Save stays disabled while the
-/// description is blank), and Delete in the title bar when editing.
-final class _TodoTaskDialog extends StatefulWidget {
+/// description is blank), and Delete in the title bar when editing: as a
+/// dialog, or — [panel] — as the panel beside a tablet's task list
+/// (#1266).
+final class TodoTaskEditor extends StatefulWidget {
+  /// The editor over [initial] (null: a task being added), whose Save and
+  /// Cancel hand [onClose] the new line or null.
   const new({
+    required this.onClose,
     required this.initial,
     required this.text,
     required this.due,
@@ -105,8 +111,17 @@ final class _TodoTaskDialog extends StatefulWidget {
     required this.onOpenReminderSettings,
     required this.title,
     required this.confirmLabel,
+    this.panel = false,
+    super.key,
   });
 
+  /// Closes the editor with the new line, or with null on a cancel.
+  final ValueChanged<String?> onClose;
+
+  /// Whether the editor is a panel beside the list rather than a dialog.
+  final bool panel;
+
+  /// The task edited; null while one is being added.
   final TodoTask? initial;
 
   /// A new task's text to start from — a Home action's project and
@@ -116,11 +131,16 @@ final class _TodoTaskDialog extends StatefulWidget {
   /// The due date a new task starts with, or null.
   final DateTime? due;
 
+  /// The day an added task is stamped with, and the pickers start from.
   final DateTime today;
+
+  /// The tokens the description's completion offers (`+p`, `@c`, `#t`).
   final Set<String> knownTokens;
 
   /// The notes a `[[` link can name; null offers none.
   final WikilinkSuggester? Function()? linkSuggester;
+
+  /// Deletes the task; null leaves Delete out.
   final VoidCallback? onDelete;
 
   /// The reminder preconditions as last known; a failing one is warned
@@ -135,13 +155,15 @@ final class _TodoTaskDialog extends StatefulWidget {
   /// The title and the save button's words when they are not the add or
   /// edit dialog's own.
   final String? title;
+
+  /// The save button's words, when not the dialog's own.
   final String? confirmLabel;
 
   @override
-  State<_TodoTaskDialog> createState() => _TodoTaskDialogState();
+  State<TodoTaskEditor> createState() => _TodoTaskEditorState();
 }
 
-final class _TodoTaskDialogState extends State<_TodoTaskDialog> {
+final class _TodoTaskEditorState extends State<TodoTaskEditor> {
   static const AppLogger _log = AppLogger(name: 'todo');
 
   late final TextEditingController _field = TextEditingController.fromValue(
@@ -409,7 +431,7 @@ final class _TodoTaskDialogState extends State<_TodoTaskDialog> {
       return;
     }
     _log.debug('todo dialog saved');
-    Navigator.pop(context, _result(text));
+    widget.onClose(_result(text));
   }
 
   @override
@@ -417,6 +439,7 @@ final class _TodoTaskDialogState extends State<_TodoTaskDialog> {
     final adding = widget.initial == null;
     final tokens = _fieldTokens();
     final wide = MediaQuery.sizeOf(context).width >= wideBreakpoint;
+    if (widget.panel) return _panel(context, adding, tokens);
     return AlertDialog(
       title: _title(adding),
       // A phone keeps the dialog's own width; a desktop has the room for a
@@ -427,7 +450,7 @@ final class _TodoTaskDialogState extends State<_TodoTaskDialog> {
       ),
       actions: [
         TextButton(
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => widget.onClose(null),
           child: Text(AppStrings.todoCancel),
         ),
         FilledButton(
@@ -436,6 +459,42 @@ final class _TodoTaskDialogState extends State<_TodoTaskDialog> {
           child: Text(widget.confirmLabel ?? AppStrings.todoSave),
         ),
       ],
+    );
+  }
+
+  /// The editor as a panel beside the list (#1266): the title and
+  /// Delete over the fields, Cancel and Save under them.
+  Widget _panel(BuildContext context, bool adding, List<String> tokens) {
+    return Padding(
+      key: const Key('todo-panel'),
+      padding: const EdgeInsets.fromLTRB(20, 12, 12, 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          DefaultTextStyle.merge(
+            style: Theme.of(context).textTheme.titleMedium,
+            child: _title(adding),
+          ),
+          const SizedBox(height: 8),
+          Expanded(child: _content(context, tokens)),
+          const SizedBox(height: 8),
+          OverflowBar(
+            alignment: MainAxisAlignment.end,
+            spacing: 8,
+            children: [
+              TextButton(
+                onPressed: () => widget.onClose(null),
+                child: Text(AppStrings.todoCancel),
+              ),
+              FilledButton(
+                key: const Key('todo-dialog-save'),
+                onPressed: _field.text.trim().isEmpty ? null : _save,
+                child: Text(widget.confirmLabel ?? AppStrings.todoSave),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -466,7 +525,7 @@ final class _TodoTaskDialogState extends State<_TodoTaskDialog> {
   /// Closes the dialog as a cancel, then deletes: nothing is saved first.
   void _delete(VoidCallback onDelete) {
     _log.debug('todo dialog delete');
-    Navigator.pop(context);
+    widget.onClose(null);
     onDelete();
   }
 

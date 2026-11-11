@@ -44,6 +44,7 @@ import 'package:niman/src/ui/todo_phone_list.dart';
 import 'package:niman/src/ui/todo_pointer_list.dart';
 import 'package:niman/src/ui/todo_quick_add.dart';
 import 'package:niman/src/ui/todo_task_edit.dart';
+import 'package:niman/src/ui/todo_task_panel.dart';
 import 'package:niman/src/ui/todo_toolbar.dart';
 
 /// The Todo tab body.
@@ -101,6 +102,16 @@ final class _TodoTabState extends State<TodoTab> {
   /// not published yet.
   final TodoModelCache _cache = TodoModelCache();
 
+  /// The task shown beside the list on a tablet (#1266), or null.
+  TodoRowItem? _panel;
+
+  /// Whether the pane has the room for the task beside the list, on a
+  /// touch device: as the last build measured it.
+  bool _panelRoom = false;
+
+  /// The least width of a pane that holds the list and the task beside it.
+  static const double _panelMinWidth = 760;
+
   @override
   void initState() {
     super.initState();
@@ -147,6 +158,10 @@ final class _TodoTabState extends State<TodoTab> {
         final shellWide = isWideShell(context);
         final labelled =
             shellWide && constraints.maxWidth >= TodoToolbar.labelledMinWidth;
+        _panelRoom =
+            shellWide &&
+            thumbDense(Theme.of(context)) &&
+            constraints.maxWidth >= _panelMinWidth;
         return ListenableBuilder(
           listenable: Listenable.merge([
             widget.controller,
@@ -173,27 +188,35 @@ final class _TodoTabState extends State<TodoTab> {
                     ),
                   ),
                 Expanded(
-                  child: NoteColumnPadding(
-                    column: _column,
-                    child: Column(
-                      children: [
-                        if (shellWide)
-                          TodoToolbar(
-                            controller: controller,
-                            view: widget.view,
-                            labelled: labelled,
-                            onAddTask: widget.onAddTask,
-                            clock: widget.clock,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Expanded(
+                        child: NoteColumnPadding(
+                          column: _column,
+                          child: Column(
+                            children: [
+                              if (shellWide)
+                                TodoToolbar(
+                                  controller: controller,
+                                  view: widget.view,
+                                  labelled: labelled,
+                                  onAddTask: widget.onAddTask,
+                                  clock: widget.clock,
+                                ),
+                              if (model != null)
+                                TodoFilterStrip(
+                                  view: widget.view,
+                                  shown: model.openShown,
+                                  total: model.openTotal,
+                                ),
+                              Expanded(child: _body(model)),
+                            ],
                           ),
-                        if (model != null)
-                          TodoFilterStrip(
-                            view: widget.view,
-                            shown: model.openShown,
-                            total: model.openTotal,
-                          ),
-                        Expanded(child: _body(model)),
-                      ],
-                    ),
+                        ),
+                      ),
+                      ..._besideList(),
+                    ],
                   ),
                 ),
               ],
@@ -330,8 +353,37 @@ final class _TodoTabState extends State<TodoTab> {
         : widget.controller.check(row.entry);
   }
 
-  /// Opens the edit dialog and applies the result to [row]'s file.
+  /// The task beside the list, where it is shown (#1266).
+  List<Widget> _besideList() {
+    final row = _panel;
+    if (row == null || !_panelRoom) return const [];
+    return [
+      const VerticalDivider(width: 1),
+      SizedBox(
+        width: TodoTaskPanel.width,
+        child: TodoTaskPanel(
+          controller: widget.controller,
+          entry: row.entry,
+          done: row.done,
+          today: _today,
+          links: widget.links,
+          reminders: widget.reminders,
+          onClose: () {
+            if (mounted) setState(() => _panel = null);
+          },
+        ),
+      ),
+    ];
+  }
+
+  /// Opens the task: beside the list where a tablet's pane has the room
+  /// (#1266), in the edit dialog elsewhere, the result applied to [row]'s
+  /// file.
   Future<void> _edit(TodoRowItem row) {
+    if (_panelRoom) {
+      setState(() => _panel = row);
+      return Future.value();
+    }
     return editTodoTask(
       context,
       controller: widget.controller,
