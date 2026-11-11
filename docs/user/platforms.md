@@ -456,7 +456,10 @@ panel shows and leave the open notes, the panes and the right panel where
 they are. Home and Todo are content destinations: they open as a pinned
 tab in the focused pane — the chip at the far end of its tab row, so
 opening or closing it moves no note tab — and the tree stays beside them,
-so a note is one click away while the list or the grid is up. Closing the
+so a note is one click away while the list or the grid is up. On a tablet
+they are pages that want the width (#1266): the tree steps aside while one
+shows, the sidebar's toggle lays it over the page, and a note opened from
+it takes the pane back with the tree beside it again. Closing the
 tab (its ✕) leaves the notes. Home or Todo on screen when a window grows
 from narrow to wide becomes that pinned tab. A phone keeps its
 one-screen-per-destination model, and the Search sidebar's tag tree is

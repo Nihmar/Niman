@@ -36,4 +36,15 @@ void main() {
       TreeShape.over,
     );
   });
+
+  test('a thumb lays it over Home and Todo, a mouse does not', () {
+    expect(
+      treeShapeFor(touch: true, portrait: false, panesBeside: 900, page: true),
+      TreeShape.over,
+    );
+    expect(
+      treeShapeFor(touch: false, portrait: false, panesBeside: 900, page: true),
+      TreeShape.beside,
+    );
+  });
 }

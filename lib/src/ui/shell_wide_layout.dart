@@ -218,7 +218,8 @@ final class ShellWideLayout {
           : 0);
 
   /// Where the tree's island stands (#1266): beside the panes, or over
-  /// them on a tablet whose panes would be too narrow beside it. The dock
+  /// them on a tablet whose panes would be too narrow beside it or that
+  /// shows Home or Todo. The dock
   /// is not counted: where the tree leaves it no room, it lies over the
   /// note by its own rule.
   TreeShape get treeShape {
@@ -227,6 +228,7 @@ final class ShellWideLayout {
     return treeShapeFor(
       touch: thumbDense(theme),
       portrait: size.height > size.width,
+      page: tabs.contentTabShows,
       panesBeside:
           size.width -
           ShellRail.panelStartFor(theme) -

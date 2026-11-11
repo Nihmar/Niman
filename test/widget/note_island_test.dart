@@ -275,7 +275,8 @@ void main() {
           .hidden,
       isFalse,
     );
-  });
+    // A desktop's: a tablet lays the tree over a page (#1266).
+  }, variant: desktopDensity);
 
   testWidgets('the phone has no islands', (tester) async {
     await pumpAt(tester, const Size(400, 800));

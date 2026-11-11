@@ -243,7 +243,7 @@ void main() {
     expect(find.byKey(const Key('content-pane-todo')), findsNothing);
     expect(railIndex(tester), ShellTab.files);
     expect(find.byKey(const Key('tree-island')), findsOne);
-  });
+  }, variant: desktopDensity);
 
   testWidgets('wide: the rail home opens a pane tab, tree and rail stay', (
     tester,
@@ -273,7 +273,7 @@ void main() {
     expect(find.byType(NoteView), findsOne);
     expect(find.byKey(const Key('content-tab-home')), findsOne);
     expect(railIndex(tester), ShellTab.files);
-  });
+  }, variant: desktopDensity);
 
   // #770: a phone keeps Home and Todo as whole destinations; widening the
   // window shows the one on screen as the pinned tab, not an empty pane.
@@ -357,7 +357,7 @@ void main() {
     await tester.tap(find.byKey(const Key('content-tab-home')));
     await settle(tester);
     expect(noteHasFocus(), isFalse);
-  });
+  }, variant: desktopDensity);
 
   // #770: the chip comes and goes at the row's far end, so no note tab
   // moves under the pointer when it does.
@@ -383,7 +383,7 @@ void main() {
     await tester.tap(find.byKey(const Key('content-tab-close-todo')));
     await settle(tester);
     expect(tester.getRect(find.byKey(const Key('note-tab-0'))), before);
-  });
+  }, variant: desktopDensity);
 
   // #202: a floating window over what was on screen, which it closes
   // back to; the rail keeps its selection.
