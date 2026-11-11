@@ -32,7 +32,6 @@ import 'package:niman/src/todo/todo_source.dart';
 import 'package:niman/src/transcription/open_audio_notes.dart';
 import 'package:niman/src/transcription/transcription_models.dart';
 import 'package:niman/src/ui/app_menu.dart';
-import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/capture/capture_flow.dart';
 import 'package:niman/src/ui/capture/capture_services.dart';
 import 'package:niman/src/ui/deferred_listenable.dart';
@@ -52,9 +51,7 @@ import 'package:niman/src/ui/link_update_dialog.dart';
 import 'package:niman/src/ui/mac_menu_bar.dart';
 import 'package:niman/src/ui/note_tab_bar.dart';
 import 'package:niman/src/ui/note_view.dart';
-import 'package:niman/src/ui/ocr/ocr_file_actions.dart';
 import 'package:niman/src/ui/outside_files.dart';
-import 'package:niman/src/ui/palette/command_features.dart';
 import 'package:niman/src/ui/pinned_tab_chip.dart';
 import 'package:niman/src/ui/shell_annotation_flow.dart';
 import 'package:niman/src/ui/shell_commands.dart';
@@ -80,6 +77,7 @@ import 'package:niman/src/ui/shell_note_fade.dart';
 import 'package:niman/src/ui/shell_note_history.dart';
 import 'package:niman/src/ui/shell_note_kind.dart';
 import 'package:niman/src/ui/shell_note_panes.dart';
+import 'package:niman/src/ui/shell_ocr.dart';
 import 'package:niman/src/ui/shell_ocr_flow.dart';
 import 'package:niman/src/ui/shell_open_notes.dart';
 import 'package:niman/src/ui/shell_outside_routes.dart';
@@ -629,7 +627,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     journal: _journalFlow,
     capture: _captureFlow,
     features: () => _features,
-    offersOcr: () => _offersOcr,
+    offersOcr: () => _ocr.offers,
     wide: () => _wide,
   );
 
@@ -692,7 +690,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       library: false,
       anchor: anchor,
     ),
-    onRecognize: _recognize,
+    onRecognize: _ocr.recognize,
     onConvertBook: (path) {
       if (widget.controller.root case final root?) {
         _convertBook(p.join(root, path));
@@ -863,8 +861,8 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     guard: _guard,
     showPanel: _showPanel,
     openHistory: _openHistory,
-    recognize: _recognize,
-    offersOcr: () => _offersOcr,
+    recognize: _ocr.recognize,
+    offersOcr: () => _ocr.offers,
     paletteByTouch: () => _paletteByTouch,
     features: () => _features,
     wide: () => _wide,
@@ -894,7 +892,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     annotations: _annotations,
     annotating: () => _annotating,
     annotate: _annotate,
-    ocrActions: () => _ocrActions,
+    ocrActions: () => _ocr.actions,
     convertBook: _convertBook,
     tasks: _tasks,
     unsaved: widget.unsavedTracker,
@@ -987,7 +985,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     ref: ref,
     guard: _guard,
     openTodo: _openTodo,
-    recognize: _recognize,
+    recognize: _ocr.recognize,
     openHistory: _openHistory,
     openPath: _openPath,
     revealInTree: _revealInTree,
@@ -1508,40 +1506,14 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     _ => null,
   };
 
-  /// Whether the Recognize text entries are offered: there is OCR, and the
-  /// library has it on (#1109).
-  bool get _offersOcr =>
-      _ocrFlow != null && commandFeatureOn(AppCommand.recognizeText, _features);
-
-  /// The file views' Recognize text, or null without OCR or a library.
-  OcrFileActions? get _ocrActions {
-    final queue = widget.ocrQueue;
-    final root = widget.controller.root;
-    final ops = widget.controller.ops;
-    final flow = _ocrFlow;
-    if (flow == null ||
-        !_offersOcr ||
-        queue == null ||
-        root == null ||
-        ops == null) {
-      return null;
-    }
-    return OcrFileActions(
-      queue: queue,
-      root: root,
-      ops: ops,
-      recognize: _recognize,
-      openNote: _openRecognizedText,
-      recognizeAgain: flow.recognizeAgain,
-    );
-  }
-
-  /// Asks how to recognize [path] (library-relative) and queues it.
-  void _recognize(String path, {int? page, int? pageCount}) {
-    final flow = _ocrFlow;
-    if (flow == null) return;
-    unawaited(flow.recognize(context, path, page: page, pageCount: pageCount));
-  }
+  late final ShellOcr _ocr = ShellOcr(
+    flow: _ocrFlow,
+    queue: widget.ocrQueue,
+    controller: widget.controller,
+    features: () => _features,
+    openNote: _openRecognizedText,
+    context: () => context,
+  );
 
   /// Opens the note at [path] (a recognized text).
   void _openRecognizedText(String path) =>
