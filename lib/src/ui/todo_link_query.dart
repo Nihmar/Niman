@@ -5,6 +5,7 @@ library;
 
 import 'package:flutter/foundation.dart' show immutable;
 import 'package:flutter/services.dart';
+import 'package:niman/src/links/parser.dart';
 
 /// A wikilink being typed: where it starts, where the part being completed
 /// ends, and what is written of it.
@@ -90,8 +91,10 @@ final class TodoLinkQuery {
   int get hashAt => start + target.length + 1;
 
   /// The offset just past the last `#`: where the level of a heading path
-  /// being typed (`A#B`) starts.
-  int get levelAt => hashAt + heading.lastIndexOf('#') + 1;
+  /// being typed (`A#B`) starts. A heading typed as Markdown writes it
+  /// (`[[Note## Intro`) has no level before its last `#`, and is completed
+  /// from the first one: `[[Note#Intro]]` (#1268).
+  int get levelAt => hashAt + headingLevelAt(heading);
 
   /// What the rows are matched against: the name typed, the last level of a
   /// heading path, the id after `#^`.

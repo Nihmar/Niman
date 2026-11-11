@@ -60,7 +60,9 @@ the note's. The panel lists:
 - after a `#` — the headings of the note just named, filtered the same
   way. `[[#` — no target — lists the headings of the note being edited.
   After a second `#` (`[[note#Part#`) the same list is filtered by the
-  level being typed;
+  level being typed. A heading typed as the note writes it,
+  `[[note## Part`, lists the same rows and is written with one `#`,
+  `[[note#Part]]`;
 - after `#^` — the block ids of the note just named, each with the first
   words of its block, filtered by the id or by those words. `[[#^`
   lists the ids of the note being edited;

@@ -162,6 +162,20 @@ void main() {
       expect(description(tester), 'Fix [[Repairs#Boiler]]');
     });
 
+    testWidgets('a heading typed as Markdown writes it is linked with one # '
+        '(#1268)', (tester) async {
+      final suggester = library();
+      await openDialog(tester, suggester);
+      // `## Boiler` in the note: the `## ` is typed after the name.
+      await tester.enterText(field, 'Fix [[Repairs## boi');
+      await tester.pump();
+      await tester.pump();
+      expect(find.text('Boiler'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('todo-link-option-0')));
+      await tester.pump();
+      expect(description(tester), 'Fix [[Repairs#Boiler]]');
+    });
+
     testWidgets('lists the block ids after #^', (tester) async {
       await openDialog(tester, library());
       await tester.enterText(field, 'Ring [[Repairs#^');

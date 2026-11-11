@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/editor/outline.dart';
 import 'package:niman/src/links/anchor.dart';
 import 'package:niman/src/links/block_anchors.dart';
+import 'package:niman/src/links/parser.dart';
 
 void main() {
   group('parseAnchor', () {
@@ -148,6 +149,22 @@ void main() {
     test('a missing id is not found', () {
       expect(blockLineOf(blocks, 'zzz'), isNull);
       expect(blockLineOf(const <BlockAnchor>[], 'abc'), isNull);
+    });
+  });
+
+  group('headingLevelAt (#1268)', () {
+    test('the last level starts past the last #', () {
+      expect(headingLevelAt(''), 0);
+      expect(headingLevelAt('Intro'), 0);
+      expect(headingLevelAt('A#B'), 2);
+      expect(headingLevelAt('A##B'), 3);
+    });
+
+    test('a heading typed as Markdown writes it starts at the first #', () {
+      // `[[Note## Intro`: the part after the link's first `#`.
+      expect(headingLevelAt('# Intro'), 0);
+      expect(headingLevelAt('## Intro'), 0);
+      expect(headingLevelAt(' # Intro'), 0);
     });
   });
 }
