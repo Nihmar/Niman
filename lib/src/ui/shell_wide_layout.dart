@@ -210,7 +210,7 @@ final class ShellWideLayout {
   /// Where the tabs start in the title bar: the panes' island's left
   /// edge, past the base and the tree's island.
   double get tabsStart =>
-      ShellRail.panelStart +
+      ShellRail.panelStartFor(Theme.of(context())) +
       (selection.sidebarVisible
           ? settings.editor.treeWidth + ResizeDivider.width
           : 0);

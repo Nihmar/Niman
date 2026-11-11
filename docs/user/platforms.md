@@ -376,7 +376,7 @@ tablet keeps the
 thumb-sized rows and the long-press sheet. The choice follows the
 platform's own density (compact on a desktop), not the window's width,
 so a tablet in landscape keeps the touch sizes. That holds for the wide
-layout's own chrome too (#849): on a tablet the rail's buttons, the open
+layout's own chrome too (#849): on a tablet the rail's destinations, the open
 notes' tab row and its buttons, the tree footer's buttons and the grab
 strip of the dividers between the panels are at least 48 px, where a
 mouse has them smaller (the rail's at 38, the divider's strip at 8). In the
@@ -422,10 +422,19 @@ a library saved on a phone and opened on a tablet finds them untouched.
 
 The wide layout on a touch device keeps what a touch device needs of
 it: nothing under the status bar, the gesture bar or a camera cutout;
-a rail that scrolls when the keyboard leaves it too little height, so
-Settings and the library switch stay within reach; the system Back
-stepping inside the app (below); and the command palette by two fingers,
-there being no key for it.
+the system Back stepping inside the app (below); and the command palette
+by two fingers, there being no key for it.
+
+Its rail is a tablet's (#1266, the [mockups](../design/tablet/README.md)):
+each destination shows its **name under its icon**, there being no hover
+to read a tooltip by; the **library** sits at the rail's top, its initial
+on the accent, with **New** under it — the tree footer's create menu,
+where a thumb on the left edge finds it — and Settings at the foot. With
+the keyboard up, or wherever the rail is too short for them, the names
+go and the icons stay, the rail keeping its width so the note beside it
+does not move; what still does not fit scrolls, so Settings and the
+library stay within reach. A desktop's rail is icons only, their names
+in the tooltips.
 
 ## Destinations
 

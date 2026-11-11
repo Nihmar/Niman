@@ -14,6 +14,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/marquee_text.dart';
+import 'package:niman/src/ui/new_shell_items.dart';
 import 'package:niman/src/ui/palette/palette_swipe.dart';
 import 'package:niman/src/ui/shell_navigation.dart';
 import 'package:niman/src/ui/strings.dart';
@@ -54,6 +55,7 @@ final class ShellLayoutProps {
     required this.backStepAvailable,
     required this.onBackStep,
     required this.onSwitchLibrary,
+    required this.onNewItem,
     required this.buildWideSlots,
     this.wideBackAvailable = false,
     this.onWideBack,
@@ -161,6 +163,9 @@ final class ShellLayoutProps {
 
   /// The rail's library button (#170): the library window (#203).
   final VoidCallback onSwitchLibrary;
+
+  /// Runs a create action from the touch rail's **New** (#1266).
+  final ValueChanged<NewShellItem> onNewItem;
 
   /// Opens the command palette from the two-finger swipe (#206): on every
   /// touch device, the phone's and the tablet's wide shell alike (#849);
@@ -413,6 +418,12 @@ final class WideShellLayout extends StatelessWidget {
                           current: props.tab,
                           onDestinationSelected: props.onDestinationSelected,
                           onSwitchLibrary: props.onSwitchLibrary,
+                          library: props.windowTitle,
+                          newItems: (context) => newShellItemEntries(
+                            context,
+                            props.controller.features.value,
+                          ),
+                          onNewItem: props.onNewItem,
                         ),
                       ),
                     ],

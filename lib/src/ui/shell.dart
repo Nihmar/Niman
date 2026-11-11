@@ -1619,6 +1619,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
           _files.gridInFolder,
       onBackStep: _files.gridUp,
       onSwitchLibrary: () => _windows.switchLibrary(context),
+      onNewItem: (item) => _treeMenus.newItem(context, item),
       // The touch way into the palette (#206); the desktop has a key.
       onOpenPalette: _paletteByTouch
           ? () => unawaited(_palette.open(context))

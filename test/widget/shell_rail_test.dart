@@ -120,7 +120,7 @@ void main() {
     );
     await tester.pump();
     expect(files().tooltip, contains('Alt+B'));
-  });
+  }, variant: desktopDensity);
 
   // #203: a floating window, like Settings, and not a destination: the
   // selection stays where it was.
