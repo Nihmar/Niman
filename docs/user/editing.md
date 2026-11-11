@@ -620,7 +620,10 @@ the read view: closed to one row until you open it, and away while the
 note is scrolled past its head (see [frontmatter](organization.md)).
 
 On a phone the toolbar keeps its size and rides the keyboard, and the ⋮
-in the note's bar offers the same actions. Opening the keyboard — a tap
+in the note's bar offers the same actions. A tablet does the same
+(#1266): the row above the note keeps the note's own controls — its
+**Edit | Read** pair and its ⋮ — and the toolbar comes under the note
+while you write in it, a keyboard on screen or not, where the thumbs are. Opening the keyboard — a tap
 or a selection — takes the pane's bottom with it, and the note comes up
 just enough to keep what the keyboard was raised for above it: the whole
 selection where it fits, the caret's end where it does not. A selection

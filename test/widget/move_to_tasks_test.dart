@@ -48,6 +48,8 @@ void main() {
     final flow = MoveToTasksFlow(fixture.host);
     await tester.pumpWidget(
       MaterialApp(
+        // A desktop's density: the toolbar is in the row above (#1266).
+        theme: ThemeData(visualDensity: VisualDensity.compact),
         home: Scaffold(
           body: Builder(
             builder: (context) => NoteView(

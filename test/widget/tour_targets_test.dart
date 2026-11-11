@@ -67,6 +67,8 @@ void main() {
   testWidgets('the note chrome claims its switch and toolbar', (tester) async {
     await tester.pumpWidget(
       MaterialApp(
+        // A desktop's density: the toolbar is in the row above (#1266).
+        theme: ThemeData(visualDensity: VisualDensity.compact),
         home: Scaffold(
           body: NoteView(
             options: const NoteEditorOptions(
