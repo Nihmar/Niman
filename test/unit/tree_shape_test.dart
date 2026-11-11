@@ -47,4 +47,16 @@ void main() {
       TreeShape.beside,
     );
   });
+
+  test('a thumb lays it over a note being written in', () {
+    expect(
+      treeShapeFor(
+        touch: true,
+        portrait: false,
+        panesBeside: 900,
+        writing: true,
+      ),
+      TreeShape.over,
+    );
+  });
 }

@@ -18,6 +18,7 @@ import 'package:niman/src/ui/shell_navigation.dart';
 import 'package:niman/src/ui/shell_navigation_state.dart';
 import 'package:niman/src/ui/shell_study.dart';
 import 'package:niman/src/ui/shell_tab_rows.dart';
+import 'package:niman/src/ui/soft_keyboard_watch.dart';
 import 'package:niman/src/ui/sync/sync_status.dart';
 import 'package:niman/src/ui/tour/tour_steps.dart';
 import 'package:niman/src/ui/tour/tour_targets.dart';
@@ -142,7 +143,30 @@ final class ShellWideBody {
   /// base between them. The gaps never change while the tree or the dock
   /// comes and goes, so nothing on screen moves but the edge that has to.
   /// Zen drops the base: the note takes the window edge to edge.
-  Widget build(BuildContext context, LibrarySession controller) {
+  Widget build(BuildContext context, LibrarySession controller) =>
+      SoftKeyboardWatch(
+        onChanged: (up) {
+          _keyboardUp = up;
+          _syncWriting();
+        },
+        // Rebuilt when writing starts or stops, not on each frame of the
+        // keyboard's animation.
+        child: ListenableBuilder(
+          listenable: _writing,
+          builder: (context, _) => _body(context, controller),
+        ),
+      );
+
+  /// Whether a note is being written in (#1266): the keyboard up with the
+  /// focus in the panes. A tablet's tree steps aside for it.
+  bool get writing => _writing.value;
+  final ValueNotifier<bool> _writing = ValueNotifier(false);
+  bool _keyboardUp = false;
+  bool _panesFocused = false;
+
+  void _syncWriting() => _writing.value = _keyboardUp && _panesFocused;
+
+  Widget _body(BuildContext context, LibrarySession controller) {
     final zen = inZen();
     final touch = thumbDense(Theme.of(context));
     final tree = this.tree();
@@ -319,37 +343,49 @@ final class ShellWideBody {
           // it (Zen takes both at once), and the panes must stay where
           // they are.
           key: const ValueKey('wide-panes'),
-          // One island for the panes, split or not: the split's divider
-          // stays a line inside it, as the title bar's tabs divide at
-          // that same x — two islands would part the panes by a gap the
-          // tabs above them do not have.
-          child: Island(
-            key: const Key('panes-island'),
-            floating: !zen,
-            child: Column(
-              children: [
-                // Without a title bar of the app's own (an Android
-                // tablet, a phone in landscape) the tabs head the panes
-                // instead: the same row, at the same x as the panes
-                // below it.
-                if (!customTitleBar()) ...[
-                  SizedBox(
-                    key: paneTabRowKey,
-                    height: NoteTabBar.rowHeight(
-                      touch: thumbDense(Theme.of(context)),
-                    ),
-                    child: LayoutBuilder(
-                      builder: (context, constraints) => tabRows.row(
-                        const SizedBox.shrink(),
-                        panesWidth: constraints.maxWidth,
-                        chrome: true,
+          // Hears the focus come into the panes and leave them: with the
+          // keyboard up, that is a note being written in (#1266).
+          child: Focus(
+            canRequestFocus: false,
+            skipTraversal: true,
+            onFocusChange: (focused) {
+              _panesFocused = focused;
+              _syncWriting();
+            },
+            // One island for the panes, split or not: the split's divider
+            // stays a line inside it, as the title bar's tabs divide at
+            // that same x — two islands would part the panes by a gap the
+            // tabs above them do not have.
+            child: Island(
+              key: const Key('panes-island'),
+              floating: !zen,
+              child: Column(
+                children: [
+                  // Without a title bar of the app's own (an Android
+                  // tablet, a phone in landscape) the tabs head the panes
+                  // instead: the same row, at the same x as the panes
+                  // below it.
+                  if (!customTitleBar()) ...[
+                    SizedBox(
+                      key: paneTabRowKey,
+                      height: NoteTabBar.rowHeight(
+                        touch: thumbDense(Theme.of(context)),
+                      ),
+                      child: LayoutBuilder(
+                        builder: (context, constraints) => tabRows.row(
+                          const SizedBox.shrink(),
+                          panesWidth: constraints.maxWidth,
+                          chrome: true,
+                        ),
                       ),
                     ),
+                    const Divider(height: 1),
+                  ],
+                  Expanded(
+                    child: zen ? zenPanes(controller) : panes(controller),
                   ),
-                  const Divider(height: 1),
                 ],
-                Expanded(child: zen ? zenPanes(controller) : panes(controller)),
-              ],
+              ),
             ),
           ),
         ),

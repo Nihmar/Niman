@@ -443,8 +443,11 @@ closed until the sidebar's toggle, **Files**, **Search** or **Study**
 opens it from the rail's edge, a scrim over the rest. A tap outside it
 closes it, and so do a note opened from it and Back; the search in it
 keeps its query while it is closed. Turned back to landscape, the tree is
-beside the note again if it was there. A desktop's tree is always beside
-the note.
+beside the note again if it was there. Writing is the note and the
+keyboard: while the keyboard is up in a note, the tree steps aside the
+same way, and comes back when the keyboard goes — typing in the tree's
+own search leaves it where it is. A desktop's tree is always beside the
+note.
 
 ## Destinations
 
