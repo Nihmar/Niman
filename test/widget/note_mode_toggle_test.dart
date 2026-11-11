@@ -28,6 +28,11 @@ void main() {
       filePicker: filePicker,
       size: size,
     );
+    // Held upright, the tree lies closed over the note: it is opened first.
+    if (size.height > size.width) {
+      await tester.tap(find.byKey(const Key('tabs-toggle-sidebar')));
+      await settle(tester);
+    }
     await tester.tap(noteRow('alpha.md'));
     await settle(tester);
   }

@@ -168,8 +168,10 @@ Future<void> tapTreeFooterAction(WidgetTester tester, Finder finder) async {
 }
 
 /// Opens the create affordance of whichever layout is up: the phone's
-/// expandable FAB menu, or the desktop tree footer's "+ New" menu
-/// (T-PP-22). The individual actions share their keys across layouts.
+/// expandable FAB menu, the desktop tree footer's "+ New" menu (T-PP-22),
+/// or — the tree closed over the note of a tablet held upright — the
+/// rail's New (#1266). The individual actions share their keys across
+/// layouts.
 Future<void> openNewItemMenu(WidgetTester tester) async {
   final fab = find.byKey(const Key('new-note-fab'));
   if (fab.evaluate().isNotEmpty) {
@@ -177,7 +179,10 @@ Future<void> openNewItemMenu(WidgetTester tester) async {
     await settleFabMenu(tester);
     return;
   }
-  await tester.tap(find.byKey(const Key('new-item-menu')));
+  final footer = find.byKey(const Key('new-item-menu')).hitTestable();
+  await tester.tap(
+    footer.evaluate().isNotEmpty ? footer : find.byKey(const Key('rail-new')),
+  );
   await settle(tester);
 }
 

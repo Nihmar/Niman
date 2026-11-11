@@ -333,7 +333,10 @@ void main() {
     // it is typed in (the fake library has no file for the editor to
     // load): whatever in the note has it, it must let it go.
     final inNote = find.descendant(
-      of: find.byType(NoteView),
+      of: find.descendant(
+        of: find.byType(NoteView),
+        matching: find.byKey(const Key('note-menu')),
+      ),
       matching: find.byType(Icon),
     );
     Focus.of(tester.element(inNote.first)).requestFocus();

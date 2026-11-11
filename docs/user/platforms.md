@@ -436,6 +436,16 @@ does not move; what still does not fit scrolls, so Settings and the
 library stay within reach. A desktop's rail is icons only, their names
 in the tooltips.
 
+On a tablet held upright, or in landscape where the tree beside the note
+would leave the note less than 360 dp, the tree **lies over the note**
+instead (#1266):
+closed until the sidebar's toggle, **Files**, **Search** or **Study**
+opens it from the rail's edge, a scrim over the rest. A tap outside it
+closes it, and so do a note opened from it and Back; the search in it
+keeps its query while it is closed. Turned back to landscape, the tree is
+beside the note again if it was there. A desktop's tree is always beside
+the note.
+
 ## Destinations
 
 On a wide window (the desktops and an Android tablet; a phone is never

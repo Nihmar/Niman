@@ -22,6 +22,8 @@ import 'package:niman/src/ui/sync/sync_status.dart';
 import 'package:niman/src/ui/tour/tour_steps.dart';
 import 'package:niman/src/ui/tour/tour_targets.dart';
 import 'package:niman/src/ui/tree_header.dart';
+import 'package:niman/src/ui/tree_overlay.dart';
+import 'package:niman/src/ui/tree_shape.dart';
 
 /// The wide body's layout, built from the shell's parts.
 final class ShellWideBody {
@@ -34,7 +36,7 @@ final class ShellWideBody {
     required this.tabRows,
     required this.settings,
     required this.inZen,
-    required this.sidebarVisible,
+    required this.tree,
     required this.dockWidth,
     required this.customTitleBar,
     required this.libraryName,
@@ -67,8 +69,9 @@ final class ShellWideBody {
   /// Whether Zen is what is on screen (#69).
   final bool Function() inZen;
 
-  /// Whether the tree's island shows.
-  final bool Function() sidebarVisible;
+  /// Where the tree's island stands, whether it shows, and how the one
+  /// lying over the panes closes (#1266).
+  final ({TreeShape shape, bool shown, VoidCallback close}) Function() tree;
 
   /// The dock's width on screen.
   final double Function() dockWidth;
@@ -120,6 +123,11 @@ final class ShellWideBody {
   /// The wide body, to measure the note row against.
   final GlobalKey _wideBodyKey = GlobalKey(debugLabel: 'wide body');
 
+  /// The tree's island, which moves between its place beside the panes and
+  /// its place over them (#1266) with its state: the tree's scroll, the
+  /// search's query and results.
+  final GlobalKey _treeIslandKey = GlobalKey(debugLabel: 'tree island');
+
   /// The wide-layout body: the tree pane and the split detail pane, in
   /// [context], the shell's.
   ///
@@ -137,6 +145,7 @@ final class ShellWideBody {
   Widget build(BuildContext context, LibrarySession controller) {
     final zen = inZen();
     final touch = thumbDense(Theme.of(context));
+    final tree = this.tree();
     dock.settle();
     // A stack always, the overlay or not: the islands below keep their
     // place in the tree, and so their editors their state.
@@ -144,7 +153,24 @@ final class ShellWideBody {
       key: _wideBodyKey,
       fit: StackFit.expand,
       children: [
-        _wideIslands(context, controller, zen: zen, touch: touch),
+        _wideIslands(context, controller, zen: zen, touch: touch, tree: tree),
+        // A tablet without the room for the tree beside the note lays it
+        // over the panes, from the rail's edge (#1266).
+        if (tree.shape == TreeShape.over && !zen)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              Island.gap,
+              0,
+              Island.gap,
+              Island.gap,
+            ),
+            child: TreeOverlay(
+              open: tree.shown,
+              width: settings().treeWidth,
+              onDismiss: tree.close,
+              island: _treeIsland(context, controller),
+            ),
+          ),
         // A window without room for the dock beside the note lays it over
         // the note instead, under the title bar and the rail — and under
         // the note's row, whose button stays in reach to shut it again.
@@ -172,7 +198,9 @@ final class ShellWideBody {
     LibrarySession controller, {
     required bool zen,
     required bool touch,
+    required ({TreeShape shape, bool shown, VoidCallback close}) tree,
   }) {
+    final beside = tree.shape == TreeShape.beside && tree.shown;
     return Padding(
       padding: EdgeInsets.fromLTRB(
         zen ? 0 : Island.gap,
@@ -186,8 +214,8 @@ final class ShellWideBody {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          _wideRow(context, controller, zen: zen),
-          if (sidebarVisible() && !zen)
+          _wideRow(context, controller, zen: zen, treeBeside: beside),
+          if (beside && !zen)
             Positioned(
               left:
                   settings().treeWidth -
@@ -208,74 +236,81 @@ final class ShellWideBody {
     );
   }
 
+  /// The tree's island: the tree, or the sidebar view in its place
+  /// (#712). Keyed, so it keeps its state where it moves (#1266).
+  Widget _treeIsland(BuildContext context, LibrarySession controller) {
+    final showsSearch = sidebarShowsSearch();
+    final showsStudy = sidebarShowsStudy();
+    return KeyedSubtree(
+      key: _treeIslandKey,
+      child: Island(
+        key: const Key('tree-island'),
+        // Both stay mounted across a sidebar switch (#712): the
+        // search keeps its query and results, and the tree its
+        // expansion and scroll, as they did when each had a slot
+        // of its own. The search keeps its layout too — it is the
+        // one whose show-layout costs frames (T-TS-10).
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            Offstage(
+              offstage: showsSearch || showsStudy,
+              child: Column(
+                children: [
+                  // Without a title bar of the app's own, nothing
+                  // else says which library this is (#1134).
+                  if (!customTitleBar()) ...[
+                    TreeHeader(
+                      library: libraryName(),
+                      folder: treeFolder(),
+                      height: NoteTabBar.rowHeight(
+                        touch: thumbDense(Theme.of(context)),
+                      ),
+                      onSwitchLibrary: onSwitchLibrary,
+                    ),
+                    const Divider(height: 1),
+                  ],
+                  Expanded(child: files.build(context, controller)),
+                  if (controller.sync case final sync?)
+                    SyncProgressStrip(sync: sync),
+                  treeFooter(controller),
+                ],
+              ),
+            ),
+            // Built on the first visit, as its slot was: the
+            // search source (a background connection) is not
+            // opened for a library no one searched in.
+            if (nav.visited.contains(ShellTab.search))
+              Visibility(
+                visible: showsSearch,
+                maintainState: true,
+                maintainAnimation: true,
+                maintainSize: true,
+                child: searchSlot(controller),
+              ),
+            // The decks (#533): built on the first visit too.
+            if (nav.visited.contains(ShellTab.study))
+              Offstage(offstage: !showsStudy, child: study().view(context)),
+          ],
+        ),
+      ),
+    );
+  }
+
   /// The wide body's row: the islands, [Island.gap] apart, the gaps where
   /// the dividers lie.
   Widget _wideRow(
     BuildContext context,
     LibrarySession controller, {
     required bool zen,
+    required bool treeBeside,
   }) {
-    final showsSearch = sidebarShowsSearch();
-    final showsStudy = sidebarShowsStudy();
     return Row(
       children: [
-        if (sidebarVisible() && !zen) ...[
+        if (treeBeside && !zen) ...[
           SizedBox(
             width: settings().treeWidth,
-            child: Island(
-              key: const Key('tree-island'),
-              // Both stay mounted across a sidebar switch (#712): the
-              // search keeps its query and results, and the tree its
-              // expansion and scroll, as they did when each had a slot
-              // of its own. The search keeps its layout too — it is the
-              // one whose show-layout costs frames (T-TS-10).
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  Offstage(
-                    offstage: showsSearch || showsStudy,
-                    child: Column(
-                      children: [
-                        // Without a title bar of the app's own, nothing
-                        // else says which library this is (#1134).
-                        if (!customTitleBar()) ...[
-                          TreeHeader(
-                            library: libraryName(),
-                            folder: treeFolder(),
-                            height: NoteTabBar.rowHeight(
-                              touch: thumbDense(Theme.of(context)),
-                            ),
-                            onSwitchLibrary: onSwitchLibrary,
-                          ),
-                          const Divider(height: 1),
-                        ],
-                        Expanded(child: files.build(context, controller)),
-                        if (controller.sync case final sync?)
-                          SyncProgressStrip(sync: sync),
-                        treeFooter(controller),
-                      ],
-                    ),
-                  ),
-                  // Built on the first visit, as its slot was: the
-                  // search source (a background connection) is not
-                  // opened for a library no one searched in.
-                  if (nav.visited.contains(ShellTab.search))
-                    Visibility(
-                      visible: showsSearch,
-                      maintainState: true,
-                      maintainAnimation: true,
-                      maintainSize: true,
-                      child: searchSlot(controller),
-                    ),
-                  // The decks (#533): built on the first visit too.
-                  if (nav.visited.contains(ShellTab.study))
-                    Offstage(
-                      offstage: !showsStudy,
-                      child: study().view(context),
-                    ),
-                ],
-              ),
-            ),
+            child: _treeIsland(context, controller),
           ),
           const SizedBox(width: ResizeDivider.width),
         ],

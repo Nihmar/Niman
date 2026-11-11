@@ -1153,8 +1153,8 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     takePane: _takePane,
     onTabAction: (path, action, anchor) =>
         unawaited(_tabAction(path, action, anchor)),
-    sidebarVisible: () => _selection.sidebarVisible,
-    onToggleSidebar: _selection.toggleSidebar,
+    sidebarVisible: () => _wideLayout.treeShown,
+    onToggleSidebar: () => _wideLayout.toggleTree(),
     dockToggle: _dockToggle,
   );
 
@@ -1607,7 +1607,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       shellFocus: _shellFocus,
       tab: _tab,
       destinations: _nav.destinations,
-      onDestinationSelected: _tabs.destinationSelected,
+      onDestinationSelected: _wideLayout.destinationSelected,
       hiddenTab: !_nav.shown(_tab),
       onLeaveHiddenTab: _tabs.leaveHiddenTab,
       // Back walks up one folder before it leaves the Files tab, while the
@@ -1843,7 +1843,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     tabRows: _tabRows,
     settings: () => _settings.editor,
     inZen: () => _inZen,
-    sidebarVisible: () => _selection.sidebarVisible,
+    tree: () => _wideLayout.tree,
     dockWidth: () => _wideLayout.dockWidth,
     customTitleBar: () => widget.window.customTitleBar,
     libraryName: () => _libraryName,
