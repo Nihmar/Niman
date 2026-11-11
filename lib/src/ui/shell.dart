@@ -53,7 +53,6 @@ import 'package:niman/src/ui/mac_menu_bar.dart';
 import 'package:niman/src/ui/note_tab_bar.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/ocr/ocr_file_actions.dart';
-import 'package:niman/src/ui/open_notes_sheet.dart';
 import 'package:niman/src/ui/outside_files.dart';
 import 'package:niman/src/ui/palette/command_features.dart';
 import 'package:niman/src/ui/pinned_tab_chip.dart';
@@ -82,6 +81,7 @@ import 'package:niman/src/ui/shell_note_history.dart';
 import 'package:niman/src/ui/shell_note_kind.dart';
 import 'package:niman/src/ui/shell_note_panes.dart';
 import 'package:niman/src/ui/shell_ocr_flow.dart';
+import 'package:niman/src/ui/shell_open_notes.dart';
 import 'package:niman/src/ui/shell_outside_routes.dart';
 import 'package:niman/src/ui/shell_palette.dart';
 import 'package:niman/src/ui/shell_personal_dictionary.dart';
@@ -1034,6 +1034,17 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   /// the one the shell shows, kept current and kept for the next launch.
   late final ShellWorkspace _workspace = ShellWorkspace(widget.controller);
 
+  late final ShellOpenNotes _openNotes = ShellOpenNotes(
+    workspace: _workspace,
+    selection: _selection,
+    tabs: _tabs,
+    createFlow: _createFlow,
+    changes: _tabsListenable,
+    unsaved: _unsavedRelPaths,
+    open: (path) => _openNoteFromLink(path, null),
+    context: () => context,
+  );
+
   /// The right dock and the phone's panel sheets.
   late final ShellDock _dock = ShellDock(
     workspace: _workspace,
@@ -1601,7 +1612,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       onCloseFullScreenNote: _tabs.closeNote,
       isQuickNote:
           selectedPath != null && selectedPath == _settings.quickNotePath,
-      noteBarActions: _noteActions.barActions(_openNotesButton()),
+      noteBarActions: _noteActions.barActions(_openNotes.button()),
       buildTabShell: () => _phoneChrome.scaffold(
         context,
         controller: controller,
@@ -1677,46 +1688,6 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     );
   }
 
-  /// The phone's badge for the notes left open (#23, PR 4).
-  Widget _openNotesButton() => OpenNotesButton(
-    count: _workspace.value.tabs.length,
-    onPressed: () => unawaited(_showOpenNotes()),
-  );
-
-  /// The phone's open-notes switcher: every note left open, the one on
-  /// screen marked, each with its unsaved dot and a close.
-  Future<void> _showOpenNotes() => showOpenNotesSheet(
-    context,
-    workspace: () => _workspace.value,
-    changes: _tabsListenable,
-    unsaved: _unsavedRelPaths,
-    shown: () => _selection.noteOnScreen,
-    onOpen: (path) => _openNoteFromLink(path, null),
-    onClose: _closeOpenNote,
-    onCloseAll: () {
-      _workspace.controller.update((w) => w.closeAll());
-      if (_selection.noteOnScreen != null) _tabs.closeNote();
-      _selection.clear();
-    },
-    // A phone opens every note alongside the others: the new one joins
-    // them once it is named, and a cancel leaves nothing behind (#1133).
-    onNewNote: () => unawaited(_createFlow.createNote(context)),
-  );
-
-  /// Closes [path] from the switcher. The note on screen gives way to the
-  /// next one open, or to the tree when it was the last.
-  void _closeOpenNote(String path) {
-    final wasShown = _selection.noteOnScreen == path;
-    _workspace.controller.update((w) => w.closePath(path));
-    final next = _workspace.value.activePath;
-    if (wasShown && next != null) {
-      _openNoteFromLink(next, null);
-      return;
-    }
-    if (wasShown) _tabs.closeNote();
-    _selection.clearIf(path);
-  }
-
   /// The open notes holding unsaved edits, library-relative.
   Set<String> _unsavedRelPaths() {
     final root = widget.controller.root;
@@ -1742,7 +1713,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     journalUi: _journalUi,
     syncActions: _syncActions,
     workspace: _workspace,
-    openNotesButton: _openNotesButton,
+    openNotesButton: _openNotes.button,
     sortToggle: _bodies.sortToggle,
     features: () => _features,
     ocrQueue: widget.ocrQueue,
