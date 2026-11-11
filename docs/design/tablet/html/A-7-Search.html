@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>A · Search</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Source+Serif+4:ital,wght@0,400;1,400&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+input{font:inherit;color:inherit}
+a{color:#4762BE}a:hover{color:#2F4699}
+</style>
+</head>
+<body>
+<div style="width: 1194px; height: 834px; display: flex; background: #F2EDE5; color: #23262B; font-family: Inter, system-ui, sans-serif; overflow: hidden">
+  <nav aria-label="Destinations" style="width: 88px; flex: none; background: #EAE4D8; display: flex; flex-direction: column; align-items: center; padding: 20px 0 16px; gap: 6px; box-sizing: border-box">
+    <button aria-label="Switch library: Notes" style="width: 48px; height: 48px; border-radius: 14px; border: 0; background: #23262B; display: flex; align-items: center; justify-content: center; margin-bottom: 8px">
+      <span style="width: 30px; height: 30px; border-radius: 7px; background: #587CD3; color: #F2EDE5; font-weight: 700; font-size: 18px; display: flex; align-items: center; justify-content: center">N</span>
+    </button>
+    <button aria-label="New note" style="width: 56px; height: 56px; border-radius: 16px; border: 0; background: #D2D9F0; color: #23347A; display: flex; align-items: center; justify-content: center; margin-bottom: 14px; box-shadow: 0 1px 2px rgba(35,38,43,.18)">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14 M5 12h14"></path></svg>
+    </button>
+      <button style="border: 0; background: none; width: 88px; padding: 4px 0 8px; display: flex; flex-direction: column; align-items: center; gap: 4px; color: #4F525A">
+        <span style="width: 56px; height: 32px; border-radius: 16px; display: flex; align-items: center; justify-content: center; background: transparent">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10l9-7 9 7v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z M9 22V12h6v10"></path></svg>
+        </span>
+        <span style="font-size: 12px; font-weight: 500">Home</span>
+      </button>
+      <button style="border: 0; background: none; width: 88px; padding: 4px 0 8px; display: flex; flex-direction: column; align-items: center; gap: 4px; color: #4F525A">
+        <span style="width: 56px; height: 32px; border-radius: 16px; display: flex; align-items: center; justify-content: center; background: transparent">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.7-.9l-.8-1.2A2 2 0 0 0 7.9 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2z"></path></svg>
+        </span>
+        <span style="font-size: 12px; font-weight: 500">Files</span>
+      </button>
+      <button style="border: 0; background: none; width: 88px; padding: 4px 0 8px; display: flex; flex-direction: column; align-items: center; gap: 4px; color: #4F525A">
+        <span style="width: 56px; height: 32px; border-radius: 16px; display: flex; align-items: center; justify-content: center; background: transparent">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11l3 3L22 4 M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+        </span>
+        <span style="font-size: 12px; font-weight: 500">Todo</span>
+      </button>
+      <button style="border: 0; background: none; width: 88px; padding: 4px 0 8px; display: flex; flex-direction: column; align-items: center; gap: 4px; color: #23347A">
+        <span style="width: 56px; height: 32px; border-radius: 16px; display: flex; align-items: center; justify-content: center; background: #D2D9F0">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16z M21 21l-4.3-4.3"></path></svg>
+        </span>
+        <span style="font-size: 12px; font-weight: 650">Search</span>
+      </button>
+      <button style="border: 0; background: none; width: 88px; padding: 4px 0 8px; display: flex; flex-direction: column; align-items: center; gap: 4px; color: #4F525A">
+        <span style="width: 56px; height: 32px; border-radius: 16px; display: flex; align-items: center; justify-content: center; background: transparent">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2l10 5-10 5L2 7z M2 17l10 5 10-5 M2 12l10 5 10-5"></path></svg>
+        </span>
+        <span style="font-size: 12px; font-weight: 500">Study</span>
+      </button>
+      <button style="border: 0; background: none; width: 88px; padding: 4px 0 8px; display: flex; flex-direction: column; align-items: center; gap: 4px; color: #4F525A">
+        <span style="width: 56px; height: 32px; border-radius: 16px; display: flex; align-items: center; justify-content: center; background: transparent">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"></path></svg>
+        </span>
+        <span style="font-size: 12px; font-weight: 500">Quick note</span>
+      </button>
+    <div style="flex: 1"></div>
+    <button style="border: 0; background: none; width: 88px; padding: 4px 0; display: flex; flex-direction: column; align-items: center; gap: 4px; color: #4F525A">
+      <span style="width: 56px; height: 32px; display: flex; align-items: center; justify-content: center">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 21v-7 M4 10V3 M12 21v-9 M12 8V3 M20 21v-5 M20 12V3 M1 14h6 M9 8h6 M17 16h6"></path></svg>
+      </span>
+      <span style="font-size: 12px; font-weight: 500">Settings</span>
+    </button>
+  </nav>
+  <aside aria-label="Search" style="width: 340px; flex: none; display: flex; flex-direction: column; border-right: 1px solid #D6CFC2; background: #EFE9E0">
+    <div style="padding: 14px 14px 8px">
+      <label style="height: 48px; border: 2px solid #4762BE; background: #FAF7F1; border-radius: 24px; display: flex; align-items: center; gap: 10px; padding: 0 8px 0 14px; box-sizing: border-box">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4F525A" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16z M21 21l-4.3-4.3"></path></svg>
+        <input aria-label="Search notes" value="subspace" style="flex: 1; min-width: 0; border: 0; background: none; font-size: 17px; outline: none">
+        <span aria-hidden="true" style="width: 32px; height: 32px; border-radius: 16px; display: flex; align-items: center; justify-content: center; color: #4F525A"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M18 6L6 18 M6 6l12 12"></path></svg></span>
+      </label>
+    </div>
+    <div style="display: flex; gap: 6px; padding: 0 14px 10px">
+      <button aria-pressed="true" style="height: 34px; border: 0; background: #23262B; color: #F2EDE5; border-radius: 17px; padding: 0 14px; font-size: 14px; font-weight: 600">Words</button>
+      <button style="height: 34px; border: 1px solid #D6CFC2; background: none; border-radius: 17px; padding: 0 14px; font-size: 14px">Contains</button>
+      <button style="height: 34px; border: 1px solid #D6CFC2; background: none; border-radius: 17px; padding: 0 14px; font-size: 14px">Replace</button>
+    </div>
+    <div style="font-size: 13px; color: #5F6269; padding: 2px 26px 8px">7 notes</div>
+    <div style="flex: 1; overflow: hidden; padding: 0 10px; display: flex; flex-direction: column; gap: 2px">
+        <button style="border: 0; border-radius: 14px; padding: 12px 12px 12px 14px; text-align: left; display: flex; flex-direction: column; gap: 4px; background: #D2D9F0">
+          <span style="font-size: 16px; font-weight: 600; color: #23347A">1.2 Subspaces and linear dependence</span>
+          <span style="font-size: 12px; color: #5F6269">Study › Linear algebra</span>
+          <span style="font-size: 14px; line-height: 1.45; color: #4F525A">
+            <span style="background: transparent; color: #4F525A; font-weight: 400; border-radius: 3px">…a non-empty set W of ℝ³ is a </span><span style="background: #F7E3A6; color: #23262B; font-weight: 600; border-radius: 3px">subspace</span><span style="background: transparent; color: #4F525A; font-weight: 400; border-radius: 3px"> if it is closed under addition…</span>
+          </span>
+        </button>
+        <button style="border: 0; border-radius: 14px; padding: 12px 12px 12px 14px; text-align: left; display: flex; flex-direction: column; gap: 4px; background: transparent">
+          <span style="font-size: 16px; font-weight: 600; color: #23262B">1.3 Bases and dimension</span>
+          <span style="font-size: 12px; color: #5F6269">Study › Linear algebra</span>
+          <span style="font-size: 14px; line-height: 1.45; color: #4F525A">
+            <span style="background: transparent; color: #4F525A; font-weight: 400; border-radius: 3px">…every </span><span style="background: #F7E3A6; color: #23262B; font-weight: 600; border-radius: 3px">subspace</span><span style="background: transparent; color: #4F525A; font-weight: 400; border-radius: 3px"> of ℝ³ has a basis of at most three vectors…</span>
+          </span>
+        </button>
+        <button style="border: 0; border-radius: 14px; padding: 12px 12px 12px 14px; text-align: left; display: flex; flex-direction: column; gap: 4px; background: transparent">
+          <span style="font-size: 16px; font-weight: 600; color: #23262B">Exercises — week 3</span>
+          <span style="font-size: 12px; color: #5F6269">Study › Linear algebra</span>
+          <span style="font-size: 14px; line-height: 1.45; color: #4F525A">
+            <span style="background: transparent; color: #4F525A; font-weight: 400; border-radius: 3px">…show that the plane x + y = 0 is a </span><span style="background: #F7E3A6; color: #23262B; font-weight: 600; border-radius: 3px">subspace</span><span style="background: transparent; color: #4F525A; font-weight: 400; border-radius: 3px">…</span>
+          </span>
+        </button>
+        <button style="border: 0; border-radius: 14px; padding: 12px 12px 12px 14px; text-align: left; display: flex; flex-direction: column; gap: 4px; background: transparent">
+          <span style="font-size: 16px; font-weight: 600; color: #23262B">Questions for office hours</span>
+          <span style="font-size: 12px; color: #5F6269">Study › Linear algebra</span>
+          <span style="font-size: 14px; line-height: 1.45; color: #4F525A">
+            <span style="background: transparent; color: #4F525A; font-weight: 400; border-radius: 3px">…why must a </span><span style="background: #F7E3A6; color: #23262B; font-weight: 600; border-radius: 3px">subspace</span><span style="background: transparent; color: #4F525A; font-weight: 400; border-radius: 3px"> be non-empty?</span>
+          </span>
+        </button>
+        <button style="border: 0; border-radius: 14px; padding: 12px 12px 12px 14px; text-align: left; display: flex; flex-direction: column; gap: 4px; background: transparent">
+          <span style="font-size: 16px; font-weight: 600; color: #23262B">Exam plan</span>
+          <span style="font-size: 12px; color: #5F6269">Study</span>
+          <span style="font-size: 14px; line-height: 1.45; color: #4F525A">
+            <span style="background: transparent; color: #4F525A; font-weight: 400; border-radius: 3px">…Friday: </span><span style="background: #F7E3A6; color: #23262B; font-weight: 600; border-radius: 3px">subspace</span><span style="background: transparent; color: #4F525A; font-weight: 400; border-radius: 3px"> and bases, then linear maps…</span>
+          </span>
+        </button>
+    </div>
+  </aside>
+  <main style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+    <div style="height: 72px; display: flex; align-items: center; gap: 8px; padding: 0 12px; border-bottom: 1px solid #DED7CA">
+      <div role="tablist" aria-label="Open notes" style="flex: 1; min-width: 0; display: flex; gap: 8px; overflow: hidden">
+        <button role="tab" aria-selected="true" style="height: 44px; flex: none; border-radius: 22px; padding: 0 8px 0 16px; display: flex; align-items: center; gap: 6px; font-size: 15px; border: 1px solid #4762BE; background: #FBF8F3; font-weight: 600">
+          1.2 Subspaces
+          <span aria-hidden="true" style="width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; color: #5F6269"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6L6 18 M6 6l12 12"></path></svg></span>
+        </button>
+        <button role="tab" style="height: 44px; flex: none; border-radius: 22px; padding: 0 16px; display: flex; align-items: center; font-size: 15px; border: 1px solid #D6CFC2; background: none">Exam plan</button>
+      </div>
+      <div role="group" aria-label="Mode" style="display: flex; height: 44px; border: 1px solid #C4BDAF; border-radius: 22px; overflow: hidden; flex: none">
+        <button aria-label="Edit" style="border: 0; background: none; width: 52px; display: flex; align-items: center; justify-content: center">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"></path></svg>
+        </button>
+        <button aria-label="Read" aria-pressed="true" style="border: 0; background: #DCD5C8; width: 52px; display: flex; align-items: center; justify-content: center">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="#23262B" stroke="#DCD5C8" stroke-width="1.6" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"></path></svg>
+        </button>
+      </div>
+      <button aria-label="More" style="width: 48px; height: 48px; border: 0; background: none; border-radius: 24px; display: flex; align-items: center; justify-content: center; color: #4F525A; flex: none">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="1.8"></circle><circle cx="12" cy="12" r="1.8"></circle><circle cx="12" cy="19" r="1.8"></circle></svg>
+      </button>
+    </div>
+    <div role="search" aria-label="Find in note" style="height: 56px; display: flex; align-items: center; gap: 8px; padding: 0 16px; background: #EAE4D8; border-bottom: 1px solid #DED7CA">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4F525A" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16z M21 21l-4.3-4.3"></path></svg>
+      <span style="font-size: 16px; font-weight: 500; flex: 1">subspace</span>
+      <span style="font-size: 14px; color: #4F525A">1 of 4</span>
+      <button aria-label="Previous match" style="width: 44px; height: 44px; border: 0; background: none; border-radius: 22px; display: flex; align-items: center; justify-content: center; color: #3A3D44"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 15l-6-6-6 6"></path></svg></button>
+      <button aria-label="Next match" style="width: 44px; height: 44px; border: 0; background: none; border-radius: 22px; display: flex; align-items: center; justify-content: center; color: #3A3D44"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></button>
+      <button aria-label="Close find" style="width: 44px; height: 44px; border: 0; background: none; border-radius: 22px; display: flex; align-items: center; justify-content: center; color: #3A3D44"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6L6 18 M6 6l12 12"></path></svg></button>
+    </div>
+    <article style="flex: 1; overflow: hidden; display: flex; justify-content: center; padding: 30px 40px 0">
+      <div style="width: 100%; max-width: 600px">
+        <h1 style="font-size: 30px; line-height: 1.2; font-weight: 700; letter-spacing: -0.015em; margin: 0 0 18px">1.2 Subspaces and linear dependence</h1>
+        <p style="font-size: 17px; line-height: 1.65; margin: 0 0 16px">Once a coordinate system is chosen, the geometric vectors of space can be identified with ℝ³, and the operations between vectors become operations on triples.</p>
+        <p style="font-size: 17px; line-height: 1.65; margin: 0 0 16px"><strong>Definition 1.2.1.</strong> A non-empty set <em>W</em> of ℝ³ is a <strong><mark style="background: #F2C94C; color: #23262B; border-radius: 3px; box-shadow: 0 0 0 2px #B98A00">subspace</mark></strong> if it is closed under addition and under multiplication by a scalar.</p>
+        <p style="font-family: 'Source Serif 4', Georgia, serif; font-size: 22px; text-align: center; margin: 22px 0">⟨<b>v</b>⟩ = { α<b>v</b> | α ∈ ℝ }</p>
+        <p style="font-size: 17px; line-height: 1.65; margin: 0 0 16px">The set {<b>0</b>} and ℝ³ itself are the trivial <mark style="background: #F7E3A6; color: #23262B; border-radius: 3px">subspace</mark>s; the plane <em>x</em>₃ = 0 is a <mark style="background: #F7E3A6; color: #23262B; border-radius: 3px">subspace</mark> that can be identified with ℝ².</p>
+      </div>
+    </article>
+  </main>
+</div>
+</body>
+</html>

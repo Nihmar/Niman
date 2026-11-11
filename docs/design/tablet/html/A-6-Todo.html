@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>A · Todo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+input,textarea{font:inherit;color:inherit}
+a{color:#4762BE}a:hover{color:#2F4699}
+</style>
+</head>
+<body>
+<div style="width: 1194px; height: 834px; display: flex; background: #F2EDE5; color: #23262B; font-family: Inter, system-ui, sans-serif; overflow: hidden">
+  <nav aria-label="Destinations" style="width: 88px; flex: none; background: #EAE4D8; display: flex; flex-direction: column; align-items: center; padding: 20px 0 16px; gap: 6px; box-sizing: border-box">
+    <button aria-label="Switch library: Notes" style="width: 48px; height: 48px; border-radius: 14px; border: 0; background: #23262B; display: flex; align-items: center; justify-content: center; margin-bottom: 8px">
+      <span style="width: 30px; height: 30px; border-radius: 7px; background: #587CD3; color: #F2EDE5; font-weight: 700; font-size: 18px; display: flex; align-items: center; justify-content: center">N</span>
+    </button>
+    <button aria-label="Add task" style="width: 56px; height: 56px; border-radius: 16px; border: 0; background: #D2D9F0; color: #23347A; display: flex; align-items: center; justify-content: center; margin-bottom: 14px; box-shadow: 0 1px 2px rgba(35,38,43,.18)">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14 M5 12h14"></path></svg>
+    </button>
+      <button style="border: 0; background: none; width: 88px; padding: 4px 0 8px; display: flex; flex-direction: column; align-items: center; gap: 4px; color: #4F525A">
+        <span style="width: 56px; height: 32px; border-radius: 16px; display: flex; align-items: center; justify-content: center; background: transparent">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10l9-7 9 7v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z M9 22V12h6v10"></path></svg>
+        </span>
+        <span style="font-size: 12px; font-weight: 500">Home</span>
+      </button>
+      <button style="border: 0; background: none; width: 88px; padding: 4px 0 8px; display: flex; flex-direction: column; align-items: center; gap: 4px; color: #4F525A">
+        <span style="width: 56px; height: 32px; border-radius: 16px; display: flex; align-items: center; justify-content: center; background: transparent">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.7-.9l-.8-1.2A2 2 0 0 0 7.9 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2z"></path></svg>
+        </span>
+        <span style="font-size: 12px; font-weight: 500">Files</span>
+      </button>
+      <button style="border: 0; background: none; width: 88px; padding: 4px 0 8px; display: flex; flex-direction: column; align-items: center; gap: 4px; color: #23347A">
+        <span style="width: 56px; height: 32px; border-radius: 16px; display: flex; align-items: center; justify-content: center; background: #D2D9F0">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11l3 3L22 4 M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+        </span>
+        <span style="font-size: 12px; font-weight: 650">Todo</span>
+      </button>
+      <button style="border: 0; background: none; width: 88px; padding: 4px 0 8px; display: flex; flex-direction: column; align-items: center; gap: 4px; color: #4F525A">
+        <span style="width: 56px; height: 32px; border-radius: 16px; display: flex; align-items: center; justify-content: center; background: transparent">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16z M21 21l-4.3-4.3"></path></svg>
+        </span>
+        <span style="font-size: 12px; font-weight: 500">Search</span>
+      </button>
+      <button style="border: 0; background: none; width: 88px; padding: 4px 0 8px; display: flex; flex-direction: column; align-items: center; gap: 4px; color: #4F525A">
+        <span style="width: 56px; height: 32px; border-radius: 16px; display: flex; align-items: center; justify-content: center; background: transparent">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2l10 5-10 5L2 7z M2 17l10 5 10-5 M2 12l10 5 10-5"></path></svg>
+        </span>
+        <span style="font-size: 12px; font-weight: 500">Study</span>
+      </button>
+      <button style="border: 0; background: none; width: 88px; padding: 4px 0 8px; display: flex; flex-direction: column; align-items: center; gap: 4px; color: #4F525A">
+        <span style="width: 56px; height: 32px; border-radius: 16px; display: flex; align-items: center; justify-content: center; background: transparent">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"></path></svg>
+        </span>
+        <span style="font-size: 12px; font-weight: 500">Quick note</span>
+      </button>
+    <div style="flex: 1"></div>
+    <button style="border: 0; background: none; width: 88px; padding: 4px 0; display: flex; flex-direction: column; align-items: center; gap: 4px; color: #4F525A">
+      <span style="width: 56px; height: 32px; display: flex; align-items: center; justify-content: center">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 21v-7 M4 10V3 M12 21v-9 M12 8V3 M20 21v-5 M20 12V3 M1 14h6 M9 8h6 M17 16h6"></path></svg>
+      </span>
+      <span style="font-size: 12px; font-weight: 500">Settings</span>
+    </button>
+  </nav>
+  <main style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+    <div style="height: 72px; flex: none; display: flex; align-items: center; gap: 8px; padding: 0 12px 0 24px">
+      <div style="flex: 1">
+        <div style="font-size: 13px; color: #5F6269">todo.txt</div>
+        <h1 style="font-size: 24px; font-weight: 700; letter-spacing: -0.01em; margin: 0">Todo</h1>
+      </div>
+      <button aria-pressed="true" style="height: 44px; border: 1px solid #4762BE; background: #E4E7F3; color: #23347A; border-radius: 22px; padding: 0 16px; display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 600">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5h18l-7 8v6l-4 2v-8z"></path></svg>
+        Filter · 1
+      </button>
+      <button style="height: 44px; border: 1px solid #C4BDAF; background: none; border-radius: 22px; padding: 0 16px; display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 500">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18 M6 12h12 M10 18h4"></path></svg>
+        Due date
+      </button>
+      <button aria-label="Help" style="width: 48px; height: 48px; border: 0; background: none; border-radius: 24px; display: flex; align-items: center; justify-content: center; color: #4F525A">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3 M12 17h.01"></path></svg>
+      </button>
+    </div>
+    <div style="display: flex; align-items: center; gap: 8px; padding: 0 24px 10px; font-size: 14px">
+      <span style="height: 32px; border-radius: 16px; background: #EDE7DD; padding: 0 6px 0 12px; display: flex; align-items: center; gap: 4px; color: #6F2F96; font-weight: 500">
+        +algebra
+        <button aria-label="Remove +algebra" style="width: 24px; height: 24px; border: 0; background: none; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #4F525A"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M18 6L6 18 M6 6l12 12"></path></svg></button>
+      </span>
+      <span style="color: #5F6269">5 of 14 open tasks</span>
+      <button style="height: 32px; border: 0; background: none; color: #4762BE; font-weight: 600; padding: 0 8px">Clear</button>
+    </div>
+    <div style="flex: 1; min-height: 0; display: flex; border-top: 1px solid #DED7CA">
+      <section aria-label="Tasks" style="flex: 1; min-width: 0; overflow: hidden; padding: 8px 16px">
+          <div>
+            <button style="width: 100%; height: 44px; border: 0; background: none; display: flex; align-items: center; gap: 8px; padding: 0 8px; font-size: 14px; font-weight: 650; color: #B03A2E">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg>
+              Overdue
+              <span style="font-weight: 500; color: #5F6269">1</span>
+            </button>
+              <div style="min-height: 56px; display: flex; align-items: center; gap: 12px; padding: 6px 10px; border-radius: 12px; background: transparent">
+                <input type="checkbox" aria-label="Done" style="width: 22px; height: 22px; accent-color: #4762BE; flex: none; margin: 0">
+                <span style="width: 26px; height: 22px; border-radius: 6px; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex: none; background: #F1E3CF; color: #8A5418">A</span>
+                <span style="flex: 1; min-width: 0; font-size: 16px; line-height: 1.4">
+                  <span style="color: #23262B; font-weight: 400">Hand </span><span style="color: #23262B; font-weight: 400">in </span><span style="color: #23262B; font-weight: 400">exercise </span><span style="color: #23262B; font-weight: 400">sheet </span><span style="color: #23262B; font-weight: 400">3 </span><span style="color: #6F2F96; font-weight: 500">+algebra </span>
+                </span>
+                <span style="font-size: 13px; font-weight: 600; color: #B03A2E; flex: none">10 Nov</span>
+              </div>
+          </div>
+          <div>
+            <button style="width: 100%; height: 44px; border: 0; background: none; display: flex; align-items: center; gap: 8px; padding: 0 8px; font-size: 14px; font-weight: 650; color: #23262B">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg>
+              Today
+              <span style="font-weight: 500; color: #5F6269">2</span>
+            </button>
+              <div style="min-height: 56px; display: flex; align-items: center; gap: 12px; padding: 6px 10px; border-radius: 12px; background: #D2D9F0">
+                <input type="checkbox" aria-label="Done" style="width: 22px; height: 22px; accent-color: #4762BE; flex: none; margin: 0">
+                <span style="width: 26px; height: 22px; border-radius: 6px; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex: none; background: #F1E3CF; color: #8A5418">A</span>
+                <span style="flex: 1; min-width: 0; font-size: 16px; line-height: 1.4">
+                  <span style="color: #23262B; font-weight: 400">Redo </span><span style="color: #23262B; font-weight: 400">exercise </span><span style="color: #23262B; font-weight: 400">1.2.4 </span><span style="color: #6F2F96; font-weight: 500">+algebra </span><span style="color: #3E63C7; font-weight: 500">@library </span>
+                </span>
+                <span style="font-size: 13px; font-weight: 600; color: #5F6269; flex: none">Today</span>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5F6269" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-label="Reminder" role="img"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9 M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg>
+              </div>
+              <div style="min-height: 56px; display: flex; align-items: center; gap: 12px; padding: 6px 10px; border-radius: 12px; background: transparent">
+                <input type="checkbox" aria-label="Done" style="width: 22px; height: 22px; accent-color: #4762BE; flex: none; margin: 0">
+                <span style="width: 26px; height: 22px; border-radius: 6px; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex: none; background: #F1E3CF; color: #8A5418">B</span>
+                <span style="flex: 1; min-width: 0; font-size: 16px; line-height: 1.4">
+                  <span style="color: #23262B; font-weight: 400">Ask </span><span style="color: #23262B; font-weight: 400">about </span><span style="color: #23262B; font-weight: 400">the </span><span style="color: #23262B; font-weight: 400">span </span><span style="color: #23262B; font-weight: 400">of </span><span style="color: #23262B; font-weight: 400">the </span><span style="color: #23262B; font-weight: 400">empty </span><span style="color: #23262B; font-weight: 400">set </span><span style="color: #6F2F96; font-weight: 500">+algebra </span><span style="color: #1A6C7E; font-weight: 500">#exam </span>
+                </span>
+                <span style="font-size: 13px; font-weight: 600; color: #5F6269; flex: none">Today</span>
+              </div>
+          </div>
+          <div>
+            <button style="width: 100%; height: 44px; border: 0; background: none; display: flex; align-items: center; gap: 8px; padding: 0 8px; font-size: 14px; font-weight: 650; color: #23262B">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg>
+              Next 7 days
+              <span style="font-weight: 500; color: #5F6269">2</span>
+            </button>
+              <div style="min-height: 56px; display: flex; align-items: center; gap: 12px; padding: 6px 10px; border-radius: 12px; background: transparent">
+                <input type="checkbox" aria-label="Done" style="width: 22px; height: 22px; accent-color: #4762BE; flex: none; margin: 0">
+                <span style="width: 26px; height: 22px; border-radius: 6px; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex: none; background: transparent; color: #8A5418"></span>
+                <span style="flex: 1; min-width: 0; font-size: 16px; line-height: 1.4">
+                  <span style="color: #23262B; font-weight: 400">Read </span><span style="color: #23262B; font-weight: 400">chapter </span><span style="color: #23262B; font-weight: 400">1.4 </span><span style="color: #6F2F96; font-weight: 500">+algebra </span>
+                </span>
+                <span style="font-size: 13px; font-weight: 600; color: #5F6269; flex: none">Sat 14</span>
+              </div>
+              <div style="min-height: 56px; display: flex; align-items: center; gap: 12px; padding: 6px 10px; border-radius: 12px; background: transparent">
+                <input type="checkbox" aria-label="Done" style="width: 22px; height: 22px; accent-color: #4762BE; flex: none; margin: 0">
+                <span style="width: 26px; height: 22px; border-radius: 6px; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex: none; background: #F1E3CF; color: #8A5418">C</span>
+                <span style="flex: 1; min-width: 0; font-size: 16px; line-height: 1.4">
+                  <span style="color: #23262B; font-weight: 400">Mock </span><span style="color: #23262B; font-weight: 400">exam </span><span style="color: #23262B; font-weight: 400">with </span><span style="color: #23262B; font-weight: 400">Giulia </span><span style="color: #6F2F96; font-weight: 500">+algebra </span><span style="color: #3E63C7; font-weight: 500">@library </span>
+                </span>
+                <span style="font-size: 13px; font-weight: 600; color: #5F6269; flex: none">Mon 16</span>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5F6269" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-label="Reminder" role="img"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9 M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg>
+              </div>
+          </div>
+          <div>
+            <button style="width: 100%; height: 44px; border: 0; background: none; display: flex; align-items: center; gap: 8px; padding: 0 8px; font-size: 14px; font-weight: 650; color: #5F6269">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"></path></svg>
+              Done
+              <span style="font-weight: 500; color: #5F6269">3</span>
+            </button>
+          </div>
+      </section>
+      <aside aria-label="Task" style="width: 360px; flex: none; border-left: 1px solid #DED7CA; background: #EFE9E0; padding: 18px 20px; display: flex; flex-direction: column; gap: 16px; box-sizing: border-box">
+        <div style="display: flex; align-items: center; justify-content: space-between">
+          <span style="font-size: 12px; font-weight: 600; letter-spacing: .06em; color: #5F6269">TASK</span>
+          <button aria-label="Delete task" style="width: 40px; height: 40px; border: 0; background: none; border-radius: 20px; display: flex; align-items: center; justify-content: center; color: #4F525A"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18 M8 6V4h8v2 M19 6l-1 14H6L5 6"></path></svg></button>
+        </div>
+        <label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600; color: #4F525A">
+          Description
+          <textarea rows="3" style="border: 1px solid #C4BDAF; background: #FAF7F1; border-radius: 12px; padding: 10px 12px; font-size: 16px; font-weight: 400; color: #23262B; resize: none; line-height: 1.4">Redo exercise 1.2.4 +algebra @library</textarea>
+        </label>
+        <div style="display: flex; flex-direction: column; gap: 6px">
+          <span style="font-size: 13px; font-weight: 600; color: #4F525A">Priority</span>
+          <div role="group" aria-label="Priority" style="display: flex; gap: 6px">
+            <button aria-pressed="true" style="width: 52px; height: 40px; border: 1px solid #8A5418; background: #F1E3CF; color: #8A5418; border-radius: 12px; font-weight: 700">A</button>
+            <button style="width: 52px; height: 40px; border: 1px solid #C4BDAF; background: none; border-radius: 12px; font-weight: 600">B</button>
+            <button style="width: 52px; height: 40px; border: 1px solid #C4BDAF; background: none; border-radius: 12px; font-weight: 600">C</button>
+            <button style="flex: 1; height: 40px; border: 1px solid #C4BDAF; background: none; border-radius: 12px; font-weight: 500; color: #4F525A">None</button>
+          </div>
+        </div>
+          <button style="height: 52px; border: 1px solid #C4BDAF; background: #FAF7F1; border-radius: 12px; display: flex; align-items: center; gap: 12px; padding: 0 14px; text-align: left">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4F525A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4 M16 2v4 M3 10h18 M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"></path></svg>
+            <span style="display: flex; flex-direction: column; flex: 1">
+              <span style="font-size: 12px; color: #5F6269">Due</span>
+              <span style="font-size: 15px; font-weight: 500">Today, Wednesday 11 November</span>
+            </span>
+          </button>
+          <button style="height: 52px; border: 1px solid #C4BDAF; background: #FAF7F1; border-radius: 12px; display: flex; align-items: center; gap: 12px; padding: 0 14px; text-align: left">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4F525A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9 M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg>
+            <span style="display: flex; flex-direction: column; flex: 1">
+              <span style="font-size: 12px; color: #5F6269">Reminder</span>
+              <span style="font-size: 15px; font-weight: 500">Today at 17:00</span>
+            </span>
+          </button>
+          <button style="height: 52px; border: 1px solid #C4BDAF; background: #FAF7F1; border-radius: 12px; display: flex; align-items: center; gap: 12px; padding: 0 14px; text-align: left">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4F525A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 2l4 4-4 4 M3 11v-1a4 4 0 0 1 4-4h14 M7 22l-4-4 4-4 M21 13v1a4 4 0 0 1-4 4H3"></path></svg>
+            <span style="display: flex; flex-direction: column; flex: 1">
+              <span style="font-size: 12px; color: #5F6269">Repeats</span>
+              <span style="font-size: 15px; font-weight: 500">Never</span>
+            </span>
+          </button>
+        <div style="font-size: 13px; color: #5F6269">Created 4 Nov · linked note <span style="color: #4762BE">[[Exercises — week 3]]</span></div>
+      </aside>
+    </div>
+  </main>
+</div>
+</body>
+</html>
