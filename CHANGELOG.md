@@ -6,6 +6,36 @@ This file ships inside the build and feeds the in-app changelog (the
 launch dialog after an update and the screen under Settings → Diagnostics
 and info). Update it in the release commit, before the tag.
 
+## [0.3.5] - 2026-11-11
+
+A screenshot pastes into a note, a picture dropped twice is copied once,
+and the code underneath is cut into files a person can read.
+
+A picture alone on the clipboard — a capture of the Snipping Tool, a Mac
+or Linux screenshot, an image a browser copied — now pastes into a note
+the way a copied file does: kept as a PNG named for when it came, copied
+into the attachments folder under its hash and embedded at the caret. When
+text comes with it, as a spreadsheet's cells do, the text wins and pastes
+as a table. A picture dropped again while its last drop was still copying
+is no longer copied three times at once, which on Windows held a drop for
+seconds.
+
+The rest of this release changes nothing you can see. No file of the app
+may now grow past 600 lines of code: a test fails one that does, and the
+files already over it were split. The window, the note view and the
+source editor — each once several thousand lines — are now a model and the
+parts that draw it.
+
+### Added
+- **Editor**: a picture on the clipboard, with no file and no text beside it, is attached and embedded at the caret on Windows, Linux and macOS; Android and iOS already handed it over as a file (#1254)
+
+### Fixed
+- **Attachments**: the same file stored twice at once is copied once, so a picture dropped again mid-copy no longer waits on its own copies (#1254)
+
+### Other
+- A size gate fails any file in `lib/` over 600 code lines; the files above it were split, `shell.dart`, `note_view.dart` and `source_view.dart` among them (#100, #1256, #1257, #1261)
+- SwiftPM's build folder is no longer tracked (#1252)
+
 ## [0.3.4] - 2026-11-03
 
 Spreadsheet cells paste as a table, a file pasted or dropped on a note is
