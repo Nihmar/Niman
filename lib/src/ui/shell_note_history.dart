@@ -2,8 +2,14 @@
 /// side buttons that ask for it on a desktop.
 library;
 
+import 'dart:async';
+
 import 'package:flutter/gestures.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:niman/src/core/host_platform.dart';
+import 'package:niman/src/ui/app_shortcuts.dart';
+import 'package:niman/src/ui/key_map.dart';
 import 'package:niman/src/ui/shell_workspace.dart';
 
 /// Takes the window back and forward through its [ShellWorkspace.history].
@@ -70,6 +76,38 @@ final class NoteHistoryNavigator {
       return;
     }
   }
+
+  /// Back and forward from a keyboard while nothing in the window has the
+  /// focus (#700): the phone's layout claims none, so a field keeps the
+  /// software keyboard (T-PP-10), and no binding of the shell hears a key
+  /// then. With a focus, the shell's bindings answer, and this does not.
+  bool unfocusedKey(KeyEvent event) {
+    if (event is! KeyDownEvent) return false;
+    if (FocusManager.instance.primaryFocus is! FocusScopeNode) return false;
+    final keys = AppKeyMap.current.value;
+    final keyboard = HardwareKeyboard.instance;
+    if (keys.bindingOf(AppCommand.noteBack)?.accepts(event, keyboard) ??
+        false) {
+      unawaited(back());
+      return true;
+    }
+    if (keys.bindingOf(AppCommand.noteForward)?.accepts(event, keyboard) ??
+        false) {
+      unawaited(forward());
+      return true;
+    }
+    return false;
+  }
+
+  /// The mouse's side buttons over [child], on a desktop (#700). A phone's
+  /// back button is the system's Back, which keeps its meaning.
+  Widget mouseButtons(Widget child) => HostPlatform.isDesktop
+      ? MouseHistoryButtons(
+          onBack: () => unawaited(back()),
+          onForward: () => unawaited(forward()),
+          child: child,
+        )
+      : child;
 }
 
 /// Answers the mouse's back and forward buttons over [child] — the side
