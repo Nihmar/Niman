@@ -65,37 +65,67 @@ final class PinnedTabChip extends StatelessWidget {
         selected: selected,
         focused: focused,
         onTap: onTap,
-        builder: (context, {required hover}) => Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(width: 12),
-            Icon(icon, size: 15, color: colour),
-            const SizedBox(width: 6),
-            Flexible(
-              child: switch (maxLabelWidth) {
-                final width? => ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: width),
-                  child: text,
-                ),
-                null => text,
-              },
-            ),
-            const SizedBox(width: 6),
-            SizedBox.square(
-              dimension: TabSurface.closeFor(touch: thumbDense(theme)),
-              child: IconButton(
-                key: closeKey,
-                tooltip: AppStrings.closeTabTooltip,
-                padding: EdgeInsets.zero,
-                iconSize: 14,
-                icon: const Icon(Icons.close),
-                onPressed: onClose,
-              ),
-            ),
-            const SizedBox(width: 6),
-          ],
+        // A pane too narrow for the label keeps the icon and the close
+        // (a tablet's, beside the tree, #1266), and what not even they fit
+        // in is clipped rather than overflowing.
+        builder: (context, {required hover}) => LayoutBuilder(
+          builder: (context, constraints) {
+            final touch = thumbDense(theme);
+            if (constraints.maxWidth >= _labelledMin(theme)) {
+              return _row(text, colour, touch: touch, labelled: true);
+            }
+            return UnconstrainedBox(
+              constrainedAxis: Axis.vertical,
+              alignment: AlignmentDirectional.centerStart,
+              clipBehavior: Clip.hardEdge,
+              child: _row(text, colour, touch: touch, labelled: false),
+            );
+          },
         ),
       ),
     );
   }
+
+  /// The least width the chip shows its label in: its fixed parts, and a
+  /// few letters.
+  double _labelledMin(ThemeData theme) =>
+      12 + 15 + 6 + 6 + TabSurface.closeFor(touch: thumbDense(theme)) + 6 + 24;
+
+  Widget _row(
+    Widget text,
+    Color colour, {
+    required bool touch,
+    required bool labelled,
+  }) => Row(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      SizedBox(width: labelled ? 12 : 6),
+      Icon(icon, size: 15, color: colour),
+      if (labelled) ...[
+        const SizedBox(width: 6),
+        Flexible(
+          child: switch (maxLabelWidth) {
+            final width? => ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: width),
+              child: text,
+            ),
+            null => text,
+          },
+        ),
+      ],
+      SizedBox(width: labelled ? 6 : 2),
+      SizedBox.square(
+        dimension: TabSurface.closeFor(touch: touch),
+        child: IconButton(
+          key: closeKey,
+          tooltip: AppStrings.closeTabTooltip,
+          padding: EdgeInsets.zero,
+          iconSize: 14,
+          icon: const Icon(Icons.close),
+          onPressed: onClose,
+        ),
+      ),
+      SizedBox(width: labelled ? 6 : 2),
+    ],
+  );
 }
