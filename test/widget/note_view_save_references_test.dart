@@ -11,8 +11,8 @@ import 'package:niman/src/ui/note_services.dart';
 import 'package:niman/src/ui/note_view.dart';
 
 void main() {
-  setUp(() => MarkdownSourceViewState.backgroundLines = 2);
-  tearDown(() => MarkdownSourceViewState.backgroundLines = 50000);
+  setUp(() => SourceEditor.backgroundLines = 2);
+  tearDown(() => SourceEditor.backgroundLines = 50000);
 
   testWidgets('a long note saves with its references', (tester) async {
     final saves = <(String, NoteReferences?)>[];

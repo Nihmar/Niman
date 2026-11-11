@@ -56,8 +56,7 @@ Future<MarkdownSourceViewState> _pump(
       home: Scaffold(
         body: MarkdownSourceView(
           buffer: SourceBuffer.fromText(note),
-          theme: _theme,
-          hideMarkers: live,
+          look: SourceLook(theme: _theme, hideMarkers: live),
         ),
       ),
     ),

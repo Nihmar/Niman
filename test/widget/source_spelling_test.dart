@@ -122,13 +122,15 @@ Future<void> _pump(
       home: Scaffold(
         body: MarkdownSourceView(
           buffer: SourceBuffer.fromText(text),
-          theme: _theme,
-          showLineNumbers: false,
-          spellCheck: check,
-          // The same tests in both unified modes (#246): hiding a marker is a
-          // style, and the spelling's skip ranges are read off the tokens, so
-          // the underline must not know which mode drew the line.
-          hideMarkers: live,
+          look: SourceLook(
+            theme: _theme,
+            showLineNumbers: false,
+            // The same tests in both unified modes (#246): hiding a marker is a
+            // style, and the spelling's skip ranges are read off the tokens, so
+            // the underline must not know which mode drew the line.
+            hideMarkers: live,
+          ),
+          services: SourceServices(spellCheck: check),
         ),
       ),
     ),
@@ -203,8 +205,8 @@ void main() {
     // reading lands no line's tokens are known, and a line judged then would
     // be judged with nothing to skip — its code underlined — and the
     // underline would outlive the reading that says otherwise.
-    MarkdownSourceViewState.backgroundLines = 2;
-    addTearDown(() => MarkdownSourceViewState.backgroundLines = 50000);
+    SourceEditor.backgroundLines = 2;
+    addTearDown(() => SourceEditor.backgroundLines = 50000);
     final check = EditorSpellCheck(createChecker: (_) => const _FakeChecker());
     addTearDown(check.dispose);
     await _pump(tester, 'wrold here\n\nand `wrold` in code\n', check);

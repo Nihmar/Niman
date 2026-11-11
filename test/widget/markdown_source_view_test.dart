@@ -70,11 +70,13 @@ void main() {
         home: Scaffold(
           body: MarkdownSourceView(
             buffer: SourceBuffer.fromText(text),
-            theme: _theme,
+            look: SourceLook(
+              theme: _theme,
+              showLineNumbers: false,
+              hideMarkers: hideMarkers,
+            ),
             selection: selection,
             onSelection: onSelection,
-            showLineNumbers: false,
-            hideMarkers: hideMarkers,
           ),
         ),
       ),
@@ -108,8 +110,7 @@ void main() {
         home: Scaffold(
           body: MarkdownSourceView(
             buffer: SourceBuffer.fromText('$long\nsecond\n'),
-            theme: _theme,
-            showLineNumbers: false,
+            look: const SourceLook(theme: _theme, showLineNumbers: false),
           ),
         ),
       ),
@@ -167,9 +168,8 @@ void main() {
               rebuild = setState;
               return MarkdownSourceView(
                 buffer: SourceBuffer.fromText(text),
-                theme: _theme,
+                look: const SourceLook(theme: _theme, showLineNumbers: false),
                 selection: selection,
-                showLineNumbers: false,
               );
             },
           ),
@@ -224,8 +224,7 @@ void main() {
         home: Scaffold(
           body: MarkdownSourceView(
             buffer: SourceBuffer.fromText(note.toString()),
-            theme: _theme,
-            showLineNumbers: false,
+            look: const SourceLook(theme: _theme, showLineNumbers: false),
           ),
         ),
       ),
@@ -279,7 +278,7 @@ void main() {
         home: Scaffold(
           body: MarkdownSourceView(
             buffer: SourceBuffer.fromText("una riga di testo\nun'altra"),
-            theme: _theme,
+            look: const SourceLook(theme: _theme),
           ),
         ),
       ),
@@ -401,8 +400,7 @@ void main() {
         home: Scaffold(
           body: MarkdownSourceView(
             buffer: buffer,
-            theme: _theme,
-            showLineNumbers: false,
+            look: const SourceLook(theme: _theme, showLineNumbers: false),
           ),
         ),
       ),
@@ -758,10 +756,9 @@ void main() {
           body: StatefulBuilder(
             builder: (context, setState) => MarkdownSourceView(
               buffer: buffer,
-              theme: _theme,
+              look: const SourceLook(theme: _theme, showLineNumbers: false),
               selection: selection,
               onSelection: (next) => selection = next,
-              showLineNumbers: false,
             ),
           ),
         ),
@@ -810,8 +807,7 @@ void main() {
         home: Scaffold(
           body: MarkdownSourceView(
             buffer: buffer,
-            theme: _theme,
-            showLineNumbers: false,
+            look: const SourceLook(theme: _theme, showLineNumbers: false),
             onSelection: carets.add,
           ),
         ),
@@ -868,8 +864,7 @@ void main() {
                   .copyWith(textScaler: const TextScaler.linear(1.25)),
               child: MarkdownSourceView(
                 buffer: buffer,
-                theme: _theme,
-                showLineNumbers: false,
+                look: const SourceLook(theme: _theme, showLineNumbers: false),
                 onSelection: carets.add,
               ),
             ),
@@ -910,8 +905,7 @@ void main() {
         home: Scaffold(
           body: MarkdownSourceView(
             buffer: buffer,
-            theme: _theme,
-            showLineNumbers: false,
+            look: const SourceLook(theme: _theme, showLineNumbers: false),
             onSelection: carets.add,
           ),
         ),
@@ -945,8 +939,7 @@ void main() {
         home: Scaffold(
           body: MarkdownSourceView(
             buffer: buffer,
-            theme: _theme,
-            showLineNumbers: false,
+            look: const SourceLook(theme: _theme, showLineNumbers: false),
             onSelection: carets.add,
           ),
         ),
@@ -977,8 +970,7 @@ void main() {
         home: Scaffold(
           body: MarkdownSourceView(
             buffer: buffer,
-            theme: _theme,
-            showLineNumbers: false,
+            look: const SourceLook(theme: _theme, showLineNumbers: false),
             onSelection: carets.add,
           ),
         ),
@@ -1011,8 +1003,7 @@ void main() {
           body: StatefulBuilder(
             builder: (context, setState) => MarkdownSourceView(
               buffer: buffer,
-              theme: _theme,
-              showLineNumbers: false,
+              look: const SourceLook(theme: _theme, showLineNumbers: false),
               selection: selection,
               onSelection: (next) {
                 carets.add(next);
@@ -1042,8 +1033,7 @@ void main() {
         home: Scaffold(
           body: MarkdownSourceView(
             buffer: buffer,
-            theme: _theme,
-            showLineNumbers: false,
+            look: const SourceLook(theme: _theme, showLineNumbers: false),
             onSelection: carets.add,
           ),
         ),
@@ -1098,8 +1088,7 @@ void main() {
         home: Scaffold(
           body: MarkdownSourceView(
             buffer: buffer,
-            theme: _theme,
-            showLineNumbers: false,
+            look: const SourceLook(theme: _theme, showLineNumbers: false),
           ),
         ),
       ),
@@ -1152,8 +1141,7 @@ void main() {
         home: Scaffold(
           body: MarkdownSourceView(
             buffer: buffer,
-            theme: _theme,
-            showLineNumbers: false,
+            look: const SourceLook(theme: _theme, showLineNumbers: false),
           ),
         ),
       ),
@@ -1180,8 +1168,7 @@ void main() {
         home: Scaffold(
           body: MarkdownSourceView(
             buffer: buffer,
-            theme: _theme,
-            showLineNumbers: false,
+            look: const SourceLook(theme: _theme, showLineNumbers: false),
           ),
         ),
       ),
@@ -1207,8 +1194,7 @@ void main() {
             body: MarkdownSourceView(
               key: UniqueKey(),
               buffer: SourceBuffer.fromText(text),
-              theme: _theme,
-              showLineNumbers: false,
+              look: const SourceLook(theme: _theme, showLineNumbers: false),
             ),
           ),
         ),
@@ -1242,8 +1228,7 @@ void main() {
         home: Scaffold(
           body: MarkdownSourceView(
             buffer: buffer,
-            theme: _theme,
-            showLineNumbers: false,
+            look: const SourceLook(theme: _theme, showLineNumbers: false),
             onSelection: carets.add,
           ),
         ),
@@ -1281,8 +1266,7 @@ void main() {
         home: Scaffold(
           body: MarkdownSourceView(
             buffer: buffer,
-            theme: _theme,
-            showLineNumbers: false,
+            look: const SourceLook(theme: _theme, showLineNumbers: false),
             onChanged: (_) => told.add(buffer.text),
           ),
         ),
@@ -1328,9 +1312,11 @@ void main() {
           home: Scaffold(
             body: MarkdownSourceView(
               buffer: SourceBuffer.fromText(text),
-              theme: _theme,
-              showLineNumbers: false,
-              hideMarkers: hide,
+              look: SourceLook(
+                theme: _theme,
+                showLineNumbers: false,
+                hideMarkers: hide,
+              ),
               selection: SelectionModel.at(caret),
             ),
           ),
@@ -1393,9 +1379,11 @@ void main() {
           home: Scaffold(
             body: MarkdownSourceView(
               buffer: SourceBuffer.fromText('## Sezione\ntesto\n'),
-              theme: _theme,
-              showLineNumbers: false,
-              hideMarkers: hide,
+              look: SourceLook(
+                theme: _theme,
+                showLineNumbers: false,
+                hideMarkers: hide,
+              ),
               // The caret is on the line below: the heading's hash is hidden
               // while the writer is not in it, which is the reveal policy
               // (`docs/records/unified-surface.md` §8.6.2).
@@ -1482,8 +1470,7 @@ void main() {
         home: Scaffold(
           body: MarkdownSourceView(
             buffer: buffer,
-            theme: _theme,
-            showLineNumbers: false,
+            look: const SourceLook(theme: _theme, showLineNumbers: false),
             selection: const SelectionModel.at(3),
           ),
         ),
@@ -1535,8 +1522,7 @@ void main() {
         home: Scaffold(
           body: MarkdownSourceView(
             buffer: buffer,
-            theme: _theme,
-            showLineNumbers: false,
+            look: const SourceLook(theme: _theme, showLineNumbers: false),
             onChanged: (_) => changed.add(buffer.text),
           ),
         ),
@@ -1576,7 +1562,7 @@ void main() {
             buffer: SourceBuffer.fromText(
               List<String>.generate(12, (i) => 'riga $i').join('\n'),
             ),
-            theme: _theme,
+            look: const SourceLook(theme: _theme),
           ),
         ),
       ),
@@ -1606,9 +1592,11 @@ void main() {
         home: Scaffold(
           body: MarkdownSourceView(
             buffer: SourceBuffer.fromText('una riga\n'),
-            theme: _theme,
-            showLineNumbers: false,
-            column: const NoteColumn(width: 300),
+            look: const SourceLook(
+              theme: _theme,
+              showLineNumbers: false,
+              column: NoteColumn(width: 300),
+            ),
           ),
         ),
       ),
@@ -1673,8 +1661,10 @@ void main() {
                 Expanded(
                   child: MarkdownSourceView(
                     buffer: SourceBuffer.fromText('una riga\n'),
-                    theme: _theme,
-                    showLineNumbers: false,
+                    look: const SourceLook(
+                      theme: _theme,
+                      showLineNumbers: false,
+                    ),
                   ),
                 ),
               ],

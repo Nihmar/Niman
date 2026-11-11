@@ -58,8 +58,8 @@ const String _note =
 
 void main() {
   group('a long note', () {
-    setUp(() => MarkdownSourceViewState.backgroundLines = 2);
-    tearDown(() => MarkdownSourceViewState.backgroundLines = 50000);
+    setUp(() => SourceEditor.backgroundLines = 2);
+    tearDown(() => SourceEditor.backgroundLines = 50000);
 
     testWidgets('joins its text for each ask after an edit, keeping none', (
       tester,

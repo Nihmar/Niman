@@ -66,7 +66,10 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: MarkdownSourceView(buffer: buffer, theme: _theme),
+          body: MarkdownSourceView(
+            buffer: buffer,
+            look: const SourceLook(theme: _theme),
+          ),
         ),
       ),
     );
@@ -136,10 +139,7 @@ void main() {
       for (var at = 0; at < 3000; at++) ...['# h$at', 'prose $at', ''],
     ].join('\n');
     final buffer = SourceBuffer.fromText(note);
-    expect(
-      buffer.lineCount,
-      greaterThan(MarkdownSourceViewState.progressiveLines),
-    );
+    expect(buffer.lineCount, greaterThan(SourceEditor.progressiveLines));
     tester.view.physicalSize = const Size(700, 500);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
@@ -152,7 +152,10 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: MarkdownSourceView(buffer: buffer, theme: _theme),
+          body: MarkdownSourceView(
+            buffer: buffer,
+            look: const SourceLook(theme: _theme),
+          ),
         ),
       ),
     );
@@ -184,7 +187,10 @@ void main() {
     ].join('\n');
     Widget view(SourceBuffer buffer) => MaterialApp(
       home: Scaffold(
-        body: MarkdownSourceView(buffer: buffer, theme: _theme),
+        body: MarkdownSourceView(
+          buffer: buffer,
+          look: const SourceLook(theme: _theme),
+        ),
       ),
     );
     await tester.pumpWidget(view(SourceBuffer.fromText(note('a'))));
@@ -214,7 +220,7 @@ void main() {
         home: Scaffold(
           body: MarkdownSourceView(
             buffer: SourceBuffer.fromText(note),
-            theme: _theme,
+            look: const SourceLook(theme: _theme),
           ),
         ),
       ),

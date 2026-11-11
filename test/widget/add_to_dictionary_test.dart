@@ -114,10 +114,12 @@ Future<void> _pump(
       home: Scaffold(
         body: MarkdownSourceView(
           buffer: SourceBuffer.fromText(text),
-          theme: _theme,
-          showLineNumbers: false,
-          spellCheck: check,
-          hideMarkers: live,
+          look: SourceLook(
+            theme: _theme,
+            showLineNumbers: false,
+            hideMarkers: live,
+          ),
+          services: SourceServices(spellCheck: check),
         ),
       ),
     ),

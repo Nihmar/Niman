@@ -1090,9 +1090,8 @@ void main() {
           home: Scaffold(
             body: MarkdownSourceView(
               buffer: buffer,
-              theme: _theme,
-              showLineNumbers: false,
-              wikilinkSuggester: suggester,
+              look: const SourceLook(theme: _theme, showLineNumbers: false),
+              services: SourceServices(wikilinkSuggester: suggester),
             ),
           ),
         ),
@@ -1257,8 +1256,8 @@ void main() {
       // A long note is read in the background: until it lands its lines have
       // no tokens, which is "nobody has read it yet" and not "no code here" —
       // the fence the caret is in was answered as prose (#494).
-      MarkdownSourceViewState.backgroundLines = 2;
-      addTearDown(() => MarkdownSourceViewState.backgroundLines = 50000);
+      SourceEditor.backgroundLines = 2;
+      addTearDown(() => SourceEditor.backgroundLines = 50000);
       // Long enough for the reading to be in the background.
       final buffer = SourceBuffer.fromText('\n\n\n');
       final suggester = _library();
@@ -1308,9 +1307,8 @@ void main() {
         home: Scaffold(
           body: MarkdownSourceView(
             buffer: buffer,
-            theme: _theme,
+            look: const SourceLook(theme: _theme, showLineNumbers: false),
             selection: const SelectionModel.at(0),
-            showLineNumbers: false,
           ),
         ),
       ),

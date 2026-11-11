@@ -108,16 +108,20 @@ Future<MarkdownSourceViewState> _pump(
       home: Scaffold(
         body: MarkdownSourceView(
           buffer: SourceBuffer.fromText(text),
-          theme: _theme,
-          showLineNumbers: false,
-          formatMenu: formatMenu,
-          spellCheck: spellCheck,
-          onOpenLink: onOpenLink,
-          // The same tests in both unified modes (#246). The fixtures here
-          // carry no markers, so a click at a column lands on the same
-          // character either way — which is what lets one click test hold for
-          // both.
-          hideMarkers: live,
+          look: SourceLook(
+            theme: _theme,
+            showLineNumbers: false,
+            // The same tests in both unified modes (#246). The fixtures here
+            // carry no markers, so a click at a column lands on the same
+            // character either way — which is what lets one click test hold for
+            // both.
+            hideMarkers: live,
+          ),
+          actions: SourceActions(
+            formatMenu: formatMenu,
+            onOpenLink: onOpenLink,
+          ),
+          services: SourceServices(spellCheck: spellCheck),
         ),
       ),
     ),

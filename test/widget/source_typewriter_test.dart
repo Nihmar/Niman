@@ -61,13 +61,15 @@ Future<MarkdownSourceViewState> _pump(
       home: Scaffold(
         body: MarkdownSourceView(
           buffer: SourceBuffer.fromText(text),
-          theme: _theme,
-          showLineNumbers: false,
-          typewriter: typewriter,
-          caretWidth: caretWidth,
-          // The mode hides markers; this note has none, and what is under test
-          // is where the row being written is kept.
-          hideMarkers: live,
+          look: SourceLook(
+            theme: _theme,
+            showLineNumbers: false,
+            caretWidth: caretWidth,
+            // The mode hides markers; this note has none, and what is under
+            // test is where the row being written is kept.
+            hideMarkers: live,
+          ),
+          behaviour: SourceBehaviour(typewriter: typewriter),
         ),
       ),
     ),
@@ -219,10 +221,12 @@ void main() {
         home: Scaffold(
           body: MarkdownSourceView(
             buffer: buffer,
-            theme: _theme,
-            showLineNumbers: false,
-            typewriter: true,
-            hideMarkers: true,
+            look: const SourceLook(
+              theme: _theme,
+              showLineNumbers: false,
+              hideMarkers: true,
+            ),
+            behaviour: const SourceBehaviour(typewriter: true),
           ),
         ),
       ),

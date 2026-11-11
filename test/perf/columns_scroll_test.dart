@@ -86,9 +86,11 @@ Future<({double micros, int built})> _scrollAtEnd(
         body: MarkdownSourceView(
           key: UniqueKey(),
           buffer: SourceBuffer.fromText(text),
-          theme: _theme,
-          hideMarkers: true,
-          showLineNumbers: false,
+          look: const SourceLook(
+            theme: _theme,
+            hideMarkers: true,
+            showLineNumbers: false,
+          ),
           controller: controller,
         ),
       ),

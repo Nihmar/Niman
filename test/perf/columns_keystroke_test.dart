@@ -89,9 +89,11 @@ Future<({double micros, int scanned, int laidOut})> _keystroke(
         body: MarkdownSourceView(
           key: UniqueKey(),
           buffer: buffer,
-          theme: _theme,
-          hideMarkers: true,
-          showLineNumbers: false,
+          look: const SourceLook(
+            theme: _theme,
+            hideMarkers: true,
+            showLineNumbers: false,
+          ),
           onChanged: (_) {},
         ),
       ),

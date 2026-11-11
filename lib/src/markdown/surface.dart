@@ -112,29 +112,29 @@ final class MarkdownSurface extends StatelessWidget {
     super.key,
   });
 
-  /// See [MarkdownSourceView.lineTokens].
+  /// See [SourceLook.lineTokens].
   final List<Token> Function(String line)? lineTokens;
 
-  /// See [MarkdownSourceView.templateCommands].
+  /// See [SourceBehaviour.templateCommands].
   final bool templateCommands;
 
-  /// See [MarkdownSourceView.wikilinkSuggester]: the library the wikilink
+  /// See [SourceServices.wikilinkSuggester]: the library the wikilink
   /// suggester panel reads (#475), the same in both modes.
   final WikilinkSuggester? wikilinkSuggester;
 
-  /// See [MarkdownSourceView.notePath].
+  /// See [SourceServices.notePath].
   final String? notePath;
 
-  /// See [MarkdownSourceView.blockAnchors].
+  /// See [SourceServices.blockAnchors].
   final BufferBlockAnchors? blockAnchors;
 
-  /// See [MarkdownSourceView.deadLinks].
+  /// See [SourceServices.deadLinks].
   final ValueListenable<DeadLinks>? deadLinks;
 
-  /// See [MarkdownSourceView.onLinkHover].
+  /// See [SourceActions.onLinkHover].
   final void Function(SourceLinkHover? hover)? onLinkHover;
 
-  /// See [MarkdownSourceView.onPaste].
+  /// See [SourceActions.onPaste].
   final Future<bool> Function()? onPaste;
 
   /// The note.
@@ -203,7 +203,7 @@ final class MarkdownSurface extends StatelessWidget {
   final EditorSpellCheck? spellCheck;
 
   /// The note's template syntax check (T-TPL-09); see
-  /// [MarkdownSourceView.templateCheck].
+  /// [SourceServices.templateCheck].
   final TemplateCheck? templateCheck;
 
   /// What the find bar found, painted over the lines.
@@ -223,7 +223,7 @@ final class MarkdownSurface extends StatelessWidget {
   /// Where an embed's target is on disk, for the pictures `live` draws.
   final Future<String?> Function(String target)? embedResolver;
 
-  /// See [MarkdownSourceView.onStage].
+  /// See [SourceBehaviour.onStage].
   final bool onStage;
 
   /// The caret's width; null keeps the surface's own.
@@ -260,7 +260,17 @@ final class MarkdownSurface extends StatelessWidget {
   Widget build(BuildContext context) => MarkdownSourceView(
     key: viewKey,
     buffer: buffer,
-    theme: effectiveTheme,
+    look: SourceLook(
+      theme: effectiveTheme,
+      column: column,
+      padding: padding,
+      showLineNumbers: showLineNumbers,
+      syntax: syntax,
+      dark: dark,
+      hideMarkers: hidesMarkers,
+      caretWidth: caretWidth,
+      lineTokens: lineTokens,
+    ),
     selection: selection,
     onSelection: onSelection,
     onChanged: onChanged,
@@ -268,34 +278,32 @@ final class MarkdownSurface extends StatelessWidget {
     controller: controller,
     history: history,
     surface: surface,
-    column: column,
-    padding: padding,
-    showLineNumbers: showLineNumbers,
-    onStage: onStage,
-    indentWidth: indentWidth,
-    syntax: syntax,
-    dark: dark,
-    hideMarkers: hidesMarkers,
-    formatMenu: formatMenu,
-    editorMenu: editorMenu,
-    spellCheck: spellCheck,
-    templateCheck: templateCheck,
-    findMatches: findMatches,
-    onOpenLink: onOpenLink,
-    activeItems: activeItems,
-    mathCache: mathCache,
-    embedResolver: embedResolver,
-    caretWidth: caretWidth,
-    typewriter: typewriter,
-    cascadeChecklist: cascadeChecklist,
-    autofocus: autofocus,
-    lineTokens: lineTokens,
-    templateCommands: templateCommands,
-    wikilinkSuggester: wikilinkSuggester,
-    notePath: notePath,
-    blockAnchors: blockAnchors,
-    deadLinks: deadLinks,
-    onLinkHover: onLinkHover,
-    onPaste: onPaste,
+    behaviour: SourceBehaviour(
+      onStage: onStage,
+      indentWidth: indentWidth,
+      typewriter: typewriter,
+      cascadeChecklist: cascadeChecklist,
+      autofocus: autofocus,
+      templateCommands: templateCommands,
+    ),
+    actions: SourceActions(
+      formatMenu: formatMenu,
+      editorMenu: editorMenu,
+      onOpenLink: onOpenLink,
+      onLinkHover: onLinkHover,
+      onPaste: onPaste,
+    ),
+    services: SourceServices(
+      spellCheck: spellCheck,
+      templateCheck: templateCheck,
+      findMatches: findMatches,
+      activeItems: activeItems,
+      mathCache: mathCache,
+      embedResolver: embedResolver,
+      wikilinkSuggester: wikilinkSuggester,
+      notePath: notePath,
+      blockAnchors: blockAnchors,
+      deadLinks: deadLinks,
+    ),
   );
 }
