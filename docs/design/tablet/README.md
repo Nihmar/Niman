@@ -55,3 +55,14 @@ Three directions were drawn; **A** was chosen.
   another task is tapped. Where it has not, the dialog stays.
 - **Search stays the sidebar view it is** (#712); only its touch sizes
   change.
+
+## Where the app parts from the mockups
+
+- **Edit | Read and ⋮ head the note**, in the note's own top row, not in
+  the open notes' row: each pane of a split has its own note, and the
+  pair has to say what that pane's note shows.
+- **The tree lies over the note when the tablet is held upright**, or in
+  landscape when beside it the note would have under 360 dp — not by
+  width alone: a 7″ tablet in landscape and a 1024 dp one keep it beside.
+- **The library's button shows its initial** on the accent, rather than
+  the app's mark: it is the library, not the app, that it switches.
