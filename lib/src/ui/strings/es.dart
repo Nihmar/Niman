@@ -896,6 +896,10 @@ final class SpanishStrings extends Strings {
   String get showPreviewTooltip => 'Mostrar vista previa';
   @override
   String get showEditorTooltip => 'Mostrar editor';
+  @override
+  String get noteModeEdit => 'Editar';
+  @override
+  String get noteModeRead => 'Leer';
   // Raw-HTML table fallback.
 
   // Search (T-M3-05).

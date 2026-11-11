@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:niman/src/editor/note_column.dart';
+import 'package:niman/src/ui/note_top_bar_room.dart';
+import 'package:niman/src/ui/pointer_density.dart';
 
 /// The one row of chrome above a note on the desktop (issue #173).
 ///
@@ -33,9 +35,17 @@ final class NoteTopBar extends StatelessWidget {
   /// The row's height: the toolbar's, with room around it.
   static const double height = 38;
 
+  /// The row's height on a touch device (#1266): a thumb's buttons, with
+  /// room around them.
+  static const double touchHeight = 54;
+
   @override
   Widget build(BuildContext context) {
     final toolbar = this.toolbar;
+    // A tablet's row holds its Edit | Read and its ⋮ at a thumb's size
+    // (#1266); a mouse's keeps the toolbar's.
+    final touch = thumbDense(Theme.of(context));
+    final row = Row(mainAxisSize: MainAxisSize.min, children: actions);
     return Column(
       key: const Key('note-top-bar'),
       mainAxisSize: MainAxisSize.min,
@@ -43,38 +53,11 @@ final class NoteTopBar extends StatelessWidget {
         NoteColumnPadding(
           column: column,
           child: SizedBox(
-            height: height,
-            child: Padding(
-              // The first button's icon lands on the text's left edge
-              // (NoteColumn.textInset, less the button's own padding).
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: toolbar == null
-                        ? const SizedBox.shrink()
-                        : Align(
-                            alignment: AlignmentDirectional.centerStart,
-                            child: toolbar,
-                          ),
-                  ),
-                  // Sized like the toolbar's buttons, not like a phone's.
-                  IconButtonTheme(
-                    data: IconButtonThemeData(
-                      style: IconButton.styleFrom(
-                        iconSize: 18,
-                        minimumSize: const Size(30, 30),
-                        padding: const EdgeInsets.all(6),
-                        visualDensity: VisualDensity.compact,
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: actions,
-                    ),
-                  ),
-                ],
+            height: touch ? touchHeight : height,
+            child: LayoutBuilder(
+              builder: (context, constraints) => NoteTopBarRoom(
+                roomy: constraints.maxWidth >= roomForLabels,
+                child: _row(toolbar, row, touch: touch),
               ),
             ),
           ),
@@ -83,4 +66,44 @@ final class NoteTopBar extends StatelessWidget {
       ],
     );
   }
+
+  /// The least width of the row its controls show their labels in.
+  static const double roomForLabels = 420;
+
+  Widget _row(Widget? toolbar, Widget row, {required bool touch}) => SizedBox(
+    height: double.infinity,
+    child: Padding(
+      // The first button's icon lands on the text's left edge
+      // (NoteColumn.textInset, less the button's own padding).
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      child: Row(
+        children: [
+          Expanded(
+            child: toolbar == null
+                ? const SizedBox.shrink()
+                : Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: toolbar,
+                  ),
+          ),
+          // Sized like the toolbar's buttons, not like a phone's.
+          if (touch)
+            row
+          else
+            IconButtonTheme(
+              data: IconButtonThemeData(
+                style: IconButton.styleFrom(
+                  iconSize: 18,
+                  minimumSize: const Size(30, 30),
+                  padding: const EdgeInsets.all(6),
+                  visualDensity: VisualDensity.compact,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+              ),
+              child: row,
+            ),
+        ],
+      ),
+    ),
+  );
 }

@@ -891,6 +891,10 @@ final class SerbianStrings extends Strings {
   String get showPreviewTooltip => 'Прикажи преглед';
   @override
   String get showEditorTooltip => 'Прикажи уредитељ';
+  @override
+  String get noteModeEdit => 'Уређивање';
+  @override
+  String get noteModeRead => 'Читање';
   // Raw-HTML table fallback.
 
   // Search (T-M3-05).

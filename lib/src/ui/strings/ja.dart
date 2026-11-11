@@ -841,6 +841,10 @@ final class JapaneseStrings extends Strings {
   String get showPreviewTooltip => 'プレビューを表示';
   @override
   String get showEditorTooltip => 'エディタを表示';
+  @override
+  String get noteModeEdit => '編集';
+  @override
+  String get noteModeRead => '閲覧';
   // Raw-HTML table fallback.
 
   // Search (T-M3-05).

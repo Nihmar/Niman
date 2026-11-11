@@ -890,6 +890,10 @@ final class IcelandicStrings extends Strings {
   String get showPreviewTooltip => 'Sýna forsýningu';
   @override
   String get showEditorTooltip => 'Sýna ritara';
+  @override
+  String get noteModeEdit => 'Breyta';
+  @override
+  String get noteModeRead => 'Lesa';
   // Raw-HTML table fallback.
 
   // Search (T-M3-05).

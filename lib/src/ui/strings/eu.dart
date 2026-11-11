@@ -889,6 +889,10 @@ final class BasqueStrings extends Strings {
   String get showPreviewTooltip => 'Erakutsi aurrebista';
   @override
   String get showEditorTooltip => 'Erakutsi erreditorra';
+  @override
+  String get noteModeEdit => 'Editatu';
+  @override
+  String get noteModeRead => 'Irakurri';
   // Raw-HTML table fallback.
 
   // Search (T-M3-05).

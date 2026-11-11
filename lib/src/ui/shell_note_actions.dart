@@ -24,10 +24,12 @@ import 'package:niman/src/ui/kinds/flashcards/make_flashcards.dart';
 import 'package:niman/src/ui/kinds/slides/slides_present.dart';
 import 'package:niman/src/ui/move_to_tasks_flow.dart';
 import 'package:niman/src/ui/note_menu.dart';
+import 'package:niman/src/ui/note_mode_toggle.dart';
 import 'package:niman/src/ui/note_view_handle.dart';
 import 'package:niman/src/ui/note_view_memento.dart';
 import 'package:niman/src/ui/ocr/ocr_file_actions.dart';
 import 'package:niman/src/ui/palette/command_features.dart';
+import 'package:niman/src/ui/pointer_density.dart';
 import 'package:niman/src/ui/shell_editor_settings.dart';
 import 'package:niman/src/ui/shell_export_flow.dart';
 import 'package:niman/src/ui/shell_note_kind.dart';
@@ -494,10 +496,37 @@ final class ShellNoteActions {
   }
 
   /// The view controls in [pane]'s status row (T-PP-22): for the note
-  /// that pane shows, so each pane's eye says what its own tab does.
+  /// that pane shows, so each pane's eye says what its own tab does. A
+  /// tablet has them at the note's top instead ([modeToggleFor], #1266).
   List<Widget> statusActionsFor(int pane) {
+    if (thumbDense(Theme.of(context()))) return const [];
+    final mode = _modeOf(pane);
+    if (mode == null) return const [];
+    return [
+      PreviewToggleAction(
+        previewVisible: mode.preview,
+        onToggle: mode.toggle,
+        compact: true,
+      ),
+    ];
+  }
+
+  /// [pane]'s **Edit | Read** pair at the top of its note, on a tablet
+  /// (#1266): the status row's eye, named.
+  List<Widget> modeToggleFor(int pane) {
+    if (!thumbDense(Theme.of(context()))) return const [];
+    final mode = _modeOf(pane);
+    if (mode == null) return const [];
+    return [
+      NoteModeToggle(previewVisible: mode.preview, onToggle: mode.toggle),
+    ];
+  }
+
+  /// Whether [pane]'s note shows its preview and what flips it, or null
+  /// when its note has no such switch.
+  ({bool preview, VoidCallback? toggle})? _modeOf(int pane) {
     final tab = shown.workspace.value.panes[pane].activeTab;
-    if (tab == null) return const [];
+    if (tab == null) return null;
     // The focused pane's note is the one the shell's kind and raw mode
     // speak of; another pane's is told by its own kind (#1081).
     final offered = pane == shown.workspace.value.focused
@@ -507,14 +536,11 @@ final class ShellNoteActions {
             kindGui: kind.guiOf(tab.path),
             features: controller.features.value,
           );
-    if (!offered) return const [];
+    if (!offered) return null;
     final plain = isPlainTextFile(p.basename(tab.path));
-    return [
-      PreviewToggleAction(
-        previewVisible: !plain && (tab.memento.preview ?? false),
-        onToggle: plain ? null : () => shown.togglePreviewOf(tab.path),
-        compact: true,
-      ),
-    ];
+    return (
+      preview: !plain && (tab.memento.preview ?? false),
+      toggle: plain ? null : () => shown.togglePreviewOf(tab.path),
+    );
   }
 }

@@ -630,6 +630,8 @@ final class AppStrings {
   // Preview switch (phone mode).
   static String get showPreviewTooltip => _s.showPreviewTooltip;
   static String get showEditorTooltip => _s.showEditorTooltip;
+  static String get noteModeEdit => _s.noteModeEdit;
+  static String get noteModeRead => _s.noteModeRead;
   // Raw-HTML table fallback.
 
   // Search (T-M3-05).

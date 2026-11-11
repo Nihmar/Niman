@@ -454,6 +454,8 @@ void main() {
       ];
 
       final probes = <String, String Function()>{
+        'noteModeEdit': () => AppStrings.noteModeEdit,
+        'noteModeRead': () => AppStrings.noteModeRead,
         'sourceFontTitle': () => AppStrings.sourceFontTitle,
         'sourceFontSubtitle': () => AppStrings.sourceFontSubtitle,
         'sourceFontMonospace': () => AppStrings.sourceFontMonospace,

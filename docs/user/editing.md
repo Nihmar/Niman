@@ -1114,7 +1114,10 @@ in the first quadrant, ready to write a task.
 The note is one pane, and it holds one of the two: the editor you write
 in, or the rendered note you read. The eye flips between them — in the
 note's status row on a wide window, in the app bar on a phone, or *Show
-preview* / *Show editor* in the palette anywhere. What you leave behind
+preview* / *Show editor* in the palette anywhere. On a tablet the eye is
+**Edit | Read**, a pair at the top of the note beside its ⋮, the one on
+screen selected (#1266); in a narrow pane it keeps the two icons and
+names them in their tooltips. What you leave behind
 keeps its place: the caret, the undo history, the typeset math and the
 images are all there when you come back. The note stays where you were
 reading it, too: flipping to the preview, back to

@@ -893,6 +893,10 @@ final class HungarianStrings extends Strings {
   String get showPreviewTooltip => 'Előnézet megjelenítése';
   @override
   String get showEditorTooltip => 'Szerkesztő megjelenítése';
+  @override
+  String get noteModeEdit => 'Szerkesztés';
+  @override
+  String get noteModeRead => 'Olvasás';
   // Raw-HTML table fallback.
 
   // Search (T-M3-05).

@@ -442,6 +442,9 @@ final class ShellNotePanes {
                     // toggle ends that row instead (#1134).
                     barActions: [
                       ...noteActions.kindActions,
+                      // A tablet's Edit | Read, where the status row's
+                      // eye was (#1266).
+                      ...noteActions.modeToggleFor(pane),
                       if (window.customTitleBar) dockToggle(),
                       noteActions.menu(),
                     ],

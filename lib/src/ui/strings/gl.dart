@@ -892,6 +892,10 @@ final class GalicianStrings extends Strings {
   String get showPreviewTooltip => 'Mostrar a previsualización';
   @override
   String get showEditorTooltip => 'Mostrar o editor';
+  @override
+  String get noteModeEdit => 'Editar';
+  @override
+  String get noteModeRead => 'Ler';
   // Raw-HTML table fallback.
 
   // Search (T-M3-05).

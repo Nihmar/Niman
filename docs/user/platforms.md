@@ -498,6 +498,9 @@ row too narrow for them and the tabs (a small tablet with the tree and
 the side panel open) leaves them out until there is room. A line over the
 tree names the **library** and the folder the selection is in, with the
 library switch beside it; on Linux and Windows the title bar says it.
+The row at the top of each note — its ⋮, and on a tablet its **Edit |
+Read** pair in the place of the status row's eye — is a thumb's height
+there too (#1266).
 
 On an Android phone the same open notes are reached from a **switcher** instead
 of tabs: a count on the note bar opens the list. One note is on screen

@@ -910,6 +910,10 @@ final class GreekStrings extends Strings {
   String get showPreviewTooltip => 'Εμφάνιση προεπισκόπησης';
   @override
   String get showEditorTooltip => 'Εμφάνιση επεξεργαστή';
+  @override
+  String get noteModeEdit => 'Επεξεργασία';
+  @override
+  String get noteModeRead => 'Ανάγνωση';
   // Raw-HTML table fallback.
 
   // Search (T-M3-05).

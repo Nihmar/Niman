@@ -894,6 +894,10 @@ final class SwedishStrings extends Strings {
   String get showPreviewTooltip => 'Visa förhandsvisning';
   @override
   String get showEditorTooltip => 'Visa editor';
+  @override
+  String get noteModeEdit => 'Redigera';
+  @override
+  String get noteModeRead => 'Läs';
   // Raw-HTML table fallback.
 
   // Search (T-M3-05).

@@ -883,6 +883,10 @@ final class EnglishStrings extends Strings {
   String get showPreviewTooltip => 'Show preview';
   @override
   String get showEditorTooltip => 'Show editor';
+  @override
+  String get noteModeEdit => 'Edit';
+  @override
+  String get noteModeRead => 'Read';
   // Raw-HTML table fallback.
 
   // Search (T-M3-05).

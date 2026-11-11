@@ -896,6 +896,10 @@ final class DutchStrings extends Strings {
   String get showPreviewTooltip => 'Voorbeeld tonen';
   @override
   String get showEditorTooltip => 'Editor tonen';
+  @override
+  String get noteModeEdit => 'Bewerken';
+  @override
+  String get noteModeRead => 'Lezen';
   // Raw-HTML table fallback.
 
   // Search (T-M3-05).

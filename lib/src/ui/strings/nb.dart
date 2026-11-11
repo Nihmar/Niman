@@ -886,6 +886,10 @@ final class NorwegianStrings extends Strings {
   String get showPreviewTooltip => 'Vis forhåndsvising';
   @override
   String get showEditorTooltip => 'Vis editor';
+  @override
+  String get noteModeEdit => 'Rediger';
+  @override
+  String get noteModeRead => 'Les';
   // Raw-HTML table fallback.
 
   // Search (T-M3-05).

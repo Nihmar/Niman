@@ -885,6 +885,10 @@ final class DanishStrings extends Strings {
   String get showPreviewTooltip => 'Vis forhåndsvisning';
   @override
   String get showEditorTooltip => 'Vis editor';
+  @override
+  String get noteModeEdit => 'Rediger';
+  @override
+  String get noteModeRead => 'Læs';
   // Raw-HTML table fallback.
 
   // Search (T-M3-05).

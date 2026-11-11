@@ -891,6 +891,10 @@ final class SlovakStrings extends Strings {
   String get showPreviewTooltip => 'Zobraziť náhľad';
   @override
   String get showEditorTooltip => 'Zobraziť editor';
+  @override
+  String get noteModeEdit => 'Úpravy';
+  @override
+  String get noteModeRead => 'Čítanie';
   // Raw-HTML table fallback.
 
   // Search (T-M3-05).

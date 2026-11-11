@@ -835,6 +835,10 @@ final class ChineseStrings extends Strings {
   String get showPreviewTooltip => '显示预览';
   @override
   String get showEditorTooltip => '显示编辑器';
+  @override
+  String get noteModeEdit => '编辑';
+  @override
+  String get noteModeRead => '阅读';
   // Raw-HTML table fallback.
 
   // Search (T-M3-05).

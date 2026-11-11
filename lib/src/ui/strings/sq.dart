@@ -888,6 +888,10 @@ final class AlbanianStrings extends Strings {
   String get showPreviewTooltip => 'Shfaq parapamjen';
   @override
   String get showEditorTooltip => 'Shfaq redaktorin';
+  @override
+  String get noteModeEdit => 'Redakto';
+  @override
+  String get noteModeRead => 'Lexo';
   // Raw-HTML table fallback.
 
   // Search (T-M3-05).

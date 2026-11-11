@@ -901,6 +901,10 @@ final class ItalianStrings extends Strings {
   String get showPreviewTooltip => 'Mostra anteprima';
   @override
   String get showEditorTooltip => 'Mostra editor';
+  @override
+  String get noteModeEdit => 'Modifica';
+  @override
+  String get noteModeRead => 'Lettura';
   // Raw-HTML table fallback.
 
   // Search (T-M3-05).

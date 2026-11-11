@@ -886,6 +886,10 @@ final class LatvianStrings extends Strings {
   String get showPreviewTooltip => 'Rādīt priekšskatījumu';
   @override
   String get showEditorTooltip => 'Rādīt redaktoru';
+  @override
+  String get noteModeEdit => 'Rediģēt';
+  @override
+  String get noteModeRead => 'Lasīt';
   // Raw-HTML table fallback.
 
   // Search (T-M3-05).

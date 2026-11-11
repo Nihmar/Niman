@@ -889,6 +889,10 @@ final class BelarusianStrings extends Strings {
   String get showPreviewTooltip => 'Паказаць прагляд';
   @override
   String get showEditorTooltip => 'Паказаць рэдактар';
+  @override
+  String get noteModeEdit => 'Рэдагаванне';
+  @override
+  String get noteModeRead => 'Чытанне';
   // Raw-HTML table fallback.
 
   // Search (T-M3-05).

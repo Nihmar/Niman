@@ -63,5 +63,5 @@ void main() {
     await ctrl(tester, LogicalKeyboardKey.keyW);
     await ctrl(tester, LogicalKeyboardKey.keyB);
     expect(noteTree(), findsNothing);
-  });
+  }, variant: desktopDensity);
 }

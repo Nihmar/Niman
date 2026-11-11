@@ -895,6 +895,10 @@ final class BulgarianStrings extends Strings {
   String get showPreviewTooltip => 'Покажи преглед';
   @override
   String get showEditorTooltip => 'Покажи редактор';
+  @override
+  String get noteModeEdit => 'Редакция';
+  @override
+  String get noteModeRead => 'Четене';
   // Raw-HTML table fallback.
 
   // Search (T-M3-05).
