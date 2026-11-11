@@ -86,6 +86,7 @@ final class NoteView extends StatefulWidget {
     this.onToggleTypewriter,
     this.statusActions = const <Widget>[],
     this.reloadToken = 0,
+    this.anchorRequests = 0,
     this.caretRequest = 0,
     super.key,
   });
@@ -242,6 +243,11 @@ final class NoteView extends StatefulWidget {
   /// disk (a same-note reopen, an app resume). A change triggers a
   /// clean-only re-read — unsaved edits always win over the disk.
   final int reloadToken;
+
+  /// Links followed (#1268): a change asks the note already open to land
+  /// on [initialAnchor] again, as a link to it from elsewhere does when it
+  /// opens the note. A note still loading lands on it when it opens.
+  final int anchorRequests;
 
   @override
   State<NoteView> createState() => _NoteViewState();
@@ -523,6 +529,10 @@ final class _NoteViewState extends State<NoteView>
     // re-read when the buffer is clean, keep unsaved edits otherwise.
     if (widget.reloadToken != oldWidget.reloadToken) {
       unawaited(_reloadIfChanged());
+    }
+    if (widget.anchorRequests != oldWidget.anchorRequests &&
+        widget.path == oldWidget.path) {
+      _parts.landOnAnchor();
     }
     // Coming back to the editor no longer remounts it (both panes stay
     // mounted below), so the source editor's autofocus no longer fires on

@@ -283,6 +283,7 @@ final class ShellDetailPane extends StatelessWidget {
     onEditorKindChanged: onEditorKindChanged,
     services: services,
     initialAnchor: tab.anchor,
+    anchorRequests: linksFollowed,
     initialCaretOffset: tab.caret,
     initialFind: tab.find,
     kindMode: kindMode,
