@@ -183,8 +183,6 @@ final class RomanianStrings extends Strings {
   @override
   String get updateCheckFailed => 'Verificarea actualizărilor a eșuat';
   @override
-  String updateSavedTo(Object path) => 'Actualizare salvată în $path';
-  @override
   String get updateInstallerStarted => 'Programul de instalare a pornit';
   @override
   String updateDownloading(Object percent) => 'Se descarcă… $percent%';
@@ -215,6 +213,11 @@ final class RomanianStrings extends Strings {
       'următoarea.';
   @override
   String get updateFromAppStore => 'App Store ține Niman la zi.';
+  @override
+  String get updateFromReleasePage =>
+      'Pe un computer, Niman nu se actualizează singur: descarcă noua '
+      'versiune de pe GitHub și instaleaz-o așa cum ai instalat-o pe '
+      'aceasta.';
   @override
   String get settingsSpellCheckTitle => 'Verificarea ortografiei';
   @override

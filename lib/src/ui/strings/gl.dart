@@ -182,8 +182,6 @@ final class GalicianStrings extends Strings {
   @override
   String get updateCheckFailed => 'Non se puideron comprobar as actualizacións';
   @override
-  String updateSavedTo(Object path) => 'Actualización gardada en $path';
-  @override
   String get updateInstallerStarted => 'Instalador iniciado';
   @override
   String updateDownloading(Object percent) => 'Descargando… $percent %';
@@ -212,6 +210,10 @@ final class GalicianStrings extends Strings {
       'As versións de proba non se actualizan soas: instala a seguinte á man.';
   @override
   String get updateFromAppStore => 'A App Store mantén Niman ao día.';
+  @override
+  String get updateFromReleasePage =>
+      'Nun ordenador, Niman non se actualiza só: descarga a nova versión '
+      'de GitHub e instálaa como instalaches esta.';
   @override
   String get settingsSpellCheckTitle => 'Comprobación ortográfica';
   @override

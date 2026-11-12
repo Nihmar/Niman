@@ -177,8 +177,6 @@ final class HungarianStrings extends Strings {
   @override
   String get updateCheckFailed => 'A frissítések ellenőrzése nem sikerült';
   @override
-  String updateSavedTo(Object path) => 'Frissítés mentve ide: $path';
-  @override
   String get updateInstallerStarted => 'A telepítő elindult';
   @override
   String updateDownloading(Object percent) => 'Letöltés… $percent%';
@@ -208,6 +206,10 @@ final class HungarianStrings extends Strings {
       'A tesztverziók nem frissülnek maguktól: a következőt kézzel telepítse.';
   @override
   String get updateFromAppStore => 'Az App Store naprakészen tartja a Nimant.';
+  @override
+  String get updateFromReleasePage =>
+      'Számítógépen a Niman nem frissíti magát: töltsd le az új verziót '
+      'a GitHubról, és telepítsd úgy, ahogy ezt.';
   @override
   String get settingsSpellCheckTitle => 'Helyesírásellenőrzés';
   @override

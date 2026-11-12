@@ -177,8 +177,6 @@ final class EnglishStrings extends Strings {
   @override
   String get updateCheckFailed => 'Update check failed';
   @override
-  String updateSavedTo(Object path) => 'Update saved to $path';
-  @override
   String get updateInstallerStarted => 'Installer started';
   @override
   String updateDownloading(Object percent) => 'Downloading… $percent%';
@@ -207,6 +205,10 @@ final class EnglishStrings extends Strings {
       'Test builds do not update themselves: install the next one by hand.';
   @override
   String get updateFromAppStore => 'The App Store keeps Niman up to date.';
+  @override
+  String get updateFromReleasePage =>
+      'Niman does not update itself on a computer: download the new '
+      'version from GitHub and install it as you installed this one.';
   @override
   String get settingsSpellCheckTitle => 'Check spelling';
   @override

@@ -182,8 +182,6 @@ final class SerbianStrings extends Strings {
   @override
   String get updateCheckFailed => 'Провера ажурирања није успела';
   @override
-  String updateSavedTo(Object path) => 'Ажурирање сачувано у $path';
-  @override
   String get updateInstallerStarted => 'Инсталер је покренут';
   @override
   String updateDownloading(Object percent) => 'Преузимање… $percent%';
@@ -212,6 +210,10 @@ final class SerbianStrings extends Strings {
       'Тестне верзије се не ажурирају саме: следећу инсталирајте ручно.';
   @override
   String get updateFromAppStore => 'App Store ажурира Niman.';
+  @override
+  String get updateFromReleasePage =>
+      'На рачунару се Niman не ажурира сам: преузмите нову верзију са '
+      'GitHub-а и инсталирајте је као и ову.';
   @override
   String get settingsSpellCheckTitle => 'Провера правописа';
   @override

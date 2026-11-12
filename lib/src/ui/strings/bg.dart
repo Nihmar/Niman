@@ -183,8 +183,6 @@ final class BulgarianStrings extends Strings {
   @override
   String get updateCheckFailed => 'Проверката за актуализации е неуспешна';
   @override
-  String updateSavedTo(Object path) => 'Актуализацията е запазена в $path';
-  @override
   String get updateInstallerStarted => 'Инсталаторът е стартиран';
   @override
   String updateDownloading(Object percent) => 'Изтегляне… $percent%';
@@ -215,6 +213,10 @@ final class BulgarianStrings extends Strings {
       'ръчно.';
   @override
   String get updateFromAppStore => 'App Store поддържа Niman актуален.';
+  @override
+  String get updateFromReleasePage =>
+      'На компютър Niman не се обновява сам: изтеглете новата версия от '
+      'GitHub и я инсталирайте както тази.';
   @override
   String get settingsSpellCheckTitle => 'Проверка за правопис';
   @override

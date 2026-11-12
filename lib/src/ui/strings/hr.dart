@@ -182,8 +182,6 @@ final class CroatianStrings extends Strings {
   @override
   String get updateCheckFailed => 'Provjera ažuriranja nije uspjela';
   @override
-  String updateSavedTo(Object path) => 'Ažuriranje spremljeno u $path';
-  @override
   String get updateInstallerStarted => 'Instalacijski program pokrenut';
   @override
   String updateDownloading(Object percent) => 'Preuzimanje… $percent %';
@@ -212,6 +210,10 @@ final class CroatianStrings extends Strings {
       'Testne verzije se ne ažuriraju same: sljedeću instalirajte ručno.';
   @override
   String get updateFromAppStore => 'App Store ažurira Niman.';
+  @override
+  String get updateFromReleasePage =>
+      'Na računalu se Niman ne ažurira sam: preuzmite novu verziju s '
+      'GitHuba i instalirajte je kao i ovu.';
   @override
   String get settingsSpellCheckTitle => 'Kontrola pravopisa';
   @override

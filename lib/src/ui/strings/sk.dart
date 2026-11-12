@@ -181,8 +181,6 @@ final class SlovakStrings extends Strings {
   @override
   String get updateCheckFailed => 'Kontrola aktualizácií zlyhala';
   @override
-  String updateSavedTo(Object path) => 'Aktualizácia uložená do $path';
-  @override
   String get updateInstallerStarted => 'Inštalátor spustený';
   @override
   String updateDownloading(Object percent) => 'Sťahuje sa… $percent %';
@@ -211,6 +209,10 @@ final class SlovakStrings extends Strings {
       'Testovacie zostavy sa neaktualizujú samy: ďalšiu nainštalujte ručne.';
   @override
   String get updateFromAppStore => 'Niman aktualizuje App Store.';
+  @override
+  String get updateFromReleasePage =>
+      'Na počítači sa Niman neaktualizuje sám: stiahnite novú verziu z '
+      'GitHubu a nainštalujte ju rovnako ako túto.';
   @override
   String get settingsSpellCheckTitle => 'Kontrola pravopisu';
   @override

@@ -182,8 +182,6 @@ final class BosnianStrings extends Strings {
   @override
   String get updateCheckFailed => 'Provjera ažuriranja nije uspjela';
   @override
-  String updateSavedTo(Object path) => 'Ažuriranje spremljeno u $path';
-  @override
   String get updateInstallerStarted => 'Program za instalaciju pokrenut';
   @override
   String updateDownloading(Object percent) => 'Preuzimanje… $percent%';
@@ -213,6 +211,10 @@ final class BosnianStrings extends Strings {
       'Testne verzije se ne ažuriraju same: sljedeću instalirajte ručno.';
   @override
   String get updateFromAppStore => 'App Store ažurira Niman.';
+  @override
+  String get updateFromReleasePage =>
+      'Na računaru se Niman ne ažurira sam: preuzmite novu verziju s '
+      'GitHuba i instalirajte je kao i ovu.';
   @override
   String get settingsSpellCheckTitle => 'Provjera pravopisa';
   @override

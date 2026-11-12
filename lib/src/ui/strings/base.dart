@@ -81,7 +81,6 @@ abstract base class Strings {
   String updateAvailableMessage(Object version);
   String get updateUpToDate;
   String get updateCheckFailed;
-  String updateSavedTo(Object path);
   String get updateInstallerStarted;
   String updateDownloading(Object percent);
   String get updateLater;
@@ -93,6 +92,7 @@ abstract base class Strings {
   String get updateReleasePage;
   String get updateTestingBuild;
   String get updateFromAppStore;
+  String get updateFromReleasePage;
   String get settingsSpellCheckTitle;
   String get settingsSpellCheckSubtitle;
   String get spellCheckDictionaryTitle;

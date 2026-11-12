@@ -181,8 +181,6 @@ final class CzechStrings extends Strings {
   @override
   String get updateCheckFailed => 'Kontrola aktualizací selhala';
   @override
-  String updateSavedTo(Object path) => 'Aktualizace uložena do $path';
-  @override
   String get updateInstallerStarted => 'Instalátor spuštěn';
   @override
   String updateDownloading(Object percent) => 'Stahování… $percent %';
@@ -211,6 +209,10 @@ final class CzechStrings extends Strings {
       'Testovací sestavení se neaktualizují sama: další nainstalujte ručně.';
   @override
   String get updateFromAppStore => 'Niman aktualizuje App Store.';
+  @override
+  String get updateFromReleasePage =>
+      'Na počítači se Niman neaktualizuje sám: stáhněte novou verzi z '
+      'GitHubu a nainstalujte ji stejně jako tuto.';
   @override
   String get settingsSpellCheckTitle => 'Kontrola pravopisu';
   @override

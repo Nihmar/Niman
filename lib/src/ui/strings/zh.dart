@@ -165,8 +165,6 @@ final class ChineseStrings extends Strings {
   @override
   String get updateCheckFailed => '检查更新失败';
   @override
-  String updateSavedTo(Object path) => '更新已保存到 $path';
-  @override
   String get updateInstallerStarted => '安装程序已启动';
   @override
   String updateDownloading(Object percent) => '正在下载… $percent%';
@@ -191,6 +189,9 @@ final class ChineseStrings extends Strings {
   String get updateTestingBuild => '测试版不会自动更新：请手动安装下一个版本。';
   @override
   String get updateFromAppStore => 'App Store 会让 Niman 保持最新。';
+  @override
+  String get updateFromReleasePage =>
+      '在电脑上 Niman 不会自动更新：请从 GitHub 下载新版本，并按安装此版本的方式安装。';
   @override
   String get settingsSpellCheckTitle => '拼写检查';
   @override

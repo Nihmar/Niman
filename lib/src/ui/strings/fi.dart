@@ -179,8 +179,6 @@ final class FinnishStrings extends Strings {
   @override
   String get updateCheckFailed => 'Päivitysten tarkistus epäonnistui';
   @override
-  String updateSavedTo(Object path) => 'Päivitys tallennettu sijaintiin $path';
-  @override
   String get updateInstallerStarted => 'Asennusohjelma käynnistetty';
   @override
   String updateDownloading(Object percent) => 'Ladataan… $percent %';
@@ -209,6 +207,10 @@ final class FinnishStrings extends Strings {
       'Testiversiot eivät päivitä itseään: asenna seuraava käsin.';
   @override
   String get updateFromAppStore => 'App Store pitää Nimanin ajan tasalla.';
+  @override
+  String get updateFromReleasePage =>
+      'Tietokoneella Niman ei päivitä itseään: lataa uusi versio '
+      'GitHubista ja asenna se samoin kuin asensit tämän.';
   @override
   String get settingsSpellCheckTitle => 'Oikoluku';
   @override

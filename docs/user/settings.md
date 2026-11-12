@@ -225,22 +225,24 @@ original's server. See [sync.md](sync.md).
 
 ### Updates
 
-`Automatic updates` (default off) checks GitHub Releases shortly after
-launch and then every 6 hours, quietly: a failure (offline, no network)
-is a skipped check, never an error dialog. When a newer release is
-found, a banner offers the download:
+On a computer — Linux, Windows, macOS — Niman does not look for new
+versions and does not offer them (#1270). The Updates screen holds one row,
+**Release page**, which opens the latest release on GitHub in the browser:
+download the new version there and install it as you installed this one.
+A desktop install takes too many shapes (an AppImage run from anywhere, a
+tarball, a package, a setup, a disk image) for the app to replace the one
+that runs.
 
-- Android: downloads the `.apk` into the app's own folder and opens the
-  system installer, where you confirm. The first time, Android has to let
-  Niman install apps: the app explains it and opens the **Install unknown
-  apps** page; turn on *Allow from this source*, come back, and the install
-  goes on — without downloading again (#900). If the installer cannot be
-  opened, the message offers the release page instead. A downloaded APK is
-  cleared at the next launch.
-- Windows: downloads the setup `.exe` and launches the installer.
-- Linux: downloads the installed variant (AppImage, `.tar.gz`, Arch
-  package) into Downloads; when the variant cannot be detected, the
-  release's Linux assets are listed instead.
+On Android, `Automatic updates` (default off) checks GitHub Releases
+shortly after launch and then every 6 hours, quietly: a failure (offline,
+no network) is a skipped check, never an error dialog. When a newer release
+is found, a banner offers the download: the `.apk` goes into the app's own
+folder and the system installer opens, where you confirm. The first time,
+Android has to let Niman install apps: the app explains it and opens the
+**Install unknown apps** page; turn on *Allow from this source*, come back,
+and the install goes on — without downloading again (#900). If the
+installer cannot be opened, the message offers the release page instead. A
+downloaded APK is cleared at the next launch.
 
 `Check for updates` runs the same check on demand, and only checks: it
 says whether a newer release is out, and when one is, the **Download** row
@@ -253,8 +255,8 @@ far it got; **Cancel** there stops it and leaves nothing behind, and a
 second Download is not started over one already running. **Later** puts the
 banner away for this run.
 
-A test (beta) build has no updates of its own: the screen says so, and
-the next one is installed by hand.
+A test (beta) build has no updates of its own, on any platform: the
+screen says so, and the next one is installed by hand.
 
 The **Diagnostics and info** section holds two read-only facts about the
 installation: the app's own **Version**, and **Changelog**, which opens

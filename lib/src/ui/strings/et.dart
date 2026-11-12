@@ -177,8 +177,6 @@ final class EstonianStrings extends Strings {
   @override
   String get updateCheckFailed => 'Uuenduste kontroll ebaõnnestus';
   @override
-  String updateSavedTo(Object path) => 'Uuendus salvestati asukohta $path';
-  @override
   String get updateInstallerStarted => 'Paigaldusprogramm käivitati';
   @override
   String updateDownloading(Object percent) => 'Allalaadimine… $percent%';
@@ -207,6 +205,10 @@ final class EstonianStrings extends Strings {
       'Testversioonid ei uuenda end ise: paigalda järgmine käsitsi.';
   @override
   String get updateFromAppStore => 'App Store hoiab Nimani ajakohasena.';
+  @override
+  String get updateFromReleasePage =>
+      'Arvutis Niman ennast ise ei uuenda: laadi uus versioon GitHubist '
+      'alla ja paigalda see nii, nagu paigaldasid selle.';
   @override
   String get settingsSpellCheckTitle => 'Õigekirjapide';
   @override

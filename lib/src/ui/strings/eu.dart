@@ -177,8 +177,6 @@ final class BasqueStrings extends Strings {
   @override
   String get updateCheckFailed => 'Ezin izan dira eguneratzeak egiaztatu';
   @override
-  String updateSavedTo(Object path) => 'Eguneratzea hemen gorde da: $path';
-  @override
   String get updateInstallerStarted => 'Instalatzailea abiarazi da';
   @override
   String updateDownloading(Object percent) => 'Deskargatzen… % $percent';
@@ -208,6 +206,11 @@ final class BasqueStrings extends Strings {
   @override
   String get updateFromAppStore =>
       'App Storeak Niman eguneratuta mantentzen du.';
+  @override
+  String get updateFromReleasePage =>
+      'Ordenagailuan Niman ez da bere kabuz eguneratzen: deskargatu '
+      'bertsio berria GitHub-etik eta instalatu hau instalatu zenuen '
+      'bezala.';
   @override
   String get settingsSpellCheckTitle => 'Ortografia-egiaztapena';
   @override

@@ -175,8 +175,6 @@ final class TurkishStrings extends Strings {
   @override
   String get updateCheckFailed => 'Güncelleme kontrolü başarısız';
   @override
-  String updateSavedTo(Object path) => 'Güncelleme şuraya kaydedildi: $path';
-  @override
   String get updateInstallerStarted => 'Yükleyici başlatıldı';
   @override
   String updateDownloading(Object percent) => 'İndiriliyor… %$percent';
@@ -206,6 +204,10 @@ final class TurkishStrings extends Strings {
       'Test sürümleri kendini güncellemez: bir sonrakini elle yükleyin.';
   @override
   String get updateFromAppStore => "App Store, Niman'ı güncel tutar.";
+  @override
+  String get updateFromReleasePage =>
+      "Bilgisayarda Niman kendini güncellemez: yeni sürümü GitHub'dan "
+      'indirip bunu kurduğunuz gibi kurun.';
   @override
   String get settingsSpellCheckTitle => 'Yazım denetimi';
   @override

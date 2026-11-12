@@ -165,8 +165,6 @@ final class JapaneseStrings extends Strings {
   @override
   String get updateCheckFailed => 'アップデートの確認に失敗しました';
   @override
-  String updateSavedTo(Object path) => 'アップデートを $path に保存しました';
-  @override
   String get updateInstallerStarted => 'インストーラーを起動しました';
   @override
   String updateDownloading(Object percent) => 'ダウンロード中… $percent%';
@@ -194,6 +192,10 @@ final class JapaneseStrings extends Strings {
   String get updateTestingBuild => 'テスト版は自動で更新されません。次の版は手動でインストールしてください。';
   @override
   String get updateFromAppStore => 'App Store が Niman を最新に保ちます。';
+  @override
+  String get updateFromReleasePage =>
+      'パソコンでは Niman は自動で更新されません。新しいバージョンを GitHub '
+      'からダウンロードし、このバージョンと同じ方法でインストールしてください。';
   @override
   String get settingsSpellCheckTitle => 'スペルチェック';
   @override

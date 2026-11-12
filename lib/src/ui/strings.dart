@@ -185,7 +185,6 @@ final class AppStrings {
       _s.updateAvailableMessage(version);
   static String get updateUpToDate => _s.updateUpToDate;
   static String get updateCheckFailed => _s.updateCheckFailed;
-  static String updateSavedTo(Object path) => _s.updateSavedTo(path);
   static String get updateInstallerStarted => _s.updateInstallerStarted;
   static String updateDownloading(Object percent) =>
       _s.updateDownloading(percent);
@@ -201,6 +200,7 @@ final class AppStrings {
   static String get updateReleasePage => _s.updateReleasePage;
   static String get updateTestingBuild => _s.updateTestingBuild;
   static String get updateFromAppStore => _s.updateFromAppStore;
+  static String get updateFromReleasePage => _s.updateFromReleasePage;
   static String get settingsSpellCheckTitle => _s.settingsSpellCheckTitle;
   static String get settingsSpellCheckSubtitle => _s.settingsSpellCheckSubtitle;
   static String get spellCheckDictionaryTitle => _s.spellCheckDictionaryTitle;

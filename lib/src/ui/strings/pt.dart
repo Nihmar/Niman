@@ -179,8 +179,6 @@ final class PortugueseStrings extends Strings {
   @override
   String get updateCheckFailed => 'Falha ao verificar atualizações';
   @override
-  String updateSavedTo(Object path) => 'Atualização salva em $path';
-  @override
   String get updateInstallerStarted => 'Instalador iniciado';
   @override
   String updateDownloading(Object percent) => 'A transferir… $percent%';
@@ -210,6 +208,10 @@ final class PortugueseStrings extends Strings {
       'mão.';
   @override
   String get updateFromAppStore => 'A App Store mantém o Niman atualizado.';
+  @override
+  String get updateFromReleasePage =>
+      'Num computador, o Niman não se atualiza sozinho: transfira a nova '
+      'versão do GitHub e instale-a como instalou esta.';
   @override
   String get settingsSpellCheckTitle => 'Conferir ortografia';
   @override

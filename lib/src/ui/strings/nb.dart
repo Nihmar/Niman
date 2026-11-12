@@ -178,8 +178,6 @@ final class NorwegianStrings extends Strings {
   @override
   String get updateCheckFailed => 'Kunne ikke se etter oppdateringer';
   @override
-  String updateSavedTo(Object path) => 'Oppdateringen er lagret i $path';
-  @override
   String get updateInstallerStarted => 'Installasjonsprogrammet er startet';
   @override
   String updateDownloading(Object percent) => 'Laster ned … $percent %';
@@ -209,6 +207,10 @@ final class NorwegianStrings extends Strings {
       'Testversjoner oppdaterer seg ikke selv: installer den neste manuelt.';
   @override
   String get updateFromAppStore => 'App Store holder Niman oppdatert.';
+  @override
+  String get updateFromReleasePage =>
+      'På en datamaskin oppdaterer ikke Niman seg selv: last ned den nye '
+      'versjonen fra GitHub og installer den slik du installerte denne.';
   @override
   String get settingsSpellCheckTitle => 'Stavekontroll';
   @override

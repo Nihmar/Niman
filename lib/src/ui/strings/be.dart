@@ -182,8 +182,6 @@ final class BelarusianStrings extends Strings {
   @override
   String get updateCheckFailed => 'Не ўдалося праверыць абнаўленні';
   @override
-  String updateSavedTo(Object path) => 'Абнаўленне захавана ў $path';
-  @override
   String get updateInstallerStarted => 'Усталёўшчык запушчаны';
   @override
   String updateDownloading(Object percent) => 'Спампоўка… $percent%';
@@ -212,6 +210,10 @@ final class BelarusianStrings extends Strings {
       'Тэставыя зборкі не абнаўляюцца самі: наступную ўсталюйце ўручную.';
   @override
   String get updateFromAppStore => 'App Store абнаўляе Niman.';
+  @override
+  String get updateFromReleasePage =>
+      "На камп'ютары Niman не абнаўляецца сам: спампуйце новую версію з "
+      'GitHub і ўсталюйце яе так, як гэтую.';
   @override
   String get settingsSpellCheckTitle => 'Праверка арфаграфіі';
   @override

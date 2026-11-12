@@ -183,8 +183,6 @@ final class LithuanianStrings extends Strings {
   @override
   String get updateCheckFailed => 'Nepavyko patikrinti atnaujinimų';
   @override
-  String updateSavedTo(Object path) => 'Atnaujinimas išsaugotas: $path';
-  @override
   String get updateInstallerStarted => 'Diegimo programa paleista';
   @override
   String updateDownloading(Object percent) => 'Atsisiunčiama… $percent %';
@@ -213,6 +211,10 @@ final class LithuanianStrings extends Strings {
       'Bandomosios versijos neatsinaujina pačios: kitą įdiekite rankiniu būdu.';
   @override
   String get updateFromAppStore => 'App Store atnaujina Niman.';
+  @override
+  String get updateFromReleasePage =>
+      'Kompiuteryje Niman pats neatsinaujina: atsisiųskite naują versiją '
+      'iš GitHub ir įdiekite ją taip, kaip įdiegėte šią.';
   @override
   String get settingsSpellCheckTitle => 'Rašybos patikra';
   @override

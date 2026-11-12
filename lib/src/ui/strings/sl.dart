@@ -184,8 +184,6 @@ final class SlovenianStrings extends Strings {
   @override
   String get updateCheckFailed => 'Preverjanje posodobitev ni uspelo';
   @override
-  String updateSavedTo(Object path) => 'Posodobitev shranjena v $path';
-  @override
   String get updateInstallerStarted => 'Namestitveni program zagnan';
   @override
   String updateDownloading(Object percent) => 'Prenašanje … $percent %';
@@ -215,6 +213,10 @@ final class SlovenianStrings extends Strings {
       'ročno.';
   @override
   String get updateFromAppStore => 'Niman posodablja App Store.';
+  @override
+  String get updateFromReleasePage =>
+      'Na računalniku se Niman ne posodablja sam: novo različico '
+      'prenesite z GitHuba in jo namestite tako kot to.';
   @override
   String get settingsSpellCheckTitle => 'Preverjanje pravopisa';
   @override

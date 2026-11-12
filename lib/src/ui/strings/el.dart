@@ -182,8 +182,6 @@ final class GreekStrings extends Strings {
   @override
   String get updateCheckFailed => 'Ο έλεγχος ενημερώσεων απέτυχε';
   @override
-  String updateSavedTo(Object path) => 'Η ενημέρωση αποθηκεύτηκε στο $path';
-  @override
   String get updateInstallerStarted => 'Το πρόγραμμα εγκατάστασης ξεκίνησε';
   @override
   String updateDownloading(Object percent) => 'Λήψη… $percent%';
@@ -214,6 +212,10 @@ final class GreekStrings extends Strings {
       'την επόμενη χειροκίνητα.';
   @override
   String get updateFromAppStore => 'Το App Store ενημερώνει το Niman.';
+  @override
+  String get updateFromReleasePage =>
+      'Σε υπολογιστή το Niman δεν ενημερώνεται μόνο του: κατεβάστε τη '
+      'νέα έκδοση από το GitHub και εγκαταστήστε τη όπως αυτήν.';
   @override
   String get settingsSpellCheckTitle => 'Έλεγχος ορθογραφίας';
   @override

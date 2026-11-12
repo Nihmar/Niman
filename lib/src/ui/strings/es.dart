@@ -182,8 +182,6 @@ final class SpanishStrings extends Strings {
   @override
   String get updateCheckFailed => 'Error al buscar actualizaciones';
   @override
-  String updateSavedTo(Object path) => 'Actualización guardada en $path';
-  @override
   String get updateInstallerStarted => 'Instalador iniciado';
   @override
   String updateDownloading(Object percent) => 'Descargando… $percent %';
@@ -214,6 +212,10 @@ final class SpanishStrings extends Strings {
       'mano.';
   @override
   String get updateFromAppStore => 'El App Store mantiene Niman actualizado.';
+  @override
+  String get updateFromReleasePage =>
+      'En un ordenador, Niman no se actualiza solo: descarga la nueva '
+      'versión de GitHub e instálala como instalaste esta.';
   @override
   String get settingsSpellCheckTitle => 'Comprobar ortografía';
   @override

@@ -181,8 +181,6 @@ final class CatalanStrings extends Strings {
   String get updateCheckFailed =>
       'No s’han pogut comprovar les actualitzacions';
   @override
-  String updateSavedTo(Object path) => 'Actualització guardada a $path';
-  @override
   String get updateInstallerStarted => 'Instal·lador iniciat';
   @override
   String updateDownloading(Object percent) => 'Baixant… $percent%';
@@ -213,6 +211,10 @@ final class CatalanStrings extends Strings {
       'mà.';
   @override
   String get updateFromAppStore => "L'App Store manté el Niman al dia.";
+  @override
+  String get updateFromReleasePage =>
+      "En un ordinador, Niman no s'actualitza sol: baixa la nova versió "
+      'de GitHub i instal·la-la com vas instal·lar aquesta.';
   @override
   String get settingsSpellCheckTitle => 'Comprovació d’ortografia';
   @override

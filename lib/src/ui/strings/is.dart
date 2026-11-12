@@ -178,8 +178,6 @@ final class IcelandicStrings extends Strings {
   @override
   String get updateCheckFailed => 'Ekki tókst að leita að uppfærslum';
   @override
-  String updateSavedTo(Object path) => 'Uppfærsla vistuð í $path';
-  @override
   String get updateInstallerStarted => 'Uppsetningarforrit ræst';
   @override
   String updateDownloading(Object percent) => 'Sæki… $percent%';
@@ -208,6 +206,10 @@ final class IcelandicStrings extends Strings {
       'Prófunarútgáfur uppfæra sig ekki sjálfar: settu þá næstu upp handvirkt.';
   @override
   String get updateFromAppStore => 'App Store heldur Niman uppfærðu.';
+  @override
+  String get updateFromReleasePage =>
+      'Á tölvu uppfærir Niman sig ekki sjálft: sæktu nýju útgáfuna á '
+      'GitHub og settu hana upp eins og þessa.';
   @override
   String get settingsSpellCheckTitle => 'Stafsetningarprófun';
   @override

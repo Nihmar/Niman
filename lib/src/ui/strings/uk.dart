@@ -183,8 +183,6 @@ final class UkrainianStrings extends Strings {
   @override
   String get updateCheckFailed => 'Не вдалося перевірити оновлення';
   @override
-  String updateSavedTo(Object path) => 'Оновлення збережено в $path';
-  @override
   String get updateInstallerStarted => 'Інсталятор запущено';
   @override
   String updateDownloading(Object percent) => 'Завантаження… $percent%';
@@ -213,6 +211,10 @@ final class UkrainianStrings extends Strings {
       'Тестові збірки не оновлюються самі: наступну встановіть вручну.';
   @override
   String get updateFromAppStore => 'App Store оновлює Niman.';
+  @override
+  String get updateFromReleasePage =>
+      "На комп'ютері Niman не оновлюється сам: завантажте нову версію з "
+      'GitHub і встановіть її так само, як цю.';
   @override
   String get settingsSpellCheckTitle => 'Перевірка орфографії';
   @override

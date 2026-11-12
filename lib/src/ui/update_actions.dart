@@ -80,11 +80,15 @@ final class UpdateDownload extends ChangeNotifier {
 /// The app's one update download.
 final UpdateDownload updateDownload = UpdateDownload();
 
-/// The page of the latest release, for an update the installer would not
-/// take.
-final Uri _releasePage = Uri.parse(
+/// The page of the latest release: for an update the installer would not
+/// take, and where a computer finds its new versions (#1270).
+final Uri releasePage = Uri.parse(
   'https://github.com/Nihmar/Niman/releases/latest',
 );
+
+/// Opens [releasePage] in the browser.
+void openReleasePage() =>
+    unawaited(launchUrl(releasePage, mode: LaunchMode.externalApplication));
 
 /// The steps of the flow that reach the platform, so a test can stand in for
 /// them: the download, the install permission and the hand-over.
@@ -117,9 +121,9 @@ final class UpdateSteps {
 
 /// Downloads [update]'s asset and hands it to the platform.
 ///
-/// Windows launches the setup installer; Linux reveals the download;
-/// Android asks for "Install unknown apps" first when it is not granted,
-/// and opens the system installer once it is. A download already running
+/// Android, the one platform that updates itself (#1270), asks for "Install
+/// unknown apps" first when it is not granted, and opens the system
+/// installer once it is. A download already running
 /// is not started twice. Every outcome — and every failure, the hand-over's
 /// too (#905) — surfaces as a snackbar, never a dialog; the permission's
 /// explanation is the one dialog, because it sends the user out of the app.
@@ -173,9 +177,9 @@ Future<bool> downloadAndApplyUpdate(
     }
     launched = await steps.apply(file);
   } on Object catch (error) {
-    // Starting the installer can throw (a ProcessException on Windows: the
-    // setup file blocked, removed or refused): the offer stands, and the
-    // user is told rather than left to an uncaught async error.
+    // Starting the installer can throw (the bridge refused, the file gone):
+    // the offer stands, and the user is told rather than left to an
+    // uncaught async error.
     log.warning('install failed: $error');
     messenger.showSnackBar(_installerFailed());
     return false;
@@ -187,12 +191,7 @@ Future<bool> downloadAndApplyUpdate(
             persist: false,
             content: Text(AppStrings.updateInstallerStarted),
           )
-        : update.asset.name.endsWith('.apk')
-        ? _installerFailed()
-        : SnackBar(
-            persist: false,
-            content: Text(AppStrings.updateSavedTo(file.path)),
-          ),
+        : _installerFailed(),
   );
   return launched;
 }
@@ -205,9 +204,7 @@ SnackBar _installerFailed() => SnackBar(
   content: Text(AppStrings.updateInstallerFailed),
   action: SnackBarAction(
     label: AppStrings.updateReleasePage,
-    onPressed: () => unawaited(
-      launchUrl(_releasePage, mode: LaunchMode.externalApplication),
-    ),
+    onPressed: openReleasePage,
   ),
 );
 

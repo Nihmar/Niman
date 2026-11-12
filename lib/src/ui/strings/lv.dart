@@ -178,8 +178,6 @@ final class LatvianStrings extends Strings {
   @override
   String get updateCheckFailed => 'Neizdevās pārbaudīt atjauninājumus';
   @override
-  String updateSavedTo(Object path) => 'Atjauninājums saglabāts: $path';
-  @override
   String get updateInstallerStarted => 'Instalētājs palaists';
   @override
   String updateDownloading(Object percent) => 'Lejupielādē… $percent%';
@@ -208,6 +206,10 @@ final class LatvianStrings extends Strings {
       'Testa versijas pašas neatjauninās: nākamo instalējiet manuāli.';
   @override
   String get updateFromAppStore => 'App Store atjaunina Niman.';
+  @override
+  String get updateFromReleasePage =>
+      'Datorā Niman pats neatjaunojas: lejupielādējiet jauno versiju no '
+      'GitHub un instalējiet to tāpat kā šo.';
   @override
   String get settingsSpellCheckTitle => 'Orfogrāfiskā pārbaude';
   @override

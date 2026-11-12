@@ -171,8 +171,6 @@ final class HindiStrings extends Strings {
   @override
   String get updateCheckFailed => 'अपडेट की जाँच विफल';
   @override
-  String updateSavedTo(Object path) => 'अपडेट $path में सहेजा गया';
-  @override
   String get updateInstallerStarted => 'इंस्टॉलर शुरू हुआ';
   @override
   String updateDownloading(Object percent) => 'डाउनलोड हो रहा है… $percent%';
@@ -201,6 +199,10 @@ final class HindiStrings extends Strings {
       'टेस्ट बिल्ड अपने आप अपडेट नहीं होते: अगला वाला स्वयं इंस्टॉल करें।';
   @override
   String get updateFromAppStore => 'App Store Niman को अद्यतन रखता है।';
+  @override
+  String get updateFromReleasePage =>
+      'कंप्यूटर पर Niman ख़ुद अपडेट नहीं होता: नया संस्करण GitHub से '
+      'डाउनलोड करें और उसे वैसे ही इंस्टॉल करें जैसे यह किया था।';
   @override
   String get settingsSpellCheckTitle => 'व्याकरण जाँचें';
   @override

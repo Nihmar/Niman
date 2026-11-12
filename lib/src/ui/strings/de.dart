@@ -181,8 +181,6 @@ final class GermanStrings extends Strings {
   @override
   String get updateCheckFailed => 'Update-Prüfung fehlgeschlagen';
   @override
-  String updateSavedTo(Object path) => 'Update gespeichert unter $path';
-  @override
   String get updateInstallerStarted => 'Installationsprogramm gestartet';
   @override
   String updateDownloading(Object percent) => 'Wird geladen … $percent %';
@@ -214,6 +212,10 @@ final class GermanStrings extends Strings {
       'von Hand.';
   @override
   String get updateFromAppStore => 'Der App Store hält Niman aktuell.';
+  @override
+  String get updateFromReleasePage =>
+      'Auf einem Computer aktualisiert sich Niman nicht selbst: Lade die '
+      'neue Version von GitHub herunter und installiere sie wie diese.';
   @override
   String get settingsSpellCheckTitle => 'Rechtschreibung prüfen';
   @override

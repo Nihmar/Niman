@@ -92,6 +92,7 @@ abstract final class SettingsKeys {
   // Updates.
   static const autoUpdate = Key('auto-update-setting');
   static const checkUpdates = Key('check-updates-setting');
+  static const releasePage = Key('release-page-setting');
 
   // Diagnostics and about.
   static const debugLogs = Key('debug-logs-setting');
