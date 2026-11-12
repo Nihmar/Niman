@@ -902,6 +902,10 @@ final class RomanianStrings extends Strings {
   String get showPreviewTooltip => 'Afișează previzualizarea';
   @override
   String get showEditorTooltip => 'Afișează editorul';
+  @override
+  String get noteModeEdit => 'Editare';
+  @override
+  String get noteModeRead => 'Citire';
   // Raw-HTML table fallback.
 
   // Search (T-M3-05).

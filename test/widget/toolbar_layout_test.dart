@@ -87,7 +87,7 @@ void main() {
     expect(bar, lessThan(editor));
     // A divider sets the bar off the text.
     expect(find.byType(Divider), findsOneWidget);
-  });
+  }, variant: TargetPlatformVariant.only(TargetPlatform.windows));
 
   testWidgets('fullscreen preview hides the toolbar, top or bottom', (
     tester,

@@ -891,6 +891,10 @@ final class LithuanianStrings extends Strings {
   String get showPreviewTooltip => 'Rodyti peržiūrą';
   @override
   String get showEditorTooltip => 'Rodyti redaktorių';
+  @override
+  String get noteModeEdit => 'Redaguoti';
+  @override
+  String get noteModeRead => 'Skaityti';
   // Raw-HTML table fallback.
 
   // Search (T-M3-05).

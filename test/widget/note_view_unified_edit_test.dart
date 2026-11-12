@@ -47,7 +47,14 @@ Future<void> _pump(WidgetTester tester, NoteView view) async {
   tester.view.physicalSize = const Size(1200, 800);
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
-  await tester.pumpWidget(MaterialApp(home: Scaffold(body: view)));
+  // Pointer-dense, as a desktop's theme is: the toolbar sits above the
+  // note, where these tests press it (#1266).
+  await tester.pumpWidget(
+    MaterialApp(
+      theme: ThemeData(visualDensity: VisualDensity.compact),
+      home: Scaffold(body: view),
+    ),
+  );
   await tester.pumpAndSettle();
 }
 

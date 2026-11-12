@@ -32,6 +32,7 @@ import 'package:niman/src/ui/note_view_adapters.dart';
 import 'package:niman/src/ui/note_view_chrome.dart';
 import 'package:niman/src/ui/note_view_handle.dart';
 import 'package:niman/src/ui/note_view_parts.dart';
+import 'package:niman/src/ui/pointer_density.dart';
 import 'package:niman/src/workspace/note_memento.dart';
 import 'package:path/path.dart' as p;
 
@@ -220,8 +221,9 @@ final class NoteView extends StatefulWidget {
   /// the shell on this note; null leaves the entry out.
   final ValueChanged<NoteViewHandle>? onMoveToTasks;
 
-  /// Whether the formatting toolbar sits above the editor (desktop)
-  /// instead of below it (phone, where it extends the keyboard).
+  /// Whether the note has its row of chrome above it (the wide layout),
+  /// the formatting toolbar in it on a desktop; a phone's toolbar, and a
+  /// tablet's (#1266), is below the editor, extending the keyboard.
   final bool toolbarTop;
 
   /// Zen mode (#69): the note alone. Its row above, its status row and
@@ -675,8 +677,13 @@ final class _NoteViewState extends State<NoteView>
   /// so a focus change repaints it; the desktop's top toolbar never rides
   /// the keyboard and does not repaint for it.
   void _onToolbarFocusChanged() {
-    if (mounted && !widget.toolbarTop) setState(() {});
+    if (mounted && !_formatAbove) setState(() {});
   }
+
+  /// Whether the formatting toolbar sits above the note: a desktop's. A
+  /// tablet keeps the row above for the note's own controls and has the
+  /// toolbar ride the keyboard, as a phone does (#1266).
+  bool get _formatAbove => widget.toolbarTop && !thumbDense(Theme.of(context));
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
@@ -723,7 +730,7 @@ final class _NoteViewState extends State<NoteView>
     final showToolbar =
         !showPreview &&
         !NoteViewParts.plainTextIn(widget) &&
-        (widget.toolbarTop || _parts.keyboardUp) &&
+        (_formatAbove || _parts.keyboardUp) &&
         widget.options.toolbarLayout.visible.isNotEmpty;
     // Kind mode (T-TK-02): a known `type` swaps the body for the kind GUI
     // and hides the editor chrome (outline, status row, toolbar) — the
@@ -751,6 +758,7 @@ final class _NoteViewState extends State<NoteView>
             column: widget.options.noteColumn,
             toolbar:
                 showToolbar &&
+                    _formatAbove &&
                     !kindBody &&
                     !_parts.session.loading &&
                     error == null
@@ -854,7 +862,7 @@ final class _NoteViewState extends State<NoteView>
                 onToggleTypewriter: widget.onToggleTypewriter,
               ),
             ),
-            toolbarBelow: !widget.toolbarTop && !_parts.session.loading,
+            toolbarBelow: !_formatAbove && !_parts.session.loading,
             showToolbar: showToolbar,
             toolbar: _toolbar,
           ),

@@ -7,6 +7,7 @@ import 'package:niman/src/ui/dock/right_dock.dart';
 import 'package:niman/src/ui/hidden_slot.dart';
 import 'package:niman/src/ui/island.dart';
 import 'package:niman/src/ui/kinds/flashcards/review_tab.dart';
+import 'package:niman/src/ui/pointer_density.dart';
 import 'package:niman/src/ui/resize_divider.dart';
 import 'package:niman/src/ui/shell_compare_tab.dart';
 import 'package:niman/src/ui/shell_dock.dart';
@@ -23,6 +24,7 @@ import 'package:niman/src/ui/shell_wide_body.dart';
 import 'package:niman/src/ui/shell_workspace.dart';
 import 'package:niman/src/ui/shell_zen.dart';
 import 'package:niman/src/ui/tab_body_stack.dart';
+import 'package:niman/src/ui/tree_shape.dart';
 import 'package:niman/src/workspace/workspace.dart';
 
 /// The wide window's layout (#1256): its kept-alive slots, the tabs'
@@ -208,12 +210,67 @@ final class ShellWideLayout {
   }
 
   /// Where the tabs start in the title bar: the panes' island's left
-  /// edge, past the base and the tree's island.
+  /// edge, past the base and the tree's island when it stands beside them.
   double get tabsStart =>
-      ShellRail.panelStart +
-      (selection.sidebarVisible
+      ShellRail.panelStartFor(Theme.of(context())) +
+      (treeShape == TreeShape.beside && selection.sidebarVisible
           ? settings.editor.treeWidth + ResizeDivider.width
           : 0);
+
+  /// Where the tree's island stands (#1266): beside the panes, or over
+  /// them on a tablet whose panes would be too narrow beside it, that
+  /// shows Home or Todo, or whose note is being written in. The dock
+  /// is not counted: where the tree leaves it no room, it lies over the
+  /// note by its own rule.
+  TreeShape get treeShape {
+    final theme = Theme.of(context());
+    final size = MediaQuery.sizeOf(context());
+    return treeShapeFor(
+      touch: thumbDense(theme),
+      portrait: size.height > size.width,
+      page: tabs.contentTabShows,
+      writing: wideBody().writing,
+      panesBeside:
+          size.width -
+          ShellRail.panelStartFor(theme) -
+          settings.editor.treeWidth -
+          ResizeDivider.width -
+          Island.gap,
+    );
+  }
+
+  /// Whether the tree shows, beside the panes or over them.
+  bool get treeShown => treeShape == TreeShape.beside
+      ? selection.sidebarVisible
+      : selection.treeOver;
+
+  /// The sidebar's toggle: the docked tree's, or the one over the panes.
+  void toggleTree() => treeShape == TreeShape.beside
+      ? selection.toggleSidebar()
+      : selection.toggleTreeOver();
+
+  /// The tree's place, whether it shows, and how the one over the panes
+  /// closes: what the wide body draws it by.
+  ({TreeShape shape, bool shown, VoidCallback close}) get tree =>
+      (shape: treeShape, shown: treeShown, close: selection.closeTreeOver);
+
+  /// A destination picked in the rail: where the tree lies over the panes,
+  /// a sidebar view opens it (Files, Search, Study are in it) and any
+  /// other destination closes it.
+  void destinationSelected(ShellTab tab) {
+    tabs.destinationSelected(tab);
+    if (!wide() || treeShape != TreeShape.over) return;
+    if (tab == ShellTab.files ||
+        tab == ShellTab.search ||
+        tab == ShellTab.study) {
+      selection.openTreeOver();
+    } else {
+      selection.closeTreeOver();
+    }
+  }
+
+  /// Whether the tree lies open over the panes: Back closes it first.
+  bool get _treeOverShown => treeShape == TreeShape.over && selection.treeOver;
 
   /// Puts a new study beside its deck: in the other pane of a split; in a
   /// pane split off to the right where the window has room for two; over
@@ -279,6 +336,7 @@ final class ShellWideLayout {
   bool get backAvailable =>
       wide() &&
       (dock.overlayShown ||
+          _treeOverShown ||
           tabs.contentTabShows ||
           sidebarShowsView ||
           compare.shows ||
@@ -294,6 +352,8 @@ final class ShellWideLayout {
   void back() {
     if (dock.overlayShown) {
       dock.closeOverlay();
+    } else if (_treeOverShown) {
+      selection.closeTreeOver();
     } else if (immersive.fullScreen.value != null) {
       immersive.fullScreen.value = null;
     } else if (reviewTab.shows) {

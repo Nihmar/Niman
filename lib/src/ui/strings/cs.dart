@@ -889,6 +889,10 @@ final class CzechStrings extends Strings {
   String get showPreviewTooltip => 'Zobrazit náhled';
   @override
   String get showEditorTooltip => 'Zobrazit editor';
+  @override
+  String get noteModeEdit => 'Úpravy';
+  @override
+  String get noteModeRead => 'Čtení';
   // Raw-HTML table fallback.
 
   // Search (T-M3-05).

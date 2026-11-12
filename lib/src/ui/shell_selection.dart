@@ -78,6 +78,12 @@ final class ShellSelection extends ChangeNotifier {
   bool get sidebarVisible => _sidebarVisible;
   bool _sidebarVisible = true;
 
+  /// Whether the tree lies open over the panes, on a tablet without the
+  /// room for it beside them (#1266): closed until asked for, and again
+  /// once a note opens.
+  bool get treeOver => _treeOver;
+  bool _treeOver = false;
+
   /// What the note about to open is asked to land on.
   OpenRequest get request => _request;
   OpenRequest _request = OpenRequest.none;
@@ -264,6 +270,26 @@ final class ShellSelection extends ChangeNotifier {
     _notify(NoteShift.none);
   }
 
+  /// Opens the tree over the panes (#1266).
+  void openTreeOver() {
+    if (_treeOver) return;
+    _treeOver = true;
+    _notify(NoteShift.none);
+  }
+
+  /// Closes the tree lying over the panes (#1266).
+  void closeTreeOver() {
+    if (!_treeOver) return;
+    _treeOver = false;
+    _notify(NoteShift.none);
+  }
+
+  /// Opens or closes the tree over the panes (#1266).
+  void toggleTreeOver() {
+    _treeOver = !_treeOver;
+    _notify(NoteShift.none);
+  }
+
   /// Opens or closes the tree's folder at [path].
   void toggleFolder(String path) {
     if (expanded.contains(path)) {
@@ -348,6 +374,8 @@ final class ShellSelection extends ChangeNotifier {
   }
 
   void _notify(NoteShift shift) {
+    // A note opened from the tree lying over the panes takes its place.
+    if (shift == NoteShift.opened) _treeOver = false;
     _shift = shift;
     try {
       notifyListeners();

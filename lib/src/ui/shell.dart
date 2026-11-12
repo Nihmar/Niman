@@ -9,7 +9,6 @@ import 'package:niman/src/calendar/calendar_source.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/frame_cost.dart';
 import 'package:niman/src/core/frame_log.dart';
-import 'package:niman/src/core/host_platform.dart';
 import 'package:niman/src/core/launch_requests.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/settings/features.dart';
@@ -33,7 +32,6 @@ import 'package:niman/src/todo/todo_source.dart';
 import 'package:niman/src/transcription/open_audio_notes.dart';
 import 'package:niman/src/transcription/transcription_models.dart';
 import 'package:niman/src/ui/app_menu.dart';
-import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/capture/capture_flow.dart';
 import 'package:niman/src/ui/capture/capture_services.dart';
 import 'package:niman/src/ui/deferred_listenable.dart';
@@ -53,10 +51,7 @@ import 'package:niman/src/ui/link_update_dialog.dart';
 import 'package:niman/src/ui/mac_menu_bar.dart';
 import 'package:niman/src/ui/note_tab_bar.dart';
 import 'package:niman/src/ui/note_view.dart';
-import 'package:niman/src/ui/ocr/ocr_file_actions.dart';
-import 'package:niman/src/ui/open_notes_sheet.dart';
 import 'package:niman/src/ui/outside_files.dart';
-import 'package:niman/src/ui/palette/command_features.dart';
 import 'package:niman/src/ui/pinned_tab_chip.dart';
 import 'package:niman/src/ui/shell_annotation_flow.dart';
 import 'package:niman/src/ui/shell_commands.dart';
@@ -82,7 +77,9 @@ import 'package:niman/src/ui/shell_note_fade.dart';
 import 'package:niman/src/ui/shell_note_history.dart';
 import 'package:niman/src/ui/shell_note_kind.dart';
 import 'package:niman/src/ui/shell_note_panes.dart';
+import 'package:niman/src/ui/shell_ocr.dart';
 import 'package:niman/src/ui/shell_ocr_flow.dart';
+import 'package:niman/src/ui/shell_open_notes.dart';
 import 'package:niman/src/ui/shell_outside_routes.dart';
 import 'package:niman/src/ui/shell_palette.dart';
 import 'package:niman/src/ui/shell_personal_dictionary.dart';
@@ -630,7 +627,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     journal: _journalFlow,
     capture: _captureFlow,
     features: () => _features,
-    offersOcr: () => _offersOcr,
+    offersOcr: () => _ocr.offers,
     wide: () => _wide,
   );
 
@@ -693,7 +690,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       library: false,
       anchor: anchor,
     ),
-    onRecognize: _recognize,
+    onRecognize: _ocr.recognize,
     onConvertBook: (path) {
       if (widget.controller.root case final root?) {
         _convertBook(p.join(root, path));
@@ -864,8 +861,8 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     guard: _guard,
     showPanel: _showPanel,
     openHistory: _openHistory,
-    recognize: _recognize,
-    offersOcr: () => _offersOcr,
+    recognize: _ocr.recognize,
+    offersOcr: () => _ocr.offers,
     paletteByTouch: () => _paletteByTouch,
     features: () => _features,
     wide: () => _wide,
@@ -895,7 +892,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     annotations: _annotations,
     annotating: () => _annotating,
     annotate: _annotate,
-    ocrActions: () => _ocrActions,
+    ocrActions: () => _ocr.actions,
     convertBook: _convertBook,
     tasks: _tasks,
     unsaved: widget.unsavedTracker,
@@ -988,7 +985,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     ref: ref,
     guard: _guard,
     openTodo: _openTodo,
-    recognize: _recognize,
+    recognize: _ocr.recognize,
     openHistory: _openHistory,
     openPath: _openPath,
     revealInTree: _revealInTree,
@@ -1034,6 +1031,17 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   /// The notes open in this library on this device (issue #23): for now
   /// the one the shell shows, kept current and kept for the next launch.
   late final ShellWorkspace _workspace = ShellWorkspace(widget.controller);
+
+  late final ShellOpenNotes _openNotes = ShellOpenNotes(
+    workspace: _workspace,
+    selection: _selection,
+    tabs: _tabs,
+    createFlow: _createFlow,
+    changes: _tabsListenable,
+    unsaved: _unsavedRelPaths,
+    open: (path) => _openNoteFromLink(path, null),
+    context: () => context,
+  );
 
   /// The right dock and the phone's panel sheets.
   late final ShellDock _dock = ShellDock(
@@ -1145,8 +1153,8 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     takePane: _takePane,
     onTabAction: (path, action, anchor) =>
         unawaited(_tabAction(path, action, anchor)),
-    sidebarVisible: () => _selection.sidebarVisible,
-    onToggleSidebar: _selection.toggleSidebar,
+    sidebarVisible: () => _wideLayout.treeShown,
+    onToggleSidebar: () => _wideLayout.toggleTree(),
     dockToggle: _dockToggle,
   );
 
@@ -1292,7 +1300,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     AppKeyMap.current.addListener(_rebuild);
     _chosenKeys.attach();
     FocusManager.instance.addListener(_reclaimFocus);
-    HardwareKeyboard.instance.addHandler(_historyKeyUnfocused);
+    HardwareKeyboard.instance.addHandler(_noteHistory.unfocusedKey);
     _immersive.addListener(_rebuild);
     unawaited(_restoreWorkspace());
     _inboundRoutes.listen();
@@ -1346,7 +1354,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     AppKeyMap.current.removeListener(_rebuild);
     _chosenKeys.detach();
     FocusManager.instance.removeListener(_reclaimFocus);
-    HardwareKeyboard.instance.removeHandler(_historyKeyUnfocused);
+    HardwareKeyboard.instance.removeHandler(_noteHistory.unfocusedKey);
     // A library switch tears the shell down: the window it maximized goes
     // back as it was.
     _immersive.removeListener(_rebuild);
@@ -1498,40 +1506,14 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     _ => null,
   };
 
-  /// Whether the Recognize text entries are offered: there is OCR, and the
-  /// library has it on (#1109).
-  bool get _offersOcr =>
-      _ocrFlow != null && commandFeatureOn(AppCommand.recognizeText, _features);
-
-  /// The file views' Recognize text, or null without OCR or a library.
-  OcrFileActions? get _ocrActions {
-    final queue = widget.ocrQueue;
-    final root = widget.controller.root;
-    final ops = widget.controller.ops;
-    final flow = _ocrFlow;
-    if (flow == null ||
-        !_offersOcr ||
-        queue == null ||
-        root == null ||
-        ops == null) {
-      return null;
-    }
-    return OcrFileActions(
-      queue: queue,
-      root: root,
-      ops: ops,
-      recognize: _recognize,
-      openNote: _openRecognizedText,
-      recognizeAgain: flow.recognizeAgain,
-    );
-  }
-
-  /// Asks how to recognize [path] (library-relative) and queues it.
-  void _recognize(String path, {int? page, int? pageCount}) {
-    final flow = _ocrFlow;
-    if (flow == null) return;
-    unawaited(flow.recognize(context, path, page: page, pageCount: pageCount));
-  }
+  late final ShellOcr _ocr = ShellOcr(
+    flow: _ocrFlow,
+    queue: widget.ocrQueue,
+    controller: widget.controller,
+    features: () => _features,
+    openNote: _openRecognizedText,
+    context: () => context,
+  );
 
   /// Opens the note at [path] (a recognized text).
   void _openRecognizedText(String path) =>
@@ -1602,7 +1584,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       onCloseFullScreenNote: _tabs.closeNote,
       isQuickNote:
           selectedPath != null && selectedPath == _settings.quickNotePath,
-      noteBarActions: _noteActions.barActions(_openNotesButton()),
+      noteBarActions: _noteActions.barActions(_openNotes.button()),
       buildTabShell: () => _phoneChrome.scaffold(
         context,
         controller: controller,
@@ -1625,7 +1607,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       shellFocus: _shellFocus,
       tab: _tab,
       destinations: _nav.destinations,
-      onDestinationSelected: _tabs.destinationSelected,
+      onDestinationSelected: _wideLayout.destinationSelected,
       hiddenTab: !_nav.shown(_tab),
       onLeaveHiddenTab: _tabs.leaveHiddenTab,
       // Back walks up one folder before it leaves the Files tab, while the
@@ -1637,6 +1619,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
           _files.gridInFolder,
       onBackStep: _files.gridUp,
       onSwitchLibrary: () => _windows.switchLibrary(context),
+      onNewItem: (item) => _treeMenus.newItem(context, item),
       // The touch way into the palette (#206); the desktop has a key.
       onOpenPalette: _paletteByTouch
           ? () => unawaited(_palette.open(context))
@@ -1668,7 +1651,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
               (url) => unawaited(_captureFlow.capture(context, url: url)),
             ),
           },
-          child: _mouseHistory(
+          child: _noteHistory.mouseButtons(
             narrow
                 ? NarrowShellLayout(props: props)
                 : WideShellLayout(props: props),
@@ -1676,78 +1659,6 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
         ),
       ),
     );
-  }
-
-  /// Back and forward from a keyboard while nothing in the window has the
-  /// focus (#700): the phone's layout claims none, so a field keeps the
-  /// software keyboard (T-PP-10), and no binding of the shell hears a key
-  /// then. With a focus, the shell's bindings answer, and this does not.
-  bool _historyKeyUnfocused(KeyEvent event) {
-    if (event is! KeyDownEvent || !mounted) return false;
-    if (FocusManager.instance.primaryFocus is! FocusScopeNode) return false;
-    final keys = AppKeyMap.current.value;
-    final keyboard = HardwareKeyboard.instance;
-    if (keys.bindingOf(AppCommand.noteBack)?.accepts(event, keyboard) ??
-        false) {
-      unawaited(_noteHistory.back());
-      return true;
-    }
-    if (keys.bindingOf(AppCommand.noteForward)?.accepts(event, keyboard) ??
-        false) {
-      unawaited(_noteHistory.forward());
-      return true;
-    }
-    return false;
-  }
-
-  /// The mouse's side buttons over the window, on a desktop (#700). A
-  /// phone's back button is the system's Back, which keeps its meaning.
-  Widget _mouseHistory(Widget child) => HostPlatform.isDesktop
-      ? MouseHistoryButtons(
-          onBack: () => unawaited(_noteHistory.back()),
-          onForward: () => unawaited(_noteHistory.forward()),
-          child: child,
-        )
-      : child;
-
-  /// The phone's badge for the notes left open (#23, PR 4).
-  Widget _openNotesButton() => OpenNotesButton(
-    count: _workspace.value.tabs.length,
-    onPressed: () => unawaited(_showOpenNotes()),
-  );
-
-  /// The phone's open-notes switcher: every note left open, the one on
-  /// screen marked, each with its unsaved dot and a close.
-  Future<void> _showOpenNotes() => showOpenNotesSheet(
-    context,
-    workspace: () => _workspace.value,
-    changes: _tabsListenable,
-    unsaved: _unsavedRelPaths,
-    shown: () => _selection.noteOnScreen,
-    onOpen: (path) => _openNoteFromLink(path, null),
-    onClose: _closeOpenNote,
-    onCloseAll: () {
-      _workspace.controller.update((w) => w.closeAll());
-      if (_selection.noteOnScreen != null) _tabs.closeNote();
-      _selection.clear();
-    },
-    // A phone opens every note alongside the others: the new one joins
-    // them once it is named, and a cancel leaves nothing behind (#1133).
-    onNewNote: () => unawaited(_createFlow.createNote(context)),
-  );
-
-  /// Closes [path] from the switcher. The note on screen gives way to the
-  /// next one open, or to the tree when it was the last.
-  void _closeOpenNote(String path) {
-    final wasShown = _selection.noteOnScreen == path;
-    _workspace.controller.update((w) => w.closePath(path));
-    final next = _workspace.value.activePath;
-    if (wasShown && next != null) {
-      _openNoteFromLink(next, null);
-      return;
-    }
-    if (wasShown) _tabs.closeNote();
-    _selection.clearIf(path);
   }
 
   /// The open notes holding unsaved edits, library-relative.
@@ -1775,7 +1686,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     journalUi: _journalUi,
     syncActions: _syncActions,
     workspace: _workspace,
-    openNotesButton: _openNotesButton,
+    openNotesButton: _openNotes.button,
     sortToggle: _bodies.sortToggle,
     features: () => _features,
     ocrQueue: widget.ocrQueue,
@@ -1932,7 +1843,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     tabRows: _tabRows,
     settings: () => _settings.editor,
     inZen: () => _inZen,
-    sidebarVisible: () => _selection.sidebarVisible,
+    tree: () => _wideLayout.tree,
     dockWidth: () => _wideLayout.dockWidth,
     customTitleBar: () => widget.window.customTitleBar,
     libraryName: () => _libraryName,

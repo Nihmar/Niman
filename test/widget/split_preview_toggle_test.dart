@@ -53,5 +53,5 @@ void main() {
 
     // The note's pane keeps its eye; the PDF's has none.
     expect(find.byKey(const Key('editor-preview-toggle')), findsOne);
-  });
+  }, variant: desktopDensity);
 }

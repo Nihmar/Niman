@@ -897,6 +897,10 @@ final class MacedonianStrings extends Strings {
   String get showPreviewTooltip => 'Прикажи преглед';
   @override
   String get showEditorTooltip => 'Прикажи уредник';
+  @override
+  String get noteModeEdit => 'Уредување';
+  @override
+  String get noteModeRead => 'Читање';
   // Raw-HTML table fallback.
 
   // Search (T-M3-05).

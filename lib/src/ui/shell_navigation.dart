@@ -19,8 +19,10 @@ import 'package:niman/src/core/settings/navigation_layout.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/island.dart';
 import 'package:niman/src/ui/key_map.dart';
+import 'package:niman/src/ui/new_shell_items.dart';
 import 'package:niman/src/ui/pointer_density.dart';
 import 'package:niman/src/ui/strings.dart';
+import 'package:niman/src/ui/touch_rail.dart';
 
 /// The command a destination runs on a key, if any.
 AppCommand? _tabCommand(ShellTab tab) => switch (tab) {
@@ -337,6 +339,9 @@ final class ShellRail extends StatelessWidget {
     required this.current,
     required this.onDestinationSelected,
     required this.onSwitchLibrary,
+    this.library = '',
+    this.newItems,
+    this.onNewItem,
     super.key,
   });
 
@@ -372,8 +377,39 @@ final class ShellRail extends StatelessWidget {
   /// Opens the known-library list.
   final VoidCallback onSwitchLibrary;
 
+  /// The open library's name, on a touch device's rail (#1266).
+  final String library;
+
+  /// The create menu's entries, for the touch rail's **New** (#1266).
+  final List<PopupMenuEntry<NewShellItem>> Function(BuildContext)? newItems;
+
+  /// Runs the chosen create action; with [newItems], a touch device gets
+  /// the labelled rail and its **New** (#1266).
+  final ValueChanged<NewShellItem>? onNewItem;
+
+  /// Where the panels start on this surface: past the touch rail on a
+  /// touch device, past [panelStart]'s otherwise.
+  static double panelStartFor(ThemeData theme) =>
+      thumbDense(theme) ? TouchRail.width + Island.gap : panelStart;
+
   @override
   Widget build(BuildContext context) {
+    final newItems = this.newItems;
+    final onNewItem = this.onNewItem;
+    if (thumbDense(Theme.of(context)) &&
+        newItems != null &&
+        onNewItem != null) {
+      return TouchRail(
+        destinations: destinations,
+        current: current,
+        onDestinationSelected: onDestinationSelected,
+        onSwitchLibrary: onSwitchLibrary,
+        library: library,
+        newItems: newItems,
+        onNewItem: onNewItem,
+        tooltipOf: _railLabel,
+      );
+    }
     // Settings is locked (it is always among them) and sits at the foot.
     final settings = destinations.firstWhere((d) => d.tab == ShellTab.settings);
     final places = [

@@ -899,6 +899,10 @@ final class CatalanStrings extends Strings {
   String get showPreviewTooltip => 'Mostra la previsualització';
   @override
   String get showEditorTooltip => 'Mostra l’editor';
+  @override
+  String get noteModeEdit => 'Edició';
+  @override
+  String get noteModeRead => 'Lectura';
   // Raw-HTML table fallback.
 
   // Search (T-M3-05).

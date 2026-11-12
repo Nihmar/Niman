@@ -240,6 +240,8 @@ void main() {
       await settle(tester);
       expect(find.byKey(const Key('todo-help-dialog')), findsNothing);
     },
+    // A desktop's pane: a tablet's is narrower beside its labelled rail.
+    variant: TargetPlatformVariant.only(TargetPlatform.windows),
   );
 
   testWidgets('wide: the title bar toggles the tree, the rail stays', (

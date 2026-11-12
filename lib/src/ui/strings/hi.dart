@@ -877,6 +877,10 @@ final class HindiStrings extends Strings {
   String get showPreviewTooltip => 'पूर्वावलोकन दिखाएँ';
   @override
   String get showEditorTooltip => 'एडिटर दिखाएँ';
+  @override
+  String get noteModeEdit => 'संपादन';
+  @override
+  String get noteModeRead => 'पढ़ना';
   // Raw-HTML table fallback.
 
   // Search (T-M3-05).

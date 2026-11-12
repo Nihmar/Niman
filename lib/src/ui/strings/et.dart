@@ -881,6 +881,10 @@ final class EstonianStrings extends Strings {
   String get showPreviewTooltip => 'Kuva eelvaadet';
   @override
   String get showEditorTooltip => 'Kuva redaktorit';
+  @override
+  String get noteModeEdit => 'Muuda';
+  @override
+  String get noteModeRead => 'Loe';
   // Raw-HTML table fallback.
 
   // Search (T-M3-05).

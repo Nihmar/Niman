@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>A · Writing with the keyboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+a{color:#4762BE}a:hover{color:#2F4699}
+</style>
+</head>
+<body>
+<div style="width: 1194px; height: 834px; display: flex; flex-direction: column; background: #F2EDE5; color: #23262B; font-family: Inter, system-ui, sans-serif; overflow: hidden">
+  <div style="flex: 1; min-height: 0; display: flex">
+    <nav aria-label="Destinations" style="width: 88px; flex: none; background: #EAE4D8; display: flex; flex-direction: column; align-items: center; padding: 14px 0 10px; gap: 4px; box-sizing: border-box">
+      <button aria-label="Switch library: Notes" style="width: 44px; height: 44px; border-radius: 12px; border: 0; background: #23262B; display: flex; align-items: center; justify-content: center; margin-bottom: 4px">
+        <span style="width: 28px; height: 28px; border-radius: 7px; background: #587CD3; color: #F2EDE5; font-weight: 700; font-size: 16px; display: flex; align-items: center; justify-content: center">N</span>
+      </button>
+      <button aria-label="New note" style="width: 52px; height: 52px; border-radius: 16px; border: 0; background: #D2D9F0; color: #23347A; display: flex; align-items: center; justify-content: center; margin-bottom: 6px">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14 M5 12h14"></path></svg>
+      </button>
+        <button aria-label="Home" style="border: 0; width: 56px; height: 44px; border-radius: 22px; display: flex; align-items: center; justify-content: center; background: transparent; color: #4F525A">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10l9-7 9 7v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z M9 22V12h6v10"></path></svg>
+        </button>
+        <button aria-label="Files" style="border: 0; width: 56px; height: 44px; border-radius: 22px; display: flex; align-items: center; justify-content: center; background: #D2D9F0; color: #23347A">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.7-.9l-.8-1.2A2 2 0 0 0 7.9 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2z"></path></svg>
+        </button>
+        <button aria-label="Todo" style="border: 0; width: 56px; height: 44px; border-radius: 22px; display: flex; align-items: center; justify-content: center; background: transparent; color: #4F525A">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11l3 3L22 4 M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+        </button>
+        <button aria-label="Search" style="border: 0; width: 56px; height: 44px; border-radius: 22px; display: flex; align-items: center; justify-content: center; background: transparent; color: #4F525A">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16z M21 21l-4.3-4.3"></path></svg>
+        </button>
+        <button aria-label="Study" style="border: 0; width: 56px; height: 44px; border-radius: 22px; display: flex; align-items: center; justify-content: center; background: transparent; color: #4F525A">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2l10 5-10 5L2 7z M2 17l10 5 10-5 M2 12l10 5 10-5"></path></svg>
+        </button>
+        <button aria-label="Quick note" style="border: 0; width: 56px; height: 44px; border-radius: 22px; display: flex; align-items: center; justify-content: center; background: transparent; color: #4F525A">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"></path></svg>
+        </button>
+      <div style="flex: 1"></div>
+      <button aria-label="Settings" style="border: 0; background: none; width: 56px; height: 44px; border-radius: 22px; display: flex; align-items: center; justify-content: center; color: #4F525A">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 21v-7 M4 10V3 M12 21v-9 M12 8V3 M20 21v-5 M20 12V3 M1 14h6 M9 8h6 M17 16h6"></path></svg>
+      </button>
+    </nav>
+    <main style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+      <div style="height: 64px; flex: none; display: flex; align-items: center; gap: 8px; padding: 0 12px; border-bottom: 1px solid #DED7CA">
+        <button aria-label="Show the tree" style="width: 48px; height: 48px; border: 0; background: none; border-radius: 24px; display: flex; align-items: center; justify-content: center; color: #4F525A; flex: none">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z M9 3v18"></path></svg>
+        </button>
+        <div role="tablist" aria-label="Open notes" style="flex: 1; min-width: 0; display: flex; gap: 8px; overflow: hidden">
+          <button role="tab" aria-selected="true" style="height: 40px; flex: none; border-radius: 20px; padding: 0 8px 0 16px; display: flex; align-items: center; gap: 6px; font-size: 15px; border: 1px solid #4762BE; background: #FBF8F3; font-weight: 600">
+            1.2 Subspaces
+            <span aria-hidden="true" style="width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; color: #5F6269"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6L6 18 M6 6l12 12"></path></svg></span>
+          </button>
+          <button role="tab" style="height: 40px; flex: none; border-radius: 20px; padding: 0 16px; display: flex; align-items: center; font-size: 15px; border: 1px solid #D6CFC2; background: none">Exam plan</button>
+          <button role="tab" style="height: 40px; flex: none; border-radius: 20px; padding: 0 16px; display: flex; align-items: center; font-size: 15px; border: 1px solid #D6CFC2; background: none">Inbox</button>
+        </div>
+        <span style="font-size: 13px; color: #5F6269">Saved</span>
+        <div role="group" aria-label="Mode" style="display: flex; height: 44px; border: 1px solid #C4BDAF; border-radius: 22px; overflow: hidden; flex: none">
+          <button aria-pressed="true" style="border: 0; background: #DCD5C8; padding: 0 16px; font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 6px">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"></path></svg>
+            Edit
+          </button>
+          <button style="border: 0; background: none; padding: 0 16px; font-size: 15px; font-weight: 500; display: flex; align-items: center; gap: 6px">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"></path></svg>
+            Read
+          </button>
+        </div>
+        <button aria-label="More" style="width: 48px; height: 48px; border: 0; background: none; border-radius: 24px; display: flex; align-items: center; justify-content: center; color: #4F525A; flex: none">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="1.8"></circle><circle cx="12" cy="12" r="1.8"></circle><circle cx="12" cy="19" r="1.8"></circle></svg>
+        </button>
+      </div>
+      <article style="flex: 1; min-height: 0; overflow: hidden; display: flex; justify-content: center; padding: 22px 40px 0">
+        <div style="width: 100%; max-width: 660px; font-size: 18px; line-height: 1.7">
+          <p style="margin: 0 0 12px">A non-empty subset <em>W</em> of ℝ³ is a <span style="color: #9B968C">**</span><strong>subspace</strong><span style="color: #9B968C">**</span> if it is closed under addition and under multiplication by a scalar.</p>
+          <p style="margin: 0 0 8px; font-size: 22px; font-weight: 700"><span style="color: #9B968C; font-weight: 500">## </span>Definition 1.2.2</p>
+          <p style="margin: 0 0 10px">Given <em>k</em> vectors, the <strong>span</strong> is the set of their linear combinations. See <span style="color: #4762BE">[[1.3 Bases and dimension]]</span> and the exercises in <span style="color: #4762BE">[[Exercises — week</span><span style="display: inline-block; width: 2px; height: 22px; background: #4762BE; vertical-align: -4px; margin-left: 1px"></span></p>
+          <div style="margin: -4px 0 0 260px; width: 320px; background: #FBF8F3; border-radius: 14px; box-shadow: 0 6px 22px rgba(35,38,43,.18), 0 0 0 1px rgba(35,38,43,.06); padding: 6px; font-size: 15px; line-height: 1.3">
+            <button style="width: 100%; border: 0; background: #D2D9F0; border-radius: 10px; padding: 9px 12px; text-align: left; display: flex; flex-direction: column; gap: 2px">
+              <span style="font-weight: 600; color: #23347A">Exercises — week 3</span>
+              <span style="font-size: 13px; color: #4F525A">Study › Linear algebra</span>
+            </button>
+            <button style="width: 100%; border: 0; background: none; border-radius: 10px; padding: 9px 12px; text-align: left; display: flex; flex-direction: column; gap: 2px">
+              <span style="font-weight: 500">Exercises — week 2</span>
+              <span style="font-size: 13px; color: #5F6269">Study › Linear algebra</span>
+            </button>
+          </div>
+        </div>
+      </article>
+      <div role="toolbar" aria-label="Formatting" style="height: 56px; flex: none; display: flex; align-items: center; gap: 2px; padding: 0 12px; background: #EAE4D8; border-top: 1px solid #D6CFC2">
+          <button aria-label="Heading" style="min-width: 48px; height: 44px; border: 0; background: none; border-radius: 10px; padding: 0 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 600; color: #3A3D44">
+              <span>H</span>
+          </button>
+          <button aria-label="Bold" style="min-width: 48px; height: 44px; border: 0; background: none; border-radius: 10px; padding: 0 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 600; color: #3A3D44">
+              <span>B</span>
+          </button>
+          <button aria-label="Italic" style="min-width: 48px; height: 44px; border: 0; background: none; border-radius: 10px; padding: 0 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 600; color: #3A3D44">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 4h-9 M14 20H5 M15 4L9 20"></path></svg>
+          </button>
+          <button aria-label="List" style="min-width: 48px; height: 44px; border: 0; background: none; border-radius: 10px; padding: 0 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 600; color: #3A3D44">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13 M8 12h13 M8 18h13 M3 6h.01 M3 12h.01 M3 18h.01"></path></svg>
+          </button>
+          <button aria-label="Checklist" style="min-width: 48px; height: 44px; border: 0; background: none; border-radius: 10px; padding: 0 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 600; color: #3A3D44">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5l2 2 4-4 M3 17l2 2 4-4 M13 6h8 M13 18h8 M13 12h8"></path></svg>
+          </button>
+          <button aria-label="Wikilink" style="min-width: 48px; height: 44px; border: 0; background: none; border-radius: 10px; padding: 0 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 600; color: #3A3D44">
+              <span>[[ ]]</span>
+          </button>
+          <button aria-label="Tag" style="min-width: 48px; height: 44px; border: 0; background: none; border-radius: 10px; padding: 0 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 600; color: #3A3D44">
+              <span>#</span>
+          </button>
+          <button aria-label="Link" style="min-width: 48px; height: 44px; border: 0; background: none; border-radius: 10px; padding: 0 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 600; color: #3A3D44">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7 M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"></path></svg>
+          </button>
+          <button aria-label="Image" style="min-width: 48px; height: 44px; border: 0; background: none; border-radius: 10px; padding: 0 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 600; color: #3A3D44">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z M9 11a2 2 0 1 0 0-4 2 2 0 0 0 0 4z M21 15l-5-5L5 21"></path></svg>
+          </button>
+          <button aria-label="Code" style="min-width: 48px; height: 44px; border: 0; background: none; border-radius: 10px; padding: 0 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 600; color: #3A3D44">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 18l6-6-6-6 M8 6l-6 6 6 6"></path></svg>
+          </button>
+          <button aria-label="Math" style="min-width: 48px; height: 44px; border: 0; background: none; border-radius: 10px; padding: 0 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 600; color: #3A3D44">
+              <span>∑</span>
+          </button>
+          <button aria-label="Template" style="min-width: 48px; height: 44px; border: 0; background: none; border-radius: 10px; padding: 0 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 600; color: #3A3D44">
+              <span>{ }</span>
+          </button>
+        <div style="flex: 1"></div>
+        <button aria-label="Undo" style="width: 48px; height: 44px; border: 0; background: none; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #3A3D44">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7v6h6 M21 17a9 9 0 0 0-15-6.7L3 13"></path></svg>
+        </button>
+        <button aria-label="Redo" style="width: 48px; height: 44px; border: 0; background: none; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #3A3D44">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 7v6h-6 M3 17a9 9 0 0 1 15-6.7L21 13"></path></svg>
+        </button>
+        <button aria-label="Hide the keyboard" style="width: 48px; height: 44px; border: 0; background: none; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #3A3D44">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z M7 8h.01 M11 8h.01 M15 8h.01 M8 11h8 M9 18l3 3 3-3"></path></svg>
+        </button>
+      </div>
+    </main>
+  </div>
+  <div aria-hidden="true" style="height: 300px; flex: none; background: #D3D0CA; padding: 10px 8px 12px; box-sizing: border-box; display: flex; flex-direction: column; gap: 9px">
+      <div style="flex: 1; display: flex; gap: 8px">
+          <div style="flex: 1; background: #F4F2EE; border-radius: 8px; box-shadow: 0 1px 0 rgba(0,0,0,.18); display: flex; align-items: center; justify-content: center; font-size: 20px; color: #3A3D44">q</div>
+          <div style="flex: 1; background: #F4F2EE; border-radius: 8px; box-shadow: 0 1px 0 rgba(0,0,0,.18); display: flex; align-items: center; justify-content: center; font-size: 20px; color: #3A3D44">w</div>
+          <div style="flex: 1; background: #F4F2EE; border-radius: 8px; box-shadow: 0 1px 0 rgba(0,0,0,.18); display: flex; align-items: center; justify-content: center; font-size: 20px; color: #3A3D44">e</div>
+          <div style="flex: 1; background: #F4F2EE; border-radius: 8px; box-shadow: 0 1px 0 rgba(0,0,0,.18); display: flex; align-items: center; justify-content: center; font-size: 20px; color: #3A3D44">r</div>
+          <div style="flex: 1; background: #F4F2EE; border-radius: 8px; box-shadow: 0 1px 0 rgba(0,0,0,.18); display: flex; align-items: center; justify-content: center; font-size: 20px; color: #3A3D44">t</div>
+          <div style="flex: 1; background: #F4F2EE; border-radius: 8px; box-shadow: 0 1px 0 rgba(0,0,0,.18); display: flex; align-items: center; justify-content: center; font-size: 20px; color: #3A3D44">y</div>
+          <div style="flex: 1; background: #F4F2EE; border-radius: 8px; box-shadow: 0 1px 0 rgba(0,0,0,.18); display: flex; align-items: center; justify-content: center; font-size: 20px; color: #3A3D44">u</div>
+          <div style="flex: 1; background: #F4F2EE; border-radius: 8px; box-shadow: 0 1px 0 rgba(0,0,0,.18); display: flex; align-items: center; justify-content: center; font-size: 20px; color: #3A3D44">i</div>
+          <div style="flex: 1; background: #F4F2EE; border-radius: 8px; box-shadow: 0 1px 0 rgba(0,0,0,.18); display: flex; align-items: center; justify-content: center; font-size: 20px; color: #3A3D44">o</div>
+          <div style="flex: 1; background: #F4F2EE; border-radius: 8px; box-shadow: 0 1px 0 rgba(0,0,0,.18); display: flex; align-items: center; justify-content: center; font-size: 20px; color: #3A3D44">p</div>
+          <div style="flex: 1.4; background: #B9B5AE; border-radius: 8px; box-shadow: 0 1px 0 rgba(0,0,0,.18); display: flex; align-items: center; justify-content: center; font-size: 20px; color: #3A3D44">⌫</div>
+      </div>
+      <div style="flex: 1; display: flex; gap: 8px">
+          <div style="flex: 0.4; background: #B9B5AE; border-radius: 8px; box-shadow: 0 1px 0 rgba(0,0,0,.18); display: flex; align-items: center; justify-content: center; font-size: 20px; color: #3A3D44"></div>
+          <div style="flex: 1; background: #F4F2EE; border-radius: 8px; box-shadow: 0 1px 0 rgba(0,0,0,.18); display: flex; align-items: center; justify-content: center; font-size: 20px; color: #3A3D44">a</div>
+          <div style="flex: 1; background: #F4F2EE; border-radius: 8px; box-shadow: 0 1px 0 rgba(0,0,0,.18); display: flex; align-items: center; justify-content: center; font-size: 20px; color: #3A3D44">s</div>
+          <div style="flex: 1; background: #F4F2EE; border-radius: 8px; box-shadow: 0 1px 0 rgba(0,0,0,.18); display: flex; align-items: center; justify-content: center; font-size: 20px; color: #3A3D44">d</div>
+          <div style="flex: 1; background: #F4F2EE; border-radius: 8px; box-shadow: 0 1px 0 rgba(0,0,0,.18); display: flex; align-items: center; justify-content: center; font-size: 20px; color: #3A3D44">f</div>
+          <div style="flex: 1; background: #F4F2EE; border-radius: 8px; box-shadow: 0 1px 0 rgba(0,0,0,.18); display: flex; align-items: center; justify-content: center; font-size: 20px; color: #3A3D44">g</div>
+          <div style="flex: 1; background: #F4F2EE; border-radius: 8px; box-shadow: 0 1px 0 rgba(0,0,0,.18); display: flex; align-items: center; justify-content: center; font-size: 20px; color: #3A3D44">h</div>
+          <div style="flex: 1; background: #F4F2EE; border-radius: 8px; box-shadow: 0 1px 0 rgba(0,0,0,.18); display: flex; align-items: center; justify-content: center; font-size: 20px; color: #3A3D44">j</div>
+          <div style="flex: 1; background: #F4F2EE; border-radius: 8px; box-shadow: 0 1px 0 rgba(0,0,0,.18); display: flex; align-items: center; justify-content: center; font-size: 20px; color: #3A3D44">k</div>
+          <div style="flex: 1; background: #F4F2EE; border-radius: 8px; box-shadow: 0 1px 0 rgba(0,0,0,.18); display: flex; align-items: center; justify-content: center; font-size: 20px; color: #3A3D44">l</div>
+          <div style="flex: 1.8; background: #B9B5AE; border-radius: 8px; box-shadow: 0 1px 0 rgba(0,0,0,.18); display: flex; align-items: center; justify-content: center; font-size: 20px; color: #3A3D44">return</div>
+      </div>
+      <div style="flex: 1; display: flex; gap: 8px">
+          <div style="flex: 1.4; background: #B9B5AE; border-radius: 8px; box-shadow: 0 1px 0 rgba(0,0,0,.18); display: flex; align-items: center; justify-content: center; font-size: 20px; color: #3A3D44">⇧</div>
+          <div style="flex: 1; background: #F4F2EE; border-radius: 8px; box-shadow: 0 1px 0 rgba(0,0,0,.18); display: flex; align-items: center; justify-content: center; font-size: 20px; color: #3A3D44">z</div>
+          <div style="flex: 1; background: #F4F2EE; border-radius: 8px; box-shadow: 0 1px 0 rgba(0,0,0,.18); display: flex; align-items: center; justify-content: center; font-size: 20px; color: #3A3D44">x</div>
+          <div style="flex: 1; background: #F4F2EE; border-radius: 8px; box-shadow: 0 1px 0 rgba(0,0,0,.18); display: flex; align-items: center; justify-content: center; font-size: 20px; color: #3A3D44">c</div>
+          <div style="flex: 1; background: #F4F2EE; border-radius: 8px; box-shadow: 0 1px 0 rgba(0,0,0,.18); display: flex; align-items: center; justify-content: center; font-size: 20px; color: #3A3D44">v</div>
+          <div style="flex: 1; background: #F4F2EE; border-radius: 8px; box-shadow: 0 1px 0 rgba(0,0,0,.18); display: flex; align-items: center; justify-content: center; font-size: 20px; color: #3A3D44">b</div>
+          <div style="flex: 1; background: #F4F2EE; border-radius: 8px; box-shadow: 0 1px 0 rgba(0,0,0,.18); display: flex; align-items: center; justify-content: center; font-size: 20px; color: #3A3D44">n</div>
+          <div style="flex: 1; background: #F4F2EE; border-radius: 8px; box-shadow: 0 1px 0 rgba(0,0,0,.18); display: flex; align-items: center; justify-content: center; font-size: 20px; color: #3A3D44">m</div>
+          <div style="flex: 1; background: #F4F2EE; border-radius: 8px; box-shadow: 0 1px 0 rgba(0,0,0,.18); display: flex; align-items: center; justify-content: center; font-size: 20px; color: #3A3D44">,</div>
+          <div style="flex: 1; background: #F4F2EE; border-radius: 8px; box-shadow: 0 1px 0 rgba(0,0,0,.18); display: flex; align-items: center; justify-content: center; font-size: 20px; color: #3A3D44">.</div>
+          <div style="flex: 1.4; background: #B9B5AE; border-radius: 8px; box-shadow: 0 1px 0 rgba(0,0,0,.18); display: flex; align-items: center; justify-content: center; font-size: 20px; color: #3A3D44">⇧</div>
+      </div>
+      <div style="flex: 1; display: flex; gap: 8px">
+          <div style="flex: 1.6; background: #B9B5AE; border-radius: 8px; box-shadow: 0 1px 0 rgba(0,0,0,.18); display: flex; align-items: center; justify-content: center; font-size: 20px; color: #3A3D44">.?123</div>
+          <div style="flex: 7; background: #F4F2EE; border-radius: 8px; box-shadow: 0 1px 0 rgba(0,0,0,.18); display: flex; align-items: center; justify-content: center; font-size: 20px; color: #3A3D44"></div>
+          <div style="flex: 1.6; background: #B9B5AE; border-radius: 8px; box-shadow: 0 1px 0 rgba(0,0,0,.18); display: flex; align-items: center; justify-content: center; font-size: 20px; color: #3A3D44">.?123</div>
+      </div>
+  </div>
+</div>
+</body>
+</html>

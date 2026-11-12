@@ -891,6 +891,10 @@ final class UkrainianStrings extends Strings {
   String get showPreviewTooltip => 'Показати перегляд';
   @override
   String get showEditorTooltip => 'Показати редактор';
+  @override
+  String get noteModeEdit => 'Редагування';
+  @override
+  String get noteModeRead => 'Читання';
   // Raw-HTML table fallback.
 
   // Search (T-M3-05).

@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>B · Three columns</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Source+Serif+4:ital,wght@0,400;1,400&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+a{color:#4762BE}a:hover{color:#2F4699}
+</style>
+</head>
+<body>
+<div style="width: 1194px; height: 834px; display: flex; background: #F2EDE5; color: #23262B; font-family: Inter, system-ui, sans-serif; overflow: hidden">
+  <nav aria-label="Library" style="width: 264px; flex: none; background: #E6DFD2; display: flex; flex-direction: column; padding: 16px 12px 12px; box-sizing: border-box; gap: 2px">
+    <div style="display: flex; align-items: center; gap: 4px; margin-bottom: 10px">
+      <button style="flex: 1; min-width: 0; height: 48px; border: 0; background: none; border-radius: 12px; display: flex; align-items: center; gap: 10px; padding: 0 8px; text-align: left">
+        <span style="width: 30px; height: 30px; border-radius: 8px; background: #23262B; display: flex; align-items: center; justify-content: center; flex: none">
+          <span style="width: 20px; height: 20px; border-radius: 5px; background: #587CD3; color: #F2EDE5; font-weight: 700; font-size: 13px; display: flex; align-items: center; justify-content: center">N</span>
+        </span>
+        <span style="font-size: 18px; font-weight: 650">Notes</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5F6269" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg>
+      </button>
+      <button aria-label="Hide the sidebar" style="width: 44px; height: 44px; border: 0; background: none; border-radius: 22px; display: flex; align-items: center; justify-content: center; color: #4F525A">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z M9 3v18"></path></svg>
+      </button>
+    </div>
+    <button style="height: 44px; border: 1px solid #CFC7B8; background: #F2EDE5; border-radius: 22px; display: flex; align-items: center; gap: 10px; padding: 0 14px; color: #5F6269; font-size: 15px; margin-bottom: 12px; text-align: left">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16z M21 21l-4.3-4.3"></path></svg>
+      Search notes and commands
+    </button>
+      <button style="height: 44px; border: 0; background: none; border-radius: 12px; display: flex; align-items: center; gap: 14px; padding: 0 12px; font-size: 16px; text-align: left; color: #23262B">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4F525A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10l9-7 9 7v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z M9 22V12h6v10"></path></svg>
+        <span style="flex: 1">Home</span>
+        <span style="font-size: 13px; color: #5F6269"></span>
+      </button>
+      <button style="height: 44px; border: 0; background: none; border-radius: 12px; display: flex; align-items: center; gap: 14px; padding: 0 12px; font-size: 16px; text-align: left; color: #23262B">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4F525A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11l3 3L22 4 M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+        <span style="flex: 1">Todo</span>
+        <span style="font-size: 13px; color: #5F6269">4</span>
+      </button>
+      <button style="height: 44px; border: 0; background: none; border-radius: 12px; display: flex; align-items: center; gap: 14px; padding: 0 12px; font-size: 16px; text-align: left; color: #23262B">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4F525A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2l10 5-10 5L2 7z M2 17l10 5 10-5 M2 12l10 5 10-5"></path></svg>
+        <span style="flex: 1">Study</span>
+        <span style="font-size: 13px; color: #5F6269">12 due</span>
+      </button>
+      <button style="height: 44px; border: 0; background: none; border-radius: 12px; display: flex; align-items: center; gap: 14px; padding: 0 12px; font-size: 16px; text-align: left; color: #23262B">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4F525A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"></path></svg>
+        <span style="flex: 1">Quick note</span>
+        <span style="font-size: 13px; color: #5F6269"></span>
+      </button>
+    <div style="display: flex; align-items: center; justify-content: space-between; padding: 16px 12px 4px">
+      <span style="font-size: 12px; font-weight: 600; letter-spacing: .06em; color: #5F6269">FOLDERS</span>
+      <button aria-label="New folder" style="width: 32px; height: 32px; border: 0; background: none; border-radius: 16px; display: flex; align-items: center; justify-content: center; color: #4F525A">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14 M5 12h14"></path></svg>
+      </button>
+    </div>
+      <button style="height: 44px; border: 0; border-radius: 12px; display: flex; align-items: center; gap: 8px; padding: 0 12px 0 8px; font-size: 16px; text-align: left; background: transparent; color: #23262B; font-weight: 400; box-sizing: border-box">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5F6269" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M9 18l6-6-6-6"></path></svg>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none; opacity: .85"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.7-.9l-.8-1.2A2 2 0 0 0 7.9 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2z"></path></svg>
+        <span style="flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-left: 4px">Journal</span>
+        <span style="font-size: 13px; color: #5F6269; font-weight: 400">214</span>
+      </button>
+      <button style="height: 44px; border: 0; border-radius: 12px; display: flex; align-items: center; gap: 8px; padding: 0 12px 0 8px; font-size: 16px; text-align: left; background: transparent; color: #23262B; font-weight: 400; box-sizing: border-box">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5F6269" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M9 18l6-6-6-6"></path></svg>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none; opacity: .85"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.7-.9l-.8-1.2A2 2 0 0 0 7.9 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2z"></path></svg>
+        <span style="flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-left: 4px">Lists</span>
+        <span style="font-size: 13px; color: #5F6269; font-weight: 400">9</span>
+      </button>
+      <button style="height: 44px; border: 0; border-radius: 12px; display: flex; align-items: center; gap: 8px; padding: 0 12px 0 8px; font-size: 16px; text-align: left; background: transparent; color: #23262B; font-weight: 400; box-sizing: border-box">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5F6269" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M9 18l6-6-6-6"></path></svg>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none; opacity: .85"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.7-.9l-.8-1.2A2 2 0 0 0 7.9 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2z"></path></svg>
+        <span style="flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-left: 4px">Projects</span>
+        <span style="font-size: 13px; color: #5F6269; font-weight: 400">31</span>
+      </button>
+      <button style="height: 44px; border: 0; border-radius: 12px; display: flex; align-items: center; gap: 8px; padding: 0 12px 0 8px; font-size: 16px; text-align: left; background: transparent; color: #23262B; font-weight: 400; box-sizing: border-box">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5F6269" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M6 9l6 6 6-6"></path></svg>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none; opacity: .85"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.7-.9l-.8-1.2A2 2 0 0 0 7.9 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2z"></path></svg>
+        <span style="flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-left: 4px">Study</span>
+        <span style="font-size: 13px; color: #5F6269; font-weight: 400">48</span>
+      </button>
+      <button style="height: 44px; border: 0; border-radius: 12px; display: flex; align-items: center; gap: 8px; padding: 0 12px 0 28px; font-size: 16px; text-align: left; background: transparent; color: #23262B; font-weight: 400; box-sizing: border-box">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5F6269" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M9 18l6-6-6-6"></path></svg>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none; opacity: .85"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.7-.9l-.8-1.2A2 2 0 0 0 7.9 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2z"></path></svg>
+        <span style="flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-left: 4px">Analysis</span>
+        <span style="font-size: 13px; color: #5F6269; font-weight: 400">17</span>
+      </button>
+      <button style="height: 44px; border: 0; border-radius: 12px; display: flex; align-items: center; gap: 8px; padding: 0 12px 0 28px; font-size: 16px; text-align: left; background: #D2D9F0; color: #23347A; font-weight: 600; box-sizing: border-box">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5F6269" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M9 18l6-6-6-6"></path></svg>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none; opacity: .85"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.7-.9l-.8-1.2A2 2 0 0 0 7.9 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2z"></path></svg>
+        <span style="flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-left: 4px">Linear algebra</span>
+        <span style="font-size: 13px; color: #5F6269; font-weight: 400">6</span>
+      </button>
+      <button style="height: 44px; border: 0; border-radius: 12px; display: flex; align-items: center; gap: 8px; padding: 0 12px 0 8px; font-size: 16px; text-align: left; background: transparent; color: #23262B; font-weight: 400; box-sizing: border-box">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5F6269" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M9 18l6-6-6-6"></path></svg>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none; opacity: .85"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.7-.9l-.8-1.2A2 2 0 0 0 7.9 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2z"></path></svg>
+        <span style="flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-left: 4px">Templates</span>
+        <span style="font-size: 13px; color: #5F6269; font-weight: 400">5</span>
+      </button>
+    <div style="padding: 16px 12px 6px; font-size: 12px; font-weight: 600; letter-spacing: .06em; color: #5F6269">TAGS</div>
+    <div style="display: flex; flex-wrap: wrap; gap: 6px; padding: 0 8px">
+      <button style="height: 32px; border: 1px solid #CFC7B8; background: none; border-radius: 16px; padding: 0 12px; font-size: 14px; color: #1A6C7E">#algebra</button>
+      <button style="height: 32px; border: 1px solid #CFC7B8; background: none; border-radius: 16px; padding: 0 12px; font-size: 14px; color: #1A6C7E">#exam</button>
+      <button style="height: 32px; border: 1px solid #CFC7B8; background: none; border-radius: 16px; padding: 0 12px; font-size: 14px; color: #1A6C7E">#ideas</button>
+    </div>
+    <div style="flex: 1"></div>
+    <div style="display: flex; gap: 4px">
+      <button style="flex: 1; height: 44px; border: 0; background: none; border-radius: 12px; display: flex; align-items: center; gap: 12px; padding: 0 12px; font-size: 15px; color: #4F525A">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 21v-7 M4 10V3 M12 21v-9 M12 8V3 M20 21v-5 M20 12V3 M1 14h6 M9 8h6 M17 16h6"></path></svg>
+        Settings
+      </button>
+      <button aria-label="Trash" style="width: 44px; height: 44px; border: 0; background: none; border-radius: 22px; display: flex; align-items: center; justify-content: center; color: #4F525A">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18 M8 6V4h8v2 M19 6l-1 14H6L5 6"></path></svg>
+      </button>
+      <button aria-label="Synced" style="width: 44px; height: 44px; border: 0; background: none; border-radius: 22px; display: flex; align-items: center; justify-content: center; color: #4F525A">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.5 19H9a7 7 0 1 1 6.7-9h1.8a4.5 4.5 0 0 1 0 9z M9.5 14l2 2 4-4"></path></svg>
+      </button>
+    </div>
+  </nav>
+  <section aria-label="Linear algebra" style="width: 330px; flex: none; display: flex; flex-direction: column; border-right: 1px solid #DED7CA; background: #F2EDE5">
+    <div style="padding: 18px 16px 10px 20px; display: flex; align-items: flex-start; gap: 8px">
+      <div style="flex: 1; min-width: 0">
+        <div style="font-size: 13px; color: #5F6269">Study</div>
+        <h2 style="font-size: 24px; font-weight: 700; letter-spacing: -0.01em; margin: 2px 0 2px">Linear algebra</h2>
+        <div style="font-size: 13px; color: #5F6269">6 notes · by name</div>
+      </div>
+      <button aria-label="Sort" style="width: 44px; height: 44px; border: 0; background: none; border-radius: 22px; display: flex; align-items: center; justify-content: center; color: #4F525A">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18 M6 12h12 M10 18h4"></path></svg>
+      </button>
+      <button aria-label="New note" style="width: 44px; height: 44px; border: 0; background: #4762BE; color: #F2EDE5; border-radius: 22px; display: flex; align-items: center; justify-content: center">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14 M5 12h14"></path></svg>
+      </button>
+    </div>
+    <div style="flex: 1; overflow: hidden; padding: 4px 10px; display: flex; flex-direction: column; gap: 2px">
+        <button style="border: 0; border-radius: 14px; padding: 12px 12px 12px 14px; text-align: left; display: flex; flex-direction: column; gap: 4px; background: transparent">
+          <span style="font-size: 16px; font-weight: 600; color: #23262B">1.1 Vectors</span>
+          <span style="font-size: 14px; line-height: 1.45; color: #4F525A; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden">Free vectors, applied vectors and the parallelogram rule; sum and product by a scalar.</span>
+          <span style="font-size: 12px; color: #5F6269; display: flex; gap: 8px"><span>Mon</span><span style="color: #1A6C7E">#algebra</span></span>
+        </button>
+        <button style="border: 0; border-radius: 14px; padding: 12px 12px 12px 14px; text-align: left; display: flex; flex-direction: column; gap: 4px; background: #E3E1E6">
+          <span style="font-size: 16px; font-weight: 600; color: #23347A">1.2 Subspaces and linear dependence</span>
+          <span style="font-size: 14px; line-height: 1.45; color: #4F525A; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden">Once a coordinate system is chosen, the geometric vectors of space can be identified with ℝ³…</span>
+          <span style="font-size: 12px; color: #5F6269; display: flex; gap: 8px"><span>Today 09:12</span><span style="color: #1A6C7E">#algebra #exam</span></span>
+        </button>
+        <button style="border: 0; border-radius: 14px; padding: 12px 12px 12px 14px; text-align: left; display: flex; flex-direction: column; gap: 4px; background: transparent">
+          <span style="font-size: 16px; font-weight: 600; color: #23262B">1.3 Bases and dimension</span>
+          <span style="font-size: 14px; line-height: 1.45; color: #4F525A; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden">A basis is a set of linearly independent vectors that spans the space.</span>
+          <span style="font-size: 12px; color: #5F6269; display: flex; gap: 8px"><span>Yesterday</span><span style="color: #1A6C7E">#algebra</span></span>
+        </button>
+        <button style="border: 0; border-radius: 14px; padding: 12px 12px 12px 14px; text-align: left; display: flex; flex-direction: column; gap: 4px; background: transparent">
+          <span style="font-size: 16px; font-weight: 600; color: #23262B">1.4 Linear maps</span>
+          <span style="font-size: 14px; line-height: 1.45; color: #4F525A; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden">Kernel, image and the rank–nullity theorem.</span>
+          <span style="font-size: 12px; color: #5F6269; display: flex; gap: 8px"><span>3 Nov</span><span style="color: #1A6C7E"></span></span>
+        </button>
+        <button style="border: 0; border-radius: 14px; padding: 12px 12px 12px 14px; text-align: left; display: flex; flex-direction: column; gap: 4px; background: transparent">
+          <span style="font-size: 16px; font-weight: 600; color: #23262B">Exercises — week 3</span>
+          <span style="font-size: 14px; line-height: 1.45; color: #4F525A; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden">- [ ] 1.2.4 redo  - [x] 1.2.5  - [ ] 1.3.1</span>
+          <span style="font-size: 12px; color: #5F6269; display: flex; gap: 8px"><span>2 Nov</span><span style="color: #1A6C7E">#exam</span></span>
+        </button>
+        <button style="border: 0; border-radius: 14px; padding: 12px 12px 12px 14px; text-align: left; display: flex; flex-direction: column; gap: 4px; background: transparent">
+          <span style="font-size: 16px; font-weight: 600; color: #23262B">Questions for office hours</span>
+          <span style="font-size: 14px; line-height: 1.45; color: #4F525A; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden">Is the empty set a subspace? Why must W be non-empty?</span>
+          <span style="font-size: 12px; color: #5F6269; display: flex; gap: 8px"><span>28 Oct</span><span style="color: #1A6C7E"></span></span>
+        </button>
+    </div>
+  </section>
+  <main style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+    <div style="height: 64px; display: flex; align-items: center; gap: 4px; padding: 0 10px">
+      <button aria-label="Full width" style="width: 44px; height: 44px; border: 0; background: none; border-radius: 22px; display: flex; align-items: center; justify-content: center; color: #4F525A">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3 M21 8V5a2 2 0 0 0-2-2h-3 M3 16v3a2 2 0 0 0 2 2h3 M16 21h3a2 2 0 0 0 2-2v-3"></path></svg>
+      </button>
+      <div style="flex: 1"></div>
+      <button style="height: 40px; border: 1px solid #C4BDAF; background: none; border-radius: 20px; padding: 0 14px; font-size: 15px; font-weight: 500; display: flex; align-items: center; gap: 6px">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"></path></svg>
+        Edit
+      </button>
+      <button aria-label="Open notes: 3" style="width: 44px; height: 44px; border: 0; background: none; border-radius: 22px; display: flex; align-items: center; justify-content: center; color: #4F525A; position: relative">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M8 8h12v12H8z M4 16V4h12"></path></svg>
+        <span style="position: absolute; top: 6px; right: 5px; min-width: 16px; height: 16px; border-radius: 8px; background: #4762BE; color: #F2EDE5; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center">3</span>
+      </button>
+      <button aria-label="Outline, tags, history" style="width: 44px; height: 44px; border: 0; background: none; border-radius: 22px; display: flex; align-items: center; justify-content: center; color: #4F525A">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z M15 3v18"></path></svg>
+      </button>
+      <button aria-label="More" style="width: 44px; height: 44px; border: 0; background: none; border-radius: 22px; display: flex; align-items: center; justify-content: center; color: #4F525A">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="1.8"></circle><circle cx="12" cy="12" r="1.8"></circle><circle cx="12" cy="19" r="1.8"></circle></svg>
+      </button>
+    </div>
+    <article style="flex: 1; overflow: hidden; padding: 12px 44px 0">
+      <h1 style="font-size: 30px; line-height: 1.2; font-weight: 700; letter-spacing: -0.015em; margin: 0 0 18px">1.2 Subspaces and linear dependence</h1>
+      <p style="font-size: 17px; line-height: 1.65; margin: 0 0 16px">Once a coordinate system is chosen, the geometric vectors of space can be identified with ℝ³, and the operations between vectors become operations on triples.</p>
+      <p style="font-size: 17px; line-height: 1.65; margin: 0 0 16px"><strong>Definition 1.2.1.</strong> A non-empty subset <em>W</em> of ℝ³ is a <strong>subspace</strong> if it is closed under addition and under multiplication by a scalar.</p>
+      <p style="font-family: 'Source Serif 4', Georgia, serif; font-size: 22px; text-align: center; margin: 22px 0">⟨<b>v</b>⟩ = { α<b>v</b> | α ∈ ℝ }</p>
+      <p style="font-size: 17px; line-height: 1.65; margin: 0 0 16px"><strong>Definition 1.2.2.</strong> Given <em>k</em> vectors <b>v</b>₁, …, <b>v</b>ₖ, the <strong>span</strong> is the set of their linear combinations. See <a href="#">[[1.3 Bases and dimension]]</a>.</p>
+    </article>
+    <div style="height: 40px; display: flex; align-items: center; justify-content: flex-end; gap: 16px; padding: 0 24px; font-size: 13px; color: #5F6269">
+      <span>1,284 words</span><span>Saved</span>
+    </div>
+  </main>
+</div>
+</body>
+</html>

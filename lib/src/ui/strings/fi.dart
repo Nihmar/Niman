@@ -893,6 +893,10 @@ final class FinnishStrings extends Strings {
   String get showPreviewTooltip => 'Näytä esikatselu';
   @override
   String get showEditorTooltip => 'Näytä muokkain';
+  @override
+  String get noteModeEdit => 'Muokkaa';
+  @override
+  String get noteModeRead => 'Lue';
   // Raw-HTML table fallback.
 
   // Search (T-M3-05).

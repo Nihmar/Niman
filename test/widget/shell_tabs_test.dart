@@ -181,7 +181,7 @@ void main() {
     await settle(tester);
     expect(shown().path, endsWith('alpha.md'));
     expect(shown().showPreview, isFalse);
-  });
+  }, variant: desktopDensity);
 
   testWidgets('a re-index that prunes a note keeps its tab, flagged (#372)', (
     tester,

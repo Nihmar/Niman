@@ -898,6 +898,10 @@ final class GermanStrings extends Strings {
   String get showPreviewTooltip => 'Vorschau zeigen';
   @override
   String get showEditorTooltip => 'Editor zeigen';
+  @override
+  String get noteModeEdit => 'Bearbeiten';
+  @override
+  String get noteModeRead => 'Lesen';
   // Raw-HTML table fallback.
 
   // Search (T-M3-05).

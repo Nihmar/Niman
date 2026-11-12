@@ -889,6 +889,10 @@ final class CroatianStrings extends Strings {
   String get showPreviewTooltip => 'Prikaži pregled';
   @override
   String get showEditorTooltip => 'Prikaži uređivač';
+  @override
+  String get noteModeEdit => 'Uređivanje';
+  @override
+  String get noteModeRead => 'Čitanje';
   // Raw-HTML table fallback.
 
   // Search (T-M3-05).

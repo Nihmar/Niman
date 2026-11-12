@@ -513,6 +513,10 @@ abstract base class Strings {
   String get showPreviewTooltip;
   String get showEditorTooltip;
 
+  // The note's Edit | Read pair on a tablet (#1266).
+  String get noteModeEdit;
+  String get noteModeRead;
+
   // Search (T-M3-05).
   String get searchHint;
   String get searchModeWords;

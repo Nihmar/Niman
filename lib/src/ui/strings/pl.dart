@@ -899,6 +899,10 @@ final class PolishStrings extends Strings {
   String get showPreviewTooltip => 'Pokaż podgląd';
   @override
   String get showEditorTooltip => 'Pokaż edytor';
+  @override
+  String get noteModeEdit => 'Edycja';
+  @override
+  String get noteModeRead => 'Czytanie';
   // Raw-HTML table fallback.
 
   // Search (T-M3-05).

@@ -306,6 +306,14 @@ On a phone, tap a task to edit it; the trash icon in the dialog's title
 deletes it. Long-press a row for the same Edit / Delete as a menu, or
 swipe it to the left and confirm.
 
+On a tablet whose Todo pane has the room — in landscape, where Home and
+Todo take the width (#1266) — a tapped task opens **beside the list**
+instead: the dialog's fields in a panel that stays while the list does.
+Tapping another task moves the panel to it; **Save** writes the line and
+the panel goes, **Cancel** leaves it as it was. The task is found by its
+text when it is saved, so checking off another one meanwhile does not
+send the edit to the wrong line. Held upright, a tablet opens the dialog.
+
 On a desktop the list is driven by the mouse and the keyboard (#712):
 
 - a click selects a row, a double click edits its text in place —

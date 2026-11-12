@@ -895,6 +895,10 @@ final class SlovenianStrings extends Strings {
   String get showPreviewTooltip => 'Prikaži predogled';
   @override
   String get showEditorTooltip => 'Prikaži urejevalnik';
+  @override
+  String get noteModeEdit => 'Urejanje';
+  @override
+  String get noteModeRead => 'Branje';
   // Raw-HTML table fallback.
 
   // Search (T-M3-05).

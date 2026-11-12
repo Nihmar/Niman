@@ -376,7 +376,7 @@ tablet keeps the
 thumb-sized rows and the long-press sheet. The choice follows the
 platform's own density (compact on a desktop), not the window's width,
 so a tablet in landscape keeps the touch sizes. That holds for the wide
-layout's own chrome too (#849): on a tablet the rail's buttons, the open
+layout's own chrome too (#849): on a tablet the rail's destinations, the open
 notes' tab row and its buttons, the tree footer's buttons and the grab
 strip of the dividers between the panels are at least 48 px, where a
 mouse has them smaller (the rail's at 38, the divider's strip at 8). In the
@@ -422,10 +422,32 @@ a library saved on a phone and opened on a tablet finds them untouched.
 
 The wide layout on a touch device keeps what a touch device needs of
 it: nothing under the status bar, the gesture bar or a camera cutout;
-a rail that scrolls when the keyboard leaves it too little height, so
-Settings and the library switch stay within reach; the system Back
-stepping inside the app (below); and the command palette by two fingers,
-there being no key for it.
+the system Back stepping inside the app (below); and the command palette
+by two fingers, there being no key for it.
+
+Its rail is a tablet's (#1266, the [mockups](../design/tablet/README.md)):
+each destination shows its **name under its icon**, there being no hover
+to read a tooltip by; the **library** sits at the rail's top, its initial
+on the accent, with **New** under it — the tree footer's create menu,
+where a thumb on the left edge finds it — and Settings at the foot. With
+the keyboard up, or wherever the rail is too short for them, the names
+go and the icons stay, the rail keeping its width so the note beside it
+does not move; what still does not fit scrolls, so Settings and the
+library stay within reach. A desktop's rail is icons only, their names
+in the tooltips.
+
+On a tablet held upright, or in landscape where the tree beside the note
+would leave the note less than 360 dp, the tree **lies over the note**
+instead (#1266):
+closed until the sidebar's toggle, **Files**, **Search** or **Study**
+opens it from the rail's edge, a scrim over the rest. A tap outside it
+closes it, and so do a note opened from it and Back; the search in it
+keeps its query while it is closed. Turned back to landscape, the tree is
+beside the note again if it was there. Writing is the note and the
+keyboard: while the keyboard is up in a note, the tree steps aside the
+same way, and comes back when the keyboard goes — typing in the tree's
+own search leaves it where it is. A desktop's tree is always beside the
+note.
 
 ## Destinations
 
@@ -437,7 +459,10 @@ panel shows and leave the open notes, the panes and the right panel where
 they are. Home and Todo are content destinations: they open as a pinned
 tab in the focused pane — the chip at the far end of its tab row, so
 opening or closing it moves no note tab — and the tree stays beside them,
-so a note is one click away while the list or the grid is up. Closing the
+so a note is one click away while the list or the grid is up. On a tablet
+they are pages that want the width (#1266): the tree steps aside while one
+shows, the sidebar's toggle lays it over the page, and a note opened from
+it takes the pane back with the tree beside it again. Closing the
 tab (its ✕) leaves the notes. Home or Todo on screen when a window grows
 from narrow to wide becomes that pinned tab. A phone keeps its
 one-screen-per-destination model, and the Search sidebar's tag tree is
@@ -489,6 +514,9 @@ row too narrow for them and the tabs (a small tablet with the tree and
 the side panel open) leaves them out until there is room. A line over the
 tree names the **library** and the folder the selection is in, with the
 library switch beside it; on Linux and Windows the title bar says it.
+The row at the top of each note — its ⋮, and on a tablet its **Edit |
+Read** pair in the place of the status row's eye — is a thumb's height
+there too (#1266).
 
 On an Android phone the same open notes are reached from a **switcher** instead
 of tabs: a count on the note bar opens the list. One note is on screen

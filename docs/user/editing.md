@@ -620,7 +620,10 @@ the read view: closed to one row until you open it, and away while the
 note is scrolled past its head (see [frontmatter](organization.md)).
 
 On a phone the toolbar keeps its size and rides the keyboard, and the ⋮
-in the note's bar offers the same actions. Opening the keyboard — a tap
+in the note's bar offers the same actions. A tablet does the same
+(#1266): the row above the note keeps the note's own controls — its
+**Edit | Read** pair and its ⋮ — and the toolbar comes under the note
+while you write in it, a keyboard on screen or not, where the thumbs are. Opening the keyboard — a tap
 or a selection — takes the pane's bottom with it, and the note comes up
 just enough to keep what the keyboard was raised for above it: the whole
 selection where it fits, the caret's end where it does not. A selection
@@ -1114,7 +1117,10 @@ in the first quadrant, ready to write a task.
 The note is one pane, and it holds one of the two: the editor you write
 in, or the rendered note you read. The eye flips between them — in the
 note's status row on a wide window, in the app bar on a phone, or *Show
-preview* / *Show editor* in the palette anywhere. What you leave behind
+preview* / *Show editor* in the palette anywhere. On a tablet the eye is
+**Edit | Read**, a pair at the top of the note beside its ⋮, the one on
+screen selected (#1266); in a narrow pane it keeps the two icons and
+names them in their tooltips. What you leave behind
 keeps its place: the caret, the undo history, the typeset math and the
 images are all there when you come back. The note stays where you were
 reading it, too: flipping to the preview, back to

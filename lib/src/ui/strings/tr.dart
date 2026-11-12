@@ -882,6 +882,10 @@ final class TurkishStrings extends Strings {
   String get showPreviewTooltip => 'Önizlemeyi göster';
   @override
   String get showEditorTooltip => 'Düzenleyiciyi göster';
+  @override
+  String get noteModeEdit => 'Düzenle';
+  @override
+  String get noteModeRead => 'Oku';
   // Raw-HTML table fallback.
 
   // Search (T-M3-05).

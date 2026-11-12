@@ -905,6 +905,10 @@ final class FrenchStrings extends Strings {
   String get showPreviewTooltip => 'Afficher l’aperçu';
   @override
   String get showEditorTooltip => 'Afficher l’éditeur';
+  @override
+  String get noteModeEdit => 'Modifier';
+  @override
+  String get noteModeRead => 'Lire';
   // Raw-HTML table fallback.
 
   // Search (T-M3-05).
