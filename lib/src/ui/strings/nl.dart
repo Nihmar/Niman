@@ -179,8 +179,6 @@ final class DutchStrings extends Strings {
   @override
   String get updateCheckFailed => 'Controleren op updates mislukt';
   @override
-  String updateSavedTo(Object path) => 'Update opgeslagen in $path';
-  @override
   String get updateInstallerStarted => 'Installatieprogramma gestart';
   @override
   String updateDownloading(Object percent) => 'Downloaden… $percent%';

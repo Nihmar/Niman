@@ -178,8 +178,6 @@ final class IcelandicStrings extends Strings {
   @override
   String get updateCheckFailed => 'Ekki tókst að leita að uppfærslum';
   @override
-  String updateSavedTo(Object path) => 'Uppfærsla vistuð í $path';
-  @override
   String get updateInstallerStarted => 'Uppsetningarforrit ræst';
   @override
   String updateDownloading(Object percent) => 'Sæki… $percent%';

@@ -183,8 +183,6 @@ final class LithuanianStrings extends Strings {
   @override
   String get updateCheckFailed => 'Nepavyko patikrinti atnaujinimų';
   @override
-  String updateSavedTo(Object path) => 'Atnaujinimas išsaugotas: $path';
-  @override
   String get updateInstallerStarted => 'Diegimo programa paleista';
   @override
   String updateDownloading(Object percent) => 'Atsisiunčiama… $percent %';

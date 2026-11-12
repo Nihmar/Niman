@@ -182,8 +182,6 @@ final class CroatianStrings extends Strings {
   @override
   String get updateCheckFailed => 'Provjera ažuriranja nije uspjela';
   @override
-  String updateSavedTo(Object path) => 'Ažuriranje spremljeno u $path';
-  @override
   String get updateInstallerStarted => 'Instalacijski program pokrenut';
   @override
   String updateDownloading(Object percent) => 'Preuzimanje… $percent %';

@@ -180,8 +180,6 @@ final class SwedishStrings extends Strings {
   @override
   String get updateCheckFailed => 'Det gick inte att söka efter uppdateringar';
   @override
-  String updateSavedTo(Object path) => 'Uppdateringen sparades i $path';
-  @override
   String get updateInstallerStarted => 'Installationsprogrammet har startats';
   @override
   String updateDownloading(Object percent) => 'Hämtar … $percent %';

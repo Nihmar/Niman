@@ -185,7 +185,6 @@ final class AppStrings {
       _s.updateAvailableMessage(version);
   static String get updateUpToDate => _s.updateUpToDate;
   static String get updateCheckFailed => _s.updateCheckFailed;
-  static String updateSavedTo(Object path) => _s.updateSavedTo(path);
   static String get updateInstallerStarted => _s.updateInstallerStarted;
   static String updateDownloading(Object percent) =>
       _s.updateDownloading(percent);

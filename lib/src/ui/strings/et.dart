@@ -177,8 +177,6 @@ final class EstonianStrings extends Strings {
   @override
   String get updateCheckFailed => 'Uuenduste kontroll ebaõnnestus';
   @override
-  String updateSavedTo(Object path) => 'Uuendus salvestati asukohta $path';
-  @override
   String get updateInstallerStarted => 'Paigaldusprogramm käivitati';
   @override
   String updateDownloading(Object percent) => 'Allalaadimine… $percent%';

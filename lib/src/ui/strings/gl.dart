@@ -182,8 +182,6 @@ final class GalicianStrings extends Strings {
   @override
   String get updateCheckFailed => 'Non se puideron comprobar as actualizacións';
   @override
-  String updateSavedTo(Object path) => 'Actualización gardada en $path';
-  @override
   String get updateInstallerStarted => 'Instalador iniciado';
   @override
   String updateDownloading(Object percent) => 'Descargando… $percent %';

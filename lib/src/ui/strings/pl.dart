@@ -182,8 +182,6 @@ final class PolishStrings extends Strings {
   @override
   String get updateCheckFailed => 'Nie udało się sprawdzić aktualizacji';
   @override
-  String updateSavedTo(Object path) => 'Aktualizację zapisano w $path';
-  @override
   String get updateInstallerStarted => 'Uruchomiono instalator';
   @override
   String updateDownloading(Object percent) => 'Pobieranie… $percent%';

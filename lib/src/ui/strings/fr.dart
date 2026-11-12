@@ -183,8 +183,6 @@ final class FrenchStrings extends Strings {
   @override
   String get updateCheckFailed => 'Échec de la recherche de mises à jour';
   @override
-  String updateSavedTo(Object path) => 'Mise à jour enregistrée dans $path';
-  @override
   String get updateInstallerStarted => 'Programme d’installation lancé';
   @override
   String updateDownloading(Object percent) => 'Téléchargement… $percent %';

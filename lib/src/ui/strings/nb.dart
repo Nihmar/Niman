@@ -178,8 +178,6 @@ final class NorwegianStrings extends Strings {
   @override
   String get updateCheckFailed => 'Kunne ikke se etter oppdateringer';
   @override
-  String updateSavedTo(Object path) => 'Oppdateringen er lagret i $path';
-  @override
   String get updateInstallerStarted => 'Installasjonsprogrammet er startet';
   @override
   String updateDownloading(Object percent) => 'Laster ned … $percent %';

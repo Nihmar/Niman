@@ -181,8 +181,6 @@ final class SlovakStrings extends Strings {
   @override
   String get updateCheckFailed => 'Kontrola aktualizácií zlyhala';
   @override
-  String updateSavedTo(Object path) => 'Aktualizácia uložená do $path';
-  @override
   String get updateInstallerStarted => 'Inštalátor spustený';
   @override
   String updateDownloading(Object percent) => 'Sťahuje sa… $percent %';

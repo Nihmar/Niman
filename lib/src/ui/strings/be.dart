@@ -182,8 +182,6 @@ final class BelarusianStrings extends Strings {
   @override
   String get updateCheckFailed => 'Не ўдалося праверыць абнаўленні';
   @override
-  String updateSavedTo(Object path) => 'Абнаўленне захавана ў $path';
-  @override
   String get updateInstallerStarted => 'Усталёўшчык запушчаны';
   @override
   String updateDownloading(Object percent) => 'Спампоўка… $percent%';

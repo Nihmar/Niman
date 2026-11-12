@@ -178,8 +178,6 @@ final class LatvianStrings extends Strings {
   @override
   String get updateCheckFailed => 'Neizdevās pārbaudīt atjauninājumus';
   @override
-  String updateSavedTo(Object path) => 'Atjauninājums saglabāts: $path';
-  @override
   String get updateInstallerStarted => 'Instalētājs palaists';
   @override
   String updateDownloading(Object percent) => 'Lejupielādē… $percent%';

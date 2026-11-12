@@ -165,8 +165,6 @@ final class ChineseStrings extends Strings {
   @override
   String get updateCheckFailed => '检查更新失败';
   @override
-  String updateSavedTo(Object path) => '更新已保存到 $path';
-  @override
   String get updateInstallerStarted => '安装程序已启动';
   @override
   String updateDownloading(Object percent) => '正在下载… $percent%';

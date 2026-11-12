@@ -182,8 +182,6 @@ final class ItalianStrings extends Strings {
   @override
   String get updateCheckFailed => 'Controllo aggiornamenti non riuscito';
   @override
-  String updateSavedTo(Object path) => 'Aggiornamento salvato in $path';
-  @override
   String get updateInstallerStarted => 'Programma di installazione avviato';
   @override
   String updateDownloading(Object percent) => 'Download in corso… $percent%';

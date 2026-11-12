@@ -182,8 +182,6 @@ final class SerbianStrings extends Strings {
   @override
   String get updateCheckFailed => 'Провера ажурирања није успела';
   @override
-  String updateSavedTo(Object path) => 'Ажурирање сачувано у $path';
-  @override
   String get updateInstallerStarted => 'Инсталер је покренут';
   @override
   String updateDownloading(Object percent) => 'Преузимање… $percent%';

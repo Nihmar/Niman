@@ -183,8 +183,6 @@ final class RomanianStrings extends Strings {
   @override
   String get updateCheckFailed => 'Verificarea actualizărilor a eșuat';
   @override
-  String updateSavedTo(Object path) => 'Actualizare salvată în $path';
-  @override
   String get updateInstallerStarted => 'Programul de instalare a pornit';
   @override
   String updateDownloading(Object percent) => 'Se descarcă… $percent%';

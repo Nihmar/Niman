@@ -179,8 +179,6 @@ final class PortugueseStrings extends Strings {
   @override
   String get updateCheckFailed => 'Falha ao verificar atualizações';
   @override
-  String updateSavedTo(Object path) => 'Atualização salva em $path';
-  @override
   String get updateInstallerStarted => 'Instalador iniciado';
   @override
   String updateDownloading(Object percent) => 'A transferir… $percent%';

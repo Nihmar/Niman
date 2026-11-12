@@ -177,8 +177,6 @@ final class AlbanianStrings extends Strings {
   @override
   String get updateCheckFailed => 'Kontrolli i përditësimeve dështoi';
   @override
-  String updateSavedTo(Object path) => 'Përditësimi u ruajt në $path';
-  @override
   String get updateInstallerStarted => 'Instaluesi u nis';
   @override
   String updateDownloading(Object percent) => 'Po shkarkohet… $percent%';

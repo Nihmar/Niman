@@ -171,8 +171,6 @@ final class HindiStrings extends Strings {
   @override
   String get updateCheckFailed => 'अपडेट की जाँच विफल';
   @override
-  String updateSavedTo(Object path) => 'अपडेट $path में सहेजा गया';
-  @override
   String get updateInstallerStarted => 'इंस्टॉलर शुरू हुआ';
   @override
   String updateDownloading(Object percent) => 'डाउनलोड हो रहा है… $percent%';

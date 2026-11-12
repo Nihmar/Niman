@@ -181,8 +181,6 @@ final class MacedonianStrings extends Strings {
   @override
   String get updateCheckFailed => 'Проверката за ажурирања не успеа';
   @override
-  String updateSavedTo(Object path) => 'Ажурирањето е зачувано во $path';
-  @override
   String get updateInstallerStarted => 'Инсталерот е стартуван';
   @override
   String updateDownloading(Object percent) => 'Преземање… $percent%';

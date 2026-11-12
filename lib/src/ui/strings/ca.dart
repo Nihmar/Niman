@@ -181,8 +181,6 @@ final class CatalanStrings extends Strings {
   String get updateCheckFailed =>
       'No s’han pogut comprovar les actualitzacions';
   @override
-  String updateSavedTo(Object path) => 'Actualització guardada a $path';
-  @override
   String get updateInstallerStarted => 'Instal·lador iniciat';
   @override
   String updateDownloading(Object percent) => 'Baixant… $percent%';

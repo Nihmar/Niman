@@ -182,8 +182,6 @@ final class SpanishStrings extends Strings {
   @override
   String get updateCheckFailed => 'Error al buscar actualizaciones';
   @override
-  String updateSavedTo(Object path) => 'Actualización guardada en $path';
-  @override
   String get updateInstallerStarted => 'Instalador iniciado';
   @override
   String updateDownloading(Object percent) => 'Descargando… $percent %';

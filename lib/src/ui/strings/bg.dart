@@ -183,8 +183,6 @@ final class BulgarianStrings extends Strings {
   @override
   String get updateCheckFailed => 'Проверката за актуализации е неуспешна';
   @override
-  String updateSavedTo(Object path) => 'Актуализацията е запазена в $path';
-  @override
   String get updateInstallerStarted => 'Инсталаторът е стартиран';
   @override
   String updateDownloading(Object percent) => 'Изтегляне… $percent%';

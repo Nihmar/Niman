@@ -23,7 +23,6 @@ import 'package:niman/src/update/cancellable_stream.dart';
 import 'package:niman/src/update/release_asset.dart';
 import 'package:niman/src/update/update_check.dart';
 import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
 
 /// The GitHub API endpoint listing the latest Niman release.
 const String latestReleaseUrl =
@@ -82,17 +81,6 @@ Future<AppVersion> currentAppVersion() async {
   return version;
 }
 
-/// Which Linux package variant this process runs as.
-///
-/// An AppImage sets `APPIMAGE` to its own file; a tarball and an Arch
-/// package leave no reliable trace, so both read as [LinuxVariant.unknown]
-/// and are offered the release's generic `.tar.gz` bundle instead.
-LinuxVariant detectLinuxVariant() {
-  final appImage = Platform.environment['APPIMAGE'];
-  if (appImage != null && appImage.isNotEmpty) return LinuxVariant.appImage;
-  return LinuxVariant.unknown;
-}
-
 /// Runs the full update check for this device: latest release against the
 /// running version, with this platform's asset selected.
 ///
@@ -104,54 +92,18 @@ Future<UpdateAvailable?> checkNow({required AppVersion current}) async {
     release: release,
     current: current,
     isAndroid: Platform.isAndroid,
-    isWindows: Platform.isWindows,
-    isMacOS: Platform.isMacOS,
-    isLinux: Platform.isLinux,
-    linuxVariant: Platform.isLinux
-        ? detectLinuxVariant()
-        : LinuxVariant.unknown,
   );
   return check is UpdateAvailable ? check : null;
 }
 
-/// The folder downloads land in: the platform Downloads, falling back to
-/// `~/Downloads`, created on the way.
-Future<Directory> downloadDirectory() async {
-  final platform = await getDownloadsDirectory();
-  final candidates = [
-    if (platform != null) platform.path,
-    if (Platform.isLinux || Platform.isMacOS)
-      if (Platform.environment['HOME'] case final home?)
-        p.join(home, 'Downloads'),
-    if (Platform.isWindows)
-      if (Platform.environment['USERPROFILE'] case final home?)
-        p.join(home, 'Downloads'),
-  ];
-  for (final path in candidates) {
-    try {
-      return await Directory(path).create(recursive: true);
-    } on FileSystemException {
-      continue;
-    }
-  }
-  throw StateError('no downloads folder is reachable');
-}
-
-/// The folder update downloads land in.
-///
-/// The platform Downloads everywhere except Android, where the APK goes
-/// into the app support directory's `updates/` folder instead: it needs
-/// no storage permission there, and the system installer reads it
-/// through FileProvider (see `file_provider_paths.xml`).
-Future<Directory> updateDownloadDirectory() {
-  if (Platform.isAndroid) {
-    return appSupportDirectory().then(
-      (support) =>
-          Directory(p.join(support.path, 'updates')).create(recursive: true),
-    );
-  }
-  return downloadDirectory();
-}
+/// The folder update downloads land in: the app support directory's
+/// `updates/` folder on Android, the one platform that updates itself
+/// (#1270). It needs no storage permission there, and the system installer
+/// reads it through FileProvider (see `file_provider_paths.xml`).
+Future<Directory> updateDownloadDirectory() => appSupportDirectory().then(
+  (support) =>
+      Directory(p.join(support.path, 'updates')).create(recursive: true),
+);
 
 /// The downloaded bytes did not match the release's published digest, or
 /// the release published no digest to check them against.
@@ -337,43 +289,10 @@ Future<void> _verifyDownload(ReleaseAsset asset, File file) async {
   }
 }
 
-/// Hands a downloaded [file] to the platform.
-///
-/// - Android: opens the system package installer for the APK (issue #81)
-///   and returns whether it launched; the user still confirms there.
-/// - Windows: launches the setup installer and returns true.
-/// - macOS: opens the disk image, which Finder mounts and shows with the
-///   Applications folder to drag Niman onto, and returns false.
-/// - Linux: reveals the Downloads folder (best effort) and returns false.
-Future<bool> applyDownloadedUpdate(File file) {
-  if (Platform.isAndroid) return installApk(file);
-  return _applyDesktop(file);
-}
-
-/// Hands a downloaded [file] to a desktop platform: see
-/// [applyDownloadedUpdate].
-Future<bool> _applyDesktop(File file) async {
-  if (Platform.isWindows) {
-    await Process.start(file.path, []);
-    return true;
-  }
-  if (Platform.isMacOS) {
-    try {
-      await Process.run('open', [file.path]);
-    } on ProcessException {
-      // Opening is a courtesy; the file is downloaded either way.
-    }
-    return false;
-  }
-  if (Platform.isLinux) {
-    try {
-      await Process.run('xdg-open', [file.parent.path]);
-    } on ProcessException {
-      // Revealing is a courtesy; the file is downloaded either way.
-    }
-  }
-  return false;
-}
+/// Hands a downloaded [file] to the platform: opens Android's package
+/// installer for the APK (issue #81) and returns whether it launched; the
+/// user still confirms there.
+Future<bool> applyDownloadedUpdate(File file) => installApk(file);
 
 /// Whether Android lets the app install a package now: "Install unknown
 /// apps" for Niman (#900). True off Android, and where the bridge is not
@@ -403,8 +322,8 @@ Future<bool> openInstallPermission() async {
 
 /// Removes what earlier downloads left in Android's updates folder (#900):
 /// run at launch, when an installed update has done its work and a refused
-/// one is fetched again only if it is still wanted. Off Android the files
-/// are the user's, in Downloads, and stay.
+/// one is fetched again only if it is still wanted. Nothing else downloads
+/// an update.
 Future<void> clearUpdateDownloads() async {
   if (!Platform.isAndroid) return;
   try {

@@ -177,8 +177,6 @@ final class BasqueStrings extends Strings {
   @override
   String get updateCheckFailed => 'Ezin izan dira eguneratzeak egiaztatu';
   @override
-  String updateSavedTo(Object path) => 'Eguneratzea hemen gorde da: $path';
-  @override
   String get updateInstallerStarted => 'Instalatzailea abiarazi da';
   @override
   String updateDownloading(Object percent) => 'Deskargatzen… % $percent';

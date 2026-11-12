@@ -179,8 +179,6 @@ final class FinnishStrings extends Strings {
   @override
   String get updateCheckFailed => 'Päivitysten tarkistus epäonnistui';
   @override
-  String updateSavedTo(Object path) => 'Päivitys tallennettu sijaintiin $path';
-  @override
   String get updateInstallerStarted => 'Asennusohjelma käynnistetty';
   @override
   String updateDownloading(Object percent) => 'Ladataan… $percent %';

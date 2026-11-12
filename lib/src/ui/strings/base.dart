@@ -81,7 +81,6 @@ abstract base class Strings {
   String updateAvailableMessage(Object version);
   String get updateUpToDate;
   String get updateCheckFailed;
-  String updateSavedTo(Object path);
   String get updateInstallerStarted;
   String updateDownloading(Object percent);
   String get updateLater;

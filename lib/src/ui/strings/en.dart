@@ -177,8 +177,6 @@ final class EnglishStrings extends Strings {
   @override
   String get updateCheckFailed => 'Update check failed';
   @override
-  String updateSavedTo(Object path) => 'Update saved to $path';
-  @override
   String get updateInstallerStarted => 'Installer started';
   @override
   String updateDownloading(Object percent) => 'Downloading… $percent%';

@@ -184,8 +184,6 @@ final class SlovenianStrings extends Strings {
   @override
   String get updateCheckFailed => 'Preverjanje posodobitev ni uspelo';
   @override
-  String updateSavedTo(Object path) => 'Posodobitev shranjena v $path';
-  @override
   String get updateInstallerStarted => 'Namestitveni program zagnan';
   @override
   String updateDownloading(Object percent) => 'Prenašanje … $percent %';

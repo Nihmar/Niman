@@ -181,8 +181,6 @@ final class GermanStrings extends Strings {
   @override
   String get updateCheckFailed => 'Update-Prüfung fehlgeschlagen';
   @override
-  String updateSavedTo(Object path) => 'Update gespeichert unter $path';
-  @override
   String get updateInstallerStarted => 'Installationsprogramm gestartet';
   @override
   String updateDownloading(Object percent) => 'Wird geladen … $percent %';

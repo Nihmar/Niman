@@ -182,8 +182,6 @@ final class BosnianStrings extends Strings {
   @override
   String get updateCheckFailed => 'Provjera ažuriranja nije uspjela';
   @override
-  String updateSavedTo(Object path) => 'Ažuriranje spremljeno u $path';
-  @override
   String get updateInstallerStarted => 'Program za instalaciju pokrenut';
   @override
   String updateDownloading(Object percent) => 'Preuzimanje… $percent%';

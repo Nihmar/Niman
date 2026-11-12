@@ -177,8 +177,6 @@ final class HungarianStrings extends Strings {
   @override
   String get updateCheckFailed => 'A frissítések ellenőrzése nem sikerült';
   @override
-  String updateSavedTo(Object path) => 'Frissítés mentve ide: $path';
-  @override
   String get updateInstallerStarted => 'A telepítő elindult';
   @override
   String updateDownloading(Object percent) => 'Letöltés… $percent%';

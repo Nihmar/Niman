@@ -181,8 +181,6 @@ final class CzechStrings extends Strings {
   @override
   String get updateCheckFailed => 'Kontrola aktualizací selhala';
   @override
-  String updateSavedTo(Object path) => 'Aktualizace uložena do $path';
-  @override
   String get updateInstallerStarted => 'Instalátor spuštěn';
   @override
   String updateDownloading(Object percent) => 'Stahování… $percent %';

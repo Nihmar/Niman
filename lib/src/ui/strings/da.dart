@@ -179,8 +179,6 @@ final class DanishStrings extends Strings {
   @override
   String get updateCheckFailed => 'Kunne ikke søge efter opdateringer';
   @override
-  String updateSavedTo(Object path) => 'Opdatering gemt i $path';
-  @override
   String get updateInstallerStarted => 'Installationsprogrammet er startet';
   @override
   String updateDownloading(Object percent) => 'Henter… $percent %';

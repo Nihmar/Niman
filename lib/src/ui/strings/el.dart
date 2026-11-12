@@ -182,8 +182,6 @@ final class GreekStrings extends Strings {
   @override
   String get updateCheckFailed => 'Ο έλεγχος ενημερώσεων απέτυχε';
   @override
-  String updateSavedTo(Object path) => 'Η ενημέρωση αποθηκεύτηκε στο $path';
-  @override
   String get updateInstallerStarted => 'Το πρόγραμμα εγκατάστασης ξεκίνησε';
   @override
   String updateDownloading(Object percent) => 'Λήψη… $percent%';

@@ -183,8 +183,6 @@ final class UkrainianStrings extends Strings {
   @override
   String get updateCheckFailed => 'Не вдалося перевірити оновлення';
   @override
-  String updateSavedTo(Object path) => 'Оновлення збережено в $path';
-  @override
   String get updateInstallerStarted => 'Інсталятор запущено';
   @override
   String updateDownloading(Object percent) => 'Завантаження… $percent%';

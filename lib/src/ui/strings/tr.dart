@@ -175,8 +175,6 @@ final class TurkishStrings extends Strings {
   @override
   String get updateCheckFailed => 'Güncelleme kontrolü başarısız';
   @override
-  String updateSavedTo(Object path) => 'Güncelleme şuraya kaydedildi: $path';
-  @override
   String get updateInstallerStarted => 'Yükleyici başlatıldı';
   @override
   String updateDownloading(Object percent) => 'İndiriliyor… %$percent';

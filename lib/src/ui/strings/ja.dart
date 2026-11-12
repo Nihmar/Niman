@@ -165,8 +165,6 @@ final class JapaneseStrings extends Strings {
   @override
   String get updateCheckFailed => 'アップデートの確認に失敗しました';
   @override
-  String updateSavedTo(Object path) => 'アップデートを $path に保存しました';
-  @override
   String get updateInstallerStarted => 'インストーラーを起動しました';
   @override
   String updateDownloading(Object percent) => 'ダウンロード中… $percent%';
