@@ -791,10 +791,7 @@ final class NoteViewParts {
         }
       });
     }
-    final anchor = view.initialAnchor;
-    if (anchor != null && mounted()) {
-      unawaited(jumpToAnchor(context(), anchor, links.targets()));
-    }
+    landOnAnchor();
     view.onLoaded?.call(path, length);
     log.info(
       'note loaded: $path ($length chars, '
@@ -803,5 +800,14 @@ final class NoteViewParts {
     // The read time above is what the disk/isolate cost; this is what the
     // user waited for — load plus the frame that paints the loaded note.
     logNextFrame('editor', 'note open first frame ($length chars)');
+  }
+
+  /// Lands on the anchor the note was opened at, once it is open: the
+  /// view's own opening jump, and a link followed to the note while it was
+  /// already on screen (#1268), which opens nothing to jump after.
+  void landOnAnchor() {
+    final anchor = view.initialAnchor;
+    if (anchor == null || !mounted() || !session.ready) return;
+    unawaited(jumpToAnchor(context(), anchor, links.targets()));
   }
 }

@@ -287,6 +287,7 @@ final class ShellNotePanes {
               : null,
           services: _services(controller),
           initialAnchor: selection.request.anchor,
+          anchorRequests: selection.linksFollowed,
           initialCaretOffset: selection.request.caret,
           initialFind: selection.request.find,
           kindMode: !kind.raw,

@@ -517,6 +517,25 @@ void main() {
       expect(buffer.text, '[[Notes#Links#Dead links]]');
     });
 
+    testWidgets('a heading typed as Markdown writes it is linked with one # '
+        '(#1268)', (tester) async {
+      final buffer = SourceBuffer.fromText('');
+      final suggester = library();
+      await pump(tester, buffer, suggester);
+
+      // `## Dead links` in the note: the `## ` is typed after the name.
+      await type(tester, '[[Notes## dead');
+      final drawn = panel(tester);
+      expect(drawn.kind, WikilinkPanelKind.headings);
+      expect(drawn.entries.map((e) => (e as HeadingSuggestion).heading), [
+        'Dead links',
+      ]);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pump();
+      expect(buffer.text, '[[Notes#Dead links]]');
+    });
+
     testWidgets('## lists headings across the library, with their note', (
       tester,
     ) async {

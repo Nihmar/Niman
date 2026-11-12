@@ -51,6 +51,7 @@ NoteView _note({
   FakeLinkSource? links,
   List<String>? opened,
   String? initialAnchor,
+  int anchorRequests = 0,
   int? initialCaret,
   List<String>? initialFind,
   bool showPreview = false,
@@ -87,6 +88,7 @@ NoteView _note({
   initialMemento: memento,
   onMemento: onMemento,
   initialAnchor: initialAnchor,
+  anchorRequests: anchorRequests,
   initialCaretOffset: initialCaret,
   initialFind: initialFind,
   showPreview: showPreview,
@@ -546,6 +548,42 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(_surface(tester).selection, const SelectionModel.at(6));
+  });
+
+  testWidgets('a link followed to the note already open lands on its '
+      'heading (#1268)', (tester) async {
+    // The note a task's link names is open in a tab: following the link
+    // reopens nothing, and the view lands on the heading all the same.
+    const text = '# 2026\nintro\n## 07:55 radiator vents :house:\nbody\n';
+    NoteView note({String? anchor, int requests = 0}) => _note(
+      text: text,
+      path: '/notes/2026.md',
+      libraryRoot: '/notes',
+      links: FakeLinkSource(notes: <String>['2026.md']),
+      initialAnchor: anchor,
+      anchorRequests: requests,
+    );
+    await tester.pumpWidget(_app(note()));
+    await tester.pumpAndSettle();
+    expect(_surface(tester).selection, const SelectionModel.at(0));
+
+    const anchor = '#07:55 radiator vents :house:';
+    await tester.pumpWidget(_app(note(anchor: anchor, requests: 1)));
+    await tester.pumpAndSettle();
+    expect(_surface(tester).selection, const SelectionModel.at(13));
+
+    // The caret moved away, and the same link is followed again.
+    _surface(tester).select(const SelectionModel.at(0));
+    await tester.pumpWidget(_app(note(anchor: anchor, requests: 1)));
+    await tester.pumpAndSettle();
+    expect(
+      _surface(tester).selection,
+      const SelectionModel.at(0),
+      reason: 'a rebuild alone asks for nothing',
+    );
+    await tester.pumpWidget(_app(note(anchor: anchor, requests: 2)));
+    await tester.pumpAndSettle();
+    expect(_surface(tester).selection, const SelectionModel.at(13));
   });
 
   testWidgets('the note carries a "Links to this note" section under it, '

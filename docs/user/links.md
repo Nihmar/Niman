@@ -60,7 +60,9 @@ the note's. The panel lists:
 - after a `#` — the headings of the note just named, filtered the same
   way. `[[#` — no target — lists the headings of the note being edited.
   After a second `#` (`[[note#Part#`) the same list is filtered by the
-  level being typed;
+  level being typed. A heading typed as the note writes it,
+  `[[note## Part`, lists the same rows and is written with one `#`,
+  `[[note#Part]]`;
 - after `#^` — the block ids of the note just named, each with the first
   words of its block, filtered by the id or by those words. `[[#^`
   lists the ids of the note being edited;
@@ -116,7 +118,9 @@ is read by the outline's levels: `A#C` finds `C` only in the section of
 `A` (up to the next heading as high as `A`), so a `C` under another
 heading is not it. A single heading still lands on the first one of that
 name. Moving or renaming the note rewrites the target and keeps the whole
-path.
+path. A note already open — in a tab, or on a phone's screen — lands on
+the heading too, each time the link is followed, from another note or
+from a task's chip.
 
 A `#` in a heading's own text is fine: `[[note#Issue #12]]` and
 `[[note#C#]]` land on the headings `Issue #12` and `C#`. The path is tried

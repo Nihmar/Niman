@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:niman/src/editor/outline.dart';
 import 'package:niman/src/links/block_anchors.dart';
+import 'package:niman/src/links/parser.dart';
 import 'package:niman/src/links/suggester.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/render/wikilink_panel.dart';
@@ -684,8 +685,9 @@ final class _LinkQuery {
   int get hashAt => start + target.length + 1;
 
   /// The offset just past the last `#`: where the level of a heading path
-  /// being typed (`A#B`) starts. The first one's for a single level.
-  int get levelAt => hashAt + heading.lastIndexOf('#') + 1;
+  /// being typed (`A#B`) starts. The first one's for a single level, and
+  /// for a heading typed as Markdown writes it (`[[Note## Intro`, #1268).
+  int get levelAt => hashAt + headingLevelAt(heading);
 
   /// What the panel matches and bolds: the text typed for what is listed —
   /// the last level of a heading path, an id after `#^`, what follows `##`
@@ -698,7 +700,8 @@ final class _LinkQuery {
       return heading.substring(1).trim();
     }
     if (heading.startsWith('^')) return heading.substring(1);
-    return heading.substring(heading.lastIndexOf('#') + 1);
+    // `[[Note## Intro` matches `Intro`, as the task field's panel does.
+    return heading.substring(heading.lastIndexOf('#') + 1).trimLeft();
   }
 
   /// Whether [other] names the same link text, however the caret moved.

@@ -144,6 +144,17 @@ List<String> headingPathOf(String? heading) {
   ];
 }
 
+/// Where the last level of the heading path [heading] (what follows a
+/// link's `#`) starts: past its last `#`, or at its start when nothing but
+/// `#`s and spaces comes before that one — `# Intro`, from a heading typed
+/// as Markdown writes it, `[[Note## Intro` (#1268).
+int headingLevelAt(String heading) {
+  final last = heading.lastIndexOf('#');
+  if (last == -1) return 0;
+  final before = heading.substring(0, last).replaceAll('#', '');
+  return before.trim().isEmpty ? 0 : last + 1;
+}
+
 /// All links in [text], in document order, with absolute offsets.
 ///
 /// Skips fenced code, math blocks, inline code and the leading frontmatter
