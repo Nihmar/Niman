@@ -136,6 +136,24 @@ final class ShellWorkspace {
     );
   }
 
+  /// Opens [notePath] in a tab behind the showing one (#1268), which stays
+  /// on screen; [anchor] is landed on when the tab first shows. A note
+  /// already open is left where it is.
+  void openBehind(String notePath, {String? anchor}) {
+    if (anchor != null && value.locate(notePath) == null) {
+      _behindAnchors[notePath] = anchor;
+    }
+    controller.update((w) => w.openBehind(notePath));
+  }
+
+  /// The heading a tab opened behind lands on when it first shows, by path:
+  /// kept until its note loads, or its tab closes.
+  final Map<String, String> _behindAnchors = {};
+
+  /// What [openBehind] asked [path] to land on, while its note has not
+  /// loaded yet.
+  String? anchorBehind(String path) => _behindAnchors[path];
+
   /// Brings back the tab [path] had before a click replaced it with the
   /// showing note, which keeps its own tab: a double-click is "open it
   /// alongside", and the note already there stays put (#1076).
@@ -270,8 +288,13 @@ final class ShellWorkspace {
       if (!_recent.contains(tab.path)) tab.path,
   ];
 
-  /// Records a loaded note's [length], for [largeNote].
-  void noteLoaded(String path, int length) => _lengths[path] = length;
+  /// Records a loaded note's [length], for [largeNote], and forgets what it
+  /// was opened behind to land on ([anchorBehind]).
+  void noteLoaded(String path, int length) {
+    _lengths[path] = length;
+    // The note has landed on what it was opened behind for.
+    _behindAnchors.remove(path);
+  }
 
   /// The tabs whose editor stays mounted: each pane's showing one, then
   /// the most recently shown others up to [keptAlive], passing over
@@ -285,6 +308,7 @@ final class ShellWorkspace {
     };
     final open = {for (final tab in w.tabs) tab.path};
     _recent.removeWhere((path) => !open.contains(path));
+    _behindAnchors.removeWhere((path, _) => !open.contains(path));
     if (active != null) {
       _recent
         ..remove(active)

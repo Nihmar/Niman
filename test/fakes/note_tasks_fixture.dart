@@ -62,7 +62,7 @@ final class NoteTasksFixture {
       source: () => links,
       previewEnabled: () => false,
       suggester: FakeWikilinkSuggester.new,
-      targets: (anchor) => NoteLinkTargets(
+      targets: (anchor, {behind = false}) => NoteLinkTargets(
         source: links,
         notePath: '/fake/todo.txt',
         libraryRoot: '/fake',

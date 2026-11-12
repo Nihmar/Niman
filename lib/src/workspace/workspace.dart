@@ -241,6 +241,18 @@ final class Workspace {
     return _withPane(focused, WorkspacePane.clamped(tabs, pane.active + 1));
   }
 
+  /// Opens [path] in a tab of its own after the focused pane's showing one,
+  /// which stays showing (#1268): a link from a task followed with Ctrl,
+  /// Cmd or a middle click, to read later. Nothing changes when [path] is
+  /// open already; an empty pane shows it, having nothing else to.
+  Workspace openBehind(String path) {
+    if (locate(path) != null) return this;
+    final pane = focusedPane;
+    if (pane.isEmpty) return open(path);
+    final tabs = [...pane.tabs]..insert(pane.active + 1, _tabFor(path));
+    return _withPane(focused, WorkspacePane.clamped(tabs, pane.active));
+  }
+
   /// Shows the tab at [index] of [pane], and focuses that pane.
   Workspace activate(int pane, int index) {
     final target = panes[pane];

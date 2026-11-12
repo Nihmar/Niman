@@ -546,8 +546,10 @@ final class ShellNotePanes {
               memento: tab.memento,
               showWysiwyg: editor == EditorKind.wysiwyg,
               showPreview: tab.memento.preview ?? false,
+              // A tab opened behind (#1268) lands on its own anchor when it
+              // first shows.
               anchor: focused && tab.path == showing
-                  ? selection.request.anchor
+                  ? workspace.anchorBehind(tab.path) ?? selection.request.anchor
                   : null,
               // The wide deck's own door for it: the phone's single note
               // view took it, and the tabs never did, so a template's

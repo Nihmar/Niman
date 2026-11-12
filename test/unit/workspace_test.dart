@@ -588,6 +588,24 @@ void main() {
     });
   });
 
+  // #1268: a link from a task followed with Ctrl, Cmd or a middle click.
+  group('a tab opened behind', () {
+    test('goes after the showing tab, which stays showing', () {
+      final w = _opened(['a.md', 'b.md']).activate(0, 0).openBehind('c.md');
+      expect(_row(w), '[a.md] c.md b.md');
+      expect(w.activePath, 'a.md');
+    });
+
+    test('a note already open changes nothing', () {
+      final w = _opened(['a.md', 'b.md']);
+      expect(w.openBehind('a.md'), w);
+    });
+
+    test('an empty pane shows it, having nothing else to', () {
+      expect(_row(Workspace.empty.openBehind('a.md')), '[a.md]');
+    });
+  });
+
   // #1133, #1134: `+` opens a tab with no note, the pane's launcher in it.
   group('the new tab', () {
     String blanked(String row) => row.replaceAll('[]', '[+]');

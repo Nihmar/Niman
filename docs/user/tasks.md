@@ -87,8 +87,14 @@ journal — a link reads the same words as its chip, `Repairs` or
 
 - **Tap** (or click) a chip to open the note. A heading or a block link
   opens the note scrolled to it, as a wikilink in a note does. On a
-  desktop, hovering a chip says where it goes (`Open House/Repairs.md`).
-  The rest of the row still opens the task.
+  desktop or a tablet the note opens in a **tab of its own**, beside the
+  note you had open rather than in its place; a note already open shows
+  in its tab (#1268). On a desktop, hovering a chip says where it goes
+  (`Open House/Repairs.md`). The rest of the row still opens the task.
+- **Ctrl-click** (Cmd-click on a Mac) or **middle-click** a chip to open
+  the note in a tab **behind** the one showing, and stay on the list: the
+  note lands on the link's heading or block when you go to its tab. The
+  same goes for a chip in a note's task list.
 - **Long-press** a chip on a phone or a tablet to preview the note in a
   sheet with an **Open** action, as a long press on a wikilink does
   (when *Preview a link* is on; see [links](links.md)).

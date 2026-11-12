@@ -214,4 +214,39 @@ void main() {
 
     expect(workspace.value.tabs.single.missing, isTrue);
   });
+
+  // #1268: a link from a task opened behind the showing tab lands on its
+  // heading when the tab first shows, and only then.
+  group('a tab opened behind', () {
+    Future<ShellWorkspace> showing(String path) async {
+      final workspace = ShellWorkspace(FakeLibrarySession());
+      addTearDown(workspace.dispose);
+      workspace.show(path);
+      await pumpEventQueue();
+      return workspace;
+    }
+
+    test('keeps its anchor until its note loads', () async {
+      final workspace = await showing('a.md');
+      workspace.openBehind('b.md', anchor: 'Boiler');
+      expect(workspace.value.activePath, 'a.md');
+      expect(workspace.anchorBehind('b.md'), 'Boiler');
+      workspace.noteLoaded('b.md', 10);
+      expect(workspace.anchorBehind('b.md'), isNull);
+    });
+
+    test('a note already open keeps no anchor', () async {
+      final workspace = await showing('a.md');
+      workspace.openBehind('a.md', anchor: 'Boiler');
+      expect(workspace.anchorBehind('a.md'), isNull);
+    });
+
+    test('its tab closed before it showed forgets the anchor', () async {
+      final workspace = await showing('a.md');
+      workspace.openBehind('b.md', anchor: 'Boiler');
+      workspace.controller.update((w) => w.closePath('b.md'));
+      workspace.mounted();
+      expect(workspace.anchorBehind('b.md'), isNull);
+    });
+  });
 }

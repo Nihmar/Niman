@@ -5,6 +5,7 @@ library;
 import 'dart:async';
 
 import 'package:flutter/painting.dart' show Rect;
+import 'package:flutter/services.dart' show HardwareKeyboard;
 import 'package:flutter/widgets.dart' show BuildContext;
 import 'package:niman/src/links/library_links.dart';
 import 'package:niman/src/links/parser.dart';
@@ -54,8 +55,9 @@ final class TodoLinkHost {
   final WikilinkSuggester? Function()? suggester;
 
   /// What following a link written in `todo.txt` needs, for a tap at
-  /// [Rect] (null on a phone).
-  final NoteLinkTargets Function(Rect? anchor) targets;
+  /// [Rect] (null on a phone); `behind` opens the note in a tab behind the
+  /// one showing (#1268).
+  final NoteLinkTargets Function(Rect? anchor, {bool behind}) targets;
 
   final LibraryLinks? Function() _source;
   final LinkPreviewController _previews;
@@ -73,16 +75,27 @@ final class TodoLinkHost {
   /// Follows [chip] as a tap on it in a note would: the note opens (at its
   /// heading or block), a name two notes share asks which, and a note that
   /// is not there is offered. [anchor] is where the pointer went down.
+  ///
+  /// [behind] — a middle click — or Ctrl or Cmd held as it was pressed
+  /// opens the note in a tab behind the one showing (#1268). The keys are
+  /// read now: the note opens once the link is resolved, by when they may
+  /// be up.
   Future<void> follow(
     BuildContext context,
     TaskRowLink chip, {
     Rect? anchor,
+    bool behind = false,
   }) async {
+    final keys = HardwareKeyboard.instance;
+    final link = targets(
+      anchor,
+      behind: behind || keys.isControlPressed || keys.isMetaPressed,
+    );
     switch (chip.link.link) {
       case final WikiLink wiki:
-        await openWiki(context, wiki.ref, targets(anchor));
+        await openWiki(context, wiki.ref, link);
       case final MarkdownLink markdown:
-        await openHref(context, markdown.href, targets(anchor));
+        await openHref(context, markdown.href, link);
     }
   }
 
