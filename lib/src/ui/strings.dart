@@ -201,6 +201,7 @@ final class AppStrings {
   static String get updateReleasePage => _s.updateReleasePage;
   static String get updateTestingBuild => _s.updateTestingBuild;
   static String get updateFromAppStore => _s.updateFromAppStore;
+  static String get updateFromReleasePage => _s.updateFromReleasePage;
   static String get settingsSpellCheckTitle => _s.settingsSpellCheckTitle;
   static String get settingsSpellCheckSubtitle => _s.settingsSpellCheckSubtitle;
   static String get spellCheckDictionaryTitle => _s.spellCheckDictionaryTitle;

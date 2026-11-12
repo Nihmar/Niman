@@ -215,6 +215,10 @@ final class GermanStrings extends Strings {
   @override
   String get updateFromAppStore => 'Der App Store hält Niman aktuell.';
   @override
+  String get updateFromReleasePage =>
+      'Auf einem Computer aktualisiert sich Niman nicht selbst: Lade die '
+      'neue Version von GitHub herunter und installiere sie wie diese.';
+  @override
   String get settingsSpellCheckTitle => 'Rechtschreibung prüfen';
   @override
   String get settingsSpellCheckSubtitle =>

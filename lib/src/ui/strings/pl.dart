@@ -214,6 +214,10 @@ final class PolishStrings extends Strings {
   @override
   String get updateFromAppStore => 'App Store dba o aktualizacje Nimana.';
   @override
+  String get updateFromReleasePage =>
+      'Na komputerze Niman nie aktualizuje się sam: pobierz nową wersję '
+      'z GitHuba i zainstaluj ją tak jak tę.';
+  @override
   String get settingsSpellCheckTitle => 'Sprawdzanie pisowni';
   @override
   String get settingsSpellCheckSubtitle =>

@@ -213,6 +213,10 @@ final class GalicianStrings extends Strings {
   @override
   String get updateFromAppStore => 'A App Store mantén Niman ao día.';
   @override
+  String get updateFromReleasePage =>
+      'Nun ordenador, Niman non se actualiza só: descarga a nova versión '
+      'de GitHub e instálaa como instalaches esta.';
+  @override
   String get settingsSpellCheckTitle => 'Comprobación ortográfica';
   @override
   String get settingsSpellCheckSubtitle =>

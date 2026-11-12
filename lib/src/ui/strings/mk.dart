@@ -213,6 +213,10 @@ final class MacedonianStrings extends Strings {
   @override
   String get updateFromAppStore => 'App Store го ажурира Niman.';
   @override
+  String get updateFromReleasePage =>
+      'На компјутер Niman не се ажурира сам: преземете ја новата верзија '
+      'од GitHub и инсталирајте ја како и оваа.';
+  @override
   String get settingsSpellCheckTitle => 'Проверка на правопис';
   @override
   String get settingsSpellCheckSubtitle =>

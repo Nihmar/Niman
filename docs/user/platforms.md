@@ -141,6 +141,11 @@ the two agree.
   `./niman-<version>-linux-x64.AppImage note.md` — or symlink the AppImage
   itself as `niman`. The flags are under
   [shortcuts](shortcuts.md#cli-launch-flags-desktop).
+- **Updates** are not looked for: Settings → Updates → **Release page**
+  opens the latest release. Download the AppImage, the `.tar.gz` or the
+  Arch package again, the one you run now, and replace it (#1270): an
+  AppImage left in Downloads beside the old one is not what the launcher
+  you use starts.
 - **Dropping files and folders on the window** is the window's own GDK
   drop destination, which takes the `text/uri-list` a file manager
   offers. The frame around the window says a drag is over it, and the
@@ -206,6 +211,8 @@ the two agree.
   installer puts nothing on `PATH`, so call it by path or add that folder
   yourself; the flags are under
   [shortcuts](shortcuts.md#cli-launch-flags-desktop).
+- **Updates** are not looked for: Settings → Updates → **Release page**
+  opens the latest release, whose setup installs over this one (#1270).
 - **Dropping files and folders on the window** takes the paths Win32
   hands the window (`WM_DROPFILES`), and the drop opens or imports what
   it names. The frame that Linux draws while a drag is over the window is
@@ -243,8 +250,9 @@ list at the end says what else it still lacks.
   macOS refuses it: open System Settings → Privacy & Security and choose
   **Open Anyway** (a right click → Open no longer gets past it since
   macOS 15).
-- **Updates** download the new disk image and open it; drag Niman onto
-  Applications again to replace it.
+- **Updates** are not looked for: Settings → Updates → **Release page**
+  opens the latest release, whose disk image you drag onto Applications
+  again to replace Niman (#1270).
 - **A library is any folder**: the app is not sandboxed, so it reads and
   writes where the library is, as on Linux.
 - **The window:** Niman's own title bar beside the system's traffic

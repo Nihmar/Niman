@@ -31,7 +31,15 @@ List<SettingsSearchEntry> diagnosticsSearchEntries(SettingsSearchScope scope) {
         areaId: SettingsAreaId.updates,
         open: () => pushUpdates(SettingsKeys.checkUpdates),
       ),
-    ],
+    ] else if (updatesFromReleasePage)
+      SettingsSearchEntry(
+        title: AppStrings.updateReleasePage,
+        area: AppStrings.settingsSectionUpdates,
+        rowKey: SettingsKeys.releasePage,
+        value: scope.noValue,
+        areaId: SettingsAreaId.updates,
+        open: () => pushUpdates(SettingsKeys.releasePage),
+      ),
     SettingsSearchEntry(
       title: AppStrings.debugLogsTitle,
       area: AppStrings.settingsAreaDiagnostics,

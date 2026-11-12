@@ -214,6 +214,10 @@ final class LithuanianStrings extends Strings {
   @override
   String get updateFromAppStore => 'App Store atnaujina Niman.';
   @override
+  String get updateFromReleasePage =>
+      'Kompiuteryje Niman pats neatsinaujina: atsisiųskite naują versiją '
+      'iš GitHub ir įdiekite ją taip, kaip įdiegėte šią.';
+  @override
   String get settingsSpellCheckTitle => 'Rašybos patikra';
   @override
   String get settingsSpellCheckSubtitle => 'Paryškina rašybos klaidas rašant.';

@@ -218,6 +218,11 @@ final class FrenchStrings extends Strings {
   @override
   String get updateFromAppStore => "L'App Store tient Niman à jour.";
   @override
+  String get updateFromReleasePage =>
+      'Sur un ordinateur, Niman ne se met pas à jour tout seul : '
+      'téléchargez la nouvelle version sur GitHub et installez-la comme '
+      'celle-ci.';
+  @override
   String get settingsSpellCheckTitle => 'Vérifier l’orthographe';
   @override
   String get settingsSpellCheckSubtitle =>

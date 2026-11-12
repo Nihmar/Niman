@@ -10,6 +10,7 @@ library;
 
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
@@ -27,10 +28,30 @@ const String appChannel = String.fromEnvironment(
 /// release channel, so there is nothing for them to check.
 const bool isTestingBuild = appChannel == 'testing';
 
-/// Whether this build checks for and installs its own updates: not a
-/// testing build ([isTestingBuild]), and not on iOS, which the App Store
-/// (or TestFlight) updates.
-bool get appUpdatesItself => !isTestingBuild && !Platform.isIOS;
+/// Whether this build checks for and installs its own updates: an Android
+/// release build. A testing build checks no release channel
+/// ([isTestingBuild]), iOS is the App Store's (or TestFlight's), and a
+/// computer is not told of new versions at all (#1270): see
+/// [updatesFromReleasePage].
+bool get appUpdatesItself =>
+    !isTestingBuild && defaultTargetPlatform == TargetPlatform.android;
+
+/// Whether the Updates area sends the user to the releases page instead
+/// (#1270): a release build on a computer. A desktop install takes too many
+/// shapes — an AppImage run from anywhere, a tarball, a package, a setup, a
+/// disk image — for the app to replace the one that runs; the user downloads
+/// the new version and installs it as they installed this one.
+///
+/// Both read [defaultTargetPlatform], the platform the app runs on, which a
+/// test can stand in for.
+bool get updatesFromReleasePage =>
+    !isTestingBuild &&
+    switch (defaultTargetPlatform) {
+      TargetPlatform.linux ||
+      TargetPlatform.windows ||
+      TargetPlatform.macOS => true,
+      _ => false,
+    };
 
 /// The folder this build keeps its own files in: the settings database, the
 /// indexes, the log, the single-instance claim.

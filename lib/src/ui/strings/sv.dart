@@ -212,6 +212,11 @@ final class SwedishStrings extends Strings {
   @override
   String get updateFromAppStore => 'App Store håller Niman uppdaterat.';
   @override
+  String get updateFromReleasePage =>
+      'På en dator uppdaterar Niman inte sig själv: ladda ner den nya '
+      'versionen från GitHub och installera den som du installerade den '
+      'här.';
+  @override
   String get settingsSpellCheckTitle => 'Stavkontroll';
   @override
   String get settingsSpellCheckSubtitle =>

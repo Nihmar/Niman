@@ -213,6 +213,10 @@ final class BelarusianStrings extends Strings {
   @override
   String get updateFromAppStore => 'App Store абнаўляе Niman.';
   @override
+  String get updateFromReleasePage =>
+      "На камп'ютары Niman не абнаўляецца сам: спампуйце новую версію з "
+      'GitHub і ўсталюйце яе так, як гэтую.';
+  @override
   String get settingsSpellCheckTitle => 'Праверка арфаграфіі';
   @override
   String get settingsSpellCheckSubtitle =>

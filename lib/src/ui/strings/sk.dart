@@ -212,6 +212,10 @@ final class SlovakStrings extends Strings {
   @override
   String get updateFromAppStore => 'Niman aktualizuje App Store.';
   @override
+  String get updateFromReleasePage =>
+      'Na počítači sa Niman neaktualizuje sám: stiahnite novú verziu z '
+      'GitHubu a nainštalujte ju rovnako ako túto.';
+  @override
   String get settingsSpellCheckTitle => 'Kontrola pravopisu';
   @override
   String get settingsSpellCheckSubtitle =>

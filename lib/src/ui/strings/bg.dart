@@ -216,6 +216,10 @@ final class BulgarianStrings extends Strings {
   @override
   String get updateFromAppStore => 'App Store поддържа Niman актуален.';
   @override
+  String get updateFromReleasePage =>
+      'На компютър Niman не се обновява сам: изтеглете новата версия от '
+      'GitHub и я инсталирайте както тази.';
+  @override
   String get settingsSpellCheckTitle => 'Проверка за правопис';
   @override
   String get settingsSpellCheckSubtitle =>

@@ -214,6 +214,10 @@ final class CatalanStrings extends Strings {
   @override
   String get updateFromAppStore => "L'App Store manté el Niman al dia.";
   @override
+  String get updateFromReleasePage =>
+      "En un ordinador, Niman no s'actualitza sol: baixa la nova versió "
+      'de GitHub i instal·la-la com vas instal·lar aquesta.';
+  @override
   String get settingsSpellCheckTitle => 'Comprovació d’ortografia';
   @override
   String get settingsSpellCheckSubtitle =>

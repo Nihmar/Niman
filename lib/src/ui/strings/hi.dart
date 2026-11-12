@@ -202,6 +202,10 @@ final class HindiStrings extends Strings {
   @override
   String get updateFromAppStore => 'App Store Niman को अद्यतन रखता है।';
   @override
+  String get updateFromReleasePage =>
+      'कंप्यूटर पर Niman ख़ुद अपडेट नहीं होता: नया संस्करण GitHub से '
+      'डाउनलोड करें और उसे वैसे ही इंस्टॉल करें जैसे यह किया था।';
+  @override
   String get settingsSpellCheckTitle => 'व्याकरण जाँचें';
   @override
   String get settingsSpellCheckSubtitle =>

@@ -212,6 +212,10 @@ final class CzechStrings extends Strings {
   @override
   String get updateFromAppStore => 'Niman aktualizuje App Store.';
   @override
+  String get updateFromReleasePage =>
+      'Na počítači se Niman neaktualizuje sám: stáhněte novou verzi z '
+      'GitHubu a nainstalujte ji stejně jako tuto.';
+  @override
   String get settingsSpellCheckTitle => 'Kontrola pravopisu';
   @override
   String get settingsSpellCheckSubtitle =>

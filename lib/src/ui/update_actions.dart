@@ -80,11 +80,15 @@ final class UpdateDownload extends ChangeNotifier {
 /// The app's one update download.
 final UpdateDownload updateDownload = UpdateDownload();
 
-/// The page of the latest release, for an update the installer would not
-/// take.
-final Uri _releasePage = Uri.parse(
+/// The page of the latest release: for an update the installer would not
+/// take, and where a computer finds its new versions (#1270).
+final Uri releasePage = Uri.parse(
   'https://github.com/Nihmar/Niman/releases/latest',
 );
+
+/// Opens [releasePage] in the browser.
+void openReleasePage() =>
+    unawaited(launchUrl(releasePage, mode: LaunchMode.externalApplication));
 
 /// The steps of the flow that reach the platform, so a test can stand in for
 /// them: the download, the install permission and the hand-over.
@@ -205,9 +209,7 @@ SnackBar _installerFailed() => SnackBar(
   content: Text(AppStrings.updateInstallerFailed),
   action: SnackBarAction(
     label: AppStrings.updateReleasePage,
-    onPressed: () => unawaited(
-      launchUrl(_releasePage, mode: LaunchMode.externalApplication),
-    ),
+    onPressed: openReleasePage,
   ),
 );
 

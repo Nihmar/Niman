@@ -210,6 +210,10 @@ final class FinnishStrings extends Strings {
   @override
   String get updateFromAppStore => 'App Store pitää Nimanin ajan tasalla.';
   @override
+  String get updateFromReleasePage =>
+      'Tietokoneella Niman ei päivitä itseään: lataa uusi versio '
+      'GitHubista ja asenna se samoin kuin asensit tämän.';
+  @override
   String get settingsSpellCheckTitle => 'Oikoluku';
   @override
   String get settingsSpellCheckSubtitle =>

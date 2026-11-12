@@ -209,6 +209,11 @@ final class BasqueStrings extends Strings {
   String get updateFromAppStore =>
       'App Storeak Niman eguneratuta mantentzen du.';
   @override
+  String get updateFromReleasePage =>
+      'Ordenagailuan Niman ez da bere kabuz eguneratzen: deskargatu '
+      'bertsio berria GitHub-etik eta instalatu hau instalatu zenuen '
+      'bezala.';
+  @override
   String get settingsSpellCheckTitle => 'Ortografia-egiaztapena';
   @override
   String get settingsSpellCheckSubtitle =>

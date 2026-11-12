@@ -213,6 +213,10 @@ final class SerbianStrings extends Strings {
   @override
   String get updateFromAppStore => 'App Store ажурира Niman.';
   @override
+  String get updateFromReleasePage =>
+      'На рачунару се Niman не ажурира сам: преузмите нову верзију са '
+      'GitHub-а и инсталирајте је као и ову.';
+  @override
   String get settingsSpellCheckTitle => 'Провера правописа';
   @override
   String get settingsSpellCheckSubtitle =>

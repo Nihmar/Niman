@@ -186,7 +186,16 @@ final class _SettingsUpdatesScreenState extends State<SettingsUpdatesScreen> {
                 );
               },
             ),
-          ] else
+          ] else if (updatesFromReleasePage)
+            HighlightRow(
+              key: SettingsKeys.releasePage,
+              child: SettingsActionRow(
+                title: AppStrings.updateReleasePage,
+                description: AppStrings.updateFromReleasePage,
+                onTap: openReleasePage,
+              ),
+            )
+          else
             SettingsRowFrame(
               key: const Key('settings-update-testing'),
               title: AppStrings.settingsSectionUpdates,

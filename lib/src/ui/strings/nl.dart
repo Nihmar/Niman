@@ -212,6 +212,11 @@ final class DutchStrings extends Strings {
   @override
   String get updateFromAppStore => 'De App Store houdt Niman up-to-date.';
   @override
+  String get updateFromReleasePage =>
+      'Op een computer werkt Niman zichzelf niet bij: download de nieuwe '
+      'versie van GitHub en installeer die zoals je deze hebt '
+      'geïnstalleerd.';
+  @override
   String get settingsSpellCheckTitle => 'Spellingscontrole';
   @override
   String get settingsSpellCheckSubtitle =>

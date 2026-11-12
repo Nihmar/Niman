@@ -209,6 +209,10 @@ final class IcelandicStrings extends Strings {
   @override
   String get updateFromAppStore => 'App Store heldur Niman uppfærðu.';
   @override
+  String get updateFromReleasePage =>
+      'Á tölvu uppfærir Niman sig ekki sjálft: sæktu nýju útgáfuna á '
+      'GitHub og settu hana upp eins og þessa.';
+  @override
   String get settingsSpellCheckTitle => 'Stafsetningarprófun';
   @override
   String get settingsSpellCheckSubtitle =>

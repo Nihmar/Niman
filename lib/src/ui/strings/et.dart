@@ -208,6 +208,10 @@ final class EstonianStrings extends Strings {
   @override
   String get updateFromAppStore => 'App Store hoiab Nimani ajakohasena.';
   @override
+  String get updateFromReleasePage =>
+      'Arvutis Niman ennast ise ei uuenda: laadi uus versioon GitHubist '
+      'alla ja paigalda see nii, nagu paigaldasid selle.';
+  @override
   String get settingsSpellCheckTitle => 'Õigekirjapide';
   @override
   String get settingsSpellCheckSubtitle =>

@@ -1,9 +1,11 @@
 // The update banner and the Updates screen on a phone: the banner clears
 // the status bar instead of sitting under it, and "Check for updates" only
 // checks — an update found enables the Download row, and nothing is fetched
-// until that row is pressed.
+// until that row is pressed. A computer is not told of new versions: its
+// Updates area is the releases page (#1270).
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/ui/settings_keys.dart';
 import 'package:niman/src/ui/settings_rows.dart';
 import 'package:niman/src/ui/settings_updates.dart';
 import 'package:niman/src/ui/strings.dart';
@@ -145,4 +147,44 @@ void main() {
     await tester.pump();
     expect(updateDownload.cancelled, isTrue);
   });
+
+  testWidgets(
+    'a computer has the releases page, and nothing to check (#1270)',
+    (tester) async {
+      var checks = 0;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SettingsUpdatesScreen(
+            controller: FakeLibrarySession(),
+            checkUpdate: () async {
+              checks++;
+              return _update;
+            },
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byKey(SettingsKeys.releasePage), findsOne);
+      expect(find.text(AppStrings.updateReleasePage), findsOne);
+      expect(find.text(AppStrings.updateFromReleasePage), findsOne);
+      expect(find.byKey(SettingsKeys.autoUpdate), findsNothing);
+      expect(find.byKey(SettingsKeys.checkUpdates), findsNothing);
+      expect(_downloadRow(), findsNothing);
+      expect(checks, 0);
+    },
+    variant: TargetPlatformVariant.desktop(),
+  );
+
+  testWidgets('a phone still checks, and has no releases page row', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SettingsUpdatesScreen(controller: FakeLibrarySession()),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byKey(SettingsKeys.checkUpdates), findsOne);
+    expect(find.byKey(SettingsKeys.releasePage), findsNothing);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 }

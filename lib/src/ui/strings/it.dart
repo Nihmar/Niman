@@ -216,6 +216,10 @@ final class ItalianStrings extends Strings {
   @override
   String get updateFromAppStore => "Niman si aggiorna dall'App Store.";
   @override
+  String get updateFromReleasePage =>
+      'Su un computer Niman non si aggiorna da solo: scarica la nuova '
+      'versione da GitHub e installala come hai installato questa.';
+  @override
   String get settingsSpellCheckTitle => 'Controlla ortografia';
   @override
   String get settingsSpellCheckSubtitle =>

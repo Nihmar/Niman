@@ -209,6 +209,10 @@ final class LatvianStrings extends Strings {
   @override
   String get updateFromAppStore => 'App Store atjaunina Niman.';
   @override
+  String get updateFromReleasePage =>
+      'Datorā Niman pats neatjaunojas: lejupielādējiet jauno versiju no '
+      'GitHub un instalējiet to tāpat kā šo.';
+  @override
   String get settingsSpellCheckTitle => 'Orfogrāfiskā pārbaude';
   @override
   String get settingsSpellCheckSubtitle =>

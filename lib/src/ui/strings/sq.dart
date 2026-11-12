@@ -208,6 +208,10 @@ final class AlbanianStrings extends Strings {
   @override
   String get updateFromAppStore => 'App Store e mban Niman të përditësuar.';
   @override
+  String get updateFromReleasePage =>
+      'Në kompjuter Niman nuk përditësohet vetë: shkarkoni versionin e '
+      'ri nga GitHub dhe instalojeni si këtë.';
+  @override
   String get settingsSpellCheckTitle => 'Kontrolli i shkrimit';
   @override
   String get settingsSpellCheckSubtitle =>
