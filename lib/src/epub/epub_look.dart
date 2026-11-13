@@ -58,7 +58,7 @@ final class EpubLook {
           ? AppBrightness.fromId(brightness)
           : null,
       font: EpubFont.fromName(json[fontKey]),
-      textScale: normalizeTextScale(json[textScaleKey]),
+      textScale: normalizeBookTextScale(json[textScaleKey]),
     );
   }
 

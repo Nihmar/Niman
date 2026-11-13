@@ -146,8 +146,14 @@ const double defaultTextScale = 1;
 /// The smallest accepted text scale.
 const double minTextScale = 0.8;
 
-/// The largest accepted text scale.
+/// The largest accepted text scale for the interface and the note.
 const double maxTextScale = 1.8;
+
+/// The largest accepted text scale for a book (#1274): a book is read at
+/// arm's length on a phone, or by someone who needs it larger, for longer
+/// than a note is, and 180% is not enough there. Its smallest is
+/// [minTextScale], as for the rest.
+const double maxBookTextScale = 2.5;
 
 /// The source editor's font in a fresh library: the monospace face the
 /// editor has always been set in (issue #259).
@@ -172,12 +178,19 @@ SourceFont normalizeSourceFont(Object? raw) => SourceFont.fromName(raw);
 /// Clamped rather than defaulted, for the reason [normalizeIndentWidth]
 /// is: someone who typed 3 wants the text as large as it goes, not back
 /// at the size they were trying to leave.
-double normalizeTextScale(Object? raw) {
+double normalizeTextScale(Object? raw) => _clampTextScale(raw, maxTextScale);
+
+/// Reads a book's text scale out of the settings file, into its own,
+/// wider range ([maxBookTextScale]), clamped as [normalizeTextScale] is.
+double normalizeBookTextScale(Object? raw) =>
+    _clampTextScale(raw, maxBookTextScale);
+
+double _clampTextScale(Object? raw, double max) {
   if (raw is! num) return defaultTextScale;
   final scale = raw.toDouble();
   if (!scale.isFinite) return defaultTextScale;
   if (scale < minTextScale) return minTextScale;
-  if (scale > maxTextScale) return maxTextScale;
+  if (scale > max) return max;
   return scale;
 }
 

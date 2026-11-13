@@ -6,7 +6,7 @@
 /// ([EpubLook.textScale]): the gestures and the sheet move one value, kept
 /// per library as the sheet keeps it. It moves on the note zoom's grid —
 /// a pinch on the slider's 5% steps, a key by a 10% step — and stays in
-/// the slider's range.
+/// the slider's range, the books' own 80%–250% (#1274).
 library;
 
 import 'package:flutter/widgets.dart';
@@ -23,7 +23,7 @@ import 'package:niman/src/ui/text_zoom_pinch.dart';
 Future<void> keepEpubTextScale(LibrarySession session, double scale) async {
   final look = await session.librarySettings.epubLook;
   await session.librarySettings.setEpubLook(
-    look.copyWith(textScale: normalizeTextScale(scale)),
+    look.copyWith(textScale: normalizeBookTextScale(scale)),
   );
 }
 
@@ -42,14 +42,18 @@ final class EpubTextZoom {
   /// Puts [scale] on the open books, as the sheet's slider does while it
   /// moves; nothing is kept.
   static void show(double scale) => EpubLooks.apply(
-    EpubLooks.look.copyWith(textScale: normalizeTextScale(scale)),
+    EpubLooks.look.copyWith(textScale: normalizeBookTextScale(scale)),
     theme: EpubLooks.theme,
   );
 
   /// The text [steps] zoom steps larger (smaller when negative), or back
   /// to the shipped size at zero, shown and kept.
   void zoom(int steps) {
-    final zoomed = AppTextScales.zoomed(scale, steps);
+    final zoomed = AppTextScales.zoomed(
+      scale,
+      steps,
+      normalize: normalizeBookTextScale,
+    );
     show(zoomed);
     keep(zoomed);
   }
@@ -64,6 +68,7 @@ final class EpubTextZoom {
   /// [child] zoomed by a pinch: each step shown at once, the size kept
   /// when the fingers lift.
   Widget pinch(Widget child) => TextZoomPinch(
+    normalize: normalizeBookTextScale,
     scale: () => scale,
     onZoom: (scale, {required done}) {
       show(scale);

@@ -134,6 +134,20 @@ void main() {
     await tester.pumpWidget(const SizedBox());
   });
 
+  testWidgets("a pinch takes a book to 250%, past a note's 180% (#1274)", (
+    tester,
+  ) async {
+    await pump(tester);
+    final at = tester.getCenter(find.text('It begins.'));
+    await twoFingers(
+      tester,
+      (at - const Offset(30, 0), at + const Offset(30, 0)),
+      (at - const Offset(90, 0), at + const Offset(90, 0)),
+    );
+    expect(await kept(), maxBookTextScale, reason: 'three times, held there');
+    await tester.pumpWidget(const SizedBox());
+  });
+
   testWidgets('the zoom keys step the size, Ctrl+0 puts it back', (
     tester,
   ) async {
@@ -152,14 +166,25 @@ void main() {
     await tester.pumpWidget(const SizedBox());
   });
 
-  testWidgets('a key past the end of the range leaves the size there', (
-    tester,
-  ) async {
+  testWidgets("a key steps a book past a note's 180% (#1274)", (tester) async {
     await session.setEpubLook(const EpubLook(textScale: maxTextScale));
     await pump(tester);
     await focusBook(tester);
+    final before = height(tester);
     await ctrl(tester, LogicalKeyboardKey.equal);
-    expect(await kept(), maxTextScale);
+    expect(await kept(), closeTo(1.9, 1e-9));
+    expect(height(tester), greaterThan(before));
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('a key past the end of the range leaves the size there', (
+    tester,
+  ) async {
+    await session.setEpubLook(const EpubLook(textScale: maxBookTextScale));
+    await pump(tester);
+    await focusBook(tester);
+    await ctrl(tester, LogicalKeyboardKey.equal);
+    expect(await kept(), maxBookTextScale);
     await tester.pumpWidget(const SizedBox());
   });
 
