@@ -53,8 +53,8 @@ final class TreeFolderFacts {
     final (rank, count) = await (
       placed != null
           ? Future<int>.value(placed.rank)
-          : session.rankOf(note, sort: sort),
-      held != null ? Future<int>.value(held) : session.childCount(note.id),
+          : session.tree.rankOf(note, sort: sort),
+      held != null ? Future<int>.value(held) : session.tree.childCount(note.id),
     ).wait;
     if (guard.holds(stamp, note.parent)) {
       _placed[path] = (note: note, rank: rank);

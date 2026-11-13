@@ -20,6 +20,7 @@ import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/home/home_layout.dart';
 import 'package:niman/src/journal/journal_settings.dart';
 import 'package:niman/src/library/library_state.dart';
+import 'package:niman/src/library/library_tree.dart';
 import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/library/note_ops.dart';
 import 'package:niman/src/library/note_relocation.dart';
@@ -434,11 +435,6 @@ abstract interface class LibrarySession {
   /// open compares the file with what it last read or wrote before it
   /// believes a change.
   Stream<Set<String>> get externalChanges;
-
-  /// Which of [paths] the index does not hold — a note pruned before this
-  /// session read the tree, so no [removals] event carries it. What a tab
-  /// holds open on one closes when the workspace loads (#289).
-  Future<Set<String>> missingPaths(Iterable<String> paths);
 
   /// CRUD ops for the open library, or null while closed.
   NoteOperations? get ops;
@@ -883,59 +879,9 @@ abstract interface class LibrarySession {
   /// Closes the session and releases resources; call exactly once.
   Future<void> dispose();
 
-  /// Children of the row with id [parentId] (0 = library root), in
-  /// [sort]'s order (#726): directories first whatever the field, then
-  /// the field in its own direction, the name breaking ties.
-  Future<List<Note>> children(int parentId, {TreeSort sort = TreeSort.nameAsc});
-
-  /// One page of the children of [parentId] in [sort]'s order: at most
-  /// [limit] rows, those after [after], a row of the previous page (#1064),
-  /// or the [limit] rows immediately before [before], in the tree's order
-  /// (#1200). Giving both is an error. A page after a row that is shorter
-  /// than [limit] is the last one.
-  Future<List<Note>> childrenPage(
-    int parentId, {
-    required int limit,
-    TreeSort sort = TreeSort.nameAsc,
-    Note? after,
-    Note? before,
-  });
-
-  /// How many children the row with id [parentId] has (#1200).
-  Future<int> childCount(int parentId);
-
-  /// How many siblings of [note] sort before it in [sort]'s order: its
-  /// position among its parent's children (#1200).
-  Future<int> rankOf(Note note, {TreeSort sort = TreeSort.nameAsc});
-
-  /// [limit] children of [parentId] from position [offset] on in [sort]'s
-  /// order (#1200): a page with no loaded neighbour to read from.
-  Future<List<Note>> childrenAt(
-    int parentId, {
-    required int offset,
-    required int limit,
-    TreeSort sort = TreeSort.nameAsc,
-  });
-
-  /// The first child of [parentId], in [sort]'s order and after [after] when
-  /// given, whose name starts with [foldedPrefix] as `foldName` folds names
-  /// (#1200); null when none does.
-  Future<Note?> firstChildStartingWith(
-    int parentId,
-    String foldedPrefix, {
-    TreeSort sort = TreeSort.nameAsc,
-    Note? after,
-  });
-
-  /// Every note that belongs to the root or to one of the [expandedPaths],
-  /// in [sort]'s order the same way [children] reads it.
-  Future<List<Note>> tree(
-    Iterable<String> expandedPaths, {
-    TreeSort sort = TreeSort.nameAsc,
-  });
-
-  /// Every indexed folder, path-ordered (for move-target pickers).
-  Future<List<Note>> folders();
+  /// The open library's tree as its index holds it (#1258); every read
+  /// answers empty while no library is open.
+  LibraryTree get tree;
 
   /// The search data source (FTS words + contains scan over the open
   /// library's index); null while no library is ready.

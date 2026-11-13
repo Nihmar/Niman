@@ -100,7 +100,7 @@ final class TreePages {
     final (rootCount, folders) = await (
       held != null
           ? Future<int>.value(held)
-          : session.childCount(VisibleTree.rootId),
+          : session.tree.childCount(VisibleTree.rootId),
       Future.wait([
         for (final path in _reachable(expandedPaths))
           _facts.read(session, path, sort, _guard, stamp),
@@ -264,21 +264,21 @@ final class TreePages {
     final next = pageRows(parent, page + 1);
     final List<Note> rows;
     if (previous != null && previous.isNotEmpty) {
-      rows = await session.childrenPage(
+      rows = await session.tree.childrenPage(
         parent,
         limit: pageSize,
         sort: sort,
         after: previous.last,
       );
     } else if (next != null && next.isNotEmpty) {
-      rows = await session.childrenPage(
+      rows = await session.tree.childrenPage(
         parent,
         limit: pageSize,
         sort: sort,
         before: next.first,
       );
     } else {
-      rows = await session.childrenAt(
+      rows = await session.tree.childrenAt(
         parent,
         offset: page * pageSize,
         limit: pageSize,

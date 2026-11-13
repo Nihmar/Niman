@@ -224,7 +224,7 @@ final class CaptureFlow {
       read: services.read,
       save: services.save,
       pickFolder: (current) async {
-        final folders = await controller.folders();
+        final folders = await controller.tree.folders();
         if (!context.mounted) return null;
         return await showFolderPicker(
           context,

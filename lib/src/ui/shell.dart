@@ -1117,7 +1117,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   /// Back and forward through the notes shown (#700).
   late final NoteHistoryNavigator _noteHistory = NoteHistoryNavigator(
     workspace: _workspace,
-    missing: widget.controller.missingPaths,
+    missing: widget.controller.tree.missingPaths,
     show: (path) {
       if (mounted) _openSearchNote(path);
     },

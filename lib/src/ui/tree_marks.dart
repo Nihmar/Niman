@@ -55,7 +55,7 @@ final class TreeMarks {
     if (_paths.isEmpty) return;
     _paths.removeWhere((path) => !_isUnderOpenFolders(path, expanded));
     if (_paths.isEmpty) return;
-    final gone = await session.missingPaths(_paths.toList());
+    final gone = await session.tree.missingPaths(_paths.toList());
     _paths.removeWhere(gone.contains);
   }
 

@@ -17,7 +17,6 @@ import 'package:niman/src/core/theme.dart';
 import 'package:niman/src/core/week_start.dart';
 import 'package:niman/src/core/welcome.dart';
 import 'package:niman/src/db/app_database.dart';
-import 'package:niman/src/db/dao.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/db/index_scan.dart';
 import 'package:niman/src/db/indexer.dart';
@@ -27,6 +26,7 @@ import 'package:niman/src/flashcards/review_store.dart';
 import 'package:niman/src/frontmatter/fields.dart';
 import 'package:niman/src/library/container_path.dart';
 import 'package:niman/src/library/file_watcher.dart';
+import 'package:niman/src/library/index_library_tree.dart';
 import 'package:niman/src/library/index_progress_throttle.dart';
 import 'package:niman/src/library/indexing_status.dart';
 import 'package:niman/src/library/library_databases.dart';
@@ -35,6 +35,7 @@ import 'package:niman/src/library/library_open_chores.dart';
 import 'package:niman/src/library/library_records.dart';
 import 'package:niman/src/library/library_registry.dart';
 import 'package:niman/src/library/library_sources.dart';
+import 'package:niman/src/library/library_tree.dart';
 import 'package:niman/src/library/library_widgets.dart';
 import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/library/note_ops.dart';
@@ -340,105 +341,9 @@ final class LibraryController implements LibrarySession {
   @override
   SyncService? get sync => _sync;
 
-  /// Children of the row with id [parentId] (0 = library root),
-  /// directories first, then by name.
-  ///
-  /// Empty while no library is open: there is no index to read, and the
-  /// tree UI asks for the root's children before the first open.
+  /// The open library's tree, read from its index.
   @override
-  Future<List<Note>> children(
-    int parentId, {
-    TreeSort sort = TreeSort.nameAsc,
-  }) async {
-    final db = _indexDb;
-    if (db == null) return const [];
-    return await NoteDao(db).children(parentId, sort: sort);
-  }
-
-  @override
-  Future<List<Note>> childrenPage(
-    int parentId, {
-    required int limit,
-    TreeSort sort = TreeSort.nameAsc,
-    Note? after,
-    Note? before,
-  }) async {
-    final db = _indexDb;
-    if (db == null) return const [];
-    return await NoteDao(db).childrenPage(
-      parentId,
-      limit: limit,
-      sort: sort,
-      after: after,
-      before: before,
-    );
-  }
-
-  @override
-  Future<int> childCount(int parentId) async {
-    final db = _indexDb;
-    if (db == null) return 0;
-    return await NoteDao(db).childCount(parentId);
-  }
-
-  @override
-  Future<int> rankOf(Note note, {TreeSort sort = TreeSort.nameAsc}) async {
-    final db = _indexDb;
-    if (db == null) return 0;
-    return await NoteDao(db).rankOf(note, sort: sort);
-  }
-
-  @override
-  Future<List<Note>> childrenAt(
-    int parentId, {
-    required int offset,
-    required int limit,
-    TreeSort sort = TreeSort.nameAsc,
-  }) async {
-    final db = _indexDb;
-    if (db == null) return const [];
-    return await NoteDao(db)
-        .childrenAt(parentId, offset: offset, limit: limit, sort: sort);
-  }
-
-  @override
-  Future<Note?> firstChildStartingWith(
-    int parentId,
-    String foldedPrefix, {
-    TreeSort sort = TreeSort.nameAsc,
-    Note? after,
-  }) async {
-    final db = _indexDb;
-    if (db == null) return null;
-    return await NoteDao(
-      db,
-    ).firstChildStartingWith(parentId, foldedPrefix, sort: sort, after: after);
-  }
-
-  @override
-  Future<Set<String>> missingPaths(Iterable<String> paths) async {
-    final db = _indexDb;
-    if (db == null) return const <String>{};
-    return await NoteDao(db).missingAmong(paths);
-  }
-
-  @override
-  Future<List<Note>> tree(
-    Iterable<String> expandedPaths, {
-    TreeSort sort = TreeSort.nameAsc,
-  }) async {
-    final db = _indexDb;
-    if (db == null) return const [];
-    return await NoteDao(db).tree(expandedPaths, sort: sort);
-  }
-
-  /// Every indexed folder, path-ordered (for move-target pickers).
-  @override
-  Future<List<Note>> folders() async {
-    final db = _indexDb;
-    if (db == null) return const [];
-    return await NoteDao(db).folders();
-  }
+  late final LibraryTree tree = IndexLibraryTree(() => _indexDb);
 
   @override
   Future<SearchSource?> get searchSource => _sources.searchSource;

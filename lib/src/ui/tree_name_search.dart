@@ -39,14 +39,17 @@ final class TreeNameSearch {
         // answer lies in it.
         if (before == null) return null;
       }
-      final found = await listing.session.firstChildStartingWith(
+      final found = await listing.session.tree.firstChildStartingWith(
         slot.parent,
         foldedPrefix,
         sort: listing.sort,
         after: before,
       );
       if (found != null) {
-        final rank = await listing.session.rankOf(found, sort: listing.sort);
+        final rank = await listing.session.tree.rankOf(
+          found,
+          sort: listing.sort,
+        );
         if (rank <= last) {
           // The first match of the folder after the run's start is the first
           // of the run if it lies in it; before [end] or not at all, since

@@ -352,7 +352,7 @@ final class ShellTabBodies {
     openJournal: journalFlow.openToday,
     capture: (context, action) =>
         captureFlow.capture(context, folder: action.folder),
-    missing: controller.missingPaths,
+    missing: controller.tree.missingPaths,
     tell: (message) =>
         ScaffoldMessenger.of(context())
             .showSnackBar(SnackBar(content: Text(message))),

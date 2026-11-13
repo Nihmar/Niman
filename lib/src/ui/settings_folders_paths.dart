@@ -68,7 +68,7 @@ final class _SettingsFoldersPathsScreenState
     final annotationsFolder = await ops.annotationsFolder;
     final captureFolder = await ops.captureFolder;
     final quickNotePath = await ops.quickNotePath;
-    final folders = await widget.controller.folders();
+    final folders = await widget.controller.tree.folders();
     if (!mounted) return;
     setState(() {
       _listFolder = listFolder;
@@ -97,7 +97,7 @@ final class _SettingsFoldersPathsScreenState
   }) async {
     final ops = widget.controller.ops;
     if (ops == null) return null;
-    final folders = await widget.controller.folders();
+    final folders = await widget.controller.tree.folders();
     if (!mounted) return null;
     final folder = await showFolderPicker(
       context,

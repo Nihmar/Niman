@@ -139,7 +139,7 @@ final class _ActionEditorState extends State<_ActionEditor> {
   Future<void> _pickFolder() async {
     final ops = _controller.ops;
     if (ops == null) return;
-    final folders = await _controller.folders();
+    final folders = await _controller.tree.folders();
     if (!mounted) return;
     final picked = await showFolderPicker(
       context,

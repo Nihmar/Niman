@@ -57,7 +57,7 @@ final class _SettingsJournalScreenState extends State<SettingsJournalScreen> {
     final ops = widget.controller.ops;
     if (ops == null) return;
     final settings = await ops.journal;
-    final folders = await widget.controller.folders();
+    final folders = await widget.controller.tree.folders();
     if (!mounted) return;
     setState(() {
       _settings = settings;
@@ -78,7 +78,7 @@ final class _SettingsJournalScreenState extends State<SettingsJournalScreen> {
   Future<void> _pickFolder(JournalSettings settings) async {
     final ops = widget.controller.ops;
     if (ops == null) return;
-    final folders = await widget.controller.folders();
+    final folders = await widget.controller.tree.folders();
     if (!mounted) return;
     final folder = await showFolderPicker(
       context,

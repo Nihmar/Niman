@@ -43,7 +43,7 @@ final class ActionsTile extends StatelessWidget {
       key: ValueKey(paths.join('\n')),
       revision: revision,
       initial: (value: const <String>{}),
-      load: () => host.controller.missingPaths(paths),
+      load: () => host.controller.tree.missingPaths(paths),
       builder: (context, gone) => ValueListenableBuilder<Features>(
         valueListenable: host.controller.features,
         builder: (context, features, _) => SingleChildScrollView(

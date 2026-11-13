@@ -67,7 +67,7 @@ void main() {
   }
 
   Future<List<String>> names(LibrarySession session) async {
-    final kids = await session.children(0);
+    final kids = await session.tree.children(0);
     return kids.map((n) => n.name).toList();
   }
 
@@ -445,9 +445,9 @@ void main() {
     // The index belongs to the open library, so there is nothing to read
     // before the first open — and the tree UI asks anyway.
     final controller = makeController();
-    expect(await controller.children(0), isEmpty);
-    expect(await controller.tree(const []), isEmpty);
-    expect(await controller.folders(), isEmpty);
+    expect(await controller.tree.children(0), isEmpty);
+    expect(await controller.tree.rows(const []), isEmpty);
+    expect(await controller.tree.folders(), isEmpty);
     expect(await controller.searchSource, isNull);
     expect(await controller.tagSource, isNull);
     expect(await controller.linkSource, isNull);
@@ -609,7 +609,7 @@ void main() {
     await first.rescanNow();
 
     // Default: directories first, then ascending names.
-    expect((await first.children(0)).map((note) => note.name).toList(), [
+    expect((await first.tree.children(0)).map((note) => note.name).toList(), [
       'a.md',
       'b.md',
       'c.md',
@@ -618,7 +618,7 @@ void main() {
     // Descending flips the name sort (dirs stay first).
     await first.setTreeSort(TreeSort.nameDesc);
     expect(
-      (await first.children(
+      (await first.tree.children(
         0,
         sort: TreeSort.nameDesc,
       )).map((n) => n.name).toList(),
@@ -627,7 +627,7 @@ void main() {
     // A later order round-trips as its own id, direction and all (#726).
     await first.setTreeSort(TreeSort.sizeDesc);
     expect(
-      (await first.children(
+      (await first.tree.children(
         0,
         sort: TreeSort.sizeDesc,
       )).map((n) => n.name).toList(),

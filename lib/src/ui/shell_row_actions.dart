@@ -262,7 +262,7 @@ final class ShellRowActions {
   Future<void> move(BuildContext context, [String? path]) async {
     final sel = path ?? selectedPath();
     if (sel == null) return;
-    final folders = await controller.folders();
+    final folders = await controller.tree.folders();
     if (!context.mounted) return;
     // A folder cannot move into itself or its own subtree, so those
     // targets are not offered.

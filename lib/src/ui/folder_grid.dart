@@ -275,7 +275,10 @@ final class _FolderGridState extends State<FolderGrid> {
       }
       at = parentOf(at);
     }
-    final children = await widget.controller.children(dir?.id ?? 0, sort: sort);
+    final children = await widget.controller.tree.children(
+      dir?.id ?? 0,
+      sort: sort,
+    );
     if (asked == _rowsFolder) _rowsDir = dir?.id ?? 0;
     final rows = _GridRows(
       folder: at,
