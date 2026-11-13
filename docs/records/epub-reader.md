@@ -56,8 +56,8 @@ Read the EPUB with what the app has, draw it with the app's read view.
   or null for the app's, `AppBrightness` or null for the app's,
   `EpubFont`, text scale), four device keys of the library's settings
   (`epubTheme`, `epubBrightness`, `epubFont`, `epubTextScale`), part of
-  `LibraryConfig` as `epubLook`. `LibrarySession.epubLook` /
-  `setEpubLook` read and keep it; the session publishes it, with the
+  `LibraryConfig` as `epubLook`. `LibrarySession.librarySettings`'
+  `epubLook` / `setEpubLook` read and keep it; the session publishes it, with the
   theme it names resolved (a custom theme from the app database, none
   when it is gone), to the global `EpubLooks` (`epub_looks.dart`) when
   the library opens, when it is set, and when a custom theme is saved or

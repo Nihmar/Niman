@@ -48,7 +48,7 @@ final class HomeTileView extends StatelessWidget {
   Widget build(BuildContext context) {
     final kind = tile.kind!;
     return ValueListenableBuilder<Features>(
-      valueListenable: host.controller.features,
+      valueListenable: host.controller.librarySettings.features,
       builder: (context, features, _) => HomeTileFrame(
         key: Key('home-tile-${tile.id}'),
         icon: homeTileIcon(kind),

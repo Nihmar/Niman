@@ -64,7 +64,7 @@ List<SettingsSearchEntry> settingsSearchEntries({
   ];
   // A row of an area whose feature is off is not found (#1109): the area is
   // not listed either.
-  final features = controller.features.value;
+  final features = controller.librarySettings.features.value;
   return [
     for (final entry in all)
       if (entry.areaId case final area? when !areaShown(area, features))

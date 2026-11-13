@@ -33,7 +33,8 @@ List<SettingsSearchEntry> appearanceSearchEntries(SettingsSearchScope scope) {
       title: AppStrings.weekStartTitle,
       area: appearance,
       rowKey: SettingsKeys.weekStart,
-      value: () async => AppStrings.weekStartName(await controller.weekStart),
+      value: () async =>
+          AppStrings.weekStartName(await controller.librarySettings.weekStart),
       areaId: SettingsAreaId.appearance,
       open: () => pushAppearance(SettingsKeys.weekStart),
     ),
@@ -61,8 +62,9 @@ List<SettingsSearchEntry> appearanceSearchEntries(SettingsSearchScope scope) {
       title: AppStrings.uiTextScaleTitle,
       area: appearance,
       rowKey: SettingsKeys.uiTextScale,
-      value: () async =>
-          AppStrings.textScaleValue(await controller.uiTextScale),
+      value: () async => AppStrings.textScaleValue(
+        await controller.librarySettings.uiTextScale,
+      ),
       areaId: SettingsAreaId.appearance,
       open: () => pushAppearance(SettingsKeys.uiTextScale),
     ),
@@ -70,7 +72,8 @@ List<SettingsSearchEntry> appearanceSearchEntries(SettingsSearchScope scope) {
       title: AppStrings.epubLookTitle,
       area: appearance,
       rowKey: SettingsKeys.epubLook,
-      value: () async => epubLookSummary(await controller.epubLook),
+      value: () async =>
+          epubLookSummary(await controller.librarySettings.epubLook),
       areaId: SettingsAreaId.appearance,
       open: () => pushAppearance(SettingsKeys.epubLook),
     ),

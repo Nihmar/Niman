@@ -31,6 +31,7 @@ import 'package:niman/src/home/home_layout.dart';
 import 'package:niman/src/journal/journal_settings.dart';
 import 'package:niman/src/library/app_preferences.dart';
 import 'package:niman/src/library/folder_spelling.dart';
+import 'package:niman/src/library/library_preferences.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/library/library_tree.dart';
 import 'package:niman/src/library/new_item_folder.dart';
@@ -73,7 +74,12 @@ import 'fake_tag_source.dart';
 /// (empty string = root), sanitized and uniquified names, directories first
 /// in listings, and a trash manifest with restore.
 final class FakeLibrarySession
-    implements LibrarySession, NoteOperations, LibraryTree, AppPreferences {
+    implements
+        LibrarySession,
+        NoteOperations,
+        LibraryTree,
+        AppPreferences,
+        LibraryPreferences {
   /// Creates a fake session; [resumePath] is auto-opened by [resume] when
   /// non-null (simulates the persisted last-library path).
   new({this.resumePath});
@@ -186,9 +192,12 @@ final class FakeLibrarySession
   @override
   LibraryTree get tree => this;
 
-  /// And its own app settings.
+  /// And its own app settings, and its library's.
   @override
   AppPreferences get appSettings => this;
+
+  @override
+  LibraryPreferences get librarySettings => this;
 
   /// The sync the shell and settings see while open; null = none wired.
   SyncService? syncService;

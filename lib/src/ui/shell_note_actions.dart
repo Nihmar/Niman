@@ -392,7 +392,7 @@ final class ShellNoteActions {
           .zoom(steps);
       return;
     }
-    await controller.setNoteTextScale(
+    await controller.librarySettings.setNoteTextScale(
       AppTextScales.zoomed(AppTextScales.note, steps),
     );
   }
@@ -534,7 +534,7 @@ final class ShellNoteActions {
         : previewToggleOffered(
             path: tab.path,
             kindGui: kind.guiOf(tab.path),
-            features: controller.features.value,
+            features: controller.librarySettings.features.value,
           );
     if (!offered) return null;
     final plain = isPlainTextFile(p.basename(tab.path));

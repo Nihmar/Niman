@@ -126,14 +126,14 @@ final class ShellHomeWidgets {
     AppThemes.revision.addListener(pushAll);
     // A switch flipped here or brought by a sync: the widgets of a feature
     // that went off show it, and those that came back show their data.
-    controller.features.addListener(pushAll);
+    controller.librarySettings.features.addListener(pushAll);
   }
 
   /// Stops listening. The pended target is deliberately left alone — it
   /// belongs to the shell this one is making way for.
   Future<void> dispose() async {
     AppThemes.revision.removeListener(pushAll);
-    controller.features.removeListener(pushAll);
+    controller.librarySettings.features.removeListener(pushAll);
     await _taps?.cancel();
   }
 

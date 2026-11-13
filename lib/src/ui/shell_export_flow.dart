@@ -102,7 +102,8 @@ final class ShellExportFlow {
   final String? Function() shownNote;
 
   /// Whether the Kanban feature is on (#1170): a board is exported as one.
-  bool get _kanban => controller.features.value.isOn(LibraryFeature.kindKanban);
+  bool get _kanban =>
+      controller.librarySettings.features.value.isOn(LibraryFeature.kindKanban);
 
   /// Exports the note at [path] as a file (#24): asks which format, reads
   /// the note (the buffer's edits first) and asks where to save it.

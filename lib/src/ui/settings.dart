@@ -255,7 +255,10 @@ final class _SettingsBodyState extends State<SettingsBody> {
     final keyboardAttached = _keyboard.attached;
     return ListenableBuilder(
       // The areas follow the library's features too (#1109).
-      listenable: Listenable.merge([_keyboard, controller.features]),
+      listenable: Listenable.merge([
+        _keyboard,
+        controller.librarySettings.features,
+      ]),
       builder: (context, _) {
         return Column(
           children: [

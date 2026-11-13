@@ -143,7 +143,7 @@ final class _DeckNoteViewState extends ConsumerState<DeckNoteView> {
   Future<void> _readSettings() async {
     try {
       final session = ref.read(librarySessionProvider);
-      final perDay = await session.newCardsPerDay;
+      final perDay = await session.librarySettings.newCardsPerDay;
       final dayStart = (await session.ops?.journal)?.dayStartHour ?? 0;
       if (!mounted) return;
       final today = studyToday(ref.read(studyClockProvider)(), dayStart);

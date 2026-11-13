@@ -21,8 +21,8 @@ import 'package:niman/src/ui/text_zoom_pinch.dart';
 /// Keeps [scale] as the books' text size in [session]'s library, the rest
 /// of their look as it was.
 Future<void> keepEpubTextScale(LibrarySession session, double scale) async {
-  final look = await session.epubLook;
-  await session.setEpubLook(
+  final look = await session.librarySettings.epubLook;
+  await session.librarySettings.setEpubLook(
     look.copyWith(textScale: normalizeTextScale(scale)),
   );
 }

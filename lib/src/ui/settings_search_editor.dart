@@ -11,7 +11,7 @@ import 'package:niman/src/ui/strings.dart';
 /// The settings search's rows of Editor (#104), in the order the search
 /// lists them.
 List<SettingsSearchEntry> editorSearchEntries(SettingsSearchScope scope) {
-  final controller = scope.controller;
+  final settings = scope.controller.librarySettings;
   void pushEditor(Key row) => scope.openArea(SettingsAreaId.editor, row);
   final editor = AppStrings.settingsSectionEditor;
   return [
@@ -28,7 +28,7 @@ List<SettingsSearchEntry> editorSearchEntries(SettingsSearchScope scope) {
       area: editor,
       rowKey: SettingsKeys.editorSource,
       value: () async => scope.onOff(
-        on: (await controller.enabledEditors).contains(EditorKind.source),
+        on: (await settings.enabledEditors).contains(EditorKind.source),
       ),
       open: () => pushEditor(SettingsKeys.editorSource),
     ),
@@ -37,7 +37,7 @@ List<SettingsSearchEntry> editorSearchEntries(SettingsSearchScope scope) {
       area: editor,
       rowKey: SettingsKeys.editorWysiwyg,
       value: () async => scope.onOff(
-        on: (await controller.enabledEditors).contains(EditorKind.wysiwyg),
+        on: (await settings.enabledEditors).contains(EditorKind.wysiwyg),
       ),
       open: () => pushEditor(SettingsKeys.editorWysiwyg),
     ),
@@ -45,7 +45,7 @@ List<SettingsSearchEntry> editorSearchEntries(SettingsSearchScope scope) {
       title: AppStrings.lineNumbersTitle,
       area: editor,
       rowKey: SettingsKeys.lineNumbers,
-      value: () async => scope.onOff(on: await controller.lineNumbersEnabled),
+      value: () async => scope.onOff(on: await settings.lineNumbersEnabled),
       areaId: SettingsAreaId.editor,
       open: () => pushEditor(SettingsKeys.lineNumbers),
     ),
@@ -53,7 +53,7 @@ List<SettingsSearchEntry> editorSearchEntries(SettingsSearchScope scope) {
       title: AppStrings.readableLineLengthTitle,
       area: editor,
       rowKey: SettingsKeys.readableLineLength,
-      value: () async => scope.onOff(on: await controller.readableLineLength),
+      value: () async => scope.onOff(on: await settings.readableLineLength),
       areaId: SettingsAreaId.editor,
       open: () => pushEditor(SettingsKeys.readableLineLength),
     ),
@@ -62,14 +62,14 @@ List<SettingsSearchEntry> editorSearchEntries(SettingsSearchScope scope) {
       area: editor,
       rowKey: SettingsKeys.noteColumnWidth,
       value: () async =>
-          AppStrings.noteColumnWidthValue(await controller.noteColumnWidth),
+          AppStrings.noteColumnWidthValue(await settings.noteColumnWidth),
       open: () => pushEditor(SettingsKeys.noteColumnWidth),
     ),
     SettingsSearchEntry(
       title: AppStrings.typewriterTitle,
       area: editor,
       rowKey: SettingsKeys.typewriter,
-      value: () async => scope.onOff(on: await controller.typewriter),
+      value: () async => scope.onOff(on: await settings.typewriter),
       areaId: SettingsAreaId.editor,
       open: () => pushEditor(SettingsKeys.typewriter),
     ),
@@ -77,7 +77,7 @@ List<SettingsSearchEntry> editorSearchEntries(SettingsSearchScope scope) {
       title: AppStrings.cascadeChecklistTitle,
       area: editor,
       rowKey: SettingsKeys.cascadeChecklist,
-      value: () async => scope.onOff(on: await controller.cascadeChecklist),
+      value: () async => scope.onOff(on: await settings.cascadeChecklist),
       areaId: SettingsAreaId.editor,
       open: () => pushEditor(SettingsKeys.cascadeChecklist),
     ),
@@ -85,7 +85,7 @@ List<SettingsSearchEntry> editorSearchEntries(SettingsSearchScope scope) {
       title: AppStrings.linkPreviewTitle,
       area: editor,
       rowKey: SettingsKeys.linkPreview,
-      value: () async => scope.onOff(on: await controller.linkPreview),
+      value: () async => scope.onOff(on: await settings.linkPreview),
       areaId: SettingsAreaId.editor,
       open: () => pushEditor(SettingsKeys.linkPreview),
     ),
@@ -93,7 +93,7 @@ List<SettingsSearchEntry> editorSearchEntries(SettingsSearchScope scope) {
       title: AppStrings.linkTypeTitle,
       area: editor,
       rowKey: SettingsKeys.linkType,
-      value: () async => switch (await controller.linkType) {
+      value: () async => switch (await settings.linkType) {
         LinkType.wikilink => AppStrings.linkTypeWikilink,
         LinkType.markdown => AppStrings.linkTypeMarkdown,
       },
@@ -104,7 +104,7 @@ List<SettingsSearchEntry> editorSearchEntries(SettingsSearchScope scope) {
       title: AppStrings.linkUpdateTitle,
       area: editor,
       rowKey: SettingsKeys.linkUpdate,
-      value: () async => switch (await controller.linkUpdate) {
+      value: () async => switch (await settings.linkUpdate) {
         LinkUpdate.automatic => AppStrings.linkUpdateAutomatic,
         LinkUpdate.ask => AppStrings.linkUpdateAsk,
         LinkUpdate.never => AppStrings.linkUpdateNever,
@@ -116,7 +116,7 @@ List<SettingsSearchEntry> editorSearchEntries(SettingsSearchScope scope) {
       title: AppStrings.newItemLocationTitle,
       area: editor,
       rowKey: SettingsKeys.newItemLocation,
-      value: () async => switch (await controller.newItemLocation) {
+      value: () async => switch (await settings.newItemLocation) {
         NewItemLocation.libraryRoot => AppStrings.newItemLocationRoot,
         NewItemLocation.openNoteFolder => AppStrings.newItemLocationOpenNote,
       },
@@ -128,7 +128,7 @@ List<SettingsSearchEntry> editorSearchEntries(SettingsSearchScope scope) {
       area: editor,
       rowKey: SettingsKeys.noteTextScale,
       value: () async =>
-          AppStrings.textScaleValue(await controller.noteTextScale),
+          AppStrings.textScaleValue(await settings.noteTextScale),
       areaId: SettingsAreaId.editor,
       open: () => pushEditor(SettingsKeys.noteTextScale),
     ),
@@ -136,7 +136,7 @@ List<SettingsSearchEntry> editorSearchEntries(SettingsSearchScope scope) {
       title: AppStrings.sourceFontTitle,
       area: editor,
       rowKey: SettingsKeys.sourceFont,
-      value: () async => switch (await controller.sourceFont) {
+      value: () async => switch (await settings.sourceFont) {
         SourceFont.monospace => AppStrings.sourceFontMonospace,
         SourceFont.sansSerif => AppStrings.sourceFontSansSerif,
         SourceFont.serif => AppStrings.sourceFontSerif,
@@ -149,7 +149,7 @@ List<SettingsSearchEntry> editorSearchEntries(SettingsSearchScope scope) {
       area: editor,
       rowKey: SettingsKeys.indentWidth,
       value: () async =>
-          AppStrings.indentWidthValue(await controller.indentWidth),
+          AppStrings.indentWidthValue(await settings.indentWidth),
       areaId: SettingsAreaId.editor,
       open: () => pushEditor(SettingsKeys.indentWidth),
     ),
@@ -157,7 +157,7 @@ List<SettingsSearchEntry> editorSearchEntries(SettingsSearchScope scope) {
       title: AppStrings.tidyOnCloseTitle,
       area: editor,
       rowKey: SettingsKeys.tidyOnClose,
-      value: () async => scope.onOff(on: await controller.tidyOnClose),
+      value: () async => scope.onOff(on: await settings.tidyOnClose),
       areaId: SettingsAreaId.editor,
       open: () => pushEditor(SettingsKeys.tidyOnClose),
     ),
@@ -166,7 +166,7 @@ List<SettingsSearchEntry> editorSearchEntries(SettingsSearchScope scope) {
       area: editor,
       rowKey: SettingsKeys.lintRules,
       value: () async {
-        final off = await controller.lintRulesOff;
+        final off = await settings.lintRulesOff;
         return AppStrings.lintRulesValue(
           LintRule.values.length - off.length,
           LintRule.values.length,

@@ -229,7 +229,10 @@ final class ShellNotePanes {
 
   Widget _phoneNote(LibrarySession controller, String selectedPath) {
     // A picture, a PDF or a book, shown rather than read as a note.
-    if (isShownAttachment(selectedPath, controller.features.value)) {
+    if (isShownAttachment(
+      selectedPath,
+      controller.librarySettings.features.value,
+    )) {
       return TourTarget(
         id: TourTargets.note,
         child: AttachmentView(
@@ -309,7 +312,7 @@ final class ShellNotePanes {
     wikilinkSuggester: settings.wikilinkSuggester,
     tasks: tasks.notes,
     onOpenNote: openNote,
-    features: controller.features,
+    features: controller.librarySettings.features,
     unsavedTracker: unsaved,
     spellCheck: spellCheck,
     saveNote: noteSaverFor(controller),
@@ -325,7 +328,7 @@ final class ShellNotePanes {
     scale: () => AppTextScales.note,
     onZoom: (scale, {required done}) {
       if (done) {
-        unawaited(controller.setNoteTextScale(scale));
+        unawaited(controller.librarySettings.setNoteTextScale(scale));
       } else {
         AppTextScales.note = scale;
       }

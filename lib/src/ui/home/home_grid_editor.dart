@@ -270,7 +270,7 @@ final class _HomeGridEditorState extends State<HomeGridEditor> {
             ),
             _ => HomeAddPanel(
               editing: _editing,
-              features: widget.controller.features,
+              features: widget.controller.librarySettings.features,
             ),
           },
         ),

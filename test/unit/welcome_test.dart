@@ -199,8 +199,10 @@ void main() {
 
       await controller.open(library.path, create: true);
 
-      expect(await controller.editorKind, EditorKind.wysiwyg);
-      expect(await controller.enabledEditors, {EditorKind.wysiwyg});
+      expect(await controller.librarySettings.editorKind, EditorKind.wysiwyg);
+      expect(await controller.librarySettings.enabledEditors, {
+        EditorKind.wysiwyg,
+      });
       await controller.close();
     });
 
@@ -222,8 +224,8 @@ void main() {
 
       await controller.open(library.path, create: true);
 
-      expect(await controller.editorKind, EditorKind.source);
-      expect(await controller.enabledEditors, {
+      expect(await controller.librarySettings.editorKind, EditorKind.source);
+      expect(await controller.librarySettings.enabledEditors, {
         EditorKind.source,
         EditorKind.wysiwyg,
       });

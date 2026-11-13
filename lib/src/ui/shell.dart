@@ -347,7 +347,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
 
   /// The library's features (#1109): every surface of the shell asks this,
   /// and none keeps a boolean of its own.
-  Features get _features => widget.controller.features.value;
+  Features get _features => widget.controller.librarySettings.features.value;
 
   /// Whether a note opened now would land in a pane the user can see:
   /// the panes are the files slot, and no content tab paints over them
@@ -389,7 +389,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   /// a notification or a widget tap for a feature that is off says so in
   /// one sentence (#1109).
   late final ShellIntentGate _intents = ShellIntentGate(
-    features: widget.controller.features,
+    features: widget.controller.librarySettings.features,
     say: (feature) {
       if (!mounted) return;
       showFeatureOff(context, feature, openFeatures: _openFeaturesFromWidget);
@@ -1296,7 +1296,9 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       ..pushStudy();
     _workspaceFollow.attach();
     _workspace.unsavedPaths = _unsavedRelPaths;
-    widget.controller.features.addListener(_tabs.featuresChanged);
+    widget.controller.librarySettings.features.addListener(
+      _tabs.featuresChanged,
+    );
     AppKeyMap.current.addListener(_rebuild);
     _chosenKeys.attach();
     FocusManager.instance.addListener(_reclaimFocus);
@@ -1343,7 +1345,9 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     _bodies.dispose();
     _treeFocus.dispose();
     _workspaceFollow.detach();
-    widget.controller.features.removeListener(_tabs.featuresChanged);
+    widget.controller.librarySettings.features.removeListener(
+      _tabs.featuresChanged,
+    );
     // The study is the library's: the tab is app-wide, and a run left in it
     // would show in the next library's panes and grade into this one's
     // review.json (#944).
@@ -1483,8 +1487,9 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
 
   /// Whether the readers annotate (#1109): off, they offer no annotating
   /// and draw no marks, the companion notes untouched.
-  bool get _annotating =>
-      widget.controller.features.value.isOn(LibraryFeature.annotations);
+  bool get _annotating => widget.controller.librarySettings.features.value.isOn(
+    LibraryFeature.annotations,
+  );
 
   void _annotate(Annotation annotation) =>
       unawaited(_annotations.annotate(context, annotation));

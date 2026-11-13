@@ -233,7 +233,7 @@ List<SettingsArea> settingsAreas({
       title: AppStrings.commandsTitle,
       subtitle: () => AppStrings.commandsSubtitle,
       build: (highlight) => SettingsCommandsScreen(
-        features: controller.features,
+        features: controller.librarySettings.features,
         highlight: highlight,
         // Only where the way in is open: the shortcuts need a keyboard.
         openShortcuts: openArea == null || !keyboardAttached
@@ -405,7 +405,7 @@ List<SettingsArea> settingsAreas({
   ];
   // The area of a feature that is off is not listed (#1109): the list and
   // the search read this one answer.
-  final features = controller.features.value;
+  final features = controller.librarySettings.features.value;
   return [
     for (final area in all)
       if (areaShown(area.id, features)) area,

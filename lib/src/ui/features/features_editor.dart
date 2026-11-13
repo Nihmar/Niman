@@ -51,10 +51,10 @@ final class FeaturesEditor {
   }
 
   Future<void> _run(Features Function(Features) change) async {
-    final before = session.features.value;
+    final before = session.librarySettings.features.value;
     final after = change(before);
     if (after == before) return;
-    await session.setFeatures(after);
+    await session.librarySettings.setFeatures(after);
     final wentOff = [
       for (final feature in _reminderFeatures)
         if (before.isOn(feature) && !after.isOn(feature)) feature,

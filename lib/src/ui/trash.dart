@@ -52,7 +52,7 @@ final class _TrashScreenState extends State<TrashScreen> {
     final ops = controller.ops;
     if (ops == null) return;
     final items = await ops.trashItems();
-    final autoEmptyDays = await controller.trashAutoEmptyDays;
+    final autoEmptyDays = await controller.librarySettings.trashAutoEmptyDays;
     if (mounted) {
       setState(() {
         _items = items;

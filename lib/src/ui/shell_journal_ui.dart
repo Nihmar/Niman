@@ -113,10 +113,11 @@ final class ShellJournalUi {
   /// Whether the calendar file's events show under a day: the library has
   /// the calendar on (#1109).
   bool get _showsEvents =>
-      controller.features.value.isOn(LibraryFeature.calendar);
+      controller.librarySettings.features.value.isOn(LibraryFeature.calendar);
 
   /// Whether the tasks due show under a day: the library has todo on.
-  bool get _showsTasks => controller.features.value.isOn(LibraryFeature.todo);
+  bool get _showsTasks =>
+      controller.librarySettings.features.value.isOn(LibraryFeature.todo);
 
   /// The dock's journal pane, on [focusDay] when an entry is on screen.
   Widget browser(BuildContext context, {DateTime? focusDay}) => JournalBrowser(
@@ -240,7 +241,8 @@ final class ShellJournalUi {
   /// The journal's strip over [path] when it is an entry (#7), else null.
   Widget? header(BuildContext context, String path, {bool compact = false}) {
     // With the journal off its entries are ordinary notes (#1109).
-    if (!controller.features.value.isOn(LibraryFeature.journal)) return null;
+    final features = controller.librarySettings.features.value;
+    if (!features.isOn(LibraryFeature.journal)) return null;
     final settings = journal();
     final day = settings.dayOfPath(path);
     if (day == null) return null;

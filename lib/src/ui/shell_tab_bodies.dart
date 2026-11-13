@@ -333,7 +333,10 @@ final class ShellTabBodies {
     openTag: (tag) => _showSearch(SearchRequest.forTag(tag)),
     openTodo: openTodo,
     runAction: (action) => unawaited(
-      homeActions.run(context(), action.under(controller.features.value)),
+      homeActions.run(
+        context(),
+        action.under(controller.librarySettings.features.value),
+      ),
     ),
     decks: () => study().decks,
     study: (paths, title) => study().studyPaths(context(), paths, title),

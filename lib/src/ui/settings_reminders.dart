@@ -49,7 +49,8 @@ final class _SettingsRemindersScreenState
   }
 
   Future<void> _load() async {
-    final showTokens = await widget.controller.reminderShowTokens;
+    final showTokens =
+        await widget.controller.librarySettings.reminderShowTokens;
     if (!mounted) return;
     setState(() => _showTokens = showTokens);
   }
@@ -61,7 +62,7 @@ final class _SettingsRemindersScreenState
   /// resume resyncs), so already-scheduled alarms pick up the new text.
   Future<void> _toggleShowTokens(bool value) async {
     final controller = widget.controller;
-    await controller.setReminderShowTokens(enabled: value);
+    await controller.librarySettings.setReminderShowTokens(enabled: value);
     controller.notify();
     if (mounted) {
       setState(() => _showTokens = value);

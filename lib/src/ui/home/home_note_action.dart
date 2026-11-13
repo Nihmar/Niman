@@ -38,7 +38,7 @@ Future<void> makeHomeNote(
   required ShellTemplateFlow templates,
 }) async {
   // With Templates off (#1109) the action's template is left unread.
-  final action = requested.under(controller.features.value);
+  final action = requested.under(controller.librarySettings.features.value);
   final source = await controller.templateSource;
   final templateFolder = await source?.folder ?? '';
   if (!context.mounted) return;

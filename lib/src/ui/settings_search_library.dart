@@ -119,8 +119,9 @@ List<SettingsSearchEntry> librarySearchEntries(SettingsSearchScope scope) {
         title: featureName(feature),
         area: featuresArea,
         rowKey: SettingsKeys.featureRow(feature),
-        value: () async =>
-            scope.onOff(on: controller.features.value.isOn(feature)),
+        value: () async => scope.onOff(
+          on: controller.librarySettings.features.value.isOn(feature),
+        ),
         areaId: SettingsAreaId.features,
         open: () => scope.openArea(
           SettingsAreaId.features,
@@ -186,8 +187,9 @@ List<SettingsSearchEntry> librarySearchEntries(SettingsSearchScope scope) {
       title: AppStrings.trashAutoEmptyTitle,
       area: trashHistory,
       rowKey: SettingsKeys.trashAutoEmpty,
-      value: () async =>
-          AppStrings.trashAutoEmptyValue(await controller.trashAutoEmptyDays),
+      value: () async => AppStrings.trashAutoEmptyValue(
+        await controller.librarySettings.trashAutoEmptyDays,
+      ),
       areaId: SettingsAreaId.trashHistory,
       open: () => pushTrash(SettingsKeys.trashAutoEmpty),
     ),
@@ -195,7 +197,7 @@ List<SettingsSearchEntry> librarySearchEntries(SettingsSearchScope scope) {
       title: AppStrings.settingsNewCardsPerDay,
       area: study,
       rowKey: SettingsKeys.newCardsPerDay,
-      value: () async => '${await controller.newCardsPerDay}',
+      value: () async => '${await controller.librarySettings.newCardsPerDay}',
       areaId: SettingsAreaId.study,
       open: () => pushStudy(SettingsKeys.newCardsPerDay),
     ),
@@ -211,8 +213,9 @@ List<SettingsSearchEntry> librarySearchEntries(SettingsSearchScope scope) {
       title: AppStrings.historyVersionsTitle,
       area: trashHistory,
       rowKey: SettingsKeys.historyVersions,
-      value: () async =>
-          AppStrings.historyVersionsValue(await controller.historyVersions),
+      value: () async => AppStrings.historyVersionsValue(
+        await controller.librarySettings.historyVersions,
+      ),
       areaId: SettingsAreaId.trashHistory,
       open: () => pushTrash(SettingsKeys.historyVersions),
     ),
@@ -221,7 +224,7 @@ List<SettingsSearchEntry> librarySearchEntries(SettingsSearchScope scope) {
       area: trashHistory,
       rowKey: SettingsKeys.historyInterval,
       value: () async => AppStrings.historyIntervalValue(
-        await controller.historyIntervalMinutes,
+        await controller.librarySettings.historyIntervalMinutes,
       ),
       open: () => pushTrash(SettingsKeys.historyInterval),
     ),

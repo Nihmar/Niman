@@ -32,7 +32,7 @@ Future<void> startTour(
   final wide = isWideShell(context);
   final store = await welcomeStore(ref);
   final session = ref.read(librarySessionProvider);
-  final editors = await session.enabledEditors;
+  final editors = await session.librarySettings.enabledEditors;
   if (!context.mounted) return;
   final steps = tourSteps(canSwitchEditor: editors.length > 1, hasDock: wide);
   final index = from.clamp(0, steps.length - 1);

@@ -68,7 +68,7 @@ final class _EpubLookPanelState extends State<EpubLookPanel> {
   }
 
   Future<void> _load() async {
-    final look = await widget.session.epubLook;
+    final look = await widget.session.librarySettings.epubLook;
     final custom = await widget.session.appSettings.customThemes();
     if (!mounted) return;
     setState(() {
@@ -79,7 +79,7 @@ final class _EpubLookPanelState extends State<EpubLookPanel> {
 
   Future<void> _set(EpubLook look) async {
     setState(() => _look = look);
-    await widget.session.setEpubLook(look);
+    await widget.session.librarySettings.setEpubLook(look);
   }
 
   /// Shows [look] on the open book while the slider moves; it is kept

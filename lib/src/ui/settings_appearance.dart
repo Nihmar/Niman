@@ -61,9 +61,9 @@ final class _SettingsAppearanceScreenState
   Future<void> _load() async {
     final controller = widget.controller;
     final language = await controller.appSettings.language;
-    final weekStart = await controller.weekStart;
-    final uiTextScale = await controller.uiTextScale;
-    final epubLook = await controller.epubLook;
+    final weekStart = await controller.librarySettings.weekStart;
+    final uiTextScale = await controller.librarySettings.uiTextScale;
+    final epubLook = await controller.librarySettings.epubLook;
     final closeToTray = await controller.appSettings.closeToTray;
     if (!mounted) return;
     setState(() {
@@ -119,7 +119,7 @@ final class _SettingsAppearanceScreenState
       ],
     );
     if (start == null) return;
-    await widget.controller.setWeekStart(start);
+    await widget.controller.librarySettings.setWeekStart(start);
     if (mounted) setState(() => _weekStart = start);
   }
 
@@ -142,7 +142,7 @@ final class _SettingsAppearanceScreenState
   }
 
   Future<void> _setUiTextScale(double scale) async {
-    await widget.controller.setUiTextScale(scale);
+    await widget.controller.librarySettings.setUiTextScale(scale);
     if (mounted) setState(() => _uiTextScale = scale);
   }
 
@@ -151,7 +151,7 @@ final class _SettingsAppearanceScreenState
   Future<void> _editEpubLook(Rect? anchor) async {
     final controller = widget.controller;
     await showEpubLookSheet(context, session: controller, anchor: anchor);
-    final look = await controller.epubLook;
+    final look = await controller.librarySettings.epubLook;
     if (mounted) setState(() => _epubLook = look);
   }
 

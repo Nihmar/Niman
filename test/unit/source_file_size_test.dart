@@ -25,7 +25,6 @@ const int _slack = 50;
 /// its size then or since lowered by a split.
 const Map<String, int> _oversized = {
   'ui/shell.dart': 1420,
-  'library/library_state.dart': 875,
 };
 
 /// Tables that are long by nature, not by mixed responsibilities, and why:

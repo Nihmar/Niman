@@ -11,4 +11,9 @@ import 'package:niman/src/library/library_state.dart';
 /// the switch belongs to one, which is why the gate asks the session. With
 /// no library open every feature reads as on, as the session answers.
 bool Function() featureDownloadGate(Ref ref, LibraryFeature feature) =>
-    () => ref.read(librarySessionProvider).features.value.isOn(feature);
+    () => ref
+        .read(librarySessionProvider)
+        .librarySettings
+        .features
+        .value
+        .isOn(feature);

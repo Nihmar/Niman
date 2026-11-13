@@ -71,7 +71,7 @@ final class _SettingsFeaturesScreenState extends State<SettingsFeaturesScreen> {
   @override
   void dispose() {
     if (_recordsLeaving) {
-      unawaited(widget.controller.markFeaturesReviewed());
+      unawaited(widget.controller.librarySettings.markFeaturesReviewed());
     }
     super.dispose();
   }
@@ -110,7 +110,7 @@ final class _SettingsFeaturesScreenState extends State<SettingsFeaturesScreen> {
       library: true,
       highlight: widget.highlight,
       body: ValueListenableBuilder<Features>(
-        valueListenable: widget.controller.features,
+        valueListenable: widget.controller.librarySettings.features,
         builder: (context, features, _) => _body(context, features),
       ),
     );

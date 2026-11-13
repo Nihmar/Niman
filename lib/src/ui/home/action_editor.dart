@@ -213,7 +213,10 @@ final class _ActionEditorState extends State<_ActionEditor> {
           // (#1109).
           for (final k in HomeActionKind.values)
             if (k == kind ||
-                actionKindIsOn(k, widget.controller.features.value))
+                actionKindIsOn(
+                  k,
+                  widget.controller.librarySettings.features.value,
+                ))
               (k, homeActionKindName(k)),
         ],
         onChanged: (k) => setState(() => _kind = k),
