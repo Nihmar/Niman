@@ -23,9 +23,7 @@ const int _slack = 50;
 
 /// The files over [_ceiling] when the gate came in (2026-11-03), each held at
 /// its size then or since lowered by a split.
-const Map<String, int> _oversized = {
-  'ui/shell.dart': 1420,
-};
+const Map<String, int> _oversized = {'ui/shell.dart': 1420};
 
 /// Tables that are long by nature, not by mixed responsibilities, and why:
 /// splitting them would scatter one list over files without making any of
