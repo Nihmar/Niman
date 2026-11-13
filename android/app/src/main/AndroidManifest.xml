@@ -46,6 +46,11 @@
          (shortService needs no permission of its own beyond this one). -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
+    <!-- A book read aloud (#1276) goes on with the screen off and Niman in
+         the background, under a foreground service of type mediaPlayback
+         (ReadAloudService), which Android 14 asks this permission of. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+
     <!-- Auto-update (issue #81): installing the downloaded APK through
          the system installer. The user still confirms on the system
          screen (including the per-app "unknown apps" allowlist). -->
@@ -191,6 +196,14 @@
              launcher binds this on demand when it renders the remote
              collection, so a long list scrolls; BIND_REMOTEVIEWS keeps
              other apps from binding it. -->
+        <!-- A book read aloud (#1276): the media notification and the lock
+             screen's controls while the voice speaks; not exported, its
+             buttons are the app's own intents. -->
+        <service
+            android:name=".ReadAloudService"
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback"
+            android:stopWithTask="false" />
         <service
             android:name=".TodoWidgetService"
             android:exported="true"
@@ -324,6 +337,11 @@
 
          In particular, this is used by the Flutter engine in io.flutter.plugin.text.ProcessTextPlugin. -->
     <queries>
+        <!-- A book read aloud (#1276): TextToSpeech binds to the device's
+             engine, which Android 11+ hides unless it is asked for. -->
+        <intent>
+            <action android:name="android.intent.action.TTS_SERVICE" />
+        </intent>
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
