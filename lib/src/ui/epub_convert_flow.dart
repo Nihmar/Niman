@@ -92,7 +92,7 @@ final class EpubConvertFlow {
         parent: parent,
         preview: preview,
         pickFolder: (current) async {
-          final folders = await session.folders();
+          final folders = await session.tree.folders();
           if (!context.mounted) return null;
           return await showFolderPicker(
             context,

@@ -34,7 +34,7 @@ final class _ToolbarSettingsScreenState extends State<ToolbarSettingsScreen> {
   }
 
   Future<void> _load() async {
-    final stored = await widget.controller.editorToolbar;
+    final stored = await widget.controller.librarySettings.editorToolbar;
     if (!mounted) return;
     setState(() {
       _layout = ToolbarLayout.parse(stored);
@@ -44,7 +44,7 @@ final class _ToolbarSettingsScreenState extends State<ToolbarSettingsScreen> {
 
   Future<void> _save(ToolbarLayout layout) async {
     setState(() => _layout = layout);
-    await widget.controller.setEditorToolbar(layout.encode());
+    await widget.controller.librarySettings.setEditorToolbar(layout.encode());
     widget.controller.notify();
   }
 

@@ -98,7 +98,7 @@ final class HomeColumnEditor extends StatelessWidget {
             ),
             footer: _AddSection(
               editing: editing,
-              features: controller.features,
+              features: controller.librarySettings.features,
             ),
             itemCount: tiles.length,
             onReorderItem: (from, to) => _reorder(tiles, from, to),

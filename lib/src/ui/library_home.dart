@@ -97,11 +97,11 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
   Future<void> _applyTheme() async {
     final session = ref.read(librarySessionProvider);
     AppThemes.apply(
-      brightness: await session.themeBrightness,
-      theme: await session.theme,
+      brightness: await session.appSettings.themeBrightness,
+      theme: await session.appSettings.theme,
     );
     // The keys this device was given (#159): read once, like the theme.
-    AppKeyMap.current.value = KeyMap.fromJson(await session.keyMap);
+    AppKeyMap.current.value = KeyMap.fromJson(await session.appSettings.keyMap);
     // And the commands pinned in its palette (#208).
     await PinnedCommands.load(session);
     // Whether the window's × hides Niman to the tray (#209): the tray is
@@ -109,7 +109,8 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
     // Dock, with no setting (decision 11 of docs/records/apple-platforms.md).
     CloseToTray.enabled.value =
         Platform.isMacOS ||
-        ((Platform.isLinux || Platform.isWindows) && await session.closeToTray);
+        ((Platform.isLinux || Platform.isWindows) &&
+            await session.appSettings.closeToTray);
   }
 
   /// Applies the stored UI language (T-L10N-03).
@@ -117,7 +118,10 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
   /// Read once at start: the app renders in the OS language until it
   /// lands, which is the same answer whenever the user never chose one.
   Future<void> _applyLanguage() async {
-    AppLanguages.choice = await ref.read(librarySessionProvider).language;
+    AppLanguages.choice = await ref
+        .read(librarySessionProvider)
+        .appSettings
+        .language;
   }
 
   /// Publishes the quick actions on every surface that takes a label map:

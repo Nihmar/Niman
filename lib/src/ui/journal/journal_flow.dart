@@ -178,7 +178,8 @@ final class JournalFlow {
     final ops = controller.ops!;
     final messenger = ScaffoldMessenger.of(context);
     var source = builtInJournalTemplate;
-    final template = controller.features.value.isOn(LibraryFeature.templates)
+    final template =
+        controller.librarySettings.features.value.isOn(LibraryFeature.templates)
         ? settings.template
         : null;
     if (template != null) {

@@ -40,7 +40,7 @@ final class _SettingsStudyScreenState extends State<SettingsStudyScreen> {
   }
 
   Future<void> _load() async {
-    final perDay = await widget.controller.newCardsPerDay;
+    final perDay = await widget.controller.librarySettings.newCardsPerDay;
     if (mounted) setState(() => _newPerDay = perDay);
   }
 
@@ -61,7 +61,7 @@ final class _SettingsStudyScreenState extends State<SettingsStudyScreen> {
       ],
     );
     if (count == null) return;
-    await widget.controller.setNewCardsPerDay(count);
+    await widget.controller.librarySettings.setNewCardsPerDay(count);
     // The counts of Study and of the decks follow the setting.
     widget.controller.notify();
     if (mounted) setState(() => _newPerDay = count);

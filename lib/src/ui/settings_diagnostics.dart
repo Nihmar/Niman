@@ -50,7 +50,7 @@ final class _SettingsDiagnosticsScreenState
   }
 
   Future<void> _load() async {
-    final debug = await widget.controller.debugLogsEnabled;
+    final debug = await widget.controller.appSettings.debugLogsEnabled;
     if (!mounted) return;
     setState(() => _debugLogs = debug);
     // Kept out of the load above: the platform channel behind
@@ -74,7 +74,7 @@ final class _SettingsDiagnosticsScreenState
 
   Future<void> _toggleDebugLogs(bool value) async {
     final controller = widget.controller;
-    await controller.setDebugLogsEnabled(enabled: value);
+    await controller.appSettings.setDebugLogsEnabled(enabled: value);
     if (mounted) {
       setState(() => _debugLogs = value);
     }

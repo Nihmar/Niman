@@ -219,7 +219,7 @@ final class TreeListing {
   Future<int?> modelIndexOfNote(Note note) async {
     final count = model.childCount(note.parent);
     if (count == null) return null;
-    final rank = await session.rankOf(note, sort: sort);
+    final rank = await session.tree.rankOf(note, sort: sort);
     if (rank >= count) return null;
     final page = rank ~/ pages.pageSize;
     await pages.load(session, note.parent, page, sort);
@@ -246,7 +246,7 @@ final class TreeListing {
     final page = pages.pageRows(parent, position ~/ pages.pageSize);
     final at = position % pages.pageSize;
     if (page != null && at < page.length) return page[at];
-    final read = await session.childrenAt(
+    final read = await session.tree.childrenAt(
       parent,
       offset: position,
       limit: 1,

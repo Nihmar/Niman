@@ -67,7 +67,7 @@ final class ShellMarkedActions {
   Future<void> move(BuildContext context, List<String> paths) async {
     final ops = rows.controller.ops;
     if (ops == null) return;
-    final folders = await rows.controller.folders();
+    final folders = await rows.controller.tree.folders();
     if (!context.mounted) return;
     bool moving(String folder) =>
         paths.any((path) => folder == path || isUnder(path, folder));

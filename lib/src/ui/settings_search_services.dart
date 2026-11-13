@@ -25,7 +25,8 @@ List<SettingsSearchEntry> serviceSearchEntries(
       title: AppStrings.reminderShowTokensTitle,
       area: scope.libraryArea(AppStrings.settingsSectionReminders),
       rowKey: SettingsKeys.reminderShowTokens,
-      value: () async => scope.onOff(on: await controller.reminderShowTokens),
+      value: () async =>
+          scope.onOff(on: await controller.librarySettings.reminderShowTokens),
       areaId: SettingsAreaId.reminders,
       open: () => scope.openArea(
         SettingsAreaId.reminders,

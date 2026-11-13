@@ -44,9 +44,11 @@ final class _SettingsTrashHistoryScreenState
     final ops = controller.ops;
     if (ops == null) return;
     final trash = await ops.trashEnabled;
-    final trashAutoEmptyDays = await controller.trashAutoEmptyDays;
-    final historyVersions = await controller.historyVersions;
-    final historyInterval = await controller.historyIntervalMinutes;
+    final trashAutoEmptyDays =
+        await controller.librarySettings.trashAutoEmptyDays;
+    final historyVersions = await controller.librarySettings.historyVersions;
+    final historyInterval =
+        await controller.librarySettings.historyIntervalMinutes;
     if (!mounted) return;
     setState(() {
       _trash = trash;
@@ -81,7 +83,7 @@ final class _SettingsTrashHistoryScreenState
       ],
     );
     if (days == null) return;
-    await widget.controller.setTrashAutoEmptyDays(days);
+    await widget.controller.librarySettings.setTrashAutoEmptyDays(days);
     if (mounted) setState(() => _trashAutoEmptyDays = days);
   }
 
@@ -99,7 +101,7 @@ final class _SettingsTrashHistoryScreenState
       ],
     );
     if (versions == null) return;
-    await widget.controller.setHistoryVersions(versions);
+    await widget.controller.librarySettings.setHistoryVersions(versions);
     if (mounted) setState(() => _historyVersions = versions);
   }
 
@@ -117,7 +119,7 @@ final class _SettingsTrashHistoryScreenState
       ],
     );
     if (minutes == null) return;
-    await widget.controller.setHistoryIntervalMinutes(minutes);
+    await widget.controller.librarySettings.setHistoryIntervalMinutes(minutes);
     if (mounted) setState(() => _historyInterval = minutes);
   }
 

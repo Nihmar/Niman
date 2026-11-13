@@ -141,7 +141,7 @@ final class _HomeScreenState extends State<HomeScreen> {
     // The tiles of a feature that is off are not built; the file keeps
     // them, so turning it back on finds the Home as it was (#1109).
     return ValueListenableBuilder(
-      valueListenable: widget.host.controller.features,
+      valueListenable: widget.host.controller.librarySettings.features,
       builder: (context, features, _) => _body(home, features),
     );
   }

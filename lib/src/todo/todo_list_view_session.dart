@@ -18,19 +18,21 @@ TodoListView todoListViewFor(LibrarySession session) {
   final view = TodoListView(
     onCollapsedChanged: (ids) {
       unawaited(
-        session.setTodoCollapsedSections(ids).onError<Object>((error, _) {
+        session.librarySettings.setTodoCollapsedSections(ids).onError<Object>((
+          error,
+          _,
+        ) {
           _log.warning('todo folded sections not saved: $error');
         }),
       );
     },
   );
   unawaited(
-    session.todoCollapsedSections.then(view.restoreCollapsed).onError<Object>((
-      error,
-      _,
-    ) {
-      _log.warning('todo folded sections not read: $error');
-    }),
+    session.librarySettings.todoCollapsedSections
+        .then(view.restoreCollapsed)
+        .onError<Object>((error, _) {
+          _log.warning('todo folded sections not read: $error');
+        }),
   );
   return view;
 }

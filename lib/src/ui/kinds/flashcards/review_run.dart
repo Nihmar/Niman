@@ -95,7 +95,7 @@ Future<ReviewRun?> loadReviewRun({
       if (decks[i] case final deck?) (path: rel[i], deck: deck),
   ];
   if (read.isEmpty) return null;
-  final newPerDay = await session.newCardsPerDay;
+  final newPerDay = await session.librarySettings.newCardsPerDay;
   final dayStart = (await session.ops?.journal)?.dayStartHour ?? 0;
   final first = read.first;
   final studied = {for (final deck in read) deck.path};

@@ -55,10 +55,10 @@ void main() {
 
     expect(controller.phase, LibraryPhase.ready);
     expect(controller.lastError, isNull);
-    expect((await controller.children(0)).map((note) => note.name).toList(), [
-      'a.md',
-      'b.md',
-    ]);
+    expect(
+      (await controller.tree.children(0)).map((note) => note.name).toList(),
+      ['a.md', 'b.md'],
+    );
     final db = await controller.appDatabase;
     expect((await LibraryRegistry(db).all()).single.path, root.path);
     expect((await controller.workspaceSlot.load()).activePath, 'a.md');
@@ -100,9 +100,10 @@ void main() {
 
     expect(deletes, 1, reason: 'the index was deleted exactly once');
     expect(controller.phase, LibraryPhase.ready);
-    expect((await controller.children(0)).map((note) => note.name).toList(), [
-      'a.md',
-    ]);
+    expect(
+      (await controller.tree.children(0)).map((note) => note.name).toList(),
+      ['a.md'],
+    );
     await controller.close();
     await controller.dispose();
   });

@@ -139,7 +139,7 @@ final class _ActionEditorState extends State<_ActionEditor> {
   Future<void> _pickFolder() async {
     final ops = _controller.ops;
     if (ops == null) return;
-    final folders = await _controller.folders();
+    final folders = await _controller.tree.folders();
     if (!mounted) return;
     final picked = await showFolderPicker(
       context,
@@ -213,7 +213,10 @@ final class _ActionEditorState extends State<_ActionEditor> {
           // (#1109).
           for (final k in HomeActionKind.values)
             if (k == kind ||
-                actionKindIsOn(k, widget.controller.features.value))
+                actionKindIsOn(
+                  k,
+                  widget.controller.librarySettings.features.value,
+                ))
               (k, homeActionKindName(k)),
         ],
         onChanged: (k) => setState(() => _kind = k),

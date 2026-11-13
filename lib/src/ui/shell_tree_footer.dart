@@ -110,8 +110,10 @@ final class TreeFooterBar extends StatelessWidget {
                     duration: Duration(milliseconds: 120),
                     curve: Curves.easeOut,
                   ),
-                  itemBuilder: (context) =>
-                      newShellItemEntries(context, controller.features.value),
+                  itemBuilder: (context) => newShellItemEntries(
+                    context,
+                    controller.librarySettings.features.value,
+                  ),
                   child: Padding(
                     padding: EdgeInsets.symmetric(
                       horizontal: 8,

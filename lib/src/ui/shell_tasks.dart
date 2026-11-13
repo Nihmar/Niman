@@ -70,8 +70,8 @@ final class ShellTasks {
       links: () => session.linkSource,
       enabled: () =>
           session.root != null &&
-          session.features.value.isOn(LibraryFeature.todo),
-      enabledChanges: session.features,
+          session.librarySettings.features.value.isOn(LibraryFeature.todo),
+      enabledChanges: session.librarySettings.features,
     );
   }
 
@@ -227,7 +227,7 @@ final class ShellTasks {
   /// to print in their place (#1152); none while the Todo feature is off,
   /// where the fence is the code it is.
   Future<PrintedTodoBlocks> exportBlocks(String path, String text) =>
-      session.features.value.isOn(LibraryFeature.todo)
+      session.librarySettings.features.value.isOn(LibraryFeature.todo)
       ? ExportTodoBlocks(notes).of(text: text, notePath: path)
       : Future<PrintedTodoBlocks>.value(const <String, PrintedTodoBlock>{});
 

@@ -60,11 +60,11 @@ final class _SettingsAppearanceScreenState
 
   Future<void> _load() async {
     final controller = widget.controller;
-    final language = await controller.language;
-    final weekStart = await controller.weekStart;
-    final uiTextScale = await controller.uiTextScale;
-    final epubLook = await controller.epubLook;
-    final closeToTray = await controller.closeToTray;
+    final language = await controller.appSettings.language;
+    final weekStart = await controller.librarySettings.weekStart;
+    final uiTextScale = await controller.librarySettings.uiTextScale;
+    final epubLook = await controller.librarySettings.epubLook;
+    final closeToTray = await controller.appSettings.closeToTray;
     if (!mounted) return;
     setState(() {
       _language = language;
@@ -78,7 +78,7 @@ final class _SettingsAppearanceScreenState
   /// Persists the UI language and applies it immediately (T-L10N-04):
   /// the app root listens to [AppLanguages] and rebuilds every screen.
   Future<void> _setLanguage(AppLanguage language) async {
-    await widget.controller.setLanguage(language);
+    await widget.controller.appSettings.setLanguage(language);
     AppLanguages.choice = language;
     if (mounted) {
       setState(() => _language = language);
@@ -119,7 +119,7 @@ final class _SettingsAppearanceScreenState
       ],
     );
     if (start == null) return;
-    await widget.controller.setWeekStart(start);
+    await widget.controller.librarySettings.setWeekStart(start);
     if (mounted) setState(() => _weekStart = start);
   }
 
@@ -142,7 +142,7 @@ final class _SettingsAppearanceScreenState
   }
 
   Future<void> _setUiTextScale(double scale) async {
-    await widget.controller.setUiTextScale(scale);
+    await widget.controller.librarySettings.setUiTextScale(scale);
     if (mounted) setState(() => _uiTextScale = scale);
   }
 
@@ -151,12 +151,12 @@ final class _SettingsAppearanceScreenState
   Future<void> _editEpubLook(Rect? anchor) async {
     final controller = widget.controller;
     await showEpubLookSheet(context, session: controller, anchor: anchor);
-    final look = await controller.epubLook;
+    final look = await controller.librarySettings.epubLook;
     if (mounted) setState(() => _epubLook = look);
   }
 
   Future<void> _setCloseToTray({required bool enabled}) async {
-    await widget.controller.setCloseToTray(enabled: enabled);
+    await widget.controller.appSettings.setCloseToTray(enabled: enabled);
     CloseToTray.enabled.value = enabled;
     if (mounted) setState(() => _closeToTray = enabled);
   }

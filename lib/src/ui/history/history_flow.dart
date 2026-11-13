@@ -36,7 +36,7 @@ Future<void> openNoteHistory(
     // The history still opens: "Current version" is then the disk's.
     _log.warning('open history "$path": saving open notes failed: $e');
   }
-  final limit = await session.historyVersions;
+  final limit = await session.librarySettings.historyVersions;
   if (!context.mounted) return;
   final restored = await Navigator.push<HistoryVersion>(
     context,

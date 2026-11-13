@@ -52,7 +52,7 @@ final class ShellFeaturesIntro {
     ]);
     await WidgetsBinding.instance.endOfFrame;
     if (!mounted() || _requested) return;
-    final introduction = await controller.featuresIntroduction;
+    final introduction = await controller.librarySettings.featuresIntroduction;
     if (!mounted() || _requested) return;
     if (introduction == FeaturesIntroduction.none) return;
     open(introduction);

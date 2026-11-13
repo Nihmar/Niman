@@ -162,35 +162,36 @@ final class ShellEditorSettings {
     // of the event loop between the mount and the frame the settings land
     // in. Every one is started before the first is awaited.
     final ops = session.ops;
+    final settings = session.librarySettings;
     final head = (
-      session.lineNumbersEnabled,
-      session.readableLineLength,
-      session.noteColumnWidth,
-      session.typewriter,
-      session.editorAutofocusEnabled,
-      session.linkType,
-      session.newItemLocation,
-      session.indentWidth,
-      session.sourceFont,
+      settings.lineNumbersEnabled,
+      settings.readableLineLength,
+      settings.noteColumnWidth,
+      settings.typewriter,
+      settings.editorAutofocusEnabled,
+      settings.linkType,
+      settings.newItemLocation,
+      settings.indentWidth,
+      settings.sourceFont,
     ).wait;
     // Started here with the rest, awaited below: a record's `wait` covers
     // nine futures, and this one makes the group ten (#157).
-    final panel = session.frontmatterPanel;
-    final preview = session.linkPreview;
+    final panel = settings.frontmatterPanel;
+    final preview = settings.linkPreview;
     final body = (
-      session.treeSort,
-      session.treeWidth,
-      session.dockWidth,
-      session.editorToolbar,
-      session.tidyOnClose,
-      session.cascadeChecklist,
-      session.lintRulesOff,
-      session.editorKind,
-      session.enabledEditors,
+      settings.treeSort,
+      settings.treeWidth,
+      settings.dockWidth,
+      settings.editorToolbar,
+      settings.tidyOnClose,
+      settings.cascadeChecklist,
+      settings.lintRulesOff,
+      settings.editorKind,
+      settings.enabledEditors,
     ).wait;
     // Started with the rest, awaited below: a record's `wait` covers nine
     // futures, and this one makes the group ten (#727).
-    final treeView = session.treeView;
+    final treeView = settings.treeView;
     final folders = (
       ops?.attachmentsFolder ?? Future<String>.value(defaultAttachmentsFolder),
       ops?.templateFolder ?? Future<String>.value(defaultTemplateFolder),

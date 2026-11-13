@@ -67,7 +67,7 @@ void main() {
   }
 
   Future<List<String>> names(LibrarySession session) async {
-    final kids = await session.children(0);
+    final kids = await session.tree.children(0);
     return kids.map((n) => n.name).toList();
   }
 
@@ -445,9 +445,9 @@ void main() {
     // The index belongs to the open library, so there is nothing to read
     // before the first open — and the tree UI asks anyway.
     final controller = makeController();
-    expect(await controller.children(0), isEmpty);
-    expect(await controller.tree(const []), isEmpty);
-    expect(await controller.folders(), isEmpty);
+    expect(await controller.tree.children(0), isEmpty);
+    expect(await controller.tree.rows(const []), isEmpty);
+    expect(await controller.tree.folders(), isEmpty);
     expect(await controller.searchSource, isNull);
     expect(await controller.tagSource, isNull);
     expect(await controller.linkSource, isNull);
@@ -609,25 +609,25 @@ void main() {
     await first.rescanNow();
 
     // Default: directories first, then ascending names.
-    expect((await first.children(0)).map((note) => note.name).toList(), [
+    expect((await first.tree.children(0)).map((note) => note.name).toList(), [
       'a.md',
       'b.md',
       'c.md',
     ]);
 
     // Descending flips the name sort (dirs stay first).
-    await first.setTreeSort(TreeSort.nameDesc);
+    await first.librarySettings.setTreeSort(TreeSort.nameDesc);
     expect(
-      (await first.children(
+      (await first.tree.children(
         0,
         sort: TreeSort.nameDesc,
       )).map((n) => n.name).toList(),
       ['c.md', 'b.md', 'a.md'],
     );
     // A later order round-trips as its own id, direction and all (#726).
-    await first.setTreeSort(TreeSort.sizeDesc);
+    await first.librarySettings.setTreeSort(TreeSort.sizeDesc);
     expect(
-      (await first.children(
+      (await first.tree.children(
         0,
         sort: TreeSort.sizeDesc,
       )).map((n) => n.name).toList(),
@@ -640,7 +640,7 @@ void main() {
     // A fresh controller (an app restart) sees the persisted choice.
     final second = makeController();
     await second.open(root.path, create: false);
-    expect(await second.treeSort, TreeSort.sizeDesc);
+    expect(await second.librarySettings.treeSort, TreeSort.sizeDesc);
     await second.close();
     await second.dispose();
   });
@@ -648,27 +648,36 @@ void main() {
   test('the folded todo sections persist, Done folded by default', () async {
     final first = makeController();
     await first.open(root.path, create: false);
-    expect(await first.todoCollapsedSections, {'done'});
+    expect(await first.librarySettings.todoCollapsedSections, {'done'});
 
-    await first.setTodoCollapsedSections({'due.later', 'priority.A'});
-    expect(await first.todoCollapsedSections, {'due.later', 'priority.A'});
+    await first.librarySettings.setTodoCollapsedSections({
+      'due.later',
+      'priority.A',
+    });
+    expect(await first.librarySettings.todoCollapsedSections, {
+      'due.later',
+      'priority.A',
+    });
     // Everything open is an answer of its own, not the default again.
-    await first.setTodoCollapsedSections(<String>{});
-    expect(await first.todoCollapsedSections, isEmpty);
-    await first.setTodoCollapsedSections({'done', 'due.none'});
+    await first.librarySettings.setTodoCollapsedSections(<String>{});
+    expect(await first.librarySettings.todoCollapsedSections, isEmpty);
+    await first.librarySettings.setTodoCollapsedSections({'done', 'due.none'});
     await first.close();
     await first.dispose();
 
     final second = makeController();
     await second.open(root.path, create: false);
-    expect(await second.todoCollapsedSections, {'done', 'due.none'});
-    await second.setTodoCollapsedSections(<String>{});
+    expect(await second.librarySettings.todoCollapsedSections, {
+      'done',
+      'due.none',
+    });
+    await second.librarySettings.setTodoCollapsedSections(<String>{});
     await second.close();
     await second.dispose();
 
     final third = makeController();
     await third.open(root.path, create: false);
-    expect(await third.todoCollapsedSections, isEmpty);
+    expect(await third.librarySettings.todoCollapsedSections, isEmpty);
     await third.close();
     await third.dispose();
   });

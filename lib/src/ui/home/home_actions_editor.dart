@@ -50,7 +50,7 @@ final class _HomeActionsEditorState extends State<HomeActionsEditor> {
   }
 
   Future<void> _check() async {
-    final missing = await widget.controller.missingPaths([
+    final missing = await widget.controller.tree.missingPaths([
       for (final a in _actions) ...a.requiredPaths,
     ]);
     if (mounted) setState(() => _missing = missing);

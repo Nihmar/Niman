@@ -62,7 +62,7 @@ final class TodoController extends ChangeNotifier {
   /// Cancels and restores the alarms as the library's Todo and Calendar
   /// switches flip (#1109), whoever flipped them.
   late final ReminderFeatureFollower _follower = ReminderFeatureFollower(
-    features: session.features,
+    features: session.librarySettings.features,
     scheduledFor: _scheduledFor,
     resync: _syncReminders,
     isOpen: () => session.root != null,
@@ -114,7 +114,7 @@ final class TodoController extends ChangeNotifier {
   /// Re-reads the reminder display setting (cheap, one settings row).
   Future<void> _refreshReminderSettings() async {
     try {
-      final showTokens = await session.reminderShowTokens;
+      final showTokens = await session.librarySettings.reminderShowTokens;
       if (!_disposed) {
         _reminderShowTokens = showTokens;
       }
@@ -306,7 +306,7 @@ final class TodoController extends ChangeNotifier {
       // apart and payloads that say which file a tap opens (#730).
       // A feature that is off wants none: the file keeps its `rem:`s and
       // the alarms come back with the switch (#1109).
-      final features = session.features.value;
+      final features = session.librarySettings.features.value;
       await service.reconcile({
         if (features.isOn(LibraryFeature.todo))
           ...wantedReminders(

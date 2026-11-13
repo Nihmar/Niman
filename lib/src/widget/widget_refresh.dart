@@ -38,7 +38,10 @@ Future<void> refreshTodoWidgets({
   WidgetPlacementStore? placement,
 }) async {
   final root = session.root;
-  final off = widgetOffFeature(WidgetProvider.todo, session.features.value);
+  final off = widgetOffFeature(
+    WidgetProvider.todo,
+    session.librarySettings.features.value,
+  );
   // A widget that is off needs no snapshot: it is sent the off payload.
   if (root == null || (snapshot == null && off == null)) return;
   final ids = await reconcilePlacedWidgets(
@@ -143,7 +146,10 @@ Future<void> refreshNoteWidgets({
       );
     }
   }
-  final off = widgetOffFeature(WidgetProvider.note, session.features.value);
+  final off = widgetOffFeature(
+    WidgetProvider.note,
+    session.librarySettings.features.value,
+  );
   final notes = <({int id, String notePath})>[
     for (final config in await session.widgetConfigsFor(root))
       if (config.provider == WidgetProvider.note.name &&
@@ -163,7 +169,7 @@ Future<void> refreshNoteWidgets({
             root,
             note.notePath,
             theme,
-            session.features.value,
+            session.librarySettings.features.value,
           );
     await push.push(
       provider: WidgetProvider.note,

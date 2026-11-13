@@ -9,6 +9,7 @@ import 'package:niman/src/core/settings/library_config.dart'
     show defaultSourceFont;
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/editor/note_column.dart';
+import 'package:niman/src/library/library_preferences.dart';
 import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/shell_editor_settings.dart';
@@ -22,7 +23,7 @@ import '../fakes/fake_library_session.dart';
 /// awaits one before asking for the next has one of them outstanding at
 /// its most: what the read is held to here is that they are all asked for
 /// together.
-final class _CountedReads implements LibrarySession {
+final class _CountedReads implements LibrarySession, LibraryPreferences {
   new(this._inner);
 
   final LibrarySession _inner;
@@ -46,69 +47,82 @@ final class _CountedReads implements LibrarySession {
     }
   }
 
+  /// The wrapper counts the library's settings reads, so it is them.
   @override
-  Future<bool> get lineNumbersEnabled => _read(_inner.lineNumbersEnabled);
+  LibraryPreferences get librarySettings => this;
 
   @override
-  Future<bool> get readableLineLength => _read(_inner.readableLineLength);
+  Future<bool> get lineNumbersEnabled =>
+      _read(_inner.librarySettings.lineNumbersEnabled);
 
   @override
-  Future<double> get noteColumnWidth => _read(_inner.noteColumnWidth);
+  Future<bool> get readableLineLength =>
+      _read(_inner.librarySettings.readableLineLength);
 
   @override
-  Future<bool> get typewriter => _read(_inner.typewriter);
+  Future<double> get noteColumnWidth =>
+      _read(_inner.librarySettings.noteColumnWidth);
+
+  @override
+  Future<bool> get typewriter => _read(_inner.librarySettings.typewriter);
 
   @override
   Future<bool> get editorAutofocusEnabled =>
-      _read(_inner.editorAutofocusEnabled);
+      _read(_inner.librarySettings.editorAutofocusEnabled);
 
   @override
-  Future<LinkType> get linkType => _read(_inner.linkType);
+  Future<LinkType> get linkType => _read(_inner.librarySettings.linkType);
 
   @override
-  Future<NewItemLocation> get newItemLocation => _read(_inner.newItemLocation);
+  Future<NewItemLocation> get newItemLocation =>
+      _read(_inner.librarySettings.newItemLocation);
 
   @override
-  Future<int> get indentWidth => _read(_inner.indentWidth);
+  Future<int> get indentWidth => _read(_inner.librarySettings.indentWidth);
 
   @override
-  Future<SourceFont> get sourceFont => _read(_inner.sourceFont);
+  Future<SourceFont> get sourceFont => _read(_inner.librarySettings.sourceFont);
 
   @override
-  Future<TreeSort> get treeSort => _read(_inner.treeSort);
+  Future<TreeSort> get treeSort => _read(_inner.librarySettings.treeSort);
 
   @override
-  Future<TreeView> get treeView => _read(_inner.treeView);
+  Future<TreeView> get treeView => _read(_inner.librarySettings.treeView);
 
   @override
-  Future<double> get treeWidth => _read(_inner.treeWidth);
+  Future<double> get treeWidth => _read(_inner.librarySettings.treeWidth);
 
   @override
-  Future<double> get dockWidth => _read(_inner.dockWidth);
+  Future<double> get dockWidth => _read(_inner.librarySettings.dockWidth);
 
   @override
-  Future<String> get editorToolbar => _read(_inner.editorToolbar);
+  Future<String> get editorToolbar =>
+      _read(_inner.librarySettings.editorToolbar);
 
   @override
-  Future<bool> get tidyOnClose => _read(_inner.tidyOnClose);
+  Future<bool> get tidyOnClose => _read(_inner.librarySettings.tidyOnClose);
 
   @override
-  Future<bool> get cascadeChecklist => _read(_inner.cascadeChecklist);
+  Future<bool> get cascadeChecklist =>
+      _read(_inner.librarySettings.cascadeChecklist);
 
   @override
-  Future<bool> get frontmatterPanel => _read(_inner.frontmatterPanel);
+  Future<bool> get frontmatterPanel =>
+      _read(_inner.librarySettings.frontmatterPanel);
 
   @override
-  Future<bool> get linkPreview => _read(_inner.linkPreview);
+  Future<bool> get linkPreview => _read(_inner.librarySettings.linkPreview);
 
   @override
-  Future<Set<String>> get lintRulesOff => _read(_inner.lintRulesOff);
+  Future<Set<String>> get lintRulesOff =>
+      _read(_inner.librarySettings.lintRulesOff);
 
   @override
-  Future<EditorKind> get editorKind => _read(_inner.editorKind);
+  Future<EditorKind> get editorKind => _read(_inner.librarySettings.editorKind);
 
   @override
-  Future<Set<EditorKind>> get enabledEditors => _read(_inner.enabledEditors);
+  Future<Set<EditorKind>> get enabledEditors =>
+      _read(_inner.librarySettings.enabledEditors);
 
   /// The two folders ride on the ops, and the fake has none open.
   @override

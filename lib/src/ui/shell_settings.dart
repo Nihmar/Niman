@@ -64,7 +64,8 @@ final class ShellSettings extends ChangeNotifier {
     // The spell checker follows the library's dictionaries (T-PP-09,
     // revised); it notifies the open editor itself, so it stays out of
     // the settings value.
-    final spellDictionaries = await controller.spellDictionaries;
+    final spellDictionaries =
+        await controller.librarySettings.spellDictionaries;
     final ops = controller.ops;
     final quickNote = ops == null ? null : await ops.quickNotePath;
     final journal = ops == null ? null : await ops.journal;
@@ -112,7 +113,7 @@ final class ShellSettings extends ChangeNotifier {
   /// Switches the library's editor (T-WYS-12): shown at once, then kept.
   Future<void> setEditorKind(EditorKind kind) async {
     if (kind == _editor.editorKind) return;
-    await controller.setEditorKind(kind);
+    await controller.librarySettings.setEditorKind(kind);
     controller.notify();
     if (!_disposed) _set(_editor.copyWith(editorKind: kind));
   }
@@ -123,7 +124,7 @@ final class ShellSettings extends ChangeNotifier {
     final on = !_editor.typewriter;
     _set(_editor.copyWith(typewriter: on));
     unawaited(() async {
-      await controller.setTypewriter(enabled: on);
+      await controller.librarySettings.setTypewriter(enabled: on);
       controller.notify();
     }());
   }
@@ -139,7 +140,7 @@ final class ShellSettings extends ChangeNotifier {
     if (next == _editor.treeSort) return;
     _set(_editor.copyWith(treeSort: next));
     try {
-      await controller.setTreeSort(next);
+      await controller.librarySettings.setTreeSort(next);
     } on Object catch (error) {
       const AppLogger(name: 'shell').debug('tree sort write failed: $error');
       return;
@@ -153,7 +154,7 @@ final class ShellSettings extends ChangeNotifier {
     if (next == _editor.treeView) return;
     _set(_editor.copyWith(treeView: next));
     try {
-      await controller.setTreeView(next);
+      await controller.librarySettings.setTreeView(next);
     } on Object catch (error) {
       const AppLogger(name: 'shell').debug('tree view write failed: $error');
       return;
@@ -171,13 +172,13 @@ final class ShellSettings extends ChangeNotifier {
 
   /// Keeps the dragged tree width for the library.
   Future<void> keepTreeWidth() async {
-    await controller.setTreeWidth(_editor.treeWidth);
+    await controller.librarySettings.setTreeWidth(_editor.treeWidth);
     controller.notify();
   }
 
   /// Keeps the dragged dock width for the library.
   Future<void> keepDockWidth() async {
-    await controller.setDockWidth(_editor.dockWidth);
+    await controller.librarySettings.setDockWidth(_editor.dockWidth);
     controller.notify();
   }
 

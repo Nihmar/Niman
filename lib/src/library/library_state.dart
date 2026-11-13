@@ -1,49 +1,44 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:niman/src/core/app_theme.dart';
-import 'package:niman/src/core/custom_theme.dart';
 import 'package:niman/src/core/frame_log.dart';
-import 'package:niman/src/core/language.dart';
 import 'package:niman/src/core/logging.dart';
-import 'package:niman/src/core/settings/features.dart';
-import 'package:niman/src/core/settings/features_introduction.dart';
-import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/core/text_scale.dart';
-import 'package:niman/src/core/theme.dart';
 import 'package:niman/src/core/week_start.dart';
 import 'package:niman/src/core/welcome.dart';
 import 'package:niman/src/db/app_database.dart';
-import 'package:niman/src/db/dao.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/db/index_scan.dart';
 import 'package:niman/src/db/indexer.dart';
-import 'package:niman/src/epub/epub_look.dart';
 import 'package:niman/src/epub/epub_looks.dart';
 import 'package:niman/src/flashcards/review_store.dart';
 import 'package:niman/src/frontmatter/fields.dart';
+import 'package:niman/src/library/app_preferences.dart';
 import 'package:niman/src/library/container_path.dart';
 import 'package:niman/src/library/file_watcher.dart';
+import 'package:niman/src/library/index_library_tree.dart';
 import 'package:niman/src/library/index_progress_throttle.dart';
 import 'package:niman/src/library/indexing_status.dart';
 import 'package:niman/src/library/library_databases.dart';
 import 'package:niman/src/library/library_index_files.dart';
 import 'package:niman/src/library/library_open_chores.dart';
+import 'package:niman/src/library/library_preferences.dart';
 import 'package:niman/src/library/library_records.dart';
 import 'package:niman/src/library/library_registry.dart';
 import 'package:niman/src/library/library_sources.dart';
+import 'package:niman/src/library/library_tree.dart';
 import 'package:niman/src/library/library_widgets.dart';
-import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/library/note_ops.dart';
+import 'package:niman/src/library/open_library_preferences.dart';
 import 'package:niman/src/library/open_library_settings.dart';
 import 'package:niman/src/library/rescan_scheduler.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/library/session_events.dart';
 import 'package:niman/src/library/session_themes.dart';
 import 'package:niman/src/library/session_update_checks.dart';
+import 'package:niman/src/library/stored_app_preferences.dart';
 import 'package:niman/src/library/watch_batch_applier.dart';
 import 'package:niman/src/library/watch_batch_queue.dart';
 import 'package:niman/src/links/library_links.dart';
@@ -288,10 +283,6 @@ final class LibraryController implements LibrarySession {
   Set<int>? foldersMovedSince(int since, {required bool tree}) =>
       _changes.foldersMovedSince(since, tree: tree);
 
-  /// The open library's features (#1109); every one on while none is open.
-  @override
-  ValueListenable<Features> get features => _settings.features;
-
   /// Fires with the new [treeRevision] after a change that may move the
   /// tree's rows (#751).
   @override
@@ -340,105 +331,9 @@ final class LibraryController implements LibrarySession {
   @override
   SyncService? get sync => _sync;
 
-  /// Children of the row with id [parentId] (0 = library root),
-  /// directories first, then by name.
-  ///
-  /// Empty while no library is open: there is no index to read, and the
-  /// tree UI asks for the root's children before the first open.
+  /// The open library's tree, read from its index.
   @override
-  Future<List<Note>> children(
-    int parentId, {
-    TreeSort sort = TreeSort.nameAsc,
-  }) async {
-    final db = _indexDb;
-    if (db == null) return const [];
-    return await NoteDao(db).children(parentId, sort: sort);
-  }
-
-  @override
-  Future<List<Note>> childrenPage(
-    int parentId, {
-    required int limit,
-    TreeSort sort = TreeSort.nameAsc,
-    Note? after,
-    Note? before,
-  }) async {
-    final db = _indexDb;
-    if (db == null) return const [];
-    return await NoteDao(db).childrenPage(
-      parentId,
-      limit: limit,
-      sort: sort,
-      after: after,
-      before: before,
-    );
-  }
-
-  @override
-  Future<int> childCount(int parentId) async {
-    final db = _indexDb;
-    if (db == null) return 0;
-    return await NoteDao(db).childCount(parentId);
-  }
-
-  @override
-  Future<int> rankOf(Note note, {TreeSort sort = TreeSort.nameAsc}) async {
-    final db = _indexDb;
-    if (db == null) return 0;
-    return await NoteDao(db).rankOf(note, sort: sort);
-  }
-
-  @override
-  Future<List<Note>> childrenAt(
-    int parentId, {
-    required int offset,
-    required int limit,
-    TreeSort sort = TreeSort.nameAsc,
-  }) async {
-    final db = _indexDb;
-    if (db == null) return const [];
-    return await NoteDao(db)
-        .childrenAt(parentId, offset: offset, limit: limit, sort: sort);
-  }
-
-  @override
-  Future<Note?> firstChildStartingWith(
-    int parentId,
-    String foldedPrefix, {
-    TreeSort sort = TreeSort.nameAsc,
-    Note? after,
-  }) async {
-    final db = _indexDb;
-    if (db == null) return null;
-    return await NoteDao(
-      db,
-    ).firstChildStartingWith(parentId, foldedPrefix, sort: sort, after: after);
-  }
-
-  @override
-  Future<Set<String>> missingPaths(Iterable<String> paths) async {
-    final db = _indexDb;
-    if (db == null) return const <String>{};
-    return await NoteDao(db).missingAmong(paths);
-  }
-
-  @override
-  Future<List<Note>> tree(
-    Iterable<String> expandedPaths, {
-    TreeSort sort = TreeSort.nameAsc,
-  }) async {
-    final db = _indexDb;
-    if (db == null) return const [];
-    return await NoteDao(db).tree(expandedPaths, sort: sort);
-  }
-
-  /// Every indexed folder, path-ordered (for move-target pickers).
-  @override
-  Future<List<Note>> folders() async {
-    final db = _indexDb;
-    if (db == null) return const [];
-    return await NoteDao(db).folders();
-  }
+  late final LibraryTree tree = IndexLibraryTree(() => _indexDb);
 
   @override
   Future<SearchSource?> get searchSource => _sources.searchSource;
@@ -841,45 +736,12 @@ final class LibraryController implements LibrarySession {
     _bump();
   }
 
-  /// Whether the in-app debug log buffer records events.
+  /// The app's own settings, in its database.
   @override
-  Future<bool> get debugLogsEnabled async {
-    final enabled = await AppSettingsRepo(await appDatabase).debugLogsEnabled();
-    AppLog.enabled = enabled;
-    return enabled;
-  }
-
-  /// Sets (and persists) the debug log recording toggle.
-  @override
-  Future<void> setDebugLogsEnabled({required bool enabled}) async {
-    _log.info('debug logging set to $enabled');
-    await AppSettingsRepo(await appDatabase)
-        .setDebugLogsEnabled(enabled: enabled);
-    AppLog.enabled = enabled;
-  }
-
-  /// Whether the app checks GitHub Releases for updates (issue #81).
-  @override
-  Future<bool> get autoUpdateEnabled async =>
-      await AppSettingsRepo(await appDatabase).autoUpdateEnabled();
-
-  @override
-  Future<bool> get closeToTray async =>
-      await AppSettingsRepo(await appDatabase).closeToTray();
-
-  @override
-  Future<void> setCloseToTray({required bool enabled}) async {
-    _log.info('close to tray: $enabled');
-    await AppSettingsRepo(await appDatabase).setCloseToTray(enabled: enabled);
-  }
-
-  /// Sets (and persists) the auto-update toggle.
-  @override
-  Future<void> setAutoUpdateEnabled({required bool enabled}) async {
-    _log.info('auto-update set to $enabled');
-    await AppSettingsRepo(await appDatabase)
-        .setAutoUpdateEnabled(enabled: enabled);
-  }
+  late final AppPreferences appSettings = StoredAppPreferences(
+    appDatabase: () => appDatabase,
+    themes: _themes,
+  );
 
   /// The launch + six-hourly update checks, started once per controller.
   late final SessionUpdateChecks _updates = SessionUpdateChecks(
@@ -900,14 +762,12 @@ final class LibraryController implements LibrarySession {
     notify();
   }
 
-  /// The open library's settings, or the shipped defaults while none is
-  /// open ([OpenLibrarySettings.config]).
-  Future<LibraryConfig> get _library => _settings.config;
-
-  /// Applies [change] to the open library's settings; a no-op with none
-  /// open.
-  Future<void> _editLibrary(LibraryConfig Function(LibraryConfig) change) =>
-      _settings.edit(change);
+  /// The open library's own settings, in its `.niman/settings.json`.
+  @override
+  late final LibraryPreferences librarySettings = OpenLibraryPreferences(
+    _settings,
+    _themes.publishEpubLook,
+  );
 
   @override
   WorkspaceSlot get workspaceSlot {
@@ -917,496 +777,12 @@ final class LibraryController implements LibrarySession {
         : StoredWorkspaceSlot(appDatabase, root);
   }
 
-  /// Whether the note editor shows the row-number column.
-  @override
-  Future<bool> get lineNumbersEnabled async => (await _library).lineNumbers;
-
-  /// Sets (and persists) the editor line-numbers toggle.
-  @override
-  Future<void> setLineNumbersEnabled({required bool enabled}) async {
-    _log.info('editor line numbers set to $enabled');
-    await _editLibrary((c) => c.copyWith(lineNumbers: enabled));
-  }
-
-  @override
-  Future<bool> get readableLineLength async =>
-      (await _library).readableLineLength;
-
-  @override
-  Future<void> setReadableLineLength({required bool enabled}) async {
-    _log.info('readable line length set to $enabled');
-    await _editLibrary((c) => c.copyWith(readableLineLength: enabled));
-  }
-
-  @override
-  Future<bool> get typewriter async => (await _library).typewriter;
-
-  @override
-  Future<void> setTypewriter({required bool enabled}) async {
-    _log.info('typewriter mode set to $enabled');
-    await _editLibrary((c) => c.copyWith(typewriter: enabled));
-  }
-
-  @override
-  Future<bool> get cascadeChecklist async => (await _library).cascadeChecklist;
-
-  @override
-  Future<void> setCascadeChecklist({required bool enabled}) async {
-    _log.info('cascade checklist set to $enabled');
-    await _editLibrary((c) => c.copyWith(cascadeChecklist: enabled));
-  }
-
-  @override
-  Future<bool> get linkPreview async => (await _library).linkPreview;
-
-  @override
-  Future<void> setLinkPreview({required bool enabled}) async {
-    _log.info('link preview set to $enabled');
-    await _editLibrary((c) => c.copyWith(linkPreview: enabled));
-  }
-
-  @override
-  Future<bool> get frontmatterPanel async => (await _library).frontmatterPanel;
-
-  @override
-  Future<void> setFrontmatterPanel({required bool enabled}) async {
-    _log.info('frontmatter panel set to $enabled');
-    await _editLibrary((c) => c.copyWith(frontmatterPanel: enabled));
-  }
-
-  @override
-  Future<double> get noteColumnWidth async => (await _library).noteColumnWidth;
-
-  @override
-  Future<void> setNoteColumnWidth(double width) async {
-    _log.info('note column width set to $width');
-    await _editLibrary(
-      (c) => c.copyWith(noteColumnWidth: normalizeNoteColumnWidth(width)),
-    );
-  }
-
-  /// Whether the note editor focuses (shows the keyboard) on note open.
-  @override
-  Future<bool> get editorAutofocusEnabled async =>
-      (await _library).editorAutofocus;
-
-  /// Sets (and persists) the keyboard-on-open toggle.
-  @override
-  Future<void> setEditorAutofocusEnabled({required bool enabled}) async {
-    _log.info('editor keyboard-on-open set to $enabled');
-    await _editLibrary((c) => c.copyWith(editorAutofocus: enabled));
-  }
-
-  /// Whether reminder text keeps the +project/@context/#tag markers.
-  @override
-  Future<bool> get reminderShowTokens async =>
-      (await _library).reminderShowTokens;
-
-  /// Sets (and persists) the reminder-markers toggle.
-  @override
-  Future<void> setReminderShowTokens({required bool enabled}) async {
-    _log.info('reminder markers set to $enabled');
-    await _editLibrary((c) => c.copyWith(reminderShowTokens: enabled));
-  }
-
-  /// Whether a note edited and then closed has its Markdown tidied.
-  @override
-  Future<bool> get tidyOnClose async => (await _library).tidyOnClose;
-
-  /// Sets (and persists) the tidy-on-close toggle.
-  @override
-  Future<void> setTidyOnClose({required bool enabled}) async {
-    _log.info('tidy on close set to $enabled');
-    await _editLibrary((c) => c.copyWith(tidyOnClose: enabled));
-  }
-
-  /// The #72 rules turned off, by id.
-  @override
-  Future<Set<String>> get lintRulesOff async => (await _library).lintRulesOff;
-
-  /// Sets (and persists) the rules turned off.
-  @override
-  Future<void> setLintRulesOff(Set<String> ids) async {
-    _log.info('lint rules off set to ${ids.join(', ')}');
-    await _editLibrary((c) => c.copyWith(lintRulesOff: ids));
-  }
-
-  /// The spell-check dictionary names, in selection order.
-  @override
-  Future<List<String>> get spellDictionaries async =>
-      (await _library).spellDictionaries;
-
-  /// Sets (and persists) the spell-check dictionaries.
-  @override
-  Future<void> setSpellDictionaries(List<String> names) async {
-    _log.info(
-      'spell-check dictionaries set to '
-      '${names.isEmpty ? 'system' : names.join(', ')}',
-    );
-    await _editLibrary((c) => c.copyWith(spellDictionaries: names));
-  }
-
-  /// Which editor the library writes in (default source).
-  @override
-  Future<EditorKind> get editorKind async => (await _library).editorKind;
-
-  /// Sets (and persists) the editor kind.
-  @override
-  Future<void> setEditorKind(EditorKind kind) async {
-    _log.info('editor kind set to ${kind.name}');
-    await _editLibrary((c) => c.copyWith(editorKind: kind));
-  }
-
-  /// Which editors the library offers (default both).
-  @override
-  Future<Set<EditorKind>> get enabledEditors async =>
-      (await _library).enabledEditors;
-
-  /// Sets (and persists) the enabled editors; an empty set is ignored.
-  @override
-  Future<void> setEnabledEditors(Set<EditorKind> editors) async {
-    if (editors.isEmpty) {
-      _log.info('enabled editors: empty set ignored');
-      return;
-    }
-    _log.info('enabled editors set to ${editors.map((e) => e.name).join(',')}');
-    await _editLibrary((c) => c.copyWith(enabledEditors: {...editors}));
-  }
-
-  /// The library tree sort order.
-  @override
-  Future<TreeSort> get treeSort async => (await _library).treeSort;
-
-  @override
-  Future<void> setFeatures(Features features) =>
-      _editLibrary((c) => c.copyWith(features: features));
-
-  @override
-  Future<FeaturesIntroduction> get featuresIntroduction =>
-      _settings.featuresIntroduction;
-
-  @override
-  Future<void> markFeaturesReviewed() =>
-      _editLibrary((c) => c.copyWith(featuresReviewed: true));
-
-  /// Sets (and persists) the library tree sort order.
-  @override
-  Future<void> setTreeSort(TreeSort sort) async {
-    await _editLibrary((c) => c.copyWith(treeSort: sort));
-  }
-
-  /// The todo sections folded on this device (#1003).
-  @override
-  Future<Set<String>> get todoCollapsedSections async =>
-      (await _library).todoCollapsedSections;
-
-  /// Sets (and persists) the folded todo sections on this device.
-  @override
-  Future<void> setTodoCollapsedSections(Set<String> ids) async {
-    await _editLibrary((c) => c.copyWith(todoCollapsedSections: {...ids}));
-  }
-
-  /// How the Files pane shows a folder on this device (#727).
-  @override
-  Future<TreeView> get treeView async => (await _library).treeView;
-
-  /// Sets (and persists) the Files pane's view.
-  @override
-  Future<void> setTreeView(TreeView view) async {
-    await _editLibrary((c) => c.copyWith(treeView: view));
-  }
-
-  /// The tree pane's width in logical pixels.
-  @override
-  Future<double> get treeWidth async => (await _library).treeWidth;
-
-  /// Sets (and persists) the tree pane's width.
-  @override
-  Future<void> setTreeWidth(double width) async {
-    await _editLibrary((c) => c.copyWith(treeWidth: width));
-  }
-
-  /// The right dock's width in logical pixels.
-  @override
-  Future<double> get dockWidth async => (await _library).dockWidth;
-
-  /// Sets (and persists) the right dock's width.
-  @override
-  Future<void> setDockWidth(double width) async {
-    await _editLibrary((c) => c.copyWith(dockWidth: width));
-  }
-
-  /// Whether the tree's pinned section is rolled up.
-  @override
-  Future<bool> get pinnedCollapsed async => (await _library).pinnedCollapsed;
-
-  /// Sets (and persists) the pinned section's rolled-up state.
-  @override
-  Future<void> setPinnedCollapsed({required bool collapsed}) async {
-    await _editLibrary((c) => c.copyWith(pinnedCollapsed: collapsed));
-  }
-
-  /// The link format the editor's link button inserts.
-  @override
-  Future<LinkType> get linkType async => (await _library).linkType;
-
-  /// Sets (and persists) the link format.
-  @override
-  Future<void> setLinkType(LinkType type) async {
-    _log.info('link type set to ${type.name}');
-    await _editLibrary((c) => c.copyWith(linkType: type));
-  }
-
-  /// What a rename or a move does to the links pointing at what moved.
-  @override
-  Future<LinkUpdate> get linkUpdate async => (await _library).linkUpdate;
-
-  /// Sets (and persists) what a rename or a move does to those links.
-  @override
-  Future<void> setLinkUpdate(LinkUpdate mode) async {
-    _log.info('link update set to ${mode.name}');
-    await _editLibrary((c) => c.copyWith(linkUpdate: mode));
-  }
-
-  /// Where a note created from a dead link lands.
-  @override
-  Future<NewItemLocation> get newItemLocation async =>
-      (await _library).newItemLocation;
-
-  /// Sets (and persists) the dead-link note location.
-  @override
-  Future<void> setNewItemLocation(NewItemLocation location) async {
-    _log.info('missing note location set to ${location.name}');
-    await _editLibrary((c) => c.copyWith(newItemLocation: location));
-  }
-
-  /// The editor's indent/outdent width in spaces.
-  @override
-  Future<int> get indentWidth async => (await _library).indentWidth;
-
-  /// Sets (and persists) the indent/outdent width, clamped to its range.
-  @override
-  Future<void> setIndentWidth(int width) async {
-    _log.info('indent width set to $width');
-    await _editLibrary(
-      (c) => c.copyWith(indentWidth: normalizeIndentWidth(width)),
-    );
-  }
-
-  /// The new flashcards each deck shows per day (#533).
-  @override
-  Future<int> get newCardsPerDay async => (await _library).newCardsPerDay;
-
-  /// Sets (and persists) the new flashcards per deck per day, into range.
-  @override
-  Future<void> setNewCardsPerDay(int count) async {
-    _log.info('new cards per day set to $count');
-    await _editLibrary(
-      (c) => c.copyWith(newCardsPerDay: normalizeNewCardsPerDay(count)),
-    );
-  }
-
-  @override
-  Future<int> get trashAutoEmptyDays async =>
-      (await _library).trashAutoEmptyDays;
-
-  @override
-  Future<void> setTrashAutoEmptyDays(int days) async {
-    _log.info('trash auto-empty set to $days day(s)');
-    await _editLibrary(
-      (c) => c.copyWith(trashAutoEmptyDays: normalizeTrashAutoEmptyDays(days)),
-    );
-  }
-
-  @override
-  Future<int> get historyVersions async => (await _library).historyVersions;
-
-  @override
-  Future<void> setHistoryVersions(int versions) async {
-    _log.info('history versions set to $versions');
-    await _editLibrary(
-      (c) => c.copyWith(historyVersions: normalizeHistoryVersions(versions)),
-    );
-  }
-
-  @override
-  Future<int> get historyIntervalMinutes async =>
-      (await _library).historyIntervalMinutes;
-
-  @override
-  Future<void> setHistoryIntervalMinutes(int minutes) async {
-    _log.info('history interval set to $minutes min');
-    await _editLibrary(
-      (c) => c.copyWith(
-        historyIntervalMinutes: normalizeHistoryIntervalMinutes(minutes),
-      ),
-    );
-  }
-
-  /// The stored editor-toolbar layout (empty = the shipped toolbar).
-  @override
-  Future<String> get editorToolbar async => (await _library).editorToolbar;
-
-  /// Sets (and persists) the editor-toolbar layout.
-  @override
-  Future<void> setEditorToolbar(String layout) async {
-    _log.info('editor toolbar set to "$layout"');
-    await _editLibrary((c) => c.copyWith(editorToolbar: layout));
-  }
-
-  /// The interface text size.
-  @override
-  Future<double> get uiTextScale async => (await _library).uiTextScale;
-
-  /// Sets (and persists) the interface text size, and puts it on screen.
-  @override
-  Future<void> setUiTextScale(double scale) async {
-    final clamped = normalizeTextScale(scale);
-    _log.info('interface text scale set to $clamped');
-    await _editLibrary((c) => c.copyWith(uiTextScale: clamped));
-    AppTextScales.ui = clamped;
-  }
-
-  /// The note text size.
-  @override
-  Future<double> get noteTextScale async => (await _library).noteTextScale;
-
-  /// Sets (and persists) the note text size, and puts it on screen.
-  @override
-  Future<void> setNoteTextScale(double scale) async {
-    final clamped = normalizeTextScale(scale);
-    _log.info('note text scale set to $clamped');
-    await _editLibrary((c) => c.copyWith(noteTextScale: clamped));
-    AppTextScales.note = clamped;
-  }
-
-  /// The day the library's calendars start the week on (#566).
-  @override
-  Future<WeekStart> get weekStart async => (await _library).weekStart;
-
-  /// Sets (and persists) the first day of the week, and puts it on screen.
-  @override
-  Future<void> setWeekStart(WeekStart start) async {
-    _log.info('first day of the week set to ${start.name}');
-    await _editLibrary((c) => c.copyWith(weekStart: start));
-    AppWeekStart.choice = start;
-  }
-
-  /// The source editor's face (issue #259).
-  @override
-  Future<SourceFont> get sourceFont async => (await _library).sourceFont;
-
-  /// Sets (and persists) the source editor's face.
-  @override
-  Future<void> setSourceFont(SourceFont font) async {
-    _log.info('source editor font set to ${font.name}');
-    await _editLibrary((c) => c.copyWith(sourceFont: font));
-  }
-
-  /// How the library's books look (#280).
-  @override
-  Future<EpubLook> get epubLook async => (await _library).epubLook;
-
-  /// Sets (and persists) how the books look, and puts it on screen.
-  @override
-  Future<void> setEpubLook(EpubLook look) async {
-    _log.info(
-      'books set to ${look.theme ?? 'the app theme'}, '
-      '${look.brightness?.id ?? 'the app brightness'}, '
-      '${look.font.name} at ${look.textScale}',
-    );
-    await _editLibrary((c) => c.copyWith(epubLook: look));
-    await _themes.publishEpubLook(look);
-  }
-
   /// Publishes the books' look again: a custom theme it may name was
   /// changed or deleted.
   Future<void> _republishEpubLook() async {
     if (_phase != LibraryPhase.ready) return;
-    await _themes.publishEpubLook(await epubLook);
+    await _themes.publishEpubLook(await librarySettings.epubLook);
   }
-
-  /// The UI language.
-  @override
-  Future<AppLanguage> get language async {
-    return await AppSettingsRepo(await appDatabase).language();
-  }
-
-  /// Sets (and persists) the UI language.
-  @override
-  Future<void> setLanguage(AppLanguage language) async {
-    _log.info('language set to ${language.id}');
-    await AppSettingsRepo(await appDatabase).setLanguage(language);
-  }
-
-  /// The keyboard shortcuts changed on this device (#159).
-  @override
-  Future<String?> get keyMap async =>
-      await AppSettingsRepo(await appDatabase).keyMap();
-
-  @override
-  Future<void> setKeyMap(String json) async {
-    _log.info('key map set');
-    await AppSettingsRepo(await appDatabase).setKeyMap(json);
-  }
-
-  @override
-  Future<String?> get pinnedCommands async =>
-      await AppSettingsRepo(await appDatabase).pinnedCommands();
-
-  @override
-  Future<void> setPinnedCommands(String json) async {
-    await AppSettingsRepo(await appDatabase).setPinnedCommands(json);
-  }
-
-  /// How bright the app is (T-M6-05).
-  @override
-  Future<AppBrightness> get themeBrightness async =>
-      await AppSettingsRepo(await appDatabase).themeBrightness();
-
-  /// Sets (and persists) the brightness choice.
-  @override
-  Future<void> setThemeBrightness(AppBrightness brightness) async {
-    _log.info('theme brightness set to ${brightness.id}');
-    await AppSettingsRepo(await appDatabase).setThemeBrightness(brightness);
-  }
-
-  /// The theme the app wears ([SessionThemes.theme]).
-  @override
-  Future<AppTheme> get theme => _themes.theme;
-
-  /// Sets (and persists) the theme, by its id.
-  @override
-  Future<void> setTheme(AppTheme theme) => _themes.setTheme(theme);
-
-  /// The custom themes this installation holds, by name (issue #269).
-  @override
-  Future<List<CustomTheme>> customThemes() => _themes.customThemes();
-
-  /// The custom theme with [id], or null.
-  @override
-  Future<CustomTheme?> customTheme(String id) => _themes.customTheme(id);
-
-  /// Stores [theme]: the row with its id, or a new one.
-  @override
-  Future<void> saveCustomTheme(CustomTheme theme) =>
-      _themes.saveCustomTheme(theme);
-
-  /// Renames the custom theme with [id].
-  @override
-  Future<void> renameCustomTheme(String id, String name) =>
-      _themes.renameCustomTheme(id, name);
-
-  /// Deletes the custom theme with [id], and returns the theme in force
-  /// afterwards ([SessionThemes.deleteCustomTheme]).
-  @override
-  Future<AppTheme> deleteCustomTheme(String id) =>
-      _themes.deleteCustomTheme(id);
-
-  /// Whether [name] is a custom theme's name already.
-  @override
-  Future<bool> customThemeNameTaken(String name) =>
-      _themes.customThemeNameTaken(name);
 
   /// Notifies listeners that state changed without an index mutation
   /// (e.g. a settings change the tree UI should react to).

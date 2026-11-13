@@ -220,7 +220,7 @@ final class TreeRowsReader {
     // state lives here, so a toggle repaints instead of round-tripping
     // through the settings file.
     final settingsAt = DateTime.now();
-    _pinnedCollapsed ??= await session.pinnedCollapsed;
+    _pinnedCollapsed ??= await session.librarySettings.pinnedCollapsed;
     final settingsMs = DateTime.now().difference(settingsAt).inMilliseconds;
 
     final listing = TreeListing(

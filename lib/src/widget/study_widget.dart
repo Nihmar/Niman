@@ -93,7 +93,10 @@ Future<void> refreshStudyWidgets({
     adopt: session.adoptStudyWidget,
   );
   if (ids.isEmpty) return;
-  final off = widgetOffFeature(WidgetProvider.study, session.features.value);
+  final off = widgetOffFeature(
+    WidgetProvider.study,
+    session.librarySettings.features.value,
+  );
   // Off: the decks are not even counted (#1109).
   final String payload;
   if (off != null) {

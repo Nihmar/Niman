@@ -67,7 +67,7 @@ final class ShellImportFlow {
         final web = classifyShare(text, subject: subject);
         switch (sharedTextRoute(
           isWebPage: web != null,
-          features: controller.features.value,
+          features: controller.librarySettings.features.value,
         )) {
           case SharedTextRoute.capture:
             if (context.mounted) await capture.captureShared(context, web!);

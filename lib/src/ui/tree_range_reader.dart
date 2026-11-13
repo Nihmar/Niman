@@ -69,14 +69,14 @@ final class TreeRangeReader {
         previous.page == page - 1 &&
         previous.plain.isNotEmpty) {
       // The next page of the same folder: from the last row of this one.
-      plain = await session.childrenPage(
+      plain = await session.tree.childrenPage(
         parent,
         limit: size,
         sort: listing.sort,
         after: previous.plain.last,
       );
     } else {
-      plain = await session.childrenAt(
+      plain = await session.tree.childrenAt(
         parent,
         offset: page * size,
         limit: size,

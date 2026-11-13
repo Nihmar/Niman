@@ -29,8 +29,11 @@ import 'package:niman/src/frontmatter/parser.dart';
 import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/home/home_layout.dart';
 import 'package:niman/src/journal/journal_settings.dart';
+import 'package:niman/src/library/app_preferences.dart';
 import 'package:niman/src/library/folder_spelling.dart';
+import 'package:niman/src/library/library_preferences.dart';
 import 'package:niman/src/library/library_state.dart';
+import 'package:niman/src/library/library_tree.dart';
 import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/library/note_ops.dart';
 import 'package:niman/src/library/note_relocation.dart';
@@ -70,7 +73,13 @@ import 'fake_tag_source.dart';
 /// Mirrors the real semantics the UI relies on: library-relative slash paths
 /// (empty string = root), sanitized and uniquified names, directories first
 /// in listings, and a trash manifest with restore.
-final class FakeLibrarySession implements LibrarySession, NoteOperations {
+final class FakeLibrarySession
+    implements
+        LibrarySession,
+        NoteOperations,
+        LibraryTree,
+        AppPreferences,
+        LibraryPreferences {
   /// Creates a fake session; [resumePath] is auto-opened by [resume] when
   /// non-null (simulates the persisted last-library path).
   new({this.resumePath});
@@ -178,6 +187,17 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
 
   @override
   NoteOperations? get ops => _phase == LibraryPhase.ready ? this : null;
+
+  /// The fake is its own tree, as it is its own [ops].
+  @override
+  LibraryTree get tree => this;
+
+  /// And its own app settings, and its library's.
+  @override
+  AppPreferences get appSettings => this;
+
+  @override
+  LibraryPreferences get librarySettings => this;
 
   /// The sync the shell and settings see while open; null = none wired.
   SyncService? syncService;
@@ -1087,7 +1107,7 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   int _treeOutstanding = 0;
 
   @override
-  Future<List<Note>> tree(
+  Future<List<Note>> rows(
     Iterable<String> expandedPaths, {
     TreeSort sort = TreeSort.nameAsc,
   }) async {

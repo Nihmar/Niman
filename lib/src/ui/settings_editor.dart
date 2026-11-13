@@ -74,25 +74,25 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
   }
 
   Future<void> _load() async {
-    final controller = widget.controller;
-    final lineNumbers = await controller.lineNumbersEnabled;
-    final readableLineLength = await controller.readableLineLength;
-    final noteColumnWidth = await controller.noteColumnWidth;
-    final typewriter = await controller.typewriter;
-    final cascadeChecklist = await controller.cascadeChecklist;
-    final linkPreview = await controller.linkPreview;
-    final frontmatterPanel = await controller.frontmatterPanel;
-    final tidyOnClose = await controller.tidyOnClose;
-    final lintRulesOff = await controller.lintRulesOff;
-    final autofocus = await controller.editorAutofocusEnabled;
-    final linkType = await controller.linkType;
-    final linkUpdate = await controller.linkUpdate;
-    final newItemLocation = await controller.newItemLocation;
-    final noteTextScale = await controller.noteTextScale;
-    final sourceFont = await controller.sourceFont;
-    final indentWidth = await controller.indentWidth;
-    final spellDictionaries = await controller.spellDictionaries;
-    final enabledEditors = await controller.enabledEditors;
+    final settings = widget.controller.librarySettings;
+    final lineNumbers = await settings.lineNumbersEnabled;
+    final readableLineLength = await settings.readableLineLength;
+    final noteColumnWidth = await settings.noteColumnWidth;
+    final typewriter = await settings.typewriter;
+    final cascadeChecklist = await settings.cascadeChecklist;
+    final linkPreview = await settings.linkPreview;
+    final frontmatterPanel = await settings.frontmatterPanel;
+    final tidyOnClose = await settings.tidyOnClose;
+    final lintRulesOff = await settings.lintRulesOff;
+    final autofocus = await settings.editorAutofocusEnabled;
+    final linkType = await settings.linkType;
+    final linkUpdate = await settings.linkUpdate;
+    final newItemLocation = await settings.newItemLocation;
+    final noteTextScale = await settings.noteTextScale;
+    final sourceFont = await settings.sourceFont;
+    final indentWidth = await settings.indentWidth;
+    final spellDictionaries = await settings.spellDictionaries;
+    final enabledEditors = await settings.enabledEditors;
     if (!mounted) return;
     setState(() {
       _lineNumbers = lineNumbers;
@@ -122,7 +122,7 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
   /// notification reaches the shell, which re-lays the open surface.
   Future<void> _toggleLineNumbers(bool value) async {
     final controller = widget.controller;
-    await controller.setLineNumbersEnabled(enabled: value);
+    await controller.librarySettings.setLineNumbersEnabled(enabled: value);
     // Notify so the shell refreshes its cached value — an open editor
     // shows/hides the column without reopening the note.
     controller.notify();
@@ -135,7 +135,7 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
   /// takes the column on the spot, through the shell's refresh.
   Future<void> _toggleReadableLineLength(bool value) async {
     final controller = widget.controller;
-    await controller.setReadableLineLength(enabled: value);
+    await controller.librarySettings.setReadableLineLength(enabled: value);
     controller.notify();
     if (mounted) setState(() => _readableLineLength = value);
   }
@@ -144,7 +144,7 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
   /// through the shell's refresh.
   Future<void> _toggleTypewriter(bool value) async {
     final controller = widget.controller;
-    await controller.setTypewriter(enabled: value);
+    await controller.librarySettings.setTypewriter(enabled: value);
     controller.notify();
     if (mounted) setState(() => _typewriter = value);
   }
@@ -153,7 +153,7 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
   /// on the spot, through the shell's refresh.
   Future<void> _toggleCascadeChecklist(bool value) async {
     final controller = widget.controller;
-    await controller.setCascadeChecklist(enabled: value);
+    await controller.librarySettings.setCascadeChecklist(enabled: value);
     controller.notify();
     if (mounted) setState(() => _cascadeChecklist = value);
   }
@@ -162,7 +162,7 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
   /// spot, through the shell's refresh.
   Future<void> _toggleLinkPreview(bool value) async {
     final controller = widget.controller;
-    await controller.setLinkPreview(enabled: value);
+    await controller.librarySettings.setLinkPreview(enabled: value);
     controller.notify();
     if (mounted) setState(() => _linkPreview = value);
   }
@@ -171,7 +171,7 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
   /// the spot, through the shell's refresh.
   Future<void> _toggleFrontmatterPanel(bool value) async {
     final controller = widget.controller;
-    await controller.setFrontmatterPanel(enabled: value);
+    await controller.librarySettings.setFrontmatterPanel(enabled: value);
     controller.notify();
     if (mounted) setState(() => _frontmatterPanel = value);
   }
@@ -180,7 +180,7 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
   /// so the next note closed after an edit follows it.
   Future<void> _toggleTidyOnClose(bool value) async {
     final controller = widget.controller;
-    await controller.setTidyOnClose(enabled: value);
+    await controller.librarySettings.setTidyOnClose(enabled: value);
     controller.notify();
     if (mounted) setState(() => _tidyOnClose = value);
   }
@@ -188,21 +188,21 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
   /// Persists the rules a tidy skips (#72); the shell picks them up
   /// through its refresh.
   Future<void> _setLintRulesOff(Set<String> off) async {
-    await widget.controller.setLintRulesOff(off);
+    await widget.controller.librarySettings.setLintRulesOff(off);
     widget.controller.notify();
     if (mounted) setState(() => _lintRulesOff = off);
   }
 
   Future<void> _setNoteColumnWidth(double width) async {
     final controller = widget.controller;
-    await controller.setNoteColumnWidth(width.roundToDouble());
+    await controller.librarySettings.setNoteColumnWidth(width.roundToDouble());
     controller.notify();
     if (mounted) setState(() => _noteColumnWidth = width.roundToDouble());
   }
 
   Future<void> _toggleAutofocusEditor(bool value) async {
     final controller = widget.controller;
-    await controller.setEditorAutofocusEnabled(enabled: value);
+    await controller.librarySettings.setEditorAutofocusEnabled(enabled: value);
     // Notify so the shell picks the value up; the next opened note
     // focuses (an already-open note keeps its current keyboard state).
     controller.notify();
@@ -213,7 +213,7 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
 
   Future<void> _setLinkType(LinkType type) async {
     final controller = widget.controller;
-    await controller.setLinkType(type);
+    await controller.librarySettings.setLinkType(type);
     controller.notify();
     if (mounted) {
       setState(() => _linkType = type);
@@ -222,7 +222,7 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
 
   Future<void> _setLinkUpdate(LinkUpdate mode) async {
     final controller = widget.controller;
-    await controller.setLinkUpdate(mode);
+    await controller.librarySettings.setLinkUpdate(mode);
     controller.notify();
     if (mounted) {
       setState(() => _linkUpdate = mode);
@@ -231,7 +231,7 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
 
   Future<void> _setNewItemLocation(NewItemLocation location) async {
     final controller = widget.controller;
-    await controller.setNewItemLocation(location);
+    await controller.librarySettings.setNewItemLocation(location);
     controller.notify();
     if (mounted) {
       setState(() => _newItemLocation = location);
@@ -240,7 +240,7 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
 
   Future<void> _setIndentWidth(int width) async {
     final controller = widget.controller;
-    await controller.setIndentWidth(width);
+    await controller.librarySettings.setIndentWidth(width);
     controller.notify();
     if (mounted) {
       setState(() => _indentWidth = width);
@@ -248,13 +248,13 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
   }
 
   Future<void> _setNoteTextScale(double scale) async {
-    await widget.controller.setNoteTextScale(scale);
+    await widget.controller.librarySettings.setNoteTextScale(scale);
     if (mounted) setState(() => _noteTextScale = scale);
   }
 
   /// Persists the source editor's face (issue #259).
   Future<void> _setSourceFont(SourceFont font) async {
-    await widget.controller.setSourceFont(font);
+    await widget.controller.librarySettings.setSourceFont(font);
     // Notify so the shell re-reads the value and an open source pane takes
     // the new face without the note being reopened.
     widget.controller.notify();
@@ -274,7 +274,7 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
       if (next.length < 2) return;
       next.remove(kind);
     }
-    await widget.controller.setEnabledEditors(next);
+    await widget.controller.librarySettings.setEnabledEditors(next);
     // Notify so the shell refreshes its cached value — the open note swaps
     // surfaces, and the status row gains or loses its switch, without
     // reopening it.
@@ -290,7 +290,7 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
       _spellDictionaries,
     );
     if (choice == null) return;
-    await widget.controller.setSpellDictionaries(choice);
+    await widget.controller.librarySettings.setSpellDictionaries(choice);
     spell.setDictionaries(choice);
     if (mounted) setState(() => _spellDictionaries = choice);
   }

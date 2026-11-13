@@ -36,6 +36,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/db/dao.dart';
 import 'package:niman/src/db/index_database.dart';
+import 'package:niman/src/library/library_tree.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/tree.dart';
 import 'package:niman/src/ui/tree_pages.dart';
@@ -309,13 +310,17 @@ double _median(List<double> values) {
 
 /// The reads `TreePages` makes of a session, answered from the index by the
 /// [NoteDao] the library controller uses; anything else is not asked.
-final class _IndexSession implements LibrarySession, NoteOperations {
+final class _IndexSession
+    implements LibrarySession, NoteOperations, LibraryTree {
   new(IndexDatabase db) : _dao = NoteDao(db);
 
   final NoteDao _dao;
 
   @override
   NoteOperations? get ops => this;
+
+  @override
+  LibraryTree get tree => this;
 
   @override
   Future<Note?> find(String path) => _dao.find(path);

@@ -421,7 +421,7 @@ final class WideShellLayout extends StatelessWidget {
                           library: props.windowTitle,
                           newItems: (context) => newShellItemEntries(
                             context,
-                            props.controller.features.value,
+                            props.controller.librarySettings.features.value,
                           ),
                           onNewItem: props.onNewItem,
                         ),

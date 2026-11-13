@@ -247,7 +247,7 @@ void main() {
     // part of what the user waits for.
     final firstFrame = await timed(
       'first tree read',
-      () => controller.children(0),
+      () => controller.tree.children(0),
     );
 
     // What the open holds in memory: the tree pages, the index is not

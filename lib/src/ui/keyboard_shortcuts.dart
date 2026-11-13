@@ -148,7 +148,7 @@ Future<KeyMap?> _cleared(
 
 Future<void> _keep(LibrarySession session, KeyMap map) async {
   AppKeyMap.current.value = map;
-  await session.setKeyMap(map.toJson());
+  await session.appSettings.setKeyMap(map.toJson());
 }
 
 Future<bool> _ask(

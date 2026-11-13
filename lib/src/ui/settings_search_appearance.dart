@@ -24,7 +24,8 @@ List<SettingsSearchEntry> appearanceSearchEntries(SettingsSearchScope scope) {
       title: AppStrings.languageTitle,
       area: appearance,
       rowKey: SettingsKeys.language,
-      value: () async => AppStrings.languageName(await controller.language),
+      value: () async =>
+          AppStrings.languageName(await controller.appSettings.language),
       areaId: SettingsAreaId.appearance,
       open: () => pushAppearance(SettingsKeys.language),
     ),
@@ -32,7 +33,8 @@ List<SettingsSearchEntry> appearanceSearchEntries(SettingsSearchScope scope) {
       title: AppStrings.weekStartTitle,
       area: appearance,
       rowKey: SettingsKeys.weekStart,
-      value: () async => AppStrings.weekStartName(await controller.weekStart),
+      value: () async =>
+          AppStrings.weekStartName(await controller.librarySettings.weekStart),
       areaId: SettingsAreaId.appearance,
       open: () => pushAppearance(SettingsKeys.weekStart),
     ),
@@ -40,7 +42,7 @@ List<SettingsSearchEntry> appearanceSearchEntries(SettingsSearchScope scope) {
       title: AppStrings.themeBrightnessTitle,
       area: themes,
       rowKey: SettingsKeys.brightness,
-      value: () async => switch (await controller.themeBrightness) {
+      value: () async => switch (await controller.appSettings.themeBrightness) {
         AppBrightness.system => AppStrings.themeBrightnessSystem,
         AppBrightness.day => AppStrings.themeBrightnessDay,
         AppBrightness.night => AppStrings.themeBrightnessNight,
@@ -52,7 +54,7 @@ List<SettingsSearchEntry> appearanceSearchEntries(SettingsSearchScope scope) {
       title: AppStrings.themeTitle,
       area: themes,
       rowKey: SettingsKeys.theme,
-      value: () async => themeLabel(await controller.theme),
+      value: () async => themeLabel(await controller.appSettings.theme),
       areaId: SettingsAreaId.themes,
       open: () => pushThemes(SettingsKeys.theme),
     ),
@@ -60,8 +62,9 @@ List<SettingsSearchEntry> appearanceSearchEntries(SettingsSearchScope scope) {
       title: AppStrings.uiTextScaleTitle,
       area: appearance,
       rowKey: SettingsKeys.uiTextScale,
-      value: () async =>
-          AppStrings.textScaleValue(await controller.uiTextScale),
+      value: () async => AppStrings.textScaleValue(
+        await controller.librarySettings.uiTextScale,
+      ),
       areaId: SettingsAreaId.appearance,
       open: () => pushAppearance(SettingsKeys.uiTextScale),
     ),
@@ -69,7 +72,8 @@ List<SettingsSearchEntry> appearanceSearchEntries(SettingsSearchScope scope) {
       title: AppStrings.epubLookTitle,
       area: appearance,
       rowKey: SettingsKeys.epubLook,
-      value: () async => epubLookSummary(await controller.epubLook),
+      value: () async =>
+          epubLookSummary(await controller.librarySettings.epubLook),
       areaId: SettingsAreaId.appearance,
       open: () => pushAppearance(SettingsKeys.epubLook),
     ),
@@ -79,7 +83,8 @@ List<SettingsSearchEntry> appearanceSearchEntries(SettingsSearchScope scope) {
         title: AppStrings.closeToTrayTitle,
         area: appearance,
         rowKey: SettingsKeys.closeToTray,
-        value: () async => scope.onOff(on: await controller.closeToTray),
+        value: () async =>
+            scope.onOff(on: await controller.appSettings.closeToTray),
         areaId: SettingsAreaId.appearance,
         open: () => pushAppearance(SettingsKeys.closeToTray),
       ),

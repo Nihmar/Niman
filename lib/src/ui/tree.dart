@@ -744,6 +744,10 @@ final class _NoteTreeState extends State<NoteTree> {
   /// library. The repaint does not wait on the write.
   void _togglePinned({required bool collapsed}) {
     setState(() => _reader.collapsed = collapsed);
-    unawaited(widget.controller.setPinnedCollapsed(collapsed: collapsed));
+    unawaited(
+      widget.controller.librarySettings.setPinnedCollapsed(
+        collapsed: collapsed,
+      ),
+    );
   }
 }

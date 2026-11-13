@@ -122,7 +122,7 @@ final class ShellWorkspace {
     final saved = await _slot.load();
     controller.adopt(saved);
     final open = [for (final tab in value.tabs) tab.path];
-    if (open.isNotEmpty) missing(await _session.missingPaths(open));
+    if (open.isNotEmpty) missing(await _session.tree.missingPaths(open));
     return saved;
   }
 
@@ -381,7 +381,7 @@ final class ShellWorkspace {
     };
     if (flagged.isEmpty) return;
     final before = _flagged;
-    final gone = await _session.missingPaths(flagged);
+    final gone = await _session.tree.missingPaths(flagged);
     if (_flagged != before) return;
     final back = flagged.difference(gone);
     if (back.isNotEmpty) controller.update((w) => w.withPresent(back));

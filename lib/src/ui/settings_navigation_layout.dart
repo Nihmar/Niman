@@ -60,12 +60,14 @@ final class _SettingsNavigationLayoutScreenState
     super.initState();
     unawaited(_load());
     _sessionEvents = widget.controller.events.listen((_) => unawaited(_load()));
-    widget.controller.features.addListener(_onFeaturesChanged);
+    widget.controller.librarySettings.features.addListener(_onFeaturesChanged);
   }
 
   @override
   void dispose() {
-    widget.controller.features.removeListener(_onFeaturesChanged);
+    widget.controller.librarySettings.features.removeListener(
+      _onFeaturesChanged,
+    );
     unawaited(_sessionEvents?.cancel());
     super.dispose();
   }
@@ -75,7 +77,7 @@ final class _SettingsNavigationLayoutScreenState
     if (mounted) setState(() {});
   }
 
-  Features get _features => widget.controller.features.value;
+  Features get _features => widget.controller.librarySettings.features.value;
 
   Future<void> _load() async {
     final navigation = await widget.controller.ops?.navigation;

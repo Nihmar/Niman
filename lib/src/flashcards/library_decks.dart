@@ -22,7 +22,7 @@ DeckCatalogController? deckCatalogOf(LibrarySession session) {
       },
     ),
     settings: () async => (
-      newPerDay: await session.newCardsPerDay,
+      newPerDay: await session.librarySettings.newCardsPerDay,
       dayStartHour: (await session.ops?.journal)?.dayStartHour ?? 0,
     ),
     indexEvents: session.events,

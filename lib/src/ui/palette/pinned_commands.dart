@@ -30,7 +30,7 @@ final class PinnedCommands {
 
   /// Loads the pins kept on this device.
   static Future<void> load(LibrarySession session) async {
-    current.value = decode(await session.pinnedCommands);
+    current.value = decode(await session.appSettings.pinnedCommands);
   }
 
   /// Pins [command] (at the end), or unpins it if it is pinned already,
@@ -54,7 +54,7 @@ final class PinnedCommands {
     List<AppCommand> pinned,
   ) async {
     current.value = List.unmodifiable(pinned);
-    await session.setPinnedCommands(encode(pinned));
+    await session.appSettings.setPinnedCommands(encode(pinned));
   }
 
   /// The stored form: a JSON array of command names, in pinning order.

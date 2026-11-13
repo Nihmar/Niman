@@ -52,7 +52,10 @@ void main() {
   test('a folder with no settings file is a library being created', () async {
     await controller.open(root.path, create: false);
     expect(controller.phase.name, 'ready');
-    expect(await controller.featuresIntroduction, FeaturesIntroduction.created);
+    expect(
+      await controller.librarySettings.featuresIntroduction,
+      FeaturesIntroduction.created,
+    );
     // Asking writes nothing.
     expect(settings().existsSync(), isFalse);
   });
@@ -64,7 +67,7 @@ void main() {
       settings().writeAsStringSync('{"trashEnabled": true}');
       await controller.open(root.path, create: false);
       expect(
-        await controller.featuresIntroduction,
+        await controller.librarySettings.featuresIntroduction,
         FeaturesIntroduction.existing,
       );
       expect(settingsJson().containsKey('featuresReviewed'), isFalse);
@@ -75,30 +78,39 @@ void main() {
     Directory(p.join(root.path, '.niman')).createSync();
     settings().writeAsStringSync('{"featuresReviewed": true}');
     await controller.open(root.path, create: false);
-    expect(await controller.featuresIntroduction, FeaturesIntroduction.none);
+    expect(
+      await controller.librarySettings.featuresIntroduction,
+      FeaturesIntroduction.none,
+    );
   });
 
   test('markFeaturesReviewed writes the flag, and only it', () async {
     await controller.open(root.path, create: false);
-    await controller.markFeaturesReviewed();
+    await controller.librarySettings.markFeaturesReviewed();
 
-    expect(await controller.featuresIntroduction, FeaturesIntroduction.none);
+    expect(
+      await controller.librarySettings.featuresIntroduction,
+      FeaturesIntroduction.none,
+    );
     expect(settingsJson()['featuresReviewed'], isTrue);
     expect(settingsJson().containsKey('features'), isFalse);
   });
 
   test('the flag survives a reopen, and a created library asks once', () async {
     await controller.open(root.path, create: false);
-    await controller.markFeaturesReviewed();
+    await controller.librarySettings.markFeaturesReviewed();
     await controller.close();
 
     await controller.open(root.path, create: false);
-    expect(await controller.featuresIntroduction, FeaturesIntroduction.none);
+    expect(
+      await controller.librarySettings.featuresIntroduction,
+      FeaturesIntroduction.none,
+    );
   });
 
   test('a library that was never marked asks again on its next open', () async {
     await controller.open(root.path, create: false);
-    await controller.setFeatures(
+    await controller.librarySettings.setFeatures(
       const Features().withPreset(FeaturePreset.notesOnly),
     );
     await controller.close();
@@ -107,11 +119,11 @@ void main() {
     // the card is the one a library with settings gets.
     await controller.open(root.path, create: false);
     expect(
-      await controller.featuresIntroduction,
+      await controller.librarySettings.featuresIntroduction,
       FeaturesIntroduction.existing,
     );
     expect(
-      controller.features.value,
+      controller.librarySettings.features.value,
       const Features().withPreset(FeaturePreset.notesOnly),
     );
   });

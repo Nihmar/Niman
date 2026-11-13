@@ -333,7 +333,10 @@ final class ShellTabBodies {
     openTag: (tag) => _showSearch(SearchRequest.forTag(tag)),
     openTodo: openTodo,
     runAction: (action) => unawaited(
-      homeActions.run(context(), action.under(controller.features.value)),
+      homeActions.run(
+        context(),
+        action.under(controller.librarySettings.features.value),
+      ),
     ),
     decks: () => study().decks,
     study: (paths, title) => study().studyPaths(context(), paths, title),
@@ -352,7 +355,7 @@ final class ShellTabBodies {
     openJournal: journalFlow.openToday,
     capture: (context, action) =>
         captureFlow.capture(context, folder: action.folder),
-    missing: controller.missingPaths,
+    missing: controller.tree.missingPaths,
     tell: (message) =>
         ScaffoldMessenger.of(context())
             .showSnackBar(SnackBar(content: Text(message))),
