@@ -40,6 +40,7 @@ typedef CaptureSave = Future<({CapturedNote note, int pictures})> Function(
   bool downloadPictures,
   List<String> tags,
   LinkType linkType,
+  String folder,
 });
 
 /// Where a capture goes, and how it gets there.
@@ -248,6 +249,7 @@ final class _CaptureDialogState extends State<CaptureDialog> {
         downloadPictures: choices.downloadPictures,
         tags: choices.tags,
         linkType: target.linkType,
+        folder: choices.folder,
       );
       final path = await target.create(
         choices.folder,

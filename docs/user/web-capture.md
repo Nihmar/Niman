@@ -56,7 +56,10 @@ for [where new notes go](organization.md#where-new-notes-and-folders-go):
 it keeps this folder whatever that setting says.
 
 The pictures go in the attachments folder whatever folder the note is
-in: the note links them from there.
+in: the note links them from there. In a library that writes Markdown
+links, the link is written from the note's folder
+(`![](../../assets/…png)` from a note two folders down), so other
+Markdown tools and the exports find the picture too.
 
 ## On a phone
 

@@ -36,7 +36,9 @@ List<String> picturesOf(PageReading page) {
 /// The note of [page], captured on [captured], with [tags].
 ///
 /// [pictures] maps a picture's address to the library-relative path it was
-/// downloaded to; a picture not in it keeps its address. [linkType] is how
+/// downloaded to; a picture not in it keeps its address. [folder] is the
+/// library-relative folder the note goes in, which a Markdown picture link
+/// is written from (#1282). [linkType] is how
 /// the library embeds a picture. [unreadableNotice] is the notice a page
 /// with no article gets, as Markdown in the app's language, its link to the
 /// page in it.
@@ -47,11 +49,20 @@ CapturedNote captureNote(
   Map<String, String> pictures = const {},
   List<String> tags = const [],
   LinkType linkType = LinkType.wikilink,
+  String folder = '',
 }) {
+  // The note's own name is not known yet (it is the title's), but its
+  // folder is, and a Markdown link is written from there (#1282).
+  final from = folder.isEmpty ? 'note.md' : '$folder/note.md';
   String embed(String src, String alt) {
     final local = pictures[src];
     if (local == null) return markdownImage(src, alt);
-    return attachmentEmbed(relativePath: local, label: alt, linkType: linkType);
+    return attachmentEmbed(
+      relativePath: local,
+      label: alt,
+      linkType: linkType,
+      note: from,
+    );
   }
 
   final out = StringBuffer()

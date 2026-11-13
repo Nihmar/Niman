@@ -20,12 +20,28 @@ library;
 
 import 'dart:io';
 
+import 'package:niman/src/core/percent.dart';
 import 'package:niman/src/links/resolver.dart';
 import 'package:path/path.dart' as p;
 
 /// Resolves the embed [target] against [root] and [notePath] (both
-/// absolute), then the link index.
+/// absolute), then the link index; a Markdown link's percent-encoded path
+/// (`my%20folder/a.png`, as the app writes one, #1282) is tried decoded
+/// when it does not resolve as written.
 Future<String?> resolveEmbedPath(
+  String target,
+  String notePath,
+  String root,
+  LinkSource? linkSource,
+) async {
+  final found = await _resolve(target, notePath, root, linkSource);
+  if (found != null) return found;
+  final decoded = percentDecoded(target);
+  if (decoded == target) return null;
+  return await _resolve(decoded, notePath, root, linkSource);
+}
+
+Future<String?> _resolve(
   String target,
   String notePath,
   String root,

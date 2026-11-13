@@ -289,6 +289,7 @@ final class NoteViewParts {
     readView: () => readViewKey.currentState,
     activeFormats: activeFormats,
     linkType: () => view.options.linkType,
+    notePath: () => libraryPath,
     indentWidth: () => view.options.indentWidth,
     toolbarLayout: () => view.options.toolbarLayout,
     pasteAsMarkdown: () => switch (view.onPasteAsMarkdown) {

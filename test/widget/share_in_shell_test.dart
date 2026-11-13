@@ -76,6 +76,7 @@ void main() {
                   downloadPictures = true,
                   tags = const [],
                   linkType = LinkType.wikilink,
+                  folder = '',
                 }) async => (
                   note: (name: title ?? page.title, text: 'tags: $tags'),
                   pictures: 0,

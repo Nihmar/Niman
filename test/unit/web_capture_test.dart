@@ -15,6 +15,7 @@ import 'package:niman/src/capture/capture_note.dart';
 import 'package:niman/src/capture/fetch/page_fetch.dart';
 import 'package:niman/src/capture/page_reading.dart';
 import 'package:niman/src/capture/web_capture.dart';
+import 'package:niman/src/core/settings/library_settings.dart' show LinkType;
 import 'package:path/path.dart' as p;
 
 final String _fixtures = p.join('test', 'fixtures', 'capture');
@@ -95,6 +96,8 @@ void main() {
     PageBrowser? browser,
     String? title,
     List<CaptureProgress>? steps,
+    LinkType linkType = LinkType.wikilink,
+    String folder = '',
   }) async {
     final reading = await readWebPage(
       Uri.parse('$base$path'),
@@ -111,6 +114,8 @@ void main() {
       captured: DateTime(2026, 10, 8),
       tags: const ['web'],
       title: title,
+      linkType: linkType,
+      folder: folder,
     );
     return (
       note: saved.note,
@@ -204,6 +209,20 @@ void main() {
       expect(File(p.join(library.path, 'assets', name)).existsSync(), isTrue);
     }
   });
+
+  test(
+    "a Markdown picture link is written from the note's folder (#1282)",
+    () async {
+      final result = await capture(
+        '/figure-srcset.html',
+        linkType: LinkType.markdown,
+        folder: 'Clips/2026',
+      );
+      final name = '${sha256.convert(_picture('/media/leeks.png'))}.png';
+      expect(result.note.text, contains('](../../assets/$name)'));
+      expect(result.note.text, isNot(contains('](assets/')));
+    },
+  );
 
   test('a redirect is followed, and the note is the page it ends at', () async {
     final result = await capture('/moved');

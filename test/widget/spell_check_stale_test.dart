@@ -58,6 +58,7 @@ void main() {
       readView: () => null,
       activeFormats: ValueNotifier(const {}),
       linkType: () => LinkType.wikilink,
+      notePath: () => null,
       indentWidth: () => 2,
       toolbarLayout: () => ToolbarLayout.defaults,
       pasteAsMarkdown: () => null,
