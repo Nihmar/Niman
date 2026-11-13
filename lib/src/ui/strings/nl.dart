@@ -447,6 +447,70 @@ final class DutchStrings extends Strings {
   @override
   String get epubProgressShowChapter => 'Voortgang in het hoofdstuk tonen';
 
+  // Books: read aloud (#1276).
+  @override
+  String get readAloud => 'Voorlezen';
+  @override
+  String get readAloudFromHere => 'Vanaf hier voorlezen';
+  @override
+  String get readAloudStop => 'Voorlezen stoppen';
+  @override
+  String get readAloudPrevious => 'Vorige alinea';
+  @override
+  String get readAloudNext => 'Volgende alinea';
+  @override
+  String get readAloudPause => 'Pauzeren';
+  @override
+  String get readAloudResume => 'Hervatten';
+  @override
+  String readAloudSpeed(String speed) => 'Snelheid $speed';
+  @override
+  String get readAloudSpeedTitle => 'Snelheid';
+  @override
+  String get readAloudVoice => 'Stem';
+  @override
+  String get readAloudVoiceTitle => 'Stem en snelheid';
+  @override
+  String readAloudVoiceNumber(int n) => 'Stem $n';
+  @override
+  String get readAloudDefault => 'Standaardstem';
+  @override
+  String get readAloudLanguage => 'Taal';
+  @override
+  String get readAloudFromBook => 'uit het boek';
+  @override
+  String get readAloudOnDevice => 'op het apparaat';
+  @override
+  String get readAloudNeedsNetwork => 'heeft netwerk nodig';
+  @override
+  String readAloudListen(String voice) => '$voice beluisteren';
+  @override
+  String get readAloudSettings => 'Instellingen voor tekst-naar-spraak';
+  @override
+  String get readAloudBackToVoice => 'Terug naar de stem';
+  @override
+  String readAloudWhere(String chapter, int paragraph, int paragraphs) =>
+      '$chapter · alinea $paragraph van $paragraphs';
+  @override
+  String get readAloudPaused => 'Gepauzeerd';
+  @override
+  String get readAloudDeviceVoice => 'apparaatstem';
+  @override
+  String readAloudNoVoiceTitle(String language) => 'Geen stem in het $language';
+  @override
+  String readAloudNoVoiceBody(String language) =>
+      'Dit boek is in het $language, maar het apparaat heeft er geen stem '
+      'voor. Je kunt er een installeren in de tekst-naar-spraakinstellingen '
+      'van het systeem, of het laten voorlezen met de standaardstem.';
+  @override
+  String get readAloudUseDefault => 'Standaardstem gebruiken';
+  @override
+  String get readAloudInstallVoice => 'Een stem installeren';
+  @override
+  String get readAloudSample => 'Zo leest deze stem.';
+  @override
+  String get readAloudChannel => 'Voorlezen';
+
   // Settings: preview mode.
   // Settings: editor formatting.
   @override

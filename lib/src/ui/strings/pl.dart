@@ -446,6 +446,71 @@ final class PolishStrings extends Strings {
   @override
   String get epubProgressShowChapter => 'Pokaż postęp w rozdziale';
 
+  // Books: read aloud (#1276).
+  @override
+  String get readAloud => 'Czytaj na głos';
+  @override
+  String get readAloudFromHere => 'Czytaj na głos od tego miejsca';
+  @override
+  String get readAloudStop => 'Zatrzymaj czytanie';
+  @override
+  String get readAloudPrevious => 'Poprzedni akapit';
+  @override
+  String get readAloudNext => 'Następny akapit';
+  @override
+  String get readAloudPause => 'Wstrzymaj';
+  @override
+  String get readAloudResume => 'Wznów';
+  @override
+  String readAloudSpeed(String speed) => 'Szybkość $speed';
+  @override
+  String get readAloudSpeedTitle => 'Szybkość';
+  @override
+  String get readAloudVoice => 'Głos';
+  @override
+  String get readAloudVoiceTitle => 'Głos i szybkość';
+  @override
+  String readAloudVoiceNumber(int n) => 'Głos $n';
+  @override
+  String get readAloudDefault => 'Głos domyślny';
+  @override
+  String get readAloudLanguage => 'Język';
+  @override
+  String get readAloudFromBook => 'z książki';
+  @override
+  String get readAloudOnDevice => 'na urządzeniu';
+  @override
+  String get readAloudNeedsNetwork => 'wymaga sieci';
+  @override
+  String readAloudListen(String voice) => 'Posłuchaj: $voice';
+  @override
+  String get readAloudSettings => 'Ustawienia zamiany tekstu na mowę';
+  @override
+  String get readAloudBackToVoice => 'Wróć do głosu';
+  @override
+  String readAloudWhere(String chapter, int paragraph, int paragraphs) =>
+      '$chapter · akapit $paragraph z $paragraphs';
+  @override
+  String get readAloudPaused => 'Wstrzymano';
+  @override
+  String get readAloudDeviceVoice => 'głos urządzenia';
+  @override
+  String readAloudNoVoiceTitle(String language) =>
+      'Brak głosu dla języka: $language';
+  @override
+  String readAloudNoVoiceBody(String language) =>
+      'Ta książka jest w języku: $language, ale urządzenie nie ma dla niego '
+      'głosu. Możesz go zainstalować w systemowych ustawieniach zamiany tekstu '
+      'na mowę lub czytać głosem domyślnym.';
+  @override
+  String get readAloudUseDefault => 'Użyj głosu domyślnego';
+  @override
+  String get readAloudInstallVoice => 'Zainstaluj głos';
+  @override
+  String get readAloudSample => 'Tak czyta ten głos.';
+  @override
+  String get readAloudChannel => 'Czytanie na głos';
+
   // Settings: preview mode.
   // Settings: editor formatting.
   @override

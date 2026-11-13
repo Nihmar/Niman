@@ -445,6 +445,70 @@ final class SwedishStrings extends Strings {
   @override
   String get epubProgressShowChapter => 'Visa förlopp i kapitlet';
 
+  // Books: read aloud (#1276).
+  @override
+  String get readAloud => 'Läs upp';
+  @override
+  String get readAloudFromHere => 'Läs upp härifrån';
+  @override
+  String get readAloudStop => 'Sluta läsa upp';
+  @override
+  String get readAloudPrevious => 'Föregående stycke';
+  @override
+  String get readAloudNext => 'Nästa stycke';
+  @override
+  String get readAloudPause => 'Pausa';
+  @override
+  String get readAloudResume => 'Fortsätt';
+  @override
+  String readAloudSpeed(String speed) => 'Hastighet $speed';
+  @override
+  String get readAloudSpeedTitle => 'Hastighet';
+  @override
+  String get readAloudVoice => 'Röst';
+  @override
+  String get readAloudVoiceTitle => 'Röst och hastighet';
+  @override
+  String readAloudVoiceNumber(int n) => 'Röst $n';
+  @override
+  String get readAloudDefault => 'Standardröst';
+  @override
+  String get readAloudLanguage => 'Språk';
+  @override
+  String get readAloudFromBook => 'från boken';
+  @override
+  String get readAloudOnDevice => 'på enheten';
+  @override
+  String get readAloudNeedsNetwork => 'kräver nätverk';
+  @override
+  String readAloudListen(String voice) => 'Lyssna på $voice';
+  @override
+  String get readAloudSettings => 'Inställningar för text till tal';
+  @override
+  String get readAloudBackToVoice => 'Tillbaka till rösten';
+  @override
+  String readAloudWhere(String chapter, int paragraph, int paragraphs) =>
+      '$chapter · stycke $paragraph av $paragraphs';
+  @override
+  String get readAloudPaused => 'Pausad';
+  @override
+  String get readAloudDeviceVoice => 'enhetens röst';
+  @override
+  String readAloudNoVoiceTitle(String language) => 'Ingen röst på $language';
+  @override
+  String readAloudNoVoiceBody(String language) =>
+      'Den här boken är på $language, men enheten har ingen röst för det. Du '
+      'kan installera en i systemets inställningar för text till tal eller '
+      'läsa upp den med standardrösten.';
+  @override
+  String get readAloudUseDefault => 'Använd standardrösten';
+  @override
+  String get readAloudInstallVoice => 'Installera en röst';
+  @override
+  String get readAloudSample => 'Så här läser den här rösten.';
+  @override
+  String get readAloudChannel => 'Uppläsning';
+
   // Settings: preview mode.
   // Settings: editor formatting.
   @override

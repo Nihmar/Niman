@@ -452,6 +452,72 @@ final class GreekStrings extends Strings {
   @override
   String get epubProgressShowChapter => 'Εμφάνιση προόδου στο κεφάλαιο';
 
+  // Books: read aloud (#1276).
+  @override
+  String get readAloud => 'Ανάγνωση φωναχτά';
+  @override
+  String get readAloudFromHere => 'Ανάγνωση φωναχτά από εδώ';
+  @override
+  String get readAloudStop => 'Διακοπή ανάγνωσης';
+  @override
+  String get readAloudPrevious => 'Προηγούμενη παράγραφος';
+  @override
+  String get readAloudNext => 'Επόμενη παράγραφος';
+  @override
+  String get readAloudPause => 'Παύση';
+  @override
+  String get readAloudResume => 'Συνέχεια';
+  @override
+  String readAloudSpeed(String speed) => 'Ταχύτητα $speed';
+  @override
+  String get readAloudSpeedTitle => 'Ταχύτητα';
+  @override
+  String get readAloudVoice => 'Φωνή';
+  @override
+  String get readAloudVoiceTitle => 'Φωνή και ταχύτητα';
+  @override
+  String readAloudVoiceNumber(int n) => 'Φωνή $n';
+  @override
+  String get readAloudDefault => 'Προεπιλεγμένη φωνή';
+  @override
+  String get readAloudLanguage => 'Γλώσσα';
+  @override
+  String get readAloudFromBook => 'από το βιβλίο';
+  @override
+  String get readAloudOnDevice => 'στη συσκευή';
+  @override
+  String get readAloudNeedsNetwork => 'χρειάζεται δίκτυο';
+  @override
+  String readAloudListen(String voice) => 'Ακρόαση: $voice';
+  @override
+  String get readAloudSettings => 'Ρυθμίσεις μετατροπής κειμένου σε ομιλία';
+  @override
+  String get readAloudBackToVoice => 'Πίσω στη φωνή';
+  @override
+  String readAloudWhere(String chapter, int paragraph, int paragraphs) =>
+      '$chapter · παράγραφος $paragraph από $paragraphs';
+  @override
+  String get readAloudPaused => 'Σε παύση';
+  @override
+  String get readAloudDeviceVoice => 'φωνή συσκευής';
+  @override
+  String readAloudNoVoiceTitle(String language) =>
+      'Δεν υπάρχει φωνή για $language';
+  @override
+  String readAloudNoVoiceBody(String language) =>
+      'Αυτό το βιβλίο είναι σε $language, αλλά η συσκευή δεν έχει φωνή για '
+      'αυτή τη γλώσσα. Μπορείτε να εγκαταστήσετε μία στις ρυθμίσεις μετατροπής '
+      'κειμένου σε ομιλία του συστήματος ή να το διαβάσετε με την '
+      'προεπιλεγμένη φωνή.';
+  @override
+  String get readAloudUseDefault => 'Χρήση προεπιλεγμένης φωνής';
+  @override
+  String get readAloudInstallVoice => 'Εγκατάσταση φωνής';
+  @override
+  String get readAloudSample => 'Έτσι διαβάζει αυτή η φωνή.';
+  @override
+  String get readAloudChannel => 'Ανάγνωση φωναχτά';
+
   // Settings: preview mode.
   // Settings: editor formatting.
   @override

@@ -453,6 +453,70 @@ final class FrenchStrings extends Strings {
   String get epubProgressShowChapter =>
       'Afficher la progression dans le chapitre';
 
+  // Books: read aloud (#1276).
+  @override
+  String get readAloud => 'Lire à voix haute';
+  @override
+  String get readAloudFromHere => 'Lire à voix haute à partir d’ici';
+  @override
+  String get readAloudStop => 'Arrêter la lecture';
+  @override
+  String get readAloudPrevious => 'Paragraphe précédent';
+  @override
+  String get readAloudNext => 'Paragraphe suivant';
+  @override
+  String get readAloudPause => 'Pause';
+  @override
+  String get readAloudResume => 'Reprendre';
+  @override
+  String readAloudSpeed(String speed) => 'Vitesse $speed';
+  @override
+  String get readAloudSpeedTitle => 'Vitesse';
+  @override
+  String get readAloudVoice => 'Voix';
+  @override
+  String get readAloudVoiceTitle => 'Voix et vitesse';
+  @override
+  String readAloudVoiceNumber(int n) => 'Voix $n';
+  @override
+  String get readAloudDefault => 'Voix par défaut';
+  @override
+  String get readAloudLanguage => 'Langue';
+  @override
+  String get readAloudFromBook => 'du livre';
+  @override
+  String get readAloudOnDevice => 'sur l’appareil';
+  @override
+  String get readAloudNeedsNetwork => 'nécessite le réseau';
+  @override
+  String readAloudListen(String voice) => 'Écouter $voice';
+  @override
+  String get readAloudSettings => 'Paramètres de synthèse vocale';
+  @override
+  String get readAloudBackToVoice => 'Revenir à la voix';
+  @override
+  String readAloudWhere(String chapter, int paragraph, int paragraphs) =>
+      '$chapter · paragraphe $paragraph sur $paragraphs';
+  @override
+  String get readAloudPaused => 'En pause';
+  @override
+  String get readAloudDeviceVoice => 'voix de l’appareil';
+  @override
+  String readAloudNoVoiceTitle(String language) => 'Aucune voix en $language';
+  @override
+  String readAloudNoVoiceBody(String language) =>
+      'Ce livre est en $language, mais l’appareil n’a pas de voix pour cette '
+      'langue. Vous pouvez en installer une dans les paramètres de synthèse '
+      'vocale du système, ou le faire lire avec la voix par défaut.';
+  @override
+  String get readAloudUseDefault => 'Utiliser la voix par défaut';
+  @override
+  String get readAloudInstallVoice => 'Installer une voix';
+  @override
+  String get readAloudSample => 'Voici comment lit cette voix.';
+  @override
+  String get readAloudChannel => 'Lecture à voix haute';
+
   // Settings: preview mode.
   // Settings: editor formatting.
   @override

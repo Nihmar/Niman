@@ -440,6 +440,71 @@ final class BelarusianStrings extends Strings {
   @override
   String get epubProgressShowChapter => 'Паказаць прагрэс у раздзеле';
 
+  // Books: read aloud (#1276).
+  @override
+  String get readAloud => 'Чытаць услых';
+  @override
+  String get readAloudFromHere => 'Чытаць услых адсюль';
+  @override
+  String get readAloudStop => 'Спыніць чытанне';
+  @override
+  String get readAloudPrevious => 'Папярэдні абзац';
+  @override
+  String get readAloudNext => 'Наступны абзац';
+  @override
+  String get readAloudPause => 'Паўза';
+  @override
+  String get readAloudResume => 'Працягнуць';
+  @override
+  String readAloudSpeed(String speed) => 'Хуткасць $speed';
+  @override
+  String get readAloudSpeedTitle => 'Хуткасць';
+  @override
+  String get readAloudVoice => 'Голас';
+  @override
+  String get readAloudVoiceTitle => 'Голас і хуткасць';
+  @override
+  String readAloudVoiceNumber(int n) => 'Голас $n';
+  @override
+  String get readAloudDefault => 'Стандартны голас';
+  @override
+  String get readAloudLanguage => 'Мова';
+  @override
+  String get readAloudFromBook => 'з кнігі';
+  @override
+  String get readAloudOnDevice => 'на прыладзе';
+  @override
+  String get readAloudNeedsNetwork => 'патрэбна сетка';
+  @override
+  String readAloudListen(String voice) => 'Паслухаць: $voice';
+  @override
+  String get readAloudSettings => 'Налады сінтэзу маўлення';
+  @override
+  String get readAloudBackToVoice => 'Назад да голасу';
+  @override
+  String readAloudWhere(String chapter, int paragraph, int paragraphs) =>
+      '$chapter · абзац $paragraph з $paragraphs';
+  @override
+  String get readAloudPaused => 'Прыпынена';
+  @override
+  String get readAloudDeviceVoice => 'голас прылады';
+  @override
+  String readAloudNoVoiceTitle(String language) =>
+      'Няма голасу для мовы: $language';
+  @override
+  String readAloudNoVoiceBody(String language) =>
+      'Гэта кніга на мове $language, але на прыладзе няма голасу для яе. Вы '
+      'можаце ўсталяваць яго ў сістэмных наладах сінтэзу маўлення або чытаць '
+      'кнігу стандартным голасам.';
+  @override
+  String get readAloudUseDefault => 'Выкарыстаць стандартны голас';
+  @override
+  String get readAloudInstallVoice => 'Усталяваць голас';
+  @override
+  String get readAloudSample => 'Вось так чытае гэты голас.';
+  @override
+  String get readAloudChannel => 'Чытанне ўслых';
+
   // Settings: preview mode.
   // Settings: editor formatting.
   @override

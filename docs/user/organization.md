@@ -529,6 +529,27 @@ library.
   on the desktop, and the system bars step aside on Android. The same
   button, **Esc** on the desktop or **Back** on Android leaves it, the
   book still where you were reading.
+- **Reading a book aloud** (Android, for now — see
+  [platforms](platforms.md#reading-a-book-aloud)): the speaker on the
+  book's row reads from the paragraph at the top of the view, and
+  *Read aloud from here*, in the menu of a passage selected, from that
+  paragraph. The voice is the device's own text-to-speech, in the book's
+  language (the device's when the book names none); with no voice
+  installed for it, Niman says so and offers the system's settings to
+  install one, or the default voice. While it reads, a player takes the
+  row's place: stop, the paragraph before and after, play and pause, the
+  speed (0.5× to 2×, a tap moves to the next) and a sheet for the voice,
+  each with a sample. The sentence spoken is marked and the book follows
+  it; scroll away by hand and the voice goes on, **Back to the voice**
+  bringing the view back. What is read is the text — headings,
+  paragraphs, list items, quotes; pictures, rules, code and footnote
+  marks are skipped, a link reads as its words. A pause keeps the
+  sentence, and play says it again; a chapter's end goes on into the
+  next, the book's end stops. It goes on with the screen off and Niman in
+  the background, under a notification with the lock screen's controls;
+  a call, another app's audio or headphones unplugged pause it, and it
+  does not resume by itself. The place kept is the one spoken. Closing
+  the book, or swiping Niman away, stops it.
 - **Anything else** (an audio clip, an archive) does not go
   in the editor: the pane says the file is not a text note, and on
   desktop offers **Open in default app** right there.

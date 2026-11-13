@@ -447,6 +447,70 @@ final class CatalanStrings extends Strings {
   @override
   String get epubProgressShowChapter => 'Mostra el progrés al capítol';
 
+  // Books: read aloud (#1276).
+  @override
+  String get readAloud => 'Llegeix en veu alta';
+  @override
+  String get readAloudFromHere => 'Llegeix en veu alta des d’aquí';
+  @override
+  String get readAloudStop => 'Atura la lectura';
+  @override
+  String get readAloudPrevious => 'Paràgraf anterior';
+  @override
+  String get readAloudNext => 'Paràgraf següent';
+  @override
+  String get readAloudPause => 'Pausa';
+  @override
+  String get readAloudResume => 'Reprèn';
+  @override
+  String readAloudSpeed(String speed) => 'Velocitat $speed';
+  @override
+  String get readAloudSpeedTitle => 'Velocitat';
+  @override
+  String get readAloudVoice => 'Veu';
+  @override
+  String get readAloudVoiceTitle => 'Veu i velocitat';
+  @override
+  String readAloudVoiceNumber(int n) => 'Veu $n';
+  @override
+  String get readAloudDefault => 'Veu predeterminada';
+  @override
+  String get readAloudLanguage => 'Idioma';
+  @override
+  String get readAloudFromBook => 'del llibre';
+  @override
+  String get readAloudOnDevice => 'al dispositiu';
+  @override
+  String get readAloudNeedsNetwork => 'necessita la xarxa';
+  @override
+  String readAloudListen(String voice) => 'Escolta $voice';
+  @override
+  String get readAloudSettings => 'Configuració de text a veu';
+  @override
+  String get readAloudBackToVoice => 'Torna a la veu';
+  @override
+  String readAloudWhere(String chapter, int paragraph, int paragraphs) =>
+      '$chapter · paràgraf $paragraph de $paragraphs';
+  @override
+  String get readAloudPaused => 'En pausa';
+  @override
+  String get readAloudDeviceVoice => 'veu del dispositiu';
+  @override
+  String readAloudNoVoiceTitle(String language) => 'Cap veu en $language';
+  @override
+  String readAloudNoVoiceBody(String language) =>
+      'Aquest llibre és en $language, però el dispositiu no té cap veu per a '
+      'aquest idioma. En pots instal·lar una a la configuració de text a veu '
+      'del sistema, o fer-lo llegir amb la veu predeterminada.';
+  @override
+  String get readAloudUseDefault => 'Usa la veu predeterminada';
+  @override
+  String get readAloudInstallVoice => 'Instal·la una veu';
+  @override
+  String get readAloudSample => 'Així llegeix aquesta veu.';
+  @override
+  String get readAloudChannel => 'Lectura en veu alta';
+
   // Settings: preview mode.
   // Settings: editor formatting.
   @override

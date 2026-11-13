@@ -26,6 +26,7 @@ import 'package:niman/src/epub/epub_progress.dart';
 import 'package:niman/src/reading/book_location.dart';
 import 'package:niman/src/reading/reading_positions.dart';
 import 'package:niman/src/ui/epub_pane_state.dart';
+import 'package:niman/src/ui/epub_read_aloud_engine.dart';
 import 'package:niman/src/ui/file_tree_context.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
@@ -55,6 +56,7 @@ final class EpubPane extends StatefulWidget {
     this.onConvert,
     this.marks,
     this.fullScreen,
+    this.readAloud,
     super.key,
   });
 
@@ -116,6 +118,11 @@ final class EpubPane extends StatefulWidget {
   /// null. The shell holds it, to take the window there and to leave on
   /// Back; null offers no full screen.
   final ValueNotifier<Object?>? fullScreen;
+
+  /// The engine the book is read aloud with (#1276); null for the
+  /// platform's, which only Android has for now — elsewhere there is no
+  /// control to read aloud.
+  final ReadAloudEngine? readAloud;
 
   @override
   State<EpubPane> createState() => EpubPaneState();

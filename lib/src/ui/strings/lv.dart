@@ -437,6 +437,71 @@ final class LatvianStrings extends Strings {
   @override
   String get epubProgressShowChapter => 'Rādīt progresu nodaļā';
 
+  // Books: read aloud (#1276).
+  @override
+  String get readAloud => 'Lasīt skaļi';
+  @override
+  String get readAloudFromHere => 'Lasīt skaļi no šejienes';
+  @override
+  String get readAloudStop => 'Pārtraukt lasīšanu';
+  @override
+  String get readAloudPrevious => 'Iepriekšējā rindkopa';
+  @override
+  String get readAloudNext => 'Nākamā rindkopa';
+  @override
+  String get readAloudPause => 'Pauze';
+  @override
+  String get readAloudResume => 'Turpināt';
+  @override
+  String readAloudSpeed(String speed) => 'Ātrums $speed';
+  @override
+  String get readAloudSpeedTitle => 'Ātrums';
+  @override
+  String get readAloudVoice => 'Balss';
+  @override
+  String get readAloudVoiceTitle => 'Balss un ātrums';
+  @override
+  String readAloudVoiceNumber(int n) => 'Balss $n';
+  @override
+  String get readAloudDefault => 'Noklusējuma balss';
+  @override
+  String get readAloudLanguage => 'Valoda';
+  @override
+  String get readAloudFromBook => 'no grāmatas';
+  @override
+  String get readAloudOnDevice => 'ierīcē';
+  @override
+  String get readAloudNeedsNetwork => 'vajag tīklu';
+  @override
+  String readAloudListen(String voice) => 'Klausīties: $voice';
+  @override
+  String get readAloudSettings => 'Teksta pārveides runā iestatījumi';
+  @override
+  String get readAloudBackToVoice => 'Atpakaļ pie balss';
+  @override
+  String readAloudWhere(String chapter, int paragraph, int paragraphs) =>
+      '$chapter · $paragraph. rindkopa no $paragraphs';
+  @override
+  String get readAloudPaused => 'Pauzēts';
+  @override
+  String get readAloudDeviceVoice => 'ierīces balss';
+  @override
+  String readAloudNoVoiceTitle(String language) =>
+      'Nav balss valodai: $language';
+  @override
+  String readAloudNoVoiceBody(String language) =>
+      'Šī grāmata ir valodā $language, bet ierīcei nav tai balss. Varat to '
+      'instalēt sistēmas teksta pārveides runā iestatījumos vai lasīt ar '
+      'noklusējuma balsi.';
+  @override
+  String get readAloudUseDefault => 'Izmantot noklusējuma balsi';
+  @override
+  String get readAloudInstallVoice => 'Instalēt balsi';
+  @override
+  String get readAloudSample => 'Lūk, kā lasa šī balss.';
+  @override
+  String get readAloudChannel => 'Lasīšana skaļi';
+
   // Settings: preview mode.
   // Settings: editor formatting.
   @override

@@ -439,6 +439,71 @@ final class FinnishStrings extends Strings {
   @override
   String get epubProgressShowChapter => 'Näytä edistyminen luvussa';
 
+  // Books: read aloud (#1276).
+  @override
+  String get readAloud => 'Lue ääneen';
+  @override
+  String get readAloudFromHere => 'Lue ääneen tästä';
+  @override
+  String get readAloudStop => 'Lopeta lukeminen';
+  @override
+  String get readAloudPrevious => 'Edellinen kappale';
+  @override
+  String get readAloudNext => 'Seuraava kappale';
+  @override
+  String get readAloudPause => 'Tauko';
+  @override
+  String get readAloudResume => 'Jatka';
+  @override
+  String readAloudSpeed(String speed) => 'Nopeus $speed';
+  @override
+  String get readAloudSpeedTitle => 'Nopeus';
+  @override
+  String get readAloudVoice => 'Ääni';
+  @override
+  String get readAloudVoiceTitle => 'Ääni ja nopeus';
+  @override
+  String readAloudVoiceNumber(int n) => 'Ääni $n';
+  @override
+  String get readAloudDefault => 'Oletusääni';
+  @override
+  String get readAloudLanguage => 'Kieli';
+  @override
+  String get readAloudFromBook => 'kirjasta';
+  @override
+  String get readAloudOnDevice => 'laitteessa';
+  @override
+  String get readAloudNeedsNetwork => 'tarvitsee verkon';
+  @override
+  String readAloudListen(String voice) => 'Kuuntele: $voice';
+  @override
+  String get readAloudSettings => 'Tekstistä puheeksi -asetukset';
+  @override
+  String get readAloudBackToVoice => 'Takaisin ääneen';
+  @override
+  String readAloudWhere(String chapter, int paragraph, int paragraphs) =>
+      '$chapter · kappale $paragraph/$paragraphs';
+  @override
+  String get readAloudPaused => 'Tauolla';
+  @override
+  String get readAloudDeviceVoice => 'laitteen ääni';
+  @override
+  String readAloudNoVoiceTitle(String language) =>
+      'Ei ääntä kielelle $language';
+  @override
+  String readAloudNoVoiceBody(String language) =>
+      'Tämä kirja on kielellä $language, mutta laitteessa ei ole sille ääntä. '
+      'Voit asentaa äänen järjestelmän tekstistä puheeksi -asetuksista tai '
+      'lukea kirjan oletusäänellä.';
+  @override
+  String get readAloudUseDefault => 'Käytä oletusääntä';
+  @override
+  String get readAloudInstallVoice => 'Asenna ääni';
+  @override
+  String get readAloudSample => 'Näin tämä ääni lukee.';
+  @override
+  String get readAloudChannel => 'Ääneen lukeminen';
+
   // Settings: preview mode.
   // Settings: editor formatting.
   @override

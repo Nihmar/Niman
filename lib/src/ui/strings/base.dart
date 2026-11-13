@@ -238,6 +238,37 @@ abstract base class Strings {
   String get epubProgressShowTime;
   String get epubProgressShowChapter;
 
+  // Books: read aloud (#1276).
+  String get readAloud;
+  String get readAloudFromHere;
+  String get readAloudStop;
+  String get readAloudPrevious;
+  String get readAloudNext;
+  String get readAloudPause;
+  String get readAloudResume;
+  String readAloudSpeed(String speed);
+  String get readAloudSpeedTitle;
+  String get readAloudVoice;
+  String get readAloudVoiceTitle;
+  String readAloudVoiceNumber(int n);
+  String get readAloudDefault;
+  String get readAloudLanguage;
+  String get readAloudFromBook;
+  String get readAloudOnDevice;
+  String get readAloudNeedsNetwork;
+  String readAloudListen(String voice);
+  String get readAloudSettings;
+  String get readAloudBackToVoice;
+  String readAloudWhere(String chapter, int paragraph, int paragraphs);
+  String get readAloudPaused;
+  String get readAloudDeviceVoice;
+  String readAloudNoVoiceTitle(String language);
+  String readAloudNoVoiceBody(String language);
+  String get readAloudUseDefault;
+  String get readAloudInstallVoice;
+  String get readAloudSample;
+  String get readAloudChannel;
+
   // Settings: preview mode.
   // Settings: editor formatting.
   String get linkTypeTitle;

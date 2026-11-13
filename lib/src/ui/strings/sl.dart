@@ -446,6 +446,71 @@ final class SlovenianStrings extends Strings {
   @override
   String get epubProgressShowChapter => 'Pokaži napredek v poglavju';
 
+  // Books: read aloud (#1276).
+  @override
+  String get readAloud => 'Beri na glas';
+  @override
+  String get readAloudFromHere => 'Beri na glas od tu';
+  @override
+  String get readAloudStop => 'Ustavi branje';
+  @override
+  String get readAloudPrevious => 'Prejšnji odstavek';
+  @override
+  String get readAloudNext => 'Naslednji odstavek';
+  @override
+  String get readAloudPause => 'Premor';
+  @override
+  String get readAloudResume => 'Nadaljuj';
+  @override
+  String readAloudSpeed(String speed) => 'Hitrost $speed';
+  @override
+  String get readAloudSpeedTitle => 'Hitrost';
+  @override
+  String get readAloudVoice => 'Glas';
+  @override
+  String get readAloudVoiceTitle => 'Glas in hitrost';
+  @override
+  String readAloudVoiceNumber(int n) => 'Glas $n';
+  @override
+  String get readAloudDefault => 'Privzeti glas';
+  @override
+  String get readAloudLanguage => 'Jezik';
+  @override
+  String get readAloudFromBook => 'iz knjige';
+  @override
+  String get readAloudOnDevice => 'v napravi';
+  @override
+  String get readAloudNeedsNetwork => 'potrebuje omrežje';
+  @override
+  String readAloudListen(String voice) => 'Poslušaj: $voice';
+  @override
+  String get readAloudSettings => 'Nastavitve pretvorbe besedila v govor';
+  @override
+  String get readAloudBackToVoice => 'Nazaj h glasu';
+  @override
+  String readAloudWhere(String chapter, int paragraph, int paragraphs) =>
+      '$chapter · odstavek $paragraph od $paragraphs';
+  @override
+  String get readAloudPaused => 'Začasno ustavljeno';
+  @override
+  String get readAloudDeviceVoice => 'glas naprave';
+  @override
+  String readAloudNoVoiceTitle(String language) =>
+      'Ni glasu za jezik $language';
+  @override
+  String readAloudNoVoiceBody(String language) =>
+      'Ta knjiga je v jeziku $language, vendar naprava zanj nima glasu. Lahko '
+      'ga namestite v sistemskih nastavitvah pretvorbe besedila v govor ali '
+      'knjigo berete s privzetim glasom.';
+  @override
+  String get readAloudUseDefault => 'Uporabi privzeti glas';
+  @override
+  String get readAloudInstallVoice => 'Namesti glas';
+  @override
+  String get readAloudSample => 'Tako bere ta glas.';
+  @override
+  String get readAloudChannel => 'Branje na glas';
+
   // Settings: preview mode.
   // Settings: editor formatting.
   @override

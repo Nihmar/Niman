@@ -445,6 +445,71 @@ final class MacedonianStrings extends Strings {
   @override
   String get epubProgressShowChapter => 'Прикажи го напредокот во поглавјето';
 
+  // Books: read aloud (#1276).
+  @override
+  String get readAloud => 'Читај на глас';
+  @override
+  String get readAloudFromHere => 'Читај на глас од тука';
+  @override
+  String get readAloudStop => 'Запри го читањето';
+  @override
+  String get readAloudPrevious => 'Претходен пасус';
+  @override
+  String get readAloudNext => 'Следен пасус';
+  @override
+  String get readAloudPause => 'Пауза';
+  @override
+  String get readAloudResume => 'Продолжи';
+  @override
+  String readAloudSpeed(String speed) => 'Брзина $speed';
+  @override
+  String get readAloudSpeedTitle => 'Брзина';
+  @override
+  String get readAloudVoice => 'Глас';
+  @override
+  String get readAloudVoiceTitle => 'Глас и брзина';
+  @override
+  String readAloudVoiceNumber(int n) => 'Глас $n';
+  @override
+  String get readAloudDefault => 'Стандарден глас';
+  @override
+  String get readAloudLanguage => 'Јазик';
+  @override
+  String get readAloudFromBook => 'од книгата';
+  @override
+  String get readAloudOnDevice => 'на уредот';
+  @override
+  String get readAloudNeedsNetwork => 'бара мрежа';
+  @override
+  String readAloudListen(String voice) => 'Слушни: $voice';
+  @override
+  String get readAloudSettings => 'Поставки за претворање текст во говор';
+  @override
+  String get readAloudBackToVoice => 'Назад кон гласот';
+  @override
+  String readAloudWhere(String chapter, int paragraph, int paragraphs) =>
+      '$chapter · пасус $paragraph од $paragraphs';
+  @override
+  String get readAloudPaused => 'Паузирано';
+  @override
+  String get readAloudDeviceVoice => 'глас на уредот';
+  @override
+  String readAloudNoVoiceTitle(String language) =>
+      'Нема глас за јазикот $language';
+  @override
+  String readAloudNoVoiceBody(String language) =>
+      'Оваа книга е на $language, но уредот нема глас за него. Можете да '
+      'инсталирате глас во системските поставки за претворање текст во говор '
+      'или да ја читате со стандардниот глас.';
+  @override
+  String get readAloudUseDefault => 'Користи го стандардниот глас';
+  @override
+  String get readAloudInstallVoice => 'Инсталирај глас';
+  @override
+  String get readAloudSample => 'Вака чита овој глас.';
+  @override
+  String get readAloudChannel => 'Читање на глас';
+
   // Settings: preview mode.
   // Settings: editor formatting.
   @override

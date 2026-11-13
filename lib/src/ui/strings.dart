@@ -338,6 +338,48 @@ final class AppStrings {
   static String get epubProgressShowTime => _s.epubProgressShowTime;
   static String get epubProgressShowChapter => _s.epubProgressShowChapter;
 
+  // Books: read aloud (#1276).
+  static String get readAloud => _s.readAloud;
+  static String get readAloudFromHere => _s.readAloudFromHere;
+  static String get readAloudStop => _s.readAloudStop;
+  static String get readAloudPrevious => _s.readAloudPrevious;
+  static String get readAloudNext => _s.readAloudNext;
+  static String get readAloudPause => _s.readAloudPause;
+  static String get readAloudResume => _s.readAloudResume;
+  static String readAloudSpeed(String speed) => _s.readAloudSpeed(speed);
+  static String get readAloudSpeedTitle => _s.readAloudSpeedTitle;
+  static String get readAloudVoice => _s.readAloudVoice;
+  static String get readAloudVoiceTitle => _s.readAloudVoiceTitle;
+  static String readAloudVoiceNumber(int n) => _s.readAloudVoiceNumber(n);
+  static String get readAloudDefault => _s.readAloudDefault;
+  static String get readAloudLanguage => _s.readAloudLanguage;
+  static String get readAloudFromBook => _s.readAloudFromBook;
+  static String get readAloudOnDevice => _s.readAloudOnDevice;
+  static String get readAloudNeedsNetwork => _s.readAloudNeedsNetwork;
+  static String readAloudListen(String voice) => _s.readAloudListen(voice);
+  static String get readAloudSettings => _s.readAloudSettings;
+  static String get readAloudBackToVoice => _s.readAloudBackToVoice;
+  static String readAloudWhere(String chapter, int paragraph, int paragraphs) =>
+      _s.readAloudWhere(chapter, paragraph, paragraphs);
+  static String get readAloudPaused => _s.readAloudPaused;
+  static String get readAloudDeviceVoice => _s.readAloudDeviceVoice;
+  static String readAloudNoVoiceTitle(String language) =>
+      _s.readAloudNoVoiceTitle(language);
+  static String readAloudNoVoiceBody(String language) =>
+      _s.readAloudNoVoiceBody(language);
+  static String get readAloudUseDefault => _s.readAloudUseDefault;
+  static String get readAloudInstallVoice => _s.readAloudInstallVoice;
+  static String get readAloudSample => _s.readAloudSample;
+  static String get readAloudChannel => _s.readAloudChannel;
+
+  /// A reading pace, e.g. "1.25×", in the language's decimal separator.
+  static String readAloudRate(double rate) {
+    final text = rate == rate.roundToDouble()
+        ? rate.toStringAsFixed(0)
+        : rate.toString();
+    return '${text.replaceAll('.', _s.decimalSeparator)}×';
+  }
+
   /// A text size as a row's value, e.g. "120%".
   static String textScaleValue(double scale) => '${(scale * 100).round()}%';
 

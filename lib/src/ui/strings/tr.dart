@@ -433,6 +433,70 @@ final class TurkishStrings extends Strings {
   @override
   String get epubProgressShowChapter => 'Bölümdeki ilerlemeyi göster';
 
+  // Books: read aloud (#1276).
+  @override
+  String get readAloud => 'Sesli oku';
+  @override
+  String get readAloudFromHere => 'Buradan sesli oku';
+  @override
+  String get readAloudStop => 'Okumayı durdur';
+  @override
+  String get readAloudPrevious => 'Önceki paragraf';
+  @override
+  String get readAloudNext => 'Sonraki paragraf';
+  @override
+  String get readAloudPause => 'Duraklat';
+  @override
+  String get readAloudResume => 'Sürdür';
+  @override
+  String readAloudSpeed(String speed) => 'Hız $speed';
+  @override
+  String get readAloudSpeedTitle => 'Hız';
+  @override
+  String get readAloudVoice => 'Ses';
+  @override
+  String get readAloudVoiceTitle => 'Ses ve hız';
+  @override
+  String readAloudVoiceNumber(int n) => 'Ses $n';
+  @override
+  String get readAloudDefault => 'Varsayılan ses';
+  @override
+  String get readAloudLanguage => 'Dil';
+  @override
+  String get readAloudFromBook => 'kitaptan';
+  @override
+  String get readAloudOnDevice => 'cihazda';
+  @override
+  String get readAloudNeedsNetwork => 'ağ gerekir';
+  @override
+  String readAloudListen(String voice) => 'Dinle: $voice';
+  @override
+  String get readAloudSettings => 'Metin okuma ayarları';
+  @override
+  String get readAloudBackToVoice => 'Sese dön';
+  @override
+  String readAloudWhere(String chapter, int paragraph, int paragraphs) =>
+      '$chapter · paragraf $paragraph/$paragraphs';
+  @override
+  String get readAloudPaused => 'Duraklatıldı';
+  @override
+  String get readAloudDeviceVoice => 'cihaz sesi';
+  @override
+  String readAloudNoVoiceTitle(String language) => '$language için ses yok';
+  @override
+  String readAloudNoVoiceBody(String language) =>
+      'Bu kitabın dili $language, ancak cihazda bu dil için ses yok. Sistemin '
+      'metin okuma ayarlarından bir ses yükleyebilir veya kitabı varsayılan '
+      'sesle okutabilirsiniz.';
+  @override
+  String get readAloudUseDefault => 'Varsayılan sesi kullan';
+  @override
+  String get readAloudInstallVoice => 'Ses yükle';
+  @override
+  String get readAloudSample => 'Bu ses böyle okur.';
+  @override
+  String get readAloudChannel => 'Sesli okuma';
+
   // Settings: preview mode.
   // Settings: editor formatting.
   @override

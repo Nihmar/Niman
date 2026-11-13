@@ -440,6 +440,71 @@ final class CzechStrings extends Strings {
   @override
   String get epubProgressShowChapter => 'Zobrazit postup v kapitole';
 
+  // Books: read aloud (#1276).
+  @override
+  String get readAloud => 'Číst nahlas';
+  @override
+  String get readAloudFromHere => 'Číst nahlas odsud';
+  @override
+  String get readAloudStop => 'Zastavit čtení';
+  @override
+  String get readAloudPrevious => 'Předchozí odstavec';
+  @override
+  String get readAloudNext => 'Další odstavec';
+  @override
+  String get readAloudPause => 'Pozastavit';
+  @override
+  String get readAloudResume => 'Pokračovat';
+  @override
+  String readAloudSpeed(String speed) => 'Rychlost $speed';
+  @override
+  String get readAloudSpeedTitle => 'Rychlost';
+  @override
+  String get readAloudVoice => 'Hlas';
+  @override
+  String get readAloudVoiceTitle => 'Hlas a rychlost';
+  @override
+  String readAloudVoiceNumber(int n) => 'Hlas $n';
+  @override
+  String get readAloudDefault => 'Výchozí hlas';
+  @override
+  String get readAloudLanguage => 'Jazyk';
+  @override
+  String get readAloudFromBook => 'z knihy';
+  @override
+  String get readAloudOnDevice => 'v zařízení';
+  @override
+  String get readAloudNeedsNetwork => 'vyžaduje síť';
+  @override
+  String readAloudListen(String voice) => 'Poslechnout: $voice';
+  @override
+  String get readAloudSettings => 'Nastavení převodu textu na řeč';
+  @override
+  String get readAloudBackToVoice => 'Zpět k hlasu';
+  @override
+  String readAloudWhere(String chapter, int paragraph, int paragraphs) =>
+      '$chapter · odstavec $paragraph z $paragraphs';
+  @override
+  String get readAloudPaused => 'Pozastaveno';
+  @override
+  String get readAloudDeviceVoice => 'hlas zařízení';
+  @override
+  String readAloudNoVoiceTitle(String language) =>
+      'Žádný hlas pro jazyk $language';
+  @override
+  String readAloudNoVoiceBody(String language) =>
+      'Tato kniha je v jazyce $language, ale zařízení pro něj nemá hlas. '
+      'Můžete ho nainstalovat v systémovém nastavení převodu textu na řeč, '
+      'nebo knihu nechat číst výchozím hlasem.';
+  @override
+  String get readAloudUseDefault => 'Použít výchozí hlas';
+  @override
+  String get readAloudInstallVoice => 'Nainstalovat hlas';
+  @override
+  String get readAloudSample => 'Takto čte tento hlas.';
+  @override
+  String get readAloudChannel => 'Čtení nahlas';
+
   // Settings: preview mode.
   // Settings: editor formatting.
   @override

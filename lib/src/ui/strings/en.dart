@@ -440,6 +440,70 @@ final class EnglishStrings extends Strings {
   @override
   String get epubProgressShowChapter => 'Show progress in the chapter';
 
+  // Books: read aloud (#1276).
+  @override
+  String get readAloud => 'Read aloud';
+  @override
+  String get readAloudFromHere => 'Read aloud from here';
+  @override
+  String get readAloudStop => 'Stop reading';
+  @override
+  String get readAloudPrevious => 'Previous paragraph';
+  @override
+  String get readAloudNext => 'Next paragraph';
+  @override
+  String get readAloudPause => 'Pause';
+  @override
+  String get readAloudResume => 'Resume';
+  @override
+  String readAloudSpeed(String speed) => 'Speed $speed';
+  @override
+  String get readAloudSpeedTitle => 'Speed';
+  @override
+  String get readAloudVoice => 'Voice';
+  @override
+  String get readAloudVoiceTitle => 'Voice and speed';
+  @override
+  String readAloudVoiceNumber(int n) => 'Voice $n';
+  @override
+  String get readAloudDefault => 'Default voice';
+  @override
+  String get readAloudLanguage => 'Language';
+  @override
+  String get readAloudFromBook => 'from the book';
+  @override
+  String get readAloudOnDevice => 'on the device';
+  @override
+  String get readAloudNeedsNetwork => 'needs the network';
+  @override
+  String readAloudListen(String voice) => 'Listen to $voice';
+  @override
+  String get readAloudSettings => 'Text-to-speech settings';
+  @override
+  String get readAloudBackToVoice => 'Back to the voice';
+  @override
+  String readAloudWhere(String chapter, int paragraph, int paragraphs) =>
+      '$chapter · paragraph $paragraph of $paragraphs';
+  @override
+  String get readAloudPaused => 'Paused';
+  @override
+  String get readAloudDeviceVoice => 'device voice';
+  @override
+  String readAloudNoVoiceTitle(String language) => 'No voice in $language';
+  @override
+  String readAloudNoVoiceBody(String language) =>
+      'This book is in $language, but the device has no voice for it. You can '
+      'install one in the system text-to-speech settings, or have it read with '
+      'the default voice.';
+  @override
+  String get readAloudUseDefault => 'Use the default voice';
+  @override
+  String get readAloudInstallVoice => 'Install a voice';
+  @override
+  String get readAloudSample => 'This is how this voice reads.';
+  @override
+  String get readAloudChannel => 'Reading aloud';
+
   // Settings: preview mode.
   // Settings: editor formatting.
   @override
