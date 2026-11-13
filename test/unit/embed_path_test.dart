@@ -42,6 +42,23 @@ void main() {
     );
   });
 
+  test(
+    "a link written from the note's folder, percent-encoded, (#1282)",
+    () async {
+      final picture = File(p.join(root.path, 'My pictures', 'a.png'));
+      await picture.create(recursive: true);
+      expect(
+        await resolveEmbedPath('../My%20pictures/a.png', note, root.path, null),
+        picture.path,
+      );
+      expect(
+        await resolveEmbedPath('My%20pictures/a.png', note, root.path, null),
+        picture.path,
+        reason: 'written from the root, as before',
+      );
+    },
+  );
+
   test('then the link index, by unique name', () async {
     final indexed = File(p.join(root.path, 'Attachments', 'photo.png'))
       ..createSync(recursive: true)
