@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Lettura ad alta voce — in lettura</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Literata:opsz,wght@7..72,400;7..72,600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#1A5FB4}a:hover{color:#134a8c}
+.ic{width:44px;height:44px;border:0;background:transparent;border-radius:22px;display:flex;align-items:center;justify-content:center;color:#3C4043;padding:0;cursor:pointer;flex-shrink:0}
+.ic:hover{background:#E6E7EA}
+.ic:focus-visible,.play:focus-visible,.chip:focus-visible{outline:2px solid #1A5FB4;outline-offset:2px}
+.play{width:56px;height:56px;border:0;border-radius:28px;background:#1A5FB4;color:#FFFFFF;display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;flex-shrink:0}
+.play:hover{background:#134a8c}
+.chip{height:36px;min-width:56px;border:1px solid #C4C7CC;border-radius:18px;background:#FFFFFF;color:#1F1F1F;font:600 14px Inter,system-ui,sans-serif;padding:0 12px;cursor:pointer;flex-shrink:0}
+.chip:hover{background:#F1F2F4}
+</style>
+</head>
+<body>
+<div style="width: 390px; height: 844px; box-sizing: border-box; display: flex; flex-direction: column; background: #FFFFFF; font-family: Inter, system-ui, sans-serif; color: #1F1F1F; overflow: hidden">
+  <header style="height: 56px; flex-shrink: 0; display: flex; align-items: center; gap: 4px; padding: 0 4px; border-bottom: 1px solid #E3E4E6">
+    <button class="ic" aria-label="Indietro"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg></button>
+    <div style="flex: 1; min-width: 0; font-size: 17px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Le avventure di Pinocchio</div>
+  </header>
+  <main style="flex: 1; min-height: 0; overflow: hidden; padding: 24px 24px 0; font-family: Literata, Georgia, serif; font-size: 18px; line-height: 1.62; color: #24262A">
+    <h2 style="margin: 0 0 16px; font-size: 22px; font-weight: 600; line-height: 1.3">Capitolo I</h2>
+    <p style="margin: 0 0 14px"><span data-s data-p="0">C’era una volta…</span></p>
+    <p style="margin: 0 0 14px"><span data-s data-p="1">— Un re! — diranno subito i miei piccoli lettori.</span></p>
+    <p style="margin: 0 0 14px"><span data-s data-p="2">No, ragazzi, avete sbagliato.</span> <span data-s data-p="2">C’era una volta un pezzo di legno.</span></p>
+    <p style="margin: 0 0 14px"><span data-s data-p="3">Non era un legno di lusso, ma un semplice pezzo da catasta, di quelli che d’inverno si mettono nelle stufe e nei caminetti per accendere il fuoco e per riscaldare le stanze.</span></p>
+    <p style="margin: 0 0 14px"><span data-s data-p="4">Non so come andasse, ma il fatto gli è che un bel giorno questo pezzo di legno capitò nella bottega di un vecchio falegname, il quale aveva nome mastr’Antonio, se non che tutti lo chiamavano maestro Ciliegia, per via della punta del suo naso, che era sempre lustra e paonazza, come una ciliegia matura.</span></p>
+  </main>
+  <section aria-label="Lettura ad alta voce" style="flex-shrink: 0; background: #F7F7F8; border-top: 1px solid #E3E4E6; padding: 10px 8px 12px; display: flex; flex-direction: column; gap: 8px">
+    <div style="display: flex; align-items: center; gap: 8px; padding: 0 8px">
+      <span style="flex: 1; min-width: 0; font-size: 13px; font-weight: 500; color: #2B2D31; white-space: nowrap; overflow: hidden; text-overflow: ellipsis" id="where"></span>
+      <span style="font-size: 12px; color: #5F6368; white-space: nowrap" id="status"></span>
+    </div>
+    <div style="margin: 0 8px; height: 4px; border-radius: 2px; background: #E3E4E6; overflow: hidden" aria-hidden="true"><div style="height: 4px; background: #1A5FB4; width: 0" id="fill"></div></div>
+    <div style="display: flex; align-items: center; justify-content: space-between; padding: 2px 0 0">
+      <button class="ic" aria-label="Ferma la lettura"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+      <button class="ic" id="prev" aria-label="Paragrafo precedente"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 5v14M19 6l-9 6 9 6z"></path></svg></button>
+      <button class="play" id="play" aria-label="Pausa">
+        <svg data-icon="pause" width="26" height="26" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"></rect><rect x="14" y="5" width="4" height="14" rx="1"></rect></svg>
+        <svg data-icon="play" width="26" height="26" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13a1 1 0 001.5.9l10-6.5a1 1 0 000-1.7l-10-6.5A1 1 0 008 5.5z"></path></svg>
+      </button>
+      <button class="ic" id="next" aria-label="Paragrafo successivo"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 5v14M5 6l9 6-9 6z"></path></svg></button>
+      <button class="chip" id="speed" aria-label="Velocità 1×">1×</button>
+      <button class="ic" aria-label="Voce"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a3 3 0 013 3v5a3 3 0 01-6 0V6a3 3 0 013-3zM5 11a7 7 0 0014 0M12 18v3"></path></svg></button>
+    </div>
+  </section>
+</div>
+<script>
+// The player: the sentence spoken is marked and moves on by itself; pause,
+// the previous and next paragraph and the speed work as they would.
+(() => {
+  const spans = [...document.querySelectorAll('[data-s]')];
+  const paraOf = spans.map((s) => Number(s.dataset.p));
+  const paras = Math.max(...paraOf) + 1;
+  const where = document.getElementById('where');
+  const status = document.getElementById('status');
+  const fill = document.getElementById('fill');
+  const play = document.getElementById('play');
+  const speedChip = document.getElementById('speed');
+  const speeds = [1, 1.25, 1.5, 2, 0.5, 0.75];
+  const mark = 'background:#FFE2A8;color:#1F1F1F;border-radius:4px;box-shadow:0 0 0 3px #FFE2A8';
+  let at = 2, playing = true, speed = 1, elapsed = 0;
+  const fmt = (v) => String(v).replace('.', ',') + '×';
+  const firstOf = (p) => paraOf.indexOf(p);
+  function show() {
+    spans.forEach((s, i) => { s.style.cssText = i === at ? mark : ''; });
+    where.textContent = 'Capitolo I · paragrafo ' + (paraOf[at] + 1) + ' di ' + paras;
+    status.textContent = playing ? 'Italiano · voce del dispositivo' : 'In pausa';
+    fill.style.width = ((at + 1) / spans.length * 100).toFixed(1) + '%';
+    play.setAttribute('aria-label', playing ? 'Pausa' : 'Riprendi');
+    play.querySelector('[data-icon=pause]').style.display = playing ? '' : 'none';
+    play.querySelector('[data-icon=play]').style.display = playing ? 'none' : '';
+    const next = speeds[(speeds.indexOf(speed) + 1) % speeds.length];
+    speedChip.textContent = fmt(speed);
+    speedChip.setAttribute('aria-label', 'Velocità ' + fmt(speed) + ', tocca per ' + fmt(next));
+  }
+  setInterval(() => {
+    if (!playing) return;
+    const words = spans[at].textContent.split(/\s+/).length;
+    elapsed += 0.25;
+    if (elapsed < Math.max(1.4, words * 0.32) / speed) return;
+    elapsed = 0;
+    if (at + 1 >= spans.length) { at = 0; playing = false; } else { at += 1; }
+    show();
+  }, 250);
+  play.addEventListener('click', () => { playing = !playing; elapsed = 0; show(); });
+  speedChip.addEventListener('click', () => { speed = speeds[(speeds.indexOf(speed) + 1) % speeds.length]; show(); });
+  document.getElementById('next').addEventListener('click', () => { at = firstOf(Math.min(paraOf[at] + 1, paras - 1)); elapsed = 0; show(); });
+  document.getElementById('prev').addEventListener('click', () => {
+    const start = firstOf(paraOf[at]);
+    at = firstOf(at > start || paraOf[at] === 0 ? paraOf[at] : paraOf[at] - 1);
+    elapsed = 0;
+    show();
+  });
+  show();
+})();
+</script>
+</body>
+</html>
