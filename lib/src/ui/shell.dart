@@ -514,9 +514,9 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     calendarSourceFactory: widget.calendarSourceFactory,
     linkSource: () => _settings.linkSource,
     suggester: () => _settings.wikilinkSuggester,
-    linkPreview: () => _settings.editor.linkPreview,
-    newItemLocation: () => _settings.editor.newItemLocation,
+    editor: () => _settings.editor,
     openNote: _openNoteFromLink,
+    workspace: _workspace,
     guard: _guard,
     context: () => context,
   );

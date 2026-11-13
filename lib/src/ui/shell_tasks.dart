@@ -7,7 +7,6 @@ import 'package:niman/src/calendar/calendar_store.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/settings/library_features.dart';
 import 'package:niman/src/export/printed_todo_block.dart';
-import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/links/library_links.dart';
 import 'package:niman/src/links/suggester.dart';
@@ -20,11 +19,14 @@ import 'package:niman/src/todo/todo_list_view.dart';
 import 'package:niman/src/todo/todo_list_view_session.dart';
 import 'package:niman/src/todo/todo_source.dart';
 import 'package:niman/src/todo/todo_store.dart';
+import 'package:niman/src/ui/device_shape.dart';
 import 'package:niman/src/ui/export_todo_blocks.dart';
 import 'package:niman/src/ui/note_link_targets.dart';
 import 'package:niman/src/ui/note_tasks_host.dart';
 import 'package:niman/src/ui/search_task_events.dart';
+import 'package:niman/src/ui/shell_editor_settings.dart';
 import 'package:niman/src/ui/shell_note_io.dart';
+import 'package:niman/src/ui/shell_workspace.dart';
 import 'package:niman/src/ui/todo_edit_dialog.dart';
 import 'package:niman/src/ui/todo_link_host.dart';
 import 'package:path/path.dart' as p;
@@ -43,9 +45,9 @@ final class ShellTasks {
     required CalendarSource Function(String root) calendarSourceFactory,
     required this.linkSource,
     required this.suggester,
-    required this.linkPreview,
-    required this.newItemLocation,
+    required this.editor,
     required this.openNote,
+    required this.workspace,
     required this.guard,
     required this.context,
   }) : _reminders = reminders,
@@ -84,14 +86,16 @@ final class ShellTasks {
   /// The library the link suggester reads, once resolved.
   final WikilinkSuggester? Function() suggester;
 
-  /// Whether a link's preview shows on hover (settings, #846).
-  final bool Function() linkPreview;
-
-  /// Where a note made from a task's dead link lands (#78).
-  final NewItemLocation Function() newItemLocation;
+  /// The editor's settings: whether a link's preview shows on hover
+  /// (#846), where a note made from a task's dead link lands (#78).
+  final ShellEditorSettings Function() editor;
 
   /// Opens a note by library-relative path, at a heading when there is one.
   final void Function(String path, String? anchor) openNote;
+
+  /// The panes and their tabs, which a note a task's link names opens in
+  /// (#1268).
+  final ShellWorkspace workspace;
 
   /// The shell's reentrancy guard around a write.
   final Future<void> Function(Future<void> Function() action) guard;
@@ -122,7 +126,7 @@ final class ShellTasks {
     map: links,
     targets: linkTargets,
     source: linkSource,
-    previewEnabled: linkPreview,
+    previewEnabled: () => editor().linkPreview,
     suggester: suggester,
   );
 
@@ -164,22 +168,37 @@ final class ShellTasks {
   /// What following a link written in a task asks (#1152): `todo.txt` sits
   /// at the library root, a link in it is resolved from there, and it opens
   /// a note, or offers to create one, as a link in a note does. [anchor] is
-  /// where the pointer went down, when a pointer did.
-  NoteLinkTargets linkTargets(Rect? anchor) {
+  /// where the pointer went down, when a pointer did; [behind] opens the
+  /// note in a tab behind the one showing (see [_openFromTask]).
+  NoteLinkTargets linkTargets(Rect? anchor, {bool behind = false}) {
     final root = session.root ?? '';
     return NoteLinkTargets(
       source: linkSource(),
       notePath: p.join(root, todoFileName),
       libraryRoot: session.root,
-      newItemLocation: newItemLocation(),
+      newItemLocation: editor().newItemLocation,
       // A task has no headings of its own: an anchor lands in the note the
       // link opens.
       outline: const [],
       jumpToHeading: (_) {},
-      onOpenNote: openNote,
+      onOpenNote: (path, at) => _openFromTask(path, at, behind: behind),
       createMissingNote: missingNoteCreatorFor(session),
       anchor: anchor,
     );
+  }
+
+  /// Opens the note a task's link names (#1268). On a wide window it opens
+  /// in a tab of its own, not in place of the note on show: the list is
+  /// not that note, and a link followed from it took the tab away. With
+  /// [behind] (Ctrl, Cmd or a middle click on the chip) the tab opens
+  /// behind the one showing and the list stays on screen; the note lands
+  /// on [anchor] when its tab first shows. A note already open shows in
+  /// its tab. A phone has one note on screen, and shows it.
+  void _openFromTask(String path, String? anchor, {required bool behind}) {
+    if (!isWideShell(context())) return openNote(path, anchor);
+    if (behind) return workspace.openBehind(path, anchor: anchor);
+    workspace.show(path, newTab: true);
+    openNote(path, anchor);
   }
 
   /// Adds a task from the Todo tab's add FAB (T-TD-04), or from a Home

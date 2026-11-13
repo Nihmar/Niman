@@ -8,6 +8,7 @@ import 'dart:async';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/todo/task_links.dart';
@@ -31,6 +32,7 @@ void main() {
   late TodoLinkHost host;
   late TodoListView view;
   late List<(String, String?)> opened;
+  late List<bool> behinds;
   late List<String> created;
 
   Future<void> pumpTab(
@@ -46,6 +48,7 @@ void main() {
       notes: ['House/Repairs.md', 'Ideas.md', 'a/Twin.md', 'b/Twin.md'],
     )..queryGate = gate;
     opened = [];
+    behinds = [];
     created = [];
     controller = TodoController(
       session: session,
@@ -63,14 +66,17 @@ void main() {
       map: map,
       source: () => links,
       previewEnabled: () => false,
-      targets: (anchor) => NoteLinkTargets(
+      targets: (anchor, {behind = false}) => NoteLinkTargets(
         source: links,
         notePath: '/fake/todo.txt',
         libraryRoot: '/fake',
         newItemLocation: NewItemLocation.openNoteFolder,
         outline: const [],
         jumpToHeading: (_) {},
-        onOpenNote: (path, anchor) => opened.add((path, anchor)),
+        onOpenNote: (path, anchor) {
+          opened.add((path, anchor));
+          behinds.add(behind);
+        },
         createMissingNote: (path) async {
           created.add(path);
           return path;
@@ -224,6 +230,26 @@ void main() {
         ('House/Repairs.md', 'Boiler'),
         ('House/Repairs.md', '^b7'),
       ]);
+    });
+
+    testWidgets('plainly opens the note in front, and a middle click or '
+        'Ctrl behind (#1268)', (tester) async {
+      await pumpTab(tester, ['Call the plumber [[Ideas]]'], pointer: true);
+      await resolved(tester);
+      await tester.tap(chip('Ideas'));
+      await tester.pump();
+      await tester.tap(chip('Ideas'), buttons: kTertiaryButton);
+      await tester.pump();
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await tester.tap(chip('Ideas'));
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      await tester.pump();
+      expect(opened, [
+        ('Ideas.md', null),
+        ('Ideas.md', null),
+        ('Ideas.md', null),
+      ]);
+      expect(behinds, [false, true, true]);
     });
 
     testWidgets("opens a note from a pointer's row too", (tester) async {

@@ -88,18 +88,24 @@ final class TodoLinkChip extends StatelessWidget {
           color: dead ? Colors.transparent : color.withValues(alpha: 0.16),
           shape: const StadiumBorder(),
           clipBehavior: Clip.antiAlias,
-          child: InkWell(
-            key: Key('todo-link-chip-${link.label}'),
-            onTap: h == null ? null : () => _follow(context, h),
-            onLongPress: h == null || !_touch(theme)
+          // A middle click opens the note behind the tab showing (#1268).
+          child: GestureDetector(
+            onTertiaryTapUp: h == null
                 ? null
-                : () => h.preview(context, link),
-            child: Padding(
-              padding: EdgeInsetsDirectional.only(
-                start: dead ? 6 : 5,
-                end: dead ? 8 : 8,
+                : (_) => _follow(context, h, behind: true),
+            child: InkWell(
+              key: Key('todo-link-chip-${link.label}'),
+              onTap: h == null ? null : () => _follow(context, h),
+              onLongPress: h == null || !_touch(theme)
+                  ? null
+                  : () => h.preview(context, link),
+              child: Padding(
+                padding: EdgeInsetsDirectional.only(
+                  start: dead ? 6 : 5,
+                  end: dead ? 8 : 8,
+                ),
+                child: body,
               ),
-              child: body,
             ),
           ),
         ),
@@ -119,7 +125,7 @@ final class TodoLinkChip extends StatelessWidget {
   }
 
   /// Follows the link, telling where the chip is, for a question it asks.
-  void _follow(BuildContext context, TodoLinkHost host) {
+  void _follow(BuildContext context, TodoLinkHost host, {bool behind = false}) {
     final box = context.findRenderObject();
     final anchor = box is RenderBox && box.hasSize
         ? box.localToGlobal(Offset.zero) & box.size
@@ -129,6 +135,7 @@ final class TodoLinkChip extends StatelessWidget {
         context,
         link,
         anchor: _touch(Theme.of(context)) ? null : anchor,
+        behind: behind,
       ),
     );
   }
