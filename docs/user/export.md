@@ -125,16 +125,21 @@ one zip:
 - **HTML** — every Markdown note as a page at its own relative path, the
   other files copied beside it. A picture used by several notes is stored
   once. A wikilink between two notes of the export becomes a relative
-  link; a link to a note outside the folder — which the zip does not
+  link, and so does a link — wikilink or Markdown — to any other file of
+  the folder, a PDF or an attachment in whichever subfolder it sits: it
+  points at the copy beside the pages, `../attachments/target.pdf` from
+  a page one folder down, though the note names it `[[target.pdf]]`. A
+  link to a note or a file outside the folder — which the zip does not
   hold — stays as the note wrote it, so nothing points at a page that is
   not there.
 - **PDF** — every Markdown note as **its own PDF**, one file per note, at
   the note's own relative path (`Notes/it.md` becomes `Notes/it.pdf`);
   the other files are copied beside them, and each page carries its own
   note's pictures inside it. Links between notes point at the other
-  PDFs. Printing a folder needs something to print with, as a note's PDF
-  does; where the machine has neither a browser nor Android's WebView,
-  the format is not offered.
+  PDFs, and a link to another file of the folder at its copy. Printing a
+  folder needs something to print with, as a note's PDF does; where the
+  machine has neither a browser nor Android's WebView, the format is not
+  offered.
 - **EPUB** — the folder (or the library) as **one book**: every Markdown
   note is a chapter, in the tree's own order, with a table of contents
   and links between the chapters. The pictures the chapters show travel

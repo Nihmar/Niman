@@ -18,6 +18,7 @@ import 'package:niman/src/export/note_html.dart';
 import 'package:niman/src/export/note_html_source.dart';
 import 'package:niman/src/export/pdf_printer.dart';
 import 'package:niman/src/frontmatter/parser.dart';
+import 'package:niman/src/links/link_path.dart';
 import 'package:niman/src/links/parser.dart';
 import 'package:niman/src/markdown/note_bytes.dart';
 import 'package:path/path.dart' as p;
@@ -166,14 +167,17 @@ abstract final class ExportTreePages {
   }) {
     final noteDir = p.dirname(rel);
     final title = pageTitle(text, rel);
+    // The zip holds the subtree's other files beside the pages, so a link
+    // to one of them is a link too; a note's own link wins over a file's.
+    final files = fileLinks(text, noteDir, tree);
     final source = NoteHtmlSource(
       text: text,
       title: title,
       images: embedPictures
           ? imageFileUrls(text, noteDir, tree)
           : imageUrls(text, noteDir, tree),
-      links: linkUrls(text, noteDir, tree, linkExtension),
-      anchors: linkAnchors(text, noteDir, tree),
+      links: {...files.links, ...linkUrls(text, noteDir, tree, linkExtension)},
+      anchors: {...files.anchors, ...linkAnchors(text, noteDir, tree)},
       kanban: kanban,
     );
     final html = NoteHtml(source);
@@ -258,6 +262,54 @@ abstract final class ExportTreePages {
       }
     }
     return out;
+  }
+
+  /// The links [text] writes to files of the subtree that are not notes —
+  /// a PDF, a book, an attachment (#1278, #1279) — as URLs relative to the
+  /// page, at the copy the zip holds beside it: `links` by the target as
+  /// written, `anchors` the fragment a wikilink carries, kept as written
+  /// (`#page=34` is the page a browser's PDF viewer opens on).
+  ///
+  /// A target outside the subtree, or one that names a note, is left out:
+  /// a note is [linkUrls]'s, and a file the zip does not hold stays as the
+  /// note wrote it.
+  static ({Map<String, String> links, Map<String, String> anchors}) fileLinks(
+    String text,
+    String noteDir,
+    ExportTreeWalk tree,
+  ) {
+    final links = <String, String>{};
+    final anchors = <String, String>{};
+    String? fileFor(String target) {
+      final file = fileIn(target, noteDir, tree.files);
+      return file == null || isNote(file) ? null : file;
+    }
+
+    for (final link in parseLinks(text)) {
+      switch (link) {
+        case WikiLink(:final ref):
+          final file = fileFor(ref.target);
+          if (file == null) continue;
+          links[ref.target] = url(noteDir, file);
+          final heading = ref.heading;
+          if (heading != null) {
+            anchors[ExportAnchors.keyOf(ref.target, heading)] = heading;
+          }
+        case MarkdownLink(:final href):
+          final written = href.trim();
+          if (LinkPaths.hasScheme(written) || written.startsWith('#')) {
+            continue;
+          }
+          final read = LinkPaths.markdownTarget(written);
+          if (read == null) continue;
+          final file = fileFor(read.path);
+          if (file == null) continue;
+          final fragment = read.fragment;
+          links[href] =
+              '${url(noteDir, file)}${fragment == null ? '' : '#$fragment'}';
+      }
+    }
+    return (links: links, anchors: anchors);
   }
 
   /// The ids the links of [text] with a `#` in their heading land on, read
