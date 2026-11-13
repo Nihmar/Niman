@@ -427,6 +427,23 @@ final class PortugueseStrings extends Strings {
   @override
   String get epubTextSizeTitle => 'Tamanho do texto';
 
+  // Books: reading progress (#1275).
+  @override
+  String epubProgressBook(int percent, int chapter, int chapters) =>
+      '$percent% do livro · capítulo $chapter de $chapters';
+  @override
+  String epubProgressTime(String chapter, String book) =>
+      'Capítulo ≈ $chapter · Livro ≈ $book';
+  @override
+  String readingTimeValue(int hours, int minutes) =>
+      hours == 0 ? '$minutes min' : '$hours h $minutes min';
+  @override
+  String get epubProgressShowBook => 'Mostrar o progresso no livro';
+  @override
+  String get epubProgressShowTime => 'Mostrar o tempo restante';
+  @override
+  String get epubProgressShowChapter => 'Mostrar o progresso no capítulo';
+
   // Settings: preview mode.
   // Settings: editor formatting.
   @override

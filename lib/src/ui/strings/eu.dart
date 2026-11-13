@@ -424,6 +424,23 @@ final class BasqueStrings extends Strings {
   @override
   String get epubTextSizeTitle => 'Testuaren tamaina';
 
+  // Books: reading progress (#1275).
+  @override
+  String epubProgressBook(int percent, int chapter, int chapters) =>
+      'Liburua: %$percent · $chapter. kapitulua, $chapters guztira';
+  @override
+  String epubProgressTime(String chapter, String book) =>
+      'Kapitulua ≈ $chapter · Liburua ≈ $book';
+  @override
+  String readingTimeValue(int hours, int minutes) =>
+      hours == 0 ? '$minutes min' : '$hours h $minutes min';
+  @override
+  String get epubProgressShowBook => 'Erakutsi liburuko aurrerapena';
+  @override
+  String get epubProgressShowTime => 'Erakutsi geratzen den denbora';
+  @override
+  String get epubProgressShowChapter => 'Erakutsi kapituluko aurrerapena';
+
   // Settings: preview mode.
   // Settings: editor formatting.
   @override

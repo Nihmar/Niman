@@ -91,6 +91,35 @@ Tests: `test/unit/xhtml_markdown_test.dart`,
 `test/widget/epub_pane_test.dart`, `test/widget/epub_look_sheet_test.dart`,
 `test/widget/epub_look_settings_test.dart`.
 
+## How far it has been read (#1275)
+
+`lib/src/epub/epub_progress.dart`: `EpubCounts` counts the book's
+Markdown once, a line at a time — its characters, whitespace left out,
+and its words, kept in halves so a script written without spaces counts a
+word every two characters — on the isolate that reads the book
+(`readEpub`), into `EpubDocument.counts`. `EpubProgress` looks a place up
+in them against the chapters' first lines: the chapter (a binary search),
+how far into it and into the book, and the minutes left to each at 250
+words a minute. In characters, not lines or laid-out pixels: a book's
+paragraphs vary too much in length for lines to be fair, and the pixels
+are known only for the part built so far.
+
+`lib/src/ui/epub_progress_line.dart` — `EpubProgressLine`, one button
+(its semantics a container of its own: the label is what it shows, the
+hint what a tap shows next) cycling `EpubProgressView` chapter → book →
+time; a tooltip has the three at once. The pane follows the view's top
+anchor into a `ValueNotifier` on every scroll, and the book's end once the
+view can go no further, so only the line rebuilds. `EpubBar` puts it over
+the row below 600 logical pixels and beside the book's name from there
+(`AttachmentBar.beside`, flexible, two thirds of the room the actions
+leave). The view is the books' look's `progress` (`epubProgress`), shown
+on every open book at once through `EpubLooks` and kept through
+`EpubPane.onProgressView` → `keepEpubProgressView`.
+
+Tests: `test/unit/epub_progress_test.dart`,
+`test/widget/epub_progress_line_test.dart`. The mockups and what was
+decided with them: [docs/design/book-progress](../design/book-progress/README.md).
+
 ## Where the reader was left (#281)
 
 `lib/src/reading/`: a `BookLocation` is a place in a document in its own

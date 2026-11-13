@@ -1,9 +1,11 @@
-// How the books look (#280): four device settings of the library, read
-// the settings file's way — a value nobody can read is the default.
+// How the books look (#280): device settings of the library, read the
+// settings file's way — a value nobody can read is the default — and the
+// view their progress line shows (#1275).
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/core/theme.dart';
 import 'package:niman/src/epub/epub_look.dart';
+import 'package:niman/src/epub/epub_progress.dart';
 
 void main() {
   test('a fresh library reads its books in Literata, in the app colors', () {
@@ -13,6 +15,7 @@ void main() {
     expect(look.brightness, isNull);
     expect(look.font, EpubFont.literata);
     expect(look.textScale, defaultTextScale);
+    expect(look.progress, EpubProgressView.chapter);
   });
 
   test('a look goes to the settings and back', () {
@@ -21,12 +24,14 @@ void main() {
       brightness: AppBrightness.night,
       font: EpubFont.serif,
       textScale: 1.25,
+      progress: EpubProgressView.time,
     );
     expect(look.toJson(), {
       EpubLook.themeKey: 'custom:abc',
       EpubLook.brightnessKey: 'night',
       EpubLook.fontKey: 'serif',
       EpubLook.textScaleKey: 1.25,
+      EpubLook.progressKey: 'time',
     });
     expect(EpubLook.fromJson(look.toJson()), look);
     final config = LibraryConfig.defaults.copyWith(epubLook: look);
@@ -45,11 +50,13 @@ void main() {
       EpubLook.brightnessKey: 'dusk',
       EpubLook.fontKey: 'comic',
       EpubLook.textScaleKey: 9,
+      EpubLook.progressKey: 'pages',
     });
     expect(look.theme, isNull);
     // An unknown brightness is the system's, as the app's own is.
     expect(look.brightness, AppBrightness.system);
     expect(look.font, EpubFont.literata);
+    expect(look.progress, EpubProgressView.chapter);
     expect(look.textScale, maxBookTextScale);
   });
 

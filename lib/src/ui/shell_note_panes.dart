@@ -11,6 +11,7 @@ import 'package:niman/src/reading/reading_positions.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/ui/attachment_view.dart';
 import 'package:niman/src/ui/epub_look_sheet.dart';
+import 'package:niman/src/ui/epub_progress_line.dart';
 import 'package:niman/src/ui/epub_text_zoom.dart';
 import 'package:niman/src/ui/hidden_slot.dart';
 import 'package:niman/src/ui/note_services.dart';
@@ -242,6 +243,8 @@ final class ShellNotePanes {
           onEditEpubLook: (anchor) => _editEpubLook(controller, anchor),
           onEpubTextScale: (scale) =>
               unawaited(keepEpubTextScale(controller, scale)),
+          onEpubProgressView: (view) =>
+              unawaited(keepEpubProgressView(controller, view)),
           positions: switch (controller.root) {
             final root? => ReadingPositions(root),
             null => null,
@@ -481,6 +484,8 @@ final class ShellNotePanes {
                         _editEpubLook(controller, anchor),
                     onEpubTextScale: (scale) =>
                         unawaited(keepEpubTextScale(controller, scale)),
+                    onEpubProgressView: (view) =>
+                        unawaited(keepEpubProgressView(controller, view)),
                     epubFullScreen: immersive.fullScreen,
                   ),
                 ),

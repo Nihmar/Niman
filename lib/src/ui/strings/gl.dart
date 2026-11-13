@@ -429,6 +429,23 @@ final class GalicianStrings extends Strings {
   @override
   String get epubTextSizeTitle => 'Tamaño do texto';
 
+  // Books: reading progress (#1275).
+  @override
+  String epubProgressBook(int percent, int chapter, int chapters) =>
+      '$percent % do libro · capítulo $chapter de $chapters';
+  @override
+  String epubProgressTime(String chapter, String book) =>
+      'Capítulo ≈ $chapter · Libro ≈ $book';
+  @override
+  String readingTimeValue(int hours, int minutes) =>
+      hours == 0 ? '$minutes min' : '$hours h $minutes min';
+  @override
+  String get epubProgressShowBook => 'Amosar o progreso no libro';
+  @override
+  String get epubProgressShowTime => 'Amosar o tempo restante';
+  @override
+  String get epubProgressShowChapter => 'Amosar o progreso no capítulo';
+
   // Settings: preview mode.
   // Settings: editor formatting.
   @override

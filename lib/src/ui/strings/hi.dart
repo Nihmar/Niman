@@ -414,6 +414,23 @@ final class HindiStrings extends Strings {
   @override
   String get epubTextSizeTitle => 'टेक्स्ट का आकार';
 
+  // Books: reading progress (#1275).
+  @override
+  String epubProgressBook(int percent, int chapter, int chapters) =>
+      'किताब का $percent% · अध्याय $chapter/$chapters';
+  @override
+  String epubProgressTime(String chapter, String book) =>
+      'अध्याय ≈ $chapter · किताब ≈ $book';
+  @override
+  String readingTimeValue(int hours, int minutes) =>
+      hours == 0 ? '$minutes मिनट' : '$hours घंटे $minutes मिनट';
+  @override
+  String get epubProgressShowBook => 'किताब में प्रगति दिखाएँ';
+  @override
+  String get epubProgressShowTime => 'बचा हुआ समय दिखाएँ';
+  @override
+  String get epubProgressShowChapter => 'अध्याय में प्रगति दिखाएँ';
+
   // Settings: preview mode.
   // Settings: editor formatting.
   @override

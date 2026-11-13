@@ -430,6 +430,23 @@ final class DutchStrings extends Strings {
   @override
   String get epubTextSizeTitle => 'Tekstgrootte';
 
+  // Books: reading progress (#1275).
+  @override
+  String epubProgressBook(int percent, int chapter, int chapters) =>
+      '$percent% van het boek · hoofdstuk $chapter van $chapters';
+  @override
+  String epubProgressTime(String chapter, String book) =>
+      'Hoofdstuk ≈ $chapter · Boek ≈ $book';
+  @override
+  String readingTimeValue(int hours, int minutes) =>
+      hours == 0 ? '$minutes min' : '$hours u $minutes min';
+  @override
+  String get epubProgressShowBook => 'Voortgang in het boek tonen';
+  @override
+  String get epubProgressShowTime => 'Resterende tijd tonen';
+  @override
+  String get epubProgressShowChapter => 'Voortgang in het hoofdstuk tonen';
+
   // Settings: preview mode.
   // Settings: editor formatting.
   @override

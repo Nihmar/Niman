@@ -428,6 +428,23 @@ final class MacedonianStrings extends Strings {
   @override
   String get epubTextSizeTitle => 'Големина на текстот';
 
+  // Books: reading progress (#1275).
+  @override
+  String epubProgressBook(int percent, int chapter, int chapters) =>
+      '$percent % од книгата · поглавје $chapter од $chapters';
+  @override
+  String epubProgressTime(String chapter, String book) =>
+      'Поглавје ≈ $chapter · Книга ≈ $book';
+  @override
+  String readingTimeValue(int hours, int minutes) =>
+      hours == 0 ? '$minutes мин' : '$hours ч $minutes мин';
+  @override
+  String get epubProgressShowBook => 'Прикажи го напредокот во книгата';
+  @override
+  String get epubProgressShowTime => 'Прикажи го преостанатото време';
+  @override
+  String get epubProgressShowChapter => 'Прикажи го напредокот во поглавјето';
+
   // Settings: preview mode.
   // Settings: editor formatting.
   @override

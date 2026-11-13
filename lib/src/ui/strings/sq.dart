@@ -423,6 +423,23 @@ final class AlbanianStrings extends Strings {
   @override
   String get epubTextSizeTitle => 'Madhësia e tekstit';
 
+  // Books: reading progress (#1275).
+  @override
+  String epubProgressBook(int percent, int chapter, int chapters) =>
+      '$percent% e librit · kapitulli $chapter nga $chapters';
+  @override
+  String epubProgressTime(String chapter, String book) =>
+      'Kapitulli ≈ $chapter · Libri ≈ $book';
+  @override
+  String readingTimeValue(int hours, int minutes) =>
+      hours == 0 ? '$minutes min' : '$hours orë $minutes min';
+  @override
+  String get epubProgressShowBook => 'Shfaq përparimin në libër';
+  @override
+  String get epubProgressShowTime => 'Shfaq kohën e mbetur';
+  @override
+  String get epubProgressShowChapter => 'Shfaq përparimin në kapitull';
+
   // Settings: preview mode.
   // Settings: editor formatting.
   @override

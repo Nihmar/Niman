@@ -425,6 +425,23 @@ final class HungarianStrings extends Strings {
   @override
   String get epubTextSizeTitle => 'Szövegméret';
 
+  // Books: reading progress (#1275).
+  @override
+  String epubProgressBook(int percent, int chapter, int chapters) =>
+      'A könyv $percent%-a · $chapter./$chapters fejezet';
+  @override
+  String epubProgressTime(String chapter, String book) =>
+      'Fejezet ≈ $chapter · Könyv ≈ $book';
+  @override
+  String readingTimeValue(int hours, int minutes) =>
+      hours == 0 ? '$minutes perc' : '$hours óra $minutes perc';
+  @override
+  String get epubProgressShowBook => 'A könyvbeli haladás mutatása';
+  @override
+  String get epubProgressShowTime => 'A hátralévő idő mutatása';
+  @override
+  String get epubProgressShowChapter => 'A fejezetbeli haladás mutatása';
+
   // Settings: preview mode.
   // Settings: editor formatting.
   @override

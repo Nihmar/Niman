@@ -424,6 +424,23 @@ final class LithuanianStrings extends Strings {
   @override
   String get epubTextSizeTitle => 'Teksto dydis';
 
+  // Books: reading progress (#1275).
+  @override
+  String epubProgressBook(int percent, int chapter, int chapters) =>
+      '$percent % knygos · $chapter skyrius iš $chapters';
+  @override
+  String epubProgressTime(String chapter, String book) =>
+      'Skyrius ≈ $chapter · Knyga ≈ $book';
+  @override
+  String readingTimeValue(int hours, int minutes) =>
+      hours == 0 ? '$minutes min.' : '$hours val. $minutes min.';
+  @override
+  String get epubProgressShowBook => 'Rodyti pažangą knygoje';
+  @override
+  String get epubProgressShowTime => 'Rodyti likusį laiką';
+  @override
+  String get epubProgressShowChapter => 'Rodyti pažangą skyriuje';
+
   // Settings: preview mode.
   // Settings: editor formatting.
   @override

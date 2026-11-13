@@ -432,6 +432,23 @@ final class RomanianStrings extends Strings {
   @override
   String get epubTextSizeTitle => 'Dimensiunea textului';
 
+  // Books: reading progress (#1275).
+  @override
+  String epubProgressBook(int percent, int chapter, int chapters) =>
+      '$percent% din carte · capitolul $chapter din $chapters';
+  @override
+  String epubProgressTime(String chapter, String book) =>
+      'Capitol ≈ $chapter · Carte ≈ $book';
+  @override
+  String readingTimeValue(int hours, int minutes) =>
+      hours == 0 ? '$minutes min' : '$hours h $minutes min';
+  @override
+  String get epubProgressShowBook => 'Arată progresul în carte';
+  @override
+  String get epubProgressShowTime => 'Arată timpul rămas';
+  @override
+  String get epubProgressShowChapter => 'Arată progresul în capitol';
+
   // Settings: preview mode.
   // Settings: editor formatting.
   @override

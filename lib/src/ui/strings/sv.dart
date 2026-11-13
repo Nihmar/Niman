@@ -428,6 +428,23 @@ final class SwedishStrings extends Strings {
   @override
   String get epubTextSizeTitle => 'Textstorlek';
 
+  // Books: reading progress (#1275).
+  @override
+  String epubProgressBook(int percent, int chapter, int chapters) =>
+      '$percent % av boken · kapitel $chapter av $chapters';
+  @override
+  String epubProgressTime(String chapter, String book) =>
+      'Kapitel ≈ $chapter · Bok ≈ $book';
+  @override
+  String readingTimeValue(int hours, int minutes) =>
+      hours == 0 ? '$minutes min' : '$hours h $minutes min';
+  @override
+  String get epubProgressShowBook => 'Visa förlopp i boken';
+  @override
+  String get epubProgressShowTime => 'Visa återstående tid';
+  @override
+  String get epubProgressShowChapter => 'Visa förlopp i kapitlet';
+
   // Settings: preview mode.
   // Settings: editor formatting.
   @override

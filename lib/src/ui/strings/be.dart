@@ -423,6 +423,23 @@ final class BelarusianStrings extends Strings {
   @override
   String get epubTextSizeTitle => 'Памер тэксту';
 
+  // Books: reading progress (#1275).
+  @override
+  String epubProgressBook(int percent, int chapter, int chapters) =>
+      '$percent % кнігі · раздзел $chapter з $chapters';
+  @override
+  String epubProgressTime(String chapter, String book) =>
+      'Раздзел ≈ $chapter · Кніга ≈ $book';
+  @override
+  String readingTimeValue(int hours, int minutes) =>
+      hours == 0 ? '$minutes хв' : '$hours гадз $minutes хв';
+  @override
+  String get epubProgressShowBook => 'Паказаць прагрэс у кнізе';
+  @override
+  String get epubProgressShowTime => 'Паказаць час, які застаўся';
+  @override
+  String get epubProgressShowChapter => 'Паказаць прагрэс у раздзеле';
+
   // Settings: preview mode.
   // Settings: editor formatting.
   @override

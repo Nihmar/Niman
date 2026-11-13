@@ -325,6 +325,19 @@ final class AppStrings {
   static String get epubFontMono => _s.epubFontMono;
   static String get epubTextSizeTitle => _s.epubTextSizeTitle;
 
+  // Books: reading progress (#1275).
+  static String epubProgressBook(int percent, int chapter, int chapters) =>
+      _s.epubProgressBook(percent, chapter, chapters);
+  static String epubProgressTime(String chapter, String book) =>
+      _s.epubProgressTime(chapter, book);
+
+  /// A reading time: the minutes alone under an hour.
+  static String readingTimeValue(int hours, int minutes) =>
+      _s.readingTimeValue(hours, minutes);
+  static String get epubProgressShowBook => _s.epubProgressShowBook;
+  static String get epubProgressShowTime => _s.epubProgressShowTime;
+  static String get epubProgressShowChapter => _s.epubProgressShowChapter;
+
   /// A text size as a row's value, e.g. "120%".
   static String textScaleValue(double scale) => '${(scale * 100).round()}%';
 

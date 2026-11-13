@@ -394,6 +394,23 @@ final class JapaneseStrings extends Strings {
   @override
   String get epubTextSizeTitle => '文字サイズ';
 
+  // Books: reading progress (#1275).
+  @override
+  String epubProgressBook(int percent, int chapter, int chapters) =>
+      '本の $percent% · 全 $chapters 章中 第 $chapter 章';
+  @override
+  String epubProgressTime(String chapter, String book) =>
+      '章 ≈ $chapter · 本 ≈ $book';
+  @override
+  String readingTimeValue(int hours, int minutes) =>
+      hours == 0 ? '$minutes 分' : '$hours 時間 $minutes 分';
+  @override
+  String get epubProgressShowBook => '本の進み具合を表示';
+  @override
+  String get epubProgressShowTime => '残り時間を表示';
+  @override
+  String get epubProgressShowChapter => '章の進み具合を表示';
+
   // Settings: preview mode.
   // Settings: editor formatting.
   @override
