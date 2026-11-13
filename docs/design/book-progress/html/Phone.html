@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Avanzamento del libro — smartphone</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Literata:opsz,wght@7..72,400;7..72,600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#1A5FB4}a:hover{color:#134a8c}
+.ic{width:40px;height:40px;border:0;background:transparent;border-radius:20px;display:flex;align-items:center;justify-content:center;color:#3C4043;padding:0;cursor:pointer}
+.ic:hover{background:#EDEEF0}
+.prog{all:unset;box-sizing:border-box;cursor:pointer;display:flex;flex-direction:column;justify-content:center;gap:6px;height:44px;padding:0 16px;width:100%}
+.prog:hover{background:#F1F2F4}
+.prog:focus-visible{outline:2px solid #1A5FB4;outline-offset:-2px}
+</style>
+</head>
+<body>
+<div style="width: 390px; height: 844px; box-sizing: border-box; display: flex; flex-direction: column; background: #FFFFFF; font-family: Inter, system-ui, sans-serif; color: #1F1F1F; overflow: hidden">
+  <header style="height: 56px; flex-shrink: 0; display: flex; align-items: center; gap: 4px; padding: 0 4px; border-bottom: 1px solid #E3E4E6">
+    <button class="ic" aria-label="Indietro"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg></button>
+    <div style="flex: 1; min-width: 0; font-size: 17px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">I promessi sposi</div>
+    <button class="ic" aria-label="Altro"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="1.7"></circle><circle cx="12" cy="12" r="1.7"></circle><circle cx="12" cy="19" r="1.7"></circle></svg></button>
+  </header>
+  <main style="flex: 1; min-height: 0; overflow: hidden; padding: 28px 24px 0; font-family: Literata, Georgia, serif; font-size: 18px; line-height: 1.62; color: #24262A">
+    <h2 style="margin: 0 0 18px; font-size: 24px; font-weight: 600; line-height: 1.3">Capitolo I</h2>
+    <p style="margin: 0 0 16px">Quel ramo del lago di Como, che volge a mezzogiorno, tra due catene non interrotte di monti, tutto a seni e a golfi, a seconda dello sporgere e del rientrare di quelli, vien, quasi a un tratto, a ristringersi, e a prender corso e figura di fiume, tra un promontorio a destra, e un’ampia costiera dall’altra parte;</p>
+    <p style="margin: 0 0 16px">e il ponte, che ivi congiunge le due rive, par che renda ancor più sensibile all’occhio questa trasformazione, e segni il punto in cui il lago cessa, e l’Adda rincomincia, per ripigliar poi nome di lago dove le rive, allontanandosi di nuovo, lascian l’acqua distendersi e rallentarsi in nuovi golfi e in nuovi seni.</p>
+  </main>
+  <div style="flex-shrink: 0; border-top: 1px solid #E3E4E6; background: #FFFFFF">
+    <button class="prog" id="progress" data-verb="Tocca" aria-label="Capitolo I, 62 per cento. Tocca per vedere il libro.">
+      <span style="display: flex; align-items: center; gap: 8px; width: 100%">
+        <span style="flex: 1; min-width: 0; font-size: 13px; font-weight: 500; color: #2B2D31; white-space: nowrap; overflow: hidden; text-overflow: ellipsis" id="progress-label">Capitolo I · 62%</span>
+        <span style="display: flex; gap: 4px" aria-hidden="true">
+          <span data-dot style="display:block;width:6px;height:6px;border-radius:3px;background:#C4C7CC"></span><span data-dot style="display:block;width:6px;height:6px;border-radius:3px;background:#C4C7CC"></span><span data-dot style="display:block;width:6px;height:6px;border-radius:3px;background:#C4C7CC"></span>
+        </span>
+      </span>
+      <span style="position: relative; display: block; height: 4px; width: 100%; border-radius: 2px; background: #E3E4E6; overflow: hidden" aria-hidden="true">
+        <span style="position: absolute; left: 0; top: 0; bottom: 0; background: #1A5FB4; border-radius: 2px; width: 62%" id="progress-fill" data-tick="2"></span>
+      </span>
+    </button>
+  </div>
+  <nav aria-label="Barra del libro" style="height: 52px; flex-shrink: 0; display: flex; align-items: center; gap: 0; padding: 0 4px 0 12px; background: #F7F7F8; border-top: 1px solid #E3E4E6">
+    <span style="flex: 1; min-width: 0; font-size: 13px; color: #5F6368; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">I promessi sposi.epub</span>
+    <button class="ic" aria-label="Aspetto dei libri"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 19l5-13 5 13M4.8 14.5h6.4M14 19l3.5-9 3.5 9M15.2 16h4.6"></path></svg></button>
+    <button class="ic" aria-label="Indice"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 6h2M9 6h11M4 12h2M9 12h11M4 18h2M9 18h11"></path></svg></button>
+    <button class="ic" aria-label="Link a questo punto"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M10 14a4 4 0 005.7 0l3-3a4 4 0 00-5.7-5.7l-1 1M14 10a4 4 0 00-5.7 0l-3 3a4 4 0 005.7 5.7l1-1"></path></svg></button>
+    <button class="ic" aria-label="Annota"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M4 12h7M4 17h5M14 19l1-3.5 5-5 2.5 2.5-5 5z"></path></svg></button>
+    <button class="ic" aria-label="Schermo intero"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"></path></svg></button>
+  </nav>
+</div>
+<script>
+// The three views the reading-progress control cycles through on a tap.
+(() => {
+  const lengths = [7,6,5,6,8,5,7,9,8,10,6,5,7,6,8,7,6,5,9,7,6,5,6,7,8,6,7,5,6,7,6,8,7,6,5,6,7,5];
+  const total = lengths.reduce((a, b) => a + b, 0);
+  const button = document.getElementById('progress');
+  const label = document.getElementById('progress-label');
+  const fill = document.getElementById('progress-fill');
+  const tip = document.getElementById('progress-tip');
+  const dots = button.querySelectorAll('[data-dot]');
+  const verb = button.dataset.verb;
+  const ticks = [];
+  let run = 0;
+  for (const n of lengths.slice(0, -1)) {
+    run += n;
+    const tick = document.createElement('span');
+    tick.style.cssText = 'position:absolute;top:0;bottom:0;background:#FFFFFF;width:' + fill.dataset.tick + 'px;left:' + (run / total * 100).toFixed(2) + '%';
+    ticks.push(tick);
+  }
+  const views = [
+    { label: 'Capitolo I · 62%', aria: 'Capitolo I, 62 per cento. ' + verb + ' per vedere il libro.', fill: '62%', ticks: false },
+    { label: '2% del libro · capitolo 1 di 38', aria: '2 per cento del libro, capitolo 1 di 38. ' + verb + ' per vedere il tempo.', fill: (lengths[0] * 0.62 / total * 100).toFixed(2) + '%', ticks: true },
+    { label: 'Capitolo ≈ 11 min · Libro ≈ 14 h 50 min', aria: 'Circa 11 minuti alla fine del capitolo, 14 ore e 50 al libro. ' + verb + ' per vedere il capitolo.', fill: '62%', ticks: false },
+  ];
+  let view = 0;
+  function show() {
+    const v = views[view];
+    label.textContent = v.label;
+    button.setAttribute('aria-label', v.aria);
+    fill.style.width = v.fill;
+    for (const tick of ticks) {
+      if (v.ticks) fill.parentElement.appendChild(tick); else tick.remove();
+    }
+    dots.forEach((dot, i) => { dot.style.background = i === view ? '#1A5FB4' : '#C4C7CC'; });
+  }
+  button.addEventListener('click', () => { view = (view + 1) % views.length; show(); });
+  if (tip) {
+    button.addEventListener('mouseenter', () => { tip.hidden = false; });
+    button.addEventListener('mouseleave', () => { tip.hidden = true; });
+  }
+  show();
+})();
+</script>
+</body>
+</html>
