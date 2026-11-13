@@ -63,6 +63,7 @@ final class NoteEditCommands {
     required this.readView,
     required this.activeFormats,
     required this.linkType,
+    required this.notePath,
     required this.indentWidth,
     required this.toolbarLayout,
     required this.pasteAsMarkdown,
@@ -105,6 +106,10 @@ final class NoteEditCommands {
 
   /// The link format the link button inserts (settings).
   final LinkType Function() linkType;
+
+  /// The note's path in the library, slash-separated; null for a note
+  /// opened from outside one. A Markdown image is linked from its folder.
+  final String? Function() notePath;
 
   /// The indent/outdent width in spaces (settings).
   final int Function() indentWidth;
@@ -331,8 +336,9 @@ final class NoteEditCommands {
   }
 
   /// T-M2-09: pick an image, copy it into the library's attachments
-  /// folder, insert a library-relative link at the caret — in the
-  /// library's link format (wikilink embed or Markdown image).
+  /// folder, insert a link to it at the caret — in the library's link
+  /// format: a wikilink embed by its library path, or a Markdown image
+  /// from the note's folder (#1282).
   Future<void> insertImage() async {
     final root = libraryRoot();
     if (root == null) return;
@@ -347,6 +353,7 @@ final class NoteEditCommands {
       relativePath: relative,
       label: label,
       linkType: linkType(),
+      note: notePath() ?? '',
     );
     surface()?.replaceSelection(snippet);
     focus();

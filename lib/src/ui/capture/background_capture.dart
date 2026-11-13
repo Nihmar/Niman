@@ -215,6 +215,7 @@ final class BackgroundCapture {
       downloadPictures: chosen.downloadPictures,
       tags: chosen.tags,
       linkType: target.linkType,
+      folder: chosen.folder,
     );
     final path = await target.create(
       chosen.folder,

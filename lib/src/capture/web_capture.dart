@@ -124,7 +124,8 @@ int _textWords(String html) => RegExp(r'\S+')
 /// pictures downloaded into [attachmentsFolder] unless [downloadPictures]
 /// is off, under [title] when one is given. [unreadableNotice] is the
 /// Markdown a page with no article gets; [tags], [linkType] and
-/// [captured] are the note's.
+/// [captured] are the note's, and [folder] the library-relative folder it
+/// goes in.
 Future<({CapturedNote note, int pictures})> saveWebCapture(
   PageReading page, {
   required String libraryRoot,
@@ -135,6 +136,7 @@ Future<({CapturedNote note, int pictures})> saveWebCapture(
   bool downloadPictures = true,
   List<String> tags = const [],
   LinkType linkType = LinkType.wikilink,
+  String folder = '',
 }) {
   final named = title == null || title.trim().isEmpty
       ? page
@@ -151,6 +153,7 @@ Future<({CapturedNote note, int pictures})> saveWebCapture(
         pictures: pictures,
         tags: tags,
         linkType: linkType,
+        folder: folder,
       ),
       pictures: pictures.length,
     );

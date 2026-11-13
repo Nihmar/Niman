@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/settings/library_settings.dart' show LinkType;
 import 'package:niman/src/core/theme_tokens.dart';
 import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/links/mentions.dart';
@@ -62,6 +63,7 @@ NoteView _note({
   Future<String> Function(String path)? readNote,
   Future<String> Function(String path)? createMissingNote,
   bool linkPreview = true,
+  LinkType linkType = LinkType.wikilink,
 }) => NoteView(
   key: key,
   path: path,
@@ -70,6 +72,7 @@ NoteView _note({
     autofocusEditor: autofocus,
     noteColumn: column,
     linkPreview: linkPreview,
+    linkType: linkType,
   ),
   toolbarTop: toolbarTop,
   reloadToken: reloadToken,
@@ -371,6 +374,41 @@ void main() {
     expect(surface.widget.buffer.text, startsWith('hello'));
     await tester.pump(const Duration(seconds: 1));
     expect(writes.last, contains('xx.png'));
+  });
+
+  testWidgets("a Markdown image is linked from the note's folder (#1282)", (
+    tester,
+  ) async {
+    final dir = (await tester.runAsync(
+      () => Directory.systemTemp.createTemp('niman_ins_'),
+    ))!;
+    addTearDown(() => dir.deleteSync(recursive: true));
+    final source = File(p.join(dir.path, 'pic.png'));
+    await tester.runAsync(() => source.writeAsBytes(<int>[1, 2, 3]));
+    await tester.pumpWidget(
+      _app(
+        _note(
+          text: 'hello',
+          path: p.join(dir.path, 'Projects', 'plan.md'),
+          autofocus: true,
+          libraryRoot: dir.path,
+          linkType: LinkType.markdown,
+          pickImagePath: () async => source.path,
+          importImage: (root, src) => Future.value('assets/xx.png'),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    _surface(tester).placeCaret(5);
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('insert-image')));
+    await tester.pump();
+    await tester.pump();
+    expect(
+      _surface(tester).widget.buffer.text,
+      contains('![pic](../assets/xx.png)'),
+    );
+    await tester.pump(const Duration(seconds: 1));
   });
 
   testWidgets('Ctrl+click on a wikilink opens it (link_navigation_test)', (

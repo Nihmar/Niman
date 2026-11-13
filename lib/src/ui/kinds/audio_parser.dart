@@ -99,10 +99,14 @@ String appendAudioClip(
   required LinkType linkType,
   String label = '',
 }) {
+  // From the library root, the form the voice note reads its clips back
+  // in (`AudioNote._absoluteOf`); written from the note is #1282's next
+  // step.
   final embed = attachmentEmbed(
     relativePath: relativePath,
     label: label,
     linkType: linkType,
+    note: '',
   );
   return '${chatParagraphPrefix(text)}$embed\n';
 }

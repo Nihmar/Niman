@@ -1144,7 +1144,12 @@ lines, is not counted either. The words inside a code block are.
 ## Images
 
 Pasting or inserting an image copies the file into the library — notes
-never carry base64 blobs. The note references the copied file.
+never carry base64 blobs. The note references the copied file, in the
+library's link format: `![[assets/…png]]`, or, in a library that writes
+Markdown links, `![photo](../assets/…png)` — written from the note's
+folder, as a dropped file's link is, so another Markdown tool, the
+Markdown export and a browser opening an HTML export all find it. A link
+written from the library root by an older Niman still shows.
 
 ## Spellcheck
 

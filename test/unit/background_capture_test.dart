@@ -104,6 +104,7 @@ void main() {
     bool downloadPictures = true,
     List<String> tags = const [],
     LinkType linkType = LinkType.wikilink,
+    String folder = '',
   }) async => (
     note: (name: title ?? page.title, text: 'tags: $tags'),
     pictures: downloadPictures ? 3 : 0,
