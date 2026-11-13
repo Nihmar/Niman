@@ -154,6 +154,45 @@ void main() {
     expect(a, isNot(contains('Top.html')));
   });
 
+  test('a link to a file in another folder points at its copy', () async {
+    // #1278, #1279: the note sits in one folder, the PDF in another, and
+    // both links name the PDF by its file name alone, as Niman writes them.
+    await Directory(p.join(notes, 'attachments')).create();
+    await File(p.join(notes, 'attachments', 'target.pdf'))
+        .writeAsBytes(<int>[37, 80, 68, 70]);
+    await File(p.join(lib.path, 'outside.pdf')).writeAsBytes(<int>[1]);
+    await File(p.join(notes, 'sub', 'reader.md')).writeAsString(
+      'Wiki [[target.pdf]], aliased [[target.pdf#page=3|page 3]].\n\n'
+      'Markdown [the pdf](target.pdf) and [p. 3](target.pdf#page=3).\n\n'
+      'Gone [[missing.pdf]], outside [[outside.pdf]], '
+      'and [away](outside.pdf).\n',
+    );
+    await TreeExport.run(
+      dir: notes,
+      zipPath: zip,
+      format: ExportTreeFormat.html,
+      language: 'en',
+    );
+    final files = await contents();
+    expect(files.keys, contains('attachments/target.pdf'));
+    final page = files['sub/reader.html']!;
+    expect(
+      page,
+      contains('<a class="wikilink" href="../attachments/target.pdf">'),
+    );
+    expect(
+      page,
+      contains('href="../attachments/target.pdf#page=3">page 3</a>'),
+    );
+    expect(page, contains('<a href="../attachments/target.pdf">the pdf</a>'));
+    expect(page, contains('<a href="../attachments/target.pdf#page=3">'));
+    // A file the zip does not hold keeps what it is today: a wikilink is
+    // highlighted text, a Markdown link the href the note wrote.
+    expect(page, contains('<span class="wikilink">missing.pdf</span>'));
+    expect(page, contains('<span class="wikilink">outside.pdf</span>'));
+    expect(page, contains('<a href="outside.pdf">away</a>'));
+  });
+
   test(
     'a link to a heading with a # in its text lands on that heading',
     () async {
