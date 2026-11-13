@@ -449,6 +449,72 @@ final class RomanianStrings extends Strings {
   @override
   String get epubProgressShowChapter => 'Arată progresul în capitol';
 
+  // Books: read aloud (#1276).
+  @override
+  String get readAloud => 'Citește cu voce tare';
+  @override
+  String get readAloudFromHere => 'Citește cu voce tare de aici';
+  @override
+  String get readAloudStop => 'Oprește citirea';
+  @override
+  String get readAloudPrevious => 'Paragraful anterior';
+  @override
+  String get readAloudNext => 'Paragraful următor';
+  @override
+  String get readAloudPause => 'Pauză';
+  @override
+  String get readAloudResume => 'Reia';
+  @override
+  String readAloudSpeed(String speed) => 'Viteză $speed';
+  @override
+  String get readAloudSpeedTitle => 'Viteză';
+  @override
+  String get readAloudVoice => 'Voce';
+  @override
+  String get readAloudVoiceTitle => 'Voce și viteză';
+  @override
+  String readAloudVoiceNumber(int n) => 'Vocea $n';
+  @override
+  String get readAloudDefault => 'Voce implicită';
+  @override
+  String get readAloudLanguage => 'Limbă';
+  @override
+  String get readAloudFromBook => 'din carte';
+  @override
+  String get readAloudOnDevice => 'pe dispozitiv';
+  @override
+  String get readAloudNeedsNetwork => 'necesită rețea';
+  @override
+  String readAloudListen(String voice) => 'Ascultă: $voice';
+  @override
+  String get readAloudSettings =>
+      'Setări pentru transformarea textului în vorbire';
+  @override
+  String get readAloudBackToVoice => 'Înapoi la voce';
+  @override
+  String readAloudWhere(String chapter, int paragraph, int paragraphs) =>
+      '$chapter · paragraful $paragraph din $paragraphs';
+  @override
+  String get readAloudPaused => 'În pauză';
+  @override
+  String get readAloudDeviceVoice => 'vocea dispozitivului';
+  @override
+  String readAloudNoVoiceTitle(String language) =>
+      'Nicio voce pentru $language';
+  @override
+  String readAloudNoVoiceBody(String language) =>
+      'Această carte este în $language, dar dispozitivul nu are o voce pentru '
+      'această limbă. Poți instala una din setările de transformare a textului '
+      'în vorbire ale sistemului sau o poți citi cu vocea implicită.';
+  @override
+  String get readAloudUseDefault => 'Folosește vocea implicită';
+  @override
+  String get readAloudInstallVoice => 'Instalează o voce';
+  @override
+  String get readAloudSample => 'Așa citește această voce.';
+  @override
+  String get readAloudChannel => 'Citire cu voce tare';
+
   // Settings: preview mode.
   // Settings: editor formatting.
   @override

@@ -407,6 +407,68 @@ final class ChineseStrings extends Strings {
   @override
   String get epubProgressShowChapter => '显示本章进度';
 
+  // Books: read aloud (#1276).
+  @override
+  String get readAloud => '朗读';
+  @override
+  String get readAloudFromHere => '从这里朗读';
+  @override
+  String get readAloudStop => '停止朗读';
+  @override
+  String get readAloudPrevious => '上一段';
+  @override
+  String get readAloudNext => '下一段';
+  @override
+  String get readAloudPause => '暂停';
+  @override
+  String get readAloudResume => '继续';
+  @override
+  String readAloudSpeed(String speed) => '语速 $speed';
+  @override
+  String get readAloudSpeedTitle => '语速';
+  @override
+  String get readAloudVoice => '语音';
+  @override
+  String get readAloudVoiceTitle => '语音和语速';
+  @override
+  String readAloudVoiceNumber(int n) => '语音 $n';
+  @override
+  String get readAloudDefault => '默认语音';
+  @override
+  String get readAloudLanguage => '语言';
+  @override
+  String get readAloudFromBook => '来自本书';
+  @override
+  String get readAloudOnDevice => '设备上';
+  @override
+  String get readAloudNeedsNetwork => '需要网络';
+  @override
+  String readAloudListen(String voice) => '试听：$voice';
+  @override
+  String get readAloudSettings => '文字转语音设置';
+  @override
+  String get readAloudBackToVoice => '回到朗读位置';
+  @override
+  String readAloudWhere(String chapter, int paragraph, int paragraphs) =>
+      '$chapter · 第 $paragraph/$paragraphs 段';
+  @override
+  String get readAloudPaused => '已暂停';
+  @override
+  String get readAloudDeviceVoice => '设备语音';
+  @override
+  String readAloudNoVoiceTitle(String language) => '没有 $language 语音';
+  @override
+  String readAloudNoVoiceBody(String language) =>
+      '这本书是 $language 的，但设备上没有该语言的语音。你可以在系统的文字转语音设置中安装一个，或使用默认语音朗读。';
+  @override
+  String get readAloudUseDefault => '使用默认语音';
+  @override
+  String get readAloudInstallVoice => '安装语音';
+  @override
+  String get readAloudSample => '这个语音是这样朗读的。';
+  @override
+  String get readAloudChannel => '朗读';
+
   // Settings: preview mode.
   // Settings: editor formatting.
   @override

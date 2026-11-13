@@ -441,6 +441,71 @@ final class UkrainianStrings extends Strings {
   @override
   String get epubProgressShowChapter => 'Показати поступ у розділі';
 
+  // Books: read aloud (#1276).
+  @override
+  String get readAloud => 'Читати вголос';
+  @override
+  String get readAloudFromHere => 'Читати вголос звідси';
+  @override
+  String get readAloudStop => 'Зупинити читання';
+  @override
+  String get readAloudPrevious => 'Попередній абзац';
+  @override
+  String get readAloudNext => 'Наступний абзац';
+  @override
+  String get readAloudPause => 'Пауза';
+  @override
+  String get readAloudResume => 'Продовжити';
+  @override
+  String readAloudSpeed(String speed) => 'Швидкість $speed';
+  @override
+  String get readAloudSpeedTitle => 'Швидкість';
+  @override
+  String get readAloudVoice => 'Голос';
+  @override
+  String get readAloudVoiceTitle => 'Голос і швидкість';
+  @override
+  String readAloudVoiceNumber(int n) => 'Голос $n';
+  @override
+  String get readAloudDefault => 'Типовий голос';
+  @override
+  String get readAloudLanguage => 'Мова';
+  @override
+  String get readAloudFromBook => 'з книги';
+  @override
+  String get readAloudOnDevice => 'на пристрої';
+  @override
+  String get readAloudNeedsNetwork => 'потрібна мережа';
+  @override
+  String readAloudListen(String voice) => 'Прослухати: $voice';
+  @override
+  String get readAloudSettings => 'Налаштування синтезу мовлення';
+  @override
+  String get readAloudBackToVoice => 'Назад до голосу';
+  @override
+  String readAloudWhere(String chapter, int paragraph, int paragraphs) =>
+      '$chapter · абзац $paragraph з $paragraphs';
+  @override
+  String get readAloudPaused => 'Призупинено';
+  @override
+  String get readAloudDeviceVoice => 'голос пристрою';
+  @override
+  String readAloudNoVoiceTitle(String language) =>
+      'Немає голосу для мови: $language';
+  @override
+  String readAloudNoVoiceBody(String language) =>
+      'Ця книга мовою $language, але на пристрої немає голосу для неї. Ви '
+      'можете встановити його в системних налаштуваннях синтезу мовлення або '
+      'читати книгу типовим голосом.';
+  @override
+  String get readAloudUseDefault => 'Використати типовий голос';
+  @override
+  String get readAloudInstallVoice => 'Установити голос';
+  @override
+  String get readAloudSample => 'Ось так читає цей голос.';
+  @override
+  String get readAloudChannel => 'Читання вголос';
+
   // Settings: preview mode.
   // Settings: editor formatting.
   @override

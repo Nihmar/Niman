@@ -33,6 +33,7 @@ class MainActivity : FlutterActivity() {
     private val clipboard = ClipboardBridge(this)
     private val drops = DropBridge(this)
     private val openFile = OpenFileBridge(this)
+    private val readAloud = ReadAloudBridge(this)
 
     /** The launching intent, handled once (#721). */
     private val launch = LaunchIntent()
@@ -62,6 +63,7 @@ class MainActivity : FlutterActivity() {
         clipboard.attach(flutterEngine.dartExecutor.binaryMessenger)
         drops.attach(flutterEngine.dartExecutor.binaryMessenger)
         openFile.attach(flutterEngine.dartExecutor.binaryMessenger)
+        readAloud.attach(flutterEngine.dartExecutor.binaryMessenger)
         // Cold start: this runs while Dart is still booting, so the
         // launching intent's action waits until Dart asks for it.
         //
@@ -178,6 +180,7 @@ class MainActivity : FlutterActivity() {
         shares.detach()
         clipboard.detach()
         drops.detach()
+        readAloud.detach()
         super.cleanUpFlutterEngine(flutterEngine)
     }
 

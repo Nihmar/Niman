@@ -440,6 +440,70 @@ final class AlbanianStrings extends Strings {
   @override
   String get epubProgressShowChapter => 'Shfaq përparimin në kapitull';
 
+  // Books: read aloud (#1276).
+  @override
+  String get readAloud => 'Lexo me zë';
+  @override
+  String get readAloudFromHere => 'Lexo me zë nga këtu';
+  @override
+  String get readAloudStop => 'Ndalo leximin';
+  @override
+  String get readAloudPrevious => 'Paragrafi i mëparshëm';
+  @override
+  String get readAloudNext => 'Paragrafi tjetër';
+  @override
+  String get readAloudPause => 'Pauzë';
+  @override
+  String get readAloudResume => 'Vazhdo';
+  @override
+  String readAloudSpeed(String speed) => 'Shpejtësia $speed';
+  @override
+  String get readAloudSpeedTitle => 'Shpejtësia';
+  @override
+  String get readAloudVoice => 'Zëri';
+  @override
+  String get readAloudVoiceTitle => 'Zëri dhe shpejtësia';
+  @override
+  String readAloudVoiceNumber(int n) => 'Zëri $n';
+  @override
+  String get readAloudDefault => 'Zëri i parazgjedhur';
+  @override
+  String get readAloudLanguage => 'Gjuha';
+  @override
+  String get readAloudFromBook => 'nga libri';
+  @override
+  String get readAloudOnDevice => 'në pajisje';
+  @override
+  String get readAloudNeedsNetwork => 'kërkon rrjet';
+  @override
+  String readAloudListen(String voice) => 'Dëgjo: $voice';
+  @override
+  String get readAloudSettings => 'Cilësimet e kthimit të tekstit në të folur';
+  @override
+  String get readAloudBackToVoice => 'Kthehu te zëri';
+  @override
+  String readAloudWhere(String chapter, int paragraph, int paragraphs) =>
+      '$chapter · paragrafi $paragraph nga $paragraphs';
+  @override
+  String get readAloudPaused => 'Në pauzë';
+  @override
+  String get readAloudDeviceVoice => 'zëri i pajisjes';
+  @override
+  String readAloudNoVoiceTitle(String language) => 'Nuk ka zë për $language';
+  @override
+  String readAloudNoVoiceBody(String language) =>
+      'Ky libër është në $language, por pajisja nuk ka zë për këtë gjuhë. Mund '
+      'të instaloni një në cilësimet e sistemit për kthimin e tekstit në të '
+      'folur, ose ta lexoni me zërin e parazgjedhur.';
+  @override
+  String get readAloudUseDefault => 'Përdor zërin e parazgjedhur';
+  @override
+  String get readAloudInstallVoice => 'Instalo një zë';
+  @override
+  String get readAloudSample => 'Kështu lexon ky zë.';
+  @override
+  String get readAloudChannel => 'Lexim me zë';
+
   // Settings: preview mode.
   // Settings: editor formatting.
   @override

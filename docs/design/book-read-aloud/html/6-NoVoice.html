@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Lettura ad alta voce — voce mancante</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#1A5FB4}a:hover{color:#134a8c}
+.primary{display:flex;align-items:center;justify-content:center;gap:8px;height:44px;border:0;border-radius:22px;background:#1A5FB4;color:#FFFFFF;font:500 14px Inter,system-ui,sans-serif;cursor:pointer;padding:0 18px}
+.primary:hover{background:#134a8c}
+.ghost{height:44px;border:0;border-radius:22px;background:transparent;color:#123F78;font:500 14px Inter,system-ui,sans-serif;cursor:pointer;padding:0 16px}
+.ghost:hover{background:#F1F2F4}
+</style>
+</head>
+<body>
+<div style="width: 390px; height: 420px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; padding: 20px; background: rgba(20,22,26,0.42); font-family: Inter, system-ui, sans-serif; color: #1F1F1F">
+  <section role="alertdialog" aria-labelledby="nv-title" aria-describedby="nv-body" style="width: 100%; box-sizing: border-box; padding: 24px 20px 16px; border-radius: 24px; background: #FFFFFF; display: flex; flex-direction: column; gap: 14px">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#123F78" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9zM17 9l4 6M21 9l-4 6"></path></svg>
+    <h3 id="nv-title" style="margin: 0; font-size: 20px; font-weight: 600">Nessuna voce in inglese</h3>
+    <p id="nv-body" style="margin: 0; font-size: 15px; line-height: 1.5; color: #3C4043">Questo libro è in inglese, ma sul dispositivo non c’è una voce per questa lingua. Puoi installarla dalle impostazioni di sintesi vocale di Android, oppure farlo leggere con la voce predefinita.</p>
+    <div style="display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap">
+      <button class="ghost">Usa la voce predefinita</button>
+      <button class="primary">Installa una voce</button>
+    </div>
+  </section>
+</div>
+</body>
+</html>

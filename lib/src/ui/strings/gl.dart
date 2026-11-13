@@ -446,6 +446,70 @@ final class GalicianStrings extends Strings {
   @override
   String get epubProgressShowChapter => 'Amosar o progreso no capítulo';
 
+  // Books: read aloud (#1276).
+  @override
+  String get readAloud => 'Ler en voz alta';
+  @override
+  String get readAloudFromHere => 'Ler en voz alta desde aquí';
+  @override
+  String get readAloudStop => 'Deter a lectura';
+  @override
+  String get readAloudPrevious => 'Parágrafo anterior';
+  @override
+  String get readAloudNext => 'Parágrafo seguinte';
+  @override
+  String get readAloudPause => 'Pausa';
+  @override
+  String get readAloudResume => 'Continuar';
+  @override
+  String readAloudSpeed(String speed) => 'Velocidade $speed';
+  @override
+  String get readAloudSpeedTitle => 'Velocidade';
+  @override
+  String get readAloudVoice => 'Voz';
+  @override
+  String get readAloudVoiceTitle => 'Voz e velocidade';
+  @override
+  String readAloudVoiceNumber(int n) => 'Voz $n';
+  @override
+  String get readAloudDefault => 'Voz predeterminada';
+  @override
+  String get readAloudLanguage => 'Idioma';
+  @override
+  String get readAloudFromBook => 'do libro';
+  @override
+  String get readAloudOnDevice => 'no dispositivo';
+  @override
+  String get readAloudNeedsNetwork => 'precisa da rede';
+  @override
+  String readAloudListen(String voice) => 'Escoitar $voice';
+  @override
+  String get readAloudSettings => 'Configuración de texto a voz';
+  @override
+  String get readAloudBackToVoice => 'Volver á voz';
+  @override
+  String readAloudWhere(String chapter, int paragraph, int paragraphs) =>
+      '$chapter · parágrafo $paragraph de $paragraphs';
+  @override
+  String get readAloudPaused => 'En pausa';
+  @override
+  String get readAloudDeviceVoice => 'voz do dispositivo';
+  @override
+  String readAloudNoVoiceTitle(String language) => 'Ningunha voz en $language';
+  @override
+  String readAloudNoVoiceBody(String language) =>
+      'Este libro está en $language, pero o dispositivo non ten unha voz para '
+      'ese idioma. Podes instalar unha na configuración de texto a voz do '
+      'sistema ou lelo coa voz predeterminada.';
+  @override
+  String get readAloudUseDefault => 'Usar a voz predeterminada';
+  @override
+  String get readAloudInstallVoice => 'Instalar unha voz';
+  @override
+  String get readAloudSample => 'Así le esta voz.';
+  @override
+  String get readAloudChannel => 'Lectura en voz alta';
+
   // Settings: preview mode.
   // Settings: editor formatting.
   @override

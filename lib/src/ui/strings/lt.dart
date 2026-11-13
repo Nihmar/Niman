@@ -441,6 +441,71 @@ final class LithuanianStrings extends Strings {
   @override
   String get epubProgressShowChapter => 'Rodyti pažangą skyriuje';
 
+  // Books: read aloud (#1276).
+  @override
+  String get readAloud => 'Skaityti garsiai';
+  @override
+  String get readAloudFromHere => 'Skaityti garsiai nuo čia';
+  @override
+  String get readAloudStop => 'Baigti skaityti';
+  @override
+  String get readAloudPrevious => 'Ankstesnė pastraipa';
+  @override
+  String get readAloudNext => 'Kita pastraipa';
+  @override
+  String get readAloudPause => 'Pristabdyti';
+  @override
+  String get readAloudResume => 'Tęsti';
+  @override
+  String readAloudSpeed(String speed) => 'Greitis $speed';
+  @override
+  String get readAloudSpeedTitle => 'Greitis';
+  @override
+  String get readAloudVoice => 'Balsas';
+  @override
+  String get readAloudVoiceTitle => 'Balsas ir greitis';
+  @override
+  String readAloudVoiceNumber(int n) => 'Balsas $n';
+  @override
+  String get readAloudDefault => 'Numatytasis balsas';
+  @override
+  String get readAloudLanguage => 'Kalba';
+  @override
+  String get readAloudFromBook => 'iš knygos';
+  @override
+  String get readAloudOnDevice => 'įrenginyje';
+  @override
+  String get readAloudNeedsNetwork => 'reikia tinklo';
+  @override
+  String readAloudListen(String voice) => 'Klausyti: $voice';
+  @override
+  String get readAloudSettings => 'Teksto vertimo kalba nustatymai';
+  @override
+  String get readAloudBackToVoice => 'Atgal prie balso';
+  @override
+  String readAloudWhere(String chapter, int paragraph, int paragraphs) =>
+      '$chapter · pastraipa $paragraph iš $paragraphs';
+  @override
+  String get readAloudPaused => 'Pristabdyta';
+  @override
+  String get readAloudDeviceVoice => 'įrenginio balsas';
+  @override
+  String readAloudNoVoiceTitle(String language) =>
+      'Nėra balso kalbai: $language';
+  @override
+  String readAloudNoVoiceBody(String language) =>
+      'Ši knyga yra kalba $language, bet įrenginyje jai nėra balso. Galite jį '
+      'įdiegti sistemos teksto vertimo kalba nustatymuose arba skaityti '
+      'numatytuoju balsu.';
+  @override
+  String get readAloudUseDefault => 'Naudoti numatytąjį balsą';
+  @override
+  String get readAloudInstallVoice => 'Įdiegti balsą';
+  @override
+  String get readAloudSample => 'Taip skaito šis balsas.';
+  @override
+  String get readAloudChannel => 'Skaitymas garsiai';
+
   // Settings: preview mode.
   // Settings: editor formatting.
   @override

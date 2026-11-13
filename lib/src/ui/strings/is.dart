@@ -438,6 +438,70 @@ final class IcelandicStrings extends Strings {
   @override
   String get epubProgressShowChapter => 'Sýna framvindu í kaflanum';
 
+  // Books: read aloud (#1276).
+  @override
+  String get readAloud => 'Lesa upphátt';
+  @override
+  String get readAloudFromHere => 'Lesa upphátt héðan';
+  @override
+  String get readAloudStop => 'Hætta lestri';
+  @override
+  String get readAloudPrevious => 'Fyrri málsgrein';
+  @override
+  String get readAloudNext => 'Næsta málsgrein';
+  @override
+  String get readAloudPause => 'Hlé';
+  @override
+  String get readAloudResume => 'Halda áfram';
+  @override
+  String readAloudSpeed(String speed) => 'Hraði $speed';
+  @override
+  String get readAloudSpeedTitle => 'Hraði';
+  @override
+  String get readAloudVoice => 'Rödd';
+  @override
+  String get readAloudVoiceTitle => 'Rödd og hraði';
+  @override
+  String readAloudVoiceNumber(int n) => 'Rödd $n';
+  @override
+  String get readAloudDefault => 'Sjálfgefin rödd';
+  @override
+  String get readAloudLanguage => 'Tungumál';
+  @override
+  String get readAloudFromBook => 'úr bókinni';
+  @override
+  String get readAloudOnDevice => 'í tækinu';
+  @override
+  String get readAloudNeedsNetwork => 'þarf netið';
+  @override
+  String readAloudListen(String voice) => 'Hlusta á $voice';
+  @override
+  String get readAloudSettings => 'Stillingar talgervils';
+  @override
+  String get readAloudBackToVoice => 'Aftur að röddinni';
+  @override
+  String readAloudWhere(String chapter, int paragraph, int paragraphs) =>
+      '$chapter · málsgrein $paragraph af $paragraphs';
+  @override
+  String get readAloudPaused => 'Í hléi';
+  @override
+  String get readAloudDeviceVoice => 'rödd tækisins';
+  @override
+  String readAloudNoVoiceTitle(String language) => 'Engin rödd á $language';
+  @override
+  String readAloudNoVoiceBody(String language) =>
+      'Þessi bók er á $language en tækið hefur enga rödd fyrir það. Þú getur '
+      'sett upp rödd í talgervilsstillingum kerfisins eða látið lesa hana með '
+      'sjálfgefnu röddinni.';
+  @override
+  String get readAloudUseDefault => 'Nota sjálfgefna rödd';
+  @override
+  String get readAloudInstallVoice => 'Setja upp rödd';
+  @override
+  String get readAloudSample => 'Svona les þessi rödd.';
+  @override
+  String get readAloudChannel => 'Upplestur';
+
   // Settings: preview mode.
   // Settings: editor formatting.
   @override

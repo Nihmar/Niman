@@ -1,7 +1,8 @@
 /// A book's row, under it in the note pane (#280): its name, how the books
 /// look, its contents, converting it into notes (#1138), a link to the
 /// place being read (#282), annotating it (#284), full screen (#621), how far
-/// it has been read (#1275), and on desktop the system's application.
+/// it has been read (#1275), reading it aloud on Android (#1276), and on
+/// desktop the system's application.
 library;
 
 import 'package:flutter/material.dart';
@@ -31,6 +32,8 @@ final class EpubBar extends StatelessWidget {
     this.fullScreen = false,
     this.onFullScreen,
     this.progress,
+    this.readsAloud = false,
+    this.onReadAloud,
     super.key,
   });
 
@@ -74,6 +77,14 @@ final class EpubBar extends StatelessWidget {
   /// The book's progress line, in the row when `inline`, over it when
   /// not; null while the book is read, or when it has no text.
   final Widget Function({required bool inline})? progress;
+
+  /// Whether the platform reads books aloud (#1276): Android, for now; the
+  /// button is not on the row elsewhere.
+  final bool readsAloud;
+
+  /// Reads the book aloud from the paragraph at the top of the view; null
+  /// while it is read.
+  final VoidCallback? onReadAloud;
 
   @override
   Widget build(BuildContext context) {
@@ -126,6 +137,14 @@ final class EpubBar extends StatelessWidget {
         onPressed: onConvert,
       ),
       PlaceLinkButton(here: here, linkType: linkType),
+      if (readsAloud)
+        IconButton(
+          key: const Key('read-aloud-button'),
+          tooltip: AppStrings.readAloud,
+          icon: const Icon(Icons.record_voice_over_outlined),
+          visualDensity: VisualDensity.compact,
+          onPressed: onReadAloud,
+        ),
       IconButton(
         key: const Key('annotate-button'),
         tooltip: AppStrings.annotateAction,

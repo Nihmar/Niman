@@ -28,6 +28,7 @@ import 'package:niman/src/links/dead_links.dart';
 import 'package:niman/src/markdown/background_scan.dart';
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_index.dart';
+import 'package:niman/src/markdown/read_block.dart';
 import 'package:niman/src/markdown/read_parser.dart';
 import 'package:niman/src/markdown/render/block_height_map.dart';
 import 'package:niman/src/markdown/render/block_view.dart';
@@ -305,6 +306,20 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
       line: block.startLine,
       text: widget.parser.of(block, shown).plainText,
     );
+  }
+
+  /// The blocks from the one holding [line] to the last opening before
+  /// [end], each with its first line and read: what a voice reads of the
+  /// note, in order (#1276). Empty while none is drawn.
+  Iterable<({int line, ReadBlock block})> readBlocks(int line, int end) sync* {
+    final shown = _entries.shown;
+    final blocks = _entries.blocks;
+    final from = _entries.indexAt(line) ?? 0;
+    if (shown == null) return;
+    for (var i = from; i < blocks.length && blocks[i].startLine < end; i++) {
+      final block = blocks[i];
+      yield (line: block.startLine, block: widget.parser.of(block, shown));
+    }
   }
 
   /// The scroll the view is moved by: the shell's, or the view's own.

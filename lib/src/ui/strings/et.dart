@@ -437,6 +437,71 @@ final class EstonianStrings extends Strings {
   @override
   String get epubProgressShowChapter => 'Näita edenemist peatükis';
 
+  // Books: read aloud (#1276).
+  @override
+  String get readAloud => 'Loe ette';
+  @override
+  String get readAloudFromHere => 'Loe siit ette';
+  @override
+  String get readAloudStop => 'Lõpeta ettelugemine';
+  @override
+  String get readAloudPrevious => 'Eelmine lõik';
+  @override
+  String get readAloudNext => 'Järgmine lõik';
+  @override
+  String get readAloudPause => 'Paus';
+  @override
+  String get readAloudResume => 'Jätka';
+  @override
+  String readAloudSpeed(String speed) => 'Kiirus $speed';
+  @override
+  String get readAloudSpeedTitle => 'Kiirus';
+  @override
+  String get readAloudVoice => 'Hääl';
+  @override
+  String get readAloudVoiceTitle => 'Hääl ja kiirus';
+  @override
+  String readAloudVoiceNumber(int n) => 'Hääl $n';
+  @override
+  String get readAloudDefault => 'Vaikehääl';
+  @override
+  String get readAloudLanguage => 'Keel';
+  @override
+  String get readAloudFromBook => 'raamatust';
+  @override
+  String get readAloudOnDevice => 'seadmes';
+  @override
+  String get readAloudNeedsNetwork => 'vajab võrku';
+  @override
+  String readAloudListen(String voice) => 'Kuula: $voice';
+  @override
+  String get readAloudSettings => 'Kõnesünteesi seaded';
+  @override
+  String get readAloudBackToVoice => 'Tagasi hääle juurde';
+  @override
+  String readAloudWhere(String chapter, int paragraph, int paragraphs) =>
+      '$chapter · lõik $paragraph/$paragraphs';
+  @override
+  String get readAloudPaused => 'Peatatud';
+  @override
+  String get readAloudDeviceVoice => 'seadme hääl';
+  @override
+  String readAloudNoVoiceTitle(String language) =>
+      'Keele $language jaoks pole häält';
+  @override
+  String readAloudNoVoiceBody(String language) =>
+      'See raamat on keeles $language, kuid seadmel pole selle jaoks häält. '
+      'Saad selle paigaldada süsteemi kõnesünteesi seadetes või lasta raamatut '
+      'lugeda vaikehäälega.';
+  @override
+  String get readAloudUseDefault => 'Kasuta vaikehäält';
+  @override
+  String get readAloudInstallVoice => 'Paigalda hääl';
+  @override
+  String get readAloudSample => 'Nii loeb see hääl.';
+  @override
+  String get readAloudChannel => 'Ettelugemine';
+
   // Settings: preview mode.
   // Settings: editor formatting.
   @override

@@ -42,6 +42,7 @@ final class EpubDocument {
     required this.links,
     required this.chapters,
     required this.counts,
+    this.language,
     this.mathReport,
   });
 
@@ -67,6 +68,10 @@ final class EpubDocument {
   /// Its text's characters and words, counted as it is read, off the UI
   /// isolate, for the progress line (#1275).
   final EpubCounts counts;
+
+  /// The book's language (`dc:language`, a BCP 47 tag), when it names one:
+  /// the voice it is read aloud in (#1276).
+  final String? language;
 
   /// The progress through the book, its chapters' starts the measure.
   EpubProgress progress() =>
@@ -211,6 +216,10 @@ EpubDocument readEpub(String path, String pictureDir) {
           (file: file, line: line),
       ],
       counts: EpubCounts.of(markdown),
+      language: switch (book.info.language?.trim()) {
+        final tag? when tag.isNotEmpty => tag,
+        _ => null,
+      },
       mathReport: _mathReport(book.formulaSvgs, book.firstTex, book.mathMl),
     );
   } finally {

@@ -442,6 +442,71 @@ final class HungarianStrings extends Strings {
   @override
   String get epubProgressShowChapter => 'A fejezetbeli haladás mutatása';
 
+  // Books: read aloud (#1276).
+  @override
+  String get readAloud => 'Felolvasás';
+  @override
+  String get readAloudFromHere => 'Felolvasás innen';
+  @override
+  String get readAloudStop => 'Felolvasás leállítása';
+  @override
+  String get readAloudPrevious => 'Előző bekezdés';
+  @override
+  String get readAloudNext => 'Következő bekezdés';
+  @override
+  String get readAloudPause => 'Szünet';
+  @override
+  String get readAloudResume => 'Folytatás';
+  @override
+  String readAloudSpeed(String speed) => 'Sebesség: $speed';
+  @override
+  String get readAloudSpeedTitle => 'Sebesség';
+  @override
+  String get readAloudVoice => 'Hang';
+  @override
+  String get readAloudVoiceTitle => 'Hang és sebesség';
+  @override
+  String readAloudVoiceNumber(int n) => '$n. hang';
+  @override
+  String get readAloudDefault => 'Alapértelmezett hang';
+  @override
+  String get readAloudLanguage => 'Nyelv';
+  @override
+  String get readAloudFromBook => 'a könyvből';
+  @override
+  String get readAloudOnDevice => 'az eszközön';
+  @override
+  String get readAloudNeedsNetwork => 'hálózat kell';
+  @override
+  String readAloudListen(String voice) => 'Meghallgatás: $voice';
+  @override
+  String get readAloudSettings => 'Szövegfelolvasási beállítások';
+  @override
+  String get readAloudBackToVoice => 'Vissza a hanghoz';
+  @override
+  String readAloudWhere(String chapter, int paragraph, int paragraphs) =>
+      '$chapter · $paragraph./$paragraphs bekezdés';
+  @override
+  String get readAloudPaused => 'Szüneteltetve';
+  @override
+  String get readAloudDeviceVoice => 'az eszköz hangja';
+  @override
+  String readAloudNoVoiceTitle(String language) =>
+      'Nincs hang ehhez a nyelvhez: $language';
+  @override
+  String readAloudNoVoiceBody(String language) =>
+      'Ez a könyv ezen a nyelven íródott: $language, de az eszközön nincs '
+      'hozzá hang. A rendszer szövegfelolvasási beállításaiban telepíthet '
+      'egyet, vagy felolvastathatja az alapértelmezett hanggal.';
+  @override
+  String get readAloudUseDefault => 'Alapértelmezett hang használata';
+  @override
+  String get readAloudInstallVoice => 'Hang telepítése';
+  @override
+  String get readAloudSample => 'Így olvas ez a hang.';
+  @override
+  String get readAloudChannel => 'Felolvasás';
+
   // Settings: preview mode.
   // Settings: editor formatting.
   @override

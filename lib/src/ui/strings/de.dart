@@ -448,6 +448,70 @@ final class GermanStrings extends Strings {
   @override
   String get epubProgressShowChapter => 'Fortschritt im Kapitel zeigen';
 
+  // Books: read aloud (#1276).
+  @override
+  String get readAloud => 'Vorlesen';
+  @override
+  String get readAloudFromHere => 'Ab hier vorlesen';
+  @override
+  String get readAloudStop => 'Vorlesen beenden';
+  @override
+  String get readAloudPrevious => 'Vorheriger Absatz';
+  @override
+  String get readAloudNext => 'Nächster Absatz';
+  @override
+  String get readAloudPause => 'Pause';
+  @override
+  String get readAloudResume => 'Fortsetzen';
+  @override
+  String readAloudSpeed(String speed) => 'Tempo $speed';
+  @override
+  String get readAloudSpeedTitle => 'Tempo';
+  @override
+  String get readAloudVoice => 'Stimme';
+  @override
+  String get readAloudVoiceTitle => 'Stimme und Tempo';
+  @override
+  String readAloudVoiceNumber(int n) => 'Stimme $n';
+  @override
+  String get readAloudDefault => 'Standardstimme';
+  @override
+  String get readAloudLanguage => 'Sprache';
+  @override
+  String get readAloudFromBook => 'aus dem Buch';
+  @override
+  String get readAloudOnDevice => 'auf dem Gerät';
+  @override
+  String get readAloudNeedsNetwork => 'braucht das Netz';
+  @override
+  String readAloudListen(String voice) => '$voice anhören';
+  @override
+  String get readAloudSettings => 'Sprachausgabe-Einstellungen';
+  @override
+  String get readAloudBackToVoice => 'Zurück zur Stimme';
+  @override
+  String readAloudWhere(String chapter, int paragraph, int paragraphs) =>
+      '$chapter · Absatz $paragraph von $paragraphs';
+  @override
+  String get readAloudPaused => 'Pausiert';
+  @override
+  String get readAloudDeviceVoice => 'Gerätestimme';
+  @override
+  String readAloudNoVoiceTitle(String language) => 'Keine Stimme für $language';
+  @override
+  String readAloudNoVoiceBody(String language) =>
+      'Dieses Buch ist auf $language, aber das Gerät hat keine Stimme dafür. '
+      'Du kannst eine in den Sprachausgabe-Einstellungen des Systems '
+      'installieren oder es mit der Standardstimme vorlesen lassen.';
+  @override
+  String get readAloudUseDefault => 'Standardstimme verwenden';
+  @override
+  String get readAloudInstallVoice => 'Stimme installieren';
+  @override
+  String get readAloudSample => 'So liest diese Stimme.';
+  @override
+  String get readAloudChannel => 'Vorlesen';
+
   // Settings: preview mode.
   // Settings: editor formatting.
   @override

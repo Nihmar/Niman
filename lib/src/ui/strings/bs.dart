@@ -445,6 +445,71 @@ final class BosnianStrings extends Strings {
   @override
   String get epubProgressShowChapter => 'Prikaži napredak u poglavlju';
 
+  // Books: read aloud (#1276).
+  @override
+  String get readAloud => 'Čitaj naglas';
+  @override
+  String get readAloudFromHere => 'Čitaj naglas odavde';
+  @override
+  String get readAloudStop => 'Zaustavi čitanje';
+  @override
+  String get readAloudPrevious => 'Prethodni pasus';
+  @override
+  String get readAloudNext => 'Sljedeći pasus';
+  @override
+  String get readAloudPause => 'Pauza';
+  @override
+  String get readAloudResume => 'Nastavi';
+  @override
+  String readAloudSpeed(String speed) => 'Brzina $speed';
+  @override
+  String get readAloudSpeedTitle => 'Brzina';
+  @override
+  String get readAloudVoice => 'Glas';
+  @override
+  String get readAloudVoiceTitle => 'Glas i brzina';
+  @override
+  String readAloudVoiceNumber(int n) => 'Glas $n';
+  @override
+  String get readAloudDefault => 'Zadani glas';
+  @override
+  String get readAloudLanguage => 'Jezik';
+  @override
+  String get readAloudFromBook => 'iz knjige';
+  @override
+  String get readAloudOnDevice => 'na uređaju';
+  @override
+  String get readAloudNeedsNetwork => 'treba mrežu';
+  @override
+  String readAloudListen(String voice) => 'Poslušaj: $voice';
+  @override
+  String get readAloudSettings => 'Postavke pretvaranja teksta u govor';
+  @override
+  String get readAloudBackToVoice => 'Nazad na glas';
+  @override
+  String readAloudWhere(String chapter, int paragraph, int paragraphs) =>
+      '$chapter · pasus $paragraph od $paragraphs';
+  @override
+  String get readAloudPaused => 'Pauzirano';
+  @override
+  String get readAloudDeviceVoice => 'glas uređaja';
+  @override
+  String readAloudNoVoiceTitle(String language) =>
+      'Nema glasa za jezik $language';
+  @override
+  String readAloudNoVoiceBody(String language) =>
+      'Ova knjiga je na jeziku $language, ali uređaj nema glas za njega. '
+      'Možete ga instalirati u sistemskim postavkama pretvaranja teksta u '
+      'govor ili knjigu čitati zadanim glasom.';
+  @override
+  String get readAloudUseDefault => 'Koristi zadani glas';
+  @override
+  String get readAloudInstallVoice => 'Instaliraj glas';
+  @override
+  String get readAloudSample => 'Ovako čita ovaj glas.';
+  @override
+  String get readAloudChannel => 'Čitanje naglas';
+
   // Settings: preview mode.
   // Settings: editor formatting.
   @override

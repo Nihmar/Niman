@@ -411,6 +411,69 @@ final class JapaneseStrings extends Strings {
   @override
   String get epubProgressShowChapter => '章の進み具合を表示';
 
+  // Books: read aloud (#1276).
+  @override
+  String get readAloud => '読み上げ';
+  @override
+  String get readAloudFromHere => 'ここから読み上げ';
+  @override
+  String get readAloudStop => '読み上げを停止';
+  @override
+  String get readAloudPrevious => '前の段落';
+  @override
+  String get readAloudNext => '次の段落';
+  @override
+  String get readAloudPause => '一時停止';
+  @override
+  String get readAloudResume => '再開';
+  @override
+  String readAloudSpeed(String speed) => '速度 $speed';
+  @override
+  String get readAloudSpeedTitle => '速度';
+  @override
+  String get readAloudVoice => '音声';
+  @override
+  String get readAloudVoiceTitle => '音声と速度';
+  @override
+  String readAloudVoiceNumber(int n) => '音声 $n';
+  @override
+  String get readAloudDefault => 'デフォルトの音声';
+  @override
+  String get readAloudLanguage => '言語';
+  @override
+  String get readAloudFromBook => '本から';
+  @override
+  String get readAloudOnDevice => '端末内';
+  @override
+  String get readAloudNeedsNetwork => 'ネットワークが必要';
+  @override
+  String readAloudListen(String voice) => '試聴: $voice';
+  @override
+  String get readAloudSettings => 'テキスト読み上げの設定';
+  @override
+  String get readAloudBackToVoice => '読み上げ位置に戻る';
+  @override
+  String readAloudWhere(String chapter, int paragraph, int paragraphs) =>
+      '$chapter · 段落 $paragraph/$paragraphs';
+  @override
+  String get readAloudPaused => '一時停止中';
+  @override
+  String get readAloudDeviceVoice => '端末の音声';
+  @override
+  String readAloudNoVoiceTitle(String language) => '$language の音声がありません';
+  @override
+  String readAloudNoVoiceBody(String language) =>
+      'この本は $language '
+      'ですが、端末にこの言語の音声がありません。システムのテキスト読み上げの設定で音声をインストールするか、デフォルトの音声で読み上げてください。';
+  @override
+  String get readAloudUseDefault => 'デフォルトの音声を使う';
+  @override
+  String get readAloudInstallVoice => '音声をインストール';
+  @override
+  String get readAloudSample => 'この音声はこのように読み上げます。';
+  @override
+  String get readAloudChannel => '読み上げ';
+
   // Settings: preview mode.
   // Settings: editor formatting.
   @override

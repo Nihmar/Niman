@@ -120,6 +120,49 @@ Tests: `test/unit/epub_progress_test.dart`,
 `test/widget/epub_progress_line_test.dart`. The mockups and what was
 decided with them: [docs/design/book-progress](../design/book-progress/README.md).
 
+## Read aloud (#1276)
+
+Android only, for now (`docs/user/platforms.md`): the other platforms have
+no `ReadAloudEngine` (`ReadAloudEngine.platform` is null) and the row has
+no button.
+
+- `lib/src/epub/read_aloud_text.dart` — what is spoken, off the blocks the
+  read view draws (`MarkdownReadViewState.readBlocks`): a heading's or a
+  paragraph's `ReadInline.plainOf`, pictures written as nothing, split by
+  `splitSentences` (a stop, any closing quote, then a space and no
+  lowercase word; cut at a space past 4000 characters, the engine's
+  limit). A leaf block's sentences carry their characters, so the view
+  marks them where they are; a list item's or a quote's mark the whole
+  block, whose drawn text has more than its words.
+- `lib/src/ui/epub_read_aloud.dart` — `EpubReadAloud`, the reading: a
+  sentence handed to the engine at a time with the next queued behind it
+  (no gap), utterance ids so what a flush dropped is not listened to,
+  chapters read when reached (two kept), the place told back
+  (`onSpoken` → `ReadingTracker.moved`). Pause is a stop that keeps the
+  sentence. The pace and the voice last picked are kept for the session.
+- `lib/src/ui/epub_read_aloud_engine.dart` — the engine's seam and the
+  `niman/read_aloud` channel; `epub_read_aloud_host.dart` — what the pane
+  holds: the no-voice dialog, the mark, following until a drag
+  (`ScrollStartNotification.dragDetails`), *Back to the voice*;
+  `epub_read_aloud_bar.dart`, `epub_read_aloud_sheet.dart` — the player
+  and the voice sheet.
+- Android: `ReadAloudBridge.kt` over `TextToSpeech` and its
+  `UtteranceProgressListener`, audio focus (lost → `pause`, never resumed
+  by itself) and `ACTION_AUDIO_BECOMING_NOISY`, a platform `MediaSession`
+  for the outside controls; `ReadAloudService.kt`, a `mediaPlayback`
+  foreground service under a `Notification.MediaStyle` notification,
+  stopping the reading when the task is removed; `ReadAloudVoices.kt`,
+  the voices of a language, its country's first, offline before network.
+  The manifest asks `FOREGROUND_SERVICE_MEDIA_PLAYBACK` and queries
+  `TTS_SERVICE` (package visibility).
+
+Tests: `test/unit/read_aloud_text_test.dart`,
+`test/unit/epub_read_aloud_test.dart` (over
+`test/fakes/fake_read_aloud_engine.dart`),
+`test/widget/epub_read_aloud_pane_test.dart`,
+`android/app/src/test/.../ReadAloudVoicesTest.kt`. The mockups:
+[docs/design/book-read-aloud](../design/book-read-aloud/README.md).
+
 ## Where the reader was left (#281)
 
 `lib/src/reading/`: a `BookLocation` is a place in a document in its own

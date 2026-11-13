@@ -27,6 +27,8 @@ import 'package:niman/src/ui/epub_links.dart';
 import 'package:niman/src/ui/epub_pane.dart';
 import 'package:niman/src/ui/epub_places.dart';
 import 'package:niman/src/ui/epub_progress_line.dart';
+import 'package:niman/src/ui/epub_read_aloud_engine.dart';
+import 'package:niman/src/ui/epub_read_aloud_host.dart';
 import 'package:niman/src/ui/epub_text_zoom.dart';
 import 'package:niman/src/ui/epub_theme.dart';
 import 'package:niman/src/ui/file_marks.dart';
@@ -53,6 +55,12 @@ final class EpubPaneState extends State<EpubPane> {
   /// and where the reader is in it, followed as it scrolls.
   EpubProgress? _progress;
   ValueNotifier<EpubProgressHere>? _here;
+
+  /// The book read aloud (#1276), where the platform reads aloud.
+  EpubReadAloudHost? _aloud;
+
+  /// The engine books are read aloud with here; null where there is none.
+  ReadAloudEngine? get _engine => widget.readAloud ?? ReadAloudEngine.platform;
 
   /// Whether the book could not be read.
   bool get failed => _failed;
@@ -136,6 +144,7 @@ final class EpubPaneState extends State<EpubPane> {
     _document = null;
     _buffer = null;
     _dropProgress();
+    _dropAloud();
     _failed = false;
     unawaited(_open());
   }
@@ -147,6 +156,7 @@ final class EpubPaneState extends State<EpubPane> {
     if (owner?.value == this) owner!.value = null;
     _fullScreenFocus.dispose();
     _dropProgress();
+    _dropAloud();
     _marks?.dispose();
     _reading.flush();
     _scroll.dispose();
@@ -175,6 +185,15 @@ final class EpubPaneState extends State<EpubPane> {
         _dropProgress();
         final progress = _progress = document.progress();
         _here = ValueNotifier(epubProgressHere(document, progress, null));
+        _dropAloud();
+        if (_engine case final engine?) {
+          _aloud = EpubReadAloudHost(
+            engine: engine,
+            document: document,
+            view: () => _readKey.currentState,
+            onSpoken: _spokenAt,
+          )..addListener(_onAloud);
+        }
       });
       // Once the view is there to be scrolled: the link's place, else
       // where the book was left, else its start.
@@ -208,6 +227,29 @@ final class EpubPaneState extends State<EpubPane> {
     if (line == null) return false;
     _readKey.currentState?.showAnchor((line: line, fraction: place.fraction));
     return true;
+  }
+
+  void _dropAloud() {
+    _aloud
+      ?..removeListener(_onAloud)
+      ..dispose();
+    _aloud = null;
+  }
+
+  void _onAloud() {
+    if (mounted) setState(() {});
+  }
+
+  /// The voice has reached [line]: the place kept is the one spoken.
+  void _spokenAt(int line) {
+    final here = _document?.locationAt(line, 0);
+    if (here != null) _reading.moved(here);
+  }
+
+  /// Reads the book aloud from the paragraph at [line].
+  void _readAloudFrom(int line) {
+    final aloud = _aloud;
+    if (aloud != null) unawaited(aloud.start(context, line));
   }
 
   void _dropProgress() {
@@ -320,6 +362,11 @@ final class EpubPaneState extends State<EpubPane> {
   /// first, where a phone keeps it in sight — annotating it and a link to
   /// it, in a library; copying it, anywhere.
   List<ReadSelectionAction> _selectionActions() => [
+    if (_aloud != null)
+      (
+        label: AppStrings.readAloudFromHere,
+        onPressed: (selection) => _readAloudFrom(selection.line),
+      ),
     if (widget.positions != null && widget.marks != null)
       (
         label: AppStrings.highlightAction,
@@ -415,28 +462,37 @@ final class EpubPaneState extends State<EpubPane> {
                 ? const Center(child: CircularProgressIndicator())
                 : _book(context, document, buffer),
           ),
-          EpubBar(
-            path: widget.path,
-            launcher: widget.launcher,
-            linkType: widget.linkType,
-            onEditLook: widget.onEditLook,
-            onContents: document == null || document.contents.isEmpty
-                ? null
-                : (anchor) => unawaited(_showContents(anchor)),
-            onConvert: document == null ? null : widget.onConvert,
-            here: document == null || widget.positions == null
-                ? null
-                : () => _places.here(),
-            onAnnotate:
-                document == null ||
-                    widget.positions == null ||
-                    widget.onAnnotate == null
-                ? null
-                : () => _annotate(_places.annotationHere()),
-            fullScreen: _fullScreen,
-            onFullScreen: widget.fullScreen == null ? null : _toggleFullScreen,
-            progress: _progressLine,
-          ),
+          if (_aloud case final aloud? when aloud.active)
+            aloud.bar(context)
+          else
+            EpubBar(
+              path: widget.path,
+              launcher: widget.launcher,
+              linkType: widget.linkType,
+              onEditLook: widget.onEditLook,
+              onContents: document == null || document.contents.isEmpty
+                  ? null
+                  : (anchor) => unawaited(_showContents(anchor)),
+              onConvert: document == null ? null : widget.onConvert,
+              here: document == null || widget.positions == null
+                  ? null
+                  : () => _places.here(),
+              onAnnotate:
+                  document == null ||
+                      widget.positions == null ||
+                      widget.onAnnotate == null
+                  ? null
+                  : () => _annotate(_places.annotationHere()),
+              fullScreen: _fullScreen,
+              onFullScreen: widget.fullScreen == null
+                  ? null
+                  : _toggleFullScreen,
+              progress: _progressLine,
+              readsAloud: _engine != null,
+              onReadAloud: _aloud == null
+                  ? null
+                  : () => _readAloudFrom(_places.topLine() ?? 0),
+            ),
         ],
       ),
     );
@@ -462,7 +518,8 @@ final class EpubPaneState extends State<EpubPane> {
     SourceBuffer buffer,
   ) {
     final book = _read(context, document, buffer);
-    return _zoom?.pinch(book) ?? book;
+    final zoomed = _zoom?.pinch(book) ?? book;
+    return _aloud?.around(zoomed) ?? zoomed;
   }
 
   Widget _read(
@@ -488,7 +545,10 @@ final class EpubPaneState extends State<EpubPane> {
       embedResolver: (target) async => document.pictures[target],
       // A paragraph links, and annotates, only in a library.
       selectionActions: _selectionActions(),
-      marks: epubBlockMarks(document, _marks?.marks ?? const []),
+      marks: [
+        ...epubBlockMarks(document, _marks?.marks ?? const []),
+        ...?_aloud?.marks,
+      ]..sort((a, b) => a.line.compareTo(b.line)),
       onTapMark: (start, end, anchor) =>
           _openMarks(document, start, end, anchor),
     ),

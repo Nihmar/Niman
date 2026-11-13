@@ -636,3 +636,15 @@ the same lists. Where the panel shows,
 its left edge drags to make it wider or narrower, like the tree's edge.
 It stops growing before the note gets narrower than 360 px, and it
 keeps its width for the next launch.
+
+## Reading a book aloud
+
+**Android only, for now** — a decision, not an omission (#1276). A book is
+read aloud there with the device's own text-to-speech engine
+(`android.speech.tts.TextToSpeech`, the one TalkBack speaks with; Niman
+adds no library and downloads no voice), under a media notification and
+the lock screen's controls — see
+[organization](organization.md#files-that-are-not-notes). iOS and macOS
+(AVSpeechSynthesizer), Windows (the system's speech API) and Linux
+(speech-dispatcher) all have an engine of their own and may get read
+aloud **later**; until then the button is not on the book's row there.

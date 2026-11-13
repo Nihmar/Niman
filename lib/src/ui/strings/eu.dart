@@ -441,6 +441,71 @@ final class BasqueStrings extends Strings {
   @override
   String get epubProgressShowChapter => 'Erakutsi kapituluko aurrerapena';
 
+  // Books: read aloud (#1276).
+  @override
+  String get readAloud => 'Irakurri ozen';
+  @override
+  String get readAloudFromHere => 'Irakurri ozen hemendik';
+  @override
+  String get readAloudStop => 'Gelditu irakurketa';
+  @override
+  String get readAloudPrevious => 'Aurreko paragrafoa';
+  @override
+  String get readAloudNext => 'Hurrengo paragrafoa';
+  @override
+  String get readAloudPause => 'Pausatu';
+  @override
+  String get readAloudResume => 'Jarraitu';
+  @override
+  String readAloudSpeed(String speed) => 'Abiadura: $speed';
+  @override
+  String get readAloudSpeedTitle => 'Abiadura';
+  @override
+  String get readAloudVoice => 'Ahotsa';
+  @override
+  String get readAloudVoiceTitle => 'Ahotsa eta abiadura';
+  @override
+  String readAloudVoiceNumber(int n) => '$n. ahotsa';
+  @override
+  String get readAloudDefault => 'Ahots lehenetsia';
+  @override
+  String get readAloudLanguage => 'Hizkuntza';
+  @override
+  String get readAloudFromBook => 'liburutik';
+  @override
+  String get readAloudOnDevice => 'gailuan';
+  @override
+  String get readAloudNeedsNetwork => 'sarea behar du';
+  @override
+  String readAloudListen(String voice) => 'Entzun: $voice';
+  @override
+  String get readAloudSettings => 'Testua ahots bihurtzeko ezarpenak';
+  @override
+  String get readAloudBackToVoice => 'Itzuli ahotsera';
+  @override
+  String readAloudWhere(String chapter, int paragraph, int paragraphs) =>
+      '$chapter · $paragraph/$paragraphs paragrafoa';
+  @override
+  String get readAloudPaused => 'Pausatuta';
+  @override
+  String get readAloudDeviceVoice => 'gailuaren ahotsa';
+  @override
+  String readAloudNoVoiceTitle(String language) =>
+      'Ez dago ahotsik hizkuntza honetan: $language';
+  @override
+  String readAloudNoVoiceBody(String language) =>
+      'Liburu hau hizkuntza honetan dago: $language, baina gailuak ez du '
+      'ahotsik horretarako. Sistemaren testua ahots bihurtzeko ezarpenetan '
+      'instala dezakezu bat, edo ahots lehenetsiarekin irakurri.';
+  @override
+  String get readAloudUseDefault => 'Erabili ahots lehenetsia';
+  @override
+  String get readAloudInstallVoice => 'Instalatu ahots bat';
+  @override
+  String get readAloudSample => 'Honela irakurtzen du ahots honek.';
+  @override
+  String get readAloudChannel => 'Ozen irakurtzea';
+
   // Settings: preview mode.
   // Settings: editor formatting.
   @override

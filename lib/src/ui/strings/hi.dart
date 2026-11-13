@@ -431,6 +431,71 @@ final class HindiStrings extends Strings {
   @override
   String get epubProgressShowChapter => 'अध्याय में प्रगति दिखाएँ';
 
+  // Books: read aloud (#1276).
+  @override
+  String get readAloud => 'ज़ोर से पढ़ें';
+  @override
+  String get readAloudFromHere => 'यहाँ से ज़ोर से पढ़ें';
+  @override
+  String get readAloudStop => 'पढ़ना रोकें';
+  @override
+  String get readAloudPrevious => 'पिछला अनुच्छेद';
+  @override
+  String get readAloudNext => 'अगला अनुच्छेद';
+  @override
+  String get readAloudPause => 'रोकें';
+  @override
+  String get readAloudResume => 'फिर से शुरू करें';
+  @override
+  String readAloudSpeed(String speed) => 'गति $speed';
+  @override
+  String get readAloudSpeedTitle => 'गति';
+  @override
+  String get readAloudVoice => 'आवाज़';
+  @override
+  String get readAloudVoiceTitle => 'आवाज़ और गति';
+  @override
+  String readAloudVoiceNumber(int n) => 'आवाज़ $n';
+  @override
+  String get readAloudDefault => 'डिफ़ॉल्ट आवाज़';
+  @override
+  String get readAloudLanguage => 'भाषा';
+  @override
+  String get readAloudFromBook => 'किताब से';
+  @override
+  String get readAloudOnDevice => 'डिवाइस पर';
+  @override
+  String get readAloudNeedsNetwork => 'नेटवर्क चाहिए';
+  @override
+  String readAloudListen(String voice) => 'सुनें: $voice';
+  @override
+  String get readAloudSettings => 'टेक्स्ट-टू-स्पीच सेटिंग';
+  @override
+  String get readAloudBackToVoice => 'आवाज़ पर वापस जाएँ';
+  @override
+  String readAloudWhere(String chapter, int paragraph, int paragraphs) =>
+      '$chapter · अनुच्छेद $paragraph/$paragraphs';
+  @override
+  String get readAloudPaused => 'रुका हुआ';
+  @override
+  String get readAloudDeviceVoice => 'डिवाइस की आवाज़';
+  @override
+  String readAloudNoVoiceTitle(String language) =>
+      '$language के लिए कोई आवाज़ नहीं';
+  @override
+  String readAloudNoVoiceBody(String language) =>
+      'यह किताब $language में है, लेकिन डिवाइस में इसके लिए कोई आवाज़ नहीं है। '
+      'आप सिस्टम की टेक्स्ट-टू-स्पीच सेटिंग में एक आवाज़ इंस्टॉल कर सकते हैं, '
+      'या इसे डिफ़ॉल्ट आवाज़ से पढ़वा सकते हैं।';
+  @override
+  String get readAloudUseDefault => 'डिफ़ॉल्ट आवाज़ इस्तेमाल करें';
+  @override
+  String get readAloudInstallVoice => 'आवाज़ इंस्टॉल करें';
+  @override
+  String get readAloudSample => 'यह आवाज़ ऐसे पढ़ती है।';
+  @override
+  String get readAloudChannel => 'ज़ोर से पढ़ना';
+
   // Settings: preview mode.
   // Settings: editor formatting.
   @override
