@@ -26,12 +26,16 @@ final class TextZoomPinch extends StatefulWidget {
     required this.onZoom,
     required this.child,
     this.enabled = true,
+    this.normalize = normalizeTextScale,
     super.key,
   });
 
   /// Whether a pinch zooms: off over a pane whose text zooms by a pinch
   /// of its own, a book in the note pane, so one pinch is one zoom.
   final bool enabled;
+
+  /// Puts a size in range: the note's, or a book's wider one (#1274).
+  final double Function(Object?) normalize;
 
   /// The text size now.
   final double Function() scale;
@@ -49,9 +53,11 @@ final class TextZoomPinch extends StatefulWidget {
   /// The steps the size moves in, the settings slider's.
   static const double step = 0.05;
 
-  /// [scale] on the steps, in range.
-  static double snap(double scale) =>
-      normalizeTextScale((scale / step).round() * step);
+  /// [scale] on the steps, in the range [normalize] keeps.
+  static double snap(
+    double scale, {
+    double Function(Object?) normalize = normalizeTextScale,
+  }) => normalize((scale / step).round() * step);
 
   @override
   State<TextZoomPinch> createState() => _TextZoomPinchState();
@@ -102,7 +108,7 @@ final class _TextZoomPinchState extends State<TextZoomPinch> {
 
   /// A step the size reached, told once.
   void _show(double scale) {
-    final snapped = TextZoomPinch.snap(scale);
+    final snapped = TextZoomPinch.snap(scale, normalize: widget.normalize);
     if (!widget.enabled || snapped == _shown) return;
     _shown = snapped;
     widget.onZoom(snapped, done: false);
@@ -133,6 +139,7 @@ final class _TextZoomPinchState extends State<TextZoomPinch> {
       final up = (event as PointerScrollEvent).scrollDelta.dy < 0;
       final next = TextZoomPinch.snap(
         widget.scale() + (up ? TextZoomPinch.step : -TextZoomPinch.step),
+        normalize: widget.normalize,
       );
       widget.onZoom(next, done: true);
     });

@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/app_theme.dart';
+import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/core/theme.dart';
 import 'package:niman/src/epub/epub_look.dart';
 import 'package:niman/src/epub/epub_looks.dart';
@@ -98,6 +99,18 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
     expect((await session.epubLook).textScale, moving);
+  });
+
+  testWidgets("the size slider runs from 80% to the books' 250% (#1274)", (
+    tester,
+  ) async {
+    await open(tester);
+    final slider = tester.widget<Slider>(
+      find.byKey(const Key('epub-look-size')),
+    );
+    expect(slider.min, minTextScale);
+    expect(slider.max, maxBookTextScale);
+    expect(slider.divisions, 34, reason: 'steps of 5%');
   });
 
   testWidgets("a custom theme gone since it was picked reads as the app's", (

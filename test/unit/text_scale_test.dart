@@ -36,6 +36,45 @@ void main() {
     });
   });
 
+  group('normalizeBookTextScale', () {
+    test("a book's range is wider than the note's (#1274)", () {
+      expect(maxBookTextScale, 2.5);
+      expect(normalizeBookTextScale(2), 2.0);
+      expect(normalizeBookTextScale(maxBookTextScale), maxBookTextScale);
+      expect(normalizeTextScale(2), maxTextScale, reason: "a note's stops");
+    });
+
+    test('out of range clamps to the nearest legal size', () {
+      expect(normalizeBookTextScale(9), maxBookTextScale);
+      expect(normalizeBookTextScale(0.1), minTextScale);
+    });
+
+    test('anything that is not a finite number is the shipped size', () {
+      expect(normalizeBookTextScale(null), defaultTextScale);
+      expect(normalizeBookTextScale(double.nan), defaultTextScale);
+    });
+
+    test('the zoom steps a book past 180%, a note not', () {
+      expect(
+        AppTextScales.zoomed(
+          maxTextScale,
+          1,
+          normalize: normalizeBookTextScale,
+        ),
+        closeTo(1.9, 1e-9),
+      );
+      expect(AppTextScales.zoomed(maxTextScale, 1), maxTextScale);
+      expect(
+        AppTextScales.zoomed(
+          maxBookTextScale,
+          1,
+          normalize: normalizeBookTextScale,
+        ),
+        maxBookTextScale,
+      );
+    });
+  });
+
   group('the library config carries both sizes', () {
     test('a fresh library reads at the shipped sizes', () {
       expect(LibraryConfig.defaults.uiTextScale, defaultTextScale);

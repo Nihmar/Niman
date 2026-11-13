@@ -57,11 +57,16 @@ final class AppTextScales {
   static const double zoomStep = 0.1;
 
   /// The note scale [steps] zoom steps from [from], on the steps' grid and
-  /// in range; zero steps is the shipped size.
-  static double zoomed(double from, int steps) {
+  /// in the range [normalize] keeps (a book's is wider, #1274); zero steps
+  /// is the shipped size.
+  static double zoomed(
+    double from,
+    int steps, {
+    double Function(Object?) normalize = normalizeTextScale,
+  }) {
     if (steps == 0) return defaultTextScale;
     final grid = (from / zoomStep).round() + steps;
-    return normalizeTextScale(grid * zoomStep);
+    return normalize(grid * zoomStep);
   }
 
   /// Puts both back to the shipped sizes: no library is open, so no

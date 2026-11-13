@@ -53,9 +53,9 @@ final class EpubLookPanel extends StatefulWidget {
 }
 
 final class _EpubLookPanelState extends State<EpubLookPanel> {
-  /// Steps of 5% between [minTextScale] and [maxTextScale], as the note
-  /// text size has.
-  static final int _textScaleSteps = ((maxTextScale - minTextScale) * 20)
+  /// Steps of 5% between [minTextScale] and [maxBookTextScale], as the
+  /// note text size has; a book goes larger than a note (#1274).
+  static final int _textScaleSteps = ((maxBookTextScale - minTextScale) * 20)
       .round();
 
   EpubLook? _look;
@@ -228,7 +228,7 @@ final class _EpubLookPanelState extends State<EpubLookPanel> {
           key: const Key('epub-look-size'),
           value: look.textScale,
           min: minTextScale,
-          max: maxTextScale,
+          max: maxBookTextScale,
           divisions: _textScaleSteps,
           onChanged: (scale) => _preview(look.copyWith(textScale: scale)),
           onChangeEnd: (scale) =>

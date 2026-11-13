@@ -50,7 +50,16 @@ void main() {
     // An unknown brightness is the system's, as the app's own is.
     expect(look.brightness, AppBrightness.system);
     expect(look.font, EpubFont.literata);
-    expect(look.textScale, maxTextScale);
+    expect(look.textScale, maxBookTextScale);
+  });
+
+  test("a book's size reads in its own range, past the note's (#1274)", () {
+    EpubLook read(Object? scale) =>
+        EpubLook.fromJson({EpubLook.textScaleKey: scale});
+    expect(read(2.2).textScale, 2.2, reason: 'past 180%, kept as it is');
+    expect(read(maxBookTextScale).textScale, maxBookTextScale);
+    expect(read(4).textScale, maxBookTextScale, reason: 'a hand-edited file');
+    expect(read(0.5).textScale, minTextScale);
   });
 
   test('clearing the theme and brightness puts back the app ones', () {

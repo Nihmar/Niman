@@ -496,7 +496,9 @@ library.
   light, dark, the system's, or the app's; the **font** is Literata (a
   typeface made for reading on screen, shipped with Niman, the same on
   every platform), the system's serif, the app's own sans serif, or
-  monospace; **Text size** shows on the book as the slider moves. Every
+  monospace; **Text size** shows on the book as the slider moves, from
+  80% to 250% — larger than a note goes, for a phone held at arm's
+  length or a reader who needs it bigger. Every
   choice applies at once to every book of the library, and is kept per
   library on this device, like the note text size. A fresh library reads
   its books in Literata, in the app's colours.
@@ -506,8 +508,8 @@ library.
   zoom out — turn the mouse wheel with `Ctrl` held, or press `Ctrl/⌘+=`, `Ctrl/⌘+-` and `Ctrl/⌘+0` (back to the
   normal size), in full screen too; the palette's *Zoom in*, *Zoom out*
   and *Reset zoom* do the same while a book is on screen. The size is
-  kept like a pick in the sheet, and stays between 80% and 180%; a note's
-  own text size is left alone.
+  kept like a pick in the sheet, and stays between 80% and 250%; a note's
+  own text size is left alone, and still stops at 180%.
 - **Full screen**: the full-screen button on the book's row reads it over
   the whole screen, its row still under it — the window goes full screen
   on the desktop, and the system bars step aside on Android. The same
