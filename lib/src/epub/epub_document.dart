@@ -19,6 +19,7 @@ import 'package:archive/archive.dart';
 import 'package:crypto/crypto.dart';
 import 'package:niman/src/epub/epub_archive.dart';
 import 'package:niman/src/epub/epub_book.dart';
+import 'package:niman/src/epub/epub_progress.dart';
 import 'package:niman/src/reading/book_location.dart';
 import 'package:path/path.dart' as p;
 
@@ -40,6 +41,7 @@ final class EpubDocument {
     required this.pictures,
     required this.links,
     required this.chapters,
+    required this.counts,
     this.mathReport,
   });
 
@@ -61,6 +63,14 @@ final class EpubDocument {
 
   /// Its chapters with any text, in the order they are read.
   final List<EpubChapter> chapters;
+
+  /// Its text's characters and words, counted as it is read, off the UI
+  /// isolate, for the progress line (#1275).
+  final EpubCounts counts;
+
+  /// The progress through the book, its chapters' starts the measure.
+  EpubProgress progress() =>
+      EpubProgress(counts, [for (final chapter in chapters) chapter.line]);
 
   /// An ad-hoc diagnostic (#303): what the chapters' math looked like to a
   /// plain scan — the SVG formulas, their first TeX, the MathML — for the
@@ -175,6 +185,7 @@ EpubDocument readEpub(String path, String pictureDir) {
       line += '\n'.allMatches(chapter.markdown).length;
     }
     text.write('\n');
+    final markdown = text.toString();
 
     int? lineOf(String file, String fragment) {
       final start = chapterStart[file];
@@ -185,7 +196,7 @@ EpubDocument readEpub(String path, String pictureDir) {
 
     return EpubDocument(
       title: book.info.title ?? p.basenameWithoutExtension(path),
-      markdown: text.toString(),
+      markdown: markdown,
       contents: [
         for (final entry in book.contents)
           if (lineOf(entry.file, entry.fragment) case final line?)
@@ -199,6 +210,7 @@ EpubDocument readEpub(String path, String pictureDir) {
         for (final MapEntry(key: file, value: line) in chapterStart.entries)
           (file: file, line: line),
       ],
+      counts: EpubCounts.of(markdown),
       mathReport: _mathReport(book.formulaSvgs, book.firstTex, book.mathMl),
     );
   } finally {
