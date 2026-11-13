@@ -425,6 +425,23 @@ final class DanishStrings extends Strings {
   @override
   String get epubTextSizeTitle => 'Tekststørrelse';
 
+  // Books: reading progress (#1275).
+  @override
+  String epubProgressBook(int percent, int chapter, int chapters) =>
+      '$percent % af bogen · kapitel $chapter af $chapters';
+  @override
+  String epubProgressTime(String chapter, String book) =>
+      'Kapitel ≈ $chapter · Bog ≈ $book';
+  @override
+  String readingTimeValue(int hours, int minutes) =>
+      hours == 0 ? '$minutes min' : '$hours t $minutes min';
+  @override
+  String get epubProgressShowBook => 'Vis fremskridt i bogen';
+  @override
+  String get epubProgressShowTime => 'Vis resterende tid';
+  @override
+  String get epubProgressShowChapter => 'Vis fremskridt i kapitlet';
+
   // Settings: preview mode.
   // Settings: editor formatting.
   @override

@@ -435,6 +435,23 @@ final class GreekStrings extends Strings {
   @override
   String get epubTextSizeTitle => 'Μέγεθος κειμένου';
 
+  // Books: reading progress (#1275).
+  @override
+  String epubProgressBook(int percent, int chapter, int chapters) =>
+      '$percent% του βιβλίου · κεφάλαιο $chapter από $chapters';
+  @override
+  String epubProgressTime(String chapter, String book) =>
+      'Κεφάλαιο ≈ $chapter · Βιβλίο ≈ $book';
+  @override
+  String readingTimeValue(int hours, int minutes) =>
+      hours == 0 ? '$minutes λεπ.' : '$hours ώρ. $minutes λεπ.';
+  @override
+  String get epubProgressShowBook => 'Εμφάνιση προόδου στο βιβλίο';
+  @override
+  String get epubProgressShowTime => 'Εμφάνιση χρόνου που απομένει';
+  @override
+  String get epubProgressShowChapter => 'Εμφάνιση προόδου στο κεφάλαιο';
+
   // Settings: preview mode.
   // Settings: editor formatting.
   @override

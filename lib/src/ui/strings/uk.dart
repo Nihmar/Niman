@@ -424,6 +424,23 @@ final class UkrainianStrings extends Strings {
   @override
   String get epubTextSizeTitle => 'Розмір тексту';
 
+  // Books: reading progress (#1275).
+  @override
+  String epubProgressBook(int percent, int chapter, int chapters) =>
+      '$percent % книги · розділ $chapter з $chapters';
+  @override
+  String epubProgressTime(String chapter, String book) =>
+      'Розділ ≈ $chapter · Книга ≈ $book';
+  @override
+  String readingTimeValue(int hours, int minutes) =>
+      hours == 0 ? '$minutes хв' : '$hours год $minutes хв';
+  @override
+  String get epubProgressShowBook => 'Показати поступ у книзі';
+  @override
+  String get epubProgressShowTime => 'Показати час, що лишився';
+  @override
+  String get epubProgressShowChapter => 'Показати поступ у розділі';
+
   // Settings: preview mode.
   // Settings: editor formatting.
   @override

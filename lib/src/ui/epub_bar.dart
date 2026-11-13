@@ -1,7 +1,7 @@
 /// A book's row, under it in the note pane (#280): its name, how the books
 /// look, its contents, converting it into notes (#1138), a link to the
-/// place being read (#282), annotating it (#284), full screen (#621), and on
-/// desktop the system's application.
+/// place being read (#282), annotating it (#284), full screen (#621), how far
+/// it has been read (#1275), and on desktop the system's application.
 library;
 
 import 'package:flutter/material.dart';
@@ -30,8 +30,13 @@ final class EpubBar extends StatelessWidget {
     this.onAnnotate,
     this.fullScreen = false,
     this.onFullScreen,
+    this.progress,
     super.key,
   });
+
+  /// Below this width the progress line sits over the row, as wide as the
+  /// pane; from it, in the row beside the book's name.
+  static const double inlineProgressWidth = 600;
 
   /// The book's absolute path.
   final String path;
@@ -66,10 +71,28 @@ final class EpubBar extends StatelessWidget {
   /// Enters full screen, or leaves it.
   final VoidCallback? onFullScreen;
 
+  /// The book's progress line, in the row when `inline`, over it when
+  /// not; null while the book is read, or when it has no text.
+  final Widget Function({required bool inline})? progress;
+
   @override
-  Widget build(BuildContext context) => AttachmentBar(
+  Widget build(BuildContext context) {
+    final progress = this.progress;
+    if (progress == null) return _row(null);
+    return LayoutBuilder(
+      builder: (context, box) => box.maxWidth < inlineProgressWidth
+          ? Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [progress(inline: false), _row(null)],
+            )
+          : _row(progress(inline: true)),
+    );
+  }
+
+  Widget _row(Widget? beside) => AttachmentBar(
     path: path,
     launcher: launcher,
+    beside: beside,
     actions: [
       Builder(
         builder: (context) => IconButton(

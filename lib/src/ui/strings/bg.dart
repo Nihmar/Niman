@@ -432,6 +432,23 @@ final class BulgarianStrings extends Strings {
   @override
   String get epubTextSizeTitle => 'Размер на текста';
 
+  // Books: reading progress (#1275).
+  @override
+  String epubProgressBook(int percent, int chapter, int chapters) =>
+      '$percent % от книгата · глава $chapter от $chapters';
+  @override
+  String epubProgressTime(String chapter, String book) =>
+      'Глава ≈ $chapter · Книга ≈ $book';
+  @override
+  String readingTimeValue(int hours, int minutes) =>
+      hours == 0 ? '$minutes мин' : '$hours ч $minutes мин';
+  @override
+  String get epubProgressShowBook => 'Покажи напредъка в книгата';
+  @override
+  String get epubProgressShowTime => 'Покажи оставащото време';
+  @override
+  String get epubProgressShowChapter => 'Покажи напредъка в главата';
+
   // Settings: preview mode.
   // Settings: editor formatting.
   @override

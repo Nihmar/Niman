@@ -423,6 +423,23 @@ final class CzechStrings extends Strings {
   @override
   String get epubTextSizeTitle => 'Velikost textu';
 
+  // Books: reading progress (#1275).
+  @override
+  String epubProgressBook(int percent, int chapter, int chapters) =>
+      '$percent % knihy · kapitola $chapter z $chapters';
+  @override
+  String epubProgressTime(String chapter, String book) =>
+      'Kapitola ≈ $chapter · Kniha ≈ $book';
+  @override
+  String readingTimeValue(int hours, int minutes) =>
+      hours == 0 ? '$minutes min' : '$hours h $minutes min';
+  @override
+  String get epubProgressShowBook => 'Zobrazit postup v knize';
+  @override
+  String get epubProgressShowTime => 'Zobrazit zbývající čas';
+  @override
+  String get epubProgressShowChapter => 'Zobrazit postup v kapitole';
+
   // Settings: preview mode.
   // Settings: editor formatting.
   @override

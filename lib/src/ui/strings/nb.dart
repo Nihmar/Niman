@@ -423,6 +423,23 @@ final class NorwegianStrings extends Strings {
   @override
   String get epubTextSizeTitle => 'Tekststørrelse';
 
+  // Books: reading progress (#1275).
+  @override
+  String epubProgressBook(int percent, int chapter, int chapters) =>
+      '$percent % av boka · kapittel $chapter av $chapters';
+  @override
+  String epubProgressTime(String chapter, String book) =>
+      'Kapittel ≈ $chapter · Bok ≈ $book';
+  @override
+  String readingTimeValue(int hours, int minutes) =>
+      hours == 0 ? '$minutes min' : '$hours t $minutes min';
+  @override
+  String get epubProgressShowBook => 'Vis framdrift i boka';
+  @override
+  String get epubProgressShowTime => 'Vis gjenstående tid';
+  @override
+  String get epubProgressShowChapter => 'Vis framdrift i kapittelet';
+
   // Settings: preview mode.
   // Settings: editor formatting.
   @override

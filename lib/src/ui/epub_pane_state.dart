@@ -11,6 +11,7 @@ import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/epub/epub_document.dart';
 import 'package:niman/src/epub/epub_looks.dart';
 import 'package:niman/src/epub/epub_marks.dart';
+import 'package:niman/src/epub/epub_progress.dart';
 import 'package:niman/src/markdown/read_parser.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
 import 'package:niman/src/markdown/render/read_selection.dart';
@@ -25,6 +26,7 @@ import 'package:niman/src/ui/epub_contents_sheet.dart';
 import 'package:niman/src/ui/epub_links.dart';
 import 'package:niman/src/ui/epub_pane.dart';
 import 'package:niman/src/ui/epub_places.dart';
+import 'package:niman/src/ui/epub_progress_line.dart';
 import 'package:niman/src/ui/epub_text_zoom.dart';
 import 'package:niman/src/ui/epub_theme.dart';
 import 'package:niman/src/ui/file_marks.dart';
@@ -46,6 +48,11 @@ final class EpubPaneState extends State<EpubPane> {
   EpubDocument? get document => _document;
   EpubDocument? _document;
   SourceBuffer? _buffer;
+
+  /// How far it has been read (#1275): the book's measure, counted once,
+  /// and where the reader is in it, followed as it scrolls.
+  EpubProgress? _progress;
+  ValueNotifier<EpubProgressHere>? _here;
 
   /// Whether the book could not be read.
   bool get failed => _failed;
@@ -128,6 +135,7 @@ final class EpubPaneState extends State<EpubPane> {
     // The build that follows shows the spinner until the new book is read.
     _document = null;
     _buffer = null;
+    _dropProgress();
     _failed = false;
     unawaited(_open());
   }
@@ -138,6 +146,7 @@ final class EpubPaneState extends State<EpubPane> {
     // A book closed in full screen takes the window out with it.
     if (owner?.value == this) owner!.value = null;
     _fullScreenFocus.dispose();
+    _dropProgress();
     _marks?.dispose();
     _reading.flush();
     _scroll.dispose();
@@ -163,6 +172,9 @@ final class EpubPaneState extends State<EpubPane> {
       setState(() {
         _document = document;
         _buffer = SourceBuffer.fromText(document.markdown);
+        _dropProgress();
+        final progress = _progress = document.progress();
+        _here = ValueNotifier(epubProgressHere(document, progress, null));
       });
       // Once the view is there to be scrolled: the link's place, else
       // where the book was left, else its start.
@@ -174,6 +186,7 @@ final class EpubPaneState extends State<EpubPane> {
           orElse: () => null,
         );
         reading.placed(place);
+        _followProgress();
       });
     } on Object catch (error) {
       _log.warning('could not read ${widget.path}: $error');
@@ -197,7 +210,54 @@ final class EpubPaneState extends State<EpubPane> {
     return true;
   }
 
+  void _dropProgress() {
+    _here?.dispose();
+    _here = null;
+    _progress = null;
+  }
+
+  /// Moves the progress line to where the view is: the top line, or the
+  /// book's end once the view can go no further.
+  void _followProgress() {
+    final document = _document;
+    final progress = _progress;
+    final here = _here;
+    if (document == null || progress == null || here == null) return;
+    final end =
+        _scroll.hasClients &&
+        _scroll.position.maxScrollExtent > 0 &&
+        _scroll.position.extentAfter == 0;
+    here.value = epubProgressHere(
+      document,
+      progress,
+      _readKey.currentState?.topAnchor,
+      atEnd: end,
+    );
+  }
+
+  /// A tap on the progress line: the next view, shown on every book at
+  /// once and kept.
+  void _onProgressView(EpubProgressView view) {
+    showEpubProgressView(view);
+    widget.onProgressView?.call(view);
+  }
+
+  /// The book's progress line, once the book is read and has text.
+  Widget Function({required bool inline})? get _progressLine {
+    final progress = _progress;
+    final here = _here;
+    if (progress == null || here == null || progress.isEmpty) return null;
+    return ({required inline}) => EpubProgressLine(
+      progress: progress,
+      here: here,
+      view: EpubLooks.look.progress,
+      onView: widget.onProgressView == null ? null : _onProgressView,
+      inline: inline,
+    );
+  }
+
   void _onScroll() {
+    _followProgress();
     final anchor = _readKey.currentState?.topAnchor;
     final here = anchor == null
         ? null
@@ -375,6 +435,7 @@ final class EpubPaneState extends State<EpubPane> {
                 : () => _annotate(_places.annotationHere()),
             fullScreen: _fullScreen,
             onFullScreen: widget.fullScreen == null ? null : _toggleFullScreen,
+            progress: _progressLine,
           ),
         ],
       ),

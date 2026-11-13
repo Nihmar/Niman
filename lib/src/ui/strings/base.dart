@@ -230,6 +230,14 @@ abstract base class Strings {
   String get epubFontMono;
   String get epubTextSizeTitle;
 
+  // Books: reading progress (#1275).
+  String epubProgressBook(int percent, int chapter, int chapters);
+  String epubProgressTime(String chapter, String book);
+  String readingTimeValue(int hours, int minutes);
+  String get epubProgressShowBook;
+  String get epubProgressShowTime;
+  String get epubProgressShowChapter;
+
   // Settings: preview mode.
   // Settings: editor formatting.
   String get linkTypeTitle;

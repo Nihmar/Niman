@@ -425,6 +425,23 @@ final class SlovakStrings extends Strings {
   @override
   String get epubTextSizeTitle => 'Veľkosť textu';
 
+  // Books: reading progress (#1275).
+  @override
+  String epubProgressBook(int percent, int chapter, int chapters) =>
+      '$percent % knihy · kapitola $chapter z $chapters';
+  @override
+  String epubProgressTime(String chapter, String book) =>
+      'Kapitola ≈ $chapter · Kniha ≈ $book';
+  @override
+  String readingTimeValue(int hours, int minutes) =>
+      hours == 0 ? '$minutes min' : '$hours h $minutes min';
+  @override
+  String get epubProgressShowBook => 'Zobraziť postup v knihe';
+  @override
+  String get epubProgressShowTime => 'Zobraziť zostávajúci čas';
+  @override
+  String get epubProgressShowChapter => 'Zobraziť postup v kapitole';
+
   // Settings: preview mode.
   // Settings: editor formatting.
   @override

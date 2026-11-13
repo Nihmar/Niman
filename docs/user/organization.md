@@ -510,6 +510,20 @@ library.
   and *Reset zoom* do the same while a book is on screen. The size is
   kept like a pick in the sheet, and stays between 80% and 250%; a note's
   own text size is left alone, and still stops at 180%.
+- **How far you have read**: a line by the book's row says it, in one of
+  three views a tap (or `Enter` on it) moves between — the dots beside
+  it say which: the **chapter** and how far into it (`Chapter I · 62%`),
+  the **book** and which chapter of how many (`38% of the book · chapter
+  4 of 38`, its track ticked where every chapter starts), or the **time
+  left** to the chapter's end and to the book's (`Chapter ≈ 11 min ·
+  Book ≈ 5 h 40 min`). On a phone it is a line of its own over the row;
+  on a tablet and a desktop it sits in the row beside the book's name,
+  and a pointer resting on it shows the three at once. It follows the
+  reading as the book scrolls, and moves at once on a jump — the
+  contents, a link. It is measured in characters, from the top of the
+  view, so a long paragraph weighs what it holds; the time is the words
+  left at about 250 a minute. The view picked is kept per library with
+  the books' look, so the next book opens on it.
 - **Full screen**: the full-screen button on the book's row reads it over
   the whole screen, its row still under it — the window goes full screen
   on the desktop, and the system bars step aside on Android. The same

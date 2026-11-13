@@ -16,6 +16,7 @@ import 'package:niman/src/core/settings/features.dart';
 import 'package:niman/src/core/settings/library_features.dart';
 import 'package:niman/src/core/settings/library_settings.dart' show LinkType;
 import 'package:niman/src/editor/note_column.dart';
+import 'package:niman/src/epub/epub_progress.dart';
 import 'package:niman/src/reading/reading_positions.dart';
 import 'package:niman/src/ui/attachment_bar.dart';
 import 'package:niman/src/ui/attachment_picture.dart';
@@ -65,6 +66,7 @@ final class AttachmentView extends StatelessWidget {
     this.column = NoteColumn.off,
     this.onEditEpubLook,
     this.onEpubTextScale,
+    this.onEpubProgressView,
     this.positions,
     this.anchor,
     this.reloadToken = 0,
@@ -92,6 +94,10 @@ final class AttachmentView extends StatelessWidget {
   /// Keeps the books' text size a pinch or a zoom key reached
   /// ([EpubPane.onTextScale]).
   final ValueChanged<double>? onEpubTextScale;
+
+  /// Keeps the view of the books' progress line
+  /// ([EpubPane.onProgressView]).
+  final ValueChanged<EpubProgressView>? onEpubProgressView;
 
   /// Where the library keeps where each book and PDF was left; null keeps
   /// none.
@@ -137,6 +143,7 @@ final class AttachmentView extends StatelessWidget {
         column: column,
         onEditLook: onEditEpubLook,
         onTextScale: onEpubTextScale,
+        onProgressView: onEpubProgressView,
         positions: positions,
         anchor: anchor,
         reloadToken: reloadToken,

@@ -430,6 +430,23 @@ final class CatalanStrings extends Strings {
   @override
   String get epubTextSizeTitle => 'Mida del text';
 
+  // Books: reading progress (#1275).
+  @override
+  String epubProgressBook(int percent, int chapter, int chapters) =>
+      '$percent % del llibre · capítol $chapter de $chapters';
+  @override
+  String epubProgressTime(String chapter, String book) =>
+      'Capítol ≈ $chapter · Llibre ≈ $book';
+  @override
+  String readingTimeValue(int hours, int minutes) =>
+      hours == 0 ? '$minutes min' : '$hours h $minutes min';
+  @override
+  String get epubProgressShowBook => 'Mostra el progrés al llibre';
+  @override
+  String get epubProgressShowTime => 'Mostra el temps que queda';
+  @override
+  String get epubProgressShowChapter => 'Mostra el progrés al capítol';
+
   // Settings: preview mode.
   // Settings: editor formatting.
   @override

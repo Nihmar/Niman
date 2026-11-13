@@ -416,6 +416,23 @@ final class TurkishStrings extends Strings {
   @override
   String get epubTextSizeTitle => 'Metin boyutu';
 
+  // Books: reading progress (#1275).
+  @override
+  String epubProgressBook(int percent, int chapter, int chapters) =>
+      'Kitap %$percent · bölüm $chapter/$chapters';
+  @override
+  String epubProgressTime(String chapter, String book) =>
+      'Bölüm ≈ $chapter · Kitap ≈ $book';
+  @override
+  String readingTimeValue(int hours, int minutes) =>
+      hours == 0 ? '$minutes dk' : '$hours sa $minutes dk';
+  @override
+  String get epubProgressShowBook => 'Kitaptaki ilerlemeyi göster';
+  @override
+  String get epubProgressShowTime => 'Kalan süreyi göster';
+  @override
+  String get epubProgressShowChapter => 'Bölümdeki ilerlemeyi göster';
+
   // Settings: preview mode.
   // Settings: editor formatting.
   @override

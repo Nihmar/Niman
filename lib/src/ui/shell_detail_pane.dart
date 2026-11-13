@@ -7,6 +7,7 @@ import 'package:niman/src/annotations/annotation.dart';
 import 'package:niman/src/annotations/annotation_mark_source.dart';
 import 'package:niman/src/core/settings/features.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
+import 'package:niman/src/epub/epub_progress.dart';
 import 'package:niman/src/reading/reading_positions.dart';
 import 'package:niman/src/ui/attachment_view.dart';
 import 'package:niman/src/ui/detail_deck.dart';
@@ -56,6 +57,7 @@ final class ShellDetailPane extends StatelessWidget {
     this.onTabKind,
     this.onEditEpubLook,
     this.onEpubTextScale,
+    this.onEpubProgressView,
     this.epubFullScreen,
     super.key,
   });
@@ -80,6 +82,9 @@ final class ShellDetailPane extends StatelessWidget {
 
   /// Keeps the books' text size a pinch or a zoom key reached (#538).
   final ValueChanged<double>? onEpubTextScale;
+
+  /// Keeps the view of the books' progress line (#1275).
+  final ValueChanged<EpubProgressView>? onEpubProgressView;
 
   /// Which book is read in full screen (#621).
   final ValueNotifier<Object?>? epubFullScreen;
@@ -242,6 +247,7 @@ final class ShellDetailPane extends StatelessWidget {
           column: options.noteColumn,
           onEditEpubLook: onEditEpubLook,
           onEpubTextScale: onEpubTextScale,
+          onEpubProgressView: onEpubProgressView,
           positions: ReadingPositions(root),
           anchor: tab.anchor,
           reloadToken: linksFollowed,

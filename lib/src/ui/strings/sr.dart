@@ -426,6 +426,23 @@ final class SerbianStrings extends Strings {
   @override
   String get epubTextSizeTitle => 'Величина текста';
 
+  // Books: reading progress (#1275).
+  @override
+  String epubProgressBook(int percent, int chapter, int chapters) =>
+      '$percent % књиге · поглавље $chapter од $chapters';
+  @override
+  String epubProgressTime(String chapter, String book) =>
+      'Поглавље ≈ $chapter · Књига ≈ $book';
+  @override
+  String readingTimeValue(int hours, int minutes) =>
+      hours == 0 ? '$minutes мин' : '$hours ч $minutes мин';
+  @override
+  String get epubProgressShowBook => 'Прикажи напредак у књизи';
+  @override
+  String get epubProgressShowTime => 'Прикажи преостало време';
+  @override
+  String get epubProgressShowChapter => 'Прикажи напредак у поглављу';
+
   // Settings: preview mode.
   // Settings: editor formatting.
   @override

@@ -179,6 +179,7 @@ leave the file at its next write.
 | `epubTheme` | none (= the app's) | The theme the EPUB books wear: a theme id, a shipped one or `custom:…` |
 | `epubBrightness` | none (= the app's) | The books' brightness: `system`, `day` or `night` |
 | `epubFont` | `literata` | The books' face: `literata`, `serif`, `sans` or `mono` |
+| `epubProgress` | `chapter` | What the books' progress line shows: `chapter`, `book` or `time` (the time left); also set by a tap on the line |
 | `epubTextScale` | 1.0 | The books' text size (0.8–2.5, wider than the note's); also set by a pinch over a book and, with a book on screen, by the zoom keys and commands |
 | `deviceNavigation` | none (= the library's `navigation`) | This device's own navigation, same shape as `navigation`, set by **Only on this device**; while there, it wins |
 

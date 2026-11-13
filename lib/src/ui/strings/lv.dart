@@ -420,6 +420,23 @@ final class LatvianStrings extends Strings {
   @override
   String get epubTextSizeTitle => 'Teksta lielums';
 
+  // Books: reading progress (#1275).
+  @override
+  String epubProgressBook(int percent, int chapter, int chapters) =>
+      '$percent% no grāmatas · $chapter. nodaļa no $chapters';
+  @override
+  String epubProgressTime(String chapter, String book) =>
+      'Nodaļa ≈ $chapter · Grāmata ≈ $book';
+  @override
+  String readingTimeValue(int hours, int minutes) =>
+      hours == 0 ? '$minutes min' : '$hours st. $minutes min';
+  @override
+  String get epubProgressShowBook => 'Rādīt progresu grāmatā';
+  @override
+  String get epubProgressShowTime => 'Rādīt atlikušo laiku';
+  @override
+  String get epubProgressShowChapter => 'Rādīt progresu nodaļā';
+
   // Settings: preview mode.
   // Settings: editor formatting.
   @override

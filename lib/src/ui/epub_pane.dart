@@ -22,6 +22,7 @@ import 'package:niman/src/core/settings/library_settings.dart' show LinkType;
 import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/epub/epub_document.dart';
 import 'package:niman/src/epub/epub_looks.dart';
+import 'package:niman/src/epub/epub_progress.dart';
 import 'package:niman/src/reading/book_location.dart';
 import 'package:niman/src/reading/reading_positions.dart';
 import 'package:niman/src/ui/epub_pane_state.dart';
@@ -45,6 +46,7 @@ final class EpubPane extends StatefulWidget {
     this.cacheDir = _epubCacheDir,
     this.onEditLook,
     this.onTextScale,
+    this.onProgressView,
     this.positions,
     this.anchor,
     this.reloadToken = 0,
@@ -77,6 +79,10 @@ final class EpubPane extends StatefulWidget {
   /// Keeps the books' text size a pinch or a zoom key reached (#538), the
   /// size the look sheet sets; null leaves the text unzoomed by either.
   final ValueChanged<double>? onTextScale;
+
+  /// Keeps the view a tap on the progress line moved to (#1275); null
+  /// leaves the line on the view it shows.
+  final ValueChanged<EpubProgressView>? onProgressView;
 
   /// Where the library keeps its reading positions; null keeps none, and
   /// the book opens at its start.

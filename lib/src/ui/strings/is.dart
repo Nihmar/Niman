@@ -421,6 +421,23 @@ final class IcelandicStrings extends Strings {
   @override
   String get epubTextSizeTitle => 'Textastærð';
 
+  // Books: reading progress (#1275).
+  @override
+  String epubProgressBook(int percent, int chapter, int chapters) =>
+      '$percent% af bókinni · kafli $chapter af $chapters';
+  @override
+  String epubProgressTime(String chapter, String book) =>
+      'Kafli ≈ $chapter · Bók ≈ $book';
+  @override
+  String readingTimeValue(int hours, int minutes) =>
+      hours == 0 ? '$minutes mín' : '$hours klst. $minutes mín';
+  @override
+  String get epubProgressShowBook => 'Sýna framvindu í bókinni';
+  @override
+  String get epubProgressShowTime => 'Sýna tímann sem eftir er';
+  @override
+  String get epubProgressShowChapter => 'Sýna framvindu í kaflanum';
+
   // Settings: preview mode.
   // Settings: editor formatting.
   @override

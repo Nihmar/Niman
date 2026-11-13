@@ -1,5 +1,6 @@
 /// How the library's books look (#280): their own theme, brightness, font
-/// and text size, apart from the notes'.
+/// and text size, apart from the notes', and which view their progress
+/// line shows (#1275).
 ///
 /// Device settings of the library, kept per library as the note text size
 /// is: a size picked on a phone means nothing on a desktop, and a custom
@@ -9,6 +10,7 @@ library;
 import 'package:meta/meta.dart';
 import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/core/theme.dart';
+import 'package:niman/src/epub/epub_progress.dart';
 
 /// The typefaces a book can be set in.
 enum EpubFont {
@@ -44,9 +46,10 @@ final class EpubLook {
     this.brightness,
     this.font = EpubFont.literata,
     this.textScale = defaultTextScale,
+    this.progress = EpubProgressView.chapter,
   });
 
-  /// Reads the four keys out of the library's settings. A value that is
+  /// Reads the keys out of the library's settings. A value that is
   /// missing or of the wrong type reads as the default, a size out of range
   /// as the nearest end of it.
   factory fromJson(Map<String, Object?> json) {
@@ -59,6 +62,7 @@ final class EpubLook {
           : null,
       font: EpubFont.fromName(json[fontKey]),
       textScale: normalizeBookTextScale(json[textScaleKey]),
+      progress: EpubProgressView.fromName(json[progressKey]),
     );
   }
 
@@ -74,12 +78,16 @@ final class EpubLook {
   /// See [themeKey].
   static const String textScaleKey = 'epubTextScale';
 
+  /// See [themeKey].
+  static const String progressKey = 'epubProgress';
+
   /// Every key, for the settings' known and device key lists.
   static const Set<String> keys = {
     themeKey,
     brightnessKey,
     fontKey,
     textScaleKey,
+    progressKey,
   };
 
   /// The id of the theme the books wear (`AppTheme.id`), or null for the
@@ -95,6 +103,10 @@ final class EpubLook {
   /// The books' text size, as a multiplier of the shipped one.
   final double textScale;
 
+  /// What the progress line shows: the next book opens on the view last
+  /// picked.
+  final EpubProgressView progress;
+
   /// A copy with the given fields replaced; [clearTheme] and
   /// [clearBrightness] put those back to the app's.
   EpubLook copyWith({
@@ -104,11 +116,13 @@ final class EpubLook {
     bool clearBrightness = false,
     EpubFont? font,
     double? textScale,
+    EpubProgressView? progress,
   }) => EpubLook(
     theme: clearTheme ? null : theme ?? this.theme,
     brightness: clearBrightness ? null : brightness ?? this.brightness,
     font: font ?? this.font,
     textScale: textScale ?? this.textScale,
+    progress: progress ?? this.progress,
   );
 
   /// The keys as the settings hold them; the app's theme and brightness
@@ -118,6 +132,7 @@ final class EpubLook {
     if (brightness != null) brightnessKey: brightness!.id,
     fontKey: font.name,
     textScaleKey: textScale,
+    progressKey: progress.name,
   };
 
   @override
@@ -126,8 +141,9 @@ final class EpubLook {
       other.theme == theme &&
       other.brightness == brightness &&
       other.font == font &&
-      other.textScale == textScale;
+      other.textScale == textScale &&
+      other.progress == progress;
 
   @override
-  int get hashCode => Object.hash(theme, brightness, font, textScale);
+  int get hashCode => Object.hash(theme, brightness, font, textScale, progress);
 }

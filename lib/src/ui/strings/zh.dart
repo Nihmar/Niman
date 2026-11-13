@@ -390,6 +390,23 @@ final class ChineseStrings extends Strings {
   @override
   String get epubTextSizeTitle => '文字大小';
 
+  // Books: reading progress (#1275).
+  @override
+  String epubProgressBook(int percent, int chapter, int chapters) =>
+      '全书 $percent% · 第 $chapter 章，共 $chapters 章';
+  @override
+  String epubProgressTime(String chapter, String book) =>
+      '本章 ≈ $chapter · 全书 ≈ $book';
+  @override
+  String readingTimeValue(int hours, int minutes) =>
+      hours == 0 ? '$minutes 分钟' : '$hours 小时 $minutes 分钟';
+  @override
+  String get epubProgressShowBook => '显示全书进度';
+  @override
+  String get epubProgressShowTime => '显示剩余时间';
+  @override
+  String get epubProgressShowChapter => '显示本章进度';
+
   // Settings: preview mode.
   // Settings: editor formatting.
   @override

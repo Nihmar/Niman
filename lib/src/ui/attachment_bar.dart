@@ -21,6 +21,7 @@ final class AttachmentBar extends StatelessWidget {
     required this.path,
     required this.launcher,
     this.actions = const <Widget>[],
+    this.beside,
     super.key,
   });
 
@@ -32,6 +33,11 @@ final class AttachmentBar extends StatelessWidget {
 
   /// What this kind of attachment adds to the row: a book's contents.
   final List<Widget> actions;
+
+  /// What sits beside the name, taking its room before the [actions]: a
+  /// book's progress line on a wide pane. It gets up to two thirds of the
+  /// room the actions leave, and shrinks to what it gets.
+  final Widget? beside;
 
   Future<void> _openOutside(BuildContext context) async {
     final outcome = await runTreeContextAction(
@@ -65,6 +71,10 @@ final class AttachmentBar extends StatelessWidget {
                 ),
               ),
             ),
+            if (beside case final beside?)
+              // Before the name in its claim on the room, and shrunk to
+              // it rather than pushing the actions off the row.
+              Flexible(flex: 2, child: beside),
             ...actions,
             if (supportsOpenInDefaultApp)
               IconButton(

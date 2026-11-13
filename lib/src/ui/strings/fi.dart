@@ -422,6 +422,23 @@ final class FinnishStrings extends Strings {
   @override
   String get epubTextSizeTitle => 'Tekstin koko';
 
+  // Books: reading progress (#1275).
+  @override
+  String epubProgressBook(int percent, int chapter, int chapters) =>
+      '$percent % kirjasta · luku $chapter/$chapters';
+  @override
+  String epubProgressTime(String chapter, String book) =>
+      'Luku ≈ $chapter · Kirja ≈ $book';
+  @override
+  String readingTimeValue(int hours, int minutes) =>
+      hours == 0 ? '$minutes min' : '$hours t $minutes min';
+  @override
+  String get epubProgressShowBook => 'Näytä edistyminen kirjassa';
+  @override
+  String get epubProgressShowTime => 'Näytä jäljellä oleva aika';
+  @override
+  String get epubProgressShowChapter => 'Näytä edistyminen luvussa';
+
   // Settings: preview mode.
   // Settings: editor formatting.
   @override
