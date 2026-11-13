@@ -3,17 +3,13 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:niman/src/core/app_theme.dart';
-import 'package:niman/src/core/custom_theme.dart';
 import 'package:niman/src/core/frame_log.dart';
-import 'package:niman/src/core/language.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/settings/features.dart';
 import 'package:niman/src/core/settings/features_introduction.dart';
 import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/core/text_scale.dart';
-import 'package:niman/src/core/theme.dart';
 import 'package:niman/src/core/week_start.dart';
 import 'package:niman/src/core/welcome.dart';
 import 'package:niman/src/db/app_database.dart';
@@ -24,6 +20,7 @@ import 'package:niman/src/epub/epub_look.dart';
 import 'package:niman/src/epub/epub_looks.dart';
 import 'package:niman/src/flashcards/review_store.dart';
 import 'package:niman/src/frontmatter/fields.dart';
+import 'package:niman/src/library/app_preferences.dart';
 import 'package:niman/src/library/container_path.dart';
 import 'package:niman/src/library/file_watcher.dart';
 import 'package:niman/src/library/index_library_tree.dart';
@@ -45,6 +42,7 @@ import 'package:niman/src/library/session.dart';
 import 'package:niman/src/library/session_events.dart';
 import 'package:niman/src/library/session_themes.dart';
 import 'package:niman/src/library/session_update_checks.dart';
+import 'package:niman/src/library/stored_app_preferences.dart';
 import 'package:niman/src/library/watch_batch_applier.dart';
 import 'package:niman/src/library/watch_batch_queue.dart';
 import 'package:niman/src/links/library_links.dart';
@@ -746,45 +744,12 @@ final class LibraryController implements LibrarySession {
     _bump();
   }
 
-  /// Whether the in-app debug log buffer records events.
+  /// The app's own settings, in its database.
   @override
-  Future<bool> get debugLogsEnabled async {
-    final enabled = await AppSettingsRepo(await appDatabase).debugLogsEnabled();
-    AppLog.enabled = enabled;
-    return enabled;
-  }
-
-  /// Sets (and persists) the debug log recording toggle.
-  @override
-  Future<void> setDebugLogsEnabled({required bool enabled}) async {
-    _log.info('debug logging set to $enabled');
-    await AppSettingsRepo(await appDatabase)
-        .setDebugLogsEnabled(enabled: enabled);
-    AppLog.enabled = enabled;
-  }
-
-  /// Whether the app checks GitHub Releases for updates (issue #81).
-  @override
-  Future<bool> get autoUpdateEnabled async =>
-      await AppSettingsRepo(await appDatabase).autoUpdateEnabled();
-
-  @override
-  Future<bool> get closeToTray async =>
-      await AppSettingsRepo(await appDatabase).closeToTray();
-
-  @override
-  Future<void> setCloseToTray({required bool enabled}) async {
-    _log.info('close to tray: $enabled');
-    await AppSettingsRepo(await appDatabase).setCloseToTray(enabled: enabled);
-  }
-
-  /// Sets (and persists) the auto-update toggle.
-  @override
-  Future<void> setAutoUpdateEnabled({required bool enabled}) async {
-    _log.info('auto-update set to $enabled');
-    await AppSettingsRepo(await appDatabase)
-        .setAutoUpdateEnabled(enabled: enabled);
-  }
+  late final AppPreferences appSettings = StoredAppPreferences(
+    appDatabase: () => appDatabase,
+    themes: _themes,
+  );
 
   /// The launch + six-hourly update checks, started once per controller.
   late final SessionUpdateChecks _updates = SessionUpdateChecks(
@@ -1230,88 +1195,6 @@ final class LibraryController implements LibrarySession {
     if (_phase != LibraryPhase.ready) return;
     await _themes.publishEpubLook(await epubLook);
   }
-
-  /// The UI language.
-  @override
-  Future<AppLanguage> get language async {
-    return await AppSettingsRepo(await appDatabase).language();
-  }
-
-  /// Sets (and persists) the UI language.
-  @override
-  Future<void> setLanguage(AppLanguage language) async {
-    _log.info('language set to ${language.id}');
-    await AppSettingsRepo(await appDatabase).setLanguage(language);
-  }
-
-  /// The keyboard shortcuts changed on this device (#159).
-  @override
-  Future<String?> get keyMap async =>
-      await AppSettingsRepo(await appDatabase).keyMap();
-
-  @override
-  Future<void> setKeyMap(String json) async {
-    _log.info('key map set');
-    await AppSettingsRepo(await appDatabase).setKeyMap(json);
-  }
-
-  @override
-  Future<String?> get pinnedCommands async =>
-      await AppSettingsRepo(await appDatabase).pinnedCommands();
-
-  @override
-  Future<void> setPinnedCommands(String json) async {
-    await AppSettingsRepo(await appDatabase).setPinnedCommands(json);
-  }
-
-  /// How bright the app is (T-M6-05).
-  @override
-  Future<AppBrightness> get themeBrightness async =>
-      await AppSettingsRepo(await appDatabase).themeBrightness();
-
-  /// Sets (and persists) the brightness choice.
-  @override
-  Future<void> setThemeBrightness(AppBrightness brightness) async {
-    _log.info('theme brightness set to ${brightness.id}');
-    await AppSettingsRepo(await appDatabase).setThemeBrightness(brightness);
-  }
-
-  /// The theme the app wears ([SessionThemes.theme]).
-  @override
-  Future<AppTheme> get theme => _themes.theme;
-
-  /// Sets (and persists) the theme, by its id.
-  @override
-  Future<void> setTheme(AppTheme theme) => _themes.setTheme(theme);
-
-  /// The custom themes this installation holds, by name (issue #269).
-  @override
-  Future<List<CustomTheme>> customThemes() => _themes.customThemes();
-
-  /// The custom theme with [id], or null.
-  @override
-  Future<CustomTheme?> customTheme(String id) => _themes.customTheme(id);
-
-  /// Stores [theme]: the row with its id, or a new one.
-  @override
-  Future<void> saveCustomTheme(CustomTheme theme) =>
-      _themes.saveCustomTheme(theme);
-
-  /// Renames the custom theme with [id].
-  @override
-  Future<void> renameCustomTheme(String id, String name) =>
-      _themes.renameCustomTheme(id, name);
-
-  /// Deletes the custom theme with [id], and returns the theme in force
-  /// afterwards ([SessionThemes.deleteCustomTheme]).
-  @override
-  Future<AppTheme> deleteCustomTheme(String id) =>
-      _themes.deleteCustomTheme(id);
-
-  /// Whether [name] is a custom theme's name already.
-  @override
-  Future<bool> customThemeNameTaken(String name) =>
-      _themes.customThemeNameTaken(name);
 
   /// Notifies listeners that state changed without an index mutation
   /// (e.g. a settings change the tree UI should react to).

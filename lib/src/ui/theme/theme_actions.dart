@@ -138,7 +138,7 @@ final class ThemeActions {
     if (name == null || !context.mounted) {
       return;
     }
-    await controller.renameCustomTheme(theme.theme.id, name);
+    await controller.appSettings.renameCustomTheme(theme.theme.id, name);
     await reload();
   }
 
@@ -239,15 +239,15 @@ final class ThemeActions {
     if (confirmed != true || !context.mounted) {
       return;
     }
-    await controller.deleteCustomTheme(theme.theme.id);
+    await controller.appSettings.deleteCustomTheme(theme.theme.id);
     await reload();
   }
 
   /// Stores [theme] and wears it: making one, copying one and importing
   /// one all end with the new theme in front of the user.
   Future<void> _save(CustomTheme theme) async {
-    await controller.saveCustomTheme(theme);
-    await controller.setTheme(CustomAppTheme(theme));
+    await controller.appSettings.saveCustomTheme(theme);
+    await controller.appSettings.setTheme(CustomAppTheme(theme));
     AppThemes.theme = CustomAppTheme(theme);
     await reload();
   }

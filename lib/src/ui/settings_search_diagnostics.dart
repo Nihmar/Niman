@@ -19,7 +19,8 @@ List<SettingsSearchEntry> diagnosticsSearchEntries(SettingsSearchScope scope) {
         title: AppStrings.autoUpdateTitle,
         area: AppStrings.settingsSectionUpdates,
         rowKey: SettingsKeys.autoUpdate,
-        value: () async => scope.onOff(on: await controller.autoUpdateEnabled),
+        value: () async =>
+            scope.onOff(on: await controller.appSettings.autoUpdateEnabled),
         areaId: SettingsAreaId.updates,
         open: () => pushUpdates(SettingsKeys.autoUpdate),
       ),
@@ -44,7 +45,8 @@ List<SettingsSearchEntry> diagnosticsSearchEntries(SettingsSearchScope scope) {
       title: AppStrings.debugLogsTitle,
       area: AppStrings.settingsAreaDiagnostics,
       rowKey: SettingsKeys.debugLogs,
-      value: () async => scope.onOff(on: await controller.debugLogsEnabled),
+      value: () async =>
+          scope.onOff(on: await controller.appSettings.debugLogsEnabled),
       areaId: SettingsAreaId.diagnostics,
       open: () => pushDiagnostics(SettingsKeys.debugLogs),
     ),

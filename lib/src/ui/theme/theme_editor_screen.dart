@@ -108,7 +108,7 @@ final class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
   }
 
   Future<void> _save() async {
-    await widget.controller.saveCustomTheme(_theme);
+    await widget.controller.appSettings.saveCustomTheme(_theme);
     if (!mounted) return;
     _endPreview();
     Navigator.pop(context, _theme);

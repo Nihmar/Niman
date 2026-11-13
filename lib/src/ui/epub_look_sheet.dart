@@ -69,7 +69,7 @@ final class _EpubLookPanelState extends State<EpubLookPanel> {
 
   Future<void> _load() async {
     final look = await widget.session.epubLook;
-    final custom = await widget.session.customThemes();
+    final custom = await widget.session.appSettings.customThemes();
     if (!mounted) return;
     setState(() {
       _look = look;

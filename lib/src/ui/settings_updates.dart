@@ -64,14 +64,14 @@ final class _SettingsUpdatesScreenState extends State<SettingsUpdatesScreen> {
   }
 
   Future<void> _load() async {
-    final autoUpdate = await widget.controller.autoUpdateEnabled;
+    final autoUpdate = await widget.controller.appSettings.autoUpdateEnabled;
     if (!mounted) return;
     setState(() => _autoUpdate = autoUpdate);
   }
 
   Future<void> _toggleAutoUpdate(bool value) async {
     final controller = widget.controller;
-    await controller.setAutoUpdateEnabled(enabled: value);
+    await controller.appSettings.setAutoUpdateEnabled(enabled: value);
     if (mounted) {
       setState(() => _autoUpdate = value);
     }

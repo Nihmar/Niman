@@ -60,11 +60,11 @@ final class _SettingsAppearanceScreenState
 
   Future<void> _load() async {
     final controller = widget.controller;
-    final language = await controller.language;
+    final language = await controller.appSettings.language;
     final weekStart = await controller.weekStart;
     final uiTextScale = await controller.uiTextScale;
     final epubLook = await controller.epubLook;
-    final closeToTray = await controller.closeToTray;
+    final closeToTray = await controller.appSettings.closeToTray;
     if (!mounted) return;
     setState(() {
       _language = language;
@@ -78,7 +78,7 @@ final class _SettingsAppearanceScreenState
   /// Persists the UI language and applies it immediately (T-L10N-04):
   /// the app root listens to [AppLanguages] and rebuilds every screen.
   Future<void> _setLanguage(AppLanguage language) async {
-    await widget.controller.setLanguage(language);
+    await widget.controller.appSettings.setLanguage(language);
     AppLanguages.choice = language;
     if (mounted) {
       setState(() => _language = language);
@@ -156,7 +156,7 @@ final class _SettingsAppearanceScreenState
   }
 
   Future<void> _setCloseToTray({required bool enabled}) async {
-    await widget.controller.setCloseToTray(enabled: enabled);
+    await widget.controller.appSettings.setCloseToTray(enabled: enabled);
     CloseToTray.enabled.value = enabled;
     if (mounted) setState(() => _closeToTray = enabled);
   }

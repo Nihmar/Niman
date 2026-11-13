@@ -71,9 +71,9 @@ final class _SettingsThemesScreenState extends State<SettingsThemesScreen> {
 
   Future<void> _load() async {
     final controller = widget.controller;
-    final brightness = await controller.themeBrightness;
-    final theme = await controller.theme;
-    final custom = await controller.customThemes();
+    final brightness = await controller.appSettings.themeBrightness;
+    final theme = await controller.appSettings.theme;
+    final custom = await controller.appSettings.customThemes();
     if (!mounted) return;
     setState(() {
       _brightness = brightness;
@@ -86,8 +86,8 @@ final class _SettingsThemesScreenState extends State<SettingsThemesScreen> {
   /// the one in use, which a rename or a delete changes with the rows.
   Future<void> _reload() async {
     final controller = widget.controller;
-    final custom = await controller.customThemes();
-    final theme = await controller.theme;
+    final custom = await controller.appSettings.customThemes();
+    final theme = await controller.appSettings.theme;
     if (!mounted) return;
     AppThemes.theme = theme;
     setState(() {
@@ -99,7 +99,7 @@ final class _SettingsThemesScreenState extends State<SettingsThemesScreen> {
   /// Persists the brightness and applies it immediately (T-M6-05): the
   /// app root listens to [AppThemes] and rebuilds every screen.
   Future<void> _setBrightness(AppBrightness brightness) async {
-    await widget.controller.setThemeBrightness(brightness);
+    await widget.controller.appSettings.setThemeBrightness(brightness);
     AppThemes.brightness = brightness;
     if (mounted) {
       setState(() => _brightness = brightness);
@@ -108,7 +108,7 @@ final class _SettingsThemesScreenState extends State<SettingsThemesScreen> {
 
   /// Persists the theme and applies it immediately (issue #269).
   Future<void> _setTheme(AppTheme theme) async {
-    await widget.controller.setTheme(theme);
+    await widget.controller.appSettings.setTheme(theme);
     AppThemes.theme = theme;
     if (mounted) {
       setState(() => _theme = theme);
