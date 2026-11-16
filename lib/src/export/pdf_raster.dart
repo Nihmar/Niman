@@ -69,8 +69,10 @@ TodoBlockBuilder? _printed(PrintedTodoBlocks blocks) =>
 /// [todoBlocks] are the lists the note's `todo` fences are at this moment
 /// (#1152), drawn in place of their source.
 ///
+/// The pages are sheets of [paper] (#1285), A4 unless told.
+///
 /// [board], the kanban board the note is (#1170), is drawn as a board on
-/// the sheet its columns fit, A4 landscape or portrait, instead of the
+/// the sheet its columns fit, [paper] landscape or portrait, instead of the
 /// note's Markdown: see [rasterBoardPdf].
 Future<Uint8List> rasterPdf({
   required String text,
@@ -80,13 +82,16 @@ Future<Uint8List> rasterPdf({
   PrintedTodoBlocks todoBlocks = const <String, PrintedTodoBlock>{},
   void Function(int done, int total)? onProgress,
   bool Function()? isCancelled,
-  double pageWidth = a4WidthPx,
-  double pageHeight = a4HeightPx,
   double margin = pdfPageMarginPx,
   double pixelRatio = 2,
   KanbanBoard? board,
   PaperSize paper = PaperSize.a4,
 }) async {
+  // The page is [paper]'s, taken from it alone: a size of its own beside
+  // it could describe another sheet than the one the board's rows are
+  // decided on.
+  final pageWidth = paper.widthMm * pointsPerMm / pointsPerPixel;
+  final pageHeight = paper.heightMm * pointsPerMm / pointsPerPixel;
   if (board != null && board.columns.isNotEmpty) {
     final sheet = kanbanSheetFor(board.columns.length, paper);
     final landscape = sheet == KanbanSheet.landscape;
