@@ -353,6 +353,7 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
   void showAnchor(ScrollAnchor anchor) {
     if (_notYet(anchor.line)) {
       _pendingAnchor = anchor;
+      _pendingAnchorMoves = _jumps.moves;
       return;
     }
     _jumps.toAnchor(anchor);
@@ -360,6 +361,12 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
 
   /// An anchor asked for while there were no blocks to show it in.
   ScrollAnchor? _pendingAnchor;
+
+  /// The reader's moves when [_pendingAnchor] was asked for: once they have
+  /// moved the page since, the place they were sent to is dropped — the
+  /// page is where they took it (a book's saved place, past the top shown
+  /// while the rest is read).
+  int _pendingAnchorMoves = 0;
 
   @override
   void initState() {
@@ -463,23 +470,33 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
         final kept = _head ? topAnchor : null;
         setState(() {
           _scanning = false;
+          _show(buffer, result, keepTop: _head);
           _head = false;
-          _show(buffer, result);
         });
-        if (kept != null && (kept.line > 0 || kept.fraction > 0)) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) showAnchor(kept);
-          });
-        }
         final jump = _pendingJump;
         _pendingJump = null;
+        // A place asked for before the reader moved the page is theirs no
+        // longer: they have read on from the top instead.
+        final anchor =
+            _jumps.moves == _pendingAnchorMoves && !_jumps.readerMoving
+            ? _pendingAnchor
+            : null;
+        _pendingAnchor = null;
+        // Not over a place asked for meanwhile, which moved the page every
+        // frame the two took turns; and not under a reader moving the page.
+        if (kept != null &&
+            jump == null &&
+            anchor == null &&
+            (kept.line > 0 || kept.fraction > 0)) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) _jumps.keep(kept);
+          });
+        }
         if (jump != null) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) jumpToLine(jump);
           });
         }
-        final anchor = _pendingAnchor;
-        _pendingAnchor = null;
         if (anchor != null) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) showAnchor(anchor);
@@ -496,9 +513,12 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
   /// earlier scope to keep. Keeping one when the lines opening with `[` were
   /// unchanged saved nothing, since the new one was already read, and missed
   /// a footnote cited mid-sentence: the citations are the footnotes' order.
-  void _show(SourceBuffer buffer, DocumentScan scan) {
+  ///
+  /// With [keepTop], what is shown is the top of [buffer] alone, and [scan]
+  /// the whole of it ([ReadEntries.show]).
+  void _show(SourceBuffer buffer, DocumentScan scan, {bool keepTop = false}) {
     widget.parser.scope = scan.scope;
-    _entries.show(buffer, scan);
+    _entries.show(buffer, scan, keepTop: keepTop);
   }
 
   /// Draws nothing until the next scan lands.
@@ -628,19 +648,28 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
       availableWidth,
       enabled: widget.selectionActions == null,
     );
+    // What the reader does to the page, for the moves the view makes on
+    // its own to give way to ([ReadJumps.readerMoving]).
     return _cost.timed(
-      () => CustomScrollView(
-        controller: _scroll,
-        physics: const ContentClampPhysics(),
-        slivers: readSlivers(
-          entries: _entries,
-          heights: heights,
-          padding: padding,
-          width: availableWidth,
-          head: _head,
-          parser: widget.parser,
-          mathCache: widget.mathCache,
-          blockAt: _blockAt,
+      () => Listener(
+        onPointerDown: (_) => _jumps.pointerDown(),
+        onPointerUp: (_) => _jumps.pointerUp(),
+        onPointerCancel: (_) => _jumps.pointerUp(),
+        onPointerSignal: (_) => _jumps.readerMoved(),
+        onPointerPanZoomStart: (_) => _jumps.readerMoved(),
+        child: CustomScrollView(
+          controller: _scroll,
+          physics: const ContentClampPhysics(),
+          slivers: readSlivers(
+            entries: _entries,
+            heights: heights,
+            padding: padding,
+            width: availableWidth,
+            head: _head,
+            parser: widget.parser,
+            mathCache: widget.mathCache,
+            blockAt: _blockAt,
+          ),
         ),
       ),
     );
