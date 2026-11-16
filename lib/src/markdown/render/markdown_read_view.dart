@@ -463,8 +463,8 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
         final kept = _head ? topAnchor : null;
         setState(() {
           _scanning = false;
+          _show(buffer, result, keepTop: _head);
           _head = false;
-          _show(buffer, result);
         });
         if (kept != null && (kept.line > 0 || kept.fraction > 0)) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -496,9 +496,12 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
   /// earlier scope to keep. Keeping one when the lines opening with `[` were
   /// unchanged saved nothing, since the new one was already read, and missed
   /// a footnote cited mid-sentence: the citations are the footnotes' order.
-  void _show(SourceBuffer buffer, DocumentScan scan) {
+  ///
+  /// With [keepTop], what is shown is the top of [buffer] alone, and [scan]
+  /// the whole of it ([ReadEntries.show]).
+  void _show(SourceBuffer buffer, DocumentScan scan, {bool keepTop = false}) {
     widget.parser.scope = scan.scope;
-    _entries.show(buffer, scan);
+    _entries.show(buffer, scan, keepTop: keepTop);
   }
 
   /// Draws nothing until the next scan lands.

@@ -96,10 +96,18 @@ final class ReadEntries {
   );
 
   /// Takes [scan], the blocks of [buffer].
-  void show(SourceBuffer buffer, DocumentScan scan) {
+  ///
+  /// With [keepTop], what is shown is the top of the note alone
+  /// (`DocumentScan.head`) and [scan] the whole of it: the blocks they share
+  /// keep the heights a frame measured. A new map forgot them, and the
+  /// reader's offset then pointed into estimates — the frame the whole of a
+  /// long book took its place in drew a page 234 lines further on, and three
+  /// more frames moved it back.
+  void show(SourceBuffer buffer, DocumentScan scan, {bool keepTop = false}) {
     _shown = buffer;
     final changes = scan.changes;
     if (!_follow(changes, scan.blocks)) {
+      final top = keepTop ? (blocks: _blocks, heights: _heights) : null;
       _blocks = pieces.pieced(scan.blocks);
       // A new map assumes no block side by side, until a layout says.
       hosts.flags = null;
@@ -111,9 +119,34 @@ final class ReadEntries {
         estimate: estimateOf,
         estimateSpan: _estimateSpanOf,
       );
+      if (top case (:final blocks, heights: final measured?)) {
+        _keepMeasured(blocks, measured);
+      }
       built = 0;
     }
     _handed = changes?.token;
+  }
+
+  /// Gives the entries this list opens with the same as [blocks] — up to
+  /// the first that differs — the heights [measured] has for them there:
+  /// the same block, read the same way, is drawn as tall.
+  void _keepMeasured(List<Block> blocks, BlockHeightMap measured) {
+    final heights = _heights!;
+    final shared = blocks.length < _blocks.length
+        ? blocks.length
+        : _blocks.length;
+    for (var at = 0; at < shared; at++) {
+      final before = blocks[at];
+      final now = _blocks[at];
+      if (before.kind != now.kind ||
+          before.startLine != now.startLine ||
+          before.endLine != now.endLine) {
+        return;
+      }
+      if (measured.isMeasured(at)) {
+        heights.measured(at, measured.extentFor(at));
+      }
+    }
   }
 
   /// Takes [blocks] by replaying [changes] over the heights the pane has,
