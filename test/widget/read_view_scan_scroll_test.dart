@@ -246,4 +246,47 @@ void main() {
       expect(moved, 120, reason: 'a turn of the wheel was undone: $offsets');
     }
   });
+
+  group('a place asked for before the rest is read', () {
+    // Past the top shown while the rest of the book is read: a book's saved
+    // place, which waits for the scan.
+    const saved = (line: 700, fraction: 0.0);
+
+    testWidgets('is gone to once the scan lands, when the page was left '
+        'alone', (tester) async {
+      final buffer = SourceBuffer.fromText(_book(400));
+      final controller = ScrollController();
+      final scan = Completer<DocumentScan?>();
+      final view = await open(tester, buffer, controller, scan);
+      view.showAnchor(saved);
+      await tester.pump();
+      expect(view.topAnchor!.line, lessThan(saved.line), reason: 'not yet');
+
+      scan.complete(DocumentScan.of(buffer));
+      await tester.pumpAndSettle();
+      expect(view.topAnchor!.line, saved.line);
+    });
+
+    testWidgets('is dropped once the reader has scrolled meanwhile', (
+      tester,
+    ) async {
+      final buffer = SourceBuffer.fromText(_book(400));
+      final controller = ScrollController();
+      final scan = Completer<DocumentScan?>();
+      final view = await open(tester, buffer, controller, scan);
+      view.showAnchor(saved);
+      await tester.pump();
+      await tester.drag(find.byType(MarkdownReadView), const Offset(0, -300));
+      for (var frame = 0; frame < 30; frame++) {
+        await tester.pump(const Duration(milliseconds: 16));
+      }
+      final read = view.topAnchor!.line;
+      expect(read, greaterThan(0));
+
+      scan.complete(DocumentScan.of(buffer));
+      await tester.pumpAndSettle();
+      // Where the reader took it, not the place they were sent to.
+      expect(view.topAnchor!.line, read);
+    });
+  });
 }

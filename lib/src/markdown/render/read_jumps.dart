@@ -58,6 +58,10 @@ final class ReadJumps {
   /// move began: the reader's place is the reader's.
   int _moves = 0;
 
+  /// How many times the reader has moved the page so far: a mark to tell,
+  /// later, whether they have since.
+  int get moves => _moves;
+
   /// A pointer went down on the view.
   void pointerDown() {
     _down++;

@@ -353,6 +353,7 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
   void showAnchor(ScrollAnchor anchor) {
     if (_notYet(anchor.line)) {
       _pendingAnchor = anchor;
+      _pendingAnchorMoves = _jumps.moves;
       return;
     }
     _jumps.toAnchor(anchor);
@@ -360,6 +361,12 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
 
   /// An anchor asked for while there were no blocks to show it in.
   ScrollAnchor? _pendingAnchor;
+
+  /// The reader's moves when [_pendingAnchor] was asked for: once they have
+  /// moved the page since, the place they were sent to is dropped — the
+  /// page is where they took it (a book's saved place, past the top shown
+  /// while the rest is read).
+  int _pendingAnchorMoves = 0;
 
   @override
   void initState() {
@@ -468,7 +475,12 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
         });
         final jump = _pendingJump;
         _pendingJump = null;
-        final anchor = _pendingAnchor;
+        // A place asked for before the reader moved the page is theirs no
+        // longer: they have read on from the top instead.
+        final anchor =
+            _jumps.moves == _pendingAnchorMoves && !_jumps.readerMoving
+            ? _pendingAnchor
+            : null;
         _pendingAnchor = null;
         // Not over a place asked for meanwhile, which moved the page every
         // frame the two took turns; and not under a reader moving the page.
