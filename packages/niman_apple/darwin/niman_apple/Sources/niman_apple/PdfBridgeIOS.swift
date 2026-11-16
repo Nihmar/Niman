@@ -10,9 +10,10 @@
   /// iOS has no print operation that saves a file: an offscreen
   /// `WKWebView` lays the page out, a `UIPrintPageRenderer` paginates its
   /// print formatter, and each page is drawn into a PDF context — real
-  /// text, which selects and searches. A4 with an 18 mm margin, A4 landscape
-  /// with the same one for a wide kanban board (#1170), or a 16:9 sheet a
-  /// slide with none (#534).
+  /// text, which selects and searches. The paper picked in Settings (#1285),
+  /// sent by its width and height, with an 18 mm margin — on its side, with
+  /// the same one, for a wide kanban board (#1170) — or a 16:9 sheet a slide
+  /// with none (#534).
   ///
   /// One print at a time (`print-busy`), and a watchdog for a page whose
   /// load never ends.

@@ -20,10 +20,11 @@ import java.util.concurrent.atomic.AtomicBoolean
  * The page is already HTML; an offscreen [WebView] lays it out, its print
  * adapter paginates it, and [NimanPdfWriter] — under `android.print`, the
  * only package that may call the adapter's callbacks — writes the pages
- * straight into the PDF file. A4, with the 18 mm margin the page's own
- * print CSS asks for — the attribute is in thousandths of an inch — or the
- * other sheets of [PdfSheet]: A4 landscape for a wide kanban board (#1170),
- * a 16:9 slide.
+ * straight into the PDF file. The sheet is the [PdfSheet] the call names:
+ * the paper picked in Settings (#1285), any size, sent by its width and
+ * height, standing up or — for a wide kanban board (#1170) — on its side,
+ * with the 18 mm margin the page's own print CSS asks for (the attribute
+ * is in thousandths of an inch); or a 16:9 slide, edge to edge.
  *
  * One print at a time: the view and the answer belong to the activity,
  * and a second call while one runs is refused rather than raced.
