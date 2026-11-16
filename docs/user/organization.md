@@ -476,7 +476,8 @@ library.
   Niman, or a folder holding it, keeps its place. A long book shows its
   start while the rest of it is read; if you scroll it before then, it
   stays where you took it instead of jumping to where you left it, and the
-  page is not pulled back from under your finger or the wheel.
+  page is not pulled back from under your finger, the wheel or the keys.
+  A tap or a click that does not scroll it moves nothing.
 - **A PDF on screen can be renamed, moved or deleted** like any other
   file, on every platform — Windows included, which refuses to move a
   file a program still has open. The PDF lets go of its file first (the
