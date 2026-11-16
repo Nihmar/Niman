@@ -57,9 +57,31 @@ void main() {
     );
   });
 
-  test('a library outside the shared storage has nothing to name', () {
-    expect(androidDocumentOf('/storage/1234-ABCD/Notes'), isNull);
+  test('the shared storage is named primary by any of its paths', () {
+    const notes =
+        'content://com.android.externalstorage.documents/document/'
+        'primary%3ANotes';
+    expect(androidDocumentOf('/sdcard/Notes'), notes);
+    expect(androidDocumentOf('/mnt/sdcard/Notes'), notes);
+    expect(androidDocumentOf('/storage/self/primary/Notes'), notes);
+    // A second user's, or a work profile's: its own provider's primary.
+    expect(androidDocumentOf('/storage/emulated/10/Notes'), notes);
+  });
+
+  test('a removable volume is named by its id', () {
+    expect(
+      androidDocumentOf('/storage/1234-ABCD/Notes/Work'),
+      'content://com.android.externalstorage.documents/document/'
+      '1234-ABCD%3ANotes%2FWork',
+    );
+    expect(androidDocumentOf('/storage/1234-ABCD'), endsWith('1234-ABCD%3A'));
+  });
+
+  test('a library on no storage the provider names has nothing to name', () {
     expect(androidDocumentOf('/storage/emulated/01/Notes'), isNull);
+    expect(androidDocumentOf('/storage/emulated'), isNull);
+    expect(androidDocumentOf('/data/user/0/dev.niman.niman/Notes'), isNull);
+    expect(androidDocumentOf('/sdcardx/Notes'), isNull);
   });
 
   test("the choice is the library's, kept in its settings", () {
