@@ -2173,6 +2173,17 @@ final class HindiStrings extends Strings {
   @override
   String get captureFolderSubtitle =>
       'नए नोट के रूप में सहेजे गए वेब पेज और उद्धरण';
+
+  // Settings: export folder (#1286).
+  @override
+  String get exportOpensInTitle => 'निर्यात फ़ोल्डर';
+  @override
+  String get exportOpensInSubtitle =>
+      'निर्यात का सहेजने वाला डायलॉग कहाँ खुलता है';
+  @override
+  String get exportOpensInSystem => 'जहाँ सिस्टम उसे खोले';
+  @override
+  String get exportOpensInLibrary => 'इस लाइब्रेरी का फ़ोल्डर';
   @override
   String get annotationNoteSuffix => 'एनोटेशन';
   @override

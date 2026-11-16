@@ -176,6 +176,13 @@ than a dialog (#712): you can keep writing while a long PDF is drawn, and
 ## Where it lands
 
 The save dialog on the desktop, or the system picker on Android, decides.
+Where it opens is the library's choice (**Settings → Folders and paths →
+Export folder**, #1286): wherever the system opens it — the home folder on
+Linux, the last one used elsewhere — or **this library's folder**. On
+Android the library's folder is the place the picker starts from when a
+note is saved; a folder's zip is placed with the system's folder picker,
+which takes no starting place. On a Mac and an iPhone the system chooses
+(see [platforms](platforms.md#where-an-exports-dialog-opens)).
 Niman says where the file went when it is done. The banner goes away on its
 own after a few seconds; on a wide window it also has a close button, and on
 desktop it offers **Show in file manager** to open the folder with the file

@@ -2222,6 +2222,16 @@ final class FinnishStrings extends Strings {
   @override
   String get captureFolderSubtitle =>
       'Uusina muistiinpanoina tallennetut sivut ja lainaukset';
+
+  // Settings: export folder (#1286).
+  @override
+  String get exportOpensInTitle => 'Vientikansio';
+  @override
+  String get exportOpensInSubtitle => 'Missä viennin tallennusikkuna avautuu';
+  @override
+  String get exportOpensInSystem => 'Missä järjestelmä sen avaa';
+  @override
+  String get exportOpensInLibrary => 'Tämän kirjaston kansio';
   @override
   String get annotationNoteSuffix => 'Merkintä';
   @override

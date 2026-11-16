@@ -648,3 +648,17 @@ the lock screen's controls — see
 (AVSpeechSynthesizer), Windows (the system's speech API) and Linux
 (speech-dispatcher) all have an engine of their own and may get read
 aloud **later**; until then the button is not on the book's row there.
+
+## Where an export's dialog opens
+
+A library can have its exports' save dialog open in its own folder
+(**Settings → Folders and paths → Export folder**, #1286):
+
+- On **Linux and Windows** the dialog opens there, for a note and for a
+  folder's zip alike.
+- On **Android** the system's picker starts there when a note is saved.
+  The folder picker a zip is placed with takes no starting place, so the
+  system chooses for it.
+- On **macOS and iOS** the system chooses: the picker Niman opens there is
+  not told where to start. This is a decision for now, not an omission,
+  and it may change later.

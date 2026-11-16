@@ -2229,6 +2229,17 @@ final class DutchStrings extends Strings {
   @override
   String get captureFolderSubtitle =>
       'Webpagina’s en citaten vastgelegd als nieuwe notities';
+
+  // Settings: export folder (#1286).
+  @override
+  String get exportOpensInTitle => 'Exportmap';
+  @override
+  String get exportOpensInSubtitle =>
+      'Waar het opslagvenster van een export opent';
+  @override
+  String get exportOpensInSystem => 'Waar het systeem het opent';
+  @override
+  String get exportOpensInLibrary => 'De map van deze bibliotheek';
   @override
   String get annotationNoteSuffix => 'Aantekening';
   @override

@@ -2206,6 +2206,16 @@ final class BelarusianStrings extends Strings {
   @override
   String get captureFolderSubtitle =>
       'Вэб-старонкі і цытаты, захаваныя як новыя нататкі';
+
+  // Settings: export folder (#1286).
+  @override
+  String get exportOpensInTitle => 'Папка экспарту';
+  @override
+  String get exportOpensInSubtitle => 'Дзе адкрываецца акно захавання экспарту';
+  @override
+  String get exportOpensInSystem => 'Там, дзе яго адкрые сістэма';
+  @override
+  String get exportOpensInLibrary => 'Папка гэтай бібліятэкі';
   @override
   String get annotationNoteSuffix => 'Анатацыя';
   @override

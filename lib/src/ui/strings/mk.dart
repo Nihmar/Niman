@@ -2220,6 +2220,17 @@ final class MacedonianStrings extends Strings {
   @override
   String get captureFolderSubtitle =>
       'Веб-страници и цитати зачувани како нови белешки';
+
+  // Settings: export folder (#1286).
+  @override
+  String get exportOpensInTitle => 'Папка за извоз';
+  @override
+  String get exportOpensInSubtitle =>
+      'Каде се отвора дијалогот за зачувување на извозот';
+  @override
+  String get exportOpensInSystem => 'Каде што го отвора системот';
+  @override
+  String get exportOpensInLibrary => 'Папката на оваа библиотека';
   @override
   String get annotationNoteSuffix => 'Анотација';
   @override

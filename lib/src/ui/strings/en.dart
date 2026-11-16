@@ -2181,6 +2181,17 @@ final class EnglishStrings extends Strings {
   @override
   String get captureFolderSubtitle =>
       'Web pages and quotes captured as new notes';
+
+  // Settings: export folder (#1286).
+  @override
+  String get exportOpensInTitle => 'Export folder';
+  @override
+  String get exportOpensInSubtitle =>
+      'Where the save dialog of an export opens';
+  @override
+  String get exportOpensInSystem => 'Where the system opens it';
+  @override
+  String get exportOpensInLibrary => 'This library’s folder';
   @override
   String get annotationNoteSuffix => 'Annotation';
   @override

@@ -78,6 +78,16 @@ List<SettingsSearchEntry> librarySearchEntries(SettingsSearchScope scope) {
       open: () => pushFolders(SettingsKeys.captureFolder),
     ),
     SettingsSearchEntry(
+      title: AppStrings.exportOpensInTitle,
+      area: folders,
+      rowKey: SettingsKeys.exportFolder,
+      value: () async => AppStrings.exportFolderName(
+        await scope.controller.librarySettings.exportFolder,
+      ),
+      areaId: SettingsAreaId.folders,
+      open: () => pushFolders(SettingsKeys.exportFolder),
+    ),
+    SettingsSearchEntry(
       title: AppStrings.quickNoteTitle,
       area: folders,
       rowKey: SettingsKeys.quickNote,

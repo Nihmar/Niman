@@ -4,6 +4,8 @@ library;
 
 import 'package:niman/src/core/language.dart';
 import 'package:niman/src/core/settings/library_config.dart';
+import 'package:niman/src/core/settings/library_settings.dart'
+    show ExportFolder;
 import 'package:niman/src/core/week_start.dart';
 // The getters need no per-member docs: their names are the labels', and
 // the class doc explains where each label comes from.
@@ -1388,6 +1390,16 @@ final class AppStrings {
   static String get annotationsFolderSubtitle => _s.annotationsFolderSubtitle;
   static String get captureFolderTitle => _s.captureFolderTitle;
   static String get captureFolderSubtitle => _s.captureFolderSubtitle;
+
+  // Settings: export folder (#1286).
+  static String get exportOpensInTitle => _s.exportOpensInTitle;
+  static String get exportOpensInSubtitle => _s.exportOpensInSubtitle;
+
+  /// Where an export's save dialog opens, as the row and its choices say it.
+  static String exportFolderName(ExportFolder folder) => switch (folder) {
+    ExportFolder.system => _s.exportOpensInSystem,
+    ExportFolder.library => _s.exportOpensInLibrary,
+  };
   static String get annotationNoteSuffix => _s.annotationNoteSuffix;
   static String get annotateAction => _s.annotateAction;
   static String get annotationCommentHint => _s.annotationCommentHint;

@@ -2199,6 +2199,17 @@ final class SlovenianStrings extends Strings {
   @override
   String get captureFolderSubtitle =>
       'Spletne strani in citati, shranjeni kot nove opombe';
+
+  // Settings: export folder (#1286).
+  @override
+  String get exportOpensInTitle => 'Mapa za izvoz';
+  @override
+  String get exportOpensInSubtitle =>
+      'Kje se odpre okno za shranjevanje izvoza';
+  @override
+  String get exportOpensInSystem => 'Kjer ga odpre sistem';
+  @override
+  String get exportOpensInLibrary => 'Mapa te knjižnice';
   @override
   String get annotationNoteSuffix => 'Opomba';
   @override

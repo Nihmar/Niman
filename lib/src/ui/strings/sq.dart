@@ -2220,6 +2220,17 @@ final class AlbanianStrings extends Strings {
   @override
   String get captureFolderSubtitle =>
       'Faqe uebi dhe citime të ruajtura si shënime të reja';
+
+  // Settings: export folder (#1286).
+  @override
+  String get exportOpensInTitle => 'Dosja e eksportit';
+  @override
+  String get exportOpensInSubtitle =>
+      'Ku hapet dritarja e ruajtjes së një eksporti';
+  @override
+  String get exportOpensInSystem => 'Aty ku e hap sistemi';
+  @override
+  String get exportOpensInLibrary => 'Dosja e kësaj biblioteke';
   @override
   String get annotationNoteSuffix => 'Anotim';
   @override

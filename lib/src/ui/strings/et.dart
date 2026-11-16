@@ -2182,6 +2182,16 @@ final class EstonianStrings extends Strings {
   @override
   String get captureFolderSubtitle =>
       'Uute märkmetena salvestatud veebilehed ja tsitaadid';
+
+  // Settings: export folder (#1286).
+  @override
+  String get exportOpensInTitle => 'Ekspordikaust';
+  @override
+  String get exportOpensInSubtitle => 'Kus avaneb ekspordi salvestusdialoog';
+  @override
+  String get exportOpensInSystem => 'Kus süsteem selle avab';
+  @override
+  String get exportOpensInLibrary => 'Selle kogu kaust';
   @override
   String get annotationNoteSuffix => 'Märkus';
   @override

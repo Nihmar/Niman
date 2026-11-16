@@ -2187,6 +2187,17 @@ final class TurkishStrings extends Strings {
   @override
   String get captureFolderSubtitle =>
       'Yeni not olarak kaydedilen web sayfaları ve alıntılar';
+
+  // Settings: export folder (#1286).
+  @override
+  String get exportOpensInTitle => 'Dışa aktarma klasörü';
+  @override
+  String get exportOpensInSubtitle =>
+      'Bir dışa aktarmanın kaydetme penceresinin açıldığı yer';
+  @override
+  String get exportOpensInSystem => 'Sistemin açtığı yer';
+  @override
+  String get exportOpensInLibrary => 'Bu kütüphanenin klasörü';
   @override
   String get annotationNoteSuffix => 'Açıklama';
   @override

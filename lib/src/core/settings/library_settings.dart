@@ -123,6 +123,26 @@ enum LinkUpdate {
   never,
 }
 
+/// Where an export's save dialog opens (#1286): a library's own choice,
+/// kept in its `settings.json`, so it is the same on every device the
+/// library is opened on.
+enum ExportFolder {
+  /// Wherever the system opens it: the home folder on Linux, the last one
+  /// used elsewhere. What an export did before there was a choice.
+  system,
+
+  /// The library's own folder.
+  library;
+
+  /// The choice with this [name]; anything unknown is [system].
+  static ExportFolder fromName(Object? name) {
+    for (final folder in values) {
+      if (folder.name == name) return folder;
+    }
+    return system;
+  }
+}
+
 /// The face the source editor is set in (issue #259).
 ///
 /// The source is read as *text* — its markers, its indents, its columns —

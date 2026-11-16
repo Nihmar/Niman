@@ -2248,6 +2248,17 @@ final class GermanStrings extends Strings {
   @override
   String get captureFolderSubtitle =>
       'Webseiten und Zitate, als neue Notizen erfasst';
+
+  // Settings: export folder (#1286).
+  @override
+  String get exportOpensInTitle => 'Exportordner';
+  @override
+  String get exportOpensInSubtitle =>
+      'Wo sich der Speicherdialog eines Exports öffnet';
+  @override
+  String get exportOpensInSystem => 'Wo das System ihn öffnet';
+  @override
+  String get exportOpensInLibrary => 'Der Ordner dieser Bibliothek';
   @override
   String get annotationNoteSuffix => 'Anmerkung';
   @override

@@ -2196,6 +2196,16 @@ final class LatvianStrings extends Strings {
   @override
   String get captureFolderSubtitle =>
       'Tīmekļa lapas un citāti, saglabāti kā jaunas piezīmes';
+
+  // Settings: export folder (#1286).
+  @override
+  String get exportOpensInTitle => 'Eksporta mape';
+  @override
+  String get exportOpensInSubtitle => 'Kur atveras eksporta saglabāšanas logs';
+  @override
+  String get exportOpensInSystem => 'Kur to atver sistēma';
+  @override
+  String get exportOpensInLibrary => 'Šīs bibliotēkas mape';
   @override
   String get annotationNoteSuffix => 'Anotācija';
   @override

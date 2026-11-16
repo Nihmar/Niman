@@ -2220,6 +2220,17 @@ final class HungarianStrings extends Strings {
   @override
   String get captureFolderSubtitle =>
       'Új jegyzetként mentett weboldalak és idézetek';
+
+  // Settings: export folder (#1286).
+  @override
+  String get exportOpensInTitle => 'Exportálási mappa';
+  @override
+  String get exportOpensInSubtitle =>
+      'Hol nyílik meg az exportálás mentési ablaka';
+  @override
+  String get exportOpensInSystem => 'Ahol a rendszer megnyitja';
+  @override
+  String get exportOpensInLibrary => 'Ennek a könyvtárnak a mappája';
   @override
   String get annotationNoteSuffix => 'Kommentár';
   @override

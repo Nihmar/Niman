@@ -2230,6 +2230,16 @@ final class PolishStrings extends Strings {
   @override
   String get captureFolderSubtitle =>
       'Strony internetowe i cytaty zapisane jako nowe notatki';
+
+  // Settings: export folder (#1286).
+  @override
+  String get exportOpensInTitle => 'Folder eksportu';
+  @override
+  String get exportOpensInSubtitle => 'Gdzie otwiera się okno zapisu eksportu';
+  @override
+  String get exportOpensInSystem => 'Tam, gdzie otworzy je system';
+  @override
+  String get exportOpensInLibrary => 'Folder tej biblioteki';
   @override
   String get annotationNoteSuffix => 'Adnotacja';
   @override

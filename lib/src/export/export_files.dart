@@ -16,12 +16,15 @@ import 'package:niman/src/export/printed_todo_block.dart';
 import 'package:niman/src/links/resolver.dart';
 
 /// Where an exported file is written; the place it landed, or null when
-/// the dialog was dismissed. The tests hand in their own.
+/// the dialog was dismissed. [initialDirectory] is where the dialog opens,
+/// null for wherever the system opens it (#1286). The tests hand in their
+/// own.
 typedef SaveExportFile = Future<String?> Function({
   required String name,
   required Uint8List bytes,
   required String mimeType,
   required String dialogTitle,
+  String? initialDirectory,
 });
 
 /// Asks where to write [bytes] as [name], and writes them there.
@@ -33,12 +36,14 @@ Future<String?> saveExportFileToDisk({
   required Uint8List bytes,
   required String mimeType,
   required String dialogTitle,
+  String? initialDirectory,
 }) async {
   final uri = await FilePicker.saveFile(
     fileName: name,
     bytes: bytes,
     mimeType: mimeType,
     dialogTitle: dialogTitle,
+    initialDirectory: initialDirectory,
   );
   return uri == null ? null : savedPlace(uri);
 }
@@ -50,16 +55,23 @@ final saveExportFileProvider = Provider<SaveExportFile>(
 );
 
 /// Where the folder an export's zip is written into is asked for; its
-/// path, or null when the dialog was dismissed. The tests hand in their
+/// path, or null when the dialog was dismissed. [initialDirectory] is
+/// where the dialog opens, as [SaveExportFile]'s. The tests hand in their
 /// own.
 typedef PickExportFolder = Future<String?> Function({
   required String dialogTitle,
+  String? initialDirectory,
 });
 
 /// Asks for the folder, through the system's own picker: a directory
-/// dialog on the desktop, SAF on Android.
-Future<String?> pickExportFolderFromDisk({required String dialogTitle}) =>
-    FilePicker.getDirectoryPath(dialogTitle: dialogTitle);
+/// dialog on the desktop, SAF on Android (which takes no starting place).
+Future<String?> pickExportFolderFromDisk({
+  required String dialogTitle,
+  String? initialDirectory,
+}) => FilePicker.getDirectoryPath(
+  dialogTitle: dialogTitle,
+  initialDirectory: initialDirectory,
+);
 
 /// The folder seam the shell exports a tree through.
 final pickExportFolderProvider = Provider<PickExportFolder>(

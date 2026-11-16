@@ -2208,6 +2208,17 @@ final class UkrainianStrings extends Strings {
   @override
   String get captureFolderSubtitle =>
       'Вебсторінки й цитати, збережені як нові нотатки';
+
+  // Settings: export folder (#1286).
+  @override
+  String get exportOpensInTitle => 'Тека експорту';
+  @override
+  String get exportOpensInSubtitle =>
+      'Де відкривається вікно збереження експорту';
+  @override
+  String get exportOpensInSystem => 'Там, де його відкриє система';
+  @override
+  String get exportOpensInLibrary => 'Тека цієї бібліотеки';
   @override
   String get annotationNoteSuffix => 'Анотація';
   @override

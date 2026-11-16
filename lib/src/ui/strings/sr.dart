@@ -2206,6 +2206,16 @@ final class SerbianStrings extends Strings {
   @override
   String get captureFolderSubtitle =>
       'Веб-странице и цитати сачувани као нове белешке';
+
+  // Settings: export folder (#1286).
+  @override
+  String get exportOpensInTitle => 'Фасцикла за извоз';
+  @override
+  String get exportOpensInSubtitle => 'Где се отвара дијалог за чување извоза';
+  @override
+  String get exportOpensInSystem => 'Где га отвори систем';
+  @override
+  String get exportOpensInLibrary => 'Фасцикла ове библиотеке';
   @override
   String get annotationNoteSuffix => 'Анотација';
   @override

@@ -2278,6 +2278,17 @@ final class GreekStrings extends Strings {
   @override
   String get captureFolderSubtitle =>
       'Ιστοσελίδες και αποσπάσματα ως νέες σημειώσεις';
+
+  // Settings: export folder (#1286).
+  @override
+  String get exportOpensInTitle => 'Φάκελος εξαγωγής';
+  @override
+  String get exportOpensInSubtitle =>
+      'Πού ανοίγει το παράθυρο αποθήκευσης μιας εξαγωγής';
+  @override
+  String get exportOpensInSystem => 'Όπου το ανοίγει το σύστημα';
+  @override
+  String get exportOpensInLibrary => 'Ο φάκελος αυτής της βιβλιοθήκης';
   @override
   String get annotationNoteSuffix => 'Σχολιασμός';
   @override

@@ -2265,6 +2265,17 @@ final class FrenchStrings extends Strings {
   @override
   String get captureFolderSubtitle =>
       'Pages web et citations capturées en nouvelles notes';
+
+  // Settings: export folder (#1286).
+  @override
+  String get exportOpensInTitle => 'Dossier d’export';
+  @override
+  String get exportOpensInSubtitle =>
+      'L’endroit où s’ouvre la fenêtre d’enregistrement d’un export';
+  @override
+  String get exportOpensInSystem => 'Là où le système l’ouvre';
+  @override
+  String get exportOpensInLibrary => 'Le dossier de cette bibliothèque';
   @override
   String get annotationNoteSuffix => 'Annotation';
   @override

@@ -189,6 +189,13 @@ abstract interface class LibraryPreferences {
   /// Sets (and persists) what a rename or a move does to those links.
   Future<void> setLinkUpdate(LinkUpdate mode);
 
+  /// Where an export's save dialog opens (#1286): wherever the system opens
+  /// it (the default), or the library's own folder.
+  Future<ExportFolder> get exportFolder;
+
+  /// Sets (and persists) where an export's save dialog opens.
+  Future<void> setExportFolder(ExportFolder folder);
+
   /// Where a note created from a dead link lands (default the folder of
   /// the note the link was clicked in, issue #78).
   Future<NewItemLocation> get newItemLocation;

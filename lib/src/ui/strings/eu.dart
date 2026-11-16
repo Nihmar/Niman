@@ -2220,6 +2220,17 @@ final class BasqueStrings extends Strings {
   @override
   String get captureFolderSubtitle =>
       'Ohar berri gisa gordetako web-orriak eta aipuak';
+
+  // Settings: export folder (#1286).
+  @override
+  String get exportOpensInTitle => 'Esportazio-karpeta';
+  @override
+  String get exportOpensInSubtitle =>
+      'Esportazio baten gordetze-leihoa non irekitzen den';
+  @override
+  String get exportOpensInSystem => 'Sistemak irekitzen duen tokian';
+  @override
+  String get exportOpensInLibrary => 'Biblioteka honen karpeta';
   @override
   String get annotationNoteSuffix => 'Oharpena';
   @override

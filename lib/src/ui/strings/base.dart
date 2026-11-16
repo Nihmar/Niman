@@ -1186,6 +1186,12 @@ abstract base class Strings {
   String get captureFolderTitle;
   String get captureFolderSubtitle;
 
+  // Settings: export folder (#1286).
+  String get exportOpensInTitle;
+  String get exportOpensInSubtitle;
+  String get exportOpensInSystem;
+  String get exportOpensInLibrary;
+
   /// Ends the name of a note made to annotate a file:
   /// `Dune - Annotation.md`.
   String get annotationNoteSuffix;

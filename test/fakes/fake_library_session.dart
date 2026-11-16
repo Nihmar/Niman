@@ -692,6 +692,14 @@ final class FakeLibrarySession
   }
 
   @override
+  Future<ExportFolder> get exportFolder async => _config.exportFolder;
+
+  @override
+  Future<void> setExportFolder(ExportFolder folder) async {
+    _config = _config.copyWith(exportFolder: folder);
+  }
+
+  @override
   Future<NewItemLocation> get newItemLocation async => _config.newItemLocation;
 
   @override

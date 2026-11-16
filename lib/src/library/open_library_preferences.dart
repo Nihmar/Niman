@@ -289,6 +289,18 @@ final class OpenLibraryPreferences implements LibraryPreferences {
     await _settings.edit((c) => c.copyWith(linkUpdate: mode));
   }
 
+  /// Where an export's save dialog opens (#1286).
+  @override
+  Future<ExportFolder> get exportFolder async =>
+      (await _settings.config).exportFolder;
+
+  /// Sets (and persists) where an export's save dialog opens.
+  @override
+  Future<void> setExportFolder(ExportFolder folder) async {
+    _log.info('export folder set to ${folder.name}');
+    await _settings.edit((c) => c.copyWith(exportFolder: folder));
+  }
+
   /// Where a note created from a dead link lands.
   @override
   Future<NewItemLocation> get newItemLocation async =>

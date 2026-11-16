@@ -17,6 +17,7 @@ import 'package:niman/src/core/settings/library_features.dart';
 import 'package:niman/src/core/text_scale.dart';
 import 'package:niman/src/export/epub_note.dart';
 import 'package:niman/src/export/export_files.dart';
+import 'package:niman/src/export/export_folder.dart';
 import 'package:niman/src/export/export_note.dart';
 import 'package:niman/src/export/export_pdf.dart';
 import 'package:niman/src/export/export_progress_dialog.dart';
@@ -294,6 +295,11 @@ final class ShellExportFlow {
           bytes: payload.bytes,
           mimeType: payload.mimeType,
           dialogTitle: AppStrings.exportTitle,
+          // Where the library says the dialog opens (#1286).
+          initialDirectory: exportStartFolder(
+            await controller.librarySettings.exportFolder,
+            root,
+          ),
         );
       } on Object catch (error) {
         if (context.mounted) {
@@ -399,7 +405,13 @@ final class ShellExportFlow {
         return;
       }
     }
-    final folder = await pickExportFolder(dialogTitle: AppStrings.exportTitle);
+    final folder = await pickExportFolder(
+      dialogTitle: AppStrings.exportTitle,
+      initialDirectory: exportStartFolder(
+        await controller.librarySettings.exportFolder,
+        root,
+      ),
+    );
     if (folder == null || !context.mounted) return;
     final name = dir.isEmpty ? p.basename(root) : p.basename(dir);
     // An existing file is never overwritten silently: a second export of

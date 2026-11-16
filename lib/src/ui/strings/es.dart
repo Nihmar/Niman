@@ -2237,6 +2237,17 @@ final class SpanishStrings extends Strings {
   @override
   String get captureFolderSubtitle =>
       'Páginas web y citas capturadas como notas nuevas';
+
+  // Settings: export folder (#1286).
+  @override
+  String get exportOpensInTitle => 'Carpeta de exportación';
+  @override
+  String get exportOpensInSubtitle =>
+      'Dónde se abre el diálogo de guardado de una exportación';
+  @override
+  String get exportOpensInSystem => 'Donde lo abra el sistema';
+  @override
+  String get exportOpensInLibrary => 'La carpeta de esta biblioteca';
   @override
   String get annotationNoteSuffix => 'Anotación';
   @override

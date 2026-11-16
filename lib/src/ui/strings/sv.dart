@@ -2213,6 +2213,16 @@ final class SwedishStrings extends Strings {
   @override
   String get captureFolderSubtitle =>
       'Webbsidor och citat sparade som nya anteckningar';
+
+  // Settings: export folder (#1286).
+  @override
+  String get exportOpensInTitle => 'Exportmapp';
+  @override
+  String get exportOpensInSubtitle => 'Var en exports spara-dialog öppnas';
+  @override
+  String get exportOpensInSystem => 'Där systemet öppnar den';
+  @override
+  String get exportOpensInLibrary => 'Det här bibliotekets mapp';
   @override
   String get annotationNoteSuffix => 'Annotering';
   @override

@@ -2190,6 +2190,17 @@ final class NorwegianStrings extends Strings {
   @override
   String get captureFolderSubtitle =>
       'Nettsider og sitater lagret som nye notater';
+
+  // Settings: export folder (#1286).
+  @override
+  String get exportOpensInTitle => 'Eksportmappe';
+  @override
+  String get exportOpensInSubtitle =>
+      'Hvor lagringsdialogen for en eksport åpnes';
+  @override
+  String get exportOpensInSystem => 'Der systemet åpner den';
+  @override
+  String get exportOpensInLibrary => 'Mappen til dette biblioteket';
   @override
   String get annotationNoteSuffix => 'Merknad';
   @override

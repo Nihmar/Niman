@@ -2202,6 +2202,17 @@ final class IcelandicStrings extends Strings {
   @override
   String get captureFolderSubtitle =>
       'Vefsíður og tilvitnanir vistaðar sem nýjar glósur';
+
+  // Settings: export folder (#1286).
+  @override
+  String get exportOpensInTitle => 'Útflutningsmappa';
+  @override
+  String get exportOpensInSubtitle =>
+      'Hvar vistunarglugginn opnast við útflutning';
+  @override
+  String get exportOpensInSystem => 'Þar sem kerfið opnar hann';
+  @override
+  String get exportOpensInLibrary => 'Mappa þessa bókasafns';
   @override
   String get annotationNoteSuffix => 'Athugasemd';
   @override

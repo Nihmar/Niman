@@ -2193,6 +2193,16 @@ final class DanishStrings extends Strings {
   String get captureFolderTitle => 'Mappe til webudklip';
   @override
   String get captureFolderSubtitle => 'Websider og citater gemt som nye noter';
+
+  // Settings: export folder (#1286).
+  @override
+  String get exportOpensInTitle => 'Eksportmappe';
+  @override
+  String get exportOpensInSubtitle => 'Hvor gemmedialogen for en eksport åbner';
+  @override
+  String get exportOpensInSystem => 'Hvor systemet åbner den';
+  @override
+  String get exportOpensInLibrary => 'Dette biblioteks mappe';
   @override
   String get annotationNoteSuffix => 'Annotering';
   @override

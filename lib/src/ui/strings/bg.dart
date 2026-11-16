@@ -2222,6 +2222,17 @@ final class BulgarianStrings extends Strings {
   @override
   String get captureFolderSubtitle =>
       'Уеб страници и цитати, запазени като нови бележки';
+
+  // Settings: export folder (#1286).
+  @override
+  String get exportOpensInTitle => 'Папка за експорт';
+  @override
+  String get exportOpensInSubtitle =>
+      'Къде се отваря прозорецът за запазване на експорт';
+  @override
+  String get exportOpensInSystem => 'Където го отвори системата';
+  @override
+  String get exportOpensInLibrary => 'Папката на тази библиотека';
   @override
   String get annotationNoteSuffix => 'Анотация';
   @override

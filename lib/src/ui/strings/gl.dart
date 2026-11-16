@@ -2217,6 +2217,17 @@ final class GalicianStrings extends Strings {
   @override
   String get captureFolderSubtitle =>
       'Páxinas web e citas capturadas como notas novas';
+
+  // Settings: export folder (#1286).
+  @override
+  String get exportOpensInTitle => 'Cartafol de exportación';
+  @override
+  String get exportOpensInSubtitle =>
+      'Onde se abre o diálogo de gardar dunha exportación';
+  @override
+  String get exportOpensInSystem => 'Onde o abra o sistema';
+  @override
+  String get exportOpensInLibrary => 'O cartafol desta biblioteca';
   @override
   String get annotationNoteSuffix => 'Anotación';
   @override

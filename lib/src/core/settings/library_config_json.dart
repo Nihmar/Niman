@@ -9,6 +9,7 @@ import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/core/settings/library_settings.dart'
     show
         EditorKind,
+        ExportFolder,
         LinkType,
         LinkUpdate,
         TreeSort,
@@ -129,6 +130,7 @@ const Set<String> _knownKeys = {
   'treeView',
   'linkType',
   'linkUpdate',
+  'exportFolder',
   'weekStart',
   'newItemLocation',
   // Legacy dead-link setting, read never written (#850): the new key
@@ -254,6 +256,7 @@ LibraryConfig libraryConfigFromJsonMap(Map<String, Object?> json) {
       'never' => LinkUpdate.never,
       _ => LinkUpdate.automatic,
     },
+    exportFolder: ExportFolder.fromName(json['exportFolder']),
     weekStart: WeekStart.fromName(json['weekStart']),
     // The old dead-link setting reads into the new one when the new key
     // is absent (#850); it is never written again.
@@ -338,6 +341,7 @@ Map<String, Object?> libraryConfigToJsonMap(LibraryConfig config) {
     'treeView': config.treeView.name,
     'linkType': config.linkType.name,
     'linkUpdate': config.linkUpdate.name,
+    'exportFolder': config.exportFolder.name,
     'weekStart': config.weekStart.name,
     'newItemLocation': config.newItemLocation.name,
     'indentWidth': config.indentWidth,

@@ -2225,6 +2225,17 @@ final class RomanianStrings extends Strings {
   @override
   String get captureFolderSubtitle =>
       'Pagini web și citate salvate ca note noi';
+
+  // Settings: export folder (#1286).
+  @override
+  String get exportOpensInTitle => 'Dosar de export';
+  @override
+  String get exportOpensInSubtitle =>
+      'Unde se deschide fereastra de salvare a unui export';
+  @override
+  String get exportOpensInSystem => 'Unde o deschide sistemul';
+  @override
+  String get exportOpensInLibrary => 'Dosarul acestei biblioteci';
   @override
   String get annotationNoteSuffix => 'Adnotare';
   @override
