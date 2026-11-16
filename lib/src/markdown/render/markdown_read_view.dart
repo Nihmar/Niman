@@ -503,8 +503,9 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
   /// With [keepTop], what is shown is the top of [buffer] alone, and [scan]
   /// the whole of it ([ReadEntries.show]).
   void _show(SourceBuffer buffer, DocumentScan scan, {bool keepTop = false}) {
+    final top = widget.parser.scope;
     widget.parser.scope = scan.scope;
-    _entries.show(buffer, scan, keepTop: keepTop);
+    _entries.show(buffer, scan, keepTop: keepTop, topScope: top);
   }
 
   /// Draws nothing until the next scan lands.
