@@ -45,7 +45,10 @@ class ReadAloudBridge(private val context: Context) : MethodChannel.MethodCallHa
     }
 
     private val main = Handler(Looper.getMainLooper())
-    private val audio = context.getSystemService(AudioManager::class.java)
+    // Asked for when first used, not here: the bridge is built with the
+    // activity, before its onCreate, and an activity asked for a system
+    // service then throws — which closed Niman as it opened (0.3.6).
+    private val audio by lazy { context.getSystemService(AudioManager::class.java) }
     private val attributes = AudioAttributes.Builder()
         .setUsage(AudioAttributes.USAGE_MEDIA)
         .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
