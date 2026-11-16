@@ -20,6 +20,7 @@ import 'package:niman/src/export/board_raster_context.dart';
 import 'package:niman/src/export/board_raster_head.dart';
 import 'package:niman/src/export/board_raster_plan.dart';
 import 'package:niman/src/export/kanban_sheet.dart';
+import 'package:niman/src/export/paper_size.dart';
 import 'package:niman/src/export/pdf_printer.dart';
 import 'package:niman/src/export/pdf_raster_support.dart';
 import 'package:niman/src/export/pdf_writer.dart';
@@ -29,7 +30,8 @@ import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/preview/math_cache.dart';
 
 /// Lays [board] out on [sheet] pages of [pageWidth] by [pageHeight] logical
-/// pixels, [margin] in, and draws them, answering the PDF's bytes.
+/// pixels — the sheet of [paper] — [margin] in, and draws them, answering
+/// the PDF's bytes.
 ///
 /// [images] are the note's pictures, decoded here as the note's own
 /// fallback decodes them; [onProgress] and [isCancelled] are as in
@@ -42,6 +44,7 @@ Future<Uint8List> rasterBoardPdf({
   required double pageWidth,
   required double pageHeight,
   required double margin,
+  PaperSize paper = PaperSize.a4,
   Map<String, Uint8List>? images,
   void Function(int done, int total)? onProgress,
   bool Function()? isCancelled,
@@ -62,6 +65,7 @@ Future<Uint8List> rasterBoardPdf({
     final content = BoardRasterContent(
       board: board,
       sheet: sheet,
+      paper: paper,
       contentWidth: contentWidth,
       context: BoardRasterContext(
         board: board,

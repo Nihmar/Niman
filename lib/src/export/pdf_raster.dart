@@ -99,6 +99,7 @@ Future<Uint8List> rasterPdf({
       pageWidth: landscape ? math.max(pageWidth, pageHeight) : pageWidth,
       pageHeight: landscape ? math.min(pageWidth, pageHeight) : pageHeight,
       margin: margin,
+      paper: paper,
       images: images,
       onProgress: onProgress,
       isCancelled: isCancelled,
