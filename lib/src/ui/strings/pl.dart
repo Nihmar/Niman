@@ -2029,6 +2029,15 @@ final class PolishStrings extends Strings {
   String get formatNoteDone => 'Notatka została uporządkowana.';
   @override
   String get exportTitle => 'Eksportuj';
+
+  // Settings: export (#1285).
+  @override
+  String get settingsSectionExport => 'Eksport';
+  @override
+  String get pdfPaperTitle => 'Papier PDF';
+  @override
+  String get pdfPaperSubtitle =>
+      'Arkusz, na którym drukowany jest eksportowany PDF';
   @override
   String get exportFormatMarkdown => 'Markdown';
   @override

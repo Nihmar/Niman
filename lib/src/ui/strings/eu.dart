@@ -2023,6 +2023,14 @@ final class BasqueStrings extends Strings {
   String get formatNoteDone => 'Oharra txukundu da.';
   @override
   String get exportTitle => 'Esportatu';
+
+  // Settings: export (#1285).
+  @override
+  String get settingsSectionExport => 'Esportazioa';
+  @override
+  String get pdfPaperTitle => 'PDFaren papera';
+  @override
+  String get pdfPaperSubtitle => 'PDF esportatu bat inprimatzen den orria';
   @override
   String get exportFormatMarkdown => 'Markdown';
   @override

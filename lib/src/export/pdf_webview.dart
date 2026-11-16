@@ -76,10 +76,14 @@ final class WebViewPdfPrinter implements PdfPrinter {
     for (var attempt = 0; ; attempt++) {
       try {
         await _channel
-            .invokeMethod<void>('print', <String, String>{
+            .invokeMethod<void>('print', <String, Object>{
               'htmlPath': htmlPath,
               'pdfPath': pdfPath,
               'paper': paper.name,
+              // The sheet as it lies, in PDF points (#1285); slides ignore
+              // it.
+              'width': paper.widthPt,
+              'height': paper.heightPt,
             })
             .timeout(timeout);
         break;

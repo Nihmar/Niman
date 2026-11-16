@@ -20,7 +20,8 @@ one file:
   types it can carry are PNG, JPEG, GIF, WebP and BMP; a picture of
   another type (an SVG, say) stays as the note wrote it rather than
   breaking the page.
-- **PDF** — the same page printed: A4, its paper style, its formulas and
+- **PDF** — the same page printed: on the paper picked in **Settings →
+  Export** (A4 unless another is), its paper style, its formulas and
   pictures in place. The machine prints it with its own browser — Edge on
   Windows, a Chromium-family browser on Linux (Chromium, Chrome, Brave,
   Vivaldi, Helium), the system WebView on Android — so the text stays
@@ -70,9 +71,10 @@ in the rest of the note. Obsidian's settings footer is left out.
 
 - **HTML** — the columns side by side, scrolling sideways; stacked on a
   narrow screen.
-- **PDF** — a board of up to four columns prints on **A4 landscape**, the
-  columns in one row; five or more print on A4 portrait, two columns to
-  a row. A card is never split across two pages. Without a browser
+- **PDF** — a board prints on its paper on its side when its columns
+  fit one row of it, each at least 60 mm wide — up to four on **A4
+  landscape**, three on Letter, five on A3 — and standing up otherwise, as
+  many to a row as fit (two on A4). A card is never split across two pages. Without a browser
   engine the board is drawn the same way, as pictures of the pages.
 - **EPUB** — the columns one after another, since an e-reader's page is
   narrow.

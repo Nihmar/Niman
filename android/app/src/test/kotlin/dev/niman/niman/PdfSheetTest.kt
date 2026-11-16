@@ -6,39 +6,45 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
- * The sheet the `niman/pdf` channel's `paper` names (#1170): the Dart side
- * sends `PdfPaper.name`, and a name this side cannot read must still print.
+ * The sheet the `niman/pdf` channel's `paper`, `width` and `height` name
+ * (#1170, #1285): the Dart side sends `PdfPaper.name` and the sheet's size
+ * as it lies, and a name this side cannot read must still print.
  */
 class PdfSheetTest {
     @Test
-    fun everyPaperTheDartSideSendsIsRead() {
-        assertEquals(PdfSheet.A4, PdfSheet.forName("a4"))
-        assertEquals(PdfSheet.A4_LANDSCAPE, PdfSheet.forName("a4Landscape"))
-        assertEquals(PdfSheet.SLIDES, PdfSheet.forName("slides"))
+    fun aSheetIsReadAtTheSizeItIsSent() {
+        // US Letter, 612 × 792 points: 8.5 × 11 inches.
+        val letter = PdfSheet.of("portrait", 612.0, 792.0)
+        assertEquals(8500, letter.widthMils)
+        assertEquals(11000, letter.heightMils)
+        assertFalse(letter.landscape)
+        assertEquals(PDF_MARGIN_MILS, letter.marginMils)
+        val board = PdfSheet.of("landscape", 1224.0, 792.0)
+        assertTrue(board.landscape)
+        assertEquals(11000, board.shortMils)
+        assertEquals(17000, board.longMils)
     }
 
     @Test
-    fun noNameOrAnUnknownOneIsAPortraitA4() {
-        assertEquals(PdfSheet.A4, PdfSheet.forName(null))
-        assertEquals(PdfSheet.A4, PdfSheet.forName("a3"))
+    fun theNamesBeforeThePaperWasAChoiceAreA4() {
+        assertEquals(PdfSheet.A4, PdfSheet.of("a4", null, null))
+        assertEquals(PdfSheet.A4_LANDSCAPE, PdfSheet.of("a4Landscape", null, null))
+        assertEquals(PdfSheet.SLIDES, PdfSheet.of("slides", 1.0, 1.0))
     }
 
     @Test
-    fun aBoardSheetLiesOnItsSideWithTheNotesMargin() {
-        assertTrue(PdfSheet.A4_LANDSCAPE.landscape)
-        assertEquals(PdfSheet.A4.marginMils, PdfSheet.A4_LANDSCAPE.marginMils)
-        assertEquals(709, PdfSheet.A4_LANDSCAPE.marginMils)
+    fun noNameAnUnknownOneOrNoSizeIsA4() {
+        assertEquals(PdfSheet.A4, PdfSheet.of(null, null, null))
+        assertEquals(PdfSheet.A4, PdfSheet.of("a3", 842.0, 1191.0))
+        assertEquals(PdfSheet.A4, PdfSheet.of("portrait", null, 10.0))
+        assertEquals(PdfSheet.A4_LANDSCAPE, PdfSheet.of("landscape", 0.0, 0.0))
     }
 
     @Test
-    fun theNotesSheetStaysPortraitAndASlideHasNoMargin() {
-        assertFalse(PdfSheet.A4.landscape)
+    fun aSlideHasNoMarginAndANoteTheNotesMargin() {
+        assertTrue(PdfSheet.SLIDES.slides)
         assertEquals(0, PdfSheet.SLIDES.marginMils)
-    }
-
-    @Test
-    fun everyKeyIsOneOfAKind() {
-        val keys = PdfSheet.entries.map { it.key }
-        assertEquals(keys.size, keys.toSet().size)
+        assertEquals(709, PdfSheet.A4_LANDSCAPE.marginMils)
+        assertFalse(PdfSheet.A4.slides)
     }
 }

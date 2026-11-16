@@ -23,6 +23,7 @@ import 'package:niman/src/editor/markdown_format.dart';
 import 'package:niman/src/editor/outline.dart';
 import 'package:niman/src/epub/epub_look.dart';
 import 'package:niman/src/epub/epub_looks.dart';
+import 'package:niman/src/export/paper_size.dart';
 import 'package:niman/src/frontmatter/edit.dart';
 import 'package:niman/src/frontmatter/fields.dart';
 import 'package:niman/src/frontmatter/parser.dart';
@@ -445,6 +446,15 @@ final class FakeLibrarySession
     pendingUpdate = null;
     _bump();
   }
+
+  /// The paper a PDF export is printed on (#1285).
+  PaperSize pdfPaperValue = PaperSize.a4;
+
+  @override
+  Future<PaperSize> get pdfPaper async => pdfPaperValue;
+
+  @override
+  Future<void> setPdfPaper(PaperSize paper) async => pdfPaperValue = paper;
 
   /// The settings a library keeps for itself (T-ML-10), in memory. A
   /// fresh fake starts at the shipped defaults, as a fresh library does.

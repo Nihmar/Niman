@@ -1999,6 +1999,14 @@ final class DanishStrings extends Strings {
   String get formatNoteDone => 'Noten blev ryddet op.';
   @override
   String get exportTitle => 'Eksportér';
+
+  // Settings: export (#1285).
+  @override
+  String get settingsSectionExport => 'Eksport';
+  @override
+  String get pdfPaperTitle => 'PDF-papir';
+  @override
+  String get pdfPaperSubtitle => 'Det ark en eksporteret PDF udskrives på';
   @override
   String get exportFormatMarkdown => 'Markdown';
   @override

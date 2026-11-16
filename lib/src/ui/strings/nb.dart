@@ -1996,6 +1996,14 @@ final class NorwegianStrings extends Strings {
   String get formatNoteDone => 'Notatet ble ryddet.';
   @override
   String get exportTitle => 'Eksporter';
+
+  // Settings: export (#1285).
+  @override
+  String get settingsSectionExport => 'Eksport';
+  @override
+  String get pdfPaperTitle => 'PDF-papir';
+  @override
+  String get pdfPaperSubtitle => 'Arket en eksportert PDF skrives ut på';
   @override
   String get exportFormatMarkdown => 'Markdown';
   @override

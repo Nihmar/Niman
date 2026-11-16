@@ -2005,6 +2005,14 @@ final class SlovakStrings extends Strings {
   String get formatNoteDone => 'Poznámka bola upratená.';
   @override
   String get exportTitle => 'Exportovať';
+
+  // Settings: export (#1285).
+  @override
+  String get settingsSectionExport => 'Export';
+  @override
+  String get pdfPaperTitle => 'Papier PDF';
+  @override
+  String get pdfPaperSubtitle => 'Hárok, na ktorý sa tlačí exportované PDF';
   @override
   String get exportFormatMarkdown => 'Markdown';
   @override

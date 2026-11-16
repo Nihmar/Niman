@@ -191,3 +191,38 @@ demands; the container is `mimetype` (stored, first),
 - A folder as **one combined PDF** (notes in tree order, a page break between them) instead of a zip of PDFs.
 - **Very large pictures** inline in a single-note page: embed them all, or link them above some size.
 - A **library-wide HTML zip on a phone**: it streams, so memory is bounded, but the time for a million notes calls for a progress estimate before it starts.
+
+## The paper (#1285)
+
+A PDF export is printed on the paper picked in **Settings → Export**, one
+app-wide setting (`AppPreferences.pdfPaper`, the `pdf_paper` column of
+`app_settings`, schema v34). It is A4 by default, and a name it does not
+know reads as A4.
+
+- `lib/src/export/paper_size.dart` lists the sizes: `PaperSize` A0–A5,
+  Letter, Legal and Tabloid, each in millimetres, standing up.
+- `PdfPaper` is a size and a way it lies, or the slides' 16:9 sheet.
+  Before #1285 it was an enum of three sheets.
+- The page states its sheet in millimetres in `@page`
+  (`PdfPaper.cssSize`), since `A4` names no A0 and no Tabloid. A4 keeps
+  `pageStyle`'s own rule, and another paper adds one after it.
+- The system WebViews are told the sheet on `niman/pdf`:
+  - `paper` is `portrait`, `landscape` or `slides`, and `width` and
+    `height` are the sheet as it lies, in points;
+  - on Android `PdfSheet.of` reads them into a custom
+    `PrintAttributes.MediaSize`, and the Apple bridges into
+    `NSPrintInfo.paperSize` and the iOS page size;
+  - the old names, `a4` and `a4Landscape`, still read as A4.
+- The raster fallback draws on the same sheet.
+- A kanban board's rule (`kanban_sheet.dart`) counts columns on the
+  paper. It lies on its side when its columns fit one row there, each
+  60 mm wide or more; standing up, as many go to a row as fit:
+  - A4 holds four columns on its side and two standing up;
+  - Letter holds three on its side;
+  - A3 holds five on its side;
+  - A5 standing up holds one.
+
+Tests: `test/unit/paper_size_test.dart`, the paper groups of
+`test/unit/kanban_paper_test.dart` and `kanban_export_test.dart`, the v34
+group of `database_migration_test.dart`,
+`test/widget/settings_export_test.dart` and `PdfSheetTest.kt`.

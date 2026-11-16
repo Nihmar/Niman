@@ -1997,6 +1997,14 @@ final class CzechStrings extends Strings {
   String get formatNoteDone => 'Poznámka byla uklizena.';
   @override
   String get exportTitle => 'Export';
+
+  // Settings: export (#1285).
+  @override
+  String get settingsSectionExport => 'Export';
+  @override
+  String get pdfPaperTitle => 'Papír PDF';
+  @override
+  String get pdfPaperSubtitle => 'List, na který se tiskne exportované PDF';
   @override
   String get exportFormatMarkdown => 'Markdown';
   @override

@@ -2011,6 +2011,14 @@ final class SerbianStrings extends Strings {
   String get formatNoteDone => 'Белешка је сложена.';
   @override
   String get exportTitle => 'Извези';
+
+  // Settings: export (#1285).
+  @override
+  String get settingsSectionExport => 'Извоз';
+  @override
+  String get pdfPaperTitle => 'Папир за PDF';
+  @override
+  String get pdfPaperSubtitle => 'Лист на који се штампа извезени PDF';
   @override
   String get exportFormatMarkdown => 'Markdown';
   @override

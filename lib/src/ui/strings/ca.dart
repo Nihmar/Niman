@@ -2044,6 +2044,14 @@ final class CatalanStrings extends Strings {
   String get formatNoteDone => 'La nota s’ha endreçat.';
   @override
   String get exportTitle => 'Exporta';
+
+  // Settings: export (#1285).
+  @override
+  String get settingsSectionExport => 'Exportació';
+  @override
+  String get pdfPaperTitle => 'Paper del PDF';
+  @override
+  String get pdfPaperSubtitle => 'El full on s’imprimeix un PDF exportat';
   @override
   String get exportFormatMarkdown => 'Markdown';
   @override

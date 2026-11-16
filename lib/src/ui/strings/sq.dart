@@ -2024,6 +2024,15 @@ final class AlbanianStrings extends Strings {
   String get formatNoteDone => 'Shënimi u rregullua.';
   @override
   String get exportTitle => 'Eksporto';
+
+  // Settings: export (#1285).
+  @override
+  String get settingsSectionExport => 'Eksportimi';
+  @override
+  String get pdfPaperTitle => 'Letra e PDF-së';
+  @override
+  String get pdfPaperSubtitle =>
+      'Fleta në të cilën shtypet një PDF i eksportuar';
   @override
   String get exportFormatMarkdown => 'Markdown';
   @override

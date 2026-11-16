@@ -11,7 +11,9 @@ library;
 import 'dart:async';
 import 'dart:io';
 
+import 'package:meta/meta.dart';
 import 'package:niman/src/core/process_run.dart';
+import 'package:niman/src/export/paper_size.dart';
 import 'package:path/path.dart' as p;
 
 /// How a print ended.
@@ -78,18 +80,79 @@ final class PdfExportCancelled implements Exception {
 /// The sheet a page is printed on.
 ///
 /// A browser engine takes it from the page's own `@page` (the page is built
-/// for the paper it asks for); the system WebViews are told it by name
-/// through the `niman/pdf` channel, [name] being the channel's word for it.
-enum PdfPaper {
-  /// A4 with the page's margin: a note.
-  a4,
+/// for the paper it asks for); the system WebViews are told it through the
+/// `niman/pdf` channel: [name] (`slides`, `portrait` or `landscape`) and the
+/// sheet's [widthPt] × [heightPt], as it lies.
+@immutable
+final class PdfPaper {
+  /// [size] standing up, or on its side when [landscape], with the page's
+  /// margin.
+  const new(this.size, {this.landscape = false}) : isSlides = false;
 
-  /// A4 on its side with the page's margin: a kanban board whose columns
-  /// fit one row of it (#1170).
-  a4Landscape,
+  const new _slides() : size = PaperSize.a4, landscape = true, isSlides = true;
 
-  /// 16:9 with no margin, one slide a sheet (#534).
-  slides,
+  /// A4 with the page's margin: a note, before the paper was a choice.
+  static const PdfPaper a4 = PdfPaper(PaperSize.a4);
+
+  /// A4 on its side: a kanban board whose columns fit one row of it
+  /// (#1170).
+  static const PdfPaper a4Landscape = PdfPaper(PaperSize.a4, landscape: true);
+
+  /// 16:9 with no margin, one slide a sheet (#534); the paper setting does
+  /// not apply.
+  static const PdfPaper slides = PdfPaper._slides();
+
+  /// The sheet (#1285); for [slides], none that matters.
+  final PaperSize size;
+
+  /// Whether the sheet lies on its long side.
+  final bool landscape;
+
+  /// Whether this is a slides note's 16:9 sheet.
+  final bool isSlides;
+
+  /// The channel's word for the sheet.
+  String get name => isSlides
+      ? 'slides'
+      : landscape
+      ? 'landscape'
+      : 'portrait';
+
+  /// The sheet's width as it lies, in millimetres.
+  double get widthMm => landscape ? size.heightMm : size.widthMm;
+
+  /// The sheet's height as it lies, in millimetres.
+  double get heightMm => landscape ? size.widthMm : size.heightMm;
+
+  /// [widthMm] in PDF points.
+  double get widthPt => widthMm * pointsPerMm;
+
+  /// [heightMm] in PDF points.
+  double get heightPt => heightMm * pointsPerMm;
+
+  /// The sheet as a CSS `@page` `size`: its sides as it lies, in
+  /// millimetres, which every engine reads alike (`A4` would not name an
+  /// A0 or a Tabloid).
+  String get cssSize => '${_mm(widthMm)}mm ${_mm(heightMm)}mm';
+
+  static String _mm(double mm) =>
+      mm == mm.roundToDouble() ? mm.toStringAsFixed(0) : mm.toStringAsFixed(1);
+
+  /// The same sheet on its side.
+  PdfPaper get onItsSide => PdfPaper(size, landscape: true);
+
+  @override
+  bool operator ==(Object other) =>
+      other is PdfPaper &&
+      other.isSlides == isSlides &&
+      (isSlides || (other.size == size && other.landscape == landscape));
+
+  @override
+  int get hashCode => isSlides ? 0 : Object.hash(size, landscape);
+
+  @override
+  String toString() =>
+      isSlides ? 'PdfPaper.slides' : 'PdfPaper(${size.name}, $name)';
 }
 
 /// What prints a page.

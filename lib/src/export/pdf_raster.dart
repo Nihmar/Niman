@@ -23,6 +23,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/export/kanban_sheet.dart';
+import 'package:niman/src/export/paper_size.dart';
 import 'package:niman/src/export/pdf_breaks.dart';
 import 'package:niman/src/export/pdf_printer.dart';
 import 'package:niman/src/export/pdf_raster_board.dart';
@@ -84,16 +85,17 @@ Future<Uint8List> rasterPdf({
   double margin = pdfPageMarginPx,
   double pixelRatio = 2,
   KanbanBoard? board,
+  PaperSize paper = PaperSize.a4,
 }) async {
   if (board != null && board.columns.isNotEmpty) {
-    final sheet = kanbanSheetFor(board.columns.length);
+    final sheet = kanbanSheetFor(board.columns.length, paper);
     final landscape = sheet == KanbanSheet.landscape;
     return await rasterBoardPdf(
       board: board,
       sheet: sheet,
       theme: theme,
       mathCache: mathCache,
-      // A4 on its side: the sheet's short side is the page's height.
+      // On its side: the sheet's short side is the page's height.
       pageWidth: landscape ? math.max(pageWidth, pageHeight) : pageWidth,
       pageHeight: landscape ? math.min(pageWidth, pageHeight) : pageHeight,
       margin: margin,

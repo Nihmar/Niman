@@ -2063,6 +2063,15 @@ final class FrenchStrings extends Strings {
   String get formatNoteDone => 'La note a été rangée.';
   @override
   String get exportTitle => 'Exporter';
+
+  // Settings: export (#1285).
+  @override
+  String get settingsSectionExport => 'Exportation';
+  @override
+  String get pdfPaperTitle => 'Papier du PDF';
+  @override
+  String get pdfPaperSubtitle =>
+      'La feuille sur laquelle un export PDF est imprimé';
   @override
   String get exportFormatMarkdown => 'Markdown';
   @override

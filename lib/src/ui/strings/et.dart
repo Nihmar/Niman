@@ -1986,6 +1986,14 @@ final class EstonianStrings extends Strings {
   String get formatNoteDone => 'Märge korrastati.';
   @override
   String get exportTitle => 'Ekspordi';
+
+  // Settings: export (#1285).
+  @override
+  String get settingsSectionExport => 'Eksport';
+  @override
+  String get pdfPaperTitle => 'PDF-i paber';
+  @override
+  String get pdfPaperSubtitle => 'Leht, millele eksporditud PDF prinditakse';
   @override
   String get exportFormatMarkdown => 'Markdown';
   @override

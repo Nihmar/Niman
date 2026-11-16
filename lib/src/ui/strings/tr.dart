@@ -1992,6 +1992,14 @@ final class TurkishStrings extends Strings {
   String get formatNoteDone => 'Not düzenlendi.';
   @override
   String get exportTitle => 'Dışa aktar';
+
+  // Settings: export (#1285).
+  @override
+  String get settingsSectionExport => 'Dışa aktarma';
+  @override
+  String get pdfPaperTitle => 'PDF kâğıdı';
+  @override
+  String get pdfPaperSubtitle => 'Dışa aktarılan bir PDF’nin basıldığı sayfa';
   @override
   String get exportFormatMarkdown => 'Markdown';
   @override

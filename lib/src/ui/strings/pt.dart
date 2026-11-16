@@ -2018,6 +2018,14 @@ final class PortugueseStrings extends Strings {
   String get formatNoteDone => 'A nota foi arrumada.';
   @override
   String get exportTitle => 'Exportar';
+
+  // Settings: export (#1285).
+  @override
+  String get settingsSectionExport => 'Exportação';
+  @override
+  String get pdfPaperTitle => 'Papel do PDF';
+  @override
+  String get pdfPaperSubtitle => 'A folha em que um PDF exportado é impresso';
   @override
   String get exportFormatMarkdown => 'Markdown';
   @override

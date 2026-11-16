@@ -2022,6 +2022,14 @@ final class GalicianStrings extends Strings {
   String get formatNoteDone => 'A nota arranxouse.';
   @override
   String get exportTitle => 'Exportar';
+
+  // Settings: export (#1285).
+  @override
+  String get settingsSectionExport => 'Exportación';
+  @override
+  String get pdfPaperTitle => 'Papel do PDF';
+  @override
+  String get pdfPaperSubtitle => 'A folla na que se imprime un PDF exportado';
   @override
   String get exportFormatMarkdown => 'Markdown';
   @override

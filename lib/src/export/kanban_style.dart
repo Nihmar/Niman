@@ -8,6 +8,7 @@
 library;
 
 import 'package:niman/src/export/kanban_sheet.dart';
+import 'package:niman/src/export/paper_size.dart';
 
 /// The cards, the chips and the column heads: shared by every medium, on
 /// the page's own colour variables.
@@ -36,15 +37,16 @@ ul.kanban-cards { list-style: none; margin: 0; padding: 0; }
 .kanban-prose > :last-child { margin-bottom: 0; }
 ''';
 
-/// A board's style on a page: [sheet] is the one the board prints on.
-String kanbanPageStyle(KanbanSheet sheet) {
+/// A board's style on a page: [sheet] is the way the board's [paper]
+/// lies (#1285).
+String kanbanPageStyle(KanbanSheet sheet, [PaperSize paper = PaperSize.a4]) {
   final gap = '${kanbanGapMm.toStringAsFixed(0)}mm';
   final margin = '${kanbanMarginMm.toStringAsFixed(0)}mm';
   final print = switch (sheet) {
     // Every column in one row, sharing the width.
     KanbanSheet.landscape =>
       '''
-  @page { size: A4 landscape; margin: $margin; }
+  @page { size: ${sheet.paperOf(paper).cssSize}; margin: $margin; }
   .kanban { display: flex; gap: $gap; overflow: visible; }
   .kanban-column { flex: 1 1 0; }
 ''',
@@ -52,7 +54,7 @@ String kanbanPageStyle(KanbanSheet sheet) {
     KanbanSheet.portrait =>
       '''
   .kanban { display: grid;
-    grid-template-columns: repeat($kanbanPortraitColumns, minmax(0, 1fr));
+    grid-template-columns: repeat(${kanbanColumnsPerRow(sheet, paper)}, minmax(0, 1fr));
     gap: $gap; overflow: visible; }
 ''',
   };

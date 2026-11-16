@@ -1977,6 +1977,14 @@ final class HindiStrings extends Strings {
   String get formatNoteDone => 'नोट व्यवस्थित कर दिया गया।';
   @override
   String get exportTitle => 'निर्यात';
+
+  // Settings: export (#1285).
+  @override
+  String get settingsSectionExport => 'निर्यात';
+  @override
+  String get pdfPaperTitle => 'PDF का काग़ज़';
+  @override
+  String get pdfPaperSubtitle => 'वह शीट जिस पर निर्यात किया गया PDF छपता है';
   @override
   String get exportFormatMarkdown => 'Markdown';
   @override

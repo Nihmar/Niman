@@ -2024,6 +2024,15 @@ final class BulgarianStrings extends Strings {
   String get formatNoteDone => 'Бележката беше подредена.';
   @override
   String get exportTitle => 'Изнасяне';
+
+  // Settings: export (#1285).
+  @override
+  String get settingsSectionExport => 'Експортиране';
+  @override
+  String get pdfPaperTitle => 'Хартия за PDF';
+  @override
+  String get pdfPaperSubtitle =>
+      'Листът, на който се отпечатва експортиран PDF';
   @override
   String get exportFormatMarkdown => 'Markdown';
   @override

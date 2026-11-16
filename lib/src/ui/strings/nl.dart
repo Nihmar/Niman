@@ -2029,6 +2029,15 @@ final class DutchStrings extends Strings {
   String get formatNoteDone => 'De notitie is opgeruimd.';
   @override
   String get exportTitle => 'Exporteren';
+
+  // Settings: export (#1285).
+  @override
+  String get settingsSectionExport => 'Exporteren';
+  @override
+  String get pdfPaperTitle => 'Pdf-papier';
+  @override
+  String get pdfPaperSubtitle =>
+      'Het vel waarop een geëxporteerde pdf wordt afgedrukt';
   @override
   String get exportFormatMarkdown => 'Markdown';
   @override

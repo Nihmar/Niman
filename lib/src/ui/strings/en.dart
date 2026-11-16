@@ -1988,6 +1988,14 @@ final class EnglishStrings extends Strings {
   String get formatNoteDone => 'The note was tidied.';
   @override
   String get exportTitle => 'Export';
+
+  // Settings: export (#1285).
+  @override
+  String get settingsSectionExport => 'Export';
+  @override
+  String get pdfPaperTitle => 'PDF paper';
+  @override
+  String get pdfPaperSubtitle => 'The sheet a PDF export is printed on';
   @override
   String get exportFormatMarkdown => 'Markdown';
   @override

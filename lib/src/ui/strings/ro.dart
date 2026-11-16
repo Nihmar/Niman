@@ -2028,6 +2028,14 @@ final class RomanianStrings extends Strings {
   String get formatNoteDone => 'Nota a fost aranjată.';
   @override
   String get exportTitle => 'Exportă';
+
+  // Settings: export (#1285).
+  @override
+  String get settingsSectionExport => 'Exportare';
+  @override
+  String get pdfPaperTitle => 'Hârtie PDF';
+  @override
+  String get pdfPaperSubtitle => 'Coala pe care se tipărește un PDF exportat';
   @override
   String get exportFormatMarkdown => 'Markdown';
   @override

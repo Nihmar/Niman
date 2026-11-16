@@ -95,7 +95,8 @@ went.
 ## Export
 
 HTML, PDF and EPUB draw the board: see [export](export.md#a-note). A
-board of up to four columns prints on A4 landscape.
+board of up to four columns prints on A4 landscape (on another paper,
+as many as fit: see [export](export.md#a-note)).
 
 ## Not yet
 

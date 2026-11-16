@@ -1886,6 +1886,14 @@ final class JapaneseStrings extends Strings {
   String get formatNoteDone => 'ノートを整えました。';
   @override
   String get exportTitle => 'エクスポート';
+
+  // Settings: export (#1285).
+  @override
+  String get settingsSectionExport => 'エクスポート';
+  @override
+  String get pdfPaperTitle => 'PDF の用紙';
+  @override
+  String get pdfPaperSubtitle => 'エクスポートした PDF を印刷する用紙';
   @override
   String get exportFormatMarkdown => 'Markdown';
   @override

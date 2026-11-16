@@ -2007,6 +2007,14 @@ final class IcelandicStrings extends Strings {
   String get formatNoteDone => 'Tekið var til í glósunni.';
   @override
   String get exportTitle => 'Flytja út';
+
+  // Settings: export (#1285).
+  @override
+  String get settingsSectionExport => 'Útflutningur';
+  @override
+  String get pdfPaperTitle => 'Pappír PDF-skjala';
+  @override
+  String get pdfPaperSubtitle => 'Örkin sem útflutt PDF er prentuð á';
   @override
   String get exportFormatMarkdown => 'Markdown';
   @override

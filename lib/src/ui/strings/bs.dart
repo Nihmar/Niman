@@ -2012,6 +2012,14 @@ final class BosnianStrings extends Strings {
   String get formatNoteDone => 'Bilješka je posložena.';
   @override
   String get exportTitle => 'Izvoz';
+
+  // Settings: export (#1285).
+  @override
+  String get settingsSectionExport => 'Izvoz';
+  @override
+  String get pdfPaperTitle => 'Papir za PDF';
+  @override
+  String get pdfPaperSubtitle => 'List na koji se štampa izvezeni PDF';
   @override
   String get exportFormatMarkdown => 'Markdown';
   @override

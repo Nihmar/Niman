@@ -2002,6 +2002,14 @@ final class LatvianStrings extends Strings {
   String get formatNoteDone => 'Piezīme tika sakārtota.';
   @override
   String get exportTitle => 'Eksportēt';
+
+  // Settings: export (#1285).
+  @override
+  String get settingsSectionExport => 'Eksports';
+  @override
+  String get pdfPaperTitle => 'PDF papīrs';
+  @override
+  String get pdfPaperSubtitle => 'Lapa, uz kuras drukā eksportētu PDF';
   @override
   String get exportFormatMarkdown => 'Markdown';
   @override

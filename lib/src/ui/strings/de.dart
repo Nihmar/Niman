@@ -2041,6 +2041,15 @@ final class GermanStrings extends Strings {
   String get formatNoteDone => 'Die Notiz wurde aufgeräumt.';
   @override
   String get exportTitle => 'Exportieren';
+
+  // Settings: export (#1285).
+  @override
+  String get settingsSectionExport => 'Export';
+  @override
+  String get pdfPaperTitle => 'PDF-Papier';
+  @override
+  String get pdfPaperSubtitle =>
+      'Das Blatt, auf das ein PDF-Export gedruckt wird';
   @override
   String get exportFormatMarkdown => 'Markdown';
   @override

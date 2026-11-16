@@ -14,6 +14,8 @@ import 'package:niman/src/export/kanban_sheet.dart';
 import 'package:niman/src/export/math_svg.dart';
 import 'package:niman/src/export/note_html.dart';
 import 'package:niman/src/export/note_html_source.dart';
+import 'package:niman/src/export/paper_size.dart';
+import 'package:niman/src/export/pdf_printer.dart';
 import 'package:niman/src/markdown/html/tree_html.dart';
 import 'package:path/path.dart' as p;
 import 'package:xml/xml.dart';
@@ -440,20 +442,42 @@ void main() {
     });
 
     test('counts the usable width of A4 with the page margin', () {
-      expect(KanbanSheet.landscape.usableMm, 261);
-      expect(KanbanSheet.portrait.usableMm, 174);
-      expect(kanbanLandscapeColumns, 4);
-      expect(kanbanPortraitColumns, 2);
+      expect(KanbanSheet.landscape.usableMm(), 261);
+      expect(KanbanSheet.portrait.usableMm(), 174);
+      final landscapeColumns = kanbanColumnsPerRow(KanbanSheet.landscape);
+      final portraitColumns = kanbanColumnsPerRow(KanbanSheet.portrait);
+      expect(landscapeColumns, 4);
+      expect(portraitColumns, 2);
       // Wrapped in portrait, a column is still at least the minimum wide.
-      final portrait = KanbanSheet.portrait.usableMm;
+      final portrait = KanbanSheet.portrait.usableMm();
       final width =
-          (portrait - (kanbanPortraitColumns - 1) * kanbanGapMm) /
-          kanbanPortraitColumns;
+          (portrait - (portraitColumns - 1) * kanbanGapMm) / portraitColumns;
       expect(width, greaterThanOrEqualTo(kanbanColumnMinMm));
       // Four columns and their gaps fit a landscape row; five do not.
       double row(int n) => n * kanbanColumnMinMm + (n - 1) * kanbanGapMm;
-      expect(row(4), lessThanOrEqualTo(KanbanSheet.landscape.usableMm));
-      expect(row(5), greaterThan(KanbanSheet.landscape.usableMm));
+      expect(row(4), lessThanOrEqualTo(KanbanSheet.landscape.usableMm()));
+      expect(row(5), greaterThan(KanbanSheet.landscape.usableMm()));
+    });
+
+    test('follows the paper picked (#1285)', () {
+      // Letter is a little wider than A4 and shorter: three columns on its
+      // side, where A4 holds four, and two standing up.
+      expect(kanbanColumnsPerRow(KanbanSheet.landscape, PaperSize.letter), 3);
+      expect(kanbanColumnsPerRow(KanbanSheet.portrait, PaperSize.letter), 2);
+      // A3 holds five on its side, where A4 holds four.
+      expect(kanbanColumnsPerRow(KanbanSheet.landscape, PaperSize.a3), 5);
+      expect(kanbanSheetFor(5, PaperSize.a3), KanbanSheet.landscape);
+      expect(kanbanSheetFor(5), KanbanSheet.portrait, reason: 'not on A4');
+      // A5 standing up has room for one column, never none.
+      expect(kanbanColumnsPerRow(KanbanSheet.portrait, PaperSize.a5), 1);
+      expect(
+        kanbanPaper(null, PaperSize.letter),
+        const PdfPaper(PaperSize.letter),
+      );
+      expect(
+        kanbanPaper(KanbanSheet.landscape, PaperSize.a3),
+        const PdfPaper(PaperSize.a3, landscape: true),
+      );
     });
 
     test('is the board, read off the note', () {
@@ -470,9 +494,9 @@ void main() {
     }
 
     test('asks for A4 landscape for four columns, not for five', () {
-      expect(page(_columns(4)), contains('size: A4 landscape'));
+      expect(page(_columns(4)), contains('size: 297mm 210mm'));
       final five = page(_columns(5));
-      expect(five, isNot(contains('A4 landscape')));
+      expect(five, isNot(contains('297mm 210mm')));
       // The grid that wraps two to a row, as many as fit at the minimum.
       expect(five, contains('repeat(2, minmax(0, 1fr))'));
     });
@@ -524,7 +548,7 @@ void main() {
       final page = await html(kanban: true);
       expect(page, contains('<div class="kanban" data-columns="3">'));
       expect(page, contains('.kanban-column {'));
-      expect(page, contains('size: A4 landscape'));
+      expect(page, contains('size: 297mm 210mm'));
       final off = await html(kanban: false);
       expect(off, isNot(contains('kanban-column')));
       expect(off, contains('<h2 id="to-do">To do</h2>'));
@@ -556,7 +580,7 @@ void main() {
         on['board.html'],
         contains('<div class="kanban" data-columns="3">'),
       );
-      expect(on['board.html'], contains('size: A4 landscape'));
+      expect(on['board.html'], contains('size: 297mm 210mm'));
       expect(on['plain.html'], isNot(contains('kanban')));
       final off = await zipped(kanban: false);
       expect(off['board.html'], isNot(contains('kanban-column')));
@@ -589,7 +613,7 @@ void main() {
       final style = on['OEBPS/style.css']!;
       expect(style, contains('.kanban-card {'));
       // No side-by-side layout, and no sheet, in a reflowing book.
-      expect(style, isNot(contains('A4 landscape')));
+      expect(style, isNot(contains('297mm 210mm')));
       expect(style, isNot(contains('flex: 0 0 16em')));
       final off = await book(kanban: false);
       expect(off['OEBPS/text/note.xhtml'], isNot(contains('kanban-column')));

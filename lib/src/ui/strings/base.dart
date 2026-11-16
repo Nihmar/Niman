@@ -1071,6 +1071,11 @@ abstract base class Strings {
   String get formatNoteDone;
   String get formatNoteAlreadyTidy;
   String get exportTitle;
+
+  // Settings: export (#1285).
+  String get settingsSectionExport;
+  String get pdfPaperTitle;
+  String get pdfPaperSubtitle;
   String get exportFormatMarkdown;
   String get exportFormatHtml;
   String get exportFolderTitle;

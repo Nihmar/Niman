@@ -6,6 +6,8 @@ library;
 import 'package:niman/src/export/html_text.dart';
 import 'package:niman/src/export/kanban_sheet.dart';
 import 'package:niman/src/export/kanban_style.dart';
+import 'package:niman/src/export/paper_size.dart';
+import 'package:niman/src/export/pdf_printer.dart';
 import 'package:niman/src/export/slide_page.dart';
 
 /// A whole page titled [title] around [body]; [fontFaces] are the maths
@@ -21,12 +23,18 @@ String htmlPage({
   String language = 'en',
   String? style,
   KanbanSheet? board,
+  PaperSize paper = PaperSize.a4,
 }) {
   final fonts = fontFaces == null ? '' : '<style>$fontFaces</style>\n';
   final own = style == null ? '' : '<style>$style</style>\n';
+  // The paper picked (#1285), over [pageStyle]'s A4; a board's own sheet,
+  // the same paper on its side or standing up, comes after it and wins.
+  final paperStyle = paper == PaperSize.a4
+      ? ''
+      : '<style>@media print { @page { size: ${PdfPaper(paper).cssSize}; } }</style>\n';
   final boardStyle = board == null
       ? ''
-      : '<style>${kanbanPageStyle(board)}</style>\n';
+      : '<style>${kanbanPageStyle(board, paper)}</style>\n';
   return '<!DOCTYPE html>\n'
       '<html lang="${escapeAttribute(language)}">\n'
       '<head>\n'
@@ -35,6 +43,7 @@ String htmlPage({
       '<meta name="generator" content="Niman">\n'
       '<title>${escapeHtml(title)}</title>\n'
       '<style>$pageStyle</style>\n'
+      '$paperStyle'
       '$boardStyle'
       '$own'
       '$fonts'

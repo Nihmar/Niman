@@ -1,15 +1,16 @@
 /// What a rastered kanban board is made of (#1170): its rows of columns,
 /// each column's head and the widgets of what it holds, then the footnotes.
 ///
-/// The rows follow the printed page (`kanban_style.dart`, `KanbanSheet`):
-/// every column in one row on a landscape sheet, sharing the width, and
-/// [kanbanPortraitColumns] to a row on a portrait one, each as wide as a
-/// grid cell. The text before the first column, and any prose between a
-/// column's cards, keeps its place as the printed page keeps it; Obsidian's
-/// settings footer is not drawn. The footnotes the note cites, numbered over
-/// the whole note, are one more row after the board, in the read view's own
-/// list.
+/// The rows follow the printed page (`kanban_style.dart`, `KanbanSheet`): every
+/// column in one row on a landscape sheet, sharing the width, and as many to a
+/// row as fit on a portrait one (`kanbanColumnsPerRow`), each as wide as a grid
+/// cell. The text before the first column, and any prose between a column's
+/// cards, keeps its place as the printed page keeps it; Obsidian's settings
+/// footer is not drawn. The footnotes the note cites, numbered over the whole
+/// note, are one more row after the board, in the read view's own list.
 library;
+
+import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
 import 'package:niman/src/export/board_raster_card.dart';
@@ -87,9 +88,16 @@ final class BoardRasterContent {
     final columns = board.columns;
     final theme = context.theme;
     const gap = kanbanGapMm * pxPerMm;
+    // Standing up, as many to a row as the printed page's grid holds on a
+    // sheet this wide (`kanbanColumnsPerRow`), whatever the paper (#1285).
     final perRow = sheet == KanbanSheet.landscape
         ? columns.length
-        : kanbanPortraitColumns;
+        : math.max(
+            1,
+            ((contentWidth / pxPerMm + kanbanGapMm) /
+                    (kanbanColumnMinMm + kanbanGapMm))
+                .floor(),
+          );
     final laneWidth = (contentWidth - (perRow - 1) * gap) / perRow;
     final innerWidth = laneWidth - boardLanePadding.horizontal - 2;
     final headStyle = boardHeadStyle(context, [

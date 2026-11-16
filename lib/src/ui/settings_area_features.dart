@@ -19,6 +19,7 @@ LibraryFeature? featureOfArea(SettingsAreaId area) => switch (area) {
   SettingsAreaId.editor ||
   SettingsAreaId.shortcuts ||
   SettingsAreaId.commands ||
+  SettingsAreaId.export ||
   SettingsAreaId.updates ||
   SettingsAreaId.diagnostics ||
   // Always listed: it is where the switches are (#1109).

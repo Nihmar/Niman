@@ -2032,6 +2032,14 @@ final class ItalianStrings extends Strings {
   String get formatNoteDone => 'Nota sistemata.';
   @override
   String get exportTitle => 'Esporta';
+
+  // Settings: export (#1285).
+  @override
+  String get settingsSectionExport => 'Esportazione';
+  @override
+  String get pdfPaperTitle => 'Carta del PDF';
+  @override
+  String get pdfPaperSubtitle => 'Il foglio su cui si stampa un PDF esportato';
   @override
   String get exportFormatMarkdown => 'Markdown';
   @override

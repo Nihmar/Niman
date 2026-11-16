@@ -2010,6 +2010,14 @@ final class UkrainianStrings extends Strings {
   String get formatNoteDone => 'Нотатку впорядковано.';
   @override
   String get exportTitle => 'Експортувати';
+
+  // Settings: export (#1285).
+  @override
+  String get settingsSectionExport => 'Експорт';
+  @override
+  String get pdfPaperTitle => 'Папір PDF';
+  @override
+  String get pdfPaperSubtitle => 'Аркуш, на якому друкується експортований PDF';
   @override
   String get exportFormatMarkdown => 'Markdown';
   @override

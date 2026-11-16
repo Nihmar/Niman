@@ -2025,6 +2025,14 @@ final class FinnishStrings extends Strings {
   String get formatNoteDone => 'Muistiinpano siivottiin.';
   @override
   String get exportTitle => 'Vie';
+
+  // Settings: export (#1285).
+  @override
+  String get settingsSectionExport => 'Vienti';
+  @override
+  String get pdfPaperTitle => 'PDF:n paperi';
+  @override
+  String get pdfPaperSubtitle => 'Arkki, jolle viety PDF tulostetaan';
   @override
   String get exportFormatMarkdown => 'Markdown';
   @override

@@ -2040,6 +2040,15 @@ final class SpanishStrings extends Strings {
   String get formatNoteDone => 'La nota se ha ordenado.';
   @override
   String get exportTitle => 'Exportar';
+
+  // Settings: export (#1285).
+  @override
+  String get settingsSectionExport => 'Exportación';
+  @override
+  String get pdfPaperTitle => 'Papel del PDF';
+  @override
+  String get pdfPaperSubtitle =>
+      'La hoja en la que se imprime un PDF exportado';
   @override
   String get exportFormatMarkdown => 'Markdown';
   @override

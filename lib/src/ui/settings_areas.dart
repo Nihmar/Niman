@@ -23,6 +23,7 @@ import 'package:niman/src/ui/settings_area_features.dart';
 import 'package:niman/src/ui/settings_commands.dart';
 import 'package:niman/src/ui/settings_diagnostics.dart';
 import 'package:niman/src/ui/settings_editor.dart';
+import 'package:niman/src/ui/settings_export.dart';
 import 'package:niman/src/ui/settings_folders_paths.dart';
 import 'package:niman/src/ui/settings_navigation_layout.dart';
 import 'package:niman/src/ui/settings_reminders.dart';
@@ -52,6 +53,9 @@ enum SettingsAreaId {
 
   /// What the command palette can run, and when (#207).
   commands,
+
+  /// What an export is made on: the PDF's paper (#1285).
+  export,
 
   /// The release channel.
   updates,
@@ -264,6 +268,16 @@ List<SettingsArea> settingsAreas({
       ),
     // A test build lists it too, to say why it has nothing to check (#900),
     // and so does iOS, which the App Store updates.
+    // What an export is made on (#1285), the same for every library.
+    SettingsArea(
+      id: SettingsAreaId.export,
+      group: SettingsGroup.app,
+      rowKey: const Key('settings-area-export'),
+      icon: () => Icons.ios_share,
+      title: AppStrings.settingsSectionExport,
+      build: (highlight) =>
+          SettingsExportScreen(controller: controller, highlight: highlight),
+    ),
     SettingsArea(
       id: SettingsAreaId.updates,
       group: SettingsGroup.app,

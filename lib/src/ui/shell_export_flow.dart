@@ -215,6 +215,7 @@ final class ShellExportFlow {
                 ? [for (final slide in splitSlides(text)) slide.markdown]
                 : null,
             kanban: _kanban,
+            paper: await controller.appSettings.pdfPaper,
           );
           payload = printed.payload;
           selectable = printed.selectable;
@@ -282,6 +283,8 @@ final class ShellExportFlow {
           linkSource: linkSource(),
           todoBlocks: await todoBlocks(path, text),
           kanban: _kanban,
+          // The page asks a printer for the paper the PDFs are made on.
+          paper: await controller.appSettings.pdfPaper,
         );
       }
       final String? place;
@@ -412,6 +415,7 @@ final class ShellExportFlow {
         language: AppLanguages.resolved.id,
         engine: engine,
         kanban: _kanban,
+        paper: await controller.appSettings.pdfPaper,
       );
     } on Object catch (error) {
       if (context.mounted) {

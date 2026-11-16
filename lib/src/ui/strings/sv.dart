@@ -2016,6 +2016,14 @@ final class SwedishStrings extends Strings {
   String get formatNoteDone => 'Anteckningen städades.';
   @override
   String get exportTitle => 'Exportera';
+
+  // Settings: export (#1285).
+  @override
+  String get settingsSectionExport => 'Export';
+  @override
+  String get pdfPaperTitle => 'PDF-papper';
+  @override
+  String get pdfPaperSubtitle => 'Arket som en exporterad PDF skrivs ut på';
   @override
   String get exportFormatMarkdown => 'Markdown';
   @override

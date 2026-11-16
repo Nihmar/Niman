@@ -2023,6 +2023,14 @@ final class MacedonianStrings extends Strings {
   String get formatNoteDone => 'Белешката е средена.';
   @override
   String get exportTitle => 'Извези';
+
+  // Settings: export (#1285).
+  @override
+  String get settingsSectionExport => 'Извоз';
+  @override
+  String get pdfPaperTitle => 'Хартија за PDF';
+  @override
+  String get pdfPaperSubtitle => 'Листот на кој се печати извезен PDF';
   @override
   String get exportFormatMarkdown => 'Markdown';
   @override

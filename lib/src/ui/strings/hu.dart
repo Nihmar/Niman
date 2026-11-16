@@ -2021,6 +2021,14 @@ final class HungarianStrings extends Strings {
   String get formatNoteDone => 'A jegyzet rendbe lett téve.';
   @override
   String get exportTitle => 'Exportálás';
+
+  // Settings: export (#1285).
+  @override
+  String get settingsSectionExport => 'Exportálás';
+  @override
+  String get pdfPaperTitle => 'PDF-papír';
+  @override
+  String get pdfPaperSubtitle => 'A lap, amelyre az exportált PDF készül';
   @override
   String get exportFormatMarkdown => 'Markdown';
   @override

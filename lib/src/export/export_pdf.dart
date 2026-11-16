@@ -15,6 +15,7 @@ import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/export/export_board.dart';
 import 'package:niman/src/export/export_note.dart';
 import 'package:niman/src/export/export_sources.dart';
+import 'package:niman/src/export/paper_size.dart';
 import 'package:niman/src/export/pdf_printer.dart';
 import 'package:niman/src/export/pdf_raster.dart';
 import 'package:niman/src/export/printed_todo_block.dart';
@@ -60,8 +61,10 @@ typedef PdfProgressListener = void Function(PdfExportProgress progress);
 /// boundaries and between drawn pages, and answers with
 /// [PdfExportCancelled] rather than a file.
 ///
+/// [paper] is the sheet the note is printed on (#1285), A4 unless another
+/// is picked; a board lies on its side when its columns fit one row of it.
 /// [slides], a slides note's slides as Markdown (#534), prints them one
-/// 16:9 sheet each instead of the note on A4. [kanban] says the Kanban
+/// 16:9 sheet each instead, whatever the paper. [kanban] says the Kanban
 /// feature is on (#1170): a board is then drawn as one.
 ///
 /// [todoBlocks] are the lists the note's `todo` fences are at this moment
@@ -82,6 +85,7 @@ Future<PdfExport> exportNotePdf({
   List<String>? slides,
   PrintedTodoBlocks todoBlocks = const <String, PrintedTodoBlock>{},
   bool kanban = false,
+  PaperSize paper = PaperSize.a4,
 }) async {
   final chosen = printer ?? ProcessPdfPrinter();
   // Nothing to print with: the note is drawn, and its page — the reads,
@@ -100,6 +104,7 @@ Future<PdfExport> exportNotePdf({
       slides: slides,
       todoBlocks: todoBlocks,
       kanban: kanban,
+      paper: paper,
     );
   }
   final source = await ExportSources.forPrint(
@@ -114,7 +119,7 @@ Future<PdfExport> exportNotePdf({
   // The sheet follows the page: slides on their own, a board on the sheet
   // its columns fit, any other note on A4 (#1170).
   final page = slides == null
-      ? await ExportSources.printable(source, language: language)
+      ? await ExportSources.printable(source, language: language, paper: paper)
       : (
           html: await ExportSources.slidesPage(
             source,
@@ -155,6 +160,7 @@ Future<PdfExport> exportNotePdf({
           slides: slides,
           todoBlocks: todoBlocks,
           kanban: kanban,
+          paper: paper,
         );
       case PdfFailed(:final message):
         _log.warning('the PDF engine failed ($message): drawing the note');
@@ -175,6 +181,7 @@ Future<PdfExport> exportNotePdf({
           slides: slides,
           todoBlocks: todoBlocks,
           kanban: kanban,
+          paper: paper,
         );
     }
   } finally {
@@ -204,6 +211,7 @@ Future<PdfExport> _draw({
   List<String>? slides,
   PrintedTodoBlocks todoBlocks = const <String, PrintedTodoBlock>{},
   bool kanban = false,
+  PaperSize paper = PaperSize.a4,
 }) async {
   if (theme == null || mathCache == null) throw const NoPdfEngine();
   // The pictures are read here, off the UI isolate, and drawn by the
@@ -235,6 +243,9 @@ Future<PdfExport> _draw({
           isCancelled: isCancelled,
           todoBlocks: todoBlocks,
           board: exportedBoard(text, kanban: kanban),
+          paper: paper,
+          pageWidth: paper.widthMm * pointsPerMm / pointsPerPixel,
+          pageHeight: paper.heightMm * pointsPerMm / pointsPerPixel,
         )
       : await rasterSlidesPdf(
           slides: slides,

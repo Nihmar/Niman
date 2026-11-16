@@ -12,7 +12,7 @@ library.
 
 Settings is split into areas, grouped by what they change: **App**
 (appearance, themes, editor, keyboard shortcuts, commands, text
-recognition, updates, diagnostics),
+recognition, export, updates, diagnostics),
 the open **Library** (features, folders, journal, study, navigation, trash and history, sync,
 transcription, reminders), and **Maintenance** (re-index, rebuild the index, switch or
 close the library; in the settings window only the first two, since the
@@ -201,6 +201,17 @@ Brightness (day / night / system) and the theme the app wears are on
 (default on), the keyboard shortcuts and the formatting keys, the
 commands pinned in the palette, and — on the desktops — *Close to the
 tray* (default on: the window's × hides Niman and leaves it running).
+
+### Export
+
+**Settings → Export** holds what an export is made on, the same for
+every library:
+
+- **PDF paper** — the sheet a PDF export is printed on: A0, A1, A2, A3,
+  **A4** (the default), A5, Letter, Legal or Tabloid. A note prints on it
+  standing up; a kanban board on its side when its columns fit one row
+  of it. A slides note keeps its own 16:9 sheets. The HTML export's page
+  asks a printer for the same paper.
 
 ### Themes
 

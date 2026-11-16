@@ -2003,6 +2003,14 @@ final class SlovenianStrings extends Strings {
   String get formatNoteDone => 'Zapisek je bil pospravljen.';
   @override
   String get exportTitle => 'Izvozi';
+
+  // Settings: export (#1285).
+  @override
+  String get settingsSectionExport => 'Izvoz';
+  @override
+  String get pdfPaperTitle => 'Papir PDF';
+  @override
+  String get pdfPaperSubtitle => 'List, na katerega se natisne izvoženi PDF';
   @override
   String get exportFormatMarkdown => 'Markdown';
   @override

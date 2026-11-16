@@ -2005,6 +2005,15 @@ final class LithuanianStrings extends Strings {
   String get formatNoteDone => 'Pastaba sutvarkyta.';
   @override
   String get exportTitle => 'Eksportuoti';
+
+  // Settings: export (#1285).
+  @override
+  String get settingsSectionExport => 'Eksportas';
+  @override
+  String get pdfPaperTitle => 'PDF popierius';
+  @override
+  String get pdfPaperSubtitle =>
+      'Lapas, ant kurio spausdinamas eksportuotas PDF';
   @override
   String get exportFormatMarkdown => 'Markdown';
   @override

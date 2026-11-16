@@ -129,6 +129,12 @@ class AppSettings extends Table {
   BoolColumn get tourOffer =>
       boolean().named('tour_offer').withDefault(const Constant(false))();
 
+  /// The paper a PDF export is printed on (#1285): a `PaperSize` name,
+  /// A4 by default. App-wide: the printer is the machine's, not a
+  /// library's.
+  TextColumn get pdfPaper =>
+      text().named('pdf_paper').withDefault(const Constant('a4'))();
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -462,7 +468,7 @@ class AppDatabase extends _$AppDatabase {
   new(super.e);
 
   @override
-  int get schemaVersion => 33;
+  int get schemaVersion => 34;
 
   /// The index that makes a custom theme's name unique without regard to
   /// case, and the name it answers to (issue #269).
@@ -821,6 +827,15 @@ class AppDatabase extends _$AppDatabase {
           // that has none: below v22 the sync tables were just made, this
           // one with them.
           await m.createTable(syncPendingDownloads);
+        }
+        if (from < 34 &&
+            !(await _columnsOf('app_settings')).contains('pdf_paper')) {
+          // The PDF export's paper (#1285): A4, as every export was printed
+          // on before there was a choice.
+          await m.database.customStatement(
+            'ALTER TABLE app_settings ADD COLUMN pdf_paper '
+            "TEXT NOT NULL DEFAULT 'a4'",
+          );
         }
         // The whole chain is in the file now, with the number that says so
         // (see [_migrating]).

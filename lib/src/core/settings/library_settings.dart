@@ -273,6 +273,21 @@ final class AppSettingsRepo {
     );
   }
 
+  /// The name of the paper a PDF export is printed on (#1285): `a4` until
+  /// another is picked.
+  Future<String> pdfPaper() async {
+    final rows = await _db.select(_db.appSettings).get();
+    return rows.isEmpty ? 'a4' : rows.first.pdfPaper;
+  }
+
+  /// Persists the PDF export's paper, by its name.
+  Future<void> setPdfPaper(String name) async {
+    await _ensureRow();
+    await (_db.update(_db.appSettings)..where((t) => t.id.equals(1))).write(
+      AppSettingsCompanion(pdfPaper: Value(name)),
+    );
+  }
+
   /// The last update-check time, or null before the first check (issue
   /// #81).
   Future<DateTime?> lastUpdateCheck() async {

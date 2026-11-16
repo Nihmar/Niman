@@ -29,13 +29,20 @@
     /// A slide's sheet: 10 × 5.625 in, 16:9.
     static let slide = CGSize(width: 720, height: 405)
 
-    /// The sheet the channel's `paper` names, and the margin it prints with:
-    /// a slide edge to edge, any other sheet with the note's margin. A name
-    /// this side does not know is A4, as a channel older than it was.
-    static func sheet(_ paper: String) -> (size: CGSize, margin: CGFloat) {
+    /// The sheet the channel's `paper` names, `width` × `height` points as
+    /// it lies (#1285), and the margin it prints with: a slide edge to edge,
+    /// any other sheet with the note's margin. The names a Dart side before
+    /// #1285 sent (`a4`, `a4Landscape`) are A4; a name this side does not
+    /// know, or no size, is A4, as a channel older than it was.
+    static func sheet(_ paper: String, width: Double?, height: Double?) -> (size: CGSize, margin: CGFloat) {
       switch paper {
       case "slides": return (slide, 0)
       case "a4Landscape": return (a4Landscape, margin)
+      case "portrait", "landscape":
+        if let width, let height, width > 0, height > 0 {
+          return (CGSize(width: width, height: height), margin)
+        }
+        return (paper == "landscape" ? a4Landscape : a4, margin)
       default: return (a4, margin)
       }
     }
@@ -49,6 +56,8 @@
     private var watchdog: DispatchWorkItem?
     private var pdfPath = ""
     private var paper = "a4"
+    private var paperWidth: Double?
+    private var paperHeight: Double?
 
     func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
       switch call.method {
@@ -64,6 +73,8 @@
           result(FlutterError(code: "print-busy", message: "another page is being printed", details: nil))
           return
         }
+        paperWidth = (args["width"] as? NSNumber)?.doubleValue
+        paperHeight = (args["height"] as? NSNumber)?.doubleValue
         print(htmlPath: htmlPath, pdfPath: pdfPath, paper: args["paper"] as? String ?? "a4", result: result)
       case "cancel":
         answer(FlutterError(code: "print-cancelled", message: "the export was cancelled", details: nil))
@@ -82,7 +93,7 @@
       }
       watchdog = timer
       DispatchQueue.main.asyncAfter(deadline: .now() + Self.watchdogSeconds, execute: timer)
-      let sheet = Self.sheet(paper)
+      let sheet = Self.sheet(paper, width: paperWidth, height: paperHeight)
       let width = sheet.size.width - 2 * sheet.margin
       let view = WKWebView(frame: CGRect(x: 0, y: 0, width: width, height: 1000))
       view.navigationDelegate = self
@@ -95,7 +106,7 @@
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
       guard webView === self.webView else { return }
-      let sheet = Self.sheet(paper)
+      let sheet = Self.sheet(paper, width: paperWidth, height: paperHeight)
       let paperRect = CGRect(origin: .zero, size: sheet.size)
       let renderer = PageRenderer(
         paper: paperRect, printable: paperRect.insetBy(dx: sheet.margin, dy: sheet.margin))

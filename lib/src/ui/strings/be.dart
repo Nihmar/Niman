@@ -2007,6 +2007,14 @@ final class BelarusianStrings extends Strings {
   String get formatNoteDone => 'Нататка ўпарадкавана.';
   @override
   String get exportTitle => 'Экспарт';
+
+  // Settings: export (#1285).
+  @override
+  String get settingsSectionExport => 'Экспарт';
+  @override
+  String get pdfPaperTitle => 'Папера PDF';
+  @override
+  String get pdfPaperSubtitle => 'Аркуш, на якім друкуецца экспартаваны PDF';
   @override
   String get exportFormatMarkdown => 'Markdown';
   @override

@@ -1845,6 +1845,14 @@ final class ChineseStrings extends Strings {
   String get formatNoteDone => '已整理该笔记。';
   @override
   String get exportTitle => '导出';
+
+  // Settings: export (#1285).
+  @override
+  String get settingsSectionExport => '导出';
+  @override
+  String get pdfPaperTitle => 'PDF 纸张';
+  @override
+  String get pdfPaperSubtitle => '导出的 PDF 所用的纸张';
   @override
   String get exportFormatMarkdown => 'Markdown';
   @override

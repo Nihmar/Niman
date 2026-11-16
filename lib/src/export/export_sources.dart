@@ -16,6 +16,7 @@ import 'package:niman/src/export/html_page.dart';
 import 'package:niman/src/export/kanban_sheet.dart';
 import 'package:niman/src/export/note_html.dart';
 import 'package:niman/src/export/note_html_source.dart';
+import 'package:niman/src/export/paper_size.dart';
 import 'package:niman/src/export/pdf_printer.dart';
 import 'package:niman/src/export/picture_mime.dart';
 import 'package:niman/src/export/printed_todo_block.dart';
@@ -208,17 +209,20 @@ abstract final class ExportSources {
   static Future<String> page(
     NoteHtmlSource source, {
     required String language,
-  }) async => (await printable(source, language: language)).html;
+    PaperSize paper = PaperSize.a4,
+  }) async => (await printable(source, language: language, paper: paper)).html;
 
   /// [page], and the paper a printer must be told to print it on (#1170):
-  /// A4 portrait, or A4 landscape for a board whose columns fit one row of
-  /// it. Both come from one parse, off the UI isolate.
+  /// [paper] standing up (A4 unless another is picked, #1285), or on its
+  /// side for a board whose columns fit one row of it. Both come from one
+  /// parse, off the UI isolate.
   static Future<({String html, PdfPaper paper})> printable(
     NoteHtmlSource source, {
     required String language,
+    PaperSize paper = PaperSize.a4,
   }) => Isolate.run(() {
     final html = NoteHtml(source);
-    final board = html.boardSheet;
+    final board = html.boardSheetOn(paper);
     return (
       html: htmlPage(
         title: source.title,
@@ -226,8 +230,9 @@ abstract final class ExportSources {
         fontFaces: html.fontFaces,
         language: language,
         board: board,
+        paper: paper,
       ),
-      paper: kanbanPaper(board),
+      paper: kanbanPaper(board, paper),
     );
   });
 
