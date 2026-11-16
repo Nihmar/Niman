@@ -7,6 +7,7 @@ import 'dart:async';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:katex_dart/katex_dart.dart';
 import 'package:niman/src/markdown/background_scan.dart';
@@ -286,6 +287,48 @@ void main() {
       scan.complete(DocumentScan.of(buffer));
       await tester.pumpAndSettle();
       // Where the reader took it, not the place they were sent to.
+      expect(view.topAnchor!.line, read);
+    });
+
+    testWidgets('is still gone to after a tap that moved nothing', (
+      tester,
+    ) async {
+      final buffer = SourceBuffer.fromText(_book(400));
+      final controller = ScrollController();
+      final scan = Completer<DocumentScan?>();
+      final view = await open(tester, buffer, controller, scan);
+      view.showAnchor(saved);
+      await tester.pump();
+      // A click to give the view the keyboard, or a tap for the chrome.
+      await tester.tap(find.byType(MarkdownReadView));
+      await tester.pump();
+      expect(controller.offset, 0);
+
+      scan.complete(DocumentScan.of(buffer));
+      await tester.pumpAndSettle();
+      expect(view.topAnchor!.line, saved.line);
+    });
+
+    testWidgets('is dropped once the reader has paged on with the keys', (
+      tester,
+    ) async {
+      final buffer = SourceBuffer.fromText(_book(400));
+      final controller = ScrollController();
+      final scan = Completer<DocumentScan?>();
+      final view = await open(tester, buffer, controller, scan);
+      view.showAnchor(saved);
+      await tester.pump();
+      view.focus();
+      await tester.pump();
+      for (var page = 0; page < 3; page++) {
+        await tester.sendKeyEvent(LogicalKeyboardKey.pageDown);
+        await tester.pump();
+      }
+      final read = view.topAnchor!.line;
+      expect(read, greaterThan(0));
+
+      scan.complete(DocumentScan.of(buffer));
+      await tester.pumpAndSettle();
       expect(view.topAnchor!.line, read);
     });
   });

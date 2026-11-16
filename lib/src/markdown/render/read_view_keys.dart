@@ -13,11 +13,15 @@ import 'package:flutter/widgets.dart';
 /// The end is where the height map says, and far from the viewport that is
 /// estimates: [toEnd] is called for End instead, to go there again once the
 /// rows it lands on are measured.
+///
+/// [moved] is called before any key moves the page — End's [toEnd]
+/// included — for the view's own moves still settling to give way to it.
 KeyEventResult readViewKey(
   KeyEvent event,
   ScrollController scroll, {
   required double row,
   required VoidCallback toEnd,
+  required VoidCallback moved,
 }) {
   if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
     return KeyEventResult.ignored;
@@ -43,6 +47,7 @@ KeyEventResult readViewKey(
   } else if (key == LogicalKeyboardKey.home) {
     to = position.minScrollExtent;
   } else if (key == LogicalKeyboardKey.end) {
+    moved();
     toEnd();
     return KeyEventResult.handled;
   } else {
@@ -55,6 +60,7 @@ KeyEventResult readViewKey(
       key != LogicalKeyboardKey.end) {
     return KeyEventResult.ignored;
   }
+  moved();
   scroll.jumpTo(to.clamp(position.minScrollExtent, position.maxScrollExtent));
   return KeyEventResult.handled;
 }

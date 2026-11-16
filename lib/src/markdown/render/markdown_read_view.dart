@@ -600,6 +600,7 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
         _scroll,
         row: MediaQuery.textScalerOf(context).scale(_entries.theme.lineHeight),
         toEnd: _jumps.toEnd,
+        moved: _jumps.readerMoved,
       ),
       // A selectable view takes the keyboard itself, where it is clicked:
       // taken back on each click, a selection would be dropped.
@@ -649,7 +650,9 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
       enabled: widget.selectionActions == null,
     );
     // What the reader does to the page, for the moves the view makes on
-    // its own to give way to ([ReadJumps.readerMoving]).
+    // its own to give way to ([ReadJumps.readerMoving]). A drag counts when
+    // it moves the page, not when its pointer goes down or its gesture is
+    // won: a tap alone on the page wins the arena as a drag of nothing.
     return _cost.timed(
       () => Listener(
         onPointerDown: (_) => _jumps.pointerDown(),
@@ -657,18 +660,28 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
         onPointerCancel: (_) => _jumps.pointerUp(),
         onPointerSignal: (_) => _jumps.readerMoved(),
         onPointerPanZoomStart: (_) => _jumps.readerMoved(),
-        child: CustomScrollView(
-          controller: _scroll,
-          physics: const ContentClampPhysics(),
-          slivers: readSlivers(
-            entries: _entries,
-            heights: heights,
-            padding: padding,
-            width: availableWidth,
-            head: _head,
-            parser: widget.parser,
-            mathCache: widget.mathCache,
-            blockAt: _blockAt,
+        child: NotificationListener<ScrollUpdateNotification>(
+          onNotification: (update) {
+            if (update.depth == 0 &&
+                update.dragDetails != null &&
+                update.scrollDelta != 0) {
+              _jumps.readerMoved();
+            }
+            return false;
+          },
+          child: CustomScrollView(
+            controller: _scroll,
+            physics: const ContentClampPhysics(),
+            slivers: readSlivers(
+              entries: _entries,
+              heights: heights,
+              padding: padding,
+              width: availableWidth,
+              head: _head,
+              parser: widget.parser,
+              mathCache: widget.mathCache,
+              blockAt: _blockAt,
+            ),
           ),
         ),
       ),

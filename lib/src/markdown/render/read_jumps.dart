@@ -49,13 +49,16 @@ final class ReadJumps {
   /// mouse button held on it.
   int _down = 0;
 
-  /// Counts what the reader did to move the page: a pointer put down on
-  /// it, a wheel turned or a trackpad scrolled over it.
+  /// Counts what the reader did to move the page: a drag that moved it, a
+  /// wheel turned or a trackpad scrolled over it, a key that moves it.
   ///
   /// A move settles over the frames after it, and each pass jumps — which
   /// ends a drag or a fling under way, and pulls the page back from under
   /// a wheel. So a pass stops once the reader has moved the page since the
-  /// move began: the reader's place is the reader's.
+  /// move began: the reader's place is the reader's. A pointer put down and
+  /// lifted without a drag is not a move: a tap that gives the view the
+  /// keyboard, shows the chrome or follows a link leaves the page where it
+  /// is.
   int _moves = 0;
 
   /// How many times the reader has moved the page so far: a mark to tell,
@@ -63,18 +66,15 @@ final class ReadJumps {
   int get moves => _moves;
 
   /// A pointer went down on the view.
-  void pointerDown() {
-    _down++;
-    _moves++;
-  }
+  void pointerDown() => _down++;
 
   /// A pointer down on the view went up, or was cancelled.
   void pointerUp() {
     if (_down > 0) _down--;
   }
 
-  /// The reader moved the page without a pointer down: a wheel, a
-  /// trackpad.
+  /// The reader moved the page: a drag moved it, a wheel or a trackpad
+  /// scrolled it, a key moved it.
   void readerMoved() => _moves++;
 
   /// Whether the reader is moving the page now: a pointer is down on it,
