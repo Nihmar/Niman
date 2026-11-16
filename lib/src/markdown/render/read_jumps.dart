@@ -49,33 +49,50 @@ final class ReadJumps {
   /// mouse button held on it.
   int _down = 0;
 
-  /// Counts what the reader did to move the page: a pointer put down on
-  /// it, a wheel turned or a trackpad scrolled over it.
+  /// Counts what the reader did to move the page: a drag that moved it, a
+  /// wheel turned or a trackpad scrolled over it, a key that moves it.
   ///
   /// A move settles over the frames after it, and each pass jumps — which
   /// ends a drag or a fling under way, and pulls the page back from under
   /// a wheel. So a pass stops once the reader has moved the page since the
-  /// move began: the reader's place is the reader's.
+  /// move began: the reader's place is the reader's. A pointer put down and
+  /// lifted without a drag is not a move: a tap that gives the view the
+  /// keyboard, shows the chrome or follows a link leaves the page where it
+  /// is.
   int _moves = 0;
 
   /// How many times the reader has moved the page so far: a mark to tell,
   /// later, whether they have since.
   int get moves => _moves;
 
-  /// A pointer went down on the view.
-  void pointerDown() {
-    _down++;
-    _moves++;
+  /// Counts the view's own moves started, and the reader's: a move still
+  /// settling stops at the next pass once another has started since — a
+  /// newer place asked for, or the reader's hand. Two settling at once
+  /// moved the page every frame, each back to its own place (a voice
+  /// reading a book asks for every block it speaks).
+  int _epoch = 0;
+
+  /// The mark a move's first pass takes, [since] when it is a later pass:
+  /// null when a move started since, and the pass is to be dropped.
+  int? _passOf(int? since) {
+    if (since == null) return ++_epoch;
+    return since == _epoch ? since : null;
   }
+
+  /// A pointer went down on the view.
+  void pointerDown() => _down++;
 
   /// A pointer down on the view went up, or was cancelled.
   void pointerUp() {
     if (_down > 0) _down--;
   }
 
-  /// The reader moved the page without a pointer down: a wheel, a
-  /// trackpad.
-  void readerMoved() => _moves++;
+  /// The reader moved the page: a drag moved it, a wheel or a trackpad
+  /// scrolled it, a key moved it.
+  void readerMoved() {
+    _moves++;
+    _epoch++;
+  }
 
   /// Whether the reader is moving the page now: a pointer is down on it,
   /// or a fling it let go of is still running.
@@ -95,13 +112,13 @@ final class ReadJumps {
 
   /// One pass of a line jump: jump to where the map says entry [index]
   /// starts, then look again after the frame that landed — unless the
-  /// reader has moved the page since the first pass, [since] by
-  /// [_moves].
+  /// reader has moved the page, or another move has started, since the
+  /// first pass, [since] by [_epoch].
   void toEntry(int index, {int attempt = 0, int? since}) {
     final heights = entries.heights;
     final controller = scroll();
-    final moves = since ?? _moves;
-    if (heights == null || !controller.hasClients || moves != _moves) return;
+    final pass = _passOf(since);
+    if (heights == null || !controller.hasClients || pass == null) return;
     final offset = heights
         .offsetOf(index)
         .clamp(0.0, controller.position.maxScrollExtent);
@@ -115,7 +132,7 @@ final class ReadJumps {
     if (attempt >= maxAttempts) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted()) return;
-      toEntry(index, attempt: attempt + 1, since: moves);
+      toEntry(index, attempt: attempt + 1, since: pass);
     });
   }
 
@@ -150,8 +167,8 @@ final class ReadJumps {
   void toAnchor(ScrollAnchor anchor, {int attempt = 0, int? since}) {
     final heights = entries.heights;
     final scroll = this.scroll();
-    final moves = since ?? _moves;
-    if (heights == null || !scroll.hasClients || moves != _moves) return;
+    final pass = _passOf(since);
+    if (heights == null || !scroll.hasClients || pass == null) return;
     final found = entries.indexAt(anchor.line);
     if (found == null) return;
     final index = entries.hosts.entryOf(found);
@@ -175,23 +192,23 @@ final class ReadJumps {
     }
     if (attempt >= maxAttempts) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted()) toAnchor(anchor, attempt: attempt + 1, since: moves);
+      if (mounted()) toAnchor(anchor, attempt: attempt + 1, since: pass);
     });
   }
 
   /// Goes to the note's end, and again after each frame that measured the
-  /// rows it landed on and moved the end — as long as it moves, and the
-  /// reader does not.
+  /// rows it landed on and moved the end — as long as it moves, and
+  /// neither the reader nor another move does.
   void toEnd({int attempt = 0, int? since}) {
     final scroll = this.scroll();
-    final moves = since ?? _moves;
-    if (!scroll.hasClients || moves != _moves) return;
+    final pass = _passOf(since);
+    if (!scroll.hasClients || pass == null) return;
     final end = scroll.position.maxScrollExtent;
     if ((scroll.position.pixels - end).abs() <= 0.5 && attempt > 0) return;
     scroll.jumpTo(end);
     if (attempt >= maxAttempts) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted()) toEnd(attempt: attempt + 1, since: moves);
+      if (mounted()) toEnd(attempt: attempt + 1, since: pass);
     });
   }
 }

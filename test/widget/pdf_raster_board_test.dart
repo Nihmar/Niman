@@ -12,6 +12,7 @@ import 'package:niman/src/export/board_raster_head.dart';
 import 'package:niman/src/export/board_raster_plan.dart';
 import 'package:niman/src/export/export_pdf.dart';
 import 'package:niman/src/export/kanban_sheet.dart';
+import 'package:niman/src/export/paper_size.dart';
 import 'package:niman/src/export/pdf_printer.dart';
 import 'package:niman/src/export/pdf_raster.dart';
 import 'package:niman/src/export/pdf_raster_board.dart';
@@ -192,6 +193,33 @@ void main() {
       }
       // A column is never narrower than the printed page's minimum.
       expect(cell / pxPerMm, greaterThanOrEqualTo(kanbanColumnMinMm));
+    });
+
+    testWidgets('wrap as the printed page does, on every paper', (
+      tester,
+    ) async {
+      await pumpTheme(tester);
+      final board = parseKanban(_board(12, 1));
+      for (final paper in PaperSize.values) {
+        final width =
+            paper.widthMm * pointsPerMm / pointsPerPixel - 2 * pdfPageMarginPx;
+        final built = BoardRasterContent(
+          board: board,
+          sheet: KanbanSheet.portrait,
+          paper: paper,
+          contentWidth: width,
+          context: BoardRasterContext(
+            board: board,
+            theme: theme,
+            mathCache: cache,
+          ),
+        );
+        expect(
+          built.bands.first,
+          hasLength(kanbanColumnsPerRow(KanbanSheet.portrait, paper)),
+          reason: paper.name,
+        );
+      }
     });
 
     testWidgets('the text before the board is a row of its own', (

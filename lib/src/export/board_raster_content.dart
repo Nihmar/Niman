@@ -10,13 +10,12 @@
 /// note, are one more row after the board, in the read view's own list.
 library;
 
-import 'dart:math' as math;
-
 import 'package:flutter/widgets.dart';
 import 'package:niman/src/export/board_raster_card.dart';
 import 'package:niman/src/export/board_raster_context.dart';
 import 'package:niman/src/export/board_raster_head.dart';
 import 'package:niman/src/export/kanban_sheet.dart';
+import 'package:niman/src/export/paper_size.dart';
 import 'package:niman/src/kanban/kanban_board.dart';
 import 'package:niman/src/kanban/kanban_column.dart';
 import 'package:niman/src/markdown/render/footnote_list.dart';
@@ -78,26 +77,23 @@ final class BoardRasterLane {
 /// The rows of a board, top to bottom, ready to be measured and paged.
 final class BoardRasterContent {
   /// The content of [board] for a [contentWidth]-wide page printed on
-  /// [sheet], drawn with [context].
+  /// [sheet] of [paper], drawn with [context].
   factory({
     required KanbanBoard board,
     required KanbanSheet sheet,
     required double contentWidth,
     required BoardRasterContext context,
+    PaperSize paper = PaperSize.a4,
   }) {
     final columns = board.columns;
     final theme = context.theme;
     const gap = kanbanGapMm * pxPerMm;
-    // Standing up, as many to a row as the printed page's grid holds on a
-    // sheet this wide (`kanbanColumnsPerRow`), whatever the paper (#1285).
+    // Standing up, as many to a row as the printed page's grid holds on
+    // this sheet of [paper] (#1285): the rule the HTML grid wraps by, asked
+    // rather than written out again, so the two print the same rows.
     final perRow = sheet == KanbanSheet.landscape
         ? columns.length
-        : math.max(
-            1,
-            ((contentWidth / pxPerMm + kanbanGapMm) /
-                    (kanbanColumnMinMm + kanbanGapMm))
-                .floor(),
-          );
+        : kanbanColumnsPerRow(sheet, paper);
     final laneWidth = (contentWidth - (perRow - 1) * gap) / perRow;
     final innerWidth = laneWidth - boardLanePadding.horizontal - 2;
     final headStyle = boardHeadStyle(context, [

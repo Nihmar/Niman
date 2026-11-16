@@ -266,8 +266,6 @@ List<SettingsArea> settingsAreas({
           highlight: highlight,
         ),
       ),
-    // A test build lists it too, to say why it has nothing to check (#900),
-    // and so does iOS, which the App Store updates.
     // What an export is made on (#1285), the same for every library.
     SettingsArea(
       id: SettingsAreaId.export,
@@ -278,6 +276,8 @@ List<SettingsArea> settingsAreas({
       build: (highlight) =>
           SettingsExportScreen(controller: controller, highlight: highlight),
     ),
+    // A test build lists it too, to say why it has nothing to check (#900),
+    // and so does iOS, which the App Store updates.
     SettingsArea(
       id: SettingsAreaId.updates,
       group: SettingsGroup.app,

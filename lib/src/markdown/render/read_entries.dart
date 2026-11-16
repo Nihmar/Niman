@@ -11,6 +11,7 @@ library;
 import 'package:flutter/painting.dart';
 import 'package:niman/src/markdown/background_scan.dart';
 import 'package:niman/src/markdown/block.dart';
+import 'package:niman/src/markdown/block_parser.dart' show DocumentScope;
 import 'package:niman/src/markdown/column_layout.dart';
 import 'package:niman/src/markdown/render/block_height_map.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
@@ -103,7 +104,16 @@ final class ReadEntries {
   /// reader's offset then pointed into estimates — the frame the whole of a
   /// long book took its place in drew a page 234 lines further on, and three
   /// more frames moved it back.
-  void show(SourceBuffer buffer, DocumentScan scan, {bool keepTop = false}) {
+  ///
+  /// [topScope] is the definitions the top was read with: a block that could
+  /// cite one the whole note has and the top had not is read anew, and its
+  /// measured height not kept ([_keepMeasured]).
+  void show(
+    SourceBuffer buffer,
+    DocumentScan scan, {
+    bool keepTop = false,
+    DocumentScope? topScope,
+  }) {
     _shown = buffer;
     final changes = scan.changes;
     if (!_follow(changes, scan.blocks)) {
@@ -120,7 +130,13 @@ final class ReadEntries {
         estimateSpan: _estimateSpanOf,
       );
       if (top case (:final blocks, heights: final measured?)) {
-        _keepMeasured(blocks, measured);
+        _keepMeasured(
+          blocks,
+          measured,
+          reread: topScope == null || !_readAlike(topScope, scan.scope)
+              ? buffer
+              : null,
+        );
       }
       built = 0;
     }
@@ -130,7 +146,18 @@ final class ReadEntries {
   /// Gives the entries this list opens with the same as [blocks] — up to
   /// the first that differs — the heights [measured] has for them there:
   /// the same block, read the same way, is drawn as tall.
-  void _keepMeasured(List<Block> blocks, BlockHeightMap measured) {
+  ///
+  /// With [reread], the buffer of a whole note whose definitions are not
+  /// the top's, a block is not read the same way when it has a `[` on any
+  /// line: `[text][ref]`, `[text]` and `[^1]` read as brackets in the top
+  /// and as a link or a citation once their definition, further down, is
+  /// known — and wrap to another number of lines. Those are left to their
+  /// estimate, and measured again when a frame reaches them.
+  void _keepMeasured(
+    List<Block> blocks,
+    BlockHeightMap measured, {
+    SourceBuffer? reread,
+  }) {
     final heights = _heights!;
     final shared = blocks.length < _blocks.length
         ? blocks.length
@@ -143,10 +170,37 @@ final class ReadEntries {
           before.endLine != now.endLine) {
         return;
       }
-      if (measured.isMeasured(at)) {
+      if (measured.isMeasured(at) &&
+          (reread == null || !_mayCite(reread, now))) {
         heights.measured(at, measured.extentFor(at));
       }
     }
+  }
+
+  /// Whether [block] of [buffer] has a `[` on any of its lines: what could
+  /// cite a definition.
+  static bool _mayCite(SourceBuffer buffer, Block block) {
+    for (var line = block.startLine; line < block.endLine; line++) {
+      if (buffer.lineAt(line).contains('[')) return true;
+    }
+    return false;
+  }
+
+  /// Whether [a] and [b] read every block alike: the same link labels
+  /// defined, and the same footnotes in the same order — their numbers.
+  static bool _readAlike(DocumentScope a, DocumentScope b) {
+    if (identical(a, b)) return true;
+    if (a.references.length != b.references.length ||
+        !a.references.keys.every(b.references.containsKey) ||
+        a.footnoteKeys.length != b.footnoteKeys.length ||
+        !a.footnoteKeys.every(b.footnoteKeys.contains) ||
+        a.footnotes.length != b.footnotes.length) {
+      return false;
+    }
+    for (var at = 0; at < a.footnotes.length; at++) {
+      if (a.footnotes[at].label != b.footnotes[at].label) return false;
+    }
+    return true;
   }
 
   /// Takes [blocks] by replaying [changes] over the heights the pane has,

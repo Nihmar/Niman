@@ -9,9 +9,10 @@
   /// The page is already HTML: an offscreen `WKWebView` lays it out and
   /// WebKit's print operation, saving to the file with no panel, paginates
   /// it — real text, which selects and searches. `createPDF` would give one
-  /// endless page instead. A4 with an 18 mm margin, A4 landscape with the same
-  /// one for a wide kanban board (#1170), or a 16:9 sheet a slide with none
-  /// (#534).
+  /// endless page instead. The paper picked in Settings (#1285), sent by its
+  /// width and height, with an 18 mm margin — on its side, with the same
+  /// one, for a wide kanban board (#1170) — or a 16:9 sheet a slide with
+  /// none (#534).
   ///
   /// One print at a time: a second call while one runs is refused
   /// (`print-busy`) rather than raced, and a watchdog answers a page whose

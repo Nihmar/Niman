@@ -7,11 +7,13 @@ import 'dart:async';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:katex_dart/katex_dart.dart';
 import 'package:niman/src/markdown/background_scan.dart';
 import 'package:niman/src/markdown/read_parser.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
+import 'package:niman/src/markdown/render/read_jumps.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/preview/math_cache.dart';
 
@@ -247,6 +249,30 @@ void main() {
     }
   });
 
+  testWidgets('a place asked for takes over from one still settling', (
+    tester,
+  ) async {
+    final buffer = SourceBuffer.fromText(_book(400));
+    final controller = ScrollController();
+    final scan = Completer<DocumentScan?>()..complete(DocumentScan.of(buffer));
+    final view = await open(tester, buffer, controller, scan);
+    await tester.pumpAndSettle();
+    expect(view.scanning, isFalse);
+
+    // A voice reading on asks for the next block before the last settled.
+    view
+      ..showAnchor((line: 300, fraction: 0.0))
+      ..showAnchor((line: 700, fraction: 0.0));
+    var moved = 0;
+    controller.addListener(() => moved++);
+    await tester.pumpAndSettle();
+
+    expect(view.topAnchor!.line, 700);
+    // Each pass of the older move put the page back at its own place, and
+    // the newer one's took it away again: both ran their every pass.
+    expect(moved, lessThan(ReadJumps.maxAttempts), reason: '$moved moves');
+  });
+
   group('a place asked for before the rest is read', () {
     // Past the top shown while the rest of the book is read: a book's saved
     // place, which waits for the scan.
@@ -286,6 +312,84 @@ void main() {
       scan.complete(DocumentScan.of(buffer));
       await tester.pumpAndSettle();
       // Where the reader took it, not the place they were sent to.
+      expect(view.topAnchor!.line, read);
+    });
+
+    testWidgets('as a line is dropped once the reader has scrolled '
+        'meanwhile', (tester) async {
+      final buffer = SourceBuffer.fromText(_book(400));
+      final controller = ScrollController();
+      final scan = Completer<DocumentScan?>();
+      final view = await open(tester, buffer, controller, scan);
+      // A `[[note#Heading]]` past the top, waiting for the scan.
+      view.jumpToLine(saved.line);
+      await tester.pump();
+      await tester.drag(find.byType(MarkdownReadView), const Offset(0, -300));
+      for (var frame = 0; frame < 30; frame++) {
+        await tester.pump(const Duration(milliseconds: 16));
+      }
+      final read = view.topAnchor!.line;
+      expect(read, greaterThan(0));
+
+      scan.complete(DocumentScan.of(buffer));
+      await tester.pumpAndSettle();
+      expect(view.topAnchor!.line, read);
+    });
+
+    testWidgets('is the last one asked for', (tester) async {
+      final buffer = SourceBuffer.fromText(_book(400));
+      final controller = ScrollController();
+      final scan = Completer<DocumentScan?>();
+      final view = await open(tester, buffer, controller, scan);
+      view
+        ..jumpToLine(500)
+        ..showAnchor(saved);
+      await tester.pump();
+
+      scan.complete(DocumentScan.of(buffer));
+      await tester.pumpAndSettle();
+      expect(view.topAnchor!.line, saved.line);
+    });
+
+    testWidgets('is still gone to after a tap that moved nothing', (
+      tester,
+    ) async {
+      final buffer = SourceBuffer.fromText(_book(400));
+      final controller = ScrollController();
+      final scan = Completer<DocumentScan?>();
+      final view = await open(tester, buffer, controller, scan);
+      view.showAnchor(saved);
+      await tester.pump();
+      // A click to give the view the keyboard, or a tap for the chrome.
+      await tester.tap(find.byType(MarkdownReadView));
+      await tester.pump();
+      expect(controller.offset, 0);
+
+      scan.complete(DocumentScan.of(buffer));
+      await tester.pumpAndSettle();
+      expect(view.topAnchor!.line, saved.line);
+    });
+
+    testWidgets('is dropped once the reader has paged on with the keys', (
+      tester,
+    ) async {
+      final buffer = SourceBuffer.fromText(_book(400));
+      final controller = ScrollController();
+      final scan = Completer<DocumentScan?>();
+      final view = await open(tester, buffer, controller, scan);
+      view.showAnchor(saved);
+      await tester.pump();
+      view.focus();
+      await tester.pump();
+      for (var page = 0; page < 3; page++) {
+        await tester.sendKeyEvent(LogicalKeyboardKey.pageDown);
+        await tester.pump();
+      }
+      final read = view.topAnchor!.line;
+      expect(read, greaterThan(0));
+
+      scan.complete(DocumentScan.of(buffer));
+      await tester.pumpAndSettle();
       expect(view.topAnchor!.line, read);
     });
   });

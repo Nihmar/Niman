@@ -656,9 +656,12 @@ A library can have its exports' save dialog open in its own folder
 
 - On **Linux and Windows** the dialog opens there, for a note and for a
   folder's zip alike.
-- On **Android** the system's picker starts there when a note is saved.
-  The folder picker a zip is placed with takes no starting place, so the
-  system chooses for it.
+- On **Android** the system's picker starts there when a note is saved,
+  for a library on the shared storage — by whichever of its paths it was
+  opened, `/sdcard` included, and a work profile's own — or on an SD card.
+  A library in a folder no storage provider names opens where the system
+  chooses. The folder picker a zip is placed with takes no starting place,
+  so the system chooses for it.
 - On **macOS and iOS** the system chooses: the picker Niman opens there is
   not told where to start. This is a decision for now, not an omission,
   and it may change later.

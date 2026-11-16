@@ -244,8 +244,6 @@ Future<PdfExport> _draw({
           todoBlocks: todoBlocks,
           board: exportedBoard(text, kanban: kanban),
           paper: paper,
-          pageWidth: paper.widthMm * pointsPerMm / pointsPerPixel,
-          pageHeight: paper.heightMm * pointsPerMm / pointsPerPixel,
         )
       : await rasterSlidesPdf(
           slides: slides,
