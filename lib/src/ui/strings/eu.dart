@@ -2023,6 +2023,14 @@ final class BasqueStrings extends Strings {
   String get formatNoteDone => 'Oharra txukundu da.';
   @override
   String get exportTitle => 'Esportatu';
+
+  // Settings: export (#1285).
+  @override
+  String get settingsSectionExport => 'Esportazioa';
+  @override
+  String get pdfPaperTitle => 'PDFaren papera';
+  @override
+  String get pdfPaperSubtitle => 'PDF esportatu bat inprimatzen den orria';
   @override
   String get exportFormatMarkdown => 'Markdown';
   @override
@@ -2212,6 +2220,17 @@ final class BasqueStrings extends Strings {
   @override
   String get captureFolderSubtitle =>
       'Ohar berri gisa gordetako web-orriak eta aipuak';
+
+  // Settings: export folder (#1286).
+  @override
+  String get exportOpensInTitle => 'Esportazio-karpeta';
+  @override
+  String get exportOpensInSubtitle =>
+      'Esportazio baten gordetze-leihoa non irekitzen den';
+  @override
+  String get exportOpensInSystem => 'Sistemak irekitzen duen tokian';
+  @override
+  String get exportOpensInLibrary => 'Biblioteka honen karpeta';
   @override
   String get annotationNoteSuffix => 'Oharpena';
   @override

@@ -2021,6 +2021,14 @@ final class HungarianStrings extends Strings {
   String get formatNoteDone => 'A jegyzet rendbe lett téve.';
   @override
   String get exportTitle => 'Exportálás';
+
+  // Settings: export (#1285).
+  @override
+  String get settingsSectionExport => 'Exportálás';
+  @override
+  String get pdfPaperTitle => 'PDF-papír';
+  @override
+  String get pdfPaperSubtitle => 'A lap, amelyre az exportált PDF készül';
   @override
   String get exportFormatMarkdown => 'Markdown';
   @override
@@ -2212,6 +2220,17 @@ final class HungarianStrings extends Strings {
   @override
   String get captureFolderSubtitle =>
       'Új jegyzetként mentett weboldalak és idézetek';
+
+  // Settings: export folder (#1286).
+  @override
+  String get exportOpensInTitle => 'Exportálási mappa';
+  @override
+  String get exportOpensInSubtitle =>
+      'Hol nyílik meg az exportálás mentési ablaka';
+  @override
+  String get exportOpensInSystem => 'Ahol a rendszer megnyitja';
+  @override
+  String get exportOpensInLibrary => 'Ennek a könyvtárnak a mappája';
   @override
   String get annotationNoteSuffix => 'Kommentár';
   @override

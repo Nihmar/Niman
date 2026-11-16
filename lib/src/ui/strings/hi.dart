@@ -1977,6 +1977,14 @@ final class HindiStrings extends Strings {
   String get formatNoteDone => 'नोट व्यवस्थित कर दिया गया।';
   @override
   String get exportTitle => 'निर्यात';
+
+  // Settings: export (#1285).
+  @override
+  String get settingsSectionExport => 'निर्यात';
+  @override
+  String get pdfPaperTitle => 'PDF का काग़ज़';
+  @override
+  String get pdfPaperSubtitle => 'वह शीट जिस पर निर्यात किया गया PDF छपता है';
   @override
   String get exportFormatMarkdown => 'Markdown';
   @override
@@ -2165,6 +2173,17 @@ final class HindiStrings extends Strings {
   @override
   String get captureFolderSubtitle =>
       'नए नोट के रूप में सहेजे गए वेब पेज और उद्धरण';
+
+  // Settings: export folder (#1286).
+  @override
+  String get exportOpensInTitle => 'निर्यात फ़ोल्डर';
+  @override
+  String get exportOpensInSubtitle =>
+      'निर्यात का सहेजने वाला डायलॉग कहाँ खुलता है';
+  @override
+  String get exportOpensInSystem => 'जहाँ सिस्टम उसे खोले';
+  @override
+  String get exportOpensInLibrary => 'इस लाइब्रेरी का फ़ोल्डर';
   @override
   String get annotationNoteSuffix => 'एनोटेशन';
   @override

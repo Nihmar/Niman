@@ -12,7 +12,7 @@ library.
 
 Settings is split into areas, grouped by what they change: **App**
 (appearance, themes, editor, keyboard shortcuts, commands, text
-recognition, updates, diagnostics),
+recognition, export, updates, diagnostics),
 the open **Library** (features, folders, journal, study, navigation, trash and history, sync,
 transcription, reminders), and **Maintenance** (re-index, rebuild the index, switch or
 close the library; in the settings window only the first two, since the
@@ -123,6 +123,7 @@ sync) in `.niman/settings.json`.
 | `captureFolder` | `Clippings` | Where a web page or a quote captured as a new note goes (**Settings → Folders and paths → Web captures folder**), whatever `newItemLocation` says; the capture can still pick another folder for one page. Its pictures go in `attachmentsFolder` (see [web capture](web-capture.md)) |
 | `highlightColour` | `yellow` | The colour a passage of a PDF or a book is highlighted in: the one last chosen (`yellow`, `green`, `blue`, `pink`; see [organization](organization.md)) |
 | `linkType` | `wikilink` | What the link button inserts (`wikilink` or `markdown`) |
+| `exportFolder` | `system` | Where an export's save dialog opens (**Settings → Folders and paths → Export folder**, #1286): `system` (wherever the system opens it) or `library` (this library's folder); see [export](export.md#where-it-lands) for what each platform's dialog takes |
 | `linkUpdate` | `automatic` | What a rename or a move does to the links other notes hold to what moved (**Settings → Editor → Update links after rename or move**): `automatic` rewrites them, `ask` asks once per move how many notes would change and rewrites on a yes, `never` leaves them as written. History, reading positions, settings and the Home follow the move whichever it is (see [links](links.md)) |
 | `weekStart` | `system` | The day every calendar starts the week on (**Settings → Appearance → First day of the week**): `system` — the system's region's first day, not the app language's (on Linux `LC_ALL`, `LC_TIME`, `LANG`; on Windows the region settings' first day) — or `monday`, `saturday`, `sunday`, the same on every device of the library |
 | `newItemLocation` | `openNoteFolder` | Where new notes and folders go (**Settings → Editor → New notes and folders go to**): `libraryRoot`, or `openNoteFolder` — the folder of the note open at the time, the library root while none is open. One rule for a new note, a new folder, new slides, a voice note, the quick note's *create*, a note from a template, the note a dead link creates and a shared text file imported as a note; the tree's *Create … here*, a link that names a path, the journal's folder, list notes (`listNoteFolder`) and web captures (`captureFolder`) do not ask it (see [organization](organization.md#where-new-notes-and-folders-go)). It replaced `missingNoteLocation` (`currentFolder` reads as `openNoteFolder`), which is read when `newItemLocation` is absent and no longer written |
@@ -201,6 +202,17 @@ Brightness (day / night / system) and the theme the app wears are on
 (default on), the keyboard shortcuts and the formatting keys, the
 commands pinned in the palette, and — on the desktops — *Close to the
 tray* (default on: the window's × hides Niman and leaves it running).
+
+### Export
+
+**Settings → Export** holds what an export is made on, the same for
+every library:
+
+- **PDF paper** — the sheet a PDF export is printed on: A0, A1, A2, A3,
+  **A4** (the default), A5, Letter, Legal or Tabloid. A note prints on it
+  standing up; a kanban board on its side when its columns fit one row
+  of it. A slides note keeps its own 16:9 sheets. The HTML export's page
+  asks a printer for the same paper.
 
 ### Themes
 

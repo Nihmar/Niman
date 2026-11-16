@@ -2005,6 +2005,14 @@ final class SlovakStrings extends Strings {
   String get formatNoteDone => 'Poznámka bola upratená.';
   @override
   String get exportTitle => 'Exportovať';
+
+  // Settings: export (#1285).
+  @override
+  String get settingsSectionExport => 'Export';
+  @override
+  String get pdfPaperTitle => 'Papier PDF';
+  @override
+  String get pdfPaperSubtitle => 'Hárok, na ktorý sa tlačí exportované PDF';
   @override
   String get exportFormatMarkdown => 'Markdown';
   @override
@@ -2192,6 +2200,17 @@ final class SlovakStrings extends Strings {
   @override
   String get captureFolderSubtitle =>
       'Webové stránky a citáty uložené ako nové poznámky';
+
+  // Settings: export folder (#1286).
+  @override
+  String get exportOpensInTitle => 'Priečinok exportu';
+  @override
+  String get exportOpensInSubtitle =>
+      'Kde sa otvorí dialóg na uloženie exportu';
+  @override
+  String get exportOpensInSystem => 'Kde ho otvorí systém';
+  @override
+  String get exportOpensInLibrary => 'Priečinok tejto knižnice';
   @override
   String get annotationNoteSuffix => 'Anotácia';
   @override

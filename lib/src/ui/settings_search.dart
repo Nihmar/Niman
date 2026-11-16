@@ -9,6 +9,7 @@ import 'package:niman/src/ui/settings_search_appearance.dart';
 import 'package:niman/src/ui/settings_search_diagnostics.dart';
 import 'package:niman/src/ui/settings_search_editor.dart';
 import 'package:niman/src/ui/settings_search_entry.dart';
+import 'package:niman/src/ui/settings_search_export.dart';
 import 'package:niman/src/ui/settings_search_library.dart';
 import 'package:niman/src/ui/settings_search_maintenance.dart';
 import 'package:niman/src/ui/settings_search_scope.dart';
@@ -49,6 +50,7 @@ List<SettingsSearchEntry> settingsSearchEntries({
     ...appearanceSearchEntries(scope),
     ...editorSearchEntries(scope),
     ...librarySearchEntries(scope),
+    ...exportSearchEntries(scope),
     ...diagnosticsSearchEntries(scope),
     ...serviceSearchEntries(scope, ocr: ocr, transcription: transcription),
     ...maintenanceSearchEntries(scope, libraryRows: libraryRows),

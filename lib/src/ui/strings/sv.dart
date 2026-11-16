@@ -2016,6 +2016,14 @@ final class SwedishStrings extends Strings {
   String get formatNoteDone => 'Anteckningen städades.';
   @override
   String get exportTitle => 'Exportera';
+
+  // Settings: export (#1285).
+  @override
+  String get settingsSectionExport => 'Export';
+  @override
+  String get pdfPaperTitle => 'PDF-papper';
+  @override
+  String get pdfPaperSubtitle => 'Arket som en exporterad PDF skrivs ut på';
   @override
   String get exportFormatMarkdown => 'Markdown';
   @override
@@ -2205,6 +2213,16 @@ final class SwedishStrings extends Strings {
   @override
   String get captureFolderSubtitle =>
       'Webbsidor och citat sparade som nya anteckningar';
+
+  // Settings: export folder (#1286).
+  @override
+  String get exportOpensInTitle => 'Exportmapp';
+  @override
+  String get exportOpensInSubtitle => 'Var en exports spara-dialog öppnas';
+  @override
+  String get exportOpensInSystem => 'Där systemet öppnar den';
+  @override
+  String get exportOpensInLibrary => 'Det här bibliotekets mapp';
   @override
   String get annotationNoteSuffix => 'Annotering';
   @override

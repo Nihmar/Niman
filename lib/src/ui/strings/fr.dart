@@ -2063,6 +2063,15 @@ final class FrenchStrings extends Strings {
   String get formatNoteDone => 'La note a été rangée.';
   @override
   String get exportTitle => 'Exporter';
+
+  // Settings: export (#1285).
+  @override
+  String get settingsSectionExport => 'Exportation';
+  @override
+  String get pdfPaperTitle => 'Papier du PDF';
+  @override
+  String get pdfPaperSubtitle =>
+      'La feuille sur laquelle un export PDF est imprimé';
   @override
   String get exportFormatMarkdown => 'Markdown';
   @override
@@ -2256,6 +2265,17 @@ final class FrenchStrings extends Strings {
   @override
   String get captureFolderSubtitle =>
       'Pages web et citations capturées en nouvelles notes';
+
+  // Settings: export folder (#1286).
+  @override
+  String get exportOpensInTitle => 'Dossier d’export';
+  @override
+  String get exportOpensInSubtitle =>
+      'L’endroit où s’ouvre la fenêtre d’enregistrement d’un export';
+  @override
+  String get exportOpensInSystem => 'Là où le système l’ouvre';
+  @override
+  String get exportOpensInLibrary => 'Le dossier de cette bibliothèque';
   @override
   String get annotationNoteSuffix => 'Annotation';
   @override

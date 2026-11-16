@@ -2032,6 +2032,14 @@ final class ItalianStrings extends Strings {
   String get formatNoteDone => 'Nota sistemata.';
   @override
   String get exportTitle => 'Esporta';
+
+  // Settings: export (#1285).
+  @override
+  String get settingsSectionExport => 'Esportazione';
+  @override
+  String get pdfPaperTitle => 'Carta del PDF';
+  @override
+  String get pdfPaperSubtitle => 'Il foglio su cui si stampa un PDF esportato';
   @override
   String get exportFormatMarkdown => 'Markdown';
   @override
@@ -2221,6 +2229,17 @@ final class ItalianStrings extends Strings {
   @override
   String get captureFolderSubtitle =>
       'Pagine web e citazioni catturate come nuove note';
+
+  // Settings: export folder (#1286).
+  @override
+  String get exportOpensInTitle => 'Cartella di esportazione';
+  @override
+  String get exportOpensInSubtitle =>
+      'Dove si apre la finestra di salvataggio di un’esportazione';
+  @override
+  String get exportOpensInSystem => 'Dove la apre il sistema';
+  @override
+  String get exportOpensInLibrary => 'La cartella di questa libreria';
   @override
   String get annotationNoteSuffix => 'Annotazione';
   @override

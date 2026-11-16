@@ -1997,6 +1997,14 @@ final class CzechStrings extends Strings {
   String get formatNoteDone => 'Poznámka byla uklizena.';
   @override
   String get exportTitle => 'Export';
+
+  // Settings: export (#1285).
+  @override
+  String get settingsSectionExport => 'Export';
+  @override
+  String get pdfPaperTitle => 'Papír PDF';
+  @override
+  String get pdfPaperSubtitle => 'List, na který se tiskne exportované PDF';
   @override
   String get exportFormatMarkdown => 'Markdown';
   @override
@@ -2184,6 +2192,17 @@ final class CzechStrings extends Strings {
   @override
   String get captureFolderSubtitle =>
       'Webové stránky a citace uložené jako nové poznámky';
+
+  // Settings: export folder (#1286).
+  @override
+  String get exportOpensInTitle => 'Složka exportu';
+  @override
+  String get exportOpensInSubtitle =>
+      'Kde se otevře dialog pro uložení exportu';
+  @override
+  String get exportOpensInSystem => 'Kde ho otevře systém';
+  @override
+  String get exportOpensInLibrary => 'Složka této knihovny';
   @override
   String get annotationNoteSuffix => 'Anotace';
   @override

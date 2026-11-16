@@ -232,6 +232,18 @@ class $AppSettingsTable extends AppSettings
     ),
     defaultValue: const Constant(false),
   );
+  static const VerificationMeta _pdfPaperMeta = const VerificationMeta(
+    'pdfPaper',
+  );
+  @override
+  late final GeneratedColumn<String> pdfPaper = GeneratedColumn<String>(
+    'pdf_paper',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('a4'),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -252,6 +264,7 @@ class $AppSettingsTable extends AppSettings
     tourSeen,
     tourStep,
     tourOffer,
+    pdfPaper,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -406,6 +419,12 @@ class $AppSettingsTable extends AppSettings
         tourOffer.isAcceptableOrUnknown(data['tour_offer']!, _tourOfferMeta),
       );
     }
+    if (data.containsKey('pdf_paper')) {
+      context.handle(
+        _pdfPaperMeta,
+        pdfPaper.isAcceptableOrUnknown(data['pdf_paper']!, _pdfPaperMeta),
+      );
+    }
     return context;
   }
 
@@ -486,6 +505,10 @@ class $AppSettingsTable extends AppSettings
       tourOffer: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
         data['${effectivePrefix}tour_offer'],
+      )!,
+      pdfPaper: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}pdf_paper'],
       )!,
     );
   }
@@ -591,6 +614,11 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
   /// The welcome's "show me around" choice (#266), read once a library is
   /// open: the tour needs a shell to point at.
   final bool tourOffer;
+
+  /// The paper a PDF export is printed on (#1285): a `PaperSize` name,
+  /// A4 by default. App-wide: the printer is the machine's, not a
+  /// library's.
+  final String pdfPaper;
   const AppSetting({
     required this.id,
     this.libraryPath,
@@ -610,6 +638,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     required this.tourSeen,
     required this.tourStep,
     required this.tourOffer,
+    required this.pdfPaper,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -644,6 +673,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     map['tour_seen'] = Variable<bool>(tourSeen);
     map['tour_step'] = Variable<int>(tourStep);
     map['tour_offer'] = Variable<bool>(tourOffer);
+    map['pdf_paper'] = Variable<String>(pdfPaper);
     return map;
   }
 
@@ -679,6 +709,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       tourSeen: Value(tourSeen),
       tourStep: Value(tourStep),
       tourOffer: Value(tourOffer),
+      pdfPaper: Value(pdfPaper),
     );
   }
 
@@ -712,6 +743,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       tourSeen: serializer.fromJson<bool>(json['tourSeen']),
       tourStep: serializer.fromJson<int>(json['tourStep']),
       tourOffer: serializer.fromJson<bool>(json['tourOffer']),
+      pdfPaper: serializer.fromJson<String>(json['pdfPaper']),
     );
   }
   @override
@@ -736,6 +768,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       'tourSeen': serializer.toJson<bool>(tourSeen),
       'tourStep': serializer.toJson<int>(tourStep),
       'tourOffer': serializer.toJson<bool>(tourOffer),
+      'pdfPaper': serializer.toJson<String>(pdfPaper),
     };
   }
 
@@ -758,6 +791,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     bool? tourSeen,
     int? tourStep,
     bool? tourOffer,
+    String? pdfPaper,
   }) => AppSetting(
     id: id ?? this.id,
     libraryPath: libraryPath.present ? libraryPath.value : this.libraryPath,
@@ -785,6 +819,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     tourSeen: tourSeen ?? this.tourSeen,
     tourStep: tourStep ?? this.tourStep,
     tourOffer: tourOffer ?? this.tourOffer,
+    pdfPaper: pdfPaper ?? this.pdfPaper,
   );
   AppSetting copyWithCompanion(AppSettingsCompanion data) {
     return AppSetting(
@@ -830,6 +865,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       tourSeen: data.tourSeen.present ? data.tourSeen.value : this.tourSeen,
       tourStep: data.tourStep.present ? data.tourStep.value : this.tourStep,
       tourOffer: data.tourOffer.present ? data.tourOffer.value : this.tourOffer,
+      pdfPaper: data.pdfPaper.present ? data.pdfPaper.value : this.pdfPaper,
     );
   }
 
@@ -853,7 +889,8 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
           ..write('markdownExperience: $markdownExperience, ')
           ..write('tourSeen: $tourSeen, ')
           ..write('tourStep: $tourStep, ')
-          ..write('tourOffer: $tourOffer')
+          ..write('tourOffer: $tourOffer, ')
+          ..write('pdfPaper: $pdfPaper')
           ..write(')'))
         .toString();
   }
@@ -878,6 +915,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     tourSeen,
     tourStep,
     tourOffer,
+    pdfPaper,
   );
   @override
   bool operator ==(Object other) =>
@@ -900,7 +938,8 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
           other.markdownExperience == this.markdownExperience &&
           other.tourSeen == this.tourSeen &&
           other.tourStep == this.tourStep &&
-          other.tourOffer == this.tourOffer);
+          other.tourOffer == this.tourOffer &&
+          other.pdfPaper == this.pdfPaper);
 }
 
 class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
@@ -922,6 +961,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
   final Value<bool> tourSeen;
   final Value<int> tourStep;
   final Value<bool> tourOffer;
+  final Value<String> pdfPaper;
   const AppSettingsCompanion({
     this.id = const Value.absent(),
     this.libraryPath = const Value.absent(),
@@ -941,6 +981,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     this.tourSeen = const Value.absent(),
     this.tourStep = const Value.absent(),
     this.tourOffer = const Value.absent(),
+    this.pdfPaper = const Value.absent(),
   });
   AppSettingsCompanion.insert({
     this.id = const Value.absent(),
@@ -961,6 +1002,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     this.tourSeen = const Value.absent(),
     this.tourStep = const Value.absent(),
     this.tourOffer = const Value.absent(),
+    this.pdfPaper = const Value.absent(),
   });
   static Insertable<AppSetting> custom({
     Expression<int>? id,
@@ -981,6 +1023,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     Expression<bool>? tourSeen,
     Expression<int>? tourStep,
     Expression<bool>? tourOffer,
+    Expression<String>? pdfPaper,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1003,6 +1046,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
       if (tourSeen != null) 'tour_seen': tourSeen,
       if (tourStep != null) 'tour_step': tourStep,
       if (tourOffer != null) 'tour_offer': tourOffer,
+      if (pdfPaper != null) 'pdf_paper': pdfPaper,
     });
   }
 
@@ -1025,6 +1069,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     Value<bool>? tourSeen,
     Value<int>? tourStep,
     Value<bool>? tourOffer,
+    Value<String>? pdfPaper,
   }) {
     return AppSettingsCompanion(
       id: id ?? this.id,
@@ -1046,6 +1091,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
       tourSeen: tourSeen ?? this.tourSeen,
       tourStep: tourStep ?? this.tourStep,
       tourOffer: tourOffer ?? this.tourOffer,
+      pdfPaper: pdfPaper ?? this.pdfPaper,
     );
   }
 
@@ -1110,6 +1156,9 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     if (tourOffer.present) {
       map['tour_offer'] = Variable<bool>(tourOffer.value);
     }
+    if (pdfPaper.present) {
+      map['pdf_paper'] = Variable<String>(pdfPaper.value);
+    }
     return map;
   }
 
@@ -1133,7 +1182,8 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
           ..write('markdownExperience: $markdownExperience, ')
           ..write('tourSeen: $tourSeen, ')
           ..write('tourStep: $tourStep, ')
-          ..write('tourOffer: $tourOffer')
+          ..write('tourOffer: $tourOffer, ')
+          ..write('pdfPaper: $pdfPaper')
           ..write(')'))
         .toString();
   }
@@ -5146,6 +5196,7 @@ typedef $$AppSettingsTableCreateCompanionBuilder =
       Value<bool> tourSeen,
       Value<int> tourStep,
       Value<bool> tourOffer,
+      Value<String> pdfPaper,
     });
 typedef $$AppSettingsTableUpdateCompanionBuilder =
     AppSettingsCompanion Function({
@@ -5167,6 +5218,7 @@ typedef $$AppSettingsTableUpdateCompanionBuilder =
       Value<bool> tourSeen,
       Value<int> tourStep,
       Value<bool> tourOffer,
+      Value<String> pdfPaper,
     });
 
 class $$AppSettingsTableFilterComposer
@@ -5265,6 +5317,11 @@ class $$AppSettingsTableFilterComposer
 
   ColumnFilters<bool> get tourOffer => $composableBuilder(
     column: $table.tourOffer,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get pdfPaper => $composableBuilder(
+    column: $table.pdfPaper,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -5367,6 +5424,11 @@ class $$AppSettingsTableOrderingComposer
     column: $table.tourOffer,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get pdfPaper => $composableBuilder(
+    column: $table.pdfPaper,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$AppSettingsTableAnnotationComposer
@@ -5455,6 +5517,9 @@ class $$AppSettingsTableAnnotationComposer
 
   GeneratedColumn<bool> get tourOffer =>
       $composableBuilder(column: $table.tourOffer, builder: (column) => column);
+
+  GeneratedColumn<String> get pdfPaper =>
+      $composableBuilder(column: $table.pdfPaper, builder: (column) => column);
 }
 
 class $$AppSettingsTableTableManager
@@ -5506,6 +5571,7 @@ class $$AppSettingsTableTableManager
                 Value<bool> tourSeen = const Value.absent(),
                 Value<int> tourStep = const Value.absent(),
                 Value<bool> tourOffer = const Value.absent(),
+                Value<String> pdfPaper = const Value.absent(),
               }) => AppSettingsCompanion(
                 id: id,
                 libraryPath: libraryPath,
@@ -5525,6 +5591,7 @@ class $$AppSettingsTableTableManager
                 tourSeen: tourSeen,
                 tourStep: tourStep,
                 tourOffer: tourOffer,
+                pdfPaper: pdfPaper,
               ),
           createCompanionCallback:
               ({
@@ -5546,6 +5613,7 @@ class $$AppSettingsTableTableManager
                 Value<bool> tourSeen = const Value.absent(),
                 Value<int> tourStep = const Value.absent(),
                 Value<bool> tourOffer = const Value.absent(),
+                Value<String> pdfPaper = const Value.absent(),
               }) => AppSettingsCompanion.insert(
                 id: id,
                 libraryPath: libraryPath,
@@ -5565,6 +5633,7 @@ class $$AppSettingsTableTableManager
                 tourSeen: tourSeen,
                 tourStep: tourStep,
                 tourOffer: tourOffer,
+                pdfPaper: pdfPaper,
               ),
           withReferenceMapper: (p0) => p0
               .map(

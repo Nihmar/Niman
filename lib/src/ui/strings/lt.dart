@@ -2005,6 +2005,15 @@ final class LithuanianStrings extends Strings {
   String get formatNoteDone => 'Pastaba sutvarkyta.';
   @override
   String get exportTitle => 'Eksportuoti';
+
+  // Settings: export (#1285).
+  @override
+  String get settingsSectionExport => 'Eksportas';
+  @override
+  String get pdfPaperTitle => 'PDF popierius';
+  @override
+  String get pdfPaperSubtitle =>
+      'Lapas, ant kurio spausdinamas eksportuotas PDF';
   @override
   String get exportFormatMarkdown => 'Markdown';
   @override
@@ -2194,6 +2203,17 @@ final class LithuanianStrings extends Strings {
   @override
   String get captureFolderSubtitle =>
       'Tinklalapiai ir citatos, išsaugoti kaip nauji užrašai';
+
+  // Settings: export folder (#1286).
+  @override
+  String get exportOpensInTitle => 'Eksporto aplankas';
+  @override
+  String get exportOpensInSubtitle =>
+      'Kur atidaromas eksporto išsaugojimo langas';
+  @override
+  String get exportOpensInSystem => 'Kur jį atidaro sistema';
+  @override
+  String get exportOpensInLibrary => 'Šios bibliotekos aplankas';
   @override
   String get annotationNoteSuffix => 'Anotacija';
   @override

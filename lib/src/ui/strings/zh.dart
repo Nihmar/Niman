@@ -1845,6 +1845,14 @@ final class ChineseStrings extends Strings {
   String get formatNoteDone => '已整理该笔记。';
   @override
   String get exportTitle => '导出';
+
+  // Settings: export (#1285).
+  @override
+  String get settingsSectionExport => '导出';
+  @override
+  String get pdfPaperTitle => 'PDF 纸张';
+  @override
+  String get pdfPaperSubtitle => '导出的 PDF 所用的纸张';
   @override
   String get exportFormatMarkdown => 'Markdown';
   @override
@@ -2013,6 +2021,16 @@ final class ChineseStrings extends Strings {
   String get captureFolderTitle => '网页收藏文件夹';
   @override
   String get captureFolderSubtitle => '保存为新笔记的网页和引文';
+
+  // Settings: export folder (#1286).
+  @override
+  String get exportOpensInTitle => '导出文件夹';
+  @override
+  String get exportOpensInSubtitle => '导出的保存对话框打开的位置';
+  @override
+  String get exportOpensInSystem => '由系统决定的位置';
+  @override
+  String get exportOpensInLibrary => '本文库的文件夹';
   @override
   String get annotationNoteSuffix => '批注';
   @override

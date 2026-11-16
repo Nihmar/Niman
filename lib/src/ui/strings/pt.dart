@@ -2018,6 +2018,14 @@ final class PortugueseStrings extends Strings {
   String get formatNoteDone => 'A nota foi arrumada.';
   @override
   String get exportTitle => 'Exportar';
+
+  // Settings: export (#1285).
+  @override
+  String get settingsSectionExport => 'Exportação';
+  @override
+  String get pdfPaperTitle => 'Papel do PDF';
+  @override
+  String get pdfPaperSubtitle => 'A folha em que um PDF exportado é impresso';
   @override
   String get exportFormatMarkdown => 'Markdown';
   @override
@@ -2205,6 +2213,17 @@ final class PortugueseStrings extends Strings {
   @override
   String get captureFolderSubtitle =>
       'Páginas web e citações capturadas como notas novas';
+
+  // Settings: export folder (#1286).
+  @override
+  String get exportOpensInTitle => 'Pasta de exportação';
+  @override
+  String get exportOpensInSubtitle =>
+      'Onde a janela de salvar de uma exportação abre';
+  @override
+  String get exportOpensInSystem => 'Onde o sistema a abrir';
+  @override
+  String get exportOpensInLibrary => 'A pasta desta biblioteca';
   @override
   String get annotationNoteSuffix => 'Anotação';
   @override

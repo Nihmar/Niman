@@ -2024,6 +2024,15 @@ final class BulgarianStrings extends Strings {
   String get formatNoteDone => 'Бележката беше подредена.';
   @override
   String get exportTitle => 'Изнасяне';
+
+  // Settings: export (#1285).
+  @override
+  String get settingsSectionExport => 'Експортиране';
+  @override
+  String get pdfPaperTitle => 'Хартия за PDF';
+  @override
+  String get pdfPaperSubtitle =>
+      'Листът, на който се отпечатва експортиран PDF';
   @override
   String get exportFormatMarkdown => 'Markdown';
   @override
@@ -2213,6 +2222,17 @@ final class BulgarianStrings extends Strings {
   @override
   String get captureFolderSubtitle =>
       'Уеб страници и цитати, запазени като нови бележки';
+
+  // Settings: export folder (#1286).
+  @override
+  String get exportOpensInTitle => 'Папка за експорт';
+  @override
+  String get exportOpensInSubtitle =>
+      'Къде се отваря прозорецът за запазване на експорт';
+  @override
+  String get exportOpensInSystem => 'Където го отвори системата';
+  @override
+  String get exportOpensInLibrary => 'Папката на тази библиотека';
   @override
   String get annotationNoteSuffix => 'Анотация';
   @override

@@ -2029,6 +2029,15 @@ final class DutchStrings extends Strings {
   String get formatNoteDone => 'De notitie is opgeruimd.';
   @override
   String get exportTitle => 'Exporteren';
+
+  // Settings: export (#1285).
+  @override
+  String get settingsSectionExport => 'Exporteren';
+  @override
+  String get pdfPaperTitle => 'Pdf-papier';
+  @override
+  String get pdfPaperSubtitle =>
+      'Het vel waarop een geëxporteerde pdf wordt afgedrukt';
   @override
   String get exportFormatMarkdown => 'Markdown';
   @override
@@ -2220,6 +2229,17 @@ final class DutchStrings extends Strings {
   @override
   String get captureFolderSubtitle =>
       'Webpagina’s en citaten vastgelegd als nieuwe notities';
+
+  // Settings: export folder (#1286).
+  @override
+  String get exportOpensInTitle => 'Exportmap';
+  @override
+  String get exportOpensInSubtitle =>
+      'Waar het opslagvenster van een export opent';
+  @override
+  String get exportOpensInSystem => 'Waar het systeem het opent';
+  @override
+  String get exportOpensInLibrary => 'De map van deze bibliotheek';
   @override
   String get annotationNoteSuffix => 'Aantekening';
   @override

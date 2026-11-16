@@ -1988,6 +1988,14 @@ final class EnglishStrings extends Strings {
   String get formatNoteDone => 'The note was tidied.';
   @override
   String get exportTitle => 'Export';
+
+  // Settings: export (#1285).
+  @override
+  String get settingsSectionExport => 'Export';
+  @override
+  String get pdfPaperTitle => 'PDF paper';
+  @override
+  String get pdfPaperSubtitle => 'The sheet a PDF export is printed on';
   @override
   String get exportFormatMarkdown => 'Markdown';
   @override
@@ -2173,6 +2181,17 @@ final class EnglishStrings extends Strings {
   @override
   String get captureFolderSubtitle =>
       'Web pages and quotes captured as new notes';
+
+  // Settings: export folder (#1286).
+  @override
+  String get exportOpensInTitle => 'Export folder';
+  @override
+  String get exportOpensInSubtitle =>
+      'Where the save dialog of an export opens';
+  @override
+  String get exportOpensInSystem => 'Where the system opens it';
+  @override
+  String get exportOpensInLibrary => 'This library’s folder';
   @override
   String get annotationNoteSuffix => 'Annotation';
   @override

@@ -8,6 +8,7 @@ import 'package:niman/src/core/settings/library_config_values.dart';
 import 'package:niman/src/core/settings/library_settings.dart'
     show
         EditorKind,
+        ExportFolder,
         LinkType,
         LinkUpdate,
         SourceFont,
@@ -85,6 +86,7 @@ final class LibraryConfig {
     this.treeView = TreeView.list,
     this.linkType = LinkType.wikilink,
     this.linkUpdate = LinkUpdate.automatic,
+    this.exportFolder = ExportFolder.system,
     this.weekStart = WeekStart.system,
     this.newItemLocation = NewItemLocation.openNoteFolder,
     this.indentWidth = defaultIndentWidth,
@@ -260,6 +262,10 @@ final class LibraryConfig {
   /// (default: rewrite them, as it always has, #848).
   final LinkUpdate linkUpdate;
 
+  /// Where an export's save dialog opens (#1286): wherever the system opens
+  /// it, by default, or the library's own folder.
+  final ExportFolder exportFolder;
+
   /// The day the calendars start the week on (#566): the system's by
   /// default; a library sets one for every device it is opened on.
   final WeekStart weekStart;
@@ -385,6 +391,7 @@ final class LibraryConfig {
     TreeView? treeView,
     LinkType? linkType,
     LinkUpdate? linkUpdate,
+    ExportFolder? exportFolder,
     WeekStart? weekStart,
     NewItemLocation? newItemLocation,
     int? indentWidth,
@@ -442,6 +449,7 @@ final class LibraryConfig {
       treeView: treeView ?? this.treeView,
       linkType: linkType ?? this.linkType,
       linkUpdate: linkUpdate ?? this.linkUpdate,
+      exportFolder: exportFolder ?? this.exportFolder,
       weekStart: weekStart ?? this.weekStart,
       newItemLocation: newItemLocation ?? this.newItemLocation,
       indentWidth: indentWidth ?? this.indentWidth,
@@ -593,6 +601,7 @@ final class LibraryConfig {
         treeView == other.treeView &&
         linkType == other.linkType &&
         linkUpdate == other.linkUpdate &&
+        exportFolder == other.exportFolder &&
         weekStart == other.weekStart &&
         newItemLocation == other.newItemLocation &&
         indentWidth == other.indentWidth &&

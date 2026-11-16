@@ -2007,6 +2007,14 @@ final class BelarusianStrings extends Strings {
   String get formatNoteDone => 'Нататка ўпарадкавана.';
   @override
   String get exportTitle => 'Экспарт';
+
+  // Settings: export (#1285).
+  @override
+  String get settingsSectionExport => 'Экспарт';
+  @override
+  String get pdfPaperTitle => 'Папера PDF';
+  @override
+  String get pdfPaperSubtitle => 'Аркуш, на якім друкуецца экспартаваны PDF';
   @override
   String get exportFormatMarkdown => 'Markdown';
   @override
@@ -2198,6 +2206,16 @@ final class BelarusianStrings extends Strings {
   @override
   String get captureFolderSubtitle =>
       'Вэб-старонкі і цытаты, захаваныя як новыя нататкі';
+
+  // Settings: export folder (#1286).
+  @override
+  String get exportOpensInTitle => 'Папка экспарту';
+  @override
+  String get exportOpensInSubtitle => 'Дзе адкрываецца акно захавання экспарту';
+  @override
+  String get exportOpensInSystem => 'Там, дзе яго адкрые сістэма';
+  @override
+  String get exportOpensInLibrary => 'Папка гэтай бібліятэкі';
   @override
   String get annotationNoteSuffix => 'Анатацыя';
   @override

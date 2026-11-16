@@ -2025,6 +2025,14 @@ final class FinnishStrings extends Strings {
   String get formatNoteDone => 'Muistiinpano siivottiin.';
   @override
   String get exportTitle => 'Vie';
+
+  // Settings: export (#1285).
+  @override
+  String get settingsSectionExport => 'Vienti';
+  @override
+  String get pdfPaperTitle => 'PDF:n paperi';
+  @override
+  String get pdfPaperSubtitle => 'Arkki, jolle viety PDF tulostetaan';
   @override
   String get exportFormatMarkdown => 'Markdown';
   @override
@@ -2214,6 +2222,16 @@ final class FinnishStrings extends Strings {
   @override
   String get captureFolderSubtitle =>
       'Uusina muistiinpanoina tallennetut sivut ja lainaukset';
+
+  // Settings: export folder (#1286).
+  @override
+  String get exportOpensInTitle => 'Vientikansio';
+  @override
+  String get exportOpensInSubtitle => 'Missä viennin tallennusikkuna avautuu';
+  @override
+  String get exportOpensInSystem => 'Missä järjestelmä sen avaa';
+  @override
+  String get exportOpensInLibrary => 'Tämän kirjaston kansio';
   @override
   String get annotationNoteSuffix => 'Merkintä';
   @override

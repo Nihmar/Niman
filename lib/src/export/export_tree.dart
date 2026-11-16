@@ -37,6 +37,7 @@ import 'package:niman/src/export/epub_book.dart';
 import 'package:niman/src/export/export_tree_book.dart';
 import 'package:niman/src/export/export_tree_pages.dart';
 import 'package:niman/src/export/export_tree_printer.dart';
+import 'package:niman/src/export/paper_size.dart';
 import 'package:niman/src/export/pdf_webview.dart';
 import 'package:path/path.dart' as p;
 
@@ -161,7 +162,9 @@ final class TreeExport {
   /// isolate boundary.
   ///
   /// [kanban] says the Kanban feature is on (#1170): a `type: kanban` note
-  /// of the folder is then drawn as a board.
+  /// of the folder is then drawn as a board. [paper] is what a PDF zip's
+  /// notes are printed on (#1285), and what an HTML page asks a printer
+  /// for.
   static Future<TreeExport> start({
     required String dir,
     required String zipPath,
@@ -170,6 +173,7 @@ final class TreeExport {
     String? engine,
     ProcessRunner? runner,
     bool kanban = false,
+    PaperSize paper = PaperSize.a4,
   }) async {
     if (format == ExportTreeFormat.pdf &&
         engine == null &&
@@ -189,6 +193,7 @@ final class TreeExport {
         engine: engine,
         runner: runner,
         kanban: kanban,
+        paper: paper,
         events: events.sendPort,
       ),
       onError: errors.sendPort,
@@ -209,6 +214,7 @@ final class TreeExport {
     String? engine,
     ProcessRunner? runner,
     bool kanban = false,
+    PaperSize paper = PaperSize.a4,
   }) async {
     final export = await start(
       dir: dir,
@@ -218,6 +224,7 @@ final class TreeExport {
       engine: engine,
       runner: runner,
       kanban: kanban,
+      paper: paper,
     );
     await export.done;
   }
@@ -367,6 +374,7 @@ typedef TreeExportRequest = ({
   String? engine,
   ProcessRunner? runner,
   bool kanban,
+  PaperSize paper,
   SendPort events,
 });
 
@@ -478,6 +486,7 @@ Future<void> _exportTree(TreeExportRequest request) async {
             // a `file:` URL the engine fetches.
             embedPictures: request.format == ExportTreeFormat.pdf,
             kanban: request.kanban,
+            paper: request.paper,
           );
           if (request.format == ExportTreeFormat.pdf) {
             await ExportTreePrinter.printInto(

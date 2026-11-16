@@ -11,6 +11,7 @@ import 'package:niman/src/export/export_pdf.dart';
 import 'package:niman/src/export/export_sources.dart';
 import 'package:niman/src/export/export_tree.dart';
 import 'package:niman/src/export/note_html_source.dart';
+import 'package:niman/src/export/paper_size.dart';
 import 'package:niman/src/export/pdf_printer.dart';
 import 'package:niman/src/export/pdf_webview.dart';
 import 'package:path/path.dart' as p;
@@ -65,6 +66,23 @@ void main() {
           language: 'en',
         )).paper;
 
+    test('is the paper picked, a board on its side (#1285)', () async {
+      Future<({String html, PdfPaper paper})> on(String text) =>
+          ExportSources.printable(
+            NoteHtmlSource(text: text, title: 't', kanban: true),
+            language: 'en',
+            paper: PaperSize.letter,
+          );
+      final plain = await on(_plain);
+      expect(plain.paper, const PdfPaper(PaperSize.letter));
+      expect(plain.html, contains('size: 215.9mm 279.4mm'));
+      // Three columns fit Letter on its side; four do not, as they do A4.
+      final board = await on(_columns(3));
+      expect(board.paper, const PdfPaper(PaperSize.letter, landscape: true));
+      expect(board.html, contains('size: 279.4mm 215.9mm'));
+      expect((await on(_columns(4))).paper, const PdfPaper(PaperSize.letter));
+    });
+
     test('is A4 landscape for a board of up to four columns', () async {
       expect(await paperOf(_columns(1)), PdfPaper.a4Landscape);
       expect(await paperOf(_columns(4)), PdfPaper.a4Landscape);
@@ -92,8 +110,8 @@ void main() {
             NoteHtmlSource(text: text, title: 't', kanban: true),
             language: 'en',
           )).html;
-      expect(await pageOf(_columns(4)), contains('size: A4 landscape'));
-      expect(await pageOf(_columns(5)), isNot(contains('A4 landscape')));
+      expect(await pageOf(_columns(4)), contains('size: 297mm 210mm'));
+      expect(await pageOf(_columns(5)), isNot(contains('297mm 210mm')));
     });
   });
 
@@ -131,7 +149,7 @@ void main() {
       final printer = await printed(_columns(4));
       expect(printer.paper, PdfPaper.a4Landscape);
       // The engines that read the page's own sheet find it there too.
-      expect(printer.page, contains('@page { size: A4 landscape'));
+      expect(printer.page, contains('@page { size: 297mm 210mm'));
     });
 
     test(
@@ -160,13 +178,13 @@ void main() {
         },
         size: (path) async => 10,
       );
-      for (final paper in PdfPaper.values) {
+      for (final paper in _sheets) {
         await printer.print('/tmp/page.html', '/tmp/out.pdf', paper: paper);
       }
       // One command for every sheet: the engine takes the paper from the
       // page's `@page`, as it does for the slides' sheet; a flag of its own
       // would be a second place to say it.
-      expect(calls, hasLength(PdfPaper.values.length));
+      expect(calls, hasLength(_sheets.length));
       for (final args in calls) {
         expect(args, equals(calls.first));
         expect(args.join(' '), isNot(contains('landscape')));
@@ -237,20 +255,31 @@ void main() {
           .setMockMethodCallHandler(const MethodChannel(webViewPdfChannel), (
             call,
           ) async {
-            final arguments = (call.arguments as Map).cast<String, String>();
-            seen.add(arguments['paper']!);
-            await File(arguments['pdfPath']!).writeAsBytes(<int>[1]);
+            final arguments = (call.arguments as Map).cast<String, Object>();
+            seen.add(
+              '${arguments['paper']} '
+              '${(arguments['width']! as double).round()}x'
+              '${(arguments['height']! as double).round()}',
+            );
+            await File(arguments['pdfPath']! as String).writeAsBytes(<int>[1]);
             return null;
           });
-      for (final paper in PdfPaper.values) {
+      for (final paper in _sheets) {
         await const WebViewPdfPrinter().print(
           p.join(dir.path, 'page.html'),
           p.join(dir.path, 'page.pdf'),
           paper: paper,
         );
       }
-      // The words PdfBridge.kt (PdfSheet) and the Apple bridges match.
-      expect(seen, <String>['a4', 'a4Landscape', 'slides']);
+      // The words PdfBridge.kt (PdfSheet) and the Apple bridges match, and
+      // the sheet as it lies in PDF points (#1285).
+      expect(seen, <String>[
+        'portrait 595x842',
+        'landscape 842x595',
+        'slides 842x595',
+        'portrait 612x792',
+        'landscape 1224x792',
+      ]);
     });
   });
 
@@ -284,11 +313,13 @@ void main() {
           .setMockMethodCallHandler(const MethodChannel(webViewPdfChannel), (
             call,
           ) async {
-            final arguments = (call.arguments as Map).cast<String, String>();
-            final page = File(arguments['htmlPath']!).readAsStringSync();
+            final arguments = (call.arguments as Map).cast<String, Object>();
+            final page = File(arguments['htmlPath']! as String)
+                .readAsStringSync();
             final title = RegExp('<title>(.*?)</title>').firstMatch(page)!;
-            papers[title.group(1)!] = arguments['paper']!;
-            await File(arguments['pdfPath']!).writeAsString('%PDF-fake');
+            papers[title.group(1)!] = arguments['paper']! as String;
+            await File(arguments['pdfPath']! as String)
+                .writeAsString('%PDF-fake');
             return null;
           });
       await TreeExport.run(
@@ -310,18 +341,28 @@ void main() {
 
     test('prints each note on the paper of its own', () async {
       expect(await papersOf(kanban: true), <String, String>{
-        'narrow': 'a4Landscape',
-        'wide': 'a4',
-        'plain': 'a4',
+        'narrow': 'landscape',
+        'wide': 'portrait',
+        'plain': 'portrait',
       });
     });
 
     test('prints every note on A4 with the Kanban feature off', () async {
       expect(await papersOf(kanban: false), <String, String>{
-        'narrow': 'a4',
-        'wide': 'a4',
-        'plain': 'a4',
+        'narrow': 'portrait',
+        'wide': 'portrait',
+        'plain': 'portrait',
       });
     });
   });
 }
+
+/// A sheet of each kind the printers are told: A4 standing up and on its
+/// side, the slides' sheet, and another paper both ways (#1285).
+const List<PdfPaper> _sheets = [
+  PdfPaper.a4,
+  PdfPaper.a4Landscape,
+  PdfPaper.slides,
+  PdfPaper(PaperSize.letter),
+  PdfPaper(PaperSize.tabloid, landscape: true),
+];

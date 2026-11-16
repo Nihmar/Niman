@@ -100,6 +100,7 @@ Future<void> _rewindTo(AppDatabase db, int version) async {
   Future<void> drop(String table, String column) =>
       db.customStatement('ALTER TABLE $table DROP COLUMN $column');
 
+  if (version < 34) await drop('app_settings', 'pdf_paper');
   if (version < 33) {
     await db.customStatement('DROP TABLE sync_pending_downloads');
   }
@@ -1443,6 +1444,45 @@ void main() {
     });
   });
 
+  group("v33 → v34: the PDF export's paper (#1285)", () {
+    for (final from in [33, 21]) {
+      test('a v$from install prints on A4 until another is picked', () async {
+        {
+          final db = AppDatabase(NativeDatabase(dbFile));
+          await _rewindTo(db, from);
+          await db.customStatement(
+            "INSERT INTO app_settings (id, library_path) VALUES (1, '/lib')",
+          );
+          await db.close();
+        }
+
+        final db = AppDatabase(NativeDatabase(dbFile));
+        addTearDown(db.close);
+        final repo = AppSettingsRepo(db);
+        expect(await repo.pdfPaper(), 'a4');
+        await repo.setPdfPaper('letter');
+        expect(await repo.pdfPaper(), 'letter');
+      });
+    }
+
+    test('a file that has the column already is left alone', () async {
+      {
+        final db = AppDatabase(NativeDatabase(dbFile));
+        await db.customStatement(
+          "INSERT INTO app_settings (id, library_path) VALUES (1, '/lib')",
+        );
+        await AppSettingsRepo(db).setPdfPaper('a3');
+        // The file a testing build left: the column made, the number not.
+        await db.customStatement('PRAGMA user_version = 33');
+        await db.close();
+      }
+
+      final db = AppDatabase(NativeDatabase(dbFile));
+      addTearDown(db.close);
+      expect(await AppSettingsRepo(db).pdfPaper(), 'a3');
+    });
+  });
+
   group('v32 → v33: downloads being written are remembered', () {
     for (final from in [32, 21]) {
       test('a v$from install gets the table, its rows intact', () async {
@@ -1536,8 +1576,8 @@ void main() {
       ]);
       expect(rows[0], hasLength(1));
       expect(rows[1], hasLength(1));
-      expect(await versionOf(first), 33);
-      expect(await versionOf(second), 33);
+      expect(await versionOf(first), 34);
+      expect(await versionOf(second), 34);
       // The upgrade ran once, and the row that was there is the row it
       // welcomed.
       expect((await AppSettingsRepo(first).firstRun()).deckSeen, isTrue);
@@ -1571,7 +1611,7 @@ void main() {
 
       final db = open();
       expect((await AppSettingsRepo(db).firstRun()).deckSeen, isFalse);
-      expect(await versionOf(db), 33);
+      expect(await versionOf(db), 34);
       await db.close();
     });
 

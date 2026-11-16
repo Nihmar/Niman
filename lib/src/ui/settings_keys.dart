@@ -26,6 +26,8 @@ abstract final class SettingsKeys {
   static const uiTextScale = Key('ui-text-scale-setting');
   static const closeToTray = Key('close-to-tray-setting');
   static const epubLook = Key('epub-look-setting');
+  // Export (#1285).
+  static const pdfPaper = Key('pdf-paper-setting');
 
   // Themes (issue #269).
   static const brightness = Key('theme-brightness-setting');
@@ -66,6 +68,7 @@ abstract final class SettingsKeys {
   static const attachmentsFolder = Key('attachments-folder-setting');
   static const annotationsFolder = Key('annotations-folder-setting');
   static const captureFolder = Key('capture-folder-setting');
+  static const exportFolder = Key('export-folder-setting');
   static const journalFolder = Key('journal-folder-setting');
   static const journalEntryName = Key('journal-entry-name-setting');
   static const journalTemplate = Key('journal-template-setting');

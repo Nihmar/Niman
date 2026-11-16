@@ -16,6 +16,7 @@ import 'package:niman/src/export/kanban_html.dart';
 import 'package:niman/src/export/kanban_sheet.dart';
 import 'package:niman/src/export/math_svg.dart';
 import 'package:niman/src/export/note_html_source.dart';
+import 'package:niman/src/export/paper_size.dart';
 import 'package:niman/src/kanban/kanban_board.dart';
 import 'package:niman/src/markdown/html/html_hooks.dart';
 import 'package:niman/src/markdown/html/tree_html.dart';
@@ -43,11 +44,15 @@ final class NoteHtml {
   /// The note's body as HTML.
   String body() => _render(_hooks);
 
-  /// The sheet a printed page of this note wants, or null when it is no
-  /// board, or a board with no column: the plain A4 page (#1170).
-  KanbanSheet? get boardSheet {
+  /// The sheet a printed page of this note wants on A4, or null when it is
+  /// no board, or a board with no column: the plain page (#1170).
+  KanbanSheet? get boardSheet => boardSheetOn(PaperSize.a4);
+
+  /// [boardSheet] on [paper] (#1285): how many columns fit a row depends
+  /// on how wide the sheet is.
+  KanbanSheet? boardSheetOn(PaperSize paper) {
     final columns = _board?.columns.length ?? 0;
-    return columns == 0 ? null : kanbanSheetFor(columns);
+    return columns == 0 ? null : kanbanSheetFor(columns, paper);
   }
 
   /// [source] written with [hooks]: a board by [KanbanHtml], any other note

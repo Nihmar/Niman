@@ -92,7 +92,12 @@ class PdfBridge(private val context: Context) : MethodChannel.MethodCallHandler 
                     result.error("print-busy", "another page is being printed", null)
                     return
                 }
-                print(htmlPath, pdfPath, PdfSheet.forName(call.argument<String>("paper")), result)
+                val sheet = PdfSheet.of(
+                    call.argument<String>("paper"),
+                    call.argument<Double>("width"),
+                    call.argument<Double>("height"),
+                )
+                print(htmlPath, pdfPath, sheet, result)
             }
             // The export was cancelled: destroy the view and answer the
             // waiting print, instead of staying busy until the watchdog.
@@ -178,12 +183,19 @@ class PdfBridge(private val context: Context) : MethodChannel.MethodCallHandler 
         done: (Boolean, String?) -> Unit,
     ) {
         // A slides note (#534) prints one 16:9 sheet a slide, edge to edge;
-        // a wide kanban board (#1170) prints on A4 on its side.
+        // a note on the paper picked (#1285), and a wide kanban board
+        // (#1170) on the same paper on its side.
         val margin = sheet.marginMils
-        val media = when (sheet) {
-            PdfSheet.SLIDES -> SLIDE_SHEET
-            PdfSheet.A4_LANDSCAPE -> PrintAttributes.MediaSize.ISO_A4.asLandscape()
-            PdfSheet.A4 -> PrintAttributes.MediaSize.ISO_A4
+        val media = if (sheet.slides) {
+            SLIDE_SHEET
+        } else {
+            val standing = PrintAttributes.MediaSize(
+                "niman-${sheet.shortMils}x${sheet.longMils}",
+                "${sheet.shortMils}x${sheet.longMils}",
+                sheet.shortMils,
+                sheet.longMils,
+            )
+            if (sheet.landscape) standing.asLandscape() else standing
         }
         val attributes = PrintAttributes.Builder()
             .setMediaSize(media)

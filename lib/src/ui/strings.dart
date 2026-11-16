@@ -2,13 +2,16 @@
 /// in whatever language the app speaks.
 library;
 
+import 'package:niman/src/core/language.dart';
+import 'package:niman/src/core/settings/library_config.dart';
+import 'package:niman/src/core/settings/library_settings.dart'
+    show ExportFolder;
+import 'package:niman/src/core/week_start.dart';
 // The getters need no per-member docs: their names are the labels', and
 // the class doc explains where each label comes from.
 // ignore_for_file: public_member_api_docs
 
-import 'package:niman/src/core/language.dart';
-import 'package:niman/src/core/settings/library_config.dart';
-import 'package:niman/src/core/week_start.dart';
+import 'package:niman/src/export/paper_size.dart';
 import 'package:niman/src/transcription/transcription_model.dart';
 import 'package:niman/src/ui/strings/base.dart';
 import 'package:niman/src/ui/strings/be.dart';
@@ -1274,6 +1277,35 @@ final class AppStrings {
   static String get formatNoteDone => _s.formatNoteDone;
   static String get formatNoteAlreadyTidy => _s.formatNoteAlreadyTidy;
   static String get exportTitle => _s.exportTitle;
+
+  // Settings: export (#1285).
+  static String get settingsSectionExport => _s.settingsSectionExport;
+  static String get pdfPaperTitle => _s.pdfPaperTitle;
+  static String get pdfPaperSubtitle => _s.pdfPaperSubtitle;
+
+  /// A paper's name and its sides, in its own units and the language's
+  /// decimal separator: `A4 · 210 × 297 mm`, `Letter · 8.5 × 11 in`.
+  static String paperSizeName(PaperSize size) {
+    String number(double value) {
+      // To a tenth first: Legal's 355.6 mm is 13.9999… inches.
+      final tenths = (value * 10).round() / 10;
+      final text = tenths == tenths.roundToDouble()
+          ? tenths.toStringAsFixed(0)
+          : tenths.toStringAsFixed(1);
+      return text.replaceAll('.', _s.decimalSeparator);
+    }
+
+    final name = switch (size) {
+      PaperSize.letter => 'Letter',
+      PaperSize.legal => 'Legal',
+      PaperSize.tabloid => 'Tabloid',
+      _ => size.name.toUpperCase(),
+    };
+    final unit = size.inches ? 25.4 : 1.0;
+    return '$name · ${number(size.widthMm / unit)} × '
+        '${number(size.heightMm / unit)} ${size.inches ? 'in' : 'mm'}';
+  }
+
   static String get exportFormatMarkdown => _s.exportFormatMarkdown;
   static String get exportFormatHtml => _s.exportFormatHtml;
   static String get exportFolderTitle => _s.exportFolderTitle;
@@ -1358,6 +1390,16 @@ final class AppStrings {
   static String get annotationsFolderSubtitle => _s.annotationsFolderSubtitle;
   static String get captureFolderTitle => _s.captureFolderTitle;
   static String get captureFolderSubtitle => _s.captureFolderSubtitle;
+
+  // Settings: export folder (#1286).
+  static String get exportOpensInTitle => _s.exportOpensInTitle;
+  static String get exportOpensInSubtitle => _s.exportOpensInSubtitle;
+
+  /// Where an export's save dialog opens, as the row and its choices say it.
+  static String exportFolderName(ExportFolder folder) => switch (folder) {
+    ExportFolder.system => _s.exportOpensInSystem,
+    ExportFolder.library => _s.exportOpensInLibrary,
+  };
   static String get annotationNoteSuffix => _s.annotationNoteSuffix;
   static String get annotateAction => _s.annotateAction;
   static String get annotationCommentHint => _s.annotationCommentHint;

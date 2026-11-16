@@ -1886,6 +1886,14 @@ final class JapaneseStrings extends Strings {
   String get formatNoteDone => 'ノートを整えました。';
   @override
   String get exportTitle => 'エクスポート';
+
+  // Settings: export (#1285).
+  @override
+  String get settingsSectionExport => 'エクスポート';
+  @override
+  String get pdfPaperTitle => 'PDF の用紙';
+  @override
+  String get pdfPaperSubtitle => 'エクスポートした PDF を印刷する用紙';
   @override
   String get exportFormatMarkdown => 'Markdown';
   @override
@@ -2060,6 +2068,16 @@ final class JapaneseStrings extends Strings {
   String get captureFolderTitle => 'ウェブ取り込みフォルダー';
   @override
   String get captureFolderSubtitle => '新しいノートとして取り込んだウェブページと引用';
+
+  // Settings: export folder (#1286).
+  @override
+  String get exportOpensInTitle => 'エクスポート先フォルダー';
+  @override
+  String get exportOpensInSubtitle => 'エクスポートの保存ダイアログを開く場所';
+  @override
+  String get exportOpensInSystem => 'システムが開く場所';
+  @override
+  String get exportOpensInLibrary => 'このライブラリのフォルダー';
   @override
   String get annotationNoteSuffix => '注釈';
   @override

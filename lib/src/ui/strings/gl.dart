@@ -2022,6 +2022,14 @@ final class GalicianStrings extends Strings {
   String get formatNoteDone => 'A nota arranxouse.';
   @override
   String get exportTitle => 'Exportar';
+
+  // Settings: export (#1285).
+  @override
+  String get settingsSectionExport => 'Exportación';
+  @override
+  String get pdfPaperTitle => 'Papel do PDF';
+  @override
+  String get pdfPaperSubtitle => 'A folla na que se imprime un PDF exportado';
   @override
   String get exportFormatMarkdown => 'Markdown';
   @override
@@ -2209,6 +2217,17 @@ final class GalicianStrings extends Strings {
   @override
   String get captureFolderSubtitle =>
       'Páxinas web e citas capturadas como notas novas';
+
+  // Settings: export folder (#1286).
+  @override
+  String get exportOpensInTitle => 'Cartafol de exportación';
+  @override
+  String get exportOpensInSubtitle =>
+      'Onde se abre o diálogo de gardar dunha exportación';
+  @override
+  String get exportOpensInSystem => 'Onde o abra o sistema';
+  @override
+  String get exportOpensInLibrary => 'O cartafol desta biblioteca';
   @override
   String get annotationNoteSuffix => 'Anotación';
   @override

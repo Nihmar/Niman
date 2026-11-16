@@ -2007,6 +2007,14 @@ final class IcelandicStrings extends Strings {
   String get formatNoteDone => 'Tekið var til í glósunni.';
   @override
   String get exportTitle => 'Flytja út';
+
+  // Settings: export (#1285).
+  @override
+  String get settingsSectionExport => 'Útflutningur';
+  @override
+  String get pdfPaperTitle => 'Pappír PDF-skjala';
+  @override
+  String get pdfPaperSubtitle => 'Örkin sem útflutt PDF er prentuð á';
   @override
   String get exportFormatMarkdown => 'Markdown';
   @override
@@ -2194,6 +2202,17 @@ final class IcelandicStrings extends Strings {
   @override
   String get captureFolderSubtitle =>
       'Vefsíður og tilvitnanir vistaðar sem nýjar glósur';
+
+  // Settings: export folder (#1286).
+  @override
+  String get exportOpensInTitle => 'Útflutningsmappa';
+  @override
+  String get exportOpensInSubtitle =>
+      'Hvar vistunarglugginn opnast við útflutning';
+  @override
+  String get exportOpensInSystem => 'Þar sem kerfið opnar hann';
+  @override
+  String get exportOpensInLibrary => 'Mappa þessa bókasafns';
   @override
   String get annotationNoteSuffix => 'Athugasemd';
   @override

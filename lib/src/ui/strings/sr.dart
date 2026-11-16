@@ -2011,6 +2011,14 @@ final class SerbianStrings extends Strings {
   String get formatNoteDone => 'Белешка је сложена.';
   @override
   String get exportTitle => 'Извези';
+
+  // Settings: export (#1285).
+  @override
+  String get settingsSectionExport => 'Извоз';
+  @override
+  String get pdfPaperTitle => 'Папир за PDF';
+  @override
+  String get pdfPaperSubtitle => 'Лист на који се штампа извезени PDF';
   @override
   String get exportFormatMarkdown => 'Markdown';
   @override
@@ -2198,6 +2206,16 @@ final class SerbianStrings extends Strings {
   @override
   String get captureFolderSubtitle =>
       'Веб-странице и цитати сачувани као нове белешке';
+
+  // Settings: export folder (#1286).
+  @override
+  String get exportOpensInTitle => 'Фасцикла за извоз';
+  @override
+  String get exportOpensInSubtitle => 'Где се отвара дијалог за чување извоза';
+  @override
+  String get exportOpensInSystem => 'Где га отвори систем';
+  @override
+  String get exportOpensInLibrary => 'Фасцикла ове библиотеке';
   @override
   String get annotationNoteSuffix => 'Анотација';
   @override

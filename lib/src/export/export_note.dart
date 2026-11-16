@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:niman/src/export/export_sources.dart';
+import 'package:niman/src/export/paper_size.dart';
 import 'package:niman/src/export/printed_todo_block.dart';
 import 'package:niman/src/links/resolver.dart';
 import 'package:path/path.dart' as p;
@@ -60,7 +61,7 @@ ExportPayload exportMarkdown({
 /// library-relative path (its name becomes the file's), and `root` the
 /// library's absolute root. `todoBlocks` are the lists the note's `todo`
 /// fences are at this moment (#1152). `kanban` says the Kanban feature is on
-/// (#1170).
+/// (#1170). `paper` is what an HTML page asks a printer for (#1285).
 Future<ExportPayload> exportNote({
   required String text,
   required String title,
@@ -71,6 +72,7 @@ Future<ExportPayload> exportNote({
   LinkSource? linkSource,
   PrintedTodoBlocks todoBlocks = const <String, PrintedTodoBlock>{},
   bool kanban = false,
+  PaperSize paper = PaperSize.a4,
 }) async {
   switch (format) {
     case ExportFileFormat.markdown:
@@ -88,7 +90,11 @@ Future<ExportPayload> exportNote({
         todoBlocks: todoBlocks,
         kanban: kanban,
       );
-      final page = await ExportSources.page(source, language: language);
+      final page = await ExportSources.page(
+        source,
+        language: language,
+        paper: paper,
+      );
       return (
         name: '${p.basenameWithoutExtension(path)}.html',
         bytes: Uint8List.fromList(utf8.encode(page)),

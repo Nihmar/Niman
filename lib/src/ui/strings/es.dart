@@ -2040,6 +2040,15 @@ final class SpanishStrings extends Strings {
   String get formatNoteDone => 'La nota se ha ordenado.';
   @override
   String get exportTitle => 'Exportar';
+
+  // Settings: export (#1285).
+  @override
+  String get settingsSectionExport => 'Exportación';
+  @override
+  String get pdfPaperTitle => 'Papel del PDF';
+  @override
+  String get pdfPaperSubtitle =>
+      'La hoja en la que se imprime un PDF exportado';
   @override
   String get exportFormatMarkdown => 'Markdown';
   @override
@@ -2228,6 +2237,17 @@ final class SpanishStrings extends Strings {
   @override
   String get captureFolderSubtitle =>
       'Páginas web y citas capturadas como notas nuevas';
+
+  // Settings: export folder (#1286).
+  @override
+  String get exportOpensInTitle => 'Carpeta de exportación';
+  @override
+  String get exportOpensInSubtitle =>
+      'Dónde se abre el diálogo de guardado de una exportación';
+  @override
+  String get exportOpensInSystem => 'Donde lo abra el sistema';
+  @override
+  String get exportOpensInLibrary => 'La carpeta de esta biblioteca';
   @override
   String get annotationNoteSuffix => 'Anotación';
   @override

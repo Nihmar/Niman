@@ -13,7 +13,7 @@ import 'package:niman/src/ui/template_help.dart';
 
 /// The Folders and paths area of the settings home (issue #104): where
 /// the library's notes, templates, attachments and captured pages live,
-/// and the library itself.
+/// where its exports' dialog opens (#1286), and the library itself.
 final class SettingsFoldersPathsScreen extends StatefulWidget {
   /// Creates the screen for [controller]'s library session.
   const new({required this.controller, this.highlight, super.key});
@@ -37,6 +37,7 @@ final class _SettingsFoldersPathsScreenState
   String? _annotationsFolder;
   String? _captureFolder;
   String? _quickNotePath;
+  ExportFolder _exportFolder = ExportFolder.system;
 
   /// The folders the library actually holds, for the "to create" badge:
   /// a configured value outside this set names a folder that is not
@@ -68,6 +69,7 @@ final class _SettingsFoldersPathsScreenState
     final annotationsFolder = await ops.annotationsFolder;
     final captureFolder = await ops.captureFolder;
     final quickNotePath = await ops.quickNotePath;
+    final exportFolder = await widget.controller.librarySettings.exportFolder;
     final folders = await widget.controller.tree.folders();
     if (!mounted) return;
     setState(() {
@@ -77,6 +79,7 @@ final class _SettingsFoldersPathsScreenState
       _annotationsFolder = annotationsFolder;
       _captureFolder = captureFolder;
       _quickNotePath = quickNotePath;
+      _exportFolder = exportFolder;
       _folderPaths = {for (final folder in folders) folder.path};
     });
   }
@@ -169,6 +172,24 @@ final class _SettingsFoldersPathsScreenState
       read: (ops) => ops.captureFolder,
     );
     if (saved != null && mounted) setState(() => _captureFolder = saved);
+  }
+
+  /// Asks where an export's save dialog opens (#1286).
+  Future<void> _chooseExportFolder() async {
+    final folder = await showSettingsChoice<ExportFolder>(
+      context,
+      dialogKey: const Key('export-folder-dialog'),
+      title: AppStrings.exportOpensInTitle,
+      subtitle: AppStrings.exportOpensInSubtitle,
+      current: _exportFolder,
+      options: [
+        for (final folder in ExportFolder.values)
+          SettingsOption(folder, AppStrings.exportFolderName(folder)),
+      ],
+    );
+    if (folder == null) return;
+    await widget.controller.librarySettings.setExportFolder(folder);
+    if (mounted) setState(() => _exportFolder = folder);
   }
 
   /// Opens the quick-note picker (the chosen note is set from the tree
@@ -271,6 +292,15 @@ final class _SettingsFoldersPathsScreenState
             subtitle: AppStrings.captureFolderSubtitle,
             value: captureFolder,
             onTap: _pickCaptureFolder,
+          ),
+          HighlightRow(
+            key: SettingsKeys.exportFolder,
+            child: SettingsValueRow(
+              title: AppStrings.exportOpensInTitle,
+              subtitle: AppStrings.exportOpensInSubtitle,
+              value: AppStrings.exportFolderName(_exportFolder),
+              onTap: () => unawaited(_chooseExportFolder()),
+            ),
           ),
           HighlightRow(
             key: SettingsKeys.quickNote,

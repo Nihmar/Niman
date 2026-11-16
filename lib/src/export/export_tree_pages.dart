@@ -16,6 +16,7 @@ import 'package:niman/src/export/html_page.dart';
 import 'package:niman/src/export/kanban_sheet.dart';
 import 'package:niman/src/export/note_html.dart';
 import 'package:niman/src/export/note_html_source.dart';
+import 'package:niman/src/export/paper_size.dart';
 import 'package:niman/src/export/pdf_printer.dart';
 import 'package:niman/src/frontmatter/parser.dart';
 import 'package:niman/src/links/link_path.dart';
@@ -154,8 +155,9 @@ abstract final class ExportTreePages {
   ).html;
 
   /// [page], with the paper a printer must print it on (#1170): each note
-  /// of a PDF folder is printed on the sheet of its own, A4 landscape for a
-  /// board whose columns fit one row of it and A4 for any other note.
+  /// of a PDF folder is printed on the sheet of its own, [paper] on its
+  /// side for a board whose columns fit one row of it and standing up for
+  /// any other note — A4 unless another is picked (#1285).
   static ({String html, PdfPaper paper}) built(
     String text,
     String rel,
@@ -164,6 +166,7 @@ abstract final class ExportTreePages {
     String linkExtension, {
     bool embedPictures = false,
     bool kanban = false,
+    PaperSize paper = PaperSize.a4,
   }) {
     final noteDir = p.dirname(rel);
     final title = pageTitle(text, rel);
@@ -181,7 +184,7 @@ abstract final class ExportTreePages {
       kanban: kanban,
     );
     final html = NoteHtml(source);
-    final board = html.boardSheet;
+    final board = html.boardSheetOn(paper);
     return (
       html: htmlPage(
         title: title,
@@ -189,8 +192,9 @@ abstract final class ExportTreePages {
         fontFaces: html.fontFaces,
         language: language,
         board: board,
+        paper: paper,
       ),
-      paper: kanbanPaper(board),
+      paper: kanbanPaper(board, paper),
     );
   }
 

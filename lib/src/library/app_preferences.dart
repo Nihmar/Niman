@@ -2,6 +2,7 @@ import 'package:niman/src/core/app_theme.dart';
 import 'package:niman/src/core/custom_theme.dart';
 import 'package:niman/src/core/language.dart';
 import 'package:niman/src/core/theme.dart';
+import 'package:niman/src/export/paper_size.dart';
 
 /// The settings the app keeps for itself (#1258), whichever library is
 /// open — none included: the language, the theme and the custom themes,
@@ -31,6 +32,13 @@ abstract interface class AppPreferences {
 
   /// Sets (and persists) the close-to-tray choice.
   Future<void> setCloseToTray({required bool enabled});
+
+  /// The paper a PDF export is printed on (#1285), [PaperSize.a4] until
+  /// another is picked; app-wide, as the printer is the machine's.
+  Future<PaperSize> get pdfPaper;
+
+  /// Sets (and persists) the PDF export's paper.
+  Future<void> setPdfPaper(PaperSize paper);
 
   /// The UI language ([AppLanguage.system] by default).
   Future<AppLanguage> get language;

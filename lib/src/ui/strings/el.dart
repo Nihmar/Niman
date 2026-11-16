@@ -2073,6 +2073,15 @@ final class GreekStrings extends Strings {
   String get formatNoteDone => 'Η σημείωση τακτοποιήθηκε.';
   @override
   String get exportTitle => 'Εξαγωγή';
+
+  // Settings: export (#1285).
+  @override
+  String get settingsSectionExport => 'Εξαγωγή';
+  @override
+  String get pdfPaperTitle => 'Χαρτί PDF';
+  @override
+  String get pdfPaperSubtitle =>
+      'Το φύλλο στο οποίο τυπώνεται ένα εξαγόμενο PDF';
   @override
   String get exportFormatMarkdown => 'Markdown';
   @override
@@ -2269,6 +2278,17 @@ final class GreekStrings extends Strings {
   @override
   String get captureFolderSubtitle =>
       'Ιστοσελίδες και αποσπάσματα ως νέες σημειώσεις';
+
+  // Settings: export folder (#1286).
+  @override
+  String get exportOpensInTitle => 'Φάκελος εξαγωγής';
+  @override
+  String get exportOpensInSubtitle =>
+      'Πού ανοίγει το παράθυρο αποθήκευσης μιας εξαγωγής';
+  @override
+  String get exportOpensInSystem => 'Όπου το ανοίγει το σύστημα';
+  @override
+  String get exportOpensInLibrary => 'Ο φάκελος αυτής της βιβλιοθήκης';
   @override
   String get annotationNoteSuffix => 'Σχολιασμός';
   @override

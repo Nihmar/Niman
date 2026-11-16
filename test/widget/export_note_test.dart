@@ -8,8 +8,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/app.dart';
+import 'package:niman/src/core/settings/library_settings.dart'
+    show ExportFolder;
 import 'package:niman/src/export/epub_note.dart';
 import 'package:niman/src/export/export_files.dart';
+import 'package:niman/src/export/export_folder.dart';
 import 'package:niman/src/export/export_tree_book.dart';
 import 'package:niman/src/export/pdf_printer.dart';
 import 'package:niman/src/export/pdf_webview.dart';
@@ -37,6 +40,10 @@ void main() {
   String? place;
   String? pickedFolder;
   String? pickedTitle;
+
+  /// Where the save dialog and the folder picker were told to open (#1286).
+  String? savedFrom;
+  String? pickedFrom;
   late EpubNoteExport epubExport;
 
   setUp(() {
@@ -46,6 +53,8 @@ void main() {
     place = null;
     pickedFolder = null;
     pickedTitle = null;
+    savedFrom = null;
+    pickedFrom = null;
     // The real book builder typesets in an isolate the fake-async zone
     // cannot wait on; a test that does not care gets an empty book.
     epubExport =
@@ -91,7 +100,9 @@ void main() {
             required bytes,
             required mimeType,
             required dialogTitle,
+            initialDirectory,
           }) async {
+            savedFrom = initialDirectory;
             saved = (
               name: name,
               bytes: bytes,
@@ -102,7 +113,9 @@ void main() {
           }),
           pickExportFolderProvider.overrideWithValue(({
             required dialogTitle,
+            initialDirectory,
           }) async {
+            pickedFrom = initialDirectory;
             pickedTitle = dialogTitle;
             return pickedFolder;
           }),
@@ -168,6 +181,40 @@ void main() {
     expect(saved?.dialogTitle, AppStrings.exportTitle);
     expect(utf8.decode(saved!.bytes), '# Note\n');
     expect(find.text(AppStrings.exportDone('/tmp/note.md')), findsOne);
+  });
+
+  group('the save dialog opens where the library says (#1286)', () {
+    setUp(() => debugExportDialogsOpenWhereTold = true);
+    tearDown(() => debugExportDialogsOpenWhereTold = null);
+
+    testWidgets('wherever the system opens it, by default', (tester) async {
+      place = '/tmp/note.md';
+      await pumpShell(tester);
+      await chooseExport(tester, 'markdown', sweep: false);
+      expect(saved?.name, 'note.md');
+      expect(savedFrom, isNull);
+    });
+
+    testWidgets("in the library's folder, a note's and a folder's", (
+      tester,
+    ) async {
+      place = '/tmp/note.md';
+      await pumpShell(tester);
+      await controller.librarySettings.setExportFolder(ExportFolder.library);
+      await chooseExport(tester, 'markdown', sweep: false);
+      expect(savedFrom, controller.root);
+
+      pickedFolder = null;
+      await controller.createFolder(parentPath: '', name: 'Docs');
+      await settle(tester);
+      await tester.longPress(noteRow('Docs'));
+      await settle(tester);
+      await tester.tap(find.byKey(const Key('menu-export-folder')));
+      await settle(tester);
+      await tester.tap(find.byKey(const Key('export-tree-markdown')));
+      await settle(tester);
+      expect(pickedFrom, controller.root);
+    });
   });
 
   testWidgets('the export banner times out, and closes on demand (#508)', (

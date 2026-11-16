@@ -2023,6 +2023,14 @@ final class MacedonianStrings extends Strings {
   String get formatNoteDone => 'Белешката е средена.';
   @override
   String get exportTitle => 'Извези';
+
+  // Settings: export (#1285).
+  @override
+  String get settingsSectionExport => 'Извоз';
+  @override
+  String get pdfPaperTitle => 'Хартија за PDF';
+  @override
+  String get pdfPaperSubtitle => 'Листот на кој се печати извезен PDF';
   @override
   String get exportFormatMarkdown => 'Markdown';
   @override
@@ -2212,6 +2220,17 @@ final class MacedonianStrings extends Strings {
   @override
   String get captureFolderSubtitle =>
       'Веб-страници и цитати зачувани како нови белешки';
+
+  // Settings: export folder (#1286).
+  @override
+  String get exportOpensInTitle => 'Папка за извоз';
+  @override
+  String get exportOpensInSubtitle =>
+      'Каде се отвора дијалогот за зачувување на извозот';
+  @override
+  String get exportOpensInSystem => 'Каде што го отвора системот';
+  @override
+  String get exportOpensInLibrary => 'Папката на оваа библиотека';
   @override
   String get annotationNoteSuffix => 'Анотација';
   @override

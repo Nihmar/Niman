@@ -5,6 +5,7 @@ import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/core/theme.dart';
 import 'package:niman/src/db/app_database.dart';
+import 'package:niman/src/export/paper_size.dart';
 import 'package:niman/src/library/app_preferences.dart';
 import 'package:niman/src/library/session_themes.dart';
 
@@ -57,6 +58,16 @@ final class StoredAppPreferences implements AppPreferences {
   Future<void> setCloseToTray({required bool enabled}) async {
     _log.info('close to tray: $enabled');
     await (await _repo).setCloseToTray(enabled: enabled);
+  }
+
+  @override
+  Future<PaperSize> get pdfPaper async =>
+      PaperSize.fromName(await (await _repo).pdfPaper());
+
+  @override
+  Future<void> setPdfPaper(PaperSize paper) async {
+    _log.info('pdf paper: ${paper.name}');
+    await (await _repo).setPdfPaper(paper.name);
   }
 
   @override

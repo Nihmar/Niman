@@ -2012,6 +2012,14 @@ final class BosnianStrings extends Strings {
   String get formatNoteDone => 'Bilješka je posložena.';
   @override
   String get exportTitle => 'Izvoz';
+
+  // Settings: export (#1285).
+  @override
+  String get settingsSectionExport => 'Izvoz';
+  @override
+  String get pdfPaperTitle => 'Papir za PDF';
+  @override
+  String get pdfPaperSubtitle => 'List na koji se štampa izvezeni PDF';
   @override
   String get exportFormatMarkdown => 'Markdown';
   @override
@@ -2199,6 +2207,17 @@ final class BosnianStrings extends Strings {
   @override
   String get captureFolderSubtitle =>
       'Web stranice i citati sačuvani kao nove bilješke';
+
+  // Settings: export folder (#1286).
+  @override
+  String get exportOpensInTitle => 'Folder za izvoz';
+  @override
+  String get exportOpensInSubtitle =>
+      'Gdje se otvara dijalog za spremanje izvoza';
+  @override
+  String get exportOpensInSystem => 'Gdje ga otvori sistem';
+  @override
+  String get exportOpensInLibrary => 'Folder ove biblioteke';
   @override
   String get annotationNoteSuffix => 'Anotacija';
   @override

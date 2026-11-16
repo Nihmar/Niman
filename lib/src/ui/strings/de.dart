@@ -2041,6 +2041,15 @@ final class GermanStrings extends Strings {
   String get formatNoteDone => 'Die Notiz wurde aufgeräumt.';
   @override
   String get exportTitle => 'Exportieren';
+
+  // Settings: export (#1285).
+  @override
+  String get settingsSectionExport => 'Export';
+  @override
+  String get pdfPaperTitle => 'PDF-Papier';
+  @override
+  String get pdfPaperSubtitle =>
+      'Das Blatt, auf das ein PDF-Export gedruckt wird';
   @override
   String get exportFormatMarkdown => 'Markdown';
   @override
@@ -2239,6 +2248,17 @@ final class GermanStrings extends Strings {
   @override
   String get captureFolderSubtitle =>
       'Webseiten und Zitate, als neue Notizen erfasst';
+
+  // Settings: export folder (#1286).
+  @override
+  String get exportOpensInTitle => 'Exportordner';
+  @override
+  String get exportOpensInSubtitle =>
+      'Wo sich der Speicherdialog eines Exports öffnet';
+  @override
+  String get exportOpensInSystem => 'Wo das System ihn öffnet';
+  @override
+  String get exportOpensInLibrary => 'Der Ordner dieser Bibliothek';
   @override
   String get annotationNoteSuffix => 'Anmerkung';
   @override

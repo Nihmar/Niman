@@ -2010,6 +2010,14 @@ final class UkrainianStrings extends Strings {
   String get formatNoteDone => 'Нотатку впорядковано.';
   @override
   String get exportTitle => 'Експортувати';
+
+  // Settings: export (#1285).
+  @override
+  String get settingsSectionExport => 'Експорт';
+  @override
+  String get pdfPaperTitle => 'Папір PDF';
+  @override
+  String get pdfPaperSubtitle => 'Аркуш, на якому друкується експортований PDF';
   @override
   String get exportFormatMarkdown => 'Markdown';
   @override
@@ -2200,6 +2208,17 @@ final class UkrainianStrings extends Strings {
   @override
   String get captureFolderSubtitle =>
       'Вебсторінки й цитати, збережені як нові нотатки';
+
+  // Settings: export folder (#1286).
+  @override
+  String get exportOpensInTitle => 'Тека експорту';
+  @override
+  String get exportOpensInSubtitle =>
+      'Де відкривається вікно збереження експорту';
+  @override
+  String get exportOpensInSystem => 'Там, де його відкриє система';
+  @override
+  String get exportOpensInLibrary => 'Тека цієї бібліотеки';
   @override
   String get annotationNoteSuffix => 'Анотація';
   @override

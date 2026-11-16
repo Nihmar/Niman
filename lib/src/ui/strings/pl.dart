@@ -2029,6 +2029,15 @@ final class PolishStrings extends Strings {
   String get formatNoteDone => 'Notatka została uporządkowana.';
   @override
   String get exportTitle => 'Eksportuj';
+
+  // Settings: export (#1285).
+  @override
+  String get settingsSectionExport => 'Eksport';
+  @override
+  String get pdfPaperTitle => 'Papier PDF';
+  @override
+  String get pdfPaperSubtitle =>
+      'Arkusz, na którym drukowany jest eksportowany PDF';
   @override
   String get exportFormatMarkdown => 'Markdown';
   @override
@@ -2221,6 +2230,16 @@ final class PolishStrings extends Strings {
   @override
   String get captureFolderSubtitle =>
       'Strony internetowe i cytaty zapisane jako nowe notatki';
+
+  // Settings: export folder (#1286).
+  @override
+  String get exportOpensInTitle => 'Folder eksportu';
+  @override
+  String get exportOpensInSubtitle => 'Gdzie otwiera się okno zapisu eksportu';
+  @override
+  String get exportOpensInSystem => 'Tam, gdzie otworzy je system';
+  @override
+  String get exportOpensInLibrary => 'Folder tej biblioteki';
   @override
   String get annotationNoteSuffix => 'Adnotacja';
   @override

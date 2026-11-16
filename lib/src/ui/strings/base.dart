@@ -1071,6 +1071,11 @@ abstract base class Strings {
   String get formatNoteDone;
   String get formatNoteAlreadyTidy;
   String get exportTitle;
+
+  // Settings: export (#1285).
+  String get settingsSectionExport;
+  String get pdfPaperTitle;
+  String get pdfPaperSubtitle;
   String get exportFormatMarkdown;
   String get exportFormatHtml;
   String get exportFolderTitle;
@@ -1180,6 +1185,12 @@ abstract base class Strings {
   // Where a captured web page or quote goes as a new note.
   String get captureFolderTitle;
   String get captureFolderSubtitle;
+
+  // Settings: export folder (#1286).
+  String get exportOpensInTitle;
+  String get exportOpensInSubtitle;
+  String get exportOpensInSystem;
+  String get exportOpensInLibrary;
 
   /// Ends the name of a note made to annotate a file:
   /// `Dune - Annotation.md`.

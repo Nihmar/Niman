@@ -1986,6 +1986,14 @@ final class EstonianStrings extends Strings {
   String get formatNoteDone => 'Märge korrastati.';
   @override
   String get exportTitle => 'Ekspordi';
+
+  // Settings: export (#1285).
+  @override
+  String get settingsSectionExport => 'Eksport';
+  @override
+  String get pdfPaperTitle => 'PDF-i paber';
+  @override
+  String get pdfPaperSubtitle => 'Leht, millele eksporditud PDF prinditakse';
   @override
   String get exportFormatMarkdown => 'Markdown';
   @override
@@ -2174,6 +2182,16 @@ final class EstonianStrings extends Strings {
   @override
   String get captureFolderSubtitle =>
       'Uute märkmetena salvestatud veebilehed ja tsitaadid';
+
+  // Settings: export folder (#1286).
+  @override
+  String get exportOpensInTitle => 'Ekspordikaust';
+  @override
+  String get exportOpensInSubtitle => 'Kus avaneb ekspordi salvestusdialoog';
+  @override
+  String get exportOpensInSystem => 'Kus süsteem selle avab';
+  @override
+  String get exportOpensInLibrary => 'Selle kogu kaust';
   @override
   String get annotationNoteSuffix => 'Märkus';
   @override
