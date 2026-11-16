@@ -290,6 +290,41 @@ void main() {
       expect(view.topAnchor!.line, read);
     });
 
+    testWidgets('as a line is dropped once the reader has scrolled '
+        'meanwhile', (tester) async {
+      final buffer = SourceBuffer.fromText(_book(400));
+      final controller = ScrollController();
+      final scan = Completer<DocumentScan?>();
+      final view = await open(tester, buffer, controller, scan);
+      // A `[[note#Heading]]` past the top, waiting for the scan.
+      view.jumpToLine(saved.line);
+      await tester.pump();
+      await tester.drag(find.byType(MarkdownReadView), const Offset(0, -300));
+      for (var frame = 0; frame < 30; frame++) {
+        await tester.pump(const Duration(milliseconds: 16));
+      }
+      final read = view.topAnchor!.line;
+      expect(read, greaterThan(0));
+
+      scan.complete(DocumentScan.of(buffer));
+      await tester.pumpAndSettle();
+      expect(view.topAnchor!.line, read);
+    });
+
+    testWidgets('is the last one asked for', (tester) async {
+      final buffer = SourceBuffer.fromText(_book(400));
+      final controller = ScrollController();
+      final scan = Completer<DocumentScan?>();
+      final view = await open(tester, buffer, controller, scan);
+      view.jumpToLine(500);
+      view.showAnchor(saved);
+      await tester.pump();
+
+      scan.complete(DocumentScan.of(buffer));
+      await tester.pumpAndSettle();
+      expect(view.topAnchor!.line, saved.line);
+    });
+
     testWidgets('is still gone to after a tap that moved nothing', (
       tester,
     ) async {
