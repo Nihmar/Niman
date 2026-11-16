@@ -466,20 +466,25 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
           _show(buffer, result, keepTop: _head);
           _head = false;
         });
-        if (kept != null && (kept.line > 0 || kept.fraction > 0)) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) showAnchor(kept);
-          });
-        }
         final jump = _pendingJump;
         _pendingJump = null;
+        final anchor = _pendingAnchor;
+        _pendingAnchor = null;
+        // Not over a place asked for meanwhile, which moved the page every
+        // frame the two took turns; and not under a reader moving the page.
+        if (kept != null &&
+            jump == null &&
+            anchor == null &&
+            (kept.line > 0 || kept.fraction > 0)) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) _jumps.keep(kept);
+          });
+        }
         if (jump != null) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) jumpToLine(jump);
           });
         }
-        final anchor = _pendingAnchor;
-        _pendingAnchor = null;
         if (anchor != null) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) showAnchor(anchor);
@@ -631,19 +636,28 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
       availableWidth,
       enabled: widget.selectionActions == null,
     );
+    // What the reader does to the page, for the moves the view makes on
+    // its own to give way to ([ReadJumps.readerMoving]).
     return _cost.timed(
-      () => CustomScrollView(
-        controller: _scroll,
-        physics: const ContentClampPhysics(),
-        slivers: readSlivers(
-          entries: _entries,
-          heights: heights,
-          padding: padding,
-          width: availableWidth,
-          head: _head,
-          parser: widget.parser,
-          mathCache: widget.mathCache,
-          blockAt: _blockAt,
+      () => Listener(
+        onPointerDown: (_) => _jumps.pointerDown(),
+        onPointerUp: (_) => _jumps.pointerUp(),
+        onPointerCancel: (_) => _jumps.pointerUp(),
+        onPointerSignal: (_) => _jumps.readerMoved(),
+        onPointerPanZoomStart: (_) => _jumps.readerMoved(),
+        child: CustomScrollView(
+          controller: _scroll,
+          physics: const ContentClampPhysics(),
+          slivers: readSlivers(
+            entries: _entries,
+            heights: heights,
+            padding: padding,
+            width: availableWidth,
+            head: _head,
+            parser: widget.parser,
+            mathCache: widget.mathCache,
+            blockAt: _blockAt,
+          ),
         ),
       ),
     );

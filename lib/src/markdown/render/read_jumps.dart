@@ -45,12 +45,59 @@ final class ReadJumps {
   /// moves nothing.
   static const int maxAttempts = 12;
 
+  /// How many pointers are down on the view: a finger on the page, or a
+  /// mouse button held on it.
+  int _down = 0;
+
+  /// Counts what the reader did to move the page: a pointer put down on
+  /// it, a wheel turned or a trackpad scrolled over it.
+  ///
+  /// A move settles over the frames after it, and each pass jumps — which
+  /// ends a drag or a fling under way, and pulls the page back from under
+  /// a wheel. So a pass stops once the reader has moved the page since the
+  /// move began: the reader's place is the reader's.
+  int _moves = 0;
+
+  /// A pointer went down on the view.
+  void pointerDown() {
+    _down++;
+    _moves++;
+  }
+
+  /// A pointer down on the view went up, or was cancelled.
+  void pointerUp() {
+    if (_down > 0) _down--;
+  }
+
+  /// The reader moved the page without a pointer down: a wheel, a
+  /// trackpad.
+  void readerMoved() => _moves++;
+
+  /// Whether the reader is moving the page now: a pointer is down on it,
+  /// or a fling it let go of is still running.
+  bool get readerMoving {
+    final controller = scroll();
+    return _down > 0 ||
+        (controller.hasClients &&
+            controller.position.isScrollingNotifier.value);
+  }
+
+  /// Puts [anchor] back at the top as [toAnchor] does — unless the reader
+  /// is moving the page, which the view then leaves where the reader takes
+  /// it.
+  void keep(ScrollAnchor anchor) {
+    if (!readerMoving) toAnchor(anchor);
+  }
+
   /// One pass of a line jump: jump to where the map says entry [index]
-  /// starts, then look again after the frame that landed.
-  void toEntry(int index, {int attempt = 0}) {
+  /// starts, then look again after the frame that landed — unless the
+  /// reader has moved the page since the first pass, [since] by
+  /// [_moves].
+  void toEntry(int index, {int attempt = 0, int? since}) {
     final heights = entries.heights;
     final controller = scroll();
-    if (heights == null || !controller.hasClients) return;
+    final moves = since ?? _moves;
+    if (heights == null || !controller.hasClients || moves != _moves) return;
     final offset = heights
         .offsetOf(index)
         .clamp(0.0, controller.position.maxScrollExtent);
@@ -64,7 +111,7 @@ final class ReadJumps {
     if (attempt >= maxAttempts) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted()) return;
-      toEntry(index, attempt: attempt + 1);
+      toEntry(index, attempt: attempt + 1, since: moves);
     });
   }
 
@@ -96,10 +143,11 @@ final class ReadJumps {
   /// Scrolls the view so [anchor]'s line is at its top, as far into it as
   /// the anchor says — and again after each frame that measured the blocks
   /// it landed among, as [toEntry] does.
-  void toAnchor(ScrollAnchor anchor, {int attempt = 0}) {
+  void toAnchor(ScrollAnchor anchor, {int attempt = 0, int? since}) {
     final heights = entries.heights;
     final scroll = this.scroll();
-    if (heights == null || !scroll.hasClients) return;
+    final moves = since ?? _moves;
+    if (heights == null || !scroll.hasClients || moves != _moves) return;
     final found = entries.indexAt(anchor.line);
     if (found == null) return;
     final index = entries.hosts.entryOf(found);
@@ -123,21 +171,23 @@ final class ReadJumps {
     }
     if (attempt >= maxAttempts) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted()) toAnchor(anchor, attempt: attempt + 1);
+      if (mounted()) toAnchor(anchor, attempt: attempt + 1, since: moves);
     });
   }
 
   /// Goes to the note's end, and again after each frame that measured the
-  /// rows it landed on and moved the end — as long as it moves.
-  void toEnd({int attempt = 0}) {
+  /// rows it landed on and moved the end — as long as it moves, and the
+  /// reader does not.
+  void toEnd({int attempt = 0, int? since}) {
     final scroll = this.scroll();
-    if (!scroll.hasClients) return;
+    final moves = since ?? _moves;
+    if (!scroll.hasClients || moves != _moves) return;
     final end = scroll.position.maxScrollExtent;
     if ((scroll.position.pixels - end).abs() <= 0.5 && attempt > 0) return;
     scroll.jumpTo(end);
     if (attempt >= maxAttempts) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted()) toEnd(attempt: attempt + 1);
+      if (mounted()) toEnd(attempt: attempt + 1, since: moves);
     });
   }
 }
