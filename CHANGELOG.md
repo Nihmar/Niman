@@ -6,6 +6,46 @@ This file ships inside the build and feeds the in-app changelog (the
 launch dialog after an update and the screen under Settings → Diagnostics
 and info). Update it in the release commit, before the tag.
 
+## [0.3.6] - 2026-11-16
+
+A tablet gets a shell made for a thumb, a book can be read aloud and says
+how much of it is left, and a PDF prints on the paper you pick.
+
+On a tablet the rail labels its destinations, the note's own top row holds
+**Edit | Read**, the formatting toolbar sits above the keyboard, and in
+portrait the tree opens over the note and steps aside while you write. In
+landscape a tapped task opens in a panel beside the Todo list. Books read
+up to 250%, show how much is left of the chapter and of the book — and the
+time it takes — and on Android are read aloud with the system's voice. A
+long book no longer jumps when you scroll it before it has finished loading.
+
+A PDF is printed on A0-A5, Letter, Legal or Tabloid (**Settings → Export**),
+and a library can have its exports' dialog open in its own folder. On a
+computer Niman no longer checks for updates itself: **Settings → Updates**
+opens the release page, and you install the new version as you installed
+this one. Android keeps its checks.
+
+### Added
+- **Tablet**: a wide shell redrawn for a thumb — a labelled rail, **Edit | Read** in the note's top row, the toolbar above the keyboard, the tree over the note in portrait, and a task panel beside the Todo list in landscape (#1266)
+- **Books**: the text size goes up to 250% (#1274)
+- **Books**: a line by the book's row shows how much is left of the chapter and of the book, and the reading time left (#1275)
+- **Books**: read aloud on Android with the system's text-to-speech; the other platforms may get it later (#1276)
+- **Export**: the PDF's paper is a setting, A4 by default, and a kanban board counts its columns on it (#1285)
+- **Export**: a library can open its exports' save dialog in its own folder; on Android the picker starts there for a note (#1286)
+
+### Changed
+- **Updates**: on Linux, Windows and macOS the Updates area opens the release page instead of checking for and downloading new versions (#1270)
+- **Todo**: a task's link opens the note in a tab of its own instead of replacing the one on show (#1268)
+
+### Fixed
+- **Read view**: a long book scrolled before it has loaded stays where you take it — no jumping, no drag or fling cut short — and a saved place or a heading asked for meanwhile gives way to your scroll, the keys included, but not to a tap
+- **Links**: a link to a heading of a note already open lands on the heading, and a heading typed with its own `## ` completes as one level (#1268)
+- **Export**: a folder's HTML and PDF zips link the files they copy, by wikilink or by a Markdown link naming the file (#1278, #1279)
+- **Attachments**: a picture inserted or captured from the web is linked from the note's folder in a library that writes Markdown links, so other tools open it (#1282)
+
+### Other
+- The library session hands out its tree, the app's settings and the library's as objects of their own (#1258)
+
 ## [0.3.5] - 2026-11-11
 
 A screenshot pastes into a note, a picture dropped twice is copied once,
