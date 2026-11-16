@@ -13,6 +13,7 @@ import 'package:katex_dart/katex_dart.dart';
 import 'package:niman/src/markdown/background_scan.dart';
 import 'package:niman/src/markdown/read_parser.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
+import 'package:niman/src/markdown/render/read_jumps.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/preview/math_cache.dart';
 
@@ -248,6 +249,30 @@ void main() {
     }
   });
 
+  testWidgets('a place asked for takes over from one still settling', (
+    tester,
+  ) async {
+    final buffer = SourceBuffer.fromText(_book(400));
+    final controller = ScrollController();
+    final scan = Completer<DocumentScan?>()..complete(DocumentScan.of(buffer));
+    final view = await open(tester, buffer, controller, scan);
+    await tester.pumpAndSettle();
+    expect(view.scanning, isFalse);
+
+    // A voice reading on asks for the next block before the last settled.
+    view
+      ..showAnchor((line: 300, fraction: 0.0))
+      ..showAnchor((line: 700, fraction: 0.0));
+    var moved = 0;
+    controller.addListener(() => moved++);
+    await tester.pumpAndSettle();
+
+    expect(view.topAnchor!.line, 700);
+    // Each pass of the older move put the page back at its own place, and
+    // the newer one's took it away again: both ran their every pass.
+    expect(moved, lessThan(ReadJumps.maxAttempts), reason: '$moved moves');
+  });
+
   group('a place asked for before the rest is read', () {
     // Past the top shown while the rest of the book is read: a book's saved
     // place, which waits for the scan.
@@ -316,8 +341,9 @@ void main() {
       final controller = ScrollController();
       final scan = Completer<DocumentScan?>();
       final view = await open(tester, buffer, controller, scan);
-      view.jumpToLine(500);
-      view.showAnchor(saved);
+      view
+        ..jumpToLine(500)
+        ..showAnchor(saved);
       await tester.pump();
 
       scan.complete(DocumentScan.of(buffer));
