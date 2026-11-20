@@ -2166,6 +2166,9 @@ final class MacedonianStrings extends Strings {
   @override
   String get lintRuleSplitParagraphLines => 'Раздели ги редовите во пасуси';
   @override
+  String get lintRuleHardBreaksAsParagraphs =>
+      'Претвори ги присилните прекини на ред во пасуси';
+  @override
   String get tidyOnCloseTitle => 'Средување на Markdown при затворање';
   @override
   String get tidyOnCloseSubtitle =>

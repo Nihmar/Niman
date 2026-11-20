@@ -10,8 +10,11 @@
 /// What a paragraph is, is the engine's own block tree's to say, so code —
 /// fenced or indented — tables, math, HTML, frontmatter, headings and link
 /// reference definitions are never touched. A quote's lines stay together,
-/// and a list item's are the list's. Only a soft line break is split: a
-/// line ending in a hard break keeps the line under it.
+/// and a list item's are the list's. A soft line break is split by
+/// `LintRule.splitParagraphLines`; a hard break only by
+/// `LintRule.hardBreaksAsParagraphs` — a book saved with its paragraphs as
+/// `<br>` — which drops the break with it, and otherwise keeps the line
+/// under it.
 ///
 /// A blank line can change what the line under it is: `2001. A year` goes
 /// on with a paragraph, and after a blank line opens a list; a lazy line
@@ -30,14 +33,21 @@ import 'package:niman/src/markdown/block_tree.dart';
 typedef _Place = ({String path, bool first});
 
 /// [source] with a blank line before every line that goes on with a
-/// paragraph after a soft break. A line keeps the `\r` it ended with, and
+/// paragraph: after a soft break when [soft], after a hard break when
+/// [hard], the break then dropped. A line keeps the `\r` it ended with, and
 /// the blank line gets one too.
-String splitParagraphLines(String source) {
+String splitParagraphLines(
+  String source, {
+  bool soft = true,
+  bool hard = false,
+}) {
   final before = _paragraphLines(source);
   final lines = source.split('\n');
   final cuts = <int>{
     for (final line in before.keys)
-      if (!before[line]!.first && !endsInHardBreak(lines[line - 1])) line,
+      if (!before[line]!.first &&
+          (endsInHardBreak(lines[line - 1]) ? hard : soft))
+        line,
   };
   while (cuts.isNotEmpty) {
     final cut = _cut(lines, cuts);
@@ -51,11 +61,17 @@ String splitParagraphLines(String source) {
   return source;
 }
 
-/// [lines] joined back, a blank line before each of [cuts].
+/// [lines] joined back, a blank line before each of [cuts] and the line
+/// above it without its hard break: at the end of a paragraph a backslash
+/// is a backslash, not a break.
 String _cut(List<String> lines, Set<int> cuts) {
   final out = <String>[];
   for (var at = 0; at < lines.length; at++) {
-    if (cuts.contains(at)) out.add(lines[at].endsWith('\r') ? '\r' : '');
+    if (cuts.contains(at)) {
+      out
+        ..last = withoutHardBreak(out.last)
+        ..add(lines[at].endsWith('\r') ? '\r' : '');
+    }
     out.add(lines[at]);
   }
   return out.join('\n');

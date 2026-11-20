@@ -105,7 +105,7 @@ abstract interface class LibraryPreferences {
   Future<void> setTidyOnClose({required bool enabled});
 
   /// The #72 rules turned off, by id (`LintRule.id`); the rest run when a
-  /// note is tidied. Empty — the default — means every rule runs.
+  /// note is tidied. The default is `LintRule.offByDefaultIds`.
   Future<Set<String>> get lintRulesOff;
 
   /// Sets (and persists) the rules turned off.

@@ -2143,6 +2143,9 @@ final class SlovenianStrings extends Strings {
   @override
   String get lintRuleSplitParagraphLines => 'Razdeli vrstice v odstavke';
   @override
+  String get lintRuleHardBreaksAsParagraphs =>
+      'Pretvori prisilne prelome vrstic v odstavke';
+  @override
   String get tidyOnCloseTitle => 'Pospravi Markdown ob zaprtju';
   @override
   String get tidyOnCloseSubtitle =>

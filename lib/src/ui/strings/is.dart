@@ -2145,6 +2145,9 @@ final class IcelandicStrings extends Strings {
   @override
   String get lintRuleSplitParagraphLines => 'Skipta línum í málsgreinar';
   @override
+  String get lintRuleHardBreaksAsParagraphs =>
+      'Breyta þvinguðum línuskiptum í málsgreinar';
+  @override
   String get tidyOnCloseTitle => 'Taka til í Markdown við lokun';
   @override
   String get tidyOnCloseSubtitle =>

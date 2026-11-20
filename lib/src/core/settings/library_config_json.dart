@@ -61,19 +61,33 @@ Set<String> _todoCollapsedSectionsFrom(Object? raw) {
   };
 }
 
-/// Reads a `lintRulesOff` list out of the settings file: the #72 rules
-/// this library has turned off, by [LintRule.id].
+/// The #72 rules that do not run in this library, by [LintRule.id], out
+/// of the settings file's `lintRulesOff` and `lintRulesOn` lists.
 ///
-/// The rules *left out* are stored, not the ones on, so a rule added in a
-/// later build runs without a migration — and an unknown id (a rule a
-/// newer build wrote, or one since removed) is dropped.
-Set<String> _lintRulesOffFrom(Object? raw) {
-  if (raw is! List) return const <String>{};
+/// The file stores what a library changed from the defaults: the rules on
+/// by default it turned off, and the ones off by default it turned on. So a
+/// rule added in a later build runs, or not, as it ships without a
+/// migration — and an unknown id (a rule a newer build wrote, or one since
+/// removed) is dropped.
+Set<String> _lintRulesOffFrom(Object? off, Object? on) {
+  final turnedOff = _ids(off);
+  final turnedOn = _ids(on);
   return <String>{
-    for (final id in raw)
-      if (id is String && LintRule.values.any((rule) => rule.id == id)) id,
+    for (final rule in LintRule.values)
+      if (rule.onByDefault
+          ? turnedOff.contains(rule.id)
+          : !turnedOn.contains(rule.id))
+        rule.id,
   };
 }
+
+/// The strings of [raw], when it is a list.
+Set<String> _ids(Object? raw) => raw is List
+    ? <String>{
+        for (final id in raw)
+          if (id is String) id,
+      }
+    : const <String>{};
 
 /// Reads a `spellDictionaries` list out of the settings file.
 ///
@@ -125,6 +139,7 @@ const Set<String> _knownKeys = {
   'linkPreview',
   'frontmatterPanel',
   'lintRulesOff',
+  'lintRulesOn',
   'treeSort',
   'todoCollapsedSections',
   'treeView',
@@ -225,7 +240,7 @@ LibraryConfig libraryConfigFromJsonMap(Map<String, Object?> json) {
     cascadeChecklist: _boolOr(json['cascadeChecklist'], true),
     linkPreview: _boolOr(json['linkPreview'], true),
     frontmatterPanel: _boolOr(json['frontmatterPanel'], true),
-    lintRulesOff: _lintRulesOffFrom(json['lintRulesOff']),
+    lintRulesOff: _lintRulesOffFrom(json['lintRulesOff'], json['lintRulesOn']),
     // The enum's name is the stored id (#726): a value a later build
     // added reads back as the default here, which is what the setting
     // has always done with an unknown one.
@@ -380,14 +395,18 @@ Map<String, Object?> libraryConfigToJsonMap(LibraryConfig config) {
   final off = config.features.toJson();
   if (off.isNotEmpty) json['features'] = off;
   if (config.featuresReviewed) json['featuresReviewed'] = true;
-  if (config.lintRulesOff.isNotEmpty) {
-    // Canonical order, so the file does not churn on a set rebuilt
-    // insertion-ordered differently.
-    json['lintRulesOff'] = [
-      for (final rule in LintRule.values)
-        if (config.lintRulesOff.contains(rule.id)) rule.id,
-    ];
-  }
+  // What the library changed from the defaults, in canonical order, so the
+  // file does not churn on a set rebuilt insertion-ordered differently.
+  final rulesOff = [
+    for (final rule in LintRule.values)
+      if (rule.onByDefault && config.lintRulesOff.contains(rule.id)) rule.id,
+  ];
+  if (rulesOff.isNotEmpty) json['lintRulesOff'] = rulesOff;
+  final rulesOn = [
+    for (final rule in LintRule.values)
+      if (!rule.onByDefault && !config.lintRulesOff.contains(rule.id)) rule.id,
+  ];
+  if (rulesOn.isNotEmpty) json['lintRulesOn'] = rulesOn;
   for (final entry in config.extra.entries) {
     if (_knownKeys.contains(entry.key)) continue;
     json[entry.key] = entry.value;

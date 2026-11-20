@@ -1364,6 +1364,8 @@ final class AppStrings {
   static String get lintRuleJoinParagraphLines => _s.lintRuleJoinParagraphLines;
   static String get lintRuleSplitParagraphLines =>
       _s.lintRuleSplitParagraphLines;
+  static String get lintRuleHardBreaksAsParagraphs =>
+      _s.lintRuleHardBreaksAsParagraphs;
   static String get typewriterSubtitle => _s.typewriterSubtitle;
   static String get zenMode => _s.zenMode;
   static String get zoomIn => _s.zoomIn;

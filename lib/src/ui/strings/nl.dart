@@ -2175,6 +2175,9 @@ final class DutchStrings extends Strings {
   @override
   String get lintRuleSplitParagraphLines => 'Regels opsplitsen in alinea’s';
   @override
+  String get lintRuleHardBreaksAsParagraphs =>
+      'Geforceerde regeleinden omzetten in alinea’s';
+  @override
   String get tidyOnCloseTitle => 'Markdown opruimen bij sluiten';
   @override
   String get tidyOnCloseSubtitle =>

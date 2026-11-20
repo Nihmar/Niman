@@ -2185,6 +2185,9 @@ final class SpanishStrings extends Strings {
   @override
   String get lintRuleSplitParagraphLines => 'Separar las líneas en párrafos';
   @override
+  String get lintRuleHardBreaksAsParagraphs =>
+      'Convertir los saltos de línea forzados en párrafos';
+  @override
   String get tidyOnCloseTitle => 'Ordenar el Markdown al cerrar';
   @override
   String get tidyOnCloseSubtitle =>

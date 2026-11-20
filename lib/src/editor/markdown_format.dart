@@ -26,6 +26,8 @@
 /// * with [LintRule.splitParagraphLines], which wins over joining but for
 ///   a quote's lines, each line of a paragraph outside a list and a quote
 ///   becomes a paragraph of its own, a blank line before it;
+/// * with [LintRule.hardBreaksAsParagraphs], off unless a library turns
+///   it on, so does a line under a hard break, the break dropped;
 /// * a heading gets exactly one space after its hashes (`#Title`, which
 ///   is a paragraph and not a heading at all, is left alone: tidying is
 ///   not the place to change what a line means);
@@ -65,9 +67,10 @@ final RegExp _heading = RegExp(r'^(\s{0,3})(#{1,6})[ \t]*(\S.*)?$');
 
 /// Tidies [source]; an empty note stays empty.
 ///
-/// [rules] are the #72 rules to apply; null applies them all.
+/// [rules] are the #72 rules to apply; null applies the ones a library
+/// runs until it chooses ([LintRule.defaults]).
 String formatMarkdown(String source, {Set<LintRule>? rules}) {
-  final on = rules ?? LintRule.all;
+  final on = rules ?? LintRule.defaults;
   if (source.trim().isEmpty) return source.isEmpty ? source : _newline;
   // Splitting a paragraph's lines wins over joining them, but for a
   // quote's, which stay together.
@@ -79,7 +82,10 @@ String formatMarkdown(String source, {Set<LintRule>? rules}) {
     outside: join && !split,
     inQuotes: join,
   );
-  final text = split ? splitParagraphLines(joined) : joined;
+  final hard = on.contains(LintRule.hardBreaksAsParagraphs);
+  final text = split || hard
+      ? splitParagraphLines(joined, soft: split, hard: hard)
+      : joined;
   final out = <String>[];
   _Unit? last;
   for (final block in _units(text)) {

@@ -133,7 +133,8 @@ sync) in `.niman/settings.json`.
 | `cascadeChecklist` | true | Ticking a checklist item ticks the tasks nested under it (**Settings → Editor → Tick nested checkboxes**); clearing a parent leaves its children as they are |
 | `linkPreview` | true | Whether hovering a link previews the note it points at (**Settings → Editor → Preview links**): a card at the pointer in the read view, with Ctrl (⌘) held in the editor, and a sheet from a long press on a touch screen (see [links](links.md#preview-a-link)) |
 | `frontmatterPanel` | true | Whether a note's frontmatter is drawn as the properties panel above it (**Settings → Editor → Properties panel**): closed until it is opened, away while the note is scrolled past its head. Off, a note is its own text everywhere (see [frontmatter](organization.md)) |
-| `lintRulesOff` | [] (= all rules) | The #72 rules turned off, by id (`tight-lists`, `task-marker`, `list-spacing`, `closing-fence`, `fence-language`, `join-wrapped-items`, `join-paragraph-lines`, `split-paragraph-lines`), chosen in **Settings → Editor → Markdown rules**; a rule added in a later build runs unless it is turned off |
+| `lintRulesOff` | [] | The #72 rules on by default turned off, by id (`tight-lists`, `task-marker`, `list-spacing`, `closing-fence`, `fence-language`, `join-wrapped-items`, `join-paragraph-lines`, `split-paragraph-lines`), chosen in **Settings → Editor → Markdown rules**; a rule added in a later build runs, or not, as it ships |
+| `lintRulesOn` | [] | The #72 rules off by default turned on, by id (`hard-breaks-as-paragraphs`), chosen in the same place |
 | `spellDictionaries` | [] (= locale default) | hunspell dictionaries, selection order |
 | `reminderShowTokens` | false | Keep `+`/`@`/`#` markers in reminder notifications |
 | `journalFolder` | `Journal` | Where the [journal](journal.md)'s entries go (empty = the root) |

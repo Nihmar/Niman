@@ -2189,6 +2189,9 @@ final class GermanStrings extends Strings {
   @override
   String get lintRuleSplitParagraphLines => 'Zeilen in Absätze aufteilen';
   @override
+  String get lintRuleHardBreaksAsParagraphs =>
+      'Erzwungene Zeilenumbrüche in Absätze umwandeln';
+  @override
   String get tidyOnCloseTitle => 'Markdown beim Schließen aufräumen';
   @override
   String get tidyOnCloseSubtitle =>
