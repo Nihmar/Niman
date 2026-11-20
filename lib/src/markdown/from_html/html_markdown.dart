@@ -31,12 +31,18 @@ typedef MarkdownWithAnchors = ({String markdown, Map<String, int> anchors});
 /// the picture out. [link] does the same for a link's `href`. [embed]
 /// writes the picture's name and its escaped alt text as the note embeds
 /// it: a Markdown image unless the caller says otherwise.
+///
+/// With [breaksAsParagraphs] a paragraph's lines, cut at its `<br>`s, are
+/// paragraphs of their own, for a page that writes each of them so, as an
+/// AO3 download does; a capture or a paste keeps them as the line breaks
+/// they are. Headings, table cells and list items keep theirs either way.
 final class HtmlMarkdown {
   /// A converter with the caller's own ways to name pictures and links.
   const new({
     required this.picture,
     required this.link,
     this.embed = markdownImage,
+    this.breaksAsParagraphs = false,
   });
 
   /// The name a picture's `src` is written under, or null to leave it out.
@@ -48,6 +54,9 @@ final class HtmlMarkdown {
   /// The target a link's `href` is written under.
   final String Function(String href) link;
 
+  /// Whether the lines of a paragraph, cut at its `<br>`s, are paragraphs.
+  final bool breaksAsParagraphs;
+
   /// The Markdown of the page [source].
   MarkdownWithAnchors convert(String source) {
     final document = html.parse(source);
@@ -58,7 +67,10 @@ final class HtmlMarkdown {
         pictures: HtmlPictures(picture: picture, embed: embed),
         link: link,
       );
-      HtmlBlocks(inline).walk(body.nodes, out, const BlockContext());
+      HtmlBlocks(
+        inline,
+        breaksAsParagraphs: breaksAsParagraphs,
+      ).walk(body.nodes, out, const BlockContext());
     }
     return (markdown: out.text, anchors: out.anchors);
   }

@@ -11,11 +11,16 @@ import 'package:niman/src/markdown/text_escape.dart';
 
 /// Writes the blocks of a page, one conversion at a time.
 final class HtmlBlocks {
-  /// A block writer that sets inline content with [inline].
-  const new(this.inline);
+  /// A block writer that sets inline content with [inline]; with
+  /// [breaksAsParagraphs] the lines of a paragraph, cut at its `<br>`s, are
+  /// paragraphs of their own.
+  const new(this.inline, {this.breaksAsParagraphs = false});
 
   /// The writer of inline content.
   final HtmlInline inline;
+
+  /// Whether a `<br>` between two lines of a paragraph ends the paragraph.
+  final bool breaksAsParagraphs;
 
   /// The blocks of [nodes], in order.
   void walk(Iterable<Node> nodes, MarkdownBlocks out, BlockContext context) {
@@ -23,9 +28,8 @@ final class HtmlBlocks {
     final run = <Node>[];
     void flush() {
       if (run.isEmpty) return;
-      final text = inline.of(run).trim();
+      _paragraphs(run, out, context);
       run.clear();
-      if (text.isNotEmpty) out.add(context.wrap(escapeMarkdownLineStart(text)));
     }
 
     for (final node in nodes) {
@@ -52,10 +56,7 @@ final class HtmlBlocks {
         out.add(context.wrap('${'#' * level} $text'));
       case 'p':
         _anchorsWithin(element, out);
-        final text = inline.of(element.nodes).trim();
-        if (text.isNotEmpty) {
-          out.add(context.wrap(escapeMarkdownLineStart(text)));
-        }
+        _paragraphs(element.nodes, out, context);
       case 'blockquote':
         walk(element.nodes, out, context.quoted());
       case 'ul' || 'ol':
@@ -79,6 +80,16 @@ final class HtmlBlocks {
       default:
         // A container — section, div, figure, article, aside…: its blocks.
         walk(element.nodes, out, context);
+    }
+  }
+
+  /// The paragraphs of the inline content [nodes].
+  void _paragraphs(List<Node> nodes, MarkdownBlocks out, BlockContext context) {
+    for (final text in inline.paragraphsOf(
+      nodes,
+      splitAtBreaks: breaksAsParagraphs,
+    )) {
+      out.add(context.wrap(escapeMarkdownLineStart(text)));
     }
   }
 

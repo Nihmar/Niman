@@ -148,6 +148,69 @@ void main() {
     });
   });
 
+  group('breaksAsParagraphs', () {
+    final paragraphs = HtmlMarkdown(
+      picture: (src) => src,
+      link: (href) => href,
+      breaksAsParagraphs: true,
+    );
+
+    String markdownOf(String body) =>
+        paragraphs.convert('<html><body>$body</body></html>').markdown;
+
+    // An AO3 download: a chapter is one <p>, a <br /> to each paragraph.
+    const chapter =
+        '<p>First line.<br />\n    Second <em>line</em>.<br /><br />\n'
+        '    Third.</p>';
+
+    test('the lines of a paragraph are paragraphs of their own', () {
+      expect(markdownOf(chapter), 'First line.\n\nSecond *line*.\n\nThird.');
+    });
+
+    test('off, they stay one paragraph of hard breaks', () {
+      expect(markdown(chapter), 'First line.\\\nSecond *line*.\\\n\\\nThird.');
+    });
+
+    test('two breaks in a row, or at the ends, make no empty paragraph', () {
+      expect(markdownOf('<p><br/>a<br/><br/><br/>b<br/></p>'), 'a\n\nb');
+      expect(markdownOf('<p><br/></p><p>a</p>'), 'a');
+    });
+
+    test('the loose words between blocks are cut too', () {
+      expect(
+        markdownOf('<div>a<br/>b<h2>H</h2>c<br/>d</div>'),
+        'a\n\nb\n\n## H\n\nc\n\nd',
+      );
+    });
+
+    test('a break inside an emphasis or a link cuts each piece', () {
+      expect(
+        markdownOf('<p><em>a<br/>b</em> <a href="x">c<br/>d</a></p>'),
+        '*a*\n\n*b* [c](<x>)\n\n[d](<x>)',
+      );
+    });
+
+    test('a quote keeps its paragraphs, each on a quote line', () {
+      expect(
+        markdownOf('<blockquote><p>a<br/>b</p></blockquote>'),
+        '> a\n\n> b',
+      );
+    });
+
+    test('a heading, a table cell and a list item keep their breaks', () {
+      expect(markdownOf('<h2>a<br/>b</h2>'), '## a\\\nb');
+      expect(
+        markdownOf('<table><tr><td>a<br/>b</td></tr></table>'),
+        '| a b |\n| --- |',
+      );
+      expect(markdownOf('<ul><li>a<br/>b</li></ul>'), '- a\\\nb');
+    });
+
+    test('a line that would open a list is escaped as a paragraph', () {
+      expect(markdownOf('<p>x<br/>- y<br/>1. z</p>'), 'x\n\n\\- y\n\n1\\. z');
+    });
+  });
+
   group('escaping', () {
     test("a book's #word is not a tag", () {
       expect(markdown('<p>see #chapter</p>'), r'see \#chapter');
