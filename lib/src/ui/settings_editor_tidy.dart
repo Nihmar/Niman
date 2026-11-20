@@ -73,8 +73,8 @@ final class SettingsEditorTidy extends StatelessWidget {
 /// Asks for the rules a tidy applies (#72), from [lintRulesOff], the ones
 /// it skips now; null when the dialog is cancelled.
 ///
-/// The dialog edits the *off* set, the way the settings file stores it: a
-/// rule added in a later build then runs with no migration.
+/// The dialog edits the *off* set; **Reset** goes back to the rules a
+/// library runs until it chooses ([LintRule.offByDefaultIds] off).
 Future<Set<String>?> showLintRulesDialog(
   BuildContext context,
   Set<String> lintRulesOff,
@@ -118,7 +118,12 @@ Future<Set<String>?> showLintRulesDialog(
         actions: [
           TextButton(
             key: const Key('lint-rules-reset'),
-            onPressed: () => setDialogState(off.clear),
+            // Back to the rules a library runs until it chooses.
+            onPressed: () => setDialogState(
+              () => off
+                ..clear()
+                ..addAll(LintRule.offByDefaultIds),
+            ),
             child: Text(AppStrings.lintRulesReset),
           ),
           TextButton(
@@ -147,4 +152,5 @@ String lintRuleLabel(LintRule rule) => switch (rule) {
   LintRule.joinWrappedItems => AppStrings.lintRuleJoinWrappedItems,
   LintRule.joinParagraphLines => AppStrings.lintRuleJoinParagraphLines,
   LintRule.splitParagraphLines => AppStrings.lintRuleSplitParagraphLines,
+  LintRule.hardBreaksAsParagraphs => AppStrings.lintRuleHardBreaksAsParagraphs,
 };

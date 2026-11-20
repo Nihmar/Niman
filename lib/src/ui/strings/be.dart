@@ -2151,6 +2151,9 @@ final class BelarusianStrings extends Strings {
   @override
   String get lintRuleSplitParagraphLines => 'Падзяляць радкі на абзацы';
   @override
+  String get lintRuleHardBreaksAsParagraphs =>
+      'Ператвараць прымусовыя разрывы радка ў абзацы';
+  @override
   String get tidyOnCloseTitle => 'Упарадкоўваць Markdown пры закрыцці';
   @override
   String get tidyOnCloseSubtitle =>

@@ -2146,6 +2146,9 @@ final class SlovakStrings extends Strings {
   @override
   String get lintRuleSplitParagraphLines => 'Rozdeliť riadky na odseky';
   @override
+  String get lintRuleHardBreaksAsParagraphs =>
+      'Previesť vynútené zalomenia riadka na odseky';
+  @override
   String get tidyOnCloseTitle => 'Upratať Markdown pri zatvorení';
   @override
   String get tidyOnCloseSubtitle =>

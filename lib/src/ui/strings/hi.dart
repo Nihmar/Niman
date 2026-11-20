@@ -2119,6 +2119,9 @@ final class HindiStrings extends Strings {
   String get lintRuleSplitParagraphLines =>
       'पंक्तियों को अनुच्छेदों में बाँटें';
   @override
+  String get lintRuleHardBreaksAsParagraphs =>
+      'ज़बरन लाइन ब्रेक को अनुच्छेदों में बदलें';
+  @override
   String get tidyOnCloseTitle => 'बंद करते समय मार्कडाउन व्यवस्थित करें';
   @override
   String get tidyOnCloseSubtitle =>

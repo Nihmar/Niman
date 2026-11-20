@@ -2139,6 +2139,9 @@ final class CzechStrings extends Strings {
   @override
   String get lintRuleSplitParagraphLines => 'Rozdělit řádky na odstavce';
   @override
+  String get lintRuleHardBreaksAsParagraphs =>
+      'Převést vynucená zalomení řádku na odstavce';
+  @override
   String get tidyOnCloseTitle => 'Uklidit Markdown při zavření';
   @override
   String get tidyOnCloseSubtitle =>

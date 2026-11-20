@@ -2158,6 +2158,9 @@ final class SwedishStrings extends Strings {
   @override
   String get lintRuleSplitParagraphLines => 'Dela upp rader i stycken';
   @override
+  String get lintRuleHardBreaksAsParagraphs =>
+      'Gör tvingade radbrytningar till stycken';
+  @override
   String get tidyOnCloseTitle => 'Städa upp i Markdown vid stängning';
   @override
   String get tidyOnCloseSubtitle =>

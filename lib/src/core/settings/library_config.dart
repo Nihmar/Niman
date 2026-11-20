@@ -80,7 +80,7 @@ final class LibraryConfig {
     this.cascadeChecklist = true,
     this.linkPreview = true,
     this.frontmatterPanel = true,
-    this.lintRulesOff = const <String>{},
+    this.lintRulesOff = LintRule.offByDefaultIds,
     this.treeSort = TreeSort.nameAsc,
     this.todoCollapsedSections = defaultTodoCollapsedSections,
     this.treeView = TreeView.list,
@@ -229,11 +229,13 @@ final class LibraryConfig {
   /// chrome while it is closed, and away once the note is scrolled past it.
   final bool frontmatterPanel;
 
-  /// The #72 rules this library has turned off, by [LintRule.id].
+  /// The #72 rules that do not run in this library, by [LintRule.id].
   ///
-  /// The rules *left out* are stored: a rule added in a later build runs
-  /// without a migration, and an id a newer build wrote is dropped on
-  /// read. Empty — the default — means every rule runs.
+  /// The file stores only what the library changed from the defaults: a
+  /// rule added in a later build runs, or not, as it ships without a
+  /// migration, and an id a newer build wrote is dropped on read. The
+  /// default is [LintRule.offByDefaultIds]: every rule runs but the ones
+  /// off until a library turns them on.
   final Set<String> lintRulesOff;
 
   /// The tree's sort order (default [TreeSort.nameAsc]).

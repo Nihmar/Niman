@@ -2165,6 +2165,9 @@ final class FinnishStrings extends Strings {
   @override
   String get lintRuleSplitParagraphLines => 'Jaa rivit kappaleiksi';
   @override
+  String get lintRuleHardBreaksAsParagraphs =>
+      'Muuta pakotetut rivinvaihdot kappaleiksi';
+  @override
   String get tidyOnCloseTitle => 'Siivoa Markdown suljettaessa';
   @override
   String get tidyOnCloseSubtitle =>

@@ -2152,6 +2152,9 @@ final class BosnianStrings extends Strings {
   @override
   String get lintRuleSplitParagraphLines => 'Razdvoji redove u pasuse';
   @override
+  String get lintRuleHardBreaksAsParagraphs =>
+      'Pretvori prisilne prijelome reda u pasuse';
+  @override
   String get tidyOnCloseTitle => 'Posloži Markdown pri zatvaranju';
   @override
   String get tidyOnCloseSubtitle =>

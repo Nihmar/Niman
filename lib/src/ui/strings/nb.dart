@@ -2135,6 +2135,9 @@ final class NorwegianStrings extends Strings {
   @override
   String get lintRuleSplitParagraphLines => 'Del linjer opp i avsnitt';
   @override
+  String get lintRuleHardBreaksAsParagraphs =>
+      'Gjør tvungne linjeskift om til avsnitt';
+  @override
   String get tidyOnCloseTitle => 'Rydd opp i Markdown ved lukking';
   @override
   String get tidyOnCloseSubtitle =>

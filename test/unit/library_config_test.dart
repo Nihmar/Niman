@@ -18,6 +18,7 @@ import 'package:niman/src/core/settings/library_settings.dart'
         defaultHighlightColour,
         defaultListFolder;
 import 'package:niman/src/library/new_item_folder.dart';
+import 'package:niman/src/lint/lint_rule.dart';
 import 'package:niman/src/todo/todo_sections.dart' show todoDoneSectionId;
 import 'package:path/path.dart' as p;
 
@@ -270,22 +271,49 @@ void main() {
         'tight-lists',
         'closing-fence',
       });
-      // Nothing off writes no key and reads back as every rule on.
+      // The defaults write no key and read back as every rule on but the
+      // ones off until a library turns them on.
       await store.write(LibraryConfig.defaults);
-      expect((await store.read()).lintRulesOff, isEmpty);
+      expect(await store.file.readAsString(), isNot(contains('lintRules')));
+      expect((await store.read()).lintRulesOff, LintRule.offByDefaultIds);
+    });
+
+    test('a rule off by default turned on round trips', () async {
+      final lib = await makeLibrary();
+      final store = LibraryConfigStore(lib.path);
+      await store.write(
+        LibraryConfig.defaults.copyWith(lintRulesOff: const {'tight-lists'}),
+      );
+      // The file stores what changed from the defaults.
+      final json = await store.file.readAsString();
+      expect(json, contains('"lintRulesOff"'));
+      expect(json, contains('"lintRulesOn"'));
+      expect((await store.read()).lintRulesOff, const {'tight-lists'});
     });
 
     test('an unknown or malformed lint rule id is dropped', () async {
       expect(
         LibraryConfig.fromJsonMap(const {
           'lintRulesOff': ['tight-lists', 'byVibes'],
+          'lintRulesOn': ['hard-breaks-as-paragraphs', 'byVibes'],
         }).lintRulesOff,
         const {'tight-lists'},
       );
       expect(
         LibraryConfig.fromJsonMap(const {'lintRulesOff': 'tight-lists'})
             .lintRulesOff,
-        isEmpty,
+        LintRule.offByDefaultIds,
+      );
+    });
+
+    test('the rules off by default are the ones the enum says', () {
+      expect(LintRule.offByDefaultIds, {
+        for (final rule in LintRule.values)
+          if (!rule.onByDefault) rule.id,
+      });
+      expect(
+        LintRule.defaults,
+        isNot(contains(LintRule.hardBreaksAsParagraphs)),
       );
     });
 

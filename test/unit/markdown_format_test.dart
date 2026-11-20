@@ -20,19 +20,19 @@ String tidy(String source, {Set<LintRule>? rules}) {
   return once;
 }
 
-/// Every rule but the one joining an item's wrapped lines (#549): what
+/// Every default rule but the one joining an item's wrapped lines (#549): what
 /// the tidying makes of a wrapped item it leaves wrapped.
-final Set<LintRule> _keepWraps = {...LintRule.all}
+final Set<LintRule> _keepWraps = {...LintRule.defaults}
   ..remove(LintRule.joinWrappedItems);
 
-/// Every rule but the ones joining and splitting a paragraph's lines
+/// Every default rule but the ones joining and splitting a paragraph's lines
 /// outside a list.
-final Set<LintRule> _keepParagraphs = {...LintRule.all}
+final Set<LintRule> _keepParagraphs = {...LintRule.defaults}
   ..remove(LintRule.joinParagraphLines)
   ..remove(LintRule.splitParagraphLines);
 
-/// Every rule but the one splitting a paragraph's lines: they are joined.
-final Set<LintRule> _joinParagraphs = {...LintRule.all}
+/// Every default rule but the one splitting a paragraph's lines: they are joined.
+final Set<LintRule> _joinParagraphs = {...LintRule.defaults}
   ..remove(LintRule.splitParagraphLines);
 
 void main() {

@@ -2167,6 +2167,9 @@ final class AlbanianStrings extends Strings {
   @override
   String get lintRuleSplitParagraphLines => 'Ndaji rreshtat në paragrafë';
   @override
+  String get lintRuleHardBreaksAsParagraphs =>
+      'Ktheji ndërprerjet e detyruara të rreshtit në paragrafë';
+  @override
   String get tidyOnCloseTitle => 'Rregullo Markdown-in në mbyllje';
   @override
   String get tidyOnCloseSubtitle =>

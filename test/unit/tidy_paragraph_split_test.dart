@@ -47,8 +47,8 @@ void main() {
   });
 
   test('the rule is on unless a library turns it off', () {
-    expect(LintRule.all, contains(LintRule.splitParagraphLines));
-    final off = {...LintRule.all}..remove(LintRule.splitParagraphLines);
+    expect(LintRule.defaults, contains(LintRule.splitParagraphLines));
+    final off = {...LintRule.defaults}..remove(LintRule.splitParagraphLines);
     // Off, the lines are joined, as they were before the rule.
     expect(tidy('one\ntwo\n', rules: off), 'one two\n');
   });
@@ -66,7 +66,7 @@ void main() {
     // Joined, as the join rule writes a quote.
     expect(tidy('> quoted\n> more\nlazy\n'), '> quoted more lazy\n');
     // Kept as written with the join off.
-    final noJoin = {...LintRule.all}..remove(LintRule.joinParagraphLines);
+    final noJoin = {...LintRule.defaults}..remove(LintRule.joinParagraphLines);
     const quote = '> quoted\n> more\n';
     expect(tidy(quote, rules: noJoin), quote);
     // An annotation's link back stays on the line under its quote.
@@ -121,5 +121,67 @@ void main() {
 
   test('a Windows line ending stays on the line it was on', () {
     expect(splitParagraphLines('one\r\ntwo\r\n'), 'one\r\n\r\ntwo\r\n');
+    expect(
+      splitParagraphLines('one  \r\ntwo\r\n', soft: false, hard: true),
+      'one\r\n\r\ntwo\r\n',
+    );
+  });
+
+  group('with hard breaks as paragraphs', () {
+    final hard = {...LintRule.defaults, LintRule.hardBreaksAsParagraphs};
+
+    test('the rule is off unless a library turns it on', () {
+      expect(
+        LintRule.defaults,
+        isNot(contains(LintRule.hardBreaksAsParagraphs)),
+      );
+      kept('one  \ntwo\n');
+    });
+
+    test("a book's lines, each ending in a break, become paragraphs", () {
+      // As reported: a book saved from AO3, its `<br>` written as breaks.
+      expect(
+        tidy(
+          '## Chapter 1\n'
+          '\n'
+          'The gates of Hogwarts loomed ahead.  \n'
+          'It had been eight years.  \n'
+          'He didn’t feel ready.  \n'
+          'But then again, he hadn’t felt much of anything in months.\n',
+          rules: hard,
+        ),
+        '## Chapter 1\n'
+        '\n'
+        'The gates of Hogwarts loomed ahead.\n'
+        '\n'
+        'It had been eight years.\n'
+        '\n'
+        'He didn’t feel ready.\n'
+        '\n'
+        'But then again, he hadn’t felt much of anything in months.\n',
+      );
+    });
+
+    test('a backslash break goes with its line', () {
+      // At the end of a paragraph a backslash would be a backslash.
+      expect(tidy('one\\\ntwo\n', rules: hard), 'one\n\ntwo\n');
+      // An escaped backslash is no break, and stays.
+      expect(tidy('one\\\\\ntwo\n', rules: hard), 'one\\\\\n\ntwo\n');
+    });
+
+    test('with the split off, only the hard breaks are split', () {
+      final hardOnly = {...hard}..remove(LintRule.splitParagraphLines);
+      expect(
+        tidy('one  \ntwo\nthree\n', rules: hardOnly),
+        'one\n\ntwo three\n',
+      );
+    });
+
+    test("a quote's breaks and a list item's stay", () {
+      const quote = '> Eight years after the war.  \n> He expects silence.\n';
+      expect(tidy(quote, rules: hard), quote);
+      const item = '- one  \n  two\n';
+      expect(tidy(item, rules: hard), item);
+    });
   });
 }

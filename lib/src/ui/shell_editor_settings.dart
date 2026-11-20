@@ -46,7 +46,7 @@ final class ShellEditorSettings {
     this.cascadeChecklist = true,
     this.linkPreview = true,
     this.frontmatterPanel = true,
-    this.lintRulesOff = const <String>{},
+    this.lintRulesOff = LintRule.offByDefaultIds,
   });
 
   /// What the shell shows before the first read lands.

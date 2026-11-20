@@ -2128,6 +2128,9 @@ final class EnglishStrings extends Strings {
   @override
   String get lintRuleSplitParagraphLines => 'Split lines into paragraphs';
   @override
+  String get lintRuleHardBreaksAsParagraphs =>
+      'Turn hard line breaks into paragraphs';
+  @override
   String get tidyOnCloseTitle => 'Tidy the Markdown on close';
   @override
   String get tidyOnCloseSubtitle =>

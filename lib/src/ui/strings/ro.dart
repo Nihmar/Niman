@@ -2172,6 +2172,9 @@ final class RomanianStrings extends Strings {
   @override
   String get lintRuleSplitParagraphLines => 'Separă rândurile în paragrafe';
   @override
+  String get lintRuleHardBreaksAsParagraphs =>
+      'Transformă întreruperile de rând forțate în paragrafe';
+  @override
   String get tidyOnCloseTitle => 'Aranjează Markdown-ul la închidere';
   @override
   String get tidyOnCloseSubtitle =>

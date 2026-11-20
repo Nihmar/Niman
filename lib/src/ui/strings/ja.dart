@@ -2015,6 +2015,8 @@ final class JapaneseStrings extends Strings {
   @override
   String get lintRuleSplitParagraphLines => '行ごとに段落を分ける';
   @override
+  String get lintRuleHardBreaksAsParagraphs => '強制改行を段落に変える';
+  @override
   String get tidyOnCloseTitle => '閉じるときに Markdown を整える';
   @override
   String get tidyOnCloseSubtitle =>

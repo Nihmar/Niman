@@ -2124,6 +2124,9 @@ final class EstonianStrings extends Strings {
   @override
   String get lintRuleSplitParagraphLines => 'Jaga read lõikudeks';
   @override
+  String get lintRuleHardBreaksAsParagraphs =>
+      'Muuda sunnitud reavahetused lõikudeks';
+  @override
   String get tidyOnCloseTitle => 'Korrasta Markdown sulgemisel';
   @override
   String get tidyOnCloseSubtitle =>

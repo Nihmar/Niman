@@ -133,6 +133,19 @@ void main() {
     expect(await controller.readNote('note.md'), 'one two\n');
   });
 
+  testWidgets('a hard break stays, unless the library turns its rule on', (
+    tester,
+  ) async {
+    await pumpWithNote(tester, 'one  \ntwo\n');
+    await runFromMenu(tester);
+    expect(await controller.readNote('note.md'), 'one  \ntwo\n');
+
+    // Turned on, as a library of books would: no rule off at all.
+    await controller.setLintRulesOff(const <String>{});
+    await runFromMenu(tester);
+    expect(await controller.readNote('note.md'), 'one\n\ntwo\n');
+  });
+
   testWidgets("with both rules off, a paragraph's lines stay", (tester) async {
     // Switched off in Settings, the command tidies the rest — the trailing
     // space goes — and leaves the paragraph wrapped.

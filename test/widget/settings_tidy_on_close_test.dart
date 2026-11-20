@@ -53,51 +53,44 @@ void main() {
     await tester.scrollUntilVisible(row, 200);
     await tester.ensureVisible(row);
     await tester.pumpAndSettle();
-    // Everything is on to start with, and the row says so.
-    expect(
-      find.text(
-        AppStrings.lintRulesValue(
-          LintRule.values.length,
-          LintRule.values.length,
-        ),
-      ),
-      findsOneWidget,
-    );
+    // Every rule is on to start with but the ones off by default, and the
+    // row says so.
+    final all = LintRule.values.length;
+    final onByDefault = LintRule.defaults.length;
+    expect(find.text(AppStrings.lintRulesValue(onByDefault, all)), findsOne);
 
     await tester.tap(row);
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('lint-rules-dialog')), findsOne);
     for (final rule in LintRule.values) {
       final box = find.byKey(Key('lint-rule-${rule.id}'));
-      expect(tester.widget<CheckboxListTile>(box).value, isTrue);
+      expect(tester.widget<CheckboxListTile>(box).value, rule.onByDefault);
     }
 
-    // Turn one rule off and save.
+    // Turn one rule off, the hard-break one on, and save.
     await tester.tap(find.byKey(const Key('lint-rule-tight-lists')));
+    await tester.pumpAndSettle();
+    final hard = find.byKey(const Key('lint-rule-hard-breaks-as-paragraphs'));
+    await tester.ensureVisible(hard);
+    await tester.tap(hard);
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('lint-rules-save')));
     await tester.pumpAndSettle();
     expect(await controller.lintRulesOff, {'tight-lists'});
-    expect(
-      find.text(
-        AppStrings.lintRulesValue(
-          LintRule.values.length - 1,
-          LintRule.values.length,
-        ),
-      ),
-      findsOneWidget,
-    );
+    expect(find.text(AppStrings.lintRulesValue(all - 1, all)), findsOne);
 
-    // And the dialog remembers it, with the reset putting it back.
+    // And the dialog remembers it, with the reset putting the defaults back.
     await tester.tap(row);
     await tester.pumpAndSettle();
     final tight = find.byKey(const Key('lint-rule-tight-lists'));
     expect(tester.widget<CheckboxListTile>(tight).value, isFalse);
+    expect(tester.widget<CheckboxListTile>(hard).value, isTrue);
     await tester.tap(find.byKey(const Key('lint-rules-reset')));
     await tester.pumpAndSettle();
     expect(tester.widget<CheckboxListTile>(tight).value, isTrue);
+    expect(tester.widget<CheckboxListTile>(hard).value, isFalse);
     await tester.tap(find.byKey(const Key('lint-rules-save')));
     await tester.pumpAndSettle();
-    expect(await controller.lintRulesOff, isEmpty);
+    expect(await controller.lintRulesOff, LintRule.offByDefaultIds);
   });
 }

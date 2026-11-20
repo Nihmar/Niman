@@ -542,13 +542,20 @@ changing what it says:
   paragraphs one per line, no blank line between them, reads as it was
   written instead of running together. Only a plain line break is set
   apart: a line ending in a hard break (two spaces, or a backslash)
-  keeps the line under it. A quote's lines stay together, a list item's
-  are the list's, and code, tables, math, HTML, frontmatter and headings
-  keep their lines. A line that would read as something else after a
+  keeps the line under it, unless the rule below is on. A quote's lines
+  stay together, a list item's are the list's, and code, tables, math,
+  HTML, frontmatter and headings keep their lines. A line that would read as something else after a
   blank line — `2001. A year`, which goes on with a paragraph but would
   open a list on its own — stays where it was. This is the **Split lines
   into paragraphs** rule, and it wins over the next one: turn it off in
   **Markdown rules** to have your paragraphs joined instead;
+- with **Turn hard line breaks into paragraphs** on — it is off until
+  you turn it on in **Markdown rules** — a line under a hard break
+  becomes a paragraph of its own too, and the break goes. It is for a
+  book saved as a web page, whose paragraphs came as line breaks and now
+  end in two spaces each; elsewhere a hard break is a line break you
+  asked for, in a poem or an address, and stays. A quote's and a list
+  item's breaks always stay;
 - a paragraph wrapped over several lines — a quote's, and with the rule
   above off a note's own and a footnote's — is written back on one, its
   lines joined with a single space; the editor wraps it on screen. Only

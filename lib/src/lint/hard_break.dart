@@ -13,3 +13,15 @@ bool endsInHardBreak(String line) {
   }
   return slashes.isOdd;
 }
+
+/// [line] without the hard break it ends in — its trailing spaces, or the
+/// backslash — and as it is when it ends in none. The `\r` stays.
+String withoutHardBreak(String line) {
+  if (!endsInHardBreak(line)) return line;
+  final cr = line.endsWith('\r');
+  final text = cr ? line.substring(0, line.length - 1) : line;
+  final kept = text.endsWith('  ')
+      ? text.trimRight()
+      : text.substring(0, text.length - 1);
+  return cr ? '$kept\r' : kept;
+}

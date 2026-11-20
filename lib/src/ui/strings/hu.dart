@@ -2161,6 +2161,9 @@ final class HungarianStrings extends Strings {
   @override
   String get lintRuleSplitParagraphLines => 'Sorok szétválasztása bekezdésekre';
   @override
+  String get lintRuleHardBreaksAsParagraphs =>
+      'Kényszerített sortörések bekezdésekké alakítása';
+  @override
   String get tidyOnCloseTitle => 'Markdown rendbetétele bezáráskor';
   @override
   String get tidyOnCloseSubtitle =>

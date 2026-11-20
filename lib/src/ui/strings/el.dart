@@ -2223,6 +2223,9 @@ final class GreekStrings extends Strings {
   String get lintRuleSplitParagraphLines =>
       'Διαχωρισμός γραμμών σε παραγράφους';
   @override
+  String get lintRuleHardBreaksAsParagraphs =>
+      'Οι αναγκαστικές αλλαγές γραμμής γίνονται παράγραφοι';
+  @override
   String get tidyOnCloseTitle => 'Τακτοποίηση του Markdown στο κλείσιμο';
   @override
   String get tidyOnCloseSubtitle =>

@@ -2152,6 +2152,9 @@ final class UkrainianStrings extends Strings {
   @override
   String get lintRuleSplitParagraphLines => 'Розділяти рядки на абзаци';
   @override
+  String get lintRuleHardBreaksAsParagraphs =>
+      'Перетворювати примусові розриви рядка на абзаци';
+  @override
   String get tidyOnCloseTitle => 'Упорядковувати Markdown під час закриття';
   @override
   String get tidyOnCloseSubtitle =>

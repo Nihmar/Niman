@@ -5,6 +5,7 @@ import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/library/session.dart';
+import 'package:niman/src/lint/lint_rule.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/ui/settings_area.dart';
 import 'package:niman/src/ui/settings_editor_column.dart';
@@ -57,7 +58,7 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
   bool _linkPreview = true;
   bool _frontmatterPanel = true;
   bool _tidyOnClose = true;
-  Set<String> _lintRulesOff = const <String>{};
+  Set<String> _lintRulesOff = LintRule.offByDefaultIds;
   bool? _autofocusEditor;
   LinkType _linkType = LinkType.wikilink;
   LinkUpdate _linkUpdate = LinkUpdate.automatic;

@@ -1969,6 +1969,8 @@ final class ChineseStrings extends Strings {
   @override
   String get lintRuleSplitParagraphLines => '将每行拆分为段落';
   @override
+  String get lintRuleHardBreaksAsParagraphs => '将强制换行转为段落';
+  @override
   String get tidyOnCloseTitle => '关闭时整理 Markdown';
   @override
   String get tidyOnCloseSubtitle =>

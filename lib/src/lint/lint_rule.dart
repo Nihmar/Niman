@@ -40,13 +40,36 @@ enum LintRule {
   /// Each line of a paragraph outside a list and a quote — a note's own, a
   /// footnote's — is a paragraph of its own, a blank line before it: text
   /// pasted with its paragraphs one per line reads as it was written.
-  splitParagraphLines('split-paragraph-lines');
+  splitParagraphLines('split-paragraph-lines'),
 
-  new(this.id);
+  /// A line that goes on with a paragraph after a hard break — a book
+  /// whose every line ends in two spaces — is a paragraph of its own, its
+  /// break dropped. Off unless a library turns it on: elsewhere a hard
+  /// break is the line break its writer asked for, in a poem or an
+  /// address.
+  hardBreaksAsParagraphs(_hardBreaksAsParagraphs, onByDefault: false);
+
+  new(this.id, {this.onByDefault = true});
 
   /// The id the rule is stored and enabled under.
   final String id;
 
+  /// Whether the rule runs in a library that never chose: every rule but
+  /// [hardBreaksAsParagraphs].
+  final bool onByDefault;
+
+  static const String _hardBreaksAsParagraphs = 'hard-breaks-as-paragraphs';
+
   /// Every rule, in the order the settings list them.
   static final Set<LintRule> all = Set<LintRule>.unmodifiable(LintRule.values);
+
+  /// The rules a library that never chose runs.
+  static final Set<LintRule> defaults = Set<LintRule>.unmodifiable({
+    for (final rule in LintRule.values)
+      if (rule.onByDefault) rule,
+  });
+
+  /// The ids of the rules that are off until a library turns them on: what
+  /// a library that never chose has turned off.
+  static const Set<String> offByDefaultIds = {_hardBreaksAsParagraphs};
 }

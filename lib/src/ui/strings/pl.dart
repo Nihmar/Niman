@@ -2173,6 +2173,9 @@ final class PolishStrings extends Strings {
   @override
   String get lintRuleSplitParagraphLines => 'Dziel wiersze na akapity';
   @override
+  String get lintRuleHardBreaksAsParagraphs =>
+      'Zamieniaj wymuszone podziały wiersza na akapity';
+  @override
   String get tidyOnCloseTitle => 'Porządkuj Markdown przy zamykaniu';
   @override
   String get tidyOnCloseSubtitle =>

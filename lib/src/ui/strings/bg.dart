@@ -2169,6 +2169,9 @@ final class BulgarianStrings extends Strings {
   @override
   String get lintRuleSplitParagraphLines => 'Разделяне на редовете на абзаци';
   @override
+  String get lintRuleHardBreaksAsParagraphs =>
+      'Принудителните нови редове стават абзаци';
+  @override
   String get tidyOnCloseTitle => 'Подреждане на Markdown при затваряне';
   @override
   String get tidyOnCloseSubtitle =>
