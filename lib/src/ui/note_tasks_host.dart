@@ -14,9 +14,9 @@ import 'package:niman/src/ui/todo_link_host.dart';
 import 'package:niman/src/ui/todo_list_actions.dart';
 import 'package:niman/src/ui/todo_task_edit.dart';
 
-/// The shell's tasks as a note's views use them: the three places *Tasks for
-/// this note* lives in (under the note, the side panel, the phone's sheet)
-/// share one.
+/// The shell's tasks as a note's views use them: the places *Tasks for
+/// this note* lives in (the status row's counter, the side panel, the phone's
+/// sheet) share one.
 ///
 /// Reading is [map]; a tick and an edit go through the same [TodoController]
 /// and the same dialog as the Todo tab's rows, and adding hands the text to

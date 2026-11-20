@@ -17,22 +17,13 @@ import 'package:path/path.dart' as p;
 /// the note that holds the link; past the last page, "Show more" reads on.
 final class LinksToNoteList extends StatelessWidget {
   /// The rows of [controller]; [onOpenNote] opens the note at a path.
-  const new({
-    required this.controller,
-    required this.onOpenNote,
-    this.shrinkWrap = false,
-    super.key,
-  });
+  const new({required this.controller, required this.onOpenNote, super.key});
 
   /// Who links to the note.
   final LinksToNoteController controller;
 
   /// Opens the note at a library-relative path.
   final ValueChanged<String> onOpenNote;
-
-  /// Whether the list is as tall as its rows (inside the note view's
-  /// section, which bounds it) rather than as tall as the room it is given.
-  final bool shrinkWrap;
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +54,6 @@ final class LinksToNoteList extends StatelessWidget {
         final source = controller.source!;
         return ListView.builder(
           key: const Key('links-to-note'),
-          shrinkWrap: shrinkWrap,
           padding: const EdgeInsets.symmetric(vertical: 4),
           itemCount: referrers.items.length + (referrers.truncated ? 1 : 0),
           itemBuilder: (context, index) {

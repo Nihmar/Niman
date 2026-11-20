@@ -629,10 +629,11 @@ upright or turned, has no room for a note and a panel side by side, so
 this is a decision rather than an omission: the note's status row keeps
 its outline and spelling buttons there — both open as sheets — and the
 ⋮ menu opens the outline, the tags, *Links to this note* and *Tasks for
-this note* as sheets, the history as its screen. The *Links to this note*
-and *Tasks for this note* headers under the note are on every platform;
-on a wide window they step aside while the panel is open, since it holds
-the same lists. Where the panel shows,
+this note* as sheets, the history as its screen. On a wide window the
+status row also counts the notes and the open tasks that link the note —
+a link icon and a task icon with a number each, before the word count —
+and a click on one opens its pane in the panel; a phone has no counts,
+and the ⋮ menu's sheets are its way to the same lists. Where the panel shows,
 its left edge drags to make it wider or narrower, like the tree's edge.
 It stops growing before the note gets narrower than 360 px, and it
 keeps its width for the next launch.

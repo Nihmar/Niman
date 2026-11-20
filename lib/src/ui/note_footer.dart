@@ -1,14 +1,9 @@
-/// The rows under the open note: the frontmatter warning, the notes and the
-/// tasks that link it, the status row and the phone's toolbar (issue #100
-/// moved them out of `note_view.dart`).
+/// The rows under the open note: the frontmatter warning, the status row and
+/// the phone's toolbar (issue #100 moved them out of `note_view.dart`).
 library;
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/editor/note_column.dart';
-import 'package:niman/src/links/mention_reader.dart';
-import 'package:niman/src/ui/links_to_note_section.dart';
-import 'package:niman/src/ui/note_tasks_host.dart';
-import 'package:niman/src/ui/note_tasks_section.dart';
 import 'package:niman/src/ui/note_view_chrome.dart';
 
 /// The note's bottom chrome. Purely presentational: everything it reads
@@ -20,12 +15,6 @@ final class NoteFooter extends StatelessWidget {
     required this.loading,
     required this.ready,
     required this.frontmatterError,
-    required this.showRelated,
-    required this.linkSource,
-    required this.notePath,
-    required this.onOpenNote,
-    required this.showTasks,
-    required this.tasks,
     required this.statusRow,
     required this.toolbarBelow,
     required this.showToolbar,
@@ -44,25 +33,6 @@ final class NoteFooter extends StatelessWidget {
 
   /// The parser's message for the note's malformed frontmatter, or null.
   final String? frontmatterError;
-
-  /// Whether the notes and tasks that link this one show here: not while
-  /// the window's panel has them.
-  final bool showRelated;
-
-  /// Where the notes that link this one are read from.
-  final MentionSource? linkSource;
-
-  /// The note's path in the library, or null outside one.
-  final String? notePath;
-
-  /// Opens a note that links this one.
-  final ValueChanged<String> onOpenNote;
-
-  /// Whether the library's Todo feature is on.
-  final bool showTasks;
-
-  /// The tasks that link a note, or null with no library.
-  final NoteTasksHost? tasks;
 
   /// The status row.
   final Widget statusRow;
@@ -95,22 +65,6 @@ final class NoteFooter extends StatelessWidget {
         // it.
         if (!loading && frontmatterError != null)
           FrontmatterWarningBanner(message: frontmatterError!),
-        // The notes that link to this one (#842), under the note.
-        if (!loading && ready && showRelated)
-          NoteColumnPadding(
-            column: column,
-            child: LinksToNoteSection(
-              source: linkSource,
-              path: notePath,
-              onOpenNote: onOpenNote,
-            ),
-          ),
-        // The tasks that link it (#1152), under the links.
-        if (!loading && ready && showRelated && showTasks)
-          NoteColumnPadding(
-            column: column,
-            child: NoteTasksSection(host: tasks, path: notePath),
-          ),
         NoteColumnPadding(column: column, child: statusRow),
         // The toolbar fades + sizes in and out (hidden in preview
         // mode). It is only mounted once loaded, so it appears

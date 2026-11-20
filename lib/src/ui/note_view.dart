@@ -22,6 +22,7 @@ import 'package:niman/src/ui/note_links.dart';
 import 'package:niman/src/ui/note_load_error.dart';
 import 'package:niman/src/ui/note_place.dart';
 import 'package:niman/src/ui/note_read_pane.dart';
+import 'package:niman/src/ui/note_related_counters.dart';
 import 'package:niman/src/ui/note_services.dart';
 import 'package:niman/src/ui/note_session.dart';
 import 'package:niman/src/ui/note_source_pane.dart';
@@ -34,6 +35,7 @@ import 'package:niman/src/ui/note_view_handle.dart';
 import 'package:niman/src/ui/note_view_parts.dart';
 import 'package:niman/src/ui/pointer_density.dart';
 import 'package:niman/src/workspace/note_memento.dart';
+import 'package:niman/src/workspace/workspace.dart';
 import 'package:path/path.dart' as p;
 
 export 'package:niman/src/ui/note_save_pipeline.dart'
@@ -77,7 +79,7 @@ final class NoteView extends StatefulWidget {
     this.kindMode = true,
     this.outlineInDock = false,
     this.spellCheckInDock = false,
-    this.relatedInDock = false,
+    this.onShowRelated,
     this.onNoteKindChanged,
     this.onKindMarkdown,
     this.onPasteAsMarkdown,
@@ -201,9 +203,11 @@ final class NoteView extends StatefulWidget {
   /// keeps its button — the sheet is its way to the review.
   final bool spellCheckInDock;
 
-  /// Whether the window's panel is open on a wide layout: it has the notes
-  /// and tasks that link this one, so the rows under the note are left out.
-  final bool relatedInDock;
+  /// Opens the panel's pane of the notes (links) or tasks that link this
+  /// note (#1296): non-null on the wide layout only, where the status row
+  /// counts them and a tap on a count asks for the pane. The phone has no
+  /// counters; its ⋮ menu opens the sheets.
+  final ValueChanged<DockPane>? onShowRelated;
 
   /// Reports the loaded note's kind (the frontmatter `type` value, null =
   /// plain note); the shell shows the kind toggle for known kinds.
@@ -833,12 +837,6 @@ final class _NoteViewState extends State<NoteView>
             loading: _parts.session.loading,
             ready: _parts.session.ready,
             frontmatterError: _parts.stats.frontmatterError,
-            showRelated: !widget.relatedInDock,
-            linkSource: widget.services.linkSource,
-            notePath: _parts.libraryPath,
-            onOpenNote: (path) => widget.services.onOpenNote?.call(path, null),
-            showTasks: _parts.features.isOn(LibraryFeature.todo),
-            tasks: widget.services.tasks,
             statusRow: ListenableBuilder(
               listenable: _parts.templateCheck,
               builder: (context, _) => NoteStatusRow(
@@ -864,6 +862,16 @@ final class _NoteViewState extends State<NoteView>
                     ? null
                     : _parts.saves.saveInBackground,
                 statusActions: widget.statusActions,
+                related: widget.onShowRelated == null
+                    ? null
+                    : NoteRelatedCounters(
+                        linkSource: widget.services.linkSource,
+                        path: _parts.libraryPath,
+                        tasks: _parts.features.isOn(LibraryFeature.todo)
+                            ? widget.services.tasks
+                            : null,
+                        onShow: widget.onShowRelated!,
+                      ),
                 onOutline: _parts.links.openOutline,
                 onFind: () => _parts.sourceFind.open(),
                 onSpellCheck: _parts.commands.openSpellCheck,

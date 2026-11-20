@@ -87,6 +87,7 @@ final class NoteStatusRow extends StatelessWidget {
     this.showOutline = true,
     this.typewriter = false,
     this.templateProblems = 0,
+    this.related,
     this.onToggleTypewriter,
     this.onStatusTap,
     super.key,
@@ -120,6 +121,10 @@ final class NoteStatusRow extends StatelessWidget {
   /// there is something to count; it points at nothing the note's own marks
   /// do not already point at.
   final int templateProblems;
+
+  /// The counters of the notes and tasks that link the note (#1296), just
+  /// before the word count, or null where the layout has none (the phone).
+  final Widget? related;
 
   /// The saved/unsaved text right of the count.
   final String statusText;
@@ -345,6 +350,7 @@ final class NoteStatusRow extends StatelessWidget {
             ),
             const SizedBox(width: 10),
           ],
+          ?related,
           Text(
             AppStrings.wordCount(wordCount),
             style: labelStyle?.copyWith(

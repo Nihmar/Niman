@@ -8,8 +8,8 @@ import 'package:niman/src/ui/note_tasks_host.dart';
 import 'package:niman/src/ui/pointer_density.dart';
 import 'package:niman/src/ui/strings.dart';
 
-/// The tasks that link a note (#1152), the same list in the three places it
-/// lives in: under the note, in the side panel, in the phone's sheet.
+/// The tasks that link a note (#1152), the same list in the two places it
+/// lives in: the side panel and the phone's sheet.
 ///
 /// Add task heads it. The open tasks follow, the soonest due first and the
 /// undated last, then *Done (n)* folded, from `done.txt`. The rows come from
@@ -18,22 +18,13 @@ import 'package:niman/src/ui/strings.dart';
 /// task at all the list says so in a line, under Add task.
 final class NoteTasksList extends StatefulWidget {
   /// The tasks of [host] that link the note at library-relative [path].
-  const new({
-    required this.host,
-    required this.path,
-    this.shrinkWrap = false,
-    super.key,
-  });
+  const new({required this.host, required this.path, super.key});
 
   /// The tasks, and how to tick, edit and add one.
   final NoteTasksHost host;
 
   /// The note's library-relative path, or null for a note outside a library.
   final String? path;
-
-  /// Whether the list is as tall as its rows (inside the note view's section,
-  /// which bounds it) rather than as tall as the room it is given.
-  final bool shrinkWrap;
 
   @override
   State<NoteTasksList> createState() => _NoteTasksListState();
@@ -69,7 +60,6 @@ final class _NoteTasksListState extends State<NoteTasksList> {
         ];
         return ListView(
           key: const Key('tasks-for-note'),
-          shrinkWrap: widget.shrinkWrap,
           padding: const EdgeInsets.symmetric(vertical: 4),
           children: rows,
         );

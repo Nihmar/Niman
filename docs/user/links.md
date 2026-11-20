@@ -186,22 +186,24 @@ table or a list takes) draws nothing and leaves the anchor where it stands.
 
 Links go both ways in a library, and the open note shows the other one: the
 notes that **link to it**, each with the line it says the link on. It is in
-three places, one list:
+two places, one list, and a count on a wide window:
 
-- **under the note**, a header — *Links to this note*, with the count — that
-  opens onto the list and shuts again. It is always there while a library is
-  open, so it never appears under your thumb; with no one linking in, it opens
-  onto the words that say so. A note opened from outside a library has none,
-  and on a wide window it steps aside while the side panel is open — the
-  panel has the same list — and comes back when the panel is closed;
 - **in the side panel** on a wide window (beside the note from 1000 px up,
   over it below), the *Links* pane beside Outline, Tags and History,
   following the note in the focused pane;
 - **as a sheet on a phone**, from the note's ⋮ menu — *Links to this note* —
-  as the Outline and Tags are (see [platforms](platforms.md)).
+  as the Outline and Tags are (see [platforms](platforms.md));
+- **the count**, on a wide window: a link icon and a number at the right of
+  the note's status row, just before the word count — the number of notes
+  that link here, with a `+` when there are more than the first page. It is
+  always in its place while a library is open (the number arrives once the
+  index has answered, and a zero is dimmer), so nothing in the row moves when
+  it changes; a note opened from outside a library has none. A click opens
+  the *Links* pane. A phone has no count — its status row is full — and the
+  ⋮ menu opens the sheet.
 
-The tasks that link a note are listed the same way, in the same three places:
-see [Tasks for this note](tasks.md#tasks-for-this-note).
+The tasks that link a note are listed the same way, with their own count: see
+[Tasks for this note](tasks.md#tasks-for-this-note).
 
 A row is the note's name, its folder dimmed, and the line it says the link
 on, cut to two rows of the list (a long line is a window around the link, with

@@ -120,20 +120,21 @@ source of truth and syncs line by line like the rest of it.
 
 ## Tasks for this note
 
-A note shows the tasks that link it. It is in three places, one list, the
-way [Links to this note](links.md#links-to-this-note) is:
+A note shows the tasks that link it. It is in two places, one list, and a
+count on a wide window, the way
+[Links to this note](links.md#links-to-this-note) is:
 
-- **under the note**, a header — *Tasks for this note*, with the number of
-  open tasks — below *Links to this note*, that opens onto the list and shuts
-  again. It is always there while a library is open and the Todo feature is
-  on, so it never appears under your thumb; with no task linking in it opens
-  onto the words that say so. With the Todo feature off (Settings → Features)
-  there is no header, no pane and no menu entry. On a wide window the header
-  steps aside while the side panel is open, as *Links to this note* does;
 - **in the side panel** on a wide window, the *Tasks* pane, after Links and
   before History, following the note in the focused pane;
 - **as a sheet on a phone**, from the note's ⋮ menu — *Tasks for this note* —
-  as the Outline, Tags and Links are (see [platforms](platforms.md)).
+  as the Outline, Tags and Links are (see [platforms](platforms.md));
+- **the count**, on a wide window: a task icon and the number of open tasks
+  at the right of the note's status row, beside the links count and before
+  the word count. It is always in its place while a library is open and the
+  Todo feature is on (a zero is dimmer), and it follows the tasks as they are
+  ticked and added; a click opens the *Tasks* pane. With the Todo feature
+  off (Settings → Features) there is no count, no pane and no menu entry. A
+  phone has no count, and the ⋮ menu opens the sheet.
 
 **Add task** heads the list. The open tasks follow, the soonest due first and
 the ones with no due date last, in the order of `todo.txt`; then **Done (n)**,
