@@ -4,7 +4,8 @@
 /// **The rule.** A page is a book when its headings say so:
 ///
 /// - the chapters' heading level is the **shallowest level that occurs at
-///   least [minimumChapters] times** (`h2` for a page with one `h1`, its
+///   least [minimumChapters] times** ([chapterLevelOf], the rule a note
+///   exported as an EPUB splits by too: `h2` for a page with one `h1`, its
 ///   title, and chapters under it) — headings of a `nav`, an `aside` or a
 ///   footer do not count;
 /// - the page has at least [minimumBookCharacters] characters of text: a
@@ -25,11 +26,9 @@ library;
 
 import 'package:html/dom.dart';
 import 'package:html/parser.dart' as html;
+import 'package:niman/src/core/chapter_level.dart';
 import 'package:niman/src/import/html/book/html_book.dart';
 import 'package:niman/src/import/html/html_page.dart';
-
-/// How many headings of a level make it the chapters'.
-const int minimumChapters = 3;
 
 /// How much text a page has to be a book.
 const int minimumBookCharacters = 20000;
@@ -78,14 +77,7 @@ HtmlBook? readHeadingsBook(HtmlPage page) {
 
   walk(body);
   if (characters < minimumBookCharacters) return null;
-  final counts = <int, int>{};
-  for (final entry in found) {
-    counts[entry.level] = (counts[entry.level] ?? 0) + 1;
-  }
-  final level = [
-    for (final entry in counts.entries)
-      if (entry.value >= minimumChapters) entry.key,
-  ].fold<int?>(null, (best, at) => best == null || at < best ? at : best);
+  final level = chapterLevelOf([for (final entry in found) entry.level]);
   if (level == null) return null;
   final chapters = [
     for (final entry in found)

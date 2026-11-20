@@ -40,11 +40,24 @@ one file:
   says it is running while it runs — the engine printing, or the pages
   being drawn one by one — and can be stopped from the same dialog: a
   long note is minutes of work, not a hang.
-- **EPUB** — the note as a book of one chapter, for an e-reader: the same
-  page (`NoteHtml`) as XHTML, formulas as vectors, pictures inside the
-  file. A `cover:` key in the note's frontmatter names a picture the book
-  opens on. A wikilink out has nothing to point at, exactly as on a
-  single HTML page.
+- **EPUB** — the note as a book, for an e-reader: the same page
+  (`NoteHtml`) as XHTML, formulas as vectors, pictures inside the file.
+  A `cover:` key in the note's frontmatter names a picture the book opens
+  on. A wikilink out has nothing to point at, exactly as on a single HTML
+  page.
+
+  The book has a chapter per heading of the **shallowest level the note
+  uses at least three times** — the rule the import of a
+  [page that is a book](organization.md#a-page-that-is-a-book) reads
+  chapters by. A note whose chapters are `#` keeps its `##` as sections
+  inside them; a novel kept as one note — a `# Title`, then
+  `## Chapter 1`, `## Chapter 2`, … — is a chapter per `##`, each opening
+  on a page of its own and listed in the reader's contents by its
+  heading. What comes before the first chapter (the title, a summary, the
+  author's notes) is a page of its own, named after the note; the
+  footnotes are at the end of the last chapter, and a footnote mark or a
+  link to a heading of the note still lands where it points. A note with
+  no level used three times is one chapter.
 
 A task item prints as the box that marks it, the bullet off, so a
 checklist reads as one in the HTML, the PDF and the EPUB — inside a kanban

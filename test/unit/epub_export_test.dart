@@ -99,6 +99,81 @@ void main() {
     expect(nav, contains('href="text/note.xhtml"'));
   });
 
+  /// The chapters' files in spine order, the nav and every entry of a note
+  /// exported as [text].
+  Future<({List<String> files, String nav, Map<String, String> all})>
+  chaptersOf(String text) async {
+    final payload = await exportNoteEpub(
+      text: text,
+      title: 'Book',
+      path: 'Book.md',
+      root: root.path,
+      language: 'en',
+    );
+    final file = p.join(root.path, 'chapters.epub');
+    await File(file).writeAsBytes(payload.bytes);
+    final files = textEntries(file);
+    expectParses(files);
+    final opf = files['OEBPS/content.opf']!;
+    final hrefs = {
+      for (final m in RegExp(
+        r'<item id="(ch\d+)" href="([^"]+)"',
+      ).allMatches(opf))
+        m[1]!: m[2]!,
+    };
+    return (
+      files: [
+        for (final m in RegExp(r'<itemref idref="(ch\d+)"').allMatches(opf))
+          hrefs[m[1]]!,
+      ],
+      nav: files['OEBPS/nav.xhtml']!,
+      all: files,
+    );
+  }
+
+  test('a note chaptered at ## is a chapter per ##', () async {
+    final book = await chaptersOf(
+      '# Book\n\nBy someone.\n\n'
+      '## Chapter 1\n\nOne.[^1]\n\n'
+      '## Chapter 2\n\nTwo.\n\n### A scene\n\nStill two.\n\n'
+      '## Chapter 3\n\nThree.\n\n[^1]: A note.\n',
+    );
+    expect(book.files, [
+      'text/note-1.xhtml',
+      'text/note-2.xhtml',
+      'text/note-3.xhtml',
+      'text/note-4.xhtml',
+    ]);
+    // The opening, the title and the byline, is a page named by the note.
+    expect(book.nav, contains('<a href="text/note-1.xhtml">Book</a>'));
+    expect(book.nav, contains('<a href="text/note-2.xhtml">Chapter 1</a>'));
+    expect(book.nav, contains('<a href="text/note-4.xhtml">Chapter 3</a>'));
+    final two = book.all['OEBPS/text/note-3.xhtml']!;
+    expect(two, contains('A scene'));
+    expect(two, isNot(contains('Three.')));
+    // The footnote is the last chapter's; its mark in chapter 1 goes there.
+    expect(
+      book.all['OEBPS/text/note-2.xhtml'],
+      contains('href="note-4.xhtml#fn-'),
+    );
+  });
+
+  test('a note chaptered at # keeps its ## inside its chapters', () async {
+    final book = await chaptersOf(
+      '# One\n\nA.\n\n## Scene\n\nB.\n\n'
+      '# Two\n\n## Scene\n\n## Scene\n\n'
+      '# Three\n\nC.\n',
+    );
+    expect(book.files, [
+      'text/note-1.xhtml',
+      'text/note-2.xhtml',
+      'text/note-3.xhtml',
+    ]);
+    expect(book.nav, contains('<a href="text/note-1.xhtml">One</a>'));
+    expect(book.nav, isNot(contains('>Scene</a>')));
+    expect(book.all['OEBPS/text/note-1.xhtml'], contains('Scene'));
+  });
+
   test('an embed and an open callout are well-formed XHTML', () async {
     await File(p.join(root.path, 'photo.png')).writeAsBytes(<int>[1, 2, 3]);
     final payload = await exportNoteEpub(
