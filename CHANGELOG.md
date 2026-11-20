@@ -6,6 +6,39 @@ This file ships inside the build and feeds the in-app changelog (the
 launch dialog after an update and the screen under Settings → Diagnostics
 and info). Update it in the release commit, before the tag.
 
+## [0.3.7] - 2026-11-20
+
+A web page saved as a file becomes a note, a book downloaded as HTML
+becomes a book of notes, and the two rows under every note are gone.
+
+Drop an `.html` file on Niman, share it to Niman on Android, or pick
+**Library: Convert HTML to Markdown…**: the page's article comes in as a
+note, with its title, its source and its pictures — local ones copied, web
+ones downloaded. A book saved from Archive of Our Own, or any page long
+enough to be one, is cut into a note per chapter with an `index.md` that
+exports back to an EPUB. Importing a folder now converts the pages in it
+too, and rewrites the links between them to point at the notes.
+
+The *Links to this note* and *Tasks for this note* rows no longer take two
+lines under each note: on a wide screen the status row counts them, and a
+click opens the list; on a phone the note's ⋮ menu opens them, as before.
+**Tidy the Markdown** now sets apart paragraphs pasted one per line, and
+**New** from the Files view creates at the top of the library.
+
+### Added
+- **Import**: an HTML page becomes a note — its article, title, `source` and `author`, pictures copied or downloaded, links inside the page kept — from a drop, the tree's row menu, the palette, Settings → Maintenance, and Android's share and open (#1293)
+- **Import**: an HTML book — Archive of Our Own first, any long page with repeating chapter headings — becomes one note per chapter or one note for the book, with its tags in `index.md` (#1294)
+- **Import**: a folder's HTML pages are converted with the rest of the folder, their links rewritten to the notes and their pictures moved into attachments (#1295)
+- **Tidy**: a new rule, on by default, sets a paragraph's lines apart as paragraphs; a quote's lines stay together, and code is never touched (#1291)
+
+### Changed
+- **Note view**: the *Links* and *Tasks* rows under the note are gone; on a wide screen two counters in the status row open the lists, on a phone the ⋮ menu does (#1296)
+- **Files**: **New** from the Files view — the phone's button, the tree's footer, the tablet's rail — creates in the library's root instead of the open note's folder (#1290)
+- **Web capture**: the HTML converter keeps definition lists, folding sections, highlights, sub- and superscripts, task boxes, code languages and footnotes (#1292)
+
+### Fixed
+- **Android**: the *Links* sheet of a note nothing links to spans the screen instead of a narrow column (#1296)
+
 ## [0.3.6] - 2026-11-16
 
 A tablet gets a shell made for a thumb, a book can be read aloud and says
