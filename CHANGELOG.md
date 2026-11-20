@@ -6,6 +6,30 @@ This file ships inside the build and feeds the in-app changelog (the
 launch dialog after an update and the screen under Settings → Diagnostics
 and info). Update it in the release commit, before the tag.
 
+## [0.3.8] - 2026-11-20
+
+A book kept as one note exports as a book of chapters, and a book whose
+every line ends in a line break can be tidied into paragraphs.
+
+**Export as EPUB** of a note now cuts it into chapters at its headings: at
+the shallowest level that occurs at least three times, the same rule the
+HTML import reads a book's chapters by. A novel kept as one note — `# Title`,
+then `## Chapter 1`, `## Chapter 2` — gets a chapter per `##` and an entry
+for each in the reader's contents; what comes before the first chapter is
+a page of its own, and footnotes and links to headings follow the text to
+its new file.
+
+**Tidy the Markdown** has a new rule, off by default, that turns hard line
+breaks into paragraphs: a book saved from Archive of Our Own writes every
+line with a break at its end, so the rule that sets lines apart left it
+untouched. Turn it on under Settings → Editor → Markdown rules.
+
+### Added
+- **Tidy**: a new rule, off by default, turns a paragraph's hard line breaks into paragraph breaks; a quote's and a list item's breaks stay (#1299)
+
+### Changed
+- **EPUB export**: a note's EPUB has a chapter per heading of its chapter level, not one chapter for the whole note; a note with no level used three times stays one chapter, as before (#1300)
+
 ## [0.3.7] - 2026-11-20
 
 A web page saved as a file becomes a note, a book downloaded as HTML
