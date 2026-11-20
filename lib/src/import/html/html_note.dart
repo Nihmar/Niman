@@ -72,15 +72,13 @@ String htmlNote(
             );
     },
     link: (href) => isUnlinked(href)
-        ? unlinkedTarget
+        ? null
         : href.startsWith('#') && href.length > 1
         ? anchorTarget(href.substring(1))
         : href,
   ).convert(page.html);
   final body = withoutTitleHeading(
-    withoutUnlinked(
-      resolveAnchorLinks(converted.markdown, converted.anchors, title: title),
-    ),
+    resolveAnchorLinks(converted.markdown, converted.anchors, title: title),
     title,
   );
   final out = StringBuffer(_frontmatter(page, imported))..write('\n# $title\n');

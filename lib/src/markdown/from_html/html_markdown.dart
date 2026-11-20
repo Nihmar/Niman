@@ -52,8 +52,9 @@ final class HtmlMarkdown {
   /// How a picture, named, is written into the note.
   final String Function(String target, String alt) embed;
 
-  /// The target a link's `href` is written under.
-  final String Function(String href) link;
+  /// The target a link's `href` is written under, or null for no link: the
+  /// link's words are written as they are.
+  final String? Function(String href) link;
 
   /// Whether the lines of a paragraph, cut at its `<br>`s, are paragraphs.
   final bool breaksAsParagraphs;

@@ -20,8 +20,9 @@ final class HtmlInline {
   /// The page's pictures.
   final HtmlPictures pictures;
 
-  /// The target a link's `href` is written under.
-  final String Function(String href) link;
+  /// The target a link's `href` is written under, or null for no link: the
+  /// link's words are written as they are.
+  final String? Function(String href) link;
 
   /// The page's footnotes.
   final HtmlFootnotes footnotes;
@@ -113,11 +114,14 @@ final class HtmlInline {
         }
         final text = inner();
         final href = node.attributes['href'];
-        if (href == null || href.isEmpty || text.trim().isEmpty) {
+        final target = href == null || href.isEmpty || text.trim().isEmpty
+            ? null
+            : link(href);
+        // No target — none given, or the caller names none — is no link.
+        if (target == null) {
           out.write(text);
           return;
         }
-        final target = link(href);
         // A break that cuts the link in paragraphs makes a link of each.
         out.write(
           text

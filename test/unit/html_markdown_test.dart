@@ -356,6 +356,33 @@ void main() {
     });
   });
 
+  group('a link the caller gives no target', () {
+    final unlinked = HtmlMarkdown(
+      picture: (src) => src,
+      link: (href) => href.startsWith('x:') ? null : href,
+    );
+
+    String markdownOf(String body) =>
+        unlinked.convert('<html><body>$body</body></html>').markdown;
+
+    test('is its words, as an empty href is', () {
+      expect(
+        markdownOf(
+          '<p>a <a href="x:go">*b* <em>c</em></a> d <a href="">e</a> '
+          '<a href="https://example.org">f</a></p>',
+        ),
+        r'a \*b\* *c* d e [f](<https://example.org>)',
+      );
+    });
+
+    test('is nothing of a link around a picture', () {
+      expect(
+        markdownOf('<p><a href="x:go"><img src="a.png" alt="A"></a></p>'),
+        '![A](a.png)',
+      );
+    });
+  });
+
   group('breaksAsParagraphs', () {
     final paragraphs = HtmlMarkdown(
       picture: (src) => src,
