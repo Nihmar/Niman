@@ -16,6 +16,7 @@ import 'package:niman/src/import/html/html_conversion.dart';
 import 'package:niman/src/import/html/html_file.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/convert_progress_dialog.dart';
+import 'package:niman/src/ui/convert_words.dart';
 import 'package:niman/src/ui/folder_picker.dart';
 import 'package:niman/src/ui/html_convert_dialog.dart';
 import 'package:niman/src/ui/strings.dart';
@@ -25,7 +26,12 @@ import 'package:path/path.dart' as p;
 final class HtmlConvertFlow {
   /// Converts into [session]'s library; [reveal] shows a folder in the
   /// tree and [open] opens a note, both by library-relative path.
-  const new({required this.session, required this.reveal, required this.open});
+  const new({
+    required this.session,
+    required this.reveal,
+    required this.open,
+    this.preview = previewHtmlOnIsolate,
+  });
 
   /// The library.
   final LibrarySession session;
@@ -35,6 +41,10 @@ final class HtmlConvertFlow {
 
   /// Opens a note.
   final void Function(String note) open;
+
+  /// What reads a page for the dialog, to tell whether it is a book; a test
+  /// hands in its own.
+  final HtmlPreviewer preview;
 
   static const AppLogger _log = AppLogger(name: 'html');
 
@@ -98,6 +108,7 @@ final class HtmlConvertFlow {
       sources: sources,
       name: name,
       parent: parent,
+      preview: preview,
       pickFolder: (current) async {
         final folders = await session.tree.folders();
         if (!context.mounted) return null;
@@ -123,6 +134,8 @@ final class HtmlConvertFlow {
         parent: choice.parent,
         attachments: attachments,
         linkType: linkType,
+        book: choice.book,
+        words: convertWords(),
       );
       if (!context.mounted) {
         await conversion.cancel();
@@ -184,10 +197,14 @@ final class HtmlConvertFlow {
     }
     _log.info(
       'convert "$shown" -> "${converted.made}": '
-      '${converted.pictures} picture(s)',
+      '${converted.notes} note(s), ${converted.pictures} picture(s)',
     );
     if (context.mounted && session.root == root) {
-      final folder = p.posix.dirname(converted.made);
+      // A book a note a chapter made a folder, to show whole; a note, the
+      // folder it is in.
+      final folder = converted.open == converted.made
+          ? p.posix.dirname(converted.made)
+          : converted.made;
       reveal(folder == '.' ? '' : folder);
       open(converted.open);
     }

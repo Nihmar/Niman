@@ -13,6 +13,7 @@ import 'package:niman/src/epub/epub_archive.dart';
 import 'package:niman/src/epub/epub_conversion.dart';
 import 'package:niman/src/epub/epub_convert_job.dart';
 import 'package:niman/src/epub/epub_convert_plan.dart';
+import 'package:niman/src/ui/convert_words.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// What the dialog answers: one note or a note a chapter, and the folder
@@ -28,11 +29,7 @@ typedef EpubPreviewer = Future<EpubConvertPreview> Function(
 });
 
 /// The words a conversion writes, in the interface's language.
-EpubConvertWords epubConvertWords() => (
-  chapter: AppStrings.convertChapterName,
-  opening: AppStrings.convertOpening,
-  contents: AppStrings.convertContents,
-);
+EpubConvertWords epubConvertWords() => convertWords();
 
 /// Asks how to convert the book at [source] and where to; null when the
 /// dialog is dismissed or the book cannot be converted. [name] is what the

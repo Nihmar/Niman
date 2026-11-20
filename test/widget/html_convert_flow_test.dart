@@ -91,6 +91,27 @@ void main() {
     expect(find.textContaining('Web/Dune.md'), findsOneWidget);
   });
 
+  testWidgets('a book made a folder shows the folder and opens its index', (
+    tester,
+  ) async {
+    await openLibrary();
+    expect(
+      await ends(
+        tester,
+        result: (
+          made: 'Web/The Novel',
+          open: 'Web/The Novel/index.md',
+          notes: 24,
+          pictures: 0,
+        ),
+      ),
+      isTrue,
+    );
+    expect(revealed, ['Web/The Novel']);
+    expect(opened, ['Web/The Novel/index.md']);
+    expect(find.textContaining('Web/The Novel'), findsOneWidget);
+  });
+
   testWidgets('a note at the top shows the top', (tester) async {
     await openLibrary();
     await ends(

@@ -1,10 +1,20 @@
-// The question a web page's conversion asks (#1293): what the page is
-// called, where it goes, and the pages of a drop of several asked about at
-// once.
+// The question a web page's conversion asks (#1293, #1294): what the page is
+// called, where it goes, how it is cut when it is a book, and the pages of a
+// drop of several asked about at once.
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/import/book/book_plan.dart';
+import 'package:niman/src/import/html/html_conversion.dart';
 import 'package:niman/src/ui/html_convert_dialog.dart';
 import 'package:niman/src/ui/strings.dart';
+
+Future<HtmlBookPreview?> _noBook(
+  String source,
+  BookWords words, {
+  String? name,
+}) async => null;
 
 void main() {
   Future<HtmlConvertChoice?> ask(
@@ -13,6 +23,7 @@ void main() {
     String? name,
     String parent = 'Web',
     Future<String?> Function(String current)? pickFolder,
+    HtmlPreviewer preview = _noBook,
     Future<void> Function()? act,
   }) async {
     HtmlConvertChoice? answer;
@@ -29,6 +40,7 @@ void main() {
                   name: name,
                   parent: parent,
                   pickFolder: pickFolder,
+                  preview: preview,
                 );
                 answered = true;
               },
@@ -39,7 +51,9 @@ void main() {
       ),
     );
     await tester.tap(find.text('go'));
-    await tester.pumpAndSettle();
+    // A page being read shows a spinner, which never settles.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
     await act?.call();
     await tester.pumpAndSettle();
     expect(answered, isTrue);
@@ -55,7 +69,7 @@ void main() {
         await tester.tap(find.byKey(const Key('html-convert-start')));
       },
     );
-    expect(choice, (parent: 'Web'));
+    expect(choice, (parent: 'Web', book: null));
   });
 
   testWidgets('a share is named as it came, not by its copy', (tester) async {
@@ -98,7 +112,7 @@ void main() {
       },
     );
     expect(from, 'Web');
-    expect(choice, (parent: 'Archive/Web'));
+    expect(choice, (parent: 'Archive/Web', book: null));
   });
 
   testWidgets('a folder picker dismissed keeps the folder', (tester) async {
@@ -111,7 +125,7 @@ void main() {
         await tester.tap(find.byKey(const Key('html-convert-start')));
       },
     );
-    expect(choice, (parent: 'Web'));
+    expect(choice, (parent: 'Web', book: null));
   });
 
   testWidgets('several pages are counted and listed, asked once', (
@@ -128,7 +142,7 @@ void main() {
         await tester.tap(find.byKey(const Key('html-convert-start')));
       },
     );
-    expect(choice, (parent: 'Web'));
+    expect(choice, (parent: 'Web', book: null));
   });
 
   testWidgets('Cancel answers nothing', (tester) async {
@@ -137,5 +151,121 @@ void main() {
       act: () => tester.tap(find.byKey(const Key('html-convert-cancel'))),
     );
     expect(choice, isNull);
+  });
+
+  group('a page that is a book', () {
+    Future<HtmlBookPreview?> book(
+      String source,
+      BookWords words, {
+      String? name,
+    }) async =>
+        (title: 'The Novel', authors: ['Ada', 'Bo'], notes: 24, folders: 0);
+
+    testWidgets('says what it found and offers the two ways to cut it', (
+      tester,
+    ) async {
+      final choice = await ask(
+        tester,
+        preview: book,
+        act: () async {
+          expect(find.byKey(const Key('html-convert-book-title')), findsOne);
+          expect(find.text('The Novel'), findsOneWidget);
+          expect(find.text('Ada, Bo'), findsOneWidget);
+          expect(find.text(AppStrings.convertPerChapter), findsOneWidget);
+          expect(
+            find.text(AppStrings.convertPerChapterDetail(24, 0)),
+            findsOneWidget,
+          );
+          expect(find.text(AppStrings.convertOneNote), findsOneWidget);
+          await tester.tap(find.byKey(const Key('html-convert-start')));
+        },
+      );
+      // A note a chapter is what a book is converted to, unless asked not.
+      expect(choice, (parent: 'Web', book: HtmlBookSplit.chapters));
+    });
+
+    testWidgets('can be one note instead', (tester) async {
+      final choice = await ask(
+        tester,
+        preview: book,
+        act: () async {
+          await tester.tap(find.byKey(const Key('html-convert-one-note')));
+          await tester.pump();
+          await tester.tap(find.byKey(const Key('html-convert-start')));
+        },
+      );
+      expect(choice, (parent: 'Web', book: HtmlBookSplit.oneNote));
+    });
+
+    testWidgets('of one chapter starts as one note', (tester) async {
+      final choice = await ask(
+        tester,
+        preview: (source, words, {name}) async =>
+            (title: 'One Shot', authors: <String>[], notes: 1, folders: 0),
+        act: () => tester.tap(find.byKey(const Key('html-convert-start'))),
+      );
+      expect(choice, (parent: 'Web', book: HtmlBookSplit.oneNote));
+    });
+
+    testWidgets('asks where it goes as a page does', (tester) async {
+      final choice = await ask(
+        tester,
+        preview: book,
+        pickFolder: (_) async => 'Books',
+        act: () async {
+          await tester.tap(find.byKey(const Key('html-convert-folder')));
+          await tester.pumpAndSettle();
+          await tester.tap(find.byKey(const Key('html-convert-start')));
+        },
+      );
+      expect(choice, (parent: 'Books', book: HtmlBookSplit.chapters));
+    });
+
+    testWidgets('is waited for: Convert is not offered before it is read', (
+      tester,
+    ) async {
+      final read = Completer<HtmlBookPreview?>();
+      final choice = await ask(
+        tester,
+        preview: (source, words, {name}) => read.future,
+        act: () async {
+          expect(find.byKey(const Key('html-convert-reading')), findsOne);
+          final start = tester.widget<FilledButton>(
+            find.byKey(const Key('html-convert-start')),
+          );
+          expect(start.onPressed, isNull);
+          read.complete(null);
+          await tester.pumpAndSettle();
+          expect(find.byKey(const Key('html-convert-reading')), findsNothing);
+          await tester.tap(find.byKey(const Key('html-convert-start')));
+        },
+      );
+      expect(choice, (parent: 'Web', book: null));
+    });
+  });
+
+  testWidgets('a page that cannot be read is converted as a page', (
+    tester,
+  ) async {
+    final choice = await ask(
+      tester,
+      preview: (source, words, {name}) => throw const FormatException('x'),
+      act: () => tester.tap(find.byKey(const Key('html-convert-start'))),
+    );
+    expect(choice, (parent: 'Web', book: null));
+  });
+
+  testWidgets('several pages are not read for books', (tester) async {
+    var asked = 0;
+    await ask(
+      tester,
+      sources: const ['/a/One.html', '/a/Two.html'],
+      preview: (source, words, {name}) async {
+        asked++;
+        return null;
+      },
+      act: () => tester.tap(find.byKey(const Key('html-convert-start'))),
+    );
+    expect(asked, 0);
   });
 }

@@ -180,6 +180,8 @@ void main() {
                       session: session,
                       reveal: (_) {},
                       open: (_) {},
+                      // No page to read: none is a book.
+                      preview: (source, words, {name}) async => null,
                     ),
                     attach: (paths) async {
                       attached.add(paths);
