@@ -24,7 +24,7 @@ final class HtmlTable {
             if (cell.localName == 'td' || cell.localName == 'th')
               // One line a row: a break in a cell is a space. (Its `|`s
               // are escaped with the rest of the text.)
-              inline.of(cell.nodes).replaceAll('\\\n', ' ').trim(),
+              inline.lineOf(cell.nodes),
         ],
     ];
     final width = cells.fold<int>(0, (w, r) => r.length > w ? r.length : w);

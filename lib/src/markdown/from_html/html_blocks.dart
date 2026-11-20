@@ -64,7 +64,13 @@ final class HtmlBlocks {
         _anchorsWithin(element, out);
         _paragraphs(element.nodes, out, context);
       case 'blockquote':
-        walk(element.nodes, out, context.quoted());
+        // One quote, its blocks apart by `>` lines: a bare blank line would
+        // end it. A quote in it is quoted again, `> > `.
+        final body = MarkdownBlocks();
+        walk(element.nodes, body, const BlockContext());
+        if (body.text.isNotEmpty) {
+          out.addHolding(context.wrap(_quoted(body.text.split('\n'))), body);
+        }
       case 'ul' || 'ol':
         _list(element, out, context, ordered: tag == 'ol');
       case 'pre':
@@ -115,9 +121,7 @@ final class HtmlBlocks {
         .where((child) => child.localName == 'summary')
         .firstOrNull;
     // The title is read first: a footnote it cites comes before the body's.
-    final title = summary == null
-        ? 'Details'
-        : inline.of(summary.nodes).replaceAll('\\\n', ' ').trim();
+    final title = summary == null ? 'Details' : inline.lineOf(summary.nodes);
     final body = MarkdownBlocks();
     walk(
       element.nodes.where((node) => node != summary),
@@ -132,14 +136,12 @@ final class HtmlBlocks {
     final head = '[!$type]$fold${title.isEmpty ? '' : ' $title'}';
     final lines = [head, if (body.text.isNotEmpty) ...body.text.split('\n')];
     // The callout is one quote: its blank lines carry the `>` too.
-    out.addHolding(
-      context.wrap(
-        lines.map((line) => line.isEmpty ? '>' : '> $line').join('\n'),
-      ),
-      body,
-      lineOffset: 1,
-    );
+    out.addHolding(context.wrap(_quoted(lines)), body, lineOffset: 1);
   }
+
+  /// [lines] as the lines of one quote: a blank one is a bare `>`.
+  static String _quoted(List<String> lines) =>
+      lines.map((line) => line.isEmpty ? '>' : '> $line').join('\n');
 
   static final RegExp _calloutType = RegExp(r'^[A-Za-z][\w-]*$');
 

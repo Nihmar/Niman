@@ -169,8 +169,19 @@ void main() {
           '<blockquote><p>a</p><blockquote><p>b</p></blockquote>'
           '</blockquote>',
         ),
-        '> a\n\n> > b',
+        '> a\n>\n> > b',
       );
+    });
+
+    test('the paragraphs of a quote are one quote, a `>` line apart', () {
+      final chapter = convert(
+        '<p>x</p><blockquote><p>a</p><p id="two">b</p>'
+        '<blockquote><p>c</p><p>d</p></blockquote></blockquote><p>y</p>',
+      );
+      expect(chapter.markdown, 'x\n\n> a\n>\n> b\n>\n> > c\n> >\n> > d\n\ny');
+      // `x`, blank, `> a`, `>`, `> b`: the id is on the third line of it.
+      expect(chapter.anchors, {'two': 4});
+      expect(markdown('<blockquote></blockquote><p>a</p>'), 'a');
     });
 
     test('preformatted text is fenced, as it is', () {
@@ -379,10 +390,12 @@ void main() {
       );
     });
 
-    test('a quote keeps its paragraphs, each on a quote line', () {
+    test('the lines of a quote are paragraphs of one quote', () {
       expect(
-        markdownOf('<blockquote><p>a<br/>b</p></blockquote>'),
-        '> a\n\n> b',
+        markdownOf(
+          '<blockquote><p>a<br/>b<br/><br/>c</p><p>d</p></blockquote>',
+        ),
+        '> a\n>\n> b\n>\n> c\n>\n> d',
       );
     });
 

@@ -29,6 +29,10 @@ final class HtmlInline {
   /// The inline Markdown of [nodes].
   String of(List<Node> nodes) => _run(nodes, paragraphs: false);
 
+  /// The inline Markdown of [nodes] as one line, trimmed: a `<br>` is a
+  /// space, as in a heading, a table cell or a callout's title.
+  String lineOf(List<Node> nodes) => of(nodes).replaceAll('\\\n', ' ').trim();
+
   /// The paragraphs of [nodes]: one, trimmed, or — with [splitAtBreaks] —
   /// the pieces between its `<br>`s, each its own paragraph. A piece with
   /// nothing in it is none, so two breaks in a row make no empty one.
