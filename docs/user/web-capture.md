@@ -133,7 +133,22 @@ A quote is written as a passage quoted from a book or a PDF:
 
 A passage copied in the browser can go into the note as Markdown rather
 than as plain text: its headings, emphasis, lists, quotes, tables, links
-and pictures kept, the page's styling left behind.
+and pictures kept, the page's styling left behind. What else a page says
+is kept in the shape Niman writes it in:
+
+- **Highlight, superscript and subscript** (`<mark>`, `<sup>`, `<sub>`)
+  as `==highlight==`, `<sup>` and `<sub>`. Underline and insertion are
+  plain text.
+- **Checkboxes** at the start of a list item as a task: `- [ ]` open,
+  `- [x]` ticked.
+- **Code blocks** with the language the page tags them with, as a fence
+  tagged the same.
+- **Lists of terms** (`<dl>`): each term a bold paragraph, its definitions
+  the paragraphs after it.
+- **Details** (`<details>`): a callout that folds, its summary the title.
+- **Footnotes**: a link to a note at the page's end becomes `[^1]`, the
+  notes numbered in the order the page cites them and written at the end
+  as `[^1]: text`, without the links back.
 
 - **Desktop**: `Ctrl/⌘+Shift+V` in the editor, or **Editor: Paste as
   Markdown** in the command palette. `Ctrl/⌘+V` still pastes the plain
