@@ -150,6 +150,36 @@ void main() {
     });
   });
 
+  group('the links that run code', () {
+    test('are not links: their words stay as text', () {
+      final text = _note(
+        '<p><a href="javascript:void(0)">Open</a>, '
+        '<a href="JaVaScRiPt:alert(1)">Shout</a>, '
+        '<a href="java&#9;script:x()">Tab</a>, '
+        '<a href="vbscript:run">Basic</a> and '
+        '<a href="data:text/html;base64,PGI+">Data</a>, '
+        'but <a href="https://example.org/ok">this one</a> is.</p>',
+      );
+      expect(
+        text,
+        endsWith(
+          'Open, Shout, Tab, Basic and Data, '
+          'but [this one](<https://example.org/ok>) is.\n',
+        ),
+      );
+      expect(text, isNot(contains('niman-unlinked')));
+    });
+
+    test('keep a bracket of their words, and a picture in them', () {
+      final text = _note(
+        '<p><a href="javascript:a()">see [1] here</a> '
+        '<a href="javascript:b()"><img src="a.png" alt="A"></a></p>',
+        pictures: {'a.png': 'assets/abc.png'},
+      );
+      expect(text, endsWith('see \\[1\\] here ![[assets/abc.png]]\n'));
+    });
+  });
+
   group('the pictures', () {
     test('lists each src once, in order', () {
       final page = _page(

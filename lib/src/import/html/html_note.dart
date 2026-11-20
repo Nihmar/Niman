@@ -13,6 +13,7 @@ import 'package:niman/src/frontmatter/yaml_scalar.dart';
 import 'package:niman/src/import/html/html_anchor_links.dart';
 import 'package:niman/src/import/html/html_page.dart';
 import 'package:niman/src/import/html/html_picture_source.dart';
+import 'package:niman/src/import/html/html_unlinked.dart';
 import 'package:niman/src/links/attachment_embed.dart';
 import 'package:niman/src/markdown/from_html/html_markdown.dart';
 import 'package:niman/src/markdown/text_escape.dart';
@@ -70,12 +71,16 @@ String htmlNote(
               note: from,
             );
     },
-    link: (href) => href.startsWith('#') && href.length > 1
+    link: (href) => isUnlinked(href)
+        ? unlinkedTarget
+        : href.startsWith('#') && href.length > 1
         ? anchorTarget(href.substring(1))
         : href,
   ).convert(page.html);
   final body = withoutTitleHeading(
-    resolveAnchorLinks(converted.markdown, converted.anchors, title: title),
+    withoutUnlinked(
+      resolveAnchorLinks(converted.markdown, converted.anchors, title: title),
+    ),
     title,
   );
   final out = StringBuffer(_frontmatter(page, imported))..write('\n# $title\n');
