@@ -131,6 +131,56 @@ void main() {
       expect(chapter.anchors, {'t': 0});
     });
 
+    test('details is a callout that folds, its summary the title', () {
+      expect(
+        markdown(
+          '<details><summary>More <b>info</b></summary>'
+          '<p>First.</p><p>Second.</p></details>',
+        ),
+        '> [!note]- More **info**\n> First.\n>\n> Second.',
+      );
+    });
+
+    test('an open details starts open, one with no summary is Details', () {
+      expect(
+        markdown('<details open=""><summary>S</summary><p>a</p></details>'),
+        '> [!note]+ S\n> a',
+      );
+      expect(
+        markdown('<details><p>a</p></details>'),
+        '> [!note]- Details\n> a',
+      );
+      expect(
+        markdown('<details><summary>Only</summary></details>'),
+        '> [!note]- Only',
+      );
+    });
+
+    test('a callout Niman exported comes back with its type', () {
+      expect(
+        markdown(
+          '<details class="callout" data-callout="warning">'
+          '<summary class="callout-title">Mind</summary>'
+          '<div class="callout-body"><p>the gap</p></div></details>',
+        ),
+        '> [!warning]- Mind\n> the gap',
+      );
+    });
+
+    test('details nests, holds lists and code, and keeps its anchors', () {
+      final chapter = convert(
+        '<p>x</p><details><summary>S</summary><ul><li>a</li></ul>'
+        '<details><summary>In</summary><p id="deep">b</p></details>'
+        '</details>',
+      );
+      expect(
+        chapter.markdown,
+        'x\n\n> [!note]- S\n> - a\n>\n> > [!note]- In\n> > b',
+      );
+      // `x`, blank, `> [!note]- S`, `> - a`, `>`, `> > [!note]- In`, `> > b`.
+      expect(chapter.anchors, {'deep': 6});
+    });
+
     test('a rule', () {
       expect(markdown('<p>a</p><hr/><p>b</p>'), 'a\n\n---\n\nb');
     });

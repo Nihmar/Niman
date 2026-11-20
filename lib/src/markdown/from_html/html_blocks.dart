@@ -77,6 +77,8 @@ final class HtmlBlocks {
         _anchorsWithin(element, out);
         final text = inline.of(element.nodes).trim();
         if (text.isNotEmpty) out.add(context.wrap(_bold(element, text)));
+      case 'details':
+        _details(element, out, context);
       case 'hr':
         out.add(context.wrap('---'));
       case 'table':
@@ -98,6 +100,40 @@ final class HtmlBlocks {
         only.text.trim() == element.text.trim();
     return strong ? text : '**$text**';
   }
+
+  /// A `<details>` as a callout that folds, closed unless the page opens
+  /// it, its `<summary>` the title and the rest of it the body.
+  void _details(Element element, MarkdownBlocks out, BlockContext context) {
+    final summary = element.children
+        .where((child) => child.localName == 'summary')
+        .firstOrNull;
+    final body = MarkdownBlocks();
+    walk(
+      element.nodes.where((node) => node != summary),
+      body,
+      const BlockContext(),
+    );
+    final title = summary == null
+        ? 'Details'
+        : inline.of(summary.nodes).replaceAll('\\\n', ' ').trim();
+    if (title.isEmpty && body.text.isEmpty) return;
+    // Niman's own export names the callout's type on its `<details>`.
+    final written = element.attributes['data-callout'] ?? '';
+    final type = _calloutType.hasMatch(written) ? written : 'note';
+    final fold = element.attributes.containsKey('open') ? '+' : '-';
+    final head = '[!$type]$fold${title.isEmpty ? '' : ' $title'}';
+    final lines = [head, if (body.text.isNotEmpty) ...body.text.split('\n')];
+    // The callout is one quote: its blank lines carry the `>` too.
+    out.addHolding(
+      context.wrap(
+        lines.map((line) => line.isEmpty ? '>' : '> $line').join('\n'),
+      ),
+      body,
+      lineOffset: 1,
+    );
+  }
+
+  static final RegExp _calloutType = RegExp(r'^[A-Za-z][\w-]*$');
 
   /// The paragraphs of the inline content [nodes].
   void _paragraphs(List<Node> nodes, MarkdownBlocks out, BlockContext context) {
