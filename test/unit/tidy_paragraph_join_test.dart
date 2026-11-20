@@ -2,18 +2,25 @@
 // paragraph wrapped by hand comes back on one line, the editor wrapping it
 // on screen. Only a soft line break is joined — a hard break stays, and so
 // does every block that is not a paragraph, as the engine's block tree
-// reads it. Formatting twice changes nothing.
+// reads it. Formatting twice changes nothing. The rule that splits a
+// paragraph's lines instead (`tidy_paragraph_split_test.dart`) is off here.
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/editor/markdown_format.dart';
 import 'package:niman/src/lint/line_join.dart';
 import 'package:niman/src/lint/lint_rule.dart';
 
-/// Formats [source] by [rules], and asserts the second pass changes
-/// nothing.
+/// Every rule but the one splitting a paragraph's lines, which wins over
+/// joining them.
+final Set<LintRule> _joining = {...LintRule.all}
+  ..remove(LintRule.splitParagraphLines);
+
+/// Formats [source] by [rules] — every rule but the split by default — and
+/// asserts the second pass changes nothing.
 String tidy(String source, {Set<LintRule>? rules}) {
-  final once = formatMarkdown(source, rules: rules);
+  final on = rules ?? _joining;
+  final once = formatMarkdown(source, rules: on);
   expect(
-    formatMarkdown(once, rules: rules),
+    formatMarkdown(once, rules: on),
     once,
     reason: 'formatting is idempotent',
   );
@@ -24,7 +31,7 @@ String tidy(String source, {Set<LintRule>? rules}) {
 void kept(String note) => expect(tidy(note), note);
 
 /// Every rule but this one.
-final Set<LintRule> _off = {...LintRule.all}
+final Set<LintRule> _off = {..._joining}
   ..remove(LintRule.joinParagraphLines);
 
 void main() {
@@ -152,7 +159,7 @@ void main() {
   });
 
   test("an item's lines are the other rule's to join", () {
-    final itemsOff = {...LintRule.all}..remove(LintRule.joinWrappedItems);
+    final itemsOff = {..._joining}..remove(LintRule.joinWrappedItems);
     expect(
       tidy('one\ntwo\n\n- a\nb\n', rules: itemsOff),
       'one two\n\n- a\n  b\n',

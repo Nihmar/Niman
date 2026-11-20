@@ -2087,6 +2087,8 @@ final class CroatianStrings extends Strings {
   @override
   String get lintRuleJoinParagraphLines => 'Spoji prelomljene odlomke';
   @override
+  String get lintRuleSplitParagraphLines => 'Razdvoji retke u odlomke';
+  @override
   String get tidyOnCloseTitle => 'Posloži Markdown pri zatvaranju';
   @override
   String get tidyOnCloseSubtitle =>

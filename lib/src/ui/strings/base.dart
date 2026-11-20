@@ -1128,6 +1128,7 @@ abstract base class Strings {
   String get lintRuleFenceLanguage;
   String get lintRuleJoinWrappedItems;
   String get lintRuleJoinParagraphLines;
+  String get lintRuleSplitParagraphLines;
   String get typewriterSubtitle;
   String get zenMode;
   String get zoomIn;

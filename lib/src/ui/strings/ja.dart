@@ -1963,6 +1963,8 @@ final class JapaneseStrings extends Strings {
   @override
   String get lintRuleJoinParagraphLines => '折り返した段落を1行にまとめる';
   @override
+  String get lintRuleSplitParagraphLines => '行ごとに段落を分ける';
+  @override
   String get tidyOnCloseTitle => '閉じるときに Markdown を整える';
   @override
   String get tidyOnCloseSubtitle =>

@@ -2075,6 +2075,8 @@ final class TurkishStrings extends Strings {
   @override
   String get lintRuleJoinParagraphLines => 'Bölünmüş paragrafları birleştir';
   @override
+  String get lintRuleSplitParagraphLines => 'Satırları paragraflara ayır';
+  @override
   String get tidyOnCloseTitle => 'Kapatırken Markdown’ı düzenle';
   @override
   String get tidyOnCloseSubtitle =>

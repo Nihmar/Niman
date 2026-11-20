@@ -23,6 +23,9 @@
 ///   joined to the line above, the item's paragraph on one line (#549);
 /// * with [LintRule.joinParagraphLines], any other paragraph wrapped over
 ///   several lines is written on one the same way, a hard break kept;
+/// * with [LintRule.splitParagraphLines], which wins over joining but for
+///   a quote's lines, each line of a paragraph outside a list and a quote
+///   becomes a paragraph of its own, a blank line before it;
 /// * a heading gets exactly one space after its hashes (`#Title`, which
 ///   is a paragraph and not a heading at all, is left alone: tidying is
 ///   not the place to change what a line means);
@@ -47,6 +50,7 @@ library;
 
 import 'package:niman/src/lint/fence_fixes.dart';
 import 'package:niman/src/lint/line_join.dart';
+import 'package:niman/src/lint/line_split.dart';
 import 'package:niman/src/lint/lint_rule.dart';
 import 'package:niman/src/lint/list_fixes.dart';
 import 'package:niman/src/markdown/block.dart';
@@ -65,11 +69,17 @@ final RegExp _heading = RegExp(r'^(\s{0,3})(#{1,6})[ \t]*(\S.*)?$');
 String formatMarkdown(String source, {Set<LintRule>? rules}) {
   final on = rules ?? LintRule.all;
   if (source.trim().isEmpty) return source.isEmpty ? source : _newline;
-  final text = joinWrappedLines(
+  // Splitting a paragraph's lines wins over joining them, but for a
+  // quote's, which stay together.
+  final join = on.contains(LintRule.joinParagraphLines);
+  final split = on.contains(LintRule.splitParagraphLines);
+  final joined = joinWrappedLines(
     source,
     inItems: on.contains(LintRule.joinWrappedItems),
-    outside: on.contains(LintRule.joinParagraphLines),
+    outside: join && !split,
+    inQuotes: join,
   );
+  final text = split ? splitParagraphLines(joined) : joined;
   final out = <String>[];
   _Unit? last;
   for (final block in _units(text)) {

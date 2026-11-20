@@ -2106,6 +2106,8 @@ final class GalicianStrings extends Strings {
   @override
   String get lintRuleJoinParagraphLines => 'Unir parágrafos partidos';
   @override
+  String get lintRuleSplitParagraphLines => 'Separar as liñas en parágrafos';
+  @override
   String get tidyOnCloseTitle => 'Arranxar o Markdown ao pechar';
   @override
   String get tidyOnCloseSubtitle =>

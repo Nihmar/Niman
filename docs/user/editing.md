@@ -534,10 +534,22 @@ changing what it says:
   an item's second paragraph stays a paragraph of its own); with that
   rule off, a line that continues an item is indented to the item's text
   instead, so a wrapped item stays one item;
-- a paragraph wrapped over several lines — a note's own, a quote's, a
-  footnote's — is written back on one, its lines joined with a single
-  space; the editor wraps it on screen. Only a plain line break is
-  joined: a line ending in a hard break (two spaces, or a backslash)
+- each line of a paragraph — a note's own, a footnote's — becomes a
+  paragraph of its own, a blank line before it: text pasted with its
+  paragraphs one per line, no blank line between them, reads as it was
+  written instead of running together. Only a plain line break is set
+  apart: a line ending in a hard break (two spaces, or a backslash)
+  keeps the line under it. A quote's lines stay together, a list item's
+  are the list's, and code, tables, math, HTML, frontmatter and headings
+  keep their lines. A line that would read as something else after a
+  blank line — `2001. A year`, which goes on with a paragraph but would
+  open a list on its own — stays where it was. This is the **Split lines
+  into paragraphs** rule, and it wins over the next one: turn it off in
+  **Markdown rules** to have your paragraphs joined instead;
+- a paragraph wrapped over several lines — a quote's, and with the rule
+  above off a note's own and a footnote's — is written back on one, its
+  lines joined with a single space; the editor wraps it on screen. Only
+  a plain line break is joined: a line ending in a hard break (two spaces, or a backslash)
   keeps it, a blank line still ends the paragraph, and a line that
   starts something else — a heading, a list item, a quote, a rule, a
   fence, a table — stays on its own line. So does an annotation's line
@@ -545,8 +557,8 @@ changing what it says:
   annotating its file (#1183). Headings (an underlined one
   included), code, tables, math, HTML, frontmatter and link definitions
   keep their lines. This is the **Join wrapped paragraphs** rule: turn it
-  off in **Markdown rules** to keep your paragraphs wrapped as you wrote
-  them;
+  off too in **Markdown rules** to keep your paragraphs wrapped as you
+  wrote them;
 - a heading gets one space after its hashes;
 - runs of blank lines become one, and the trailing ones go;
 - spaces left at the end of a line go, except the ones that mean a line
@@ -566,7 +578,8 @@ changing what it says:
   punctuation included: `c++`, `c#` and `objective-c` are names;
 - the note ends with a single newline.
 
-Beyond joining a paragraph's lines it never reflows your prose — no
+Beyond setting a paragraph's lines apart or joining them it never
+reflows your prose — no
 rewrapping at a width, the words and the inline marks byte for byte —
 and never touches what it cannot read:
 tables, math, frontmatter and HTML come back byte for byte, and so does

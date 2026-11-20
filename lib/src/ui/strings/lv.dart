@@ -2085,6 +2085,8 @@ final class LatvianStrings extends Strings {
   @override
   String get lintRuleJoinParagraphLines => 'Apvienot pārnestas rindkopas';
   @override
+  String get lintRuleSplitParagraphLines => 'Sadalīt rindas rindkopās';
+  @override
   String get tidyOnCloseTitle => 'Sakārtot Markdown, aizverot';
   @override
   String get tidyOnCloseSubtitle =>
