@@ -1957,13 +1957,13 @@ final class MacedonianStrings extends Strings {
   @override
   String importFolderEmpty(String name) => 'Нема Markdown датотеки во $name';
   @override
-  String get epubConvertAction => 'Претвори во Markdown…';
+  String get convertAction => 'Претвори во Markdown…';
   @override
   String get epubConvertCommand => 'Претвори EPUB во Markdown…';
   @override
   String get epubConvertSettingsTitle => 'Претвори EPUB во Markdown';
   @override
-  String get epubConvertTitle => 'Претвори во Markdown';
+  String get convertTitle => 'Претвори во Markdown';
   @override
   String get epubConvertReading => 'Се чита книгата…';
   @override
@@ -1976,14 +1976,13 @@ final class MacedonianStrings extends Strings {
   @override
   String get epubConvertOneNoteDetail => 'Целата книга во една белешка';
   @override
-  String get epubConvertInto => 'Во';
+  String get convertInto => 'Во';
   @override
-  String get epubConvertStart => 'Претвори';
+  String get convertStart => 'Претвори';
   @override
-  String epubConvertProgress(int done, int total) =>
-      'Запишување $done од $total';
+  String convertProgress(int done, int total) => 'Запишување $done од $total';
   @override
-  String epubConvertDone(String made, int notes, int pictures) =>
+  String convertDone(String made, int notes, int pictures) =>
       'Претворено во $made (белешки: $notes, слики: $pictures)';
   @override
   String get epubConvertProtected =>

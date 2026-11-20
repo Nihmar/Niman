@@ -1939,13 +1939,13 @@ final class SlovakStrings extends Strings {
   String importFolderEmpty(String name) =>
       'V priečinku $name nie sú súbory Markdown';
   @override
-  String get epubConvertAction => 'Previesť na Markdown…';
+  String get convertAction => 'Previesť na Markdown…';
   @override
   String get epubConvertCommand => 'Previesť EPUB na Markdown…';
   @override
   String get epubConvertSettingsTitle => 'Previesť EPUB na Markdown';
   @override
-  String get epubConvertTitle => 'Previesť na Markdown';
+  String get convertTitle => 'Previesť na Markdown';
   @override
   String get epubConvertReading => 'Číta sa kniha…';
   @override
@@ -1958,14 +1958,13 @@ final class SlovakStrings extends Strings {
   @override
   String get epubConvertOneNoteDetail => 'Celá kniha v jednej poznámke';
   @override
-  String get epubConvertInto => 'Do';
+  String get convertInto => 'Do';
   @override
-  String get epubConvertStart => 'Previesť';
+  String get convertStart => 'Previesť';
   @override
-  String epubConvertProgress(int done, int total) =>
-      'Zapisuje sa $done z $total';
+  String convertProgress(int done, int total) => 'Zapisuje sa $done z $total';
   @override
-  String epubConvertDone(String made, int notes, int pictures) =>
+  String convertDone(String made, int notes, int pictures) =>
       'Prevedené do $made (poznámky: $notes, obrázky: $pictures)';
   @override
   String get epubConvertProtected =>

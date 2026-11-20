@@ -1932,13 +1932,13 @@ final class CzechStrings extends Strings {
   String importFolderEmpty(String name) =>
       'Ve složce $name nejsou soubory Markdown';
   @override
-  String get epubConvertAction => 'Převést na Markdown…';
+  String get convertAction => 'Převést na Markdown…';
   @override
   String get epubConvertCommand => 'Převést EPUB na Markdown…';
   @override
   String get epubConvertSettingsTitle => 'Převést EPUB na Markdown';
   @override
-  String get epubConvertTitle => 'Převést na Markdown';
+  String get convertTitle => 'Převést na Markdown';
   @override
   String get epubConvertReading => 'Čtení knihy…';
   @override
@@ -1951,13 +1951,13 @@ final class CzechStrings extends Strings {
   @override
   String get epubConvertOneNoteDetail => 'Celá kniha v jedné poznámce';
   @override
-  String get epubConvertInto => 'Do';
+  String get convertInto => 'Do';
   @override
-  String get epubConvertStart => 'Převést';
+  String get convertStart => 'Převést';
   @override
-  String epubConvertProgress(int done, int total) => 'Zápis $done z $total';
+  String convertProgress(int done, int total) => 'Zápis $done z $total';
   @override
-  String epubConvertDone(String made, int notes, int pictures) =>
+  String convertDone(String made, int notes, int pictures) =>
       'Převedeno do $made (poznámky: $notes, obrázky: $pictures)';
   @override
   String get epubConvertProtected =>

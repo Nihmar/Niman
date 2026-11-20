@@ -1963,13 +1963,13 @@ final class DutchStrings extends Strings {
   @override
   String importFolderEmpty(String name) => 'Geen Markdown-bestanden in $name';
   @override
-  String get epubConvertAction => 'Omzetten naar Markdown…';
+  String get convertAction => 'Omzetten naar Markdown…';
   @override
   String get epubConvertCommand => 'EPUB omzetten naar Markdown…';
   @override
   String get epubConvertSettingsTitle => 'Een EPUB omzetten naar Markdown';
   @override
-  String get epubConvertTitle => 'Omzetten naar Markdown';
+  String get convertTitle => 'Omzetten naar Markdown';
   @override
   String get epubConvertReading => 'Boek wordt gelezen…';
   @override
@@ -1982,14 +1982,13 @@ final class DutchStrings extends Strings {
   @override
   String get epubConvertOneNoteDetail => 'Het hele boek in één notitie';
   @override
-  String get epubConvertInto => 'Naar';
+  String get convertInto => 'Naar';
   @override
-  String get epubConvertStart => 'Omzetten';
+  String get convertStart => 'Omzetten';
   @override
-  String epubConvertProgress(int done, int total) =>
-      'Schrijven $done van $total';
+  String convertProgress(int done, int total) => 'Schrijven $done van $total';
   @override
-  String epubConvertDone(String made, int notes, int pictures) =>
+  String convertDone(String made, int notes, int pictures) =>
       'Omgezet naar $made (notities: $notes, afbeeldingen: $pictures)';
   @override
   String get epubConvertProtected =>

@@ -1941,13 +1941,13 @@ final class BelarusianStrings extends Strings {
   @override
   String importFolderEmpty(String name) => 'У $name няма файлаў Markdown';
   @override
-  String get epubConvertAction => 'Пераўтварыць у Markdown…';
+  String get convertAction => 'Пераўтварыць у Markdown…';
   @override
   String get epubConvertCommand => 'Пераўтварыць EPUB у Markdown…';
   @override
   String get epubConvertSettingsTitle => 'Пераўтварыць EPUB у Markdown';
   @override
-  String get epubConvertTitle => 'Пераўтварыць у Markdown';
+  String get convertTitle => 'Пераўтварыць у Markdown';
   @override
   String get epubConvertReading => 'Чытанне кнігі…';
   @override
@@ -1960,13 +1960,13 @@ final class BelarusianStrings extends Strings {
   @override
   String get epubConvertOneNoteDetail => 'Уся кніга ў адной нататцы';
   @override
-  String get epubConvertInto => 'У';
+  String get convertInto => 'У';
   @override
-  String get epubConvertStart => 'Пераўтварыць';
+  String get convertStart => 'Пераўтварыць';
   @override
-  String epubConvertProgress(int done, int total) => 'Запіс $done з $total';
+  String convertProgress(int done, int total) => 'Запіс $done з $total';
   @override
-  String epubConvertDone(String made, int notes, int pictures) =>
+  String convertDone(String made, int notes, int pictures) =>
       'Пераўтворана ў $made (нататкі: $notes, выявы: $pictures)';
   @override
   String get epubConvertProtected =>

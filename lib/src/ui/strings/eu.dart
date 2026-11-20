@@ -1957,13 +1957,13 @@ final class BasqueStrings extends Strings {
   String importFolderEmpty(String name) =>
       'Ez dago Markdown fitxategirik $name karpetan';
   @override
-  String get epubConvertAction => 'Bihurtu Markdown-era…';
+  String get convertAction => 'Bihurtu Markdown-era…';
   @override
   String get epubConvertCommand => 'Bihurtu EPUB Markdown-era…';
   @override
   String get epubConvertSettingsTitle => 'Bihurtu EPUB bat Markdown-era';
   @override
-  String get epubConvertTitle => 'Bihurtu Markdown-era';
+  String get convertTitle => 'Bihurtu Markdown-era';
   @override
   String get epubConvertReading => 'Liburua irakurtzen…';
   @override
@@ -1976,13 +1976,13 @@ final class BasqueStrings extends Strings {
   @override
   String get epubConvertOneNoteDetail => 'Liburu osoa ohar bakar batean';
   @override
-  String get epubConvertInto => 'Hona';
+  String get convertInto => 'Hona';
   @override
-  String get epubConvertStart => 'Bihurtu';
+  String get convertStart => 'Bihurtu';
   @override
-  String epubConvertProgress(int done, int total) => 'Idazten: $done / $total';
+  String convertProgress(int done, int total) => 'Idazten: $done / $total';
   @override
-  String epubConvertDone(String made, int notes, int pictures) =>
+  String convertDone(String made, int notes, int pictures) =>
       'Hona bihurtua: $made (oharrak: $notes, irudiak: $pictures)';
   @override
   String get epubConvertProtected =>

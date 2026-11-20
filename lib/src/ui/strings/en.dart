@@ -1922,13 +1922,13 @@ final class EnglishStrings extends Strings {
   @override
   String importFolderEmpty(String name) => 'No Markdown files in $name';
   @override
-  String get epubConvertAction => 'Convert to Markdown…';
+  String get convertAction => 'Convert to Markdown…';
   @override
   String get epubConvertCommand => 'Convert EPUB to Markdown…';
   @override
   String get epubConvertSettingsTitle => 'Convert an EPUB to Markdown';
   @override
-  String get epubConvertTitle => 'Convert to Markdown';
+  String get convertTitle => 'Convert to Markdown';
   @override
   String get epubConvertReading => 'Reading the book…';
   @override
@@ -1941,13 +1941,13 @@ final class EnglishStrings extends Strings {
   @override
   String get epubConvertOneNoteDetail => 'The whole book in a single note';
   @override
-  String get epubConvertInto => 'Into';
+  String get convertInto => 'Into';
   @override
-  String get epubConvertStart => 'Convert';
+  String get convertStart => 'Convert';
   @override
-  String epubConvertProgress(int done, int total) => 'Writing $done of $total';
+  String convertProgress(int done, int total) => 'Writing $done of $total';
   @override
-  String epubConvertDone(String made, int notes, int pictures) =>
+  String convertDone(String made, int notes, int pictures) =>
       'Converted into $made (notes: $notes, pictures: $pictures)';
   @override
   String get epubConvertProtected =>

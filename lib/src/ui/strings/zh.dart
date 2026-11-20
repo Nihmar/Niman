@@ -1784,13 +1784,13 @@ final class ChineseStrings extends Strings {
   @override
   String importFolderEmpty(String name) => '$name 中没有 Markdown 文件';
   @override
-  String get epubConvertAction => '转换为 Markdown…';
+  String get convertAction => '转换为 Markdown…';
   @override
   String get epubConvertCommand => '将 EPUB 转换为 Markdown…';
   @override
   String get epubConvertSettingsTitle => '将 EPUB 转换为 Markdown';
   @override
-  String get epubConvertTitle => '转换为 Markdown';
+  String get convertTitle => '转换为 Markdown';
   @override
   String get epubConvertReading => '正在读取图书…';
   @override
@@ -1803,13 +1803,13 @@ final class ChineseStrings extends Strings {
   @override
   String get epubConvertOneNoteDetail => '整本书放在一个笔记中';
   @override
-  String get epubConvertInto => '保存到';
+  String get convertInto => '保存到';
   @override
-  String get epubConvertStart => '转换';
+  String get convertStart => '转换';
   @override
-  String epubConvertProgress(int done, int total) => '正在写入 $done / $total';
+  String convertProgress(int done, int total) => '正在写入 $done / $total';
   @override
-  String epubConvertDone(String made, int notes, int pictures) =>
+  String convertDone(String made, int notes, int pictures) =>
       '已转换到 $made（笔记：$notes，图片：$pictures）';
   @override
   String get epubConvertProtected => '这本书受保护（DRM）：无法转换其文本';

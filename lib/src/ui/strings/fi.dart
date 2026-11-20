@@ -1959,13 +1959,13 @@ final class FinnishStrings extends Strings {
   String importFolderEmpty(String name) =>
       'Kansiossa $name ei ole Markdown-tiedostoja';
   @override
-  String get epubConvertAction => 'Muunna Markdowniksi…';
+  String get convertAction => 'Muunna Markdowniksi…';
   @override
   String get epubConvertCommand => 'Muunna EPUB Markdowniksi…';
   @override
   String get epubConvertSettingsTitle => 'Muunna EPUB Markdowniksi';
   @override
-  String get epubConvertTitle => 'Muunna Markdowniksi';
+  String get convertTitle => 'Muunna Markdowniksi';
   @override
   String get epubConvertReading => 'Luetaan kirjaa…';
   @override
@@ -1978,14 +1978,13 @@ final class FinnishStrings extends Strings {
   @override
   String get epubConvertOneNoteDetail => 'Koko kirja yhdessä muistiinpanossa';
   @override
-  String get epubConvertInto => 'Kohteeseen';
+  String get convertInto => 'Kohteeseen';
   @override
-  String get epubConvertStart => 'Muunna';
+  String get convertStart => 'Muunna';
   @override
-  String epubConvertProgress(int done, int total) =>
-      'Kirjoitetaan $done/$total';
+  String convertProgress(int done, int total) => 'Kirjoitetaan $done/$total';
   @override
-  String epubConvertDone(String made, int notes, int pictures) =>
+  String convertDone(String made, int notes, int pictures) =>
       'Muunnettu kohteeseen $made (muistiinpanoja: $notes, kuvia: $pictures)';
   @override
   String get epubConvertProtected =>

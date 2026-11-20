@@ -1957,13 +1957,13 @@ final class BulgarianStrings extends Strings {
   @override
   String importFolderEmpty(String name) => 'Няма файлове Markdown в $name';
   @override
-  String get epubConvertAction => 'Преобразуване в Markdown…';
+  String get convertAction => 'Преобразуване в Markdown…';
   @override
   String get epubConvertCommand => 'Преобразуване на EPUB в Markdown…';
   @override
   String get epubConvertSettingsTitle => 'Преобразуване на EPUB в Markdown';
   @override
-  String get epubConvertTitle => 'Преобразуване в Markdown';
+  String get convertTitle => 'Преобразуване в Markdown';
   @override
   String get epubConvertReading => 'Четене на книгата…';
   @override
@@ -1976,14 +1976,13 @@ final class BulgarianStrings extends Strings {
   @override
   String get epubConvertOneNoteDetail => 'Цялата книга в една бележка';
   @override
-  String get epubConvertInto => 'В';
+  String get convertInto => 'В';
   @override
-  String get epubConvertStart => 'Преобразуване';
+  String get convertStart => 'Преобразуване';
   @override
-  String epubConvertProgress(int done, int total) =>
-      'Записване $done от $total';
+  String convertProgress(int done, int total) => 'Записване $done от $total';
   @override
-  String epubConvertDone(String made, int notes, int pictures) =>
+  String convertDone(String made, int notes, int pictures) =>
       'Преобразувано в $made (бележки: $notes, изображения: $pictures)';
   @override
   String get epubConvertProtected =>

@@ -1931,13 +1931,13 @@ final class NorwegianStrings extends Strings {
   @override
   String importFolderEmpty(String name) => 'Ingen Markdown-filer i $name';
   @override
-  String get epubConvertAction => 'Konverter til Markdown…';
+  String get convertAction => 'Konverter til Markdown…';
   @override
   String get epubConvertCommand => 'Konverter EPUB til Markdown…';
   @override
   String get epubConvertSettingsTitle => 'Konverter en EPUB til Markdown';
   @override
-  String get epubConvertTitle => 'Konverter til Markdown';
+  String get convertTitle => 'Konverter til Markdown';
   @override
   String get epubConvertReading => 'Leser boken…';
   @override
@@ -1950,13 +1950,13 @@ final class NorwegianStrings extends Strings {
   @override
   String get epubConvertOneNoteDetail => 'Hele boken i ett notat';
   @override
-  String get epubConvertInto => 'Til';
+  String get convertInto => 'Til';
   @override
-  String get epubConvertStart => 'Konverter';
+  String get convertStart => 'Konverter';
   @override
-  String epubConvertProgress(int done, int total) => 'Skriver $done av $total';
+  String convertProgress(int done, int total) => 'Skriver $done av $total';
   @override
-  String epubConvertDone(String made, int notes, int pictures) =>
+  String convertDone(String made, int notes, int pictures) =>
       'Konvertert til $made (notater: $notes, bilder: $pictures)';
   @override
   String get epubConvertProtected =>

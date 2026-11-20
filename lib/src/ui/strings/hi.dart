@@ -1911,13 +1911,13 @@ final class HindiStrings extends Strings {
   @override
   String importFolderEmpty(String name) => '$name में कोई Markdown फ़ाइल नहीं';
   @override
-  String get epubConvertAction => 'Markdown में बदलें…';
+  String get convertAction => 'Markdown में बदलें…';
   @override
   String get epubConvertCommand => 'EPUB को Markdown में बदलें…';
   @override
   String get epubConvertSettingsTitle => 'किसी EPUB को Markdown में बदलें';
   @override
-  String get epubConvertTitle => 'Markdown में बदलें';
+  String get convertTitle => 'Markdown में बदलें';
   @override
   String get epubConvertReading => 'किताब पढ़ी जा रही है…';
   @override
@@ -1930,14 +1930,14 @@ final class HindiStrings extends Strings {
   @override
   String get epubConvertOneNoteDetail => 'पूरी किताब एक ही नोट में';
   @override
-  String get epubConvertInto => 'यहाँ';
+  String get convertInto => 'यहाँ';
   @override
-  String get epubConvertStart => 'बदलें';
+  String get convertStart => 'बदलें';
   @override
-  String epubConvertProgress(int done, int total) =>
+  String convertProgress(int done, int total) =>
       '$total में से $done लिखा जा रहा है';
   @override
-  String epubConvertDone(String made, int notes, int pictures) =>
+  String convertDone(String made, int notes, int pictures) =>
       '$made में बदला गया (नोट: $notes, चित्र: $pictures)';
   @override
   String get epubConvertProtected =>

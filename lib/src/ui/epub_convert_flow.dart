@@ -15,8 +15,8 @@ import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/epub/epub_conversion.dart';
 import 'package:niman/src/epub/epub_convert_job.dart';
 import 'package:niman/src/library/session.dart';
+import 'package:niman/src/ui/convert_progress_dialog.dart';
 import 'package:niman/src/ui/epub_convert_dialog.dart';
-import 'package:niman/src/ui/epub_convert_progress_dialog.dart';
 import 'package:niman/src/ui/folder_picker.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:path/path.dart' as p;
@@ -96,7 +96,7 @@ final class EpubConvertFlow {
           if (!context.mounted) return null;
           return await showFolderPicker(
             context,
-            title: AppStrings.epubConvertInto,
+            title: AppStrings.convertInto,
             folders: folders,
             ops: ops,
             current: current,
@@ -118,12 +118,14 @@ final class EpubConvertFlow {
         await conversion.cancel();
         return;
       }
-      unawaited(
-        showDialog<void>(
-          context: context,
-          barrierDismissible: false,
-          builder: (context) => EpubConvertProgressDialog(conversion),
-        ),
+      ConvertProgressDialog.show(
+        context,
+        progress: conversion.progress,
+        done: conversion.done,
+        cancel: conversion.cancel,
+        reading: AppStrings.epubConvertReading,
+        key: const Key('epub-convert-progress'),
+        cancelKey: const Key('epub-convert-cancel'),
       );
       await settle(
         context,
@@ -192,7 +194,7 @@ final class EpubConvertFlow {
     messenger?.showSnackBar(
       SnackBar(
         content: Text(
-          AppStrings.epubConvertDone(
+          AppStrings.convertDone(
             converted.made,
             converted.notes,
             converted.pictures,

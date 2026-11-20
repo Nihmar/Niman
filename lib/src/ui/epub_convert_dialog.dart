@@ -137,7 +137,7 @@ final class _EpubConvertDialogState extends State<EpubConvertDialog> {
     final oneNote = _oneNote ?? (preview != null && preview.notes <= 1);
     return AlertDialog(
       key: const Key('epub-convert-dialog'),
-      title: Text(AppStrings.epubConvertTitle),
+      title: Text(AppStrings.convertTitle),
       scrollable: true,
       content: problem != null
           ? Text(problem, key: const Key('epub-convert-problem'))
@@ -166,7 +166,7 @@ final class _EpubConvertDialogState extends State<EpubConvertDialog> {
                 : () =>
                       Navigator.of(context)
                           .pop((oneNote: oneNote, parent: _parent)),
-            child: Text(AppStrings.epubConvertStart),
+            child: Text(AppStrings.convertStart),
           ),
       ],
     );
@@ -218,7 +218,7 @@ final class _EpubConvertDialogState extends State<EpubConvertDialog> {
           key: const Key('epub-convert-folder'),
           contentPadding: EdgeInsets.zero,
           leading: const Icon(Icons.folder_outlined),
-          title: Text(AppStrings.epubConvertInto),
+          title: Text(AppStrings.convertInto),
           subtitle: Text(_parent.isEmpty ? AppStrings.libraryRoot : _parent),
           trailing: widget.pickFolder == null
               ? null

@@ -1936,13 +1936,13 @@ final class LatvianStrings extends Strings {
   @override
   String importFolderEmpty(String name) => 'Mapē $name nav Markdown failu';
   @override
-  String get epubConvertAction => 'Pārvērst Markdown formātā…';
+  String get convertAction => 'Pārvērst Markdown formātā…';
   @override
   String get epubConvertCommand => 'Pārvērst EPUB Markdown formātā…';
   @override
   String get epubConvertSettingsTitle => 'Pārvērst EPUB Markdown formātā';
   @override
-  String get epubConvertTitle => 'Pārvērst Markdown formātā';
+  String get convertTitle => 'Pārvērst Markdown formātā';
   @override
   String get epubConvertReading => 'Notiek grāmatas lasīšana…';
   @override
@@ -1955,13 +1955,13 @@ final class LatvianStrings extends Strings {
   @override
   String get epubConvertOneNoteDetail => 'Visa grāmata vienā piezīmē';
   @override
-  String get epubConvertInto => 'Uz';
+  String get convertInto => 'Uz';
   @override
-  String get epubConvertStart => 'Pārvērst';
+  String get convertStart => 'Pārvērst';
   @override
-  String epubConvertProgress(int done, int total) => 'Raksta $done no $total';
+  String convertProgress(int done, int total) => 'Raksta $done no $total';
   @override
-  String epubConvertDone(String made, int notes, int pictures) =>
+  String convertDone(String made, int notes, int pictures) =>
       'Pārvērsts uz $made (piezīmes: $notes, attēli: $pictures)';
   @override
   String get epubConvertProtected =>

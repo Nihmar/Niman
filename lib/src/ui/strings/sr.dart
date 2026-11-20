@@ -1945,13 +1945,13 @@ final class SerbianStrings extends Strings {
   @override
   String importFolderEmpty(String name) => 'Нема Markdown датотека у $name';
   @override
-  String get epubConvertAction => 'Претвори у Markdown…';
+  String get convertAction => 'Претвори у Markdown…';
   @override
   String get epubConvertCommand => 'Претвори EPUB у Markdown…';
   @override
   String get epubConvertSettingsTitle => 'Претвори EPUB у Markdown';
   @override
-  String get epubConvertTitle => 'Претвори у Markdown';
+  String get convertTitle => 'Претвори у Markdown';
   @override
   String get epubConvertReading => 'Читање књиге…';
   @override
@@ -1964,14 +1964,13 @@ final class SerbianStrings extends Strings {
   @override
   String get epubConvertOneNoteDetail => 'Цела књига у једној белешци';
   @override
-  String get epubConvertInto => 'У';
+  String get convertInto => 'У';
   @override
-  String get epubConvertStart => 'Претвори';
+  String get convertStart => 'Претвори';
   @override
-  String epubConvertProgress(int done, int total) =>
-      'Уписивање $done од $total';
+  String convertProgress(int done, int total) => 'Уписивање $done од $total';
   @override
-  String epubConvertDone(String made, int notes, int pictures) =>
+  String convertDone(String made, int notes, int pictures) =>
       'Претворено у $made (белешке: $notes, слике: $pictures)';
   @override
   String get epubConvertProtected =>

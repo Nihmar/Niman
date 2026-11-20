@@ -1825,13 +1825,13 @@ final class JapaneseStrings extends Strings {
   @override
   String importFolderEmpty(String name) => '$name に Markdown ファイルはありません';
   @override
-  String get epubConvertAction => 'Markdown に変換…';
+  String get convertAction => 'Markdown に変換…';
   @override
   String get epubConvertCommand => 'EPUB を Markdown に変換…';
   @override
   String get epubConvertSettingsTitle => 'EPUB を Markdown に変換';
   @override
-  String get epubConvertTitle => 'Markdown に変換';
+  String get convertTitle => 'Markdown に変換';
   @override
   String get epubConvertReading => '本を読み込んでいます…';
   @override
@@ -1844,13 +1844,13 @@ final class JapaneseStrings extends Strings {
   @override
   String get epubConvertOneNoteDetail => '本全体を1つのノートに';
   @override
-  String get epubConvertInto => '保存先';
+  String get convertInto => '保存先';
   @override
-  String get epubConvertStart => '変換';
+  String get convertStart => '変換';
   @override
-  String epubConvertProgress(int done, int total) => '$total 件中 $done 件を書き込み中';
+  String convertProgress(int done, int total) => '$total 件中 $done 件を書き込み中';
   @override
-  String epubConvertDone(String made, int notes, int pictures) =>
+  String convertDone(String made, int notes, int pictures) =>
       '$made に変換しました（ノート：$notes、画像：$pictures）';
   @override
   String get epubConvertProtected => 'この本は保護されています（DRM）：本文を変換できません';

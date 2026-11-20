@@ -1242,22 +1242,22 @@ final class AppStrings {
   static String importFolderBody(int count) => _s.importFolderBody(count);
   static String importFolderDone(String folder) => _s.importFolderDone(folder);
   static String importFolderEmpty(String name) => _s.importFolderEmpty(name);
-  static String get epubConvertAction => _s.epubConvertAction;
+  static String get convertAction => _s.convertAction;
   static String get epubConvertCommand => _s.epubConvertCommand;
   static String get epubConvertSettingsTitle => _s.epubConvertSettingsTitle;
-  static String get epubConvertTitle => _s.epubConvertTitle;
+  static String get convertTitle => _s.convertTitle;
   static String get epubConvertReading => _s.epubConvertReading;
   static String get epubConvertPerChapter => _s.epubConvertPerChapter;
   static String epubConvertPerChapterDetail(int notes, int folders) =>
       _s.epubConvertPerChapterDetail(notes, folders);
   static String get epubConvertOneNote => _s.epubConvertOneNote;
   static String get epubConvertOneNoteDetail => _s.epubConvertOneNoteDetail;
-  static String get epubConvertInto => _s.epubConvertInto;
-  static String get epubConvertStart => _s.epubConvertStart;
-  static String epubConvertProgress(int done, int total) =>
-      _s.epubConvertProgress(done, total);
-  static String epubConvertDone(String made, int notes, int pictures) =>
-      _s.epubConvertDone(made, notes, pictures);
+  static String get convertInto => _s.convertInto;
+  static String get convertStart => _s.convertStart;
+  static String convertProgress(int done, int total) =>
+      _s.convertProgress(done, total);
+  static String convertDone(String made, int notes, int pictures) =>
+      _s.convertDone(made, notes, pictures);
   static String get epubConvertProtected => _s.epubConvertProtected;
   static String epubConvertNotABook(String name) =>
       _s.epubConvertNotABook(name);

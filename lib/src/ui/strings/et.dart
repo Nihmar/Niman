@@ -1921,13 +1921,13 @@ final class EstonianStrings extends Strings {
   @override
   String importFolderEmpty(String name) => 'Kaustas $name pole Markdowni faile';
   @override
-  String get epubConvertAction => 'Teisenda Markdowniks…';
+  String get convertAction => 'Teisenda Markdowniks…';
   @override
   String get epubConvertCommand => 'Teisenda EPUB Markdowniks…';
   @override
   String get epubConvertSettingsTitle => 'Teisenda EPUB Markdowniks';
   @override
-  String get epubConvertTitle => 'Teisenda Markdowniks';
+  String get convertTitle => 'Teisenda Markdowniks';
   @override
   String get epubConvertReading => 'Raamatut loetakse…';
   @override
@@ -1940,13 +1940,13 @@ final class EstonianStrings extends Strings {
   @override
   String get epubConvertOneNoteDetail => 'Kogu raamat ühes märkmes';
   @override
-  String get epubConvertInto => 'Kausta';
+  String get convertInto => 'Kausta';
   @override
-  String get epubConvertStart => 'Teisenda';
+  String get convertStart => 'Teisenda';
   @override
-  String epubConvertProgress(int done, int total) => 'Kirjutamine $done/$total';
+  String convertProgress(int done, int total) => 'Kirjutamine $done/$total';
   @override
-  String epubConvertDone(String made, int notes, int pictures) =>
+  String convertDone(String made, int notes, int pictures) =>
       'Teisendatud: $made (märkmeid: $notes, pilte: $pictures)';
   @override
   String get epubConvertProtected =>

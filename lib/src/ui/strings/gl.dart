@@ -1955,13 +1955,13 @@ final class GalicianStrings extends Strings {
   String importFolderEmpty(String name) =>
       'Non hai ficheiros Markdown en $name';
   @override
-  String get epubConvertAction => 'Converter a Markdown…';
+  String get convertAction => 'Converter a Markdown…';
   @override
   String get epubConvertCommand => 'Converter EPUB a Markdown…';
   @override
   String get epubConvertSettingsTitle => 'Converter un EPUB a Markdown';
   @override
-  String get epubConvertTitle => 'Converter a Markdown';
+  String get convertTitle => 'Converter a Markdown';
   @override
   String get epubConvertReading => 'Lendo o libro…';
   @override
@@ -1974,14 +1974,13 @@ final class GalicianStrings extends Strings {
   @override
   String get epubConvertOneNoteDetail => 'O libro enteiro nunha soa nota';
   @override
-  String get epubConvertInto => 'En';
+  String get convertInto => 'En';
   @override
-  String get epubConvertStart => 'Converter';
+  String get convertStart => 'Converter';
   @override
-  String epubConvertProgress(int done, int total) =>
-      'Escribindo $done de $total';
+  String convertProgress(int done, int total) => 'Escribindo $done de $total';
   @override
-  String epubConvertDone(String made, int notes, int pictures) =>
+  String convertDone(String made, int notes, int pictures) =>
       'Convertido en $made (notas: $notes, imaxes: $pictures)';
   @override
   String get epubConvertProtected =>

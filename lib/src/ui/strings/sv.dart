@@ -1950,13 +1950,13 @@ final class SwedishStrings extends Strings {
   @override
   String importFolderEmpty(String name) => 'Inga Markdown-filer i $name';
   @override
-  String get epubConvertAction => 'Konvertera till Markdown…';
+  String get convertAction => 'Konvertera till Markdown…';
   @override
   String get epubConvertCommand => 'Konvertera EPUB till Markdown…';
   @override
   String get epubConvertSettingsTitle => 'Konvertera en EPUB till Markdown';
   @override
-  String get epubConvertTitle => 'Konvertera till Markdown';
+  String get convertTitle => 'Konvertera till Markdown';
   @override
   String get epubConvertReading => 'Läser boken…';
   @override
@@ -1969,13 +1969,13 @@ final class SwedishStrings extends Strings {
   @override
   String get epubConvertOneNoteDetail => 'Hela boken i en enda anteckning';
   @override
-  String get epubConvertInto => 'Till';
+  String get convertInto => 'Till';
   @override
-  String get epubConvertStart => 'Konvertera';
+  String get convertStart => 'Konvertera';
   @override
-  String epubConvertProgress(int done, int total) => 'Skriver $done av $total';
+  String convertProgress(int done, int total) => 'Skriver $done av $total';
   @override
-  String epubConvertDone(String made, int notes, int pictures) =>
+  String convertDone(String made, int notes, int pictures) =>
       'Konverterad till $made (anteckningar: $notes, bilder: $pictures)';
   @override
   String get epubConvertProtected =>

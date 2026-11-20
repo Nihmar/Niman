@@ -1995,13 +1995,13 @@ final class FrenchStrings extends Strings {
   @override
   String importFolderEmpty(String name) => 'Aucun fichier Markdown dans $name';
   @override
-  String get epubConvertAction => 'Convertir en Markdown…';
+  String get convertAction => 'Convertir en Markdown…';
   @override
   String get epubConvertCommand => 'Convertir un EPUB en Markdown…';
   @override
   String get epubConvertSettingsTitle => 'Convertir un EPUB en Markdown';
   @override
-  String get epubConvertTitle => 'Convertir en Markdown';
+  String get convertTitle => 'Convertir en Markdown';
   @override
   String get epubConvertReading => 'Lecture du livre…';
   @override
@@ -2014,14 +2014,13 @@ final class FrenchStrings extends Strings {
   @override
   String get epubConvertOneNoteDetail => 'Le livre entier dans une seule note';
   @override
-  String get epubConvertInto => 'Dans';
+  String get convertInto => 'Dans';
   @override
-  String get epubConvertStart => 'Convertir';
+  String get convertStart => 'Convertir';
   @override
-  String epubConvertProgress(int done, int total) =>
-      'Écriture $done sur $total';
+  String convertProgress(int done, int total) => 'Écriture $done sur $total';
   @override
-  String epubConvertDone(String made, int notes, int pictures) =>
+  String convertDone(String made, int notes, int pictures) =>
       'Converti dans $made (notes : $notes, images : $pictures)';
   @override
   String get epubConvertProtected =>

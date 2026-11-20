@@ -1962,13 +1962,13 @@ final class PolishStrings extends Strings {
   @override
   String importFolderEmpty(String name) => 'Brak plików Markdown w $name';
   @override
-  String get epubConvertAction => 'Konwertuj na Markdown…';
+  String get convertAction => 'Konwertuj na Markdown…';
   @override
   String get epubConvertCommand => 'Konwertuj EPUB na Markdown…';
   @override
   String get epubConvertSettingsTitle => 'Konwertuj EPUB na Markdown';
   @override
-  String get epubConvertTitle => 'Konwertuj na Markdown';
+  String get convertTitle => 'Konwertuj na Markdown';
   @override
   String get epubConvertReading => 'Czytanie książki…';
   @override
@@ -1981,14 +1981,13 @@ final class PolishStrings extends Strings {
   @override
   String get epubConvertOneNoteDetail => 'Cała książka w jednej notatce';
   @override
-  String get epubConvertInto => 'Do';
+  String get convertInto => 'Do';
   @override
-  String get epubConvertStart => 'Konwertuj';
+  String get convertStart => 'Konwertuj';
   @override
-  String epubConvertProgress(int done, int total) =>
-      'Zapisywanie $done z $total';
+  String convertProgress(int done, int total) => 'Zapisywanie $done z $total';
   @override
-  String epubConvertDone(String made, int notes, int pictures) =>
+  String convertDone(String made, int notes, int pictures) =>
       'Skonwertowano do $made (notatki: $notes, obrazy: $pictures)';
   @override
   String get epubConvertProtected =>

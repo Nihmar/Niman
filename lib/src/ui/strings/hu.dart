@@ -1956,13 +1956,13 @@ final class HungarianStrings extends Strings {
   @override
   String importFolderEmpty(String name) => 'Nincs Markdown-fájl itt: $name';
   @override
-  String get epubConvertAction => 'Átalakítás Markdownná…';
+  String get convertAction => 'Átalakítás Markdownná…';
   @override
   String get epubConvertCommand => 'EPUB átalakítása Markdownná…';
   @override
   String get epubConvertSettingsTitle => 'EPUB átalakítása Markdownná';
   @override
-  String get epubConvertTitle => 'Átalakítás Markdownná';
+  String get convertTitle => 'Átalakítás Markdownná';
   @override
   String get epubConvertReading => 'A könyv olvasása…';
   @override
@@ -1975,13 +1975,13 @@ final class HungarianStrings extends Strings {
   @override
   String get epubConvertOneNoteDetail => 'Az egész könyv egyetlen jegyzetben';
   @override
-  String get epubConvertInto => 'Ide';
+  String get convertInto => 'Ide';
   @override
-  String get epubConvertStart => 'Átalakítás';
+  String get convertStart => 'Átalakítás';
   @override
-  String epubConvertProgress(int done, int total) => 'Írás: $done / $total';
+  String convertProgress(int done, int total) => 'Írás: $done / $total';
   @override
-  String epubConvertDone(String made, int notes, int pictures) =>
+  String convertDone(String made, int notes, int pictures) =>
       'Átalakítva ide: $made (jegyzetek: $notes, képek: $pictures)';
   @override
   String get epubConvertProtected =>

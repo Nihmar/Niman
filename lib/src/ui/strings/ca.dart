@@ -1977,13 +1977,13 @@ final class CatalanStrings extends Strings {
   @override
   String importFolderEmpty(String name) => 'No hi ha fitxers Markdown a $name';
   @override
-  String get epubConvertAction => 'Converteix a Markdown…';
+  String get convertAction => 'Converteix a Markdown…';
   @override
   String get epubConvertCommand => 'Converteix un EPUB a Markdown…';
   @override
   String get epubConvertSettingsTitle => 'Converteix un EPUB a Markdown';
   @override
-  String get epubConvertTitle => 'Converteix a Markdown';
+  String get convertTitle => 'Converteix a Markdown';
   @override
   String get epubConvertReading => 'S’està llegint el llibre…';
   @override
@@ -1996,14 +1996,14 @@ final class CatalanStrings extends Strings {
   @override
   String get epubConvertOneNoteDetail => 'Tot el llibre en una sola nota';
   @override
-  String get epubConvertInto => 'A';
+  String get convertInto => 'A';
   @override
-  String get epubConvertStart => 'Converteix';
+  String get convertStart => 'Converteix';
   @override
-  String epubConvertProgress(int done, int total) =>
+  String convertProgress(int done, int total) =>
       'S’està escrivint $done de $total';
   @override
-  String epubConvertDone(String made, int notes, int pictures) =>
+  String convertDone(String made, int notes, int pictures) =>
       'Convertit a $made (notes: $notes, imatges: $pictures)';
   @override
   String get epubConvertProtected =>

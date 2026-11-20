@@ -1955,13 +1955,13 @@ final class AlbanianStrings extends Strings {
   @override
   String importFolderEmpty(String name) => 'Nuk ka skedarë Markdown në $name';
   @override
-  String get epubConvertAction => 'Shndërro në Markdown…';
+  String get convertAction => 'Shndërro në Markdown…';
   @override
   String get epubConvertCommand => 'Shndërro EPUB në Markdown…';
   @override
   String get epubConvertSettingsTitle => 'Shndërro një EPUB në Markdown';
   @override
-  String get epubConvertTitle => 'Shndërro në Markdown';
+  String get convertTitle => 'Shndërro në Markdown';
   @override
   String get epubConvertReading => 'Po lexohet libri…';
   @override
@@ -1975,14 +1975,13 @@ final class AlbanianStrings extends Strings {
   String get epubConvertOneNoteDetail =>
       'I gjithë libri në një shënim të vetëm';
   @override
-  String get epubConvertInto => 'Në';
+  String get convertInto => 'Në';
   @override
-  String get epubConvertStart => 'Shndërro';
+  String get convertStart => 'Shndërro';
   @override
-  String epubConvertProgress(int done, int total) =>
-      'Po shkruhet $done nga $total';
+  String convertProgress(int done, int total) => 'Po shkruhet $done nga $total';
   @override
-  String epubConvertDone(String made, int notes, int pictures) =>
+  String convertDone(String made, int notes, int pictures) =>
       'U shndërrua në $made (shënime: $notes, figura: $pictures)';
   @override
   String get epubConvertProtected =>

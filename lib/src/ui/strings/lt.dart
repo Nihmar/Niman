@@ -1940,13 +1940,13 @@ final class LithuanianStrings extends Strings {
   @override
   String importFolderEmpty(String name) => 'Aplanke $name nėra Markdown failų';
   @override
-  String get epubConvertAction => 'Konvertuoti į Markdown…';
+  String get convertAction => 'Konvertuoti į Markdown…';
   @override
   String get epubConvertCommand => 'Konvertuoti EPUB į Markdown…';
   @override
   String get epubConvertSettingsTitle => 'Konvertuoti EPUB į Markdown';
   @override
-  String get epubConvertTitle => 'Konvertuoti į Markdown';
+  String get convertTitle => 'Konvertuoti į Markdown';
   @override
   String get epubConvertReading => 'Skaitoma knyga…';
   @override
@@ -1959,13 +1959,13 @@ final class LithuanianStrings extends Strings {
   @override
   String get epubConvertOneNoteDetail => 'Visa knyga vienoje pastaboje';
   @override
-  String get epubConvertInto => 'Į';
+  String get convertInto => 'Į';
   @override
-  String get epubConvertStart => 'Konvertuoti';
+  String get convertStart => 'Konvertuoti';
   @override
-  String epubConvertProgress(int done, int total) => 'Rašoma $done iš $total';
+  String convertProgress(int done, int total) => 'Rašoma $done iš $total';
   @override
-  String epubConvertDone(String made, int notes, int pictures) =>
+  String convertDone(String made, int notes, int pictures) =>
       'Konvertuota į $made (pastabos: $notes, paveikslėliai: $pictures)';
   @override
   String get epubConvertProtected =>

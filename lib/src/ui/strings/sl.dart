@@ -1937,13 +1937,13 @@ final class SlovenianStrings extends Strings {
   @override
   String importFolderEmpty(String name) => 'V $name ni datotek Markdown';
   @override
-  String get epubConvertAction => 'Pretvori v Markdown…';
+  String get convertAction => 'Pretvori v Markdown…';
   @override
   String get epubConvertCommand => 'Pretvori EPUB v Markdown…';
   @override
   String get epubConvertSettingsTitle => 'Pretvori EPUB v Markdown';
   @override
-  String get epubConvertTitle => 'Pretvori v Markdown';
+  String get convertTitle => 'Pretvori v Markdown';
   @override
   String get epubConvertReading => 'Branje knjige…';
   @override
@@ -1956,14 +1956,13 @@ final class SlovenianStrings extends Strings {
   @override
   String get epubConvertOneNoteDetail => 'Vsa knjiga v enem zapisku';
   @override
-  String get epubConvertInto => 'V';
+  String get convertInto => 'V';
   @override
-  String get epubConvertStart => 'Pretvori';
+  String get convertStart => 'Pretvori';
   @override
-  String epubConvertProgress(int done, int total) =>
-      'Zapisovanje $done od $total';
+  String convertProgress(int done, int total) => 'Zapisovanje $done od $total';
   @override
-  String epubConvertDone(String made, int notes, int pictures) =>
+  String convertDone(String made, int notes, int pictures) =>
       'Pretvorjeno v $made (zapiski: $notes, slike: $pictures)';
   @override
   String get epubConvertProtected =>

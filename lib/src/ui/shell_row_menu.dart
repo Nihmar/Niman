@@ -391,7 +391,7 @@ List<List<RowMenuEntry>> rowMenuGroups(
       (
         key: const Key('menu-convert-epub'),
         icon: Icons.note_add_outlined,
-        label: AppStrings.epubConvertAction,
+        label: AppStrings.convertAction,
         value: 'convertepub',
         destructive: false,
       ),

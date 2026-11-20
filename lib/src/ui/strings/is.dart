@@ -1941,13 +1941,13 @@ final class IcelandicStrings extends Strings {
   @override
   String importFolderEmpty(String name) => 'Engar Markdown-skrár í $name';
   @override
-  String get epubConvertAction => 'Umbreyta í Markdown…';
+  String get convertAction => 'Umbreyta í Markdown…';
   @override
   String get epubConvertCommand => 'Umbreyta EPUB í Markdown…';
   @override
   String get epubConvertSettingsTitle => 'Umbreyta EPUB í Markdown';
   @override
-  String get epubConvertTitle => 'Umbreyta í Markdown';
+  String get convertTitle => 'Umbreyta í Markdown';
   @override
   String get epubConvertReading => 'Les bókina…';
   @override
@@ -1960,13 +1960,13 @@ final class IcelandicStrings extends Strings {
   @override
   String get epubConvertOneNoteDetail => 'Öll bókin í einni glósu';
   @override
-  String get epubConvertInto => 'Í';
+  String get convertInto => 'Í';
   @override
-  String get epubConvertStart => 'Umbreyta';
+  String get convertStart => 'Umbreyta';
   @override
-  String epubConvertProgress(int done, int total) => 'Skrifa $done af $total';
+  String convertProgress(int done, int total) => 'Skrifa $done af $total';
   @override
-  String epubConvertDone(String made, int notes, int pictures) =>
+  String convertDone(String made, int notes, int pictures) =>
       'Umbreytt í $made (glósur: $notes, myndir: $pictures)';
   @override
   String get epubConvertProtected =>

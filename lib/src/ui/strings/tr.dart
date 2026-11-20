@@ -1925,13 +1925,13 @@ final class TurkishStrings extends Strings {
   @override
   String importFolderEmpty(String name) => '$name içinde Markdown dosyası yok';
   @override
-  String get epubConvertAction => 'Markdown’a dönüştür…';
+  String get convertAction => 'Markdown’a dönüştür…';
   @override
   String get epubConvertCommand => 'EPUB’u Markdown’a dönüştür…';
   @override
   String get epubConvertSettingsTitle => 'Bir EPUB’u Markdown’a dönüştür';
   @override
-  String get epubConvertTitle => 'Markdown’a dönüştür';
+  String get convertTitle => 'Markdown’a dönüştür';
   @override
   String get epubConvertReading => 'Kitap okunuyor…';
   @override
@@ -1944,14 +1944,13 @@ final class TurkishStrings extends Strings {
   @override
   String get epubConvertOneNoteDetail => 'Kitabın tamamı tek bir notta';
   @override
-  String get epubConvertInto => 'Hedef';
+  String get convertInto => 'Hedef';
   @override
-  String get epubConvertStart => 'Dönüştür';
+  String get convertStart => 'Dönüştür';
   @override
-  String epubConvertProgress(int done, int total) =>
-      'Yazılıyor: $done / $total';
+  String convertProgress(int done, int total) => 'Yazılıyor: $done / $total';
   @override
-  String epubConvertDone(String made, int notes, int pictures) =>
+  String convertDone(String made, int notes, int pictures) =>
       '$made içine dönüştürüldü (notlar: $notes, resimler: $pictures)';
   @override
   String get epubConvertProtected =>

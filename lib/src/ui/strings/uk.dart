@@ -1945,13 +1945,13 @@ final class UkrainianStrings extends Strings {
   @override
   String importFolderEmpty(String name) => 'У $name немає файлів Markdown';
   @override
-  String get epubConvertAction => 'Перетворити на Markdown…';
+  String get convertAction => 'Перетворити на Markdown…';
   @override
   String get epubConvertCommand => 'Перетворити EPUB на Markdown…';
   @override
   String get epubConvertSettingsTitle => 'Перетворити EPUB на Markdown';
   @override
-  String get epubConvertTitle => 'Перетворити на Markdown';
+  String get convertTitle => 'Перетворити на Markdown';
   @override
   String get epubConvertReading => 'Читання книги…';
   @override
@@ -1964,13 +1964,13 @@ final class UkrainianStrings extends Strings {
   @override
   String get epubConvertOneNoteDetail => 'Уся книга в одній нотатці';
   @override
-  String get epubConvertInto => 'До';
+  String get convertInto => 'До';
   @override
-  String get epubConvertStart => 'Перетворити';
+  String get convertStart => 'Перетворити';
   @override
-  String epubConvertProgress(int done, int total) => 'Запис $done з $total';
+  String convertProgress(int done, int total) => 'Запис $done з $total';
   @override
-  String epubConvertDone(String made, int notes, int pictures) =>
+  String convertDone(String made, int notes, int pictures) =>
       'Перетворено до $made (нотатки: $notes, зображення: $pictures)';
   @override
   String get epubConvertProtected =>

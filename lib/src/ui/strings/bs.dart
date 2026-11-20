@@ -1946,13 +1946,13 @@ final class BosnianStrings extends Strings {
   @override
   String importFolderEmpty(String name) => 'Nema Markdown datoteka u $name';
   @override
-  String get epubConvertAction => 'Pretvori u Markdown…';
+  String get convertAction => 'Pretvori u Markdown…';
   @override
   String get epubConvertCommand => 'Pretvori EPUB u Markdown…';
   @override
   String get epubConvertSettingsTitle => 'Pretvori EPUB u Markdown';
   @override
-  String get epubConvertTitle => 'Pretvori u Markdown';
+  String get convertTitle => 'Pretvori u Markdown';
   @override
   String get epubConvertReading => 'Čitanje knjige…';
   @override
@@ -1965,14 +1965,13 @@ final class BosnianStrings extends Strings {
   @override
   String get epubConvertOneNoteDetail => 'Cijela knjiga u jednoj bilješci';
   @override
-  String get epubConvertInto => 'U';
+  String get convertInto => 'U';
   @override
-  String get epubConvertStart => 'Pretvori';
+  String get convertStart => 'Pretvori';
   @override
-  String epubConvertProgress(int done, int total) =>
-      'Upisivanje $done od $total';
+  String convertProgress(int done, int total) => 'Upisivanje $done od $total';
   @override
-  String epubConvertDone(String made, int notes, int pictures) =>
+  String convertDone(String made, int notes, int pictures) =>
       'Pretvoreno u $made (bilješke: $notes, slike: $pictures)';
   @override
   String get epubConvertProtected =>

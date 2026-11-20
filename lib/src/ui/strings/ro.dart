@@ -1961,13 +1961,13 @@ final class RomanianStrings extends Strings {
   @override
   String importFolderEmpty(String name) => 'Niciun fișier Markdown în $name';
   @override
-  String get epubConvertAction => 'Convertește în Markdown…';
+  String get convertAction => 'Convertește în Markdown…';
   @override
   String get epubConvertCommand => 'Convertește EPUB în Markdown…';
   @override
   String get epubConvertSettingsTitle => 'Convertește un EPUB în Markdown';
   @override
-  String get epubConvertTitle => 'Convertește în Markdown';
+  String get convertTitle => 'Convertește în Markdown';
   @override
   String get epubConvertReading => 'Se citește cartea…';
   @override
@@ -1980,14 +1980,13 @@ final class RomanianStrings extends Strings {
   @override
   String get epubConvertOneNoteDetail => 'Toată cartea într-o singură notă';
   @override
-  String get epubConvertInto => 'În';
+  String get convertInto => 'În';
   @override
-  String get epubConvertStart => 'Convertește';
+  String get convertStart => 'Convertește';
   @override
-  String epubConvertProgress(int done, int total) =>
-      'Se scrie $done din $total';
+  String convertProgress(int done, int total) => 'Se scrie $done din $total';
   @override
-  String epubConvertDone(String made, int notes, int pictures) =>
+  String convertDone(String made, int notes, int pictures) =>
       'Convertit în $made (note: $notes, imagini: $pictures)';
   @override
   String get epubConvertProtected =>

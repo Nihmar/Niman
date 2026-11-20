@@ -2005,13 +2005,13 @@ final class GreekStrings extends Strings {
   @override
   String importFolderEmpty(String name) => 'Κανένα αρχείο Markdown στο $name';
   @override
-  String get epubConvertAction => 'Μετατροπή σε Markdown…';
+  String get convertAction => 'Μετατροπή σε Markdown…';
   @override
   String get epubConvertCommand => 'Μετατροπή EPUB σε Markdown…';
   @override
   String get epubConvertSettingsTitle => 'Μετατροπή ενός EPUB σε Markdown';
   @override
-  String get epubConvertTitle => 'Μετατροπή σε Markdown';
+  String get convertTitle => 'Μετατροπή σε Markdown';
   @override
   String get epubConvertReading => 'Ανάγνωση του βιβλίου…';
   @override
@@ -2024,13 +2024,13 @@ final class GreekStrings extends Strings {
   @override
   String get epubConvertOneNoteDetail => 'Όλο το βιβλίο σε μία σημείωση';
   @override
-  String get epubConvertInto => 'Σε';
+  String get convertInto => 'Σε';
   @override
-  String get epubConvertStart => 'Μετατροπή';
+  String get convertStart => 'Μετατροπή';
   @override
-  String epubConvertProgress(int done, int total) => 'Εγγραφή $done από $total';
+  String convertProgress(int done, int total) => 'Εγγραφή $done από $total';
   @override
-  String epubConvertDone(String made, int notes, int pictures) =>
+  String convertDone(String made, int notes, int pictures) =>
       'Μετατράπηκε σε $made (σημειώσεις: $notes, εικόνες: $pictures)';
   @override
   String get epubConvertProtected =>
