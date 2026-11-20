@@ -172,9 +172,17 @@ final class HtmlBlocks {
           if (!(node is Element && _isList(node))) node,
       ];
       final text = inline.of(_flatten(words)).trim();
+      // A checkbox the item opens with is a task's box.
+      final box = _checkboxOf(item);
+      final task = box == null
+          ? ''
+          : box.attributes.containsKey('checked')
+          ? '[x]'
+          : '[ ]';
+      final body = text.isEmpty ? '' : escapeMarkdownLineStart(text);
       out.add(
         context.wrap(
-          '$marker${text.isEmpty ? '' : escapeMarkdownLineStart(text)}',
+          '$marker${task.isEmpty || body.isEmpty ? task : '$task '}$body',
         ),
       );
       for (final nested in item.children.where(_isList)) {
@@ -187,6 +195,31 @@ final class HtmlBlocks {
       }
     }
   }
+
+  /// The checkbox [item] opens with — GFM's `<li><input type="checkbox">`,
+  /// as Niman's export writes it, or one in a leading paragraph or label —
+  /// or null when it opens with something else.
+  static Element? _checkboxOf(Element item) {
+    Node? first(List<Node> nodes) => nodes
+        .where(
+          (node) =>
+              !(node is Text && node.text.trim().isEmpty) && node is! Comment,
+        )
+        .firstOrNull;
+    var node = first(item.nodes);
+    while (node is Element) {
+      if (node.localName == 'input') {
+        return node.attributes['type']?.toLowerCase() == 'checkbox'
+            ? node
+            : null;
+      }
+      if (!_boxHolders.contains(node.localName)) return null;
+      node = first(node.nodes);
+    }
+    return null;
+  }
+
+  static const Set<String> _boxHolders = {'p', 'label', 'span', 'div'};
 
   /// [nodes], with the paragraphs inside a list item run into one line.
   List<Node> _flatten(List<Node> nodes) => [

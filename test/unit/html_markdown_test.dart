@@ -116,6 +116,49 @@ void main() {
       );
     });
 
+    test('a checkbox opening an item is a task, ticked or not', () {
+      expect(
+        markdown(
+          '<ul><li><input type="checkbox"/> open</li>'
+          '<li><input type="checkbox" checked="" disabled=""> done *</li>'
+          '<li><input type="text"/> not a box</li></ul>',
+        ),
+        '- [ ] open\n\n- [x] done \\*\n\n- not a box',
+      );
+    });
+
+    test('a checkbox in a leading paragraph or label, nested lists too', () {
+      expect(
+        markdown(
+          '<ul><li><p><input type="checkbox" checked/> loose</p></li>'
+          '<li><label><input type="checkbox"/> labelled</label>'
+          '<ul><li><input type="checkbox" checked/>inner</li></ul></li>'
+          '<li><input type="checkbox"/></li>'
+          '<li>words <input type="checkbox"/> after</li></ul>',
+        ),
+        '- [x] loose\n\n- [ ] labelled\n\n  - [x] inner\n\n- [ ]\n\n'
+        '- words after',
+      );
+      expect(
+        markdown('<ol><li><input type="checkbox"/> a</li></ol>'),
+        '1. [ ] a',
+      );
+    });
+
+    test('the tasks of a note exported by Niman read back (#1186)', () {
+      final body = NoteHtml(
+        const NoteHtmlSource(
+          text: '- [ ] open\n- [x] done *x*\n  - [ ] nested\n\n1. [x] one\n',
+          title: 't',
+        ),
+      ).body();
+      expect(body, contains('type="checkbox"'));
+      expect(
+        markdown(body),
+        '- [ ] open\n\n- [x] done *x*\n\n  - [ ] nested\n\n1. [x] one',
+      );
+    });
+
     test('a list item of paragraphs is one line', () {
       expect(markdown('<ul><li><p>a</p><p>b</p></li></ul>'), '- a b');
     });
