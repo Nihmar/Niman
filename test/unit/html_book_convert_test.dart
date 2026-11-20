@@ -14,9 +14,8 @@ import 'package:niman/src/capture/capture_pictures.dart';
 import 'package:niman/src/core/settings/library_settings.dart' show LinkType;
 import 'package:niman/src/import/html/book/html_book_job.dart';
 import 'package:niman/src/import/html/book/html_book_preview.dart';
-import 'package:niman/src/import/html/html_convert_failures.dart';
+import 'package:niman/src/import/html/html_conversion.dart';
 import 'package:niman/src/import/html/html_convert_types.dart';
-import 'package:niman/src/import/html/html_page.dart';
 import 'package:path/path.dart' as p;
 
 const List<int> _png = [137, 80, 78, 71, 13, 10, 26, 10, 1, 2, 3];
@@ -498,6 +497,29 @@ void main() {
       'index.md',
     ]);
     expect(seen.last.done, seen.last.total - 1);
+  });
+
+  test('a book converts on its own isolate, as a page does', () async {
+    final conversion = await HtmlConversion.start(
+      source: fixture('ao3.html'),
+      libraryRoot: library,
+      parent: 'Books',
+      attachments: 'assets',
+      linkType: LinkType.wikilink,
+      book: HtmlBookSplit.chapters,
+      importedOn: DateTime(2026, 11, 20),
+    );
+    final converted = await conversion.done;
+    expect(converted, (
+      made: 'Books/Placeholder Title',
+      open: 'Books/Placeholder Title/index.md',
+      notes: 3,
+      pictures: 0,
+    ));
+    expect(
+      read('Books/Placeholder Title/index.md'),
+      contains('imported: 2026-11-20'),
+    );
   });
 
   group('the preview', () {
