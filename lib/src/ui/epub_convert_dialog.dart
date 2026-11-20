@@ -13,6 +13,7 @@ import 'package:niman/src/epub/epub_archive.dart';
 import 'package:niman/src/epub/epub_conversion.dart';
 import 'package:niman/src/epub/epub_convert_job.dart';
 import 'package:niman/src/epub/epub_convert_plan.dart';
+import 'package:niman/src/ui/convert_words.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// What the dialog answers: one note or a note a chapter, and the folder
@@ -28,11 +29,7 @@ typedef EpubPreviewer = Future<EpubConvertPreview> Function(
 });
 
 /// The words a conversion writes, in the interface's language.
-EpubConvertWords epubConvertWords() => (
-  chapter: AppStrings.epubConvertChapterName,
-  opening: AppStrings.epubConvertOpening,
-  contents: AppStrings.epubConvertContents,
-);
+EpubConvertWords epubConvertWords() => convertWords();
 
 /// Asks how to convert the book at [source] and where to; null when the
 /// dialog is dismissed or the book cannot be converted. [name] is what the
@@ -137,7 +134,7 @@ final class _EpubConvertDialogState extends State<EpubConvertDialog> {
     final oneNote = _oneNote ?? (preview != null && preview.notes <= 1);
     return AlertDialog(
       key: const Key('epub-convert-dialog'),
-      title: Text(AppStrings.epubConvertTitle),
+      title: Text(AppStrings.convertTitle),
       scrollable: true,
       content: problem != null
           ? Text(problem, key: const Key('epub-convert-problem'))
@@ -166,7 +163,7 @@ final class _EpubConvertDialogState extends State<EpubConvertDialog> {
                 : () =>
                       Navigator.of(context)
                           .pop((oneNote: oneNote, parent: _parent)),
-            child: Text(AppStrings.epubConvertStart),
+            child: Text(AppStrings.convertStart),
           ),
       ],
     );
@@ -196,9 +193,9 @@ final class _EpubConvertDialogState extends State<EpubConvertDialog> {
                 key: const Key('epub-convert-per-chapter'),
                 value: false,
                 contentPadding: EdgeInsets.zero,
-                title: Text(AppStrings.epubConvertPerChapter),
+                title: Text(AppStrings.convertPerChapter),
                 subtitle: Text(
-                  AppStrings.epubConvertPerChapterDetail(
+                  AppStrings.convertPerChapterDetail(
                     preview.notes,
                     preview.folders,
                   ),
@@ -208,8 +205,8 @@ final class _EpubConvertDialogState extends State<EpubConvertDialog> {
                 key: const Key('epub-convert-one-note'),
                 value: true,
                 contentPadding: EdgeInsets.zero,
-                title: Text(AppStrings.epubConvertOneNote),
-                subtitle: Text(AppStrings.epubConvertOneNoteDetail),
+                title: Text(AppStrings.convertOneNote),
+                subtitle: Text(AppStrings.convertOneNoteDetail),
               ),
             ],
           ),
@@ -218,7 +215,7 @@ final class _EpubConvertDialogState extends State<EpubConvertDialog> {
           key: const Key('epub-convert-folder'),
           contentPadding: EdgeInsets.zero,
           leading: const Icon(Icons.folder_outlined),
-          title: Text(AppStrings.epubConvertInto),
+          title: Text(AppStrings.convertInto),
           subtitle: Text(_parent.isEmpty ? AppStrings.libraryRoot : _parent),
           trailing: widget.pickFolder == null
               ? null

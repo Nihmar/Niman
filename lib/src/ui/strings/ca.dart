@@ -1977,33 +1977,50 @@ final class CatalanStrings extends Strings {
   @override
   String importFolderEmpty(String name) => 'No hi ha fitxers Markdown a $name';
   @override
-  String get epubConvertAction => 'Converteix a Markdown…';
+  String get importFolderSettingsTitle => 'Importa una carpeta';
+  @override
+  String importFolderBodyPages(int notes, int pages) =>
+      'Els seus fitxers Markdown ($notes) es copien i les pàgines web ($pages) '
+      'es converteixen en notes, en una carpeta nova de la biblioteca. La '
+      'carpeta original queda igual.';
+  @override
+  String get importFolderTooLarge =>
+      'Aquesta carpeta és massa gran per importar-la';
+  @override
+  String get importFolderFailed => 'No s’ha pogut importar la carpeta';
+  @override
+  String get importFolderReading => 'Llegint la carpeta…';
+  @override
+  String importFolderSkipped(String folder, int count) =>
+      'Importat a $folder (fitxers omesos: $count)';
+  @override
+  String get convertAction => 'Converteix a Markdown…';
   @override
   String get epubConvertCommand => 'Converteix un EPUB a Markdown…';
   @override
   String get epubConvertSettingsTitle => 'Converteix un EPUB a Markdown';
   @override
-  String get epubConvertTitle => 'Converteix a Markdown';
+  String get convertTitle => 'Converteix a Markdown';
   @override
   String get epubConvertReading => 'S’està llegint el llibre…';
   @override
-  String get epubConvertPerChapter => 'Una nota per capítol';
+  String get convertPerChapter => 'Una nota per capítol';
   @override
-  String epubConvertPerChapterDetail(int notes, int folders) =>
+  String convertPerChapterDetail(int notes, int folders) =>
       'Notes: $notes · carpetes: $folders';
   @override
-  String get epubConvertOneNote => 'Una nota';
+  String get convertOneNote => 'Una nota';
   @override
-  String get epubConvertOneNoteDetail => 'Tot el llibre en una sola nota';
+  String get convertOneNoteDetail => 'Tot el llibre en una sola nota';
   @override
-  String get epubConvertInto => 'A';
+  String get convertInto => 'A';
   @override
-  String get epubConvertStart => 'Converteix';
+  String get convertStart => 'Converteix';
   @override
-  String epubConvertProgress(int done, int total) =>
+  String convertProgress(int done, int total) =>
       'S’està escrivint $done de $total';
   @override
-  String epubConvertDone(String made, int notes, int pictures) =>
+  String convertDone(String made, int notes, int pictures) =>
       'Convertit a $made (notes: $notes, imatges: $pictures)';
   @override
   String get epubConvertProtected =>
@@ -2019,13 +2036,54 @@ final class CatalanStrings extends Strings {
   String get epubConvertNeedsLibrary =>
       'Obriu una biblioteca per convertir un llibre en notes';
   @override
-  String get epubConvertChapterName => 'Capítol {n}';
+  String get convertChapterName => 'Capítol {n}';
   @override
-  String get epubConvertOpening => 'Pàgines preliminars';
+  String get convertOpening => 'Pàgines preliminars';
   @override
-  String get epubConvertContents => 'Índex';
+  String get convertContents => 'Índex';
   @override
   String get epubConvertPickTitle => 'Trieu un EPUB per convertir';
+  @override
+  String get htmlConvertCommand => 'Converteix HTML a Markdown…';
+  @override
+  String get htmlConvertSettingsTitle => 'Converteix un fitxer HTML a Markdown';
+  @override
+  String get htmlConvertPickTitle => 'Trieu un fitxer HTML per convertir';
+  @override
+  String get htmlConvertReading => 'Llegint la pàgina…';
+  @override
+  String htmlConvertMany(int count) => 'Fitxers HTML: $count';
+  @override
+  String get htmlConvertNeedsLibrary =>
+      'Obriu una biblioteca per convertir una pàgina web en una nota';
+  @override
+  String htmlConvertUnreadable(String name) => '«$name» no s’ha pogut llegir';
+  @override
+  String get htmlConvertTooLarge =>
+      'Aquesta pàgina és massa gran per convertir-la';
+  @override
+  String get htmlConvertCharset =>
+      'La codificació del text d’aquesta pàgina no és compatible';
+  @override
+  String get htmlConvertFailed => 'No s’ha pogut convertir la pàgina';
+  @override
+  String get htmlDropTitle => 'Què voleu fer amb l’HTML deixat anar?';
+  @override
+  String get htmlDropConvertDetail =>
+      'Crea una nota de la pàgina, amb les seves imatges';
+  @override
+  String get htmlDropAttach => 'Adjunta';
+  @override
+  String get htmlDropAttachDetail =>
+      'Conserva el fitxer amb la nota oberta, tal com és';
+  @override
+  String get htmlDropBoth => 'Adjunta i converteix';
+  @override
+  String get htmlDropBothDetail =>
+      'Conserva el fitxer amb la nota oberta i crea una nota de la pàgina';
+  @override
+  String get htmlDropNeedsNote =>
+      'Per adjuntar cal tenir una nota oberta a la biblioteca';
   @override
   String get openFileTitle => 'Obre un fitxer';
   @override

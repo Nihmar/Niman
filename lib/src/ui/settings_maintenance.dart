@@ -6,6 +6,8 @@ import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/import/notion.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/epub_convert_flow.dart';
+import 'package:niman/src/ui/folder_import_flow.dart';
+import 'package:niman/src/ui/html_convert_flow.dart';
 import 'package:niman/src/ui/settings_area.dart';
 import 'package:niman/src/ui/settings_keys.dart';
 import 'package:niman/src/ui/strings.dart';
@@ -181,6 +183,23 @@ final class SettingsMaintenanceGroup extends StatelessWidget {
             onTap: () => _importNotion(context),
           ),
         ),
+        // A folder of Markdown files and web pages outside the library, into
+        // notes (#1295): a drop on the window brings one already at hand.
+        HighlightRow(
+          key: SettingsKeys.importFolder,
+          child: ListTile(
+            dense: compact,
+            visualDensity: compact ? VisualDensity.compact : null,
+            leading: const Icon(Icons.folder_open_outlined),
+            title: Text(AppStrings.importFolderSettingsTitle),
+            onTap: () => unawaited(
+              FolderImportFlow(
+                session: controller,
+                reveal: (_) {},
+              ).pickAndRun(context),
+            ),
+          ),
+        ),
         // A book outside the library, into notes (#1138): the tree's menu,
         // the reader's row and a drop convert one already at hand.
         HighlightRow(
@@ -192,6 +211,24 @@ final class SettingsMaintenanceGroup extends StatelessWidget {
             title: Text(AppStrings.epubConvertSettingsTitle),
             onTap: () => unawaited(
               EpubConvertFlow(
+                session: controller,
+                reveal: (_) {},
+                open: (_) {},
+              ).pickAndRun(context),
+            ),
+          ),
+        ),
+        // A web page saved as a file, outside the library, into a note
+        // (#1293): the tree's menu and a drop convert one already at hand.
+        HighlightRow(
+          key: SettingsKeys.htmlConvert,
+          child: ListTile(
+            dense: compact,
+            visualDensity: compact ? VisualDensity.compact : null,
+            leading: const Icon(Icons.web_outlined),
+            title: Text(AppStrings.htmlConvertSettingsTitle),
+            onTap: () => unawaited(
+              HtmlConvertFlow(
                 session: controller,
                 reveal: (_) {},
                 open: (_) {},

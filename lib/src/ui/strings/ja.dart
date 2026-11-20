@@ -1825,32 +1825,48 @@ final class JapaneseStrings extends Strings {
   @override
   String importFolderEmpty(String name) => '$name に Markdown ファイルはありません';
   @override
-  String get epubConvertAction => 'Markdown に変換…';
+  String get importFolderSettingsTitle => 'フォルダーを読み込む';
+  @override
+  String importFolderBodyPages(int notes, int pages) =>
+      'その Markdown ファイル（$notes）はコピーされ、'
+      'ウェブページ（$pages）はノートに変換されて、'
+      'ライブラリの新しいフォルダーに入ります。元のフォルダーはそのままです。';
+  @override
+  String get importFolderTooLarge => 'このフォルダーは大きすぎて読み込めません';
+  @override
+  String get importFolderFailed => 'フォルダーを読み込めませんでした';
+  @override
+  String get importFolderReading => 'フォルダーを読み込み中…';
+  @override
+  String importFolderSkipped(String folder, int count) =>
+      '$folder に読み込みました（除外したファイル：$count 件）';
+  @override
+  String get convertAction => 'Markdown に変換…';
   @override
   String get epubConvertCommand => 'EPUB を Markdown に変換…';
   @override
   String get epubConvertSettingsTitle => 'EPUB を Markdown に変換';
   @override
-  String get epubConvertTitle => 'Markdown に変換';
+  String get convertTitle => 'Markdown に変換';
   @override
   String get epubConvertReading => '本を読み込んでいます…';
   @override
-  String get epubConvertPerChapter => '章ごとに1つのノート';
+  String get convertPerChapter => '章ごとに1つのノート';
   @override
-  String epubConvertPerChapterDetail(int notes, int folders) =>
+  String convertPerChapterDetail(int notes, int folders) =>
       'ノート：$notes · フォルダー：$folders';
   @override
-  String get epubConvertOneNote => '1つのノート';
+  String get convertOneNote => '1つのノート';
   @override
-  String get epubConvertOneNoteDetail => '本全体を1つのノートに';
+  String get convertOneNoteDetail => '本全体を1つのノートに';
   @override
-  String get epubConvertInto => '保存先';
+  String get convertInto => '保存先';
   @override
-  String get epubConvertStart => '変換';
+  String get convertStart => '変換';
   @override
-  String epubConvertProgress(int done, int total) => '$total 件中 $done 件を書き込み中';
+  String convertProgress(int done, int total) => '$total 件中 $done 件を書き込み中';
   @override
-  String epubConvertDone(String made, int notes, int pictures) =>
+  String convertDone(String made, int notes, int pictures) =>
       '$made に変換しました（ノート：$notes、画像：$pictures）';
   @override
   String get epubConvertProtected => 'この本は保護されています（DRM）：本文を変換できません';
@@ -1863,13 +1879,47 @@ final class JapaneseStrings extends Strings {
   @override
   String get epubConvertNeedsLibrary => '本をノートに変換するにはライブラリを開いてください';
   @override
-  String get epubConvertChapterName => '第{n}章';
+  String get convertChapterName => '第{n}章';
   @override
-  String get epubConvertOpening => '前付け';
+  String get convertOpening => '前付け';
   @override
-  String get epubConvertContents => '目次';
+  String get convertContents => '目次';
   @override
   String get epubConvertPickTitle => '変換する EPUB を選択';
+  @override
+  String get htmlConvertCommand => 'HTML を Markdown に変換…';
+  @override
+  String get htmlConvertSettingsTitle => 'HTML ファイルを Markdown に変換';
+  @override
+  String get htmlConvertPickTitle => '変換する HTML ファイルを選択';
+  @override
+  String get htmlConvertReading => 'ページを読み込み中…';
+  @override
+  String htmlConvertMany(int count) => 'HTML ファイル：$count 件';
+  @override
+  String get htmlConvertNeedsLibrary => 'Web ページをノートに変換するにはライブラリを開いてください';
+  @override
+  String htmlConvertUnreadable(String name) => '「$name」 を読み込めませんでした';
+  @override
+  String get htmlConvertTooLarge => 'このページは大きすぎて変換できません';
+  @override
+  String get htmlConvertCharset => 'このページの文字エンコーディングには対応していません';
+  @override
+  String get htmlConvertFailed => 'ページを変換できませんでした';
+  @override
+  String get htmlDropTitle => 'ドロップした HTML をどうしますか？';
+  @override
+  String get htmlDropConvertDetail => 'ページを画像付きでノートにします';
+  @override
+  String get htmlDropAttach => '添付';
+  @override
+  String get htmlDropAttachDetail => '開いているノートにファイルをそのまま添付します';
+  @override
+  String get htmlDropBoth => '添付して変換';
+  @override
+  String get htmlDropBothDetail => '開いているノートにファイルを添付し、ページをノートにします';
+  @override
+  String get htmlDropNeedsNote => '添付するにはライブラリでノートを開いておく必要があります';
   @override
   String get openFileTitle => 'ファイルを開く';
   @override

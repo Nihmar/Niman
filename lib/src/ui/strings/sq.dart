@@ -1955,34 +1955,49 @@ final class AlbanianStrings extends Strings {
   @override
   String importFolderEmpty(String name) => 'Nuk ka skedarë Markdown në $name';
   @override
-  String get epubConvertAction => 'Shndërro në Markdown…';
+  String get importFolderSettingsTitle => 'Importo një dosje';
+  @override
+  String importFolderBodyPages(int notes, int pages) =>
+      'Skedarët e saj Markdown ($notes) kopjohen dhe faqet e saj web ($pages) '
+      'shndërrohen në shënime, në një dosje të re të bibliotekës. Dosja '
+      'origjinale mbetet siç është.';
+  @override
+  String get importFolderTooLarge =>
+      'Kjo dosje është shumë e madhe për importim';
+  @override
+  String get importFolderFailed => 'Dosja nuk u importua dot';
+  @override
+  String get importFolderReading => 'Po lexohet dosja…';
+  @override
+  String importFolderSkipped(String folder, int count) =>
+      'U importua në $folder (skedarë të lënë jashtë: $count)';
+  @override
+  String get convertAction => 'Shndërro në Markdown…';
   @override
   String get epubConvertCommand => 'Shndërro EPUB në Markdown…';
   @override
   String get epubConvertSettingsTitle => 'Shndërro një EPUB në Markdown';
   @override
-  String get epubConvertTitle => 'Shndërro në Markdown';
+  String get convertTitle => 'Shndërro në Markdown';
   @override
   String get epubConvertReading => 'Po lexohet libri…';
   @override
-  String get epubConvertPerChapter => 'Një shënim për çdo kapitull';
+  String get convertPerChapter => 'Një shënim për çdo kapitull';
   @override
-  String epubConvertPerChapterDetail(int notes, int folders) =>
+  String convertPerChapterDetail(int notes, int folders) =>
       'Shënime: $notes · dosje: $folders';
   @override
-  String get epubConvertOneNote => 'Një shënim';
+  String get convertOneNote => 'Një shënim';
   @override
-  String get epubConvertOneNoteDetail =>
-      'I gjithë libri në një shënim të vetëm';
+  String get convertOneNoteDetail => 'I gjithë libri në një shënim të vetëm';
   @override
-  String get epubConvertInto => 'Në';
+  String get convertInto => 'Në';
   @override
-  String get epubConvertStart => 'Shndërro';
+  String get convertStart => 'Shndërro';
   @override
-  String epubConvertProgress(int done, int total) =>
-      'Po shkruhet $done nga $total';
+  String convertProgress(int done, int total) => 'Po shkruhet $done nga $total';
   @override
-  String epubConvertDone(String made, int notes, int pictures) =>
+  String convertDone(String made, int notes, int pictures) =>
       'U shndërrua në $made (shënime: $notes, figura: $pictures)';
   @override
   String get epubConvertProtected =>
@@ -1999,13 +2014,55 @@ final class AlbanianStrings extends Strings {
   String get epubConvertNeedsLibrary =>
       'Hapni një bibliotekë për ta shndërruar një libër në shënime';
   @override
-  String get epubConvertChapterName => 'Kapitulli {n}';
+  String get convertChapterName => 'Kapitulli {n}';
   @override
-  String get epubConvertOpening => 'Faqet hyrëse';
+  String get convertOpening => 'Faqet hyrëse';
   @override
-  String get epubConvertContents => 'Përmbajtja';
+  String get convertContents => 'Përmbajtja';
   @override
   String get epubConvertPickTitle => 'Zgjidhni një EPUB për ta shndërruar';
+  @override
+  String get htmlConvertCommand => 'Shndërro HTML në Markdown…';
+  @override
+  String get htmlConvertSettingsTitle => 'Shndërro një skedar HTML në Markdown';
+  @override
+  String get htmlConvertPickTitle =>
+      'Zgjidhni një skedar HTML për ta shndërruar';
+  @override
+  String get htmlConvertReading => 'Po lexohet faqja…';
+  @override
+  String htmlConvertMany(int count) => 'Skedarë HTML: $count';
+  @override
+  String get htmlConvertNeedsLibrary =>
+      'Hapni një bibliotekë për ta shndërruar një faqe uebi në shënim';
+  @override
+  String htmlConvertUnreadable(String name) => '“$name” nuk u lexua dot';
+  @override
+  String get htmlConvertTooLarge =>
+      'Kjo faqe është shumë e madhe për shndërrim';
+  @override
+  String get htmlConvertCharset =>
+      'Kodimi i tekstit të kësaj faqeje nuk mbështetet';
+  @override
+  String get htmlConvertFailed => 'Faqja nuk u shndërrua dot';
+  @override
+  String get htmlDropTitle => 'Çfarë të bëhet me HTML-në e lëshuar?';
+  @override
+  String get htmlDropConvertDetail =>
+      'Bëj një shënim nga faqja, bashkë me figurat e saj';
+  @override
+  String get htmlDropAttach => 'Bashkëngjit';
+  @override
+  String get htmlDropAttachDetail =>
+      'Mbaje skedarin me shënimin e hapur, siç është';
+  @override
+  String get htmlDropBoth => 'Bashkëngjit dhe shndërro';
+  @override
+  String get htmlDropBothDetail =>
+      'Mbaje skedarin me shënimin e hapur dhe bëj një shënim nga faqja';
+  @override
+  String get htmlDropNeedsNote =>
+      'Për bashkëngjitje duhet një shënim i hapur në bibliotekë';
   @override
   String get openFileTitle => 'Hap skedar';
   @override

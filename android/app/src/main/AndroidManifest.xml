@@ -107,8 +107,8 @@
             <!-- Share-in (#40): another app shares into Niman. Text lands
                  at the end of the quick note; the file is copied into the
                  library as a new note, a Notion export (a zip, #25)
-                 into a folder of pages, and a book (#1138) converted
-                 into notes. -->
+                 into a folder of pages, a book (#1138) converted
+                 into notes and a web page (#1293) into a note. -->
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -118,6 +118,8 @@
                 <data android:mimeType="application/zip" />
                 <data android:mimeType="application/x-zip-compressed" />
                 <data android:mimeType="application/epub+zip" />
+                <data android:mimeType="text/html" />
+                <data android:mimeType="application/xhtml+xml" />
             </intent-filter>
             <!-- "Open with" a book (#1138): converted into notes of the
                  library, as a shared one is. -->
@@ -125,6 +127,16 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="application/epub+zip" />
+            </intent-filter>
+            <!-- "Open with" a web page saved as a file (#1293): converted
+                 into a note, as a shared one is. A type with no scheme
+                 matches content: and file: only, so a link to a page on
+                 the web is still the browser's. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/html" />
+                <data android:mimeType="application/xhtml+xml" />
             </intent-filter>
             <!-- "Open with" a Markdown file. A sender that knows the type
                  reports text/markdown; a file manager often reports only

@@ -12,6 +12,7 @@ import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/settings/features.dart';
 import 'package:niman/src/core/settings/library_features.dart';
 import 'package:niman/src/db/index_database.dart';
+import 'package:niman/src/import/html/html_file.dart';
 import 'package:niman/src/ui/action_sheet.dart';
 import 'package:niman/src/ui/create_kinds.dart';
 import 'package:niman/src/ui/file_icon.dart';
@@ -386,12 +387,21 @@ List<List<RowMenuEntry>> rowMenuGroups(
         value: 'recognize',
         destructive: false,
       ),
+    // A web page saved as a file: a note of the library (#1293).
+    if (!note.isDir && isHtmlFile(note.name))
+      (
+        key: const Key('menu-convert-html'),
+        icon: Icons.note_add_outlined,
+        label: AppStrings.convertAction,
+        value: 'converthtml',
+        destructive: false,
+      ),
     // A book: its chapters into notes of the library (#1138).
     if (!note.isDir && _isBook(note.name))
       (
         key: const Key('menu-convert-epub'),
         icon: Icons.note_add_outlined,
-        label: AppStrings.epubConvertAction,
+        label: AppStrings.convertAction,
         value: 'convertepub',
         destructive: false,
       ),

@@ -7,11 +7,13 @@ import 'package:niman/src/core/settings/features.dart';
 import 'package:niman/src/core/settings/library_features.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/editor/diagram_templates.dart';
+import 'package:niman/src/import/html/html_file.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/attachment_view.dart';
 import 'package:niman/src/ui/capture/capture_flow.dart';
 import 'package:niman/src/ui/epub_convert_flow.dart';
+import 'package:niman/src/ui/html_convert_flow.dart';
 import 'package:niman/src/ui/journal/journal_flow.dart';
 import 'package:niman/src/ui/kinds/flashcards/review_tab.dart';
 import 'package:niman/src/ui/ocr/ocr_file_actions.dart';
@@ -70,6 +72,7 @@ final class ShellCommands {
     required this.captureFlow,
     required this.exportFlow,
     required this.epubConvert,
+    required this.htmlConvert,
     required this.journalFlow,
     required this.journalUi,
     required this.immersive,
@@ -143,6 +146,9 @@ final class ShellCommands {
 
   /// Books converted into notes.
   final EpubConvertFlow epubConvert;
+
+  /// Web pages converted into notes (#1293).
+  final HtmlConvertFlow htmlConvert;
 
   /// Journal entries opened and made.
   final JournalFlow journalFlow;
@@ -349,6 +355,7 @@ final class ShellCommands {
         if (shown.path case final path?) recognize(path);
       },
       AppCommand.convertEpub: () => unawaited(_convertEpub()),
+      AppCommand.convertHtml: () => unawaited(_convertHtml()),
       AppCommand.exportLibrary: () =>
           unawaited(exportFlow.runFolderExport(context(), '', library: true)),
       AppCommand.markdownCheatsheet: () =>
@@ -468,6 +475,20 @@ final class ShellCommands {
       return await epubConvert.run(context(), p.join(root, book));
     }
     await epubConvert.pickAndRun(context());
+  }
+
+  /// The palette's conversion of a web page (#1293): the one on screen,
+  /// else the one selected in the tree, else one picked.
+  Future<void> _convertHtml() async {
+    final root = controller.root;
+    final page = [
+      shown.path,
+      selection.path,
+    ].nonNulls.where(isHtmlFile).firstOrNull;
+    if (root != null && page != null) {
+      return await htmlConvert.run(context(), p.join(root, page));
+    }
+    await htmlConvert.pickAndRun(context());
   }
 
   /// Opens a Markdown file from anywhere (#77). One inside this library

@@ -1973,33 +1973,49 @@ final class SpanishStrings extends Strings {
   @override
   String importFolderEmpty(String name) => 'No hay archivos Markdown en $name';
   @override
-  String get epubConvertAction => 'Convertir a Markdown…';
+  String get importFolderSettingsTitle => 'Importar una carpeta';
+  @override
+  String importFolderBodyPages(int notes, int pages) =>
+      'Sus archivos Markdown ($notes) se copian y sus páginas web ($pages) se '
+      'convierten en notas, en una carpeta nueva de la biblioteca. La carpeta '
+      'original queda como está.';
+  @override
+  String get importFolderTooLarge =>
+      'Esta carpeta es demasiado grande para importarla';
+  @override
+  String get importFolderFailed => 'No se pudo importar la carpeta';
+  @override
+  String get importFolderReading => 'Leyendo la carpeta…';
+  @override
+  String importFolderSkipped(String folder, int count) =>
+      'Importado en $folder (archivos omitidos: $count)';
+  @override
+  String get convertAction => 'Convertir a Markdown…';
   @override
   String get epubConvertCommand => 'Convertir EPUB a Markdown…';
   @override
   String get epubConvertSettingsTitle => 'Convertir un EPUB a Markdown';
   @override
-  String get epubConvertTitle => 'Convertir a Markdown';
+  String get convertTitle => 'Convertir a Markdown';
   @override
   String get epubConvertReading => 'Leyendo el libro…';
   @override
-  String get epubConvertPerChapter => 'Una nota por capítulo';
+  String get convertPerChapter => 'Una nota por capítulo';
   @override
-  String epubConvertPerChapterDetail(int notes, int folders) =>
+  String convertPerChapterDetail(int notes, int folders) =>
       'Notas: $notes · carpetas: $folders';
   @override
-  String get epubConvertOneNote => 'Una nota';
+  String get convertOneNote => 'Una nota';
   @override
-  String get epubConvertOneNoteDetail => 'Todo el libro en una sola nota';
+  String get convertOneNoteDetail => 'Todo el libro en una sola nota';
   @override
-  String get epubConvertInto => 'En';
+  String get convertInto => 'En';
   @override
-  String get epubConvertStart => 'Convertir';
+  String get convertStart => 'Convertir';
   @override
-  String epubConvertProgress(int done, int total) =>
-      'Escribiendo $done de $total';
+  String convertProgress(int done, int total) => 'Escribiendo $done de $total';
   @override
-  String epubConvertDone(String made, int notes, int pictures) =>
+  String convertDone(String made, int notes, int pictures) =>
       'Convertido en $made (notas: $notes, imágenes: $pictures)';
   @override
   String get epubConvertProtected =>
@@ -2015,13 +2031,54 @@ final class SpanishStrings extends Strings {
   String get epubConvertNeedsLibrary =>
       'Abre una biblioteca para convertir un libro en notas';
   @override
-  String get epubConvertChapterName => 'Capítulo {n}';
+  String get convertChapterName => 'Capítulo {n}';
   @override
-  String get epubConvertOpening => 'Páginas preliminares';
+  String get convertOpening => 'Páginas preliminares';
   @override
-  String get epubConvertContents => 'Índice';
+  String get convertContents => 'Índice';
   @override
   String get epubConvertPickTitle => 'Elige un EPUB para convertir';
+  @override
+  String get htmlConvertCommand => 'Convertir HTML a Markdown…';
+  @override
+  String get htmlConvertSettingsTitle => 'Convertir un archivo HTML a Markdown';
+  @override
+  String get htmlConvertPickTitle => 'Elige un archivo HTML para convertir';
+  @override
+  String get htmlConvertReading => 'Leyendo la página…';
+  @override
+  String htmlConvertMany(int count) => 'Archivos HTML: $count';
+  @override
+  String get htmlConvertNeedsLibrary =>
+      'Abre una biblioteca para convertir una página web en una nota';
+  @override
+  String htmlConvertUnreadable(String name) => 'No se pudo leer «$name»';
+  @override
+  String get htmlConvertTooLarge =>
+      'Esta página es demasiado grande para convertirla';
+  @override
+  String get htmlConvertCharset =>
+      'No se admite la codificación de texto de esta página';
+  @override
+  String get htmlConvertFailed => 'No se pudo convertir la página';
+  @override
+  String get htmlDropTitle => '¿Qué hacer con el HTML soltado?';
+  @override
+  String get htmlDropConvertDetail =>
+      'Crea una nota de la página, con sus imágenes';
+  @override
+  String get htmlDropAttach => 'Adjuntar';
+  @override
+  String get htmlDropAttachDetail =>
+      'Conserva el archivo con la nota abierta, tal cual';
+  @override
+  String get htmlDropBoth => 'Adjuntar y convertir';
+  @override
+  String get htmlDropBothDetail =>
+      'Conserva el archivo con la nota abierta y crea una nota de la página';
+  @override
+  String get htmlDropNeedsNote =>
+      'Para adjuntar hace falta una nota abierta en la biblioteca';
   @override
   String get openFileTitle => 'Abrir archivo';
   @override

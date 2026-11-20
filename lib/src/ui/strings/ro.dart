@@ -1961,33 +1961,49 @@ final class RomanianStrings extends Strings {
   @override
   String importFolderEmpty(String name) => 'Niciun fișier Markdown în $name';
   @override
-  String get epubConvertAction => 'Convertește în Markdown…';
+  String get importFolderSettingsTitle => 'Importă un dosar';
+  @override
+  String importFolderBodyPages(int notes, int pages) =>
+      'Fișierele sale Markdown ($notes) sunt copiate, iar paginile sale web '
+      '($pages) sunt convertite în notițe, într-un dosar nou al bibliotecii. '
+      'Dosarul original rămâne neschimbat.';
+  @override
+  String get importFolderTooLarge =>
+      'Acest dosar este prea mare pentru a fi importat';
+  @override
+  String get importFolderFailed => 'Dosarul nu a putut fi importat';
+  @override
+  String get importFolderReading => 'Se citește dosarul…';
+  @override
+  String importFolderSkipped(String folder, int count) =>
+      'Importat în $folder (fișiere omise: $count)';
+  @override
+  String get convertAction => 'Convertește în Markdown…';
   @override
   String get epubConvertCommand => 'Convertește EPUB în Markdown…';
   @override
   String get epubConvertSettingsTitle => 'Convertește un EPUB în Markdown';
   @override
-  String get epubConvertTitle => 'Convertește în Markdown';
+  String get convertTitle => 'Convertește în Markdown';
   @override
   String get epubConvertReading => 'Se citește cartea…';
   @override
-  String get epubConvertPerChapter => 'O notă pe capitol';
+  String get convertPerChapter => 'O notă pe capitol';
   @override
-  String epubConvertPerChapterDetail(int notes, int folders) =>
+  String convertPerChapterDetail(int notes, int folders) =>
       'Note: $notes · dosare: $folders';
   @override
-  String get epubConvertOneNote => 'O singură notă';
+  String get convertOneNote => 'O singură notă';
   @override
-  String get epubConvertOneNoteDetail => 'Toată cartea într-o singură notă';
+  String get convertOneNoteDetail => 'Toată cartea într-o singură notă';
   @override
-  String get epubConvertInto => 'În';
+  String get convertInto => 'În';
   @override
-  String get epubConvertStart => 'Convertește';
+  String get convertStart => 'Convertește';
   @override
-  String epubConvertProgress(int done, int total) =>
-      'Se scrie $done din $total';
+  String convertProgress(int done, int total) => 'Se scrie $done din $total';
   @override
-  String epubConvertDone(String made, int notes, int pictures) =>
+  String convertDone(String made, int notes, int pictures) =>
       'Convertit în $made (note: $notes, imagini: $pictures)';
   @override
   String get epubConvertProtected =>
@@ -2003,13 +2019,55 @@ final class RomanianStrings extends Strings {
   String get epubConvertNeedsLibrary =>
       'Deschide o bibliotecă pentru a converti o carte în note';
   @override
-  String get epubConvertChapterName => 'Capitolul {n}';
+  String get convertChapterName => 'Capitolul {n}';
   @override
-  String get epubConvertOpening => 'Pagini preliminare';
+  String get convertOpening => 'Pagini preliminare';
   @override
-  String get epubConvertContents => 'Cuprins';
+  String get convertContents => 'Cuprins';
   @override
   String get epubConvertPickTitle => 'Alege un EPUB de convertit';
+  @override
+  String get htmlConvertCommand => 'Convertește HTML în Markdown…';
+  @override
+  String get htmlConvertSettingsTitle =>
+      'Convertește un fișier HTML în Markdown';
+  @override
+  String get htmlConvertPickTitle => 'Alege un fișier HTML de convertit';
+  @override
+  String get htmlConvertReading => 'Se citește pagina…';
+  @override
+  String htmlConvertMany(int count) => 'Fișiere HTML: $count';
+  @override
+  String get htmlConvertNeedsLibrary =>
+      'Deschide o bibliotecă pentru a converti o pagină web într-o notă';
+  @override
+  String htmlConvertUnreadable(String name) => '„$name” nu a putut fi citit';
+  @override
+  String get htmlConvertTooLarge =>
+      'Pagina este prea mare pentru a fi convertită';
+  @override
+  String get htmlConvertCharset =>
+      'Codificarea textului acestei pagini nu este acceptată';
+  @override
+  String get htmlConvertFailed => 'Pagina nu a putut fi convertită';
+  @override
+  String get htmlDropTitle => 'Ce să se facă cu HTML-ul plasat aici?';
+  @override
+  String get htmlDropConvertDetail =>
+      'Creează o notă din pagină, împreună cu imaginile ei';
+  @override
+  String get htmlDropAttach => 'Atașează';
+  @override
+  String get htmlDropAttachDetail =>
+      'Păstrează fișierul lângă nota deschisă, așa cum este';
+  @override
+  String get htmlDropBoth => 'Atașează și convertește';
+  @override
+  String get htmlDropBothDetail =>
+      'Păstrează fișierul lângă nota deschisă și creează o notă din pagină';
+  @override
+  String get htmlDropNeedsNote =>
+      'Pentru atașare trebuie să fie deschisă o notă în bibliotecă';
   @override
   String get openFileTitle => 'Deschide fișier';
   @override

@@ -1957,32 +1957,48 @@ final class BasqueStrings extends Strings {
   String importFolderEmpty(String name) =>
       'Ez dago Markdown fitxategirik $name karpetan';
   @override
-  String get epubConvertAction => 'Bihurtu Markdown-era…';
+  String get importFolderSettingsTitle => 'Inportatu karpeta bat';
+  @override
+  String importFolderBodyPages(int notes, int pages) =>
+      'Bere Markdown fitxategiak ($notes) kopiatzen dira eta web orriak '
+      '($pages) ohar bihurtzen dira, liburutegiko karpeta berri batean. '
+      'Jatorrizko karpeta dagoen bezala geratzen da.';
+  @override
+  String get importFolderTooLarge => 'Karpeta hau handiegia da inportatzeko';
+  @override
+  String get importFolderFailed => 'Ezin izan da karpeta inportatu';
+  @override
+  String get importFolderReading => 'Karpeta irakurtzen…';
+  @override
+  String importFolderSkipped(String folder, int count) =>
+      '$folder karpetara inportatua (alde batera utzitako fitxategiak: $count)';
+  @override
+  String get convertAction => 'Bihurtu Markdown-era…';
   @override
   String get epubConvertCommand => 'Bihurtu EPUB Markdown-era…';
   @override
   String get epubConvertSettingsTitle => 'Bihurtu EPUB bat Markdown-era';
   @override
-  String get epubConvertTitle => 'Bihurtu Markdown-era';
+  String get convertTitle => 'Bihurtu Markdown-era';
   @override
   String get epubConvertReading => 'Liburua irakurtzen…';
   @override
-  String get epubConvertPerChapter => 'Ohar bat kapituluko';
+  String get convertPerChapter => 'Ohar bat kapituluko';
   @override
-  String epubConvertPerChapterDetail(int notes, int folders) =>
+  String convertPerChapterDetail(int notes, int folders) =>
       'Oharrak: $notes · karpetak: $folders';
   @override
-  String get epubConvertOneNote => 'Ohar bakarra';
+  String get convertOneNote => 'Ohar bakarra';
   @override
-  String get epubConvertOneNoteDetail => 'Liburu osoa ohar bakar batean';
+  String get convertOneNoteDetail => 'Liburu osoa ohar bakar batean';
   @override
-  String get epubConvertInto => 'Hona';
+  String get convertInto => 'Hona';
   @override
-  String get epubConvertStart => 'Bihurtu';
+  String get convertStart => 'Bihurtu';
   @override
-  String epubConvertProgress(int done, int total) => 'Idazten: $done / $total';
+  String convertProgress(int done, int total) => 'Idazten: $done / $total';
   @override
-  String epubConvertDone(String made, int notes, int pictures) =>
+  String convertDone(String made, int notes, int pictures) =>
       'Hona bihurtua: $made (oharrak: $notes, irudiak: $pictures)';
   @override
   String get epubConvertProtected =>
@@ -1998,13 +2014,52 @@ final class BasqueStrings extends Strings {
   String get epubConvertNeedsLibrary =>
       'Ireki liburutegi bat liburu bat ohar bihurtzeko';
   @override
-  String get epubConvertChapterName => '{n}. kapitulua';
+  String get convertChapterName => '{n}. kapitulua';
   @override
-  String get epubConvertOpening => 'Hasierako orriak';
+  String get convertOpening => 'Hasierako orriak';
   @override
-  String get epubConvertContents => 'Aurkibidea';
+  String get convertContents => 'Aurkibidea';
   @override
   String get epubConvertPickTitle => 'Aukeratu bihurtzeko EPUB bat';
+  @override
+  String get htmlConvertCommand => 'Bihurtu HTML Markdown formatura…';
+  @override
+  String get htmlConvertSettingsTitle =>
+      'Bihurtu HTML fitxategi bat Markdown formatura';
+  @override
+  String get htmlConvertPickTitle => 'Aukeratu bihurtzeko HTML fitxategi bat';
+  @override
+  String get htmlConvertReading => 'Orrialdea irakurtzen…';
+  @override
+  String htmlConvertMany(int count) => 'HTML fitxategiak: $count';
+  @override
+  String get htmlConvertNeedsLibrary =>
+      'Ireki liburutegi bat web-orri bat ohar bihurtzeko';
+  @override
+  String htmlConvertUnreadable(String name) => '«$name» ezin izan da irakurri';
+  @override
+  String get htmlConvertTooLarge => 'Orri hau handiegia da bihurtzeko';
+  @override
+  String get htmlConvertCharset => 'Orri honen testu-kodeketa ez da onartzen';
+  @override
+  String get htmlConvertFailed => 'Ezin izan da orria bihurtu';
+  @override
+  String get htmlDropTitle => 'Zer egin jaregindako HTMLarekin?';
+  @override
+  String get htmlDropConvertDetail => 'Egin orriaren ohar bat, irudiekin';
+  @override
+  String get htmlDropAttach => 'Erantsi';
+  @override
+  String get htmlDropAttachDetail =>
+      'Gorde fitxategia irekitako oharrarekin, dagoen bezala';
+  @override
+  String get htmlDropBoth => 'Erantsi eta bihurtu';
+  @override
+  String get htmlDropBothDetail =>
+      'Gorde fitxategia irekitako oharrarekin eta egin orriaren ohar bat';
+  @override
+  String get htmlDropNeedsNote =>
+      'Erantsi ahal izateko, liburutegian ohar bat irekita egon behar da';
   @override
   String get openFileTitle => 'Ireki fitxategia';
   @override

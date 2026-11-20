@@ -1959,33 +1959,48 @@ final class FinnishStrings extends Strings {
   String importFolderEmpty(String name) =>
       'Kansiossa $name ei ole Markdown-tiedostoja';
   @override
-  String get epubConvertAction => 'Muunna Markdowniksi…';
+  String get importFolderSettingsTitle => 'Tuo kansio';
+  @override
+  String importFolderBodyPages(int notes, int pages) =>
+      'Sen Markdown-tiedostot ($notes) kopioidaan ja verkkosivut ($pages) '
+      'muunnetaan muistiinpanoiksi kirjaston uuteen kansioon. Alkuperäinen '
+      'kansio pysyy ennallaan.';
+  @override
+  String get importFolderTooLarge => 'Tämä kansio on liian suuri tuotavaksi';
+  @override
+  String get importFolderFailed => 'Kansiota ei voitu tuoda';
+  @override
+  String get importFolderReading => 'Luetaan kansiota…';
+  @override
+  String importFolderSkipped(String folder, int count) =>
+      'Tuotu kansioon $folder (pois jätettyjä tiedostoja: $count)';
+  @override
+  String get convertAction => 'Muunna Markdowniksi…';
   @override
   String get epubConvertCommand => 'Muunna EPUB Markdowniksi…';
   @override
   String get epubConvertSettingsTitle => 'Muunna EPUB Markdowniksi';
   @override
-  String get epubConvertTitle => 'Muunna Markdowniksi';
+  String get convertTitle => 'Muunna Markdowniksi';
   @override
   String get epubConvertReading => 'Luetaan kirjaa…';
   @override
-  String get epubConvertPerChapter => 'Yksi muistiinpano lukua kohden';
+  String get convertPerChapter => 'Yksi muistiinpano lukua kohden';
   @override
-  String epubConvertPerChapterDetail(int notes, int folders) =>
+  String convertPerChapterDetail(int notes, int folders) =>
       'Muistiinpanoja: $notes · kansioita: $folders';
   @override
-  String get epubConvertOneNote => 'Yksi muistiinpano';
+  String get convertOneNote => 'Yksi muistiinpano';
   @override
-  String get epubConvertOneNoteDetail => 'Koko kirja yhdessä muistiinpanossa';
+  String get convertOneNoteDetail => 'Koko kirja yhdessä muistiinpanossa';
   @override
-  String get epubConvertInto => 'Kohteeseen';
+  String get convertInto => 'Kohteeseen';
   @override
-  String get epubConvertStart => 'Muunna';
+  String get convertStart => 'Muunna';
   @override
-  String epubConvertProgress(int done, int total) =>
-      'Kirjoitetaan $done/$total';
+  String convertProgress(int done, int total) => 'Kirjoitetaan $done/$total';
   @override
-  String epubConvertDone(String made, int notes, int pictures) =>
+  String convertDone(String made, int notes, int pictures) =>
       'Muunnettu kohteeseen $made (muistiinpanoja: $notes, kuvia: $pictures)';
   @override
   String get epubConvertProtected =>
@@ -2000,13 +2015,53 @@ final class FinnishStrings extends Strings {
   String get epubConvertNeedsLibrary =>
       'Avaa kirjasto muuntaaksesi kirjan muistiinpanoiksi';
   @override
-  String get epubConvertChapterName => 'Luku {n}';
+  String get convertChapterName => 'Luku {n}';
   @override
-  String get epubConvertOpening => 'Alkusivut';
+  String get convertOpening => 'Alkusivut';
   @override
-  String get epubConvertContents => 'Sisällys';
+  String get convertContents => 'Sisällys';
   @override
   String get epubConvertPickTitle => 'Valitse muunnettava EPUB';
+  @override
+  String get htmlConvertCommand => 'Muunna HTML Markdowniksi…';
+  @override
+  String get htmlConvertSettingsTitle => 'Muunna HTML-tiedosto Markdowniksi';
+  @override
+  String get htmlConvertPickTitle => 'Valitse muunnettava HTML-tiedosto';
+  @override
+  String get htmlConvertReading => 'Luetaan sivua…';
+  @override
+  String htmlConvertMany(int count) => 'HTML-tiedostoja: $count';
+  @override
+  String get htmlConvertNeedsLibrary =>
+      'Avaa kirjasto muuntaaksesi verkkosivun muistiinpanoksi';
+  @override
+  String htmlConvertUnreadable(String name) =>
+      'Tiedostoa ”$name” ei voitu lukea';
+  @override
+  String get htmlConvertTooLarge => 'Tämä sivu on liian suuri muunnettavaksi';
+  @override
+  String get htmlConvertCharset => 'Tämän sivun merkistökoodausta ei tueta';
+  @override
+  String get htmlConvertFailed => 'Sivua ei voitu muuntaa';
+  @override
+  String get htmlDropTitle => 'Mitä pudotetulle HTML-tiedostolle tehdään?';
+  @override
+  String get htmlDropConvertDetail => 'Tee sivusta muistiinpano kuvineen';
+  @override
+  String get htmlDropAttach => 'Liitä';
+  @override
+  String get htmlDropAttachDetail =>
+      'Säilytä tiedosto avoimen muistiinpanon mukana sellaisenaan';
+  @override
+  String get htmlDropBoth => 'Liitä ja muunna';
+  @override
+  String get htmlDropBothDetail =>
+      'Säilytä tiedosto avoimen muistiinpanon '
+      'mukana ja tee sivusta muistiinpano';
+  @override
+  String get htmlDropNeedsNote =>
+      'Liittäminen vaatii kirjastossa avoimen muistiinpanon';
   @override
   String get openFileTitle => 'Avaa tiedosto';
   @override

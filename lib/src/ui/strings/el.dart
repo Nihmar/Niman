@@ -2005,32 +2005,49 @@ final class GreekStrings extends Strings {
   @override
   String importFolderEmpty(String name) => 'Κανένα αρχείο Markdown στο $name';
   @override
-  String get epubConvertAction => 'Μετατροπή σε Markdown…';
+  String get importFolderSettingsTitle => 'Εισαγωγή φακέλου';
+  @override
+  String importFolderBodyPages(int notes, int pages) =>
+      'Τα αρχεία Markdown του ($notes) αντιγράφονται και οι ιστοσελίδες του '
+      '($pages) μετατρέπονται σε σημειώσεις, σε νέο φάκελο της βιβλιοθήκης. Ο '
+      'αρχικός φάκελος μένει ως έχει.';
+  @override
+  String get importFolderTooLarge =>
+      'Αυτός ο φάκελος είναι πολύ μεγάλος για εισαγωγή';
+  @override
+  String get importFolderFailed => 'Δεν ήταν δυνατή η εισαγωγή του φακέλου';
+  @override
+  String get importFolderReading => 'Ανάγνωση του φακέλου…';
+  @override
+  String importFolderSkipped(String folder, int count) =>
+      'Εισήχθη στο $folder (αρχεία που παραλείφθηκαν: $count)';
+  @override
+  String get convertAction => 'Μετατροπή σε Markdown…';
   @override
   String get epubConvertCommand => 'Μετατροπή EPUB σε Markdown…';
   @override
   String get epubConvertSettingsTitle => 'Μετατροπή ενός EPUB σε Markdown';
   @override
-  String get epubConvertTitle => 'Μετατροπή σε Markdown';
+  String get convertTitle => 'Μετατροπή σε Markdown';
   @override
   String get epubConvertReading => 'Ανάγνωση του βιβλίου…';
   @override
-  String get epubConvertPerChapter => 'Μία σημείωση ανά κεφάλαιο';
+  String get convertPerChapter => 'Μία σημείωση ανά κεφάλαιο';
   @override
-  String epubConvertPerChapterDetail(int notes, int folders) =>
+  String convertPerChapterDetail(int notes, int folders) =>
       'Σημειώσεις: $notes · φάκελοι: $folders';
   @override
-  String get epubConvertOneNote => 'Μία σημείωση';
+  String get convertOneNote => 'Μία σημείωση';
   @override
-  String get epubConvertOneNoteDetail => 'Όλο το βιβλίο σε μία σημείωση';
+  String get convertOneNoteDetail => 'Όλο το βιβλίο σε μία σημείωση';
   @override
-  String get epubConvertInto => 'Σε';
+  String get convertInto => 'Σε';
   @override
-  String get epubConvertStart => 'Μετατροπή';
+  String get convertStart => 'Μετατροπή';
   @override
-  String epubConvertProgress(int done, int total) => 'Εγγραφή $done από $total';
+  String convertProgress(int done, int total) => 'Εγγραφή $done από $total';
   @override
-  String epubConvertDone(String made, int notes, int pictures) =>
+  String convertDone(String made, int notes, int pictures) =>
       'Μετατράπηκε σε $made (σημειώσεις: $notes, εικόνες: $pictures)';
   @override
   String get epubConvertProtected =>
@@ -2048,13 +2065,56 @@ final class GreekStrings extends Strings {
   String get epubConvertNeedsLibrary =>
       'Ανοίξτε μια βιβλιοθήκη για να μετατρέψετε ένα βιβλίο σε σημειώσεις';
   @override
-  String get epubConvertChapterName => 'Κεφάλαιο {n}';
+  String get convertChapterName => 'Κεφάλαιο {n}';
   @override
-  String get epubConvertOpening => 'Προλογικές σελίδες';
+  String get convertOpening => 'Προλογικές σελίδες';
   @override
-  String get epubConvertContents => 'Περιεχόμενα';
+  String get convertContents => 'Περιεχόμενα';
   @override
   String get epubConvertPickTitle => 'Επιλέξτε ένα EPUB για μετατροπή';
+  @override
+  String get htmlConvertCommand => 'Μετατροπή HTML σε Markdown…';
+  @override
+  String get htmlConvertSettingsTitle => 'Μετατροπή αρχείου HTML σε Markdown';
+  @override
+  String get htmlConvertPickTitle => 'Επιλέξτε ένα αρχείο HTML για μετατροπή';
+  @override
+  String get htmlConvertReading => 'Ανάγνωση της σελίδας…';
+  @override
+  String htmlConvertMany(int count) => 'Αρχεία HTML: $count';
+  @override
+  String get htmlConvertNeedsLibrary =>
+      'Ανοίξτε μια βιβλιοθήκη για να μετατρέψετε μια ιστοσελίδα σε σημείωση';
+  @override
+  String htmlConvertUnreadable(String name) =>
+      'Το «$name» δεν ήταν δυνατό να διαβαστεί';
+  @override
+  String get htmlConvertTooLarge =>
+      'Αυτή η σελίδα είναι πολύ μεγάλη για μετατροπή';
+  @override
+  String get htmlConvertCharset =>
+      'Η κωδικοποίηση κειμένου αυτής της σελίδας δεν υποστηρίζεται';
+  @override
+  String get htmlConvertFailed => 'Δεν ήταν δυνατή η μετατροπή της σελίδας';
+  @override
+  String get htmlDropTitle => 'Τι να γίνει με το HTML που αφήσατε;';
+  @override
+  String get htmlDropConvertDetail =>
+      'Δημιουργία σημείωσης από τη σελίδα, μαζί με τις εικόνες της';
+  @override
+  String get htmlDropAttach => 'Επισύναψη';
+  @override
+  String get htmlDropAttachDetail =>
+      'Το αρχείο μένει με την ανοιχτή σημείωση, ως έχει';
+  @override
+  String get htmlDropBoth => 'Επισύναψη και μετατροπή';
+  @override
+  String get htmlDropBothDetail =>
+      'Το αρχείο μένει με την ανοιχτή σημείωση και '
+      'δημιουργείται σημείωση από τη σελίδα';
+  @override
+  String get htmlDropNeedsNote =>
+      'Η επισύναψη απαιτεί μια ανοιχτή σημείωση στη βιβλιοθήκη';
   @override
   String get openFileTitle => 'Άνοιγμα αρχείου';
   @override

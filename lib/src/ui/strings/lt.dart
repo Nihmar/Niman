@@ -1940,32 +1940,48 @@ final class LithuanianStrings extends Strings {
   @override
   String importFolderEmpty(String name) => 'Aplanke $name nėra Markdown failų';
   @override
-  String get epubConvertAction => 'Konvertuoti į Markdown…';
+  String get importFolderSettingsTitle => 'Importuoti aplanką';
+  @override
+  String importFolderBodyPages(int notes, int pages) =>
+      'Jo Markdown failai ($notes) nukopijuojami, o internetiniai puslapiai '
+      '($pages) konvertuojami į užrašus, naujame bibliotekos aplanke. Pradinis '
+      'aplankas lieka nepakitęs.';
+  @override
+  String get importFolderTooLarge => 'Šis aplankas per didelis importuoti';
+  @override
+  String get importFolderFailed => 'Aplanko importuoti nepavyko';
+  @override
+  String get importFolderReading => 'Skaitomas aplankas…';
+  @override
+  String importFolderSkipped(String folder, int count) =>
+      'Importuota į $folder (praleisti failai: $count)';
+  @override
+  String get convertAction => 'Konvertuoti į Markdown…';
   @override
   String get epubConvertCommand => 'Konvertuoti EPUB į Markdown…';
   @override
   String get epubConvertSettingsTitle => 'Konvertuoti EPUB į Markdown';
   @override
-  String get epubConvertTitle => 'Konvertuoti į Markdown';
+  String get convertTitle => 'Konvertuoti į Markdown';
   @override
   String get epubConvertReading => 'Skaitoma knyga…';
   @override
-  String get epubConvertPerChapter => 'Viena pastaba skyriui';
+  String get convertPerChapter => 'Viena pastaba skyriui';
   @override
-  String epubConvertPerChapterDetail(int notes, int folders) =>
+  String convertPerChapterDetail(int notes, int folders) =>
       'Pastabos: $notes · aplankai: $folders';
   @override
-  String get epubConvertOneNote => 'Viena pastaba';
+  String get convertOneNote => 'Viena pastaba';
   @override
-  String get epubConvertOneNoteDetail => 'Visa knyga vienoje pastaboje';
+  String get convertOneNoteDetail => 'Visa knyga vienoje pastaboje';
   @override
-  String get epubConvertInto => 'Į';
+  String get convertInto => 'Į';
   @override
-  String get epubConvertStart => 'Konvertuoti';
+  String get convertStart => 'Konvertuoti';
   @override
-  String epubConvertProgress(int done, int total) => 'Rašoma $done iš $total';
+  String convertProgress(int done, int total) => 'Rašoma $done iš $total';
   @override
-  String epubConvertDone(String made, int notes, int pictures) =>
+  String convertDone(String made, int notes, int pictures) =>
       'Konvertuota į $made (pastabos: $notes, paveikslėliai: $pictures)';
   @override
   String get epubConvertProtected =>
@@ -1980,13 +1996,52 @@ final class LithuanianStrings extends Strings {
   String get epubConvertNeedsLibrary =>
       'Atidarykite biblioteką, kad knygą konvertuotumėte į pastabas';
   @override
-  String get epubConvertChapterName => '{n} skyrius';
+  String get convertChapterName => '{n} skyrius';
   @override
-  String get epubConvertOpening => 'Įžanginiai puslapiai';
+  String get convertOpening => 'Įžanginiai puslapiai';
   @override
-  String get epubConvertContents => 'Turinys';
+  String get convertContents => 'Turinys';
   @override
   String get epubConvertPickTitle => 'Pasirinkite EPUB konvertuoti';
+  @override
+  String get htmlConvertCommand => 'Konvertuoti HTML į Markdown…';
+  @override
+  String get htmlConvertSettingsTitle => 'Konvertuoti HTML failą į Markdown';
+  @override
+  String get htmlConvertPickTitle => 'Pasirinkite HTML failą konvertuoti';
+  @override
+  String get htmlConvertReading => 'Skaitomas puslapis…';
+  @override
+  String htmlConvertMany(int count) => 'HTML failai: $count';
+  @override
+  String get htmlConvertNeedsLibrary =>
+      'Atidarykite biblioteką, kad tinklalapį konvertuotumėte į pastabą';
+  @override
+  String htmlConvertUnreadable(String name) => '„$name“ nepavyko perskaityti';
+  @override
+  String get htmlConvertTooLarge => 'Šis puslapis per didelis konvertuoti';
+  @override
+  String get htmlConvertCharset => 'Šio puslapio teksto koduotė nepalaikoma';
+  @override
+  String get htmlConvertFailed => 'Puslapio konvertuoti nepavyko';
+  @override
+  String get htmlDropTitle => 'Ką daryti su numestu HTML?';
+  @override
+  String get htmlDropConvertDetail =>
+      'Sukurti puslapio pastabą kartu su paveikslėliais';
+  @override
+  String get htmlDropAttach => 'Prisegti';
+  @override
+  String get htmlDropAttachDetail =>
+      'Palikti failą prie atidarytos pastabos tokį, koks yra';
+  @override
+  String get htmlDropBoth => 'Prisegti ir konvertuoti';
+  @override
+  String get htmlDropBothDetail =>
+      'Palikti failą prie atidarytos pastabos ir sukurti puslapio pastabą';
+  @override
+  String get htmlDropNeedsNote =>
+      'Norint prisegti, bibliotekoje turi būti atidaryta pastaba';
   @override
   String get openFileTitle => 'Atidaryti failą';
   @override

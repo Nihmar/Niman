@@ -1963,33 +1963,48 @@ final class DutchStrings extends Strings {
   @override
   String importFolderEmpty(String name) => 'Geen Markdown-bestanden in $name';
   @override
-  String get epubConvertAction => 'Omzetten naar Markdown…';
+  String get importFolderSettingsTitle => 'Een map importeren';
+  @override
+  String importFolderBodyPages(int notes, int pages) =>
+      'De Markdown-bestanden ($notes) worden gekopieerd en de webpagina’s '
+      '($pages) omgezet in notities, in een nieuwe map in de bibliotheek. De '
+      'oorspronkelijke map blijft zoals hij is.';
+  @override
+  String get importFolderTooLarge => 'Deze map is te groot om te importeren';
+  @override
+  String get importFolderFailed => 'De map kon niet worden geïmporteerd';
+  @override
+  String get importFolderReading => 'Map wordt gelezen…';
+  @override
+  String importFolderSkipped(String folder, int count) =>
+      'Geïmporteerd in $folder (overgeslagen bestanden: $count)';
+  @override
+  String get convertAction => 'Omzetten naar Markdown…';
   @override
   String get epubConvertCommand => 'EPUB omzetten naar Markdown…';
   @override
   String get epubConvertSettingsTitle => 'Een EPUB omzetten naar Markdown';
   @override
-  String get epubConvertTitle => 'Omzetten naar Markdown';
+  String get convertTitle => 'Omzetten naar Markdown';
   @override
   String get epubConvertReading => 'Boek wordt gelezen…';
   @override
-  String get epubConvertPerChapter => 'Eén notitie per hoofdstuk';
+  String get convertPerChapter => 'Eén notitie per hoofdstuk';
   @override
-  String epubConvertPerChapterDetail(int notes, int folders) =>
+  String convertPerChapterDetail(int notes, int folders) =>
       'Notities: $notes · mappen: $folders';
   @override
-  String get epubConvertOneNote => 'Eén notitie';
+  String get convertOneNote => 'Eén notitie';
   @override
-  String get epubConvertOneNoteDetail => 'Het hele boek in één notitie';
+  String get convertOneNoteDetail => 'Het hele boek in één notitie';
   @override
-  String get epubConvertInto => 'Naar';
+  String get convertInto => 'Naar';
   @override
-  String get epubConvertStart => 'Omzetten';
+  String get convertStart => 'Omzetten';
   @override
-  String epubConvertProgress(int done, int total) =>
-      'Schrijven $done van $total';
+  String convertProgress(int done, int total) => 'Schrijven $done van $total';
   @override
-  String epubConvertDone(String made, int notes, int pictures) =>
+  String convertDone(String made, int notes, int pictures) =>
       'Omgezet naar $made (notities: $notes, afbeeldingen: $pictures)';
   @override
   String get epubConvertProtected =>
@@ -2004,13 +2019,56 @@ final class DutchStrings extends Strings {
   String get epubConvertNeedsLibrary =>
       'Open een bibliotheek om een boek naar notities om te zetten';
   @override
-  String get epubConvertChapterName => 'Hoofdstuk {n}';
+  String get convertChapterName => 'Hoofdstuk {n}';
   @override
-  String get epubConvertOpening => 'Voorwerk';
+  String get convertOpening => 'Voorwerk';
   @override
-  String get epubConvertContents => 'Inhoud';
+  String get convertContents => 'Inhoud';
   @override
   String get epubConvertPickTitle => 'Kies een EPUB om om te zetten';
+  @override
+  String get htmlConvertCommand => 'HTML naar Markdown omzetten…';
+  @override
+  String get htmlConvertSettingsTitle =>
+      'Een HTML-bestand naar Markdown omzetten';
+  @override
+  String get htmlConvertPickTitle => 'Kies een HTML-bestand om om te zetten';
+  @override
+  String get htmlConvertReading => 'Pagina wordt gelezen…';
+  @override
+  String htmlConvertMany(int count) => 'HTML-bestanden: $count';
+  @override
+  String get htmlConvertNeedsLibrary =>
+      'Open een bibliotheek om een webpagina naar een notitie om te zetten';
+  @override
+  String htmlConvertUnreadable(String name) =>
+      '“$name” kon niet worden gelezen';
+  @override
+  String get htmlConvertTooLarge => 'Deze pagina is te groot om om te zetten';
+  @override
+  String get htmlConvertCharset =>
+      'De tekencodering van deze pagina wordt niet ondersteund';
+  @override
+  String get htmlConvertFailed => 'De pagina kon niet worden omgezet';
+  @override
+  String get htmlDropTitle => 'Wat moet er met de neergezette HTML gebeuren?';
+  @override
+  String get htmlDropConvertDetail =>
+      'Maak een notitie van de pagina, met de afbeeldingen';
+  @override
+  String get htmlDropAttach => 'Bijvoegen';
+  @override
+  String get htmlDropAttachDetail =>
+      'Bewaar het bestand bij de geopende notitie, zoals het is';
+  @override
+  String get htmlDropBoth => 'Bijvoegen en omzetten';
+  @override
+  String get htmlDropBothDetail =>
+      'Bewaar het bestand bij de geopende notitie '
+      'en maak een notitie van de pagina';
+  @override
+  String get htmlDropNeedsNote =>
+      'Voor bijvoegen moet er een notitie open zijn in de bibliotheek';
   @override
   String get openFileTitle => 'Bestand openen';
   @override

@@ -1956,32 +1956,48 @@ final class HungarianStrings extends Strings {
   @override
   String importFolderEmpty(String name) => 'Nincs Markdown-fájl itt: $name';
   @override
-  String get epubConvertAction => 'Átalakítás Markdownná…';
+  String get importFolderSettingsTitle => 'Mappa importálása';
+  @override
+  String importFolderBodyPages(int notes, int pages) =>
+      'A Markdown-fájljai ($notes) átmásolódnak, a weboldalai ($pages) pedig '
+      'jegyzetekké alakulnak, a könyvtár egy új mappájában. Az eredeti mappa '
+      'változatlan marad.';
+  @override
+  String get importFolderTooLarge => 'Ez a mappa túl nagy az importáláshoz';
+  @override
+  String get importFolderFailed => 'A mappát nem sikerült importálni';
+  @override
+  String get importFolderReading => 'A mappa beolvasása…';
+  @override
+  String importFolderSkipped(String folder, int count) =>
+      'Importálva ide: $folder (kihagyott fájlok: $count)';
+  @override
+  String get convertAction => 'Átalakítás Markdownná…';
   @override
   String get epubConvertCommand => 'EPUB átalakítása Markdownná…';
   @override
   String get epubConvertSettingsTitle => 'EPUB átalakítása Markdownná';
   @override
-  String get epubConvertTitle => 'Átalakítás Markdownná';
+  String get convertTitle => 'Átalakítás Markdownná';
   @override
   String get epubConvertReading => 'A könyv olvasása…';
   @override
-  String get epubConvertPerChapter => 'Fejezetenként egy jegyzet';
+  String get convertPerChapter => 'Fejezetenként egy jegyzet';
   @override
-  String epubConvertPerChapterDetail(int notes, int folders) =>
+  String convertPerChapterDetail(int notes, int folders) =>
       'Jegyzetek: $notes · mappák: $folders';
   @override
-  String get epubConvertOneNote => 'Egyetlen jegyzet';
+  String get convertOneNote => 'Egyetlen jegyzet';
   @override
-  String get epubConvertOneNoteDetail => 'Az egész könyv egyetlen jegyzetben';
+  String get convertOneNoteDetail => 'Az egész könyv egyetlen jegyzetben';
   @override
-  String get epubConvertInto => 'Ide';
+  String get convertInto => 'Ide';
   @override
-  String get epubConvertStart => 'Átalakítás';
+  String get convertStart => 'Átalakítás';
   @override
-  String epubConvertProgress(int done, int total) => 'Írás: $done / $total';
+  String convertProgress(int done, int total) => 'Írás: $done / $total';
   @override
-  String epubConvertDone(String made, int notes, int pictures) =>
+  String convertDone(String made, int notes, int pictures) =>
       'Átalakítva ide: $made (jegyzetek: $notes, képek: $pictures)';
   @override
   String get epubConvertProtected =>
@@ -1996,13 +2012,53 @@ final class HungarianStrings extends Strings {
   String get epubConvertNeedsLibrary =>
       'Nyiss meg egy könyvtárat, hogy a könyvet jegyzetekké alakíthasd';
   @override
-  String get epubConvertChapterName => '{n}. fejezet';
+  String get convertChapterName => '{n}. fejezet';
   @override
-  String get epubConvertOpening => 'Előzéklapok';
+  String get convertOpening => 'Előzéklapok';
   @override
-  String get epubConvertContents => 'Tartalom';
+  String get convertContents => 'Tartalom';
   @override
   String get epubConvertPickTitle => 'Válassz egy átalakítandó EPUB-ot';
+  @override
+  String get htmlConvertCommand => 'HTML átalakítása Markdownná…';
+  @override
+  String get htmlConvertSettingsTitle => 'HTML-fájl átalakítása Markdownná';
+  @override
+  String get htmlConvertPickTitle => 'Válassz egy átalakítandó HTML-fájlt';
+  @override
+  String get htmlConvertReading => 'Az oldal beolvasása…';
+  @override
+  String htmlConvertMany(int count) => 'HTML-fájlok: $count';
+  @override
+  String get htmlConvertNeedsLibrary =>
+      'Nyiss meg egy könyvtárat, hogy a weboldalt jegyzetté alakíthasd';
+  @override
+  String htmlConvertUnreadable(String name) => '„$name” nem olvasható';
+  @override
+  String get htmlConvertTooLarge => 'Ez az oldal túl nagy az átalakításhoz';
+  @override
+  String get htmlConvertCharset => 'Az oldal szövegkódolása nem támogatott';
+  @override
+  String get htmlConvertFailed => 'Az oldalt nem sikerült átalakítani';
+  @override
+  String get htmlDropTitle => 'Mi legyen az eldobott HTML-lel?';
+  @override
+  String get htmlDropConvertDetail =>
+      'Jegyzet készítése az oldalból a képeivel együtt';
+  @override
+  String get htmlDropAttach => 'Csatolás';
+  @override
+  String get htmlDropAttachDetail =>
+      'A fájl megtartása a megnyitott jegyzet mellett, változatlanul';
+  @override
+  String get htmlDropBoth => 'Csatolás és átalakítás';
+  @override
+  String get htmlDropBothDetail =>
+      'A fájl megtartása a megnyitott jegyzet '
+      'mellett, és jegyzet készítése az oldalból';
+  @override
+  String get htmlDropNeedsNote =>
+      'A csatoláshoz a könyvtárban meg kell nyitni egy jegyzetet';
   @override
   String get openFileTitle => 'Fájl megnyitása';
   @override

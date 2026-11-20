@@ -1911,33 +1911,49 @@ final class HindiStrings extends Strings {
   @override
   String importFolderEmpty(String name) => '$name में कोई Markdown फ़ाइल नहीं';
   @override
-  String get epubConvertAction => 'Markdown में बदलें…';
+  String get importFolderSettingsTitle => 'फ़ोल्डर आयात करें';
+  @override
+  String importFolderBodyPages(int notes, int pages) =>
+      'इसकी Markdown फ़ाइलें ($notes) कॉपी होती हैं और वेब पेज ($pages) नोट '
+      'में बदले जाते हैं, लाइब्रेरी के नए फ़ोल्डर में। मूल फ़ोल्डर जैसा है '
+      'वैसा रहता है।';
+  @override
+  String get importFolderTooLarge => 'यह फ़ोल्डर आयात करने के लिए बहुत बड़ा है';
+  @override
+  String get importFolderFailed => 'फ़ोल्डर आयात नहीं किया जा सका';
+  @override
+  String get importFolderReading => 'फ़ोल्डर पढ़ा जा रहा है…';
+  @override
+  String importFolderSkipped(String folder, int count) =>
+      '$folder में आयात किया गया (छोड़ी गई फ़ाइलें: $count)';
+  @override
+  String get convertAction => 'Markdown में बदलें…';
   @override
   String get epubConvertCommand => 'EPUB को Markdown में बदलें…';
   @override
   String get epubConvertSettingsTitle => 'किसी EPUB को Markdown में बदलें';
   @override
-  String get epubConvertTitle => 'Markdown में बदलें';
+  String get convertTitle => 'Markdown में बदलें';
   @override
   String get epubConvertReading => 'किताब पढ़ी जा रही है…';
   @override
-  String get epubConvertPerChapter => 'हर अध्याय के लिए एक नोट';
+  String get convertPerChapter => 'हर अध्याय के लिए एक नोट';
   @override
-  String epubConvertPerChapterDetail(int notes, int folders) =>
+  String convertPerChapterDetail(int notes, int folders) =>
       'नोट: $notes · फ़ोल्डर: $folders';
   @override
-  String get epubConvertOneNote => 'एक नोट';
+  String get convertOneNote => 'एक नोट';
   @override
-  String get epubConvertOneNoteDetail => 'पूरी किताब एक ही नोट में';
+  String get convertOneNoteDetail => 'पूरी किताब एक ही नोट में';
   @override
-  String get epubConvertInto => 'यहाँ';
+  String get convertInto => 'यहाँ';
   @override
-  String get epubConvertStart => 'बदलें';
+  String get convertStart => 'बदलें';
   @override
-  String epubConvertProgress(int done, int total) =>
+  String convertProgress(int done, int total) =>
       '$total में से $done लिखा जा रहा है';
   @override
-  String epubConvertDone(String made, int notes, int pictures) =>
+  String convertDone(String made, int notes, int pictures) =>
       '$made में बदला गया (नोट: $notes, चित्र: $pictures)';
   @override
   String get epubConvertProtected =>
@@ -1952,13 +1968,52 @@ final class HindiStrings extends Strings {
   String get epubConvertNeedsLibrary =>
       'किताब को नोट्स में बदलने के लिए कोई लाइब्रेरी खोलें';
   @override
-  String get epubConvertChapterName => 'अध्याय {n}';
+  String get convertChapterName => 'अध्याय {n}';
   @override
-  String get epubConvertOpening => 'प्रारंभिक पृष्ठ';
+  String get convertOpening => 'प्रारंभिक पृष्ठ';
   @override
-  String get epubConvertContents => 'विषय-सूची';
+  String get convertContents => 'विषय-सूची';
   @override
   String get epubConvertPickTitle => 'बदलने के लिए कोई EPUB चुनें';
+  @override
+  String get htmlConvertCommand => 'HTML को Markdown में बदलें…';
+  @override
+  String get htmlConvertSettingsTitle => 'HTML फ़ाइल को Markdown में बदलें';
+  @override
+  String get htmlConvertPickTitle => 'बदलने के लिए कोई HTML फ़ाइल चुनें';
+  @override
+  String get htmlConvertReading => 'पेज पढ़ा जा रहा है…';
+  @override
+  String htmlConvertMany(int count) => 'HTML फ़ाइलें: $count';
+  @override
+  String get htmlConvertNeedsLibrary =>
+      'वेब पेज को नोट में बदलने के लिए कोई लाइब्रेरी खोलें';
+  @override
+  String htmlConvertUnreadable(String name) => '“$name” पढ़ी नहीं जा सकी';
+  @override
+  String get htmlConvertTooLarge => 'यह पेज बदलने के लिए बहुत बड़ा है';
+  @override
+  String get htmlConvertCharset =>
+      'इस पेज का टेक्स्ट एन्कोडिंग समर्थित नहीं है';
+  @override
+  String get htmlConvertFailed => 'पेज बदला नहीं जा सका';
+  @override
+  String get htmlDropTitle => 'छोड़ी गई HTML का क्या करें?';
+  @override
+  String get htmlDropConvertDetail => 'पेज का नोट बनाएँ, उसकी तस्वीरों के साथ';
+  @override
+  String get htmlDropAttach => 'संलग्न करें';
+  @override
+  String get htmlDropAttachDetail =>
+      'फ़ाइल को खुले नोट के साथ जैसी है वैसी रखें';
+  @override
+  String get htmlDropBoth => 'संलग्न करें और बदलें';
+  @override
+  String get htmlDropBothDetail =>
+      'फ़ाइल को खुले नोट के साथ रखें और पेज का नोट बनाएँ';
+  @override
+  String get htmlDropNeedsNote =>
+      'संलग्न करने के लिए लाइब्रेरी में कोई नोट खुला होना चाहिए';
   @override
   String get openFileTitle => 'फ़ाइल खोलें';
   @override

@@ -30,8 +30,8 @@ import 'package:meta/meta.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/isolate_gauge.dart';
 import 'package:niman/src/core/percent.dart';
-import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/import/bounded_entry.dart';
+import 'package:niman/src/import/markdown_links.dart';
 import 'package:niman/src/library/markdown_import.dart';
 import 'package:niman/src/links/link_path.dart';
 import 'package:path/path.dart' as p;
@@ -346,56 +346,23 @@ Future<({int notes, int assets})> _writeAll(
 /// Links and images alike — an asset with its id stripped is as broken as
 /// a page. Only the targets the plan knows: a link out of the export (a
 /// URL, a dead path) is left exactly as it was, and the anchor of a link
-/// is kept. Fenced code and inline code hold no tokens, so a `](…)` in a
-/// sample is not touched.
+/// is kept (`rewriteLinkDestinations`).
 String _rewriteLinks(
   String text, {
   required String sourceDir,
   required String newDir,
   required Map<String, String> plan,
   required Map<String, String> byName,
-}) {
-  final edits = <({int start, int end, String value})>[];
-  var lineStart = 0;
-  for (final line in HighlightDocument.fromText(text).lines) {
-    final src = line.text;
-    for (final token in line.tokens) {
-      if (token.kind != TokenKind.link && token.kind != TokenKind.image) {
-        continue;
-      }
-      final close = src.indexOf(']', token.start);
-      if (close < 0 || close + 2 > token.end - 1) continue;
-      final href = src.substring(close + 2, token.end - 1).trim();
-      final mapped = _mapHref(
-        href,
-        sourceDir: sourceDir,
-        newDir: newDir,
-        plan: plan,
-        byName: byName,
-      );
-      if (mapped == null) continue;
-      final start = lineStart + token.start;
-      final end = lineStart + token.end;
-      final raw = text.substring(start, end);
-      final open = raw.lastIndexOf('](');
-      if (open < 0) continue;
-      edits.add((
-        start: start,
-        end: end,
-        value: '${raw.substring(0, open + 2)}$mapped)',
-      ));
-    }
-    lineStart += src.length + 1;
-  }
-  if (edits.isEmpty) return text;
-  // Last to first, so an earlier span's offsets stay valid.
-  edits.sort((a, b) => b.start.compareTo(a.start));
-  var out = text;
-  for (final edit in edits) {
-    out = out.substring(0, edit.start) + edit.value + out.substring(edit.end);
-  }
-  return out;
-}
+}) => rewriteLinkDestinations(
+  text,
+  (href) => _mapHref(
+    href,
+    sourceDir: sourceDir,
+    newDir: newDir,
+    plan: plan,
+    byName: byName,
+  ),
+);
 
 /// The new href for an exported [href], or null when it points at nothing
 /// the plan renamed.

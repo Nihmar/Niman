@@ -150,7 +150,8 @@ the two agree.
   drop destination, which takes the `text/uri-list` a file manager
   offers. The frame around the window says a drag is over it, and the
   drop opens, imports or attaches what it names
-  ([organization](organization.md#dropping-files-on-the-window)). The
+  ([organization](organization.md#dropping-files-on-the-window)); a web
+  page asks whether to convert it, attach it or both. The
   portal's file-transfer target is not taken: it carries a one-time key
   to resolve over D-Bus rather than paths, and preferring it is what left
   a drop on KDE/Wayland doing nothing at all (#224). A drag from a
@@ -215,7 +216,7 @@ the two agree.
   opens the latest release, whose setup installs over this one (#1270).
 - **Dropping files and folders on the window** takes the paths Win32
   hands the window (`WM_DROPFILES`), and the drop opens or imports what
-  it names. The frame that Linux draws while a drag is over the window is
+  it names (a web page asks whether to convert it, attach it or both). The frame that Linux draws while a drag is over the window is
   **not** drawn here: reporting a drag that is over the window and has
   not landed needs an OLE `IDropTarget` registered on the Flutter view,
   which this pass does not do (#224). The drop itself is unaffected.
@@ -281,7 +282,10 @@ list at the end says what else it still lacks.
 - **Transcription** reads WAV and, decoded by the system, m4a, mp3, AAC
   and the other formats macOS plays.
 - **Dropping files, folders and links** on the window opens, imports or
-  captures them, with the frame Linux draws while a drag is over it.
+  captures them, with the frame Linux draws while a drag is over it; a
+  web page asks whether to convert it, attach it or both. Niman is not in
+  Finder's *Open With* for a page, as it is not for a book: drop it, or use
+  the tree and the palette.
 - A tree row's right-click menu can **show the note in Finder**, selected.
 - **Opening a `.md` from Finder:** Niman is in its *Open With* menu, as an
   alternate — the default stays the app you chose. Double-clicking a note
@@ -588,9 +592,32 @@ folders from the file manager, and draws a frame while a drag is over
 it — on Windows the window's drop target is OLE's (#531). On Android and
 iPadOS a drag comes from another app beside Niman (split screen, DeX,
 ChromeOS, Stage Manager): there the drop takes files, which it attaches
-to the note on screen (#1250), not folders or text. A link dropped on a
+to the note on screen (#1250), not folders or text; a web page saved as a
+file asks first whether to convert it into a note
+([organization](organization.md#converting-a-web-page-into-a-note)),
+attach it or both (#1293). A passage selected in a browser is text, and
+is not taken. A link dropped on a
 desktop window is a [web capture](web-capture.md); on a phone, the
 browser's Share does it.
+
+**Importing a folder** (see
+[organization](organization.md#importing-a-folder)) is *Settings →
+Maintenance → Import a folder* on every platform, and a drop on the
+window on Linux, Windows and macOS. What the picker gives depends on the
+platform:
+
+- On **Linux, Windows and macOS** it is the system's folder dialog.
+- On **Android** it is the system's folder picker, read by path as a
+  library is, so it needs the same *all files access*; Niman says so when
+  it is missing. A folder dragged from another app is not taken (a
+  drag there carries files, not folders): use the row in Settings.
+- On **iOS and iPadOS** the picker lists the folders in Niman's own folder
+  (*On My iPhone › Niman* in Files), as opening a library there does: put
+  the folder there with Files first. iOS gives the app no access to a
+  folder picked anywhere else — iCloud Drive, another app's storage — so it
+  cannot be imported from where it is. This is a decision, not an omission.
+  The library itself is in that list; picking it shows it, importing
+  nothing.
 
 **Opening a file outside any library** (`Ctrl+Shift+O`, see
 [organization](organization.md#opening-a-file-outside-any-library)) is
@@ -613,8 +640,11 @@ root when no note is open), and opened. A copy, because Android hands the sender
 file as a read-only `content://` reference, not a path Niman could edit
 in place. A Notion export (a `.zip`) shared the same way is
 [imported](organization.md#importing-a-notion-export) instead of copied
-as one note, and a book (`.epub`), shared or opened with Niman from a file
-manager, is [converted into notes](organization.md#converting-a-book-into-notes). That copy is made in the background, so the app stays
+as one note, a book (`.epub`), shared or opened with Niman from a file
+manager, is [converted into notes](organization.md#converting-a-book-into-notes),
+and so is a web page (`.html`, `.htm`, `.xhtml`) —
+[into a note](organization.md#converting-a-web-page-into-a-note) — told by
+its name, or by how the file begins when the sender gave it none. That copy is made in the background, so the app stays
 responsive while a large share is read, and it is capped at 512 MB: past
 that the share is refused rather than copied — the sender's text arrives
 instead, if it attached any.

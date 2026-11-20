@@ -1784,32 +1784,46 @@ final class ChineseStrings extends Strings {
   @override
   String importFolderEmpty(String name) => '$name 中没有 Markdown 文件';
   @override
-  String get epubConvertAction => '转换为 Markdown…';
+  String get importFolderSettingsTitle => '导入文件夹';
+  @override
+  String importFolderBodyPages(int notes, int pages) =>
+      '其中的 Markdown 文件（$notes）会被复制，网页（$pages）会被转换为笔记，放入资料库的新文件夹中。原文件夹保持不变。';
+  @override
+  String get importFolderTooLarge => '这个文件夹太大，无法导入';
+  @override
+  String get importFolderFailed => '无法导入此文件夹';
+  @override
+  String get importFolderReading => '正在读取文件夹…';
+  @override
+  String importFolderSkipped(String folder, int count) =>
+      '已导入到 $folder（跳过的文件：$count 个）';
+  @override
+  String get convertAction => '转换为 Markdown…';
   @override
   String get epubConvertCommand => '将 EPUB 转换为 Markdown…';
   @override
   String get epubConvertSettingsTitle => '将 EPUB 转换为 Markdown';
   @override
-  String get epubConvertTitle => '转换为 Markdown';
+  String get convertTitle => '转换为 Markdown';
   @override
   String get epubConvertReading => '正在读取图书…';
   @override
-  String get epubConvertPerChapter => '每章一个笔记';
+  String get convertPerChapter => '每章一个笔记';
   @override
-  String epubConvertPerChapterDetail(int notes, int folders) =>
+  String convertPerChapterDetail(int notes, int folders) =>
       '笔记：$notes · 文件夹：$folders';
   @override
-  String get epubConvertOneNote => '一个笔记';
+  String get convertOneNote => '一个笔记';
   @override
-  String get epubConvertOneNoteDetail => '整本书放在一个笔记中';
+  String get convertOneNoteDetail => '整本书放在一个笔记中';
   @override
-  String get epubConvertInto => '保存到';
+  String get convertInto => '保存到';
   @override
-  String get epubConvertStart => '转换';
+  String get convertStart => '转换';
   @override
-  String epubConvertProgress(int done, int total) => '正在写入 $done / $total';
+  String convertProgress(int done, int total) => '正在写入 $done / $total';
   @override
-  String epubConvertDone(String made, int notes, int pictures) =>
+  String convertDone(String made, int notes, int pictures) =>
       '已转换到 $made（笔记：$notes，图片：$pictures）';
   @override
   String get epubConvertProtected => '这本书受保护（DRM）：无法转换其文本';
@@ -1822,13 +1836,47 @@ final class ChineseStrings extends Strings {
   @override
   String get epubConvertNeedsLibrary => '请打开一个资料库，以便将图书转换为笔记';
   @override
-  String get epubConvertChapterName => '第 {n} 章';
+  String get convertChapterName => '第 {n} 章';
   @override
-  String get epubConvertOpening => '前置页';
+  String get convertOpening => '前置页';
   @override
-  String get epubConvertContents => '目录';
+  String get convertContents => '目录';
   @override
   String get epubConvertPickTitle => '选择要转换的 EPUB';
+  @override
+  String get htmlConvertCommand => '将 HTML 转换为 Markdown…';
+  @override
+  String get htmlConvertSettingsTitle => '将 HTML 文件转换为 Markdown';
+  @override
+  String get htmlConvertPickTitle => '选择要转换的 HTML 文件';
+  @override
+  String get htmlConvertReading => '正在读取网页…';
+  @override
+  String htmlConvertMany(int count) => 'HTML 文件：$count 个';
+  @override
+  String get htmlConvertNeedsLibrary => '请打开一个资料库，以便将网页转换为笔记';
+  @override
+  String htmlConvertUnreadable(String name) => '无法读取“$name”';
+  @override
+  String get htmlConvertTooLarge => '这个网页太大，无法转换';
+  @override
+  String get htmlConvertCharset => '不支持此网页的文本编码';
+  @override
+  String get htmlConvertFailed => '无法转换此网页';
+  @override
+  String get htmlDropTitle => '如何处理拖入的 HTML？';
+  @override
+  String get htmlDropConvertDetail => '将网页连同图片制成一条笔记';
+  @override
+  String get htmlDropAttach => '附加';
+  @override
+  String get htmlDropAttachDetail => '将文件原样保留在当前打开的笔记中';
+  @override
+  String get htmlDropBoth => '附加并转换';
+  @override
+  String get htmlDropBothDetail => '将文件保留在当前打开的笔记中，并将网页制成笔记';
+  @override
+  String get htmlDropNeedsNote => '附加文件需要在资料库中打开一条笔记';
   @override
   String get openFileTitle => '打开文件';
   @override

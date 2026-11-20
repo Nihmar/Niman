@@ -20,6 +20,7 @@ import 'package:niman/src/core/tray.dart';
 import 'package:niman/src/editor/editor_only.dart';
 import 'package:niman/src/export/export_files.dart';
 import 'package:niman/src/export/pdf_printer.dart';
+import 'package:niman/src/import/html/html_file.dart';
 import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/library/note_relocation.dart' show linkRewriteBatch;
 import 'package:niman/src/library/session.dart';
@@ -44,6 +45,7 @@ import 'package:niman/src/ui/feature_off.dart';
 import 'package:niman/src/ui/features/features_host.dart';
 import 'package:niman/src/ui/features_link.dart';
 import 'package:niman/src/ui/history/history_flow.dart';
+import 'package:niman/src/ui/html_convert_flow.dart';
 import 'package:niman/src/ui/journal/journal_flow.dart';
 import 'package:niman/src/ui/key_map.dart';
 import 'package:niman/src/ui/kinds/flashcards/review_tab.dart';
@@ -598,7 +600,19 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     open: (note) => _openNoteFromLink(note, null),
   );
 
-  void _convertBook(String path) => unawaited(_epubConvert.run(context, path));
+  /// Converting a web page into a note (#1293), from the same places.
+  late final HtmlConvertFlow _htmlConvert = HtmlConvertFlow(
+    session: widget.controller,
+    reveal: _revealFolder,
+    open: (note) => _openNoteFromLink(note, null),
+  );
+
+  /// Converts the book or the web page at [path], absolute.
+  void _convertBook(String path) => unawaited(
+    isHtmlFile(path)
+        ? _htmlConvert.run(context, path)
+        : _epubConvert.run(context, path),
+  );
 
   /// Shares, Notion exports, books and folders brought in from outside.
   late final ShellImportFlow _imports = ShellImportFlow(
@@ -606,6 +620,9 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     guard: _guard,
     capture: _captureFlow,
     epubConvert: _epubConvert,
+    htmlConvert: _htmlConvert,
+    attachDropped: _noteActions.attachDropped,
+    canAttachDropped: () => _noteActions.canAttachDropped,
     shareText: _quickNote.share,
     newItemFolder: () => _newItemRule.folder,
     reveal: _revealFolder,
@@ -691,7 +708,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
       anchor: anchor,
     ),
     onRecognize: _ocr.recognize,
-    onConvertBook: (path) {
+    onConvertFile: (path) {
       if (widget.controller.root case final root?) {
         _convertBook(p.join(root, path));
       }
@@ -969,6 +986,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     captureFlow: _captureFlow,
     exportFlow: _exportFlow,
     epubConvert: _epubConvert,
+    htmlConvert: _htmlConvert,
     journalFlow: _journalFlow,
     journalUi: () => _journalUi,
     immersive: _immersive,

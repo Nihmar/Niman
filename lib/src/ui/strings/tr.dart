@@ -1925,33 +1925,49 @@ final class TurkishStrings extends Strings {
   @override
   String importFolderEmpty(String name) => '$name içinde Markdown dosyası yok';
   @override
-  String get epubConvertAction => 'Markdown’a dönüştür…';
+  String get importFolderSettingsTitle => 'Klasör içe aktar';
+  @override
+  String importFolderBodyPages(int notes, int pages) =>
+      'Markdown dosyaları ($notes) kopyalanır, web sayfaları ($pages) notlara '
+      'dönüştürülür; hepsi kitaplığın yeni bir klasörüne konur. Özgün klasör '
+      'olduğu gibi kalır.';
+  @override
+  String get importFolderTooLarge =>
+      'Bu klasör içe aktarılamayacak kadar büyük';
+  @override
+  String get importFolderFailed => 'Klasör içe aktarılamadı';
+  @override
+  String get importFolderReading => 'Klasör okunuyor…';
+  @override
+  String importFolderSkipped(String folder, int count) =>
+      '$folder klasörüne aktarıldı (atlanan dosyalar: $count)';
+  @override
+  String get convertAction => 'Markdown’a dönüştür…';
   @override
   String get epubConvertCommand => 'EPUB’u Markdown’a dönüştür…';
   @override
   String get epubConvertSettingsTitle => 'Bir EPUB’u Markdown’a dönüştür';
   @override
-  String get epubConvertTitle => 'Markdown’a dönüştür';
+  String get convertTitle => 'Markdown’a dönüştür';
   @override
   String get epubConvertReading => 'Kitap okunuyor…';
   @override
-  String get epubConvertPerChapter => 'Bölüm başına bir not';
+  String get convertPerChapter => 'Bölüm başına bir not';
   @override
-  String epubConvertPerChapterDetail(int notes, int folders) =>
+  String convertPerChapterDetail(int notes, int folders) =>
       'Notlar: $notes · klasörler: $folders';
   @override
-  String get epubConvertOneNote => 'Tek not';
+  String get convertOneNote => 'Tek not';
   @override
-  String get epubConvertOneNoteDetail => 'Kitabın tamamı tek bir notta';
+  String get convertOneNoteDetail => 'Kitabın tamamı tek bir notta';
   @override
-  String get epubConvertInto => 'Hedef';
+  String get convertInto => 'Hedef';
   @override
-  String get epubConvertStart => 'Dönüştür';
+  String get convertStart => 'Dönüştür';
   @override
-  String epubConvertProgress(int done, int total) =>
-      'Yazılıyor: $done / $total';
+  String convertProgress(int done, int total) => 'Yazılıyor: $done / $total';
   @override
-  String epubConvertDone(String made, int notes, int pictures) =>
+  String convertDone(String made, int notes, int pictures) =>
       '$made içine dönüştürüldü (notlar: $notes, resimler: $pictures)';
   @override
   String get epubConvertProtected =>
@@ -1967,13 +1983,52 @@ final class TurkishStrings extends Strings {
   String get epubConvertNeedsLibrary =>
       'Bir kitabı notlara dönüştürmek için bir kitaplık açın';
   @override
-  String get epubConvertChapterName => 'Bölüm {n}';
+  String get convertChapterName => 'Bölüm {n}';
   @override
-  String get epubConvertOpening => 'Ön sayfalar';
+  String get convertOpening => 'Ön sayfalar';
   @override
-  String get epubConvertContents => 'İçindekiler';
+  String get convertContents => 'İçindekiler';
   @override
   String get epubConvertPickTitle => 'Dönüştürülecek bir EPUB seçin';
+  @override
+  String get htmlConvertCommand => 'HTML’yi Markdown’a dönüştür…';
+  @override
+  String get htmlConvertSettingsTitle =>
+      'Bir HTML dosyasını Markdown’a dönüştür';
+  @override
+  String get htmlConvertPickTitle => 'Dönüştürülecek bir HTML dosyası seçin';
+  @override
+  String get htmlConvertReading => 'Sayfa okunuyor…';
+  @override
+  String htmlConvertMany(int count) => 'HTML dosyaları: $count';
+  @override
+  String get htmlConvertNeedsLibrary =>
+      'Bir web sayfasını nota dönüştürmek için bir kitaplık açın';
+  @override
+  String htmlConvertUnreadable(String name) => '“$name” okunamadı';
+  @override
+  String get htmlConvertTooLarge => 'Bu sayfa dönüştürülemeyecek kadar büyük';
+  @override
+  String get htmlConvertCharset => 'Bu sayfanın metin kodlaması desteklenmiyor';
+  @override
+  String get htmlConvertFailed => 'Sayfa dönüştürülemedi';
+  @override
+  String get htmlDropTitle => 'Bırakılan HTML ile ne yapılsın?';
+  @override
+  String get htmlDropConvertDetail =>
+      'Sayfadan, görselleriyle birlikte bir not oluştur';
+  @override
+  String get htmlDropAttach => 'Ekle';
+  @override
+  String get htmlDropAttachDetail =>
+      'Dosyayı olduğu gibi açık notla birlikte tut';
+  @override
+  String get htmlDropBoth => 'Ekle ve dönüştür';
+  @override
+  String get htmlDropBothDetail =>
+      'Dosyayı açık notla birlikte tut ve sayfadan bir not oluştur';
+  @override
+  String get htmlDropNeedsNote => 'Eklemek için kitaplıkta açık bir not olmalı';
   @override
   String get openFileTitle => 'Dosya aç';
   @override

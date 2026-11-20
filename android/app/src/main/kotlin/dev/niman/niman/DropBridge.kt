@@ -29,6 +29,21 @@ class DropBridge(private val activity: Activity) : View.OnDragListener {
     companion object {
         /** The Dart-facing channel, the desktop runners' name. */
         const val CHANNEL = "niman/drop"
+
+        /**
+         * Whether a drag of these [mimes] holds a file or a picture rather
+         * than text. A web page's file (#1293) is `text/html`, as is the
+         * HTML of a selection dragged out of a browser; the selection
+         * carries its `text/plain` too, and a file is only itself.
+         */
+        fun carriesFiles(mimes: List<String>): Boolean {
+            val plain = ClipDescription.MIMETYPE_TEXT_PLAIN
+            val html = ClipDescription.MIMETYPE_TEXT_HTML
+            if (mimes.any { it != plain && it != html && it != ClipDescription.MIMETYPE_TEXT_INTENT }) {
+                return true
+            }
+            return html in mimes && plain !in mimes
+        }
     }
 
     private var channel: MethodChannel? = null
@@ -68,11 +83,7 @@ class DropBridge(private val activity: Activity) : View.OnDragListener {
     /** Whether a drag holds anything but text: a file, a picture. */
     private fun carriesFiles(description: ClipDescription?): Boolean {
         if (description == null) return false
-        return (0 until description.mimeTypeCount)
-            .map { description.getMimeType(it) }
-            .any { it != ClipDescription.MIMETYPE_TEXT_PLAIN &&
-                it != ClipDescription.MIMETYPE_TEXT_HTML &&
-                it != ClipDescription.MIMETYPE_TEXT_INTENT }
+        return carriesFiles((0 until description.mimeTypeCount).map { description.getMimeType(it) })
     }
 
     private fun drop(event: DragEvent): Boolean {

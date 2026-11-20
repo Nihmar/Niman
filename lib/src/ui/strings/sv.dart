@@ -1950,32 +1950,49 @@ final class SwedishStrings extends Strings {
   @override
   String importFolderEmpty(String name) => 'Inga Markdown-filer i $name';
   @override
-  String get epubConvertAction => 'Konvertera till Markdown…';
+  String get importFolderSettingsTitle => 'Importera en mapp';
+  @override
+  String importFolderBodyPages(int notes, int pages) =>
+      'Dess Markdown-filer ($notes) kopieras och webbsidorna ($pages) '
+      'konverteras till anteckningar, i en ny mapp i biblioteket. Den '
+      'ursprungliga mappen förblir som den är.';
+  @override
+  String get importFolderTooLarge =>
+      'Den här mappen är för stor för att importeras';
+  @override
+  String get importFolderFailed => 'Mappen kunde inte importeras';
+  @override
+  String get importFolderReading => 'Läser mappen…';
+  @override
+  String importFolderSkipped(String folder, int count) =>
+      'Importerad till $folder (utelämnade filer: $count)';
+  @override
+  String get convertAction => 'Konvertera till Markdown…';
   @override
   String get epubConvertCommand => 'Konvertera EPUB till Markdown…';
   @override
   String get epubConvertSettingsTitle => 'Konvertera en EPUB till Markdown';
   @override
-  String get epubConvertTitle => 'Konvertera till Markdown';
+  String get convertTitle => 'Konvertera till Markdown';
   @override
   String get epubConvertReading => 'Läser boken…';
   @override
-  String get epubConvertPerChapter => 'En anteckning per kapitel';
+  String get convertPerChapter => 'En anteckning per kapitel';
   @override
-  String epubConvertPerChapterDetail(int notes, int folders) =>
+  String convertPerChapterDetail(int notes, int folders) =>
       'Anteckningar: $notes · mappar: $folders';
   @override
-  String get epubConvertOneNote => 'En anteckning';
+  String get convertOneNote => 'En anteckning';
   @override
-  String get epubConvertOneNoteDetail => 'Hela boken i en enda anteckning';
+  String get convertOneNoteDetail => 'Hela boken i en enda anteckning';
   @override
-  String get epubConvertInto => 'Till';
+  String get convertInto => 'Till';
   @override
-  String get epubConvertStart => 'Konvertera';
+  String get convertStart => 'Konvertera';
   @override
-  String epubConvertProgress(int done, int total) => 'Skriver $done av $total';
+  String convertProgress(int done, int total) => 'Skriver $done av $total';
   @override
-  String epubConvertDone(String made, int notes, int pictures) =>
+  String convertDone(String made, int notes, int pictures) =>
       'Konverterad till $made (anteckningar: $notes, bilder: $pictures)';
   @override
   String get epubConvertProtected =>
@@ -1991,13 +2008,53 @@ final class SwedishStrings extends Strings {
   String get epubConvertNeedsLibrary =>
       'Öppna ett bibliotek för att konvertera en bok till anteckningar';
   @override
-  String get epubConvertChapterName => 'Kapitel {n}';
+  String get convertChapterName => 'Kapitel {n}';
   @override
-  String get epubConvertOpening => 'Försättsblad';
+  String get convertOpening => 'Försättsblad';
   @override
-  String get epubConvertContents => 'Innehåll';
+  String get convertContents => 'Innehåll';
   @override
   String get epubConvertPickTitle => 'Välj en EPUB att konvertera';
+  @override
+  String get htmlConvertCommand => 'Konvertera HTML till Markdown…';
+  @override
+  String get htmlConvertSettingsTitle => 'Konvertera en HTML-fil till Markdown';
+  @override
+  String get htmlConvertPickTitle => 'Välj en HTML-fil att konvertera';
+  @override
+  String get htmlConvertReading => 'Läser sidan…';
+  @override
+  String htmlConvertMany(int count) => 'HTML-filer: $count';
+  @override
+  String get htmlConvertNeedsLibrary =>
+      'Öppna ett bibliotek för att konvertera en webbsida till en anteckning';
+  @override
+  String htmlConvertUnreadable(String name) => '”$name” kunde inte läsas';
+  @override
+  String get htmlConvertTooLarge =>
+      'Den här sidan är för stor för att konverteras';
+  @override
+  String get htmlConvertCharset => 'Textkodningen för den här sidan stöds inte';
+  @override
+  String get htmlConvertFailed => 'Sidan kunde inte konverteras';
+  @override
+  String get htmlDropTitle => 'Vad ska göras med den släppta HTML-filen?';
+  @override
+  String get htmlDropConvertDetail =>
+      'Gör en anteckning av sidan, med dess bilder';
+  @override
+  String get htmlDropAttach => 'Bifoga';
+  @override
+  String get htmlDropAttachDetail =>
+      'Behåll filen vid den öppna anteckningen, som den är';
+  @override
+  String get htmlDropBoth => 'Bifoga och konvertera';
+  @override
+  String get htmlDropBothDetail =>
+      'Behåll filen vid den öppna anteckningen och gör en anteckning av sidan';
+  @override
+  String get htmlDropNeedsNote =>
+      'För att bifoga måste en anteckning vara öppen i biblioteket';
   @override
   String get openFileTitle => 'Öppna fil';
   @override

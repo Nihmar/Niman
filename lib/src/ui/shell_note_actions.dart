@@ -413,6 +413,10 @@ final class ShellNoteActions {
   void moveToTasks(NoteViewHandle note) =>
       unawaited(MoveToTasksFlow(tasks.notes).run(context(), note));
 
+  /// Whether a note is on screen that takes attachments dropped on the
+  /// window (#1250): what [attachDropped] would answer, before any file.
+  bool get canAttachDropped => shown.handle?.canInsert ?? false;
+
   /// Attaches files dropped on the window to the note on screen (#1250):
   /// false when there is none that takes text — no note open, a kind's view
   /// in front of it, a note outside the library.

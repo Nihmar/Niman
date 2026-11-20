@@ -1921,32 +1921,48 @@ final class EstonianStrings extends Strings {
   @override
   String importFolderEmpty(String name) => 'Kaustas $name pole Markdowni faile';
   @override
-  String get epubConvertAction => 'Teisenda Markdowniks…';
+  String get importFolderSettingsTitle => 'Impordi kaust';
+  @override
+  String importFolderBodyPages(int notes, int pages) =>
+      'Selle Markdowni failid ($notes) kopeeritakse ja veebilehed ($pages) '
+      'teisendatakse märkmeteks, raamatukogu uude kausta. Algne kaust jääb '
+      'samaks.';
+  @override
+  String get importFolderTooLarge => 'See kaust on importimiseks liiga suur';
+  @override
+  String get importFolderFailed => 'Kausta ei õnnestunud importida';
+  @override
+  String get importFolderReading => 'Kausta lugemine…';
+  @override
+  String importFolderSkipped(String folder, int count) =>
+      'Imporditud kausta $folder (vahele jäetud faile: $count)';
+  @override
+  String get convertAction => 'Teisenda Markdowniks…';
   @override
   String get epubConvertCommand => 'Teisenda EPUB Markdowniks…';
   @override
   String get epubConvertSettingsTitle => 'Teisenda EPUB Markdowniks';
   @override
-  String get epubConvertTitle => 'Teisenda Markdowniks';
+  String get convertTitle => 'Teisenda Markdowniks';
   @override
   String get epubConvertReading => 'Raamatut loetakse…';
   @override
-  String get epubConvertPerChapter => 'Üks märge peatüki kohta';
+  String get convertPerChapter => 'Üks märge peatüki kohta';
   @override
-  String epubConvertPerChapterDetail(int notes, int folders) =>
+  String convertPerChapterDetail(int notes, int folders) =>
       'Märkmeid: $notes · kaustu: $folders';
   @override
-  String get epubConvertOneNote => 'Üks märge';
+  String get convertOneNote => 'Üks märge';
   @override
-  String get epubConvertOneNoteDetail => 'Kogu raamat ühes märkmes';
+  String get convertOneNoteDetail => 'Kogu raamat ühes märkmes';
   @override
-  String get epubConvertInto => 'Kausta';
+  String get convertInto => 'Kausta';
   @override
-  String get epubConvertStart => 'Teisenda';
+  String get convertStart => 'Teisenda';
   @override
-  String epubConvertProgress(int done, int total) => 'Kirjutamine $done/$total';
+  String convertProgress(int done, int total) => 'Kirjutamine $done/$total';
   @override
-  String epubConvertDone(String made, int notes, int pictures) =>
+  String convertDone(String made, int notes, int pictures) =>
       'Teisendatud: $made (märkmeid: $notes, pilte: $pictures)';
   @override
   String get epubConvertProtected =>
@@ -1961,13 +1977,51 @@ final class EstonianStrings extends Strings {
   String get epubConvertNeedsLibrary =>
       'Raamatu märkmeteks teisendamiseks ava kogu';
   @override
-  String get epubConvertChapterName => 'Peatükk {n}';
+  String get convertChapterName => 'Peatükk {n}';
   @override
-  String get epubConvertOpening => 'Eessõnalehed';
+  String get convertOpening => 'Eessõnalehed';
   @override
-  String get epubConvertContents => 'Sisukord';
+  String get convertContents => 'Sisukord';
   @override
   String get epubConvertPickTitle => 'Vali teisendatav EPUB';
+  @override
+  String get htmlConvertCommand => 'Teisenda HTML Markdowniks…';
+  @override
+  String get htmlConvertSettingsTitle => 'Teisenda HTML-fail Markdowniks';
+  @override
+  String get htmlConvertPickTitle => 'Vali teisendatav HTML-fail';
+  @override
+  String get htmlConvertReading => 'Lehe lugemine…';
+  @override
+  String htmlConvertMany(int count) => 'HTML-faile: $count';
+  @override
+  String get htmlConvertNeedsLibrary =>
+      'Veebilehe märkmeks teisendamiseks ava kogu';
+  @override
+  String htmlConvertUnreadable(String name) => '„$name“ ei õnnestunud lugeda';
+  @override
+  String get htmlConvertTooLarge => 'See leht on teisendamiseks liiga suur';
+  @override
+  String get htmlConvertCharset => 'Selle lehe tekstikodeeringut ei toetata';
+  @override
+  String get htmlConvertFailed => 'Lehte ei õnnestunud teisendada';
+  @override
+  String get htmlDropTitle => 'Mida teha ülekantud HTML-iga?';
+  @override
+  String get htmlDropConvertDetail => 'Tee lehest märge koos piltidega';
+  @override
+  String get htmlDropAttach => 'Lisa manusena';
+  @override
+  String get htmlDropAttachDetail =>
+      'Hoia fail avatud märkme juures sellisena, nagu see on';
+  @override
+  String get htmlDropBoth => 'Lisa manusena ja teisenda';
+  @override
+  String get htmlDropBothDetail =>
+      'Hoia fail avatud märkme juures ja tee lehest märge';
+  @override
+  String get htmlDropNeedsNote =>
+      'Manusena lisamiseks peab kogus olema märge avatud';
   @override
   String get openFileTitle => 'Ava fail';
   @override

@@ -34,7 +34,7 @@ EpubProgressHere epubProgressHere(
   final entry = document.entryAt(line);
   return (
     title: entry == -1
-        ? AppStrings.epubConvertChapterName.replaceAll('{n}', '${at.chapter}')
+        ? AppStrings.convertChapterName.replaceAll('{n}', '${at.chapter}')
         : document.contents[entry].title,
     at: at,
   );

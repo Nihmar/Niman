@@ -121,7 +121,9 @@ abstract final class SettingsKeys {
   static const reindex = Key('reindex-setting');
   static const rebuildIndex = Key('rebuild-index-setting');
   static const notionImport = Key('notion-import-setting');
+  static const importFolder = Key('import-folder-setting');
   static const epubConvert = Key('epub-convert-setting');
+  static const htmlConvert = Key('html-convert-setting');
   static const switchLibrary = Key('switch-library-setting');
   static const closeLibrary = Key('close-library-setting');
 }

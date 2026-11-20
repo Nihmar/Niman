@@ -1945,32 +1945,48 @@ final class UkrainianStrings extends Strings {
   @override
   String importFolderEmpty(String name) => 'У $name немає файлів Markdown';
   @override
-  String get epubConvertAction => 'Перетворити на Markdown…';
+  String get importFolderSettingsTitle => 'Імпортувати теку';
+  @override
+  String importFolderBodyPages(int notes, int pages) =>
+      'Її файли Markdown ($notes) буде скопійовано, а вебсторінки ($pages) '
+      'перетворено на нотатки в новій теці бібліотеки. Початкова тека '
+      'залишиться як є.';
+  @override
+  String get importFolderTooLarge => 'Ця тека завелика для імпорту';
+  @override
+  String get importFolderFailed => 'Не вдалося імпортувати теку';
+  @override
+  String get importFolderReading => 'Читання теки…';
+  @override
+  String importFolderSkipped(String folder, int count) =>
+      'Імпортовано до $folder (пропущено файлів: $count)';
+  @override
+  String get convertAction => 'Перетворити на Markdown…';
   @override
   String get epubConvertCommand => 'Перетворити EPUB на Markdown…';
   @override
   String get epubConvertSettingsTitle => 'Перетворити EPUB на Markdown';
   @override
-  String get epubConvertTitle => 'Перетворити на Markdown';
+  String get convertTitle => 'Перетворити на Markdown';
   @override
   String get epubConvertReading => 'Читання книги…';
   @override
-  String get epubConvertPerChapter => 'Одна нотатка на розділ';
+  String get convertPerChapter => 'Одна нотатка на розділ';
   @override
-  String epubConvertPerChapterDetail(int notes, int folders) =>
+  String convertPerChapterDetail(int notes, int folders) =>
       'Нотатки: $notes · теки: $folders';
   @override
-  String get epubConvertOneNote => 'Одна нотатка';
+  String get convertOneNote => 'Одна нотатка';
   @override
-  String get epubConvertOneNoteDetail => 'Уся книга в одній нотатці';
+  String get convertOneNoteDetail => 'Уся книга в одній нотатці';
   @override
-  String get epubConvertInto => 'До';
+  String get convertInto => 'До';
   @override
-  String get epubConvertStart => 'Перетворити';
+  String get convertStart => 'Перетворити';
   @override
-  String epubConvertProgress(int done, int total) => 'Запис $done з $total';
+  String convertProgress(int done, int total) => 'Запис $done з $total';
   @override
-  String epubConvertDone(String made, int notes, int pictures) =>
+  String convertDone(String made, int notes, int pictures) =>
       'Перетворено до $made (нотатки: $notes, зображення: $pictures)';
   @override
   String get epubConvertProtected =>
@@ -1985,13 +2001,52 @@ final class UkrainianStrings extends Strings {
   String get epubConvertNeedsLibrary =>
       'Відкрийте бібліотеку, щоб перетворити книгу на нотатки';
   @override
-  String get epubConvertChapterName => 'Розділ {n}';
+  String get convertChapterName => 'Розділ {n}';
   @override
-  String get epubConvertOpening => 'Початкові сторінки';
+  String get convertOpening => 'Початкові сторінки';
   @override
-  String get epubConvertContents => 'Зміст';
+  String get convertContents => 'Зміст';
   @override
   String get epubConvertPickTitle => 'Виберіть EPUB для перетворення';
+  @override
+  String get htmlConvertCommand => 'Перетворити HTML на Markdown…';
+  @override
+  String get htmlConvertSettingsTitle => 'Перетворити файл HTML на Markdown';
+  @override
+  String get htmlConvertPickTitle => 'Виберіть файл HTML для перетворення';
+  @override
+  String get htmlConvertReading => 'Читання сторінки…';
+  @override
+  String htmlConvertMany(int count) => 'Файли HTML: $count';
+  @override
+  String get htmlConvertNeedsLibrary =>
+      'Відкрийте бібліотеку, щоб перетворити вебсторінку на нотатку';
+  @override
+  String htmlConvertUnreadable(String name) => '«$name» не вдалося прочитати';
+  @override
+  String get htmlConvertTooLarge => 'Ця сторінка завелика для перетворення';
+  @override
+  String get htmlConvertCharset =>
+      'Кодування тексту цієї сторінки не підтримується';
+  @override
+  String get htmlConvertFailed => 'Не вдалося перетворити сторінку';
+  @override
+  String get htmlDropTitle => 'Що зробити з перетягнутим файлом HTML?';
+  @override
+  String get htmlDropConvertDetail =>
+      'Створити нотатку зі сторінки разом із зображеннями';
+  @override
+  String get htmlDropAttach => 'Прикріпити';
+  @override
+  String get htmlDropAttachDetail => 'Залишити файл при відкритій нотатці як є';
+  @override
+  String get htmlDropBoth => 'Прикріпити й перетворити';
+  @override
+  String get htmlDropBothDetail =>
+      'Залишити файл при відкритій нотатці та створити нотатку зі сторінки';
+  @override
+  String get htmlDropNeedsNote =>
+      'Щоб прикріпити, потрібна відкрита нотатка в бібліотеці';
   @override
   String get openFileTitle => 'Відкрити файл';
   @override

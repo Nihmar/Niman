@@ -131,7 +131,7 @@ final class EpubBar extends StatelessWidget {
       ),
       IconButton(
         key: const Key('epub-convert-button'),
-        tooltip: AppStrings.epubConvertAction,
+        tooltip: AppStrings.convertAction,
         icon: const Icon(Icons.note_add_outlined),
         visualDensity: VisualDensity.compact,
         onPressed: onConvert,

@@ -1941,32 +1941,48 @@ final class IcelandicStrings extends Strings {
   @override
   String importFolderEmpty(String name) => 'Engar Markdown-skrár í $name';
   @override
-  String get epubConvertAction => 'Umbreyta í Markdown…';
+  String get importFolderSettingsTitle => 'Flytja inn möppu';
+  @override
+  String importFolderBodyPages(int notes, int pages) =>
+      'Markdown-skrár hennar ($notes) eru afritaðar og vefsíður hennar '
+      '($pages) umbreyttar í minnispunkta, í nýrri möppu í safninu. '
+      'Upprunalega mappan helst óbreytt.';
+  @override
+  String get importFolderTooLarge => 'Þessi mappa er of stór til að flytja inn';
+  @override
+  String get importFolderFailed => 'Ekki tókst að flytja möppuna inn';
+  @override
+  String get importFolderReading => 'Les möppuna…';
+  @override
+  String importFolderSkipped(String folder, int count) =>
+      'Flutt inn í $folder (skrár sem var sleppt: $count)';
+  @override
+  String get convertAction => 'Umbreyta í Markdown…';
   @override
   String get epubConvertCommand => 'Umbreyta EPUB í Markdown…';
   @override
   String get epubConvertSettingsTitle => 'Umbreyta EPUB í Markdown';
   @override
-  String get epubConvertTitle => 'Umbreyta í Markdown';
+  String get convertTitle => 'Umbreyta í Markdown';
   @override
   String get epubConvertReading => 'Les bókina…';
   @override
-  String get epubConvertPerChapter => 'Ein glósa á kafla';
+  String get convertPerChapter => 'Ein glósa á kafla';
   @override
-  String epubConvertPerChapterDetail(int notes, int folders) =>
+  String convertPerChapterDetail(int notes, int folders) =>
       'Glósur: $notes · möppur: $folders';
   @override
-  String get epubConvertOneNote => 'Ein glósa';
+  String get convertOneNote => 'Ein glósa';
   @override
-  String get epubConvertOneNoteDetail => 'Öll bókin í einni glósu';
+  String get convertOneNoteDetail => 'Öll bókin í einni glósu';
   @override
-  String get epubConvertInto => 'Í';
+  String get convertInto => 'Í';
   @override
-  String get epubConvertStart => 'Umbreyta';
+  String get convertStart => 'Umbreyta';
   @override
-  String epubConvertProgress(int done, int total) => 'Skrifa $done af $total';
+  String convertProgress(int done, int total) => 'Skrifa $done af $total';
   @override
-  String epubConvertDone(String made, int notes, int pictures) =>
+  String convertDone(String made, int notes, int pictures) =>
       'Umbreytt í $made (glósur: $notes, myndir: $pictures)';
   @override
   String get epubConvertProtected =>
@@ -1982,13 +1998,50 @@ final class IcelandicStrings extends Strings {
   String get epubConvertNeedsLibrary =>
       'Opnaðu safn til að umbreyta bók í glósur';
   @override
-  String get epubConvertChapterName => 'Kafli {n}';
+  String get convertChapterName => 'Kafli {n}';
   @override
-  String get epubConvertOpening => 'Forsíður';
+  String get convertOpening => 'Forsíður';
   @override
-  String get epubConvertContents => 'Efnisyfirlit';
+  String get convertContents => 'Efnisyfirlit';
   @override
   String get epubConvertPickTitle => 'Veldu EPUB til að umbreyta';
+  @override
+  String get htmlConvertCommand => 'Umbreyta HTML í Markdown…';
+  @override
+  String get htmlConvertSettingsTitle => 'Umbreyta HTML-skrá í Markdown';
+  @override
+  String get htmlConvertPickTitle => 'Veldu HTML-skrá til að umbreyta';
+  @override
+  String get htmlConvertReading => 'Les síðuna…';
+  @override
+  String htmlConvertMany(int count) => 'HTML-skrár: $count';
+  @override
+  String get htmlConvertNeedsLibrary =>
+      'Opnaðu safn til að umbreyta vefsíðu í glósu';
+  @override
+  String htmlConvertUnreadable(String name) => 'Ekki tókst að lesa „$name“';
+  @override
+  String get htmlConvertTooLarge => 'Þessi síða er of stór til að umbreyta';
+  @override
+  String get htmlConvertCharset => 'Textakóðun þessarar síðu er ekki studd';
+  @override
+  String get htmlConvertFailed => 'Ekki tókst að umbreyta síðunni';
+  @override
+  String get htmlDropTitle => 'Hvað á að gera við HTML-skrána sem var sleppt?';
+  @override
+  String get htmlDropConvertDetail => 'Búa til glósu úr síðunni, með myndunum';
+  @override
+  String get htmlDropAttach => 'Hengja við';
+  @override
+  String get htmlDropAttachDetail => 'Geyma skrána með opnu glósunni, óbreytta';
+  @override
+  String get htmlDropBoth => 'Hengja við og umbreyta';
+  @override
+  String get htmlDropBothDetail =>
+      'Geyma skrána með opnu glósunni og búa til glósu úr síðunni';
+  @override
+  String get htmlDropNeedsNote =>
+      'Til að hengja við þarf glósa að vera opin í safninu';
   @override
   String get openFileTitle => 'Opna skrá';
   @override

@@ -73,6 +73,17 @@ final class LaunchRequests {
   Future<bool> attachFiles(List<String> paths) async =>
       await attachHandler?.call(paths) ?? false;
 
+  /// Who takes the web pages (`.html`) dropped on the window, to ask what to
+  /// do with them (#1293): the library's shell, while it is up. It answers
+  /// whether it took them.
+  Future<bool> Function(List<String> paths)? pageHandler;
+
+  /// Offers the web pages at [paths] to be converted, attached or both:
+  /// false when nobody is there to ask (no library open), and they are
+  /// left to what a drop of any other file does.
+  Future<bool> offerPages(List<String> paths) async =>
+      await pageHandler?.call(paths) ?? false;
+
   /// Stops taking requests.
   Future<void> dispose() async {
     await _laterFiles.cancel();

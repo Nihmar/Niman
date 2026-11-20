@@ -1934,32 +1934,48 @@ final class DanishStrings extends Strings {
   @override
   String importFolderEmpty(String name) => 'Ingen Markdown-filer i $name';
   @override
-  String get epubConvertAction => 'Konvertér til Markdown…';
+  String get importFolderSettingsTitle => 'Importér en mappe';
+  @override
+  String importFolderBodyPages(int notes, int pages) =>
+      'Dens Markdown-filer ($notes) kopieres, og websiderne ($pages) '
+      'konverteres til noter, i en ny mappe i biblioteket. Den oprindelige '
+      'mappe forbliver som den er.';
+  @override
+  String get importFolderTooLarge => 'Denne mappe er for stor til at importere';
+  @override
+  String get importFolderFailed => 'Mappen kunne ikke importeres';
+  @override
+  String get importFolderReading => 'Læser mappen…';
+  @override
+  String importFolderSkipped(String folder, int count) =>
+      'Importeret til $folder (udeladte filer: $count)';
+  @override
+  String get convertAction => 'Konvertér til Markdown…';
   @override
   String get epubConvertCommand => 'Konvertér EPUB til Markdown…';
   @override
   String get epubConvertSettingsTitle => 'Konvertér en EPUB til Markdown';
   @override
-  String get epubConvertTitle => 'Konvertér til Markdown';
+  String get convertTitle => 'Konvertér til Markdown';
   @override
   String get epubConvertReading => 'Læser bogen…';
   @override
-  String get epubConvertPerChapter => 'Én note pr. kapitel';
+  String get convertPerChapter => 'Én note pr. kapitel';
   @override
-  String epubConvertPerChapterDetail(int notes, int folders) =>
+  String convertPerChapterDetail(int notes, int folders) =>
       'Noter: $notes · mapper: $folders';
   @override
-  String get epubConvertOneNote => 'Én note';
+  String get convertOneNote => 'Én note';
   @override
-  String get epubConvertOneNoteDetail => 'Hele bogen i en enkelt note';
+  String get convertOneNoteDetail => 'Hele bogen i en enkelt note';
   @override
-  String get epubConvertInto => 'Til';
+  String get convertInto => 'Til';
   @override
-  String get epubConvertStart => 'Konvertér';
+  String get convertStart => 'Konvertér';
   @override
-  String epubConvertProgress(int done, int total) => 'Skriver $done af $total';
+  String convertProgress(int done, int total) => 'Skriver $done af $total';
   @override
-  String epubConvertDone(String made, int notes, int pictures) =>
+  String convertDone(String made, int notes, int pictures) =>
       'Konverteret til $made (noter: $notes, billeder: $pictures)';
   @override
   String get epubConvertProtected =>
@@ -1974,13 +1990,52 @@ final class DanishStrings extends Strings {
   String get epubConvertNeedsLibrary =>
       'Åbn et bibliotek for at konvertere en bog til noter';
   @override
-  String get epubConvertChapterName => 'Kapitel {n}';
+  String get convertChapterName => 'Kapitel {n}';
   @override
-  String get epubConvertOpening => 'Forsats';
+  String get convertOpening => 'Forsats';
   @override
-  String get epubConvertContents => 'Indhold';
+  String get convertContents => 'Indhold';
   @override
   String get epubConvertPickTitle => 'Vælg en EPUB at konvertere';
+  @override
+  String get htmlConvertCommand => 'Konvertér HTML til Markdown…';
+  @override
+  String get htmlConvertSettingsTitle => 'Konvertér en HTML-fil til Markdown';
+  @override
+  String get htmlConvertPickTitle => 'Vælg en HTML-fil at konvertere';
+  @override
+  String get htmlConvertReading => 'Læser siden…';
+  @override
+  String htmlConvertMany(int count) => 'HTML-filer: $count';
+  @override
+  String get htmlConvertNeedsLibrary =>
+      'Åbn et bibliotek for at konvertere en webside til en note';
+  @override
+  String htmlConvertUnreadable(String name) => '“$name” kunne ikke læses';
+  @override
+  String get htmlConvertTooLarge => 'Denne side er for stor til at konvertere';
+  @override
+  String get htmlConvertCharset =>
+      'Tegnkodningen på denne side understøttes ikke';
+  @override
+  String get htmlConvertFailed => 'Siden kunne ikke konverteres';
+  @override
+  String get htmlDropTitle => 'Hvad skal der ske med den droppede HTML-fil?';
+  @override
+  String get htmlDropConvertDetail => 'Lav en note af siden, med billeder';
+  @override
+  String get htmlDropAttach => 'Vedhæft';
+  @override
+  String get htmlDropAttachDetail =>
+      'Behold filen ved den åbne note, som den er';
+  @override
+  String get htmlDropBoth => 'Vedhæft og konvertér';
+  @override
+  String get htmlDropBothDetail =>
+      'Behold filen ved den åbne note, og lav en note af siden';
+  @override
+  String get htmlDropNeedsNote =>
+      'Vedhæftning kræver en åben note i biblioteket';
   @override
   String get openFileTitle => 'Åbn fil';
   @override

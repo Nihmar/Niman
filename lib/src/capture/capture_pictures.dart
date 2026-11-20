@@ -37,6 +37,9 @@ const Map<String, String> _extensions = {
   'image/bmp': '.bmp',
 };
 
+/// A picture fetched: its bytes and the extension it is stored under.
+typedef FetchedPicture = ({Uint8List bytes, String extension});
+
 /// Downloads the pictures at [urls] — absolute http, https or base64
 /// `data:` addresses — into `<libraryRoot>/<attachmentsFolder>/`, and gives
 /// each one that landed its library-relative path.
@@ -56,7 +59,7 @@ Future<Map<String, String>> downloadPictures(
     while (next < queue.length) {
       final url = queue[next++];
       try {
-        final picture = await _download(client, url).timeout(timeout);
+        final picture = await downloadPicture(client, url).timeout(timeout);
         if (picture == null) continue;
         stored[url] = await storeAttachmentBytes(
           libraryRoot: libraryRoot,
@@ -81,12 +84,10 @@ Future<Map<String, String>> downloadPictures(
 }
 
 /// The picture at [url] with the extension it is stored under, or null
-/// when it is not a picture, is too large, or does not come.
-Future<({Uint8List bytes, String extension})?> _download(
-  HttpClient client,
-  String url,
-) async {
-  if (url.startsWith('data:')) return _dataUrl(url);
+/// when it is not a picture, is too large, or does not come. Throws when
+/// the connection fails.
+Future<FetchedPicture?> downloadPicture(HttpClient client, String url) async {
+  if (url.startsWith('data:')) return decodeDataPicture(url);
   final uri = Uri.tryParse(url);
   if (uri == null || !(uri.isScheme('http') || uri.isScheme('https'))) {
     return null;
@@ -100,7 +101,7 @@ Future<({Uint8List bytes, String extension})?> _download(
     return null;
   }
   final type = response.headers.contentType?.mimeType;
-  final extension = _extensionOf(type, uri.path);
+  final extension = pictureExtension(type, uri.path);
   if (extension == null) {
     await response.drain<void>();
     return null;
@@ -116,7 +117,7 @@ Future<({Uint8List bytes, String extension})?> _download(
 /// The extension a picture of media [type] at [path] is stored under: by
 /// its type, else — no type, or a generic one — by its own name; null when
 /// it is not a picture.
-String? _extensionOf(String? type, String path) {
+String? pictureExtension(String? type, String path) {
   final byType = _extensions[type];
   if (byType != null) return byType;
   if (type != null &&
@@ -128,8 +129,9 @@ String? _extensionOf(String? type, String path) {
   return _extensions.values.contains(own) || own == '.jpeg' ? own : null;
 }
 
-/// A base64 `data:` picture, decoded.
-({Uint8List bytes, String extension})? _dataUrl(String url) {
+/// A base64 `data:` picture, decoded; null when it is not a picture, is
+/// too large, or is not valid base64.
+FetchedPicture? decodeDataPicture(String url) {
   final match = RegExp(
     r'^data:\s*([^\s;,]+)\s*;\s*base64\s*,(.*)$',
     caseSensitive: false,
@@ -137,7 +139,12 @@ String? _extensionOf(String? type, String path) {
   ).firstMatch(url);
   final extension = _extensions[match?[1]?.toLowerCase()];
   if (match == null || extension == null) return null;
-  final bytes = base64.decode(match[2]!.replaceAll(RegExp(r'\s'), ''));
+  final Uint8List bytes;
+  try {
+    bytes = base64.decode(match[2]!.replaceAll(RegExp(r'\s'), ''));
+  } on FormatException {
+    return null;
+  }
   if (bytes.length > maxCapturedPictureBytes) return null;
   return (bytes: bytes, extension: extension);
 }

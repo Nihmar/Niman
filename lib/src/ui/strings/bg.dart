@@ -1957,33 +1957,49 @@ final class BulgarianStrings extends Strings {
   @override
   String importFolderEmpty(String name) => 'Няма файлове Markdown в $name';
   @override
-  String get epubConvertAction => 'Преобразуване в Markdown…';
+  String get importFolderSettingsTitle => 'Импортиране на папка';
+  @override
+  String importFolderBodyPages(int notes, int pages) =>
+      'Файловете ѝ Markdown ($notes) се копират, а уеб страниците ($pages) се '
+      'преобразуват в бележки в нова папка на библиотеката. Оригиналната папка '
+      'остава непроменена.';
+  @override
+  String get importFolderTooLarge =>
+      'Тази папка е твърде голяма за импортиране';
+  @override
+  String get importFolderFailed => 'Папката не може да се импортира';
+  @override
+  String get importFolderReading => 'Четене на папката…';
+  @override
+  String importFolderSkipped(String folder, int count) =>
+      'Импортирано в $folder (пропуснати файлове: $count)';
+  @override
+  String get convertAction => 'Преобразуване в Markdown…';
   @override
   String get epubConvertCommand => 'Преобразуване на EPUB в Markdown…';
   @override
   String get epubConvertSettingsTitle => 'Преобразуване на EPUB в Markdown';
   @override
-  String get epubConvertTitle => 'Преобразуване в Markdown';
+  String get convertTitle => 'Преобразуване в Markdown';
   @override
   String get epubConvertReading => 'Четене на книгата…';
   @override
-  String get epubConvertPerChapter => 'Една бележка на глава';
+  String get convertPerChapter => 'Една бележка на глава';
   @override
-  String epubConvertPerChapterDetail(int notes, int folders) =>
+  String convertPerChapterDetail(int notes, int folders) =>
       'Бележки: $notes · папки: $folders';
   @override
-  String get epubConvertOneNote => 'Една бележка';
+  String get convertOneNote => 'Една бележка';
   @override
-  String get epubConvertOneNoteDetail => 'Цялата книга в една бележка';
+  String get convertOneNoteDetail => 'Цялата книга в една бележка';
   @override
-  String get epubConvertInto => 'В';
+  String get convertInto => 'В';
   @override
-  String get epubConvertStart => 'Преобразуване';
+  String get convertStart => 'Преобразуване';
   @override
-  String epubConvertProgress(int done, int total) =>
-      'Записване $done от $total';
+  String convertProgress(int done, int total) => 'Записване $done от $total';
   @override
-  String epubConvertDone(String made, int notes, int pictures) =>
+  String convertDone(String made, int notes, int pictures) =>
       'Преобразувано в $made (бележки: $notes, изображения: $pictures)';
   @override
   String get epubConvertProtected =>
@@ -1999,13 +2015,55 @@ final class BulgarianStrings extends Strings {
   String get epubConvertNeedsLibrary =>
       'Отворете библиотека, за да преобразувате книга в бележки';
   @override
-  String get epubConvertChapterName => 'Глава {n}';
+  String get convertChapterName => 'Глава {n}';
   @override
-  String get epubConvertOpening => 'Начални страници';
+  String get convertOpening => 'Начални страници';
   @override
-  String get epubConvertContents => 'Съдържание';
+  String get convertContents => 'Съдържание';
   @override
   String get epubConvertPickTitle => 'Изберете EPUB за преобразуване';
+  @override
+  String get htmlConvertCommand => 'Преобразуване на HTML в Markdown…';
+  @override
+  String get htmlConvertSettingsTitle =>
+      'Преобразуване на HTML файл в Markdown';
+  @override
+  String get htmlConvertPickTitle => 'Изберете HTML файл за преобразуване';
+  @override
+  String get htmlConvertReading => 'Четене на страницата…';
+  @override
+  String htmlConvertMany(int count) => 'HTML файлове: $count';
+  @override
+  String get htmlConvertNeedsLibrary =>
+      'Отворете библиотека, за да преобразувате уеб страница в бележка';
+  @override
+  String htmlConvertUnreadable(String name) => '„$name“ не може да се прочете';
+  @override
+  String get htmlConvertTooLarge =>
+      'Тази страница е твърде голяма за преобразуване';
+  @override
+  String get htmlConvertCharset =>
+      'Кодирането на текста на тази страница не се поддържа';
+  @override
+  String get htmlConvertFailed => 'Страницата не може да се преобразува';
+  @override
+  String get htmlDropTitle => 'Какво да се направи с пуснатия HTML?';
+  @override
+  String get htmlDropConvertDetail =>
+      'Създава бележка от страницата, заедно със снимките';
+  @override
+  String get htmlDropAttach => 'Прикачи';
+  @override
+  String get htmlDropAttachDetail =>
+      'Запазва файла към отворената бележка както е';
+  @override
+  String get htmlDropBoth => 'Прикачи и преобразувай';
+  @override
+  String get htmlDropBothDetail =>
+      'Запазва файла към отворената бележка и създава бележка от страницата';
+  @override
+  String get htmlDropNeedsNote =>
+      'За прикачване е нужна отворена бележка в библиотеката';
   @override
   String get openFileTitle => 'Отвори файл';
   @override

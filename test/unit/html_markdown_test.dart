@@ -58,12 +58,52 @@ void main() {
       );
     });
 
+    test("highlight, super- and subscript are the app's own syntax", () {
+      expect(
+        markdown('<p>a <mark>b</mark> H<sub>2</sub>O x<sup>2</sup></p>'),
+        'a ==b== H<sub>2</sub>O x<sup>2</sup>',
+      );
+      final nodes = InlineParser(
+        markdown('<p><mark>b</mark> H<sub>2</sub>O x<sup>2</sup></p>'),
+      ).parse();
+      expect(nodes.whereType<HighlightNode>(), hasLength(1));
+      expect(nodes.whereType<StyledNode>().map((node) => node.tag), [
+        'sub',
+        'sup',
+      ]);
+    });
+
+    test('their words are escaped, and their ends are blank outside', () {
+      expect(
+        markdown('<p>a<mark> *b* </mark>c<sup> 2 </sup>d<sub> </sub>e</p>'),
+        r'a ==\*b\*== c <sup>2</sup> d e',
+      );
+      expect(markdown('<p><mark><strong>b</strong></mark></p>'), '==**b**==');
+    });
+
+    test('underline and insertion stay plain text', () {
+      expect(markdown('<p><u>a</u> <ins>b</ins></p>'), 'a b');
+    });
+
     test('a code span holding a backtick is fenced with two', () {
       expect(markdown('<p><code>a`b</code></p>'), '`` a`b ``');
     });
 
     test('a line break is a hard break', () {
       expect(markdown('<p>one<br/>two</p>'), 'one\\\ntwo');
+    });
+
+    test('a hard break takes the blank space around it with it', () {
+      // The source's newline and indent after a `<br>` are one space once
+      // collapsed, and a line may not open with it.
+      expect(markdown('<p>a<br />\n    b</p>'), 'a\\\nb');
+      expect(markdown('<p>a <br/> b</p>'), 'a\\\nb');
+      expect(markdown('<p><em>a<br/>\n  b</em></p>'), '*a\\\nb*');
+      expect(markdown('<p>a<br/><br/>b</p>'), 'a\\\n\\\nb');
+    });
+
+    test('a backslash before a hard break stays a backslash', () {
+      expect(markdown(r'<p>a\<br/> b</p>'), 'a\\\\\\\nb');
     });
 
     test('lists, nested, numbered from their start', () {
@@ -76,8 +116,59 @@ void main() {
       );
     });
 
+    test('a checkbox opening an item is a task, ticked or not', () {
+      expect(
+        markdown(
+          '<ul><li><input type="checkbox"/> open</li>'
+          '<li><input type="checkbox" checked="" disabled=""> done *</li>'
+          '<li><input type="text"/> not a box</li></ul>',
+        ),
+        '- [ ] open\n\n- [x] done \\*\n\n- not a box',
+      );
+    });
+
+    test('a checkbox in a leading paragraph or label, nested lists too', () {
+      expect(
+        markdown(
+          '<ul><li><p><input type="checkbox" checked/> loose</p></li>'
+          '<li><label><input type="checkbox"/> labelled</label>'
+          '<ul><li><input type="checkbox" checked/>inner</li></ul></li>'
+          '<li><input type="checkbox"/></li>'
+          '<li>words <input type="checkbox"/> after</li></ul>',
+        ),
+        '- [x] loose\n\n- [ ] labelled\n\n  - [x] inner\n\n- [ ]\n\n'
+        '- words after',
+      );
+      expect(
+        markdown('<ol><li><input type="checkbox"/> a</li></ol>'),
+        '1. [ ] a',
+      );
+    });
+
+    test('the tasks of a note exported by Niman read back (#1186)', () {
+      final body = NoteHtml(
+        const NoteHtmlSource(
+          text: '- [ ] open\n- [x] done *x*\n  - [ ] nested\n\n1. [x] one\n',
+          title: 't',
+        ),
+      ).body();
+      expect(body, contains('type="checkbox"'));
+      expect(
+        markdown(body),
+        '- [ ] open\n\n- [x] done *x*\n\n  - [ ] nested\n\n1. [x] one',
+      );
+    });
+
     test('a list item of paragraphs is one line', () {
       expect(markdown('<ul><li><p>a</p><p>b</p></li></ul>'), '- a b');
+    });
+
+    test('a break in a heading is a space, not a hard break', () {
+      expect(markdown('<h2>Title<br>Sub</h2>'), '## Title Sub');
+      expect(
+        markdown('<h2>Title <br/>\n  <em>Sub</em><br/></h2>'),
+        '## Title *Sub*',
+      );
     });
 
     test('a quote, and a quote in a quote', () {
@@ -86,8 +177,19 @@ void main() {
           '<blockquote><p>a</p><blockquote><p>b</p></blockquote>'
           '</blockquote>',
         ),
-        '> a\n\n> > b',
+        '> a\n>\n> > b',
       );
+    });
+
+    test('the paragraphs of a quote are one quote, a `>` line apart', () {
+      final chapter = convert(
+        '<p>x</p><blockquote><p>a</p><p id="two">b</p>'
+        '<blockquote><p>c</p><p>d</p></blockquote></blockquote><p>y</p>',
+      );
+      expect(chapter.markdown, 'x\n\n> a\n>\n> b\n>\n> > c\n> >\n> > d\n\ny');
+      // `x`, blank, `> a`, `>`, `> b`: the id is on the third line of it.
+      expect(chapter.anchors, {'two': 4});
+      expect(markdown('<blockquote></blockquote><p>a</p>'), 'a');
     });
 
     test('preformatted text is fenced, as it is', () {
@@ -96,6 +198,125 @@ void main() {
         '```\nlet *a* = 1;\n  #b\n```',
       );
       expect(markdown('<pre>```x```</pre>'), '~~~~\n```x```\n~~~~');
+    });
+
+    test('a list of terms: the term bold, its definitions after it', () {
+      expect(
+        markdown(
+          '<dl><dt>Rating:</dt><dd>General Audiences</dd>'
+          '<dt><strong>Tags</strong></dt><dt>More</dt>'
+          '<dd>one</dd><dd>two</dd></dl>',
+        ),
+        '**Rating:**\n\nGeneral Audiences\n\n**Tags**\n\n**More**\n\n'
+        'one\n\ntwo',
+      );
+    });
+
+    test('a term keeps its own emphasis and its id', () {
+      final chapter = convert(
+        '<dl><dt id="t">a <em>b</em></dt><dd>c</dd></dl>',
+      );
+      expect(chapter.markdown, '**a *b***\n\nc');
+      expect(chapter.anchors, {'t': 0});
+    });
+
+    test('details is a callout that folds, its summary the title', () {
+      expect(
+        markdown(
+          '<details><summary>More <b>info</b></summary>'
+          '<p>First.</p><p>Second.</p></details>',
+        ),
+        '> [!note]- More **info**\n> First.\n>\n> Second.',
+      );
+    });
+
+    test('an open details starts open, one with no summary is Details', () {
+      expect(
+        markdown('<details open=""><summary>S</summary><p>a</p></details>'),
+        '> [!note]+ S\n> a',
+      );
+      expect(
+        markdown('<details><p>a</p></details>'),
+        '> [!note]- Details\n> a',
+      );
+      expect(
+        markdown('<details><summary>Only</summary></details>'),
+        '> [!note]- Only',
+      );
+    });
+
+    test('a callout Niman exported comes back with its type', () {
+      expect(
+        markdown(
+          '<details class="callout" data-callout="warning">'
+          '<summary class="callout-title">Mind</summary>'
+          '<div class="callout-body"><p>the gap</p></div></details>',
+        ),
+        '> [!warning]- Mind\n> the gap',
+      );
+    });
+
+    test('details nests, holds lists and code, and keeps its anchors', () {
+      final chapter = convert(
+        '<p>x</p><details><summary>S</summary><ul><li>a</li></ul>'
+        '<details><summary>In</summary><p id="deep">b</p></details>'
+        '</details>',
+      );
+      expect(
+        chapter.markdown,
+        'x\n\n> [!note]- S\n> - a\n>\n> > [!note]- In\n> > b',
+      );
+      // `x`, blank, `> [!note]- S`, `> - a`, `>`, `> > [!note]- In`, `> > b`.
+      expect(chapter.anchors, {'deep': 6});
+    });
+
+    test('a code block names its language, however the page tags it', () {
+      expect(
+        markdown('<pre><code class="language-dart">var a;</code></pre>'),
+        '```dart\nvar a;\n```',
+      );
+      expect(
+        markdown('<pre><code class="x lang-c++">a</code></pre>'),
+        '```c++\na\n```',
+      );
+      expect(
+        markdown('<pre class="language-sh"><code>a</code></pre>'),
+        '```sh\na\n```',
+      );
+      expect(markdown('<pre data-lang="py">a</pre>'), '```py\na\n```');
+      expect(
+        markdown(
+          '<div class="sourceCode"><pre class="sourceCode python">'
+          '<code class="sourceCode python">a</code></pre></div>',
+        ),
+        '```python\na\n```',
+      );
+    });
+
+    test('a code block with no usable language is a plain fence', () {
+      expect(
+        markdown('<pre><code class="language-none">a</code></pre>'),
+        '```\na\n```',
+      );
+      expect(markdown('<pre><code class="hljs">a</code></pre>'), '```\na\n```');
+      expect(
+        markdown('<pre><code class="language-a b">a</code></pre>'),
+        '```a\na\n```',
+      );
+    });
+
+    test('the fences of a note exported by Niman come back tagged', () {
+      final body = NoteHtml(
+        const NoteHtmlSource(
+          text: '```dart\nvar a = 1; // *x*\n```\n\n```\nplain\n```\n',
+          title: 't',
+        ),
+      ).body();
+      expect(body, contains('language-dart'));
+      expect(
+        markdown(body),
+        '```dart\nvar a = 1; // *x*\n```\n\n```\nplain\n```',
+      );
     });
 
     test('a rule', () {
@@ -132,6 +353,240 @@ void main() {
 
     test('scripts and styles are not words', () {
       expect(markdown('<p>a<script>var x = 1;</script></p>'), 'a');
+    });
+  });
+
+  group('a link the caller gives no target', () {
+    final unlinked = HtmlMarkdown(
+      picture: (src) => src,
+      link: (href) => href.startsWith('x:') ? null : href,
+    );
+
+    String markdownOf(String body) =>
+        unlinked.convert('<html><body>$body</body></html>').markdown;
+
+    test('is its words, as an empty href is', () {
+      expect(
+        markdownOf(
+          '<p>a <a href="x:go">*b* <em>c</em></a> d <a href="">e</a> '
+          '<a href="https://example.org">f</a></p>',
+        ),
+        r'a \*b\* *c* d e [f](<https://example.org>)',
+      );
+    });
+
+    test('is nothing of a link around a picture', () {
+      expect(
+        markdownOf('<p><a href="x:go"><img src="a.png" alt="A"></a></p>'),
+        '![A](a.png)',
+      );
+    });
+  });
+
+  group('breaksAsParagraphs', () {
+    final paragraphs = HtmlMarkdown(
+      picture: (src) => src,
+      link: (href) => href,
+      breaksAsParagraphs: true,
+    );
+
+    String markdownOf(String body) =>
+        paragraphs.convert('<html><body>$body</body></html>').markdown;
+
+    // An AO3 download: a chapter is one <p>, a <br /> to each paragraph.
+    const chapter =
+        '<p>First line.<br />\n    Second <em>line</em>.<br /><br />\n'
+        '    Third.</p>';
+
+    test('the lines of a paragraph are paragraphs of their own', () {
+      expect(markdownOf(chapter), 'First line.\n\nSecond *line*.\n\nThird.');
+    });
+
+    test('off, they stay one paragraph of hard breaks', () {
+      expect(markdown(chapter), 'First line.\\\nSecond *line*.\\\n\\\nThird.');
+    });
+
+    test('two breaks in a row, or at the ends, make no empty paragraph', () {
+      expect(markdownOf('<p><br/>a<br/><br/><br/>b<br/></p>'), 'a\n\nb');
+      expect(markdownOf('<p><br/></p><p>a</p>'), 'a');
+    });
+
+    test('the loose words between blocks are cut too', () {
+      expect(
+        markdownOf('<div>a<br/>b<h2>H</h2>c<br/>d</div>'),
+        'a\n\nb\n\n## H\n\nc\n\nd',
+      );
+    });
+
+    test('a break inside an emphasis or a link cuts each piece', () {
+      expect(
+        markdownOf('<p><em>a<br/>b</em> <a href="x">c<br/>d</a></p>'),
+        '*a*\n\n*b* [c](<x>)\n\n[d](<x>)',
+      );
+    });
+
+    test('the lines of a quote are paragraphs of one quote', () {
+      expect(
+        markdownOf(
+          '<blockquote><p>a<br/>b<br/><br/>c</p><p>d</p></blockquote>',
+        ),
+        '> a\n>\n> b\n>\n> c\n>\n> d',
+      );
+    });
+
+    test('a heading and a table cell are one line, a list item breaks', () {
+      expect(markdownOf('<h2>a<br/>b</h2>'), '## a b');
+      expect(
+        markdownOf('<table><tr><td>a<br/>b</td></tr></table>'),
+        '| a b |\n| --- |',
+      );
+      expect(markdownOf('<ul><li>a<br/>b</li></ul>'), '- a\\\nb');
+    });
+
+    test('a line that would open a list is escaped as a paragraph', () {
+      expect(markdownOf('<p>x<br/>- y<br/>1. z</p>'), 'x\n\n\\- y\n\n1\\. z');
+    });
+  });
+
+  group('footnotes', () {
+    // Pandoc's shape.
+    const pandoc =
+        '<p>Text<a href="#fn1" class="footnote-ref" id="fnref1" '
+        'role="doc-noteref"><sup>1</sup></a> and more'
+        '<a href="#fn2" class="footnote-ref" id="fnref2" '
+        'role="doc-noteref"><sup>2</sup></a>.</p>'
+        '<section id="footnotes" class="footnotes footnote-section" '
+        'role="doc-endnotes"><hr /><ol>'
+        '<li id="fn1"><p>First <em>note</em>. '
+        '<a href="#fnref1" class="footnote-back" role="doc-backlink">'
+        '↩︎</a></p></li>'
+        '<li id="fn2"><p>Second.'
+        '<a href="#fnref2" class="footnote-back" role="doc-backlink">'
+        '↩︎</a></p></li></ol></section>';
+
+    test('a reference is [^n], the notes written at the end', () {
+      final chapter = convert('$pandoc<p>After.</p>');
+      expect(
+        chapter.markdown,
+        'Text[^1] and more[^2].\n\nAfter.\n\n'
+        '[^1]: First *note*.\n\n[^2]: Second.',
+      );
+      // The list of notes is not where the page left it, nor its ids.
+      expect(chapter.anchors.keys, isNot(contains('footnotes')));
+      expect(chapter.anchors.keys, isNot(contains('fn1')));
+      expect(links, isEmpty);
+    });
+
+    test('notes are numbered in the order the text cites them', () {
+      expect(
+        markdown(
+          '<p>a<a href="#b"><sup>2</sup></a> b<a href="#a"><sup>1</sup></a> '
+          'c<a href="#b"><sup>2</sup></a></p>'
+          '<div class="footnotes"><ol><li id="a">A</li><li id="b">B</li></ol>'
+          '</div>',
+        ),
+        'a[^1] b[^2] c[^1]\n\n[^1]: B\n\n[^2]: A',
+      );
+    });
+
+    test('the sup may wrap the link, or the link stand alone', () {
+      expect(
+        markdown(
+          '<p>a<sup id="r1"><a href="#n1">1</a></sup>'
+          'b<a href="#n2">[2]</a>c<sup>3</sup></p>'
+          '<section class="footnotes"><ol><li id="n1">One</li>'
+          '<li id="n2">Two</li></ol></section>',
+        ),
+        'a[^1]b[^2]c<sup>3</sup>\n\n[^1]: One\n\n[^2]: Two',
+      );
+    });
+
+    test('a link that does not lead to a note stays a link', () {
+      expect(
+        markdown(
+          '<p>a<sup><a href="#sec">1</a></sup> <a href="#gone">b</a></p>'
+          '<h2 id="sec">S</h2>'
+          '<section class="footnotes"><ol><li id="n1">One</li></ol></section>',
+        ),
+        'a<sup>[1](<link:#sec>)</sup> [b](<link:#gone>)\n\n## S\n\n'
+        '[^1]: One',
+      );
+    });
+
+    test('a page with notes it never links keeps them, after the rest', () {
+      expect(
+        markdown(
+          '<p>x<a href="#n2">2</a></p>'
+          '<div class="footnotes"><ol><li id="n1">One</li>'
+          '<li id="n2">Two</li></ol></div>',
+        ),
+        'x[^1]\n\n[^1]: Two\n\n[^2]: One',
+      );
+    });
+
+    test('a note of its own element: an aside with a role or an epub:type', () {
+      expect(
+        markdown(
+          '<p>a<a epub:type="noteref" href="#n1">1</a>'
+          'b<a href="#n2">2</a></p>'
+          '<aside epub:type="footnote" id="n1"><p>One.</p></aside>'
+          '<aside role="doc-footnote" id="n2"><p>Two <b>x</b></p></aside>'
+          '<p>end</p>',
+        ),
+        'a[^1]b[^2]\n\nend\n\n[^1]: One.\n\n[^2]: Two **x**',
+      );
+    });
+
+    test('the paragraphs of a note are one line, a note may cite a note', () {
+      expect(
+        markdown(
+          '<p>a<a href="#n1">1</a></p>'
+          '<div class="footnotes"><ol>'
+          '<li id="n1"><p>One</p><p>and <a href="#n2">2</a> '
+          '<a class="footnote-backref" href="#r">↩</a></p></li>'
+          '<li id="n2">Two</li></ol></div>',
+        ),
+        'a[^1]\n\n[^1]: One and [^2]\n\n[^2]: Two',
+      );
+    });
+
+    test('a note with no words is its label', () {
+      expect(
+        markdown(
+          '<p>a<a href="#n">1</a></p><div class="footnotes"><ol>'
+          '<li id="n"><a role="doc-backlink" href="#x">↩</a></li>'
+          '</ol></div>',
+        ),
+        'a[^1]\n\n[^1]:',
+      );
+    });
+
+    test('a page with no notes is not touched by the search for them', () {
+      expect(
+        markdown('<p><a href="#a">x</a><sup>1</sup></p>'),
+        '[x](<link:#a>)<sup>1</sup>',
+      );
+    });
+
+    test("a note Niman's export wrote reads back, cited twice too", () {
+      const note =
+          'Hi[^b] there[^a] and again[^b].\n\n'
+          '[^a]: Alpha *x*\n\n[^b]: Beta\n';
+      final body = NoteHtml(const NoteHtmlSource(text: note, title: 't'))
+          .body();
+      expect(body, contains('footnote-backref'));
+      final text = markdown(body);
+      expect(
+        text,
+        'Hi[^1] there[^2] and again[^1].\n\n'
+        '[^1]: Beta\n\n[^2]: Alpha *x*',
+      );
+      // And the app reads the references as the footnotes they are.
+      final nodes = InlineParser(
+        text.split('\n\n').first,
+        footnotes: {'1', '2'},
+      ).parse();
+      expect(nodes.whereType<FootnoteRefNode>(), hasLength(3));
     });
   });
 
@@ -263,6 +718,25 @@ void main() {
         ),
         '![](pic:a.png)![](pic:b.jpg)\n\n![](pic:c.gif)',
       );
+    });
+
+    test('a data: picture reaches the caller whole, to keep or to drop', () {
+      const src = 'data:image/png;base64,iVBORw0KGgo=';
+      expect(
+        markdown('<p><img src="$src" alt="Dot"/></p>'),
+        '![Dot](pic:$src)',
+      );
+      expect(
+        markdown('<p><svg><image xlink:href="$src"/></svg></p>'),
+        '![](pic:$src)',
+      );
+      expect(pictures, [src, src]);
+      // A caller that leaves them out, as a capture does, has none.
+      final leaving = HtmlMarkdown(
+        picture: (src) => src.startsWith('data:') ? null : src,
+        link: (href) => href,
+      );
+      expect(leaving.convert('<p>a<img src="$src"/></p>').markdown, 'a');
     });
 
     test('a picture the book does not have is left out', () {

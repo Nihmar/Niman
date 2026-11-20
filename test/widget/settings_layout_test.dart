@@ -283,6 +283,7 @@ void main() {
     expect(find.text(AppStrings.settingsGroupMaintenance), findsOne);
     expect(find.byKey(const Key('reindex-setting')), findsOneWidget);
     expect(find.byKey(const Key('notion-import-setting')), findsOneWidget);
+    expect(find.byKey(const Key('import-folder-setting')), findsOneWidget);
     expect(find.byKey(const Key('switch-library-setting')), findsOneWidget);
     expect(find.byKey(const Key('close-library-setting')), findsOneWidget);
     // And they are out of the areas they used to hide in.
@@ -537,6 +538,16 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text(AppStrings.settingsSearchResults(1)), findsNothing);
       expect(find.byKey(const Key('reindex-setting')), findsOneWidget);
+    });
+
+    testWidgets('finds Import a folder, a row of Maintenance (#1295)', (
+      tester,
+    ) async {
+      await search(tester, 'import a folder');
+      expect(
+        find.byKey(const Key('settings-search-import-folder-setting')),
+        findsOne,
+      );
     });
 
     // A query matches a row's area as well as its title, so one word can

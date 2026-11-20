@@ -75,7 +75,7 @@ CapturedNote captureNote(
       link: (href) => _absolute(page.url, href),
       embed: embed,
     ).convert(article.contentHtml).markdown;
-    final text = _withoutTitle(body, escapeMarkdownText(page.title));
+    final text = withoutTitleHeading(body, escapeMarkdownText(page.title));
     if (text.isNotEmpty) out.write('\n$text\n');
   } else {
     final description = page.description;
@@ -121,7 +121,7 @@ String _absolute(Uri page, String href) => href.startsWith('#')
 /// [body] without a first heading that only says [title] again: the note's
 /// own heading says it. Readability drops such a heading by its words, and
 /// finds none in a script without spaces — Japanese, Chinese.
-String _withoutTitle(String body, String title) {
+String withoutTitleHeading(String body, String title) {
   final match = RegExp(r'^#{1,6} (.*)\n*').firstMatch(body);
   if (match == null || match[1]!.trim() != title.trim()) return body;
   return body.substring(match.end);

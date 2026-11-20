@@ -1945,33 +1945,48 @@ final class SerbianStrings extends Strings {
   @override
   String importFolderEmpty(String name) => 'Нема Markdown датотека у $name';
   @override
-  String get epubConvertAction => 'Претвори у Markdown…';
+  String get importFolderSettingsTitle => 'Увези фасциклу';
+  @override
+  String importFolderBodyPages(int notes, int pages) =>
+      'Њене Markdown датотеке ($notes) се копирају, а веб странице ($pages) '
+      'претварају у белешке, у нову фасциклу библиотеке. Изворна фасцикла '
+      'остаје каква јесте.';
+  @override
+  String get importFolderTooLarge => 'Ова фасцикла је превелика за увоз';
+  @override
+  String get importFolderFailed => 'Фасциклу није могуће увести';
+  @override
+  String get importFolderReading => 'Читање фасцикле…';
+  @override
+  String importFolderSkipped(String folder, int count) =>
+      'Увезено у $folder (изостављене датотеке: $count)';
+  @override
+  String get convertAction => 'Претвори у Markdown…';
   @override
   String get epubConvertCommand => 'Претвори EPUB у Markdown…';
   @override
   String get epubConvertSettingsTitle => 'Претвори EPUB у Markdown';
   @override
-  String get epubConvertTitle => 'Претвори у Markdown';
+  String get convertTitle => 'Претвори у Markdown';
   @override
   String get epubConvertReading => 'Читање књиге…';
   @override
-  String get epubConvertPerChapter => 'Једна белешка по поглављу';
+  String get convertPerChapter => 'Једна белешка по поглављу';
   @override
-  String epubConvertPerChapterDetail(int notes, int folders) =>
+  String convertPerChapterDetail(int notes, int folders) =>
       'Белешке: $notes · фасцикле: $folders';
   @override
-  String get epubConvertOneNote => 'Једна белешка';
+  String get convertOneNote => 'Једна белешка';
   @override
-  String get epubConvertOneNoteDetail => 'Цела књига у једној белешци';
+  String get convertOneNoteDetail => 'Цела књига у једној белешци';
   @override
-  String get epubConvertInto => 'У';
+  String get convertInto => 'У';
   @override
-  String get epubConvertStart => 'Претвори';
+  String get convertStart => 'Претвори';
   @override
-  String epubConvertProgress(int done, int total) =>
-      'Уписивање $done од $total';
+  String convertProgress(int done, int total) => 'Уписивање $done од $total';
   @override
-  String epubConvertDone(String made, int notes, int pictures) =>
+  String convertDone(String made, int notes, int pictures) =>
       'Претворено у $made (белешке: $notes, слике: $pictures)';
   @override
   String get epubConvertProtected =>
@@ -1986,13 +2001,52 @@ final class SerbianStrings extends Strings {
   String get epubConvertNeedsLibrary =>
       'Отворите библиотеку да бисте књигу претворили у белешке';
   @override
-  String get epubConvertChapterName => 'Поглавље {n}';
+  String get convertChapterName => 'Поглавље {n}';
   @override
-  String get epubConvertOpening => 'Уводне странице';
+  String get convertOpening => 'Уводне странице';
   @override
-  String get epubConvertContents => 'Садржај';
+  String get convertContents => 'Садржај';
   @override
   String get epubConvertPickTitle => 'Изаберите EPUB за претварање';
+  @override
+  String get htmlConvertCommand => 'Претвори HTML у Markdown…';
+  @override
+  String get htmlConvertSettingsTitle => 'Претвори HTML датотеку у Markdown';
+  @override
+  String get htmlConvertPickTitle => 'Изаберите HTML датотеку за претварање';
+  @override
+  String get htmlConvertReading => 'Читање странице…';
+  @override
+  String htmlConvertMany(int count) => 'HTML датотеке: $count';
+  @override
+  String get htmlConvertNeedsLibrary =>
+      'Отворите библиотеку да бисте веб страницу претворили у белешку';
+  @override
+  String htmlConvertUnreadable(String name) => '„$name“ није могуће прочитати';
+  @override
+  String get htmlConvertTooLarge => 'Ова страница је превелика за претварање';
+  @override
+  String get htmlConvertCharset => 'Кодирање текста ове странице није подржано';
+  @override
+  String get htmlConvertFailed => 'Страницу није могуће претворити';
+  @override
+  String get htmlDropTitle => 'Шта урадити са превученим HTML-ом?';
+  @override
+  String get htmlDropConvertDetail =>
+      'Направи белешку од странице, заједно са сликама';
+  @override
+  String get htmlDropAttach => 'Приложи';
+  @override
+  String get htmlDropAttachDetail =>
+      'Задржи датотеку уз отворену белешку, онакву каква јесте';
+  @override
+  String get htmlDropBoth => 'Приложи и претвори';
+  @override
+  String get htmlDropBothDetail =>
+      'Задржи датотеку уз отворену белешку и направи белешку од странице';
+  @override
+  String get htmlDropNeedsNote =>
+      'За прилагање је потребна отворена белешка у библиотеци';
   @override
   String get openFileTitle => 'Отвори датотеку';
   @override

@@ -1937,33 +1937,48 @@ final class SlovenianStrings extends Strings {
   @override
   String importFolderEmpty(String name) => 'V $name ni datotek Markdown';
   @override
-  String get epubConvertAction => 'Pretvori v Markdown…';
+  String get importFolderSettingsTitle => 'Uvozi mapo';
+  @override
+  String importFolderBodyPages(int notes, int pages) =>
+      'Njene datoteke Markdown ($notes) se kopirajo, spletne strani ($pages) '
+      'pa pretvorijo v zapiske, v novo mapo knjižnice. Izvirna mapa ostane '
+      'nespremenjena.';
+  @override
+  String get importFolderTooLarge => 'Ta mapa je prevelika za uvoz';
+  @override
+  String get importFolderFailed => 'Mape ni bilo mogoče uvoziti';
+  @override
+  String get importFolderReading => 'Branje mape…';
+  @override
+  String importFolderSkipped(String folder, int count) =>
+      'Uvoženo v $folder (izpuščene datoteke: $count)';
+  @override
+  String get convertAction => 'Pretvori v Markdown…';
   @override
   String get epubConvertCommand => 'Pretvori EPUB v Markdown…';
   @override
   String get epubConvertSettingsTitle => 'Pretvori EPUB v Markdown';
   @override
-  String get epubConvertTitle => 'Pretvori v Markdown';
+  String get convertTitle => 'Pretvori v Markdown';
   @override
   String get epubConvertReading => 'Branje knjige…';
   @override
-  String get epubConvertPerChapter => 'En zapisek na poglavje';
+  String get convertPerChapter => 'En zapisek na poglavje';
   @override
-  String epubConvertPerChapterDetail(int notes, int folders) =>
+  String convertPerChapterDetail(int notes, int folders) =>
       'Zapiski: $notes · mape: $folders';
   @override
-  String get epubConvertOneNote => 'En zapisek';
+  String get convertOneNote => 'En zapisek';
   @override
-  String get epubConvertOneNoteDetail => 'Vsa knjiga v enem zapisku';
+  String get convertOneNoteDetail => 'Vsa knjiga v enem zapisku';
   @override
-  String get epubConvertInto => 'V';
+  String get convertInto => 'V';
   @override
-  String get epubConvertStart => 'Pretvori';
+  String get convertStart => 'Pretvori';
   @override
-  String epubConvertProgress(int done, int total) =>
-      'Zapisovanje $done od $total';
+  String convertProgress(int done, int total) => 'Zapisovanje $done od $total';
   @override
-  String epubConvertDone(String made, int notes, int pictures) =>
+  String convertDone(String made, int notes, int pictures) =>
       'Pretvorjeno v $made (zapiski: $notes, slike: $pictures)';
   @override
   String get epubConvertProtected =>
@@ -1978,13 +1993,53 @@ final class SlovenianStrings extends Strings {
   String get epubConvertNeedsLibrary =>
       'Odprite knjižnico, da knjigo pretvorite v zapiske';
   @override
-  String get epubConvertChapterName => 'Poglavje {n}';
+  String get convertChapterName => 'Poglavje {n}';
   @override
-  String get epubConvertOpening => 'Uvodne strani';
+  String get convertOpening => 'Uvodne strani';
   @override
-  String get epubConvertContents => 'Kazalo';
+  String get convertContents => 'Kazalo';
   @override
   String get epubConvertPickTitle => 'Izberite EPUB za pretvorbo';
+  @override
+  String get htmlConvertCommand => 'Pretvori HTML v Markdown…';
+  @override
+  String get htmlConvertSettingsTitle => 'Pretvori datoteko HTML v Markdown';
+  @override
+  String get htmlConvertPickTitle => 'Izberite datoteko HTML za pretvorbo';
+  @override
+  String get htmlConvertReading => 'Branje strani…';
+  @override
+  String htmlConvertMany(int count) => 'Datoteke HTML: $count';
+  @override
+  String get htmlConvertNeedsLibrary =>
+      'Odprite knjižnico, da spletno stran pretvorite v zapisek';
+  @override
+  String htmlConvertUnreadable(String name) =>
+      '»$name« ni bilo mogoče prebrati';
+  @override
+  String get htmlConvertTooLarge => 'Ta stran je prevelika za pretvorbo';
+  @override
+  String get htmlConvertCharset => 'Kodiranje besedila te strani ni podprto';
+  @override
+  String get htmlConvertFailed => 'Strani ni bilo mogoče pretvoriti';
+  @override
+  String get htmlDropTitle => 'Kaj storiti s spuščeno datoteko HTML?';
+  @override
+  String get htmlDropConvertDetail =>
+      'Naredi zapisek iz strani, skupaj s slikami';
+  @override
+  String get htmlDropAttach => 'Priloži';
+  @override
+  String get htmlDropAttachDetail =>
+      'Ohrani datoteko pri odprtem zapisku, kakršna je';
+  @override
+  String get htmlDropBoth => 'Priloži in pretvori';
+  @override
+  String get htmlDropBothDetail =>
+      'Ohrani datoteko pri odprtem zapisku in naredi zapisek iz strani';
+  @override
+  String get htmlDropNeedsNote =>
+      'Za prilaganje mora biti v knjižnici odprt zapisek';
   @override
   String get openFileTitle => 'Odpri datoteko';
   @override

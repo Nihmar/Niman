@@ -1936,32 +1936,48 @@ final class LatvianStrings extends Strings {
   @override
   String importFolderEmpty(String name) => 'Mapē $name nav Markdown failu';
   @override
-  String get epubConvertAction => 'Pārvērst Markdown formātā…';
+  String get importFolderSettingsTitle => 'Importēt mapi';
+  @override
+  String importFolderBodyPages(int notes, int pages) =>
+      'Tās Markdown faili ($notes) tiek nokopēti, bet tīmekļa lapas ($pages) '
+      'pārvērstas piezīmēs, jaunā bibliotēkas mapē. Sākotnējā mape paliek '
+      'nemainīga.';
+  @override
+  String get importFolderTooLarge => 'Šī mape ir pārāk liela, lai to importētu';
+  @override
+  String get importFolderFailed => 'Mapi nevarēja importēt';
+  @override
+  String get importFolderReading => 'Lasa mapi…';
+  @override
+  String importFolderSkipped(String folder, int count) =>
+      'Importēts mapē $folder (izlaisti faili: $count)';
+  @override
+  String get convertAction => 'Pārvērst Markdown formātā…';
   @override
   String get epubConvertCommand => 'Pārvērst EPUB Markdown formātā…';
   @override
   String get epubConvertSettingsTitle => 'Pārvērst EPUB Markdown formātā';
   @override
-  String get epubConvertTitle => 'Pārvērst Markdown formātā';
+  String get convertTitle => 'Pārvērst Markdown formātā';
   @override
   String get epubConvertReading => 'Notiek grāmatas lasīšana…';
   @override
-  String get epubConvertPerChapter => 'Viena piezīme katrai nodaļai';
+  String get convertPerChapter => 'Viena piezīme katrai nodaļai';
   @override
-  String epubConvertPerChapterDetail(int notes, int folders) =>
+  String convertPerChapterDetail(int notes, int folders) =>
       'Piezīmes: $notes · mapes: $folders';
   @override
-  String get epubConvertOneNote => 'Viena piezīme';
+  String get convertOneNote => 'Viena piezīme';
   @override
-  String get epubConvertOneNoteDetail => 'Visa grāmata vienā piezīmē';
+  String get convertOneNoteDetail => 'Visa grāmata vienā piezīmē';
   @override
-  String get epubConvertInto => 'Uz';
+  String get convertInto => 'Uz';
   @override
-  String get epubConvertStart => 'Pārvērst';
+  String get convertStart => 'Pārvērst';
   @override
-  String epubConvertProgress(int done, int total) => 'Raksta $done no $total';
+  String convertProgress(int done, int total) => 'Raksta $done no $total';
   @override
-  String epubConvertDone(String made, int notes, int pictures) =>
+  String convertDone(String made, int notes, int pictures) =>
       'Pārvērsts uz $made (piezīmes: $notes, attēli: $pictures)';
   @override
   String get epubConvertProtected =>
@@ -1977,13 +1993,52 @@ final class LatvianStrings extends Strings {
   String get epubConvertNeedsLibrary =>
       'Atveriet bibliotēku, lai pārvērstu grāmatu piezīmēs';
   @override
-  String get epubConvertChapterName => '{n}. nodaļa';
+  String get convertChapterName => '{n}. nodaļa';
   @override
-  String get epubConvertOpening => 'Ievada lapas';
+  String get convertOpening => 'Ievada lapas';
   @override
-  String get epubConvertContents => 'Saturs';
+  String get convertContents => 'Saturs';
   @override
   String get epubConvertPickTitle => 'Izvēlieties pārvēršamo EPUB';
+  @override
+  String get htmlConvertCommand => 'Pārvērst HTML par Markdown…';
+  @override
+  String get htmlConvertSettingsTitle => 'Pārvērst HTML failu par Markdown';
+  @override
+  String get htmlConvertPickTitle => 'Izvēlieties pārvēršamo HTML failu';
+  @override
+  String get htmlConvertReading => 'Lasa lapu…';
+  @override
+  String htmlConvertMany(int count) => 'HTML faili: $count';
+  @override
+  String get htmlConvertNeedsLibrary =>
+      'Atveriet bibliotēku, lai tīmekļa lapu pārvērstu piezīmē';
+  @override
+  String htmlConvertUnreadable(String name) => '“$name” nevarēja nolasīt';
+  @override
+  String get htmlConvertTooLarge => 'Šī lapa ir pārāk liela, lai to pārvērstu';
+  @override
+  String get htmlConvertCharset =>
+      'Šīs lapas teksta kodējums netiek atbalstīts';
+  @override
+  String get htmlConvertFailed => 'Lapu nevarēja pārvērst';
+  @override
+  String get htmlDropTitle => 'Ko darīt ar nomesto HTML?';
+  @override
+  String get htmlDropConvertDetail => 'Izveidot lapas piezīmi kopā ar attēliem';
+  @override
+  String get htmlDropAttach => 'Pievienot';
+  @override
+  String get htmlDropAttachDetail =>
+      'Atstāt failu pie atvērtās piezīmes tādu, kāds tas ir';
+  @override
+  String get htmlDropBoth => 'Pievienot un pārvērst';
+  @override
+  String get htmlDropBothDetail =>
+      'Atstāt failu pie atvērtās piezīmes un izveidot lapas piezīmi';
+  @override
+  String get htmlDropNeedsNote =>
+      'Lai pievienotu, bibliotēkā jābūt atvērtai piezīmei';
   @override
   String get openFileTitle => 'Atvērt failu';
   @override

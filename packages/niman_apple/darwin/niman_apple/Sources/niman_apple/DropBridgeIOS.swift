@@ -34,7 +34,7 @@
       _ interaction: UIDropInteraction, canHandle session: UIDropSession
     ) -> Bool {
       session.items.contains {
-        ClipboardFiles.fileType($0.itemProvider.registeredTypeIdentifiers) != nil
+        ClipboardFiles.fileType($0.itemProvider.registeredTypeIdentifiers, pages: true) != nil
       }
     }
 
@@ -59,7 +59,7 @@
     func dropInteraction(
       _ interaction: UIDropInteraction, performDrop session: UIDropSession
     ) {
-      ClipboardFiles.copy(session.items.map(\.itemProvider), into: "drop") { [weak self] paths in
+      ClipboardFiles.copy(session.items.map(\.itemProvider), into: "drop", pages: true) { [weak self] paths in
         self?.channel?.invokeMethod("drop", arguments: paths)
       }
     }

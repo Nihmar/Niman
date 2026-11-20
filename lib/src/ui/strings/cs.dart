@@ -1932,32 +1932,48 @@ final class CzechStrings extends Strings {
   String importFolderEmpty(String name) =>
       'Ve složce $name nejsou soubory Markdown';
   @override
-  String get epubConvertAction => 'Převést na Markdown…';
+  String get importFolderSettingsTitle => 'Importovat složku';
+  @override
+  String importFolderBodyPages(int notes, int pages) =>
+      'Její soubory Markdown ($notes) se zkopírují a webové stránky ($pages) '
+      'se převedou na poznámky, do nové složky knihovny. Původní složka '
+      'zůstane beze změny.';
+  @override
+  String get importFolderTooLarge => 'Tato složka je na import příliš velká';
+  @override
+  String get importFolderFailed => 'Složku se nepodařilo importovat';
+  @override
+  String get importFolderReading => 'Čtení složky…';
+  @override
+  String importFolderSkipped(String folder, int count) =>
+      'Importováno do $folder (vynechané soubory: $count)';
+  @override
+  String get convertAction => 'Převést na Markdown…';
   @override
   String get epubConvertCommand => 'Převést EPUB na Markdown…';
   @override
   String get epubConvertSettingsTitle => 'Převést EPUB na Markdown';
   @override
-  String get epubConvertTitle => 'Převést na Markdown';
+  String get convertTitle => 'Převést na Markdown';
   @override
   String get epubConvertReading => 'Čtení knihy…';
   @override
-  String get epubConvertPerChapter => 'Jedna poznámka na kapitolu';
+  String get convertPerChapter => 'Jedna poznámka na kapitolu';
   @override
-  String epubConvertPerChapterDetail(int notes, int folders) =>
+  String convertPerChapterDetail(int notes, int folders) =>
       'Poznámky: $notes · složky: $folders';
   @override
-  String get epubConvertOneNote => 'Jedna poznámka';
+  String get convertOneNote => 'Jedna poznámka';
   @override
-  String get epubConvertOneNoteDetail => 'Celá kniha v jedné poznámce';
+  String get convertOneNoteDetail => 'Celá kniha v jedné poznámce';
   @override
-  String get epubConvertInto => 'Do';
+  String get convertInto => 'Do';
   @override
-  String get epubConvertStart => 'Převést';
+  String get convertStart => 'Převést';
   @override
-  String epubConvertProgress(int done, int total) => 'Zápis $done z $total';
+  String convertProgress(int done, int total) => 'Zápis $done z $total';
   @override
-  String epubConvertDone(String made, int notes, int pictures) =>
+  String convertDone(String made, int notes, int pictures) =>
       'Převedeno do $made (poznámky: $notes, obrázky: $pictures)';
   @override
   String get epubConvertProtected =>
@@ -1972,13 +1988,53 @@ final class CzechStrings extends Strings {
   String get epubConvertNeedsLibrary =>
       'Otevřete knihovnu, abyste mohli převést knihu na poznámky';
   @override
-  String get epubConvertChapterName => 'Kapitola {n}';
+  String get convertChapterName => 'Kapitola {n}';
   @override
-  String get epubConvertOpening => 'Úvodní strany';
+  String get convertOpening => 'Úvodní strany';
   @override
-  String get epubConvertContents => 'Obsah';
+  String get convertContents => 'Obsah';
   @override
   String get epubConvertPickTitle => 'Vyberte EPUB k převodu';
+  @override
+  String get htmlConvertCommand => 'Převést HTML na Markdown…';
+  @override
+  String get htmlConvertSettingsTitle => 'Převést soubor HTML na Markdown';
+  @override
+  String get htmlConvertPickTitle => 'Vyberte soubor HTML k převodu';
+  @override
+  String get htmlConvertReading => 'Čtení stránky…';
+  @override
+  String htmlConvertMany(int count) => 'Soubory HTML: $count';
+  @override
+  String get htmlConvertNeedsLibrary =>
+      'Otevřete knihovnu, abyste mohli převést webovou stránku na poznámku';
+  @override
+  String htmlConvertUnreadable(String name) => '„$name“ se nepodařilo přečíst';
+  @override
+  String get htmlConvertTooLarge => 'Tato stránka je na převod příliš velká';
+  @override
+  String get htmlConvertCharset =>
+      'Kódování textu této stránky není podporováno';
+  @override
+  String get htmlConvertFailed => 'Stránku se nepodařilo převést';
+  @override
+  String get htmlDropTitle => 'Co udělat s přetaženým souborem HTML?';
+  @override
+  String get htmlDropConvertDetail =>
+      'Vytvoří ze stránky poznámku, včetně obrázků';
+  @override
+  String get htmlDropAttach => 'Připojit';
+  @override
+  String get htmlDropAttachDetail =>
+      'Ponechá soubor u otevřené poznámky tak, jak je';
+  @override
+  String get htmlDropBoth => 'Připojit a převést';
+  @override
+  String get htmlDropBothDetail =>
+      'Ponechá soubor u otevřené poznámky a vytvoří ze stránky poznámku';
+  @override
+  String get htmlDropNeedsNote =>
+      'K připojení je potřeba mít v knihovně otevřenou poznámku';
   @override
   String get openFileTitle => 'Otevřít soubor';
   @override
