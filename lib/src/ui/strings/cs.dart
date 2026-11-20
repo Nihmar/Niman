@@ -1932,6 +1932,22 @@ final class CzechStrings extends Strings {
   String importFolderEmpty(String name) =>
       'Ve složce $name nejsou soubory Markdown';
   @override
+  String get importFolderSettingsTitle => 'Importovat složku';
+  @override
+  String importFolderBodyPages(int notes, int pages) =>
+      'Její soubory Markdown ($notes) se zkopírují a webové stránky ($pages) '
+      'se převedou na poznámky, do nové složky knihovny. Původní složka '
+      'zůstane beze změny.';
+  @override
+  String get importFolderTooLarge => 'Tato složka je na import příliš velká';
+  @override
+  String get importFolderFailed => 'Složku se nepodařilo importovat';
+  @override
+  String get importFolderReading => 'Čtení složky…';
+  @override
+  String importFolderSkipped(String folder, int count) =>
+      'Importováno do $folder (vynechané soubory: $count)';
+  @override
   String get convertAction => 'Převést na Markdown…';
   @override
   String get epubConvertCommand => 'Převést EPUB na Markdown…';

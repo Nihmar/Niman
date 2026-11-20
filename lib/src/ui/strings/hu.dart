@@ -1956,6 +1956,22 @@ final class HungarianStrings extends Strings {
   @override
   String importFolderEmpty(String name) => 'Nincs Markdown-fájl itt: $name';
   @override
+  String get importFolderSettingsTitle => 'Mappa importálása';
+  @override
+  String importFolderBodyPages(int notes, int pages) =>
+      'A Markdown-fájljai ($notes) átmásolódnak, a weboldalai ($pages) pedig '
+      'jegyzetekké alakulnak, a könyvtár egy új mappájában. Az eredeti mappa '
+      'változatlan marad.';
+  @override
+  String get importFolderTooLarge => 'Ez a mappa túl nagy az importáláshoz';
+  @override
+  String get importFolderFailed => 'A mappát nem sikerült importálni';
+  @override
+  String get importFolderReading => 'A mappa beolvasása…';
+  @override
+  String importFolderSkipped(String folder, int count) =>
+      'Importálva ide: $folder (kihagyott fájlok: $count)';
+  @override
   String get convertAction => 'Átalakítás Markdownná…';
   @override
   String get epubConvertCommand => 'EPUB átalakítása Markdownná…';

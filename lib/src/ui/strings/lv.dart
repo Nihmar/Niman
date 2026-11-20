@@ -1936,6 +1936,22 @@ final class LatvianStrings extends Strings {
   @override
   String importFolderEmpty(String name) => 'Mapē $name nav Markdown failu';
   @override
+  String get importFolderSettingsTitle => 'Importēt mapi';
+  @override
+  String importFolderBodyPages(int notes, int pages) =>
+      'Tās Markdown faili ($notes) tiek nokopēti, bet tīmekļa lapas ($pages) '
+      'pārvērstas piezīmēs, jaunā bibliotēkas mapē. Sākotnējā mape paliek '
+      'nemainīga.';
+  @override
+  String get importFolderTooLarge => 'Šī mape ir pārāk liela, lai to importētu';
+  @override
+  String get importFolderFailed => 'Mapi nevarēja importēt';
+  @override
+  String get importFolderReading => 'Lasa mapi…';
+  @override
+  String importFolderSkipped(String folder, int count) =>
+      'Importēts mapē $folder (izlaisti faili: $count)';
+  @override
   String get convertAction => 'Pārvērst Markdown formātā…';
   @override
   String get epubConvertCommand => 'Pārvērst EPUB Markdown formātā…';

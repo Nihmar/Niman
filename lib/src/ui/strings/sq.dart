@@ -1955,6 +1955,23 @@ final class AlbanianStrings extends Strings {
   @override
   String importFolderEmpty(String name) => 'Nuk ka skedarë Markdown në $name';
   @override
+  String get importFolderSettingsTitle => 'Importo një dosje';
+  @override
+  String importFolderBodyPages(int notes, int pages) =>
+      'Skedarët e saj Markdown ($notes) kopjohen dhe faqet e saj web ($pages) '
+      'shndërrohen në shënime, në një dosje të re të bibliotekës. Dosja '
+      'origjinale mbetet siç është.';
+  @override
+  String get importFolderTooLarge =>
+      'Kjo dosje është shumë e madhe për importim';
+  @override
+  String get importFolderFailed => 'Dosja nuk u importua dot';
+  @override
+  String get importFolderReading => 'Po lexohet dosja…';
+  @override
+  String importFolderSkipped(String folder, int count) =>
+      'U importua në $folder (skedarë të lënë jashtë: $count)';
+  @override
   String get convertAction => 'Shndërro në Markdown…';
   @override
   String get epubConvertCommand => 'Shndërro EPUB në Markdown…';

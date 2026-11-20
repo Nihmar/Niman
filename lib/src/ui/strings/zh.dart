@@ -1784,6 +1784,20 @@ final class ChineseStrings extends Strings {
   @override
   String importFolderEmpty(String name) => '$name 中没有 Markdown 文件';
   @override
+  String get importFolderSettingsTitle => '导入文件夹';
+  @override
+  String importFolderBodyPages(int notes, int pages) =>
+      '其中的 Markdown 文件（$notes）会被复制，网页（$pages）会被转换为笔记，放入资料库的新文件夹中。原文件夹保持不变。';
+  @override
+  String get importFolderTooLarge => '这个文件夹太大，无法导入';
+  @override
+  String get importFolderFailed => '无法导入此文件夹';
+  @override
+  String get importFolderReading => '正在读取文件夹…';
+  @override
+  String importFolderSkipped(String folder, int count) =>
+      '已导入到 $folder（跳过的文件：$count 个）';
+  @override
   String get convertAction => '转换为 Markdown…';
   @override
   String get epubConvertCommand => '将 EPUB 转换为 Markdown…';

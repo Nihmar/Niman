@@ -1825,6 +1825,22 @@ final class JapaneseStrings extends Strings {
   @override
   String importFolderEmpty(String name) => '$name に Markdown ファイルはありません';
   @override
+  String get importFolderSettingsTitle => 'フォルダーを読み込む';
+  @override
+  String importFolderBodyPages(int notes, int pages) =>
+      'その Markdown ファイル（$notes）はコピーされ、'
+      'ウェブページ（$pages）はノートに変換されて、'
+      'ライブラリの新しいフォルダーに入ります。元のフォルダーはそのままです。';
+  @override
+  String get importFolderTooLarge => 'このフォルダーは大きすぎて読み込めません';
+  @override
+  String get importFolderFailed => 'フォルダーを読み込めませんでした';
+  @override
+  String get importFolderReading => 'フォルダーを読み込み中…';
+  @override
+  String importFolderSkipped(String folder, int count) =>
+      '$folder に読み込みました（除外したファイル：$count 件）';
+  @override
   String get convertAction => 'Markdown に変換…';
   @override
   String get epubConvertCommand => 'EPUB を Markdown に変換…';

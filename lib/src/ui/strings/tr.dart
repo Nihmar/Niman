@@ -1925,6 +1925,23 @@ final class TurkishStrings extends Strings {
   @override
   String importFolderEmpty(String name) => '$name içinde Markdown dosyası yok';
   @override
+  String get importFolderSettingsTitle => 'Klasör içe aktar';
+  @override
+  String importFolderBodyPages(int notes, int pages) =>
+      'Markdown dosyaları ($notes) kopyalanır, web sayfaları ($pages) notlara '
+      'dönüştürülür; hepsi kitaplığın yeni bir klasörüne konur. Özgün klasör '
+      'olduğu gibi kalır.';
+  @override
+  String get importFolderTooLarge =>
+      'Bu klasör içe aktarılamayacak kadar büyük';
+  @override
+  String get importFolderFailed => 'Klasör içe aktarılamadı';
+  @override
+  String get importFolderReading => 'Klasör okunuyor…';
+  @override
+  String importFolderSkipped(String folder, int count) =>
+      '$folder klasörüne aktarıldı (atlanan dosyalar: $count)';
+  @override
   String get convertAction => 'Markdown’a dönüştür…';
   @override
   String get epubConvertCommand => 'EPUB’u Markdown’a dönüştür…';

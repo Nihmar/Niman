@@ -1995,6 +1995,23 @@ final class FrenchStrings extends Strings {
   @override
   String importFolderEmpty(String name) => 'Aucun fichier Markdown dans $name';
   @override
+  String get importFolderSettingsTitle => 'Importer un dossier';
+  @override
+  String importFolderBodyPages(int notes, int pages) =>
+      'Ses fichiers Markdown ($notes) sont copiés et ses pages web ($pages) '
+      'converties en notes, dans un nouveau dossier de la bibliothèque. Le '
+      'dossier d’origine reste tel quel.';
+  @override
+  String get importFolderTooLarge =>
+      'Ce dossier est trop volumineux pour être importé';
+  @override
+  String get importFolderFailed => 'Le dossier n’a pas pu être importé';
+  @override
+  String get importFolderReading => 'Lecture du dossier…';
+  @override
+  String importFolderSkipped(String folder, int count) =>
+      'Importé dans $folder (fichiers ignorés : $count)';
+  @override
   String get convertAction => 'Convertir en Markdown…';
   @override
   String get epubConvertCommand => 'Convertir un EPUB en Markdown…';

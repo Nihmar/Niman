@@ -1937,6 +1937,22 @@ final class SlovenianStrings extends Strings {
   @override
   String importFolderEmpty(String name) => 'V $name ni datotek Markdown';
   @override
+  String get importFolderSettingsTitle => 'Uvozi mapo';
+  @override
+  String importFolderBodyPages(int notes, int pages) =>
+      'Njene datoteke Markdown ($notes) se kopirajo, spletne strani ($pages) '
+      'pa pretvorijo v zapiske, v novo mapo knjižnice. Izvirna mapa ostane '
+      'nespremenjena.';
+  @override
+  String get importFolderTooLarge => 'Ta mapa je prevelika za uvoz';
+  @override
+  String get importFolderFailed => 'Mape ni bilo mogoče uvoziti';
+  @override
+  String get importFolderReading => 'Branje mape…';
+  @override
+  String importFolderSkipped(String folder, int count) =>
+      'Uvoženo v $folder (izpuščene datoteke: $count)';
+  @override
   String get convertAction => 'Pretvori v Markdown…';
   @override
   String get epubConvertCommand => 'Pretvori EPUB v Markdown…';

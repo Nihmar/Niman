@@ -1945,6 +1945,22 @@ final class UkrainianStrings extends Strings {
   @override
   String importFolderEmpty(String name) => 'У $name немає файлів Markdown';
   @override
+  String get importFolderSettingsTitle => 'Імпортувати теку';
+  @override
+  String importFolderBodyPages(int notes, int pages) =>
+      'Її файли Markdown ($notes) буде скопійовано, а вебсторінки ($pages) '
+      'перетворено на нотатки в новій теці бібліотеки. Початкова тека '
+      'залишиться як є.';
+  @override
+  String get importFolderTooLarge => 'Ця тека завелика для імпорту';
+  @override
+  String get importFolderFailed => 'Не вдалося імпортувати теку';
+  @override
+  String get importFolderReading => 'Читання теки…';
+  @override
+  String importFolderSkipped(String folder, int count) =>
+      'Імпортовано до $folder (пропущено файлів: $count)';
+  @override
   String get convertAction => 'Перетворити на Markdown…';
   @override
   String get epubConvertCommand => 'Перетворити EPUB на Markdown…';

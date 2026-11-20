@@ -1957,6 +1957,22 @@ final class BasqueStrings extends Strings {
   String importFolderEmpty(String name) =>
       'Ez dago Markdown fitxategirik $name karpetan';
   @override
+  String get importFolderSettingsTitle => 'Inportatu karpeta bat';
+  @override
+  String importFolderBodyPages(int notes, int pages) =>
+      'Bere Markdown fitxategiak ($notes) kopiatzen dira eta web orriak '
+      '($pages) ohar bihurtzen dira, liburutegiko karpeta berri batean. '
+      'Jatorrizko karpeta dagoen bezala geratzen da.';
+  @override
+  String get importFolderTooLarge => 'Karpeta hau handiegia da inportatzeko';
+  @override
+  String get importFolderFailed => 'Ezin izan da karpeta inportatu';
+  @override
+  String get importFolderReading => 'Karpeta irakurtzen…';
+  @override
+  String importFolderSkipped(String folder, int count) =>
+      '$folder karpetara inportatua (alde batera utzitako fitxategiak: $count)';
+  @override
   String get convertAction => 'Bihurtu Markdown-era…';
   @override
   String get epubConvertCommand => 'Bihurtu EPUB Markdown-era…';

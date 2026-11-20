@@ -1922,6 +1922,22 @@ final class EnglishStrings extends Strings {
   @override
   String importFolderEmpty(String name) => 'No Markdown files in $name';
   @override
+  String get importFolderSettingsTitle => 'Import a folder';
+  @override
+  String importFolderBodyPages(int notes, int pages) =>
+      'Its Markdown files ($notes) are copied and its web pages ($pages) '
+      'converted into notes, in a new folder of the library. The original '
+      'folder stays as it is.';
+  @override
+  String get importFolderTooLarge => 'This folder is too large to import';
+  @override
+  String get importFolderFailed => 'The folder could not be imported';
+  @override
+  String get importFolderReading => 'Reading the folder…';
+  @override
+  String importFolderSkipped(String folder, int count) =>
+      'Imported into $folder (files left out: $count)';
+  @override
   String get convertAction => 'Convert to Markdown…';
   @override
   String get epubConvertCommand => 'Convert EPUB to Markdown…';

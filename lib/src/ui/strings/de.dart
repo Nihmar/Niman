@@ -1974,6 +1974,23 @@ final class GermanStrings extends Strings {
   @override
   String importFolderEmpty(String name) => 'Keine Markdown-Dateien in $name';
   @override
+  String get importFolderSettingsTitle => 'Ordner importieren';
+  @override
+  String importFolderBodyPages(int notes, int pages) =>
+      'Seine Markdown-Dateien ($notes) werden kopiert und seine Webseiten '
+      '($pages) in Notizen umgewandelt, in einen neuen Ordner der Bibliothek. '
+      'Der ursprüngliche Ordner bleibt, wie er ist.';
+  @override
+  String get importFolderTooLarge =>
+      'Dieser Ordner ist zu groß zum Importieren';
+  @override
+  String get importFolderFailed => 'Der Ordner konnte nicht importiert werden';
+  @override
+  String get importFolderReading => 'Ordner wird gelesen…';
+  @override
+  String importFolderSkipped(String folder, int count) =>
+      'Importiert nach $folder (ausgelassene Dateien: $count)';
+  @override
   String get convertAction => 'In Markdown umwandeln…';
   @override
   String get epubConvertCommand => 'EPUB in Markdown umwandeln…';

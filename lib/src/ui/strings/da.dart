@@ -1934,6 +1934,22 @@ final class DanishStrings extends Strings {
   @override
   String importFolderEmpty(String name) => 'Ingen Markdown-filer i $name';
   @override
+  String get importFolderSettingsTitle => 'Importér en mappe';
+  @override
+  String importFolderBodyPages(int notes, int pages) =>
+      'Dens Markdown-filer ($notes) kopieres, og websiderne ($pages) '
+      'konverteres til noter, i en ny mappe i biblioteket. Den oprindelige '
+      'mappe forbliver som den er.';
+  @override
+  String get importFolderTooLarge => 'Denne mappe er for stor til at importere';
+  @override
+  String get importFolderFailed => 'Mappen kunne ikke importeres';
+  @override
+  String get importFolderReading => 'Læser mappen…';
+  @override
+  String importFolderSkipped(String folder, int count) =>
+      'Importeret til $folder (udeladte filer: $count)';
+  @override
   String get convertAction => 'Konvertér til Markdown…';
   @override
   String get epubConvertCommand => 'Konvertér EPUB til Markdown…';

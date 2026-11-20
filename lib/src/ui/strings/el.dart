@@ -2005,6 +2005,23 @@ final class GreekStrings extends Strings {
   @override
   String importFolderEmpty(String name) => 'Κανένα αρχείο Markdown στο $name';
   @override
+  String get importFolderSettingsTitle => 'Εισαγωγή φακέλου';
+  @override
+  String importFolderBodyPages(int notes, int pages) =>
+      'Τα αρχεία Markdown του ($notes) αντιγράφονται και οι ιστοσελίδες του '
+      '($pages) μετατρέπονται σε σημειώσεις, σε νέο φάκελο της βιβλιοθήκης. Ο '
+      'αρχικός φάκελος μένει ως έχει.';
+  @override
+  String get importFolderTooLarge =>
+      'Αυτός ο φάκελος είναι πολύ μεγάλος για εισαγωγή';
+  @override
+  String get importFolderFailed => 'Δεν ήταν δυνατή η εισαγωγή του φακέλου';
+  @override
+  String get importFolderReading => 'Ανάγνωση του φακέλου…';
+  @override
+  String importFolderSkipped(String folder, int count) =>
+      'Εισήχθη στο $folder (αρχεία που παραλείφθηκαν: $count)';
+  @override
   String get convertAction => 'Μετατροπή σε Markdown…';
   @override
   String get epubConvertCommand => 'Μετατροπή EPUB σε Markdown…';

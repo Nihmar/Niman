@@ -1963,6 +1963,22 @@ final class DutchStrings extends Strings {
   @override
   String importFolderEmpty(String name) => 'Geen Markdown-bestanden in $name';
   @override
+  String get importFolderSettingsTitle => 'Een map importeren';
+  @override
+  String importFolderBodyPages(int notes, int pages) =>
+      'De Markdown-bestanden ($notes) worden gekopieerd en de webpagina’s '
+      '($pages) omgezet in notities, in een nieuwe map in de bibliotheek. De '
+      'oorspronkelijke map blijft zoals hij is.';
+  @override
+  String get importFolderTooLarge => 'Deze map is te groot om te importeren';
+  @override
+  String get importFolderFailed => 'De map kon niet worden geïmporteerd';
+  @override
+  String get importFolderReading => 'Map wordt gelezen…';
+  @override
+  String importFolderSkipped(String folder, int count) =>
+      'Geïmporteerd in $folder (overgeslagen bestanden: $count)';
+  @override
   String get convertAction => 'Omzetten naar Markdown…';
   @override
   String get epubConvertCommand => 'EPUB omzetten naar Markdown…';

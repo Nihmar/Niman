@@ -1921,6 +1921,22 @@ final class EstonianStrings extends Strings {
   @override
   String importFolderEmpty(String name) => 'Kaustas $name pole Markdowni faile';
   @override
+  String get importFolderSettingsTitle => 'Impordi kaust';
+  @override
+  String importFolderBodyPages(int notes, int pages) =>
+      'Selle Markdowni failid ($notes) kopeeritakse ja veebilehed ($pages) '
+      'teisendatakse märkmeteks, raamatukogu uude kausta. Algne kaust jääb '
+      'samaks.';
+  @override
+  String get importFolderTooLarge => 'See kaust on importimiseks liiga suur';
+  @override
+  String get importFolderFailed => 'Kausta ei õnnestunud importida';
+  @override
+  String get importFolderReading => 'Kausta lugemine…';
+  @override
+  String importFolderSkipped(String folder, int count) =>
+      'Imporditud kausta $folder (vahele jäetud faile: $count)';
+  @override
   String get convertAction => 'Teisenda Markdowniks…';
   @override
   String get epubConvertCommand => 'Teisenda EPUB Markdowniks…';

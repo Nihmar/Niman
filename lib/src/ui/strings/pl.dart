@@ -1962,6 +1962,23 @@ final class PolishStrings extends Strings {
   @override
   String importFolderEmpty(String name) => 'Brak plików Markdown w $name';
   @override
+  String get importFolderSettingsTitle => 'Importuj folder';
+  @override
+  String importFolderBodyPages(int notes, int pages) =>
+      'Jego pliki Markdown ($notes) zostaną skopiowane, a strony internetowe '
+      '($pages) przekonwertowane na notatki, w nowym folderze biblioteki. '
+      'Oryginalny folder pozostaje bez zmian.';
+  @override
+  String get importFolderTooLarge =>
+      'Ten folder jest za duży do zaimportowania';
+  @override
+  String get importFolderFailed => 'Nie udało się zaimportować folderu';
+  @override
+  String get importFolderReading => 'Wczytywanie folderu…';
+  @override
+  String importFolderSkipped(String folder, int count) =>
+      'Zaimportowano do $folder (pominięte pliki: $count)';
+  @override
   String get convertAction => 'Konwertuj na Markdown…';
   @override
   String get epubConvertCommand => 'Konwertuj EPUB na Markdown…';

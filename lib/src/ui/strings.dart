@@ -1242,6 +1242,14 @@ final class AppStrings {
   static String importFolderBody(int count) => _s.importFolderBody(count);
   static String importFolderDone(String folder) => _s.importFolderDone(folder);
   static String importFolderEmpty(String name) => _s.importFolderEmpty(name);
+  static String get importFolderSettingsTitle => _s.importFolderSettingsTitle;
+  static String importFolderBodyPages(int notes, int pages) =>
+      _s.importFolderBodyPages(notes, pages);
+  static String get importFolderTooLarge => _s.importFolderTooLarge;
+  static String get importFolderFailed => _s.importFolderFailed;
+  static String get importFolderReading => _s.importFolderReading;
+  static String importFolderSkipped(String folder, int count) =>
+      _s.importFolderSkipped(folder, count);
   static String get convertAction => _s.convertAction;
   static String get epubConvertCommand => _s.epubConvertCommand;
   static String get epubConvertSettingsTitle => _s.epubConvertSettingsTitle;

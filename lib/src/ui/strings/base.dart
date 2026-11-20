@@ -1038,6 +1038,14 @@ abstract base class Strings {
   String importFolderBody(int count);
   String importFolderDone(String folder);
   String importFolderEmpty(String name);
+
+  // Importing a folder of Markdown files and web pages (#1295).
+  String get importFolderSettingsTitle;
+  String importFolderBodyPages(int notes, int pages);
+  String get importFolderTooLarge;
+  String get importFolderFailed;
+  String get importFolderReading;
+  String importFolderSkipped(String folder, int count);
   // Converting an EPUB into notes (#1138). The chapter name keeps `{n}`
   // for the number: the conversion fills it in on its isolate.
   String get convertAction;

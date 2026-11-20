@@ -1977,6 +1977,23 @@ final class CatalanStrings extends Strings {
   @override
   String importFolderEmpty(String name) => 'No hi ha fitxers Markdown a $name';
   @override
+  String get importFolderSettingsTitle => 'Importa una carpeta';
+  @override
+  String importFolderBodyPages(int notes, int pages) =>
+      'Els seus fitxers Markdown ($notes) es copien i les pàgines web ($pages) '
+      'es converteixen en notes, en una carpeta nova de la biblioteca. La '
+      'carpeta original queda igual.';
+  @override
+  String get importFolderTooLarge =>
+      'Aquesta carpeta és massa gran per importar-la';
+  @override
+  String get importFolderFailed => 'No s’ha pogut importar la carpeta';
+  @override
+  String get importFolderReading => 'Llegint la carpeta…';
+  @override
+  String importFolderSkipped(String folder, int count) =>
+      'Importat a $folder (fitxers omesos: $count)';
+  @override
   String get convertAction => 'Converteix a Markdown…';
   @override
   String get epubConvertCommand => 'Converteix un EPUB a Markdown…';

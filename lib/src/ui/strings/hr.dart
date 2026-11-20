@@ -1937,6 +1937,22 @@ final class CroatianStrings extends Strings {
   @override
   String importFolderEmpty(String name) => 'Nema Markdown datoteka u $name';
   @override
+  String get importFolderSettingsTitle => 'Uvezi mapu';
+  @override
+  String importFolderBodyPages(int notes, int pages) =>
+      'Njezine Markdown datoteke ($notes) kopiraju se, a web stranice ($pages) '
+      'pretvaraju u bilješke, u novu mapu knjižnice. Izvorna mapa ostaje kakva '
+      'jest.';
+  @override
+  String get importFolderTooLarge => 'Ova je mapa prevelika za uvoz';
+  @override
+  String get importFolderFailed => 'Mapu nije bilo moguće uvesti';
+  @override
+  String get importFolderReading => 'Čitanje mape…';
+  @override
+  String importFolderSkipped(String folder, int count) =>
+      'Uvezeno u $folder (izostavljene datoteke: $count)';
+  @override
   String get convertAction => 'Pretvori u Markdown…';
   @override
   String get epubConvertCommand => 'Pretvori EPUB u Markdown…';

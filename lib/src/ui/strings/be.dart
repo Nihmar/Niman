@@ -1941,6 +1941,22 @@ final class BelarusianStrings extends Strings {
   @override
   String importFolderEmpty(String name) => 'У $name няма файлаў Markdown';
   @override
+  String get importFolderSettingsTitle => 'Імпартаваць папку';
+  @override
+  String importFolderBodyPages(int notes, int pages) =>
+      'Яе файлы Markdown ($notes) капіруюцца, а вэб-старонкі ($pages) '
+      'пераўтвараюцца ў нататкі ў новай папцы бібліятэкі. Зыходная папка '
+      'застаецца як ёсць.';
+  @override
+  String get importFolderTooLarge => 'Гэта папка завялікая для імпарту';
+  @override
+  String get importFolderFailed => 'Не ўдалося імпартаваць папку';
+  @override
+  String get importFolderReading => 'Чытанне папкі…';
+  @override
+  String importFolderSkipped(String folder, int count) =>
+      'Імпартавана ў $folder (прапушчана файлаў: $count)';
+  @override
   String get convertAction => 'Пераўтварыць у Markdown…';
   @override
   String get epubConvertCommand => 'Пераўтварыць EPUB у Markdown…';

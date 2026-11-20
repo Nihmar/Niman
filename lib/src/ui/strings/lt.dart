@@ -1940,6 +1940,22 @@ final class LithuanianStrings extends Strings {
   @override
   String importFolderEmpty(String name) => 'Aplanke $name nėra Markdown failų';
   @override
+  String get importFolderSettingsTitle => 'Importuoti aplanką';
+  @override
+  String importFolderBodyPages(int notes, int pages) =>
+      'Jo Markdown failai ($notes) nukopijuojami, o internetiniai puslapiai '
+      '($pages) konvertuojami į užrašus, naujame bibliotekos aplanke. Pradinis '
+      'aplankas lieka nepakitęs.';
+  @override
+  String get importFolderTooLarge => 'Šis aplankas per didelis importuoti';
+  @override
+  String get importFolderFailed => 'Aplanko importuoti nepavyko';
+  @override
+  String get importFolderReading => 'Skaitomas aplankas…';
+  @override
+  String importFolderSkipped(String folder, int count) =>
+      'Importuota į $folder (praleisti failai: $count)';
+  @override
   String get convertAction => 'Konvertuoti į Markdown…';
   @override
   String get epubConvertCommand => 'Konvertuoti EPUB į Markdown…';

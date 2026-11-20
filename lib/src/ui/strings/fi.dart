@@ -1959,6 +1959,22 @@ final class FinnishStrings extends Strings {
   String importFolderEmpty(String name) =>
       'Kansiossa $name ei ole Markdown-tiedostoja';
   @override
+  String get importFolderSettingsTitle => 'Tuo kansio';
+  @override
+  String importFolderBodyPages(int notes, int pages) =>
+      'Sen Markdown-tiedostot ($notes) kopioidaan ja verkkosivut ($pages) '
+      'muunnetaan muistiinpanoiksi kirjaston uuteen kansioon. Alkuperäinen '
+      'kansio pysyy ennallaan.';
+  @override
+  String get importFolderTooLarge => 'Tämä kansio on liian suuri tuotavaksi';
+  @override
+  String get importFolderFailed => 'Kansiota ei voitu tuoda';
+  @override
+  String get importFolderReading => 'Luetaan kansiota…';
+  @override
+  String importFolderSkipped(String folder, int count) =>
+      'Tuotu kansioon $folder (pois jätettyjä tiedostoja: $count)';
+  @override
   String get convertAction => 'Muunna Markdowniksi…';
   @override
   String get epubConvertCommand => 'Muunna EPUB Markdowniksi…';

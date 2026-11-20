@@ -1965,6 +1965,24 @@ final class ItalianStrings extends Strings {
   @override
   String importFolderEmpty(String name) => 'Nessun file Markdown in $name';
   @override
+  String get importFolderSettingsTitle => 'Importa una cartella';
+  @override
+  String importFolderBodyPages(int notes, int pages) =>
+      'I suoi file Markdown ($notes) vengono copiati e le sue pagine web '
+      '($pages) convertite in note, in una nuova cartella della libreria. La '
+      'cartella originale resta com’è.';
+  @override
+  String get importFolderTooLarge =>
+      'Questa cartella è troppo grande da importare';
+  @override
+  String get importFolderFailed =>
+      'Non è stato possibile importare la cartella';
+  @override
+  String get importFolderReading => 'Lettura della cartella…';
+  @override
+  String importFolderSkipped(String folder, int count) =>
+      'Importata in $folder (file saltati: $count)';
+  @override
   String get convertAction => 'Converti in Markdown…';
   @override
   String get epubConvertCommand => 'Converti EPUB in Markdown…';

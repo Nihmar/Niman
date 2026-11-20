@@ -1931,6 +1931,23 @@ final class NorwegianStrings extends Strings {
   @override
   String importFolderEmpty(String name) => 'Ingen Markdown-filer i $name';
   @override
+  String get importFolderSettingsTitle => 'Importer en mappe';
+  @override
+  String importFolderBodyPages(int notes, int pages) =>
+      'Markdown-filene ($notes) kopieres, og nettsidene ($pages) konverteres '
+      'til notater, i en ny mappe i biblioteket. Den opprinnelige mappen '
+      'forblir som den er.';
+  @override
+  String get importFolderTooLarge =>
+      'Denne mappen er for stor til å importeres';
+  @override
+  String get importFolderFailed => 'Mappen kunne ikke importeres';
+  @override
+  String get importFolderReading => 'Leser mappen…';
+  @override
+  String importFolderSkipped(String folder, int count) =>
+      'Importert til $folder (utelatte filer: $count)';
+  @override
   String get convertAction => 'Konverter til Markdown…';
   @override
   String get epubConvertCommand => 'Konverter EPUB til Markdown…';

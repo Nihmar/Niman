@@ -1957,6 +1957,22 @@ final class MacedonianStrings extends Strings {
   @override
   String importFolderEmpty(String name) => 'Нема Markdown датотеки во $name';
   @override
+  String get importFolderSettingsTitle => 'Увези папка';
+  @override
+  String importFolderBodyPages(int notes, int pages) =>
+      'Нејзините Markdown датотеки ($notes) се копираат, а веб-страниците '
+      '($pages) се претвораат во белешки, во нова папка на библиотеката. '
+      'Оригиналната папка останува каква што е.';
+  @override
+  String get importFolderTooLarge => 'Оваа папка е преголема за увоз';
+  @override
+  String get importFolderFailed => 'Папката не можеше да се увезе';
+  @override
+  String get importFolderReading => 'Се чита папката…';
+  @override
+  String importFolderSkipped(String folder, int count) =>
+      'Увезено во $folder (прескокнати датотеки: $count)';
+  @override
   String get convertAction => 'Претвори во Markdown…';
   @override
   String get epubConvertCommand => 'Претвори EPUB во Markdown…';

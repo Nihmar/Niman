@@ -1961,6 +1961,23 @@ final class RomanianStrings extends Strings {
   @override
   String importFolderEmpty(String name) => 'Niciun fișier Markdown în $name';
   @override
+  String get importFolderSettingsTitle => 'Importă un dosar';
+  @override
+  String importFolderBodyPages(int notes, int pages) =>
+      'Fișierele sale Markdown ($notes) sunt copiate, iar paginile sale web '
+      '($pages) sunt convertite în notițe, într-un dosar nou al bibliotecii. '
+      'Dosarul original rămâne neschimbat.';
+  @override
+  String get importFolderTooLarge =>
+      'Acest dosar este prea mare pentru a fi importat';
+  @override
+  String get importFolderFailed => 'Dosarul nu a putut fi importat';
+  @override
+  String get importFolderReading => 'Se citește dosarul…';
+  @override
+  String importFolderSkipped(String folder, int count) =>
+      'Importat în $folder (fișiere omise: $count)';
+  @override
   String get convertAction => 'Convertește în Markdown…';
   @override
   String get epubConvertCommand => 'Convertește EPUB în Markdown…';

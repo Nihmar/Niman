@@ -1939,6 +1939,23 @@ final class SlovakStrings extends Strings {
   String importFolderEmpty(String name) =>
       'V priečinku $name nie sú súbory Markdown';
   @override
+  String get importFolderSettingsTitle => 'Importovať priečinok';
+  @override
+  String importFolderBodyPages(int notes, int pages) =>
+      'Jeho súbory Markdown ($notes) sa skopírujú a webové stránky ($pages) sa '
+      'prevedú na poznámky, do nového priečinka knižnice. Pôvodný priečinok '
+      'zostane bez zmeny.';
+  @override
+  String get importFolderTooLarge =>
+      'Tento priečinok je na import príliš veľký';
+  @override
+  String get importFolderFailed => 'Priečinok sa nepodarilo importovať';
+  @override
+  String get importFolderReading => 'Číta sa priečinok…';
+  @override
+  String importFolderSkipped(String folder, int count) =>
+      'Importované do $folder (vynechané súbory: $count)';
+  @override
   String get convertAction => 'Previesť na Markdown…';
   @override
   String get epubConvertCommand => 'Previesť EPUB na Markdown…';

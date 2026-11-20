@@ -1955,6 +1955,23 @@ final class GalicianStrings extends Strings {
   String importFolderEmpty(String name) =>
       'Non hai ficheiros Markdown en $name';
   @override
+  String get importFolderSettingsTitle => 'Importar un cartafol';
+  @override
+  String importFolderBodyPages(int notes, int pages) =>
+      'Os seus ficheiros Markdown ($notes) cópianse e as súas páxinas web '
+      '($pages) conviértense en notas, nun cartafol novo da biblioteca. O '
+      'cartafol orixinal queda como está.';
+  @override
+  String get importFolderTooLarge =>
+      'Este cartafol é grande de máis para importalo';
+  @override
+  String get importFolderFailed => 'Non se puido importar o cartafol';
+  @override
+  String get importFolderReading => 'Lendo o cartafol…';
+  @override
+  String importFolderSkipped(String folder, int count) =>
+      'Importado en $folder (ficheiros omitidos: $count)';
+  @override
   String get convertAction => 'Converter a Markdown…';
   @override
   String get epubConvertCommand => 'Converter EPUB a Markdown…';

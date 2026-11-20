@@ -1952,6 +1952,22 @@ final class PortugueseStrings extends Strings {
   @override
   String importFolderEmpty(String name) => 'Sem ficheiros Markdown em $name';
   @override
+  String get importFolderSettingsTitle => 'Importar uma pasta';
+  @override
+  String importFolderBodyPages(int notes, int pages) =>
+      'Os seus ficheiros Markdown ($notes) são copiados e as suas páginas web '
+      '($pages) convertidas em notas, numa pasta nova da biblioteca. A pasta '
+      'original fica como está.';
+  @override
+  String get importFolderTooLarge => 'Esta pasta é grande demais para importar';
+  @override
+  String get importFolderFailed => 'Não foi possível importar a pasta';
+  @override
+  String get importFolderReading => 'A ler a pasta…';
+  @override
+  String importFolderSkipped(String folder, int count) =>
+      'Importado para $folder (ficheiros omitidos: $count)';
+  @override
   String get convertAction => 'Converter para Markdown…';
   @override
   String get epubConvertCommand => 'Converter EPUB para Markdown…';

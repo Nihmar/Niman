@@ -1941,6 +1941,22 @@ final class IcelandicStrings extends Strings {
   @override
   String importFolderEmpty(String name) => 'Engar Markdown-skrár í $name';
   @override
+  String get importFolderSettingsTitle => 'Flytja inn möppu';
+  @override
+  String importFolderBodyPages(int notes, int pages) =>
+      'Markdown-skrár hennar ($notes) eru afritaðar og vefsíður hennar '
+      '($pages) umbreyttar í minnispunkta, í nýrri möppu í safninu. '
+      'Upprunalega mappan helst óbreytt.';
+  @override
+  String get importFolderTooLarge => 'Þessi mappa er of stór til að flytja inn';
+  @override
+  String get importFolderFailed => 'Ekki tókst að flytja möppuna inn';
+  @override
+  String get importFolderReading => 'Les möppuna…';
+  @override
+  String importFolderSkipped(String folder, int count) =>
+      'Flutt inn í $folder (skrár sem var sleppt: $count)';
+  @override
   String get convertAction => 'Umbreyta í Markdown…';
   @override
   String get epubConvertCommand => 'Umbreyta EPUB í Markdown…';

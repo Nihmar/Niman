@@ -1911,6 +1911,22 @@ final class HindiStrings extends Strings {
   @override
   String importFolderEmpty(String name) => '$name में कोई Markdown फ़ाइल नहीं';
   @override
+  String get importFolderSettingsTitle => 'फ़ोल्डर आयात करें';
+  @override
+  String importFolderBodyPages(int notes, int pages) =>
+      'इसकी Markdown फ़ाइलें ($notes) कॉपी होती हैं और वेब पेज ($pages) नोट '
+      'में बदले जाते हैं, लाइब्रेरी के नए फ़ोल्डर में। मूल फ़ोल्डर जैसा है '
+      'वैसा रहता है।';
+  @override
+  String get importFolderTooLarge => 'यह फ़ोल्डर आयात करने के लिए बहुत बड़ा है';
+  @override
+  String get importFolderFailed => 'फ़ोल्डर आयात नहीं किया जा सका';
+  @override
+  String get importFolderReading => 'फ़ोल्डर पढ़ा जा रहा है…';
+  @override
+  String importFolderSkipped(String folder, int count) =>
+      '$folder में आयात किया गया (छोड़ी गई फ़ाइलें: $count)';
+  @override
   String get convertAction => 'Markdown में बदलें…';
   @override
   String get epubConvertCommand => 'EPUB को Markdown में बदलें…';

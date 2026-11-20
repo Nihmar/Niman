@@ -1957,6 +1957,23 @@ final class BulgarianStrings extends Strings {
   @override
   String importFolderEmpty(String name) => 'Няма файлове Markdown в $name';
   @override
+  String get importFolderSettingsTitle => 'Импортиране на папка';
+  @override
+  String importFolderBodyPages(int notes, int pages) =>
+      'Файловете ѝ Markdown ($notes) се копират, а уеб страниците ($pages) се '
+      'преобразуват в бележки в нова папка на библиотеката. Оригиналната папка '
+      'остава непроменена.';
+  @override
+  String get importFolderTooLarge =>
+      'Тази папка е твърде голяма за импортиране';
+  @override
+  String get importFolderFailed => 'Папката не може да се импортира';
+  @override
+  String get importFolderReading => 'Четене на папката…';
+  @override
+  String importFolderSkipped(String folder, int count) =>
+      'Импортирано в $folder (пропуснати файлове: $count)';
+  @override
   String get convertAction => 'Преобразуване в Markdown…';
   @override
   String get epubConvertCommand => 'Преобразуване на EPUB в Markdown…';

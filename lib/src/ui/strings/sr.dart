@@ -1945,6 +1945,22 @@ final class SerbianStrings extends Strings {
   @override
   String importFolderEmpty(String name) => 'Нема Markdown датотека у $name';
   @override
+  String get importFolderSettingsTitle => 'Увези фасциклу';
+  @override
+  String importFolderBodyPages(int notes, int pages) =>
+      'Њене Markdown датотеке ($notes) се копирају, а веб странице ($pages) '
+      'претварају у белешке, у нову фасциклу библиотеке. Изворна фасцикла '
+      'остаје каква јесте.';
+  @override
+  String get importFolderTooLarge => 'Ова фасцикла је превелика за увоз';
+  @override
+  String get importFolderFailed => 'Фасциклу није могуће увести';
+  @override
+  String get importFolderReading => 'Читање фасцикле…';
+  @override
+  String importFolderSkipped(String folder, int count) =>
+      'Увезено у $folder (изостављене датотеке: $count)';
+  @override
   String get convertAction => 'Претвори у Markdown…';
   @override
   String get epubConvertCommand => 'Претвори EPUB у Markdown…';

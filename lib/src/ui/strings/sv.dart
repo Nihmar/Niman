@@ -1950,6 +1950,23 @@ final class SwedishStrings extends Strings {
   @override
   String importFolderEmpty(String name) => 'Inga Markdown-filer i $name';
   @override
+  String get importFolderSettingsTitle => 'Importera en mapp';
+  @override
+  String importFolderBodyPages(int notes, int pages) =>
+      'Dess Markdown-filer ($notes) kopieras och webbsidorna ($pages) '
+      'konverteras till anteckningar, i en ny mapp i biblioteket. Den '
+      'ursprungliga mappen förblir som den är.';
+  @override
+  String get importFolderTooLarge =>
+      'Den här mappen är för stor för att importeras';
+  @override
+  String get importFolderFailed => 'Mappen kunde inte importeras';
+  @override
+  String get importFolderReading => 'Läser mappen…';
+  @override
+  String importFolderSkipped(String folder, int count) =>
+      'Importerad till $folder (utelämnade filer: $count)';
+  @override
   String get convertAction => 'Konvertera till Markdown…';
   @override
   String get epubConvertCommand => 'Konvertera EPUB till Markdown…';
