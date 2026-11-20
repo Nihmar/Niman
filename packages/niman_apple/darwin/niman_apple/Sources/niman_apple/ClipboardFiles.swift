@@ -61,12 +61,27 @@ enum ClipboardFiles {
     /// The type a provider's file is read as: the first it registers that
     /// is data and not text — text pastes as text, and a link copied in a
     /// browser is a link, not a file.
-    static func fileType(_ identifiers: [String]) -> String? {
-      identifiers.first { identifier in
+    ///
+    /// [pages] lets a web page's file through as well (#1293): an HTML file
+    /// dragged in from Files is text by type, and still a file to convert.
+    /// What a drag out of a page's selection carries is its HTML *and* its
+    /// plain text, and stays text; a file carries only itself. The clipboard
+    /// keeps it out: a browser's copied HTML is the paste's text.
+    static func fileType(_ identifiers: [String], pages: Bool = false) -> String? {
+      if pages, let page = pageType(identifiers) { return page }
+      return identifiers.first { identifier in
         guard let type = UTType(identifier) else { return false }
         return type.conforms(to: .data) && !type.conforms(to: .text)
           && !type.conforms(to: .url)
       }
+    }
+
+    /// The HTML type of a provider that holds a web page as a file: it
+    /// registers HTML and no plain text beside it.
+    static func pageType(_ identifiers: [String]) -> String? {
+      let types = identifiers.compactMap { UTType($0) }
+      if types.contains(where: { $0.conforms(to: .plainText) }) { return nil }
+      return identifiers.first { UTType($0)?.conforms(to: .html) == true }
     }
 
     /// The name a copied file keeps: the one the provider suggests, with
@@ -101,7 +116,7 @@ enum ClipboardFiles {
     /// on the main queue. The folder is emptied first: the files of the
     /// last paste or drop have been copied on into the library by then.
     static func copy(
-      _ providers: [NSItemProvider], into folder: String,
+      _ providers: [NSItemProvider], into folder: String, pages: Bool = false,
       done: @escaping ([String]) -> Void
     ) {
       let base = FileManager.default.temporaryDirectory
@@ -112,7 +127,9 @@ enum ClipboardFiles {
       let lock = NSLock()
       var paths = [Int: String]()
       for (index, provider) in providers.enumerated() {
-        guard let type = fileType(provider.registeredTypeIdentifiers) else { continue }
+        guard let type = fileType(provider.registeredTypeIdentifiers, pages: pages) else {
+          continue
+        }
         group.enter()
         provider.loadFileRepresentation(forTypeIdentifier: type) { url, _ in
           defer { group.leave() }
