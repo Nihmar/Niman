@@ -2102,6 +2102,8 @@ final class PortugueseStrings extends Strings {
   @override
   String get lintRuleJoinParagraphLines => 'Unir parágrafos quebrados';
   @override
+  String get lintRuleSplitParagraphLines => 'Separar linhas em parágrafos';
+  @override
   String get tidyOnCloseTitle => 'Arrumar o Markdown ao fechar';
   @override
   String get tidyOnCloseSubtitle =>

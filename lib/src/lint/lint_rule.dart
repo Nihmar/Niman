@@ -32,8 +32,15 @@ enum LintRule {
   joinWrappedItems('join-wrapped-items'),
 
   /// A paragraph outside a list — a note's own, a quote's, a footnote's —
-  /// wrapped over several lines is written on one.
-  joinParagraphLines('join-paragraph-lines');
+  /// wrapped over several lines is written on one. With
+  /// [splitParagraphLines] on, the note's own and a footnote's lines are
+  /// split instead, and only a quote's are joined.
+  joinParagraphLines('join-paragraph-lines'),
+
+  /// Each line of a paragraph outside a list and a quote — a note's own, a
+  /// footnote's — is a paragraph of its own, a blank line before it: text
+  /// pasted with its paragraphs one per line reads as it was written.
+  splitParagraphLines('split-paragraph-lines');
 
   new(this.id);
 

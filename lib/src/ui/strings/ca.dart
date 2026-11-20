@@ -2128,6 +2128,8 @@ final class CatalanStrings extends Strings {
   @override
   String get lintRuleJoinParagraphLines => 'Uneix els paràgrafs partits';
   @override
+  String get lintRuleSplitParagraphLines => 'Separa les línies en paràgrafs';
+  @override
   String get tidyOnCloseTitle => 'Endreça el Markdown en tancar';
   @override
   String get tidyOnCloseSubtitle =>

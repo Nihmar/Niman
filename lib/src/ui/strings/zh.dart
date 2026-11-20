@@ -1919,6 +1919,8 @@ final class ChineseStrings extends Strings {
   @override
   String get lintRuleJoinParagraphLines => '合并换行的段落';
   @override
+  String get lintRuleSplitParagraphLines => '将每行拆分为段落';
+  @override
   String get tidyOnCloseTitle => '关闭时整理 Markdown';
   @override
   String get tidyOnCloseSubtitle =>

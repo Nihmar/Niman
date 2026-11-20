@@ -2090,6 +2090,8 @@ final class LithuanianStrings extends Strings {
   @override
   String get lintRuleJoinParagraphLines => 'Sujungti perkeltas pastraipas';
   @override
+  String get lintRuleSplitParagraphLines => 'Skaidyti eilutes į pastraipas';
+  @override
   String get tidyOnCloseTitle => 'Sutvarkyti Markdown uždarant';
   @override
   String get tidyOnCloseSubtitle =>

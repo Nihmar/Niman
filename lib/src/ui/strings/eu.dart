@@ -2107,6 +2107,8 @@ final class BasqueStrings extends Strings {
   @override
   String get lintRuleJoinParagraphLines => 'Lerro anitzeko paragrafoak batu';
   @override
+  String get lintRuleSplitParagraphLines => 'Lerroak paragrafotan banandu';
+  @override
   String get tidyOnCloseTitle => 'Markdown txukundu ixtean';
   @override
   String get tidyOnCloseSubtitle =>

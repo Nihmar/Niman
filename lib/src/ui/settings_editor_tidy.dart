@@ -146,4 +146,5 @@ String lintRuleLabel(LintRule rule) => switch (rule) {
   LintRule.fenceLanguage => AppStrings.lintRuleFenceLanguage,
   LintRule.joinWrappedItems => AppStrings.lintRuleJoinWrappedItems,
   LintRule.joinParagraphLines => AppStrings.lintRuleJoinParagraphLines,
+  LintRule.splitParagraphLines => AppStrings.lintRuleSplitParagraphLines,
 };

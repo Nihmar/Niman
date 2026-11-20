@@ -1,8 +1,9 @@
 // #227: tidying a note's Markdown. The wrapped list item is what this is
 // for; everything else it touches is a line's whitespace. Fences,
 // tables, math, frontmatter and HTML pass through untouched, prose is
-// never rewrapped (its lines are joined: `tidy_paragraph_join_test.dart`),
-// and formatting twice changes nothing.
+// never rewrapped (its lines are set apart as paragraphs:
+// `tidy_paragraph_split_test.dart`, or joined:
+// `tidy_paragraph_join_test.dart`), and formatting twice changes nothing.
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/editor/markdown_format.dart';
 import 'package:niman/src/lint/lint_rule.dart';
@@ -24,9 +25,15 @@ String tidy(String source, {Set<LintRule>? rules}) {
 final Set<LintRule> _keepWraps = {...LintRule.all}
   ..remove(LintRule.joinWrappedItems);
 
-/// Every rule but the one joining a paragraph's lines outside a list.
+/// Every rule but the ones joining and splitting a paragraph's lines
+/// outside a list.
 final Set<LintRule> _keepParagraphs = {...LintRule.all}
-  ..remove(LintRule.joinParagraphLines);
+  ..remove(LintRule.joinParagraphLines)
+  ..remove(LintRule.splitParagraphLines);
+
+/// Every rule but the one splitting a paragraph's lines: they are joined.
+final Set<LintRule> _joinParagraphs = {...LintRule.all}
+  ..remove(LintRule.splitParagraphLines);
 
 void main() {
   test('a wrapped list item is indented to its own text', () {
@@ -105,7 +112,7 @@ void main() {
       'Some prose with #tagDiEsempio in it.\n',
     );
     expect(
-      tidy('#primo #secondo\nand a wrapped line\n'),
+      tidy('#primo #secondo\nand a wrapped line\n', rules: _joinParagraphs),
       '#primo #secondo and a wrapped line\n',
     );
     // In a list item it is text like any other.

@@ -2083,6 +2083,8 @@ final class DanishStrings extends Strings {
   @override
   String get lintRuleJoinParagraphLines => 'Saml ombrudte afsnit';
   @override
+  String get lintRuleSplitParagraphLines => 'Del linjer op i afsnit';
+  @override
   String get tidyOnCloseTitle => 'Ryd op i Markdown ved lukning';
   @override
   String get tidyOnCloseSubtitle =>

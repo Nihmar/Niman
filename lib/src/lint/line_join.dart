@@ -13,6 +13,7 @@
 /// Only a soft line break is: a line ending in a hard break keeps it.
 library;
 
+import 'package:niman/src/lint/hard_break.dart';
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_node.dart';
 import 'package:niman/src/markdown/block_tree.dart';
@@ -23,34 +24,45 @@ import 'package:niman/src/markdown/block_tree.dart';
 /// leading white space going with it.
 ///
 /// [inItems] joins the paragraphs inside a list item; [outside] the rest:
-/// a note's own paragraphs, a quote's, a footnote's. A line keeps the
-/// `\r` it ended with.
+/// a note's own paragraphs, a quote's, a footnote's. [inQuotes], when
+/// given, decides a quote's apart from [outside]: the split rule sets a
+/// note's lines apart and leaves a quote's joined. A line keeps the `\r`
+/// it ended with.
 String joinWrappedLines(
   String source, {
   required bool inItems,
   required bool outside,
+  bool? inQuotes,
 }) {
-  if (!inItems && !outside) return source;
+  final quotes = inQuotes ?? outside;
+  if (!inItems && !outside && !quotes) return source;
   // Where each paragraph line's text starts, by line, and which of the
   // lines go on with the one above.
   final starts = <int, int>{};
   final joins = <int, int>{};
-  void walk(List<BlockNode> nodes, {required bool inItem}) {
+  void walk(
+    List<BlockNode> nodes, {
+    required bool inItem,
+    required bool inQuote,
+  }) {
     for (final node in nodes) {
       switch (node) {
         case ItemNode(:final children):
-          walk(children, inItem: true);
+          walk(children, inItem: true, inQuote: inQuote);
         case ListNode(:final items):
-          walk(items, inItem: inItem);
+          walk(items, inItem: inItem, inQuote: inQuote);
         case ColumnsNode(:final columns):
-          walk(columns, inItem: inItem);
+          walk(columns, inItem: inItem, inQuote: inQuote);
         case ColumnNode(:final children):
-          walk(children, inItem: inItem);
-        case QuoteNode(:final children) || FootnoteNode(:final children):
-          walk(children, inItem: inItem);
+          walk(children, inItem: inItem, inQuote: inQuote);
+        case QuoteNode(:final children):
+          walk(children, inItem: inItem, inQuote: true);
+        case FootnoteNode(:final children):
+          walk(children, inItem: inItem, inQuote: inQuote);
         case LeafNode(:final kind, :final lines, :final definition):
           if (kind != BlockKind.paragraph || definition) continue;
-          if (!(inItem ? inItems : outside)) continue;
+          final joined = inItem ? inItems : (inQuote ? quotes : outside);
+          if (!joined) continue;
           for (final span in lines) {
             starts[span.line] = span.start;
             joins[span.line] = span.start;
@@ -61,7 +73,7 @@ String joinWrappedLines(
     }
   }
 
-  walk(BlockTree.of(source), inItem: false);
+  walk(BlockTree.of(source), inItem: false, inQuote: false);
   if (joins.isEmpty) return source;
   final lines = source.split('\n');
 
@@ -89,7 +101,7 @@ String joinWrappedLines(
     // Its trailing spaces stay: a hard break at its end is the next
     // line's to keep.
     final text = _contentOf(line, start);
-    if (_opensLinkBack(text) || afterLinkBack || _breaks(out.last)) {
+    if (_opensLinkBack(text) || afterLinkBack || endsInHardBreak(out.last)) {
       out.add(line);
       afterLinkBack = _opensLinkBack(text);
       continue;
@@ -116,16 +128,3 @@ final RegExp _linkBack = RegExp(r'^—\s*\[{1,2}');
 /// The line is the annotation's, not a continuation of the quote above it:
 /// joined, the quote loses its passage and the companion its mark (#1183).
 bool _opensLinkBack(String text) => _linkBack.hasMatch(text);
-
-/// Whether [line] ends in a hard break: two spaces, or a backslash that
-/// escapes none.
-bool _breaks(String line) {
-  final text = line.endsWith('\r') ? line.substring(0, line.length - 1) : line;
-  if (text.endsWith('  ')) return true;
-  var slashes = 0;
-  while (slashes < text.length &&
-      text.codeUnitAt(text.length - 1 - slashes) == 0x5C) {
-    slashes++;
-  }
-  return slashes.isOdd;
-}

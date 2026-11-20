@@ -2160,6 +2160,9 @@ final class GreekStrings extends Strings {
   @override
   String get lintRuleJoinParagraphLines => 'Ένωση αναδιπλωμένων παραγράφων';
   @override
+  String get lintRuleSplitParagraphLines =>
+      'Διαχωρισμός γραμμών σε παραγράφους';
+  @override
   String get tidyOnCloseTitle => 'Τακτοποίηση του Markdown στο κλείσιμο';
   @override
   String get tidyOnCloseSubtitle =>

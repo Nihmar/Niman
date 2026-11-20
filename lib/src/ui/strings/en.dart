@@ -2071,6 +2071,8 @@ final class EnglishStrings extends Strings {
   @override
   String get lintRuleJoinParagraphLines => 'Join wrapped paragraphs';
   @override
+  String get lintRuleSplitParagraphLines => 'Split lines into paragraphs';
+  @override
   String get tidyOnCloseTitle => 'Tidy the Markdown on close';
   @override
   String get tidyOnCloseSubtitle =>

@@ -2129,6 +2129,8 @@ final class GermanStrings extends Strings {
   @override
   String get lintRuleJoinParagraphLines => 'Umbrochene Absätze zusammenführen';
   @override
+  String get lintRuleSplitParagraphLines => 'Zeilen in Absätze aufteilen';
+  @override
   String get tidyOnCloseTitle => 'Markdown beim Schließen aufräumen';
   @override
   String get tidyOnCloseSubtitle =>

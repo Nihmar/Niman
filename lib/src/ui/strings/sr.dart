@@ -2094,6 +2094,8 @@ final class SerbianStrings extends Strings {
   @override
   String get lintRuleJoinParagraphLines => 'Spoji prelomljene pasuse';
   @override
+  String get lintRuleSplitParagraphLines => 'Razdvoji redove u pasuse';
+  @override
   String get tidyOnCloseTitle => 'Сложи Markdown при затварању';
   @override
   String get tidyOnCloseSubtitle =>

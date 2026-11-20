@@ -2078,6 +2078,8 @@ final class NorwegianStrings extends Strings {
   @override
   String get lintRuleJoinParagraphLines => 'Slå sammen ombrutte avsnitt';
   @override
+  String get lintRuleSplitParagraphLines => 'Del linjer opp i avsnitt';
+  @override
   String get tidyOnCloseTitle => 'Rydd opp i Markdown ved lukking';
   @override
   String get tidyOnCloseSubtitle =>

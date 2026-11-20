@@ -2118,6 +2118,8 @@ final class ItalianStrings extends Strings {
   @override
   String get lintRuleJoinParagraphLines => 'Unisci i paragrafi a capo';
   @override
+  String get lintRuleSplitParagraphLines => 'Separa le righe in paragrafi';
+  @override
   String get tidyOnCloseTitle => 'Sistema il Markdown alla chiusura';
   @override
   String get tidyOnCloseSubtitle =>
