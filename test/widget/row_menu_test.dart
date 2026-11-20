@@ -139,6 +139,28 @@ void main() {
     expect(find.byKey(const Key('menu-convert-epub')), findsNothing);
   });
 
+  testWidgets('a web page offers its conversion into a note (#1293), '
+      'a note does not', (tester) async {
+    await pumpLibrary(tester);
+    await controller.seedFile('Page.html');
+    await controller.seedFile('Old.HTM');
+    await controller.createNote(parentPath: '', name: 'Note');
+    await settle(tester);
+
+    for (final name in ['Page.html', 'Old.HTM']) {
+      await tester.longPress(noteRow(name));
+      await settle(tester);
+      expect(find.byKey(const Key('menu-convert-html')), findsOneWidget);
+      expect(find.byKey(const Key('menu-convert-epub')), findsNothing);
+      await tester.tapAt(Offset.zero);
+      await settle(tester);
+    }
+
+    await tester.longPress(noteRow('Note.md'));
+    await settle(tester);
+    expect(find.byKey(const Key('menu-convert-html')), findsNothing);
+  });
+
   testWidgets('on a folder, creating comes first', (tester) async {
     await pumpLibrary(tester);
     await controller.createFolder(parentPath: '', name: 'Books');

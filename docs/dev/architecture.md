@@ -13,7 +13,7 @@ fields) — it stores nothing that cannot be reconstructed from disk.
 | `core/` | Settings (`settings/library_config.dart`), logging, the in-flight isolate gauge (`isolate_gauge.dart`), storage access, themes and their `.json` transfer, language, shortcuts/launch args, share-in (`share_in.dart`), the first-run state (`welcome.dart`), single instance, the tray, the changelog parser, running a program with a timeout (`process_run.dart`) |
 | `update/` | The GitHub-Releases update check, its scheduler and the download of the next build |
 | `library/` | Library open/session state, note file ops, the note write path (`NoteWriter`), watcher, image/audio import, Markdown import |
-| `import/` | Bringing a Notion export into the library (#25): the zip walk, page ids off the names, links rewritten, assets kept |
+| `import/` | Bringing a Notion export into the library (#25): the zip walk, page ids off the names, links rewritten, assets kept; and, in `html/`, an HTML file converted into a note on its own isolate (#1293: `html_page`, `html_note`, `html_convert_job`, `html_conversion`), whose UI is `ui/html_convert_flow.dart` and, for a drop, `ui/html_drop_flow.dart` |
 | `export/` | What leaves the app: a note's one-page HTML (`note_html.dart`, `html_*`), the PDF through the system browser and its drawn fallback (`export_pdf.dart`, `pdf_webview.dart`), the EPUB books (`epub_book.dart`, `epub_note.dart`) and the folder/library zips (`export_tree*.dart`) |
 | `workspace/` | The open notes of one library on one device: panes, tabs and their mementos — see [workspace.md](../records/workspace.md) |
 | `journal/` | The journal's day pattern, settings and calendar summaries (see [journal](../user/journal.md)) |

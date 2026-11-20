@@ -6,6 +6,7 @@ import 'package:niman/src/capture/shared_page.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/share_in.dart';
 import 'package:niman/src/epub/epub_archive.dart';
+import 'package:niman/src/import/html/html_file.dart';
 import 'package:niman/src/import/notion.dart';
 import 'package:niman/src/library/markdown_import.dart';
 import 'package:niman/src/library/session.dart';
@@ -13,6 +14,8 @@ import 'package:niman/src/markdown/note_bytes.dart';
 import 'package:niman/src/ui/attachment_view.dart';
 import 'package:niman/src/ui/capture/capture_flow.dart';
 import 'package:niman/src/ui/epub_convert_flow.dart';
+import 'package:niman/src/ui/html_convert_flow.dart';
+import 'package:niman/src/ui/html_drop_flow.dart';
 import 'package:niman/src/ui/intent_features.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:path/path.dart' as p;
@@ -27,6 +30,9 @@ final class ShellImportFlow {
     required this.guard,
     required this.capture,
     required this.epubConvert,
+    required this.htmlConvert,
+    required this.attachDropped,
+    required this.canAttachDropped,
     required this.shareText,
     required this.newItemFolder,
     required this.reveal,
@@ -44,6 +50,15 @@ final class ShellImportFlow {
 
   /// Books converted into notes (#1138).
   final EpubConvertFlow epubConvert;
+
+  /// Web pages converted into notes (#1293).
+  final HtmlConvertFlow htmlConvert;
+
+  /// Attaches files dropped on the window to the note on screen (#1250).
+  final Future<bool> Function(List<String> paths) attachDropped;
+
+  /// Whether a note is on screen to attach dropped files to.
+  final bool Function() canAttachDropped;
 
   /// Puts shared text into the quick note and opens it.
   final Future<void> Function(String text) shareText;
@@ -112,6 +127,15 @@ final class ShellImportFlow {
     if (isBook(name) || await looksLikeEpub(path)) {
       if (context.mounted) {
         await epubConvert.run(context, path, name: name, consume: true);
+      }
+      return;
+    }
+    // A shared web page is converted into a note (#1293), told by its name
+    // or, from a provider that gives none, by how the file begins.
+    if (isHtmlFile(name) ||
+        (p.extension(name).isEmpty && await looksLikeHtml(path))) {
+      if (context.mounted) {
+        await htmlConvert.run(context, path, name: name, consume: true);
       }
       return;
     }
@@ -212,6 +236,18 @@ final class ShellImportFlow {
     messenger.showSnackBar(
       SnackBar(content: Text(AppStrings.importFolderDone(folder))),
     );
+  }
+
+  /// Web pages dropped on the window (#1293): asks whether to convert them,
+  /// attach them to the note on screen, or both.
+  Future<bool> dropPages(BuildContext context, List<String> paths) async {
+    if (controller.root == null || !context.mounted) return false;
+    await HtmlDropFlow(
+      convert: htmlConvert,
+      attach: attachDropped,
+      canAttach: canAttachDropped,
+    ).run(context, paths);
+    return true;
   }
 
   /// A folder dropped on the window (#75). One of this library's own is

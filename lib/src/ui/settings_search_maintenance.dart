@@ -46,6 +46,14 @@ List<SettingsSearchEntry> maintenanceSearchEntries(
       open: () => scope.flashHome(SettingsKeys.epubConvert),
       onHome: true,
     ),
+    SettingsSearchEntry(
+      title: AppStrings.htmlConvertSettingsTitle,
+      area: maintenance,
+      rowKey: SettingsKeys.htmlConvert,
+      value: scope.noValue,
+      open: () => scope.flashHome(SettingsKeys.htmlConvert),
+      onHome: true,
+    ),
     if (libraryRows) ...[
       SettingsSearchEntry(
         title: AppStrings.switchLibraryTitle,

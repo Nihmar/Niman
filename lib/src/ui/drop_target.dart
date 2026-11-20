@@ -3,7 +3,9 @@
 /// The drag itself is taken by the platform runner, which reports what it
 /// sees over `niman/drop` ([DropTargetService], #224); one target here
 /// covers the whole window, above every screen, and hands what lands on it
-/// to the same requests a launch makes (#41). A Markdown file opens the
+/// to the same requests a launch makes (#41). A web page (`.html`) is asked
+/// about: converted into a note, attached, or both (#1293). A Markdown file
+/// opens the
 /// way Open file opens one (#77): as its note inside the open library, on
 /// its own anywhere else. A folder is offered for import into the library,
 /// or, with no library open, opens as one. Anything else — a PDF, a
@@ -25,13 +27,17 @@ import 'package:niman/src/core/drop_in.dart';
 import 'package:niman/src/core/launch_requests.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/editor/editor_only.dart';
+import 'package:niman/src/import/html/html_file.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:path/path.dart' as p;
 
-/// What a drop holds, sorted by what each can become.
+/// What a drop holds, sorted by what each can become: the Markdown to open,
+/// the folders, Notion exports and books to import, the web pages to ask
+/// about (#1293), and what is left over.
 typedef SortedDrop = ({
   List<String> files,
   List<String> folders,
+  List<String> pages,
   List<String> rejected,
 });
 
@@ -52,7 +58,8 @@ Future<Set<String>> _foldersAmong(List<String> paths) => Isolate.run(
 );
 
 /// Sorts the dropped [paths]: Markdown files to open, folders and Notion
-/// exports to import, and the rest, which is left alone. [isFolder] answers
+/// exports to import, web pages to ask about, and the rest, which is
+/// attached to the note on screen or left alone. [isFolder] answers
 /// for the disk: [foldersAmong] asks it off the UI isolate.
 SortedDrop sortDrop(
   List<String> paths, {
@@ -60,6 +67,7 @@ SortedDrop sortDrop(
 }) {
   final files = <String>[];
   final folders = <String>[];
+  final pages = <String>[];
   final rejected = <String>[];
   for (final path in paths) {
     final extension = p.extension(path).toLowerCase().replaceFirst('.', '');
@@ -72,16 +80,21 @@ SortedDrop sortDrop(
       // conversion into notes (#1138): the shell decides by the extension
       // what the archive is.
       folders.add(path);
+    } else if (isHtmlFile(path)) {
+      // Converted into a note, attached to the note on screen, or both: the
+      // shell asks (#1293).
+      pages.add(path);
     } else {
       rejected.add(path);
     }
   }
-  return (files: files, folders: folders, rejected: rejected);
+  return (files: files, folders: folders, pages: pages, rejected: rejected);
 }
 
-/// Hands a sorted drop to [requests]: what nothing opens goes to the note
-/// on screen as attachments (#1250), and is named through [messenger] when
-/// there is no note to take it.
+/// Hands a sorted drop to [requests]: the web pages are offered to be
+/// converted (#1293), and what nothing opens goes to the note on screen as
+/// attachments (#1250), and is named through [messenger] when there is no
+/// note to take it. A page nobody is there to ask about is such a file.
 Future<void> deliverDrop(
   SortedDrop drop,
   LaunchRequests requests,
@@ -89,13 +102,29 @@ Future<void> deliverDrop(
 ) async {
   drop.files.forEach(requests.openFile);
   drop.folders.forEach(requests.openFolder);
-  if (drop.rejected.isEmpty) return;
-  if (await requests.attachFiles(drop.rejected)) return;
+  // The pages are asked about last, the question being a dialog the rest
+  // would wait behind; with nobody to ask, they go the way the rest does.
+  final asked = drop.pages.isNotEmpty && requests.pageHandler != null;
+  await _attachOrName(
+    [...drop.rejected, if (!asked) ...drop.pages],
+    requests,
+    messenger,
+  );
+  if (asked && !await requests.offerPages(drop.pages)) {
+    await _attachOrName(drop.pages, requests, messenger);
+  }
+}
+
+/// Attaches [paths] to the note on screen, or names them when there is none.
+Future<void> _attachOrName(
+  List<String> paths,
+  LaunchRequests requests,
+  ScaffoldMessengerState? messenger,
+) async {
+  if (paths.isEmpty || await requests.attachFiles(paths)) return;
   messenger?.showSnackBar(
     SnackBar(
-      content: Text(
-        AppStrings.dropRejected(drop.rejected.map(p.basename).join(', ')),
-      ),
+      content: Text(AppStrings.dropRejected(paths.map(p.basename).join(', '))),
     ),
   );
 }

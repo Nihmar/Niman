@@ -24,6 +24,23 @@ void main() {
     ], isFolder: (path) => path == '/a/dir');
     expect(drop.files, ['/a/notes.md', '/a/README.MARKDOWN', '/a/todo.txt']);
     expect(drop.folders, ['/a/dir', '/a/Export.ZIP', '/a/Dune.epub']);
+    expect(drop.pages, isEmpty);
+    expect(drop.rejected, ['/a/pic.png']);
+  });
+
+  test('a web page is asked about, whatever its extension in any case', () {
+    final drop = sortDrop([
+      '/a/Dune.html',
+      '/a/old.HTM',
+      '/a/strict.xhtml',
+      '/a/notes.md',
+      '/a/pic.png',
+      // A folder that is called like a page is still a folder.
+      '/a/site.html',
+    ], isFolder: (path) => path == '/a/site.html');
+    expect(drop.pages, ['/a/Dune.html', '/a/old.HTM', '/a/strict.xhtml']);
+    expect(drop.files, ['/a/notes.md']);
+    expect(drop.folders, ['/a/site.html']);
     expect(drop.rejected, ['/a/pic.png']);
   });
 

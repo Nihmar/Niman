@@ -68,6 +68,7 @@ LibraryFeature? featureOf(AppCommand command) => switch (command) {
   AppCommand.exportNote ||
   AppCommand.exportLibrary ||
   AppCommand.convertEpub ||
+  AppCommand.convertHtml ||
   AppCommand.markdownCheatsheet ||
   AppCommand.welcomeTour ||
   AppCommand.welcomeDeck ||

@@ -70,6 +70,34 @@ void main() {
     expect(find.textContaining('photo.png'), findsOne);
   });
 
+  testWidgets('a web page nobody can be asked about is named, as any file '
+      'nothing opens is', (tester) async {
+    await pumpApp(tester);
+    drop(tester, ['/elsewhere/page.html']);
+    await settle(tester);
+    expect(find.textContaining('page.html'), findsOne);
+  });
+
+  testWidgets('a web page dropped on a library is asked about, not '
+      'attached unasked (#1293)', (tester) async {
+    await pumpApp(tester);
+    await openLibrary(tester, filePicker);
+    drop(tester, ['/elsewhere/page.html', '/elsewhere/photo.png']);
+    await settle(tester);
+    // With no note open: the dialog, its attaching choices disabled.
+    expect(find.byKey(const Key('html-drop-dialog')), findsOne);
+    expect(
+      tester
+          .widget<ListTile>(find.byKey(const Key('html-drop-attach')))
+          .enabled,
+      isFalse,
+    );
+    expect(find.textContaining('photo.png'), findsOne);
+    await tester.tap(find.byKey(const Key('html-drop-cancel')));
+    await settle(tester);
+    expect(find.byKey(const Key('html-drop-dialog')), findsNothing);
+  });
+
   testWidgets('a folder of the library is shown in the tree', (tester) async {
     await pumpApp(tester);
     await openLibrary(tester, filePicker);

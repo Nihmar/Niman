@@ -198,6 +198,9 @@ final class ShellInboundRoutes {
       (path) => unawaited(imports.openFolder(context(), path)),
       request: true,
     );
+    // Web pages dropped on the window (#1293): asked about here, where the
+    // note on screen is known.
+    launchRequests.pageHandler = (paths) => imports.dropPages(context(), paths);
     // Links dropped on the window (#531).
     _inbound.listen(launchRequests.pages, (url) {
       if (mounted()) unawaited(captureFlow.capture(context(), url: url));
@@ -205,5 +208,8 @@ final class ShellInboundRoutes {
   }
 
   /// Ends every subscription.
-  Future<void> cancel() => _inbound.cancel();
+  Future<void> cancel() {
+    launchRequests.pageHandler = null;
+    return _inbound.cancel();
+  }
 }

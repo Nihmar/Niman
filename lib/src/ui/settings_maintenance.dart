@@ -6,6 +6,7 @@ import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/import/notion.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/epub_convert_flow.dart';
+import 'package:niman/src/ui/html_convert_flow.dart';
 import 'package:niman/src/ui/settings_area.dart';
 import 'package:niman/src/ui/settings_keys.dart';
 import 'package:niman/src/ui/strings.dart';
@@ -192,6 +193,24 @@ final class SettingsMaintenanceGroup extends StatelessWidget {
             title: Text(AppStrings.epubConvertSettingsTitle),
             onTap: () => unawaited(
               EpubConvertFlow(
+                session: controller,
+                reveal: (_) {},
+                open: (_) {},
+              ).pickAndRun(context),
+            ),
+          ),
+        ),
+        // A web page saved as a file, outside the library, into a note
+        // (#1293): the tree's menu and a drop convert one already at hand.
+        HighlightRow(
+          key: SettingsKeys.htmlConvert,
+          child: ListTile(
+            dense: compact,
+            visualDensity: compact ? VisualDensity.compact : null,
+            leading: const Icon(Icons.web_outlined),
+            title: Text(AppStrings.htmlConvertSettingsTitle),
+            onTap: () => unawaited(
+              HtmlConvertFlow(
                 session: controller,
                 reveal: (_) {},
                 open: (_) {},

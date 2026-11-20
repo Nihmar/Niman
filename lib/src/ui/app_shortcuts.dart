@@ -140,6 +140,10 @@ enum AppCommand {
   /// one, or one picked.
   convertEpub,
 
+  /// Convert a web page into a note (#1293): the one on screen, the
+  /// selected one, or one picked.
+  convertHtml,
+
   /// The Markdown cheatsheet (#265): every construct, written and shown.
   markdownCheatsheet,
 
@@ -487,6 +491,7 @@ String appCommandLabel(AppCommand command) => switch (command) {
   AppCommand.recognizeText => AppStrings.ocrRecognizeAction,
   AppCommand.exportLibrary => AppStrings.exportLibraryTitle,
   AppCommand.convertEpub => AppStrings.epubConvertCommand,
+  AppCommand.convertHtml => AppStrings.htmlConvertCommand,
   AppCommand.markdownCheatsheet => AppStrings.cheatsheetTitle,
   AppCommand.welcomeTour => AppStrings.welcomeTourCommand,
   AppCommand.welcomeDeck => AppStrings.welcomeDeckCommand,
