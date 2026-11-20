@@ -31,9 +31,10 @@ Create one with **New slides** in the Files FAB, the desktop's **New**
 menu under the tree, the **New slides here** entry of a folder's
 right-click menu, or the command palette. It asks for a name and
 starts with two slides, the second with a point and a speaker note. A new
-presentation is made where the library's setting for new notes puts
-it (**Settings → Editor → New notes and folders go to**: the library root,
-or the folder of the open note; see
+presentation made from the Files FAB or the menu under the tree goes in
+the library root; from the command palette, where the library's setting
+for new notes puts it (**Settings → Editor → New notes and folders go
+to**: the library root, or the folder of the open note; see
 [organization](organization.md#where-new-notes-and-folders-go)) — or,
 from a folder's menu, in that folder; move it from the tree if it
 belongs elsewhere.

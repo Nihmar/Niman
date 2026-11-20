@@ -264,9 +264,9 @@ final class ShellPhoneChrome {
 
   /// The expandable "+" FAB (bottom-right, above the bottom nav):
   /// reveals New note / New folder mini FABs; each creates in the
-  /// selected folder, root if none (T-UI-05).
+  /// library root, whatever the tree has selected (T-UI-05).
   Widget _newItemFab(BuildContext context) {
-    void make(NewShellItem item) => menus.newItem(context, item);
+    void make(NewShellItem item) => menus.newItemInFiles(context, item);
     return TourTarget(
       id: TourTargets.create,
       child: fab.button(

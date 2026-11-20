@@ -113,6 +113,31 @@ void main() {
     expect(await controller.ops!.find('from the footer.md'), isNotNull);
   });
 
+  // The footer is the Files view's New: it starts at the library root,
+  // not beside the note open in a folder (which the palette and the
+  // shortcuts still follow, by the library's rule).
+  testWidgets("wide: the footer's New note goes in the root, whatever is "
+      'open', (tester) async {
+    await pumpShell(tester, const Size(1200, 900));
+    await controller.createFolder(parentPath: '', name: 'Docs');
+    await controller.createNote(parentPath: 'Docs', name: 'Plan');
+    await settle(tester);
+    await tester.tap(noteRow('Docs'));
+    await settle(tester);
+    await tester.tap(noteRow('Plan.md'));
+    await settle(tester);
+
+    await tester.tap(find.byKey(const Key('new-item-menu')));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('new-note-action')));
+    await settle(tester);
+    await tester.enterText(dialogField(), 'At root');
+    await tester.tap(find.text('OK'));
+    await settle(tester);
+    expect(await controller.ops!.find('At root.md'), isNotNull);
+    expect(await controller.ops!.find('Docs/At root.md'), isNull);
+  });
+
   // #747: the footer's menus are the tree's own — a pointer's 32 px rows on
   // a pointer-dense theme (#296), not Material's 48 — the create menu and
   // the sort chevron both.
