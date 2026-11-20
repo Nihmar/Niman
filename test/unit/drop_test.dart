@@ -5,7 +5,8 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/isolate_gauge.dart';
-import 'package:niman/src/library/markdown_import.dart';
+import 'package:niman/src/core/settings/library_settings.dart' show LinkType;
+import 'package:niman/src/import/folder/folder_import.dart';
 import 'package:niman/src/ui/drop_target.dart';
 import 'package:path/path.dart' as p;
 
@@ -44,7 +45,7 @@ void main() {
     expect(drop.rejected, ['/a/pic.png']);
   });
 
-  group('importMarkdownFolder', () {
+  group('importing a folder of Markdown', () {
     late Directory tmp;
     late Directory source;
     late Directory library;
@@ -55,6 +56,19 @@ void main() {
       library = Directory(p.join(tmp.path, 'library'))..createSync();
     });
     tearDown(() => tmp.deleteSync(recursive: true));
+
+    /// The folder imported as the shell does it: walked, then written on an
+    /// isolate of its own.
+    Future<FolderImported?> importMarkdownFolder({
+      required String source,
+      required String libraryRoot,
+    }) async => await (await FolderImport.start(
+      source: source,
+      scan: await scanFolder(source),
+      libraryRoot: libraryRoot,
+      attachments: 'assets',
+      linkType: LinkType.wikilink,
+    )).done;
 
     void write(String relative, String text) =>
         File(p.join(source.path, relative))

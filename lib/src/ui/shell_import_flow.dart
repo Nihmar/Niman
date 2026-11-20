@@ -8,12 +8,12 @@ import 'package:niman/src/core/share_in.dart';
 import 'package:niman/src/epub/epub_archive.dart';
 import 'package:niman/src/import/html/html_file.dart';
 import 'package:niman/src/import/notion.dart';
-import 'package:niman/src/library/markdown_import.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/markdown/note_bytes.dart';
 import 'package:niman/src/ui/attachment_view.dart';
 import 'package:niman/src/ui/capture/capture_flow.dart';
 import 'package:niman/src/ui/epub_convert_flow.dart';
+import 'package:niman/src/ui/folder_import_flow.dart';
 import 'package:niman/src/ui/html_convert_flow.dart';
 import 'package:niman/src/ui/html_drop_flow.dart';
 import 'package:niman/src/ui/intent_features.dart';
@@ -68,6 +68,12 @@ final class ShellImportFlow {
 
   /// Shows a library folder (relative; '' is the root) in the tree.
   final void Function(String folder) reveal;
+
+  /// Folders from outside, imported into notes (#75, #1295).
+  late final FolderImportFlow _folders = FolderImportFlow(
+    session: controller,
+    reveal: reveal,
+  );
 
   /// Opens a note (library-relative).
   final void Function(String path) openNote;
@@ -252,8 +258,9 @@ final class ShellImportFlow {
 
   /// A folder dropped on the window (#75). One of this library's own is
   /// shown in the tree; any other is offered for import — its Markdown
-  /// copied into a new folder here — and shown once it is in. A Notion
-  /// export (a `.zip`, #25) goes through the import instead.
+  /// copied and its web pages converted into a new folder here (#1295) —
+  /// and shown once it is in. A Notion export (a `.zip`, #25) goes through
+  /// the import instead.
   Future<void> openFolder(BuildContext context, String path) async {
     if (p.extension(path).toLowerCase() == '.zip') {
       await _importNotionArchive(context, File(path), p.basename(path));
@@ -270,42 +277,6 @@ final class ShellImportFlow {
       reveal(p.equals(root, path) ? '' : relPath(path, root));
       return;
     }
-    final name = p.basename(p.normalize(path));
-    // The walk is a FUSE round trip per folder on Android: it runs off the
-    // UI isolate, so the count is awaited rather than read inline (#382).
-    final count = (await markdownFilesIn(path)).length;
-    if (!context.mounted) return;
-    if (count == 0) return _showImported(context, null, name);
-    final go = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        key: const Key('import-folder'),
-        title: Text(AppStrings.importFolderTitle(name)),
-        content: Text(AppStrings.importFolderBody(count)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(AppStrings.actionCancel),
-          ),
-          FilledButton(
-            key: const Key('import-folder-yes'),
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text(AppStrings.importFolderAction),
-          ),
-        ],
-      ),
-    );
-    if (go != true || !context.mounted) return;
-    await guard(() async {
-      final imported = await importMarkdownFolder(
-        source: path,
-        libraryRoot: root,
-      );
-      if (imported == null || !context.mounted) return;
-      // The walk and the copy are off the UI isolate now (#382), and the
-      // watcher finds what landed on its own: a rescan here would only block
-      // the frame the reveal is drawn in, so it is left to converge.
-      _showImported(context, imported.folder, name);
-    });
+    await _folders.run(context, path);
   }
 }

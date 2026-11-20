@@ -39,6 +39,14 @@ List<SettingsSearchEntry> maintenanceSearchEntries(
       onHome: true,
     ),
     SettingsSearchEntry(
+      title: AppStrings.importFolderSettingsTitle,
+      area: maintenance,
+      rowKey: SettingsKeys.importFolder,
+      value: scope.noValue,
+      open: () => scope.flashHome(SettingsKeys.importFolder),
+      onHome: true,
+    ),
+    SettingsSearchEntry(
       title: AppStrings.epubConvertSettingsTitle,
       area: maintenance,
       rowKey: SettingsKeys.epubConvert,

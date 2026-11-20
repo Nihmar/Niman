@@ -6,6 +6,7 @@ import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/import/notion.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/epub_convert_flow.dart';
+import 'package:niman/src/ui/folder_import_flow.dart';
 import 'package:niman/src/ui/html_convert_flow.dart';
 import 'package:niman/src/ui/settings_area.dart';
 import 'package:niman/src/ui/settings_keys.dart';
@@ -180,6 +181,23 @@ final class SettingsMaintenanceGroup extends StatelessWidget {
             leading: const Icon(Icons.archive_outlined),
             title: Text(AppStrings.notionImportTitle),
             onTap: () => _importNotion(context),
+          ),
+        ),
+        // A folder of Markdown files and web pages outside the library, into
+        // notes (#1295): a drop on the window brings one already at hand.
+        HighlightRow(
+          key: SettingsKeys.importFolder,
+          child: ListTile(
+            dense: compact,
+            visualDensity: compact ? VisualDensity.compact : null,
+            leading: const Icon(Icons.folder_open_outlined),
+            title: Text(AppStrings.importFolderSettingsTitle),
+            onTap: () => unawaited(
+              FolderImportFlow(
+                session: controller,
+                reveal: (_) {},
+              ).pickAndRun(context),
+            ),
           ),
         ),
         // A book outside the library, into notes (#1138): the tree's menu,

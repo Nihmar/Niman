@@ -28,6 +28,7 @@ final class ConvertProgressDialog extends StatefulWidget {
     required this.reading,
     super.key,
     this.cancelKey,
+    this.title,
   });
 
   /// Puts the dialog over [context]'s screen, for the conversion whose
@@ -39,6 +40,7 @@ final class ConvertProgressDialog extends StatefulWidget {
     required Future<void> done,
     required Future<void> Function() cancel,
     required String reading,
+    String? title,
     Key? key,
     Key? cancelKey,
   }) => unawaited(
@@ -52,6 +54,7 @@ final class ConvertProgressDialog extends StatefulWidget {
         cancel: cancel,
         reading: reading,
         cancelKey: cancelKey,
+        title: title,
       ),
     ),
   );
@@ -70,6 +73,9 @@ final class ConvertProgressDialog extends StatefulWidget {
 
   /// The key of the Cancel button.
   final Key? cancelKey;
+
+  /// What the dialog is titled; "Convert to Markdown" when null.
+  final String? title;
 
   @override
   State<ConvertProgressDialog> createState() => _ConvertProgressDialogState();
@@ -90,7 +96,7 @@ final class _ConvertProgressDialogState extends State<ConvertProgressDialog> {
 
   @override
   Widget build(BuildContext context) => AlertDialog(
-    title: Text(AppStrings.convertTitle),
+    title: Text(widget.title ?? AppStrings.convertTitle),
     content: ValueListenableBuilder<ConvertProgress?>(
       valueListenable: widget.progress,
       builder: (context, progress, _) => Column(
