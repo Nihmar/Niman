@@ -726,6 +726,16 @@ drop lands without it, for the reason
 - **A book** (`.epub`) is offered for conversion into notes: see
   [Converting a book into notes](#converting-a-book-into-notes). With no
   library open, a message says one is needed.
+- **A web page** (`.html`, `.htm`, `.xhtml`) opens a dialog with three
+  choices: **Convert** makes a note of it (see
+  [Converting a web page into a note](#converting-a-web-page-into-a-note)),
+  **Attach** does what a drop of any other file does (next item), and
+  **Attach and convert** does the attaching, then the converting. With no
+  note open to take it — or a note outside the library — the two
+  that attach stay in the dialog, greyed, with the reason under them.
+  Drop several pages at once and the one dialog lists them all; the folder
+  is asked once and each is converted in turn. With no library open, a
+  page is left alone and a message names it.
 - **With no library open**, a dropped folder opens as the library, the
   way *Open existing* would open it.
 - **Anything else** — a PDF, a picture, an archive — is **attached to
@@ -738,7 +748,9 @@ On Android (split screen, a freeform window, Samsung DeX, ChromeOS) and
 on an iPad (Split View, Slide Over, Stage Manager), files dragged from
 another app onto Niman are taken the same way: copied first, since the
 other app hands over their content rather than a path, then attached to
-the note on screen. A drag that carries only text is not taken there.
+the note on screen — or, for a web page, asked about as above. A drag that
+carries only text is not taken there: a passage selected in a browser is
+text, and a page saved as a file is told from it by being only itself.
 
 ## Converting a book into notes
 
@@ -804,6 +816,64 @@ was; a shared book's copy is deleted.
 Formulas come in as TeX where the book draws them as images with their
 TeX attached. Formulas written as MathML alone are left out, as the
 reader leaves them out.
+
+## Converting a web page into a note
+
+A web page saved as a file — `.html`, `.htm` or `.xhtml`, what a
+browser's *Save page as* writes — can become a note of the library:
+editable, searchable, linkable. **Convert to Markdown…** is in the tree's
+menu on such a row, in the palette (*Library: Convert HTML to
+Markdown…*, which converts the page on screen or the one selected, and
+otherwise asks for a file), in *Settings → Maintenance* (**Convert an
+HTML file to Markdown**, for a file outside the library), and it is what
+the **Convert** choice of a [drop on the window](#dropping-files-on-the-window)
+does, and what sharing a page to Niman, or opening it with Niman, does
+on Android.
+
+The dialog names the file and asks one thing: **Into** which folder — the
+one the page is in, when it is in the library, otherwise the top of the
+library; any other can be picked. The note is named after the page's title
+(the `<title>`, else the page's `og:title`, else its first heading), and
+numbered like any new note when that name is taken.
+
+What the note holds:
+
+- **The article, not the page.** As [web capture](web-capture.md) does, it
+  keeps the article and leaves the menus, the banners and the footer out.
+  A page where none can be told — a list, a table, a page of a few
+  lines — is kept whole instead, everything between its `<body>` tags.
+- **Frontmatter.** `source` is the page's own address, when it says one
+  (its canonical link, else `og:url`); `imported` is the day of the
+  conversion; `author` is there when the page names one (its author
+  `<meta>` or a link marked as the author's). The title is the note's
+  first heading.
+- **Pictures.** A picture beside the file (a browser's `Page_files`
+  folder) is copied into the library's attachments folder; one that is
+  on the web is downloaded there; one written into the page itself
+  (`data:`) is decoded and written there. Each picture is kept once, named
+  by what it is, the way a pasted picture is, and the note shows it like
+  any attachment. A picture that cannot be had keeps its web address; a
+  local one that is missing is left out.
+- **Links.** A link to the web stays as it is. A link to another local
+  file stays as it was written. A link inside the page (`#section`)
+  points at the heading it lands in. A `javascript:` link, and the like,
+  is text, not a link.
+
+The conversion runs in the background, with a progress dialog and
+**Cancel**, which leaves the library as it was. When it is done, the tree
+shows the note's folder and the note opens. The page itself stays where it
+was; a shared page's copy is deleted.
+
+**Not converted:**
+
+- a file of more than 32 MiB;
+- a page whose text encoding Niman cannot read — it reads UTF-8,
+  UTF-16, ASCII, Latin-1 and Windows-1252, told by the file's byte-order
+  mark or its `<meta charset>` — which says so;
+- a file that cannot be read.
+
+The limits on pictures are the web capture's: at most 60 downloaded for a
+page, each under 15 MB; the ones past it keep their web address.
 
 ## Importing a Notion export
 
