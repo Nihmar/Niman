@@ -55,7 +55,9 @@ final class HtmlBlocks {
     final tag = element.localName ?? '';
     switch (tag) {
       case 'h1' || 'h2' || 'h3' || 'h4' || 'h5' || 'h6':
-        final text = inline.of(element.nodes).trim();
+        // One line: a `<br>` in a heading is a space, a hard break would
+        // end the heading.
+        final text = inline.lineOf(element.nodes);
         _anchorsWithin(element, out);
         if (text.isEmpty) return;
         final level = int.parse(tag.substring(1));

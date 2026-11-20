@@ -163,6 +163,14 @@ void main() {
       expect(markdown('<ul><li><p>a</p><p>b</p></li></ul>'), '- a b');
     });
 
+    test('a break in a heading is a space, not a hard break', () {
+      expect(markdown('<h2>Title<br>Sub</h2>'), '## Title Sub');
+      expect(
+        markdown('<h2>Title <br/>\n  <em>Sub</em><br/></h2>'),
+        '## Title *Sub*',
+      );
+    });
+
     test('a quote, and a quote in a quote', () {
       expect(
         markdown(
@@ -399,8 +407,8 @@ void main() {
       );
     });
 
-    test('a heading, a table cell and a list item keep their breaks', () {
-      expect(markdownOf('<h2>a<br/>b</h2>'), '## a\\\nb');
+    test('a heading and a table cell are one line, a list item breaks', () {
+      expect(markdownOf('<h2>a<br/>b</h2>'), '## a b');
       expect(
         markdownOf('<table><tr><td>a<br/>b</td></tr></table>'),
         '| a b |\n| --- |',
