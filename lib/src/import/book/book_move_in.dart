@@ -7,6 +7,8 @@
 /// - **One note** is that note moved in beside the folder's others, its
 ///   pictures into the library's attachments folder, each kept once
 ///   ([moveNoteIn]).
+/// - **Pictures** staged for a note or for a folder of them go into the
+///   attachments folder alike ([moveStagedPictures]).
 library;
 
 import 'dart:io';
@@ -45,20 +47,33 @@ Future<String> moveNoteIn({
   required String attachments,
   required String note,
 }) async {
-  final assets = Directory(p.join(staging, attachments));
-  if (assets.existsSync()) {
-    final into = Directory(p.join(libraryRoot, attachments))
-      ..createSync(recursive: true);
-    for (final picture in assets.listSync().whereType<File>()) {
-      final target = File(p.join(into.path, p.basename(picture.path)));
-      // Named by its content: one already there is this one.
-      if (!target.existsSync()) picture.renameSync(target.path);
-    }
-  }
+  moveStagedPictures(
+    libraryRoot: libraryRoot,
+    staging: staging,
+    attachments: attachments,
+  );
   final folder = Directory(p.joinAll([libraryRoot, ...parent.split('/')]))
     ..createSync(recursive: true);
   final stem = p.posix.basenameWithoutExtension(note);
   final name = await uniqueFileName(folder, stem, '.md');
   File(p.join(staging, note)).renameSync(p.join(folder.path, name));
   return parent.isEmpty ? name : '$parent/$name';
+}
+
+/// The pictures staged in [attachments] under [staging] moved into the
+/// library's own attachments folder, each kept once: they are named by their
+/// content, so one already there is the same one.
+void moveStagedPictures({
+  required String libraryRoot,
+  required String staging,
+  required String attachments,
+}) {
+  final assets = Directory(p.join(staging, attachments));
+  if (!assets.existsSync()) return;
+  final into = Directory(p.join(libraryRoot, attachments))
+    ..createSync(recursive: true);
+  for (final picture in assets.listSync().whereType<File>()) {
+    final target = File(p.join(into.path, p.basename(picture.path)));
+    if (!target.existsSync()) picture.renameSync(target.path);
+  }
 }
